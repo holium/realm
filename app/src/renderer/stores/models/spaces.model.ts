@@ -3,19 +3,12 @@ import {
   types,
   flow,
   applySnapshot,
-  cast,
   castToSnapshot,
-  getSnapshot,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { LoaderModel, SubscriptionModel } from './common.model';
 import { DocketApp, UrbitApp, WebApp } from './bazaar.model';
-import {
-  MembersModel,
-  MembersStore,
-  RolesType,
-  VisaModel,
-} from './invitations.model';
+import { MembersModel, MembersStore, VisaModel } from './invitations.model';
 import { Theme, defaultTheme } from './theme.model';
 import { BazaarIPC, SpacesIPC } from '../ipc';
 import { appState } from '../app.store';
@@ -355,7 +348,6 @@ export const SpacesStore = types
       self.invitations.initialIncoming(invitations);
     },
     _onSpaceAdded: (addPayload: any) => {
-      console.log(addPayload);
       // Set pending space to loaded
       self.spaces.set(addPayload.path, spaceRowToModel(addPayload));
       // if the space is set to current, set it as selected
@@ -374,8 +366,15 @@ export const SpacesStore = types
       }
     },
     _onSpaceUpdated: (updatePayload: any) => {
-      console.log(updatePayload);
-      // self.invitations.initialIncoming(invitations);
+      const space = self.spaces.get(updatePayload.path);
+      if (!space) return;
+      self.spaces.set(updatePayload.path, spaceRowToModel(updatePayload));
+      if (updatePayload.theme !== space.theme) {
+        const updatedTheme = self.spaces.get(updatePayload.path)?.theme;
+        if (updatedTheme) {
+          appState.setTheme(updatedTheme);
+        }
+      }
     },
     _onSpaceRemoved: (removePayload: any) => {
       if (!removePayload.path.includes(shipStore.ship?.patp)) {
@@ -409,14 +408,12 @@ export type SpacesStoreType = Instance<typeof SpacesStore>;
 
 SpacesIPC.onUpdate((_event: any, update: any) => {
   const { type, payload } = update;
-  console.log('spaces update', update);
   // on update we need to requery the store
   switch (type) {
     case 'initial':
       shipStore.spacesStore.init();
       break;
     case 'invitations':
-      console.log('invitations', payload);
       shipStore.spacesStore._onInitialInvitationsUpdate(payload);
       break;
     case 'invite-sent':

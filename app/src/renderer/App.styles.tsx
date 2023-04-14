@@ -86,6 +86,7 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
   fieldset {
     border: 0;
   }
+  
 `;
 
 export const BgImage = ({

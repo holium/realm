@@ -598,8 +598,8 @@
         =/  watch-path                    [/spaces/(scot %p ship.path)/(scot %tas space.path) ~]
         :_  state
         :~
-          [%give %kick watch-path ~]
           [%give %fact watch-path spaces-reaction+!>([%remove path])]
+          [%give %kick watch-path ~]
         ==
     ::
     ++  on-remote-space
@@ -829,16 +829,17 @@
     ++  handle-edit-role
       |=  [path=space-path:store member=ship role-set=(set role:membership-store)]
       ^-  (quip card _state)
-      =/  src-roles  roles:(~(got by (~(got by membership) path)) src.bowl)
+      =/  src-roles           roles:(~(got by (~(got by membership) path)) src.bowl)
       ?>  (~(has in src-roles) %admin)
-      =/  space-members  (~(got by membership) path)
-      =/  member-state  (~(got by space-members) member)
+      =/  space-members       (~(got by membership) path)
+      =/  member-state        (~(got by space-members) member)
       =.  roles.member-state  role-set
-      =.  space-members  (~(put by space-members) [member member-state])
-      =.  membership  (~(put by membership) [path space-members])
+      =.  space-members       (~(put by space-members) [member member-state])
+      =.  membership          (~(put by membership) [path space-members])
+      =/  watch-paths         [/updates /spaces/(scot %p ship.path)/(scot %tas space.path) ~]
       =/  cards
         ^-  (list card)
-        [%give %fact [/updates ~] visa-reaction+!>([%edited path member role-set])]~
+        [%give %fact watch-paths visa-reaction+!>([%edited path member role-set])]~
       =?  cards  =(%group type:(~(got by spaces.state) path))
         %+  weld  cards
           ?:  (~(has in role-set) %admin)

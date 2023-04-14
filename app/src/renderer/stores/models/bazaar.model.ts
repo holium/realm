@@ -450,7 +450,6 @@ export const BazaarStore = types
     scryAllies: flow(function* () {
       try {
         const allies = yield BazaarIPC.scryAllies() as Promise<any>;
-        console.log('allies', allies);
         for (const key in allies) {
           const desks = allies[key];
           for (let i = 0; i < desks.length; i++) {

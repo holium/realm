@@ -48,7 +48,6 @@ export class SpacesService extends AbstractService {
       path: `/invitations`,
     });
     const invites = this.invitationsDB?.insertAll(response.invitations);
-    console.log('sending update invites', invites);
     this.sendUpdate({
       type: 'invitations',
       payload: invites,
@@ -63,9 +62,9 @@ export class SpacesService extends AbstractService {
   }
 
   private _onEvent = (data: any, _id?: number, mark?: string) => {
+    console.log('spaces event', data, _id, mark);
     if (mark === 'spaces-reaction') {
       const spacesType = Object.keys(data)[0];
-      // log.info('spaces-reaction', spacesType, data[spacesType]);
       switch (spacesType) {
         case 'initial':
           this.spacesDB?.insertAll(data['initial'].spaces);
@@ -106,11 +105,18 @@ export class SpacesService extends AbstractService {
         case 'replace':
           const replacePayload = data['replace'];
           log.info('replace', replacePayload);
-          // todo update spaces
+          const replacePath = replacePayload.space.path;
+          this.spacesDB?.update(replacePath, replacePayload.space);
+          const updatedSpace = this.getSpace(replacePath);
+
+          log.info(updatedSpace);
+          this.sendUpdate({
+            type: 'replace',
+            payload: this.getSpace(replacePath),
+          });
           break;
         case 'remote-space':
           // when a remote space is added, we need to add it to our local db
-          console.log('remote-space', data['remote-space']);
           const remoteSpace = data['remote-space'];
           this.spacesDB?.insertAll({ [remoteSpace.path]: remoteSpace.space });
           this.spacesDB?.setCurrent(remoteSpace.path);
@@ -132,7 +138,6 @@ export class SpacesService extends AbstractService {
 
       switch (visaType) {
         case 'invite-sent':
-          log.info('invite-sent', visaData[visaType]);
           const sentPayload = visaData['invite-sent'];
           this.membersDB?.createMember({
             space: sentPayload.path,
@@ -146,8 +151,6 @@ export class SpacesService extends AbstractService {
           break;
         case 'invite-accepted':
           const acceptedPayload = visaData['invite-accepted'];
-          // const reactionData = data[mark][visaType];
-          log.info('invite-accepted', acceptedPayload);
           const updated = this.membersDB?.updateMember(
             acceptedPayload.path,
             acceptedPayload.ship,
@@ -169,7 +172,6 @@ export class SpacesService extends AbstractService {
           break;
         case 'invite-received':
           const receivedPayload = visaData[visaType];
-          log.info('invite-received', visaData[visaType]);
           const invites = this.invitationsDB?.insertAll({
             [receivedPayload.path]: receivedPayload.invite,
           });
@@ -179,13 +181,11 @@ export class SpacesService extends AbstractService {
           });
           break;
         case 'invite-removed': // this is when an invite is declined by our or after we have accepted it
-          log.info('invite-removed', visaData[visaType]);
           const path = visaData[visaType].path;
           this.invitationsDB?.removeInvite(path);
           break;
         case 'kicked':
           const kickedPayload = visaData.kicked;
-          log.info('kicked', kickedPayload);
           this.membersDB?.deleteMember(kickedPayload.path, kickedPayload.ship);
           this.sendUpdate({
             type: 'kicked',
@@ -194,12 +194,25 @@ export class SpacesService extends AbstractService {
           break;
         case 'edited':
           const editedPayload = visaData.edited;
-          log.info('edited', editedPayload);
-          // state.editMember(
-          //   editedPayload.path,
-          //   editedPayload.ship,
-          //   editedPayload.roles
-          // );
+          const editedUpdated = this.membersDB?.updateMember(
+            editedPayload.path,
+            editedPayload.ship,
+            {
+              roles: editedPayload.roles,
+            }
+          );
+          this.sendUpdate({
+            type: 'invite-updated',
+            payload: {
+              path: editedPayload.path,
+              ship: editedPayload.ship,
+              member: {
+                alias: editedUpdated?.alias,
+                roles: editedUpdated?.roles,
+                status: editedUpdated?.status,
+              },
+            },
+          });
           break;
         case 'invite-declined':
           log.info('invite-declined', visaData[visaType]);

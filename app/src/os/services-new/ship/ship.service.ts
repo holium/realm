@@ -123,6 +123,7 @@ export class ShipService extends AbstractService {
     });
     // return Array.from(Object.values(response.groups));
   }
+
   // ----------------------------------------
   // ------------------ S3 ------------------
   // ----------------------------------------

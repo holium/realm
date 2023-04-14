@@ -132,6 +132,8 @@ export class SpacesDB extends AbstractDataAccess<Space> {
   }
 
   public update(path: string, values: Partial<Space>): Space {
+    if (values.theme) values.theme = JSON.stringify(values.theme);
+    console.log('update', path, values);
     const setClause = Object.keys(values)
       .map((key) => `${key} = ?`)
       .join(', ');
