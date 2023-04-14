@@ -9,6 +9,7 @@ import APIConnection from '../conduit';
 import RoomsService from './rooms.service';
 import NotificationsService from './notifications/notifications.service';
 import ChatService from './chat/chat.service';
+import WalletService from './wallet/wallet.service';
 import { Friends } from './friends.table';
 import SpacesService from './spaces/spaces.service';
 import { S3Client, StorageAcl } from '../../s3/S3Client';
@@ -24,6 +25,7 @@ export class ShipService extends AbstractService {
     friends: Friends;
     spaces: SpacesService;
     bazaar: BazaarService;
+    wallet: WalletService;
   };
 
   constructor(patp: string, password: string, options?: ServiceOptions) {
@@ -68,6 +70,7 @@ export class ShipService extends AbstractService {
       friends: new Friends(false, this.shipDB.db),
       spaces: new SpacesService(undefined, this.shipDB.db, this.patp),
       bazaar: new BazaarService(undefined, this.shipDB.db),
+      wallet: new WalletService(undefined, this.shipDB.db),
     };
 
     app.on('quit', () => {
@@ -98,6 +101,7 @@ export class ShipService extends AbstractService {
     this.services?.friends.reset();
     this.services?.spaces.reset();
     this.services?.bazaar.reset();
+    this.services?.wallet.reset();
   }
 
   public async getOurGroups(): Promise<{ [path: string]: any }> {

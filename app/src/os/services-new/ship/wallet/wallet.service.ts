@@ -1,9 +1,10 @@
-import APIConnection from 'os/services-new/conduit';
+import APIConnection from '../../conduit';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
-import { UqbarApi } from 'os/api/uqbar';
+import { UqbarApi } from '../../../api/uqbar';
+import { Database } from 'better-sqlite3-multiple-ciphers';
 
 export class WalletService extends AbstractService {
-  constructor(options?: ServiceOptions) {
+  constructor(options?: ServiceOptions, db?: Database) {
     super('walletService', options);
     if (options?.preload) {
       return;

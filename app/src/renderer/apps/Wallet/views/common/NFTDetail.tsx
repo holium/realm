@@ -1,13 +1,9 @@
 import { EthWalletType } from 'os/services/tray/wallet-lib/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
 import { Flex, Text, Icon } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from '../../lib/helpers';
 
 export const NFTDetail = () => {
   const { walletApp } = useTrayApps();
-  const { theme } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
 
   const wallet = walletApp.currentWallet as EthWalletType;
   const nft = wallet.data
@@ -23,11 +19,7 @@ export const NFTDetail = () => {
       </Flex>
 
       <Flex mt={8} flexDirection="column" alignItems="center">
-        <Text.Body
-          variant="body"
-          fontSize={1}
-          color={baseTheme.colors.text.secondary}
-        >
+        <Text.Body variant="body" fontSize={1}>
           {nft.collectionName || 'NFT'}
         </Text.Body>
         <Text.H5 variant="h5">{nft.name}</Text.H5>

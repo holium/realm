@@ -12,8 +12,6 @@ import {
   Spinner,
   TextInput,
 } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from '../../lib/helpers';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
@@ -50,10 +48,6 @@ const WalletSettingsPresenter = () => {
     provider: settings.provider ?? '',
     blocked: [...walletApp.blacklist],
   });
-
-  const { theme } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
-  const selectBg = darken(0.025, theme.currentTheme.windowColor);
 
   // async function setProvider(newProviderURL: string) {
   //   setProviderInput(newProviderURL);
@@ -215,20 +209,13 @@ const WalletSettingsPresenter = () => {
         </Flex>*/}
         <Flex mt={3} flexDirection="column">
           <Text.Label>Address Creation Mode</Text.Label>
-          <Text.Custom
-            mt={1}
-            mb={2}
-            fontSize={1}
-            opacity={0.8}
-            color={baseTheme.colors.text.secondary}
-          >
+          <Text.Custom mt={1} mb={2} fontSize={1} opacity={0.8}>
             If set to on-demand, anytime you're sent funds a new address will be
             created to receive them.
           </Text.Custom>
           <Flex width="140px">
             <Select
               id="wallet-creation-mode"
-              backgroundColor={selectBg}
               options={[
                 { label: 'Default', value: 'default' },
                 { label: 'On-demand', value: 'on-demand' },
@@ -241,19 +228,11 @@ const WalletSettingsPresenter = () => {
 
         <Flex mt={3} flexDirection="column">
           <Text.Label>Wallet Visibility</Text.Label>
-          <Text.Custom
-            mt={1}
-            mb={2}
-            fontSize={1}
-            opacity={0.8}
-            color={baseTheme.colors.text.secondary}
-          >
+          <Text.Custom mt={1} mb={2} fontSize={1} opacity={0.8}>
             Determine how you want to share addresses with other people on the
             network.
           </Text.Custom>
           <VisibilitySelect
-            theme={theme}
-            baseTheme={baseTheme}
             wallets={wallets as Wallets}
             sharingMode={state.sharingMode}
             defaultIndex={state.defaultIndex}
@@ -264,12 +243,7 @@ const WalletSettingsPresenter = () => {
 
         <Flex mt={3} flexDirection="column">
           <Text.Label mb={2}>Blocked IDs</Text.Label>
-          <BlockedInput
-            theme={theme}
-            baseTheme={baseTheme}
-            blocked={state.blocked}
-            onChange={setBlockList}
-          />
+          <BlockedInput blocked={state.blocked} onChange={setBlockList} />
         </Flex>
       </Flex>
       <Flex flexDirection="column" mb={2}>
@@ -284,14 +258,7 @@ const WalletSettingsPresenter = () => {
         >
           Delete Local HD Wallet
         </Button.TextButton>
-        <Text.Custom
-          mt={2}
-          mb={2}
-          ml="2px"
-          fontSize={2}
-          opacity={0.8}
-          color={baseTheme.colors.text.secondary}
-        >
+        <Text.Custom mt={2} mb={2} ml="2px" fontSize={2} opacity={0.8}>
           Delete your HD wallet from local storage.
         </Text.Custom>
         <br />
@@ -306,14 +273,7 @@ const WalletSettingsPresenter = () => {
         >
           Delete Ship HD Wallet
         </Button.TextButton>
-        <Text.Custom
-          mt={2}
-          mb={2}
-          ml="2px"
-          fontSize={2}
-          opacity={0.8}
-          color={baseTheme.colors.text.secondary}
-        >
+        <Text.Custom mt={2} mb={2} ml="2px" fontSize={2} opacity={0.8}>
           Completely delete your HD wallet locally and remove all metadata from
           your Urbit.
         </Text.Custom>

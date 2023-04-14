@@ -1,7 +1,5 @@
 import { FC, useMemo } from 'react';
-import { darken, lighten, rgba } from 'polished';
 import { Text, Flex } from '@holium/design-system';
-import { ThemeType } from 'renderer/theme';
 import { useTrayApps } from 'renderer/apps/store';
 import {
   formatEthAmount,
@@ -27,7 +25,6 @@ interface WalletCardProps {
   walletKey: any;
   isSelected?: boolean;
   onSelect?: () => void;
-  theme?: ThemeType;
 }
 
 export const WalletCard: FC<WalletCardProps> = ({
@@ -36,7 +33,6 @@ export const WalletCard: FC<WalletCardProps> = ({
   onSelect,
 }: WalletCardProps) => {
   const { walletApp } = useTrayApps();
-  const mode = theme.currentTheme.mode === 'light' ? 'light' : 'dark';
 
   const wallet = walletApp.currentStore.wallets.get(walletKey);
 
@@ -78,12 +74,6 @@ export const WalletCard: FC<WalletCardProps> = ({
         layoutId={`wallet-card-${wallet?.address}`}
         justifyContent="flex-start"
         transition={walletCardStyleTransition}
-        customBg={lighten(0.04, theme.currentTheme.windowColor)}
-        borderColor={
-          theme.currentTheme.mode === 'dark'
-            ? darken(0.1, theme.currentTheme.backgroundColor)
-            : darken(0.1, theme.currentTheme.windowColor)
-        }
         mode={mode}
         isSelected={!!isSelected}
         onClick={onSelect}
@@ -93,7 +83,6 @@ export const WalletCard: FC<WalletCardProps> = ({
           layout="position"
           transition={{ duration: 0.1 }}
           fontWeight={600}
-          color={rgba(theme.currentTheme.textColor, 0.4)}
           style={{ textTransform: 'uppercase' }}
         >
           {wallet?.nickname}
