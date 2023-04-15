@@ -170,7 +170,6 @@ const TransactionList = types
       }
     },
     applyChainTransactions(
-      conduit: any,
       protocol: ProtocolType,
       index: number,
       address: string,
@@ -200,9 +199,7 @@ const TransactionList = types
         if (previousTransaction) {
           if (newTransaction.status !== previousStatus) {
             const tx = this.getStoredTransaction(transaction.hash);
-            WalletApi.setTransaction(
-              conduit,
-              'ethereum',
+            this.setTransaction(
               protocol,
               index,
               transaction.contractAddress || null,
@@ -213,6 +210,22 @@ const TransactionList = types
         }
       }
     },
+    setTransaction: flow(function* (
+      protocol: ProtocolType,
+      index: number,
+      contractAddress: string | null,
+      hash: string,
+      tx: any
+    ) {
+      yield WalletIPC.setTransaction(
+        'ethereum',
+        protocol,
+        index,
+        contractAddress,
+        hash,
+        tx
+      );
+    }),
     getStoredTransaction(hash: string) {
       const tx: any = self.transactions.get(hash);
       return {

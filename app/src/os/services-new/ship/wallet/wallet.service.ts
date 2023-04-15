@@ -47,6 +47,26 @@ export class WalletService extends AbstractService {
   async setXpub(network: string, hash: string) {
     await WalletApi.setXpub(APIConnection.getInstance().conduit, network, hash);
   }
+
+  async setTransaction(
+    network: string,
+    net: string,
+    wallet: number,
+    contract: string | null,
+    hash: string
+  ) {
+    const tx = this.getStoredTransaction(hash);
+    await WalletApi.setTransaction(
+      APIConnection.getInstance().conduit,
+      network,
+      net,
+      wallet,
+      contract,
+      hash,
+      tx
+    );
+  }
+  getStoredTransaction(hash: string) {}
 }
 
 export default WalletService;
