@@ -23,7 +23,8 @@ export class WalletService extends AbstractService {
   }
 
   private _onEvent = (data: any, _id?: number, mark?: string) => {
-    console.log('wallet event', data, _id, mark);
+    console.log('SENDING UPDATE');
+    this.sendUpdate(data);
   };
 
   private _onQuit = () => {

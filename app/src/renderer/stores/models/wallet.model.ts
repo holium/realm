@@ -898,6 +898,8 @@ export const WalletStore = types
     return {
       setInitialized(initialized: boolean) {
         self.initialized = initialized;
+        console.log('trying to set the ship', shipStore.ship?.patp);
+        self.ourPatp = shipStore.ship?.patp;
       },
       setNetwork(network: NetworkType) {
         /* @ts-expect-error */
@@ -1070,57 +1072,10 @@ export const WalletStore = types
 
 export type WalletStoreType = Instance<typeof WalletStore>;
 
-export const initialWalletState = (ship: string) => ({
-  navState: {
-    view: WalletView.NEW,
-    protocol: ProtocolType.ETH_GORLI,
-    lastEthProtocol: ProtocolType.ETH_GORLI,
-    btcNetwork: NetworkStoreType.BTC_MAIN,
-    // transSend: false,
-  },
-  ethereum: {
-    // block: 0,
-    gorliBlock: 0,
-    protocol: ProtocolType.ETH_GORLI,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    initialized: false,
-    conversions: {},
-  },
-  bitcoin: {
-    block: 0,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    conversions: {},
-  },
-  btctest: {
-    block: 0,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    conversions: {},
-  },
-  navHistory: [],
-  creationMode: 'default',
-  sharingMode: 'anybody',
-  lastInteraction: Date.now(),
-  initialized: false,
-  settings: {
-    passcodeHash: '',
-  },
-  forceActive: false,
-});
-
 WalletIPC.onUpdate((_event: any, update: any) => {
+  console.log('GOT UDPATE');
   const { type, payload } = update;
+  console.log('got type', type);
   switch (type) {
     case 'wallet':
       const wallet = payload.wallet;
@@ -1134,11 +1089,13 @@ WalletIPC.onUpdate((_event: any, update: any) => {
       break;
     case 'wallets':
       const wallets = payload.wallets;
+      console.log('setting initialized');
       if (
         Object.keys(wallets.ethereum).length !== 0 ||
         Object.keys(wallets.bitcoin).length !== 0 ||
         Object.keys(wallets.btctestnet).length !== 0
       ) {
+        console.log('confirmed setting initialized');
         shipStore.walletStore.setInitialized(true);
       }
       shipStore.walletStore.ethereum.initial(wallets);

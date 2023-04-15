@@ -15,6 +15,7 @@ import {
 import { Dimensions } from '@holium/design-system';
 import { RealmUpdateTypes } from 'os/realm.types';
 import { RealmIPC } from 'renderer/stores/ipc';
+import { shipStore } from 'renderer/stores/ship.store';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -145,6 +146,7 @@ const walletAppDefault = {
     passcodeHash: '',
   },
   forceActive: false,
+  ourPatp: shipStore.ship?.patp,
 };
 
 export const trayStore = TrayAppStore.create({
