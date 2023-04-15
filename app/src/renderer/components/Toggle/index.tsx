@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import styled, { css } from 'styled-components';
 
-const ToggleLabel = styled.label`
+export const ToggleLabel = styled.label`
   display: flex;
   align-items: center;
   gap: 10px;

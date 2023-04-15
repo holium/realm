@@ -1,8 +1,8 @@
 import {
   Crest,
   Flex,
+  IconPathsType,
   Icons,
-  IconTypes,
   isValidHexColor,
   isValidImageUrl,
   Text,
@@ -16,7 +16,7 @@ interface ISelectRow {
   title: string;
   selected?: boolean;
   disabled?: boolean;
-  icon?: IconTypes;
+  icon?: IconPathsType;
   image?: string;
   color?: string;
   customBg?: string;

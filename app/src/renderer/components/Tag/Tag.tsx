@@ -1,6 +1,7 @@
 import { IconButton } from '../Button';
 import { Flex } from '../Flex';
-import { Icons, IconTypes } from '../Icons';
+import { Icons } from '../Icons';
+import { IconPathsType } from '../Icons/icons';
 
 import { TagIcon, TagStyle } from './Tag.styles';
 
@@ -11,7 +12,7 @@ export interface TagProps {
   minimal?: boolean;
   custom?: string;
   intent: IntentTypes;
-  icon?: IconTypes;
+  icon?: IconPathsType;
   rounded?: boolean;
   onRemove?: (evt: any) => any;
 }

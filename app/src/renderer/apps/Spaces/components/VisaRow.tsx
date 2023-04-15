@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Spinner } from '@holium/design-system';
 import { Patp } from 'os/types';
-import { Flex, IconTypes, Text, TextButton } from 'renderer/components';
+import { Flex, IconPathsType, Text, TextButton } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 
@@ -11,7 +11,7 @@ interface IVisaRow {
   title: string;
   selected?: boolean;
   disabled?: boolean;
-  icon?: IconTypes;
+  icon?: IconPathsType;
   image: string | null;
   color: string | null;
   customBg?: string;

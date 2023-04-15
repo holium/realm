@@ -19,7 +19,7 @@ export * from './Flex';
 export * from './Grid/index';
 export * from './Heading';
 export * from './Icons';
-export type { IconPathsType as IconTypes } from './Icons/icons';
+export type { IconPathsType } from './Icons/icons';
 export * from './Input';
 export * from './Menu';
 export * from './NFTBadge';

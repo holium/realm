@@ -1,9 +1,9 @@
 import { MouseEventHandler } from 'react';
 import { rgba } from 'polished';
-import { IconButton, Icons, IconTypes } from 'renderer/components';
+import { IconButton, IconPathsType, Icons } from 'renderer/components';
 
 interface WindowIconProps {
-  icon: IconTypes;
+  icon: IconPathsType;
   bg: string;
   iconColor: string;
   disabled?: boolean;
