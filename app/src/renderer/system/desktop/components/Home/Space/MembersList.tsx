@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
 import { observer } from 'mobx-react';
-import { PersonRow } from 'renderer/components';
+import { PersonRow } from 'renderer/components-new/People/PersonRow';
 import { Flex, Text, WindowedList } from '@holium/design-system';
-import { Member } from 'os/types';
 import { MemberType } from 'os/services/spaces/models/members';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -13,13 +12,11 @@ const MembersListPresenter = () => {
   const currentSpace = spacesStore.selected;
 
   let members = currentSpace ? Array.from(currentSpace?.members.list) : [];
-  const admins = members.filter((member: Member) =>
-    member.roles.includes('admin')
-  );
-  members = members.filter((member: Member) => !member.roles.includes('admin'));
+  const admins = members.filter((member) => member.roles.includes('admin'));
+  members = members.filter((member) => !member.roles.includes('admin'));
 
   const membersOnly = members.filter(
-    (member: Member) =>
+    (member) =>
       member.roles.includes('member') || member.status.includes('invited')
   );
 

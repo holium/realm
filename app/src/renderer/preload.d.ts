@@ -1,7 +1,7 @@
 import { AppPreloadType } from 'main/preload';
 import { OSPreloadType } from 'os/preload';
 import { realmPreload } from 'os/realm.service';
-import { authPreload } from 'os/services-new/auth.service';
+import { authPreload } from 'os/services-new/auth/auth.service';
 import { shipPreload } from 'os/services-new/ship/ship.service';
 import { roomsPreload } from 'os/services-new/ship/rooms.service';
 import { chatPreload } from 'os/services-new/ship/chat/chat.db';

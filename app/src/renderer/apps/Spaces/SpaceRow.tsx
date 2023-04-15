@@ -1,6 +1,6 @@
 import { useMemo, useEffect } from 'react';
 import styled from 'styled-components';
-import { pluralize } from 'renderer/logic/lib/text';
+import { pluralize } from 'renderer/lib/text';
 import { observer } from 'mobx-react';
 import {
   ContextMenuOption,

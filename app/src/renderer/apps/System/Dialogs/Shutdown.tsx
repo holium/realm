@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { Flex, Box, Button, Text } from '@holium/design-system';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';
-import { trackEvent } from 'renderer/logic/lib/track';
+import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
 
 export const ShutdownDialogConfig: DialogConfig = {

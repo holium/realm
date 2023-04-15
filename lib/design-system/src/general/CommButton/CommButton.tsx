@@ -10,6 +10,6 @@ interface CommButtonProps {
 
 export const CommButton = ({ icon, customBg, onClick }: CommButtonProps) => (
   <CommCircle customBg={customBg} onClick={(evt: any) => onClick(evt)}>
-    <Icon size={24} name={icon} />
+    <Icon size={28} name={icon} />
   </CommCircle>
 );

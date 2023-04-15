@@ -1,4 +1,4 @@
-import { S3Client, StorageClient, StorageAcl } from '../s3/S3Client';
+import { S3Client, StorageClient, StorageAcl } from './S3Client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import moment from 'moment';
 import { ShipIPC } from 'renderer/stores/ipc';

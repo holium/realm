@@ -4,11 +4,11 @@ import { createField, createForm } from 'mobx-easy-form';
 import { isValidPatp } from 'urbit-ob';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { ShipSearch } from 'renderer/components';
 import { Flex, Icon, Text, Button, TextInput } from '@holium/design-system';
 import { FriendsList } from './Ship/FriendsList';
 import { MembersList } from './Space/MembersList';
 import { shipStore, useShipStore } from 'renderer/stores/ship.store';
+import { ShipSearch } from 'renderer/components-new/ShipSearch';
 
 const HomeSidebar = styled(motion.div)`
   position: relative;

@@ -6,8 +6,10 @@ import {
   flow,
   SnapshotOut,
 } from 'mobx-state-tree';
+import { toJS } from 'mobx';
 import { cleanNounColor } from 'os/lib/color';
 import { BazaarIPC } from '../ipc';
+import { Glob } from './docket.model';
 
 export enum InstallStatus {
   uninstalled = 'uninstalled',
@@ -17,7 +19,8 @@ export enum InstallStatus {
   installed = 'installed',
   treaty = 'treaty',
   suspended = 'suspended',
-  resuming = 'resuming',
+  suspending = 'suspending',
+  reviving = 'reviving',
   // this is set when joining a space and you do not have the app
   //  installed, but want it to appear on the home screen. this
   //  is different than uninstalled which has %suspend implications
@@ -31,24 +34,6 @@ export enum AppTypes {
   Web = 'web',
   Dev = 'dev',
 }
-
-export const Glob = types.model('Glob', {
-  site: types.maybe(types.string),
-  glob: types.maybe(
-    types.model({
-      base: types.string,
-      'glob-reference': types.model({
-        location: types.model({
-          http: types.maybe(types.string),
-          ames: types.maybe(types.string),
-        }),
-        hash: types.string,
-      }),
-    })
-  ),
-});
-
-export type GlobMobxType = Instance<typeof Glob>;
 
 export const RealmConfig = types.model('RealmConfig', {
   size: types.array(types.number),
@@ -117,6 +102,7 @@ export const UrbitApp = types
     config: types.maybeNull(RealmConfig),
     gridIndex: types.maybe(types.number),
     dockIndex: types.maybe(types.number),
+    isRecommended: types.optional(types.boolean, false),
   })
   .actions((self) => ({
     setHost(host: string) {
@@ -127,6 +113,15 @@ export const UrbitApp = types
     },
     setStatus(status: InstallStatus) {
       self.installStatus = status;
+    },
+    setGridIndex(index: number) {
+      self.gridIndex = index;
+    },
+    setDockIndex(index: number | undefined) {
+      self.dockIndex = index;
+    },
+    setIsRecommended(isRecommended: boolean) {
+      self.isRecommended = isRecommended;
     },
   }));
 
@@ -146,9 +141,6 @@ const AppModel = types.union(
     eager: true,
   },
   UrbitApp
-  // WebApp,
-  // DevAppModel,
-  // NativeApp
 );
 
 const AppId = types.string;
@@ -168,16 +160,98 @@ export const BazaarStore = types
     loadingTreaties: false,
     addingAlly: types.map(types.string),
     devAppMap: types.map(DevAppModel),
+    installations: types.map(types.string),
     treatiesLoaded: types.optional(types.boolean, false),
     recentApps: types.array(types.string),
     recentDevs: types.array(types.string),
-    // subscription: types.optional(SubscriptionModel, {
-    //   state: 'subscribing',
-    // }),
   })
+  .views((self) => ({
+    get installed(): SnapshotOut<AppMobxType>[] {
+      const apps = Array.from<AppMobxType>(self.catalog.values())
+        .map((app) => getSnapshot(app))
+        .filter((app: SnapshotOut<AppMobxType>) => {
+          if (app.type === 'urbit') {
+            const urb = app as AppMobxType;
+            return (
+              urb.installStatus === 'installed' ||
+              urb.installStatus === 'suspended' ||
+              urb.installStatus === 'resuming' ||
+              urb.installStatus === 'failed' ||
+              urb.installStatus === 'suspending' ||
+              urb.installStatus === 'reviving'
+            );
+          } else {
+            return true;
+          }
+        })
+        .slice()
+        .sort((a, b) => {
+          if (a.gridIndex === undefined && b.gridIndex === undefined) return 0;
+          if (a.gridIndex === undefined) return 1;
+          if (b.gridIndex === undefined) return -1;
+          return a.gridIndex - b.gridIndex;
+        });
+      return apps;
+    },
+    get devApps() {
+      if (self.devAppMap.size === 0) return [];
+      return Array.from(self.devAppMap.values()) || [];
+    },
+    getRecentApps() {
+      return self.recentApps.map((appId) => self.catalog.get(appId));
+    },
+    getRecentDevs() {
+      return self.recentDevs;
+    },
+    getAllies() {
+      return Array.from(Object.values(getSnapshot(self.allies)));
+    },
+    getTreaties(ship: string) {
+      return Array.from(Object.values(getSnapshot(self.treaties))).filter(
+        (val) => val.id.split('/')[0] === ship
+      );
+    },
+    getTreaty(ship: string, desk: string) {
+      const treaty = self.treaties.get(`${ship}/${desk}`);
+      return treaty && getSnapshot(treaty);
+    },
+    searchTreaties(ship: string, term: string) {
+      const str = term.toLowerCase();
+      return this.getTreaties(ship).filter((val) => {
+        const tokens = val.id.split('/');
+        return (
+          tokens[0] === ship &&
+          (val.title.toLowerCase().startsWith(str) ||
+            tokens[1].startsWith(term))
+        );
+      });
+    },
+    searchApps(term: string) {
+      const str = term.toLowerCase();
+      return Array.from(Object.values(getSnapshot(self.catalog))).filter(
+        (app) => {
+          return (
+            app.id.startsWith(term) || app.title.toLowerCase().startsWith(str)
+          );
+        }
+      );
+    },
+    hasAlly(ship: string) {
+      return self.allies.has(ship);
+    },
+    isRecommended(appId: string) {
+      return self.recommendations.includes(appId);
+    },
+    getApp(appId: string) {
+      const app = self.catalog.get(appId);
+      if (app) return toJS(app);
+      return self.devAppMap.get(appId);
+    },
+  }))
   .actions((self) => ({
     init: flow(function* () {
       const data = yield BazaarIPC.fetchAppCatalog() as Promise<any>;
+      console.log('catalog', data);
       applySnapshot(self.catalog, data);
       // const { apps, gridIndex, recentApps, recentDevs } = data;
       // self.catalog.clear();
@@ -252,18 +326,6 @@ export const BazaarStore = types
     //   });
     //   self.stalls.set(data.path, data.stall);
     // },
-    // _updateStall(data: any) {
-    //   if ('add-app' in data) {
-    //     const app: AppType = data['add-app'];
-    //     if (app.type === 'urbit') {
-    //       app.color = cleanNounColor(app.color);
-    //     }
-    //     self.catalog.set(app.id, app);
-    //   } else if ('remove-app' in data) {
-    //     // const appId: string = data['remove-app'];
-    //   }
-    //   self.stalls.set(data.path, data.stall);
-    // },
     // _rebuildCatalog(data: any) {
     //   if (data.catalog) {
     //     for (let i = 0; i < data.catalog.length; i++) {
@@ -330,10 +392,7 @@ export const BazaarStore = types
     //   self.recommendations.splice(removeIndex, 1);
     //   applySnapshot(self.stalls, data.stalls);
     // },
-    // _treatiesLoaded() {
-    //   self.loadingTreaties = false;
-    //   self.treatiesLoaded = !self.treatiesLoaded;
-    // },
+
     addRecentApp(appId: string) {
       // keep no more than 5 recent app entries
       if (self.recentApps.length >= 5) {
@@ -354,21 +413,22 @@ export const BazaarStore = types
       if (idx !== -1) self.recentDevs.splice(idx, 1);
       self.recentDevs.splice(0, 0, shipId);
     },
-    // installAppDirect: flow(function* (conduit: Conduit, body: InstallPoke) {
-    //   try {
-    //     return yield DocketApi.installApp(conduit, body.ship, body.desk);
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // }),
     //
     // Pokes
     //
     installApp: flow(function* (ship: string, desk: string) {
+      const app = self.catalog.get(desk);
       try {
+        if (app) {
+          app.setStatus(InstallStatus.started);
+          self.installations.set(app.id, InstallStatus.started);
+        }
         return yield BazaarIPC.installApp(ship, desk) as Promise<any>;
       } catch (error) {
-        // self.installations.delete(body.desk);
+        if (app) {
+          app.setStatus(InstallStatus.failed);
+          self.installations.delete(app.id);
+        }
         console.error(error);
       }
     }),
@@ -391,17 +451,41 @@ export const BazaarStore = types
       }
     }),
     suspendApp: flow(function* (desk: string) {
+      const app = self.catalog.get(desk);
+      if (!app) return;
+      if (app.installStatus === InstallStatus.suspended) {
+        self.installations.delete(app.id);
+        return;
+      }
+      app.setStatus(InstallStatus.suspending);
+      self.installations.set(app.id, InstallStatus.suspending);
       try {
         return yield BazaarIPC.suspendApp(desk) as Promise<any>;
       } catch (error) {
         console.error(error);
+        if (app) {
+          app.setStatus(InstallStatus.failed);
+          self.installations.delete(app.id);
+        }
       }
     }),
     reviveApp: flow(function* (desk: string) {
+      const app = self.catalog.get(desk);
+      if (!app) return;
+      if (app.installStatus === InstallStatus.installed) {
+        self.installations.delete(app.id);
+        return;
+      }
+      app.setStatus(InstallStatus.reviving);
+      self.installations.set(app.id, InstallStatus.reviving);
       try {
-        return yield BazaarIPC.resumeApp(desk) as Promise<any>;
+        return yield BazaarIPC.reviveApp(desk) as Promise<any>;
       } catch (error) {
         console.error(error);
+        if (app) {
+          app.setStatus(InstallStatus.failed);
+          self.installations.delete(app.id);
+        }
       }
     }),
     recommendApp: flow(function* (appId: string) {
@@ -437,6 +521,15 @@ export const BazaarStore = types
         self.loadingTreaties = false;
       }
     }),
+
+    removeAlly: flow(function* (ship: string) {
+      try {
+        const result: any = yield BazaarIPC.removeAlly(ship) as Promise<any>;
+        return result;
+      } catch (error) {
+        console.error(error);
+      }
+    }),
     //
     // Scries
     //
@@ -466,6 +559,7 @@ export const BazaarStore = types
     scryTreaties: flow(function* (ship: string) {
       self.loadingTreaties = true;
       try {
+        self.treaties.clear();
         const treaties = yield BazaarIPC.scryTreaties(ship) as Promise<any>;
         const formedTreaties = [];
         for (const key in treaties) {
@@ -495,89 +589,72 @@ export const BazaarStore = types
         self.devAppMap.set(app.id, DevAppModel.create(app));
       });
     },
-    // setSubscriptionStatus: (
-    //   newSubscriptionStatus: 'subscribed' | 'subscribing' | 'unsubscribed'
-    // ) => {
-    //   self.subscription.set(newSubscriptionStatus);
-    // },
-  }))
-  .views((self) => ({
-    get installed(): SnapshotOut<AppMobxType>[] {
-      const apps = Array.from<AppMobxType>(self.catalog.values())
-        .map((app) => getSnapshot(app))
-        .filter((app: SnapshotOut<AppMobxType>) => {
-          if (app.type === 'urbit') {
-            const urb = app as AppMobxType;
-            return (
-              urb.installStatus === 'installed' ||
-              urb.installStatus === 'suspended' ||
-              urb.installStatus === 'resuming' ||
-              urb.installStatus === 'failed'
-            );
-          } else {
-            return true;
-          }
-        });
-      return apps;
+    // helpers
+    setAppDuringInstallation(app: AppType, status: InstallStatus) {
+      const install = self.installations.get(app.id);
+      // console.log('current install status', install, 'new status', status);
+      // Handles the case where an app is suspended on reviving
+      if (
+        install === InstallStatus.reviving &&
+        status === InstallStatus.suspended
+      ) {
+        return;
+      }
+
+      if (
+        !install &&
+        (status === InstallStatus.suspended ||
+          status === InstallStatus.uninstalled)
+      ) {
+        // this is when an app is suspended on install
+        self.installations.set(app.id, status);
+        return;
+      }
+      if (status === InstallStatus.started) {
+        self.installations.set(app.id, status);
+        return;
+      }
+      if (
+        status === InstallStatus.uninstalled ||
+        status === InstallStatus.installed ||
+        status === InstallStatus.suspended ||
+        status === InstallStatus.failed
+      ) {
+        self.installations.delete(app.id);
+        return;
+      }
     },
-    get devApps() {
-      if (self.devAppMap.size === 0) return [];
-      return Array.from(self.devAppMap.values()) || [];
+    // onUpdate handlers
+    _onInstallationUpdate(update: any) {
+      const app = self.catalog.get(update.id);
+      const curStatus = self.installations.get(update.id);
+      // Handles the case where the agent update is suspended on reviving
+      if (
+        curStatus === InstallStatus.reviving &&
+        update.installStatus === InstallStatus.suspended
+      ) {
+        return;
+      }
+      if (!app) {
+        // add to catalog
+        self.catalog.set(update.id, AppModel.create(update));
+      } else {
+        app.setStatus(update.installStatus);
+      }
+      this.setAppDuringInstallation(update, update.installStatus);
     },
-    getRecentApps() {
-      return self.recentApps.map((appId) => self.catalog.get(appId));
-    },
-    getRecentDevs() {
-      return self.recentDevs;
-    },
-    getAllies() {
-      return Array.from(Object.values(getSnapshot(self.allies)));
-    },
-    getTreaties(ship: string) {
-      return Array.from(Object.values(getSnapshot(self.treaties))).filter(
-        (val) => val.id.split('/')[0] === ship
-      );
-    },
-    getTreaty(ship: string, desk: string) {
-      const treaty = self.treaties.get(`${ship}/${desk}`);
-      return treaty && getSnapshot(treaty);
-    },
-    searchTreaties(ship: string, term: string) {
-      const str = term.toLowerCase();
-      return this.getTreaties(ship).filter((val) => {
-        const tokens = val.id.split('/');
-        return (
-          tokens[0] === ship &&
-          (val.title.toLowerCase().startsWith(str) ||
-            tokens[1].startsWith(term))
-        );
-      });
-    },
-    searchApps(term: string) {
-      const str = term.toLowerCase();
-      return Array.from(Object.values(getSnapshot(self.catalog))).filter(
-        (app) => {
-          return (
-            app.id.startsWith(term) || app.title.toLowerCase().startsWith(str)
-          );
-        }
-      );
-    },
-    hasAlly(ship: string) {
-      return self.allies.has(ship);
-    },
-    isRecommended(appId: string) {
-      return self.recommendations.includes(appId);
-    },
-    getApp(appId: string) {
+    _onRecommendedUpdate(appId: string) {
       const app = self.catalog.get(appId);
-      if (app) return app;
-      return self.devAppMap.get(appId);
+      if (app) app.setIsRecommended(true);
     },
-    // },
-    // get subscriptionState() {
-    //   return self.subscription.state;
-    // },
+    _onUnrecommendedUpdate(appId: string) {
+      const app = self.catalog.get(appId);
+      if (app) app.setIsRecommended(false);
+    },
+    _onPinnedUpdate(appId: string, index: number | undefined) {
+      const app = self.catalog.get(appId);
+      if (app) app.setDockIndex(index);
+    },
   }));
 
 export type AppMobxType = Instance<typeof UrbitApp>;

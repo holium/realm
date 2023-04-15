@@ -2,22 +2,24 @@ import { useEffect, useMemo, useRef } from 'react';
 import { observer } from 'mobx-react';
 import styled, { css } from 'styled-components';
 import { darken, desaturate, lighten, rgba } from 'polished';
-import { Box, Flex, Spinner } from '@holium/design-system';
-import { Text } from 'renderer/components';
 import {
-  AppType,
-  InstallStatus,
-  DevAppType,
-} from 'os/services/spaces/models/bazaar';
-import { bgIsLightOrDark } from 'os/lib/color';
+  bgIsLightOrDark,
+  Box,
+  Flex,
+  Spinner,
+  Text,
+} from '@holium/design-system';
 import { Icons } from '../Icons';
-import { ThemeType } from 'renderer/theme';
-import { useServices } from 'renderer/logic/store';
-import { getAppTileFlags } from 'renderer/logic/lib/app';
+import { getAppTileFlags } from 'renderer/lib/app';
 import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
+import {
+  InstallStatus,
+  AppType,
+  DevAppType,
+} from 'renderer/stores/models/bazaar.model';
 
 const sizes = {
   sm: 32,
@@ -62,7 +64,6 @@ const scales = {
 interface TileHighlightProps {
   isSelected?: boolean;
   isOpen?: boolean;
-  theme: ThemeType;
 }
 export const TileHighlight = styled(Box)<TileHighlightProps>`
   left: 11px;
@@ -74,12 +75,12 @@ export const TileHighlight = styled(Box)<TileHighlightProps>`
   ${(props: TileHighlightProps) =>
     props.isOpen &&
     css`
-      background-color: ${lighten(0.05, props.theme.colors.icon.app)};
+      background-color: rgba(var(--rlm-icon-rgba), 0.5);
     `}
   ${(props: TileHighlightProps) =>
     props.isSelected &&
     css`
-      background-color: ${lighten(0.05, props.theme.colors.brand.primary)};
+      background-color: rgba(var(--rlm-accent-rgba));
     `}
 `;
 
@@ -142,7 +143,6 @@ const AppTilePresenter = ({
   hasTitle,
   installStatus = InstallStatus.installed,
 }: AppTileProps) => {
-  const { theme } = useServices();
   const { getOptions, setOptions, getColors, setColors } = useContextMenu();
   const tileRef = useRef(null);
   const isAppGrid =
@@ -196,21 +196,21 @@ const AppTilePresenter = ({
     if (isAppGrid) {
       const appColor = app.color;
       title = (
-        <Text
+        <Text.Custom
           position="absolute"
-          style={{ pointerEvents: 'none' }}
+          style={{
+            pointerEvents: 'none',
+            backgroundColor: app.image && appColor,
+          }}
           left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
           padding=".2rem"
           borderRadius={4}
-          // @ts-ignore
-          backgroundColor={app.image && appColor}
           bottom={tileSize === 'xl1' ? '1rem' : '1.25rem'}
           fontWeight={500}
           fontSize={2}
-          color={textColor}
         >
           {app.title}
-        </Text>
+        </Text.Custom>
       );
       if (isSuspended || isFailed) {
         let statusBadgeColor = isLight
@@ -222,21 +222,24 @@ const AppTilePresenter = ({
             : rgba(lighten(0.1, '#D0384E'), 0.1);
         }
         status = (
-          <Text
+          <Text.Custom
             position="absolute"
-            style={{ pointerEvents: 'none', textTransform: 'uppercase' }}
+            style={{
+              pointerEvents: 'none',
+              textTransform: 'uppercase',
+              color: isFailed ? '#5e0b18' : textColor,
+              backgroundColor: rgba(statusBadgeColor, 0.5),
+            }}
             left={tileSize === 'xl1' ? '1.2rem' : '1.5rem'}
             padding={tileSize === 'xl1' ? '.1rem .2rem' : '.3rem .4rem'}
             borderRadius={6}
-            backgroundColor={rgba(statusBadgeColor, 0.5)}
             top={tileSize === 'xl1' ? '1rem' : '1.25rem'}
             fontWeight={500}
             textStyle="capitalize"
             fontSize={tileSize === 'xl1' ? '13px' : 2}
-            color={isFailed ? '#5e0b18' : textColor}
           >
             {app.installStatus}
-          </Text>
+          </Text.Custom>
         );
       }
     }
@@ -433,13 +436,9 @@ const AppTilePresenter = ({
           />
         </Flex>
         {hasTitle && (
-          <Text
-            style={{ pointerEvents: 'none' }}
-            color={theme.currentTheme.textColor}
-            mt={2}
-          >
+          <Text.Custom style={{ pointerEvents: 'none' }} mt={2}>
             {app.title}
-          </Text>
+          </Text.Custom>
         )}
       </Flex>
     );
@@ -455,8 +454,6 @@ const AppTilePresenter = ({
     onAppClick,
     open,
     selected,
-    theme.currentTheme.textColor,
-    textColor,
     tileId,
     tileSize,
     variants,

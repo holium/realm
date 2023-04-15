@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, KeyboardEventHandler } from 'react';
 import { observer } from 'mobx-react';
 import emailValidator from 'email-validator';
-import { Label, BigInput } from 'renderer/components';
 import {
   TextInput,
   Text,
@@ -11,9 +10,8 @@ import {
   Spinner,
 } from '@holium/design-system';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { AuthActions } from 'renderer/logic/actions/auth';
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { appState } from 'renderer/stores/app.store';
+import { normalizeBounds } from 'renderer/lib/window-manager';
 
 export const ChangeEmailDialogConfig: DialogConfig = {
   component: (props: any) => <ChangeEmailDialog {...props} />,
@@ -91,14 +89,14 @@ function InitialScreen(props: { done: any }) {
     if (!email) return;
     console.log(`setting email: ${email}`);
     setLoading(true);
-    const result = await AuthActions.changeEmail(email);
+    // const result = await AuthActions.changeEmail(email);
     setLoading(false);
 
-    if (result.verificationCode) {
-      props.done();
-    } else {
-      setError(result.error || 'Something went wrong, please try again.');
-    }
+    // if (result.verificationCode) {
+    //   props.done();
+    // } else {
+    //   setError(result.error || 'Something went wrong, please try again.');
+    // }
   };
 
   return (
@@ -112,9 +110,9 @@ function InitialScreen(props: { done: any }) {
         </Text.Custom>
       </Flex>
       <Flex mt={8} flexDirection="column">
-        <Label mb={3} required={true}>
-          Email
-        </Label>
+        <Text.Label mb={3}>
+          Email <span style={{ opacity: 0.5, fontWeight: '500' }}>*</span>
+        </Text.Label>
         <TextInput
           id="email-change"
           name="email-change"
@@ -151,7 +149,8 @@ function VerifyScreen(props: { done: any }) {
   const [error, setError] = useState(false);
 
   const submit = async (code: string) => {
-    const wasCorrect = await AuthActions.verifyNewEmail(code);
+    // const wasCorrect = await AuthActions.verifyNewEmail(code);
+    const wasCorrect = true;
     wasCorrect ? props.done() : setError(true);
   };
 
@@ -184,6 +183,7 @@ function VerifyScreen(props: { done: any }) {
         <Flex mt={5} width="100%" justifyContent="center">
           <BigInput
             mt={7}
+            id="change-email-verification-code"
             placeholder="A1F9C5"
             value={code}
             onChange={onChange}
@@ -205,7 +205,7 @@ function ResendCodeButton() {
 
   const resendCode = async () => {
     setState('loading');
-    await AuthActions.resendNewEmailVerificationCode();
+    // await AuthActions.resendNewEmailVerificationCode();
     setState('resent');
   };
 
@@ -253,3 +253,57 @@ function SuccessScreen() {
     </Flex>
   );
 }
+
+interface BigInputProps {
+  id: string;
+  m?: number | string;
+  mt?: number | string;
+  mb?: number | string;
+  mx?: number | string;
+  my?: number | string;
+  placeholder: string;
+  value: string;
+  onChange: (value: any) => void;
+  onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
+}
+
+export const BigInput = ({
+  id,
+  m,
+  mt,
+  mb,
+  mx,
+  my,
+  placeholder,
+  value,
+  onKeyDown,
+  onChange,
+}: BigInputProps) => (
+  <Flex
+    m={m}
+    mt={mt}
+    mb={mb}
+    mx={mx}
+    my={my}
+    flexDirection="row"
+    alignItems="space-between"
+    justifyContent="center"
+  >
+    <Box width={300} height={50}>
+      <TextInput
+        autoFocus
+        id={id || 'big-input'}
+        name={id || 'big-input'}
+        spellCheck={false}
+        textAlign="center"
+        fontSize={24}
+        fontWeight={500}
+        placeholder={placeholder}
+        value={value}
+        // @ts-ignore
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={onKeyDown}
+      />
+    </Box>
+  </Flex>
+);

@@ -39,7 +39,6 @@ export class ShipDB {
         this.shipDB.pragma(`key='${password}'`);
       }
     } else {
-      log.info('ship db file exists');
       this.shipDB = this.open();
       if (this.isDev) {
         this.shipDB.exec(initSql);

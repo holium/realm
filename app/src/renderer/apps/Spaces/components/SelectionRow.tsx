@@ -52,6 +52,7 @@ export const SelectRow = (props: ISelectRow) => {
 
   return (
     <Row
+      noHover
       selected={selected}
       disabled={disabled}
       style={{ paddingLeft: 12, gap: 16 }}

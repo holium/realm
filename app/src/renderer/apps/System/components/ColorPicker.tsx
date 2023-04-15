@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex } from 'renderer/components';
+import { Flex } from '@holium/design-system';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
 import { TwitterPicker } from 'react-color';
 
@@ -21,9 +21,6 @@ export interface ColorPickerProps {
 
 export const ColorPicker = observer((props: ColorPickerProps) => {
   const colorPickerRef = useRef(null);
-
-  // const { desktop, ship, contacts } = useServices();
-  // const { inputColor, accentColor } = theme.currentTheme;
 
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [validatedColor, setValidatedColor] = useState(props.initialColor);

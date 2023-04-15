@@ -6,10 +6,9 @@ import {
   flow,
   getSnapshot,
 } from 'mobx-state-tree';
-import { AuthIPC, ShipIPC } from 'renderer/stores/ipc';
+import { AuthIPC } from 'renderer/stores/ipc';
 import { AccountModel, AccountModelType } from './models/account.model';
-// import { AuthUpdateLogin } from 'os/services-new/auth/auth.service';
-import { trackEvent } from 'renderer/logic/lib/track';
+import { trackEvent } from 'renderer/lib/track';
 
 export const LoginStatus = types.enumeration([
   'initial',
@@ -131,24 +130,3 @@ export const AuthenticationModel = types
       // }
     }),
   }));
-
-ShipIPC.onUpdate((_evt: any, update: any) => {
-  console.log('ShipIPC.onUpdate', update);
-});
-
-// AuthIPC.onUpdate((_evt: any, update: AuthUpdateTypes) => {
-//   switch (update.type) {
-//     case 'init':
-//       appState.authStore._setAccounts((update as AuthUpdateInit).payload);
-//       break;
-//     case 'login':
-//       appState.authStore._setSession((update as AuthUpdateLogin).payload.patp);
-//       break;
-//     // case 'logout':
-//     //   authState.session = null;
-//     //   break;
-
-//     default:
-//       break;
-//   }
-// });

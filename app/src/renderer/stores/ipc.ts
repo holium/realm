@@ -1,4 +1,5 @@
 // Sets up the IPC interface for the renderer process
+export const MainIPC = window.electron.app;
 export const RealmIPC = window.realm;
 export const AuthIPC = window.authService;
 export const ShipIPC = window.shipService;
@@ -9,5 +10,3 @@ export const FriendsIPC = window.friendDb;
 export const SpacesIPC = window.spacesService;
 export const BazaarIPC = window.bazaarService;
 export const WalletIPC = window.walletService;
-
-console.log(SpacesIPC);

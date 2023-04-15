@@ -6,7 +6,7 @@ import { AppWindow } from '../desktop/components/AppWindow/AppWindow';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 import { useAppState } from 'renderer/stores/app.store';
-import { getCenteredPosition } from 'renderer/stores/lib/window-manager';
+import { getCenteredPosition } from 'renderer/lib/window-manager';
 
 interface DialogManagerProps {
   dialogId?: string;

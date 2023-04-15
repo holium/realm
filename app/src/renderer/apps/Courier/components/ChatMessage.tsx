@@ -9,7 +9,7 @@ import { useContextMenu } from 'renderer/components';
 import { ChatMessageType } from '../models';
 import { toJS } from 'mobx';
 import { useShipStore } from 'renderer/stores/ship.store';
-import { OSActions } from 'renderer/logic/actions/os';
+import { MainIPC } from 'renderer/stores/ipc';
 
 type ChatMessageProps = {
   containerWidth: number;
@@ -111,9 +111,9 @@ export const ChatMessagePresenter = ({
               asImage.src &&
               images.find((i) => i.image === asImage.src)
             )
-              OSActions.downloadUrlAsFile(asImage.src);
+              MainIPC.downloadUrlAsFile(asImage.src);
           } else if (images && images.length > 0) {
-            OSActions.downloadUrlAsFile(images[0].image);
+            MainIPC.downloadUrlAsFile(images[0].image);
           }
         },
       });

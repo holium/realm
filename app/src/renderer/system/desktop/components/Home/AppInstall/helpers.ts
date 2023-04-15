@@ -49,6 +49,12 @@ export const handleInstallation = (
     case InstallStatus.failed:
       bazaarStore.uninstallApp(desk);
       return;
+    case InstallStatus.reviving:
+      bazaarStore.uninstallApp(desk);
+      return;
+    case InstallStatus.suspending:
+      bazaarStore.uninstallApp(desk);
+      return;
     default:
       console.error('Unknown install status', status);
   }

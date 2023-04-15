@@ -62,7 +62,6 @@ export class SpacesService extends AbstractService {
   }
 
   private _onEvent = (data: any, _id?: number, mark?: string) => {
-    console.log('spaces event', data, _id, mark);
     if (mark === 'spaces-reaction') {
       const spacesType = Object.keys(data)[0];
       switch (spacesType) {
@@ -432,7 +431,7 @@ export class SpacesService extends AbstractService {
             path: pathToObj(path),
           },
         },
-        reaction: 'spaces-reaction.delete',
+        reaction: 'spaces-reaction.remove',
         onReaction: (data: any) => {
           // TODO: remove from db
           console.log('deleted space -> success');

@@ -1,18 +1,18 @@
-import { OSActions } from '../actions/os';
-import { CoreInstance } from '../store';
+import { AppStateType } from 'renderer/stores/app.store';
+// import { MainIPC } from 'renderer/stores/ipc';
 
-export const watchOnlineStatus = (coreStore: CoreInstance) => {
+export const watchOnlineStatus = (appState: AppStateType) => {
   window.removeEventListener('online', () => {});
   window.removeEventListener('offline', () => {});
 
   window.addEventListener('online', () => {
     console.log('online detected, reconnecting...');
-    coreStore.setOnline(true);
-    OSActions.reconnect();
+    appState.setOnline(true);
+    // MainIPC.reconnect();
   });
   window.addEventListener('offline', () => {
     console.log('offline detected, cleaning up...');
-    OSActions.disconnect();
-    coreStore.setOnline(false);
+    // MainIPC.disconnect();
+    appState.setOnline(false);
   });
 };

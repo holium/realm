@@ -13,24 +13,22 @@ import {
   NoScrollBar,
   TextInput,
 } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { InlineEdit, ShipSearch, useContextMenu } from 'renderer/components';
+import { InlineEdit, useContextMenu } from 'renderer/components';
 import { isValidPatp } from 'urbit-ob';
 import { createField, createForm } from 'mobx-easy-form';
 import { ChatLogHeader } from '../components/ChatLogHeader';
-import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { ChatAvatar } from '../components/ChatAvatar';
 import { FileUploadParams } from 'os/services/ship/models/ship';
-import { useFileUpload } from 'renderer/logic/lib/useFileUpload';
-import { ShipActions } from 'renderer/logic/actions/ship';
-import { IuseStorage } from 'renderer/logic/lib/useStorage';
+import { useFileUpload } from 'renderer/lib/useFileUpload';
+import { IuseStorage } from 'renderer/lib/useStorage';
 import { observer } from 'mobx-react-lite';
 import { InvitePermissionType, PeerModelType } from '../models';
 import { ExpiresValue, millisecondsToExpires } from '../types';
 import { useTrayApps } from 'renderer/apps/store';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { useShipStore, useShipStore } from 'renderer/stores/ship.store';
 import { ShipIPC } from 'renderer/stores/ipc';
 import { useAppState } from 'renderer/stores/app.store';
+import { ShipSearch } from 'renderer/components-new/ShipSearch';
 
 export const createPeopleForm = (
   defaults: any = {
@@ -67,7 +65,7 @@ type ChatInfoProps = {
 
 export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const { theme } = useAppState();
-  const { ship, chatStore, spacesStore } = useShipStore();
+  const { ship, chatStore, spacesStore, friends } = useShipStore();
   const { selectedChat, setSubroute, getChatHeader } = chatStore;
   const { dimensions } = useTrayApps();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -188,7 +186,8 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
     const patp = contact[0];
     selectedPatp.add(patp);
     setSelected(new Set(selectedPatp));
-    ChatDBActions.addPeer(path, patp)
+    selectedChat
+      .addPeer(patp)
       .then(() => {
         console.log('adding peer', patp);
       })
@@ -491,7 +490,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 label: 'Add as friend',
                 onClick: (evt: any) => {
                   evt.stopPropagation();
-                  ShipActions.addFriend(peer.ship);
+                  friends.addFriend(peer.ship);
                 },
               });
             }
@@ -501,7 +500,8 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 label: 'Remove',
                 onClick: (evt: any) => {
                   evt.stopPropagation();
-                  ChatDBActions.removePeer(path, peer.ship)
+                  selectedChat
+                    .removePeer(peer.ship)
                     .then(() => {
                       console.log('removed peer');
                     })
@@ -548,7 +548,7 @@ const LabelMap = {
 const PeerRow = ({ id, peer, options, role }: PeerRowProps) => {
   const { getOptions, setOptions } = useContextMenu();
 
-  const { friends } = useServices();
+  const { friends } = useShipStore();
 
   useEffect(() => {
     if (options && options.length && options !== getOptions(id)) {

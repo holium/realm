@@ -171,6 +171,7 @@ export const PinnedDockApp = ({
           },
         }}
         whileDrag={{ zIndex: 20 }}
+        drag="x"
         onPointerDown={() => {
           const rect = document.getElementById(tileId)?.getBoundingClientRect();
           if (rect) pointerDownRef.current = { tileId, rect };

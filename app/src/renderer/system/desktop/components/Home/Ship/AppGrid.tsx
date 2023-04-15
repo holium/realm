@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { AppTileSize, Box } from '@holium/design-system';
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';
-import { AppGridTile } from './GridAppTile';
+import { GridAppTile } from './GridAppTile';
 
 interface AppGridProps {
   tileSize: AppTileSize;
@@ -18,7 +18,7 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
         ...bazaarStore.installed,
         // ...bazaarStore.devApps,
       ] as AppMobxType[],
-    [bazaarStore.catalog]
+    [bazaarStore.catalog, bazaarStore.installations.values()]
   );
 
   if (!currentSpace) return null;
@@ -29,12 +29,11 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
         const tileId = `${app.title}-${index}-ship-grid-tile`;
         return (
           <Box id={tileId} key={tileId}>
-            <AppGridTile
+            <GridAppTile
               tileId={tileId}
               tileSize={tileSize}
               app={app}
               currentSpace={currentSpace}
-              bazaarStore={bazaarStore}
             />
           </Box>
         );

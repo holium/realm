@@ -1,8 +1,10 @@
 import { useCallback, useState } from 'react';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
 import { Reorder } from 'framer-motion';
-import { Flex, Divider } from 'renderer/components';
+import { Divider } from 'renderer/components';
+import { Flex } from '@holium/design-system';
 import { PinnedDockApp } from './PinnedDockApp';
 import { UnpinnedDockApp } from './UnpinnedDockApp';
 import { useAppState } from 'renderer/stores/app.store';
@@ -45,8 +47,14 @@ const AppDockViewPresenter = ({
   const onOrderUpdate = useCallback(() => {
     // First we update the dock locally so the user doesn't have to
     // wait for the subscription to come back from Hoon side.
-    spacesStore.selected?.reorderPinnedApps(localDockAppIds);
+    currentSpace?.reorderPinnedApps(localDockAppIds);
   }, [localDockAppIds]);
+
+  // const onOrderUpdate = () => {
+  //   // First we update the dock locally so the user doesn't have to
+  //   // wait for the subscription to come back from Hoon side.
+  //   currentSpace?.reorderPinnedApps(localDockAppIds);
+  // };
 
   const pinnedAppTiles = pinnedDockApps.map((app) => {
     const appWindow = shellStore.getWindowByAppId(app.id);
@@ -82,6 +90,9 @@ const AppDockViewPresenter = ({
       />
     );
   });
+  // const unpinnedAppTiles: any = [];
+  console.log('pinnedDockApps', toJS(pinnedDockApps));
+  console.log('unpinnedDockApps', toJS(unpinnedDockApps));
 
   const showDivider = pinnedDockApps.length > 0 && unpinnedDockApps.length > 0;
 

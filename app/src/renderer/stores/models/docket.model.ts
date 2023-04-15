@@ -1,4 +1,4 @@
-import { types } from 'mobx-state-tree';
+import { Instance, types } from 'mobx-state-tree';
 
 export const AppTypes = types.enumeration(['urbit', 'web', 'native']);
 
@@ -17,6 +17,8 @@ export const Glob = types.model('Glob', {
     })
   ),
 });
+
+export type GlobMobxType = Instance<typeof Glob>;
 
 export const DocketApp = types.model('DocketApp', {
   title: types.string,

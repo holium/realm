@@ -5,7 +5,7 @@ import { ChatProvider } from './store';
 import { useEffect } from 'react';
 import { ChatInfo } from './views/ChatInfo';
 import { ChatLog } from './views/ChatLog';
-import { useStorage } from 'renderer/logic/lib/useStorage';
+import { useStorage } from 'renderer/lib/useStorage';
 import { LayoutGroup } from 'framer-motion';
 import { useShipStore } from 'renderer/stores/ship.store';
 
