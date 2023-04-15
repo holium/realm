@@ -36,6 +36,9 @@ export const useNavigation = () => {
   const router = useRouter();
 
   const currentAccountSection = useMemo(() => {
+    const isAccountSection = router.pathname.split('/')[1] === 'account';
+    if (!isAccountSection) return null;
+
     const path = router.pathname.split('/')[2] ?? SidebarSection.Hosting;
     const eachWordCapitalized = path
       .split('-')

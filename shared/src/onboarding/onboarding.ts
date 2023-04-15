@@ -1,4 +1,5 @@
 export { AccountDialogSkeleton } from './components/AccountDialog';
+export { OnboardDialogSkeleton } from './components/OnboardDialog';
 export { AccountCustomDomainDialog } from './dialogs/AccountCustomDomainDialog';
 export { AccountDownloadRealmDialog } from './dialogs/AccountDownloadRealmDialog';
 export { AccountHostingDialog } from './dialogs/AccountHostingDialog';

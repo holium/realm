@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { useToggle } from '@holium/design-system/util';
 import { api } from '../util/api';
 import { useNavigation } from '../util/useNavigation';
-import { AccountDialogSkeleton } from '@holium/shared';
+import { AccountDialogSkeleton, OnboardDialogSkeleton } from '@holium/shared';
 
 const Main = styled.main`
   width: 100%;
@@ -59,11 +59,17 @@ export const Page = ({ title, isProtected = false, children }: Props) => {
         <link rel="icon" href="/favicon.ico" />
       </NextHead>
       <Main>
-        {isProtected ? (
+        {isProtected && currentAccountSection ? (
           authenticated.isOn ? (
             children
           ) : (
             <AccountDialogSkeleton currentSection={currentAccountSection} />
+          )
+        ) : isProtected ? (
+          authenticated.isOn ? (
+            children
+          ) : (
+            <OnboardDialogSkeleton />
           )
         ) : (
           children
