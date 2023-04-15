@@ -81,7 +81,7 @@ const HomePresenter = (props: HomePaneProps) => {
             flex={8}
             style={{ position: 'relative' }}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            animate={isOpen ? 'show' : 'exit'}
             exit={{ opacity: 0 }}
             maxHeight={42}
             height={42}
@@ -92,6 +92,21 @@ const HomePresenter = (props: HomePaneProps) => {
             alignItems="center"
             justifyContent="center"
             width="100%"
+            variants={{
+              hidden: {
+                opacity: 0,
+              },
+              show: {
+                opacity: 1,
+                x: sidebar ? -80 : 0,
+                transition: {
+                  x: { duration: 0.25 },
+                },
+              },
+              exit: {
+                opacity: 0,
+              },
+            }}
           >
             {ship && (
               <Avatar
