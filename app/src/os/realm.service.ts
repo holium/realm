@@ -7,7 +7,7 @@ import AbstractService, {
 import { AuthService } from './services-new/auth/auth.service';
 import { ShipService } from './services-new/ship/ship.service';
 import { getReleaseChannel, setReleaseChannel } from './lib/settings';
-import APIConnection from './services-new/conduit';
+import { APIConnection } from '@holium/conduit';
 
 export class RealmService extends AbstractService {
   // private realmProcess: RealmProcess | null = null;

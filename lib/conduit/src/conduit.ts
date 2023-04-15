@@ -15,6 +15,7 @@ import {
   SubscribeParams,
   Thread,
 } from './types';
+import { preSig } from '@urbit/aura';
 
 // For now, set it to 20
 setMaxListeners(20);
@@ -29,7 +30,7 @@ export class Conduit extends EventEmitter {
   private prevMsgId: number = 0;
   private lastAckId: number = 0;
   cookie: string | null = null;
-  ship: string | null = null;
+  ship: string;
   pokes: Map<number, PokeParams & PokeCallbacks>;
   watches: Map<number, SubscribeParams & SubscribeCallbacks>;
   idleWatches: Map<number, SubscribeParams & SubscribeCallbacks>;
@@ -41,8 +42,9 @@ export class Conduit extends EventEmitter {
   private code: string | undefined = undefined;
   private sse: EventSource | undefined;
 
-  constructor() {
+  constructor(ship: Patp) {
     super();
+    this.ship = ship;
     this.pokes = new Map();
     this.watches = new Map();
     this.idleWatches = new Map();
@@ -104,17 +106,12 @@ export class Conduit extends EventEmitter {
             this.cookie = cookie;
             this.updateStatus(ConduitState.Refreshed, {
               url: this.url,
-              ship: `~${this.ship}`,
+              ship: preSig(this.ship),
               cookie: this.cookie,
               code: this.code,
             });
             if (err.originator === 'sse') {
-              await this.init(
-                this.url,
-                this.ship ?? '',
-                this.cookie,
-                this.code
-              );
+              await this.init(this.url, this.cookie, this.code);
               resolve(undefined);
               return;
             }
@@ -151,13 +148,12 @@ export class Conduit extends EventEmitter {
    */
   async init(
     url: string,
-    ship: Patp,
     cookie: string,
     code: string | undefined = undefined
   ): Promise<void> {
     this.url = url;
-    this.ship = ship;
     this.cookie = cookie;
+    this.code = code;
     // Get a cookie if not provided
     if (!this.cookie) {
       const cookie = await Conduit.fetchCookie(this.url, this.code ?? '');
@@ -167,7 +163,6 @@ export class Conduit extends EventEmitter {
         this.cookie = null;
       }
     }
-    this.code = code;
     this.uid = this.generateUID();
     await this.startSSE(this.channelUrl(this.uid));
   }
@@ -193,7 +188,7 @@ export class Conduit extends EventEmitter {
     this.cookie = cookie;
     this.updateStatus(ConduitState.Refreshed, {
       url: this.url,
-      ship: `~${this.ship}`,
+      ship: preSig(this.ship),
       cookie: this.cookie,
       code: this.code,
     });
@@ -706,7 +701,7 @@ export class Conduit extends EventEmitter {
    */
   static async fetchCookie(
     url: string,
-    code: Patp
+    code: string
   ): Promise<string | undefined> {
     let cookie;
     try {

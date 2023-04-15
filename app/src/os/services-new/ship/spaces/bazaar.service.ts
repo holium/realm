@@ -381,21 +381,21 @@ export class BazaarService extends AbstractService {
 
   async scryAllies() {
     // todo error handle
-    return (
-      await APIConnection.getInstance().conduit.scry({
-        app: 'bazaar',
-        path: '/allies',
-      })
-    ).allies;
+    const response = APIConnection.getInstance().conduit.scry({
+      app: 'bazaar',
+      path: '/allies',
+    });
+    // @ts-ignore
+    return response.allies;
   }
 
   async scryTreaties(ship: string) {
-    return (
-      await APIConnection.getInstance().conduit.scry({
-        app: 'bazaar',
-        path: `/treaties/${ship}`,
-      })
-    ).treaties;
+    const response = APIConnection.getInstance().conduit.scry({
+      app: 'bazaar',
+      path: `/treaties/${ship}`,
+    });
+    // @ts-ignore
+    return response.treaties;
   }
 
   // async addRecentApp(appId: string) {

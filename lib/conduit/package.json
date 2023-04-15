@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@types/eventsource": "^1.1.11",
+    "@urbit/aura": "^1.0.0",
     "axios": "^0.27.2",
     "babel-loader": "^8.2.5",
     "eventsource": "^2.0.2"

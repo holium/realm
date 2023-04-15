@@ -8,6 +8,10 @@ You should build the project from root with `yarn` so that all the libs build pr
 
 Start the app in dev mode with `yarn start` or `npm run start`.
 
+## Running tests
+
+See https://github.com/WiseLibs/better-sqlite3/issues/545#issuecomment-824887942
+
 ## Developing apps within Realm
 
 You can think of Realm like a web browser. You can hot reload apps you are actively developing through Realm by adding some metadata to `src/app.dev.json`.

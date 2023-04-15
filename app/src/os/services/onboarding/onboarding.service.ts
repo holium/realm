@@ -23,6 +23,7 @@ import { HostingPlanet, AccessCode } from 'os/api/holium';
 import { Conduit } from '@holium/conduit';
 import { toJS } from 'mobx';
 import { RealmInstallationStatus } from '../../types';
+import { deSig } from '@urbit/aura';
 
 export class OnboardingService extends BaseService {
   private readonly db: Store<OnboardingStoreType>; // for persistance
@@ -271,8 +272,8 @@ export class OnboardingService extends BaseService {
       if (this.conduit !== undefined) {
         await this.closeConduit();
       }
-      this.conduit = new Conduit();
-      await this.conduit.init(url, patp.substring(1), cookie, code);
+      this.conduit = new Conduit(deSig(patp));
+      await this.conduit.init(url, cookie, code);
       return this.conduit;
     } catch (e) {
       throw new Error('Failed to connect to ship.');

@@ -24,6 +24,7 @@ import { ThemeModelType } from './services/theme.model';
 import { getCookie } from './lib/shipHelpers';
 import { ChatService } from './services/chat/chat.service';
 import { NotificationService } from './services/notification/notification.service';
+import { deSig } from '@urbit/aura';
 
 export interface ISession {
   ship: string;
@@ -332,19 +333,14 @@ export class Realm extends EventEmitter {
   ) {
     // this.sendLog('connecting conduit');
     if (!this.conduit) {
-      this.conduit = new Conduit();
+      this.conduit = new Conduit(deSig(session.ship));
       this.handleConnectionStatus(this.conduit);
     }
     try {
       // wait for the init function to resolve
       // this.sendLog(JSON.stringify(session));
 
-      await this.conduit.init(
-        session.url,
-        session.ship.substring(1),
-        session.cookie ?? '',
-        session.code
-      );
+      await this.conduit.init(session.url, session.cookie ?? '', session.code);
       // this.sendLog('after conduit init');
       // this.sendLog('connection successful');
       this.onConduit(params);

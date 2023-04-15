@@ -91,10 +91,11 @@ export class Friends extends AbstractDataAccess<Friend> {
 
   private async _fetchFriends() {
     // Get last timestamp
-    const response = await APIConnection.getInstance().conduit.scry({
+    const response = APIConnection.getInstance().conduit.scry({
       app: 'friends',
       path: '/all',
     });
+    // @ts-ignore
     return response.friends;
   }
 
@@ -103,7 +104,7 @@ export class Friends extends AbstractDataAccess<Friend> {
   }
 
   public async addFriend(patp: string) {
-    const response = await APIConnection.getInstance().conduit.poke({
+    const response = APIConnection.getInstance().conduit.poke({
       app: 'friends',
       mark: 'friend-action',
       json: {
@@ -119,7 +120,7 @@ export class Friends extends AbstractDataAccess<Friend> {
     patp: string,
     payload: { pinned: boolean; tags: string[] }
   ) {
-    const response = await APIConnection.getInstance().conduit.poke({
+    const response = APIConnection.getInstance().conduit.poke({
       app: 'friends',
       mark: 'friend-action',
       json: {
@@ -134,7 +135,7 @@ export class Friends extends AbstractDataAccess<Friend> {
   }
 
   public async removeFriend(patp: string) {
-    const response = await APIConnection.getInstance().conduit.poke({
+    const response = APIConnection.getInstance().conduit.poke({
       app: 'friends',
       mark: 'friend-action',
       json: {
@@ -154,7 +155,7 @@ export class Friends extends AbstractDataAccess<Friend> {
       bio: data.bio || null,
       cover: data.cover || null,
     };
-    const response = await APIConnection.getInstance().conduit.poke({
+    const response = APIConnection.getInstance().conduit.poke({
       app: 'friends',
       mark: 'friend-action',
       json: {

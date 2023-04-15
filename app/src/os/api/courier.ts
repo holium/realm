@@ -2,6 +2,7 @@ import { Conduit } from '@holium/conduit';
 import { Post } from '@urbit/api';
 import { CourierStoreType, DMLogType } from '../services/ship/models/courier';
 import { Patp } from '../types';
+import { preSig } from '@urbit/aura';
 
 type CourierApiType = {
   /* TODO: Typeset Counduit returns */
@@ -52,7 +53,7 @@ export const CourierApi: CourierApiType = {
             break;
           case 'dm-received':
             /* TODO: don't send this event to self */
-            const self = `~${conduit.ship}`;
+            const self = preSig(conduit.ship);
             const isFromSelf = payload.messages?.[0].author === self;
             if (isFromSelf) {
               store.updatePreviewsFromDmLog(payload as DMLogType);

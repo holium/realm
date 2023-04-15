@@ -1,7 +1,8 @@
 import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
-import { APIConnection } from '../../conduit';
+import { APIConnection } from '@holium/conduit';
+import { preSig } from '@urbit/aura';
 
 import {
   ChatDbReactions,
@@ -108,7 +109,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
   // Fetches
   //
   async fetchMuted() {
-    const response = await APIConnection.getInstance().conduit.scry({
+    const response = APIConnection.getInstance().conduit.scry({
       app: 'realm-chat',
       path: '/mutes',
     });
@@ -116,7 +117,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
   }
 
   async fetchPinnedChats() {
-    const response = await APIConnection.getInstance().conduit.scry({
+    const response = APIConnection.getInstance().conduit.scry({
       app: 'realm-chat',
       path: '/pins',
     });
@@ -126,10 +127,11 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
   private async _fetchMessages() {
     const lastTimestamp = this.getLastTimestamp('messages');
     try {
-      const response = await APIConnection.getInstance().conduit.scry({
+      const response = APIConnection.getInstance().conduit.scry({
         app: 'chat-db',
         path: `/db/messages/start-ms/${lastTimestamp}`,
       });
+      // @ts-ignore
       return response.tables.messages;
     } catch (e) {
       return [];
@@ -138,25 +140,27 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
 
   private async _fetchPaths() {
     const lastTimestamp = this.getLastTimestamp('paths');
-    const response = await APIConnection.getInstance().conduit.scry({
+    const response = APIConnection.getInstance().conduit.scry({
       app: 'chat-db',
       path: `/db/paths/start-ms/${lastTimestamp}`,
     });
+    // @ts-ignore
     return response?.tables.paths;
   }
 
   private async _fetchPeers() {
     const lastTimestamp = this.getLastTimestamp('peers');
-    const response = await APIConnection.getInstance().conduit.scry({
+    const response = APIConnection.getInstance().conduit.scry({
       app: 'chat-db',
       path: `/db/peers/start-ms/${lastTimestamp}`,
     });
+    // @ts-ignore
     return response?.tables.peers;
   }
 
   private async _fetchDeleteLogs() {
     const lastTimestamp = this.getLastTimestamp('delete_logs');
-    const response = await APIConnection.getInstance().conduit.scry({
+    const response = APIConnection.getInstance().conduit.scry({
       app: 'chat-db',
       path: `/delete-log/start-ms/${lastTimestamp}`,
     });
@@ -482,7 +486,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
           json_extract(json(metadata), '$.timestamp') DESC;
     `);
     const result: any = query.all(
-      `~${APIConnection.getInstance().conduit.ship}`,
+      preSig(APIConnection.getInstance().conduit.ship),
       path
     );
 

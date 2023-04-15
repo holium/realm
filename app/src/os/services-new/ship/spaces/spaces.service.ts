@@ -43,10 +43,11 @@ export class SpacesService extends AbstractService {
   }
 
   public async fetchInviteData() {
-    const response = await APIConnection.getInstance().conduit.scry({
+    const response = APIConnection.getInstance().conduit.scry({
       app: 'spaces',
       path: `/invitations`,
     });
+    // @ts-ignore
     const invites = this.invitationsDB?.insertAll(response.invitations);
     this.sendUpdate({
       type: 'invitations',
@@ -448,7 +449,7 @@ export class SpacesService extends AbstractService {
   // Invitations
   public async acceptInvite(path: string): Promise<void> {
     try {
-      const response = await APIConnection.getInstance().conduit.poke({
+      const response = APIConnection.getInstance().conduit.poke({
         app: 'spaces',
         mark: 'visa-action',
         json: {
@@ -465,7 +466,7 @@ export class SpacesService extends AbstractService {
   }
   public async declineInvite(path: string): Promise<void> {
     try {
-      const response = await APIConnection.getInstance().conduit.poke({
+      const response = APIConnection.getInstance().conduit.poke({
         app: 'spaces',
         mark: 'visa-action',
         json: {
@@ -485,7 +486,7 @@ export class SpacesService extends AbstractService {
     payload: { patp: string; role: MemberRole; message: string }
   ) {
     try {
-      const response = await APIConnection.getInstance().conduit.poke({
+      const response = APIConnection.getInstance().conduit.poke({
         app: 'spaces',
         mark: 'visa-action',
         json: {
@@ -505,7 +506,7 @@ export class SpacesService extends AbstractService {
 
   public async kickMember(path: string, patp: string) {
     try {
-      const response = await APIConnection.getInstance().conduit.poke({
+      const response = APIConnection.getInstance().conduit.poke({
         app: 'spaces',
         mark: 'visa-action',
         json: {
@@ -523,7 +524,7 @@ export class SpacesService extends AbstractService {
 
   public async setRoles(path: string, patp: string, roles: MemberRole[]) {
     try {
-      const response = await APIConnection.getInstance().conduit.poke({
+      const response = APIConnection.getInstance().conduit.poke({
         app: 'spaces',
         mark: 'visa-action',
         json: {

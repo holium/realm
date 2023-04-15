@@ -33,12 +33,7 @@ export class ShipService extends AbstractService {
     }
     this.shipDB = new ShipDB(this.patp, password);
     const credentials = this.shipDB.getCredentials();
-    if (
-      !this.shipDB ||
-      !credentials.code ||
-      !credentials.url ||
-      !credentials.cookie
-    ) {
+    if (!this.shipDB || !credentials.code || !credentials.url) {
       log.info(`No credentials found for ${patp}`);
       return;
     }
@@ -47,7 +42,11 @@ export class ShipService extends AbstractService {
     APIConnection.getInstance(credentials).conduit.on(
       'refreshed',
       (session: ConduitSession) => {
-        this.shipDB?.setCredentials(session.url, session.code, session.cookie);
+        this.shipDB?.setCredentials(
+          session.url,
+          session.code,
+          session.cookie ?? ''
+        );
       }
     );
 
@@ -89,6 +88,7 @@ export class ShipService extends AbstractService {
     return this.shipDB?.getCredentials();
   }
 
+  // @ts-ignore
   private _decryptDb(password: string) {
     this.shipDB?.decrypt(password);
   }
@@ -105,15 +105,16 @@ export class ShipService extends AbstractService {
   }
 
   public async getOurGroups(): Promise<{ [path: string]: any }> {
-    const response = await APIConnection.getInstance().conduit.scry({
+    const response = APIConnection.getInstance().conduit.scry({
       app: 'spaces',
       path: '/groups', // the spaces scry is at the root of the path
     });
     // return response.groups;
+    // @ts-ignore
     return Array.from(Object.values(response.groups));
   }
   public async getGroup(path: string): Promise<{ [path: string]: any }> {
-    const response = await APIConnection.getInstance().conduit.scry({
+    const response = APIConnection.getInstance().conduit.scry({
       app: 'spaces',
       path: `/groups${path}`, // the spaces scry is at the root of the path
     });
@@ -121,7 +122,7 @@ export class ShipService extends AbstractService {
     // return Array.from(Object.values(response.groups));
   }
   public async getGroupMembers(path: string): Promise<{ [path: string]: any }> {
-    return await APIConnection.getInstance().conduit.scry({
+    return APIConnection.getInstance().conduit.scry({
       app: 'spaces',
       path: `/groups${path}/members`, // the spaces scry is at the root of the path
     });

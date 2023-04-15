@@ -1,4 +1,4 @@
-import log from 'electron-log';
+// import log from 'electron-log';
 import { Database } from 'better-sqlite3';
 import AbstractDataAccess from '../../../abstract.db';
 
@@ -14,6 +14,10 @@ export interface Invitation {
   invitedAt: number;
   // createdAt: number;
   // updatedAt: number;
+}
+
+export interface Invitations {
+  [key: string]: Invitation;
 }
 
 export class InvitationDB extends AbstractDataAccess<Invitation> {

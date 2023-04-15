@@ -1,5 +1,6 @@
 import { Conduit, ConduitState } from './index';
 import log from 'electron-log';
+import { deSig } from '@urbit/aura';
 
 export type ConduitSession = {
   url: string;
@@ -11,24 +12,25 @@ export type ConduitSession = {
 export class APIConnection {
   private static instance: APIConnection;
   private conduitInstance: Conduit;
-  private isResuming = false;
+  // private isResuming = false;
   private isReconnecting = false;
-  private session: ConduitSession;
+  // private session: ConduitSession;
 
-  private constructor(session: ConduitSession) {
-    this.session = session;
-    this.conduitInstance = new Conduit();
+  private constructor(conduit: Conduit) {
+    // this.session = session;
+    this.conduitInstance = conduit;
     this.handleConnectionStatus(this.conduitInstance);
-    this.conduitInstance
-      .init(
-        session.url,
-        session.ship.substring(1),
-        session.cookie ?? '',
-        session.code
-      )
-      .then(() => {
-        this.handleConnectionStatus(this.conduitInstance);
-      });
+  }
+
+  public static async getInstanceAsync(
+    session: ConduitSession
+  ): Promise<APIConnection> {
+    if (!APIConnection.instance) {
+      const conduit = new Conduit(deSig(session.ship));
+      await conduit.init(session.url, session.cookie ?? '', session.code);
+      APIConnection.instance = new APIConnection(conduit);
+    }
+    return APIConnection.instance;
   }
 
   public static getInstance(session?: ConduitSession): APIConnection {
@@ -38,7 +40,9 @@ export class APIConnection {
           'API key must be provided on the first call to getInstance.'
         );
       }
-      APIConnection.instance = new APIConnection(session);
+      const conduit = new Conduit(deSig(session.ship));
+      conduit.init(session.url, session.cookie ?? '', session.code);
+      APIConnection.instance = new APIConnection(conduit);
     }
     return APIConnection.instance;
   }
@@ -47,8 +51,8 @@ export class APIConnection {
     return this.conduitInstance;
   }
 
-  public closeChannel(): Promise<boolean> {
-    return this.conduitInstance.closeChannel();
+  public async closeChannel(): Promise<boolean> {
+    return await this.conduitInstance.closeChannel();
   }
   /**
    * Relays the current connection status to renderer
@@ -83,7 +87,7 @@ export class APIConnection {
     });
     conduit.on(ConduitState.Failed, () => {
       // this.services.identity.auth.setLoader('error');
-      this.isResuming = false;
+      // this.isResuming = false;
       this.isReconnecting = false;
       this.sendConnectionStatus(ConduitState.Failed);
     });

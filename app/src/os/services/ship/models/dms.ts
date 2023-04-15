@@ -3,6 +3,7 @@ import { flow, Instance, types } from 'mobx-state-tree';
 import { LoaderModel } from '../../common.model';
 import { patp2dec, patp } from 'urbit-ob';
 import { PostType } from '../../../types';
+import { deSig } from '@urbit/aura';
 
 const MessagePosition = types.enumeration(['right', 'left']);
 
@@ -260,7 +261,7 @@ export const ChatStore = types
     },
     // TODO clean up how contact names are derived
     setDMs: (ship: string, dmGraph: any, contactsModel: any) => {
-      const strippedShip = ship.substring(1);
+      const strippedShip = deSig(ship);
       // console.log(dmGraph);
       Object.entries(dmGraph).forEach((chat: [string, any]) => {
         let lastSent = 0;
