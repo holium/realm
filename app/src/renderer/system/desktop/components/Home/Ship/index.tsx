@@ -77,36 +77,7 @@ const OurHomePresenter = (props: OurHomeProps) => {
           alignItems="center"
           justifyContent="center"
           width="100%"
-        >
-          <Flex>
-            {ship && (
-              <Avatar
-                simple
-                size={32}
-                avatar={ship.avatar}
-                patp={ship.patp}
-                sigilColor={[ship.color || '#000000', 'white']}
-              />
-            )}
-          </Flex>
-          <AppSearchApp mode="home" />
-          <Flex justifyContent="flex-end">
-            <IconButton
-              size={3}
-              customBg={iconHoverColor}
-              color={
-                sidebar === 'friends'
-                  ? highlightColor
-                  : theme.currentTheme.iconColor
-              }
-              onClick={() => {
-                setSidebar(!sidebar ? 'friends' : null);
-              }}
-            >
-              <Icon name="Members" size="22px" />
-            </IconButton>
-          </Flex>
-        </Flex>
+        ></Flex>
         <Flex flexDirection="row" justifyContent="space-between" gap={36}>
           <Flex
             variants={{

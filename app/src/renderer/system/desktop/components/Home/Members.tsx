@@ -10,7 +10,6 @@ import { Flex, Icons, Text, Input, ShipSearch } from 'renderer/components';
 import { Button } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { FriendsList } from './Ship/FriendsList';
 import { MembersList } from './Space/MembersList';
 import { ShipActions } from 'renderer/logic/actions/ship';
 
@@ -216,8 +215,7 @@ const MembersPresenter = ({ our }: IMembers) => {
           }}
         />
       </Flex>
-      {our && <FriendsList />}
-      {!our && <MembersList path={spaces.selected.path ?? ''} />}
+      <MembersList our={our} path={spaces.selected.path ?? ''} />
     </HomeSidebar>
   );
 };

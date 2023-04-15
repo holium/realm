@@ -5142,6 +5142,11 @@
     immer "^9.0.1"
     urbit-ob "^5.0.1"
 
+"@urbit/aura@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@urbit/aura/-/aura-1.0.0.tgz#791cba1de04f128a4f30374ef4b9924f6b6d478b"
+  integrity sha512-IeP3uoDzZ0Rpn345auXK0y/BCcXTmpgAlOPbgf7n4eD35h56OnSoit1kuXKA21sWE19gFjK/wqZcz5ULjz2ADg==
+
 "@urbit/http-api@^2.3.0":
   version "2.3.0"
   resolved "https://registry.npmjs.org/@urbit/http-api/-/http-api-2.3.0.tgz"

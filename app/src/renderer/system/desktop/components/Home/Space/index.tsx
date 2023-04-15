@@ -2,23 +2,26 @@ import { useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
-import { Flex, Text } from 'renderer/components';
-
+import { Flex, Text, IconButton } from 'renderer/components';
+import { rgba, darken } from 'polished';
 import { SpaceTitlebar } from './SpaceTitlebar';
 import { AppSuite } from './AppSuite/AppSuite';
 import { RecommendedApps } from './Recommended';
 import { Members } from '../Members';
 import { AppGrid } from '../Ship/AppGrid';
+import { NoScrollBar } from 'renderer/components/NoScrollbar';
+import { Avatar, Icon } from '@holium/design-system';
+import { AppSearchApp } from '../AppInstall/AppSearch';
 
 interface HomePaneProps {
   isOpen?: boolean;
 }
 
-type SidebarType = 'members' | null;
+type SidebarType = 'members' | 'friends' | null;
 
 const SpaceHomePresenter = (props: HomePaneProps) => {
   const { isOpen } = props;
-  const { ship, spaces, membership } = useServices();
+  const { ship, spaces, membership, theme } = useServices();
   const currentSpace = spaces.selected;
   const [sidebar, setSidebar] = useState<SidebarType>(null);
   const [appGrid, showAppGrid] = useState(false);
@@ -46,6 +49,12 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
     );
   }, [sidebar]);
 
+  const highlightColor = '#4E9EFD';
+  const iconHoverColor = useMemo(
+    () => rgba(darken(0.03, theme.currentTheme.iconColor), 0.1),
+    [theme.currentTheme.iconColor]
+  );
+
   if (!ship) return null;
   if (!currentSpace) return null;
 
@@ -54,10 +63,43 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
 
   const isAdmin = membership.isAdmin(currentSpace.path, ship.patp);
 
+  const ourTopBar = (
+    <>
+      <Flex>
+        {ship && (
+          <Avatar
+            simple
+            size={32}
+            avatar={ship.avatar}
+            patp={ship.patp}
+            sigilColor={[ship.color || '#000000', 'white']}
+          />
+        )}
+      </Flex>
+      <AppSearchApp mode="home" />
+      <Flex justifyContent="flex-end">
+        <IconButton
+          size={3}
+          customBg={iconHoverColor}
+          color={
+            sidebar === 'friends'
+              ? highlightColor
+              : theme.currentTheme.iconColor
+          }
+          onClick={() => {
+            setSidebar(!sidebar ? 'friends' : null);
+          }}
+        >
+          <Icon name="Members" size="22px" />
+        </IconButton>
+      </Flex>
+    </>
+  );
+
   return (
     <Flex flexDirection="row" width="100%" height="calc(100vh - 50px)">
-      <Flex
-        flex={1}
+      <NoScrollBar
+        flex={8}
         overflowY="auto"
         height="100%"
         flexDirection="column"
@@ -65,139 +107,148 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
         justifyContent="flex-start"
       >
         <Flex
-          initial={{ opacity: 0 }}
-          animate={isOpen ? 'show' : 'exit'}
-          exit={{ opacity: 0 }}
-          maxHeight={42}
-          height={42}
-          gap={12}
-          mt={40}
-          mb={46}
-          width={maxWidth}
-          variants={{
-            hidden: {
-              opacity: 0,
-            },
-            show: {
-              opacity: 1,
-              x: sidebar ? -80 : 0,
-              transition: {
-                x: { duration: 0.25 },
-              },
-            },
-            exit: {
-              opacity: 0,
-            },
-          }}
-          flexDirection="row"
-          justifyContent="space-between"
+          flex={1}
+          overflowY="auto"
+          height="100%"
+          flexDirection="column"
           alignItems="center"
+          justifyContent="flex-start"
         >
-          <SpaceTitlebar
-            space={currentSpace}
-            membersCount={membersCount}
-            showAppGrid={appGrid}
-            showMembers={sidebar === 'members'}
-            onToggleApps={() => {
-              showAppGrid(!appGrid);
+          <Flex
+            initial={{ opacity: 0 }}
+            animate={isOpen ? 'show' : 'exit'}
+            exit={{ opacity: 0 }}
+            maxHeight={42}
+            height={42}
+            gap={12}
+            mt={40}
+            mb={46}
+            width={maxWidth}
+            variants={{
+              hidden: {
+                opacity: 0,
+              },
+              show: {
+                opacity: 1,
+                x: sidebar ? -80 : 0,
+                transition: {
+                  x: { duration: 0.25 },
+                },
+              },
+              exit: {
+                opacity: 0,
+              },
             }}
-            onMemberClick={() => {
-              setSidebar(!sidebar ? 'members' : null);
-            }}
-          />
-        </Flex>
+            flexDirection="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <SpaceTitlebar
+              space={currentSpace}
+              membersCount={membersCount}
+              showAppGrid={appGrid}
+              showMembers={sidebar === 'members'}
+              onToggleApps={() => {
+                showAppGrid(!appGrid);
+              }}
+              onMemberClick={() => {
+                setSidebar(!sidebar ? 'members' : null);
+              }}
+            />
+          </Flex>
 
-        <Flex
-          flexGrow={1}
-          flexDirection="row"
-          justifyContent="space-between"
-          gap={36}
-          width={maxWidth}
-        >
-          {appGrid && (
-            <Flex
-              animate={isOpen ? 'show' : 'exit'}
-              flexDirection="column"
-              justifyContent="flex-start"
-              variants={{
-                hidden: {
-                  opacity: 0,
-                },
-                show: {
-                  opacity: 1,
-                  x: sidebar ? -80 : 0,
-                  transition: {
-                    x: { duration: 0.25 },
-                  },
-                },
-                exit: {
-                  opacity: 0,
-                },
-              }}
-              gap={20}
-            >
-              <Text variant="h3" fontWeight={500}>
-                Your Apps
-              </Text>
+          <Flex
+            flexGrow={1}
+            flexDirection="row"
+            justifyContent="space-between"
+            gap={36}
+            width={maxWidth}
+          >
+            {appGrid && (
               <Flex
-                style={{ position: 'relative' }}
-                gap={32}
-                width={maxWidth}
-                flexWrap="wrap"
-                flexDirection="row"
+                animate={isOpen ? 'show' : 'exit'}
+                flexDirection="column"
+                justifyContent="flex-start"
+                variants={{
+                  hidden: {
+                    opacity: 0,
+                  },
+                  show: {
+                    opacity: 1,
+                    x: sidebar ? -80 : 0,
+                    transition: {
+                      x: { duration: 0.25 },
+                    },
+                  },
+                  exit: {
+                    opacity: 0,
+                  },
+                }}
+                gap={20}
               >
-                <AppGrid tileSize="xl2" />
+                <Text variant="h3" fontWeight={500}>
+                  Your Apps
+                </Text>
+                <Flex
+                  style={{ position: 'relative' }}
+                  gap={32}
+                  width={maxWidth}
+                  flexWrap="wrap"
+                  flexDirection="row"
+                >
+                  <AppGrid tileSize="xl2" />
+                </Flex>
               </Flex>
-            </Flex>
-          )}
-          {!appGrid && (
-            <Flex
-              flex={4}
-              flexGrow={1}
-              position="relative"
-              flexDirection="column"
-              gap={16}
-              mb="180px"
-              initial="hidden"
-              animate={isOpen ? 'show' : 'exit'}
-              exit="hidden"
-              variants={{
-                hidden: {
-                  opacity: 0,
-                  transition: {
-                    opacity: 0.3,
-                    staggerChildren: 0,
-                    delayChildren: 0,
+            )}
+            {!appGrid && (
+              <Flex
+                flex={4}
+                flexGrow={1}
+                position="relative"
+                flexDirection="column"
+                gap={16}
+                mb="180px"
+                initial="hidden"
+                animate={isOpen ? 'show' : 'exit'}
+                exit="hidden"
+                variants={{
+                  hidden: {
+                    opacity: 0,
+                    transition: {
+                      opacity: 0.3,
+                      staggerChildren: 0,
+                      delayChildren: 0,
+                    },
                   },
-                },
-                show: {
-                  opacity: 1,
-                  x: sidebar ? -80 : 0,
-                  transition: {
-                    x: { duration: 0.25 },
-                    opacity: 0.3,
-                    staggerChildren: 0.1,
-                    delayChildren: 0.1,
+                  show: {
+                    opacity: 1,
+                    x: sidebar ? -80 : 0,
+                    transition: {
+                      x: { duration: 0.25 },
+                      opacity: 0.3,
+                      staggerChildren: 0.1,
+                      delayChildren: 0.1,
+                    },
                   },
-                },
-                exit: {
-                  opacity: 0,
-                  transition: {
-                    opacity: 0.3,
-                    staggerChildren: 0,
-                    delayChildren: 0,
+                  exit: {
+                    opacity: 0,
+                    transition: {
+                      opacity: 0.3,
+                      staggerChildren: 0,
+                      delayChildren: 0,
+                    },
                   },
-                },
-              }}
-            >
-              <AppSuite patp={ship.patp} isAdmin={isAdmin as boolean} />
-              <RecommendedApps />
-              {/* <RecentActivity /> */}
-            </Flex>
-          )}
-          {sidebarComponent}
+                }}
+              >
+                <AppSuite patp={ship.patp} isAdmin={isAdmin as boolean} />
+                <RecommendedApps />
+                {/* <RecentActivity /> */}
+              </Flex>
+            )}
+            {sidebarComponent}
+          </Flex>
         </Flex>
-      </Flex>
+      </NoScrollBar>
     </Flex>
   );
 };
