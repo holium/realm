@@ -32,7 +32,7 @@ export class ChatService extends AbstractService {
         },
       },
     };
-    APIConnection.getInstance().conduit.poke(payload);
+    await APIConnection.getInstance().conduit.poke(payload);
     return {
       path,
       pending: true,
@@ -52,7 +52,7 @@ export class ChatService extends AbstractService {
       },
     };
     try {
-      APIConnection.getInstance().conduit.poke(payload);
+      await APIConnection.getInstance().conduit.poke(payload);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to toggle muted chat');
@@ -72,7 +72,7 @@ export class ChatService extends AbstractService {
       },
     };
     try {
-      APIConnection.getInstance().conduit.poke(payload);
+      await APIConnection.getInstance().conduit.poke(payload);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to pin chat');
@@ -90,7 +90,7 @@ export class ChatService extends AbstractService {
       },
     };
     try {
-      APIConnection.getInstance().conduit.poke(payload);
+      await APIConnection.getInstance().conduit.poke(payload);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to unpin chat');
@@ -110,7 +110,7 @@ export class ChatService extends AbstractService {
       },
     };
     try {
-      APIConnection.getInstance().conduit.poke(payload);
+      await APIConnection.getInstance().conduit.poke(payload);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to edit message');
@@ -129,7 +129,7 @@ export class ChatService extends AbstractService {
       },
     };
     try {
-      APIConnection.getInstance().conduit.poke(payload);
+      await APIConnection.getInstance().conduit.poke(payload);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to delete message');
@@ -147,7 +147,7 @@ export class ChatService extends AbstractService {
       },
     };
     try {
-      APIConnection.getInstance().conduit.poke(payload);
+      await APIConnection.getInstance().conduit.poke(payload);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to delete chat backlog');
@@ -184,7 +184,7 @@ export class ChatService extends AbstractService {
       },
     };
     try {
-      APIConnection.getInstance().conduit.poke(payload);
+      await APIConnection.getInstance().conduit.poke(payload);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to create chat');
@@ -192,8 +192,8 @@ export class ChatService extends AbstractService {
   }
 
   // readChat(path: string) {
-  //   if (! APIConnection.getInstance().conduit) throw new Error('No conduit connection');
-  //   //  APIConnection.getInstance().conduit.readChat(path);
+  //   if (! await APIConnection.getInstance().conduit) throw new Error('No conduit connection');
+  //   //  await APIConnection.getInstance().conduit.readChat(path);
   // }
 
   async togglePinnedChat(path: string, pinned: boolean) {
@@ -209,7 +209,7 @@ export class ChatService extends AbstractService {
       },
     };
     try {
-      APIConnection.getInstance().conduit.poke(payload);
+      await APIConnection.getInstance().conduit.poke(payload);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to pin chat');
@@ -240,7 +240,7 @@ export class ChatService extends AbstractService {
       },
     };
     try {
-      APIConnection.getInstance().conduit.poke(payload);
+      await APIConnection.getInstance().conduit.poke(payload);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to edit chat');
@@ -260,7 +260,7 @@ export class ChatService extends AbstractService {
       },
     };
     try {
-      APIConnection.getInstance().conduit.poke(payload);
+      await APIConnection.getInstance().conduit.poke(payload);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to create chat');
@@ -280,7 +280,7 @@ export class ChatService extends AbstractService {
       },
     };
     try {
-      APIConnection.getInstance().conduit.poke(payload);
+      await APIConnection.getInstance().conduit.poke(payload);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to create chat');
@@ -310,7 +310,7 @@ export class ChatService extends AbstractService {
       },
     };
     try {
-      APIConnection.getInstance().conduit.poke(payload);
+      await APIConnection.getInstance().conduit.poke(payload);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to leave chat');

@@ -109,7 +109,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
   // Fetches
   //
   async fetchMuted() {
-    const response = APIConnection.getInstance().conduit.scry({
+    const response = await APIConnection.getInstance().conduit.scry({
       app: 'realm-chat',
       path: '/mutes',
     });
@@ -117,7 +117,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
   }
 
   async fetchPinnedChats() {
-    const response = APIConnection.getInstance().conduit.scry({
+    const response = await APIConnection.getInstance().conduit.scry({
       app: 'realm-chat',
       path: '/pins',
     });
@@ -127,7 +127,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
   private async _fetchMessages() {
     const lastTimestamp = this.getLastTimestamp('messages');
     try {
-      const response = APIConnection.getInstance().conduit.scry({
+      const response = await APIConnection.getInstance().conduit.scry({
         app: 'chat-db',
         path: `/db/messages/start-ms/${lastTimestamp}`,
       });
@@ -140,7 +140,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
 
   private async _fetchPaths() {
     const lastTimestamp = this.getLastTimestamp('paths');
-    const response = APIConnection.getInstance().conduit.scry({
+    const response = await APIConnection.getInstance().conduit.scry({
       app: 'chat-db',
       path: `/db/paths/start-ms/${lastTimestamp}`,
     });
@@ -150,7 +150,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
 
   private async _fetchPeers() {
     const lastTimestamp = this.getLastTimestamp('peers');
-    const response = APIConnection.getInstance().conduit.scry({
+    const response = await APIConnection.getInstance().conduit.scry({
       app: 'chat-db',
       path: `/db/peers/start-ms/${lastTimestamp}`,
     });
@@ -160,7 +160,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
 
   private async _fetchDeleteLogs() {
     const lastTimestamp = this.getLastTimestamp('delete_logs');
-    const response = APIConnection.getInstance().conduit.scry({
+    const response = await APIConnection.getInstance().conduit.scry({
       app: 'chat-db',
       path: `/delete-log/start-ms/${lastTimestamp}`,
     });

@@ -43,7 +43,7 @@ export class SpacesService extends AbstractService {
   }
 
   public async fetchInviteData() {
-    const response = APIConnection.getInstance().conduit.scry({
+    const response = await APIConnection.getInstance().conduit.scry({
       app: 'spaces',
       path: `/invitations`,
     });
@@ -285,7 +285,7 @@ export class SpacesService extends AbstractService {
   public async setSelectedSpace(path: string) {
     this.spacesDB?.setCurrent(path);
     console.log('setting current space to', path, pathToObj(path));
-    APIConnection.getInstance().conduit.poke({
+    await APIConnection.getInstance().conduit.poke({
       app: 'spaces',
       mark: 'spaces-action',
       json: {
@@ -449,7 +449,7 @@ export class SpacesService extends AbstractService {
   // Invitations
   public async acceptInvite(path: string): Promise<void> {
     try {
-      const response = APIConnection.getInstance().conduit.poke({
+      const response = await APIConnection.getInstance().conduit.poke({
         app: 'spaces',
         mark: 'visa-action',
         json: {
@@ -466,7 +466,7 @@ export class SpacesService extends AbstractService {
   }
   public async declineInvite(path: string): Promise<void> {
     try {
-      const response = APIConnection.getInstance().conduit.poke({
+      const response = await APIConnection.getInstance().conduit.poke({
         app: 'spaces',
         mark: 'visa-action',
         json: {
@@ -486,7 +486,7 @@ export class SpacesService extends AbstractService {
     payload: { patp: string; role: MemberRole; message: string }
   ) {
     try {
-      const response = APIConnection.getInstance().conduit.poke({
+      const response = await APIConnection.getInstance().conduit.poke({
         app: 'spaces',
         mark: 'visa-action',
         json: {
@@ -506,7 +506,7 @@ export class SpacesService extends AbstractService {
 
   public async kickMember(path: string, patp: string) {
     try {
-      const response = APIConnection.getInstance().conduit.poke({
+      const response = await APIConnection.getInstance().conduit.poke({
         app: 'spaces',
         mark: 'visa-action',
         json: {
@@ -524,7 +524,7 @@ export class SpacesService extends AbstractService {
 
   public async setRoles(path: string, patp: string, roles: MemberRole[]) {
     try {
-      const response = APIConnection.getInstance().conduit.poke({
+      const response = await APIConnection.getInstance().conduit.poke({
         app: 'spaces',
         mark: 'visa-action',
         json: {

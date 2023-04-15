@@ -93,7 +93,7 @@ export class NotificationsDB extends AbstractDataAccess<NotificationRow> {
 
   async fetchNotifications() {
     const lastTimestamp = this.getLastTimestamp();
-    const response = APIConnection.getInstance().conduit.scry({
+    const response = await APIConnection.getInstance().conduit.scry({
       app: 'notif-db',
       path: `/db/since-ms/${lastTimestamp}`,
     });
@@ -314,7 +314,7 @@ export class NotificationsDB extends AbstractDataAccess<NotificationRow> {
     };
 
     try {
-      APIConnection.getInstance().conduit.poke(payload);
+      await APIConnection.getInstance().conduit.poke(payload);
     } catch (err) {
       console.error('Failed to mark notifications read for', app, err);
     }
@@ -350,7 +350,7 @@ export class NotificationsDB extends AbstractDataAccess<NotificationRow> {
       json: pokeJson,
     };
     try {
-      APIConnection.getInstance().conduit.poke(payload);
+      await APIConnection.getInstance().conduit.poke(payload);
     } catch (err) {
       console.error('Failed to dismiss notifications for ', app, err);
     }

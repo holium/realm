@@ -105,7 +105,7 @@ export class ShipService extends AbstractService {
   }
 
   public async getOurGroups(): Promise<{ [path: string]: any }> {
-    const response = APIConnection.getInstance().conduit.scry({
+    const response = await APIConnection.getInstance().conduit.scry({
       app: 'spaces',
       path: '/groups', // the spaces scry is at the root of the path
     });
@@ -114,7 +114,7 @@ export class ShipService extends AbstractService {
     return Array.from(Object.values(response.groups));
   }
   public async getGroup(path: string): Promise<{ [path: string]: any }> {
-    const response = APIConnection.getInstance().conduit.scry({
+    const response = await APIConnection.getInstance().conduit.scry({
       app: 'spaces',
       path: `/groups${path}`, // the spaces scry is at the root of the path
     });
@@ -122,7 +122,7 @@ export class ShipService extends AbstractService {
     // return Array.from(Object.values(response.groups));
   }
   public async getGroupMembers(path: string): Promise<{ [path: string]: any }> {
-    return APIConnection.getInstance().conduit.scry({
+    return await APIConnection.getInstance().conduit.scry({
       app: 'spaces',
       path: `/groups${path}/members`, // the spaces scry is at the root of the path
     });

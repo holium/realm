@@ -219,14 +219,14 @@ export class BazaarService extends AbstractService {
   // ----------------- Actions --------------------
   // ----------------------------------------------
   async suspendApp(desk: string) {
-    return APIConnection.getInstance().conduit.poke({
+    return await APIConnection.getInstance().conduit.poke({
       app: 'hood',
       mark: 'kiln-suspend',
       json: desk,
     });
   }
   async reviveApp(desk: string) {
-    return APIConnection.getInstance().conduit.poke({
+    return await APIConnection.getInstance().conduit.poke({
       app: 'hood',
       mark: 'kiln-revive',
       json: desk,
@@ -234,7 +234,7 @@ export class BazaarService extends AbstractService {
   }
 
   async installApp(ship: string, desk: string) {
-    return APIConnection.getInstance().conduit.poke({
+    return await APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
       json: {
@@ -247,7 +247,7 @@ export class BazaarService extends AbstractService {
   }
 
   async uninstallApp(desk: string) {
-    return APIConnection.getInstance().conduit.poke({
+    return await APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
       json: {
@@ -258,12 +258,12 @@ export class BazaarService extends AbstractService {
     });
   }
   /*
-   return APIConnection.getInstance().conduit.poke({
+   return await APIConnection.getInstance().conduit.poke({
 
     });
     */
   async pinApp(path: string, appId: string, index: number | null) {
-    return APIConnection.getInstance().conduit.poke({
+    return await APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
       json: {
@@ -277,7 +277,7 @@ export class BazaarService extends AbstractService {
   }
 
   async unpinApp(path: string, appId: string) {
-    return APIConnection.getInstance().conduit.poke({
+    return await APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
       json: {
@@ -290,7 +290,7 @@ export class BazaarService extends AbstractService {
   }
 
   async reorderPinnedApps(path: string, dock: string[]) {
-    return APIConnection.getInstance().conduit.poke({
+    return await APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
       json: {
@@ -303,7 +303,7 @@ export class BazaarService extends AbstractService {
   }
 
   async addToSuite(path: string, appId: string, index: number) {
-    return APIConnection.getInstance().conduit.poke({
+    return await APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
       json: {
@@ -317,7 +317,7 @@ export class BazaarService extends AbstractService {
   }
 
   async removeFromSuite(path: string, index: number) {
-    return APIConnection.getInstance().conduit.poke({
+    return await APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
       json: {
@@ -330,7 +330,7 @@ export class BazaarService extends AbstractService {
   }
 
   async recommendApp(appId: string) {
-    return APIConnection.getInstance().conduit.poke({
+    return await APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
       json: {
@@ -340,7 +340,7 @@ export class BazaarService extends AbstractService {
   }
 
   async unrecommendApp(appId: string) {
-    return APIConnection.getInstance().conduit.poke({
+    return await APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
       json: {
@@ -350,7 +350,7 @@ export class BazaarService extends AbstractService {
   }
 
   async addAlly(ship: string) {
-    const ally = APIConnection.getInstance().conduit.poke({
+    const ally = await APIConnection.getInstance().conduit.poke({
       app: 'treaty',
       mark: 'ally-update-0',
       json: {
@@ -361,7 +361,7 @@ export class BazaarService extends AbstractService {
   }
 
   async removeAlly(ship: string) {
-    const ally = APIConnection.getInstance().conduit.poke({
+    const ally = await APIConnection.getInstance().conduit.poke({
       app: 'treaty',
       mark: 'ally-update-0',
       json: {
@@ -373,7 +373,7 @@ export class BazaarService extends AbstractService {
   }
 
   async scryHash(app: string) {
-    return APIConnection.getInstance().conduit.scry({
+    return await APIConnection.getInstance().conduit.scry({
       app: 'bazaar',
       path: `/app-hash/${app}`,
     });
@@ -381,7 +381,7 @@ export class BazaarService extends AbstractService {
 
   async scryAllies() {
     // todo error handle
-    const response = APIConnection.getInstance().conduit.scry({
+    const response = await APIConnection.getInstance().conduit.scry({
       app: 'bazaar',
       path: '/allies',
     });
@@ -390,7 +390,7 @@ export class BazaarService extends AbstractService {
   }
 
   async scryTreaties(ship: string) {
-    const response = APIConnection.getInstance().conduit.scry({
+    const response = await APIConnection.getInstance().conduit.scry({
       app: 'bazaar',
       path: `/treaties/${ship}`,
     });
