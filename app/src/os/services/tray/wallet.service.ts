@@ -14,7 +14,7 @@ import {
   initialWalletState,
 } from './wallet-lib/wallet.model';
 import { BaseProtocol } from './wallet-lib/wallets/BaseProtocol';
-import { RealmSigner } from './wallet/signers/realm';
+// import { RealmSigner } from './wallet/signers/realm';
 import { WalletApi } from '../../api/wallet';
 import { removeDots, UqbarApi } from '../../api/uqbar';
 import bcrypt from 'bcryptjs';

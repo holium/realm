@@ -138,7 +138,7 @@ export class ShipService extends AbstractService {
       app: 'spaces',
       path: `/groups${path}/members`, // the spaces scry is at the root of the path
     });
-    // return Array.from(Object.values(response.groups));
+    // return Array.from(Object.values(response.groups))
   }
 
   // ----------------------------------------

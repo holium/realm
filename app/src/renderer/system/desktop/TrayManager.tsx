@@ -3,7 +3,7 @@ import { TrayAppKeys, useTrayApps } from 'renderer/apps/store';
 import { observer } from 'mobx-react';
 import { trayAppRenderers } from './components/SystemBar/apps';
 import { TrayApp } from '@holium/design-system';
-import { ErrorBoundary } from '../../logic/ErrorBoundary';
+import { ErrorBoundary } from '../ErrorBoundary';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 const TrayManagerPresenter = () => {
