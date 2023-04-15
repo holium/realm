@@ -1,4 +1,4 @@
-import { BaseSigner } from '../../wallet-lib/wallets/BaseSigner';
+import { BaseSigner } from '../../../../services-new/ship/wallet/signers/BaseSigner';
 import { ethers } from 'ethers';
 // import { safeStorage } from 'electron';
 import { removeDots } from '../../../../api/uqbar';

@@ -2,6 +2,7 @@ import { FC, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Spinner } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { WalletView } from 'renderer/stores/models/wallet.model';
 
 interface FinalizingProps {
   seedPhrase: string;
@@ -15,7 +16,7 @@ export const Finalizing: FC<FinalizingProps> = observer(
       if (props.seedPhrase && props.passcode) {
         await walletStore.setMnemonic(props.seedPhrase, props.passcode);
         await walletStore.navigate(WalletView.LIST);
-        await walletStore.watchUpdates();
+        // await walletStore.watchUpdates();
       }
     };
     useEffect(() => {

@@ -4,7 +4,7 @@ import { UqbarApi } from '../../../api/uqbar';
 import { Database } from 'better-sqlite3-multiple-ciphers';
 import { WalletApi } from '../../../api/wallet';
 import log from 'electron-log';
-import { RealmSigner } from 'os/services/tray/wallet/signers/realm';
+import { RealmSigner } from './signers/realm';
 
 export class WalletService extends AbstractService {
   constructor(options?: ServiceOptions, db?: Database) {
