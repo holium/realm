@@ -1,6 +1,6 @@
 import { FC } from 'react';
-import { observer } from 'mobx-react';
 import { Flex, Spinner } from '@holium/design-system';
+import { observer } from 'mobx-react';
 import { Text, TextButton } from 'renderer/components';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';

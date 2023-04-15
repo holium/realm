@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Text } from 'renderer/components';
-import { useBrowser } from './store';
 import { WebView } from 'renderer/system/desktop/components/AppWindow/View/WebView';
+
+import { useBrowser } from './store';
 
 type Props = {
   isDragging: boolean;

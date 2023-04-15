@@ -1,22 +1,22 @@
 import { useEffect, useState } from 'react';
-import { observer } from 'mobx-react';
+import { Box, Flex, Spinner } from '@holium/design-system';
 import emailValidator from 'email-validator';
+import { observer } from 'mobx-react';
+import { normalizeBounds } from 'os/services/shell/lib/window-manager';
+import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import {
-  Input,
-  TextButton,
-  Text,
-  Label,
   BigInput,
   Button,
+  Input,
+  Label,
+  Text,
+  TextButton,
 } from 'renderer/components';
-import { Box, Flex, Spinner } from '@holium/design-system';
-import { ThemeType } from 'renderer/theme';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+import { AuthActions } from 'renderer/logic/actions/auth';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { AuthActions } from 'renderer/logic/actions/auth';
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
+import { ThemeType } from 'renderer/theme';
 
 export const ChangeEmailDialogConfig: DialogConfig = {
   component: (props: any) => <ChangeEmailDialog {...props} />,

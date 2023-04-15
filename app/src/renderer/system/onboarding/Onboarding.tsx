@@ -1,10 +1,9 @@
 import { useEffect } from 'react';
 import { observer } from 'mobx-react';
-
-import { useServices } from 'renderer/logic/store';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { Flex } from 'renderer/components';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
+import { Flex } from 'renderer/components';
+import { ShellActions } from 'renderer/logic/actions/shell';
+import { useServices } from 'renderer/logic/store';
 
 interface OnboardingProps {
   firstTime: boolean;

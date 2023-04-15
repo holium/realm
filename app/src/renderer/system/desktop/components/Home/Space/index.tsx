@@ -1,14 +1,15 @@
-import { useState, useMemo } from 'react';
-import { observer } from 'mobx-react';
+import { useMemo, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { useServices } from 'renderer/logic/store';
+import { observer } from 'mobx-react';
 import { Flex, Text } from 'renderer/components';
+import { useServices } from 'renderer/logic/store';
 
-import { SpaceTitlebar } from './SpaceTitlebar';
-import { AppSuite } from './AppSuite/AppSuite';
-import { RecommendedApps } from './Recommended';
 import { Members } from '../Members';
 import { AppGrid } from '../Ship/AppGrid';
+
+import { AppSuite } from './AppSuite/AppSuite';
+import { RecommendedApps } from './Recommended';
+import { SpaceTitlebar } from './SpaceTitlebar';
 
 interface HomePaneProps {
   isOpen?: boolean;

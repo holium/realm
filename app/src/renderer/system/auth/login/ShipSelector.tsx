@@ -1,15 +1,14 @@
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
-import { lighten } from 'polished';
-import { motion, Reorder } from 'framer-motion';
-import { observer } from 'mobx-react';
-import { toJS } from 'mobx';
-import { delay } from 'lodash';
-
 import { Avatar, Flex, Tooltip } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
+import { motion, Reorder } from 'framer-motion';
+import { delay } from 'lodash';
+import { toJS } from 'mobx';
+import { observer } from 'mobx-react';
+import { lighten } from 'polished';
 import { AuthActions } from 'renderer/logic/actions/auth';
+import { useServices } from 'renderer/logic/store';
 import { LoginError } from 'renderer/system/auth/login';
+import styled from 'styled-components';
 
 // ----------------------------------------
 // -------- Local style components --------

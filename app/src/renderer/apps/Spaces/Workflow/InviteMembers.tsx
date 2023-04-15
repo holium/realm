@@ -1,26 +1,26 @@
-import { useEffect, useMemo, useState, useRef } from 'react';
-import styled from 'styled-components';
-import { isValidPatp } from 'urbit-ob';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Avatar, Box, Flex, Select } from '@holium/design-system';
-import {
-  Text,
-  Label,
-  ShipSearch,
-  Input,
-  Icons,
-  Crest,
-  IconButton,
-  Skeleton,
-} from 'renderer/components';
-import { Row } from 'renderer/components/NewRow';
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
+import { MemberRole, MemberStatus } from 'os/types';
+import {
+  Crest,
+  IconButton,
+  Icons,
+  Input,
+  Label,
+  ShipSearch,
+  Skeleton,
+  Text,
+} from 'renderer/components';
+import { Row } from 'renderer/components/NewRow';
+import { ShipActions } from 'renderer/logic/actions/ship';
+import { pluralize } from 'renderer/logic/lib/text';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { ThemeType } from 'renderer/theme';
-import { pluralize } from 'renderer/logic/lib/text';
-import { MemberRole, MemberStatus } from 'os/types';
-import { ShipActions } from 'renderer/logic/actions/ship';
+import styled from 'styled-components';
+import { isValidPatp } from 'urbit-ob';
 
 interface IMemberList {
   customBg: string;

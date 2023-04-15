@@ -1,4 +1,3 @@
-import { BaseBlockProtocol } from '../../wallet-lib/wallets/BaseBlockProtocol';
 import {
   Alchemy,
   AlchemySettings,
@@ -6,22 +5,24 @@ import {
   Network,
 } from 'alchemy-sdk';
 import axios from 'axios';
-// NOTE: this was needed for JsonRpcProvider to work
-import fetch from 'node-fetch';
+import { ethers } from 'ethers';
 // @ts-expect-error
 import abi from 'human-standard-token-abi';
+// NOTE: this was needed for JsonRpcProvider to work
+import fetch from 'node-fetch';
+import io from 'socket.io-client';
+
 // import nftabi from 'non-fungible-token-abi';
 import {
-  ProtocolType,
-  WalletStoreType,
   Asset,
   CoinAsset,
-  NFTAsset,
-  NetworkStoreType,
   EthWalletType,
+  NetworkStoreType,
+  NFTAsset,
+  ProtocolType,
+  WalletStoreType,
 } from '../../wallet-lib/wallet.model';
-import { ethers } from 'ethers';
-import io from 'socket.io-client';
+import { BaseBlockProtocol } from '../../wallet-lib/wallets/BaseBlockProtocol';
 
 declare var global: any;
 global.fetch = fetch;

@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { AccountCustomDomainDialog } from '@holium/shared';
-import { useUser, UserContextProvider } from 'util/UserContext';
 import { api } from 'util/api';
+import { UserContextProvider, useUser } from 'util/UserContext';
+
 import { Page } from '../../components/Page';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 

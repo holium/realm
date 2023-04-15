@@ -1,12 +1,13 @@
 import { KeyboardEventHandler } from 'react';
-import { useForm, useField } from 'mobx-easy-form';
-import * as yup from 'yup';
-import { Label, FormControl, Box } from 'renderer/components';
+import { Avatar, Button, Flex, Text, TextInput } from '@holium/design-system';
+import { useField, useForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
+import { Box, FormControl, Label } from 'renderer/components';
+import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { Flex, Text, Avatar, TextInput, Button } from '@holium/design-system';
+import * as yup from 'yup';
+
 import { OnboardingStoreType } from '../../../os/services/onboarding/onboarding.model';
 
 type SetPasswordPresenterViewProps = {

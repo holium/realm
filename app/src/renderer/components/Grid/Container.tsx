@@ -1,6 +1,8 @@
 import styled, { css } from 'styled-components';
-import { space, layout, SpaceProps, LayoutProps, compose } from 'styled-system';
+import { compose, layout, LayoutProps, space, SpaceProps } from 'styled-system';
+
 import type { ThemeType } from '../../theme';
+
 import { config, DIMENSIONS } from './helpers';
 
 type ContainerType = SpaceProps &

@@ -1,9 +1,10 @@
 import { FC } from 'react';
 import { motion } from 'framer-motion';
-import styled, { css } from 'styled-components';
 import { darken, rgba, saturate } from 'polished';
-import { ThemeType } from '../theme';
 import { Text } from 'renderer/components';
+import styled, { css } from 'styled-components';
+
+import { ThemeType } from '../theme';
 
 type ThemeMode = 'light' | 'dark';
 

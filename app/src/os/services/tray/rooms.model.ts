@@ -1,5 +1,4 @@
-import { Instance, types, applySnapshot } from 'mobx-state-tree';
-
+import { applySnapshot, Instance, types } from 'mobx-state-tree';
 import { Patp } from 'os/types';
 
 export const DmAppState = types.model('DmAppState', {

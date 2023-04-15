@@ -1,15 +1,16 @@
 import { useMemo } from 'react';
 import {
-  Flex,
   Button,
-  Text,
+  Flex,
   Icon,
   Menu,
   MenuItemProps,
+  Text,
 } from '@holium/design-system';
-import { useChatStore } from '../store';
-import { useServices } from 'renderer/logic/store';
 import { ShellActions } from 'renderer/logic/actions/shell';
+import { useServices } from 'renderer/logic/store';
+
+import { useChatStore } from '../store';
 
 type ChatLogHeaderProps = {
   path: string;

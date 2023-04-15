@@ -1,6 +1,6 @@
 import { ReactNode, useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { SpaceProps, WidthProps, FlexboxProps } from 'styled-system';
+import { FlexboxProps, SpaceProps, WidthProps } from 'styled-system';
 
 import { Flex } from './Flex';
 import { Space } from './Space';

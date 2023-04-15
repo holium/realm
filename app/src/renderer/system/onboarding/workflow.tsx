@@ -1,34 +1,35 @@
+import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
+import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { ShellActions } from 'renderer/logic/actions/shell';
-import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 import { servicesStore } from 'renderer/logic/store';
 import {
   BaseDialogProps,
   DialogRenderers,
 } from 'renderer/system/dialog/dialogs';
+import { AccessCode } from 'renderer/system/onboarding/AccessCode.dialog';
+import { AccessGate } from 'renderer/system/onboarding/AccessGate.dialog';
+import { AccessGatePassed } from 'renderer/system/onboarding/AccessGatePassed.dialog';
+import { AddShip } from 'renderer/system/onboarding/AddShip.dialog';
 import { DisclaimerDialog } from 'renderer/system/onboarding/Disclaimer.dialog';
 import { EmailDialog } from 'renderer/system/onboarding/Email.dialog';
 import { HaveUrbitDialog } from 'renderer/system/onboarding/HaveUrbit.dialog';
-import { AddShip } from 'renderer/system/onboarding/AddShip.dialog';
-import { ProfileSetup } from 'renderer/system/onboarding/ProfileSetup.dialog';
-import { SetPassword } from 'renderer/system/onboarding/SetPassword.dialog';
+import { HostingConfirmation } from 'renderer/system/onboarding/HostingConfirmation.dialog';
 import { InstallAgent } from 'renderer/system/onboarding/InstallAgent.dialog';
+import { ProfileSetup } from 'renderer/system/onboarding/ProfileSetup.dialog';
 import { SelectPatp } from 'renderer/system/onboarding/SelectPatp.dialog';
 import {
   SelectPlan,
   SelectPlanProps,
 } from 'renderer/system/onboarding/SelectPlan.dialog';
+import { SetPassword } from 'renderer/system/onboarding/SetPassword.dialog';
 import {
   StripePayment,
   StripePaymentProps,
 } from 'renderer/system/onboarding/StripePayment.dialog';
-import { HostingConfirmation } from 'renderer/system/onboarding/HostingConfirmation.dialog';
-import { AccessCode } from 'renderer/system/onboarding/AccessCode.dialog';
-import { AccessGate } from 'renderer/system/onboarding/AccessGate.dialog';
-import { AccessGatePassed } from 'renderer/system/onboarding/AccessGatePassed.dialog';
-import { ViewCode } from './ViewCode.dialog';
+
 import { CheckInstallationDialog } from './CheckInstallation.dialog';
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
+import { ViewCode } from './ViewCode.dialog';
 
 const initialOnboardingDialogs: DialogRenderers = {
   [OnboardingStep.DISCLAIMER]: {

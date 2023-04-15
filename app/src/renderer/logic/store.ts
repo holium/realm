@@ -1,37 +1,39 @@
 import { createContext, useContext } from 'react';
 import {
   applyPatch,
+  applySnapshot,
   castToSnapshot,
   Instance,
-  applySnapshot,
   types,
 } from 'mobx-state-tree';
-import { DesktopStore } from 'os/services/shell/desktop.model';
-import { ShellStore } from 'os/services/shell/shell.model';
-import { SpacesStore } from 'os/services/spaces/models/spaces';
-import { NewBazaarStore } from 'os/services/spaces/models/bazaar';
+import { LoaderModel } from 'os/services/common.model';
 import { AuthStore } from 'os/services/identity/auth.model';
 import { OnboardingStore } from 'os/services/onboarding/onboarding.model';
-import { ShipModel, ShipModelType } from 'os/services/ship/models/ship';
-import { ShellActions } from './actions/shell';
-import { DesktopActions } from './actions/desktop';
-import { MembershipStore } from 'os/services/spaces/models/members';
-import { SoundActions } from './actions/sound';
-import { LoaderModel } from 'os/services/common.model';
-import { OSActions } from './actions/os';
-import { ShipModels } from 'os/services/ship/ship.service';
-import { FriendsStore } from 'os/services/ship/models/friends';
+import { DesktopStore } from 'os/services/shell/desktop.model';
+import { ShellStore } from 'os/services/shell/shell.model';
 import { CourierStore } from 'os/services/ship/models/courier';
+import { FriendsStore } from 'os/services/ship/models/friends';
+import { ShipModel, ShipModelType } from 'os/services/ship/models/ship';
+import { ShipModels } from 'os/services/ship/ship.service';
+import { NewBazaarStore } from 'os/services/spaces/models/bazaar';
 import {
   NotificationStore,
   NotificationStoreType,
 } from 'os/services/spaces/models/beacon';
-import { VisaModel } from 'os/services/spaces/models/visas';
-import { ThemeStore } from './theme';
-import { watchOnlineStatus } from './lib/offline';
 import { BulletinStore } from 'os/services/spaces/models/bulletin';
-import { AuthActions } from './actions/auth';
+import { MembershipStore } from 'os/services/spaces/models/members';
+import { SpacesStore } from 'os/services/spaces/models/spaces';
+import { VisaModel } from 'os/services/spaces/models/visas';
+
 import { defaultTheme } from '../../os/services/theme.model';
+
+import { AuthActions } from './actions/auth';
+import { DesktopActions } from './actions/desktop';
+import { OSActions } from './actions/os';
+import { ShellActions } from './actions/shell';
+import { SoundActions } from './actions/sound';
+import { watchOnlineStatus } from './lib/offline';
+import { ThemeStore } from './theme';
 
 const Services = types
   .model('ServicesStore', {

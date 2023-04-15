@@ -1,3 +1,12 @@
+import { Conduit } from '@holium/conduit';
+import {
+  applySnapshot,
+  flow,
+  getSnapshot,
+  Instance,
+  types,
+} from 'mobx-state-tree';
+
 import {
   AddToSuitePoke,
   BazaarApi,
@@ -8,19 +17,9 @@ import {
   UninstallPoke,
   UnpinPoke,
 } from '../../../api/bazaar';
-
-import {
-  types,
-  Instance,
-  applySnapshot,
-  getSnapshot,
-  flow,
-} from 'mobx-state-tree';
-
-import { cleanNounColor } from '../../../lib/color';
-import { Conduit } from '@holium/conduit';
-import { Patp } from '../../../types';
 import { DocketApi } from '../../../api/docket';
+import { cleanNounColor } from '../../../lib/color';
+import { Patp } from '../../../types';
 import { SubscriptionModel } from '../../common.model';
 
 export enum InstallStatus {

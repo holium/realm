@@ -1,19 +1,18 @@
 import { useMemo, useState } from 'react';
-import { observer } from 'mobx-react';
-import { Text, Card, TextButton, Input } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { lighten } from 'polished';
-
-import styled from 'styled-components';
+import { Flex, RadioImages } from '@holium/design-system';
 import { motion } from 'framer-motion';
 import { useField, useForm } from 'mobx-easy-form';
-import { Member } from 'os/types';
+import { observer } from 'mobx-react';
 import { ShipModelType } from 'os/services/ship/models/ship';
 import { MembershipType } from 'os/services/spaces/models/members';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
-import { ThemeStoreType } from 'renderer/logic/theme';
-import { Flex, RadioImages } from '@holium/design-system';
+import { Member } from 'os/types';
+import { lighten } from 'polished';
+import { Card, Input, Text, TextButton } from 'renderer/components';
 import { AuthActions } from 'renderer/logic/actions/auth';
+import { useServices } from 'renderer/logic/store';
+import { ThemeStoreType } from 'renderer/logic/theme';
+import styled from 'styled-components';
 
 const WallpaperPreview = styled(motion.img)`
   width: 80%;

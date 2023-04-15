@@ -1,11 +1,13 @@
-import { observer } from 'mobx-react';
-import { Flex, Text, Button, Icon, Tooltip } from '@holium/design-system';
-import { RoomRow } from './components/RoomRow';
-import { useServices } from 'renderer/logic/store';
-import { ProviderSelector } from './components/ProviderSelector';
-import { useRooms } from './useRooms';
-import { useTrayApps } from '../store';
+import { Button, Flex, Icon, Text, Tooltip } from '@holium/design-system';
 import { RealmProtocol, RoomType } from '@holium/realm-room';
+import { observer } from 'mobx-react';
+import { useServices } from 'renderer/logic/store';
+
+import { useTrayApps } from '../store';
+
+import { ProviderSelector } from './components/ProviderSelector';
+import { RoomRow } from './components/RoomRow';
+import { useRooms } from './useRooms';
 
 const RoomsPresenter = () => {
   const { ship, spaces, theme } = useServices();

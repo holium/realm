@@ -1,23 +1,24 @@
 import { HTMLProps, RefObject } from 'react';
+import { AnimationProps } from 'framer-motion';
+import { rgba } from 'polished';
 import styled, { css, StyledComponentProps } from 'styled-components';
 import {
-  compose,
-  space,
-  layout,
-  flexbox,
-  border,
-  position,
-  color,
   background,
   backgroundColor,
+  border,
+  color,
+  compose,
+  flexbox,
+  layout,
+  position,
+  space,
 } from 'styled-system';
-import { rgba } from 'polished';
+
+import { ThemeType } from '../../theme';
 import { Box, BoxProps } from '../Box';
 import { Flex } from '../Flex';
-import { TypographyFunctionsProps } from '../typography-functions';
 import { Text } from '../Text';
-import { ThemeType } from '../../theme';
-import { AnimationProps } from 'framer-motion';
+import { TypographyFunctionsProps } from '../typography-functions';
 
 const inputTokens = {
   iconSize: 4, // icon size on font-size scale

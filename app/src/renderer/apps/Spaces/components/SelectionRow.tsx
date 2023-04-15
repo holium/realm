@@ -1,12 +1,12 @@
 import {
-  Icons,
-  Text,
-  TextButton,
-  Flex,
-  IconTypes,
   Crest,
+  Flex,
+  Icons,
+  IconTypes,
   isValidHexColor,
   isValidImageUrl,
+  Text,
+  TextButton,
 } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
 

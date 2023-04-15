@@ -1,5 +1,5 @@
 // import { osState, shipState } from './../store';
-import { types, Instance, getSnapshot, applySnapshot } from 'mobx-state-tree';
+import { applySnapshot, getSnapshot, Instance, types } from 'mobx-state-tree';
 
 export const ShellStore = types
   .model('ShellStore', {

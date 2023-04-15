@@ -1,18 +1,18 @@
-import { useRef, useMemo, useState } from 'react';
-import { observer } from 'mobx-react';
-import { createField, createForm } from 'mobx-easy-form';
-import { isValidPatp } from 'urbit-ob';
-import styled from 'styled-components';
-import { motion } from 'framer-motion';
-import { rgba, lighten, darken } from 'polished';
-
-import { Flex, Icons, Text, Input, ShipSearch } from 'renderer/components';
+import { useMemo, useRef, useState } from 'react';
 import { Button } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
+import { motion } from 'framer-motion';
+import { createField, createForm } from 'mobx-easy-form';
+import { observer } from 'mobx-react';
+import { darken, lighten, rgba } from 'polished';
+import { Flex, Icons, Input, ShipSearch, Text } from 'renderer/components';
+import { ShipActions } from 'renderer/logic/actions/ship';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { useServices } from 'renderer/logic/store';
+import styled from 'styled-components';
+import { isValidPatp } from 'urbit-ob';
+
 import { FriendsList } from './Ship/FriendsList';
 import { MembersList } from './Space/MembersList';
-import { ShipActions } from 'renderer/logic/actions/ship';
 
 interface HomeSidebarProps {
   filterMode: 'light' | 'dark';

@@ -1,8 +1,8 @@
 import { FC, useCallback } from 'react';
+import { BarButton, Icon } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/logic/lib/position';
-import { BarButton, Icon } from '@holium/design-system';
 
 const position = 'top-left';
 const anchorOffset = { x: 4, y: 24 };

@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
-import { Flex, EmbedBox, Text, Skeleton } from '../index';
+
+import { EmbedBox, Flex, Skeleton, Text } from '../index';
 
 interface AppLinkProps {
   loading?: boolean;

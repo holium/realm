@@ -1,9 +1,11 @@
+import { useMemo } from 'react';
+import { Button, Flex, Icon, Text, TextInput } from '@holium/design-system';
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
-import { useMemo } from 'react';
-import { TextInput, Text, Button, Flex, Icon } from '@holium/design-system';
 import { useServices } from 'renderer/logic/store';
+
 import { useTrayApps } from '../store';
+
 import { useRooms } from './useRooms';
 
 export const createRoomForm = (

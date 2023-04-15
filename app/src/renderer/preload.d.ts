@@ -1,6 +1,6 @@
 import { AppPreloadType } from 'main/preload';
-import { OSPreloadType } from 'os/preload';
 import { MultiplayerPreloadType } from 'main/preload.multiplayer';
+import { OSPreloadType } from 'os/preload';
 
 declare global {
   interface Window {

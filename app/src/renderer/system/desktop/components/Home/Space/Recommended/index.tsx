@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
 import { Flex, Text } from 'renderer/components';
+import { useServices } from 'renderer/logic/store';
+
 import { AppPreview } from './AppPreview';
 
 const RecommendedAppsPresenter = () => {

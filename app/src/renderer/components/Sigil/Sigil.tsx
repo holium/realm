@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { sigil, reactRenderer } from '@tlon/sigil-js';
+import { reactRenderer, sigil } from '@tlon/sigil-js';
+
 import { AvatarWrapper, SigilStyle } from './Sigil.styles';
 
 export interface SigilProps {

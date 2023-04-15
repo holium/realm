@@ -1,11 +1,12 @@
-import { useRef, useMemo } from 'react';
-import styled, { css } from 'styled-components';
+import { useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { rgba, darken } from 'polished';
-import { useServices } from 'renderer/logic/store';
-import { Flex, Text, Icons, Box } from 'renderer/components';
-import { ThemeType } from '../../../../../theme';
 import { DocketAppType } from 'os/services/spaces/models/bazaar';
+import { darken, rgba } from 'polished';
+import { Box, Flex, Icons, Text } from 'renderer/components';
+import { useServices } from 'renderer/logic/store';
+import styled, { css } from 'styled-components';
+
+import { ThemeType } from '../../../../../theme';
 
 const sizes = {
   sm: 32,

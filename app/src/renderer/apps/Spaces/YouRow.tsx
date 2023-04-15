@@ -1,8 +1,8 @@
-import styled from 'styled-components';
+import { Avatar, Box, Flex, Row, Text } from '@holium/design-system';
 import { ShipModelType } from 'os/services/ship/models/ship';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { useServices } from 'renderer/logic/store';
-import { Avatar, Box, Row, Text, Flex } from '@holium/design-system';
+import styled from 'styled-components';
 
 const Wrapper = styled(Box)`
   position: absolute;

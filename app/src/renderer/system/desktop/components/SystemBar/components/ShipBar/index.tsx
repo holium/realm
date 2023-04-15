@@ -1,32 +1,33 @@
-import { useEffect, useState, useCallback } from 'react';
-import { WalletTray } from './WalletTray';
-import { observer } from 'mobx-react';
-import { MessagesTray } from './MessagesTray';
-import { AccountTray } from './AccountTray';
+import { useCallback, useEffect, useState } from 'react';
 import {
-  Flex,
   BarStyle,
-  NotificationType,
-  NotificationList,
-  Button,
-  Icon,
   Box,
+  Button,
+  Flex,
+  Icon,
   NoScrollBar,
+  NotificationList,
+  NotificationType,
 } from '@holium/design-system';
-import { RoomTray } from './Rooms';
 import { AnimatePresence } from 'framer-motion';
-import { AuthActions } from 'renderer/logic/actions/auth';
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
-import { useServices } from 'renderer/logic/store';
-import { trackEvent } from 'renderer/logic/lib/track';
-import { nativeApps } from 'renderer/apps/nativeApps';
+import { observer } from 'mobx-react';
 import { AppType } from 'os/services/spaces/models/bazaar';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { useTrayApps } from 'renderer/apps/store';
 import { useAccountStore } from 'renderer/apps/Account/store';
 import { useChatStore } from 'renderer/apps/Courier/store';
-import { openChatToPath } from 'renderer/logic/lib/useTrayControls';
+import { nativeApps } from 'renderer/apps/nativeApps';
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
+import { useTrayApps } from 'renderer/apps/store';
+import { AuthActions } from 'renderer/logic/actions/auth';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { ShellActions } from 'renderer/logic/actions/shell';
+import { trackEvent } from 'renderer/logic/lib/track';
+import { openChatToPath } from 'renderer/logic/lib/useTrayControls';
+import { useServices } from 'renderer/logic/store';
+
+import { AccountTray } from './AccountTray';
+import { MessagesTray } from './MessagesTray';
+import { RoomTray } from './Rooms';
+import { WalletTray } from './WalletTray';
 
 type ExpandBarStyles = {
   height: number | 'fit-content';

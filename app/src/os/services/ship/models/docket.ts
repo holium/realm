@@ -1,4 +1,4 @@
-import { types, Instance, applySnapshot } from 'mobx-state-tree';
+import { applySnapshot, Instance, types } from 'mobx-state-tree';
 
 export const AppTypes = types.enumeration(['urbit', 'web', 'native']);
 

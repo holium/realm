@@ -1,8 +1,9 @@
 import { toJS } from 'mobx';
-import { flow, Instance, types, cast, applySnapshot } from 'mobx-state-tree';
+import { applySnapshot, cast, flow, Instance, types } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { SoundActions } from 'renderer/logic/actions/sound';
+
 import { expiresInMap, ExpiresValue } from './types';
 
 const ChatFragment = types.union(

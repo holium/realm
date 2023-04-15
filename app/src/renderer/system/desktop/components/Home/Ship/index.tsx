@@ -1,14 +1,16 @@
-import { useState, useMemo } from 'react';
-import { observer } from 'mobx-react';
-import { rgba, darken } from 'polished';
-import { AnimatePresence } from 'framer-motion';
-import { Flex, IconButton } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { Members } from '../Members';
-import { AppGrid } from './AppGrid';
-import { AppSearchApp } from '../AppInstall/AppSearch';
-import { NoScrollBar } from 'renderer/components/NoScrollbar';
+import { useMemo, useState } from 'react';
 import { Avatar, Icon } from '@holium/design-system';
+import { AnimatePresence } from 'framer-motion';
+import { observer } from 'mobx-react';
+import { darken, rgba } from 'polished';
+import { Flex, IconButton } from 'renderer/components';
+import { NoScrollBar } from 'renderer/components/NoScrollbar';
+import { useServices } from 'renderer/logic/store';
+
+import { AppSearchApp } from '../AppInstall/AppSearch';
+import { Members } from '../Members';
+
+import { AppGrid } from './AppGrid';
 
 type SidebarType = 'friends' | 'members' | null;
 

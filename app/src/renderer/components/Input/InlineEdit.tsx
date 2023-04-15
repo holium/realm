@@ -1,18 +1,19 @@
 import React, { forwardRef } from 'react';
-import styled, { StyledComponentProps } from 'styled-components';
 import { rgba } from 'polished';
+import styled, { StyledComponentProps } from 'styled-components';
 import {
-  compose,
-  space,
-  layout,
-  flexbox,
   border,
-  position,
   color,
+  compose,
+  flexbox,
+  layout,
+  position,
+  space,
 } from 'styled-system';
-import { Flex, Text, Box, BoxProps } from '../';
-import { TypographyFunctionsProps } from '../typography-functions';
+
 import type { ThemeType } from '../../theme';
+import { TypographyFunctionsProps } from '../typography-functions';
+import { Box, BoxProps, Flex, Text } from '../';
 
 const inputTokens = {
   iconSize: 4, // icon size on font-size scale

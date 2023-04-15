@@ -1,10 +1,11 @@
-import styled from 'styled-components';
-import { rgba, darken } from 'polished';
-import { Flex, Icons, Text } from 'renderer/components';
-import { ThemeType } from 'renderer/theme';
-import { useServices } from 'renderer/logic/store';
-import { useRooms } from '../useRooms';
 import { observer } from 'mobx-react';
+import { darken, rgba } from 'polished';
+import { Flex, Icons, Text } from 'renderer/components';
+import { useServices } from 'renderer/logic/store';
+import { ThemeType } from 'renderer/theme';
+import styled from 'styled-components';
+
+import { useRooms } from '../useRooms';
 
 interface CommCircleProps {
   customBg: string;

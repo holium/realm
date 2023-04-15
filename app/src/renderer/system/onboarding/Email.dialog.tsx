@@ -1,22 +1,21 @@
 import { KeyboardEventHandler, useEffect, useState } from 'react';
-import { observer } from 'mobx-react';
-import emailValidator from 'email-validator';
-
-import { Label, TextButton } from 'renderer/components';
 import {
-  Flex,
   Button,
-  Text,
-  TextInput,
+  Flex,
   Icon,
   Spinner,
+  Text,
+  TextInput,
 } from '@holium/design-system';
-import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+import emailValidator from 'email-validator';
+import { observer } from 'mobx-react';
+import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
+import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+import { Label, TextButton } from 'renderer/components';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { ThemeType } from 'renderer/theme';
-import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 
 const EmailDialogPresenter = ({ workflowState, onNext }: BaseDialogProps) => {
   const { onboarding } = useServices();

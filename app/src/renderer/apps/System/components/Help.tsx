@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Card, Anchor } from 'renderer/components';
 import { lighten } from 'polished';
+import { Anchor, Card, Flex, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 
 const HelpPanelPresenter = () => {

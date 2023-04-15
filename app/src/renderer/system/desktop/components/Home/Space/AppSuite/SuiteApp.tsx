@@ -1,9 +1,10 @@
 import React from 'react';
-import styled, { css } from 'styled-components';
-import { rgba } from 'polished';
-import { Box, Icons, BoxProps } from 'renderer/components';
-import { SpaceModelType } from 'os/services/spaces/models/spaces';
 import { AppType } from 'os/services/spaces/models/bazaar';
+import { SpaceModelType } from 'os/services/spaces/models/spaces';
+import { rgba } from 'polished';
+import { Box, BoxProps, Icons } from 'renderer/components';
+import styled, { css } from 'styled-components';
+
 import { SuiteAppTile } from './SuiteAppTile';
 
 type AppEmptyProps = {

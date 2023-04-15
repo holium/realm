@@ -1,10 +1,11 @@
 import {
   applySnapshot,
-  types,
-  Instance,
-  getSnapshot,
   cast,
+  getSnapshot,
+  Instance,
+  types,
 } from 'mobx-state-tree';
+
 import { WalletApi } from '../../../api/wallet';
 
 export enum WalletView {

@@ -1,26 +1,27 @@
 import { useEffect, useMemo, useState } from 'react';
-import { observer } from 'mobx-react';
 import {
   AvatarInput,
   Button,
-  Icon,
+  CopyButton,
   Flex,
+  Icon,
   RadioGroup,
   Spinner,
   TextInput,
-  CopyButton,
   useToggle,
 } from '@holium/design-system';
-import { Text, Card, TextButton, Anchor } from 'renderer/components';
+import { useField, useForm } from 'mobx-easy-form';
+import { observer } from 'mobx-react';
 import { lighten } from 'polished';
-import { useServices } from 'renderer/logic/store';
-import { ColorPicker } from './ColorPicker';
-import { useForm, useField } from 'mobx-easy-form';
-import { ShipActions } from 'renderer/logic/actions/ship';
+import { useTrayApps } from 'renderer/apps/store';
+import { Anchor, Card, Text, TextButton } from 'renderer/components';
+import { AuthActions } from 'renderer/logic/actions/auth';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { ShellActions } from 'renderer/logic/actions/shell';
-import { AuthActions } from 'renderer/logic/actions/auth';
-import { useTrayApps } from 'renderer/apps/store';
+import { ShipActions } from 'renderer/logic/actions/ship';
+import { useServices } from 'renderer/logic/store';
+
+import { ColorPicker } from './ColorPicker';
 
 const AccountPanelPresenter = () => {
   const { theme, ship, identity } = useServices();

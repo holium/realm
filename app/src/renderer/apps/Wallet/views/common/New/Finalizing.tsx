@@ -1,9 +1,9 @@
-import { FC, useMemo, useEffect } from 'react';
+import { FC, useEffect, useMemo } from 'react';
+import { Flex, Spinner, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { Flex, Text, Spinner } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useServices } from 'renderer/logic/store';
 
 interface FinalizingProps {
   seedPhrase: string;

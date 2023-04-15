@@ -1,11 +1,12 @@
-import { useEffect, useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
+import { Box } from '@holium/design-system';
 import { AnimatePresence, motion } from 'framer-motion';
-import styled from 'styled-components';
-import { compose, space, color, typography } from 'styled-system';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
+import styled from 'styled-components';
+import { color, compose, space, typography } from 'styled-system';
+
 import { MiniAppWindow } from '../SystemBar/components/MiniAppWindow';
-import { Box } from '@holium/design-system';
 
 export interface RealmPopoverProps {
   id: string;

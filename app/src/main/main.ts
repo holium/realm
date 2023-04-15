@@ -6,27 +6,29 @@
  * When running `yarn build` or `yarn build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
-import path from 'path';
-import { app, ipcMain, BrowserWindow, shell, session } from 'electron';
+import { ElectronBlocker } from '@cliqz/adblocker-electron';
+import fetch from 'cross-fetch';
+import { app, BrowserWindow, ipcMain, session, shell } from 'electron';
+import { download } from 'electron-dl';
 import isDev from 'electron-is-dev';
 import fs from 'fs';
-import fetch from 'cross-fetch';
-import { download } from 'electron-dl';
-import { ElectronBlocker } from '@cliqz/adblocker-electron';
-import { MenuBuilder } from './menu';
-import { resolveHtmlPath } from './util';
+import path from 'path';
+
 import { Realm } from '../os';
-import { FullScreenHelper } from './helpers/fullscreen';
-import { WebViewHelper } from './helpers/webview';
+
+import { BrowserHelper } from './helpers/browser';
 import { DevHelper } from './helpers/dev';
-import { PowerHelper } from './helpers/power';
+import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
+import { FullScreenHelper } from './helpers/fullscreen';
+import { hideCursor } from './helpers/hideCursor';
+import { KeyHelper } from './helpers/key';
 import { MediaHelper } from './helpers/media';
 import { MouseHelper } from './helpers/mouse';
-import { KeyHelper } from './helpers/key';
-import { BrowserHelper } from './helpers/browser';
-import { hideCursor } from './helpers/hideCursor';
+import { PowerHelper } from './helpers/power';
+import { WebViewHelper } from './helpers/webview';
 import { AppUpdater } from './AppUpdater';
-import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
+import { MenuBuilder } from './menu';
+import { resolveHtmlPath } from './util';
 
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));

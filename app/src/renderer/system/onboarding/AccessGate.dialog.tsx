@@ -1,9 +1,9 @@
 import { KeyboardEventHandler, useState } from 'react';
-import { Label } from 'renderer/components';
-import { TextInput, Text, Button, Flex, Spinner } from '@holium/design-system';
+import { Button, Flex, Spinner, Text, TextInput } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+import { Label } from 'renderer/components';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 
 const AccessGatePresenter = (props: BaseDialogProps) => {
   const [accessCode, setAccessCode] = useState('');

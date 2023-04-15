@@ -1,26 +1,28 @@
 import { ChangeEvent, useState } from 'react';
-import { observer } from 'mobx-react';
-import { darken } from 'polished';
-import { isValidPatp } from 'urbit-ob';
-import { NoScrollBar } from 'renderer/components';
 import {
-  Flex,
-  Text,
-  Icon,
   Button,
+  Flex,
+  Icon,
   Select,
   Spinner,
+  Text,
   TextInput,
 } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from '../../lib/helpers';
-import { useTrayApps } from 'renderer/apps/store';
-import { WalletActions } from 'renderer/logic/actions/wallet';
+import { observer } from 'mobx-react';
 import {
-  WalletCreationMode,
   SharingMode,
   UISettingsType,
+  WalletCreationMode,
 } from 'os/services/tray/wallet-lib/wallet.model';
+import { darken } from 'polished';
+import { useTrayApps } from 'renderer/apps/store';
+import { NoScrollBar } from 'renderer/components';
+import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useServices } from 'renderer/logic/store';
+import { isValidPatp } from 'urbit-ob';
+
+import { getBaseTheme } from '../../lib/helpers';
+
 import { DeletePasscode } from './DeletePasscode';
 
 type WalletVisibility = 'anyone' | 'friends' | 'nobody';

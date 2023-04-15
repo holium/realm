@@ -1,15 +1,15 @@
 import { FC } from 'react';
-import { darken } from 'polished';
-
-import { Flex, Text, Icons } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from '../../../lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
   ERC721Type,
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
+import { darken } from 'polished';
+import { Flex, Icons, Text } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
+import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useServices } from 'renderer/logic/store';
+
+import { getBaseTheme } from '../../../lib/helpers';
 
 interface NFTListProps {
   nfts: ERC721Type[];

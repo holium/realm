@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components';
+
 import { config, DIMENSIONS } from './helpers';
 
 interface RowType {

@@ -1,6 +1,6 @@
+import CryptoJS from 'crypto-js';
 import { safeStorage } from 'electron';
 import Store from 'electron-store';
-import CryptoJS from 'crypto-js';
 
 interface EncryptedStoreParams {
   name: string;

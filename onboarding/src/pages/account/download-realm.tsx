@@ -1,5 +1,6 @@
 import { AccountDownloadRealmDialog } from '@holium/shared';
-import { useUser, UserContextProvider } from 'util/UserContext';
+import { UserContextProvider, useUser } from 'util/UserContext';
+
 import { Page } from '../../components/Page';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 

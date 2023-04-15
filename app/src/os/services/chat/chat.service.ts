@@ -1,26 +1,28 @@
-import { ipcMain, ipcRenderer, app, IpcRendererEvent } from 'electron';
-import { BaseService } from '../base.service';
-import path from 'path';
 import Database from 'better-sqlite3';
-import { Patp } from '../../types';
+import { app, ipcMain, ipcRenderer, IpcRendererEvent } from 'electron';
+import path from 'path';
+import { InvitePermissionType } from 'renderer/apps/Courier/models';
+
 import { Realm } from '../..';
+import { Patp } from '../../types';
+import { BaseService } from '../base.service';
+
+import { chatInitSql } from './chat.init-sql';
 import {
+  AddRow,
+  ChatDbOps,
   ChatDbReactions,
+  DeleteLogRow,
+  DelMessagesRow,
+  DelPathsRow,
+  DelPeersRow,
   MessagesRow,
   PathsRow,
   PeersRow,
-  ChatDbOps,
-  AddRow,
-  DelPathsRow,
+  UpdateMessage,
   // DelPeersRow,
   UpdateRow,
-  DelMessagesRow,
-  DeleteLogRow,
-  DelPeersRow,
-  UpdateMessage,
 } from './chat.types';
-import { InvitePermissionType } from 'renderer/apps/Courier/models';
-import { chatInitSql } from './chat.init-sql';
 
 type ChatUpdateType =
   | 'message-received'

@@ -1,13 +1,15 @@
-import { LoaderModel } from 'os/services/common.model';
-import { toJS } from 'mobx';
-import { types, onSnapshot, Instance } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
-import { RealmActions } from 'renderer/logic/actions/main';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { nativeApps } from '../nativeApps';
-import { isUrlSafe } from './helpers/createUrl';
-import { servicesStore } from 'renderer/logic/store';
+import { toJS } from 'mobx';
+import { Instance, onSnapshot, types } from 'mobx-state-tree';
+import { LoaderModel } from 'os/services/common.model';
 import { AppType } from 'os/services/spaces/models/bazaar';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { RealmActions } from 'renderer/logic/actions/main';
+import { servicesStore } from 'renderer/logic/store';
+
+import { nativeApps } from '../nativeApps';
+
+import { isUrlSafe } from './helpers/createUrl';
 
 const TabModel = types.model('BrowserTabModel', {
   id: types.identifier,

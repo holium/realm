@@ -1,18 +1,19 @@
 import {
-  useMemo,
+  ChangeEvent,
   Dispatch,
   SetStateAction,
+  useMemo,
   useState,
-  ChangeEvent,
 } from 'react';
-import styled from 'styled-components';
+import { TextInput } from '@holium/design-system';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import { Button, Flex, Text, Label, FormControl } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+import { Button, Flex, FormControl, Label, Text } from 'renderer/components';
+import { useServices } from 'renderer/logic/store';
+import styled from 'styled-components';
+
 import { NewWalletScreen } from './index';
-import { TextInput } from '@holium/design-system';
 
 const NoResize = styled(Flex)`
   textarea {

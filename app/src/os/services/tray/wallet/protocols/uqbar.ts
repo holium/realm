@@ -1,7 +1,8 @@
-import { BaseProtocol } from '../../wallet-lib/wallets/BaseProtocol';
-import { WalletStoreType } from 'os/services/tray/wallet-lib/wallet.model';
 import { Conduit } from '@holium/conduit';
+import { WalletStoreType } from 'os/services/tray/wallet-lib/wallet.model';
+
 import { UqbarApi } from '../../../../api/uqbar';
+import { BaseProtocol } from '../../wallet-lib/wallets/BaseProtocol';
 
 export class UqbarProtocol implements BaseProtocol {
   updateWalletState(conduit: Conduit, walletState: WalletStoreType) {

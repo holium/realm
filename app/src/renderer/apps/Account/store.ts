@@ -1,7 +1,8 @@
 import { createContext, useContext } from 'react';
 // import { toJS } from 'mobx';
-import { flow, Instance, types, applySnapshot } from 'mobx-state-tree';
+import { applySnapshot, flow, Instance, types } from 'mobx-state-tree';
 import { NotifDBActions } from 'renderer/logic/actions/notif-db';
+
 import { chatStore } from '../Courier/store';
 
 const sortByUpdatedAt = (a: NotifMobxType, b: NotifMobxType) => {

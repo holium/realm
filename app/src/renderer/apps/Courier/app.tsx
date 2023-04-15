@@ -1,12 +1,13 @@
+import { useEffect } from 'react';
+import { LayoutGroup } from 'framer-motion';
 import { observer } from 'mobx-react';
+import { useStorage } from 'renderer/logic/lib/useStorage';
+
+import { ChatInfo } from './views/ChatInfo';
+import { ChatLog } from './views/ChatLog';
 import { Inbox } from './views/Inbox';
 import { NewChat } from './views/NewChat';
 import { ChatProvider, chatStore } from './store';
-import { useEffect } from 'react';
-import { ChatInfo } from './views/ChatInfo';
-import { ChatLog } from './views/ChatLog';
-import { useStorage } from 'renderer/logic/lib/useStorage';
-import { LayoutGroup } from 'framer-motion';
 
 export const CourierAppPresenter = () => {
   const storage = useStorage();

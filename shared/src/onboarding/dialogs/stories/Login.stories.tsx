@@ -1,10 +1,12 @@
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+
 import { AccountCustomDomainDialog } from '../AccountCustomDomainDialog';
 import { AccountDownloadRealmDialog } from '../AccountDownloadRealmDialog';
 import { AccountHostingDialog } from '../AccountHostingDialog';
 import { AccountS3StorageDialog } from '../AccountS3StorageDialog';
 import { AccountStatisticsDialog } from '../AccountStatisticsDialog';
 import { LoginDialog } from '../LoginDialog';
+
 import { OnboardingDialogWrapper } from './helpers';
 
 export default {

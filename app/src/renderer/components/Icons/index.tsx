@@ -1,21 +1,22 @@
-import { motion, SVGMotionProps } from 'framer-motion';
 import { forwardRef, useState } from 'react';
+import { motion, SVGMotionProps } from 'framer-motion';
 import styled from 'styled-components';
 import {
-  compose,
-  space,
   color,
-  layout,
-  width,
-  height,
-  typography,
-  WidthProps,
-  HeightProps,
-  SpaceProps,
   ColorProps,
+  compose,
+  height,
+  HeightProps,
+  layout,
   LayoutProps,
+  space,
+  SpaceProps,
+  typography,
   TypographyProps,
+  width,
+  WidthProps,
 } from 'styled-system';
+
 import { IconPathsType, paths } from './icons';
 import { uuid } from './uuid';
 

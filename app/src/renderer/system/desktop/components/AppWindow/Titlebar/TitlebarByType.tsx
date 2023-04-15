@@ -1,16 +1,18 @@
-import { FC, useEffect, PointerEvent } from 'react';
-import { Titlebar } from './Titlebar';
-import { nativeApps } from 'renderer/apps/nativeApps';
+import { FC, PointerEvent, useEffect } from 'react';
+import { AppWindowType } from 'os/services/shell/desktop.model';
+import { ShellStoreType } from 'os/services/shell/shell.model';
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/BrowserToolbar';
-import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
+import { nativeApps } from 'renderer/apps/nativeApps';
+import { ThemeType } from 'renderer/logic/theme';
 import {
   DialogTitlebar,
   DialogTitlebarProps,
 } from 'renderer/system/dialog/Dialog/DialogTitlebar';
-import { AppWindowType } from 'os/services/shell/desktop.model';
-import { ShellStoreType } from 'os/services/shell/shell.model';
-import { ThemeType } from 'renderer/logic/theme';
-import { NativeAppId, getNativeAppWindow } from '../getNativeAppWindow';
+import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
+
+import { getNativeAppWindow, NativeAppId } from '../getNativeAppWindow';
+
+import { Titlebar } from './Titlebar';
 
 type Props = {
   appWindow: AppWindowType;

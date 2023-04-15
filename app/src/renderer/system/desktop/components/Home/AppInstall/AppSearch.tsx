@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { isValidPatp } from 'urbit-ob';
-import { observer } from 'mobx-react';
-import { Input, Flex } from 'renderer/components';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { useAppInstaller } from './store';
-import * as yup from 'yup';
 import { createField, createForm } from 'mobx-easy-form';
+import { observer } from 'mobx-react';
+import { Flex, Input } from 'renderer/components';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { isValidPatp } from 'urbit-ob';
+import * as yup from 'yup';
+
+import { useAppInstaller } from './store';
 
 interface AppSearchProps {
   mode: 'home' | 'space';

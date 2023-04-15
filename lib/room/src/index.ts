@@ -1,13 +1,13 @@
+import { ProtocolEvent } from './connection/events';
 import { RealmProtocol } from './connection/RealmProtocol';
 import { TestProtocol } from './connection/TestProtocol';
-import { RoomsManager } from './RoomsManager';
-import { RemotePeer } from './peer/RemotePeer';
+import { DataPacket_Kind } from './helpers/data';
 import { LocalPeer } from './peer/LocalPeer';
-import { RoomState } from './types';
+import { RemotePeer } from './peer/RemotePeer';
 import { PeerConnectionState } from './peer/types';
 import { RoomManagerEvent } from './events';
-import { ProtocolEvent } from './connection/events';
-import { DataPacket_Kind } from './helpers/data';
+import { RoomsManager } from './RoomsManager';
+import { RoomState } from './types';
 
 export {
   RoomsManager,

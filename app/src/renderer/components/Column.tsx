@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { style, compose } from 'styled-system';
+import { compose, style } from 'styled-system';
+
 import { Box, BoxProps } from './Box';
 
 type ColumnProps = BoxProps & {

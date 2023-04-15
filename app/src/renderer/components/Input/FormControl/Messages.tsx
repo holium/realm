@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+
 import { Text, TextProps } from '../../Text';
 
 export const Hint: any = styled(Text).attrs({

@@ -1,5 +1,5 @@
 import { KeyboardEventHandler } from 'react';
-import { Flex, Box, Input } from 'renderer/components';
+import { Box, Flex, Input } from 'renderer/components';
 
 interface BigInputProps {
   m?: number | string;

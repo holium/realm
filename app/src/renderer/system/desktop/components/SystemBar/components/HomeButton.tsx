@@ -1,7 +1,7 @@
-import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { BarStyle, HoliumButton } from '@holium/design-system';
+import { observer } from 'mobx-react';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { useServices } from 'renderer/logic/store';
 
 const HomeButtonPresenter = () => {
   const { desktop } = useServices();

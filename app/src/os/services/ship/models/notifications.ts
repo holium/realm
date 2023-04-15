@@ -1,6 +1,6 @@
-import { cast, Instance, types, flow } from 'mobx-state-tree';
 import { daToUnix, udToDec } from '@urbit/api';
 import bigInt from 'big-integer';
+import { cast, flow, Instance, types } from 'mobx-state-tree';
 
 const NotificationContentTypes = types.union(
   { eager: true },

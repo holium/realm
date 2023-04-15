@@ -1,4 +1,5 @@
 import { Conduit } from '@holium/conduit';
+
 import { NotificationStoreType } from '../services/spaces/models/beacon';
 
 export type BeaconInboxType =

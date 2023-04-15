@@ -1,14 +1,15 @@
-import { useRef, useEffect, useState, useMemo } from 'react';
-import styled from 'styled-components';
-import { AppWindowType } from 'os/services/shell/desktop.model';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { applyStyleOverrides } from './applyStyleOverrides';
-import { genCSSVariables } from 'renderer/logic/theme';
-import { WebView } from './WebView';
+import { AppWindowType } from 'os/services/shell/desktop.model';
 import { AppType } from 'os/services/spaces/models/bazaar';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { useServices } from 'renderer/logic/store';
+import { genCSSVariables } from 'renderer/logic/theme';
+import styled from 'styled-components';
+
+import { applyStyleOverrides } from './applyStyleOverrides';
+import { WebView } from './WebView';
 
 const AppViewContainer = styled.div`
   overflow: hidden;

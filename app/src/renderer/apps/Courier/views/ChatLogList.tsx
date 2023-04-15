@@ -1,4 +1,5 @@
 import { RefObject } from 'react';
+import { Gallery } from 'react-photoswipe-gallery';
 import {
   Box,
   Text,
@@ -6,9 +7,9 @@ import {
   WindowedListRef,
 } from '@holium/design-system';
 import { displayDate } from 'os/lib/time';
+
 import { ChatMessage } from '../components/ChatMessage';
 import { ChatMessageType, ChatModelType } from '../models';
-import { Gallery } from 'react-photoswipe-gallery';
 
 type Props = {
   listRef: RefObject<WindowedListRef>;

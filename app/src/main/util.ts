@@ -1,5 +1,5 @@
-import { URL } from 'url';
 import path from 'path';
+import { URL } from 'url';
 
 export let resolveHtmlPath: (htmlFileName: string) => string;
 export let resolveUpdaterPath: (mediaFileName: string) => string;

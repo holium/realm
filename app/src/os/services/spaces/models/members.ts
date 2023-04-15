@@ -1,11 +1,12 @@
+import { toJS } from 'mobx';
 import {
   applySnapshot,
-  castToSnapshot,
   cast,
+  castToSnapshot,
   Instance,
   types,
 } from 'mobx-state-tree';
-import { toJS } from 'mobx';
+
 import { Patp, SpacePath } from '../../../types';
 // import { InvitationsModel } from './invitations';
 

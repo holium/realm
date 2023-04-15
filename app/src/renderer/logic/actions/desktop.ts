@@ -2,9 +2,10 @@
 // ['#005050', '#000000']
 // ['#f0a0a0', '#a0a0a0', '#a0f0f0', '#f0f0f0', '#f0f0a0']
 
+import { Bounds } from '@holium/design-system';
 import { AppWindowProps, AppWindowType } from 'os/services/shell/desktop.model';
 import { AppType } from 'os/services/spaces/models/bazaar';
-import { Bounds } from '@holium/design-system';
+
 import { SpacesActions } from './spaces';
 
 /**

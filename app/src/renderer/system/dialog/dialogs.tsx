@@ -1,17 +1,18 @@
 import { FC } from 'react';
+import { Dimensions } from '@holium/design-system';
 import { AppWindowProps } from 'os/services/shell/desktop.model';
 import { ThemeModelType } from 'os/services/theme.model';
+import { LeaveChatDialogConfig } from 'renderer/apps/Courier/dialogs/LeaveChatDialog';
 import { spacesDialogs } from 'renderer/apps/Spaces/Workflow/workflow';
-import { onboardingDialogs } from 'renderer/system/onboarding/workflow';
-import { WallpaperDialogConfig } from 'renderer/apps/System/Dialogs/Wallpaper';
-import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceConfirm';
-import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { ChangeEmailDialogConfig } from 'renderer/apps/System/Dialogs/ChangeEmail';
-import { Dimensions } from '@holium/design-system';
-import { ResetCodeDialogConfig } from '../auth/login/ResetCodeDialog';
-import { LeaveChatDialogConfig } from 'renderer/apps/Courier/dialogs/LeaveChatDialog';
+import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
+import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceConfirm';
 import { ShutdownDialogConfig } from 'renderer/apps/System/Dialogs/Shutdown';
+import { WallpaperDialogConfig } from 'renderer/apps/System/Dialogs/Wallpaper';
+import { onboardingDialogs } from 'renderer/system/onboarding/workflow';
+
+import { ResetCodeDialogConfig } from '../auth/login/ResetCodeDialog';
 
 export interface BaseWorkflowProps {
   workflow?: boolean; // lets the dialog manager know if this dialog is in a workflow

@@ -1,10 +1,10 @@
 import { FC } from 'react';
+import { motion } from 'framer-motion';
 import { darken } from 'polished';
+import styled, { css } from 'styled-components';
 
 import { Flex, Icons, Text } from '../../../components';
 import { IconPathsType } from '../../../components/Icons/icons';
-import styled, { css } from 'styled-components';
-import { motion } from 'framer-motion';
 import { ThemeType } from '../../../theme';
 
 interface CircleButtonProps {

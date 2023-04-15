@@ -2,8 +2,8 @@
 
 import { FC } from 'react';
 import { motion } from 'framer-motion';
-import styled from 'styled-components';
 import { rgba } from 'polished';
+import styled from 'styled-components';
 
 const PulseStyle = styled(motion.div)<{ background: string }>`
   display: block;

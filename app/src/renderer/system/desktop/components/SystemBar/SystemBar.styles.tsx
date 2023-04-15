@@ -1,21 +1,21 @@
-import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import styled from 'styled-components';
 import {
-  compose,
-  space,
-  layout,
-  flexbox,
-  border,
-  position,
-  color,
   backgroundColor,
-  SpaceProps,
-  LayoutProps,
-  FlexboxProps,
-  BorderProps,
-  PositionProps,
-  ColorProps,
   BackgroundColorProps,
+  border,
+  BorderProps,
+  color,
+  ColorProps,
+  compose,
+  flexbox,
+  FlexboxProps,
+  layout,
+  LayoutProps,
+  position,
+  PositionProps,
+  space,
+  SpaceProps,
 } from 'styled-system';
 
 import { ThemeType } from '../../../../theme';

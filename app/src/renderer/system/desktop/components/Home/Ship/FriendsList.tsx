@@ -1,11 +1,11 @@
 import { useMemo, useRef } from 'react';
-import { observer } from 'mobx-react';
-import { rgba, darken } from 'polished';
-import { Flex, Text, PersonRow } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { ShipActions } from 'renderer/logic/actions/ship';
-import { FriendType } from 'os/services/ship/models/friends';
 import { WindowedList } from '@holium/design-system';
+import { observer } from 'mobx-react';
+import { FriendType } from 'os/services/ship/models/friends';
+import { darken, rgba } from 'polished';
+import { Flex, PersonRow, Text } from 'renderer/components';
+import { ShipActions } from 'renderer/logic/actions/ship';
+import { useServices } from 'renderer/logic/store';
 
 const FriendsListPresenter = () => {
   const paneRef = useRef(null);

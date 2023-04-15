@@ -1,23 +1,23 @@
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { TwitterPicker } from 'react-color';
+import { Flex, RadioGroup, RadioList } from '@holium/design-system';
+import { createField, createForm } from 'mobx-easy-form';
+import { observer } from 'mobx-react';
 import {
-  Text,
-  Label,
-  Input,
-  Icons,
   Crest,
   FormControl,
-  isValidHexColor,
+  Icons,
+  Input,
   isImgUrl,
+  isValidHexColor,
+  Label,
+  Text,
   TextButton,
 } from 'renderer/components';
-import { createField, createForm } from 'mobx-easy-form';
-import * as yup from 'yup';
-import { observer } from 'mobx-react';
-import { TwitterPicker } from 'react-color';
+import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
-import { Flex, RadioGroup, RadioList } from '@holium/design-system';
+import * as yup from 'yup';
 
 type CreateSpaceFormProps = {
   name: string;

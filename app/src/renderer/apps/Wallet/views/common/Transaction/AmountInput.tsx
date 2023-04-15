@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
-import { observer } from 'mobx-react';
-import { darken } from 'polished';
-
-import { Flex, Box, Icons, Text } from 'renderer/components';
-import { getBaseTheme } from '../../../lib/helpers';
-import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
 import { Input } from '@holium/design-system';
-import { ContainerFlex, FlexHider } from './styled';
+import { observer } from 'mobx-react';
 import {
   ERC20Type,
   ProtocolType,
 } from 'os/services/tray/wallet-lib/wallet.model';
+import { darken } from 'polished';
+import { useTrayApps } from 'renderer/apps/store';
+import { Box, Flex, Icons, Text } from 'renderer/components';
+import { useServices } from 'renderer/logic/store';
+
+import { getBaseTheme } from '../../../lib/helpers';
+
+import { ContainerFlex, FlexHider } from './styled';
 
 // TODO: replace with actual exchange rate
 const ethToUsd = (eth: number, currentPrice: number) =>

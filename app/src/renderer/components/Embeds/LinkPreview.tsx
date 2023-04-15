@@ -1,7 +1,8 @@
 import { FC } from 'react';
-import { Flex, Icons, EmbedBox } from '..';
-import styled from 'styled-components';
 import { ThemeType } from 'renderer/theme';
+import styled from 'styled-components';
+
+import { EmbedBox, Flex, Icons } from '..';
 
 interface LinkPreviewStyleType {
   theme: ThemeType;

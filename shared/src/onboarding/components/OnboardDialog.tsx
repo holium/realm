@@ -1,6 +1,8 @@
 import { FormEvent, ReactNode } from 'react';
 import { Flex, Icon, Spinner } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
+
+import { SubmitButton } from './hosting/SubmitButton';
 import {
   OnboardDialogBackButton,
   OnboardDialogBody,
@@ -9,7 +11,6 @@ import {
   OnboardDialogFooter,
   OnboardDialogIconContainer,
 } from './OnboardDialog.styles';
-import { SubmitButton } from './hosting/SubmitButton';
 
 type Props = {
   icon: ReactNode;

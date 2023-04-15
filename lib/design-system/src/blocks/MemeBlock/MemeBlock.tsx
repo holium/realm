@@ -1,10 +1,11 @@
-import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import styled from 'styled-components';
+
 import { Flex, Text } from '../../../general';
-import { BlockProps, Block } from '../Block/Block';
-import { FragmentReactionType } from '../Bubble/Bubble.types';
-import { Reactions, OnReactionPayload } from '../Bubble/Reaction';
 import { timelineDate } from '../../util/date';
+import { Block, BlockProps } from '../Block/Block';
+import { FragmentReactionType } from '../Bubble/Bubble.types';
+import { OnReactionPayload, Reactions } from '../Bubble/Reaction';
 
 export const MemeStyle = styled(motion.img)`
   width: 100%;

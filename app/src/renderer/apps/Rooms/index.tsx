@@ -1,14 +1,15 @@
 import { useEffect } from 'react';
+import { Flex } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
+import { RealmActions } from 'renderer/logic/actions/main';
+import { useServices } from 'renderer/logic/store';
+
 import { Rooms } from './List';
 import { NewRoom } from './NewRoom';
 import { Room } from './Room';
-import { useRooms } from './useRooms';
 import { Settings } from './Settings';
-import { useServices } from 'renderer/logic/store';
-import { Flex } from '@holium/design-system';
-import { RealmActions } from 'renderer/logic/actions/main';
+import { useRooms } from './useRooms';
 
 const RoomViews: { [key: string]: any } = {
   list: () => <Rooms />,

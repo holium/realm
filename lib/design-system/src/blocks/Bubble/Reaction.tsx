@@ -1,16 +1,18 @@
-import { useMemo, useCallback } from 'react';
-import styled, { css } from 'styled-components';
-import { AnimatePresence } from 'framer-motion';
-import { Flex, Box, Icon, Text, Portal, Card } from '../../../general';
+import { useCallback, useMemo } from 'react';
 import EmojiPicker, {
+  Emoji,
   EmojiClickData,
   EmojiStyle,
-  Emoji,
   SkinTones,
 } from 'emoji-picker-react';
-import { FragmentReactionType } from './Bubble.types';
-import { opacifyHexColor } from '../../util/colors';
+import { AnimatePresence } from 'framer-motion';
+import styled, { css } from 'styled-components';
+
+import { Box, Card, Flex, Icon, Portal, Text } from '../../../general';
 import { useMenu } from '../../navigation/Menu/useMenu';
+import { opacifyHexColor } from '../../util/colors';
+
+import { FragmentReactionType } from './Bubble.types';
 
 const WIDTH = 300;
 const HEIGHT = 350;

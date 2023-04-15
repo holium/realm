@@ -1,12 +1,13 @@
 import { useRef } from 'react';
 import { Anchor, Flex } from '@holium/design-system/general';
 import { HoliumButton } from '@holium/design-system/os';
+
+import { OnboardDialog } from '../components/OnboardDialog';
 import {
   OnboardDialogDescription,
   OnboardDialogInput,
   OnboardDialogInputLabel,
 } from '../components/OnboardDialog.styles';
-import { OnboardDialog } from '../components/OnboardDialog';
 
 type Props = {
   prefilledEmail: string;

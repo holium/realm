@@ -1,11 +1,12 @@
+import { Bottom, Fill, Layer } from 'react-spaces';
 import { observer } from 'mobx-react';
-import { Bottom, Layer, Fill } from 'react-spaces';
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
+import { useServices } from 'renderer/logic/store';
+
+import { HomePane } from './components/Home/HomePane';
 import { SystemBar } from './components/SystemBar/SystemBar';
 import { AppWindowManager } from './AppWindowManager';
-import { HomePane } from './components/Home/HomePane';
-import { useServices } from 'renderer/logic/store';
 import { TrayManager } from './TrayManager';
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { useMultiplayer } from './useMultiplayer';
 
 const DesktopPresenter = () => {

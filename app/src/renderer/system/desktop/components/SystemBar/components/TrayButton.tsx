@@ -1,20 +1,20 @@
+import { Box } from '@holium/design-system';
+import { lighten, rgba } from 'polished';
 import styled, { css } from 'styled-components';
 import {
-  compose,
-  space,
-  layout,
-  size,
   color,
-  SizeProps,
-  typography,
-  SpaceProps,
   ColorProps,
+  compose,
+  layout,
   LayoutProps,
+  size,
+  SizeProps,
+  space,
+  SpaceProps,
+  typography,
 } from 'styled-system';
 
-import { rgba, lighten } from 'polished';
 import { ThemeType } from '../../../../../theme';
-import { Box } from '@holium/design-system';
 
 type IProps = {
   ref?: unknown;

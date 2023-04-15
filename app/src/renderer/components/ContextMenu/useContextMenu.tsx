@@ -10,6 +10,7 @@ import {
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useSelection } from 'renderer/logic/lib/selection';
 import { useServices } from 'renderer/logic/store';
+
 import { ContextMenuOption } from './ContextMenu';
 
 type ContextMenuOptionsMap = {

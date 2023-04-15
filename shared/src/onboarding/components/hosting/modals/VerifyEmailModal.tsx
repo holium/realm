@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react';
-import { Text, Flex, ErrorBox } from '@holium/design-system/general';
+import { ErrorBox, Flex, Text } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
+
 import { Modal } from '../../Modal';
 import {
-  OnboardDialogInputLabel,
   OnboardDialogInput,
+  OnboardDialogInputLabel,
 } from '../../OnboardDialog.styles';
 import { SubmitButton } from '../SubmitButton';
 

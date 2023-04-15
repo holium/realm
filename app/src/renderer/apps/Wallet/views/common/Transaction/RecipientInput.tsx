@@ -1,16 +1,18 @@
-import { useEffect, useState, useRef } from 'react';
-import { isValidPatp } from 'urbit-ob';
+import { useEffect, useRef, useState } from 'react';
+import { Avatar, Box, Flex, Input, Spinner } from '@holium/design-system';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import { darken, lighten } from 'polished';
-import { Icons, Text } from 'renderer/components';
-import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
-import { shortened, getBaseTheme } from '../../../lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import { RecipientPayload } from 'os/services/tray/wallet.service';
+import { darken, lighten } from 'polished';
+import { useTrayApps } from 'renderer/apps/store';
+import { Icons, Text } from 'renderer/components';
+import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useServices } from 'renderer/logic/store';
+import { isValidPatp } from 'urbit-ob';
+
+import { getBaseTheme, shortened } from '../../../lib/helpers';
+
 import { ContainerFlex } from './styled';
-import { Avatar, Flex, Box, Input, Spinner } from '@holium/design-system';
 
 export const RecipientInput = observer(
   (props: {

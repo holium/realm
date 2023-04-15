@@ -1,11 +1,10 @@
 import {
   createContext,
   ReactNode,
+  useContext,
   useEffect,
   useState,
-  useContext,
 } from 'react';
-import Urbit from '@urbit/http-api';
 import {
   APIHandlers,
   ProtocolConfig,
@@ -13,6 +12,7 @@ import {
   RoomsManager,
   ShipConfig,
 } from '@holium/realm-room';
+import Urbit from '@urbit/http-api';
 
 const testProtocolConfig: ProtocolConfig = {
   rtc: {

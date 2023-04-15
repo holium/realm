@@ -1,9 +1,10 @@
 // @ts-ignore
 import { isValidPatp } from 'urbit-ob';
+
 import {
-  FragmentType,
-  FragmentPlainType,
   FragmentBreakType,
+  FragmentPlainType,
+  FragmentType,
 } from '../Bubble/Bubble.types';
 
 type ParserKey =

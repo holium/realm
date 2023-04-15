@@ -1,27 +1,29 @@
-import { useMemo, useEffect, useState, useRef } from 'react';
-import { observer } from 'mobx-react';
-import styled from 'styled-components';
-import { AnimatePresence } from 'framer-motion';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Flex,
-  Text,
-  measureImage,
-  fetchOGData,
   extractOGData,
-  parseMediaType,
+  fetchOGData,
+  Flex,
+  measureImage,
   measureTweet,
+  parseMediaType,
+  Text,
   WindowedListRef,
 } from '@holium/design-system';
-import { useChatStore } from '../store';
+import { AnimatePresence } from 'framer-motion';
+import { observer } from 'mobx-react';
+import { useAccountStore } from 'renderer/apps/Account/store';
 import { useTrayApps } from 'renderer/apps/store';
+import { IuseStorage } from 'renderer/logic/lib/useStorage';
+import { useServices } from 'renderer/logic/store';
+import styled from 'styled-components';
+
+import { ChatAvatar } from '../components/ChatAvatar';
 import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
-import { ChatAvatar } from '../components/ChatAvatar';
-import { IuseStorage } from 'renderer/logic/lib/useStorage';
 import { PinnedContainer } from '../components/PinnedMessage';
-import { useServices } from 'renderer/logic/store';
 import { ChatMessageType } from '../models';
-import { useAccountStore } from 'renderer/apps/Account/store';
+import { useChatStore } from '../store';
+
 import { ChatLogList } from './ChatLogList';
 
 const FullWidthAnimatePresence = styled(AnimatePresence)`

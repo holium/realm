@@ -1,23 +1,23 @@
 import { useEffect, useMemo } from 'react';
+import { Layer, ViewPort } from 'react-spaces';
+import { Spinner } from '@holium/design-system';
+import { AnimatePresence } from 'framer-motion';
 import { observer } from 'mobx-react';
-import { ViewPort, Layer } from 'react-spaces';
-
+import { ConnectionStatus } from 'renderer/components';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { RealmActions } from 'renderer/logic/actions/main';
+import { ShellActions } from 'renderer/logic/actions/shell';
 import { useCore, useServices } from 'renderer/logic/store';
-import { Auth } from './auth';
+
 import { Desktop } from './desktop/Desktop';
+import { DialogManager } from './dialog/DialogManager';
+import { Auth } from './auth';
 import {
-  BackgroundImage,
   BackgroundFill,
+  BackgroundImage,
   DragBar,
   ResumingOverlay,
 } from './system.styles';
-import { AnimatePresence } from 'framer-motion';
-import { DialogManager } from './dialog/DialogManager';
-import { Spinner } from '@holium/design-system';
-import { ConnectionStatus } from 'renderer/components';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { RealmActions } from 'renderer/logic/actions/main';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 
 // Get the initial dimensions from the main process
 RealmActions.onInitialDimensions((_e: any, dims: any) => {

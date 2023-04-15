@@ -1,13 +1,13 @@
 import { useCallback, useEffect } from 'react';
-import { observer } from 'mobx-react';
-import { calculateAnchorPoint } from 'renderer/logic/lib/position';
-import { useTrayApps } from 'renderer/apps/store';
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
-import { roomTrayConfig } from 'renderer/apps/Rooms/config';
-import { RoomsDock, Box } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
+import { Box, RoomsDock } from '@holium/design-system';
 import { RealmProtocol } from '@holium/realm-room';
+import { observer } from 'mobx-react';
+import { roomTrayConfig } from 'renderer/apps/Rooms/config';
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
+import { useTrayApps } from 'renderer/apps/store';
 import { RealmActions } from 'renderer/logic/actions/main';
+import { calculateAnchorPoint } from 'renderer/logic/lib/position';
+import { useServices } from 'renderer/logic/store';
 
 const RoomTrayPresenter = () => {
   const { ship, friends, spaces, desktop } = useServices();

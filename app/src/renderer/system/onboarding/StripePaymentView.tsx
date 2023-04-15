@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
+import { Avatar } from '@holium/design-system';
 import {
   PaymentElement,
-  useStripe,
   useElements,
+  useStripe,
 } from '@stripe/react-stripe-js';
-import { Box, Text, Flex, Button, Icons } from 'renderer/components';
-import { transparentize } from 'polished';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
+import { transparentize } from 'polished';
+import { Box, Button, Flex, Icons, Text } from 'renderer/components';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { Avatar } from '@holium/design-system';
+import { useServices } from 'renderer/logic/store';
+
 import { StripePaymentProps } from './StripePayment.dialog';
 
 const StripePaymentViewPresenter = (props: StripePaymentProps) => {

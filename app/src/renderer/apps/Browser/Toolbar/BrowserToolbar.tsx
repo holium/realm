@@ -6,16 +6,18 @@ import {
   useRef,
   useState,
 } from 'react';
-import styled from 'styled-components';
-import { TitlebarContainer } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
-import { Icons } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
-import { ToolbarControlButtons } from './ToolbarControlButtons';
-import { ToolbarSearchInput } from './ToolbarSearchInput';
-import { ToolbarNavigationButtons } from './ToolbarNavigationButtons';
-import { useBrowser } from '../store';
+import { Icons } from 'renderer/components';
 import { useDoubleClick } from 'renderer/logic/lib/useDoubleClick';
+import { useServices } from 'renderer/logic/store';
+import { TitlebarContainer } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
+import styled from 'styled-components';
+
+import { useBrowser } from '../store';
+
+import { ToolbarControlButtons } from './ToolbarControlButtons';
+import { ToolbarNavigationButtons } from './ToolbarNavigationButtons';
+import { ToolbarSearchInput } from './ToolbarSearchInput';
 
 const ToolbarContainer = styled(TitlebarContainer)`
   padding: 0 10px;

@@ -1,20 +1,20 @@
 import { ReactNode } from 'react';
-import styled, { css } from 'styled-components';
 import { rgba } from 'polished';
+import { ThemeType } from 'renderer/theme';
+import styled, { css } from 'styled-components';
 import {
-  compose,
-  space,
-  layout,
-  flexbox,
   border,
-  position,
   color,
   ColorProps,
+  compose,
+  flexbox,
+  layout,
+  position,
+  space,
   SpaceProps,
 } from 'styled-system';
 
 import { IntentTypes } from './Tag';
-import { ThemeType } from 'renderer/theme';
 
 export type TagStyleProps = ColorProps &
   SpaceProps & {

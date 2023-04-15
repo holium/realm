@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
-import { Text, Flex, Icon, Spinner } from '@holium/design-system';
+import { Flex, Icon, Spinner, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { useServices } from 'renderer/logic/store';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 
 const CheckInstallationDialogPresenter = (props: BaseDialogProps) => {
   const { onboarding } = useServices();

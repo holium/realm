@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { space, layout, SpaceProps, LayoutProps, compose } from 'styled-system';
+import { compose, layout, LayoutProps, space, SpaceProps } from 'styled-system';
 
 import { config, DIMENSIONS } from './helpers';
 

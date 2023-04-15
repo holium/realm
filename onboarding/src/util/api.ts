@@ -1,8 +1,9 @@
 import {
-  ThirdEarthProduct,
   ThirdEarthPortalSession,
+  ThirdEarthProduct,
   ThirdEarthShip,
 } from '@holium/shared';
+
 import { constants } from './constants';
 import { http } from './http';
 

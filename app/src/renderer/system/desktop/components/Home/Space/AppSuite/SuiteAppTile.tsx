@@ -1,31 +1,32 @@
 import { useMemo } from 'react';
+import { Box } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import rgba from 'polished/lib/color/rgba';
 import { bgIsLightOrDark } from 'os/lib/color';
 import {
   AppType,
   InstallStatus,
   UrbitAppType,
 } from 'os/services/spaces/models/bazaar';
-import { useServices } from 'renderer/logic/store';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
+import rgba from 'polished/lib/color/rgba';
 import {
+  AppTile,
   ContextMenuOption,
   IconButton,
   Icons,
-  AppTile,
 } from 'renderer/components';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { getAppTileFlags } from 'renderer/logic/lib/app';
+import { useServices } from 'renderer/logic/store';
+
 import {
   handleInstallation,
-  resumeSuspendLabel,
   handleResumeSuspend,
   installLabel,
+  resumeSuspendLabel,
 } from '../../AppInstall/helpers';
-import { Box } from '@holium/design-system';
 
 type Props = {
   index: number;

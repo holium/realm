@@ -1,23 +1,25 @@
-import { debounce } from 'lodash';
 import { PointerEvent, useCallback, useEffect, useMemo } from 'react';
-import { useMotionValue, useDragControls } from 'framer-motion';
-import { observer } from 'mobx-react';
-import { AppWindowType } from '../../../../../os/services/shell/desktop.model';
-import { AppWindowByType } from './AppWindowByType';
-import { AppWindowContainer } from './AppWindow.styles';
-import { AppWindowResizeHandles } from './AppWindowResizeHandles';
-import { Flex } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import { useToggle } from '@holium/design-system';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
+import { useDragControls, useMotionValue } from 'framer-motion';
+import { debounce } from 'lodash';
+import { observer } from 'mobx-react';
 import {
   denormalizeBounds,
   normalizeBounds,
 } from 'os/services/shell/lib/window-manager';
-import { TitlebarByType } from './Titlebar/TitlebarByType';
 import rgba from 'polished/lib/color/rgba';
+import { Flex } from 'renderer/components';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { useServices } from 'renderer/logic/store';
+import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
+
+import { AppWindowType } from '../../../../../os/services/shell/desktop.model';
 import { ErrorBoundary } from '../../../../logic/ErrorBoundary';
+
+import { TitlebarByType } from './Titlebar/TitlebarByType';
+import { AppWindowContainer } from './AppWindow.styles';
+import { AppWindowByType } from './AppWindowByType';
+import { AppWindowResizeHandles } from './AppWindowResizeHandles';
 
 const CURSOR_WIDTH = 10;
 

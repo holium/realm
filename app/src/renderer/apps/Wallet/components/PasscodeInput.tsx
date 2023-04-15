@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { Box, Flex, Spinner } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { Flex, Box, Spinner } from '@holium/design-system';
 import { Text } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from '../lib/helpers';
 import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useServices } from 'renderer/logic/store';
+
+import { getBaseTheme } from '../lib/helpers';
+
 import { PasscodeDisplay } from './PasscodeDisplay';
 
 const PASSCODE_LENGTH = 6;

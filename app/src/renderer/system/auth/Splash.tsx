@@ -1,15 +1,14 @@
 import { useEffect } from 'react';
-import { observer } from 'mobx-react';
-
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { Flex } from 'renderer/components';
-import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
 import { AnimatePresence, motion } from 'framer-motion';
+import { observer } from 'mobx-react';
+import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
+import { Flex } from 'renderer/components';
 import {
   HoliumAnimated,
   SplashWordMark,
 } from 'renderer/components/Icons/holium';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { ShellActions } from 'renderer/logic/actions/shell';
 import { SoundActions } from 'renderer/logic/actions/sound';
 
 const SplashPresenter = () => {

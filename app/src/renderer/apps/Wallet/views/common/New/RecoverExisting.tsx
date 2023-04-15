@@ -1,21 +1,22 @@
 import {
-  FC,
-  useMemo,
-  Dispatch,
-  SetStateAction,
-  useState,
   ChangeEvent,
+  Dispatch,
+  FC,
+  SetStateAction,
+  useMemo,
+  useState,
 } from 'react';
-import styled from 'styled-components';
+import { TextInput } from '@holium/design-system';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import { Button, Flex, Text, Icons, Label, Box } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
-import { NewWalletScreen } from './index';
-import { TextInput } from '@holium/design-system';
-import { VerifyPasscode } from './VerifyPasscode';
+import { Box, Button, Flex, Icons, Label, Text } from 'renderer/components';
 import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useServices } from 'renderer/logic/store';
+import styled from 'styled-components';
+
+import { NewWalletScreen } from './index';
+import { VerifyPasscode } from './VerifyPasscode';
 
 const NoResize = styled(Flex)`
   textarea {

@@ -1,18 +1,19 @@
 import {
-  Instance,
-  types,
   applySnapshot,
   castToSnapshot,
+  Instance,
+  types,
 } from 'mobx-state-tree';
-import { ThemeModel } from '../../theme.model';
+import { Patp } from 'os/types';
+
 import { LoaderModel, SubscriptionModel } from '../../common.model';
 import { DocketApp, WebApp } from '../../ship/models/docket';
-import { VisaModel } from './visas';
+import { ThemeModel } from '../../theme.model';
 
-import { TokenModel } from './token';
 // import { FriendsStore } from '../../ship/models/friends';
 import { MembersStore } from './members';
-import { Patp } from 'os/types';
+import { TokenModel } from './token';
+import { VisaModel } from './visas';
 
 export const DocketMap = types.map(
   types.union({ eager: false }, DocketApp, WebApp)

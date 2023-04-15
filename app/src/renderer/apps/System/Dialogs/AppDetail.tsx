@@ -1,32 +1,31 @@
 import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { getSnapshot } from 'mobx-state-tree';
+import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import {
+  AppType,
+  AppTypes,
+  InstallStatus,
+  NativeAppType,
+  UrbitApp,
+  UrbitAppType,
+} from 'os/services/spaces/models/bazaar';
+import { darken, rgba } from 'polished';
+import {
+  Box,
   Button,
   Flex,
   Icons,
-  Text,
-  Box,
   LinkPreview,
+  Text,
 } from 'renderer/components';
-import styled from 'styled-components';
-
+import { IconPathsType } from 'renderer/components/Icons/icons';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { useServices } from 'renderer/logic/store';
-import {
-  UrbitApp,
-  AppType,
-  NativeAppType,
-  UrbitAppType,
-  AppTypes,
-  InstallStatus,
-} from 'os/services/spaces/models/bazaar';
-import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { darken, rgba } from 'polished';
-import { IconPathsType } from 'renderer/components/Icons/icons';
 import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInstall/store';
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
+import { DialogConfig } from 'renderer/system/dialog/dialogs';
+import styled from 'styled-components';
 
 const TileStyle = styled(Box)`
   position: relative;

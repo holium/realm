@@ -1,13 +1,13 @@
-import { createRef, useMemo, useCallback } from 'react';
-import { observer } from 'mobx-react';
-import { rgba, lighten, darken } from 'polished';
-
-import { Flex, Pulser, Divider } from 'renderer/components';
-import { SelectedSpace } from './SelectedSpace';
-import { useServices } from 'renderer/logic/store';
-import { useTrayApps } from 'renderer/apps/store';
-import { calculateAnchorPoint } from 'renderer/logic/lib/position';
+import { createRef, useCallback, useMemo } from 'react';
 import { BarButton } from '@holium/design-system';
+import { observer } from 'mobx-react';
+import { darken, lighten, rgba } from 'polished';
+import { useTrayApps } from 'renderer/apps/store';
+import { Divider, Flex, Pulser } from 'renderer/components';
+import { calculateAnchorPoint } from 'renderer/logic/lib/position';
+import { useServices } from 'renderer/logic/store';
+
+import { SelectedSpace } from './SelectedSpace';
 
 const position = 'top-right';
 const anchorOffset = { x: 4, y: 16 };

@@ -1,7 +1,8 @@
 import { FC } from 'react';
-import { Flex, Box } from 'renderer/components';
 import { darken, transparentize } from 'polished';
+import { Box, Flex } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
+
 import { getBaseTheme } from '../lib/helpers';
 
 interface PasscodeDisplayProps {

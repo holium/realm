@@ -1,10 +1,11 @@
 import { createContext, useContext } from 'react';
 // import { toJS } from 'mobx';
-import { flow, Instance, types, tryReference, destroy } from 'mobx-state-tree';
+import { destroy, flow, Instance, tryReference, types } from 'mobx-state-tree';
 import { ChatDBActions } from 'renderer/logic/actions/chat-db';
-import { Chat, ChatModelType } from './models';
 import { OSActions } from 'renderer/logic/actions/os';
 import { servicesStore } from 'renderer/logic/store';
+
+import { Chat, ChatModelType } from './models';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 

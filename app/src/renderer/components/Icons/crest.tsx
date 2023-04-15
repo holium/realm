@@ -1,20 +1,20 @@
-import { motion } from 'framer-motion';
 import { SVGProps, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import styled from 'styled-components';
 import {
-  compose,
-  space,
   color,
-  layout,
-  width,
-  height,
-  typography,
-  WidthProps,
-  HeightProps,
-  SpaceProps,
   ColorProps,
+  compose,
+  height,
+  HeightProps,
+  layout,
   LayoutProps,
+  space,
+  SpaceProps,
+  typography,
   TypographyProps,
+  width,
+  WidthProps,
 } from 'styled-system';
 
 export type IconProps = SVGProps<SVGSVGElement> &

@@ -1,15 +1,16 @@
-import { useMemo, Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useMemo } from 'react';
 import { observer } from 'mobx-react';
+import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import {
+  Box,
   Button,
   Flex,
-  Text,
-  Box,
   Icons,
+  Text,
   TextButton,
 } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+
 import { NewWalletScreen } from './index';
 
 interface CreateProps {

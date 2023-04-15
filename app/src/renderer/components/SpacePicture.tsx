@@ -1,8 +1,8 @@
-import styled, { css } from 'styled-components';
 import { Icon } from '@holium/design-system';
-import { Flex, Text, Crest } from 'renderer/components';
 import { SpaceModelType } from 'os/services/spaces/models/spaces';
+import { Crest, Flex, Text } from 'renderer/components';
 import { pluralize } from 'renderer/logic/lib/text';
+import styled, { css } from 'styled-components';
 
 interface SpacePictureProps {
   space: SpaceModelType;

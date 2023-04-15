@@ -1,8 +1,8 @@
-import { Grid, Text, Flex, Anchor } from 'renderer/components';
 import { CheckBox } from '@holium/design-system';
-import { theme } from 'renderer/theme';
 import { observer } from 'mobx-react';
+import { Anchor, Flex, Grid, Text } from 'renderer/components';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+import { theme } from 'renderer/theme';
 
 const DisclaimerDialogPresenter = (props: BaseDialogProps) => {
   const toggleChecked = () => {

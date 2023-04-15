@@ -1,4 +1,4 @@
-import { Instance, types, applySnapshot } from 'mobx-state-tree';
+import { applySnapshot, Instance, types } from 'mobx-state-tree';
 
 export const defaultTheme = {
   id: 'default',

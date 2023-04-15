@@ -1,6 +1,7 @@
 // @ts-nocheck
-import { types, Instance, flow } from 'mobx-state-tree';
 import { Conduit } from '@holium/conduit';
+import { flow, Instance, types } from 'mobx-state-tree';
+
 import { BeaconApi } from '../../../api/beacon';
 
 const NotificationContentTypes = types.union(

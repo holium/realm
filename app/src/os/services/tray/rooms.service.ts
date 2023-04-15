@@ -1,7 +1,8 @@
+import { PokeParams, Scry } from '@holium/conduit/src/types';
 import { ipcMain, ipcRenderer } from 'electron';
+
 import { Realm } from '../../index';
 import { BaseService } from '../base.service';
-import { PokeParams, Scry } from '@holium/conduit/src/types';
 
 export interface IPCHandlers {
   [channel: string]: (...args: any) => Promise<any> | any;

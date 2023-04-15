@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
-import { observer } from 'mobx-react';
+import { useEffect, useMemo, useState } from 'react';
 import { Flex, Select, Text } from '@holium/design-system';
-import { Card } from 'renderer/components';
+import { observer } from 'mobx-react';
 import { lighten } from 'polished';
-import { useServices } from 'renderer/logic/store';
+import { Card } from 'renderer/components';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { useServices } from 'renderer/logic/store';
 
 const AboutPanelPresenter = () => {
   const { theme } = useServices();

@@ -4,13 +4,15 @@
  *   https://github.com/electron-userland/electron-builder/issues/1505
  *
  *****************/
-import path from 'path';
-import { app, ipcMain, BrowserWindow, dialog, net } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, net } from 'electron';
 import log from 'electron-log';
 import { autoUpdater, UpdateInfo /*, NsisUpdater */ } from 'electron-updater';
-import { resolveUpdaterPath, resolveHtmlPath } from './util';
-import { isDevelopment } from './helpers/env';
+import path from 'path';
+
 import { getReleaseChannel } from '../os/lib/settings';
+
+import { isDevelopment } from './helpers/env';
+import { resolveHtmlPath, resolveUpdaterPath } from './util';
 
 const RESOURCES_PATH = app.isPackaged
   ? path.join(process.resourcesPath, 'assets')

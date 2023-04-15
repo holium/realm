@@ -1,15 +1,16 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
 import {
-  Text,
-  Flex,
   ErrorBox,
+  Flex,
   SuccessBox,
+  Text,
 } from '@holium/design-system/general';
-import { useToggle } from '@holium/design-system/util';
 import { RadioList } from '@holium/design-system/inputs';
+import { useToggle } from '@holium/design-system/util';
+
 import { Modal } from '../../Modal';
-import { SubmitButton } from '../SubmitButton';
 import { OnboardDialogInput } from '../../OnboardDialog.styles';
+import { SubmitButton } from '../SubmitButton';
 
 type Props = {
   isOpen: boolean;

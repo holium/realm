@@ -1,15 +1,16 @@
 import { FC } from 'react';
-import { observer } from 'mobx-react';
-import { Flex, Box } from 'renderer/components';
 import { Text } from '@holium/design-system';
-import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
+import { observer } from 'mobx-react';
 import {
   BitcoinWalletType,
-  EthWalletType,
   ERC20Type,
+  EthWalletType,
   ProtocolType,
 } from 'os/services/tray/wallet-lib/wallet.model';
+import { useTrayApps } from 'renderer/apps/store';
+import { Box, Flex } from 'renderer/components';
+import { useServices } from 'renderer/logic/store';
+
 import { TransactionPane } from './Pane';
 
 const abbrMap = {

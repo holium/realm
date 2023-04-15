@@ -1,16 +1,18 @@
-import { useMemo, useEffect, MouseEvent } from 'react';
-import { observer } from 'mobx-react';
-import { Text, Flex } from 'renderer/components';
-import { Row } from 'renderer/components/NewRow';
-import { useServices } from 'renderer/logic/store';
-import { AvatarRow } from './AvatarRow';
-import { darken } from 'polished';
+import { MouseEvent, useEffect, useMemo } from 'react';
 import { RoomType } from '@holium/realm-room';
-import { useRooms } from '../useRooms';
+import { observer } from 'mobx-react';
+import { darken } from 'polished';
+import { Flex, Text } from 'renderer/components';
 import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
+import { Row } from 'renderer/components/NewRow';
+import { useServices } from 'renderer/logic/store';
+
+import { useRooms } from '../useRooms';
+
+import { AvatarRow } from './AvatarRow';
 
 type RoomRowProps = Partial<RoomType> & {
   tray?: boolean;

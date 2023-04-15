@@ -1,7 +1,8 @@
 import { forwardRef } from 'react';
-import styled, { css, StyledComponentProps } from 'styled-components';
-import { compose, space, HeightProps, SpaceProps, height } from 'styled-system';
 import { darken } from 'polished';
+import styled, { css, StyledComponentProps } from 'styled-components';
+import { compose, height, HeightProps, space, SpaceProps } from 'styled-system';
+
 import { ThemeType } from '../theme';
 
 // import { Spinner, Flex } from '.';

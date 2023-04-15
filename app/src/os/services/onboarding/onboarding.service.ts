@@ -1,28 +1,30 @@
+import { Conduit } from '@holium/conduit';
+import bcrypt from 'bcryptjs';
 import { ipcMain, ipcRenderer, safeStorage } from 'electron';
 import Store from 'electron-store';
+import { toJS } from 'mobx';
 import {
+  castToSnapshot,
+  getSnapshot,
   onPatch,
   onSnapshot,
-  getSnapshot,
-  castToSnapshot,
 } from 'mobx-state-tree';
-import bcrypt from 'bcryptjs';
+import { AccessCode, HostingPlanet } from 'os/api/holium';
+
+import { ContactApi } from '../../api/contacts';
+import { DocketApi } from '../../api/docket';
+import { FriendsApi } from '../../api/friends';
 import { Realm } from '../../index';
+import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
+import { RealmInstallationStatus } from '../../types';
 import { BaseService } from '../base.service';
+import { AuthShip } from '../identity/auth.model';
+
 import {
+  OnboardingStep,
   OnboardingStore,
   OnboardingStoreType,
-  OnboardingStep,
 } from './onboarding.model';
-import { AuthShip } from '../identity/auth.model';
-import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
-import { ContactApi } from '../../api/contacts';
-import { FriendsApi } from '../../api/friends';
-import { DocketApi } from '../../api/docket';
-import { HostingPlanet, AccessCode } from 'os/api/holium';
-import { Conduit } from '@holium/conduit';
-import { toJS } from 'mobx';
-import { RealmInstallationStatus } from '../../types';
 
 export class OnboardingService extends BaseService {
   private readonly db: Store<OnboardingStoreType>; // for persistance

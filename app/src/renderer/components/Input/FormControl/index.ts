@@ -1,5 +1,5 @@
 import { Field, FieldSet } from './Field';
-import { Hint, Error } from './Messages';
+import { Error, Hint } from './Messages';
 
 export const FormControl = {
   Field,

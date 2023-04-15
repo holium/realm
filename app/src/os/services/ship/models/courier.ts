@@ -1,13 +1,14 @@
-import { Instance, types, flow } from 'mobx-state-tree';
-import { Content, createPost } from '@urbit/api';
-import { patp2dec } from 'urbit-ob';
-import { Patp } from 'os/types';
-import { cleanNounColor } from '../../../lib/color';
-import { LoaderModel, SubscriptionModel } from '../../common.model';
-import moment from 'moment';
-import { pathToDmInbox } from '../../../lib/graph-store';
-import { CourierApi } from '../../../api/courier';
 import { Conduit } from '@holium/conduit';
+import { Content, createPost } from '@urbit/api';
+import { flow, Instance, types } from 'mobx-state-tree';
+import moment from 'moment';
+import { Patp } from 'os/types';
+import { patp2dec } from 'urbit-ob';
+
+import { CourierApi } from '../../../api/courier';
+import { cleanNounColor } from '../../../lib/color';
+import { pathToDmInbox } from '../../../lib/graph-store';
+import { LoaderModel, SubscriptionModel } from '../../common.model';
 
 const MessagePosition = types.enumeration(['right', 'left']);
 

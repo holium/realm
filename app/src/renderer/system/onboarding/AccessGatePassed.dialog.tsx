@@ -1,5 +1,5 @@
-import { Text, Flex, Button } from 'renderer/components';
 import { observer } from 'mobx-react';
+import { Button, Flex, Text } from 'renderer/components';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 
 const AccessGatePassedPresenter = (props: BaseDialogProps) => {

@@ -1,8 +1,8 @@
 import { createContext, useContext } from 'react';
-import { Instance, types, onSnapshot } from 'mobx-state-tree';
+import { Instance, onSnapshot, types } from 'mobx-state-tree';
+import { DocketApp, DocketAppType } from 'os/services/spaces/models/bazaar';
 import { Patp } from 'os/types';
 import { calculatePopoverAnchorById } from 'renderer/logic/lib/position';
-import { DocketApp, DocketAppType } from 'os/services/spaces/models/bazaar';
 
 const searchMode = types.enumeration([
   'none',

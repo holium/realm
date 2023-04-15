@@ -1,10 +1,10 @@
 import { ChangeEvent, useState } from 'react';
-import { observer } from 'mobx-react';
-import { Flex, Text, Button, Label, FormControl } from 'renderer/components';
 import { TextInput } from '@holium/design-system';
 import { useField, useForm } from 'mobx-easy-form';
-import { WalletActions } from 'renderer/logic/actions/wallet';
+import { observer } from 'mobx-react';
 import { NetworkType } from 'os/services/tray/wallet-lib/wallet.model';
+import { Button, Flex, FormControl, Label, Text } from 'renderer/components';
+import { WalletActions } from 'renderer/logic/actions/wallet';
 
 interface CreateWalletProps {
   network: NetworkType;

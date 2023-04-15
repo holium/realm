@@ -1,10 +1,12 @@
-import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { variant, space, layout } from 'styled-system';
+import styled, { css } from 'styled-components';
+import { layout, space, variant } from 'styled-system';
+
 import type { ThemeType } from '../theme';
+
 import {
-  TypographyFunctionsProps,
   typographyFunctions,
+  TypographyFunctionsProps,
 } from './typography-functions';
 
 export type TextProps = {

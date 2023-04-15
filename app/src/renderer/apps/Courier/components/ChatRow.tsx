@@ -1,20 +1,22 @@
-import { useMemo, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  Row,
   Flex,
-  Text,
-  timelineDate,
   MenuItemProps,
+  Row,
+  Text,
   TEXT_TYPES,
+  timelineDate,
 } from '@holium/design-system';
 import { observer } from 'mobx-react';
+import { ChatPathType } from 'os/services/chat/chat.service';
+import { useAccountStore } from 'renderer/apps/Account/store';
 import { useContextMenu } from 'renderer/components';
 import { ShellActions } from 'renderer/logic/actions/shell';
-import { useChatStore } from '../store';
-import { ChatPathType } from 'os/services/chat/chat.service';
-import { ChatAvatar } from './ChatAvatar';
 import { useServices } from 'renderer/logic/store';
-import { useAccountStore } from 'renderer/apps/Account/store';
+
+import { useChatStore } from '../store';
+
+import { ChatAvatar } from './ChatAvatar';
 import { UnreadBadge } from './UnreadBadge';
 
 type ChatRowProps = {

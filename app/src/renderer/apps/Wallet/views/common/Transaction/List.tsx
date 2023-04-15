@@ -1,23 +1,24 @@
-import { observer } from 'mobx-react';
-import { darken } from 'polished';
-import { Flex, Icons, NoScrollBar, Text as OldText } from 'renderer/components';
 import { Text } from '@holium/design-system';
-import { Row } from 'renderer/components/NewRow';
 import { toJS } from 'mobx';
-import { useServices } from 'renderer/logic/store';
-import { useTrayApps } from 'renderer/apps/store';
-import {
-  monthNames,
-  formatEthAmount,
-  formatBtcAmount,
-  convertEthAmountToUsd,
-  shortened,
-} from '../../../lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
+import { observer } from 'mobx-react';
 import {
   TransactionType,
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
+import { darken } from 'polished';
+import { useTrayApps } from 'renderer/apps/store';
+import { Flex, Icons, NoScrollBar, Text as OldText } from 'renderer/components';
+import { Row } from 'renderer/components/NewRow';
+import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useServices } from 'renderer/logic/store';
+
+import {
+  convertEthAmountToUsd,
+  formatBtcAmount,
+  formatEthAmount,
+  monthNames,
+  shortened,
+} from '../../../lib/helpers';
 
 export type TxType = 'coin' | 'nft' | 'general' | undefined;
 

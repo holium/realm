@@ -1,11 +1,12 @@
+import { Flex } from '@holium/design-system/general';
 import {
-  CardNumberElement,
   CardCvcElement,
   CardExpiryElement,
+  CardNumberElement,
 } from '@stripe/react-stripe-js';
-import { Flex } from '@holium/design-system/general';
-import { OnboardDialogSubTitle } from '../OnboardDialog.styles';
 import styled, { css } from 'styled-components';
+
+import { OnboardDialogSubTitle } from '../OnboardDialog.styles';
 
 const InputCss = css`
   background-color: white;

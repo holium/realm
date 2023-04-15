@@ -1,10 +1,11 @@
 import {
+  applySnapshot,
   castToSnapshot,
+  destroy,
   Instance,
   types,
-  applySnapshot,
-  destroy,
 } from 'mobx-state-tree';
+
 import { LoaderModel } from '../../common.model';
 // import { NotificationsStore } from './notifications';
 

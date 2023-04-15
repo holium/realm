@@ -1,18 +1,20 @@
-import { DesktopActions } from './actions/desktop';
 import { average } from 'color.js';
+import { toJS } from 'mobx';
 import {
-  types,
-  flow,
-  Instance,
   applySnapshot,
+  flow,
   getSnapshot,
+  Instance,
   SnapshotOut,
+  types,
 } from 'mobx-state-tree';
 import { darken, lighten, rgba } from 'polished';
+
 import { bgIsLightOrDark, toRgbaString } from '../../os/lib/color';
 import { LoaderModel } from '../../os/services/common.model';
-import { toJS } from 'mobx';
 import { defaultTheme } from '../../os/services/theme.model';
+
+import { DesktopActions } from './actions/desktop';
 
 export const genCSSVariables = (theme: ThemeType) => {
   /**

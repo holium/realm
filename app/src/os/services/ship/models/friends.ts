@@ -1,13 +1,14 @@
+import { toJS } from 'mobx';
 import {
   applySnapshot,
   castToSnapshot,
   Instance,
   types,
 } from 'mobx-state-tree';
-import { toJS } from 'mobx';
+
+import { cleanNounColor } from '../../../lib/color';
 import { Patp } from '../../../types';
 import { SubscriptionModel } from '../../common.model';
-import { cleanNounColor } from '../../../lib/color';
 
 const FriendStatus = types.enumeration('FriendStatus', [
   'fren',

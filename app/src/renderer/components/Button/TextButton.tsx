@@ -1,19 +1,20 @@
 import { ReactNode } from 'react';
 import styled, { css } from 'styled-components';
 import {
-  compose,
-  space,
+  backgroundColor,
+  ButtonStyleProps,
   color,
   ColorProps,
-  backgroundColor,
+  compose,
   layout,
   opacity,
   OpacityProps,
   position,
   PositionProps,
+  space,
   typography,
-  ButtonStyleProps,
 } from 'styled-system';
+
 import { ThemeType } from '../../theme';
 
 type IProps = {

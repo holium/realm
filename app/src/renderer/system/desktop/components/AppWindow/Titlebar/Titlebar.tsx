@@ -1,11 +1,13 @@
-import { ReactNode, PointerEvent } from 'react';
+import { PointerEvent, ReactNode } from 'react';
+import { AppWindowType } from 'os/services/shell/desktop.model';
 import { ThemeModelType } from 'os/services/theme.model';
 import { Flex, Text } from 'renderer/components';
-import { AppWindowIcon } from '../AppWindowIcon';
-import { SharedAvatars } from './SharedAvatars';
-import { AppWindowType } from 'os/services/shell/desktop.model';
-import { TitlebarContainer, TitleCentered } from './Titlebar.styles';
 import { useDoubleClick } from 'renderer/logic/lib/useDoubleClick';
+
+import { AppWindowIcon } from '../AppWindowIcon';
+
+import { SharedAvatars } from './SharedAvatars';
+import { TitlebarContainer, TitleCentered } from './Titlebar.styles';
 
 type Props = {
   theme: Partial<ThemeModelType>;

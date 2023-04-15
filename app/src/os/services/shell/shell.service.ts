@@ -1,8 +1,10 @@
 import { ipcMain, ipcRenderer } from 'electron';
-import { onPatch, getSnapshot } from 'mobx-state-tree';
+import { getSnapshot, onPatch } from 'mobx-state-tree';
+
 import { Realm } from '../../index';
 import { BaseService } from '../base.service';
-import { ShellStoreType, ShellStore } from './shell.model';
+
+import { ShellStore, ShellStoreType } from './shell.model';
 
 export class ShellService extends BaseService {
   private readonly state?: ShellStoreType; // for state management

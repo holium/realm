@@ -1,6 +1,5 @@
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { AppTile, AppTileSize } from 'renderer/components/AppTile/AppTile';
 import {
   AppType,
   AppTypes,
@@ -8,10 +7,12 @@ import {
   UrbitAppType,
   WebAppType,
 } from 'os/services/spaces/models/bazaar';
-import { useServices } from 'renderer/logic/store';
+import { AppTile, AppTileSize } from 'renderer/components/AppTile/AppTile';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { ShellActions } from 'renderer/logic/actions/shell';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { useServices } from 'renderer/logic/store';
+
 import {
   handleInstallation,
   handleResumeSuspend,

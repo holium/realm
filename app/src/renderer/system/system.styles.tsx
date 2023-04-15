@@ -1,6 +1,6 @@
-import styled, { css } from 'styled-components';
-import { motion } from 'framer-motion';
 import { Fill } from 'react-spaces';
+import { motion } from 'framer-motion';
+import styled, { css } from 'styled-components';
 
 import { ThemeType } from '../theme';
 

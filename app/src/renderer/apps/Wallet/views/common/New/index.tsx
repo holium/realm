@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
-
-import { Box, Flex, Icons, IconButton } from 'renderer/components';
-import { Create } from './Create';
-import { Backup } from './Backup';
-import { Import } from './Import';
-import { Confirm } from './Confirm';
-import { CreatePasscode } from './CreatePasscode';
-import { ConfirmPasscode } from './ConfirmPasscode';
-import { Finalizing } from './Finalizing';
-import { DetectedExisting } from './DetectedExisting';
-import { RecoverExisting } from './RecoverExisting';
 import { useTrayApps } from 'renderer/apps/store';
+import { Box, Flex, IconButton, Icons } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
+
+import { Backup } from './Backup';
+import { Confirm } from './Confirm';
+import { ConfirmPasscode } from './ConfirmPasscode';
+import { Create } from './Create';
+import { CreatePasscode } from './CreatePasscode';
+import { DetectedExisting } from './DetectedExisting';
+import { Finalizing } from './Finalizing';
+import { Import } from './Import';
+import { RecoverExisting } from './RecoverExisting';
 
 export enum NewWalletScreen {
   CREATE = 'create',

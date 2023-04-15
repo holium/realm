@@ -1,26 +1,26 @@
 import { KeyboardEventHandler, useEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
-import { useField, useForm } from 'mobx-easy-form';
-import * as yup from 'yup';
-import styled from 'styled-components';
-import { motion } from 'framer-motion';
 import { TwitterPicker } from 'react-color';
-import { FormControl } from 'renderer/components';
-import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
-import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+import ReactDOM from 'react-dom';
 import {
   Avatar,
   AvatarInput,
   Box,
+  Button,
   Flex,
+  Spinner,
   Text,
   TextInput,
-  Button,
-  Spinner,
 } from '@holium/design-system';
+import { motion } from 'framer-motion';
+import { useField, useForm } from 'mobx-easy-form';
+import { observer } from 'mobx-react';
+import { FormControl } from 'renderer/components';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { useServices } from 'renderer/logic/store';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+import styled from 'styled-components';
+import * as yup from 'yup';
 
 interface ColorTileProps {
   tileColor: string;

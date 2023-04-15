@@ -1,20 +1,20 @@
-import { ThemeModelType } from './../theme.model';
-import { ipcMain, session, ipcRenderer } from 'electron';
-import { onPatch, getSnapshot } from 'mobx-state-tree';
-
-import { Realm } from '../../index';
-import { BaseService } from '../base.service';
-import {
-  DesktopStoreType,
-  DesktopStore,
-  AppWindowProps,
-} from './desktop.model';
-import { AppType } from '../spaces/models/bazaar';
+import { Bounds } from '@holium/design-system';
+import { ipcMain, ipcRenderer, session } from 'electron';
 import { IpcRendererEvent } from 'electron/renderer';
 import { toJS } from 'mobx';
-import { Bounds } from '@holium/design-system';
+import { getSnapshot, onPatch } from 'mobx-state-tree';
 
+import { Realm } from '../../index';
 import { getReleaseChannel, setReleaseChannel } from '../../lib/settings';
+import { BaseService } from '../base.service';
+import { AppType } from '../spaces/models/bazaar';
+
+import { ThemeModelType } from './../theme.model';
+import {
+  AppWindowProps,
+  DesktopStore,
+  DesktopStoreType,
+} from './desktop.model';
 
 /**
  * DesktopService

@@ -1,12 +1,13 @@
 import { toJS } from 'mobx';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { DialogRenderers } from 'renderer/system/dialog/dialogs';
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';
-import { CreateSpaceModal } from './SelectType';
-import { SpacesCreateForm } from './Details';
-import { SelectArchetype } from './SelectArchetype';
-import { InviteMembers } from './InviteMembers';
+import { ShellActions } from 'renderer/logic/actions/shell';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { DialogRenderers } from 'renderer/system/dialog/dialogs';
+
+import { SpacesCreateForm } from './Details';
+import { InviteMembers } from './InviteMembers';
+import { SelectArchetype } from './SelectArchetype';
+import { CreateSpaceModal } from './SelectType';
 
 interface NewSpace {
   access: 'public' | 'antechamber' | 'private';

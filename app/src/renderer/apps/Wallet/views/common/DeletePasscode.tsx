@@ -1,4 +1,5 @@
-import { Flex, Text, Icons } from 'renderer/components';
+import { Flex, Icons, Text } from 'renderer/components';
+
 import { PasscodeInput } from '../../components/PasscodeInput';
 
 interface PasscodeProps {

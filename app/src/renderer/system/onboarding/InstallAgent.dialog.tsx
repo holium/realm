@@ -1,18 +1,18 @@
-import { observer } from 'mobx-react';
-import { ActionButton } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { trackEvent } from 'renderer/logic/lib/track';
 import {
   Avatar,
-  Flex,
-  Text,
-  Button,
   Box,
+  Button,
+  Flex,
   Icon,
   Spinner,
+  Text,
   useToggle,
 } from '@holium/design-system';
+import { observer } from 'mobx-react';
+import { ActionButton } from 'renderer/components';
+import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { trackEvent } from 'renderer/logic/lib/track';
+import { useServices } from 'renderer/logic/store';
 
 const InstallAgentPresenter = () => {
   const { onboarding } = useServices();

@@ -1,5 +1,5 @@
-import styled, { css } from 'styled-components';
 import { Card } from 'renderer/components';
+import styled, { css } from 'styled-components';
 
 interface CardStyleProps {
   isSelected: boolean;

@@ -1,12 +1,13 @@
+import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
 import {
-  compose,
-  color,
   backgroundColor,
   BackgroundColorProps,
+  color,
   ColorProps,
+  compose,
 } from 'styled-system';
-import { motion } from 'framer-motion';
+
 import { ThemeType } from '../../../theme';
 
 type BubbleProps = {

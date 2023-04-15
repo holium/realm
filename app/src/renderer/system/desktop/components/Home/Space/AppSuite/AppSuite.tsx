@@ -1,15 +1,17 @@
 import { useMemo, useState } from 'react';
-import { Flex, Text, Button } from 'renderer/components';
-import { SuiteApp } from './SuiteApp';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { styled, keyframes } from '@stitches/react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
-import { AppRow } from '../../AppInstall/AppRow';
-import { useServices } from 'renderer/logic/store';
+import { keyframes, styled } from '@stitches/react';
 import { observer } from 'mobx-react';
 import { darken, rgba } from 'polished';
-import { RealmPopover } from '../../Popover';
+import { Button, Flex, Text } from 'renderer/components';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { calculatePopoverAnchorById } from 'renderer/logic/lib/position';
+import { useServices } from 'renderer/logic/store';
+
+import { AppRow } from '../../AppInstall/AppRow';
+import { RealmPopover } from '../../Popover';
+
+import { SuiteApp } from './SuiteApp';
 
 interface AppSuiteProps {
   patp: string;

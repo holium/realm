@@ -1,9 +1,10 @@
-import { useState, Dispatch, SetStateAction, useEffect } from 'react';
-import { observer } from 'mobx-react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { ethers } from 'ethers';
-import { Button, Flex, Text, Box, Icons } from 'renderer/components';
+import { observer } from 'mobx-react';
 import { darken, transparentize } from 'polished';
+import { Box, Button, Flex, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
+
 import { NewWalletScreen } from './index';
 
 interface BackupProps {

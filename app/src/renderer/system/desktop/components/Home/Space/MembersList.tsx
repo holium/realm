@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
-import { observer } from 'mobx-react';
-import { rgba, darken } from 'polished';
-import { Flex, Text, PersonRow } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { Member } from 'os/types';
 import { WindowedList } from '@holium/design-system';
+import { observer } from 'mobx-react';
 import { MemberType } from 'os/services/spaces/models/members';
+import { Member } from 'os/types';
+import { darken, rgba } from 'polished';
+import { Flex, PersonRow, Text } from 'renderer/components';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { useServices } from 'renderer/logic/store';
 
 interface IMembersList {
   path: string;

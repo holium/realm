@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
-import { darken, transparentize } from 'polished';
-import { Box, Text, Flex, Icons, Button } from 'renderer/components';
-import { theme } from 'renderer/theme';
-import { observer } from 'mobx-react';
-import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { useServices } from 'renderer/logic/store';
-import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { Avatar } from '@holium/design-system';
+import { observer } from 'mobx-react';
 import { ThemeModelType } from 'os/services/theme.model';
+import { darken, transparentize } from 'polished';
+import { Box, Button, Flex, Icons, Text } from 'renderer/components';
+import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { useServices } from 'renderer/logic/store';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+import { theme } from 'renderer/theme';
 
 export interface SelectPlanProps extends BaseDialogProps {
   patp: string;

@@ -1,7 +1,8 @@
 import { FC, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { Label, Button, Box } from '../';
+
 import { ThemeType } from '../../theme';
+import { Box, Button, Label } from '../';
 
 interface FileUploadContainerProps {
   theme: ThemeType;

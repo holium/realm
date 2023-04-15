@@ -1,12 +1,12 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
+import { EthWalletType } from 'os/services/tray/wallet-lib/wallet.model';
 import { darken } from 'polished';
 import { QRCodeSVG } from 'qrcode.react';
-
-import { Flex, Box, Icons, Text } from 'renderer/components';
+import { Box, Flex, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { shortened, formatEthAmount, getBaseTheme } from '../../../lib/helpers';
-import { EthWalletType } from 'os/services/tray/wallet-lib/wallet.model';
+
+import { formatEthAmount, getBaseTheme, shortened } from '../../../lib/helpers';
 
 interface WalletInfoProps {
   wallet: EthWalletType;

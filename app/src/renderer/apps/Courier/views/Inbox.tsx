@@ -1,20 +1,21 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
+  Box,
+  Button,
   Flex,
   Icon,
-  Button,
-  TextInput,
-  Box,
   Text,
+  TextInput,
   WindowedList,
 } from '@holium/design-system';
+import { observer } from 'mobx-react';
+import { useServices } from 'renderer/logic/store';
+
 // import { toJS } from 'mobx';
 import { useTrayApps } from '../../store';
 import { ChatRow } from '../components/ChatRow';
-import { useChatStore } from '../store';
-import { observer } from 'mobx-react';
 import { ChatModelType } from '../models';
-import { useServices } from 'renderer/logic/store';
+import { useChatStore } from '../store';
 const rowHeight = 52;
 
 const scrollbarWidth = 12;

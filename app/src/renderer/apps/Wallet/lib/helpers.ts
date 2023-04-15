@@ -1,11 +1,11 @@
-import { utils, BigNumber } from 'ethers';
+import { BigNumber, utils } from 'ethers';
 import {
   ERC20Type,
   ERC721Type,
   TransactionType,
 } from 'os/services/tray/wallet-lib/wallet.model';
-
 import { ThemeType } from 'renderer/logic/theme';
+
 import { theme } from '../../../theme';
 
 export function getDisplayDate(date: Date) {

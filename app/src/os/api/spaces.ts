@@ -1,11 +1,13 @@
 import { Conduit } from '@holium/conduit';
-import { MembershipType } from './../services/spaces/models/members';
-import { SpacesStoreType } from '../services/spaces/models/spaces';
-import { snakeify } from '../lib/obj';
-import { MemberRole, Patp, SpacePath } from '../types';
-import { VisaModelType } from 'os/services/spaces/models/visas';
 import { NewBazaarStoreType } from 'os/services/spaces/models/bazaar';
+import { VisaModelType } from 'os/services/spaces/models/visas';
+
+import { snakeify } from '../lib/obj';
+import { SpacesStoreType } from '../services/spaces/models/spaces';
 import { getHost } from '../services/spaces/spaces.service';
+import { MemberRole, Patp, SpacePath } from '../types';
+
+import { MembershipType } from './../services/spaces/models/members';
 
 export const SpacesApi = {
   getSpaces: async (conduit: Conduit) => {

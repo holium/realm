@@ -1,39 +1,39 @@
-import { FC, useState, useMemo } from 'react';
-import styled from 'styled-components';
+import { FC, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
-import { darken, lighten, rgba } from 'polished';
-import { QRCodeSVG } from 'qrcode.react';
-
-import { Flex, Box, Icons, Text } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import {
-  shortened,
-  formatEthAmount,
-  formatZigAmount,
-  getBaseTheme,
-  getMockCoinIcon,
-  formatCoinAmount,
-  convertBtcAmountToUsd,
-  convertEthAmountToUsd,
-  convertERC20AmountToUsd,
-  formatBtcAmount,
-} from '../../../lib/helpers';
-import {
+  BitcoinWalletType,
   ERC20Type,
   EthWalletType,
-  BitcoinWalletType,
   NetworkType,
   ProtocolType,
 } from 'os/services/tray/wallet-lib/wallet.model';
-import { CircleButton } from '../../../components/CircleButton';
-import { SendTransaction } from '../Transaction/Send';
+import { darken, lighten, rgba } from 'polished';
+import { QRCodeSVG } from 'qrcode.react';
 import { useTrayApps } from 'renderer/apps/store';
-import { motion } from 'framer-motion';
+import { Box, Flex, Icons, Text } from 'renderer/components';
 import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useServices } from 'renderer/logic/store';
+import styled from 'styled-components';
+
+import { CircleButton } from '../../../components/CircleButton';
 import {
   WalletCardStyle,
   walletCardStyleTransition,
 } from '../../../components/WalletCardWrapper';
+import {
+  convertBtcAmountToUsd,
+  convertERC20AmountToUsd,
+  convertEthAmountToUsd,
+  formatBtcAmount,
+  formatCoinAmount,
+  formatEthAmount,
+  formatZigAmount,
+  getBaseTheme,
+  getMockCoinIcon,
+  shortened,
+} from '../../../lib/helpers';
+import { SendTransaction } from '../Transaction/Send';
 import { TransactionPasscode } from '../Transaction/TransactionPasscode';
 
 const BreadCrumb = styled(Text)`

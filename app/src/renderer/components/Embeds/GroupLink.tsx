@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { Flex, EmbedBox, Text, Skeleton } from '..';
+
+import { EmbedBox, Flex, Skeleton, Text } from '..';
 
 interface GroupViewProps {
   loading?: boolean;

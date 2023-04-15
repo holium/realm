@@ -1,17 +1,18 @@
-import { useEffect, useRef, useMemo, useCallback } from 'react';
-import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   Bubble,
+  convertFragmentsToText,
   MenuItemProps,
   OnReactionPayload,
-  convertFragmentsToText,
 } from '@holium/design-system';
-import { useContextMenu } from 'renderer/components';
-import { useChatStore } from '../store';
-import { ChatMessageType } from '../models';
 import { toJS } from 'mobx';
+import { observer } from 'mobx-react';
+import { useContextMenu } from 'renderer/components';
 import { OSActions } from 'renderer/logic/actions/os';
+import { useServices } from 'renderer/logic/store';
+
+import { ChatMessageType } from '../models';
+import { useChatStore } from '../store';
 
 type ChatMessageProps = {
   containerWidth: number;

@@ -1,11 +1,12 @@
-import { useEffect, ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
+import { useToggle } from '@holium/design-system/util';
+import { AccountDialogSkeleton, OnboardDialogSkeleton } from '@holium/shared';
 import NextHead from 'next/head';
 import styled from 'styled-components';
-import { useToggle } from '@holium/design-system/util';
+
 import { api } from '../util/api';
 import { useNavigation } from '../util/useNavigation';
-import { AccountDialogSkeleton, OnboardDialogSkeleton } from '@holium/shared';
 
 const Main = styled.main`
   width: 100%;

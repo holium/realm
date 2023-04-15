@@ -1,41 +1,43 @@
-import {
-  FragmentType,
-  FragmentBlockquoteType,
-  FragmentBoldType,
-  FragmentBoldItalicsType,
-  FragmentBoldItalicsStrikeType,
-  FragmentItalicsStrikeType,
-  FragmentBoldStrikeType,
-  FragmentCodeType,
-  FragmentImageType,
-  FragmentInlineCodeType,
-  FragmentItalicsType,
-  FragmentLinkType,
-  FragmentPlainType,
-  FragmentShipType,
-  FragmentStrikeType,
-  FragmentKey,
-  FragmentUrLinkType,
-  FragmentReplyType,
-  FragmentTabType,
-  TEXT_TYPES,
-} from './Bubble.types';
+import { motion } from 'framer-motion';
 import styled from 'styled-components';
-import { capitalizeFirstLetter } from '../../util/strings';
+
 import {
-  Text,
-  TextProps,
   Flex,
   FlexProps,
   skeletonStyle,
+  Text,
+  TextProps,
 } from '../../../general';
-import { BlockStyle } from '../Block/Block';
-import { motion } from 'framer-motion';
 import { ImageBlock } from '../../blocks/ImageBlock/ImageBlock';
 import { LinkBlock } from '../../blocks/LinkBlock/LinkBlock';
-import { BubbleAuthor } from './Bubble.styles';
 import { Bookmark } from '../../os/Bookmark/Bookmark';
+import { capitalizeFirstLetter } from '../../util/strings';
+import { BlockStyle } from '../Block/Block';
+
 import { BUBBLE_HEIGHT } from './Bubble.constants';
+import { BubbleAuthor } from './Bubble.styles';
+import {
+  FragmentBlockquoteType,
+  FragmentBoldItalicsStrikeType,
+  FragmentBoldItalicsType,
+  FragmentBoldStrikeType,
+  FragmentBoldType,
+  FragmentCodeType,
+  FragmentImageType,
+  FragmentInlineCodeType,
+  FragmentItalicsStrikeType,
+  FragmentItalicsType,
+  FragmentKey,
+  FragmentLinkType,
+  FragmentPlainType,
+  FragmentReplyType,
+  FragmentShipType,
+  FragmentStrikeType,
+  FragmentTabType,
+  FragmentType,
+  FragmentUrLinkType,
+  TEXT_TYPES,
+} from './Bubble.types';
 
 export const FragmentBase = styled(Text.Custom)<TextProps>`
   display: inline;

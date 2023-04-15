@@ -1,4 +1,4 @@
-import { lighten, darken, rgba } from 'polished';
+import { darken, lighten, rgba } from 'polished';
 
 export const fonts = {
   body: '"Rubik", sans-serif',

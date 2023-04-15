@@ -1,5 +1,3 @@
-import { Realm } from '../index';
-import { EventEmitter } from 'stream';
 // import {
 //   getSnapshot,
 //   IModelType,
@@ -7,6 +5,9 @@ import { EventEmitter } from 'stream';
 //   IStateTreeNode,
 // } from 'mobx-state-tree';
 import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
+import { EventEmitter } from 'stream';
+
+import { Realm } from '../index';
 import { Patp } from '../types';
 
 export interface SlipType {

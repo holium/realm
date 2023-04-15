@@ -1,14 +1,15 @@
 import { useEffect, useMemo } from 'react';
-import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
-import { AppWindow } from './components/AppWindow/AppWindow';
-import { useServices } from 'renderer/logic/store';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { ShellActions } from 'renderer/logic/actions/shell';
+import { observer } from 'mobx-react';
 import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { ShellActions } from 'renderer/logic/actions/shell';
+import { useServices } from 'renderer/logic/store';
+
+import { AppWindow } from './components/AppWindow/AppWindow';
 
 const AppWindowManagerPresenter = () => {
   const { getOptions, setOptions } = useContextMenu();

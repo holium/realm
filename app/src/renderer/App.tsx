@@ -1,23 +1,24 @@
-import { ThemeProvider } from 'styled-components';
-import { MotionConfig } from 'framer-motion';
-import { GlobalStyle } from './App.styles';
-import { Shell } from './system';
 import { useEffect, useMemo } from 'react';
+import { MotionConfig } from 'framer-motion';
 import { observer } from 'mobx-react';
-import { theme as baseTheme } from './theme';
+import { ThemeProvider } from 'styled-components';
+
+import { AccountProvider, accountStore } from './apps/Account/store';
+import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
+import { ShellActions } from './logic/actions/shell';
+import { ErrorBoundary } from './logic/ErrorBoundary';
+import { SelectionProvider } from './logic/lib/selection';
 import {
   CoreProvider,
-  useCore,
   coreStore,
   ServiceProvider,
   servicesStore,
+  useCore,
   useServices,
 } from './logic/store';
-import { ShellActions } from './logic/actions/shell';
-import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
-import { SelectionProvider } from './logic/lib/selection';
-import { ErrorBoundary } from './logic/ErrorBoundary';
-import { AccountProvider, accountStore } from './apps/Account/store';
+import { GlobalStyle } from './App.styles';
+import { Shell } from './system';
+import { theme as baseTheme } from './theme';
 
 const AppPresenter = () => {
   const { booted } = useCore();

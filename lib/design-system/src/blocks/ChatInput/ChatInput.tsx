@@ -1,15 +1,17 @@
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { Icon, Button, BoxProps, Flex, Spinner } from '../../../general';
+
+import { BoxProps, Button, Flex, Icon, Spinner } from '../../../general';
 import { InputBox, TextArea } from '../../../inputs';
-import { ImageBlock } from '../ImageBlock/ImageBlock';
-import { MediaBlock } from '../MediaBlock/MediaBlock';
 import { isImageLink, parseMediaType } from '../../util/links';
 import { FragmentType } from '../Bubble/Bubble.types';
 import { FragmentImage } from '../Bubble/fragment-lib';
-import { convertFragmentsToText, parseChatInput } from './fragment-parser';
 import { Reply } from '../Bubble/Reply';
+import { ImageBlock } from '../ImageBlock/ImageBlock';
+import { MediaBlock } from '../MediaBlock/MediaBlock';
+
+import { convertFragmentsToText, parseChatInput } from './fragment-parser';
 
 const CHAT_INPUT_LINE_HEIGHT = 22;
 const ChatBox = styled(TextArea)`

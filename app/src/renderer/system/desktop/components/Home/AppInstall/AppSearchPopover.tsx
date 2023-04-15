@@ -1,9 +1,11 @@
-import { observer } from 'mobx-react';
 import { useMemo } from 'react';
-import { useServices } from 'renderer/logic/store';
+import { observer } from 'mobx-react';
 import { darken } from 'polished';
+import { useServices } from 'renderer/logic/store';
 import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInstall/store';
+
 import { RealmPopover } from '../Popover';
+
 import { SearchModes } from './SearchModes';
 
 const AppSearchPopoverPresenter = () => {

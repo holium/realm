@@ -1,5 +1,6 @@
-import { GetServerSideProps } from 'next';
 import { LoginDialog } from '@holium/shared';
+import { GetServerSideProps } from 'next';
+
 import { Page } from '../components/Page';
 import { api } from '../util/api';
 import { useNavigation } from '../util/useNavigation';

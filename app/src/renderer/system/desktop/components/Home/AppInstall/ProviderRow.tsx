@@ -1,11 +1,12 @@
-import { useRef, useMemo } from 'react';
-import styled, { css } from 'styled-components';
+import { useMemo, useRef } from 'react';
+import { Avatar } from '@holium/design-system';
 import { motion } from 'framer-motion';
 import { darken } from 'polished';
-import { useServices } from 'renderer/logic/store';
 import { Flex, Text } from 'renderer/components';
+import { useServices } from 'renderer/logic/store';
+import styled, { css } from 'styled-components';
+
 import { ThemeType } from '../../../../../theme';
-import { Avatar } from '@holium/design-system';
 
 interface RowProps {
   theme: ThemeType;

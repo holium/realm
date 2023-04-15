@@ -1,8 +1,9 @@
-import { flow, Instance, types } from 'mobx-state-tree';
-import { LoaderModel } from '../common.model';
-import { AccessCode, HostingPlanet } from 'os/api/holium';
-import { DocketApi } from '../../api/docket';
 import { Conduit } from '@holium/conduit';
+import { flow, Instance, types } from 'mobx-state-tree';
+import { AccessCode, HostingPlanet } from 'os/api/holium';
+
+import { DocketApi } from '../../api/docket';
+import { LoaderModel } from '../common.model';
 
 export enum OnboardingStep {
   PRE_INSTALLATION_CHECK = 'onboarding:pre-installation-check',

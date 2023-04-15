@@ -1,4 +1,4 @@
-import { rgba, darken, lighten } from 'polished';
+import { darken, lighten, rgba } from 'polished';
 import { ThemeType } from 'renderer/logic/theme';
 
 export const applyStyleOverrides = (appId: string, theme: ThemeType) => {

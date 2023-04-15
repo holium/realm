@@ -1,22 +1,24 @@
-import { ipcMain, ipcRenderer, app, IpcRendererEvent } from 'electron';
-import { BaseService } from '../base.service';
 import Database from 'better-sqlite3';
-import { Patp } from '../../types';
+import { app, ipcMain, ipcRenderer, IpcRendererEvent } from 'electron';
+import path from 'path';
+
 import { Realm } from '../..';
+import { Patp } from '../../types';
+import { BaseService } from '../base.service';
+
+import notifInitSql from './notif.init-sql';
 import {
   AddRow,
-  UpdateRow,
   DelRow,
-  NotifDbOps,
   NotifDbChangeReactions,
+  NotifDbOps,
   NotificationsRow,
+  UpdateRow,
 } from './notification.types';
 import {
   convertRowToNotification,
   QUERY_NOTIFICATIONS,
 } from './notification.utils';
-import notifInitSql from './notif.init-sql';
-import path from 'path';
 
 type NotifMobxUpdateType =
   | 'notification-added'

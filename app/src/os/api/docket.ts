@@ -1,6 +1,7 @@
 import { Conduit } from '@holium/conduit';
-import { cleanNounColor } from '../lib/color';
 import { allyShip, docketInstall } from '@urbit/api';
+
+import { cleanNounColor } from '../lib/color';
 import { Patp } from '../types';
 
 export const DocketApi = {

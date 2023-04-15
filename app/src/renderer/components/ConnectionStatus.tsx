@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
-import styled, { css } from 'styled-components';
-import { darken, lighten, rgba, saturate } from 'polished';
-import { ThemeType } from '../theme';
 import { Flex, Spinner } from '@holium/design-system';
-import { Text, Icons } from 'renderer/components';
+import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
-import { useCore, useServices } from 'renderer/logic/store';
+import { darken, lighten, rgba, saturate } from 'polished';
+import { Icons, Text } from 'renderer/components';
 import { OSActions } from 'renderer/logic/actions/os';
+import { useCore, useServices } from 'renderer/logic/store';
+import styled, { css } from 'styled-components';
+
+import { ThemeType } from '../theme';
 
 interface ConnStatusStyleProps {
   theme: ThemeType;

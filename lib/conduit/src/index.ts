@@ -1,6 +1,7 @@
+import axios, { AxiosError } from 'axios';
 import EventEmitter, { setMaxListeners } from 'events';
 import EventSource from 'eventsource';
-import axios, { AxiosError } from 'axios';
+
 import {
   Action,
   ConduitState,

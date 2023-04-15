@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
+
 import { ConfirmDialog } from './Confirm';
 
 type LeaveSpaceDialogConfigComponentProps = {

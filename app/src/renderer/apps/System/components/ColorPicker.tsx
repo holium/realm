@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { TwitterPicker } from 'react-color';
 import { observer } from 'mobx-react';
 import { Flex } from 'renderer/components';
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
-import { TwitterPicker } from 'react-color';
 
 // TODO a lot of this is taken from Spaces/Workflow/Details.tsx
 // there should probably be a generic shared component

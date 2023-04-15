@@ -1,5 +1,5 @@
+import { Button, Flex, Icon, Text } from '@holium/design-system';
 import { rgba } from 'polished';
-import { Icon, Flex, Button, Text } from '@holium/design-system';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
 type Network = 'ethereum' | 'bitcoin';

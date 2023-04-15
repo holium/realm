@@ -1,7 +1,8 @@
-import { Flex } from 'renderer/components';
-import { SpaceSelector } from './SpaceSelector';
-import { AppDock } from './AppDock/AppDock';
 import { BarStyle } from '@holium/design-system';
+import { Flex } from 'renderer/components';
+
+import { AppDock } from './AppDock/AppDock';
+import { SpaceSelector } from './SpaceSelector';
 // import { RoomTray } from '../ShipBar/Rooms';
 
 export const CommunityBar = () => {

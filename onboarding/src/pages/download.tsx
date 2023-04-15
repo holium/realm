@@ -1,5 +1,7 @@
 import { DownloadDialog } from '@holium/shared';
+
 import { Page } from 'components/Page';
+
 import { useNavigation } from '../util/useNavigation';
 
 const downloadLinks = {

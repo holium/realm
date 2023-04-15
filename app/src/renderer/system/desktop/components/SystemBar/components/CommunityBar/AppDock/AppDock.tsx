@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react';
 import { AppType } from 'os/services/spaces/models/bazaar';
 import { useServices } from 'renderer/logic/store';
+
 import { AppDockView } from './AppDockView';
 
 const AppDockPresenter = () => {

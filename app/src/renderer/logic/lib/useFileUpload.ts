@@ -1,5 +1,6 @@
+import { ClipboardEvent, useCallback, useState } from 'react';
 import _ from 'lodash';
-import { useState, ClipboardEvent, useCallback } from 'react';
+
 // import { useFileDrag } from './useDrag';
 import { IuseStorage } from './useStorage';
 

@@ -1,10 +1,11 @@
-import { useRef, useMemo, useCallback } from 'react';
-import { Flex, Text, Input, IconButton, Icons } from 'renderer/components';
+import { useCallback, useMemo, useRef } from 'react';
+import { WindowedList } from '@holium/design-system';
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
+import { Flex, IconButton, Icons, Input, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { WindowedList } from '@holium/design-system';
+
 import { RoomChatMessage } from '../components/RoomChatMessage';
 import { useRooms } from '../useRooms';
 

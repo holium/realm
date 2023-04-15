@@ -1,11 +1,14 @@
-import { contextBridge, ipcRenderer } from 'electron';
-import { MouseState } from '@holium/realm-presence';
-import { osPreload } from '../os/preload';
-import { MediaAccess, MediaAccessStatus } from '../os/types';
 import { Position } from '@holium/design-system';
-import { multiplayerPreload } from './preload.multiplayer';
+import { MouseState } from '@holium/realm-presence';
+import { contextBridge, ipcRenderer } from 'electron';
+
 import './helpers/mouseListener';
 import './helpers/keyListener';
+
+import { osPreload } from '../os/preload';
+import { MediaAccess, MediaAccessStatus } from '../os/types';
+
+import { multiplayerPreload } from './preload.multiplayer';
 
 const appPreload = {
   /* Senders */

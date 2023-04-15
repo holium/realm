@@ -1,11 +1,11 @@
-import { useState, useCallback, KeyboardEvent } from 'react';
-import { Grid, Button, Box } from 'renderer/components';
-import { HoliumButton, TextInput, Text, Flex } from '@holium/design-system';
-import { observer } from 'mobx-react';
-import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { KeyboardEvent, useCallback, useState } from 'react';
+import { Flex, HoliumButton, Text, TextInput } from '@holium/design-system';
 import _ from 'lodash';
+import { observer } from 'mobx-react';
 import { AccessCode as AccessCodeType } from 'os/api/holium';
+import { Box, Button, Grid } from 'renderer/components';
+import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 
 const stubAccessCode = {
   title: 'Combine DAO',

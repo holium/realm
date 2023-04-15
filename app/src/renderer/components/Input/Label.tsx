@@ -1,9 +1,10 @@
 import { FC, forwardRef } from 'react';
 import styled, { StyledComponentProps } from 'styled-components';
-import { TypographyFunctionsProps } from '../typography-functions';
-import { Text } from '../Text';
-import { Box } from '../Box';
+
 import { ThemeType } from '../../theme';
+import { Box } from '../Box';
+import { Text } from '../Text';
+import { TypographyFunctionsProps } from '../typography-functions';
 
 type StyledLabelProps = {
   /** Apply the mandatory adornment */

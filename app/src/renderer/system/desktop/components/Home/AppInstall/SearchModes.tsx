@@ -1,23 +1,24 @@
-import { useState, useMemo, useEffect } from 'react';
-import { observer } from 'mobx-react';
-import { isValidPatp } from 'urbit-ob';
-import { rgba } from 'polished';
+import { useEffect, useMemo, useState } from 'react';
 import { Flex, Spinner } from '@holium/design-system';
-import { Text, Button, NoScrollBar } from 'renderer/components';
-import { AppRow } from './AppRow';
-import { ProviderRow } from './ProviderRow';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { toJS } from 'mobx';
+import { observer } from 'mobx-react';
 import {
+  AppType,
+  DocketAppType,
   InstallStatus,
   UrbitAppType,
-  DocketAppType,
-  AppType,
 } from 'os/services/spaces/models/bazaar';
-import { useAppInstaller } from './store';
-import { useServices } from 'renderer/logic/store';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { rgba } from 'polished';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
-import { toJS } from 'mobx';
+import { Button, NoScrollBar, Text } from 'renderer/components';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { useServices } from 'renderer/logic/store';
+import { isValidPatp } from 'urbit-ob';
+
+import { AppRow } from './AppRow';
+import { ProviderRow } from './ProviderRow';
+import { useAppInstaller } from './store';
 
 const SearchModesPresenter = () => {
   const { bazaar, theme } = useServices();

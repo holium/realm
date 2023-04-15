@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
+import { Button, Flex, Spinner, Text } from '@holium/design-system/general';
 import styled from 'styled-components';
-import { Button, Text, Flex, Spinner } from '@holium/design-system/general';
 
 const ButtonText = styled(Text.Body)`
   font-size: 16px;

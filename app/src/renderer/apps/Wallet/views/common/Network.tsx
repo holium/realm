@@ -1,9 +1,10 @@
-import { darken } from 'polished';
 import { observer } from 'mobx-react';
+import { ProtocolType } from 'os/services/tray/wallet-lib/wallet.model';
+import { darken } from 'polished';
 import { Box, Flex, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
+
 import { getBaseTheme } from '../../lib/helpers';
-import { ProtocolType } from 'os/services/tray/wallet-lib/wallet.model';
 
 interface WalletNetworkProps {
   network: ProtocolType;

@@ -1,4 +1,5 @@
 import { Conduit } from '@holium/conduit';
+
 import {
   ProtocolType,
   WalletStoreType,

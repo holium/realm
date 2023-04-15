@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
+import { Flex, Spinner } from '@holium/design-system';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { Flex, Spinner } from '@holium/design-system';
-import { darken } from 'polished';
 import { observer } from 'mobx-react';
-import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { useServices } from 'renderer/logic/store';
-import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { darken } from 'polished';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { useServices } from 'renderer/logic/store';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+
 import { StripePaymentView } from './StripePaymentView';
 
 export interface StripePaymentProps extends BaseDialogProps {

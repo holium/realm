@@ -1,5 +1,3 @@
-import { Box, Position } from '@holium/design-system';
-import { AnimatePresence } from 'framer-motion';
 import {
   createContext,
   ReactNode,
@@ -7,8 +5,12 @@ import {
   useContext,
   useState,
 } from 'react';
+import { Box, Position } from '@holium/design-system';
+import { AnimatePresence } from 'framer-motion';
 import { useServices } from 'renderer/logic/store';
+
 import { Menu } from '../Menu';
+
 import { PassportCard } from './PassportCard';
 
 type PassportMenuOptions = {

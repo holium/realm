@@ -1,7 +1,7 @@
+import { Avatar, BarButton, Flex, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import styled from 'styled-components';
 import { useServices } from 'renderer/logic/store';
-import { Flex, Text, Avatar, BarButton } from '@holium/design-system';
+import styled from 'styled-components';
 
 type EmptyPictureProps = {
   color?: string;

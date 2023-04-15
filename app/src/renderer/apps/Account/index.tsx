@@ -1,13 +1,14 @@
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
-import { Button, Avatar, Flex, Icon, Text } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { nativeApps } from '../nativeApps';
+import { Avatar, Button, Flex, Icon, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { useTrayApps } from '../store';
-import { AuthActions } from 'renderer/logic/actions/auth';
-import { trackEvent } from 'renderer/logic/lib/track';
 import { AppType } from 'os/services/spaces/models/bazaar';
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
+import { AuthActions } from 'renderer/logic/actions/auth';
+import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { trackEvent } from 'renderer/logic/lib/track';
+import { useServices } from 'renderer/logic/store';
+
+import { nativeApps } from '../nativeApps';
+import { useTrayApps } from '../store';
 
 const AccountTrayAppPresenter = () => {
   const { ship } = useServices();

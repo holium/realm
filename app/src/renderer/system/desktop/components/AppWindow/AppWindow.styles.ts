@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { darken } from 'polished';
 import styled from 'styled-components';
+
 import { ThemeType } from '../../../../theme';
 
 type AppWindowStyleProps = {

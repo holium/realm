@@ -1,4 +1,5 @@
 import { EventEmitter } from 'stream';
+
 import { Realm } from '../index';
 
 /**

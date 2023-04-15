@@ -40,10 +40,11 @@
 
 // import { Conduit } from '@holium/conduit';
 
-import { decToUd, unixToDa } from '@urbit/api';
 import { Conduit } from '@holium/conduit';
-import { NotificationStoreType } from '../services/ship/models/notifications';
+import { decToUd, unixToDa } from '@urbit/api';
+
 import { CourierStoreType } from '../services/ship/models/courier';
+import { NotificationStoreType } from '../services/ship/models/notifications';
 
 export const NotificationApi: any = {
   allStats: async (conduit: Conduit, notifications: NotificationStoreType) => {

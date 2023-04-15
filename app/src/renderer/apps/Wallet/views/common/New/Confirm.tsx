@@ -1,10 +1,11 @@
-import { useState, Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Button, Flex, Text } from 'renderer/components';
 import { darken, transparentize } from 'polished';
+import { Button, Flex, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { WordPicker } from './WordPicker';
+
 import { NewWalletScreen } from './index';
+import { WordPicker } from './WordPicker';
 
 interface ConfirmProps {
   seedPhrase: string;

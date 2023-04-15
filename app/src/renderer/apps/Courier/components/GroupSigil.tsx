@@ -1,7 +1,7 @@
 import { FC } from 'react';
-import { Flex } from 'renderer/components';
-import { Patp } from 'os/types';
 import { Avatar } from '@holium/design-system';
+import { Patp } from 'os/types';
+import { Flex } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 
 interface GroupSigilProps {

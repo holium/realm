@@ -1,5 +1,6 @@
-import { Flex, Text, Icons } from 'renderer/components';
+import { Flex, Icons, Text } from 'renderer/components';
 import { WalletActions } from 'renderer/logic/actions/wallet';
+
 import { PasscodeInput } from '../../components/PasscodeInput';
 
 export const Locked = () => {

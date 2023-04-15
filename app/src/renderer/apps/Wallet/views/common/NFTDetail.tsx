@@ -1,7 +1,8 @@
 import { EthWalletType } from 'os/services/tray/wallet-lib/wallet.model';
 import { useTrayApps } from 'renderer/apps/store';
-import { Flex, Text, Anchor, Icons } from 'renderer/components';
+import { Anchor, Flex, Icons, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
+
 import { getBaseTheme } from '../../lib/helpers';
 
 export const NFTDetail = () => {

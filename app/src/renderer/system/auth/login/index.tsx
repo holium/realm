@@ -1,32 +1,33 @@
-import { useRef, useEffect, useState } from 'react';
-import { Fill, Bottom, Centered } from 'react-spaces';
-import { observer } from 'mobx-react';
-import { AnimatePresence } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { Bottom, Centered, Fill } from 'react-spaces';
+import { ConduitState } from '@holium/conduit/src/types';
 import {
   Avatar,
-  Flex,
   Box,
+  Flex,
   MenuItem,
   Portal,
   Spinner,
 } from '@holium/design-system';
+import { AnimatePresence } from 'framer-motion';
+import { observer } from 'mobx-react';
 import {
-  Text,
-  Input,
+  FormControl,
   IconButton,
   Icons,
+  Input,
+  Menu,
+  Text,
   TextButton,
   useMenu,
-  Menu,
-  FormControl,
 } from 'renderer/components';
-import { ShipSelector } from './ShipSelector';
-import { useServices } from 'renderer/logic/store';
 import { AuthActions } from 'renderer/logic/actions/auth';
 import { OSActions } from 'renderer/logic/actions/os';
-import { ConduitState } from '@holium/conduit/src/types';
-import { trackEvent } from 'renderer/logic/lib/track';
 import { ShellActions } from 'renderer/logic/actions/shell';
+import { trackEvent } from 'renderer/logic/lib/track';
+import { useServices } from 'renderer/logic/store';
+
+import { ShipSelector } from './ShipSelector';
 
 interface LoginProps {
   addShip: () => void;

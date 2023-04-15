@@ -1,14 +1,16 @@
 import { FC, useMemo } from 'react';
-import { observer } from 'mobx-react';
-import styled from 'styled-components';
+import { Avatar, Row, WindowedList } from '@holium/design-system';
 import { motion } from 'framer-motion';
-import { searchPatpOrNickname } from './helpers';
-import { Flex, Text, Box, IconButton, Icons } from '../';
+import { observer } from 'mobx-react';
 import { ContactModelType } from 'os/services/ship/models/friends';
 import { darken, lighten } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { ThemeType } from 'renderer/theme';
-import { Row, Avatar, WindowedList } from '@holium/design-system';
+import styled from 'styled-components';
+
+import { Box, Flex, IconButton, Icons, Text } from '../';
+
+import { searchPatpOrNickname } from './helpers';
 
 const resultHeight = 50;
 

@@ -1,6 +1,6 @@
 import { FC } from 'react';
-import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import styled from 'styled-components';
 
 const hexRegex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 export const isValidHexColor = (hex: string) => {

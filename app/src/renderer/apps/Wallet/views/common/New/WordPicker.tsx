@@ -1,9 +1,9 @@
 import { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Box } from 'renderer/components';
 import { transparentize } from 'polished';
-import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+import { Box, Flex, Text } from 'renderer/components';
+import { useServices } from 'renderer/logic/store';
 
 interface WordPickerProps {
   seedPhrase: string;

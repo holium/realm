@@ -1,14 +1,15 @@
 import { FC } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Button } from 'renderer/components';
-import { useTrayApps } from 'renderer/apps/store';
-import { WalletCard } from './common/WalletCard';
 import {
   NetworkStoreType,
   NetworkType,
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
+import { useTrayApps } from 'renderer/apps/store';
+import { Button, Flex, Text } from 'renderer/components';
 import { WalletActions } from 'renderer/logic/actions/wallet';
+
+import { WalletCard } from './common/WalletCard';
 
 export const WalletList = observer(() => {
   const { walletApp } = useTrayApps();

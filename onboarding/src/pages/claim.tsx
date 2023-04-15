@@ -1,9 +1,11 @@
-import { GetServerSideProps } from 'next';
+import { useEffect } from 'react';
 import { ClaimTokenDialog } from '@holium/shared';
+import { GetServerSideProps } from 'next';
+
 import { Page } from 'components/Page';
+
 import { api } from '../util/api';
 import { useNavigation } from '../util/useNavigation';
-import { useEffect } from 'react';
 
 type Props = {
   token: string;

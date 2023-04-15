@@ -1,5 +1,5 @@
-import { rgba } from 'polished';
 import { MouseEventHandler } from 'react';
+import { rgba } from 'polished';
 import { IconButton, Icons, IconTypes } from 'renderer/components';
 
 interface WindowIconProps {

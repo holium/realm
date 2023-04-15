@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { Reorder } from 'framer-motion';
 import {
   AppType,
@@ -10,10 +10,10 @@ import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
 import { getAppTileFlags } from 'renderer/logic/lib/app';
 import {
-  resumeSuspendLabel,
+  handleInstallation,
   handleResumeSuspend,
   installLabel,
-  handleInstallation,
+  resumeSuspendLabel,
 } from 'renderer/system/desktop/components/Home/AppInstall/helpers';
 
 type Props = {

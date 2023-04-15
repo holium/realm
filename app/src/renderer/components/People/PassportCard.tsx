@@ -1,11 +1,13 @@
-import { observer } from 'mobx-react';
-import { rgba, darken } from 'polished';
-import { Flex, Box, Text, Icons } from '../';
-import { useTrayApps } from 'renderer/apps/store';
-import { PassportButton } from './PassportButton';
-import { WalletActions } from 'renderer/logic/actions/wallet';
-import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
 import { Avatar } from '@holium/design-system';
+import { observer } from 'mobx-react';
+import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
+import { darken, rgba } from 'polished';
+import { useTrayApps } from 'renderer/apps/store';
+import { WalletActions } from 'renderer/logic/actions/wallet';
+
+import { Box, Flex, Icons, Text } from '../';
+
+import { PassportButton } from './PassportButton';
 
 interface IPassport {
   patp: string;

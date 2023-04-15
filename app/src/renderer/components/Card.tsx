@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { BorderProps, ShadowProps } from 'styled-system';
+
 import { ThemeType } from '../theme';
 
 import { BoxProps } from './Box';

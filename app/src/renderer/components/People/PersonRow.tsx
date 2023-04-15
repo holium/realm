@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'react';
-import { clan } from 'urbit-ob';
-import { Text } from '../';
-import { Row } from 'renderer/components/NewRow';
+import { Avatar, Box, Flex, MenuItemProps } from '@holium/design-system';
 import { useContextMenu } from 'renderer/components/ContextMenu';
+import { Row } from 'renderer/components/NewRow';
+import { clan } from 'urbit-ob';
+
 import { ThemeType } from '../../logic/theme';
+import { Text } from '../';
+
 import { usePassportMenu } from './usePassportMenu';
-import { Avatar, Flex, Box, MenuItemProps } from '@holium/design-system';
 
 interface IPersonRow {
   listId: string;

@@ -1,17 +1,19 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { Button, Flex, Icon, Spinner, Text } from '@holium/design-system';
+import { observer } from 'mobx-react';
+import { darken, lighten } from 'polished';
 import { Input } from 'renderer/components';
-import { Text, Flex, Button, Icon, Spinner } from '@holium/design-system';
+import { ShellActions } from 'renderer/logic/actions/shell';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { useServices } from 'renderer/logic/store';
+import { isValidPatp } from 'urbit-ob';
+
+import { useTrayApps } from '../store';
+import { getBaseTheme } from '../Wallet/lib/helpers';
+
+import { FeaturedList } from './FeaturedList';
 import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';
-import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { lighten, darken } from 'polished';
-import { isValidPatp } from 'urbit-ob';
-import { getBaseTheme } from '../Wallet/lib/helpers';
-import { useTrayApps } from '../store';
-import { FeaturedList } from './FeaturedList';
 
 const bottomHeight = 54;
 

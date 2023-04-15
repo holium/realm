@@ -1,9 +1,21 @@
 import { FC, useMemo } from 'react';
+import {
+  BitcoinWalletType,
+  ERC20Type,
+  EthWalletType,
+  NetworkType,
+  ProtocolType,
+} from 'os/services/tray/wallet-lib/wallet.model';
 import { darken, lighten, rgba } from 'polished';
-import { Text, Flex } from 'renderer/components';
-import { ThemeType } from 'renderer/theme';
-import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from 'renderer/apps/store';
+import { Flex, Text } from 'renderer/components';
+import { useServices } from 'renderer/logic/store';
+import { ThemeType } from 'renderer/theme';
+
+import {
+  WalletCardStyle,
+  walletCardStyleTransition,
+} from '../../components/WalletCardWrapper';
 import {
   formatEthAmount,
   formatZigAmount,
@@ -11,17 +23,6 @@ import {
   getMockCoinIcon,
   getTransactions,
 } from '../../lib/helpers';
-import {
-  EthWalletType,
-  BitcoinWalletType,
-  NetworkType,
-  ProtocolType,
-  ERC20Type,
-} from 'os/services/tray/wallet-lib/wallet.model';
-import {
-  WalletCardStyle,
-  walletCardStyleTransition,
-} from '../../components/WalletCardWrapper';
 
 interface WalletCardProps {
   // wallet: EthWalletType | BitcoinWalletType;

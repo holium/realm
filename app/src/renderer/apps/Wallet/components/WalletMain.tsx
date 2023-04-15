@@ -1,7 +1,8 @@
 import { FC } from 'react';
-
 import { ThemeModelType } from 'os/services/theme.model';
-import { Grid, Flex, Text } from '../../../components';
+
+import { Flex, Grid, Text } from '../../../components';
+
 import { CircleButton } from './CircleButton';
 
 interface WalletMainProps {

@@ -1,13 +1,14 @@
 import { FC, useEffect, useState } from 'react';
-import styled from 'styled-components';
 // import { toJS } from 'mobx';
 import { motion } from 'framer-motion';
-import { Text, Flex, Skeleton } from 'renderer/components';
 import { observer } from 'mobx-react';
+import { Flex, Skeleton, Text } from 'renderer/components';
+import { ShipActions } from 'renderer/logic/actions/ship';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+import styled from 'styled-components';
+
 import { SelectRow } from '../components/SelectionRow';
-import { ShipActions } from 'renderer/logic/actions/ship';
 
 export const Wrapper = styled(motion.div)`
   position: absolute;

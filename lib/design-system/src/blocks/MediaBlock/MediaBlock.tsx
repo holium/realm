@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
-import styled from 'styled-components';
 import ReactPlayer from 'react-player';
+import styled from 'styled-components';
+
 import { Flex, Icon, Text } from '../../../general';
 import { isSpotifyLink } from '../../util/links';
-import { BlockProps, Block } from '../Block/Block';
+import { Block, BlockProps } from '../Block/Block';
 
 type MediaBlockProps = {
   url: string;

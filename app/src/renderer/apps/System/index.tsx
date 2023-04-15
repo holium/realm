@@ -1,13 +1,14 @@
 import { useState } from 'react';
+import { Avatar, RadioList } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { Flex, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
-import { ThemePanel } from './components/Theme';
-import { SystemPanel } from './components/System';
+
 import { AboutPanel } from './components/About';
-import { HelpPanel } from './components/Help';
 import { AccountPanel } from './components/Account';
-import { Avatar, RadioList } from '@holium/design-system';
+import { HelpPanel } from './components/Help';
+import { SystemPanel } from './components/System';
+import { ThemePanel } from './components/Theme';
 
 type SystemPanelType =
   | 'system'

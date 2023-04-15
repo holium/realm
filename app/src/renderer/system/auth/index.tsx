@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex } from 'renderer/components';
-import { Login } from './login';
-import { Onboarding } from 'renderer/system/onboarding/Onboarding';
 import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 import { useServices } from 'renderer/logic/store';
+import { Onboarding } from 'renderer/system/onboarding/Onboarding';
+
+import { Login } from './login';
 import { Splash } from './Splash';
 
 interface LoginProps {

@@ -1,8 +1,8 @@
 import { FC, useMemo } from 'react';
+import { darken, lighten, rgba } from 'polished';
+import { Flex, IconButton, Icons, Text, TextButton } from 'renderer/components';
 import styled from 'styled-components';
-import { rgba, lighten, darken } from 'polished';
 
-import { Flex, Text, TextButton, IconButton, Icons } from 'renderer/components';
 import { Row } from '../NewRow';
 
 interface InnerNotificationProps {

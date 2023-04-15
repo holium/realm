@@ -1,6 +1,8 @@
 import { Flex } from '@holium/design-system/general';
-import { ProductCard } from './ProductCard';
+
 import { ThirdEarthProduct } from '../../types/index';
+
+import { ProductCard } from './ProductCard';
 
 type Props = {
   products: ThirdEarthProduct[];

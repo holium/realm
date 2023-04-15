@@ -1,29 +1,30 @@
+import { Conduit, ConduitState } from '@holium/conduit';
 import {
+  app,
   BrowserWindow,
+  dialog,
   ipcMain,
   ipcRenderer,
-  WebContents,
-  dialog,
   session,
+  WebContents,
   WebPreferences,
-  app,
 } from 'electron';
-import { EventEmitter } from 'stream';
 import Store from 'electron-store';
-import { Conduit, ConduitState } from '@holium/conduit';
-import { AuthService } from './services/identity/auth.service';
-import { ShipService } from './services/ship/ship.service';
-import { SpacesService } from './services/spaces/spaces.service';
-import { DesktopService } from './services/shell/desktop.service';
-import { ShellService } from './services/shell/shell.service';
-import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
+import { EventEmitter } from 'stream';
+
 import { HoliumAPI } from './api/holium';
 import { PasswordStore } from './lib/passwordStore';
-import { ThemeModelType } from './services/theme.model';
 import { getCookie } from './lib/shipHelpers';
 import { ChatService } from './services/chat/chat.service';
+import { AuthService } from './services/identity/auth.service';
 import { NotificationService } from './services/notification/notification.service';
+import { OnboardingService } from './services/onboarding/onboarding.service';
+import { DesktopService } from './services/shell/desktop.service';
+import { ShellService } from './services/shell/shell.service';
+import { ShipService } from './services/ship/ship.service';
+import { SpacesService } from './services/spaces/spaces.service';
+import { ThemeModelType } from './services/theme.model';
 
 export interface ISession {
   ship: string;

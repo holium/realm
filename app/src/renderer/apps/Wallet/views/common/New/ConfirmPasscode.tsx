@@ -1,8 +1,10 @@
-import { FC, Dispatch, SetStateAction } from 'react';
+import { Dispatch, FC, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text } from 'renderer/components';
-import { NewWalletScreen } from './index';
+
 import { PasscodeInput } from '../../../components/PasscodeInput';
+
+import { NewWalletScreen } from './index';
 
 interface PasscodeProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;

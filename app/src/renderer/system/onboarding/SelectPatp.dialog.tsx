@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import styled, { css } from 'styled-components';
-import { rgba } from 'polished';
-import { Grid, UrbitSVG } from 'renderer/components';
-import { observer } from 'mobx-react';
-import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-import { HostingPlanet } from 'os/api/holium';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
 import {
   Avatar,
-  Button,
   Box,
+  Button,
   Flex,
-  Text,
   Spinner,
+  Text,
 } from '@holium/design-system';
+import { observer } from 'mobx-react';
+import { HostingPlanet } from 'os/api/holium';
+import { rgba } from 'polished';
+import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+import { Grid, UrbitSVG } from 'renderer/components';
+import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { useServices } from 'renderer/logic/store';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+import styled, { css } from 'styled-components';
 
 interface AvailablePlanetProps
   extends React.HtmlHTMLAttributes<HTMLDivElement> {

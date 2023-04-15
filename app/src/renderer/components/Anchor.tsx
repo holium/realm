@@ -1,8 +1,9 @@
-import styled, { css } from 'styled-components';
-import { darken } from 'polished';
 import { motion } from 'framer-motion';
-import { typographyFunctions } from './typography-functions';
+import { darken } from 'polished';
+import styled, { css } from 'styled-components';
+
 import { TextProps, textVariants } from './Text';
+import { typographyFunctions } from './typography-functions';
 
 export const Anchor = styled(motion.a)<TextProps>`
   ${textVariants}

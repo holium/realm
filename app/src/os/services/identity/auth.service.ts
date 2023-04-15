@@ -1,21 +1,22 @@
-import fs from 'node:fs';
+import bcrypt from 'bcryptjs';
 import { ipcMain, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import {
+  castToSnapshot,
+  getSnapshot,
   onPatch,
   onSnapshot,
-  getSnapshot,
-  castToSnapshot,
 } from 'mobx-state-tree';
-import bcrypt from 'bcryptjs';
+import fs from 'node:fs';
+import { ThemeSnapshotType } from 'renderer/logic/theme';
 
 import { Realm } from '../../index';
-import { BaseService } from '../base.service';
-import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
-import { getCookie } from '../../lib/shipHelpers';
 import { EncryptedStore } from '../../lib/encryptedStore';
-import { ThemeSnapshotType } from 'renderer/logic/theme';
+import { getCookie } from '../../lib/shipHelpers';
+import { BaseService } from '../base.service';
 import { defaultTheme } from '../theme.model';
+
+import { AuthShip, AuthShipType, AuthStore, AuthStoreType } from './auth.model';
 
 export type ShipCredentials = {
   // needed to refresh cookie when stale (403)

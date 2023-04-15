@@ -1,5 +1,6 @@
-import { NewBazaarStoreType } from '../services/spaces/models/bazaar';
 import { Conduit } from '@holium/conduit';
+
+import { NewBazaarStoreType } from '../services/spaces/models/bazaar';
 import { Patp } from '../types';
 
 export interface PinPoke {

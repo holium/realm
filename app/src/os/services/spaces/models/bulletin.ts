@@ -1,4 +1,5 @@
-import { types, Instance, applySnapshot } from 'mobx-state-tree';
+import { applySnapshot, Instance, types } from 'mobx-state-tree';
+
 import { SubscriptionModel } from '../../common.model';
 
 export const SpaceListingModel = types.model('SpaceListingModel', {

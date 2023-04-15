@@ -1,16 +1,16 @@
 import { ReactNode } from 'react';
 import styled, { css, CSSProperties } from 'styled-components';
 import {
-  compose,
-  space,
-  layout,
-  flexbox,
   border,
-  position,
-  color,
   BorderProps,
-  OpacityProps,
+  color,
+  compose,
+  flexbox,
+  layout,
   opacity,
+  OpacityProps,
+  position,
+  space,
 } from 'styled-system';
 
 export type SigilStyleProps = BorderProps &

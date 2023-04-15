@@ -1,16 +1,18 @@
-import { useRef, useEffect, useMemo } from 'react';
-import { observer } from 'mobx-react';
+import { useEffect, useMemo, useRef } from 'react';
 import BeatLoader from 'react-spinners/BeatLoader';
-import styled from 'styled-components';
-import { useServices } from 'renderer/logic/store';
+import { Avatar, Flex, FlexProps, Icon, Text } from '@holium/design-system';
 import { PeerConnectionState, RealmProtocol } from '@holium/realm-room';
+import { observer } from 'mobx-react';
 import { darken } from 'polished';
-import { useRooms } from '../useRooms';
 import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
-import { Flex, FlexProps, Text, Avatar, Icon } from '@holium/design-system';
+import { useServices } from 'renderer/logic/store';
+import styled from 'styled-components';
+
+import { useRooms } from '../useRooms';
+
 import { AudioWave } from './AudioWave';
 
 interface ISpeaker {

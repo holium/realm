@@ -1,5 +1,6 @@
 import { darken } from 'polished';
 import { createGlobalStyle, css } from 'styled-components';
+
 import { genCSSVariables, ThemeType } from './logic/theme';
 import { ThemeType as OldTheme } from './theme';
 

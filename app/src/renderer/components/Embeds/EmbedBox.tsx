@@ -1,7 +1,8 @@
-import styled, { css } from 'styled-components';
 import { darken } from 'polished';
-import { Flex } from '..';
 import { ThemeType } from 'renderer/theme';
+import styled, { css } from 'styled-components';
+
+import { Flex } from '..';
 
 interface IEmbedBox {
   theme: ThemeType;

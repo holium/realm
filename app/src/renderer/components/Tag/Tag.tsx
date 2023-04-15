@@ -1,5 +1,6 @@
-import { Flex, Icons, IconButton, IconTypes } from '../';
-import { TagStyle, TagIcon } from './Tag.styles';
+import { Flex, IconButton, Icons, IconTypes } from '../';
+
+import { TagIcon, TagStyle } from './Tag.styles';
 
 export type IntentTypes = 'info' | 'success' | 'caution' | 'alert';
 

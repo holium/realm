@@ -1,7 +1,7 @@
-import { useRouter } from 'next/router';
 import { useCallback, useMemo } from 'react';
 import { capitalizeFirstLetter } from '@holium/design-system/util';
 import { SidebarSection } from '@holium/shared';
+import { useRouter } from 'next/router';
 
 type AccountPage =
   | '/account'

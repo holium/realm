@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react';
-import { Grid, Text, Flex, Button, UrbitSVG } from 'renderer/components';
-import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { useServices } from 'renderer/logic/store';
 import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+import { Button, Flex, Grid, Text, UrbitSVG } from 'renderer/components';
+import { useServices } from 'renderer/logic/store';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 
 const HaveUrbitDialogPresenter = (props: BaseDialogProps) => {
   const { theme } = useServices();

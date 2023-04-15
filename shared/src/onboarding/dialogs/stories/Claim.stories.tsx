@@ -1,8 +1,10 @@
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { CreateAccountDialog } from '../CreateAccountDialog';
-import { OnboardingDialogWrapper } from './helpers';
-import { ClaimTokenDialog } from '../ClaimTokenDialog';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+
 import { AccountDownloadRealmDialog } from '../AccountDownloadRealmDialog';
+import { ClaimTokenDialog } from '../ClaimTokenDialog';
+import { CreateAccountDialog } from '../CreateAccountDialog';
+
+import { OnboardingDialogWrapper } from './helpers';
 
 export default {
   component: CreateAccountDialog,

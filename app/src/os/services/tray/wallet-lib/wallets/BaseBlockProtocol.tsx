@@ -1,5 +1,6 @@
-import { BaseProtocol } from './BaseProtocol';
 import { Asset } from '../wallet.model';
+
+import { BaseProtocol } from './BaseProtocol';
 
 /**
  * BaseProtocol is an abstract class that defines the interface for chain communication.

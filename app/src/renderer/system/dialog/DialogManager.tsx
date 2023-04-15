@@ -1,14 +1,15 @@
-import { useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
-import { observer } from 'mobx-react';
-import { motion } from 'framer-motion';
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useServices } from 'renderer/logic/store';
-import { AppWindow } from '../desktop/components/AppWindow/AppWindow';
-import { getCenteredPosition } from 'os/services/shell/lib/window-manager';
-import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
+import { motion } from 'framer-motion';
+import { observer } from 'mobx-react';
 import { OnboardingStep } from 'os/services/onboarding/onboarding.model';
-import { ShellActions } from 'renderer/logic/actions/shell';
+import { getCenteredPosition } from 'os/services/shell/lib/window-manager';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { ShellActions } from 'renderer/logic/actions/shell';
+import { useServices } from 'renderer/logic/store';
+import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
+
+import { AppWindow } from '../desktop/components/AppWindow/AppWindow';
 
 interface DialogManagerProps {
   dialogId?: string;

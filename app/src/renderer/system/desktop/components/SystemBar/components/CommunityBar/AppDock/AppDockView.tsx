@@ -1,13 +1,14 @@
 import { useCallback, useState } from 'react';
+import { Reorder } from 'framer-motion';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { lighten, rgba } from 'polished';
-import { Reorder } from 'framer-motion';
-import { Flex, Divider } from 'renderer/components';
 import { AppType } from 'os/services/spaces/models/bazaar';
-import { useServices } from 'renderer/logic/store';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { lighten, rgba } from 'polished';
+import { Divider, Flex } from 'renderer/components';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { useServices } from 'renderer/logic/store';
+
 import { PinnedDockApp } from './PinnedDockApp';
 import { UnpinnedDockApp } from './UnpinnedDockApp';
 

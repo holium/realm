@@ -1,11 +1,12 @@
-import { observer } from 'mobx-react';
-import { ChatModelType } from '@holium/realm-room';
-import { lighten, darken } from 'polished';
 import { useEffect, useState } from 'react';
-import { Bubble } from './RoomBubble';
 import { Flex, Tooltip } from '@holium/design-system';
+import { ChatModelType } from '@holium/realm-room';
+import { observer } from 'mobx-react';
+import { darken, lighten } from 'polished';
 import { Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
+
+import { Bubble } from './RoomBubble';
 
 interface RoomChatMessageProps {
   chat: ChatModelType;

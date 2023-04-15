@@ -1,4 +1,5 @@
 import { Conduit } from '@holium/conduit';
+
 import { cleanNounColor } from '../lib/color';
 
 export const ContactApi = {

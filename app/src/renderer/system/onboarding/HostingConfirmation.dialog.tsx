@@ -1,10 +1,10 @@
-import { useEffect, useState, useRef } from 'react';
-import { Box, Grid, Text, Flex, Button } from 'renderer/components';
-import { observer } from 'mobx-react';
-import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { useServices } from 'renderer/logic/store';
-import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { useEffect, useRef, useState } from 'react';
 import { Avatar } from '@holium/design-system';
+import { observer } from 'mobx-react';
+import { Box, Button, Flex, Grid, Text } from 'renderer/components';
+import { OnboardingActions } from 'renderer/logic/actions/onboarding';
+import { useServices } from 'renderer/logic/store';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 
 function useInterval(callback: () => void, delay: number) {
   const savedCallback = useRef<() => void>();

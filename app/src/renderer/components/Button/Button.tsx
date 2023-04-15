@@ -1,29 +1,30 @@
 /* eslint-disable react/prop-types */
 import { forwardRef, PropsWithChildren, Ref } from 'react';
+import { Flex, Spinner } from '@holium/design-system';
 import { darken } from 'polished';
 import styled, { StyledComponentProps } from 'styled-components';
 import {
+  background,
+  BackgroundProps,
   border,
+  BorderProps,
+  color,
+  ColorProps,
   compose,
   flexbox,
-  layout,
-  position,
-  background,
-  space,
-  color,
-  variant,
-  fontWeight,
-  BorderProps,
   FlexboxProps,
+  fontWeight,
   FontWeightProps,
+  layout,
   LayoutProps,
+  position,
   PositionProps,
-  BackgroundProps,
+  space,
   SpaceProps,
-  ColorProps,
+  variant,
 } from 'styled-system';
-import { IconButton, BoxProps } from '..';
-import { Spinner, Flex } from '@holium/design-system';
+
+import { BoxProps, IconButton } from '..';
 
 export type StyledButtonProps = SpaceProps &
   LayoutProps &

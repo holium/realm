@@ -1,9 +1,10 @@
-import { FC, useState, useEffect } from 'react';
-import { Text, Flex } from 'renderer/components';
+import { FC, useEffect, useState } from 'react';
 // import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
+import { Flex, Text } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+
 import { SelectRow } from '../components/SelectionRow';
 
 export const SelectArchetype: FC<BaseDialogProps> = observer(

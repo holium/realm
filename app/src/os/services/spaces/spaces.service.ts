@@ -1,30 +1,32 @@
-import { ThemeModelType } from '../theme.model';
 import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
-import { toJS } from 'mobx';
 import fs from 'fs';
+import { toJS } from 'mobx';
+import { getSnapshot, onPatch } from 'mobx-state-tree';
 import path from 'path';
-import { onPatch, getSnapshot } from 'mobx-state-tree';
-import { Realm } from '../../index';
-import { BaseService } from '../base.service';
-import { SpacesStore, SpacesStoreType } from './models/spaces';
+
+import { BazaarApi, BazaarSubscriptions } from '../../api/bazaar';
+import { BeaconApi, BeaconInboxType } from '../../api/beacon';
+import { BulletinApi } from '../../api/bulletin';
 import { SpacesApi } from '../../api/spaces';
-import { humanFriendlySpaceNameSlug } from '../../lib/text';
+import { Realm } from '../../index';
 import { snakeify } from '../../lib/obj';
+import { formPathObj } from '../../lib/path';
+import { humanFriendlySpaceNameSlug } from '../../lib/text';
 import { MemberRole, Patp, SpacePath } from '../../types';
-import { VisaModel, VisaModelType } from './models/visas';
-import { MembershipStore, MembershipType } from './models/members';
+import { BaseService } from '../base.service';
 import { DiskStore } from '../base.store';
-import { BazaarSubscriptions, BazaarApi } from '../../api/bazaar';
+import { ThemeModelType } from '../theme.model';
+
 import {
   DevAppType,
   NewBazaarStore,
   NewBazaarStoreType,
 } from './models/bazaar';
-import { BeaconApi, BeaconInboxType } from '../../api/beacon';
-import { formPathObj } from '../../lib/path';
-import { BulletinApi } from '../../api/bulletin';
 import { NotificationStore, NotificationStoreType } from './models/beacon';
 import { BulletinStore, BulletinStoreType } from './models/bulletin';
+import { MembershipStore, MembershipType } from './models/members';
+import { SpacesStore, SpacesStoreType } from './models/spaces';
+import { VisaModel, VisaModelType } from './models/visas';
 
 export const getHost = (path: string) => path.split('/')[1];
 let devApps: Record<string, DevAppType> | null = null;

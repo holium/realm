@@ -1,35 +1,36 @@
-import { useState, ChangeEvent } from 'react';
-import { observer } from 'mobx-react';
-import { Anchor } from 'renderer/components';
+import { ChangeEvent, useState } from 'react';
 import {
   Avatar,
-  TextInput,
-  Flex,
-  Text,
   Button,
+  Flex,
   Icon,
   Spinner,
+  Text,
+  TextInput,
 } from '@holium/design-system';
-import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
+import { observer } from 'mobx-react';
 import {
-  shortened,
-  getBaseTheme,
-  formatEthAmount,
-  formatBtcAmount,
-  convertEthAmountToUsd,
-  convertBtcAmountToUsd,
-  getDisplayDate,
-} from '../../lib/helpers';
-import {
-  NetworkType,
-  EthWalletType,
   BitcoinWalletType,
-  TransactionType,
+  EthWalletType,
+  NetworkType,
   ProtocolType,
+  TransactionType,
   WalletStoreType,
 } from 'os/services/tray/wallet-lib/wallet.model';
+import { useTrayApps } from 'renderer/apps/store';
+import { Anchor } from 'renderer/components';
 import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useServices } from 'renderer/logic/store';
+
+import {
+  convertBtcAmountToUsd,
+  convertEthAmountToUsd,
+  formatBtcAmount,
+  formatEthAmount,
+  getBaseTheme,
+  getDisplayDate,
+  shortened,
+} from '../../lib/helpers';
 
 const getTransaction = (walletApp: WalletStoreType): TransactionType | null => {
   const isEthereum = walletApp.navState.network === NetworkType.ETHEREUM;

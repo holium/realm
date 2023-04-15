@@ -1,10 +1,11 @@
 import { Conduit } from '@holium/conduit';
+import { Patp } from '@urbit/api';
+import { toJS } from 'mobx';
+
 import {
   RoomsAppStateType,
   RoomsModelType,
 } from '../services/tray/rooms.model';
-import { Patp } from '@urbit/api';
-import { toJS } from 'mobx';
 
 export const RoomsApi = {
   /**

@@ -1,21 +1,23 @@
 import { FC, useMemo } from 'react';
-import { darken, lighten } from 'polished';
 import { Flex, Spinner } from '@holium/design-system';
-import { Icons, Text, IconButton } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import {
-  shortened,
-  getBaseTheme,
-  formatEthAmount,
-  formatBtcAmount,
-} from '../../../lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
-import {
-  WalletView,
-  TransactionType,
   ProtocolType,
+  TransactionType,
+  WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
+import { darken, lighten } from 'polished';
 import { useTrayApps } from 'renderer/apps/store';
+import { IconButton, Icons, Text } from 'renderer/components';
+import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useServices } from 'renderer/logic/store';
+
+import {
+  formatBtcAmount,
+  formatEthAmount,
+  getBaseTheme,
+  shortened,
+} from '../../../lib/helpers';
+
 import { TxType } from './List';
 
 interface PendingTransactionDisplayProps {

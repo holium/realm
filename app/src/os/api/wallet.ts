@@ -1,9 +1,10 @@
 import { Conduit } from '@holium/conduit';
+
 import {
+  NetworkStoreType,
   ProtocolType,
   UISettingsType,
   WalletStoreType,
-  NetworkStoreType,
 } from '../services/tray/wallet-lib/wallet.model';
 
 export const WalletApi = {

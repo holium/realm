@@ -1,16 +1,16 @@
 import { useMemo, useState } from 'react';
-import { observer } from 'mobx-react';
-import styled from 'styled-components';
+import { Flex, Spinner } from '@holium/design-system';
 import { motion } from 'framer-motion';
+import { createField, createForm } from 'mobx-easy-form';
+import { observer } from 'mobx-react';
+import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { rgba } from 'polished';
 import { FormControl, Input, TextButton } from 'renderer/components';
-import { Flex, Spinner } from '@holium/design-system';
-import * as yup from 'yup';
 import { ShellActions } from 'renderer/logic/actions/shell';
 import { useServices } from 'renderer/logic/store';
-import { createField, createForm } from 'mobx-easy-form';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
+import styled from 'styled-components';
+import * as yup from 'yup';
 
 export const WallpaperDialogConfig: DialogConfig = {
   component: (props: any) => <WallpaperDialog {...props} />,

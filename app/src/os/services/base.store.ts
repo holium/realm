@@ -1,3 +1,4 @@
+import Store from 'electron-store';
 import {
   applySnapshot,
   castToSnapshot,
@@ -7,7 +8,7 @@ import {
   onSnapshot,
   typecheck,
 } from 'mobx-state-tree';
-import Store from 'electron-store';
+
 import { Patp } from '../types';
 
 export class DiskStore {

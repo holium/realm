@@ -1,12 +1,12 @@
-import { calculateAnchorPointById } from './../logic/lib/position';
 import { createContext, useContext } from 'react';
-
+// import { DmApp } from './Messages/store';
+import { Dimensions } from '@holium/design-system';
 import {
   applyPatch,
-  Instance,
-  types,
-  onSnapshot,
   applySnapshot,
+  Instance,
+  onSnapshot,
+  types,
 } from 'mobx-state-tree';
 import { RoomsAppState } from 'os/services/tray/rooms.model';
 import {
@@ -19,8 +19,8 @@ import {
 } from 'os/services/tray/wallet-lib/wallet.model';
 
 import { OSActions } from '../logic/actions/os';
-// import { DmApp } from './Messages/store';
-import { Dimensions } from '@holium/design-system';
+
+import { calculateAnchorPointById } from './../logic/lib/position';
 
 const TrayAppCoords = types.model({
   left: types.number,

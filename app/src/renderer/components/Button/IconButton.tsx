@@ -1,19 +1,20 @@
+import { motion } from 'framer-motion';
+import { darken, rgba } from 'polished';
 import styled, { css } from 'styled-components';
 import {
-  compose,
-  space,
-  layout,
-  size,
   color,
-  SizeProps,
-  typography,
-  SpaceProps,
   ColorProps,
+  compose,
+  layout,
   LayoutProps,
+  size,
+  SizeProps,
+  space,
+  SpaceProps,
+  typography,
   TypographyProps,
 } from 'styled-system';
-import { motion } from 'framer-motion';
-import { rgba, darken } from 'polished';
+
 import type { ThemeType } from '../../theme';
 
 type IProps = {

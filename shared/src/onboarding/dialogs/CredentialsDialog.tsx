@@ -1,12 +1,13 @@
-import styled from 'styled-components';
 import { CopyButton, Flex, Text } from '@holium/design-system/general';
-import { CredentialsIcon } from '../icons/CredentialsIcon';
+import styled from 'styled-components';
+
+import { OnboardDialog } from '../components/OnboardDialog';
 import {
   OnboardDialogDescription,
   OnboardDialogSubTitle,
   OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
-import { OnboardDialog } from '../components/OnboardDialog';
+import { CredentialsIcon } from '../icons/CredentialsIcon';
 
 const InfoCard = styled.div`
   display: flex;

@@ -1,5 +1,6 @@
 import { AppWindowType } from 'os/services/shell/desktop.model';
-import { NativeAppId, getNativeAppWindow } from '../getNativeAppWindow';
+
+import { getNativeAppWindow, NativeAppId } from '../getNativeAppWindow';
 
 type Props = {
   appWindow: AppWindowType;

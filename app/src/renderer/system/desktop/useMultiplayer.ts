@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import debounce from 'lodash/debounce';
+import { Dimensions, useToggle } from '@holium/design-system';
 import {
-  MultiplayerOut,
-  MultiplayerDown,
-  MultiplayerUp,
-  MultiplayerMove,
-  MultiplayerClick,
   MultiplayerChat,
+  MultiplayerClick,
+  MultiplayerDown,
+  MultiplayerMove,
+  MultiplayerOut,
+  MultiplayerUp,
   PresenceBroadcast,
 } from '@holium/realm-presence';
 import {
@@ -15,8 +15,8 @@ import {
   RoomManagerEvent,
   RoomsManager,
 } from '@holium/realm-room';
+import debounce from 'lodash/debounce';
 import { normalizePosition } from 'os/services/shell/lib/window-manager';
-import { Dimensions, useToggle } from '@holium/design-system';
 
 type Props = {
   patp: string | undefined;

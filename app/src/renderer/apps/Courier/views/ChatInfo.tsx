@@ -1,34 +1,35 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Flex,
-  Text,
-  Box,
-  SectionDivider,
-  Row,
   Avatar,
-  MenuItemProps,
-  Toggle,
-  Select,
+  Box,
+  Flex,
   Icon,
-  TextInput,
+  MenuItemProps,
   NoScrollBar,
+  Row,
+  SectionDivider,
+  Select,
+  Text,
+  TextInput,
+  Toggle,
 } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { InlineEdit, ShipSearch, useContextMenu } from 'renderer/components';
-import { isValidPatp } from 'urbit-ob';
 import { createField, createForm } from 'mobx-easy-form';
-import { ChatLogHeader } from '../components/ChatLogHeader';
-import { useChatStore } from '../store';
-import { ChatDBActions } from 'renderer/logic/actions/chat-db';
-import { ChatAvatar } from '../components/ChatAvatar';
-import { FileUploadParams } from 'os/services/ship/models/ship';
-import { useFileUpload } from 'renderer/logic/lib/useFileUpload';
-import { ShipActions } from 'renderer/logic/actions/ship';
-import { IuseStorage } from 'renderer/logic/lib/useStorage';
 import { observer } from 'mobx-react-lite';
-import { InvitePermissionType, PeerModelType } from '../models';
-import { ExpiresValue, millisecondsToExpires } from '../types';
+import { FileUploadParams } from 'os/services/ship/models/ship';
 import { useTrayApps } from 'renderer/apps/store';
+import { InlineEdit, ShipSearch, useContextMenu } from 'renderer/components';
+import { ChatDBActions } from 'renderer/logic/actions/chat-db';
+import { ShipActions } from 'renderer/logic/actions/ship';
+import { useFileUpload } from 'renderer/logic/lib/useFileUpload';
+import { IuseStorage } from 'renderer/logic/lib/useStorage';
+import { useServices } from 'renderer/logic/store';
+import { isValidPatp } from 'urbit-ob';
+
+import { ChatAvatar } from '../components/ChatAvatar';
+import { ChatLogHeader } from '../components/ChatLogHeader';
+import { InvitePermissionType, PeerModelType } from '../models';
+import { useChatStore } from '../store';
+import { ExpiresValue, millisecondsToExpires } from '../types';
 
 export const createPeopleForm = (
   defaults: any = {

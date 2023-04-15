@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useServices } from 'renderer/logic/store';
-import { WebView } from './WebView';
-import { AppWindowType } from 'os/services/shell/desktop.model';
-import { observer } from 'mobx-react';
 import { useToggle } from '@holium/design-system';
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { RoomManagerEvent, RoomsManager } from '@holium/realm-room';
+import { observer } from 'mobx-react';
+import { AppWindowType } from 'os/services/shell/desktop.model';
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
+import { useServices } from 'renderer/logic/store';
 import { genCSSVariables } from 'renderer/logic/theme';
+
+import { WebView } from './WebView';
 
 const connectWebviewToMultiplayer = async (
   ship: string,

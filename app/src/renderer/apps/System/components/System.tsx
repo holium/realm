@@ -1,13 +1,13 @@
-import { useMemo, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { CheckBox, Flex, Spinner } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import styled from 'styled-components';
-import { Text, Card, TextButton } from 'renderer/components';
+import { MediaAccess, MediaAccessStatus } from 'os/types';
 import { lighten } from 'polished';
-import { useServices } from 'renderer/logic/store';
+import { Card, Text, TextButton } from 'renderer/components';
 import { RealmActions } from 'renderer/logic/actions/main';
 import { OSActions } from 'renderer/logic/actions/os';
-import { CheckBox, Flex, Spinner } from '@holium/design-system';
-import { MediaAccess, MediaAccessStatus } from 'os/types';
+import { useServices } from 'renderer/logic/store';
+import styled from 'styled-components';
 
 const colorMap: Record<MediaAccessStatus, string> = {
   granted: '#39a839',

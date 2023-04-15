@@ -1,8 +1,8 @@
-import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { rgba, darken } from 'polished';
-import { compose, space, color, typography } from 'styled-system';
+import { darken, rgba } from 'polished';
 import { ThemeType } from 'renderer/theme';
+import styled, { css } from 'styled-components';
+import { color, compose, space, typography } from 'styled-system';
 
 interface MenuWrapperStyleProps {
   customBg?: string;

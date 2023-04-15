@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { Flex, Spinner, WindowedList } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { Text, TextButton } from 'renderer/components';
 import { Row } from 'renderer/components/NewRow';
-import { useServices } from 'renderer/logic/store';
-import { Flex, Spinner, WindowedList } from '@holium/design-system';
-import { EmptyGroup } from './SpaceRow';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { useServices } from 'renderer/logic/store';
+
+import { EmptyGroup } from './SpaceRow';
 
 export interface Space {
   color?: string;

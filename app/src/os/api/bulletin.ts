@@ -1,4 +1,5 @@
 import { Conduit } from '@holium/conduit';
+
 import { BulletinStoreType } from '../services/spaces/models/bulletin';
 
 export const BulletinApi = {

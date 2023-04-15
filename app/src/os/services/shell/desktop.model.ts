@@ -1,10 +1,12 @@
-import { types, applySnapshot, Instance, SnapshotIn } from 'mobx-state-tree';
 import { Dimensions } from '@holium/design-system';
-import { AppType, Glob } from '../spaces/models/bazaar';
 import { toJS } from 'mobx';
+import { applySnapshot, Instance, SnapshotIn, types } from 'mobx-state-tree';
+
+import { AppType, Glob } from '../spaces/models/bazaar';
+
 import {
-  getMaximizedBounds,
   getInitialWindowBounds,
+  getMaximizedBounds,
   isMaximizedBounds,
 } from './lib/window-manager';
 

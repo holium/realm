@@ -8,8 +8,10 @@ import {
 import { observer } from 'mobx-react';
 import { Flex, Input } from 'renderer/components';
 import { useServices } from 'renderer/logic/store';
+
 import { createUrl } from '../helpers/createUrl';
 import { useBrowser } from '../store';
+
 import { ToolbarLockIcon } from './ToolbarLockIcon';
 import { ToolbarSearchIcon } from './ToolbarSearchIcon';
 

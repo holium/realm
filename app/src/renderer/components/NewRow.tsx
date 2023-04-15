@@ -1,6 +1,7 @@
-import styled, { css } from 'styled-components';
-import { rgba, darken } from 'polished';
 import { motion } from 'framer-motion';
+import { darken, rgba } from 'polished';
+import styled, { css } from 'styled-components';
+
 import { ThemeType } from '../theme';
 
 interface RowProps {

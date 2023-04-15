@@ -1,20 +1,21 @@
 import { FC } from 'react';
-import { rgba, darken, desaturate, lighten } from 'polished';
+import { Flex, Spinner } from '@holium/design-system';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { Flex, Spinner } from '@holium/design-system';
-import { Text, AppTile, Icons, IconButton, Button } from 'renderer/components';
 import {
   AppType,
   InstallStatus,
   UrbitAppType,
 } from 'os/services/spaces/models/bazaar';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { useServices } from 'renderer/logic/store';
+import { darken, desaturate, lighten, rgba } from 'polished';
+import { AppTile, Button, IconButton, Icons, Text } from 'renderer/components';
 import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { handleInstallation } from '../../AppInstall/helpers';
-import { getAppTileFlags } from 'renderer/logic/lib/app';
+import { ShellActions } from 'renderer/logic/actions/shell';
 import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { getAppTileFlags } from 'renderer/logic/lib/app';
+import { useServices } from 'renderer/logic/store';
+
+import { handleInstallation } from '../../AppInstall/helpers';
 
 interface AppPreviewProps {
   app: AppType;

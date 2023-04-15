@@ -1,14 +1,15 @@
 import { useEffect, useMemo } from 'react';
-import { observer } from 'mobx-react';
-import styled from 'styled-components';
 import { AnimatePresence, motion } from 'framer-motion';
+import { observer } from 'mobx-react';
 import { rgba } from 'polished';
-import { useServices } from 'renderer/logic/store';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { SpaceHome } from './Space';
-import { OurHome } from './Ship';
 import { PassportMenuProvider } from 'renderer/components/People/usePassportMenu';
+import { ShellActions } from 'renderer/logic/actions/shell';
+import { useServices } from 'renderer/logic/store';
+import styled from 'styled-components';
+
 import { AppSearchPopover } from './AppInstall/AppSearchPopover';
+import { OurHome } from './Ship';
+import { SpaceHome } from './Space';
 
 const HomeWindow = styled(motion.div)`
   height: 100%;

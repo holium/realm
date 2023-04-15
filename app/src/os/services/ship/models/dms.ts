@@ -1,8 +1,9 @@
 import { createPost } from '@urbit/api';
 import { flow, Instance, types } from 'mobx-state-tree';
-import { LoaderModel } from '../../common.model';
-import { patp2dec, patp } from 'urbit-ob';
+import { patp, patp2dec } from 'urbit-ob';
+
 import { PostType } from '../../../types';
+import { LoaderModel } from '../../common.model';
 
 const MessagePosition = types.enumeration(['right', 'left']);
 

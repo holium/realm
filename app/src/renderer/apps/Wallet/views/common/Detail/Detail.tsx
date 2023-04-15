@@ -1,18 +1,7 @@
 import { useMemo, useState } from 'react';
-import { observer } from 'mobx-react';
-import { Flex, Box, TextButton } from 'renderer/components';
 import { Text } from '@holium/design-system';
-import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
+import { observer } from 'mobx-react';
 import { ThemeModelType } from 'os/services/theme.model';
-import {
-  getBaseTheme,
-  getTransactions,
-  getCoins,
-  getNfts,
-} from '../../../lib/helpers';
-import { DetailHero } from './Hero';
-import { TransactionList } from '../Transaction/List';
 import {
   BitcoinWalletType,
   ERC20Type,
@@ -20,9 +9,22 @@ import {
   NetworkType,
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
-import { CoinList } from './CoinList';
-import { NFTList } from './NFTList';
+import { useTrayApps } from 'renderer/apps/store';
+import { Box, Flex, TextButton } from 'renderer/components';
 import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useServices } from 'renderer/logic/store';
+
+import {
+  getBaseTheme,
+  getCoins,
+  getNfts,
+  getTransactions,
+} from '../../../lib/helpers';
+import { TransactionList } from '../Transaction/List';
+
+import { CoinList } from './CoinList';
+import { DetailHero } from './Hero';
+import { NFTList } from './NFTList';
 
 type DisplayType = 'coins' | 'nfts' | 'transactions';
 
