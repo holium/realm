@@ -10,29 +10,28 @@ import { RoomsManager } from './RoomsManager';
 import { RoomState } from './types';
 
 export {
+  DataPacket_Kind,
+  LocalPeer,
+  PeerConnectionState,
+  ProtocolEvent,
+  RealmProtocol,
+  RemotePeer,
+  RoomManagerEvent,
   RoomsManager,
   RoomState,
   TestProtocol,
-  RealmProtocol,
-  RemotePeer,
-  LocalPeer,
-  PeerConnectionState,
-  RoomManagerEvent,
-  ProtocolEvent,
-  DataPacket_Kind,
 };
 
-export type {
-  Patp,
-  SlipType,
-  ShipConfig,
-  EnterDiff,
-  ExitDiff,
-  DiffType,
-  RoomType,
-  ChatModelType,
-} from './types';
-
-export type { DataPacket } from './helpers/data';
 export type { ProtocolConfig } from './connection/BaseProtocol';
 export type { APIHandlers } from './connection/RealmProtocol';
+export type { DataPacket } from './helpers/data';
+export type {
+  ChatModelType,
+  DiffType,
+  EnterDiff,
+  ExitDiff,
+  Patp,
+  RoomType,
+  ShipConfig,
+  SlipType,
+} from './types';

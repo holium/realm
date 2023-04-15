@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import styled, { css } from 'styled-components';
 
-const Label = styled.label`
+const ToggleLabel = styled.label`
   display: flex;
   align-items: center;
   gap: 10px;
@@ -61,10 +61,10 @@ export const ImageToggle = (props: {
 }) => {
   return (
     // @ts-ignore
-    <Label disabled={props.disabled} onClick={props.onClick}>
+    <ToggleLabel disabled={props.disabled} onClick={props.onClick}>
       {/* @ts-ignore */}
       <Input checked={props.checked} type="checkbox" readOnly />
       <Switch src={props.src} color={props.color} />
-    </Label>
+    </ToggleLabel>
   );
 };

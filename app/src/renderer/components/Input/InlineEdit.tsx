@@ -12,8 +12,10 @@ import {
 } from 'styled-system';
 
 import type { ThemeType } from '../../theme';
+import { Box, BoxProps } from '../Box';
+import { Flex } from '../Flex';
+import { Text } from '../Text';
 import { TypographyFunctionsProps } from '../typography-functions';
-import { Box, BoxProps, Flex, Text } from '../';
 
 const inputTokens = {
   iconSize: 4, // icon size on font-size scale

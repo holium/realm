@@ -1,4 +1,6 @@
-import { Flex, IconButton, Icons, IconTypes } from '../';
+import { IconButton } from '../Button';
+import { Flex } from '../Flex';
+import { Icons, IconTypes } from '../Icons';
 
 import { TagIcon, TagStyle } from './Tag.styles';
 

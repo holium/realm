@@ -24,7 +24,8 @@ import {
   variant,
 } from 'styled-system';
 
-import { BoxProps, IconButton } from '..';
+import { BoxProps } from '../Box';
+import { IconButton } from '../Button/IconButton';
 
 export type StyledButtonProps = SpaceProps &
   LayoutProps &

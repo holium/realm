@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { Flex, Row, Text } from '../../../general';
 
-import { Folder } from '.';
+import { Folder } from './index';
 
 const SidebarList = styled(Flex)`
   gap: 2px;

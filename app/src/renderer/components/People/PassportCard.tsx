@@ -5,7 +5,10 @@ import { darken, rgba } from 'polished';
 import { useTrayApps } from 'renderer/apps/store';
 import { WalletActions } from 'renderer/logic/actions/wallet';
 
-import { Box, Flex, Icons, Text } from '../';
+import { Box } from '../Box';
+import { Flex } from '../Flex';
+import { Icons } from '../Icons';
+import { Text } from '../Text';
 
 import { PassportButton } from './PassportButton';
 

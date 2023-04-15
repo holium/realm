@@ -5,7 +5,8 @@ import { compose, height, HeightProps, space, SpaceProps } from 'styled-system';
 
 import { ThemeType } from '../theme';
 
-// import { Spinner, Flex } from '.';
+// import { Spinner } from '???';
+// import { Flex } from './Flex';
 
 // const defaultButtonStyles = {
 //   position: 'relative',

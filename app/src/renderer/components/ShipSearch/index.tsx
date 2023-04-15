@@ -8,7 +8,11 @@ import { useServices } from 'renderer/logic/store';
 import { ThemeType } from 'renderer/theme';
 import styled from 'styled-components';
 
-import { Box, Flex, IconButton, Icons, Text } from '../';
+import { Box } from '../Box';
+import { IconButton } from '../Button';
+import { Flex } from '../Flex';
+import { Icons } from '../Icons';
+import { Text } from '../Text';
 
 import { searchPatpOrNickname } from './helpers';
 

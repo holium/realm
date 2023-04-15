@@ -3,7 +3,7 @@ import { rgba } from 'polished';
 import { ThemeType } from 'renderer/theme';
 import styled, { CSSProperties } from 'styled-components';
 
-import { Flex } from '..';
+import { Flex } from '../Flex';
 
 interface IMentionStyle {
   theme: ThemeType;

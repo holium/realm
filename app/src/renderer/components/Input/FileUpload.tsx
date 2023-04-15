@@ -2,7 +2,9 @@ import { FC, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { ThemeType } from '../../theme';
-import { Box, Button, Label } from '../';
+import { Box } from '../Box';
+import { Button } from '../Button';
+import { ToggleLabel } from '../Toggle';
 
 interface FileUploadContainerProps {
   theme: ThemeType;
@@ -175,9 +177,9 @@ export const FileUpload: FC<IProps> = ({
       >
         {label && (
           // @ts-ignore
-          <Label mb={1} htmlFor="avatar">
+          <ToggleLabel mb={1} htmlFor="avatar">
             {label}
-          </Label>
+          </ToggleLabel>
         )}
         {/* @ts-ignore */}
         <FileUploadContainer size={width} theme={theme}>

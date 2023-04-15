@@ -5,7 +5,7 @@ import { Row } from 'renderer/components/NewRow';
 import { clan } from 'urbit-ob';
 
 import { ThemeType } from '../../logic/theme';
-import { Text } from '../';
+import { Text } from '../Text';
 
 import { usePassportMenu } from './usePassportMenu';
 
