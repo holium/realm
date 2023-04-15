@@ -20,6 +20,7 @@ import {
 import { PendingTransactionDisplay } from './views/common/Transaction/Pending';
 import { getTransactions } from './lib/helpers';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { useTrayApps } from '../store';
 
 const WalletViews: (network: NetworkType) => { [key: string]: any } = (
   network: NetworkType
@@ -40,6 +41,7 @@ const WalletViews: (network: NetworkType) => { [key: string]: any } = (
 const WalletAppPresenter = (props: any) => {
   const [hidePending, setHidePending] = useState(true);
 
+  const { dimensions } = useTrayApps();
   const { walletStore } = useShipStore();
   let transactions: any = [];
   for (const key of walletStore.currentStore.wallets.keys()) {
@@ -121,6 +123,7 @@ const WalletAppPresenter = (props: any) => {
     <Flex
       onClick={(evt: any) => evt.stopPropagation()}
       position="relative"
+      height={dimensions.height - 24}
       width="100%"
       flexDirection="column"
     >
