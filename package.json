@@ -21,6 +21,7 @@
     "build:conduit": "yarn workspace @holium/conduit build",
     "build:multiplayer": "yarn workspace @holium/realm-presence build",
     "build:room": "yarn workspace @holium/realm-room build",
+    "lint-check": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
     "lint": "eslint . --fix --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
     "start": "yarn workspace @holium/realm start",
     "start:onboard": "yarn workspace @holium/realm start:onboard",
