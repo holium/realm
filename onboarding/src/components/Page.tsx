@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { useToggle } from '@holium/design-system/util';
 import { api } from '../util/api';
 import { useNavigation } from '../util/useNavigation';
+import { AccountDialogSkeleton } from '@holium/shared';
 
 const Main = styled.main`
   width: 100%;
@@ -21,7 +22,7 @@ type Props = {
 };
 
 export const Page = ({ title, isProtected = false, children }: Props) => {
-  const { goToPage, logout } = useNavigation();
+  const { currentAccountSection, goToPage, logout } = useNavigation();
   const authenticated = useToggle(false);
 
   useEffect(() => {
@@ -58,7 +59,15 @@ export const Page = ({ title, isProtected = false, children }: Props) => {
         <link rel="icon" href="/favicon.ico" />
       </NextHead>
       <Main>
-        {isProtected ? (authenticated.isOn ? children : null) : children}
+        {isProtected ? (
+          authenticated.isOn ? (
+            children
+          ) : (
+            <AccountDialogSkeleton currentSection={currentAccountSection} />
+          )
+        ) : (
+          children
+        )}
       </Main>
     </>
   );

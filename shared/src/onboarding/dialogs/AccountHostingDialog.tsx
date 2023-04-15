@@ -46,10 +46,10 @@ const GetNewAccessCodeContainer = styled(Flex)`
 type Props = {
   patps: string[];
   selectedPatp: string;
-  email: string;
-  shipUrl: string;
-  shipCode: string;
-  shipMaintenanceWindow: number;
+  email: string | null;
+  shipUrl: string | undefined;
+  shipCode: string | undefined;
+  shipMaintenanceWindow: number | undefined;
   setSelectedPatp: (patp: string) => void;
   onClickChangeEmail: () => void;
   onClickChangePassword: () => void;
@@ -83,6 +83,7 @@ export const AccountHostingDialog = ({
     selectedPatp={selectedPatp}
     setSelectedPatp={setSelectedPatp}
     currentSection={SidebarSection.Hosting}
+    isLoading={!email || !shipUrl || !shipCode || !shipMaintenanceWindow}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >
@@ -121,7 +122,7 @@ export const AccountHostingDialog = ({
       <AccountDialogTableRow title="URL">
         <AccountDialogDescription flex={1}>{shipUrl}</AccountDialogDescription>
       </AccountDialogTableRow>
-      <ChangeAccessCode shipCode={shipCode} />
+      <ChangeAccessCode shipCode={shipCode as string} />
       <GetNewAccessCodeContainer>
         <ChangeButton type="button" onClick={onClickGetNewAccessCode}>
           Get new access code
@@ -129,7 +130,7 @@ export const AccountHostingDialog = ({
       </GetNewAccessCodeContainer>
 
       <ChangeMaintenanceWindow
-        maintenanceWindow={shipMaintenanceWindow}
+        maintenanceWindow={shipMaintenanceWindow as number}
         onClick={onClickChangeMaintenanceWindow}
       />
     </AccountDialogTable>

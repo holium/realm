@@ -1,5 +1,11 @@
 import { FormEvent, ReactNode } from 'react';
-import { Button, Flex, Icon } from '@holium/design-system/general';
+import {
+  Button,
+  Flex,
+  Icon,
+  Skeleton,
+  Spinner,
+} from '@holium/design-system/general';
 import { HoliumButton } from '@holium/design-system/os';
 import { Select } from '@holium/design-system/inputs';
 import {
@@ -24,9 +30,10 @@ export enum SidebarSection {
 type Props = {
   patps: string[];
   selectedPatp: string;
-  currentSection: SidebarSection;
+  currentSection?: SidebarSection;
   children?: ReactNode;
   customBody?: ReactNode;
+  isLoading?: boolean;
   setSelectedPatp: (patp: string) => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onSubmit?: () => void;
@@ -39,22 +46,24 @@ export const AccountDialog = ({
   currentSection,
   children,
   customBody,
+  isLoading,
   setSelectedPatp,
   onClickSidebarSection,
   onSubmit,
   onExit,
 }: Props) => {
-  const hasShips = patps.length > 0;
+  const hasShips = patps ? patps.length > 0 : false;
 
-  const sidebarItems = hasShips
-    ? [
-        SidebarSection.Hosting,
-        SidebarSection.S3Storage,
-        SidebarSection.Statistics,
-        SidebarSection.CustomDomain,
-        SidebarSection.DownloadRealm,
-      ]
-    : [SidebarSection.GetHosting, SidebarSection.DownloadRealm];
+  const sidebarItems =
+    hasShips || isLoading
+      ? [
+          SidebarSection.Hosting,
+          SidebarSection.S3Storage,
+          SidebarSection.Statistics,
+          SidebarSection.CustomDomain,
+          SidebarSection.DownloadRealm,
+        ]
+      : [SidebarSection.GetHosting, SidebarSection.DownloadRealm];
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -70,7 +79,15 @@ export const AccountDialog = ({
       <AccountDialogSidebar>
         <Flex flexDirection="column" gap="25px">
           <HoliumButton size={26} onClick={onClickHoliumButton} />
-          {hasShips && (
+          {isLoading && (
+            <Flex flexDirection="column" gap="2px">
+              <AccountDialogSidebarMenuItemText isOpen={false}>
+                Server ID
+              </AccountDialogSidebarMenuItemText>
+              <Skeleton height={32} />
+            </Flex>
+          )}
+          {hasShips && !isLoading && (
             <Flex flexDirection="column" gap="2px">
               <AccountDialogSidebarMenuItemText isOpen={false}>
                 Server ID
@@ -110,10 +127,34 @@ export const AccountDialog = ({
               <AccountDialogSubtitle>Account</AccountDialogSubtitle>
               <AccountDialogTitle>{currentSection}</AccountDialogTitle>
             </Flex>
-            {children}
+            {isLoading ? (
+              <Flex flex={1} justifyContent="center" alignItems="center">
+                <Spinner size={8} />
+              </Flex>
+            ) : (
+              children
+            )}
           </Flex>
         </AccountDialogInnerCard>
       )}
     </AccountDialogCard>
   );
 };
+
+type AccountDialogSkeletonProps = {
+  currentSection?: SidebarSection;
+};
+
+export const AccountDialogSkeleton = ({
+  currentSection,
+}: AccountDialogSkeletonProps) => (
+  <AccountDialog
+    patps={[]}
+    selectedPatp=""
+    currentSection={currentSection}
+    isLoading
+    setSelectedPatp={() => {}}
+    onClickSidebarSection={() => {}}
+    onExit={() => {}}
+  />
+);
