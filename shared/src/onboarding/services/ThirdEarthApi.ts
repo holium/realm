@@ -27,6 +27,13 @@ type RefreshTokenResponse = {
 
 type GetProductsResponse = ThirdEarthProduct[];
 
+type ResetPasswordResponse = {
+  message: string;
+  token?: string;
+  email?: string;
+  client_side_encryption_key?: string;
+};
+
 type GetPlanetsResponse = {
   freeProduct: boolean;
   planets: {
@@ -169,6 +176,22 @@ export class ThirdEarthApi {
         /* The account password is needed if confirming an email change,
         otherwise it can be left out. */
         password,
+      }),
+    });
+  }
+
+  resetPassword(
+    verificationcode: string,
+    newPassword: string,
+    reveal_realm_key?: boolean
+  ) {
+    return http<ResetPasswordResponse>(`${this.apiBaseUrl}/reset-password`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({
+        verificationcode,
+        newPassword,
+        reveal_realm_key,
       }),
     });
   }

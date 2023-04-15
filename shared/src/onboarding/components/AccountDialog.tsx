@@ -18,6 +18,7 @@ export enum SidebarSection {
   Statistics = 'Statistics',
   CustomDomain = 'Custom Domain',
   DownloadRealm = 'Download Realm',
+  GetHosting = 'Get Hosting',
 }
 
 type Props = {
@@ -43,6 +44,18 @@ export const AccountDialog = ({
   onSubmit,
   onExit,
 }: Props) => {
+  const hasShips = patps.length > 0;
+
+  const sidebarItems = hasShips
+    ? [
+        SidebarSection.Hosting,
+        SidebarSection.S3Storage,
+        SidebarSection.Statistics,
+        SidebarSection.CustomDomain,
+        SidebarSection.DownloadRealm,
+      ]
+    : [SidebarSection.GetHosting, SidebarSection.DownloadRealm];
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSubmit?.();
@@ -53,23 +66,25 @@ export const AccountDialog = ({
       <AccountDialogSidebar>
         <Flex flexDirection="column" gap="25px">
           <HoliumButton size={26} pointer={false} />
-          <Flex flexDirection="column" gap="2px">
-            <AccountDialogSidebarMenuItemText isOpen={false}>
-              Server ID
-            </AccountDialogSidebarMenuItemText>
-            <Select
-              id="ship-selector"
-              options={patps.map((patp) => ({
-                value: patp,
-                label: patp,
-              }))}
-              selected={selectedPatp}
-              onClick={(newPatp) => setSelectedPatp(newPatp)}
-            />
-          </Flex>
+          {hasShips && (
+            <Flex flexDirection="column" gap="2px">
+              <AccountDialogSidebarMenuItemText isOpen={false}>
+                Server ID
+              </AccountDialogSidebarMenuItemText>
+              <Select
+                id="ship-selector"
+                options={patps.map((patp) => ({
+                  value: patp,
+                  label: patp,
+                }))}
+                selected={selectedPatp}
+                onClick={(newPatp) => setSelectedPatp(newPatp)}
+              />
+            </Flex>
+          )}
         </Flex>
         <AccountDialogSidebarMenu>
-          {Object.values(SidebarSection).map((section) => (
+          {sidebarItems.map((section) => (
             <AccountDialogSidebarMenuItemText
               key={section}
               isOpen={section === currentSection}

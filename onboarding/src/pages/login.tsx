@@ -1,10 +1,28 @@
+import { GetServerSideProps } from 'next';
 import { Anchor } from '@holium/design-system/general';
 import { LoginDialog, OnboardDialogDescription } from '@holium/shared';
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
-export default function Login() {
+type Props = {
+  prefilledEmail: string;
+  redirectAfterLogin: string;
+};
+
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+  const prefilledEmail = (query.email ?? '') as string;
+  const redirectAfterLogin = (query.redirect ?? '') as string;
+
+  return {
+    props: {
+      prefilledEmail,
+      redirectAfterLogin,
+    },
+  };
+};
+
+export default function Login({ prefilledEmail, redirectAfterLogin }: Props) {
   const { goToPage } = useNavigation();
 
   const onNoAccount = () => goToPage('/');
@@ -14,7 +32,8 @@ export default function Login() {
       const response = await thirdEarthApi.login(email, password);
       localStorage.setItem('token', response.token);
 
-      goToPage('/account');
+      if (redirectAfterLogin) goToPage(redirectAfterLogin as any);
+      else goToPage('/account');
 
       return Boolean(response);
     } catch (error) {
@@ -33,6 +52,7 @@ export default function Login() {
             <Anchor onClick={onNoAccount}>Sign up</Anchor>.
           </OnboardDialogDescription>
         }
+        prefilledEmail={prefilledEmail}
         onLogin={onLogin}
       />
     </Page>

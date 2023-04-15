@@ -8,6 +8,7 @@ export { BootingDialog } from './dialogs/BootingDialog';
 export { ChooseIdDialog } from './dialogs/ChooseIdDialog';
 export { CreateAccountDialog } from './dialogs/CreateAccountDialog';
 export { CredentialsDialog } from './dialogs/CredentialsDialog';
+export { ClaimTokenDialog } from './dialogs/ClaimTokenDialog';
 export { DownloadDialog } from './dialogs/DownloadDialog';
 export { LoginDialog } from './dialogs/LoginDialog';
 export { PaymentDialog } from './dialogs/PaymentDialog';

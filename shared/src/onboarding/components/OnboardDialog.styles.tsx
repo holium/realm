@@ -20,11 +20,12 @@ export const OnboardDialogCard = styled.form`
   min-height: 500px;
   backdrop-filter: var(--blur);
   box-shadow: var(--rlm-box-shadow-1);
-  margin: 0 auto;
+  margin: 12px auto;
 
   @media (max-width: ${TABLET_WIDTH}px) {
     min-height: 0;
-    margin: 0 12px;
+    margin-left: 12px;
+    margin-right: 12px;
     padding: 69px 24px 24px 24px;
     gap: 42px;
   }

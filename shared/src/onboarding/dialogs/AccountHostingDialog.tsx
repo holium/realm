@@ -87,7 +87,7 @@ export const AccountHostingDialog = ({
     onExit={onExit}
   >
     <AccountDialogTable>
-      <AccountDialogTableRow title="ID">
+      <AccountDialogTableRow title="Server ID">
         <AccountDialogDescription flex={1}>
           {selectedPatp}
         </AccountDialogDescription>

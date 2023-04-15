@@ -8,6 +8,7 @@ export const accountPageUrl: Record<string, OnboardingPage> = {
   'S3 Storage': '/account/s3-storage',
   Statistics: '/account/statistics',
   Hosting: '/account',
+  'Get Hosting': '/choose-id',
 };
 
 export const useNavigation = () => {

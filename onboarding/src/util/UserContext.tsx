@@ -26,7 +26,7 @@ export const UserContextProvider = ({ children }: Props) => {
   const [token, setToken] = useState<string>();
   const [email, setEmail] = useState<string>();
   const [ships, setShips] = useState<ThirdEarthShip[]>([]);
-  const [selectedPatp, setSelectedPatp] = useState<string>();
+  const [selectedPatp, setSelectedPatp] = useState<string>('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -39,14 +39,14 @@ export const UserContextProvider = ({ children }: Props) => {
 
       setToken(token);
       setEmail(email);
-      setShips(newShips);
-      setSelectedPatp(newShips[0].patp);
+      setShips(newShips ?? []);
+      setSelectedPatp(newShips[0]?.patp ?? '');
     };
 
     getAndSetUserData();
   }, []);
 
-  if (!ships || !token || !email || !selectedPatp) return null;
+  if (!token || !email) return null;
 
   return (
     <UserContext.Provider
