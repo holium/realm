@@ -1,4 +1,4 @@
-import { InstallStatus } from 'os/services/spaces/models/bazaar';
+import { InstallStatus } from 'renderer/stores/models/bazaar.model';
 
 type AppStatusFlags = {
   isInstalled: boolean;
@@ -14,11 +14,13 @@ export const getAppTileFlags = (
   installStatus: InstallStatus
 ): AppStatusFlags => {
   const isInstalling =
-    installStatus !== InstallStatus.installed &&
-    installStatus !== InstallStatus.suspended &&
-    installStatus !== InstallStatus.failed &&
-    installStatus !== InstallStatus.uninstalled &&
-    installStatus !== InstallStatus.desktop;
+    installStatus === InstallStatus.reviving ||
+    installStatus === InstallStatus.suspending ||
+    (installStatus !== InstallStatus.installed &&
+      installStatus !== InstallStatus.suspended &&
+      installStatus !== InstallStatus.failed &&
+      installStatus !== InstallStatus.uninstalled &&
+      installStatus !== InstallStatus.desktop);
 
   const isFaded =
     isInstalling ||

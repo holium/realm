@@ -5,7 +5,7 @@ import { rgba, lighten, darken } from 'polished';
 import { Flex, Pulser, Divider } from 'renderer/components';
 import { SelectedSpace } from './SelectedSpace';
 import { useTrayApps } from 'renderer/apps/store';
-import { calculateAnchorPoint } from 'renderer/logic/lib/position';
+import { calculateAnchorPoint } from 'renderer/lib/position';
 import { BarButton } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { useAppState } from 'renderer/stores/app.store';

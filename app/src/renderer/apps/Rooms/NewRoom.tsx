@@ -2,9 +2,9 @@ import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
 import { useMemo } from 'react';
 import { TextInput, Text, Button, Flex, Icon } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
 import { useTrayApps } from '../store';
 import { useRooms } from './useRooms';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 export const createRoomForm = (
   currentRooms: string[],
@@ -55,7 +55,7 @@ export const createRoomForm = (
 };
 
 const NewRoomPresenter = () => {
-  const { ship, spaces } = useServices();
+  const { ship, spacesStore } = useShipStore();
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms(ship?.patp);
 
@@ -69,7 +69,9 @@ const NewRoomPresenter = () => {
     const { name, isPrivate } = form.actions.submit();
     evt.stopPropagation();
     const spacePath =
-      spaces.selected?.type !== 'our' ? spaces.selected?.path ?? '' : null;
+      spacesStore.selected?.type !== 'our'
+        ? spacesStore.selected?.path ?? ''
+        : null;
     roomsManager?.createRoom(name, isPrivate ? 'private' : 'public', spacePath);
     roomsApp.setView('room');
   };

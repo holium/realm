@@ -1,5 +1,6 @@
 import { AppTileSize, InstallStatus } from '@holium/design-system';
 import { toJS } from 'mobx';
+import { observer } from 'mobx-react';
 import { useMemo } from 'react';
 import { ContextMenuOption, AppTile } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
@@ -9,6 +10,7 @@ import {
   BazaarStoreType,
 } from 'renderer/stores/models/bazaar.model';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
+import { useShipStore } from 'renderer/stores/ship.store';
 import {
   handleInstallation,
   handleResumeSuspend,
@@ -21,19 +23,19 @@ type AppProps = {
   tileSize: AppTileSize;
   app: AppMobxType;
   currentSpace: SpaceModelType;
-  bazaarStore: BazaarStoreType;
 };
 
-export const AppGridTile = ({
+export const GridAppTilePresenter = ({
   tileId,
   tileSize,
   app,
   currentSpace,
-  bazaarStore,
 }: AppProps) => {
   const { shellStore } = useAppState();
+  const { bazaarStore } = useShipStore();
   const isAppPinned = currentSpace.isPinned(app.id);
-  const weRecommended = bazaarStore.isRecommended(app.id);
+  const appInfo = bazaarStore.catalog.get(app.id);
+  const weRecommended = appInfo?.isRecommended;
   const installStatus = app.installStatus as InstallStatus;
 
   const canSuspend =
@@ -115,3 +117,5 @@ export const AppGridTile = ({
     />
   );
 };
+
+export const GridAppTile = observer(GridAppTilePresenter);

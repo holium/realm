@@ -114,15 +114,13 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
           A space is a place where people can compute together.
         </Text.Custom>
         <Flex col justify="flex-start">
-          <Flex row justify="space-between">
+          <Flex row justify="space-between" align="center">
             <Flex row gap={16} align="center">
               <Icon size={32} name="SpacesColor" />
-
-              <Text.Custom opacity={0.9} fontSize={4} fontWeight={500}>
+              <Text.Custom opacity={0.9} fontSize={3} fontWeight={500}>
                 New Space
               </Text.Custom>
             </Flex>
-
             <Button.TextButton
               // fontSize={2}
               onClick={(evt: any) => {

@@ -1,7 +1,7 @@
 import { toJS } from 'mobx';
 import { flow, Instance, types, cast, applySnapshot } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
-import { SoundActions } from 'renderer/logic/actions/sound';
+import { SoundActions } from 'renderer/lib/sound';
 import { ChatIPC } from 'renderer/stores/ipc';
 import { expiresInMap, ExpiresValue } from './types';
 
@@ -393,7 +393,6 @@ export const Chat = types
         self.muted = !mute;
       }
     }),
-
     removeMessage(messageId: string) {
       const message = self.messages.find((m) => m.id === messageId);
       if (!message) return;
@@ -589,6 +588,33 @@ export const Chat = types
         console.error(error);
         self.messages = oldMessages;
         return self.messages;
+      }
+    }),
+    addPeer: flow(function* (ship: string) {
+      const oldPeers = self.peers;
+      try {
+        yield ChatIPC.addPeerToChat(self.path, ship) as Promise<void>;
+        self.peers.push(PeerModel.create({ ship, role: 'member' }));
+        return self.peers;
+      } catch (error) {
+        console.error(error);
+        self.peers = oldPeers;
+        return self.peers;
+      }
+    }),
+    removePeer: flow(function* (ship: string) {
+      const oldPeers = self.peers;
+      try {
+        yield ChatIPC.removePeerFromChat(self.path, ship) as Promise<void>;
+        const peer = self.peers.find((p) => p.ship === ship);
+
+        if (!peer) return;
+        self.peers.remove(peer);
+        return self.peers;
+      } catch (error) {
+        console.error(error);
+        self.peers = oldPeers;
+        return self.peers;
       }
     }),
     onPeerAdded(ship: string, role: string) {

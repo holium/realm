@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
 import {
   Flex,
   Text,
@@ -22,12 +21,12 @@ export interface Space {
 }
 
 const FeaturedListPresenter = () => {
-  const { spacesStore } = useShipStore();
-  const { bulletin } = useServices();
+  const { spacesStore, featuredStore } = useShipStore();
+  // const { bulletin } = useServices();
 
   const [joining, setJoining] = useState(false);
 
-  const listData = bulletin.list;
+  const listData = featuredStore.list;
   // console.log(bulletin.list);
   if (listData.length === 0) {
     return (

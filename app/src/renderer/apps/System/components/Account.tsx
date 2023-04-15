@@ -10,30 +10,26 @@ import {
   TextInput,
   CopyButton,
   useToggle,
+  Text,
+  Card,
+  Anchor,
 } from '@holium/design-system';
-import { Text, Card, TextButton, Anchor } from 'renderer/components';
-import { lighten } from 'polished';
-import { useServices } from 'renderer/logic/store';
 import { ColorPicker } from './ColorPicker';
 import { useForm, useField } from 'mobx-easy-form';
-import { ShipActions } from 'renderer/logic/actions/ship';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { AuthActions } from 'renderer/logic/actions/auth';
 import { useTrayApps } from 'renderer/apps/store';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 const AccountPanelPresenter = () => {
-  const { theme, ship, identity } = useServices();
+  const { shellStore } = useAppState();
+  const { ship, friends } = useShipStore();
   const { setActiveApp } = useTrayApps();
   const [avatarImg, setAvatarImg] = useState(ship?.avatar ?? '');
   const showAccessKey = useToggle(false);
 
-  const { windowColor, textColor, accentColor } = theme.currentTheme;
-
-  const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
-
   const [isLoading, setIsLoading] = useState(false);
 
+  // TODO
   const url = identity.auth.currentShip?.url;
   const isHostedShip = url?.includes('holium.network');
   const email = identity.auth.email;
@@ -41,8 +37,8 @@ const AccountPanelPresenter = () => {
 
   useEffect(() => {
     async function getCode() {
-      const code = await AuthActions.getCode();
-      setCode(code);
+      // const code = await AuthActions.getCode();
+      // setCode(code);
     }
     getCode();
   }, []);
@@ -67,9 +63,9 @@ const AccountPanelPresenter = () => {
 
       setIsLoading(true);
 
-      await ShipActions.saveMyContact(profileData);
-      await DesktopActions.setMouseColor(values.avatarColor);
-      await AuthActions.setShipProfile(ship?.patp ?? '', profileData);
+      // await friends.saveMyContact(profileData);
+      // await shellStore.setMouseColor(values.avatarColor);
+      // await AuthActions.setShipProfile(ship?.patp ?? '', profileData);
 
       setIsLoading(false);
     },
@@ -99,16 +95,16 @@ const AccountPanelPresenter = () => {
 
   return (
     <Flex gap={12} flexDirection="column" p={3} width="100%" overflowY="auto">
-      <Text fontSize={7} fontWeight={600} mb={6}>
+      <Text.Custom fontSize={7} fontWeight={600} mb={6}>
         Account
-      </Text>
+      </Text.Custom>
 
-      <Text opacity={0.7} fontSize={3} fontWeight={500}>
+      <Text.Custom opacity={0.7} fontSize={3} fontWeight={500}>
         PROFILE
-      </Text>
+      </Text.Custom>
       <Card
         p="20px"
-        elevation="none"
+        elevation={0}
         customBg={cardColor}
         flexDirection={'column'}
         mb={2}
@@ -120,18 +116,18 @@ const AccountPanelPresenter = () => {
             justifyContent="flex-start"
             minWidth={100}
           >
-            <Text fontWeight={500} flex={1} margin={'auto'}>
+            <Text.Custom fontWeight={500} flex={1} margin={'auto'}>
               Urbit ID
-            </Text>
-            <Text flex={3} mx={4}>
+            </Text.Custom>
+            <Text.Custom flex={3} mx={4}>
               {ship.patp}
-            </Text>
+            </Text.Custom>
           </Flex>
 
           <Flex flexDirection={'row'} flex={4} justifyContent="flex-start">
-            <Text fontWeight={500} flex={1} margin="auto">
+            <Text.Custom fontWeight={500} flex={1} margin="auto">
               Nickname
-            </Text>
+            </Text.Custom>
             <Flex flex={3}>
               <TextInput
                 id="account-nickname"
@@ -148,9 +144,9 @@ const AccountPanelPresenter = () => {
           </Flex>
 
           <Flex flexDirection={'row'} flex={4} justifyContent="flex-start">
-            <Text fontWeight={500} flex={1} mt={2}>
+            <Text.Custom fontWeight={500} flex={1} mt={2}>
               Avatar
-            </Text>
+            </Text.Custom>
 
             <Flex
               flex={3}
@@ -207,50 +203,37 @@ const AccountPanelPresenter = () => {
             {isLoading ? (
               <Spinner size={1} />
             ) : (
-              <TextButton
+              <Button.TextButton
                 style={{ fontWeight: 400 }}
-                showBackground
-                textColor={accentColor}
-                highlightColor={accentColor}
                 disabled={!profileForm.computed.isValid}
                 onClick={profileForm.actions.submit}
               >
                 Save
-              </TextButton>
+              </Button.TextButton>
             )}
           </Flex>
         </Flex>
       </Card>
-      <Text opacity={0.7} fontSize={3} fontWeight={500}>
+      <Text.Custom opacity={0.7} fontSize={3} fontWeight={500}>
         HOSTING
-      </Text>
-      <Card
-        p="20px"
-        width="100%"
-        elevation="none"
-        customBg={cardColor}
-        flexDirection={'column'}
-        mb={2}
-      >
+      </Text.Custom>
+      <Card p="20px" width="100%" elevation={0} flexDirection={'column'}>
         <Flex flexDirection={'row'} flex={4} justifyContent="flex-start">
-          <Text fontWeight={500} flex={1} margin={'auto'}>
+          <Text.Custom fontWeight={500} flex={1} margin={'auto'}>
             Email
-          </Text>
+          </Text.Custom>
           <Flex justifyContent="space-between" flex={3}>
-            <Text color={textColor}>{email}</Text>
-            <TextButton
+            <Text.Custom>{email}</Text.Custom>
+            <Button.TextButton
               style={{ fontWeight: 400 }}
-              showBackground
-              textColor={accentColor}
-              highlightColor={accentColor}
               onClick={() => {
-                ShellActions.setBlur(true);
-                ShellActions.openDialog('change-email-dialog');
+                shellStore.setIsBlurred(true);
+                shellStore.openDialog('change-email-dialog');
                 setActiveApp(null);
               }}
             >
               Change Email
-            </TextButton>
+            </Button.TextButton>
           </Flex>
         </Flex>
 
@@ -262,24 +245,15 @@ const AccountPanelPresenter = () => {
               mt={4}
               justifyContent="flex-start"
             >
-              <Text fontWeight={500} flex={1} margin={'auto'}>
+              <Text.Custom fontWeight={500} flex={1} margin={'auto'}>
                 Payment
-              </Text>
+              </Text.Custom>
               <Flex justifyContent="space-between" flex={3}>
-                <Text color={textColor}>Credit Card</Text>
-                <Anchor
-                  href="https://billing.stripe.com/p/login/00g4gz19T9WbfxS4gg"
-                  p={0}
-                  m={0}
-                >
-                  <TextButton
-                    style={{ fontWeight: 400 }}
-                    showBackground
-                    textColor={accentColor}
-                    highlightColor={accentColor}
-                  >
+                <Text.Custom>Credit Card</Text.Custom>
+                <Anchor href="https://billing.stripe.com/p/login/00g4gz19T9WbfxS4gg">
+                  <Button.TextButton style={{ fontWeight: 400 }}>
                     Manage billing
-                  </TextButton>
+                  </Button.TextButton>
                 </Anchor>
               </Flex>
             </Flex>
@@ -287,18 +261,16 @@ const AccountPanelPresenter = () => {
         )}
 
         <Flex flexDirection={'row'} flex={4} mt={4} justifyContent="flex-start">
-          <Text fontWeight={500} flex={1} margin={'auto'}>
+          <Text.Custom fontWeight={500} flex={1} margin={'auto'}>
             URL
-          </Text>
-          <Text color={textColor} flex={3}>
-            {url}
-          </Text>
+          </Text.Custom>
+          <Text.Custom flex={3}>{url}</Text.Custom>
         </Flex>
 
         <Flex flexDirection={'row'} flex={4} mt={4} justifyContent="flex-start">
-          <Text fontWeight={500} flex={1} margin={'auto'}>
+          <Text.Custom fontWeight={500} flex={1} margin={'auto'}>
             Access Code
-          </Text>
+          </Text.Custom>
           {code === '' ? (
             <Flex flex={3}>
               <Spinner size={1} />

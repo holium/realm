@@ -7,12 +7,11 @@ import {
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { LoaderModel, SubscriptionModel } from './common.model';
-import { DocketApp, UrbitApp, WebApp } from './bazaar.model';
+import { UrbitApp } from './bazaar.model';
 import { MembersModel, MembersStore, VisaModel } from './invitations.model';
 import { Theme, defaultTheme } from './theme.model';
 import { BazaarIPC, SpacesIPC } from '../ipc';
 import { appState } from '../app.store';
-import { NewSpace } from 'os/services-new/ship/spaces/spaces.service';
 import { shipStore } from '../ship.store';
 
 const spaceRowToModel = (space: any) => {
@@ -26,10 +25,6 @@ const spaceRowToModel = (space: any) => {
     },
   };
 };
-
-export const DocketMap = types.map(
-  types.union({ eager: false }, DocketApp, WebApp)
-);
 
 const StallModel = types.model('StallModel', {
   suite: types.map(UrbitApp),
@@ -57,13 +52,18 @@ export const SpaceModel = types
   })
   .views((self) => ({
     isPinned(appId: string) {
-      return self.dock.map((app) => app.id === appId);
+      console.log(self.dock, appId);
+      return self.dock.some((app) => app.id === appId);
     },
     get dockAppIds() {
       return self.dock
         .slice()
         .sort((a, b) => (a.dockIndex || 0) - (b.dockIndex || 0))
         .map((app) => app.id);
+    },
+    isHost() {
+      // TODO check if admin
+      return self.path.includes(window.ship);
     },
   }))
   .actions((self) => ({
@@ -86,8 +86,15 @@ export const SpaceModel = types
       }
     }),
     reorderPinnedApps: flow(function* (dock: string[]) {
+      // sort the dock apps by the dock id array
+      const dockApps = self.dock.sort((a, b) => {
+        const aIndex = dock.findIndex((appId) => appId === a.id);
+        const bIndex = dock.findIndex((appId) => appId === b.id);
+        return aIndex - bIndex;
+      });
+
       try {
-        applySnapshot(self.dock, dock);
+        applySnapshot(self.dock, dockApps);
         return yield BazaarIPC.reorderPinnedApps(
           self.path,
           dock
@@ -117,6 +124,19 @@ export const SpaceModel = types
         console.error(error);
       }
     }),
+    // addPinned(app: any) {
+    //   self.dock.push(app);
+    // },
+    // removePinned(appId: string) {
+    //   const index = self.dock.findIndex((app) => app.id === appId);
+    //   self.dock.splice(index, 1);
+    // },
+    _setDock(dock: any) {
+      self.dock = dock;
+    },
+    _setStall(stall: any) {
+      self.stall = StallModel.create(stall);
+    },
   }));
 
 export type SpaceModelType = Instance<typeof SpaceModel>;
@@ -180,6 +200,7 @@ export const SpacesStore = types
           const spaceModel = SpaceModel.create(spaceRowToModel(space));
           self.spaces.set(space.path, spaceModel);
         });
+        console.log(toJS(self.spaces));
         self.selected = self.spaces.get(current);
         if (self.selected) {
           appState.setTheme(self.selected.theme);
@@ -210,7 +231,7 @@ export const SpacesStore = types
         // TODO notify user it failed
       }
     }),
-    createSpace: flow(function* (newSpace: NewSpace) {
+    createSpace: flow(function* (newSpace: any) {
       self.creating.set('loading');
       try {
         const spacePath = yield SpacesIPC.createSpace(newSpace) as Promise<any>;
@@ -402,40 +423,16 @@ export const SpacesStore = types
       if (!space) return;
       space.members.remove(kickPayload.ship);
     },
+    _onDockUpdate: (dockPayload: any) => {
+      const space = self.spaces.get(dockPayload.path);
+      if (!space) return;
+      space._setDock(dockPayload.dock);
+    },
+    _onStallUpdate: (stallPayload: any) => {
+      const space = self.spaces.get(stallPayload.path);
+      if (!space) return;
+      space._setStall(stallPayload.stall);
+    },
   }));
 
 export type SpacesStoreType = Instance<typeof SpacesStore>;
-
-SpacesIPC.onUpdate((_event: any, update: any) => {
-  const { type, payload } = update;
-  // on update we need to requery the store
-  switch (type) {
-    case 'initial':
-      shipStore.spacesStore.init();
-      break;
-    case 'invitations':
-      shipStore.spacesStore._onInitialInvitationsUpdate(payload);
-      break;
-    case 'invite-sent':
-      shipStore.spacesStore._onSpaceMemberAdded(payload);
-      break;
-    case 'invite-updated':
-      shipStore.spacesStore._onSpaceMemberUpdated(payload);
-      break;
-    case 'kicked':
-      shipStore.spacesStore._onSpaceMemberKicked(payload);
-      break;
-    case 'edited':
-      shipStore.spacesStore._onSpaceMemberUpdated(payload);
-      break;
-    case 'add':
-      shipStore.spacesStore._onSpaceAdded(payload);
-      break;
-    case 'replace':
-      shipStore.spacesStore._onSpaceUpdated(payload);
-      break;
-    case 'remove':
-      shipStore.spacesStore._onSpaceRemoved(payload);
-      break;
-  }
-});

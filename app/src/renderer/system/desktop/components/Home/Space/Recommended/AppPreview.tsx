@@ -1,20 +1,17 @@
 import { FC } from 'react';
-import { rgba, darken, desaturate, lighten } from 'polished';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { Text, Icon, Button, Flex, Spinner } from '@holium/design-system';
 import { AppTile } from 'renderer/components';
+import { handleInstallation } from '../../AppInstall/helpers';
+import { getAppTileFlags } from 'renderer/lib/app';
+import { useShipStore } from 'renderer/stores/ship.store';
 import {
+  AppMobxType,
   AppType,
   InstallStatus,
-  UrbitAppType,
-} from 'os/services/spaces/models/bazaar';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { handleInstallation } from '../../AppInstall/helpers';
-import { getAppTileFlags } from 'renderer/logic/lib/app';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { useShipStore } from 'renderer/stores/ship.store';
+} from 'renderer/stores/models/bazaar.model';
+import { useAppState } from 'renderer/stores/app.store';
 
 interface AppPreviewProps {
   app: AppType;
@@ -23,7 +20,8 @@ interface AppPreviewProps {
 export const AppPreview: FC<AppPreviewProps> = observer(
   (props: AppPreviewProps) => {
     const { app } = props;
-    const { spacesStore } = useShipStore();
+    const { shellStore } = useAppState();
+    const { spacesStore, bazaarStore } = useShipStore();
     const space = spacesStore.selected;
     let installStatus = InstallStatus.installed;
     let info = '';
@@ -45,7 +43,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
 
     const onInstallation = (evt: React.MouseEvent<HTMLButtonElement>) => {
       evt.stopPropagation();
-      const appHost = (app as UrbitAppType).host;
+      const appHost = (app as AppMobxType).host;
       return handleInstallation(appHost, app.id, installStatus);
     };
     let status;
@@ -86,7 +84,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
           installStatus={InstallStatus.installed}
           onAppClick={(selectedApp: AppType) => {
             if (!(isInstalling || isInstalled)) {
-              ShellActions.openDialogWithStringProps('app-detail-dialog', {
+              shellStore.openDialogWithStringProps('app-detail-dialog', {
                 appId: selectedApp.id,
               });
             }
@@ -142,7 +140,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
                 // color={rgba(theme.currentTheme.textColor, 0.9)}
                 // backgroundColor={rgba(theme.currentTheme.dockColor, 0.5)}
                 onClick={() => {
-                  SpacesActions.uninstallApp(app.id);
+                  bazaarStore.uninstallApp(app.id);
                 }}
               >
                 Uninstall
@@ -158,7 +156,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
                 // color={'#FFF'}
                 // backgroundColor={theme.currentTheme.accentColor}
                 onClick={() => {
-                  SpacesActions.reviveApp(app.id);
+                  bazaarStore.reviveApp(app.id);
                 }}
               >
                 Revive
@@ -174,8 +172,8 @@ export const AppPreview: FC<AppPreviewProps> = observer(
                 // color={rgba(theme.currentTheme.textColor, 0.9)}
                 // backgroundColor={rgba(theme.currentTheme.dockColor, 0.5)}
                 onClick={() => {
-                  space && DesktopActions.openAppWindow(toJS(app));
-                  DesktopActions.closeHomePane();
+                  space && shellStore.openWindow(toJS(app));
+                  shellStore.closeHomePane();
                 }}
               >
                 Open

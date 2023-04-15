@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { clan } from 'urbit-ob';
 import { useContextMenu } from 'renderer/components/ContextMenu';
-import { ThemeType } from '../../logic/theme';
 import { usePassportMenu } from './usePassportMenu';
 import {
   Avatar,
@@ -19,8 +18,6 @@ interface IPersonRow {
   avatar?: string | null;
   nickname?: string | null;
   description?: string | null;
-  style?: any;
-  theme?: ThemeType;
   contextMenuOptions?: MenuItemProps[];
   children?: any;
 }
@@ -32,7 +29,6 @@ export const PersonRow = ({
   avatar,
   nickname,
   description,
-  style,
   contextMenuOptions,
   children,
 }: IPersonRow) => {

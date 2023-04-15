@@ -1,8 +1,9 @@
-// import log from 'electron-log';
+import log from 'electron-log';
 import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../../abstract.db';
 import { cleanNounColor } from '../../../../lib/color';
+import { spaceDockQuery, spaceStallQuery } from '../spaces.query';
 
 export interface App {
   id: string;
@@ -20,6 +21,8 @@ export interface App {
   license?: string;
   host?: string;
   icon?: string;
+  // gridIndex?: number;
+  // isRecommended?: boolean;
 }
 
 export class AppCatalogDB extends AbstractDataAccess<App> {
@@ -49,6 +52,8 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
       license: row.license,
       host: row.host,
       icon: row.icon,
+      // gridIndex: row.gridIndex,
+      // isRecommended?: row.isRecommended,
       // updatedAt: row.updatedAt,
       // createdAt: row.createdAt,
     };
@@ -76,17 +81,190 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
               'license', ac.license,
               'host', ac.host,
               'icon', ac.icon,
-              'gridIndex', ag.idx
+              'gridIndex', ag.idx,
+              'isRecommended', CASE WHEN ar.id IS NULL THEN json('false') ELSE json('true') END
               )
           ) app
         FROM app_catalog ac
         LEFT JOIN app_grid ag ON ac.id = ag.appId
-        WHERE ag.idx IS NOT NULL;`
+        LEFT JOIN app_recommendations ar ON ac.id = ar.id
+        WHERE ag.idx IS NOT NULL AND ac.id != 'landscape';`
     );
     const apps: any[] = select.all();
     if (!apps.length) return {};
     return JSON.parse(apps[0].app);
   }
+
+  public getApp(appId: string) {
+    if (!this.db) throw new Error('No db connection');
+    const select = this.db.prepare(
+      `SELECT
+        json_object(
+            'id', ac.id,
+            'title', ac.title,
+            'href', json(ac.href),
+            'favicon', ac.favicon,
+            'type', ac.type,
+            'config', json(ac.config),
+            'installStatus', ac.installStatus,
+            'info', ac.info,
+            'color', ac.color,
+            'image', ac.image,
+            'version', ac.version,
+            'website', ac.website,
+            'license', ac.license,
+            'host', ac.host,
+            'icon', ac.icon,
+            'gridIndex', ag.idx,
+            'dockIndex', ad.idx,
+            'isRecommended', CASE WHEN ar.id IS NULL THEN json('false') ELSE json('true') END
+            ) app
+        FROM app_catalog ac
+        LEFT JOIN app_grid ag ON ac.id = ag.appId
+        LEFT JOIN app_recommendations ar ON ac.id = ar.id
+        LEFT JOIN app_docks ad ON ac.id = ad.id
+        WHERE ac.id = ?;`
+    );
+    const apps: any[] = select.all(appId);
+    if (!apps.length) return {};
+    const app = JSON.parse(apps[0].app);
+    app.isRecommended = app.isRecommended === 1;
+    return app;
+  }
+
+  getDock(spacePath: string) {
+    if (!this.db) throw new Error('No db connection');
+    const select = this.db.prepare(
+      `${spaceDockQuery}
+      WHERE space = ?;`
+    );
+    const apps: any[] = select.all(spacePath);
+    if (!apps.length) return {};
+    return JSON.parse(apps[0].dock);
+  }
+
+  getStall(spacePath: string) {
+    if (!this.db) throw new Error('No db connection');
+    const select = this.db.prepare(
+      `${spaceStallQuery}
+      WHERE stalls.space = ?;`
+    );
+    const apps: any[] = select.all(spacePath);
+    if (!apps.length) return {};
+    return JSON.parse(apps[0].stall);
+  }
+
+  public updateInstallStatus(id: string, status: string) {
+    if (!this.db) throw new Error('No db connection');
+    const update = this.db.prepare(
+      `UPDATE app_catalog SET installStatus = ? WHERE id = ?;`
+    );
+    update.run(status, id);
+    const updated = this.getApp(id);
+    if (!updated) log.error('App not found');
+    return updated;
+  }
+
+  public updateSuite(
+    payload: { id: string; index: number; path: string },
+    type: 'add' | 'remove'
+  ) {
+    if (!this.db) throw new Error('No db connection');
+    // get suite column
+    const select = this.db.prepare(
+      `SELECT json(suite) suite FROM spaces_stalls WHERE space = ?;`
+    );
+    const suites: any[] = select.all(payload.path);
+    if (!suites.length) return {};
+    const suite = JSON.parse(suites[0].suite);
+    if (type === 'remove') {
+      delete suite[payload.index];
+    } else {
+      suite[payload.index] = payload.id;
+    }
+    const update = this.db.prepare(
+      `UPDATE spaces_stalls SET suite = ? WHERE space = ?;`
+    );
+    update.run(JSON.stringify(suite), payload.path);
+    const updated = this.getStall(payload.path);
+    if (!updated) log.error('Stall not found');
+    return updated;
+  }
+
+  public updateStall(
+    path: string,
+    payload: {
+      recommended: { [key: string]: number };
+      suite: any;
+    }
+  ) {
+    if (!this.db) throw new Error('No db connection');
+    // update recommended
+    const update = this.db.prepare(
+      `UPDATE spaces_stalls SET suite = ?, recommended = ? WHERE space = ?;`
+    );
+    update.run(
+      JSON.stringify(payload.suite),
+      JSON.stringify(payload.recommended),
+      path
+    );
+    const updated = this.getStall(path);
+    if (!updated) log.error('Stall not found');
+    return updated;
+  }
+
+  public updateCatalog(catalogUpdate: { [appId: string]: App }) {
+    if (!this.db) throw new Error('No db connection');
+    this._insertAppCatalog(catalogUpdate);
+  }
+
+  public updateApp(appId: string, app: App) {
+    if (!this.db) throw new Error('No db connection');
+    this._insertAppCatalog({ [appId]: app });
+  }
+
+  public updateGrid(grid: { [idx: string]: string }) {
+    if (!this.db) throw new Error('No db connection');
+    this._insertGrid(grid);
+  }
+
+  public updateRecommendations(
+    update: { id: string; stalls: any },
+    type: 'add' | 'remove'
+  ) {
+    if (!this.db) throw new Error('No db connection');
+    if (type === 'add') {
+      this._insertRecommendations([update.id]);
+    } else {
+      const deleteRecommendation = this.db.prepare(
+        `DELETE FROM app_recommendations WHERE id = ?;`
+      );
+      deleteRecommendation.run(update.id);
+    }
+    this._insertStalls(update.stalls);
+  }
+
+  public updatePinned(
+    update: { index: number; id: string; path: string },
+    type: 'add' | 'remove'
+  ) {
+    if (!this.db) throw new Error('No db connection');
+
+    if (type === 'add') {
+      this.db
+        .prepare(`INSERT INTO app_docks (space, id, idx) VALUES (?, ?, ?);`)
+        .run(update.path, update.id, update.index);
+    } else {
+      this.db
+        .prepare(`DELETE FROM app_docks WHERE space = ? AND id = ?;`)
+        .run(update.path, update.id);
+    }
+    return this.getDock(update.path);
+  }
+
+  // ------------------------------
+  // ---------- INSERTS -----------
+  // ------------------------------
 
   public insertAll(initial: any) {
     this._insertGrid(initial.grid);
@@ -187,7 +365,7 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
   private _insertDocks(docks: { [key: string]: string[] }) {
     if (!this.db) throw new Error('No db connection');
     const insert = this.db.prepare(
-      `REPLACE INTO docks (
+      `REPLACE INTO app_docks (
         space,
         id,
         idx
@@ -214,7 +392,7 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
   private _insertRecommendations(recommendations: string[]) {
     if (!this.db) throw new Error('No db connection');
     const insert = this.db.prepare(
-      `REPLACE INTO recommendations (
+      `REPLACE INTO app_recommendations (
         id
       ) VALUES (
         @id
@@ -233,7 +411,7 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
   private _insertStalls(stalls: { [key: string]: string[] }) {
     if (!this.db) throw new Error('No db connection');
     const insert = this.db.prepare(
-      `REPLACE INTO stalls (
+      `REPLACE INTO spaces_stalls (
         space,
         suite,
         recommended
@@ -282,24 +460,24 @@ create table if not exists app_grid (
 create unique index if not exists grid_uindex on app_grid (idx, appId);
 
 
-create table if not exists docks (
+create table if not exists app_docks (
     space             TEXT NOT NULL,
     id                TEXT NOT NULL,
     idx               INTEGER NOT NULL
 );
-create unique index if not exists docks_uindex on docks (space, id);
+create unique index if not exists app_docks_uindex on app_docks (space, id);
 
 
-create table if not exists recommendations (
+create table if not exists app_recommendations (
     id                TEXT NOT NULL
 );
-create unique index if not exists recommendations_uindex on recommendations (id);
+create unique index if not exists app_recommendations_uindex on app_recommendations (id);
 
-create table if not exists stalls (
+create table if not exists spaces_stalls (
     space             TEXT NOT NULL,
     suite             TEXT NOT NULL,
     recommended       TEXT NOT NULL
 );
-create unique index if not exists stalls_uindex on stalls (space);
+create unique index if not exists spaces_stalls_uindex on spaces_stalls (space);
 
 `;

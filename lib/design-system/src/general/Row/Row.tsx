@@ -31,36 +31,35 @@ export const Row = styled(Box)<RowProps>`
   transition: var(--transition);
 
   &:active:not([disabled]) {
-    background-color: rgba(var(--rlm-overlay-active-rgba))
+    background-color: rgba(var(--rlm-overlay-active-rgba));
     ${({ backgroundColor }) =>
       backgroundColor &&
       css`
         background-color: ${backgroundColor};
         backdrop-filter: brightness(0.8);
-      `}}
-
+      `}
   }
 
   &:hover:not([disabled]) {
-    background-color: rgba(var(--rlm-overlay-active-rgba))
+    background-color: rgba(var(--rlm-overlay-active-rgba));
     ${({ backgroundColor }) =>
       backgroundColor &&
       css`
         background-color: ${backgroundColor};
         backdrop-filter: brightness(0.9);
-      `}}
+      `}
     cursor: pointer;
   }
 
   &:focus:not([disabled]) {
     outline: none;
-    background-color: rgba(var(--rlm-overlay-active-rgba))
+    background-color: rgba(var(--rlm-overlay-active-rgba));
     ${({ backgroundColor }) =>
       backgroundColor &&
       css`
         background-color: ${backgroundColor};
         backdrop-filter: brightness(0.9);
-      `}}
+      `}
   }
 
   &:disabled {
@@ -78,6 +77,13 @@ export const Row = styled(Box)<RowProps>`
         background-color: rgba(var(--rlm-overlay-active-rgba));
         &:hover:not([disabled]) {
           background-color: rgba(var(--rlm-overlay-active-rgba));
+        }
+      `}
+      ${props.noHover &&
+      css`
+        background-color: transparent;
+        &:hover:not([disabled]) {
+          background-color: transparent;
         }
       `}
     `}

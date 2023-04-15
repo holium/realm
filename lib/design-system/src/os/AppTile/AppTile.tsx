@@ -51,7 +51,8 @@ export enum InstallStatus {
   installed = 'installed',
   treaty = 'treaty',
   suspended = 'suspended',
-  resuming = 'resuming',
+  suspending = 'suspending',
+  reviving = 'reviving',
   // this is set when joining a space and you do not have the app
   //  installed, but want it to appear on the home screen. this
   //  is different than uninstalled which has %suspend implications

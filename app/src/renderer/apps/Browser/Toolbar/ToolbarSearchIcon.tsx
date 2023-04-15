@@ -1,4 +1,4 @@
-import { Flex, IconButton, Icons } from 'renderer/components';
+import { Flex, Button, Icon } from '@holium/design-system';
 
 type Props = {
   onClick: () => void;
@@ -6,8 +6,8 @@ type Props = {
 
 export const ToolbarSearchIcon = ({ onClick }: Props) => (
   <Flex mr={2} flexDirection="row" alignItems="center">
-    <IconButton onClick={onClick}>
-      <Icons name="Search" opacity={0.5} />
-    </IconButton>
+    <Button.IconButton onClick={onClick}>
+      <Icon size={18} name="Search" opacity={0.5} />
+    </Button.IconButton>
   </Flex>
 );

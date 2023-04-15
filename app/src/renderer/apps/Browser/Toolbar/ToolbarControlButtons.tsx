@@ -1,4 +1,4 @@
-import { Flex } from 'renderer/components';
+import { Flex } from '@holium/design-system';
 import { AppWindowIcon } from 'renderer/system/desktop/components/AppWindow/AppWindowIcon';
 
 type Props = {

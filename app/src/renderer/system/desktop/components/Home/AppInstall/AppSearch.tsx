@@ -131,7 +131,6 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
             search.actions.onChange('');
             clearInput();
           }
-          console.log(evt.key);
           if (
             evt.key === 'Escape' &&
             searchMode !== 'dev-app-search' &&

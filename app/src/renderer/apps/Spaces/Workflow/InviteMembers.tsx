@@ -11,16 +11,16 @@ import {
   Select,
   Skeleton,
   TextInput,
+  Row,
 } from '@holium/design-system';
-import { ShipSearch, Crest } from 'renderer/components';
-import { Row } from 'renderer/components/NewRow';
+import { Crest } from 'renderer/components';
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { pluralize } from 'renderer/logic/lib/text';
+import { pluralize } from 'renderer/lib/text';
 import { MemberRole, MemberStatus } from 'os/types';
-import { ShipActions } from 'renderer/logic/actions/ship';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { ShipSearch } from 'renderer/components-new/ShipSearch';
 
 interface IMemberList {
   height?: any;
@@ -70,7 +70,7 @@ export const createPeopleForm = (
 };
 
 const InviteMembersPresenter = (props: BaseDialogProps) => {
-  const { ship, friends } = useShipStore();
+  const { ship, friends, getGroupMembers } = useShipStore();
   const { workflowState, setState } = props;
   const searchRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -122,7 +122,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
     if (!ship) return;
     if (workflowState.type === 'group') {
       setLoading(true);
-      ShipActions.getGroupMembers(workflowState.path).then(
+      getGroupMembers(workflowState.path).then(
         ({ members: groupMembers }: any) => {
           // Set up our ships
           groupMembers[ship.patp].roles = ['owner'];

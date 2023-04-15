@@ -1,5 +1,11 @@
 // import RealmProcess from '../background/realm.process';
-import { app } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  session,
+  WebContents,
+  WebPreferences,
+} from 'electron';
 import log from 'electron-log';
 import AbstractService, {
   ServiceOptions,
@@ -7,6 +13,7 @@ import AbstractService, {
 import { AuthService } from './services-new/auth/auth.service';
 import { ShipService } from './services-new/ship/ship.service';
 import { getReleaseChannel, setReleaseChannel } from './lib/settings';
+import { getCookie } from './lib/shipHelpers';
 import APIConnection from './services-new/conduit';
 
 export class RealmService extends AbstractService {
@@ -23,11 +30,23 @@ export class RealmService extends AbstractService {
       auth: new AuthService(),
     };
 
+    this.onWebViewAttached = this.onWebViewAttached.bind(this);
     const session = this._hydrateSessionIfExists();
     if (session)
       this._sendAuthenticated(session.patp, session.url, session.cookie);
     app.on('quit', () => {
       // do other cleanup here
+    });
+
+    const windows = BrowserWindow.getAllWindows();
+    windows.forEach((window) => {
+      window.webContents.on('did-attach-webview', this.onWebViewAttached);
+      window.webContents.on(
+        'will-attach-webview',
+        (_event: Electron.Event, webPreferences: WebPreferences) => {
+          webPreferences.partition = 'urbit-webview';
+        }
+      );
     });
   }
 
@@ -170,6 +189,64 @@ export class RealmService extends AbstractService {
       });
     }
     setReleaseChannel(channel);
+  }
+
+  async onWillRedirect(url: string, webContents: any) {
+    try {
+      const delim = '/~/login?redirect=';
+      const parts = url.split(delim);
+      // http://localhost/~/login?redirect=
+      if (parts.length > 1) {
+        let appPath = decodeURIComponent(parts[1]);
+        // console.log('appPath => %o', appPath);
+        appPath = appPath.split('?')[0];
+        if (appPath.endsWith('/')) {
+          appPath = appPath.substring(0, appPath.length - 1);
+        }
+        const hasSession = this.services?.ship?.credentials;
+        const { url, ship, code } = this.services?.ship?.credentials;
+        if (!hasSession) {
+          log.error('unable to redirect. invalid session');
+          return;
+        }
+        if (!url || !ship || !code) {
+          log.error('no credentials');
+          return;
+        }
+        log.info(
+          'child window attempting to redirect to login. refreshing cookie...'
+        );
+        const cookie = await getCookie({
+          patp: ship,
+          url,
+          code,
+        });
+        log.info(
+          'new cookie generated. reloading child window and saving new cookie to session.'
+        );
+        if (!cookie) {
+          log.error('no cookie');
+          return;
+        }
+        await session.fromPartition(`urbit-webview`).cookies.set({
+          url: `${url}`,
+          // url: `${url}${appPath}`,
+          name: `urbauth-${ship}`,
+          value: cookie?.split('=')[1].split('; ')[0],
+          // value: cookie,
+        });
+        this.services?.ship?.updateCookie(cookie);
+        webContents.reload();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async onWebViewAttached(_: Event, webContents: WebContents) {
+    webContents.on('will-redirect', (_e: Event, url: string) =>
+      this.onWillRedirect(url, webContents)
+    );
   }
   // private startBackgroundProcess(): void {
   //   if (this.realmProcess) {

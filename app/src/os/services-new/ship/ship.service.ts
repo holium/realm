@@ -34,9 +34,13 @@ export class ShipService extends AbstractService {
     }
     this.shipDB = new ShipDB(this.patp, password);
     const credentials = this.shipDB.getCredentials();
-    log.info('credentials', credentials);
-    if (!this.shipDB || !credentials) {
-      log.info(`No ship found for ${patp}`);
+    if (
+      !this.shipDB ||
+      !credentials.code ||
+      !credentials.url ||
+      !credentials.cookie
+    ) {
+      log.info(`No credentials found for ${patp}`);
       return;
     }
 
@@ -51,9 +55,10 @@ export class ShipService extends AbstractService {
     // TODO this DROP is here until we get the agent refactor with lastTimestamp scries
     try {
       this.shipDB.db.exec(`
-        DELETE FROM docks;
-        DELETE FROM stalls;
+        DELETE FROM app_docks;
+        DELETE FROM app_recommendations;
         DELETE FROM app_catalog;
+        DELETE FROM spaces_stalls;
         DELETE FROM spaces_members;
         DELETE FROM spaces;
       `);
@@ -79,6 +84,14 @@ export class ShipService extends AbstractService {
   // TODO initialize the ship services here
   public init() {
     this.services?.spaces.init();
+  }
+
+  public updateCookie(cookie: string) {
+    this.shipDB?.setCredentials(
+      this.credentials.url,
+      this.credentials.code,
+      cookie
+    );
   }
 
   get credentials() {
