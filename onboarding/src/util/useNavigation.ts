@@ -57,7 +57,7 @@ export const useNavigation = () => {
   );
 
   const logout = useCallback(() => {
-    goToPage('/');
+    goToPage('/login');
     localStorage.clear();
   }, [router]);
 
