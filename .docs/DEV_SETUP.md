@@ -1,8 +1,9 @@
 ## Getting started
 
-So, you've just cloned down the Realm monorepo.  What now?
+So, you've just cloned down the Realm monorepo. What now?
 
 ## Pull Urbit submodule
+
 ```bash
 # have `git pull` also get the pinned commit of the Urbit submodule
 $: git config --global submodule.recurse true
@@ -10,6 +11,9 @@ $: git config --global submodule.recurse true
 $: git submodule update --init --recursive
 $: git pull
 ```
+
+Tip: in VSCode add `urbit/*` in "files to exclude" to hide `urbit/urbit` from searches.
+
 ### Urbit binary
 
 First, run the following one-time setup commands:
@@ -38,6 +42,7 @@ $: ./urbit -F bus
 [See more docs for working with the developer environment.](https://developers.urbit.org/guides/core/environment)
 
 On subsequent boots, you can:
+
 ```bash
 $: ./zod/.run
 # and
@@ -45,30 +50,38 @@ $: ./bus/.run
 ```
 
 ### Holium Desks
+
 Create and mount `%realm` and `%courier` on `zod` only:
 
 ```hoon
 |new-desk %realm
 |mount %realm
 ```
+
 ```hoon
 |new-desk %courier
 |mount %courier
 ```
+
 Watch the desks into your `zod`, so they are always up to date:
+
 ```bash
 # from the desks directory
 $: ./watch-desks.sh ../ships/zod
 ```
+
 Now the files are on your ship, commit and start the agents:
+
 ```hoon
 |commit %realm
 |revive %realm
 ```
+
 ```hoon
 |commit %courier
 |revive %courier
 ```
+
 To test your changes, save the files in your IDE, and then `|commit %<desk-name>` to apply.
 
 ### Developing with multiple ships
