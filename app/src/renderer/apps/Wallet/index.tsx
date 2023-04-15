@@ -16,7 +16,7 @@ import {
   BitcoinWalletType,
   NetworkType,
   WalletView,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from 'renderer/stores/models/wallet.model';
 import { PendingTransactionDisplay } from './views/common/Transaction/Pending';
 import { getTransactions } from './lib/helpers';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -38,7 +38,6 @@ const WalletViews: (network: NetworkType) => { [key: string]: any } = (
 });
 
 const WalletAppPresenter = (props: any) => {
-  console.log('PRESENTING WALLET APP');
   const [hidePending, setHidePending] = useState(true);
 
   const { walletStore } = useShipStore();
