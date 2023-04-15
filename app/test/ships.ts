@@ -11,7 +11,7 @@ export const ships = {
   },
   dev: {
     name: 'dev',
-    url: 'http://localhost:8081',
+    url: 'http://localhost:8082',
     code: 'magsub-micsev-bacmug-moldex',
   },
 };
