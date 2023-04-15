@@ -1,4 +1,4 @@
-import { Conduit, ConduitState } from '@holium/conduit';
+import { Conduit, ConduitState } from './index';
 import log from 'electron-log';
 
 export type ConduitSession = {

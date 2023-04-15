@@ -1,4 +1,4 @@
-import APIConnection from '../../conduit';
+import { APIConnection } from '@holium/conduit';
 import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';

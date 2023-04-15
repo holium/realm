@@ -1,5 +1,5 @@
 import { Database } from 'better-sqlite3';
-import APIConnection from '../conduit';
+import { APIConnection } from '@holium/conduit';
 import AbstractDataAccess from '../abstract.db';
 import { cleanNounColor, removeHash } from '../../lib/color';
 
