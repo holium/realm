@@ -4,6 +4,7 @@ import { UqbarApi } from '../../../api/uqbar';
 import { Database } from 'better-sqlite3-multiple-ciphers';
 import { WalletApi } from '../../../api/wallet';
 import log from 'electron-log';
+import { RealmSigner } from 'os/services/tray/wallet/signers/realm';
 
 export class WalletService extends AbstractService {
   constructor(options?: ServiceOptions, db?: Database) {
@@ -44,8 +45,18 @@ export class WalletService extends AbstractService {
     );
   }
 
-  async setXpub(network: string, hash: string) {
-    await WalletApi.setXpub(APIConnection.getInstance().conduit, network, hash);
+  async setXpub(
+    network: string,
+    ethPath: string,
+    ourPatp: any,
+    passcode: string
+  ) {
+    const xpub = RealmSigner.getXpub(ethPath, ourPatp, passcode);
+    await WalletApi.setXpub(APIConnection.getInstance().conduit, network, xpub);
+  }
+
+  async setMnemonic(mnemonic: string, ourPatp: string, passcode: string) {
+    RealmSigner.setMnemonic(mnemonic, ourPatp, passcode);
   }
 
   async setTransaction(
@@ -53,9 +64,9 @@ export class WalletService extends AbstractService {
     net: string,
     wallet: number,
     contract: string | null,
-    hash: string
+    hash: string,
+    tx: any
   ) {
-    const tx = this.getStoredTransaction(hash);
     await WalletApi.setTransaction(
       APIConnection.getInstance().conduit,
       network,
@@ -66,7 +77,6 @@ export class WalletService extends AbstractService {
       tx
     );
   }
-  getStoredTransaction(hash: string) {}
 }
 
 export default WalletService;

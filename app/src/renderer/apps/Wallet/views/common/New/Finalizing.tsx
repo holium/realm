@@ -14,6 +14,7 @@ export const Finalizing: FC<FinalizingProps> = observer(
     const initWallet = async () => {
       if (props.seedPhrase && props.passcode) {
         await walletStore.setMnemonic(props.seedPhrase, props.passcode);
+        await walletStore.navigate(WalletView.LIST);
         await walletStore.watchUpdates();
       }
     };

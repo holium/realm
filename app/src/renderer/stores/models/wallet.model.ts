@@ -8,7 +8,7 @@ import {
 } from 'mobx-state-tree';
 import { WalletIPC } from '../ipc';
 import { shipStore } from '../ship.store';
-// import { WalletApi } from '../../../api/wallet';
+import bcrypt from 'bcryptjs';
 
 export enum WalletView {
   LIST = 'list',
@@ -1024,31 +1024,31 @@ export const WalletStore = types
       },
       setMnemonic: flow(function* (mnemonic: string, passcode: number[]) {
         const passcodeString = passcode.map(String).join('');
-        (self.signer as RealmSigner).setMnemonic(
+        yield WalletIPC.setMnemonic(
           mnemonic,
           self.ourPatp ?? '',
           passcodeString
         );
         const passcodeHash = yield bcrypt.hash(passcodeString, 12);
         yield WalletIPC.setPasscodeHash(passcodeHash);
-        const ethPath = "m/44'/60'/0'";
-        const btcPath = "m/44'/0'/0'";
-        const btcTestnetPath = "m/44'/1'/0'";
-        let xpub: string;
-        // eth
-        xpub = self.signer.getXpub(ethPath, self.ourPatp ?? '', passcodeString);
-        yield WalletIPC.setXpub('ethereum', xpub);
-        // btc
-        xpub = self.signer.getXpub(btcPath, self.ourPatp ?? '', passcodeString);
-        yield WalletIPC.setXpub('bitcoin', xpub);
-        // btc testnet
-        xpub = self.signer.getXpub(
-          btcTestnetPath,
+        yield WalletIPC.setXpub(
+          'ethereum',
+          "m/44'/60'/0'",
           self.ourPatp ?? '',
           passcodeString
         );
-        yield WalletIPC.setXpub('btctestnet', xpub);
-        self.navigate(WalletView.LIST);
+        yield WalletIPC.setXpub(
+          'bitcoin',
+          "m/44'/0'/0'",
+          self.ourPatp ?? '',
+          passcodeString
+        );
+        yield WalletIPC.setXpub(
+          'btctestnet',
+          "m/44'/1'/0'",
+          self.ourPatp ?? '',
+          passcodeString
+        );
       }),
     };
   });

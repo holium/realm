@@ -4,9 +4,9 @@ import { ethers } from 'ethers';
 import { removeDots } from '../../../../api/uqbar';
 import { EncryptedStore } from '../../../../lib/encryptedStore';
 
-export class RealmSigner implements BaseSigner {
+export abstract class RealmSigner implements BaseSigner {
   // TODO use ethers wallet encryption
-  setMnemonic(mnemonic: string, patp: string, passcode: string) {
+  static setMnemonic(mnemonic: string, patp: string, passcode: string) {
     /*const encryptedMnemonic = safeStorage
       .encryptString(mnemonic)
       .toString('base64');*/
@@ -25,7 +25,7 @@ export class RealmSigner implements BaseSigner {
     const db = new EncryptedStore<string>(storeParams);
     db.store = mnemonic;
   }
-  signTransaction(
+  static signTransaction(
     path: string,
     message: any,
     patp: string,
@@ -35,7 +35,7 @@ export class RealmSigner implements BaseSigner {
     const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
     return wallet.signTransaction(message);
   }
-  async signUqbarTransaction(
+  static async signUqbarTransaction(
     path: string,
     hash: string,
     txn: any,
@@ -69,7 +69,7 @@ export class RealmSigner implements BaseSigner {
     const mySig = { v: oursig.v, r: oursig.r, s: oursig.s };
     return { ethHash, sig: mySig };
   }
-  private getPrivateKey(patp: string, passcode: string) {
+  private static getPrivateKey(patp: string, passcode: string) {
     /*const mnemonic = 
       this.core.services.identity.auth.getMnemonic(null, patp, passcode);*/
     const storeParams = {
@@ -85,11 +85,11 @@ export class RealmSigner implements BaseSigner {
     );*/
     return ethers.utils.HDNode.fromMnemonic(mnemonic);
   }
-  getXpub(path: string, patp: string, passcode: string): string {
+  static getXpub(path: string, patp: string, passcode: string): string {
     return this.getPrivateKey(patp, passcode).derivePath(path).neuter()
       .extendedKey;
   }
-  deleteMnemonic(patp: string, passcode: string) {
+  static deleteMnemonic(patp: string, passcode: string) {
     const storeParams = {
       name: 'mnemonic',
       cwd: `realm.${patp}`,
