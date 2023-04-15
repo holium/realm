@@ -9,7 +9,7 @@ import {
   WalletCreationMode,
   WalletStore,
   WalletView,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from '../stores/models/wallet.model';
 
 // import { DmApp } from './Messages/store';
 import { Dimensions } from '@holium/design-system';

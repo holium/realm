@@ -2,8 +2,6 @@ import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import { Flex, Box, Icon, Text, Button, Avatar } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { shortened, getBaseTheme } from '../../../lib/helpers';
 import { RecipientInput } from './RecipientInput';
 import { AmountInput } from './AmountInput';
 import {
@@ -11,6 +9,8 @@ import {
   ERC20Type,
   WalletView,
 } from 'os/services/tray/wallet-lib/wallet.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { shortened } from 'renderer/apps/Wallet/lib/helpers';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -46,9 +46,6 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     const [amountValid, setAmountValid] = useState(false);
 
     const [recipientValid, setRecipientValid] = useState(false);
-
-    const { theme } = useServices();
-    const themeData = getBaseTheme(theme.currentTheme);
 
     const next = () => {
       if (walletStore.navState.protocol === ProtocolType.UQBAR) {
@@ -159,12 +156,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                   alignItems="center"
                 >
                   <Flex width="100%" justifyContent="space-between">
-                    <Text.Body
-                      variant="body"
-                      color={themeData.colors.text.secondary}
-                    >
-                      TO
-                    </Text.Body>
+                    <Text.Body variant="body">TO</Text.Body>
                     <Flex justifyContent="center">
                       <Flex mr={2}>
                         {!props.transactionRecipient.patp &&
@@ -173,11 +165,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                               flexDirection="column"
                               justifyContent="center"
                             >
-                              <Icon
-                                name="Spy"
-                                size="24px"
-                                color={themeData.colors.text.secondary}
-                              />
+                              <Icon name="Spy" size="24px" />
                               <Text.Body variant="body">
                                 {shortened(props.transactionRecipient.address)}
                               </Text.Body>
@@ -202,10 +190,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                                 <Text.Body variant="body">
                                   {props.transactionRecipient.patp}
                                 </Text.Body>
-                                <Text.Body
-                                  variant="body"
-                                  color={themeData.colors.text.tertiary}
-                                >
+                                <Text.Body variant="body">
                                   {shortened(
                                     props.transactionRecipient.address
                                   )}
@@ -236,12 +221,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                     </Flex>
                   </Flex>
                   <Flex mt={5} width="100%" justifyContent="space-between">
-                    <Text.Body
-                      variant="body"
-                      color={themeData.colors.text.secondary}
-                    >
-                      NETWORK FEE
-                    </Text.Body>
+                    <Text.Body variant="body">NETWORK FEE</Text.Body>
                     <Flex flexDirection="column">
                       <Text.Body variant="body">0.001 ETH</Text.Body>
                       {walletStore.navState.protocol ===
@@ -258,12 +238,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                     </Flex>
                   </Flex>
                   <Flex mt={5} width="100%" justifyContent="space-between">
-                    <Text.Body
-                      variant="body"
-                      color={themeData.colors.text.secondary}
-                    >
-                      TOTAL
-                    </Text.Body>
+                    <Text.Body variant="body">TOTAL</Text.Body>
                     <Flex flexDirection="column">
                       <Text.Body variant="body">
                         {props.transactionAmount + 0.0005}{' '}

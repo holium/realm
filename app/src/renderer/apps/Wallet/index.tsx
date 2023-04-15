@@ -38,6 +38,7 @@ const WalletViews: (network: NetworkType) => { [key: string]: any } = (
 });
 
 const WalletAppPresenter = (props: any) => {
+  console.log('PRESENTING WALLET APP');
   const [hidePending, setHidePending] = useState(true);
 
   const { walletStore } = useShipStore();

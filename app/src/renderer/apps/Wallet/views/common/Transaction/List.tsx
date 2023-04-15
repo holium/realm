@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react';
-import { Flex, Icon, NoScrollBar, Text } from '@holium/design-system';
-import { Row } from 'renderer/components/NewRow';
+import { Row, Flex, Icon, NoScrollBar, Text } from '@holium/design-system';
 import { toJS } from 'mobx';
 import {
   monthNames,

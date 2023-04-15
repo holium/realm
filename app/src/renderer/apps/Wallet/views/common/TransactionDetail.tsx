@@ -9,10 +9,8 @@ import {
   Icon,
   Spinner,
 } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
 import {
   shortened,
-  getBaseTheme,
   formatEthAmount,
   formatBtcAmount,
   convertEthAmountToUsd,
@@ -78,9 +76,6 @@ const TransactionDetailPresenter = () => {
 
   let transaction = getTransaction(walletStore);
 
-  const { theme } = useServices();
-  const themeData = getBaseTheme(theme.currentTheme);
-
   const [notes, setNotes] = useState(transaction?.notes ?? '');
   const [loading, setLoading] = useState(false);
 
@@ -109,9 +104,7 @@ const TransactionDetailPresenter = () => {
 
   return (
     <Flex width="100%" height="100%" flexDirection="column" py={1}>
-      <Text.Custom fontSize={2} color={themeData.colors.text.disabled}>
-        Transaction
-      </Text.Custom>
+      <Text.Custom fontSize={2}>Transaction</Text.Custom>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
         {transaction.status === 'pending' ? (
           <Flex alignItems="center">
@@ -123,12 +116,7 @@ const TransactionDetailPresenter = () => {
             >
               Pending
             </Text.Custom>
-            <Spinner
-              ml={3}
-              mt={1}
-              size={0}
-              color={themeData.colors.text.primary}
-            />
+            <Spinner ml={3} mt={1} size={0} />
           </Flex>
         ) : (
           <Text.Custom
@@ -145,18 +133,11 @@ const TransactionDetailPresenter = () => {
           justifyContent="center"
           alignItems="flex-end"
         >
-          <Text.Custom
-            fontSize={4}
-            color={
-              wasSent
-                ? themeData.colors.text.error
-                : themeData.colors.text.success
-            }
-          >
+          <Text.Custom fontSize={4}>
             {wasSent && '-'} {amountDisplay}
           </Text.Custom>
           {walletStore.navState.protocol === ProtocolType.ETH_MAIN && (
-            <Text.Custom fontSize={2} color={themeData.colors.text.secondary}>
+            <Text.Custom fontSize={2}>
               $
               {isEth
                 ? convertEthAmountToUsd(
@@ -172,27 +153,14 @@ const TransactionDetailPresenter = () => {
         </Flex>
       </Flex>
       <Flex mt={8} width="100%" justifyContent="space-between">
-        <Text.Custom
-          fontSize={1}
-          opacity={0.7}
-          color={themeData.colors.text.secondary}
-        >
+        <Text.Custom fontSize={1} opacity={0.7}>
           {wasSent ? 'SENT TO' : 'RECEIVED FROM'}
         </Text.Custom>
         <Flex alignItems="center">
           {!transaction.theirPatp ? (
             <Icon name="Spy" size={18} opacity={0.5} />
           ) : (
-            <Avatar
-              sigilColor={
-                theme.currentTheme.mode === 'light'
-                  ? ['black', 'white']
-                  : ['white', 'black']
-              }
-              simple={true}
-              size={20}
-              patp={transaction.theirPatp}
-            />
+            <Avatar simple={true} size={20} patp={transaction.theirPatp} />
           )}
           <Text.Custom fontSize={1} ml={2}>
             {themDisplay}
@@ -205,11 +173,7 @@ const TransactionDetailPresenter = () => {
         width="100%"
         justifyContent="space-between"
       >
-        <Text.Custom
-          fontSize={1}
-          opacity={0.7}
-          color={themeData.colors.text.secondary}
-        >
+        <Text.Custom fontSize={1} opacity={0.7}>
           DATE
         </Text.Custom>
         <Text.Custom fontSize={1}>{getDisplayDate(completed)}</Text.Custom>
@@ -220,11 +184,7 @@ const TransactionDetailPresenter = () => {
         width="100%"
         justifyContent="space-between"
       >
-        <Text.Custom
-          fontSize={1}
-          opacity={0.7}
-          color={themeData.colors.text.secondary}
-        >
+        <Text.Custom fontSize={1} opacity={0.7}>
           HASH
         </Text.Custom>
         <Flex position="relative" left="10px">

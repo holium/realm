@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Box, Text } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
 import {
   BitcoinWalletType,
   EthWalletType,
@@ -32,7 +31,6 @@ interface SendTransactionProps {
 export const SendTransaction: FC<SendTransactionProps> = observer(
   (props: SendTransactionProps) => {
     const { coin } = props;
-    const { theme } = useServices();
     const { walletStore } = useShipStore();
     const pendingTx =
       walletStore.navState.protocol === ProtocolType.UQBAR
@@ -54,9 +52,6 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
             justifyContent="center"
             alignItems="center"
             borderRadius="50px"
-            background={
-              theme.currentTheme.mode === 'light' ? '#EAF3FF' : '#262f3b'
-            }
           >
             <Text.Body color="accent">Contract Interaction</Text.Body>
           </Flex>
@@ -70,9 +65,6 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
             justifyContent="center"
             alignItems="center"
             borderRadius="50px"
-            background={
-              theme.currentTheme.mode === 'light' ? '#EAF3FF' : '#262f3b'
-            }
           >
             <Text.Body color="accent">
               {`Send ${

@@ -5,13 +5,10 @@ import { ProviderSelector } from './components/ProviderSelector';
 import { useRooms } from './useRooms';
 import { useTrayApps } from '../store';
 import { RealmProtocol, RoomType } from '@holium/realm-room';
-import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 const RoomsPresenter = () => {
-  const { theme } = useAppState();
   const { ship, spacesStore } = useShipStore();
-  const { windowColor } = theme;
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms(ship?.patp);
 
@@ -97,7 +94,6 @@ const RoomsPresenter = () => {
           content="This is your room provider."
         >
           <ProviderSelector
-            seedColor={windowColor}
             onClick={() => {
               console.log('show provider setup');
             }}
