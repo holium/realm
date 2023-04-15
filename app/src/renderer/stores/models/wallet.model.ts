@@ -1094,12 +1094,65 @@ export const initialWalletState = (ship: string) => ({
 WalletIPC.onUpdate((_event: any, update: any) => {
   const { type, payload } = update;
   // on update we need to requery the store
-  switch (type) {
-    case 'initial':
-      shipStore.walletStore.init();
+  const reaction: string = Object.keys(data)[0];
+  switch (reaction) {
+    case 'wallet':
+      const wallet = data.wallet;
+      if (wallet.network === 'ethereum') {
+        shipStore.walletStore.ethereum.applyWalletUpdate(wallet);
+      } else if (wallet.network === 'bitcoin') {
+        shipStore.walletStore.bitcoin.applyWalletUpdate(wallet);
+      } else if (wallet.network === 'btctestnet') {
+        shipStore.walletStore.btctest.applyWalletUpdate(wallet);
+      }
+      onWallet();
       break;
-    case 'invitations':
-      shipStore.walletStore._onInitialInvitationsUpdate(payload);
+    case 'wallets':
+      const wallets = data.wallets;
+      if (
+        Object.keys(wallets.ethereum).length !== 0 ||
+        Object.keys(wallets.bitcoin).length !== 0 ||
+        Object.keys(wallets.btctestnet).length !== 0
+      ) {
+        shipStore.walletStore.setInitialized(true);
+      }
+      shipStore.walletStore.ethereum.initial(wallets);
+      shipStore.walletStore.bitcoin.initial(wallets.bitcoin);
+      shipStore.walletStore.btctest.initial(wallets.btctestnet);
+      onWallet();
+      break;
+    case 'transaction':
+      const transaction = data.transaction;
+      const network: NetworkStoreType =
+        transaction.net === ProtocolType.ETH_MAIN ||
+        transaction.net === ProtocolType.ETH_GORLI ||
+        transaction.net === ProtocolType.UQBAR
+          ? NetworkStoreType.ETHEREUM
+          : transaction.net === ProtocolType.BTC_MAIN
+          ? NetworkStoreType.BTC_MAIN
+          : NetworkStoreType.BTC_TEST;
+      if (network === NetworkStoreType.ETHEREUM) {
+        shipStore.walletStore.ethereum.wallets
+          .get(transaction.index)
+          ?.applyTransactionUpdate(
+            transaction.net,
+            transaction.contract,
+            transaction.transaction
+          );
+      } else if (network === NetworkStoreType.BTC_MAIN) {
+        /*walletState.bitcoin.wallets
+          .get(transaction.index)!
+          .applyTransactionUpdate(transaction.net, transaction.transaction);*/
+      } else if (network === NetworkStoreType.BTC_TEST) {
+        /*walletState.btctest.wallets.get(
+          transaction.index
+        ).applyTransactions(transaction.net, transaction.transaction);*/
+      }
+      break;
+    case 'settings':
+      shipStore.walletStore.setSettings(data.settings);
+      break;
+    default:
       break;
   }
 });

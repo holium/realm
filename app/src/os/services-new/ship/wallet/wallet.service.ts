@@ -3,6 +3,7 @@ import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { UqbarApi } from '../../../api/uqbar';
 import { Database } from 'better-sqlite3-multiple-ciphers';
 import { WalletApi } from '../../../api/wallet';
+import log from 'electron-log';
 
 export class WalletService extends AbstractService {
   constructor(options?: ServiceOptions, db?: Database) {
@@ -10,25 +11,27 @@ export class WalletService extends AbstractService {
     if (options?.preload) {
       return;
     }
-    // APIConnection.getInstance().conduit.watch({
-    //   app: 'rooms-v2',
-    //   path: '/lib',
-    //   onEvent: async (data, _id, mark) => {
-    //     this.sendUpdate({ mark, data });
-    //   },
-    //   onError: () => console.log('rooms subscription rejected'),
-    //   onQuit: () => {
-    //     console.log('Kicked from rooms subscription');
-    //   },
-    // });
+    this._onEvent = this._onEvent.bind(this);
+    APIConnection.getInstance().conduit.watch({
+      app: 'realm-wallet',
+      path: `/updates`,
+      onEvent: this._onEvent,
+      onQuit: this._onQuit,
+      onError: this._onError,
+    });
   }
-  // public poke(payload: PokeParams) {
-  //   return APIConnection.getInstance().conduit.poke(payload);
-  // }
-  // public scry(payload: Scry) {
-  //   console.log('scry', payload);
-  //   return APIConnection.getInstance().conduit.scry(payload);
-  // }
+
+  private _onEvent = (data: any, _id?: number, mark?: string) => {
+    console.log('wallet event', data, _id, mark);
+  };
+
+  private _onQuit = () => {
+    log.warn('Wallet subscription quit');
+  };
+
+  private _onError = (err: any) => {
+    log.warn('Wallet subscription error', err);
+  };
 
   async uqbarDeskExists(_evt: any) {
     return await UqbarApi.uqbarDeskExists(APIConnection.getInstance().conduit);
