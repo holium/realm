@@ -1093,11 +1093,9 @@ export const initialWalletState = (ship: string) => ({
 
 WalletIPC.onUpdate((_event: any, update: any) => {
   const { type, payload } = update;
-  // on update we need to requery the store
-  const reaction: string = Object.keys(data)[0];
-  switch (reaction) {
+  switch (type) {
     case 'wallet':
-      const wallet = data.wallet;
+      const wallet = payload.wallet;
       if (wallet.network === 'ethereum') {
         shipStore.walletStore.ethereum.applyWalletUpdate(wallet);
       } else if (wallet.network === 'bitcoin') {
@@ -1105,10 +1103,9 @@ WalletIPC.onUpdate((_event: any, update: any) => {
       } else if (wallet.network === 'btctestnet') {
         shipStore.walletStore.btctest.applyWalletUpdate(wallet);
       }
-      onWallet();
       break;
     case 'wallets':
-      const wallets = data.wallets;
+      const wallets = payload.wallets;
       if (
         Object.keys(wallets.ethereum).length !== 0 ||
         Object.keys(wallets.bitcoin).length !== 0 ||
@@ -1119,10 +1116,9 @@ WalletIPC.onUpdate((_event: any, update: any) => {
       shipStore.walletStore.ethereum.initial(wallets);
       shipStore.walletStore.bitcoin.initial(wallets.bitcoin);
       shipStore.walletStore.btctest.initial(wallets.btctestnet);
-      onWallet();
       break;
     case 'transaction':
-      const transaction = data.transaction;
+      const transaction = payload.transaction;
       const network: NetworkStoreType =
         transaction.net === ProtocolType.ETH_MAIN ||
         transaction.net === ProtocolType.ETH_GORLI ||
@@ -1150,7 +1146,7 @@ WalletIPC.onUpdate((_event: any, update: any) => {
       }
       break;
     case 'settings':
-      shipStore.walletStore.setSettings(data.settings);
+      shipStore.walletStore.setSettings(payload.settings);
       break;
     default:
       break;
