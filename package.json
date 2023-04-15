@@ -21,7 +21,7 @@
     "build:conduit": "yarn workspace @holium/conduit build",
     "build:multiplayer": "yarn workspace @holium/realm-presence build",
     "build:room": "yarn workspace @holium/realm-room build",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
+    "lint": "eslint . --fix --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
     "start": "yarn workspace @holium/realm start",
     "start:onboard": "yarn workspace @holium/realm start:onboard",
     "add:realm": "yarn workspace @holium/realm add -W",
@@ -58,6 +58,7 @@
     "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-unused-imports": "^2.0.0",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
     "prettier": "^2.8.3",
     "storybook-addon-state": "^1.0.3",
     "typescript": "^4.9.4"
