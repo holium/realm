@@ -77,18 +77,31 @@ const HomePresenter = (props: HomePaneProps) => {
         justifyContent="flex-start"
       >
         {isOur ? (
-          <>
-            <Flex>
-              {ship && (
-                <Avatar
-                  simple
-                  size={32}
-                  avatar={ship.avatar}
-                  patp={ship.patp}
-                  sigilColor={[ship.color || '#000000', 'white']}
-                />
-              )}
-            </Flex>
+          <Flex
+            flex={8}
+            style={{ position: 'relative' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            maxHeight={42}
+            height={42}
+            gap={12}
+            mb={40}
+            mt={40}
+            flexDirection="row"
+            alignItems="center"
+            justifyContent="center"
+            width="100%"
+          >
+            {ship && (
+              <Avatar
+                simple
+                size={32}
+                avatar={ship.avatar}
+                patp={ship.patp}
+                sigilColor={[ship.color || '#000000', 'white']}
+              />
+            )}
             <AppSearchApp mode="home" />
             <Flex justifyContent="flex-end">
               <IconButton
@@ -106,7 +119,7 @@ const HomePresenter = (props: HomePaneProps) => {
                 <Icon name="Members" size="22px" />
               </IconButton>
             </Flex>
-          </>
+          </Flex>
         ) : (
           <Flex
             initial={{ opacity: 0 }}
