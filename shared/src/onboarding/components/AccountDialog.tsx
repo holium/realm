@@ -61,11 +61,15 @@ export const AccountDialog = ({
     onSubmit?.();
   };
 
+  const onClickHoliumButton = () => {
+    window.open('https://holium.com', '_blank');
+  };
+
   return (
     <AccountDialogCard onSubmit={handleSubmit}>
       <AccountDialogSidebar>
         <Flex flexDirection="column" gap="25px">
-          <HoliumButton size={26} pointer={false} />
+          <HoliumButton size={26} onClick={onClickHoliumButton} />
           {hasShips && (
             <Flex flexDirection="column" gap="2px">
               <AccountDialogSidebarMenuItemText isOpen={false}>
