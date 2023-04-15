@@ -100,6 +100,7 @@ const HomePresenter = (props: HomePaneProps) => {
                 opacity: 1,
                 x: sidebar ? -80 : 0,
                 transition: {
+                  duration: 1,
                   x: { duration: 0.25 },
                 },
               },
