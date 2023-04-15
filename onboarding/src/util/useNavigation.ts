@@ -6,7 +6,8 @@ type AccountPage =
   | '/account/custom-domain'
   | '/account/download-realm'
   | '/account/s3-storage'
-  | '/account/statistics';
+  | '/account/statistics'
+  | '/choose-id';
 
 type OnboardingPage =
   | '/'
@@ -26,6 +27,7 @@ export const accountPageUrl: Record<string, AccountPage> = {
   'S3 Storage': '/account/s3-storage',
   Statistics: '/account/statistics',
   Hosting: '/account',
+  'Get Hosting': '/choose-id',
 };
 
 export const useNavigation = () => {

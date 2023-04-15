@@ -9,11 +9,16 @@ import {
 import { OnboardDialog } from '../components/OnboardDialog';
 
 type Props = {
+  prefilledEmail: string;
   onNoAccount: () => void;
   onLogin: (email: string, password: string) => Promise<boolean>;
 };
 
-export const LoginDialog = ({ onNoAccount, onLogin }: Props) => {
+export const LoginDialog = ({
+  prefilledEmail,
+  onNoAccount,
+  onLogin,
+}: Props) => {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
@@ -38,6 +43,7 @@ export const LoginDialog = ({ onNoAccount, onLogin }: Props) => {
               ref={emailRef}
               type="email"
               placeholder="name@email.com"
+              defaultValue={prefilledEmail}
             />
           </Flex>
           <Flex flexDirection="column" gap={2}>

@@ -32,6 +32,7 @@ export const AccountDialogInnerCard = styled(OnboardDialogCard)`
   background-color: rgba(var(--rlm-window-rgba));
   border-radius: 11px;
   padding: 16px;
+  margin: 0;
 
   @media (max-width: ${TABLET_WIDTH}px) {
     flex: none;
