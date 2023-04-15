@@ -77,6 +77,18 @@ export class WalletService extends AbstractService {
       tx
     );
   }
+
+  createWallet(sender: string, network: string, nickname: string) {
+    console.log('sender', sender);
+    console.log('network', network);
+    console.log('nickname', nickname);
+    WalletApi.createWallet(
+      APIConnection.getInstance().conduit,
+      sender,
+      network,
+      nickname
+    );
+  }
 }
 
 export default WalletService;

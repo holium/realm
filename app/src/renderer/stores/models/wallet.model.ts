@@ -1050,6 +1050,21 @@ export const WalletStore = types
           passcodeString
         );
       }),
+      createWalletFlow: flow(function* (nickname: string) {
+        const sender = self.ourPatp ?? '';
+        let network: string = self.navState.network;
+        if (
+          network === 'bitcoin' &&
+          self.navState.btcNetwork === NetworkStoreType.BTC_TEST
+        ) {
+          network = 'btctestnet';
+        }
+        yield WalletIPC.createWallet(sender, network, nickname);
+      }),
+      createWallet(nickname: string) {
+        this.createWalletFlow(nickname);
+        this.navigate(WalletView.LIST, { canReturn: false });
+      },
     };
   });
 
