@@ -6,6 +6,7 @@ import {
   flow,
   SnapshotOut,
 } from 'mobx-state-tree';
+import { toJS } from 'mobx';
 import { cleanNounColor } from 'os/lib/color';
 import { BazaarIPC } from '../ipc';
 import { Glob } from './docket.model';
@@ -243,7 +244,7 @@ export const BazaarStore = types
     },
     getApp(appId: string) {
       const app = self.catalog.get(appId);
-      if (app) return app;
+      if (app) return toJS(app);
       return self.devAppMap.get(appId);
     },
   }))

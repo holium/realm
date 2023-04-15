@@ -1,9 +1,15 @@
 import { useMemo, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
-import { Text, Card, TextButton } from 'renderer/components';
 import { lighten } from 'polished';
-import { CheckBox, Flex, Spinner } from '@holium/design-system';
+import {
+  Text,
+  Card,
+  Button,
+  CheckBox,
+  Flex,
+  Spinner,
+} from '@holium/design-system';
 import { MediaAccess, MediaAccessStatus } from 'os/types';
 import { MainIPC } from 'renderer/stores/ipc';
 import { useAppState } from 'renderer/stores/app.store';
@@ -28,7 +34,7 @@ const StatusIndicator = styled.div<{ isSubscribed: boolean }>`
 const SystemPanelPresenter = () => {
   const { theme, shellStore } = useAppState();
   // const { bazaarStore, friends, spacesStore, bulletinStore } = useShipStore();
-  const { windowColor, accentColor } = theme;
+  const { windowColor } = theme;
 
   const [mediaStatus, setMediaStatus] = useState<MediaAccess>({
     camera: 'unknown',
@@ -86,14 +92,13 @@ const SystemPanelPresenter = () => {
 
   return (
     <Flex gap={12} flexDirection="column" p={3} width="100%" overflowY="auto">
-      <Text fontSize={7} fontWeight={600} mb={6}>
+      <Text.Custom fontSize={7} fontWeight={600} mb={2}>
         System
-      </Text>
-
-      <Text opacity={0.7} fontSize={3} fontWeight={500}>
+      </Text.Custom>
+      <Text.Custom opacity={0.7} fontSize={3} fontWeight={500}>
         INTERFACE
-      </Text>
-      <Card p="20px" width="100%" customBg={cardColor}>
+      </Text.Custom>
+      <Card elevation={1} p="20px" width="100%" customBg={cardColor}>
         <CheckBox
           title="Isolation Mode"
           label="Prevents the native OS from causing edge events and notifications."
@@ -101,39 +106,38 @@ const SystemPanelPresenter = () => {
           onChange={shellStore.toggleIsolationMode}
         />
       </Card>
-
-      <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
+      <Text.Custom opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
         PERMISSIONS
-      </Text>
+      </Text.Custom>
       <Card
         p="20px"
         width="100%"
-        elevation="none"
+        elevation={1}
         customBg={cardColor}
         flexDirection={'column'}
       >
         <Flex flexDirection="column" gap={12}>
           <Flex flexDirection="row" flex={4} justifyContent="flex-start">
-            <Text fontWeight={500} flex={2} margin={'auto'}>
+            <Text.Custom fontSize={2} fontWeight={500} flex={2} margin={'auto'}>
               Microphone
-            </Text>
+            </Text.Custom>
             <Flex justifyContent="space-between" alignItems="center" flex={2}>
               {mediaStatus.camera === 'granted' ? (
-                <Text
+                <Text.Custom
                   fontSize={2}
                   opacity={0.7}
                   flexDirection="row"
                   alignItems="center"
-                  color={colorMap[mediaStatus.mic] || 'inherit'}
+                  style={{
+                    color: colorMap[mediaStatus.mic] || 'inherit',
+                  }}
                 >
                   {mediaStatus.mic}
-                </Text>
+                </Text.Custom>
               ) : (
-                <TextButton
+                <Button.TextButton
                   style={{ fontWeight: 400 }}
-                  showBackground
-                  textColor={accentColor}
-                  highlightColor={accentColor}
+                  color="accent"
                   disabled={mediaStatus.mic === 'granted'}
                   onClick={() => {
                     MainIPC.askForMicrophone().then((status) => {
@@ -142,7 +146,7 @@ const SystemPanelPresenter = () => {
                   }}
                 >
                   Grant
-                </TextButton>
+                </Button.TextButton>
               )}
             </Flex>
           </Flex>
@@ -152,26 +156,26 @@ const SystemPanelPresenter = () => {
             alignItems="center"
             justifyContent="flex-start"
           >
-            <Text fontWeight={500} flex={2} margin={'auto'}>
+            <Text.Custom fontSize={2} fontWeight={500} flex={2} margin={'auto'}>
               Camera
-            </Text>
+            </Text.Custom>
             <Flex justifyContent="flex-start" flex={2}>
               {mediaStatus.camera === 'granted' ? (
-                <Text
+                <Text.Custom
                   fontSize={2}
                   opacity={0.7}
                   flexDirection="row"
                   alignItems="center"
-                  color={colorMap[mediaStatus.camera] || 'inherit'}
+                  style={{
+                    color: colorMap[mediaStatus.mic] || 'inherit',
+                  }}
                 >
                   {mediaStatus.camera}
-                </Text>
+                </Text.Custom>
               ) : (
-                <TextButton
+                <Button.TextButton
                   style={{ fontWeight: 400 }}
-                  showBackground
-                  textColor={accentColor}
-                  highlightColor={accentColor}
+                  color="accent"
                   // disabled={mediaStatus.camera === 'granted'}
                   onClick={() => {
                     MainIPC.askForCamera().then((status) => {
@@ -180,21 +184,21 @@ const SystemPanelPresenter = () => {
                   }}
                 >
                   Grant
-                </TextButton>
+                </Button.TextButton>
               )}
             </Flex>
           </Flex>
         </Flex>
       </Card>
 
-      <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
+      <Text.Custom opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
         SUBSCRIPTIONS
-      </Text>
+      </Text.Custom>
       <Card
         p="20px"
         width="100%"
         gap={16}
-        elevation="none"
+        elevation={1}
         customBg={cardColor}
         flexDirection={'column'}
       >
@@ -209,44 +213,44 @@ const SystemPanelPresenter = () => {
             <StatusIndicator
               isSubscribed={app.subscriptionState === 'subscribed'}
             />
-            <Text fontWeight={500} width={100}>
+            <Text.Custom fontWeight={500} width={100}>
               {app.name}
-            </Text>
-            <Text fontSize={2} opacity={0.7} flex={1}>
+            </Text.Custom>
+            <Text.Custom fontSize={2} opacity={0.7} flex={1}>
               {app.path}
-            </Text>
+            </Text.Custom>
             {app.subscriptionState === 'unsubscribed' && (
-              <TextButton
+              <Button.TextButton
                 style={{ fontWeight: 600 }}
                 disabled={isSubscribing}
                 onClick={() => resubscribe(app.name)}
               >
                 Reconnect
-              </TextButton>
+              </Button.TextButton>
             )}
             {app.subscriptionState === 'subscribing' && <Spinner size={0} />}
           </Flex>
         ))}
       </Card>
 
-      <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
+      <Text.Custom opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
         SOUNDS
-      </Text>
+      </Text.Custom>
       <Card
         p="20px"
         width="100%"
         // minHeight="240px"
-        elevation="none"
+        elevation={1}
         customBg={cardColor}
         flexDirection={'column'}
       >
-        <Text>Coming Soon</Text>
+        <Text.Custom>Coming Soon</Text.Custom>
       </Card>
 
       {/* 
-    <Text opacity={0.7} fontSize={3} fontWeight={500}>
+    <Text.Custom opacity={0.7} fontSize={3} fontWeight={500}>
       MOUSE
-    </Text>
+    </Text.Custom>
     <Card
         p="20px"
         width="100%"
@@ -255,9 +259,9 @@ const SystemPanelPresenter = () => {
         customBg={cardColor}
         flexDirection={'column'}
       >
-        <Text mb={4}>
+        <Text.Custom mb={4}>
           Cursor Type:
-        </Text>
+        </Text.Custom>
         <Flex >
             <RadioGroup
                 selected={mouseOption}
@@ -276,13 +280,13 @@ const SystemPanelPresenter = () => {
             // TODO default value doesnt work
             // there appears to be no way to set an initial value to the checkbox component
           />
-          <Text>Use profile color for cursor</Text>
+          <Text.Custom>Use profile color for cursor</Text.Custom>
         </Flex>
 
     </Card>
-    <Text opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
+    <Text.Custom opacity={0.7} fontSize={3} fontWeight={500} mt={2}>
       SOUNDS
-    </Text>
+    </Text.Custom>
     <Card
         p="20px"
         width="100%"
@@ -294,8 +298,8 @@ const SystemPanelPresenter = () => {
        <Flex mt={2} justifyContent="flex-start">
           <Checkbox mr={16} defaultValue="false" />
           <Flex flexDirection='column' justifyContent='center' gap={4}>
-        <Text>Disable OS System Sounds</Text>
-          <Text fontWeight='200'>These sounds play on login, logout, etc.</Text>
+        <Text.Custom>Disable OS System Sounds</Text.Custom>
+          <Text.Custom fontWeight='200'>These sounds play on login, logout, etc.</Text.Custom>
           </Flex>
         </Flex>
     </Card> */}

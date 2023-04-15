@@ -1,8 +1,8 @@
 import { useMemo, useRef } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, PersonRow } from 'renderer/components';
+import { PersonRow } from 'renderer/components-new/People/PersonRow';
 import { FriendType } from 'os/services/ship/models/friends';
-import { WindowedList } from '@holium/design-system';
+import { Flex, Text, WindowedList } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 const FriendsListPresenter = () => {
@@ -50,7 +50,7 @@ const FriendsListPresenter = () => {
   };
 
   const TitleRow = ({ title }: { title: string }) => (
-    <Text
+    <Text.Custom
       key={title}
       pt={23}
       style={{ textTransform: 'uppercase' }}
@@ -61,7 +61,7 @@ const FriendsListPresenter = () => {
       mb="4px"
     >
       {title}
-    </Text>
+    </Text.Custom>
   );
 
   const HintRow = ({ hint }: { hint: string }) => (
@@ -72,9 +72,9 @@ const FriendsListPresenter = () => {
       alignItems="center"
       height={60}
     >
-      <Text fontSize={2} opacity={0.5}>
+      <Text.Custom fontSize={2} opacity={0.5}>
         {hint}
-      </Text>
+      </Text.Custom>
     </Flex>
   );
 

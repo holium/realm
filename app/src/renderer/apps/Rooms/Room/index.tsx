@@ -152,9 +152,10 @@ const RoomPresenter = () => {
           <Flex alignItems="center">
             <Button.IconButton
               className="realm-cursor-hover"
-              size={26}
-              customColor={
-                presentRoom.creator === ship?.patp ? 'intent-alert' : 'icon'
+              size={30}
+              showOnHover
+              iconColor={
+                presentRoom.creator === ship?.patp ? 'intent-alert' : undefined
               }
               onClick={(evt) => {
                 evt.stopPropagation();
@@ -165,7 +166,12 @@ const RoomPresenter = () => {
                 }
               }}
             >
-              <Icon name="RoomLeave" size={22} opacity={0.7} />
+              <Icon
+                name="RoomLeave"
+                fill="intent-alert"
+                size={22}
+                opacity={0.9}
+              />
             </Button.IconButton>
           </Flex>
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
@@ -205,8 +211,9 @@ const RoomPresenter = () => {
             >
               <Button.IconButton
                 className="realm-cursor-hover"
-                size={26}
-                customColor={roomView === 'chat' ? 'accent' : 'icon'}
+                size={30}
+                showOnHover
+                iconColor={roomView === 'chat' ? 'accent' : 'icon'}
                 onClick={(evt) => {
                   evt.stopPropagation();
                   roomView === 'chat'
@@ -214,7 +221,7 @@ const RoomPresenter = () => {
                     : setRoomView('chat');
                 }}
               >
-                <Icon name="Chat3" size={22} opacity={0.7} />
+                <Icon name="Chat3" size={22} opacity={0.9} />
               </Button.IconButton>
             </Badge>
           </Flex>

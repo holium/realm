@@ -1,5 +1,5 @@
-import { Avatar, Flex, Box } from '@holium/design-system';
 import { observer } from 'mobx-react';
+import { Avatar, Flex, Box } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 interface AvatarRowProps {

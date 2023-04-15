@@ -18,6 +18,9 @@ import { spacesPreload } from 'os/services-new/ship/spaces/spaces.service';
 import { bazaarPreload } from 'os/services-new/ship/spaces/bazaar.service';
 
 const appPreload = {
+  setPartitionCookie: (partition: string, cookie: any) => {
+    ipcRenderer.send('set-partition-cookie', partition, cookie);
+  },
   downloadUrlAsFile: (url: string) =>
     ipcRenderer.send('download-url-as-file', { url }),
   /* Senders */

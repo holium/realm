@@ -6,8 +6,7 @@ import { AppWindowType } from '../../../../../os/services/shell/desktop.model';
 import { AppWindowByType } from './AppWindowByType';
 import { AppWindowContainer } from './AppWindow.styles';
 import { AppWindowResizeHandles } from './AppWindowResizeHandles';
-import { Flex } from 'renderer/components';
-import { useToggle } from '@holium/design-system';
+import { useToggle, Flex } from '@holium/design-system';
 import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
 import {
   denormalizeBounds,

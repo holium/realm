@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Input } from 'renderer/components';
+import { Box, Flex, TextInput } from '@holium/design-system';
 import { createUrl } from '../helpers/createUrl';
 import { useBrowser } from '../store';
 import { ToolbarLockIcon } from './ToolbarLockIcon';
@@ -60,25 +60,30 @@ const ToolbarSearchInputPresenter = ({ innerRef, readyWebview }: Props) => {
 
   return (
     <Flex flex={1} ref={innerRef}>
-      <Input
+      <TextInput
         autoFocus
+        id="browser-search-input"
+        name="browser-search-input"
         tabIndex={0}
-        leftIcon={
-          <ToolbarLockIcon
-            isSafe={currentTab.isSafe}
-            loading={currentTab.loader.state === 'loading'}
-          />
+        leftAdornment={
+          <Box ml={2}>
+            <ToolbarLockIcon
+              isSafe={currentTab.isSafe}
+              loading={currentTab.loader.state === 'loading'}
+            />
+          </Box>
         }
-        rightIcon={<ToolbarSearchIcon onClick={search} />}
-        placeholder="Search Qwant or enter url"
-        wrapperStyle={{
+        rightAdornment={<ToolbarSearchIcon onClick={search} />}
+        placeholder="Search DuckDuckGo or enter url"
+        width="100%"
+        style={{
           borderRadius: '20px',
           height: 32,
           backgroundColor: theme.inputColor,
         }}
         value={input}
         onChange={onInputChange}
-        onKeyPress={onKeyPress}
+        onKeyDown={onKeyPress}
       />
     </Flex>
   );

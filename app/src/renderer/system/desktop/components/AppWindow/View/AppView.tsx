@@ -1,12 +1,11 @@
 import { useRef, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
-import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { applyStyleOverrides } from './applyStyleOverrides';
 import { WebView } from './WebView';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { useAppState } from 'renderer/stores/app.store';
-import { AppType } from 'renderer/stores/models/bazaar.model';
+// import { AppType } from 'renderer/stores/models/bazaar.model';
 import { genCSSVariables } from 'renderer/lib/theme';
 
 const AppViewContainer = styled.div`
@@ -24,13 +23,13 @@ type Props = {
 
 const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
   const { theme, shellStore } = useAppState();
-  const { ship, spacesStore, bazaarStore } = useShipStore();
+  const { ship, spacesStore } = useShipStore();
   const [ready, setReady] = useState(false);
   const webViewRef = useRef<HTMLWebViewElement>(null);
 
   const [appUrl, setAppUrl] = useState<string | null>(null);
 
-  const app = bazaarStore.getApp(appWindow.appId) as AppType;
+  // const app = bazaarStore.getApp(appWindow.appId) as AppType;
   const isActive = shellStore.getWindowByAppId(appWindow.appId)?.isActive;
 
   const [loading, setLoading] = useState(true);
@@ -43,7 +42,7 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
     () => isResizing || isDragging || loading || !isActive,
     [isResizing, isDragging, loading, isActive]
   );
-  console.log(appWindow);
+
   useEffect(() => {
     const webView: Electron.WebviewTag = document.getElementById(
       `${appWindow.appId}-urbit-webview`
@@ -86,8 +85,7 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
       if (appWindow.href?.site) {
         appUrl = `${ship.url}${appWindow.href?.site}?spaceId=${spacesStore.selected?.path}`;
       }
-
-      shellStore.openWindow(toJS(app));
+      // shellStore.openWindow(toJS(app));
       setAppUrl(appUrl);
     }
 

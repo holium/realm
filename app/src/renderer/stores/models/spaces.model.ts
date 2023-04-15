@@ -52,6 +52,7 @@ export const SpaceModel = types
   })
   .views((self) => ({
     isPinned(appId: string) {
+      console.log(self.dock, appId);
       return self.dock.some((app) => app.id === appId);
     },
     get dockAppIds() {
@@ -59,6 +60,10 @@ export const SpaceModel = types
         .slice()
         .sort((a, b) => (a.dockIndex || 0) - (b.dockIndex || 0))
         .map((app) => app.id);
+    },
+    isHost() {
+      // TODO check if admin
+      return self.path.includes(window.ship);
     },
   }))
   .actions((self) => ({

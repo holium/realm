@@ -36,10 +36,12 @@ const VoiceViewPresenter = () => {
       flex={2}
       gap={12}
       py={2}
-      display="grid"
-      gridTemplateColumns={speakers.length + 1 ? `repeat(2, 1fr)` : '.5fr'}
-      gridAutoColumns="1fr"
-      gridAutoRows={'.5fr'}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: speakers.length + 1 ? `repeat(2, 1fr)` : '.5fr',
+        gridAutoColumns: '1fr',
+        gridAutoRows: '.5fr',
+      }}
     >
       <Speaker key={our} type="our" person={our ?? ''} />
       {speakers.map((person: string) => (

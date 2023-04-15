@@ -17,17 +17,17 @@ const AboutPanelPresenter = () => {
   }, []);
 
   return (
-    <Flex flex={1} gap={12} flexDirection="column" p={3}>
-      <Text.Custom fontSize={7} fontWeight={600} mb={6}>
+    <Flex flex={1} flexDirection="column" p={3}>
+      <Text.Custom fontSize={7} fontWeight={600} mb={3}>
         About
       </Text.Custom>
-      <Text.Custom opacity={0.7} fontSize={3} fontWeight={500}>
+      <Text.Custom opacity={0.7} fontSize={3} mb={2} fontWeight={500}>
         RELEASE CHANNEL
       </Text.Custom>
       <Card p="20px" flexDirection="column" gap={16}>
-        <Text.Body>
+        <Text.Custom fontSize={2} mb={2}>
           The release channel determines which Realm updates you receive.
-        </Text.Body>
+        </Text.Custom>
         <Select
           id="about-release-channel-setting"
           maxWidth={200}

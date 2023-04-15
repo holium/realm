@@ -123,6 +123,8 @@ const RoomChatPresenter = () => {
           ref={chatInputRef}
           spellCheck={false}
           style={{
+            width: '100%',
+            height: 24,
             borderRadius: 6,
           }}
           value={text.state.value}

@@ -31,7 +31,6 @@ export * from './Crest';
 export * from '../components-new/People';
 export * from './SpacePicture';
 export * from '../system/desktop/components/Home/AppTile';
-export * from './Notification/InnerNotification';
 export * from '../components-new/ConnectionStatus';
 export * from './urbitSvg';
 export * from './NoScrollbar';

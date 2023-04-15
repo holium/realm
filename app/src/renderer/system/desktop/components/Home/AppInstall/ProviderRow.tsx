@@ -2,13 +2,10 @@ import { useRef, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { darken } from 'polished';
-import { Flex, Text } from 'renderer/components';
-import { ThemeType } from '../../../../../theme';
-import { Avatar } from '@holium/design-system';
+import { Avatar, Flex, Text } from '@holium/design-system';
 import { useAppState } from 'renderer/stores/app.store';
 
 interface RowProps {
-  theme: ThemeType;
   selected?: boolean;
   customBg: string;
 }
@@ -22,7 +19,7 @@ export const ProviderRowStyle = styled(motion.div)<RowProps>`
   flex-direction: row;
   overflow: visible;
   align-items: center;
-  transition: ${(props: RowProps) => props.theme.transition};
+  transition: var(--transition);
   ${(props: RowProps) =>
     props.selected
       ? css`
@@ -30,7 +27,7 @@ export const ProviderRowStyle = styled(motion.div)<RowProps>`
         `
       : css`
           &:hover {
-            transition: ${(props: RowProps) => props.theme.transition};
+            transition: var(--transition);
             background-color: ${props.customBg
               ? darken(0.025, props.customBg)
               : 'inherit'};
@@ -75,9 +72,12 @@ export const ProviderRow = ({ id, ship, color, onClick }: ProviderRowProps) => {
           sigilColor={[color || '#000000', 'white']}
         />
         <Flex flexDirection="column" flex={1}>
-          <Text fontWeight={500} color={currentTheme.textColor}>
+          <Text.Custom
+            fontWeight={500}
+            style={{ color: currentTheme.textColor }}
+          >
             {ship}
-          </Text>
+          </Text.Custom>
         </Flex>
       </Flex>
     </ProviderRowStyle>

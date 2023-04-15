@@ -1,9 +1,34 @@
 import { MouseEventHandler } from 'react';
-import { Button, Icon, IconPathsType } from '@holium/design-system';
+import {
+  Button,
+  ColorVariants,
+  Icon,
+  IconPathsType,
+} from '@holium/design-system';
+import styled from 'styled-components';
+
+type WindowButtonProps = {
+  bgColor?: string;
+};
+
+const WindowButton = styled(Button.IconButton)<WindowButtonProps>`
+  position: relative;
+  width: 24px;
+  height: 24px;
+  transition: var(--transition);
+  &:hover:not([disabled]) {
+    ${({ bgColor }) =>
+      bgColor && `background-color rgba(var(--rlm-${bgColor}-rgba), 0.12)`};
+    svg {
+      fill: ${({ bgColor }) => `rgba(var(--rlm-${bgColor}-rgba))`};
+    }
+    transition: var(--transition);
+  }
+`;
 
 interface WindowIconProps {
   icon: IconPathsType;
-  bg: string;
+  iconColor?: ColorVariants;
   disabled?: boolean;
   size?: number;
   fillWithBg?: boolean;
@@ -11,28 +36,22 @@ interface WindowIconProps {
 }
 
 export const AppWindowIcon = ({
-  size = 24,
-  disabled,
   icon,
-  bg,
-  fillWithBg,
+  iconColor,
   onClick,
 }: WindowIconProps) => (
-  <Button.IconButton
+  <WindowButton
+    position="relative"
     className="realm-cursor-hover"
-    size={size}
-    // initial={{ background: rgba(bg, 0) }}
-    // whileHover={{ background: rgba(bg, 0.2), fill: bg }}
-    // transition={{ background: 0.2, fill: 0.2 }}
-    // hoverFill={fillWithBg ? bg : iconColor}
-    // onPointerDown={(evt: any) => {
-    //   evt.stopPropagation();
-    // }}
+    bgColor={iconColor}
+    onPointerDown={(evt: any) => {
+      evt.stopPropagation();
+    }}
     onDrag={(evt: any) => {
       evt.stopPropagation();
     }}
     onClick={onClick}
   >
-    <Icon name={icon} size={22} />
-  </Button.IconButton>
+    <Icon name={icon} size={20} />
+  </WindowButton>
 );

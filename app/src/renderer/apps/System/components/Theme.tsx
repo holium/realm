@@ -11,6 +11,7 @@ import {
   Card,
   Button,
   TextInput,
+  Box,
 } from '@holium/design-system';
 import { useAppState } from 'renderer/stores/app.store';
 import { ShipMobxType, useShipStore } from 'renderer/stores/ship.store';
@@ -68,6 +69,7 @@ const ThemePanelPresenterView = ({
   space,
 }: ThemePanelPresenterViewProps) => {
   const { setTheme } = useAppState();
+  // const { spacesStore } = useShipStore();
   const { windowColor, inputColor } = theme;
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
   const [wpOption, setWpOption] = useState<wpOptionType>(undefined);
@@ -135,20 +137,28 @@ const ThemePanelPresenterView = ({
   });
 
   return (
-    <Flex gap={12} flexDirection="column" p={3} width="100%" overflowY="auto">
+    <Flex
+      gap={12}
+      flexDirection="column"
+      p={3}
+      width="100%"
+      height="100%"
+      overflowY="auto"
+    >
       <Flex flexDirection="row" justifyContent={'space-between'} mb={0}>
         <Text.Custom fontSize={7} fontWeight={600}>
           Theme
         </Text.Custom>
-
         {canEditSpace && (
-          <Button.TextButton
-            style={{ fontWeight: 400 }}
-            disabled={!themeForm.computed.isValid || !canEditSpace}
-            onClick={themeForm.actions.submit}
-          >
-            Save
-          </Button.TextButton>
+          <Box>
+            <Button.TextButton
+              style={{ fontWeight: 400 }}
+              disabled={!themeForm.computed.isValid || !canEditSpace}
+              onClick={themeForm.actions.submit}
+            >
+              Save
+            </Button.TextButton>
+          </Box>
         )}
       </Flex>
 
@@ -242,20 +252,25 @@ const ThemePanelPresenterView = ({
         WALLPAPER
       </Text> */}
 
-      <Card p="20px" width="100%" customBg={cardColor} flexDirection={'column'}>
+      <Card
+        p="20px"
+        width="100%"
+        customBg={cardColor}
+        elevation={1}
+        flexDirection={'column'}
+      >
         <Text.Custom mb={4} fontWeight={500}>
           Current
         </Text.Custom>
-
         <WallpaperPreview src={theme.wallpaper} />
-
-        <Text.Custom mt={6} mb={2} fontWeight={500}>
+        <Text.Custom mt={4} mb={2} fontWeight={500}>
           Gallery
         </Text.Custom>
-
         <RadioImages
-          // customBg={windowColor}
-          // accentColor={accentColor}
+          // style={{
+          //   background: 'rgba(var((--rlm-overlay-hover-rgba))',
+          // }}
+
           selected={wpOption}
           options={wpGalleryKeys.map((key: string) => ({
             imageSrc: wpGallery[key],
@@ -269,8 +284,7 @@ const ThemePanelPresenterView = ({
             }
           }}
         />
-
-        <Text.Custom my={4} fontWeight={500}>
+        <Text.Custom mt={4} mb={2} fontWeight={500}>
           Custom
         </Text.Custom>
         <TextInput

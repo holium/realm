@@ -18,7 +18,6 @@ interface IPersonRow {
   avatar?: string | null;
   nickname?: string | null;
   description?: string | null;
-  style?: any;
   contextMenuOptions?: MenuItemProps[];
   children?: any;
 }
@@ -30,7 +29,6 @@ export const PersonRow = ({
   avatar,
   nickname,
   description,
-  style,
   contextMenuOptions,
   children,
 }: IPersonRow) => {

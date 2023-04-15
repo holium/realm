@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
 import { observer } from 'mobx-react';
-import { Badge, Flex } from 'renderer/components';
+import { Badge } from 'renderer/components';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/lib/position';
-import { Icon, BarButton } from '@holium/design-system';
+import { Flex, Icon, BarButton } from '@holium/design-system';
 import { AppRegistry } from 'renderer/apps/registry';
 
 const MessagesTrayPresenter = () => {

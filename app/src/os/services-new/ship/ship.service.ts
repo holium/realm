@@ -86,6 +86,14 @@ export class ShipService extends AbstractService {
     this.services?.spaces.init();
   }
 
+  public updateCookie(cookie: string) {
+    this.shipDB?.setCredentials(
+      this.credentials.url,
+      this.credentials.code,
+      cookie
+    );
+  }
+
   get credentials() {
     return this.shipDB?.getCredentials();
   }

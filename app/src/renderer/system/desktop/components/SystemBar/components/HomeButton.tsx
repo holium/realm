@@ -6,7 +6,6 @@ const HomeButtonPresenter = () => {
   const { shellStore } = useAppState();
 
   const onHome = () => {
-    console.log('onHome', shellStore.isHomePaneOpen);
     if (shellStore.isHomePaneOpen) {
       shellStore.closeHomePane();
     } else shellStore.openHomePane();

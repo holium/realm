@@ -7,6 +7,8 @@ import {
 } from './window.model';
 import { getInitialWindowBounds } from '../../lib/window-manager';
 import { toJS } from 'mobx';
+import { shipStore } from '../ship.store';
+import { MainIPC } from '../ipc';
 
 export const ShellModel = types
   .model('ShellModel', {
@@ -139,13 +141,38 @@ export const ShellModel = types
       const newWindow = AppWindowModel.create({
         appId: app.id,
         title: app.title,
-        glob,
-        href,
+        glob: glob,
+        href: toJS(href),
         state: 'normal',
         zIndex: self.windows.size + 1,
         type: app.type,
         bounds: getInitialWindowBounds(app, self.desktopDimensions),
       });
+      const credentials = {
+        url: shipStore.ship?.url,
+        cookie: shipStore.ship?.cookie,
+        ship: shipStore.ship?.patp,
+      };
+      // console.log('credentials', credentials);
+      if (app.type === 'urbit') {
+        const appUrl = newWindow.href?.glob
+          ? `${credentials.url}/apps/${app.id}`
+          : `${credentials.url}${newWindow.href?.site}`;
+
+        MainIPC.setPartitionCookie(`${app.type}-webview`, {
+          url: appUrl,
+          name: `urbauth-${credentials.ship}`,
+          value: credentials.cookie?.split('=')[1].split('; ')[0],
+        });
+      } else if (app.type === 'dev') {
+        const appUrl = app.web.url;
+        // Hit the main process handler for setting partition cookies
+        MainIPC.setPartitionCookie(`${app.type}-webview`, {
+          url: appUrl,
+          name: `urbauth-${credentials.ship}`,
+          value: credentials.cookie?.split('=')[1].split('; ')[0],
+        });
+      }
 
       self.windows.set(newWindow.appId, newWindow);
       this.setActive(newWindow.appId);

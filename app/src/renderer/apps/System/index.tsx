@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text } from 'renderer/components';
 import { ThemePanel } from './components/Theme';
 import { SystemPanel } from './components/System';
 import { AboutPanel } from './components/About';
 import { HelpPanel } from './components/Help';
 import { AccountPanel } from './components/Account';
-import { Avatar, RadioList } from '@holium/design-system';
+import { Avatar, RadioList, Flex, Text, Box } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 type SystemPanelType =
@@ -28,22 +27,21 @@ const SystemAppPresenter = () => {
     <Flex flex={1} minHeight={0}>
       {/* left hand side, list selector view */}
       <Flex flex={1} gap={12} flexDirection="column" p={3}>
-        <Flex
-          flexDirection="row"
-          alignItems="center"
-          gap={8}
-          maxWidth={'220px'}
-        >
+        <Flex flexDirection="row" alignItems="center" gap={8} width={'240px'}>
           {/* sig and patp */}
-          <Avatar
-            // borderColor={backgroundColor}
-            borderRadiusOverride="4px"
-            simple
-            size={55}
-            avatar={ship.avatar}
-            patp={ship.patp}
-            sigilColor={[ship.color || '#000000', 'white']}
-          />
+          <Box height={55} width={55}>
+            <Avatar
+              borderRadiusOverride="4px"
+              simple
+              size={55}
+              style={{
+                minWidth: 55,
+              }}
+              avatar={ship.avatar}
+              patp={ship.patp}
+              sigilColor={[ship.color || '#000000', 'white']}
+            />
+          </Box>
           <Flex
             flexDirection="column"
             ml={2}
@@ -53,13 +51,13 @@ const SystemAppPresenter = () => {
             }}
           >
             {ship.nickname && (
-              <Text fontWeight={500} fontSize={2}>
+              <Text.Custom fontWeight={500} fontSize={2}>
                 {ship.nickname}
-              </Text>
+              </Text.Custom>
             )}
-            <Text fontWeight={300} fontSize={2}>
+            <Text.Custom fontWeight={300} fontSize={2}>
               {ship.patp}
-            </Text>
+            </Text.Custom>
           </Flex>
         </Flex>
 

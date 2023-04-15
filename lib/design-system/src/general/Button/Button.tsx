@@ -226,6 +226,7 @@ export type IconButtonProps = ButtonProps & {
   showOnHover?: boolean;
   isSelected?: boolean;
   customColor?: ColorVariants;
+  iconColor?: ColorVariants;
 };
 
 const IconButton = styled(Base)<IconButtonProps>`
@@ -258,9 +259,7 @@ const IconButton = styled(Base)<IconButtonProps>`
   svg {
     pointer-events: none;
     fill: ${(props) =>
-      props.customColor
-        ? props.customColor
-        : 'rgba(var(--rlm-icon-rgba), 0.7)'};
+      props.iconColor ? props.iconColor : 'rgba(var(--rlm-icon-rgba))'};
   }
 `;
 

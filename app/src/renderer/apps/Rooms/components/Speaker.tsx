@@ -3,7 +3,6 @@ import { observer } from 'mobx-react';
 import BeatLoader from 'react-spinners/BeatLoader';
 import styled from 'styled-components';
 import { PeerConnectionState, RealmProtocol } from '@holium/realm-room';
-import { darken } from 'polished';
 import { useRooms } from '../useRooms';
 import {
   ContextMenuOption,
@@ -12,7 +11,6 @@ import {
 import { Flex, FlexProps, Text, Avatar, Icon } from '@holium/design-system';
 import { AudioWave } from './AudioWave';
 import { useShipStore } from 'renderer/stores/ship.store';
-import { useAppState } from 'renderer/stores/app.store';
 
 interface ISpeaker {
   person: string;
@@ -29,14 +27,12 @@ const speakerType = {
 
 const SpeakerPresenter = (props: ISpeaker) => {
   const { person, type } = props;
-  const { theme } = useAppState();
   const { ship, friends } = useShipStore();
   const speakerRef = useRef<any>(null);
   const roomsManager = useRooms(ship?.patp);
   const { getOptions, setOptions } = useContextMenu();
   const isOur = person === ship?.patp;
   const metadata = friends.getContactAvatarMetadata(person);
-  console.log(metadata);
 
   let name = metadata?.nickname || person;
   const peer = isOur
@@ -104,7 +100,6 @@ const SpeakerPresenter = (props: ISpeaker) => {
       id={`room-speaker-${person}`}
       // data-close-tray="false"
       ref={speakerRef}
-      hoverBg={darken(0.04, theme.windowColor)}
       key={person}
       gap={4}
       flexDirection="column"
@@ -188,15 +183,13 @@ const SpeakerPresenter = (props: ISpeaker) => {
 
 export const Speaker = observer(SpeakerPresenter);
 
-type SpeakerStyle = FlexProps & { hoverBg: string };
-
-const SpeakerWrapper = styled(Flex)<SpeakerStyle>`
+const SpeakerWrapper = styled(Flex)<FlexProps>`
   padding: 16px 0;
   border-radius: 9px;
   transition: 0.25s ease;
   &:hover {
     transition: 0.25s ease;
-    background-color: ${(props: SpeakerStyle) => props.hoverBg};
+    background: rgba(var(--rlm-overlay-hover-rgba));
   }
 `;
 
