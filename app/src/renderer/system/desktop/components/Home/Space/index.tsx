@@ -15,16 +15,17 @@ import { AppSearchApp } from '../AppInstall/AppSearch';
 
 interface HomePaneProps {
   isOpen?: boolean;
+  isOur: boolean;
 }
 
 type SidebarType = 'members' | 'friends' | null;
 
-const SpaceHomePresenter = (props: HomePaneProps) => {
-  const { isOpen } = props;
+const HomePresenter = (props: HomePaneProps) => {
+  const { isOpen, isOur } = props;
   const { ship, spaces, membership, theme } = useServices();
   const currentSpace = spaces.selected;
   const [sidebar, setSidebar] = useState<SidebarType>(null);
-  const [appGrid, showAppGrid] = useState(false);
+  const [appGrid, showAppGrid] = useState(isOur ? true : false);
 
   const sidebarComponent = useMemo(() => {
     return (
@@ -42,12 +43,12 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
             flexDirection="column"
             flex={2}
           >
-            {sidebar !== null && <Members our={false} />}
+            {sidebar !== null && <Members our={isOur} />}
           </Flex>
         )}
       </AnimatePresence>
     );
-  }, [sidebar]);
+  }, [sidebar, isOur]);
 
   const highlightColor = '#4E9EFD';
   const iconHoverColor = useMemo(
@@ -63,7 +64,9 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
 
   const isAdmin = membership.isAdmin(currentSpace.path, ship.patp);
 
-  const ourTopBar = (
+  const shouldShowAppGrid = appGrid || isOur;
+
+  const OurTopBar = (
     <>
       <Flex>
         {ship && (
@@ -96,6 +99,104 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
     </>
   );
 
+  const SpaceTopBar = (
+    <SpaceTitlebar
+      space={currentSpace}
+      membersCount={membersCount}
+      showAppGrid={appGrid}
+      showMembers={sidebar === 'members'}
+      onToggleApps={() => {
+        showAppGrid(!appGrid);
+      }}
+      onMemberClick={() => {
+        setSidebar(!sidebar ? 'members' : null);
+      }}
+    />
+  );
+
+  const AppGridComponent = (
+    <Flex
+      animate={isOpen ? 'show' : 'exit'}
+      flexDirection="column"
+      justifyContent="flex-start"
+      variants={{
+        hidden: {
+          opacity: 0,
+        },
+        show: {
+          opacity: 1,
+          x: sidebar ? -80 : 0,
+          transition: {
+            x: { duration: 0.25 },
+          },
+        },
+        exit: {
+          opacity: 0,
+        },
+      }}
+      gap={20}
+    >
+      <Text variant="h3" fontWeight={500}>
+        Your Apps
+      </Text>
+      <Flex
+        style={{ position: 'relative' }}
+        gap={32}
+        width={maxWidth}
+        flexWrap="wrap"
+        flexDirection="row"
+      >
+        <AppGrid tileSize="xl2" />
+      </Flex>
+    </Flex>
+  );
+
+  const AppSuiteComponent = (
+    <Flex
+      flex={4}
+      flexGrow={1}
+      position="relative"
+      flexDirection="column"
+      gap={16}
+      mb="180px"
+      initial="hidden"
+      animate={isOpen ? 'show' : 'exit'}
+      exit="hidden"
+      variants={{
+        hidden: {
+          opacity: 0,
+          transition: {
+            opacity: 0.3,
+            staggerChildren: 0,
+            delayChildren: 0,
+          },
+        },
+        show: {
+          opacity: 1,
+          x: sidebar ? -80 : 0,
+          transition: {
+            x: { duration: 0.25 },
+            opacity: 0.3,
+            staggerChildren: 0.1,
+            delayChildren: 0.1,
+          },
+        },
+        exit: {
+          opacity: 0,
+          transition: {
+            opacity: 0.3,
+            staggerChildren: 0,
+            delayChildren: 0,
+          },
+        },
+      }}
+    >
+      <AppSuite patp={ship.patp} isAdmin={isAdmin as boolean} />
+      <RecommendedApps />
+      {/* <RecentActivity /> */}
+    </Flex>
+  );
+
   return (
     <Flex flexDirection="row" width="100%" height="calc(100vh - 50px)">
       <NoScrollBar
@@ -107,150 +208,49 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
         justifyContent="flex-start"
       >
         <Flex
-          flex={1}
-          overflowY="auto"
-          height="100%"
-          flexDirection="column"
+          initial={{ opacity: 0 }}
+          animate={isOpen ? 'show' : 'exit'}
+          exit={{ opacity: 0 }}
+          maxHeight={42}
+          height={42}
+          gap={12}
+          mt={40}
+          mb={46}
+          width={maxWidth}
+          variants={{
+            hidden: {
+              opacity: 0,
+            },
+            show: {
+              opacity: 1,
+              x: sidebar ? -80 : 0,
+              transition: {
+                x: { duration: 0.25 },
+              },
+            },
+            exit: {
+              opacity: 0,
+            },
+          }}
+          flexDirection="row"
+          justifyContent="space-between"
           alignItems="center"
-          justifyContent="flex-start"
         >
-          <Flex
-            initial={{ opacity: 0 }}
-            animate={isOpen ? 'show' : 'exit'}
-            exit={{ opacity: 0 }}
-            maxHeight={42}
-            height={42}
-            gap={12}
-            mt={40}
-            mb={46}
-            width={maxWidth}
-            variants={{
-              hidden: {
-                opacity: 0,
-              },
-              show: {
-                opacity: 1,
-                x: sidebar ? -80 : 0,
-                transition: {
-                  x: { duration: 0.25 },
-                },
-              },
-              exit: {
-                opacity: 0,
-              },
-            }}
-            flexDirection="row"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <SpaceTitlebar
-              space={currentSpace}
-              membersCount={membersCount}
-              showAppGrid={appGrid}
-              showMembers={sidebar === 'members'}
-              onToggleApps={() => {
-                showAppGrid(!appGrid);
-              }}
-              onMemberClick={() => {
-                setSidebar(!sidebar ? 'members' : null);
-              }}
-            />
-          </Flex>
-
-          <Flex
-            flexGrow={1}
-            flexDirection="row"
-            justifyContent="space-between"
-            gap={36}
-            width={maxWidth}
-          >
-            {appGrid && (
-              <Flex
-                animate={isOpen ? 'show' : 'exit'}
-                flexDirection="column"
-                justifyContent="flex-start"
-                variants={{
-                  hidden: {
-                    opacity: 0,
-                  },
-                  show: {
-                    opacity: 1,
-                    x: sidebar ? -80 : 0,
-                    transition: {
-                      x: { duration: 0.25 },
-                    },
-                  },
-                  exit: {
-                    opacity: 0,
-                  },
-                }}
-                gap={20}
-              >
-                <Text variant="h3" fontWeight={500}>
-                  Your Apps
-                </Text>
-                <Flex
-                  style={{ position: 'relative' }}
-                  gap={32}
-                  width={maxWidth}
-                  flexWrap="wrap"
-                  flexDirection="row"
-                >
-                  <AppGrid tileSize="xl2" />
-                </Flex>
-              </Flex>
-            )}
-            {!appGrid && (
-              <Flex
-                flex={4}
-                flexGrow={1}
-                position="relative"
-                flexDirection="column"
-                gap={16}
-                mb="180px"
-                initial="hidden"
-                animate={isOpen ? 'show' : 'exit'}
-                exit="hidden"
-                variants={{
-                  hidden: {
-                    opacity: 0,
-                    transition: {
-                      opacity: 0.3,
-                      staggerChildren: 0,
-                      delayChildren: 0,
-                    },
-                  },
-                  show: {
-                    opacity: 1,
-                    x: sidebar ? -80 : 0,
-                    transition: {
-                      x: { duration: 0.25 },
-                      opacity: 0.3,
-                      staggerChildren: 0.1,
-                      delayChildren: 0.1,
-                    },
-                  },
-                  exit: {
-                    opacity: 0,
-                    transition: {
-                      opacity: 0.3,
-                      staggerChildren: 0,
-                      delayChildren: 0,
-                    },
-                  },
-                }}
-              >
-                <AppSuite patp={ship.patp} isAdmin={isAdmin as boolean} />
-                <RecommendedApps />
-                {/* <RecentActivity /> */}
-              </Flex>
-            )}
-            {sidebarComponent}
-          </Flex>
+          {isOur ? OurTopBar : SpaceTopBar}
+        </Flex>
+        <Flex
+          flexGrow={1}
+          flexDirection="row"
+          justifyContent="space-between"
+          gap={36}
+          width={maxWidth}
+        >
+          {shouldShowAppGrid ? AppGridComponent : AppSuiteComponent}
+          {sidebarComponent}
         </Flex>
       </NoScrollBar>
     </Flex>
   );
 };
 
-export const SpaceHome = observer(SpaceHomePresenter);
+export const Home = observer(HomePresenter);
