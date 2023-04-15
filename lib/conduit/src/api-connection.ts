@@ -5,7 +5,7 @@ export type ConduitSession = {
   url: string;
   ship: string;
   code: string;
-  cookie: string;
+  cookie?: string;
 };
 
 export class APIConnection {
@@ -47,6 +47,9 @@ export class APIConnection {
     return this.conduitInstance;
   }
 
+  public closeChannel(): Promise<boolean> {
+    return this.conduitInstance.closeChannel();
+  }
   /**
    * Relays the current connection status to renderer
    *

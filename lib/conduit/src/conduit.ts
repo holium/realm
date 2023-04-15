@@ -158,6 +158,15 @@ export class Conduit extends EventEmitter {
     this.url = url;
     this.ship = ship;
     this.cookie = cookie;
+    // Get a cookie if not provided
+    if (!this.cookie) {
+      const cookie = await Conduit.fetchCookie(this.url, this.code ?? '');
+      if (cookie) {
+        this.cookie = cookie;
+      } else {
+        this.cookie = null;
+      }
+    }
     this.code = code;
     this.uid = this.generateUID();
     await this.startSSE(this.channelUrl(this.uid));
