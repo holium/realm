@@ -53,7 +53,10 @@ export const Mouse = () => {
 
     window.electron.app.onToggleOnEphemeralChat(ephemeralChat.toggleOn);
 
-    window.electron.app.onToggleOffEphemeralChat(ephemeralChat.toggleOff);
+    window.electron.app.onToggleOffEphemeralChat(() => {
+      ephemeralChat.toggleOff();
+      setChat('');
+    });
 
     window.electron.app.onRealmToAppEphemeralChat((_, c) => setChat(c));
 
