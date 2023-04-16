@@ -106,7 +106,7 @@
       [%edit-path-pins =path =pins]
       [%leave-path =path]
       [%insert =insert-message-action]
-      [%insert-backlog =msg-part]
+      [%insert-backlog =message]
       [%edit =edit-message-action]
       [%delete =msg-id]
       [%delete-backlog =path before=time]

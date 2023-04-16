@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import ReactPlayer from 'react-player';
-import { Flex, Icon, Text } from '../../general';
+import { Flex, Icon, Text } from '../../../general';
 import { isSpotifyLink } from '../../util/links';
 import { BlockProps, Block } from '../Block/Block';
 

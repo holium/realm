@@ -7,14 +7,12 @@ import {
   WebPreferences,
 } from 'electron';
 import log from 'electron-log';
-import AbstractService, {
-  ServiceOptions,
-} from './services-new/abstract.service';
-import { AuthService } from './services-new/auth/auth.service';
-import { ShipService } from './services-new/ship/ship.service';
+import AbstractService, { ServiceOptions } from './services/abstract.service';
+import { AuthService } from './services/auth/auth.service';
+import { ShipService } from './services/ship/ship.service';
 import { getReleaseChannel, setReleaseChannel } from './lib/settings';
 import { getCookie } from './lib/shipHelpers';
-import APIConnection from './services-new/conduit';
+import APIConnection from './services/conduit';
 
 export class RealmService extends AbstractService {
   // private realmProcess: RealmProcess | null = null;
@@ -164,14 +162,14 @@ export class RealmService extends AbstractService {
     let ship = undefined;
     let desks = undefined;
     // INSTALL_MOON is a string of format <moon>:<desk>,<desk>,<desk>,...
-    // example: INSTALL_MOON=~hostyv:realm,courier
+    // example: INSTALL_MOON=~hostyv:realm
     if (process.env.INSTALL_MOON && process.env.INSTALL_MOON !== 'bypass') {
       const parts: string[] = process.env.INSTALL_MOON.split(':');
       ship = parts[0];
       desks = parts[1].split(',');
     } else {
       ship = channel === 'latest' ? '~hostyv' : '~nimwyd-ramwyl-dozzod-hostyv';
-      desks = ['realm', 'courier'];
+      desks = ['realm'];
     }
     for (let i = 0; i < desks.length; i++) {
       const desk = desks[i];

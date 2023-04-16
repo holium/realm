@@ -1,9 +1,12 @@
 import styled, { css } from 'styled-components';
-import { Flex, Row, Text, Icon, TextProps } from '../../general';
+import { toRgbaString } from '../../util/colors';
+import { Flex, Row, Text, Icon, TextProps } from '../../../general';
 import { IconPathsType } from '../../general/Icon/icons';
+import { useMemo } from 'react';
 
 export type MenuItemProps = {
   id?: string;
+  tabIndex?: number;
   icon?: IconPathsType;
   iconColor?: string;
   label: string;
@@ -11,10 +14,7 @@ export type MenuItemProps = {
   backgroundColor?: string;
   disabled?: boolean;
   section?: number;
-  onClick: (
-    evt: React.MouseEvent<HTMLButtonElement>,
-    elem?: HTMLElement
-  ) => void;
+  onClick: (evt: React.MouseEvent<HTMLDivElement>, elem?: HTMLElement) => void;
 };
 
 type MenuItemLabelProps = {
@@ -39,6 +39,10 @@ export const MenuItem = ({
   backgroundColor,
   onClick,
 }: MenuItemProps) => {
+  const rgbaBg = useMemo(
+    () => (backgroundColor ? toRgbaString(backgroundColor) : undefined),
+    [backgroundColor]
+  );
   return (
     <Row
       id={id}
@@ -46,9 +50,9 @@ export const MenuItem = ({
       height={34}
       disabled={disabled}
       className="nav-menu-item"
-      backgroundColor={backgroundColor}
-      onClick={(evt) =>
-        !disabled && onClick(evt as React.MouseEvent<HTMLButtonElement>)
+      backgroundColor={rgbaBg}
+      onClick={(evt: React.MouseEvent<HTMLDivElement>) =>
+        !disabled && onClick(evt)
       }
     >
       <Flex

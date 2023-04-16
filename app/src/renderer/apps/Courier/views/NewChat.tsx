@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { ChatPathType } from 'os/services/chat/chat.service';
 import { useShipStore } from 'renderer/stores/ship.store';
-import { ShipSearch } from 'renderer/components-new/ShipSearch';
+import { ShipSearch } from 'renderer/components/ShipSearch';
 
 export const NewChat = () => {
   const { ship, friends, chatStore } = useShipStore();
@@ -176,7 +176,7 @@ const SelectedShips = ({ ships, onRemove }: SelectedShipsProps) => {
   const { friends } = useShipStore();
 
   return (
-    <Flex py={1} gap={12} overflowY="scroll">
+    <Flex height="98px" py={1} gap={12} overflowY="scroll">
       {Array.from(ships).map((ship) => {
         const metadata = ship
           ? friends.getContactAvatarMetadata(ship)

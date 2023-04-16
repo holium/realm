@@ -1,4 +1,3 @@
-import { AppTileSize, InstallStatus } from '@holium/design-system';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { useMemo } from 'react';
@@ -7,7 +6,7 @@ import { useAppState } from 'renderer/stores/app.store';
 import {
   AppMobxType,
   AppTypes,
-  BazaarStoreType,
+  InstallStatus,
 } from 'renderer/stores/models/bazaar.model';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -17,6 +16,7 @@ import {
   installLabel,
   resumeSuspendLabel,
 } from '../AppInstall/helpers';
+import { AppTileSize } from '../AppTile';
 
 type AppProps = {
   tileId: string;

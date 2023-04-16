@@ -115,9 +115,6 @@ dist
 /ships
 /globs
 
-# Hide urbit repo
-/urbit
-
 .env
 .env.moon1
 .env.moon2
@@ -135,3 +132,6 @@ lib/room/test-ui/public/ships.json
 
 # Storybook
 storybook-static
+
+# submodule
+urbit/*

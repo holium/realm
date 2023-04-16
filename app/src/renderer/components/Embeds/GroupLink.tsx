@@ -1,6 +1,6 @@
 import { Flex, Skeleton, Text } from '@holium/design-system';
 import styled from 'styled-components';
-import { EmbedBox } from '..';
+import { EmbedBox } from '../../components';
 
 interface GroupViewProps {
   loading?: boolean;

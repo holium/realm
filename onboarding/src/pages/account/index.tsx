@@ -8,7 +8,7 @@ import {
   ChangePasswordModal,
   EjectIdModal,
 } from '@holium/shared';
-import { useToggle } from '@holium/design-system';
+import { useToggle } from '@holium/design-system/util';
 import { Page } from '../../components/Page';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 import { api } from '../../util/api';
@@ -37,6 +37,7 @@ const HostingPresenter = () => {
   };
 
   const onSubmitNewEmail = async (email: string) => {
+    if (!token) return Promise.resolve(false);
     try {
       const response = await api.changeEmail(token, email);
 
@@ -71,6 +72,7 @@ const HostingPresenter = () => {
   };
 
   const onSubmitNewPassword = async (password: string) => {
+    if (!token) return Promise.resolve(false);
     try {
       const response = await api.changePassword(token, password);
 
@@ -86,6 +88,7 @@ const HostingPresenter = () => {
   };
 
   const onSubmitNewAccessCode = async () => {
+    if (!token) return Promise.resolve(false);
     if (!selectedShip) return Promise.resolve(false);
 
     const response = await api.resetShipCode(token, selectedShip.id.toString());
@@ -95,6 +98,7 @@ const HostingPresenter = () => {
   };
 
   const onSubmitNewMaintenanceWindow = async (maintenanceWindow: string) => {
+    if (!token) return Promise.resolve(false);
     if (!selectedShip) return Promise.resolve(false);
 
     const response = await api.updateMaintenanceWindow(
@@ -112,6 +116,7 @@ const HostingPresenter = () => {
   };
 
   const onSubmitEjectId = async (ejectAddress: string, ethAddress: string) => {
+    if (!token) return Promise.resolve(false);
     if (!selectedShip) return Promise.resolve(false);
 
     const response = await api.ejectShip(
@@ -127,12 +132,11 @@ const HostingPresenter = () => {
   };
 
   useEffect(() => {
+    if (!token) return;
     api
       .getManagePaymentLink(token)
       .then((response) => setManagePaymentLink(response.url));
   }, []);
-
-  if (!selectedShip) return null;
 
   return (
     <Page title="Account / Hosting" isProtected>
@@ -158,7 +162,7 @@ const HostingPresenter = () => {
       />
       <ChangeMaintenanceWindowModal
         isOpen={changeMaintenanceWindowModal.isOn}
-        initialSelected={selectedShip.maintenance_window.toString()}
+        initialSelected={selectedShip?.maintenance_window.toString()}
         onDismiss={changeMaintenanceWindowModal.toggleOff}
         onSubmit={onSubmitNewMaintenanceWindow}
       />
@@ -171,9 +175,9 @@ const HostingPresenter = () => {
         patps={ships.map((ship) => ship.patp)}
         selectedPatp={selectedPatp}
         email={email}
-        shipUrl={selectedShip.link}
-        shipCode={selectedShip.code}
-        shipMaintenanceWindow={selectedShip.maintenance_window}
+        shipUrl={selectedShip?.link}
+        shipCode={selectedShip?.code}
+        shipMaintenanceWindow={selectedShip?.maintenance_window}
         setSelectedPatp={setSelectedPatp}
         onClickChangeEmail={changeEmailModal.toggleOn}
         onClickChangePassword={changePasswordModal.toggleOn}

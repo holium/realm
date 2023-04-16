@@ -3,9 +3,8 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { AnimatePresence, motion } from 'framer-motion';
 import { rgba } from 'polished';
-import { SpaceHome } from './Space';
-import { OurHome } from './Ship';
-import { PassportMenuProvider } from 'renderer/components-new/People/usePassportMenu';
+import { Home } from './Space';
+import { PassportMenuProvider } from 'renderer/components/People/usePassportMenu';
 import { AppSearchPopover } from './AppInstall/AppSearchPopover';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -22,7 +21,6 @@ const HomePanePresenter = () => {
   const { shellStore, theme } = useAppState();
   const { spacesStore } = useShipStore();
   const isOpen = shellStore.isHomePaneOpen;
-
   const isOur = spacesStore.selected?.type === 'our';
 
   useEffect(() => {
@@ -48,9 +46,7 @@ const HomePanePresenter = () => {
           exit={{ opacity: 0 }}
         >
           <PassportMenuProvider>
-            {/* TODO make app grid not reanimate when switching around */}
-            {isOur && <OurHome isOpen={isOpen} />}
-            {!isOur && <SpaceHome isOpen={isOpen} />}
+            <Home isOpen={isOpen} isOur={isOur} />
             <AppSearchPopover />
           </PassportMenuProvider>
         </HomeWindow>

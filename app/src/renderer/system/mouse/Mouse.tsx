@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MouseState } from '@holium/realm-presence';
-import { useToggle } from '@holium/design-system';
-import { hexToRgb, rgbToString } from 'os/lib/color';
+import { useToggle, hexToRgb, rgbToString } from '@holium/design-system';
 import { AnimatedCursor } from './AnimatedCursor';
 import { EphemeralChat } from './Mouse.styles';
 
@@ -53,7 +52,10 @@ export const Mouse = () => {
 
     window.electron.app.onToggleOnEphemeralChat(ephemeralChat.toggleOn);
 
-    window.electron.app.onToggleOffEphemeralChat(ephemeralChat.toggleOff);
+    window.electron.app.onToggleOffEphemeralChat(() => {
+      ephemeralChat.toggleOff();
+      setChat('');
+    });
 
     window.electron.app.onRealmToAppEphemeralChat((_, c) => setChat(c));
 

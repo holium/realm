@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { Icon, Button, BoxProps, Flex, Spinner } from '../../general';
-import { InputBox, TextArea } from '../../input';
+import { Icon, Button, BoxProps, Flex, Spinner } from '../../../general';
+import { InputBox, TextArea } from '../../../inputs';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
 import { MediaBlock } from '../MediaBlock/MediaBlock';
 import { isImageLink, parseMediaType } from '../../util/links';
@@ -124,7 +124,7 @@ export const ChatInput = ({
   useEffect(() => {
     if (editingMessage) {
       const parsedFragments = convertFragmentsToText(editingMessage);
-      if (inputRef.current && isFocused) {
+      if (inputRef.current && !isFocused) {
         inputRef.current.value = parsedFragments;
         changeRows(inputRef.current.value, inputRef.current.scrollHeight);
         inputRef.current.focus();

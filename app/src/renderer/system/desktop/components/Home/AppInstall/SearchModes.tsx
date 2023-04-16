@@ -7,8 +7,8 @@ import {
   Text,
   Button,
   InstallStatus,
+  NoScrollBar,
 } from '@holium/design-system';
-import { NoScrollBar } from 'renderer/components';
 import { AppRow } from './AppRow';
 import { ProviderRow } from './ProviderRow';
 import { useAppInstaller } from './store';

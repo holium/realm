@@ -6,6 +6,8 @@ import {
   flow,
 } from 'mobx-state-tree';
 import { FriendsIPC } from '../ipc';
+import { cite } from '@urbit/aura';
+import { toJS } from 'mobx';
 
 const FriendStatus = types.enumeration('FriendStatus', [
   'fren',
@@ -16,17 +18,29 @@ const FriendStatus = types.enumeration('FriendStatus', [
 ]);
 export type FriendStatusType = Instance<typeof FriendStatus>;
 
-export const FriendModel = types.model({
-  patp: types.identifier,
-  pinned: types.boolean,
-  tags: types.optional(types.array(types.string), []),
-  status: FriendStatus,
-  nickname: types.maybeNull(types.string),
-  avatar: types.maybeNull(types.string),
-  bio: types.maybeNull(types.string),
-  color: types.maybeNull(types.string),
-  cover: types.maybeNull(types.string),
-});
+export const FriendModel = types
+  .model({
+    patp: types.identifier,
+    pinned: types.boolean,
+    tags: types.optional(types.array(types.string), []),
+    status: FriendStatus,
+    nickname: types.maybeNull(types.string),
+    avatar: types.maybeNull(types.string),
+    bio: types.maybeNull(types.string),
+    color: types.maybeNull(types.string),
+    cover: types.maybeNull(types.string),
+  })
+  .actions((self) => ({
+    setPinned(pinned: boolean) {
+      self.pinned = pinned;
+    },
+    setStatus(status: FriendStatusType) {
+      self.status = status;
+    },
+    setTags(tags: string[]) {
+      applySnapshot(self.tags, tags);
+    },
+  }));
 
 export type FriendType = Instance<typeof FriendModel>;
 
@@ -37,12 +51,18 @@ export const FriendsStore = types
   .views((self) => ({
     get pinned() {
       const list = self.all
+        .map((friend: FriendType) => {
+          return { ...friend, shortPatp: cite(friend.patp) };
+        })
         .filter((friend: any) => friend.status !== 'contact')
         .filter((friend: any) => friend.pinned);
       return list.filter((friend: any) => friend.pinned);
     },
     get unpinned() {
       return self.all
+        .map((friend: FriendType) => {
+          return { ...friend, shortPatp: cite(friend.patp) };
+        })
         .filter((friend: any) => friend.status !== 'contact')
         .filter((friend: any) => !friend.pinned && !(friend.status === 'our'));
     },
@@ -93,8 +113,24 @@ export const FriendsStore = types
     },
     addFriend: flow(function* (patp: string) {
       try {
+        // TODO make this work
         const friend = yield FriendsIPC.addFriend(patp) as Promise<any>;
         self.all.push(friend);
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+    editFriend: flow(function* (
+      patp: string,
+      update: { pinned: boolean; tags: string[] }
+    ) {
+      try {
+        console.log('editFriend', patp, update);
+        yield FriendsIPC.editFriend(patp, update) as Promise<any>;
+        const idx = self.all.findIndex((f) => f.patp === patp);
+        const friend = self.all[idx];
+        friend.setPinned(update.pinned);
+        friend.setTags(toJS(update.tags));
       } catch (error) {
         console.error(error);
       }

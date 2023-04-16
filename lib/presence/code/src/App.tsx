@@ -23,7 +23,7 @@ export type SendTransaction = (
   clientID: string | number
 ) => void;
 
-const filePath = 'desks/courier/mar/graph/validator/dm.hoon';
+const filePath = 'desks/realm/mar/bazaar/action.hoon';
 
 export const App = () => {
   const [editorView, setEditorView] = useState<EditorView>();

@@ -53,7 +53,7 @@ export const PinnedContainer = ({ message }: PinnedContainerProps) => {
       icon: 'EyeOff',
       label: 'Hide pin',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         selectedChat.setHidePinned(true);
       },
@@ -64,7 +64,7 @@ export const PinnedContainer = ({ message }: PinnedContainerProps) => {
         icon: 'Unpin',
         label: 'Unpin',
         disabled: false,
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
           selectedChat.clearPinnedMessage(message.id);
         },

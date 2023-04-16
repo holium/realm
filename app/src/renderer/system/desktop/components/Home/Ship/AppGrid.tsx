@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { useShipStore } from 'renderer/stores/ship.store';
-import { AppTileSize, Box } from '@holium/design-system';
+import { Box } from '@holium/design-system';
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 import { GridAppTile } from './GridAppTile';
+import { AppTileSize } from '../AppTile';
 
 interface AppGridProps {
   tileSize: AppTileSize;

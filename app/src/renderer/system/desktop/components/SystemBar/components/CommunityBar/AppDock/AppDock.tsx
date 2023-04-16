@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react';
-import { AppType } from 'os/services/spaces/models/bazaar';
 import { useAppState } from 'renderer/stores/app.store';
+import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { AppDockView } from './AppDockView';
 
@@ -17,12 +17,13 @@ const AppDockPresenter = () => {
         self.findIndex(({ appId: id }) => id === appId) === index
     )
     .map(({ appId }) => bazaarStore.getApp(appId))
-    .filter(Boolean) as AppType[];
+    .filter(Boolean) as AppMobxType[];
 
   if (!currentSpace) return null;
 
   return (
     <AppDockView
+      spacePath={currentSpace.path}
       pinnedDockApps={pinnedDockApps}
       unpinnedDockApps={unpinnedDockApps}
     />

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Text, Flex, Box, BoxProps, Button, Icon } from '../../general';
+import { Text, Flex, Box, BoxProps, Button, Icon } from '../../../general';
 import { capitalizeFirstLetter } from '../../util/strings';
 import { BubbleAuthor } from './Bubble.styles';
 import {
@@ -11,7 +11,7 @@ import {
 } from './fragment-lib';
 import { FragmentType, FragmentImageType, TEXT_TYPES } from './Bubble.types';
 import { useMemo } from 'react';
-import { convertDarkText } from '../../util';
+import { convertDarkText } from '../../../util';
 
 const ReplyContainer = styled(Flex)`
   flex-direction: column;

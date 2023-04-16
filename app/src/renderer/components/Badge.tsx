@@ -1,10 +1,8 @@
 import React, { FC } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styled, { css } from 'styled-components';
-import { Text } from './Text';
-import { Box } from '@holium/design-system';
+import { Box, Text } from '@holium/design-system';
 import { lighten } from 'polished';
-import { ThemeType } from '../theme';
 
 const Wrapper = styled(motion.div)<{ height: number; width: number }>`
   position: relative;
@@ -13,7 +11,6 @@ const Wrapper = styled(motion.div)<{ height: number; width: number }>`
 `;
 
 interface BadgeStyleProps {
-  theme: ThemeType;
   minimal?: boolean;
   top?: number;
   bottom?: number;
@@ -34,14 +31,12 @@ const BadgeStyle = styled(Box)<BadgeStyleProps>`
           background: ${lighten(0.02, props.background)};
         `
       : css`
-          background: ${lighten(0.02, props.theme.colors.brand.primary)};
+          background: rgba(var(--rlm-accent-rbga));
         `}
 
     border-radius: ${props.minimal ? '50%' : '3px'};
     padding: ${props.minimal ? '0' : '0.5px 3px 0.5px 3px'};
-    color: ${props.textColor
-      ? props.textColor
-      : props.theme.colors.text.primary};
+    color: ${props.textColor ? props.textColor : ' rgba(var(--rlm-text-rgba))'};
     ${props.top &&
     css`
       top: ${props.top}px;
@@ -116,7 +111,11 @@ export const Badge: FC<BadgeProps> = (props: BadgeProps) => {
             minimal={minimal}
             textColor={textColor}
           >
-            {!minimal && <Text fontWeight={500}>{count}</Text>}
+            {!minimal && (
+              <Text.Custom fontSize={1} fontWeight={500}>
+                {count}
+              </Text.Custom>
+            )}
           </BadgeStyle>
         )}
       </AnimatePresence>

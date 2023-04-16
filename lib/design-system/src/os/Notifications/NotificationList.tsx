@@ -1,4 +1,4 @@
-import { Flex, BoxProps, Text } from '../../';
+import { Flex, BoxProps, Text } from '../../../general';
 import { NotificationType } from './Notifications.types';
 import { AppGroup } from './AppGroup';
 import { Notification } from './Notification';

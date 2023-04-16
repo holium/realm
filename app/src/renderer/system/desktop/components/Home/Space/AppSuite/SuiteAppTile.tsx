@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { observer } from 'mobx-react';
-// import { bgIsLightOrDark } from 'os/lib/color';
 import { ContextMenuOption, AppTile } from 'renderer/components';
 import { getAppTileFlags } from 'renderer/lib/app';
 import {
@@ -9,7 +8,7 @@ import {
   handleResumeSuspend,
   installLabel,
 } from '../../AppInstall/helpers';
-import { Box, Button, Icon } from '@holium/design-system';
+import { bgIsLightOrDark, Box, Button, Icon } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { useAppState } from 'renderer/stores/app.store';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
@@ -17,6 +16,7 @@ import {
   AppMobxType,
   InstallStatus,
 } from 'renderer/stores/models/bazaar.model';
+import { rgba } from 'polished';
 
 type Props = {
   index: number;
@@ -35,8 +35,12 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
     return (app as AppMobxType).host;
   }, [app]);
 
-  // const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
-  // const isLight = useMemo(() => lightOrDark === 'light', [lightOrDark]);
+  const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
+  const isLight = useMemo(() => lightOrDark === 'light', [lightOrDark]);
+  const iconColor = useMemo(
+    () => (isLight ? rgba('#333333', 0.7) : rgba('#FFFFFF', 0.7)),
+    [isLight]
+  );
 
   const isPinned = currentSpace?.isPinned(app.id);
   const weRecommended = bazaarStore.isRecommended(app.id);
@@ -144,7 +148,7 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
             // color={iconColor}
             onClick={onInstallation}
           >
-            <Icon name="CloudDownload" size={20} />
+            <Icon name="CloudDownload" size={20} iconColor={iconColor} />
           </Button.IconButton>
         </Box>
       )}

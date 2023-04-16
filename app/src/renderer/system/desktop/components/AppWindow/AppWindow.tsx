@@ -2,20 +2,20 @@ import { debounce } from 'lodash';
 import { PointerEvent, useCallback, useEffect, useMemo } from 'react';
 import { useMotionValue, useDragControls } from 'framer-motion';
 import { observer } from 'mobx-react';
-import { AppWindowType } from '../../../../../os/services/shell/desktop.model';
 import { AppWindowByType } from './AppWindowByType';
 import { AppWindowContainer } from './AppWindow.styles';
 import { AppWindowResizeHandles } from './AppWindowResizeHandles';
 import { useToggle, Flex } from '@holium/design-system';
 import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
-import {
-  denormalizeBounds,
-  normalizeBounds,
-} from 'os/services/shell/lib/window-manager';
 import { TitlebarByType } from './Titlebar/TitlebarByType';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { ErrorBoundary } from '../../../ErrorBoundary';
+import {
+  denormalizeBounds,
+  normalizeBounds,
+} from 'renderer/lib/window-manager';
+import { AppWindowMobxType } from 'renderer/stores/models/window.model';
 
 const CURSOR_WIDTH = 10;
 
@@ -23,7 +23,7 @@ const MIN_WIDTH = 500;
 const MIN_HEIGHT = 400;
 
 type Props = {
-  appWindow: AppWindowType;
+  appWindow: AppWindowMobxType;
 };
 
 const AppWindowPresenter = ({ appWindow }: Props) => {

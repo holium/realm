@@ -7,9 +7,9 @@ import {
   Text,
   InstallStatus,
   Spinner,
+  bgIsLightOrDark,
   Icon,
 } from '@holium/design-system';
-import { bgIsLightOrDark } from 'os/lib/color';
 import { getAppTileFlags } from 'renderer/lib/app';
 import {
   ContextMenuOption,

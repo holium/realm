@@ -5,10 +5,10 @@ import { isValidPatp } from 'urbit-ob';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Flex, Icon, Text, Button, TextInput } from '@holium/design-system';
-import { FriendsList } from './Ship/FriendsList';
 import { MembersList } from './Space/MembersList';
 import { shipStore, useShipStore } from 'renderer/stores/ship.store';
-import { ShipSearch } from 'renderer/components-new/ShipSearch';
+import { ShipSearch } from 'renderer/components/ShipSearch';
+import { useAppState } from 'renderer/stores/app.store';
 
 const HomeSidebar = styled(motion.div)`
   position: relative;
@@ -58,6 +58,7 @@ export const createPeopleForm = (
 };
 
 const MembersPresenter = ({ our }: IMembers) => {
+  const { theme } = useAppState();
   const { spacesStore } = useShipStore();
   const searchRef = useRef(null);
 
@@ -96,6 +97,7 @@ const MembersPresenter = ({ our }: IMembers) => {
 
   return (
     <HomeSidebar
+      filterMode={theme.mode as 'light' | 'dark'}
       onContextMenu={(evt: any) => {
         evt.stopPropagation();
       }}
@@ -160,8 +162,7 @@ const MembersPresenter = ({ our }: IMembers) => {
           }}
         />
       </Flex>
-      {our && <FriendsList />}
-      {!our && <MembersList />}
+      <MembersList our={our} />
     </HomeSidebar>
   );
 };

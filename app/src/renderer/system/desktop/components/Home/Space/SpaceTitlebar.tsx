@@ -14,16 +14,14 @@ interface SpaceTitlebarProps {
   onToggleApps: (evt: MouseEvent) => void;
 }
 
-const SpaceTitlebarPresenter = (props: SpaceTitlebarProps) => {
-  const {
-    space,
-    membersCount,
-    showAppGrid,
-    showMembers,
-    onMemberClick,
-    onToggleApps,
-  } = props;
-
+const SpaceTitlebarPresenter = ({
+  space,
+  membersCount,
+  showAppGrid,
+  showMembers,
+  onMemberClick,
+  onToggleApps,
+}: SpaceTitlebarProps) => {
   return (
     <Flex style={{ position: 'relative' }} width="100%">
       <Flex flex={1}>

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
-import { Box, BoxProps } from '../index';
+import { Box, BoxProps } from '../../../general';
 
 type RowProps = {
   as?: any;
@@ -11,6 +11,7 @@ type RowProps = {
   pending?: boolean;
   noHover?: boolean;
   backgroundColor?: string;
+  onClick?: (evt: React.MouseEvent<HTMLDivElement>) => void;
 } & BoxProps;
 
 export const Row = styled(Box)<RowProps>`

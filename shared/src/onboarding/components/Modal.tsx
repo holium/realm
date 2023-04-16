@@ -1,6 +1,6 @@
 import { FormEvent, ReactNode } from 'react';
 import styled from 'styled-components';
-import { Button, Icon } from '@holium/design-system';
+import { Button, Icon } from '@holium/design-system/general';
 import { MOBILE_WIDTH } from './OnboardDialog.styles';
 
 const ModalContainer = styled.div`
