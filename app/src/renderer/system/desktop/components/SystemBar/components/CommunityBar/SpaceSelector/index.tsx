@@ -2,11 +2,11 @@ import { createRef, useMemo, useCallback } from 'react';
 import { observer } from 'mobx-react';
 import { rgba, lighten, darken } from 'polished';
 
-import { Flex, Pulser, Divider } from 'renderer/components';
+import { Pulser, Divider } from 'renderer/components';
 import { SelectedSpace } from './SelectedSpace';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/lib/position';
-import { BarButton } from '@holium/design-system';
+import { Flex, BarButton } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { useAppState } from 'renderer/stores/app.store';
 import { SystemTrayRegistry } from 'renderer/apps/registry';

@@ -9,7 +9,7 @@ export interface UploadParams {
   Key: string; // the desired location within the bucket
   ContentType: string; // the object's mime-type
   ACL: StorageAcl; // ACL, always 'public-read'
-  Body: File; // the object itself
+  Body: File | Buffer; // the object itself
 }
 
 export interface UploadResult {

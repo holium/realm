@@ -18,7 +18,7 @@ import { DesktopService } from './services/shell/desktop.service';
 import { ShellService } from './services/shell/shell.service';
 import { OnboardingService } from './services/onboarding/onboarding.service';
 import { toJS } from 'mobx';
-import { HoliumAPI } from './api/holium';
+import { HoliumAPI } from './api-to-delete/holium';
 import { PasswordStore } from './lib/passwordStore';
 import { ThemeModelType } from './services/theme.model';
 import { getCookie } from './lib/shipHelpers';

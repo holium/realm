@@ -64,20 +64,16 @@ const SettingsPresenter = () => {
         <Flex ml={1} pl={2} pr={2}></Flex>
       </Flex>
       <Flex flex={1} flexDirection="column">
-        <FormControl.FieldSet>
-          <FormControl.Field>
-            <Text.Label>Audio input</Text.Label>
-            <Select
-              id="rooms-settings-audio-input"
-              options={audioSourceOptions}
-              selected={selectedSource}
-              onClick={(source) => {
-                setSelectedSource(source);
-                roomsManager?.setAudioInput(source);
-              }}
-            />
-          </FormControl.Field>
-        </FormControl.FieldSet>
+        <Text.Label>Audio input</Text.Label>
+        <Select
+          id="rooms-settings-audio-input"
+          options={audioSourceOptions}
+          selected={selectedSource}
+          onClick={(source) => {
+            setSelectedSource(source);
+            roomsManager?.setAudioInput(source);
+          }}
+        />
       </Flex>
     </>
   );

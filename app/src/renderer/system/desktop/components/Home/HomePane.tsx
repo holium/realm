@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { rgba } from 'polished';
 import { SpaceHome } from './Space';
 import { OurHome } from './Ship';
-import { PassportMenuProvider } from 'renderer/components-new/People/usePassportMenu';
+import { PassportMenuProvider } from 'renderer/components/People/usePassportMenu';
 import { AppSearchPopover } from './AppInstall/AppSearchPopover';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';

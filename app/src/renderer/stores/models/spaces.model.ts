@@ -52,7 +52,6 @@ export const SpaceModel = types
   })
   .views((self) => ({
     isPinned(appId: string) {
-      console.log(self.dock, appId);
       return self.dock.some((app) => app.id === appId);
     },
     get dockAppIds() {

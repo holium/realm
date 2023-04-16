@@ -20,7 +20,7 @@ import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 import { pluralize } from 'renderer/lib/text';
 import { MemberRole, MemberStatus } from 'os/types';
 import { useShipStore } from 'renderer/stores/ship.store';
-import { ShipSearch } from 'renderer/components-new/ShipSearch';
+import { ShipSearch } from 'renderer/components/ShipSearch';
 
 interface IMemberList {
   height?: any;

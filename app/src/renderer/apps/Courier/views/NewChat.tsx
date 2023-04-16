@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { ChatPathType } from 'os/services/chat/chat.service';
 import { useShipStore } from 'renderer/stores/ship.store';
-import { ShipSearch } from 'renderer/components-new/ShipSearch';
+import { ShipSearch } from 'renderer/components/ShipSearch';
 
 export const NewChat = () => {
   const { ship, friends, chatStore } = useShipStore();

@@ -10,6 +10,7 @@ import { ChatMessageType } from '../models';
 import { toJS } from 'mobx';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { MainIPC } from 'renderer/stores/ipc';
+import { useAppState } from 'renderer/stores/app.store';
 
 type ChatMessageProps = {
   containerWidth: number;
@@ -28,6 +29,7 @@ export const ChatMessagePresenter = ({
   isNextGrouped,
   onReplyClick,
 }: ChatMessageProps) => {
+  const { theme } = useAppState();
   const { ship, chatStore, friends } = useShipStore();
   const { selectedChat } = chatStore;
   const messageRef = useRef<HTMLDivElement>(null);
@@ -222,7 +224,7 @@ export const ChatMessagePresenter = ({
       isNextGrouped={isNextGrouped}
       expiresAt={message.expiresAt}
       containerWidth={containerWidth}
-      // themeMode={theme.currentTheme.mode as 'light' | 'dark'}
+      themeMode={theme.mode as 'light' | 'dark'}
       isOur={isOur}
       ourShip={ourShip}
       ourColor={ourColor}

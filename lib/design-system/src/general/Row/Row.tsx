@@ -11,6 +11,7 @@ type RowProps = {
   pending?: boolean;
   noHover?: boolean;
   backgroundColor?: string;
+  onClick?: (evt: React.MouseEvent<HTMLDivElement>) => void;
 } & BoxProps;
 
 export const Row = styled(Box)<RowProps>`

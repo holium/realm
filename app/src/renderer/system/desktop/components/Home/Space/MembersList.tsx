@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { observer } from 'mobx-react';
-import { PersonRow } from 'renderer/components-new/People/PersonRow';
+import { PersonRow } from 'renderer/components/People/PersonRow';
 import { Flex, Text, WindowedList } from '@holium/design-system';
 import { MemberType } from 'os/services/spaces/models/members';
 import { useShipStore } from 'renderer/stores/ship.store';

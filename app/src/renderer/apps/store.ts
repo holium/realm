@@ -1,20 +1,21 @@
 import { calculateAnchorPointById } from '../lib/position';
 import { createContext, useContext } from 'react';
 import { Instance, types, onSnapshot, applySnapshot } from 'mobx-state-tree';
-import { RoomsAppState } from 'os/services/tray/rooms.model';
-import {
-  NetworkStoreType,
-  ProtocolType,
-  SharingMode,
-  WalletCreationMode,
-  WalletStore,
-  WalletView,
-} from 'os/services/tray/wallet-lib/wallet.model';
+// import { RoomsAppState } from 'os/services/tray/rooms.model';
+// import {
+//   NetworkStoreType,
+//   ProtocolType,
+//   SharingMode,
+//   WalletCreationMode,
+//   WalletStore,
+//   WalletView,
+// } from 'os/services/tray/wallet-lib/wallet.model';
 
 // import { DmApp } from './Messages/store';
 import { Dimensions } from '@holium/design-system';
 import { RealmUpdateTypes } from 'os/realm.types';
 import { RealmIPC } from 'renderer/stores/ipc';
+import { RoomsAppState } from './Rooms/rooms.model';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -47,7 +48,7 @@ const TrayAppStore = types
     coords: TrayAppCoords,
     dimensions: TrayAppDimensions,
     roomsApp: RoomsAppState,
-    walletApp: WalletStore,
+    // walletApp: WalletStore,
     // dmApp: DmApp,
   })
   .actions((self) => ({
@@ -98,54 +99,54 @@ const loadSnapshot = () => {
 
 const persistedState = loadSnapshot();
 
-const walletAppDefault = {
-  navState: {
-    view: WalletView.NEW,
-    protocol: ProtocolType.ETH_GORLI,
-    lastEthProtocol: ProtocolType.ETH_GORLI,
-    btcNetwork: NetworkStoreType.BTC_MAIN,
-    transSend: false,
-  },
-  ethereum: {
-    block: 0,
-    gorliBlock: 0,
-    protocol: ProtocolType.ETH_GORLI,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    initialized: false,
-    conversions: {},
-  },
-  bitcoin: {
-    block: 0,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    conversions: {},
-  },
-  btctest: {
-    block: 0,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    conversions: {},
-  },
-  navHistory: [],
-  creationMode: 'default',
-  sharingMode: 'anybody',
-  lastInteraction: Date.now(),
-  initialized: false,
-  settings: {
-    passcodeHash: '',
-  },
-  forceActive: false,
-};
+// const walletAppDefault = {
+//   navState: {
+//     view: WalletView.NEW,
+//     protocol: ProtocolType.ETH_GORLI,
+//     lastEthProtocol: ProtocolType.ETH_GORLI,
+//     btcNetwork: NetworkStoreType.BTC_MAIN,
+//     transSend: false,
+//   },
+//   ethereum: {
+//     block: 0,
+//     gorliBlock: 0,
+//     protocol: ProtocolType.ETH_GORLI,
+//     settings: {
+//       walletCreationMode: WalletCreationMode.DEFAULT,
+//       sharingMode: SharingMode.ANYBODY,
+//       defaultIndex: 0,
+//     },
+//     initialized: false,
+//     conversions: {},
+//   },
+//   bitcoin: {
+//     block: 0,
+//     settings: {
+//       walletCreationMode: WalletCreationMode.DEFAULT,
+//       sharingMode: SharingMode.ANYBODY,
+//       defaultIndex: 0,
+//     },
+//     conversions: {},
+//   },
+//   btctest: {
+//     block: 0,
+//     settings: {
+//       walletCreationMode: WalletCreationMode.DEFAULT,
+//       sharingMode: SharingMode.ANYBODY,
+//       defaultIndex: 0,
+//     },
+//     conversions: {},
+//   },
+//   navHistory: [],
+//   creationMode: 'default',
+//   sharingMode: 'anybody',
+//   lastInteraction: Date.now(),
+//   initialized: false,
+//   settings: {
+//     passcodeHash: '',
+//   },
+//   forceActive: false,
+// };
 
 export const trayStore = TrayAppStore.create({
   activeApp: null,
@@ -161,7 +162,7 @@ export const trayStore = TrayAppStore.create({
   roomsApp: {
     currentView: 'list',
   },
-  walletApp: walletAppDefault,
+  // walletApp: walletAppDefault,
   // dmApp: {
   //   currentView: 'dm-list',
   // },
@@ -190,7 +191,7 @@ export function useTrayApps() {
 
 RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
   if (update.type === 'logout') {
-    applySnapshot(trayStore.walletApp, walletAppDefault);
+    // applySnapshot(trayStore.walletApp, walletAppDefault);
   }
 });
 

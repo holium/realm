@@ -1,5 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
-import { Anchor, Flex, Text } from 'renderer/components';
+import { Anchor, Flex, Text } from '@holium/design-system';
 
 type State = {
   error: Error | null;
@@ -35,22 +35,21 @@ export class ErrorBoundary extends Component<Props, State> {
           flexDirection="column"
         >
           <Flex maxWidth="100%" flexDirection="column" my={8}>
-            <Text fontSize={8} fontWeight={600}>
+            <Text.Custom fontSize={4} fontWeight={600}>
               Something went wrong.
-            </Text>
-            <Text my={4} maxWidth={500}>
+            </Text.Custom>
+            <Text.Custom my={4} maxWidth={500}>
               The issue has been logged. Please refresh the page, and reach out
               to{' '}
               <Anchor
                 href="https://twitter.com/HoliumCorp"
                 rel="noreferrer"
                 target="_blank"
-                m={0}
               >
                 @HoliumCorp
               </Anchor>{' '}
               if the issue persists.
-            </Text>
+            </Text.Custom>
             <details style={{ whiteSpace: 'pre-wrap' }}>
               {this.state.error && this.state.error.toString()}
               <br />

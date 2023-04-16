@@ -7,7 +7,7 @@ import {
   SnapshotOut,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
-import { cleanNounColor } from 'os/lib/color';
+import { cleanNounColor } from '@holium/design-system';
 import { BazaarIPC } from '../ipc';
 import { Glob } from './docket.model';
 

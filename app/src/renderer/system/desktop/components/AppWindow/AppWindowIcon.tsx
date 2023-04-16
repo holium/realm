@@ -20,7 +20,7 @@ const WindowButton = styled(Button.IconButton)<WindowButtonProps>`
     ${({ bgColor }) =>
       bgColor && `background-color rgba(var(--rlm-${bgColor}-rgba), 0.12)`};
     svg {
-      fill: ${({ bgColor }) => `rgba(var(--rlm-${bgColor}-rgba))`};
+      ${({ bgColor }) => bgColor && `fill: rgba(var(--rlm-${bgColor}-rgba))`};
     }
     transition: var(--transition);
   }

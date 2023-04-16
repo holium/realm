@@ -8,7 +8,7 @@ import { Flex, Icon, Text, Button, TextInput } from '@holium/design-system';
 import { FriendsList } from './Ship/FriendsList';
 import { MembersList } from './Space/MembersList';
 import { shipStore, useShipStore } from 'renderer/stores/ship.store';
-import { ShipSearch } from 'renderer/components-new/ShipSearch';
+import { ShipSearch } from 'renderer/components/ShipSearch';
 
 const HomeSidebar = styled(motion.div)`
   position: relative;
