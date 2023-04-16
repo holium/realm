@@ -26,8 +26,7 @@ const StatusIndicator = styled.div<{ isSubscribed: boolean }>`
 `;
 
 const SystemPanelPresenter = () => {
-  const { theme, courier, bazaar, bulletin, friends, spaces, desktop } =
-    useServices();
+  const { theme, bazaar, bulletin, friends, spaces, desktop } = useServices();
   const { windowColor, accentColor } = theme.currentTheme;
 
   const [mediaStatus, setMediaStatus] = useState<MediaAccess>({
@@ -53,12 +52,6 @@ const SystemPanelPresenter = () => {
       path: '/updates',
       subscriptionState: bazaar.subscriptionState,
       subscribing: () => bazaar.setSubscriptionStatus('subscribing'),
-    },
-    {
-      name: '%courier',
-      path: '/updates',
-      subscriptionState: courier.subscriptionState,
-      subscribing: () => courier.setSubscriptionStatus('subscribing'),
     },
     {
       name: '%bulletin',

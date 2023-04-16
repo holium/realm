@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
-import { useCallback } from 'react';
-import { OnboardingPage } from '@holium/shared';
+import { useCallback, useMemo } from 'react';
+import { capitalizeFirstLetter } from '@holium/design-system/util';
+import { SidebarSection, OnboardingPage } from '@holium/shared';
 
 export const accountPageUrl: Record<string, OnboardingPage> = {
   'Download Realm': '/account/download-realm',
@@ -14,6 +15,18 @@ export const accountPageUrl: Record<string, OnboardingPage> = {
 export const useNavigation = () => {
   const router = useRouter();
 
+  const currentAccountSection = useMemo(() => {
+    const isAccountSection = router.pathname.split('/')[1] === 'account';
+    if (!isAccountSection) return null;
+
+    const path = router.pathname.split('/')[2] ?? SidebarSection.Hosting;
+    const eachWordCapitalized = path
+      .split('-')
+      .map((word) => capitalizeFirstLetter(word))
+      .join(' ');
+    return eachWordCapitalized as SidebarSection;
+  }, [router.pathname]);
+
   const goToPage = useCallback(
     (page: OnboardingPage, params?: Record<string, string>) => {
       const path =
@@ -24,9 +37,9 @@ export const useNavigation = () => {
   );
 
   const logout = useCallback(() => {
-    goToPage('/');
+    goToPage('/login');
     localStorage.clear();
   }, [router]);
 
-  return { goToPage, logout };
+  return { currentAccountSection, goToPage, logout };
 };

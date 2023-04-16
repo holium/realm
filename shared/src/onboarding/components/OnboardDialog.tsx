@@ -1,5 +1,5 @@
 import { FormEvent, ReactNode } from 'react';
-import { Flex, Icon } from '@holium/design-system/general';
+import { Flex, Icon, Spinner } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
 import {
   OnboardDialogBackButton,
@@ -86,3 +86,14 @@ export const OnboardDialog = ({
     </OnboardDialogCard>
   );
 };
+
+export const OnboardDialogSkeleton = () => (
+  <OnboardDialog
+    icon=""
+    body={
+      <Flex flex={1} justifyContent="center" alignItems="center">
+        <Spinner size={8} />
+      </Flex>
+    }
+  />
+);

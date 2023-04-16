@@ -173,10 +173,6 @@ export const SpacesStore = types
     setJoin(status: 'initial' | 'loading' | 'error' | 'loaded') {
       self.join.state = status;
     },
-    setOurSpace(ourSpace: any) {
-      // self.our = ourSpace;
-      if (!self.selected) self.selected = ourSpace;
-    },
     selectSpace(spacePath: string) {
       self.selected = self.spaces.get(spacePath);
       return self.selected;

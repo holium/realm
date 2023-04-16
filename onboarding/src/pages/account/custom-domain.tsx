@@ -19,6 +19,7 @@ const CustomDomainPresenter = () => {
 
   const onClickSave = async (domain: string) => {
     if (!ship) return;
+    if (!token) return;
 
     setErrorMessage(undefined);
     setSuccessMessage(undefined);
@@ -49,14 +50,12 @@ const CustomDomainPresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  if (!ship) return null;
-
   return (
     <Page title="Account / Download Realm" isProtected>
       <AccountCustomDomainDialog
         patps={ships.map((ship) => ship.patp)}
         selectedPatp={selectedPatp}
-        dropletIp={ship.droplet_ip}
+        dropletIp={ship?.droplet_ip}
         errorMessage={errorMessage}
         successMessage={successMessage}
         setSelectedPatp={setSelectedPatp}

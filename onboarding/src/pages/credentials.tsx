@@ -11,8 +11,6 @@ export default function Credentials() {
     accessCode: '',
   });
 
-  const onBack = () => goToPage('/booting');
-
   const onNext = () => goToPage('/download');
 
   useEffect(() => {
@@ -25,11 +23,7 @@ export default function Credentials() {
 
   return (
     <Page title="Credentials" isProtected>
-      <CredentialsDialog
-        credentials={credentials}
-        onBack={onBack}
-        onNext={onNext}
-      />
+      <CredentialsDialog credentials={credentials} onNext={onNext} />
     </Page>
   );
 }

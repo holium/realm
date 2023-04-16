@@ -9,8 +9,8 @@ import { ThirdEarthShip } from '@holium/shared';
 import { thirdEarthApi } from './thirdEarthApi';
 
 interface IUserContext {
-  token: string;
-  email: string;
+  token: string | null;
+  email: string | null;
   ships: ThirdEarthShip[];
   selectedPatp: string;
   setSelectedPatp: (patp: string) => void;
@@ -23,8 +23,8 @@ type Props = {
 };
 
 export const UserContextProvider = ({ children }: Props) => {
-  const [token, setToken] = useState<string>();
-  const [email, setEmail] = useState<string>();
+  const [token, setToken] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
   const [ships, setShips] = useState<ThirdEarthShip[]>([]);
   const [selectedPatp, setSelectedPatp] = useState<string>('');
 
@@ -45,8 +45,6 @@ export const UserContextProvider = ({ children }: Props) => {
 
     getAndSetUserData();
   }, []);
-
-  if (!token || !email) return null;
 
   return (
     <UserContext.Provider

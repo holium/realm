@@ -24,6 +24,7 @@ const S3StoragePresenter = () => {
   useEffect(() => {
     const selectedShip = ships.find((ship) => ship.patp === selectedPatp);
 
+    if (!token) return;
     if (!selectedShip) return;
 
     thirdEarthApi
@@ -36,7 +37,7 @@ const S3StoragePresenter = () => {
         setNetworkUsage(response.networkUsage?.network_sent_total ?? 0);
         setMinioUsage(response.networkUsage?.minio_sent_total ?? 0);
       });
-  }, []);
+  }, [token, ships, selectedPatp]);
 
   return (
     <AccountS3StorageDialog

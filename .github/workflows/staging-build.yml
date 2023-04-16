@@ -302,7 +302,7 @@ jobs:
             console.log(script({github}, JSON.parse(process.env.CI_ENV), ['./desks/realm']))
         env:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
-      # publish latest agent udpates for realm, courier, and usher
+      # publish latest agent udpates for realm, and usher
       - name: Publish ship updates
         run: |
           mkdir ~/.ssh
@@ -311,8 +311,6 @@ jobs:
           chmod 600 ~/.ssh/usher_rsa
           ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf nimwyd-ramwyl-dozzod-hostyv/realm/*"
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
-          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf nimwyd-ramwyl-dozzod-hostyv/courier/*"
-          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/courier $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
           ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf nimwyd-ramwyl-dozzod-hostyv/usher/*"
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
         env:
@@ -336,7 +334,7 @@ jobs:
               ship: process.env.DEPLOY_SHIP,
               code: process.env.DEPLOY_SHIP_CODE,
               rootUrl: process.env.DEPLOY_ROOT_URL,
-              mounts: ['usher', 'realm', 'courier']
+              mounts: ['usher', 'realm']
             }))
       # Workaround to avoid "Post Run actions/setup-node" failures.
       # See: https://codesti.com/issue/actions/setup-node/317

@@ -86,7 +86,6 @@ const createWindow = async () => {
     show: false,
     width: 1920,
     height: 1080,
-    titleBarStyle: 'hidden',
     icon: getAssetPath('icon.png'),
     title: 'Realm',
     fullscreen: true,

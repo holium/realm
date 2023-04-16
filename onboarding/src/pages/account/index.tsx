@@ -37,6 +37,7 @@ const HostingPresenter = () => {
   };
 
   const onSubmitNewEmail = async (email: string) => {
+    if (!token) return Promise.resolve(false);
     try {
       const response = await thirdEarthApi.changeEmail(token, email);
 
@@ -74,6 +75,7 @@ const HostingPresenter = () => {
   };
 
   const onSubmitNewPassword = async (password: string) => {
+    if (!token) return Promise.resolve(false);
     try {
       const response = await thirdEarthApi.changePassword(token, password);
 
@@ -89,6 +91,7 @@ const HostingPresenter = () => {
   };
 
   const onSubmitNewAccessCode = async () => {
+    if (!token) return Promise.resolve(false);
     if (!selectedShip) return Promise.resolve(false);
 
     const response = await thirdEarthApi.resetShipCode(
@@ -101,6 +104,7 @@ const HostingPresenter = () => {
   };
 
   const onSubmitNewMaintenanceWindow = async (maintenanceWindow: string) => {
+    if (!token) return Promise.resolve(false);
     if (!selectedShip) return Promise.resolve(false);
 
     const response = await thirdEarthApi.updateMaintenanceWindow(
@@ -118,6 +122,7 @@ const HostingPresenter = () => {
   };
 
   const onSubmitEjectId = async (ejectAddress: string, ethAddress: string) => {
+    if (!token) return Promise.resolve(false);
     if (!selectedShip) return Promise.resolve(false);
 
     const response = await thirdEarthApi.ejectShip(
@@ -133,12 +138,11 @@ const HostingPresenter = () => {
   };
 
   useEffect(() => {
+    if (!token) return;
     thirdEarthApi
       .getManagePaymentLink(token)
       .then((response) => setManagePaymentLink(response.url));
   }, []);
-
-  if (!selectedShip) return null;
 
   return (
     <Page title="Account / Hosting" isProtected>
@@ -164,7 +168,7 @@ const HostingPresenter = () => {
       />
       <ChangeMaintenanceWindowModal
         isOpen={changeMaintenanceWindowModal.isOn}
-        initialSelected={selectedShip.maintenance_window.toString()}
+        initialSelected={selectedShip?.maintenance_window.toString()}
         onDismiss={changeMaintenanceWindowModal.toggleOff}
         onSubmit={onSubmitNewMaintenanceWindow}
       />
@@ -177,9 +181,9 @@ const HostingPresenter = () => {
         patps={ships.map((ship) => ship.patp)}
         selectedPatp={selectedPatp}
         email={email}
-        shipUrl={selectedShip.link}
-        shipCode={selectedShip.code}
-        shipMaintenanceWindow={selectedShip.maintenance_window}
+        shipUrl={selectedShip?.link}
+        shipCode={selectedShip?.code}
+        shipMaintenanceWindow={selectedShip?.maintenance_window}
         setSelectedPatp={setSelectedPatp}
         onClickChangeEmail={changeEmailModal.toggleOn}
         onClickChangePassword={changePasswordModal.toggleOn}
