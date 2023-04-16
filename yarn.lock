@@ -1261,6 +1261,13 @@
   dependencies:
     regenerator-runtime "^0.13.11"
 
+"@babel/runtime@^7.3.1":
+  version "7.21.0"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.21.0.tgz#5b55c9d394e5fcf304909a8b00c07dc217b56673"
+  integrity sha512-xwII0//EObnq89Ji5AKYQaRYiW/nZ3llSv29d49IuxPhKbtJoLP+9QUUZ4nVragQVtaVGeZrpB+ZtG/Pdy/POw==
+  dependencies:
+    regenerator-runtime "^0.13.11"
+
 "@babel/runtime@~7.5.4":
   version "7.5.5"
   resolved "https://registry.npmjs.org/@babel/runtime/-/runtime-7.5.5.tgz"
@@ -4751,6 +4758,13 @@
     "@types/react" "*"
     "@types/reactcss" "*"
 
+"@types/react-dom@^16.8.3":
+  version "16.9.18"
+  resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-16.9.18.tgz#1fda8b84370b1339d639a797a84c16d5a195b419"
+  integrity sha512-lmNARUX3+rNF/nmoAFqasG0jAA7q6MeGZK/fdeLwY3kAA4NPgHHrG5bNQe2B5xmD4B+x6Z6h0rEJQ7MEEgQxsw==
+  dependencies:
+    "@types/react" "^16"
+
 "@types/react-dom@^18.0.0", "@types/react-dom@^18.0.9":
   version "18.0.10"
   resolved "https://registry.npmjs.org/@types/react-dom/-/react-dom-18.0.10.tgz"
@@ -4776,6 +4790,15 @@
   version "18.0.27"
   resolved "https://registry.npmjs.org/@types/react/-/react-18.0.27.tgz"
   integrity sha512-3vtRKHgVxu3Jp9t718R9BuzoD4NcQ8YJ5XRzsSKxNDiDonD2MXIT1TmSkenxuCycZJoQT5d2vE8LwWJxBC1gmA==
+  dependencies:
+    "@types/prop-types" "*"
+    "@types/scheduler" "*"
+    csstype "^3.0.2"
+
+"@types/react@^16", "@types/react@^16.8.10":
+  version "16.14.40"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.14.40.tgz#cbf1c6249e9a96eb1badc7f32f1055e532e21c72"
+  integrity sha512-elQj2VQHDuJ5xuEcn5Wxh/YQFNbEuPJFRKSdyG866awDm5dmtoqsMmuAJWb/l/qd2kDkZMfOTKygVfMIdBBPKg==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -8173,6 +8196,11 @@ dir-glob@^3.0.1:
   integrity sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==
   dependencies:
     path-type "^4.0.0"
+
+disable-scroll@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/disable-scroll/-/disable-scroll-0.6.0.tgz#ff0ae8d4c9d395e65842583eefb9313d046f462a"
+  integrity sha512-6bTAS16sz+3X7Pib8d5dAO9xo5MvqDZvSlzuhW/2c3NhUvbPNqnsV3JttvnqgNCDEgWUgNWJYM392iUmLETDxA==
 
 dmg-builder@23.6.0:
   version "23.6.0"
@@ -12194,6 +12222,11 @@ lodash.merge@^4.6.2:
   resolved "https://registry.npmjs.org/lodash.merge/-/lodash.merge-4.6.2.tgz"
   integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
 
+lodash.throttle@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/lodash.throttle/-/lodash.throttle-4.1.1.tgz#c23e91b710242ac70c37f1e1cda9274cc39bf2f4"
+  integrity sha512-wIkUCfVKpVsWo3JSZlc+8MB5it+2AN5W8J7YVMST30UrvcQNZ1Okbj+rbVniijTWE6FGYy4XJq/rHkas8qJMLQ==
+
 lodash.uniq@4.5.0, lodash.uniq@^4.5.0:
   version "4.5.0"
   resolved "https://registry.npmjs.org/lodash.uniq/-/lodash.uniq-4.5.0.tgz"
@@ -14314,7 +14347,7 @@ prompts@^2.0.1, prompts@^2.4.0:
     kleur "^3.0.3"
     sisteransi "^1.0.5"
 
-prop-types@^15.0.0, prop-types@^15.5.10, prop-types@^15.7.2, prop-types@^15.8.1:
+prop-types@^15.0.0, prop-types@^15.5.10, prop-types@^15.5.8, prop-types@^15.7.2, prop-types@^15.8.1:
   version "15.8.1"
   resolved "https://registry.npmjs.org/prop-types/-/prop-types-15.8.1.tgz"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==
@@ -14634,6 +14667,26 @@ react-fast-compare@^3.0.1:
   resolved "https://registry.npmjs.org/react-fast-compare/-/react-fast-compare-3.2.0.tgz"
   integrity sha512-rtGImPZ0YyLrscKI9xTpV8psd6I8VAtjKCzQDlzyDvqJA8XOW78TXYQwNRNd8g8JZnDu8q9Fu/1v4HPAVwVdHA==
 
+react-gesture-responder@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/react-gesture-responder/-/react-gesture-responder-2.1.0.tgz#204606dc23e388d6d51d0f27d4acf7ede2bd10ba"
+  integrity sha512-uXfFNOtSus5zo2u2WoXMmfAWLdbAYvubmA4AOk9UyLO9n7koVagvSHW7MOUEnhE+F6NeVuyTc+8pyZxLKwyxmg==
+  dependencies:
+    "@types/react" "^16.8.10"
+    "@types/react-dom" "^16.8.3"
+    tslib "^1.9.3"
+
+react-grid-dnd@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/react-grid-dnd/-/react-grid-dnd-2.1.2.tgz#6e442eb97656b3823a93998a25123a5ed5bcbecc"
+  integrity sha512-E+XcyemjmRm5Dk3Rn4e2KPpRK4dF1e8NyuOXhm4ZsmVIJVnkP+AzojkTn333ec2Fbe55PUxuHqYA6Fl0Wz65Ng==
+  dependencies:
+    "@types/react" "^16.8.10"
+    "@types/react-dom" "^16.8.3"
+    react-spring "9.0.0-beta.8"
+    resize-observer-polyfill "^1.5.1"
+    tslib "^1.9.3"
+
 react-hotkeys-hook@^3.4.7:
   version "3.4.7"
   resolved "https://registry.npmjs.org/react-hotkeys-hook/-/react-hotkeys-hook-3.4.7.tgz"
@@ -14720,6 +14773,14 @@ react-remove-scroll@2.5.5:
     use-callback-ref "^1.3.0"
     use-sidecar "^1.1.2"
 
+react-scroll@^1.8.9:
+  version "1.8.9"
+  resolved "https://registry.yarnpkg.com/react-scroll/-/react-scroll-1.8.9.tgz#96f8a82f882b187970c2338759225c7e619d915b"
+  integrity sha512-9m7ztraiX/l6L7erzYAD3fhnveNckei6/NkWfqwN2e0FRdoE2W6Pk4oi2Nah7mWpPCPAeIgegfaqZACTimPOwg==
+  dependencies:
+    lodash.throttle "^4.1.1"
+    prop-types "^15.7.2"
+
 react-spaces@^0.3.2:
   version "0.3.9"
   resolved "https://registry.npmjs.org/react-spaces/-/react-spaces-0.3.9.tgz"
@@ -14732,6 +14793,14 @@ react-spinners@^0.13.4:
   version "0.13.8"
   resolved "https://registry.npmjs.org/react-spinners/-/react-spinners-0.13.8.tgz"
   integrity sha512-3e+k56lUkPj0vb5NDXPVFAOkPC//XyhKPJjvcGjyMNPWsBKpplfeyialP74G7H7+It7KzhtET+MvGqbKgAqpZA==
+
+react-spring@9.0.0-beta.8:
+  version "9.0.0-beta.8"
+  resolved "https://registry.yarnpkg.com/react-spring/-/react-spring-9.0.0-beta.8.tgz#dd4348d3d6dd88ff596b36fa85b3328200914b15"
+  integrity sha512-pcyQqr5W9HBM5Rm0rmdbVIEQz7wocAfWBNWSUm/EEvpb4M0OQ3Xp9JW6Ayo+6ZgV7fLzJJHO/QgNdUMpAtVaTw==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+    prop-types "^15.5.8"
 
 react-style-singleton@^2.2.1:
   version "2.2.1"
@@ -15084,6 +15153,11 @@ requires-port@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/requires-port/-/requires-port-1.0.0.tgz"
   integrity sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==
+
+resize-observer-polyfill@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/resize-observer-polyfill/-/resize-observer-polyfill-1.5.1.tgz#0e9020dd3d21024458d4ebd27e23e40269810464"
+  integrity sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==
 
 resolve-alpn@^1.0.0:
   version "1.2.1"

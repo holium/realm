@@ -212,15 +212,7 @@ const HomePresenter = (props: HomePaneProps) => {
               <Text variant="h3" fontWeight={500}>
                 Your Apps
               </Text>
-              <Flex
-                style={{ position: 'relative' }}
-                gap={32}
-                width={maxWidth}
-                flexWrap="wrap"
-                flexDirection="row"
-              >
-                <AppGrid tileSize="xl2" />
-              </Flex>
+              <AppGrid maxWidth={maxWidth} tileSize="xl2" />
             </Flex>
           ) : (
             <Flex

@@ -3,7 +3,7 @@ import { MouseState, PresenceArg } from '@holium/realm-presence';
 import { Position } from '@holium/design-system';
 import { denormalizePosition } from '../../os/services/shell/lib/window-manager';
 
-const getWebContentsPosition = (mainWindow: BrowserWindow) => {
+export const getWebContentsPosition = (mainWindow: BrowserWindow) => {
   const screenPosition = screen.getCursorScreenPoint();
   const mainWindowPosition = mainWindow.getPosition();
   return {
