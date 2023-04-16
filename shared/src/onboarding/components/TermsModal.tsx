@@ -41,7 +41,7 @@ export const TermsModal = ({ isOpen, onDismiss, onAccept }: Props) => (
       .
     </OnboardDialogDescription>
     <Flex justifyContent="flex-end">
-      <Button.TextButton onClick={onAccept}>
+      <Button.TextButton type="button" onClick={onAccept}>
         <OnboardDialogButtonText>Agree</OnboardDialogButtonText>
       </Button.TextButton>
     </Flex>

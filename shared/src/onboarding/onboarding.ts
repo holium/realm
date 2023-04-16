@@ -28,6 +28,7 @@ export { PassportDialog } from './dialogs/PassportDialog';
 export { SidebarSection } from './components/AccountDialog';
 
 export type {
+  OnboardingPage,
   ThirdEarthShip,
   ThirdEarthProduct,
   ThirdEarthPortalSession,
