@@ -26,7 +26,6 @@ import {
   swap,
 } from 'react-grid-dnd';
 import disableScroll from 'disable-scroll';
-import { getWebContentsPosition } from 'main/helpers/mouse';
 
 interface AppGridProps {
   tileSize: AppTileSize;
@@ -43,6 +42,17 @@ const AppGridPresenter = ({
     | AppType[]
     | WebAppType[];
   const [items, setItems] = useState(apps);
+
+  // useEffect(() => {
+  //   window.electron.app.onMouseMove((position, state, isDragging) => {
+  //     if (isDragging) {
+  //       if (position.y > window.innerHeight - 220) {
+  //         console.log('greater!');
+  //         scroll.scrollToBottom();
+  //       }
+  //     }
+  //   });
+  // }, []);
 
   if (!currentSpace) return null;
 
@@ -108,9 +118,6 @@ const AppGridPresenter = ({
           return (
             <GridItem
               key={tileId}
-              onMouseMove={() => {
-                console.log(getWebContentsPosition());
-              }}
               onMouseDownCapture={() => {
                 disableScroll.on();
               }}
