@@ -1,11 +1,10 @@
-import { LoaderModel } from 'os/services/common.model';
 import { toJS } from 'mobx';
 import { types, onSnapshot, Instance } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
 import { nativeApps } from '../nativeApps';
 import { isUrlSafe } from './helpers/createUrl';
-import { AppType } from 'os/services/spaces/models/bazaar';
 import { MainIPC } from 'renderer/stores/ipc';
+import { LoaderModel } from 'renderer/stores/models/common.model';
 
 const TabModel = types.model('BrowserTabModel', {
   id: types.identifier,

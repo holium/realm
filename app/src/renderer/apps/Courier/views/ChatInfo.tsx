@@ -25,10 +25,10 @@ import { observer } from 'mobx-react-lite';
 import { InvitePermissionType, PeerModelType } from '../models';
 import { ExpiresValue, millisecondsToExpires } from '../types';
 import { useTrayApps } from 'renderer/apps/store';
-import { useShipStore, useShipStore } from 'renderer/stores/ship.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 import { ShipIPC } from 'renderer/stores/ipc';
 import { useAppState } from 'renderer/stores/app.store';
-import { ShipSearch } from 'renderer/components-new/ShipSearch';
+import { ShipSearch } from 'renderer/components/ShipSearch';
 
 export const createPeopleForm = (
   defaults: any = {

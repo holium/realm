@@ -4,8 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import { Members } from '../Members';
 import { AppGrid } from './AppGrid';
 import { AppSearchApp } from '../AppInstall/AppSearch';
-import { NoScrollBar } from 'renderer/components/NoScrollbar';
-import { Avatar, Flex, Button, Icon } from '@holium/design-system';
+import { Avatar, Flex, Button, Icon, NoScrollBar } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 type SidebarType = 'friends' | 'members' | null;

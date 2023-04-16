@@ -2,14 +2,13 @@ import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { FormControl } from 'renderer/components';
-import { Flex, Spinner, TextInput, Button } from '@holium/design-system';
+import { Text, Flex, Spinner, TextInput, Button } from '@holium/design-system';
 import * as yup from 'yup';
 import { createField, createForm } from 'mobx-easy-form';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { normalizeBounds } from 'renderer/lib/window-manager';
 
 export const WallpaperDialogConfig: DialogConfig = {
   component: (props: any) => <WallpaperDialog {...props} />,
@@ -101,28 +100,26 @@ const WallpaperDialogPresenter = () => {
       justifyContent="space-between"
     >
       <WallpaperPreview src={theme.wallpaper} />
-      <FormControl.Field>
-        <TextInput
-          autoFocus
-          tabIndex={0}
-          id="imageUrl"
-          name="imageUrl"
-          placeholder="https://my-image.google.com"
-          defaultValue={imageUrl.state.value}
-          error={
-            (imageUrl.computed.ifWasEverBlurredThenError &&
-              imageUrl.computed.isDirty) ||
-            imageUrl.computed.error
-          }
-          onChange={(e: any) => imageUrl.actions.onChange(e.target.value)}
-          onFocus={() => imageUrl.actions.onFocus()}
-          onBlur={() => imageUrl.actions.onBlur()}
-        />
-        {imageUrl.computed.ifWasEverBlurredThenError &&
-          imageUrl.computed.isDirty && (
-            <FormControl.Error>{imageUrl.computed.error}</FormControl.Error>
-          )}
-      </FormControl.Field>
+      <TextInput
+        autoFocus
+        tabIndex={0}
+        id="imageUrl"
+        name="imageUrl"
+        placeholder="https://my-image.google.com"
+        defaultValue={imageUrl.state.value}
+        error={
+          (imageUrl.computed.ifWasEverBlurredThenError &&
+            imageUrl.computed.isDirty) ||
+          imageUrl.computed.error
+        }
+        onChange={(e: any) => imageUrl.actions.onChange(e.target.value)}
+        onFocus={() => imageUrl.actions.onFocus()}
+        onBlur={() => imageUrl.actions.onBlur()}
+      />
+      {imageUrl.computed.ifWasEverBlurredThenError &&
+        imageUrl.computed.isDirty && (
+          <Text.Hint color="intent-alert">{imageUrl.computed.error}</Text.Hint>
+        )}
 
       <Flex justifyContent="space-between">
         <Button.Secondary

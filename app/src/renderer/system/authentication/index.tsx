@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import { Flex } from 'renderer/components';
+import { Flex } from '@holium/design-system';
 import { Login } from './login';
 // import { OnboardingActions } from 'renderer/logic/actions/onboarding';
 // import { Splash } from './Splash';

@@ -7,14 +7,12 @@ import {
   WebPreferences,
 } from 'electron';
 import log from 'electron-log';
-import AbstractService, {
-  ServiceOptions,
-} from './services-new/abstract.service';
-import { AuthService } from './services-new/auth/auth.service';
-import { ShipService } from './services-new/ship/ship.service';
+import AbstractService, { ServiceOptions } from './services/abstract.service';
+import { AuthService } from './services/auth/auth.service';
+import { ShipService } from './services/ship/ship.service';
 import { getReleaseChannel, setReleaseChannel } from './lib/settings';
 import { getCookie } from './lib/shipHelpers';
-import APIConnection from './services-new/conduit';
+import APIConnection from './services/conduit';
 
 export class RealmService extends AbstractService {
   // private realmProcess: RealmProcess | null = null;

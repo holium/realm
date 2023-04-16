@@ -12,9 +12,9 @@ import {
   useToggle,
 } from '@holium/design-system';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { appState } from 'renderer/stores/app.store';
 import { AuthIPC } from 'renderer/stores/ipc';
+import { normalizeBounds } from 'renderer/lib/window-manager';
 
 export const ResetCodeDialogConfig: (dialogProps: any) => DialogConfig = (
   dialogProps: any

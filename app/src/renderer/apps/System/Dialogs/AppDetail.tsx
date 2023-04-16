@@ -14,13 +14,13 @@ import {
 } from '@holium/design-system';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInstall/store';
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { normalizeBounds } from 'renderer/lib/window-manager';
+
 import {
   AppMobxType,
   AppTypes,
   UrbitApp,
-  GlobMobxType,
 } from 'renderer/stores/models/bazaar.model';
 import { useAppState, appState } from 'renderer/stores/app.store';
 

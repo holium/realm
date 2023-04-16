@@ -1,6 +1,6 @@
 import { useMemo, useRef } from 'react';
 import { observer } from 'mobx-react';
-import { PersonRow } from 'renderer/components-new/People/PersonRow';
+import { PersonRow } from 'renderer/components/People/PersonRow';
 import { FriendType } from 'os/services/ship/models/friends';
 import { Flex, Text, WindowedList } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';

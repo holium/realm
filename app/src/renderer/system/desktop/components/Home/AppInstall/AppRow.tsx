@@ -44,7 +44,7 @@ interface AppRowProps {
 }
 
 export const AppRow = ({
-  descriptionWidth,
+  descriptionWidth = 340,
   app,
   onClick,
   actionRenderer,
@@ -106,26 +106,14 @@ export const AppRow = ({
             {app.icon && <Icon name={app.icon} size={16} />}
           </TileStyle>
           <Flex flexDirection="column" overflow="hidden">
-            <Text.Custom
-              fontWeight={500}
-              fontSize={3}
-              style={{
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                maxWidth: '100%',
-              }}
-            >
+            <Text.Custom fontWeight={500} fontSize={3} truncate>
               {title}
             </Text.Custom>
             <Text.Custom
               mt="2px"
+              truncate
               style={{
                 width: descriptionWidth || 'fit-content',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                maxWidth: '100%',
               }}
               fontSize={2}
               opacity={0.4}

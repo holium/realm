@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { ConfirmDialog } from './Confirm';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { normalizeBounds } from 'renderer/lib/window-manager';
 
 type LeaveSpaceDialogConfigComponentProps = {
   path: string;
