@@ -321,26 +321,6 @@
   [gives state]
 ::
 ++  insert-backlog
-<<<<<<< HEAD
-:: :chat-db &db-action [%insert-backlog some msg-part]
-  |=  [msg=msg-part:sur state=state-1 =bowl:gall]
-  ^-  (quip card state-1)
-  ::
-  :: backlog-pokes are only allowed if all the following are true:
-  ::
-  :: we already have that path in our table, and the associated peers
-  =/  pathrow   (~(got by paths-table.state) path.msg)
-  =/  peers     (~(got by peers-table.state) path.msg)
-  :: the created-at of our peer-row for the path is gth
-  :: created-at.msg (because the message was from *before* we
-  :: joined the chat)
-  =/  us-peer   (snag 0 (skim peers |=(p=peer-row:sur =(patp.p our.bowl))))
-  ?>  (gth created-at.us-peer created-at.msg)
-  :: has to be from a ship that has invite-potential in the path
-  ?>  (is-valid-inviter pathrow peers src.bowl)
-  :: the path has to be %.y on peers-get-backlog
-  ?>  peers-get-backlog.pathrow
-=======
 :: :chat-db &db-action [%insert-backlog list-of-msg-parts]
   |=  [=message:sur state=state-1 =bowl:gall]
   ^-  (quip card state-1)
@@ -366,8 +346,6 @@
       ?>  (is-valid-inviter pathrow peers src.bowl)
       :: the path has to be %.y on peers-get-backlog
       ?>  peers-get-backlog.pathrow
->>>>>>> master
-
       $(messages-table.state (put:msgon:sur messages-table.state [msg-id.msg msg-part-id.msg] msg), index +(index), changes [[%add-row %messages msg] changes])
 
   =/  thechange  chat-db-change+!>(-.changes-and-state)
