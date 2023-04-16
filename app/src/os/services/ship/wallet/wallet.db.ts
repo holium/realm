@@ -1,6 +1,7 @@
 import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
+import AbstractDataAccess from 'os/services/abstract.db';
 import { APIConnection } from '../../conduit';
 // type ChatUpdateType =
 //   | 'message-received'
