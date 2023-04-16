@@ -3,37 +3,18 @@ import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { UqbarApi } from '../../../api/uqbar';
 import { Database } from 'better-sqlite3-multiple-ciphers';
 import { WalletApi } from '../../../api/wallet';
-import log from 'electron-log';
 import { RealmSigner } from './signers/realm';
+import { WalletDB } from './wallet.db';
 
 export class WalletService extends AbstractService {
+  public walletDB?: WalletDB;
   constructor(options?: ServiceOptions, db?: Database) {
     super('walletService', options);
     if (options?.preload) {
       return;
     }
-    this._onEvent = this._onEvent.bind(this);
-    APIConnection.getInstance().conduit.watch({
-      app: 'realm-wallet',
-      path: `/updates`,
-      onEvent: this._onEvent,
-      onQuit: this._onQuit,
-      onError: this._onError,
-    });
+    this.walletDB = new WalletDB({ preload: false, db });
   }
-
-  private _onEvent = (data: any, _id?: number, mark?: string) => {
-    console.log('SENDING UPDATE');
-    this.sendUpdate(data);
-  };
-
-  private _onQuit = () => {
-    log.warn('Wallet subscription quit');
-  };
-
-  private _onError = (err: any) => {
-    log.warn('Wallet subscription error', err);
-  };
 
   async uqbarDeskExists(_evt: any) {
     return await UqbarApi.uqbarDeskExists(APIConnection.getInstance().conduit);

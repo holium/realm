@@ -30,11 +30,11 @@ import { APIConnection } from '../../conduit';
   dismissedAt: number | null;
   dismissed: boolean;
 }*/
-interface WalletRow {}
+// interface WalletRow {}
 
 export class WalletDB extends AbstractDataAccess<WalletRow> {
   constructor(params: DataAccessContructorParams) {
-    params.name = 'chatDB';
+    params.name = 'walletDB';
     params.tableName = 'paths';
     super(params);
     if (params.preload) return;
@@ -44,7 +44,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     this._handleDBChange = this._handleDBChange.bind(this);
     this.init = this.init.bind(this);
     APIConnection.getInstance().conduit.watch({
-      app: 'chat-db',
+      app: 'wallet',
       path: '/db',
       onEvent: this._onDbUpdate,
       onQuit: this._onQuit,
