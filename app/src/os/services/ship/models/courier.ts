@@ -6,7 +6,7 @@ import { cleanNounColor } from '../../../lib/color';
 import { LoaderModel, SubscriptionModel } from '../../common.model';
 import moment from 'moment';
 import { pathToDmInbox } from '../../../lib/graph-store';
-import { CourierApi } from '../../../api/courier';
+import { CourierApi } from '../../../api-to-delete/courier';
 import { Conduit } from '@holium/conduit';
 
 const MessagePosition = types.enumeration(['right', 'left']);

@@ -16,10 +16,10 @@ import {
 } from './onboarding.model';
 import { AuthShip } from '../identity/auth.model';
 import { getCookie, ShipConnectionData } from '../../lib/shipHelpers';
-import { ContactApi } from '../../api/contacts';
-import { FriendsApi } from '../../api/friends';
-import { DocketApi } from '../../api/docket';
-import { HostingPlanet, AccessCode } from 'os/api/holium';
+import { ContactApi } from '../../api-to-delete/contacts';
+import { FriendsApi } from '../../api-to-delete/friends';
+import { DocketApi } from '../../api-to-delete/docket';
+import { HostingPlanet, AccessCode } from 'os/api-to-delete/holium';
 import { Conduit } from '@holium/conduit';
 import { toJS } from 'mobx';
 import { RealmInstallationStatus } from '../../types';

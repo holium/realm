@@ -1,4 +1,4 @@
-import { ThemeModelType } from './../theme.model';
+import { ThemeModelType } from '../theme.model';
 import { ipcMain, session, ipcRenderer } from 'electron';
 import { onPatch, getSnapshot } from 'mobx-state-tree';
 

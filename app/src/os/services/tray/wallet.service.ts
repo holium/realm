@@ -15,8 +15,8 @@ import {
 } from './wallet-lib/wallet.model';
 import { BaseProtocol } from './wallet-lib/wallets/BaseProtocol';
 import { RealmSigner } from './wallet/signers/realm';
-import { WalletApi } from '../../api/wallet';
-import { removeDots, UqbarApi } from '../../api/uqbar';
+import { WalletApi } from '../../api-to-delete/wallet';
+import { removeDots, UqbarApi } from '../../api-to-delete/uqbar';
 import bcrypt from 'bcryptjs';
 import { getSnapshot } from 'mobx-state-tree';
 import { ethers } from 'ethers';

@@ -6,7 +6,7 @@ import { SpacesDB, spacesInitSql } from './tables/spaces.table';
 import { MembersDB, spacesMembersInitSql } from './tables/members.table';
 import { humanFriendlySpaceNameSlug } from '../../../lib/text';
 import { snakeify } from '../../../lib/obj';
-import { pathToObj } from '../../..//lib/path';
+import { pathToObj } from '../../../lib/path';
 import { InvitationDB, spacesInvitationsInitSql } from './tables/visas.table';
 import { spacesModelQuery } from './spaces.query';
 import { MemberRole } from '../../../types';

@@ -1,5 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import { MembershipType } from './../services/spaces/models/members';
+import { MembershipType } from '../services/spaces/models/members';
 import { SpacesStoreType } from '../services/spaces/models/spaces';
 import { snakeify } from '../lib/obj';
 import { MemberRole, Patp, SpacePath } from '../types';

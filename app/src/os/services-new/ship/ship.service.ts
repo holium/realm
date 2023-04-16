@@ -2,7 +2,7 @@ import { app } from 'electron';
 import fs from 'fs';
 import log from 'electron-log';
 import moment from 'moment';
-import { ConduitSession } from './../conduit';
+import { ConduitSession } from '../conduit';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { ShipDB } from './ship.db';
 import APIConnection from '../conduit';

@@ -1,7 +1,7 @@
 import { flow, Instance, types } from 'mobx-state-tree';
 import { LoaderModel } from '../common.model';
-import { AccessCode, HostingPlanet } from 'os/api/holium';
-import { DocketApi } from '../../api/docket';
+import { AccessCode, HostingPlanet } from 'os/api-to-delete/holium';
+import { DocketApi } from '../../api-to-delete/docket';
 import { Conduit } from '@holium/conduit';
 
 export enum OnboardingStep {

@@ -7,22 +7,22 @@ import { onPatch, getSnapshot } from 'mobx-state-tree';
 import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import { SpacesStore, SpacesStoreType } from './models/spaces';
-import { SpacesApi } from '../../api/spaces';
+import { SpacesApi } from '../../api-to-delete/spaces';
 import { humanFriendlySpaceNameSlug } from '../../lib/text';
 import { snakeify } from '../../lib/obj';
 import { MemberRole, Patp, SpacePath } from '../../types';
 import { VisaModel, VisaModelType } from './models/visas';
 import { MembershipStore, MembershipType } from './models/members';
 import { DiskStore } from '../base.store';
-import { BazaarSubscriptions, BazaarApi } from '../../api/bazaar';
+import { BazaarSubscriptions, BazaarApi } from '../../api-to-delete/bazaar';
 import {
   DevAppType,
   NewBazaarStore,
   NewBazaarStoreType,
 } from './models/bazaar';
-import { BeaconApi, BeaconInboxType } from '../../api/beacon';
+import { BeaconApi, BeaconInboxType } from '../../api-to-delete/beacon';
 import { formPathObj } from '../../lib/path';
-import { BulletinApi } from '../../api/bulletin';
+import { BulletinApi } from '../../api-to-delete/bulletin';
 import { NotificationStore, NotificationStoreType } from './models/beacon';
 import { BulletinStore, BulletinStoreType } from './models/bulletin';
 

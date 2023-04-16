@@ -1,7 +1,7 @@
 import { BaseSigner } from '../../wallet-lib/wallets/BaseSigner';
 import { ethers } from 'ethers';
 // import { safeStorage } from 'electron';
-import { removeDots } from '../../../../api/uqbar';
+import { removeDots } from '../../../../api-to-delete/uqbar';
 import { EncryptedStore } from '../../../../lib/encryptedStore';
 
 export class RealmSigner implements BaseSigner {

@@ -1,4 +1,4 @@
-import { S3Api } from './../../api/s3';
+import { S3Api } from '../../api-to-delete/s3';
 import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron';
 import Store from 'electron-store';
 import { onPatch, onSnapshot, getSnapshot } from 'mobx-state-tree';
@@ -10,14 +10,14 @@ import { EncryptedStore } from '../../lib/encryptedStore';
 import { ShipModelType, ShipModel, FileUploadParams } from './models/ship';
 import { Patp } from '../../types';
 import { AuthShipType } from '../identity/auth.model';
-import { GroupsApi } from '../../api/groups';
+import { GroupsApi } from '../../api-to-delete/groups';
 import { RoomsService } from '../tray/rooms.service';
 import { WalletService } from '../tray/wallet.service';
-import { FriendsApi } from '../../api/friends';
+import { FriendsApi } from '../../api-to-delete/friends';
 import { FriendsStore, FriendsType } from './models/friends';
 import { SlipService } from '../slip.service';
 import { ChatStoreType } from './models/dms';
-import { CourierApi } from '../../api/courier';
+import { CourierApi } from '../../api-to-delete/courier';
 import {
   CourierStore,
   CourierStoreType,

@@ -7,7 +7,7 @@ import {
   ReorderPinnedAppsPoke,
   UninstallPoke,
   UnpinPoke,
-} from '../../../api/bazaar';
+} from '../../../api-to-delete/bazaar';
 
 import {
   types,
@@ -20,7 +20,7 @@ import {
 import { cleanNounColor } from '../../../lib/color';
 import { Conduit } from '@holium/conduit';
 import { Patp } from '../../../types';
-import { DocketApi } from '../../../api/docket';
+import { DocketApi } from '../../../api-to-delete/docket';
 import { SubscriptionModel } from '../../common.model';
 
 export enum InstallStatus {

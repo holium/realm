@@ -1,5 +1,5 @@
 import { Conduit } from '@holium/conduit';
-import { cleanNounColor, removeHash } from '../../os/lib/color';
+import { cleanNounColor, removeHash } from '../lib/color';
 import { FriendsType } from '../services/ship/models/friends';
 import { Patp } from '../types';
 

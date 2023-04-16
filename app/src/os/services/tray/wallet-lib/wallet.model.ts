@@ -5,7 +5,7 @@ import {
   getSnapshot,
   cast,
 } from 'mobx-state-tree';
-import { WalletApi } from '../../../api/wallet';
+import { WalletApi } from '../../../api-to-delete/wallet';
 
 export enum WalletView {
   LIST = 'list',
