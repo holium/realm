@@ -91,18 +91,6 @@ const createWindow = async () => {
     },
   });
 
-  // export class MainWindow {
-  //   mainWindow: BrowserWindow;
-
-  //   constructor(mainWindow: BrowserWindow) {
-  //     this.mainWindow = mainWindow;
-  //   }
-
-  //   static get() {
-  //     return mainWindow;
-  //   }
-  // }
-
   // ---------------------------------------------------------------------
   // ----------------------- Start Realm services ------------------------
   // ---------------------------------------------------------------------

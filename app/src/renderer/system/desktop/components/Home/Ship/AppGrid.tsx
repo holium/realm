@@ -39,7 +39,7 @@ const AppGridPresenter = ({
 }: AppGridProps) => {
   const { spaces, bazaar } = useServices();
   const currentSpace = spaces.selected;
-  const apps = [...bazaar.installed, ...bazaar.installed, ...bazaar.devApps] as
+  const apps = [...bazaar.installed, ...bazaar.devApps] as
     | AppType[]
     | WebAppType[];
   const [items, setItems] = useState(apps);
