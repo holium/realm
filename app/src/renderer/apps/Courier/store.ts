@@ -293,7 +293,8 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
 // -------------------------------
 // Listen for changes
 type ChatUpdateTypes = { type: string; payload: any };
-ChatIPC.onUpdate(({ type, payload }: ChatUpdateTypes) => {
+ChatIPC.onUpdate((_event: any, { type, payload }: ChatUpdateTypes) => {
+  console.log('got chat update', type, payload);
   if (type === 'path-added') {
     console.log('onPathsAdded', toJS(payload));
     shipStore.chatStore.onPathsAdded(payload);

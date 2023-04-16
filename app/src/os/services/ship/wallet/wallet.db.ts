@@ -102,6 +102,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   }
 
   private _onDbUpdate(data: any /*WalletDbReactions*/, _id?: number) {
+    console.log('sending wallet update', data);
     this.sendUpdate(data);
     if ('tables' in data) {
       this._insertTransactions(data.tables.transactions);
