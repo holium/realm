@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { AppTile, AppTileSize } from 'renderer/components/AppTile/AppTile';
@@ -26,6 +26,7 @@ import {
   swap,
 } from 'react-grid-dnd';
 import disableScroll from 'disable-scroll';
+import { useToggle } from '@holium/design-system';
 
 interface AppGridProps {
   tileSize: AppTileSize;
@@ -42,21 +43,18 @@ const AppGridPresenter = ({
     | AppType[]
     | WebAppType[];
   const [items, setItems] = useState(apps);
+  const canClick = useToggle(true);
 
-  // useEffect(() => {
-  //   window.electron.app.onMouseMove((position, state, isDragging) => {
-  //     if (isDragging) {
-  //       if (position.y > window.innerHeight - 220) {
-  //         console.log('greater!');
-  //         scroll.scrollToBottom();
-  //       }
-  //     }
-  //   });
-  // }, []);
+  useEffect(() => {
+    window.electron.app.onMouseMove((position, state, isDragging) => {
+      canClick.setToggle(!isDragging);
+    });
+  }, []);
 
   if (!currentSpace) return null;
 
-  const onChange = (sourceId, sourceIndex, targetIndex, targetId) => {
+  const onChange = (sourceId, sourceIndex, targetIndex) => {
+    console.log('onChange', sourceId, sourceIndex, targetIndex);
     const nextState = swap(items, sourceIndex, targetIndex);
     console.log(nextState);
     setItems(nextState);
@@ -172,8 +170,10 @@ const AppGridPresenter = ({
                   ...installRow,
                 ]}
                 onAppClick={(selectedApp) => {
-                  DesktopActions.openAppWindow(toJS(selectedApp));
-                  DesktopActions.closeHomePane();
+                  if (canClick.isOn) {
+                    DesktopActions.openAppWindow(toJS(selectedApp));
+                    DesktopActions.closeHomePane();
+                  }
                 }}
               />
             </GridItem>
