@@ -6579,7 +6579,7 @@ better-opn@^2.1.1:
   dependencies:
     open "^7.0.3"
 
-better-sqlite3-multiple-ciphers@^8.2.0:
+better-sqlite3-multiple-ciphers@^8.2.0, better-sqlite3-multiple-ciphers@^8.3.0:
   version "8.3.0"
   resolved "https://registry.yarnpkg.com/better-sqlite3-multiple-ciphers/-/better-sqlite3-multiple-ciphers-8.3.0.tgz#e2e555a92cda8c152c1444683318f75be5c72455"
   integrity sha512-q56v+L/U/e0/hXIGh/nzkuKeEDVlHOoU1mrCrPYpfQP9LmSSDYbNBxC7bSVnHB+S9/HGod92mRII6M+ZnoWRVA==

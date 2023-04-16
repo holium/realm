@@ -3,19 +3,21 @@ import AbstractDataAccess, {
 } from '../../abstract.db';
 import { APIConnection } from '../../conduit';
 import {
-  WalletDbReactions,
   WalletsRow,
   AddRow,
   UpdateRow,
   UpdateTransaction,
   DelTransactionsRow,
   WalletDbOps,
+  DelWalletsRow,
+  TransactionsRow,
 } from './wallet.types';
 
 export class WalletDB extends AbstractDataAccess<WalletRow> {
   constructor(params: DataAccessContructorParams) {
     params.name = 'walletDB';
-    params.tableName = 'paths';
+    params.tableName = 'wallets';
+    params.tableName = 'transactions';
     super(params);
     if (params.preload) return;
     this._onQuit = this._onQuit.bind(this);
@@ -24,7 +26,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     this._handleDBChange = this._handleDBChange.bind(this);
     this.init = this.init.bind(this);
     APIConnection.getInstance().conduit.watch({
-      app: 'wallet',
+      app: 'realm-wallet',
       path: '/updates',
       onEvent: this._onDbUpdate,
       onQuit: this._onQuit,
@@ -34,18 +36,16 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   }
 
   async init() {
-    const paths = await this._fetchPaths();
-    const peers = await this._fetchPeers();
-    const messages = await this._fetchMessages();
-    const deleteLogs = await this._fetchDeleteLogs();
-    this._insertTransactions(messages);
-    this._insertWallets(paths);
-    this._insertPeers(peers);
+    const transactions = await this._fetchTransactions();
+    const wallets = await this._fetchWallets();
+    // const deleteLogs = await this._fetchDeleteLogs();
+    this._insertTransactions(transactions);
+    this._insertWallets(wallets);
     // Missed delete events must be applied after inserts
-    this._applyDeleteLogs(deleteLogs).then(() => {
+    /*this._applyDeleteLogs(deleteLogs).then(() => {
       // and after applying successfully, insert them into the db
       this._insertDeleteLogs(deleteLogs);
-    });
+    });*/
   }
 
   protected mapRow(row: any): WalletRow {
@@ -79,16 +79,8 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     return response;
   }
 
-  async fetchPinnedWallets() {
-    const response = await APIConnection.getInstance().conduit.scry({
-      app: 'realm-chat',
-      path: '/pins',
-    });
-    return response;
-  }
-
-  private async _fetchMessages() {
-    const lastTimestamp = this.getLastTimestamp('messages');
+  private async _fetchTransactions() {
+    const lastTimestamp = this.getLastTimestamp('transactions');
     try {
       const response = await APIConnection.getInstance().conduit.scry({
         app: 'chat-db',
@@ -100,8 +92,8 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     }
   }
 
-  private async _fetchPaths() {
-    const lastTimestamp = this.getLastTimestamp('paths');
+  private async _fetchWallets() {
+    const lastTimestamp = this.getLastTimestamp('wallets');
     const response = await APIConnection.getInstance().conduit.scry({
       app: 'chat-db',
       path: `/db/paths/start-ms/${lastTimestamp}`,
@@ -109,25 +101,9 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     return response?.tables.paths;
   }
 
-  private async _fetchPeers() {
-    const lastTimestamp = this.getLastTimestamp('peers');
-    const response = await APIConnection.getInstance().conduit.scry({
-      app: 'chat-db',
-      path: `/db/peers/start-ms/${lastTimestamp}`,
-    });
-    return response?.tables.peers;
-  }
-
-  private async _fetchDeleteLogs() {
-    const lastTimestamp = this.getLastTimestamp('delete_logs');
-    const response = await APIConnection.getInstance().conduit.scry({
-      app: 'chat-db',
-      path: `/delete-log/start-ms/${lastTimestamp}`,
-    });
-    return response;
-  }
-
-  private _onDbUpdate(data: WalletDbReactions, _id?: number) {
+  private _onDbUpdate(data: any /*WalletDbReactions*/, _id?: number) {
+    console.log('SENDING UPDATE');
+    this.sendUpdate(data);
     if ('tables' in data) {
       this._insertTransactions(data.tables.transactions);
       this._insertWallets(data.tables.wallets);
@@ -209,7 +185,6 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
       ]);
     }
     if (dbChange.type === 'del-wallets-row') {
-      // console.log('del-paths-row', dbChange);
       const delPathsRow = dbChange as DelWalletsRow;
       this._deletePathsRow(delPathsRow.row);
       this.sendUpdate({ type: 'path-deleted', payload: delPathsRow.row });
@@ -650,7 +625,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   private _insertWallets(wallets: WalletsRow[]) {
     if (!this.db) throw new Error('No db connection');
     if (!wallets) return;
-    const insert = this.db.prepare(
+    /*const insert = this.db.prepare(
       `REPLACE INTO paths (
             path, 
             type, 
@@ -677,7 +652,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
           updated_at: path['updated-at'],
         });
     });
-    insertMany(paths);
+    insertMany(paths);*/
   }
 
   private async _applyDeleteLogs(deleteLogs: DeleteLogRow[]) {
@@ -740,25 +715,25 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 }
 
 export const walletInitSql = `
-  create table if not exists wallet_wallets
+  create table if not exists transactions
   (
-      path         TEXT    not null,
-      msg_id       TEXT    not null,
-      msg_part_id  integer not null,
-      content_type TEXT,
-      content_data TEXT,
-      reply_to     TEXT,
-      metadata     text,
-      sender       text    not null,
-      updated_at   integer not null,
-      created_at   integer not null,
-      expires_at   integer
-  );
+    hash           text    not null,
+    network        text    not null,
+    type           text    not null,
+    initiated_at   integer not null,
+    completed_at   integer,
+    our_address    text    not null,
+    their_patp     text,
+    their_address  text    not null,
+    status         text    not null,
+    failure_reason text,
+    notes          text
+);
   
   create unique index if not exists messages_path_msg_id_msg_part_id_uindex
       on messages (path, msg_id, msg_part_id);
   
-  create table if not exists wallet_transactions
+  create table if not exists wallets
   (
       path                        TEXT not null,
       type                        TEXT not null,
@@ -772,6 +747,6 @@ export const walletInitSql = `
   );
   `;
 
-export const chatDBPreload = WalletDB.preload(
+export const walletDBPreload = WalletDB.preload(
   new WalletDB({ preload: true, name: 'walletDB' })
 );

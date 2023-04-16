@@ -2,7 +2,7 @@ import APIConnection from '../../conduit';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { Database } from 'better-sqlite3-multiple-ciphers';
 import { RealmSigner } from './signers/realm';
-import { WalletDB } from './wallet.db';
+import { WalletDB, walletDBPreload } from './wallet.db';
 
 export class WalletService extends AbstractService {
   public walletDB?: WalletDB;
@@ -63,15 +63,21 @@ export class WalletService extends AbstractService {
     hash: string,
     tx: any
   ) {
-    await WalletApi.setTransaction(
-      APIConnection.getInstance().conduit,
-      network,
-      net,
-      wallet,
-      contract,
-      hash,
-      tx
-    );
+    const payload = {
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
+      json: {
+        'set-transaction': {
+          network,
+          net,
+          wallet,
+          contract,
+          hash,
+          tx,
+        },
+      },
+    };
+    await APIConnection.getInstance().conduit.poke(payload);
   }
 
   async createWallet(sender: string, network: string, nickname: string) {
@@ -93,6 +99,11 @@ export class WalletService extends AbstractService {
 export default WalletService;
 
 // Generate preload
-export const walletPreload = WalletService.preload(
+const walletServiceInstance = WalletService.preload(
   new WalletService({ preload: true })
 );
+
+export const walletPreload = {
+  ...walletDBPreload,
+  ...walletServiceInstance,
+};

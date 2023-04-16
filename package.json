@@ -38,6 +38,7 @@
   "dependencies": {
     "@etchteam/storybook-addon-css-variables-theme": "^1.4.0",
     "alchemy-sdk": "^2.2.1",
+    "better-sqlite3-multiple-ciphers": "^8.3.0",
     "ethers": "^5.7.0",
     "qrcode.react": "^3.1.0",
     "socket.io-client": "^4.5.4",

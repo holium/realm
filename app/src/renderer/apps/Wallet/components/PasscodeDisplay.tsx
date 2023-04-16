@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Flex, Box } from 'renderer/components';
+import { Flex, Box } from '@holium/design-system';
 import { transparentize } from 'polished';
 
 interface PasscodeDisplayProps {
