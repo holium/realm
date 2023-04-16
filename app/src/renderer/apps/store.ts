@@ -1,16 +1,18 @@
 import { calculateAnchorPointById } from '../lib/position';
 import { createContext, useContext } from 'react';
+import { Instance, types, onSnapshot } from 'mobx-state-tree';
+import { Dimensions } from '@holium/design-system';
+import { RealmUpdateTypes } from 'os/realm.types';
+import { RealmIPC } from 'renderer/stores/ipc';
+import { RoomsAppState } from './Rooms/rooms.model';
 import {
-  Instance,
-  types,
-  onSnapshot,
-  types,
-  onSnapshot,
-} from 'mobx-state-tree';
-import { RoomsAppState, RoomsAppState } from './Rooms/rooms.model';
-import { Dimensions, Dimensions } from '@holium/design-system';
-import { RealmUpdateTypes, RealmUpdateTypes } from 'os/realm.types';
-import { RealmIPC, RealmIPC } from 'renderer/stores/ipc';
+  NetworkStoreType,
+  ProtocolType,
+  SharingMode,
+  WalletCreationMode,
+  WalletStore,
+  WalletView,
+} from 'renderer/stores/models/wallet.model';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -43,7 +45,7 @@ const TrayAppStore = types
     coords: TrayAppCoords,
     dimensions: TrayAppDimensions,
     roomsApp: RoomsAppState,
-    // walletApp: WalletStore,
+    walletApp: WalletStore,
     // dmApp: DmApp,
   })
   .actions((self) => ({
@@ -94,54 +96,54 @@ const loadSnapshot = () => {
 
 const persistedState = loadSnapshot();
 
-// const walletAppDefault = {
-//   navState: {
-//     view: WalletView.NEW,
-//     protocol: ProtocolType.ETH_GORLI,
-//     lastEthProtocol: ProtocolType.ETH_GORLI,
-//     btcNetwork: NetworkStoreType.BTC_MAIN,
-//     transSend: false,
-//   },
-//   ethereum: {
-//     block: 0,
-//     gorliBlock: 0,
-//     protocol: ProtocolType.ETH_GORLI,
-//     settings: {
-//       walletCreationMode: WalletCreationMode.DEFAULT,
-//       sharingMode: SharingMode.ANYBODY,
-//       defaultIndex: 0,
-//     },
-//     initialized: false,
-//     conversions: {},
-//   },
-//   bitcoin: {
-//     block: 0,
-//     settings: {
-//       walletCreationMode: WalletCreationMode.DEFAULT,
-//       sharingMode: SharingMode.ANYBODY,
-//       defaultIndex: 0,
-//     },
-//     conversions: {},
-//   },
-//   btctest: {
-//     block: 0,
-//     settings: {
-//       walletCreationMode: WalletCreationMode.DEFAULT,
-//       sharingMode: SharingMode.ANYBODY,
-//       defaultIndex: 0,
-//     },
-//     conversions: {},
-//   },
-//   navHistory: [],
-//   creationMode: 'default',
-//   sharingMode: 'anybody',
-//   lastInteraction: Date.now(),
-//   initialized: false,
-//   settings: {
-//     passcodeHash: '',
-//   },
-//   forceActive: false,
-// };
+const walletAppDefault = {
+  navState: {
+    view: WalletView.NEW,
+    protocol: ProtocolType.ETH_GORLI,
+    lastEthProtocol: ProtocolType.ETH_GORLI,
+    btcNetwork: NetworkStoreType.BTC_MAIN,
+    transSend: false,
+  },
+  ethereum: {
+    block: 0,
+    gorliBlock: 0,
+    protocol: ProtocolType.ETH_GORLI,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      defaultIndex: 0,
+    },
+    initialized: false,
+    conversions: {},
+  },
+  bitcoin: {
+    block: 0,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  btctest: {
+    block: 0,
+    settings: {
+      walletCreationMode: WalletCreationMode.DEFAULT,
+      sharingMode: SharingMode.ANYBODY,
+      defaultIndex: 0,
+    },
+    conversions: {},
+  },
+  navHistory: [],
+  creationMode: 'default',
+  sharingMode: 'anybody',
+  lastInteraction: Date.now(),
+  initialized: false,
+  settings: {
+    passcodeHash: '',
+  },
+  forceActive: false,
+};
 
 export const trayStore = TrayAppStore.create({
   activeApp: null,
@@ -157,7 +159,7 @@ export const trayStore = TrayAppStore.create({
   roomsApp: {
     currentView: 'list',
   },
-  // walletApp: walletAppDefault,
+  walletApp: walletAppDefault,
 });
 
 onSnapshot(trayStore, (snapshot) => {
