@@ -10,7 +10,7 @@ import { CreateWallet } from './views/common/Create';
 import { NFTDetail } from './views/common/NFTDetail';
 import { Locked } from './views/common/Locked';
 import { WalletHeader } from './views/common/Header';
-import { Flex } from 'renderer/components';
+import { Flex } from '@holium/design-system';
 import {
   EthWalletType,
   BitcoinWalletType,

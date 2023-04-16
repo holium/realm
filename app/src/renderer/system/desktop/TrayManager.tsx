@@ -3,23 +3,8 @@ import { observer } from 'mobx-react';
 import { trayAppRenderers } from './components/SystemBar/apps';
 import { TrayApp } from '@holium/design-system';
 import { ErrorBoundary } from '../ErrorBoundary';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 const TrayManagerPresenter = () => {
-<<<<<<< HEAD
-  const { activeApp, coords, dimensions, setActiveApp } = useTrayApps();
-  const { walletStore } = useShipStore();
-  const [walletForceActive, setWalletForceActive] = useState(false);
-
-  if (walletForceActive && activeApp !== 'wallet-tray') {
-    walletStore.setForceActive(false);
-    setWalletForceActive(false);
-  }
-  if (walletStore.forceActive && !walletForceActive) {
-    setWalletForceActive(true);
-    setActiveApp('wallet-tray');
-  }
-=======
   // const { activeApp, coords, walletApp, dimensions, setActiveApp } =
   //   useTrayApps();
   const { activeApp, coords, dimensions, setActiveApp } = useTrayApps();
@@ -33,7 +18,6 @@ const TrayManagerPresenter = () => {
   //   setWalletForceActive(true);
   //   setActiveApp('wallet-tray');
   // }
->>>>>>> rebuilt-os-process
 
   if (!activeApp) return null;
 

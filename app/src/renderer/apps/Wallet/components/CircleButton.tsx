@@ -1,11 +1,9 @@
 import { FC } from 'react';
 import { darken } from 'polished';
 
-import { Flex, Icons, Text } from '../../../components';
-import { IconPathsType } from '../../../components/Icons/icons';
+import { Flex, Icon, Text, IconPathsType } from '@holium/design-system';
 import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { ThemeType } from '../../../theme';
 
 interface CircleButtonProps {
   icon: IconPathsType;
@@ -13,9 +11,7 @@ interface CircleButtonProps {
   title?: string;
 }
 
-interface StyleProps {
-  theme: ThemeType;
-}
+interface StyleProps {}
 
 const CircleBtn = styled(motion.div)`
   border-radius: 50%;
@@ -65,7 +61,7 @@ const FullButton = styled(Flex)`
 export const CircleButton: FC<CircleButtonProps> = (
   props: CircleButtonProps
 ) => {
-  const { icon, title, iconColor } = props;
+  const { icon, title } = props;
   // const { walletStore } = useMst();
 
   return (
@@ -75,12 +71,12 @@ export const CircleButton: FC<CircleButtonProps> = (
       justifyContent="center"
     >
       <CircleBtn>
-        <Icons name={icon} size={24} color={iconColor || 'inherit'} />
+        <Icon name={icon} size={24} />
       </CircleBtn>
       {title && (
-        <Text mt={2} fontWeight={300} color="brand.primary" fontSize={2}>
+        <Text.Body mt={2} fontWeight={300} fontSize={2}>
           {title}
-        </Text>
+        </Text.Body>
       )}
     </FullButton>
   );

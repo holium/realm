@@ -1,7 +1,7 @@
 import { BaseSigner } from '../../../../services-new/ship/wallet/signers/BaseSigner';
 import { ethers } from 'ethers';
 // import { safeStorage } from 'electron';
-import { removeDots } from '../../../../api/uqbar';
+// import { removeDots } from '../../../../api/uqbar';
 import { EncryptedStore } from '../../../../lib/encryptedStore';
 
 export abstract class RealmSigner implements BaseSigner {

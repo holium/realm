@@ -1,4 +1,4 @@
-import { EthWalletType } from 'os/services/tray/wallet-lib/wallet.model';
+import { EthWalletType } from 'renderer/stores/models/wallet.model';
 import { Flex, Text, Icon } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
 

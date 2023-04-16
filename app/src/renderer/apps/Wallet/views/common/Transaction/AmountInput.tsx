@@ -3,10 +3,7 @@ import { observer } from 'mobx-react';
 
 import { Flex, Box, Icon, Text, Input } from '@holium/design-system';
 import { ContainerFlex, FlexHider } from './styled';
-import {
-  ERC20Type,
-  ProtocolType,
-} from 'os/services/tray/wallet-lib/wallet.model';
+import { ERC20Type, ProtocolType } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 // TODO: replace with actual exchange rate

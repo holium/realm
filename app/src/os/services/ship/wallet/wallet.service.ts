@@ -1,6 +1,5 @@
 import APIConnection from '../../conduit';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
-import { UqbarApi } from '../../../api/uqbar';
 import { Database } from 'better-sqlite3-multiple-ciphers';
 import { RealmSigner } from './signers/realm';
 import { WalletDB } from './wallet.db';
@@ -16,7 +15,7 @@ export class WalletService extends AbstractService {
   }
 
   async uqbarDeskExists(_evt: any) {
-    return await UqbarApi.uqbarDeskExists(APIConnection.getInstance().conduit);
+    // return await UqbarApi.uqbarDeskExists(APIConnection.getInstance().conduit);
   }
 
   async setPasscodeHash(passcodeHash: string) {

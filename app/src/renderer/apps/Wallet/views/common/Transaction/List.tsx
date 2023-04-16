@@ -11,7 +11,7 @@ import {
 import {
   TransactionType,
   WalletView,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 export type TxType = 'coin' | 'nft' | 'general' | undefined;

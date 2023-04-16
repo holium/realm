@@ -1,10 +1,7 @@
 import { FC } from 'react';
 
 import { Row, Flex, Text, Icons } from 'renderer/components';
-import {
-  ERC721Type,
-  WalletView,
-} from 'os/services/tray/wallet-lib/wallet.model';
+import { ERC721Type, WalletView } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 interface NFTListProps {

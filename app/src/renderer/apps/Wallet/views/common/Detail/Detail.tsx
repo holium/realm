@@ -11,7 +11,7 @@ import {
   EthWalletType,
   NetworkType,
   WalletView,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from 'renderer/stores/models/wallet.model';
 import { CoinList } from './CoinList';
 import { NFTList } from './NFTList';
 

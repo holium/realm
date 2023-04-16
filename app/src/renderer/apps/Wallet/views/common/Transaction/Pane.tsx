@@ -8,7 +8,7 @@ import {
   ProtocolType,
   ERC20Type,
   WalletView,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { shortened } from 'renderer/apps/Wallet/lib/helpers';
 

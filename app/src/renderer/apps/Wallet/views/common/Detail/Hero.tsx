@@ -1,10 +1,9 @@
 import { FC, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
-import { darken } from 'polished';
 import { QRCodeSVG } from 'qrcode.react';
 
-import { Flex, Box, Icons, Text } from 'renderer/components';
+import { Flex, Box, Icon, Text } from '@holium/design-system';
 import {
   shortened,
   formatEthAmount,
@@ -22,7 +21,7 @@ import {
   BitcoinWalletType,
   NetworkType,
   ProtocolType,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from 'renderer/stores/models/wallet.model';
 import { CircleButton } from '../../../components/CircleButton';
 import { SendTransaction } from '../Transaction/Send';
 import { motion } from 'framer-motion';
@@ -33,7 +32,7 @@ import {
 import { TransactionPasscode } from '../Transaction/TransactionPasscode';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-const BreadCrumb = styled(Text)`
+const BreadCrumb = styled(Text.Body)`
   transition: var(--transition);
 
   &:hover {
@@ -124,17 +123,16 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         : '';
 
     const accountDisplay = !props.coin ? (
-      <Text
+      <Text.Body
         layoutId={`wallet-name-${props.wallet.address}`}
         layout="position"
         transition={walletCardStyleTransition}
         mt={2}
         fontWeight={600}
-        color={fadedTextColor}
         style={{ textTransform: 'uppercase' }}
       >
         {props.wallet.nickname}
-      </Text>
+      </Text.Body>
     ) : (
       <Flex
         mt={2}
@@ -147,27 +145,20 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           <BreadCrumb
             fontWeight={500}
             fontSize={2}
-            color={fadedTextColor}
             style={{ textTransform: 'uppercase' }}
             onClick={walletStore.navigateBack}
           >
             {`${props.wallet.nickname}`}
           </BreadCrumb>
-          <Text
-            pl="2px"
-            fontWeight={500}
-            fontSize={2}
-            color={fadedTextColor}
-          >{` / `}</Text>
-
-          <Text
+          <Text.Body pl="2px" fontWeight={500} fontSize={2}>{` / `}</Text.Body>
+          <Text.Body
             fontSize={2}
             style={{
               marginLeft: '4px',
             }}
           >
             {props.coin.name}
-          </Text>
+          </Text.Body>
         </Flex>
       </Flex>
     );
@@ -252,22 +243,22 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           <Flex width="100%" justifyContent="space-between" alignItems="center">
             <Flex>
               {walletStore.navState.network === NetworkType.ETHEREUM ? (
-                <Icons name="Ethereum" height="20px" mr={2} />
+                <Icon name="Ethereum" height="20px" mr={2} />
               ) : (
-                <Icons name="Bitcoin" height="20px" mr={2} />
+                <Icon name="Bitcoin" height="20px" mr={2} />
               )}
-              <Text pt="2px" textAlign="center" fontSize="14px">
+              <Text.Body pt="2px" textAlign="center" fontSize="14px">
                 {shortened(props.wallet.address)}
-              </Text>
+              </Text.Body>
             </Flex>
             <Flex>
               {props.sendTrans ? (
-                <Icons name="ChevronDown" />
+                <Icon name="ChevronDown" />
               ) : (
                 <>
                   <CopyButton content={props.wallet.address} />
                   <Box onClick={() => props.setQROpen(!props.QROpen)}>
-                    <Icons ml={2} name="QRCode" height="20px" />
+                    <Icon ml={2} name="QRCode" height="20px" />
                   </Box>
                 </>
               )}
@@ -341,7 +332,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
 
 interface CopyProps {
   content: string;
-  colors: any;
 }
 function CopyButton(props: CopyProps) {
   const [copied, setCopied] = useState(false);
@@ -355,10 +345,10 @@ function CopyButton(props: CopyProps) {
     <Box>
       {!copied ? (
         <Box onClick={copy}>
-          <Icons name="Copy" height="20px" color={props.colors.text.disabled} />
+          <Icon name="Copy" height="20px" color={props.colors.text.disabled} />
         </Box>
       ) : (
-        <Icons
+        <Icon
           name="CheckCircle"
           height="20px"
           color={props.colors.ui.intent.success}
@@ -370,12 +360,9 @@ function CopyButton(props: CopyProps) {
 
 const SendReceiveButtons = (props: {
   hidden: boolean;
-  windowColor: string;
   send: any;
   receive: any;
 }) => {
-  const panelBackground = darken(0.04, props.windowColor);
-
   return useMemo(
     () => (
       <Box width="100%" hidden={props.hidden}>
@@ -386,18 +373,10 @@ const SendReceiveButtons = (props: {
           alignItems="center"
         >
           <Box mr="16px" onClick={props.receive}>
-            <CircleButton
-              icon="Receive"
-              title="Receive"
-              iconColor={panelBackground}
-            />
+            <CircleButton icon="Receive" title="Receive" />
           </Box>
           <Box onClick={props.send}>
-            <CircleButton
-              icon="Send"
-              title="Send"
-              iconColor={panelBackground}
-            />
+            <CircleButton icon="Send" title="Send" />
           </Box>
         </Flex>
       </Box>
@@ -411,7 +390,6 @@ interface BalanceInterface {
   coin: ERC20Type | null;
   amountDisplay: string;
   amountUsdDisplay: string;
-  colors: any;
 }
 function Balance(props: BalanceInterface) {
   const coinIcon = props.coin
@@ -419,7 +397,7 @@ function Balance(props: BalanceInterface) {
     : '';
   return !props.coin ? (
     <>
-      <Text
+      <Text.Body
         mt={1}
         layout="position"
         transition={walletCardStyleTransition}
@@ -428,17 +406,16 @@ function Balance(props: BalanceInterface) {
         fontSize={7}
       >
         {props.amountDisplay}
-      </Text>
-      <Text
+      </Text.Body>
+      <Text.Body
         mt={1}
         layout="position"
         layoutId={`wallet-usd-${props.address}`}
         transition={walletCardStyleTransition}
         variant="body"
-        color={props.colors.text.secondary}
       >
         {props.amountUsdDisplay}
-      </Text>
+      </Text.Body>
     </>
   ) : (
     <Flex
@@ -452,7 +429,7 @@ function Balance(props: BalanceInterface) {
       <Flex width={26} height={26}>
         <motion.img height="26px" src={coinIcon} />
       </Flex>
-      <Text
+      <Text.Body
         mt={1}
         layout="position"
         layoutId={`wallet-coin-balance`}
@@ -461,16 +438,15 @@ function Balance(props: BalanceInterface) {
         fontSize={5}
       >
         {props.amountDisplay}
-      </Text>
-      <Text
+      </Text.Body>
+      <Text.Body
         mt={1}
         layout="position"
         layoutId={`wallet-coin-usd`}
         variant="body"
-        color={props.colors.text.secondary}
       >
         {props.amountUsdDisplay}
-      </Text>
+      </Text.Body>
     </Flex>
   );
 }

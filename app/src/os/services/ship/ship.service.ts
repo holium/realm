@@ -6,7 +6,7 @@ import AbstractService, { ServiceOptions } from '../abstract.service';
 import { ShipDB } from './ship.db';
 import APIConnection, { ConduitSession } from '../conduit';
 import RoomsService from './rooms.service';
-//import NotificationsService from './notifications/notifications.service';
+import NotificationsService from './notifications/notifications.service';
 import ChatService from './chat/chat.service';
 import { Friends } from './friends.table';
 import SpacesService from './spaces/spaces.service';
@@ -18,7 +18,7 @@ export class ShipService extends AbstractService {
   private readonly shipDB?: ShipDB;
   services?: {
     rooms: RoomsService;
-    //   notifications: NotificationsService;
+    notifications: NotificationsService;
     chat: ChatService;
     friends: Friends;
     spaces: SpacesService;

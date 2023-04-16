@@ -1,37 +1,16 @@
 import { calculateAnchorPointById } from '../lib/position';
 import { createContext, useContext } from 'react';
-<<<<<<< HEAD
-import { Instance, types, onSnapshot, applySnapshot } from 'mobx-state-tree';
-import { RoomsAppState } from 'os/services/tray/rooms.model';
 import {
-  NetworkStoreType,
-  ProtocolType,
-  SharingMode,
-  WalletCreationMode,
-  WalletStore,
-  WalletView,
-} from '../stores/models/wallet.model';
-
-// import { DmApp } from './Messages/store';
-import { Dimensions } from '@holium/design-system';
-import { RealmUpdateTypes } from 'os/realm.types';
-import { RealmIPC } from 'renderer/stores/ipc';
-import { shipStore } from 'renderer/stores/ship.store';
-=======
-import { Instance, types, onSnapshot } from 'mobx-state-tree';
-import { Dimensions } from '@holium/design-system';
-import { RealmUpdateTypes } from 'os/realm.types';
-import { RealmIPC } from 'renderer/stores/ipc';
-import { RoomsAppState } from './Rooms/rooms.model';
-// import {
-//   NetworkStoreType,
-//   ProtocolType,
-//   SharingMode,
-//   WalletCreationMode,
-//   WalletStore,
-//   WalletView,
-// } from 'os/services/tray/wallet-lib/wallet.model';
->>>>>>> rebuilt-os-process
+  Instance,
+  types,
+  onSnapshot,
+  types,
+  onSnapshot,
+} from 'mobx-state-tree';
+import { RoomsAppState, RoomsAppState } from './Rooms/rooms.model';
+import { Dimensions, Dimensions } from '@holium/design-system';
+import { RealmUpdateTypes, RealmUpdateTypes } from 'os/realm.types';
+import { RealmIPC, RealmIPC } from 'renderer/stores/ipc';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -115,57 +94,6 @@ const loadSnapshot = () => {
 
 const persistedState = loadSnapshot();
 
-<<<<<<< HEAD
-const walletAppDefault = {
-  navState: {
-    view: WalletView.NEW,
-    protocol: ProtocolType.ETH_GORLI,
-    lastEthProtocol: ProtocolType.ETH_GORLI,
-    btcNetwork: NetworkStoreType.BTC_MAIN,
-    transSend: false,
-  },
-  ethereum: {
-    block: 0,
-    gorliBlock: 0,
-    protocol: ProtocolType.ETH_GORLI,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    initialized: false,
-    conversions: {},
-  },
-  bitcoin: {
-    block: 0,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    conversions: {},
-  },
-  btctest: {
-    block: 0,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    conversions: {},
-  },
-  navHistory: [],
-  creationMode: 'default',
-  sharingMode: 'anybody',
-  lastInteraction: Date.now(),
-  initialized: false,
-  settings: {
-    passcodeHash: '',
-  },
-  forceActive: false,
-  ourPatp: shipStore.ship?.patp,
-};
-=======
 // const walletAppDefault = {
 //   navState: {
 //     view: WalletView.NEW,
@@ -214,7 +142,6 @@ const walletAppDefault = {
 //   },
 //   forceActive: false,
 // };
->>>>>>> rebuilt-os-process
 
 export const trayStore = TrayAppStore.create({
   activeApp: null,

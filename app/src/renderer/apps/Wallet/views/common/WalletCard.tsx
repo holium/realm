@@ -13,7 +13,7 @@ import {
   NetworkType,
   ProtocolType,
   ERC20Type,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from 'renderer/stores/models/wallet.model';
 import {
   WalletCardStyle,
   walletCardStyleTransition,

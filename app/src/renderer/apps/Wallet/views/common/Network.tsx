@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react';
 import { Box, Flex, Text } from '@holium/design-system';
-import { ProtocolType } from 'os/services/tray/wallet-lib/wallet.model';
+import { ProtocolType } from 'renderer/stores/models/wallet.model';
 
 interface WalletNetworkProps {
   network: ProtocolType;

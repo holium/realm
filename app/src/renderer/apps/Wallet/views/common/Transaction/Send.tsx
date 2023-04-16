@@ -6,7 +6,7 @@ import {
   EthWalletType,
   ERC20Type,
   ProtocolType,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from 'renderer/stores/models/wallet.model';
 import { TransactionPane } from './Pane';
 import { useShipStore } from 'renderer/stores/ship.store';
 

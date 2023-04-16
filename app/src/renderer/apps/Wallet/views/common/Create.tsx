@@ -2,13 +2,8 @@ import { ChangeEvent, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Flex, Text, Button, TextInput } from '@holium/design-system';
 import { useField, useForm } from 'mobx-easy-form';
-<<<<<<< HEAD
-import { NetworkType } from 'os/services/tray/wallet-lib/wallet.model';
+import { NetworkType } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
-=======
-import { WalletActions } from 'renderer/logic/actions/wallet';
-import { NetworkType } from 'os-will-delete/services/tray/wallet-lib/wallet.model';
->>>>>>> rebuilt-os-process
 
 interface CreateWalletProps {
   network: NetworkType;

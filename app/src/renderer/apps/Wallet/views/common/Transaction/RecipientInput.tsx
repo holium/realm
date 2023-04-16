@@ -2,11 +2,18 @@ import { useEffect, useState, useRef } from 'react';
 import { isValidPatp } from 'urbit-ob';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import { Icons, Text } from 'renderer/components';
+import {
+  Icon,
+  Text,
+  Avatar,
+  Flex,
+  Box,
+  Input,
+  Spinner,
+} from '@holium/design-system';
 import { shortened } from '../../../lib/helpers';
 import { RecipientPayload } from 'os/services/tray/wallet.service';
 import { ContainerFlex } from './styled';
-import { Avatar, Flex, Box, Input, Spinner } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 export const RecipientInput = observer(
@@ -166,7 +173,7 @@ export const RecipientInput = observer(
         );
       }
 
-      if (props.icon === 'spy') return <Icons name="Spy" size="24px" />;
+      if (props.icon === 'spy') return <Icon name="Spy" size="24px" />;
 
       if (props.icon === 'sigil')
         return <Avatar simple={true} size={24} patp={valueCache} />;
@@ -177,9 +184,9 @@ export const RecipientInput = observer(
     return (
       <Flex flexDirection="column">
         <Flex width="100%" justifyContent="space-evenly" alignItems="center">
-          <Text fontSize={1} variant="body">
+          <Text.Body fontSize={1} variant="body">
             TO
-          </Text>
+          </Text.Body>
           <ContainerFlex
             className="realm-cursor-hover"
             px={1}
@@ -201,9 +208,9 @@ export const RecipientInput = observer(
                 onChange={onChange}
               />
               {recipientDetails.details?.address && (
-                <Text fontSize={1} variant="body" opacity={0.7}>
+                <Text.Body fontSize={1} variant="body" opacity={0.7}>
                   {shortened(recipientDetails.details?.address)}
-                </Text>
+                </Text.Body>
               )}
             </Flex>
             {loading && (
@@ -214,12 +221,12 @@ export const RecipientInput = observer(
           </ContainerFlex>
         </Flex>
         <Flex mt={2} width="100%" justifyContent="flex-end">
-          <Text variant="body" fontSize="11px">
+          <Text.Body variant="body" fontSize="11px">
             {recipientDetails.failed &&
               recipientDetails.details?.patp === recipient &&
               `${recipient} doesn't have a Realm wallet.`}
             &nbsp;&nbsp;&nbsp;
-          </Text>
+          </Text.Body>
         </Flex>
       </Flex>
     );

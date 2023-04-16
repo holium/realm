@@ -9,7 +9,7 @@ import {
   WalletView,
   TransactionType,
   ProtocolType,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from 'renderer/stores/models/wallet.model';
 import { TxType } from './List';
 import { useShipStore } from 'renderer/stores/ship.store';
 

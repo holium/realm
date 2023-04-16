@@ -2,10 +2,7 @@ import { FC } from 'react';
 
 import { Row, Flex, Text, Icons } from 'renderer/components';
 import { getMockCoinIcon, formatCoinAmount } from '../../../lib/helpers';
-import {
-  ERC20Type,
-  WalletView,
-} from 'os/services/tray/wallet-lib/wallet.model';
+import { ERC20Type, WalletView } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 interface CoinListProps {

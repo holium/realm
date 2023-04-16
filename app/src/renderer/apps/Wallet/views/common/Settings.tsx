@@ -2,7 +2,6 @@ import { ChangeEvent, useState } from 'react';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
 import { isValidPatp } from 'urbit-ob';
-import { NoScrollBar } from 'renderer/components';
 import {
   Flex,
   Text,
@@ -11,12 +10,13 @@ import {
   Select,
   Spinner,
   TextInput,
+  NoScrollBar,
 } from '@holium/design-system';
 import {
   WalletCreationMode,
   SharingMode,
   UISettingsType,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from 'renderer/stores/models/wallet.model';
 import { DeletePasscode } from './DeletePasscode';
 import { useShipStore } from 'renderer/stores/ship.store';
 
