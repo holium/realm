@@ -2,7 +2,6 @@ import APIConnection from '../../conduit';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { UqbarApi } from '../../../api/uqbar';
 import { Database } from 'better-sqlite3-multiple-ciphers';
-import { WalletApi } from '../../../api/wallet';
 import { RealmSigner } from './signers/realm';
 import { WalletDB } from './wallet.db';
 
@@ -21,10 +20,16 @@ export class WalletService extends AbstractService {
   }
 
   async setPasscodeHash(passcodeHash: string) {
-    await WalletApi.setPasscodeHash(
-      APIConnection.getInstance().conduit,
-      passcodeHash
-    );
+    const payload = {
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
+      json: {
+        'set-passcode-hash': {
+          hash: passcodeHash,
+        },
+      },
+    };
+    await APIConnection.getInstance().conduit.poke(payload);
   }
 
   async setXpub(
@@ -34,7 +39,17 @@ export class WalletService extends AbstractService {
     passcode: string
   ) {
     const xpub = RealmSigner.getXpub(ethPath, ourPatp, passcode);
-    await WalletApi.setXpub(APIConnection.getInstance().conduit, network, xpub);
+    const payload = {
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
+      json: {
+        'set-xpub': {
+          network,
+          xpub,
+        },
+      },
+    };
+    await APIConnection.getInstance().conduit.poke(payload);
   }
 
   async setMnemonic(mnemonic: string, ourPatp: string, passcode: string) {
@@ -60,16 +75,19 @@ export class WalletService extends AbstractService {
     );
   }
 
-  createWallet(sender: string, network: string, nickname: string) {
-    console.log('sender', sender);
-    console.log('network', network);
-    console.log('nickname', nickname);
-    WalletApi.createWallet(
-      APIConnection.getInstance().conduit,
-      sender,
-      network,
-      nickname
-    );
+  async createWallet(sender: string, network: string, nickname: string) {
+    const payload = {
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
+      json: {
+        'create-wallet': {
+          sndr: sender,
+          network,
+          nickname,
+        },
+      },
+    };
+    await APIConnection.getInstance().conduit.poke(payload);
   }
 }
 
