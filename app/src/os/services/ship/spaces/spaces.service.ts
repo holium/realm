@@ -67,6 +67,7 @@ export class SpacesService extends AbstractService {
     this.spacesDB?.reset();
     this.membersDB?.reset();
     this.invitationsDB?.reset();
+    this.featuredSpacesDB?.reset();
   }
 
   private _onEvent = (data: any, _id?: number, mark?: string) => {
