@@ -1,37 +1,15 @@
 import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
-import AbstractDataAccess from 'os/services/abstract.db';
 import { APIConnection } from '../../conduit';
-// type ChatUpdateType =
-//   | 'message-received'
-//   | 'message-edited'
-//   | 'message-deleted'
-//   | 'path-added'
-//   | 'path-updated'
-//   | 'path-deleted'
-//   | 'peer-added'
-//   | 'peer-deleted';
-
-/*interface ChatRow {
-  id: number;
-  app: string;
-  path: string;
-  type: string;
-  title: string;
-  content: string;
-  image: string;
-  buttons: any;
-  link: string;
-  metadata: any;
-  createdAt: number;
-  updatedAt: number;
-  readAt: number | null;
-  read: boolean;
-  dismissedAt: number | null;
-  dismissed: boolean;
-}*/
-// interface WalletRow {}
+import {
+  WalletDbReactions,
+  WalletsRow,
+  AddRow,
+  UpdateRow,
+  UpdateTransaction,
+  DelTransactionsRow,
+} from './wallet.types';
 
 export class WalletDB extends AbstractDataAccess<WalletRow> {
   constructor(params: DataAccessContructorParams) {
@@ -46,7 +24,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     this.init = this.init.bind(this);
     APIConnection.getInstance().conduit.watch({
       app: 'wallet',
-      path: '/db',
+      path: '/updates',
       onEvent: this._onDbUpdate,
       onQuit: this._onQuit,
       onError: this._onError,
@@ -59,8 +37,8 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     const peers = await this._fetchPeers();
     const messages = await this._fetchMessages();
     const deleteLogs = await this._fetchDeleteLogs();
-    this._insertMessages(messages);
-    this._insertPaths(paths);
+    this._insertTransactions(messages);
+    this._insertWallets(paths);
     this._insertPeers(peers);
     // Missed delete events must be applied after inserts
     this._applyDeleteLogs(deleteLogs).then(() => {
@@ -150,9 +128,8 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
   private _onDbUpdate(data: WalletDbReactions, _id?: number) {
     if ('tables' in data) {
-      this._insertMessages(data.tables.messages);
-      this._insertPaths(data.tables.paths);
-      this._insertPeers(data.tables.peers);
+      this._insertTransactions(data.tables.transactions);
+      this._insertWallets(data.tables.wallets);
     } else if (Array.isArray(data)) {
       if (
         data.length > 1 &&
@@ -162,7 +139,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
         const messages = data.map(
           (row) => (row as AddRow).row as WalletsRow
         ) as WalletsRow[];
-        this._insertMessages(messages);
+        this._insertTransactions(messages);
         const msg = this.getChatMessage(messages[0]['msg-id']);
         this.sendUpdate({ type: 'message-received', payload: msg });
       } else {
@@ -177,17 +154,17 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     if (dbChange.type === 'add-row') {
       const addRow = dbChange as AddRow;
       switch (addRow.table) {
-        case 'messages':
+        case 'transactions':
           // console.log('add-row to messages', addRow.row);
           const message = addRow.row as WalletsRow;
-          this._insertMessages([message]);
+          this._insertTransactions([message]);
           const msg = this.getChatMessage(message['msg-id']);
           this.sendUpdate({ type: 'message-received', payload: msg });
           break;
         case 'paths':
           // console.log('add-row to paths', addRow.row);
           const path = addRow.row as PathsRow;
-          this._insertPaths([path]);
+          this._insertWallets([path]);
           const chat = this.getChat(path.path);
           this.sendUpdate({ type: 'path-added', payload: chat });
 
@@ -204,24 +181,17 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
       const update = dbChange as UpdateRow;
       switch (update.table) {
         case 'messages':
-          const message = update as UpdateMessage;
-          // console.log('update messages', message.message);
+          const message = update as UpdateTransaction;
           const msgId = message.message[0]['msg-id'];
-          this._insertMessages(message.message);
+          this._insertTransactions(message.message);
           const msg = this.getChatMessage(msgId);
           this.sendUpdate({ type: 'message-edited', payload: msg });
           break;
         case 'paths':
-          // console.log('update paths', update.row);
-          const path = update.row as PathsRow;
-          this._insertPaths([path]);
+          const path = update.row as WalletsRow;
+          this._insertWallets([path]);
           const chat = this.getChat(path.path);
           this.sendUpdate({ type: 'path-updated', payload: chat });
-          break;
-        case 'peers':
-          // console.log('update peers', update.row);
-          const peers = update.row as PeersRow;
-          this._insertPeers([peers]);
           break;
       }
     }
@@ -234,12 +204,13 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     }
   }
 
-  private _handleDeletes(dbChange: DelMessagesRow | DelPathsRow | DelPeersRow) {
+  private _handleDeletes(
+    dbChange: DelTransactionsRow | DelPathsRow | DelPeersRow
+  ) {
     // insert into delete_logs
-    if (dbChange.type === 'del-messages-row') {
-      // console.log('del-messages-row', dbChange);
-      const delMessagesRow = dbChange as DelMessagesRow;
-      this._deleteMessagesRow(delMessagesRow['msg-id']);
+    if (dbChange.type === 'del-transactions-row') {
+      const delMessagesRow = dbChange as DelTransactionsRow;
+      this._deleteTransactionsRow(delMessagesRow['msg-id']);
       this.sendUpdate({ type: 'message-deleted', payload: delMessagesRow });
       this._insertDeleteLogs([
         {
@@ -650,7 +621,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   // Inserts
   //
 
-  private _insertMessages(messages: MessagesRow[]) {
+  private _insertTransactions(transactions: TransactionsRow[]) {
     if (!this.db) throw new Error('No db connection');
     const insert = this.db.prepare(
       `REPLACE INTO messages (
@@ -696,12 +667,12 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
         });
       }
     });
-    insertMany(messages);
+    insertMany(transactions);
   }
 
-  private _insertPaths(paths: PathsRow[]) {
+  private _insertWallets(wallets: WalletsRow[]) {
     if (!this.db) throw new Error('No db connection');
-    if (!paths) return;
+    if (!wallets) return;
     const insert = this.db.prepare(
       `REPLACE INTO paths (
             path, 
@@ -730,31 +701,6 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
         });
     });
     insertMany(paths);
-  }
-
-  private _insertPeers(peers: PeersRow[]) {
-    if (!this.db) throw new Error('No db connection');
-    if (!peers) return;
-    const insert = this.db.prepare(
-      `REPLACE INTO peers (
-            path, 
-            ship, 
-            role,
-            created_at, 
-            updated_at
-          ) VALUES (@path, @ship, @role, @created_at, @updated_at)`
-    );
-    const insertMany = this.db.transaction((peers) => {
-      for (const peer of peers)
-        insert.run({
-          path: peer.path,
-          ship: peer.ship,
-          role: peer.role,
-          created_at: peer['created-at'],
-          updated_at: peer['updated-at'],
-        });
-    });
-    insertMany(peers);
   }
 
   private async _applyDeleteLogs(deleteLogs: DeleteLogRow[]) {
@@ -805,13 +751,13 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     deletePath.run(path, peer);
   }
 
-  private _deleteMessagesRow(msgId: string) {
+  private _deleteTransactionsRow(msgId: string) {
     if (!this.db) throw new Error('No db connection');
-    const deleteMessage = this.db.prepare(
-      'DELETE FROM messages WHERE msg_id = ?'
+    const deleteTransaction = this.db.prepare(
+      'DELETE FROM transactions WHERE msg_id = ?'
     );
     console.log('deleting msgId', msgId);
-    deleteMessage.run(msgId);
+    deleteTransaction.run(msgId);
     // insert into delete logs
   }
 }
