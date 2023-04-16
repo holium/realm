@@ -179,6 +179,7 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
 });
 
 NotifIPC.onUpdate(({ type, payload }: any) => {
+  console.log('GOT NOTIF UPDATE');
   switch (type) {
     case 'notification-added':
       shipStore.notifStore.onNotifAdded(payload);

@@ -104,6 +104,6 @@ const walletServiceInstance = WalletService.preload(
 );
 
 export const walletPreload = {
-  ...walletDBPreload,
   ...walletServiceInstance,
+  ...walletDBPreload,
 };

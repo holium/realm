@@ -326,6 +326,6 @@ const chatServiceInstance = ChatService.preload(
 );
 
 export const chatPreload = {
-  ...chatDBPreload,
   ...chatServiceInstance,
+  ...chatDBPreload,
 };
