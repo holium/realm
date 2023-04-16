@@ -40,25 +40,17 @@
   [cards new-chat]
 
 :: matching members are status %joined or %host AND have
-<<<<<<< HEAD
-:: either %member or %owner roles
-=======
 :: either %member or %admin or %owner roles
->>>>>>> master
 ++  skim-init-members
   |=  =members:mstore
   ^-  (list [ship member:mstore])
   %+  skim  ~(tap by members)
     |=  kv=[k=ship v=member:mstore]
     ?&  |(=(status.v.kv %joined) =(status.v.kv %host))
-<<<<<<< HEAD
-        |((~(has in roles.v.kv) %member) (~(has in roles.v.kv) %owner))
-=======
         ?|  (~(has in roles.v.kv) %member)
             (~(has in roles.v.kv) %admin)
             (~(has in roles.v.kv) %owner)
         ==
->>>>>>> master
     ==
   
 ++  skim-joined-members
@@ -67,14 +59,10 @@
   %+  skim  ~(tap by members)
     |=  kv=[k=ship v=member:mstore]
     ?&  =(status.v.kv %joined)
-<<<<<<< HEAD
-        |((~(has in roles.v.kv) %member) (~(has in roles.v.kv) %admin))
-=======
         ?|  (~(has in roles.v.kv) %member)
             (~(has in roles.v.kv) %admin)
             (~(has in roles.v.kv) %owner)
         ==
->>>>>>> master
     ==
 
 ++  create-channel-pokes
@@ -118,9 +106,4 @@
   |=  kv=[k=path v=chat:store]
   ^-  (list card:agent:gall)
   [%pass /rcpoke %agent [our.bowl %realm-chat] %poke %chat-action !>([%remove-ship-from-chat k.kv ship])]~
-
-<<<<<<< HEAD
 --
-=======
---
->>>>>>> master

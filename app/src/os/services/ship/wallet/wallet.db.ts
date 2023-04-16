@@ -9,6 +9,7 @@ import {
   UpdateRow,
   UpdateTransaction,
   DelTransactionsRow,
+  WalletDbOps,
 } from './wallet.types';
 
 export class WalletDB extends AbstractDataAccess<WalletRow> {
@@ -134,7 +135,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
       if (
         data.length > 1 &&
         data[0].type === 'add-row' &&
-        data[0].table === 'messages'
+        data[0].table === 'transactions'
       ) {
         const messages = data.map(
           (row) => (row as AddRow).row as WalletsRow
@@ -155,39 +156,30 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
       const addRow = dbChange as AddRow;
       switch (addRow.table) {
         case 'transactions':
-          // console.log('add-row to messages', addRow.row);
-          const message = addRow.row as WalletsRow;
+          const message = addRow.row as TransactionsRow;
           this._insertTransactions([message]);
           const msg = this.getChatMessage(message['msg-id']);
           this.sendUpdate({ type: 'message-received', payload: msg });
           break;
-        case 'paths':
-          // console.log('add-row to paths', addRow.row);
-          const path = addRow.row as PathsRow;
+        case 'wallets':
+          const path = addRow.row as WalletsRow;
           this._insertWallets([path]);
           const chat = this.getChat(path.path);
           this.sendUpdate({ type: 'path-added', payload: chat });
-
-          break;
-        case 'peers':
-          // console.log('add-row to peers', addRow.row);
-          const peers = addRow.row as PeersRow;
-          this._insertPeers([peers]);
-          this.sendUpdate({ type: 'peer-added', payload: peers });
           break;
       }
     }
     if (dbChange.type === 'update') {
       const update = dbChange as UpdateRow;
       switch (update.table) {
-        case 'messages':
+        case 'transactions':
           const message = update as UpdateTransaction;
           const msgId = message.message[0]['msg-id'];
           this._insertTransactions(message.message);
           const msg = this.getChatMessage(msgId);
           this.sendUpdate({ type: 'message-edited', payload: msg });
           break;
-        case 'paths':
+        case 'wallets':
           const path = update.row as WalletsRow;
           this._insertWallets([path]);
           const chat = this.getChat(path.path);
@@ -196,17 +188,14 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
       }
     }
     if (
-      dbChange.type === 'del-messages-row' ||
-      dbChange.type === 'del-paths-row' ||
-      dbChange.type === 'del-peers-row'
+      dbChange.type === 'del-transactions-row' ||
+      dbChange.type === 'del-wallets-row'
     ) {
       this._handleDeletes(dbChange);
     }
   }
 
-  private _handleDeletes(
-    dbChange: DelTransactionsRow | DelPathsRow | DelPeersRow
-  ) {
+  private _handleDeletes(dbChange: DelTransactionsRow | DelWalletsRow) {
     // insert into delete_logs
     if (dbChange.type === 'del-transactions-row') {
       const delMessagesRow = dbChange as DelTransactionsRow;
@@ -219,27 +208,15 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
         },
       ]);
     }
-    if (dbChange.type === 'del-paths-row') {
+    if (dbChange.type === 'del-wallets-row') {
       // console.log('del-paths-row', dbChange);
-      const delPathsRow = dbChange as DelPathsRow;
+      const delPathsRow = dbChange as DelWalletsRow;
       this._deletePathsRow(delPathsRow.row);
       this.sendUpdate({ type: 'path-deleted', payload: delPathsRow.row });
       this._insertDeleteLogs([
         {
           change: delPathsRow,
           timestamp: delPathsRow.timestamp,
-        },
-      ]);
-    }
-    if (dbChange.type === 'del-peers-row') {
-      // console.log('del-peers-row', dbChange);
-      const delPeersRow = dbChange as DelPeersRow;
-      this._deletePeersRow(delPeersRow.row, delPeersRow.ship);
-      this.sendUpdate({ type: 'peer-deleted', payload: delPeersRow });
-      this._insertDeleteLogs([
-        {
-          change: delPeersRow,
-          timestamp: delPeersRow.timestamp,
         },
       ]);
     }

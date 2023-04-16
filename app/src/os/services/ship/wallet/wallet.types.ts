@@ -37,7 +37,7 @@ export type UpdateRow = {
 export type UpdateTransaction = {
   table: 'transactions';
   type: 'update';
-  transaction: TransacitonsRow[];
+  transaction: TransactionsRow[];
 };
 
 export type DelTransactionsRow = {
@@ -47,9 +47,9 @@ export type DelTransactionsRow = {
   ship: string;
   timestamp: number;
 };
-export type DelPathsRow = {
+export type DelWalletsRow = {
   table: WalletTables;
-  type: 'del-paths-row';
+  type: 'del-wallets-row';
   row: string;
   timestamp: number;
 };
@@ -64,15 +64,14 @@ export type DelMessagesRow = {
 export type WalletDbOps = DelTransactionsRow | UpdateRow;
 
 export type DeleteLogRow = {
-  change: DelTransactionsRow | DelPathsRow | DelMessagesRow;
+  change: DelTransactionsRow | DelWalletsRow;
   timestamp: number;
 };
 
 export type WalletDbChangeReactions =
   | AddRow[]
   | DelTransactionsRow[]
-  | DelPathsRow[]
-  | DelMessagesRow[];
+  | DelWalletsRow[];
 
 export type WalletDbReactions =
   | {
