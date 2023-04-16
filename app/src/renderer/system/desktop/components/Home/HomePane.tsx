@@ -5,8 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { rgba } from 'polished';
 import { useServices } from 'renderer/logic/store';
 import { ShellActions } from 'renderer/logic/actions/shell';
-import { SpaceHome } from './Space';
-import { OurHome } from './Ship';
+import { Home } from './Space';
 import { PassportMenuProvider } from 'renderer/components/People/usePassportMenu';
 import { AppSearchPopover } from './AppInstall/AppSearchPopover';
 
@@ -21,7 +20,6 @@ const HomeWindow = styled(motion.div)`
 const HomePanePresenter = () => {
   const { theme, spaces, desktop } = useServices();
   const isOpen = desktop.isHomePaneOpen;
-
   const isOur = spaces.selected?.type === 'our';
 
   useEffect(() => {
@@ -46,9 +44,7 @@ const HomePanePresenter = () => {
           exit={{ opacity: 0 }}
         >
           <PassportMenuProvider>
-            {/* TODO make app grid not reanimate when switching around */}
-            {isOur && <OurHome isOpen={isOpen} />}
-            {!isOur && <SpaceHome isOpen={isOpen} />}
+            <Home isOpen={isOpen} isOur={isOur} />
             <AppSearchPopover />
           </PassportMenuProvider>
         </HomeWindow>
