@@ -11,19 +11,21 @@ import {
   Tooltip,
 } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
 import { VoiceView } from './Voice';
 import { RoomInvite } from './Invite';
 import { useRooms } from '../useRooms';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
 const RoomPresenter = () => {
-  const { ship, theme, desktop } = useServices();
+  const { theme, shellStore } = useAppState();
+  const { ship } = useShipStore();
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms(ship?.patp);
 
-  const { dockColor, accentColor, mode } = theme.currentTheme;
+  const { dockColor, mode } = theme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
   const isMuted = roomsManager?.protocol.local?.isMuted;
   const commButtonBg =
@@ -167,9 +169,10 @@ const RoomPresenter = () => {
           <Flex alignItems="center">
             <Button.IconButton
               className="realm-cursor-hover"
-              size={26}
-              customColor={
-                presentRoom.creator === ship?.patp ? '#E56262' : undefined
+              size={30}
+              showOnHover
+              iconColor={
+                presentRoom.creator === ship?.patp ? 'intent-alert' : undefined
               }
               onClick={(evt) => {
                 evt.stopPropagation();
@@ -180,7 +183,12 @@ const RoomPresenter = () => {
                 }
               }}
             >
-              <Icon name="RoomLeave" size={22} opacity={0.7} />
+              <Icon
+                name="RoomLeave"
+                fill="intent-alert"
+                size={22}
+                opacity={0.9}
+              />
             </Button.IconButton>
           </Flex>
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
@@ -197,9 +205,9 @@ const RoomPresenter = () => {
               }}
             />
             <CommButton
-              icon={desktop.multiplayerEnabled ? 'MouseOn' : 'MouseOff'}
+              icon={shellStore.multiplayerEnabled ? 'MouseOn' : 'MouseOff'}
               customBg={commButtonBg}
-              onClick={desktop.toggleMultiplayer}
+              onClick={shellStore.toggleMultiplayer}
             />
             {/* <CommButton
               icon="HeadphoneLine"
@@ -220,8 +228,9 @@ const RoomPresenter = () => {
             >
               <Button.IconButton
                 className="realm-cursor-hover"
-                size={26}
-                customColor={roomView === 'chat' ? accentColor : undefined}
+                size={30}
+                showOnHover
+                iconColor={roomView === 'chat' ? 'accent' : 'icon'}
                 onClick={(evt) => {
                   evt.stopPropagation();
                   roomView === 'chat'
@@ -229,7 +238,7 @@ const RoomPresenter = () => {
                     : setRoomView('chat');
                 }}
               >
-                <Icon name="Chat3" size={22} opacity={0.7} />
+                <Icon name="Chat3" size={22} opacity={0.9} />
               </Button.IconButton>
             </Badge>
           </Flex>

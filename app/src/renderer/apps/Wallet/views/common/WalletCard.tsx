@@ -1,9 +1,5 @@
 import { FC, useMemo } from 'react';
-import { darken, lighten, rgba } from 'polished';
-import { Text, Flex } from 'renderer/components';
-import { ThemeType } from 'renderer/theme';
-import { useServices } from 'renderer/logic/store';
-import { useTrayApps } from 'renderer/apps/store';
+import { Text, Flex } from '@holium/design-system';
 import {
   formatEthAmount,
   formatZigAmount,
@@ -17,18 +13,18 @@ import {
   NetworkType,
   ProtocolType,
   ERC20Type,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from 'renderer/stores/models/wallet.model';
 import {
   WalletCardStyle,
   walletCardStyleTransition,
 } from '../../components/WalletCardWrapper';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface WalletCardProps {
   // wallet: EthWalletType | BitcoinWalletType;
   walletKey: any;
   isSelected?: boolean;
   onSelect?: () => void;
-  theme?: ThemeType;
 }
 
 export const WalletCard: FC<WalletCardProps> = ({
@@ -36,37 +32,35 @@ export const WalletCard: FC<WalletCardProps> = ({
   isSelected,
   onSelect,
 }: WalletCardProps) => {
-  const { theme } = useServices();
-  const { walletApp } = useTrayApps();
-  const mode = theme.currentTheme.mode === 'light' ? 'light' : 'dark';
+  const { walletStore } = useShipStore();
 
-  const wallet = walletApp.currentStore.wallets.get(walletKey);
+  const wallet = walletStore.currentStore.wallets.get(walletKey);
 
   let coins: any = null;
-  if (walletApp.navState.network === NetworkType.ETHEREUM) {
+  if (walletStore.navState.network === NetworkType.ETHEREUM) {
     const ethWallet = wallet as EthWalletType;
-    const coinMap = ethWallet.data.get(walletApp.navState.protocol)?.coins;
+    const coinMap = ethWallet.data.get(walletStore.navState.protocol)?.coins;
     if (coinMap) coins = getCoins(coinMap);
   }
 
   const walletTransactions =
-    walletApp.navState.network === NetworkType.ETHEREUM
-      ? (wallet as EthWalletType).data.get(walletApp.navState.protocol)
+    walletStore.navState.network === NetworkType.ETHEREUM
+      ? (wallet as EthWalletType).data.get(walletStore.navState.protocol)
           ?.transactionList.transactions
       : (wallet as BitcoinWalletType).transactionList.transactions;
 
   const transactions = getTransactions(walletTransactions || new Map());
 
   const amountDisplay =
-    walletApp.navState.network === NetworkType.ETHEREUM
-      ? walletApp.navState.protocol === ProtocolType.UQBAR
+    walletStore.navState.network === NetworkType.ETHEREUM
+      ? walletStore.navState.protocol === ProtocolType.UQBAR
         ? `${formatZigAmount(
-            (wallet as EthWalletType).data.get(walletApp.navState.protocol)
+            (wallet as EthWalletType).data.get(walletStore.navState.protocol)
               ?.balance ?? ''
           )} zigs`
         : `${
             formatEthAmount(
-              (wallet as EthWalletType).data.get(walletApp.navState.protocol)
+              (wallet as EthWalletType).data.get(walletStore.navState.protocol)
                 ?.balance ?? ''
             ).eth
           } ETH`
@@ -80,27 +74,20 @@ export const WalletCard: FC<WalletCardProps> = ({
         layoutId={`wallet-card-${wallet?.address}`}
         justifyContent="flex-start"
         transition={walletCardStyleTransition}
-        customBg={lighten(0.04, theme.currentTheme.windowColor)}
-        borderColor={
-          theme.currentTheme.mode === 'dark'
-            ? darken(0.1, theme.currentTheme.backgroundColor)
-            : darken(0.1, theme.currentTheme.windowColor)
-        }
         mode={mode}
         isSelected={!!isSelected}
         onClick={onSelect}
       >
-        <Text
+        <Text.Body
           layoutId={`wallet-name-${wallet?.address}`}
           layout="position"
           transition={{ duration: 0.1 }}
           fontWeight={600}
-          color={rgba(theme.currentTheme.textColor, 0.4)}
           style={{ textTransform: 'uppercase' }}
         >
           {wallet?.nickname}
-        </Text>
-        <Text
+        </Text.Body>
+        <Text.Body
           mt={1}
           layoutId={`wallet-balance-${wallet?.address}`}
           transition={{ duration: 0.1 }}
@@ -108,7 +95,7 @@ export const WalletCard: FC<WalletCardProps> = ({
           fontSize={7}
         >
           {amountDisplay}
-        </Text>
+        </Text.Body>
         <Flex
           // layout="position"
           initial={{ opacity: 0 }}
@@ -132,14 +119,14 @@ export const WalletCard: FC<WalletCardProps> = ({
                   />
                 ))}
             {coins && coins.length > 6 && (
-              <Text ml={1} variant="body" color={theme.currentTheme.iconColor}>
+              <Text.Body ml={1} variant="body">
                 +{coins.length - 6}
-              </Text>
+              </Text.Body>
             )}
           </Flex>
-          <Text variant="body" color={theme.currentTheme.iconColor}>
+          <Text.Body variant="body" color={theme.currentTheme.iconColor}>
             {transactions.length} Transactions
-          </Text>
+          </Text.Body>
         </Flex>
       </WalletCardStyle>
     ),

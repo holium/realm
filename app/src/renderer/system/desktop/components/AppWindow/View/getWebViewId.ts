@@ -1,4 +1,4 @@
-import { AppTypes } from 'os/services/spaces/models/bazaar';
+import { AppTypes } from 'renderer/stores/models/bazaar.model';
 
 const _getWebViewId = (activeWindowId: string, webViewType: AppTypes) =>
   `${activeWindowId}-${webViewType}-webview`;

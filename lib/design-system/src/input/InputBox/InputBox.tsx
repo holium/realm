@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { Text, Box, BoxProps, Flex } from '../../general';
+import { Text, Box, BoxProps, Flex } from '../../../general';
 import { AnimationProps } from 'framer-motion';
 
 type StyledBoxProps = {
@@ -138,18 +138,26 @@ export const InputBox = ({
   error,
   children,
   borderRadius = '6px',
+  background = 'currentColor',
+  style,
+  px,
+  py,
   ...boxProps
 }: InputBoxProps) => (
   <StyledBox
+    style={style}
     width={width}
     height={height}
     error={error}
     borderRadius={borderRadius}
+    background={background}
     flexDirection={inlineLabelDirection}
     disabled={disabled}
     onFocus={() => document.getElementById(inputId)?.focus()}
     fontSize={boxProps.fontSize || '14px'}
     textAlign={boxProps.textAlign || 'left'}
+    px={px}
+    py={py}
   >
     {label && label !== 'none' && (
       <Text.Label

@@ -1,14 +1,10 @@
-import { calculateAnchorPointById } from './../logic/lib/position';
+import { calculateAnchorPointById } from '../lib/position';
 import { createContext, useContext } from 'react';
-
-import {
-  applyPatch,
-  Instance,
-  types,
-  onSnapshot,
-  applySnapshot,
-} from 'mobx-state-tree';
-import { RoomsAppState } from 'os/services/tray/rooms.model';
+import { Instance, types, onSnapshot } from 'mobx-state-tree';
+import { Dimensions } from '@holium/design-system';
+import { RealmUpdateTypes } from 'os/realm.types';
+import { RealmIPC } from 'renderer/stores/ipc';
+import { RoomsAppState } from './Rooms/rooms.model';
 import {
   NetworkStoreType,
   ProtocolType,
@@ -16,11 +12,7 @@ import {
   WalletCreationMode,
   WalletStore,
   WalletView,
-} from 'os/services/tray/wallet-lib/wallet.model';
-
-import { OSActions } from '../logic/actions/os';
-import { DmApp } from './Messages/store';
-import { Dimensions } from '@holium/design-system';
+} from 'renderer/stores/models/wallet.model';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -54,7 +46,7 @@ const TrayAppStore = types
     dimensions: TrayAppDimensions,
     roomsApp: RoomsAppState,
     walletApp: WalletStore,
-    dmApp: DmApp,
+    // dmApp: DmApp,
   })
   .actions((self) => ({
     setTrayAppCoords(coords: Instance<typeof TrayAppCoords>) {
@@ -168,9 +160,6 @@ export const trayStore = TrayAppStore.create({
     currentView: 'list',
   },
   walletApp: walletAppDefault,
-  dmApp: {
-    currentView: 'dm-list',
-  },
 });
 
 onSnapshot(trayStore, (snapshot) => {
@@ -192,27 +181,31 @@ export function useTrayApps() {
   return store;
 }
 
-OSActions.onLogout((_event: any) => {
-  applySnapshot(trayStore.walletApp, walletAppDefault);
+// TODO
+
+RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
+  if (update.type === 'logout') {
+    // applySnapshot(trayStore.walletApp, walletAppDefault);
+  }
 });
 
 // Listen for all patches
-OSActions.onEffect((_event: any, value: any) => {
-  if (value.response === 'initial') {
-    if (value.resource === 'wallet') {
-      applySnapshot(trayStore.walletApp, value.model);
-    }
-  }
-  if (value.response === 'patch') {
-    if (value.resource === 'wallet') {
-      applyPatch(trayStore.walletApp, value.patch);
-    }
-  }
-});
+// OSActions.onEffect((_event: any, value: any) => {
+//   if (value.response === 'initial') {
+//     if (value.resource === 'wallet') {
+//       applySnapshot(trayStore.walletApp, value.model);
+//     }
+//   }
+//   if (value.response === 'patch') {
+//     if (value.resource === 'wallet') {
+//       applyPatch(trayStore.walletApp, value.patch);
+//     }
+//   }
+// });
 
 // After boot, set the initial data
-OSActions.onBoot((_event: any, response: any) => {
-  if (response.wallet) {
-    applySnapshot(trayStore.walletApp, response.wallet);
-  }
-});
+// OSActions.onBoot((_event: any, response: any) => {
+//   if (response.wallet) {
+//     applySnapshot(trayStore.walletApp, response.wallet);
+//   }
+// });

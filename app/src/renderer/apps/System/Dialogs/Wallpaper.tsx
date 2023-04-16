@@ -2,15 +2,13 @@ import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { rgba } from 'polished';
-import { FormControl, Input, TextButton } from 'renderer/components';
-import { Flex, Spinner } from '@holium/design-system';
+import { Text, Flex, Spinner, TextInput, Button } from '@holium/design-system';
 import * as yup from 'yup';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { useServices } from 'renderer/logic/store';
 import { createField, createForm } from 'mobx-easy-form';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { normalizeBounds } from 'renderer/lib/window-manager';
 
 export const WallpaperDialogConfig: DialogConfig = {
   component: (props: any) => <WallpaperDialog {...props} />,
@@ -71,23 +69,26 @@ const createWallpaperForm = (
 };
 
 const WallpaperDialogPresenter = () => {
-  const { theme, spaces } = useServices();
+  const { shellStore, theme } = useAppState();
+  const { spacesStore } = useShipStore();
   const [loading, setLoading] = useState(false);
-  const { inputColor } = theme.currentTheme;
   const { wallpaperForm, imageUrl } = useMemo(
-    () => createWallpaperForm({ imageUrl: theme.currentTheme.wallpaper }),
+    () => createWallpaperForm({ imageUrl: theme.wallpaper }),
     []
   );
 
+  const closeDialog = () => {
+    shellStore.closeDialog();
+    shellStore.setIsBlurred(false);
+  };
+
+  // TODO prevent changing wallpaper if you are not admin of the space
   const onChange = () => {
-    if (!spaces.selected?.path) return;
+    if (!spacesStore.selected?.path) return;
     const formData = wallpaperForm.actions.submit();
-    setLoading(true);
-    theme.setWallpaper(spaces.selected.path, formData.imageUrl).then(() => {
-      ShellActions.closeDialog();
-      ShellActions.setBlur(false);
-      setLoading(false);
-    });
+    // setLoading(true);
+    theme.setWallpaper(spacesStore.selected.path, formData.imageUrl);
+    closeDialog();
   };
 
   return (
@@ -98,52 +99,43 @@ const WallpaperDialogPresenter = () => {
       flexDirection="column"
       justifyContent="space-between"
     >
-      <WallpaperPreview src={theme.currentTheme.wallpaper} />
-      <FormControl.Field>
-        <Input
-          autoFocus
-          tabIndex={0}
-          name="imageUrl"
-          wrapperStyle={{
-            backgroundColor: inputColor,
-          }}
-          placeholder="https://my-image.google.com"
-          defaultValue={imageUrl.state.value}
-          error={!imageUrl.computed.isDirty || imageUrl.computed.error}
-          onChange={(e: any) => imageUrl.actions.onChange(e.target.value)}
-          onFocus={() => imageUrl.actions.onFocus()}
-          onBlur={() => imageUrl.actions.onBlur()}
-        />
-        {imageUrl.computed.ifWasEverBlurredThenError &&
-          imageUrl.computed.isDirty && (
-            <FormControl.Error>{imageUrl.computed.error}</FormControl.Error>
-          )}
-      </FormControl.Field>
+      <WallpaperPreview src={theme.wallpaper} />
+      <TextInput
+        autoFocus
+        tabIndex={0}
+        id="imageUrl"
+        name="imageUrl"
+        placeholder="https://my-image.google.com"
+        defaultValue={imageUrl.state.value}
+        error={
+          (imageUrl.computed.ifWasEverBlurredThenError &&
+            imageUrl.computed.isDirty) ||
+          imageUrl.computed.error
+        }
+        onChange={(e: any) => imageUrl.actions.onChange(e.target.value)}
+        onFocus={() => imageUrl.actions.onFocus()}
+        onBlur={() => imageUrl.actions.onBlur()}
+      />
+      {imageUrl.computed.ifWasEverBlurredThenError &&
+        imageUrl.computed.isDirty && (
+          <Text.Hint color="intent-alert">{imageUrl.computed.error}</Text.Hint>
+        )}
 
       <Flex justifyContent="space-between">
-        <TextButton
+        <Button.Secondary
           tabIndex={2}
           style={{ fontWeight: 400 }}
-          showBackground
-          highlightColor={theme.currentTheme.backgroundColor}
-          textColor={rgba(theme.currentTheme.textColor, 0.7)}
-          onClick={() => {
-            ShellActions.closeDialog();
-            ShellActions.setBlur(false);
-          }}
+          onClick={closeDialog}
         >
           Close
-        </TextButton>
-        <TextButton
+        </Button.Secondary>
+        <Button.TextButton
           tabIndex={1}
           style={{ fontWeight: 400 }}
-          showBackground
-          highlightColor={theme.currentTheme.accentColor}
-          textColor={theme.currentTheme.accentColor}
           onClick={onChange}
         >
           {loading ? <Spinner size={0} /> : 'Change'}
-        </TextButton>
+        </Button.TextButton>
       </Flex>
     </Flex>
   );

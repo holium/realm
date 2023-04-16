@@ -1,28 +1,19 @@
 import { FC } from 'react';
-
-import { ThemeModelType } from 'os/services/theme.model';
-import { Grid, Flex, Text } from '../../../components';
+import { Flex, Text } from '@holium/design-system';
 import { CircleButton } from './CircleButton';
 
-interface WalletMainProps {
-  theme: ThemeModelType;
-}
-
-export const WalletMain: FC<WalletMainProps> = (props: WalletMainProps) => {
+export const WalletMain: FC = () => {
   // const { walletStore } = useMst();
-  const { theme } = props;
 
   return (
-    <Grid.Column
-      style={{
-        background: theme.windowColor,
-      }}
+    <Flex
+      flexDirection="column"
       noGutter
       expand
       align="center"
       justify="center"
     >
-      <Text
+      <Text.Body
         letterSpacing="6%"
         mb={1}
         fontWeight={500}
@@ -30,17 +21,17 @@ export const WalletMain: FC<WalletMainProps> = (props: WalletMainProps) => {
         fontSize={2}
       >
         YOUR BALANCE
-      </Text>
-      <Text mb={1} fontWeight={600} color="text.primary" fontSize={9}>
+      </Text.Body>
+      <Text.Body mb={1} fontWeight={600} fontSize={9}>
         0 BTC
-      </Text>
-      <Text fontWeight={400} opacity={0.6} color="text.primary" fontSize={5}>
+      </Text.Body>
+      <Text.Body fontWeight={400} opacity={0.6} fontSize={5}>
         ≈ 0 USD
-      </Text>
+      </Text.Body>
       <Flex mt={6} gap={24} flexDirection="row" alignItems="center">
         <CircleButton icon="Receive" title="Receive" />
         <CircleButton icon="Send" title="Send" />
       </Flex>
-    </Grid.Column>
+    </Flex>
   );
 };

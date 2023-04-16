@@ -1,13 +1,28 @@
+import { realmPreload } from '../os/realm.service';
 import { contextBridge, ipcRenderer } from 'electron';
 import { MouseState } from '@holium/realm-presence';
-import { osPreload } from '../os/preload';
 import { MediaAccess, MediaAccessStatus } from '../os/types';
 import { Position } from '@holium/design-system';
 import { multiplayerPreload } from './preload.multiplayer';
 import './helpers/mouseListener';
 import './helpers/keyListener';
 
+import { shipPreload } from '../os/services/ship/ship.service';
+import { authPreload } from '../os/services/auth/auth.service';
+import { roomsPreload } from '../os/services/ship/rooms.service';
+import { notifPreload } from '../os/services/ship/notifications/notifications.service';
+import { chatPreload } from '../os/services/ship/chat/chat.service';
+import { walletPreload } from '../os/services/ship/wallet/wallet.service';
+import { friendsPreload } from '../os/services/ship/friends.table';
+import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
+import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
+
 const appPreload = {
+  setPartitionCookie: (partition: string, cookie: any) => {
+    ipcRenderer.send('set-partition-cookie', partition, cookie);
+  },
+  downloadUrlAsFile: (url: string) =>
+    ipcRenderer.send('download-url-as-file', { url }),
   /* Senders */
   setFullscreen(callback: any) {
     ipcRenderer.on('set-fullscreen', callback);
@@ -134,6 +149,16 @@ export type AppPreloadType = typeof appPreload;
 
 contextBridge.exposeInMainWorld('electron', {
   app: appPreload,
-  os: osPreload,
   multiplayer: multiplayerPreload,
 });
+
+contextBridge.exposeInMainWorld('realm', realmPreload);
+contextBridge.exposeInMainWorld('shipService', shipPreload);
+contextBridge.exposeInMainWorld('spacesService', spacesPreload);
+contextBridge.exposeInMainWorld('authService', authPreload);
+contextBridge.exposeInMainWorld('roomsService', roomsPreload);
+contextBridge.exposeInMainWorld('chatService', chatPreload);
+contextBridge.exposeInMainWorld('walletService', walletPreload);
+contextBridge.exposeInMainWorld('notifService', notifPreload);
+contextBridge.exposeInMainWorld('friendDb', friendsPreload);
+contextBridge.exposeInMainWorld('bazaarService', bazaarPreload);

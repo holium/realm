@@ -1,18 +1,14 @@
-import { EthWalletType } from 'os/services/tray/wallet-lib/wallet.model';
-import { useTrayApps } from 'renderer/apps/store';
-import { Flex, Text, Anchor, Icons } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from '../../lib/helpers';
+import { EthWalletType } from 'renderer/stores/models/wallet.model';
+import { Flex, Text, Icon } from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 export const NFTDetail = () => {
-  const { walletApp } = useTrayApps();
-  const { theme } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
+  const { walletStore } = useShipStore();
 
-  const wallet = walletApp.currentWallet as EthWalletType;
+  const wallet = walletStore.currentWallet as EthWalletType;
   const nft = wallet.data
-    .get(walletApp.navState.protocol)
-    ?.nfts.get(walletApp.navState.detail?.key ?? '');
+    .get(walletStore.navState.protocol)
+    ?.nfts.get(walletStore.navState.detail?.key ?? '');
 
   if (!nft) return null;
 
@@ -23,24 +19,19 @@ export const NFTDetail = () => {
       </Flex>
 
       <Flex mt={8} flexDirection="column" alignItems="center">
-        <Text
-          variant="body"
-          fontSize={1}
-          color={baseTheme.colors.text.secondary}
-        >
+        <Text.Body variant="body" fontSize={1}>
           {nft.collectionName || 'NFT'}
-        </Text>
-        <Text variant="h5">{nft.name}</Text>
+        </Text.Body>
+        <Text.H5 variant="h5">{nft.name}</Text.H5>
       </Flex>
 
       <Flex mt={4} position="relative" justifyContent="center">
-        <Anchor
+        <Text.Anchor
           fontSize={1}
-          color={baseTheme.colors.text.primary}
           href={`https://etherscan.io/token/${nft.address}?a=${nft.tokenId}`}
         >
-          {nft.address.slice(0, 18)}... <Icons mb={1} name="Link" size={1} />
-        </Anchor>
+          {nft.address.slice(0, 18)}... <Icon mb={1} name="Link" size={1} />
+        </Text.Anchor>
       </Flex>
     </Flex>
   );

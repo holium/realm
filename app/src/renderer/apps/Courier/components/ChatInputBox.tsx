@@ -6,15 +6,19 @@ import {
   useEffect,
 } from 'react';
 import { Box, ChatInput } from '@holium/design-system';
-import { ChatMessageType } from '../models';
-import { useFileUpload } from 'renderer/logic/lib/useFileUpload';
-import { FileUploadParams } from 'os/services/ship/models/ship';
-import { ShipActions } from 'renderer/logic/actions/ship';
-import { IuseStorage } from 'renderer/logic/lib/useStorage';
+import { ChatMessageType, ChatModelType } from '../models';
+import { useFileUpload } from 'renderer/lib/useFileUpload';
+import { IuseStorage } from 'renderer/lib/useStorage';
+import { ShipIPC } from 'renderer/stores/ipc';
+import { FileUploadParams } from 'os/services/ship/ship.service';
 
 type CourierInputProps = {
+  replyTo?: any;
   storage: IuseStorage;
+  selectedChat: ChatModelType;
   editMessage?: ChatMessageType | null;
+  containerWidth: number;
+  themeMode: 'light' | 'dark';
   onSend: (fragments: any[]) => void;
   onAttachmentChange: (attachmentCount: number) => void;
   onCancelEdit?: (evt: React.MouseEvent<HTMLButtonElement>) => void;
@@ -22,8 +26,12 @@ type CourierInputProps = {
 };
 
 export const ChatInputBox = ({
+  replyTo,
   storage,
+  selectedChat,
   editMessage,
+  containerWidth,
+  themeMode,
   onSend,
   onEditConfirm,
   onCancelEdit,
@@ -36,6 +44,12 @@ export const ChatInputBox = ({
   const [attachments, setAttachment] = useState<string[]>([]);
   const mediaRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (replyTo) {
+      setIsFocused(true);
+    }
+  }, [replyTo]);
+
   const { canUpload, promptUpload } = useFileUpload({ storage });
   useEffect(() => {
     // send attachment count to parent
@@ -46,7 +60,7 @@ export const ChatInputBox = ({
     (params: FileUploadParams) => {
       setIsUploading(true);
       setUploadError('');
-      ShipActions.uploadFile(params)
+      (ShipIPC.uploadFile(params) as Promise<any>)
         .then((url) => {
           console.log(url);
           setAttachment([...attachments, url]);
@@ -113,7 +127,6 @@ export const ChatInputBox = ({
 
   return (
     <Box
-      width="100%"
       initial={{
         opacity: 0,
       }}
@@ -122,6 +135,7 @@ export const ChatInputBox = ({
         delay: 0.2,
         duration: 0.1,
       }}
+      width={containerWidth}
       onAnimationComplete={() => {
         setIsFocused(true);
       }}
@@ -129,13 +143,17 @@ export const ChatInputBox = ({
       <div ref={mediaRef} style={{ display: 'none' }}></div>
       <ChatInput
         id="chat-log-input"
+        selectedChatPath={selectedChat.path}
+        replyTo={replyTo}
         isFocused={isFocused}
         loading={isUploading}
+        containerWidth={containerWidth}
         onSend={(fragments) => {
           onSend(fragments);
           // clear attachments
           setAttachment([]);
         }}
+        themeMode={themeMode}
         attachments={attachments}
         onAttachment={onAttachment}
         onRemoveAttachment={(index: number) => {
@@ -148,6 +166,8 @@ export const ChatInputBox = ({
         editingMessage={editMessage?.contents}
         onEditConfirm={onEditConfirm}
         onCancelEdit={onCancelEdit}
+        onCancelReply={() => selectedChat.clearReplying()}
+        onBlur={() => setIsFocused(false)}
       />
     </Box>
   );

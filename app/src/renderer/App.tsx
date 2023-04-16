@@ -1,75 +1,72 @@
-import { ThemeProvider } from 'styled-components';
 import { MotionConfig } from 'framer-motion';
-import { GlobalStyle } from './App.styles';
+import { BgImage, GlobalStyle } from './App.styles';
 import { Shell } from './system';
 import { useEffect, useMemo } from 'react';
+import { Flex, Spinner, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { theme as baseTheme } from './theme';
-import {
-  CoreProvider,
-  useCore,
-  coreStore,
-  ServiceProvider,
-  servicesStore,
-  useServices,
-} from './logic/store';
-import { ShellActions } from './logic/actions/shell';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
-import { SelectionProvider } from './logic/lib/selection';
-import { ErrorBoundary } from './logic/ErrorBoundary';
-import { AccountProvider, accountStore } from './apps/Account/store';
+import { useAppState, appState, AppStateProvider } from './stores/app.store';
+import { Auth } from './system/authentication';
+import { SelectionProvider } from './lib/selection';
+import { ErrorBoundary } from './system/ErrorBoundary';
+
+function AppContentPresenter() {
+  const { authStore, booted } = useAppState();
+  if (!booted) {
+    return (
+      <Flex>
+        <Spinner size={2} />
+      </Flex>
+    );
+  }
+  const isOnboarding = authStore.accounts.length === 0;
+  const isLoggedOut = !authStore.session;
+
+  if (isOnboarding) {
+    // TODO onboarding here
+    return (
+      <Flex>
+        <Text.Custom>onboarding</Text.Custom>
+      </Flex>
+    );
+  }
+  if (isLoggedOut) {
+    return <Auth />;
+  }
+
+  return <Shell />;
+}
+
+export const AppContent = observer(AppContentPresenter);
 
 const AppPresenter = () => {
-  const { booted } = useCore();
-  const { theme } = useServices();
-
-  const themeMode = theme.currentTheme.mode;
-
-  const shellMemo = useMemo(
-    () =>
-      booted ? (
-        <Shell />
-      ) : (
-        <div
-          style={{
-            height: '100vh',
-            background: theme.currentTheme.backgroundColor,
-          }}
-        />
-      ),
-    [booted, theme.currentTheme.backgroundColor]
-  );
-
+  const { theme, shellStore } = useAppState();
   const contextMenuMemo = useMemo(() => <ContextMenu />, []);
+  const bgImage = useMemo(() => theme.wallpaper, [theme.wallpaper]);
 
   useEffect(() => {
     return () => {
-      ShellActions.closeDialog();
+      shellStore.closeDialog();
     };
   }, []);
+
   return (
-    <CoreProvider value={coreStore}>
-      <ThemeProvider theme={baseTheme[themeMode as 'light' | 'dark']}>
-        <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
-          <GlobalStyle blur={true} realmTheme={theme.currentTheme} />
-          {/* Modal provider */}
-          <AccountProvider value={accountStore}>
-            <ServiceProvider value={servicesStore}>
-              <SelectionProvider>
-                <ContextMenuProvider>
-                  <ErrorBoundary>
-                    {shellMemo}
-                    {contextMenuMemo}
-                    <div id="portal-root" />
-                    <div id="menu-root" />
-                  </ErrorBoundary>
-                </ContextMenuProvider>
-              </SelectionProvider>
-            </ServiceProvider>
-          </AccountProvider>
-        </MotionConfig>
-      </ThemeProvider>
-    </CoreProvider>
+    <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
+      <AppStateProvider value={appState}>
+        <GlobalStyle blur={true} realmTheme={theme} />
+        <BgImage blurred={shellStore.isBlurred} wallpaper={bgImage} />
+        <SelectionProvider>
+          <ContextMenuProvider>
+            <ErrorBoundary>
+              <AppContent />
+              {contextMenuMemo}
+              <div id="portal-root" />
+              <div id="menu-root" />
+            </ErrorBoundary>
+          </ContextMenuProvider>
+        </SelectionProvider>
+      </AppStateProvider>
+    </MotionConfig>
   );
 };
 

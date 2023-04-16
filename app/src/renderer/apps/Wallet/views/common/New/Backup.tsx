@@ -1,9 +1,8 @@
 import { useState, Dispatch, SetStateAction, useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { ethers } from 'ethers';
-import { Button, Flex, Text, Box, Icons } from 'renderer/components';
-import { darken, transparentize } from 'polished';
-import { useServices } from 'renderer/logic/store';
+import { Button, Flex, Text, Box, Icon } from '@holium/design-system';
+import { transparentize } from 'polished';
 import { NewWalletScreen } from './index';
 
 interface BackupProps {
@@ -13,13 +12,10 @@ interface BackupProps {
 }
 
 const BackupPresenter = (props: BackupProps) => {
-  const { theme } = useServices();
-
   useEffect(() => {
     props.setSeedPhrase(ethers.Wallet.createRandom().mnemonic.phrase);
   }, []);
 
-  const panelBackground = darken(0.02, theme.currentTheme.windowColor);
   const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
 
   const [blurred, setBlurred] = useState(false);
@@ -42,25 +38,24 @@ const BackupPresenter = (props: BackupProps) => {
         alignItems="center"
       >
         <Flex flexDirection="column">
-          <Text variant="h5">Back up your Wallet</Text>
-          <Text mt={3} variant="body">
+          <Text.H5 variant="h5">Back up your Wallet</Text.H5>
+          <Text.Body mt={3} variant="body">
             Your secret recovery phrase is used to restore your wallet.
-          </Text>
-          <Text mt={2} variant="body">
+          </Text.Body>
+          <Text.Body mt={2} variant="body">
             Save these 12 words and store them in a safe place. Don’t share them
             with anyone.
-          </Text>
+          </Text.Body>
         </Flex>
         <Flex
           mt={2}
           width="100%"
           flexDirection="column"
-          background={panelBackground}
           border={panelBorder}
           borderRadius="9px"
         >
           <Box px={36} paddingTop={24}>
-            <Text
+            <Text.Body
               style={{
                 filter: blurred ? 'blur(7px)' : undefined,
                 wordSpacing: '7px',
@@ -68,43 +63,34 @@ const BackupPresenter = (props: BackupProps) => {
               }}
             >
               {props.seedPhrase}
-            </Text>
+            </Text.Body>
           </Box>
           <Flex mt={5} width="100%" justifyContent="space-between">
-            <Button
+            <Button.IconButton
               variant="transparent"
-              color={theme.currentTheme.iconColor}
               onClick={() => setBlurred(!blurred)}
             >
-              <Icons name="Copy" color={theme.currentTheme.iconColor} mr={1} />
+              <Icon name="Copy" mr={1} />
               {blurred ? 'Reveal' : 'Hide'}
-            </Button>
-            <Button
-              variant="transparent"
-              color={
-                copied ? 'ui.intent.success' : theme.currentTheme.iconColor
-              }
-              onClick={copy}
-            >
+            </Button.IconButton>
+            <Button.IconButton variant="transparent" onClick={copy}>
               {copied ? (
                 'Copied!'
               ) : (
                 <>
-                  <Icons
-                    mr={1}
-                    name="Copy"
-                    color={theme.currentTheme.iconColor}
-                  />
+                  <Icon mr={1} name="Copy" />
                   Copy
                 </>
               )}
-            </Button>
+            </Button.IconButton>
           </Flex>
         </Flex>
         <Flex mt={2} width="100%" justifyContent="center">
-          <Button onClick={() => props.setScreen(NewWalletScreen.CONFIRM)}>
+          <Button.TextButton
+            onClick={() => props.setScreen(NewWalletScreen.CONFIRM)}
+          >
             I wrote it down
-          </Button>
+          </Button.TextButton>
         </Flex>
       </Flex>
     </>

@@ -2,7 +2,6 @@ import { ChangeEvent, useState } from 'react';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
 import { isValidPatp } from 'urbit-ob';
-import { NoScrollBar } from 'renderer/components';
 import {
   Flex,
   Text,
@@ -11,17 +10,15 @@ import {
   Select,
   Spinner,
   TextInput,
+  NoScrollBar,
 } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from '../../lib/helpers';
-import { useTrayApps } from 'renderer/apps/store';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
   WalletCreationMode,
   SharingMode,
   UISettingsType,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from 'renderer/stores/models/wallet.model';
 import { DeletePasscode } from './DeletePasscode';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type WalletVisibility = 'anyone' | 'friends' | 'nobody';
 
@@ -32,14 +29,14 @@ enum SettingScreen {
 }
 
 const WalletSettingsPresenter = () => {
-  const { walletApp } = useTrayApps();
+  const { walletStore } = useShipStore();
   // const [providerInput, setProviderInput] = useState('');
   // const [providerError, setProviderError] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const network = walletApp.navState.network;
-  const walletStore =
-    network === 'ethereum' ? walletApp.ethereum : walletApp.bitcoin;
+  const network = walletStore.navState.network;
+  const walletNetworkStore =
+    network === 'ethereum' ? walletStore.ethereum : walletStore.bitcoin;
   const settings = walletStore.settings;
   const wallets = walletStore.list
     .map((wallet) => walletStore.wallets.get(wallet.key))
@@ -48,35 +45,8 @@ const WalletSettingsPresenter = () => {
   const [state, setState] = useState<UISettingsType>({
     ...settings,
     provider: settings.provider ?? '',
-    blocked: [...walletApp.blacklist],
+    blocked: [...walletStore.blacklist],
   });
-
-  const { theme } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
-  const selectBg = darken(0.025, theme.currentTheme.windowColor);
-
-  // async function setProvider(newProviderURL: string) {
-  //   setProviderInput(newProviderURL);
-  //   if (newProviderURL === '') {
-  //     setProviderError('');
-  //     return;
-  //   } else if (!validUrl.isUri(newProviderURL)) {
-  //     setProviderError('Invalid URL.');
-  //     return;
-  //   }
-
-  //   const validProvider = await WalletActions.checkProviderURL(newProviderURL);
-
-  //   if (validProvider) {
-  //     setState({
-  //       ...state,
-  //       provider: newProviderURL,
-  //     });
-  //     setProviderError('');
-  //   } else {
-  //     setProviderError('No valid provider found at that URL.');
-  //   }
-  // }
 
   function setCreationMode(newMode: string) {
     setState({ ...state, walletCreationMode: newMode as WalletCreationMode });
@@ -108,7 +78,7 @@ const WalletSettingsPresenter = () => {
     setSaving(true);
     const { walletCreationMode, sharingMode, defaultIndex, provider, blocked } =
       state;
-    await WalletActions.setSettings(network, {
+    await walletStore.setSettings(network, {
       provider,
       walletCreationMode,
       sharingMode,
@@ -116,7 +86,7 @@ const WalletSettingsPresenter = () => {
       blocked,
     });
     setSaving(false);
-    WalletActions.navigateBack();
+    walletStore.navigateBack();
   }
 
   const [settingScreen, setSettingScreen] = useState<SettingScreen>(
@@ -124,9 +94,9 @@ const WalletSettingsPresenter = () => {
   );
   const deleteWallet = (passcode: number[]) => {
     if (settingScreen === SettingScreen.LOCAL) {
-      WalletActions.deleteLocalWallet(passcode);
+      walletStore.deleteLocalWallet(passcode);
     } else if (settingScreen === SettingScreen.AGENT) {
-      WalletActions.deleteShipWallet(passcode);
+      walletStore.deleteShipWallet(passcode);
     }
   };
 
@@ -156,7 +126,7 @@ const WalletSettingsPresenter = () => {
           <Flex alignItems="center">
             <Button.IconButton
               size={26}
-              onClick={async () => await WalletActions.navigateBack()}
+              onClick={async () => await walletStore.navigateBack()}
             >
               <Icon name="ArrowLeftLine" size={24} opacity={0.7} />
             </Button.IconButton>
@@ -215,20 +185,13 @@ const WalletSettingsPresenter = () => {
         </Flex>*/}
         <Flex mt={3} flexDirection="column">
           <Text.Label>Address Creation Mode</Text.Label>
-          <Text.Custom
-            mt={1}
-            mb={2}
-            fontSize={1}
-            opacity={0.8}
-            color={baseTheme.colors.text.secondary}
-          >
+          <Text.Custom mt={1} mb={2} fontSize={1} opacity={0.8}>
             If set to on-demand, anytime you're sent funds a new address will be
             created to receive them.
           </Text.Custom>
           <Flex width="140px">
             <Select
               id="wallet-creation-mode"
-              backgroundColor={selectBg}
               options={[
                 { label: 'Default', value: 'default' },
                 { label: 'On-demand', value: 'on-demand' },
@@ -241,19 +204,11 @@ const WalletSettingsPresenter = () => {
 
         <Flex mt={3} flexDirection="column">
           <Text.Label>Wallet Visibility</Text.Label>
-          <Text.Custom
-            mt={1}
-            mb={2}
-            fontSize={1}
-            opacity={0.8}
-            color={baseTheme.colors.text.secondary}
-          >
+          <Text.Custom mt={1} mb={2} fontSize={1} opacity={0.8}>
             Determine how you want to share addresses with other people on the
             network.
           </Text.Custom>
           <VisibilitySelect
-            theme={theme}
-            baseTheme={baseTheme}
             wallets={wallets as Wallets}
             sharingMode={state.sharingMode}
             defaultIndex={state.defaultIndex}
@@ -264,12 +219,7 @@ const WalletSettingsPresenter = () => {
 
         <Flex mt={3} flexDirection="column">
           <Text.Label mb={2}>Blocked IDs</Text.Label>
-          <BlockedInput
-            theme={theme}
-            baseTheme={baseTheme}
-            blocked={state.blocked}
-            onChange={setBlockList}
-          />
+          <BlockedInput blocked={state.blocked} onChange={setBlockList} />
         </Flex>
       </Flex>
       <Flex flexDirection="column" mb={2}>
@@ -284,14 +234,7 @@ const WalletSettingsPresenter = () => {
         >
           Delete Local HD Wallet
         </Button.TextButton>
-        <Text.Custom
-          mt={2}
-          mb={2}
-          ml="2px"
-          fontSize={2}
-          opacity={0.8}
-          color={baseTheme.colors.text.secondary}
-        >
+        <Text.Custom mt={2} mb={2} ml="2px" fontSize={2} opacity={0.8}>
           Delete your HD wallet from local storage.
         </Text.Custom>
         <br />
@@ -306,14 +249,7 @@ const WalletSettingsPresenter = () => {
         >
           Delete Ship HD Wallet
         </Button.TextButton>
-        <Text.Custom
-          mt={2}
-          mb={2}
-          ml="2px"
-          fontSize={2}
-          opacity={0.8}
-          color={baseTheme.colors.text.secondary}
-        >
+        <Text.Custom mt={2} mb={2} ml="2px" fontSize={2} opacity={0.8}>
           Completely delete your HD wallet locally and remove all metadata from
           your Urbit.
         </Text.Custom>

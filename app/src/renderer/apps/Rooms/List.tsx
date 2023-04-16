@@ -1,24 +1,23 @@
 import { observer } from 'mobx-react';
 import { Flex, Text, Button, Icon, Tooltip } from '@holium/design-system';
 import { RoomRow } from './components/RoomRow';
-import { useServices } from 'renderer/logic/store';
 import { ProviderSelector } from './components/ProviderSelector';
 import { useRooms } from './useRooms';
 import { useTrayApps } from '../store';
 import { RealmProtocol, RoomType } from '@holium/realm-room';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const RoomsPresenter = () => {
-  const { ship, spaces, theme } = useServices();
-  const { windowColor } = theme.currentTheme;
+  const { ship, spacesStore } = useShipStore();
   const { roomsApp } = useTrayApps();
   const roomsManager = useRooms(ship?.patp);
 
-  const ourSpace = spaces.selected?.type === 'our';
+  const ourSpace = spacesStore.selected?.type === 'our';
 
   const rooms = ourSpace
     ? roomsManager?.rooms.filter((room) => room.type === 'rooms')
     : (roomsManager?.protocol as RealmProtocol).getSpaceRooms(
-        spaces.selected?.path ?? ''
+        spacesStore.selected?.path ?? ''
       );
 
   return (
@@ -95,7 +94,6 @@ const RoomsPresenter = () => {
           content="This is your room provider."
         >
           <ProviderSelector
-            seedColor={windowColor}
             onClick={() => {
               console.log('show provider setup');
             }}

@@ -1,21 +1,19 @@
 import { useEffect, ReactNode } from 'react';
 import { track } from '@amplitude/analytics-browser';
 import NextHead from 'next/head';
-import { Rubik } from 'next/font/google';
 import styled from 'styled-components';
-import { useToggle } from '@holium/design-system';
+import { useToggle } from '@holium/design-system/util';
 import { api } from '../util/api';
 import { useNavigation } from '../util/useNavigation';
+import { AccountDialogSkeleton, OnboardDialogSkeleton } from '@holium/shared';
 
 const Main = styled.main`
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
 `;
-
-const rubik = Rubik({ subsets: ['latin'], weight: 'variable' });
 
 type Props = {
   title: string;
@@ -24,7 +22,7 @@ type Props = {
 };
 
 export const Page = ({ title, isProtected = false, children }: Props) => {
-  const { goToPage, logout } = useNavigation();
+  const { currentAccountSection, goToPage, logout } = useNavigation();
   const authenticated = useToggle(false);
 
   useEffect(() => {
@@ -60,8 +58,22 @@ export const Page = ({ title, isProtected = false, children }: Props) => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </NextHead>
-      <Main className={rubik.className}>
-        {isProtected ? (authenticated.isOn ? children : null) : children}
+      <Main>
+        {isProtected && currentAccountSection ? (
+          authenticated.isOn ? (
+            children
+          ) : (
+            <AccountDialogSkeleton currentSection={currentAccountSection} />
+          )
+        ) : isProtected ? (
+          authenticated.isOn ? (
+            children
+          ) : (
+            <OnboardDialogSkeleton />
+          )
+        ) : (
+          children
+        )}
       </Main>
     </>
   );

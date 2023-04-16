@@ -1,22 +1,17 @@
-import { FC, useMemo } from 'react';
-import { darken, lighten } from 'polished';
-import { Flex, Spinner } from '@holium/design-system';
-import { Icons, Text, IconButton } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
+import { FC } from 'react';
+import { Flex, Spinner, Icon, Text, Button } from '@holium/design-system';
 import {
   shortened,
-  getBaseTheme,
   formatEthAmount,
   formatBtcAmount,
 } from '../../../lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
   WalletView,
   TransactionType,
   ProtocolType,
-} from 'os/services/tray/wallet-lib/wallet.model';
-import { useTrayApps } from 'renderer/apps/store';
+} from 'renderer/stores/models/wallet.model';
 import { TxType } from './List';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface PendingTransactionDisplayProps {
   transactions: TransactionType[];
@@ -51,17 +46,15 @@ interface PendingTransactionProps {
 export const PendingTransaction: FC<PendingTransactionProps> = (
   props: PendingTransactionProps
 ) => {
-  const { theme } = useServices();
-  const { walletApp } = useTrayApps();
-  const { colors } = getBaseTheme(theme.currentTheme);
+  const { walletStore } = useShipStore();
 
   const goToTransaction = () => {
-    WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
+    walletStore.navigate(WalletView.TRANSACTION_DETAIL, {
       walletIndex: props.transaction.walletIndex.toString(),
       detail: {
         type: 'transaction',
-        txtype: walletApp.navState.detail?.txtype as TxType,
-        coinKey: walletApp.navState.detail?.coinKey,
+        txtype: walletStore.navState.detail?.txtype as TxType,
+        coinKey: walletStore.navState.detail?.coinKey,
         key: props.transaction.hash,
       },
     });
@@ -78,22 +71,14 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
     console.log(props.transaction.ethType);
     unitsDisplay =
       props.transaction.ethType === 'ETH'
-        ? walletApp.navState.protocol === ProtocolType.UQBAR
+        ? walletStore.navState.protocol === ProtocolType.UQBAR
           ? 'zigs'
           : 'ETH'
-        : walletApp.ethereum.wallets
+        : walletStore.ethereum.wallets
             ?.get(props.transaction.walletIndex.toString())
-            ?.data.get(walletApp.navState.protocol)
+            ?.data.get(walletStore.navState.protocol)
             ?.coins.get(props.transaction.ethType)?.name ?? '';
   }
-
-  const bgColor = useMemo(
-    () =>
-      theme.currentTheme.mode === 'light'
-        ? darken(0.04, theme.currentTheme.windowColor)
-        : lighten(0.02, theme.currentTheme.windowColor),
-    [theme.currentTheme.windowColor]
-  );
 
   return (
     <Flex
@@ -102,7 +87,6 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
       px={2}
       width="100%"
       justifyContent="space-between"
-      background={bgColor}
       borderRadius="9px"
     >
       <Flex
@@ -112,28 +96,23 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
         onClick={goToTransaction}
       >
         <Flex mr={4} height="100%" alignItems="center">
-          <Spinner size={0} color={colors.brand.primary} />
+          <Spinner size={0} />
         </Flex>
         <Flex flexDirection="column">
-          <Text variant="body" color={colors.brand.primary}>
+          <Text.Body variant="body">
             {props.transaction.type === 'sent' ? 'Sending' : 'Receiving'}{' '}
             {isEth ? ethAmount.eth : btcAmount.btc} {unitsDisplay}
-          </Text>
-          <Text pt={1} variant="body" color={colors.text.disabled} fontSize={1}>
+          </Text.Body>
+          <Text.Body pt={1} variant="body" fontSize={1}>
             {props.transaction.type === 'sent' ? 'To:' : 'From:'} {themDisplay}{' '}
-            <Icons ml="7px" name="ShareBox" size="15px" />
-          </Text>
+            <Icon ml="7px" name="ShareBox" size="15px" />
+          </Text.Body>
         </Flex>
       </Flex>
       <Flex justifyContent="center" alignItems="center">
-        <IconButton onClick={props.hide} mr={1}>
-          <Icons
-            opacity={0.7}
-            name="Close"
-            size="15px"
-            color={colors.text.disabled}
-          />
-        </IconButton>
+        <Button.IconButton onClick={props.hide} mr={1}>
+          <Icon opacity={0.7} name="Close" size="15px" />
+        </Button.IconButton>
       </Flex>
     </Flex>
   );

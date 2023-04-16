@@ -70,19 +70,19 @@
         (delete-backlog:lib +.act state bowl)
       :: notification preferences pokes
       %disable-push
-        (disable-push:lib state)
+        (disable-push:lib state bowl)
       %enable-push
-        (enable-push:lib state)
+        (enable-push:lib state bowl)
       %remove-device
-        (remove-device:lib +.act state)
+        (remove-device:lib +.act state bowl)
       %set-device
-        (set-device:lib +.act state)
+        (set-device:lib +.act state bowl)
       %mute-chat
-        (mute-chat:lib +.act state)
+        (mute-chat:lib +.act state bowl)
       %pin-chat
-        (pin-chat:lib +.act state)
+        (pin-chat:lib +.act state bowl)
       %toggle-msg-preview-notif
-        (toggle-msg-preview-notif:lib +.act state)
+        (toggle-msg-preview-notif:lib +.act state bowl)
     ==
     [cards this]
   ::  realm-chat supports no subscriptions
@@ -203,7 +203,7 @@
                       %paths
                         =/  pathrow  path-row.db-row.ch
                         =/  pathpeers  (scry-peers:lib path.pathrow bowl)
-                        =/  host  (snag 0 (skim pathpeers |=(p=peer-row:db =(role.p %host))))
+                        =/  host  (snag 0 (skim pathpeers |=(p=peer-row:db-sur =(role.p %host))))
                         ?:  =(patp.host our.bowl) :: if it's our own creation, don't do anything
                           ~
                         =/  send-status-message

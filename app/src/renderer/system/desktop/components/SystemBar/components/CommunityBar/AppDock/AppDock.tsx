@@ -1,31 +1,29 @@
 import { observer } from 'mobx-react';
-import { AppType } from 'os/services/spaces/models/bazaar';
-import { useServices } from 'renderer/logic/store';
+import { useAppState } from 'renderer/stores/app.store';
+import { AppMobxType } from 'renderer/stores/models/bazaar.model';
+import { useShipStore } from 'renderer/stores/ship.store';
 import { AppDockView } from './AppDockView';
 
 const AppDockPresenter = () => {
-  const { desktop, spaces, bazaar } = useServices();
+  const { shellStore } = useAppState();
+  const { spacesStore, bazaarStore } = useShipStore();
 
-  const spacePath = spaces.selected?.path;
-  const pinnedDockAppsOrder = spacePath ? bazaar.getDock(spacePath) ?? [] : [];
-  const pinnedDockApps = spacePath
-    ? ((bazaar.getDockApps(spacePath) ?? []).filter(Boolean) as AppType[])
-    : [];
-  const unpinnedDockApps = desktop.openWindows
-    .filter(({ appId }) => !pinnedDockAppsOrder.includes(appId))
+  const currentSpace = spacesStore.selected;
+  const pinnedDockApps = currentSpace?.dock || [];
+  const unpinnedDockApps = shellStore.openWindows
+    .filter(({ appId }) => !currentSpace?.isPinned(appId))
     .filter(
       ({ appId }, index, self) =>
         self.findIndex(({ appId: id }) => id === appId) === index
     )
-    .map(({ appId }) => bazaar.getApp(appId))
-    .filter(Boolean) as AppType[];
+    .map(({ appId }) => bazaarStore.getApp(appId))
+    .filter(Boolean) as AppMobxType[];
 
-  if (!spacePath) return null;
+  if (!currentSpace) return null;
 
   return (
     <AppDockView
-      spacePath={spacePath}
-      pinnedDockAppsOrder={pinnedDockAppsOrder}
+      spacePath={currentSpace.path}
       pinnedDockApps={pinnedDockApps}
       unpinnedDockApps={unpinnedDockApps}
     />

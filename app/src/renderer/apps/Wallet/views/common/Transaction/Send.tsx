@@ -1,16 +1,14 @@
 import { FC } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Box } from 'renderer/components';
-import { Text } from '@holium/design-system';
-import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
+import { Flex, Box, Text } from '@holium/design-system';
 import {
   BitcoinWalletType,
   EthWalletType,
   ERC20Type,
   ProtocolType,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from 'renderer/stores/models/wallet.model';
 import { TransactionPane } from './Pane';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -33,11 +31,10 @@ interface SendTransactionProps {
 export const SendTransaction: FC<SendTransactionProps> = observer(
   (props: SendTransactionProps) => {
     const { coin } = props;
-    const { theme } = useServices();
-    const { walletApp } = useTrayApps();
+    const { walletStore } = useShipStore();
     const pendingTx =
-      walletApp.navState.protocol === ProtocolType.UQBAR
-        ? walletApp.uqTx
+      walletStore.navState.protocol === ProtocolType.UQBAR
+        ? walletStore.uqTx
         : null;
     const uqbarContract: boolean = pendingTx
       ? 'noun' in pendingTx.action
@@ -55,9 +52,6 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
             justifyContent="center"
             alignItems="center"
             borderRadius="50px"
-            background={
-              theme.currentTheme.mode === 'light' ? '#EAF3FF' : '#262f3b'
-            }
           >
             <Text.Body color="accent">Contract Interaction</Text.Body>
           </Flex>
@@ -71,18 +65,15 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
             justifyContent="center"
             alignItems="center"
             borderRadius="50px"
-            background={
-              theme.currentTheme.mode === 'light' ? '#EAF3FF' : '#262f3b'
-            }
           >
             <Text.Body color="accent">
               {`Send ${
                 coin
                   ? coin.name
-                  : walletApp.navState.protocol === ProtocolType.UQBAR
+                  : walletStore.navState.protocol === ProtocolType.UQBAR
                   ? 'zigs'
                   : abbrMap[
-                      walletApp.navState.network as 'bitcoin' | 'ethereum'
+                      walletStore.navState.network as 'bitcoin' | 'ethereum'
                     ]
               }
               `}
@@ -102,7 +93,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
               ? Number(props.coin.balance)
               : Number(
                   (props.wallet as EthWalletType).data.get(
-                    walletApp.navState.protocol
+                    walletStore.navState.protocol
                   )?.balance
                 )
           }

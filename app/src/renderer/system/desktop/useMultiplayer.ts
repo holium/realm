@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import debounce from 'lodash/debounce';
 import {
   MultiplayerOut,
   MultiplayerDown,
@@ -15,8 +14,8 @@ import {
   RoomManagerEvent,
   RoomsManager,
 } from '@holium/realm-room';
-import { normalizePosition } from 'os/services/shell/lib/window-manager';
 import { Dimensions, useToggle } from '@holium/design-system';
+import { normalizePosition } from 'renderer/lib/window-manager';
 
 type Props = {
   patp: string | undefined;
@@ -36,12 +35,14 @@ export const useMultiplayer = ({
   const chat = useRef('');
   const ephemeralChat = useToggle(false);
 
+  const timeout = useRef<NodeJS.Timeout | null>(null);
+
   const isInRoom = useMemo(
     () => Boolean(roomsManager.presentRoom),
     [roomsManager.presentRoom]
   );
 
-  const broadcastChat = (patp: string, message: string) => {
+  const broadcastChat = useCallback((patp: string, message: string) => {
     const multiplayerChat: MultiplayerChat = {
       patp,
       message,
@@ -51,19 +52,19 @@ export const useMultiplayer = ({
       kind: DataPacket_Kind.DATA,
       value: { multiplayer: multiplayerChat },
     });
-  };
+  }, []);
 
-  const closeEphemeralChat = () => {
+  const closeEphemeralChat = useCallback(() => {
     chat.current = '';
     patp && broadcastChat(patp, '');
     ephemeralChat.toggleOff();
     window.electron.app.toggleOffEphemeralChat();
-  };
+  }, [patp, ephemeralChat, broadcastChat]);
 
-  const closeEphemeralChatDebounced = useCallback(
-    debounce(closeEphemeralChat, 5000),
-    [patp]
-  );
+  const closeEphemeralChatDelayed = useCallback(() => {
+    timeout.current && clearTimeout(timeout.current);
+    timeout.current = setTimeout(closeEphemeralChat, 5000);
+  }, [closeEphemeralChat]);
 
   const onKeyDown = useCallback(
     (key: string, isFocused: boolean) => {
@@ -77,37 +78,47 @@ export const useMultiplayer = ({
         return;
       }
 
-      closeEphemeralChatDebounced(); // Refresh the 5s countdown.
+      closeEphemeralChatDelayed(); // Refresh the 5s countdown.
 
-      if (key === '/') {
-        chat.current = '';
-        window.electron.app.realmToAppEphemeralChat(patp, '');
-        broadcastChat(patp, '');
-        if (ephemeralChat.isOn) {
+      if (ephemeralChat.isOn) {
+        if (key === '/') {
+          chat.current = '';
+          window.electron.app.realmToAppEphemeralChat(patp, '');
+          broadcastChat(patp, '');
           ephemeralChat.toggleOff();
           window.electron.app.toggleOffEphemeralChat();
+        } else if (key === 'Backspace') {
+          const newChat = chat.current.slice(0, -1);
+          chat.current = newChat;
+          window.electron.app.realmToAppEphemeralChat(patp, newChat);
+          broadcastChat(patp, newChat);
         } else {
+          let newKey = key;
+          // If the key is not a regular character, ignore it.
+          if (newKey.length > 1) return;
+
+          const newChat = chat.current + newKey;
+          chat.current = newChat;
+
+          window.electron.app.realmToAppEphemeralChat(patp, newChat);
+          broadcastChat(patp, newChat);
+        }
+      } else {
+        if (key === '/') {
           ephemeralChat.toggleOn();
           window.electron.app.toggleOnEphemeralChat();
         }
-      } else if (key === 'Backspace') {
-        const newChat = chat.current.slice(0, -1);
-        chat.current = newChat;
-        window.electron.app.realmToAppEphemeralChat(patp, newChat);
-        broadcastChat(patp, newChat);
-      } else {
-        let newKey = key;
-        // If the key is not a regular character, ignore it.
-        if (newKey.length > 1) return;
-
-        const newChat = chat.current + newKey;
-        chat.current = newChat;
-
-        window.electron.app.realmToAppEphemeralChat(patp, newChat);
-        broadcastChat(patp, newChat);
       }
     },
-    [patp, isInRoom, ephemeralChat.isOn, isMultiplayerEnabled]
+    [
+      patp,
+      isInRoom,
+      ephemeralChat.isOn,
+      isMultiplayerEnabled,
+      broadcastChat,
+      closeEphemeralChat,
+      closeEphemeralChatDelayed,
+    ]
   );
 
   useEffect(() => {

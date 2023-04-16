@@ -1,5 +1,6 @@
 import { ChangeEvent, useRef, useState } from 'react';
-import { Text, Flex, useToggle, ErrorBox } from '@holium/design-system';
+import { Text, Flex, ErrorBox } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 import { Modal } from '../../Modal';
 import {
   OnboardDialogInputLabel,

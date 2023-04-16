@@ -1,22 +1,14 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Select, Text } from '@holium/design-system';
-import { Card } from 'renderer/components';
-import { lighten } from 'polished';
-import { useServices } from 'renderer/logic/store';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
+import { Flex, Select, Text, Card } from '@holium/design-system';
+import { RealmIPC } from 'renderer/stores/ipc';
 
 const AboutPanelPresenter = () => {
-  const { theme } = useServices();
-  const { windowColor } = theme.currentTheme;
-
-  const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
-
   const [selectedChannel, setSelectedChannel] = useState('');
 
   useEffect(() => {
     const getAndSetSelectedChannel = async () => {
-      const releaseChannel = await DesktopActions.getReleaseChannel();
+      const releaseChannel = await RealmIPC.getReleaseChannel();
       console.log('releaseChannel => %o', releaseChannel);
       setSelectedChannel(releaseChannel);
     };
@@ -25,17 +17,17 @@ const AboutPanelPresenter = () => {
   }, []);
 
   return (
-    <Flex flex={1} gap={12} flexDirection="column" p={3}>
-      <Text.Custom fontSize={7} fontWeight={600} mb={6}>
+    <Flex flex={1} flexDirection="column" p={3}>
+      <Text.Custom fontSize={7} fontWeight={600} mb={3}>
         About
       </Text.Custom>
-      <Text.Custom opacity={0.7} fontSize={3} fontWeight={500}>
+      <Text.Custom opacity={0.7} fontSize={3} mb={2} fontWeight={500}>
         RELEASE CHANNEL
       </Text.Custom>
-      <Card p="20px" flexDirection="column" gap={16} customBg={cardColor}>
-        <Text.Body>
+      <Card p="20px" flexDirection="column" gap={16}>
+        <Text.Custom fontSize={2} mb={2}>
           The release channel determines which Realm updates you receive.
-        </Text.Body>
+        </Text.Custom>
         <Select
           id="about-release-channel-setting"
           maxWidth={200}
@@ -46,7 +38,7 @@ const AboutPanelPresenter = () => {
           selected={selectedChannel}
           onClick={(channel: string) => {
             setSelectedChannel(channel);
-            DesktopActions.setReleaseChannel(channel);
+            RealmIPC.setReleaseChannel(channel);
           }}
         />
       </Card>

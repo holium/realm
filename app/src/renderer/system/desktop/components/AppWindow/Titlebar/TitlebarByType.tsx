@@ -9,13 +9,11 @@ import {
 } from 'renderer/system/dialog/Dialog/DialogTitlebar';
 import { AppWindowType } from 'os/services/shell/desktop.model';
 import { ShellStoreType } from 'os/services/shell/shell.model';
-import { ThemeType } from 'renderer/logic/theme';
 import { NativeAppId, getNativeAppWindow } from '../getNativeAppWindow';
 
 type Props = {
   appWindow: AppWindowType;
   shell: ShellStoreType;
-  currentTheme: ThemeType;
   hideTitlebarBorder: boolean;
   onClose: () => void;
   onMaximize: () => void;
@@ -28,7 +26,6 @@ type Props = {
 export const TitlebarByType = ({
   appWindow,
   shell,
-  currentTheme,
   hideTitlebarBorder,
   onDevTools,
   onDragStart,
@@ -59,7 +56,6 @@ export const TitlebarByType = ({
       onClose={onClose}
       onMaximize={onMaximize}
       onMinimize={onMinimize}
-      theme={currentTheme}
       appWindow={appWindow}
     />
   );
@@ -104,7 +100,6 @@ export const TitlebarByType = ({
           onClose={onClose}
           onMinimize={onMinimize}
           onMaximize={onMaximize}
-          theme={currentTheme}
           appWindow={appWindow}
         />
       );

@@ -1,11 +1,9 @@
 import { observer } from 'mobx-react';
-import { useEffect } from 'react';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import { Box, Flex, Button, Icon } from '@holium/design-system';
 import { WalletNetwork } from './Network';
-import { WalletView } from 'os/services/tray/wallet-lib/wallet.model';
-import { useTrayApps } from 'renderer/apps/store';
+import { WalletView } from 'renderer/stores/models/wallet.model';
 import styled from 'styled-components';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const Wrapper = styled(Box)`
   position: absolute;
@@ -26,17 +24,13 @@ interface WalletFooterProps {
 export const WalletFooterPresenter = ({
   hidden = false,
 }: WalletFooterProps) => {
-  const { walletApp } = useTrayApps();
-
-  useEffect(() => {
-    WalletActions.uqbarDeskExists();
-  }, []);
+  const { walletStore } = useShipStore();
 
   return (
     <Wrapper hidden={hidden}>
       <Flex justifyContent="space-between">
         <Box mr={1}>
-          <WalletNetwork network={walletApp.navState.protocol} />
+          <WalletNetwork network={walletStore.navState.protocol} />
         </Box>
         <Flex>
           <Flex mr="10px">
@@ -68,7 +62,7 @@ export const WalletFooterPresenter = ({
           </Flex>
           <Button.IconButton
             size={24}
-            onClick={() => WalletActions.navigate(WalletView.SETTINGS)}
+            onClick={() => walletStore.navigate(WalletView.SETTINGS)}
           >
             <Icon name="Settings" size={20} opacity={0.5} />
           </Button.IconButton>

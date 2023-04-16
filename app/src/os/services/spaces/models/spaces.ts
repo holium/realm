@@ -76,6 +76,11 @@ export const SpacesStore = types
         (space: SpaceModelType) => space.type === 'our'
       )[0];
     },
+    getSpaceByChatPath(chatPath: string) {
+      const pathArr = chatPath.split('/');
+      const path = `/${pathArr[2]}/${pathArr[3]}`;
+      return self.spaces.get(path);
+    },
     getSpaceByPath(spacePath: string) {
       // if (spacePath === self.our.path) {
       //   return self.our;
@@ -167,10 +172,6 @@ export const SpacesStore = types
     },
     setJoin(status: 'initial' | 'loading' | 'error' | 'loaded') {
       self.join.state = status;
-    },
-    setOurSpace(ourSpace: any) {
-      // self.our = ourSpace;
-      if (!self.selected) self.selected = ourSpace;
     },
     selectSpace(spacePath: string) {
       self.selected = self.spaces.get(spacePath);

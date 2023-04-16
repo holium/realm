@@ -1,16 +1,17 @@
 import { useEffect, useRef, useMemo, useCallback } from 'react';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
 import {
   Bubble,
   MenuItemProps,
   OnReactionPayload,
+  convertFragmentsToText,
 } from '@holium/design-system';
 import { useContextMenu } from 'renderer/components';
-import { useChatStore } from '../store';
 import { ChatMessageType } from '../models';
 import { toJS } from 'mobx';
-import { OSActions } from 'renderer/logic/actions/os';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { MainIPC } from 'renderer/stores/ipc';
+import { useAppState } from 'renderer/stores/app.store';
 
 type ChatMessageProps = {
   containerWidth: number;
@@ -29,12 +30,13 @@ export const ChatMessagePresenter = ({
   isNextGrouped,
   onReplyClick,
 }: ChatMessageProps) => {
-  const { ship, friends, theme } = useServices();
-  const { selectedChat } = useChatStore();
+  const { theme } = useAppState();
+  const { ship, chatStore, friends } = useShipStore();
+  const { selectedChat } = chatStore;
   const messageRef = useRef<HTMLDivElement>(null);
   const ourShip = useMemo(() => ship?.patp, [ship]);
   const isOur = message.sender === ourShip;
-  const { getOptions, setOptions } = useContextMenu();
+  const { getOptions, setOptions, defaultOptions } = useContextMenu();
 
   const messageRowId = useMemo(() => `message-row-${message.id}`, [message.id]);
   const isPinned = selectedChat?.isMessagePinned(message.id);
@@ -67,13 +69,17 @@ export const ChatMessagePresenter = ({
   );
 
   const contextMenuOptions = useMemo(() => {
-    const menu: MenuItemProps[] = [];
+    const menu: MenuItemProps[] = [defaultOptions[0]];
     if (!selectedChat || !ship) return menu;
     const isAdmin = selectedChat.isHost(ship.patp);
+    let hasLink = false;
     let hasImage = false;
     msgModel?.contents.forEach((content) => {
       if (Object.keys(content)[0].includes('image')) {
         hasImage = true;
+      }
+      if (Object.keys(content)[0].includes('link')) {
+        hasLink = true;
       }
     });
     if (isAdmin) {
@@ -82,7 +88,7 @@ export const ChatMessagePresenter = ({
         icon: isPinned ? 'Unpin' : 'Pin',
         label: isPinned ? 'Unpin' : 'Pin',
         disabled: false,
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
           selectedChat.setPinnedMessage(message.id);
         },
@@ -95,7 +101,7 @@ export const ChatMessagePresenter = ({
         label: 'Save image',
         disabled: false,
         onClick: (
-          evt: React.MouseEvent<HTMLButtonElement>,
+          evt: React.MouseEvent<HTMLDivElement>,
           elem: HTMLElement | undefined
         ) => {
           evt.stopPropagation();
@@ -112,21 +118,97 @@ export const ChatMessagePresenter = ({
               asImage.src &&
               images.find((i) => i.image === asImage.src)
             )
-              OSActions.downloadUrlAsFile(asImage.src);
+              MainIPC.downloadUrlAsFile(asImage.src);
           } else if (images && images.length > 0) {
-            OSActions.downloadUrlAsFile(images[0].image);
+            MainIPC.downloadUrlAsFile(images[0].image);
           }
         },
       });
       // TODO if trove is installed
       // save to trove
+
+      menu.push({
+        id: `${messageRowId}-copy-image-link`,
+        icon: 'Image',
+        label: 'Copy image link',
+        disabled: false,
+        onClick: (
+          evt: React.MouseEvent<HTMLDivElement>,
+          elem: HTMLElement | undefined
+        ) => {
+          evt.stopPropagation();
+          const images =
+            msgModel &&
+            msgModel.contents.filter((c) =>
+              Object.keys(c)[0].includes('image')
+            );
+          if (elem) {
+            let asImage = elem as HTMLImageElement;
+            if (
+              images &&
+              images.length > 0 &&
+              asImage.src &&
+              images.find((i) => i.image === asImage.src)
+            ) {
+              navigator.clipboard.writeText(asImage.src);
+            } else if (images && images.length > 0) {
+              navigator.clipboard.writeText(images[0].image);
+            }
+          } else if (images && images.length > 0) {
+            navigator.clipboard.writeText(images[0].image);
+          }
+        },
+      });
     }
+    if (hasLink) {
+      menu.push({
+        id: `${messageRowId}-copy-link`,
+        icon: 'UrlLink',
+        label: 'Copy url',
+        disabled: false,
+        onClick: (
+          evt: React.MouseEvent<HTMLDivElement>,
+          elem: HTMLElement | undefined
+        ) => {
+          evt.stopPropagation();
+          const links =
+            msgModel &&
+            msgModel.contents.filter((c) => Object.keys(c)[0].includes('link'));
+          if (elem) {
+            let asImage = elem as HTMLAnchorElement;
+            if (
+              links &&
+              links.length > 0 &&
+              asImage.href &&
+              links.find((i) => i.link === asImage.href)
+            ) {
+              navigator.clipboard.writeText(asImage.href);
+            } else if (links && links.length > 0) {
+              navigator.clipboard.writeText(links[0].link);
+            }
+          } else if (links && links.length > 0) {
+            navigator.clipboard.writeText(links[0].link);
+          }
+        },
+      });
+    }
+    menu.push({
+      id: `${messageRowId}-copy-raw-message`,
+      icon: 'CopyMessage',
+      label: 'Copy message',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
+        evt.stopPropagation();
+        const msg: string = convertFragmentsToText(message.contents);
+        navigator.clipboard.writeText(msg);
+      },
+    });
     menu.push({
       id: `${messageRowId}-reply-to`,
       icon: 'Reply',
       label: 'Reply',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         selectedChat.setReplying(message);
       },
@@ -137,25 +219,27 @@ export const ChatMessagePresenter = ({
         icon: 'Edit',
         label: 'Edit',
         disabled: false,
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
           selectedChat.setEditing(message);
         },
       });
+    }
+    if (isAdmin || isOur) {
       menu.push({
         id: `${messageRowId}-delete-message`,
         label: 'Delete message',
         icon: 'Trash',
         iconColor: '#ff6240',
         labelColor: '#ff6240',
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
           selectedChat.deleteMessage(message.id);
         },
       });
     }
     return menu.filter(Boolean) as MenuItemProps[];
-  }, [messageRowId, isPinned]);
+  }, [messageRowId, isPinned, defaultOptions]);
 
   useEffect(() => {
     if (contextMenuOptions !== getOptions(messageRowId)) {
@@ -186,7 +270,9 @@ export const ChatMessagePresenter = ({
 
   let mergedContents: any | undefined = useMemo(() => {
     const replyTo = message.replyToMsgId;
-    let replyToObj;
+    let replyToObj = {
+      reply: { msgId: replyTo, author: 'unknown', message: [{ plain: '' }] },
+    };
     if (replyTo) {
       const originalMsg = toJS(messages.find((m) => m.id === replyTo));
       if (originalMsg) {
@@ -221,7 +307,7 @@ export const ChatMessagePresenter = ({
       isNextGrouped={isNextGrouped}
       expiresAt={message.expiresAt}
       containerWidth={containerWidth}
-      themeMode={theme.currentTheme.mode as 'light' | 'dark'}
+      themeMode={theme.mode as 'light' | 'dark'}
       isOur={isOur}
       ourShip={ourShip}
       ourColor={ourColor}

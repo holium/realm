@@ -1,18 +1,12 @@
 import { rgba } from 'polished';
 import { Icon, Flex, Button, Text } from '@holium/design-system';
-import { WalletActions } from 'renderer/logic/actions/wallet';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type Network = 'ethereum' | 'bitcoin';
 
 type Props = {
   showBack: boolean;
   isOnboarding: boolean;
-  theme: {
-    iconColor: string;
-    windowColor: string;
-    textColor: string;
-    mode: string;
-  };
   network: Network | string;
   onSetNetwork: (network: Network) => void;
   onAddWallet: () => void;
@@ -20,12 +14,13 @@ type Props = {
 };
 const ethBg = rgba('#627EEA', 0.14);
 export const WalletHeader = ({
-  theme,
   hide,
   showBack,
   isOnboarding,
   onAddWallet,
 }: Props) => {
+  const { walletStore } = useShipStore();
+
   if (hide) return null;
 
   return (
@@ -40,7 +35,7 @@ export const WalletHeader = ({
         <Button.IconButton
           size={26}
           mt={isOnboarding ? 1 : 0}
-          onClick={async () => await WalletActions.navigateBack()}
+          onClick={async () => await walletStore.navigateBack()}
         >
           <Icon name="ArrowLeftLine" size={24} opacity={0.7} />
         </Button.IconButton>
@@ -66,13 +61,7 @@ export const WalletHeader = ({
             borderRadius={6}
           >
             <Icon mr="6px" size={20} name="Ethereum" pointerEvents="none" />
-            <Text.Custom
-              fontSize={2}
-              fontWeight={500}
-              style={{
-                color: theme.mode === 'dark' ? '#869cf5' : '#627EEA',
-              }}
-            >
+            <Text.Custom fontSize={2} fontWeight={500}>
               Ethereum
             </Text.Custom>
           </Flex>

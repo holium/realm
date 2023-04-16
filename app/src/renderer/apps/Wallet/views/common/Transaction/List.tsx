@@ -1,11 +1,6 @@
 import { observer } from 'mobx-react';
-import { darken } from 'polished';
-import { Flex, Icons, NoScrollBar, Text as OldText } from 'renderer/components';
-import { Text } from '@holium/design-system';
-import { Row } from 'renderer/components/NewRow';
+import { Row, Flex, Icon, NoScrollBar, Text } from '@holium/design-system';
 import { toJS } from 'mobx';
-import { useServices } from 'renderer/logic/store';
-import { useTrayApps } from 'renderer/apps/store';
 import {
   monthNames,
   formatEthAmount,
@@ -13,11 +8,11 @@ import {
   convertEthAmountToUsd,
   shortened,
 } from '../../../lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 import {
   TransactionType,
   WalletView,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from 'renderer/stores/models/wallet.model';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 export type TxType = 'coin' | 'nft' | 'general' | undefined;
 
@@ -26,9 +21,7 @@ interface TransactionProps {
   transaction: TransactionType;
 }
 const TransactionPresenter = (props: TransactionProps) => {
-  const { theme } = useServices();
-  const { walletApp } = useTrayApps();
-  const hoverBackground = darken(0.0325, theme.currentTheme.windowColor);
+  const walletStore = useShipStore();
   const { transaction, isCoin } = props;
   const wasSent = transaction.type === 'sent';
   const isEth = transaction.network === 'ethereum';
@@ -43,18 +36,18 @@ const TransactionPresenter = (props: TransactionProps) => {
 
   const onClick = () => {
     console.log('clicked', toJS(transaction));
-    WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
+    walletStore.navigate(WalletView.TRANSACTION_DETAIL, {
       detail: {
         type: 'transaction',
-        txtype: (walletApp.navState.detail?.txtype as TxType) || 'general',
-        coinKey: walletApp.navState.detail?.coinKey,
+        txtype: (walletStore.navState.detail?.txtype as TxType) || 'general',
+        coinKey: walletStore.navState.detail?.coinKey,
         key: transaction.hash,
       },
     });
   };
 
   return (
-    <Row customBg={hoverBackground} onClick={onClick}>
+    <Row onClick={onClick}>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
         <Flex flexDirection="column" justifyContent="center">
           <Text.Custom fontWeight={500} fontSize={3}>
@@ -67,24 +60,14 @@ const TransactionPresenter = (props: TransactionProps) => {
               : 'Receiving'}
           </Text.Custom>
           <Flex>
-            <OldText
-              variant="body"
-              fontSize={1}
-              color={
-                transaction.status !== 'pending'
-                  ? wasSent
-                    ? 'text.error'
-                    : 'text.success'
-                  : 'brand.primary'
-              }
-            >
+            <Text.Body variant="body" fontSize={1}>
               {`${
                 monthNames[completedDate.getMonth()]
               } ${completedDate.getDate()}`}
-            </OldText>
-            <OldText mx={1} variant="body" fontSize={1} color="text.disabled">
+            </Text.Body>
+            <Text.Body mx={1} variant="body" fontSize={1}>
               ·
-            </OldText>
+            </Text.Body>
             <Text.Custom
               truncate
               width={130}
@@ -111,7 +94,7 @@ const TransactionPresenter = (props: TransactionProps) => {
               {isEth &&
                 `${convertEthAmountToUsd(
                   ethAmount,
-                  walletApp.ethereum.conversions.usd
+                  walletStore.ethereum.conversions.usd
                 )} USD`}
             </Text.Hint>
           )}
@@ -131,7 +114,6 @@ interface TransactionListProps {
 }
 const TransactionListPresenter = (props: TransactionListProps) => {
   const { height = 230, ethType } = props;
-  const { theme } = useServices();
 
   const pending = props.transactions.filter(
     (tx) => tx.status === 'pending'
@@ -162,23 +144,14 @@ const TransactionListPresenter = (props: TransactionListProps) => {
             />
           ))
         ) : (
-          <OldText
-            mt={6}
-            variant="h5"
-            textAlign="center"
-            color={theme.currentTheme.iconColor}
-          >
+          <Text.H5 mt={6} variant="h5" textAlign="center">
             No transactions
-          </OldText>
+          </Text.H5>
         )}
       </NoScrollBar>
       {transactions.length > 4 && (
         <Flex pt="2px" width="100%" justifyContent="center">
-          <Icons
-            name="ChevronDown"
-            size={1}
-            color={theme.currentTheme.iconColor}
-          />
+          <Icon name="ChevronDown" size={1} />
         </Flex>
       )}
     </>

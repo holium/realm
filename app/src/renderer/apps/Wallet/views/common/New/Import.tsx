@@ -1,18 +1,9 @@
-import {
-  useMemo,
-  Dispatch,
-  SetStateAction,
-  useState,
-  ChangeEvent,
-} from 'react';
+import { Dispatch, SetStateAction, useState, ChangeEvent } from 'react';
 import styled from 'styled-components';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import { Button, Flex, Text, Label, FormControl } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
+import { Button, Flex, Text, TextInput } from '@holium/design-system';
 import { NewWalletScreen } from './index';
-import { TextInput } from '@holium/design-system';
 
 const NoResize = styled(Flex)`
   textarea {
@@ -26,11 +17,6 @@ interface ImportProps {
 }
 
 const ImportPresenter = (props: ImportProps) => {
-  const { theme } = useServices();
-  const themeData = useMemo(
-    () => getBaseTheme(theme.currentTheme),
-    [theme.currentTheme]
-  );
   const [phrase, setPhrase] = useState('');
 
   const saveSeedPhrase = () => {
@@ -40,42 +26,40 @@ const ImportPresenter = (props: ImportProps) => {
 
   return (
     <NoResize width="100%" height="100%" flexDirection="column">
-      <Text mt={6} variant="h4">
+      <Text.H4 mt={6} variant="h4">
         Import Wallet
-      </Text>
-      <Text mt={2} variant="body" color={themeData.colors.text.secondary}>
+      </Text.H4>
+      <Text.Body mt={2} variant="body">
         If you have an existing mnemonic seed phrase, you can load it into Realm
         now.
-      </Text>
-      <FormControl.FieldSet mt={9} width="100%" flexDirection="column">
-        <FormControl.Field>
-          <Label mb={1} required={true}>
-            Seed phrase
-          </Label>
-          <TextInput
-            id="seed-phrase"
-            name="seed-phrase"
-            height="72px"
-            required={true}
-            type="textarea"
-            value={phrase}
-            cols={50}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setPhrase(e.target.value)
-            }
-            // autoFocus={true}
-          />
-        </FormControl.Field>
-        <Flex mt={7} width="100%">
-          <Button
-            width="100%"
-            disabled={!ethers.utils.isValidMnemonic(phrase)}
-            onClick={saveSeedPhrase}
-          >
-            Save
-          </Button>
-        </Flex>
-      </FormControl.FieldSet>
+      </Text.Body>
+      {/*<FormControl.FieldSet mt={9} width="100%" flexDirection="column">
+        <FormControl.Field>*/}
+      <Text.Label mb={1}>Seed phrase</Text.Label>
+      <TextInput
+        id="seed-phrase"
+        name="seed-phrase"
+        height="72px"
+        required={true}
+        type="textarea"
+        value={phrase}
+        cols={50}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          setPhrase(e.target.value)
+        }
+        // autoFocus={true}
+      />
+      {/*</FormControl.Field>*/}
+      <Flex mt={7} width="100%">
+        <Button.TextButton
+          width="100%"
+          disabled={!ethers.utils.isValidMnemonic(phrase)}
+          onClick={saveSeedPhrase}
+        >
+          Save
+        </Button.TextButton>
+      </Flex>
+      {/*</FormControl.FieldSet>*/}
     </NoResize>
   );
 };

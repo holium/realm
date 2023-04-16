@@ -1,6 +1,6 @@
 {
   "name": "@holium/design-system",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A component library for Realm apps.",
   "license": "MIT",
   "author": "trent@holium.com",
@@ -21,8 +21,6 @@
     "react-lifecycles-compat": "^3.0.4",
     "react-photoswipe-gallery": "^2.2.7",
     "react-player": "^2.11.0",
-    "react-spotify-embed": "^1.0.4",
-    "react-twitter-embed": "^4.0.4",
     "react-virtuoso": "^4.2.0",
     "urbit-ob": "^5.0.1"
   },
@@ -42,7 +40,8 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "styled-components": "^5.3.6",
-    "styled-system": "^5.1.5"
+    "styled-system": "^5.1.5",
+    "lodash": "^4.17.21"
   },
   "keywords": [
     "realm",

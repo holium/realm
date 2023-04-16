@@ -16,6 +16,20 @@ export const fontByName = {
   Inter: 'Inter, sans-serif',
 };
 
+export const fontSizes = [
+  '0.702rem', // 0 == 10px
+  '0.79rem', //  1 == 12px
+  '0.889rem', // 2 == 14px
+  '1rem', //     3 == 16px
+  '1.125rem', // 4
+  '1.266rem', // 5
+  '1.424rem', // 6
+  '1.602rem', // 7
+  '1.802rem', // 8
+  '2.027rem', // 9
+  '2.281rem', // 10
+];
+
 export type TextProps = {
   fontWeight?: number;
   fontByName?: keyof typeof fontByName;
@@ -46,8 +60,16 @@ const customStyling = css<TextProps>`
         overflow: hidden !important;
         text-overflow: ellipsis;
       `}
-  ${(props) => props.fontWeight && `font-weight: ${props.fontWeight};`}
-  ${(props) => props.noSelection && 'user-select: none;'}
+  /* if fontSize is a number use fontSizes array */
+    ${(props) =>
+      typeof props.fontSize === 'number' &&
+      css`
+        font-size: ${props.fontSize <= 10
+          ? fontSizes[props.fontSize]
+          : `${props.fontSize / 16}rem`};
+      `}
+    ${(props) => props.fontWeight && `font-weight: ${props.fontWeight};`}
+    ${(props) => props.noSelection && 'user-select: none;'}
   }
 `;
 

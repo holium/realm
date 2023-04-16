@@ -10,17 +10,16 @@ import {
   Tooltip,
 } from '@holium/design-system';
 import { useTrayApps } from '../../store';
-import { useChatStore } from '../store';
-import { ShipSearch } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { ChatPathType } from 'os/services/chat/chat.service';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { ShipSearch } from 'renderer/components/ShipSearch';
 
 export const NewChat = () => {
-  const { ship, friends } = useServices();
+  const { ship, friends, chatStore } = useShipStore();
   const { dimensions } = useTrayApps();
-  const { inbox, setSubroute, createChat } = useChatStore();
+  const { inbox, setSubroute, createChat } = chatStore;
   const [creating, setCreating] = useState<boolean>(false);
   const [searchString, setSearchString] = useState<string>('');
   const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
@@ -174,10 +173,10 @@ const RemoveWrapper = styled(motion.div)`
 `;
 
 const SelectedShips = ({ ships, onRemove }: SelectedShipsProps) => {
-  const { friends } = useServices();
+  const { friends } = useShipStore();
 
   return (
-    <Flex py={1} gap={12} overflowY="scroll">
+    <Flex height="98px" py={1} gap={12} overflowY="scroll">
       {Array.from(ships).map((ship) => {
         const metadata = ship
           ? friends.getContactAvatarMetadata(ship)

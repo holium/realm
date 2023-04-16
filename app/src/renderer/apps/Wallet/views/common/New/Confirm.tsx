@@ -1,8 +1,7 @@
 import { useState, Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
-import { Button, Flex, Text } from 'renderer/components';
-import { darken, transparentize } from 'polished';
-import { useServices } from 'renderer/logic/store';
+import { Button, Flex, Text } from '@holium/design-system';
+import { transparentize } from 'polished';
 import { WordPicker } from './WordPicker';
 import { NewWalletScreen } from './index';
 
@@ -13,9 +12,7 @@ interface ConfirmProps {
 
 const ConfirmPresenter = (props: ConfirmProps) => {
   const [valid, setValid] = useState(false);
-  const { theme } = useServices();
 
-  const panelBackground = darken(0.02, theme.currentTheme.windowColor);
   const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
 
   return (
@@ -27,27 +24,26 @@ const ConfirmPresenter = (props: ConfirmProps) => {
       alignItems="center"
     >
       <Flex flexDirection="column">
-        <Text variant="h5">Confirm words</Text>
-        <Text mt={3} variant="body">
+        <Text.H5 variant="h5">Confirm words</Text.H5>
+        <Text.Body mt={3} variant="body">
           Verify you wrote the secret recovery phrase down correctly by clicking
           the following words in the correct order.
-        </Text>
+        </Text.Body>
       </Flex>
       <Flex flexDirection="column" alignItems="center">
         <WordPicker
           seedPhrase={props.seedPhrase}
           border={panelBorder}
-          background={panelBackground}
           onValidChange={setValid}
         />
       </Flex>
       <Flex justifyContent="center" alignItems="center">
-        <Button
+        <Button.TextButton
           disabled={!valid}
           onClick={() => props.setScreen(NewWalletScreen.PASSCODE)}
         >
           Confirm
-        </Button>
+        </Button.TextButton>
       </Flex>
     </Flex>
   );

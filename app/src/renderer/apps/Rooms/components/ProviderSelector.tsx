@@ -1,14 +1,12 @@
 import styled from 'styled-components';
-import { rgba, darken } from 'polished';
-import { Flex, Icons, Text } from 'renderer/components';
-import { ThemeType } from 'renderer/theme';
-import { useServices } from 'renderer/logic/store';
+import { Flex, Icon, Text } from '@holium/design-system';
 import { useRooms } from '../useRooms';
 import { observer } from 'mobx-react';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface CommCircleProps {
   customBg: string;
-  theme: ThemeType;
 }
 
 const ProviderStyle = styled(Flex)<CommCircleProps>`
@@ -19,11 +17,11 @@ const ProviderStyle = styled(Flex)<CommCircleProps>`
   height: 24px;
   border-radius: 12px;
   gap: 6px;
-  background: ${(props: CommCircleProps) => darken(0.03, props.customBg)};
-  transition: ${(props: CommCircleProps) => props.theme.transition};
+  background: rgba(var(--rlm-overlay-hover-rgba));
+  transition: var(--transition);
   &:hover {
-    background: ${(props: CommCircleProps) => darken(0.04, props.customBg)};
-    transition: ${(props: CommCircleProps) => props.theme.transition};
+    background: rgba(var(--rlm-overlay-active-rgba));
+    transition: var(--transition);
   }
 `;
 
@@ -34,16 +32,17 @@ interface ProviderSelectorProps {
 }
 
 const ProviderSelectorPresenter = ({ onClick }: ProviderSelectorProps) => {
-  const { ship, theme } = useServices();
-  const { windowColor, textColor } = theme.currentTheme;
+  const { theme } = useAppState();
+  const { ship } = useShipStore();
+  const { windowColor } = theme;
   const roomsManager = useRooms(ship?.patp);
 
   return (
     <ProviderStyle customBg={windowColor} onClick={(evt: any) => onClick(evt)}>
-      <Icons size={18} fill={rgba(textColor, 0.7)} name="BaseStation" />
-      <Text fontSize={1} color={rgba(textColor, 0.7)}>
+      <Icon size={18} opacity={0.7} name="BaseStation" />
+      <Text.Custom fontSize={1} opacity={0.7}>
         {roomsManager?.protocol.provider}
-      </Text>
+      </Text.Custom>
     </ProviderStyle>
   );
 };

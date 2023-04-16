@@ -10,27 +10,25 @@ import {
   Toggle,
   Select,
   Icon,
-  TextInput,
   NoScrollBar,
+  TextInput,
 } from '@holium/design-system';
-// import { toJS } from 'mobx';
-import { useServices } from 'renderer/logic/store';
-import { InlineEdit, ShipSearch, useContextMenu } from 'renderer/components';
+import { InlineEdit, useContextMenu } from 'renderer/components';
 import { isValidPatp } from 'urbit-ob';
 import { createField, createForm } from 'mobx-easy-form';
 import { ChatLogHeader } from '../components/ChatLogHeader';
-import { useChatStore } from '../store';
-import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { ChatAvatar } from '../components/ChatAvatar';
-
 import { FileUploadParams } from 'os/services/ship/models/ship';
-import { useFileUpload } from 'renderer/logic/lib/useFileUpload';
-import { ShipActions } from 'renderer/logic/actions/ship';
-import { IuseStorage } from 'renderer/logic/lib/useStorage';
+import { useFileUpload } from 'renderer/lib/useFileUpload';
+import { IuseStorage } from 'renderer/lib/useStorage';
 import { observer } from 'mobx-react-lite';
 import { InvitePermissionType, PeerModelType } from '../models';
 import { ExpiresValue, millisecondsToExpires } from '../types';
 import { useTrayApps } from 'renderer/apps/store';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { ShipIPC } from 'renderer/stores/ipc';
+import { useAppState } from 'renderer/stores/app.store';
+import { ShipSearch } from 'renderer/components/ShipSearch';
 
 export const createPeopleForm = (
   defaults: any = {
@@ -66,9 +64,10 @@ type ChatInfoProps = {
 };
 
 export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
-  const { selectedChat, setSubroute, getChatHeader } = useChatStore();
+  const { theme } = useAppState();
+  const { ship, chatStore, spacesStore, friends } = useShipStore();
+  const { selectedChat, setSubroute, getChatHeader } = chatStore;
   const { dimensions } = useTrayApps();
-  const { ship } = useServices();
   const containerRef = useRef<HTMLDivElement>(null);
   const [_isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string>();
@@ -79,7 +78,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const isDMType = selectedChat?.type === 'dm';
 
   // TODO consolidate this
-  const { title, subtitle, sigil } = useMemo(() => {
+  const { title, subtitle, sigil, avatarColor, spaceTitle } = useMemo(() => {
     if (!selectedChat || !ship)
       return { resolvedTitle: 'Error loading title', subtitle: '' };
 
@@ -91,7 +90,18 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
         subtitle = sigil.patp;
       }
     }
-    return { title, subtitle, sigil };
+    let avatarColor: string | undefined;
+    let spaceTitle: string | undefined;
+    if (selectedChat.type === 'space') {
+      const space = spacesStore.getSpaceByChatPath(selectedChat.path);
+      if (space) {
+        spaceTitle = space.name;
+        subtitle = spaceTitle;
+        avatarColor = space.color;
+        if (space.picture) setImage(space.picture);
+      }
+    }
+    return { title, subtitle, sigil, spaceTitle, avatarColor };
   }, [selectedChat?.path, ship]);
 
   const [editTitle, setEditTitle] = useState(title || 'Error loading title');
@@ -128,7 +138,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const uploadFile = (params: FileUploadParams) => {
     setIsUploading(true);
     setUploadError('');
-    ShipActions.uploadFile(params)
+    (ShipIPC.uploadFile(params) as Promise<any>)
       .then((url: string) => {
         setImage(url);
         editMetadata({ image: url });
@@ -141,6 +151,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
 
   const amHost =
     sortedPeers.find((peer) => peer.ship === ship?.patp)?.role === 'host';
+  const isSpaceChat = type === 'space';
 
   const patps = sortedPeers.map((peer) => peer.ship);
 
@@ -153,6 +164,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
       size={48}
       image={image}
       metadata={metadata}
+      color={avatarColor}
       canEdit={amHost && canUpload}
       onUpload={() => {
         if (!containerRef.current) return;
@@ -174,7 +186,8 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
     const patp = contact[0];
     selectedPatp.add(patp);
     setSelected(new Set(selectedPatp));
-    ChatDBActions.addPeer(path, patp)
+    selectedChat
+      .addPeer(patp)
       .then(() => {
         console.log('adding peer', patp);
       })
@@ -212,7 +225,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
             justifyContent="center"
             gap={4}
             alignItems="center"
-            pointerEvents={isDMType || !amHost ? 'none' : 'auto'}
+            pointerEvents={isDMType || isSpaceChat || !amHost ? 'none' : 'auto'}
           >
             <div ref={containerRef} style={{ display: 'none' }}></div>
             {chatAvatarEl}
@@ -225,13 +238,14 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
               flexDirection="column"
               pointerEvents={isDMType || !amHost ? 'none' : 'auto'}
             >
-              <InlineEdit
+              <TextInput
+                id="chat-title"
+                name="chat-title"
                 fontWeight={500}
-                fontSize={3}
                 textAlign="center"
                 width={350}
                 value={editTitle}
-                editable={amHost}
+                // editable={amHost}
                 onBlur={() => {
                   if (editTitle.length > 1) {
                     editMetadata({ title: editTitle });
@@ -269,7 +283,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 </Text.Custom>
               </Flex>
               <Toggle
-                disabled={!amHost}
+                disabled={!isDMType && !amHost}
                 initialChecked={metadata?.reactions}
                 onChange={(isChecked) => {
                   editMetadata({ reactions: isChecked });
@@ -303,37 +317,39 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                     }}
                   />
                 </Flex>
-                <Flex
-                  width="100%"
-                  px={2}
-                  pt={1}
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Flex alignItems="center">
-                    <Icon name="ChatInvitePermission" size={24} mr={2} />
-                    <Text.Custom
-                      alignItems="center"
-                      fontWeight={400}
-                      fontSize="14px"
-                    >
-                      Invites
-                    </Text.Custom>
+                {!isSpaceChat && (
+                  <Flex
+                    width="100%"
+                    px={2}
+                    pt={1}
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <Flex alignItems="center">
+                      <Icon name="ChatInvitePermission" size={24} mr={2} />
+                      <Text.Custom
+                        alignItems="center"
+                        fontWeight={400}
+                        fontSize="14px"
+                      >
+                        Invites
+                      </Text.Custom>
+                    </Flex>
+                    <Select
+                      disabled={!amHost}
+                      id="select-invite-permission"
+                      width={120}
+                      options={[
+                        { label: 'Host only', value: 'host' },
+                        { label: 'Anyone', value: 'anyone' },
+                      ]}
+                      selected={invites}
+                      onClick={(value: string) => {
+                        updateInvitePermissions(value as InvitePermissionType);
+                      }}
+                    />
                   </Flex>
-                  <Select
-                    disabled={!amHost}
-                    id="select-invite-permission"
-                    width={120}
-                    options={[
-                      { label: 'Host only', value: 'host' },
-                      { label: 'Anyone', value: 'anyone' },
-                    ]}
-                    selected={invites}
-                    onClick={(value: string) => {
-                      updateInvitePermissions(value as InvitePermissionType);
-                    }}
-                  />
-                </Flex>
+                )}
               </>
             )}
 
@@ -355,7 +371,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 </Text.Custom>
               </Flex>
               <Select
-                disabled={!amHost}
+                disabled={!isDMType && !amHost}
                 id="select-disappearing-duration"
                 width={120}
                 options={[
@@ -390,37 +406,66 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
           {!isDMType && (
             <>
               <Flex flexDirection="column" position="relative" width="100%">
-                <Flex py={1} width="100%">
-                  <TextInput
-                    id="new-chat-patp-search"
-                    name="new-chat-patp-search"
-                    tabIndex={1}
-                    width="100%"
-                    className="realm-cursor-text-cursor"
-                    placeholder="Add someone?"
-                    // TODO disable if not permissioned
-                    value={person.state.value}
-                    height={34}
-                    onKeyDown={(evt: any) => {
-                      if (evt.key === 'Enter' && person.computed.parsed) {
-                        onShipSelected([person.computed.parsed, '']);
-                        person.actions.onChange('');
-                      }
+                {!isSpaceChat ? (
+                  <Flex py={1} width="100%">
+                    <TextInput
+                      id="new-chat-patp-search"
+                      name="new-chat-patp-search"
+                      tabIndex={1}
+                      width="100%"
+                      className="realm-cursor-text-cursor"
+                      placeholder="Add someone?"
+                      // TODO disable if not permissioned
+                      value={person.state.value}
+                      height={34}
+                      onKeyDown={(evt: any) => {
+                        if (evt.key === 'Enter' && person.computed.parsed) {
+                          onShipSelected([person.computed.parsed, '']);
+                          person.actions.onChange('');
+                        }
+                      }}
+                      onChange={(e: any) => {
+                        person.actions.onChange(e.target.value);
+                      }}
+                      onFocus={() => {
+                        person.actions.onFocus();
+                      }}
+                      onBlur={() => {
+                        person.actions.onBlur();
+                      }}
+                      // onFocus={() => urbitId.actions.onFocus()}
+                      // onBlur={() => urbitId.actions.onBlur()}
+                      // onKeyDown={submitNewChat} TODO make enter on valid patp add to selectedPatp
+                    />
+                  </Flex>
+                ) : (
+                  <Flex
+                    flexDirection="row"
+                    mx={1}
+                    mt={1}
+                    mb={2}
+                    p={2}
+                    border="1px solid"
+                    borderColor="intent-info"
+                    borderRadius={6}
+                    style={{
+                      borderColor: 'rgba(0, 0, 0, 0.1)',
+                      backgroundColor:
+                        theme.mode === 'dark'
+                          ? 'rgba(0, 0, 0, 0.125)'
+                          : 'rgba(0, 0, 0, 0.065)',
                     }}
-                    onChange={(e: any) => {
-                      person.actions.onChange(e.target.value);
-                    }}
-                    onFocus={() => {
-                      person.actions.onFocus();
-                    }}
-                    onBlur={() => {
-                      person.actions.onBlur();
-                    }}
-                    // onFocus={() => urbitId.actions.onFocus()}
-                    // onBlur={() => urbitId.actions.onBlur()}
-                    // onKeyDown={submitNewChat} TODO make enter on valid patp add to selectedPatp
-                  />
-                </Flex>
+                  >
+                    <Icon name="InfoCircle" color="icon" mr={2} opacity={0.7} />
+                    <Text.Hint lineHeight={1.25} opacity={0.7}>
+                      Currently all members of{' '}
+                      <span style={{ fontWeight: 500 }}>{spaceTitle}</span> are
+                      in this chat. In the future, you will be able to create
+                      channels and invite a subset of members or allow certain
+                      roles to gain access.
+                    </Text.Hint>
+                  </Flex>
+                )}
                 <Flex px={2}>
                   <ShipSearch
                     isDropdown
@@ -445,17 +490,18 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 label: 'Add as friend',
                 onClick: (evt: any) => {
                   evt.stopPropagation();
-                  ShipActions.addFriend(peer.ship);
+                  friends.addFriend(peer.ship);
                 },
               });
             }
-            if (peer.role !== 'host' && amHost) {
+            if (peer.role !== 'host' && amHost && !isSpaceChat) {
               options.push({
                 id: `${id}-remove`,
                 label: 'Remove',
                 onClick: (evt: any) => {
                   evt.stopPropagation();
-                  ChatDBActions.removePeer(path, peer.ship)
+                  selectedChat
+                    .removePeer(peer.ship)
                     .then(() => {
                       console.log('removed peer');
                     })
@@ -502,7 +548,7 @@ const LabelMap = {
 const PeerRow = ({ id, peer, options, role }: PeerRowProps) => {
   const { getOptions, setOptions } = useContextMenu();
 
-  const { friends } = useServices();
+  const { friends } = useShipStore();
 
   useEffect(() => {
     if (options && options.length && options !== getOptions(id)) {

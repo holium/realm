@@ -1,8 +1,8 @@
 import { toJS } from 'mobx';
 import { flow, Instance, types, cast, applySnapshot } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/chat/chat.service';
-import { ChatDBActions } from 'renderer/logic/actions/chat-db';
-import { SoundActions } from 'renderer/logic/actions/sound';
+import { SoundActions } from 'renderer/lib/sound';
+import { ChatIPC } from 'renderer/stores/ipc';
 import { expiresInMap, ExpiresValue } from './types';
 
 const ChatFragment = types.union(
@@ -93,14 +93,16 @@ const PeerModel = types.model('PeerModel', {
 });
 export type PeerModelType = Instance<typeof PeerModel>;
 
+// Path row metadata
 export const ChatMetadataModel = types.model({
   title: types.string,
   description: types.maybe(types.string),
   image: types.maybe(types.string),
   creator: types.string,
-  peer: types.maybe(types.string),
   timestamp: types.number,
   reactions: types.optional(types.boolean, true),
+  peer: types.maybe(types.string),
+  space: types.maybe(types.string),
 });
 
 export type ChatMetadata = Instance<typeof ChatMetadataModel>;
@@ -154,7 +156,7 @@ export const ChatMessage = types
     },
     getReplyTo: () => {
       if (!self.replyToPath || !self.replyToMsgId) return null;
-      return ChatDBActions.getChatReplyTo(self.replyToMsgId);
+      return ChatIPC.getChatReplyTo(self.replyToMsgId);
     },
     insertTempReaction(react: ReactionModelType) {
       self.reactions.push({
@@ -184,7 +186,7 @@ export const ChatMessage = types
     },
     delete: flow(function* () {
       try {
-        yield ChatDBActions.deleteMessage(self.path, self.id);
+        yield ChatIPC.deleteMessage(self.path, self.id);
       } catch (error) {
         console.error(error);
       }
@@ -211,6 +213,7 @@ export const Chat = types
         createdAt: types.number,
       })
     ),
+    lastUpdatedAt: types.maybeNull(types.number),
     lastSender: types.maybeNull(types.string),
     createdAt: types.maybeNull(types.number),
     updatedAt: types.maybeNull(types.number),
@@ -270,7 +273,7 @@ export const Chat = types
     fetchMessages: flow(function* () {
       self.lastFetch = new Date().getTime();
       try {
-        const messages = yield ChatDBActions.getChatLog(self.path);
+        const messages = yield ChatIPC.getChatLog(self.path);
         applySnapshot(self.messages, messages);
         self.hidePinned = self.isPinLocallyHidden();
         return self.messages;
@@ -282,7 +285,7 @@ export const Chat = types
     fetchPeers: flow(function* (our: string) {
       try {
         self.our = our;
-        const peers = yield ChatDBActions.getChatPeers(self.path);
+        const peers = yield ChatIPC.getChatPeers(self.path);
         self.peers = peers.map((p: PeerModelType) =>
           PeerModel.create({ ship: p.ship, role: p.role })
         );
@@ -290,7 +293,6 @@ export const Chat = types
         console.error(error);
       }
     }),
-
     sendMessage: flow(function* (path: string, fragments: any[]) {
       SoundActions.playDMSend();
       try {
@@ -318,8 +320,9 @@ export const Chat = types
           contents: lastContents,
           createdAt: new Date().getTime(),
         };
+        self.lastUpdatedAt = new Date().getTime();
         self.replyingMsg = null;
-        yield ChatDBActions.sendMessage(path, fragments);
+        yield ChatIPC.sendMessage(path, fragments);
       } catch (error) {
         console.error(error);
       }
@@ -367,6 +370,7 @@ export const Chat = types
           createdAt: message.createdAt,
         };
       }
+      // self.lastUpdatedAt = new Date().getTime();
     },
     deleteMessage: flow(function* (messageId: string) {
       const oldMessages = self.messages;
@@ -374,7 +378,7 @@ export const Chat = types
         const message = self.messages.find((m) => m.id === messageId);
         if (!message) return;
         self.messages.remove(message);
-        yield ChatDBActions.deleteMessage(self.path, messageId);
+        yield ChatIPC.deleteMessage(self.path, messageId);
       } catch (error) {
         self.messages = oldMessages;
         console.error(error);
@@ -383,13 +387,12 @@ export const Chat = types
     muteNotification: flow(function* (mute: boolean) {
       try {
         self.muted = mute;
-        yield ChatDBActions.toggleMutedChat(self.path, mute);
+        yield ChatIPC.toggleMutedChat(self.path, mute);
       } catch (error) {
         console.error(error);
         self.muted = !mute;
       }
     }),
-
     removeMessage(messageId: string) {
       const message = self.messages.find((m) => m.id === messageId);
       if (!message) return;
@@ -397,7 +400,7 @@ export const Chat = types
     },
     setPinnedMessage: flow(function* (msgId: string) {
       try {
-        yield ChatDBActions.setPinnedMessage(self.path, msgId);
+        yield ChatIPC.setPinnedMessage(self.path, msgId);
         self.pinnedMessageId = msgId;
         return self.pinnedMessageId;
       } catch (error) {
@@ -412,7 +415,7 @@ export const Chat = types
     clearPinnedMessage: flow(function* (_msgId: string) {
       const oldId = self.pinnedMessageId;
       try {
-        yield ChatDBActions.clearPinnedMessage(self.path);
+        yield ChatIPC.clearPinnedMessage(self.path);
         self.pinnedMessageId = null;
         return self.pinnedMessageId;
       } catch (error) {
@@ -435,7 +438,7 @@ export const Chat = types
       try {
         if (chatMsg && window.ship)
           chatMsg.insertTempReaction({ msgId, emoji, by: window.ship });
-        yield ChatDBActions.sendMessage(self.path, [
+        yield ChatIPC.sendMessage(self.path, [
           {
             content: { react: emoji },
             'reply-to': {
@@ -454,7 +457,7 @@ export const Chat = types
       const chatMsg = self.messages.find((m) => m.id === messageId);
       try {
         if (chatMsg) chatMsg.removeReaction(reactionId);
-        yield ChatDBActions.deleteMessage(self.path, reactionId);
+        yield ChatIPC.deleteMessage(self.path, reactionId);
       } catch (err) {
         console.error(err);
       }
@@ -463,6 +466,11 @@ export const Chat = types
       self.isReacting = undefined;
     },
     setEditing(message: ChatMessageType) {
+      if (self.editingMsg !== null) {
+        /* workaround for chat getting updated when going
+        from one edit message to another */
+        localStorage.removeItem(self.path);
+      }
       self.editingMsg = message;
     },
     saveEditedMessage: flow(function* (messageId: string, contents: any[]) {
@@ -477,7 +485,7 @@ export const Chat = types
           contents.map((frag) => frag.content),
           Date.now()
         );
-        yield ChatDBActions.editMessage(
+        yield ChatIPC.editMessage(
           self.path,
           messageId,
           contents.map((c) => ({
@@ -501,7 +509,7 @@ export const Chat = types
       };
       self.metadata = ChatMetadataModel.create(newMetadata);
       try {
-        yield ChatDBActions.editChat(
+        yield ChatIPC.editChat(
           self.path,
           stringifyMetadata(self.metadata),
           self.invites,
@@ -519,7 +527,7 @@ export const Chat = types
       const oldPeerGetBacklog = self.peersGetBacklog;
       self.peersGetBacklog = peersGetBacklog;
       try {
-        yield ChatDBActions.editChat(
+        yield ChatIPC.editChat(
           self.path,
           stringifyMetadata(self.metadata),
           self.invites,
@@ -537,7 +545,7 @@ export const Chat = types
       const oldInvitePermission = self.invites;
       self.invites = invitePermission;
       try {
-        yield ChatDBActions.editChat(
+        yield ChatIPC.editChat(
           self.path,
           stringifyMetadata(self.metadata),
           self.invites,
@@ -553,7 +561,7 @@ export const Chat = types
       const oldExpiresDuration = self.expiresDuration;
       self.expiresDuration = expiresInMap[expiresValue] || null;
       try {
-        yield ChatDBActions.editChat(
+        yield ChatIPC.editChat(
           self.path,
           stringifyMetadata(self.metadata),
           self.invites,
@@ -573,13 +581,40 @@ export const Chat = types
     clearChatBacklog: flow(function* () {
       const oldMessages = self.messages;
       try {
-        yield ChatDBActions.clearChatBacklog(self.path);
+        yield ChatIPC.clearChatBacklog(self.path);
         self.messages.clear();
         return self.messages;
       } catch (error) {
         console.error(error);
         self.messages = oldMessages;
         return self.messages;
+      }
+    }),
+    addPeer: flow(function* (ship: string) {
+      const oldPeers = self.peers;
+      try {
+        yield ChatIPC.addPeerToChat(self.path, ship) as Promise<void>;
+        self.peers.push(PeerModel.create({ ship, role: 'member' }));
+        return self.peers;
+      } catch (error) {
+        console.error(error);
+        self.peers = oldPeers;
+        return self.peers;
+      }
+    }),
+    removePeer: flow(function* (ship: string) {
+      const oldPeers = self.peers;
+      try {
+        yield ChatIPC.removePeerFromChat(self.path, ship) as Promise<void>;
+        const peer = self.peers.find((p) => p.ship === ship);
+
+        if (!peer) return;
+        self.peers.remove(peer);
+        return self.peers;
+      } catch (error) {
+        console.error(error);
+        self.peers = oldPeers;
+        return self.peers;
       }
     }),
     onPeerAdded(ship: string, role: string) {

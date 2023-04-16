@@ -5,9 +5,6 @@ import {
   TransactionType,
 } from 'os/services/tray/wallet-lib/wallet.model';
 
-import { ThemeType } from 'renderer/logic/theme';
-import { theme } from '../../../theme';
-
 export function getDisplayDate(date: Date) {
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
@@ -18,11 +15,6 @@ export function getDisplayDate(date: Date) {
     'en-US',
     options
   )} ${date.toLocaleTimeString()}`;
-}
-
-export function getBaseTheme(currentTheme: ThemeType) {
-  // @ts-expect-error
-  return theme[currentTheme.mode];
 }
 
 export function shortened(address: string) {

@@ -7,14 +7,14 @@ import {
   Menu,
   MenuItemProps,
 } from '@holium/design-system';
-import { useChatStore } from '../store';
-import { useServices } from 'renderer/logic/store';
-import { ShellActions } from 'renderer/logic/actions/shell';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 type ChatLogHeaderProps = {
   path: string;
   title: string;
-  subtitle?: string;
+  pretitle?: React.ReactNode;
+  subtitle?: React.ReactNode;
   avatar: React.ReactNode;
   isMuted: boolean;
   onBack: () => void;
@@ -25,6 +25,7 @@ type ChatLogHeaderProps = {
 export const ChatLogHeader = ({
   path,
   title,
+  pretitle,
   subtitle,
   avatar,
   onBack,
@@ -32,8 +33,10 @@ export const ChatLogHeader = ({
   isMuted,
   hasMenu = true,
 }: ChatLogHeaderProps) => {
-  const { ship } = useServices();
-  const { selectedChat, setSubroute, toggleMuted } = useChatStore();
+  const { shellStore } = useAppState();
+  const { ship, chatStore } = useShipStore();
+  const { selectedChat, setSubroute, toggleMuted } = chatStore;
+  const isSpaceChat = selectedChat?.type === 'space';
 
   const chatLogId = useMemo(() => `chat-log-${path}`, [path]);
 
@@ -46,7 +49,7 @@ export const ChatLogHeader = ({
       icon: 'Info',
       label: 'Info',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         setSubroute('chat-info');
       },
@@ -55,7 +58,7 @@ export const ChatLogHeader = ({
       id: `${chatLogId}-mute-chat`,
       icon: isMuted ? 'NotificationOff' : 'Notification',
       label: isMuted ? 'Unmute' : 'Mute',
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         toggleMuted(path, !isMuted);
       },
@@ -66,7 +69,7 @@ export const ChatLogHeader = ({
         icon: 'EyeOn',
         label: 'Show hidden pins',
         disabled: false,
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
           selectedChat.setHidePinned(false);
         },
@@ -79,31 +82,33 @@ export const ChatLogHeader = ({
         section: 2,
         label: 'Clear history',
         disabled: false,
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
           selectedChat.clearChatBacklog();
         },
       });
     }
+    if (!isSpaceChat) {
+      menu.push({
+        id: `${chatLogId}-leave-chat`,
+        icon: isAdmin ? 'Trash' : 'Logout',
+        section: 2,
+        iconColor: '#ff6240',
+        labelColor: '#ff6240',
+        label: isAdmin ? 'Delete chat' : 'Leave chat',
+        disabled: false,
+        onClick: () => {
+          // evt.stopPropagation();
+          shellStore.setIsBlurred(true);
+          shellStore.openDialogWithStringProps('leave-chat-dialog', {
+            path,
+            amHost: isAdmin.toString(),
+            our: ship.patp,
+          });
+        },
+      });
+    }
 
-    menu.push({
-      id: `${chatLogId}-leave-chat`,
-      icon: isAdmin ? 'Trash' : 'Logout',
-      section: 2,
-      iconColor: '#ff6240',
-      labelColor: '#ff6240',
-      label: isAdmin ? 'Delete chat' : 'Leave chat',
-      disabled: false,
-      onClick: () => {
-        // evt.stopPropagation();
-        ShellActions.setBlur(true);
-        ShellActions.openDialogWithStringProps('leave-chat-dialog', {
-          path,
-          amHost: isAdmin.toString(),
-          our: ship.patp,
-        });
-      },
-    });
     return menu.filter(Boolean) as MenuItemProps[];
   }, [selectedChat?.hidePinned, isMuted]);
 
@@ -144,6 +149,7 @@ export const ChatLogHeader = ({
             {avatar}
           </Flex>
           <Flex alignItems="flex-start" flexDirection="column">
+            {pretitle}
             <Text.Custom
               truncate
               width={255}
@@ -158,22 +164,7 @@ export const ChatLogHeader = ({
             >
               {title}
             </Text.Custom>
-            {subtitle && (
-              <Text.Custom
-                textAlign="left"
-                layoutId={`chat-${path}-subtitle`}
-                layout="preserve-aspect"
-                transition={{
-                  duration: 0.15,
-                }}
-                width={210}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5, lineHeight: '1' }}
-                fontSize={2}
-              >
-                {subtitle}
-              </Text.Custom>
-            )}
+            {subtitle}
           </Flex>
         </Flex>
       </Flex>

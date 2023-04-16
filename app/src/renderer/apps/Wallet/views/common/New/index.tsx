@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { Box, Flex, Icons, IconButton } from 'renderer/components';
+import { Box, Flex, Button, Icon } from '@holium/design-system';
 import { Create } from './Create';
 import { Backup } from './Backup';
 import { Import } from './Import';
@@ -11,8 +11,7 @@ import { ConfirmPasscode } from './ConfirmPasscode';
 import { Finalizing } from './Finalizing';
 import { DetectedExisting } from './DetectedExisting';
 import { RecoverExisting } from './RecoverExisting';
-import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 export enum NewWalletScreen {
   CREATE = 'create',
@@ -27,9 +26,8 @@ export enum NewWalletScreen {
 }
 
 const EthNewPresenter = () => {
-  const { theme } = useServices();
-  const { walletApp, dimensions } = useTrayApps();
-  const initialScreen = walletApp.initialized
+  const { walletStore } = useShipStore();
+  const initialScreen = walletStore.initialized
     ? NewWalletScreen.DETECTED_EXISTING
     : NewWalletScreen.CREATE;
 
@@ -95,31 +93,26 @@ const EthNewPresenter = () => {
       ) && (
         <Flex
           position="absolute"
-          top={dimensions.height - 54}
           zIndex={999}
           onClick={() =>
             setScreen(
-              walletApp.initialized
+              walletStore.initialized
                 ? NewWalletScreen.DETECTED_EXISTING
                 : NewWalletScreen.CREATE
             )
           }
         >
-          <IconButton
+          <Button.IconButton
             onClick={() =>
               setScreen(
-                walletApp.initialized
+                walletStore.initialized
                   ? NewWalletScreen.DETECTED_EXISTING
                   : NewWalletScreen.CREATE
               )
             }
           >
-            <Icons
-              name="ArrowLeftLine"
-              size={1}
-              color={theme.currentTheme.iconColor}
-            />
-          </IconButton>
+            <Icon name="ArrowLeftLine" size={1} />
+          </Button.IconButton>
         </Flex>
       )}
     </Box>

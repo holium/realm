@@ -9,13 +9,11 @@ import {
 } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { useContextMenu } from 'renderer/components';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { useChatStore } from '../store';
-import { ChatPathType } from 'os/services/chat/chat.service';
 import { ChatAvatar } from './ChatAvatar';
-import { useServices } from 'renderer/logic/store';
-import { useAccountStore } from 'renderer/apps/Account/store';
+import { useShipStore } from 'renderer/stores/ship.store';
 import { UnreadBadge } from './UnreadBadge';
+import { useAppState } from 'renderer/stores/app.store';
+import { ChatPathType } from 'os/services/ship/chat/chat.types';
 
 type ChatRowProps = {
   path: string;
@@ -41,7 +39,8 @@ export const ChatRowPresenter = ({
   height,
   onClick,
 }: ChatRowProps) => {
-  const { ship } = useServices();
+  const { shellStore } = useAppState();
+  const { ship, notifStore, chatStore, spacesStore } = useShipStore();
   const {
     inbox,
     getChatHeader,
@@ -51,8 +50,8 @@ export const ChatRowPresenter = ({
     isChatMuted,
     togglePinned,
     toggleMuted,
-  } = useChatStore();
-  const { readPath, getUnreadCountByPath } = useAccountStore();
+  } = chatStore;
+  const { readPath, getUnreadCountByPath } = notifStore;
   const { getOptions, setOptions } = useContextMenu();
 
   const unreadCount = getUnreadCountByPath(path);
@@ -60,6 +59,7 @@ export const ChatRowPresenter = ({
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
   const isPinned = isChatPinned(path);
   const isMuted = isChatMuted(path);
+  const isSpaceChat = type === 'space';
 
   const chat = inbox.find((c) => c.path === path);
   const lastMessageUpdated: React.ReactNode = useMemo(() => {
@@ -73,7 +73,9 @@ export const ChatRowPresenter = ({
               if (!chat.lastMessage) return null;
               let type = Object.keys(content)[0];
               const value = content[type];
-              if (TEXT_TYPES.includes(type)) {
+              if (type === 'break') {
+                return ' ';
+              } else if (TEXT_TYPES.includes(type) || type === 'link') {
                 return (
                   <span key={`${chat.lastMessage.id}-lastMessage-${idx}`}>
                     {value}
@@ -103,7 +105,9 @@ export const ChatRowPresenter = ({
   const [lastMessageTimestamp, setLastMessageTimestamp] = useState(
     timelineDate(
       new Date(
-        (chat && chat.lastMessage && chat.lastMessage.createdAt) || timestamp
+        (chat && chat.lastMessage && chat.lastMessage.createdAt) ||
+          (chat && chat.createdAt) ||
+          timestamp
       )
     )
   );
@@ -132,7 +136,7 @@ export const ChatRowPresenter = ({
       icon: isPinned ? 'Unpin' : 'Pin',
       label: isPinned ? 'Unpin' : 'Pin',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         togglePinned(path, !isPinned);
       },
@@ -142,7 +146,7 @@ export const ChatRowPresenter = ({
       icon: 'MessageRead',
       label: 'Mark as read',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         readPath('realm-chat', path);
       },
@@ -152,7 +156,7 @@ export const ChatRowPresenter = ({
       icon: 'Info',
       label: 'Info',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         setChat(path);
         setSubroute('chat-info');
@@ -162,27 +166,28 @@ export const ChatRowPresenter = ({
       id: `${chatRowId}-mute-chat`,
       icon: isMuted ? 'NotificationOff' : 'Notification',
       label: isMuted ? 'Unmute' : 'Mute',
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         toggleMuted(path, !isMuted);
       },
     });
-    menu.push({
-      id: `${chatRowId}-leave-chat`,
-      label: isAdmin ? 'Delete chat' : 'Leave chat',
-      icon: isAdmin ? 'Trash' : 'Logout',
-      iconColor: '#ff6240',
-      labelColor: '#ff6240',
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
-        evt.stopPropagation();
-        ShellActions.setBlur(true);
-        ShellActions.openDialogWithStringProps('leave-chat-dialog', {
-          path,
-          amHost: isAdmin.toString(),
-          our: ship.patp,
-        });
-      },
-    });
+    if (!isSpaceChat)
+      menu.push({
+        id: `${chatRowId}-leave-chat`,
+        label: isAdmin ? 'Delete chat' : 'Leave chat',
+        icon: isAdmin ? 'Trash' : 'Logout',
+        iconColor: '#ff6240',
+        labelColor: '#ff6240',
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
+          evt.stopPropagation();
+          shellStore.setIsBlurred(true);
+          shellStore.openDialogWithStringProps('leave-chat-dialog', {
+            path,
+            amHost: isAdmin.toString(),
+            our: ship.patp,
+          });
+        },
+      });
     return menu.filter(Boolean) as MenuItemProps[];
   }, [path, isPinned, isMuted]);
 
@@ -198,6 +203,35 @@ export const ChatRowPresenter = ({
     return getChatHeader(path);
   }, [path, window.ship]);
 
+  let spaceHeader = null;
+  let avatarColor: string | undefined;
+  if (type === 'space') {
+    const space = spacesStore.getSpaceByChatPath(path);
+
+    if (!space) {
+      spaceHeader = null;
+    } else {
+      spaceHeader = (
+        <Text.Custom
+          textAlign="left"
+          layoutId={`chat-${path}-pretitle`}
+          layout="preserve-aspect"
+          transition={{
+            duration: 0.15,
+          }}
+          width={210}
+          initial={{ opacity: 0.5 }}
+          animate={{ opacity: 0.5, lineHeight: '1' }}
+          fontWeight={500}
+          fontSize={1}
+        >
+          {space.name}
+        </Text.Custom>
+      );
+      avatarColor = space.color;
+    }
+  }
+
   const chatAvatarEl = useMemo(
     () =>
       title &&
@@ -210,6 +244,7 @@ export const ChatRowPresenter = ({
           path={path}
           peers={peers}
           image={image}
+          color={avatarColor}
           metadata={metadata}
           canEdit={false}
         />
@@ -245,6 +280,11 @@ export const ChatRowPresenter = ({
             {chatAvatarEl}
           </Flex>
           <Flex alignItems="flex-start" flexDirection="column">
+            {spaceHeader && (
+              <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
+                {spaceHeader}
+              </Flex>
+            )}
             <Text.Custom
               layoutId={`chat-${path}-name`}
               layout="preserve-aspect"
@@ -269,6 +309,7 @@ export const ChatRowPresenter = ({
               transition={{
                 duration: 0.1,
               }}
+              initial={{ opacity: 0.5 }}
               animate={{ opacity: 0.5, lineHeight: '1.2' }}
               exit={{ opacity: 0 }}
               fontSize={2}

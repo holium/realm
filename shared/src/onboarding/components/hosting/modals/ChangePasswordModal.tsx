@@ -1,5 +1,6 @@
 import { ChangeEvent, FormEvent, useRef, useState } from 'react';
-import { Text, Flex, useToggle, ErrorBox } from '@holium/design-system';
+import { Text, Flex, ErrorBox } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 import { Modal } from '../../Modal';
 import {
   OnboardDialogInputLabel,
@@ -22,7 +23,11 @@ export const ChangePasswordModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
   const passwordRef = useRef<HTMLInputElement>(null);
   const confirmpasswordRef = useRef<HTMLInputElement>(null);
 
-  const onConfirmPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const onChangePassword = () => {
+    confirmPasswordError.toggleOff();
+  };
+
+  const onChangeConfirmPassword = (e: ChangeEvent<HTMLInputElement>) => {
     const password = passwordRef.current?.value;
     const confirmPassword = e.target.value;
     confirmPasswordError.setToggle(password !== confirmPassword);
@@ -60,6 +65,7 @@ export const ChangePasswordModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
           ref={passwordRef}
           type="password"
           placeholder="• • • • • • • •"
+          onChange={onChangePassword}
         />
       </Flex>
       <Flex flexDirection="column" gap={2}>
@@ -70,7 +76,7 @@ export const ChangePasswordModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
           ref={confirmpasswordRef}
           type="password"
           placeholder="• • • • • • • •"
-          onChange={onConfirmPasswordChange}
+          onChange={onChangeConfirmPassword}
           isError={confirmPasswordError.isOn}
         />
       </Flex>

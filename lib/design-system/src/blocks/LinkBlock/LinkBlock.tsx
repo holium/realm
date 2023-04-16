@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Box, Flex, skeletonStyle, Text } from '../../general';
+import { Box, Flex, skeletonStyle, Text } from '../../../general';
 import { Bookmark } from '../../os/Bookmark/Bookmark';
 import { MediaBlock } from '../MediaBlock/MediaBlock';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
 import { BlockProps, Block } from '../Block/Block';
 import { parseMediaType } from '../../util/links';
 import { TweetBlock } from './TweetBlock';
+
 import {
   fetchOGData,
   RAW_LINK_HEIGHT,
@@ -49,6 +50,7 @@ type MediaType = 'twitter' | 'media' | 'image';
 export type LinkBlockType = LinkType | MediaType;
 
 export const LinkBlock = ({
+  id,
   link,
   by,
   containerWidth,
@@ -84,38 +86,25 @@ export const LinkBlock = ({
 
   let description = openGraph?.ogDescription || '';
 
-  if (
-    metadata.linkType === 'url' ||
-    !metadata.ogData ||
-    (metadata.ogData && !openGraph?.ogTitle)
-  ) {
-    const width = containerWidth ? containerWidth - 12 : 320;
-    return (
-      <Box height={RAW_LINK_HEIGHT}>
-        <Block {...rest} height={24} width={width - 4}>
-          <Bookmark
-            url={link}
-            title={link}
-            width={width - 24}
-            onNavigate={(url: string) => {
-              window.open(url, '_blank');
-            }}
-          />
-        </Block>
-      </Box>
-    );
-  }
-  if (linkBlockType === 'twitter') {
-    let width = rest.width || 320;
-    if (width < 400) {
-      width = 320;
+  // TODO make twitter height dynamic
+  if (metadata.linkType === 'twitter' || linkBlockType === 'twitter') {
+    let height = 300;
+    let width = (typeof rest.width === 'number' && rest.width) || 320;
+    if (metadata.width) {
+      width = parseInt(metadata.width);
+      height = parseInt(metadata.height);
     }
+    // if (width < 400) {
+    //   width = 320;
+    // }
     return (
       <TweetBlock
+        id={id}
         variant={rest.mode === 'embed' ? 'content' : 'default'}
         link={link}
         {...rest}
         width={width}
+        height={height}
         onTweetLoad={onLinkLoaded}
       />
     );
@@ -157,12 +146,35 @@ export const LinkBlock = ({
     );
   }
 
+  if (
+    metadata.linkType === 'url' ||
+    !metadata.ogData ||
+    (metadata.ogData && !openGraph?.ogTitle)
+  ) {
+    const width = containerWidth ? containerWidth - 12 : 320;
+    return (
+      <Box id={id} height={RAW_LINK_HEIGHT}>
+        <Block id={id} {...rest} height={24} width={width - 4}>
+          <Bookmark
+            id={id}
+            url={link}
+            title={link}
+            width={width - 24}
+            onNavigate={(url: string) => {
+              window.open(url, '_blank');
+            }}
+          />
+        </Block>
+      </Box>
+    );
+  }
+
   const ogHasURL = openGraph && openGraph.ogUrl;
   // 254px in rem is 15rem
   if (!ogHasURL) {
     const width = containerWidth ? containerWidth - 12 : 320;
     return (
-      <Box height={RAW_LINK_HEIGHT}>
+      <Box height={RAW_LINK_HEIGHT} id={id}>
         <Block id="loader" height={24} width={width - 4}>
           <Box isSkeleton height={'1.875rem'} width={width - 4}></Box>
         </Block>
@@ -170,16 +182,18 @@ export const LinkBlock = ({
     );
   }
   return (
-    <Block {...rest} height={LINK_PREVIEW_HEIGHT}>
+    <Block id={id} {...rest} height={LINK_PREVIEW_HEIGHT}>
       <LinkImage
+        id={id}
         src={openGraph?.ogImage}
         alt={openGraph?.ogTitle}
         onError={() => {
           // todo: if the image fails to load, set the image to error image
         }}
       />
-      <Flex mb="0.25rem" width="100%" flexDirection="column">
+      <Flex id={id} mb="0.25rem" width="100%" flexDirection="column">
         <LinkTitle
+          id={id}
           truncate
           isSkeleton={!ogHasURL}
           fontSize={2}
@@ -193,6 +207,7 @@ export const LinkBlock = ({
           {openGraph?.ogTitle}
         </LinkTitle>
         <LinkDescription
+          id={id}
           truncate
           isSkeleton={!ogHasURL}
           fontSize={1}
@@ -203,12 +218,14 @@ export const LinkBlock = ({
         </LinkDescription>
       </Flex>
       <Flex
+        id={id}
         className="block-footer"
         flex={1}
         justifyContent="space-between"
         width="100%"
       >
         <Flex
+          id={id}
           flexDirection="row"
           gap={4}
           justifyContent="space-between"
@@ -216,6 +233,7 @@ export const LinkBlock = ({
           width="50%"
         >
           <Text.Anchor
+            id={id}
             isSkeleton={!ogHasURL}
             fontSize={0}
             opacity={0.5}
@@ -233,6 +251,7 @@ export const LinkBlock = ({
         </Flex>
 
         <Text.Custom
+          id={id}
           truncate
           width="50%"
           textAlign="right"

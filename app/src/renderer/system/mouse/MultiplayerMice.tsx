@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
-import { Position } from '@holium/design-system';
+import { useEffect, useState, useCallback } from 'react';
+import { Position, hexToRgb, rgbToString } from '@holium/design-system';
 import { AnimatedCursor } from './AnimatedCursor';
-import { hexToRgb, rgbToString } from 'os/lib/color';
 import { MouseState } from '@holium/realm-presence';
 import { CursorLabel, EphemeralChat } from './Mouse.styles';
+
+const CURSOR_TIMEOUT = 5000;
 
 type CursorState = Record<
   string,
@@ -13,12 +14,27 @@ type CursorState = Record<
     position: Position;
     isActive: boolean;
     isVisible: boolean;
+    timeout?: NodeJS.Timeout;
     chat?: string;
   }
 >;
 
 export const MultiplayerMice = () => {
   const [cursors, setCursors] = useState<CursorState>({});
+
+  const setNewTimeout = useCallback((patp: string) => {
+    const timeout = setTimeout(() => {
+      setCursors((prev) => ({
+        ...prev,
+        [patp]: {
+          ...prev[patp],
+          isVisible: false,
+        },
+      }));
+    }, CURSOR_TIMEOUT);
+
+    return timeout;
+  }, []);
 
   useEffect(() => {
     window.electron.multiplayer.onMouseOut((patp) => {
@@ -33,16 +49,28 @@ export const MultiplayerMice = () => {
     window.electron.multiplayer.onMouseMove(
       (patp, position, state, hexColor) => {
         const color = rgbToString(hexToRgb(hexColor)) ?? '0, 0, 0';
-        setCursors((prev) => ({
-          ...prev,
-          [patp]: {
-            ...prev[patp],
-            isVisible: true,
-            state,
-            position,
-            color,
-          },
-        }));
+        setCursors((prev) => {
+          if (prev[patp] && prev[patp].timeout) {
+            const { timeout } = prev[patp];
+            if (timeout) {
+              clearTimeout(timeout);
+            }
+          }
+
+          const timeout = setNewTimeout(patp);
+
+          return {
+            ...prev,
+            [patp]: {
+              ...prev[patp],
+              isVisible: true,
+              timeout: timeout,
+              state,
+              position,
+              color,
+            },
+          };
+        });
       }
     );
     window.electron.multiplayer.onMouseDown((patp) => {
@@ -64,13 +92,25 @@ export const MultiplayerMice = () => {
       }));
     });
     window.electron.multiplayer.onRealmToAppSendChat((patp, message) => {
-      setCursors((prev) => ({
-        ...prev,
-        [patp]: {
-          ...prev[patp],
-          chat: message,
-        },
-      }));
+      setCursors((prev) => {
+        if (prev[patp] && prev[patp].timeout) {
+          const { timeout } = prev[patp];
+          if (timeout) {
+            clearTimeout(timeout);
+          }
+        }
+
+        const timeout = setNewTimeout(patp);
+
+        return {
+          ...prev,
+          [patp]: {
+            ...prev[patp],
+            chat: message,
+            timeout: timeout,
+          },
+        };
+      });
     });
   }, []);
 

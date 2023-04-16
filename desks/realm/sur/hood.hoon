@@ -18,6 +18,8 @@
 +$  sync-state  [nun=@ta kid=(unit desk) let=@ud]
 +$  sink        (unit [her=@p sud=desk kid=(unit desk) let=@ud])
 --
+::  The below code is outdated, so pull latest if you need it.
+::
 :: =,  clay
 :: =*  dude  dude:gall
 :: |%

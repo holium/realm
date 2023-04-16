@@ -1,12 +1,8 @@
 import { FormEvent, useRef } from 'react';
 import styled from 'styled-components';
-import {
-  ErrorBox,
-  SuccessBox,
-  Flex,
-  Input,
-  useToggle,
-} from '@holium/design-system';
+import { ErrorBox, SuccessBox, Flex } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
+import { Input } from '@holium/design-system/inputs';
 import { AccountDialog, SidebarSection } from '../components/AccountDialog';
 import { AccountDialogDescription } from '../components/AccountDialog.styles';
 import { SubmitButton } from '../components/hosting/SubmitButton';
@@ -21,7 +17,7 @@ const DomainInput = styled(Input)`
 type Props = {
   patps: string[];
   selectedPatp: string;
-  dropletIp: string;
+  dropletIp: string | undefined;
   errorMessage?: string;
   successMessage?: string;
   setSelectedPatp: (patp: string) => void;
@@ -68,6 +64,7 @@ export const AccountCustomDomainDialog = ({
       selectedPatp={selectedPatp}
       setSelectedPatp={setSelectedPatp}
       currentSection={SidebarSection.CustomDomain}
+      isLoading={!dropletIp}
       onClickSidebarSection={onClickSidebarSection}
       onSubmit={handleSubmit}
       onExit={onExit}

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Text, Favicon, Flex, BoxProps, Icon } from '../../general';
+import { Text, Favicon, Flex, BoxProps, Icon } from '../../../general';
 
 const BookmarkRow = styled(Flex)`
   border-radius: 6px;
@@ -43,18 +43,19 @@ export const Bookmark = ({
         onNavigate(url);
       }}
     >
-      <Flex gap={8} justifyContent="flex-start" alignItems="center">
+      <Flex id={id} gap={8} justifyContent="flex-start" alignItems="center">
         {favicon ? (
-          <Favicon src={favicon} />
+          <Favicon id={id} src={favicon} />
         ) : (
-          <Icon name="Link" opacity={0.7} />
+          <Icon id={id} name="Link" opacity={0.7} />
         )}
-        <Text.Custom fontSize={2} truncate width={textWidth}>
+        <Text.Custom id={id} fontSize={2} truncate width={textWidth}>
           {title}
         </Text.Custom>
       </Flex>
       {member && (
         <Text.Custom
+          id={id}
           textAlign="right"
           width={110}
           opacity={0.5}
@@ -65,16 +66,6 @@ export const Bookmark = ({
           {member}
         </Text.Custom>
       )}
-
-      {/* <Button.IconButton
-        size={20}
-        onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
-          evt.stopPropagation();
-          onRemove(props.url);
-        }}
-      >
-        <Icon name="Close" size={16} opacity={0.6} />
-      </Button.IconButton> */}
     </BookmarkRow>
   );
 };

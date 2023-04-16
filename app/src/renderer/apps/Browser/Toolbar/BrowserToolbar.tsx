@@ -8,14 +8,14 @@ import {
 } from 'react';
 import styled from 'styled-components';
 import { TitlebarContainer } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
-import { Icons } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
 import { ToolbarControlButtons } from './ToolbarControlButtons';
 import { ToolbarSearchInput } from './ToolbarSearchInput';
 import { ToolbarNavigationButtons } from './ToolbarNavigationButtons';
 import { useBrowser } from '../store';
-import { useDoubleClick } from 'renderer/logic/lib/useDoubleClick';
+import { useDoubleClick } from 'renderer/lib/useDoubleClick';
+import { useAppState } from 'renderer/stores/app.store';
+import { Icon } from '@holium/design-system';
 
 const ToolbarContainer = styled(TitlebarContainer)`
   padding: 0 10px;
@@ -45,11 +45,8 @@ const BrowserToolbarPresenter = ({
   onMaximize,
 }: BrowserToolbarProps) => {
   const { currentTab } = useBrowser();
-  const { theme } = useServices();
-  const iconColor = useMemo(
-    () => theme.currentTheme.iconColor,
-    [theme.currentTheme.iconColor]
-  );
+  const { theme } = useAppState();
+  const iconColor = useMemo(() => theme.iconColor, [theme.iconColor]);
   const onDoubleClick = useDoubleClick(onMaximize);
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -135,7 +132,7 @@ const BrowserToolbarPresenter = ({
       onPointerDown={onPointerDown}
       onClick={onDoubleClickToolbar}
     >
-      <Icons name="AppIconCompass" size="28px" />
+      <Icon name="AppIconCompass" size={28} />
       <ToolbarNavigationButtons
         innerRef={navigationButtonsRef}
         iconColor={iconColor}

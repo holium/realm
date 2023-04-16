@@ -1,21 +1,30 @@
 import { createContext, useContext } from 'react';
-import { toJS } from 'mobx';
-import { flow, Instance, types, tryReference, destroy } from 'mobx-state-tree';
-import { ChatDBActions } from 'renderer/logic/actions/chat-db';
+// import { toJS } from 'mobx';
+import {
+  flow,
+  Instance,
+  types,
+  tryReference,
+  destroy,
+  getParentOfType,
+} from 'mobx-state-tree';
 import { Chat, ChatModelType } from './models';
-import { OSActions } from 'renderer/logic/actions/os';
-import { servicesStore } from 'renderer/logic/store';
+import { shipStore, ShipStore } from '../../stores/ship.store';
+import { RealmIPC, ChatIPC } from 'renderer/stores/ipc';
+import { RealmUpdateTypes } from 'os/realm.types';
+import { SpacesStoreType } from 'renderer/stores/models/spaces.model';
+import { toJS } from 'mobx';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
-const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
+export const sortByUpdatedAt = (a: any, b: any) => {
   return (
     (b.updatedAt || b.metadata.timestamp) -
     (a.updatedAt || a.metadata.timestamp)
   );
 };
 
-const ChatStore = types
+export const ChatStore = types
   .model('ChatStore', {
     subroute: types.optional(
       types.enumeration<Subroutes>(['inbox', 'new', 'chat', 'chat-info']),
@@ -36,16 +45,42 @@ const ChatStore = types
     isChatSelected(path: string) {
       return self.selectedChat?.path === path;
     },
-    get pinnedChatList() {
-      return self.inbox
-        .filter((c) => self.pinnedChats.includes(c.path))
-        .sort(sortByUpdatedAt);
+    get sortedChatList() {
+      const spacesStore: SpacesStoreType = getParentOfType(
+        self,
+        ShipStore
+      ).spacesStore;
+      const selectedPath = spacesStore.selected?.path;
+      return self.inbox.slice().sort((a: ChatModelType, b: ChatModelType) => {
+        // Check if the chats are space chats and match the selected space
+        const isASpaceChatAndSelected =
+          a.type === 'space' &&
+          selectedPath === spacesStore.getSpaceByChatPath(a.path)?.path;
+        const isBSpaceChatAndSelected =
+          b.type === 'space' &&
+          selectedPath === spacesStore.getSpaceByChatPath(b.path)?.path;
+
+        // Compare the boolean values
+        if (isASpaceChatAndSelected !== isBSpaceChatAndSelected) {
+          return isBSpaceChatAndSelected ? 1 : -1;
+        }
+
+        // Check if the chats are pinned
+        const isAPinned = self.pinnedChats.includes(a.path);
+        const isBPinned = self.pinnedChats.includes(b.path);
+
+        // Compare the pinned status
+        if (isAPinned !== isBPinned) {
+          return isBPinned ? 1 : -1;
+        }
+
+        // Compare the updatedAt or metadata.timestamp properties
+        const aTimestamp = a.updatedAt || a.metadata.timestamp;
+        const bTimestamp = b.updatedAt || b.metadata.timestamp;
+        return bTimestamp - aTimestamp;
+      });
     },
-    get unpinnedChatList() {
-      return self.inbox
-        .filter((c) => !self.pinnedChats.includes(c.path))
-        .sort(sortByUpdatedAt);
-    },
+
     getChatHeader(path: string): {
       title: string;
       sigil?: any;
@@ -57,7 +92,7 @@ const ChatStore = types
         const peer = chat.peers.filter((p) => p.ship !== window.ship)[0];
         const ship = peer?.ship;
         const { nickname, avatar, color } =
-          servicesStore.friends.getContactAvatarMetadata(ship);
+          shipStore.friends.getContactAvatarMetadata(ship);
         return {
           title: nickname || ship || 'Error loading title',
           sigil: {
@@ -66,6 +101,16 @@ const ChatStore = types
             nickname: nickname || '',
           },
           image: avatar || chat.metadata.image,
+        };
+      } else if (chat.type === 'space') {
+        const spacesStore: SpacesStoreType = getParentOfType(
+          self,
+          ShipStore
+        ).spacesStore;
+        const space = spacesStore.getSpaceByChatPath(chat.path);
+        return {
+          title: chat.metadata.title,
+          image: space?.picture,
         };
       } else {
         return {
@@ -78,14 +123,14 @@ const ChatStore = types
   .actions((self) => ({
     init: flow(function* () {
       try {
-        self.inbox = yield ChatDBActions.getChatList();
-        const pinnedChats = yield ChatDBActions.fetchPinnedChats();
+        self.inbox = yield ChatIPC.getChatList();
+        const pinnedChats = yield ChatIPC.fetchPinnedChats();
         localStorage.setItem(
           `${window.ship}-pinnedChats`,
           JSON.stringify(pinnedChats)
         );
 
-        const muted = yield ChatDBActions.fetchMutedChats();
+        const muted = yield ChatIPC.fetchMuted();
         self.inbox.forEach((chat) => {
           chat.setMuted(muted.includes(chat.path));
         });
@@ -123,7 +168,7 @@ const ChatStore = types
         } else {
           self.pinnedChats.remove(path);
         }
-        yield ChatDBActions.togglePinnedChat(path, pinned);
+        yield ChatIPC.togglePinnedChat(path, pinned);
         localStorage.setItem(
           `${window.ship}-pinnedChats`,
           JSON.stringify(self.pinnedChats)
@@ -150,7 +195,7 @@ const ChatStore = types
       peers: string[]
     ) {
       try {
-        yield ChatDBActions.createChat(peers, type, {
+        yield ChatIPC.createChat(peers, type, {
           title,
           description: '',
           image: '',
@@ -172,7 +217,7 @@ const ChatStore = types
           }
           self.inbox.remove(chat);
           self.pinnedChats.remove(path);
-          yield ChatDBActions.leaveChat(path);
+          yield ChatIPC.leaveChat(path);
         } else {
           console.info(`chat ${path} not found`);
         }
@@ -181,7 +226,6 @@ const ChatStore = types
       }
     }),
     onPathsAdded(path: any) {
-      console.log('onPathsAdded', toJS(path));
       self.inbox.push(path);
     },
     // This is a handler for onDbChange
@@ -234,60 +278,67 @@ export function useChatStore() {
   return store;
 }
 
-OSActions.onBoot(() => {
-  chatStore.init();
+RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
+  if (update.type === 'authenticated') {
+    shipStore.chatStore.init();
+  }
 });
-OSActions.onConnected(() => {
-  chatStore.init();
-});
-OSActions.onLogout((_event: any) => {
-  chatStore.reset();
-});
+
+// OSActions.onBoot(() => {
+//   chatStore.init();
+// });
+// OSActions.onConnected(() => {
+//   chatStore.init();
+// });
 // -------------------------------
 // Listen for changes
-ChatDBActions.onDbChange((_evt, type, data) => {
+type ChatUpdateTypes = { type: string; payload: any };
+ChatIPC.onUpdate((_event: any, { type, payload }: ChatUpdateTypes) => {
+  console.log('got chat update', type, payload);
   if (type === 'path-added') {
-    console.log('onPathsAdded', toJS(data));
-    chatStore.onPathsAdded(data);
+    console.log('onPathsAdded', toJS(payload));
+    shipStore.chatStore.onPathsAdded(payload);
   }
   if (type === 'path-deleted') {
-    console.log('onPathDeleted', data);
-    chatStore.onPathDeleted(data);
+    console.log('onPathDeleted', payload);
+    shipStore.chatStore.onPathDeleted(payload);
   }
   if (type === 'message-deleted') {
-    const selectedChat = chatStore.inbox.find(
-      (chat) => chat.path === data.path
+    const selectedChat = shipStore.chatStore.inbox.find(
+      (chat) => chat.path === payload.path
     );
     if (!selectedChat) return;
-    selectedChat.removeMessage(data['msg-id']);
+    selectedChat.removeMessage(payload['msg-id']);
   }
   if (type === 'message-received') {
-    // console.log('addMessage', data);
-    const selectedChat = chatStore.inbox.find(
-      (chat) => chat.path === data.path
+    // console.log('addMessage', payload);
+    const selectedChat = shipStore.chatStore.inbox.find(
+      (chat) => chat.path === payload.path
     );
     if (!selectedChat) return;
-    selectedChat.addMessage(data);
+    selectedChat.addMessage(payload);
   }
   if (type === 'message-edited') {
-    const selectedChat = chatStore.inbox.find(
-      (chat) => chat.path === data.path
+    const selectedChat = shipStore.chatStore.inbox.find(
+      (chat) => chat.path === payload.path
     );
     if (!selectedChat) return;
-    selectedChat.replaceMessage(data);
+    selectedChat.replaceMessage(payload);
   }
   if (type === 'peer-added') {
-    const selectedChat = chatStore.inbox.find(
-      (chat) => chat.path === data.path
+    const selectedChat = shipStore.chatStore.inbox.find(
+      (chat) => chat.path === payload.path
     );
     if (!selectedChat) return;
-    console.log('onPeerAdded', toJS(data));
-    selectedChat.onPeerAdded(data.ship, data.role);
+    console.log('onPeerAdded', toJS(payload));
+    selectedChat.onPeerAdded(payload.ship, payload.role);
   }
   if (type === 'peer-deleted') {
-    const selectedChat = chatStore.inbox.find((chat) => chat.path === data.row);
+    const selectedChat = shipStore.chatStore.inbox.find(
+      (chat) => chat.path === payload.row
+    );
     if (!selectedChat) return;
-    console.log('onPeerDeleted', toJS(data));
-    selectedChat.onPeerDeleted(data.ship);
+    console.log('onPeerDeleted', toJS(payload));
+    selectedChat.onPeerDeleted(payload.ship);
   }
 });

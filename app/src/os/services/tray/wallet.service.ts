@@ -14,7 +14,7 @@ import {
   initialWalletState,
 } from './wallet-lib/wallet.model';
 import { BaseProtocol } from './wallet-lib/wallets/BaseProtocol';
-import { RealmSigner } from './wallet/signers/realm';
+// import { RealmSigner } from './wallet/signers/realm';
 import { WalletApi } from '../../api/wallet';
 import { removeDots, UqbarApi } from '../../api/uqbar';
 import bcrypt from 'bcryptjs';
@@ -873,11 +873,6 @@ export class WalletService extends BaseService {
   navigate(_event: any, view: WalletView, options?: WalletNavOptions) {
     if (!this.state) throw new Error('Wallet state not loaded');
     this.state.navigate(view, options);
-  }
-
-  navigateBack() {
-    if (!this.state) throw new Error('Wallet state not loaded');
-    this.state.navigateBack();
   }
 
   toggleNetwork(_evt: any) {
