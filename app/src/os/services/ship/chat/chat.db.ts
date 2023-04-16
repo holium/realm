@@ -142,7 +142,8 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
       app: 'chat-db',
       path: `/db/paths/start-ms/${lastTimestamp}`,
     });
-    return response?.tables.paths;
+    if (!response) return [];
+    return response.tables.paths;
   }
 
   private async _fetchPeers() {
@@ -151,7 +152,8 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
       app: 'chat-db',
       path: `/db/peers/start-ms/${lastTimestamp}`,
     });
-    return response?.tables.peers;
+    if (!response) return [];
+    return response.tables.peers;
   }
 
   private async _fetchDeleteLogs() {
@@ -160,6 +162,8 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
       app: 'chat-db',
       path: `/delete-log/start-ms/${lastTimestamp}`,
     });
+    if (!response) return [];
+
     return response;
   }
 
@@ -373,8 +377,8 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
         json_extract(pins, '$[0]') pinnedMessageId,
         lastMessage,
         lastSender,
-        chat_with_messages.created_at createdAt,
-        chat_with_messages.updated_at updatedAt,
+        ifnull(chat_with_messages.created_at, paths.created_at) createdAt,
+        ifnull(chat_with_messages.updated_at, paths.updated_at) updatedAt,
         paths.max_expires_at_duration expiresDuration,
         paths.invites
       FROM paths
@@ -412,7 +416,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
             WITH realm_chat as (
                 SELECT *
                 FROM messages
-                WHERE path LIKE '%realm-chat%' AND content_type != 'react' AND content_type != 'status'
+                WHERE (path LIKE '%realm-chat%' OR path LIKE '/spaces/%/chats/%') AND content_type != 'react' AND content_type != 'status'
                 ORDER BY msg_part_id, created_at DESC
             )
             SELECT
@@ -470,8 +474,8 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
         json_extract(pins, '$[0]') pinnedMessageId,
         lastMessage,
         lastSender,
-        chat_with_messages.created_at createdAt,
-        chat_with_messages.updated_at updatedAt,
+        ifnull(chat_with_messages.created_at, paths.created_at) createdAt,
+        ifnull(chat_with_messages.updated_at, paths.updated_at) updatedAt,
         paths.max_expires_at_duration expiresDuration,
         paths.invites
       FROM paths

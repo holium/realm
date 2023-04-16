@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { clan } from 'urbit-ob';
 import { useContextMenu } from 'renderer/components/ContextMenu';
 import { usePassportMenu } from './usePassportMenu';
 import {
@@ -14,6 +13,7 @@ import {
 interface IPersonRow {
   listId: string;
   patp: string;
+  shortPatp: string;
   sigilColor?: string | null;
   avatar?: string | null;
   nickname?: string | null;
@@ -25,6 +25,7 @@ interface IPersonRow {
 export const PersonRow = ({
   listId,
   patp,
+  shortPatp,
   sigilColor,
   avatar,
   nickname,
@@ -36,16 +37,7 @@ export const PersonRow = ({
   const { getOptions, setOptions } = useContextMenu();
   const { menuConfig, setMenuConfig } = usePassportMenu();
 
-  const idClass = clan(patp);
   const id = `${listId}-${patp}`;
-  let patpSanitized = patp;
-  if (idClass === 'moon') {
-    const moonTokens = patpSanitized.split('-');
-    patpSanitized = `~${moonTokens[2]}^${moonTokens[3]}`;
-  }
-  if (idClass === 'comet') {
-    // TODO sanitize comet
-  }
 
   useEffect(() => {
     if (
@@ -111,7 +103,7 @@ export const PersonRow = ({
                 whiteSpace: 'nowrap',
               }}
             >
-              {nickname ? nickname : patp}
+              {nickname ? nickname : shortPatp}
             </Text.Custom>
           </Flex>
         </Flex>

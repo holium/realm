@@ -1,11 +1,12 @@
 import styled, { css } from 'styled-components';
 import { toRgbaString } from '../../util/colors';
-import { Flex, Row, Text, Icon, TextProps } from '../../general';
+import { Flex, Row, Text, Icon, TextProps } from '../../../general';
 import { IconPathsType } from '../../general/Icon/icons';
 import { useMemo } from 'react';
 
 export type MenuItemProps = {
   id?: string;
+  tabIndex?: number;
   icon?: IconPathsType;
   iconColor?: string;
   label: string;

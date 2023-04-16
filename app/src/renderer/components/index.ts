@@ -12,3 +12,4 @@ export * from './SpacePicture';
 export * from './ConnectionStatus';
 export * from './urbitSvg';
 export * from './AppTile';
+export * from './InlineEdit';

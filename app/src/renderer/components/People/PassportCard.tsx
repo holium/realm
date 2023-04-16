@@ -1,8 +1,7 @@
 import { observer } from 'mobx-react';
-import { darken } from 'polished';
-import { useTrayApps } from 'renderer/apps/store';
-import { PassportButton } from './PassportButton';
-import { Avatar, Box, Flex, Icon, Text } from '@holium/design-system';
+// import { useTrayApps } from 'renderer/apps/store';
+// import { PassportButton } from './PassportButton';
+import { Avatar, Box, Flex, Text } from '@holium/design-system';
 
 interface IPassport {
   patp: string;
@@ -10,10 +9,6 @@ interface IPassport {
   avatar?: string | null;
   nickname?: string | null;
   description?: string | null;
-  theme: {
-    textColor: string;
-    windowColor: string;
-  };
   onClose: any;
 }
 
@@ -23,12 +18,11 @@ const PassportCardPresenter = ({
   avatar,
   nickname,
   description,
-  theme,
-  onClose,
-}: IPassport) => {
-  const { setActiveApp, walletApp } = useTrayApps();
+}: // onClose,
+IPassport) => {
+  // const { setActiveApp, walletApp } = useTrayApps();
 
-  const buttonColor = darken(0.1, theme.windowColor);
+  // const buttonColor = darken(0.1, theme.windowColor);
 
   return (
     <Flex flexDirection="column" gap={14}>
@@ -62,7 +56,7 @@ const PassportCardPresenter = ({
       </Flex>
       <Flex gap={12} flexDirection="column">
         <Flex flexDirection="row" gap={4}>
-          {walletApp.initialized && (
+          {/* {walletApp.initialized && (
             <PassportButton
               style={{ backgroundColor: buttonColor }}
               data-prevent-menu-close="true"
@@ -87,7 +81,7 @@ const PassportCardPresenter = ({
             >
               <Icon name="SendCoins" size={16} opacity={0.7} />
             </PassportButton>
-          )}
+          )} */}
           {/* TODO re-enable */}
           {/* <PassportButton
             style={{ backgroundColor: buttonColor }}

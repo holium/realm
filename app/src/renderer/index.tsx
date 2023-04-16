@@ -9,13 +9,7 @@ const isProd = environment === 'production';
 
 const sentryDsn = process.env.SENTRY_DSN;
 if (sentryDsn) {
-  // console.log(
-  //   `Initializing Sentry [release: ${process.env.SENTRY_RELEASE}]...\n`
-  // );
-  Sentry.init({
-    // this is defined 'on-the-fly' during staging/production builds where
-    //  a .env file is defined with various values
-    // release: process.env.SENTRY_RELEASE,
+  let cfg: Sentry.BrowserOptions = {
     environment,
     dsn: process.env.SENTRY_DSN,
     integrations: [new BrowserTracing()],
@@ -26,7 +20,14 @@ if (sentryDsn) {
       // False alarm caused by react-dom/server renderToString.
       'useLayoutEffect',
     ],
-  });
+  };
+  if (process.env.BUILD_VERSION) {
+    console.log(
+      `Initializing Sentry [release: ${process.env.BUILD_VERSION}]...`
+    );
+    cfg.release = process.env.BUILD_VERSION;
+  }
+  Sentry.init(cfg);
 } else {
   console.warn('Environment variable for Sentry is undefined.');
 }

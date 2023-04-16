@@ -2,11 +2,11 @@ import { ChangeEvent, FormEvent, useState } from 'react';
 import {
   Text,
   Flex,
-  useToggle,
-  RadioList,
   ErrorBox,
   SuccessBox,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
+import { RadioList } from '@holium/design-system/inputs';
 import { Modal } from '../../Modal';
 import { SubmitButton } from '../SubmitButton';
 import { OnboardDialogInput } from '../../OnboardDialog.styles';

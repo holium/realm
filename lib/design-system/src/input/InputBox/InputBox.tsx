@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { Text, Box, BoxProps, Flex } from '../../general';
+import { Text, Box, BoxProps, Flex } from '../../../general';
 import { AnimationProps } from 'framer-motion';
 
 type StyledBoxProps = {
@@ -101,7 +101,7 @@ const Adornment = styled(Box)<BoxProps & { disabled?: boolean }>`
   user-select: none;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
   svg {
     display: block;
@@ -175,13 +175,13 @@ export const InputBox = ({
     )}
     <Box display="flex" flexDirection="row" flex={1} height="100%">
       {leftAdornment && (
-        <Adornment mr={1} disabled={disabled}>
+        <Adornment mr={1} disabled={disabled} pb={2}>
           {leftAdornment}
         </Adornment>
       )}
       {children}
       {rightAdornment && (
-        <Adornment ml={1} disabled={disabled}>
+        <Adornment ml={1} disabled={disabled} pb={2}>
           {rightAdornment}
         </Adornment>
       )}

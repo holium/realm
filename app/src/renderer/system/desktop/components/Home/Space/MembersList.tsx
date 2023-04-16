@@ -2,19 +2,26 @@ import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { PersonRow } from 'renderer/components/People/PersonRow';
 import { Flex, Text, WindowedList } from '@holium/design-system';
-import { MemberType } from 'os/services/spaces/models/members';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { MemberType } from 'renderer/stores/models/invitations.model';
+import { FriendType } from 'renderer/stores/models/friends.model';
+import { toJS } from 'mobx';
 
+interface IMembersList {
+  our: boolean;
+}
 type Roles = 'initiate' | 'member' | 'admin' | 'owner';
 
-const MembersListPresenter = () => {
+const MembersListPresenter = (props: IMembersList) => {
+  const { our } = props;
   const { spacesStore, ship, friends } = useShipStore();
   const currentSpace = spacesStore.selected;
 
+  const pinned = useMemo(() => friends.pinned || [], [friends.pinned]);
+  const unpinned = useMemo(() => friends.unpinned || [], [friends.unpinned]);
   let members = currentSpace ? Array.from(currentSpace?.members.list) : [];
   const admins = members.filter((member) => member.roles.includes('admin'));
   members = members.filter((member) => !member.roles.includes('admin'));
-
   const membersOnly = members.filter(
     (member) =>
       member.roles.includes('member') || member.status.includes('invited')
@@ -25,7 +32,7 @@ const MembersListPresenter = () => {
     data: any;
   }[];
 
-  const listData: ListData = useMemo(
+  const memberListData: ListData = useMemo(
     () => [
       { type: 'title', data: 'Admins' },
       ...(admins.length === 0
@@ -37,6 +44,24 @@ const MembersListPresenter = () => {
         : membersOnly.map((n) => ({ type: 'member', data: n }))),
     ],
     [admins, membersOnly]
+  );
+
+  const friendListData: ListData = useMemo(
+    () => [
+      { type: 'title', data: 'Pinned' },
+      ...(pinned.length === 0
+        ? friends.list.length === 0
+          ? [{ type: 'hint', data: 'No friends to pin' }]
+          : [{ type: 'hint', data: 'No pinned friends' }]
+        : pinned.map((n) => ({ type: 'friend', data: n }))),
+      { type: 'title', data: 'All' },
+      ...(unpinned.length === 0
+        ? pinned.length > 0
+          ? [{ type: 'hint', data: 'All your friends are pinned' }]
+          : [{ type: 'hint', data: 'Add some friends above' }]
+        : unpinned.map((n) => ({ type: 'friend', data: n }))),
+    ],
+    [friends.list.length, pinned, unpinned]
   );
 
   const TitleRow = ({ title }: { title: string }) => (
@@ -66,7 +91,11 @@ const MembersListPresenter = () => {
     </Flex>
   );
 
-  const MemberRow = ({ member }: { member: MemberType & { patp: string } }) => {
+  const MemberRow = ({
+    member,
+  }: {
+    member: MemberType & { patp: string; shortPatp: string };
+  }) => {
     const contact = friends.getContactAvatarMetadata(member.patp);
 
     const roles = Array.from(member.roles);
@@ -94,6 +123,7 @@ const MembersListPresenter = () => {
       <PersonRow
         key={`${member.patp}-member`}
         patp={member.patp}
+        shortPatp={member.shortPatp}
         nickname={contact.nickname}
         sigilColor={contact.color}
         avatar={contact.avatar}
@@ -135,21 +165,80 @@ const MembersListPresenter = () => {
     );
   };
 
+  const onUnpin = (friend: any) => {
+    friends.editFriend(friend.patp, {
+      pinned: false,
+      tags: toJS(friend.tags),
+    });
+  };
+
+  const onPin = (friend: any) => {
+    friends.editFriend(friend.patp, {
+      pinned: true,
+      tags: toJS(friend.tags),
+    });
+  };
+
+  const FriendRow = ({
+    friend,
+  }: {
+    friend: FriendType & { patp: string; shortPatp: string };
+  }) => {
+    const contact = friends.getContactAvatarMetadata(friend.patp);
+    const pinOption = [
+      {
+        label: friend.pinned ? 'Unpin' : 'Pin',
+        onClick: (_evt: any) => {
+          friend.pinned ? onUnpin(friend) : onPin(friend);
+        },
+      },
+    ];
+
+    return (
+      <PersonRow
+        key={friend.patp}
+        patp={friend.patp}
+        shortPatp={friend.shortPatp}
+        nickname={contact.nickname}
+        sigilColor={contact.color}
+        avatar={contact.avatar}
+        description={contact.bio}
+        listId="friend-list"
+        contextMenuOptions={[
+          ...pinOption,
+          {
+            label: 'Remove',
+            onClick: (_evt: any) => {
+              friends.removeFriend(friend.patp);
+            },
+          },
+        ]}
+      />
+    );
+  };
+
   return (
     <Flex flex={1} flexDirection="column" pb={16}>
       <WindowedList
         width={298}
-        data={listData}
+        data={our ? friendListData : memberListData}
         itemContent={(_, rowData) => {
-          if (rowData.type === 'title') {
-            const title = rowData.data as string;
-            return <TitleRow title={title} />;
-          } else if (rowData.type === 'hint') {
-            const hint = rowData.data as string;
-            return <HintRow hint={hint} />;
-          } else {
-            const member = rowData.data;
-            return <MemberRow member={member} />;
+          switch (rowData.type) {
+            case 'title':
+              const title = rowData.data as string;
+              return <TitleRow title={title} />;
+            case 'hint':
+              const hint = rowData.data as string;
+              return <HintRow hint={hint} />;
+            case 'member':
+              const member = rowData.data;
+              return <MemberRow member={member} />;
+            case 'friend':
+              const friend = rowData.data;
+              return <FriendRow friend={friend} />;
+            default:
+              console.error('Invalid rowData', rowData);
+              return null;
           }
         }}
       />

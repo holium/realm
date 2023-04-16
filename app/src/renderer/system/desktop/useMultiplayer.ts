@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import debounce from 'lodash/debounce';
 import {
   MultiplayerOut,
   MultiplayerDown,
@@ -36,12 +35,14 @@ export const useMultiplayer = ({
   const chat = useRef('');
   const ephemeralChat = useToggle(false);
 
+  const timeout = useRef<NodeJS.Timeout | null>(null);
+
   const isInRoom = useMemo(
     () => Boolean(roomsManager.presentRoom),
     [roomsManager.presentRoom]
   );
 
-  const broadcastChat = (patp: string, message: string) => {
+  const broadcastChat = useCallback((patp: string, message: string) => {
     const multiplayerChat: MultiplayerChat = {
       patp,
       message,
@@ -51,19 +52,19 @@ export const useMultiplayer = ({
       kind: DataPacket_Kind.DATA,
       value: { multiplayer: multiplayerChat },
     });
-  };
+  }, []);
 
-  const closeEphemeralChat = () => {
+  const closeEphemeralChat = useCallback(() => {
     chat.current = '';
     patp && broadcastChat(patp, '');
     ephemeralChat.toggleOff();
     window.electron.app.toggleOffEphemeralChat();
-  };
+  }, [patp, ephemeralChat, broadcastChat]);
 
-  const closeEphemeralChatDebounced = useCallback(
-    debounce(closeEphemeralChat, 5000),
-    [patp]
-  );
+  const closeEphemeralChatDelayed = useCallback(() => {
+    timeout.current && clearTimeout(timeout.current);
+    timeout.current = setTimeout(closeEphemeralChat, 5000);
+  }, [closeEphemeralChat]);
 
   const onKeyDown = useCallback(
     (key: string, isFocused: boolean) => {
@@ -77,7 +78,7 @@ export const useMultiplayer = ({
         return;
       }
 
-      closeEphemeralChatDebounced(); // Refresh the 5s countdown.
+      closeEphemeralChatDelayed(); // Refresh the 5s countdown.
 
       if (ephemeralChat.isOn) {
         if (key === '/') {
@@ -109,7 +110,15 @@ export const useMultiplayer = ({
         }
       }
     },
-    [patp, isInRoom, ephemeralChat.isOn, isMultiplayerEnabled]
+    [
+      patp,
+      isInRoom,
+      ephemeralChat.isOn,
+      isMultiplayerEnabled,
+      broadcastChat,
+      closeEphemeralChat,
+      closeEphemeralChatDelayed,
+    ]
   );
 
   useEffect(() => {

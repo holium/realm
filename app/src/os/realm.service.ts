@@ -162,14 +162,14 @@ export class RealmService extends AbstractService {
     let ship = undefined;
     let desks = undefined;
     // INSTALL_MOON is a string of format <moon>:<desk>,<desk>,<desk>,...
-    // example: INSTALL_MOON=~hostyv:realm,courier
+    // example: INSTALL_MOON=~hostyv:realm
     if (process.env.INSTALL_MOON && process.env.INSTALL_MOON !== 'bypass') {
       const parts: string[] = process.env.INSTALL_MOON.split(':');
       ship = parts[0];
       desks = parts[1].split(',');
     } else {
       ship = channel === 'latest' ? '~hostyv' : '~nimwyd-ramwyl-dozzod-hostyv';
-      desks = ['realm', 'courier'];
+      desks = ['realm'];
     }
     for (let i = 0; i < desks.length; i++) {
       const desk = desks[i];

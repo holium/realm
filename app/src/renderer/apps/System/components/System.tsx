@@ -61,12 +61,6 @@ const SystemPanelPresenter = () => {
     //   subscribing: () => bazaar.setSubscriptionStatus('subscribing'),
     // },
     // {
-    //   name: '%courier',
-    //   path: '/updates',
-    //   subscriptionState: courier.subscriptionState,
-    //   subscribing: () => courier.setSubscriptionStatus('subscribing'),
-    // },
-    // {
     //   name: '%bulletin',
     //   path: '/ui',
     //   subscriptionState: bulletin.subscriptionState,

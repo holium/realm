@@ -9,11 +9,11 @@ import {
 } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { useContextMenu } from 'renderer/components';
-import { ChatPathType } from 'os/services/chat/chat.service';
 import { ChatAvatar } from './ChatAvatar';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { UnreadBadge } from './UnreadBadge';
 import { useAppState } from 'renderer/stores/app.store';
+import { ChatPathType } from 'os/services/ship/chat/chat.types';
 
 type ChatRowProps = {
   path: string;
@@ -73,7 +73,9 @@ export const ChatRowPresenter = ({
               if (!chat.lastMessage) return null;
               let type = Object.keys(content)[0];
               const value = content[type];
-              if (TEXT_TYPES.includes(type)) {
+              if (type === 'break') {
+                return ' ';
+              } else if (TEXT_TYPES.includes(type) || type === 'link') {
                 return (
                   <span key={`${chat.lastMessage.id}-lastMessage-${idx}`}>
                     {value}
@@ -134,7 +136,7 @@ export const ChatRowPresenter = ({
       icon: isPinned ? 'Unpin' : 'Pin',
       label: isPinned ? 'Unpin' : 'Pin',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         togglePinned(path, !isPinned);
       },
@@ -144,7 +146,7 @@ export const ChatRowPresenter = ({
       icon: 'MessageRead',
       label: 'Mark as read',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         readPath('realm-chat', path);
       },
@@ -154,7 +156,7 @@ export const ChatRowPresenter = ({
       icon: 'Info',
       label: 'Info',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         setChat(path);
         setSubroute('chat-info');
@@ -164,7 +166,7 @@ export const ChatRowPresenter = ({
       id: `${chatRowId}-mute-chat`,
       icon: isMuted ? 'NotificationOff' : 'Notification',
       label: isMuted ? 'Unmute' : 'Mute',
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         toggleMuted(path, !isMuted);
       },
@@ -176,7 +178,7 @@ export const ChatRowPresenter = ({
         icon: isAdmin ? 'Trash' : 'Logout',
         iconColor: '#ff6240',
         labelColor: '#ff6240',
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
           shellStore.setIsBlurred(true);
           shellStore.openDialogWithStringProps('leave-chat-dialog', {

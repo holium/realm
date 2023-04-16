@@ -1,4 +1,4 @@
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 import { DownloadButton } from '../components/DownloadButton';
 import {
   OnboardDialogTitle,
@@ -45,7 +45,7 @@ export const DownloadRealmButtons = ({
 );
 
 type Props = DownloadRealmBodyProps & {
-  onBack: () => void;
+  onBack?: () => void;
   onNext: () => Promise<boolean>;
 };
 

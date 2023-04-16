@@ -1,26 +1,35 @@
 import { useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
-import { Flex, Text, NoScrollBar } from '@holium/design-system';
+import {
+  Flex,
+  Button,
+  Icon,
+  Text,
+  NoScrollBar,
+  Avatar,
+} from '@holium/design-system';
 import { SpaceTitlebar } from './SpaceTitlebar';
 import { AppSuite } from './AppSuite/AppSuite';
 import { RecommendedApps } from './Recommended';
 import { Members } from '../Members';
 import { AppGrid } from '../Ship/AppGrid';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { AppSearchApp } from '../AppInstall/AppSearch';
 
 interface HomePaneProps {
   isOpen?: boolean;
+  isOur: boolean;
 }
 
-type SidebarType = 'members' | null;
+type SidebarType = 'members' | 'friends' | null;
 
-const SpaceHomePresenter = (props: HomePaneProps) => {
-  const { isOpen } = props;
+const HomePresenter = (props: HomePaneProps) => {
+  const { isOpen, isOur } = props;
   const { ship, spacesStore } = useShipStore();
   const currentSpace = spacesStore.selected;
   const [sidebar, setSidebar] = useState<SidebarType>(null);
-  const [appGrid, showAppGrid] = useState(false);
+  const [appGrid, showAppGrid] = useState(isOur ? true : false);
 
   const sidebarComponent = useMemo(() => {
     return (
@@ -38,12 +47,12 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
             flexDirection="column"
             flex={2}
           >
-            {sidebar !== null && <Members our={false} />}
+            <Members our={isOur} />
           </Flex>
         )}
       </AnimatePresence>
     );
-  }, [sidebar]);
+  }, [sidebar, isOur]);
 
   if (!ship) return null;
   if (!currentSpace) return null;
@@ -53,59 +62,116 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
 
   const isAdmin = currentSpace.members.isAdmin(ship.patp);
 
+  const shouldShowAppGrid = appGrid || isOur;
+
   return (
     <Flex flexDirection="row" width="100%" height="calc(100vh - 50px)">
       <NoScrollBar
-        flex={1}
+        flex={8}
         overflowY="auto"
         height="100%"
         flexDirection="column"
         alignItems="center"
         justifyContent="flex-start"
       >
-        <Flex
-          initial={{ opacity: 0 }}
-          animate={isOpen ? 'show' : 'exit'}
-          exit={{ opacity: 0 }}
-          maxHeight={42}
-          height={42}
-          gap={12}
-          mt={40}
-          mb={46}
-          width={maxWidth}
-          variants={{
-            hidden: {
-              opacity: 0,
-            },
-            show: {
-              opacity: 1,
-              x: sidebar ? -80 : 0,
-              transition: {
-                x: { duration: 0.25 },
+        {isOur ? (
+          <Flex
+            flex={8}
+            style={{ position: 'relative' }}
+            initial={{ opacity: 0 }}
+            animate={isOpen ? 'show' : 'exit'}
+            exit={{ opacity: 0 }}
+            maxHeight={42}
+            height={42}
+            gap={12}
+            mb={40}
+            mt={40}
+            flexDirection="row"
+            alignItems="center"
+            justifyContent="center"
+            width="100%"
+            variants={{
+              hidden: {
+                opacity: 0,
               },
-            },
-            exit: {
-              opacity: 0,
-            },
-          }}
-          flexDirection="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <SpaceTitlebar
-            space={currentSpace}
-            membersCount={membersCount}
-            showAppGrid={appGrid}
-            showMembers={sidebar === 'members'}
-            onToggleApps={() => {
-              showAppGrid(!appGrid);
+              show: {
+                opacity: 1,
+                x: sidebar ? -80 : 0,
+                transition: {
+                  duration: 1,
+                  x: { duration: 0.25 },
+                },
+              },
+              exit: {
+                opacity: 0,
+              },
             }}
-            onMemberClick={() => {
-              setSidebar(!sidebar ? 'members' : null);
+          >
+            {ship && (
+              <Avatar
+                simple
+                size={32}
+                avatar={ship.avatar}
+                patp={ship.patp}
+                sigilColor={[ship.color || '#000000', 'white']}
+              />
+            )}
+            <AppSearchApp mode="home" />
+            <Flex justifyContent="flex-end">
+              <Button.IconButton
+                size={32}
+                onClick={() => {
+                  setSidebar(!sidebar ? 'friends' : null);
+                }}
+              >
+                <Icon name="Members" size={22} opacity={0.7} />
+              </Button.IconButton>
+            </Flex>
+          </Flex>
+        ) : (
+          <Flex
+            initial={{ opacity: 0 }}
+            animate={isOpen ? 'show' : 'exit'}
+            exit={{ opacity: 0 }}
+            maxHeight={42}
+            height={42}
+            gap={12}
+            mt={40}
+            mb={46}
+            width={maxWidth}
+            variants={{
+              hidden: {
+                opacity: 0,
+              },
+              show: {
+                opacity: 1,
+                x: sidebar ? -80 : 0,
+                transition: {
+                  x: { duration: 0.25 },
+                },
+              },
+              exit: {
+                opacity: 0,
+              },
             }}
-          />
-        </Flex>
-
+            flexDirection="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <SpaceTitlebar
+              space={currentSpace}
+              membersCount={membersCount}
+              showAppGrid={appGrid}
+              showMembers={sidebar === 'members'}
+              onToggleApps={() => {
+                showAppGrid(!appGrid);
+              }}
+              onMemberClick={() => {
+                setSidebar(!sidebar ? 'members' : null);
+              }}
+            />
+          </Flex>
+        )}
         <Flex
           flexGrow={1}
           flexDirection="row"
@@ -113,7 +179,7 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
           gap={36}
           width={maxWidth}
         >
-          {appGrid && (
+          {shouldShowAppGrid ? (
             <Flex
               animate={isOpen ? 'show' : 'exit'}
               flexDirection="column"
@@ -148,8 +214,7 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
                 <AppGrid tileSize="xl2" />
               </Flex>
             </Flex>
-          )}
-          {!appGrid && (
+          ) : (
             <Flex
               flex={4}
               flexGrow={1}
@@ -201,4 +266,4 @@ const SpaceHomePresenter = (props: HomePaneProps) => {
   );
 };
 
-export const SpaceHome = observer(SpaceHomePresenter);
+export const Home = observer(HomePresenter);

@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
 import { Reorder } from 'framer-motion';
@@ -90,10 +89,6 @@ const AppDockViewPresenter = ({
       />
     );
   });
-  // const unpinnedAppTiles: any = [];
-  console.log('pinnedDockApps', toJS(pinnedDockApps));
-  console.log('unpinnedDockApps', toJS(unpinnedDockApps));
-
   const showDivider = pinnedDockApps.length > 0 && unpinnedDockApps.length > 0;
 
   return (

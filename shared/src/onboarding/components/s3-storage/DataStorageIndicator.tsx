@@ -1,4 +1,4 @@
-import { Flex, ProgressBar, Text } from '@holium/design-system';
+import { Flex, ProgressBar, Text } from '@holium/design-system/general';
 import { OnboardDialogSubTitle } from '../OnboardDialog.styles';
 import { bytesToString } from '../../dialogs/util/bytes';
 

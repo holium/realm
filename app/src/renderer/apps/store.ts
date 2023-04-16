@@ -1,7 +1,10 @@
 import { calculateAnchorPointById } from '../lib/position';
 import { createContext, useContext } from 'react';
-import { Instance, types, onSnapshot, applySnapshot } from 'mobx-state-tree';
-// import { RoomsAppState } from 'os/services/tray/rooms.model';
+import { Instance, types, onSnapshot } from 'mobx-state-tree';
+import { Dimensions } from '@holium/design-system';
+import { RealmUpdateTypes } from 'os/realm.types';
+import { RealmIPC } from 'renderer/stores/ipc';
+import { RoomsAppState } from './Rooms/rooms.model';
 // import {
 //   NetworkStoreType,
 //   ProtocolType,
@@ -10,12 +13,6 @@ import { Instance, types, onSnapshot, applySnapshot } from 'mobx-state-tree';
 //   WalletStore,
 //   WalletView,
 // } from 'os/services/tray/wallet-lib/wallet.model';
-
-// import { DmApp } from './Messages/store';
-import { Dimensions } from '@holium/design-system';
-import { RealmUpdateTypes } from 'os/realm.types';
-import { RealmIPC } from 'renderer/stores/ipc';
-import { RoomsAppState } from './Rooms/rooms.model';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -163,9 +160,6 @@ export const trayStore = TrayAppStore.create({
     currentView: 'list',
   },
   // walletApp: walletAppDefault,
-  // dmApp: {
-  //   currentView: 'dm-list',
-  // },
 });
 
 onSnapshot(trayStore, (snapshot) => {

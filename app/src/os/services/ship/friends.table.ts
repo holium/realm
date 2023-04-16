@@ -105,7 +105,7 @@ export class Friends extends AbstractDataAccess<Friend> {
   public async addFriend(patp: string) {
     const response = await APIConnection.getInstance().conduit.poke({
       app: 'friends',
-      mark: 'friend-action',
+      mark: 'friends-action',
       json: {
         'add-friend': {
           ship: patp,
@@ -121,7 +121,7 @@ export class Friends extends AbstractDataAccess<Friend> {
   ) {
     const response = await APIConnection.getInstance().conduit.poke({
       app: 'friends',
-      mark: 'friend-action',
+      mark: 'friends-action',
       json: {
         'edit-friend': {
           ship: patp,
@@ -136,7 +136,7 @@ export class Friends extends AbstractDataAccess<Friend> {
   public async removeFriend(patp: string) {
     const response = await APIConnection.getInstance().conduit.poke({
       app: 'friends',
-      mark: 'friend-action',
+      mark: 'friends-action',
       json: {
         'remove-friend': {
           ship: patp,

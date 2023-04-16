@@ -176,7 +176,7 @@ const SelectedShips = ({ ships, onRemove }: SelectedShipsProps) => {
   const { friends } = useShipStore();
 
   return (
-    <Flex py={1} gap={12} overflowY="scroll">
+    <Flex height="98px" py={1} gap={12} overflowY="scroll">
       {Array.from(ships).map((ship) => {
         const metadata = ship
           ? friends.getContactAvatarMetadata(ship)

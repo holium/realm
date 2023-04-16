@@ -49,7 +49,7 @@ export const ChatLogHeader = ({
       icon: 'Info',
       label: 'Info',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         setSubroute('chat-info');
       },
@@ -58,7 +58,7 @@ export const ChatLogHeader = ({
       id: `${chatLogId}-mute-chat`,
       icon: isMuted ? 'NotificationOff' : 'Notification',
       label: isMuted ? 'Unmute' : 'Mute',
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         toggleMuted(path, !isMuted);
       },
@@ -69,7 +69,7 @@ export const ChatLogHeader = ({
         icon: 'EyeOn',
         label: 'Show hidden pins',
         disabled: false,
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
           selectedChat.setHidePinned(false);
         },
@@ -82,7 +82,7 @@ export const ChatLogHeader = ({
         section: 2,
         label: 'Clear history',
         disabled: false,
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
           selectedChat.clearChatBacklog();
         },

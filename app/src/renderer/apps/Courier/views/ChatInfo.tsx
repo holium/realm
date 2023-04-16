@@ -283,7 +283,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 </Text.Custom>
               </Flex>
               <Toggle
-                disabled={!amHost}
+                disabled={!isDMType && !amHost}
                 initialChecked={metadata?.reactions}
                 onChange={(isChecked) => {
                   editMetadata({ reactions: isChecked });
@@ -371,7 +371,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 </Text.Custom>
               </Flex>
               <Select
-                disabled={!amHost}
+                disabled={!isDMType && !amHost}
                 id="select-disappearing-duration"
                 width={120}
                 options={[

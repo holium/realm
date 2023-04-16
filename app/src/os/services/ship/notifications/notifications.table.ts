@@ -185,6 +185,7 @@ export class NotificationsDB extends AbstractDataAccess<NotificationRow> {
       )`
     );
     const insertMany = this.db.transaction((notifications) => {
+      if (!notifications) return;
       for (const notif of notifications) {
         insert.run({
           id: notif.id,

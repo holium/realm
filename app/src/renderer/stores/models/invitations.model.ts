@@ -9,6 +9,7 @@ import {
 import { toJS } from 'mobx';
 import { SpacesIPC } from '../ipc';
 import { LoaderModel } from './common.model';
+import { cite } from '@urbit/aura';
 
 const Roles = types.enumeration([
   'initiate',
@@ -39,6 +40,7 @@ const generateMemberList = (entries: any) => {
     return {
       ...entry[1],
       patp: entry[0],
+      shortPatp: cite(entry[0]),
     };
   });
 };
@@ -129,6 +131,7 @@ export const MembersStore = types
             patp: value[0],
             status: value[1].status,
             roles: value[1].roles,
+            shortPatp: cite(value[0]),
           })
         );
     },
@@ -142,6 +145,7 @@ export const MembersStore = types
             patp: value[0],
             status: value[1].status,
             roles: value[1].roles,
+            shortPatp: cite(value[0]),
           })
         );
     },
@@ -155,6 +159,7 @@ export const MembersStore = types
             patp: value[0],
             status: value[1].status,
             roles: value[1].roles,
+            shortPatp: cite(value[0]),
           })
         );
     },
@@ -165,6 +170,7 @@ export const MembersStore = types
             patp: value[0],
             status: value[1].status,
             roles: value[1].roles,
+            shortPatp: cite(value[0]),
           })
       );
     },
