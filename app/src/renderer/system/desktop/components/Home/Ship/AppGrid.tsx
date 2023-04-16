@@ -45,6 +45,8 @@ const AppGridPresenter = ({
   const [items, setItems] = useState(apps);
   const canClick = useToggle(true);
 
+  // TODO: we should remove this listener when the component unmounts
+  // or find a more efficient way to get if the user is dragging
   useEffect(() => {
     window.electron.app.onMouseMove((position, state, isDragging) => {
       canClick.setToggle(!isDragging);
