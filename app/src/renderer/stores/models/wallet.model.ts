@@ -880,7 +880,7 @@ export const WalletStore = types
           return self.ethereum;
         case NetworkStoreType.BTC_MAIN:
           return self.bitcoin;
-        case NetworkStoreType.BTC_MAIN:
+        case NetworkStoreType.BTC_TEST:
           return self.btctest;
         default:
           return self.ethereum;
@@ -1024,35 +1024,40 @@ export const WalletStore = types
       reset: (initialState: any) => {
         applySnapshot(self, initialState);
       },
-      setMnemonic: flow(function* (mnemonic: string, passcode: number[]) {
+      setMnemonic: flow(function* (
+        mnemonic: string,
+        passcode: number[]
+      ): Generator<PromiseLike<any>, void, any> {
         const passcodeString = passcode.map(String).join('');
         yield WalletIPC.setMnemonic(
           mnemonic,
           self.ourPatp ?? '',
           passcodeString
-        );
+        ) as PromiseLike<any>;
         const passcodeHash = yield bcrypt.hash(passcodeString, 12);
-        yield WalletIPC.setPasscodeHash(passcodeHash);
+        yield WalletIPC.setPasscodeHash(passcodeHash) as PromiseLike<any>;
         yield WalletIPC.setXpub(
           'ethereum',
           "m/44'/60'/0'",
           self.ourPatp ?? '',
           passcodeString
-        );
+        ) as PromiseLike<any>;
         yield WalletIPC.setXpub(
           'bitcoin',
           "m/44'/0'/0'",
           self.ourPatp ?? '',
           passcodeString
-        );
+        ) as PromiseLike<any>;
         yield WalletIPC.setXpub(
           'btctestnet',
           "m/44'/1'/0'",
           self.ourPatp ?? '',
           passcodeString
-        );
+        ) as PromiseLike<any>;
       }),
-      createWalletFlow: flow(function* (nickname: string) {
+      createWalletFlow: flow(function* (
+        nickname: string
+      ): Generator<PromiseLike<any>, void, any> {
         const sender = self.ourPatp ?? '';
         let network: string = self.navState.network;
         if (
@@ -1061,7 +1066,11 @@ export const WalletStore = types
         ) {
           network = 'btctestnet';
         }
-        yield WalletIPC.createWallet(sender, network, nickname);
+        yield WalletIPC.createWallet(
+          sender,
+          network,
+          nickname
+        ) as PromiseLike<any>;
       }),
       createWallet(nickname: string) {
         this.createWalletFlow(nickname);
