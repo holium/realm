@@ -29,7 +29,7 @@ export class MasterAccounts extends AbstractDataAccess<MasterAccount> {
 
 export const masterAccountsInit = `
   create table if not exists master_accounts (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    id              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     email           TEXT NOT NULL,
     encryptionKey   TEXT NOT NULL,
     authToken       TEXT

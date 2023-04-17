@@ -96,7 +96,7 @@ export class RealmService extends AbstractService {
     return null;
   }
 
-  public async createShipAccount(
+  public async createAccount(
     accountPayload: Omit<Account, 'createdAt' | 'updatedAt'>
   ) {
     if (!this.services) return Promise.resolve(false);
@@ -276,7 +276,7 @@ type RealmServicePublicMethods = Pick<
   | 'boot'
   | 'login'
   | 'logout'
-  | 'createShipAccount'
+  | 'createAccount'
   | 'createMasterAccount'
   | 'getReleaseChannel'
   | 'setReleaseChannel'

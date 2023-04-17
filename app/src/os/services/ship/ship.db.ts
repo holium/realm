@@ -18,11 +18,7 @@ export class ShipDB {
   constructor(patp: string, password: string) {
     // Open the authentication database
     this.patp = patp;
-    this.dbPath = path.join(
-      app.getPath('userData'),
-      `realm.${patp}`,
-      `${patp}.sqlite`
-    );
+    this.dbPath = path.join(app.getPath('userData'), `${patp}.sqlite`);
     if (!fs.existsSync(this.dbPath)) {
       this.shipDB = this.open();
       // Create the database if it doesn't exist
