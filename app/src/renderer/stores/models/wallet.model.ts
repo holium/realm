@@ -216,7 +216,7 @@ const TransactionList = types
       contractAddress: string | null,
       hash: string,
       tx: any
-    ) {
+    ): Generator<PromiseLike<any>, void, any> {
       yield WalletIPC.setTransaction(
         'ethereum',
         protocol,
@@ -224,7 +224,7 @@ const TransactionList = types
         contractAddress,
         hash,
         tx
-      );
+      ) as PromiseLike<any>;
     }),
     getStoredTransaction(hash: string) {
       const tx: any = self.transactions.get(hash);
