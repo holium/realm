@@ -3,7 +3,11 @@ import { track } from '@amplitude/analytics-browser';
 import { StepProps } from './types';
 import { InstallationDialog } from '../../../../../shared/src/onboarding/dialogs/InstallationDialog';
 
-export const InstallationStep = ({ setStep }: StepProps) => {
+type Props = {
+  onNext: () => Promise<boolean>;
+} & StepProps;
+
+export const InstallationStep = ({ setStep, onNext }: Props) => {
   useEffect(() => {
     track('Onboarding / Installation');
   });
@@ -14,10 +18,6 @@ export const InstallationStep = ({ setStep }: StepProps) => {
 
   const onInstallRealm = () => {
     return Promise.resolve(true);
-  };
-
-  const onNext = () => {
-    // Log in / go to home.
   };
 
   return (

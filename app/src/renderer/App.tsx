@@ -2,7 +2,7 @@ import { MotionConfig } from 'framer-motion';
 import { BgImage, GlobalStyle } from './App.styles';
 import { Shell } from './system';
 import { useEffect, useMemo } from 'react';
-import { Flex, Spinner } from '@holium/design-system';
+import { Flex, Spinner, useToggle } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
 import { useAppState, appState, AppStateProvider } from './stores/app.store';
@@ -13,6 +13,16 @@ import { Auth } from './system/authentication/index';
 
 function AppContentPresenter() {
   const { authStore, booted } = useAppState();
+  const hasNoAccounts = authStore.accounts.length === 0;
+  const isLoggedOut = !authStore.session;
+  const addShip = useToggle(false);
+
+  const onFinishOnboarding = () => {
+    if (addShip.isOn) addShip.toggleOff();
+
+    return Promise.resolve(true);
+  };
+
   if (!booted) {
     return (
       <Flex>
@@ -20,14 +30,19 @@ function AppContentPresenter() {
       </Flex>
     );
   }
-  const isOnboarding = authStore.accounts.length === 0;
-  const isLoggedOut = !authStore.session;
 
-  if (isOnboarding) {
-    return <Onboarding />;
+  if (hasNoAccounts) {
+    return <Onboarding onFinish={onFinishOnboarding} />;
   }
+
   if (isLoggedOut) {
-    return <Auth />;
+    if (addShip.isOn) {
+      return (
+        <Onboarding initialStep="/hosting" onFinish={onFinishOnboarding} />
+      );
+    }
+
+    return <Auth onAddShip={addShip.toggleOn} />;
   }
 
   return <Shell />;

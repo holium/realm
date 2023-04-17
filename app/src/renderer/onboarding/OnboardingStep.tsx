@@ -7,7 +7,7 @@ import { PassportStep } from './steps/PassportStep';
 import { InstallationStep } from './steps/InstallationStep';
 import { useState } from 'react';
 
-type Step =
+export type Step =
   | '/login'
   | '/add-server'
   | '/passport'
@@ -18,10 +18,19 @@ type Step =
   | '/credentials'
   | '/installation';
 
-export const OnboardingStepPresenter = () => {
-  const [step, setStep] = useState<Step>(
-    (localStorage.getItem('onboardingStep') as Step | undefined) ?? '/login'
-  );
+export type OnboardingStepProps = {
+  initialStep?: Step;
+  onFinish: () => Promise<boolean>;
+};
+
+const defaultInitialStep =
+  (localStorage.getItem('onboardingStep') as Step | undefined) ?? '/login';
+
+export const OnboardingStepPresenter = ({
+  initialStep = defaultInitialStep,
+  onFinish,
+}: OnboardingStepProps) => {
+  const [step, setStep] = useState<Step>(initialStep);
 
   const handleSetStep = (step: Step) => {
     setStep(step);
@@ -38,7 +47,7 @@ export const OnboardingStepPresenter = () => {
     case '/passport':
       return <PassportStep setStep={handleSetStep} />;
     case '/installation':
-      return <InstallationStep setStep={handleSetStep} />;
+      return <InstallationStep setStep={handleSetStep} onNext={onFinish} />;
     case '/choose-id':
       return <ChooseIdStep setStep={handleSetStep} />;
     case '/payment':
