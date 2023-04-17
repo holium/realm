@@ -2,21 +2,20 @@ import { debounce } from 'lodash';
 import { PointerEvent, useCallback, useEffect, useMemo } from 'react';
 import { useMotionValue, useDragControls } from 'framer-motion';
 import { observer } from 'mobx-react';
-import { AppWindowType } from '../../../../../os/services/shell/desktop.model';
 import { AppWindowByType } from './AppWindowByType';
 import { AppWindowContainer } from './AppWindow.styles';
 import { AppWindowResizeHandles } from './AppWindowResizeHandles';
-import { Flex } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { useToggle } from '@holium/design-system';
+import { useToggle, Flex } from '@holium/design-system';
 import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
+import { TitlebarByType } from './Titlebar/TitlebarByType';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { ErrorBoundary } from '../../../ErrorBoundary';
 import {
   denormalizeBounds,
   normalizeBounds,
-} from 'os/services/shell/lib/window-manager';
-import { TitlebarByType } from './Titlebar/TitlebarByType';
-import { useAppState } from 'renderer/stores/app.store';
-import { ErrorBoundary } from '../../../../logic/ErrorBoundary';
+} from 'renderer/lib/window-manager';
+import { AppWindowMobxType } from 'renderer/stores/models/window.model';
 
 const CURSOR_WIDTH = 10;
 
@@ -24,18 +23,18 @@ const MIN_WIDTH = 500;
 const MIN_HEIGHT = 400;
 
 type Props = {
-  appWindow: AppWindowType;
+  appWindow: AppWindowMobxType;
 };
 
 const AppWindowPresenter = ({ appWindow }: Props) => {
   const { shellStore } = useAppState();
-  const { bazaar } = useServices();
+  const { bazaarStore } = useShipStore();
 
   const dragControls = useDragControls();
   const resizing = useToggle(false);
   const dragging = useToggle(false);
 
-  const appInfo = bazaar.getApp(appWindow.appId);
+  const appInfo = bazaarStore.getApp(appWindow.appId);
   const borderRadius = appWindow.type === 'dialog' ? 16 : 12;
   const bounds = useMemo(
     () => denormalizeBounds(appWindow.bounds, shellStore.desktopDimensions),
@@ -294,12 +293,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   }, [webViewId]);
 
   const onMouseDown = () => shellStore.setActive(appWindow.appId);
-  console.log(
-    'rendering window',
-    appWindow.appId,
-    'is active?',
-    appWindow.isActive
-  );
+
   return (
     <AppWindowContainer
       id={windowId}

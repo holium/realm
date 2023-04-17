@@ -4,21 +4,13 @@ import { createField, createForm } from 'mobx-easy-form';
 import { isValidPatp } from 'urbit-ob';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { rgba, lighten, darken } from 'polished';
-
-import { Flex, Icons, Text, Input, ShipSearch } from 'renderer/components';
-import { Button } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { Flex, Icon, Text, Button, TextInput } from '@holium/design-system';
 import { MembersList } from './Space/MembersList';
-import { ShipActions } from 'renderer/logic/actions/ship';
+import { shipStore, useShipStore } from 'renderer/stores/ship.store';
+import { ShipSearch } from 'renderer/components/ShipSearch';
+import { useAppState } from 'renderer/stores/app.store';
 
-interface HomeSidebarProps {
-  filterMode: 'light' | 'dark';
-  customBg: string;
-}
-
-const HomeSidebar = styled(motion.div)<HomeSidebarProps>`
+const HomeSidebar = styled(motion.div)`
   position: relative;
   display: flex;
   flex-direction: column;
@@ -27,6 +19,8 @@ const HomeSidebar = styled(motion.div)<HomeSidebarProps>`
   width: 100%;
   height: 100%;
   gap: 16px;
+  background: rgba(var(--rlm-window-rgba), 0.9);
+  backdrop-filter: blur(24px);
 `;
 
 interface IMembers {
@@ -64,22 +58,9 @@ export const createPeopleForm = (
 };
 
 const MembersPresenter = ({ our }: IMembers) => {
-  const { theme, spaces } = useServices();
+  const { theme } = useAppState();
+  const { spacesStore } = useShipStore();
   const searchRef = useRef(null);
-
-  const { inputColor, windowColor, mode, dockColor } = theme.currentTheme;
-  const themeInputColor = useMemo(
-    () =>
-      mode === 'light' ? lighten(0.2, inputColor) : darken(0.005, inputColor),
-    [inputColor]
-  );
-  const backgroundColor = useMemo(
-    () =>
-      mode === 'light'
-        ? lighten(0.025, rgba(dockColor, 0.9))
-        : darken(0.05, rgba(dockColor, 0.9)),
-    [dockColor]
-  );
 
   const { person } = useMemo(() => createPeopleForm(), []);
   // Ship search
@@ -87,20 +68,17 @@ const MembersPresenter = ({ our }: IMembers) => {
   const [selectedNickname, setSelectedNickname] = useState<Set<string>>(
     new Set()
   );
-
-  if (!spaces.selected) return null;
+  const currentSpace = spacesStore.selected;
+  if (!currentSpace) return null;
 
   const onShipSelected = (ship: [string, string?]) => {
     const patp = ship[0];
     const nickname = ship[1];
     if (our) {
-      ShipActions.addFriend(patp);
+      shipStore.friends.addFriend(patp);
     } else {
-      SpacesActions.inviteMember(spaces.selected?.path ?? '', {
-        patp,
-        role: 'member',
-        message: '',
-      });
+      currentSpace.path &&
+        shipStore.spacesStore.inviteMember(currentSpace.path, patp);
     }
     // const pendingAdd = selectedPatp;
     selectedPatp.add(patp);
@@ -119,61 +97,31 @@ const MembersPresenter = ({ our }: IMembers) => {
 
   return (
     <HomeSidebar
-      filterMode={mode as 'light' | 'dark'}
-      customBg={windowColor}
+      filterMode={theme.mode as 'light' | 'dark'}
       onContextMenu={(evt: any) => {
         evt.stopPropagation();
       }}
-      initial={{ background: backgroundColor }}
-      animate={{
-        background: backgroundColor,
-      }}
-      exit={{
-        background: backgroundColor,
-      }}
-      transition={{ background: { duration: 0.5 } }}
     >
       <Flex flexDirection="row" alignItems="center" gap={10} mb={12}>
-        <Icons name="Members" size="18px" opacity={0.5} />
-        <Text fontWeight={500} fontSize={4} opacity={1}>
+        <Icon name="Members" size={18} opacity={0.5} />
+        <Text.Custom fontWeight={500} fontSize={4} opacity={1}>
           {our ? 'Friends' : 'Members'}
-        </Text>
+        </Text.Custom>
       </Flex>
       <Flex position="relative">
         {/* Search and dropdown */}
-        <Input
+        <TextInput
           tabIndex={1}
           autoCapitalize="false"
           autoCorrect="false"
           autoComplete="false"
           name="person"
-          innerRef={searchRef}
+          id="person"
+          ref={searchRef}
           height={34}
+          width="100%"
           placeholder="Search..."
-          // bg={
-          //   mode === 'light'
-          //     ? lighten(0.2, inputColor)
-          //     : darken(0.005, inputColor)
-          // }
-          wrapperMotionProps={{
-            initial: {
-              backgroundColor: themeInputColor,
-            },
-            animate: {
-              backgroundColor: themeInputColor,
-            },
-            transition: {
-              backgroundColor: { duration: 0.3 },
-              borderColor: { duration: 0.3 },
-              color: { duration: 0.5 },
-            },
-          }}
-          wrapperStyle={{
-            borderRadius: 6,
-            paddingRight: 4,
-          }}
-          rightInteractive
-          rightIcon={
+          rightAdornment={
             <Button.TextButton
               disabled={!person.computed.parsed}
               onClick={() => {
@@ -208,14 +156,13 @@ const MembersPresenter = ({ our }: IMembers) => {
           isDropdown
           search={person.state.value}
           selected={selectedPatp}
-          customBg={windowColor}
           onSelected={(ship: [string, string?]) => {
             onShipSelected(ship);
             person.actions.onChange('');
           }}
         />
       </Flex>
-      <MembersList our={our} path={spaces.selected.path ?? ''} />
+      <MembersList our={our} />
     </HomeSidebar>
   );
 };

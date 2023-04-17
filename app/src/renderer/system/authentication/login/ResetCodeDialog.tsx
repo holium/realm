@@ -12,9 +12,9 @@ import {
   useToggle,
 } from '@holium/design-system';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { AuthActions } from 'renderer/logic/actions/auth';
+import { appState } from 'renderer/stores/app.store';
+import { AuthIPC } from 'renderer/stores/ipc';
+import { normalizeBounds } from 'renderer/lib/window-manager';
 
 export const ResetCodeDialogConfig: (dialogProps: any) => DialogConfig = (
   dialogProps: any
@@ -23,7 +23,7 @@ export const ResetCodeDialogConfig: (dialogProps: any) => DialogConfig = (
     <ResetCodeDialog ship={dialogProps.ship} password={dialogProps.password} />
   ),
   onClose: () => {
-    ShellActions.closeDialog();
+    appState.shellStore.closeDialog();
   },
   getWindowProps: (desktopDimensions) => ({
     appId: 'reset-code-dialog',
@@ -60,18 +60,18 @@ const ResetCodeDialogPresenter = ({ ship, password }: ResetCodeProps) => {
     onSubmit: async ({ values }: any) => {
       try {
         setSavingShipCode(true);
-        const result = await AuthActions.updateShipCode(
+        const result = await AuthIPC.updateShipCode(
           ship,
           // @ts-ignore
           password,
           // @ts-ignore
           values.code
         );
-
         setSaveShipCodeResult(result);
         if (result === 'success') {
           accessKey.actions.onChange('');
-          ShellActions.closeDialog();
+          appState.shellStore.closeDialog();
+
           setSavingShipCode(false);
         }
       } catch (error: any) {

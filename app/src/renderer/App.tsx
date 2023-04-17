@@ -6,10 +6,10 @@ import { Flex, Spinner } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
 import { useAppState, appState, AppStateProvider } from './stores/app.store';
-import { Auth } from './system/authentication';
-import { SelectionProvider } from './logic/lib/selection';
-import { ErrorBoundary } from './logic/ErrorBoundary';
+import { SelectionProvider } from './lib/selection';
 import { Onboarding } from './onboarding/Onboarding';
+import { ErrorBoundary } from './system/ErrorBoundary';
+import { Auth } from './system/authentication/index';
 
 function AppContentPresenter() {
   const { authStore, booted } = useAppState();

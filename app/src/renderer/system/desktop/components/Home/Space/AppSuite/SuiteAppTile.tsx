@@ -1,45 +1,38 @@
 import { useMemo } from 'react';
 import { observer } from 'mobx-react';
-import rgba from 'polished/lib/color/rgba';
-import { bgIsLightOrDark } from 'os/lib/color';
-import {
-  AppType,
-  InstallStatus,
-  UrbitAppType,
-} from 'os/services/spaces/models/bazaar';
-import { useServices } from 'renderer/logic/store';
-import { SpaceModelType } from 'os/services/spaces/models/spaces';
-import {
-  ContextMenuOption,
-  IconButton,
-  Icons,
-  AppTile,
-} from 'renderer/components';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { getAppTileFlags } from 'renderer/logic/lib/app';
+import { ContextMenuOption, AppTile } from 'renderer/components';
+import { getAppTileFlags } from 'renderer/lib/app';
 import {
   handleInstallation,
   resumeSuspendLabel,
   handleResumeSuspend,
   installLabel,
 } from '../../AppInstall/helpers';
-import { Box } from '@holium/design-system';
+import { bgIsLightOrDark, Box, Button, Icon } from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
+import {
+  AppMobxType,
+  InstallStatus,
+} from 'renderer/stores/models/bazaar.model';
+import { rgba } from 'polished';
 
 type Props = {
   index: number;
-  app: AppType;
+  app: AppMobxType;
   space: SpaceModelType;
   isAdmin?: boolean;
 };
 
 const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
-  const { bazaar } = useServices();
+  const { shellStore } = useAppState();
+  const { bazaarStore, spacesStore } = useShipStore();
+  const currentSpace = spacesStore.selected;
 
   const appHost = useMemo(() => {
     if (app.type !== 'urbit') return null;
-    return (app as UrbitAppType).host;
+    return (app as AppMobxType).host;
   }, [app]);
 
   const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
@@ -49,10 +42,10 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
     [isLight]
   );
 
-  const isPinned = bazaar.isPinned(space.path, app.id);
-  const weRecommended = bazaar.isRecommended(app.id);
+  const isPinned = currentSpace?.isPinned(app.id);
+  const weRecommended = bazaarStore.isRecommended(app.id);
   const installStatus =
-    ((app as UrbitAppType).installStatus as InstallStatus) ||
+    ((app as AppMobxType).installStatus as InstallStatus) ||
     InstallStatus.installed;
   const { isInstalled, isUninstalled, isDesktop } =
     getAppTileFlags(installStatus);
@@ -74,8 +67,8 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
           onClick: (evt: any) => {
             evt.stopPropagation();
             isPinned
-              ? SpacesActions.unpinApp(space.path, app.id)
-              : SpacesActions.pinApp(space.path, app.id, null);
+              ? currentSpace?.unpinApp(app.id)
+              : currentSpace?.pinApp(app.id);
           },
         },
         {
@@ -83,16 +76,16 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
           onClick: (evt: any) => {
             evt.stopPropagation();
             weRecommended
-              ? SpacesActions.unrecommendApp(app.id)
-              : SpacesActions.recommendApp(app.id);
+              ? bazaarStore.unrecommendApp(app.id)
+              : bazaarStore.recommendApp(app.id);
           },
         },
         {
           label: 'App info',
-          disabled: app.type === 'dev',
+          // disabled: app.type === 'dev',
           onClick: (evt: any) => {
             evt.stopPropagation();
-            ShellActions.openDialogWithStringProps('app-detail-dialog', {
+            shellStore.openDialogWithStringProps('app-detail-dialog', {
               appId: app.id,
             });
           },
@@ -101,7 +94,7 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
           label: 'Remove from suite',
           onClick: (evt: any) => {
             evt.stopPropagation();
-            SpacesActions.removeFromSuite(space.path, index);
+            currentSpace?.removeFromSuite(index);
           },
         },
         app.type === 'urbit' &&
@@ -148,27 +141,27 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
     <Box position="relative">
       {(isUninstalled || isDesktop) && (
         <Box zIndex={3} position="absolute" right="14px" top="14px">
-          <IconButton
+          <Button.IconButton
             size={26}
-            hoverFill={iconColor}
-            customBg={rgba(iconColor, 0.12)}
-            color={iconColor}
+            // hoverFill={iconColor}
+            // customBg={rgba(iconColor, 0.12)}
+            // color={iconColor}
             onClick={onInstallation}
           >
-            <Icons name="CloudDownload" />
-          </IconButton>
+            <Icon name="CloudDownload" size={20} iconColor={iconColor} />
+          </Button.IconButton>
         </Box>
       )}
       <AppTile
         tileId={`${app.id}-app`}
         tileSize="xl1"
-        app={app}
+        app={app as AppMobxType}
         isAnimated={isInstalled}
         installStatus={installStatus}
         contextMenuOptions={contextMenuOptions}
-        onAppClick={(selectedApp: AppType) => {
-          DesktopActions.openAppWindow(selectedApp);
-          DesktopActions.closeHomePane();
+        onAppClick={(selectedApp: AppMobxType) => {
+          shellStore.openWindow(selectedApp);
+          shellStore.closeHomePane();
         }}
       />
     </Box>

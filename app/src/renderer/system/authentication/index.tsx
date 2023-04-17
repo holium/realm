@@ -1,14 +1,13 @@
-import { useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex } from 'renderer/components';
+import { Flex } from '@holium/design-system';
 import { Login } from './login';
 // import { OnboardingActions } from 'renderer/logic/actions/onboarding';
-// import { useServices } from 'renderer/logic/store';
+// import { Splash } from './Splash';
+// import { useAppState } from 'renderer/stores/app.store';
 
 const AuthPresenter = () => {
   // const {} = useAppState();
   // const { onboarding } = useServices();
-  const [_, setAddShip] = useState(false);
 
   // useEffect(() => {
   //   // This is an event that is fired when onboarding is completed
@@ -24,10 +23,9 @@ const AuthPresenter = () => {
   //     </Flex>
   //   );
   // }
-
   return (
     <Flex height="100vh" alignItems="center" justifyContent="center">
-      <Login addShip={() => setAddShip(true)} />
+      <Login addShip={() => console.log('toggle onboarding')} />
     </Flex>
   );
 };

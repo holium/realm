@@ -1,19 +1,14 @@
 import { RealmIPC } from './ipc';
 import {
-  applyPatch,
-  Instance,
   types,
-  onSnapshot,
   applySnapshot,
   clone,
   flow,
   getSnapshot,
 } from 'mobx-state-tree';
-import { toJS } from 'mobx';
-import { AuthIPC, ShipIPC } from 'renderer/stores/ipc';
+import { AuthIPC } from 'renderer/stores/ipc';
 import { AccountModel, AccountModelType } from './models/account.model';
-import { AuthUpdateLogin } from 'os/services-new/auth/auth.service';
-import { trackEvent } from 'renderer/logic/lib/track';
+import { trackEvent } from 'renderer/lib/track';
 
 export const LoginStatus = types.enumeration([
   'initial',
@@ -49,11 +44,11 @@ export const AuthenticationModel = types
         self.session = null;
       }
     },
-    _authSuccess(data: AuthUpdateLogin) {
-      // self.session = account;
-    },
-    _authError(data: AuthUpdateLogin) {},
-    //
+    // _authSuccess(data: AuthUpdateLogin) {
+    //   // self.session = account;
+    // },
+    // _authError(data: AuthUpdateLogin) {},
+    // //
     setAccountCurrentTheme(theme: any) {
       const account = self.accounts.find((a) => a.patp === self.session?.patp);
       if (account) {
@@ -93,6 +88,18 @@ export const AuthenticationModel = types
         console.log(e);
       }
     }),
+    shutdown: flow(function* () {
+      // TODO implement
+      try {
+        // yield RealmIPC.shutdown(self.session?.patp) as Promise<any>;
+        self.session = null;
+        trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
+        self.status = 'initial';
+        self.session = null;
+      } catch (e) {
+        console.log(e);
+      }
+    }),
     removeAccount: flow(function* (patp: string) {
       // TODO implement
       // const account = self.accounts.find((a) => a.patp === patp);
@@ -123,24 +130,3 @@ export const AuthenticationModel = types
       // }
     }),
   }));
-
-ShipIPC.onUpdate((_evt: any, update: any) => {
-  console.log('ShipIPC.onUpdate', update);
-});
-
-// AuthIPC.onUpdate((_evt: any, update: AuthUpdateTypes) => {
-//   switch (update.type) {
-//     case 'init':
-//       appState.authStore._setAccounts((update as AuthUpdateInit).payload);
-//       break;
-//     case 'login':
-//       appState.authStore._setSession((update as AuthUpdateLogin).payload.patp);
-//       break;
-//     // case 'logout':
-//     //   authState.session = null;
-//     //   break;
-
-//     default:
-//       break;
-//   }
-// });

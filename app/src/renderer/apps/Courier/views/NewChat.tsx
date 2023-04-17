@@ -10,13 +10,11 @@ import {
   Tooltip,
 } from '@holium/design-system';
 import { useTrayApps } from '../../store';
-import { useChatStore } from '../store';
-import { ShipSearch } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { ChatPathType } from 'os/services/chat/chat.service';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { ShipSearch } from 'renderer/components/ShipSearch';
 
 export const NewChat = () => {
   const { ship, friends, chatStore } = useShipStore();
@@ -175,7 +173,7 @@ const RemoveWrapper = styled(motion.div)`
 `;
 
 const SelectedShips = ({ ships, onRemove }: SelectedShipsProps) => {
-  const { friends } = useServices();
+  const { friends } = useShipStore();
 
   return (
     <Flex height="98px" py={1} gap={12} overflowY="scroll">

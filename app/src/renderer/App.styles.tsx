@@ -2,13 +2,11 @@ import { AnimatePresence } from 'framer-motion';
 import { darken } from 'polished';
 import { useMemo } from 'react';
 import { createGlobalStyle, css } from 'styled-components';
-import { genCSSVariables } from './logic/theme';
+import { genCSSVariables } from './lib/theme';
 import { ThemeType } from './stores/models/theme.model';
 import { BackgroundImage } from './system/system.styles';
-import { ThemeType as OldTheme } from './theme';
 
 interface StyleProps {
-  theme: OldTheme;
   realmTheme: ThemeType;
   blur: boolean;
 }
@@ -86,6 +84,7 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
   fieldset {
     border: 0;
   }
+  
 `;
 
 export const BgImage = ({

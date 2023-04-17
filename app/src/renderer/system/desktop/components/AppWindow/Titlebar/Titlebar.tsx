@@ -1,10 +1,9 @@
 import { ReactNode, PointerEvent } from 'react';
 import { Text, Flex } from '@holium/design-system';
 import { AppWindowIcon } from '../AppWindowIcon';
-import { SharedAvatars } from './SharedAvatars';
 import { AppWindowType } from 'os/services/shell/desktop.model';
 import { TitlebarContainer, TitleCentered } from './Titlebar.styles';
-import { useDoubleClick } from 'renderer/logic/lib/useDoubleClick';
+import { useDoubleClick } from 'renderer/lib/useDoubleClick';
 
 type Props = {
   zIndex: number;
@@ -87,10 +86,9 @@ export const Titlebar = ({
               backgroundColor={theme.windowColor}
             />
           )} */}
-          {showDevToolsToggle && (
+          {showDevToolsToggle && appWindow.type !== 'native' && (
             <AppWindowIcon
               icon="DevBox"
-              bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 onDevTools && onDevTools();
@@ -99,16 +97,8 @@ export const Titlebar = ({
           )}
           {navigationButtons && (
             <>
-              <AppWindowIcon
-                icon="ArrowLeftLine"
-                bg="#97A3B2"
-                onClick={() => {}}
-              />
-              <AppWindowIcon
-                icon="ArrowRightLine"
-                bg="#97A3B2"
-                onClick={() => {}}
-              />
+              <AppWindowIcon icon="ArrowLeftLine" onClick={() => {}} />
+              <AppWindowIcon icon="ArrowRightLine" onClick={() => {}} />
             </>
           )}
         </Flex>
@@ -121,7 +111,6 @@ export const Titlebar = ({
           {minimizeButton && (
             <AppWindowIcon
               icon="Minimize"
-              bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 onMinimize();
@@ -131,7 +120,6 @@ export const Titlebar = ({
           {maximizeButton && (
             <AppWindowIcon
               icon="Expand"
-              bg="#97A3B2"
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 onMaximize();
@@ -141,10 +129,9 @@ export const Titlebar = ({
           {closeButton && (
             <AppWindowIcon
               icon="Close"
-              bg="#FF6240"
+              iconColor="intent-alert"
               onClick={(evt) => {
                 evt.stopPropagation();
-                console.log('closign');
                 // closeDevTools();
                 onClose();
               }}

@@ -7,7 +7,10 @@ import {
 } from '@holium/design-system';
 import { displayDate } from 'os/lib/time';
 import { ChatMessage } from '../components/ChatMessage';
-import { ChatMessageType, ChatModelType } from '../models';
+import {
+  ChatMessageType,
+  ChatModelType,
+} from '../../../stores/models/chat.model';
 import { Gallery } from 'react-photoswipe-gallery';
 
 type Props = {
@@ -106,6 +109,10 @@ export const ChatLogList = ({
         width={width}
         height={height}
         atBottomThreshold={100}
+        increaseViewportBy={{
+          top: 200,
+          bottom: 200,
+        }}
         itemContent={renderChatRow}
         chatMode
         shiftScrollbar

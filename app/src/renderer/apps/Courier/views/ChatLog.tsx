@@ -16,12 +16,12 @@ import { useTrayApps } from 'renderer/apps/store';
 import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
 import { ChatAvatar } from '../components/ChatAvatar';
-import { IuseStorage } from 'renderer/logic/lib/useStorage';
+import { IuseStorage } from 'renderer/lib/useStorage';
 import { PinnedContainer } from '../components/PinnedMessage';
-import { useServices } from 'renderer/logic/store';
-import { ChatMessageType } from '../models';
-import { useChatStore } from '../store';
+import { ChatMessageType } from '../../../stores/models/chat.model';
+import { useShipStore } from 'renderer/stores/ship.store';
 import { ChatLogList } from './ChatLogList';
+import { useAppState } from 'renderer/stores/app.store';
 
 const FullWidthAnimatePresence = styled(AnimatePresence)`
   position: absolute;
@@ -37,9 +37,10 @@ type ChatLogProps = {
 };
 
 export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
+  const { theme } = useAppState();
   const { dimensions } = useTrayApps();
-  const { selectedChat, getChatHeader, setSubroute } = useChatStore();
-  const { ship, notifStore, friends, spaces, theme } = useServices();
+  const { ship, notifStore, friends, chatStore, spacesStore } = useShipStore();
+  const { selectedChat, getChatHeader, setSubroute } = chatStore;
   const [showAttachments, setShowAttachments] = useState(false);
 
   const listRef = useRef<WindowedListRef>(null);
@@ -97,7 +98,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   let spaceTitle = undefined;
   let avatarColor: string | undefined;
   if (type === 'space') {
-    const space = spaces.getSpaceByChatPath(path);
+    const space = spacesStore.getSpaceByChatPath(path);
     if (space) {
       spaceTitle = space.name;
       avatarColor = space.color;
@@ -317,7 +318,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
         <ChatInputBox
           storage={storage}
           selectedChat={selectedChat}
-          themeMode={theme.currentTheme.mode as 'light' | 'dark'}
+          themeMode={theme.mode as 'light' | 'dark'}
           onSend={onMessageSend}
           onEditConfirm={onEditConfirm}
           editMessage={selectedChat.editingMsg}

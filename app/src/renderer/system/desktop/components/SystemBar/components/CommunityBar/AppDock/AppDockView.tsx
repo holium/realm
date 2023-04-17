@@ -1,36 +1,35 @@
 import { useCallback, useState } from 'react';
-import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
 import { Reorder } from 'framer-motion';
-import { Flex, Divider } from 'renderer/components';
-import { AppType } from 'os/services/spaces/models/bazaar';
-import { useServices } from 'renderer/logic/store';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { Divider } from 'renderer/components';
+import { Flex } from '@holium/design-system';
 import { PinnedDockApp } from './PinnedDockApp';
 import { UnpinnedDockApp } from './UnpinnedDockApp';
 import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 
 type Props = {
   spacePath: string;
-  pinnedDockAppsOrder: string[];
-  pinnedDockApps: AppType[];
-  unpinnedDockApps: AppType[];
+  pinnedDockApps: AppMobxType[];
+  unpinnedDockApps: AppMobxType[];
 };
 
 const AppDockViewPresenter = ({
   spacePath,
-  pinnedDockAppsOrder,
   pinnedDockApps,
   unpinnedDockApps,
 }: Props) => {
   const { shellStore, theme } = useAppState();
+  const { spacesStore } = useShipStore();
+  const currentSpace = spacesStore.selected;
+  // todo move this to mobx
+  const [localDockAppIds, setLocalDockAppIds] = useState(
+    currentSpace?.dockAppIds || []
+  );
 
-  const { desktop, bazaar } = useServices();
-
-  const [localDockAppIds, setLocalDockAppIds] = useState(pinnedDockAppsOrder);
-
-  const onClickDockedApp = useCallback((dockedApp: AppType) => {
+  const onClickDockedApp = useCallback((dockedApp: AppMobxType) => {
     const appWindow = shellStore.getWindowByAppId(dockedApp.id);
     if (appWindow) {
       if (appWindow.isMinimized) {
@@ -47,12 +46,17 @@ const AppDockViewPresenter = ({
   const onOrderUpdate = useCallback(() => {
     // First we update the dock locally so the user doesn't have to
     // wait for the subscription to come back from Hoon side.
-    bazaar.setDock(spacePath, localDockAppIds);
-    SpacesActions.setPinnedOrder(spacePath, toJS(localDockAppIds));
+    currentSpace?.reorderPinnedApps(localDockAppIds);
   }, [localDockAppIds]);
 
+  // const onOrderUpdate = () => {
+  //   // First we update the dock locally so the user doesn't have to
+  //   // wait for the subscription to come back from Hoon side.
+  //   currentSpace?.reorderPinnedApps(localDockAppIds);
+  // };
+
   const pinnedAppTiles = pinnedDockApps.map((app) => {
-    const appWindow = desktop.getWindowByAppId(app.id);
+    const appWindow = shellStore.getWindowByAppId(app.id);
     const pinnedTileId = `pinned-${app.id}-${spacePath}`;
 
     return (
@@ -60,7 +64,7 @@ const AppDockViewPresenter = ({
         key={`tile-${pinnedTileId}`}
         tileId={pinnedTileId}
         app={app}
-        spacePath={spacePath}
+        space={spacesStore.selected}
         hasWindow={Boolean(appWindow)}
         isActive={Boolean(appWindow?.isActive)}
         isMinimized={Boolean(appWindow?.isMinimized)}
@@ -70,7 +74,7 @@ const AppDockViewPresenter = ({
   });
 
   const unpinnedAppTiles = unpinnedDockApps.map((app, index) => {
-    const appWindow = desktop.getWindowByAppId(app.id);
+    const appWindow = shellStore.getWindowByAppId(app.id);
     const unpinnedTileId = `unpinned-${app.id}-${spacePath}-${index}`;
 
     return (
@@ -78,14 +82,13 @@ const AppDockViewPresenter = ({
         key={`tile-${unpinnedTileId}`}
         tileId={unpinnedTileId}
         app={app}
-        spacePath={spacePath}
+        space={spacesStore.selected}
         isActive={Boolean(appWindow?.isActive)}
         isMinimized={Boolean(appWindow?.isMinimized)}
         onClick={onClickDockedApp}
       />
     );
   });
-
   const showDivider = pinnedDockApps.length > 0 && unpinnedDockApps.length > 0;
 
   return (

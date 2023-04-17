@@ -14,8 +14,8 @@ import {
   RoomManagerEvent,
   RoomsManager,
 } from '@holium/realm-room';
-import { normalizePosition } from 'os/services/shell/lib/window-manager';
 import { Dimensions, useToggle } from '@holium/design-system';
+import { normalizePosition } from 'renderer/lib/window-manager';
 
 type Props = {
   patp: string | undefined;

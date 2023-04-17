@@ -5,7 +5,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { AppWindow } from '../desktop/components/AppWindow/AppWindow';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 import { useAppState } from 'renderer/stores/app.store';
-import { getCenteredPosition } from 'renderer/stores/lib/window-manager';
+import { getCenteredPosition } from 'renderer/lib/window-manager';
 
 interface DialogManagerProps {
   dialogId?: string;
@@ -24,7 +24,6 @@ const DialogManagerPresenter = ({
 
   const onEsc = useCallback(() => {
     if (!dialogId) return;
-
     if (isOpen && dialogConfig?.hasCloseButton) {
       shellStore.closeDialog();
       if (dialogConfig.unblurOnClose) shellStore.setIsBlurred(false);
