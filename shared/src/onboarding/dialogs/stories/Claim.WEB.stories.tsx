@@ -6,7 +6,7 @@ import { AccountDownloadRealmDialog } from '../AccountDownloadRealmDialog';
 
 export default {
   component: CreateAccountDialog,
-  title: 'Onboarding/Claim flow',
+  title: 'Onboarding/Claim flow WEB',
 } as ComponentMeta<typeof CreateAccountDialog>;
 
 export const CreateAccountDialogStory: ComponentStory<

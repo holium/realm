@@ -9,13 +9,13 @@ import {
 import { OnboardDialog } from '../components/OnboardDialog';
 
 type Props = {
-  prefilledEmail: string;
+  prefilledEmail?: string;
   onNoAccount: () => void;
   onLogin: (email: string, password: string) => Promise<boolean>;
 };
 
 export const LoginDialog = ({
-  prefilledEmail,
+  prefilledEmail = '',
   onNoAccount,
   onLogin,
 }: Props) => {
