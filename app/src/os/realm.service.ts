@@ -6,6 +6,7 @@ import {
   WebPreferences,
 } from 'electron';
 import log from 'electron-log';
+import bcrypt from 'bcryptjs';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { AuthService } from './services/auth/auth.service';
 import { ShipService } from './services/ship/ship.service';
@@ -97,11 +98,17 @@ export class RealmService extends AbstractService {
   }
 
   public async createAccount(
-    accountPayload: Omit<Account, 'createdAt' | 'updatedAt'>
+    accountPayload: Omit<
+      Account,
+      'passwordHash' | 'createdAt' | 'updatedAt'
+    > & { password: string }
   ) {
     if (!this.services) return Promise.resolve(false);
 
-    return this.services.auth.createAccount(accountPayload);
+    return this.services.auth.createAccount({
+      ...accountPayload,
+      passwordHash: bcrypt.hashSync(accountPayload.password, 10),
+    });
   }
 
   public async createMasterAccount(payload: Omit<MasterAccount, 'id'>) {

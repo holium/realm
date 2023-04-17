@@ -6,7 +6,6 @@ import { StepProps } from './types';
 import { thirdEarthApi } from '../thirdEarthApi';
 import { RealmIPC } from 'renderer/stores/ipc';
 import { defaultTheme } from 'renderer/lib/defaultTheme';
-import bcrypt from 'bcryptjs';
 
 export const LoginStep = ({ setStep }: StepProps) => {
   useEffect(() => {
@@ -56,7 +55,7 @@ export const LoginStep = ({ setStep }: StepProps) => {
             type: 'hosted',
             status: 'online',
             theme: JSON.stringify(defaultTheme),
-            passwordHash: bcrypt.hashSync(password, 10),
+            password,
           });
         });
       } else {

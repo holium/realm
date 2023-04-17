@@ -88,10 +88,14 @@ export class AuthService extends AbstractService {
   public async createMasterAccount(mAccount: Omit<MasterAccount, 'id'>) {
     if (!this.authDB) return;
     // if a master account already exists, return
-    const existingAccount = this.authDB.tables.masterAccounts.findFirst(
-      `email = "${mAccount.email}"`
-    );
-    if (existingAccount) return existingAccount;
+    try {
+      const existingAccount = this.authDB.tables.masterAccounts.findFirst(
+        `email = "${mAccount.email}"`
+      );
+      if (existingAccount) return existingAccount;
+    } catch (e) {
+      console.log(e);
+    }
 
     // TODO implement password hashing and other account creation logic
     const newAccount = this.authDB.tables.masterAccounts.create(mAccount);

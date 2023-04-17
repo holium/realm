@@ -7,6 +7,7 @@ export interface MasterAccount {
   encryptionKey: string;
   authToken?: string;
 }
+
 export class MasterAccounts extends AbstractDataAccess<MasterAccount> {
   constructor(db: Database) {
     super({
