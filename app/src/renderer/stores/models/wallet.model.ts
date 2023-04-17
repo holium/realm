@@ -896,6 +896,16 @@ export const WalletStore = types
   }))
   .actions((self) => {
     return {
+      init: flow(function* () {
+        try {
+          const wallets = yield WalletIPC.getWallets();
+          console.log(wallets);
+          const transactions = yield WalletIPC.getTransactions();
+          console.log(transactions);
+        } catch (error) {
+          console.error(error);
+        }
+      }),
       setInitialized(initialized: boolean) {
         self.initialized = initialized;
         console.log('trying to set the ship', shipStore.ship?.patp);
