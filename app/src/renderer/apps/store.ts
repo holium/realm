@@ -54,6 +54,7 @@ const TrayAppStore = types
     dimensions: TrayAppDimensions,
     roomsApp: RoomsAppState,
     walletApp: WalletStore,
+    innerNavigation: types.string,
     // dmApp: DmApp,
   })
   .actions((self) => ({
@@ -71,6 +72,10 @@ const TrayAppStore = types
     },
     closeActiveApp() {
       self.activeApp = null;
+      self.innerNavigation = '';
+    },
+    clearInnerNavigation() {
+      self.innerNavigation = '';
     },
     setActiveApp(
       appId: TrayAppKeys | null,
@@ -92,6 +97,11 @@ const TrayAppStore = types
           dimensions
         );
         self.dimensions = dimensions;
+      }
+      if (params?.innerNavigation) {
+        self.innerNavigation = params.innerNavigation;
+      } else {
+        self.innerNavigation = '';
       }
     },
   }));
@@ -168,6 +178,7 @@ export const trayStore = TrayAppStore.create({
     currentView: 'list',
   },
   walletApp: walletAppDefault,
+  innerNavigation: '',
   // dmApp: {
   //   currentView: 'dm-list',
   // },
