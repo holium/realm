@@ -1,6 +1,6 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex, Text } from '../../general';
 import { AppTile, AppTileType } from './AppTile';
+import { Text, Flex } from '../../../general';
 
 export default {
   component: AppTile,

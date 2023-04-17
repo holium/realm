@@ -5,6 +5,8 @@ import { LoginDialog, OnboardDialogDescription } from '@holium/shared';
 import { StepProps } from './types';
 import { thirdEarthApi } from '../thirdEarthApi';
 import { RealmIPC } from 'renderer/stores/ipc';
+import { defaultTheme } from 'renderer/lib/defaultTheme';
+import bcrypt from 'bcryptjs';
 
 export const LoginStep = ({ setStep }: StepProps) => {
   useEffect(() => {
@@ -30,21 +32,32 @@ export const LoginStep = ({ setStep }: StepProps) => {
         );
       }
 
-      const userShips = await thirdEarthApi.getUserShips(response.token);
-      const hasShips = userShips.length > 0;
+      // Create a master account from the ThirdEarth account.
+      const masterAccount = await RealmIPC.createMasterAccount({
+        email: response.email,
+        encryptionKey: response.client_side_encryption_key,
+      });
 
-      if (hasShips) {
-        const patp = userShips[0].patp;
-        const url = userShips[0].link;
-        // Now we need to create a local Realm account from the ThirdEarth account.
-        RealmIPC.createAccount({
-          patp,
-          url,
-          email: response.email,
-          password,
-          encryptionKey: response.client_side_encryption_key,
+      if (!masterAccount) return false;
+
+      const userShips = await thirdEarthApi.getUserShips(response.token);
+
+      if (userShips.length > 0) {
+        // Create a "default" account for each ship.
+        userShips.forEach((ship) => {
+          RealmIPC.createShipAccount({
+            accountId: masterAccount.id,
+            patp: ship.patp,
+            url: ship.link,
+            nickname: ship.screen_name,
+            avatar: '',
+            color: '#000000',
+            type: 'hosted',
+            status: 'online',
+            theme: JSON.stringify(defaultTheme),
+            passwordHash: bcrypt.hashSync(password, 10),
+          });
         });
-        // We also need to populate the local Realm account with the ships from the ThirdEarth account.
       } else {
         // Go to the hosted / self hosted step.
         setStep('/hosting');

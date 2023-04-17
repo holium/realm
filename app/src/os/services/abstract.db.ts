@@ -51,6 +51,16 @@ abstract class AbstractDataAccess<T> {
     return rows.map((row) => this.mapRow(row));
   }
 
+  public findFirst(where?: string): T | null {
+    const query = `SELECT * FROM ${this.tableName}${
+      where ? ` WHERE ${where}` : ''
+    } LIMIT 1`;
+    const stmt = this.prepare(query);
+
+    const row = stmt.get();
+    return row ? this.mapRow(row) : null;
+  }
+
   public findOne(id: number | string): T | null {
     const query = `SELECT * FROM ${this.tableName} WHERE id = ?`;
     const stmt = this.prepare(query);

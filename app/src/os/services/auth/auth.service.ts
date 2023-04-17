@@ -88,6 +88,10 @@ export class AuthService extends AbstractService {
   public async createMasterAccount(mAccount: Omit<MasterAccount, 'id'>) {
     if (!this.authDB) return;
     // if a master account already exists, return
+    const existingAccount = this.authDB.tables.masterAccounts.findFirst(
+      `email = "${mAccount.email}"`
+    );
+    if (existingAccount) return existingAccount;
 
     // TODO implement password hashing and other account creation logic
     const newAccount = this.authDB.tables.masterAccounts.create(mAccount);
@@ -166,11 +170,7 @@ export class AuthService extends AbstractService {
   }
 
   // TODO FINISH THIS FUNCTION REFACTOR
-  public async updateShipCode(
-    patp: string,
-    password: string,
-    code: string
-  ): string {
+  public async updateShipCode(patp: string, password: string) {
     let result = '';
     try {
       const ship = this.authDB?.tables.accounts.findOne(patp);
@@ -193,8 +193,6 @@ export class AuthService extends AbstractService {
       //   code: code,
       // });
 
-      let cookie = null,
-        connectConduit = false;
       // in the case of development or DEBUG_PROD builds, we auto connect at startup; therefore
       //  when this is the case, get a new cookie in order to refresh the conduit
       if (

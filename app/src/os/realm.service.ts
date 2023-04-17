@@ -1,4 +1,3 @@
-import bcrypt from 'bcryptjs';
 import {
   app,
   BrowserWindow,
@@ -13,15 +12,8 @@ import { ShipService } from './services/ship/ship.service';
 import { getReleaseChannel, setReleaseChannel } from './lib/settings';
 import { getCookie } from './lib/shipHelpers';
 import APIConnection from './services/conduit';
-import { defaultTheme } from '../renderer/lib/defaultTheme';
-
-type CreateAccountPayload = {
-  patp: string;
-  password: string;
-  encryptionKey: string;
-  email: string;
-  url: string;
-};
+import { MasterAccount } from './services/auth/masterAccounts.table';
+import { Account } from './services/auth/accounts.table';
 
 export class RealmService extends AbstractService {
   // private realmProcess: RealmProcess | null = null;
@@ -104,33 +96,18 @@ export class RealmService extends AbstractService {
     return null;
   }
 
-  public async createAccount({
-    patp,
-    password,
-    encryptionKey,
-    email,
-  }: CreateAccountPayload) {
+  public async createShipAccount(
+    accountPayload: Omit<Account, 'createdAt' | 'updatedAt'>
+  ) {
     if (!this.services) return Promise.resolve(false);
 
-    const masterAcc = await this.services.auth.createMasterAccount({
-      email,
-      encryptionKey,
-    });
+    return this.services.auth.createAccount(accountPayload);
+  }
 
-    if (!masterAcc) return Promise.resolve(false);
+  public async createMasterAccount(payload: Omit<MasterAccount, 'id'>) {
+    if (!this.services) return;
 
-    return this.services.auth.createAccount({
-      type: 'hosted',
-      nickname: patp,
-      color: '#000000',
-      avatar: '',
-      status: 'online',
-      theme: JSON.stringify(defaultTheme),
-      accountId: masterAcc.id,
-      patp,
-      passwordHash: bcrypt.hashSync(password, 10),
-      url: '',
-    });
+    return this.services.auth.createMasterAccount(payload);
   }
 
   async login(patp: string, password: string): Promise<boolean> {
@@ -299,7 +276,8 @@ type RealmServicePublicMethods = Pick<
   | 'boot'
   | 'login'
   | 'logout'
-  | 'createAccount'
+  | 'createShipAccount'
+  | 'createMasterAccount'
   | 'getReleaseChannel'
   | 'setReleaseChannel'
 > & {
