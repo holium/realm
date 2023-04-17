@@ -1,12 +1,12 @@
 import { AppPreloadType } from 'main/preload';
-import { authPreload } from 'os/services-new/auth/auth.service';
-import { shipPreload } from 'os/services-new/ship/ship.service';
-import { roomsPreload } from 'os/services-new/ship/rooms.service';
+import { authPreload } from 'os/services/auth/auth.service';
+import { shipPreload } from 'os/services/ship/ship.service';
+import { roomsPreload } from 'os/services/ship/rooms.service';
 import { realmPreload } from 'os/realm.service';
-import { chatPreload } from 'os/services-new/ship/chat.service';
-import { notifPreload } from 'os/services-new/ship/notifications.service';
-import { friendsPreload } from 'os/services-new/ship/models/friends.model';
-import { spacesPreload } from 'os/services-new/ship/spaces.service';
+import { chatPreload } from 'os/services/ship/chat/chat.service';
+import { notifPreload } from 'os/services/ship/notifications/notifications.service';
+import { friendsPreload } from 'renderer/stores/models/friends.model';
+import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
 import { MultiplayerPreloadType } from 'main/preload.multiplayer';
 
 declare global {
