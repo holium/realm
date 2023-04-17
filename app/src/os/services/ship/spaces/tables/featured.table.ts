@@ -68,6 +68,28 @@ export class FeaturedSpacesDB extends AbstractDataAccess<FeaturedSpace> {
     };
   }
 
+  public getFeaturedSpaces(): { [path: string]: FeaturedSpace } {
+    if (!this.db) throw new Error('No db connection');
+    const query = this.db.prepare(
+      `
+      SELECT 
+      json_group_object(
+        path,
+        json_object(
+          'path', path,
+          'name', name,
+          'description', description,
+          'picture', picture,
+          'color', color
+        )
+      ) as spaces
+      FROM spaces_featured`
+    );
+    const spaces: any = query.all();
+    if (!spaces.length) return {};
+    return JSON.parse(spaces[0].spaces);
+  }
+
   public insertAll(featuredSpaces: { [key: string]: FeaturedSpace }) {
     if (!this.db) throw new Error('No db connection');
     const insert = this.db.prepare(

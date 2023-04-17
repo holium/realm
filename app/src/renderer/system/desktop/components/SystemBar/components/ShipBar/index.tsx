@@ -18,11 +18,11 @@ import { AnimatePresence } from 'framer-motion';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { trackEvent } from 'renderer/lib/track';
 import { nativeApps } from 'renderer/apps/nativeApps';
-import { AppType } from 'os/services/spaces/models/bazaar';
 import { useTrayApps } from 'renderer/apps/store';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { openChatToPath } from 'renderer/lib/useTrayControls';
 import { useAppState } from 'renderer/stores/app.store';
+import { AppType } from 'renderer/stores/models/bazaar.model';
 
 type ExpandBarStyles = {
   height: number | 'fit-content';
@@ -80,6 +80,7 @@ export const ShipBarPresenter = () => {
       evt.stopPropagation();
       return;
     }
+    initNotifications();
     setAccountTrayOpen(true);
   };
 

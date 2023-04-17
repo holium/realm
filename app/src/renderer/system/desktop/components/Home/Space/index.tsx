@@ -1,14 +1,7 @@
 import { useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
-import {
-  Flex,
-  Button,
-  Icon,
-  Text,
-  NoScrollBar,
-  Avatar,
-} from '@holium/design-system';
+import { Flex, Button, Icon, NoScrollBar, Avatar } from '@holium/design-system';
 import { SpaceTitlebar } from './SpaceTitlebar';
 import { AppSuite } from './AppSuite/AppSuite';
 import { RecommendedApps } from './Recommended';
@@ -201,9 +194,9 @@ const HomePresenter = (props: HomePaneProps) => {
               }}
               gap={20}
             >
-              <Text.Custom variant="h3" fontWeight={500}>
-                Your Apps
-              </Text.Custom>
+              {/* <Text.H4 height={20} fontWeight={500}>
+                {isOur ? '' : 'Your Apps'}
+              </Text.H4> */}
               <Flex
                 style={{ position: 'relative' }}
                 gap={32}

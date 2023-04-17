@@ -43,6 +43,10 @@ export class BazaarService extends AbstractService {
       switch (spacesType) {
         case 'initial':
           this.tables?.appCatalog.insertAll(data['initial']);
+          this.sendUpdate({
+            type: 'initial',
+            payload: this.tables?.appCatalog.getCatalog(),
+          });
           break;
         case 'app-install-update': //  installed, uninstalled, started, etc.
           const { appId, app, grid } = data['app-install-update'];

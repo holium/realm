@@ -12,10 +12,7 @@ const RecommendedAppsPresenter = () => {
 
   return (
     <Flex flexGrow={0} flexDirection="column" gap={20} mb={60}>
-      <Text.Custom variant="h3" fontWeight={500}>
-        Recommended Apps
-      </Text.Custom>
-
+      <Text.H4 fontWeight={500}>Recommended Apps</Text.H4>
       {!apps ||
         (apps.length === 0 && (
           <Text.Custom variant="h6" opacity={0.4}>

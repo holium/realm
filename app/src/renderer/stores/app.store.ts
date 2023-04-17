@@ -8,6 +8,7 @@ import { RealmUpdateTypes } from 'os/realm.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';
 import { BazaarIPC, MainIPC, NotifIPC, RealmIPC, SpacesIPC } from './ipc';
 import { shipStore } from './ship.store';
+import { SoundActions } from 'renderer/lib/sound';
 
 const Screen = types.enumeration(['login', 'onboarding', 'os']);
 
@@ -127,20 +128,6 @@ export function useAppState() {
 
 RealmIPC.boot();
 
-// RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
-//   if (update.type === 'booted') {
-//     appState.reset();
-//     appState.setBooted(update.payload);
-//   }
-//   if (update.type === 'authenticated') {
-//     appState.authStore._setSession(update.payload.patp);
-//     appState.setLoggedIn();
-//   }
-//   if (update.type === 'logout') {
-//     appState.setLoggedOut();
-//   }
-// });
-
 MainIPC.onInitialDimensions((_e: any, dims: any) => {
   appState.shellStore.setDesktopDimensions(dims.width, dims.height);
 });
@@ -149,7 +136,6 @@ window.addEventListener('beforeunload', function (event) {
   if (event.type === 'beforeunload') {
     console.log('refreshing');
     appState.shellStore.closeDialog();
-    // appState.reset();
     // The event was triggered by a refresh or navigation
     // Your code to handle the refresh event here
   } else {
@@ -163,18 +149,22 @@ window.addEventListener('beforeunload', function (event) {
 RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
   if (update.type === 'booted') {
     appState.reset();
+    shipStore.reset();
     appState.setBooted(update.payload);
     if (update.payload.session) {
       shipStore.setShip(update.payload.session);
     }
   }
   if (update.type === 'authenticated') {
+    SoundActions.playLogin();
     appState.authStore._setSession(update.payload.patp);
     appState.setLoggedIn();
     shipStore.setShip(update.payload);
   }
   if (update.type === 'logout') {
     appState.setLoggedOut();
+    shipStore.reset();
+    SoundActions.playLogout();
   }
 });
 
@@ -237,8 +227,7 @@ BazaarIPC.onUpdate((_event: any, update: any) => {
   // on update we need to requery the store
   switch (type) {
     case 'initial':
-      // shipStore.bazaarStore.loadDevApps(payload.devApps);
-      // shipStore.bazaarStore.loadDevs(payload.devs);
+      shipStore.bazaarStore._onInitialLoad(payload);
       break;
     case 'installation-update':
       shipStore.bazaarStore._onInstallationUpdate(payload);

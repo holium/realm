@@ -6,8 +6,8 @@ import {
   PinnedMessage,
 } from '@holium/design-system';
 import { useContextMenu } from 'renderer/components';
-import { useChatStore } from '../store';
-import { ChatMessageType } from '../models';
+import { useChatStore } from '../../../stores/chat.store';
+import { ChatMessageType } from '../../../stores/models/chat.model';
 import styled from 'styled-components';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { useAppState } from 'renderer/stores/app.store';
