@@ -252,10 +252,10 @@ const IconButton = styled(Base)<IconButtonProps>`
     transition: var(--transition);
     background: rgba(var(--rlm-overlay-active-rgba));
   } */
-  &:focus:not([disabled]) {
+  /* &:focus:not([disabled]) {
     outline: none;
     background: rgba(var(--rlm-overlay-active-rgba));
-  }
+  } */
   svg {
     pointer-events: none;
     fill: ${(props) =>
