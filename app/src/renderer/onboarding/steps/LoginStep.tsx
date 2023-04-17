@@ -60,8 +60,8 @@ export const LoginStep = ({ setStep }: StepProps) => {
 
   return (
     <LoginDialog
-      prefilledEmail={localStorage.getItem('email') ?? ''}
       showTerms
+      prefilledEmail={localStorage.getItem('email') ?? ''}
       label={
         <OnboardDialogDescription>
           Don't have access?{' '}

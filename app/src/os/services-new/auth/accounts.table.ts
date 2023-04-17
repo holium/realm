@@ -12,8 +12,6 @@ export interface Account {
   status: string;
   theme: string;
   passwordHash: string;
-  encryptionKey: string;
-  authToken: string;
   createdAt: number;
   updatedAt: number;
 }
@@ -35,8 +33,6 @@ export class Accounts extends AbstractDataAccess<Account> {
       status: row.status,
       theme: row.theme ? JSON.parse(row.theme) : {},
       passwordHash: row.passwordHash,
-      encryptionKey: row.encryptionKey,
-      authToken: row.authToken,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     };

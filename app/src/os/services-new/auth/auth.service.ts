@@ -113,25 +113,15 @@ export class AuthService extends AbstractService {
   }
 
   // Call this from onboarding.
-  public createAccount({
-    accountId,
-    patp,
-    passwordHash,
-    url,
-  }: Pick<Account, 'accountId' | 'patp' | 'passwordHash' | 'url'>): boolean {
+  public createAccount(acc: Omit<Account, 'createdAt' | 'updatedAt'>): boolean {
     if (!this.authDB) return false;
-    const account = this.authDB.tables.accounts.findOne(patp);
-    if (account) {
-      log.info(`Account already exists for ${patp}`);
+    const existing = this.authDB.tables.accounts.findOne(acc.patp);
+    if (existing) {
+      log.info(`Account already exists for ${acc.patp}`);
       return false;
     }
 
-    const newAccount = this.authDB.tables.accounts.create({
-      accountId,
-      patp,
-      url,
-      passwordHash,
-    });
+    const newAccount = this.authDB.tables.accounts.create(acc);
 
     if (newAccount) {
       this.sendUpdate({
@@ -140,7 +130,7 @@ export class AuthService extends AbstractService {
       });
       return true;
     } else {
-      log.info(`Failed to create account for ${patp}`);
+      log.info(`Failed to create account for ${acc.patp}`);
       return false;
     }
   }

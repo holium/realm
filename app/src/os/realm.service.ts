@@ -8,6 +8,7 @@ import { AuthService } from './services-new/auth/auth.service';
 import { ShipService } from './services-new/ship/ship.service';
 import { getReleaseChannel, setReleaseChannel } from './lib/settings';
 import APIConnection from './services-new/conduit';
+import { defaultTheme } from './services/theme.model';
 
 type CreateAccountPayload = {
   patp: string;
@@ -101,6 +102,12 @@ export class RealmService extends AbstractService {
     if (!masterAcc) return Promise.resolve(false);
 
     return this.services.auth.createAccount({
+      type: 'hosted',
+      nickname: patp,
+      color: '#000000',
+      avatar: '',
+      status: 'online',
+      theme: JSON.stringify(defaultTheme),
       accountId: masterAcc.id,
       patp,
       passwordHash: bcrypt.hashSync(password, 10),
