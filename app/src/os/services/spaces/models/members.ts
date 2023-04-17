@@ -7,6 +7,7 @@ import {
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { Patp, SpacePath } from '../../../types';
+import { cite } from '@urbit/aura';
 // import { InvitationsModel } from './invitations';
 
 const Roles = types.enumeration([
@@ -38,6 +39,7 @@ const generateMemberList = (entries: any) => {
     return {
       ...entry[1],
       patp: entry[0],
+      shortPatp: cite(entry[0]),
     };
   });
 };

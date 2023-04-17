@@ -22,6 +22,7 @@ jobs:
       ci: ${{ steps.ci.outputs.result }}
       release_name: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
       build_version: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
+      artifact_version: ${{ fromJSON(steps.ci.outputs.result).artifactVersion }}
       package_version: ${{ fromJSON(steps.ci.outputs.result).packageVersion }}
       build_version_major: ${{ fromJSON(steps.ci.outputs.result).version.major }}
       build_version_minor: ${{ fromJSON(steps.ci.outputs.result).version.minor }}
@@ -121,7 +122,7 @@ jobs:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - name: Build and publish
-        run: npx cross-env GH_TOKEN=$GH_TOKEN BUILD_VERSION=$BUILD_VERSION RELEASE_CHANNEL=$RELEASE_CHANNEL APPLE_ID=$APPLE_ID APPLE_ID_PASS=$APPLE_ID_PASS PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true CSC_LINK=$BUILD_CERTIFICATE_BASE64 CSC_KEY_PASSWORD=$P12_PASSWORD GH_TOKEN=$GH_TOKEN yarn package:release:mac
+        run: npx cross-env PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true npx cross-env yarn package:release:mac
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -175,9 +176,8 @@ jobs:
       - name: Build linux version
         run: |
           sudo apt-get install --no-install-recommends -y libopenjp2-tools
-          npx cross-env GH_TOKEN=$GH_TOKEN BUILD_VERSION=$BUILD_VERSION RELEASE_CHANNEL=$RELEASE_CHANNEL yarn package:release:linux
+          npx yarn package:release:linux
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       #
@@ -257,7 +257,7 @@ jobs:
       #
       - name: Build and install
         run: |
-          npx cross-env GH_TOKEN=$GH_TOKEN BUILD_VERSION=$BUILD_VERSION RELEASE_CHANNEL=$RELEASE_CHANNEL sudo yarn package:release:win
+          npx cross-env sudo yarn package:release:win
         env:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
@@ -278,12 +278,13 @@ jobs:
         run: |
           chmod +x ./signer/CodeSignTool.sh
           mkdir -p ./app/release/build/signed
-          CODE_SIGN_TOOL_PATH=./signer ./signer/CodeSignTool.sh sign -username=$USERNAME -password=$PASSWORD -totp_secret=$SSLCOM_SIGNING_SECRET -output_dir_path=./app/release/build/signed -input_file_path=./app/release/build/Realm-Setup-$BUILD_VERSION.exe
+          CODE_SIGN_TOOL_PATH=./signer ./signer/CodeSignTool.sh sign -username=$USERNAME -password=$PASSWORD -totp_secret=$SSLCOM_SIGNING_SECRET -output_dir_path=./app/release/build/signed -input_file_path=./app/release/build/Realm-Setup-$ARTIFACT_VERSION.exe
         env:
           USERNAME: ${{ secrets.CODE_SIGNING_USERNAME }}
           PASSWORD: ${{ secrets.CODE_SIGNING_PASSWORD }}
           SSLCOM_SIGNING_SECRET: ${{ secrets.SSLCOM_SIGNING_SECRET }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          ARTIFACT_VERSION: ${{ needs.pre-deploy.outputs.artifact_version }}
           BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
           BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
           BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
@@ -291,13 +292,14 @@ jobs:
       - name: Deploy binaries and other artifacts to draft release
         run: |
           # move the signed version of the exe into the main build folder
-          rm -f ./app/release/build/Realm-Setup-$BUILD_VERSION.exe
-          mv ./app/release/build/signed/Realm-Setup-$BUILD_VERSION.exe ./app/release/build/Realm-Setup-$BUILD_VERSION.exe
+          rm -f ./app/release/build/Realm-Setup-$ARTIFACT_VERSION.exe
+          mv ./app/release/build/signed/Realm-Setup-$ARTIFACT_VERSION.exe ./app/release/build/Realm-Setup-$ARTIFACT_VERSION.exe
           gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           GH_DEBUG: api
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          ARTIFACT_VERSION: ${{ needs.pre-deploy.outputs.artifact_version }}
           BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
           BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
           BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
@@ -329,7 +331,7 @@ jobs:
             console.log(script({github}, JSON.parse(process.env.CI_ENV), ['./desks/realm']))
         env:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
-      # publish latest agent udpates for realm, courier, and usher
+      # publish latest agent udpates for realm and usher
       - name: Publish ship updates
         run: |
           mkdir ~/.ssh
@@ -338,8 +340,6 @@ jobs:
           chmod 600 ~/.ssh/usher_rsa
           ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf urbit/hostyv/realm/*"
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm/* $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/realm
-          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf urbit/hostyv/courier/*"
-          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/courier/* $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/courier
           ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf urbit/hostyv/usher/*"
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher/* $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/usher
         env:
@@ -363,7 +363,7 @@ jobs:
               ship: process.env.DEPLOY_SHIP,
               code: process.env.DEPLOY_SHIP_CODE,
               rootUrl: process.env.DEPLOY_ROOT_URL,
-              mounts: ['usher', 'realm', 'courier']
+              mounts: ['usher', 'realm']
             }))
       # Workaround to avoid "Post Run actions/setup-node" failures.
       # See: https://codesti.com/issue/actions/setup-node/317

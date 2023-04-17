@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Rubik:ital, wght@0, 400;0, 500;0, 600;0, 700;0, 800;0, 900;1, 400;1, 500;1, 600;1, 700;1, 800;1, 900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 :root {
   --theme-mode: 'light';
@@ -16,6 +16,7 @@
   --rlm-box-shadow-3: 0px 0px 9px rgba(0, 0, 0, 0.18);
   --rlm-box-shadow-lifted: 0px 0px 9px rgba(0, 0, 0, 0.24);
 
+  --rlm-home-button-rgba: 204, 204, 204, 0.5;
   --rlm-base-rgba: 196, 195, 191;
   --rlm-accent-rgba: 78, 158, 253;
   --rlm-input-rgba: 255, 255, 255;

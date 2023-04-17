@@ -37,10 +37,10 @@ const VIDEO_REGEX = [
 ];
 
 const MEDIA_TYPE = {
-  IMAGE: /(\.jpg|\.webp|\.jpeg|\.png|\.gif|\.svg|\.avif)$/,
-  VIDEO: /(\.mp4|\.webm|\.ogg|\.ogv|\.avi|\.mov|\.wmv|\.flv|\.mpg|\.mpeg)$/,
-  AUDIO: /(\.mp3|\.wav|\.ogg|\.oga|\.flac|\.aac|\.m4a)$/,
-  DOCUMENT: /(\.pdf|\.doc|\.docx|\.xls|\.xlsx|\.ppt|\.pptx)$/,
+  IMAGE: /(\.jpg|\.webp|\.jpeg|\.png|\.gif|\.svg|\.avif|\.tiff)$/i,
+  VIDEO: /(\.mp4|\.webm|\.ogg|\.ogv|\.avi|\.mov|\.wmv|\.flv|\.mpg|\.mpeg)$/i,
+  AUDIO: /(\.mp3|\.wav|\.ogg|\.oga|\.flac|\.aac|\.m4a)$/i,
+  DOCUMENT: /(\.pdf|\.doc|\.docx|\.xls|\.xlsx|\.ppt|\.pptx)$/i,
   LINK: /((http|https|ftp):\/\/)?(www\.)?[a-z0-9]+([-.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?/,
 };
 

@@ -68,6 +68,8 @@ export interface Member {
   roles: MemberRole[];
   status: MemberStatus;
   patp: string;
+  shortPatp: string;
+  alias: string;
 }
 export interface Members {
   [patp: Patp]: Member;

@@ -33,7 +33,7 @@ export const DataSentIndicator = ({ dataSent }: Props) => {
         <Text.Body color="intent-alert">
           {bytesToString(Number(minioBytes))} (S3 data)
         </Text.Body>
-        of {bytesToString(totalBytes)}.
+        of {bytesToString(totalBytes)}
       </Text.Body>
     </Flex>
   );
