@@ -23,6 +23,7 @@ export const LoginStep = ({ setStep }: StepProps) => {
       ) {
         throw new Error('Invalid response from login');
       } else {
+        localStorage.setItem('password', password);
         localStorage.setItem('token', response.token);
         localStorage.setItem('email', response.email);
         localStorage.setItem(
@@ -39,6 +40,8 @@ export const LoginStep = ({ setStep }: StepProps) => {
 
       if (!masterAccount) return false;
 
+      localStorage.setItem('masterAccountId', masterAccount.id.toString());
+
       const userShips = await thirdEarthApi.getUserShips(response.token);
 
       if (userShips.length > 0) {
@@ -49,8 +52,9 @@ export const LoginStep = ({ setStep }: StepProps) => {
             accountId: masterAccount.id,
             patp: ship.patp,
             url: ship.link,
-            nickname: ship.screen_name,
             avatar: '',
+            nickname: ship.screen_name,
+            description: '',
             color: '#000000',
             type: 'hosted',
             status: 'online',

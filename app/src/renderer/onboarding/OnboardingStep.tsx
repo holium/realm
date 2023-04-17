@@ -45,7 +45,7 @@ export const OnboardingStepPresenter = ({
     case '/add-server':
       return <AddServerStep setStep={handleSetStep} />;
     case '/passport':
-      return <PassportStep setStep={handleSetStep} />;
+      return <PassportStep setStep={handleSetStep} onNext={onFinish} />;
     case '/installation':
       return <InstallationStep setStep={handleSetStep} onNext={onFinish} />;
     case '/choose-id':
