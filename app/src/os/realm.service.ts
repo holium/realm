@@ -12,7 +12,7 @@ import { AuthService } from './services/auth/auth.service';
 import { ShipService } from './services/ship/ship.service';
 import { getReleaseChannel, setReleaseChannel } from './lib/settings';
 import { getCookie } from './lib/shipHelpers';
-import APIConnection from './services/conduit';
+import { APIConnection } from './services/api';
 
 export class RealmService extends AbstractService {
   // private realmProcess: RealmProcess | null = null;
