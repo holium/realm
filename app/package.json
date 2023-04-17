@@ -21,7 +21,7 @@
     "start:onboard": "cross-env DEBUG_PROD=true INSTALL_MOON='~hostyv:realm' NODE_ENV=development electronmon -r ts-node/register/transpile-only ./src/main/main.ts",
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.holium/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.holium/configs/webpack.config.renderer.dev.ts",
-    "test": "jest"
+    "test": "cross-env NODE_ENV=development ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ../node_modules/jest-cli/bin/jest.js"
   },
   "dependencies": {
     "@amplitude/analytics-browser": "^1.9.4",
@@ -73,6 +73,7 @@
     "socket.io-client": "^4.5.4",
     "styled-components": "^5.3.3",
     "styled-system": "^5.1.5",
+    "ts-node-dev": "^2.0.0",
     "urbit-ob": "^5.0.1",
     "yup": "^0.32.11"
   },
@@ -222,13 +223,5 @@
   "bugs": {
     "url": "https://github.com/holium/realm/issues"
   },
-  "homepage": "https://github.com/holium/realm#readme",
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node",
-    "moduleDirectories": [
-      "node_modules",
-      "src"
-    ]
-  }
+  "homepage": "https://github.com/holium/realm#readme"
 }
