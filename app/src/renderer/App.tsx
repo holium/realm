@@ -10,15 +10,19 @@ import { SelectionProvider } from './lib/selection';
 import { Onboarding } from './onboarding/Onboarding';
 import { ErrorBoundary } from './system/ErrorBoundary';
 import { Auth } from './system/authentication/index';
+import { Splash } from './onboarding/Splash';
 
 function AppContentPresenter() {
-  const { authStore, booted } = useAppState();
+  const { seenSplash, authStore, booted } = useAppState();
   if (!booted) {
     return (
       <Flex>
         <Spinner size={2} />
       </Flex>
     );
+  }
+  if (!seenSplash) {
+    return <Splash />;
   }
   const isOnboarding = authStore.accounts.length === 0;
   const isLoggedOut = !authStore.session;

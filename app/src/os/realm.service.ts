@@ -13,6 +13,7 @@ import { ShipService } from './services/ship/ship.service';
 import { getReleaseChannel, setReleaseChannel } from './lib/settings';
 import { getCookie } from './lib/shipHelpers';
 import APIConnection from './services/conduit';
+import { defaultTheme } from '../renderer/lib/defaultTheme';
 
 type CreateAccountPayload = {
   patp: string;
@@ -79,6 +80,7 @@ export class RealmService extends AbstractService {
         screen: hasSession ? 'os' : 'login',
         accounts: this.services?.auth.getAccounts(),
         session,
+        seenSplash: this.services?.auth.hasSeenSplash(),
       },
     });
   }

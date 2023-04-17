@@ -41,6 +41,18 @@ export class AuthDB {
     });
   }
 
+  hasSeenSplash(): boolean {
+    const result: any = this.authDB
+      .prepare('SELECT seenSplash FROM accounts_meta;')
+      .all();
+    if (result.length === 0) return false;
+    return result[0]?.seenSplash === 1 || false;
+  }
+
+  setSeenSplash(): void {
+    this.authDB.prepare('UPDATE accounts_meta SET seenSplash = 1;').run();
+  }
+
   migrateJsonToSqlite() {
     try {
       const oldAuth = new Store({
@@ -143,6 +155,7 @@ create table if not exists accounts_order (
 );
 
 create table if not exists accounts_meta (
+  seenSplash          INTEGER NOT NULL DEFAULT 0,
   migrated            INTEGER NOT NULL DEFAULT 0,
   migratedAt          INTEGER
 );

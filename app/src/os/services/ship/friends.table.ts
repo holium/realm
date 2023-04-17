@@ -45,6 +45,7 @@ export class Friends extends AbstractDataAccess<Friend> {
 
   private async _init() {
     const friends: any[] = await this._fetchFriends();
+    if (!friends) return;
     if (!this.db) throw new Error('No db connection');
     const insert = this.db.prepare(
       `REPLACE INTO friends (
@@ -95,7 +96,7 @@ export class Friends extends AbstractDataAccess<Friend> {
       app: 'friends',
       path: '/all',
     });
-    return response.friends;
+    return response?.friends;
   }
 
   public async getFriends() {

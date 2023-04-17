@@ -1,4 +1,4 @@
-import { Instance, types, clone } from 'mobx-state-tree';
+import { Instance, types, clone, flow } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
 import { AccountModelType } from './models/account.model';
 import { defaultTheme, Theme, ThemeType } from './models/theme.model';
@@ -6,7 +6,14 @@ import { AuthenticationModel } from './auth.store';
 import { ShellModel } from './models/shell.model';
 import { RealmUpdateTypes } from 'os/realm.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';
-import { BazaarIPC, MainIPC, NotifIPC, RealmIPC, SpacesIPC } from './ipc';
+import {
+  AuthIPC,
+  BazaarIPC,
+  MainIPC,
+  NotifIPC,
+  RealmIPC,
+  SpacesIPC,
+} from './ipc';
 import { shipStore } from './ship.store';
 import { SoundActions } from 'renderer/lib/sound';
 
@@ -15,6 +22,7 @@ const Screen = types.enumeration(['login', 'onboarding', 'os']);
 const AppStateModel = types
   .model('AppStateModel', {
     booted: types.boolean,
+    seenSplash: types.boolean,
     currentScreen: Screen,
     theme: Theme,
     isLoggedIn: types.boolean,
@@ -41,10 +49,12 @@ const AppStateModel = types
         patp: string;
         cookie: string;
       };
+      seenSplash: boolean;
     }) {
       self.authStore._setAccounts(data.accounts);
       self.currentScreen = data.screen;
       self.booted = true;
+      self.seenSplash = data.seenSplash;
       if (data.session) {
         self.authStore._setSession(data.session.patp);
         self.shellStore.setIsBlurred(false);
@@ -79,6 +89,10 @@ const AppStateModel = types
     setOnline(isOnline: boolean) {
       self.online = isOnline;
     },
+    setSeenSplash: flow(function* () {
+      self.seenSplash = true;
+      yield AuthIPC.setSeenSplash();
+    }),
   }));
 
 // const loadSnapshot = () => {
@@ -91,6 +105,7 @@ const AppStateModel = types
 
 export const appState = AppStateModel.create({
   booted: false,
+  seenSplash: false,
   currentScreen: 'onboarding',
   theme: Theme.create(defaultTheme),
   isLoggedIn: false,

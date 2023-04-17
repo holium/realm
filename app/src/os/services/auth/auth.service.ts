@@ -249,6 +249,19 @@ export class AuthService extends AbstractService {
     return bcrypt.compareSync(password, hash);
   }
 
+  public hasSeenSplash(): boolean {
+    if (!this.authDB) return false;
+    return this.authDB.hasSeenSplash();
+  }
+
+  public setSeenSplash(): void {
+    this.authDB?.setSeenSplash();
+    this.sendUpdate({
+      type: 'seenSplash',
+      payload: true,
+    });
+  }
+
   public async deriveDbKey(password: string) {
     const salt = crypto.randomBytes(16);
     return crypto

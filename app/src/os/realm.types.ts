@@ -10,6 +10,7 @@ export type RealmUpdateBooted = {
       patp: string;
       cookie: string;
     };
+    seenSplash: boolean;
   };
 };
 
