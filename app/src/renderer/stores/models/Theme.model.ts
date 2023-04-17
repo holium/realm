@@ -1,7 +1,7 @@
 import { Instance, types, applySnapshot, getSnapshot } from 'mobx-state-tree';
 import { bgIsLightOrDark } from '@holium/design-system';
 import { darken, lighten, rgba } from 'polished';
-import { defaultTheme } from 'renderer/lib/defaultTheme';
+import { defaultTheme } from '../../lib/defaultTheme';
 
 export const Theme = types
   .model('Theme', {

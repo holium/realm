@@ -1,7 +1,7 @@
 import { Instance, types, clone } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
 import { AccountModelType } from './models/Account.model';
-import { defaultTheme } from 'renderer/lib/defaultTheme';
+import { defaultTheme } from '../lib/defaultTheme';
 import { Theme, ThemeType } from './models/theme.model';
 import { AuthenticationModel } from './auth.store';
 import { ShellModel } from './models/Shell.model';
