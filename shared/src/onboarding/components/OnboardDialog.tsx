@@ -7,6 +7,7 @@ import {
   OnboardDialogBodyContainer,
   OnboardDialogCard,
   OnboardDialogFooter,
+  OnboardDialogFooterBackButtonFlex,
   OnboardDialogIconContainer,
 } from './OnboardDialog.styles';
 import { SubmitButton } from './hosting/SubmitButton';
@@ -56,7 +57,7 @@ export const OnboardDialog = ({
       </OnboardDialogBody>
       <OnboardDialogFooter>
         <Flex flex={1}>
-          <Flex flex={3} alignItems="center">
+          <OnboardDialogFooterBackButtonFlex>
             {onBack && (
               <OnboardDialogBackButton onClick={onBack} type="button">
                 <Icon
@@ -67,8 +68,8 @@ export const OnboardDialog = ({
                 />
               </OnboardDialogBackButton>
             )}
-          </Flex>
-          <Flex flex={5}>
+          </OnboardDialogFooterBackButtonFlex>
+          <Flex flex={5} gap="8px">
             <Flex flex={1} alignItems="center">
               {footerText}
             </Flex>

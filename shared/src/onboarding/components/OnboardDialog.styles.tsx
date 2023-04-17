@@ -133,6 +133,19 @@ export const OnboardDialogBackButton = styled.button`
 export const OnboardDialogFooter = styled.footer`
   width: 100%;
   height: 30px;
+
+  @media (max-width: ${TABLET_WIDTH}px) {
+    flex-direction: column;
+  }
+`;
+
+export const OnboardDialogFooterBackButtonFlex = styled.div`
+  flex: 3;
+  align-items: center;
+
+  @media (max-width: ${TABLET_WIDTH}px) {
+    flex: none;
+  }
 `;
 
 export const OnboardDialogButtonText = styled(Text.Body)`
