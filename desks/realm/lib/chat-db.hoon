@@ -748,7 +748,12 @@
     ++  msg-id-to-json
       |=  =msg-id:sur
       ^-  json
-      s+(spat ~[(scot %da timestamp.msg-id) (scot %p sender.msg-id)])
+      s+(msg-id-to-cord msg-id)
+    ::
+    ++  msg-id-to-cord
+      |=  =msg-id:sur
+      ^-  cord
+      (spat ~[(scot %da timestamp.msg-id) (scot %p sender.msg-id)])
     ::
     ++  metadata-to-json
       |=  m=(map cord cord)

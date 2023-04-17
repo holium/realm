@@ -1,6 +1,6 @@
 ::  app/realm-chat.hoon
 /-  *realm-chat, db-sur=chat-db, notify
-/+  dbug, lib=realm-chat
+/+  dbug, lib=realm-chat, db-lib=chat-db
 =|  state-0
 =*  state  -
 :: ^-  agent:gall
@@ -258,6 +258,10 @@
   |=  [=message:db-sur =ship dismissed=?]
   ^-  card
   =/  msg-part  (snag 0 message)
+  =/  title     (notif-msg message)
+  =/  content   (crip "from {(scow %p sender.msg-id.msg-part)}")
+  =/  link      (msg-id-to-cord:encode:db-lib msg-id.msg-part)
+  ~&  >  link
   [
     %pass
     /dbpoke
@@ -265,7 +269,7 @@
     [ship %notif-db]
     %poke
     %notif-db-poke
-    !>([%create %realm-chat path.msg-part %message (notif-msg message) (crip "from {(scow %p sender.msg-id.msg-part)}") '' ~ '' ~ dismissed])
+    !>([%create %realm-chat path.msg-part %message title content '' ~ link ~ dismissed])
   ]
 ++  notif-msg
   |=  =message:db-sur

@@ -52,6 +52,7 @@ export const Notification = ({
       background="card"
       onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
+        onDismiss(app, path, id);
         onLinkClick(app, path, notification.link);
       }}
     >
