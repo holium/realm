@@ -9,3 +9,10 @@ export const constants = {
   STRIPE_KEY: nextConfig.STRIPE_KEY as string,
   AMPLITUDE_API_KEY: nextConfig.AMPLITUDE_API_KEY as string,
 };
+
+export const downloadLinks = {
+  macM1: 'https://ghproxy.holium.xyz/latest-Realm-mac-arm64.dmg',
+  macIntel: 'https://ghproxy.holium.xyz/latest-Realm-mac.dmg',
+  windows: 'https://ghproxy.holium.xyz/latest/windows',
+  linux: 'https://ghproxy.holium.xyz/latest/linux',
+};

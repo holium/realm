@@ -10,10 +10,6 @@ export const CredentialsStep = ({ setStep }: StepProps) => {
     accessCode: '',
   });
 
-  const onBack = () => {
-    setStep('/booting');
-  };
-
   const onNext = () => {
     setStep('/passport');
 
@@ -32,11 +28,5 @@ export const CredentialsStep = ({ setStep }: StepProps) => {
     });
   }, []);
 
-  return (
-    <CredentialsDialog
-      credentials={credentials}
-      onBack={onBack}
-      onNext={onNext}
-    />
-  );
+  return <CredentialsDialog credentials={credentials} onNext={onNext} />;
 };

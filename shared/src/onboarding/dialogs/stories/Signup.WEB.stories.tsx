@@ -112,7 +112,6 @@ export const CredentialsDialogStory: ComponentStory<
         url: 'https://pasren-satmex.holium.network',
         accessCode: 'tolnym-rilmug-ricnep-marlyx',
       }}
-      onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>

@@ -1,9 +1,10 @@
 import { Instance, types, clone, flow } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
-import { AccountModelType } from './models/account.model';
-import { defaultTheme, Theme, ThemeType } from './models/theme.model';
+import { AccountModelType } from './models/Account.model';
+import { defaultTheme } from '../lib/defaultTheme';
+import { Theme, ThemeType } from './models/theme.model';
 import { AuthenticationModel } from './auth.store';
-import { ShellModel } from './models/shell.model';
+import { ShellModel } from './models/Shell.model';
 import { RealmUpdateTypes } from 'os/realm.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';
 import {
@@ -91,7 +92,7 @@ const AppStateModel = types
     },
     setSeenSplash: flow(function* () {
       self.seenSplash = true;
-      yield AuthIPC.setSeenSplash();
+      yield AuthIPC.setSeenSplash() as Promise<void>;
     }),
   }));
 

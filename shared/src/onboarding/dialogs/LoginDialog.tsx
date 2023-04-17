@@ -19,7 +19,7 @@ type Props = {
 };
 
 export const LoginDialog = ({
-  prefilledEmail,
+  prefilledEmail = '',
   showTerms = false,
   label,
   onLogin,

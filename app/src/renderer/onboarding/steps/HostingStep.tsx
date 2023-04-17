@@ -13,6 +13,7 @@ export const HostingStep = ({ setStep }: StepProps) => {
   };
 
   const onGetHosting = () => {
+    localStorage.setItem('isHosted', 'true');
     setStep('/choose-id');
   };
 

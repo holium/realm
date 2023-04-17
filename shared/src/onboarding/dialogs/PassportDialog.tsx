@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import styled from 'styled-components';
-import { Flex, Box } from '@holium/design-system/general';
+import { Flex, Box, Spinner } from '@holium/design-system/general';
 import {
   OnboardDialogDescription,
   OnboardDialogTitle,
@@ -10,7 +10,7 @@ import { AccountDialogSubtitle } from '../components/AccountDialog.styles';
 import { PassportCard } from '../components/PassportCard';
 import { AddImageIcon } from '../icons/AddImageIcon';
 
-const List = styled.li`
+const List = styled.ul`
   margin-left: 20px;
   // Remove ::marker in beginning of list.
   &::marker {
@@ -25,7 +25,7 @@ const ListItem = styled(AccountDialogSubtitle)`
 `;
 
 type Props = {
-  patp: string;
+  patp: string | null;
   onBack: () => void;
   onNext: (
     username: string,
@@ -62,14 +62,18 @@ export const PassportDialog = ({ patp, onBack, onNext }: Props) => {
             <br />
             It allows p2p payments, DMs, etc. Make it yours.
           </OnboardDialogDescription>
-          <PassportCard
-            patp={patp}
-            username={username}
-            description={description}
-            setUsername={setUsername}
-            setDescription={setDescription}
-            setAvatarSrc={setAvatarSrc}
-          />
+          {patp ? (
+            <PassportCard
+              patp={patp}
+              username={username}
+              description={description}
+              setUsername={setUsername}
+              setDescription={setDescription}
+              setAvatarSrc={setAvatarSrc}
+            />
+          ) : (
+            <Spinner size={8} />
+          )}
           <List>
             <ListItem as="li">A username can be changed later</ListItem>
             <ListItem as="li">

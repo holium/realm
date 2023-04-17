@@ -7,6 +7,7 @@ export interface Account {
   patp: string;
   url: string;
   nickname: string;
+  description: string;
   color: string;
   avatar: string;
   status: string;
@@ -28,6 +29,7 @@ export class Accounts extends AbstractDataAccess<Account> {
       patp: row.patp,
       url: row.url,
       nickname: row.nickname,
+      description: row.description,
       color: row.color,
       avatar: row.avatar,
       status: row.status,
@@ -89,6 +91,7 @@ export const accountsInit = `
     type            TEXT NOT NULL DEFAULT 'local',
     url             TEXT NOT NULL,
     nickname        TEXT,
+    description     TEXT,
     color           TEXT default '#000000',
     avatar          TEXT,
     status          TEXT NOT NULL DEFAULT 'initial',

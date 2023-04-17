@@ -5,7 +5,11 @@ import { Login } from './login';
 // import { Splash } from './Splash';
 // import { useAppState } from 'renderer/stores/app.store';
 
-const AuthPresenter = () => {
+type Props = {
+  onAddShip: () => void;
+};
+
+const AuthPresenter = ({ onAddShip }: Props) => {
   // const {} = useAppState();
   // const { onboarding } = useServices();
 
@@ -23,9 +27,10 @@ const AuthPresenter = () => {
   //     </Flex>
   //   );
   // }
+
   return (
     <Flex height="100vh" alignItems="center" justifyContent="center">
-      <Login addShip={() => console.log('toggle onboarding')} />
+      <Login addShip={onAddShip} />
     </Flex>
   );
 };

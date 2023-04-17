@@ -204,10 +204,15 @@ export class ShipService extends AbstractService {
 
 export default ShipService;
 
+type ShipServicePublicMethods = Pick<
+  ShipService,
+  'getOurGroups' | 'getGroup' | 'getGroupMembers' | 'uploadFile'
+>;
+
 // Generate preload
 export const shipPreload = ShipService.preload(
   new ShipService('', '', { preload: true })
-);
+) as ShipServicePublicMethods;
 
 export interface FileUploadParams {
   source: 'file' | 'buffer';
