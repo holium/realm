@@ -13,6 +13,7 @@ import { ShipService } from './services/ship/ship.service';
 import { getReleaseChannel, setReleaseChannel } from './lib/settings';
 import { getCookie } from './lib/shipHelpers';
 import APIConnection from './services/conduit';
+import { defaultTheme } from 'renderer/lib/defaultTheme';
 
 type CreateAccountPayload = {
   patp: string;
@@ -301,7 +302,9 @@ type RealmServicePublicMethods = Pick<
   | 'createAccount'
   | 'getReleaseChannel'
   | 'setReleaseChannel'
->;
+> & {
+  onUpdate: (...args: any[]) => void;
+};
 
 // Generate preload
 export const realmPreload = RealmService.preload(
