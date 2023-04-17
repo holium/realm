@@ -1,5 +1,6 @@
 import { Conduit, ConduitState } from '@holium/conduit';
 import log from 'electron-log';
+import { deSig } from '@urbit/aura';
 
 export type ConduitSession = {
   url: string;
@@ -22,7 +23,7 @@ export class APIConnection {
     this.conduitInstance
       .init(
         session.url,
-        session.ship.substring(1),
+        deSig(session.ship),
         session.cookie ?? '',
         session.code
       )

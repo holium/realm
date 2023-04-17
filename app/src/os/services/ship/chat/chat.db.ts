@@ -2,6 +2,7 @@ import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
 import { APIConnection } from '../../conduit';
+import { preSig } from '@urbit/aura';
 
 import {
   ChatDbReactions,
@@ -486,7 +487,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
           json_extract(json(metadata), '$.timestamp') DESC;
     `);
     const result: any = query.all(
-      `~${APIConnection.getInstance().conduit.ship}`,
+      preSig(APIConnection.getInstance().conduit.ship),
       path
     );
 

@@ -13,6 +13,7 @@ import {
   RoomsManager,
   ShipConfig,
 } from '@holium/realm-room';
+import { preSig } from '@urbit/aura';
 
 const testProtocolConfig: ProtocolConfig = {
   rtc: {
@@ -49,7 +50,7 @@ export const RoomsManagerProvider = ({ ship, children }: Props) => {
         scry: newApi.scry.bind(newApi),
       };
       const protocol = new RealmProtocol(
-        `~${ship.ship}`,
+        preSig(ship.ship),
         testProtocolConfig,
         handlers
       );

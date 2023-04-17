@@ -4,6 +4,7 @@ import APIConnection from '../../conduit';
 import { chatDBPreload, ChatDB } from './chat.db';
 import { ChatPathMetadata, ChatPathType } from './chat.types';
 import { InvitePermissionType } from 'renderer/stores/models/chat.model';
+import { preSig } from '@urbit/aura';
 
 export class ChatService extends AbstractService {
   public chatDB?: ChatDB;
@@ -165,7 +166,7 @@ export class ChatService extends AbstractService {
       // store the peer in metadata in the case the peer leaves
       dmPeer =
         peers.filter(
-          (p) => p !== `~${APIConnection.getInstance().conduit?.ship}`
+          (p) => p !== preSig(APIConnection.getInstance().conduit?.ship)
         )[0] || '';
       metadata.peer = dmPeer;
     }
