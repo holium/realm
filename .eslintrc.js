@@ -25,6 +25,28 @@ module.exports = {
     '@typescript-eslint/no-non-null-assertion': 'error',
     '@typescript-eslint/no-unused-expressions': 'off',
     '@typescript-eslint/no-unused-vars': 'off',
+    'simple-import-sort/imports': [
+      'error',
+      {
+        groups: [
+          // Packages `react` related packages come first.
+          ['^(react|electron)', '^@?\\w'],
+          // Side effect imports.
+          ['^\\u0000'],
+          // Urbit packages
+          ['^(@urbit)', '^@?\\w'],
+          // Other internal packages.
+          ['^(@|components)(/.*|$)'],
+          // Parent imports. Put `..` last.
+          ['^\\.\\.(?!/?$)', '^\\.\\./?$'],
+          // Other relative imports. Put same-folder imports and `.` last.
+          ['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$'],
+          // Style imports.
+          ['^.+\\.?(css)$'],
+        ],
+      },
+    ],
+    'simple-import-sort/exports': 'error',
   },
   settings: {
     react: {
