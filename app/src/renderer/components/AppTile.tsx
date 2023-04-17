@@ -314,7 +314,6 @@ const AppTilePresenter = ({
       const iconTileSize = sizes[tileSize];
       const iconSize =
         iconTileSize < 88 ? sizes[tileSize] / 1.6 : sizes[tileSize] / 2.5;
-
       graphic = (
         <TileStyle
           id={tileId}
@@ -352,7 +351,7 @@ const AppTilePresenter = ({
           background={tileBg}
         >
           {/* @ts-ignore */}
-          <Icon name={app.icon} height={iconSize} width={iconSize} />
+          <Icon name={app.icon} size={iconSize} />
           {title}
         </TileStyle>
       );

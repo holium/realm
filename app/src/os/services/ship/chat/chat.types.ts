@@ -1,4 +1,4 @@
-import { InvitePermissionType } from 'renderer/apps/Courier/models';
+import { InvitePermissionType } from 'renderer/stores/models/chat.model';
 
 export type PathsRow = {
   path: string;

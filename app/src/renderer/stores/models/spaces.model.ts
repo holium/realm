@@ -346,7 +346,14 @@ export const SpacesStore = types
         console.error(e);
       }
     }),
-
+    reset() {
+      self.spaces.clear();
+      self.selected = undefined;
+      self.loader.set('initial');
+      self.join.set('initial');
+      self.creating.set('initial');
+      self.invitations.reset();
+    },
     // Setters
     setLoader(status: 'initial' | 'loading' | 'error' | 'loaded') {
       self.loader.state = status;

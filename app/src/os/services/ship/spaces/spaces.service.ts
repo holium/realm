@@ -340,6 +340,11 @@ export class SpacesService extends AbstractService {
   }
 
   public async joinSpace(path: string): Promise<void> {
+    log.info({
+      join: {
+        path: pathToObj(path),
+      },
+    });
     return await new Promise((resolve, reject) => {
       APIConnection.getInstance().conduit.poke({
         app: 'spaces',
@@ -549,18 +554,7 @@ export class SpacesService extends AbstractService {
   }
 
   public async getFeaturedSpaces() {
-    // try {
-    //   const response = await APIConnection.getInstance().conduit.poke({
-    //     app: 'spaces',
-    //     mark: 'featured-action',
-    //     json: {
-    //       'get-featured': {},
-    //     },
-    //   });
-    //   return response;
-    // } catch (e) {
-    //   log.error(e);
-    // }
+    return this.featuredSpacesDB?.getFeaturedSpaces();
   }
 }
 

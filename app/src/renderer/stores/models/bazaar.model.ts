@@ -268,6 +268,15 @@ export const BazaarStore = types
       // self.recentApps.push(...recentApps);
       // self.recentDevs.push(...recentDevs);
     }),
+    _onInitialLoad(catalog: any) {
+      applySnapshot(self.catalog, catalog);
+    },
+    reset() {
+      self.catalog.clear();
+      self.gridIndex.clear();
+      self.recentApps.clear();
+      self.recentDevs.clear();
+    },
     // Updates
     // _setAppStatus(appId: string, app: UrbitAppType, gridIndex: any) {
     //   self.catalog.set(appId, {

@@ -1,14 +1,7 @@
 import { useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
-import {
-  Flex,
-  Button,
-  Icon,
-  Text,
-  NoScrollBar,
-  Avatar,
-} from '@holium/design-system';
+import { Flex, Button, Icon, NoScrollBar } from '@holium/design-system';
 import { SpaceTitlebar } from './SpaceTitlebar';
 import { AppSuite } from './AppSuite/AppSuite';
 import { RecommendedApps } from './Recommended';
@@ -81,8 +74,8 @@ const HomePresenter = (props: HomePaneProps) => {
             initial={{ opacity: 0 }}
             animate={isOpen ? 'show' : 'exit'}
             exit={{ opacity: 0 }}
-            maxHeight={42}
-            height={42}
+            maxHeight={44}
+            height={44}
             gap={12}
             mb={40}
             mt={40}
@@ -107,7 +100,8 @@ const HomePresenter = (props: HomePaneProps) => {
               },
             }}
           >
-            {ship && (
+            {/* TODO replace with updater dropdown */}
+            {/* {ship && (
               <Avatar
                 simple
                 size={32}
@@ -115,7 +109,7 @@ const HomePresenter = (props: HomePaneProps) => {
                 patp={ship.patp}
                 sigilColor={[ship.color || '#000000', 'white']}
               />
-            )}
+            )} */}
             <AppSearchApp mode="home" />
             <Flex justifyContent="flex-end">
               <Button.IconButton
@@ -133,11 +127,11 @@ const HomePresenter = (props: HomePaneProps) => {
             initial={{ opacity: 0 }}
             animate={isOpen ? 'show' : 'exit'}
             exit={{ opacity: 0 }}
-            maxHeight={42}
-            height={42}
+            maxHeight={44}
+            height={44}
             gap={12}
             mt={40}
-            mb={46}
+            mb={40}
             width={maxWidth}
             variants={{
               hidden: {
@@ -201,9 +195,9 @@ const HomePresenter = (props: HomePaneProps) => {
               }}
               gap={20}
             >
-              <Text.Custom variant="h3" fontWeight={500}>
-                Your Apps
-              </Text.Custom>
+              {/* <Text.H4 height={20} fontWeight={500}>
+                {isOur ? '' : 'Your Apps'}
+              </Text.H4> */}
               <Flex
                 style={{ position: 'relative' }}
                 gap={32}

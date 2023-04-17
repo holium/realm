@@ -7,7 +7,7 @@ import {
   convertFragmentsToText,
 } from '@holium/design-system';
 import { useContextMenu } from 'renderer/components';
-import { ChatMessageType } from '../models';
+import { ChatMessageType } from '../../../stores/models/chat.model';
 import { toJS } from 'mobx';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { MainIPC } from 'renderer/stores/ipc';

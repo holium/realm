@@ -32,12 +32,14 @@ export class APIConnection {
   }
 
   public static getInstance(session?: ConduitSession): APIConnection {
-    if (!APIConnection.instance) {
-      if (!session) {
-        throw new Error(
-          'API key must be provided on the first call to getInstance.'
-        );
-      }
+    if (!APIConnection.instance && !session) {
+      throw new Error(
+        'API key must be provided on the first call to getInstance.'
+      );
+    }
+    if (session) {
+      if (APIConnection.instance) APIConnection.instance.conduit.cleanup();
+      // if a session is provided, we can infer it is to create a new instance
       APIConnection.instance = new APIConnection(session);
     }
     return APIConnection.instance;

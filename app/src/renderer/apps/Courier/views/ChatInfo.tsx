@@ -22,7 +22,10 @@ import { FileUploadParams } from 'os/services/ship/models/ship';
 import { useFileUpload } from 'renderer/lib/useFileUpload';
 import { IuseStorage } from 'renderer/lib/useStorage';
 import { observer } from 'mobx-react-lite';
-import { InvitePermissionType, PeerModelType } from '../models';
+import {
+  InvitePermissionType,
+  PeerModelType,
+} from '../../../stores/models/chat.model';
 import { ExpiresValue, millisecondsToExpires } from '../types';
 import { useTrayApps } from 'renderer/apps/store';
 import { useShipStore } from 'renderer/stores/ship.store';

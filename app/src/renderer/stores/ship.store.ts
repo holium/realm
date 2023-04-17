@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 import { Instance, types, flow, onSnapshot, SnapshotIn } from 'mobx-state-tree';
-import { ChatStore } from '../apps/Courier/store';
+import { ChatStore } from './chat.store';
 import { ShipIPC } from './ipc';
 import { SpacesStore } from './models/spaces.model';
 import { FriendsStore } from './models/friends.model';
@@ -64,6 +64,10 @@ export const ShipStore = types
       self.ship = null;
       self.notifStore.reset();
       self.chatStore.reset();
+      self.bazaarStore.reset();
+      self.spacesStore.reset();
+      self.friends.reset();
+      self.featuredStore.reset();
     },
     getOurGroups: flow(function* () {
       try {

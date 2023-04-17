@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 import {
   Flex,
@@ -22,12 +22,15 @@ export interface Space {
 
 const FeaturedListPresenter = () => {
   const { spacesStore, featuredStore } = useShipStore();
-  // const { bulletin } = useServices();
 
-  const [joining, setJoining] = useState(false);
+  useEffect(() => {
+    featuredStore.fetchFeatured();
+  }, []);
+
+  const joining = spacesStore.join.state === 'loading';
 
   const listData = featuredStore.list;
-  // console.log(bulletin.list);
+
   if (listData.length === 0) {
     return (
       <Flex flex={1} py={1} px={4} width="100%">
@@ -51,18 +54,14 @@ const FeaturedListPresenter = () => {
         data={listData}
         itemContent={(_, data) => {
           const onJoin = async () => {
-            setJoining(true);
             console.log('joining', data.path.substring(1));
             spacesStore
               .joinSpace(data.path.substring(1))
               .then(() => {
                 spacesStore.selectSpace(data.path);
-                spacesStore.setJoin('loaded');
-                setJoining(false);
               })
               .catch((err) => {
                 console.error(err);
-                setJoining(false);
               });
           };
           const hasJoined = spacesStore.getSpaceByPath(data.path) !== undefined;
