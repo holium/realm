@@ -27,6 +27,7 @@ export enum NewWalletScreen {
 
 const EthNewPresenter = () => {
   const { walletStore } = useShipStore();
+  console.log('walletStore.initialized', walletStore.initialized);
   const initialScreen = walletStore.initialized
     ? NewWalletScreen.DETECTED_EXISTING
     : NewWalletScreen.CREATE;

@@ -48,6 +48,7 @@ export class AuthService extends AbstractService {
       return;
     }
     this.authDB = new AuthDB();
+    console.log('SENDING AUTH UPDATE');
     this.sendUpdate({
       type: 'init',
       payload: this.getAccounts(),
