@@ -51,6 +51,12 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
     }
   }, [productId]);
 
+  useEffect(() => {
+    const stripeIframe = document.querySelector('iframe');
+    const stripeIframeBody = stripeIframe?.contentDocument?.body;
+    if (stripeIframeBody) stripeIframeBody.style.cursor = 'none !important';
+  }, [stripe]);
+
   const stripeOptions: StripeElementsOptions = {
     clientSecret: clientSecret,
     appearance: {

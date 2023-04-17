@@ -4,7 +4,7 @@ import { PassportDialog } from '@holium/shared';
 import { StepProps } from './types';
 
 export const PassportStep = ({ setStep }: StepProps) => {
-  const patp = 'patp';
+  const patp = localStorage.getItem('patp');
 
   useEffect(() => {
     track('Onboarding / Passport');
