@@ -1,6 +1,6 @@
 module.exports = {
   extends: ['react-app', 'plugin:prettier/recommended'],
-  plugins: ['unused-imports'],
+  plugins: ['unused-imports', 'simple-import-sort'],
   parser: '@typescript-eslint/parser',
   root: true,
   parserOptions: { project: './tsconfig.json' },
