@@ -9,7 +9,7 @@ import { OnboardingDialogWrapper } from './helpers';
 
 export default {
   component: LoginDialog,
-  title: 'Onboarding/Login flow',
+  title: 'Onboarding/Login flow WEB',
 } as ComponentMeta<typeof LoginDialog>;
 
 export const LoginDialogStory: ComponentStory<typeof LoginDialog> = () => (

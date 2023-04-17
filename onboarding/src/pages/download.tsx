@@ -1,13 +1,7 @@
 import { DownloadDialog } from '@holium/shared';
 import { Page } from 'components/Page';
 import { useNavigation } from '../util/useNavigation';
-
-const downloadLinks = {
-  macM1: 'https://ghproxy.holium.xyz/latest-Realm-mac-arm64.dmg',
-  macIntel: 'https://ghproxy.holium.xyz/latest-Realm-mac.dmg',
-  windows: 'https://ghproxy.holium.xyz/latest/windows',
-  linux: 'https://ghproxy.holium.xyz/latest/linux',
-};
+import { downloadLinks } from '../util/constants';
 
 export default function Download() {
   const { goToPage } = useNavigation();
