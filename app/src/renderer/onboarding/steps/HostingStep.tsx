@@ -2,14 +2,28 @@ import { useEffect } from 'react';
 import { HostingDialog } from '@holium/shared';
 import { track } from '@amplitude/analytics-browser';
 import { StepProps } from './types';
+import { useAppState } from 'renderer/stores/app.store';
+import { observer } from 'mobx-react';
 
-export const HostingStep = ({ setStep }: StepProps) => {
+type HostingStepProps = {
+  onFinish: () => Promise<boolean>;
+} & StepProps;
+
+export const HostingStepPresenter = ({
+  setStep,
+  onFinish,
+}: HostingStepProps) => {
+  const { authStore } = useAppState();
   useEffect(() => {
     track('Onboarding / Hosting');
   });
 
   const onBack = () => {
-    setStep('/login');
+    if (authStore.accounts.length > 0) {
+      onFinish();
+    } else {
+      setStep('/login');
+    }
   };
 
   const onGetHosting = () => {
@@ -29,3 +43,5 @@ export const HostingStep = ({ setStep }: StepProps) => {
     />
   );
 };
+
+export const HostingStep = observer(HostingStepPresenter);

@@ -1,5 +1,13 @@
 import { AccountModelType } from 'renderer/stores/models/account.model';
 
+export type LoginErrorType =
+  | 'bad-gateway'
+  | 'password'
+  | 'missing'
+  | 'code'
+  | 'unknown'
+  | '';
+
 export type RealmUpdateBooted = {
   type: 'booted';
   payload: {
@@ -14,13 +22,18 @@ export type RealmUpdateBooted = {
   };
 };
 
-export type RealmUpdateAuthenticated = {
-  type: 'authenticated';
+export type RealmUpdateAuthSuccess = {
+  type: 'auth-success';
   payload: {
     url: string;
     patp: string;
     cookie: string;
   };
+};
+
+export type RealmUpdateAuthFailed = {
+  type: 'auth-failed';
+  payload: LoginErrorType;
 };
 
 export type RealmUpdateLogout = {
@@ -31,6 +44,7 @@ export type RealmUpdateLogout = {
 };
 
 export type RealmUpdateTypes =
-  | RealmUpdateAuthenticated
+  | RealmUpdateAuthSuccess
+  | RealmUpdateAuthFailed
   | RealmUpdateBooted
   | RealmUpdateLogout;

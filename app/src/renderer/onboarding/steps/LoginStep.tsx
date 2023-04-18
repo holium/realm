@@ -7,7 +7,11 @@ import { thirdEarthApi } from '../thirdEarthApi';
 import { RealmIPC } from 'renderer/stores/ipc';
 import { defaultTheme } from 'renderer/lib/defaultTheme';
 
-export const LoginStep = ({ setStep }: StepProps) => {
+type LoginStepProps = {
+  onFinish: () => Promise<boolean>;
+} & StepProps;
+
+export const LoginStep = ({ setStep, onFinish }: LoginStepProps) => {
   useEffect(() => {
     track('Onboarding / Login');
   });
@@ -23,7 +27,6 @@ export const LoginStep = ({ setStep }: StepProps) => {
       ) {
         throw new Error('Invalid response from login');
       } else {
-        localStorage.setItem('password', password);
         localStorage.setItem('token', response.token);
         localStorage.setItem('email', response.email);
         localStorage.setItem(
@@ -36,6 +39,8 @@ export const LoginStep = ({ setStep }: StepProps) => {
       const masterAccount = await RealmIPC.createMasterAccount({
         email: response.email,
         encryptionKey: response.client_side_encryption_key,
+        authToken: response.token,
+        password: password,
       });
 
       if (!masterAccount) return false;
@@ -59,9 +64,9 @@ export const LoginStep = ({ setStep }: StepProps) => {
             type: 'hosted',
             status: 'online',
             theme: JSON.stringify(defaultTheme),
-            password,
           });
         });
+        onFinish();
       } else {
         // Go to the hosted / self hosted step.
         setStep('/hosting');

@@ -17,6 +17,7 @@ import {
 } from './ipc';
 import { shipStore } from './ship.store';
 import { SoundActions } from 'renderer/lib/sound';
+import { AuthUpdateTypes } from 'os/services/auth/auth.types';
 
 const Screen = types.enumeration(['login', 'onboarding', 'os']);
 
@@ -40,6 +41,7 @@ const AppStateModel = types
       'refreshing',
       'refreshed',
     ]),
+    error: types.maybeNull(types.string),
     //
   })
   .actions((self) => ({
@@ -113,7 +115,7 @@ export const appState = AppStateModel.create({
   authStore: {
     accounts: [],
     session: null,
-    status: 'initial',
+    status: { state: 'initial' },
   },
   shellStore: {},
   online: navigator.onLine,
@@ -148,19 +150,6 @@ MainIPC.onInitialDimensions((_e: any, dims: any) => {
   appState.shellStore.setDesktopDimensions(dims.width, dims.height);
 });
 
-window.addEventListener('beforeunload', function (event) {
-  if (event.type === 'beforeunload') {
-    console.log('refreshing');
-    appState.shellStore.closeDialog();
-    // The event was triggered by a refresh or navigation
-    // Your code to handle the refresh event here
-  } else {
-    console.log('closing');
-    appState.shellStore.closeDialog();
-    // The event was triggered by a window/tab close
-    // Your code to handle the close event here
-  }
-});
 // updates
 RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
   if (update.type === 'booted') {
@@ -171,16 +160,32 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
       shipStore.setShip(update.payload.session);
     }
   }
-  if (update.type === 'authenticated') {
+  if (update.type === 'auth-success') {
     SoundActions.playLogin();
     appState.authStore._setSession(update.payload.patp);
     appState.setLoggedIn();
     shipStore.setShip(update.payload);
   }
+  if (update.type === 'auth-failed') {
+    // SoundActions.playError();
+    appState.authStore.status.setError(update.payload);
+  }
   if (update.type === 'logout') {
     appState.setLoggedOut();
     shipStore.reset();
     SoundActions.playLogout();
+  }
+});
+
+AuthIPC.onUpdate((_event: any, update: AuthUpdateTypes) => {
+  if (update.type === 'account-added') {
+    appState.authStore._onAddAccount(update.payload);
+  }
+  if (update.type === 'account-removed') {
+    appState.authStore._onRemoveAccount(update.payload);
+  }
+  if (update.type === 'account-updated') {
+    appState.authStore._onUpdateAccount(update.payload);
   }
 });
 
@@ -266,5 +271,19 @@ BazaarIPC.onUpdate((_event: any, update: any) => {
     case 'stall-update':
       shipStore.spacesStore._onStallUpdate(payload);
       break;
+  }
+});
+
+window.addEventListener('beforeunload', function (event) {
+  if (event.type === 'beforeunload') {
+    console.log('refreshing');
+    appState.shellStore.closeDialog();
+    // The event was triggered by a refresh or navigation
+    // Your code to handle the refresh event here
+  } else {
+    console.log('closing');
+    appState.shellStore.closeDialog();
+    // The event was triggered by a window/tab close
+    // Your code to handle the close event here
   }
 });

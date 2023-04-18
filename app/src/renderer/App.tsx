@@ -36,7 +36,7 @@ function AppContentPresenter() {
   }
 
   if (hasNoAccounts) {
-    return <Onboarding onFinish={onFinishOnboarding} />;
+    return <Onboarding initialStep="/login" onFinish={onFinishOnboarding} />;
   }
 
   if (isLoggedOut) {

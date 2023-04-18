@@ -98,24 +98,20 @@ export class RealmService extends AbstractService {
     return null;
   }
 
-  public async createAccount(
-    accountPayload: Omit<
-      Account,
-      'passwordHash' | 'createdAt' | 'updatedAt'
-    > & { password: string }
+  public async createMasterAccount(
+    payload: Omit<MasterAccount, 'id' | 'passwordHash'> & { password: string }
   ) {
-    if (!this.services) return Promise.resolve(false);
-
-    return this.services.auth.createAccount({
-      ...accountPayload,
-      passwordHash: bcrypt.hashSync(accountPayload.password, 10),
-    });
-  }
-
-  public async createMasterAccount(payload: Omit<MasterAccount, 'id'>) {
     if (!this.services) return;
 
     return this.services.auth.createMasterAccount(payload);
+  }
+
+  public async createAccount(
+    accountPayload: Omit<Account, 'passwordHash' | 'createdAt' | 'updatedAt'>
+  ) {
+    if (!this.services) return Promise.resolve(false);
+
+    return this.services.auth.createAccount(accountPayload);
   }
 
   async login(patp: string, password: string): Promise<boolean> {
@@ -136,8 +132,8 @@ export class RealmService extends AbstractService {
     if (!isAuthenticated) {
       log.warn(`${patp} failed to authenticate`);
       this.sendUpdate({
-        type: 'login-failed',
-        payload: `${patp} failed to authenticate`,
+        type: 'auth-failed',
+        payload: 'password',
       });
       return false;
     }

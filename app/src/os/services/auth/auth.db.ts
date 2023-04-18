@@ -106,6 +106,37 @@ export class AuthDB {
       .run(Date.now());
   }
 
+  public addToOrder(patp: string): void {
+    const query = this.authDB.prepare(`
+      REPLACE INTO accounts_order (patp, idx)
+      VALUES (?, ?);
+    `);
+    query.run(patp, this.getOrder().length);
+  }
+
+  public removeFromOrder(patp: string): void {
+    const query = this.authDB.prepare(`
+      DELETE FROM accounts_order WHERE patp = ?;
+    `);
+    query.run(patp);
+  }
+
+  public getOrder(): string[] {
+    const query = this.authDB.prepare(`
+      SELECT patp FROM accounts_order ORDER BY idx ASC;
+    `);
+    const result: any = query.all();
+    return result.map((r: { patp: string }) => r.patp);
+  }
+
+  public setOrder(patp: string, idx: number): void {
+    const query = this.authDB.prepare(`
+      REPLACE INTO accounts_order (patp, idx)
+      VALUES (?, ?);
+    `);
+    query.run(patp, idx);
+  }
+
   public _setSession(patp: string, cookie: string) {
     log.info(`Setting session for ${patp} to ${cookie}`);
     const query = this.authDB.prepare(`
