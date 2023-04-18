@@ -2,7 +2,7 @@ import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
 import { APIConnection } from '../../conduit';
-import { WalletsRow, WalletDbOps, TransactionsRow } from './wallet.types';
+import { WalletDbOps } from './wallet.types';
 
 export class WalletDB extends AbstractDataAccess<WalletRow> {
   constructor(params: DataAccessContructorParams) {
@@ -177,6 +177,9 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   getWallets() {
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
+      SELECT * FROM wallets
+    `);
+    /*const query = this.db.prepare(`
         WITH formed_messages AS (
           WITH formed_fragments AS (
               WITH realm_chat as (
@@ -250,10 +253,10 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
         ORDER BY
             chat_with_messages.created_at DESC,
             json_extract(json(metadata), '$.timestamp') DESC;
-      `);
+      `);*/
     const result: any = query.all();
 
-    return result.map((row: any) => {
+    return result; /*.map((row: any) => {
       // deserialize the last message
       const lastMessage = row.lastMessage ? JSON.parse(row.lastMessage) : null;
       if (lastMessage && lastMessage.contents) {
@@ -268,12 +271,15 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
         metadata: row.metadata ? this._parseMetadata(row.metadata) : null,
         lastMessage,
       };
-    });
+    });*/
   }
 
-  getTransactions(path: string) {
+  getTransactions() {
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
+      SELECT * FROM transactions
+    `);
+    /*const query = this.db.prepare(`
         WITH formed_messages AS (
           WITH formed_fragments AS (
               WITH realm_chat as (
@@ -347,8 +353,8 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
         ORDER BY
             chat_with_messages.created_at DESC,
             json_extract(json(metadata), '$.timestamp') DESC;
-      `);
-    const result: any = query.all(
+      `);*/
+    /*const result: any = query.all(
       `~${APIConnection.getInstance().conduit.ship}`,
       path
     );
@@ -369,7 +375,8 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
       };
     });
     if (rows.length === 0) return null;
-    return rows[0];
+    return rows[0];*/
+    return query.all();
   }
 
   getChatLog(path: string, _params?: { start: number; amount: number }) {
@@ -566,24 +573,21 @@ export const walletInitSql = `
     status         text    not null,
     failure_reason text,
     notes          text
-);
+  );
   
-  create unique index if not exists messages_path_msg_id_msg_part_id_uindex
-      on messages (path, msg_id, msg_part_id);
+  create unique index if not exists hash_network_uindex
+      on transactions (hash, network);
   
   create table if not exists wallets
   (
       path                        TEXT not null,
-      type                        TEXT not null,
-      metadata                    TEXT,
-      invites                     TEXT default 'host' not null,
-      peers_get_backlog           integer default 1 not null,
-      pins                        TEXT,
-      max_expires_at_duration     integer,
-      updated_at                  integer not null,
-      created_at                  integer not null
+      address                     TEXT not null,
+      nickname                    TEXT not null,
   );
-  `;
+
+  create unique index if not exists path_uindex
+      on wallets (path);
+`;
 
 export const walletDBPreload = WalletDB.preload(
   new WalletDB({ preload: true, name: 'walletDB' })
