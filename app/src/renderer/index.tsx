@@ -28,23 +28,23 @@ let cfg: Sentry.BrowserOptions = {
         //   "colno": 397144,
         //   "in_app": true
         // },
-        // console.log('frame => %o', frame);
-        // if (frame.filename) {
-        //   // strip everything between the file:// and the /dist folder
-        //   const filename = frame.filename;
-        //   console.log('mapping frame');
-        //   const idx = filename.lastIndexOf('/');
-        //   if (idx !== 1) {
-        //     frame.filename = `file://${filename.substring(idx + 1)}`;
-        //   } else {
-        //     frame.filename = `file://${filename}`;
-        //   }
-        //   console.log(
-        //     `mapping stack trace frame '%o' to '%o`,
-        //     filename,
-        //     frame.filename
-        //   );
-        // }
+        console.log('frame => %o', frame);
+        if (frame.filename) {
+          // strip everything between the file:// and the /dist folder
+          const filename = frame.filename;
+          console.log('mapping frame');
+          const idx = filename.lastIndexOf('/');
+          if (idx !== 1) {
+            frame.filename = `app:///${filename.substring(idx + 1)}`;
+          } else {
+            frame.filename = `app:///${filename}`;
+          }
+          console.log(
+            `mapping stack trace frame '%o' to '%o`,
+            filename,
+            frame.filename
+          );
+        }
         return frame;
       },
     }),
