@@ -3,9 +3,15 @@ import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { Database } from 'better-sqlite3-multiple-ciphers';
 import { RealmSigner } from './signers/realm';
 import { WalletDB, walletDBPreload } from './wallet.db';
+import { ethers } from 'ethers';
+import { ProtocolType } from 'renderer/stores/models/wallet.model';
+import { ProtocolManager } from './protocols/ProtocolManager';
+import { EthereumProtocol } from './protocols/ethereum';
+import { BaseBlockProtocol } from './protocols/BaseBlockProtocol';
 
 export class WalletService extends AbstractService {
   public walletDB?: WalletDB;
+  private protocolManager?: ProtocolManager;
   constructor(options?: ServiceOptions, db?: Database) {
     super('walletService', options);
     if (options?.preload) {
@@ -113,8 +119,8 @@ export class WalletService extends AbstractService {
     toPatp?: string
   ) {
     const path = "m/44'/60'/0'/0/0" + walletIndex;
-    const protocol = this.wallet.protocols.get(
-      this.state.navState.protocol
+    const protocol = this.protocolManager?.protocols.get(
+      currentProtocol
     ) as EthereumProtocol;
     const from = this.state.ethereum.wallets.get(walletIndex)?.address ?? '';
     const tx = {
@@ -165,6 +171,43 @@ export class WalletService extends AbstractService {
       hash,
       stateTx
     );
+  }
+
+  async sendTransaction(
+    currentProtocol: ProtocolType,
+    path: string,
+    ourPatp: string,
+    passcode: string,
+    from: string,
+    to: string,
+    amount: string
+  ) {
+    const protocol = this.protocolManager?.protocols.get(
+      currentProtocol
+    ) as EthereumProtocol;
+    const tx = {
+      from,
+      to,
+      value: ethers.utils.parseEther(amount),
+      gasLimit: await protocol.getFeeEstimate({
+        to,
+        from,
+        value: ethers.utils.parseEther(amount),
+      }),
+      gasPrice: await protocol.getFeePrice(),
+      nonce: await protocol.getNonce(from),
+      chainId: await protocol.getChainId(),
+    };
+    const signedTx = await RealmSigner.signTransaction(
+      path,
+      tx,
+      ourPatp,
+      passcode
+    );
+    const hash = await (
+      this.protocolManager?.protocols.get(currentProtocol) as BaseBlockProtocol
+    ).sendTransaction(signedTx);
+    return { hash, tx };
   }
 }
 

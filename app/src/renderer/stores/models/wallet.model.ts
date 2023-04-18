@@ -912,7 +912,7 @@ export const WalletStore = types
         console.log('trying to set the ship', shipStore.ship?.patp);
         self.ourPatp = shipStore.ship?.patp;
       },
-      setNetwork(network: NetworkType) {
+      setNetworkSetter(network: NetworkType) {
         /* @ts-expect-error */
         self.resetNavigation();
         if (network !== self.navState.network) {
@@ -929,7 +929,13 @@ export const WalletStore = types
           }
         }
       },
-      setProtocol(protocol: ProtocolType) {
+      setNetwork(_event: any, network: NetworkType) {
+        this.navigate(WalletView.LIST);
+        if (self.navState.network !== network) {
+          this.setNetworkSetter(network);
+        }
+      },
+      setProtocolSetter(protocol: ProtocolType) {
         /* @ts-expect-error */
         self.resetNavigation();
         if (protocol === ProtocolType.UQBAR) {
@@ -1096,32 +1102,16 @@ export const WalletStore = types
         toPatp?: string
       ): Generator<PromiseLike<any>, void, any> {
         const path = "m/44'/60'/0'/0/0" + walletIndex;
-        const protocol = this.wallet.protocols.get(
-          self.navState.protocol
-        ) as EthereumProtocol;
         const from = self.ethereum.wallets.get(walletIndex)?.address ?? '';
-        const tx = {
+        const { hash, tx } = yield WalletIPC.sendTransaction(
+          self.navState.protocol,
+          path,
+          self.ourPatp ?? '',
+          passcode.map(String).join(''),
           from,
           to,
-          value: ethers.utils.parseEther(amount),
-          gasLimit: yield protocol.getFeeEstimate({
-            to,
-            from,
-            value: ethers.utils.parseEther(amount),
-          }),
-          gasPrice: yield protocol.getFeePrice(),
-          nonce: yield protocol.getNonce(from),
-          chainId: yield protocol.getChainId(),
-        };
-        const signedTx = yield WalletIPC.signTransaction(
-          path,
-          tx,
-          self.ourPatp ?? '',
-          passcode.map(String).join('')
+          amount
         ) as PromiseLike<any>;
-        const hash = yield (
-          this.wallet.protocols.get(self.navState.protocol) as BaseBlockProtocol
-        ).sendTransaction(signedTx);
         const currentWallet = self.currentWallet as EthWalletType;
         const fromAddress = currentWallet.address;
         currentWallet.enqueueTransaction(
@@ -1146,6 +1136,21 @@ export const WalletStore = types
           stateTx
         ) as PromiseLike<any>;
       }),
+      toggleNetwork() {
+        if (self.navState.network === NetworkType.ETHEREUM) {
+          if (self.navState.protocol === ProtocolType.ETH_MAIN) {
+            this.setProtocolSetter(ProtocolType.ETH_GORLI);
+          } else if (self.navState.protocol === ProtocolType.ETH_GORLI) {
+            this.setProtocolSetter(ProtocolType.ETH_MAIN);
+          }
+        }
+      },
+      setProtocol(_event: any, protocol: ProtocolType) {
+        this.navigate(WalletView.LIST);
+        if (self.navState.protocol !== protocol) {
+          this.setProtocolSetter(protocol);
+        }
+      },
     };
   });
 
