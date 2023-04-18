@@ -71,7 +71,7 @@
 ::
 +$  state-0  [%0 is-public=? friends=friends-0]
 +$  state-1  [%1 sync-contact-store=? is-public=? friends=friends-1]
-+$  state-2  [%2 =friends]
++$  state-2  [%2 =friends =friend-times]
 ::
 +$  card  card:agent:gall
 --
@@ -128,9 +128,10 @@
     |=  =vase
     ~>  %bout.[0 '%friends +on-load']
     ^-  (quip card _this)
-    =^  cards  state
-      abet:(load:core vase)
-    [cards this]
+    (on-load:def vase)
+    :: =^  cards  state
+    ::   abet:(load:core vase)
+    :: [cards this]
   ::
   ++  on-poke
     |=  =cage
@@ -187,13 +188,55 @@
 ::  Put older ones further down, so that they can be ignored                  ::
 ::  for the probably bad code that they are.                                  ::
 ::                                                                            ::
+::  Only +watch, +poke, and +peek use the versioned cores.                    ::
+::  This is because they interface with the frontend.                         ::
+::  Ship-to-ship (push / pull) have no concept of versioning.                 ::
+::                                                                            ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::
 |_  [=bowl:gall cards=(list card)]
 +*  core  .
+    latest  %'0'
+::
 ++  abet  [(flop cards) state]
 ++  emit  |=(=card core(cards [card cards]))
 ++  emil  |=(new-cards=(list card) core(cards (welp new-cards cards)))
+::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::                                                                            ::
+::  LIBRARY FUNCTIONS
+::    With mop maximalism, we still want to be able to get values via
+::    ship only rather than ship + time.  So make necessary library functions
+::    to do so - and potentially others.
+::                                                                            ::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::
+++  got-friend
+  |=  =ship
+  ^-  friend
+  (got:fon friends [ship (~(got by friend-times) ship)])
+::  +put-friend: atomically replaces friend from previous timestamp
+::  with friend at current timestamp.  Returns friend list / friend times
+::  for updating state.
+::
+++  put-friend
+  |=  [=ship =friend]
+  :: ^-  [friends friend-times]
+  ?:  (~(has by friend-times) ship)
+    ::  Already have, need to delete and reinsert from ordered map.
+    ::
+    =*  wiped  (del:fon friends [ship (~(got by friend-times) ship)])
+    ::
+    :-  %:  put:fon
+            +.wiped
+            [ship updated-at.friend]
+            friend
+        ==
+        (~(put by friend-times) ship updated-at.friend)
+  ::  No record, just insert new ones.
+  ::
+  :-  (put:fon friends [ship updated-at.friend] friend)
+      (~(put by friend-times) ship updated-at.friend)
 ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::                                                                            ::
@@ -209,7 +252,8 @@
   ^+  core
   ::
   =/  us
-    :*  pinned=%.n
+    :*  version=latest
+        pinned=%.n
         tags=*tags
         created-at=now.bowl
         updated-at=now.bowl
@@ -219,7 +263,8 @@
         contact-info=~
     ==
   ::
-  core(friends (~(put by friends) our.bowl us))
+  =/  data  (put-friend our.bowl us)
+  core(friends -.data, friend-times +.data)
 ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::                                                                            ::
@@ -246,51 +291,260 @@
 ++  load
   |=  =vase
   ^+  core
-  =/  old  !<(versioned-state vase)
-  |-
-  ?-    -.old
-      %0
-    %=  $
-        old   :*  %1
-                  %.y
-                  is-public.old
-                  ^-  friends-1
-                  %-  malt
-                  %+  turn  ~(tap by friends.old)
-                  |=  [=ship fren=friend-0]
-                  :-  ship
-                  :*  pinned.fren
-                      tags.fren
-                      status.fren
-                      ~
-    ==        ==  ==
+  core
+  :: =/  old  !<(versioned-state vase)
+  :: ::
+  :: core(state old)
+  :: |-
+  :: ?-    -.old
+  ::     %0
+  ::   %=  $
+  ::       old   :*  %1
+  ::                 %.y
+  ::                 is-public.old
+  ::                 ^-  friends-1
+  ::                 %-  malt
+  ::                 %+  turn  ~(tap by friends.old)
+  ::                 |=  [=ship fren=friend-0]
+  ::                 :-  ship
+  ::                 :*  pinned.fren
+  ::                     tags.fren
+  ::                     status.fren
+  ::                     ~
+  ::   ==        ==  ==
+  ::  TODO: handle state migration to ordered map
+    ::   %1
+    :: %=  $
+    ::     old   :*  %2
+    ::               ^-  ^friends
+    ::               %-  malt
+    ::               %+  turn  ~(tap by friends.old)
+    ::               |=  [=ship fren=friend-1]
+    ::               :-  ship
+    ::               ^-  friend
+    ::               :*  pinned.fren
+    ::                   tags.fren
+    ::                   now.bowl
+    ::                   now.bowl
+    ::                   ~
+    ::                   ?-  status.fren
+    ::                     %fren       %fren
+    ::                     %following  %sent
+    ::                     %follower   %received
+    ::                     %contact    %know
+    ::                     %our        %our
+    ::                   ==
+    ::                   %offline
+    ::                   ~
+    :: ==        ==  ==
+    ::   %2
+    :: core(state old)
+  :: ==
+::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::                                                                            ::
+::  +agent: handle on-agent                                                   ::
+::                                                                            ::
+::    In +agent we receive responses from other agents.                       ::
+::    See https://developers.urbit.org/reference/arvo/gall/gall#on-agent      ::
+::    for the types of responses we can expect.                               ::
+::
+::    Note that we are always subbed to their current version.
+::    When they upgrade, we will be kicked from current subs (minus version).
+::    We will re-sub to the paths we want.
+::    
+::    When we upgrade first, we will leave old sub paths and join new ones.   ::
+::                                                                            ::
+::    1.  Route on request wire and then route on sign.                       ::
+::    3.  Update state and emit effects as necessary.                         ::
+::                                                                            ::
+::    Error states:                                                           ::
+::    1.  Negative poke-ack or watch-ack (NACK).                              ::
+::        Notify the frontend that these requests were rejected.              ::
+::    2.  Recieve a %fact that we don't understand.
+::        They are on an incompatible version, ignore for now.                ::
+::                                                                            ::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::
+++  agent
+  |=  [path=(pole knot) =sign:agent:gall]
+  ^+  core
+  =*  dock  [src.bowl dap.bowl]
   ::
-      %1
-    %=  $
-        old   :*  %2
-                  ^-  ^friends
-                  %-  malt
-                  %+  turn  ~(tap by friends.old)
-                  |=  [=ship fren=friend-1]
-                  :-  ship
-                  ^-  friend
-                  :*  pinned.fren
-                      tags.fren
-                      now.bowl
-                      now.bowl
-                      ~
-                      ?-  status.fren
-                        %fren       %fren
-                        %following  %sent
-                        %follower   %received
-                        %contact    %know
-                        %our        %our
-                      ==
-                      %offline
-                      ~
-    ==        ==  ==
+  ?+    path  ~|(bad-agent-wire/path !!)
+    ::  Check poke-acks first.
+    ::
+      [%sent-friend ~]
+    ::
+    ?+    -.sign  ~|(bad-sent-friend-sign/sign !!)
+        %poke-ack
+      ::  This checks if poke succeeded or failed.
+      ::
+      ?~  p.sign
+        ::  Poke succeeded.  Verify that the ship is currently %know,
+        ::  then update state.
+        ::
+        =/  fren  (got-friend src.bowl)
+        ?+  relationship.fren  ~|(dont-know-cant-sent/relationship.fren !!)
+            %know
+          ::
+          =/  fren-upd
+            :*  version=version.fren
+                pinned=pinned.fren
+                tags=tags.fren
+                created-at=created-at.fren
+                updated-at=now.bowl
+                phone-number=phone-number.fren
+                relationship=%sent
+                status=status.fren
+                contact-info=contact-info.fren
+            ==
+          ::  TODO, emit any necessary cards
+          =/  data  (put-friend src.bowl fren-upd)
+          core(friends -.data, friend-times +.data)
+        ==
+      ::  Poke failed - don't update state.
+      ::  TODO, notify UI of failure.
+      ::
+      ((slog leaf/"sent-friend nack" ~) core)
+    ::
+    ==
   ::
-    %2  core(state old)
+      [%accept-friend ~]
+    ::
+    ?+    -.sign  ~|(bad-accept-friend-sign/sign !!)
+        %poke-ack
+      ::
+      ?~  p.sign
+        ::  We should be in %received to be accepted.
+        ::
+        =/  fren  (got-friend src.bowl)
+        ?+  relationship.fren  ~|(dont-know-cant-accept/relationship.fren !!)
+            %received
+          ::
+          =/  fren-upd
+            :*  version=version.fren
+                pinned=pinned.fren
+                tags=tags.fren
+                created-at=created-at.fren
+                updated-at=now.bowl
+                phone-number=phone-number.fren
+                relationship=%fren
+                status=status.fren
+                contact-info=contact-info.fren
+            ==
+          ::  TODO, emit any necessary cards
+          =/  data  (put-friend src.bowl fren-upd)
+          core(friends -.data, friend-times +.data)
+        ==
+      ::  Poke failed
+      ::
+      ((slog leaf/"accept-friend nack" ~) core)
+    ::
+    ==
+  ::
+      [%bye-friend ~]
+    ::
+    ?+    -.sign  ~|(bad-accept-friend-sign/sign !!)
+        %poke-ack
+      ::
+      ?~  p.sign
+        core
+      ((slog leaf/"bye-friend nack" ~) core)
+    ::
+    ==
+  ::  Check subscription paths next.  Can be %fact, %watch-ack, or %kick.
+  ::
+      [%status ~]
+    ::
+    ?+    -.sign  ~|(bad-status-sign/sign !!)
+      ::  Always just resubscribe on kick.
+      ::
+        %kick
+      core(cards [[%pass /status %agent dock %watch /status] cards])
+    ::
+        %watch-ack
+      ?~  p.sign
+        core
+      ((slog leaf/"watch-status nack" ~) core)
+    ::
+        %fact
+      ::
+      ?+    p.cage.sign  !!:: (on-agent:def `wire`path sign)
+          %friends-pull
+        =/  act   !<(friends-pull q.cage.sign)
+        ?.  ?=(%status -.act)  ~|(bad-friends-pull-act/act !!)
+        =/  fren  (got-friend src.bowl)
+        ::
+        ?:  =(status.fren status.act)  core
+        ::
+        =/  fren-upd
+          :*  version=version.fren
+              pinned=pinned.fren
+              tags=tags.fren
+              created-at=created-at.fren
+              updated-at=now.bowl
+              phone-number=phone-number.fren
+              relationship=relationship.fren
+              ::
+              status=status.act
+              ::
+              contact-info=contact-info.fren
+          ==
+        ::  TODO emit any necessary cards.
+        ::
+        =/  data  (put-friend src.bowl fren-upd)
+        core(friends -.data, friend-times +.data)
+      ::
+      ==
+    ::
+    ==
+  ::
+        [%contact-info ~]
+    ::
+    ?+    -.sign  ~|(bad-contact-info-sign/sign !!)
+      ::  Always just resubscribe on kick.
+      ::
+        %kick
+      core(cards [[%pass /contact-info %agent dock %watch /contact-info] cards])
+    ::
+        %watch-ack
+      ?~  p.sign
+        core
+      ((slog leaf/"watch-contact-info nack" ~) core)
+    ::
+        %fact
+      ::
+      ?+    p.cage.sign  !!  ::(on-agent:def `wire`path sign)  cant find def
+          %friends-pull
+        =/  act   !<(friends-pull q.cage.sign)
+        ?.  ?=(%contact-info -.act)  ~|(bad-friends-pull-act/act !!)
+        =/  fren  (got-friend src.bowl)
+        ::
+        ?:  =(contact-info.fren (some contact-info.act))  core
+        ::
+        =/  fren-upd
+          :*  version=version.fren
+              pinned=pinned.fren
+              tags=tags.fren
+              created-at=created-at.fren
+              updated-at=now.bowl
+              phone-number=phone-number.fren
+              relationship=relationship.fren
+              status=status.fren
+              ::
+              contact-info=(some contact-info.act)
+              ::
+          ==
+        ::  TODO emit any necessary cards.
+        ::
+        =/  data  (put-friend src.bowl fren-upd)
+        core(friends -.data, friend-times +.data)
+      ::
+      ==
+    ::
+    ==
+  ::
   ==
 ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -298,11 +552,14 @@
 ::  +poke: handle on-poke                                                     ::
 ::                                                                            ::
 ::                                                                            ::
-::    General steps (2-3 are in the versioned core):                          ::
+::    General steps:                                                          ::
 ::    1.  Branch on mark; extract mark's type from vase to get the action.    ::
 ::    2.  Branch on action type, conventionally the head of the action.       ::
 ::    3.  Handle action; update state and emit effects as necessary.          ::
-::        This step is handled in our versioned core.                         ::
+
+::    Note, this arm handles both `action` and `push` pokes.                  ::
+::    `action` is sent by the frontend and has a version.                     ::
+::    `push` is sent by another ship and has no version, it is handled here.  ::
 ::                                                                            ::
 ::    Error states:                                                           ::
 ::    1.  Poke is not received by the other ship (it is not running).         ::
@@ -321,42 +578,131 @@
   |=  [=mark =vase]
   ^+  core
   ?+    mark  ~|(bad-friends-mark/mark !!)
+  ::  First, check for version upgrade.
+  ::
+      %realm-action
+    =/  act  !<(realm-action vase)
+    ?.  =(%upgrade -.act)  ~|('bad-friends-action' !!)
+    ::
+    ::  TODO, upgrade to current.  Leave _all_ subscriptions and kick everyone.
+    ::  Start subbing for everyone's version again.
+    ::  Version %facts are our cue to reissue our other subscriptions.
+    ::
+    ~|('upgrade-not-supported' !!)
+  ::  Then, check for versioned pokes.
+  ::
       %friends-action-0
     (poke:core-0 !<(friends-action-0 vase))
-  ==
-::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::                                                                            ::
-::  +agent: handle on-agent                                                   ::
-::                                                                            ::
-::    In +agent we receive responses from other agents.                       ::
-::    See https://developers.urbit.org/reference/arvo/gall/gall#on-agent      ::
-::    for the types of responses we can expect.                               ::
-::                                                                            ::
-::    General steps (2-4 are in the versioned core):                          ::
-::    1.  Check version number of incoming update.                            ::
-::        By our convention, this is always the head of path.  Note that      ::
-::        these are text constants and not numbers, as they are in +load.     ::
-::    2.  Route on request wire.  By our convention,                          ::
-::        this is always path's tail.                                         ::
-::    3.  Route on sign.                                                      ::
-::    4.  Update state and emit effects as necessary.                         ::
-::                                                                            ::
-::    Error states:                                                           ::
-::    1.  Negative poke-ack or watch-ack (NACK).                              ::
-::        Notify the frontend that these requests were rejected.              ::
-::                                                                            ::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::
-++  agent
-  |=  [path=(pole knot) =sign:agent:gall]
-  ^+  core
+  ::  Now check for pushes.
   ::
-  ::  This is more naive than subbing to everyone's version, but it's a rare case.
-  ::
-  ?+    -.path  ~|(bad-agent-version/path !!)
-      %'0'
-    (agent:core-0 +.path sign)
+      %friends-push
+    =/  act  !<(friends-push vase)
+    ::
+    ?-    -.act
+        %sent-friend
+      ::  Receive a new friend request from another ship.
+      ::
+      ?:  =(our.bowl src.bowl)  ~|('no-self-sent-friend' !!)
+      ::
+      ?:  (~(has by friend-times) src.bowl)
+        ::  Already received, do nothing.
+        ::  Only know, update to received.
+        ::
+        =/  fren  (got-friend src.bowl)
+        ?+  relationship.fren  ~|(invalid-sent-friend/relationship.fren !!)
+          %received  core
+        ::
+            %know
+          =/  fren-upd
+            :*  version=version.fren
+                pinned=pinned.fren
+                tags=tags.fren
+                created-at=created-at.fren
+                updated-at=now.bowl
+                phone-number=phone-number.fren
+                relationship=%received
+                status=status.fren
+                contact-info=contact-info.fren
+            ==
+          ::
+          =/  data  (put-friend src.bowl fren-upd)
+          core(friends -.data, friend-times +.data)
+        ::
+        ==
+      ::  Ship not on our list, so add them as received
+      ::
+      =/  fren
+        :*  version=%unset
+            pinned=%.n
+            tags=*tags
+            created-at=now.bowl
+            updated-at=now.bowl
+            phone-number=~
+            relationship=%received
+            status=%offline
+            contact-info=~
+        ==
+      ::
+      =/  data  (put-friend src.bowl fren)
+      core(friends -.data, friend-times +.data)
+    ::
+        %accept-friend
+      ::  Receive a friend request acceptance from another ship.
+      ::
+      ?:  =(our.bowl src.bowl)  ~|('no-self-accept-friend' !!)
+      ::  We should currently be in %sent to be accepted.
+      ::
+      =/  fren  (got-friend src.bowl)
+      ?+  relationship.fren  ~|(invalid-accept-friend/relationship.fren !!)
+          %sent
+        ::
+        =/  fren-upd
+          :*  version=version.fren
+              pinned=pinned.fren
+              tags=tags.fren
+              created-at=created-at.fren
+              updated-at=now.bowl
+              phone-number=phone-number.fren
+              relationship=%fren
+              status=status.fren
+              contact-info=contact-info.fren
+          ==
+        ::
+        =/  data  (put-friend src.bowl fren-upd)
+        core(friends -.data, friend-times +.data)
+      ==
+    ::
+        %bye-friend
+      ::  Receive an unfriend request from another ship.
+      ::
+      ?:  =(our.bowl src.bowl)               ~|('no-self-bye-friend' !!)
+      ?.  (~(has by friend-times) src.bowl)  ~|('no-bye-unknown-friend' !!)
+      ::
+      =/  fren  (got-friend src.bowl)
+      ::  We should be friends, sent, or received.
+      ::  We can also be %know, which means we were probably blocked.
+      ::
+      ?.  ?=(?(%sent %received %fren) relationship.fren)
+        ?:  ?=(%know relationship.fren)
+          core
+        ~|(invalid-bye-friend/relationship.fren !!)
+      ::
+      =/  fren-upd
+        :*  version=version.fren
+            pinned=pinned.fren
+            tags=tags.fren
+            created-at=created-at.fren
+            updated-at=now.bowl
+            phone-number=phone-number.fren
+            relationship=%know
+            status=status.fren
+            contact-info=contact-info.fren
+        ==
+      ::
+      =/  data  (put-friend src.bowl fren-upd)
+      core(friends -.data, friend-times +.data)
+    ::
+    ==
   ::
   ==
 ::
@@ -365,68 +711,118 @@
 ::  +watch: handle on-watch                                                   ::
 ::                                                                            ::
 ::    In +watch we receive subscription requests from other agents or
-::    the frontend.  Like poke requests, these always have the version
-::    at the head of the path for routing.
+::    the frontend.  Frontend requests will have version at the head
+::    and will be handled in the nested core.
+::    Requests from other agents will not have a version and are handled
+::    here directly.
+::   
 ::
 ::    General steps (2-4 are in the versioned core):                          ::
-::    1.  Check version number of incoming request.                           ::
-::        By our convention, this is always the head of path.  Note that      ::
-::        these are text constants and not numbers, as they are in +load.     ::
-::    2.  Route on request wire.  By our convention,                          ::
-::        this is always path's tail.                                         ::
+::    1.  Check head of path, branching on `pull` type or version number.     ::
+::        Note that versions are strings, i.e. %'1' instead of %1.            ::
+::    2.  Route on request wire.                                              ::
 ::    3.  Crash if invalid path or permissions.                               ::
 ::    4.  Update state and emit effects as necessary.                         ::
-::        For initial updates these are on the ~ path.                        ::
+::        For initial updates these are on the `~` path.                      ::
 ::                                                                            ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::
 ++  watch
   |=  path=(pole knot)
   ^+  core
+  =*  dock  [src.bowl dap.bowl]
+  ::
+  =*  us    (got-friend our.bowl)
+  =*  fren  (got-friend src.bowl)
+  ::
   ?+    -.path  ~|(bad-watch-version/path !!)
+  ::  First, check for versions we support.
+  ::
       %'0'
     (watch:core-0 +.path)
+  ::  Now check for pull paths.
+  ::
+  ::  We choose to be resilient here.  If a subbing ship is still
+  ::  unknown, add them as know and start watching back.
+  ::
+      %status
+    ::
+    =*  pull-status
+      :*  %give  %fact  ~  %friends-pull
+          !>(`friends-pull`[%status status.us])
+      ==
+    ::
+    =*  watch-version
+      :*  %pass  /version  %agent
+          dock  %watch  /version
+      ==
+    ::
+    ?:  (~(has by friend-times) src.bowl)
+      (emit pull-status)
+    ::  Add friend as %know
+    ::
+    =/  fren
+      :*  version=%unset
+          pinned=%.n
+          tags=*tags
+          created-at=now.bowl
+          updated-at=now.bowl
+          phone-number=~
+          relationship=%know
+          status=%offline
+          contact-info=~
+      ==
+    ::  Send them our status, and start watching their version.
+    ::
+    =/  data  (put-friend src.bowl fren)
+    ::
+    %=  core
+      friends       -.data
+      friend-times  +.data
+      cards         [pull-status watch-version cards]
+    ==
+  ::
+      %contact-info
+    ::
+    %-  emit
+    [%give %fact ~ %friends-pull !>(`friends-pull`[%contact-info (need contact-info.us)])]
   ::
   ==
 ::
 ++  core-0
   |%
   ++  ver  %'0'
-  ++  status-path        /[ver]/status
-  ::  v1 status paths will be (welp ~[status-path] core-0:status-paths)
-  ::
-  ++  status-paths       ~[status-path]
-  ++  contact-info-path  /[ver]/contact-info
   ::
   ++  action-type        friends-action-0
   ++  action-mark        %friends-action-0
   ::
-  ++  update-type        friends-update-0
-  ++  update-mark        %friends-update-0
+  :: ++  update-type        friends-update-0
+  :: ++  update-mark        %friends-update-0
   ::
   ++  poke
     |=  act=action-type
     ^+  core
+    ::
     =*  dock  [ship.act dap.bowl]
     ::  Deferred pokes that may be used below.
     ::
     =*  bye-friend
       :*  %pass
-          /[ver]/bye-friend/(scot %p ship.act)
+          /bye-friend
           %agent  dock  %poke
           [action-mark !>([%bye-friend ~])]
       ==
     ::
     =*  sent-friend
       :*  %pass
-          /[ver]/sent-friend/(scot %p ship.act)
+          /sent-friend
           %agent  dock  %poke
           [action-mark !>([%sent-friend ~])]
       ==
     ::
     =*  accept-friend
       :*  %pass
-          /[ver]/accept-friend/(scot %p ship.act)
+          /accept-friend
           %agent  dock  %poke
           [action-mark !>([%accept-friend ~])]
       ==
@@ -445,12 +841,12 @@
       ?.  =(our.bowl src.bowl)  ~|('no-foreign-add-friend' !!)
       ?:  =(our.bowl ship.act)  ~|('no-self-add-friend' !!)
       ::
-      ?:  (~(has by friends) ship.act)
-        =/  fren  (~(got by friends) ship.act)
+      ?:  (~(has by friend-times) ship.act)
         ::  Already sent, do nothing.
         ::  Only know, send request.
         ::  Already received, accept request.
         ::
+        =/  fren  (got-friend ship.act)
         ?+  relationship.fren  ~|(invalid-add-friend/relationship.fren !!)
           %sent      core
           %know      (emit sent-friend)
@@ -459,16 +855,14 @@
       ::  ship is not in our friends list, so add them as know
       ::  and send a friend request.  Start watching for updates.
       ::
-      ::  TODO remote scry for their version.  If older, reissue poke on their version.
-      ::
-      ::  TODO should watch version first, then on version start watching other paths.
       =*  watch-version
         :*  %pass  /version  %agent
             dock  %watch  /version
         ==
       ::
-      =/  fren
-        :*  pinned=%.n
+      =/  new-fren
+        :*  version=%unset
+            pinned=%.n
             tags=*tags
             created-at=now.bowl
             updated-at=now.bowl
@@ -478,9 +872,12 @@
             contact-info=~
         ==
       ::
+      =/  data  (put-friend ship.act new-fren)
+      ::
       %=  core
-        friends  (~(put by friends) ship.act fren)
-        cards    [sent-friend watch-version cards]
+        friends       -.data
+        friend-times  +.data
+        cards         [sent-friend watch-version cards]
       ==
     ::
         %edit-friend
@@ -497,25 +894,26 @@
       ::
       ::  Use for unfriending, cancelling friend request, or declining.
       ::
-      ?.  =(our.bowl src.bowl)          ~|('no-foreign-remove-friend' !!)
-      ?:  =(our.bowl ship.act)          ~|('no-self-remove-friend' !!)
-      ?.  (~(has by friends) ship.act)  ~|('no-remove-unknown-friend' !!)
+      ?.  =(our.bowl src.bowl)               ~|('no-foreign-remove-friend' !!)
+      ?:  =(our.bowl ship.act)               ~|('no-self-remove-friend' !!)
+      ?.  (~(has by friend-times) ship.act)  ~|('no-remove-unknown-friend' !!)
       ::
       =*  bye-friend
         :*  %pass
-            /[ver]/bye-friend/(scot %p ship.act)
+            /bye-friend
             %agent  dock  %poke
             [action-mark !>([%bye-friend ~])]
         ==
       ::
-      =/  fren  (~(got by friends) ship.act)
+      =/  fren  (got-friend ship.act)
       ::  Only remove if friends or received.
       ::
       ?.  ?=(?(%sent %received %fren) relationship.fren)
         ~|(invalid-remove-friend/relationship.fren !!)
       ::
       =/  fren-upd
-        :*  pinned=pinned.fren
+        :*  version=version.fren
+            pinned=pinned.fren
             tags=tags.fren
             created-at=created-at.fren
             updated-at=now.bowl
@@ -525,9 +923,11 @@
             contact-info=contact-info.fren
         ==
       ::
+      =/  data  (put-friend src.bowl fren-upd)
       %=  core
-        friends  (~(put by friends) ship.act fren-upd)
-        cards    [bye-friend cards]
+        friends       -.data
+        friend-times  +.data
+        cards         [bye-friend cards]
       ==
     ::
         %block-friend
@@ -536,13 +936,14 @@
       ?.  =(our.bowl src.bowl)  ~|('no-foreign-block-friend' !!)
       ?:  =(our.bowl ship.act)  ~|('no-self-block-friend' !!)
       ::
-      =/  fren  (~(got by friends) ship.act)
+      =/  fren  (got-friend ship.act)
       ::
       ?:  ?=(%blocked relationship.fren)
         ~|(invalid-block-friend/relationship.fren !!)
       ::
       =/  fren-upd
-        :*  pinned=pinned.fren
+        :*  version=version.fren
+            pinned=pinned.fren
             tags=tags.fren
             created-at=created-at.fren
             updated-at=now.bowl
@@ -552,22 +953,25 @@
             contact-info=contact-info.fren
         ==
       ::
+      =/  data  (put-friend src.bowl fren-upd)
       %=  core
-        friends  (~(put by friends) ship.act fren-upd)
-        cards    [bye-friend cards]
+        friends       -.data
+        friend-times  +.data
+        cards         [bye-friend cards]
       ==
     ::
         %unblock-friend
       ?.  =(our.bowl src.bowl)  ~|('no-foreign-unblock-friend' !!)
       ?:  =(our.bowl ship.act)  ~|('no-self-unblock-friend' !!)
       ::
-      =/  fren  (~(got by friends) ship.act)
+      =/  fren  (got-friend ship.act)
       ::
       ?+    relationship.fren  ~|(invalid-unblock-friend/relationship.fren !!)
           %blocked
       ::
         =/  fren-upd
-          :*  pinned=pinned.fren
+          :*  version=version.fren
+              pinned=pinned.fren
               tags=tags.fren
               created-at=created-at.fren
               updated-at=now.bowl
@@ -577,15 +981,17 @@
               contact-info=contact-info.fren
           ==
         ::
-        core(friends (~(put by friends) ship.act fren-upd))
+        =/  data  (put-friend src.bowl fren-upd)
+        core(friends -.data, friend-times +.data)
       ==
     ::
         %set-contact-info
       ?.  =(our.bowl src.bowl)  ~|('no-foreign-set-contact-info' !!)
-      =/  us  (~(got by friends) our.bowl)
+      =/  us  (got-friend our.bowl)
       ::
       =/  us-upd
-        :*  pinned=pinned.us
+        :*  version=version.us
+            pinned=pinned.us
             tags=tags.us
             created-at=created-at.us
             updated-at=now.bowl
@@ -597,14 +1003,16 @@
             ::
         ==
       ::
-      core(friends (~(put by friends) our.bowl us-upd))
+      =/  data  (put-friend our.bowl us-upd)
+      core(friends -.data, friend-times +.data)
     ::
         %set-status
       ?.  =(our.bowl src.bowl)  ~|('no-foreign-set-status' !!)
-      =/  us  (~(got by friends) our.bowl)
+      =/  us  (got-friend our.bowl)
       ::
       =/  us-upd
-        :*  pinned=pinned.us
+        :*  version=version.us
+            pinned=pinned.us
             tags=tags.us
             created-at=created-at.us
             updated-at=now.bowl
@@ -616,238 +1024,24 @@
             contact-info=contact-info.us
         ==
       ::
+      =*  pull-status
+        :*  %give  %fact  ~[/status]  %friends-pull
+            !>(`friends-pull`[%status status.act])
+        ==
+      ::
+      =/  data  (put-friend our.bowl us-upd)
       %=  core
-        friends  (~(put by friends) our.bowl us-upd)
-        cards    [[%give %fact status-paths update-mark !>(`update-type`[%status status.act])] cards]
+        friends       -.data
+        friend-times  +.data
+        cards         [pull-status cards]
       ==
-    ::
-        %sent-friend
-      ::  Receive a new friend request from another ship.
-      ::
-      ?:  =(our.bowl src.bowl)  ~|('no-self-sent-friend' !!)
-      ::
-      ?:  (~(has by friends) src.bowl)
-        =/  fren  (~(got by friends) src.bowl)
-        ::  Already received, do nothing.
-        ::  Only know, update to received.
-        ::
-        ?+  relationship.fren  ~|(invalid-sent-friend/relationship.fren !!)
-          %received  core
-        ::
-            %know
-          =/  fren-upd
-            :*  pinned=pinned.fren
-                tags=tags.fren
-                created-at=created-at.fren
-                updated-at=now.bowl
-                phone-number=phone-number.fren
-                relationship=%received
-                status=status.fren
-                contact-info=contact-info.fren
-            ==
-          core(friends (~(put by friends) src.bowl fren-upd))
-        ::
-        ==
-      ::  Ship not on our list, so add them as received
-      ::
-      =/  fren
-        :*  pinned=%.n
-            tags=*tags
-            created-at=now.bowl
-            updated-at=now.bowl
-            phone-number=~
-            relationship=%received
-            status=%offline
-            contact-info=~
-        ==
-      core(friends (~(put by friends) src.bowl fren))
-    ::
-        %accept-friend
-      ::  Receive a friend request acceptance from another ship.
-      ::
-      ?:  =(our.bowl src.bowl)  ~|('no-self-accept-friend' !!)
-      ::
-      =/  fren  (~(got by friends) src.bowl)
-      ::  We should currently be in %sent to be accepted.
-      ::
-      ?+  relationship.fren  ~|(invalid-accept-friend/relationship.fren !!)
-          %sent
-        ::
-        =/  fren-upd
-          :*  pinned=pinned.fren
-              tags=tags.fren
-              created-at=created-at.fren
-              updated-at=now.bowl
-              phone-number=phone-number.fren
-              relationship=%fren
-              status=status.fren
-              contact-info=contact-info.fren
-          ==
-        core(friends (~(put by friends) src.bowl fren-upd))
-      ==
-    ::
-        %bye-friend
-      ::  Receive an unfriend request from another ship.
-      ::
-      ?:  =(our.bowl src.bowl)          ~|('no-self-bye-friend' !!)
-      ?.  (~(has by friends) src.bowl)  ~|('no-bye-unknown-friend' !!)
-      ::
-      =/  fren  (~(got by friends) src.bowl)
-      ::  We should be friends, sent, or received.
-      ::  We can also be %know, which means we were probably blocked.
-      ::
-      ?.  ?=(?(%sent %received %fren) relationship.fren)
-        ?:  ?=(%know relationship.fren)
-          core
-        ~|(invalid-bye-friend/relationship.fren !!)
-      ::
-      =/  fren-upd
-        :*  pinned=pinned.fren
-            tags=tags.fren
-            created-at=created-at.fren
-            updated-at=now.bowl
-            phone-number=phone-number.fren
-            relationship=%know
-            status=status.fren
-            contact-info=contact-info.fren
-        ==
-      ::
-      core(friends (~(put by friends) src.bowl fren-upd))
     ::
     ==
   ::
-  ++  agent
-    |=  [path=(pole knot) =sign:agent:gall]
-    ^+  core
-    ::  This will be used repeatedly, so define it once.
-    ::
-    =*  ship  `@p`(slav %p ship.path)
-    ::
-    ?+    path  ~|(bad-agent-wire/path !!)
-        [%sent-friend ship=@ ~]
-      ::
-      ?+    -.sign  ~|(bad-sent-friend-sign/sign !!)
-          %poke-ack
-        ::  This checks if poke succeeded or failed.
-        ::
-        ?~  p.sign
-          ::  Poke succeeded.  Verify that the ship is currently %know,
-          ::  then update state.
-          ::
-          =/  fren  (~(got by friends) ship)
-          ?+  relationship.fren  ~|(dont-know-cant-sent/relationship.fren !!)
-              %know
-            ::
-            =/  fren-upd
-              :*  pinned=pinned.fren
-                  tags=tags.fren
-                  created-at=created-at.fren
-                  updated-at=now.bowl
-                  phone-number=phone-number.fren
-                  relationship=%sent
-                  status=status.fren
-                  contact-info=contact-info.fren
-              ==
-            ::  TODO, emit any necessary cards
-            core(friends (~(put by friends) ship fren-upd))
-          ==
-        ::  Poke failed - don't update state.
-        ::  TODO, notify UI of failure.
-        ::
-        ((slog leaf/"sent-friend nack" ~) core)
-      ::
-      ==
-    ::
-        [%accept-friend ship=@ ~]
-      ::
-      ?+    -.sign  ~|(bad-accept-friend-sign/sign !!)
-          %poke-ack
-        ::
-        ?~  p.sign
-          =/  fren  (~(got by friends) ship)
-          ::  We should be in %received to be accepted.
-          ::
-          ?+  relationship.fren  ~|(dont-know-cant-accept/relationship.fren !!)
-              %received
-            ::
-            =/  fren-upd
-              :*  pinned=pinned.fren
-                  tags=tags.fren
-                  created-at=created-at.fren
-                  updated-at=now.bowl
-                  phone-number=phone-number.fren
-                  relationship=%fren
-                  status=status.fren
-                  contact-info=contact-info.fren
-              ==
-            ::  TODO, emit any necessary cards
-            core(friends (~(put by friends) ship fren-upd))
-          ==
-        ::  Poke failed
-        ::
-        ((slog leaf/"accept-friend nack" ~) core)
-      ::
-      ==
-    ::
-        [%bye-friend ship=@ ~]
-      ::
-      ?+    -.sign  ~|(bad-accept-friend-sign/sign !!)
-          %poke-ack
-        ::
-        ?~  p.sign
-          core
-        ((slog leaf/"bye-friend nack" ~) core)
-      ::
-      ==
-    ::
-    ==
   ++  watch
     |=  path=(pole knot)
     ^+  core
-    =*  dock  [src.bowl dap.bowl]
-    ::
-    ::  We choose to be a bit more resilient here.  If a subbing ship is still
-    ::  unknown, add them as know and start watching back.
-    ::
-    =*  us    (~(got by friends) our.bowl)
-    =*  fren  (~(got by friends) src.bowl)
-    ::
-    ?+    path  ~|(bad-watch-path/path !!)
-        [%status ~]
-      ::
-      =*  pull-status  [%give %fact ~ %friends-pull !>(`friends-pull`[%status status.us])]
-      =*  watch-version
-        :*  %pass  /version  %agent
-            dock  %watch  /version
-        ==
-      ::
-      ?:  (~(has by friends) src.bowl)
-        (emit pull-status)
-      ::  Add friend as %know
-      ::
-      =/  fren
-        :*  pinned=%.n
-            tags=*tags
-            created-at=now.bowl
-            updated-at=now.bowl
-            phone-number=~
-            relationship=%know
-            status=%offline
-            contact-info=~
-        ==
-      ::  Send them our status, and start watching their version.
-      ::
-      %=  core
-        friends  (~(put by friends) src.bowl fren)
-        cards    [pull-status watch-version cards]
-      ==
-    ::
-        [%contact-info ~]
-      ::
-      %-  emit
-      [%give %fact ~ %friends-pull !>(`friends-pull`[%contact-info contact-info.us])]
-    ::
-    ==
+    !!
   --
 ::
 ::  "when they see the Realm of the Gods, they will tremble in fear

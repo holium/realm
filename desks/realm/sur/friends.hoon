@@ -1,10 +1,23 @@
 ::  friends [realm]
 ::
-/-  resource, *contact-store, membership
+/-  resource, *contact-store, membership, *realm-common
 |%
++$  key  [=ship =time]
 ::
-
-+$  friends    (map ship friend)
+++  idx-sort
+  |=  [a=key b=key]
+  ?.  =(time.a time.b)
+    (gth time.a time.b)
+  :: same timestamp, order by ship (don't care)
+  (gth ship.a ship.b)
+::  friends: our ordered map to easily get updates by time.
+::
++$  friends    ((mop key friend) idx-sort)
+++  fon        ((on key friend) idx-sort)
+::  friend-times: map of ship to time for resolving the mop.
+::
++$  friend-times  (map ship time)
+::
 +$  tags       (set @t)
 +$  status     ?(%online %away %dnd %offline %invisible)
 ::
@@ -12,7 +25,7 @@
 ::  contact-info and status are updated by peers - should be done via SSS.
 ::
 +$  friend
-  $:  version=@tas
+  $:  =version
       pinned=_|
       =tags
       created-at=@da
@@ -95,6 +108,7 @@
 ::
 +$  friends-action-0
       ::  `friend` actions issued from Realm UI to our %friends agent
+      ::  Upgrade: start using new version.
   $%  [%add-friend =ship]
       [%edit-friend =ship pinned=? =tags]
       [%remove-friend =ship]
@@ -106,6 +120,10 @@
       [%set-contact-info =contact-info]
       [%set-status =status]
   ==
+::
+:: +$  friends-update-0
+::   $%
+::   ==
 ::
 ::  Ship to ship actions
 ::
@@ -124,14 +142,6 @@
   $%  [%status =status]
       [%contact-info =contact-info]
   ==
-::
-::  Scry views
-::
-:: +$  friends-view-0
-::   $%  
-::       [%friends =friends]
-::       [%contact-info =contact-info]
-::   ==
 ::
 :: Old types
 ::
