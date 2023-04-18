@@ -403,6 +403,7 @@
       %recommend         (recommend +.action)
       %unrecommend       (unrecommend +.action)
       %suite-add         (add-suite +.action)
+      %suite-add-full    (add-suite-full +.action)
       %suite-remove      (rem-suite +.action)
       %install-app       (install-app +.action)
       %uninstall-app     (uninstall-app +.action)
@@ -546,8 +547,9 @@
       ++  member-add-suite
         |=  [path=space-path:spaces-store =app-id:store index=@ud]
         ?>  (check-admin:security path src.bowl)
+        =/  app  (~(got by catalog.state) app-id)
         :_  state
-        [%pass / %agent [ship.path %bazaar] %poke bazaar-action+!>([%suite-add path app-id index])]~
+        [%pass / %agent [ship.path %bazaar] %poke bazaar-interaction+!>([%suite-add-full path app-id app index])]~
       ::
       ++  host-add-suite
         |=  [path=space-path:spaces-store =app-id:store index=@ud]
@@ -557,6 +559,35 @@
         =/  paths               [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
         :_  state
         [%give %fact paths bazaar-reaction+!>([%suite-added path app-id index])]~
+    ::
+    ::  this should only ever come into the space host (see "lite" versions add-suite above)
+    ++  add-suite-full
+      |=  [path=space-path:spaces-store =app-id:store =app:store index=@ud]
+      ?.  (is-host:core ship.path)
+        %-  (slog leaf+"{<dap.bowl>}: suite-add-full should only be used to inform the host. use suite-add if acting on behalf of a member ship" ~)
+        [~ state]
+      (host-add-suite-full path app-id app index)
+      ::
+      ++  host-add-suite-full
+        |=  [path=space-path:spaces-store =app-id:store =app:store index=@ud]
+        =/  app-entry                 (~(get by catalog.state) app-id)
+        =/  app
+          ?~  app-entry  :: app is not in the catalog. add it
+              %-  (slog leaf+"{<dap.bowl>}: [suite-add-full] - adding {<app-id>} to catalog" ~)
+              ?+  -.app   app
+                %urbit
+                  =.  install-status.app   %desktop
+                  app
+              ==
+            :: app is already in the catalog. leave as is
+            u.app-entry
+        =.  catalog.state       (~(put by catalog.state) app-id app)
+        =/  stall=stall:store   (~(gut by stalls.state) path [suite=~ recommended=~])
+        =.  suite.stall         (~(put by suite.stall) [index app-id])
+        =.  stalls.state        (~(put by stalls.state) [path stall])
+        =/  paths               [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+        :_  state
+        [%give %fact paths bazaar-reaction+!>([%suite-added-full path app-id app index])]~
     ::
     ++  rem-suite
       |=  [path=space-path:spaces-store index=@ud]
@@ -711,7 +742,11 @@
     ?+  -.rct             `state
       %recommended        (on-rec +.rct)
       %unrecommended      (on-unrec +.rct)
+      :: UI/frontend only requires app-id as input
       %suite-added        (on-suite-add +.rct)
+      :: full version is used "under the hood" to pass complete app detail
+      ::  in order to add the app to the ship catalog if it doesn't exist
+      %suite-added-full   (on-suite-add-full +.rct)
       %suite-removed      (on-suite-rem +.rct)
       %joined-bazaar      (on-joined +.rct)
       %stall-update
@@ -739,6 +774,16 @@
       =.  stalls.state        (~(put by stalls.state) [path stall])
       :_  state
       [%give %fact [/updates ~] bazaar-reaction+!>([%suite-added path app-id index])]~
+    ::
+    ++  on-suite-add-full
+      |=  [path=space-path:spaces-store app-id=@tas =app:store index=@ud]
+      ?:  =(is-host:core ship.path)
+        `state
+      =/  stall               (~(got by stalls.state) path)
+      =.  suite.stall         (~(put by suite.stall) [index app-id])
+      =.  stalls.state        (~(put by stalls.state) [path stall])
+      :_  state
+      [%give %fact [/updates ~] bazaar-reaction+!>([%suite-added-full path app-id app index])]~
     ::
     ++  on-suite-rem
       |=  [path=space-path:spaces-store index=@ud]

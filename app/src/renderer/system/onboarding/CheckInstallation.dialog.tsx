@@ -11,8 +11,14 @@ const CheckInstallationDialogPresenter = (props: BaseDialogProps) => {
   const isChecking =
     ['initial', 'loading'].indexOf(onboarding.versionLoader.state) !== -1;
 
+  console.log('CheckInstallationDialogPresenter => %o', {
+    isChecking,
+    loaderState: onboarding.versionLoader.state,
+  });
+
   useEffect(() => {
     onboarding.versionLoader.set('initial');
+    console.log('OnboardingActions.preInstallSysCheck();');
     OnboardingActions.preInstallSysCheck();
     return () => {
       onboarding.versionLoader.set('initial');
