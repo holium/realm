@@ -103,18 +103,12 @@ export class AuthDB {
     query.run(patp, cookie, Date.now());
   }
 
-  public _getSession(patp?: string): SessionType | null {
-    const query = this.authDB.prepare(
-      patp
-        ? `
+  public _getSession(patp: string): SessionType | null {
+    const query = this.authDB.prepare(`
       SELECT patp, key FROM accounts_session WHERE patp = ?;
-    `
-        : `SELECT patp, key FROM accounts_session LIMIT 1;`
-    );
-    const result: any = patp ? query.get(patp) : query.get();
-    if (result) {
-      return result;
-    }
+    `);
+    const result: any = query.get(patp);
+    if (result) return result;
     return null;
   }
 

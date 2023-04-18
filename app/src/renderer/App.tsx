@@ -13,9 +13,10 @@ import { Auth } from './system/authentication/index';
 
 function AppContentPresenter() {
   const { authStore, booted } = useAppState();
-  const hasNoAccounts = authStore.accounts.length === 0;
-  const isLoggedOut = !authStore.session;
   const addShip = useToggle(false);
+
+  const isLoggedOut = !authStore.session;
+  const hasNoAccounts = authStore.accounts.length === 0;
 
   if (!booted) {
     return (

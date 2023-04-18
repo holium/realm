@@ -6,7 +6,7 @@ export const HostingIcon = () => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g clip-path="url(#clip0_2749_17717)">
+    <g clipPath="url(#clip0_2749_17717)">
       <path
         d="M70 53H10C5.85786 53 2.5 56.3579 2.5 60.5V70.5C2.5 74.6421 5.85786 78 10 78H70C74.1421 78 77.5 74.6421 77.5 70.5V60.5C77.5 56.3579 74.1421 53 70 53Z"
         fill="#B0C1D4"

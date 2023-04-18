@@ -37,6 +37,11 @@ export const OnboardingStepPresenter = ({
     localStorage.setItem('onboardingStep', step);
   };
 
+  const handleOnFinish = () => {
+    localStorage.setItem('onboardingStep', '/login');
+    onFinish?.();
+  };
+
   switch (step) {
     case '/login':
       return <LoginStep setStep={handleSetStep} />;
@@ -45,9 +50,11 @@ export const OnboardingStepPresenter = ({
     case '/add-server':
       return <AddServerStep setStep={handleSetStep} />;
     case '/passport':
-      return <PassportStep setStep={handleSetStep} onFinish={onFinish} />;
+      return <PassportStep setStep={handleSetStep} onFinish={handleOnFinish} />;
     case '/installation':
-      return <InstallationStep setStep={handleSetStep} onFinish={onFinish} />;
+      return (
+        <InstallationStep setStep={handleSetStep} onFinish={handleOnFinish} />
+      );
     case '/choose-id':
       return <ChooseIdStep setStep={handleSetStep} />;
     case '/payment':

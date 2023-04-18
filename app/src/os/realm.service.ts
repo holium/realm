@@ -121,6 +121,19 @@ export class RealmService extends AbstractService {
     return this.services.auth.createMasterAccount(payload);
   }
 
+  public async getCookie(patp:string, url:string, code:string) {
+    const cookie = await getCookie({ patp, url, code });
+    if (!cookie) throw new Error('Failed to get cookie');
+    const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
+    const sanitizedCookie = cookie.split('; ')[0];
+
+    if (patp.toLowerCase() !== cookiePatp.toLowerCase()) {
+      throw new Error('Invalid code.');
+    }
+
+    return sanitizedCookie;
+  }
+
   async login(patp: string, password: string): Promise<boolean> {
     if (!this.services) {
       return false;
@@ -285,6 +298,7 @@ export class RealmService extends AbstractService {
 type RealmServicePublicMethods = Pick<
   RealmService,
   | 'boot'
+  | 'getCookie'
   | 'login'
   | 'logout'
   | 'createAccount'
