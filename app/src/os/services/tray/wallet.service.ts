@@ -26,6 +26,7 @@ import { Wallet } from './wallet-lib/ProtocolManager';
 import { BaseBlockProtocol } from './wallet-lib/wallets/BaseBlockProtocol';
 import { DiskStore } from '../base.store';
 import axios from 'axios';
+import { RealmSigner } from '../ship/wallet/signers/realm';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
@@ -325,7 +326,7 @@ export class WalletService extends BaseService {
     });
 
     setInterval(this.autoLock.bind(this), AUTO_LOCK_INTERVAL);
-    this.signer = new RealmSigner();
+    this.signer = RealmSigner;
   }
 
   async onLogin(ship: string) {

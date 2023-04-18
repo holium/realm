@@ -289,6 +289,9 @@ export const VisaModel = types
       // update outgoing invitations
       self.outgoing.delete(path);
     },
+    reset() {
+      applySnapshot(self, {});
+    },
   }));
 
 export type VisaModelType = Instance<typeof VisaModel>;

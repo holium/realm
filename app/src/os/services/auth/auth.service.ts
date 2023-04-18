@@ -5,7 +5,7 @@ import Store from 'electron-store';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { AuthDB } from './auth.db';
 import { Account } from './accounts.table';
-import { AccountModelType } from 'renderer/stores/models/account.model';
+import { AccountModelType } from 'renderer/stores/models/Account.model';
 import { ThemeType } from 'renderer/stores/models/theme.model';
 import { MasterAccount } from './masterAccounts.table';
 // import { getCookie } from 'os/lib/shipHelpers';

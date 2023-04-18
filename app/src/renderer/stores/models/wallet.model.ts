@@ -216,7 +216,7 @@ const TransactionList = types
       contractAddress: string | null,
       hash: string,
       tx: any
-    ) {
+    ): Generator<PromiseLike<any>, void, any> {
       yield WalletIPC.setTransaction(
         'ethereum',
         protocol,
@@ -224,7 +224,7 @@ const TransactionList = types
         contractAddress,
         hash,
         tx
-      );
+      ) as PromiseLike<any>;
     }),
     getStoredTransaction(hash: string) {
       const tx: any = self.transactions.get(hash);
@@ -880,7 +880,7 @@ export const WalletStore = types
           return self.ethereum;
         case NetworkStoreType.BTC_MAIN:
           return self.bitcoin;
-        case NetworkStoreType.BTC_MAIN:
+        case NetworkStoreType.BTC_TEST:
           return self.btctest;
         default:
           return self.ethereum;
@@ -896,12 +896,24 @@ export const WalletStore = types
   }))
   .actions((self) => {
     return {
+      init: flow(function* (): Generator<PromiseLike<any>, void, any> {
+        try {
+          const wallets = yield WalletIPC.getWallets() as PromiseLike<any>;
+          console.log(wallets);
+          const transactions =
+            yield WalletIPC.getTransactions() as PromiseLike<any>;
+          console.log(transactions);
+          self.ourPatp = shipStore.ship?.patp;
+        } catch (error) {
+          console.error(error);
+        }
+      }),
       setInitialized(initialized: boolean) {
         self.initialized = initialized;
         console.log('trying to set the ship', shipStore.ship?.patp);
         self.ourPatp = shipStore.ship?.patp;
       },
-      setNetwork(network: NetworkType) {
+      setNetworkSetter(network: NetworkType) {
         /* @ts-expect-error */
         self.resetNavigation();
         if (network !== self.navState.network) {
@@ -918,7 +930,13 @@ export const WalletStore = types
           }
         }
       },
-      setProtocol(protocol: ProtocolType) {
+      setNetwork(_event: any, network: NetworkType) {
+        this.navigate(WalletView.LIST);
+        if (self.navState.network !== network) {
+          this.setNetworkSetter(network);
+        }
+      },
+      setProtocolSetter(protocol: ProtocolType) {
         /* @ts-expect-error */
         self.resetNavigation();
         if (protocol === ProtocolType.UQBAR) {
@@ -1024,35 +1042,40 @@ export const WalletStore = types
       reset: (initialState: any) => {
         applySnapshot(self, initialState);
       },
-      setMnemonic: flow(function* (mnemonic: string, passcode: number[]) {
+      setMnemonic: flow(function* (
+        mnemonic: string,
+        passcode: number[]
+      ): Generator<PromiseLike<any>, void, any> {
         const passcodeString = passcode.map(String).join('');
         yield WalletIPC.setMnemonic(
           mnemonic,
           self.ourPatp ?? '',
           passcodeString
-        );
+        ) as PromiseLike<any>;
         const passcodeHash = yield bcrypt.hash(passcodeString, 12);
-        yield WalletIPC.setPasscodeHash(passcodeHash);
+        yield WalletIPC.setPasscodeHash(passcodeHash) as PromiseLike<any>;
         yield WalletIPC.setXpub(
           'ethereum',
           "m/44'/60'/0'",
           self.ourPatp ?? '',
           passcodeString
-        );
+        ) as PromiseLike<any>;
         yield WalletIPC.setXpub(
           'bitcoin',
           "m/44'/0'/0'",
           self.ourPatp ?? '',
           passcodeString
-        );
+        ) as PromiseLike<any>;
         yield WalletIPC.setXpub(
           'btctestnet',
           "m/44'/1'/0'",
           self.ourPatp ?? '',
           passcodeString
-        );
+        ) as PromiseLike<any>;
       }),
-      createWalletFlow: flow(function* (nickname: string) {
+      createWalletFlow: flow(function* (
+        nickname: string
+      ): Generator<PromiseLike<any>, void, any> {
         const sender = self.ourPatp ?? '';
         let network: string = self.navState.network;
         if (
@@ -1061,20 +1084,83 @@ export const WalletStore = types
         ) {
           network = 'btctestnet';
         }
-        yield WalletIPC.createWallet(sender, network, nickname);
+        yield WalletIPC.createWallet(
+          sender,
+          network,
+          nickname
+        ) as PromiseLike<any>;
       }),
       createWallet(nickname: string) {
         this.createWalletFlow(nickname);
         this.navigate(WalletView.LIST, { canReturn: false });
+      },
+      sendEthereumTransaction: flow(function* (
+        _event: any,
+        walletIndex: string,
+        to: string,
+        amount: string,
+        passcode: number[],
+        toPatp?: string
+      ): Generator<PromiseLike<any>, void, any> {
+        const path = "m/44'/60'/0'/0/0" + walletIndex;
+        const from = self.ethereum.wallets.get(walletIndex)?.address ?? '';
+        const { hash, tx } = yield WalletIPC.sendTransaction(
+          self.navState.protocol,
+          path,
+          self.ourPatp ?? '',
+          passcode.map(String).join(''),
+          from,
+          to,
+          amount
+        ) as PromiseLike<any>;
+        const currentWallet = self.currentWallet as EthWalletType;
+        const fromAddress = currentWallet.address;
+        currentWallet.enqueueTransaction(
+          self.navState.protocol,
+          hash,
+          tx.to,
+          toPatp,
+          fromAddress,
+          tx.value,
+          new Date().toISOString()
+        );
+        const stateTx = currentWallet.data
+          .get(self.navState.protocol)
+          ?.transactionList.getStoredTransaction(hash);
+
+        yield WalletIPC.setTransaction(
+          'ethereum',
+          self.navState.protocol,
+          currentWallet.index,
+          null,
+          hash,
+          stateTx
+        ) as PromiseLike<any>;
+      }),
+      toggleNetwork() {
+        if (self.navState.network === NetworkType.ETHEREUM) {
+          if (self.navState.protocol === ProtocolType.ETH_MAIN) {
+            this.setProtocolSetter(ProtocolType.ETH_GORLI);
+          } else if (self.navState.protocol === ProtocolType.ETH_GORLI) {
+            this.setProtocolSetter(ProtocolType.ETH_MAIN);
+          }
+        }
+      },
+      setProtocol(_event: any, protocol: ProtocolType) {
+        this.navigate(WalletView.LIST);
+        if (self.navState.protocol !== protocol) {
+          this.setProtocolSetter(protocol);
+        }
       },
     };
   });
 
 export type WalletStoreType = Instance<typeof WalletStore>;
 
-WalletIPC.onUpdate((_event: any, update: any) => {
-  console.log('got update', update);
-  const { type, payload } = update;
+WalletIPC.onUpdate((_event: any, payload: any) => {
+  console.log('got update', payload);
+  // const { type, payload } = update;
+  const type = Object.keys(payload)[0];
   console.log('type', type);
   console.log('payload', payload);
   switch (type) {

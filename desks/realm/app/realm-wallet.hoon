@@ -77,10 +77,11 @@
       :-  [%pass /addr/(scot %p from) %agent [from dap.bowl] task]~
       this
         [%updates ~]
-      :_  this
-      :~  [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%wallets wallets.state])]
-          [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]
-      ==
+      `this
+      :: :_  this
+      :: :~  [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%wallets wallets.state])]
+      ::     [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]
+      :: ==
     ==
   ++  on-leave  on-leave:def
   ++  on-peek

@@ -18,7 +18,7 @@ import { ChatLogHeader } from '../components/ChatLogHeader';
 import { ChatAvatar } from '../components/ChatAvatar';
 import { IuseStorage } from 'renderer/lib/useStorage';
 import { PinnedContainer } from '../components/PinnedMessage';
-import { ChatMessageType } from '../models';
+import { ChatMessageType } from '../../../stores/models/chat.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { ChatLogList } from './ChatLogList';
 import { useAppState } from 'renderer/stores/app.store';

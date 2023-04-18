@@ -3,7 +3,7 @@ import AbstractService, { ServiceOptions } from '../../abstract.service';
 import APIConnection from '../../conduit';
 import { chatDBPreload, ChatDB } from './chat.db';
 import { ChatPathMetadata, ChatPathType } from './chat.types';
-import { InvitePermissionType } from 'renderer/apps/Courier/models';
+import { InvitePermissionType } from 'renderer/stores/models/chat.model';
 
 export class ChatService extends AbstractService {
   public chatDB?: ChatDB;

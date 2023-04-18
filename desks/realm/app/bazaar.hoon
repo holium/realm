@@ -3,7 +3,6 @@
 ::
 ::  A store for metadata on app dockets and installs.
 ::
-::
 /-  store=bazaar-store, docket, spaces-store, vstore=visas
 /-  membership-store=membership, hark=hark-store
 /-  treaty, hood

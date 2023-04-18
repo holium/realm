@@ -206,9 +206,7 @@ const AppSuitePresenter = ({ isAdmin }: AppSuiteProps) => {
   return (
     <Flex flexDirection="column" position="relative" gap={20} mb={60}>
       <Flex>
-        <Text.Custom variant="h3" fontWeight={500}>
-          App Suite
-        </Text.Custom>
+        <Text.H4 fontWeight={500}>App Suite</Text.H4>
       </Flex>
       <Flex
         flexGrow={1}

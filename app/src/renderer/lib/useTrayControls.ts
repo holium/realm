@@ -1,4 +1,4 @@
-import { ChatStoreInstance } from 'renderer/apps/Courier/store';
+import { ChatStoreInstance } from 'renderer/stores/chat.store';
 import { AppRegistry } from 'renderer/apps/registry';
 
 export const openChatToPath = (

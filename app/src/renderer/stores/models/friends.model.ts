@@ -166,6 +166,9 @@ export const FriendsStore = types
         self.all.splice(delIdx, 1);
       }
     },
+    reset() {
+      applySnapshot(self.all, []);
+    },
   }));
 
 export type FriendsType = Instance<typeof FriendsStore>;

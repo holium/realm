@@ -2,7 +2,6 @@ import { Flex } from '@holium/design-system';
 import { AppWindowIcon } from 'renderer/system/desktop/components/AppWindow/AppWindowIcon';
 
 type Props = {
-  iconColor: string;
   showDevToolsToggle: boolean;
   toggleDevTools: () => void;
   onClose: () => void;
@@ -11,7 +10,6 @@ type Props = {
 };
 
 export const ToolbarControlButtons = ({
-  iconColor,
   showDevToolsToggle,
   toggleDevTools,
   onClose,
@@ -22,8 +20,6 @@ export const ToolbarControlButtons = ({
     {showDevToolsToggle && (
       <AppWindowIcon
         icon="DevBox"
-        iconColor={iconColor}
-        bg="#97A3B2"
         onClick={(evt) => {
           evt.stopPropagation();
           toggleDevTools();
@@ -32,8 +28,6 @@ export const ToolbarControlButtons = ({
     )}
     <AppWindowIcon
       icon="Minimize"
-      iconColor={iconColor}
-      bg="#97A3B2"
       onClick={(evt) => {
         evt.stopPropagation();
         onMinimize && onMinimize();
@@ -41,8 +35,6 @@ export const ToolbarControlButtons = ({
     />
     <AppWindowIcon
       icon="Expand"
-      iconColor={iconColor}
-      bg="#97A3B2"
       onClick={(evt) => {
         evt.stopPropagation();
         onMaximize && onMaximize();
@@ -50,9 +42,7 @@ export const ToolbarControlButtons = ({
     />
     <AppWindowIcon
       icon="Close"
-      iconColor={iconColor}
-      bg="#FF6240"
-      fillWithBg
+      iconColor="intent-alert"
       onClick={(evt) => {
         evt.stopPropagation();
         onClose && onClose();

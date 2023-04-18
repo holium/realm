@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
 import { Inbox } from './views/Inbox';
 import { NewChat } from './views/NewChat';
-import { ChatProvider } from './store';
+import { ChatProvider } from '../../stores/chat.store';
 import { useEffect } from 'react';
 import { ChatInfo } from './views/ChatInfo';
 import { ChatLog } from './views/ChatLog';

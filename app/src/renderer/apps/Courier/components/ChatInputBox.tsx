@@ -6,7 +6,10 @@ import {
   useEffect,
 } from 'react';
 import { Box, ChatInput } from '@holium/design-system';
-import { ChatMessageType, ChatModelType } from '../models';
+import {
+  ChatMessageType,
+  ChatModelType,
+} from '../../../stores/models/chat.model';
 import { useFileUpload } from 'renderer/lib/useFileUpload';
 import { IuseStorage } from 'renderer/lib/useStorage';
 import { ShipIPC } from 'renderer/stores/ipc';

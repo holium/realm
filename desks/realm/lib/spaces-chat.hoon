@@ -106,4 +106,5 @@
   |=  kv=[k=path v=chat:store]
   ^-  (list card:agent:gall)
   [%pass /rcpoke %agent [our.bowl %realm-chat] %poke %chat-action !>([%remove-ship-from-chat k.kv ship])]~
+
 --

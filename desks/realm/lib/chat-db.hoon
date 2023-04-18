@@ -346,6 +346,7 @@
       ?>  (is-valid-inviter pathrow peers src.bowl)
       :: the path has to be %.y on peers-get-backlog
       ?>  peers-get-backlog.pathrow
+
       $(messages-table.state (put:msgon:sur messages-table.state [msg-id.msg msg-part-id.msg] msg), index +(index), changes [[%add-row %messages msg] changes])
 
   =/  thechange  chat-db-change+!>(-.changes-and-state)

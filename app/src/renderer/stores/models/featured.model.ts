@@ -1,4 +1,5 @@
 import { types, Instance, applySnapshot, flow } from 'mobx-state-tree';
+import { SpacesIPC } from '../ipc';
 
 export const SpaceListingModel = types.model('SpaceListingModel', {
   path: types.string,
@@ -19,12 +20,11 @@ export const FeaturedStore = types
     },
   }))
   .actions((self) => ({
-    // TODO
     fetchFeatured: flow(function* () {
-      // const { data } = yield api.get('/featured');
-      // self._initial({ spaces: data });
+      const data = yield SpacesIPC.getFeaturedSpaces() as Promise<any>;
+      applySnapshot(self.spaces, data);
+      return data;
     }),
-
     _initial(payload: { spaces: SpaceListingType }) {
       applySnapshot(self.spaces, payload.spaces as any);
     },
@@ -33,6 +33,9 @@ export const FeaturedStore = types
     },
     _spaceRemoved(payload: { path: string }) {
       self.spaces.delete(payload.path);
+    },
+    reset() {
+      applySnapshot(self, {});
     },
   }));
 

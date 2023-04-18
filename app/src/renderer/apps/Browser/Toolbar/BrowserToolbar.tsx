@@ -1,11 +1,4 @@
-import {
-  PointerEvent,
-  RefObject,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { PointerEvent, RefObject, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { TitlebarContainer } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
 import { observer } from 'mobx-react';
@@ -14,8 +7,6 @@ import { ToolbarSearchInput } from './ToolbarSearchInput';
 import { ToolbarNavigationButtons } from './ToolbarNavigationButtons';
 import { useBrowser } from '../store';
 import { useDoubleClick } from 'renderer/lib/useDoubleClick';
-import { useAppState } from 'renderer/stores/app.store';
-import { Icon } from '@holium/design-system';
 
 const ToolbarContainer = styled(TitlebarContainer)`
   padding: 0 10px;
@@ -45,8 +36,6 @@ const BrowserToolbarPresenter = ({
   onMaximize,
 }: BrowserToolbarProps) => {
   const { currentTab } = useBrowser();
-  const { theme } = useAppState();
-  const iconColor = useMemo(() => theme.iconColor, [theme.iconColor]);
   const onDoubleClick = useDoubleClick(onMaximize);
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -132,10 +121,8 @@ const BrowserToolbarPresenter = ({
       onPointerDown={onPointerDown}
       onClick={onDoubleClickToolbar}
     >
-      <Icon name="AppIconCompass" size={28} />
       <ToolbarNavigationButtons
         innerRef={navigationButtonsRef}
-        iconColor={iconColor}
         canGoBack={canGoBack}
         canGoForward={canGoForward}
         onBack={onBack}
@@ -144,7 +131,6 @@ const BrowserToolbarPresenter = ({
       />
       <ToolbarSearchInput innerRef={inputRef} readyWebview={readyWebview} />
       <ToolbarControlButtons
-        iconColor={iconColor}
         showDevToolsToggle={showDevToolsToggle}
         toggleDevTools={toggleDevTools}
         onClose={onClose}
