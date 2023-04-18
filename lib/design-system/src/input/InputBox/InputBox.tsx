@@ -32,9 +32,6 @@ const StyledBox = styled(Flex)<StyledBoxProps>`
         transition: var(--transition);
         outline: none;
         border-color: rgba(var(--rlm-accent-rgba));
-        &::placeholder {
-          color: transparent;
-        }
       }
     `}
 
@@ -51,9 +48,6 @@ const StyledBox = styled(Flex)<StyledBoxProps>`
     appearance: none;
     outline: none;
     border: 1px transparent;
-    &::placeholder {
-      opacity: 0.5;
-    }
   }
 
   input[type='password'] {
@@ -173,7 +167,7 @@ export const InputBox = ({
         {label}
       </Text.Label>
     )}
-    <Box display="flex" flexDirection="row" flex={1} height="100%">
+    <Box display="flex" flexDirection="row" flex={1} alignItems="center">
       {leftAdornment && (
         <Adornment mr={1} disabled={disabled} alignContent="center">
           {leftAdornment}

@@ -1,6 +1,6 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Text } from '@holium/design-system/general';
-import { Input } from '@holium/design-system/inputs';
+import { Input, TextInput } from '@holium/design-system/inputs';
 
 export const TABLET_WIDTH = 800;
 export const MOBILE_WIDTH = 400;
@@ -85,17 +85,28 @@ type OnboardDialogInputProps = {
   isError?: boolean;
 };
 
-export const OnboardDialogInput = styled(Input)<OnboardDialogInputProps>`
+const inputCss = css<OnboardDialogInputProps>`
   flex: 1;
   padding: 11px 12px;
-  border: 1px solid rgba(var(--rlm-border-rgba));
   border-radius: 6px;
+  border: 1px solid rgba(var(--rlm-border-rgba));
+  color: rgba(var(--rlm-text-rgba));
 
   ${({ isError }) =>
     isError &&
     `
     border: 1px solid rgba(var(--rlm-intent-alert-rgba));
   `}
+`;
+
+export const OnboardDialogInput = styled(Input)<OnboardDialogInputProps>`
+  ${inputCss}
+`;
+
+export const OnboardDialogTextInput = styled(
+  TextInput
+)<OnboardDialogInputProps>`
+  ${inputCss}
 `;
 
 export const OnboardDialogTitle = styled(Text.H1)`

@@ -2,7 +2,6 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 
 export const Input = styled(motion.input)`
-  /* border-radius: var(--rlm-border-radius-4); */
   background-color: rgba(var(--rlm-input-rgba));
   color: rgba(var(--rlm-text-rgba));
   pointer-events: all;
