@@ -9,13 +9,19 @@ import {
 
 type Props = {
   onBack: () => void;
-  onNext: () => Promise<boolean>;
+  onNext: (id: string, url: string, code: string) => void;
 };
 
 export const AddServerDialog = ({ onBack, onNext }: Props) => {
   const [id, setId] = useState('');
   const [url, setUrl] = useState('');
   const [code, setCode] = useState('');
+
+  const handleOnNext = () => {
+    onNext(id, url, code);
+
+    return Promise.resolve(true);
+  };
 
   return (
     <OnboardDialog
@@ -59,7 +65,7 @@ export const AddServerDialog = ({ onBack, onNext }: Props) => {
       }
       nextText="Add Ship"
       onBack={onBack}
-      onNext={onNext}
+      onNext={handleOnNext}
     />
   );
 };
