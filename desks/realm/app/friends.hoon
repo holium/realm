@@ -351,45 +351,84 @@
 ++  agent
   |=  [path=(pole knot) =sign:agent:gall]
   ^+  core
+  ::
+  ::  This is more naive than subbing to everyone's version, but it's a rare case.
+  ::
   ?+    -.path  ~|(bad-agent-version/path !!)
       %'0'
     (agent:core-0 +.path sign)
   ::
   ==
 ::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::                                                                            ::
+::  +watch: handle on-watch                                                   ::
+::                                                                            ::
+::    In +watch we receive subscription requests from other agents or
+::    the frontend.  Like poke requests, these always have the version
+::    at the head of the path for routing.
+::
+::    General steps (2-4 are in the versioned core):                          ::
+::    1.  Check version number of incoming request.                           ::
+::        By our convention, this is always the head of path.  Note that      ::
+::        these are text constants and not numbers, as they are in +load.     ::
+::    2.  Route on request wire.  By our convention,                          ::
+::        this is always path's tail.                                         ::
+::    3.  Crash if invalid path or permissions.                               ::
+::    4.  Update state and emit effects as necessary.                         ::
+::        For initial updates these are on the ~ path.                        ::
+::                                                                            ::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::
+++  watch
+  |=  path=(pole knot)
+  ^+  core
+  ?+    -.path  ~|(bad-watch-version/path !!)
+      %'0'
+    (watch:core-0 +.path)
+  ::
+  ==
+::
 ++  core-0
   |%
   ++  ver  %'0'
+  ++  status-path        /[ver]/status
+  ::  v1 status paths will be (welp ~[status-path] core-0:status-paths)
+  ::
+  ++  status-paths       ~[status-path]
+  ++  contact-info-path  /[ver]/contact-info
+  ::
+  ++  action-type        friends-action-0
+  ++  action-mark        %friends-action-0
+  ::
+  ++  update-type        friends-update-0
+  ++  update-mark        %friends-update-0
+  ::
   ++  poke
-    |=  act=friends-action-0
+    |=  act=action-type
     ^+  core
+    =*  dock  [ship.act dap.bowl]
     ::  Deferred pokes that may be used below.
     ::
     =*  bye-friend
       :*  %pass
           /[ver]/bye-friend/(scot %p ship.act)
-          %agent
-          [ship.act dap.bowl]
-          %poke
-          friends-action-0+!>([%bye-friend ~])
+          %agent  dock  %poke
+          [action-mark !>([%bye-friend ~])]
       ==
     ::
     =*  sent-friend
       :*  %pass
           /[ver]/sent-friend/(scot %p ship.act)
-          %agent
-          [ship.act dap.bowl]
-          %poke
-          friends-action-0+!>([%sent-friend ~])
+          %agent  dock  %poke
+          [action-mark !>([%sent-friend ~])]
       ==
     ::
     =*  accept-friend
       :*  %pass
           /[ver]/accept-friend/(scot %p ship.act)
-          %agent
-          [ship.act dap.bowl]
-          %poke
-          friends-action-0+!>([%accept-friend ~])
+          %agent  dock  %poke
+          [action-mark !>([%accept-friend ~])]
       ==
     ::
     ?-    -.act
@@ -418,7 +457,15 @@
           %received  (emit accept-friend)
         ==
       ::  ship is not in our friends list, so add them as know
-      ::  and send a friend request
+      ::  and send a friend request.  Start watching for updates.
+      ::
+      ::  TODO remote scry for their version.  If older, reissue poke on their version.
+      ::
+      ::  TODO should watch version first, then on version start watching other paths.
+      =*  watch-version
+        :*  %pass  /version  %agent
+            dock  %watch  /version
+        ==
       ::
       =/  fren
         :*  pinned=%.n
@@ -433,7 +480,7 @@
       ::
       %=  core
         friends  (~(put by friends) ship.act fren)
-        cards    [sent-friend cards]
+        cards    [sent-friend watch-version cards]
       ==
     ::
         %edit-friend
@@ -457,10 +504,8 @@
       =*  bye-friend
         :*  %pass
             /[ver]/bye-friend/(scot %p ship.act)
-            %agent
-            [ship.act dap.bowl]
-            %poke
-            friends-action-0+!>([%bye-friend ~])
+            %agent  dock  %poke
+            [action-mark !>([%bye-friend ~])]
         ==
       ::
       =/  fren  (~(got by friends) ship.act)
@@ -535,8 +580,8 @@
         core(friends (~(put by friends) ship.act fren-upd))
       ==
     ::
-        %set-passport
-      ?.  =(our.bowl src.bowl)  ~|('no-foreign-set-passport' !!)
+        %set-contact-info
+      ?.  =(our.bowl src.bowl)  ~|('no-foreign-set-contact-info' !!)
       =/  us  (~(got by friends) our.bowl)
       ::
       =/  us-upd
@@ -571,7 +616,10 @@
             contact-info=contact-info.us
         ==
       ::
-      core(friends (~(put by friends) our.bowl us-upd))
+      %=  core
+        friends  (~(put by friends) our.bowl us-upd)
+        cards    [[%give %fact status-paths update-mark !>(`update-type`[%status status.act])] cards]
+      ==
     ::
         %sent-friend
       ::  Receive a new friend request from another ship.
@@ -751,6 +799,53 @@
         ((slog leaf/"bye-friend nack" ~) core)
       ::
       ==
+    ::
+    ==
+  ++  watch
+    |=  path=(pole knot)
+    ^+  core
+    =*  dock  [src.bowl dap.bowl]
+    ::
+    ::  We choose to be a bit more resilient here.  If a subbing ship is still
+    ::  unknown, add them as know and start watching back.
+    ::
+    =*  us    (~(got by friends) our.bowl)
+    =*  fren  (~(got by friends) src.bowl)
+    ::
+    ?+    path  ~|(bad-watch-path/path !!)
+        [%status ~]
+      ::
+      =*  pull-status  [%give %fact ~ %friends-pull !>(`friends-pull`[%status status.us])]
+      =*  watch-version
+        :*  %pass  /version  %agent
+            dock  %watch  /version
+        ==
+      ::
+      ?:  (~(has by friends) src.bowl)
+        (emit pull-status)
+      ::  Add friend as %know
+      ::
+      =/  fren
+        :*  pinned=%.n
+            tags=*tags
+            created-at=now.bowl
+            updated-at=now.bowl
+            phone-number=~
+            relationship=%know
+            status=%offline
+            contact-info=~
+        ==
+      ::  Send them our status, and start watching their version.
+      ::
+      %=  core
+        friends  (~(put by friends) src.bowl fren)
+        cards    [pull-status watch-version cards]
+      ==
+    ::
+        [%contact-info ~]
+      ::
+      %-  emit
+      [%give %fact ~ %friends-pull !>(`friends-pull`[%contact-info contact-info.us])]
     ::
     ==
   --

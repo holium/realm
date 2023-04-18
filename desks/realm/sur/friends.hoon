@@ -3,6 +3,7 @@
 /-  resource, *contact-store, membership
 |%
 ::
+
 +$  friends    (map ship friend)
 +$  tags       (set @t)
 +$  status     ?(%online %away %dnd %offline %invisible)
@@ -11,7 +12,8 @@
 ::  contact-info and status are updated by peers - should be done via SSS.
 ::
 +$  friend
-  $:  pinned=_|
+  $:  version=@tas
+      pinned=_|
       =tags
       created-at=@da
       updated-at=@da
@@ -98,14 +100,17 @@
       [%remove-friend =ship]
       [%block-friend =ship]
       [%unblock-friend =ship]
-      :: editing our own passport information
+      :: editing our own contact information
       :: could support diffs, but this is simpler
       ::
-      [%set-passport =contact-info]
+      [%set-contact-info =contact-info]
       [%set-status =status]
-      ::  `fren` actions are sent agent to agent
-      ::
-      ::  sent-friend: ship sends you friend request
+  ==
+::
+::  Ship to ship actions
+::
++$  friends-push
+  $%  ::  sent-friend: ship sends you friend request
       ::  accept-friend: ship accepts your friend request
       ::  bye-friend: ship notifies you that it has cancelled friend request or unfriended you.
       [%sent-friend ~]
@@ -113,13 +118,12 @@
       [%bye-friend ~]
   ==
 ::
-:: +$  friends-update-0
-::   $%  
-::       [%friends =friends]
-::       [%friend =ship =friend]       :: when old friend is updated
-::       [%new-friend =ship =friend]   :: when a new friend is added
-::       [%bye-friend =ship]           :: when a friend is removed 
-::   ==
+::  Ship to ship updates
+::
++$  friends-pull
+  $%  [%status =status]
+      [%contact-info =contact-info]
+  ==
 ::
 ::  Scry views
 ::
