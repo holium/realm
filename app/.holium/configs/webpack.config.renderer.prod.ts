@@ -20,12 +20,10 @@ const Dotenv = require('dotenv-webpack');
 checkNodeEnv('production');
 deleteSourceMaps();
 
-const devtoolsConfig = {
-  devtool: 'source-map',
-};
-
 const configuration: webpack.Configuration = {
-  ...devtoolsConfig,
+  // @see: https://docs.sentry.io/platforms/javascript/guides/react/sourcemaps/uploading/cli/#1-generate-your-artifacts
+  // Enable "sourcesContent".
+  devtool: 'source-map',
   mode: 'production',
   target: ['web', 'electron-renderer'],
   entry: {

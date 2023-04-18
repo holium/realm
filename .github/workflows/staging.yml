@@ -188,22 +188,31 @@ jobs:
       # all builds should produce the same sourcemaps; therefore only need to create the Sentry
       #   release one time. Use linux build since Sentry action only runs on linux
       - name: Create Sentry release
-        uses: getsentry/action-release@v1
+        # uses: getsentry/action-release@v1
+        # env:
+        #   SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        #   SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+        #   SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        #   # SENTRY_URL: https://sentry.io/
+        #   BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+        #   SENTRY_LOG_LEVEL: debug
+        # with:
+        #   environment: staging
+        #   # must match dist set in Sentry.init call
+        #   dist: ${{ needs.pre-deploy.outputs.build_version }}
+        #   url_prefix: 'file://'
+        #   sourcemaps: './app/release/app/dist/renderer'
+        #   version: ${{ needs.pre-deploy.outputs.build_version }}
+        #   ignore_empty: true
+        run: |
+          sudo npm install -g @sentry/cli --unsafe-perm
+          sentry-cli sourcemaps inject ./app/release/app/dist
+          sentry-cli sourcemaps upload --org $SENTRY_ORG --auth-token $SENTRY_AUTH_TOKEN --project $SENTRY_PROJECT --use-artifact-bundle --release $BUILD_VERSION --dist $BUILD_VERSION ./app/release/app/dist
         env:
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-          # SENTRY_URL: https://sentry.io/
-          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-          SENTRY_LOG_LEVEL: debug
-        with:
-          environment: staging
-          # must match dist set in Sentry.init call
-          dist: ${{ needs.pre-deploy.outputs.build_version }}
-          url_prefix: 'file://'
-          sourcemaps: './app/release/app/dist/renderer'
-          version: ${{ needs.pre-deploy.outputs.build_version }}
-          ignore_empty: true
   #
   build-windows:
     needs: [pre-deploy]
