@@ -16,6 +16,7 @@ let cfg: Sentry.BrowserOptions = {
   integrations: [
     new BrowserTracing(),
     new RewriteFramesIntegration({
+      // prefix: 'app://',
       // function that takes the frame, applies a transformation, and returns it
       iteratee: (frame: any) => {
         // example frame contents from crash
@@ -34,7 +35,9 @@ let cfg: Sentry.BrowserOptions = {
           console.log('mapping frame');
           const idx = filename.lastIndexOf('/');
           if (idx !== 1) {
-            frame.filename = `file://${filename.substring(idx + 1)}`;
+            frame.filename = `app:///${filename.substring(idx + 1)}`;
+          } else {
+            frame.filename = `app:///${filename}`;
           }
           console.log(
             `mapping stack trace frame '%o' to '%o`,
