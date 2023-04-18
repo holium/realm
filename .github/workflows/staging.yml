@@ -206,8 +206,11 @@ jobs:
         #   ignore_empty: true
         run: |
           sudo npm install -g @sentry/cli --unsafe-perm
-          sentry-cli sourcemaps inject ./app/release/app/dist
-          sentry-cli sourcemaps upload --org $SENTRY_ORG --auth-token $SENTRY_AUTH_TOKEN --project $SENTRY_PROJECT --use-artifact-bundle --release $BUILD_VERSION --dist $BUILD_VERSION ./app/release/app/dist
+          sentry-cli sourcemaps inject ./app/release/app/dist/renderer
+          sentry-cli sourcemaps upload --org $SENTRY_ORG --auth-token $SENTRY_AUTH_TOKEN --project $SENTRY_PROJECT --use-artifact-bundle --release $BUILD_VERSION --dist $BUILD_VERSION ./app/release/app/dist/renderer
+          # legacy method
+          sentry-cli releases files $BUILD_VERSION upload-sourcemaps ./app/release/app/dist/renderer
+          sentry-cli releases finalize $BUILD_VERSION
         env:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
