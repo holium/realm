@@ -200,7 +200,7 @@ jobs:
           environment: staging
           # must match dist set in Sentry.init call
           dist: ${{ needs.pre-deploy.outputs.build_version }}
-          url_prefix: '~/'
+          url_prefix: 'file://'
           sourcemaps: './app/release/app/dist/renderer'
           version: ${{ needs.pre-deploy.outputs.build_version }}
           ignore_empty: true
