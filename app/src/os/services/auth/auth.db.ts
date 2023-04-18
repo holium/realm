@@ -41,6 +41,18 @@ export class AuthDB {
     });
   }
 
+  hasSeenSplash(): boolean {
+    const result: any = this.authDB
+      .prepare('SELECT seenSplash FROM accounts_meta;')
+      .all();
+    if (result.length === 0) return false;
+    return result[0]?.seenSplash === 1 || false;
+  }
+
+  setSeenSplash(): void {
+    this.authDB.prepare('UPDATE accounts_meta SET seenSplash = 1;').run();
+  }
+
   migrateJsonToSqlite() {
     try {
       const oldAuth = new Store({
@@ -94,6 +106,37 @@ export class AuthDB {
       .run(Date.now());
   }
 
+  public addToOrder(patp: string): void {
+    const query = this.authDB.prepare(`
+      REPLACE INTO accounts_order (patp, idx)
+      VALUES (?, ?);
+    `);
+    query.run(patp, this.getOrder().length);
+  }
+
+  public removeFromOrder(patp: string): void {
+    const query = this.authDB.prepare(`
+      DELETE FROM accounts_order WHERE patp = ?;
+    `);
+    query.run(patp);
+  }
+
+  public getOrder(): string[] {
+    const query = this.authDB.prepare(`
+      SELECT patp FROM accounts_order ORDER BY idx ASC;
+    `);
+    const result: any = query.all();
+    return result.map((r: { patp: string }) => r.patp);
+  }
+
+  public setOrder(patp: string, idx: number): void {
+    const query = this.authDB.prepare(`
+      REPLACE INTO accounts_order (patp, idx)
+      VALUES (?, ?);
+    `);
+    query.run(patp, idx);
+  }
+
   public _setSession(patp: string, cookie: string) {
     log.info(`Setting session for ${patp} to ${cookie}`);
     const query = this.authDB.prepare(`
@@ -137,6 +180,7 @@ create table if not exists accounts_order (
 );
 
 create table if not exists accounts_meta (
+  seenSplash          INTEGER NOT NULL DEFAULT 0,
   migrated            INTEGER NOT NULL DEFAULT 0,
   migratedAt          INTEGER
 );

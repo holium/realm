@@ -1,4 +1,4 @@
-import { Instance, types, clone } from 'mobx-state-tree';
+import { Instance, types, clone, flow } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
 import { AccountModelType } from './models/Account.model';
 import { defaultTheme } from '../lib/defaultTheme';
@@ -17,13 +17,14 @@ import {
 } from './ipc';
 import { shipStore } from './ship.store';
 import { SoundActions } from 'renderer/lib/sound';
-import { AuthUpdateTypes } from 'os/services/auth/auth.service';
+import { AuthUpdateTypes } from 'os/services/auth/auth.types';
 
 const Screen = types.enumeration(['login', 'onboarding', 'os']);
 
 const AppStateModel = types
   .model('AppStateModel', {
     booted: types.boolean,
+    seenSplash: types.boolean,
     currentScreen: Screen,
     theme: Theme,
     isLoggedIn: types.boolean,
@@ -40,6 +41,7 @@ const AppStateModel = types
       'refreshing',
       'refreshed',
     ]),
+    error: types.maybeNull(types.string),
     //
   })
   .actions((self) => ({
@@ -50,10 +52,12 @@ const AppStateModel = types
         patp: string;
         cookie: string;
       };
+      seenSplash: boolean;
     }) {
       self.authStore.setAccounts(data.accounts);
       self.currentScreen = data.screen;
       self.booted = true;
+      self.seenSplash = data.seenSplash;
       if (data.session) {
         self.authStore._setSession(data.session.patp);
         self.shellStore.setIsBlurred(false);
@@ -88,6 +92,10 @@ const AppStateModel = types
     setOnline(isOnline: boolean) {
       self.online = isOnline;
     },
+    setSeenSplash: flow(function* () {
+      self.seenSplash = true;
+      yield AuthIPC.setSeenSplash() as Promise<void>;
+    }),
   }));
 
 // const loadSnapshot = () => {
@@ -100,13 +108,14 @@ const AppStateModel = types
 
 export const appState = AppStateModel.create({
   booted: false,
+  seenSplash: false,
   currentScreen: 'onboarding',
   theme: Theme.create(defaultTheme),
   isLoggedIn: false,
   authStore: {
     accounts: [],
     session: null,
-    status: 'initial',
+    status: { state: 'initial' },
   },
   shellStore: {},
   online: navigator.onLine,
@@ -142,19 +151,6 @@ MainIPC.onInitialDimensions((_e: any, dims: any) => {
   appState.shellStore.setDesktopDimensions(dims.width, dims.height);
 });
 
-window.addEventListener('beforeunload', function (event) {
-  if (event.type === 'beforeunload') {
-    console.log('refreshing');
-    appState.shellStore.closeDialog();
-    // The event was triggered by a refresh or navigation
-    // Your code to handle the refresh event here
-  } else {
-    console.log('closing');
-    appState.shellStore.closeDialog();
-    // The event was triggered by a window/tab close
-    // Your code to handle the close event here
-  }
-});
 // updates
 RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
   if (update.type === 'booted') {
@@ -165,11 +161,15 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
       shipStore.setShip(update.payload.session);
     }
   }
-  if (update.type === 'authenticated') {
+  if (update.type === 'auth-success') {
     SoundActions.playLogin();
     appState.authStore._setSession(update.payload.patp);
     appState.setLoggedIn();
     shipStore.setShip(update.payload);
+  }
+  if (update.type === 'auth-failed') {
+    // SoundActions.playError();
+    appState.authStore.status.setError(update.payload);
   }
   if (update.type === 'logout') {
     appState.setLoggedOut();
@@ -179,9 +179,18 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
 });
 
 AuthIPC.onUpdate((_event: any, update: AuthUpdateTypes) => {
-  if (update.type === 'init') {
-    appState.authStore.setAccounts(update.payload);
+  if (update.type === 'account-added') {
+    appState.authStore._onAddAccount(update.payload);
   }
+  if (update.type === 'account-removed') {
+    appState.authStore._onRemoveAccount(update.payload);
+  }
+  if (update.type === 'account-updated') {
+    appState.authStore._onUpdateAccount(update.payload);
+  }
+  // if (update.type === 'init') {
+  //   appState.authStore.setAccounts(update.payload);
+  // }
 });
 
 NotifIPC.onUpdate(({ type, payload }: any) => {
@@ -266,5 +275,19 @@ BazaarIPC.onUpdate((_event: any, update: any) => {
     case 'stall-update':
       shipStore.spacesStore._onStallUpdate(payload);
       break;
+  }
+});
+
+window.addEventListener('beforeunload', function (event) {
+  if (event.type === 'beforeunload') {
+    console.log('refreshing');
+    appState.shellStore.closeDialog();
+    // The event was triggered by a refresh or navigation
+    // Your code to handle the refresh event here
+  } else {
+    console.log('closing');
+    appState.shellStore.closeDialog();
+    // The event was triggered by a window/tab close
+    // Your code to handle the close event here
   }
 });

@@ -123,14 +123,14 @@ export const ChatStore = types
   .actions((self) => ({
     init: flow(function* () {
       try {
-        self.inbox = yield ChatIPC.getChatList();
-        const pinnedChats = yield ChatIPC.fetchPinnedChats();
+        self.inbox = yield ChatIPC.getChatList() as Promise<any>;
+        const pinnedChats = yield ChatIPC.fetchPinnedChats() as Promise<any>;
         localStorage.setItem(
           `${window.ship}-pinnedChats`,
           JSON.stringify(pinnedChats)
         );
 
-        const muted = yield ChatIPC.fetchMuted();
+        const muted = yield ChatIPC.fetchMuted() as Promise<any>;
         self.inbox.forEach((chat) => {
           chat.setMuted(muted.includes(chat.path));
         });
@@ -168,7 +168,7 @@ export const ChatStore = types
         } else {
           self.pinnedChats.remove(path);
         }
-        yield ChatIPC.togglePinnedChat(path, pinned);
+        yield ChatIPC.togglePinnedChat(path, pinned) as Promise<any>;
         localStorage.setItem(
           `${window.ship}-pinnedChats`,
           JSON.stringify(self.pinnedChats)
@@ -202,7 +202,7 @@ export const ChatStore = types
           creator: creator,
           timestamp: Date.now().toString(),
           reactions: 'true',
-        });
+        }) as Promise<any>;
       } catch (e) {
         console.error('Failed to create chat');
       }
@@ -217,7 +217,7 @@ export const ChatStore = types
           }
           self.inbox.remove(chat);
           self.pinnedChats.remove(path);
-          yield ChatIPC.leaveChat(path);
+          yield ChatIPC.leaveChat(path) as Promise<any>;
         } else {
           console.info(`chat ${path} not found`);
         }
@@ -254,12 +254,11 @@ export const ChatStore = types
 
 // -------------------------------
 // TODO Write a caching layer for the inbox
-const pinnedChats = localStorage.getItem(`${window.ship}-pinnedChats`);
 
 export const chatStore = ChatStore.create({
   subroute: 'inbox',
   isOpen: false,
-  pinnedChats: pinnedChats ? JSON.parse(pinnedChats) : [],
+  pinnedChats: [],
 });
 
 // -------------------------------
@@ -280,7 +279,7 @@ export function useChatStore() {
 }
 
 RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
-  if (update.type === 'authenticated') {
+  if (update.type === 'auth-success') {
     shipStore.chatStore.init();
   }
 });

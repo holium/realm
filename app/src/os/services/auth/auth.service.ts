@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+import { app } from 'electron';
 import log from 'electron-log';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
@@ -5,25 +8,11 @@ import Store from 'electron-store';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { AuthDB } from './auth.db';
 import { Account } from './accounts.table';
-import { AccountModelType } from '../../../renderer/stores/models/Account.model';
 import { ThemeType } from 'renderer/stores/models/theme.model';
 import { MasterAccount } from './masterAccounts.table';
-// import { getCookie } from 'os/lib/shipHelpers';
+import { ShipDB } from '../ship/ship.db';
+import { getCookie } from '../../lib/shipHelpers';
 
-export type AuthUpdateInit = {
-  type: 'init';
-  payload: AccountModelType[];
-};
-
-export type AuthUpdateLogin = {
-  type: 'login';
-  payload: {
-    patp: string;
-    token: string;
-  };
-};
-
-export type AuthUpdateTypes = AuthUpdateInit | AuthUpdateLogin;
 const isDev = process.env.NODE_ENV === 'development';
 
 export type SessionType = {
@@ -85,11 +74,13 @@ export class AuthService extends AbstractService {
     return this.authDB.tables.accounts.findOne(patp);
   }
 
-  public async createMasterAccount(mAccount: Omit<MasterAccount, 'id'>) {
+  public async createMasterAccount(
+    mAccount: Omit<MasterAccount, 'id' | 'passwordHash'> & { password: string }
+  ) {
     if (!this.authDB) return;
     // if a master account already exists, return
     try {
-      const existingAccount = this.authDB.tables.masterAccounts.findFirst(
+      const existingAccount = this.authDB.tables.masterAccounts.findOne(
         `email = "${mAccount.email}"`
       );
       if (existingAccount) return existingAccount;
@@ -98,7 +89,12 @@ export class AuthService extends AbstractService {
     }
 
     // TODO implement password hashing and other account creation logic
-    const newAccount = this.authDB.tables.masterAccounts.create(mAccount);
+    const newAccount = this.authDB.tables.masterAccounts.create({
+      email: mAccount.email,
+      encryptionKey: mAccount.encryptionKey,
+      authToken: mAccount.authToken,
+      passwordHash: bcrypt.hashSync(mAccount.password, 10),
+    });
     if (newAccount) {
       // sends update to renderer with new account
       this.sendUpdate({
@@ -121,20 +117,51 @@ export class AuthService extends AbstractService {
   }
 
   // Call this from onboarding.
-  public createAccount(acc: Omit<Account, 'createdAt' | 'updatedAt'>): boolean {
+  public createAccount(
+    acc: Omit<Account, 'passwordHash' | 'createdAt' | 'updatedAt'>,
+    shipCode: string
+  ): boolean {
     if (!this.authDB) return false;
+    const masterAccount = this.authDB.tables.masterAccounts.findOne(
+      acc.accountId
+    );
+    if (!masterAccount) {
+      log.info(`No master account found for ${acc.patp}`);
+      return false;
+    }
     const existing = this.authDB.tables.accounts.findOne(acc.patp);
     if (existing) {
       log.info(`Account already exists for ${acc.patp}`);
       return false;
     }
 
-    const newAccount = this.authDB.tables.accounts.create(acc);
+    const newAccount = this.authDB.tables.accounts.create({
+      accountId: acc.accountId,
+      patp: acc.patp,
+      url: acc.url,
+      avatar: acc.avatar,
+      nickname: acc.nickname,
+      description: acc.description,
+      color: acc.color,
+      type: acc.type,
+      status: acc.status,
+      theme: acc.theme,
+      passwordHash: masterAccount?.passwordHash,
+    });
+    this.authDB.addToOrder(acc.patp);
+    // Creates the ship database with the master account's encryption key
+    this._createShipDB(acc.patp, masterAccount.encryptionKey, {
+      code: shipCode,
+      url: acc.url,
+    });
 
     if (newAccount) {
       this.sendUpdate({
-        type: 'init',
-        payload: this.getAccounts(),
+        type: 'account-added',
+        payload: {
+          account: newAccount,
+          order: this.authDB?.getOrder(),
+        },
       });
       return true;
     } else {
@@ -143,6 +170,69 @@ export class AuthService extends AbstractService {
     }
   }
 
+  private _createShipDB(
+    patp: string,
+    encryptionKey: string,
+    credentials: {
+      url: string;
+      code: string;
+      cookie?: string;
+    }
+  ) {
+    const newShipDB = new ShipDB(patp, encryptionKey);
+    log.info(
+      `Created ship database for ${patp} with encryption key`,
+      encryptionKey
+    );
+    if (!credentials.cookie) {
+      getCookie({
+        patp,
+        url: credentials.url,
+        code: credentials.code,
+      }).then((cookie) => {
+        if (cookie) {
+          log.info('cookie', cookie, credentials.url, credentials.code);
+          newShipDB.setCredentials(credentials.url, credentials.code, cookie);
+        } else {
+          log.error('Failed to get cookie');
+        }
+      });
+    } else {
+      newShipDB.setCredentials(
+        credentials.url,
+        credentials.code,
+        credentials.cookie
+      );
+    }
+  }
+
+  private _deleteShipDB(patp: string) {
+    const dbPath = path.join(app.getPath('userData'), `${patp}.sqlite`);
+    if (fs.existsSync(dbPath)) {
+      fs.unlinkSync(dbPath);
+    }
+  }
+
+  public deleteAccount(patp: string): void {
+    if (!this.authDB) return;
+    const account = this.authDB.tables.accounts.findOne(patp);
+    if (!account) {
+      log.info(`No account found for ${patp}`);
+      return;
+    }
+
+    this.authDB.tables.accounts.delete(patp);
+    this.authDB.removeFromOrder(patp);
+
+    this.sendUpdate({
+      type: 'account-removed',
+      payload: {
+        account,
+        order: this.authDB?.getOrder(),
+      },
+    });
+    this._deleteShipDB(patp);
+  }
   /**
    *
    * @param patp
@@ -168,7 +258,6 @@ export class AuthService extends AbstractService {
       // this.deriveDbKey()
       return true;
     } else {
-      log.info(`Failed to authenticate ${patp}`);
       return false;
     }
   }
@@ -249,6 +338,19 @@ export class AuthService extends AbstractService {
 
   public _verifyPassword(password: string, hash: string): boolean {
     return bcrypt.compareSync(password, hash);
+  }
+
+  public hasSeenSplash(): boolean {
+    if (!this.authDB) return false;
+    return this.authDB.hasSeenSplash();
+  }
+
+  public setSeenSplash(): void {
+    this.authDB?.setSeenSplash();
+    this.sendUpdate({
+      type: 'seenSplash',
+      payload: true,
+    });
   }
 
   public async deriveDbKey(password: string) {

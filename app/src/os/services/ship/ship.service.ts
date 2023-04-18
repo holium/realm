@@ -12,6 +12,7 @@ import { Friends } from './friends.table';
 import SpacesService from './spaces/spaces.service';
 import { S3Client, StorageAcl } from '../../../renderer/lib/S3Client';
 import BazaarService from './spaces/bazaar.service';
+import { getCookie } from '../../lib/shipHelpers';
 
 export class ShipService extends AbstractService {
   private patp: string;
@@ -78,6 +79,37 @@ export class ShipService extends AbstractService {
       this.shipDB?.disconnect();
       APIConnection.getInstance(credentials).conduit.removeAllListeners();
     });
+  }
+
+  static createShipDB(
+    patp: string,
+    encryptionKey: string,
+    credentials: {
+      url: string;
+      code: string;
+      cookie?: string;
+    }
+  ) {
+    const newShipDB = new ShipDB(patp, encryptionKey);
+    if (!credentials.cookie) {
+      getCookie({
+        patp,
+        url: credentials.url,
+        code: credentials.code,
+      }).then((cookie) => {
+        if (cookie) {
+          newShipDB.setCredentials(credentials.url, credentials.code, cookie);
+        } else {
+          log.error('Failed to get cookie');
+        }
+      });
+    } else {
+      newShipDB.setCredentials(
+        credentials.url,
+        credentials.code,
+        credentials.cookie
+      );
+    }
   }
 
   // TODO initialize the ship services here

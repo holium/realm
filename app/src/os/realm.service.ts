@@ -6,7 +6,6 @@ import {
   WebPreferences,
 } from 'electron';
 import log from 'electron-log';
-import bcrypt from 'bcryptjs';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { AuthService } from './services/auth/auth.service';
 import { ShipService } from './services/ship/ship.service';
@@ -20,10 +19,12 @@ type CreateAccountPayload = Omit<
   Account,
   'passwordHash' | 'updatedAt' | 'createdAt'
 > & {
-  password: string;
+  password?: string;
 };
 
-type CreateMasterAccountPayload = Omit<MasterAccount, 'id'>;
+type CreateMasterAccountPayload = Omit<MasterAccount, 'id' | 'passwordHash'> & {
+  password: string;
+};
 
 export class RealmService extends AbstractService {
   // private realmProcess: RealmProcess | null = null;
@@ -82,6 +83,7 @@ export class RealmService extends AbstractService {
         screen: hasSession ? 'os' : 'login',
         accounts: this.services?.auth.getAccounts(),
         session,
+        seenSplash: this.services?.auth.hasSeenSplash(),
       },
     });
   }
@@ -106,13 +108,20 @@ export class RealmService extends AbstractService {
     return null;
   }
 
-  public async createAccount({ password, ...rest }: CreateAccountPayload) {
+  public async createAccount(
+    accountPayload: CreateAccountPayload,
+    shipCode: string
+  ) {
     if (!this.services) return Promise.resolve(false);
 
-    return this.services.auth.createAccount({
-      ...rest,
-      passwordHash: bcrypt.hashSync(password, 10),
-    });
+    const account = this.services.auth.createAccount(accountPayload, shipCode);
+
+    if (account) {
+      // create ship db
+      return account;
+    }
+
+    return Promise.resolve(false);
   }
 
   public async createMasterAccount(payload: CreateMasterAccountPayload) {
@@ -121,7 +130,7 @@ export class RealmService extends AbstractService {
     return this.services.auth.createMasterAccount(payload);
   }
 
-  public async getCookie(patp:string, url:string, code:string) {
+  public async getCookie(patp: string, url: string, code: string) {
     const cookie = await getCookie({ patp, url, code });
     if (!cookie) throw new Error('Failed to get cookie');
     const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
@@ -152,8 +161,8 @@ export class RealmService extends AbstractService {
     if (!isAuthenticated) {
       log.warn(`${patp} failed to authenticate`);
       this.sendUpdate({
-        type: 'login-failed',
-        payload: `${patp} failed to authenticate`,
+        type: 'auth-failed',
+        payload: 'password',
       });
       return false;
     }

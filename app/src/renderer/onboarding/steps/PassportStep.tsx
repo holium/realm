@@ -27,12 +27,15 @@ export const PassportStep = ({ setStep, onFinish }: Props) => {
   ) => {
     const patp = localStorage.getItem('patp');
     const isHosted = localStorage.getItem('isHosted');
-    const shipLink = localStorage.getItem('shipLink');
-    const password = localStorage.getItem('password');
+    const shipLink = localStorage.getItem('url');
     const accountId = Number(localStorage.getItem('masterAccountId'));
 
-    if (!patp || !shipLink || !accountId || !password)
-      return Promise.resolve(false);
+    console.log('patp', patp);
+    console.log('isHosted', isHosted);
+    console.log('shipLink', shipLink);
+    console.log('accountId', accountId);
+
+    if (!patp || !shipLink || !accountId) return Promise.resolve(false);
 
     await RealmIPC.createAccount({
       accountId,
@@ -45,11 +48,12 @@ export const PassportStep = ({ setStep, onFinish }: Props) => {
       url: shipLink,
       status: 'online',
       theme: JSON.stringify(defaultTheme),
-      password,
     });
 
-    if (isHosted) onFinish?.();
-    else setStep('/installation');
+    if (isHosted) {
+      onFinish?.();
+      setStep('/login');
+    } else setStep('/installation');
 
     return true;
   };

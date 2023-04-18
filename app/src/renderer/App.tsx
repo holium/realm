@@ -10,9 +10,10 @@ import { SelectionProvider } from './lib/selection';
 import { Onboarding } from './onboarding/Onboarding';
 import { ErrorBoundary } from './system/ErrorBoundary';
 import { Auth } from './system/authentication/index';
+import { Splash } from './onboarding/Splash';
 
 function AppContentPresenter() {
-  const { authStore, booted } = useAppState();
+  const { seenSplash, authStore, booted } = useAppState();
   const addShip = useToggle(false);
 
   const isLoggedOut = !authStore.session;
@@ -25,9 +26,12 @@ function AppContentPresenter() {
       </Flex>
     );
   }
+  if (!seenSplash) {
+    return <Splash />;
+  }
 
   if (hasNoAccounts) {
-    return <Onboarding />;
+    return <Onboarding initialStep="/login" onFinish={addShip.toggleOff} />;
   }
 
   if (isLoggedOut) {
