@@ -1,11 +1,9 @@
 import { useRef, useState } from 'react';
 import { Text, Flex, ErrorBox } from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
 import { Modal } from '../../Modal';
-import {
-  OnboardDialogInputLabel,
-  OnboardDialogInput,
-} from '../../OnboardDialog.styles';
+import { OnboardDialogInputLabel } from '../../OnboardDialog.styles';
 import { SubmitButton } from '../SubmitButton';
 
 type Props = {
@@ -49,7 +47,10 @@ export const VerifyEmailModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
         <OnboardDialogInputLabel as="label" htmlFor="text">
           Authorization token
         </OnboardDialogInputLabel>
-        <OnboardDialogInput
+        <TextInput
+          height="38px"
+          id="verify-email-auth-token"
+          name="verify-email-auth-token"
           ref={tokenRef}
           type="text"
           placeholder="abc...xyz"
@@ -59,7 +60,10 @@ export const VerifyEmailModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
         <OnboardDialogInputLabel as="label" htmlFor="password">
           Password
         </OnboardDialogInputLabel>
-        <OnboardDialogInput
+        <TextInput
+          height="38px"
+          id="verify-email-password"
+          name="verify-email-password"
           ref={passwordRef}
           type="password"
           placeholder="• • • • • • • •"

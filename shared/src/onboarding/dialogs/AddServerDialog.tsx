@@ -3,11 +3,8 @@ import { Button, ErrorBox, Flex, Icon } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
 import { OnboardDialog } from '../components/OnboardDialog';
 import { CredentialsIcon } from '../icons/CredentialsIcon';
-import {
-  OnboardDialogInput,
-  OnboardDialogInputLabel,
-  OnboardDialogTextInput,
-} from '../components/OnboardDialog.styles';
+import { OnboardDialogInputLabel } from '../components/OnboardDialog.styles';
+import { TextInput } from '@holium/design-system/inputs';
 
 type Props = {
   onBack: () => void;
@@ -82,11 +79,14 @@ export const AddServerDialog = ({ onBack, onNext }: Props) => {
             <OnboardDialogInputLabel as="label" htmlFor="email">
               Server ID
             </OnboardDialogInputLabel>
-            <OnboardDialogInput
+            <TextInput
+              height="38px"
+              id="id-onboarding"
+              name="id-onboarding"
               type="text"
               placeholder="~sampel-palnet"
               value={id}
-              isError={idError.isOn}
+              error={idError.isOn}
               onBlur={onBlurId}
               onChange={onChangeId}
             />
@@ -95,11 +95,14 @@ export const AddServerDialog = ({ onBack, onNext }: Props) => {
             <OnboardDialogInputLabel as="label" htmlFor="email">
               Server URL
             </OnboardDialogInputLabel>
-            <OnboardDialogInput
+            <TextInput
+              height="38px"
+              id="url-onboarding"
+              name="url-onboarding"
               type="text"
               placeholder="https://my-server.host.com"
               value={url}
-              isError={urlError.isOn}
+              error={urlError.isOn}
               onBlur={onBlurUrl}
               onChange={onChangeUrl}
             />
@@ -108,13 +111,14 @@ export const AddServerDialog = ({ onBack, onNext }: Props) => {
             <OnboardDialogInputLabel as="label" htmlFor="email">
               Server Code
             </OnboardDialogInputLabel>
-            <OnboardDialogTextInput
+            <TextInput
+              height="38px"
               id="access-key-onboarding"
               name="access-key-onboarding"
               type={showAccessKey.isOn ? 'text' : 'password'}
               placeholder="sample-micsev-bacmug-moldex"
               value={code}
-              isError={codeError.isOn}
+              error={codeError.isOn}
               onBlur={onBlurCode}
               onChange={onChangeCode}
               rightAdornment={

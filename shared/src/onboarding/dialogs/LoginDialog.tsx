@@ -1,11 +1,9 @@
 import { ReactNode, useRef } from 'react';
 import { Flex } from '@holium/design-system/general';
 import { HoliumButton } from '@holium/design-system/os';
+import { TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
-import {
-  OnboardDialogInput,
-  OnboardDialogInputLabel,
-} from '../components/OnboardDialog.styles';
+import { OnboardDialogInputLabel } from '../components/OnboardDialog.styles';
 import { OnboardDialog } from '../components/OnboardDialog';
 import { TermsModal } from '../components/TermsModal';
 import { TermsDisclaimer } from '../components/TermsDisclaimer';
@@ -47,7 +45,10 @@ export const LoginDialog = ({
               <OnboardDialogInputLabel as="label" htmlFor="email">
                 Email
               </OnboardDialogInputLabel>
-              <OnboardDialogInput
+              <TextInput
+                height="38px"
+                id="login-email"
+                name="login-email"
                 ref={emailRef}
                 defaultValue={prefilledEmail}
                 type="email"
@@ -58,7 +59,10 @@ export const LoginDialog = ({
               <OnboardDialogInputLabel as="label" htmlFor="password">
                 Password
               </OnboardDialogInputLabel>
-              <OnboardDialogInput
+              <TextInput
+                height="38px"
+                id="login-password"
+                name="login-password"
                 ref={passwordRef}
                 type="password"
                 placeholder="• • • • • • • •"

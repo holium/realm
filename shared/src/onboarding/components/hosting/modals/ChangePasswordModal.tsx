@@ -1,11 +1,9 @@
 import { ChangeEvent, FormEvent, useRef, useState } from 'react';
 import { Text, Flex, ErrorBox } from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
 import { Modal } from '../../Modal';
-import {
-  OnboardDialogInputLabel,
-  OnboardDialogInput,
-} from '../../OnboardDialog.styles';
+import { OnboardDialogInputLabel } from '../../OnboardDialog.styles';
 import { SubmitButton } from '../SubmitButton';
 
 type Props = {
@@ -61,7 +59,10 @@ export const ChangePasswordModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
         <OnboardDialogInputLabel as="label" htmlFor="email">
           New password
         </OnboardDialogInputLabel>
-        <OnboardDialogInput
+        <TextInput
+          height="38px"
+          id="new-password"
+          name="new-password"
           ref={passwordRef}
           type="password"
           placeholder="• • • • • • • •"
@@ -72,12 +73,15 @@ export const ChangePasswordModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
         <OnboardDialogInputLabel as="label" htmlFor="email">
           Confirm password
         </OnboardDialogInputLabel>
-        <OnboardDialogInput
+        <TextInput
+          height="38px"
+          id="confirm-password"
+          name="confirm-password"
           ref={confirmpasswordRef}
           type="password"
           placeholder="• • • • • • • •"
           onChange={onChangeConfirmPassword}
-          isError={confirmPasswordError.isOn}
+          error={confirmPasswordError.isOn}
         />
       </Flex>
       <Flex justifyContent="flex-end" paddingTop="8px">
