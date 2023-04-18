@@ -31,6 +31,10 @@ export const ChooseIdStep = ({ setStep }: StepProps) => {
     localStorage.setItem('patp', patp);
   };
 
+  const onBack = () => {
+    setStep('/hosting');
+  };
+
   const onNext = () => {
     setStep('/payment');
 
@@ -38,6 +42,11 @@ export const ChooseIdStep = ({ setStep }: StepProps) => {
   };
 
   return (
-    <ChooseIdDialog patps={patps} onSelectPatp={onSelectPatp} onNext={onNext} />
+    <ChooseIdDialog
+      patps={patps}
+      onSelectPatp={onSelectPatp}
+      onBack={onBack}
+      onNext={onNext}
+    />
   );
 };
