@@ -193,46 +193,46 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   private _insertTransactions(transactions: TransactionsRow[]) {
     if (!this.db) throw new Error('No db connection');
     const insert = this.db.prepare(
-      `REPLACE INTO messages (
-          path, 
-          msg_id, 
-          msg_part_id, 
-          content_type, 
-          content_data, 
-          reply_to, 
-          metadata, 
-          sender,
-          created_at, 
-          updated_at,
-          expires_at
+      `REPLACE INTO transactions (
+          hash,
+          network,
+          type,
+          initiated_at,
+          completed_at,
+          our_address,
+          their_patp,
+          their_address,
+          status,
+          failure_reason,
+          notes
         ) VALUES (
-          @path, 
-          @msg_id, 
-          @msg_part_id,
-          @content_type,
-          @content_data,
-          @reply_to,
-          @metadata,
-          @sender,
-          @created_at,
-          @updated_at,
-          @expires_at
+          @hash,
+          @network,
+          @type,
+          @initiated_at,
+          @completed_at,
+          @our_address,
+          @their_patp,
+          @their_address,
+          @status,
+          @failure_reason,
+          @notes
         )`
     );
-    const insertMany = this.db.transaction((messages) => {
-      for (const message of messages) {
+    const insertMany = this.db.transaction((transactions) => {
+      for (const tx of transactions) {
         insert.run({
-          path: message.path,
-          msg_id: message['msg-id'],
-          msg_part_id: message['msg-part-id'],
-          content_type: message['content-type'],
-          content_data: message['content-data'],
-          reply_to: JSON.stringify(message['reply-to']),
-          metadata: JSON.stringify(message.metadata),
-          sender: message.sender,
-          created_at: message['created-at'],
-          updated_at: message['updated-at'],
-          expires_at: message['expires-at'],
+          hash: tx.hash,
+          network: tx.network,
+          type: tx.type,
+          initiated_at: tx['initiated-at'],
+          completed_at: tx['completed-at'],
+          our_address: tx['our-address'],
+          their_patp: tx['their-patp'],
+          their_address: tx['their-address'],
+          status: tx.status,
+          failure_reason: tx['failure-reason'],
+          notes: tx.notes,
         });
       }
     });
