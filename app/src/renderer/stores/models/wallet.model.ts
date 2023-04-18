@@ -896,11 +896,12 @@ export const WalletStore = types
   }))
   .actions((self) => {
     return {
-      init: flow(function* () {
+      init: flow(function* (): Generator<PromiseLike<any>, void, any> {
         try {
-          const wallets = yield WalletIPC.getWallets();
+          const wallets = yield WalletIPC.getWallets() as PromiseLike<any>;
           console.log(wallets);
-          const transactions = yield WalletIPC.getTransactions();
+          const transactions =
+            yield WalletIPC.getTransactions() as PromiseLike<any>;
           console.log(transactions);
         } catch (error) {
           console.error(error);
@@ -1086,6 +1087,65 @@ export const WalletStore = types
         this.createWalletFlow(nickname);
         this.navigate(WalletView.LIST, { canReturn: false });
       },
+      sendEthereumTransaction: flow(function* (
+        _event: any,
+        walletIndex: string,
+        to: string,
+        amount: string,
+        passcode: number[],
+        toPatp?: string
+      ): Generator<PromiseLike<any>, void, any> {
+        const path = "m/44'/60'/0'/0/0" + walletIndex;
+        const protocol = this.wallet.protocols.get(
+          self.navState.protocol
+        ) as EthereumProtocol;
+        const from = self.ethereum.wallets.get(walletIndex)?.address ?? '';
+        const tx = {
+          from,
+          to,
+          value: ethers.utils.parseEther(amount),
+          gasLimit: yield protocol.getFeeEstimate({
+            to,
+            from,
+            value: ethers.utils.parseEther(amount),
+          }),
+          gasPrice: yield protocol.getFeePrice(),
+          nonce: yield protocol.getNonce(from),
+          chainId: yield protocol.getChainId(),
+        };
+        const signedTx = yield WalletIPC.signTransaction(
+          path,
+          tx,
+          self.ourPatp ?? '',
+          passcode.map(String).join('')
+        ) as PromiseLike<any>;
+        const hash = yield (
+          this.wallet.protocols.get(self.navState.protocol) as BaseBlockProtocol
+        ).sendTransaction(signedTx);
+        const currentWallet = self.currentWallet as EthWalletType;
+        const fromAddress = currentWallet.address;
+        currentWallet.enqueueTransaction(
+          self.navState.protocol,
+          hash,
+          tx.to,
+          toPatp,
+          fromAddress,
+          tx.value,
+          new Date().toISOString()
+        );
+        const stateTx = currentWallet.data
+          .get(self.navState.protocol)
+          ?.transactionList.getStoredTransaction(hash);
+
+        yield WalletIPC.setTransaction(
+          'ethereum',
+          self.navState.protocol,
+          currentWallet.index,
+          null,
+          hash,
+          stateTx
+        ) as PromiseLike<any>;
+      }),
     };
   });
 

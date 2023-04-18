@@ -281,6 +281,7 @@ export function useChatStore() {
 RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
   if (update.type === 'authenticated') {
     shipStore.chatStore.init();
+    shipStore.walletStore.init();
   }
 });
 
