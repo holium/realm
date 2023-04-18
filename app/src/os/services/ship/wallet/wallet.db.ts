@@ -2,7 +2,9 @@ import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
 import { APIConnection } from '../../conduit';
-import { WalletDbOps } from './wallet.types';
+import { TransactionsRow, WalletDbOps } from './wallet.types';
+
+interface WalletRow {}
 
 export class WalletDB extends AbstractDataAccess<WalletRow> {
   constructor(params: DataAccessContructorParams) {
