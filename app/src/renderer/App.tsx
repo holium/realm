@@ -14,15 +14,10 @@ import { Splash } from './onboarding/Splash';
 
 function AppContentPresenter() {
   const { seenSplash, authStore, booted } = useAppState();
-  const hasNoAccounts = authStore.accounts.length === 0;
-  const isLoggedOut = !authStore.session;
   const addShip = useToggle(false);
 
-  const onFinishOnboarding = () => {
-    if (addShip.isOn) addShip.toggleOff();
-
-    return Promise.resolve(true);
-  };
+  const isLoggedOut = !authStore.session;
+  const hasNoAccounts = authStore.accounts.length === 0;
 
   if (!booted) {
     return (
@@ -36,14 +31,12 @@ function AppContentPresenter() {
   }
 
   if (hasNoAccounts) {
-    return <Onboarding initialStep="/login" onFinish={onFinishOnboarding} />;
+    return <Onboarding initialStep="/login" onFinish={addShip.toggleOff} />;
   }
 
   if (isLoggedOut) {
     if (addShip.isOn) {
-      return (
-        <Onboarding initialStep="/hosting" onFinish={onFinishOnboarding} />
-      );
+      return <Onboarding initialStep="/hosting" onFinish={addShip.toggleOff} />;
     }
 
     return <Auth onAddShip={addShip.toggleOn} />;

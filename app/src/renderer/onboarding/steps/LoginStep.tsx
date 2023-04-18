@@ -8,7 +8,7 @@ import { RealmIPC } from 'renderer/stores/ipc';
 import { defaultTheme } from 'renderer/lib/defaultTheme';
 
 type LoginStepProps = {
-  onFinish: () => Promise<boolean>;
+  onFinish: () => void;
 } & StepProps;
 
 export const LoginStep = ({ setStep, onFinish }: LoginStepProps) => {
@@ -72,7 +72,7 @@ export const LoginStep = ({ setStep, onFinish }: LoginStepProps) => {
         setStep('/hosting');
       }
 
-      return Boolean(response);
+      return true;
     } catch (error) {
       console.error(error);
 

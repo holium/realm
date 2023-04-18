@@ -14,10 +14,11 @@ export const ChangeAccessCode = ({ shipCode }: Props) => {
     <AccountDialogTableRow title="Access code">
       <Flex flex={1}>
         <TextInput
+          width="100%"
+          height="38px"
           id="hosting-access-code"
           name="hosting-access-code"
           value={shipCode}
-          width="100%"
           readOnly={true}
           type={showAccessKey.isOn ? 'text' : 'password'}
           rightAdornment={

@@ -4,10 +4,10 @@ import { StepProps } from './types';
 import { InstallationDialog } from '../../../../../shared/src/onboarding/dialogs/InstallationDialog';
 
 type Props = {
-  onNext: () => Promise<boolean>;
+  onFinish?: () => void;
 } & StepProps;
 
-export const InstallationStep = ({ setStep, onNext }: Props) => {
+export const InstallationStep = ({ setStep, onFinish }: Props) => {
   useEffect(() => {
     track('Onboarding / Installation');
   });
@@ -17,6 +17,11 @@ export const InstallationStep = ({ setStep, onNext }: Props) => {
   };
 
   const onInstallRealm = () => {
+    return Promise.resolve(true);
+  };
+
+  const onNext = () => {
+    onFinish?.();
     return Promise.resolve(true);
   };
 

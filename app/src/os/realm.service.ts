@@ -6,7 +6,6 @@ import {
   WebPreferences,
 } from 'electron';
 import log from 'electron-log';
-import bcrypt from 'bcryptjs';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { AuthService } from './services/auth/auth.service';
 import { ShipService } from './services/ship/ship.service';
@@ -15,6 +14,17 @@ import { getCookie } from './lib/shipHelpers';
 import APIConnection from './services/conduit';
 import { MasterAccount } from './services/auth/masterAccounts.table';
 import { Account } from './services/auth/accounts.table';
+
+type CreateAccountPayload = Omit<
+  Account,
+  'passwordHash' | 'updatedAt' | 'createdAt'
+> & {
+  password?: string;
+};
+
+type CreateMasterAccountPayload = Omit<MasterAccount, 'id' | 'passwordHash'> & {
+  password: string;
+};
 
 export class RealmService extends AbstractService {
   // private realmProcess: RealmProcess | null = null;
@@ -97,18 +107,12 @@ export class RealmService extends AbstractService {
     }
     return null;
   }
-
-  public async createMasterAccount(
-    payload: Omit<MasterAccount, 'id' | 'passwordHash'> & { password: string }
-  ) {
+  public async createMasterAccount(payload: CreateMasterAccountPayload) {
     if (!this.services) return;
-
     return this.services.auth.createMasterAccount(payload);
   }
 
-  public async createAccount(
-    accountPayload: Omit<Account, 'passwordHash' | 'createdAt' | 'updatedAt'>
-  ) {
+  public async createAccount(accountPayload: CreateAccountPayload) {
     if (!this.services) return Promise.resolve(false);
 
     return this.services.auth.createAccount(accountPayload);

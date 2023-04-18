@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { observer } from 'mobx-react';
 import { BootingStep, ChooseIdStep, LoginStep, PaymentStep } from './steps';
 import { CredentialsStep } from './steps/CredentialsStep';
@@ -5,7 +6,6 @@ import { HostingStep } from './steps/HostingStep';
 import { AddServerStep } from './steps/AddServerStep';
 import { PassportStep } from './steps/PassportStep';
 import { InstallationStep } from './steps/InstallationStep';
-import { useState } from 'react';
 
 export type Step =
   | '/login'
@@ -20,7 +20,7 @@ export type Step =
 
 export type OnboardingStepProps = {
   initialStep?: Step;
-  onFinish: () => Promise<boolean>;
+  onFinish: () => void;
 };
 
 const defaultInitialStep =
@@ -45,9 +45,9 @@ export const OnboardingStepPresenter = ({
     case '/add-server':
       return <AddServerStep setStep={handleSetStep} />;
     case '/passport':
-      return <PassportStep setStep={handleSetStep} onNext={onFinish} />;
+      return <PassportStep setStep={handleSetStep} onFinish={onFinish} />;
     case '/installation':
-      return <InstallationStep setStep={handleSetStep} onNext={onFinish} />;
+      return <InstallationStep setStep={handleSetStep} onFinish={onFinish} />;
     case '/choose-id':
       return <ChooseIdStep setStep={handleSetStep} />;
     case '/payment':

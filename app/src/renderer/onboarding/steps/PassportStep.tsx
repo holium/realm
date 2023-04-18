@@ -6,10 +6,10 @@ import { RealmIPC } from '../../stores/ipc';
 import { defaultTheme } from '../../lib/defaultTheme';
 
 type Props = {
-  onNext: () => Promise<boolean>;
+  onFinish?: () => void;
 } & StepProps;
 
-export const PassportStep = ({ setStep, onNext }: Props) => {
+export const PassportStep = ({ setStep, onFinish }: Props) => {
   const patp = localStorage.getItem('patp');
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export const PassportStep = ({ setStep, onNext }: Props) => {
     });
 
     if (isHosted) {
-      onNext();
+      onFinish?.();
       setStep('/login');
     } else setStep('/installation');
 

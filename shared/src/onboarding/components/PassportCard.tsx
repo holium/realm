@@ -18,6 +18,7 @@ const UsernameInput = styled(Input)`
   font-size: 16px;
   padding: 8px;
   border-radius: 4px;
+  filter: brightness(0.96);
 `;
 
 const DescriptionTextArea = styled(UsernameInput)`
@@ -26,6 +27,7 @@ const DescriptionTextArea = styled(UsernameInput)`
   resize: none;
   line-height: 18px;
   height: 28px;
+  filter: brightness(0.96);
 `;
 
 type Props = {

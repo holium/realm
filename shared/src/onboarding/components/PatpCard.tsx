@@ -39,7 +39,7 @@ type Props = {
 
 export const PatpCard = ({ patp, isSelected, onClick }: Props) => (
   <PatpCardView isSelected={isSelected} onClick={onClick}>
-    <Avatar patp={patp} sigilColor={['black', 'white']} size={24} />
+    <Avatar patp={patp} sigilColor={['black', 'white']} size={24} simple />
     <PatpCardText isSelected={isSelected}>{patp}</PatpCardText>
   </PatpCardView>
 );

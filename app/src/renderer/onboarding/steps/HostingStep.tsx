@@ -6,7 +6,7 @@ import { useAppState } from 'renderer/stores/app.store';
 import { observer } from 'mobx-react';
 
 type HostingStepProps = {
-  onFinish: () => Promise<boolean>;
+  onFinish: () => void;
 } & StepProps;
 
 export const HostingStepPresenter = ({

@@ -2,11 +2,9 @@ import { ChangeEvent, useRef, useState } from 'react';
 import { Text, Flex, ErrorBox } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
 import { Modal } from '../../Modal';
-import {
-  OnboardDialogInputLabel,
-  OnboardDialogInput,
-} from '../../OnboardDialog.styles';
+import { OnboardDialogInputLabel } from '../../OnboardDialog.styles';
 import { SubmitButton } from '../SubmitButton';
+import { TextInput } from '@holium/design-system/inputs';
 
 type Props = {
   isOpen: boolean;
@@ -50,25 +48,31 @@ export const ChangeEmailModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
     <Modal isOpen={isOpen} onDismiss={onDismiss} onSubmit={handleSubmit}>
       <Text.H5 padding="16px 0">Change email</Text.H5>
       <Flex flexDirection="column" gap={2}>
-        <OnboardDialogInputLabel as="label" htmlFor="email">
+        <OnboardDialogInputLabel as="label" htmlFor="change-email">
           New email
         </OnboardDialogInputLabel>
-        <OnboardDialogInput
+        <TextInput
+          height="38px"
+          id="change-email"
+          name="change-email"
           ref={emailRef}
           type="email"
           placeholder="name@email.com"
         />
       </Flex>
       <Flex flexDirection="column" gap={2}>
-        <OnboardDialogInputLabel as="label" htmlFor="email">
+        <OnboardDialogInputLabel as="label" htmlFor="confirm-email">
           Confirm email
         </OnboardDialogInputLabel>
-        <OnboardDialogInput
-          ref={confirmEmailRef}
+        <TextInput
+          height="38px"
+          id="confirm-email"
+          name="confirm-email"
           type="email"
+          ref={confirmEmailRef}
           placeholder="name@email.com"
+          error={confirmEmailError.isOn}
           onChange={onConfirmEmailChange}
-          isError={confirmEmailError.isOn}
         />
       </Flex>
       <Flex justifyContent="flex-end" paddingTop="8px">

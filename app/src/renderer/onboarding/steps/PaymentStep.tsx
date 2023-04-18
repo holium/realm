@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { track } from '@amplitude/analytics-browser';
-import { PaymentDialog, ThirdEarthProduct } from '@holium/shared';
+import {
+  OnboardDialogSkeleton,
+  PaymentDialog,
+  ThirdEarthProduct,
+} from '@holium/shared';
 import { StepProps } from './types';
 import { thirdEarthApi } from '../thirdEarthApi';
 import { Stripe, loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
@@ -110,7 +114,7 @@ export const PaymentStep = ({ setStep }: StepProps) => {
     thirdEarthApi.getProducts().then(setProducts);
   }, []);
 
-  if (!products.length) return null;
+  if (!products.length) return <OnboardDialogSkeleton />;
 
   return <PaymentStepView products={products} setStep={setStep} />;
 };

@@ -54,7 +54,7 @@ const AppStateModel = types
       };
       seenSplash: boolean;
     }) {
-      self.authStore._setAccounts(data.accounts);
+      self.authStore.setAccounts(data.accounts);
       self.currentScreen = data.screen;
       self.booted = true;
       self.seenSplash = data.seenSplash;
@@ -120,7 +120,8 @@ export const appState = AppStateModel.create({
   shellStore: {},
   online: navigator.onLine,
   connectionStatus:
-    (localStorage.getItem('connection-status') as any) || 'offline',
+    (localStorage.getItem('connection-status') as string | undefined) ||
+    'offline',
 });
 
 watchOnlineStatus(appState);
@@ -187,6 +188,9 @@ AuthIPC.onUpdate((_event: any, update: AuthUpdateTypes) => {
   if (update.type === 'account-updated') {
     appState.authStore._onUpdateAccount(update.payload);
   }
+  // if (update.type === 'init') {
+  //   appState.authStore.setAccounts(update.payload);
+  // }
 });
 
 NotifIPC.onUpdate(({ type, payload }: any) => {
