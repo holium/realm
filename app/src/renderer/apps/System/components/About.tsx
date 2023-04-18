@@ -45,9 +45,6 @@ const AboutPanelPresenter = () => {
           ]}
           selected={selectedChannel}
           onClick={(channel: string) => {
-            const val = undefined;
-            // @ts-ignore
-            val.data = 'test';
             setSelectedChannel(channel);
             DesktopActions.setReleaseChannel(channel);
           }}
