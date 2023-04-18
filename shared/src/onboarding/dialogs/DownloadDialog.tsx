@@ -45,7 +45,7 @@ export const DownloadRealmButtons = ({
 );
 
 type Props = DownloadRealmBodyProps & {
-  onBack: () => void;
+  onBack?: () => void;
   onNext: () => Promise<boolean>;
 };
 

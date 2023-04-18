@@ -731,7 +731,7 @@ export class OnboardingService extends BaseService {
     this.state.installer.set('initial');
 
     // INSTALL_MOON is a string of format <moon>:<desk>,<desk>,<desk>,...
-    // example: INSTALL_MOON=~hostyv:realm,courier
+    // example: INSTALL_MOON=~hostyv:realm
     const parts: string[] = process.env.INSTALL_MOON.split(':');
     const moon: string = parts[0];
     const desks: string[] = parts[1].split(',');

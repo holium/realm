@@ -45,15 +45,11 @@ $: ./bus/.run
 ```
 
 ### Holium Desks
-Create and mount `%realm` and `%courier` on `zod` only:
+Create and mount `%realm` on `zod` only:
 
 ```hoon
 |new-desk %realm
 |mount %realm
-```
-```hoon
-|new-desk %courier
-|mount %courier
 ```
 Watch the desks into your `zod`, so they are always up to date:
 ```bash
@@ -65,10 +61,6 @@ Now the files are on your ship, commit and start the agents:
 |commit %realm
 |revive %realm
 ```
-```hoon
-|commit %courier
-|revive %courier
-```
 To test your changes, save the files in your IDE, and then `|commit %<desk-name>` to apply.
 
 ### Developing with multiple ships
@@ -79,14 +71,12 @@ From `~zod`:
 
 ```hoon
 :treaty|publish %realm
-:treaty|publish %courier
 ```
 
 From `~bus`:
 
 ```hoon
 |install ~zod %realm
-|install ~zod %courier
 ```
 
 #### Allow origin (CORS)

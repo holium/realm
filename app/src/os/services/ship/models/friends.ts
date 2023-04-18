@@ -8,6 +8,7 @@ import { toJS } from 'mobx';
 import { Patp } from '../../../types';
 import { SubscriptionModel } from '../../common.model';
 import { cleanNounColor } from '../../../lib/color';
+import { cite } from '@urbit/aura';
 
 const FriendStatus = types.enumeration('FriendStatus', [
   'fren',
@@ -61,6 +62,7 @@ export const FriendsStore = types
           ...value[1],
           color: cleanNounColor(value[1].contactInfo?.color || ''),
           patp: value[0],
+          shortPatp: cite(value[0]),
           pinned: value[1].pinned,
           tags: toJS(value[1].tags),
           status: value[1].status,
@@ -75,6 +77,7 @@ export const FriendsStore = types
           ...value[1],
           color: cleanNounColor(value[1].contactInfo?.color || ''),
           patp: value[0],
+          shortPatp: cite(value[0]),
           pinned: value[1].pinned,
           tags: toJS(value[1].tags),
           status: value[1].status,

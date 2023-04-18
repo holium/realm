@@ -17,7 +17,7 @@ const DomainInput = styled(Input)`
 type Props = {
   patps: string[];
   selectedPatp: string;
-  dropletIp: string;
+  dropletIp: string | undefined;
   errorMessage?: string;
   successMessage?: string;
   setSelectedPatp: (patp: string) => void;
@@ -64,6 +64,7 @@ export const AccountCustomDomainDialog = ({
       selectedPatp={selectedPatp}
       setSelectedPatp={setSelectedPatp}
       currentSection={SidebarSection.CustomDomain}
+      isLoading={!dropletIp}
       onClickSidebarSection={onClickSidebarSection}
       onSubmit={handleSubmit}
       onExit={onExit}

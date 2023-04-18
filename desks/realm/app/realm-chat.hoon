@@ -1,6 +1,6 @@
 ::  app/realm-chat.hoon
 /-  *realm-chat, db-sur=chat-db, notify
-/+  dbug, lib=realm-chat
+/+  dbug, lib=realm-chat, db-lib=chat-db
 =|  state-0
 =*  state  -
 :: ^-  agent:gall
@@ -70,19 +70,19 @@
         (delete-backlog:lib +.act state bowl)
       :: notification preferences pokes
       %disable-push
-        (disable-push:lib state)
+        (disable-push:lib state bowl)
       %enable-push
-        (enable-push:lib state)
+        (enable-push:lib state bowl)
       %remove-device
-        (remove-device:lib +.act state)
+        (remove-device:lib +.act state bowl)
       %set-device
-        (set-device:lib +.act state)
+        (set-device:lib +.act state bowl)
       %mute-chat
-        (mute-chat:lib +.act state)
+        (mute-chat:lib +.act state bowl)
       %pin-chat
-        (pin-chat:lib +.act state)
+        (pin-chat:lib +.act state bowl)
       %toggle-msg-preview-notif
-        (toggle-msg-preview-notif:lib +.act state)
+        (toggle-msg-preview-notif:lib +.act state bowl)
     ==
     [cards this]
   ::  realm-chat supports no subscriptions
@@ -258,6 +258,10 @@
   |=  [=message:db-sur =ship dismissed=?]
   ^-  card
   =/  msg-part  (snag 0 message)
+  =/  title     (notif-msg message)
+  =/  content   (crip "from {(scow %p sender.msg-id.msg-part)}")
+  =/  link      (msg-id-to-cord:encode:db-lib msg-id.msg-part)
+  ~&  >  link
   [
     %pass
     /dbpoke
@@ -265,7 +269,7 @@
     [ship %notif-db]
     %poke
     %notif-db-poke
-    !>([%create %realm-chat path.msg-part %message (notif-msg message) (crip "from {(scow %p sender.msg-id.msg-part)}") '' ~ '' ~ dismissed])
+    !>([%create %realm-chat path.msg-part %message title content '' ~ link ~ dismissed])
   ]
 ++  notif-msg
   |=  =message:db-sur

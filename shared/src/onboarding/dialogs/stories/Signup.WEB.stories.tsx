@@ -11,7 +11,7 @@ import { ThirdEarthProduct } from '../../types/index';
 
 export default {
   component: CreateAccountDialog,
-  title: 'Onboarding/Signup flow',
+  title: 'Onboarding/Signup flow WEB',
 } as ComponentMeta<typeof CreateAccountDialog>;
 
 export const CreateAccountDialogStory: ComponentStory<
@@ -149,7 +149,6 @@ export const CredentialsDialogStory: ComponentStory<
         url: 'https://pasren-satmex.holium.network',
         accessCode: 'tolnym-rilmug-ricnep-marlyx',
       }}
-      onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>

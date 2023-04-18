@@ -7,8 +7,10 @@ import { ChatInfo } from './views/ChatInfo';
 import { ChatLog } from './views/ChatLog';
 import { useStorage } from 'renderer/logic/lib/useStorage';
 import { LayoutGroup } from 'framer-motion';
+import { useTrayApps } from 'renderer/apps/store';
 
 export const CourierAppPresenter = () => {
+  const { clearInnerNavigation } = useTrayApps();
   const storage = useStorage();
   useEffect(() => {
     if (chatStore.subroute === 'inbox') {
@@ -17,6 +19,10 @@ export const CourierAppPresenter = () => {
       chatStore.selectedChat?.fetchMessages();
     }
   }, []);
+
+  useEffect(() => {
+    clearInnerNavigation();
+  }, [chatStore.subroute]);
 
   return (
     <ChatProvider value={chatStore}>
