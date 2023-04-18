@@ -60,6 +60,7 @@ let cfg: Sentry.BrowserOptions = {
 if (process.env.BUILD_VERSION) {
   console.log(`Initializing Sentry [release: ${process.env.BUILD_VERSION}]...`);
   cfg.release = process.env.BUILD_VERSION;
+  cfg.dist = process.env.BUILD_VERSION;
 }
 Sentry.init(cfg);
 // } else {

@@ -198,7 +198,9 @@ jobs:
           SENTRY_LOG_LEVEL: debug
         with:
           environment: staging
-          url_prefix: '~'
+          # must match dist set in Sentry.init call
+          dist: ${{ needs.pre-deploy.outputs.build_version }}
+          url_prefix: '~/'
           sourcemaps: './app/release/app/dist/renderer'
           version: ${{ needs.pre-deploy.outputs.build_version }}
           ignore_empty: true
