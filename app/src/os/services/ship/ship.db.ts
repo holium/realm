@@ -54,6 +54,7 @@ export class ShipDB {
   }
 
   setCredentials(url: string, code: string, cookie: string) {
+    log.info('setting credentials', url, code, cookie);
     this.shipDB
       .prepare(
         'INSERT OR REPLACE INTO credentials (url, code, cookie) VALUES (?, ?, ?);'
@@ -85,10 +86,9 @@ ${notifInitSql}
 ${friendsInitSql}
 ${spacesTablesInitSql}
 create table if not exists credentials (
-  url       text primary key,
-  code      text,
-  cookie    text,
-  wallet    text
+  url       TEXT PRIMARY KEY NOT NULL,
+  code      TEXT NOT NULL,
+  cookie    TEXT NOT NULL,
+  wallet    TEXT
 );
-create unique index if not exists credentials_url_uindex on credentials (url);
 `;

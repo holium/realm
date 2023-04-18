@@ -115,6 +115,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   const submitPassword = () => {
     passwordRef.current?.blur();
     submitRef.current?.click();
+    login();
   };
 
   const accountMenuId = `${selectedShip.patp}-account-menu`;

@@ -100,8 +100,6 @@ const loadBazaarSnapshot = (): SnapshotIn<BazaarStoreType> => {
   };
 };
 
-const pinnedChats = localStorage.getItem(`${window.ship}-pinnedChats`);
-
 export const shipStore = ShipStore.create({
   notifStore: {
     notifications: [],
@@ -112,7 +110,7 @@ export const shipStore = ShipStore.create({
   chatStore: {
     subroute: 'inbox',
     isOpen: false,
-    pinnedChats: pinnedChats ? JSON.parse(pinnedChats) : [],
+    pinnedChats: [],
   },
   spacesStore: {
     spaces: {},

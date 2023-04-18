@@ -112,10 +112,17 @@ export class RealmService extends AbstractService {
     return this.services.auth.createMasterAccount(payload);
   }
 
-  public async createAccount(accountPayload: CreateAccountPayload) {
+  public async createAccount(
+    accountPayload: CreateAccountPayload,
+    shipCode: string
+  ) {
     if (!this.services) return Promise.resolve(false);
-
-    return this.services.auth.createAccount(accountPayload);
+    const account = this.services.auth.createAccount(accountPayload, shipCode);
+    if (account) {
+      // create ship db
+      return account;
+    }
+    return Promise.resolve(false);
   }
 
   async login(patp: string, password: string): Promise<boolean> {

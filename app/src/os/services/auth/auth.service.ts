@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+import { app } from 'electron';
 import log from 'electron-log';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
@@ -7,6 +10,8 @@ import { AuthDB } from './auth.db';
 import { Account } from './accounts.table';
 import { ThemeType } from 'renderer/stores/models/theme.model';
 import { MasterAccount } from './masterAccounts.table';
+import { ShipDB } from '../ship/ship.db';
+import { getCookie } from '../../lib/shipHelpers';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -113,12 +118,17 @@ export class AuthService extends AbstractService {
 
   // Call this from onboarding.
   public createAccount(
-    acc: Omit<Account, 'passwordHash' | 'createdAt' | 'updatedAt'>
+    acc: Omit<Account, 'passwordHash' | 'createdAt' | 'updatedAt'>,
+    shipCode: string
   ): boolean {
     if (!this.authDB) return false;
     const masterAccount = this.authDB.tables.masterAccounts.findOne(
       acc.accountId
     );
+    if (!masterAccount) {
+      log.info(`No master account found for ${acc.patp}`);
+      return false;
+    }
     const existing = this.authDB.tables.accounts.findOne(acc.patp);
     if (existing) {
       log.info(`Account already exists for ${acc.patp}`);
@@ -139,6 +149,11 @@ export class AuthService extends AbstractService {
       passwordHash: masterAccount?.passwordHash,
     });
     this.authDB.addToOrder(acc.patp);
+    // Creates the ship database with the master account's encryption key
+    this._createShipDB(acc.patp, masterAccount.encryptionKey, {
+      code: shipCode,
+      url: acc.url,
+    });
 
     if (newAccount) {
       this.sendUpdate({
@@ -152,6 +167,49 @@ export class AuthService extends AbstractService {
     } else {
       log.info(`Failed to create account for ${acc.patp}`);
       return false;
+    }
+  }
+
+  private _createShipDB(
+    patp: string,
+    encryptionKey: string,
+    credentials: {
+      url: string;
+      code: string;
+      cookie?: string;
+    }
+  ) {
+    const newShipDB = new ShipDB(patp, encryptionKey);
+    log.info(
+      `Created ship database for ${patp} with encryption key`,
+      encryptionKey
+    );
+    if (!credentials.cookie) {
+      getCookie({
+        patp,
+        url: credentials.url,
+        code: credentials.code,
+      }).then((cookie) => {
+        if (cookie) {
+          log.info('cookie', cookie, credentials.url, credentials.code);
+          newShipDB.setCredentials(credentials.url, credentials.code, cookie);
+        } else {
+          log.error('Failed to get cookie');
+        }
+      });
+    } else {
+      newShipDB.setCredentials(
+        credentials.url,
+        credentials.code,
+        credentials.cookie
+      );
+    }
+  }
+
+  private _deleteShipDB(patp: string) {
+    const dbPath = path.join(app.getPath('userData'), `${patp}.sqlite`);
+    if (fs.existsSync(dbPath)) {
+      fs.unlinkSync(dbPath);
     }
   }
 
@@ -173,6 +231,7 @@ export class AuthService extends AbstractService {
         order: this.authDB?.getOrder(),
       },
     });
+    this._deleteShipDB(patp);
   }
   /**
    *
