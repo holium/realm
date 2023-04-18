@@ -83,6 +83,9 @@ const AddImageButton = styled(Button.IconButton)`
 `;
 
 const keywords = ['art', 'space', 'horizon', 'animal'];
+const headers = {
+  Authorization: `Client-ID ${process.env.UNSPLASH_KEY}`,
+};
 
 type Props = {
   patp: string;
@@ -97,6 +100,7 @@ export const PassportCardAvatar = ({ patp, setAvatarSrc }: Props) => {
       src: string;
       author: string;
       authorLink: string;
+      downloadLink: string;
     }[]
   >();
   const [author, setAuthor] = useState<string>();
@@ -111,14 +115,15 @@ export const PassportCardAvatar = ({ patp, setAvatarSrc }: Props) => {
   const refreshImages = async () => {
     if (selectedImage < 21) setSelectedImage(0);
     const keyword = keywords[Math.floor(Math.random() * keywords.length)];
-    const apiUrl = `https://api.unsplash.com/photos/random?client_id=${process.env.UNSPLASH_KEY}&query=${keyword}&orientation=squarish&count=19`;
-    fetch(apiUrl)
+    const apiUrl = `https://api.unsplash.com/photos/random?query=${keyword}&orientation=squarish&count=19`;
+    fetch(apiUrl, { headers })
       .then((response) => response.json())
       .then((data) => {
         const newImages = data.map((image: any) => ({
           src: image.urls.small,
           author: image.user.name,
           authorLink: `${image.user.links.html}?utm_source=Realm&utm_medium=referral`,
+          downloadLink: image.links.download_location,
         }));
         setGeneratedImages(newImages);
       })
@@ -142,6 +147,11 @@ export const PassportCardAvatar = ({ patp, setAvatarSrc }: Props) => {
       setAvatarSrc(generatedImages?.[index - 1].src);
       setAuthor(generatedImages?.[index - 1].author);
       setAuthorLink(generatedImages?.[index - 1].authorLink);
+
+      // Call download link on select according to Unsplash guidelines.
+      if (generatedImages?.[index - 1]?.downloadLink) {
+        fetch(generatedImages[index - 1].downloadLink, { headers });
+      }
     }
   };
 

@@ -24,4 +24,5 @@ export const defaultImages = defaultSrcs.map((src) => ({
   src,
   author: 'John Doe',
   authorLink: 'https://unsplash.com/@johndoe',
+  downloadLink: 'https://unsplash.com/photos/abc123',
 }));
