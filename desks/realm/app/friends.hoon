@@ -165,9 +165,8 @@
     |=  path=(pole knot)
     ~>  %bout.[0 '%arvo +on-watch']
     ^-  (quip card _this)
-    :: =^  cards  state  abet:(watch:core path)
-    :: [cards this]
-    `this
+    =^  cards  state  abet:(watch:core path)
+    [cards this]
   ::
   ++  on-fail
     ~>  %bout.[0 '%friends +on-fail']
@@ -257,6 +256,7 @@
         tags=*tags
         created-at=now.bowl
         updated-at=now.bowl
+        nickname=~
         phone-number=~
         relationship=%our
         status=%offline
@@ -291,8 +291,8 @@
 ++  load
   |=  =vase
   ^+  core
-  core
-  :: =/  old  !<(versioned-state vase)
+  =/  old  !<(state-2 vase)
+  core(state old)
   :: ::
   :: core(state old)
   :: |-
@@ -394,6 +394,7 @@
                 tags=tags.fren
                 created-at=created-at.fren
                 updated-at=now.bowl
+                nickname=nickname.fren
                 phone-number=phone-number.fren
                 relationship=%sent
                 status=status.fren
@@ -428,6 +429,7 @@
                 tags=tags.fren
                 created-at=created-at.fren
                 updated-at=now.bowl
+                nickname=nickname.fren
                 phone-number=phone-number.fren
                 relationship=%fren
                 status=status.fren
@@ -484,6 +486,7 @@
               tags=tags.fren
               created-at=created-at.fren
               updated-at=now.bowl
+              nickname=nickname.fren
               phone-number=phone-number.fren
               relationship=relationship.fren
               ::
@@ -521,7 +524,7 @@
         ?.  ?=(%contact-info -.act)  ~|(bad-friends-pull-act/act !!)
         =/  fren  (got-friend src.bowl)
         ::
-        ?:  =(contact-info.fren (some contact-info.act))  core
+        ?:  =(contact-info.fren contact-info.act)  core
         ::
         =/  fren-upd
           :*  version=version.fren
@@ -529,17 +532,71 @@
               tags=tags.fren
               created-at=created-at.fren
               updated-at=now.bowl
+              nickname=nickname.fren
               phone-number=phone-number.fren
               relationship=relationship.fren
               status=status.fren
               ::
-              contact-info=(some contact-info.act)
+              contact-info=contact-info.act
               ::
           ==
         ::  TODO emit any necessary cards.
         ::
         =/  data  (put-friend src.bowl fren-upd)
         core(friends -.data, friend-times +.data)
+      ::
+      ==
+    ::
+    ==
+  ::
+      [%version ~]
+    ::
+    ?+    -.sign  ~|(bad-watch-version-sign/sign !!)
+      ::  Always just resubscribe on kick.
+      ::
+        %kick
+      core(cards [[%pass /version %agent dock %watch /version] cards])
+    ::
+        %watch-ack
+      ?~  p.sign
+        core
+      ((slog leaf/"watch-version nack" ~) core)
+    ::
+        %fact
+      ::
+      ?+    p.cage.sign  !!  ::(on-agent:def `wire`path sign)  cant find def
+          %realm-pull
+        =/  act   !<(realm-pull q.cage.sign)
+        =/  fren  (got-friend src.bowl)
+        ::
+        ?:  =(version.fren version.act)  core
+        ::
+        =/  fren-upd
+          :*  version=version.act
+              ::
+              pinned=pinned.fren
+              tags=tags.fren
+              created-at=created-at.fren
+              updated-at=now.bowl
+              nickname=nickname.fren
+              phone-number=phone-number.fren
+              relationship=relationship.fren
+              status=status.fren
+              contact-info=contact-info.fren
+          ==
+        ::  Here's where we issue subs to the other paths.  Can make changes
+        ::  as necessary depending on the version.
+        ::
+        =/  data  (put-friend src.bowl fren-upd)
+        =/  subs  :~  [%pass /status %agent dock %watch /status]
+                      [%pass /contact-info %agent dock %watch /contact-info]
+                  ==
+        ::
+        %=  core
+          friends       -.data
+          friend-times  +.data
+          cards         (welp subs cards)
+        ==
       ::
       ==
     ::
@@ -582,7 +639,6 @@
   ::
       %realm-action
     =/  act  !<(realm-action vase)
-    ?.  =(%upgrade -.act)  ~|('bad-friends-action' !!)
     ::
     ::  TODO, upgrade to current.  Leave _all_ subscriptions and kick everyone.
     ::  Start subbing for everyone's version again.
@@ -597,6 +653,7 @@
   ::
       %friends-push
     =/  act  !<(friends-push vase)
+    =*  dock  [src.bowl dap.bowl]
     ::
     ?-    -.act
         %sent-friend
@@ -619,6 +676,7 @@
                 tags=tags.fren
                 created-at=created-at.fren
                 updated-at=now.bowl
+                nickname=nickname.fren
                 phone-number=phone-number.fren
                 relationship=%received
                 status=status.fren
@@ -630,6 +688,12 @@
         ::
         ==
       ::  Ship not on our list, so add them as received
+      ::  and start watching their version.
+      ::
+      =*  watch-version
+        :*  %pass  /version  %agent
+            dock  %watch  /version
+        ==
       ::
       =/  fren
         :*  version=%unset
@@ -637,6 +701,7 @@
             tags=*tags
             created-at=now.bowl
             updated-at=now.bowl
+            nickname=nickname.fren
             phone-number=~
             relationship=%received
             status=%offline
@@ -644,7 +709,12 @@
         ==
       ::
       =/  data  (put-friend src.bowl fren)
-      core(friends -.data, friend-times +.data)
+      ::
+      %=  core
+        friends       -.data
+        friend-times  +.data
+        cards         [watch-version cards]
+      ==
     ::
         %accept-friend
       ::  Receive a friend request acceptance from another ship.
@@ -662,6 +732,7 @@
               tags=tags.fren
               created-at=created-at.fren
               updated-at=now.bowl
+              nickname=nickname.fren
               phone-number=phone-number.fren
               relationship=%fren
               status=status.fren
@@ -693,6 +764,7 @@
             tags=tags.fren
             created-at=created-at.fren
             updated-at=now.bowl
+            nickname=nickname.fren
             phone-number=phone-number.fren
             relationship=%know
             status=status.fren
@@ -735,8 +807,13 @@
   =*  us    (got-friend our.bowl)
   =*  fren  (got-friend src.bowl)
   ::
-  ?+    -.path  ~|(bad-watch-version/path !!)
-  ::  First, check for versions we support.
+  ?+    -.path  ~|(bad-watch-path/path !!)
+  ::  First check for version requests.
+  ::
+      %version
+    %-  emit
+    [%give %fact ~ %realm-pull !>(`realm-pull`[%version version.us])]
+  ::  Then, check for versions we support to the frontend.
   ::
       %'0'
     (watch:core-0 +.path)
@@ -767,6 +844,7 @@
           tags=*tags
           created-at=now.bowl
           updated-at=now.bowl
+          nickname=~
           phone-number=~
           relationship=%know
           status=%offline
@@ -785,7 +863,7 @@
       %contact-info
     ::
     %-  emit
-    [%give %fact ~ %friends-pull !>(`friends-pull`[%contact-info (need contact-info.us)])]
+    [%give %fact ~ %friends-pull !>(`friends-pull`[%contact-info contact-info.us])]
   ::
   ==
 ::
@@ -794,7 +872,7 @@
   ++  ver  %'0'
   ::
   ++  action-type        friends-action-0
-  ++  action-mark        %friends-action-0
+  :: ++  action-mark        %friends-action-0
   ::
   :: ++  update-type        friends-update-0
   :: ++  update-mark        %friends-update-0
@@ -802,7 +880,6 @@
   ++  poke
     |=  act=action-type
     ^+  core
-    ::
     =*  dock  [ship.act dap.bowl]
     ::  Deferred pokes that may be used below.
     ::
@@ -810,21 +887,21 @@
       :*  %pass
           /bye-friend
           %agent  dock  %poke
-          [action-mark !>([%bye-friend ~])]
+          [%friends-push !>(`friends-push`[%bye-friend ~])]
       ==
     ::
     =*  sent-friend
       :*  %pass
           /sent-friend
           %agent  dock  %poke
-          [action-mark !>([%sent-friend ~])]
+          [%friends-push !>(`friends-push`[%sent-friend ~])]
       ==
     ::
     =*  accept-friend
       :*  %pass
           /accept-friend
           %agent  dock  %poke
-          [action-mark !>([%accept-friend ~])]
+          [%friends-push !>(`friends-push`[%accept-friend ~])]
       ==
     ::
     ?-    -.act
@@ -866,6 +943,7 @@
             tags=*tags
             created-at=now.bowl
             updated-at=now.bowl
+            nickname=~
             phone-number=~
             relationship=%know
             status=%offline
@@ -898,13 +976,6 @@
       ?:  =(our.bowl ship.act)               ~|('no-self-remove-friend' !!)
       ?.  (~(has by friend-times) ship.act)  ~|('no-remove-unknown-friend' !!)
       ::
-      =*  bye-friend
-        :*  %pass
-            /bye-friend
-            %agent  dock  %poke
-            [action-mark !>([%bye-friend ~])]
-        ==
-      ::
       =/  fren  (got-friend ship.act)
       ::  Only remove if friends or received.
       ::
@@ -917,6 +988,7 @@
             tags=tags.fren
             created-at=created-at.fren
             updated-at=now.bowl
+            nickname=nickname.fren
             phone-number=phone-number.fren
             relationship=%know
             status=status.fren
@@ -932,6 +1004,7 @@
     ::
         %block-friend
       ::  Emits a %bye-friend poke to unfriend the ship.
+      ::  The other ship doesn't know it's been blocked.
       ::
       ?.  =(our.bowl src.bowl)  ~|('no-foreign-block-friend' !!)
       ?:  =(our.bowl ship.act)  ~|('no-self-block-friend' !!)
@@ -947,13 +1020,14 @@
             tags=tags.fren
             created-at=created-at.fren
             updated-at=now.bowl
+            nickname=nickname.fren
             phone-number=phone-number.fren
             relationship=%blocked
             status=status.fren
             contact-info=contact-info.fren
         ==
       ::
-      =/  data  (put-friend src.bowl fren-upd)
+      =/  data  (put-friend ship.act fren-upd)
       %=  core
         friends       -.data
         friend-times  +.data
@@ -961,6 +1035,8 @@
       ==
     ::
         %unblock-friend
+      ::  For internal bookkeeping only.
+      ::
       ?.  =(our.bowl src.bowl)  ~|('no-foreign-unblock-friend' !!)
       ?:  =(our.bowl ship.act)  ~|('no-self-unblock-friend' !!)
       ::
@@ -975,13 +1051,14 @@
               tags=tags.fren
               created-at=created-at.fren
               updated-at=now.bowl
+              nickname=nickname.fren
               phone-number=phone-number.fren
               relationship=%know
               status=status.fren
               contact-info=contact-info.fren
           ==
         ::
-        =/  data  (put-friend src.bowl fren-upd)
+        =/  data  (put-friend ship.act fren-upd)
         core(friends -.data, friend-times +.data)
       ==
     ::
@@ -995,16 +1072,27 @@
             tags=tags.us
             created-at=created-at.us
             updated-at=now.bowl
+            nickname=nickname.us
             phone-number=phone-number.us
             relationship=%our
             status=status.us
             ::
-            contact-info=(some contact-info.act)
+            contact-info=contact-info.act
             ::
         ==
       ::
+      =*  pull-contact-info
+        :*  %give  %fact  ~[/contact-info]  %friends-pull
+            !>(`friends-pull`[%contact-info contact-info.act])
+        ==
+      ::
       =/  data  (put-friend our.bowl us-upd)
-      core(friends -.data, friend-times +.data)
+      ::
+      %=  core
+        friends       -.data
+        friend-times  +.data
+        cards         [pull-contact-info cards]
+      ==
     ::
         %set-status
       ?.  =(our.bowl src.bowl)  ~|('no-foreign-set-status' !!)
@@ -1016,6 +1104,7 @@
             tags=tags.us
             created-at=created-at.us
             updated-at=now.bowl
+            nickname=nickname.us
             phone-number=phone-number.us
             relationship=%our
             ::
@@ -1030,6 +1119,7 @@
         ==
       ::
       =/  data  (put-friend our.bowl us-upd)
+      ::
       %=  core
         friends       -.data
         friend-times  +.data

@@ -30,17 +30,9 @@
       =tags
       created-at=@da
       updated-at=@da
-      :: 
-      :: public -> only set by us. If public, others can discover us
-      :: by searching twitter handle or Realm username.
-      :: linking contacts allows discovery via phone number.
+      ::  Nickname: what we call them, overrides their username.
       ::
-      :: your phone number will _never_ be visible to anyone.
-      ::
-      :: private: those that "know" you (have shared space(s)/DMs with you)
-      :: can see your profile.
-      ::
-      :: public=(unit _|)
+      nickname=(unit @t)
       phone-number=(unit @t)
       ::
       :: %our = us
@@ -84,26 +76,13 @@
 ::  $contact-info: what a peer decides to tell us about themselves.
 ::
 +$  contact-info
-  $:  nickname=@t    :: passport set name (required)
-      color=@t           :: passport set color
+  $:  username=@t        :: passport set name (required)
+      color=@t           :: passport set color (required)
       twitter=(unit @t)  :: twitter handle
       bio=(unit @t)
       avatar=(unit @t)
       cover=(unit @t)
       featured-url=(unit @t)  :: can be used for personal site, linktree, opensea...
-  ==
-::
-::  $contact-info-edit: updates from peer about their information.
-::  this should eventually be done via SSS.
-::
-+$  contact-info-edit
-  $:  nickname=(unit @t)
-      color=(unit @t)
-      twitter=(unit @t)
-      bio=(unit @t)
-      avatar=(unit @t)
-      cover=(unit @t)
-      featured-url=(unit @t)
   ==
 ::
 +$  friends-action-0
@@ -117,7 +96,7 @@
       :: editing our own contact information
       :: could support diffs, but this is simpler
       ::
-      [%set-contact-info =contact-info]
+      [%set-contact-info contact-info=(unit contact-info)]
       [%set-status =status]
   ==
 ::
@@ -140,7 +119,7 @@
 ::
 +$  friends-pull
   $%  [%status =status]
-      [%contact-info =contact-info]
+      [%contact-info contact-info=(unit contact-info)]
   ==
 ::
 :: Old types
