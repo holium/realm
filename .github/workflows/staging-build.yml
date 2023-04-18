@@ -281,6 +281,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           GH_DEBUG: api
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          ARTIFACT_VERSION: ${{ needs.pre-deploy.outputs.artifact_version }}
           BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
           BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
           BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}

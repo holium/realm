@@ -257,7 +257,16 @@ jobs:
       #
       - name: Build and install
         run: |
-          npx cross-env sudo yarn package:release:win
+          cd ./app
+          # create environment variable file. only needed for windows build where maintaining environment
+          #  variables across scripts and commands is complex. this file is referenced by the Dotenv webpack plugin
+          cat << EOF > .env
+          BUILD_VERSION=$BUILD_VERSION
+          ARTIFACT_VERSION=$ARTIFACT_VERSION
+          RELEASE_CHANNEL=$RELEASE_CHANNEL
+          EOF
+          cd ../
+          sudo yarn package:release:win
         env:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
@@ -315,6 +324,7 @@ jobs:
           ref: production
           # Urbit symlink fetching
           submodules: 'true'
+      #
       - name: Setup node
         uses: actions/setup-node@v3
         with:
