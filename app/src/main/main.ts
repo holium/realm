@@ -125,7 +125,7 @@ const createWindow = async () => {
   // ---------------------------------------------------------------------
   // ----------------------- Start Realm services ------------------------
   // ---------------------------------------------------------------------
-  new RealmService();
+  const realmService = new RealmService();
   // realmService.login('~lomder-librun', 'password');
 
   // TODO why is this rendering multiple times?
@@ -253,13 +253,6 @@ app.on('before-quit', (event) => {
 
 ipcMain.on('realm.app.quit', (_event) => {
   if (!updater.checkingForUpdates) app.quit();
-});
-
-ipcMain.on('download-url-as-file', (_event, { url }) => {
-  const win = BrowserWindow.getFocusedWindow();
-  if (win) {
-    download(win, url, { saveAs: true });
-  }
 });
 
 ipcMain.on('download-url-as-file', (_event, { url }) => {

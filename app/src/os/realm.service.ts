@@ -23,6 +23,8 @@ type CreateAccountPayload = Omit<
   password: string;
 };
 
+type CreateMasterAccountPayload = Omit<MasterAccount, 'id'>;
+
 export class RealmService extends AbstractService {
   // private realmProcess: RealmProcess | null = null;
   public services?: {
@@ -113,7 +115,7 @@ export class RealmService extends AbstractService {
     });
   }
 
-  public async createMasterAccount(payload: Omit<MasterAccount, 'id'>) {
+  public async createMasterAccount(payload: CreateMasterAccountPayload) {
     if (!this.services) return;
 
     return this.services.auth.createMasterAccount(payload);

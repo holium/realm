@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { observer } from 'mobx-react';
 import { BootingStep, ChooseIdStep, LoginStep, PaymentStep } from './steps';
 import { CredentialsStep } from './steps/CredentialsStep';
@@ -5,7 +6,6 @@ import { HostingStep } from './steps/HostingStep';
 import { AddServerStep } from './steps/AddServerStep';
 import { PassportStep } from './steps/PassportStep';
 import { InstallationStep } from './steps/InstallationStep';
-import { useState } from 'react';
 
 export type Step =
   | '/login'
