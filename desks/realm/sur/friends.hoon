@@ -103,9 +103,11 @@
       [%set-status =status]
   ==
 ::
-:: +$  friends-update-0
-::   $%
-::   ==
++$  friends-update-0
+  $%  [%status =status]
+      [%friend =friend]
+      [%friends =friends]
+  ==
 ::
 ::  Ship to ship actions
 ::

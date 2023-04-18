@@ -446,7 +446,7 @@
           =/  data  (put-friend src.bowl fren-upd)
           core(friends -.data, friend-times +.data)
         ==
-      ::  Poke failed
+      ::  Poke failed TODO, notify UI of failure.
       ::
       ((slog leaf/"accept-friend nack" ~) core)
     ::
@@ -897,8 +897,6 @@
       ::  or an accept request, depending on our state.
       ::  We don't directly update state here, rather we wait for a
       ::  positive %poke-ack from the other ship.
-      ::
-      ::  TODO: receiving a NACK should notify the UI that the request failed.
       ::
       ::  If trying to add-friend ourselves, or issued from another ship, crash.
       ::
