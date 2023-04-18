@@ -903,6 +903,7 @@ export const WalletStore = types
           const transactions =
             yield WalletIPC.getTransactions() as PromiseLike<any>;
           console.log(transactions);
+          self.ourPatp = shipStore.ship?.patp;
         } catch (error) {
           console.error(error);
         }
