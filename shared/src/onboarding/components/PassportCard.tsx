@@ -11,13 +11,14 @@ const PassportCardContainer = styled(Flex)`
   padding: 12px;
   border-radius: 9px;
   border: 1px solid rgba(var(--rlm-border-rgba));
-  background-color: rgba(var(--rlm-window-rgba));
+  background-color: rgba(var(--rlm-input-rgba));
 `;
 
 const UsernameInput = styled(Input)`
   font-size: 16px;
   padding: 8px;
   border-radius: 4px;
+  background-color: rgba(var(--rlm-window-rgba));
 `;
 
 const DescriptionTextArea = styled(UsernameInput)`
@@ -26,6 +27,7 @@ const DescriptionTextArea = styled(UsernameInput)`
   resize: none;
   line-height: 18px;
   height: 28px;
+  background-color: rgba(var(--rlm-window-rgba));
 `;
 
 type Props = {
