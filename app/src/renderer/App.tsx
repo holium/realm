@@ -17,12 +17,6 @@ function AppContentPresenter() {
   const isLoggedOut = !authStore.session;
   const addShip = useToggle(false);
 
-  const onFinishOnboarding = () => {
-    if (addShip.isOn) addShip.toggleOff();
-
-    return Promise.resolve(true);
-  };
-
   if (!booted) {
     return (
       <Flex>
@@ -32,14 +26,12 @@ function AppContentPresenter() {
   }
 
   if (hasNoAccounts) {
-    return <Onboarding onFinish={onFinishOnboarding} />;
+    return <Onboarding />;
   }
 
   if (isLoggedOut) {
     if (addShip.isOn) {
-      return (
-        <Onboarding initialStep="/hosting" onFinish={onFinishOnboarding} />
-      );
+      return <Onboarding initialStep="/hosting" onFinish={addShip.toggleOff} />;
     }
 
     return <Auth onAddShip={addShip.toggleOn} />;

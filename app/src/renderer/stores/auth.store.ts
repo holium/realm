@@ -7,7 +7,7 @@ import {
   getSnapshot,
 } from 'mobx-state-tree';
 import { AuthIPC } from 'renderer/stores/ipc';
-import { AccountModel, AccountModelType } from './models/account.model';
+import { AccountModel, AccountModelType } from './models/Account.model';
 import { trackEvent } from 'renderer/lib/track';
 
 export const LoginStatus = types.enumeration([
@@ -25,7 +25,7 @@ export const AuthenticationModel = types
     status: LoginStatus,
   })
   .actions((self) => ({
-    _setAccounts(accounts: AccountModelType[]) {
+    setAccounts(accounts: AccountModelType[]) {
       applySnapshot(self.accounts, accounts);
     },
     _setSession(patp: string) {

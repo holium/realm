@@ -7,9 +7,17 @@ import { AuthenticationModel } from './auth.store';
 import { ShellModel } from './models/Shell.model';
 import { RealmUpdateTypes } from 'os/realm.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';
-import { BazaarIPC, MainIPC, NotifIPC, RealmIPC, SpacesIPC } from './ipc';
+import {
+  AuthIPC,
+  BazaarIPC,
+  MainIPC,
+  NotifIPC,
+  RealmIPC,
+  SpacesIPC,
+} from './ipc';
 import { shipStore } from './ship.store';
 import { SoundActions } from 'renderer/lib/sound';
+import { AuthUpdateTypes } from 'os/services/auth/auth.service';
 
 const Screen = types.enumeration(['login', 'onboarding', 'os']);
 
@@ -43,7 +51,7 @@ const AppStateModel = types
         cookie: string;
       };
     }) {
-      self.authStore._setAccounts(data.accounts);
+      self.authStore.setAccounts(data.accounts);
       self.currentScreen = data.screen;
       self.booted = true;
       if (data.session) {
@@ -103,7 +111,8 @@ export const appState = AppStateModel.create({
   shellStore: {},
   online: navigator.onLine,
   connectionStatus:
-    (localStorage.getItem('connection-status') as any) || 'offline',
+    (localStorage.getItem('connection-status') as string | undefined) ||
+    'offline',
 });
 
 watchOnlineStatus(appState);
@@ -166,6 +175,12 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
     appState.setLoggedOut();
     shipStore.reset();
     SoundActions.playLogout();
+  }
+});
+
+AuthIPC.onUpdate((_event: any, update: AuthUpdateTypes) => {
+  if (update.type === 'init') {
+    appState.authStore.setAccounts(update.payload);
   }
 });
 

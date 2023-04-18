@@ -67,7 +67,7 @@ export const LoginStep = ({ setStep }: StepProps) => {
         setStep('/hosting');
       }
 
-      return Boolean(response);
+      return true;
     } catch (error) {
       console.error(error);
 

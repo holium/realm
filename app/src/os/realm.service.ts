@@ -16,6 +16,13 @@ import APIConnection from './services/conduit';
 import { MasterAccount } from './services/auth/masterAccounts.table';
 import { Account } from './services/auth/accounts.table';
 
+type CreateAccountPayload = Omit<
+  Account,
+  'passwordHash' | 'updatedAt' | 'createdAt'
+> & {
+  password: string;
+};
+
 export class RealmService extends AbstractService {
   // private realmProcess: RealmProcess | null = null;
   public services?: {
@@ -97,17 +104,12 @@ export class RealmService extends AbstractService {
     return null;
   }
 
-  public async createAccount(
-    accountPayload: Omit<
-      Account,
-      'passwordHash' | 'createdAt' | 'updatedAt'
-    > & { password: string }
-  ) {
+  public async createAccount({ password, ...rest }: CreateAccountPayload) {
     if (!this.services) return Promise.resolve(false);
 
     return this.services.auth.createAccount({
-      ...accountPayload,
-      passwordHash: bcrypt.hashSync(accountPayload.password, 10),
+      ...rest,
+      passwordHash: bcrypt.hashSync(password, 10),
     });
   }
 
