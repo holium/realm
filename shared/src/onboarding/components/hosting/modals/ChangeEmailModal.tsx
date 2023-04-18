@@ -48,7 +48,7 @@ export const ChangeEmailModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
     <Modal isOpen={isOpen} onDismiss={onDismiss} onSubmit={handleSubmit}>
       <Text.H5 padding="16px 0">Change email</Text.H5>
       <Flex flexDirection="column" gap={2}>
-        <OnboardDialogInputLabel as="label" htmlFor="email">
+        <OnboardDialogInputLabel as="label" htmlFor="change-email">
           New email
         </OnboardDialogInputLabel>
         <TextInput
@@ -61,7 +61,7 @@ export const ChangeEmailModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
         />
       </Flex>
       <Flex flexDirection="column" gap={2}>
-        <OnboardDialogInputLabel as="label" htmlFor="email">
+        <OnboardDialogInputLabel as="label" htmlFor="confirm-email">
           Confirm email
         </OnboardDialogInputLabel>
         <TextInput

@@ -65,7 +65,7 @@ export const ClaimTokenDialog = ({
             disabled
           />
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="password">
+            <OnboardDialogInputLabel as="label" htmlFor="claim-token-password">
               Password
             </OnboardDialogInputLabel>
             <TextInput
@@ -79,7 +79,10 @@ export const ClaimTokenDialog = ({
             />
           </Flex>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="password">
+            <OnboardDialogInputLabel
+              as="label"
+              htmlFor="claim-token-confirm-password"
+            >
               Confirm password
             </OnboardDialogInputLabel>
             <TextInput

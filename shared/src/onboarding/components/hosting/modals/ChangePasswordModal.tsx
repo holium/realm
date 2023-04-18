@@ -56,7 +56,7 @@ export const ChangePasswordModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
     <Modal isOpen={isOpen} onDismiss={onDismiss} onSubmit={handleSubmit}>
       <Text.H5 padding="16px 0">Change password</Text.H5>
       <Flex flexDirection="column" gap={2}>
-        <OnboardDialogInputLabel as="label" htmlFor="email">
+        <OnboardDialogInputLabel as="label" htmlFor="new-password">
           New password
         </OnboardDialogInputLabel>
         <TextInput
@@ -70,7 +70,7 @@ export const ChangePasswordModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
         />
       </Flex>
       <Flex flexDirection="column" gap={2}>
-        <OnboardDialogInputLabel as="label" htmlFor="email">
+        <OnboardDialogInputLabel as="label" htmlFor="confirm-password">
           Confirm password
         </OnboardDialogInputLabel>
         <TextInput

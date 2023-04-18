@@ -44,7 +44,7 @@ export const VerifyEmailModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
     <Modal isOpen={isOpen} onDismiss={onDismiss} onSubmit={handleSubmit}>
       <Text.H5 padding="16px 0">Verify new email</Text.H5>
       <Flex flexDirection="column" gap={2}>
-        <OnboardDialogInputLabel as="label" htmlFor="text">
+        <OnboardDialogInputLabel as="label" htmlFor="verify-email-auth-token">
           Authorization token
         </OnboardDialogInputLabel>
         <TextInput
@@ -57,7 +57,7 @@ export const VerifyEmailModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
         />
       </Flex>
       <Flex flexDirection="column" gap={2}>
-        <OnboardDialogInputLabel as="label" htmlFor="password">
+        <OnboardDialogInputLabel as="label" htmlFor="verify-email-password">
           Password
         </OnboardDialogInputLabel>
         <TextInput

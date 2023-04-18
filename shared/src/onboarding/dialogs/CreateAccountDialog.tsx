@@ -64,7 +64,7 @@ export const CreateAccountDialog = ({
         <>
           <OnboardDialogTitle pb={3}>Create account</OnboardDialogTitle>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="email">
+            <OnboardDialogInputLabel as="label" htmlFor="create-account-email">
               Email
             </OnboardDialogInputLabel>
             <TextInput
@@ -79,7 +79,10 @@ export const CreateAccountDialog = ({
             />
           </Flex>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="password">
+            <OnboardDialogInputLabel
+              as="label"
+              htmlFor="create-account-password"
+            >
               Password
             </OnboardDialogInputLabel>
             <TextInput
@@ -93,7 +96,10 @@ export const CreateAccountDialog = ({
             />
           </Flex>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="password">
+            <OnboardDialogInputLabel
+              as="label"
+              htmlFor="create-account-confirm-password"
+            >
               Confirm password
             </OnboardDialogInputLabel>
             <TextInput

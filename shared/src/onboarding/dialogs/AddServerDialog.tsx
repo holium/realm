@@ -76,7 +76,7 @@ export const AddServerDialog = ({ onBack, onNext }: Props) => {
       body={
         <>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="email">
+            <OnboardDialogInputLabel as="label" htmlFor="id-onboarding">
               Server ID
             </OnboardDialogInputLabel>
             <TextInput
@@ -92,7 +92,7 @@ export const AddServerDialog = ({ onBack, onNext }: Props) => {
             />
           </Flex>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="email">
+            <OnboardDialogInputLabel as="label" htmlFor="url-onboarding">
               Server URL
             </OnboardDialogInputLabel>
             <TextInput
@@ -108,7 +108,7 @@ export const AddServerDialog = ({ onBack, onNext }: Props) => {
             />
           </Flex>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="email">
+            <OnboardDialogInputLabel as="label" htmlFor="access-key-onboarding">
               Server Code
             </OnboardDialogInputLabel>
             <TextInput

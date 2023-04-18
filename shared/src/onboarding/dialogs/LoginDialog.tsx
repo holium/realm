@@ -42,7 +42,7 @@ export const LoginDialog = ({
         body={
           <>
             <Flex flexDirection="column" gap={2}>
-              <OnboardDialogInputLabel as="label" htmlFor="email">
+              <OnboardDialogInputLabel as="label" htmlFor="login-email">
                 Email
               </OnboardDialogInputLabel>
               <TextInput
@@ -56,7 +56,7 @@ export const LoginDialog = ({
               />
             </Flex>
             <Flex flexDirection="column" gap={2}>
-              <OnboardDialogInputLabel as="label" htmlFor="password">
+              <OnboardDialogInputLabel as="label" htmlFor="login-password">
                 Password
               </OnboardDialogInputLabel>
               <TextInput
