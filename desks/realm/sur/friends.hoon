@@ -16,9 +16,15 @@
 ++  fon        ((on key friend) idx-sort)
 ::  friend-times: map of ship to time for resolving the mop.
 ::
-+$  friend-times  (map ship time)
++$  friend-times     (map ship time)
+::  friend statuses: store separately so we can get everyone's latest status
+::  without muddying the other subscription.
+::
++$  friend-statuses  (map ship status)
 ::
 +$  tags       (set @t)
+:: %invisible is used by us only, communicated to peers as %offline
+:: default to %offline
 +$  status     ?(%online %away %dnd %offline %invisible)
 ::
 ::  $friend: these values are mostly used by us for bookkeeping on peers.
@@ -51,9 +57,6 @@
       ::
       :: defaults to %know
       relationship=?(%our %fren %received %sent %know %blocked)
-      :: %invisible is used by us only, communicated to peers as %offline
-      :: defaults to %offline
-      =status
       ::
       :: Taking live status updates further:
       :: These are decent ideas but we need to weigh 

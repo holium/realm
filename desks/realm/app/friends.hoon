@@ -51,7 +51,12 @@
 ::
 :: Potential bugs list (04/10/2023):
 :: - If I remove a friend but their ship is down, then they won't for sure know
-::   about it.  Urbit should "cover" this with retries.
+::   about it.  Urbit should "cover" this with retries.  Too bad!
+::
+:: Other ideas:
+:: - Can split "friends" into "friend-meta" and "friend-data",
+::   with separate updated time maps.  This way we would be retrieving 
+::   less duplicate information on each boot.
 ::
 /-  *friends
 /+  verb, dbug, defa=default-agent
@@ -71,7 +76,7 @@
 ::
 +$  state-0  [%0 is-public=? friends=friends-0]
 +$  state-1  [%1 sync-contact-store=? is-public=? friends=friends-1]
-+$  state-2  [%2 =friends =friend-times]
++$  state-2  [%2 =friends =friend-times =friend-statuses]
 ::
 +$  card  card:agent:gall
 --
@@ -259,12 +264,16 @@
         nickname=~
         phone-number=~
         relationship=%our
-        status=%offline
         contact-info=~
     ==
   ::
   =/  data  (put-friend our.bowl us)
-  core(friends -.data, friend-times +.data)
+  ::
+  %=  core
+    friends          -.data
+    friend-times     +.data
+    friend-statuses  (~(put by friend-statuses) our.bowl %offline)
+  ==
 ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::                                                                            ::
@@ -397,7 +406,6 @@
                 nickname=nickname.fren
                 phone-number=phone-number.fren
                 relationship=%sent
-                status=status.fren
                 contact-info=contact-info.fren
             ==
           ::  TODO, emit any necessary cards
@@ -432,7 +440,6 @@
                 nickname=nickname.fren
                 phone-number=phone-number.fren
                 relationship=%fren
-                status=status.fren
                 contact-info=contact-info.fren
             ==
           ::  TODO, emit any necessary cards
@@ -476,28 +483,12 @@
           %friends-pull
         =/  act   !<(friends-pull q.cage.sign)
         ?.  ?=(%status -.act)  ~|(bad-friends-pull-act/act !!)
-        =/  fren  (got-friend src.bowl)
+        =/  curr-status  (~(got by friend-statuses) src.bowl)
         ::
-        ?:  =(status.fren status.act)  core
-        ::
-        =/  fren-upd
-          :*  version=version.fren
-              pinned=pinned.fren
-              tags=tags.fren
-              created-at=created-at.fren
-              updated-at=now.bowl
-              nickname=nickname.fren
-              phone-number=phone-number.fren
-              relationship=relationship.fren
-              ::
-              status=status.act
-              ::
-              contact-info=contact-info.fren
-          ==
+        ?:  =(curr-status status.act)  core
         ::  TODO emit any necessary cards.
         ::
-        =/  data  (put-friend src.bowl fren-upd)
-        core(friends -.data, friend-times +.data)
+        core(friend-statuses (~(put by friend-statuses) src.bowl status.act))
       ::
       ==
     ::
@@ -535,7 +526,6 @@
               nickname=nickname.fren
               phone-number=phone-number.fren
               relationship=relationship.fren
-              status=status.fren
               ::
               contact-info=contact-info.act
               ::
@@ -581,7 +571,6 @@
               nickname=nickname.fren
               phone-number=phone-number.fren
               relationship=relationship.fren
-              status=status.fren
               contact-info=contact-info.fren
           ==
         ::  Here's where we issue subs to the other paths.  Can make changes
@@ -679,7 +668,6 @@
                 nickname=nickname.fren
                 phone-number=phone-number.fren
                 relationship=%received
-                status=status.fren
                 contact-info=contact-info.fren
             ==
           ::
@@ -701,19 +689,19 @@
             tags=*tags
             created-at=now.bowl
             updated-at=now.bowl
-            nickname=nickname.fren
+            nickname=~
             phone-number=~
             relationship=%received
-            status=%offline
             contact-info=~
         ==
       ::
       =/  data  (put-friend src.bowl fren)
       ::
       %=  core
-        friends       -.data
-        friend-times  +.data
-        cards         [watch-version cards]
+        friends          -.data
+        friend-times     +.data
+        friend-statuses  (~(put by friend-statuses) src.bowl %offline)
+        cards            [watch-version cards]
       ==
     ::
         %accept-friend
@@ -735,7 +723,6 @@
               nickname=nickname.fren
               phone-number=phone-number.fren
               relationship=%fren
-              status=status.fren
               contact-info=contact-info.fren
           ==
         ::
@@ -767,7 +754,6 @@
             nickname=nickname.fren
             phone-number=phone-number.fren
             relationship=%know
-            status=status.fren
             contact-info=contact-info.fren
         ==
       ::
@@ -824,9 +810,10 @@
   ::
       %status
     ::
-    =*  pull-status
+    =/  curr-status  (~(got by friend-statuses) our.bowl)
+    =/  pull-status
       :*  %give  %fact  ~  %friends-pull
-          !>(`friends-pull`[%status status.us])
+          !>(`friends-pull`[%status curr-status])
       ==
     ::
     =*  watch-version
@@ -847,7 +834,6 @@
           nickname=~
           phone-number=~
           relationship=%know
-          status=%offline
           contact-info=~
       ==
     ::  Send them our status, and start watching their version.
@@ -855,9 +841,10 @@
     =/  data  (put-friend src.bowl fren)
     ::
     %=  core
-      friends       -.data
-      friend-times  +.data
-      cards         [pull-status watch-version cards]
+      friends          -.data
+      friend-times     +.data
+      friend-statuses  (~(put by friend-statuses) src.bowl %offline)
+      cards            [pull-status watch-version cards]
     ==
   ::
       %contact-info
@@ -946,16 +933,16 @@
             nickname=~
             phone-number=~
             relationship=%know
-            status=%offline
             contact-info=~
         ==
       ::
       =/  data  (put-friend ship.act new-fren)
       ::
       %=  core
-        friends       -.data
-        friend-times  +.data
-        cards         [sent-friend watch-version cards]
+        friends          -.data
+        friend-times     +.data
+        friend-statuses  (~(put by friend-statuses) ship.act %offline)
+        cards            [sent-friend watch-version cards]
       ==
     ::
         %edit-friend
@@ -991,7 +978,6 @@
             nickname=nickname.fren
             phone-number=phone-number.fren
             relationship=%know
-            status=status.fren
             contact-info=contact-info.fren
         ==
       ::
@@ -1023,7 +1009,6 @@
             nickname=nickname.fren
             phone-number=phone-number.fren
             relationship=%blocked
-            status=status.fren
             contact-info=contact-info.fren
         ==
       ::
@@ -1054,7 +1039,6 @@
               nickname=nickname.fren
               phone-number=phone-number.fren
               relationship=%know
-              status=status.fren
               contact-info=contact-info.fren
           ==
         ::
@@ -1075,7 +1059,6 @@
             nickname=nickname.us
             phone-number=phone-number.us
             relationship=%our
-            status=status.us
             ::
             contact-info=contact-info.act
             ::
@@ -1096,34 +1079,17 @@
     ::
         %set-status
       ?.  =(our.bowl src.bowl)  ~|('no-foreign-set-status' !!)
-      =/  us  (got-friend our.bowl)
-      ::
-      =/  us-upd
-        :*  version=version.us
-            pinned=pinned.us
-            tags=tags.us
-            created-at=created-at.us
-            updated-at=now.bowl
-            nickname=nickname.us
-            phone-number=phone-number.us
-            relationship=%our
-            ::
-            status=status.act
-            ::
-            contact-info=contact-info.us
-        ==
+      =/  curr-status  (~(got by friend-statuses) our.bowl)
+      ?:  =(status.act curr-status)  core
       ::
       =*  pull-status
         :*  %give  %fact  ~[/status]  %friends-pull
             !>(`friends-pull`[%status status.act])
         ==
       ::
-      =/  data  (put-friend our.bowl us-upd)
-      ::
       %=  core
-        friends       -.data
-        friend-times  +.data
-        cards         [pull-status cards]
+        friend-statuses  (~(put by friend-statuses) our.bowl status.act)
+        cards            [pull-status cards]
       ==
     ::
     ==
