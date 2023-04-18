@@ -146,6 +146,8 @@
         =/  msgs-t=@da      (di:dejs:format n+i.t.t.t.path)
         =/  paths-t=@da     (di:dejs:format n+i.t.t.t.t.path)
         =/  peers-t=@da     (di:dejs:format n+i.t.t.t.t.t.path)
+        ?:  &(=(0 msgs-t) =(0 paths-t) =(0 peers-t))
+          ``chat-db-dump+!>(tables+all-tables:core)  :: if all 3 timestamps are 0, just return the whole tables, don't bother actually filtering them
         =/  msgs            messages+(start:from:db-lib msgs-t messages-table.state)
         =/  paths           paths+(path-start:from:db-lib paths-t paths-table.state)
         =/  peers           peers+(peer-start:from:db-lib peers-t peers-table.state)
