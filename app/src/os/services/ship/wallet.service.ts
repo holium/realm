@@ -1,7 +1,6 @@
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import log from 'electron-log';
-import APIConnection from '../conduit';
-import { PokeParams, Scry } from '@holium/conduit/src/types';
+// import { APIConnection, PokeParams, Scry } from 'os/services/api';
 
 export class WalletService extends AbstractService {
   constructor(options?: ServiceOptions) {

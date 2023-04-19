@@ -1,7 +1,7 @@
 import { Database } from 'better-sqlite3-multiple-ciphers';
 import log from 'electron-log';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
-import APIConnection from '../../conduit';
+import { APIConnection } from '../../api';
 import { AppCatalogDB } from './tables/catalog.table';
 import { pathToObj } from '../../../lib/path';
 

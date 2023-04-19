@@ -717,5 +717,3 @@ export class Conduit extends EventEmitter {
     return cookie;
   }
 }
-
-export { ConduitState };

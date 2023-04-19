@@ -1,8 +1,8 @@
 import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
-import { APIConnection } from '../../conduit';
 import { preSig } from '@urbit/aura';
+import { APIConnection } from '../../api';
 
 import {
   ChatDbReactions,
