@@ -119,7 +119,7 @@ jobs:
           chmod 600 ~/.ssh/usher_rsa
           # rename the latest-mac.yml file to alpha-mac.yml for staging builds
           mv -f ./app/release/build/latest-mac.yml ./app/release/build/alpha-mac.yml
-          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir ~/$BUILD_VERSION"
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir -p ~/$BUILD_VERSION"
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
@@ -177,6 +177,7 @@ jobs:
           chmod 600 ~/.ssh/usher_rsa
           # rename the latest-mac.yml file to alpha-mac.yml for staging builds
           mv -f ./app/release/build/latest-linux.yml ./app/release/build/$RELEASE_CHANNEL-linux.yml
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir -p ~/$BUILD_VERSION"
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
@@ -273,6 +274,7 @@ jobs:
           chmod 600 ~/.ssh/usher_rsa
           # rename the latest.yml (windows) file to alpha.yml for staging builds
           mv -f ./app/release/build/latest.yml ./app/release/build/alpha.yml
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir -p ~/$BUILD_VERSION"
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
@@ -401,6 +403,10 @@ jobs:
           ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf ~/$BUILD_VERSION"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA_STAGING }}
+          RELEASE_NAME: ${{ needs.pre-deploy.outputs.release_name }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   # this will run even if the build is canceled or fails

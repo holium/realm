@@ -42,86 +42,87 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
   #
-  # build-mac:
-  #   needs: [pre-deploy]
-  #   runs-on: macos-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-  #       with:
-  #         ref: staging
-  #     - name: Setup node
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: '>=18'
-  #         cache: 'npm'
-  #     - name: Install the Apple certificate
-  #       env:
-  #         BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
-  #         P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-  #         # BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
-  #         KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-  #       run: |
-  #         # create variables
-  #         CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-  #         # PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-  #         KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-  #         # import certificate and provisioning profile from secrets
-  #         echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
-  #         # echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
-  #         # create temporary keychain
-  #         security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-  #         security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-  #         security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-  #         # import certificate to keychain
-  #         security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-  #         security list-keychain -d user -s $KEYCHAIN_PATH
-  #         # apply provisioning profile
-  #         # mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-  #         # cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-  #     - name: Install yarn
-  #       run: npm install -g yarn
-  #     - name: Install app dependencies
-  #       run: yarn install
-  #     #
-  #     - name: Run pre-deploy script
-  #       uses: actions/github-script@v6
-  #       id: pre-mac
-  #       with:
-  #         script: |
-  #           const script = require('./.github/workflows/scripts/pre-platform.js')
-  #           const result = script({github, context}, 'staging.yml', 'mac', JSON.parse(process.env.CI_ENV))
-  #           console.log(result)
-  #           return result
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-  #         CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
-  #     #
-  #     - name: Build and publish
-  #       run: npx cross-env PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true yarn package:prerelease:mac
-  #       env:
-  #         APPLE_ID: ${{ secrets.APPLE_ID }}
-  #         APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
-  #         BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
-  #         P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-  #         BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-  #         RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
-  #     # copy release artifacts from this runner to digitalocean
-  #     - name: Publish artifacts
-  #       run: |
-  #         mkdir ~/.ssh
-  #         # ensure private key
-  #         echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
-  #         chmod 600 ~/.ssh/usher_rsa
-  #         # rename the latest-mac.yml file to alpha-mac.yml for staging builds
-  #         mv -f ./app/release/build/latest-mac.yml ./app/release/build/alpha-mac.yml
-  #         scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
-  #       env:
-  #         DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
-  #         DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
-  #         DEPLOY_RSA: ${{ secrets.DEPLOY_RSA_STAGING }}
-  #         BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-  #         RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
+  build-mac:
+    needs: [pre-deploy]
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: staging
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '>=18'
+          cache: 'npm'
+      - name: Install the Apple certificate
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          # BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          # PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          # import certificate and provisioning profile from secrets
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
+          # echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
+          # create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+          # apply provisioning profile
+          # mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          # cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+      - name: Install yarn
+        run: npm install -g yarn
+      - name: Install app dependencies
+        run: yarn install
+      #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: pre-mac
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-platform.js')
+            const result = script({github, context}, 'staging.yml', 'mac', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
+      - name: Build and publish
+        run: npx cross-env PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true yarn package:prerelease:mac
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
+      # copy release artifacts from this runner to digitalocean
+      - name: Publish artifacts
+        run: |
+          mkdir ~/.ssh
+          # ensure private key
+          echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
+          chmod 600 ~/.ssh/usher_rsa
+          # rename the latest-mac.yml file to alpha-mac.yml for staging builds
+          mv -f ./app/release/build/latest-mac.yml ./app/release/build/alpha-mac.yml
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir -p ~/$BUILD_VERSION"
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
+        env:
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA_STAGING }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
   #
   build-linux:
     needs: [pre-deploy]
@@ -171,7 +172,7 @@ jobs:
           chmod 600 ~/.ssh/usher_rsa
           # rename the latest-mac.yml file to alpha-mac.yml for staging builds
           mv -f ./app/release/build/latest-linux.yml ./app/release/build/$RELEASE_CHANNEL-linux.yml
-          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir ~/$BUILD_VERSION"
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir -p ~/$BUILD_VERSION"
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
@@ -195,155 +196,156 @@ jobs:
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
   #
-  # build-windows:
-  #   needs: [pre-deploy]
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: electronuserland/builder:wine
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-  #       with:
-  #         ref: staging
-  #     - run: git config --global --add safe.directory '*'
-  #     #
-  #     - name: Setup node
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: '>=18'
-  #         cache: 'npm'
-  #     #
-  #     - name: Install yarn
-  #       run: npm install -g yarn
-  #     #
-  #     - name: Install app dependencies
-  #       run: yarn install
-  #     #
-  #     - name: Install gh cli
-  #       run: |
-  #         apt-get update && apt-get -y install sudo
-  #         type -p curl >/dev/null || sudo apt install curl -y
-  #         curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-  #         && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-  #         && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-  #         && sudo apt update \
-  #         && sudo apt install gh -y
-  #     #
-  #     - name: Run pre-deploy script
-  #       uses: actions/github-script@v6
-  #       id: pre-windows
-  #       with:
-  #         script: |
-  #           const script = require('./.github/workflows/scripts/pre-platform.js')
-  #           const result = script({github, context}, 'staging.yml', 'windows', JSON.parse(process.env.CI_ENV))
-  #           console.log(result)
-  #           return result
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-  #         CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
-  #     #
-  #     - name: Build and install
-  #       run: |
-  #         cd ./app
-  #         # create environment variable file. only needed for windows build where maintaining environment
-  #         #  variables across scripts and commands is complex. this file is referenced by the Dotenv webpack plugin
-  #         cat << EOF > .env
-  #         BUILD_VERSION=$BUILD_VERSION
-  #         ARTIFACT_VERSION=$ARTIFACT_VERSION
-  #         RELEASE_CHANNEL=$RELEASE_CHANNEL
-  #         EOF
-  #         cd ../
-  #         sudo yarn package:prerelease:win
-  #       env:
-  #         BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-  #         RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
-  #         ARTIFACT_VERSION: ${{ needs.pre-deploy.outputs.artifact_version }}
-  #     # copy release artifacts from this runner to digitalocean
-  #     - name: Publish artifacts
-  #       run: |
-  #         mkdir ~/.ssh
-  #         # ensure private key
-  #         echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
-  #         chmod 600 ~/.ssh/usher_rsa
-  #         # rename the latest.yml (windows) file to alpha.yml for staging builds
-  #         mv -f ./app/release/build/latest.yml ./app/release/build/alpha.yml
-  #         scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
-  #       env:
-  #         DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
-  #         DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
-  #         DEPLOY_RSA: ${{ secrets.DEPLOY_RSA_STAGING }}
-  #         BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+  build-windows:
+    needs: [pre-deploy]
+    runs-on: ubuntu-latest
+    container:
+      image: electronuserland/builder:wine
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: staging
+      - run: git config --global --add safe.directory '*'
+      #
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '>=18'
+          cache: 'npm'
+      #
+      - name: Install yarn
+        run: npm install -g yarn
+      #
+      - name: Install app dependencies
+        run: yarn install
+      #
+      - name: Install gh cli
+        run: |
+          apt-get update && apt-get -y install sudo
+          type -p curl >/dev/null || sudo apt install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y
+      #
+      - name: Run pre-deploy script
+        uses: actions/github-script@v6
+        id: pre-windows
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/pre-platform.js')
+            const result = script({github, context}, 'staging.yml', 'windows', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      #
+      - name: Build and install
+        run: |
+          cd ./app
+          # create environment variable file. only needed for windows build where maintaining environment
+          #  variables across scripts and commands is complex. this file is referenced by the Dotenv webpack plugin
+          cat << EOF > .env
+          BUILD_VERSION=$BUILD_VERSION
+          ARTIFACT_VERSION=$ARTIFACT_VERSION
+          RELEASE_CHANNEL=$RELEASE_CHANNEL
+          EOF
+          cd ../
+          sudo yarn package:prerelease:win
+        env:
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
+          ARTIFACT_VERSION: ${{ needs.pre-deploy.outputs.artifact_version }}
+      # copy release artifacts from this runner to digitalocean
+      - name: Publish artifacts
+        run: |
+          mkdir ~/.ssh
+          # ensure private key
+          echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
+          chmod 600 ~/.ssh/usher_rsa
+          # rename the latest.yml (windows) file to alpha.yml for staging builds
+          mv -f ./app/release/build/latest.yml ./app/release/build/alpha.yml
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir -p ~/$BUILD_VERSION"
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
+        env:
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA_STAGING }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
-  # deploy-desks:
-  #   needs: [pre-deploy, build-linux]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-  #       with:
-  #         ref: staging
-  #         # Urbit symlink fetching
-  #         submodules: 'true'
-  #     #
-  #     - name: Setup node
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: '>=18'
-  #         cache: 'npm'
-  #     #
-  #     - name: Bump desks version
-  #       uses: actions/github-script@v6
-  #       id: bump-desks
-  #       with:
-  #         script: |
-  #           const script = require('./.github/workflows/scripts/bump-desk-version.js')
-  #           console.log(process.env.CI_ENV)
-  #           console.log(script({github}, JSON.parse(process.env.CI_ENV), ['./desks/realm']))
-  #       env:
-  #         CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
-  #     # publish latest agent udpates for realm and usher
-  #     - name: Publish ship updates
-  #       run: |
-  #         mkdir ~/.ssh
-  #         # ensure private key
-  #         echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
-  #         chmod 600 ~/.ssh/usher_rsa
-  #         ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf nimwyd-ramwyl-dozzod-hostyv/realm/*"
-  #         scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
-  #         ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf nimwyd-ramwyl-dozzod-hostyv/usher/*"
-  #         scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
-  #       env:
-  #         DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
-  #         DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
-  #         DEPLOY_RSA: ${{ secrets.DEPLOY_RSA_STAGING }}
-  #     #
-  #     # poke remote endpoint in usher agent which will run clay commit
-  #     #  see dirk: https://developers.urbit.org/reference/arvo/clay/examples#dirk
-  #     #  for more information
-  #     - name: Deploy ship updates
-  #       uses: actions/github-script@v6
-  #       env:
-  #         DEPLOY_SHIP: ${{ secrets.DEPLOY_SHIP_STAGING }}
-  #         DEPLOY_SHIP_CODE: ${{ secrets.DEPLOY_SHIP_CODE_STAGING }}
-  #         DEPLOY_ROOT_URL: ${{ secrets.DEPLOY_ROOT_URL_STAGING }}
-  #       with:
-  #         script: |
-  #           const script = require('./.github/workflows/scripts/deploy.js')
-  #           console.log(script({github}, {
-  #             ship: process.env.DEPLOY_SHIP,
-  #             code: process.env.DEPLOY_SHIP_CODE,
-  #             rootUrl: process.env.DEPLOY_ROOT_URL,
-  #             mounts: ['usher', 'realm']
-  #           }))
-  #     # Workaround to avoid "Post Run actions/setup-node" failures.
-  #     # See: https://codesti.com/issue/actions/setup-node/317
-  #     - run: mkdir -p /home/runner/.npm
-  #       continue-on-error: true
+  deploy-desks:
+    needs: [pre-deploy, build-mac, build-windows, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: staging
+          # Urbit symlink fetching
+          submodules: 'true'
+      #
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '>=18'
+          cache: 'npm'
+      #
+      - name: Bump desks version
+        uses: actions/github-script@v6
+        id: bump-desks
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/bump-desk-version.js')
+            console.log(process.env.CI_ENV)
+            console.log(script({github}, JSON.parse(process.env.CI_ENV), ['./desks/realm']))
+        env:
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      # publish latest agent udpates for realm and usher
+      - name: Publish ship updates
+        run: |
+          mkdir ~/.ssh
+          # ensure private key
+          echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
+          chmod 600 ~/.ssh/usher_rsa
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf nimwyd-ramwyl-dozzod-hostyv/realm/*"
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf nimwyd-ramwyl-dozzod-hostyv/usher/*"
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher $DEPLOY_USERNAME@$DEPLOY_HOST:nimwyd-ramwyl-dozzod-hostyv
+        env:
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA_STAGING }}
+      #
+      # poke remote endpoint in usher agent which will run clay commit
+      #  see dirk: https://developers.urbit.org/reference/arvo/clay/examples#dirk
+      #  for more information
+      - name: Deploy ship updates
+        uses: actions/github-script@v6
+        env:
+          DEPLOY_SHIP: ${{ secrets.DEPLOY_SHIP_STAGING }}
+          DEPLOY_SHIP_CODE: ${{ secrets.DEPLOY_SHIP_CODE_STAGING }}
+          DEPLOY_ROOT_URL: ${{ secrets.DEPLOY_ROOT_URL_STAGING }}
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/deploy.js')
+            console.log(script({github}, {
+              ship: process.env.DEPLOY_SHIP,
+              code: process.env.DEPLOY_SHIP_CODE,
+              rootUrl: process.env.DEPLOY_ROOT_URL,
+              mounts: ['usher', 'realm']
+            }))
+      # Workaround to avoid "Post Run actions/setup-node" failures.
+      # See: https://codesti.com/issue/actions/setup-node/317
+      - run: mkdir -p /home/runner/.npm
+        continue-on-error: true
   #
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   post-deploy:
-    needs: [pre-deploy, build-linux]
+    needs: [pre-deploy, build-mac, build-windows, build-linux, deploy-desks]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -389,10 +391,14 @@ jobs:
           git config --global user.name ${{ github.actor }}
           git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
           git push origin $BUILD_VERSION
-          gh release create $BUILD_VERSION ~/$BUILD_VERSION/*.* --target master --title "$RELEASE_NAME" --prerelease=false --draft=true --latest=false --verify-tag --notes "$CHANGELOG"
+          gh release create $BUILD_VERSION ~/$BUILD_VERSION/*.* --target staging --title "$RELEASE_NAME" --prerelease=false --draft=true --latest=false --verify-tag --notes "$CHANGELOG"
           ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf ~/$BUILD_VERSION"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA_STAGING }}
+          RELEASE_NAME: ${{ needs.pre-deploy.outputs.release_name }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   # this will run even if the build is canceled or fails
