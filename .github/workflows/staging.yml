@@ -109,7 +109,7 @@ jobs:
       # copy release artifacts from this runner to digitalocean
       - name: Publish artifacts
         run: |
-          mkdir ~/.ssh
+          mkdir -p ~/.ssh
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
@@ -166,7 +166,7 @@ jobs:
       # copy release artifacts from this runner to digitalocean
       - name: Publish artifacts
         run: |
-          mkdir ~/.ssh
+          mkdir -p ~/.ssh
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
@@ -262,7 +262,7 @@ jobs:
       # copy release artifacts from this runner to digitalocean
       - name: Publish artifacts
         run: |
-          mkdir ~/.ssh
+          mkdir -p ~/.ssh
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
@@ -306,7 +306,7 @@ jobs:
       # publish latest agent udpates for realm and usher
       - name: Publish ship updates
         run: |
-          mkdir ~/.ssh
+          mkdir -p ~/.ssh
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
@@ -375,10 +375,11 @@ jobs:
       # copy release artifacts from digitalocean (all platforms) back to this runner
       - name: Retrieve release artifacts
         run: |
-          mkdir ~/.ssh
+          mkdir -p ~/.ssh
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
+          mkdir -p ~/$BUILD_VERSION
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION ~/$BUILD_VERSION
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
