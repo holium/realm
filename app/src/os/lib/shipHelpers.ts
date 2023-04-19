@@ -1,5 +1,6 @@
 import axios from 'axios';
 import http from 'http';
+import dns from 'dns';
 
 export interface ShipConnectionData {
   patp: string;
@@ -8,6 +9,8 @@ export interface ShipConnectionData {
 }
 
 const httpAgent = new http.Agent({ family: 4 });
+// fixes ipv6 resolution bug on macOS for now
+dns.setDefaultResultOrder('ipv4first');
 
 export async function getCookie(ship: ShipConnectionData) {
   const response = await axios.post(
