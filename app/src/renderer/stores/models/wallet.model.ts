@@ -897,16 +897,13 @@ export const WalletStore = types
   .actions((self) => {
     return {
       init: flow(function* (): Generator<PromiseLike<any>, void, any> {
-        console.log('CALLING WALLET MODEL INIT');
         try {
-          console.log('asdlfkj');
           const wallets = yield WalletIPC.getWallets() as PromiseLike<any>;
-          console.log(wallets);
+          console.log('wallets', wallets);
           const transactions =
             yield WalletIPC.getTransactions() as PromiseLike<any>;
-          console.log(transactions);
+          console.log('transactions', transactions);
           self.ourPatp = shipStore.ship?.patp;
-          console.log('self.ourPatp', self.ourPatp);
         } catch (error) {
           console.error(error);
         }
@@ -1215,11 +1212,8 @@ export const WalletStore = types
 export type WalletStoreType = Instance<typeof WalletStore>;
 
 WalletIPC.onUpdate((_event: any, payload: any) => {
-  console.log('got update', payload);
   // const { type, payload } = update;
   const type = Object.keys(payload)[0];
-  console.log('type', type);
-  console.log('payload', payload);
   switch (type) {
     case 'wallet':
       const wallet = payload.wallet;
@@ -1233,13 +1227,11 @@ WalletIPC.onUpdate((_event: any, payload: any) => {
       break;
     case 'wallets':
       const wallets = payload.wallets;
-      console.log('setting initialized');
       if (
         Object.keys(wallets.ethereum).length !== 0 ||
         Object.keys(wallets.bitcoin).length !== 0 ||
         Object.keys(wallets.btctestnet).length !== 0
       ) {
-        console.log('confirmed setting initialized');
         shipStore.walletStore.setInitialized(true);
       }
       shipStore.walletStore.ethereum.initial(wallets);

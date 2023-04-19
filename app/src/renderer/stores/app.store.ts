@@ -191,7 +191,6 @@ NotifIPC.onUpdate(({ type, payload }: any) => {
 
 SpacesIPC.onUpdate((_event: any, update: any) => {
   const { type, payload } = update;
-  console.log('spaces update', type, payload);
   // on update we need to requery the store
   switch (type) {
     case 'initial':
