@@ -1,6 +1,6 @@
+import { deSig } from '@urbit/aura';
 import { Conduit, ConduitState } from './index';
 import log from 'electron-log';
-import { deSig } from '@urbit/aura';
 
 export type ConduitSession = {
   url: string;
@@ -12,13 +12,13 @@ export type ConduitSession = {
 export class APIConnection {
   private static instance: APIConnection;
   private conduitInstance: Conduit;
-  // private isResuming = false;
+  private isResuming = false;
   private isReconnecting = false;
-  // private session: CondauitSession;
+  private session: ConduitSession;
 
-  private constructor(conduit: Conduit) {
-    // this.session = session;
-    this.conduitInstance = conduit;
+  private constructor(session: ConduitSession) {
+    this.session = session;
+    this.conduitInstance = new Conduit();
     this.handleConnectionStatus(this.conduitInstance);
     this.conduitInstance
       .init(
@@ -38,21 +38,21 @@ export class APIConnection {
     if (!APIConnection.instance) {
       const conduit = new Conduit();
       await conduit.init(session.url, session.cookie ?? '', session.code);
-      APIConnection.instance = new APIConnection(conduit);
+      APIConnection.instance = new APIConnection(session);
     }
     return APIConnection.instance;
   }
 
   public static getInstance(session?: ConduitSession): APIConnection {
-    if (!APIConnection.instance) {
-      if (!session) {
-        throw new Error(
-          'API key must be provided on the first call to getInstance.'
-        );
-      }
-      const conduit = new Conduit();
-      conduit.init(session.url, session.cookie ?? '', session.code);
-      APIConnection.instance = new APIConnection(conduit);
+    if (!APIConnection.instance && !session) {
+      throw new Error(
+        'API key must be provided on the first call to getInstance.'
+      );
+    }
+    if (session) {
+      if (APIConnection.instance) APIConnection.instance.conduit.cleanup();
+      // if a session is provided, we can infer it is to create a new instance
+      APIConnection.instance = new APIConnection(session);
     }
     return APIConnection.instance;
   }
@@ -97,7 +97,7 @@ export class APIConnection {
     });
     conduit.on(ConduitState.Failed, () => {
       // this.services.identity.auth.setLoader('error');
-      // this.isResuming = false;
+      this.isResuming = false;
       this.isReconnecting = false;
       this.sendConnectionStatus(ConduitState.Failed);
     });

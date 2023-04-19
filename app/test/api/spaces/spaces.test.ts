@@ -49,7 +49,7 @@ jest.mock(
   { virtual: true }
 );
 
-describe('basic Friends tests', () => {
+describe('basic spaces tests', () => {
   let service: SpacesService;
   let connection: APIConnection;
   beforeAll(async () => {
