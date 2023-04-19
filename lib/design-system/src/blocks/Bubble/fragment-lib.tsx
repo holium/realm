@@ -33,6 +33,7 @@ import { BlockStyle } from '../Block/Block';
 import { motion } from 'framer-motion';
 import { ImageBlock } from '../../blocks/ImageBlock/ImageBlock';
 import { LinkBlock } from '../../blocks/LinkBlock/LinkBlock';
+import { convertFragmentsToPreview } from '../ChatInput/fragment-parser';
 import { BubbleAuthor } from './Bubble.styles';
 import { Bookmark } from '../../os/Bookmark/Bookmark';
 import { BUBBLE_HEIGHT } from './Bubble.constants';
@@ -391,10 +392,15 @@ export const renderFragment = (
 
     case 'reply':
       const msg = (fragment as FragmentReplyType).reply.message[0];
+      const fullmessage = (fragment as FragmentReplyType).reply.message;
       const replyAuthor = (fragment as FragmentReplyType).reply.author;
       const replyId = (fragment as FragmentReplyType).reply.msgId;
-      const fragmentType: string = Object.keys(msg)[0];
-      let replyContent = null;
+      const fragmentType = Object.keys(msg)[0];
+      let replyContent: any = (
+        <FragmentPlain id={id}>
+          {convertFragmentsToPreview(id, fullmessage)}
+        </FragmentPlain>
+      );
       if (
         !TEXT_TYPES.includes(fragmentType) &&
         fragmentType !== 'image' &&
@@ -410,12 +416,9 @@ export const renderFragment = (
             {capitalizeFirstLetter(fragmentType)}
           </FragmentPlain>
         );
-      } else {
-        // TODO flesh out the image case with the following text
-        if (fragmentType === 'image') {
-          // take out precalculated height and width
-          (msg as FragmentImageType).metadata = {};
-        }
+      } else if (fragmentType === 'image') {
+        // take out precalculated height and width
+        (msg as FragmentImageType).metadata = {};
         replyContent = renderFragment(id, msg, index, replyAuthor);
       }
 
