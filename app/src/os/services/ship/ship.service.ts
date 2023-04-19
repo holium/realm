@@ -4,7 +4,7 @@ import log from 'electron-log';
 import moment from 'moment';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { ShipDB } from './ship.db';
-import APIConnection, { ConduitSession } from '../conduit';
+import { APIConnection, ConduitSession } from '../api';
 import RoomsService from './rooms.service';
 import NotificationsService from './notifications/notifications.service';
 import ChatService from './chat/chat.service';

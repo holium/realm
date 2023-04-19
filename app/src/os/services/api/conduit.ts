@@ -15,6 +15,7 @@ import {
   SubscribeParams,
   Thread,
 } from './types';
+import { preSig } from '@urbit/aura';
 
 // For now, set it to 20
 setMaxListeners(20);
@@ -104,7 +105,7 @@ export class Conduit extends EventEmitter {
             this.cookie = cookie;
             this.updateStatus(ConduitState.Refreshed, {
               url: this.url,
-              ship: `~${this.ship}`,
+              ship: preSig(this.ship),
               cookie: this.cookie,
               code: this.code,
             });
@@ -184,7 +185,7 @@ export class Conduit extends EventEmitter {
     this.cookie = cookie;
     this.updateStatus(ConduitState.Refreshed, {
       url: this.url,
-      ship: `~${this.ship}`,
+      ship: preSig(this.ship),
       cookie: this.cookie,
       code: this.code,
     });
@@ -716,5 +717,3 @@ export class Conduit extends EventEmitter {
     return cookie;
   }
 }
-
-export { ConduitState };

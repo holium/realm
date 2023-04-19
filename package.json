@@ -8,17 +8,15 @@
     "lib/design-system",
     "lib/presence",
     "lib/presence/code",
-    "lib/conduit",
     "lib/room",
     "lib/room/test-ui"
   ],
   "scripts": {
-    "tsc": "yarn workspace @holium/realm tsc && yarn workspace @holium/design-system tsc && yarn workspace @holium/conduit tsc && yarn workspace @holium/realm-presence tsc && yarn workspace @holium/realm-presence-notes tsc && yarn workspace @holium/realm-room tsc && yarn workspace @holium/realm-room-test-ui tsc",
+    "tsc": "yarn workspace @holium/realm tsc && yarn workspace @holium/design-system tsc && yarn workspace @holium/realm-presence tsc && yarn workspace @holium/realm-presence-notes tsc && yarn workspace @holium/realm-room tsc && yarn workspace @holium/realm-room-test-ui tsc",
     "postinstall": "yarn workspace @holium/realm electron-rebuild better-sqlite3",
     "build": "yarn build:app",
     "build:app": "yarn workspace @holium/realm build",
     "build:design-system": "yarn workspace @holium/design-system build",
-    "build:conduit": "yarn workspace @holium/conduit build",
     "build:multiplayer": "yarn workspace @holium/realm-presence build",
     "build:room": "yarn workspace @holium/realm-room build",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
@@ -26,12 +24,12 @@
     "start:onboard": "yarn workspace @holium/realm start:onboard",
     "add:realm": "yarn workspace @holium/realm add -W",
     "package": "yarn workspace @holium/realm package",
-    "package:prerelease:linux": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:prerelease:linux",
-    "package:prerelease:mac": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:prerelease:mac",
-    "package:prerelease:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:prerelease:win",
-    "package:release:linux": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:linux",
-    "package:release:mac": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:mac",
-    "package:release:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:win",
+    "package:prerelease:linux": "yarn build:multiplayer && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:prerelease:linux",
+    "package:prerelease:mac": "yarn build:multiplayer && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:prerelease:mac",
+    "package:prerelease:win": "yarn build:multiplayer && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:prerelease:win",
+    "package:release:linux": "yarn build:multiplayer && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:linux",
+    "package:release:mac": "yarn build:multiplayer && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:mac",
+    "package:release:win": "yarn build:multiplayer && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:win",
     "build-storybook": "build-storybook",
     "storybook": "start-storybook -p 6006"
   },
@@ -69,7 +67,6 @@
       "shared",
       "lib/design-system",
       "lib/presence",
-      "lib/conduit",
       "lib/room"
     ]
   }
