@@ -146,9 +146,12 @@ export class WalletService extends AbstractService {
       app: 'realm-wallet',
       mark: 'realm-wallet-action',
       json: {
-        'set-settings': {
+        'set-network-settings': {
           network,
-          settings,
+          mode: settings.walletCreationMode,
+          who: settings.sharingMode,
+          blocked: settings.blocked,
+          'share-index': settings.defaultIndex,
         },
       },
     });

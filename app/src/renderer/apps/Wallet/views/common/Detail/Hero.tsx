@@ -2,8 +2,8 @@ import { FC, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react';
 import { QRCodeSVG } from 'qrcode.react';
+import { CopyButton, Flex, Box, Icon, Text } from '@holium/design-system';
 
-import { Flex, Box, Icon, Text } from '@holium/design-system';
 import {
   shortened,
   formatEthAmount,
@@ -218,7 +218,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     ) : (
       <WalletCardStyle
         layout="size"
-        elevation="none"
         layoutId={`wallet-card-${props.wallet.address}`}
         transition={walletCardStyleTransition}
         pb="8px"
@@ -242,9 +241,9 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           <Flex width="100%" justifyContent="space-between" alignItems="center">
             <Flex>
               {walletStore.navState.network === NetworkType.ETHEREUM ? (
-                <Icon name="Ethereum" height="20px" mr={2} />
+                <Icon name="Ethereum" mr={2} />
               ) : (
-                <Icon name="Bitcoin" height="20px" mr={2} />
+                <Icon name="Bitcoin" mr={2} />
               )}
               <Text.Body pt="2px" textAlign="center" fontSize="14px">
                 {shortened(props.wallet.address)}
@@ -257,7 +256,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
                 <>
                   <CopyButton content={props.wallet.address} />
                   <Box onClick={() => props.setQROpen(!props.QROpen)}>
-                    <Icon ml={2} name="QRCode" height="20px" />
+                    <Icon ml={2} name="QRCode" />
                   </Box>
                 </>
               )}
@@ -328,30 +327,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     );
   }
 );
-
-interface CopyProps {
-  content: string;
-}
-function CopyButton(props: CopyProps) {
-  const [copied, setCopied] = useState(false);
-  const copy = () => {
-    navigator.clipboard.writeText(props.content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 750);
-  };
-
-  return (
-    <Box>
-      {!copied ? (
-        <Box onClick={copy}>
-          <Icon name="Copy" height="20px" />
-        </Box>
-      ) : (
-        <Icon name="CheckCircle" height="20px" />
-      )}
-    </Box>
-  );
-}
 
 const SendReceiveButtons = (props: {
   hidden: boolean;

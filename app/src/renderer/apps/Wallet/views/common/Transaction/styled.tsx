@@ -1,10 +1,10 @@
 import styled from 'styled-components';
 import { Flex } from '@holium/design-system';
 
-export const ContainerFlex = styled(Flex)<{ focusBorder: string }>`
+export const ContainerFlex = styled(Flex)`
   background-color: rgba(var(--rlm-input-rgba));
   :focus-within {
-    border: 1px solid ${(props) => props.focusBorder};
+    border: 1px solid rgba(var(--rlm-input-rgba));
   }
 `;
 

@@ -3,7 +3,6 @@ import { Card } from '@holium/design-system';
 
 interface CardStyleProps {
   isSelected: boolean;
-  mode: string;
 }
 
 export const WalletCardStyle = styled(Card)<CardStyleProps>`
