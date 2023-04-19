@@ -15,9 +15,12 @@ import {
   SubscribeParams,
   Thread,
 } from './types';
+const dns = require('dns');
 
 // For now, set it to 20
 setMaxListeners(20);
+
+dns.setDefaultResultOrder('ipv4first');
 
 /**
  * Conduit
