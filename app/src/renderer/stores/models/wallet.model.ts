@@ -1048,9 +1048,22 @@ export const WalletStore = types
       setForceActive(forceActive: boolean) {
         self.forceActive = forceActive;
       },
-      reset: (initialState: any) => {
-        applySnapshot(self, initialState);
+      reset() {
+        // applySnapshot(self, walletAppDefault);
       },
+      deleteLocalWallet(passcode: number[]) {
+        this.deleteLocalMnemonic(passcode);
+        this.reset();
+      },
+      deleteLocalMnemonic: flow(function* (
+        passcode: number[]
+      ): Generator<PromiseLike<any>, void, any> {
+        const passcodeString = passcode.map(String).join('');
+        yield WalletIPC.deleteLocalMnemonic(
+          self.ourPatp ?? '',
+          passcodeString ?? ''
+        ) as PromiseLike<any>;
+      }),
       setMnemonic: flow(function* (
         mnemonic: string,
         passcode: number[]

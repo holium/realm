@@ -96,7 +96,7 @@ const loadSnapshot = () => {
 
 const persistedState = loadSnapshot();
 
-const walletAppDefault = {
+export const walletAppDefault = {
   navState: {
     view: WalletView.NEW,
     protocol: ProtocolType.ETH_GORLI,

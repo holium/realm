@@ -40,8 +40,8 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
       ? 'noun' in pendingTx.action
       : false;
 
-    const Seperator = () => (
-      <Flex mt={6} position="relative" width="100%" justifyContent="center">
+    const Separator = () => (
+      <Flex position="relative" width="100%" justifyContent="center">
         <Box position="absolute" width="300px" height="1px" left="-10px" />
         {uqbarContract ? (
           <Flex
@@ -60,7 +60,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
             position="absolute"
             px={2}
             bottom="-12px"
-            height="25px"
+            // height="25px"
             min-width="80px"
             justifyContent="center"
             alignItems="center"
@@ -85,7 +85,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
 
     return (
       <Box width="100%" hidden={props.hidden}>
-        <Seperator />
+        <Separator />
         <TransactionPane
           onConfirm={props.onConfirm}
           max={

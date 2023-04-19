@@ -40,11 +40,10 @@ const FullButton = styled(Flex)`
     transition: var(--transition);
     ${CircleBtn} {
       transition: var(--transition);
-      background-color: rgba(var(--rlm-overlay-hover-rgba));
+      background-color: rgba(var(--rlm-accent-rgba));
     }
     ${Text} {
       transition: var(--transition);
-      background-color: rgba(var(--rlm-overlay-hover-rgba));
     }
   }
 `;

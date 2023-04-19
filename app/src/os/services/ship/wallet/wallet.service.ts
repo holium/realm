@@ -1,4 +1,4 @@
-import APIConnection from '../../conduit';
+import { APIConnection } from '../../api';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { Database } from 'better-sqlite3-multiple-ciphers';
 import { RealmSigner } from './signers/realm';
@@ -155,6 +155,10 @@ export class WalletService extends AbstractService {
         },
       },
     });
+  }
+
+  async deleteLocalMnemonic(ourPatp: string, passcode: string) {
+    RealmSigner.deleteMnemonic(ourPatp, passcode);
   }
 }
 

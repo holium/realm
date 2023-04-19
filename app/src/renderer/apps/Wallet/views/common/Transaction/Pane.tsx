@@ -96,16 +96,16 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     return (
       <>
         {screen === 'initial' ? (
-          <Flex mt={7} flexDirection="column">
+          <Flex flexDirection="column">
             <AmountInput
               max={props.max}
               coin={props.coin}
               setValid={amountValidator}
             />
-            <Box width="100%" mt={4}>
+            <Box width="100%">
               <RecipientInput setValid={recipientValidator} />
             </Box>
-            <Flex mt={7} justifyContent="space-between">
+            <Flex justifyContent="space-between">
               <Button.TextButton
                 variant="transparent"
                 onClick={() => props.close()}
@@ -122,7 +122,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
             </Flex>
           </Flex>
         ) : (
-          <Flex mt={7} flexDirection="column">
+          <Flex flexDirection="column">
             {!props.uqbarContract && (
               <>
                 <Text.Body
@@ -139,7 +139,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                     : abbrMap[walletStore.navState.network]}
                 </Text.Body>
                 {walletStore.navState.protocol === ProtocolType.ETH_MAIN && (
-                  <Text.Body mt={1}>
+                  <Text.Body>
                     $
                     {ethToUsd(
                       props.transactionAmount,
@@ -149,7 +149,6 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                   </Text.Body>
                 )}
                 <Flex
-                  mt={7}
                   width="100%"
                   flexDirection="column"
                   justifyContent="space-evenly"
@@ -220,7 +219,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
     </Flex> */}
                     </Flex>
                   </Flex>
-                  <Flex mt={5} width="100%" justifyContent="space-between">
+                  <Flex width="100%" justifyContent="space-between">
                     <Text.Body variant="body">NETWORK FEE</Text.Body>
                     <Flex flexDirection="column">
                       <Text.Body variant="body">0.001 ETH</Text.Body>
@@ -237,7 +236,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                       )}
                     </Flex>
                   </Flex>
-                  <Flex mt={5} width="100%" justifyContent="space-between">
+                  <Flex width="100%" justifyContent="space-between">
                     <Text.Body variant="body">TOTAL</Text.Body>
                     <Flex flexDirection="column">
                       <Text.Body variant="body">
@@ -260,7 +259,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                 </Flex>
               </>
             )}
-            <Flex mt={7} justifyContent="space-between">
+            <Flex justifyContent="space-between">
               <Button.TextButton variant="transparent" onClick={() => prev()}>
                 Reject
               </Button.TextButton>
