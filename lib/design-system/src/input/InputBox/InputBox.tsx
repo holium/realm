@@ -27,8 +27,7 @@ const StyledBox = styled(Flex)<StyledBoxProps>`
     props.shouldHighlightOnFocus &&
     css`
       &:focus,
-      &:focus-within,
-      &:active {
+      &:focus-within {
         transition: var(--transition);
         outline: none;
         border-color: rgba(var(--rlm-accent-rgba));
@@ -89,6 +88,12 @@ const StyledBox = styled(Flex)<StyledBoxProps>`
         }
       }
     `}
+
+  /* Gets rid of Chrome's autofill styling */
+  input:-webkit-autofill,
+  input:-webkit-autofill:focus {
+    transition: background-color 600000s 0s, color 600000s 0s;
+  }
 `;
 
 const Adornment = styled(Box)<BoxProps & { disabled?: boolean }>`
@@ -136,6 +141,7 @@ export const InputBox = ({
   style,
   px,
   py,
+  onClick,
   ...boxProps
 }: InputBoxProps) => (
   <StyledBox
@@ -152,6 +158,7 @@ export const InputBox = ({
     textAlign={boxProps.textAlign || 'left'}
     px={px}
     py={py}
+    onClick={onClick}
   >
     {label && label !== 'none' && (
       <Text.Label
