@@ -1,5 +1,8 @@
 import axios from 'axios';
 import http from 'http';
+const dns = require('dns');
+
+dns.setDefaultResultOrder('ipv4first');
 
 export interface ShipConnectionData {
   patp: string;
