@@ -147,11 +147,17 @@ export class AuthDB {
   }
 
   public _getSession(patp?: string): SessionType | null {
-    const query = this.authDB.prepare(`
+    const query = this.authDB.prepare(
+      patp
+        ? `
       SELECT patp, key FROM accounts_session WHERE patp = ?;
-    `);
-    const result: any = query.get(patp);
-    if (result) return result;
+    `
+        : `SELECT patp, key FROM accounts_session LIMIT 1;`
+    );
+    const result: any = patp ? query.get(patp) : query.get();
+    if (result) {
+      return result;
+    }
     return null;
   }
 
