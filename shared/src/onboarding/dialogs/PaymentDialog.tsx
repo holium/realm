@@ -52,35 +52,24 @@ const PaymentDialogPresenter = ({
     });
 
     // Execute the payment.
-    try {
-      if (!stripeOptions?.clientSecret) return Promise.resolve(false);
+    if (!stripeOptions?.clientSecret) return false;
 
-      const result = await stripe.confirmCardPayment(
-        stripeOptions.clientSecret,
-        {
-          payment_method: payload.paymentMethod?.id,
-        }
-      );
+    const result = await stripe.confirmCardPayment(stripeOptions.clientSecret, {
+      payment_method: payload.paymentMethod?.id,
+    });
 
-      if (result.error) {
-        console.error(result.error);
-      } else {
-        if (result.paymentIntent?.status === 'succeeded') {
-          return onNext();
-        }
-      }
-    } catch (e) {
-      console.error(e);
+    if (!result.error && result.paymentIntent?.status === 'succeeded') {
+      return onNext();
     }
 
-    return Promise.resolve(false);
+    return false;
   };
 
   return (
     <OnboardDialog
       icon={<PaymentIcon />}
       body={
-        <Flex flexDirection="column" gap={16} marginBottom={30}>
+        <>
           <OnboardDialogTitle>Payment</OnboardDialogTitle>
           <ProductCards
             products={products}
@@ -89,7 +78,7 @@ const PaymentDialogPresenter = ({
           />
           <AccountInformation patp={patp} email={email} />
           <PaymentForm />
-        </Flex>
+        </>
       }
       nextText="Submit"
       onBack={onBack}
@@ -104,7 +93,7 @@ export const PaymentDialog = ({ stripe, stripeOptions, ...props }: Props) => {
       <OnboardDialog
         icon={<PaymentIcon />}
         body={
-          <Flex flexDirection="column" gap={16} marginBottom={30}>
+          <>
             <OnboardDialogTitle>Payment</OnboardDialogTitle>
             <ProductCards
               products={props.products}
@@ -115,7 +104,7 @@ export const PaymentDialog = ({ stripe, stripeOptions, ...props }: Props) => {
             <Flex justifyContent="center" alignItems="center" my={30}>
               <Spinner size={3} />
             </Flex>
-          </Flex>
+          </>
         }
         nextText="Submit"
         onBack={props.onBack}

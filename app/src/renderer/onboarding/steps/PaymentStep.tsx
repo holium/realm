@@ -71,21 +71,17 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
   const onBack = () => setStep('/choose-id');
 
   const onNext = async () => {
-    if (!token || !patp || !invoiceId || !productId) return false;
-
-    try {
-      await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
-      await thirdEarthApi.updatePlanetStatus(token, patp, 'sold');
-      await thirdEarthApi.ship(token, patp, productId.toString(), invoiceId);
-
-      setStep('/booting');
-
-      return true;
-    } catch (error) {
-      console.error(error);
-
-      return false;
+    if (!token || !patp || !invoiceId || !productId) {
+      return Promise.resolve(false);
     }
+
+    await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
+    await thirdEarthApi.updatePlanetStatus(token, patp, 'sold');
+    await thirdEarthApi.ship(token, patp, productId.toString(), invoiceId);
+
+    setStep('/booting');
+
+    return true;
   };
 
   return (

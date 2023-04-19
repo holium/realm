@@ -74,21 +74,16 @@ export default function Payment({ products }: ServerSideProps) {
   const onBack = () => goToPage('/choose-id');
 
   const onNext = async () => {
-    if (!token || !patp || !invoiceId || !productId) return false;
+    if (!token || !patp || !invoiceId || !productId)
+      return Promise.resolve(false);
 
-    try {
-      await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
-      await thirdEarthApi.updatePlanetStatus(token, patp, 'sold');
-      await thirdEarthApi.ship(token, patp, productId.toString(), invoiceId);
+    await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
+    await thirdEarthApi.updatePlanetStatus(token, patp, 'sold');
+    await thirdEarthApi.ship(token, patp, productId.toString(), invoiceId);
 
-      goToPage('/booting');
+    goToPage('/booting');
 
-      return true;
-    } catch (error) {
-      console.error(error);
-
-      return false;
-    }
+    return true;
   };
 
   return (

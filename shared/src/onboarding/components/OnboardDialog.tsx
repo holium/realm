@@ -1,5 +1,5 @@
-import { FormEvent, ReactNode } from 'react';
-import { Flex, Icon, Spinner } from '@holium/design-system/general';
+import { FormEvent, ReactNode, useState } from 'react';
+import { Flex, ErrorBox, Icon, Spinner } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
 import {
   OnboardDialogBackButton,
@@ -34,15 +34,24 @@ export const OnboardDialog = ({
   onNext,
 }: Props) => {
   const submitting = useToggle(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     submitting.toggleOn();
+    setErrorMessage(null);
+
+    // Unfocus all inputs.
+    (document.activeElement as HTMLElement)?.blur();
 
     try {
       const successfull = await onNext?.();
-      if (!successfull) submitting.toggleOff();
-    } catch (error) {
+      if (!successfull) throw new Error('Something went wrong.');
+    } catch (error: any) {
+      if (typeof error === 'string') setErrorMessage(error);
+      else if (error.message) setErrorMessage(error.message);
+      else setErrorMessage('Something went wrong.');
+
       submitting.toggleOff();
     }
   };
@@ -53,7 +62,10 @@ export const OnboardDialog = ({
         {icon && (
           <OnboardDialogIconContainer>{icon}</OnboardDialogIconContainer>
         )}
-        <OnboardDialogBodyContainer>{body}</OnboardDialogBodyContainer>
+        <OnboardDialogBodyContainer>
+          {body}
+          {errorMessage && <ErrorBox>{errorMessage}</ErrorBox>}
+        </OnboardDialogBodyContainer>
       </OnboardDialogBody>
       <OnboardDialogFooter>
         <Flex flex={1}>

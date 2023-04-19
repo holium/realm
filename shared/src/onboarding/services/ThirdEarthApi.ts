@@ -9,10 +9,11 @@ type LoginResponse = {
   token: string;
   email: string;
   client_side_encryption_key: string;
+  message?: string;
 };
 
 type RegisterResponse = {
-  message: string;
+  message?: string;
 };
 
 type VerifyEmailResponse = {
@@ -105,6 +106,21 @@ type UpdateMaintenanceWindowResponse = {
 type EjectShipResponse = {
   message: string;
 };
+
+type UpdatePaymentResponse = {
+  msg?: string;
+};
+
+type UpdatePlanetResponse = {
+  msg?: string;
+};
+
+type ShipResponse = {
+  invoiceId?: string;
+  patp?: string;
+  product?: string;
+  shipType?: string;
+}[];
 
 export class ThirdEarthApi {
   private apiBaseUrl: string;
@@ -234,18 +250,21 @@ export class ThirdEarthApi {
   }
 
   updatePaymentStatus(token: string, invoiceId: string, paymentStatus: 'OK') {
-    return http(`${this.apiBaseUrl}/update-payment-status`, {
-      method: 'PUT',
-      headers: this.getHeaders(token),
-      body: JSON.stringify({
-        invoiceId,
-        paymentStatus,
-      }),
-    });
+    return http<UpdatePaymentResponse>(
+      `${this.apiBaseUrl}/update-payment-status`,
+      {
+        method: 'PUT',
+        headers: this.getHeaders(token),
+        body: JSON.stringify({
+          invoiceId,
+          paymentStatus,
+        }),
+      }
+    );
   }
 
   ship(token: string, patp: string, product: string, invoiceId: string) {
-    return http(`${this.apiBaseUrl}/ship`, {
+    return http<ShipResponse>(`${this.apiBaseUrl}/ship`, {
       method: 'POST',
       headers: this.getHeaders(token),
       body: JSON.stringify({
@@ -262,14 +281,17 @@ export class ThirdEarthApi {
     patp: string,
     planetStatus: 'available' | 'sold'
   ) {
-    return http(`${this.apiBaseUrl}/update-planet-status`, {
-      method: 'PUT',
-      headers: this.getHeaders(token),
-      body: JSON.stringify({
-        patp,
-        planetStatus,
-      }),
-    });
+    return http<UpdatePlanetResponse>(
+      `${this.apiBaseUrl}/update-planet-status`,
+      {
+        method: 'PUT',
+        headers: this.getHeaders(token),
+        body: JSON.stringify({
+          patp,
+          planetStatus,
+        }),
+      }
+    );
   }
 
   getUserShips(token: string) {

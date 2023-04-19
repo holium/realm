@@ -142,7 +142,7 @@ const HostingPresenter = () => {
     thirdEarthApi
       .getManagePaymentLink(token)
       .then((response) => setManagePaymentLink(response.url));
-  }, []);
+  }, [token]);
 
   return (
     <Page title="Account / Hosting" isProtected>

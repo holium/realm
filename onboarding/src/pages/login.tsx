@@ -28,19 +28,19 @@ export default function Login({ prefilledEmail, redirectAfterLogin }: Props) {
   const onNoAccount = () => goToPage('/');
 
   const onLogin = async (email: string, password: string) => {
-    try {
-      const response = await thirdEarthApi.login(email, password);
-      localStorage.setItem('token', response.token);
+    const response = await thirdEarthApi.login(email, password);
 
-      if (redirectAfterLogin) goToPage(redirectAfterLogin as any);
-      else goToPage('/account');
-
-      return Boolean(response);
-    } catch (error) {
-      console.error(error);
-
+    if (!response.token || !response.email) {
       return false;
+    } else {
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('email', response.email);
     }
+
+    if (redirectAfterLogin) goToPage(redirectAfterLogin as any);
+    else goToPage('/account');
+
+    return true;
   };
 
   return (
