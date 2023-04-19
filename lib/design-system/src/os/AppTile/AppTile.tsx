@@ -1,7 +1,15 @@
 import { useMemo, useRef } from 'react';
 import styled, { css } from 'styled-components';
-import { Box, Flex, Spinner, Text, Icon, bgIsLightOrDark } from '../../';
 import { Variants } from 'framer-motion';
+import {
+  Box,
+  Flex,
+  Text,
+  Spinner,
+  Icon,
+  IconPathsType,
+} from '@holium/design-system/general';
+import { bgIsLightOrDark } from '@holium/design-system/util';
 
 const sizes = {
   sm: 32,
@@ -340,8 +348,7 @@ export const AppTile = ({
         width={sizes[tileSize]}
         background={tileBg}
       >
-        {/* @ts-ignore */}
-        <Icon name={app.icon} size={iconSize} />
+        <Icon name={app.icon as IconPathsType} size={iconSize} />
         {title}
       </TileStyle>
     );
