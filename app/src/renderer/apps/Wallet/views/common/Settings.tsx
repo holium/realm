@@ -36,9 +36,9 @@ const WalletSettingsPresenter = () => {
   const network = walletStore.navState.network;
   const walletNetworkStore =
     network === 'ethereum' ? walletStore.ethereum : walletStore.bitcoin;
-  const settings = walletStore.settings;
-  const wallets = walletStore.list
-    .map((wallet) => walletStore.wallets.get(wallet.key))
+  const settings = walletNetworkStore.settings;
+  const wallets = walletNetworkStore.list
+    .map((wallet) => walletNetworkStore.wallets.get(wallet.key))
     .filter(Boolean);
 
   const [state, setState] = useState<UISettingsType>({
@@ -300,7 +300,6 @@ function VisibilitySelect(props: VisibilitySelectProps) {
           props.walletCreationMode !== WalletCreationMode.ON_DEMAND && (
             <Select
               id="wallet-default"
-              backgroundColor={selectBg}
               options={sharedWalletOptions}
               selected={props.defaultIndex.toString() || Number(0).toString()}
               onClick={(newAddress) =>
