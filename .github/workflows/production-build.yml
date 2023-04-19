@@ -77,7 +77,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '>=18'
           cache: 'npm'
       - name: Install the Apple certificate
         env:
@@ -152,7 +152,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '>=18'
           cache: 'npm'
       - name: Install yarn
         run: npm install -g yarn
@@ -223,7 +223,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '>=18'
           cache: 'npm'
       #
       - name: Install yarn
@@ -328,7 +328,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '>=18'
           cache: 'npm'
       #
       - name: Bump desks version
@@ -395,7 +395,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '>=18'
           cache: 'npm'
       #
       - name: Run post-deploy script
