@@ -1,7 +1,14 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { useToggle } from '@holium/design-system/util';
-import { Flex, Avatar, Button, Icon } from '@holium/design-system/general';
+import {
+  Flex,
+  Avatar,
+  Button,
+  Icon,
+  Spinner,
+  ErrorBox,
+} from '@holium/design-system/general';
 import { Input } from '@holium/design-system/inputs';
 import { AddImageIcon } from '../icons/AddImageIcon';
 import { MOBILE_WIDTH, OnboardDialogDescription } from './OnboardDialog.styles';
@@ -90,9 +97,14 @@ const headers = {
 type Props = {
   patp: string;
   setAvatarSrc: (src?: string) => void;
+  onUploadFile: (file: File) => Promise<string | undefined>;
 };
 
-export const PassportCardAvatar = ({ patp, setAvatarSrc }: Props) => {
+export const PassportCardAvatar = ({
+  patp,
+  setAvatarSrc,
+  onUploadFile,
+}: Props) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const avatarModal = useToggle(false);
   const [generatedImages, setGeneratedImages] = useState<
@@ -108,6 +120,9 @@ export const PassportCardAvatar = ({ patp, setAvatarSrc }: Props) => {
 
   const [selectedImage, setSelectedImage] = useState<number>(0);
   const [uploadedImage, setUploadedImage] = useState<string>();
+
+  const uploading = useToggle(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const modalButtonRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -160,17 +175,25 @@ export const PassportCardAvatar = ({ patp, setAvatarSrc }: Props) => {
   };
 
   const onChooseFile = (event: ChangeEvent<HTMLInputElement>) => {
+    uploading.toggleOn();
+    setUploadError(null);
     const file = event.target.files?.[0];
+
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const url = e.target?.result as string;
-        if (url) {
-          setSelectedImage(21);
-          setUploadedImage(url);
-        }
-      };
-      reader.readAsDataURL(file);
+      onUploadFile(file)
+        .then((src) => {
+          if (src) {
+            setAvatarSrc(src);
+            setUploadedImage(src);
+
+            setAuthor(undefined);
+            setAuthorLink(undefined);
+          }
+        })
+        .catch(() => {
+          setUploadError('Failed to upload image');
+        })
+        .finally(uploading.toggleOff);
     }
   };
 
@@ -241,6 +264,7 @@ export const PassportCardAvatar = ({ patp, setAvatarSrc }: Props) => {
               Upload a custom image
             </OnboardDialogDescription>
             <Flex>
+              {uploading.isOn && <Spinner size={4} />}
               {uploadedImage && <CustomImage src={uploadedImage} />}
               <FileInput
                 ref={fileInputRef}
@@ -248,6 +272,7 @@ export const PassportCardAvatar = ({ patp, setAvatarSrc }: Props) => {
                 onChange={onChooseFile}
               />
             </Flex>
+            {uploadError && <ErrorBox>{uploadError}</ErrorBox>}
           </Flex>
         </PassportAvatarModal>
       )}

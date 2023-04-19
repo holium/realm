@@ -60,7 +60,9 @@ export const AddServerDialog = ({ onBack, onNext }: Props) => {
     setFormError(null);
 
     try {
-      return onNext(id, url, code);
+      const urlWithNoTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
+
+      return onNext(id, urlWithNoTrailingSlash, code);
     } catch (e: any) {
       setFormError(e.message);
 

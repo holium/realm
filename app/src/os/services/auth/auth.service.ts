@@ -171,6 +171,28 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     }
   }
 
+  public updatePassport(
+    patp: string,
+    nickname: string,
+    description: string,
+    avatar: string
+  ) {
+    if (!this.authDB) return false;
+
+    const account = this.authDB.tables.accounts.findOne(patp);
+
+    if (!account) {
+      log.info(`No account found for ${patp}`);
+      return false;
+    }
+
+    return this.authDB.tables.accounts.update(patp, {
+      nickname,
+      description,
+      avatar,
+    });
+  }
+
   private _createShipDB(
     patp: string,
     encryptionKey: string,

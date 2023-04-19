@@ -193,7 +193,7 @@ export class ShipService extends AbstractService<any> {
     return await new Promise((resolve, reject) => {
       this.getS3Bucket()
         .then(async (response: any) => {
-          console.log(response);
+          console.log('getS3Bucket response: ', response);
           // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
           let endp = response.credentials.endpoint;
           if (endp.split('.')[0] === response.configuration.currentBucket) {

@@ -37,6 +37,7 @@ type Props = {
   setUsername: (username: string) => void;
   setDescription: (description: string) => void;
   setAvatarSrc: (src?: string) => void;
+  onUploadFile: (file: File) => Promise<string | undefined>;
 };
 
 export const PassportCard = ({
@@ -46,6 +47,7 @@ export const PassportCard = ({
   setUsername,
   setDescription,
   setAvatarSrc,
+  onUploadFile,
 }: Props) => {
   const onChangeDescription = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setDescription(e.target.value);
@@ -53,7 +55,11 @@ export const PassportCard = ({
 
   return (
     <PassportCardContainer>
-      <PassportCardAvatar patp={patp} setAvatarSrc={setAvatarSrc} />
+      <PassportCardAvatar
+        patp={patp}
+        setAvatarSrc={setAvatarSrc}
+        onUploadFile={onUploadFile}
+      />
       <Flex flex={1} flexDirection="column" gap={16}>
         <Flex flexDirection="column" gap={6}>
           <UsernameInput

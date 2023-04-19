@@ -6,6 +6,7 @@ import {
   WebPreferences,
 } from 'electron';
 import log from 'electron-log';
+import { track } from '@amplitude/analytics-browser';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { AuthService } from './services/auth/auth.service';
 import { ShipService } from './services/ship/ship.service';
@@ -20,7 +21,7 @@ type CreateAccountPayload = Omit<
   Account,
   'passwordHash' | 'updatedAt' | 'createdAt'
 > & {
-  password?: string;
+  password: string;
 };
 
 type CreateMasterAccountPayload = Omit<MasterAccount, 'id' | 'passwordHash'> & {
@@ -166,7 +167,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       return false;
     }
     if (isAuthenticated) {
-      // TODO Add amplitude logging here
+      track('login', { patp });
       log.info(`${patp} authenticated`);
       const key = await this.services.auth.deriveDbKey(password);
       if (this.services.ship) this.services.ship.cleanup();
@@ -191,6 +192,22 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         patp,
       },
     });
+  }
+
+  async updatePassport(
+    patp: string,
+    nickname: string,
+    description: string,
+    avatar: string
+  ) {
+    if (!this.services) return;
+
+    return this.services.auth.updatePassport(
+      patp,
+      nickname,
+      description,
+      avatar
+    );
   }
 
   private _sendAuthenticated(patp: string, url: string, cookie: string) {

@@ -28,6 +28,7 @@ export const LoginStep = ({ setStep, onFinish }: LoginStepProps) => {
     } else {
       localStorage.setItem('token', response.token);
       localStorage.setItem('email', response.email);
+      localStorage.setItem('password', password);
       localStorage.setItem(
         'client_side_encryption_key',
         response.client_side_encryption_key
@@ -37,9 +38,9 @@ export const LoginStep = ({ setStep, onFinish }: LoginStepProps) => {
     // Create a local master account from the ThirdEarth account.
     const masterAccount = await RealmIPC.createMasterAccount({
       email: response.email,
+      password,
       encryptionKey: response.client_side_encryption_key,
       authToken: response.token,
-      password: password,
     });
 
     if (!masterAccount) return false;
@@ -55,6 +56,7 @@ export const LoginStep = ({ setStep, onFinish }: LoginStepProps) => {
         RealmIPC.createAccount(
           {
             accountId: masterAccount.id,
+            password,
             patp: ship.patp,
             url: ship.link,
             avatar: '',

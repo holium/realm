@@ -26,6 +26,7 @@ const ListItem = styled(AccountDialogSubtitle)`
 
 type Props = {
   patp: string | null;
+  onUploadFile: (file: File) => Promise<string | undefined>;
   onBack: () => void;
   onNext: (
     username: string,
@@ -34,7 +35,12 @@ type Props = {
   ) => Promise<boolean>;
 };
 
-export const PassportDialog = ({ patp, onBack, onNext }: Props) => {
+export const PassportDialog = ({
+  patp,
+  onUploadFile,
+  onBack,
+  onNext,
+}: Props) => {
   const [username, setUsername] = useState('');
   const [description, setDescription] = useState('');
   const [avatarSrc, setAvatarSrc] = useState<string>();
@@ -70,6 +76,7 @@ export const PassportDialog = ({ patp, onBack, onNext }: Props) => {
               setUsername={setUsername}
               setDescription={setDescription}
               setAvatarSrc={setAvatarSrc}
+              onUploadFile={onUploadFile}
             />
           ) : (
             <Spinner size={8} />
