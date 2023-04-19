@@ -375,8 +375,8 @@ export class ChatService extends BaseService {
     if (dbChange.type === 'del-paths-row') {
       // console.log('del-paths-row', dbChange);
       const delPathsRow = dbChange as DelPathsRow;
-      this.deletePathsRow(delPathsRow.row);
-      this.sendChatUpdate('path-deleted', delPathsRow.row);
+      this.deletePathsRow(delPathsRow.path);
+      this.sendChatUpdate('path-deleted', delPathsRow.path);
       this.insertDeleteLogs([
         {
           change: delPathsRow,
@@ -387,7 +387,7 @@ export class ChatService extends BaseService {
     if (dbChange.type === 'del-peers-row') {
       // console.log('del-peers-row', dbChange);
       const delPeersRow = dbChange as DelPeersRow;
-      this.deletePeersRow(delPeersRow.row, delPeersRow.ship);
+      this.deletePeersRow(delPeersRow.path, delPeersRow.ship);
       this.sendChatUpdate('peer-deleted', delPeersRow);
       this.insertDeleteLogs([
         {
