@@ -1,8 +1,8 @@
 import { ships } from '../../ships';
-import { APIConnection, ConduitSession } from '../../src/os/services/conduit';
+import { APIConnection, ConduitSession } from '../../../src/os/services/api';
 import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
-import { SpacesService } from '../../../src/os/services-new/ship/spaces/spaces.service';
-import { ShipService } from '../../../src/os/services-new/ship/ship.service';
+import { SpacesService } from '../../../src/os/services/ship/spaces/spaces.service';
+import { ShipService } from '../../../src/os/services/ship/ship.service';
 
 jest.mock('electron-log', () => {
   return {
