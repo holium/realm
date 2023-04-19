@@ -1,4 +1,4 @@
-import { Database } from 'better-sqlite3';
+import Database from 'better-sqlite3-multiple-ciphers';
 import AbstractDataAccess from '../../../abstract.db';
 
 export interface Member {
@@ -11,7 +11,7 @@ export interface Member {
   // updatedAt: number;
 }
 
-export class MembersDB extends AbstractDataAccess<Member> {
+export class MembersDB extends AbstractDataAccess<Member, any> {
   constructor(preload: boolean, db?: Database) {
     super({
       preload: preload,
@@ -53,7 +53,7 @@ export class MembersDB extends AbstractDataAccess<Member> {
         @status
       )`
     );
-    const insertMany = this.db.transaction((spacesMembers) => {
+    const insertMany = this.db.transaction((spacesMembers: any) => {
       Object.entries<any>(spacesMembers).forEach(([space, memberList]) => {
         Object.entries<any>(memberList).forEach(([patp, member]) => {
           insert.run({

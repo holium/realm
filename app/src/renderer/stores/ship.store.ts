@@ -7,6 +7,7 @@ import { FriendsStore } from './models/friends.model';
 import { NotifStore } from './models/notification.model';
 import { BazaarStore, BazaarStoreType } from './models/bazaar.model';
 import { FeaturedStore } from './models/featured.model';
+import { LoaderModel } from './models/common.model';
 
 const ShipModel = types
   .model('ShipModel', {
@@ -36,6 +37,7 @@ export const ShipStore = types
     spacesStore: SpacesStore,
     bazaarStore: BazaarStore,
     featuredStore: FeaturedStore,
+    loader: LoaderModel,
   })
   .actions((self) => ({
     setShip(ship: any) {
@@ -114,10 +116,16 @@ export const shipStore = ShipStore.create({
   },
   spacesStore: {
     spaces: {},
+    loader: {
+      state: 'loading',
+    },
   },
   bazaarStore: loadBazaarSnapshot(),
   featuredStore: {
     spaces: {},
+  },
+  loader: {
+    state: 'initial',
   },
 });
 

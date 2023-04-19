@@ -79,8 +79,9 @@ export const getPreloadPath = () =>
     : path.join(__dirname, '../../.holium/dll/preload.js');
 
 const createWindow = async () => {
-  // TODO fix the warnings and errors with this
-  // if (isDevelopment) await installExtensions();
+  if (isDevelopment) {
+    // TODO can cleanup here
+  }
 
   mainWindow = new BrowserWindow({
     show: false,
@@ -125,8 +126,7 @@ const createWindow = async () => {
   // ---------------------------------------------------------------------
   // ----------------------- Start Realm services ------------------------
   // ---------------------------------------------------------------------
-  const realmService = new RealmService();
-  // realmService.login('~lomder-librun', 'password');
+  const _realmService = new RealmService();
 
   // TODO why is this rendering multiple times?
   mainWindow.on('ready-to-show', () => {

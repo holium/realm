@@ -14,6 +14,7 @@ import { getCookie } from './lib/shipHelpers';
 import APIConnection from './services/conduit';
 import { MasterAccount } from './services/auth/masterAccounts.table';
 import { Account } from './services/auth/accounts.table';
+import { RealmUpdateTypes } from './realm.types';
 
 type CreateAccountPayload = Omit<
   Account,
@@ -26,8 +27,7 @@ type CreateMasterAccountPayload = Omit<MasterAccount, 'id' | 'passwordHash'> & {
   password: string;
 };
 
-export class RealmService extends AbstractService {
-  // private realmProcess: RealmProcess | null = null;
+export class RealmService extends AbstractService<RealmUpdateTypes> {
   public services?: {
     auth: AuthService;
     ship?: ShipService;
@@ -80,10 +80,9 @@ export class RealmService extends AbstractService {
     this.sendUpdate({
       type: 'booted',
       payload: {
-        screen: hasSession ? 'os' : 'login',
-        accounts: this.services?.auth.getAccounts(),
+        accounts: this.services?.auth.getAccounts() || undefined,
         session,
-        seenSplash: this.services?.auth.hasSeenSplash(),
+        seenSplash: this.services?.auth.hasSeenSplash() || false,
       },
     });
   }
@@ -170,6 +169,7 @@ export class RealmService extends AbstractService {
       // TODO Add amplitude logging here
       log.info(`${patp} authenticated`);
       const key = await this.services.auth.deriveDbKey(password);
+      if (this.services.ship) this.services.ship.cleanup();
       this.services.ship = new ShipService(patp, key);
       const credentials = this.services.ship.credentials;
       this.services.auth._setSession(patp, key);
@@ -187,13 +187,15 @@ export class RealmService extends AbstractService {
     this.services.auth._clearSession();
     this.sendUpdate({
       type: 'logout',
-      payload: patp,
+      payload: {
+        patp,
+      },
     });
   }
 
   private _sendAuthenticated(patp: string, url: string, cookie: string) {
     this.sendUpdate({
-      type: 'authenticated',
+      type: 'auth-success',
       payload: {
         patp,
         url,
@@ -304,21 +306,7 @@ export class RealmService extends AbstractService {
   // }
 }
 
-type RealmServicePublicMethods = Pick<
-  RealmService,
-  | 'boot'
-  | 'getCookie'
-  | 'login'
-  | 'logout'
-  | 'createAccount'
-  | 'createMasterAccount'
-  | 'getReleaseChannel'
-  | 'setReleaseChannel'
-> & {
-  onUpdate: (...args: any[]) => void;
-};
-
 // Generate preload
 export const realmPreload = RealmService.preload(
   new RealmService({ preload: true })
-) as RealmServicePublicMethods;
+);

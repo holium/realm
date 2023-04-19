@@ -17,8 +17,6 @@ interface SpaceTitlebarProps {
 const SpaceTitlebarPresenter = ({
   space,
   membersCount,
-  showAppGrid,
-  showMembers,
   onMemberClick,
   onToggleApps,
 }: SpaceTitlebarProps) => {

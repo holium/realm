@@ -4,7 +4,6 @@ import {
   RoomsManager,
   RoomManagerEvent,
 } from '@holium/realm-room';
-import { RealmUpdateTypes } from 'os/realm.types';
 import { Patp } from 'os/types';
 import { SoundActions } from 'renderer/lib/sound';
 import { RealmIPC, RoomsIPC } from 'renderer/stores/ipc';
@@ -84,7 +83,7 @@ const clearProtocolAndManager: (callback?: () => void) => void = (
     });
   }
 };
-RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
+RealmIPC.onUpdate((update) => {
   if (update.type === 'logout') {
     clearProtocolAndManager();
   }
@@ -94,13 +93,11 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
 // we have to signal back that we are ready to actually quit with OSActions.readyToQuit
 // OSActions.onQuitSignal(clearProtocolAndManager);
 
-RoomsIPC.onUpdate(
-  (_event: any, { data, mark }: { data: any; mark: string }) => {
-    if (protocol) {
-      protocol.onSignal(data, mark);
-    }
+RoomsIPC.onUpdate(({ data, mark }: { data: any; mark: string }) => {
+  if (protocol) {
+    protocol.onSignal(data, mark);
   }
-);
+});
 
 export function useRooms(our?: Patp): RoomsManager {
   if (roomsManager) {

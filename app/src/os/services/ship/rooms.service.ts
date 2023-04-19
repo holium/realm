@@ -2,7 +2,7 @@ import AbstractService, { ServiceOptions } from '../abstract.service';
 import APIConnection from '../conduit';
 import { PokeParams, Scry } from '@holium/conduit/src/types';
 
-export class RoomsService extends AbstractService {
+export class RoomsService extends AbstractService<any> {
   constructor(options?: ServiceOptions) {
     super('roomsService', options);
     if (options?.preload) {

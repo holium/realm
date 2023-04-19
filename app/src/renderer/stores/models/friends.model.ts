@@ -148,24 +148,6 @@ export const FriendsStore = types
         self.all.splice(delIdx, 0, oldFriend);
       }
     }),
-    add(patp: string, friend: FriendType) {
-      self.all.push(friend);
-    },
-    update(patp: string, update: any) {
-      const replace = self.all.findIndex((f) => patp === f.patp);
-      if (replace !== -1) {
-        self.all[replace] = {
-          ...self.all[replace],
-          ...update,
-        };
-      }
-    },
-    remove(patp: string) {
-      const delIdx = self.all.findIndex((f) => patp === f.patp);
-      if (delIdx !== -1) {
-        self.all.splice(delIdx, 1);
-      }
-    },
     reset() {
       applySnapshot(self.all, []);
     },

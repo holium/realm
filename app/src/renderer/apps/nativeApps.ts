@@ -1,5 +1,3 @@
-import { ThemeModelType } from 'os/services/theme.model';
-
 type NativeAppType = {
   id: string;
   title: string;
@@ -18,7 +16,6 @@ type NativeAppType = {
       height: number;
     };
     openFullscreen?: boolean;
-    theme?: ThemeModelType;
     development?: boolean;
   };
 };

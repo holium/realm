@@ -8,7 +8,6 @@ import {
   Text,
   Icon,
 } from '@holium/design-system';
-import { FormControl } from 'renderer/components';
 import { useTrayApps } from '../store';
 import { useRooms } from './useRooms';
 import { useShipStore } from 'renderer/stores/ship.store';

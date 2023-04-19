@@ -12,9 +12,9 @@ import {
 import { useTrayApps } from '../../store';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { ChatPathType } from 'os/services/chat/chat.service';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { ShipSearch } from 'renderer/components/ShipSearch';
+import { ChatPathType } from 'os/services/ship/chat/chat.types';
 
 export const NewChat = () => {
   const { ship, friends, chatStore } = useShipStore();

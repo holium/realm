@@ -12,6 +12,7 @@ import { ThemeType } from 'renderer/stores/models/theme.model';
 import { MasterAccount } from './masterAccounts.table';
 import { ShipDB } from '../ship/ship.db';
 import { getCookie } from '../../lib/shipHelpers';
+import { AuthUpdateTypes } from './auth.types';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -29,7 +30,7 @@ const LockFileOptions = {
   fileExtension: 'lock',
 };
 
-export class AuthService extends AbstractService {
+export class AuthService extends AbstractService<AuthUpdateTypes> {
   private readonly authDB?: AuthDB;
   constructor(options?: ServiceOptions) {
     super('authService', options);
@@ -38,7 +39,7 @@ export class AuthService extends AbstractService {
     }
     this.authDB = new AuthDB();
     this.sendUpdate({
-      type: 'init',
+      type: 'auth-init',
       payload: this.getAccounts(),
     });
     this._checkLockFile();
@@ -95,13 +96,13 @@ export class AuthService extends AbstractService {
       authToken: mAccount.authToken,
       passwordHash: bcrypt.hashSync(mAccount.password, 10),
     });
-    if (newAccount) {
-      // sends update to renderer with new account
-      this.sendUpdate({
-        type: 'init',
-        payload: this.getAccounts(),
-      });
-    }
+    // if (newAccount) {
+    //   // sends update to renderer with new account
+    //   this.sendUpdate({
+    //     type: 'init',
+    //     payload: this.getAccounts(),
+    //   });
+    // }
 
     return newAccount;
   }
@@ -191,7 +192,6 @@ export class AuthService extends AbstractService {
         code: credentials.code,
       }).then((cookie) => {
         if (cookie) {
-          log.info('cookie', cookie, credentials.url, credentials.code);
           newShipDB.setCredentials(credentials.url, credentials.code, cookie);
         } else {
           log.error('Failed to get cookie');
@@ -348,7 +348,7 @@ export class AuthService extends AbstractService {
   public setSeenSplash(): void {
     this.authDB?.setSeenSplash();
     this.sendUpdate({
-      type: 'seenSplash',
+      type: 'seen-splash',
       payload: true,
     });
   }

@@ -9,10 +9,12 @@ import { toJS } from 'mobx';
 import { LoaderModel, SubscriptionModel } from './common.model';
 import { UrbitApp } from './bazaar.model';
 import { MembersModel, MembersStore, VisaModel } from './invitations.model';
-import { Theme, defaultTheme } from './theme.model';
+import { Theme } from './theme.model';
 import { BazaarIPC, SpacesIPC } from '../ipc';
 import { appState } from '../app.store';
 import { shipStore } from '../ship.store';
+import { MemberRole } from 'os/types';
+import { defaultTheme } from 'renderer/lib/defaultTheme';
 
 const spaceRowToModel = (space: any) => {
   return {
@@ -142,7 +144,7 @@ export type SpaceModelType = Instance<typeof SpaceModel>;
 
 export const SpacesStore = types
   .model('SpacesStore', {
-    loader: types.optional(LoaderModel, { state: 'loading' }),
+    loader: LoaderModel,
     creating: types.optional(LoaderModel, { state: 'initial' }),
     join: types.optional(LoaderModel, { state: 'initial' }),
     selected: types.safeReference(SpaceModel),
@@ -199,12 +201,10 @@ export const SpacesStore = types
           const spaceModel = SpaceModel.create(spaceRowToModel(space));
           self.spaces.set(space.path, spaceModel);
         });
-        console.log(toJS(self.spaces));
         self.selected = self.spaces.get(current);
         if (self.selected) {
           appState.setTheme(self.selected.theme);
         }
-        self.loader.set('loaded');
       } catch (e) {
         console.error(e);
         self.loader.set('error');
@@ -338,7 +338,7 @@ export const SpacesStore = types
     setRoles: flow(function* (
       spacePath: string,
       patp: string,
-      roles: string[]
+      roles: MemberRole[]
     ) {
       try {
         yield SpacesIPC.setRoles(spacePath, patp, roles) as Promise<any>;

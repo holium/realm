@@ -2,7 +2,6 @@ import { calculateAnchorPointById } from '../lib/position';
 import { createContext, useContext } from 'react';
 import { Instance, types, onSnapshot } from 'mobx-state-tree';
 import { Dimensions } from '@holium/design-system';
-import { RealmUpdateTypes } from 'os/realm.types';
 import { RealmIPC } from 'renderer/stores/ipc';
 import { RoomsAppState } from './Rooms/rooms.model';
 // import {
@@ -183,7 +182,7 @@ export function useTrayApps() {
 
 // TODO
 
-RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
+RealmIPC.onUpdate((update) => {
   if (update.type === 'logout') {
     // applySnapshot(trayStore.walletApp, walletAppDefault);
   }

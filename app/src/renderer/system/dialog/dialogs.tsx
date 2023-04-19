@@ -1,6 +1,4 @@
 import { FC } from 'react';
-import { AppWindowProps } from 'os/services/shell/desktop.model';
-import { ThemeModelType } from 'os/services/theme.model';
 import { spacesDialogs } from 'renderer/apps/Spaces/Workflow/workflow';
 import { WallpaperDialogConfig } from 'renderer/apps/System/Dialogs/Wallpaper';
 import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceConfirm';
@@ -11,6 +9,7 @@ import { Dimensions } from '@holium/design-system';
 import { ResetCodeDialogConfig } from '../authentication/login/ResetCodeDialog';
 import { LeaveChatDialogConfig } from 'renderer/apps/Courier/dialogs/LeaveChatDialog';
 import { ShutdownDialogConfig } from 'renderer/apps/System/Dialogs/Shutdown';
+import { AppWindowProps } from 'renderer/stores/models/window.model';
 
 export interface BaseWorkflowProps {
   workflow?: boolean; // lets the dialog manager know if this dialog is in a workflow
@@ -30,7 +29,6 @@ export type BaseDialogProps = {
   noTitlebar?: boolean; // should there be the base window titlebar in the dialog
   draggable?: boolean;
   unblurOnClose?: boolean;
-  theme?: ThemeModelType;
   edit?: any;
   onOpen?: () => void; // is the function that executes when the dialog is opened
   onClose?: () => void; // is the function that executes when the dialog is closed

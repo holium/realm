@@ -14,7 +14,7 @@ import { S3Client, StorageAcl } from '../../../renderer/lib/S3Client';
 import BazaarService from './spaces/bazaar.service';
 import { getCookie } from '../../lib/shipHelpers';
 
-export class ShipService extends AbstractService {
+export class ShipService extends AbstractService<any> {
   private patp: string;
   private readonly shipDB?: ShipDB;
   services?: {
@@ -135,9 +135,9 @@ export class ShipService extends AbstractService {
 
   public cleanup() {
     // remove all ipcMain listeners
-    this.reset();
+    this.removeHandlers();
     this.services?.chat.reset();
-    this.services?.rooms.reset();
+    this.services?.rooms.removeHandlers();
     this.services?.notifications.reset();
     this.services?.friends.reset();
     this.services?.spaces.reset();
@@ -236,15 +236,10 @@ export class ShipService extends AbstractService {
 
 export default ShipService;
 
-type ShipServicePublicMethods = Pick<
-  ShipService,
-  'getOurGroups' | 'getGroup' | 'getGroupMembers' | 'uploadFile'
->;
-
 // Generate preload
 export const shipPreload = ShipService.preload(
   new ShipService('', '', { preload: true })
-) as ShipServicePublicMethods;
+);
 
 export interface FileUploadParams {
   source: 'file' | 'buffer';

@@ -1,4 +1,15 @@
-export const defaultTheme = {
+export const defaultTheme: {
+  mode: 'light' | 'dark';
+  backgroundColor: string;
+  accentColor: string;
+  inputColor: string;
+  dockColor: string;
+  iconColor: string;
+  textColor: string;
+  windowColor: string;
+  wallpaper: string;
+  mouseColor: string;
+} = {
   mode: 'light',
   backgroundColor: '#C4C3BF',
   accentColor: '#4E9EFD',

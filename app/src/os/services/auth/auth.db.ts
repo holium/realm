@@ -1,6 +1,6 @@
 import path from 'path';
 import { app } from 'electron';
-import sqlite3 from 'better-sqlite3';
+import Database from 'better-sqlite3-multiple-ciphers';
 import Store from 'electron-store';
 import log from 'electron-log';
 import { Accounts, accountsInit } from './accounts.table';
@@ -9,7 +9,7 @@ import { MasterAccounts, masterAccountsInit } from './masterAccounts.table';
 import { AuthStore } from './auth.model.old';
 
 export class AuthDB {
-  private readonly authDB: sqlite3.Database;
+  private readonly authDB: Database;
   tables: {
     accounts: Accounts;
     masterAccounts: MasterAccounts;
@@ -17,7 +17,7 @@ export class AuthDB {
 
   constructor() {
     // Open the authentication database
-    this.authDB = new sqlite3(
+    this.authDB = new Database(
       path.join(app.getPath('userData'), 'auth.sqlite'),
       {}
     );
@@ -146,7 +146,7 @@ export class AuthDB {
     query.run(patp, cookie, Date.now());
   }
 
-  public _getSession(patp: string): SessionType | null {
+  public _getSession(patp?: string): SessionType | null {
     const query = this.authDB.prepare(`
       SELECT patp, key FROM accounts_session WHERE patp = ?;
     `);

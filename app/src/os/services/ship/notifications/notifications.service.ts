@@ -1,8 +1,9 @@
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { notifDBPreload, NotificationsDB } from './notifications.table';
-import { Database } from 'better-sqlite3-multiple-ciphers';
+import Database from 'better-sqlite3-multiple-ciphers';
+import { NotifUpdateType } from './notifications.types';
 
-export class NotificationsService extends AbstractService {
+export class NotificationsService extends AbstractService<NotifUpdateType> {
   protected notifDB?: NotificationsDB;
   constructor(options?: ServiceOptions, db?: Database) {
     super('notificationService', options);
@@ -13,7 +14,7 @@ export class NotificationsService extends AbstractService {
   }
 
   reset(): void {
-    super.reset();
+    super.removeHandlers();
     this.notifDB?.reset();
   }
 }
@@ -21,11 +22,10 @@ export class NotificationsService extends AbstractService {
 export default NotificationsService;
 
 // Generate preload
-const notifServiceInstance = NotificationsService.preload(
-  new NotificationsService({ preload: true })
-);
+// const notifServiceInstance = NotificationsService.preload(
+//   new NotificationsService({ preload: true })
+// );
 
 export const notifPreload = {
   ...notifDBPreload,
-  ...notifServiceInstance,
 };

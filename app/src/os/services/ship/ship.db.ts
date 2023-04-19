@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import { app } from 'electron';
-import sqlite3 from 'better-sqlite3-multiple-ciphers';
+import Database from 'better-sqlite3-multiple-ciphers';
 import log from 'electron-log';
 import { spacesTablesInitSql } from './spaces/spaces.service';
 import { bazaarTablesInitSql } from './spaces/tables/catalog.table';
@@ -10,7 +10,7 @@ import { chatInitSql } from './chat/chat.db';
 import { friendsInitSql } from './friends.table';
 
 export class ShipDB {
-  private shipDB: sqlite3.Database;
+  private shipDB: Database;
   private patp: string;
   private readonly dbPath: string;
   private readonly isDev: boolean = process.env.NODE_ENV === 'development';
@@ -54,7 +54,6 @@ export class ShipDB {
   }
 
   setCredentials(url: string, code: string, cookie: string) {
-    log.info('setting credentials', url, code, cookie);
     this.shipDB
       .prepare(
         'INSERT OR REPLACE INTO credentials (url, code, cookie) VALUES (?, ?, ?);'
@@ -63,7 +62,7 @@ export class ShipDB {
   }
 
   open() {
-    return new sqlite3(this.dbPath);
+    return new Database(this.dbPath);
   }
 
   decrypt(password: string) {

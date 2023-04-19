@@ -11,9 +11,9 @@ import {
 import { Chat, ChatModelType } from './models/chat.model';
 import { shipStore, ShipStore } from './ship.store';
 import { RealmIPC, ChatIPC } from 'renderer/stores/ipc';
-import { RealmUpdateTypes } from 'os/realm.types';
 import { SpacesStoreType } from 'renderer/stores/models/spaces.model';
 import { toJS } from 'mobx';
+import { ChatUpdateTypes } from 'os/services/ship/chat/chat.types';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
@@ -123,7 +123,7 @@ export const ChatStore = types
   .actions((self) => ({
     init: flow(function* () {
       try {
-        self.inbox = yield ChatIPC.getChatList() as Promise<any>;
+        self.inbox = yield ChatIPC.getChatList();
         const pinnedChats = yield ChatIPC.fetchPinnedChats() as Promise<any>;
         localStorage.setItem(
           `${window.ship}-pinnedChats`,
@@ -278,7 +278,7 @@ export function useChatStore() {
   return store;
 }
 
-RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
+RealmIPC.onUpdate((update) => {
   if (update.type === 'auth-success') {
     shipStore.chatStore.init();
   }
@@ -292,7 +292,6 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
 // });
 // -------------------------------
 // Listen for changes
-type ChatUpdateTypes = { type: string; payload: any };
 ChatIPC.onUpdate(({ type, payload }: ChatUpdateTypes) => {
   if (type === 'path-added') {
     console.log('onPathsAdded', toJS(payload));

@@ -1,5 +1,5 @@
 // import log from 'electron-log';
-import { Database } from 'better-sqlite3';
+import Database from 'better-sqlite3-multiple-ciphers';
 import AbstractDataAccess from '../../../abstract.db';
 import { cleanNounColor } from '../../../../lib/color';
 
@@ -18,7 +18,7 @@ export interface Space {
   // updatedAt: number;
 }
 
-export class SpacesDB extends AbstractDataAccess<Space> {
+export class SpacesDB extends AbstractDataAccess<Space, any> {
   constructor(preload: boolean, db?: Database) {
     super({ preload: preload, db, name: 'spacesDB', tableName: 'spaces' });
     if (preload) {
@@ -69,7 +69,7 @@ export class SpacesDB extends AbstractDataAccess<Space> {
         @theme
       )`
     );
-    const insertMany = this.db.transaction((spaces) => {
+    const insertMany = this.db.transaction((spaces: any) => {
       Object.entries<any>(spaces).forEach(([path, space]) => {
         insert.run({
           path,

@@ -5,12 +5,16 @@ import {
   clone,
   flow,
   getSnapshot,
+  castToSnapshot,
 } from 'mobx-state-tree';
 import { AuthIPC } from 'renderer/stores/ipc';
-import { AccountModel, AccountModelType } from './models/Account.model';
+import { AccountModel } from './models/Account.model';
 import { trackEvent } from 'renderer/lib/track';
 import { appState } from './app.store';
-import { AuthUpdateAccountPayload } from 'os/services/auth/auth.types';
+import {
+  AccountView,
+  AuthUpdateAccountPayload,
+} from 'os/services/auth/auth.types';
 import { LoginErrorType } from 'os/realm.types';
 
 export type LoginStatusStateType = 'initial' | 'loading' | 'success' | 'error';
@@ -60,8 +64,9 @@ export const AuthenticationModel = types
     status: LoginStatus,
   })
   .actions((self) => ({
-    setAccounts(accounts: AccountModelType[]) {
-      applySnapshot(self.accounts, accounts);
+    setAccounts(accounts?: AccountView[]) {
+      if (!accounts) return;
+      applySnapshot(self.accounts, castToSnapshot(accounts));
     },
     _setSession(patp: string) {
       const account = self.accounts.find((a) => a.patp === patp);

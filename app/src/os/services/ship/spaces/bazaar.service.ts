@@ -1,11 +1,12 @@
-import { Database } from 'better-sqlite3-multiple-ciphers';
+import Database from 'better-sqlite3-multiple-ciphers';
 import log from 'electron-log';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import APIConnection from '../../conduit';
 import { AppCatalogDB } from './tables/catalog.table';
 import { pathToObj } from '../../../lib/path';
+import { BazaarUpdateType } from './bazaar.types';
 
-export class BazaarService extends AbstractService {
+export class BazaarService extends AbstractService<BazaarUpdateType> {
   private tables?: {
     appCatalog: AppCatalogDB;
   };
@@ -32,7 +33,7 @@ export class BazaarService extends AbstractService {
   }
 
   reset(): void {
-    super.reset();
+    super.removeHandlers();
     this.tables?.appCatalog.reset();
   }
 

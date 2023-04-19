@@ -25,7 +25,7 @@ export interface App {
   // isRecommended?: boolean;
 }
 
-export class AppCatalogDB extends AbstractDataAccess<App> {
+export class AppCatalogDB extends AbstractDataAccess<App, any> {
   constructor(params: DataAccessContructorParams) {
     params.tableName = 'app_catalog';
     params.name = 'appCatalog';
@@ -312,7 +312,7 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
         @icon
       )`
     );
-    const insertMany = this.db.transaction((catalog) => {
+    const insertMany = this.db.transaction((catalog: any) => {
       Object.values<any>(catalog).forEach((app) => {
         const { type } = app;
         let installStatus = app.installStatus || 'uninstalled';
@@ -351,7 +351,7 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
 
       )`
     );
-    const insertMany = this.db.transaction((grid) => {
+    const insertMany = this.db.transaction((grid: any) => {
       Object.entries<any>(grid).forEach(([idx, appId]) => {
         insert.run({
           idx: parseInt(idx),
@@ -375,7 +375,7 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
         @idx
       )`
     );
-    const insertMany = this.db.transaction((docks) => {
+    const insertMany = this.db.transaction((docks: any) => {
       Object.entries<any>(docks).forEach(([space, ids]) => {
         ids.forEach((id: string, idx: string) => {
           insert.run({
@@ -398,7 +398,7 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
         @id
       )`
     );
-    const insertMany = this.db.transaction((recommendations) => {
+    const insertMany = this.db.transaction((recommendations: any) => {
       recommendations.forEach((id: string) => {
         insert.run({
           id,
@@ -421,7 +421,7 @@ export class AppCatalogDB extends AbstractDataAccess<App> {
         @recommended
       )`
     );
-    const insertMany = this.db.transaction((stalls) => {
+    const insertMany = this.db.transaction((stalls: any) => {
       Object.entries<any>(stalls).forEach(([space, stall]) => {
         insert.run({
           space,

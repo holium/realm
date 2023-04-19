@@ -39,7 +39,7 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
     menu.push({
       id: `space-row-${space.path}-btn-leave`,
       label: 'Copy link',
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         navigator.clipboard.writeText(space.path.substring(1));
       },

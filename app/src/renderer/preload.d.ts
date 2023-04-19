@@ -6,6 +6,7 @@ import { realmPreload } from 'os/realm.service';
 import { chatPreload } from 'os/services/ship/chat/chat.service';
 import { notifPreload } from 'os/services/ship/notifications/notifications.service';
 import { friendsPreload } from 'renderer/stores/models/friends.model';
+import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
 import { MultiplayerPreloadType } from 'main/preload.multiplayer';
 

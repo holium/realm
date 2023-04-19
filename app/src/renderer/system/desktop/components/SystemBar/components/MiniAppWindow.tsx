@@ -4,10 +4,7 @@ import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
 import styled from 'styled-components';
 
-import { ThemeType } from '../../../../../theme';
-
 interface MiniAppStyleProps {
-  theme: ThemeType;
   customBg?: string;
 }
 

@@ -1,4 +1,4 @@
-import { Database } from 'better-sqlite3';
+import Database from 'better-sqlite3-multiple-ciphers';
 import AbstractDataAccess from '../abstract.db';
 
 export interface Account {
@@ -17,9 +17,15 @@ export interface Account {
   updatedAt: number;
 }
 
-export class Accounts extends AbstractDataAccess<Account> {
+export class Accounts extends AbstractDataAccess<Account, any> {
   constructor(db: Database) {
-    super({ preload: false, db, name: 'accounts', tableName: 'accounts' });
+    super({
+      preload: false,
+      db,
+      name: 'accounts',
+      tableName: 'accounts',
+      pKey: 'patp',
+    });
   }
 
   protected mapRow(row: any): Account {

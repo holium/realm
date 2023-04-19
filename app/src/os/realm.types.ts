@@ -1,4 +1,4 @@
-import { AccountModelType } from 'renderer/stores/models/account.model';
+import { AccountView } from './services/auth/auth.types';
 
 export type LoginErrorType =
   | 'bad-gateway'
@@ -11,13 +11,12 @@ export type LoginErrorType =
 export type RealmUpdateBooted = {
   type: 'booted';
   payload: {
-    accounts: AccountModelType[];
-    screen: 'login' | 'onboarding' | 'os';
+    accounts: AccountView[] | undefined;
     session?: {
       url: string;
       patp: string;
       cookie: string;
-    };
+    } | null;
     seenSplash: boolean;
   };
 };
