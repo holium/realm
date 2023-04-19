@@ -119,6 +119,7 @@ jobs:
           chmod 600 ~/.ssh/usher_rsa
           # rename the latest-mac.yml file to alpha-mac.yml for staging builds
           mv -f ./app/release/build/latest-mac.yml ./app/release/build/alpha-mac.yml
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir ~/$BUILD_VERSION"
           scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
