@@ -487,6 +487,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
           json_extract(json(metadata), '$.timestamp') DESC;
     `);
     const result: any = query.all(
+      // @ts-ignore
       preSig(APIConnection.getInstance().conduit.ship),
       path
     );
