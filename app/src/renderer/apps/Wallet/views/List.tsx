@@ -53,6 +53,7 @@ export const WalletList = observer(() => {
         flexDirection="column"
         justifyContent="center"
         alignItems="center"
+        gap={20}
       >
         <Text.H3 variant="h3" textAlign="center">
           No addresses

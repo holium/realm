@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { Flex, Box, Icon, Text, Input } from '@holium/design-system';
+import { Flex, Box, Icon, Text, TextInput } from '@holium/design-system';
 import { ContainerFlex, FlexHider } from './styled';
 import { ERC20Type, ProtocolType } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -57,11 +57,12 @@ export const AmountInput = observer(
     const onChange = (e: any) => {
       const value: string = e.target.value;
       const isDecimal = value.includes('.');
-      const decimalPlaces = isDecimal && value.split('.')[1].length;
+      const decimalPlaces = isDecimal ? value.split('.')[1].length : 0;
+      const isLong = decimalPlaces > 2;
       const isZero = Number(value) === 0;
 
       if (value.length > 10) return;
-      if (!inCrypto && isDecimal && decimalPlaces > 2) return;
+      if (!inCrypto && isDecimal && isLong) return;
 
       check(inCrypto, Number(value));
       setAmount(isZero && isDecimal ? value : Number(value));
@@ -111,7 +112,7 @@ export const AmountInput = observer(
               alignItems="flex-start"
             >
               {inCrypto ? (
-                <Input
+                <TextInput
                   ref={amountRef}
                   style={{ width: '80%' }}
                   autoFocus
@@ -125,7 +126,7 @@ export const AmountInput = observer(
                   <Text.Body pt="2px" fontSize="12px">
                     $
                   </Text.Body>
-                  <Input
+                  <TextInput
                     autoFocus
                     ref={amountRef}
                     style={{ width: '80%' }}
@@ -165,7 +166,6 @@ export const AmountInput = observer(
               )}
             </Flex>
             <Flex
-              p="4px"
               justifyContent="center"
               alignItems="center"
               borderRadius="5px"
@@ -186,7 +186,7 @@ export const AmountInput = observer(
             </Flex>
           </ContainerFlex>
         </FlexHider>
-        <Box mt={2} ml="72px" width="100%">
+        <Box ml="72px" width="100%">
           <Text.Body variant="body" fontSize="11px">
             {amountError && 'Amount greater than wallet balance.'}
           </Text.Body>

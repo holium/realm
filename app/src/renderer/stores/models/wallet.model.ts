@@ -1192,6 +1192,23 @@ export const WalletStore = types
           self.settings.passcodeHash ?? ''
         );
       },
+      getRecipient: flow(function* (
+        patp: string
+      ): Generator<PromiseLike<any>, any, any> {
+        const recipientMetadata: {
+          color: string;
+          avatar?: string;
+          nickname?: string;
+        } = yield shipStore.friends.getContactAvatarMetadata(patp);
+
+        const address = yield WalletIPC.getAddress() as PromiseLike<any>;
+        return {
+          patp,
+          gasEstimate: 7,
+          recipientMetadata,
+          address,
+        };
+      }),
     };
   });
 

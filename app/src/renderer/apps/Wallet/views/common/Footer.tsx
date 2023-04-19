@@ -29,9 +29,7 @@ export const WalletFooterPresenter = ({
   return (
     <Wrapper hidden={hidden}>
       <Flex justifyContent="space-between">
-        <Box mr={1}>
-          <WalletNetwork network={walletStore.navState.protocol} />
-        </Box>
+        <WalletNetwork network={walletStore.navState.protocol} />
         <Flex>
           <Flex mr="10px">
             {/*walletApp.navState.network === NetworkType.ETHEREUM &&

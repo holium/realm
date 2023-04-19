@@ -40,7 +40,7 @@ export const CreateWallet = observer((props: CreateWalletProps) => {
   });
 
   return (
-    <Flex p={1} height="100%" width="100%" flexDirection="column">
+    <Flex p={1} height="100%" width="100%" flexDirection="column" gap={20}>
       <Text.H4 mt={2} variant="h4">
         Create Address
       </Text.H4>
@@ -50,18 +50,20 @@ export const CreateWallet = observer((props: CreateWalletProps) => {
       </Text.Body>
       {/*<FormControl.FieldSet mt={8}>
         <FormControl.Field>*/}
-      <Text.Label mb={1}>Nickname</Text.Label>
-      <TextInput
-        id="wallet-nickname"
-        name="wallet-nickname"
-        value={nickname.state.value}
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-          nickname.actions.onChange(e.target.value)
-        }
-        placeholder="Fort Knox"
-      />
+      <Flex flexDirection="column" gap={10}>
+        <Text.Label mb={1}>Nickname</Text.Label>
+        <TextInput
+          id="wallet-nickname"
+          name="wallet-nickname"
+          value={nickname.state.value}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            nickname.actions.onChange(e.target.value)
+          }
+          placeholder="Fort Knox"
+        />
+      </Flex>
       {/*</FormControl.Field>*/}
-      <Flex mt={5} width="100%">
+      <Flex width="100%">
         <Button.TextButton
           id="submit"
           width="100%"

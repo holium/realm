@@ -10,7 +10,6 @@ export const WalletNetwork = observer((props: WalletNetworkProps) => {
   return (
     <Flex
       width="fit-content"
-      height={2}
       px={2}
       alignItems="center"
       justifyContent="center"
@@ -24,7 +23,7 @@ export const WalletNetwork = observer((props: WalletNetworkProps) => {
         borderRadius="50%"
         background="#4CDD86"
       />
-      <Text.Body fontSize="12px">{props.network}</Text.Body>
+      <Text.Custom fontSize="12px">{props.network}</Text.Custom>
     </Flex>
   );
 });

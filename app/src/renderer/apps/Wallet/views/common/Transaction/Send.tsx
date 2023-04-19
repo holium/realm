@@ -41,7 +41,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
       : false;
 
     const Separator = () => (
-      <Flex position="relative" width="100%" justifyContent="center">
+      <Flex position="relative" width="100%" justifyContent="center" gap={10}>
         <Box position="absolute" width="300px" height="1px" left="-10px" />
         {uqbarContract ? (
           <Flex
@@ -85,27 +85,29 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
 
     return (
       <Box width="100%" hidden={props.hidden}>
-        <Separator />
-        <TransactionPane
-          onConfirm={props.onConfirm}
-          max={
-            props.coin
-              ? Number(props.coin.balance)
-              : Number(
-                  (props.wallet as EthWalletType).data.get(
-                    walletStore.navState.protocol
-                  )?.balance
-                )
-          }
-          onScreenChange={props.onScreenChange}
-          uqbarContract={uqbarContract}
-          close={props.close}
-          coin={props.coin}
-          setTransactionAmount={props.setTransactionAmount}
-          transactionAmount={props.transactionAmount}
-          setTransactionRecipient={props.setTransactionRecipient}
-          transactionRecipient={props.transactionRecipient}
-        />
+        <Flex flexDirection="column" gap={10}>
+          <Separator />
+          <TransactionPane
+            onConfirm={props.onConfirm}
+            max={
+              props.coin
+                ? Number(props.coin.balance)
+                : Number(
+                    (props.wallet as EthWalletType).data.get(
+                      walletStore.navState.protocol
+                    )?.balance
+                  )
+            }
+            onScreenChange={props.onScreenChange}
+            uqbarContract={uqbarContract}
+            close={props.close}
+            coin={props.coin}
+            setTransactionAmount={props.setTransactionAmount}
+            transactionAmount={props.transactionAmount}
+            setTransactionRecipient={props.setTransactionRecipient}
+            transactionRecipient={props.transactionRecipient}
+          />
+        </Flex>
       </Box>
     );
   }

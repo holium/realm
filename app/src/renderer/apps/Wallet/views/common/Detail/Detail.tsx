@@ -154,9 +154,10 @@ const DetailPresenter = (props: DetailProps) => {
       <Box width="100%" hidden={QROpen || sendTrans}>
         <Flex
           width="100%"
-          pt={4}
           flexDirection="column"
           justifyContent="center"
+          pt={2}
+          gap={10}
         >
           {!coin && (
             <>
@@ -192,11 +193,11 @@ interface ListSelectorProps {
 function ListSelector(props: ListSelectorProps) {
   const MenuButton = (props: any) => {
     return props.selected ? (
-      <Button.TextButton onClick={props.onClick}>
+      <Button.TextButton onClick={props.onClick} flex={1}>
         {props.children}
       </Button.TextButton>
     ) : (
-      <Button.TextButton onClick={props.onClick} fontWeight={500}>
+      <Button.TextButton onClick={props.onClick} color="disabled" flex={1}>
         {props.children}
       </Button.TextButton>
     );
