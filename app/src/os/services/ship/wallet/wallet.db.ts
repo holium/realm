@@ -30,8 +30,9 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
   async init() {
     const wallets = await this._fetchWallets();
+    console.log('fetched wallets', wallets);
     this._insertWallets(wallets);
-    this._insertTransactions(wallets.transactions);
+    // this._insertTransactions(wallets.transactions);
   }
 
   protected mapRow(row: any): WalletRow {
@@ -71,7 +72,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
       app: 'realm-wallet',
       path: '/wallets', // `/${lastTimestamp}`,
     });
-    return response?.tables.paths;
+    return response;
   }
 
   private _onDbUpdate(data: any /*WalletDbReactions*/, _id?: number) {
@@ -242,6 +243,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   private _insertWallets(wallets: any) {
     if (!this.db) throw new Error('No db connection');
     if (!wallets) return;
+
     const insert = this.db.prepare(
       `REPLACE INTO wallets (
             path, 
@@ -257,7 +259,12 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
           nickname: wallet.nickname,
         });
     });
-    insertMany(wallets);
+    const ethWallets = Object.values(wallets.wallets.ethereum);
+    const btcWallets = Object.values(wallets.wallets.bitcoin);
+    const btcTestWallets = Object.values(wallets.wallets.btctestnet);
+    insertMany(ethWallets);
+    insertMany(btcWallets);
+    insertMany(btcTestWallets);
   }
 }
 

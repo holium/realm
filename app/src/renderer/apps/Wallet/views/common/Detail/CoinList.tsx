@@ -1,6 +1,6 @@
 import { FC } from 'react';
 
-import { Row, Flex, Text, Icons } from 'renderer/components';
+import { Row, Flex, Text, Icon } from '@holium/design-system';
 import { getMockCoinIcon, formatCoinAmount } from '../../../lib/helpers';
 import { ERC20Type, WalletView } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -39,13 +39,13 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
               src={coinIcon}
             />
             <Flex flexDirection="column" justifyContent="center">
-              <Text variant="body">
+              <Text.Body variant="body">
                 {' '}
                 {amount.display} {props.details.name}{' '}
-              </Text>
+              </Text.Body>
             </Flex>
           </Flex>
-          <Icons name="ChevronRight" height={20} />
+          <Icon name="ChevronRight" height={20} />
         </Flex>
       </Row>
     );
@@ -56,9 +56,9 @@ export const CoinList: FC<CoinListProps> = (props: CoinListProps) => {
       {props.coins.length ? (
         props.coins.map((coin, index) => <Coin details={coin} key={index} />)
       ) : (
-        <Text mt={6} variant="h5" textAlign="center">
+        <Text.H5 mt={6} variant="h5" textAlign="center">
           No Coins
-        </Text>
+        </Text.H5>
       )}
     </Flex>
   );

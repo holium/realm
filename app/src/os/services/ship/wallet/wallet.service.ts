@@ -4,7 +4,10 @@ import { Database } from 'better-sqlite3-multiple-ciphers';
 import { RealmSigner } from './signers/realm';
 import { WalletDB, walletDBPreload } from './wallet.db';
 import { ethers } from 'ethers';
-import { ProtocolType } from 'renderer/stores/models/wallet.model';
+import {
+  ProtocolType,
+  UISettingsType,
+} from 'renderer/stores/models/wallet.model';
 import { ProtocolManager } from './protocols/ProtocolManager';
 import { EthereumProtocol } from './protocols/ethereum';
 import { BaseBlockProtocol } from './protocols/BaseBlockProtocol';
@@ -136,6 +139,19 @@ export class WalletService extends AbstractService {
       this.protocolManager?.protocols.get(currentProtocol) as BaseBlockProtocol
     ).sendTransaction(signedTx);
     return { hash, tx };
+  }
+
+  async setSettings(network: string, settings: UISettingsType) {
+    await APIConnection.getInstance().conduit.poke({
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
+      json: {
+        'set-settings': {
+          network,
+          settings,
+        },
+      },
+    });
   }
 }
 

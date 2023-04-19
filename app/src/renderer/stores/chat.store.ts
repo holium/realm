@@ -122,6 +122,7 @@ export const ChatStore = types
   }))
   .actions((self) => ({
     init: flow(function* () {
+      console.log('CHAT MODEL INIT');
       try {
         self.inbox = yield ChatIPC.getChatList();
         const pinnedChats = yield ChatIPC.fetchPinnedChats();

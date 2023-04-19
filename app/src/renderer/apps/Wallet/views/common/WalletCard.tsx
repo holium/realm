@@ -70,11 +70,9 @@ export const WalletCard: FC<WalletCardProps> = ({
     () => (
       <WalletCardStyle
         layout="size"
-        elevation="none"
         layoutId={`wallet-card-${wallet?.address}`}
         justifyContent="flex-start"
         transition={walletCardStyleTransition}
-        mode={mode}
         isSelected={!!isSelected}
         onClick={onSelect}
       >
@@ -124,13 +122,13 @@ export const WalletCard: FC<WalletCardProps> = ({
               </Text.Body>
             )}
           </Flex>
-          <Text.Body variant="body" color={theme.currentTheme.iconColor}>
+          <Text.Body variant="body">
             {transactions.length} Transactions
           </Text.Body>
         </Flex>
       </WalletCardStyle>
     ),
-    [wallet, isSelected, theme, mode, coins, transactions.length]
+    [wallet, isSelected, coins, transactions.length]
   );
 };
 

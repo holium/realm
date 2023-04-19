@@ -1,8 +1,7 @@
 import { FC } from 'react';
-import { darken } from 'polished';
 
 import { Flex, Icon, Text, IconPathsType } from '@holium/design-system';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { motion } from 'framer-motion';
 
 interface CircleButtonProps {
@@ -10,8 +9,6 @@ interface CircleButtonProps {
   iconColor?: string;
   title?: string;
 }
-
-interface StyleProps {}
 
 const CircleBtn = styled(motion.div)`
   border-radius: 50%;
@@ -23,39 +20,33 @@ const CircleBtn = styled(motion.div)`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  ${(props: StyleProps) =>
-    css`
-      background-color: ${props.theme.colors.brand.primary};
-      transition: ${props.theme.transition};
-      /* &:hover {
-        transition: ${props.theme.transition};
-        background-color: ${darken(0.05, props.theme.colors.brand.primary)};
+  background-color: rgba(var(--rlm-overlay-hover-rgba));
+  transition: var(--transition);
+  /* &:hover {
+        transition: var(--transition);
+        background-color: rgba(var(--rlm-overlay-hover-rgba));
       } */
-      svg: {
-        path: {
-          fill: white;
-        }
-      }
-    `}
+  svg: {
+    path: {
+      fill: white;
+    }
+  }
 `;
 
 const FullButton = styled(Flex)`
-  ${(props: StyleProps) =>
-    css`
-      cursor: pointer;
+  cursor: pointer;
 
-      &:hover {
-        transition: ${props.theme.transition};
-        ${CircleBtn} {
-          transition: ${props.theme.transition};
-          background-color: ${darken(0.05, props.theme.colors.brand.primary)};
-        }
-        ${Text} {
-          transition: ${props.theme.transition};
-          color: ${darken(0.05, props.theme.colors.brand.primary)};
-        }
-      }
-    `}
+  &:hover {
+    transition: var(--transition);
+    ${CircleBtn} {
+      transition: var(--transition);
+      background-color: rgba(var(--rlm-overlay-hover-rgba));
+    }
+    ${Text} {
+      transition: var(--transition);
+      background-color: rgba(var(--rlm-overlay-hover-rgba));
+    }
+  }
 `;
 
 export const CircleButton: FC<CircleButtonProps> = (

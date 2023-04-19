@@ -897,13 +897,16 @@ export const WalletStore = types
   .actions((self) => {
     return {
       init: flow(function* (): Generator<PromiseLike<any>, void, any> {
+        console.log('CALLING WALLET MODEL INIT');
         try {
+          console.log('asdlfkj');
           const wallets = yield WalletIPC.getWallets() as PromiseLike<any>;
           console.log(wallets);
           const transactions =
             yield WalletIPC.getTransactions() as PromiseLike<any>;
           console.log(transactions);
           self.ourPatp = shipStore.ship?.patp;
+          console.log('self.ourPatp', self.ourPatp);
         } catch (error) {
           console.error(error);
         }
@@ -1020,7 +1023,7 @@ export const WalletStore = types
       setLastInteraction(date: Date) {
         self.lastInteraction = date;
       },
-      setSettings(settings: any) {
+      setSettingsSetter(settings: any) {
         self.settings.passcodeHash = settings.passcodeHash;
         self.blacklist = settings.blocked;
         for (const network of Object.keys(settings.networks)) {
@@ -1036,6 +1039,12 @@ export const WalletStore = types
           store.settings.setSharingMode(netSettings.sharingMode);
         }
       },
+      setSettings: flow(function* (
+        network: string,
+        settings: UISettingsType
+      ): Generator<PromiseLike<any>, void, any> {
+        yield WalletIPC.setSettings(network, settings) as PromiseLike<any>;
+      }),
       setForceActive(forceActive: boolean) {
         self.forceActive = forceActive;
       },
@@ -1218,7 +1227,7 @@ WalletIPC.onUpdate((_event: any, payload: any) => {
       }
       break;
     case 'settings':
-      shipStore.walletStore.setSettings(payload.settings);
+      shipStore.walletStore.setSettingsSetter(payload.settings);
       break;
     default:
       break;

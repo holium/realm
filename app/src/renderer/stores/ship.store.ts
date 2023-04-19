@@ -59,6 +59,7 @@ export const ShipStore = types
       self.chatStore.init();
       self.spacesStore.init();
       self.bazaarStore.init();
+      self.walletStore.init();
     },
     reset() {
       self.ship = null;

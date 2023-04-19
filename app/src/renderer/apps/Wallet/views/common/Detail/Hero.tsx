@@ -234,7 +234,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           width="100%"
           minHeight="38px"
           style={{ height: props.QROpen ? 242 : 38 }}
-          border={`solid 1px ${panelBorder}`}
           borderRadius="8px"
           flexDirection="column"
           justifyContent="flex-start"
@@ -345,14 +344,10 @@ function CopyButton(props: CopyProps) {
     <Box>
       {!copied ? (
         <Box onClick={copy}>
-          <Icon name="Copy" height="20px" color={props.colors.text.disabled} />
+          <Icon name="Copy" height="20px" />
         </Box>
       ) : (
-        <Icon
-          name="CheckCircle"
-          height="20px"
-          color={props.colors.ui.intent.success}
-        />
+        <Icon name="CheckCircle" height="20px" />
       )}
     </Box>
   );

@@ -1,6 +1,6 @@
 import { FC } from 'react';
 
-import { Row, Flex, Text, Icons } from 'renderer/components';
+import { Row, Flex, Text, Icon } from '@holium/design-system';
 import { ERC721Type, WalletView } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -45,14 +45,14 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
               alignItems="flex-start"
             >
               <Flex flexDirection="column" justifyContent="center">
-                <Text variant="body" fontSize={1}>
+                <Text.Body variant="body" fontSize={1}>
                   {props.details.collectionName
                     ? props.details.collectionName
                     : 'Name'}
-                </Text>
-                <Text variant="h5" fontSize={1}>
+                </Text.Body>
+                <Text.H5 variant="h5" fontSize={1}>
                   {props.details.name}
-                </Text>
+                </Text.H5>
               </Flex>
               {/* <Flex mt={1} flexDirection="column" justifyContent="center">
               <Text
@@ -68,7 +68,7 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
             </Flex> */}
             </Flex>
           </Flex>
-          <Icons name="ChevronRight" height={20} />
+          <Icon name="ChevronRight" height={20} />
         </Flex>
       </Row>
     );
@@ -79,9 +79,9 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
       {props.nfts.length ? (
         props.nfts.map((nft, index) => <NFT details={nft} key={index} />)
       ) : (
-        <Text mt={6} variant="h5" textAlign="center">
+        <Text.H5 mt={6} variant="h5" textAlign="center">
           No NFTs
-        </Text>
+        </Text.H5>
       )}
     </Flex>
   );

@@ -1,6 +1,5 @@
 import { ChangeEvent, useState } from 'react';
 import { observer } from 'mobx-react';
-import { darken } from 'polished';
 import { isValidPatp } from 'urbit-ob';
 import {
   Flex,
@@ -263,8 +262,6 @@ export const WalletSettings = observer(WalletSettingsPresenter);
 type Wallets = { nickname: string; index: number }[];
 
 interface VisibilitySelectProps {
-  theme: any;
-  baseTheme: any;
   onChange: (mode: WalletVisibility | SharingMode, index?: number) => void;
   sharingMode: SharingMode;
   defaultIndex: number;
@@ -272,8 +269,6 @@ interface VisibilitySelectProps {
   wallets: Wallets;
 }
 function VisibilitySelect(props: VisibilitySelectProps) {
-  const selectBg = darken(0.025, props.theme.currentTheme.windowColor);
-
   const visibilityOptions = [
     { label: 'Anybody', value: SharingMode.ANYBODY },
     { label: 'Friends only', value: SharingMode.FRIENDS },
@@ -295,7 +290,6 @@ function VisibilitySelect(props: VisibilitySelectProps) {
       <Flex width="140px">
         <Select
           id="wallet-visibility"
-          backgroundColor={selectBg}
           options={visibilityOptions}
           selected={props.sharingMode}
           onClick={visibilityChange}
@@ -320,8 +314,6 @@ function VisibilitySelect(props: VisibilitySelectProps) {
 }
 
 interface BlockedInputProps {
-  theme: any;
-  baseTheme: any;
   blocked: string[];
   onChange: any;
 }
