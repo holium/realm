@@ -104,6 +104,7 @@ jobs:
       - name: Build and publish
         run: npx cross-env PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true yarn package:prerelease:mac
         env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
           BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
@@ -113,7 +114,7 @@ jobs:
       # copy release artifacts from this runner to digitalocean
       - name: Publish artifacts
         run: |
-          mkdir ~/.ssh
+          mkdir -p ~/.ssh
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
@@ -171,7 +172,7 @@ jobs:
       # copy release artifacts from this runner to digitalocean
       - name: Publish artifacts
         run: |
-          mkdir ~/.ssh
+          mkdir -p ~/.ssh
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
@@ -268,7 +269,7 @@ jobs:
       # copy release artifacts from this runner to digitalocean
       - name: Publish artifacts
         run: |
-          mkdir ~/.ssh
+          mkdir -p ~/.ssh
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
@@ -313,7 +314,7 @@ jobs:
       # publish latest agent udpates for realm, and usher
       - name: Publish ship updates
         run: |
-          mkdir ~/.ssh
+          mkdir -p ~/.ssh
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
@@ -383,11 +384,12 @@ jobs:
       # copy release artifacts from digitalocean (all platforms) back to this runner
       - name: Retrieve release artifacts
         run: |
-          mkdir ~/.ssh
+          mkdir -p ~/.ssh
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
-          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION ~/$BUILD_VERSION
+          mkdir -p ~/$BUILD_VERSION
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION ~
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
