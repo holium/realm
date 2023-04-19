@@ -139,6 +139,20 @@
         =/  peers           peers+(peer-start:from:db-lib timestamp peers-table.state)
         ``chat-db-dump+!>(tables+[msgs paths peers ~])
     ::
+    :: /db/start-ms/<messages-time>/<paths-time>/<peers-time>.json
+    :: all tables, but only with created-at or updated-at after <time>,
+    :: allowing you to specify a different timestamp for each table
+      [%x %db %start-ms @ @ @ ~]
+        =/  msgs-t=@da      (di:dejs:format n+i.t.t.t.path)
+        =/  paths-t=@da     (di:dejs:format n+i.t.t.t.t.path)
+        =/  peers-t=@da     (di:dejs:format n+i.t.t.t.t.t.path)
+        ?:  &(=(0 msgs-t) =(0 paths-t) =(0 peers-t))
+          ``chat-db-dump+!>(tables+all-tables:core)  :: if all 3 timestamps are 0, just return the whole tables, don't bother actually filtering them
+        =/  msgs            messages+(start:from:db-lib msgs-t messages-table.state)
+        =/  paths           paths+(path-start:from:db-lib paths-t paths-table.state)
+        =/  peers           peers+(peer-start:from:db-lib peers-t peers-table.state)
+        ``chat-db-dump+!>(tables+[msgs paths peers ~])
+    ::
     :: /db/paths/start-ms/<time>.json
       [%x %db %paths %start-ms @ ~]
         =/  timestamp=@da   (di:dejs:format n+i.t.t.t.t.path)
