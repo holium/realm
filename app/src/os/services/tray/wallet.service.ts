@@ -926,15 +926,13 @@ export class WalletService extends BaseService {
     this.db?.resetToDefaults();
   }
 
-  async deleteShipWallet(_evt: any, passcode: number[]) {
+  async deleteWallet(_evt: any, passcode: number[]) {
     if (!this.state) throw new Error('Wallet state not loaded');
-    if (!this.core.conduit) throw new Error('Conduit not loaded');
     const passcodeString = passcode.map(String).join('');
     (this.signer as RealmSigner).deleteMnemonic(
       this.state.ourPatp ?? '',
       passcodeString ?? ''
     );
     this.db?.resetToDefaults();
-    WalletApi.initialize(this.core.conduit);
   }
 }

@@ -52,8 +52,6 @@ export const CircleButton: FC<CircleButtonProps> = (
   props: CircleButtonProps
 ) => {
   const { icon, title } = props;
-  // const { walletStore } = useMst();
-
   return (
     <FullButton
       flexDirection="column"

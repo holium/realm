@@ -1051,6 +1051,10 @@ export const WalletStore = types
       reset() {
         // applySnapshot(self, walletAppDefault);
       },
+      deleteShipWallet(passcode: number[]) {
+        this.deleteShipMnemonic(passcode);
+        this.reset();
+      },
       deleteLocalWallet(passcode: number[]) {
         this.deleteLocalMnemonic(passcode);
         this.reset();
@@ -1060,6 +1064,15 @@ export const WalletStore = types
       ): Generator<PromiseLike<any>, void, any> {
         const passcodeString = passcode.map(String).join('');
         yield WalletIPC.deleteLocalMnemonic(
+          self.ourPatp ?? '',
+          passcodeString ?? ''
+        ) as PromiseLike<any>;
+      }),
+      deleteShipMnemonic: flow(function* (
+        passcode: number[]
+      ): Generator<PromiseLike<any>, void, any> {
+        const passcodeString = passcode.map(String).join('');
+        yield WalletIPC.deleteShipMnemonic(
           self.ourPatp ?? '',
           passcodeString ?? ''
         ) as PromiseLike<any>;
@@ -1117,7 +1130,6 @@ export const WalletStore = types
         this.navigate(WalletView.LIST, { canReturn: false });
       },
       sendEthereumTransaction: flow(function* (
-        _event: any,
         walletIndex: string,
         to: string,
         amount: string,
@@ -1173,6 +1185,12 @@ export const WalletStore = types
         if (self.navState.protocol !== protocol) {
           this.setProtocolSetter(protocol);
         }
+      },
+      checkPasscode: async (passcode: number[]) => {
+        return await bcrypt.compare(
+          passcode.map(String).join(''),
+          self.settings.passcodeHash ?? ''
+        );
       },
     };
   });

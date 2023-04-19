@@ -25,7 +25,7 @@ const ImportPresenter = (props: ImportProps) => {
   };
 
   return (
-    <NoResize width="100%" height="100%" flexDirection="column">
+    <NoResize width="100%" height="100%" flexDirection="column" gap={10}>
       <Text.H4 mt={6} variant="h4">
         Import Wallet
       </Text.H4>
@@ -50,7 +50,7 @@ const ImportPresenter = (props: ImportProps) => {
         // autoFocus={true}
       />
       {/*</FormControl.Field>*/}
-      <Flex mt={7} width="100%">
+      <Flex width="100%">
         <Button.TextButton
           width="100%"
           disabled={!ethers.utils.isValidMnemonic(phrase)}

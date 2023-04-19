@@ -10,7 +10,7 @@ interface CreateProps {
 const CreatePresenter = (props: CreateProps) => {
   return (
     <Flex width="100%" height="100%" flexDirection="column">
-      <Flex flex={4} flexDirection="column" alignItems="center">
+      <Flex flex={4} flexDirection="column" alignItems="center" gap={10}>
         <Text.H4 mt="100px" variant="h4">
           No Wallet Found
         </Text.H4>

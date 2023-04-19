@@ -1,17 +1,26 @@
 import { FC } from 'react';
-import { Flex, Box } from '@holium/design-system';
+import { Flex, Box, FlexProps, BoxProps } from '@holium/design-system';
 import { transparentize } from 'polished';
+import styled from 'styled-components';
 
 interface PasscodeDisplayProps {
   digits: number;
   filled: number;
 }
 
+const FilledFlex = styled(Flex)<FlexProps>`
+  border: 2px solid rgba(var(--rlm-accent-rgba));
+`;
+
+const FilledBox = styled(Box)<BoxProps>`
+  background-color: rgba(var(--rlm-accent-rgba));
+`;
+
 export const PasscodeDisplay: FC<PasscodeDisplayProps> = (
   props: PasscodeDisplayProps
 ) => {
   const Filled = () => (
-    <Flex
+    <FilledFlex
       mx="6px"
       height={35}
       width={32}
@@ -19,8 +28,8 @@ export const PasscodeDisplay: FC<PasscodeDisplayProps> = (
       alignItems="center"
       justifyContent="center"
     >
-      <Box height="8px" width="8px" borderRadius="50%"></Box>
-    </Flex>
+      <FilledBox height="8px" width="8px" borderRadius="50%"></FilledBox>
+    </FilledFlex>
   );
 
   const Empty = (props: any) => (
