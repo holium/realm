@@ -1,6 +1,8 @@
 import { Stripe, StripeElementsOptions } from '@stripe/stripe-js';
 import {
   CardNumberElement,
+  CardExpiryElement,
+  CardCvcElement,
   useStripe,
   useElements,
   Elements,
@@ -42,20 +44,26 @@ const PaymentDialogPresenter = ({
   const handleOnNext = async () => {
     if (!stripe || !elements) return Promise.resolve(false);
 
-    const card = elements.getElement(CardNumberElement);
+    const cardNumberElement = elements.getElement(CardNumberElement);
+    const cardExpiryElement = elements.getElement(CardExpiryElement);
+    const cardCvcElement = elements.getElement(CardCvcElement);
 
-    if (!card) return Promise.resolve(false);
+    if (!cardNumberElement || !cardExpiryElement || !cardCvcElement) {
+      return Promise.resolve(false);
+    }
 
-    const payload = await stripe.createPaymentMethod({
+    const paymentMethodResult = await stripe.createPaymentMethod({
       type: 'card',
-      card,
+      card: cardNumberElement,
     });
 
-    // Execute the payment.
+    if (!paymentMethodResult.paymentMethod || paymentMethodResult.error) {
+      return false;
+    }
     if (!stripeOptions?.clientSecret) return false;
 
     const result = await stripe.confirmCardPayment(stripeOptions.clientSecret, {
-      payment_method: payload.paymentMethod?.id,
+      payment_method: paymentMethodResult.paymentMethod?.id,
     });
 
     if (!result.error && result.paymentIntent?.status === 'succeeded') {
