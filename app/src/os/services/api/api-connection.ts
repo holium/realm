@@ -1,11 +1,12 @@
-import { Conduit, ConduitState } from '@holium/conduit';
+import { deSig } from '@urbit/aura';
+import { Conduit, ConduitState } from './index';
 import log from 'electron-log';
 
 export type ConduitSession = {
   url: string;
   ship: string;
   code: string;
-  cookie: string;
+  cookie?: string;
 };
 
 export class APIConnection {
@@ -22,13 +23,24 @@ export class APIConnection {
     this.conduitInstance
       .init(
         session.url,
-        session.ship.substring(1),
+        deSig(session.ship),
         session.cookie ?? '',
         session.code
       )
       .then(() => {
         this.handleConnectionStatus(this.conduitInstance);
       });
+  }
+
+  public static async getInstanceAsync(
+    session: ConduitSession
+  ): Promise<APIConnection> {
+    if (!APIConnection.instance) {
+      const conduit = new Conduit();
+      await conduit.init(session.url, session.cookie ?? '', session.code);
+      APIConnection.instance = new APIConnection(session);
+    }
+    return APIConnection.instance;
   }
 
   public static getInstance(session?: ConduitSession): APIConnection {
@@ -49,6 +61,9 @@ export class APIConnection {
     return this.conduitInstance;
   }
 
+  public async closeChannel(): Promise<boolean> {
+    return await this.conduitInstance.closeChannel();
+  }
   /**
    * Relays the current connection status to renderer
    *
