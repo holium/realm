@@ -174,11 +174,12 @@ export class Conduit extends EventEmitter {
             break;
           // quit
           case 'quit':
-            console.log('on quit', eventId);
+            log.info('on quit', eventId, this.watches.has(eventId));
             if (this.watches.has(eventId)) {
               const reconnectSub = this.watches.get(eventId);
               reconnectSub?.onQuit?.(parsedData);
               this.setAsIdleWatch(eventId);
+              this.resubscribe(eventId);
             }
             break;
           //
