@@ -1,4 +1,3 @@
-import { deSig } from '@urbit/aura';
 import { Conduit, ConduitState } from './index';
 import log from 'electron-log';
 import { app } from 'electron';

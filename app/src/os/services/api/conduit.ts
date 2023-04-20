@@ -541,10 +541,6 @@ export class Conduit extends EventEmitter {
           this.status !== ConduitState.Connected &&
           this.status !== ConduitState.Initialized
         ) {
-          console.log(
-            'postToChannel: ',
-            `status is ${this.status}, reconnecting...`
-          );
           this.startSSE(this.channelUrl(this.uid));
         }
 

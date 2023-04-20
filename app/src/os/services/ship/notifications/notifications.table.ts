@@ -31,11 +31,6 @@ interface NotificationRow {
   dismissed: boolean;
 }
 
-// type NotifMobxUpdateType =
-//   | 'notification-added'
-//   | 'notification-updated'
-//   | 'notification-deleted';
-
 type GetParamsObj = {
   app?: string;
   path?: string;
