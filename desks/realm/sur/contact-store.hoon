@@ -14,13 +14,15 @@
 ::
 +$  edit-field
   $%  [%nickname nickname=@t]
-      [%bio bio=@t]
       [%status status=@t]
-      [%color color=@ux]
+      [%color color=@t]
+      [%twitter twitter=(unit @t)]
+      [%bio bio=(unit @t)]
       [%avatar avatar=(unit @t)]
       [%add-group =resource]
       [%remove-group =resource]
       [%cover cover=(unit @t)]
+      [%featured-url url=(unit @t)]
   ==
 ::
 +$  beings
