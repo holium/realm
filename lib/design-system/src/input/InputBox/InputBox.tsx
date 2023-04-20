@@ -158,6 +158,7 @@ export const InputBox = ({
     textAlign={boxProps.textAlign || 'left'}
     px={px}
     py={py}
+    className="text-cursor"
     onClick={onClick}
   >
     {label && label !== 'none' && (

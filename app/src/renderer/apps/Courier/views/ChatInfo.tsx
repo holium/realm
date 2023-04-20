@@ -416,7 +416,6 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                       name="new-chat-patp-search"
                       tabIndex={1}
                       width="100%"
-                      className="realm-cursor-text-cursor"
                       placeholder="Add someone?"
                       // TODO disable if not permissioned
                       value={person.state.value}
