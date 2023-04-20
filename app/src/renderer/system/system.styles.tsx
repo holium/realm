@@ -2,8 +2,6 @@ import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
 import { Fill } from 'react-spaces';
 
-import { ThemeType } from '../theme';
-
 export const DragBar = styled.div`
   position: absolute;
   height: 22px;
@@ -71,17 +69,11 @@ export const BackgroundImage = styled(motion.img)`
     `}
 `;
 
-interface BackgroundStyleProps {
-  hasWallpaper: boolean;
-  theme: ThemeType;
-}
-
 export const BackgroundFill = styled(Fill)`
   position: relative;
   user-select: none;
   z-index: 1;
-  background: ${(props: BackgroundStyleProps) =>
-    props.hasWallpaper ? 'transparent' : props.theme.colors.bg.primary};
+  background: rgba(var(--rlm-base-rgba));
 `;
 
 export const BackgroundLighten = styled(Fill)`

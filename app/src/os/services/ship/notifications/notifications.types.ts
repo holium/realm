@@ -1,3 +1,8 @@
+export type NotifUpdateType =
+  | { type: 'notification-added'; payload: any }
+  | { type: 'notification-updated'; payload: any }
+  | { type: 'notification-deleted'; payload: any };
+
 export type DbChangeType = 'del-row' | 'add-row' | 'update-row' | 'update-all';
 
 export type AddRow = {

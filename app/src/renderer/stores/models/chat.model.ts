@@ -101,7 +101,6 @@ export const ChatMetadataModel = types.model({
   creator: types.string,
   timestamp: types.number,
   reactions: types.optional(types.boolean, true),
-  peer: types.maybe(types.string),
   space: types.maybe(types.string),
 });
 
@@ -153,10 +152,6 @@ export const ChatMessage = types
     },
     setMetadata(metadata: any) {
       self.metadata = metadata;
-    },
-    getReplyTo: () => {
-      if (!self.replyToPath || !self.replyToMsgId) return null;
-      return ChatIPC.getChatReplyTo(self.replyToMsgId);
     },
     insertTempReaction(react: ReactionModelType) {
       self.reactions.push({
@@ -509,12 +504,12 @@ export const Chat = types
       };
       self.metadata = ChatMetadataModel.create(newMetadata);
       try {
-        yield ChatIPC.editChat(
+        yield ChatIPC.editChatMetadata(
           self.path,
           stringifyMetadata(self.metadata),
           self.invites,
           self.peersGetBacklog,
-          self.expiresDuration
+          self.expiresDuration || 0
         );
         return self.metadata;
       } catch (e) {
@@ -527,12 +522,12 @@ export const Chat = types
       const oldPeerGetBacklog = self.peersGetBacklog;
       self.peersGetBacklog = peersGetBacklog;
       try {
-        yield ChatIPC.editChat(
+        yield ChatIPC.editChatMetadata(
           self.path,
           stringifyMetadata(self.metadata),
           self.invites,
           peersGetBacklog,
-          self.expiresDuration
+          self.expiresDuration || 0
         );
       } catch (e) {
         console.error(e);
@@ -545,12 +540,12 @@ export const Chat = types
       const oldInvitePermission = self.invites;
       self.invites = invitePermission;
       try {
-        yield ChatIPC.editChat(
+        yield ChatIPC.editChatMetadata(
           self.path,
           stringifyMetadata(self.metadata),
           self.invites,
           self.peersGetBacklog,
-          self.expiresDuration
+          self.expiresDuration || 0
         );
       } catch (e) {
         console.error(e);
@@ -561,12 +556,12 @@ export const Chat = types
       const oldExpiresDuration = self.expiresDuration;
       self.expiresDuration = expiresInMap[expiresValue] || null;
       try {
-        yield ChatIPC.editChat(
+        yield ChatIPC.editChatMetadata(
           self.path,
           stringifyMetadata(self.metadata),
           self.invites,
           self.peersGetBacklog,
-          self.expiresDuration
+          self.expiresDuration || 0
         );
       } catch (e) {
         console.error(e);

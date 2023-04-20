@@ -1,7 +1,7 @@
 import { GetServerSideProps } from 'next';
 import { ClaimTokenDialog } from '@holium/shared';
 import { Page } from 'components/Page';
-import { api } from '../util/api';
+import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 import { useEffect } from 'react';
 
@@ -46,7 +46,7 @@ export default function ClaimToken({ token, email, full_account }: Props) {
 
   const onClaim = async (password: string) => {
     try {
-      const result = await api.resetPassword(token, password, true);
+      const result = await thirdEarthApi.resetPassword(token, password, true);
       if (!result.token) return false;
 
       localStorage.setItem('token', result.token);

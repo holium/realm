@@ -1,4 +1,6 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Anchor } from '@holium/design-system/general';
+import { OnboardDialogDescription } from '@holium/shared';
 import { AccountCustomDomainDialog } from '../AccountCustomDomainDialog';
 import { AccountDownloadRealmDialog } from '../AccountDownloadRealmDialog';
 import { AccountHostingDialog } from '../AccountHostingDialog';
@@ -9,13 +11,17 @@ import { OnboardingDialogWrapper } from './helpers';
 
 export default {
   component: LoginDialog,
-  title: 'Onboarding/Login flow',
+  title: 'Onboarding/Login flow WEB',
 } as ComponentMeta<typeof LoginDialog>;
 
 export const LoginDialogStory: ComponentStory<typeof LoginDialog> = () => (
   <OnboardingDialogWrapper>
     <LoginDialog
-      onNoAccount={() => {}}
+      label={
+        <OnboardDialogDescription>
+          Don't have an account yet? <Anchor>Sign up</Anchor>.
+        </OnboardDialogDescription>
+      }
       onLogin={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>

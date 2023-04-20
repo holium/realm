@@ -7,13 +7,13 @@ import {
   DialogTitlebar,
   DialogTitlebarProps,
 } from 'renderer/system/dialog/Dialog/DialogTitlebar';
-import { AppWindowType } from 'os/services/shell/desktop.model';
-import { ShellStoreType } from 'os/services/shell/shell.model';
 import { NativeAppId, getNativeAppWindow } from '../getNativeAppWindow';
+import { ShellModelType } from 'renderer/stores/models/shell.model';
+import { AppWindowMobxType } from 'renderer/stores/models/window.model';
 
 type Props = {
-  appWindow: AppWindowType;
-  shell: ShellStoreType;
+  appWindow: AppWindowMobxType;
+  shell: ShellModelType;
   hideTitlebarBorder: boolean;
   onClose: () => void;
   onMaximize: () => void;

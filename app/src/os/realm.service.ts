@@ -1,4 +1,3 @@
-// import RealmProcess from '../background/realm.process';
 import {
   app,
   BrowserWindow,
@@ -7,15 +6,32 @@ import {
   WebPreferences,
 } from 'electron';
 import log from 'electron-log';
+import { track } from '@amplitude/analytics-browser';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { AuthService } from './services/auth/auth.service';
 import { ShipService } from './services/ship/ship.service';
-import { getReleaseChannel, setReleaseChannel } from './lib/settings';
+import {
+  getReleaseChannelFromSettings,
+  saveReleaseChannelInSettings,
+} from './lib/settings';
 import { getCookie } from './lib/shipHelpers';
 import { APIConnection } from './services/api';
+import { MasterAccount } from './services/auth/masterAccounts.table';
+import { Account } from './services/auth/accounts.table';
+import { RealmUpdateTypes } from './realm.types';
 
-export class RealmService extends AbstractService {
-  // private realmProcess: RealmProcess | null = null;
+type CreateAccountPayload = Omit<
+  Account,
+  'passwordHash' | 'updatedAt' | 'createdAt'
+> & {
+  password: string;
+};
+
+type CreateMasterAccountPayload = Omit<MasterAccount, 'id' | 'passwordHash'> & {
+  password: string;
+};
+
+export class RealmService extends AbstractService<RealmUpdateTypes> {
   public services?: {
     auth: AuthService;
     ship?: ShipService;
@@ -29,9 +45,9 @@ export class RealmService extends AbstractService {
     };
 
     this.onWebViewAttached = this.onWebViewAttached.bind(this);
-    const session = this._hydrateSessionIfExists();
-    if (session)
-      this._sendAuthenticated(session.patp, session.url, session.cookie);
+    // const session = this._hydrateSessionIfExists();
+    // if (session)
+    //   this._sendAuthenticated(session.patp, session.url, session.cookie);
     app.on('quit', () => {
       // do other cleanup here
     });
@@ -61,16 +77,118 @@ export class RealmService extends AbstractService {
     const hasSession = this.services?.auth.session;
     let session;
     if (hasSession) {
-      session = this._hydrateSessionIfExists();
-      this.services?.ship?.init();
+      // session = this._hydrateSessionIfExists();
+      // this.services?.ship?.init();
     }
 
     this.sendUpdate({
       type: 'booted',
       payload: {
-        screen: hasSession ? 'os' : 'login',
-        accounts: this.services?.auth.getAccounts(),
+        accounts: this.services?.auth.getAccounts() || undefined,
         session,
+        seenSplash: this.services?.auth.hasSeenSplash() || false,
+      },
+    });
+  }
+
+  /**
+   * ------------------------------
+   * login
+   * ------------------------------
+   * Login to a ship, unlock the db, and start the ship service.
+   *
+   * @param patp
+   * @param password
+   * @returns
+   */
+  async login(patp: string, password: string): Promise<boolean> {
+    if (!this.services) {
+      return false;
+    }
+
+    const account = this.services.auth.getAccount(patp);
+    if (!account) {
+      log.info(`No account found for ${patp}`);
+      return false;
+    }
+    const isAuthenticated = this.services.auth._verifyPassword(
+      password,
+      account.passwordHash
+    );
+
+    if (!isAuthenticated) {
+      log.warn(`${patp} failed to authenticate`);
+      this.sendUpdate({
+        type: 'auth-failed',
+        payload: 'password',
+      });
+      return false;
+    }
+    if (isAuthenticated) {
+      track('login', { patp });
+      log.info(`${patp} authenticated`);
+      const key = await this.services.auth.deriveDbKey(password);
+      if (this.services.ship) this.services.ship.cleanup();
+      this.services.ship = new ShipService(patp, key);
+      const credentials = this.services.ship.credentials;
+      return new Promise((resolve) => {
+        APIConnection.getInstance().conduit.on('connected', () => {
+          if (!this.services) return;
+          // this.services.auth._setSession(patp, key);
+          this.services.ship?.init();
+          this._sendAuthenticated(patp, credentials.url, credentials.cookie);
+          resolve(true);
+        });
+      });
+    }
+    return isAuthenticated;
+  }
+
+  async logout(patp: string) {
+    if (!this.services) {
+      return;
+    }
+    this.services.ship?.cleanup();
+    APIConnection.getInstance().closeChannel();
+    delete this.services.ship;
+    this.services.auth._clearSession();
+    this.sendUpdate({
+      type: 'logout',
+      payload: {
+        patp,
+      },
+    });
+  }
+
+  async updatePassport(
+    patp: string,
+    nickname: string,
+    description: string,
+    avatar: string
+  ) {
+    if (!this.services) return;
+
+    return this.services.auth.updatePassport(
+      patp,
+      nickname,
+      description,
+      avatar
+    );
+  }
+
+  async updatePassword(patp: string, password: string) {
+    if (!this.services) return;
+
+    return this.services.auth.updatePassword(patp, password);
+  }
+
+  private _sendAuthenticated(patp: string, url: string, cookie: string) {
+    this.sendUpdate({
+      type: 'auth-success',
+      payload: {
+        patp,
+        url,
+        cookie,
       },
     });
   }
@@ -95,72 +213,49 @@ export class RealmService extends AbstractService {
     return null;
   }
 
-  async login(patp: string, password: string): Promise<boolean> {
-    if (!this.services) {
-      return false;
+  public async createAccount(
+    accountPayload: CreateAccountPayload,
+    shipCode: string
+  ) {
+    if (!this.services) return Promise.resolve(false);
+
+    const account = this.services.auth.createAccount(accountPayload, shipCode);
+
+    if (account) {
+      // create ship db
+      return account;
     }
 
-    const account = this.services.auth.getAccount(patp);
-    if (!account) {
-      log.info(`No account found for ${patp}`);
-      return false;
-    }
-    const isAuthenticated = this.services.auth._verifyPassword(
-      password,
-      account.passwordHash
-    );
-
-    if (!isAuthenticated) {
-      log.warn(`${patp} failed to authenticate`);
-      this.sendUpdate({
-        type: 'login-failed',
-        payload: `${patp} failed to authenticate`,
-      });
-      return false;
-    }
-    if (isAuthenticated) {
-      // TODO Add amplitude logging here
-      log.info(`${patp} authenticated`);
-      const key = await this.services.auth.deriveDbKey(password);
-      this.services.ship = new ShipService(patp, key);
-      const credentials = this.services.ship.credentials;
-      this.services.auth._setSession(patp, key);
-      this._sendAuthenticated(patp, credentials.url, credentials.cookie);
-    }
-    return isAuthenticated;
+    return Promise.resolve(false);
   }
 
-  async logout(patp: string) {
-    if (!this.services) {
-      return;
-    }
-    this.services.ship?.cleanup();
-    delete this.services.ship;
-    this.services.auth._clearSession();
-    this.sendUpdate({
-      type: 'logout',
-      payload: patp,
-    });
+  public async createMasterAccount(payload: CreateMasterAccountPayload) {
+    if (!this.services) return;
+
+    return this.services.auth.createMasterAccount(payload);
   }
 
-  private _sendAuthenticated(patp: string, url: string, cookie: string) {
-    this.sendUpdate({
-      type: 'authenticated',
-      payload: {
-        patp,
-        url,
-        cookie,
-      },
-    });
+  public async getCookie(patp: string, url: string, code: string) {
+    const cookie = await getCookie({ patp, url, code });
+    if (!cookie) throw new Error('Failed to get cookie');
+    const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
+    const sanitizedCookie = cookie.split('; ')[0];
+
+    if (patp.toLowerCase() !== cookiePatp.toLowerCase()) {
+      throw new Error('Invalid code.');
+    }
+
+    return sanitizedCookie;
   }
 
   async getReleaseChannel(): Promise<string> {
-    return getReleaseChannel();
+    return getReleaseChannelFromSettings();
   }
 
   setReleaseChannel(channel: string) {
-    let ship = undefined;
-    let desks = undefined;
+    let ship;
+    let desks;
+
     // INSTALL_MOON is a string of format <moon>:<desk>,<desk>,<desk>,...
     // example: INSTALL_MOON=~hostyv:realm
     if (process.env.INSTALL_MOON && process.env.INSTALL_MOON !== 'bypass') {
@@ -186,7 +281,7 @@ export class RealmService extends AbstractService {
         },
       });
     }
-    setReleaseChannel(channel);
+    saveReleaseChannelInSettings(channel);
   }
 
   async onWillRedirect(url: string, webContents: any) {

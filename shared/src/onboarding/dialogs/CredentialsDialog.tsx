@@ -45,16 +45,20 @@ export const CredentialsDialog = ({ credentials, onNext }: Props) => (
         </OnboardDialogDescription>
         <InfoCard>
           <Flex flexDirection="column" gap={4}>
-            <OnboardDialogSubTitle fontWeight={600}>ID</OnboardDialogSubTitle>
+            <OnboardDialogSubTitle fontWeight={600}>
+              Server ID
+            </OnboardDialogSubTitle>
             <InfoCardText>{credentials.id}</InfoCardText>
           </Flex>
           <Flex flexDirection="column" gap={4}>
-            <OnboardDialogSubTitle fontWeight={600}>URL</OnboardDialogSubTitle>
+            <OnboardDialogSubTitle fontWeight={600}>
+              Server URL
+            </OnboardDialogSubTitle>
             <InfoCardText>{credentials.url}</InfoCardText>
           </Flex>
           <Flex flexDirection="column" gap={4}>
             <OnboardDialogSubTitle fontWeight={600}>
-              Access Code
+              Server Code
             </OnboardDialogSubTitle>
             <InfoCardText>{credentials.accessCode}</InfoCardText>
           </Flex>

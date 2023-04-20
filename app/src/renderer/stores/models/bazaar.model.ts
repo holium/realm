@@ -251,7 +251,6 @@ export const BazaarStore = types
   .actions((self) => ({
     init: flow(function* () {
       const data = yield BazaarIPC.fetchAppCatalog() as Promise<any>;
-      console.log('catalog', data);
       applySnapshot(self.catalog, data);
       // const { apps, gridIndex, recentApps, recentDevs } = data;
       // self.catalog.clear();

@@ -1,6 +1,6 @@
 import { CreateAccountDialog } from '@holium/shared';
-import { Page } from 'components/Page';
-import { api } from '../util/api';
+import { Page } from '../components/Page';
+import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
 export default function CreateAccount() {
@@ -14,8 +14,8 @@ export default function CreateAccount() {
     localStorage.setItem('password', password);
 
     try {
-      const result = await api.register(email, password);
-      goToPage('/verify-email');
+      const result = await thirdEarthApi.register(email, password);
+      if (Boolean(result)) goToPage('/verify-email');
       return Boolean(result);
     } catch (error) {
       console.error(error);

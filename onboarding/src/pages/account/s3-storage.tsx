@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 import { AccountS3StorageDialog } from '@holium/shared';
 import { Page } from '../../components/Page';
-import { api, GetUserS3InfoResponse } from '../../util/api';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 import { UserContextProvider, useUser } from '../../util/UserContext';
+import { thirdEarthApi } from '../../util/thirdEarthApi';
+
+type GetUserS3InfoResponse = Awaited<
+  ReturnType<typeof thirdEarthApi.getUserS3Info>
+>;
 
 const S3StoragePresenter = () => {
   const { goToPage, logout } = useNavigation();
@@ -23,9 +27,11 @@ const S3StoragePresenter = () => {
     if (!token) return;
     if (!selectedShip) return;
 
-    api.getUserS3Info(token, selectedShip.id.toString()).then(setS3Info);
+    thirdEarthApi
+      .getUserS3Info(token, selectedShip.id.toString())
+      .then(setS3Info);
 
-    api
+    thirdEarthApi
       .getUserResourceHistory(token, selectedShip.id.toString())
       .then((response) => {
         setNetworkUsage(response.networkUsage?.network_sent_total ?? 0);

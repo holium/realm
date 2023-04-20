@@ -11,13 +11,7 @@ import { SpacesIPC } from '../ipc';
 import { LoaderModel } from './common.model';
 import { cite } from '@urbit/aura';
 
-const Roles = types.enumeration([
-  'initiate',
-  'member',
-  'admin',
-  'owner',
-  'moderator',
-]);
+const Roles = types.enumeration(['initiate', 'member', 'admin', 'owner']);
 export type RolesType = Instance<typeof Roles>;
 const Status = types.enumeration(['invited', 'joined', 'host']);
 

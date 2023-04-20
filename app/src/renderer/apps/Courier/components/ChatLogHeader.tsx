@@ -7,8 +7,8 @@ import {
   Menu,
   MenuItemProps,
 } from '@holium/design-system';
-import { useShipStore } from 'renderer/stores/ship.store';
 import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type ChatLogHeaderProps = {
   path: string;

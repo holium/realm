@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import { Fill, Bottom, Centered } from 'react-spaces';
 import { observer } from 'mobx-react';
 import {
@@ -10,6 +10,8 @@ import {
   Text,
   Button,
   Icon,
+  Menu,
+  MenuItemProps,
 } from '@holium/design-system';
 import { ShipSelector } from './ShipSelector';
 import { useAppState } from 'renderer/stores/app.store';
@@ -18,40 +20,25 @@ interface LoginProps {
   addShip: () => void;
 }
 
-export type LoginError =
-  | 'bad-gateway'
-  | 'password'
-  | 'missing'
-  | 'code'
-  | 'unknown'
-  | '';
-
 const LoginPresenter = ({ addShip }: LoginProps) => {
   const { setTheme, authStore } = useAppState();
   const { accounts, status: loginStatus } = authStore;
 
-  const [hasFailed, setHasFailed] = useState(false);
+  const [password, setPassword] = useState('');
   const passwordRef = useRef<HTMLInputElement>(null);
   // const wrapperRef = useRef(null);
   const submitRef = useRef<HTMLButtonElement>(null);
-  const optionsRef = useRef(null);
-  const [loginError, setLoginError] = useState<LoginError>('');
 
   // Setting up options menu
-  const menuWidth = 180;
-  // const config = useMenu(optionsRef, {
-  //   orientation: 'bottom-left',
-  //   padding: 6,
-  //   menuWidth,
-  // });
-  // const { anchorPoint, show, setShow } = config;
   const [selectedShip, setSelectedShip] = useState(accounts[0]);
 
-  const theme = selectedShip.theme;
   const shipName = selectedShip?.nickname || selectedShip?.patp;
 
   useEffect(() => {
     selectedShip && setTheme(selectedShip.theme);
+    if (passwordRef.current) {
+      passwordRef.current?.focus();
+    }
 
     // OSActions.onConnectionStatus((_event: any, status: ConduitState) => {
     //   if (status === ConduitState.Failed) {
@@ -63,63 +50,94 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
     //     setHasFailed(true);
     //   }
     // });
-  }, []);
+  }, [passwordRef.current]);
 
   useEffect(() => {
-    setHasFailed(false);
+    loginStatus.reset();
     if (passwordRef.current) {
       const passInput = passwordRef.current as HTMLInputElement;
       passInput.value = '';
+      setPassword('');
+      passwordRef.current.blur();
+      passwordRef.current.focus();
     }
   }, [selectedShip]);
 
   const login = async () => {
     if (!selectedShip) return;
+
     const status = await authStore.login(
       selectedShip.patp ?? '',
       passwordRef.current?.value ?? ''
     );
     // trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
 
-    // if (status) {
-    //   // setAccount(selectedShip);
-    // }
-    //
-    // TODO refactor
-    // if (status && status.startsWith('error:')) {
-    //   if (submitRef.current) {
-    //     // @ts-ignore
-    //     submitRef.current.blur();
-    //   }
-    //   const parts = status.split(':');
-    //   // see: https://github.com/orgs/holium/projects/10?pane=issue&itemId=18867662
-    //   //  assume 400 means they may have changed ship code. ask them to enter the new one.
-    //   if (parts.length > 1 && parseInt(parts[1]) === 400) {
-    //     setLoginError('missing');
-    //     ShellActions.openDialogWithStringProps('reset-code-dialog', {
-    //       ship: selectedShip.patp,
-    //       // @ts-ignore
-    //       password: passwordRef.current?.value,
-    //     });
-    //   } else {
-    //     // assume all others are incorrect passwords
-    //     setLoginError('password');
-    //   }
-    // }
+    if (status) {
+      // setAccount(selectedShip);
+    }
+
+    if (status && status.state === 'error') {
+      if (submitRef.current) {
+        // @ts-ignore
+        submitRef.current.blur();
+      }
+      // const parts = status.split(':');
+      // // see: https://github.com/orgs/holium/projects/10?pane=issue&itemId=18867662
+      // //  assume 400 means they may have changed ship code. ask them to enter the new one.
+      // if (parts.length > 1 && parseInt(parts[1]) === 400) {
+      //   setLoginError('missing');
+      //   ShellActions.openDialogWithStringProps('reset-code-dialog', {
+      //     ship: selectedShip.patp,
+      //     // @ts-ignore
+      //     password: passwordRef.current?.value,
+      //   });
+      // } else {
+      //   // assume all others are incorrect passwords
+      //   setLoginError('password');
+      // }
+    }
     // trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
   };
-  const clickSubmit = async (event: any) => {
+  const clickSubmit = async (event: React.KeyboardEvent<HTMLInputElement>) => {
     event.stopPropagation();
-    setHasFailed(false);
     login();
   };
 
-  const submitPassword = (event: any) => {
-    if (event.keyCode === 13) {
-      passwordRef.current?.blur();
-      submitRef.current?.click();
+  const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    event.stopPropagation();
+    if (event.key === 'Backspace') {
+      loginStatus.reset();
+    }
+    if (event.key === 'Enter') {
+      submitPassword();
     }
   };
+
+  const submitPassword = () => {
+    passwordRef.current?.blur();
+    submitRef.current?.click();
+  };
+
+  const accountMenuId = useMemo(
+    () => `${selectedShip.patp}-account-menu`,
+    [selectedShip]
+  );
+  const contextMenuOptions: MenuItemProps[] = useMemo(() => {
+    return [
+      {
+        id: `${accountMenuId}-remove`,
+        icon: 'Trash',
+        label: 'Remove account',
+        onClick: () => {
+          const newSelectedShip =
+            accounts.find((ship) => ship.patp !== selectedShip.patp) ??
+            accounts[0];
+          authStore.removeAccount(selectedShip.patp);
+          setSelectedShip(newSelectedShip);
+        },
+      },
+    ];
+  }, [accountMenuId]);
 
   const isVertical = true;
 
@@ -127,7 +145,12 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
     <Fill>
       <Centered>
         {selectedShip && (
-          <Flex alignItems="center" justifyContent="center">
+          <Flex
+            position="relative"
+            mt={20}
+            alignItems="center"
+            justifyContent="center"
+          >
             <Flex
               flexDirection={isVertical ? 'column' : 'row'}
               alignItems="center"
@@ -173,7 +196,9 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                       animate={{
                         opacity: 0.4,
                       }}
-                      transition={{ opacity: { duration: 1, ease: 'easeOut' } }}
+                      transition={{
+                        opacity: { duration: 1, ease: 'easeOut' },
+                      }}
                       fontWeight={400}
                       fontSize={16}
                       opacity={0.35}
@@ -207,54 +232,42 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                     }}
                     name="password"
                     type="password"
-                    error={hasFailed || loginError !== ''}
-                    onKeyDown={submitPassword}
+                    value={password}
+                    error={loginStatus.error}
+                    onKeyDown={onKeyDown}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      setPassword(e.target.value);
+                    }}
                     rightAdornment={
                       <Flex
                         gap={4}
                         mr={1}
                         justifyContent="center"
                         alignItems="center"
+                        // onClick={(evt) => evt.stopPropagation()}
+                        // onKeyDown={(evt) => evt.stopPropagation()}
                       >
-                        {/* <Button.IconButton
-                          size={26}
-                          ref={optionsRef}
-                          opacity={1}
-                          onClick={() => {
-                            // setShow(true);
-                          }}
-                        >
-                          <Icon name="MoreHorizontal" />
-                        </Button.IconButton>
-                        <AnimatePresence>
-                          {show && (
-                            <Portal>
-                              <Menu
-                                id={`${selectedShip.patp}-user-menu`}
-                                style={{
-                                  top: anchorPoint && anchorPoint.y + 9,
-                                  left: anchorPoint && anchorPoint.x + 6,
-                                  visibility: show ? 'visible' : 'hidden',
-                                  width: menuWidth,
-                                }}
-                                isOpen={show}
-                                onClose={() => setShow(false)}
-                              >
-                                <MenuItem
-                                  label="Remove ship"
-                                  onClick={() => {
-                                    AuthActions.removeShip(selectedShip.patp);
-                                  }}
-                                />
-                              </Menu>
-                            </Portal>
-                          )}
-                        </AnimatePresence> */}
-                        {loginStatus === 'loading' && !hasFailed ? (
+                        <Menu
+                          id={accountMenuId}
+                          orientation="bottom-left"
+                          offset={{ x: 2, y: 2 }}
+                          triggerEl={
+                            <Button.IconButton size={26}>
+                              <Icon
+                                name="MoreHorizontal"
+                                size={22}
+                                opacity={0.6}
+                              />
+                            </Button.IconButton>
+                          }
+                          options={contextMenuOptions}
+                        />
+                        {loginStatus.state === 'loading' ? (
                           <Spinner size={0} />
                         ) : (
                           <Button.IconButton
                             ref={submitRef}
+                            disabled={password.length < 1}
                             onClick={async (evt: any) => await clickSubmit(evt)}
                           >
                             <Icon
@@ -267,33 +280,38 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                       </Flex>
                     }
                   />
-
-                  {([
-                    'bad-gateway',
-                    'password',
-                    'missing',
-                    'code',
-                    'unknown',
-                  ].indexOf(loginError) !== -1 ||
-                    hasFailed) && (
-                    <Text.Hint
-                      style={{
-                        height: 15,
-                        fontSize: 14,
-                        textShadow: '0.5px 0.5px #080000',
-                      }}
-                      color="intent-alert"
-                    >
-                      {hasFailed && 'Connection to your ship has been refused.'}
-                      {loginError === 'missing' &&
-                        'Unable to connect to ship - error code 400.'}
-                      {loginError === 'bad-gateway' &&
-                        'Ship is unreachable - error code 502.'}
-                      {loginError === 'password' && 'Incorrect password.'}
-                      {loginError === 'missing' && 'Unable to connect to ship.'}
-                      {loginError === 'code' && 'Error saving new ship code'}
-                    </Text.Hint>
-                  )}
+                  <Box height={15}>
+                    {loginStatus.error &&
+                      [
+                        'bad-gateway',
+                        'password',
+                        'missing',
+                        'code',
+                        'unknown',
+                      ].indexOf(loginStatus.error) !== -1 && (
+                        <Text.Hint
+                          style={{
+                            height: 15,
+                            fontSize: 14,
+                            textShadow: '0.6px 0.6px #080000',
+                          }}
+                          color="intent-alert"
+                        >
+                          {/* {hasFailed &&
+                            'Connection to your ship has been refused.'} */}
+                          {loginStatus.error === 'missing' &&
+                            'Unable to connect to ship - error code 400.'}
+                          {loginStatus.error === 'bad-gateway' &&
+                            'Ship is unreachable - error code 502.'}
+                          {loginStatus.error === 'password' &&
+                            'Incorrect password.'}
+                          {loginStatus.error === 'missing' &&
+                            'Unable to connect to ship.'}
+                          {loginStatus.error === 'code' &&
+                            'Error saving new ship code'}
+                        </Text.Hint>
+                      )}
+                  </Box>
                 </Flex>
               </Flex>
             </Flex>

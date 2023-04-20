@@ -1,5 +1,7 @@
 import { InvitePermissionType } from 'renderer/stores/models/chat.model';
 
+export type ChatUpdateTypes = { type: string; payload: any };
+
 export type PathsRow = {
   path: string;
   type: string;

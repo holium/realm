@@ -2,16 +2,24 @@ import { MotionConfig } from 'framer-motion';
 import { BgImage, GlobalStyle } from './App.styles';
 import { Shell } from './system';
 import { useEffect, useMemo } from 'react';
-import { Flex, Spinner, Text } from '@holium/design-system';
+import { Flex, Spinner, useToggle } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
 import { useAppState, appState, AppStateProvider } from './stores/app.store';
-import { Auth } from './system/authentication';
 import { SelectionProvider } from './lib/selection';
+import { Onboarding } from './onboarding/Onboarding';
 import { ErrorBoundary } from './system/ErrorBoundary';
+import { Auth } from './system/authentication/index';
+import { Splash } from './onboarding/Splash';
+import { RealmIPC } from './stores/ipc';
 
 function AppContentPresenter() {
-  const { authStore, booted } = useAppState();
+  const { seenSplash, authStore, booted } = useAppState();
+  const addShip = useToggle(false);
+
+  const isLoggedOut = !authStore.session;
+  const hasNoAccounts = authStore.accounts.length === 0;
+
   if (!booted) {
     return (
       <Flex>
@@ -19,19 +27,20 @@ function AppContentPresenter() {
       </Flex>
     );
   }
-  const isOnboarding = authStore.accounts.length === 0;
-  const isLoggedOut = !authStore.session;
-
-  if (isOnboarding) {
-    // TODO onboarding here
-    return (
-      <Flex>
-        <Text.Custom>onboarding</Text.Custom>
-      </Flex>
-    );
+  if (!seenSplash) {
+    return <Splash />;
   }
+
+  if (hasNoAccounts) {
+    return <Onboarding initialStep="/login" onFinish={addShip.toggleOff} />;
+  }
+
   if (isLoggedOut) {
-    return <Auth />;
+    if (addShip.isOn) {
+      return <Onboarding initialStep="/hosting" onFinish={addShip.toggleOff} />;
+    }
+
+    return <Auth onAddShip={addShip.toggleOn} />;
   }
 
   return <Shell />;
@@ -45,6 +54,7 @@ const AppPresenter = () => {
   const bgImage = useMemo(() => theme.wallpaper, [theme.wallpaper]);
 
   useEffect(() => {
+    RealmIPC.boot();
     return () => {
       shellStore.closeDialog();
     };

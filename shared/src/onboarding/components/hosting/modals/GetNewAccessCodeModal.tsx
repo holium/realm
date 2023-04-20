@@ -37,7 +37,7 @@ export const GetNewAccessCodeModal = ({
       <Text.Body>
         Generating a new access code will disconect all active sessions for this
         ID and require re-authentication with your new access code (you will
-        remain connected to your ThirdEarth account).
+        remain connected to your Holium account).
       </Text.Body>
       <Flex justifyContent="flex-end" paddingTop="8px">
         <SubmitButton text="Confirm" submitting={submitting.isOn} />

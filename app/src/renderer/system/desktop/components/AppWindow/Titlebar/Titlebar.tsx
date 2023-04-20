@@ -1,9 +1,9 @@
 import { ReactNode, PointerEvent } from 'react';
 import { Text, Flex } from '@holium/design-system';
 import { AppWindowIcon } from '../AppWindowIcon';
-import { AppWindowType } from 'os/services/shell/desktop.model';
 import { TitlebarContainer, TitleCentered } from './Titlebar.styles';
 import { useDoubleClick } from 'renderer/lib/useDoubleClick';
+import { AppWindowMobxType } from 'renderer/stores/models/window.model';
 
 type Props = {
   zIndex: number;
@@ -16,7 +16,7 @@ type Props = {
   isAppWindow?: boolean;
   noTitlebar?: boolean;
   shareable?: boolean;
-  appWindow: AppWindowType;
+  appWindow: AppWindowMobxType;
   hasBlur?: boolean;
   children?: ReactNode;
   onClose: () => void;

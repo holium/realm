@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import { app } from 'electron';
-import sqlite3 from 'better-sqlite3-multiple-ciphers';
+import Database from 'better-sqlite3-multiple-ciphers';
 import log from 'electron-log';
 import { spacesTablesInitSql } from './spaces/spaces.service';
 import { bazaarTablesInitSql } from './spaces/tables/catalog.table';
@@ -11,7 +11,7 @@ import { friendsInitSql } from './friends.table';
 import { walletInitSql } from './wallet/wallet.db';
 
 export class ShipDB {
-  private shipDB: sqlite3.Database;
+  private shipDB: Database;
   private patp: string;
   private readonly dbPath: string;
   private readonly isDev: boolean = process.env.NODE_ENV === 'development';
@@ -19,11 +19,7 @@ export class ShipDB {
   constructor(patp: string, password: string) {
     // Open the authentication database
     this.patp = patp;
-    this.dbPath = path.join(
-      app.getPath('userData'),
-      `realm.${patp}`,
-      `${patp}.sqlite`
-    );
+    this.dbPath = path.join(app.getPath('userData'), `${patp}.sqlite`);
     if (!fs.existsSync(this.dbPath)) {
       this.shipDB = this.open();
       // Create the database if it doesn't exist
@@ -67,7 +63,7 @@ export class ShipDB {
   }
 
   open() {
-    return new sqlite3(this.dbPath);
+    return new Database(this.dbPath);
   }
 
   decrypt(password: string) {
@@ -91,10 +87,9 @@ ${friendsInitSql}
 ${spacesTablesInitSql}
 ${walletInitSql}
 create table if not exists credentials (
-  url       text primary key,
-  code      text,
-  cookie    text,
-  wallet    text
+  url       TEXT PRIMARY KEY NOT NULL,
+  code      TEXT NOT NULL,
+  cookie    TEXT NOT NULL,
+  wallet    TEXT
 );
-create unique index if not exists credentials_url_uindex on credentials (url);
 `;

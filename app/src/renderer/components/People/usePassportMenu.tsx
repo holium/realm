@@ -95,11 +95,7 @@ export const PassportMenuProvider = ({
               isOpen
               onClose={() => setMenu(null)}
             >
-              <PassportCard
-                {...menu.options}
-                theme={theme}
-                onClose={() => setMenu(null)}
-              />
+              <PassportCard {...menu.options} onClose={() => setMenu(null)} />
             </Menu>
           )}
         </AnimatePresence>

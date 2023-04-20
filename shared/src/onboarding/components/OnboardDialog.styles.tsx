@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import { Text } from '@holium/design-system/general';
-import { Input } from '@holium/design-system/inputs';
 
 export const TABLET_WIDTH = 800;
 export const MOBILE_WIDTH = 400;
@@ -81,23 +80,6 @@ export const OnboardDialogInputLabel = styled(Text.Label)`
   margin-bottom: 4px;
 `;
 
-type OnboardDialogInputProps = {
-  isError?: boolean;
-};
-
-export const OnboardDialogInput = styled(Input)<OnboardDialogInputProps>`
-  flex: 1;
-  padding: 11px 12px;
-  border: 1px solid rgba(var(--rlm-border-rgba));
-  border-radius: 6px;
-
-  ${({ isError }) =>
-    isError &&
-    `
-    border: 1px solid rgba(var(--rlm-intent-alert-rgba));
-  `}
-`;
-
 export const OnboardDialogTitle = styled(Text.H1)`
   font-size: 22px;
   font-weight: 600;
@@ -133,4 +115,25 @@ export const OnboardDialogBackButton = styled.button`
 export const OnboardDialogFooter = styled.footer`
   width: 100%;
   height: 30px;
+
+  @media (max-width: ${TABLET_WIDTH}px) {
+    flex-direction: column;
+  }
+`;
+
+export const OnboardDialogFooterBackButtonFlex = styled.div`
+  flex: 3;
+  align-items: center;
+
+  @media (max-width: ${TABLET_WIDTH}px) {
+    flex: none;
+  }
+`;
+
+export const OnboardDialogButtonText = styled(Text.Body)`
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 19px;
+  color: rgba(var(--rlm-accent-rgba));
+  user-select: none;
 `;

@@ -1,5 +1,5 @@
 // import log from 'electron-log';
-import { Database } from 'better-sqlite3';
+import Database from 'better-sqlite3-multiple-ciphers';
 import AbstractDataAccess from '../../../abstract.db';
 import { APIConnection } from '../../../api';
 
@@ -13,7 +13,7 @@ export interface FeaturedSpace {
   // updatedAt: number;
 }
 
-export class FeaturedSpacesDB extends AbstractDataAccess<FeaturedSpace> {
+export class FeaturedSpacesDB extends AbstractDataAccess<FeaturedSpace, any> {
   constructor(preload: boolean, db?: Database) {
     super({
       preload: preload,
@@ -108,7 +108,7 @@ export class FeaturedSpacesDB extends AbstractDataAccess<FeaturedSpace> {
       )`
     );
 
-    const insertMany = this.db.transaction((featured) => {
+    const insertMany = this.db.transaction((featured: any) => {
       Object.entries<FeaturedSpace>(featured).forEach(([space, entry]) => {
         insert.run({
           path: space,

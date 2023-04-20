@@ -13,12 +13,11 @@ import {
   NoScrollBar,
   TextInput,
 } from '@holium/design-system';
-import { InlineEdit, useContextMenu } from 'renderer/components';
+import { useContextMenu } from 'renderer/components';
 import { isValidPatp } from 'urbit-ob';
 import { createField, createForm } from 'mobx-easy-form';
 import { ChatLogHeader } from '../components/ChatLogHeader';
 import { ChatAvatar } from '../components/ChatAvatar';
-import { FileUploadParams } from 'os/services/ship/models/ship';
 import { useFileUpload } from 'renderer/lib/useFileUpload';
 import { IuseStorage } from 'renderer/lib/useStorage';
 import { observer } from 'mobx-react-lite';
@@ -32,6 +31,7 @@ import { useShipStore } from 'renderer/stores/ship.store';
 import { ShipIPC } from 'renderer/stores/ipc';
 import { useAppState } from 'renderer/stores/app.store';
 import { ShipSearch } from 'renderer/components/ShipSearch';
+import { FileUploadParams } from 'os/services/ship/ship.service';
 
 export const createPeopleForm = (
   defaults: any = {
@@ -416,7 +416,6 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                       name="new-chat-patp-search"
                       tabIndex={1}
                       width="100%"
-                      className="realm-cursor-text-cursor"
                       placeholder="Add someone?"
                       // TODO disable if not permissioned
                       value={person.state.value}

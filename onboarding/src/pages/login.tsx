@@ -1,7 +1,8 @@
 import { GetServerSideProps } from 'next';
-import { LoginDialog } from '@holium/shared';
+import { Anchor } from '@holium/design-system/general';
+import { LoginDialog, OnboardDialogDescription } from '@holium/shared';
 import { Page } from '../components/Page';
-import { api } from '../util/api';
+import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
 type Props = {
@@ -27,26 +28,31 @@ export default function Login({ prefilledEmail, redirectAfterLogin }: Props) {
   const onNoAccount = () => goToPage('/');
 
   const onLogin = async (email: string, password: string) => {
-    try {
-      const response = await api.login(email, password);
-      localStorage.setItem('token', response.token);
+    const response = await thirdEarthApi.login(email, password);
 
-      if (redirectAfterLogin) goToPage(redirectAfterLogin as any);
-      else goToPage('/account');
-
-      return Boolean(response);
-    } catch (error) {
-      console.error(error);
-
+    if (!response.token || !response.email) {
       return false;
+    } else {
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('email', response.email);
     }
+
+    if (redirectAfterLogin) goToPage(redirectAfterLogin as any);
+    else goToPage('/account');
+
+    return true;
   };
 
   return (
     <Page title="Login">
       <LoginDialog
+        label={
+          <OnboardDialogDescription>
+            Don't have an account yet?{' '}
+            <Anchor onClick={onNoAccount}>Sign up</Anchor>.
+          </OnboardDialogDescription>
+        }
         prefilledEmail={prefilledEmail}
-        onNoAccount={onNoAccount}
         onLogin={onLogin}
       />
     </Page>

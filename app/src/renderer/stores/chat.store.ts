@@ -11,9 +11,9 @@ import {
 import { Chat, ChatModelType } from './models/chat.model';
 import { shipStore, ShipStore } from './ship.store';
 import { RealmIPC, ChatIPC } from 'renderer/stores/ipc';
-import { RealmUpdateTypes } from 'os/realm.types';
 import { SpacesStoreType } from 'renderer/stores/models/spaces.model';
 import { toJS } from 'mobx';
+import { ChatUpdateTypes } from 'os/services/ship/chat/chat.types';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
@@ -124,13 +124,13 @@ export const ChatStore = types
     init: flow(function* () {
       try {
         self.inbox = yield ChatIPC.getChatList();
-        const pinnedChats = yield ChatIPC.fetchPinnedChats();
+        const pinnedChats = yield ChatIPC.fetchPinnedChats() as Promise<any>;
         localStorage.setItem(
           `${window.ship}-pinnedChats`,
           JSON.stringify(pinnedChats)
         );
 
-        const muted = yield ChatIPC.fetchMuted();
+        const muted = yield ChatIPC.fetchMuted() as Promise<any>;
         self.inbox.forEach((chat) => {
           chat.setMuted(muted.includes(chat.path));
         });
@@ -168,7 +168,7 @@ export const ChatStore = types
         } else {
           self.pinnedChats.remove(path);
         }
-        yield ChatIPC.togglePinnedChat(path, pinned);
+        yield ChatIPC.togglePinnedChat(path, pinned) as Promise<any>;
         localStorage.setItem(
           `${window.ship}-pinnedChats`,
           JSON.stringify(self.pinnedChats)
@@ -202,7 +202,7 @@ export const ChatStore = types
           creator: creator,
           timestamp: Date.now().toString(),
           reactions: 'true',
-        });
+        }) as Promise<any>;
       } catch (e) {
         console.error('Failed to create chat');
       }
@@ -217,7 +217,7 @@ export const ChatStore = types
           }
           self.inbox.remove(chat);
           self.pinnedChats.remove(path);
-          yield ChatIPC.leaveChat(path);
+          yield ChatIPC.leaveChat(path) as Promise<any>;
         } else {
           console.info(`chat ${path} not found`);
         }
@@ -226,6 +226,7 @@ export const ChatStore = types
       }
     }),
     onPathsAdded(path: any) {
+      console.log('onPathsAdded', toJS(path));
       self.inbox.push(path);
     },
     // This is a handler for onDbChange
@@ -253,12 +254,11 @@ export const ChatStore = types
 
 // -------------------------------
 // TODO Write a caching layer for the inbox
-const pinnedChats = localStorage.getItem(`${window.ship}-pinnedChats`);
 
 export const chatStore = ChatStore.create({
   subroute: 'inbox',
   isOpen: false,
-  pinnedChats: pinnedChats ? JSON.parse(pinnedChats) : [],
+  pinnedChats: [],
 });
 
 // -------------------------------
@@ -278,8 +278,8 @@ export function useChatStore() {
   return store;
 }
 
-RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
-  if (update.type === 'authenticated') {
+RealmIPC.onUpdate((update) => {
+  if (update.type === 'auth-success') {
     shipStore.chatStore.init();
     shipStore.walletStore.init();
   }
@@ -293,9 +293,7 @@ RealmIPC.onUpdate((_event: any, update: RealmUpdateTypes) => {
 // });
 // -------------------------------
 // Listen for changes
-type ChatUpdateTypes = { type: string; payload: any };
-ChatIPC.onUpdate((_event: any, { type, payload }: ChatUpdateTypes) => {
-  console.log('got chat update', type, payload);
+ChatIPC.onUpdate(({ type, payload }: ChatUpdateTypes) => {
   if (type === 'path-added') {
     console.log('onPathsAdded', toJS(payload));
     shipStore.chatStore.onPathsAdded(payload);

@@ -1,7 +1,7 @@
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection, PokeParams, Scry } from '../api';
 
-export class RoomsService extends AbstractService {
+export class RoomsService extends AbstractService<any> {
   constructor(options?: ServiceOptions) {
     super('roomsService', options);
     if (options?.preload) {

@@ -8,6 +8,7 @@ import {
   NotifDbChangeReactions,
   NotifDbOps,
   NotificationsRow,
+  NotifUpdateType,
   UpdateRow,
 } from './notifications.types';
 
@@ -30,11 +31,6 @@ interface NotificationRow {
   dismissed: boolean;
 }
 
-// type NotifMobxUpdateType =
-//   | 'notification-added'
-//   | 'notification-updated'
-//   | 'notification-deleted';
-
 type GetParamsObj = {
   app?: string;
   path?: string;
@@ -42,7 +38,10 @@ type GetParamsObj = {
   excludeRead?: boolean;
 };
 
-export class NotificationsDB extends AbstractDataAccess<NotificationRow> {
+export class NotificationsDB extends AbstractDataAccess<
+  NotificationRow,
+  NotifUpdateType
+> {
   constructor(params: DataAccessContructorParams) {
     params.name = 'notifDB';
     params.tableName = 'notifications';
@@ -184,7 +183,7 @@ export class NotificationsDB extends AbstractDataAccess<NotificationRow> {
         @dismissed
       )`
     );
-    const insertMany = this.db.transaction((notifications) => {
+    const insertMany = this.db.transaction((notifications: any) => {
       if (!notifications) return;
       for (const notif of notifications) {
         insert.run({

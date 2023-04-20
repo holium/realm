@@ -15,6 +15,7 @@ import {
   WalletView,
 } from './models/wallet.model';
 import { FeaturedStore } from './models/featured.model';
+import { LoaderModel } from './models/common.model';
 
 const ShipModel = types
   .model('ShipModel', {
@@ -45,6 +46,7 @@ export const ShipStore = types
     bazaarStore: BazaarStore,
     walletStore: WalletStore,
     featuredStore: FeaturedStore,
+    loader: LoaderModel,
   })
   .actions((self) => ({
     setShip(ship: any) {
@@ -110,8 +112,6 @@ const loadBazaarSnapshot = (): SnapshotIn<BazaarStoreType> => {
   };
 };
 
-const pinnedChats = localStorage.getItem(`${window.ship}-pinnedChats`);
-
 export const shipStore = ShipStore.create({
   notifStore: {
     notifications: [],
@@ -122,10 +122,13 @@ export const shipStore = ShipStore.create({
   chatStore: {
     subroute: 'inbox',
     isOpen: false,
-    pinnedChats: pinnedChats ? JSON.parse(pinnedChats) : [],
+    pinnedChats: [],
   },
   spacesStore: {
     spaces: {},
+    loader: {
+      state: 'loading',
+    },
   },
   bazaarStore: loadBazaarSnapshot(),
   walletStore: {
@@ -178,6 +181,9 @@ export const shipStore = ShipStore.create({
   },
   featuredStore: {
     spaces: {},
+  },
+  loader: {
+    state: 'initial',
   },
 });
 
