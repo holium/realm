@@ -6,19 +6,18 @@ export type ConduitSession = {
   url: string;
   ship: string;
   code: string;
-  cookie?: string;
+  cookie: string;
 };
 
 export class APIConnection {
   private static instance: APIConnection;
   private conduitInstance: Conduit;
-  private isResuming = false;
   private isReconnecting = false;
   private session: ConduitSession;
 
   private constructor(session: ConduitSession) {
     this.session = session;
-    this.conduitInstance = new Conduit();
+    this.conduitInstance = new Conduit(session.ship);
     this.handleConnectionStatus(this.conduitInstance);
     this.conduitInstance
       .init(
@@ -36,7 +35,7 @@ export class APIConnection {
     session: ConduitSession
   ): Promise<APIConnection> {
     if (!APIConnection.instance) {
-      const conduit = new Conduit();
+      const conduit = new Conduit(session.ship);
       await conduit.init(session.url, session.cookie ?? '', session.code);
       APIConnection.instance = new APIConnection(session);
     }
@@ -97,7 +96,7 @@ export class APIConnection {
     });
     conduit.on(ConduitState.Failed, () => {
       // this.services.identity.auth.setLoader('error');
-      this.isResuming = false;
+      // this.isResuming = false;
       this.isReconnecting = false;
       this.sendConnectionStatus(ConduitState.Failed);
     });

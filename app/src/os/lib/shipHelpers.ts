@@ -1,3 +1,5 @@
+import fetch from 'cross-fetch';
+
 export interface ShipConnectionData {
   patp: string;
   url: string;
@@ -8,7 +10,6 @@ export async function getCookie(ship: ShipConnectionData) {
   const response = await fetch(`${ship.url}/~/login`, {
     method: 'POST',
     body: `password=${ship.code.trim()}`,
-    credentials: 'include',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },

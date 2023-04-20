@@ -11,6 +11,7 @@ import { Onboarding } from './onboarding/Onboarding';
 import { ErrorBoundary } from './system/ErrorBoundary';
 import { Auth } from './system/authentication/index';
 import { Splash } from './onboarding/Splash';
+import { RealmIPC } from './stores/ipc';
 
 function AppContentPresenter() {
   const { seenSplash, authStore, booted } = useAppState();
@@ -53,6 +54,7 @@ const AppPresenter = () => {
   const bgImage = useMemo(() => theme.wallpaper, [theme.wallpaper]);
 
   useEffect(() => {
+    RealmIPC.boot();
     return () => {
       shellStore.closeDialog();
     };

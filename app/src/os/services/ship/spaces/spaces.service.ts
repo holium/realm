@@ -35,7 +35,9 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
     this.featuredSpacesDB = new FeaturedSpacesDB(false, db);
 
     this._onEvent = this._onEvent.bind(this);
+  }
 
+  public async init() {
     APIConnection.getInstance().conduit.watch({
       app: 'spaces',
       path: `/updates`,
@@ -43,9 +45,6 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
       onQuit: this._onQuit,
       onError: this._onError,
     });
-  }
-
-  public async init() {
     this.fetchInviteData();
   }
 

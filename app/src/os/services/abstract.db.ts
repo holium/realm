@@ -191,7 +191,7 @@ abstract class AbstractDataAccess<T, U = unknown> {
 
     methods.forEach((method) => {
       const ipcChannel = `${this.name}.${method}`;
-      ipcMain.removeAllListeners(ipcChannel);
+      ipcMain.removeHandler(ipcChannel);
       ipcMain.handle(
         ipcChannel,
         async (_event: IpcMainInvokeEvent, ...args: any[]) => {

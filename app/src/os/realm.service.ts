@@ -42,9 +42,9 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     };
 
     this.onWebViewAttached = this.onWebViewAttached.bind(this);
-    const session = this._hydrateSessionIfExists();
-    if (session)
-      this._sendAuthenticated(session.patp, session.url, session.cookie);
+    // const session = this._hydrateSessionIfExists();
+    // if (session)
+    //   this._sendAuthenticated(session.patp, session.url, session.cookie);
     app.on('quit', () => {
       // do other cleanup here
     });
@@ -74,8 +74,8 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     const hasSession = this.services?.auth.session;
     let session;
     if (hasSession) {
-      session = this._hydrateSessionIfExists();
-      this.services?.ship?.init();
+      // session = this._hydrateSessionIfExists();
+      // this.services?.ship?.init();
     }
 
     this.sendUpdate({
@@ -84,6 +84,102 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         accounts: this.services?.auth.getAccounts() || undefined,
         session,
         seenSplash: this.services?.auth.hasSeenSplash() || false,
+      },
+    });
+  }
+
+  /**
+   * ------------------------------
+   * login
+   * ------------------------------
+   * Login to a ship, unlock the db, and start the ship service.
+   *
+   * @param patp
+   * @param password
+   * @returns
+   */
+  async login(patp: string, password: string): Promise<boolean> {
+    if (!this.services) {
+      return false;
+    }
+    log.info('LOGIN EVENT');
+
+    const account = this.services.auth.getAccount(patp);
+    if (!account) {
+      log.info(`No account found for ${patp}`);
+      return false;
+    }
+    const isAuthenticated = this.services.auth._verifyPassword(
+      password,
+      account.passwordHash
+    );
+
+    if (!isAuthenticated) {
+      log.warn(`${patp} failed to authenticate`);
+      this.sendUpdate({
+        type: 'auth-failed',
+        payload: 'password',
+      });
+      return false;
+    }
+    if (isAuthenticated) {
+      track('login', { patp });
+      log.info(`${patp} authenticated`);
+      const key = await this.services.auth.deriveDbKey(password);
+      if (this.services.ship) this.services.ship.cleanup();
+      this.services.ship = new ShipService(patp, key);
+      const credentials = this.services.ship.credentials;
+      return new Promise((resolve) => {
+        APIConnection.getInstance(credentials).conduit.on('connected', () => {
+          if (!this.services) return;
+          // this.services.auth._setSession(patp, key);
+          this.services.ship?.init();
+          this._sendAuthenticated(patp, credentials.url, credentials.cookie);
+          resolve(true);
+        });
+      });
+    }
+    return isAuthenticated;
+  }
+
+  async logout(patp: string) {
+    if (!this.services) {
+      return;
+    }
+    this.services.ship?.cleanup();
+    delete this.services.ship;
+    this.services.auth._clearSession();
+    this.sendUpdate({
+      type: 'logout',
+      payload: {
+        patp,
+      },
+    });
+  }
+
+  async updatePassport(
+    patp: string,
+    nickname: string,
+    description: string,
+    avatar: string
+  ) {
+    if (!this.services) return;
+
+    return this.services.auth.updatePassport(
+      patp,
+      nickname,
+      description,
+      avatar
+    );
+  }
+
+  private _sendAuthenticated(patp: string, url: string, cookie: string) {
+    this.sendUpdate({
+      type: 'auth-success',
+      payload: {
+        patp,
+        url,
+        cookie,
       },
     });
   }
@@ -141,84 +237,6 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     }
 
     return sanitizedCookie;
-  }
-
-  async login(patp: string, password: string): Promise<boolean> {
-    if (!this.services) {
-      return false;
-    }
-
-    const account = this.services.auth.getAccount(patp);
-    if (!account) {
-      log.info(`No account found for ${patp}`);
-      return false;
-    }
-    const isAuthenticated = this.services.auth._verifyPassword(
-      password,
-      account.passwordHash
-    );
-
-    if (!isAuthenticated) {
-      log.warn(`${patp} failed to authenticate`);
-      this.sendUpdate({
-        type: 'auth-failed',
-        payload: 'password',
-      });
-      return false;
-    }
-    if (isAuthenticated) {
-      track('login', { patp });
-      log.info(`${patp} authenticated`);
-      const key = await this.services.auth.deriveDbKey(password);
-      if (this.services.ship) this.services.ship.cleanup();
-      this.services.ship = new ShipService(patp, key);
-      const credentials = this.services.ship.credentials;
-      this.services.auth._setSession(patp, key);
-      this._sendAuthenticated(patp, credentials.url, credentials.cookie);
-    }
-    return isAuthenticated;
-  }
-
-  async logout(patp: string) {
-    if (!this.services) {
-      return;
-    }
-    this.services.ship?.cleanup();
-    delete this.services.ship;
-    this.services.auth._clearSession();
-    this.sendUpdate({
-      type: 'logout',
-      payload: {
-        patp,
-      },
-    });
-  }
-
-  async updatePassport(
-    patp: string,
-    nickname: string,
-    description: string,
-    avatar: string
-  ) {
-    if (!this.services) return;
-
-    return this.services.auth.updatePassport(
-      patp,
-      nickname,
-      description,
-      avatar
-    );
-  }
-
-  private _sendAuthenticated(patp: string, url: string, cookie: string) {
-    this.sendUpdate({
-      type: 'auth-success',
-      payload: {
-        patp,
-        url,
-        cookie,
-      },
-    });
   }
 
   async getReleaseChannel(): Promise<string> {

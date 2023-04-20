@@ -71,30 +71,30 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
     );
     // trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
 
-    // if (status) {
-    //   // setAccount(selectedShip);
-    // }
-    //
-    // if (status && status.startsWith('error:')) {
-    //   if (submitRef.current) {
-    //     // @ts-ignore
-    //     submitRef.current.blur();
-    //   }
-    //   const parts = status.split(':');
-    //   // see: https://github.com/orgs/holium/projects/10?pane=issue&itemId=18867662
-    //   //  assume 400 means they may have changed ship code. ask them to enter the new one.
-    //   if (parts.length > 1 && parseInt(parts[1]) === 400) {
-    //     setLoginError('missing');
-    //     ShellActions.openDialogWithStringProps('reset-code-dialog', {
-    //       ship: selectedShip.patp,
-    //       // @ts-ignore
-    //       password: passwordRef.current?.value,
-    //     });
-    //   } else {
-    //     // assume all others are incorrect passwords
-    //     setLoginError('password');
-    //   }
-    // }
+    if (status) {
+      // setAccount(selectedShip);
+    }
+
+    if (status && status.state === 'error') {
+      if (submitRef.current) {
+        // @ts-ignore
+        submitRef.current.blur();
+      }
+      // const parts = status.split(':');
+      // // see: https://github.com/orgs/holium/projects/10?pane=issue&itemId=18867662
+      // //  assume 400 means they may have changed ship code. ask them to enter the new one.
+      // if (parts.length > 1 && parseInt(parts[1]) === 400) {
+      //   setLoginError('missing');
+      //   ShellActions.openDialogWithStringProps('reset-code-dialog', {
+      //     ship: selectedShip.patp,
+      //     // @ts-ignore
+      //     password: passwordRef.current?.value,
+      //   });
+      // } else {
+      //   // assume all others are incorrect passwords
+      //   setLoginError('password');
+      // }
+    }
     // trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
   };
   const clickSubmit = async (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -115,7 +115,6 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   const submitPassword = () => {
     passwordRef.current?.blur();
     submitRef.current?.click();
-    login();
   };
 
   const accountMenuId = `${selectedShip.patp}-account-menu`;

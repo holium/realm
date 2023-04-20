@@ -15,7 +15,7 @@ import {
   SubscribeParams,
   Thread,
 } from './types';
-import { preSig } from '@urbit/aura';
+import { deSig, preSig } from '@urbit/aura';
 
 // For now, set it to 20
 setMaxListeners(20);
@@ -30,7 +30,7 @@ export class Conduit extends EventEmitter {
   private prevMsgId: number = 0;
   private lastAckId: number = 0;
   cookie: string | null = null;
-  ship: string | null = null;
+  ship: string;
   pokes: Map<number, PokeParams & PokeCallbacks>;
   watches: Map<number, SubscribeParams & SubscribeCallbacks>;
   idleWatches: Map<number, SubscribeParams & SubscribeCallbacks>;
@@ -42,8 +42,9 @@ export class Conduit extends EventEmitter {
   private code: string | undefined = undefined;
   private sse: EventSource | undefined;
 
-  constructor() {
+  constructor(patp: string) {
     super();
+    this.ship = deSig(patp);
     this.pokes = new Map();
     this.watches = new Map();
     this.idleWatches = new Map();

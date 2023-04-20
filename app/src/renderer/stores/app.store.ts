@@ -135,7 +135,6 @@ export function useAppState() {
 }
 
 let isOnUpdateRegistered = false;
-RealmIPC.boot();
 
 function registerOnUpdateListener() {
   if (isOnUpdateRegistered) {
@@ -278,8 +277,8 @@ function registerOnUpdateListener() {
       // BazaarIPC.reset();
       // SpacesIPC.reset();
       // NotifIPC.reset();
-      AuthIPC.removeHandlers && AuthIPC.removeHandlers();
-      RealmIPC.removeHandlers && RealmIPC.removeHandlers();
+      // AuthIPC.removeHandlers && AuthIPC.removeHandlers();
+      // RealmIPC.removeHandlers && RealmIPC.removeHandlers();
       // The event was triggered by a refresh or navigation
       // Your code to handle the refresh event here
     } else {

@@ -107,7 +107,7 @@ abstract class AbstractService<U = unknown> {
     methods.forEach((method) => {
       const ipcChannel = `${this.serviceName}.${method}`;
       // first remove any existing handlers
-      ipcMain.removeAllListeners(ipcChannel);
+      ipcMain.removeHandler(ipcChannel);
       ipcMain.handle(
         ipcChannel,
         async (_event: IpcMainInvokeEvent, ...args: any[]) => {

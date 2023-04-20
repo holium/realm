@@ -115,6 +115,7 @@ export class ShipService extends AbstractService<any> {
   // TODO initialize the ship services here
   public init() {
     this.services?.spaces.init();
+    this.services?.bazaar.init();
   }
 
   public updateCookie(cookie: string) {
