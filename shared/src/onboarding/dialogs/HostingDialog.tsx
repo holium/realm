@@ -44,7 +44,7 @@ export const HostingDialog = ({
   <OnboardDialog
     icon={<HostingIcon />}
     body={
-      <Flex flexDirection="column" gap={16} marginBottom={30}>
+      <Flex flexDirection="column" gap={16}>
         <OnboardDialogTitle>Hosting</OnboardDialogTitle>
         <OnboardDialogDescription maxWidth={417}>
           Signup for Realm hosting or enter your existing server connection

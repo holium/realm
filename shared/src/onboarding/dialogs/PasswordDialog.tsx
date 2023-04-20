@@ -49,10 +49,12 @@ export const PasswordDialog = ({ onBack, onNext }: Props) => {
       icon={<PasswordIcon />}
       body={
         <>
-          <OnboardDialogTitle>Password</OnboardDialogTitle>
-          <OnboardDialogDescription>
-            This password will encrypt your local data.
-          </OnboardDialogDescription>
+          <Flex flexDirection="column" gap={16} mb={12}>
+            <OnboardDialogTitle>Password</OnboardDialogTitle>
+            <OnboardDialogDescription>
+              This password will encrypt your local data.
+            </OnboardDialogDescription>
+          </Flex>
           <Flex flexDirection="column" gap={2}>
             <OnboardDialogInputLabel as="label" htmlFor="login-password">
               Password

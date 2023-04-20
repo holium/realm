@@ -34,6 +34,8 @@ export const InstallationDialog = ({
   const successfullInstall = useToggle(false);
 
   const handleInstallRealm = async () => {
+    if (installing.isOn || successfullInstall.isOn) return;
+
     installing.toggleOn();
 
     const result = await onInstallRealm();
@@ -42,11 +44,23 @@ export const InstallationDialog = ({
     installing.toggleOff();
   };
 
+  const buttonText = () => {
+    if (successfullInstall.isOn) return 'Installed';
+    if (installing.isOn) return 'Installing...';
+    return 'Install Realm';
+  };
+
+  const buttonIcon = () => {
+    if (successfullInstall.isOn) return <Icon name="CheckCircle" size={24} />;
+    if (installing.isOn) return <Spinner size="20px" />;
+    return <Icon name="DownloadCircle" size={24} />;
+  };
+
   return (
     <OnboardDialog
       icon={<DownloadIcon />}
       body={
-        <Flex flexDirection="column" gap={16} marginBottom={30}>
+        <Flex flexDirection="column" gap={16}>
           <OnboardDialogTitle>Installation</OnboardDialogTitle>
           <OnboardDialogDescription maxWidth={380}>
             We need to install Realm as an agent on your server. It handles core
@@ -54,17 +68,14 @@ export const InstallationDialog = ({
           </OnboardDialogDescription>
           <InstallRealmButton
             type="button"
+            color={successfullInstall.isOn ? 'intent-success' : 'accent'}
             disabled={installing.isOn}
             onClick={handleInstallRealm}
           >
-            Install Realm
-            {installing.isOn ? (
-              <Flex width={24} height={24} justifyContent="center">
-                <Spinner size="20px" />
-              </Flex>
-            ) : (
-              <Icon name="DownloadCircle" size={24} />
-            )}
+            {buttonText()}
+            <Flex width={24} height={24} justifyContent="center">
+              {buttonIcon()}
+            </Flex>
           </InstallRealmButton>
         </Flex>
       }

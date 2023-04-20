@@ -38,6 +38,11 @@ export const PassportStep = ({ setStep, onFinish }: Props) => {
   ) => {
     if (!patp) return false;
 
+    // Set in localstorage in case they go back.
+    localStorage.setItem('nickname', nickname);
+    localStorage.setItem('description', description);
+    localStorage.setItem('avatar', avatar);
+
     RealmIPC.updatePassport(patp, nickname, description, avatar);
 
     const isHosted = localStorage.getItem('isHosted');
@@ -46,7 +51,7 @@ export const PassportStep = ({ setStep, onFinish }: Props) => {
       onFinish?.();
       setStep('/login');
     } else {
-      setStep('/password');
+      setStep('/installation');
     }
 
     return true;
@@ -55,6 +60,9 @@ export const PassportStep = ({ setStep, onFinish }: Props) => {
   return (
     <PassportDialog
       patp={patp}
+      prefilledNickname={localStorage.getItem('nickname') ?? ''}
+      prefilledDescription={localStorage.getItem('description') ?? ''}
+      prefilledAvatarSrc={localStorage.getItem('avatar') ?? ''}
       onUploadFile={onUploadFile}
       onBack={onBack}
       onNext={handleOnNext}

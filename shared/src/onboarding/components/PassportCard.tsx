@@ -14,14 +14,14 @@ const PassportCardContainer = styled(Flex)`
   background-color: rgba(var(--rlm-window-rgba));
 `;
 
-const UsernameInput = styled(Input)`
+const NicknameInput = styled(Input)`
   font-size: 16px;
   padding: 8px;
   border-radius: 4px;
   filter: brightness(0.96);
 `;
 
-const DescriptionTextArea = styled(UsernameInput)`
+const DescriptionTextArea = styled(NicknameInput)`
   font-size: 13px;
   padding: 4px 8px;
   resize: none;
@@ -32,9 +32,9 @@ const DescriptionTextArea = styled(UsernameInput)`
 
 type Props = {
   patp: string;
-  username: string;
+  nickname: string;
   description: string;
-  setUsername: (username: string) => void;
+  setNickname: (nickname: string) => void;
   setDescription: (description: string) => void;
   setAvatarSrc: (src?: string) => void;
   onUploadFile: (file: File) => Promise<string | undefined>;
@@ -42,9 +42,9 @@ type Props = {
 
 export const PassportCard = ({
   patp,
-  username,
+  nickname,
   description,
-  setUsername,
+  setNickname,
   setDescription,
   setAvatarSrc,
   onUploadFile,
@@ -62,11 +62,11 @@ export const PassportCard = ({
       />
       <Flex flex={1} flexDirection="column" gap={16}>
         <Flex flexDirection="column" gap={6}>
-          <UsernameInput
+          <NicknameInput
             required
             placeholder="Your nickname"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
           />
           <AccountDialogSubtitle>ID: {patp}</AccountDialogSubtitle>
         </Flex>

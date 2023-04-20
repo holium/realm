@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
 import { InstallationDialog } from '@holium/shared';
 import { StepProps } from './types';
+import { RealmIPC } from 'renderer/stores/ipc';
 
 type Props = {
   onFinish?: () => void;
@@ -13,14 +14,15 @@ export const InstallationStep = ({ setStep, onFinish }: Props) => {
   });
 
   const onBack = () => {
-    setStep('/login');
+    setStep('/passport');
   };
 
-  const onInstallRealm = () => {
+  const onInstallRealm = async () => {
+    await RealmIPC.setReleaseChannel('latest');
     return Promise.resolve(true);
   };
 
-  const onNext = () => {
+  const onNext = async () => {
     onFinish?.();
     return Promise.resolve(true);
   };

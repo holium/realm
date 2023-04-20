@@ -19,7 +19,7 @@ import { LoginDialog } from '../LoginDialog';
 
 export default {
   component: CreateAccountDialog,
-  title: 'Onboarding/Buy Ship DESKTOP',
+  title: 'Onboarding/Buy Server DESKTOP',
 } as ComponentMeta<typeof CreateAccountDialog>;
 
 export const LoginDialogStory: ComponentStory<typeof LoginDialog> = () => (
@@ -131,6 +131,9 @@ export const PassportDialogStory: ComponentStory<
   <OnboardingDialogWrapper>
     <PassportDialog
       patp="~pasren-satmex"
+      prefilledNickname=""
+      prefilledDescription=""
+      prefilledAvatarSrc=""
       onUploadFile={() => Promise.reject()}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}

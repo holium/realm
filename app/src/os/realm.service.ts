@@ -10,7 +10,10 @@ import { track } from '@amplitude/analytics-browser';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { AuthService } from './services/auth/auth.service';
 import { ShipService } from './services/ship/ship.service';
-import { getReleaseChannel, setReleaseChannel } from './lib/settings';
+import {
+  getReleaseChannelFromSettings,
+  saveReleaseChannelInSettings,
+} from './lib/settings';
 import { getCookie } from './lib/shipHelpers';
 import { APIConnection } from './services/api';
 import { MasterAccount } from './services/auth/masterAccounts.table';
@@ -246,12 +249,13 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   }
 
   async getReleaseChannel(): Promise<string> {
-    return getReleaseChannel();
+    return getReleaseChannelFromSettings();
   }
 
   setReleaseChannel(channel: string) {
-    let ship = undefined;
-    let desks = undefined;
+    let ship;
+    let desks;
+
     // INSTALL_MOON is a string of format <moon>:<desk>,<desk>,<desk>,...
     // example: INSTALL_MOON=~hostyv:realm
     if (process.env.INSTALL_MOON && process.env.INSTALL_MOON !== 'bypass') {
@@ -277,7 +281,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         },
       });
     }
-    setReleaseChannel(channel);
+    saveReleaseChannelInSettings(channel);
   }
 
   async onWillRedirect(url: string, webContents: any) {

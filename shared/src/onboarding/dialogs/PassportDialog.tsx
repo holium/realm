@@ -26,10 +26,13 @@ const ListItem = styled(AccountDialogSubtitle)`
 
 type Props = {
   patp: string | null;
+  prefilledNickname: string;
+  prefilledDescription: string;
+  prefilledAvatarSrc: string;
   onUploadFile: (file: File) => Promise<string | undefined>;
   onBack: () => void;
   onNext: (
-    username: string,
+    nickname: string,
     description?: string,
     avatarSrc?: string
   ) => Promise<boolean>;
@@ -37,16 +40,21 @@ type Props = {
 
 export const PassportDialog = ({
   patp,
+  prefilledNickname,
+  prefilledDescription,
+  prefilledAvatarSrc,
   onUploadFile,
   onBack,
   onNext,
 }: Props) => {
-  const [username, setUsername] = useState('');
-  const [description, setDescription] = useState('');
-  const [avatarSrc, setAvatarSrc] = useState<string>();
+  const [nickname, setNickname] = useState(prefilledNickname);
+  const [description, setDescription] = useState(prefilledDescription);
+  const [avatarSrc, setAvatarSrc] = useState<string | undefined>(
+    prefilledAvatarSrc
+  );
 
   const handleOnNext = () => {
-    if (username) return onNext(username, description, avatarSrc);
+    if (nickname) return onNext(nickname, description, avatarSrc);
     return Promise.resolve(false);
   };
 
@@ -71,9 +79,9 @@ export const PassportDialog = ({
           {patp ? (
             <PassportCard
               patp={patp}
-              username={username}
+              nickname={nickname}
               description={description}
-              setUsername={setUsername}
+              setNickname={setNickname}
               setDescription={setDescription}
               setAvatarSrc={setAvatarSrc}
               onUploadFile={onUploadFile}
