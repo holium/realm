@@ -11,6 +11,7 @@ import {
 import { ProtocolManager } from './protocols/ProtocolManager';
 import { EthereumProtocol } from './protocols/ethereum';
 import { BaseBlockProtocol } from './protocols/BaseBlockProtocol';
+import { BaseProtocol } from './protocols/BaseProtocol';
 
 export class WalletService extends AbstractService {
   public walletDB?: WalletDB;
@@ -21,6 +22,15 @@ export class WalletService extends AbstractService {
       return;
     }
     this.walletDB = new WalletDB({ preload: false, db });
+    const protocolMap = new Map<ProtocolType, BaseProtocol>([
+      [ProtocolType.ETH_MAIN, new EthereumProtocol(ProtocolType.ETH_MAIN)],
+      [ProtocolType.ETH_GORLI, new EthereumProtocol(ProtocolType.ETH_GORLI)],
+      // [ProtocolType.UQBAR, new UqbarProtocol()],
+    ]);
+    this.protocolManager = new ProtocolManager(
+      protocolMap,
+      ProtocolType.ETH_GORLI
+    );
   }
 
   async uqbarDeskExists(_evt: any) {
@@ -189,6 +199,38 @@ export class WalletService extends AbstractService {
       console.error(e);
       return null;
     }
+  }
+
+  async saveTransactionNotes(
+    network: string,
+    net: string,
+    wallet: number,
+    contract: string | null,
+    hash: string,
+    notes: string
+  ) {
+    const payload = {
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
+      json: {
+        'set-transaction-notes': {
+          network,
+          net,
+          wallet,
+          contract,
+          hash,
+          notes,
+        },
+      },
+    };
+    await APIConnection.getInstance().conduit.poke(payload);
+  }
+
+  watchUpdates() {
+    this.protocolManager?.watchUpdates(
+      APIConnection.getInstance().conduit,
+      this.walletDB
+    );
   }
 }
 

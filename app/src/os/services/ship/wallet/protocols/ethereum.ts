@@ -22,6 +22,7 @@ import {
 } from 'renderer/stores/models/wallet.model';
 import { ethers } from 'ethers';
 import io from 'socket.io-client';
+import { WalletDB } from '../wallet.db';
 
 declare var global: any;
 global.fetch = fetch;
@@ -82,7 +83,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
     this.interval = null;
   }
 
-  watchUpdates(conduit: any, walletStore: WalletStoreType) {
+  watchUpdates(conduit: any, walletDB: WalletDB) {
     this.updateWalletState(conduit, walletStore);
     try {
       const socket = io(this.baseURL);
@@ -142,7 +143,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
             (wallet as EthWalletType).data
               .get(this.protocol)
               ?.transactionList.applyChainTransactions(
-                conduit,
                 this.protocol,
                 wallet.index,
                 wallet.address,

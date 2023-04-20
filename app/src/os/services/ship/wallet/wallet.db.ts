@@ -78,27 +78,6 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   private _onDbUpdate(data: any /*WalletDbReactions*/, _id?: number) {
     console.log('sending wallet update', data);
     this.sendUpdate(data);
-    /*if ('tables' in data) {
-      this._insertTransactions(data.tables.transactions);
-      this._insertWallets(data.tables.wallets);
-    } else if (Array.isArray(data)) {
-      if (
-        data.length > 1 &&
-        data[0].type === 'add-row' &&
-        data[0].table === 'transactions'
-      ) {
-        const transactions = data.map(
-          (row) => (row as AddRow).row as WalletsRow
-        ) as TransactionsRow[];
-        this._insertTransactions(transactions);
-        const msg = this.getChatMessage(transactions[0]['msg-id']);
-        this.sendUpdate({ type: 'transaction-received', payload: msg });
-      } else {
-        data.forEach(this._handleDBChange);
-      }
-    } else {
-      console.log(data);
-    }*/
   }
 
   private _handleDBChange(dbChange: WalletDbOps) {

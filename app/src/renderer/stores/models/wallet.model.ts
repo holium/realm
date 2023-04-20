@@ -1172,11 +1172,21 @@ export const WalletStore = types
         if (self.navState.network === NetworkType.ETHEREUM) {
           if (self.navState.protocol === ProtocolType.ETH_MAIN) {
             this.setProtocolSetter(ProtocolType.ETH_GORLI);
+            this.protocolWatchUpdates(ProtocolType.ETH_GORLI);
           } else if (self.navState.protocol === ProtocolType.ETH_GORLI) {
             this.setProtocolSetter(ProtocolType.ETH_MAIN);
+            this.protocolWatchUpdates(ProtocolType.ETH_MAIN);
           }
         }
       },
+      watchUpdates: flow(function* (): Generator<PromiseLike<any>, void, any> {
+        yield WalletIPC.watchUpdates() as PromiseLike<any>;
+      }),
+      protocolWatchUpdates: flow(function* (
+        protocol: ProtocolType
+      ): Generator<PromiseLike<any>, void, any> {
+        yield WalletIPC.protocolWatchUpdates(protocol) as PromiseLike<any>;
+      }),
       setProtocol(_event: any, protocol: ProtocolType) {
         this.navigate(WalletView.LIST);
         if (self.navState.protocol !== protocol) {
@@ -1190,13 +1200,14 @@ export const WalletStore = types
         );
       },
       getRecipient: flow(function* (
-        patp: string
+        ship: string
       ): Generator<PromiseLike<any>, any, any> {
+        const patp = ship.includes('~') ? ship : `~${ship}`;
         const recipientMetadata: {
           color: string;
           avatar?: string;
           nickname?: string;
-        } = yield shipStore.friends.getContactAvatarMetadata(patp);
+        } = shipStore.friends.getContactAvatarMetadata(patp);
 
         const address = yield WalletIPC.getAddress() as PromiseLike<any>;
         return {
@@ -1205,6 +1216,26 @@ export const WalletStore = types
           recipientMetadata,
           address,
         };
+      }),
+      saveTransactionNotes: flow(function* (
+        notes: string
+      ): Generator<PromiseLike<any>, void, any> {
+        const network = self.navState.network;
+        const net = self.navState.protocol;
+        const contract =
+          self.navState.detail?.txtype === 'coin'
+            ? self.navState.detail.coinKey ?? null
+            : null;
+        const hash = self.navState.detail?.key ?? '';
+        const index = self.currentWallet?.index ?? 0;
+        yield WalletIPC.saveTransactionNotes(
+          network,
+          net,
+          index,
+          contract,
+          hash,
+          notes
+        ) as PromiseLike<any>;
       }),
     };
   });

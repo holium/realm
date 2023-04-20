@@ -6,6 +6,7 @@ import {
   WalletStoreType,
 } from 'renderer/stores/models/wallet.model';
 import { EthereumProtocol } from './ethereum';
+import { WalletDB } from '../wallet.db';
 
 export class ProtocolManager {
   protocols: Map<ProtocolType, BaseProtocol>;
@@ -30,7 +31,7 @@ export class ProtocolManager {
     }
   }
 
-  watchUpdates(conduit: any, walletState: WalletStoreType) {
+  watchUpdates(conduit: any, walletState: WalletDB) {
     if (
       this.currentProtocol === ProtocolType.ETH_MAIN ||
       this.currentProtocol === ProtocolType.ETH_GORLI
