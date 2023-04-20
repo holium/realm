@@ -16,6 +16,7 @@ import {
   Thread,
 } from './types';
 import { deSig, preSig } from '@urbit/aura';
+import log from 'electron-log';
 
 // For now, set it to 20
 setMaxListeners(20);
@@ -61,86 +62,6 @@ export class Conduit extends EventEmitter {
     return `${Math.floor(Date.now() / 1000)}-realm`;
   }
 
-  /**
-   * Global error handler for axios errors. For now , hook 403 responses and use
-   *  to indicate that cookie has expired (stale connection).
-   *
-   * @param err
-   * @returns
-   */
-  async handleError(err: any): Promise<any> {
-    return new Promise(async (resolve, reject) => {
-      if (err.status === 403 || err.response?.status === 403) {
-        // if (!this.code) {
-        //   console.log(
-        //     'warn: http request 403 error. unable to refresh token due to missing code'
-        //   );
-        //   reject(err);
-        //   return;
-        // }
-        // if (err.response) {
-        //   // The request was made and the server responded with a status code
-        //   // that falls out of the range of 2xx
-        //   console.log(err.response.data);
-        //   console.log(err.response.status);
-        //   console.log(err.response.headers);
-        // } else if (err.request) {
-        //   // The request was made but no response was received
-        //   // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        //   // http.ClientRequest in node.js
-        //   console.log(err.request);
-        // } else {
-        //   // Something happened in setting up the request that triggered an Error
-        //   console.log('Error', err.message);
-        // }
-        // console.log(err.config);
-        console.log(
-          '403 [stale connection] refreshing cookie => %o',
-          this.code
-        );
-        let cookie: string | undefined = undefined;
-        try {
-          this.updateStatus(ConduitState.Refreshing);
-          cookie = await Conduit.fetchCookie(this.url, this.code ?? '');
-          if (cookie) {
-            this.cookie = cookie;
-            this.updateStatus(ConduitState.Refreshed, {
-              url: this.url,
-              ship: preSig(this.ship),
-              cookie: this.cookie,
-              code: this.code,
-            });
-            if (err.originator === 'sse') {
-              await this.init(
-                this.url,
-                this.ship ?? '',
-                this.cookie,
-                this.code
-              );
-              resolve(undefined);
-              return;
-            }
-            err.config.headers['Cookie'] = cookie;
-            const result = await axios(err.config);
-            resolve(result);
-            return;
-          }
-          console.log('error: could not refresh token');
-          this.updateStatus(ConduitState.Failed);
-          reject(undefined);
-          return;
-        } catch (e) {
-          console.log(e);
-          reject(e);
-          return;
-        }
-      }
-      reject(err);
-      return;
-      // Promise.reject(err);
-    });
-  }
-
   updateStatus(status: ConduitState, ...args: any[]) {
     this.status = status;
     this.emit(status, ...args);
@@ -151,50 +72,20 @@ export class Conduit extends EventEmitter {
    * @param ship i.e. lomder-librun without the ~
    * @returns
    */
-  async init(
-    url: string,
-    ship: Patp,
-    cookie: string,
-    code: string | undefined = undefined
-  ): Promise<void> {
+  async init(url: string, code: string, cookie: string): Promise<void> {
     this.url = url;
-    this.ship = ship;
     this.cookie = cookie;
     this.code = code;
     this.uid = this.generateUID();
+    await this.poke({
+      app: 'hood',
+      mark: 'helm-hi',
+      json: 'Opening Realm API channel',
+    });
     await this.startSSE(this.channelUrl(this.uid));
   }
 
-  /**
-   * Refresh the underlying conduit cookie that's used for all interactions
-   *   with the ship.
-   * @param url ship root url (e.g. http://localhost:80)
-   * @returns
-   */
-  async refresh(url: string, code: string): Promise<string | undefined> {
-    this.url = url;
-    this.updateStatus(ConduitState.Refreshing);
-    const cookie: string | undefined = await Conduit.fetchCookie(url, code);
-    if (cookie === undefined) {
-      // console.log('Conduit.fetchCookie call failed with args => %o', {
-      //   url,
-      //   code,
-      // });
-      this.updateStatus(ConduitState.Failed);
-      return undefined;
-    }
-    this.cookie = cookie;
-    this.updateStatus(ConduitState.Refreshed, {
-      url: this.url,
-      ship: preSig(this.ship),
-      cookie: this.cookie,
-      code: this.code,
-    });
-    return this.cookie;
-  }
-
   async startSSE(channelUrl: string): Promise<void> {
-    console.log('startSSE ->>>>>', channelUrl, this.prevMsgId);
     if (this.status === ConduitState.Connected) {
       return Promise.resolve();
     }
@@ -214,7 +105,6 @@ export class Conduit extends EventEmitter {
       });
 
       this.sse.onopen = async (response) => {
-        console.log('ON SSE OPEN', response);
         if (response.type === 'open') {
           this.updateStatus(ConduitState.Connected);
           resolve();
@@ -328,6 +218,34 @@ export class Conduit extends EventEmitter {
         throw new Error('Ship unexpectedly closed the connection');
       });
     });
+  }
+
+  /**
+   * Refresh the underlying conduit cookie that's used for all interactions
+   *   with the ship.
+   * @param url ship root url (e.g. http://localhost:80)
+   * @returns
+   */
+  async refresh(url: string, code: string): Promise<string | undefined> {
+    this.url = url;
+    this.updateStatus(ConduitState.Refreshing);
+    const cookie: string | undefined = await Conduit.fetchCookie(url, code);
+    if (cookie === undefined) {
+      // console.log('Conduit.fetchCookie call failed with args => %o', {
+      //   url,
+      //   code,
+      // });
+      this.updateStatus(ConduitState.Failed);
+      return undefined;
+    }
+    this.cookie = cookie;
+    this.updateStatus(ConduitState.Refreshed, {
+      url: this.url,
+      ship: preSig(this.ship),
+      cookie: this.cookie,
+      code: this.code,
+    });
+    return this.cookie;
   }
 
   /**
@@ -582,6 +500,7 @@ export class Conduit extends EventEmitter {
   private async reconnectToChannel() {
     // if (this.reconnectTimeout !== 0) clearTimeout(this.reconnectTimeout);
     // this.uid = this.generateUID();
+    log.info('Conduit ---> reconnecting to channel');
     const channelId = this.channelUrl(this.uid);
     await this.startSSE(channelId)
       .then(() => {
@@ -626,7 +545,7 @@ export class Conduit extends EventEmitter {
             'postToChannel: ',
             `status is ${this.status}, reconnecting...`
           );
-          await this.startSSE(this.channelUrl(this.uid));
+          this.startSSE(this.channelUrl(this.uid));
         }
 
         return true;
@@ -716,5 +635,80 @@ export class Conduit extends EventEmitter {
       console.log(err);
     }
     return cookie;
+  }
+
+  /**
+   * Global error handler for axios errors. For now , hook 403 responses and use
+   *  to indicate that cookie has expired (stale connection).
+   *
+   * @param err
+   * @returns
+   */
+  async handleError(err: any): Promise<any> {
+    return new Promise(async (resolve, reject) => {
+      if (err.status === 403 || err.response?.status === 403) {
+        // if (!this.code) {
+        //   console.log(
+        //     'warn: http request 403 error. unable to refresh token due to missing code'
+        //   );
+        //   reject(err);
+        //   return;
+        // }
+        // if (err.response) {
+        //   // The request was made and the server responded with a status code
+        //   // that falls out of the range of 2xx
+        //   console.log(err.response.data);
+        //   console.log(err.response.status);
+        //   console.log(err.response.headers);
+        // } else if (err.request) {
+        //   // The request was made but no response was received
+        //   // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+        //   // http.ClientRequest in node.js
+        //   console.log(err.request);
+        // } else {
+        //   // Something happened in setting up the request that triggered an Error
+        //   console.log('Error', err.message);
+        // }
+        // console.log(err.config);
+        console.log(
+          '403 [stale connection] refreshing cookie => %o',
+          this.code
+        );
+        let cookie: string | undefined = undefined;
+        try {
+          this.updateStatus(ConduitState.Refreshing);
+          cookie = await Conduit.fetchCookie(this.url, this.code ?? '');
+          if (cookie) {
+            this.cookie = cookie;
+            this.updateStatus(ConduitState.Refreshed, {
+              url: this.url,
+              ship: preSig(this.ship),
+              cookie: this.cookie,
+              code: this.code,
+            });
+            if (err.originator === 'sse') {
+              await this.init(this.url, this.cookie, this.code ?? '');
+              resolve(undefined);
+              return;
+            }
+            err.config.headers['Cookie'] = cookie;
+            const result = await axios(err.config);
+            resolve(result);
+            return;
+          }
+          console.log('error: could not refresh token');
+          this.updateStatus(ConduitState.Failed);
+          reject(undefined);
+          return;
+        } catch (e) {
+          console.log(e);
+          reject(e);
+          return;
+        }
+      }
+      reject(err);
+      return;
+      // Promise.reject(err);
+    });
   }
 }

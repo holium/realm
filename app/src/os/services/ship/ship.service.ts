@@ -77,7 +77,6 @@ export class ShipService extends AbstractService<any> {
 
     app.on('quit', () => {
       this.shipDB?.disconnect();
-      APIConnection.getInstance(credentials).conduit.removeAllListeners();
     });
   }
 

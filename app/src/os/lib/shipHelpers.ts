@@ -1,7 +1,7 @@
 import fetch from 'cross-fetch';
 
 export interface ShipConnectionData {
-  patp: string;
+  patp?: string;
   url: string;
   code: string;
 }

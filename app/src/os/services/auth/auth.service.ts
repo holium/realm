@@ -342,7 +342,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
 
   public _setSession(patp: string, key: string) {
     this._setLockfile(patp, key);
-    this.authDB?._setSession(patp, key);
+    // this.authDB?._setSession(patp, key);
   }
 
   public _getSession(patp?: string): SessionType | null {

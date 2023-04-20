@@ -138,7 +138,7 @@ export class AuthDB {
   }
 
   public _setSession(patp: string, cookie: string) {
-    log.info(`Setting session for ${patp} to ${cookie}`);
+    // log.info(`Setting session for ${patp} to ${cookie}`);
     const query = this.authDB.prepare(`
       REPLACE INTO accounts_session (patp, key, createdAt)
       VALUES (?, ?, ?);

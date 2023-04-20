@@ -102,7 +102,6 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     if (!this.services) {
       return false;
     }
-    log.info('LOGIN EVENT');
 
     const account = this.services.auth.getAccount(patp);
     if (!account) {
@@ -130,7 +129,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       this.services.ship = new ShipService(patp, key);
       const credentials = this.services.ship.credentials;
       return new Promise((resolve) => {
-        APIConnection.getInstance(credentials).conduit.on('connected', () => {
+        APIConnection.getInstance().conduit.on('connected', () => {
           if (!this.services) return;
           // this.services.auth._setSession(patp, key);
           this.services.ship?.init();
@@ -147,6 +146,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       return;
     }
     this.services.ship?.cleanup();
+    APIConnection.getInstance().closeChannel();
     delete this.services.ship;
     this.services.auth._clearSession();
     this.sendUpdate({
