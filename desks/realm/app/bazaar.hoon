@@ -553,7 +553,6 @@
       ::
       ++  host-add-suite
         |=  [path=space-path:spaces-store =app-id:store =app:store index=@ud]
-        %-  (slog leaf+"{<dap.bowl>}: [host-add-suite] {<app-id>}" ~)
         =/  stall=stall:store   (~(gut by stalls.state) path [suite=~ recommended=~])
         =.  suite.stall         (~(put by suite.stall) [index app-id])
         =.  stalls.state        (~(put by stalls.state) [path stall])
@@ -1073,7 +1072,6 @@
       |=  [=app-id:store =app:store]
       ::  return the updated app state and app catalog
       ^-  [=app:store =catalog:store]
-      %-  (slog leaf+"{<dap.bowl>}: [add-to-desktop] - adding {<app-id>} to catalog {<app>}" ~)
       =/  app-entry                 (~(get by catalog.state) app-id)
       :: =/  app
         ?~  app-entry  :: app is not in the catalog. add it
