@@ -283,7 +283,7 @@ export const ChatMessagePresenter = ({
           reply: {
             msgId: originalMsg.id,
             author: nickname || originalMsg.sender,
-            message: [originalMsg.contents[0]],
+            message: originalMsg.contents,
           },
         };
       }
