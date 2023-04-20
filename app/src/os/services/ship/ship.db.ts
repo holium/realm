@@ -7,7 +7,7 @@ import { spacesTablesInitSql } from './spaces/spaces.service';
 import { bazaarTablesInitSql } from './spaces/tables/catalog.table';
 import { notifInitSql } from './notifications/notifications.table';
 import { chatInitSql } from './chat/chat.db';
-import { friendsInitSql } from './friends.table';
+import { friendsInitSql } from './friends.service';
 import { walletInitSql } from './wallet/wallet.db';
 
 export class ShipDB {
@@ -47,7 +47,11 @@ export class ShipDB {
     return this.shipDB;
   }
 
-  getCredentials() {
+  getCredentials(): {
+    url: string;
+    code: string;
+    cookie: string;
+  } {
     const result: any = this.shipDB
       .prepare('SELECT * FROM credentials LIMIT 1;')
       .get();

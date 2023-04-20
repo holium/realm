@@ -3,7 +3,7 @@ import { track } from '@amplitude/analytics-browser';
 import { PassportDialog } from '@holium/shared';
 import { FileUploadParams } from 'os/services/ship/ship.service';
 import { StepProps } from './types';
-import { RealmIPC, ShipIPC } from '../../stores/ipc';
+import { RealmIPC, FriendsIPC } from '../../stores/ipc';
 
 type Props = {
   onFinish?: () => void;
@@ -22,7 +22,7 @@ export const PassportStep = ({ setStep, onFinish }: Props) => {
       content: file.path,
       contentType: file.type,
     };
-    const url = await ShipIPC.uploadFile(params);
+    const url = await RealmIPC.uploadFile(params);
 
     return url;
   };
@@ -38,12 +38,19 @@ export const PassportStep = ({ setStep, onFinish }: Props) => {
   ) => {
     if (!patp) return false;
 
-    // Set in localstorage in case they go back.
+    // Save in localstorage in case they go back from the install step.
     localStorage.setItem('nickname', nickname);
     localStorage.setItem('description', description);
     localStorage.setItem('avatar', avatar);
 
     RealmIPC.updatePassport(patp, nickname, description, avatar);
+
+    // Sync friends agent
+    FriendsIPC.saveContact(patp, {
+      nickname,
+      avatar,
+      bio: description,
+    });
 
     const isHosted = localStorage.getItem('isHosted');
 

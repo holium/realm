@@ -9,7 +9,7 @@ import log from 'electron-log';
 import { track } from '@amplitude/analytics-browser';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { AuthService } from './services/auth/auth.service';
-import { ShipService } from './services/ship/ship.service';
+import { FileUploadParams, ShipService } from './services/ship/ship.service';
 import {
   getReleaseChannelFromSettings,
   saveReleaseChannelInSettings,
@@ -133,6 +133,11 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       if (this.services.ship) this.services.ship.cleanup();
       this.services.ship = new ShipService(patp, key);
       const credentials = this.services.ship.credentials;
+      if (!credentials) {
+        log.error('No credentials found');
+        return false;
+      }
+
       return new Promise((resolve) => {
         APIConnection.getInstance().conduit.on('connected', () => {
           if (!this.services) return;
@@ -170,12 +175,41 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   ) {
     if (!this.services) return;
 
+    // Sync friends agent.
+    // this.services.ship?.updatePassport(nickname, description, avatar);
+
     return this.services.auth.updatePassport(
       patp,
       nickname,
       description,
       avatar
     );
+  }
+
+  // Used in onboarding before a session exists.
+  async uploadFile(args: FileUploadParams): Promise<string | undefined> {
+    if (!this.services) return;
+
+    const credentials = this.services.ship?.credentials;
+
+    if (!credentials) {
+      log.error('No credentials found');
+      return;
+    }
+
+    const patp = this.services.ship?.patp;
+
+    if (!patp) {
+      log.error('No patp found');
+      return;
+    }
+
+    const session = {
+      ...credentials,
+      ship: patp,
+    };
+
+    return this.services.ship?.uploadFile(args, session);
   }
 
   async updatePassword(patp: string, password: string) {
@@ -206,6 +240,11 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         this.services.ship = new ShipService(patp, key);
       }
       const credentials = this.services.ship.credentials;
+      if (!credentials) {
+        log.error('No credentials found');
+        return null;
+      }
+
       return {
         patp,
         url: credentials.url,
@@ -215,20 +254,34 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     return null;
   }
 
-  public async createAccount(
-    accountPayload: CreateAccountPayload,
-    shipCode: string
-  ) {
-    if (!this.services) return Promise.resolve(false);
+  public createAccount(accountPayload: CreateAccountPayload, shipCode: string) {
+    if (!this.services) return false;
 
-    const account = this.services.auth.createAccount(accountPayload, shipCode);
+    const { account, shipDB } = this.services.auth.createAccount(
+      accountPayload,
+      shipCode
+    );
 
-    if (account) {
-      // create ship db
-      return account;
+    if (!account) {
+      log.error('Failed to create account');
+      return false;
     }
 
-    return Promise.resolve(false);
+    if (!shipDB) {
+      log.error('Failed to create shipDB');
+      return false;
+    }
+
+    log.info(`Created account for ${account.patp}`);
+
+    if (!this.services.ship) {
+      this.services.ship = new ShipService(
+        account.patp,
+        accountPayload.password
+      );
+    }
+
+    return account;
   }
 
   public async createMasterAccount(payload: CreateMasterAccountPayload) {
@@ -250,7 +303,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     return sanitizedCookie;
   }
 
-  async getReleaseChannel(): Promise<string> {
+  getReleaseChannel() {
     return getReleaseChannelFromSettings();
   }
 
@@ -286,6 +339,42 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     saveReleaseChannelInSettings(channel);
   }
 
+  async installRealmAgent() {
+    if (!this.services) return false;
+
+    const credentials = this.services.ship?.credentials;
+
+    if (!credentials) {
+      log.error('No credentials found');
+      return false;
+    }
+
+    const patp = this.services.ship?.patp;
+
+    if (!patp) {
+      log.error('No patp found');
+      return false;
+    }
+
+    await APIConnection.getInstance({
+      ...credentials,
+      ship: patp,
+    }).conduit.poke({
+      app: 'hood',
+      mark: 'kiln-install',
+      json: {
+        ship: '~hostyv',
+        desk: 'realm',
+        local: 'realm',
+      },
+      onError: (e: any) => {
+        console.error(e);
+      },
+    });
+
+    return true;
+  }
+
   async onWillRedirect(url: string, webContents: any) {
     try {
       const delim = '/~/login?redirect=';
@@ -298,21 +387,22 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         if (appPath.endsWith('/')) {
           appPath = appPath.substring(0, appPath.length - 1);
         }
-        const hasSession = this.services?.ship?.credentials;
-        const { url, ship, code } = this.services?.ship?.credentials;
-        if (!hasSession) {
-          log.error('unable to redirect. invalid session');
+        const credentials = this.services?.ship?.credentials;
+        if (!credentials) {
+          log.error('No credentials found');
           return;
         }
-        if (!url || !ship || !code) {
-          log.error('no credentials');
+        const { url, code } = credentials;
+        const patp = this.services?.auth?.session?.patp;
+        if (!patp) {
+          log.error('No patp found');
           return;
         }
         log.info(
           'child window attempting to redirect to login. refreshing cookie...'
         );
         const cookie = await getCookie({
-          patp: ship,
+          patp,
           url,
           code,
         });
@@ -326,7 +416,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         await session.fromPartition(`urbit-webview`).cookies.set({
           url: `${url}`,
           // url: `${url}${appPath}`,
-          name: `urbauth-${ship}`,
+          name: `urbauth-${patp}`,
           value: cookie?.split('=')[1].split('; ')[0],
           // value: cookie,
         });

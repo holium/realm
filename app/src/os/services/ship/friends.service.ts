@@ -147,15 +147,24 @@ export class Friends extends AbstractDataAccess<Friend, any> {
     return response;
   }
 
-  public async saveContact(patp: string, data: any) {
+  saveContact(
+    patp: string,
+    data: {
+      nickname: string;
+      avatar: string;
+      color?: string;
+      bio?: string;
+      cover?: string;
+    }
+  ) {
     const preparedData = {
       nickname: data.nickname,
-      color: removeHash(data.color),
+      ...{ color: data.color && removeHash(data.color) },
       avatar: data.avatar,
       bio: data.bio || null,
       cover: data.cover || null,
     };
-    const response = await APIConnection.getInstance().conduit.poke({
+    return APIConnection.getInstance().conduit.poke({
       app: 'friends',
       mark: 'friend-action',
       json: {
@@ -165,7 +174,6 @@ export class Friends extends AbstractDataAccess<Friend, any> {
         },
       },
     });
-    return response;
   }
 
   public findOne(patp: string): Friend | null {

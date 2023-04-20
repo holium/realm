@@ -34,6 +34,7 @@ type Props = {
   patp: string;
   nickname: string;
   description: string;
+  initialAvatarSrc: string;
   setNickname: (nickname: string) => void;
   setDescription: (description: string) => void;
   setAvatarSrc: (src?: string) => void;
@@ -44,6 +45,7 @@ export const PassportCard = ({
   patp,
   nickname,
   description,
+  initialAvatarSrc,
   setNickname,
   setDescription,
   setAvatarSrc,
@@ -57,6 +59,7 @@ export const PassportCard = ({
     <PassportCardContainer>
       <PassportCardAvatar
         patp={patp}
+        initialAvatarSrc={initialAvatarSrc}
         setAvatarSrc={setAvatarSrc}
         onUploadFile={onUploadFile}
       />

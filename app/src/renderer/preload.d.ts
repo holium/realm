@@ -5,7 +5,7 @@ import { roomsPreload } from 'os/services/ship/rooms.service';
 import { realmPreload } from 'os/realm.service';
 import { chatPreload } from 'os/services/ship/chat/chat.service';
 import { notifPreload } from 'os/services/ship/notifications/notifications.service';
-import { friendsPreload } from 'renderer/stores/models/friends.model';
+import { friendsPreload } from 'os/services/ship/friends.service';
 import {
   bazaarPreload,
   bazaarPreload,
