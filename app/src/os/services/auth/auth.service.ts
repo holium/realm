@@ -136,6 +136,8 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
       return false;
     }
 
+    console.log('acc', acc);
+    console.log('acc.id', acc.accountId);
     const newAccount = this.authDB.tables.accounts.create({
       accountId: acc.accountId,
       patp: acc.patp,

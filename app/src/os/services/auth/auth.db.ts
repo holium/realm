@@ -72,12 +72,14 @@ export class AuthDB {
       });
       // loop through ships and insert into accounts table
       Object.values(oldAuth.store.ships).forEach((ship: any) => {
+        log.info(ship);
         const theme = oldTheme.store[ship.patp];
         const query = this.authDB.prepare(`
-        INSERT INTO accounts (url, patp, nickname, color, avatar, status, theme, passwordHash)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-      `);
+          INSERT INTO accounts (accountId, url, patp, nickname, color, avatar, status, theme, passwordHash)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+        `);
         query.run(
+          0,
           ship.url,
           ship.patp,
           ship.nickname,
