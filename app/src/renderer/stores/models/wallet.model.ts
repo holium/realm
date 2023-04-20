@@ -1237,12 +1237,18 @@ export const WalletStore = types
           notes
         ) as PromiseLike<any>;
       }),
+      checkMnemonic: flow(function* (
+        mnemonic: string
+      ): Generator<PromiseLike<any>, boolean, any> {
+        return yield WalletIPC.checkMnemonic(mnemonic) as PromiseLike<any>;
+      }),
     };
   });
 
 export type WalletStoreType = Instance<typeof WalletStore>;
 
-WalletIPC.onUpdate((_event: any, payload: any) => {
+WalletIPC.onUpdate((payload: any) => {
+  console.log('got wallet update', payload);
   // const { type, payload } = update;
   const type = Object.keys(payload)[0];
   switch (type) {

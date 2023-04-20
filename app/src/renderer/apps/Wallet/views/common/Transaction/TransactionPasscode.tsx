@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import { Flex, Text } from '@holium/design-system';
+import { Flex, Text, Icon } from '@holium/design-system';
 import { PasscodeInput } from '../../../components/PasscodeInput';
 
 interface PasscodeProps {

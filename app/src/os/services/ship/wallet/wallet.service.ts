@@ -36,6 +36,11 @@ export class WalletService extends AbstractService {
     );*/
   }
 
+  public reset(): void {
+    super.removeHandlers();
+    this.walletDB?.reset();
+  }
+
   async uqbarDeskExists(_evt: any) {
     // return await UqbarApi.uqbarDeskExists(APIConnection.getInstance().conduit);
   }
@@ -229,12 +234,25 @@ export class WalletService extends AbstractService {
     await APIConnection.getInstance().conduit.poke(payload);
   }
 
-  /*watchUpdates() {
+  watchUpdates() {
     this.protocolManager?.watchUpdates(
       APIConnection.getInstance().conduit,
-      this.walletDB
+      undefined /*this.walletDB*/
     );
-  }*/
+  }
+
+  async checkMnemonic(mnemonic: string) {
+    const ethXpub = ethers.utils.HDNode.fromMnemonic(mnemonic)
+      .derivePath("m/44'/60'/0'")
+      .neuter().extendedKey;
+    const agentEthXpub = (
+      await APIConnection.getInstance().conduit.scry({
+        app: 'realm-wallet',
+        path: '/eth-xpub',
+      })
+    )['eth-xpub'];
+    return ethXpub === agentEthXpub;
+  }
 }
 
 export default WalletService;

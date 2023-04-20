@@ -10,22 +10,20 @@ interface DetectedExistingProps {
 const DetectedExistingPresenter = (props: DetectedExistingProps) => {
   return (
     <Flex width="100%" height="100%" flexDirection="column">
-      <Flex flex={4} flexDirection="column" alignItems="center">
-        <Text.H4 mt={6} variant="h4">
-          Recover Wallet
-        </Text.H4>
-        <Text.Body px="10px" mt={3} mb={5} variant="body" textAlign="center">
+      <Flex flex={4} flexDirection="column" alignItems="center" gap={20}>
+        <Text.H4 variant="h4">Recover Wallet</Text.H4>
+        <Text.Body px="10px" mb={5} variant="body" textAlign="center">
           An existing Realm wallet has been detected. You can either recover it
           using your seed phrase or create a new one.
         </Text.Body>
-        <Box mt={9}>
+        <Box>
           <Button.TextButton
             onClick={() => props.setScreen(NewWalletScreen.RECOVER_EXISTING)}
           >
             Recover Wallet
           </Button.TextButton>
         </Box>
-        <Box mt={3}>
+        <Box>
           <Button.TextButton
             onClick={() => props.setScreen(NewWalletScreen.BACKUP)}
           >
@@ -33,7 +31,7 @@ const DetectedExistingPresenter = (props: DetectedExistingProps) => {
           </Button.TextButton>
         </Box>
       </Flex>
-      <Flex mb={6} mx={3} justifyContent="center" alignItems="center">
+      <Flex mb={2} mx={3} justifyContent="center" alignItems="center">
         <Box>
           <Icon name="InfoCircle" />
         </Box>

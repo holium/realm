@@ -87,11 +87,7 @@ export const AmountInput = observer(
 
     return (
       <Flex flexDirection="column">
-        <FlexHider
-          width="100%"
-          justifyContent="space-evenly"
-          alignItems="center"
-        >
+        <FlexHider width="100%" justifyContent="space-between">
           <Text.Body fontSize={1} variant="body">
             AMOUNT
           </Text.Body>
@@ -123,9 +119,9 @@ export const AmountInput = observer(
                 />
               ) : (
                 <Flex>
-                  <Text.Body pt="2px" fontSize="12px">
+                  <Text.Custom pt="2px" fontSize="12px">
                     $
-                  </Text.Body>
+                  </Text.Custom>
                   <TextInput
                     autoFocus
                     ref={amountRef}
@@ -139,7 +135,7 @@ export const AmountInput = observer(
               )}
               {showUsd && (
                 <Box hidden={!amount}>
-                  <Text.Body fontSize="11px">
+                  <Text.Custom fontSize="11px">
                     {walletStore.ethereum.conversions.usd &&
                       (inCrypto
                         ? `$${ethToUsd(
@@ -161,7 +157,7 @@ export const AmountInput = observer(
                                     | 'ethereum'
                                 ]
                           }`)}
-                  </Text.Body>
+                  </Text.Custom>
                 </Box>
               )}
             </Flex>
@@ -171,7 +167,7 @@ export const AmountInput = observer(
               borderRadius="5px"
               onClick={toggleInCrypto}
             >
-              <Text.Body fontSize="12px">
+              <Text.Custom fontSize="12px">
                 {inCrypto
                   ? props.coin
                     ? props.coin.name
@@ -181,15 +177,15 @@ export const AmountInput = observer(
                         walletStore.navState.network as 'bitcoin' | 'ethereum'
                       ]
                   : 'USD'}
-              </Text.Body>
+              </Text.Custom>
               {showUsd && <Icon ml={1} name="UpDown" size="12px" />}
             </Flex>
           </ContainerFlex>
         </FlexHider>
         <Box ml="72px" width="100%">
-          <Text.Body variant="body" fontSize="11px">
+          <Text.Custom fontSize="11px" color="intent-warning">
             {amountError && 'Amount greater than wallet balance.'}
-          </Text.Body>
+          </Text.Custom>
         </Box>
       </Flex>
     );

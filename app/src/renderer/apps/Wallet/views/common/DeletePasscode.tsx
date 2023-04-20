@@ -1,4 +1,4 @@
-import { Flex, Text, Icons } from '@holium/design-system';
+import { Flex, Text, Icon } from '@holium/design-system';
 import { PasscodeInput } from '../../components/PasscodeInput';
 
 interface PasscodeProps {
@@ -13,15 +13,15 @@ export const DeletePasscode = (props: PasscodeProps) => (
       justifyContent="center"
       alignItems="center"
     >
-      <Icons name="Locked" size={36} />
-      <Text mt={2} variant="h3" color="red">
+      <Icon name="Locked" size={36} />
+      <Text.H3 variant="h3" color="red">
         Confirm Delete
-      </Text>
+      </Text.H3>
     </Flex>
-    <Flex flex={2} pt={8} flexDirection="column" alignItems="center">
-      <Text mb={8} variant="body">
+    <Flex flex={2} flexDirection="column" alignItems="center">
+      <Text.Body mb={8} variant="body">
         Enter your passcode to continue.
-      </Text>
+      </Text.Body>
       <PasscodeInput
         checkStored={true}
         onSuccess={props.onSuccess}

@@ -2,7 +2,14 @@ import { FC, Dispatch, SetStateAction, useState, ChangeEvent } from 'react';
 import styled from 'styled-components';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import { Button, Flex, Text, Box, Icon } from '@holium/design-system';
+import {
+  Button,
+  Flex,
+  Text,
+  Box,
+  Icon,
+  TextInput,
+} from '@holium/design-system';
 import { NewWalletScreen } from './index';
 import { VerifyPasscode } from './VerifyPasscode';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -56,16 +63,14 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
         }}
       />
     ) : (
-      <NoResize width="100%" height="100%" flexDirection="column">
-        <Text.H4 mt={6} variant="h4">
-          Recover Wallet
-        </Text.H4>
-        <Text.Body mt={2} variant="body">
+      <NoResize width="100%" height="100%" flexDirection="column" gap={10}>
+        <Text.H4 variant="h4">Recover Wallet</Text.H4>
+        <Text.Body variant="body">
           Please enter the mnemonic seed phrase for your existing wallet.
         </Text.Body>
-        <Flex mt={9} width="100%" flexDirection="column">
+        <Flex width="100%" flexDirection="column" gap={10}>
           <Text.Label mb={1}>Seed phrase</Text.Label>
-          <Text.TextInput
+          <TextInput
             id="seed-phrase"
             name="seed-phrase"
             height="72px"
@@ -80,12 +85,12 @@ export const RecoverExisting: FC<RecoverExistingProps> = observer(
             // autoFocus={true}
           />
 
-          <Box mt={3} hidden={error === ''}>
+          <Box hidden={error === ''}>
             <Text.Body variant="body" fontSize={1}>
               {error}
             </Text.Body>
           </Box>
-          <Flex mt={7} width="100%">
+          <Flex width="100%">
             <Button.TextButton
               width="100%"
               disabled={!ethers.utils.isValidMnemonic(phrase)}

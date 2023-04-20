@@ -222,21 +222,20 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         transition={walletCardStyleTransition}
         pb="8px"
         px="12px"
-        minHeight="220px"
+        // minHeight="220px"
         height="auto"
         width="100%"
         isSelected
       >
         <Flex
-          p={2}
           layout="position"
           width="100%"
-          minHeight="38px"
           style={{ height: props.QROpen ? 242 : 38 }}
           borderRadius="8px"
           flexDirection="column"
           justifyContent="flex-start"
           alignItems="center"
+          gap={10}
         >
           <Flex width="100%" justifyContent="space-between" alignItems="center">
             <Flex>
@@ -253,19 +252,17 @@ export const DetailHero: FC<DetailHeroProps> = observer(
               {props.sendTrans ? (
                 <Icon name="ChevronDown" />
               ) : (
-                <>
+                <Flex gap={10}>
                   <CopyButton content={props.wallet.address} />
                   <Box onClick={() => props.setQROpen(!props.QROpen)}>
-                    <Icon ml={2} name="QRCode" />
+                    <Icon name="QRCode" />
                   </Box>
-                </>
+                </Flex>
               )}
             </Flex>
           </Flex>
           <Box width="100%" height={204} hidden={!props.QROpen}>
             <Flex
-              mt={1}
-              p={3}
               width="100%"
               height="200px"
               justifyContent="center"
@@ -282,7 +279,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         <Box
           layout="position"
           transition={walletCardStyleTransition}
-          py={2}
           width="100%"
           hidden={props.hideWalletHero}
         >
@@ -301,8 +297,6 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           animate={{ opacity: 1 }}
           exit={{ opacity: 1 }}
           transition={walletCardStyleTransition}
-          // padding="15px 12px"
-          pb="15px"
         >
           <SendReceiveButtons
             hidden={props.sendTrans}

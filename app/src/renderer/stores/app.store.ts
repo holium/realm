@@ -44,7 +44,10 @@ const AppStateModel = types
   })
   .actions((self) => ({
     setBooted(data: RealmUpdateBooted['payload']) {
-      self.authStore.setAccounts(data.accounts);
+      let dataAccounts = data.accounts?.map((account) => {
+        return account.accountId ? account : { ...account, accountId: 0 };
+      });
+      self.authStore.setAccounts(dataAccounts);
       self.booted = true;
       self.seenSplash = data.seenSplash;
       if (data.session) {

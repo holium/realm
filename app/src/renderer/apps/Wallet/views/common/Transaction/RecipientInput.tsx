@@ -8,7 +8,7 @@ import {
   Avatar,
   Flex,
   Box,
-  Input,
+  TextInput,
   Spinner,
 } from '@holium/design-system';
 import { shortened } from '../../../lib/helpers';
@@ -200,7 +200,7 @@ export const RecipientInput = observer(
               <RecipientIcon icon={icon} />
             </Flex>
             <Flex flexDirection="column">
-              <Input
+              <TextInput
                 width="100%"
                 placeholder="@p or recipient’s address"
                 spellCheck="false"

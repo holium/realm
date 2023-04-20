@@ -1,4 +1,4 @@
-import { Flex, Text, Icons } from '@holium/design-system';
+import { Flex, Text, Icon } from '@holium/design-system';
 import { PasscodeInput } from '../../components/PasscodeInput';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { observer } from 'mobx-react';
@@ -18,12 +18,12 @@ export const Locked = observer(() => {
         justifyContent="center"
         alignItems="center"
       >
-        <Icons name="Locked" size={36} />
+        <Icon name="Locked" size={36} />
         <Text.H3 mt={2} variant="h3">
           Wallet Locked
         </Text.H3>
       </Flex>
-      <Flex flex={2} pt={8} flexDirection="column" alignItems="center">
+      <Flex flex={2} flexDirection="column" alignItems="center">
         <Text.Body mb={8} variant="body">
           Enter your passcode to continue.
         </Text.Body>

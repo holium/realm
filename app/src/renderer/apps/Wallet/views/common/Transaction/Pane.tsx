@@ -113,7 +113,6 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                 Cancel
               </Button.TextButton>
               <Button.TextButton
-                px={4}
                 disabled={!recipientValid || !amountValid}
                 onClick={next}
               >
@@ -157,7 +156,7 @@ export const TransactionPane: FC<TransactionPaneProps> = observer(
                   <Flex width="100%" justifyContent="space-between">
                     <Text.Body variant="body">TO</Text.Body>
                     <Flex justifyContent="center">
-                      <Flex mr={2}>
+                      <Flex>
                         {!props.transactionRecipient.patp &&
                           props.transactionRecipient.address && (
                             <Flex

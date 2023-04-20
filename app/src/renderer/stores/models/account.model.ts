@@ -2,7 +2,7 @@ import { Instance, types } from 'mobx-state-tree';
 import { Theme } from './theme.model';
 
 export const AccountModel = types.model('AccountModel', {
-  accountId: types.number,
+  accountId: types.maybe(types.number),
   type: types.enumeration(['local', 'hosted']),
   patp: types.identifier,
   url: types.string,

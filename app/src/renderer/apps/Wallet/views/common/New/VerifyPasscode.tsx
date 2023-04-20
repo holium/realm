@@ -19,7 +19,7 @@ const VerifyPasscodePresenter = ({ onSuccess }: LockedProps) => (
         Wallet Locked
       </Text.H3>
     </Flex>
-    <Flex flex={2} pt={8} flexDirection="column" alignItems="center">
+    <Flex flex={2} flexDirection="column" alignItems="center" gap={10}>
       <Text.Body mb={8} variant="body">
         Enter your passcode to continue.
       </Text.Body>

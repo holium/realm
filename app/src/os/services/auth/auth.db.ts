@@ -30,6 +30,7 @@ export class AuthDB {
       .all();
 
     const migrated = result[0]?.migrated || null;
+    console.log('migrated', migrated);
     if (!migrated) this.migrateJsonToSqlite();
     this.tables = {
       accounts: new Accounts(this.authDB),
@@ -75,11 +76,10 @@ export class AuthDB {
         log.info(ship);
         const theme = oldTheme.store[ship.patp];
         const query = this.authDB.prepare(`
-          INSERT INTO accounts (accountId, url, patp, nickname, color, avatar, status, theme, passwordHash)
+          INSERT INTO accounts (url, patp, nickname, color, avatar, status, theme, passwordHash)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?);
         `);
         query.run(
-          0,
           ship.url,
           ship.patp,
           ship.nickname,
