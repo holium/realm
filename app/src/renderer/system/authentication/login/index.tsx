@@ -117,22 +117,25 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
     submitRef.current?.click();
   };
 
-  const accountMenuId = `${selectedShip.patp}-account-menu`;
-  const contextMenuOptions = useMemo(() => {
-    const menu: MenuItemProps[] = [];
-    menu.push({
-      id: `${accountMenuId}-remove`,
-      icon: 'Trash',
-      label: 'Remove account',
-      onClick: (evt) => {
-        evt.stopPropagation();
-        console.log('remove account');
-        authStore.removeAccount(selectedShip.patp);
-        // AuthActions.removeShip(selectedShip.patp);
+  const accountMenuId = useMemo(
+    () => `${selectedShip.patp}-account-menu`,
+    [selectedShip]
+  );
+  const contextMenuOptions: MenuItemProps[] = useMemo(() => {
+    return [
+      {
+        id: `${accountMenuId}-remove`,
+        icon: 'Trash',
+        label: 'Remove account',
+        onClick: () => {
+          const newSelectedShip =
+            accounts.find((ship) => ship.patp !== selectedShip.patp) ??
+            accounts[0];
+          setSelectedShip(newSelectedShip);
+          authStore.removeAccount(selectedShip.patp);
+        },
       },
-    });
-
-    return menu.filter(Boolean) as MenuItemProps[];
+    ];
   }, [accountMenuId]);
 
   const isVertical = true;
