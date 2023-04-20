@@ -540,25 +540,26 @@
     ::
     ++  add-suite
       |=  [path=space-path:spaces-store =app-id:store index=@ud]
+      =/  app  (~(got by catalog.state) app-id)
       ?.  (is-host:core ship.path)
-        (member-add-suite path app-id index)
-      (host-add-suite path app-id index)
+        (member-add-suite path app-id app index)
+      (host-add-suite path app-id app index)
       ::
       ++  member-add-suite
-        |=  [path=space-path:spaces-store =app-id:store index=@ud]
+        |=  [path=space-path:spaces-store =app-id:store =app:store index=@ud]
         ?>  (check-admin:security path src.bowl)
-        =/  app  (~(got by catalog.state) app-id)
         :_  state
         [%pass / %agent [ship.path %bazaar] %poke bazaar-interaction+!>([%suite-add-full path app-id app index])]~
       ::
       ++  host-add-suite
-        |=  [path=space-path:spaces-store =app-id:store index=@ud]
+        |=  [path=space-path:spaces-store =app-id:store =app:store index=@ud]
+        %-  (slog leaf+"{<dap.bowl>}: [host-add-suite] {<app-id>}" ~)
         =/  stall=stall:store   (~(gut by stalls.state) path [suite=~ recommended=~])
         =.  suite.stall         (~(put by suite.stall) [index app-id])
         =.  stalls.state        (~(put by stalls.state) [path stall])
         =/  paths               [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
         :_  state
-        [%give %fact paths bazaar-reaction+!>([%suite-added path app-id index])]~
+        [%give %fact paths bazaar-reaction+!>([%suite-added path app-id app index])]~
     ::
     ::  this should only ever come into the space host (see "lite" versions add-suite above)
     ++  add-suite-full
@@ -570,24 +571,14 @@
       ::
       ++  host-add-suite-full
         |=  [path=space-path:spaces-store =app-id:store =app:store index=@ud]
-        =/  app-entry                 (~(get by catalog.state) app-id)
-        =/  app
-          ?~  app-entry  :: app is not in the catalog. add it
-              %-  (slog leaf+"{<dap.bowl>}: [suite-add-full] - adding {<app-id>} to catalog" ~)
-              ?+  -.app   app
-                %urbit
-                  =.  install-status.app   %desktop
-                  app
-              ==
-            :: app is already in the catalog. leave as is
-            u.app-entry
-        =.  catalog.state       (~(put by catalog.state) app-id app)
+        =/  updates             (add-to-desktop:helpers:bazaar:core app-id app)
+        =.  catalog.state       catalog.updates
         =/  stall=stall:store   (~(gut by stalls.state) path [suite=~ recommended=~])
         =.  suite.stall         (~(put by suite.stall) [index app-id])
         =.  stalls.state        (~(put by stalls.state) [path stall])
         =/  paths               [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
         :_  state
-        [%give %fact paths bazaar-reaction+!>([%suite-added-full path app-id app index])]~
+        [%give %fact paths bazaar-reaction+!>([%suite-added path app-id app index])]~
     ::
     ++  rem-suite
       |=  [path=space-path:spaces-store index=@ud]
@@ -744,9 +735,6 @@
       %unrecommended      (on-unrec +.rct)
       :: UI/frontend only requires app-id as input
       %suite-added        (on-suite-add +.rct)
-      :: full version is used "under the hood" to pass complete app detail
-      ::  in order to add the app to the ship catalog if it doesn't exist
-      %suite-added-full   (on-suite-add-full +.rct)
       %suite-removed      (on-suite-rem +.rct)
       %joined-bazaar      (on-joined +.rct)
       %stall-update
@@ -766,24 +754,17 @@
       `state
     ::
     ++  on-suite-add
-      |=  [path=space-path:spaces-store app-id=@tas index=@ud]
-      ?:  =(is-host:core ship.path)
-        `state
-      =/  stall               (~(got by stalls.state) path)
-      =.  suite.stall         (~(put by suite.stall) [index app-id])
-      =.  stalls.state        (~(put by stalls.state) [path stall])
-      :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%suite-added path app-id index])]~
-    ::
-    ++  on-suite-add-full
       |=  [path=space-path:spaces-store app-id=@tas =app:store index=@ud]
       ?:  =(is-host:core ship.path)
         `state
+      :: the host is informing us that it's added a new app to the space suite
+      =/  updates             (add-to-desktop:helpers:bazaar:core app-id app)
+      =.  catalog.state       catalog.updates
       =/  stall               (~(got by stalls.state) path)
       =.  suite.stall         (~(put by suite.stall) [index app-id])
       =.  stalls.state        (~(put by stalls.state) [path stall])
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%suite-added-full path app-id app index])]~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%suite-added path app-id app.updates index])]~
     ::
     ++  on-suite-rem
       |=  [path=space-path:spaces-store index=@ud]
@@ -1088,6 +1069,23 @@
         ~&  >>>  "{<dap.bowl>}: [rebuild-stall] error. space {<space-path>} does not exist."
         ~
       (some [suite=~ recommended=~])
+    ::
+    ++  add-to-desktop
+      |=  [=app-id:store =app:store]
+      ::  return the updated app state and app catalog
+      ^-  [=app:store =catalog:store]
+      %-  (slog leaf+"{<dap.bowl>}: [add-to-desktop] - adding {<app-id>} to catalog {<app>}" ~)
+      =/  app-entry                 (~(get by catalog.state) app-id)
+      :: =/  app
+        ?~  app-entry  :: app is not in the catalog. add it
+            ?+  -.app   [app catalog.state]
+              %urbit
+                =.  install-status.app   %desktop
+                [app (~(put by catalog.state) app-id app)]
+            ==
+          :: app is already in the catalog. leave as is
+          [u.app-entry catalog.state]
+      :: [app (~(put by catalog.state) app-id app)]
     ::
     ++  is-app-installed
       |=  [=app-id:store]

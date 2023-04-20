@@ -171,14 +171,7 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%id s+app-id.rct]
-          [%index (numb index.rct)]
-      ==
-    ::
-        %suite-added-full
-      %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%id s+app-id.rct]
-          [%app (urbit-app:encode app-id.rct app.rct)]
+          [%app (app-detail:encode app-id.rct app.rct)]
           [%index (numb index.rct)]
       ==
       ::

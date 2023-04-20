@@ -144,6 +144,8 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
     ]
   );
 
+  console.log('%o, %o', app.id, isDesktop);
+
   return (
     <Box position="relative">
       {(isUninstalled || isDesktop) && (

@@ -212,8 +212,17 @@ export const NewBazaarStore = types
     _reorderPins(data: { path: string; dock: string[] }) {
       self.docks.set(data.path, data.dock);
     },
-    _suiteAdded(data: { path: string; id: string; index: number }) {
+    _suiteAdded(data: {
+      path: string;
+      id: string;
+      app: AppType;
+      index: number;
+    }) {
       const stall = self.stalls.get(data.path);
+      if (data.app.type === 'urbit') {
+        data.app.color = cleanNounColor(data.app.color);
+      }
+      self.catalog.set(data.id, data.app);
       if (!stall) return;
       stall?.suite.set(`${data.index}`, data.id);
       self.stalls.set(data.path, stall);
