@@ -32,7 +32,7 @@ const CreatePresenter = (props: CreateProps) => {
           </Button.TextButton>
         </Box>
       </Flex>
-      <Flex mb={6} mx={3} justifyContent="center" alignItems="center">
+      <Flex mb={2} mx={3} justifyContent="center" alignItems="center">
         <Box>
           <Icon name="InfoCircle" />
         </Box>
