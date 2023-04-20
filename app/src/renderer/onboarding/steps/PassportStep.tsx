@@ -3,7 +3,7 @@ import { track } from '@amplitude/analytics-browser';
 import { PassportDialog } from '@holium/shared';
 import { FileUploadParams } from 'os/services/ship/ship.service';
 import { StepProps } from './types';
-import { RealmIPC } from '../../stores/ipc';
+import { RealmIPC, FriendsIPC } from '../../stores/ipc';
 
 type Props = {
   onFinish?: () => void;
@@ -44,6 +44,13 @@ export const PassportStep = ({ setStep, onFinish }: Props) => {
     localStorage.setItem('avatar', avatar);
 
     RealmIPC.updatePassport(patp, nickname, description, avatar);
+
+    // Sync friends agent
+    FriendsIPC.saveContact(patp, {
+      nickname,
+      avatar,
+      bio: description,
+    });
 
     const isHosted = localStorage.getItem('isHosted');
 

@@ -173,6 +173,9 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   ) {
     if (!this.services) return;
 
+    // Sync friends agent.
+    // this.services.ship?.updatePassport(nickname, description, avatar);
+
     return this.services.auth.updatePassport(
       patp,
       nickname,

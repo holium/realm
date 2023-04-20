@@ -8,7 +8,7 @@ import { APIConnection, ConduitSession } from '../api';
 import RoomsService from './rooms.service';
 import NotificationsService from './notifications/notifications.service';
 import ChatService from './chat/chat.service';
-import { Friends } from './friends.table';
+import { Friends } from './friends.service';
 import SpacesService from './spaces/spaces.service';
 import { S3Client, StorageAcl } from '../../../renderer/lib/S3Client';
 import BazaarService from './spaces/bazaar.service';
@@ -208,6 +208,16 @@ export class ShipService extends AbstractService<any> {
           resolve(Location);
         })
         .catch(reject);
+    });
+  }
+
+  updatePassport(nickname: string, description: string, avatar: string) {
+    if (!this.services) return;
+
+    this.services.friends.saveContact(this.patp, {
+      nickname,
+      bio: description,
+      avatar,
     });
   }
 }
