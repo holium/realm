@@ -121,19 +121,22 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
   public createAccount(
     acc: Omit<Account, 'passwordHash' | 'createdAt' | 'updatedAt'>,
     shipCode: string
-  ): boolean {
-    if (!this.authDB) return false;
+  ): {
+    account?: Account;
+    shipDB?: ShipDB;
+  } {
+    if (!this.authDB) return {};
     const masterAccount = this.authDB.tables.masterAccounts.findOne(
       acc.accountId
     );
     if (!masterAccount) {
       log.info(`No master account found for ${acc.patp}`);
-      return false;
+      return {};
     }
     const existing = this.authDB.tables.accounts.findOne(acc.patp);
     if (existing) {
       log.info(`Account already exists for ${acc.patp}`);
-      return false;
+      return {};
     }
 
     const newAccount = this.authDB.tables.accounts.create({
@@ -151,7 +154,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     });
     this.authDB.addToOrder(acc.patp);
     // Creates the ship database with the master account's encryption key
-    this._createShipDB(acc.patp, masterAccount.encryptionKey, {
+    const shipDB = this._createShipDB(acc.patp, masterAccount.encryptionKey, {
       code: shipCode,
       url: acc.url,
     });
@@ -164,10 +167,10 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
           order: this.authDB?.getOrder(),
         },
       });
-      return true;
+      return { account: newAccount, shipDB };
     } else {
       log.info(`Failed to create account for ${acc.patp}`);
-      return false;
+      return {};
     }
   }
 
@@ -249,6 +252,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
       encryptionKey
     );
     if (!credentials.cookie) {
+      log.info('No cookie found, getting cookie...');
       getCookie({
         patp,
         url: credentials.url,
@@ -261,12 +265,15 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
         }
       });
     } else {
+      log.info('Cookie found, setting credentials...');
       newShipDB.setCredentials(
         credentials.url,
         credentials.code,
         credentials.cookie
       );
     }
+
+    return newShipDB;
   }
 
   private _deleteShipDB(patp: string) {

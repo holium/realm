@@ -1,5 +1,11 @@
 import styled from 'styled-components';
-import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
+import {
+  Button,
+  ErrorBox,
+  Flex,
+  Icon,
+  Spinner,
+} from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
 import {
   OnboardDialogTitle,
@@ -31,15 +37,21 @@ export const InstallationDialog = ({
   onNext,
 }: Props) => {
   const installing = useToggle(false);
+  const installError = useToggle(false);
   const successfullInstall = useToggle(false);
 
   const handleInstallRealm = async () => {
     if (installing.isOn || successfullInstall.isOn) return;
 
     installing.toggleOn();
+    installError.toggleOff();
 
     const result = await onInstallRealm();
-    if (result) successfullInstall.toggleOn();
+    if (result) {
+      successfullInstall.toggleOn();
+    } else {
+      installError.toggleOn();
+    }
 
     installing.toggleOff();
   };
@@ -60,7 +72,7 @@ export const InstallationDialog = ({
     <OnboardDialog
       icon={<DownloadIcon />}
       body={
-        <Flex flexDirection="column" gap={16}>
+        <>
           <OnboardDialogTitle>Installation</OnboardDialogTitle>
           <OnboardDialogDescription maxWidth={380}>
             We need to install Realm as an agent on your server. It handles core
@@ -77,7 +89,10 @@ export const InstallationDialog = ({
               {buttonIcon()}
             </Flex>
           </InstallRealmButton>
-        </Flex>
+          {installError.isOn && (
+            <ErrorBox>Failed to install. Please try again.</ErrorBox>
+          )}
+        </>
       }
       onBack={onBack}
       onNext={!installing.isOn && successfullInstall.isOn ? onNext : undefined}

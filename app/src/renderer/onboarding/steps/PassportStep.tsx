@@ -38,7 +38,7 @@ export const PassportStep = ({ setStep, onFinish }: Props) => {
   ) => {
     if (!patp) return false;
 
-    // Set in localstorage in case they go back.
+    // Save in localstorage in case they go back from the install step.
     localStorage.setItem('nickname', nickname);
     localStorage.setItem('description', description);
     localStorage.setItem('avatar', avatar);

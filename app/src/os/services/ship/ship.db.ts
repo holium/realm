@@ -46,7 +46,11 @@ export class ShipDB {
     return this.shipDB;
   }
 
-  getCredentials() {
+  getCredentials(): {
+    url: string;
+    code: string;
+    cookie: string;
+  } {
     const result: any = this.shipDB
       .prepare('SELECT * FROM credentials LIMIT 1;')
       .get();

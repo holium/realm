@@ -99,12 +99,14 @@ const headers = {
 
 type Props = {
   patp: string;
+  initialAvatarSrc: string | undefined;
   setAvatarSrc: (src?: string) => void;
   onUploadFile: (file: File) => Promise<string | undefined>;
 };
 
 export const PassportCardAvatar = ({
   patp,
+  initialAvatarSrc,
   setAvatarSrc,
   onUploadFile,
 }: Props) => {
@@ -121,8 +123,10 @@ export const PassportCardAvatar = ({
   const [author, setAuthor] = useState<string>();
   const [authorLink, setAuthorLink] = useState<string>();
 
-  const [selectedImage, setSelectedImage] = useState<number>(0);
-  const [uploadedImage, setUploadedImage] = useState<string>();
+  const [selectedImage, setSelectedImage] = useState<number>(
+    initialAvatarSrc ? 21 : 0
+  );
+  const [uploadedImage, setUploadedImage] = useState(initialAvatarSrc);
 
   const uploading = useToggle(false);
   const [uploadError, setUploadError] = useState<string | null>(null);

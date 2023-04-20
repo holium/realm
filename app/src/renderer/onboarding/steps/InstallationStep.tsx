@@ -17,9 +17,8 @@ export const InstallationStep = ({ setStep, onFinish }: Props) => {
     setStep('/passport');
   };
 
-  const onInstallRealm = async () => {
-    await RealmIPC.setReleaseChannel('latest');
-    return Promise.resolve(true);
+  const onInstallRealm = () => {
+    return RealmIPC.installRealmAgent();
   };
 
   const onNext = async () => {

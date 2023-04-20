@@ -49,9 +49,7 @@ export const PassportDialog = ({
 }: Props) => {
   const [nickname, setNickname] = useState(prefilledNickname);
   const [description, setDescription] = useState(prefilledDescription);
-  const [avatarSrc, setAvatarSrc] = useState<string | undefined>(
-    prefilledAvatarSrc
-  );
+  const [avatarSrc, setAvatarSrc] = useState<string | undefined>();
 
   const handleOnNext = () => {
     if (nickname) return onNext(nickname, description, avatarSrc);
@@ -81,6 +79,7 @@ export const PassportDialog = ({
               patp={patp}
               nickname={nickname}
               description={description}
+              initialAvatarSrc={prefilledAvatarSrc}
               setNickname={setNickname}
               setDescription={setDescription}
               setAvatarSrc={setAvatarSrc}

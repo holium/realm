@@ -12,11 +12,10 @@ import { Friends } from './friends.table';
 import SpacesService from './spaces/spaces.service';
 import { S3Client, StorageAcl } from '../../../renderer/lib/S3Client';
 import BazaarService from './spaces/bazaar.service';
-import { getCookie } from '../../lib/shipHelpers';
 
 export class ShipService extends AbstractService<any> {
-  private patp: string;
-  private readonly shipDB?: ShipDB;
+  public patp: string;
+  private shipDB?: ShipDB;
   services?: {
     rooms: RoomsService;
     notifications: NotificationsService;
@@ -45,12 +44,12 @@ export class ShipService extends AbstractService<any> {
     }
 
     // create an instance of the conduit
-    APIConnection.getInstance(credentials).conduit.on(
-      'refreshed',
-      (session: ConduitSession) => {
-        this.shipDB?.setCredentials(session.url, session.code, session.cookie);
-      }
-    );
+    APIConnection.getInstance({
+      ...credentials,
+      ship: patp,
+    }).conduit.on('refreshed', (session: ConduitSession) => {
+      this.shipDB?.setCredentials(session.url, session.code, session.cookie);
+    });
 
     // TODO this DROP is here until we get the agent refactor with lastTimestamp scries
     try {
@@ -80,35 +79,9 @@ export class ShipService extends AbstractService<any> {
     });
   }
 
-  static createShipDB(
-    patp: string,
-    encryptionKey: string,
-    credentials: {
-      url: string;
-      code: string;
-      cookie?: string;
-    }
-  ) {
-    const newShipDB = new ShipDB(patp, encryptionKey);
-    if (!credentials.cookie) {
-      getCookie({
-        patp,
-        url: credentials.url,
-        code: credentials.code,
-      }).then((cookie) => {
-        if (cookie) {
-          newShipDB.setCredentials(credentials.url, credentials.code, cookie);
-        } else {
-          log.error('Failed to get cookie');
-        }
-      });
-    } else {
-      newShipDB.setCredentials(
-        credentials.url,
-        credentials.code,
-        credentials.cookie
-      );
-    }
+  public setShipDB(shipDB: ShipDB) {
+    log.info('Setting shipDB in ship service');
+    this.shipDB = shipDB;
   }
 
   // TODO initialize the ship services here
@@ -118,6 +91,8 @@ export class ShipService extends AbstractService<any> {
   }
 
   public updateCookie(cookie: string) {
+    if (!this.credentials) return;
+
     this.shipDB?.setCredentials(
       this.credentials.url,
       this.credentials.code,
