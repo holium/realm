@@ -12,7 +12,7 @@ import { AuthService } from './services/auth/auth.service';
 import { ShipService } from './services/ship/ship.service';
 import { getReleaseChannel, setReleaseChannel } from './lib/settings';
 import { getCookie } from './lib/shipHelpers';
-import APIConnection from './services/conduit';
+import { APIConnection } from './services/api';
 import { MasterAccount } from './services/auth/masterAccounts.table';
 import { Account } from './services/auth/accounts.table';
 import { RealmUpdateTypes } from './realm.types';

@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3-multiple-ciphers';
-import APIConnection from '../conduit';
+import { APIConnection } from '../api';
 import AbstractDataAccess from '../abstract.db';
 import { cleanNounColor, removeHash } from '../../lib/color';
 

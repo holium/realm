@@ -1,4 +1,4 @@
-import APIConnection from '../../conduit';
+import { APIConnection } from '../../api';
 import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
