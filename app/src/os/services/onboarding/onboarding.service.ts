@@ -131,10 +131,8 @@ export class OnboardingService extends BaseService {
       return await ipcRenderer.invoke('realm.onboarding.getStripeKey');
     },
 
-    async preInstallSysCheck() {
-      return await ipcRenderer.invoke('realm.onboarding.pre-install-syscheck');
-    },
-
+    preInstallSysCheck: () =>
+      ipcRenderer.invoke('realm.onboarding.pre-install-syscheck'),
     async prepareCheckout(billingPeriod: string) {
       return await ipcRenderer.invoke(
         'realm.onboarding.prepareCheckout',
@@ -440,20 +438,14 @@ export class OnboardingService extends BaseService {
   }
 
   async preInstallSysCheck(_event: any) {
-    console.log('1: preInstallSysCheck(_event: any)');
     const ship = this.state.ship;
     if (!ship) throw new Error('ship not set');
-    console.log('2: preInstallSysCheck(_event: any)');
     const { url, patp } = ship;
     const session = this.core.getSession();
     if (!session) throw new Error('session not set');
-    console.log('3: preInstallSysCheck(_event: any)');
     const { cookie, code } = session;
     if (!cookie) throw new Error('cookie not set');
-    console.log('4: preInstallSysCheck(_event: any)');
-    console.log('tempConduit => %o', { url, patp, cookie, code });
     const tempConduit = await this.tempConduit(url, patp, cookie, code);
-    console.log('5: preInstallSysCheck(_event: any)');
     this.state.preInstallSysCheck(tempConduit);
   }
 

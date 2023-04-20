@@ -177,7 +177,6 @@ export const OnboardingStore = types
     },
 
     preInstallSysCheck: flow(function* (conduit: Conduit) {
-      console.log('preInstallSysCheck');
       self.versionLoader.set('loading');
       try {
         const apps = yield DocketApi.getApps(conduit);

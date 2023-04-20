@@ -733,7 +733,6 @@
     ?+  -.rct             `state
       %recommended        (on-rec +.rct)
       %unrecommended      (on-unrec +.rct)
-      :: UI/frontend only requires app-id as input
       %suite-added        (on-suite-add +.rct)
       %suite-removed      (on-suite-rem +.rct)
       %joined-bazaar      (on-joined +.rct)
