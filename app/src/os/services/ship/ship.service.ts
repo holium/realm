@@ -8,7 +8,7 @@ import { APIConnection, ConduitSession } from '../api';
 import RoomsService from './rooms.service';
 import NotificationsService from './notifications/notifications.service';
 import ChatService from './chat/chat.service';
-import { Friends } from './friends.table';
+import { Friends } from './friends/friends.table';
 import SpacesService from './spaces/spaces.service';
 import { S3Client, StorageAcl } from '../../../renderer/lib/S3Client';
 import BazaarService from './spaces/bazaar.service';

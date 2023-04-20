@@ -7,7 +7,7 @@ import { spacesTablesInitSql } from './spaces/spaces.service';
 import { bazaarTablesInitSql } from './spaces/tables/catalog.table';
 import { notifInitSql } from './notifications/notifications.table';
 import { chatInitSql } from './chat/chat.db';
-import { friendsInitSql } from './friends.table';
+import { friendsInitSql } from './friends/friends.table';
 
 export class ShipDB {
   private shipDB: sqlite3.Database;

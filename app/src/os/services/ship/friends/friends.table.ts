@@ -1,7 +1,7 @@
 import { Database } from 'better-sqlite3';
-import { APIConnection } from '../api';
-import AbstractDataAccess from '../abstract.db';
-import { cleanNounColor, removeHash } from '../../lib/color';
+import { APIConnection } from '../../api';
+import AbstractDataAccess from '../../abstract.db';
+import { cleanNounColor, removeHash } from '../../../lib/color';
 
 export interface Friend {
   patp: string;
