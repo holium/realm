@@ -143,7 +143,7 @@ export const PassportCardAvatar = ({
         setGeneratedImages(newImages);
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
         setGeneratedImages(defaultImages);
       });
   };
