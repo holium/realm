@@ -8,7 +8,7 @@ import {
   castToSnapshot,
 } from 'mobx-state-tree';
 import { AuthIPC } from 'renderer/stores/ipc';
-import { AccountModel } from './models/Account.model';
+import { AccountModel } from './models/account.model';
 import { trackEvent } from 'renderer/lib/track';
 import { appState } from './app.store';
 import {
