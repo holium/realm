@@ -186,11 +186,24 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
       return false;
     }
 
-    return this.authDB.tables.accounts.update(patp, {
+    const newAccount = this.authDB.tables.accounts.update(patp, {
       nickname,
       description,
       avatar,
     });
+
+    if (newAccount) {
+      this.sendUpdate({
+        type: 'account-updated',
+        payload: {
+          account: newAccount,
+          order: this.authDB?.getOrder(),
+        },
+      });
+      return true;
+    }
+
+    return false;
   }
 
   private _createShipDB(

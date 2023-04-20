@@ -131,8 +131,8 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
           const newSelectedShip =
             accounts.find((ship) => ship.patp !== selectedShip.patp) ??
             accounts[0];
-          setSelectedShip(newSelectedShip);
           authStore.removeAccount(selectedShip.patp);
+          setSelectedShip(newSelectedShip);
         },
       },
     ];

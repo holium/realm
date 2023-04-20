@@ -48,9 +48,9 @@ export const InstallationDialog = ({
       body={
         <Flex flexDirection="column" gap={16} marginBottom={30}>
           <OnboardDialogTitle>Installation</OnboardDialogTitle>
-          <OnboardDialogDescription>
-            We need to install Realm and other agents on your Urbit server.
-            These handle core OS functionality.
+          <OnboardDialogDescription maxWidth={380}>
+            We need to install Realm as an agent on your server. It handles core
+            OS functionality.
           </OnboardDialogDescription>
           <InstallRealmButton
             type="button"

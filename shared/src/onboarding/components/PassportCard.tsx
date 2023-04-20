@@ -64,7 +64,7 @@ export const PassportCard = ({
         <Flex flexDirection="column" gap={6}>
           <UsernameInput
             required
-            placeholder="Your username"
+            placeholder="Your nickname"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />

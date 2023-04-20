@@ -66,7 +66,7 @@ export const PassportDialog = ({
           <OnboardDialogDescription textAlign="center">
             In Realm, a passport is like an account.
             <br />
-            It allows p2p payments, DMs, etc. Make it yours.
+            It allows P2P payments, DMs, etc. Make it yours.
           </OnboardDialogDescription>
           {patp ? (
             <PassportCard
@@ -82,14 +82,11 @@ export const PassportDialog = ({
             <Spinner size={8} />
           )}
           <List>
-            <ListItem as="li">A username can be changed later</ListItem>
+            <ListItem as="li">Your nickname can be changed later</ListItem>
             <ListItem as="li">
               <Box display="inline-flex" alignItems="center" style={{ gap: 4 }}>
                 Select an avatar by clicking on the <AddImageIcon /> icon above
               </Box>
-            </ListItem>
-            <ListItem as="li">
-              Your accent color is used throughout Realm
             </ListItem>
           </List>
         </Flex>
