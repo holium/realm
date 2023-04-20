@@ -64,7 +64,6 @@
       [%recommend =app-id]
       [%unrecommend =app-id]
       [%suite-add path=space-path:spaces =app-id index=@ud]
-      [%suite-add-full path=space-path:spaces =app-id =app index=@ud]
       [%suite-remove path=space-path:spaces index=@ud]
       [%install-app =ship =desk]
       [%uninstall-app =desk]
@@ -73,12 +72,14 @@
       [%rebuild-stall path=space-path:spaces args=(map cord cord)]
       [%clear-stall path=space-path:spaces args=(map cord cord)]
       [%set-host app-id=desk host=ship]
+      [%delete-catalog-entry =app-id]
   ==
 ::
 +$  interaction
   $%
       [%member-recommend path=space-path:spaces =app-id =app]
       [%member-unrecommend path=space-path:spaces =app-id]
+      [%suite-add path=space-path:spaces =app-id =app index=@ud]
   ==
 ::
 +$  reaction

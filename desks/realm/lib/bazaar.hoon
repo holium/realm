@@ -29,6 +29,7 @@
           [%rebuild-stall rebuild-stall]
           [%clear-stall clear-stall]
           [%set-host set-host]
+          [%delete-catalog-entry del-cat-entry]
       ==
     ::
     ++  install-app
@@ -106,6 +107,11 @@
       %-  ot
       :~  [%app-id so]
           [%host (su ;~(pfix sig fed:ag))]
+      ==
+    ::
+    ++  del-cat-entry
+      %-  ot
+      :~  [%app-id so]
       ==
     --
   --

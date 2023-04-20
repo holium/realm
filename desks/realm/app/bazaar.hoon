@@ -403,7 +403,6 @@
       %recommend         (recommend +.action)
       %unrecommend       (unrecommend +.action)
       %suite-add         (add-suite +.action)
-      %suite-add-full    (add-suite-full +.action)
       %suite-remove      (rem-suite +.action)
       %install-app       (install-app +.action)
       %uninstall-app     (uninstall-app +.action)
@@ -414,6 +413,8 @@
       %rebuild-stall     (rebuild-stall +.action)
       %clear-stall       (clear-stall +.action)
       %set-host          (set-host +.action)
+      :: testing helper. remove an app from the ship catalog w/o producing any effects
+      %delete-catalog-entry  (delete-catalog-entry +.action)
     ==    ::  +pre: prefix for scries to hood
     ::
     ++  pre  /(scot %p our.bowl)/hood/(scot %da now.bowl)
@@ -549,29 +550,10 @@
         |=  [path=space-path:spaces-store =app-id:store =app:store index=@ud]
         ?>  (check-admin:security path src.bowl)
         :_  state
-        [%pass / %agent [ship.path %bazaar] %poke bazaar-interaction+!>([%suite-add-full path app-id app index])]~
+        [%pass / %agent [ship.path %bazaar] %poke bazaar-interaction+!>([%suite-add path app-id app index])]~
       ::
       ++  host-add-suite
         |=  [path=space-path:spaces-store =app-id:store =app:store index=@ud]
-        =/  stall=stall:store   (~(gut by stalls.state) path [suite=~ recommended=~])
-        =.  suite.stall         (~(put by suite.stall) [index app-id])
-        =.  stalls.state        (~(put by stalls.state) [path stall])
-        =/  paths               [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
-        :_  state
-        [%give %fact paths bazaar-reaction+!>([%suite-added path app-id app index])]~
-    ::
-    ::  this should only ever come into the space host (see "lite" versions add-suite above)
-    ++  add-suite-full
-      |=  [path=space-path:spaces-store =app-id:store =app:store index=@ud]
-      ?.  (is-host:core ship.path)
-        %-  (slog leaf+"{<dap.bowl>}: suite-add-full should only be used to inform the host. use suite-add if acting on behalf of a member ship" ~)
-        [~ state]
-      (host-add-suite-full path app-id app index)
-      ::
-      ++  host-add-suite-full
-        |=  [path=space-path:spaces-store =app-id:store =app:store index=@ud]
-        =/  updates             (add-to-desktop:helpers:bazaar:core app-id app)
-        =.  catalog.state       catalog.updates
         =/  stall=stall:store   (~(gut by stalls.state) path [suite=~ recommended=~])
         =.  suite.stall         (~(put by suite.stall) [index app-id])
         =.  stalls.state        (~(put by stalls.state) [path stall])
@@ -724,6 +706,14 @@
       :_  state
       cards.updated-stalls
     ::
+    ::
+    ::  $delete-catalog-entry
+    ::   remove an app entry from the ship's catalog and produce no effects
+    ++  delete-catalog-entry
+      |=  [=app-id:store]
+      ^-  (quip card _state)
+      =.  catalog.state  (~(del by catalog.state) app-id)
+      [~ state]
     --
   ++  reaction
     |=  [rct=reaction:store]
@@ -883,6 +873,7 @@
     ?-  -.itc
       %member-recommend          (member-recommend +.itc)
       %member-unrecommend        (member-unrecommend +.itc)
+      %suite-add                 (suite-add +.itc)
     ==
     ::
     ++  member-recommend
@@ -929,6 +920,25 @@
       =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
       :_  state
       [%give %fact paths bazaar-reaction+!>([%stall-update path stall (some [app-id ~])])]~
+    ::
+    ::  this should only ever come into the space host (see "lite" versions add-suite above)
+    ++  suite-add
+      |=  [path=space-path:spaces-store =app-id:store =app:store index=@ud]
+      ?.  (is-host:core ship.path)
+        %-  (slog leaf+"{<dap.bowl>}: suite-add-full should only be used to inform the host. use suite-add if acting on behalf of a member ship" ~)
+        [~ state]
+      (host-suite-add path app-id app index)
+      ::
+      ++  host-suite-add
+        |=  [path=space-path:spaces-store =app-id:store =app:store index=@ud]
+        =/  updates             (add-to-desktop:helpers:bazaar:core app-id app)
+        =.  catalog.state       catalog.updates
+        =/  stall=stall:store   (~(gut by stalls.state) path [suite=~ recommended=~])
+        =.  suite.stall         (~(put by suite.stall) [index app-id])
+        =.  stalls.state        (~(put by stalls.state) [path stall])
+        =/  paths               [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+        :_  state
+        [%give %fact paths bazaar-reaction+!>([%suite-added path app-id app.updates index])]~
     --
   ++  scry
     |%
@@ -1485,7 +1495,7 @@
   ++  check-admin
     |=  [path=space-path:spaces-store =ship]
     ^-  ?
-    =/  member   .^(view:membership-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/member/(scot %p ship)/noun)
+    =/  member   .^(view:membership-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/members/(scot %p ship)/noun)
     ?>  ?=(%member -.member)
     (~(has in roles.member.member) %admin)
   ::

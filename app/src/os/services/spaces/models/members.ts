@@ -51,8 +51,10 @@ export const MembershipStore = types
   })
   .views((self) => ({
     isAdmin(path: string, patp: Patp) {
+      console.log('isAdmin');
       const member = self.spaces.get(path)?.get(patp);
       if (!member) return false;
+      console.log('member => %o', member);
       return member.roles?.includes('admin');
     },
     getMemberCount(path: SpacePath) {
@@ -102,6 +104,7 @@ export const MembershipStore = types
       if (members) self.selected = members;
     },
     editMember(path: SpacePath, patp: Patp, roles: RolesType[]) {
+      console.log('editMember => %o', { path, patp, roles });
       const members = self.spaces.get(path);
       members?.get(patp)?.setRoles(roles);
     },
