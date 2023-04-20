@@ -8,7 +8,7 @@ import {
   castToSnapshot,
 } from 'mobx-state-tree';
 import { AuthIPC } from 'renderer/stores/ipc';
-import { AccountModel } from './models/Account.model';
+import { AccountModel } from './models/account.model';
 import { trackEvent } from 'renderer/lib/track';
 import { appState } from './app.store';
 import {
@@ -132,7 +132,7 @@ export const AuthenticationModel = types
         console.log(e);
       }
     }),
-    shutdown: flow(function* () {
+    shutdown() {
       // TODO implement
       try {
         // yield RealmIPC.shutdown(self.session?.patp) as Promise<any>;
@@ -143,7 +143,7 @@ export const AuthenticationModel = types
       } catch (e) {
         console.log(e);
       }
-    }),
+    },
     removeAccount: flow(function* (patp: string) {
       // TODO implement
       const account = self.accounts.find((a) => a.patp === patp);
@@ -174,6 +174,7 @@ export const AuthenticationModel = types
     //   }
     // }),
     _onAddAccount(accountPayload: AuthUpdateAccountPayload) {
+      console.log('onAddAccount', accountPayload);
       const account = AccountModel.create(accountPayload.account);
       self.accounts.push(account);
       applySnapshot(self.order, accountPayload.order);

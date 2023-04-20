@@ -53,6 +53,7 @@ export const LoginStep = ({ setStep, onFinish }: LoginStepProps) => {
       // Create a "default" account for each ship.
       // The user can customize their passports later.
       userShips.forEach((ship) => {
+        console.log('trying to create account', ship);
         RealmIPC.createAccount(
           {
             accountId: masterAccount.id,
