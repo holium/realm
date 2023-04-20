@@ -146,13 +146,13 @@ export class ShipService extends AbstractService<any> {
   // ----------------------------------------
   // ------------------ S3 ------------------
   // ----------------------------------------
-  public async getS3Bucket() {
+  public async getS3Bucket(session?: ConduitSession) {
     const [credentials, configuration] = await Promise.all([
-      APIConnection.getInstance().conduit.scry({
+      APIConnection.getInstance(session).conduit.scry({
         app: 's3-store',
         path: `/credentials`,
       }),
-      APIConnection.getInstance().conduit.scry({
+      APIConnection.getInstance(session).conduit.scry({
         app: 's3-store',
         path: `/configuration`,
       }),
@@ -164,9 +164,12 @@ export class ShipService extends AbstractService<any> {
     };
   }
 
-  public async uploadFile(args: FileUploadParams): Promise<string | undefined> {
+  public async uploadFile(
+    args: FileUploadParams,
+    session?: ConduitSession
+  ): Promise<string | undefined> {
     return await new Promise((resolve, reject) => {
-      this.getS3Bucket()
+      this.getS3Bucket(session)
         .then(async (response: any) => {
           console.log('getS3Bucket response: ', response);
           // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint

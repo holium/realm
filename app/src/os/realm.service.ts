@@ -9,7 +9,7 @@ import log from 'electron-log';
 import { track } from '@amplitude/analytics-browser';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { AuthService } from './services/auth/auth.service';
-import { ShipService } from './services/ship/ship.service';
+import { FileUploadParams, ShipService } from './services/ship/ship.service';
 import {
   getReleaseChannelFromSettings,
   saveReleaseChannelInSettings,
@@ -179,6 +179,32 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       description,
       avatar
     );
+  }
+
+  // Used in onboarding before a session exists.
+  async uploadFile(args: FileUploadParams): Promise<string | undefined> {
+    if (!this.services) return;
+
+    const credentials = this.services.ship?.credentials;
+
+    if (!credentials) {
+      log.error('No credentials found');
+      return;
+    }
+
+    const patp = this.services.ship?.patp;
+
+    if (!patp) {
+      log.error('No patp found');
+      return;
+    }
+
+    const session = {
+      ...credentials,
+      ship: patp,
+    };
+
+    return this.services.ship?.uploadFile(args, session);
   }
 
   async updatePassword(patp: string, password: string) {

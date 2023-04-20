@@ -3,7 +3,7 @@ import { track } from '@amplitude/analytics-browser';
 import { PassportDialog } from '@holium/shared';
 import { FileUploadParams } from 'os/services/ship/ship.service';
 import { StepProps } from './types';
-import { RealmIPC, ShipIPC } from '../../stores/ipc';
+import { RealmIPC } from '../../stores/ipc';
 
 type Props = {
   onFinish?: () => void;
@@ -22,7 +22,7 @@ export const PassportStep = ({ setStep, onFinish }: Props) => {
       content: file.path,
       contentType: file.type,
     };
-    const url = await ShipIPC.uploadFile(params);
+    const url = await RealmIPC.uploadFile(params);
 
     return url;
   };
