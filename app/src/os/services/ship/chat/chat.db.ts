@@ -18,17 +18,8 @@ import {
   DeleteLogRow,
   DelPeersRow,
   UpdateMessage,
+  ChatUpdateTypes,
 } from './chat.types';
-
-// type ChatUpdateType =
-//   | 'message-received'
-//   | 'message-edited'
-//   | 'message-deleted'
-//   | 'path-added'
-//   | 'path-updated'
-//   | 'path-deleted'
-//   | 'peer-added'
-//   | 'peer-deleted';
 
 interface ChatRow {
   id: number;
@@ -49,7 +40,7 @@ interface ChatRow {
   dismissed: boolean;
 }
 
-export class ChatDB extends AbstractDataAccess<ChatRow> {
+export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   constructor(params: DataAccessContructorParams) {
     params.name = 'chatDB';
     params.tableName = 'paths';
@@ -700,7 +691,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
         @expires_at
       )`
     );
-    const insertMany = this.db.transaction((messages) => {
+    const insertMany = this.db.transaction((messages: any) => {
       for (const message of messages) {
         insert.run({
           path: message.path,
@@ -736,7 +727,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
           updated_at
         ) VALUES (@path, @type, @metadata, @peers_get_backlog, @pins, @max_expires_at_duration, @invites, @created_at, @updated_at)`
     );
-    const insertMany = this.db.transaction((paths) => {
+    const insertMany = this.db.transaction((paths: any) => {
       for (const path of paths)
         insert.run({
           path: path.path,
@@ -765,7 +756,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
           updated_at
         ) VALUES (@path, @ship, @role, @created_at, @updated_at)`
     );
-    const insertMany = this.db.transaction((peers) => {
+    const insertMany = this.db.transaction((peers: any) => {
       for (const peer of peers)
         insert.run({
           path: peer.path,
@@ -792,7 +783,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow> {
           timestamp
         ) VALUES (@change, @timestamp)`
     );
-    const insertMany = this.db.transaction((deleteLogs) => {
+    const insertMany = this.db.transaction((deleteLogs: any) => {
       for (const deleteLog of deleteLogs)
         insert.run({
           change: JSON.stringify(deleteLog.change),

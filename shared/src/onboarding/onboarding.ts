@@ -1,3 +1,4 @@
+export { AddServerDialog } from './dialogs/AddServerDialog';
 export { AccountDialogSkeleton } from './components/AccountDialog';
 export { OnboardDialogSkeleton } from './components/OnboardDialog';
 export { AccountCustomDomainDialog } from './dialogs/AccountCustomDomainDialog';
@@ -20,9 +21,15 @@ export { VerifyEmailModal } from './components/hosting/modals/VerifyEmailModal';
 export { ChangePasswordModal } from './components/hosting/modals/ChangePasswordModal';
 export { GetNewAccessCodeModal } from './components/hosting/modals/GetNewAccessCodeModal';
 export { EjectIdModal } from './components/hosting/modals/EjectIdModal';
+export { HostingDialog } from './dialogs/HostingDialog';
+export { InstallationDialog } from './dialogs/InstallationDialog';
+export { OnboardDialogDescription } from './components/OnboardDialog.styles';
+export { ThirdEarthApi } from './services/ThirdEarthApi';
+export { PassportDialog } from './dialogs/PassportDialog';
 export { SidebarSection } from './components/AccountDialog';
 
 export type {
+  OnboardingPage,
   ThirdEarthShip,
   ThirdEarthProduct,
   ThirdEarthPortalSession,

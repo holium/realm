@@ -1,62 +1,61 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { BootingDialog } from '../BootingDialog';
-import { ChooseIdDialog } from '../ChooseIdDialog';
+import { Anchor } from '@holium/design-system/general';
+import {
+  BootingDialog,
+  ChooseIdDialog,
+  CredentialsDialog,
+  OnboardDialogDescription,
+  PaymentDialog,
+} from '@holium/shared';
 import { CreateAccountDialog } from '../CreateAccountDialog';
-import { CredentialsDialog } from '../CredentialsDialog';
-import { DownloadDialog } from '../DownloadDialog';
-import { PaymentDialog } from '../PaymentDialog';
-import { VerifyEmailDialog } from '../VerifyEmailDialog';
-import { OnboardingDialogWrapper } from './helpers';
-import { ThirdEarthProduct } from '../../types/index';
+import {
+  OnboardingDialogWrapper,
+  mockPatps,
+  thirdEarthMockProducts,
+} from './helpers';
+import { PassportDialog } from '../PassportDialog';
+import { HostingDialog } from '../HostingDialog';
+import { LoginDialog } from '../LoginDialog';
 
 export default {
   component: CreateAccountDialog,
-  title: 'Onboarding/Signup flow',
+  title: 'Onboarding/Buy Ship DESKTOP',
 } as ComponentMeta<typeof CreateAccountDialog>;
 
-export const CreateAccountDialogStory: ComponentStory<
-  typeof CreateAccountDialog
-> = () => (
+export const LoginDialogStory: ComponentStory<typeof LoginDialog> = () => (
   <OnboardingDialogWrapper>
-    <CreateAccountDialog
-      onAlreadyHaveAccount={() => {}}
-      onNext={() => Promise.resolve(false)}
+    <LoginDialog
+      showTerms
+      label={
+        <OnboardDialogDescription>
+          Don't have access? <Anchor>Join waitlist</Anchor>.
+        </OnboardDialogDescription>
+      }
+      onLogin={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
 
-CreateAccountDialogStory.storyName = '1. Create account';
+LoginDialogStory.storyName = '1. Login';
 
-export const VerifyEmailDialogStory: ComponentStory<
-  typeof VerifyEmailDialog
-> = () => (
+export const HostingDialogStory: ComponentStory<typeof HostingDialog> = () => (
   <OnboardingDialogWrapper>
-    <VerifyEmailDialog
-      onResend={() => {}}
+    <HostingDialog
       onBack={() => {}}
-      onNext={() => Promise.resolve(false)}
+      onGetHosting={() => {}}
+      onAddExistingUrbit={() => {}}
     />
   </OnboardingDialogWrapper>
 );
 
-VerifyEmailDialogStory.storyName = '2. Verify email';
+HostingDialogStory.storyName = '2. Hosting';
 
 export const ChooseIdDialogStory: ComponentStory<
   typeof ChooseIdDialog
 > = () => (
   <OnboardingDialogWrapper>
     <ChooseIdDialog
-      patps={[
-        '~zod',
-        '~bus',
-        '~wicdev-wisryt',
-        '~nidsut-tomdun',
-        '~fipfep-foslup',
-        '~norsyr-tomdun',
-        '~lopsyp-doztun',
-        '~lomder-librun',
-        '~littel-wolfur',
-      ]}
+      patps={mockPatps}
       onSelectPatp={() => {}}
       onNext={() => Promise.resolve(false)}
     />
@@ -65,40 +64,10 @@ export const ChooseIdDialogStory: ComponentStory<
 
 ChooseIdDialogStory.storyName = '3. Choose ID';
 
-const thirdEarthProductMock: ThirdEarthProduct = {
-  id: 1,
-  client_id: 1,
-  droplet_class_id: 1,
-  is_migration: false,
-  is_planet: true,
-  lang_code: 'en',
-  priority: 1,
-  product_status: 'active',
-  product_type: 'subscription',
-  threshold: 0,
-  comet_count: '0',
-  title: 'Monthly',
-  description: 'Monthly subscription',
-  long_description: 'Monthly subscription',
-  price_id: '11',
-  subscription_price: 15,
-};
-
 export const PaymentDialogStory: ComponentStory<typeof PaymentDialog> = () => (
   <OnboardingDialogWrapper>
     <PaymentDialog
-      products={[
-        thirdEarthProductMock,
-        {
-          ...thirdEarthProductMock,
-          id: 2,
-          title: 'Yearly',
-          description: 'Yearly subscription',
-          long_description: 'Yearly subscription',
-          price_id: '12',
-          subscription_price: 150,
-        },
-      ]}
+      products={thirdEarthMockProducts}
       productId={1}
       setProductId={() => {}}
       patp="~zod"
@@ -157,19 +126,16 @@ export const CredentialsDialogStory: ComponentStory<
 
 CredentialsDialogStory.storyName = '6. Credentials';
 
-export const DownloadDialogStory: ComponentStory<
-  typeof DownloadDialog
+export const PassportDialogStory: ComponentStory<
+  typeof PassportDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <DownloadDialog
-      onDownloadMacM1={() => {}}
-      onDownloadMacIntel={() => {}}
-      onDownloadWindows={() => {}}
-      onDownloadLinux={() => {}}
+    <PassportDialog
+      patp="~pasren-satmex"
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
 
-DownloadDialogStory.storyName = '7. Download';
+PassportDialogStory.storyName = '7. Create your Passport';

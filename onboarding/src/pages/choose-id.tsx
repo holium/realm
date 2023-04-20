@@ -1,17 +1,17 @@
 import { ChooseIdDialog } from '@holium/shared';
-import { Page } from 'components/Page';
+import { Page } from '../components/Page';
 import { useNavigation } from '../util/useNavigation';
-import { api } from '../util/api';
+import { thirdEarthApi } from '../util/thirdEarthApi';
 
 type ServerSideProps = {
   patps: string[];
 };
 
 export async function getServerSideProps() {
-  const products = await api.getProducts();
+  const products = await thirdEarthApi.getProducts();
   const productId = products[0].id;
 
-  const planets = await api.getPlanets(productId);
+  const planets = await thirdEarthApi.getPlanets(productId);
   const patps = Object.values(planets.planets)
     .filter((planet) => planet.planet_status === 'available')
     .map((planet) => planet.patp);

@@ -1,23 +1,30 @@
-import { EventEmitter } from 'events';
 import {
   ipcMain,
   ipcRenderer,
   IpcMainInvokeEvent,
   BrowserWindow,
+  IpcRendererEvent,
 } from 'electron';
+import { MethodProxies, UpdatePayload } from './abstract.types';
+// import log from 'electron-log';
 
 export interface ServiceOptions {
   preload: boolean;
 }
 
-abstract class AbstractService extends EventEmitter {
+const methodFilter = (method: any, serviceName: any) =>
+  method !== 'constructor' &&
+  !method.startsWith('_') &&
+  !method.startsWith('onUpdate') &&
+  typeof (serviceName as any)[method] === 'function';
+
+abstract class AbstractService<U = unknown> {
   serviceName: string;
 
   constructor(
     serviceName: string,
     options: ServiceOptions = { preload: false }
   ) {
-    super();
     this.serviceName = serviceName;
     if (options?.preload) {
       return;
@@ -26,7 +33,6 @@ abstract class AbstractService extends EventEmitter {
       this._registerIpcHandlers();
     }
   }
-
   /**
    * ------------------------------
    * sendUpdate
@@ -37,12 +43,26 @@ abstract class AbstractService extends EventEmitter {
    * @returns void
    * @protected
    */
-  protected sendUpdate(data: any): void {
+  public sendUpdate(data: U): void {
     const windows = BrowserWindow.getAllWindows();
     windows.forEach((window) => {
       window.webContents.send(`${this.serviceName}.onUpdate`, data);
     });
   }
+
+  /**
+   * ------------------------------
+   * onUpdate
+   * ------------------------------
+   * By default, this method does nothing. It is registered
+   * as a callback for the onUpdate IPC event.
+   *
+   * @param _callback the callback to register
+   * @returns void
+   * @see _registerIpcRendererCallbacks
+   *
+   */
+  public onUpdate(_callback: UpdatePayload<U>): void {}
 
   /**
    * ------------------------------
@@ -56,11 +76,16 @@ abstract class AbstractService extends EventEmitter {
    * @protected
    */
   protected _registerIpcRendererCallbacks(): {
-    [event: string]: (...args: any[]) => void;
+    [event: string]: (callback: UpdatePayload<U>) => void;
   } {
     return {
-      onUpdate: (callback: (...args: any[]) => void) => {
-        ipcRenderer.on(`${this.serviceName}.onUpdate`, callback);
+      onUpdate: (callback: UpdatePayload<U>) => {
+        ipcRenderer.on(
+          `${this.serviceName}.onUpdate`,
+          (_e: IpcRendererEvent, update: U) => {
+            callback(update);
+          }
+        );
       },
     };
   }
@@ -77,13 +102,12 @@ abstract class AbstractService extends EventEmitter {
   private _registerIpcHandlers(): void {
     const methods = Object.getOwnPropertyNames(
       Object.getPrototypeOf(this)
-    ).filter(
-      (method) =>
-        method !== 'constructor' && typeof (this as any)[method] === 'function'
-    );
+    ).filter((method) => methodFilter(method, this));
 
     methods.forEach((method) => {
       const ipcChannel = `${this.serviceName}.${method}`;
+      // first remove any existing handlers
+      ipcMain.removeHandler(ipcChannel);
       ipcMain.handle(
         ipcChannel,
         async (_event: IpcMainInvokeEvent, ...args: any[]) => {
@@ -98,19 +122,25 @@ abstract class AbstractService extends EventEmitter {
     });
   }
 
-  reset() {
+  /**
+   * ------------------------------
+   * reset
+   * ------------------------------
+   * Removes all IPC handlers and IPC renderer listeners.
+   * This method is called by the constructor.
+   * @returns void
+   * @private
+   */
+  removeHandlers() {
     const methods = Object.getOwnPropertyNames(
       Object.getPrototypeOf(this)
-    ).filter(
-      (method) =>
-        method !== 'constructor' && typeof (this as any)[method] === 'function'
-    );
+    ).filter((method) => methodFilter(method, this));
     methods.forEach((method) => {
       const ipcChannel = `${this.serviceName}.${method}`;
-
       ipcMain.removeHandler(ipcChannel);
     });
   }
+
   /**
    * ------------------------------
    * preload
@@ -120,34 +150,25 @@ abstract class AbstractService extends EventEmitter {
    * @param service
    * @returns a map of method names to functions
    */
-  static preload(
-    service: AbstractService
-  ): Record<string, (...args: any[]) => Promise<any> | void> {
+  static preload<T extends AbstractService>(service: T): MethodProxies<T> {
     const serviceName = service.serviceName;
     const methods = Object.getOwnPropertyNames(
       Object.getPrototypeOf(service)
-    ).filter(
-      (method) =>
-        method !== 'constructor' &&
-        !method.startsWith('_') &&
-        typeof (service as any)[method] === 'function'
-    );
+    ).filter((method) => methodFilter(method, service));
 
-    const mappedMethods: Record<
-      string,
-      (...args: any[]) => Promise<any> | void
-    > = {};
-    methods.forEach((method) => {
-      mappedMethods[method] = async (...args: any[]) => {
-        return await ipcRenderer.invoke(`${serviceName}.${method}`, ...args);
-      };
-    });
+    const mappedMethods = methods.reduce((acc, method) => {
+      acc[method as keyof T] = ((...args: any[]) => {
+        return ipcRenderer.invoke(`${serviceName}.${method}`, ...args);
+      }) as any;
+      return acc;
+    }, {} as Partial<MethodProxies<T>>);
 
     const callbacks = service._registerIpcRendererCallbacks();
     Object.keys(callbacks).forEach((event) => {
-      mappedMethods[event] = callbacks[event];
+      mappedMethods[event as keyof T] = callbacks[event] as any;
     });
-    return mappedMethods;
+
+    return mappedMethods as MethodProxies<T>;
   }
 }
 

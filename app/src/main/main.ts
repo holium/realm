@@ -79,8 +79,9 @@ export const getPreloadPath = () =>
     : path.join(__dirname, '../../.holium/dll/preload.js');
 
 const createWindow = async () => {
-  // TODO fix the warnings and errors with this
-  // if (isDevelopment) await installExtensions();
+  if (isDevelopment) {
+    // TODO can cleanup here
+  }
 
   mainWindow = new BrowserWindow({
     show: false,
@@ -125,8 +126,7 @@ const createWindow = async () => {
   // ---------------------------------------------------------------------
   // ----------------------- Start Realm services ------------------------
   // ---------------------------------------------------------------------
-  const realmService = new RealmService();
-  // realmService.login('~lomder-librun', 'password');
+  const _realmService = new RealmService();
 
   // TODO why is this rendering multiple times?
   mainWindow.on('ready-to-show', () => {
@@ -239,21 +239,21 @@ app.on('window-all-closed', () => {
 });
 // quitting is complicated. We have to catch the initial quit signal, preventDefault() it,
 // do our cleanup, and then re-emit and actually quit it
-let lastQuitSignal: number = 0;
-app.on('before-quit', (event) => {
-  if (!updater.checkingForUpdates) {
-    if (lastQuitSignal === 0) {
-      lastQuitSignal = new Date().getTime() - 1;
-      event.preventDefault();
-      mainWindow.webContents.send('realm.before-quit');
-      setTimeout(() => app.quit(), 500); // after half a second, we really do need to shut down
-    }
-  }
-});
+// let lastQuitSignal: number = 0;
+// app.on('before-quit', (event) => {
+//   if (!updater.checkingForUpdates) {
+//     if (lastQuitSignal === 0) {
+//       lastQuitSignal = new Date().getTime() - 1;
+//       event.preventDefault();
+//       mainWindow.webContents.send('realm.before-quit');
+//       setTimeout(() => app.quit(), 500); // after half a second, we really do need to shut down
+//     }
+//   }
+// });
 
-ipcMain.on('realm.app.quit', (_event) => {
-  if (!updater.checkingForUpdates) app.quit();
-});
+// ipcMain.on('realm.app.quit', (_event) => {
+//   if (!updater.checkingForUpdates) app.quit();
+// });
 
 ipcMain.on('download-url-as-file', (_event, { url }) => {
   const win = BrowserWindow.getFocusedWindow();

@@ -1,7 +1,5 @@
-import { toJS } from 'mobx';
 import { types, onSnapshot, Instance } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
-import { nativeApps } from '../nativeApps';
 import { isUrlSafe } from './helpers/createUrl';
 import { MainIPC } from 'renderer/stores/ipc';
 import { LoaderModel } from 'renderer/stores/models/common.model';

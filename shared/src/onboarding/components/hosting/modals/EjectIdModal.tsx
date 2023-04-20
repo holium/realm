@@ -6,10 +6,9 @@ import {
   SuccessBox,
 } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
-import { RadioList } from '@holium/design-system/inputs';
+import { RadioList, TextInput } from '@holium/design-system/inputs';
 import { Modal } from '../../Modal';
 import { SubmitButton } from '../SubmitButton';
-import { OnboardDialogInput } from '../../OnboardDialog.styles';
 
 type Props = {
   isOpen: boolean;
@@ -80,7 +79,10 @@ export const EjectIdModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
           onClick={setSelectedEjectOption}
         />
         {selectedEjectOption === 'ethereumAddress' && (
-          <OnboardDialogInput
+          <TextInput
+            height="38px"
+            id="eth-address"
+            name="eth-address"
             type="password"
             placeholder="Ethereum address"
             onChange={onChangeEthAddress}

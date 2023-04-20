@@ -2,7 +2,6 @@ import { FC, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { searchPatpOrNickname } from './helpers';
-import { ContactModelType } from 'os/services/ship/models/friends';
 import {
   Flex,
   Box,
@@ -15,6 +14,7 @@ import {
   Card,
 } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { FriendType } from 'renderer/stores/models/friends.model';
 
 const resultHeight = 50;
 
@@ -44,7 +44,7 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
   ({ search, isDropdown, selected, onSelected }: ShipSearchProps) => {
     const { ship, friends } = useShipStore();
 
-    const results = useMemo<Array<[string, ContactModelType]>>(() => {
+    const results = useMemo<Array<[string, FriendType]>>(() => {
       return searchPatpOrNickname(search, friends.search, selected, ship?.patp);
     }, [friends.all, search, selected, ship]);
 

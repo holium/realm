@@ -38,8 +38,7 @@ export const DialogTitlebar = ({
           <AppWindowIcon
             icon="Close"
             size={26}
-            bg="#FF6240"
-            fillWithBg
+            iconColor="intent-alert"
             onClick={(evt: any) => {
               evt.stopPropagation();
               onClose && onClose();

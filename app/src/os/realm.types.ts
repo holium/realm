@@ -1,25 +1,38 @@
-import { AccountModelType } from 'renderer/stores/models/account.model';
+import { AccountView } from './services/auth/auth.types';
+
+export type LoginErrorType =
+  | 'bad-gateway'
+  | 'password'
+  | 'missing'
+  | 'code'
+  | 'unknown'
+  | '';
 
 export type RealmUpdateBooted = {
   type: 'booted';
   payload: {
-    accounts: AccountModelType[];
-    screen: 'login' | 'onboarding' | 'os';
+    accounts: AccountView[] | undefined;
     session?: {
       url: string;
       patp: string;
       cookie: string;
-    };
+    } | null;
+    seenSplash: boolean;
   };
 };
 
-export type RealmUpdateAuthenticated = {
-  type: 'authenticated';
+export type RealmUpdateAuthSuccess = {
+  type: 'auth-success';
   payload: {
     url: string;
     patp: string;
     cookie: string;
   };
+};
+
+export type RealmUpdateAuthFailed = {
+  type: 'auth-failed';
+  payload: LoginErrorType;
 };
 
 export type RealmUpdateLogout = {
@@ -30,6 +43,7 @@ export type RealmUpdateLogout = {
 };
 
 export type RealmUpdateTypes =
-  | RealmUpdateAuthenticated
+  | RealmUpdateAuthSuccess
+  | RealmUpdateAuthFailed
   | RealmUpdateBooted
   | RealmUpdateLogout;

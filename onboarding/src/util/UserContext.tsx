@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 import { ThirdEarthShip } from '@holium/shared';
-import { api } from './api';
+import { thirdEarthApi } from './thirdEarthApi';
 
 interface IUserContext {
   token: string | null;
@@ -35,7 +35,7 @@ export const UserContextProvider = ({ children }: Props) => {
     if (!token || !email || ships.length) return;
 
     const getAndSetUserData = async () => {
-      const newShips = await api.getUserShips(token);
+      const newShips = await thirdEarthApi.getUserShips(token);
 
       setToken(token);
       setEmail(email);

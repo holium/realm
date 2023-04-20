@@ -133,7 +133,7 @@ const ShipSelectorPresenter = ({
           gap: 16,
         }}
         values={orderedList}
-        onReorder={(newOrder: any) => {
+        onReorder={(_newOrder: any) => {
           // auth.setOrder(newOrder);
         }}
       >

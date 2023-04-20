@@ -1,4 +1,4 @@
-import { Database } from 'better-sqlite3';
+import Database from 'better-sqlite3-multiple-ciphers';
 import { APIConnection } from '../api';
 import AbstractDataAccess from '../abstract.db';
 import { cleanNounColor, removeHash } from '../../lib/color';
@@ -17,7 +17,7 @@ export interface Friend {
   // updatedAt: number;
 }
 
-export class Friends extends AbstractDataAccess<Friend> {
+export class Friends extends AbstractDataAccess<Friend, any> {
   constructor(preload: boolean, db?: Database) {
     super({ preload: preload, db, name: 'friends', tableName: 'friends' });
     if (preload) {
@@ -45,6 +45,7 @@ export class Friends extends AbstractDataAccess<Friend> {
 
   private async _init() {
     const friends: any[] = await this._fetchFriends();
+    if (!friends) return;
     if (!this.db) throw new Error('No db connection');
     const insert = this.db.prepare(
       `REPLACE INTO friends (
@@ -69,7 +70,7 @@ export class Friends extends AbstractDataAccess<Friend> {
         @cover
       )`
     );
-    const insertMany = this.db.transaction((friends) => {
+    const insertMany = this.db.transaction((friends: any) => {
       Object.entries<any>(friends).forEach(([patp, friend]) => {
         insert.run({
           patp,
@@ -95,7 +96,7 @@ export class Friends extends AbstractDataAccess<Friend> {
       app: 'friends',
       path: '/all',
     });
-    return response.friends;
+    return response?.friends;
   }
 
   public async getFriends() {

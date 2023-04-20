@@ -1,4 +1,4 @@
-import { Database } from 'better-sqlite3';
+import Database from 'better-sqlite3-multiple-ciphers';
 import AbstractDataAccess from '../abstract.db';
 
 export interface Account {
@@ -7,20 +7,25 @@ export interface Account {
   patp: string;
   url: string;
   nickname: string;
+  description: string;
   color: string;
   avatar: string;
   status: string;
   theme: string;
   passwordHash: string;
-  encryptionKey: string;
-  authToken: string;
   createdAt: number;
   updatedAt: number;
 }
 
-export class Accounts extends AbstractDataAccess<Account> {
+export class Accounts extends AbstractDataAccess<Account, any> {
   constructor(db: Database) {
-    super({ preload: false, db, name: 'accounts', tableName: 'accounts' });
+    super({
+      preload: false,
+      db,
+      name: 'accounts',
+      tableName: 'accounts',
+      pKey: 'patp',
+    });
   }
 
   protected mapRow(row: any): Account {
@@ -30,13 +35,12 @@ export class Accounts extends AbstractDataAccess<Account> {
       patp: row.patp,
       url: row.url,
       nickname: row.nickname,
+      description: row.description,
       color: row.color,
       avatar: row.avatar,
       status: row.status,
       theme: row.theme ? JSON.parse(row.theme) : {},
       passwordHash: row.passwordHash,
-      encryptionKey: row.encryptionKey,
-      authToken: row.authToken,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     };
@@ -93,6 +97,7 @@ export const accountsInit = `
     type            TEXT NOT NULL DEFAULT 'local',
     url             TEXT NOT NULL,
     nickname        TEXT,
+    description     TEXT,
     color           TEXT default '#000000',
     avatar          TEXT,
     status          TEXT NOT NULL DEFAULT 'initial',

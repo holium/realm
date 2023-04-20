@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { ViewPort, Layer } from 'react-spaces';
 import { Desktop } from './desktop/Desktop';
 import { DialogManager } from './dialog/DialogManager';
-import { ConnectionStatus } from 'renderer/components';
+// import { ConnectionStatus } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 
 const ShellPresenter = () => {

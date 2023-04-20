@@ -3,7 +3,7 @@ import { track } from '@amplitude/analytics-browser';
 import NextHead from 'next/head';
 import styled from 'styled-components';
 import { useToggle } from '@holium/design-system/util';
-import { api } from '../util/api';
+import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 import { AccountDialogSkeleton, OnboardDialogSkeleton } from '@holium/shared';
 
@@ -34,7 +34,7 @@ export const Page = ({ title, isProtected = false, children }: Props) => {
 
     const refreshAndStoreToken = async (token: string) => {
       try {
-        const response = await api.refreshToken(token);
+        const response = await thirdEarthApi.refreshToken(token);
         localStorage.setItem('email', response.email);
         localStorage.setItem('token', response.token);
         authenticated.toggleOn();

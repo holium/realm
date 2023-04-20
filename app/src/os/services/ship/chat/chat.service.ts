@@ -1,12 +1,12 @@
-import { Database } from 'better-sqlite3-multiple-ciphers';
+import Database from 'better-sqlite3-multiple-ciphers';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
 import { chatDBPreload, ChatDB } from './chat.db';
-import { ChatPathMetadata, ChatPathType } from './chat.types';
+import { ChatPathMetadata, ChatPathType, ChatUpdateTypes } from './chat.types';
 import { InvitePermissionType } from 'renderer/stores/models/chat.model';
 import { preSig } from '@urbit/aura';
 
-export class ChatService extends AbstractService {
+export class ChatService extends AbstractService<ChatUpdateTypes> {
   public chatDB?: ChatDB;
   constructor(options?: ServiceOptions, db?: Database) {
     super('chatService', options);
@@ -17,7 +17,7 @@ export class ChatService extends AbstractService {
   }
 
   reset(): void {
-    super.reset();
+    super.removeHandlers();
     this.chatDB?.reset();
   }
 
@@ -137,7 +137,7 @@ export class ChatService extends AbstractService {
     }
   }
 
-  async clearChatBacklog(_evnt: any, path: string) {
+  async clearChatBacklog(path: string) {
     const payload = {
       app: 'realm-chat',
       mark: 'chat-action',
@@ -156,7 +156,6 @@ export class ChatService extends AbstractService {
   }
 
   async createChat(
-    _evt: any,
     peers: string[],
     type: ChatPathType,
     metadata: ChatPathMetadata
@@ -218,7 +217,6 @@ export class ChatService extends AbstractService {
   }
 
   async editChatMetadata(
-    _evt: any,
     path: string,
     metadata: ChatPathMetadata,
     invites: InvitePermissionType,
@@ -295,7 +293,6 @@ export class ChatService extends AbstractService {
    * which will remove us from the chat and delete it if we
    * are the host
    *
-   * @param _evt
    * @param path
    */
   async leaveChat(path: string) {
@@ -322,11 +319,11 @@ export class ChatService extends AbstractService {
 export default ChatService;
 
 // Generate preload
-const chatServiceInstance = ChatService.preload(
+export const chatServicePreload = ChatService.preload(
   new ChatService({ preload: true })
 );
 
 export const chatPreload = {
   ...chatDBPreload,
-  ...chatServiceInstance,
+  ...chatServicePreload,
 };

@@ -11,7 +11,7 @@ import {
 import { useToggle } from '@holium/design-system/util';
 import { Page } from '../../components/Page';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
-import { api } from '../../util/api';
+import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { UserContextProvider, useUser } from '../../util/UserContext';
 
 const HostingPresenter = () => {
@@ -39,7 +39,7 @@ const HostingPresenter = () => {
   const onSubmitNewEmail = async (email: string) => {
     if (!token) return Promise.resolve(false);
     try {
-      const response = await api.changeEmail(token, email);
+      const response = await thirdEarthApi.changeEmail(token, email);
 
       if (response.email) {
         changeEmailModal.toggleOff();
@@ -58,7 +58,10 @@ const HostingPresenter = () => {
     password: string
   ) => {
     try {
-      const response = await api.verifyEmail(verificationToken, password);
+      const response = await thirdEarthApi.verifyEmail(
+        verificationToken,
+        password
+      );
 
       if (response.token) {
         window.location.reload();
@@ -74,7 +77,7 @@ const HostingPresenter = () => {
   const onSubmitNewPassword = async (password: string) => {
     if (!token) return Promise.resolve(false);
     try {
-      const response = await api.changePassword(token, password);
+      const response = await thirdEarthApi.changePassword(token, password);
 
       if (response?.token) {
         changePasswordModal.toggleOff();
@@ -91,7 +94,10 @@ const HostingPresenter = () => {
     if (!token) return Promise.resolve(false);
     if (!selectedShip) return Promise.resolve(false);
 
-    const response = await api.resetShipCode(token, selectedShip.id.toString());
+    const response = await thirdEarthApi.resetShipCode(
+      token,
+      selectedShip.id.toString()
+    );
 
     if (response) return true;
     return false;
@@ -101,7 +107,7 @@ const HostingPresenter = () => {
     if (!token) return Promise.resolve(false);
     if (!selectedShip) return Promise.resolve(false);
 
-    const response = await api.updateMaintenanceWindow(
+    const response = await thirdEarthApi.updateMaintenanceWindow(
       token,
       selectedShip.id.toString(),
       maintenanceWindow
@@ -119,7 +125,7 @@ const HostingPresenter = () => {
     if (!token) return Promise.resolve(false);
     if (!selectedShip) return Promise.resolve(false);
 
-    const response = await api.ejectShip(
+    const response = await thirdEarthApi.ejectShip(
       token,
       selectedShip.id.toString(),
       ejectAddress,
@@ -133,10 +139,10 @@ const HostingPresenter = () => {
 
   useEffect(() => {
     if (!token) return;
-    api
+    thirdEarthApi
       .getManagePaymentLink(token)
       .then((response) => setManagePaymentLink(response.url));
-  }, []);
+  }, [token]);
 
   return (
     <Page title="Account / Hosting" isProtected>

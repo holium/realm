@@ -1,5 +1,5 @@
 import AbstractService, { ServiceOptions } from '../../abstract.service';
-import { Database } from 'better-sqlite3-multiple-ciphers';
+import Database from 'better-sqlite3-multiple-ciphers';
 import log from 'electron-log';
 import { APIConnection } from '../../api';
 import { SpacesDB, spacesInitSql } from './tables/spaces.table';
@@ -14,8 +14,9 @@ import {
   FeaturedSpacesDB,
   spacesFeaturedInitSql,
 } from './tables/featured.table';
+import { SpacesUpdateType } from './spaces.types';
 
-export class SpacesService extends AbstractService {
+export class SpacesService extends AbstractService<SpacesUpdateType> {
   private shipDB?: Database;
   public spacesDB?: SpacesDB;
   public membersDB?: MembersDB;
@@ -34,7 +35,9 @@ export class SpacesService extends AbstractService {
     this.featuredSpacesDB = new FeaturedSpacesDB(false, db);
 
     this._onEvent = this._onEvent.bind(this);
+  }
 
+  public async init() {
     APIConnection.getInstance().conduit.watch({
       app: 'spaces',
       path: `/updates`,
@@ -42,9 +45,6 @@ export class SpacesService extends AbstractService {
       onQuit: this._onQuit,
       onError: this._onError,
     });
-  }
-
-  public async init() {
     this.fetchInviteData();
   }
 
@@ -62,8 +62,8 @@ export class SpacesService extends AbstractService {
     }
   }
 
-  reset(): void {
-    super.reset();
+  public reset(): void {
+    super.removeHandlers();
     this.spacesDB?.reset();
     this.membersDB?.reset();
     this.invitationsDB?.reset();

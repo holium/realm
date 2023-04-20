@@ -10,11 +10,11 @@ import {
 import styled from 'styled-components';
 import { Button, Icon, Flex, Spinner } from '@holium/design-system';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
-import { AppWindowType } from 'os/services/shell/desktop.model';
 import { useAppState } from 'renderer/stores/app.store';
+import { AppWindowMobxType } from 'renderer/stores/models/window.model';
 
 export interface DialogViewProps {
-  appWindow: AppWindowType;
+  appWindow: AppWindowMobxType;
 }
 
 type ViewProps = {
