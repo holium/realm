@@ -19,13 +19,16 @@ const AvatarBox = styled(Flex)<{ isSelected: boolean }>`
   height: 54px;
   border: 2px solid transparent;
   border-radius: var(--rlm-border-radius-4);
-  background-color: rgba(var(--rlm-border-rgba));
   cursor: pointer;
+
+  img {
+    background-color: rgba(var(--rlm-border-rgba));
+  }
 
   ${({ isSelected }) =>
     isSelected &&
     css`
-      border: 2px solid rgba(var(--rlm-accent-rgba), 0.4);
+      background-color: rgba(var(--rlm-accent-rgba));
     `};
 `;
 
