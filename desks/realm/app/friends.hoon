@@ -39,7 +39,7 @@
 ::  Q: How do I introduce a new mark version?                                 ::
 ::  A: Add the new sur definitions.  Add a new versioned core,                ::
 ::     copying over the previous's logic and making the necessary changes.    ::
-::     Update the /~/current-version/ scry to latest.                         ::
+::     Update the /~/version/ scry to latest.                                 ::
 ::                                                                            ::
 ::  TODO: consider rolling a lot of this boilerplate into an
 ::  agent transformer.  The transformer could track incoming
@@ -149,7 +149,7 @@
     |=  =path
     ~>  %bout.[0 '%friends +on-peek']
     ^-  (unit (unit cage))
-    [~ ~]
+    (peek:core path)
   ::
   ++  on-agent
     |=  [path=(pole knot) =sign:agent:gall]
@@ -168,7 +168,7 @@
   ::
   ++  on-watch
     |=  path=(pole knot)
-    ~>  %bout.[0 '%arvo +on-watch']
+    ~>  %bout.[0 '%friends +on-watch']
     ^-  (quip card _this)
     =^  cards  state  abet:(watch:core path)
     [cards this]
@@ -202,9 +202,9 @@
 +*  core  .
     latest  %'0'
 ::
-++  abet  [(flop cards) state]
-++  emit  |=(=card core(cards [card cards]))
-++  emil  |=(new-cards=(list card) core(cards (welp new-cards cards)))
+++  abet    [(flop cards) state]
+++  emit    |=(=card core(cards [card cards]))
+++  emil    |=(new-cards=(list card) core(cards (welp new-cards cards)))
 ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::                                                                            ::
@@ -762,6 +762,24 @@
     ::
     ==
   ::
+  ==
+::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::
+::  +peek: handle on-peek
+::
+::    In +peek we receive scries from other agents or the frontend.
+::    
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::
+++  peek
+  |=  path=(pole knot)
+  ^-  (unit (unit cage))
+  ?+    path  ~|(bad-friends-peek-path/path !!)
+    ::  Handle version scry
+    ::
+      [%x %version ~]
+    ``realm-pull+!>([%version latest])
   ==
 ::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
