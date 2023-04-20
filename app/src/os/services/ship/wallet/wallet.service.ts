@@ -1,17 +1,20 @@
 import { APIConnection } from '../../api';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
-import { Database } from 'better-sqlite3-multiple-ciphers';
+import Database from 'better-sqlite3-multiple-ciphers';
 import { RealmSigner } from './signers/realm';
 import { WalletDB, walletDBPreload } from './wallet.db';
 import { ethers } from 'ethers';
+/*import {
+  ProtocolType,
+  UISettingsType,
+} from 'renderer/stores/models/wallet.model';*/
+import { ProtocolManager } from './protocols/ProtocolManager';
+import { EthereumProtocol } from './protocols/ethereum';
+import { BaseBlockProtocol } from './protocols/BaseBlockProtocol';
 import {
   ProtocolType,
   UISettingsType,
 } from 'renderer/stores/models/wallet.model';
-import { ProtocolManager } from './protocols/ProtocolManager';
-import { EthereumProtocol } from './protocols/ethereum';
-import { BaseBlockProtocol } from './protocols/BaseBlockProtocol';
-import { BaseProtocol } from './protocols/BaseProtocol';
 
 export class WalletService extends AbstractService {
   public walletDB?: WalletDB;
@@ -22,7 +25,7 @@ export class WalletService extends AbstractService {
       return;
     }
     this.walletDB = new WalletDB({ preload: false, db });
-    const protocolMap = new Map<ProtocolType, BaseProtocol>([
+    /*const protocolMap = new Map<ProtocolType, BaseProtocol>([
       [ProtocolType.ETH_MAIN, new EthereumProtocol(ProtocolType.ETH_MAIN)],
       [ProtocolType.ETH_GORLI, new EthereumProtocol(ProtocolType.ETH_GORLI)],
       // [ProtocolType.UQBAR, new UqbarProtocol()],
@@ -30,7 +33,7 @@ export class WalletService extends AbstractService {
     this.protocolManager = new ProtocolManager(
       protocolMap,
       ProtocolType.ETH_GORLI
-    );
+    );*/
   }
 
   async uqbarDeskExists(_evt: any) {
@@ -226,12 +229,12 @@ export class WalletService extends AbstractService {
     await APIConnection.getInstance().conduit.poke(payload);
   }
 
-  watchUpdates() {
+  /*watchUpdates() {
     this.protocolManager?.watchUpdates(
       APIConnection.getInstance().conduit,
       this.walletDB
     );
-  }
+  }*/
 }
 
 export default WalletService;

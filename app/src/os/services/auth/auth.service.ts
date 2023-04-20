@@ -8,7 +8,6 @@ import Store from 'electron-store';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { AuthDB } from './auth.db';
 import { Account } from './accounts.table';
-import { ThemeType } from 'renderer/stores/models/Theme.model';
 import { ThemeType } from 'renderer/stores/models/theme.model';
 import { MasterAccount } from './masterAccounts.table';
 import { ShipDB } from '../ship/ship.db';
