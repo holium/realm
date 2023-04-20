@@ -35,19 +35,7 @@ export class ShipService extends AbstractService<any> {
       return;
     }
     this.shipDB = new ShipDB(this.patp, password);
-    // const credentials = this.shipDB.getCredentials();
-    const credentials = {
-      ship: '~dopmer-fopryg-novned-tidsyl',
-      url: 'http://127.0.0.1',
-      cookie:
-        'urbauth-~dopmer-fopryg-novned-tidsyl=0v4.ts57d.tpntn.44g8h.d5qvs.g04vl; Path=/; Max-Age=604800',
-      code: 'timtun-noprec-witsun-tadrys',
-    };
-    this.shipDB?.setCredentials(
-      credentials.url,
-      credentials.code,
-      credentials.cookie
-    );
+    const credentials = this.shipDB.getCredentials();
     if (
       !this.shipDB ||
       !credentials.code ||
