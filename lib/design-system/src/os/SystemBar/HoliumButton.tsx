@@ -29,7 +29,11 @@ const HoliSvg = styled(motion.svg)`
   }
 `;
 
-export const HoliumButton = ({ size = 28, pointer = true }) => (
+export const HoliumButton = ({
+  size = 28,
+  pointer = true,
+  onClick = () => {},
+}) => (
   <HoliSvg
     width={size}
     height={size}
@@ -39,6 +43,7 @@ export const HoliumButton = ({ size = 28, pointer = true }) => (
     style={{
       cursor: pointer ? 'pointer' : 'default',
     }}
+    onClick={onClick}
   >
     <g filter="url(#filter0_ii_360_6399)">
       <CirclePath cx="14" cy="14" r="14" />

@@ -1,16 +1,15 @@
 import { useMemo, useEffect, MouseEvent } from 'react';
 import { observer } from 'mobx-react';
-import { Text, Flex } from 'renderer/components';
-import { Row } from 'renderer/components/NewRow';
-import { useServices } from 'renderer/logic/store';
+import { Row, Text, Flex } from '@holium/design-system';
 import { AvatarRow } from './AvatarRow';
-import { darken } from 'polished';
 import { RoomType } from '@holium/realm-room';
 import { useRooms } from '../useRooms';
 import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type RoomRowProps = Partial<RoomType> & {
   tray?: boolean;
@@ -28,18 +27,15 @@ const RoomRowPresenter = ({
   onClick,
   rightChildren,
 }: RoomRowProps) => {
-  const { theme, ship } = useServices();
+  const { theme } = useAppState();
+  const { ship } = useShipStore();
   const roomsManager = useRooms(ship?.patp);
   const { getOptions, setOptions } = useContextMenu();
   const defaultOptions = getOptions('').filter(
     (o) => o.id === 'toggle-devtools'
   );
 
-  const { dockColor, windowColor } = theme.currentTheme;
-
-  // TODO do light and dark mode coloring
-  const bgColor = useMemo(() => darken(0.025, windowColor), [windowColor]);
-  const isLiveColor = useMemo(() => darken(0.02, bgColor), [bgColor]);
+  const { dockColor, windowColor } = theme;
 
   let presentCount = present?.length ?? 0;
   let peopleText = 'people';
@@ -87,13 +83,15 @@ const RoomRowPresenter = ({
       id={`room-row-${rid}`}
       small={tray}
       className="realm-cursor-hover"
-      baseBg={!tray && isLive ? isLiveColor : undefined}
-      customBg={isLive ? bgColor : windowColor}
+      selected={isLive}
+      // baseBg={!tray && isLive ? isLiveColor : undefined}
       onClick={(evt: MouseEvent<HTMLDivElement>) => onClick?.(evt)}
       style={
         !onClick
           ? { pointerEvents: 'none', position: 'relative' }
-          : { position: 'relative' }
+          : {
+              position: 'relative',
+            }
       }
     >
       <Flex
@@ -117,25 +115,30 @@ const RoomRowPresenter = ({
             }}
           />
           {/* {(!tray && isLive) && <Icons name='CheckCircle'></Icons> */}
-          <Text fontWeight={500} fontSize={tray ? '14px' : '15px'}>
+          <Text.Custom fontWeight={500} fontSize={tray ? '14px' : '15px'}>
             {titleText}
-          </Text>
+          </Text.Custom>
           {!tray && (
             <Flex flexDirection="row">
               {/* {isLive && <Icons mr={1} color="#4E9EFD" name="RoomSpeaker" />} */}
               {/* <Icons mr={1} opacity={0.5} name="Friends" /> */}
-              <Text opacity={0.5} fontWeight={400} fontSize={2}>
+              <Text.Custom opacity={0.5} fontWeight={400} fontSize={2}>
                 {presentCount} {peopleText}{' '}
                 {/* {present.includes(ship.patp) && ` - (You)`} */}
-              </Text>
+              </Text.Custom>
               {creator === ship?.patp && (
                 <>
-                  <Text mx="6px" fontSize={2} fontWeight={200} opacity={0.5}>
+                  <Text.Custom
+                    mx="6px"
+                    fontSize={2}
+                    fontWeight={200}
+                    opacity={0.5}
+                  >
                     •
-                  </Text>
-                  <Text opacity={0.5} fontWeight={200} fontSize={2}>
+                  </Text.Custom>
+                  <Text.Custom opacity={0.5} fontWeight={200} fontSize={2}>
                     Host
-                  </Text>
+                  </Text.Custom>
                 </>
               )}
             </Flex>

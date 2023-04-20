@@ -1,10 +1,12 @@
+import { AnimatePresence } from 'framer-motion';
 import { darken } from 'polished';
+import { useMemo } from 'react';
 import { createGlobalStyle, css } from 'styled-components';
-import { genCSSVariables, ThemeType } from './logic/theme';
-import { ThemeType as OldTheme } from './theme';
+import { genCSSVariables } from './lib/theme';
+import { ThemeType } from './stores/models/theme.model';
+import { BackgroundImage } from './system/system.styles';
 
 interface StyleProps {
-  theme: OldTheme;
   realmTheme: ThemeType;
   blur: boolean;
 }
@@ -57,7 +59,7 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
   }
 
   body {
-    background-color: rgba(var(--rlm-window-rgba));
+    background-color: rgba(var(--rlm-base-rgba));
     transition: background-color 1s ease;
     color: rgba(var(--rlm-text-rgba));
     height: 100vh;
@@ -79,14 +81,37 @@ export const GlobalStyle = createGlobalStyle<StyleProps>`
     padding-inline-start: 0px;
   }
 
-  /* a {
-    text-decoration: none;
-    height: fit-content;
-    width: fit-content;
-    margin: 10px;
-  } */
-
   fieldset {
     border: 0;
   }
+  
 `;
+
+export const BgImage = ({
+  blurred,
+  wallpaper,
+}: {
+  blurred: boolean;
+  wallpaper: string;
+}) => {
+  return useMemo(
+    () => (
+      <AnimatePresence>
+        <BackgroundImage
+          key={wallpaper}
+          src={wallpaper}
+          initial={{ opacity: 0 }}
+          exit={{ opacity: 0 }}
+          animate={{
+            opacity: 1,
+            filter: blurred ? `blur(24px)` : 'blur(0px)',
+          }}
+          transition={{
+            opacity: { duration: 0.5 },
+          }}
+        />
+      </AnimatePresence>
+    ),
+    [blurred, wallpaper]
+  );
+};

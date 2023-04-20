@@ -1,14 +1,20 @@
 import { FC, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
 import { searchPatpOrNickname } from './helpers';
-import { Flex, Text, Box, IconButton, Icons } from '../';
 import { ContactModelType } from 'os/services/ship/models/friends';
-import { darken, lighten } from 'polished';
-import { useServices } from 'renderer/logic/store';
-import { ThemeType } from 'renderer/theme';
-import { Row, Avatar, WindowedList } from '@holium/design-system';
+import {
+  Flex,
+  Box,
+  Button,
+  Icon,
+  Row,
+  Avatar,
+  WindowedList,
+  Text,
+  Card,
+} from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const resultHeight = 50;
 
@@ -20,13 +26,7 @@ interface ShipSearchProps {
   onSelected: (ship: [string, string?], metadata?: any) => void;
 }
 
-interface IAutoCompleteBox {
-  customBg: string;
-  height?: any;
-  theme: ThemeType;
-}
-
-const AutoCompleteBox = styled(motion.div)<IAutoCompleteBox>`
+const AutoCompleteBox = styled(Card)`
   position: absolute;
   display: flex;
   top: 38px;
@@ -38,17 +38,11 @@ const AutoCompleteBox = styled(motion.div)<IAutoCompleteBox>`
   /* margin-top: 2px; */
   padding: 4px 4px;
   border-radius: 9px;
-  box-shadow: ${(props: IAutoCompleteBox) => props.theme.elevations.two};
-  border: 1px solid
-    ${(props: IAutoCompleteBox) => props.theme.colors.ui.borderColor};
-
-  background-color: ${(props: IAutoCompleteBox) => props.customBg};
 `;
 
 export const ShipSearch: FC<ShipSearchProps> = observer(
   ({ search, isDropdown, selected, onSelected }: ShipSearchProps) => {
-    const { theme, ship, friends } = useServices();
-    const { mode, dockColor, windowColor } = theme.currentTheme;
+    const { ship, friends } = useShipStore();
 
     const results = useMemo<Array<[string, ContactModelType]>>(() => {
       return searchPatpOrNickname(search, friends.search, selected, ship?.patp);
@@ -82,11 +76,11 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
                 sigilColor={[sigilColor || '#000000', 'white']}
               />
             </Box>
-            <Text fontSize={2}>{contact[0]}</Text>
+            <Text.Custom fontSize={2}>{contact[0]}</Text.Custom>
             {nickname ? (
-              <Text fontSize={2} opacity={0.7}>
+              <Text.Custom fontSize={2} opacity={0.7}>
                 {nickname.substring(0, 20)} {nickname.length > 21 && '...'}
-              </Text>
+              </Text.Custom>
             ) : (
               []
             )}
@@ -94,19 +88,15 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
 
           <Flex justifyContent="center" alignItems="center">
             {!isDropdown && (
-              <IconButton
-                luminosity={mode}
-                customBg={dockColor}
-                size={24}
-                canFocus
+              <Button.IconButton
                 // isDisabled={selected.size > 0}
                 onClick={(evt: any) => {
                   evt.stopPropagation();
                   onSelected([contact[0], nickname]);
                 }}
               >
-                <Icons opacity={0.5} name="Plus" />
-              </IconButton>
+                <Icon opacity={0.5} name="Plus" size={20} />
+              </Button.IconButton>
             )}
           </Flex>
         </Row>
@@ -146,11 +136,6 @@ export const ShipSearch: FC<ShipSearchProps> = observer(
               duration: 0.2,
             },
           }}
-          customBg={
-            mode === 'light'
-              ? lighten(0.1, windowColor)
-              : darken(0.2, windowColor)
-          }
         >
           {resultList}
         </AutoCompleteBox>

@@ -1,21 +1,12 @@
-import {
-  PointerEvent,
-  RefObject,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { PointerEvent, RefObject, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { TitlebarContainer } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
-import { Icons } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
 import { ToolbarControlButtons } from './ToolbarControlButtons';
 import { ToolbarSearchInput } from './ToolbarSearchInput';
 import { ToolbarNavigationButtons } from './ToolbarNavigationButtons';
 import { useBrowser } from '../store';
-import { useDoubleClick } from 'renderer/logic/lib/useDoubleClick';
+import { useDoubleClick } from 'renderer/lib/useDoubleClick';
 
 const ToolbarContainer = styled(TitlebarContainer)`
   padding: 0 10px;
@@ -45,11 +36,6 @@ const BrowserToolbarPresenter = ({
   onMaximize,
 }: BrowserToolbarProps) => {
   const { currentTab } = useBrowser();
-  const { theme } = useServices();
-  const iconColor = useMemo(
-    () => theme.currentTheme.iconColor,
-    [theme.currentTheme.iconColor]
-  );
   const onDoubleClick = useDoubleClick(onMaximize);
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -135,10 +121,8 @@ const BrowserToolbarPresenter = ({
       onPointerDown={onPointerDown}
       onClick={onDoubleClickToolbar}
     >
-      <Icons name="AppIconCompass" size="28px" />
       <ToolbarNavigationButtons
         innerRef={navigationButtonsRef}
-        iconColor={iconColor}
         canGoBack={canGoBack}
         canGoForward={canGoForward}
         onBack={onBack}
@@ -147,7 +131,6 @@ const BrowserToolbarPresenter = ({
       />
       <ToolbarSearchInput innerRef={inputRef} readyWebview={readyWebview} />
       <ToolbarControlButtons
-        iconColor={iconColor}
         showDevToolsToggle={showDevToolsToggle}
         toggleDevTools={toggleDevTools}
         onClose={onClose}

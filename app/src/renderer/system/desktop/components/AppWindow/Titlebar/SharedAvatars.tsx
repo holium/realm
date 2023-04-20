@@ -1,8 +1,8 @@
 import { darken, rgba } from 'polished';
 import { motion } from 'framer-motion';
-import { Flex, Icons, IconButton } from 'renderer/components';
+import { Flex, Icon, Button, Avatar } from '@holium/design-system';
+
 import styled from 'styled-components';
-import { Avatar } from '@holium/design-system';
 
 const sessionMembers = [
   {
@@ -13,7 +13,7 @@ const sessionMembers = [
   { patp: '~bus', color: '#3E89D1', avatar: null },
 ];
 
-const AddMember = styled(IconButton)<{ dashColor: any }>`
+const AddMember = styled(Button.IconButton)<{ dashColor: any }>`
   border: 1px dashed ${(props: any) => darken(0.1, props.dashColor)};
 `;
 
@@ -67,7 +67,6 @@ export const SharedAvatars = ({ iconColor, backgroundColor }: Props) => (
     <AddMember
       ml={sessionMembers.length === 0 ? 0 : '2px'}
       size={20}
-      customBg="#97A3B2"
       dashColor={backgroundColor}
       onPointerDown={(evt: any) => {
         evt.stopPropagation();
@@ -81,7 +80,7 @@ export const SharedAvatars = ({ iconColor, backgroundColor }: Props) => (
         console.log('popup');
       }}
     >
-      <Icons name="Plus" color={rgba(iconColor, 0.5)} />
+      <Icon name="Plus" iconColor={rgba(iconColor, 0.5)} />
     </AddMember>
   </Flex>
 );

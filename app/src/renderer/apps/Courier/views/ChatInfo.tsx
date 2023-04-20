@@ -10,25 +10,28 @@ import {
   Toggle,
   Select,
   Icon,
-  TextInput,
   NoScrollBar,
+  TextInput,
 } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { InlineEdit, ShipSearch, useContextMenu } from 'renderer/components';
+import { InlineEdit, useContextMenu } from 'renderer/components';
 import { isValidPatp } from 'urbit-ob';
 import { createField, createForm } from 'mobx-easy-form';
 import { ChatLogHeader } from '../components/ChatLogHeader';
-import { useChatStore } from '../store';
-import { ChatDBActions } from 'renderer/logic/actions/chat-db';
 import { ChatAvatar } from '../components/ChatAvatar';
 import { FileUploadParams } from 'os/services/ship/models/ship';
-import { useFileUpload } from 'renderer/logic/lib/useFileUpload';
-import { ShipActions } from 'renderer/logic/actions/ship';
-import { IuseStorage } from 'renderer/logic/lib/useStorage';
+import { useFileUpload } from 'renderer/lib/useFileUpload';
+import { IuseStorage } from 'renderer/lib/useStorage';
 import { observer } from 'mobx-react-lite';
-import { InvitePermissionType, PeerModelType } from '../models';
+import {
+  InvitePermissionType,
+  PeerModelType,
+} from '../../../stores/models/chat.model';
 import { ExpiresValue, millisecondsToExpires } from '../types';
 import { useTrayApps } from 'renderer/apps/store';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { ShipIPC } from 'renderer/stores/ipc';
+import { useAppState } from 'renderer/stores/app.store';
+import { ShipSearch } from 'renderer/components/ShipSearch';
 
 export const createPeopleForm = (
   defaults: any = {
@@ -64,9 +67,10 @@ type ChatInfoProps = {
 };
 
 export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
-  const { selectedChat, setSubroute, getChatHeader } = useChatStore();
+  const { theme } = useAppState();
+  const { ship, chatStore, spacesStore, friends } = useShipStore();
+  const { selectedChat, setSubroute, getChatHeader } = chatStore;
   const { dimensions } = useTrayApps();
-  const { ship, spaces, theme } = useServices();
   const containerRef = useRef<HTMLDivElement>(null);
   const [_isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string>();
@@ -92,7 +96,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
     let avatarColor: string | undefined;
     let spaceTitle: string | undefined;
     if (selectedChat.type === 'space') {
-      const space = spaces.getSpaceByChatPath(selectedChat.path);
+      const space = spacesStore.getSpaceByChatPath(selectedChat.path);
       if (space) {
         spaceTitle = space.name;
         subtitle = spaceTitle;
@@ -137,7 +141,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const uploadFile = (params: FileUploadParams) => {
     setIsUploading(true);
     setUploadError('');
-    ShipActions.uploadFile(params)
+    (ShipIPC.uploadFile(params) as Promise<any>)
       .then((url: string) => {
         setImage(url);
         editMetadata({ image: url });
@@ -185,7 +189,8 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
     const patp = contact[0];
     selectedPatp.add(patp);
     setSelected(new Set(selectedPatp));
-    ChatDBActions.addPeer(path, patp)
+    selectedChat
+      .addPeer(patp)
       .then(() => {
         console.log('adding peer', patp);
       })
@@ -236,13 +241,14 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
               flexDirection="column"
               pointerEvents={isDMType || !amHost ? 'none' : 'auto'}
             >
-              <InlineEdit
+              <TextInput
+                id="chat-title"
+                name="chat-title"
                 fontWeight={500}
-                fontSize={3}
                 textAlign="center"
                 width={350}
                 value={editTitle}
-                editable={amHost}
+                // editable={amHost}
                 onBlur={() => {
                   if (editTitle.length > 1) {
                     editMetadata({ title: editTitle });
@@ -280,7 +286,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 </Text.Custom>
               </Flex>
               <Toggle
-                disabled={!amHost}
+                disabled={!isDMType && !amHost}
                 initialChecked={metadata?.reactions}
                 onChange={(isChecked) => {
                   editMetadata({ reactions: isChecked });
@@ -368,7 +374,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 </Text.Custom>
               </Flex>
               <Select
-                disabled={!amHost}
+                disabled={!isDMType && !amHost}
                 id="select-disappearing-duration"
                 width={120}
                 options={[
@@ -448,7 +454,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                     style={{
                       borderColor: 'rgba(0, 0, 0, 0.1)',
                       backgroundColor:
-                        theme.currentTheme.mode === 'dark'
+                        theme.mode === 'dark'
                           ? 'rgba(0, 0, 0, 0.125)'
                           : 'rgba(0, 0, 0, 0.065)',
                     }}
@@ -487,7 +493,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 label: 'Add as friend',
                 onClick: (evt: any) => {
                   evt.stopPropagation();
-                  ShipActions.addFriend(peer.ship);
+                  friends.addFriend(peer.ship);
                 },
               });
             }
@@ -497,7 +503,8 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 label: 'Remove',
                 onClick: (evt: any) => {
                   evt.stopPropagation();
-                  ChatDBActions.removePeer(path, peer.ship)
+                  selectedChat
+                    .removePeer(peer.ship)
                     .then(() => {
                       console.log('removed peer');
                     })
@@ -544,7 +551,7 @@ const LabelMap = {
 const PeerRow = ({ id, peer, options, role }: PeerRowProps) => {
   const { getOptions, setOptions } = useContextMenu();
 
-  const { friends } = useServices();
+  const { friends } = useShipStore();
 
   useEffect(() => {
     if (options && options.length && options !== getOptions(id)) {

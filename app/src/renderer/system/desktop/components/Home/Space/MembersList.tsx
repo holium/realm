@@ -1,33 +1,29 @@
 import { useMemo } from 'react';
 import { observer } from 'mobx-react';
-import { rgba, darken } from 'polished';
-import { Flex, Text, PersonRow } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { Member } from 'os/types';
-import { WindowedList } from '@holium/design-system';
-import { MemberType } from 'os/services/spaces/models/members';
+import { PersonRow } from 'renderer/components/People/PersonRow';
+import { Flex, Text, WindowedList } from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { MemberType } from 'renderer/stores/models/invitations.model';
+import { FriendType } from 'renderer/stores/models/friends.model';
+import { toJS } from 'mobx';
 
 interface IMembersList {
-  path: string;
+  our: boolean;
 }
-
 type Roles = 'initiate' | 'member' | 'admin' | 'owner';
 
 const MembersListPresenter = (props: IMembersList) => {
-  const { path } = props;
-  const { theme, spaces, membership, ship, friends } = useServices();
+  const { our } = props;
+  const { spacesStore, ship, friends } = useShipStore();
+  const currentSpace = spacesStore.selected;
 
-  const rowBg = rgba(darken(0.075, theme.currentTheme.windowColor), 0.5);
-
-  let members = Array.from(membership.getMembersList(path));
-  const admins = members.filter((member: Member) =>
-    member.roles.includes('admin')
-  );
-  members = members.filter((member: Member) => !member.roles.includes('admin'));
-
+  const pinned = useMemo(() => friends.pinned || [], [friends.pinned]);
+  const unpinned = useMemo(() => friends.unpinned || [], [friends.unpinned]);
+  let members = currentSpace ? Array.from(currentSpace?.members.list) : [];
+  const admins = members.filter((member) => member.roles.includes('admin'));
+  members = members.filter((member) => !member.roles.includes('admin'));
   const membersOnly = members.filter(
-    (member: Member) =>
+    (member) =>
       member.roles.includes('member') || member.status.includes('invited')
   );
 
@@ -36,7 +32,7 @@ const MembersListPresenter = (props: IMembersList) => {
     data: any;
   }[];
 
-  const listData: ListData = useMemo(
+  const memberListData: ListData = useMemo(
     () => [
       { type: 'title', data: 'Admins' },
       ...(admins.length === 0
@@ -50,8 +46,26 @@ const MembersListPresenter = (props: IMembersList) => {
     [admins, membersOnly]
   );
 
+  const friendListData: ListData = useMemo(
+    () => [
+      { type: 'title', data: 'Pinned' },
+      ...(pinned.length === 0
+        ? friends.list.length === 0
+          ? [{ type: 'hint', data: 'No friends to pin' }]
+          : [{ type: 'hint', data: 'No pinned friends' }]
+        : pinned.map((n) => ({ type: 'friend', data: n }))),
+      { type: 'title', data: 'All' },
+      ...(unpinned.length === 0
+        ? pinned.length > 0
+          ? [{ type: 'hint', data: 'All your friends are pinned' }]
+          : [{ type: 'hint', data: 'Add some friends above' }]
+        : unpinned.map((n) => ({ type: 'friend', data: n }))),
+    ],
+    [friends.list.length, pinned, unpinned]
+  );
+
   const TitleRow = ({ title }: { title: string }) => (
-    <Text
+    <Text.Custom
       style={{ textTransform: 'uppercase' }}
       fontSize={1}
       fontWeight={600}
@@ -61,7 +75,7 @@ const MembersListPresenter = (props: IMembersList) => {
       mb="4px"
     >
       {title}
-    </Text>
+    </Text.Custom>
   );
 
   const HintRow = ({ hint }: { hint: string }) => (
@@ -71,13 +85,17 @@ const MembersListPresenter = (props: IMembersList) => {
       alignItems="center"
       height={40}
     >
-      <Text fontSize={2} opacity={0.5}>
+      <Text.Custom fontSize={2} opacity={0.5}>
         {hint}
-      </Text>
+      </Text.Custom>
     </Flex>
   );
 
-  const MemberRow = ({ member }: { member: MemberType & { patp: string } }) => {
+  const MemberRow = ({
+    member,
+  }: {
+    member: MemberType & { patp: string; shortPatp: string };
+  }) => {
     const contact = friends.getContactAvatarMetadata(member.patp);
 
     const roles = Array.from(member.roles);
@@ -89,29 +107,30 @@ const MembersListPresenter = (props: IMembersList) => {
         activeRole = 'initiate';
       }
     }
+
+    if (!ship) return null;
+    if (!currentSpace) return null;
+
     const setNewRole = (role: Roles) => {
       const newRoles = roles
         ? [...roles.filter((role) => role !== activeRole), role]
         : [role];
-      SpacesActions.setRoles(member.patp, newRoles);
+      currentSpace.path &&
+        spacesStore.setRoles(currentSpace.path, member.patp, newRoles);
     };
-
-    if (!ship) return null;
-    if (!spaces.selected) return null;
 
     return (
       <PersonRow
         key={`${member.patp}-member`}
         patp={member.patp}
+        shortPatp={member.shortPatp}
         nickname={contact.nickname}
         sigilColor={contact.color}
         avatar={contact.avatar}
         description={contact.bio}
         listId="member-list"
-        rowBg={rowBg}
-        theme={theme.currentTheme}
         contextMenuOptions={
-          membership.isAdmin(path, ship.patp) && member.patp !== ship.patp
+          currentSpace.members.isAdmin(ship.patp) && member.patp !== ship.patp
             ? [
                 activeRole === 'admin'
                   ? {
@@ -129,10 +148,8 @@ const MembersListPresenter = (props: IMembersList) => {
                 {
                   label: 'Kick',
                   onClick: () => {
-                    SpacesActions.kickMember(
-                      spaces.selected?.path ?? '',
-                      member.patp
-                    );
+                    currentSpace.path &&
+                      spacesStore.kickMember(currentSpace.path, member.patp);
                   },
                 },
               ]
@@ -140,11 +157,63 @@ const MembersListPresenter = (props: IMembersList) => {
         }
       >
         {member.status === 'invited' && (
-          <Text opacity={0.3} fontSize={1}>
+          <Text.Custom opacity={0.3} fontSize={1}>
             Invited
-          </Text>
+          </Text.Custom>
         )}
       </PersonRow>
+    );
+  };
+
+  const onUnpin = (friend: any) => {
+    friends.editFriend(friend.patp, {
+      pinned: false,
+      tags: toJS(friend.tags),
+    });
+  };
+
+  const onPin = (friend: any) => {
+    friends.editFriend(friend.patp, {
+      pinned: true,
+      tags: toJS(friend.tags),
+    });
+  };
+
+  const FriendRow = ({
+    friend,
+  }: {
+    friend: FriendType & { patp: string; shortPatp: string };
+  }) => {
+    const contact = friends.getContactAvatarMetadata(friend.patp);
+    const pinOption = [
+      {
+        label: friend.pinned ? 'Unpin' : 'Pin',
+        onClick: (_evt: any) => {
+          friend.pinned ? onUnpin(friend) : onPin(friend);
+        },
+      },
+    ];
+
+    return (
+      <PersonRow
+        key={friend.patp}
+        patp={friend.patp}
+        shortPatp={friend.shortPatp}
+        nickname={contact.nickname}
+        sigilColor={contact.color}
+        avatar={contact.avatar}
+        description={contact.bio}
+        listId="friend-list"
+        contextMenuOptions={[
+          ...pinOption,
+          {
+            label: 'Remove',
+            onClick: (_evt: any) => {
+              friends.removeFriend(friend.patp);
+            },
+          },
+        ]}
+      />
     );
   };
 
@@ -152,17 +221,24 @@ const MembersListPresenter = (props: IMembersList) => {
     <Flex flex={1} flexDirection="column" pb={16}>
       <WindowedList
         width={298}
-        data={listData}
+        data={our ? friendListData : memberListData}
         itemContent={(_, rowData) => {
-          if (rowData.type === 'title') {
-            const title = rowData.data as string;
-            return <TitleRow title={title} />;
-          } else if (rowData.type === 'hint') {
-            const hint = rowData.data as string;
-            return <HintRow hint={hint} />;
-          } else {
-            const member = rowData.data;
-            return <MemberRow member={member} />;
+          switch (rowData.type) {
+            case 'title':
+              const title = rowData.data as string;
+              return <TitleRow title={title} />;
+            case 'hint':
+              const hint = rowData.data as string;
+              return <HintRow hint={hint} />;
+            case 'member':
+              const member = rowData.data;
+              return <MemberRow member={member} />;
+            case 'friend':
+              const friend = rowData.data;
+              return <FriendRow friend={friend} />;
+            default:
+              console.error('Invalid rowData', rowData);
+              return null;
           }
         }}
       />

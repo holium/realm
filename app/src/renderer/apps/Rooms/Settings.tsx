@@ -8,14 +8,14 @@ import {
   Text,
   Icon,
 } from '@holium/design-system';
-import { Label, FormControl } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
+import { FormControl } from 'renderer/components';
 import { useTrayApps } from '../store';
 import { useRooms } from './useRooms';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const SettingsPresenter = () => {
   const { roomsApp } = useTrayApps();
-  const { ship } = useServices();
+  const { ship } = useShipStore();
   const roomsManager = useRooms(ship?.patp);
 
   const [audioSourceOptions, setAudioSources] = useState<RadioOption[] | any[]>(
@@ -64,20 +64,16 @@ const SettingsPresenter = () => {
         <Flex ml={1} pl={2} pr={2}></Flex>
       </Flex>
       <Flex flex={1} flexDirection="column">
-        <FormControl.FieldSet>
-          <FormControl.Field>
-            <Label>Audio input</Label>
-            <Select
-              id="rooms-settings-audio-input"
-              options={audioSourceOptions}
-              selected={selectedSource}
-              onClick={(source) => {
-                setSelectedSource(source);
-                roomsManager?.setAudioInput(source);
-              }}
-            />
-          </FormControl.Field>
-        </FormControl.FieldSet>
+        <Text.Label>Audio input</Text.Label>
+        <Select
+          id="rooms-settings-audio-input"
+          options={audioSourceOptions}
+          selected={selectedSource}
+          onClick={(source) => {
+            setSelectedSource(source);
+            roomsManager?.setAudioInput(source);
+          }}
+        />
       </Flex>
     </>
   );

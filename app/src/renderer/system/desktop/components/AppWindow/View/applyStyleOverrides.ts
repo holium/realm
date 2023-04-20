@@ -1,5 +1,5 @@
 import { rgba, darken, lighten } from 'polished';
-import { ThemeType } from 'renderer/logic/theme';
+import { ThemeType } from 'renderer/stores/models/theme.model';
 
 export const applyStyleOverrides = (appId: string, theme: ThemeType) => {
   const baseBg = theme.windowColor;

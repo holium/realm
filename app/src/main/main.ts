@@ -7,6 +7,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
+import log from 'electron-log';
 import { app, ipcMain, BrowserWindow, shell, session } from 'electron';
 import isDev from 'electron-is-dev';
 import fs from 'fs';
@@ -15,7 +16,6 @@ import { download } from 'electron-dl';
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import { MenuBuilder } from './menu';
 import { resolveHtmlPath } from './util';
-import { Realm } from '../os';
 import { FullScreenHelper } from './helpers/fullscreen';
 import { WebViewHelper } from './helpers/webview';
 import { DevHelper } from './helpers/dev';
@@ -27,6 +27,14 @@ import { BrowserHelper } from './helpers/browser';
 import { hideCursor } from './helpers/hideCursor';
 import { AppUpdater } from './AppUpdater';
 import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
+import { RealmService } from '../os/realm.service';
+
+// TODO test this
+log.create('main');
+log.catchErrors();
+log.transports.file.level = 'info';
+log.transports.file.resolvePath = () =>
+  path.join(app.getPath('userData'), 'main.log');
 
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
@@ -78,7 +86,6 @@ const createWindow = async () => {
     show: false,
     width: 1920,
     height: 1080,
-    titleBarStyle: 'hidden',
     icon: getAssetPath('icon.png'),
     title: 'Realm',
     fullscreen: true,
@@ -95,7 +102,8 @@ const createWindow = async () => {
   // ---------------------------------------------------------------------
   // ----------------------- Start Realm services ------------------------
   // ---------------------------------------------------------------------
-  Realm.start(mainWindow);
+  // Realm.start(mainWindow);
+  // ---------------------------------------------------------------------
 
   FullScreenHelper.registerListeners(mainWindow);
   WebViewHelper.registerListeners(mainWindow);
@@ -113,6 +121,12 @@ const createWindow = async () => {
     mainWindow.webContents.send('add-mouse-listeners', true);
     mainWindow.webContents.send('add-key-listeners');
   });
+
+  // ---------------------------------------------------------------------
+  // ----------------------- Start Realm services ------------------------
+  // ---------------------------------------------------------------------
+  const realmService = new RealmService();
+  // realmService.login('~lomder-librun', 'password');
 
   // TODO why is this rendering multiple times?
   mainWindow.on('ready-to-show', () => {

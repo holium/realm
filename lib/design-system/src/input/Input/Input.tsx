@@ -13,12 +13,11 @@ export const Input = styled(motion.input)`
   outline: none;
   border: 1px transparent;
   &::placeholder {
-    opacity: 0.5;
+    color: rgba(var(--rlm-text-rgba), 0.5);
   }
 `;
 
 export const TextArea = styled(motion.textarea)`
-  /* border-radius: var(--rlm-border-radius-4); */
   background-color: rgba(var(--rlm-input-rgba));
   color: rgba(var(--rlm-text-rgba));
   width: 100%;
@@ -28,6 +27,6 @@ export const TextArea = styled(motion.textarea)`
   outline: none;
   border: 1px transparent;
   &::placeholder {
-    opacity: 0.5;
+    color: rgba(var(--rlm-text-rgba), 0.5);
   }
 `;

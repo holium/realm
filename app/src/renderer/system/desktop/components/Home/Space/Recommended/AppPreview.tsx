@@ -1,20 +1,17 @@
 import { FC } from 'react';
-import { rgba, darken, desaturate, lighten } from 'polished';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { Flex, Spinner } from '@holium/design-system';
-import { Text, AppTile, Icons, IconButton, Button } from 'renderer/components';
+import { Text, Icon, Button, Flex, Spinner } from '@holium/design-system';
+import { AppTile } from 'renderer/components';
+import { handleInstallation } from '../../AppInstall/helpers';
+import { getAppTileFlags } from 'renderer/lib/app';
+import { useShipStore } from 'renderer/stores/ship.store';
 import {
+  AppMobxType,
   AppType,
   InstallStatus,
-  UrbitAppType,
-} from 'os/services/spaces/models/bazaar';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { useServices } from 'renderer/logic/store';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { handleInstallation } from '../../AppInstall/helpers';
-import { getAppTileFlags } from 'renderer/logic/lib/app';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
+} from 'renderer/stores/models/bazaar.model';
+import { useAppState } from 'renderer/stores/app.store';
 
 interface AppPreviewProps {
   app: AppType;
@@ -23,8 +20,9 @@ interface AppPreviewProps {
 export const AppPreview: FC<AppPreviewProps> = observer(
   (props: AppPreviewProps) => {
     const { app } = props;
-    const { theme, spaces } = useServices();
-    const space = spaces.selected;
+    const { shellStore } = useAppState();
+    const { spacesStore, bazaarStore } = useShipStore();
+    const space = spacesStore.selected;
     let installStatus = InstallStatus.installed;
     let info = '';
     if (app.type === 'urbit') {
@@ -45,34 +43,34 @@ export const AppPreview: FC<AppPreviewProps> = observer(
 
     const onInstallation = (evt: React.MouseEvent<HTMLButtonElement>) => {
       evt.stopPropagation();
-      const appHost = (app as UrbitAppType).host;
+      const appHost = (app as AppMobxType).host;
       return handleInstallation(appHost, app.id, installStatus);
     };
     let status;
     if (isSuspended || isFailed) {
-      let statusBadgeColor = theme.currentTheme.mode
-        ? darken(0.05, desaturate(1, app.color))
-        : lighten(0.1, desaturate(1, app.color));
-      if (isFailed) {
-        statusBadgeColor = theme.currentTheme.mode
-          ? rgba(darken(0.05, '#D0384E'), 0.1)
-          : rgba(lighten(0.1, '#D0384E'), 0.1);
-      }
+      // let statusBadgeColor = theme.currentTheme.mode
+      //   ? darken(0.05, desaturate(1, app.color))
+      //   : lighten(0.1, desaturate(1, app.color));
+      // if (isFailed) {
+      //   statusBadgeColor = theme.currentTheme.mode
+      //     ? rgba(darken(0.05, '#D0384E'), 0.1)
+      //     : rgba(lighten(0.1, '#D0384E'), 0.1);
+      // }
       status = (
-        <Text
+        <Text.Custom
           style={{ pointerEvents: 'none', textTransform: 'uppercase' }}
           padding=".2rem .3rem"
           borderRadius={6}
-          backgroundColor={
-            (app as UrbitAppType).image && rgba(statusBadgeColor, 0.5)
-          }
+          // backgroundColor={
+          //   (app as UrbitAppType).image && rgba(statusBadgeColor, 0.5)
+          // }
           fontWeight={500}
           textStyle="capitalize"
           fontSize={'13px'}
-          color={isFailed ? '#5e0b18' : theme.currentTheme.textColor}
+          // color={isFailed ? '#5e0b18' : theme.currentTheme.textColor}
         >
           {app.installStatus}
-        </Text>
+        </Text.Custom>
       );
     }
     return (
@@ -86,7 +84,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
           installStatus={InstallStatus.installed}
           onAppClick={(selectedApp: AppType) => {
             if (!(isInstalling || isInstalled)) {
-              ShellActions.openDialogWithStringProps('app-detail-dialog', {
+              shellStore.openDialogWithStringProps('app-detail-dialog', {
                 appId: selectedApp.id,
               });
             }
@@ -100,27 +98,27 @@ export const AppPreview: FC<AppPreviewProps> = observer(
         >
           <Flex flexDirection="column" mr={24} gap={6}>
             <Flex flexDirection="row" gap={16} alignItems="center">
-              <Text fontWeight={500} fontSize={4}>
+              <Text.Custom fontWeight={500} fontSize={4}>
                 {app?.title}
-              </Text>
+              </Text.Custom>
               {status}
             </Flex>
 
-            <Text fontSize={2} opacity={0.6}>
+            <Text.Custom fontSize={2} opacity={0.6}>
               {info.length > length ? `${info.substring(0, length)}...` : info}
-            </Text>
+            </Text.Custom>
           </Flex>
           <Flex flexGrow={0} gap={12}>
             {(isUninstalled || isDesktop) && (
-              <IconButton
+              <Button.IconButton
                 size={26}
-                color={theme.currentTheme.accentColor}
-                customBg={rgba(theme.currentTheme.dockColor, 0.5)}
-                hoverFill={theme.currentTheme.accentColor}
+                // color={theme.currentTheme.accentColor}
+                // customBg={rgba(theme.currentTheme.dockColor, 0.5)}
+                // hoverFill={theme.currentTheme.accentColor}
                 onClick={onInstallation}
               >
-                <Icons name="CloudDownload" />
-              </IconButton>
+                <Icon name="CloudDownload" />
+              </Button.IconButton>
             )}
             {isInstalling && (
               <Flex
@@ -133,53 +131,53 @@ export const AppPreview: FC<AppPreviewProps> = observer(
               </Flex>
             )}
             {isFailed && (
-              <Button
+              <Button.Secondary
                 pt="2px"
                 pb="2px"
                 variant="minimal"
                 fontWeight={400}
                 borderRadius={6}
-                color={rgba(theme.currentTheme.textColor, 0.9)}
-                backgroundColor={rgba(theme.currentTheme.dockColor, 0.5)}
+                // color={rgba(theme.currentTheme.textColor, 0.9)}
+                // backgroundColor={rgba(theme.currentTheme.dockColor, 0.5)}
                 onClick={() => {
-                  SpacesActions.uninstallApp(app.id);
+                  bazaarStore.uninstallApp(app.id);
                 }}
               >
                 Uninstall
-              </Button>
+              </Button.Secondary>
             )}
             {isSuspended && (
-              <Button
+              <Button.Primary
                 pt="2px"
                 pb="2px"
                 variant="minimal"
                 fontWeight={400}
                 borderRadius={6}
-                color={'#FFF'}
-                backgroundColor={theme.currentTheme.accentColor}
+                // color={'#FFF'}
+                // backgroundColor={theme.currentTheme.accentColor}
                 onClick={() => {
-                  SpacesActions.reviveApp(app.id);
+                  bazaarStore.reviveApp(app.id);
                 }}
               >
                 Revive
-              </Button>
+              </Button.Primary>
             )}
             {isInstalled && (
-              <Button
+              <Button.Secondary
                 pt="2px"
                 pb="2px"
                 variant="minimal"
                 fontWeight={400}
                 borderRadius={6}
-                color={rgba(theme.currentTheme.textColor, 0.9)}
-                backgroundColor={rgba(theme.currentTheme.dockColor, 0.5)}
+                // color={rgba(theme.currentTheme.textColor, 0.9)}
+                // backgroundColor={rgba(theme.currentTheme.dockColor, 0.5)}
                 onClick={() => {
-                  space && DesktopActions.openAppWindow(toJS(app));
-                  DesktopActions.closeHomePane();
+                  space && shellStore.openWindow(toJS(app));
+                  shellStore.closeHomePane();
                 }}
               >
                 Open
-              </Button>
+              </Button.Secondary>
             )}
             {/* TODO add menu on click  */}
             {/* <IconButton

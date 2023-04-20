@@ -1,5 +1,4 @@
-import { Spinner } from '@holium/design-system';
-import { Flex, Icons } from 'renderer/components';
+import { Flex, Icon, Spinner } from '@holium/design-system';
 
 type Props = {
   loading: boolean;
@@ -14,8 +13,8 @@ export const ToolbarLockIcon = ({ loading, isSafe }: Props) => {
       </Flex>
     );
   } else if (isSafe) {
-    return <Icons name="LockedFill" color="#23B164" />;
+    return <Icon name="LockedFill" iconColor="#23B164" />;
   } else {
-    return <Icons name="UnlockedFill" />;
+    return <Icon name="UnlockedFill" />;
   }
 };

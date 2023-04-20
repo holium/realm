@@ -1,13 +1,10 @@
-import { LoaderModel } from 'os/services/common.model';
 import { toJS } from 'mobx';
 import { types, onSnapshot, Instance } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
-import { RealmActions } from 'renderer/logic/actions/main';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { nativeApps } from '../nativeApps';
 import { isUrlSafe } from './helpers/createUrl';
-import { servicesStore } from 'renderer/logic/store';
-import { AppType } from 'os/services/spaces/models/bazaar';
+import { MainIPC } from 'renderer/stores/ipc';
+import { LoaderModel } from 'renderer/stores/models/common.model';
 
 const TabModel = types.model('BrowserTabModel', {
   id: types.identifier,
@@ -68,11 +65,11 @@ export function useBrowser() {
   return store;
 }
 
-RealmActions.onBrowserOpen((_event: any, url: string) => {
-  const relic = servicesStore.bazaar.getApp('os-browser');
-  DesktopActions.openAppWindow(
-    toJS(relic) || (nativeApps['os-browser'] as AppType)
-  ).then(() => {
-    browserState.setUrl(url);
-  });
+MainIPC.onBrowserOpen((_event: any, url: string) => {
+  // const relic = servicesStore.bazaar.getApp('os-browser');
+  // DesktopActions.openAppWindow(
+  //   toJS(relic) || (nativeApps['os-browser'] as AppType)
+  // ).then(() => {
+  //   browserState.setUrl(url);
+  // });
 });

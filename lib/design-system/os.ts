@@ -6,6 +6,7 @@ export * from './src/os/SystemBar/SystemBar';
 export { Bookmark } from './src/os/Bookmark/Bookmark';
 export * from './src/os/Tab/Tab';
 export * from './src/os/TrayApp/TrayApp';
+export * from './src/os/AppTile/AppTile';
 export * from './src/os/Notifications/Notification';
 export * from './src/os/Notifications/NotificationList';
 export * from './src/os/Notifications/AppGroup';

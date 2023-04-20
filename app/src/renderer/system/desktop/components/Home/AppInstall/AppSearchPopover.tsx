@@ -1,22 +1,10 @@
 import { observer } from 'mobx-react';
-import { useMemo } from 'react';
-import { useServices } from 'renderer/logic/store';
-import { darken } from 'polished';
 import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInstall/store';
 import { RealmPopover } from '../Popover';
 import { SearchModes } from './SearchModes';
 
 const AppSearchPopoverPresenter = () => {
   const appInstaller = useAppInstaller();
-  const { theme } = useServices();
-  const backgroundColor = useMemo(
-    () =>
-      theme.currentTheme.mode === 'light'
-        ? theme.currentTheme.windowColor
-        : darken(0.1, theme.currentTheme.windowColor),
-    [theme.currentTheme]
-  );
-
   if (appInstaller.searchMode === 'none') return null;
 
   return (
@@ -32,7 +20,7 @@ const AppSearchPopoverPresenter = () => {
         borderRadius: 12,
         maxHeight: '55vh',
         // overflowY: 'auto',
-        background: backgroundColor,
+        background: 'rgba(var(--rlm-window-rgba))',
       }}
     >
       <SearchModes />

@@ -30,11 +30,10 @@ type Props = {
     url: string;
     accessCode: string;
   };
-  onBack: () => void;
   onNext: () => Promise<boolean>;
 };
 
-export const CredentialsDialog = ({ credentials, onBack, onNext }: Props) => (
+export const CredentialsDialog = ({ credentials, onNext }: Props) => (
   <OnboardDialog
     icon={<CredentialsIcon />}
     body={
@@ -73,7 +72,6 @@ export const CredentialsDialog = ({ credentials, onBack, onNext }: Props) => (
         </InfoCard>
       </Flex>
     }
-    onBack={onBack}
     onNext={onNext}
   />
 );

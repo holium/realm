@@ -31,11 +31,11 @@ export const CreateAccountDialog = ({
     emailError.setToggle(!isValidEmail(email));
   };
 
-  const onPasswordChange = () => {
+  const onChangePassword = () => {
     confirmPasswordError.toggleOff();
   };
 
-  const onConfirmPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const onChangeConfirmPassword = (e: ChangeEvent<HTMLInputElement>) => {
     const password = passwordRef.current?.value;
     const confirmPassword = e.target.value;
     confirmPasswordError.setToggle(password !== confirmPassword);
@@ -83,7 +83,7 @@ export const CreateAccountDialog = ({
               ref={passwordRef}
               type="password"
               placeholder="• • • • • • • •"
-              onChange={onPasswordChange}
+              onChange={onChangePassword}
             />
           </Flex>
           <Flex flexDirection="column" gap={2}>
@@ -95,7 +95,7 @@ export const CreateAccountDialog = ({
               type="password"
               placeholder="• • • • • • • •"
               isError={confirmPasswordError.isOn}
-              onChange={onConfirmPasswordChange}
+              onChange={onChangeConfirmPassword}
             />
           </Flex>
           <OnboardDialogDescription>

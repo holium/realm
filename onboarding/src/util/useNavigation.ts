@@ -1,12 +1,15 @@
 import { useRouter } from 'next/router';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+import { capitalizeFirstLetter } from '@holium/design-system/util';
+import { SidebarSection } from '@holium/shared';
 
 type AccountPage =
   | '/account'
   | '/account/custom-domain'
   | '/account/download-realm'
   | '/account/s3-storage'
-  | '/account/statistics';
+  | '/account/statistics'
+  | '/choose-id';
 
 type OnboardingPage =
   | '/'
@@ -26,10 +29,23 @@ export const accountPageUrl: Record<string, AccountPage> = {
   'S3 Storage': '/account/s3-storage',
   Statistics: '/account/statistics',
   Hosting: '/account',
+  'Get Hosting': '/choose-id',
 };
 
 export const useNavigation = () => {
   const router = useRouter();
+
+  const currentAccountSection = useMemo(() => {
+    const isAccountSection = router.pathname.split('/')[1] === 'account';
+    if (!isAccountSection) return null;
+
+    const path = router.pathname.split('/')[2] ?? SidebarSection.Hosting;
+    const eachWordCapitalized = path
+      .split('-')
+      .map((word) => capitalizeFirstLetter(word))
+      .join(' ');
+    return eachWordCapitalized as SidebarSection;
+  }, [router.pathname]);
 
   const goToPage = useCallback(
     (page: Page, params?: Record<string, string>) => {
@@ -41,9 +57,9 @@ export const useNavigation = () => {
   );
 
   const logout = useCallback(() => {
-    goToPage('/');
+    goToPage('/login');
     localStorage.clear();
   }, [router]);
 
-  return { goToPage, logout };
+  return { currentAccountSection, goToPage, logout };
 };

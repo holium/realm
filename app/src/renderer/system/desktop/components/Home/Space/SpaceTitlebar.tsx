@@ -1,9 +1,9 @@
 import { MouseEvent } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Button, Icon } from '@holium/design-system';
 import { SpacePicture } from 'renderer/components';
-import { SpaceModelType } from 'os/services/spaces/models/spaces';
+import { Flex, Button, Icon } from '@holium/design-system';
 import { AppSearchApp } from '../AppInstall/AppSearch';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 
 interface SpaceTitlebarProps {
   space: SpaceModelType;
@@ -30,19 +30,11 @@ const SpaceTitlebarPresenter = ({
       <Flex alignItems="center" gap={12}>
         <AppSearchApp mode="space" />
         <Flex flex={1} gap={8} justifyContent="flex-end">
-          <Button.IconButton
-            size={3}
-            customColor={showAppGrid ? 'accent' : 'icon'}
-            onClick={onToggleApps}
-          >
-            <Icon name="AppGrid" size="22px" />
+          <Button.IconButton size={32} onClick={onToggleApps}>
+            <Icon name="AppGrid" size={22} />
           </Button.IconButton>
-          <Button.IconButton
-            size={3}
-            customColor={showMembers ? 'accent' : 'icon'}
-            onClick={onMemberClick}
-          >
-            <Icon name="Members" size="22px" />
+          <Button.IconButton size={32} onClick={onMemberClick}>
+            <Icon name="Members" size={22} opacity={0.7} />
           </Button.IconButton>
         </Flex>
       </Flex>

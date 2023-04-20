@@ -15,18 +15,14 @@ import {
 } from '@holium/design-system';
 import { RoomTray } from './Rooms';
 import { AnimatePresence } from 'framer-motion';
-import { AuthActions } from 'renderer/logic/actions/auth';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
-import { useServices } from 'renderer/logic/store';
-import { trackEvent } from 'renderer/logic/lib/track';
+import { trackEvent } from 'renderer/lib/track';
 import { nativeApps } from 'renderer/apps/nativeApps';
-import { AppType } from 'os/services/spaces/models/bazaar';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useTrayApps } from 'renderer/apps/store';
-import { useAccountStore } from 'renderer/apps/Account/store';
-import { useChatStore } from 'renderer/apps/Courier/store';
-import { openChatToPath } from 'renderer/logic/lib/useTrayControls';
-import { ShellActions } from 'renderer/logic/actions/shell';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { openChatToPath } from 'renderer/lib/useTrayControls';
+import { useAppState } from 'renderer/stores/app.store';
+import { AppType } from 'renderer/stores/models/bazaar.model';
 
 type ExpandBarStyles = {
   height: number | 'fit-content';
@@ -36,7 +32,8 @@ type ExpandBarStyles = {
 };
 
 export const ShipBarPresenter = () => {
-  const { ship } = useServices();
+  const { shellStore, authStore } = useAppState();
+  const { ship, chatStore, notifStore } = useShipStore();
   const {
     unreadCount,
     initNotifications,
@@ -44,10 +41,9 @@ export const ShipBarPresenter = () => {
     dismissOne,
     dismissApp,
     dismissPath,
-  } = useAccountStore();
+  } = notifStore;
   const roomsManager = useRooms(ship?.patp);
   const { setActiveApp, activeApp } = useTrayApps();
-  const chatStore = useChatStore();
 
   const [isAccountExpanded, setIsAccountExpanded] = useState(false);
 
@@ -65,10 +61,10 @@ export const ShipBarPresenter = () => {
     console.log('clicked notification', app, path, link);
     switch (app) {
       case 'os-settings':
-        DesktopActions.openAppWindow(nativeApps['os-settings'] as AppType);
+        shellStore.openWindow(nativeApps['os-settings'] as AppType);
         break;
       case 'os-browser':
-        DesktopActions.openAppWindow(nativeApps['os-browser'] as AppType);
+        shellStore.openWindow(nativeApps['os-browser'] as AppType);
         break;
       case 'realm-chat':
         openChatToPath(chatStore, setActiveApp, path, link);
@@ -84,6 +80,7 @@ export const ShipBarPresenter = () => {
       evt.stopPropagation();
       return;
     }
+    initNotifications();
     setAccountTrayOpen(true);
   };
 
@@ -274,8 +271,8 @@ export const ShipBarPresenter = () => {
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
                 onClick={() => {
                   roomsManager.cleanup();
-                  ShellActions.setBlur(true);
-                  ShellActions.openDialog('shutdown-dialog');
+                  shellStore.setIsBlurred(true);
+                  shellStore.openDialog('shutdown-dialog');
                   setActiveApp(null);
                 }}
               >
@@ -290,9 +287,8 @@ export const ShipBarPresenter = () => {
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
                 onClick={() => {
                   roomsManager.cleanup();
-                  AuthActions.logout(ship.patp);
+                  authStore.logout();
                   setActiveApp(null);
-                  trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
                 }}
               >
                 <Icon name="Logout" size={22} />
@@ -306,9 +302,7 @@ export const ShipBarPresenter = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
                 onClick={() =>
-                  DesktopActions.openAppWindow(
-                    nativeApps['os-settings'] as AppType
-                  )
+                  shellStore.openWindow(nativeApps['os-settings'] as AppType)
                 }
               >
                 <Icon name="Settings" size={22} />
@@ -360,7 +354,6 @@ export const ShipBarPresenter = () => {
             </Box>
           </Flex>
         </Flex>
-
         <AccountTray unreadCount={unreadCount} onClick={onAccountTrayClick} />
       </Flex>
     </BarStyle>
@@ -368,88 +361,3 @@ export const ShipBarPresenter = () => {
 };
 
 export const ShipBar = observer(ShipBarPresenter);
-
-// {
-//   isAccountTrayOpen || isAccountExpanded ? (
-//     <Flex
-//       gap={8}
-//       py={'3px'}
-//       pl="3px"
-//       width="100%"
-//       justifyContent="space-between"
-//       alignItems="center"
-//       onHoverEnd={() => {
-//         if (!isAccountTrayOpen) {
-//           setIsAccountExpanded(false);
-//         }
-//       }}
-//     >
-//       <Flex gap={8} height={34} alignItems="center">
-//         {/* <Button.IconButton
-//               size={28}
-//               className="realm-cursor-hover"
-//               onClick={() => {
-//                 roomsManager.cleanup();
-//                 AuthActions.logout(ship.patp);
-//                 setActiveApp(null);
-//                 // trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
-//               }}
-//             >
-//               <Icon name="Shutdown" size={22} opacity={0.7} />
-//             </Button.IconButton>
-//             <Button.IconButton
-//               size={28}
-//               className="realm-cursor-hover"
-//               onClick={() => {
-//                 roomsManager.cleanup();
-//                 AuthActions.logout(ship.patp);
-//                 setActiveApp(null);
-//                 trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
-//               }}
-//             >
-//               <Icon name="Logout" size={22} opacity={0.7} />
-//             </Button.IconButton>
-
-//             <Button.IconButton
-//               className="realm-cursor-hover"
-//               data-close-tray="true"
-//               size={28}
-//               onClick={() =>
-//                 DesktopActions.openAppWindow(
-//                   nativeApps['os-settings'] as AppType
-//                 )
-//               }
-//             >
-//               <Icon name="Settings" size={22} opacity={0.7} />
-//             </Button.IconButton> */}
-//       </Flex>
-//       <AccountTray
-//         isOpen={isAccountTrayOpen}
-//         isExpanded={isAccountExpanded}
-//         onToggleExpanded={(isExpanded) => setIsAccountExpanded(isExpanded)}
-//         onClick={onAccountTrayClick}
-//       />
-//     </Flex>
-//   ) : (
-//     <Flex
-//       gap={8}
-//       py={'3px'}
-//       width="100%"
-//       justifyContent="space-between"
-//       alignItems="center"
-//     >
-//       <RoomTray />
-//       <Flex gap={8} height={34} alignItems="center">
-//         <WalletTray />
-//         <MessagesTray />
-//         <AccountTray
-//           isOpen={isAccountTrayOpen}
-//           isExpanded={isAccountExpanded}
-//           onToggleExpanded={(isExpanded) => setIsAccountExpanded(isExpanded)}
-//           onClick={onAccountTrayClick}
-//         />
-//       </Flex>
-//       {/* <TrayClock /> */}
-//     </Flex>
-//   );
-// }
