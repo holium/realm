@@ -8,6 +8,7 @@ import { HostingDialog } from '../HostingDialog';
 import { InstallationDialog } from '../InstallationDialog';
 import { AddServerDialog } from '../AddServerDialog';
 import { LoginDialog } from '../LoginDialog';
+import { PasswordDialog } from '../PasswordDialog';
 
 export default {
   component: CreateAccountDialog,
@@ -35,7 +36,7 @@ export const HostingDialogStory: ComponentStory<typeof HostingDialog> = () => (
     <HostingDialog
       onBack={() => {}}
       onGetHosting={() => {}}
-      onAddExistingUrbit={() => {}}
+      onAddExistingServer={() => {}}
     />
   </OnboardingDialogWrapper>
 );
@@ -58,6 +59,7 @@ export const PassportDialogStory: ComponentStory<
   <OnboardingDialogWrapper>
     <PassportDialog
       patp="~pasren-satmex"
+      onUploadFile={() => Promise.reject()}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
@@ -65,6 +67,16 @@ export const PassportDialogStory: ComponentStory<
 );
 
 PassportDialogStory.storyName = '4. Create your Passport';
+
+export const PasswordDialogStory: ComponentStory<
+  typeof PassportDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <PasswordDialog onBack={() => {}} onNext={() => Promise.resolve(false)} />
+  </OnboardingDialogWrapper>
+);
+
+PasswordDialogStory.storyName = '5. Password';
 
 export const InstallationDialogStory: ComponentStory<
   typeof InstallationDialog
@@ -78,4 +90,4 @@ export const InstallationDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-InstallationDialogStory.storyName = '5. Installation';
+InstallationDialogStory.storyName = '6. Installation';

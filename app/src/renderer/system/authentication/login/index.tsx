@@ -58,6 +58,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
       const passInput = passwordRef.current as HTMLInputElement;
       passInput.value = '';
       setPassword('');
+      passwordRef.current.blur();
       passwordRef.current.focus();
     }
   }, [selectedShip]);
@@ -266,7 +267,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                         ) : (
                           <Button.IconButton
                             ref={submitRef}
-                            disabled={password.length < 6}
+                            disabled={password.length < 1}
                             onClick={async (evt: any) => await clickSubmit(evt)}
                           >
                             <Icon

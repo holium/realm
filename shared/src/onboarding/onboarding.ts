@@ -14,6 +14,8 @@ export { ClaimTokenDialog } from './dialogs/ClaimTokenDialog';
 export { DownloadDialog } from './dialogs/DownloadDialog';
 export { LoginDialog } from './dialogs/LoginDialog';
 export { PaymentDialog } from './dialogs/PaymentDialog';
+export { PassportDialog } from './dialogs/PassportDialog';
+export { PasswordDialog } from './dialogs/PasswordDialog';
 export { VerifyEmailDialog } from './dialogs/VerifyEmailDialog';
 export { ChangeEmailModal } from './components/hosting/modals/ChangeEmailModal';
 export { ChangeMaintenanceWindowModal } from './components/hosting/modals/ChangeMaintenanceWindowModal';
@@ -25,7 +27,6 @@ export { HostingDialog } from './dialogs/HostingDialog';
 export { InstallationDialog } from './dialogs/InstallationDialog';
 export { OnboardDialogDescription } from './components/OnboardDialog.styles';
 export { ThirdEarthApi } from './services/ThirdEarthApi';
-export { PassportDialog } from './dialogs/PassportDialog';
 export { SidebarSection } from './components/AccountDialog';
 
 export type {

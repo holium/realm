@@ -43,7 +43,7 @@ export const HostingDialogStory: ComponentStory<typeof HostingDialog> = () => (
     <HostingDialog
       onBack={() => {}}
       onGetHosting={() => {}}
-      onAddExistingUrbit={() => {}}
+      onAddExistingServer={() => {}}
     />
   </OnboardingDialogWrapper>
 );
@@ -118,7 +118,6 @@ export const CredentialsDialogStory: ComponentStory<
         url: 'https://pasren-satmex.holium.network',
         accessCode: 'tolnym-rilmug-ricnep-marlyx',
       }}
-      onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
@@ -132,6 +131,7 @@ export const PassportDialogStory: ComponentStory<
   <OnboardingDialogWrapper>
     <PassportDialog
       patp="~pasren-satmex"
+      onUploadFile={() => Promise.reject()}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />

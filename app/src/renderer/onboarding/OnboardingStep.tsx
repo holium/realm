@@ -6,11 +6,13 @@ import { HostingStep } from './steps/HostingStep';
 import { AddServerStep } from './steps/AddServerStep';
 import { PassportStep } from './steps/PassportStep';
 import { InstallationStep } from './steps/InstallationStep';
+import { PasswordStep } from './steps/PasswordStep';
 
 export type Step =
   | '/login'
   | '/add-server'
   | '/passport'
+  | '/password'
   | '/hosting'
   | '/choose-id'
   | '/payment'
@@ -51,6 +53,8 @@ export const OnboardingStepPresenter = ({
       return <AddServerStep setStep={handleSetStep} />;
     case '/passport':
       return <PassportStep setStep={handleSetStep} onFinish={handleOnFinish} />;
+    case '/password':
+      return <PasswordStep setStep={handleSetStep} />;
     case '/installation':
       return (
         <InstallationStep setStep={handleSetStep} onFinish={handleOnFinish} />

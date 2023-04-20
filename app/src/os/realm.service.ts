@@ -173,6 +173,12 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     );
   }
 
+  async updatePassword(patp: string, password: string) {
+    if (!this.services) return;
+
+    return this.services.auth.updatePassword(patp, password);
+  }
+
   private _sendAuthenticated(patp: string, url: string, cookie: string) {
     this.sendUpdate({
       type: 'auth-success',

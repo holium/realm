@@ -206,6 +206,34 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     return false;
   }
 
+  public updatePassword(patp: string, password: string) {
+    if (!this.authDB) return false;
+
+    const account = this.authDB.tables.accounts.findOne(patp);
+
+    if (!account) {
+      log.info(`No account found for ${patp}`);
+      return false;
+    }
+
+    const newAccount = this.authDB.tables.accounts.update(patp, {
+      passwordHash: bcrypt.hashSync(password, 10),
+    });
+
+    if (newAccount) {
+      this.sendUpdate({
+        type: 'account-updated',
+        payload: {
+          account: newAccount,
+          order: this.authDB?.getOrder(),
+        },
+      });
+      return true;
+    }
+
+    return false;
+  }
+
   private _createShipDB(
     patp: string,
     encryptionKey: string,

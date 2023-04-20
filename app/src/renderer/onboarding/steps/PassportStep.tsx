@@ -46,7 +46,7 @@ export const PassportStep = ({ setStep, onFinish }: Props) => {
       onFinish?.();
       setStep('/login');
     } else {
-      setStep('/installation');
+      setStep('/password');
     }
 
     return true;
