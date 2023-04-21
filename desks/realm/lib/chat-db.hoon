@@ -651,9 +651,9 @@
             ['old-row' (path-row old.ch)]
           ==
         %del-paths-row
-          :~(['type' %s -.ch] ['table' %s %paths] ['row' s+(spat path.ch)] ['timestamp' (time timestamp.ch)])
+          :~(['type' %s -.ch] ['table' %s %paths] ['path' s+(spat path.ch)] ['timestamp' (time timestamp.ch)])
         %del-peers-row
-          :~(['type' %s -.ch] ['table' %s %peers] ['row' s+(spat path.ch)] ['ship' s+(scot %p ship.ch)] ['timestamp' (time timestamp.ch)])
+          :~(['type' %s -.ch] ['table' %s %peers] ['path' s+(spat path.ch)] ['ship' s+(scot %p ship.ch)] ['timestamp' (time timestamp.ch)])
         %del-messages-row
           :~
             ['type' %s -.ch]
