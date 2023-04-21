@@ -1274,6 +1274,16 @@
       :_  state
       %+  weld  recs
       ^-  (list card)
+      ::  it is possible under very odd circumstances that we get kicked
+      ::   by the host's bazaar. note that, according to the docs, getting kicked
+      ::   can happen automatically by gall under "certain network conditions"
+      ::  under this use-case, our %kicked hander (see on-agent) will automatically
+      ::   rejoin the remote bazaar which will send out a %remote-space gift.
+      ::  when this happened, this %watch below was causing an 'non-unique channel'
+      ::  error because the auto %kicked re-%watch had already happened.
+      ::  to prevent this, check the outgoing subscriptions on this ship (wex.boat)
+      ::   to ensure we are already listening on the wire before attempting the %watch
+      ?:  (~(has by wex.bowl) [watch-path ship.path %bazaar])  ~
       :~
         [%pass watch-path %agent [ship.path %bazaar] %watch watch-path]
       ==
