@@ -787,13 +787,10 @@
         ?+  wha     [det catalog.state]
           %none     [det catalog.state]
           ::
-          %delete
-            ~&  >   "delete"
-            [det catalog.state]
+          %delete   [det catalog.state]
             :: [det ?~(det ~ (~(del by catalog.state) app-id.u.det))]
           ::
           %add
-            ~&  >   "add"
             =/  det  (need det)
             =/  app  (need app.det)
             =/  app
