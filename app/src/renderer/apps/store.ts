@@ -63,6 +63,10 @@ const TrayAppStore = types
     },
     closeActiveApp() {
       self.activeApp = null;
+      self.innerNavigation = '';
+    },
+    clearInnerNavigation() {
+      self.innerNavigation = '';
     },
     setActiveApp(
       appId: TrayAppKeys | null,
@@ -84,6 +88,11 @@ const TrayAppStore = types
           dimensions
         );
         self.dimensions = dimensions;
+      }
+      if (params?.innerNavigation) {
+        self.innerNavigation = params.innerNavigation;
+      } else {
+        self.innerNavigation = '';
       }
     },
   }));

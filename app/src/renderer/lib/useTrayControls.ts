@@ -5,31 +5,16 @@ export const openChatToPath = (
   chatStore: ChatStoreInstance,
   setActiveApp: any,
   path: string,
-  _msgId?: string
+  msgId?: string
 ) => {
   chatStore.setChat(path);
   chatStore.setSubroute('chat');
-  // TODO scrollTo and highlight msgId
   const { position, anchorOffset, dimensions } = AppRegistry['chat'];
   setActiveApp('messages-tray', {
     willOpen: true,
     anchorOffset,
     position,
     dimensions,
+    innerNavigation: msgId, // this makes it scroll to the message in the list (app has to be smart enough to pay attention to innerNavigation)
   });
 };
-
-// export const openWalletToTx = (
-//   walletApp: DmAppInstance,
-//   dmPreview: DMPreviewType,
-//   setActiveApp: any
-// ) => {
-//   dmApp.setSelectedChat(dmPreview);
-//   dmApp.setView('dm-chat');
-//   setActiveApp('messages-tray', {
-//     willOpen: true,
-//     anchorOffset: { x: 4, y: 26 },
-//     position: 'top-left',
-//     dimensions: defaultTrayDimensions['messages-tray'],
-//   });
-// };

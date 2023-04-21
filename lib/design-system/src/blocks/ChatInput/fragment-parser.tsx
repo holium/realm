@@ -4,6 +4,8 @@ import {
   FragmentType,
   FragmentPlainType,
   FragmentBreakType,
+  FragmentKey,
+  TEXT_TYPES,
 } from '../Bubble/Bubble.types';
 
 type ParserKey =
@@ -345,6 +347,38 @@ export const parseChatInput = (input: string): FragmentType[] => {
   }
   //@ts-ignore
   return results;
+};
+
+export const convertFragmentsToPreview = (
+  chatid: string | number,
+  contents: FragmentType[]
+) => {
+  return (
+    <span>
+      {contents.map((content: FragmentType, idx: number) => {
+        let type = Object.keys(content)[0] as FragmentKey;
+        const value = content[type];
+        if (type === 'break') {
+          return <span key={`${chatid}-lastMessage-${idx}`}> </span>;
+        } else if (TEXT_TYPES.includes(type) || type === 'link') {
+          return <span key={`${chatid}-lastMessage-${idx}`}>{value}</span>;
+        } else {
+          return (
+            <span
+              style={{
+                marginLeft: 2,
+                marginRight: 2,
+                fontStyle: 'italic',
+              }}
+              key={`${chatid}-lastMessage-${idx}`}
+            >
+              {type === 'code' ? 'code block' : type}
+            </span>
+          );
+        }
+      })}
+    </span>
+  );
 };
 
 export const convertFragmentsToText = (fragments: FragmentType[]): string => {
