@@ -21,12 +21,7 @@ export class APIConnection {
     this.conduitInstance = new Conduit(deSig(session.ship));
     this.handleConnectionStatus(this.conduitInstance);
     this.conduitInstance
-      .init(
-        session.url,
-        deSig(session.ship),
-        session.cookie ?? '',
-        session.code
-      )
+      .init(session.url, session.cookie ?? '', session.code)
       .then(() => {
         this.handleConnectionStatus(this.conduitInstance);
       });

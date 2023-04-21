@@ -65,7 +65,7 @@ describe('basic spaces tests', () => {
     service = new SpacesService(undefined, shipService.shipDB.db);
   });
 
-  test('friends demo', async () => {
+  test('spaces demo', async () => {
     console.log(await service.getInitial());
   });
 

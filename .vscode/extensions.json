@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "EditorConfig.EditorConfig",
+    "Orta.vscode-jest",
+    "eamodio.gitlens",
+    "donjayamanne.githistory",
+    "urbit.hoon"
+  ]
+}

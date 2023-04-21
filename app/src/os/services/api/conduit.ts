@@ -114,12 +114,7 @@ export class Conduit extends EventEmitter {
               ship: this.ship,
             });
             if (err.originator === 'sse') {
-              await this.init(
-                this.url,
-                this.ship ?? '',
-                this.cookie,
-                this.code
-              );
+              await this.init(this.url, this.cookie, this.code, this.ship);
               resolve(undefined);
               return;
             }
@@ -157,8 +152,8 @@ export class Conduit extends EventEmitter {
   async init(
     url: string,
     cookie: string,
-    ship: Patp | undefined = undefined,
-    code: string | undefined = undefined
+    code: string | undefined = undefined,
+    ship: Patp | undefined = undefined
   ): Promise<void> {
     this.url = url;
     if (ship) {

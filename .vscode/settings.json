@@ -1,0 +1,30 @@
+{
+  "files.associations": {
+    ".eslintrc": "jsonc",
+    ".prettierrc": "jsonc",
+    ".eslintignore": "ignore"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "javascript.validate.enable": false,
+  "javascript.format.enable": false,
+  "typescript.format.enable": false,
+  "editor.formatOnSave": true,
+  "eslint.format.enable": true,
+  "search.exclude": {
+    ".git": true,
+    ".eslintcache": true,
+    ".holium/dll": true,
+    "release/{build,app/dist}": true,
+    "node_modules": true,
+    "npm-debug.log.*": true,
+    "test/**/__snapshots__": true,
+    "package-lock.json": true,
+    "*.{css,sass,scss}.d.ts": true
+  },
+  "jest.rootPath": "app",
+  "jest.autoRun": { "watch": false, "onSave": "test-src-file" },
+  "jest.testExplorer": { "showInlineError": true },
+  "jest.jestCommandLine": "yarn test"
+}
