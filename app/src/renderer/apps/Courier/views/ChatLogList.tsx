@@ -1,4 +1,4 @@
-import { RefObject } from 'react';
+import { useState, RefObject } from 'react';
 import {
   Box,
   Text,
@@ -31,9 +31,18 @@ export const ChatLogList = ({
   endOfListPadding,
   topOfListPadding,
 }: Props) => {
+  const [atBottom, setAtBottom] = useState<boolean>(false);
+  const snapToBottom = () => {
+    if (atBottom) {
+      listRef?.current?.scrollToIndex({
+        index: messages.length - 1,
+        align: 'end',
+      });
+    }
+  };
+
   const renderChatRow = (index: number, row: ChatMessageType) => {
     const isLast = selectedChat ? index === messages.length - 1 : false;
-
     const isNextGrouped =
       index < messages.length - 1 && row.sender === messages[index + 1].sender;
 
@@ -84,6 +93,7 @@ export const ChatLogList = ({
           containerWidth={width}
           message={row as ChatMessageType}
           ourColor={ourColor}
+          snapToBottom={snapToBottom}
           onReplyClick={(replyId) => {
             const replyIndex = messages.findIndex((msg) => msg.id === replyId);
             if (replyIndex === -1) return;
@@ -106,6 +116,10 @@ export const ChatLogList = ({
         width={width}
         height={height}
         atBottomThreshold={100}
+        atBottomStateChange={(newBottomVal: boolean) =>
+          setAtBottom(newBottomVal)
+        }
+        followOutput={true}
         // style={{ marginRight: -scrollbarWidth }}
         // alignToBottom
         // initialTopMostItemIndex={messages.length - 1}
