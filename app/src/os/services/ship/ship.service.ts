@@ -79,11 +79,6 @@ export class ShipService extends AbstractService<any> {
     });
   }
 
-  public setShipDB(shipDB: ShipDB) {
-    log.info('Setting shipDB in ship service');
-    this.shipDB = shipDB;
-  }
-
   // TODO initialize the ship services here
   public init() {
     this.services?.spaces.init();

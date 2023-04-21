@@ -20,7 +20,7 @@ export const InstallationStep = ({ setStep, onFinish }: StepProps) => {
   const onNext = async () => {
     onFinish?.();
 
-    return Promise.resolve(true);
+    return true;
   };
 
   return (
