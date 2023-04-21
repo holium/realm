@@ -100,6 +100,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     account?: Account;
     shipDB?: ShipDB;
   } {
+    log.info('Creating account', acc);
     if (!this.authDB) return {};
     const masterAccount = this.authDB.tables.masterAccounts.findOne(
       acc.accountId

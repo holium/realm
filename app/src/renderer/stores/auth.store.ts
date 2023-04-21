@@ -65,10 +65,13 @@ export const AuthenticationModel = types
   })
   .actions((self) => ({
     setAccounts(accounts?: AccountView[]) {
+      console.log('setting accounts');
       if (!accounts) return;
       applySnapshot(self.accounts, castToSnapshot(accounts));
     },
     _setSession(patp: string) {
+      console.log('set session', patp);
+      console.log(self.accounts);
       const account = self.accounts.find((a) => a.patp === patp);
       if (!account) {
         throw new Error('Account not found');

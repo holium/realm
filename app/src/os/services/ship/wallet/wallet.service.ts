@@ -253,6 +253,10 @@ export class WalletService extends AbstractService {
     )['eth-xpub'];
     return ethXpub === agentEthXpub;
   }
+
+  async hasMnemonic() {
+    return RealmSigner.hasMnemonic();
+  }
 }
 
 export default WalletService;

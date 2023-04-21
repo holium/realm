@@ -1,4 +1,4 @@
-import { BaseSigner } from '../../../../services-new/ship/wallet/signers/BaseSigner';
+import { BaseSigner } from './BaseSigner';
 import { ethers } from 'ethers';
 // import { safeStorage } from 'electron';
 // import { removeDots } from '../../../../api/uqbar';
@@ -25,6 +25,18 @@ export abstract class RealmSigner implements BaseSigner {
     const db = new EncryptedStore<string>(storeParams);
     db.store = mnemonic;
   }
+
+  static hasMnemonic(patp, passcode) {
+    const storeParams = {
+      name: 'mnemonic',
+      cwd: `realm.${patp}`,
+      secretKey: passcode,
+      accessPropertiesByDotNotation: true,
+    };
+    const db = new EncryptedStore<string>(storeParams);
+    const mnemonic = db.store;
+  }
+
   static signTransaction(
     path: string,
     message: any,

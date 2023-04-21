@@ -30,7 +30,6 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
   async init() {
     const wallets = await this._fetchWallets();
-    console.log('fetched wallets', wallets);
     this._insertWallets(wallets);
     // this._insertTransactions(wallets.transactions);
   }
@@ -76,7 +75,6 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   }
 
   private _onDbUpdate(data: any /*WalletDbReactions*/, _id?: number) {
-    console.log('sending wallet update', data);
     this.sendUpdate(data);
   }
 
