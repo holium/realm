@@ -51,24 +51,26 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
     if (userShips.length > 0) {
       // Create a "default" account for each ship.
       // The user can customize their passports later.
-      userShips.forEach((ship) => {
-        RealmIPC.createAccount(
-          {
-            accountId: masterAccount.id,
-            password,
-            patp: ship.patp,
-            url: ship.link,
-            avatar: '',
-            nickname: ship.screen_name,
-            description: '',
-            color: '#000000',
-            type: 'hosted',
-            status: 'online',
-            theme: JSON.stringify(defaultTheme),
-          },
-          ship.code
-        );
-      });
+      await Promise.all(
+        userShips.map(async (ship) => {
+          await RealmIPC.createAccount(
+            {
+              accountId: masterAccount.id,
+              password,
+              patp: ship.patp,
+              url: ship.link,
+              avatar: '',
+              nickname: ship.screen_name,
+              description: '',
+              color: '#000000',
+              type: 'hosted',
+              status: 'online',
+              theme: JSON.stringify(defaultTheme),
+            },
+            ship.code
+          );
+        })
+      );
 
       onFinish?.();
     } else {

@@ -29,7 +29,7 @@ export const OnboardingStepPresenter = ({
 
   switch (step) {
     case '/login':
-      return <LoginStep setStep={handleSetStep} />;
+      return <LoginStep setStep={handleSetStep} onFinish={onFinish} />;
     case '/hosting':
       return <HostingStep setStep={handleSetStep} onFinish={onFinish} />;
     case '/add-server':
@@ -49,7 +49,7 @@ export const OnboardingStepPresenter = ({
     case '/credentials':
       return <CredentialsStep setStep={handleSetStep} />;
     default:
-      return <LoginStep setStep={handleSetStep} />;
+      return <LoginStep setStep={handleSetStep} onFinish={onFinish} />;
   }
 };
 

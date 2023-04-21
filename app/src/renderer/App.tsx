@@ -22,6 +22,7 @@ function AppContentPresenter() {
 
   const savedOnboardingStep = OnboardingStorage.get().step;
 
+  const onboarding = useToggle(hasNoAccounts);
   const addShip = useToggle(Boolean(savedOnboardingStep));
 
   const onAddShip = () => {
@@ -29,7 +30,12 @@ function AppContentPresenter() {
     OnboardingStorage.set({ step: '/hosting' });
   };
 
-  const onFinish = () => {
+  const onFinishOnboarding = () => {
+    onboarding.toggleOff();
+    OnboardingStorage.reset();
+  };
+
+  const onFinishAddShip = () => {
     addShip.toggleOff();
     OnboardingStorage.reset();
   };
@@ -45,11 +51,11 @@ function AppContentPresenter() {
     return <Splash />;
   }
 
-  if (hasNoAccounts) {
+  if (onboarding.isOn) {
     return (
       <Onboarding
         initialStep={savedOnboardingStep ?? '/login'}
-        onFinish={onFinish}
+        onFinish={onFinishOnboarding}
       />
     );
   }
@@ -59,7 +65,7 @@ function AppContentPresenter() {
       return (
         <Onboarding
           initialStep={savedOnboardingStep ?? '/hosting'}
-          onFinish={onFinish}
+          onFinish={onFinishAddShip}
         />
       );
     }
