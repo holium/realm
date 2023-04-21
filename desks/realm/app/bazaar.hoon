@@ -782,7 +782,7 @@
           (snoc result entry)
       =.  catalog.state       (~(uni by catalog.state) (malt new-catalog-apps))
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%joined-bazaar path catalog.state stall])]~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%joined-bazaar path catalog stall])]~
 
     ::
     ++  what
