@@ -9,7 +9,7 @@ import AbstractService, { ServiceOptions } from '../abstract.service';
 import { AuthDB } from './auth.db';
 import { Account } from './accounts.table';
 import { ThemeType } from 'renderer/stores/models/theme.model';
-import { MasterAccount } from './masterAccounts.table';
+import { CreateMasterAccountPayload } from 'os/realm.types';
 import { ShipDB } from '../ship/ship.db';
 import { getCookie } from '../../lib/shipHelpers';
 import { AuthUpdateTypes } from './auth.types';
@@ -51,13 +51,13 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
   }
 
   public async createMasterAccount(
-    mAccount: Omit<MasterAccount, 'id' | 'passwordHash'> & { password: string }
+    masterAccountPayload: CreateMasterAccountPayload
   ) {
     if (!this.authDB) return;
     // if a master account already exists, return
     try {
       const existingAccount = this.authDB.tables.masterAccounts.findOne(
-        `email = "${mAccount.email}"`
+        `email = "${masterAccountPayload.email}"`
       );
       if (existingAccount) return existingAccount;
     } catch (e) {
@@ -66,10 +66,10 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
 
     // TODO implement password hashing and other account creation logic
     const newAccount = this.authDB.tables.masterAccounts.create({
-      email: mAccount.email,
-      encryptionKey: mAccount.encryptionKey,
-      authToken: mAccount.authToken,
-      passwordHash: bcrypt.hashSync(mAccount.password, 10),
+      email: masterAccountPayload.email,
+      encryptionKey: masterAccountPayload.encryptionKey,
+      authToken: masterAccountPayload.authToken,
+      passwordHash: masterAccountPayload.passwordHash,
     });
     // if (newAccount) {
     //   // sends update to renderer with new account

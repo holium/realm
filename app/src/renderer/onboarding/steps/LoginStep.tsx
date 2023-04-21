@@ -29,10 +29,12 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
       return false;
     }
 
+    const passwordHash = await RealmIPC.hashPassword(password);
+
     // Create a local master account from the ThirdEarth account.
     const masterAccount = await RealmIPC.createMasterAccount({
       email: response.email,
-      password,
+      passwordHash,
       encryptionKey: response.client_side_encryption_key,
       authToken: response.token,
     });
@@ -43,6 +45,7 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
       email: response.email,
       clientSideEncryptionKey: response.client_side_encryption_key,
       token: response.token,
+      passwordHash: masterAccount.passwordHash,
       masterAccountId: masterAccount.id,
     });
 
@@ -52,11 +55,11 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
       // Create a "default" account for each ship.
       // The user can customize their passports later.
       await Promise.all(
-        userShips.map(async (ship) => {
-          await RealmIPC.createAccount(
+        userShips.map((ship) =>
+          RealmIPC.createAccount(
             {
               accountId: masterAccount.id,
-              password,
+              passwordHash: masterAccount.passwordHash,
               patp: ship.patp,
               url: ship.link,
               avatar: '',
@@ -68,8 +71,8 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
               theme: JSON.stringify(defaultTheme),
             },
             ship.code
-          );
-        })
+          )
+        )
       );
 
       onFinish?.();

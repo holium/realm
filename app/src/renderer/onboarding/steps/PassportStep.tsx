@@ -34,7 +34,7 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
   ) => {
     if (!shipId) return false;
 
-    RealmIPC.updatePassport(shipId, nickname, description, avatar);
+    await RealmIPC.updatePassport(shipId, nickname, description, avatar);
 
     // Sync friends agent
     // FriendsIPC.saveContact(shipId, {
