@@ -60,6 +60,6 @@ export const OnboardingStorage = {
     });
   },
   reset: () => {
-    storageKeys.forEach((key) => localStorage.removeItem(key));
+    localStorage.removeItem('step');
   },
 };

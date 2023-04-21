@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { track } from '@amplitude/analytics-browser';
+import { Stripe, loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
 import {
   OnboardDialogSkeleton,
   PaymentDialog,
@@ -8,7 +9,6 @@ import {
 } from '@holium/shared';
 import { StepProps } from './types';
 import { thirdEarthApi } from '../thirdEarthApi';
-import { Stripe, loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
 
 type PaymentStepViewProps = StepProps & {
   products: ThirdEarthProduct[];
@@ -26,19 +26,23 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
   const [invoiceId, setInvoiceId] = useState<string>();
 
   useEffect(() => {
-    const { shipId, email, token } = OnboardingStorage.get();
+    const {
+      shipId: storedShipId,
+      email: storedEmail,
+      token: storedToken,
+    } = OnboardingStorage.get();
 
-    if (!shipId || !email || !token) return;
+    if (!storedShipId || !storedEmail || !storedToken) return;
 
-    setShipId(shipId);
-    setEmail(email);
-    setToken(token);
+    setShipId(storedShipId);
+    setEmail(storedEmail);
+    setToken(storedToken);
 
     const getSecretAndSetupStripe = async () => {
       const response = await thirdEarthApi.stripeMakePayment(
-        token,
+        storedToken,
         productId.toString(),
-        shipId
+        storedShipId
       );
       setClientSecret(response.clientSecret);
       setInvoiceId(response.invoiceId);
@@ -53,12 +57,6 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
       console.error(e);
     }
   }, [productId]);
-
-  useEffect(() => {
-    const stripeIframe = document.querySelector('iframe');
-    const stripeIframeBody = stripeIframe?.contentDocument?.body;
-    if (stripeIframeBody) stripeIframeBody.style.cursor = 'none !important';
-  }, [stripe]);
 
   const stripeOptions: StripeElementsOptions = {
     clientSecret: clientSecret,

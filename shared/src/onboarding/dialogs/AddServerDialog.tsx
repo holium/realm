@@ -12,9 +12,9 @@ type Props = {
 };
 
 export const AddServerDialog = ({ onBack, onNext }: Props) => {
-  const [id, setId] = useState('~lopsyp-doztun');
-  const [url, setUrl] = useState('https://lopsyp-doztun.arvo.network');
-  const [code, setCode] = useState('palmer-bardeg-simsun-folpen');
+  const [id, setId] = useState('');
+  const [url, setUrl] = useState('');
+  const [code, setCode] = useState('');
 
   const showAccessKey = useToggle(false);
 

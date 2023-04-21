@@ -351,9 +351,10 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                 />
                 <Text.Custom
                   fontWeight={500}
+                  noSelection
                   // transition={{ color: { duration: 0.5 } }}
                 >
-                  Add Urbit ID
+                  Add Server
                 </Text.Custom>
               </Flex>
             </Button.TextButton>
