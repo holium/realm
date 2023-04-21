@@ -1,4 +1,5 @@
 /-  *friends
+/+  *tome-json
 |_  act=friends-action-0
 ++  grow
   |%
@@ -7,6 +8,7 @@
 ++  grab
   |%
   ++  noun  friends-action-0
+  ++  json  friends-action-0:dejs
   --
 ++  grad  %noun
 --

@@ -33,7 +33,7 @@ export class Conduit extends EventEmitter {
   private prevMsgId: number = 0;
   private lastAckId: number = 0;
   cookie: string | null = null;
-  ship: string | null = null;
+  ship: string;
   pokes: Map<number, PokeParams & PokeCallbacks>;
   watches: Map<number, SubscribeParams & SubscribeCallbacks>;
   idleWatches: Map<number, SubscribeParams & SubscribeCallbacks>;
@@ -45,8 +45,9 @@ export class Conduit extends EventEmitter {
   private code: string | undefined = undefined;
   private sse: EventSource | undefined;
 
-  constructor() {
+  constructor(ship: Patp) {
     super();
+    this.ship = ship;
     this.pokes = new Map();
     this.watches = new Map();
     this.idleWatches = new Map();
@@ -108,9 +109,9 @@ export class Conduit extends EventEmitter {
             this.cookie = cookie;
             this.updateStatus(ConduitState.Refreshed, {
               url: this.url,
-              ship: preSig(this.ship),
               cookie: this.cookie,
               code: this.code,
+              ship: this.ship,
             });
             if (err.originator === 'sse') {
               await this.init(
@@ -155,12 +156,14 @@ export class Conduit extends EventEmitter {
    */
   async init(
     url: string,
-    ship: Patp,
     cookie: string,
+    ship: Patp | undefined = undefined,
     code: string | undefined = undefined
   ): Promise<void> {
     this.url = url;
-    this.ship = ship;
+    if (ship) {
+      this.ship = ship;
+    }
     this.cookie = cookie;
     this.code = code;
     this.uid = this.generateUID();
@@ -634,6 +637,7 @@ export class Conduit extends EventEmitter {
         return true;
       }
     } catch (e: any) {
+      console.error(e);
       const err = e as AxiosError;
       if (err.code === 'ECONNREFUSED') {
         // if we cannot connect to the ship, cleanup

@@ -1,5 +1,5 @@
 import AbstractService, { ServiceOptions } from '../../abstract.service';
-import { Database } from 'better-sqlite3-multiple-ciphers';
+import Database from 'better-sqlite3-multiple-ciphers';
 import log from 'electron-log';
 import { APIConnection } from '../../api';
 import { SpacesDB, spacesInitSql } from './tables/spaces.table';
