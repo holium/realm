@@ -1,4 +1,4 @@
-import { ChooseIdDialog } from '@holium/shared';
+import { ChooseIdDialog, OnboardingStorage } from '@holium/shared';
 import { Page } from '../components/Page';
 import { useNavigation } from '../util/useNavigation';
 import { thirdEarthApi } from '../util/thirdEarthApi';
@@ -26,8 +26,8 @@ export async function getServerSideProps() {
 export default function ChooseId({ patps }: ServerSideProps) {
   const { goToPage } = useNavigation();
 
-  const onSelectPatp = (patp: string) => {
-    localStorage.setItem('patp', patp);
+  const onSelectPatp = (shipId: string) => {
+    OnboardingStorage.set({ shipId });
   };
 
   const onNext = () => goToPage('/payment');

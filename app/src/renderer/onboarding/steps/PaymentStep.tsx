@@ -4,6 +4,7 @@ import {
   OnboardDialogSkeleton,
   PaymentDialog,
   ThirdEarthProduct,
+  OnboardingStorage,
 } from '@holium/shared';
 import { StepProps } from './types';
 import { thirdEarthApi } from '../thirdEarthApi';
@@ -14,7 +15,7 @@ type PaymentStepViewProps = StepProps & {
 };
 
 const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
-  const [patp, setPatp] = useState('');
+  const [shipId, setShipId] = useState('');
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
 
@@ -25,13 +26,11 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
   const [invoiceId, setInvoiceId] = useState<string>();
 
   useEffect(() => {
-    const patp = localStorage.getItem('patp');
-    const email = localStorage.getItem('email');
-    const token = localStorage.getItem('token');
+    const { shipId, email, token } = OnboardingStorage.get();
 
-    if (!token || !patp || !email) return;
+    if (!shipId || !email || !token) return;
 
-    setPatp(patp);
+    setShipId(shipId);
     setEmail(email);
     setToken(token);
 
@@ -39,7 +38,7 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
       const response = await thirdEarthApi.stripeMakePayment(
         token,
         productId.toString(),
-        patp
+        shipId
       );
       setClientSecret(response.clientSecret);
       setInvoiceId(response.invoiceId);
@@ -71,13 +70,13 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
   const onBack = () => setStep('/choose-id');
 
   const onNext = async () => {
-    if (!token || !patp || !invoiceId || !productId) {
+    if (!token || !shipId || !invoiceId || !productId) {
       return Promise.resolve(false);
     }
 
     await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
-    await thirdEarthApi.updatePlanetStatus(token, patp, 'sold');
-    await thirdEarthApi.ship(token, patp, productId.toString(), invoiceId);
+    await thirdEarthApi.updatePlanetStatus(token, shipId, 'sold');
+    await thirdEarthApi.ship(token, shipId, productId.toString(), invoiceId);
 
     setStep('/booting');
 
@@ -88,7 +87,7 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
     <PaymentDialog
       products={products}
       productId={productId}
-      patp={patp}
+      patp={shipId}
       email={email}
       stripe={stripe as any}
       stripeOptions={stripeOptions as any}

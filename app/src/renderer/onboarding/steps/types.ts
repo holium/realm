@@ -1,5 +1,5 @@
-import { OnboardingStepType } from 'renderer/stores/models/onboarding.model';
+import { RealmOnboardingStep } from '@holium/shared';
 
 export type StepProps = {
-  setStep: (step: OnboardingStepType) => void;
+  setStep: (step: RealmOnboardingStep) => void;
 };

@@ -84,3 +84,17 @@ type OnboardingSignupPage =
   | '/download';
 
 export type OnboardingPage = OnboardingAccountPage | OnboardingSignupPage;
+
+export type RealmOnboardingStep =
+  | '/login'
+  | '/add-server'
+  | '/passport'
+  | '/password'
+  | '/hosting'
+  | '/choose-id'
+  | '/payment'
+  | '/booting'
+  | '/credentials'
+  | '/installation';
+
+export type Nullable<T> = { [P in keyof T]: T[P] | null };

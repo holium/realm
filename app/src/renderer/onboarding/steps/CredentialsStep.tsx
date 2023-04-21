@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { track } from '@amplitude/analytics-browser';
-import { CredentialsDialog } from '@holium/shared';
+import { CredentialsDialog, OnboardingStorage } from '@holium/shared';
 import { StepProps } from './types';
 
 export const CredentialsStep = ({ setStep }: StepProps) => {
@@ -13,7 +13,7 @@ export const CredentialsStep = ({ setStep }: StepProps) => {
   const onNext = () => {
     setStep('/passport');
 
-    return Promise.resolve(false);
+    return Promise.resolve(true);
   };
 
   useEffect(() => {
@@ -21,10 +21,13 @@ export const CredentialsStep = ({ setStep }: StepProps) => {
   });
 
   useEffect(() => {
+    const { shipId, shipUrl, shipCode } = OnboardingStorage.get();
+    if (!shipId || !shipUrl || !shipCode) return;
+
     setCredentials({
-      id: localStorage.getItem('patp') ?? '',
-      url: localStorage.getItem('url') ?? '',
-      accessCode: localStorage.getItem('accessCode') ?? '',
+      id: shipId,
+      url: shipUrl,
+      accessCode: shipCode,
     });
   }, []);
 

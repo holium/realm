@@ -1,16 +1,12 @@
 import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
-import { PassportDialog } from '@holium/shared';
-import { FileUploadParams } from 'os/services/ship/ship.service';
+import { PassportDialog, OnboardingStorage } from '@holium/shared';
 import { StepProps } from './types';
 import { RealmIPC, FriendsIPC } from '../../stores/ipc';
+import { FileUploadParams } from '../../../os/services/ship/ship.service';
 
-type Props = {
-  onFinish?: () => void;
-} & StepProps;
-
-export const PassportStep = ({ setStep, onFinish }: Props) => {
-  const patp = localStorage.getItem('patp');
+export const PassportStep = ({ setStep }: StepProps) => {
+  const { shipId, nickname, description, avatar } = OnboardingStorage.get();
 
   useEffect(() => {
     track('Onboarding / Passport');
@@ -36,26 +32,24 @@ export const PassportStep = ({ setStep, onFinish }: Props) => {
     description = '',
     avatar = ''
   ) => {
-    if (!patp) return false;
+    if (!shipId) return false;
 
-    // Save in localstorage in case they go back from the install step.
-    localStorage.setItem('nickname', nickname);
-    localStorage.setItem('description', description);
-    localStorage.setItem('avatar', avatar);
-
-    RealmIPC.updatePassport(patp, nickname, description, avatar);
+    RealmIPC.updatePassport(shipId, nickname, description, avatar);
 
     // Sync friends agent
-    FriendsIPC.saveContact(patp, {
+    FriendsIPC.saveContact(shipId, {
       nickname,
       avatar,
       bio: description,
     });
 
-    const isHosted = localStorage.getItem('isHosted');
+    // Save in localstorage in case they go back from the install step.
+    OnboardingStorage.set({ nickname, description, avatar });
+    const { shipType } = OnboardingStorage.get();
 
-    if (isHosted) {
-      onFinish?.();
+    if (shipType === 'hosted') {
+      OnboardingStorage.reset();
+
       setStep('/login');
     } else {
       setStep('/installation');
@@ -66,10 +60,10 @@ export const PassportStep = ({ setStep, onFinish }: Props) => {
 
   return (
     <PassportDialog
-      patp={patp}
-      prefilledNickname={localStorage.getItem('nickname') ?? ''}
-      prefilledDescription={localStorage.getItem('description') ?? ''}
-      prefilledAvatarSrc={localStorage.getItem('avatar') ?? ''}
+      patp={shipId ?? ''}
+      prefilledNickname={nickname ?? ''}
+      prefilledDescription={description ?? ''}
+      prefilledAvatarSrc={avatar ?? ''}
       onUploadFile={onUploadFile}
       onBack={onBack}
       onNext={handleOnNext}
