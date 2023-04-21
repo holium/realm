@@ -11,7 +11,7 @@ import { thirdEarthApi } from '../thirdEarthApi';
 import { defaultTheme } from '../../lib/defaultTheme';
 import { RealmIPC } from '../../stores/ipc';
 
-export const LoginStep = ({ setStep }: StepProps) => {
+export const LoginStep = ({ setStep, onFinish }: StepProps) => {
   const prefilledEmail = OnboardingStorage.get().email ?? '';
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export const LoginStep = ({ setStep }: StepProps) => {
         );
       });
 
-      OnboardingStorage.reset();
+      onFinish?.();
     } else {
       setStep('/hosting');
     }
