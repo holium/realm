@@ -258,6 +258,7 @@ export const NewBazaarStore = types
       self.stalls.set(data.path, data.stall);
     },
     _updateStall(data: any) {
+      console.log('_updateStall => %o', data);
       if ('add-app' in data) {
         const app: AppType = data['add-app'];
         if (app.type === 'urbit') {

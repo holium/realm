@@ -787,11 +787,13 @@
         ?+  wha     [det catalog.state]
           %none     [det catalog.state]
           ::
-          %delete   [det catalog.state]
+          %delete
+            ~&  >   "delete"
+            [det catalog.state]
             :: [det ?~(det ~ (~(del by catalog.state) app-id.u.det))]
           ::
           %add
-            :: ~&  >>   "add"
+            ~&  >   "add"
             =/  det  (need det)
             =/  app  (need app.det)
             =/  app
@@ -824,7 +826,8 @@
       =.  catalog.state       catalog.updates
       =.  stalls.state        (~(put by stalls.state) [path stall])
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%stall-update path stall det.updates])]~
+      :~  [%give %fact [/updates ~] bazaar-reaction+!>([%stall-update path stall det.updates])]
+      ==
     ::
     ++  on-rebuild-catalog
       |=  [=catalog:store =grid-index:store]
@@ -872,14 +875,18 @@
       =.  stalls.state            (~(put by stalls.state) [path stall])
       ::  per #319, ensure installed status is relative to our ship/catalog
       =/  entry                   (~(get by catalog.state) app-id)
+      ::  default to %desktop (will force download button in UI)
       =/  local-install-status    ?~(entry %desktop (get-install-status:helpers:bazaar:core u.entry))
-      =/  app
-      ?+  -.app  app
+      ::  do not overwrite our current catalog entry with the recommend app; ensure
+      ::   only overwriting the install-status
+      =/  our-app                 ?~(entry app u.entry)
+      =/  our-app
+      ?+  -.our-app  our-app
         %urbit
-          =.  install-status.app  local-install-status
-          app
+          =.  install-status.our-app  local-install-status
+          our-app
       ==
-      =.  catalog.state           (~(put by catalog.state) [app-id app])
+      =.  catalog.state           (~(put by catalog.state) [app-id our-app])
       =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
       :_  state
       :~
