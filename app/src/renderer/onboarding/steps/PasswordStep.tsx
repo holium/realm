@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
-import { PasswordDialog } from '@holium/shared';
+import { PasswordDialog, OnboardingStorage } from '@holium/shared';
 import { StepProps } from './types';
 import { RealmIPC } from 'renderer/stores/ipc';
 
 export const PasswordStep = ({ setStep }: StepProps) => {
-  const patp = localStorage.getItem('patp');
+  const { shipCode } = OnboardingStorage.get();
 
   useEffect(() => {
     track('Onboarding / Password');
@@ -16,9 +16,9 @@ export const PasswordStep = ({ setStep }: StepProps) => {
   };
 
   const handleOnNext = async (password: string) => {
-    if (!patp) return false;
+    if (!shipCode) return false;
 
-    RealmIPC.updatePassword(patp, password);
+    RealmIPC.updatePassword(shipCode, password);
 
     setStep('/installation');
 

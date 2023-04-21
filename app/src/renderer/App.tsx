@@ -3,6 +3,7 @@ import { BgImage, GlobalStyle } from './App.styles';
 import { Shell } from './system';
 import { useEffect, useMemo } from 'react';
 import { Flex, Spinner, useToggle } from '@holium/design-system';
+import { OnboardingStorage } from '@holium/shared';
 import { observer } from 'mobx-react';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
 import { useAppState, appState, AppStateProvider } from './stores/app.store';
@@ -15,10 +16,23 @@ import { RealmIPC } from './stores/ipc';
 
 function AppContentPresenter() {
   const { seenSplash, authStore, booted } = useAppState();
-  const addShip = useToggle(false);
 
   const isLoggedOut = !authStore.session;
   const hasNoAccounts = authStore.accounts.length === 0;
+
+  const savedOnboardingStep = OnboardingStorage.get().step;
+
+  const addShip = useToggle(Boolean(savedOnboardingStep));
+
+  const onAddShip = () => {
+    addShip.toggleOn();
+    OnboardingStorage.set({ step: '/hosting' });
+  };
+
+  const onFinish = () => {
+    addShip.toggleOff();
+    OnboardingStorage.reset();
+  };
 
   if (!booted) {
     return (
@@ -32,15 +46,25 @@ function AppContentPresenter() {
   }
 
   if (hasNoAccounts) {
-    return <Onboarding initialStep="/login" onFinish={addShip.toggleOff} />;
+    return (
+      <Onboarding
+        initialStep={savedOnboardingStep ?? '/login'}
+        onFinish={onFinish}
+      />
+    );
   }
 
   if (isLoggedOut) {
     if (addShip.isOn) {
-      return <Onboarding initialStep="/hosting" onFinish={addShip.toggleOff} />;
+      return (
+        <Onboarding
+          initialStep={savedOnboardingStep ?? '/hosting'}
+          onFinish={onFinish}
+        />
+      );
     }
 
-    return <Auth onAddShip={addShip.toggleOn} />;
+    return <Auth onAddShip={onAddShip} />;
   }
 
   return <Shell />;

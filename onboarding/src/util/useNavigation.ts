@@ -1,7 +1,11 @@
 import { useRouter } from 'next/router';
 import { useCallback, useMemo } from 'react';
 import { capitalizeFirstLetter } from '@holium/design-system/util';
-import { SidebarSection, OnboardingPage } from '@holium/shared';
+import {
+  SidebarSection,
+  OnboardingPage,
+  OnboardingStorage,
+} from '@holium/shared';
 
 export const accountPageUrl: Record<string, OnboardingPage> = {
   'Download Realm': '/account/download-realm',
@@ -38,7 +42,7 @@ export const useNavigation = () => {
 
   const logout = useCallback(() => {
     goToPage('/login');
-    localStorage.clear();
+    OnboardingStorage.reset();
   }, [router]);
 
   return { currentAccountSection, goToPage, logout };

@@ -25,12 +25,14 @@ export { GetNewAccessCodeModal } from './components/hosting/modals/GetNewAccessC
 export { EjectIdModal } from './components/hosting/modals/EjectIdModal';
 export { HostingDialog } from './dialogs/HostingDialog';
 export { InstallationDialog } from './dialogs/InstallationDialog';
+export { SidebarSection } from './components/AccountDialog';
 export { OnboardDialogDescription } from './components/OnboardDialog.styles';
 export { ThirdEarthApi } from './services/ThirdEarthApi';
-export { SidebarSection } from './components/AccountDialog';
+export { OnboardingStorage } from './services/OnboardingStorage';
 
 export type {
   OnboardingPage,
+  RealmOnboardingStep,
   ThirdEarthShip,
   ThirdEarthProduct,
   ThirdEarthPortalSession,

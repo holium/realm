@@ -1,4 +1,4 @@
-import { CreateAccountDialog } from '@holium/shared';
+import { CreateAccountDialog, OnboardingStorage } from '@holium/shared';
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
@@ -9,9 +9,8 @@ export default function CreateAccount() {
   const onAlreadyHaveAccount = () => goToPage('/login');
 
   const onNext = async (email: string, password: string) => {
-    // Save email in local storage for later steps in the onboarding flow.
-    localStorage.setItem('email', email);
-    localStorage.setItem('password', password);
+    // TODO: hash password
+    OnboardingStorage.set({ email, passwordHash: password });
 
     try {
       const result = await thirdEarthApi.register(email, password);

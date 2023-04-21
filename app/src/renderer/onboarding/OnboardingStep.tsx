@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
+import { RealmOnboardingStep, OnboardingStorage } from '@holium/shared';
 import { BootingStep, ChooseIdStep, LoginStep, PaymentStep } from './steps';
 import { CredentialsStep } from './steps/CredentialsStep';
 import { HostingStep } from './steps/HostingStep';
@@ -8,57 +9,37 @@ import { PassportStep } from './steps/PassportStep';
 import { InstallationStep } from './steps/InstallationStep';
 import { PasswordStep } from './steps/PasswordStep';
 
-export type Step =
-  | '/login'
-  | '/add-server'
-  | '/passport'
-  | '/password'
-  | '/hosting'
-  | '/choose-id'
-  | '/payment'
-  | '/booting'
-  | '/credentials'
-  | '/installation';
-
 export type OnboardingStepProps = {
-  initialStep?: Step;
+  initialStep: RealmOnboardingStep;
   onFinish: () => void;
 };
 
-const defaultInitialStep =
-  (localStorage.getItem('onboardingStep') as Step | undefined) ?? '/login';
-
 export const OnboardingStepPresenter = ({
-  initialStep = defaultInitialStep,
+  initialStep,
   onFinish,
 }: OnboardingStepProps) => {
-  const [step, setStep] = useState<Step>(initialStep);
+  const [step, setStep] = useState(initialStep);
 
-  const handleSetStep = (step: Step) => {
+  const handleSetStep = (step: RealmOnboardingStep) => {
     setStep(step);
-    localStorage.setItem('onboardingStep', step);
-  };
-
-  const handleOnFinish = () => {
-    localStorage.setItem('onboardingStep', '/login');
-    onFinish?.();
+    // Persist step in local storage so the user can resume onboarding
+    // even if they close the app.
+    OnboardingStorage.set({ step });
   };
 
   switch (step) {
     case '/login':
-      return <LoginStep setStep={handleSetStep} onFinish={onFinish} />;
+      return <LoginStep setStep={handleSetStep} />;
     case '/hosting':
       return <HostingStep setStep={handleSetStep} onFinish={onFinish} />;
     case '/add-server':
       return <AddServerStep setStep={handleSetStep} />;
     case '/passport':
-      return <PassportStep setStep={handleSetStep} onFinish={handleOnFinish} />;
+      return <PassportStep setStep={handleSetStep} onFinish={onFinish} />;
     case '/password':
       return <PasswordStep setStep={handleSetStep} />;
     case '/installation':
-      return (
-        <InstallationStep setStep={handleSetStep} onFinish={handleOnFinish} />
-      );
+      return <InstallationStep setStep={handleSetStep} onFinish={onFinish} />;
     case '/choose-id':
       return <ChooseIdStep setStep={handleSetStep} />;
     case '/payment':
@@ -68,7 +49,7 @@ export const OnboardingStepPresenter = ({
     case '/credentials':
       return <CredentialsStep setStep={handleSetStep} />;
     default:
-      return <LoginStep setStep={handleSetStep} onFinish={onFinish} />;
+      return <LoginStep setStep={handleSetStep} />;
   }
 };
 

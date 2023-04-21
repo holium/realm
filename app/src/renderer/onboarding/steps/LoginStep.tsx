@@ -1,17 +1,19 @@
 import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
 import { Anchor } from '@holium/design-system/general';
-import { LoginDialog, OnboardDialogDescription } from '@holium/shared';
+import {
+  LoginDialog,
+  OnboardDialogDescription,
+  OnboardingStorage,
+} from '@holium/shared';
 import { StepProps } from './types';
 import { thirdEarthApi } from '../thirdEarthApi';
-import { RealmIPC } from 'renderer/stores/ipc';
-import { defaultTheme } from 'renderer/lib/defaultTheme';
+import { defaultTheme } from '../../lib/defaultTheme';
+import { RealmIPC } from '../../stores/ipc';
 
-type LoginStepProps = {
-  onFinish: () => void;
-} & StepProps;
+export const LoginStep = ({ setStep }: StepProps) => {
+  const prefilledEmail = OnboardingStorage.get().email ?? '';
 
-export const LoginStep = ({ setStep, onFinish }: LoginStepProps) => {
   useEffect(() => {
     track('Onboarding / Login');
   });
@@ -25,14 +27,6 @@ export const LoginStep = ({ setStep, onFinish }: LoginStepProps) => {
       !response.client_side_encryption_key
     ) {
       return false;
-    } else {
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('email', response.email);
-      localStorage.setItem('password', password);
-      localStorage.setItem(
-        'client_side_encryption_key',
-        response.client_side_encryption_key
-      );
     }
 
     // Create a local master account from the ThirdEarth account.
@@ -45,7 +39,12 @@ export const LoginStep = ({ setStep, onFinish }: LoginStepProps) => {
 
     if (!masterAccount) return false;
 
-    localStorage.setItem('masterAccountId', masterAccount.id.toString());
+    OnboardingStorage.set({
+      email: response.email,
+      clientSideEncryptionKey: response.client_side_encryption_key,
+      token: response.token,
+      masterAccountId: masterAccount.id,
+    });
 
     const userShips = await thirdEarthApi.getUserShips(response.token);
 
@@ -71,7 +70,7 @@ export const LoginStep = ({ setStep, onFinish }: LoginStepProps) => {
         );
       });
 
-      onFinish();
+      OnboardingStorage.reset();
     } else {
       setStep('/hosting');
     }
@@ -82,7 +81,7 @@ export const LoginStep = ({ setStep, onFinish }: LoginStepProps) => {
   return (
     <LoginDialog
       showTerms
-      prefilledEmail={localStorage.getItem('email') ?? ''}
+      prefilledEmail={prefilledEmail}
       label={
         <OnboardDialogDescription>
           Don't have access?{' '}

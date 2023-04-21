@@ -1,37 +1,32 @@
 import { useEffect } from 'react';
-import { HostingDialog } from '@holium/shared';
+import { observer } from 'mobx-react';
+import { HostingDialog, OnboardingStorage } from '@holium/shared';
 import { track } from '@amplitude/analytics-browser';
 import { StepProps } from './types';
-import { useAppState } from 'renderer/stores/app.store';
-import { observer } from 'mobx-react';
+import { useAppState } from '../../stores/app.store';
 
-type HostingStepProps = {
-  onFinish: () => void;
-} & StepProps;
-
-export const HostingStepPresenter = ({
-  setStep,
-  onFinish,
-}: HostingStepProps) => {
+export const HostingStepPresenter = ({ setStep, onFinish }: StepProps) => {
   const { authStore } = useAppState();
+
   useEffect(() => {
     track('Onboarding / Hosting');
   });
 
   const onBack = () => {
     if (authStore.accounts.length > 0) {
-      onFinish();
+      onFinish?.();
     } else {
       setStep('/login');
     }
   };
 
   const onGetHosting = () => {
-    localStorage.setItem('isHosted', 'true');
+    OnboardingStorage.set({ shipType: 'hosted' });
     setStep('/choose-id');
   };
 
   const onAddExistingServer = () => {
+    OnboardingStorage.set({ shipType: 'local' });
     setStep('/add-server');
   };
 

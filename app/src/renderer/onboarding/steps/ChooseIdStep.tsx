@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChooseIdDialog } from '@holium/shared';
+import { ChooseIdDialog, OnboardingStorage } from '@holium/shared';
 import { track } from '@amplitude/analytics-browser';
 import { StepProps } from './types';
 import { thirdEarthApi } from '../thirdEarthApi';
@@ -27,8 +27,8 @@ export const ChooseIdStep = ({ setStep }: StepProps) => {
     getAndSetPatps();
   }, []);
 
-  const onSelectPatp = (patp: string) => {
-    localStorage.setItem('patp', patp);
+  const onSelectPatp = (shipId: string) => {
+    OnboardingStorage.set({ shipId });
   };
 
   const onBack = () => {

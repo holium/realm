@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { loadStripe, Stripe, StripeElementsOptions } from '@stripe/stripe-js';
-import { PaymentDialog, ThirdEarthProduct } from '@holium/shared';
+import {
+  OnboardingStorage,
+  PaymentDialog,
+  ThirdEarthProduct,
+} from '@holium/shared';
 import { Page } from '../components/Page';
 import { constants } from '../util/constants';
 import { useNavigation } from '../util/useNavigation';
@@ -23,7 +27,7 @@ export async function getServerSideProps() {
 export default function Payment({ products }: ServerSideProps) {
   const { goToPage } = useNavigation();
 
-  const [patp, setPatp] = useState('');
+  const [shipId, setShipId] = useState('');
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
 
@@ -34,13 +38,11 @@ export default function Payment({ products }: ServerSideProps) {
   const [invoiceId, setInvoiceId] = useState<string>();
 
   useEffect(() => {
-    const patp = localStorage.getItem('patp');
-    const email = localStorage.getItem('email');
-    const token = localStorage.getItem('token');
+    const { shipId, email, token } = OnboardingStorage.get();
 
-    if (!token || !patp || !email) return;
+    if (!shipId || !email || !token) return;
 
-    setPatp(patp);
+    setShipId(shipId);
     setEmail(email);
     setToken(token);
 
@@ -48,7 +50,7 @@ export default function Payment({ products }: ServerSideProps) {
       const response = await thirdEarthApi.stripeMakePayment(
         token,
         productId.toString(),
-        patp
+        shipId
       );
       setClientSecret(response.clientSecret);
       setInvoiceId(response.invoiceId);
@@ -74,12 +76,12 @@ export default function Payment({ products }: ServerSideProps) {
   const onBack = () => goToPage('/choose-id');
 
   const onNext = async () => {
-    if (!token || !patp || !invoiceId || !productId)
+    if (!token || !shipId || !invoiceId || !productId)
       return Promise.resolve(false);
 
     await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
-    await thirdEarthApi.updatePlanetStatus(token, patp, 'sold');
-    await thirdEarthApi.ship(token, patp, productId.toString(), invoiceId);
+    await thirdEarthApi.updatePlanetStatus(token, shipId, 'sold');
+    await thirdEarthApi.ship(token, shipId, productId.toString(), invoiceId);
 
     goToPage('/booting');
 
@@ -91,7 +93,7 @@ export default function Payment({ products }: ServerSideProps) {
       <PaymentDialog
         products={products}
         productId={productId}
-        patp={patp}
+        patp={shipId}
         email={email}
         stripe={stripe as any}
         stripeOptions={stripeOptions as any}
