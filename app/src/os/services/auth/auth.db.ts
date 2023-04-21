@@ -4,7 +4,6 @@ import Database from 'better-sqlite3-multiple-ciphers';
 import Store from 'electron-store';
 import log from 'electron-log';
 import { Accounts, accountsInit } from './accounts.table';
-import { SessionType } from './auth.service';
 import { MasterAccounts, masterAccountsInit } from './masterAccounts.table';
 import { AuthStore } from './auth.model.old';
 
@@ -137,41 +136,6 @@ export class AuthDB {
       VALUES (?, ?);
     `);
     query.run(patp, idx);
-  }
-
-  public _setSession(patp: string, cookie: string) {
-    // log.info(`Setting session for ${patp} to ${cookie}`);
-    const query = this.authDB.prepare(`
-      REPLACE INTO accounts_session (patp, key, createdAt)
-      VALUES (?, ?, ?);
-    `);
-    query.run(patp, cookie, Date.now());
-  }
-
-  public _getSession(patp?: string): SessionType | null {
-    const query = this.authDB.prepare(
-      patp
-        ? `
-      SELECT patp, key FROM accounts_session WHERE patp = ?;
-    `
-        : `SELECT patp, key FROM accounts_session LIMIT 1;`
-    );
-    const result: any = patp ? query.get(patp) : query.get();
-    if (result) {
-      return result;
-    }
-    return null;
-  }
-
-  public _clearSession(patp?: string): void {
-    const query = this.authDB.prepare(
-      patp
-        ? `
-      DELETE FROM accounts_session WHERE patp = ?;
-    `
-        : `DELETE FROM accounts_session;`
-    );
-    patp ? query.run(patp) : query.run();
   }
 
   disconnect() {

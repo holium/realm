@@ -16,20 +16,13 @@ import {
 } from './lib/settings';
 import { getCookie } from './lib/shipHelpers';
 import { APIConnection } from './services/api';
-import { MasterAccount } from './services/auth/masterAccounts.table';
-import { Account } from './services/auth/accounts.table';
-import { RealmUpdateTypes } from './realm.types';
+import {
+  CreateAccountPayload,
+  CreateMasterAccountPayload,
+  RealmUpdateTypes,
+} from './realm.types';
 
-type CreateAccountPayload = Omit<
-  Account,
-  'passwordHash' | 'updatedAt' | 'createdAt'
-> & {
-  password: string;
-};
-
-type CreateMasterAccountPayload = Omit<MasterAccount, 'id' | 'passwordHash'> & {
-  password: string;
-};
+const isDev = process.env.NODE_ENV === 'development';
 
 export class RealmService extends AbstractService<RealmUpdateTypes> {
   public services?: {
@@ -45,9 +38,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     };
 
     this.onWebViewAttached = this.onWebViewAttached.bind(this);
-    // const session = this._hydrateSessionIfExists();
-    // if (session)
-    //   this._sendAuthenticated(session.patp, session.url, session.cookie);
+
     app.on('quit', () => {
       // do other cleanup here
     });
@@ -74,11 +65,10 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
    * @returns void
    */
   public boot() {
-    const hasSession = this.services?.auth.session;
     let session;
-    if (hasSession) {
-      // session = this._hydrateSessionIfExists();
-      // this.services?.ship?.init();
+    if (isDev) {
+      session = this._hydrateSessionIfExists();
+      this.services?.ship?.init();
     }
 
     const acc = this.services?.auth.getAccounts();
@@ -141,7 +131,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       return new Promise((resolve) => {
         APIConnection.getInstance().conduit.on('connected', () => {
           if (!this.services) return;
-          // this.services.auth._setSession(patp, key);
+          this.services.auth._setLockfile({ ...credentials, ship: patp });
           this.services.ship?.init();
           this._sendAuthenticated(patp, credentials.url, credentials.cookie);
           resolve(true);
@@ -151,6 +141,15 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     return isAuthenticated;
   }
 
+  /**
+   * ------------------------------
+   * logout
+   * ------------------------------
+   * Logout of a ship, clear the db, and stop the ship service.
+   *
+   * @param patp
+   * @returns
+   */
   async logout(patp: string) {
     if (!this.services) {
       return;
@@ -158,7 +157,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     this.services.ship?.cleanup();
     APIConnection.getInstance().closeChannel();
     delete this.services.ship;
-    this.services.auth._clearSession();
+    this.services.auth._clearLockfile();
     this.sendUpdate({
       type: 'logout',
       payload: {
@@ -230,25 +229,19 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   }
 
   private _hydrateSessionIfExists(): {
-    patp: string;
     url: string;
+    patp: string;
     cookie: string;
   } | null {
-    if (this.services?.auth.session) {
-      const { patp, key } = this.services.auth.session;
-      if (!this.services.ship) {
-        this.services.ship = new ShipService(patp, key);
-      }
-      const credentials = this.services.ship.credentials;
-      if (!credentials) {
-        log.error('No credentials found');
-        return null;
-      }
-
+    if (!this.services) return null;
+    const session = this.services?.auth._getLockfile();
+    if (session) {
+      log.info('Hydrating session from session.lock');
+      this.services.ship = new ShipService(session.ship, session.code);
       return {
-        patp,
-        url: credentials.url,
-        cookie: credentials.cookie,
+        url: session.url,
+        patp: session.ship,
+        cookie: session.cookie,
       };
     }
     return null;
@@ -393,7 +386,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           return;
         }
         const { url, code } = credentials;
-        const patp = this.services?.auth?.session?.patp;
+        const patp = this.services?.ship?.patp;
         if (!patp) {
           log.error('No patp found');
           return;

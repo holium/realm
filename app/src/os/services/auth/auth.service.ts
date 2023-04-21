@@ -13,20 +13,16 @@ import { MasterAccount } from './masterAccounts.table';
 import { ShipDB } from '../ship/ship.db';
 import { getCookie } from '../../lib/shipHelpers';
 import { AuthUpdateTypes } from './auth.types';
+import { ConduitSession } from '../api';
 
 const isDev = process.env.NODE_ENV === 'development';
 
-export type SessionType = {
-  patp: string;
-  key: string;
-};
-
 type LockFileType = {
-  session?: SessionType;
+  session?: ConduitSession;
 };
 
 const LockFileOptions = {
-  name: 'realm.dev',
+  name: 'session',
   fileExtension: 'lock',
 };
 
@@ -42,27 +38,6 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
       type: 'auth-init',
       payload: this.getAccounts(),
     });
-    this._checkLockFile();
-  }
-
-  private _checkLockFile(): void {
-    if (isDev) {
-      const lockFile = new Store<LockFileType>(LockFileOptions);
-      const session = lockFile.get('session');
-      if (session) {
-        const { patp, key } = session;
-        this._setSession(patp, key);
-      } else {
-        this._clearSession();
-      }
-    }
-  }
-
-  private _setLockfile(patp: string, key: string): void {
-    if (isDev) {
-      const lockFile = new Store<LockFileType>(LockFileOptions);
-      lockFile.set('session', { patp, key });
-    }
   }
 
   public getAccounts(): Account[] {
@@ -259,13 +234,17 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
         patp,
         url: credentials.url,
         code: credentials.code,
-      }).then((cookie) => {
-        if (cookie) {
-          newShipDB.setCredentials(credentials.url, credentials.code, cookie);
-        } else {
-          log.error('Failed to get cookie');
-        }
-      });
+      })
+        .then((cookie) => {
+          if (cookie) {
+            newShipDB.setCredentials(credentials.url, credentials.code, cookie);
+          } else {
+            log.error('Failed to get cookie');
+          }
+        })
+        .catch((err) => {
+          log.error('Failed to get cookie', err);
+        });
     } else {
       log.info('Cookie found, setting credentials...');
       newShipDB.setCredentials(
@@ -313,6 +292,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
    */
   public login(patp: string, password: string): boolean {
     const account = this.authDB?.tables.accounts.findOne(patp);
+
     if (!account) {
       log.info(`No account found for ${patp}`);
       return false;
@@ -332,6 +312,11 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     } else {
       return false;
     }
+  }
+
+  public logout(): void {
+    // TODO Add amplitude logging here
+    this._clearLockfile();
   }
 
   // TODO FINISH THIS FUNCTION REFACTOR
@@ -390,26 +375,32 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     return result;
   }
 
-  public _setSession(patp: string, key: string) {
-    this._setLockfile(patp, key);
-    // this.authDB?._setSession(patp, key);
-  }
-
-  public _getSession(patp?: string): SessionType | null {
-    if (!this.authDB) return null;
-    return this.authDB?._getSession(patp);
-  }
-
-  get session(): SessionType | null {
-    return this._getSession();
-  }
-
-  public _clearSession(patp?: string) {
-    this.authDB?._clearSession(patp);
-  }
-
   public _verifyPassword(password: string, hash: string): boolean {
     return bcrypt.compareSync(password, hash);
+  }
+
+  public _setLockfile(session: ConduitSession): void {
+    if (isDev) {
+      log.info('Setting session.lock');
+      const lockFile = new Store<LockFileType>(LockFileOptions);
+      lockFile.set('session', session);
+    }
+  }
+
+  public _getLockfile(): ConduitSession | null {
+    if (isDev) {
+      const lockFile = new Store<LockFileType>(LockFileOptions);
+      return lockFile.get('session') || null;
+    }
+    return null;
+  }
+
+  public _clearLockfile(): void {
+    if (isDev) {
+      log.info('Clearing session.lock');
+      const lockFile = new Store<LockFileType>(LockFileOptions);
+      lockFile.delete('session');
+    }
   }
 
   public hasSeenSplash(): boolean {
