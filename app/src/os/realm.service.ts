@@ -16,22 +16,13 @@ import {
 } from './lib/settings';
 import { getCookie } from './lib/shipHelpers';
 import { APIConnection } from './services/api';
-import { MasterAccount } from './services/auth/masterAccounts.table';
-import { Account } from './services/auth/accounts.table';
-import { RealmUpdateTypes } from './realm.types';
+import {
+  CreateAccountPayload,
+  CreateMasterAccountPayload,
+  RealmUpdateTypes,
+} from './realm.types';
 
 const isDev = process.env.NODE_ENV === 'development';
-
-type CreateAccountPayload = Omit<
-  Account,
-  'passwordHash' | 'updatedAt' | 'createdAt'
-> & {
-  password: string;
-};
-
-type CreateMasterAccountPayload = Omit<MasterAccount, 'id' | 'passwordHash'> & {
-  password: string;
-};
 
 export class RealmService extends AbstractService<RealmUpdateTypes> {
   public services?: {
@@ -148,6 +139,15 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     return isAuthenticated;
   }
 
+  /**
+   * ------------------------------
+   * logout
+   * ------------------------------
+   * Logout of a ship, clear the db, and stop the ship service.
+   *
+   * @param patp
+   * @returns
+   */
   async logout(patp: string) {
     if (!this.services) {
       return;
@@ -232,17 +232,15 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     cookie: string;
   } | null {
     if (!this.services) return null;
-    if (isDev) {
-      const session = this.services?.auth._getLockfile();
-      if (session) {
-        log.info('Hydrating session from session.lock');
-        this.services.ship = new ShipService(session.ship, session.code);
-        return {
-          url: session.url,
-          patp: session.ship,
-          cookie: session.cookie,
-        };
-      }
+    const session = this.services?.auth._getLockfile();
+    if (session) {
+      log.info('Hydrating session from session.lock');
+      this.services.ship = new ShipService(session.ship, session.code);
+      return {
+        url: session.url,
+        patp: session.ship,
+        cookie: session.cookie,
+      };
     }
     return null;
   }

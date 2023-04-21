@@ -40,35 +40,6 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     });
   }
 
-  /**
-   *
-   * @param patp
-   * @param key
-   */
-  public _setLockfile(session: ConduitSession): void {
-    if (isDev) {
-      log.info('Setting session.lock');
-      const lockFile = new Store<LockFileType>(LockFileOptions);
-      lockFile.set('session', session);
-    }
-  }
-
-  public _getLockfile(): ConduitSession | null {
-    if (isDev) {
-      const lockFile = new Store<LockFileType>(LockFileOptions);
-      return lockFile.get('session') || null;
-    }
-    return null;
-  }
-
-  public _clearLockfile(): void {
-    if (isDev) {
-      log.info('Clearing session.lock');
-      const lockFile = new Store<LockFileType>(LockFileOptions);
-      lockFile.delete('session');
-    }
-  }
-
   public getAccounts(): Account[] {
     if (!this.authDB) return [];
     return this.authDB.tables.accounts.find();
@@ -404,6 +375,30 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
 
   public _verifyPassword(password: string, hash: string): boolean {
     return bcrypt.compareSync(password, hash);
+  }
+
+  public _setLockfile(session: ConduitSession): void {
+    if (isDev) {
+      log.info('Setting session.lock');
+      const lockFile = new Store<LockFileType>(LockFileOptions);
+      lockFile.set('session', session);
+    }
+  }
+
+  public _getLockfile(): ConduitSession | null {
+    if (isDev) {
+      const lockFile = new Store<LockFileType>(LockFileOptions);
+      return lockFile.get('session') || null;
+    }
+    return null;
+  }
+
+  public _clearLockfile(): void {
+    if (isDev) {
+      log.info('Clearing session.lock');
+      const lockFile = new Store<LockFileType>(LockFileOptions);
+      lockFile.delete('session');
+    }
   }
 
   public hasSeenSplash(): boolean {

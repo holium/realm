@@ -1,4 +1,20 @@
 import { AccountView } from './services/auth/auth.types';
+import { MasterAccount } from './services/auth/masterAccounts.table';
+import { Account } from './services/auth/accounts.table';
+
+export type CreateAccountPayload = Omit<
+  Account,
+  'passwordHash' | 'updatedAt' | 'createdAt'
+> & {
+  password: string;
+};
+
+export type CreateMasterAccountPayload = Omit<
+  MasterAccount,
+  'id' | 'passwordHash'
+> & {
+  password: string;
+};
 
 export type LoginErrorType =
   | 'bad-gateway'
