@@ -772,7 +772,7 @@
         %-  ~(rep by catalog)
           |=  [entry=[=app-id:store =app:store] result=(list [=app-id:store =app:store])]
           ?:  (~(has by catalog.state) app-id.entry)  ::  if we already have the app
-            result
+            (snoc result entry)
           =/  entry
             ?+  -.app.entry  entry
               %urbit
@@ -780,9 +780,10 @@
                 entry
             ==
           (snoc result entry)
-      =.  catalog.state       (~(uni by catalog.state) (malt new-catalog-apps))
+      =/  new-catalog-apps    (malt new-catalog-apps)
+      =.  catalog.state       (~(uni by catalog.state) new-catalog-apps)
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%joined-bazaar path catalog stall])]~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%joined-bazaar path new-catalog-apps stall])]~
 
     ::
     ++  what
