@@ -2,7 +2,7 @@ import { MotionConfig } from 'framer-motion';
 import { BgImage, GlobalStyle } from './App.styles';
 import { Shell } from './system';
 import { useEffect, useMemo } from 'react';
-import { Flex, Spinner, useToggle } from '@holium/design-system';
+import { Flex, Spinner } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
 import { useAppState, appState, AppStateProvider } from './stores/app.store';
@@ -12,13 +12,15 @@ import { ErrorBoundary } from './system/ErrorBoundary';
 import { Auth } from './system/authentication/index';
 import { Splash } from './onboarding/Splash';
 import { RealmIPC } from './stores/ipc';
+import { OnboardingStorage } from '@holium/shared';
 
 function AppContentPresenter() {
   const { seenSplash, authStore, booted } = useAppState();
-  const addShip = useToggle(false);
 
   const isLoggedOut = !authStore.session;
   const hasNoAccounts = authStore.accounts.length === 0;
+
+  const savedOnboardingStep = OnboardingStorage.get().step;
 
   if (!booted) {
     return (
@@ -32,12 +34,12 @@ function AppContentPresenter() {
   }
 
   if (hasNoAccounts) {
-    return <Onboarding initialStep="/login" onFinish={addShip.toggleOff} />;
+    return <Onboarding initialStep={savedOnboardingStep ?? '/login'} />;
   }
 
   if (isLoggedOut) {
-    if (addShip.isOn) {
-      return <Onboarding initialStep="/hosting" onFinish={addShip.toggleOff} />;
+    if (savedOnboardingStep) {
+      return <Onboarding initialStep={savedOnboardingStep} />;
     }
 
     return <Auth onAddShip={addShip.toggleOn} />;

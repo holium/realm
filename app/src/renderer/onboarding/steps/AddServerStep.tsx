@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
-import { AddServerDialog } from '@holium/shared';
+import { AddServerDialog, OnboardingStorage } from '@holium/shared';
 import { StepProps } from './types';
-import { RealmIPC } from 'renderer/stores/ipc';
-import { defaultTheme } from 'renderer/lib/defaultTheme';
+import { RealmIPC } from '../../stores/ipc';
+import { defaultTheme } from '../../lib/defaultTheme';
 
 export const AddServerStep = ({ setStep }: StepProps) => {
   useEffect(() => {
@@ -14,35 +14,37 @@ export const AddServerStep = ({ setStep }: StepProps) => {
     setStep('/hosting');
   };
 
-  const onNext = async (patp: string, url: string, code: string) => {
-    const sanitizedCookie = await RealmIPC.getCookie(patp, url, code);
+  const onNext = async (shipId: string, shipUrl: string, shipCode: string) => {
+    const sanitizedCookie = await RealmIPC.getCookie(shipId, shipUrl, shipCode);
 
-    if (!sanitizedCookie || !patp || !url || !code) return false;
+    if (!sanitizedCookie || !shipId || !shipUrl || !shipCode) return false;
 
-    localStorage.setItem('patp', patp);
-    localStorage.setItem('url', url);
-    localStorage.setItem('code', code);
+    OnboardingStorage.set({
+      shipId,
+      shipUrl,
+      shipCode,
+    });
 
-    const password = localStorage.getItem('password');
-    const accountId = Number(localStorage.getItem('masterAccountId'));
+    const { passwordHash, masterAccountId } = OnboardingStorage.get();
 
-    if (!patp || !accountId || !password) return Promise.resolve(false);
+    if (!shipId || !passwordHash || !masterAccountId)
+      return Promise.resolve(false);
 
     await RealmIPC.createAccount(
       {
-        accountId,
-        password,
-        patp,
+        accountId: masterAccountId,
+        passwordHash,
+        patp: shipId,
         avatar: '',
         nickname: '',
         description: '',
         color: '#000000',
         type: 'local',
-        url,
+        url: shipUrl,
         status: 'online',
         theme: JSON.stringify(defaultTheme),
       },
-      code
+      shipCode
     );
 
     setStep('/passport');

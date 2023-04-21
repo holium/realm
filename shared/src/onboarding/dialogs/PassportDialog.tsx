@@ -25,7 +25,7 @@ const ListItem = styled(AccountDialogSubtitle)`
 `;
 
 type Props = {
-  patp: string | null;
+  patp: string;
   prefilledNickname: string;
   prefilledDescription: string;
   prefilledAvatarSrc: string;

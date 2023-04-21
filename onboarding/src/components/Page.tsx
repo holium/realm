@@ -5,7 +5,11 @@ import styled from 'styled-components';
 import { useToggle } from '@holium/design-system/util';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
-import { AccountDialogSkeleton, OnboardDialogSkeleton } from '@holium/shared';
+import {
+  AccountDialogSkeleton,
+  OnboardDialogSkeleton,
+  OnboardingStorage,
+} from '@holium/shared';
 
 const Main = styled.main`
   width: 100%;
@@ -32,22 +36,23 @@ export const Page = ({ title, isProtected = false, children }: Props) => {
   useEffect(() => {
     if (!isProtected) return;
 
-    const refreshAndStoreToken = async (token: string) => {
+    const refreshAndStoreToken = async (usedToken: string) => {
       try {
-        const response = await thirdEarthApi.refreshToken(token);
-        localStorage.setItem('email', response.email);
-        localStorage.setItem('token', response.token);
+        const { email, token } = await thirdEarthApi.refreshToken(usedToken);
+        OnboardingStorage.set({ email, token });
+
         authenticated.toggleOn();
       } catch (error) {
         console.error(error);
+
         logout();
       }
     };
 
-    const token = localStorage.getItem('token');
+    const usedToken = OnboardingStorage.get().token;
 
-    if (!token) goToPage('/');
-    else refreshAndStoreToken(token);
+    if (!usedToken) goToPage('/');
+    else refreshAndStoreToken(usedToken);
   }, [isProtected]);
 
   return (
