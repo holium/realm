@@ -2,10 +2,10 @@ import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
 import { PassportDialog, OnboardingStorage } from '@holium/shared';
 import { StepProps } from './types';
-import { RealmIPC, FriendsIPC } from '../../stores/ipc';
+import { RealmIPC } from '../../stores/ipc';
 import { FileUploadParams } from '../../../os/services/ship/ship.service';
 
-export const PassportStep = ({ setStep }: StepProps) => {
+export const PassportStep = ({ setStep, onFinish }: StepProps) => {
   const { shipId, nickname, description, avatar } = OnboardingStorage.get();
 
   useEffect(() => {
@@ -34,23 +34,20 @@ export const PassportStep = ({ setStep }: StepProps) => {
   ) => {
     if (!shipId) return false;
 
-    RealmIPC.updatePassport(shipId, nickname, description, avatar);
+    await RealmIPC.updatePassport(shipId, nickname, description, avatar);
 
     // Sync friends agent
-    FriendsIPC.saveContact(shipId, {
-      nickname,
-      avatar,
-      bio: description,
-    });
+    // FriendsIPC.saveContact(shipId, {
+    //   nickname,
+    //   avatar,
+    //   bio: description,
+    // });
 
-    // Save in localstorage in case they go back from the install step.
     OnboardingStorage.set({ nickname, description, avatar });
     const { shipType } = OnboardingStorage.get();
 
     if (shipType === 'hosted') {
-      OnboardingStorage.reset();
-
-      setStep('/login');
+      onFinish?.();
     } else {
       setStep('/installation');
     }

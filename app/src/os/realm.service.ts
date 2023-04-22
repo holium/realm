@@ -6,6 +6,7 @@ import {
   WebPreferences,
 } from 'electron';
 import log from 'electron-log';
+import bcrypt from 'bcryptjs';
 import { track } from '@amplitude/analytics-browser';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { AuthService } from './services/auth/auth.service';
@@ -174,9 +175,6 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   ) {
     if (!this.services) return;
 
-    // Sync friends agent.
-    // this.services.ship?.updatePassport(nickname, description, avatar);
-
     return this.services.auth.updatePassport(
       patp,
       nickname,
@@ -270,11 +268,15 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     if (!this.services.ship) {
       this.services.ship = new ShipService(
         account.patp,
-        accountPayload.password
+        accountPayload.passwordHash
       );
     }
 
     return account;
+  }
+
+  public hashPassword(password: string) {
+    return bcrypt.hashSync(password, 10);
   }
 
   public async createMasterAccount(payload: CreateMasterAccountPayload) {

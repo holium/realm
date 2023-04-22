@@ -10,11 +10,13 @@ import { InstallationStep } from './steps/InstallationStep';
 import { PasswordStep } from './steps/PasswordStep';
 
 export type OnboardingStepProps = {
-  initialStep?: RealmOnboardingStep;
+  initialStep: RealmOnboardingStep;
+  onFinish: () => void;
 };
 
 export const OnboardingStepPresenter = ({
   initialStep,
+  onFinish,
 }: OnboardingStepProps) => {
   const [step, setStep] = useState(initialStep);
 
@@ -33,11 +35,11 @@ export const OnboardingStepPresenter = ({
     case '/add-server':
       return <AddServerStep setStep={handleSetStep} />;
     case '/passport':
-      return <PassportStep setStep={handleSetStep} />;
+      return <PassportStep setStep={handleSetStep} onFinish={onFinish} />;
     case '/password':
       return <PasswordStep setStep={handleSetStep} />;
     case '/installation':
-      return <InstallationStep setStep={handleSetStep} />;
+      return <InstallationStep setStep={handleSetStep} onFinish={onFinish} />;
     case '/choose-id':
       return <ChooseIdStep setStep={handleSetStep} />;
     case '/payment':

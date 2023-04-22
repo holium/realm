@@ -11,7 +11,7 @@ import { thirdEarthApi } from '../thirdEarthApi';
 import { defaultTheme } from '../../lib/defaultTheme';
 import { RealmIPC } from '../../stores/ipc';
 
-export const LoginStep = ({ setStep }: StepProps) => {
+export const LoginStep = ({ setStep, onFinish }: StepProps) => {
   const prefilledEmail = OnboardingStorage.get().email ?? '';
 
   useEffect(() => {
@@ -32,10 +32,12 @@ export const LoginStep = ({ setStep }: StepProps) => {
       return false;
     }
 
+    const passwordHash = await RealmIPC.hashPassword(password);
+
     // Create a local master account from the ThirdEarth account.
     const masterAccount = await RealmIPC.createMasterAccount({
       email: response.email,
-      password,
+      passwordHash,
       encryptionKey: response.client_side_encryption_key,
       authToken: response.token,
     });
@@ -44,9 +46,9 @@ export const LoginStep = ({ setStep }: StepProps) => {
 
     OnboardingStorage.set({
       email: response.email,
-      passwordHash,
       clientSideEncryptionKey: response.client_side_encryption_key,
       token: response.token,
+      passwordHash: masterAccount.passwordHash,
       masterAccountId: masterAccount.id,
     });
 
@@ -55,27 +57,28 @@ export const LoginStep = ({ setStep }: StepProps) => {
     if (userShips.length > 0) {
       // Create a "default" account for each ship.
       // The user can customize their passports later.
-      userShips.forEach((ship) => {
-        console.log('trying to create account', ship);
-        RealmIPC.createAccount(
-          {
-            accountId: masterAccount.id,
-            password,
-            patp: ship.patp,
-            url: ship.link,
-            avatar: '',
-            nickname: ship.screen_name,
-            description: '',
-            color: '#000000',
-            type: 'hosted',
-            status: 'online',
-            theme: JSON.stringify(defaultTheme),
-          },
-          ship.code
-        );
-      });
+      await Promise.all(
+        userShips.map((ship) =>
+          RealmIPC.createAccount(
+            {
+              accountId: masterAccount.id,
+              passwordHash: masterAccount.passwordHash,
+              patp: ship.patp,
+              url: ship.link,
+              avatar: '',
+              nickname: ship.screen_name,
+              description: '',
+              color: '#000000',
+              type: 'hosted',
+              status: 'online',
+              theme: JSON.stringify(defaultTheme),
+            },
+            ship.code
+          )
+        )
+      );
 
-      OnboardingStorage.reset();
+      onFinish?.();
     } else {
       setStep('/hosting');
     }

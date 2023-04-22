@@ -349,11 +349,8 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                   name="AddCircleLine"
                   transition={{ duration: 0.5 }}
                 />
-                <Text.Custom
-                  fontWeight={500}
-                  // transition={{ color: { duration: 0.5 } }}
-                >
-                  Add Urbit ID
+                <Text.Custom fontWeight={500} noSelection>
+                  Add Server
                 </Text.Custom>
               </Flex>
             </Button.TextButton>

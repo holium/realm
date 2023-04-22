@@ -1,6 +1,10 @@
 import { GetServerSideProps } from 'next';
 import { Anchor } from '@holium/design-system/general';
-import { LoginDialog, OnboardDialogDescription } from '@holium/shared';
+import {
+  LoginDialog,
+  OnboardDialogDescription,
+  OnboardingStorage,
+} from '@holium/shared';
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
@@ -33,8 +37,7 @@ export default function Login({ prefilledEmail, redirectAfterLogin }: Props) {
     if (!response.token || !response.email) {
       return false;
     } else {
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('email', response.email);
+      OnboardingStorage.set({ token: response.token, email: response.email });
     }
 
     if (redirectAfterLogin) goToPage(redirectAfterLogin as any);

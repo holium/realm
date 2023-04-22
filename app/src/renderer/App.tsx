@@ -2,7 +2,8 @@ import { MotionConfig } from 'framer-motion';
 import { BgImage, GlobalStyle } from './App.styles';
 import { Shell } from './system';
 import { useEffect, useMemo } from 'react';
-import { Flex, Spinner } from '@holium/design-system';
+import { Flex, Spinner, useToggle } from '@holium/design-system';
+import { OnboardingStorage, OnboardingStorage } from '@holium/shared';
 import { observer } from 'mobx-react';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
 import { useAppState, appState, AppStateProvider } from './stores/app.store';
@@ -12,7 +13,6 @@ import { ErrorBoundary } from './system/ErrorBoundary';
 import { Auth } from './system/authentication/index';
 import { Splash } from './onboarding/Splash';
 import { RealmIPC } from './stores/ipc';
-import { OnboardingStorage } from '@holium/shared';
 
 function AppContentPresenter() {
   const { seenSplash, authStore, booted } = useAppState();
@@ -21,6 +21,24 @@ function AppContentPresenter() {
   const hasNoAccounts = authStore.accounts.length === 0;
 
   const savedOnboardingStep = OnboardingStorage.get().step;
+
+  const onboarding = useToggle(hasNoAccounts);
+  const addShip = useToggle(Boolean(savedOnboardingStep));
+
+  const onAddShip = () => {
+    addShip.toggleOn();
+    OnboardingStorage.set({ step: '/hosting' });
+  };
+
+  const onFinishOnboarding = () => {
+    onboarding.toggleOff();
+    OnboardingStorage.reset();
+  };
+
+  const onFinishAddShip = () => {
+    addShip.toggleOff();
+    OnboardingStorage.reset();
+  };
 
   if (!booted) {
     return (
@@ -33,16 +51,26 @@ function AppContentPresenter() {
     return <Splash />;
   }
 
-  if (hasNoAccounts) {
-    return <Onboarding initialStep={savedOnboardingStep ?? '/login'} />;
+  if (onboarding.isOn) {
+    return (
+      <Onboarding
+        initialStep={savedOnboardingStep ?? '/login'}
+        onFinish={onFinishOnboarding}
+      />
+    );
   }
 
   if (isLoggedOut) {
-    if (savedOnboardingStep) {
-      return <Onboarding initialStep={savedOnboardingStep} />;
+    if (addShip.isOn) {
+      return (
+        <Onboarding
+          initialStep={savedOnboardingStep ?? '/hosting'}
+          onFinish={onFinishAddShip}
+        />
+      );
     }
 
-    return <Auth onAddShip={addShip.toggleOn} />;
+    return <Auth onAddShip={onAddShip} />;
   }
 
   return <Shell />;

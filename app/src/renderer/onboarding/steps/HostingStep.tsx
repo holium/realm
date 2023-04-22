@@ -5,7 +5,7 @@ import { track } from '@amplitude/analytics-browser';
 import { StepProps } from './types';
 import { useAppState } from '../../stores/app.store';
 
-export const HostingStepPresenter = ({ setStep }: StepProps) => {
+export const HostingStepPresenter = ({ setStep, onFinish }: StepProps) => {
   const { authStore } = useAppState();
 
   useEffect(() => {
@@ -14,7 +14,7 @@ export const HostingStepPresenter = ({ setStep }: StepProps) => {
 
   const onBack = () => {
     if (authStore.accounts.length > 0) {
-      OnboardingStorage.reset();
+      onFinish?.();
     } else {
       setStep('/login');
     }

@@ -1,4 +1,4 @@
-import { VerifyEmailDialog } from '@holium/shared';
+import { OnboardingStorage, VerifyEmailDialog } from '@holium/shared';
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
@@ -7,8 +7,10 @@ export default function VerifyEmail() {
   const { goToPage } = useNavigation();
 
   const onResend = () => {
-    const email = localStorage.getItem('email');
-    const password = localStorage.getItem('password');
+    const { email, passwordHash } = OnboardingStorage.get();
+
+    // TODO: unhash
+    const password = passwordHash;
 
     if (email && password) {
       try {
@@ -25,7 +27,7 @@ export default function VerifyEmail() {
   const onNext = async (verificationcode: string) => {
     try {
       const result = await thirdEarthApi.verifyEmail(verificationcode);
-      localStorage.setItem('token', result.token);
+      OnboardingStorage.set({ token: result.token });
 
       if (Boolean(result)) goToPage('/choose-id');
 

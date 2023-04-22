@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
-import { InstallationDialog, OnboardingStorage } from '@holium/shared';
+import { InstallationDialog } from '@holium/shared';
 import { StepProps } from './types';
 import { RealmIPC } from 'renderer/stores/ipc';
 
-export const InstallationStep = ({ setStep }: StepProps) => {
+export const InstallationStep = ({ setStep, onFinish }: StepProps) => {
   useEffect(() => {
     track('Onboarding / Installation');
   });
@@ -18,9 +18,9 @@ export const InstallationStep = ({ setStep }: StepProps) => {
   };
 
   const onNext = async () => {
-    OnboardingStorage.reset();
+    onFinish?.();
 
-    return Promise.resolve(true);
+    return true;
   };
 
   return (

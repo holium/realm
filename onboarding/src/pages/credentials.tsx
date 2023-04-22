@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CredentialsDialog } from '@holium/shared';
+import { CredentialsDialog, OnboardingStorage } from '@holium/shared';
 import { Page } from '../components/Page';
 import { useNavigation } from '../util/useNavigation';
 
@@ -14,10 +14,12 @@ export default function Credentials() {
   const onNext = () => goToPage('/download');
 
   useEffect(() => {
+    const { shipId, shipUrl, shipCode } = OnboardingStorage.get();
+    if (!shipId || !shipUrl || !shipCode) return;
     setCredentials({
-      id: localStorage.getItem('patp') ?? '',
-      url: localStorage.getItem('url') ?? '',
-      accessCode: localStorage.getItem('accessCode') ?? '',
+      id: shipId,
+      url: shipUrl,
+      accessCode: shipCode,
     });
   }, []);
 

@@ -27,8 +27,7 @@ export const AddServerStep = ({ setStep }: StepProps) => {
 
     const { passwordHash, masterAccountId } = OnboardingStorage.get();
 
-    if (!shipId || !passwordHash || !masterAccountId)
-      return Promise.resolve(false);
+    if (!shipId || !passwordHash || !masterAccountId) return false;
 
     await RealmIPC.createAccount(
       {
