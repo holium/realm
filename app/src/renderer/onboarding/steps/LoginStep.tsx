@@ -21,9 +21,6 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
   const onLogin = async (email: string, password: string) => {
     const response = await thirdEarthApi.login(email, password, true);
 
-    // TODO: hash
-    const passwordHash = password;
-
     if (
       !response.token ||
       !response.email ||
