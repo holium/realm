@@ -28,7 +28,7 @@ export class AuthDB {
       .prepare('SELECT migrated FROM accounts_meta LIMIT 1;')
       .all();
 
-    const migrated = false; // result[0]?.migrated || null;
+    const migrated = result[0]?.migrated || null;
     console.log('migrated', migrated);
     if (!migrated) this.migrateJsonToSqlite();
     this.tables = {
