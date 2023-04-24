@@ -68,7 +68,7 @@ export class ShipService extends AbstractService<any> {
       })
         .then((cookie) => {
           if (cookie) {
-            this.setCredentials(ship.url, ship.code, ship.code);
+            this.setCredentials(ship.url, ship.code, cookie);
           } else {
             log.error('ship.service.ts:', 'Failed to get cookie');
           }
