@@ -35,7 +35,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   const shipName = selectedShip?.nickname || selectedShip?.patp;
 
   useEffect(() => {
-    selectedShip && setTheme(selectedShip.theme);
+    selectedShip && setTheme(selectedShip?.theme);
     if (passwordRef.current) {
       passwordRef.current?.focus();
     }
@@ -67,7 +67,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
     if (!selectedShip) return;
 
     const status = await authStore.login(
-      selectedShip.patp ?? '',
+      selectedShip?.patp ?? '',
       passwordRef.current?.value ?? ''
     );
     // trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
@@ -87,7 +87,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
       // if (parts.length > 1 && parseInt(parts[1]) === 400) {
       //   setLoginError('missing');
       //   ShellActions.openDialogWithStringProps('reset-code-dialog', {
-      //     ship: selectedShip.patp,
+      //     ship: selectedShip?.patp,
       //     // @ts-ignore
       //     password: passwordRef.current?.value,
       //   });
@@ -119,7 +119,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   };
 
   const accountMenuId = useMemo(
-    () => `${selectedShip.patp}-account-menu`,
+    () => `${selectedShip?.patp}-account-menu`,
     [selectedShip]
   );
   const contextMenuOptions: MenuItemProps[] = useMemo(() => {
@@ -130,9 +130,9 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
         label: 'Remove account',
         onClick: () => {
           const newSelectedShip =
-            accounts.find((ship) => ship.patp !== selectedShip.patp) ??
+            accounts.find((ship) => ship.patp !== selectedShip?.patp) ??
             accounts[0];
-          authStore.removeAccount(selectedShip.patp);
+          authStore.removeAccount(selectedShip?.patp);
           setSelectedShip(newSelectedShip);
         },
       },
@@ -162,9 +162,9 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                   size={72}
                   simple={false}
                   borderRadiusOverride="8px"
-                  avatar={selectedShip.avatar}
-                  patp={selectedShip.patp}
-                  sigilColor={[selectedShip.color || '#000000', 'white']}
+                  avatar={selectedShip?.avatar}
+                  patp={selectedShip?.patp}
+                  sigilColor={[selectedShip?.color || '#000000', 'white']}
                 />
               </Box>
               <Flex flexDirection="column" gap={10}>
@@ -177,7 +177,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                   animate={{ height: 'auto' }}
                 >
                   <Text.Custom
-                    key={`${selectedShip.patp}`}
+                    key={`${selectedShip?.patp}`}
                     initial={{ opacity: 0 }}
                     exit={{ opacity: 0.75 }}
                     animate={{
@@ -189,7 +189,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                   >
                     {shipName}
                   </Text.Custom>
-                  {selectedShip.nickname && (
+                  {selectedShip?.nickname && (
                     <Text.Custom
                       initial={{ opacity: 0 }}
                       exit={{ opacity: 0.35 }}
@@ -203,7 +203,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                       fontSize={16}
                       opacity={0.35}
                     >
-                      {selectedShip.patp}
+                      {selectedShip?.patp}
                     </Text.Custom>
                   )}
                 </Flex>

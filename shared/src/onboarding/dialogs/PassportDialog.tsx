@@ -86,7 +86,9 @@ export const PassportDialog = ({
               onUploadFile={onUploadFile}
             />
           ) : (
-            <Spinner size={8} />
+            <Flex flex={1} justifyContent="center">
+              <Spinner size={8} />
+            </Flex>
           )}
           <List>
             <ListItem as="li">Your nickname can be changed later</ListItem>
