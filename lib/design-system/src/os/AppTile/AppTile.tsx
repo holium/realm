@@ -8,8 +8,8 @@ import {
   Spinner,
   Icon,
   IconPathsType,
-} from '@holium/design-system/general';
-import { bgIsLightOrDark } from '@holium/design-system/util';
+} from '../../../general';
+import { bgIsLightOrDark } from '../../../util';
 
 const sizes = {
   sm: 32,

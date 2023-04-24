@@ -14,15 +14,17 @@ export type LoginErrorType =
   | 'unknown'
   | '';
 
+export type RealmSession = {
+  url: string;
+  patp: string;
+  cookie: string;
+};
+
 export type RealmUpdateBooted = {
   type: 'booted';
   payload: {
     accounts: AccountView[] | undefined;
-    session?: {
-      url: string;
-      patp: string;
-      cookie: string;
-    } | null;
+    session?: RealmSession | null;
     seenSplash: boolean;
   };
 };

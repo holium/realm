@@ -22,6 +22,8 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
     this._onEvent = this._onEvent.bind(this);
     this._onError = this._onError.bind(this);
     this._onQuit = this._onQuit.bind(this);
+
+    log.info('bazaar.service.ts:', 'Constructed.');
   }
 
   init() {

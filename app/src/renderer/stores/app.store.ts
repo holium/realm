@@ -44,19 +44,14 @@ const AppStateModel = types
   })
   .actions((self) => ({
     setBooted(data: RealmUpdateBooted['payload']) {
-      console.log('data', data);
-      let dataAccounts = data.accounts?.map((account) => {
-        return account.accountId ? account : { ...account, accountId: 0 };
-      });
-      console.log(dataAccounts);
-      self.authStore.setAccounts(dataAccounts);
-      self.booted = true;
+      self.authStore.setAccounts(data.accounts);
       self.seenSplash = data.seenSplash;
       if (data.session) {
         self.authStore._setSession(data.session.patp);
         self.shellStore.setIsBlurred(false);
         self.isLoggedIn = true;
       }
+      self.booted = true;
     },
     setTheme(theme: ThemeType) {
       self.theme = clone(theme);
@@ -64,6 +59,7 @@ const AppStateModel = types
         // if the user is logged in, update the theme for the account
         // the login screen will use the theme from the account
         self.authStore.setAccountCurrentTheme(theme);
+        localStorage.setItem('lastTheme', JSON.stringify(theme));
       }
     },
     setLoggedIn() {
@@ -100,18 +96,24 @@ const AppStateModel = types
 
 // const persistedState = loadSnapshot();
 
+const lastTheme = localStorage.getItem('lastTheme');
+
 export const appState = AppStateModel.create({
   booted: false,
   seenSplash: false,
   currentScreen: 'onboarding',
-  theme: Theme.create(defaultTheme),
+  theme: lastTheme
+    ? Theme.create(JSON.parse(lastTheme))
+    : Theme.create(defaultTheme),
   isLoggedIn: false,
   authStore: {
     accounts: [],
     session: null,
     status: { state: 'initial' },
   },
-  shellStore: {},
+  shellStore: {
+    nativeConfig: {},
+  },
   online: navigator.onLine,
   connectionStatus:
     (localStorage.getItem('connection-status') as string | undefined) ||
@@ -163,6 +165,7 @@ function registerOnUpdateListener() {
     if (update.type === 'auth-success') {
       SoundActions.playLogin();
       appState.authStore._setSession(update.payload.patp);
+      localStorage.setItem('lastAccountLogin', update.payload.patp);
       appState.setLoggedIn();
       shipStore.setShip(update.payload);
     }

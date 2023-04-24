@@ -9,7 +9,7 @@ import {
 import { StepProps } from './types';
 import { thirdEarthApi } from '../thirdEarthApi';
 import { defaultTheme } from '../../lib/defaultTheme';
-import { RealmIPC } from '../../stores/ipc';
+import { AuthIPC, RealmIPC } from '../../stores/ipc';
 
 export const LoginStep = ({ setStep, onFinish }: StepProps) => {
   const prefilledEmail = OnboardingStorage.get().email ?? '';
@@ -32,7 +32,7 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
     const passwordHash = await RealmIPC.hashPassword(password);
 
     // Create a local master account from the ThirdEarth account.
-    const masterAccount = await RealmIPC.createMasterAccount({
+    const masterAccount = await AuthIPC.createMasterAccount({
       email: response.email,
       passwordHash,
       encryptionKey: response.client_side_encryption_key,
@@ -40,6 +40,7 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
     });
 
     if (!masterAccount) return false;
+    localStorage.removeItem('lastAccountLogin');
 
     OnboardingStorage.set({
       email: response.email,
@@ -70,6 +71,7 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
               status: 'online',
               theme: JSON.stringify(defaultTheme),
             },
+            password,
             ship.code
           )
         )

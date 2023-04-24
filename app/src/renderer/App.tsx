@@ -1,9 +1,10 @@
 import { MotionConfig } from 'framer-motion';
 import { BgImage, GlobalStyle } from './App.styles';
 import { Shell } from './system';
+// import { toJS } from 'mobx';
 import { useEffect, useMemo } from 'react';
-import { Flex, Spinner, useToggle } from '@holium/design-system';
-import { OnboardingStorage, OnboardingStorage } from '@holium/shared';
+import { Spinner, useToggle, Flex } from '@holium/design-system';
+import { OnboardingStorage } from '@holium/shared';
 import { observer } from 'mobx-react';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
 import { useAppState, appState, AppStateProvider } from './stores/app.store';
@@ -13,9 +14,10 @@ import { ErrorBoundary } from './system/ErrorBoundary';
 import { Auth } from './system/authentication/index';
 import { Splash } from './onboarding/Splash';
 import { RealmIPC } from './stores/ipc';
+import { Centered, ViewPort, Fill } from 'react-spaces';
 
-function AppContentPresenter() {
-  const { seenSplash, authStore, booted } = useAppState();
+const AppContentPresenter = () => {
+  const { seenSplash, authStore } = useAppState();
 
   const isLoggedOut = !authStore.session;
   const hasNoAccounts = authStore.accounts.length === 0;
@@ -24,6 +26,13 @@ function AppContentPresenter() {
 
   const onboarding = useToggle(hasNoAccounts);
   const addShip = useToggle(Boolean(savedOnboardingStep));
+
+  useEffect(() => {
+    // handles the case where we delete the last account
+    if (hasNoAccounts) {
+      onboarding.setToggle(true);
+    }
+  }, [hasNoAccounts]);
 
   const onAddShip = () => {
     addShip.toggleOn();
@@ -40,18 +49,11 @@ function AppContentPresenter() {
     OnboardingStorage.reset();
   };
 
-  if (!booted) {
-    return (
-      <Flex>
-        <Spinner size={2} />
-      </Flex>
-    );
-  }
   if (!seenSplash) {
     return <Splash />;
   }
 
-  if (onboarding.isOn) {
+  if (onboarding.isOn || hasNoAccounts) {
     return (
       <Onboarding
         initialStep={savedOnboardingStep ?? '/login'}
@@ -74,12 +76,12 @@ function AppContentPresenter() {
   }
 
   return <Shell />;
-}
+};
 
-export const AppContent = observer(AppContentPresenter);
+const AppContent = observer(AppContentPresenter);
 
 const AppPresenter = () => {
-  const { theme, shellStore } = useAppState();
+  const { theme, shellStore, booted } = useAppState();
   const contextMenuMemo = useMemo(() => <ContextMenu />, []);
   const bgImage = useMemo(() => theme.wallpaper, [theme.wallpaper]);
 
@@ -98,7 +100,7 @@ const AppPresenter = () => {
         <SelectionProvider>
           <ContextMenuProvider>
             <ErrorBoundary>
-              <AppContent />
+              {!booted ? <LoadingApp /> : <AppContent />}
               {contextMenuMemo}
               <div id="portal-root" />
               <div id="menu-root" />
@@ -111,3 +113,15 @@ const AppPresenter = () => {
 };
 
 export const App = observer(AppPresenter);
+
+export const LoadingApp = () => (
+  <ViewPort>
+    <Fill>
+      <Centered>
+        <Flex width="100%" row justify="center">
+          <Spinner color="#FFF" size={3} />
+        </Flex>
+      </Centered>
+    </Fill>
+  </ViewPort>
+);

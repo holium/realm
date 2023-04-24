@@ -7,6 +7,8 @@ import {
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 import { useAppState } from 'renderer/stores/app.store';
+import { AppType } from 'renderer/stores/models/bazaar.model';
+import { nativeApps } from 'renderer/apps/nativeApps';
 
 const AppWindowManagerPresenter = () => {
   const { shellStore } = useAppState();
@@ -21,8 +23,9 @@ const AppWindowManagerPresenter = () => {
         label: 'Change wallpaper',
         icon: 'Palette',
         onClick: () => {
-          shellStore.setIsBlurred(true);
-          shellStore.openDialog('wallpaper-dialog');
+          shellStore.openWindow(nativeApps['os-settings'] as AppType, {
+            route: 'theme',
+          });
         },
       },
       // TODO leave in as a reminder to add this feature

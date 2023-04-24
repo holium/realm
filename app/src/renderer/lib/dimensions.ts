@@ -47,8 +47,8 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: Record<string, Dimensions> = {
     height: 700,
   },
   'os-settings': {
-    width: 800,
-    height: 650,
+    width: 900,
+    height: 700,
   },
   sphinx: {
     width: 600,

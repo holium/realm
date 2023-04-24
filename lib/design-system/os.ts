@@ -11,3 +11,4 @@ export * from './src/os/Notifications/Notification';
 export * from './src/os/Notifications/NotificationList';
 export * from './src/os/Notifications/AppGroup';
 export * from './src/os/Notifications/Notifications.types';
+export * from './src/os/AppTile/AppTile';

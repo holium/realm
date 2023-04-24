@@ -29,8 +29,11 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   // const wrapperRef = useRef(null);
   const submitRef = useRef<HTMLButtonElement>(null);
 
-  // Setting up options menu
-  const [selectedShip, setSelectedShip] = useState(accounts[0]);
+  const [selectedShip, setSelectedShip] = useState(
+    accounts.find(
+      (acc) => acc.patp === localStorage.getItem('lastAccountLogin')
+    ) || accounts[0]
+  );
 
   const shipName = selectedShip?.nickname || selectedShip?.patp;
 
@@ -129,11 +132,14 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
         icon: 'Trash',
         label: 'Remove account',
         onClick: () => {
-          const newSelectedShip =
-            accounts.find((ship) => ship.patp !== selectedShip?.patp) ??
-            accounts[0];
+          let newSelectedShip;
+          if (accounts.length === 1) {
+            newSelectedShip =
+              accounts.find((ship) => ship.patp !== selectedShip?.patp) ??
+              accounts[0];
+          }
           authStore.removeAccount(selectedShip?.patp);
-          setSelectedShip(newSelectedShip);
+          if (newSelectedShip) setSelectedShip(newSelectedShip);
         },
       },
     ];

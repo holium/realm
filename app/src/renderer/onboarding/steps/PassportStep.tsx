@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
 import { PassportDialog, OnboardingStorage } from '@holium/shared';
 import { StepProps } from './types';
-import { RealmIPC } from '../../stores/ipc';
+import { AuthIPC, FriendsIPC, RealmIPC } from '../../stores/ipc';
 import { FileUploadParams } from '../../../os/services/ship/ship.service';
 
 export const PassportStep = ({ setStep, onFinish }: StepProps) => {
@@ -29,19 +29,19 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
 
   const handleOnNext = async (
     nickname: string,
-    description = '',
-    avatar = ''
+    description?: string,
+    avatar?: string
   ) => {
     if (!shipId) return false;
 
-    await RealmIPC.updatePassport(shipId, nickname, description, avatar);
+    await AuthIPC.updatePassport(shipId, nickname, description, avatar);
 
     // Sync friends agent
-    // FriendsIPC.saveContact(shipId, {
-    //   nickname,
-    //   avatar,
-    //   bio: description,
-    // });
+    await FriendsIPC.saveContact(shipId, {
+      nickname,
+      avatar,
+      bio: description,
+    });
 
     OnboardingStorage.set({ nickname, description, avatar });
     const { shipType } = OnboardingStorage.get();

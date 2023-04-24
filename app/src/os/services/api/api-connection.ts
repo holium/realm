@@ -21,8 +21,11 @@ export class APIConnection {
     this.handleConnectionStatus(this.conduitInstance);
     this.conduitInstance
       .init(session.url, session.code, session.cookie)
-      .then(() => {
-        this.handleConnectionStatus(this.conduitInstance);
+      // .then(() => {
+      //   log.info('Conduit initialized');
+      // })
+      .catch((e) => {
+        log.error('Conduit initialization failed', e);
       });
 
     app.on('quit', () => {

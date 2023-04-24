@@ -10,6 +10,12 @@ import { toJS } from 'mobx';
 import { shipStore } from '../ship.store';
 import { MainIPC } from '../ipc';
 
+export const NativeAppConfig = types.model('NativeAppConfig', {
+  route: types.string,
+});
+
+export type NativeAppConfigMobxType = Instance<typeof NativeAppConfig>;
+
 export const ShellModel = types
   .model('ShellModel', {
     isBlurred: types.optional(types.boolean, true),
@@ -29,6 +35,7 @@ export const ShellModel = types
     micAllowed: types.optional(types.boolean, false),
     multiplayerEnabled: types.optional(types.boolean, false),
     windows: types.map(AppWindowModel),
+    nativeConfig: types.map(NativeAppConfig),
   })
   .views((self) => ({
     get hasOpenWindow() {
@@ -126,7 +133,7 @@ export const ShellModel = types
       const windowBounds = self.getWindowByAppId(appId)?.bounds;
       if (windowBounds) applySnapshot(windowBounds, bounds);
     },
-    openWindow(app: any) {
+    openWindow(app: any, nativeConfig?: any) {
       let glob;
       let href;
       if (app.type === 'urbit') {
@@ -137,6 +144,10 @@ export const ShellModel = types
       if (app.type === 'dev') {
         // app as DevApp
         href = { site: app.web.url };
+      }
+      if (app.type === 'native' && nativeConfig) {
+        // app as NativeApp
+        self.nativeConfig.set(app.id, nativeConfig);
       }
       const newWindow = AppWindowModel.create({
         appId: app.id,
@@ -207,6 +218,7 @@ export const ShellModel = types
     },
     closeWindow(appId: string) {
       const windows = Array.from(self.windows.values());
+      self.nativeConfig.delete(appId);
       const activeWindow = windows.find(
         (app: AppWindowMobxType) => app.isActive
       );

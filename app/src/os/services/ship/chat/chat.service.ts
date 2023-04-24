@@ -1,3 +1,4 @@
+import log from 'electron-log';
 import Database from 'better-sqlite3-multiple-ciphers';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
@@ -14,6 +15,8 @@ export class ChatService extends AbstractService<ChatUpdateTypes> {
       return;
     }
     this.chatDB = new ChatDB({ preload: false, db });
+
+    log.info('chat.service.ts:', 'Constructed.');
   }
 
   reset(): void {

@@ -24,13 +24,6 @@ export class AuthDB {
     this.authDB.pragma('foreign_keys = ON');
     this.authDB.exec(initSql);
 
-    const result: any = this.authDB
-      .prepare('SELECT migrated FROM accounts_meta LIMIT 1;')
-      .all();
-
-    const migrated = result[0]?.migrated || null;
-    console.log('migrated', migrated);
-    if (!migrated) this.migrateJsonToSqlite();
     this.tables = {
       accounts: new Accounts(this.authDB),
       masterAccounts: new MasterAccounts(this.authDB),
@@ -53,7 +46,15 @@ export class AuthDB {
     this.authDB.prepare('UPDATE accounts_meta SET seenSplash = 1;').run();
   }
 
-  migrateJsonToSqlite() {
+  _needsMigration(): boolean {
+    const result: any = this.authDB
+      .prepare('SELECT migrated FROM accounts_meta LIMIT 1;')
+      .all();
+
+    return !(result[0]?.migrated || null);
+  }
+
+  migrateJsonToSqlite(masterAccountId: number) {
     try {
       const oldAuth = new Store({
         name: 'realm.auth',
@@ -75,10 +76,11 @@ export class AuthDB {
         log.info(ship);
         const theme = oldTheme.store[ship.patp];
         const query = this.authDB.prepare(`
-          INSERT INTO accounts (url, patp, nickname, color, avatar, status, theme, passwordHash)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-        `);
+        INSERT INTO accounts (accountId, url, patp, nickname, color, avatar, status, theme, passwordHash)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+      `);
         query.run(
+          masterAccountId,
           ship.url,
           ship.patp,
           ship.nickname,

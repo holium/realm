@@ -49,10 +49,16 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     return this.authDB.tables.accounts.findOne(patp);
   }
 
+  public getMasterAccount(patp: string): MasterAccount | null {
+    if (!this.authDB) return null;
+    return this.authDB.tables.masterAccounts.findOne(`patp = "${patp}"`);
+  }
+
   public async createMasterAccount(
     masterAccountPayload: CreateMasterAccountPayload
   ) {
     if (!this.authDB) return;
+
     // if a master account already exists, return
     try {
       const existingAccount = this.authDB.tables.masterAccounts.findOne(
@@ -60,7 +66,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
       );
       if (existingAccount) return existingAccount;
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
 
     // TODO implement password hashing and other account creation logic
@@ -70,13 +76,20 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
       authToken: masterAccountPayload.authToken,
       passwordHash: masterAccountPayload.passwordHash,
     });
-    // if (newAccount) {
-    //   // sends update to renderer with new account
-    //   this.sendUpdate({
-    //     type: 'init',
-    //     payload: this.getAccounts(),
-    //   });
-    // }
+
+    if (newAccount) {
+      //if (this.authDB._needsMigration()) this.authDB.migrateJsonToSqlite(newAccount.id);
+
+      log.info(
+        'auth.service.ts:',
+        `Created master account for ${masterAccountPayload.email}`
+      );
+    } else {
+      log.error(
+        'auth.service.ts:',
+        `Failed to create master account for ${masterAccountPayload.email}`
+      );
+    }
 
     return newAccount;
   }
@@ -100,6 +113,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
   } {
     log.info('Creating account', acc);
     if (!this.authDB) return {};
+
     const masterAccount = this.authDB.tables.masterAccounts.findOne(
       acc.accountId
     );
@@ -107,10 +121,11 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
       log.info('auth.service.ts:', `No master account found for ${acc.patp}`);
       return {};
     }
+
     const existing = this.authDB.tables.accounts.findOne(acc.patp);
     if (existing) {
       log.info('auth.service.ts:', `Account already exists for ${acc.patp}`);
-      return {};
+      return { account: existing, masterAccount };
     }
 
     console.log('acc', acc);
@@ -138,18 +153,19 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
           order: this.authDB?.getOrder(),
         },
       });
+
       return { account: newAccount, masterAccount };
     } else {
       log.info('auth.service.ts:', `Failed to create account for ${acc.patp}`);
-      return {};
+      return { masterAccount };
     }
   }
 
   public updatePassport(
     patp: string,
     nickname: string,
-    description: string,
-    avatar: string
+    description?: string,
+    avatar?: string
   ) {
     if (!this.authDB) return false;
 
@@ -160,17 +176,17 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
       return false;
     }
 
-    const newAccount = this.authDB.tables.accounts.update(patp, {
+    const updatedAccount = this.authDB.tables.accounts.update(patp, {
       nickname,
       description,
       avatar,
     });
 
-    if (newAccount) {
+    if (updatedAccount) {
       this.sendUpdate({
         type: 'account-updated',
         payload: {
-          account: newAccount,
+          account: updatedAccount,
           order: this.authDB?.getOrder(),
         },
       });
@@ -348,9 +364,8 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
 
   public _clearLockfile(): void {
     if (isDev) {
-      log.info('auth.service.ts:', 'Clearing session.lock');
-      const lockFile = new Store<LockFileType>(LockFileOptions);
-      lockFile.delete('session');
+      log.info('Clearing session.lock');
+      fs.unlinkSync(path.join(app.getPath('userData'), 'session.lock'));
     }
   }
 

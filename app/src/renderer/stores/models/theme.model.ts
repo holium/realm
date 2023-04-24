@@ -1,4 +1,11 @@
-import { Instance, types, applySnapshot, getSnapshot } from 'mobx-state-tree';
+import {
+  Instance,
+  types,
+  applySnapshot,
+  getSnapshot,
+  flow,
+} from 'mobx-state-tree';
+import { average } from 'color.js';
 import { bgIsLightOrDark } from '@holium/design-system';
 import { darken, lighten, rgba } from 'polished';
 import { defaultTheme } from '../../lib/defaultTheme';
@@ -42,7 +49,8 @@ export const Theme = types
     setAccentColor(color: string) {
       self.accentColor = color;
     },
-    setWallpaper(color: string, wallpaper: string) {
+    setWallpaper: flow(function* (wallpaper: string) {
+      const color = yield average(wallpaper, { group: 10, format: 'hex' });
       const bgLuminosity = bgIsLightOrDark(color.toString());
       const windowTheme = generateColors(color, bgLuminosity);
       const theme = Theme.create({
@@ -51,7 +59,7 @@ export const Theme = types
       });
       applySnapshot(self, getSnapshot(theme));
       return self;
-    },
+    }),
   }));
 
 export type ThemeType = Instance<typeof Theme>;
