@@ -1211,8 +1211,10 @@ export const WalletStore = types
           avatar?: string;
           nickname?: string;
         } = shipStore.friends.getContactAvatarMetadata(patp);
-
-        const address = yield WalletIPC.getAddress() as PromiseLike<any>;
+        const address = yield WalletIPC.getAddress(
+          self.navState.network,
+          patp
+        ) as PromiseLike<any>;
         return {
           patp,
           gasEstimate: 7,

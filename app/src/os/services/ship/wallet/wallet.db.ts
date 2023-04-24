@@ -2,7 +2,7 @@ import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
 import { APIConnection } from '../../api';
-import { TransactionsRow, WalletDbOps } from './wallet.types';
+import { TransactionsRow } from './wallet.types';
 
 interface WalletRow {}
 
@@ -16,7 +16,6 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     this._onQuit = this._onQuit.bind(this);
     this._onError = this._onError.bind(this);
     this._onDbUpdate = this._onDbUpdate.bind(this);
-    this._handleDBChange = this._handleDBChange.bind(this);
     this.init = this.init.bind(this);
     APIConnection.getInstance().conduit.watch({
       app: 'realm-wallet',
@@ -30,28 +29,21 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
   async init() {
     const wallets = await this._fetchWallets();
+    console.log('wallets', wallets);
     this._insertWallets(wallets);
+    const ethWallets = wallets.wallets.ethereum;
+    console.log('ethWallets', ethWallets);
+    let wallet: any;
+    for (wallet of Object.values(ethWallets)) {
+      this._insertTransactions(wallet.transactions);
+      this._insertTransactions(wallet['token-txns']);
+    }
     // this._insertTransactions(wallets.transactions);
   }
 
   protected mapRow(row: any): WalletRow {
     return {
       id: row.id,
-      app: row.app,
-      path: row.path,
-      type: row.type,
-      title: row.title,
-      content: row.content,
-      image: row.image,
-      buttons: row.buttons ? JSON.parse(row.buttons) : null,
-      link: row.link,
-      metadata: row.metadata ? JSON.parse(row.metadata) : null,
-      createdAt: row['created-at'],
-      updatedAt: row['updated-at'],
-      readAt: row['read-at'],
-      read: row.read === 1,
-      dismissedAt: row['dismissed-at'],
-      dismissed: row.dismissed === 1,
     };
   }
   //
@@ -76,44 +68,6 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
   private _onDbUpdate(data: any /*WalletDbReactions*/, _id?: number) {
     this.sendUpdate(data);
-  }
-
-  private _handleDBChange(dbChange: WalletDbOps) {
-    /*if (dbChange.type === 'add-row') {
-      const addRow = dbChange as AddRow;
-      switch (addRow.table) {
-        case 'transactions':
-          const message = addRow.row as TransactionsRow;
-          this._insertTransactions([message]);
-          const msg = this.getChatMessage(message['msg-id']);
-          this.sendUpdate({ type: 'message-received', payload: msg });
-          break;
-        case 'wallets':
-          const path = addRow.row as WalletsRow;
-          this._insertWallets([path]);
-          const chat = this.getChat(path.path);
-          this.sendUpdate({ type: 'path-added', payload: chat });
-          break;
-      }
-    }
-    if (dbChange.type === 'update') {
-      const update = dbChange as UpdateRow;
-      switch (update.table) {
-        case 'transactions':
-          const message = update as UpdateTransaction;
-          const msgId = message.message[0]['msg-id'];
-          this._insertTransactions(message.message);
-          const msg = this.getChatMessage(msgId);
-          this.sendUpdate({ type: 'message-edited', payload: msg });
-          break;
-        case 'wallets':
-          const path = update.row as WalletsRow;
-          this._insertWallets([path]);
-          const chat = this.getChat(path.path);
-          this.sendUpdate({ type: 'path-updated', payload: chat });
-          break;
-      }
-    }*/
   }
 
   private _onQuit() {
@@ -170,6 +124,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
   private _insertTransactions(transactions: TransactionsRow[]) {
     if (!this.db) throw new Error('No db connection');
+    console.log('transactions', transactions);
     const insert = this.db.prepare(
       `REPLACE INTO transactions (
           hash,
@@ -197,8 +152,9 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
           @notes
         )`
     );
-    const insertMany = this.db.transaction((transactions) => {
-      for (const tx of transactions) {
+    const insertMany = this.db.transaction((transactions: any) => {
+      let tx: any;
+      for (tx of Object.values(transactions)) {
         insert.run({
           hash: tx.hash,
           network: tx.network,
@@ -228,7 +184,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
             nickname
           ) VALUES (@path, @address, @nickname)`
     );
-    const insertMany = this.db.transaction((wallets) => {
+    const insertMany = this.db.transaction((wallets: any) => {
       for (const wallet of wallets)
         insert.run({
           path: wallet.path,

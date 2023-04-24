@@ -35,8 +35,8 @@
   $:  =address
       path=@t
       nickname=@t
-      transactions=(map net=@t (map @t transaction))
-      token-txns=(map net=@t (map @t (map @t transaction)))
+      transactions=(map net=@t (map hash=@t transaction))
+      token-txns=(map net=@t (map @t (map hash=@t transaction)))
   ==
 +$  mode  ?(%on-demand %default)
 +$  pending-tx  [txh=(unit @ux) from=@ux to=@ux amount=@ud]
