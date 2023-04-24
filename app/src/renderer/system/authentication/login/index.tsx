@@ -132,11 +132,14 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
         icon: 'Trash',
         label: 'Remove account',
         onClick: () => {
-          const newSelectedShip =
-            accounts.find((ship) => ship.patp !== selectedShip?.patp) ??
-            accounts[0];
+          let newSelectedShip;
+          if (accounts.length === 1) {
+            newSelectedShip =
+              accounts.find((ship) => ship.patp !== selectedShip?.patp) ??
+              accounts[0];
+          }
           authStore.removeAccount(selectedShip?.patp);
-          setSelectedShip(newSelectedShip);
+          if (newSelectedShip) setSelectedShip(newSelectedShip);
         },
       },
     ];

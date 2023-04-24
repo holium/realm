@@ -153,6 +153,9 @@ export const AuthenticationModel = types
         ) as Promise<any>;
         if (result) {
           self.accounts.remove(account);
+          if (self.accounts.length === 0) {
+            self.session = null;
+          }
         } else {
           // TODO show error
         }

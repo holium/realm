@@ -17,8 +17,7 @@ import { RealmIPC } from './stores/ipc';
 import { Centered, ViewPort, Fill } from 'react-spaces';
 
 const AppContentPresenter = () => {
-  const { seenSplash, authStore, booted } = useAppState();
-  // console.log('authStore', toJS(authStore.accounts));
+  const { seenSplash, authStore } = useAppState();
 
   const isLoggedOut = !authStore.session;
   const hasNoAccounts = authStore.accounts.length === 0;
@@ -27,6 +26,13 @@ const AppContentPresenter = () => {
 
   const onboarding = useToggle(hasNoAccounts);
   const addShip = useToggle(Boolean(savedOnboardingStep));
+
+  useEffect(() => {
+    // handles the case where we delete the last account
+    if (hasNoAccounts) {
+      onboarding.setToggle(true);
+    }
+  }, [hasNoAccounts]);
 
   const onAddShip = () => {
     addShip.toggleOn();
@@ -47,7 +53,7 @@ const AppContentPresenter = () => {
     return <Splash />;
   }
 
-  if (onboarding.isOn) {
+  if (onboarding.isOn || hasNoAccounts) {
     return (
       <Onboarding
         initialStep={savedOnboardingStep ?? '/login'}
