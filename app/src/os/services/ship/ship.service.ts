@@ -39,7 +39,7 @@ export class ShipService extends AbstractService<any> {
       !credentials.url ||
       !credentials.cookie
     ) {
-      log.info(`No credentials found for ${patp}`);
+      log.info('ship.service.ts:', `No credentials found for ${patp}`);
       return;
     }
 
@@ -93,6 +93,10 @@ export class ShipService extends AbstractService<any> {
       this.credentials.code,
       cookie
     );
+  }
+
+  public setCredentials(url: string, code: string, cookie: string) {
+    this.shipDB?.setCredentials(url, code, cookie);
   }
 
   get credentials() {

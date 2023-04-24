@@ -99,7 +99,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
 
     const account = this.services.auth.getAccount(patp);
     if (!account) {
-      log.info(`No account found for ${patp}`);
+      log.info('realm.service.ts:', `No account found for ${patp}`);
       return false;
     }
     const isAuthenticated = this.services.auth._verifyPassword(
@@ -117,7 +117,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     }
     if (isAuthenticated) {
       track('login', { patp });
-      log.info(`${patp} authenticated`);
+      log.info('realm.service.ts:', `${patp} authenticated`);
       const key = await this.services.auth.deriveDbKey(password);
       if (this.services.ship) this.services.ship.cleanup();
       this.services.ship = new ShipService(patp, key);
@@ -232,7 +232,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     if (!this.services) return null;
     const session = this.services?.auth._getLockfile();
     if (session) {
-      log.info('Hydrating session from session.lock');
+      log.info('realm.service.ts:', 'Hydrating session from session.lock');
       this.services.ship = new ShipService(session.ship, session.code);
       return {
         url: session.url,
@@ -246,28 +246,68 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   public createAccount(accountPayload: CreateAccountPayload, shipCode: string) {
     if (!this.services) return false;
 
-    const { account, shipDB } = this.services.auth.createAccount(
-      accountPayload,
-      shipCode
-    );
+    const { account, masterAccount } =
+      this.services.auth.createAccount(accountPayload);
 
     if (!account) {
       log.error('Failed to create account');
       return false;
     }
 
-    if (!shipDB) {
-      log.error('Failed to create shipDB');
+    if (!masterAccount) {
+      log.error('Failed to create master account');
       return false;
     }
 
-    log.info(`Created account for ${account.patp}`);
+    log.info('realm.service.ts:', `Created account for ${account.patp}`);
 
     if (!this.services.ship) {
+      // Creates the ship database with the master account's encryption key
       this.services.ship = new ShipService(
         account.patp,
-        accountPayload.passwordHash
+        masterAccount.encryptionKey
       );
+
+      if (!this.services.ship) {
+        log.error('Failed to create ship service');
+        return false;
+      }
+
+      log.info(
+        'realm.service.ts:',
+        `Created ship database for ${account.patp} with encryption key`,
+        masterAccount.encryptionKey
+      );
+
+      if (!this.services.ship.credentials?.cookie) {
+        log.info('realm.service.ts:', 'No cookie found, getting cookie...');
+        getCookie({
+          patp: account.patp,
+          url: account.url,
+          code: shipCode,
+        })
+          .then((cookie) => {
+            if (cookie) {
+              this.services?.ship?.setCredentials(
+                account.url,
+                shipCode,
+                cookie
+              );
+            } else {
+              log.error('Failed to get cookie');
+            }
+          })
+          .catch((err) => {
+            log.error('Failed to get cookie', err);
+          });
+      } else {
+        log.info('realm.service.ts:', 'Cookie found, setting credentials...');
+        this.services.ship.setCredentials(
+          account.url,
+          shipCode,
+          this.services.ship.credentials.cookie
+        );
+      }
     }
 
     return account;
@@ -392,6 +432,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           return;
         }
         log.info(
+          'realm.service.ts:',
           'child window attempting to redirect to login. refreshing cookie...'
         );
         const cookie = await getCookie({
@@ -400,6 +441,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           code,
         });
         log.info(
+          'realm.service.ts:',
           'new cookie generated. reloading child window and saving new cookie to session.'
         );
         if (!cookie) {

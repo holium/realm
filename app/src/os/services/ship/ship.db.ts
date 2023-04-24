@@ -22,12 +22,12 @@ export class ShipDB {
     if (!fs.existsSync(this.dbPath)) {
       this.shipDB = this.open();
       // Create the database if it doesn't exist
-      log.info('ship db file doesnt exist');
+      log.info('ship.db.ts:', 'ship db file doesnt exist');
       if (this.isDev) {
         this.shipDB.exec(initSql);
         return;
       } else {
-        this.shipDB.pragma(`rekey='${password}'`);
+        this.shipDB.pragma(`rekey='${password}'`); // dbek
         this.shipDB.pragma(`cipher='sqlcipher'`);
         this.shipDB.pragma(`legacy=4`);
         this.shipDB.exec(initSql);

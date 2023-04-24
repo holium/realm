@@ -49,7 +49,7 @@ export class APIConnection {
       );
     }
     if (session) {
-      log.info('Creating new APIConnection instance');
+      log.info('api-connection.ts:', 'Creating new APIConnection instance');
       if (APIConnection.instance) APIConnection.instance.conduit.cleanup();
       // if a session is provided, we can infer it is to create a new instance
       APIConnection.instance = new APIConnection(session);
@@ -82,7 +82,7 @@ export class APIConnection {
     });
     conduit.on(ConduitState.Refreshed, (session) => {
       // console.info(`ConduitState.Refreshed => %o`, session);
-      log.info(`ConduitState.Refreshed => %o`, session);
+      log.info('api-connection.ts:', `ConduitState.Refreshed => %o`, session);
       // this.saveSession(session);
       this.sendConnectionStatus(ConduitState.Refreshed);
     });
@@ -108,7 +108,7 @@ export class APIConnection {
   }
 
   sendConnectionStatus(status: ConduitState) {
-    log.info(`sendConnectionStatus => %o`, status);
+    log.info('api-connection.ts:', `sendConnectionStatus => %o`, status);
   }
 }
 
