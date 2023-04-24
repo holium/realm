@@ -1,6 +1,7 @@
-import { safeStorage } from 'electron';
+import { safeStorage, app } from 'electron';
 import Store from 'electron-store';
 import CryptoJS from 'crypto-js';
+import fs from 'fs';
 
 interface EncryptedStoreParams {
   name: string;
@@ -76,5 +77,15 @@ export class EncryptedStore<T> {
 
   delete() {
     this.db.clear();
+  }
+
+  static storeExists(name: string, cwd: string): boolean {
+    try {
+      const storeFilePath = `${app.getPath('userData')}/${cwd}/${name}.json`;
+      return fs.existsSync(storeFilePath);
+    } catch (error) {
+      console.error('Error checking if store exists:', error);
+      return false;
+    }
   }
 }

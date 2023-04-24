@@ -234,11 +234,17 @@ export class WalletService extends AbstractService {
     await APIConnection.getInstance().conduit.poke(payload);
   }
 
-  watchUpdates() {
+  watchUpdates(protocol: ProtocolType) {
+    if (!this.walletDB) throw new Error('Wallet DB not initialized');
     this.protocolManager?.watchUpdates(
       APIConnection.getInstance().conduit,
-      undefined /*this.walletDB*/
+      this.walletDB,
+      protocol
     );
+  }
+
+  pauseUpdates() {
+    this.protocolManager?.pauseUpdates();
   }
 
   async checkMnemonic(mnemonic: string) {
@@ -254,9 +260,9 @@ export class WalletService extends AbstractService {
     return ethXpub === agentEthXpub;
   }
 
-  /*async hasMnemonic() {
-    return RealmSigner.hasMnemonic();
-  }*/
+  async hasMnemonic(patp: string) {
+    return RealmSigner.hasMnemonic(patp);
+  }
 }
 
 export default WalletService;

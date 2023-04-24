@@ -275,6 +275,7 @@
     =/  cards
       ^-  (list card)
       =/  key  [network.act `@ta`idx]
+      ~&  'create wallet update'
       :~  `card`[%give %fact [/updates]~ %realm-wallet-update !>(`update`[%wallet network.act (scot %ud idx) u.wallet])]
       ==
     ::  send wallet to requester if not our

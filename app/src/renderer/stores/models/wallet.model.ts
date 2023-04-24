@@ -10,6 +10,9 @@ import { WalletIPC } from '../ipc';
 import { shipStore } from '../ship.store';
 import bcrypt from 'bcryptjs';
 
+// 10 minutes
+const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
+
 export enum WalletView {
   LIST = 'list',
   NEW = 'new',
@@ -896,7 +899,10 @@ export const WalletStore = types
   }))
   .actions((self) => {
     return {
-      init: flow(function* (): Generator<PromiseLike<any>, void, any> {
+      init() {
+        this.initFlow();
+      },
+      initFlow: flow(function* (): Generator<PromiseLike<any>, void, any> {
         try {
           const wallets = yield WalletIPC.getWallets() as PromiseLike<any>;
           console.log('wallets', wallets);
@@ -904,9 +910,14 @@ export const WalletStore = types
             yield WalletIPC.getTransactions() as PromiseLike<any>;
           console.log('transactions', transactions);
           self.ourPatp = shipStore.ship?.patp;
-          /*const hasMnemonic = yield WalletIPC.hasMnemonic();
+          if (!self.ourPatp) throw new Error('No patp in wallet model');
+          const hasMnemonic = yield WalletIPC.hasMnemonic(self.ourPatp);
+          console.log('hasMnemonic', hasMnemonic);
           if (hasMnemonic) {
-          }*/
+            console.log('has mnemonic, navigating');
+            // @ts-expect-error
+            self.navigate(WalletView.LIST);
+          }
         } catch (error) {
           console.error(error);
         }
@@ -917,8 +928,7 @@ export const WalletStore = types
         self.ourPatp = shipStore.ship?.patp;
       },
       setNetworkSetter(network: NetworkType) {
-        /* @ts-expect-error */
-        self.resetNavigation();
+        this.resetNavigation();
         if (network !== self.navState.network) {
           switch (network) {
             case NetworkType.ETHEREUM:
@@ -940,8 +950,7 @@ export const WalletStore = types
         }
       },
       setProtocolSetter(protocol: ProtocolType) {
-        /* @ts-expect-error */
-        self.resetNavigation();
+        this.resetNavigation();
         if (protocol === ProtocolType.UQBAR) {
           self.navState.lastEthProtocol =
             self.navState.protocol === ProtocolType.UQBAR
@@ -1175,20 +1184,17 @@ export const WalletStore = types
         if (self.navState.network === NetworkType.ETHEREUM) {
           if (self.navState.protocol === ProtocolType.ETH_MAIN) {
             this.setProtocolSetter(ProtocolType.ETH_GORLI);
-            this.protocolWatchUpdates(ProtocolType.ETH_GORLI);
+            this.watchUpdates(ProtocolType.ETH_GORLI);
           } else if (self.navState.protocol === ProtocolType.ETH_GORLI) {
             this.setProtocolSetter(ProtocolType.ETH_MAIN);
-            this.protocolWatchUpdates(ProtocolType.ETH_MAIN);
+            this.watchUpdates(ProtocolType.ETH_MAIN);
           }
         }
       },
-      watchUpdates: flow(function* (): Generator<PromiseLike<any>, void, any> {
-        yield WalletIPC.watchUpdates() as PromiseLike<any>;
-      }),
-      protocolWatchUpdates: flow(function* (
+      watchUpdates: flow(function* (
         protocol: ProtocolType
       ): Generator<PromiseLike<any>, void, any> {
-        yield WalletIPC.protocolWatchUpdates(protocol) as PromiseLike<any>;
+        yield WalletIPC.watchUpdates(protocol) as PromiseLike<any>;
       }),
       setProtocol(_event: any, protocol: ProtocolType) {
         this.navigate(WalletView.LIST);
@@ -1246,6 +1252,23 @@ export const WalletStore = types
         mnemonic: string
       ): Generator<PromiseLike<any>, boolean, any> {
         return yield WalletIPC.checkMnemonic(mnemonic) as PromiseLike<any>;
+      }),
+      autoLock() {
+        const shouldLock =
+          Date.now() - AUTO_LOCK_INTERVAL > self.lastInteraction.getTime();
+        if (shouldLock) {
+          this.lock();
+        }
+      },
+      lock() {
+        const hasPasscode = self.settings.passcodeHash;
+        this.pauseUpdates();
+        if (hasPasscode) {
+          this.navigate(WalletView.LOCKED);
+        }
+      },
+      pauseUpdates: flow(function* (): Generator<PromiseLike<any>, void, any> {
+        yield WalletIPC.pauseUpdates() as PromiseLike<any>;
       }),
     };
   });

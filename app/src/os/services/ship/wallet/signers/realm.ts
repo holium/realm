@@ -26,18 +26,6 @@ export abstract class RealmSigner implements BaseSigner {
     db.store = mnemonic;
   }
 
-  static hasMnemonic(patp, passcode) {
-    const storeParams = {
-      name: 'mnemonic',
-      cwd: `realm.${patp}`,
-      secretKey: passcode,
-      accessPropertiesByDotNotation: true,
-    };
-    const db = new EncryptedStore<string>(storeParams);
-    const mnemonic = db.store;
-    return mnemonic !== undefined;
-  }
-
   static signTransaction(
     path: string,
     message: any,
@@ -111,5 +99,9 @@ export abstract class RealmSigner implements BaseSigner {
     };
     const db = new EncryptedStore<string>(storeParams);
     db.delete();
+  }
+
+  static hasMnemonic(patp: string) {
+    return EncryptedStore.storeExists('mnemonic', `realm.${patp}`);
   }
 }

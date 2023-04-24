@@ -1,10 +1,6 @@
 import { Patp } from './types';
 import { BaseProtocol } from './BaseProtocol';
-import {
-  NetworkType,
-  ProtocolType,
-  WalletStoreType,
-} from 'renderer/stores/models/wallet.model';
+import { ProtocolType } from 'renderer/stores/models/wallet.model';
 import { EthereumProtocol } from './ethereum';
 import { WalletDB } from '../wallet.db';
 
@@ -31,7 +27,7 @@ export class ProtocolManager {
     }
   }
 
-  watchUpdates(conduit: any, walletState: WalletDB) {
+  watchUpdates(conduit: any, walletState: WalletDB, protocol: ProtocolType) {
     if (
       this.currentProtocol === ProtocolType.ETH_MAIN ||
       this.currentProtocol === ProtocolType.ETH_GORLI
@@ -41,7 +37,7 @@ export class ProtocolManager {
       ) as EthereumProtocol;
       lastProtocol?.removeListener();
     }
-    this.currentProtocol = walletState.navState.protocol;
+    this.currentProtocol = protocol;
     if (
       this.currentProtocol === ProtocolType.ETH_MAIN ||
       this.currentProtocol === ProtocolType.ETH_GORLI
@@ -58,16 +54,13 @@ export class ProtocolManager {
 
   updateWalletState(
     conduit: any,
-    walletState: WalletStoreType,
-    protocol?: ProtocolType
+    walletState: WalletDB,
+    protocol: ProtocolType
   ) {
-    if (walletState.navState.network === NetworkType.ETHEREUM) {
-      (
-        this.protocols.get(
-          protocol || walletState.navState.protocol
-        ) as EthereumProtocol
-      ).updateWalletState(conduit, walletState);
-    }
+    (this.protocols.get(protocol) as EthereumProtocol).updateWalletState(
+      conduit,
+      walletState
+    );
   }
 }
 

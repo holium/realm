@@ -13,7 +13,6 @@ import abi from 'human-standard-token-abi';
 // import nftabi from 'non-fungible-token-abi';
 import {
   ProtocolType,
-  WalletStoreType,
   Asset,
   CoinAsset,
   NFTAsset,
@@ -84,7 +83,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
   }
 
   watchUpdates(conduit: any, walletDB: WalletDB) {
-    this.updateWalletState(conduit, walletStore);
+    this.updateWalletState(conduit, walletDB);
     try {
       const socket = io(this.baseURL);
       socket.on('connect', () => {
@@ -94,7 +93,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
       });
       socket.on('block', (data: any) => {
         const currentBlock = Number(data.toString());
-        this.updateWalletState(conduit, walletStore, currentBlock);
+        this.updateWalletState(conduit, walletDB, currentBlock);
       });
       socket.on('error', (error: any) => {
         console.log(error);
@@ -112,7 +111,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
 
   async updateWalletState(
     conduit: any,
-    walletStore: WalletStoreType,
+    walletDB: WalletDB,
     currentBlock?: number
   ) {
     if (this.updating) {
