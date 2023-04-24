@@ -12,8 +12,8 @@ import { FragmentReactionType } from './Bubble.types';
 import { opacifyHexColor } from '../../util/colors';
 import { useMenu } from '../../navigation/Menu/useMenu';
 
-export const DEFAULT_EMOJI_PICKER_WIDTH = 300;
-export const DEFAULT_EMOJI_PICKER_HEIGHT = 350;
+const WIDTH = 300;
+const HEIGHT = 350;
 const defaultShip =
   typeof window !== 'undefined' ? (window as any)?.ship ?? 'zod' : 'zod';
 
@@ -22,7 +22,7 @@ const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`
   position: relative;
   flex-direction: row;
   width: 100%;
-  max-width: ${DEFAULT_EMOJI_PICKER_WIDTH}px;
+  max-width: ${WIDTH}px;
   flex-wrap: wrap;
   gap: 2px;
   z-index: 15;
@@ -203,7 +203,7 @@ export const Reactions = ({
   const reactIds = reactions.map((r) => r.msgId);
   const { isOpen, menuRef, position, toggleMenu, closeMenu } = useMenu(
     'top-left',
-    { width: DEFAULT_EMOJI_PICKER_WIDTH, height: DEFAULT_EMOJI_PICKER_HEIGHT },
+    { width: WIDTH, height: HEIGHT },
     { x: 0, y: 2 },
     [], // closeableIds
     [] // closeableClasses
@@ -320,17 +320,85 @@ export const Reactions = ({
       }}
     >
       {memoizedRow}
-      <AnimatedReactionPicker
-        id={id}
-        isOur={isOur}
-        isOpen={isOpen}
-        ourColor={ourColor}
-        position={position}
-        size={size}
-        onClick={onClick}
-        toggleMenu={toggleMenu}
-        menuRef={menuRef}
-      />
+      <>
+        <ReactionButton
+          id={id}
+          isOur={isOur}
+          ourColor={ourColor}
+          size={size}
+          className="bubble-reactions"
+          onClick={(evt) => {
+            toggleMenu(evt);
+          }}
+        >
+          <Icon pointerEvents="none" size={18} opacity={0.5} name="Reaction" />
+        </ReactionButton>
+        <Portal>
+          <AnimatePresence>
+            {isOpen && position && (
+              <Card
+                ref={menuRef}
+                p={0}
+                elevation={2}
+                position="absolute"
+                id={id}
+                zIndex={100}
+                initial={{
+                  opacity: 0,
+                }}
+                animate={{
+                  opacity: 1,
+                  transition: {
+                    duration: 0.1,
+                  },
+                }}
+                exit={{
+                  opacity: 0,
+                  transition: {
+                    duration: 0.1,
+                  },
+                }}
+                gap={0}
+                style={{
+                  y: position.y,
+                  x: position.x,
+                  border: 'none',
+                  width: WIDTH,
+                  height: HEIGHT,
+                  overflowY: 'hidden',
+                }}
+              >
+                <ReactionPickerStyle
+                  zIndex={20}
+                  transition={{ duration: 0.15 }}
+                  onClick={(evt) => {
+                    evt.stopPropagation();
+                  }}
+                >
+                  <EmojiPicker
+                    emojiVersion="0.6"
+                    height={HEIGHT}
+                    width={WIDTH}
+                    lazyLoadEmojis
+                    previewConfig={{
+                      showPreview: false,
+                    }}
+                    defaultSkinTone={SkinTones.NEUTRAL}
+                    onEmojiClick={(
+                      emojiData: EmojiClickData,
+                      evt: MouseEvent
+                    ) => {
+                      onClick(emojiData.unified);
+                      evt.stopPropagation();
+                    }}
+                    autoFocusSearch
+                  />
+                </ReactionPickerStyle>
+              </Card>
+            )}
+          </AnimatePresence>
+        </Portal>
+      </>
     </ReactionRow>
   );
 };
@@ -391,8 +459,8 @@ export const ReactionPicker = ({
     >
       <EmojiPicker
         emojiVersion="0.6"
-        height={DEFAULT_EMOJI_PICKER_HEIGHT}
-        width={DEFAULT_EMOJI_PICKER_WIDTH}
+        height={HEIGHT}
+        width={WIDTH}
         previewConfig={{
           showPreview: false,
         }}
@@ -405,112 +473,5 @@ export const ReactionPicker = ({
         autoFocusSearch={false}
       />
     </ReactionPickerStyle>
-  );
-};
-
-type AnimatedReactionPickerProps = {
-  onClick: (emoji: string) => void;
-  toggleMenu: (evt: any) => void;
-  id?: string;
-  isOur?: boolean;
-  isOpen?: boolean;
-  ourColor?: string;
-  position?: any;
-  size?: keyof typeof ReactionSizes;
-  menuRef?: any;
-  customButtonType?: any;
-};
-
-export const AnimatedReactionPicker = ({
-  id = 'reaction-menu',
-  size = 'medium',
-  isOur = false,
-  isOpen = false,
-  position,
-  ourColor,
-  onClick,
-  toggleMenu,
-  menuRef,
-  customButtonType,
-}: AnimatedReactionPickerProps) => {
-  const ButtonType = customButtonType || ReactionButton;
-  return (
-    <>
-      <ButtonType
-        id={id}
-        isOur={isOur}
-        ourColor={ourColor}
-        size={size}
-        className="bubble-reactions"
-        onClick={toggleMenu}
-      >
-        <Icon pointerEvents="none" size={18} opacity={0.5} name="Reaction" />
-      </ButtonType>
-      <Portal>
-        <AnimatePresence>
-          {isOpen && position && (
-            <Card
-              ref={menuRef}
-              p={0}
-              elevation={2}
-              position="absolute"
-              id={id}
-              zIndex={100}
-              initial={{
-                opacity: 0,
-              }}
-              animate={{
-                opacity: 1,
-                transition: {
-                  duration: 0.1,
-                },
-              }}
-              exit={{
-                opacity: 0,
-                transition: {
-                  duration: 0.1,
-                },
-              }}
-              gap={0}
-              style={{
-                y: position.y,
-                x: position.x,
-                border: 'none',
-                width: DEFAULT_EMOJI_PICKER_WIDTH,
-                height: DEFAULT_EMOJI_PICKER_HEIGHT,
-                overflowY: 'hidden',
-              }}
-            >
-              <ReactionPickerStyle
-                zIndex={20}
-                transition={{ duration: 0.15 }}
-                onClick={(evt) => {
-                  evt.stopPropagation();
-                }}
-              >
-                <EmojiPicker
-                  emojiVersion="0.6"
-                  height={DEFAULT_EMOJI_PICKER_HEIGHT}
-                  width={DEFAULT_EMOJI_PICKER_WIDTH}
-                  lazyLoadEmojis
-                  previewConfig={{
-                    showPreview: false,
-                  }}
-                  defaultSkinTone={SkinTones.NEUTRAL}
-                  onEmojiClick={(
-                    emojiData: EmojiClickData,
-                    evt: MouseEvent
-                  ) => {
-                    onClick(emojiData?.unified);
-                    evt.stopPropagation();
-                  }}
-                  autoFocusSearch
-                />
-              </ReactionPickerStyle>
-            </Card>
-          )}
-        </AnimatePresence>
-      </Portal>
-    </>
   );
 };

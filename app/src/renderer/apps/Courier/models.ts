@@ -77,17 +77,6 @@ const ChatFragment = types.union(
     break: types.null,
     metadata: types.optional(types.frozen(), {}),
   }),
-  types.model('FragmentEmoji', {
-    emoji: types.string,
-    metadata: types.optional(types.frozen(), {}),
-  }),
-  types.model('FragmentCustom', {
-    custom: types.model({
-      name: types.string,
-      value: types.string,
-    }),
-    metadata: types.optional(types.frozen(), {}),
-  }),
   types.model('FragmentStatus', {
     status: types.string,
     metadata: types.optional(types.frozen(), {}),
