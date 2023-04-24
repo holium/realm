@@ -18,6 +18,7 @@ import {
   FragmentUrLinkType,
   FragmentReplyType,
   FragmentTabType,
+  FragmentCustomType,
   TEXT_TYPES,
 } from './Bubble.types';
 import styled from 'styled-components';
@@ -37,6 +38,7 @@ import { convertFragmentsToPreview } from '../ChatInput/fragment-parser';
 import { BubbleAuthor } from './Bubble.styles';
 import { Bookmark } from '../../os/Bookmark/Bookmark';
 import { BUBBLE_HEIGHT } from './Bubble.constants';
+import { Emoji } from 'emoji-picker-react';
 
 export const FragmentBase = styled(Text.Custom)<TextProps>`
   display: inline;
@@ -404,6 +406,7 @@ export const renderFragment = (
       if (
         !TEXT_TYPES.includes(fragmentType) &&
         fragmentType !== 'image' &&
+        fragmentType !== 'emoji' &&
         fragmentType !== 'reply'
       ) {
         replyContent = (
@@ -460,6 +463,24 @@ export const renderFragment = (
           </Flex>
         </FragmentBlockquote>
       );
+    case 'custom':
+      const cust = (fragment as FragmentCustomType).custom;
+      if (cust.name === 'emoji') {
+        return (
+          <span style={{ position: 'relative', top: '3px' }}>
+            <Emoji unified={cust.value} size={16} />
+          </span>
+        );
+      } else {
+        return <span>UNKNOWN CUSTOM TYPE</span>;
+      }
+    case 'emoji':
+      const emo = (fragment as any).emoji as string;
+      return (
+        <span style={{ position: 'relative', top: '3px' }}>
+          <Emoji unified={emo} size={16} />
+        </span>
+      );
     case 'tab':
       const { url, favicon, title } = (fragment as FragmentTabType).tab;
       return (
@@ -485,6 +506,7 @@ export const renderFragment = (
     case 'break':
       return <LineBreak />;
     default:
+      console.log('unknown fragment type', fragment);
       // return fragment[key].data;
       return '';
   }
