@@ -19,7 +19,14 @@ export class APIConnection {
     this.session = session;
     this.conduitInstance = new Conduit(session.ship);
     this.handleConnectionStatus(this.conduitInstance);
-    this.conduitInstance.init(session.url, session.code, session.cookie);
+    this.conduitInstance
+      .init(session.url, session.code, session.cookie)
+      // .then(() => {
+      //   log.info('Conduit initialized');
+      // })
+      .catch((e) => {
+        log.error('Conduit initialization failed', e);
+      });
 
     app.on('quit', () => {
       APIConnection.getInstance().conduit.removeAllListeners();

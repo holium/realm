@@ -1,27 +1,29 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { observer } from 'mobx-react';
-import { lighten } from 'polished';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useField, useForm } from 'mobx-easy-form';
 import {
-  Flex,
   RadioImages,
-  Text,
-  Card,
-  Button,
   TextInput,
+  RadioGroup,
   Box,
+  Button,
 } from '@holium/design-system';
 import { useAppState } from 'renderer/stores/app.store';
 import { ShipMobxType, useShipStore } from 'renderer/stores/ship.store';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 import { ThemeType } from 'renderer/stores/models/theme.model';
+import { SettingTitle } from '../components/SettingTitle';
+import { SettingSection } from '../components/SettingSection';
+import { SettingControl } from '../components/SettingControl';
+import { SettingPane } from '../components/SettingPane';
+// import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
+// import TwitterPicker from 'react-color/lib/components/twitter/Twitter';
 
 const WallpaperPreview = styled(motion.img)`
-  width: 80%;
+  width: 300px;
   height: 'auto';
-  margin: 0 auto;
   border-radius: 6px;
   transition: all 0.25s ease;
   -webkit-user-drag: none;
@@ -58,21 +60,19 @@ const wpGallery: { [key: string]: string } = {
 };
 
 type ThemePanelPresenterViewProps = {
-  theme: ThemeType;
   ship: ShipMobxType;
   space: SpaceModelType;
 };
 
 const ThemePanelPresenterView = ({
-  theme,
   ship,
   space,
 }: ThemePanelPresenterViewProps) => {
+  const { theme } = useAppState();
   const { spacesStore } = useShipStore();
-  const { windowColor, inputColor } = theme;
-  const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
   const [wpOption, setWpOption] = useState<wpOptionType>(undefined);
   const wpGalleryKeys = Object.keys(wpGallery);
+  const [wallpaperOption, setWallpaperOption] = useState<string>('gallery');
 
   const members = space.members.list;
   const me = members.find(
@@ -136,97 +136,38 @@ const ThemePanelPresenterView = ({
   });
 
   return (
-    <Flex
-      gap={12}
-      flexDirection="column"
-      p={3}
-      width="100%"
-      height="100%"
-      overflowY="auto"
-    >
-      <Flex flexDirection="row" justifyContent={'space-between'} mb={0}>
-        <Text.Custom fontSize={7} fontWeight={600}>
-          Theme
-        </Text.Custom>
-        {canEditSpace && (
-          <Box>
-            <Button.TextButton
-              style={{ fontWeight: 400 }}
-              disabled={!themeForm.computed.isValid || !canEditSpace}
-              onClick={themeForm.actions.submit}
-            >
-              Save
-            </Button.TextButton>
-          </Box>
-        )}
-      </Flex>
-
-      {/* <Text opacity={0.7} fontSize={3} fontWeight={500}>
-        COLORS
-      </Text>
-      <Card
-        p="20px"
-        width="100%"
-        // minHeight="240px"
-        elevation="none"
-        customBg={cardColor}
-        flexDirection={'column'}
-      >
-        <Flex flexDirection='row'  gap={18} mb={18}>
-
-        <Text my='auto' fontWeight={500} >
-          Appearance
-        </Text>
-
-        <Flex>
-            <RadioGroup
-                selected={appearance}
-                options={[
-                  { label: 'Dynamic', value: 'dynamic' },
-                  { label: 'Light', value: 'light' },
-                  { label: 'Dark', value: 'dark' },
-                ]}
-                onClick={(value: AppearanceType) => {
-                  setAppearance(value);
-                }}
-              />
-          </Flex>
-
-        </Flex>
-
-        <Flex gap={18}>
-          <Text my='auto' fontWeight={500} >
-            Accent Color
-          </Text>
-
+    <SettingPane>
+      <SettingTitle title="Theme" />
+      {/* <SettingSection>
+        <SettingControl inline label="Accent Color">
           <Flex position="relative" justifyContent="flex-end">
-              <ColorTile
+            <ColorTile
               // id="space-color-tile"
               size={26}
-              tileColor={validatedColor}
+              tileColor={'#000'}
               onClick={(_evt: any) => {
-                  setColorPickerOpen(!colorPickerOpen);
+                // setColorPickerOpen(!colorPickerOpen);
               }}
-              />
-              <ColorTilePopover
+            />
+            <ColorTilePopover
               // id="space-color-tile-popover"
               size={26}
-              isOpen={colorPickerOpen}
-              data-is-open={colorPickerOpen}
-              >
+              // isOpen={colorPickerOpen}
+              // data-is-open={colorPickerOpen}
+            >
               <TwitterPicker
-                  width="inherit"
-                  className="cursor-style"
-                  color={validatedColor}
-                  onChange={(newColor: { hex: string }) => {
-                  accentColorField.actions.onChange(newColor.hex);
+                width="inherit"
+                className="cursor-style"
+                // color={validatedColor}
+                onChange={(newColor: { hex: string }) => {
+                  // accentColorField.actions.onChange(newColor.hex);
                   // setWorkspaceState({
                   //     color: newColor.hex,
                   // });
                   // setValidatedColor(newColor.hex);
-                  }}
-                  triangle="top-left"
-                  colors={[
+                }}
+                triangle="top-left"
+                colors={[
                   '#4E9EFD',
                   '#FFFF00',
                   '#00FF00',
@@ -235,93 +176,97 @@ const ThemePanelPresenterView = ({
                   '#D9682A',
                   '#ff3399',
                   '#8419D9',
-                  ]}
+                ]}
               />
-              </ColorTilePopover>
-            </Flex>
-
-        </Flex>
-
-      </Card> */}
-
-      {/* <Text
-        opacity={0.7}
-        fontSize={3}
-        fontWeight={500}>
-        WALLPAPER
-      </Text> */}
-
-      <Card
-        p="20px"
-        width="100%"
-        customBg={cardColor}
-        elevation={1}
-        flexDirection={'column'}
-      >
-        <Text.Custom mb={4} fontWeight={500}>
-          Current
-        </Text.Custom>
-        <WallpaperPreview src={theme.wallpaper} />
-        <Text.Custom mt={4} mb={2} fontWeight={500}>
-          Gallery
-        </Text.Custom>
-        <RadioImages
-          selected={wpOption}
-          options={wpGalleryKeys.map((key: string) => ({
-            imageSrc: wpGallery[key],
-            value: key,
-          }))}
-          onClick={async (value: wpOptionType) => {
-            if (wpOption && value === wpOption) {
-              setWpOption(undefined);
-            } else if (value) {
-              setWpOption(value);
-              const newTheme = await theme.setWallpaper(wpGallery[value]);
-              const currentSpace = spacesStore.spaces.get(space.path);
-              if (!currentSpace) {
-                console.warn('space not found in spacesStore');
-                return;
+            </ColorTilePopover>
+          </Flex>
+        </SettingControl>
+      </SettingSection> */}
+      <SettingSection title="Wallpaper">
+        <SettingControl label="Current">
+          <WallpaperPreview src={theme.wallpaper} />
+        </SettingControl>
+        <RadioGroup
+          options={[
+            { label: 'Gallery', value: 'gallery' },
+            { label: 'Custom url', value: 'custom' },
+          ]}
+          selected={wallpaperOption}
+          onClick={setWallpaperOption}
+        />
+        {wallpaperOption === 'gallery' && (
+          <SettingControl>
+            <RadioImages
+              style={{ backgroundColor: 'rgba(var(--rlm-overlay-hover-rgba))' }}
+              selected={wpOption}
+              options={wpGalleryKeys.map((key: string) => ({
+                imageSrc: wpGallery[key],
+                value: key,
+              }))}
+              onClick={async (value: wpOptionType) => {
+                if (wpOption && value === wpOption) {
+                  setWpOption(undefined);
+                } else if (value) {
+                  setWpOption(value);
+                  const newTheme = await theme.setWallpaper(wpGallery[value]);
+                  const currentSpace = spacesStore.spaces.get(space.path);
+                  if (!currentSpace) {
+                    console.warn('space not found in spacesStore');
+                    return;
+                  }
+                  await currentSpace.setTheme(newTheme);
+                }
+              }}
+            />
+          </SettingControl>
+        )}
+        {wallpaperOption === 'custom' && (
+          <SettingControl>
+            <TextInput
+              id="customWallpaper"
+              name="customWallpaper"
+              type="text"
+              placeholder="Paste url here"
+              style={{
+                width: '100%',
+                // borderRadius: 9,
+                backgroundColor: 'rgba(var(--rlm-overlay-hover-rgba))',
+              }}
+              inputStyle={{
+                background: 'transparent',
+              }}
+              defaultValue={customWallpaper.state.value}
+              // error={!shipUrl.computed.isDirty || shipUrl.computed.error}
+              onChange={(e: any) =>
+                customWallpaper.actions.onChange(e.target.value)
               }
-              await currentSpace.setTheme(newTheme);
-            }
-          }}
-        />
-        <Text.Custom mt={4} mb={2} fontWeight={500}>
-          Custom
-        </Text.Custom>
-        <TextInput
-          id="customWallpaper"
-          name="customWallpaper"
-          type="text"
-          placeholder="Paste url here"
-          style={{
-            borderRadius: 9,
-            backgroundColor: inputColor,
-          }}
-          defaultValue={customWallpaper.state.value}
-          // error={!shipUrl.computed.isDirty || shipUrl.computed.error}
-          onChange={(e: any) =>
-            customWallpaper.actions.onChange(e.target.value)
-          }
-        />
-      </Card>
-    </Flex>
+              rightAdornment={
+                canEditSpace ? (
+                  <Box>
+                    <Button.TextButton
+                      style={{ fontWeight: 400 }}
+                      disabled={!themeForm.computed.isValid || !canEditSpace}
+                      onClick={themeForm.actions.submit}
+                    >
+                      Save
+                    </Button.TextButton>
+                  </Box>
+                ) : undefined
+              }
+            />
+          </SettingControl>
+        )}
+      </SettingSection>
+    </SettingPane>
   );
 };
 
 const ThemePanelPresenter = () => {
-  const { theme } = useAppState();
   const { ship, spacesStore } = useShipStore();
 
   if (!spacesStore.selected || !ship) return null;
 
-  return (
-    <ThemePanelPresenterView
-      theme={theme}
-      ship={ship}
-      space={spacesStore.selected}
-    />
-  );
+  return <ThemePanelPresenterView ship={ship} space={spacesStore.selected} />;
 };
 
 export const ThemePanel = observer(ThemePanelPresenter);

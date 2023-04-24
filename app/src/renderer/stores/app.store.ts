@@ -45,13 +45,13 @@ const AppStateModel = types
   .actions((self) => ({
     setBooted(data: RealmUpdateBooted['payload']) {
       self.authStore.setAccounts(data.accounts);
-      self.booted = true;
       self.seenSplash = data.seenSplash;
       if (data.session) {
         self.authStore._setSession(data.session.patp);
         self.shellStore.setIsBlurred(false);
         self.isLoggedIn = true;
       }
+      self.booted = true;
     },
     setTheme(theme: ThemeType) {
       self.theme = clone(theme);
@@ -111,7 +111,9 @@ export const appState = AppStateModel.create({
     session: null,
     status: { state: 'initial' },
   },
-  shellStore: {},
+  shellStore: {
+    nativeConfig: {},
+  },
   online: navigator.onLine,
   connectionStatus:
     (localStorage.getItem('connection-status') as string | undefined) ||

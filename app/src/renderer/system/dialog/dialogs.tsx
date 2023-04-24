@@ -1,6 +1,5 @@
 import { FC } from 'react';
 import { spacesDialogs } from 'renderer/apps/Spaces/Workflow/workflow';
-import { WallpaperDialogConfig } from 'renderer/apps/System/Dialogs/Wallpaper';
 import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceConfirm';
 import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
@@ -48,7 +47,6 @@ export interface DialogRenderers {
 export const dialogRenderers: DialogRenderers = {
   'shutdown-dialog': ShutdownDialogConfig,
   'app-detail-dialog': AppDetailDialog,
-  'wallpaper-dialog': WallpaperDialogConfig,
   'leave-space-dialog': LeaveSpaceDialogConfig,
   'leave-chat-dialog': LeaveChatDialogConfig,
   'delete-space-dialog': DeleteSpaceDialogConfig,
