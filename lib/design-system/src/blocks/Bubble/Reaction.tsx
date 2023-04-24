@@ -418,6 +418,7 @@ type AnimatedReactionPickerProps = {
   position?: any;
   size?: keyof typeof ReactionSizes;
   menuRef?: any;
+  customButtonType?: any;
 };
 
 export const AnimatedReactionPicker = ({
@@ -430,10 +431,12 @@ export const AnimatedReactionPicker = ({
   onClick,
   toggleMenu,
   menuRef,
+  customButtonType,
 }: AnimatedReactionPickerProps) => {
+  const ButtonType = customButtonType || ReactionButton;
   return (
     <>
-      <ReactionButton
+      <ButtonType
         id={id}
         isOur={isOur}
         ourColor={ourColor}
@@ -442,7 +445,7 @@ export const AnimatedReactionPicker = ({
         onClick={toggleMenu}
       >
         <Icon pointerEvents="none" size={18} opacity={0.5} name="Reaction" />
-      </ReactionButton>
+      </ButtonType>
       <Portal>
         <AnimatePresence>
           {isOpen && position && (

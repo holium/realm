@@ -370,6 +370,7 @@ export const ChatInput = ({
                 onClick={onEmojiPick}
                 toggleMenu={toggleMenu}
                 menuRef={menuRef}
+                customButtonType={Button.IconButton}
               />
             </Flex>
             <ChatBox
