@@ -10,10 +10,9 @@ import { AuthDB } from './auth.db';
 import { Account } from './accounts.table';
 import { ThemeType } from 'renderer/stores/models/theme.model';
 import { CreateMasterAccountPayload } from 'os/realm.types';
-import { ShipDB } from '../ship/ship.db';
-import { getCookie } from '../../lib/shipHelpers';
 import { AuthUpdateTypes } from './auth.types';
 import { ConduitSession } from '../api';
+import { MasterAccount } from './masterAccounts.table';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -94,11 +93,10 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
 
   // Call this from onboarding.
   public createAccount(
-    acc: Omit<Account, 'passwordHash' | 'createdAt' | 'updatedAt'>,
-    shipCode: string
+    acc: Omit<Account, 'passwordHash' | 'createdAt' | 'updatedAt'>
   ): {
     account?: Account;
-    shipDB?: ShipDB;
+    masterAccount?: MasterAccount;
   } {
     log.info('Creating account', acc);
     if (!this.authDB) return {};
@@ -106,12 +104,12 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
       acc.accountId
     );
     if (!masterAccount) {
-      log.info(`No master account found for ${acc.patp}`);
+      log.info('auth.service.ts:', `No master account found for ${acc.patp}`);
       return {};
     }
     const existing = this.authDB.tables.accounts.findOne(acc.patp);
     if (existing) {
-      log.info(`Account already exists for ${acc.patp}`);
+      log.info('auth.service.ts:', `Account already exists for ${acc.patp}`);
       return {};
     }
 
@@ -131,11 +129,6 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
       passwordHash: masterAccount?.passwordHash,
     });
     this.authDB.addToOrder(acc.patp);
-    // Creates the ship database with the master account's encryption key
-    const shipDB = this._createShipDB(acc.patp, masterAccount.encryptionKey, {
-      code: shipCode,
-      url: acc.url,
-    });
 
     if (newAccount) {
       this.sendUpdate({
@@ -145,9 +138,9 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
           order: this.authDB?.getOrder(),
         },
       });
-      return { account: newAccount, shipDB };
+      return { account: newAccount, masterAccount };
     } else {
-      log.info(`Failed to create account for ${acc.patp}`);
+      log.info('auth.service.ts:', `Failed to create account for ${acc.patp}`);
       return {};
     }
   }
@@ -163,7 +156,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     const account = this.authDB.tables.accounts.findOne(patp);
 
     if (!account) {
-      log.info(`No account found for ${patp}`);
+      log.info('auth.service.ts:', `No account found for ${patp}`);
       return false;
     }
 
@@ -193,7 +186,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     const account = this.authDB.tables.accounts.findOne(patp);
 
     if (!account) {
-      log.info(`No account found for ${patp}`);
+      log.info('auth.service.ts:', `No account found for ${patp}`);
       return false;
     }
 
@@ -215,49 +208,6 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     return false;
   }
 
-  private _createShipDB(
-    patp: string,
-    encryptionKey: string,
-    credentials: {
-      url: string;
-      code: string;
-      cookie?: string;
-    }
-  ) {
-    const newShipDB = new ShipDB(patp, encryptionKey);
-    log.info(
-      `Created ship database for ${patp} with encryption key`,
-      encryptionKey
-    );
-    if (!credentials.cookie) {
-      log.info('No cookie found, getting cookie...');
-      getCookie({
-        patp,
-        url: credentials.url,
-        code: credentials.code,
-      })
-        .then((cookie) => {
-          if (cookie) {
-            newShipDB.setCredentials(credentials.url, credentials.code, cookie);
-          } else {
-            log.error('Failed to get cookie');
-          }
-        })
-        .catch((err) => {
-          log.error('Failed to get cookie', err);
-        });
-    } else {
-      log.info('Cookie found, setting credentials...');
-      newShipDB.setCredentials(
-        credentials.url,
-        credentials.code,
-        credentials.cookie
-      );
-    }
-
-    return newShipDB;
-  }
-
   private _deleteShipDB(patp: string) {
     const dbPath = path.join(app.getPath('userData'), `${patp}.sqlite`);
     if (fs.existsSync(dbPath)) {
@@ -269,7 +219,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     if (!this.authDB) return;
     const account = this.authDB.tables.accounts.findOne(patp);
     if (!account) {
-      log.info(`No account found for ${patp}`);
+      log.info('auth.service.ts:', `No account found for ${patp}`);
       return;
     }
 
@@ -295,7 +245,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     const account = this.authDB?.tables.accounts.findOne(patp);
 
     if (!account) {
-      log.info(`No account found for ${patp}`);
+      log.info('auth.service.ts:', `No account found for ${patp}`);
       return false;
     }
     // TODO Add amplitude logging here
@@ -382,7 +332,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
 
   public _setLockfile(session: ConduitSession): void {
     if (isDev) {
-      log.info('Setting session.lock');
+      log.info('auth.service.ts:', 'Setting session.lock');
       const lockFile = new Store<LockFileType>(LockFileOptions);
       lockFile.set('session', session);
     }
@@ -398,7 +348,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
 
   public _clearLockfile(): void {
     if (isDev) {
-      log.info('Clearing session.lock');
+      log.info('auth.service.ts:', 'Clearing session.lock');
       const lockFile = new Store<LockFileType>(LockFileOptions);
       lockFile.delete('session');
     }
@@ -435,7 +385,7 @@ export const authPreload = AuthService.preload(
 // public register(patp: string, password: string): boolean {
 //   const account = this.authDB.models.accounts.findOne(patp);
 //   if (account) {
-//     log.info(`Account already exists for ${patp}`);
+//     log.info('auth.service.ts:', `Account already exists for ${patp}`);
 //     return false;
 //   }
 //   const passwordHash = bcrypt.hashSync(password, 10);
