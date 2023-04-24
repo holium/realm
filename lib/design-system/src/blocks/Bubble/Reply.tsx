@@ -6,10 +6,10 @@ import {
   FragmentBlock,
   FragmentPlain,
   FragmentBlockquote,
-  renderFragment,
   FragmentImage,
 } from './fragment-lib';
 import { FragmentType, FragmentImageType, TEXT_TYPES } from './Bubble.types';
+import { convertFragmentsToPreview } from '../ChatInput/fragment-parser';
 import { useMemo } from 'react';
 import { convertDarkText } from '../../../util';
 
@@ -55,11 +55,16 @@ export const Reply = (props: ReplyProps) => {
   );
   if (!message) return null;
   const fragmentType: string = Object.keys(message[0])[0];
-  let replyContent = null;
+  let replyContent = (
+    <FragmentPlain id={id}>
+      {convertFragmentsToPreview(id, message)}
+    </FragmentPlain>
+  );
   let mediaContent = null;
   if (
     (!TEXT_TYPES.includes(fragmentType) &&
       fragmentType !== 'image' &&
+      fragmentType !== 'emoji' &&
       fragmentType !== 'reply') ||
     fragmentType === 'code'
   ) {
@@ -86,14 +91,6 @@ export const Reply = (props: ReplyProps) => {
           draggable={false}
         />
       </Box>
-    );
-  } else {
-    replyContent = renderFragment(
-      id,
-      message[0],
-      0,
-      author,
-      containerWidth ? containerWidth - 16 - 22 : undefined
     );
   }
   let additionalWidth = mediaContent ? 100 : 0;

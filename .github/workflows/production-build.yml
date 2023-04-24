@@ -46,24 +46,6 @@ jobs:
             return result
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-      #
-      - name: Start release draft
-        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
-        # create annotated tag for this branch. this will become basis for the release
-        run: |
-          mkdir -p ./app/release/build
-          touch ./app/release/build/log.txt
-          echo "pre-deploy workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
-          git push origin $BUILD_VERSION
-          gh release create $BUILD_VERSION ./app/release/build/*.* --target production --title "$RELEASE_NAME"  --draft --verify-tag --latest=false --notes "$CHANGELOG"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          RELEASE_NAME: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
-          BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
-          CHANGELOG: ${{ github.event.pull_request.body }}
   #
   build-mac:
     if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
@@ -131,14 +113,21 @@ jobs:
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
-      #
-      - name: Deploy binaries and other artifacts to draft release
+      # copy release artifacts from this runner to digitalocean
+      - name: Publish artifacts
         run: |
-          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
+          mkdir -p ~/.ssh
+          # ensure private key
+          echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
+          chmod 600 ~/.ssh/usher_rsa
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir -p ~/$BUILD_VERSION"
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
         env:
-          GH_DEBUG: api
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
   #
   build-linux:
     if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
@@ -180,32 +169,36 @@ jobs:
         env:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
-      #
-      - name: Deploy binaries and other artifacts to draft release
+      # copy release artifacts from this runner to digitalocean
+      - name: Publish artifacts
         run: |
-          # rename the latest-mac.yml file to alpha-mac.yml for staging builds
-          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
+          mkdir -p ~/.ssh
+          # ensure private key
+          echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
+          chmod 600 ~/.ssh/usher_rsa
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir -p ~/$BUILD_VERSION"
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
         env:
-          GH_DEBUG: api
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME}}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       # all builds should produce the same sourcemaps; therefore only need to create the Sentry
       #   release one time. Use linux build since Sentry action only runs on linux
       - name: Create Sentry release
-        uses: getsentry/action-release@v1
+        run: |
+          sudo npm install -g @sentry/cli --unsafe-perm
+          sentry-cli sourcemaps inject ./app/release/app/dist/renderer
+          sentry-cli sourcemaps upload --org $SENTRY_ORG --auth-token $SENTRY_AUTH_TOKEN --project $SENTRY_PROJECT --use-artifact-bundle --release $BUILD_VERSION --dist $BUILD_VERSION ./app/release/app/dist/renderer
+          # legacy method
+          sentry-cli releases files $BUILD_VERSION upload-sourcemaps ./app/release/app/dist/renderer
+          sentry-cli releases finalize $BUILD_VERSION
         env:
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-          # SENTRY_URL: https://sentry.io/
-          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-          SENTRY_LOG_LEVEL: debug
-        with:
-          environment: production
-          sourcemaps: './app/release/app/dist'
-          version: ${{ needs.pre-deploy.outputs.build_version }}
-          ignore_empty: true
   #
   build-windows:
     if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
@@ -257,7 +250,16 @@ jobs:
       #
       - name: Build and install
         run: |
-          npx cross-env sudo yarn package:release:win
+          cd ./app
+          # create environment variable file. only needed for windows build where maintaining environment
+          #  variables across scripts and commands is complex. this file is referenced by the Dotenv webpack plugin
+          cat << EOF > .env
+          BUILD_VERSION=$BUILD_VERSION
+          ARTIFACT_VERSION=$ARTIFACT_VERSION
+          RELEASE_CHANNEL=$RELEASE_CHANNEL
+          EOF
+          cd ../
+          sudo yarn package:release:win
         env:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
@@ -288,21 +290,20 @@ jobs:
           BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
           BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
           BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
-      #
-      - name: Deploy binaries and other artifacts to draft release
+      # copy release artifacts from this runner to digitalocean
+      - name: Publish artifacts
         run: |
-          # move the signed version of the exe into the main build folder
-          rm -f ./app/release/build/Realm-Setup-$ARTIFACT_VERSION.exe
-          mv ./app/release/build/signed/Realm-Setup-$ARTIFACT_VERSION.exe ./app/release/build/Realm-Setup-$ARTIFACT_VERSION.exe
-          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
+          mkdir -p ~/.ssh
+          # ensure private key
+          echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
+          chmod 600 ~/.ssh/usher_rsa
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir -p ~/$BUILD_VERSION"
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          GH_DEBUG: api
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-          ARTIFACT_VERSION: ${{ needs.pre-deploy.outputs.artifact_version }}
-          BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
-          BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
-          BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
   #
   deploy-desks:
     if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
@@ -315,6 +316,7 @@ jobs:
           ref: production
           # Urbit symlink fetching
           submodules: 'true'
+      #
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -334,7 +336,7 @@ jobs:
       # publish latest agent udpates for realm, courier, and usher
       - name: Publish ship updates
         run: |
-          mkdir ~/.ssh
+          mkdir -p ~/.ssh
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
@@ -403,11 +405,34 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
+      # copy release artifacts from digitalocean (all platforms) back to this runner
+      - name: Retrieve release artifacts
+        run: |
+          mkdir -p ~/.ssh
+          # ensure private key
+          echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
+          chmod 600 ~/.ssh/usher_rsa
+          mkdir -p ~/$BUILD_VERSION
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION ~
+        env:
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
       #
       - run: |
-          gh release edit $BUILD_VERSION --prerelease=true --draft=false --latest=false
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
+          git push origin $BUILD_VERSION
+          gh release create $BUILD_VERSION ~/$BUILD_VERSION/*.* --target master --title "$RELEASE_NAME" --prerelease=true --draft=false --latest=false --verify-tag --notes "$CHANGELOG"
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf ~/$BUILD_VERSION"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA }}
+          RELEASE_NAME: ${{ needs.pre-deploy.outputs.release_name }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   # this will run even if the build is canceled or fails

@@ -211,7 +211,7 @@
                         %-  action:visas:core
                         join-action
                       =/  cards  (zing cards)
-                      [cards this] 
+                      [cards this]
                     ==
                       %del-ships
                     `this
@@ -558,7 +558,7 @@
       =/  watch-paths                     [/updates ~]
       :_  state
       [%give %fact [/updates ~] spaces-reaction+!>([%replace space])]~
-    
+
     ::
     ++  on-remove
       |=  [path=space-path:store]
@@ -838,7 +838,7 @@
       =.  membership  (~(put by membership) [path space-members])
       =/  cards
         ^-  (list card)
-        [%give %fact [/updates ~] visa-reaction+!>([%edited path member role-set])]~
+        [%give %fact [/spaces/(scot %p ship.path)/(scot %tas space.path) /updates ~] visa-reaction+!>([%edited path member role-set])]~
       =?  cards  =(%group type:(~(got by spaces.state) path))
         %+  weld  cards
           ?:  (~(has in role-set) %admin)

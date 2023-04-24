@@ -4,7 +4,10 @@ import {
   FragmentType,
   FragmentPlainType,
   FragmentBreakType,
+  FragmentKey,
+  TEXT_TYPES,
 } from '../Bubble/Bubble.types';
+import { Emoji } from 'emoji-picker-react';
 
 type ParserKey =
   | 'bold'
@@ -17,6 +20,7 @@ type ParserKey =
   | 'image'
   | 'link'
   | 'bold-italics-strike'
+  | 'emoji'
   | 'break';
 
 type ParserRule = {
@@ -29,6 +33,7 @@ type ParserRule = {
   regex?: RegExp;
   filter?: (s: string) => boolean;
   printToken?: string;
+  custom?: boolean;
 };
 type ParserRules = {
   [K in ParserKey]: ParserRule;
@@ -56,6 +61,7 @@ const parserRules: ParserRules = {
     token: /```\n?/,
     tokenLength: 3,
     ender: '```',
+    printToken: '```',
     enderLength: 3,
     recurse: false,
     priority: 0,
@@ -65,6 +71,7 @@ const parserRules: ParserRules = {
     tokenLength: 2,
     ender: /\n|$/,
     enderLength: 1,
+    printToken: '\n> ',
     recurse: false,
     priority: 1,
   },
@@ -101,6 +108,15 @@ const parserRules: ParserRules = {
     tokenLength: 5,
     recurse: false,
     priority: 4,
+  },
+  emoji: {
+    token: ':\\u',
+    ender: ':',
+    tokenLength: 3,
+    enderLength: 1,
+    recurse: false,
+    custom: true,
+    priority: 4.5,
   },
   break: {
     token: '\n',
@@ -153,7 +169,13 @@ const eatSpecialType = (
       if (!parserRules[type].filter || parserRules[type].filter(matchingText)) {
         pre = raw.substr(0, startIndex);
         post = raw.substr(endIndex);
-        frag = { [type]: matchingText } as FragmentType;
+        if (parserRules[type].custom) {
+          frag = {
+            custom: { name: type, value: matchingText },
+          } as FragmentType;
+        } else {
+          frag = { [type]: matchingText } as FragmentType;
+        }
       }
     }
   } else {
@@ -204,7 +226,12 @@ const eatSpecialType = (
           let parsedIndex = offset + stopIndex + endTokenLength;
           pre = raw.substr(0, startIndex);
           post = raw.substr(parsedIndex);
-          frag = { [type]: raw.substr(offset, stopIndex) } as FragmentType;
+          const val = raw.substr(offset, stopIndex);
+          if (parserRules[type].custom) {
+            frag = { custom: { name: type, value: val } } as FragmentType;
+          } else {
+            frag = { [type]: val } as FragmentType;
+          }
         }
       }
     }
@@ -347,6 +374,46 @@ export const parseChatInput = (input: string): FragmentType[] => {
   return results;
 };
 
+export const convertFragmentsToPreview = (
+  chatid: string | number,
+  contents: FragmentType[]
+) => {
+  return (
+    <span>
+      {contents.map((content: FragmentType, idx: number) => {
+        let type = Object.keys(content)[0] as FragmentKey;
+        const value = content[type];
+        if (type === 'break') {
+          return <span key={`${chatid}-lastMessage-${idx}`}> </span>;
+        } else if (TEXT_TYPES.includes(type) || type === 'link') {
+          return <span key={`${chatid}-lastMessage-${idx}`}>{value}</span>;
+        } else if (type === 'emoji') {
+          return (
+            <Emoji
+              key={`${chatid}-lastMessage-${idx}`}
+              unified={value}
+              size={16}
+            />
+          );
+        } else {
+          return (
+            <span
+              style={{
+                marginLeft: 2,
+                marginRight: 2,
+                fontStyle: 'italic',
+              }}
+              key={`${chatid}-lastMessage-${idx}`}
+            >
+              {type === 'code' ? 'code block' : type}
+            </span>
+          );
+        }
+      })}
+    </span>
+  );
+};
+
 export const convertFragmentsToText = (fragments: FragmentType[]): string => {
   return fragments.map((fragment) => fragmentToText(fragment)).join('');
 };
@@ -364,11 +431,13 @@ export const fragmentToText = (fragment: FragmentType): string => {
   if (type === 'bold-strike') return `**~~${text}~~**`;
   if (type === 'italics-strike') return `*~~${text}~~*`;
   if (type === 'bold-italics-strike') return `***~~${text}~~***`;
-  if (type === 'blockquote') return `${parserRules.blockquote.token}${text}`;
+  if (type === 'blockquote')
+    return `${parserRules.blockquote.printToken}${text}`;
   if (type === 'inline-code')
     return `${parserRules['inline-code'].token}${text}${parserRules['inline-code'].token}`;
   if (type === 'code')
-    return `${parserRules.code.token}${text}${parserRules.code.token}`;
+    return `${parserRules.code.printToken}\n${text}${parserRules.code.printToken}`;
   if (type === 'break') return '\n';
+  if (type === 'emoji') return `:\\u${text}:`;
   return text;
 };

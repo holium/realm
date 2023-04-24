@@ -5,7 +5,7 @@ import {
   Text,
   timelineDate,
   MenuItemProps,
-  TEXT_TYPES,
+  convertFragmentsToPreview,
 } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { useContextMenu } from 'renderer/components';
@@ -66,40 +66,9 @@ export const ChatRowPresenter = ({
   const lastMessageUpdated: React.ReactNode = useMemo(() => {
     if (!chat) return null;
     if (!chat.lastMessage) return 'No messages yet';
-    return (
-      <span>
-        {chat.lastMessage &&
-          chat.lastMessage.contents.map(
-            (content: { [key: string]: string }, idx: number) => {
-              if (!chat.lastMessage) return null;
-              let type = Object.keys(content)[0];
-              const value = content[type];
-              if (type === 'break') {
-                return ' ';
-              } else if (TEXT_TYPES.includes(type) || type === 'link') {
-                return (
-                  <span key={`${chat.lastMessage.id}-lastMessage-${idx}`}>
-                    {value}
-                  </span>
-                );
-              } else {
-                if (type === 'code') type = 'code block';
-                return (
-                  <span
-                    style={{
-                      marginLeft: 2,
-                      marginRight: 2,
-                      fontStyle: 'italic',
-                    }}
-                    key={`${chat.lastMessage.id}-lastMessage-${idx}`}
-                  >
-                    {type}
-                  </span>
-                );
-              }
-            }
-          )}
-      </span>
+    return convertFragmentsToPreview(
+      chat.lastMessage.id,
+      chat.lastMessage.contents
     );
   }, [chat?.lastMessage?.id]);
 

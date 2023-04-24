@@ -29,6 +29,7 @@
           [%rebuild-stall rebuild-stall]
           [%clear-stall clear-stall]
           [%set-host set-host]
+          [%delete-catalog-entry del-cat-entry]
       ==
     ::
     ++  install-app
@@ -107,6 +108,11 @@
       :~  [%app-id so]
           [%host (su ;~(pfix sig fed:ag))]
       ==
+    ::
+    ++  del-cat-entry
+      %-  ot
+      :~  [%app-id so]
+      ==
     --
   --
 ::
@@ -171,6 +177,7 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%id s+app-id.rct]
+          [%app (app-detail:encode app-id.rct app.rct)]
           [%index (numb index.rct)]
       ==
       ::
