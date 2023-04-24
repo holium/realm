@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useCallback, useState } from 'react';
+import { useEffect, useRef, useMemo, useCallback } from 'react';
 import { observer } from 'mobx-react';
 import { useServices } from 'renderer/logic/store';
 import {
@@ -19,7 +19,6 @@ type ChatMessageProps = {
   ourColor: string;
   isPrevGrouped: boolean;
   isNextGrouped: boolean;
-  snapToBottom?: () => void;
   onReplyClick?: (msgId: string) => void;
 };
 
@@ -30,7 +29,6 @@ export const ChatMessagePresenter = ({
   isPrevGrouped,
   isNextGrouped,
   onReplyClick,
-  snapToBottom,
 }: ChatMessageProps) => {
   const { ship, friends, theme } = useServices();
   const { selectedChat } = useChatStore();
@@ -267,16 +265,6 @@ export const ChatMessagePresenter = ({
       msgModel?.reactions.length === 0,
     ]
   );
-  const [reactCount, setReactCount] = useState<number>(
-    reactionList?.length || 0
-  );
-
-  useEffect(() => {
-    if (reactionList && reactionList.length !== reactCount) {
-      snapToBottom && snapToBottom();
-      setReactCount(reactionList.length);
-    }
-  }, [reactionList?.length || 0]);
 
   const messages = selectedChat?.messages || [];
 
