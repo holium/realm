@@ -15,7 +15,7 @@
 ::
 +$  card  card:agent:gall
 ++  step  ~m1
-++  peak  100
+++  peak  1.000
 --
 ::
 %-  agent:dbug
