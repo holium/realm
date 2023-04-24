@@ -1,5 +1,5 @@
 ::  app/realm-chat.hoon
-/-  *realm-chat, db-sur=chat-db, notify
+/-  *realm-chat, db-sur=chat-db, notify, ndb=notif-db
 /+  dbug, lib=realm-chat, db-lib=chat-db
 =|  state-0
 =*  state  -
@@ -223,6 +223,16 @@
                           !>([%send-message path.path-row.ch ~[[[%status (crip "You set disappearing messages to {(scow %dr max-expires-at-duration.path-row.ch)}")] ~ ~]] *@dr])
                         [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action send-status-message]~
                       ~
+
+                    %del-paths-row
+                      =/  notif-ids=(list @ud)
+                        %+  turn
+                          (scry-notifs-for-path path.ch bowl)
+                        |=(n=notif-row:ndb id.n)
+                      %+  turn  notif-ids
+                      |=  id=@ud
+                      ^-  card
+                      [%pass /dbpoke %agent [our.bowl %notif-db] %poke %notif-db-poke !>([%delete id])]
                   ==
                 [(weld cards new-msg-notif-cards) this]
             ==
@@ -252,6 +262,15 @@
   ^-  ?
   ?+  -.ch  %.n
     %add-row  =(-.+.ch %messages)
+  ==
+::
+++  scry-notifs-for-path
+  |=  [=path =bowl:gall]
+  ^-  (list notif-row:ndb)
+  =/  scry-path  (weld /(scot %p our.bowl)/notif-db/(scot %da now.bowl)/db/path/realm-chat path)
+  .^  (list notif-row:ndb)
+      %gx
+      (weld scry-path /noun)
   ==
 ::
 ++  notif-new-msg

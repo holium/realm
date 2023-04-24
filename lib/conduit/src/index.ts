@@ -15,9 +15,12 @@ import {
   SubscribeParams,
   Thread,
 } from './types';
+const dns = require('dns');
 
 // For now, set it to 20
 setMaxListeners(20);
+
+dns.setDefaultResultOrder('ipv4first');
 
 /**
  * Conduit
@@ -287,6 +290,7 @@ export class Conduit extends EventEmitter {
               const reconnectSub = this.watches.get(eventId);
               reconnectSub?.onQuit?.(parsedData);
               this.setAsIdleWatch(eventId);
+              this.resubscribe(eventId);
             }
             break;
           //

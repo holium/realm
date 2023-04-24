@@ -61,6 +61,7 @@ const parserRules: ParserRules = {
     token: /```\n?/,
     tokenLength: 3,
     ender: '```',
+    printToken: '```',
     enderLength: 3,
     recurse: false,
     priority: 0,
@@ -70,6 +71,7 @@ const parserRules: ParserRules = {
     tokenLength: 2,
     ender: /\n|$/,
     enderLength: 1,
+    printToken: '\n> ',
     recurse: false,
     priority: 1,
   },
@@ -429,11 +431,13 @@ export const fragmentToText = (fragment: FragmentType): string => {
   if (type === 'bold-strike') return `**~~${text}~~**`;
   if (type === 'italics-strike') return `*~~${text}~~*`;
   if (type === 'bold-italics-strike') return `***~~${text}~~***`;
-  if (type === 'blockquote') return `${parserRules.blockquote.token}${text}`;
+  if (type === 'blockquote')
+    return `${parserRules.blockquote.printToken}${text}`;
   if (type === 'inline-code')
     return `${parserRules['inline-code'].token}${text}${parserRules['inline-code'].token}`;
   if (type === 'code')
-    return `${parserRules.code.token}${text}${parserRules.code.token}`;
+    return `${parserRules.code.printToken}\n${text}${parserRules.code.printToken}`;
   if (type === 'break') return '\n';
+  if (type === 'emoji') return `:\\u${text}:`;
   return text;
 };
