@@ -17,11 +17,7 @@ import {
 } from './lib/settings';
 import { getCookie } from './lib/shipHelpers';
 import { APIConnection } from './services/api';
-import {
-  CreateAccountPayload,
-  RealmSession,
-  RealmUpdateTypes,
-} from './realm.types';
+import { CreateAccountPayload, RealmUpdateTypes } from './realm.types';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -66,36 +62,20 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
    * @returns void
    */
   public boot() {
-    let session: RealmSession | null = null;
+    let session;
     if (isDev) {
       session = this._hydrateSessionIfExists();
+      this.services?.ship?.init();
     }
 
-    if (!session) {
-      this.sendUpdate({
-        type: 'booted',
-        payload: {
-          accounts: this.services?.auth.getAccounts() || undefined,
-          session,
-          seenSplash: this.services?.auth.hasSeenSplash() || false,
-        },
-      });
-    } else {
-      if (session) {
-        APIConnection.getInstance().conduit.on('connected', () => {
-          if (!this.services) return;
-          this.sendUpdate({
-            type: 'booted',
-            payload: {
-              accounts: this.services?.auth.getAccounts() || undefined,
-              session,
-              seenSplash: this.services?.auth.hasSeenSplash() || false,
-            },
-          });
-          this.services?.ship?.init();
-        });
-      }
-    }
+    this.sendUpdate({
+      type: 'booted',
+      payload: {
+        accounts: this.services?.auth.getAccounts() || undefined,
+        session,
+        seenSplash: this.services?.auth.hasSeenSplash() || false,
+      },
+    });
   }
 
   /**
@@ -112,6 +92,8 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     if (!this.services) {
       return false;
     }
+
+    // this.services.ship?.decryptDb(password);
 
     const account = this.services.auth.getAccount(patp);
     if (!account) {
@@ -148,6 +130,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           patp,
           code: credentials.code,
         },
+        password,
         encryptionkey
       );
 
@@ -177,6 +160,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     if (!this.services) {
       return;
     }
+
     this.services.ship?.cleanup();
     APIConnection.getInstance().closeChannel();
     delete this.services.ship;
@@ -187,22 +171,6 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         patp,
       },
     });
-  }
-
-  async updatePassport(
-    patp: string,
-    nickname: string,
-    description: string,
-    avatar: string
-  ) {
-    if (!this.services) return;
-
-    return this.services.auth.updatePassport(
-      patp,
-      nickname,
-      description,
-      avatar
-    );
   }
 
   // Used in onboarding before a session exists.
@@ -223,12 +191,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       return;
     }
 
-    const session = {
-      ...credentials,
-      ship: patp,
-    };
-
-    return this.services.ship?.uploadFile(args, session);
+    return this.services.ship?.uploadFile(args);
   }
 
   async updatePassword(patp: string, password: string) {
@@ -248,19 +211,22 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     });
   }
 
-  private _hydrateSessionIfExists(): RealmSession | null {
+  private _hydrateSessionIfExists(): {
+    url: string;
+    patp: string;
+    cookie: string;
+  } | null {
     if (!this.services) return null;
     const session = this.services?.auth._getLockfile();
     if (session) {
       log.info('realm.service.ts:', 'Hydrating session from session.lock');
-      this.services.ship = new ShipService(
-        {
-          patp: session.ship,
-          code: session.code,
-          url: session.url,
-        },
-        session.code
-      );
+
+      const masterAccount = this.services.auth.getMasterAccount(session.ship);
+      if (!masterAccount) {
+        log.error('realm.service.ts:', 'No master account');
+        return null;
+      }
+
       return {
         url: session.url,
         patp: session.ship,
@@ -270,7 +236,11 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     return null;
   }
 
-  public createAccount(accountPayload: CreateAccountPayload, shipCode: string) {
+  public createAccount(
+    accountPayload: CreateAccountPayload,
+    password: string,
+    shipCode: string
+  ) {
     if (!this.services) return false;
 
     const { account, masterAccount } =
@@ -294,6 +264,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           code: shipCode,
           url: account.url,
         },
+        password,
         masterAccount.encryptionKey
       );
 
@@ -379,21 +350,23 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       return false;
     }
 
-    await APIConnection.getInstance({
-      ...credentials,
-      ship: patp,
-    }).conduit.poke({
-      app: 'hood',
-      mark: 'kiln-install',
-      json: {
-        ship: '~hostyv',
-        desk: 'realm',
-        local: 'realm',
-      },
-      onError: (e: any) => {
-        console.error(e);
-      },
-    });
+    try {
+      await APIConnection.getInstance({
+        ...credentials,
+        ship: patp,
+      }).conduit.poke({
+        app: 'hood',
+        mark: 'kiln-install',
+        json: {
+          ship: '~hostyv',
+          desk: 'realm',
+          local: 'realm',
+        },
+      });
+    } catch (e) {
+      log.error('realm.service.ts:', 'Failed to install Realm agent');
+      return false;
+    }
 
     return true;
   }

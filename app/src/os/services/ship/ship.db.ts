@@ -1,8 +1,8 @@
 import path from 'path';
-import fs from 'fs';
 import { app } from 'electron';
 import Database from 'better-sqlite3-multiple-ciphers';
 import log from 'electron-log';
+import crypto from 'crypto';
 import { spacesTablesInitSql } from './spaces/spaces.service';
 import { bazaarTablesInitSql } from './spaces/tables/catalog.table';
 import { notifInitSql } from './notifications/notifications.table';
@@ -12,38 +12,52 @@ import { friendsInitSql } from './friends.service';
 export class ShipDB {
   private shipDB: Database;
   private patp: string;
-  private readonly dbPath: string;
-  private readonly isDev: boolean = process.env.NODE_ENV === 'development';
 
-  constructor(patp: string, password: string) {
-    // Open the authentication database
+  private readonly dbPath: string;
+  private readonly dontEncryptDb: boolean =
+    process.env.DONT_ENCRYPT_DB === 'true';
+
+  constructor(patp: string, password: string, clientSideEncryptionKey: string) {
     this.patp = patp;
     this.dbPath = path.join(app.getPath('userData'), `${patp}.sqlite`);
-    if (!fs.existsSync(this.dbPath)) {
-      this.shipDB = this.open();
-      // Create the database if it doesn't exist
-      log.info('ship.db.ts:', 'ship db file doesnt exist');
-      if (this.isDev) {
-        this.shipDB.exec(initSql);
-        return;
-      } else {
-        this.shipDB.pragma(`rekey='${password}'`); // dbek
-        this.shipDB.pragma(`cipher='sqlcipher'`);
-        this.shipDB.pragma(`legacy=4`);
-        this.shipDB.exec(initSql);
-        this.shipDB.pragma(`key='${password}'`);
-      }
+
+    // Create the database if it doesn't exist
+    log.info('ship.db.ts:', 'ship db file doesnt exist');
+    if (this.dontEncryptDb) {
+      this.shipDB = new Database(this.dbPath);
+      this.shipDB.exec(initSql);
+      return;
     } else {
-      this.shipDB = this.open();
-      if (this.isDev) {
-        this.shipDB.exec(initSql);
-      }
-      this.decrypt(password);
+      log.info('ship.db.ts:', 'Encrypting ship db');
+      const hashGenerator = crypto.createHmac(
+        'sha256',
+        clientSideEncryptionKey
+      );
+      const passwordHash = hashGenerator.update(password).digest('hex');
+
+      this.shipDB = new Database(this.dbPath, {
+        key: passwordHash,
+      });
+      this.shipDB.exec(initSql);
     }
   }
 
   get db() {
     return this.shipDB;
+  }
+
+  public decrypt(password: string) {
+    if (!this.db.open) {
+      throw new Error('Database is not open');
+    }
+    this.db.exec(`PRAGMA key = '${password}'`);
+  }
+
+  public encrypt(password: string) {
+    if (!this.db.open) {
+      throw new Error('Database is not open');
+    }
+    this.db.exec(`PRAGMA rekey = '${password}'`);
   }
 
   getCredentials(): {
@@ -65,19 +79,11 @@ export class ShipDB {
       .run(url, code, cookie);
   }
 
-  open() {
-    return new Database(this.dbPath);
-  }
-
-  decrypt(password: string) {
-    !this.isDev && this.shipDB.pragma(`key='${password}'`);
-  }
-
   getMessages() {
     return this.shipDB.prepare('SELECT * FROM messages;').all();
   }
 
-  async disconnect(): Promise<void> {
+  disconnect() {
     this.shipDB.close();
   }
 }

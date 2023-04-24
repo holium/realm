@@ -1,3 +1,4 @@
+import log from 'electron-log';
 import Database from 'better-sqlite3-multiple-ciphers';
 import { APIConnection } from '../api';
 import AbstractDataAccess from '../abstract.db';
@@ -17,7 +18,7 @@ export interface Friend {
   // updatedAt: number;
 }
 
-export class Friends extends AbstractDataAccess<Friend, any> {
+export class FriendsService extends AbstractDataAccess<Friend, any> {
   constructor(preload: boolean, db?: Database) {
     super({ preload: preload, db, name: 'friends', tableName: 'friends' });
     if (preload) {
@@ -25,6 +26,8 @@ export class Friends extends AbstractDataAccess<Friend, any> {
     } else {
       this._init();
     }
+
+    log.info('friends.service.ts:', 'Constructed.');
   }
 
   protected mapRow(row: any): Friend {
@@ -151,29 +154,37 @@ export class Friends extends AbstractDataAccess<Friend, any> {
     patp: string,
     data: {
       nickname: string;
-      avatar: string;
+      avatar?: string;
       color?: string;
       bio?: string;
       cover?: string;
     }
   ) {
-    const preparedData = {
+    const preparedData: Record<string, any> = {
       nickname: data.nickname,
-      ...{ color: data.color && removeHash(data.color) },
-      avatar: data.avatar,
-      bio: data.bio || null,
-      cover: data.cover || null,
+      color: data.color ? removeHash(data.color) : null,
+      avatar: data.avatar ?? null,
+      // bio: data.bio || null, // the agent seems to want another field
+      cover: data.cover ?? null,
     };
-    return APIConnection.getInstance().conduit.poke({
+    // Remove falsy values
+    Object.keys(preparedData).forEach((key) => {
+      if (!preparedData[key]) {
+        delete preparedData[key];
+      }
+    });
+    const payload = {
       app: 'friends',
-      mark: 'friend-action',
+      mark: 'friends-action',
       json: {
         'set-contact': {
           ship: patp,
           'contact-info': preparedData,
         },
       },
-    });
+    };
+
+    return APIConnection.getInstance().conduit.poke(payload);
   }
 
   public findOne(patp: string): Friend | null {
@@ -235,4 +246,4 @@ export const friendsInitSql = `
   create unique index if not exists friends_patp_uindex on friends (patp);
 `;
 
-export const friendsPreload = Friends.preload(new Friends(true));
+export const friendsPreload = FriendsService.preload(new FriendsService(true));

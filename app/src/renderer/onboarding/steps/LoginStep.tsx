@@ -71,6 +71,7 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
               status: 'online',
               theme: JSON.stringify(defaultTheme),
             },
+            password,
             ship.code
           )
         )

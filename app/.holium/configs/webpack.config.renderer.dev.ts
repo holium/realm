@@ -143,6 +143,7 @@ const configuration: webpack.Configuration = {
       API_HEADERS_VERSION: "2",
       STRIPE_KEY: "pk_test_51LIclKGa9esKD8bTeH2WlTZ8ZyJiwXfc5M6e1RdV01zH8G5x3kq0EZbN9Zuhtkm6WBXslp6MQlErpP8lkKtwSMqf00NomWTPxM",
       UNSPLASH_KEY: "DAGYHT-AvppY6LxaQ1qLiuI5gs5Q-tuYrMNICl0wzxI",
+      DONT_ENCRYPT_DB: "false",
     }),
 
     new webpack.LoaderOptionsPlugin({

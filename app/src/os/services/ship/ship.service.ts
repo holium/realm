@@ -8,7 +8,7 @@ import { APIConnection, ConduitSession } from '../api';
 import RoomsService from './rooms.service';
 import NotificationsService from './notifications/notifications.service';
 import ChatService from './chat/chat.service';
-import { Friends } from './friends.service';
+import { FriendsService } from './friends.service';
 import SpacesService from './spaces/spaces.service';
 import { S3Client, StorageAcl } from '../../../renderer/lib/S3Client';
 import BazaarService from './spaces/bazaar.service';
@@ -21,7 +21,7 @@ export class ShipService extends AbstractService<any> {
     rooms: RoomsService;
     notifications: NotificationsService;
     chat: ChatService;
-    friends: Friends;
+    friends: FriendsService;
     spaces: SpacesService;
     bazaar: BazaarService;
   };
@@ -32,14 +32,16 @@ export class ShipService extends AbstractService<any> {
       url: string;
       code: string;
     },
-    encryptionKey: string,
+    password: string,
+    clientSideEncryptionKey: string,
     options?: ServiceOptions
   ) {
     super('shipService', options);
     this.patp = ship.patp;
     if (options?.preload) return;
 
-    this.shipDB = new ShipDB(this.patp, encryptionKey);
+    this.shipDB = new ShipDB(ship.patp, password, clientSideEncryptionKey);
+    // this.encryptDb(password);
 
     if (!this.shipDB) {
       log.info(
@@ -51,8 +53,8 @@ export class ShipService extends AbstractService<any> {
 
     log.info(
       'ship.service.ts:',
-      `Created ship database for ${ship.patp} with encryption key`,
-      encryptionKey
+      `Created ship database for ${ship.patp} with client-side encryption key`,
+      clientSideEncryptionKey
     );
 
     const credentials = this.shipDB.getCredentials();
@@ -100,14 +102,19 @@ export class ShipService extends AbstractService<any> {
         DELETE FROM spaces;
       `);
     } catch (e) {
-      log.error(e);
+      log.error('ship.service.ts:', 'Failed to drop tables', e);
     }
+
+    log.info(
+      'ship.service.ts:',
+      'Creating ship sub-services (rooms, notifications, chat, friends, spaces, bazaar)...'
+    );
 
     this.services = {
       rooms: new RoomsService(),
       notifications: new NotificationsService(undefined, this.shipDB.db),
       chat: new ChatService(undefined, this.shipDB.db),
-      friends: new Friends(false, this.shipDB.db),
+      friends: new FriendsService(false, this.shipDB.db),
       spaces: new SpacesService(undefined, this.shipDB.db, this.patp),
       bazaar: new BazaarService(undefined, this.shipDB.db),
     };
@@ -141,8 +148,20 @@ export class ShipService extends AbstractService<any> {
     return this.shipDB?.getCredentials();
   }
 
-  private _decryptDb(password: string) {
-    this.shipDB?.decrypt(password);
+  public decryptDb(password: string) {
+    if (!this.shipDB) return;
+
+    log.info('ship.service.ts:', 'Decrypting ship database...');
+
+    this.shipDB.decrypt(password);
+  }
+
+  public encryptDb(password: string) {
+    if (!this.shipDB) return;
+
+    log.info('ship.service.ts:', 'Encrypting ship database...');
+
+    this.shipDB.encrypt(password);
   }
 
   public cleanup() {
@@ -154,6 +173,8 @@ export class ShipService extends AbstractService<any> {
     this.services?.friends.reset();
     this.services?.spaces.reset();
     this.services?.bazaar.reset();
+
+    this.shipDB?.disconnect();
   }
 
   public async getOurGroups(): Promise<{ [path: string]: any }> {
@@ -183,13 +204,13 @@ export class ShipService extends AbstractService<any> {
   // ----------------------------------------
   // ------------------ S3 ------------------
   // ----------------------------------------
-  public async getS3Bucket(session?: ConduitSession) {
+  public async getS3Bucket() {
     const [credentials, configuration] = await Promise.all([
-      APIConnection.getInstance(session).conduit.scry({
+      APIConnection.getInstance().conduit.scry({
         app: 's3-store',
         path: `/credentials`,
       }),
-      APIConnection.getInstance(session).conduit.scry({
+      APIConnection.getInstance().conduit.scry({
         app: 's3-store',
         path: `/configuration`,
       }),
@@ -201,12 +222,9 @@ export class ShipService extends AbstractService<any> {
     };
   }
 
-  public async uploadFile(
-    args: FileUploadParams,
-    session?: ConduitSession
-  ): Promise<string | undefined> {
+  public async uploadFile(args: FileUploadParams): Promise<string | undefined> {
     return await new Promise((resolve, reject) => {
-      this.getS3Bucket(session)
+      this.getS3Bucket()
         .then(async (response: any) => {
           console.log('getS3Bucket response: ', response);
           // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
@@ -248,12 +266,12 @@ export class ShipService extends AbstractService<any> {
     });
   }
 
-  updatePassport(nickname: string, description: string, avatar: string) {
+  updatePassport(nickname: string, bio?: string, avatar?: string) {
     if (!this.services) return;
 
     this.services.friends.saveContact(this.patp, {
       nickname,
-      bio: description,
+      bio,
       avatar,
     });
   }
@@ -269,6 +287,7 @@ export const shipPreload = ShipService.preload(
       url: '',
       code: '',
     },
+    '',
     '',
     { preload: true }
   )

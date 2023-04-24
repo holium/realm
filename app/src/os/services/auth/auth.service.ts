@@ -49,6 +49,11 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     return this.authDB.tables.accounts.findOne(patp);
   }
 
+  public getMasterAccount(patp: string): MasterAccount | null {
+    if (!this.authDB) return null;
+    return this.authDB.tables.masterAccounts.findOne(`patp = "${patp}"`);
+  }
+
   public async createMasterAccount(
     masterAccountPayload: CreateMasterAccountPayload
   ) {
@@ -156,8 +161,8 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
   public updatePassport(
     patp: string,
     nickname: string,
-    description: string,
-    avatar: string
+    description?: string,
+    avatar?: string
   ) {
     if (!this.authDB) return false;
 

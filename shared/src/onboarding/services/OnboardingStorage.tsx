@@ -61,5 +61,8 @@ export const OnboardingStorage = {
   },
   reset: () => {
     localStorage.removeItem('step');
+    localStorage.removeItem('nickname');
+    localStorage.removeItem('description');
+    localStorage.removeItem('avatar');
   },
 };
