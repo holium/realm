@@ -40,6 +40,7 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
     });
 
     if (!masterAccount) return false;
+    localStorage.removeItem('lastAccountLogin');
 
     OnboardingStorage.set({
       email: response.email,

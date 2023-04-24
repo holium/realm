@@ -115,9 +115,9 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
           log.info('replace', replacePayload);
           const replacePath = replacePayload.space.path;
           this.spacesDB?.update(replacePath, replacePayload.space);
-          const updatedSpace = this.getSpace(replacePath);
+          // const updatedSpace = this.getSpace(replacePath);
 
-          log.info(updatedSpace);
+          // log.info(updatedSpace);
           this.sendUpdate({
             type: 'replace',
             payload: this.getSpace(replacePath),

@@ -354,9 +354,8 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
 
   public _clearLockfile(): void {
     if (isDev) {
-      log.info('auth.service.ts:', 'Clearing session.lock');
-      const lockFile = new Store<LockFileType>(LockFileOptions);
-      lockFile.delete('session');
+      log.info('Clearing session.lock');
+      fs.unlinkSync(path.join(app.getPath('userData'), 'session.lock'));
     }
   }
 

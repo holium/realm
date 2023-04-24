@@ -29,8 +29,11 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   // const wrapperRef = useRef(null);
   const submitRef = useRef<HTMLButtonElement>(null);
 
-  // Setting up options menu
-  const [selectedShip, setSelectedShip] = useState(accounts[0]);
+  const [selectedShip, setSelectedShip] = useState(
+    accounts.find(
+      (acc) => acc.patp === localStorage.getItem('lastAccountLogin')
+    ) || accounts[0]
+  );
 
   const shipName = selectedShip?.nickname || selectedShip?.patp;
 

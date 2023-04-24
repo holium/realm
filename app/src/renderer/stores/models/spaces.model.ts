@@ -4,6 +4,8 @@ import {
   flow,
   applySnapshot,
   castToSnapshot,
+  clone,
+  getSnapshot,
 } from 'mobx-state-tree';
 import { toJS } from 'mobx';
 import { LoaderModel, SubscriptionModel } from './common.model';
@@ -68,20 +70,24 @@ export const SpaceModel = types
     },
   }))
   .actions((self) => ({
+    setTheme: flow(function* (theme: any) {
+      try {
+        self.theme = clone(theme);
+        yield SpacesIPC.updateSpace(self.path, getSnapshot(self));
+      } catch (e) {
+        console.error(e);
+      }
+    }),
     pinApp: flow(function* (appId: string) {
       try {
-        return yield BazaarIPC.pinApp(
-          self.path,
-          appId,
-          self.dock.length
-        ) as Promise<any>;
+        return yield BazaarIPC.pinApp(self.path, appId, self.dock.length);
       } catch (error) {
         console.error(error);
       }
     }),
     unpinApp: flow(function* (appId: string) {
       try {
-        return yield BazaarIPC.unpinApp(self.path, appId) as Promise<any>;
+        return yield BazaarIPC.unpinApp(self.path, appId);
       } catch (error) {
         console.error(error);
       }
@@ -96,31 +102,21 @@ export const SpaceModel = types
 
       try {
         applySnapshot(self.dock, dockApps);
-        return yield BazaarIPC.reorderPinnedApps(
-          self.path,
-          dock
-        ) as Promise<any>;
+        return yield BazaarIPC.reorderPinnedApps(self.path, dock);
       } catch (error) {
         console.error(error);
       }
     }),
     addToSuite: flow(function* (appId: string, index: number) {
       try {
-        return yield BazaarIPC.addToSuite(
-          self.path,
-          appId,
-          index
-        ) as Promise<any>;
+        return yield BazaarIPC.addToSuite(self.path, appId, index);
       } catch (error) {
         console.error(error);
       }
     }),
     removeFromSuite: flow(function* (index: number) {
       try {
-        return yield BazaarIPC.removeFromSuite(
-          self.path,
-          index
-        ) as Promise<any>;
+        return yield BazaarIPC.removeFromSuite(self.path, index);
       } catch (error) {
         console.error(error);
       }
@@ -194,8 +190,7 @@ export const SpacesStore = types
     init: flow(function* () {
       self.loader.set('loading');
       try {
-        const { current, spaces } =
-          yield SpacesIPC.getInitial() as Promise<any>;
+        const { current, spaces } = yield SpacesIPC.getInitial();
         spaces.forEach((space: any) => {
           space.theme.id = space.path;
           const spaceModel = SpaceModel.create(spaceRowToModel(space));
@@ -221,7 +216,7 @@ export const SpacesStore = types
     joinSpace: flow(function* (spacePath: string) {
       self.join.set('loading');
       try {
-        const space = yield SpacesIPC.joinSpace(spacePath) as Promise<any>;
+        const space = yield SpacesIPC.joinSpace(spacePath);
         self.join.set('loaded');
         return space;
       } catch (e) {
@@ -233,7 +228,7 @@ export const SpacesStore = types
     createSpace: flow(function* (newSpace: any) {
       self.creating.set('loading');
       try {
-        const spacePath = yield SpacesIPC.createSpace(newSpace) as Promise<any>;
+        const spacePath = yield SpacesIPC.createSpace(newSpace);
         const created = SpaceModel.create(
           castToSnapshot({
             ...newSpace,
@@ -263,9 +258,10 @@ export const SpacesStore = types
       updatedSpace.access = space.access;
       updatedSpace.description = space.description;
       updatedSpace.name = space.name;
+      updatedSpace.theme = clone(space.theme);
       try {
         self.spaces.set(spacePath, updatedSpace);
-        yield SpacesIPC.updateSpace(spacePath, space) as Promise<any>;
+        yield SpacesIPC.updateSpace(spacePath, space);
       } catch (e) {
         self.spaces.set(spacePath, oldSpace);
         console.error(e);
@@ -280,7 +276,7 @@ export const SpacesStore = types
           self.selected = self.ourSpace;
         }
         self.spaces.delete(spacePath);
-        yield SpacesIPC.deleteSpace(spacePath) as Promise<any>;
+        yield SpacesIPC.deleteSpace(spacePath);
       } catch (e) {
         console.error(e);
         self.spaces.set(spacePath, deletedSpace);
@@ -295,7 +291,7 @@ export const SpacesStore = types
           self.selected = self.ourSpace;
         }
         self.spaces.delete(spacePath);
-        yield SpacesIPC.leaveSpace(spacePath) as Promise<any>;
+        yield SpacesIPC.leaveSpace(spacePath);
       } catch (e) {
         console.error(e);
         self.spaces.set(spacePath, leftSpace);
@@ -317,7 +313,7 @@ export const SpacesStore = types
           patp,
           role: 'member',
           message: '',
-        }) as Promise<any>;
+        });
       } catch (e) {
         console.error(e);
         space.members.remove(patp);
@@ -329,7 +325,7 @@ export const SpacesStore = types
       const member = space.members.all.get(patp);
       try {
         space.members.remove(patp);
-        yield SpacesIPC.kickMember(spacePath, patp) as Promise<any>;
+        yield SpacesIPC.kickMember(spacePath, patp);
       } catch (e) {
         console.error(e);
         space.members.add(patp, MembersModel.create(member));
@@ -341,7 +337,7 @@ export const SpacesStore = types
       roles: MemberRole[]
     ) {
       try {
-        yield SpacesIPC.setRoles(spacePath, patp, roles) as Promise<any>;
+        yield SpacesIPC.setRoles(spacePath, patp, roles);
       } catch (e) {
         console.error(e);
       }

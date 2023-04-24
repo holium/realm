@@ -16,7 +16,7 @@ import {
 import { useAppState } from 'renderer/stores/app.store';
 import { ShipMobxType, useShipStore } from 'renderer/stores/ship.store';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
-import { Theme, ThemeType } from 'renderer/stores/models/theme.model';
+import { ThemeType } from 'renderer/stores/models/theme.model';
 
 const WallpaperPreview = styled(motion.img)`
   width: 80%;
@@ -68,8 +68,7 @@ const ThemePanelPresenterView = ({
   ship,
   space,
 }: ThemePanelPresenterViewProps) => {
-  const { setTheme } = useAppState();
-  // const { spacesStore } = useShipStore();
+  const { spacesStore } = useShipStore();
   const { windowColor, inputColor } = theme;
   const cardColor = useMemo(() => lighten(0.03, windowColor), [windowColor]);
   const [wpOption, setWpOption] = useState<wpOptionType>(undefined);
@@ -83,35 +82,35 @@ const ThemePanelPresenterView = ({
   // is 'me' (currently logged in user) an admin?
   const canEditSpace = me !== undefined;
 
+  const updateSpaceTheme = async (newTheme: ThemeType) => {
+    const currentSpace = spacesStore.spaces.get(space.path);
+    if (!currentSpace) {
+      console.warn('space not found in spacesStore');
+      return;
+    }
+    await currentSpace.setTheme(newTheme);
+  };
+
   const themeForm = useForm({
     async onSubmit({ values }: any) {
-      //
-
       if (!canEditSpace) {
         // this shouldnt happen, blocked at validate form
         return;
       }
 
-      let newTheme;
+      let newTheme: ThemeType | undefined;
       if (values.customWallpaper !== '') {
         customWallpaper.actions.onChange('');
-        newTheme = await theme.setWallpaper(space.path, values.customWallpaper);
+        newTheme = (await theme.setWallpaper(
+          values.customWallpaper
+        )) as ThemeType;
       } else if (wpOption !== undefined) {
-        newTheme = await theme.setWallpaper(space.path, wpGallery[wpOption]);
+        newTheme = (await theme.setWallpaper(wpGallery[wpOption])) as ThemeType;
       } else {
-        console.log('wallpaper was undefined.');
+        console.warn('wallpaper was undefined.');
         return;
       }
-      setTheme(Theme.create(newTheme.values));
-
-      // TODO doesnt work
-      // could probably be made to work, but it would be pretty hacky
-      //  drunkplato and bacwyls have agreed that theme stuff should probably be refactored
-      //  before wiring it up to settings.
-      //
-      // let mytheme = toJS(theme);
-      // mytheme.accentColor = values.accentColor;
-      // await DesktopActions.setTheme(mytheme)
+      await updateSpaceTheme(newTheme);
     },
   });
 
@@ -267,20 +266,23 @@ const ThemePanelPresenterView = ({
           Gallery
         </Text.Custom>
         <RadioImages
-          // style={{
-          //   background: 'rgba(var((--rlm-overlay-hover-rgba))',
-          // }}
-
           selected={wpOption}
           options={wpGalleryKeys.map((key: string) => ({
             imageSrc: wpGallery[key],
             value: key,
           }))}
-          onClick={(value: wpOptionType) => {
+          onClick={async (value: wpOptionType) => {
             if (wpOption && value === wpOption) {
               setWpOption(undefined);
-            } else {
+            } else if (value) {
               setWpOption(value);
+              const newTheme = await theme.setWallpaper(wpGallery[value]);
+              const currentSpace = spacesStore.spaces.get(space.path);
+              if (!currentSpace) {
+                console.warn('space not found in spacesStore');
+                return;
+              }
+              await currentSpace.setTheme(newTheme);
             }
           }}
         />

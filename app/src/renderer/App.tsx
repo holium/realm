@@ -13,9 +13,10 @@ import { ErrorBoundary } from './system/ErrorBoundary';
 import { Auth } from './system/authentication/index';
 import { Splash } from './onboarding/Splash';
 import { RealmIPC } from './stores/ipc';
+import { Centered, ViewPort } from 'react-spaces';
 
 function AppContentPresenter() {
-  const { seenSplash, authStore, booted } = useAppState();
+  const { seenSplash, authStore } = useAppState();
 
   const isLoggedOut = !authStore.session;
   const hasNoAccounts = authStore.accounts.length === 0;
@@ -40,13 +41,6 @@ function AppContentPresenter() {
     OnboardingStorage.reset();
   };
 
-  if (!booted) {
-    return (
-      <Flex>
-        <Spinner size={2} />
-      </Flex>
-    );
-  }
   if (!seenSplash) {
     return <Splash />;
   }
@@ -79,7 +73,7 @@ function AppContentPresenter() {
 export const AppContent = observer(AppContentPresenter);
 
 const AppPresenter = () => {
-  const { theme, shellStore } = useAppState();
+  const { theme, shellStore, booted } = useAppState();
   const contextMenuMemo = useMemo(() => <ContextMenu />, []);
   const bgImage = useMemo(() => theme.wallpaper, [theme.wallpaper]);
 
@@ -89,6 +83,18 @@ const AppPresenter = () => {
       shellStore.closeDialog();
     };
   }, []);
+
+  if (!booted) {
+    return (
+      <ViewPort>
+        <Flex height="100vh" width="100%">
+          <Centered>
+            <Spinner size={2} />
+          </Centered>
+        </Flex>
+      </ViewPort>
+    );
+  }
 
   return (
     <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>

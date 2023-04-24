@@ -59,6 +59,7 @@ const AppStateModel = types
         // if the user is logged in, update the theme for the account
         // the login screen will use the theme from the account
         self.authStore.setAccountCurrentTheme(theme);
+        localStorage.setItem('lastTheme', JSON.stringify(theme));
       }
     },
     setLoggedIn() {
@@ -95,11 +96,15 @@ const AppStateModel = types
 
 // const persistedState = loadSnapshot();
 
+const lastTheme = localStorage.getItem('lastTheme');
+
 export const appState = AppStateModel.create({
   booted: false,
   seenSplash: false,
   currentScreen: 'onboarding',
-  theme: Theme.create(defaultTheme),
+  theme: lastTheme
+    ? Theme.create(JSON.parse(lastTheme))
+    : Theme.create(defaultTheme),
   isLoggedIn: false,
   authStore: {
     accounts: [],
@@ -158,6 +163,7 @@ function registerOnUpdateListener() {
     if (update.type === 'auth-success') {
       SoundActions.playLogin();
       appState.authStore._setSession(update.payload.patp);
+      localStorage.setItem('lastAccountLogin', update.payload.patp);
       appState.setLoggedIn();
       shipStore.setShip(update.payload);
     }

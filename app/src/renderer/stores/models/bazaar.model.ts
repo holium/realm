@@ -250,22 +250,8 @@ export const BazaarStore = types
   }))
   .actions((self) => ({
     init: flow(function* () {
-      const data = yield BazaarIPC.fetchAppCatalog() as Promise<any>;
+      const data = yield BazaarIPC.fetchAppCatalog();
       applySnapshot(self.catalog, data);
-      // const { apps, gridIndex, recentApps, recentDevs } = data;
-      // self.catalog.clear();
-      // self.gridIndex.clear();
-      // self.recentApps.clear();
-      // self.recentDevs.clear();
-      // apps.forEach((app: UrbitAppType) => {
-      //   self.catalog.set(app.id, {
-      //     ...app,
-      //     color: cleanNounColor(app.color),
-      //   });
-      // });
-      // applySnapshot(self.gridIndex, gridIndex);
-      // self.recentApps.push(...recentApps);
-      // self.recentDevs.push(...recentDevs);
     }),
     _onInitialLoad(catalog: any) {
       applySnapshot(self.catalog, catalog);
@@ -431,7 +417,7 @@ export const BazaarStore = types
           app.setStatus(InstallStatus.started);
           self.installations.set(app.id, InstallStatus.started);
         }
-        return yield BazaarIPC.installApp(ship, desk) as Promise<any>;
+        return yield BazaarIPC.installApp(ship, desk);
       } catch (error) {
         if (app) {
           app.setStatus(InstallStatus.failed);
@@ -450,7 +436,7 @@ export const BazaarStore = types
         self.gridIndex.delete(desk);
         console.log('uninstalling app', desk);
         try {
-          return yield BazaarIPC.uninstallApp(desk) as Promise<any>;
+          return yield BazaarIPC.uninstallApp(desk);
         } catch (error) {
           console.error(error);
           self.gridIndex.set(`${self.gridIndex.size + 1}`, desk);
@@ -468,7 +454,7 @@ export const BazaarStore = types
       app.setStatus(InstallStatus.suspending);
       self.installations.set(app.id, InstallStatus.suspending);
       try {
-        return yield BazaarIPC.suspendApp(desk) as Promise<any>;
+        return yield BazaarIPC.suspendApp(desk);
       } catch (error) {
         console.error(error);
         if (app) {
@@ -487,7 +473,7 @@ export const BazaarStore = types
       app.setStatus(InstallStatus.reviving);
       self.installations.set(app.id, InstallStatus.reviving);
       try {
-        return yield BazaarIPC.reviveApp(desk) as Promise<any>;
+        return yield BazaarIPC.reviveApp(desk);
       } catch (error) {
         console.error(error);
         if (app) {
@@ -499,7 +485,7 @@ export const BazaarStore = types
     recommendApp: flow(function* (appId: string) {
       try {
         self.recommendations.push(appId);
-        return yield BazaarIPC.recommendApp(appId) as Promise<any>;
+        return yield BazaarIPC.recommendApp(appId);
       } catch (error) {
         console.error(error);
       }
@@ -511,7 +497,7 @@ export const BazaarStore = types
           self.recommendations.filter((id: string) => id !== appId)
         );
 
-        return yield BazaarIPC.unrecommendApp(appId) as Promise<any>;
+        return yield BazaarIPC.unrecommendApp(appId);
       } catch (error) {
         console.error(error);
       }
@@ -521,7 +507,7 @@ export const BazaarStore = types
         if (self.allies.has(ship)) return;
         self.loadingTreaties = true;
         self.addingAlly.set(ship, 'adding');
-        const result: any = yield BazaarIPC.addAlly(ship) as Promise<any>;
+        const result: any = yield BazaarIPC.addAlly(ship);
         // self.loadingTreaties = false;
         return result;
       } catch (error) {
@@ -532,7 +518,7 @@ export const BazaarStore = types
 
     removeAlly: flow(function* (ship: string) {
       try {
-        const result: any = yield BazaarIPC.removeAlly(ship) as Promise<any>;
+        const result: any = yield BazaarIPC.removeAlly(ship);
         return result;
       } catch (error) {
         console.error(error);
@@ -543,14 +529,14 @@ export const BazaarStore = types
     //
     scryHash: flow(function* (app: string) {
       try {
-        return yield BazaarIPC.scryHash(app) as Promise<any>;
+        return yield BazaarIPC.scryHash(app);
       } catch (error) {
         console.error(error);
       }
     }),
     scryAllies: flow(function* () {
       try {
-        const allies = yield BazaarIPC.scryAllies() as Promise<any>;
+        const allies = yield BazaarIPC.scryAllies();
         for (const key in allies) {
           const desks = allies[key];
           for (let i = 0; i < desks.length; i++) {
@@ -568,7 +554,7 @@ export const BazaarStore = types
       self.loadingTreaties = true;
       try {
         self.treaties.clear();
-        const treaties = yield BazaarIPC.scryTreaties(ship) as Promise<any>;
+        const treaties = yield BazaarIPC.scryTreaties(ship);
         const formedTreaties = [];
         for (const key in treaties) {
           const treaty = treaties[key];

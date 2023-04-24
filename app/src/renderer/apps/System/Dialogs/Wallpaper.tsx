@@ -9,6 +9,7 @@ import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { normalizeBounds } from 'renderer/lib/window-manager';
+import { Theme } from 'renderer/stores/models/theme.model';
 
 export const WallpaperDialogConfig: DialogConfig = {
   component: (props: any) => <WallpaperDialog {...props} />,
@@ -83,11 +84,21 @@ const WallpaperDialogPresenter = () => {
   };
 
   // TODO prevent changing wallpaper if you are not admin of the space
-  const onChange = () => {
+  const onChange = async () => {
     if (!spacesStore.selected?.path) return;
+    setLoading(true);
     const formData = wallpaperForm.actions.submit();
     // setLoading(true);
-    theme.setWallpaper(spacesStore.selected.path, formData.imageUrl);
+    const newTheme = await theme.setWallpaper(formData.imageUrl);
+    const currentSpace = spacesStore.selected;
+    try {
+      await currentSpace.setTheme(newTheme);
+      setLoading(false);
+    } catch (e) {
+      console.error(e);
+      setLoading(false);
+    }
+
     closeDialog();
   };
 

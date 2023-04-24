@@ -17,7 +17,11 @@ import {
 } from './lib/settings';
 import { getCookie } from './lib/shipHelpers';
 import { APIConnection } from './services/api';
-import { CreateAccountPayload, RealmUpdateTypes } from './realm.types';
+import {
+  CreateAccountPayload,
+  RealmSession,
+  RealmUpdateTypes,
+} from './realm.types';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -62,20 +66,36 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
    * @returns void
    */
   public boot() {
-    let session;
+    let session: RealmSession | null = null;
     if (isDev) {
       session = this._hydrateSessionIfExists();
-      this.services?.ship?.init();
     }
 
-    this.sendUpdate({
-      type: 'booted',
-      payload: {
-        accounts: this.services?.auth.getAccounts() || undefined,
-        session,
-        seenSplash: this.services?.auth.hasSeenSplash() || false,
-      },
-    });
+    if (!session) {
+      this.sendUpdate({
+        type: 'booted',
+        payload: {
+          accounts: this.services?.auth.getAccounts() || undefined,
+          session,
+          seenSplash: this.services?.auth.hasSeenSplash() || false,
+        },
+      });
+    } else {
+      if (session) {
+        APIConnection.getInstance().conduit.on('connected', () => {
+          if (!this.services) return;
+          this.sendUpdate({
+            type: 'booted',
+            payload: {
+              accounts: this.services?.auth.getAccounts() || undefined,
+              session,
+              seenSplash: this.services?.auth.hasSeenSplash() || false,
+            },
+          });
+          this.services?.ship?.init();
+        });
+      }
+    }
   }
 
   /**
@@ -228,11 +248,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     });
   }
 
-  private _hydrateSessionIfExists(): {
-    url: string;
-    patp: string;
-    cookie: string;
-  } | null {
+  private _hydrateSessionIfExists(): RealmSession | null {
     if (!this.services) return null;
     const session = this.services?.auth._getLockfile();
     if (session) {
