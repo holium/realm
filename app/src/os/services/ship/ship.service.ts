@@ -12,6 +12,7 @@ import { Friends } from './friends.service';
 import SpacesService from './spaces/spaces.service';
 import { S3Client, StorageAcl } from '../../../renderer/lib/S3Client';
 import BazaarService from './spaces/bazaar.service';
+import { getCookie } from '../../lib/shipHelpers';
 
 export class ShipService extends AbstractService<any> {
   public patp: string;
@@ -25,28 +26,65 @@ export class ShipService extends AbstractService<any> {
     bazaar: BazaarService;
   };
 
-  constructor(patp: string, password: string, options?: ServiceOptions) {
+  constructor(
+    ship: {
+      patp: string;
+      url: string;
+      code: string;
+    },
+    encryptionKey: string,
+    options?: ServiceOptions
+  ) {
     super('shipService', options);
-    this.patp = patp;
-    if (options?.preload) {
+    this.patp = ship.patp;
+    if (options?.preload) return;
+
+    this.shipDB = new ShipDB(this.patp, encryptionKey);
+
+    if (!this.shipDB) {
+      log.info(
+        'ship.service.ts:',
+        `Failed to create ship database for ${ship.patp}`
+      );
       return;
     }
-    this.shipDB = new ShipDB(this.patp, password);
+
+    log.info(
+      'ship.service.ts:',
+      `Created ship database for ${ship.patp} with encryption key`,
+      encryptionKey
+    );
+
     const credentials = this.shipDB.getCredentials();
-    if (
-      !this.shipDB ||
-      !credentials.code ||
-      !credentials.url ||
-      !credentials.cookie
-    ) {
-      log.info(`No credentials found for ${patp}`);
-      return;
+
+    log.info('ship.service.ts:', 'Creating new ship credentials...');
+
+    if (!credentials.cookie) {
+      log.info('ship.service.ts:', 'No cookie found, getting cookie...');
+      getCookie({
+        patp: ship.patp,
+        url: ship.url,
+        code: ship.code,
+      })
+        .then((cookie) => {
+          if (cookie) {
+            this.setCredentials(ship.url, ship.code, ship.code);
+          } else {
+            log.error('Failed to get cookie');
+          }
+        })
+        .catch((err) => {
+          log.error('Failed to get cookie', err);
+        });
+    } else {
+      log.info('ship.service.ts:', 'Cookie found, setting credentials...');
+      this.setCredentials(ship.url, ship.code, credentials.cookie);
     }
 
     // create an instance of the conduit
     APIConnection.getInstance({
       ...credentials,
-      ship: patp,
+      ship: ship.patp,
     }).conduit.on('refreshed', (session: ConduitSession) => {
       this.shipDB?.setCredentials(session.url, session.code, session.cookie);
     });
@@ -93,6 +131,10 @@ export class ShipService extends AbstractService<any> {
       this.credentials.code,
       cookie
     );
+  }
+
+  public setCredentials(url: string, code: string, cookie: string) {
+    this.shipDB?.setCredentials(url, code, cookie);
   }
 
   get credentials() {
@@ -221,7 +263,15 @@ export default ShipService;
 
 // Generate preload
 export const shipPreload = ShipService.preload(
-  new ShipService('', '', { preload: true })
+  new ShipService(
+    {
+      patp: '',
+      url: '',
+      code: '',
+    },
+    '',
+    { preload: true }
+  )
 );
 
 export interface FileUploadParams {

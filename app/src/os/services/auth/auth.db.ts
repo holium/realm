@@ -61,10 +61,10 @@ export class AuthDB {
       });
       // if realm.auth is empty, don't migrate
       if (!oldAuth.store || Object.keys(oldAuth.store).length === 0) {
-        log.info('No realm.auth.json to migrate -> skipping');
+        log.info('auth.db.ts:', 'No realm.auth.json to migrate -> skipping');
         return;
       }
-      log.info('Migrating realm.auth.json to sqlite');
+      log.info('auth.db.ts:', 'Migrating realm.auth.json to sqlite');
       const oldTheme = new Store({
         name: 'realm.auth-theme',
         accessPropertiesByDotNotation: true,

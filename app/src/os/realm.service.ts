@@ -99,7 +99,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
 
     const account = this.services.auth.getAccount(patp);
     if (!account) {
-      log.info(`No account found for ${patp}`);
+      log.info('realm.service.ts:', `No account found for ${patp}`);
       return false;
     }
     const isAuthenticated = this.services.auth._verifyPassword(
@@ -116,16 +116,24 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       return false;
     }
     if (isAuthenticated) {
-      track('login', { patp });
-      log.info(`${patp} authenticated`);
-      const key = await this.services.auth.deriveDbKey(password);
-      if (this.services.ship) this.services.ship.cleanup();
-      this.services.ship = new ShipService(patp, key);
-      const credentials = this.services.ship.credentials;
+      const credentials = this.services.ship?.credentials;
       if (!credentials) {
         log.error('No credentials found');
         return false;
       }
+
+      track('login', { patp });
+      log.info('realm.service.ts:', `${patp} authenticated`);
+      const encryptionkey = await this.services.auth.deriveDbKey(password);
+      if (this.services.ship) this.services.ship.cleanup();
+      this.services.ship = new ShipService(
+        {
+          url: account.url,
+          patp,
+          code: credentials.code,
+        },
+        encryptionkey
+      );
 
       return new Promise((resolve) => {
         APIConnection.getInstance().conduit.on('connected', () => {
@@ -232,8 +240,15 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     if (!this.services) return null;
     const session = this.services?.auth._getLockfile();
     if (session) {
-      log.info('Hydrating session from session.lock');
-      this.services.ship = new ShipService(session.ship, session.code);
+      log.info('realm.service.ts:', 'Hydrating session from session.lock');
+      this.services.ship = new ShipService(
+        {
+          patp: session.ship,
+          code: session.code,
+          url: session.url,
+        },
+        session.code
+      );
       return {
         url: session.url,
         patp: session.ship,
@@ -246,28 +261,36 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   public createAccount(accountPayload: CreateAccountPayload, shipCode: string) {
     if (!this.services) return false;
 
-    const { account, shipDB } = this.services.auth.createAccount(
-      accountPayload,
-      shipCode
-    );
+    const { account, masterAccount } =
+      this.services.auth.createAccount(accountPayload);
 
     if (!account) {
       log.error('Failed to create account');
       return false;
     }
 
-    if (!shipDB) {
-      log.error('Failed to create shipDB');
+    if (!masterAccount) {
+      log.error('Failed to create master account');
       return false;
     }
 
-    log.info(`Created account for ${account.patp}`);
+    log.info('realm.service.ts:', `Created account for ${account.patp}`);
 
     if (!this.services.ship) {
+      // Creates the ship database with the master account's encryption key
       this.services.ship = new ShipService(
-        account.patp,
-        accountPayload.passwordHash
+        {
+          patp: account.patp,
+          code: shipCode,
+          url: account.url,
+        },
+        masterAccount.encryptionKey
       );
+
+      if (!this.services.ship) {
+        log.error('Failed to create ship service');
+        return false;
+      }
     }
 
     return account;
@@ -392,6 +415,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           return;
         }
         log.info(
+          'realm.service.ts:',
           'child window attempting to redirect to login. refreshing cookie...'
         );
         const cookie = await getCookie({
@@ -400,6 +424,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           code,
         });
         log.info(
+          'realm.service.ts:',
           'new cookie generated. reloading child window and saving new cookie to session.'
         );
         if (!cookie) {
