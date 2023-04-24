@@ -73,6 +73,8 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     });
 
     if (newAccount) {
+      //if (this.authDB._needsMigration()) this.authDB.migrateJsonToSqlite(newAccount.id);
+
       log.info(
         'auth.service.ts:',
         `Created master account for ${masterAccountPayload.email}`
