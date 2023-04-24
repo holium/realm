@@ -64,7 +64,6 @@ export const Reply = (props: ReplyProps) => {
   if (
     (!TEXT_TYPES.includes(fragmentType) &&
       fragmentType !== 'image' &&
-      fragmentType !== 'emoji' &&
       fragmentType !== 'reply') ||
     fragmentType === 'code'
   ) {

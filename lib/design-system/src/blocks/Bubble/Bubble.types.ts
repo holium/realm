@@ -61,13 +61,6 @@ export type FragmentUrLinkType = {
   'ur-link': string;
   metadata?: any;
 };
-export type FragmentCustomType = {
-  custom: {
-    name: string;
-    value: string;
-  };
-  metadata?: any;
-};
 export type FragmentBreakType = {
   break: null;
   metadata?: any;
@@ -105,7 +98,6 @@ export type FragmentType =
   | FragmentBreakType
   | FragmentReplyType
   | FragmentTabType
-  | FragmentCustomType
   | FragmentStatusType;
 
 export type FragmentKey = keyof FragmentType;

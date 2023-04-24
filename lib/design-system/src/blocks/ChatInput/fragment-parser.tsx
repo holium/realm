@@ -7,7 +7,6 @@ import {
   FragmentKey,
   TEXT_TYPES,
 } from '../Bubble/Bubble.types';
-import { Emoji } from 'emoji-picker-react';
 
 type ParserKey =
   | 'bold'
@@ -20,7 +19,6 @@ type ParserKey =
   | 'image'
   | 'link'
   | 'bold-italics-strike'
-  | 'emoji'
   | 'break';
 
 type ParserRule = {
@@ -33,7 +31,6 @@ type ParserRule = {
   regex?: RegExp;
   filter?: (s: string) => boolean;
   printToken?: string;
-  custom?: boolean;
 };
 type ParserRules = {
   [K in ParserKey]: ParserRule;
@@ -109,15 +106,6 @@ const parserRules: ParserRules = {
     recurse: false,
     priority: 4,
   },
-  emoji: {
-    token: ':\\u',
-    ender: ':',
-    tokenLength: 3,
-    enderLength: 1,
-    recurse: false,
-    custom: true,
-    priority: 4.5,
-  },
   break: {
     token: '\n',
     tokenLength: 1,
@@ -169,13 +157,7 @@ const eatSpecialType = (
       if (!parserRules[type].filter || parserRules[type].filter(matchingText)) {
         pre = raw.substr(0, startIndex);
         post = raw.substr(endIndex);
-        if (parserRules[type].custom) {
-          frag = {
-            custom: { name: type, value: matchingText },
-          } as FragmentType;
-        } else {
-          frag = { [type]: matchingText } as FragmentType;
-        }
+        frag = { [type]: matchingText } as FragmentType;
       }
     }
   } else {
@@ -226,12 +208,7 @@ const eatSpecialType = (
           let parsedIndex = offset + stopIndex + endTokenLength;
           pre = raw.substr(0, startIndex);
           post = raw.substr(parsedIndex);
-          const val = raw.substr(offset, stopIndex);
-          if (parserRules[type].custom) {
-            frag = { custom: { name: type, value: val } } as FragmentType;
-          } else {
-            frag = { [type]: val } as FragmentType;
-          }
+          frag = { [type]: raw.substr(offset, stopIndex) } as FragmentType;
         }
       }
     }
@@ -387,14 +364,6 @@ export const convertFragmentsToPreview = (
           return <span key={`${chatid}-lastMessage-${idx}`}> </span>;
         } else if (TEXT_TYPES.includes(type) || type === 'link') {
           return <span key={`${chatid}-lastMessage-${idx}`}>{value}</span>;
-        } else if (type === 'emoji') {
-          return (
-            <Emoji
-              key={`${chatid}-lastMessage-${idx}`}
-              unified={value}
-              size={16}
-            />
-          );
         } else {
           return (
             <span
