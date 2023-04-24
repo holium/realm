@@ -161,7 +161,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
     );
     update.run(status, id);
     const updated = this.getApp(id);
-    if (!updated) log.error('App not found');
+    if (!updated) log.error('catalog.table.ts:', 'App not found');
     return updated;
   }
 
@@ -187,7 +187,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
     );
     update.run(JSON.stringify(suite), payload.path);
     const updated = this.getStall(payload.path);
-    if (!updated) log.error('Stall not found');
+    if (!updated) log.error('catalog.table.ts:', 'Stall not found');
     return updated;
   }
 
@@ -209,7 +209,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
       path
     );
     const updated = this.getStall(path);
-    if (!updated) log.error('Stall not found');
+    if (!updated) log.error('catalog.table.ts:', 'Stall not found');
     return updated;
   }
 

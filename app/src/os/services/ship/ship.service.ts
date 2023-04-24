@@ -70,11 +70,11 @@ export class ShipService extends AbstractService<any> {
           if (cookie) {
             this.setCredentials(ship.url, ship.code, ship.code);
           } else {
-            log.error('Failed to get cookie');
+            log.error('ship.service.ts:', 'Failed to get cookie');
           }
         })
         .catch((err) => {
-          log.error('Failed to get cookie', err);
+          log.error('ship.service.ts:', 'Failed to get cookie', err);
         });
     } else {
       log.info('ship.service.ts:', 'Cookie found, setting credentials...');

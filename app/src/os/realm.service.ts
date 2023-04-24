@@ -17,11 +17,7 @@ import {
 } from './lib/settings';
 import { getCookie } from './lib/shipHelpers';
 import { APIConnection } from './services/api';
-import {
-  CreateAccountPayload,
-  CreateMasterAccountPayload,
-  RealmUpdateTypes,
-} from './realm.types';
+import { CreateAccountPayload, RealmUpdateTypes } from './realm.types';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -118,7 +114,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     if (isAuthenticated) {
       const credentials = this.services.ship?.credentials;
       if (!credentials) {
-        log.error('No credentials found');
+        log.error('realm.service.ts:', 'No credentials found');
         return false;
       }
 
@@ -196,14 +192,14 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     const credentials = this.services.ship?.credentials;
 
     if (!credentials) {
-      log.error('No credentials found');
+      log.error('realm.service.ts:', 'No credentials found');
       return;
     }
 
     const patp = this.services.ship?.patp;
 
     if (!patp) {
-      log.error('No patp found');
+      log.error('realm.service.ts:', 'No patp found');
       return;
     }
 
@@ -264,17 +260,15 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     const { account, masterAccount } =
       this.services.auth.createAccount(accountPayload);
 
-    if (!account) {
-      log.error('Failed to create account');
-      return false;
-    }
-
     if (!masterAccount) {
-      log.error('Failed to create master account');
+      log.error('realm.service.ts:', 'No master account');
       return false;
     }
 
-    log.info('realm.service.ts:', `Created account for ${account.patp}`);
+    if (!account) {
+      log.error('realm.service.ts:', 'No account');
+      return false;
+    }
 
     if (!this.services.ship) {
       // Creates the ship database with the master account's encryption key
@@ -287,10 +281,13 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         masterAccount.encryptionKey
       );
 
-      if (!this.services.ship) {
-        log.error('Failed to create ship service');
-        return false;
+      if (this.services.ship) {
+        log.info('realm.service.ts:', 'Ship service created');
+      } else {
+        log.error('realm.service.ts:', 'Failed to create ship service');
       }
+
+      return false;
     }
 
     return account;
@@ -298,12 +295,6 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
 
   public hashPassword(password: string) {
     return bcrypt.hashSync(password, 10);
-  }
-
-  public async createMasterAccount(payload: CreateMasterAccountPayload) {
-    if (!this.services) return;
-
-    return this.services.auth.createMasterAccount(payload);
   }
 
   public async getCookie(patp: string, url: string, code: string) {
@@ -361,14 +352,14 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     const credentials = this.services.ship?.credentials;
 
     if (!credentials) {
-      log.error('No credentials found');
+      log.error('realm.service.ts:', 'No credentials found');
       return false;
     }
 
     const patp = this.services.ship?.patp;
 
     if (!patp) {
-      log.error('No patp found');
+      log.error('realm.service.ts:', 'No patp found');
       return false;
     }
 
@@ -405,13 +396,13 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         }
         const credentials = this.services?.ship?.credentials;
         if (!credentials) {
-          log.error('No credentials found');
+          log.error('realm.service.ts:', 'No credentials found');
           return;
         }
         const { url, code } = credentials;
         const patp = this.services?.ship?.patp;
         if (!patp) {
-          log.error('No patp found');
+          log.error('realm.service.ts:', 'No patp found');
           return;
         }
         log.info(
@@ -428,7 +419,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           'new cookie generated. reloading child window and saving new cookie to session.'
         );
         if (!cookie) {
-          log.error('no cookie');
+          log.error('realm.service.ts:', 'no cookie');
           return;
         }
         await session.fromPartition(`urbit-webview`).cookies.set({

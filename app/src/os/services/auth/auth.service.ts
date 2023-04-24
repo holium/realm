@@ -53,6 +53,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     masterAccountPayload: CreateMasterAccountPayload
   ) {
     if (!this.authDB) return;
+
     // if a master account already exists, return
     try {
       const existingAccount = this.authDB.tables.masterAccounts.findOne(
@@ -60,7 +61,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
       );
       if (existingAccount) return existingAccount;
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
 
     // TODO implement password hashing and other account creation logic
@@ -70,13 +71,18 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
       authToken: masterAccountPayload.authToken,
       passwordHash: masterAccountPayload.passwordHash,
     });
-    // if (newAccount) {
-    //   // sends update to renderer with new account
-    //   this.sendUpdate({
-    //     type: 'init',
-    //     payload: this.getAccounts(),
-    //   });
-    // }
+
+    if (newAccount) {
+      log.info(
+        'auth.service.ts:',
+        `Created master account for ${masterAccountPayload.email}`
+      );
+    } else {
+      log.error(
+        'auth.service.ts:',
+        `Failed to create master account for ${masterAccountPayload.email}`
+      );
+    }
 
     return newAccount;
   }
@@ -99,6 +105,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     masterAccount?: MasterAccount;
   } {
     if (!this.authDB) return {};
+
     const masterAccount = this.authDB.tables.masterAccounts.findOne(
       acc.accountId
     );
@@ -106,10 +113,11 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
       log.info('auth.service.ts:', `No master account found for ${acc.patp}`);
       return {};
     }
+
     const existing = this.authDB.tables.accounts.findOne(acc.patp);
     if (existing) {
       log.info('auth.service.ts:', `Account already exists for ${acc.patp}`);
-      return {};
+      return { account: existing, masterAccount };
     }
 
     const newAccount = this.authDB.tables.accounts.create({
@@ -135,10 +143,11 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
           order: this.authDB?.getOrder(),
         },
       });
+
       return { account: newAccount, masterAccount };
     } else {
       log.info('auth.service.ts:', `Failed to create account for ${acc.patp}`);
-      return {};
+      return { masterAccount };
     }
   }
 
