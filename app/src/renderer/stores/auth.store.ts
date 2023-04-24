@@ -175,6 +175,11 @@ export const AuthenticationModel = types
     // }),
     _onAddAccount(accountPayload: AuthUpdateAccountPayload) {
       const account = AccountModel.create(accountPayload.account);
+
+      if (self.accounts.find((a) => a.patp === account.patp)) {
+        return;
+      }
+
       self.accounts.push(account);
       applySnapshot(self.order, accountPayload.order);
     },

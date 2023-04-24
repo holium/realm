@@ -3,7 +3,7 @@ import { createContext, useContext } from 'react';
 import { defaultTheme } from '../lib/defaultTheme';
 import { Theme, ThemeType } from './models/theme.model';
 import { AuthenticationModel } from './auth.store';
-import { ShellModel } from './models/Shell.model';
+import { ShellModel } from './models/shell.model';
 import { watchOnlineStatus } from 'renderer/lib/offline';
 import {
   AuthIPC,
