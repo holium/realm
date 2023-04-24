@@ -297,6 +297,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           animate={{ opacity: 1 }}
           exit={{ opacity: 1 }}
           transition={walletCardStyleTransition}
+          padding={3}
         >
           <SendReceiveButtons
             hidden={props.sendTrans}

@@ -254,9 +254,9 @@ export class WalletService extends AbstractService {
     return ethXpub === agentEthXpub;
   }
 
-  async hasMnemonic() {
+  /*async hasMnemonic() {
     return RealmSigner.hasMnemonic();
-  }
+  }*/
 }
 
 export default WalletService;

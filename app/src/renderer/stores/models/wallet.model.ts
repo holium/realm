@@ -904,9 +904,9 @@ export const WalletStore = types
             yield WalletIPC.getTransactions() as PromiseLike<any>;
           console.log('transactions', transactions);
           self.ourPatp = shipStore.ship?.patp;
-          const hasMnemonic = yield WalletIPC.hasMnemonic();
+          /*const hasMnemonic = yield WalletIPC.hasMnemonic();
           if (hasMnemonic) {
-          }
+          }*/
         } catch (error) {
           console.error(error);
         }

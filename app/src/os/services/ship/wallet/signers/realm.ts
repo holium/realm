@@ -35,6 +35,7 @@ export abstract class RealmSigner implements BaseSigner {
     };
     const db = new EncryptedStore<string>(storeParams);
     const mnemonic = db.store;
+    return mnemonic !== undefined;
   }
 
   static signTransaction(
