@@ -67,7 +67,6 @@ const HaveUrbitDialogPresenter = (props: BaseDialogProps) => {
               variant="minimal"
               alignSelf="center"
               fontWeight={500}
-              onClick={selectHosted}
               disabled={true}
             >
               Sign up
