@@ -14,6 +14,7 @@ export const S3Password = ({ s3Password }: Props) => {
     <AccountDialogTableRow title="S3 Password">
       <Flex flex={1}>
         <TextInput
+          height="38px"
           id="hosting-access-code"
           name="hosting-access-code"
           value={s3Password}

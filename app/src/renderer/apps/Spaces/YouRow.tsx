@@ -1,8 +1,7 @@
 import styled from 'styled-components';
-import { ShipModelType } from 'os/services/ship/models/ship';
-import { SpaceModelType } from 'os/services/spaces/models/spaces';
-import { useServices } from 'renderer/logic/store';
 import { Avatar, Box, Row, Text, Flex } from '@holium/design-system';
+import { ShipMobxType, useShipStore } from 'renderer/stores/ship.store';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 
 const Wrapper = styled(Box)`
   position: absolute;
@@ -15,8 +14,7 @@ const Wrapper = styled(Box)`
   width: calc(100% + 24px);
 `;
 interface SpaceRowProps {
-  colorTheme: string;
-  ship: ShipModelType;
+  ship: ShipMobxType;
   space: SpaceModelType;
   selected?: boolean;
   onSelect: (spaceKey: string) => void;
@@ -24,7 +22,7 @@ interface SpaceRowProps {
 
 export const YouRow = (props: SpaceRowProps) => {
   const { selected, onSelect, space } = props;
-  const { ship } = useServices();
+  const { ship } = useShipStore();
 
   if (!ship) return null;
 

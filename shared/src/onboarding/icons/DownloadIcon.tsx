@@ -6,7 +6,7 @@ export const DownloadIcon = () => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g clip-path="url(#clip0_1584_10112)">
+    <g clipPath="url(#clip0_1584_10112)">
       <path
         d="M5 78C3.625 78 2.5 76.88 2.5 75.5V55.5L11.765 5.125C11.975 3.88 13.01 3 14.235 3H65.77C66.995 3 68.03 3.88 68.235 5.09L77.54 55.945L77.5 75.5C77.5 76.88 76.375 78 75 78H5Z"
         fill="#A3B2C4"

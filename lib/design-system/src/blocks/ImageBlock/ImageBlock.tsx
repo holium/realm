@@ -54,7 +54,6 @@ export const ImageBlock = ({
       >
         {({ ref, open }) => (
           <FragmentImage
-            id={id}
             ref={ref as MutableRefObject<HTMLImageElement>}
             loading="eager"
             {...(showLoader && { isSkeleton: !isLoaded })}

@@ -1,17 +1,19 @@
 import { observer } from 'mobx-react';
 import { Inbox } from './views/Inbox';
 import { NewChat } from './views/NewChat';
-import { ChatProvider, chatStore } from './store';
+import { ChatProvider } from '../../stores/chat.store';
 import { useEffect } from 'react';
 import { ChatInfo } from './views/ChatInfo';
 import { ChatLog } from './views/ChatLog';
-import { useStorage } from 'renderer/logic/lib/useStorage';
+import { useStorage } from 'renderer/lib/useStorage';
 import { LayoutGroup } from 'framer-motion';
+import { useShipStore } from 'renderer/stores/ship.store';
 import { useTrayApps } from 'renderer/apps/store';
 
 export const CourierAppPresenter = () => {
   const { clearInnerNavigation } = useTrayApps();
   const storage = useStorage();
+  const { chatStore } = useShipStore();
   useEffect(() => {
     if (chatStore.subroute === 'inbox') {
       chatStore.init();

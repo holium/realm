@@ -1,12 +1,12 @@
 import { GetServerSideProps } from 'next';
-import { ClaimTokenDialog } from '@holium/shared';
+import { ClaimTokenDialog, OnboardingStorage } from '@holium/shared';
 import { Page } from 'components/Page';
-import { api } from '../util/api';
+import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 import { useEffect } from 'react';
 
 type Props = {
-  token: string;
+  inviteToken: string;
   email: string;
   full_account: boolean;
 };
@@ -15,7 +15,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   res,
   query,
 }) => {
-  const token = query.token as string;
+  const inviteToken = query.token as string;
   const email = query.email as string;
   const full_account = (query.full_account as string) === 'true';
 
@@ -25,31 +25,39 @@ export const getServerSideProps: GetServerSideProps = async ({
   };
 
   // If the token is not present, redirect to the home page.
-  if (!token) {
+  if (!inviteToken) {
     redirectHome();
     return { props: {} };
   }
 
   return {
     props: {
-      token,
+      inviteToken,
       email,
       full_account,
     },
   };
 };
 
-export default function ClaimToken({ token, email, full_account }: Props) {
+export default function ClaimInvite({
+  inviteToken,
+  email,
+  full_account,
+}: Props) {
   const { goToPage } = useNavigation();
 
   const onAlreadyHaveAccount = () => goToPage('/login');
 
   const onClaim = async (password: string) => {
     try {
-      const result = await api.resetPassword(token, password, true);
-      if (!result.token) return false;
+      const { token } = await thirdEarthApi.resetPassword(
+        inviteToken,
+        password,
+        true
+      );
+      if (!token) return false;
 
-      localStorage.setItem('token', result.token);
+      OnboardingStorage.set({ token });
       goToPage('/account/download-realm');
 
       return true;

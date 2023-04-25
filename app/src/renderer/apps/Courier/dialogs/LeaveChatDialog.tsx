@@ -1,8 +1,8 @@
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
+import { normalizeBounds } from 'renderer/lib/window-manager';
 import { useState } from 'react';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { ConfirmDialog } from '../../System/Dialogs/Confirm';
-import { useChatStore } from '../store';
+import { useChatStore } from '../../../stores/chat.store';
 
 type LeaveChatDialogConfigComponentProps = {
   path: string;

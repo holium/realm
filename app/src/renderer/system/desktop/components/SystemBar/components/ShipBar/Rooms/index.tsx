@@ -1,22 +1,24 @@
 import { useCallback, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { calculateAnchorPoint } from 'renderer/logic/lib/position';
+import { calculateAnchorPoint } from 'renderer/lib/position';
 import { useTrayApps } from 'renderer/apps/store';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { roomTrayConfig } from 'renderer/apps/Rooms/config';
 import { RoomsDock, Box } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
 import { RealmProtocol } from '@holium/realm-room';
-import { RealmActions } from 'renderer/logic/actions/main';
+import { MainIPC } from 'renderer/stores/ipc';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 const RoomTrayPresenter = () => {
-  const { ship, friends, spaces, desktop } = useServices();
+  const { shellStore } = useAppState();
+  const { ship, friends, spacesStore } = useShipStore();
   const { position, anchorOffset, dimensions } = roomTrayConfig;
 
   useEffect(() => {
-    RealmActions.getMediaStatus().then((status) => {
-      if (status.mic === 'denied') desktop.setMicAllowed(false);
-      else desktop.setMicAllowed(true);
+    MainIPC.getMediaStatus().then((status) => {
+      if (status.mic === 'denied') shellStore.setMicAllowed(false);
+      else shellStore.setMicAllowed(true);
     });
   }, []);
 
@@ -69,9 +71,9 @@ const RoomTrayPresenter = () => {
       return metadata;
     }) || [];
 
-  const rooms = spaces.selected
+  const rooms = spacesStore.selected
     ? (roomsManager?.protocol as RealmProtocol).getSpaceRooms(
-        spaces.selected?.path
+        spacesStore.selected?.path
       )
     : [];
 
@@ -90,7 +92,7 @@ const RoomTrayPresenter = () => {
           console.log('create room');
         }}
         isMuted={muted}
-        hasMicPermissions={desktop.micAllowed}
+        hasMicPermissions={shellStore.micAllowed}
         onOpen={onButtonClick}
         onMute={() => {
           if (muted) {

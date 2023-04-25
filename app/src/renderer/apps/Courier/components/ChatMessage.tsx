@@ -1,6 +1,5 @@
 import { useEffect, useRef, useMemo, useCallback } from 'react';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
 import {
   Bubble,
   MenuItemProps,
@@ -8,10 +7,11 @@ import {
   convertFragmentsToText,
 } from '@holium/design-system';
 import { useContextMenu } from 'renderer/components';
-import { useChatStore } from '../store';
-import { ChatMessageType } from '../models';
+import { ChatMessageType } from '../../../stores/models/chat.model';
 import { toJS } from 'mobx';
-import { OSActions } from 'renderer/logic/actions/os';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { MainIPC } from 'renderer/stores/ipc';
+import { useAppState } from 'renderer/stores/app.store';
 
 type ChatMessageProps = {
   containerWidth: number;
@@ -30,8 +30,9 @@ export const ChatMessagePresenter = ({
   isNextGrouped,
   onReplyClick,
 }: ChatMessageProps) => {
-  const { ship, friends, theme } = useServices();
-  const { selectedChat } = useChatStore();
+  const { theme } = useAppState();
+  const { ship, chatStore, friends } = useShipStore();
+  const { selectedChat } = chatStore;
   const messageRef = useRef<HTMLDivElement>(null);
   const ourShip = useMemo(() => ship?.patp, [ship]);
   const isOur = message.sender === ourShip;
@@ -87,7 +88,7 @@ export const ChatMessagePresenter = ({
         icon: isPinned ? 'Unpin' : 'Pin',
         label: isPinned ? 'Unpin' : 'Pin',
         disabled: false,
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
           selectedChat.setPinnedMessage(message.id);
         },
@@ -100,7 +101,7 @@ export const ChatMessagePresenter = ({
         label: 'Save image',
         disabled: false,
         onClick: (
-          evt: React.MouseEvent<HTMLButtonElement>,
+          evt: React.MouseEvent<HTMLDivElement>,
           elem: HTMLElement | undefined
         ) => {
           evt.stopPropagation();
@@ -117,13 +118,12 @@ export const ChatMessagePresenter = ({
               asImage.src &&
               images.find((i) => i.image === asImage.src)
             )
-              OSActions.downloadUrlAsFile(asImage.src);
+              MainIPC.downloadUrlAsFile(asImage.src);
           } else if (images && images.length > 0) {
-            OSActions.downloadUrlAsFile(images[0].image);
+            MainIPC.downloadUrlAsFile(images[0].image);
           }
         },
       });
-
       // TODO if trove is installed
       // save to trove
 
@@ -133,7 +133,7 @@ export const ChatMessagePresenter = ({
         label: 'Copy image link',
         disabled: false,
         onClick: (
-          evt: React.MouseEvent<HTMLButtonElement>,
+          evt: React.MouseEvent<HTMLDivElement>,
           elem: HTMLElement | undefined
         ) => {
           evt.stopPropagation();
@@ -167,7 +167,7 @@ export const ChatMessagePresenter = ({
         label: 'Copy url',
         disabled: false,
         onClick: (
-          evt: React.MouseEvent<HTMLButtonElement>,
+          evt: React.MouseEvent<HTMLDivElement>,
           elem: HTMLElement | undefined
         ) => {
           evt.stopPropagation();
@@ -197,7 +197,7 @@ export const ChatMessagePresenter = ({
       icon: 'CopyMessage',
       label: 'Copy message',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         const msg: string = convertFragmentsToText(message.contents);
         navigator.clipboard.writeText(msg);
@@ -208,7 +208,7 @@ export const ChatMessagePresenter = ({
       icon: 'Reply',
       label: 'Reply',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         selectedChat.setReplying(message);
       },
@@ -219,7 +219,7 @@ export const ChatMessagePresenter = ({
         icon: 'Edit',
         label: 'Edit',
         disabled: false,
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
           selectedChat.setEditing(message);
         },
@@ -232,7 +232,7 @@ export const ChatMessagePresenter = ({
         icon: 'Trash',
         iconColor: '#ff6240',
         labelColor: '#ff6240',
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
           selectedChat.deleteMessage(message.id);
         },
@@ -307,7 +307,7 @@ export const ChatMessagePresenter = ({
       isNextGrouped={isNextGrouped}
       expiresAt={message.expiresAt}
       containerWidth={containerWidth}
-      themeMode={theme.currentTheme.mode as 'light' | 'dark'}
+      themeMode={theme.mode as 'light' | 'dark'}
       isOur={isOur}
       ourShip={ourShip}
       ourColor={ourColor}

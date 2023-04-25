@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Flex,
   Icon,
@@ -8,28 +8,31 @@ import {
   Text,
   WindowedList,
 } from '@holium/design-system';
-// import { toJS } from 'mobx';
 import { useTrayApps } from '../../store';
 import { ChatRow } from '../components/ChatRow';
-import { useChatStore } from '../store';
 import { observer } from 'mobx-react';
-import { ChatModelType } from '../models';
-import { useServices } from 'renderer/logic/store';
-const rowHeight = 52;
+import { ChatModelType } from '../../../stores/models/chat.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
-const scrollbarWidth = 12;
+const rowHeight = 52;
 const heightPadding = 12;
 const searchHeight = 40;
 
 export const InboxPresenter = () => {
-  const { ship, spaces, theme } = useServices();
+  const { theme } = useAppState();
+  const { ship, chatStore, spacesStore } = useShipStore();
   const { dimensions } = useTrayApps();
   const [showList, setShowList] = useState<boolean>(false);
   const { inbox, sortedChatList, setChat, setSubroute, isChatPinned } =
-    useChatStore();
+    chatStore;
   const [searchString, setSearchString] = useState<string>('');
 
-  const currentSpace = spaces.selected;
+  const currentSpace = spacesStore.selected;
+
+  useEffect(() => {
+    chatStore.init();
+  }, []);
 
   const searchFilter = useCallback(
     (preview: ChatModelType) => {
@@ -121,16 +124,14 @@ export const InboxPresenter = () => {
           <Box height={dimensions.height - heightPadding} width={listWidth}>
             <WindowedList
               data={sortedChatList.filter(searchFilter)}
-              followOutput="smooth"
-              width={listWidth + scrollbarWidth}
-              hideScrollbar
+              width={listWidth}
+              shiftScrollbar
               height={listHeight}
+              overscan={25}
               increaseViewportBy={{
-                top: 300,
-                bottom: 300,
+                top: 400,
+                bottom: 400,
               }}
-              alignToBottom={false}
-              style={{ marginRight: -scrollbarWidth }}
               itemContent={(index: number, chat: ChatModelType) => {
                 const isAdmin = ship ? chat.isHost(ship.patp) : false;
                 const height = chat.type === 'space' ? 70 : rowHeight;
@@ -153,14 +154,12 @@ export const InboxPresenter = () => {
                 } else if (isPinned) {
                   outerStyle = {
                     height,
-                    // height: height + 4,
-                    // marginBottom: 4,
                   };
                   customStyle = {
                     borderRadius: 6,
                     height,
                     background:
-                      theme.currentTheme.mode === 'dark'
+                      theme.mode === 'dark'
                         ? 'rgba(0,0,0,0.07)'
                         : 'rgba(0,0,0,0.03)',
                   };
@@ -177,11 +176,10 @@ export const InboxPresenter = () => {
 
                 return (
                   <Box
-                    style={outerStyle}
                     key={`${window.ship}-${chat.path}-${index}-unpinned`}
+                    style={outerStyle}
                   >
                     <Box
-                      key={`${window.ship}-${chat.path}-${index}-unpinned`}
                       width={listWidth}
                       zIndex={2}
                       layout="preserve-aspect"

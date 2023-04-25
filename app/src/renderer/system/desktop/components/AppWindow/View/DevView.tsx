@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useServices } from 'renderer/logic/store';
 import { WebView } from './WebView';
-import { AppWindowType } from 'os/services/shell/desktop.model';
 import { observer } from 'mobx-react';
 import { useToggle } from '@holium/design-system';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { RoomManagerEvent, RoomsManager } from '@holium/realm-room';
-import { genCSSVariables } from 'renderer/logic/theme';
+import { genCSSVariables } from 'renderer/lib/theme';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { AppWindowMobxType } from 'renderer/stores/models/window.model';
 
 const connectWebviewToMultiplayer = async (
   ship: string,
@@ -38,18 +39,20 @@ const connectWebviewToMultiplayer = async (
 };
 
 type Props = {
-  appWindow: AppWindowType;
+  appWindow: AppWindowMobxType;
   isResizing: boolean;
 };
 
 const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
-  const { theme, ship } = useServices();
+  const { theme } = useAppState();
+  const { ship } = useShipStore();
+
   const roomsManager = useRooms();
 
   const loading = useToggle(false);
   const [readyWebview, setReadyWebview] = useState<Electron.WebviewTag>();
 
-  const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
+  const currentTheme = useMemo(() => theme, [theme]);
   const webviewId = useMemo(
     () => `${appWindow.appId}-web-webview`,
     [appWindow.appId]

@@ -2,20 +2,20 @@ import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
 import { AppWindow } from './components/AppWindow/AppWindow';
-import { useServices } from 'renderer/logic/store';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { ShellActions } from 'renderer/logic/actions/shell';
 import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
+import { useAppState } from 'renderer/stores/app.store';
+import { AppType } from 'renderer/stores/models/bazaar.model';
+import { nativeApps } from 'renderer/apps/nativeApps';
 
 const AppWindowManagerPresenter = () => {
+  const { shellStore } = useAppState();
   const { getOptions, setOptions } = useContextMenu();
-  const { shell, desktop } = useServices();
   const id = 'desktop-fill';
 
-  const windows = Array.from(desktop.windows.values());
+  const windows = Array.from(shellStore.windows.values());
 
   const contextMenuOptions: ContextMenuOption[] = useMemo(
     () => [
@@ -23,8 +23,9 @@ const AppWindowManagerPresenter = () => {
         label: 'Change wallpaper',
         icon: 'Palette',
         onClick: () => {
-          ShellActions.setBlur(true);
-          ShellActions.openDialog('wallpaper-dialog');
+          shellStore.openWindow(nativeApps['os-settings'] as AppType, {
+            route: 'theme',
+          });
         },
       },
       // TODO leave in as a reminder to add this feature
@@ -39,7 +40,7 @@ const AppWindowManagerPresenter = () => {
         label: 'Toggle devtools',
         icon: 'DevBox',
         onClick: () => {
-          DesktopActions.toggleDevTools();
+          shellStore.toggleDevTools();
         },
       },
     ],
@@ -56,7 +57,7 @@ const AppWindowManagerPresenter = () => {
     <motion.div
       id={id}
       animate={{
-        display: desktop.isHomePaneOpen ? 'none' : 'block',
+        display: shellStore.isHomePaneOpen ? 'none' : 'block',
       }}
       style={{
         bottom: 0,
@@ -66,7 +67,7 @@ const AppWindowManagerPresenter = () => {
         top: 0,
         right: 0,
         height: '100vh',
-        paddingTop: shell.isFullscreen ? 0 : 30,
+        paddingTop: shellStore.isFullscreen ? 0 : 30,
       }}
     >
       {windows.map((appWindow, index: number) => (

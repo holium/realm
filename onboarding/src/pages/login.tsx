@@ -1,7 +1,12 @@
 import { GetServerSideProps } from 'next';
-import { LoginDialog } from '@holium/shared';
+import { Anchor } from '@holium/design-system/general';
+import {
+  LoginDialog,
+  OnboardDialogDescription,
+  OnboardingStorage,
+} from '@holium/shared';
 import { Page } from '../components/Page';
-import { api } from '../util/api';
+import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
 type Props = {
@@ -27,31 +32,35 @@ export default function Login({ prefilledEmail, redirectAfterLogin }: Props) {
   const onNoAccount = () => goToPage('/');
 
   const onLogin = async (email: string, password: string) => {
-    try {
-      const response = await api.login(email, password);
-      localStorage.setItem('token', response.token);
+    const response = await thirdEarthApi.login(email, password);
 
-      if (redirectAfterLogin) goToPage(redirectAfterLogin as any);
-      else {
-        const ships = await api.getUserShips(response.token);
-
-        if (ships.length > 0) goToPage('/account');
-        else goToPage('/account/download-realm');
-      }
-
-      return Boolean(response);
-    } catch (error) {
-      console.error(error);
-
+    if (!response.token || !response.email) {
       return false;
+    } else {
+      OnboardingStorage.set({ token: response.token, email: response.email });
     }
+
+    if (redirectAfterLogin) goToPage(redirectAfterLogin as any);
+    else {
+      const ships = await thirdEarthApi.getUserShips(response.token);
+
+      if (ships.length > 0) goToPage('/account');
+      else goToPage('/account/download-realm');
+    }
+
+    return true;
   };
 
   return (
     <Page title="Login">
       <LoginDialog
+        label={
+          <OnboardDialogDescription>
+            Don't have an account yet?{' '}
+            <Anchor onClick={onNoAccount}>Sign up</Anchor>.
+          </OnboardDialogDescription>
+        }
         prefilledEmail={prefilledEmail}
-        onNoAccount={onNoAccount}
         onLogin={onLogin}
       />
     </Page>

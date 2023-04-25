@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { ThemePanel } from './components/Theme';
-import { SystemPanel } from './components/System';
-import { AboutPanel } from './components/About';
-import { HelpPanel } from './components/Help';
-import { AccountPanel } from './components/Account';
-import { Avatar, RadioList } from '@holium/design-system';
+import { ThemePanel } from './pages/Theme';
+import { SystemPanel } from './pages/System';
+import { AboutPanel } from './pages/About';
+import { HelpPanel } from './pages/Help';
+import { AccountPanel } from './pages/Account';
+import { Avatar, RadioList, Flex, Text, Box } from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 type SystemPanelType =
   | 'system'
@@ -15,12 +15,18 @@ type SystemPanelType =
   | 'account'
   | 'about'
   | 'help'
+  | string
   | undefined;
 
 const SystemAppPresenter = () => {
-  const { ship } = useServices();
+  const { shellStore } = useAppState();
+  const { ship } = useShipStore();
 
-  const [systemPanel, setSystemPanelType] = useState<SystemPanelType>('theme');
+  const defaultRoute: SystemPanelType =
+    shellStore.nativeConfig?.get('os-settings')?.route;
+  const [systemPanel, setSystemPanelType] = useState<SystemPanelType>(
+    defaultRoute || 'theme'
+  );
 
   if (!ship) return null;
 
@@ -28,22 +34,20 @@ const SystemAppPresenter = () => {
     <Flex flex={1} minHeight={0}>
       {/* left hand side, list selector view */}
       <Flex flex={1} gap={12} flexDirection="column" p={3}>
-        <Flex
-          flexDirection="row"
-          alignItems="center"
-          gap={8}
-          maxWidth={'220px'}
-        >
+        <Flex flexDirection="row" alignItems="center" gap={8} width={'240px'}>
           {/* sig and patp */}
-          <Avatar
-            // borderColor={backgroundColor}
-            borderRadiusOverride="4px"
-            simple
-            size={55}
-            avatar={ship.avatar}
-            patp={ship.patp}
-            sigilColor={[ship.color || '#000000', 'white']}
-          />
+          <Box height={40} width={40}>
+            <Avatar
+              simple
+              size={40}
+              style={{
+                minWidth: 40,
+              }}
+              avatar={ship.avatar}
+              patp={ship.patp}
+              sigilColor={[ship.color || '#000000', 'white']}
+            />
+          </Box>
           <Flex
             flexDirection="column"
             ml={2}
@@ -53,13 +57,13 @@ const SystemAppPresenter = () => {
             }}
           >
             {ship.nickname && (
-              <Text fontWeight={500} fontSize={2}>
+              <Text.Custom fontWeight={500} fontSize={2}>
                 {ship.nickname}
-              </Text>
+              </Text.Custom>
             )}
-            <Text fontWeight={300} fontSize={2}>
+            <Text.Custom fontWeight={300} fontSize={2}>
               {ship.patp}
-            </Text>
+            </Text.Custom>
           </Flex>
         </Flex>
 

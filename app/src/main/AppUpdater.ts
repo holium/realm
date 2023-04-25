@@ -10,7 +10,7 @@ import log from 'electron-log';
 import { autoUpdater, UpdateInfo /*, NsisUpdater */ } from 'electron-updater';
 import { resolveUpdaterPath, resolveHtmlPath } from './util';
 import { isDevelopment } from './helpers/env';
-import { getReleaseChannel } from '../os/lib/settings';
+import { getReleaseChannelFromSettings } from '../os/lib/settings';
 
 const RESOURCES_PATH = app.isPackaged
   ? path.join(process.resourcesPath, 'assets')
@@ -97,7 +97,7 @@ export class AppUpdater implements IAppUpdater {
         provider: 'generic',
         // see the app/src/renderer/system/updater/readme.md for more information
         url: process.env.AUTOUPDATE_FEED_URL,
-        channel: getReleaseChannel(),
+        channel: getReleaseChannelFromSettings(),
       });
     }
     // autoUpdater.autoInstallOnAppQuit = true;

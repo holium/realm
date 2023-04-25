@@ -1,16 +1,13 @@
 import { useState, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { AnimatePresence } from 'framer-motion';
-import { useServices } from 'renderer/logic/store';
-import { Flex, Text, IconButton } from 'renderer/components';
-import { rgba, darken } from 'polished';
+import { Flex, Button, Icon, NoScrollBar } from '@holium/design-system';
 import { SpaceTitlebar } from './SpaceTitlebar';
 import { AppSuite } from './AppSuite/AppSuite';
 import { RecommendedApps } from './Recommended';
 import { Members } from '../Members';
 import { AppGrid } from '../Ship/AppGrid';
-import { NoScrollBar } from 'renderer/components/NoScrollbar';
-import { Avatar, Icon } from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
 import { AppSearchApp } from '../AppInstall/AppSearch';
 
 interface HomePaneProps {
@@ -22,8 +19,8 @@ type SidebarType = 'members' | 'friends' | null;
 
 const HomePresenter = (props: HomePaneProps) => {
   const { isOpen, isOur } = props;
-  const { ship, spaces, membership, theme } = useServices();
-  const currentSpace = spaces.selected;
+  const { ship, spacesStore } = useShipStore();
+  const currentSpace = spacesStore.selected;
   const [sidebar, setSidebar] = useState<SidebarType>(null);
   const [appGrid, showAppGrid] = useState(isOur ? true : false);
 
@@ -43,26 +40,20 @@ const HomePresenter = (props: HomePaneProps) => {
             flexDirection="column"
             flex={2}
           >
-            {sidebar !== null && <Members our={isOur} />}
+            <Members our={isOur} />
           </Flex>
         )}
       </AnimatePresence>
     );
   }, [sidebar, isOur]);
 
-  const highlightColor = '#4E9EFD';
-  const iconHoverColor = useMemo(
-    () => rgba(darken(0.03, theme.currentTheme.iconColor), 0.1),
-    [theme.currentTheme.iconColor]
-  );
-
   if (!ship) return null;
   if (!currentSpace) return null;
 
-  const membersCount = membership.getMemberCount(currentSpace.path);
+  const membersCount = currentSpace.members.count;
   const maxWidth = 880;
 
-  const isAdmin = membership.isAdmin(currentSpace.path, ship.patp);
+  const isAdmin = currentSpace.members.isAdmin(ship.patp);
 
   const shouldShowAppGrid = appGrid || isOur;
 
@@ -83,8 +74,8 @@ const HomePresenter = (props: HomePaneProps) => {
             initial={{ opacity: 0 }}
             animate={isOpen ? 'show' : 'exit'}
             exit={{ opacity: 0 }}
-            maxHeight={42}
-            height={42}
+            maxHeight={44}
+            height={44}
             gap={12}
             mb={40}
             mt={40}
@@ -109,7 +100,8 @@ const HomePresenter = (props: HomePaneProps) => {
               },
             }}
           >
-            {ship && (
+            {/* TODO replace with updater dropdown */}
+            {/* {ship && (
               <Avatar
                 simple
                 size={32}
@@ -117,23 +109,17 @@ const HomePresenter = (props: HomePaneProps) => {
                 patp={ship.patp}
                 sigilColor={[ship.color || '#000000', 'white']}
               />
-            )}
+            )} */}
             <AppSearchApp mode="home" />
             <Flex justifyContent="flex-end">
-              <IconButton
-                size={3}
-                customBg={iconHoverColor}
-                color={
-                  sidebar === 'friends'
-                    ? highlightColor
-                    : theme.currentTheme.iconColor
-                }
+              <Button.IconButton
+                size={32}
                 onClick={() => {
                   setSidebar(!sidebar ? 'friends' : null);
                 }}
               >
-                <Icon name="Members" size="22px" />
-              </IconButton>
+                <Icon name="Members" size={22} opacity={0.7} />
+              </Button.IconButton>
             </Flex>
           </Flex>
         ) : (
@@ -141,11 +127,11 @@ const HomePresenter = (props: HomePaneProps) => {
             initial={{ opacity: 0 }}
             animate={isOpen ? 'show' : 'exit'}
             exit={{ opacity: 0 }}
-            maxHeight={42}
-            height={42}
+            maxHeight={44}
+            height={44}
             gap={12}
             mt={40}
-            mb={46}
+            mb={40}
             width={maxWidth}
             variants={{
               hidden: {
@@ -209,9 +195,9 @@ const HomePresenter = (props: HomePaneProps) => {
               }}
               gap={20}
             >
-              <Text variant="h3" fontWeight={500}>
-                Your Apps
-              </Text>
+              {/* <Text.H4 height={20} fontWeight={500}>
+                {isOur ? '' : 'Your Apps'}
+              </Text.H4> */}
               <Flex
                 style={{ position: 'relative' }}
                 gap={32}

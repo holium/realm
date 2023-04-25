@@ -8,12 +8,18 @@ type RadioImageOption = {
 };
 
 type Props = {
+  style?: any;
   options: RadioImageOption[];
   selected?: string;
   onClick: (value: any) => void;
 };
 
-export const RadioImages = ({ options = [], selected, onClick }: Props) => (
+export const RadioImages = ({
+  style,
+  options = [],
+  selected,
+  onClick,
+}: Props) => (
   <Flex
     p={1}
     mb={10}
@@ -24,6 +30,7 @@ export const RadioImages = ({ options = [], selected, onClick }: Props) => (
     width="fit-content"
     justifyContent="flex-start"
     overflowX="auto"
+    style={style}
   >
     {options?.map((option) => {
       const isSelected = option.value === selected;

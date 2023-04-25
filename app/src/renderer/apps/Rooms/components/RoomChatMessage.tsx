@@ -3,9 +3,8 @@ import { ChatModelType } from '@holium/realm-room';
 import { lighten, darken } from 'polished';
 import { useEffect, useState } from 'react';
 import { Bubble } from './RoomBubble';
-import { Flex, Tooltip } from '@holium/design-system';
-import { Text } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
+import { Text, Flex, Tooltip } from '@holium/design-system';
+import { useAppState } from 'renderer/stores/app.store';
 
 interface RoomChatMessageProps {
   chat: ChatModelType;
@@ -13,8 +12,7 @@ interface RoomChatMessageProps {
 }
 
 const RoomChatMessagePresenter = ({ chat, doesPack }: RoomChatMessageProps) => {
-  const { theme: themeStore } = useServices();
-  const theme = themeStore.currentTheme;
+  const { theme } = useAppState();
 
   const [timeString, setTimeString] = useState('');
 
@@ -38,9 +36,7 @@ const RoomChatMessagePresenter = ({ chat, doesPack }: RoomChatMessageProps) => {
     >
       {!chat.isRightAligned && !doesPack && (
         // author string
-        <Text color={theme.textColor} fontSize={1}>
-          {chat.author}
-        </Text>
+        <Text.Custom fontSize={1}>{chat.author}</Text.Custom>
       )}
 
       <Flex justifyContent={chat.isRightAligned ? 'flex-end' : 'flex-start'}>
@@ -56,14 +52,14 @@ const RoomChatMessagePresenter = ({ chat, doesPack }: RoomChatMessageProps) => {
                 : lighten(0.1, theme.windowColor)
             }
           >
-            <Text
+            <Text.Custom
               fontSize={2}
               style={{
                 maxWidth: '200px',
               }}
             >
               {`${chat.content}`}
-            </Text>
+            </Text.Custom>
           </Bubble>
         </Tooltip>
       </Flex>

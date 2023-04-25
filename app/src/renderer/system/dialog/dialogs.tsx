@@ -1,17 +1,14 @@
 import { FC } from 'react';
-import { AppWindowProps } from 'os/services/shell/desktop.model';
-import { ThemeModelType } from 'os/services/theme.model';
 import { spacesDialogs } from 'renderer/apps/Spaces/Workflow/workflow';
-import { onboardingDialogs } from 'renderer/system/onboarding/workflow';
-import { WallpaperDialogConfig } from 'renderer/apps/System/Dialogs/Wallpaper';
 import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceConfirm';
 import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { ChangeEmailDialogConfig } from 'renderer/apps/System/Dialogs/ChangeEmail';
 import { Dimensions } from '@holium/design-system';
-import { ResetCodeDialogConfig } from '../auth/login/ResetCodeDialog';
+import { ResetCodeDialogConfig } from '../authentication/login/ResetCodeDialog';
 import { LeaveChatDialogConfig } from 'renderer/apps/Courier/dialogs/LeaveChatDialog';
 import { ShutdownDialogConfig } from 'renderer/apps/System/Dialogs/Shutdown';
+import { AppWindowProps } from 'renderer/stores/models/window.model';
 
 export interface BaseWorkflowProps {
   workflow?: boolean; // lets the dialog manager know if this dialog is in a workflow
@@ -31,7 +28,6 @@ export type BaseDialogProps = {
   noTitlebar?: boolean; // should there be the base window titlebar in the dialog
   draggable?: boolean;
   unblurOnClose?: boolean;
-  theme?: ThemeModelType;
   edit?: any;
   onOpen?: () => void; // is the function that executes when the dialog is opened
   onClose?: () => void; // is the function that executes when the dialog is closed
@@ -51,12 +47,10 @@ export interface DialogRenderers {
 export const dialogRenderers: DialogRenderers = {
   'shutdown-dialog': ShutdownDialogConfig,
   'app-detail-dialog': AppDetailDialog,
-  'wallpaper-dialog': WallpaperDialogConfig,
   'leave-space-dialog': LeaveSpaceDialogConfig,
   'leave-chat-dialog': LeaveChatDialogConfig,
   'delete-space-dialog': DeleteSpaceDialogConfig,
   'change-email-dialog': ChangeEmailDialogConfig,
   'reset-code-dialog': ResetCodeDialogConfig,
   ...spacesDialogs,
-  ...onboardingDialogs,
 };

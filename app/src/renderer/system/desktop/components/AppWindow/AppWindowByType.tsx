@@ -1,5 +1,5 @@
+import { AppWindowMobxType } from 'renderer/stores/models/window.model';
 import { DialogView } from 'renderer/system/dialog/Dialog/Dialog';
-import { AppWindowType } from 'os/services/shell/desktop.model';
 import { AppView } from './View/AppView';
 import { DevView } from './View/DevView';
 import { NativeView } from './View/NativeView';
@@ -7,7 +7,7 @@ import { NativeView } from './View/NativeView';
 type Props = {
   isResizing: boolean;
   isDragging: boolean;
-  appWindow: AppWindowType;
+  appWindow: AppWindowMobxType;
 };
 
 export const AppWindowByType = ({

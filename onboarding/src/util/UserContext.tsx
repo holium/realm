@@ -5,8 +5,8 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { ThirdEarthShip } from '@holium/shared';
-import { api } from './api';
+import { OnboardingStorage, ThirdEarthShip } from '@holium/shared';
+import { thirdEarthApi } from './thirdEarthApi';
 
 interface IUserContext {
   token: string | null;
@@ -29,13 +29,12 @@ export const UserContextProvider = ({ children }: Props) => {
   const [selectedPatp, setSelectedPatp] = useState<string>('');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const email = localStorage.getItem('email');
+    const { token, email } = OnboardingStorage.get();
 
     if (!token || !email || ships.length) return;
 
     const getAndSetUserData = async () => {
-      const newShips = await api.getUserShips(token);
+      const newShips = await thirdEarthApi.getUserShips(token);
 
       setToken(token);
       setEmail(email);

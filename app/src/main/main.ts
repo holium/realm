@@ -7,6 +7,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
+import log from 'electron-log';
 import { app, ipcMain, BrowserWindow, shell, session } from 'electron';
 import isDev from 'electron-is-dev';
 import fs from 'fs';
@@ -15,7 +16,6 @@ import { download } from 'electron-dl';
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import { MenuBuilder } from './menu';
 import { resolveHtmlPath } from './util';
-import { Realm } from '../os';
 import { FullScreenHelper } from './helpers/fullscreen';
 import { WebViewHelper } from './helpers/webview';
 import { DevHelper } from './helpers/dev';
@@ -27,6 +27,14 @@ import { BrowserHelper } from './helpers/browser';
 import { hideCursor } from './helpers/hideCursor';
 import { AppUpdater } from './AppUpdater';
 import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
+import { RealmService } from '../os/realm.service';
+
+// TODO test this
+log.create('main');
+log.catchErrors();
+log.transports.file.level = 'info';
+log.transports.file.resolvePath = () =>
+  path.join(app.getPath('userData'), 'main.log');
 
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
@@ -71,8 +79,9 @@ export const getPreloadPath = () =>
     : path.join(__dirname, '../../.holium/dll/preload.js');
 
 const createWindow = async () => {
-  // TODO fix the warnings and errors with this
-  // if (isDevelopment) await installExtensions();
+  if (isDevelopment) {
+    // TODO can cleanup here
+  }
 
   mainWindow = new BrowserWindow({
     show: false,
@@ -94,7 +103,8 @@ const createWindow = async () => {
   // ---------------------------------------------------------------------
   // ----------------------- Start Realm services ------------------------
   // ---------------------------------------------------------------------
-  Realm.start(mainWindow);
+  // Realm.start(mainWindow);
+  // ---------------------------------------------------------------------
 
   FullScreenHelper.registerListeners(mainWindow);
   WebViewHelper.registerListeners(mainWindow);
@@ -112,6 +122,11 @@ const createWindow = async () => {
     mainWindow.webContents.send('add-mouse-listeners', true);
     mainWindow.webContents.send('add-key-listeners');
   });
+
+  // ---------------------------------------------------------------------
+  // ----------------------- Start Realm services ------------------------
+  // ---------------------------------------------------------------------
+  const _realmService = new RealmService();
 
   // TODO why is this rendering multiple times?
   mainWindow.on('ready-to-show', () => {
@@ -224,21 +239,21 @@ app.on('window-all-closed', () => {
 });
 // quitting is complicated. We have to catch the initial quit signal, preventDefault() it,
 // do our cleanup, and then re-emit and actually quit it
-let lastQuitSignal: number = 0;
-app.on('before-quit', (event) => {
-  if (!updater.checkingForUpdates) {
-    if (lastQuitSignal === 0) {
-      lastQuitSignal = new Date().getTime() - 1;
-      event.preventDefault();
-      mainWindow.webContents.send('realm.before-quit');
-      setTimeout(() => app.quit(), 500); // after half a second, we really do need to shut down
-    }
-  }
-});
+// let lastQuitSignal: number = 0;
+// app.on('before-quit', (event) => {
+//   if (!updater.checkingForUpdates) {
+//     if (lastQuitSignal === 0) {
+//       lastQuitSignal = new Date().getTime() - 1;
+//       event.preventDefault();
+//       mainWindow.webContents.send('realm.before-quit');
+//       setTimeout(() => app.quit(), 500); // after half a second, we really do need to shut down
+//     }
+//   }
+// });
 
-ipcMain.on('realm.app.quit', (_event) => {
-  if (!updater.checkingForUpdates) app.quit();
-});
+// ipcMain.on('realm.app.quit', (_event) => {
+//   if (!updater.checkingForUpdates) app.quit();
+// });
 
 ipcMain.on('download-url-as-file', (_event, { url }) => {
   const win = BrowserWindow.getFocusedWindow();

@@ -5,29 +5,12 @@ import {
   RoomManagerEvent,
 } from '@holium/realm-room';
 import { Patp } from 'os/types';
-import { OSActions } from 'renderer/logic/actions/os';
-import { RoomsActions } from 'renderer/logic/actions/rooms';
-import { SoundActions } from 'renderer/logic/actions/sound';
-
-const handlers = {
-  scry: RoomsActions.scry,
-  poke: RoomsActions.poke,
-};
+import { SoundActions } from 'renderer/lib/sound';
+import { RealmIPC, RoomsIPC } from 'renderer/stores/ipc';
 
 const config = {
   rtc: {
-    // iceTransportPolicy: 'relay' as RTCIceTransportPolicy,
     iceServers: [
-      // {
-      //   username: 'realm',
-      //   credential: 'zQzjNHC34Y8RqdLW',
-      //   urls: 'stun:coturn.holium.live:3478',
-      // },
-      // {
-      //   username: 'realm',
-      //   credential: 'zQzjNHC34Y8RqdLW',
-      //   urls: 'turn:coturn.holium.live:5349?transport=tcp',
-      // },
       {
         username: 'realm',
         credential: 'zQzjNHC34Y8RqdLW',
@@ -44,6 +27,10 @@ const config = {
 
 let protocol: RealmProtocol | null;
 export const createManager = (our: Patp) => {
+  const handlers = {
+    scry: RoomsIPC.scry as (...args: any[]) => Promise<any>,
+    poke: RoomsIPC.poke as (...args: any[]) => Promise<any>,
+  };
   protocol = new RealmProtocol(our, config, handlers);
   const manager = new RoomsManager(protocol);
 
@@ -96,12 +83,17 @@ const clearProtocolAndManager: (callback?: () => void) => void = (
     });
   }
 };
-OSActions.onLogout(() => clearProtocolAndManager());
-OSActions.onSleep(() => clearProtocolAndManager());
+RealmIPC.onUpdate((update) => {
+  if (update.type === 'logout') {
+    clearProtocolAndManager();
+  }
+});
+// OSActions.onLogout(() => clearProtocolAndManager());
+// OSActions.onSleep(() => clearProtocolAndManager());
 // we have to signal back that we are ready to actually quit with OSActions.readyToQuit
-OSActions.onQuitSignal(clearProtocolAndManager);
+// OSActions.onQuitSignal(clearProtocolAndManager);
 
-RoomsActions.onUpdate((_event: any, data: any, mark: string) => {
+RoomsIPC.onUpdate(({ data, mark }: { data: any; mark: string }) => {
   if (protocol) {
     protocol.onSignal(data, mark);
   }

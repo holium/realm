@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Text } from 'renderer/components';
+import { Text } from '@holium/design-system';
 import { useBrowser } from './store';
 import { WebView } from 'renderer/system/desktop/components/AppWindow/View/WebView';
 
@@ -71,7 +71,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
     () => (
       <>
         {loadingState === 'error' ? (
-          <Text
+          <Text.Custom
             style={{
               position: 'absolute',
               top: '50%',
@@ -83,7 +83,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
             }}
           >
             Failed to load.
-          </Text>
+          </Text.Custom>
         ) : (
           <WebView
             id={currentTab.id}

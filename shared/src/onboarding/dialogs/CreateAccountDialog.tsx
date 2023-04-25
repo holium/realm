@@ -2,9 +2,9 @@ import { ChangeEvent, useRef } from 'react';
 import { HoliumButton } from '@holium/design-system/os';
 import { Flex, Anchor } from '@holium/design-system/general';
 import { isValidEmail, useToggle } from '@holium/design-system/util';
+import { TextInput } from '@holium/design-system/inputs';
 import {
   OnboardDialogDescription,
-  OnboardDialogInput,
   OnboardDialogInputLabel,
   OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
@@ -64,22 +64,31 @@ export const CreateAccountDialog = ({
         <>
           <OnboardDialogTitle pb={3}>Create account</OnboardDialogTitle>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="email">
+            <OnboardDialogInputLabel as="label" htmlFor="create-account-email">
               Email
             </OnboardDialogInputLabel>
-            <OnboardDialogInput
+            <TextInput
+              height="38px"
+              id="create-account-email"
+              name="create-account-email"
               ref={emailRef}
               type="email"
               placeholder="name@email.com"
-              isError={emailError.isOn}
+              error={emailError.isOn}
               onChange={onEmailChange}
             />
           </Flex>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="password">
+            <OnboardDialogInputLabel
+              as="label"
+              htmlFor="create-account-password"
+            >
               Password
             </OnboardDialogInputLabel>
-            <OnboardDialogInput
+            <TextInput
+              height="38px"
+              id="create-account-password"
+              name="create-account-password"
               ref={passwordRef}
               type="password"
               placeholder="• • • • • • • •"
@@ -87,14 +96,20 @@ export const CreateAccountDialog = ({
             />
           </Flex>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="password">
+            <OnboardDialogInputLabel
+              as="label"
+              htmlFor="create-account-confirm-password"
+            >
               Confirm Password
             </OnboardDialogInputLabel>
-            <OnboardDialogInput
+            <TextInput
+              height="38px"
+              id="create-account-confirm-password"
+              name="create-account-confirm-password"
               ref={confirmPasswordRef}
               type="password"
               placeholder="• • • • • • • •"
-              isError={confirmPasswordError.isOn}
+              error={confirmPasswordError.isOn}
               onChange={onChangeConfirmPassword}
             />
           </Flex>

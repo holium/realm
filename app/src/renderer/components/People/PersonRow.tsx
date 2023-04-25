@@ -1,10 +1,14 @@
 import { useEffect, useRef } from 'react';
-import { Text } from '../';
-import { Row } from 'renderer/components/NewRow';
 import { useContextMenu } from 'renderer/components/ContextMenu';
-import { ThemeType } from '../../logic/theme';
 import { usePassportMenu } from './usePassportMenu';
-import { Avatar, Flex, Box, MenuItemProps } from '@holium/design-system';
+import {
+  Avatar,
+  Flex,
+  Box,
+  MenuItemProps,
+  Row,
+  Text,
+} from '@holium/design-system';
 
 interface IPersonRow {
   listId: string;
@@ -14,8 +18,6 @@ interface IPersonRow {
   avatar?: string | null;
   nickname?: string | null;
   description?: string | null;
-  rowBg: string;
-  theme?: ThemeType;
   contextMenuOptions?: MenuItemProps[];
   children?: any;
 }
@@ -28,7 +30,6 @@ export const PersonRow = ({
   avatar,
   nickname,
   description,
-  rowBg,
   contextMenuOptions,
   children,
 }: IPersonRow) => {
@@ -57,7 +58,6 @@ export const PersonRow = ({
           evt.stopPropagation();
         }}
         style={{ justifyContent: 'space-between' }}
-        customBg={rowBg}
         selected={menuConfig?.id === id}
         onClick={(evt) => {
           setMenuConfig({
@@ -95,7 +95,7 @@ export const PersonRow = ({
             />
           </Box>
           <Flex flex={1} height="22px" overflow="hidden" alignItems="center">
-            <Text
+            <Text.Custom
               fontSize={2}
               style={{
                 overflow: 'hidden',
@@ -104,7 +104,7 @@ export const PersonRow = ({
               }}
             >
               {nickname ? nickname : shortPatp}
-            </Text>
+            </Text.Custom>
           </Flex>
         </Flex>
         {children}
