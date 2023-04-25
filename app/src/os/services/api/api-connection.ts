@@ -13,10 +13,8 @@ export class APIConnection {
   private static instance: APIConnection;
   private conduitInstance: Conduit;
   private isReconnecting = false;
-  private session: ConduitSession;
 
   private constructor(session: ConduitSession) {
-    this.session = session;
     this.conduitInstance = new Conduit(session.ship);
     this.handleConnectionStatus(this.conduitInstance);
     this.conduitInstance

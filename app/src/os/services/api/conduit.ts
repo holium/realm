@@ -388,7 +388,6 @@ export class Conduit extends EventEmitter {
     const { app, path } = params;
     try {
       if (!this.headers.Cookie) throw new Error('headers.Cookie not set');
-
       const response = await axios.get(
         `${this.url}/~/scry/${app}${path}.json`,
         {
