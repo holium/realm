@@ -8,6 +8,7 @@ export const Locked = observer(() => {
   const { walletStore } = useShipStore();
   const unlock = () => {
     walletStore.navigateBack();
+    walletStore.getWalletsUpdate();
     walletStore.watchUpdates();
   };
 

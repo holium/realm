@@ -902,10 +902,9 @@ export const WalletStore = types
     return {
       init: flow(function* (): Generator<PromiseLike<any>, void, any> {
         try {
-          const wallets = yield WalletIPC.getWallets() as PromiseLike<any>;
+          /*const wallets = yield WalletIPC.getWallets() as PromiseLike<any>;
           const transactions =
-            yield WalletIPC.getTransactions() as PromiseLike<any>;
-          console.log('transactions', transactions);
+            yield WalletIPC.getTransactions() as PromiseLike<any>;*/
           self.ourPatp = shipStore.ship?.patp;
           if (!self.ourPatp) throw new Error('No patp in wallet model');
           const hasMnemonic = yield WalletIPC.hasMnemonic(self.ourPatp);
@@ -1280,6 +1279,13 @@ export const WalletStore = types
       pauseUpdates: flow(function* (): Generator<PromiseLike<any>, void, any> {
         yield WalletIPC.pauseUpdates() as PromiseLike<any>;
       }),
+      getWalletsUpdate: flow(function* (): Generator<
+        PromiseLike<any>,
+        void,
+        any
+      > {
+        yield WalletIPC.getWalletsUpdate() as PromiseLike<any>;
+      }),
     };
   });
 
@@ -1343,8 +1349,6 @@ WalletIPC.onUpdate((payload: any) => {
       shipStore.walletStore.setSettingsSetter(payload.settings);
       break;
     case 'set-balance':
-      console.log('setting balance');
-      console.log('payload', payload);
       const balanceData = payload['set-balance'];
       shipStore.walletStore.ethereum.wallets
         .get(balanceData.index)

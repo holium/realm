@@ -56,8 +56,13 @@ export class WalletService extends AbstractService {
   }
 
   async checkPasscodeHash(passcode: number[]) {
-    return await bcrypt.compare(
-      passcode.map(String).join(''),
+    const response = await APIConnection.getInstance().conduit.scry({
+      app: 'realm-wallet',
+      path: '/passcode',
+    });
+    console.log('response', response);
+    console.log(
+      'trying',
       (
         await APIConnection.getInstance().conduit.scry({
           app: 'realm-wallet',
@@ -65,6 +70,14 @@ export class WalletService extends AbstractService {
         })
       ).passcode ?? ''
     );
+    const passcodeHash =
+      (
+        await APIConnection.getInstance().conduit.scry({
+          app: 'realm-wallet',
+          path: '/passcode',
+        })
+      ).passcode ?? '';
+    return await bcrypt.compare(passcode.map(String).join(''), passcodeHash);
   }
 
   async hasPasscodeHash() {
@@ -280,6 +293,10 @@ export class WalletService extends AbstractService {
 
   async hasMnemonic(patp: string) {
     return RealmSigner.hasMnemonic(patp);
+  }
+
+  async getWalletsUpdate() {
+    this.walletDB?.sendChainUpdate(await this.walletDB._fetchWallets());
   }
 }
 

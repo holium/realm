@@ -97,6 +97,7 @@ const DetailPresenter = (props: DetailProps) => {
       height="100%"
       justifyContent="flex-start"
       flexDirection="column"
+      gap={10}
     >
       <DetailHero
         wallet={wallet}

@@ -56,7 +56,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     return response;
   }
 
-  private async _fetchWallets() {
+  async _fetchWallets() {
     // const lastTimestamp = this.getLastTimestamp('wallets');
     const response = await APIConnection.getInstance().conduit.scry({
       app: 'realm-wallet',
@@ -128,7 +128,6 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
   private _insertTransactions(transactions: TransactionsRow[]) {
     if (!this.db) throw new Error('No db connection');
-    console.log('transactions', transactions);
     const insert = this.db.prepare(
       `REPLACE INTO transactions (
           hash,
