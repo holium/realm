@@ -134,6 +134,7 @@ export class ShipService extends AbstractService<any> {
       friends: new FriendsService(false, this.shipDB.db),
       spaces: new SpacesService(undefined, this.shipDB.db, this.patp),
       bazaar: new BazaarService(undefined, this.shipDB.db),
+      wallet: new WalletService(undefined, this.shipDB.db),
     };
   }
 
