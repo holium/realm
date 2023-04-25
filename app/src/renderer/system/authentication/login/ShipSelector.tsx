@@ -23,7 +23,7 @@ const ShipSelectorPresenter = () => {
   const { setTheme, authStore } = useAppState();
   const { accounts, selected: selectedShip, setSelected: onSelect } = authStore;
 
-  const [orderedList, setOrder] = useState(accounts.map((a) => a.patp) || []);
+  const [orderedList, _setOrder] = useState(accounts.map((a) => a.patp) || []);
   const [dragging, setDragging] = useState(false);
 
   // useEffect(() => {

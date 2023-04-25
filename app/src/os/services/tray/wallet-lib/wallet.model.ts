@@ -166,8 +166,8 @@ const TransactionList = types
       }
     },
     applyChainTransactions(
-      conduit: any,
-      protocol: ProtocolType,
+      _conduit: any,
+      _protocol: ProtocolType,
       index: number,
       address: string,
       transactions: any

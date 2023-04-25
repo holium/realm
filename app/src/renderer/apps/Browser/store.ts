@@ -63,7 +63,7 @@ export function useBrowser() {
   return store;
 }
 
-MainIPC.onBrowserOpen((_event: any, url: string) => {
+MainIPC.onBrowserOpen((_event: any, _url: string) => {
   // const relic = servicesStore.bazaar.getApp('os-browser');
   // DesktopActions.openAppWindow(
   //   toJS(relic) || (nativeApps['os-browser'] as AppType)

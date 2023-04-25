@@ -63,7 +63,17 @@ export const ConnectionStatus = observer(() => {
   const { ship } = useShipStore();
   const [isReconnecting, setIsReconnecting] = useState(false);
   // const status = connectionStatus;
-  const status = 'online';
+  const online = true;
+  const [status, _setStatus] = useState<
+    | 'online'
+    | 'offline'
+    | 'failed'
+    | 'refreshing'
+    | 'refreshed'
+    | 'connected'
+    | 'connecting'
+    | 'initialized'
+  >('online');
 
   const mode = theme.mode;
   const onReconnect = () => {
