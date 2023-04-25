@@ -60,17 +60,21 @@ const HaveUrbitDialogPresenter = (props: BaseDialogProps) => {
         >
           <Flex
             flexDirection="column"
-            alignItems="top"
+            alignItems="center"
             justifyContent="space-between"
           >
             <Button
               variant="minimal"
               alignSelf="center"
               fontWeight={500}
-              onClick={selectHosted}
+              disabled={true}
             >
               Sign up
             </Button>
+            <Text mt={20} fontSize={2} opacity={0.5}>
+              We are migrating to our new hosting system and currently aren't
+              allowing planet purchase with the old system
+            </Text>
             <Text
               mt={20}
               fontSize={2}
