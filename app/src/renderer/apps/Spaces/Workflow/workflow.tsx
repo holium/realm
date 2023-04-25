@@ -1,12 +1,13 @@
 import { toJS } from 'mobx';
-import { DialogRenderers } from 'renderer/system/dialog/dialogs';
+import { NewSpace } from 'os/services/ship/spaces/spaces.service';
 import { normalizeBounds } from 'renderer/lib/window-manager';
-import { CreateSpaceModal } from './SelectType';
-import { SpacesCreateForm } from './Details';
-import { InviteMembers } from './InviteMembers';
 import { appState } from 'renderer/stores/app.store';
 import { shipStore } from 'renderer/stores/ship.store';
-import { NewSpace } from 'os/services/ship/spaces/spaces.service';
+import { DialogRenderers } from 'renderer/system/dialog/dialogs';
+
+import { SpacesCreateForm } from './Details';
+import { InviteMembers } from './InviteMembers';
+import { CreateSpaceModal } from './SelectType';
 
 export const spacesDialogs: DialogRenderers = {
   'create-space-1': {

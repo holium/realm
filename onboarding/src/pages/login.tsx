@@ -1,10 +1,11 @@
-import { GetServerSideProps } from 'next';
 import { Anchor } from '@holium/design-system/general';
 import {
   LoginDialog,
   OnboardDialogDescription,
   OnboardingStorage,
 } from '@holium/shared';
+import { GetServerSideProps } from 'next';
+
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';

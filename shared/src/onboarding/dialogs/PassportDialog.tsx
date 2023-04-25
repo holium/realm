@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
+import { Box, Flex, Spinner } from '@holium/design-system/general';
 import styled from 'styled-components';
-import { Flex, Box, Spinner } from '@holium/design-system/general';
+
+import { AccountDialogSubtitle } from '../components/AccountDialog.styles';
+import { OnboardDialog } from '../components/OnboardDialog';
 import {
   OnboardDialogDescription,
   OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
-import { OnboardDialog } from '../components/OnboardDialog';
-import { AccountDialogSubtitle } from '../components/AccountDialog.styles';
 import { PassportCard } from '../components/PassportCard';
 import { AddImageIcon } from '../icons/AddImageIcon';
 

@@ -1,22 +1,24 @@
+import { toJS } from 'mobx';
 import {
-  Instance,
-  types,
-  flow,
   applySnapshot,
   castToSnapshot,
   clone,
+  flow,
   getSnapshot,
+  Instance,
+  types,
 } from 'mobx-state-tree';
-import { toJS } from 'mobx';
-import { LoaderModel, SubscriptionModel } from './common.model';
-import { UrbitApp } from './bazaar.model';
-import { MembersModel, MembersStore, VisaModel } from './invitations.model';
-import { Theme } from './theme.model';
-import { BazaarIPC, SpacesIPC } from '../ipc';
-import { appState } from '../app.store';
-import { shipStore } from '../ship.store';
 import { MemberRole } from 'os/types';
 import { defaultTheme } from 'renderer/lib/defaultTheme';
+
+import { appState } from '../app.store';
+import { BazaarIPC, SpacesIPC } from '../ipc';
+import { shipStore } from '../ship.store';
+
+import { UrbitApp } from './bazaar.model';
+import { LoaderModel, SubscriptionModel } from './common.model';
+import { MembersModel, MembersStore, VisaModel } from './invitations.model';
+import { Theme } from './theme.model';
 
 const spaceRowToModel = (space: any) => {
   return {

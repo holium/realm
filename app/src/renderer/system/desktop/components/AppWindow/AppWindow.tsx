@@ -1,21 +1,23 @@
-import { debounce } from 'lodash';
 import { PointerEvent, useCallback, useEffect, useMemo } from 'react';
-import { useMotionValue, useDragControls } from 'framer-motion';
+import { Flex, useToggle } from '@holium/design-system';
+import { useDragControls, useMotionValue } from 'framer-motion';
+import { debounce } from 'lodash';
 import { observer } from 'mobx-react';
-import { AppWindowByType } from './AppWindowByType';
-import { AppWindowContainer } from './AppWindow.styles';
-import { AppWindowResizeHandles } from './AppWindowResizeHandles';
-import { useToggle, Flex } from '@holium/design-system';
-import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
-import { TitlebarByType } from './Titlebar/TitlebarByType';
-import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
-import { ErrorBoundary } from '../../../ErrorBoundary';
 import {
   denormalizeBounds,
   normalizeBounds,
 } from 'renderer/lib/window-manager';
+import { useAppState } from 'renderer/stores/app.store';
 import { AppWindowMobxType } from 'renderer/stores/models/window.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
+
+import { ErrorBoundary } from '../../../ErrorBoundary';
+
+import { TitlebarByType } from './Titlebar/TitlebarByType';
+import { AppWindowContainer } from './AppWindow.styles';
+import { AppWindowByType } from './AppWindowByType';
+import { AppWindowResizeHandles } from './AppWindowResizeHandles';
 
 const CURSOR_WIDTH = 10;
 

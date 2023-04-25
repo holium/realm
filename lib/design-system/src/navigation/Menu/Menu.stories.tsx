@@ -1,8 +1,10 @@
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+
 import { Button, Icon } from '../../';
-import { Menu } from './Menu';
 import { Box } from '../../general/Box/Box';
 import { Flex } from '../../general/Flex/Flex';
+
+import { Menu } from './Menu';
 
 export default {
   component: Menu,

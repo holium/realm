@@ -1,8 +1,9 @@
 import styled from 'styled-components';
-import { Icon } from '../Icon/Icon';
-import { Flex } from '../Flex/Flex';
-import { Text } from '../Text/Text';
+
 import { useToggle } from '../../util/hooks';
+import { Flex } from '../Flex/Flex';
+import { Icon } from '../Icon/Icon';
+import { Text } from '../Text/Text';
 
 const CopyLabel = styled(Text.Body)`
   font-size: 14px;

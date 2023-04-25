@@ -1,14 +1,15 @@
 import { useCallback, useState } from 'react';
+import { Flex } from '@holium/design-system';
+import { Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
-import { Reorder } from 'framer-motion';
 import { Divider } from 'renderer/components';
-import { Flex } from '@holium/design-system';
+import { useAppState } from 'renderer/stores/app.store';
+import { AppMobxType } from 'renderer/stores/models/bazaar.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+
 import { PinnedDockApp } from './PinnedDockApp';
 import { UnpinnedDockApp } from './UnpinnedDockApp';
-import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
-import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 
 type Props = {
   spacePath: string;

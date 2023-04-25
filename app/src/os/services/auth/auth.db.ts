@@ -1,11 +1,12 @@
-import path from 'path';
 import { app } from 'electron';
-import Database from 'better-sqlite3-multiple-ciphers';
-import Store from 'electron-store';
 import log from 'electron-log';
+import Store from 'electron-store';
+import Database from 'better-sqlite3-multiple-ciphers';
+import path from 'path';
+
 import { Accounts, accountsInit } from './accounts.table';
-import { MasterAccounts, masterAccountsInit } from './masterAccounts.table';
 import { AuthStore } from './auth.model.old';
+import { MasterAccounts, masterAccountsInit } from './masterAccounts.table';
 
 export class AuthDB {
   private readonly authDB: Database;

@@ -1,7 +1,8 @@
 import { Flex } from '@holium/design-system/general';
+
 import {
-  OnboardDialogSubTitle,
   OnboardDialogDescription,
+  OnboardDialogSubTitle,
 } from '../OnboardDialog.styles';
 
 type Props = {

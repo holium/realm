@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { track } from '@amplitude/analytics-browser';
-import { BootingDialog, OnboardingStorage } from '@holium/shared';
 import { useToggle } from '@holium/design-system/util';
+import { BootingDialog, OnboardingStorage } from '@holium/shared';
+
 import { thirdEarthApi } from '../thirdEarthApi';
+
 import { StepProps } from './types';
 
 export const BootingStep = ({ setStep }: StepProps) => {

@@ -1,13 +1,14 @@
-import { useRef, useMemo, useState } from 'react';
-import { observer } from 'mobx-react';
-import { createField, createForm } from 'mobx-easy-form';
-import { isValidPatp } from 'urbit-ob';
-import styled from 'styled-components';
+import { useMemo, useRef, useState } from 'react';
+import { Button, Flex, Icon, Text, TextInput } from '@holium/design-system';
 import { motion } from 'framer-motion';
-import { Flex, Icon, Text, Button, TextInput } from '@holium/design-system';
-import { MembersList } from './Space/MembersList';
-import { shipStore, useShipStore } from 'renderer/stores/ship.store';
+import { createField, createForm } from 'mobx-easy-form';
+import { observer } from 'mobx-react';
 import { ShipSearch } from 'renderer/components/ShipSearch';
+import { shipStore, useShipStore } from 'renderer/stores/ship.store';
+import styled from 'styled-components';
+import { isValidPatp } from 'urbit-ob';
+
+import { MembersList } from './Space/MembersList';
 
 const HomeSidebar = styled(motion.div)`
   position: relative;

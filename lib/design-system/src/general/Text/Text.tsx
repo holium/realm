@@ -1,8 +1,9 @@
-import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { Box, BoxProps, boxStyles } from '../Box/Box';
-import { colorStyle } from '../../util/colors';
+import styled, { css } from 'styled-components';
+
 import { skeletonStyle } from '../../general/Skeleton/Skeleton';
+import { colorStyle } from '../../util/colors';
+import { Box, BoxProps, boxStyles } from '../Box/Box';
 
 export const fontByType = {
   body: '"Rubik", sans-serif',

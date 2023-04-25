@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { sigil, reactRenderer } from '@tlon/sigil-js';
-import styled, { css } from 'styled-components';
+import { reactRenderer, sigil } from '@tlon/sigil-js';
 import { motion } from 'framer-motion';
+import styled, { css } from 'styled-components';
 import { BorderRadiusProps } from 'styled-system';
-import { Box, BoxProps } from '../Box/Box';
+
 import { isImgValid } from '../../util/image';
+import { Box, BoxProps } from '../Box/Box';
 
 export type AvatarStyleProps = BoxProps &
   BorderRadiusProps & {

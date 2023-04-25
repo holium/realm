@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
-import { PasswordDialog, OnboardingStorage } from '@holium/shared';
-import { StepProps } from './types';
+import { OnboardingStorage, PasswordDialog } from '@holium/shared';
 import { RealmIPC } from 'renderer/stores/ipc';
+
+import { StepProps } from './types';
 
 export const PasswordStep = ({ setStep }: StepProps) => {
   const { shipCode } = OnboardingStorage.get();

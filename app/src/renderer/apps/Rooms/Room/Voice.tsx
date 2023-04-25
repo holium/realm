@@ -1,11 +1,12 @@
+import { useEffect } from 'react';
+import { Flex } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
-import { Flex } from '@holium/design-system';
-import { Speaker } from '../components/Speaker';
-import { useRooms } from '../useRooms';
-import { useEffect } from 'react';
-import { roomTrayConfig } from '../config';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+import { Speaker } from '../components/Speaker';
+import { roomTrayConfig } from '../config';
+import { useRooms } from '../useRooms';
 
 const VoiceViewPresenter = () => {
   const { ship } = useShipStore();

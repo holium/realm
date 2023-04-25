@@ -2,6 +2,7 @@ import { observer } from 'mobx-react';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 import { useShipStore } from 'renderer/stores/ship.store';
+
 import { AppDockView } from './AppDockView';
 
 const AppDockPresenter = () => {

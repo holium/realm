@@ -4,11 +4,14 @@
     ".prettierrc": "jsonc",
     ".eslintignore": "ignore"
   },
-
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
   "javascript.validate.enable": false,
   "javascript.format.enable": false,
   "typescript.format.enable": false,
-
+  "editor.formatOnSave": true,
+  "eslint.format.enable": true,
   "search.exclude": {
     ".git": true,
     ".eslintcache": true,

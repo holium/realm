@@ -1,8 +1,9 @@
-import { types, onSnapshot, Instance } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
-import { isUrlSafe } from './helpers/createUrl';
+import { Instance, onSnapshot, types } from 'mobx-state-tree';
 import { MainIPC } from 'renderer/stores/ipc';
 import { LoaderModel } from 'renderer/stores/models/common.model';
+
+import { isUrlSafe } from './helpers/createUrl';
 
 const TabModel = types.model('BrowserTabModel', {
   id: types.identifier,

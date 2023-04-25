@@ -1,25 +1,26 @@
-import { useState, useEffect } from 'react';
-import { observer } from 'mobx-react';
-import { isValidPatp } from 'urbit-ob';
+import { useEffect, useState } from 'react';
 import {
-  Flex,
-  Spinner,
-  Text,
   Button,
+  Flex,
   InstallStatus,
   NoScrollBar,
+  Spinner,
+  Text,
 } from '@holium/design-system';
-import { AppRow } from './AppRow';
-import { ProviderRow } from './ProviderRow';
-import { useAppInstaller } from './store';
-import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { toJS } from 'mobx';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { observer } from 'mobx-react';
+import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { appState } from 'renderer/stores/app.store';
 import {
   AppMobxType,
   DocketAppType,
 } from 'renderer/stores/models/bazaar.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { isValidPatp } from 'urbit-ob';
+
+import { AppRow } from './AppRow';
+import { ProviderRow } from './ProviderRow';
+import { useAppInstaller } from './store';
 
 const SearchModesPresenter = () => {
   const { bazaarStore } = useShipStore();

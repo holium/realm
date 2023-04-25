@@ -1,17 +1,17 @@
+import { SVGProps, useEffect, useState } from 'react';
 import {
   AnimatePresence,
   motion,
   useAnimationControls,
   Variants,
 } from 'framer-motion';
-import { SVGProps, useEffect, useState } from 'react';
 import {
-  WidthProps,
-  HeightProps,
-  SpaceProps,
   ColorProps,
+  HeightProps,
   LayoutProps,
+  SpaceProps,
   TypographyProps,
+  WidthProps,
 } from 'styled-system';
 
 export type IconProps = SVGProps<SVGSVGElement> &

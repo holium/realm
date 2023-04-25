@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
-import { observer } from 'mobx-react';
+import { useEffect, useState } from 'react';
 import { Select, Text } from '@holium/design-system';
+import { observer } from 'mobx-react';
 import { RealmIPC } from 'renderer/stores/ipc';
-import { SettingPane } from '../components/SettingPane';
-import { SettingTitle } from '../components/SettingTitle';
+
 import { SettingControl } from '../components/SettingControl';
+import { SettingPane } from '../components/SettingPane';
 import { SettingSection } from '../components/SettingSection';
+import { SettingTitle } from '../components/SettingTitle';
 
 const AboutPanelPresenter = () => {
   const [selectedChannel, setSelectedChannel] = useState('');

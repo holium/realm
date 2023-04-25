@@ -1,5 +1,6 @@
 import { AppWindowMobxType } from 'renderer/stores/models/window.model';
 import { DialogView } from 'renderer/system/dialog/Dialog/Dialog';
+
 import { AppView } from './View/AppView';
 import { DevView } from './View/DevView';
 import { NativeView } from './View/NativeView';

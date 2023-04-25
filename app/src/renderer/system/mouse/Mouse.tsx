@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { hexToRgb, rgbToString, useToggle } from '@holium/design-system';
 import { MouseState } from '@holium/realm-presence';
-import { useToggle, hexToRgb, rgbToString } from '@holium/design-system';
+
 import { AnimatedCursor } from './AnimatedCursor';
 import { EphemeralChat } from './Mouse.styles';
 

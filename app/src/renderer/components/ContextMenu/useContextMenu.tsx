@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { useSelection } from 'renderer/lib/selection';
 import { useAppState } from 'renderer/stores/app.store';
+
 import { ContextMenuOption } from './ContextMenu';
 
 type ContextMenuOptionsMap = {

@@ -1,23 +1,24 @@
-import { RealmIPC } from './ipc';
 import {
-  types,
   applySnapshot,
+  castToSnapshot,
   clone,
   flow,
   getSnapshot,
-  castToSnapshot,
   tryReference,
+  types,
 } from 'mobx-state-tree';
-import { AuthIPC } from 'renderer/stores/ipc';
-import { AccountModel } from './models/account.model';
-import { trackEvent } from 'renderer/lib/track';
-import { appState } from './app.store';
+import { LoginErrorType } from 'os/realm.types';
 import {
   AccountView,
   AuthUpdateAccountPayload,
 } from 'os/services/auth/auth.types';
-import { LoginErrorType } from 'os/realm.types';
 import { OnboardingEndedPayload } from 'os/services/auth/onboarding.types';
+import { trackEvent } from 'renderer/lib/track';
+import { AuthIPC } from 'renderer/stores/ipc';
+
+import { AccountModel } from './models/account.model';
+import { appState } from './app.store';
+import { RealmIPC } from './ipc';
 
 export type LoginStatusStateType = 'initial' | 'loading' | 'success' | 'error';
 

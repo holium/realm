@@ -1,20 +1,21 @@
 import { useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import styled from 'styled-components';
+
 import { Box, Flex, skeletonStyle, Text } from '../../../general';
 import { Bookmark } from '../../os/Bookmark/Bookmark';
-import { MediaBlock } from '../MediaBlock/MediaBlock';
-import { ImageBlock } from '../ImageBlock/ImageBlock';
-import { BlockProps, Block } from '../Block/Block';
 import { parseMediaType } from '../../util/links';
-import { TweetBlock } from './TweetBlock';
+import { Block, BlockProps } from '../Block/Block';
+import { ImageBlock } from '../ImageBlock/ImageBlock';
+import { MediaBlock } from '../MediaBlock/MediaBlock';
 
+import { TweetBlock } from './TweetBlock';
 import {
-  fetchOGData,
-  RAW_LINK_HEIGHT,
-  LINK_PREVIEW_HEIGHT,
   extractOGData,
+  fetchOGData,
+  LINK_PREVIEW_HEIGHT,
   LinkPreviewType,
+  RAW_LINK_HEIGHT,
 } from './util';
 
 const LinkTitle = styled(Text.Anchor)`

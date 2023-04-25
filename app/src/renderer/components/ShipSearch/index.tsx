@@ -1,19 +1,20 @@
 import { useMemo } from 'react';
-import { observer } from 'mobx-react';
-import styled from 'styled-components';
-import { searchPatpOrNickname } from './helpers';
 import {
-  Flex,
+  Avatar,
   Box,
   Button,
+  Card,
+  Flex,
   Icon,
   Row,
-  Avatar,
-  WindowedList,
   Text,
-  Card,
+  WindowedList,
 } from '@holium/design-system';
+import { observer } from 'mobx-react';
 import { useShipStore } from 'renderer/stores/ship.store';
+import styled from 'styled-components';
+
+import { searchPatpOrNickname } from './helpers';
 
 const resultHeight = 50;
 

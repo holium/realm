@@ -1,8 +1,9 @@
 import {
-  ThirdEarthProduct,
   ThirdEarthPortalSession,
+  ThirdEarthProduct,
   ThirdEarthShip,
 } from '@holium/shared';
+
 import { http } from './http';
 
 type LoginResponse = {

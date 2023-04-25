@@ -1,6 +1,10 @@
+import log from 'electron-log';
+import fetch from 'cross-fetch';
 import EventEmitter, { setMaxListeners } from 'events';
 import EventSource from 'eventsource';
-import fetch from 'cross-fetch';
+
+import { deSig, preSig } from '@urbit/aura';
+
 import {
   Action,
   ConduitState,
@@ -15,8 +19,6 @@ import {
   SubscribeParams,
   Thread,
 } from './types';
-import { deSig, preSig } from '@urbit/aura';
-import log from 'electron-log';
 
 // For now, set it to 20
 setMaxListeners(20);

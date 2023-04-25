@@ -1,7 +1,8 @@
-import { CSSProperties, useRef, useState, ReactNode } from 'react';
-import styled, { css } from 'styled-components';
-import { compose, space, color, typography } from 'styled-system';
+import { CSSProperties, ReactNode, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import styled, { css } from 'styled-components';
+import { color, compose, space, typography } from 'styled-system';
+
 import { Box } from '../Box/Box';
 import { Card } from '../Card/Card';
 import { Portal } from '../Portal/Portal';

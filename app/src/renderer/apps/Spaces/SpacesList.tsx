@@ -1,20 +1,22 @@
 import { useMemo } from 'react';
-import { observer } from 'mobx-react';
 import {
-  Flex,
-  Text,
-  Button,
-  Icon,
-  WindowedList,
   Box,
+  Button,
+  Flex,
+  Icon,
+  Text,
+  WindowedList,
 } from '@holium/design-system';
-import { SpaceRow } from './SpaceRow';
-import { VisaRow } from './components/VisaRow';
+import { observer } from 'mobx-react';
 import { rgba } from 'polished';
-import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 import { useAppState } from 'renderer/stores/app.store';
-import { useTrayApps } from '../store';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+import { useTrayApps } from '../store';
+
+import { VisaRow } from './components/VisaRow';
+import { SpaceRow } from './SpaceRow';
 
 export interface Space {
   color?: string;

@@ -1,7 +1,8 @@
-import { Flex, Icon, Spinner } from '@holium/design-system/general';
 import { useState } from 'react';
-import { PatpCard } from './PatpCard';
+import { Flex, Icon, Spinner } from '@holium/design-system/general';
 import styled from 'styled-components';
+
+import { PatpCard } from './PatpCard';
 
 const Paginator = styled.div`
   grid-column: 1 / 3;

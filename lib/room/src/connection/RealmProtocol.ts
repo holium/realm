@@ -1,14 +1,16 @@
-import { PeerEvent } from '../peer/events';
-import { BaseProtocol, ProtocolConfig } from './BaseProtocol';
-import { Patp, RoomType } from '../types';
-import { ProtocolEvent } from './events';
 import { action, makeObservable, observable, observe, runInAction } from 'mobx';
-import { RemotePeer } from '../peer/RemotePeer';
-import { LocalPeer } from '../peer/LocalPeer';
+
 import { DataPacket, DataPacket_Kind, DataPayload } from '../helpers/data';
 import { ridFromTitle } from '../helpers/parsing';
-import { isDialer } from '../utils';
+import { PeerEvent } from '../peer/events';
+import { LocalPeer } from '../peer/LocalPeer';
+import { RemotePeer } from '../peer/RemotePeer';
 import { PeerConnectionState } from '../peer/types';
+import { Patp, RoomType } from '../types';
+import { isDialer } from '../utils';
+
+import { BaseProtocol, ProtocolConfig } from './BaseProtocol';
+import { ProtocolEvent } from './events';
 
 export function isWebRTCSignal(type: any): boolean {
   return !['retry', 'ack-waiting', 'waiting'].includes(type);

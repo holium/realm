@@ -1,7 +1,8 @@
-import { observer } from 'mobx-react';
 import { Flex, Text } from '@holium/design-system';
-import { AppPreview } from './AppPreview';
+import { observer } from 'mobx-react';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+import { AppPreview } from './AppPreview';
 
 const RecommendedAppsPresenter = () => {
   const { spacesStore } = useShipStore();

@@ -1,12 +1,14 @@
 import styled from 'styled-components';
-import { Text, Box, BoxProps, Icon } from '../../../general';
+
+import { Box, BoxProps, Icon, Text } from '../../../general';
 import { BlockStyle } from '../../blocks/Block/Block';
+
 import { BUBBLE_HEIGHT, BUBBLE_WIDTH } from './Bubble.constants';
 import {
-  FragmentBlockquote,
-  FragmentShip,
   BlockWrapper,
   CodeWrapper,
+  FragmentBlockquote,
+  FragmentShip,
 } from './fragment-lib';
 
 export type BubbleStyleProps = {

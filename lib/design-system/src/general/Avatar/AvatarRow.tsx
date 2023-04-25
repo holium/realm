@@ -1,5 +1,6 @@
 import { FC } from 'react';
-import { Flex, Box, Avatar } from '../../../general';
+
+import { Avatar, Box, Flex } from '../../../general';
 
 export type ContactData = {
   patp: string;

@@ -1,11 +1,12 @@
 // import { useMemo, useState } from 'react';
+import { Avatar, Box, Flex } from '@holium/design-system';
+import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { Pulser } from 'renderer/components';
-import { Box, Flex, Avatar } from '@holium/design-system';
-import { motion } from 'framer-motion';
-import { TrayClock } from '../Clock';
-import styled from 'styled-components';
 import { useShipStore } from 'renderer/stores/ship.store';
+import styled from 'styled-components';
+
+import { TrayClock } from '../Clock';
 
 type AccountTrayProps = {
   unreadCount: number;

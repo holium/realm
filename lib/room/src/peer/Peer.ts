@@ -1,10 +1,12 @@
 import { EventEmitter } from 'events';
+import { action, makeObservable, observable, runInAction } from 'mobx';
 import TypedEmitter from 'typed-emitter';
 import { patp2dec } from 'urbit-ob';
+
 import { Patp } from '../types';
-import { action, makeObservable, observable, runInAction } from 'mobx';
-import { PeerConnectionState } from './types';
+
 import { PeerEvent } from './events';
+import { PeerConnectionState } from './types';
 
 export interface PeerConfig {
   isHost: boolean;

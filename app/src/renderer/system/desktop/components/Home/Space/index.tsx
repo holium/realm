@@ -1,14 +1,16 @@
-import { useState, useMemo } from 'react';
-import { observer } from 'mobx-react';
+import { useMemo, useState } from 'react';
+import { Button, Flex, Icon, NoScrollBar } from '@holium/design-system';
 import { AnimatePresence } from 'framer-motion';
-import { Flex, Button, Icon, NoScrollBar } from '@holium/design-system';
-import { SpaceTitlebar } from './SpaceTitlebar';
-import { AppSuite } from './AppSuite/AppSuite';
-import { RecommendedApps } from './Recommended';
+import { observer } from 'mobx-react';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import { AppSearchApp } from '../AppInstall/AppSearch';
 import { Members } from '../Members';
 import { AppGrid } from '../Ship/AppGrid';
-import { useShipStore } from 'renderer/stores/ship.store';
-import { AppSearchApp } from '../AppInstall/AppSearch';
+
+import { AppSuite } from './AppSuite/AppSuite';
+import { RecommendedApps } from './Recommended';
+import { SpaceTitlebar } from './SpaceTitlebar';
 
 interface HomePaneProps {
   isOpen?: boolean;

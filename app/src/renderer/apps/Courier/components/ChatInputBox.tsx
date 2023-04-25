@@ -1,19 +1,20 @@
 import {
-  useState,
-  useCallback,
   ClipboardEvent,
-  useRef,
+  useCallback,
   useEffect,
+  useRef,
+  useState,
 } from 'react';
 import { Box, ChatInput } from '@holium/design-system';
+import { FileUploadParams } from 'os/services/ship/ship.service';
+import { useFileUpload } from 'renderer/lib/useFileUpload';
+import { IuseStorage } from 'renderer/lib/useStorage';
+import { ShipIPC } from 'renderer/stores/ipc';
+
 import {
   ChatMessageType,
   ChatModelType,
 } from '../../../stores/models/chat.model';
-import { useFileUpload } from 'renderer/lib/useFileUpload';
-import { IuseStorage } from 'renderer/lib/useStorage';
-import { ShipIPC } from 'renderer/stores/ipc';
-import { FileUploadParams } from 'os/services/ship/ship.service';
 
 type CourierInputProps = {
   replyTo?: any;

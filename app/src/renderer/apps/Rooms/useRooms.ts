@@ -1,8 +1,8 @@
 import {
-  RealmProtocol,
   ProtocolEvent,
-  RoomsManager,
+  RealmProtocol,
   RoomManagerEvent,
+  RoomsManager,
 } from '@holium/realm-room';
 import { Patp } from 'os/types';
 import { SoundActions } from 'renderer/lib/sound';

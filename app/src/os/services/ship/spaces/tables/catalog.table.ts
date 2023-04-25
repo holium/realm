@@ -1,8 +1,9 @@
 import log from 'electron-log';
+
+import { cleanNounColor } from '../../../../lib/color';
 import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../../abstract.db';
-import { cleanNounColor } from '../../../../lib/color';
 import { spaceDockQuery, spaceStallQuery } from '../spaces.query';
 
 export interface App {

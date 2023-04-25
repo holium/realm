@@ -1,22 +1,23 @@
 import { useMemo } from 'react';
-import { observer } from 'mobx-react';
-import { ContextMenuOption, AppTile } from 'renderer/components';
-import { getAppTileFlags } from 'renderer/lib/app';
-import {
-  handleInstallation,
-  resumeSuspendLabel,
-  handleResumeSuspend,
-  installLabel,
-} from '../../AppInstall/helpers';
 import { bgIsLightOrDark, Box, Button, Icon } from '@holium/design-system';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { observer } from 'mobx-react';
+import { rgba } from 'polished';
+import { AppTile, ContextMenuOption } from 'renderer/components';
+import { getAppTileFlags } from 'renderer/lib/app';
 import { useAppState } from 'renderer/stores/app.store';
-import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 import {
   AppMobxType,
   InstallStatus,
 } from 'renderer/stores/models/bazaar.model';
-import { rgba } from 'polished';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import {
+  handleInstallation,
+  handleResumeSuspend,
+  installLabel,
+  resumeSuspendLabel,
+} from '../../AppInstall/helpers';
 
 type Props = {
   index: number;

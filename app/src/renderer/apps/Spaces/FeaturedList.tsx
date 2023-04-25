@@ -1,15 +1,16 @@
 import { useEffect } from 'react';
-import { observer } from 'mobx-react';
 import {
-  Flex,
-  Text,
   Button,
-  Spinner,
-  WindowedList,
+  Flex,
   Row,
+  Spinner,
+  Text,
+  WindowedList,
 } from '@holium/design-system';
-import { EmptyGroup } from './SpaceRow';
+import { observer } from 'mobx-react';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+import { EmptyGroup } from './SpaceRow';
 
 export interface Space {
   color?: string;

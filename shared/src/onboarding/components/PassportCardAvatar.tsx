@@ -1,17 +1,19 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import styled, { css } from 'styled-components';
-import { useToggle } from '@holium/design-system/util';
 import {
-  Flex,
   Avatar,
+  Box,
   Button,
+  ErrorBox,
+  Flex,
   Icon,
   Spinner,
-  ErrorBox,
-  Box,
 } from '@holium/design-system/general';
 import { Input } from '@holium/design-system/inputs';
+import { useToggle } from '@holium/design-system/util';
+import styled, { css } from 'styled-components';
+
 import { AddImageIcon } from '../icons/AddImageIcon';
+
 import { MOBILE_WIDTH, OnboardDialogDescription } from './OnboardDialog.styles';
 import { defaultImages } from './passportCardDefaultImages';
 

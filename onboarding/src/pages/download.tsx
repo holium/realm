@@ -1,7 +1,9 @@
 import { DownloadDialog } from '@holium/shared';
+
 import { Page } from 'components/Page';
-import { useNavigation } from '../util/useNavigation';
+
 import { downloadLinks } from '../util/constants';
+import { useNavigation } from '../util/useNavigation';
 
 export default function Download() {
   const { goToPage } = useNavigation();
