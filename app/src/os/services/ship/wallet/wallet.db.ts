@@ -32,13 +32,12 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     const wallets = await this._fetchWallets();
     console.log('wallets', wallets);
     this._insertWallets(wallets);
-    const ethWallets = wallets.wallets.ethereum;
-    console.log('ethWallets', ethWallets);
+    /*const ethWallets = wallets.wallets.ethereum;
     let wallet: any;
     for (wallet of Object.values(ethWallets)) {
       this._insertTransactions(wallet.transactions);
       this._insertTransactions(wallet['token-txns']);
-    }
+    }*/
     // this._insertTransactions(wallets.transactions);
   }
 
@@ -203,9 +202,8 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
         });
     });
     const ethWallets = wallets.wallets.ethereum;
-    const btcWallets = Object.values(wallets.wallets.bitcoin);
-    const btcTestWallets = Object.values(wallets.wallets.btctestnet);
-    console.log('ethWallets', ethWallets);
+    const btcWallets = wallets.wallets.bitcoin;
+    const btcTestWallets = wallets.wallets.btctestnet;
     insertMany(ethWallets);
     insertMany(btcWallets);
     insertMany(btcTestWallets);

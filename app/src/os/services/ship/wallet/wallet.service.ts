@@ -1,4 +1,5 @@
 import log from 'electron-log';
+import bcrypt from 'bcryptjs';
 import Database from 'better-sqlite3-multiple-ciphers';
 import { ethers } from 'ethers';
 
@@ -53,6 +54,32 @@ export class WalletService extends AbstractService {
       },
     };
     await APIConnection.getInstance().conduit.poke(payload);
+  }
+
+  async checkPasscodeHash(passcode: number[]) {
+    console.log(
+      'checking passcode',
+      (await APIConnection.getInstance().conduit.scry({
+        app: 'realm-wallet',
+        path: '/passcode',
+      })) ?? ''
+    );
+    return await bcrypt.compare(
+      passcode.map(String).join(''),
+      (await APIConnection.getInstance().conduit.scry({
+        app: 'realm-wallet',
+        path: '/passcode',
+      })) ?? ''
+    );
+  }
+
+  async hasPasscodeHash() {
+    return (
+      (await APIConnection.getInstance().conduit.scry({
+        app: 'realm-wallet',
+        path: '/passcode',
+      })) !== null
+    );
   }
 
   async setXpub(

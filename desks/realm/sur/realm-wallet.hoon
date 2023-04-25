@@ -75,6 +75,7 @@
       [%wallet =network @t =wallet]
       [%wallets wallets]
       [%settings settings]
+      [%passcode passcode-hash=@t]
   ==
 ::  stores
 ::

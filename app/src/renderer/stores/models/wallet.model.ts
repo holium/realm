@@ -903,21 +903,20 @@ export const WalletStore = types
       init: flow(function* (): Generator<PromiseLike<any>, void, any> {
         try {
           const wallets = yield WalletIPC.getWallets() as PromiseLike<any>;
-          console.log('wallets', wallets);
           const transactions =
             yield WalletIPC.getTransactions() as PromiseLike<any>;
           console.log('transactions', transactions);
           self.ourPatp = shipStore.ship?.patp;
           if (!self.ourPatp) throw new Error('No patp in wallet model');
           const hasMnemonic = yield WalletIPC.hasMnemonic(self.ourPatp);
-          console.log('hasMnemonic', hasMnemonic);
           if (hasMnemonic) {
-            console.log('has mnemonic, navigating');
             // @ts-expect-error
             self.resetNavigation();
             // @ts-expect-error
             self.lock();
           }
+          // @ts-expect-error
+          setInterval(() => self.autoLock(), AUTO_LOCK_INTERVAL);
         } catch (error) {
           console.error(error);
         }
@@ -1205,12 +1204,14 @@ export const WalletStore = types
           this.setProtocolSetter(protocol);
         }
       },
-      checkPasscode: async (passcode: number[]) => {
-        return await bcrypt.compare(
-          passcode.map(String).join(''),
-          self.settings.passcodeHash ?? ''
-        );
-      },
+      checkPasscode: flow(function* (
+        passcode: number[]
+      ): Generator<PromiseLike<any>, void, any> {
+        return yield WalletIPC.checkPasscodeHash(passcode) as PromiseLike<any>;
+      }),
+      hasPasscode: flow(function* (): Generator<PromiseLike<any>, void, any> {
+        return yield WalletIPC.hasPasscodeHash() as PromiseLike<any>;
+      }),
       getRecipient: flow(function* (
         ship: string
       ): Generator<PromiseLike<any>, any, any> {

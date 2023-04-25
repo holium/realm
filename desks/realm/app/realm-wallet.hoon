@@ -101,6 +101,10 @@
       :^  ~  ~  %realm-wallet-update
       !>  ^-  update
       [%settings settings.state]
+        [%x %passcode ~]
+      :^  ~  ~  %realm-wallet-update
+      !>  ^-  update
+      [%passcode passcode-hash.settings.state]
     ==
   ++  on-agent  on-agent:def
   ++  on-arvo   on-arvo:def
