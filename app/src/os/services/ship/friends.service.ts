@@ -164,15 +164,9 @@ export class FriendsService extends AbstractDataAccess<Friend, any> {
       nickname: data.nickname,
       color: data.color ? removeHash(data.color) : null,
       avatar: data.avatar ?? null,
-      // bio: data.bio || null, // the agent seems to want another field
+      bio: data.bio || null,
       cover: data.cover ?? null,
     };
-    // Remove falsy values
-    Object.keys(preparedData).forEach((key) => {
-      if (!preparedData[key]) {
-        delete preparedData[key];
-      }
-    });
     const payload = {
       app: 'friends',
       mark: 'friends-action',
@@ -183,8 +177,7 @@ export class FriendsService extends AbstractDataAccess<Friend, any> {
         },
       },
     };
-
-    return APIConnection.getInstance().conduit.poke(payload);
+    APIConnection.getInstance().conduit.poke(payload);
   }
 
   public findOne(patp: string): Friend | null {
