@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Button, Flex, Text } from '@holium/design-system';
+import { Button, Flex, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { trackEvent } from 'renderer/lib/track';
 import { normalizeBounds } from 'renderer/lib/window-manager';
@@ -52,44 +52,49 @@ const ShutdownDialogPresenter = () => {
   });
 
   return (
-    <Flex px={12} width="100%" height="100%" flexDirection="column">
-      <Text.Custom fontSize={3} fontWeight={500} mb={10}>
-        Power Off
-      </Text.Custom>
-      <Text.Custom fontSize={2} lineHeight="copy" variant="body">
-        Realm will power off automatically in {seconds} second
-        {seconds > 1 && 's'}.
-      </Text.Custom>
-      <Box mt={4} width="100%">
-        <Flex width="100%" justifyContent="space-between">
-          <Button.Secondary
-            width="45%"
-            textAlign="center"
-            disabled={false}
-            onClick={() => {
-              id && clearInterval(id);
-              shellStore.closeDialog();
-              shellStore.setIsBlurred(false);
-              // reset seconds/id for next open
-              // 62 === 60 ???
-              setId(undefined);
-              setSeconds(62);
-            }}
-            variant="secondary"
-          >
-            Cancel
-          </Button.Secondary>
-          <Button.Primary
-            textAlign="center"
-            background="intent-alert"
-            width="50%"
-            disabled={false}
-            onClick={shutdown}
-          >
-            Power Off
-          </Button.Primary>
-        </Flex>
-      </Box>
+    <Flex
+      px={12}
+      gap={16}
+      width="100%"
+      height="100%"
+      flexDirection="column"
+      justifyContent="space-between"
+    >
+      <Flex gap={10} flexDirection="column">
+        <Text.Custom fontSize={3} fontWeight={500}>
+          Power Off
+        </Text.Custom>
+        <Text.Custom fontSize={2} lineHeight="copy" variant="body">
+          Realm will power off automatically in {seconds} second
+          {seconds > 1 && 's'}.
+        </Text.Custom>
+      </Flex>
+      <Flex width="100%">
+        <Button.Secondary
+          flex={1}
+          justifyContent="center"
+          onClick={() => {
+            id && clearInterval(id);
+            shellStore.closeDialog();
+            shellStore.setIsBlurred(false);
+            // reset seconds/id for next open
+            // 62 === 60 ???
+            setId(undefined);
+            setSeconds(62);
+          }}
+          variant="secondary"
+        >
+          <Flex py={2}>Cancel</Flex>
+        </Button.Secondary>
+        <Button.Primary
+          flex={1}
+          justifyContent="center"
+          background="intent-alert"
+          onClick={shutdown}
+        >
+          <Flex py={2}>Power Off</Flex>
+        </Button.Primary>
+      </Flex>
     </Flex>
   );
 };
