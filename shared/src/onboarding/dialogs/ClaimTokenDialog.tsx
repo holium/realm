@@ -57,7 +57,12 @@ export const ClaimTokenDialog = ({
             To get access to Realm, you will need to create an account. After
             you click Claim, you will be brought to a download page.
           </OnboardDialogDescription>
-          <OnboardDialogInput value={email} disabled />
+          <Flex flexDirection="column" gap={2}>
+            <OnboardDialogInputLabel as="label" htmlFor="email">
+              Email
+            </OnboardDialogInputLabel>
+            <OnboardDialogInput value={email} disabled type="email" />
+          </Flex>
           <Flex flexDirection="column" gap={2}>
             <OnboardDialogInputLabel as="label" htmlFor="password">
               Password
@@ -71,7 +76,7 @@ export const ClaimTokenDialog = ({
           </Flex>
           <Flex flexDirection="column" gap={2}>
             <OnboardDialogInputLabel as="label" htmlFor="password">
-              Confirm password
+              Confirm Password
             </OnboardDialogInputLabel>
             <OnboardDialogInput
               ref={confirmPasswordRef}

@@ -54,7 +54,7 @@ export const AccountS3StorageDialog = ({
           {url as string}
         </AccountDialogDescription>
       </AccountDialogTableRow>
-      <AccountDialogTableRow title="S3 bucket">
+      <AccountDialogTableRow title="S3 Bucket">
         <AccountDialogDescription flex={1}>
           {s3Bucket as string}
         </AccountDialogDescription>

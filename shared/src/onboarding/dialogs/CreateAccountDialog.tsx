@@ -88,7 +88,7 @@ export const CreateAccountDialog = ({
           </Flex>
           <Flex flexDirection="column" gap={2}>
             <OnboardDialogInputLabel as="label" htmlFor="password">
-              Confirm password
+              Confirm Password
             </OnboardDialogInputLabel>
             <OnboardDialogInput
               ref={confirmPasswordRef}

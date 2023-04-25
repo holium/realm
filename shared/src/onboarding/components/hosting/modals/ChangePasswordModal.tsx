@@ -70,7 +70,7 @@ export const ChangePasswordModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
       </Flex>
       <Flex flexDirection="column" gap={2}>
         <OnboardDialogInputLabel as="label" htmlFor="email">
-          Confirm password
+          Confirm Password
         </OnboardDialogInputLabel>
         <OnboardDialogInput
           ref={confirmpasswordRef}
