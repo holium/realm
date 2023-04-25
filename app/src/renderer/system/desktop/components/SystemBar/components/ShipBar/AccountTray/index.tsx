@@ -65,7 +65,7 @@ const AccountTrayPresenter = ({ unreadCount, onClick }: AccountTrayProps) => {
             style={{
               position: 'absolute',
               background: 'rgba(var(--rlm-accent-rgba))',
-              border: `2px solid rgba(var(--rlm-accent-rgba), .25)`,
+              border: '2px solid rgba(var(--rlm-accent-rgba), 0.25)',
               borderRadius: '50%',
               backgroundClip: 'padding-box',
               WebkitBackgroundClip: 'padding-box',
