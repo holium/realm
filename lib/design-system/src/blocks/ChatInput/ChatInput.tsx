@@ -221,6 +221,8 @@ export const ChatInput = ({
     }
   };
 
+  const replyHeightBuffer = replyTo ? 46 : 0;
+
   return (
     <Flex flexDirection="column" overflow="visible" width={containerWidth}>
       <InputBox
@@ -228,7 +230,8 @@ export const ChatInput = ({
         px={0}
         disabled={disabled}
         height={
-          rows === 1 ? 36 : CHAT_INPUT_LINE_HEIGHT * Math.min(rows, 5) + 20
+          (rows === 1 ? 36 : CHAT_INPUT_LINE_HEIGHT * Math.min(rows, 5) + 20) +
+          replyHeightBuffer
         }
         // py="3px"
         error={!!error}
@@ -310,9 +313,9 @@ export const ChatInput = ({
           ) : null}
           {replyTo ? (
             <Flex
-              mt="6px"
+              mt="0px"
               mx="4px"
-              mb="12px"
+              mb="6px"
               gap={8}
               flexDirection="row"
               height={replyHeight}
