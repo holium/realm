@@ -33,6 +33,7 @@ const DescriptionTextArea = styled(NicknameInput)`
 type Props = {
   patp: string;
   nickname: string;
+  color?: string;
   description: string;
   initialAvatarSrc: string;
   setNickname: (nickname: string) => void;
@@ -43,6 +44,7 @@ type Props = {
 
 export const PassportCard = ({
   patp,
+  color = '#000000',
   nickname,
   description,
   initialAvatarSrc,
@@ -59,6 +61,7 @@ export const PassportCard = ({
     <PassportCardContainer>
       <PassportCardAvatar
         patp={patp}
+        color={color}
         initialAvatarSrc={initialAvatarSrc}
         setAvatarSrc={setAvatarSrc}
         onUploadFile={onUploadFile}

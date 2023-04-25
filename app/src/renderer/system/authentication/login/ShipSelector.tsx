@@ -2,9 +2,7 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import { LayoutGroup, motion, Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
-
 import { Avatar, Flex, Tooltip } from '@holium/design-system';
-import { AccountModelType } from 'renderer/stores/models/account.model';
 import { useAppState } from 'renderer/stores/app.store';
 
 // ----------------------------------------
@@ -21,15 +19,9 @@ export const SelectedLine = styled(motion.div)`
   background-color: #4e9efd;
 `;
 
-const ShipSelectorPresenter = ({
-  selectedShip,
-  onSelect,
-}: {
-  selectedShip: AccountModelType;
-  onSelect: (account: AccountModelType) => void;
-}) => {
+const ShipSelectorPresenter = () => {
   const { setTheme, authStore } = useAppState();
-  const { accounts } = authStore;
+  const { accounts, selected: selectedShip, setSelected: onSelect } = authStore;
 
   const [orderedList, setOrder] = useState(accounts.map((a) => a.patp) || []);
   const [dragging, setDragging] = useState(false);
@@ -52,9 +44,9 @@ const ShipSelectorPresenter = ({
           whileDrag={{ zIndex: 20 }}
           onDragStart={() => setDragging(true)}
           onClick={async () => {
-            onSelect(ship);
+            onSelect(ship.patp);
             if (!dragging) {
-              onSelect(ship);
+              onSelect(ship.patp);
               setTheme(ship.theme);
               // const selectedPatp = await AuthActions.getSelected();
               // if (selectedPatp) {

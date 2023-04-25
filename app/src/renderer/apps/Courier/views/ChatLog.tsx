@@ -38,7 +38,7 @@ type ChatLogProps = {
 
 export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   const { theme } = useAppState();
-  const { dimensions } = useTrayApps();
+  const { dimensions, innerNavigation } = useTrayApps();
   const { ship, notifStore, friends, chatStore, spacesStore } = useShipStore();
   const { selectedChat, getChatHeader, setSubroute } = chatStore;
   const [showAttachments, setShowAttachments] = useState(false);
@@ -57,14 +57,20 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     if (unreadCount > 0) {
       notifStore.readPath('realm-chat', selectedChat.path);
     }
+
     setTimeout(() => {
+      let goalIndex = messages.length - 1;
+      const matchingIndex = messages.findIndex((m) => m.id === innerNavigation);
+      if (matchingIndex !== -1) {
+        goalIndex = matchingIndex;
+      }
       listRef.current?.scrollToIndex({
-        index: messages.length - 1,
+        index: goalIndex,
         align: 'start',
-        behavior: 'auto',
+        behavior: innerNavigation === '' ? 'auto' : 'smooth',
       });
     }, 350);
-  }, [selectedChat?.path]);
+  }, [selectedChat?.path, innerNavigation]);
 
   const { title, sigil, image } = useMemo(() => {
     if (!selectedChat || !ship?.patp) return { title: 'Error loading title' };

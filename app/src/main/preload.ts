@@ -9,9 +9,11 @@ import './helpers/keyListener';
 
 import { shipPreload } from '../os/services/ship/ship.service';
 import { authPreload } from '../os/services/auth/auth.service';
+import { onboardingPreload } from '../os/services/auth/onboarding.service';
 import { roomsPreload } from '../os/services/ship/rooms.service';
 import { notifPreload } from '../os/services/ship/notifications/notifications.service';
 import { chatPreload } from '../os/services/ship/chat/chat.service';
+
 import { walletPreload } from '../os/services/ship/wallet/wallet.service';
 import { friendsPreload } from '../os/services/ship/friends.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
@@ -162,3 +164,4 @@ contextBridge.exposeInMainWorld('walletService', walletPreload);
 contextBridge.exposeInMainWorld('notifService', notifPreload);
 contextBridge.exposeInMainWorld('friendDb', friendsPreload);
 contextBridge.exposeInMainWorld('bazaarService', bazaarPreload);
+contextBridge.exposeInMainWorld('onboardingService', onboardingPreload);

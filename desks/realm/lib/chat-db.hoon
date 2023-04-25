@@ -651,9 +651,9 @@
             ['old-row' (path-row old.ch)]
           ==
         %del-paths-row
-          :~(['type' %s -.ch] ['table' %s %paths] ['row' s+(spat path.ch)] ['timestamp' (time timestamp.ch)])
+          :~(['type' %s -.ch] ['table' %s %paths] ['path' s+(spat path.ch)] ['timestamp' (time timestamp.ch)])
         %del-peers-row
-          :~(['type' %s -.ch] ['table' %s %peers] ['row' s+(spat path.ch)] ['ship' s+(scot %p ship.ch)] ['timestamp' (time timestamp.ch)])
+          :~(['type' %s -.ch] ['table' %s %peers] ['path' s+(spat path.ch)] ['ship' s+(scot %p ship.ch)] ['timestamp' (time timestamp.ch)])
         %del-messages-row
           :~
             ['type' %s -.ch]
@@ -748,7 +748,12 @@
     ++  msg-id-to-json
       |=  =msg-id:sur
       ^-  json
-      s+(spat ~[(scot %da timestamp.msg-id) (scot %p sender.msg-id)])
+      s+(msg-id-to-cord msg-id)
+    ::
+    ++  msg-id-to-cord
+      |=  =msg-id:sur
+      ^-  cord
+      (spat ~[(scot %da timestamp.msg-id) (scot %p sender.msg-id)])
     ::
     ++  metadata-to-json
       |=  m=(map cord cord)

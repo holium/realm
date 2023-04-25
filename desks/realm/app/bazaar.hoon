@@ -412,6 +412,8 @@
       %rebuild-stall     (rebuild-stall +.action)
       %clear-stall       (clear-stall +.action)
       %set-host          (set-host +.action)
+      :: testing helper. remove an app from the ship catalog w/o producing any effects
+      %delete-catalog-entry  (delete-catalog-entry +.action)
     ==    ::  +pre: prefix for scries to hood
     ::
     ++  pre  /(scot %p our.bowl)/hood/(scot %da now.bowl)
@@ -538,24 +540,25 @@
     ::
     ++  add-suite
       |=  [path=space-path:spaces-store =app-id:store index=@ud]
+      =/  app  (~(got by catalog.state) app-id)
       ?.  (is-host:core ship.path)
-        (member-add-suite path app-id index)
-      (host-add-suite path app-id index)
+        (member-add-suite path app-id app index)
+      (host-add-suite path app-id app index)
       ::
       ++  member-add-suite
-        |=  [path=space-path:spaces-store =app-id:store index=@ud]
+        |=  [path=space-path:spaces-store =app-id:store =app:store index=@ud]
         ?>  (check-admin:security path src.bowl)
         :_  state
-        [%pass / %agent [ship.path %bazaar] %poke bazaar-action+!>([%suite-add path app-id index])]~
+        [%pass / %agent [ship.path %bazaar] %poke bazaar-interaction+!>([%suite-add path app-id app index])]~
       ::
       ++  host-add-suite
-        |=  [path=space-path:spaces-store =app-id:store index=@ud]
+        |=  [path=space-path:spaces-store =app-id:store =app:store index=@ud]
         =/  stall=stall:store   (~(gut by stalls.state) path [suite=~ recommended=~])
         =.  suite.stall         (~(put by suite.stall) [index app-id])
         =.  stalls.state        (~(put by stalls.state) [path stall])
         =/  paths               [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
         :_  state
-        [%give %fact paths bazaar-reaction+!>([%suite-added path app-id index])]~
+        [%give %fact paths bazaar-reaction+!>([%suite-added path app-id app index])]~
     ::
     ++  rem-suite
       |=  [path=space-path:spaces-store index=@ud]
@@ -702,6 +705,14 @@
       :_  state
       cards.updated-stalls
     ::
+    ::
+    ::  $delete-catalog-entry
+    ::   remove an app entry from the ship's catalog and produce no effects
+    ++  delete-catalog-entry
+      |=  [=app-id:store]
+      ^-  (quip card _state)
+      =.  catalog.state  (~(del by catalog.state) app-id)
+      [~ state]
     --
   ++  reaction
     |=  [rct=reaction:store]
@@ -730,14 +741,17 @@
       `state
     ::
     ++  on-suite-add
-      |=  [path=space-path:spaces-store app-id=@tas index=@ud]
+      |=  [path=space-path:spaces-store app-id=@tas =app:store index=@ud]
       ?:  =(is-host:core ship.path)
         `state
+      :: the host is informing us that it's added a new app to the space suite
+      =/  updates             (add-to-desktop:helpers:bazaar:core app-id app)
+      =.  catalog.state       catalog.updates
       =/  stall               (~(got by stalls.state) path)
       =.  suite.stall         (~(put by suite.stall) [index app-id])
       =.  stalls.state        (~(put by stalls.state) [path stall])
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%suite-added path app-id index])]~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%suite-added path app-id app.updates index])]~
     ::
     ++  on-suite-rem
       |=  [path=space-path:spaces-store index=@ud]
@@ -757,7 +771,7 @@
         %-  ~(rep by catalog)
           |=  [entry=[=app-id:store =app:store] result=(list [=app-id:store =app:store])]
           ?:  (~(has by catalog.state) app-id.entry)  ::  if we already have the app
-            result
+            (snoc result entry)
           =/  entry
             ?+  -.app.entry  entry
               %urbit
@@ -765,9 +779,10 @@
                 entry
             ==
           (snoc result entry)
-      =.  catalog.state       (~(uni by catalog.state) (malt new-catalog-apps))
+      =/  new-catalog-apps    (malt new-catalog-apps)
+      =.  catalog.state       (~(uni by catalog.state) new-catalog-apps)
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%joined-bazaar path catalog.state stall])]~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%joined-bazaar path new-catalog-apps stall])]~
 
     ::
     ++  what
@@ -790,7 +805,6 @@
             :: [det ?~(det ~ (~(del by catalog.state) app-id.u.det))]
           ::
           %add
-            :: ~&  >>   "add"
             =/  det  (need det)
             =/  app  (need app.det)
             =/  app
@@ -823,7 +837,8 @@
       =.  catalog.state       catalog.updates
       =.  stalls.state        (~(put by stalls.state) [path stall])
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%stall-update path stall det.updates])]~
+      :~  [%give %fact [/updates ~] bazaar-reaction+!>([%stall-update path stall det.updates])]
+      ==
     ::
     ++  on-rebuild-catalog
       |=  [=catalog:store =grid-index:store]
@@ -858,6 +873,7 @@
     ?-  -.itc
       %member-recommend          (member-recommend +.itc)
       %member-unrecommend        (member-unrecommend +.itc)
+      %suite-add                 (suite-add +.itc)
     ==
     ::
     ++  member-recommend
@@ -871,14 +887,18 @@
       =.  stalls.state            (~(put by stalls.state) [path stall])
       ::  per #319, ensure installed status is relative to our ship/catalog
       =/  entry                   (~(get by catalog.state) app-id)
+      ::  default to %desktop (will force download button in UI)
       =/  local-install-status    ?~(entry %desktop (get-install-status:helpers:bazaar:core u.entry))
-      =/  app
-      ?+  -.app  app
+      ::  do not overwrite our current catalog entry with the recommend app; ensure
+      ::   only overwriting the install-status
+      =/  our-app                 ?~(entry app u.entry)
+      =/  our-app
+      ?+  -.our-app  our-app
         %urbit
-          =.  install-status.app  local-install-status
-          app
+          =.  install-status.our-app  local-install-status
+          our-app
       ==
-      =.  catalog.state           (~(put by catalog.state) [app-id app])
+      =.  catalog.state           (~(put by catalog.state) [app-id our-app])
       =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
       :_  state
       :~
@@ -904,6 +924,25 @@
       =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
       :_  state
       [%give %fact paths bazaar-reaction+!>([%stall-update path stall (some [app-id ~])])]~
+    ::
+    ::  this should only ever come into the space host (see "lite" versions add-suite above)
+    ++  suite-add
+      |=  [path=space-path:spaces-store =app-id:store =app:store index=@ud]
+      ?.  (is-host:core ship.path)
+        %-  (slog leaf+"{<dap.bowl>}: suite-add-full should only be used to inform the host. use suite-add if acting on behalf of a member ship" ~)
+        [~ state]
+      (host-suite-add path app-id app index)
+      ::
+      ++  host-suite-add
+        |=  [path=space-path:spaces-store =app-id:store =app:store index=@ud]
+        =/  updates             (add-to-desktop:helpers:bazaar:core app-id app)
+        =.  catalog.state       catalog.updates
+        =/  stall=stall:store   (~(gut by stalls.state) path [suite=~ recommended=~])
+        =.  suite.stall         (~(put by suite.stall) [index app-id])
+        =.  stalls.state        (~(put by stalls.state) [path stall])
+        =/  paths               [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+        :_  state
+        [%give %fact paths bazaar-reaction+!>([%suite-added path app-id app.updates index])]~
     --
   ++  scry
     |%
@@ -1042,6 +1081,22 @@
         ~&  >>>  "{<dap.bowl>}: [rebuild-stall] error. space {<space-path>} does not exist."
         ~
       (some [suite=~ recommended=~])
+    ::
+    ++  add-to-desktop
+      |=  [=app-id:store =app:store]
+      ::  return the updated app state and app catalog
+      ^-  [=app:store =catalog:store]
+      =/  app-entry                 (~(get by catalog.state) app-id)
+      :: =/  app
+        ?~  app-entry  :: app is not in the catalog. add it
+            ?+  -.app   [app catalog.state]
+              %urbit
+                =.  install-status.app   %desktop
+                [app (~(put by catalog.state) app-id app)]
+            ==
+          :: app is already in the catalog. leave as is
+          [u.app-entry catalog.state]
+      :: [app (~(put by catalog.state) app-id app)]
     ::
     ++  is-app-installed
       |=  [=app-id:store]
@@ -1266,6 +1321,16 @@
       :_  state
       %+  weld  recs
       ^-  (list card)
+      ::  it is possible under very odd circumstances that we get kicked
+      ::   by the host's bazaar. note that, according to the docs, getting kicked
+      ::   can happen automatically by gall under "certain network conditions"
+      ::  under this use-case, our %kicked hander (see on-agent) will automatically
+      ::   rejoin the remote bazaar which will send out a %remote-space gift.
+      ::  when this happened, this %watch below was causing an 'non-unique channel'
+      ::  error because the auto %kicked re-%watch had already happened.
+      ::  to prevent this, check the outgoing subscriptions on this ship (wex.boat)
+      ::   to ensure we are already listening on the wire before attempting the %watch
+      ?:  (~(has by wex.bowl) [watch-path ship.path %bazaar])  ~
       :~
         [%pass watch-path %agent [ship.path %bazaar] %watch watch-path]
       ==
@@ -1444,7 +1509,7 @@
   ++  check-admin
     |=  [path=space-path:spaces-store =ship]
     ^-  ?
-    =/  member   .^(view:membership-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/member/(scot %p ship)/noun)
+    =/  member   .^(view:membership-store %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.path)/(scot %tas space.path)/members/(scot %p ship)/noun)
     ?>  ?=(%member -.member)
     (~(has in roles.member.member) %admin)
   ::

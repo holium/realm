@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
 import { InstallationDialog } from '@holium/shared';
 import { StepProps } from './types';
-import { RealmIPC } from 'renderer/stores/ipc';
 
 export const InstallationStep = ({ setStep, onFinish }: StepProps) => {
   useEffect(() => {
@@ -14,7 +13,7 @@ export const InstallationStep = ({ setStep, onFinish }: StepProps) => {
   };
 
   const onInstallRealm = () => {
-    return RealmIPC.installRealmAgent();
+    return window.onboardingService.installRealmAgent();
   };
 
   const onNext = async () => {

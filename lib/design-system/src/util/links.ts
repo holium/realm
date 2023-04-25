@@ -71,6 +71,10 @@ export const isSpotifyLink = (link: string) => {
   return link.match(SPOTIFY_REGEX);
 };
 
+export const isSoundcloudLink = (link: string) => {
+  return link.match(MUSIC_LINKS.SOUNDCLOUD);
+};
+
 export const parseMediaType = (url: string) => {
   let mediaType: MediaTypes = 'link';
   let linkType: LinkTypes = 'link';

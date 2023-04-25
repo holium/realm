@@ -26,6 +26,8 @@ const ListItem = styled(AccountDialogSubtitle)`
 
 type Props = {
   patp: string;
+  loading?: boolean;
+  prefilledColor?: string;
   prefilledNickname: string;
   prefilledDescription: string;
   prefilledAvatarSrc: string;
@@ -40,6 +42,8 @@ type Props = {
 
 export const PassportDialog = ({
   patp,
+  loading = false,
+  prefilledColor = '#000000',
   prefilledNickname,
   prefilledDescription,
   prefilledAvatarSrc,
@@ -66,38 +70,50 @@ export const PassportDialog = ({
           margin="0 auto"
           gap={20}
         >
-          <OnboardDialogTitle textAlign="center">
-            Create your Passport
-          </OnboardDialogTitle>
-          <OnboardDialogDescription textAlign="center">
-            In Realm, a passport is like an account.
-            <br />
-            It allows P2P payments, DMs, etc. Make it yours.
-          </OnboardDialogDescription>
-          {patp ? (
-            <PassportCard
-              patp={patp}
-              nickname={nickname}
-              description={description}
-              initialAvatarSrc={prefilledAvatarSrc}
-              setNickname={setNickname}
-              setDescription={setDescription}
-              setAvatarSrc={setAvatarSrc}
-              onUploadFile={onUploadFile}
-            />
+          {loading ? (
+            <Spinner size={8} />
           ) : (
-            <Flex flex={1} justifyContent="center">
-              <Spinner size={8} />
-            </Flex>
+            <>
+              <OnboardDialogTitle textAlign="center">
+                Create your Passport
+              </OnboardDialogTitle>
+              <OnboardDialogDescription textAlign="center">
+                In Realm, a passport is like an account.
+                <br />
+                It allows P2P payments, DMs, etc. Make it yours.
+              </OnboardDialogDescription>
+              {patp ? (
+                <PassportCard
+                  patp={patp}
+                  color={prefilledColor}
+                  nickname={nickname}
+                  description={description}
+                  initialAvatarSrc={prefilledAvatarSrc}
+                  setNickname={setNickname}
+                  setDescription={setDescription}
+                  setAvatarSrc={setAvatarSrc}
+                  onUploadFile={onUploadFile}
+                />
+              ) : (
+                <Flex flex={1} justifyContent="center">
+                  <Spinner size={8} />
+                </Flex>
+              )}
+              <List>
+                <ListItem as="li">Your nickname can be changed later</ListItem>
+                <ListItem as="li">
+                  <Box
+                    display="inline-flex"
+                    alignItems="center"
+                    style={{ gap: 4 }}
+                  >
+                    Select an avatar by clicking on the <AddImageIcon /> icon
+                    above
+                  </Box>
+                </ListItem>
+              </List>
+            </>
           )}
-          <List>
-            <ListItem as="li">Your nickname can be changed later</ListItem>
-            <ListItem as="li">
-              <Box display="inline-flex" alignItems="center" style={{ gap: 4 }}>
-                Select an avatar by clicking on the <AddImageIcon /> icon above
-              </Box>
-            </ListItem>
-          </List>
         </Flex>
       }
       onBack={onBack}

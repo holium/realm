@@ -13,7 +13,7 @@ const InfoCard = styled.div`
   flex-direction: column;
   gap: 16px;
   background: rgba(var(--rlm-window-rgba));
-  filter: brightness(0.9);
+  filter: brightness(1.1);
   border-radius: 9px;
   padding: 16px;
 `;

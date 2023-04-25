@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
 import { AddServerDialog, OnboardingStorage } from '@holium/shared';
 import { StepProps } from './types';
-import { RealmIPC } from '../../stores/ipc';
 import { defaultTheme } from '../../lib/defaultTheme';
 
 export const AddServerStep = ({ setStep }: StepProps) => {
@@ -15,7 +14,11 @@ export const AddServerStep = ({ setStep }: StepProps) => {
   };
 
   const onNext = async (shipId: string, shipUrl: string, shipCode: string) => {
-    const sanitizedCookie = await RealmIPC.getCookie(shipId, shipUrl, shipCode);
+    const sanitizedCookie = await window.onboardingService.getCookie(
+      shipId,
+      shipUrl,
+      shipCode
+    );
 
     if (!sanitizedCookie || !shipId || !shipUrl || !shipCode) return false;
 
@@ -25,11 +28,17 @@ export const AddServerStep = ({ setStep }: StepProps) => {
       shipCode,
     });
 
+    window.onboardingService.setCredentials({
+      patp: shipId,
+      code: shipCode,
+      url: shipUrl,
+    });
+
     const { passwordHash, masterAccountId } = OnboardingStorage.get();
 
     if (!shipId || !passwordHash || !masterAccountId) return false;
 
-    await RealmIPC.createAccount(
+    await window.onboardingService.createAccount(
       {
         accountId: masterAccountId,
         passwordHash,

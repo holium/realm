@@ -29,6 +29,11 @@ export const CredentialsStep = ({ setStep }: StepProps) => {
       url: shipUrl,
       accessCode: shipCode,
     });
+    window.onboardingService.setCredentials({
+      patp: shipId,
+      code: shipCode,
+      url: shipUrl,
+    });
   }, []);
 
   return <CredentialsDialog credentials={credentials} onNext={onNext} />;
