@@ -1,12 +1,14 @@
-import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Anchor } from '@holium/design-system/general';
 import { OnboardDialogDescription } from '@holium/shared';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+
 import { AccountCustomDomainDialog } from '../AccountCustomDomainDialog';
 import { AccountDownloadRealmDialog } from '../AccountDownloadRealmDialog';
 import { AccountHostingDialog } from '../AccountHostingDialog';
 import { AccountS3StorageDialog } from '../AccountS3StorageDialog';
 import { AccountStatisticsDialog } from '../AccountStatisticsDialog';
 import { LoginDialog } from '../LoginDialog';
+
 import { OnboardingDialogWrapper } from './helpers';
 
 export default {

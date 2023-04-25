@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex, Box } from '../../../general';
-import { ChatInput } from './ChatInput';
+import { Virtuoso } from 'react-virtuoso';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+
+import { Box, Flex } from '../../../general';
 import { Bubble } from '../Bubble/Bubble';
 import { ChatMessageType, FragmentType } from '../Bubble/Bubble.types';
-import { Virtuoso } from 'react-virtuoso';
+
+import { ChatInput } from './ChatInput';
 
 export default {
   component: ChatInput,

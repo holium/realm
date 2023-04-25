@@ -1,6 +1,7 @@
-import { Flex, Text } from '../../../general';
-import { BlockProps, Block } from '../Block/Block';
 import { motion } from 'framer-motion';
+
+import { Flex, Text } from '../../../general';
+import { Block, BlockProps } from '../Block/Block';
 
 type TextBlockProps = {
   text: string;

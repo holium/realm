@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { AccountS3StorageDialog } from '@holium/shared';
+
 import { Page } from '../../components/Page';
+import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 import { UserContextProvider, useUser } from '../../util/UserContext';
-import { thirdEarthApi } from '../../util/thirdEarthApi';
 
 type GetUserS3InfoResponse = Awaited<
   ReturnType<typeof thirdEarthApi.getUserS3Info>

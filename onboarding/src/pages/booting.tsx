@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { BootingDialog, OnboardingStorage } from '@holium/shared';
 import { useToggle } from '@holium/design-system/util';
+import { BootingDialog, OnboardingStorage } from '@holium/shared';
+
 import { Page } from '../components/Page';
-import { useNavigation } from '../util/useNavigation';
 import { thirdEarthApi } from '../util/thirdEarthApi';
+import { useNavigation } from '../util/useNavigation';
 
 export default function Booting() {
   const { goToPage } = useNavigation();

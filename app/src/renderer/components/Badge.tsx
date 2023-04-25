@@ -1,8 +1,8 @@
 import React, { FC } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import styled, { css } from 'styled-components';
 import { Box, Text } from '@holium/design-system';
+import { AnimatePresence, motion } from 'framer-motion';
 import { lighten } from 'polished';
+import styled, { css } from 'styled-components';
 
 const Wrapper = styled(motion.div)<{ height: number; width: number }>`
   position: relative;

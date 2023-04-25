@@ -1,5 +1,5 @@
-import styled from 'styled-components';
 import { Button } from '@holium/design-system/general';
+import styled from 'styled-components';
 
 export const ChangeButton = styled(Button.TextButton)`
   height: 30px;

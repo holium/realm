@@ -1,12 +1,13 @@
 import { ReactNode, useRef } from 'react';
 import { Flex } from '@holium/design-system/general';
-import { HoliumButton } from '@holium/design-system/os';
 import { TextInput } from '@holium/design-system/inputs';
+import { HoliumButton } from '@holium/design-system/os';
 import { useToggle } from '@holium/design-system/util';
-import { OnboardDialogInputLabel } from '../components/OnboardDialog.styles';
+
 import { OnboardDialog } from '../components/OnboardDialog';
-import { TermsModal } from '../components/TermsModal';
+import { OnboardDialogInputLabel } from '../components/OnboardDialog.styles';
 import { TermsDisclaimer } from '../components/TermsDisclaimer';
+import { TermsModal } from '../components/TermsModal';
 
 type Props = {
   prefilledEmail?: string;

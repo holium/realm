@@ -1,13 +1,14 @@
+import { bgIsLightOrDark } from '@holium/design-system';
+import { average } from 'color.js';
 import {
+  applySnapshot,
+  flow,
+  getSnapshot,
   Instance,
   types,
-  applySnapshot,
-  getSnapshot,
-  flow,
 } from 'mobx-state-tree';
-import { average } from 'color.js';
-import { bgIsLightOrDark } from '@holium/design-system';
 import { darken, lighten, rgba } from 'polished';
+
 import { defaultTheme } from '../../lib/defaultTheme';
 
 export const Theme = types

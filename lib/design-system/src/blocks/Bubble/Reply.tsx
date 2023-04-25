@@ -1,17 +1,19 @@
+import { useMemo } from 'react';
 import styled from 'styled-components';
-import { Text, Flex, Box, BoxProps, Button, Icon } from '../../../general';
+
+import { Box, BoxProps, Button, Flex, Icon, Text } from '../../../general';
+import { convertDarkText } from '../../../util';
 import { capitalizeFirstLetter } from '../../util/strings';
+import { convertFragmentsToPreview } from '../ChatInput/fragment-parser';
+
 import { BubbleAuthor } from './Bubble.styles';
+import { FragmentImageType, FragmentType, TEXT_TYPES } from './Bubble.types';
 import {
   FragmentBlock,
-  FragmentPlain,
   FragmentBlockquote,
   FragmentImage,
+  FragmentPlain,
 } from './fragment-lib';
-import { FragmentType, FragmentImageType, TEXT_TYPES } from './Bubble.types';
-import { convertFragmentsToPreview } from '../ChatInput/fragment-parser';
-import { useMemo } from 'react';
-import { convertDarkText } from '../../../util';
 
 const ReplyContainer = styled(Flex)`
   flex-direction: column;

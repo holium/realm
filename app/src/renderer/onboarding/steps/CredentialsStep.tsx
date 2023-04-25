@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { track } from '@amplitude/analytics-browser';
 import { CredentialsDialog, OnboardingStorage } from '@holium/shared';
+
 import { StepProps } from './types';
 
 export const CredentialsStep = ({ setStep }: StepProps) => {

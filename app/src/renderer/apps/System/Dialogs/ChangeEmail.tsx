@@ -1,17 +1,17 @@
-import { useEffect, useState, KeyboardEventHandler } from 'react';
-import { observer } from 'mobx-react';
-import emailValidator from 'email-validator';
+import { KeyboardEventHandler, useEffect, useState } from 'react';
 import {
-  TextInput,
-  Text,
-  Button,
   Box,
+  Button,
   Flex,
   Spinner,
+  Text,
+  TextInput,
 } from '@holium/design-system';
-import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { appState } from 'renderer/stores/app.store';
+import emailValidator from 'email-validator';
+import { observer } from 'mobx-react';
 import { normalizeBounds } from 'renderer/lib/window-manager';
+import { appState } from 'renderer/stores/app.store';
+import { DialogConfig } from 'renderer/system/dialog/dialogs';
 
 export const ChangeEmailDialogConfig: DialogConfig = {
   component: (props: any) => <ChangeEmailDialog {...props} />,
@@ -42,10 +42,6 @@ export const ChangeEmailDialogConfig: DialogConfig = {
 const ChangeEmailDialogPresenter = () => {
   const [view, setView] = useState('initial');
 
-  const transitionToVerify = () => {
-    setView('verify');
-  };
-
   const emailVerified = () => {
     setView('success');
     setTimeout(() => {
@@ -55,7 +51,7 @@ const ChangeEmailDialogPresenter = () => {
   };
 
   const screens = {
-    initial: <InitialScreen done={transitionToVerify} />,
+    initial: <InitialScreen />,
     verify: <VerifyScreen done={emailVerified} />,
     success: <SuccessScreen />,
   };
@@ -71,7 +67,7 @@ const ChangeEmailDialogPresenter = () => {
 
 const ChangeEmailDialog = observer(ChangeEmailDialogPresenter);
 
-function InitialScreen(props: { done: any }) {
+function InitialScreen() {
   // TODO: add email validation --------------------
   // const { identity } = useServices();
   const currentEmail = 'email@email.com';
@@ -148,7 +144,7 @@ function VerifyScreen(props: { done: any }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState(false);
 
-  const submit = async (code: string) => {
+  const submit = async (_code: string) => {
     // const wasCorrect = await AuthActions.verifyNewEmail(code);
     const wasCorrect = true;
     wasCorrect ? props.done() : setError(true);

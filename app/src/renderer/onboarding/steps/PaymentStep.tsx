@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 import { track } from '@amplitude/analytics-browser';
-import { Stripe, loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
 import {
   OnboardDialogSkeleton,
+  OnboardingStorage,
   PaymentDialog,
   ThirdEarthProduct,
-  OnboardingStorage,
 } from '@holium/shared';
-import { StepProps } from './types';
+import { loadStripe, Stripe, StripeElementsOptions } from '@stripe/stripe-js';
+
 import { thirdEarthApi } from '../thirdEarthApi';
+
+import { StepProps } from './types';
 
 type PaymentStepViewProps = StepProps & {
   products: ThirdEarthProduct[];

@@ -1,17 +1,19 @@
-import { EditorState, Plugin } from 'prosemirror-state';
-import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
-import { undo, redo, history } from 'prosemirror-history';
-import { keymap } from 'prosemirror-keymap';
-import { baseKeymap } from 'prosemirror-commands';
 import {
   collab,
   getVersion,
   receiveTransaction,
   sendableSteps,
 } from 'prosemirror-collab';
+import { baseKeymap } from 'prosemirror-commands';
+import { history, redo, undo } from 'prosemirror-history';
+import { keymap } from 'prosemirror-keymap';
+import { EditorState, Plugin } from 'prosemirror-state';
+import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
+
+import { SendCaret, SendTransaction } from '../App';
+
 import { Authority } from './Authority';
 import { streamCaretPlugin } from './Caret';
-import { SendCaret, SendTransaction } from '../App';
 
 export const collabEditor = (
   authority: Authority,

@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
+import { Button, CheckBox, Flex, Spinner, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import styled from 'styled-components';
-import { Text, Button, CheckBox, Flex, Spinner } from '@holium/design-system';
 import { MediaAccess, MediaAccessStatus } from 'os/types';
-import { MainIPC } from 'renderer/stores/ipc';
 import { useAppState } from 'renderer/stores/app.store';
-import { SettingTitle } from '../components/SettingTitle';
-import { SettingSection } from '../components/SettingSection';
+import { MainIPC } from 'renderer/stores/ipc';
+import styled from 'styled-components';
+
 import { SettingControl } from '../components/SettingControl';
 import { SettingPane } from '../components/SettingPane';
+import { SettingSection } from '../components/SettingSection';
+import { SettingTitle } from '../components/SettingTitle';
 // import { useShipStore } from 'renderer/stores/ship.store';
 
 const colorMap: Record<MediaAccessStatus, string> = {

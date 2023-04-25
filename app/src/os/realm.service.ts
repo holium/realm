@@ -7,17 +7,18 @@ import {
 } from 'electron';
 import log from 'electron-log';
 import { track } from '@amplitude/analytics-browser';
-import AbstractService, { ServiceOptions } from './services/abstract.service';
-import { AuthService } from './services/auth/auth.service';
-import { FileUploadParams, ShipService } from './services/ship/ship.service';
+
 import {
   getReleaseChannelFromSettings,
   saveReleaseChannelInSettings,
 } from './lib/settings';
 import { getCookie } from './lib/shipHelpers';
+import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { APIConnection } from './services/api';
-import { RealmUpdateTypes } from './realm.types';
+import { AuthService } from './services/auth/auth.service';
 import OnboardingService from './services/auth/onboarding.service';
+import { FileUploadParams, ShipService } from './services/ship/ship.service';
+import { RealmUpdateTypes } from './realm.types';
 
 const isDev = process.env.NODE_ENV === 'development';
 

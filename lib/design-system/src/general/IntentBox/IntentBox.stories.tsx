@@ -1,4 +1,5 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
+
 import { ErrorBox, SuccessBox } from './IntentBox';
 
 export default {

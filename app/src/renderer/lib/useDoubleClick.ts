@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 
 export const useDoubleClick = (callback: () => void, delay = 300) => {
   const timer = useRef<NodeJS.Timeout | null>(null);

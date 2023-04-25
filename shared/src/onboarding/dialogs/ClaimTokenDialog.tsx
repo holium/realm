@@ -1,14 +1,15 @@
 import { ChangeEvent, useRef } from 'react';
-import { Flex, Anchor } from '@holium/design-system/general';
-import { useToggle } from '@holium/design-system/util';
-import { HoliumButton } from '@holium/design-system/os';
+import { Anchor, Flex } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
+import { HoliumButton } from '@holium/design-system/os';
+import { useToggle } from '@holium/design-system/util';
+
+import { OnboardDialog } from '../components/OnboardDialog';
 import {
   OnboardDialogDescription,
   OnboardDialogInputLabel,
   OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
-import { OnboardDialog } from '../components/OnboardDialog';
 
 type Props = {
   email: string;

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { normalizeBounds } from 'renderer/lib/window-manager';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
+
 import { ConfirmDialog } from './Confirm';
 
 type DeleteSpaceDialogConfigComponentProps = {

@@ -1,7 +1,8 @@
-import { Flex, BoxProps, Text } from '../../../general';
-import { NotificationType } from './Notifications.types';
+import { BoxProps, Flex, Text } from '../../../general';
+
 import { AppGroup } from './AppGroup';
 import { Notification } from './Notification';
+import { NotificationType } from './Notifications.types';
 
 type NotificationListProps = {
   settings?: {

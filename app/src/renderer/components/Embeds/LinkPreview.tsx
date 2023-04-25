@@ -1,7 +1,8 @@
 import { FC } from 'react';
-import { EmbedBox } from '../../components';
-import styled from 'styled-components';
 import { Flex, Icon } from '@holium/design-system';
+import styled from 'styled-components';
+
+import { EmbedBox } from '../../components';
 
 const LinkPreviewStyle = styled(Flex)`
   /* border-radius: 6px; */

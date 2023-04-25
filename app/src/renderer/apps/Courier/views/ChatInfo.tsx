@@ -1,37 +1,38 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Flex,
-  Text,
-  Box,
-  SectionDivider,
-  Row,
   Avatar,
-  MenuItemProps,
-  Toggle,
-  Select,
+  Box,
+  Flex,
   Icon,
+  MenuItemProps,
   NoScrollBar,
+  Row,
+  SectionDivider,
+  Select,
+  Text,
   TextInput,
+  Toggle,
 } from '@holium/design-system';
-import { useContextMenu } from 'renderer/components';
-import { isValidPatp } from 'urbit-ob';
 import { createField, createForm } from 'mobx-easy-form';
-import { ChatLogHeader } from '../components/ChatLogHeader';
-import { ChatAvatar } from '../components/ChatAvatar';
+import { observer } from 'mobx-react-lite';
+import { FileUploadParams } from 'os/services/ship/ship.service';
+import { useTrayApps } from 'renderer/apps/store';
+import { useContextMenu } from 'renderer/components';
+import { ShipSearch } from 'renderer/components/ShipSearch';
 import { useFileUpload } from 'renderer/lib/useFileUpload';
 import { IuseStorage } from 'renderer/lib/useStorage';
-import { observer } from 'mobx-react-lite';
+import { useAppState } from 'renderer/stores/app.store';
+import { ShipIPC } from 'renderer/stores/ipc';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { isValidPatp } from 'urbit-ob';
+
 import {
   InvitePermissionType,
   PeerModelType,
 } from '../../../stores/models/chat.model';
+import { ChatAvatar } from '../components/ChatAvatar';
+import { ChatLogHeader } from '../components/ChatLogHeader';
 import { ExpiresValue, millisecondsToExpires } from '../types';
-import { useTrayApps } from 'renderer/apps/store';
-import { useShipStore } from 'renderer/stores/ship.store';
-import { ShipIPC } from 'renderer/stores/ipc';
-import { useAppState } from 'renderer/stores/app.store';
-import { ShipSearch } from 'renderer/components/ShipSearch';
-import { FileUploadParams } from 'os/services/ship/ship.service';
 
 export const createPeopleForm = (
   defaults: any = {

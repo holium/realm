@@ -1,22 +1,22 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { observer } from 'mobx-react';
-import styled, { css } from 'styled-components';
 import {
+  bgIsLightOrDark,
   Box,
   Flex,
-  Text,
+  Icon,
   InstallStatus,
   Spinner,
-  bgIsLightOrDark,
-  Icon,
+  Text,
 } from '@holium/design-system';
-import { getAppTileFlags } from 'renderer/lib/app';
+import { Variants } from 'framer-motion';
+import { observer } from 'mobx-react';
 import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
-import { Variants } from 'framer-motion';
+import { getAppTileFlags } from 'renderer/lib/app';
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';
+import styled, { css } from 'styled-components';
 
 const sizes = {
   sm: 32,

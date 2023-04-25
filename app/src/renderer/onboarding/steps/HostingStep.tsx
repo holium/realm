@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
-import { observer } from 'mobx-react';
-import { HostingDialog, OnboardingStorage } from '@holium/shared';
 import { track } from '@amplitude/analytics-browser';
-import { StepProps } from './types';
+import { HostingDialog, OnboardingStorage } from '@holium/shared';
+import { observer } from 'mobx-react';
+
 import { useAppState } from '../../stores/app.store';
+
+import { StepProps } from './types';
 
 export const HostingStepPresenter = ({ setStep, onFinish }: StepProps) => {
   const { authStore } = useAppState();

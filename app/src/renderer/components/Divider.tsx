@@ -1,6 +1,6 @@
+import { motion } from 'framer-motion';
 import styled from 'styled-components';
 import { compose, space, SpaceProps } from 'styled-system';
-import { motion } from 'framer-motion';
 
 type IProps = {
   customBg?: string;

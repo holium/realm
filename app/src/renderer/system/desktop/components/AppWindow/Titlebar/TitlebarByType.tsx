@@ -1,15 +1,17 @@
-import { FC, useEffect, PointerEvent } from 'react';
-import { Titlebar } from './Titlebar';
-import { nativeApps } from 'renderer/apps/nativeApps';
+import { FC, PointerEvent, useEffect } from 'react';
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/BrowserToolbar';
-import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
+import { nativeApps } from 'renderer/apps/nativeApps';
+import { ShellModelType } from 'renderer/stores/models/shell.model';
+import { AppWindowMobxType } from 'renderer/stores/models/window.model';
 import {
   DialogTitlebar,
   DialogTitlebarProps,
 } from 'renderer/system/dialog/Dialog/DialogTitlebar';
-import { NativeAppId, getNativeAppWindow } from '../getNativeAppWindow';
-import { ShellModelType } from 'renderer/stores/models/shell.model';
-import { AppWindowMobxType } from 'renderer/stores/models/window.model';
+import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
+
+import { getNativeAppWindow, NativeAppId } from '../getNativeAppWindow';
+
+import { Titlebar } from './Titlebar';
 
 type Props = {
   appWindow: AppWindowMobxType;

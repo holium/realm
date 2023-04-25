@@ -1,12 +1,13 @@
-import { useRef, useEffect, useState, useMemo } from 'react';
-import styled from 'styled-components';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
-import { applyStyleOverrides } from './applyStyleOverrides';
-import { WebView } from './WebView';
-import { useShipStore } from 'renderer/stores/ship.store';
-import { useAppState } from 'renderer/stores/app.store';
 // import { AppType } from 'renderer/stores/models/bazaar.model';
 import { genCSSVariables } from 'renderer/lib/theme';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+import styled from 'styled-components';
+
+import { applyStyleOverrides } from './applyStyleOverrides';
+import { WebView } from './WebView';
 
 const AppViewContainer = styled.div`
   overflow: hidden;

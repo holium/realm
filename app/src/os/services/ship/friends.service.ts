@@ -1,8 +1,10 @@
 import log from 'electron-log';
 import Database from 'better-sqlite3-multiple-ciphers';
-import { APIConnection } from '../api';
-import AbstractDataAccess from '../abstract.db';
+
 import { cleanNounColor, removeHash } from '../../lib/color';
+import { ServiceOptions } from '../abstract.service';
+import AbstractDataAccess from '../abstract.db';
+import { APIConnection } from '../api';
 
 export interface Friend {
   patp: string;
@@ -19,15 +21,21 @@ export interface Friend {
 }
 
 export class FriendsService extends AbstractDataAccess<Friend, any> {
-  constructor(preload: boolean, db?: Database) {
-    super({ preload: preload, db, name: 'friends', tableName: 'friends' });
-    if (preload) {
+  constructor(options: ServiceOptions, db?: Database) {
+    super({
+      preload: options.preload,
+      db,
+      name: 'friends',
+      tableName: 'friends',
+    });
+    if (options.preload) {
       return;
     } else {
       this._init();
     }
-
-    log.info('friends.service.ts:', 'Constructed.');
+    if (options.verbose) {
+      log.info('friends.service.ts:', 'Constructed.');
+    }
   }
 
   protected mapRow(row: any): Friend {
@@ -248,4 +256,6 @@ export const friendsInitSql = `
   create unique index if not exists friends_patp_uindex on friends (patp);
 `;
 
-export const friendsPreload = FriendsService.preload(new FriendsService(true));
+export const friendsPreload = FriendsService.preload(
+  new FriendsService({ preload: true })
+);

@@ -1,19 +1,21 @@
-import fs from 'fs';
-import path from 'path';
 import { app } from 'electron';
 import log from 'electron-log';
-import crypto from 'crypto';
-import bcrypt from 'bcryptjs';
 import Store from 'electron-store';
-import AbstractService, { ServiceOptions } from '../abstract.service';
-import { AuthDB } from './auth.db';
-import { Account } from './accounts.table';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import { ThemeType } from 'renderer/stores/models/theme.model';
+
+import AbstractService, { ServiceOptions } from '../abstract.service';
+import { ConduitSession } from '../api';
+import ShipService from '../ship/ship.service';
+
+import { Account } from './accounts.table';
+import { AuthDB } from './auth.db';
 // import { CreateMasterAccountPayload } from 'os/realm.types';
 import { AuthUpdateTypes } from './auth.types';
-import { ConduitSession } from '../api';
 import { MasterAccount } from './masterAccounts.table';
-import ShipService from '../ship/ship.service';
 
 const isDev = process.env.NODE_ENV === 'development';
 

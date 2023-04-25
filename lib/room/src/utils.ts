@@ -1,4 +1,5 @@
 import { patp2dec } from 'urbit-ob';
+
 import { Patp } from '@urbit/http-api';
 
 export function isFireFox(): boolean {

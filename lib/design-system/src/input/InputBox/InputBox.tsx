@@ -1,6 +1,7 @@
-import styled, { css } from 'styled-components';
-import { Text, Box, BoxProps, Flex } from '../../../general';
 import { AnimationProps } from 'framer-motion';
+import styled, { css } from 'styled-components';
+
+import { Box, BoxProps, Flex, Text } from '../../../general';
 
 type StyledBoxProps = {
   label?: string;

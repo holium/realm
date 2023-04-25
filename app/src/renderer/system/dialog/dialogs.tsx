@@ -1,14 +1,15 @@
 import { FC } from 'react';
+import { Dimensions } from '@holium/design-system';
+import { LeaveChatDialogConfig } from 'renderer/apps/Courier/dialogs/LeaveChatDialog';
 import { spacesDialogs } from 'renderer/apps/Spaces/Workflow/workflow';
-import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceConfirm';
-import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { ChangeEmailDialogConfig } from 'renderer/apps/System/Dialogs/ChangeEmail';
-import { Dimensions } from '@holium/design-system';
-import { ResetCodeDialogConfig } from '../authentication/login/ResetCodeDialog';
-import { LeaveChatDialogConfig } from 'renderer/apps/Courier/dialogs/LeaveChatDialog';
+import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
+import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceConfirm';
 import { ShutdownDialogConfig } from 'renderer/apps/System/Dialogs/Shutdown';
 import { AppWindowProps } from 'renderer/stores/models/window.model';
+
+import { ResetCodeDialogConfig } from '../authentication/login/ResetCodeDialog';
 
 export interface BaseWorkflowProps {
   workflow?: boolean; // lets the dialog manager know if this dialog is in a workflow

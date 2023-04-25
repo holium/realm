@@ -1,6 +1,7 @@
-import { useEffect, useCallback, useState } from 'react';
-import { MenuOrientation } from './types';
+import { useCallback, useEffect, useState } from 'react';
 import { calculateAnchorPoint } from 'os/lib/anchor-point';
+
+import { MenuOrientation } from './types';
 
 export const useMenu = (
   ref: any,

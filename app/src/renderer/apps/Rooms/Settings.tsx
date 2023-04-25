@@ -1,16 +1,18 @@
-import { observer } from 'mobx-react';
 import { useEffect, useState } from 'react';
 import {
+  Button,
+  Flex,
+  Icon,
   RadioOption,
   Select,
-  Flex,
-  Button,
   Text,
-  Icon,
 } from '@holium/design-system';
-import { useTrayApps } from '../store';
-import { useRooms } from './useRooms';
+import { observer } from 'mobx-react';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+import { useTrayApps } from '../store';
+
+import { useRooms } from './useRooms';
 
 const SettingsPresenter = () => {
   const { roomsApp } = useTrayApps();

@@ -1,6 +1,7 @@
-import { Conduit, ConduitState } from './index';
-import log from 'electron-log';
 import { app } from 'electron';
+import log from 'electron-log';
+
+import { Conduit, ConduitState } from './index';
 
 export type ConduitSession = {
   url: string;

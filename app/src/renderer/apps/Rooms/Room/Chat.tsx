@@ -1,18 +1,19 @@
-import { useRef, useMemo, useCallback } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
+import {
+  Button,
+  Flex,
+  Icon,
+  Text,
+  TextInput,
+  WindowedList,
+} from '@holium/design-system';
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
-import {
-  Flex,
-  Text,
-  TextInput,
-  Button,
-  Icon,
-  WindowedList,
-} from '@holium/design-system';
+import { useShipStore } from 'renderer/stores/ship.store';
+
 import { RoomChatMessage } from '../components/RoomChatMessage';
 import { useRooms } from '../useRooms';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 export const chatForm = (
   defaults: any = {

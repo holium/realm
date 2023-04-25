@@ -1,9 +1,9 @@
-import { useRef, useMemo } from 'react';
-import styled, { css } from 'styled-components';
+import { useMemo, useRef } from 'react';
+import { Avatar, Flex, Text } from '@holium/design-system';
 import { motion } from 'framer-motion';
 import { darken } from 'polished';
-import { Avatar, Flex, Text } from '@holium/design-system';
 import { useAppState } from 'renderer/stores/app.store';
+import styled, { css } from 'styled-components';
 
 interface RowProps {
   selected?: boolean;

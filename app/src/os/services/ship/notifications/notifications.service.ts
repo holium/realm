@@ -1,7 +1,9 @@
 import log from 'electron-log';
-import AbstractService, { ServiceOptions } from '../../abstract.service';
-import { notifDBPreload, NotificationsDB } from './notifications.table';
 import Database from 'better-sqlite3-multiple-ciphers';
+
+import AbstractService, { ServiceOptions } from '../../abstract.service';
+
+import { notifDBPreload, NotificationsDB } from './notifications.table';
 import { NotifUpdateType } from './notifications.types';
 
 export class NotificationsService extends AbstractService<NotifUpdateType> {
