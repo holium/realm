@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Flex, Box, Spinner } from '@holium/design-system/general';
 import {
@@ -55,6 +55,14 @@ export const PassportDialog = ({
   const [description, setDescription] = useState(prefilledDescription);
   const [avatarSrc, setAvatarSrc] = useState<string | undefined>();
 
+  useEffect(() => {
+    if (!loading) {
+      setNickname(prefilledNickname);
+      setDescription(prefilledDescription);
+      setAvatarSrc(prefilledAvatarSrc);
+    }
+  }, [loading]);
+
   const handleOnNext = () => {
     if (nickname) return onNext(nickname, description, avatarSrc);
     return Promise.resolve(false);
@@ -71,7 +79,9 @@ export const PassportDialog = ({
           gap={20}
         >
           {loading ? (
-            <Spinner size={8} />
+            <Flex row align="center" justify="center">
+              <Spinner size={5} />
+            </Flex>
           ) : (
             <>
               <OnboardDialogTitle textAlign="center">

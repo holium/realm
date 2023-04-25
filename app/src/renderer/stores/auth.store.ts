@@ -17,6 +17,7 @@ import {
   AuthUpdateAccountPayload,
 } from 'os/services/auth/auth.types';
 import { LoginErrorType } from 'os/realm.types';
+import { OnboardingEndedPayload } from 'os/services/auth/onboarding.types';
 
 export type LoginStatusStateType = 'initial' | 'loading' | 'success' | 'error';
 
@@ -181,6 +182,18 @@ export const AuthenticationModel = types
     //     }
     //   }
     // }),
+    _onOnboardingEnded(accountsPayload: OnboardingEndedPayload) {
+      accountsPayload.accounts.forEach((account) => {
+        const existingAccount = self.accounts.find(
+          (a) => a.patp === account.patp
+        );
+        if (!existingAccount) {
+          self.accounts.push(AccountModel.create(account));
+        }
+      });
+
+      applySnapshot(self.order, accountsPayload.order);
+    },
     _onAddAccount(accountPayload: AuthUpdateAccountPayload) {
       const account = AccountModel.create(accountPayload.account);
 

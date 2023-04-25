@@ -181,6 +181,21 @@ function registerOnUpdateListener() {
     }
   });
 
+  window.onboardingService.onUpdate((update) => {
+    if (update.type === 'account-added') {
+      appState.authStore._onAddAccount(update.payload);
+    }
+    if (update.type === 'account-removed') {
+      appState.authStore._onRemoveAccount(update.payload);
+    }
+    if (update.type === 'account-updated') {
+      appState.authStore._onUpdateAccount(update.payload);
+    }
+    if (update.type === 'onboarding-ended') {
+      appState.authStore._onOnboardingEnded(update.payload);
+    }
+  });
+
   AuthIPC.onUpdate((update) => {
     if (update.type === 'account-added') {
       appState.authStore._onAddAccount(update.payload);

@@ -72,7 +72,13 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
   ) => {
     if (!shipId) return false;
 
-    await AuthIPC.updatePassport(shipId, nickname, description, avatar);
+    await AuthIPC.updatePassport(
+      shipId,
+      nickname,
+      description,
+      avatar,
+      sigilColor
+    );
 
     // Sync friends agent
     await window.onboardingService.updatePassport(shipId, {
@@ -93,9 +99,10 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
     return true;
   };
 
-  return isReady ? (
+  return (
     <PassportDialog
       patp={shipId ?? ''}
+      loading={!isReady}
       prefilledColor={sigilColor}
       prefilledNickname={nicknameSrc ?? ''}
       prefilledDescription={descriptionSrc ?? ''}
@@ -104,5 +111,5 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
       onBack={onBack}
       onNext={handleOnNext}
     />
-  ) : null;
+  );
 };

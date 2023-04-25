@@ -55,46 +55,6 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     return this.authDB.tables.masterAccounts.findOne(`patp = "${patp}"`);
   }
 
-  // public async createMasterAccount(
-  //   masterAccountPayload: CreateMasterAccountPayload
-  // ) {
-  //   if (!this.authDB) return;
-
-  //   // if a master account already exists, return
-  //   try {
-  //     const existingAccount = this.authDB.tables.masterAccounts.findOne(
-  //       `email = "${masterAccountPayload.email}"`
-  //     );
-  //     if (existingAccount) return existingAccount;
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-
-  //   // TODO implement password hashing and other account creation logic
-  //   const newAccount = this.authDB.tables.masterAccounts.create({
-  //     email: masterAccountPayload.email,
-  //     encryptionKey: masterAccountPayload.encryptionKey,
-  //     authToken: masterAccountPayload.authToken,
-  //     passwordHash: masterAccountPayload.passwordHash,
-  //   });
-
-  //   if (newAccount) {
-  //     //if (this.authDB._needsMigration()) this.authDB.migrateJsonToSqlite(newAccount.id);
-
-  //     log.info(
-  //       'auth.service.ts:',
-  //       `Created master account for ${masterAccountPayload.email}`
-  //     );
-  //   } else {
-  //     log.error(
-  //       'auth.service.ts:',
-  //       `Failed to create master account for ${masterAccountPayload.email}`
-  //     );
-  //   }
-
-  //   return newAccount;
-  // }
-
   public async setAccountTheme(patp: string, theme: ThemeType) {
     if (!this.authDB) return;
     const account = this.authDB.tables.accounts.findOne(patp);
@@ -105,65 +65,12 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     }
   }
 
-  // // Call this from onboarding.
-  // public createAccount(
-  //   acc: Omit<Account, 'passwordHash' | 'createdAt' | 'updatedAt'>
-  // ): {
-  //   account?: Account;
-  //   masterAccount?: MasterAccount;
-  // } {
-  //   if (!this.authDB) return {};
-
-  //   const masterAccount = this.authDB.tables.masterAccounts.findOne(
-  //     acc.accountId
-  //   );
-  //   if (!masterAccount) {
-  //     log.info('auth.service.ts:', `No master account found for ${acc.patp}`);
-  //     return {};
-  //   }
-
-  //   const existing = this.authDB.tables.accounts.findOne(acc.patp);
-  //   if (existing) {
-  //     log.info('auth.service.ts:', `Account already exists for ${acc.patp}`);
-  //     return { account: existing, masterAccount };
-  //   }
-
-  //   const newAccount = this.authDB.tables.accounts.create({
-  //     accountId: acc.accountId,
-  //     patp: acc.patp,
-  //     url: acc.url,
-  //     avatar: acc.avatar,
-  //     nickname: acc.nickname,
-  //     description: acc.description,
-  //     color: acc.color,
-  //     type: acc.type,
-  //     status: acc.status,
-  //     theme: acc.theme,
-  //     passwordHash: masterAccount?.passwordHash,
-  //   });
-  //   this.authDB.addToOrder(acc.patp);
-
-  //   if (newAccount) {
-  //     this.sendUpdate({
-  //       type: 'account-added',
-  //       payload: {
-  //         account: newAccount,
-  //         order: this.authDB?.getOrder(),
-  //       },
-  //     });
-
-  //     return { account: newAccount, masterAccount };
-  //   } else {
-  //     log.info('auth.service.ts:', `Failed to create account for ${acc.patp}`);
-  //     return { masterAccount };
-  //   }
-  // }
-
   public updatePassport(
     patp: string,
     nickname: string,
     description?: string,
-    avatar?: string
+    avatar?: string,
+    color?: string
   ) {
     if (!this.authDB) return false;
 
@@ -178,6 +85,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
       nickname,
       description,
       avatar,
+      color,
     });
 
     if (updatedAccount) {

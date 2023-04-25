@@ -13,6 +13,7 @@ import { Account } from './accounts.table';
 import { MasterAccount } from './masterAccounts.table';
 import { getCookie } from '../../lib/shipHelpers';
 import { ShipDB } from '../ship/ship.db';
+import { OnboardingUpdateTypes } from './onboarding.types';
 
 type OnboardingCredentials = {
   patp: string;
@@ -20,7 +21,7 @@ type OnboardingCredentials = {
   code: string;
 };
 
-export class OnboardingService extends AbstractService<any> {
+export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   private authDB?: AuthDB;
   private credentials?: OnboardingCredentials;
   constructor(options?: ServiceOptions) {
@@ -125,19 +126,24 @@ export class OnboardingService extends AbstractService<any> {
     });
 
     if (newAccount) {
-      this.sendUpdate({
-        type: 'account-added',
-        payload: {
-          account: newAccount,
-          order: this.authDB?.getOrder(),
-        },
-      });
-
       return { account: newAccount, masterAccount };
     } else {
       log.info('auth.service.ts:', `Failed to create account for ${acc.patp}`);
       return { masterAccount };
     }
+  }
+
+  public triggerOnboardingEnded() {
+    if (!this.authDB) {
+      throw new Error('No authDB found');
+    }
+    this.sendUpdate({
+      type: 'onboarding-ended',
+      payload: {
+        accounts: this.authDB.tables.accounts.find(),
+        order: this.authDB?.getOrder(),
+      },
+    });
   }
 
   public hashPassword(password: string) {
@@ -189,7 +195,7 @@ export class OnboardingService extends AbstractService<any> {
         },
       },
     };
-    APIConnection.getInstance().conduit.poke(payload);
+    return APIConnection.getInstance().conduit.poke(payload);
   }
 
   async installRealmAgent() {
