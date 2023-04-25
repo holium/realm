@@ -1,13 +1,14 @@
 import { createContext, useContext } from 'react';
-import { Instance, types, flow, onSnapshot, SnapshotIn } from 'mobx-state-tree';
-import { ChatStore } from './chat.store';
-import { ShipIPC } from './ipc';
-import { SpacesStore } from './models/spaces.model';
+import { flow, Instance, onSnapshot, SnapshotIn, types } from 'mobx-state-tree';
+
+import { BazaarStore, BazaarStoreType } from './models/bazaar.model';
+import { LoaderModel } from './models/common.model';
+import { FeaturedStore } from './models/featured.model';
 import { FriendsStore } from './models/friends.model';
 import { NotifStore } from './models/notification.model';
-import { BazaarStore, BazaarStoreType } from './models/bazaar.model';
-import { FeaturedStore } from './models/featured.model';
-import { LoaderModel } from './models/common.model';
+import { SpacesStore } from './models/spaces.model';
+import { ChatStore } from './chat.store';
+import { ShipIPC } from './ipc';
 
 const ShipModel = types
   .model('ShipModel', {

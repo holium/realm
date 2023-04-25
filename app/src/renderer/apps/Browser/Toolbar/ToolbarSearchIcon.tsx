@@ -1,4 +1,4 @@
-import { Flex, Button, Icon } from '@holium/design-system';
+import { Button, Flex, Icon } from '@holium/design-system';
 
 type Props = {
   onClick: () => void;

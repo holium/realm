@@ -1,6 +1,6 @@
-import { Card } from '@holium/design-system';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Card } from '@holium/design-system';
 
 interface IProps {
   id: any;

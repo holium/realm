@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
+import { Flex, Text, WindowedList } from '@holium/design-system';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { PersonRow } from 'renderer/components/People/PersonRow';
-import { Flex, Text, WindowedList } from '@holium/design-system';
-import { useShipStore } from 'renderer/stores/ship.store';
-import { MemberType } from 'renderer/stores/models/invitations.model';
 import { FriendType } from 'renderer/stores/models/friends.model';
-import { toJS } from 'mobx';
+import { MemberType } from 'renderer/stores/models/invitations.model';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface IMembersList {
   our: boolean;

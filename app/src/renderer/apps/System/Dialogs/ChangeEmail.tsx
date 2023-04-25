@@ -1,17 +1,17 @@
-import { useEffect, useState, KeyboardEventHandler } from 'react';
-import { observer } from 'mobx-react';
-import emailValidator from 'email-validator';
+import { KeyboardEventHandler, useEffect, useState } from 'react';
 import {
-  TextInput,
-  Text,
-  Button,
   Box,
+  Button,
   Flex,
   Spinner,
+  Text,
+  TextInput,
 } from '@holium/design-system';
-import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { appState } from 'renderer/stores/app.store';
+import emailValidator from 'email-validator';
+import { observer } from 'mobx-react';
 import { normalizeBounds } from 'renderer/lib/window-manager';
+import { appState } from 'renderer/stores/app.store';
+import { DialogConfig } from 'renderer/system/dialog/dialogs';
 
 export const ChangeEmailDialogConfig: DialogConfig = {
   component: (props: any) => <ChangeEmailDialog {...props} />,

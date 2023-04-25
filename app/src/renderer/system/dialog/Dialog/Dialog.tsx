@@ -1,17 +1,17 @@
 import {
   FC,
-  useEffect,
-  useRef,
-  useState,
-  useMemo,
   ReactNode,
   RefObject,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
-import styled from 'styled-components';
-import { Button, Icon, Flex, Spinner } from '@holium/design-system';
-import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
+import { Button, Flex, Icon, Spinner } from '@holium/design-system';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppWindowMobxType } from 'renderer/stores/models/window.model';
+import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
+import styled from 'styled-components';
 
 export interface DialogViewProps {
   appWindow: AppWindowMobxType;

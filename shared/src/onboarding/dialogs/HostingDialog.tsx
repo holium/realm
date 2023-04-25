@@ -1,10 +1,11 @@
-import styled from 'styled-components';
 import { Button, Flex } from '@holium/design-system/general';
-import {
-  OnboardDialogTitle,
-  OnboardDialogDescription,
-} from '../components/OnboardDialog.styles';
+import styled from 'styled-components';
+
 import { OnboardDialog } from '../components/OnboardDialog';
+import {
+  OnboardDialogDescription,
+  OnboardDialogTitle,
+} from '../components/OnboardDialog.styles';
 import { HostingIcon } from '../icons/HostingIcon';
 
 const GetHostingButton = styled(Button.TextButton)`

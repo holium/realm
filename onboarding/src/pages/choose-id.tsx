@@ -1,7 +1,8 @@
 import { ChooseIdDialog, OnboardingStorage } from '@holium/shared';
+
 import { Page } from '../components/Page';
-import { useNavigation } from '../util/useNavigation';
 import { thirdEarthApi } from '../util/thirdEarthApi';
+import { useNavigation } from '../util/useNavigation';
 
 type ServerSideProps = {
   patps: string[];

@@ -6,11 +6,12 @@ import {
   PinnedMessage,
 } from '@holium/design-system';
 import { useContextMenu } from 'renderer/components';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+import styled from 'styled-components';
+
 import { useChatStore } from '../../../stores/chat.store';
 import { ChatMessageType } from '../../../stores/models/chat.model';
-import styled from 'styled-components';
-import { useShipStore } from 'renderer/stores/ship.store';
-import { useAppState } from 'renderer/stores/app.store';
 type PinnedContainerProps = {
   message: ChatMessageType;
 };

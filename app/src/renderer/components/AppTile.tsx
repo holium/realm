@@ -1,25 +1,25 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { observer } from 'mobx-react';
-import styled, { css } from 'styled-components';
-import { darken, desaturate, lighten, rgba } from 'polished';
 import {
   bgIsLightOrDark,
   Box,
   Flex,
+  Icon,
   Spinner,
   Text,
-  Icon,
 } from '@holium/design-system';
-import { getAppTileFlags } from 'renderer/lib/app';
+import { observer } from 'mobx-react';
+import { darken, desaturate, lighten, rgba } from 'polished';
 import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
+import { getAppTileFlags } from 'renderer/lib/app';
 import {
-  InstallStatus,
   AppType,
   DevAppType,
+  InstallStatus,
 } from 'renderer/stores/models/bazaar.model';
+import styled, { css } from 'styled-components';
 
 const sizes = {
   sm: 32,

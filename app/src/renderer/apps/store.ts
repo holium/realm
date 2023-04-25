@@ -1,8 +1,10 @@
-import { calculateAnchorPointById } from '../lib/position';
 import { createContext, useContext } from 'react';
-import { Instance, types, onSnapshot } from 'mobx-state-tree';
 import { Dimensions } from '@holium/design-system';
+import { Instance, onSnapshot, types } from 'mobx-state-tree';
 import { RealmIPC } from 'renderer/stores/ipc';
+
+import { calculateAnchorPointById } from '../lib/position';
+
 import { RoomsAppState } from './Rooms/rooms.model';
 // import {
 //   NetworkStoreType,

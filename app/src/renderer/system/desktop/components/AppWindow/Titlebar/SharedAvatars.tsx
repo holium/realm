@@ -1,7 +1,6 @@
-import { darken, rgba } from 'polished';
+import { Avatar, Button, Flex, Icon } from '@holium/design-system';
 import { motion } from 'framer-motion';
-import { Flex, Icon, Button, Avatar } from '@holium/design-system';
-
+import { darken, rgba } from 'polished';
 import styled from 'styled-components';
 
 const sessionMembers = [

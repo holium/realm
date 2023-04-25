@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { observer } from 'mobx-react';
 import { Text } from '@holium/design-system';
-import { useBrowser } from './store';
+import { observer } from 'mobx-react';
 import { WebView } from 'renderer/system/desktop/components/AppWindow/View/WebView';
+
+import { useBrowser } from './store';
 
 type Props = {
   isDragging: boolean;

@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { isValidPatp } from 'urbit-ob';
-import { observer } from 'mobx-react';
-import { useAppInstaller } from './store';
-import * as yup from 'yup';
+import { Flex, Text, TextInput } from '@holium/design-system';
 import { createField, createForm } from 'mobx-easy-form';
-import { Flex, TextInput, Text } from '@holium/design-system';
+import { observer } from 'mobx-react';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { isValidPatp } from 'urbit-ob';
+import * as yup from 'yup';
+
+import { useAppInstaller } from './store';
 
 interface AppSearchProps {
   mode: 'home' | 'space';

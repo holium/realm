@@ -1,6 +1,6 @@
+import { Account } from './services/auth/accounts.table';
 import { AccountView } from './services/auth/auth.types';
 import { MasterAccount } from './services/auth/masterAccounts.table';
-import { Account } from './services/auth/accounts.table';
 
 export type CreateAccountPayload = Omit<Account, 'updatedAt' | 'createdAt'>;
 

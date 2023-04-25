@@ -1,5 +1,7 @@
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+
 import { Flex } from '../../../general';
+
 import { TextBlock } from './TextBlock';
 
 export default {

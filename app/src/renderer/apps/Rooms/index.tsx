@@ -1,15 +1,16 @@
 import { useEffect } from 'react';
+import { Flex } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
+import { useAppState } from 'renderer/stores/app.store';
+import { MainIPC } from 'renderer/stores/ipc';
+import { useShipStore } from 'renderer/stores/ship.store';
+
 import { Rooms } from './List';
 import { NewRoom } from './NewRoom';
 import { Room } from './Room';
-import { useRooms } from './useRooms';
 import { Settings } from './Settings';
-import { Flex } from '@holium/design-system';
-import { MainIPC } from 'renderer/stores/ipc';
-import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { useRooms } from './useRooms';
 
 const RoomViews: { [key: string]: any } = {
   list: () => <Rooms />,

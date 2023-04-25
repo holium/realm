@@ -1,7 +1,7 @@
-import { observer } from 'mobx-react';
 // import { useTrayApps } from 'renderer/apps/store';
 // import { PassportButton } from './PassportButton';
 import { Avatar, Box, Flex, Text } from '@holium/design-system';
+import { observer } from 'mobx-react';
 
 interface IPassport {
   patp: string;

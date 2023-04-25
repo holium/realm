@@ -1,8 +1,9 @@
 import { createRoot } from 'react-dom/client';
-import * as Sentry from '@sentry/react';
 import * as Amplitude from '@amplitude/analytics-browser';
 import { BrowserTracing } from '@sentry/browser';
 import { RewriteFrames as RewriteFramesIntegration } from '@sentry/integrations';
+import * as Sentry from '@sentry/react';
+
 import { App } from './App';
 
 const environment = process.env.NODE_ENV;

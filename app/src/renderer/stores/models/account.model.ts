@@ -1,4 +1,5 @@
 import { Instance, types } from 'mobx-state-tree';
+
 import { Theme } from './theme.model';
 
 export const AccountModel = types.model('AccountModel', {

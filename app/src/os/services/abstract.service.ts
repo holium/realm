@@ -1,10 +1,11 @@
 import {
-  ipcMain,
-  ipcRenderer,
-  IpcMainInvokeEvent,
   BrowserWindow,
+  ipcMain,
+  IpcMainInvokeEvent,
+  ipcRenderer,
   IpcRendererEvent,
 } from 'electron';
+
 import { MethodProxies, UpdatePayload } from './abstract.types';
 // import log from 'electron-log';
 

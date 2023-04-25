@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
 import { AccountCustomDomainDialog } from '@holium/shared';
-import { useUser, UserContextProvider } from '../../util/UserContext';
-import { thirdEarthApi } from '../../util/thirdEarthApi';
+
 import { Page } from '../../components/Page';
+import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
+import { UserContextProvider, useUser } from '../../util/UserContext';
 
 const CustomDomainPresenter = () => {
   const { goToPage, logout } = useNavigation();

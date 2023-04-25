@@ -6,9 +6,11 @@ import {
   OnboardDialogDescription,
   OnboardingStorage,
 } from '@holium/shared';
-import { StepProps } from './types';
-import { thirdEarthApi } from '../thirdEarthApi';
+
 import { defaultTheme } from '../../lib/defaultTheme';
+import { thirdEarthApi } from '../thirdEarthApi';
+
+import { StepProps } from './types';
 
 export const LoginStep = ({ setStep, onFinish }: StepProps) => {
   const prefilledEmail = OnboardingStorage.get().email ?? '';

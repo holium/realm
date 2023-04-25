@@ -1,5 +1,5 @@
-import { ChatStoreInstance } from 'renderer/stores/chat.store';
 import { AppRegistry } from 'renderer/apps/registry';
+import { ChatStoreInstance } from 'renderer/stores/chat.store';
 
 export const openChatToPath = (
   chatStore: ChatStoreInstance,

@@ -1,29 +1,28 @@
 import { FC, useEffect, useState } from 'react';
+import {
+  Box,
+  Button,
+  Flex,
+  Icon,
+  IconPathsType,
+  InstallStatus,
+  Text,
+} from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { getSnapshot } from 'mobx-state-tree';
 import { LinkPreview } from 'renderer/components';
-import styled from 'styled-components';
-import {
-  Box,
-  Flex,
-  Button,
-  Icon,
-  Text,
-  InstallStatus,
-  IconPathsType,
-} from '@holium/design-system';
-import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInstall/store';
-import { useShipStore } from 'renderer/stores/ship.store';
 import { normalizeBounds } from 'renderer/lib/window-manager';
-
+import { appState, useAppState } from 'renderer/stores/app.store';
 import {
   AppMobxType,
   AppTypes,
   UrbitApp,
 } from 'renderer/stores/models/bazaar.model';
-import { useAppState, appState } from 'renderer/stores/app.store';
 import { GlobMobxType } from 'renderer/stores/models/docket.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInstall/store';
+import { DialogConfig } from 'renderer/system/dialog/dialogs';
+import styled from 'styled-components';
 
 const TileStyle = styled(Box)`
   position: relative;

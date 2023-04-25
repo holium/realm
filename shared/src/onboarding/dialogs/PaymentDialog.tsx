@@ -1,19 +1,20 @@
-import { Stripe, StripeElementsOptions } from '@stripe/stripe-js';
-import {
-  CardNumberElement,
-  CardExpiryElement,
-  CardCvcElement,
-  useStripe,
-  useElements,
-  Elements,
-} from '@stripe/react-stripe-js';
 import { Flex, Spinner } from '@holium/design-system/general';
-import { OnboardDialogTitle } from '../components/OnboardDialog.styles';
-import { PaymentIcon } from '../icons/PaymentIcon';
+import {
+  CardCvcElement,
+  CardExpiryElement,
+  CardNumberElement,
+  Elements,
+  useElements,
+  useStripe,
+} from '@stripe/react-stripe-js';
+import { Stripe, StripeElementsOptions } from '@stripe/stripe-js';
+
 import { OnboardDialog } from '../components/OnboardDialog';
+import { OnboardDialogTitle } from '../components/OnboardDialog.styles';
+import { AccountInformation } from '../components/payment/AccountInformation';
 import { PaymentForm } from '../components/payment/PaymentForm';
 import { ProductCards } from '../components/payment/ProductCards';
-import { AccountInformation } from '../components/payment/AccountInformation';
+import { PaymentIcon } from '../icons/PaymentIcon';
 import { ThirdEarthProduct } from '../types';
 
 type Props = {

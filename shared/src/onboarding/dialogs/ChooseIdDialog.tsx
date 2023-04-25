@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Flex } from '@holium/design-system/general';
-import { IdentityIcon } from '../icons/IdentityIcon';
+
+import { OnboardDialog } from '../components/OnboardDialog';
 import {
-  OnboardDialogTitle,
   OnboardDialogDescription,
+  OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
 import { PatpsPaginated } from '../components/PatpsPaginated';
-import { OnboardDialog } from '../components/OnboardDialog';
+import { IdentityIcon } from '../icons/IdentityIcon';
 
 type Props = {
   patps: string[];

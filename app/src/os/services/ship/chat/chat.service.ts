@@ -1,11 +1,14 @@
 import log from 'electron-log';
 import Database from 'better-sqlite3-multiple-ciphers';
+import { InvitePermissionType } from 'renderer/stores/models/chat.model';
+
+import { preSig } from '@urbit/aura';
+
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
-import { chatDBPreload, ChatDB } from './chat.db';
+
+import { ChatDB, chatDBPreload } from './chat.db';
 import { ChatPathMetadata, ChatPathType, ChatUpdateTypes } from './chat.types';
-import { InvitePermissionType } from 'renderer/stores/models/chat.model';
-import { preSig } from '@urbit/aura';
 
 export class ChatService extends AbstractService<ChatUpdateTypes> {
   public chatDB?: ChatDB;

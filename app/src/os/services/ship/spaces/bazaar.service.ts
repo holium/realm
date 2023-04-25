@@ -1,9 +1,11 @@
-import Database from 'better-sqlite3-multiple-ciphers';
 import log from 'electron-log';
+import Database from 'better-sqlite3-multiple-ciphers';
+
+import { pathToObj } from '../../../lib/path';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
+
 import { AppCatalogDB } from './tables/catalog.table';
-import { pathToObj } from '../../../lib/path';
 import { BazaarUpdateType } from './bazaar.types';
 
 export class BazaarService extends AbstractService<BazaarUpdateType> {

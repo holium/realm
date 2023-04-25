@@ -1,10 +1,11 @@
 import React from 'react';
-import styled, { css } from 'styled-components';
-import { rgba } from 'polished';
-import { SuiteAppTile } from './SuiteAppTile';
-import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 import { Box, BoxProps, Icon } from '@holium/design-system';
+import { rgba } from 'polished';
 import { AppType } from 'renderer/stores/models/bazaar.model';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
+import styled, { css } from 'styled-components';
+
+import { SuiteAppTile } from './SuiteAppTile';
 
 type AppEmptyProps = {
   isSelected: boolean;

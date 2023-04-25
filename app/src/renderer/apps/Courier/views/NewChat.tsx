@@ -1,20 +1,21 @@
 import { useMemo, useState } from 'react';
 import {
-  Flex,
-  Text,
-  Icon,
-  Button,
-  TextInput,
   Avatar,
+  Button,
+  Flex,
+  Icon,
   Spinner,
+  Text,
+  TextInput,
   Tooltip,
 } from '@holium/design-system';
-import { useTrayApps } from '../../store';
-import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { useShipStore } from 'renderer/stores/ship.store';
-import { ShipSearch } from 'renderer/components/ShipSearch';
 import { ChatPathType } from 'os/services/ship/chat/chat.types';
+import { ShipSearch } from 'renderer/components/ShipSearch';
+import { useShipStore } from 'renderer/stores/ship.store';
+import styled from 'styled-components';
+
+import { useTrayApps } from '../../store';
 
 export const NewChat = () => {
   const { ship, friends, chatStore } = useShipStore();

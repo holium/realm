@@ -1,17 +1,18 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useToggle } from '@holium/design-system/util';
 import {
   AccountHostingDialog,
   ChangeEmailModal,
   ChangeMaintenanceWindowModal,
-  VerifyEmailModal,
-  GetNewAccessCodeModal,
   ChangePasswordModal,
   EjectIdModal,
+  GetNewAccessCodeModal,
+  VerifyEmailModal,
 } from '@holium/shared';
-import { useToggle } from '@holium/design-system/util';
+
 import { Page } from '../../components/Page';
-import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 import { thirdEarthApi } from '../../util/thirdEarthApi';
+import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 import { UserContextProvider, useUser } from '../../util/UserContext';
 
 const HostingPresenter = () => {

@@ -1,6 +1,7 @@
-import { ReferenceContent, resourceFromPath } from '@urbit/api';
-import urbitOb, { isValidPatp } from 'urbit-ob';
 import _ from 'lodash';
+import urbitOb, { isValidPatp } from 'urbit-ob';
+
+import { ReferenceContent, resourceFromPath } from '@urbit/api';
 
 /**
  * Took this from landscape because we are using their dm system for now.

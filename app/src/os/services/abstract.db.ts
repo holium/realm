@@ -1,4 +1,3 @@
-import Database, { Statement } from 'better-sqlite3-multiple-ciphers';
 import {
   BrowserWindow,
   ipcMain,
@@ -6,6 +5,8 @@ import {
   ipcRenderer,
   IpcRendererEvent,
 } from 'electron';
+import Database, { Statement } from 'better-sqlite3-multiple-ciphers';
+
 import { MethodProxies, UpdatePayload } from './abstract.types';
 
 export interface DataAccessContructorParams {

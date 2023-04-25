@@ -1,15 +1,15 @@
-import { useMemo, useEffect } from 'react';
-import styled from 'styled-components';
-import { pluralize } from 'renderer/lib/text';
+import { useEffect, useMemo } from 'react';
+import { Flex, Icon, Row, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
-import { Row, Text, Flex, Icon } from '@holium/design-system';
+import { pluralize } from 'renderer/lib/text';
 import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+import styled from 'styled-components';
 
 export const EmptyGroup = styled.div<{ color?: string }>`
   height: 32px;

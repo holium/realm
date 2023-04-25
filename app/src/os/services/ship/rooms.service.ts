@@ -1,4 +1,5 @@
 import log from 'electron-log';
+
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection, PokeParams, Scry } from '../api';
 

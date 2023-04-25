@@ -1,4 +1,5 @@
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+
 import { BootingDialog } from '../BootingDialog';
 import { ChooseIdDialog } from '../ChooseIdDialog';
 import { CreateAccountDialog } from '../CreateAccountDialog';
@@ -6,9 +7,10 @@ import { CredentialsDialog } from '../CredentialsDialog';
 import { DownloadDialog } from '../DownloadDialog';
 import { PaymentDialog } from '../PaymentDialog';
 import { VerifyEmailDialog } from '../VerifyEmailDialog';
+
 import {
-  OnboardingDialogWrapper,
   mockPatps,
+  OnboardingDialogWrapper,
   thirdEarthMockProducts,
 } from './helpers';
 

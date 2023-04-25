@@ -1,18 +1,19 @@
 import log from 'electron-log';
+import bcrypt from 'bcryptjs';
+
+import { cleanNounColor, removeHash } from '../../lib/color';
+import { getCookie } from '../../lib/shipHelpers';
 import {
   CreateAccountPayload,
   CreateMasterAccountPayload,
 } from '../../realm.types';
-import bcrypt from 'bcryptjs';
-
-import { cleanNounColor, removeHash } from '../../lib/color';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection } from '../api';
-import { AuthDB } from './auth.db';
-import { Account } from './accounts.table';
-import { MasterAccount } from './masterAccounts.table';
-import { getCookie } from '../../lib/shipHelpers';
 import { ShipDB } from '../ship/ship.db';
+
+import { Account } from './accounts.table';
+import { AuthDB } from './auth.db';
+import { MasterAccount } from './masterAccounts.table';
 import { OnboardingUpdateTypes } from './onboarding.types';
 
 type OnboardingCredentials = {

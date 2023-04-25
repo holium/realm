@@ -1,14 +1,15 @@
 import { useEffect, useMemo } from 'react';
-import { observer } from 'mobx-react';
 import { motion } from 'framer-motion';
-import { AppWindow } from './components/AppWindow/AppWindow';
+import { observer } from 'mobx-react';
+import { nativeApps } from 'renderer/apps/nativeApps';
 import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppType } from 'renderer/stores/models/bazaar.model';
-import { nativeApps } from 'renderer/apps/nativeApps';
+
+import { AppWindow } from './components/AppWindow/AppWindow';
 
 const AppWindowManagerPresenter = () => {
   const { shellStore } = useAppState();

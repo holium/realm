@@ -1,6 +1,7 @@
+import { BoxProps, Flex, Icon, Text } from '../../../general';
 import { pluralize } from '../../../util';
+
 import { FragmentShip } from './fragment-lib';
-import { Text, Flex, BoxProps, Icon } from '../../../general';
 
 type InlineStatusProps = {
   id: string;

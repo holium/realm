@@ -1,24 +1,25 @@
 import { useEffect, useState } from 'react';
-import { observer } from 'mobx-react';
 import {
+  Anchor,
   AvatarInput,
   Button,
-  Icon,
+  Card,
+  CopyButton,
   Flex,
+  Icon,
   RadioGroup,
   Spinner,
-  TextInput,
-  CopyButton,
-  useToggle,
   Text,
-  Card,
-  Anchor,
+  TextInput,
+  useToggle,
 } from '@holium/design-system';
-import { ColorPicker } from './ColorPicker';
-import { useForm, useField } from 'mobx-easy-form';
+import { useField, useForm } from 'mobx-easy-form';
+import { observer } from 'mobx-react';
 import { useTrayApps } from 'renderer/apps/store';
-import { useShipStore } from 'renderer/stores/ship.store';
 import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import { ColorPicker } from './ColorPicker';
 
 const AccountPanelPresenter = () => {
   const { shellStore } = useAppState();

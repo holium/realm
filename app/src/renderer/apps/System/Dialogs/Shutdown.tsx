@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Box, Button, Flex, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { Flex, Box, Button, Text } from '@holium/design-system';
-import { DialogConfig } from 'renderer/system/dialog/dialogs';
 import { trackEvent } from 'renderer/lib/track';
-import { useAppState } from 'renderer/stores/app.store';
 import { normalizeBounds } from 'renderer/lib/window-manager';
+import { useAppState } from 'renderer/stores/app.store';
+import { DialogConfig } from 'renderer/system/dialog/dialogs';
 
 export const ShutdownDialogConfig: DialogConfig = {
   component: (props: any) => <ShutdownDialog {...props} />,

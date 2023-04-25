@@ -1,5 +1,6 @@
 import { AppWindowMobxType } from 'renderer/stores/models/window.model';
-import { NativeAppId, getNativeAppWindow } from '../getNativeAppWindow';
+
+import { getNativeAppWindow, NativeAppId } from '../getNativeAppWindow';
 
 type Props = {
   appWindow: AppWindowMobxType;

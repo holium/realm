@@ -27,8 +27,9 @@ import {
   TypographyProps,
   variant,
 } from 'styled-system';
-import { ColorProps, colorStyle } from '../../util/colors';
+
 import { skeletonStyle } from '../../general/Skeleton/Skeleton';
+import { ColorProps, colorStyle } from '../../util/colors';
 
 type TextDecorationOption = 'overline' | 'line-through' | 'underline';
 type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';

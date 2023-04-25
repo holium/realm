@@ -1,5 +1,6 @@
 // import log from 'electron-log';
 import Database from 'better-sqlite3-multiple-ciphers';
+
 import AbstractDataAccess from '../../../abstract.db';
 
 export interface Invitation {
