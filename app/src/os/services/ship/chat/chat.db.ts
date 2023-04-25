@@ -1,3 +1,4 @@
+// import log from 'electron-log';
 import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';

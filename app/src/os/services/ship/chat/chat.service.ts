@@ -15,8 +15,10 @@ export class ChatService extends AbstractService<ChatUpdateTypes> {
       return;
     }
     this.chatDB = new ChatDB({ preload: false, db });
-
-    log.info('chat.service.ts:', 'Constructed.');
+    if (options?.verbose) {
+      log.info('chat.service.ts:', 'Constructed.');
+    }
+    this.sendUpdate({ type: 'init', payload: null });
   }
 
   reset(): void {

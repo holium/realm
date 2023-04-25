@@ -19,6 +19,7 @@ import { reject } from 'lodash';
 export class ShipService extends AbstractService<any> {
   public patp: string;
   private shipDB?: ShipDB;
+  private serviceOptions: ServiceOptions = { preload: false, verbose: false };
   services?: {
     rooms: RoomsService;
     notifications: NotificationsService;
@@ -37,22 +38,24 @@ export class ShipService extends AbstractService<any> {
     super('shipService', options);
     this.patp = patp;
     if (options?.preload) return;
-
+    if (options) {
+      this.serviceOptions = options;
+    }
     this.shipDB = new ShipDB(patp, password, clientSideEncryptionKey);
     // this.encryptDb(password);
-
-    log.info(
-      'ship.service.ts:',
-      `Created ship database for ${patp} with client-side encryption key`,
-      clientSideEncryptionKey
-    );
+    if (options?.verbose) {
+      log.info(
+        'ship.service.ts:',
+        `Created ship database for ${patp} with client-side encryption key`,
+        clientSideEncryptionKey
+      );
+    }
 
     const credentials = this.shipDB.getCredentials();
-
-    log.info('ship.service.ts:', 'Creating new ship credentials...');
-
     if (!credentials.cookie) {
-      log.info('ship.service.ts:', 'No cookie found, getting cookie...');
+      if (options?.verbose) {
+        log.info('ship.service.ts:', 'No cookie found, getting cookie...');
+      }
       getCookie({
         patp: patp,
         url: credentials.url,
@@ -60,7 +63,12 @@ export class ShipService extends AbstractService<any> {
       })
         .then((cookie) => {
           if (cookie) {
-            log.info('ship.service.ts:', 'Got cookie, setting credentials...');
+            if (options?.verbose) {
+              log.info(
+                'ship.service.ts:',
+                'Got cookie, setting credentials...'
+              );
+            }
             this.setCredentials(credentials.url, credentials.code, cookie);
             this._openConduit({ ...credentials, patp, cookie });
             this._registerServices();
@@ -126,12 +134,15 @@ export class ShipService extends AbstractService<any> {
       'Creating ship sub-services (rooms, notifications, chat, friends, spaces, bazaar)...'
     );
     this.services = {
-      rooms: new RoomsService(),
-      notifications: new NotificationsService(undefined, this.shipDB.db),
-      chat: new ChatService(undefined, this.shipDB.db),
-      friends: new FriendsService(false, this.shipDB.db),
-      spaces: new SpacesService(undefined, this.shipDB.db, this.patp),
-      bazaar: new BazaarService(undefined, this.shipDB.db),
+      rooms: new RoomsService(this.serviceOptions),
+      notifications: new NotificationsService(
+        this.serviceOptions,
+        this.shipDB.db
+      ),
+      chat: new ChatService(this.serviceOptions, this.shipDB.db),
+      friends: new FriendsService(this.serviceOptions, this.shipDB.db),
+      spaces: new SpacesService(this.serviceOptions, this.shipDB.db, this.patp),
+      bazaar: new BazaarService(this.serviceOptions, this.shipDB.db),
     };
   }
 

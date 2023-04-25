@@ -35,8 +35,9 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
     this.featuredSpacesDB = new FeaturedSpacesDB(false, db);
 
     this._onEvent = this._onEvent.bind(this);
-
-    log.info('spaces.service.ts:', 'Constructed.');
+    if (options?.verbose) {
+      log.info('spaces.service.ts:', 'Constructed.');
+    }
   }
 
   public async init() {

@@ -10,6 +10,7 @@ import { MethodProxies, UpdatePayload } from './abstract.types';
 
 export interface ServiceOptions {
   preload: boolean;
+  verbose?: boolean;
 }
 
 const methodFilter = (method: any, serviceName: any) =>
@@ -23,7 +24,7 @@ abstract class AbstractService<U = unknown> {
 
   constructor(
     serviceName: string,
-    options: ServiceOptions = { preload: false }
+    options: ServiceOptions = { preload: false, verbose: false }
   ) {
     this.serviceName = serviceName;
     if (options?.preload) {
