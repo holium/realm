@@ -45,7 +45,7 @@ const TrayAppStore = types
     dimensions: TrayAppDimensions,
     roomsApp: RoomsAppState,
     // walletApp: WalletStore,
-    // dmApp: DmApp,
+    innerNavigation: types.string,
   })
   .actions((self) => ({
     setTrayAppCoords(coords: Instance<typeof TrayAppCoords>) {
@@ -62,6 +62,10 @@ const TrayAppStore = types
     },
     closeActiveApp() {
       self.activeApp = null;
+      self.innerNavigation = '';
+    },
+    clearInnerNavigation() {
+      self.innerNavigation = '';
     },
     setActiveApp(
       appId: TrayAppKeys | null,
@@ -83,6 +87,11 @@ const TrayAppStore = types
           dimensions
         );
         self.dimensions = dimensions;
+      }
+      if (params?.innerNavigation) {
+        self.innerNavigation = params.innerNavigation;
+      } else {
+        self.innerNavigation = '';
       }
     },
   }));
@@ -146,7 +155,6 @@ const persistedState = loadSnapshot();
 
 export const trayStore = TrayAppStore.create({
   activeApp: null,
-  // activeApp: 'account-tray',
   coords: (persistedState && persistedState.coords) || {
     left: 0,
     bottom: 0,
@@ -159,6 +167,7 @@ export const trayStore = TrayAppStore.create({
     currentView: 'list',
   },
   // walletApp: walletAppDefault,
+  innerNavigation: '',
 });
 
 onSnapshot(trayStore, (snapshot) => {

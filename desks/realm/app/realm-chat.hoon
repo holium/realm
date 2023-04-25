@@ -1,6 +1,6 @@
 ::  app/realm-chat.hoon
-/-  *realm-chat, db-sur=chat-db, notify
-/+  dbug, lib=realm-chat
+/-  *realm-chat, db-sur=chat-db, notify, ndb=notif-db
+/+  dbug, lib=realm-chat, db-lib=chat-db
 =|  state-0
 =*  state  -
 :: ^-  agent:gall
@@ -223,6 +223,16 @@
                           !>([%send-message path.path-row.ch ~[[[%status (crip "You set disappearing messages to {(scow %dr max-expires-at-duration.path-row.ch)}")] ~ ~]] *@dr])
                         [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action send-status-message]~
                       ~
+
+                    %del-paths-row
+                      =/  notif-ids=(list @ud)
+                        %+  turn
+                          (scry-notifs-for-path path.ch bowl)
+                        |=(n=notif-row:ndb id.n)
+                      %+  turn  notif-ids
+                      |=  id=@ud
+                      ^-  card
+                      [%pass /dbpoke %agent [our.bowl %notif-db] %poke %notif-db-poke !>([%delete id])]
                   ==
                 [(weld cards new-msg-notif-cards) this]
             ==
@@ -254,10 +264,23 @@
     %add-row  =(-.+.ch %messages)
   ==
 ::
+++  scry-notifs-for-path
+  |=  [=path =bowl:gall]
+  ^-  (list notif-row:ndb)
+  =/  scry-path  (weld /(scot %p our.bowl)/notif-db/(scot %da now.bowl)/db/path/realm-chat path)
+  .^  (list notif-row:ndb)
+      %gx
+      (weld scry-path /noun)
+  ==
+::
 ++  notif-new-msg
   |=  [=message:db-sur =ship dismissed=?]
   ^-  card
   =/  msg-part  (snag 0 message)
+  =/  title     (notif-msg message)
+  =/  content   (crip "from {(scow %p sender.msg-id.msg-part)}")
+  =/  link      (msg-id-to-cord:encode:db-lib msg-id.msg-part)
+  ~&  >  link
   [
     %pass
     /dbpoke
@@ -265,7 +288,7 @@
     [ship %notif-db]
     %poke
     %notif-db-poke
-    !>([%create %realm-chat path.msg-part %message (notif-msg message) (crip "from {(scow %p sender.msg-id.msg-part)}") '' ~ '' ~ dismissed])
+    !>([%create %realm-chat path.msg-part %message title content '' ~ link ~ dismissed])
   ]
 ++  notif-msg
   |=  =message:db-sur

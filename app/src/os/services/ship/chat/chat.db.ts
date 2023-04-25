@@ -262,8 +262,8 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     if (dbChange.type === 'del-paths-row') {
       // console.log('del-paths-row', dbChange);
       const delPathsRow = dbChange as DelPathsRow;
-      this._deletePathsRow(delPathsRow.row);
-      this.sendUpdate({ type: 'path-deleted', payload: delPathsRow.row });
+      this._deletePathsRow(delPathsRow.path);
+      this.sendUpdate({ type: 'path-deleted', payload: delPathsRow.path });
       this._insertDeleteLogs([
         {
           change: delPathsRow,
@@ -274,7 +274,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     if (dbChange.type === 'del-peers-row') {
       // console.log('del-peers-row', dbChange);
       const delPeersRow = dbChange as DelPeersRow;
-      this._deletePeersRow(delPeersRow.row, delPeersRow.ship);
+      this._deletePeersRow(delPeersRow.path, delPeersRow.ship);
       this.sendUpdate({ type: 'peer-deleted', payload: delPeersRow });
       this._insertDeleteLogs([
         {

@@ -147,12 +147,13 @@ export const ChatStore = types
     setClosed() {
       self.isOpen = false;
     },
-    setSubroute(subroute: Subroutes) {
+    setSubroute: flow(function* (subroute: Subroutes) {
       if (subroute === 'inbox') {
         self.selectedChat = undefined;
+        self.inbox = yield ChatDBActions.getChatList();
       }
       self.subroute = subroute;
-    },
+    }),
     setChat(path: string) {
       self.selectedChat = tryReference(() =>
         self.inbox.find((chat) => chat.path === path)
@@ -242,6 +243,9 @@ export const ChatStore = types
         self.pinnedChats.remove(path);
       }
     },
+    refreshInbox: flow(function* () {
+      self.inbox = yield ChatDBActions.getChatList();
+    }),
     reset() {
       self.subroute = 'inbox';
       self.pinnedChats.clear();
@@ -313,8 +317,11 @@ ChatIPC.onUpdate(({ type, payload }: ChatUpdateTypes) => {
     const selectedChat = shipStore.chatStore.inbox.find(
       (chat) => chat.path === payload.path
     );
-    if (!selectedChat) return;
-    selectedChat.addMessage(payload);
+
+    if (selectedChat) selectedChat.addMessage(payload);
+    if (chatStore.subroute === 'inbox') chatStore.refreshInbox();
+
+    return;
   }
   if (type === 'message-edited') {
     const selectedChat = shipStore.chatStore.inbox.find(

@@ -1,4 +1,4 @@
-import { RefObject } from 'react';
+import { useState, RefObject } from 'react';
 import {
   Box,
   Text,
@@ -34,9 +34,10 @@ export const ChatLogList = ({
   endOfListPadding,
   topOfListPadding,
 }: Props) => {
+  const [prevHeight, setPrevHeight] = useState<number>(0);
+
   const renderChatRow = (index: number, row: ChatMessageType) => {
     const isLast = selectedChat ? index === messages.length - 1 : false;
-
     const isNextGrouped =
       index < messages.length - 1 && row.sender === messages[index + 1].sender;
 
@@ -109,9 +110,18 @@ export const ChatLogList = ({
         width={width}
         height={height}
         atBottomThreshold={100}
-        increaseViewportBy={{
-          top: 200,
-          bottom: 200,
+        followOutput={true}
+        // style={{ marginRight: -scrollbarWidth }}
+        // alignToBottom
+        // initialTopMostItemIndex={messages.length - 1}
+        totalListHeightChanged={(height: number) => {
+          if (height - prevHeight === 10) {
+            // 10 px is the height change that occurs when there's a reaction added
+            listRef?.current?.scrollBy({
+              top: 10,
+            });
+          }
+          setPrevHeight(height);
         }}
         itemContent={renderChatRow}
         chatMode
