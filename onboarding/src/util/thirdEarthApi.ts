@@ -1,4 +1,5 @@
 import { ThirdEarthApi } from '@holium/shared';
+
 import { constants } from './constants';
 
 export const thirdEarthApi = new ThirdEarthApi(

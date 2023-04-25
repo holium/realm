@@ -1,7 +1,8 @@
 // import log from 'electron-log';
 import Database from 'better-sqlite3-multiple-ciphers';
-import AbstractDataAccess from '../../../abstract.db';
+
 import { cleanNounColor } from '../../../../lib/color';
+import AbstractDataAccess from '../../../abstract.db';
 
 export interface Space {
   path: string;

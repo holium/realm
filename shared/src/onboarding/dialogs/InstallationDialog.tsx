@@ -1,4 +1,3 @@
-import styled from 'styled-components';
 import {
   Button,
   ErrorBox,
@@ -7,12 +6,14 @@ import {
   Spinner,
 } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
+import styled from 'styled-components';
+
+import { OnboardDialog } from '../components/OnboardDialog';
 import {
-  OnboardDialogTitle,
   OnboardDialogDescription,
+  OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
 import { DownloadIcon } from '../icons/DownloadIcon';
-import { OnboardDialog } from '../components/OnboardDialog';
 
 const InstallRealmButton = styled(Button.TextButton)`
   position: relative;

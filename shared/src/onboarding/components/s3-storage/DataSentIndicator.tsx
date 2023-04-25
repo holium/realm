@@ -1,6 +1,7 @@
 import { Flex, ProgressBar, Text } from '@holium/design-system/general';
-import { OnboardDialogSubTitle } from '../OnboardDialog.styles';
+
 import { bytesToString } from '../../dialogs/util/bytes';
+import { OnboardDialogSubTitle } from '../OnboardDialog.styles';
 
 type Props = {
   dataSent: {

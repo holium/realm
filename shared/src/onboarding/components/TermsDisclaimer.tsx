@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+
 import { OnboardDialogDescription } from './OnboardDialog.styles';
 
 const OnboardDialogTerms = styled(OnboardDialogDescription)`

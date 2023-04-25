@@ -1,10 +1,11 @@
 import { ChangeEvent, useState } from 'react';
 import { Button, ErrorBox, Flex, Icon } from '@holium/design-system/general';
-import { useToggle } from '@holium/design-system/util';
-import { OnboardDialog } from '../components/OnboardDialog';
-import { CredentialsIcon } from '../icons/CredentialsIcon';
-import { OnboardDialogInputLabel } from '../components/OnboardDialog.styles';
 import { TextInput } from '@holium/design-system/inputs';
+import { useToggle } from '@holium/design-system/util';
+
+import { OnboardDialog } from '../components/OnboardDialog';
+import { OnboardDialogInputLabel } from '../components/OnboardDialog.styles';
+import { CredentialsIcon } from '../icons/CredentialsIcon';
 
 type Props = {
   onBack: () => void;

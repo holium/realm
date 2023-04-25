@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Button, CommButton, Flex, Icon, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
-import { Badge } from 'renderer/components';
-import { CommButton, Flex, Button, Icon, Text } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
-import { VoiceView } from './Voice';
-import { RoomChat } from './Chat';
-import { RoomInvite } from './Invite';
-import { useRooms } from '../useRooms';
+import { Badge } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+import { useRooms } from '../useRooms';
+
+import { RoomChat } from './Chat';
+import { RoomInvite } from './Invite';
+import { VoiceView } from './Voice';
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 

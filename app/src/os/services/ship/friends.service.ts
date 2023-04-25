@@ -1,9 +1,10 @@
 import log from 'electron-log';
 import Database from 'better-sqlite3-multiple-ciphers';
-import { APIConnection } from '../api';
-import AbstractDataAccess from '../abstract.db';
+
 import { cleanNounColor, removeHash } from '../../lib/color';
 import { ServiceOptions } from '../abstract.service';
+import AbstractDataAccess from '../abstract.db';
+import { APIConnection } from '../api';
 
 export interface Friend {
   patp: string;

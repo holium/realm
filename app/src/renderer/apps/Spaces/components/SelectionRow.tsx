@@ -1,10 +1,10 @@
 import {
-  Row,
   Button,
-  Text,
-  IconPathsType,
-  Icon,
   Flex,
+  Icon,
+  IconPathsType,
+  Row,
+  Text,
 } from '@holium/design-system';
 import { Crest, isValidHexColor, isValidImageUrl } from 'renderer/components';
 

@@ -1,11 +1,11 @@
 import { EventEmitter } from 'events';
-import TypedEmitter from 'typed-emitter';
 import { action, makeObservable, observable } from 'mobx';
+import TypedEmitter from 'typed-emitter';
 
-import { RemotePeer } from '../peer/RemotePeer';
-import { LocalPeer } from '../peer/LocalPeer';
-import { Patp, RoomMap, RoomType } from '../types';
 import { DataPacket } from '../helpers/data';
+import { LocalPeer } from '../peer/LocalPeer';
+import { RemotePeer } from '../peer/RemotePeer';
+import { Patp, RoomMap, RoomType } from '../types';
 
 type AgentConnectParams = [RoomType];
 type LocalCommsParams = [RoomType];

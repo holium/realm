@@ -1,12 +1,13 @@
 import styled, { css } from 'styled-components';
+
 import {
-  Flex,
-  Text,
-  Favicon,
-  Row,
   BoxProps,
-  Icon,
   Button,
+  Favicon,
+  Flex,
+  Icon,
+  Row,
+  Text,
 } from '../../../general';
 import { AvatarRow, ContactData } from '../../general/Avatar/AvatarRow';
 

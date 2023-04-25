@@ -1,11 +1,12 @@
-import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import styled from 'styled-components';
 
 type Props = {
   isError?: boolean;
 };
 
 export const Input = styled(motion.input)<Props>`
+  font-family: var(--rlm-font);
   background-color: rgba(var(--rlm-input-rgba));
   color: rgba(var(--rlm-text-rgba));
   pointer-events: all;
@@ -25,6 +26,7 @@ export const Input = styled(motion.input)<Props>`
 `;
 
 export const TextArea = styled(motion.textarea)<Props>`
+  font-family: var(--rlm-font);
   background-color: rgba(var(--rlm-input-rgba));
   color: rgba(var(--rlm-text-rgba));
   width: 100%;

@@ -1,9 +1,11 @@
-import { GetServerSideProps } from 'next';
+import { useEffect } from 'react';
 import { ClaimTokenDialog, OnboardingStorage } from '@holium/shared';
+import { GetServerSideProps } from 'next';
+
 import { Page } from 'components/Page';
+
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
-import { useEffect } from 'react';
 
 type Props = {
   inviteToken: string;

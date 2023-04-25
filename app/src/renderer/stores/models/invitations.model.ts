@@ -1,15 +1,18 @@
+import { toJS } from 'mobx';
 import {
   applySnapshot,
-  castToSnapshot,
   cast,
+  castToSnapshot,
+  flow,
   Instance,
   types,
-  flow,
 } from 'mobx-state-tree';
-import { toJS } from 'mobx';
-import { SpacesIPC } from '../ipc';
-import { LoaderModel } from './common.model';
+
 import { cite } from '@urbit/aura';
+
+import { SpacesIPC } from '../ipc';
+
+import { LoaderModel } from './common.model';
 
 const Roles = types.enumeration(['initiate', 'member', 'admin', 'owner']);
 export type RolesType = Instance<typeof Roles>;

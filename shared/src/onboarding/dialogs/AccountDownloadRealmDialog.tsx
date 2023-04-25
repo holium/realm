@@ -1,10 +1,12 @@
 import { Flex } from '@holium/design-system/general';
+
 import { AccountDialog, SidebarSection } from '../components/AccountDialog';
-import { DownloadRealmBodyProps, DownloadRealmButtons } from './DownloadDialog';
 import {
   AccountDialogDescription,
   AccountDialogTitle,
 } from '../components/AccountDialog.styles';
+
+import { DownloadRealmBodyProps, DownloadRealmButtons } from './DownloadDialog';
 
 type Props = DownloadRealmBodyProps & {
   patps: string[] | undefined;

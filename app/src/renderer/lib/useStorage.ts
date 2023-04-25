@@ -1,7 +1,8 @@
-import { S3Client, StorageClient, StorageAcl } from './S3Client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import moment from 'moment';
 import { ShipIPC } from 'renderer/stores/ipc';
+
+import { S3Client, StorageAcl, StorageClient } from './S3Client';
 
 // Pulled this from landscape
 

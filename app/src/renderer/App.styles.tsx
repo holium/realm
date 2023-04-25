@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { darken } from 'polished';
-import { useMemo } from 'react';
 import { createGlobalStyle, css } from 'styled-components';
+
 import { genCSSVariables } from './lib/theme';
 import { ThemeType } from './stores/models/theme.model';
 import { BackgroundImage } from './system/system.styles';

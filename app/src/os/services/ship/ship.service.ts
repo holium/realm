@@ -1,20 +1,22 @@
 import { app } from 'electron';
-import fs from 'fs';
-import path from 'path';
 import log from 'electron-log';
-import moment from 'moment';
-import AbstractService, { ServiceOptions } from '../abstract.service';
-import { ShipDB } from './ship.db';
-import { APIConnection, ConduitSession } from '../api';
-import RoomsService from './rooms.service';
-import NotificationsService from './notifications/notifications.service';
-import ChatService from './chat/chat.service';
-import { FriendsService } from './friends.service';
-import SpacesService from './spaces/spaces.service';
-import { S3Client, StorageAcl } from '../../../renderer/lib/S3Client';
-import BazaarService from './spaces/bazaar.service';
-import { getCookie } from '../../lib/shipHelpers';
+import fs from 'fs';
 import { reject } from 'lodash';
+import moment from 'moment';
+import path from 'path';
+
+import { S3Client, StorageAcl } from '../../../renderer/lib/S3Client';
+import { getCookie } from '../../lib/shipHelpers';
+import AbstractService, { ServiceOptions } from '../abstract.service';
+import { APIConnection, ConduitSession } from '../api';
+
+import ChatService from './chat/chat.service';
+import NotificationsService from './notifications/notifications.service';
+import BazaarService from './spaces/bazaar.service';
+import SpacesService from './spaces/spaces.service';
+import { FriendsService } from './friends.service';
+import RoomsService from './rooms.service';
+import { ShipDB } from './ship.db';
 
 export class ShipService extends AbstractService<any> {
   public patp: string;

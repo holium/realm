@@ -6,16 +6,17 @@ import {
   Skeleton,
   Spinner,
 } from '@holium/design-system/general';
-import { HoliumButton } from '@holium/design-system/os';
 import { Select } from '@holium/design-system/inputs';
+import { HoliumButton } from '@holium/design-system/os';
+
 import {
   AccountDialogCard,
+  AccountDialogInnerCard,
   AccountDialogSidebar,
   AccountDialogSidebarMenu,
   AccountDialogSidebarMenuItemText,
-  AccountDialogInnerCard,
-  AccountDialogTitle,
   AccountDialogSubtitle,
+  AccountDialogTitle,
 } from './AccountDialog.styles';
 
 export enum SidebarSection {

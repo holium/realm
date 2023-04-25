@@ -1,6 +1,8 @@
 import { observer } from 'mobx-react';
 import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInstall/store';
+
 import { RealmPopover } from '../Popover';
+
 import { SearchModes } from './SearchModes';
 
 const AppSearchPopoverPresenter = () => {

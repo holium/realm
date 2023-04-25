@@ -1,5 +1,5 @@
-import fetch from 'cross-fetch';
 import log from 'electron-log';
+import fetch from 'cross-fetch';
 
 export interface ShipConnectionData {
   patp?: string;

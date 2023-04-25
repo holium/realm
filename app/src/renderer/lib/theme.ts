@@ -1,6 +1,6 @@
+import { toRgbaString } from '@holium/design-system';
 import { darken, lighten, rgba } from 'polished';
 import { ThemeType } from 'renderer/stores/models/theme.model';
-import { toRgbaString } from '@holium/design-system';
 
 export const genCSSVariables = (theme: ThemeType) => {
   /**

@@ -1,10 +1,11 @@
+import { AccountDialog, SidebarSection } from '../components/AccountDialog';
 import { AccountDialogDescription } from '../components/AccountDialog.styles';
 import { AccountDialogTableRow } from '../components/AccountDialogTableRow';
-import { AccountDialog, SidebarSection } from '../components/AccountDialog';
-import { AccountDialogTable } from './AccountHostingDialog';
-import { S3Password } from '../components/s3-storage/S3Password';
-import { DataStorageIndicator } from '../components/s3-storage/DataStorageIndicator';
 import { DataSentIndicator } from '../components/s3-storage/DataSentIndicator';
+import { DataStorageIndicator } from '../components/s3-storage/DataStorageIndicator';
+import { S3Password } from '../components/s3-storage/S3Password';
+
+import { AccountDialogTable } from './AccountHostingDialog';
 
 type Props = {
   patps: string[];

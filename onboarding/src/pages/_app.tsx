@@ -1,6 +1,8 @@
-import type { AppProps } from 'next/app';
 import * as Amplitude from '@amplitude/analytics-browser';
+import type { AppProps } from 'next/app';
+
 import { constants } from '../util/constants';
+
 import '../style/app.css';
 
 Amplitude.init(constants.AMPLITUDE_API_KEY, undefined, {

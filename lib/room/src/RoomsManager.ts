@@ -1,12 +1,13 @@
 import { EventEmitter } from 'events';
-import TypedEmitter from 'typed-emitter';
 import { action, makeObservable, observable } from 'mobx';
-import { ChatModelType, Patp, RoomState, RoomType } from './types';
+import TypedEmitter from 'typed-emitter';
+
 import { BaseProtocol } from './connection/BaseProtocol';
-import { LocalPeer } from './peer/LocalPeer';
 import { ProtocolEvent } from './connection/events';
 import { DataPacket } from './helpers/data';
+import { LocalPeer } from './peer/LocalPeer';
 import { RoomManagerEvent } from './events';
+import { ChatModelType, Patp, RoomState, RoomType } from './types';
 
 /**
  * RoomsManager: top level class for managing the rooms primitive

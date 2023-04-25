@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Flex, Icon, Spinner, Text } from '@holium/design-system';
 import { motion } from 'framer-motion';
-import styled, { css } from 'styled-components';
-import { darken, lighten, rgba, saturate } from 'polished';
-import { Flex, Spinner, Text, Icon } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { darken, lighten, rgba, saturate } from 'polished';
 import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+import styled, { css } from 'styled-components';
 
 interface ConnStatusStyleProps {
   baseColor: string;
@@ -63,7 +63,17 @@ export const ConnectionStatus = observer(() => {
   const { ship } = useShipStore();
   const [isReconnecting, setIsReconnecting] = useState(false);
   // const status = connectionStatus;
-  const status = 'online';
+  const online = true;
+  const [status, _setStatus] = useState<
+    | 'online'
+    | 'offline'
+    | 'failed'
+    | 'refreshing'
+    | 'refreshed'
+    | 'connected'
+    | 'connecting'
+    | 'initialized'
+  >('online');
 
   const mode = theme.mode;
   const onReconnect = () => {

@@ -1,9 +1,10 @@
 import { Anchor, Button, Flex } from '@holium/design-system/general';
+
 import { Modal } from './Modal';
 import {
-  OnboardDialogTitle,
-  OnboardDialogDescription,
   OnboardDialogButtonText,
+  OnboardDialogDescription,
+  OnboardDialogTitle,
 } from './OnboardDialog.styles';
 
 type Props = {

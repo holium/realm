@@ -1,14 +1,16 @@
-import { types, Instance, getSnapshot, applySnapshot } from 'mobx-state-tree';
+import { toJS } from 'mobx';
+import { applySnapshot, getSnapshot, Instance, types } from 'mobx-state-tree';
+
+import { getInitialWindowBounds } from '../../lib/window-manager';
+import { MainIPC } from '../ipc';
+import { shipStore } from '../ship.store';
+
 import {
   AppWindowMobxType,
   AppWindowModel,
   AppWindowProps,
   BoundsModelType,
 } from './window.model';
-import { getInitialWindowBounds } from '../../lib/window-manager';
-import { toJS } from 'mobx';
-import { shipStore } from '../ship.store';
-import { MainIPC } from '../ipc';
 
 export const NativeAppConfig = types.model('NativeAppConfig', {
   route: types.string,

@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron';
-import { PresenceArg, MouseState } from '@holium/realm-presence';
 import { Position } from '@holium/design-system';
+import { MouseState, PresenceArg } from '@holium/realm-presence';
 
 export const multiplayerPreload = {
   /* Senders */

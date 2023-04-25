@@ -1,7 +1,7 @@
+import { useMemo } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { useMemo } from 'react';
-import { ContextMenuOption, AppTile } from 'renderer/components';
+import { AppTile, ContextMenuOption } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import {
   AppMobxType,
@@ -10,6 +10,7 @@ import {
 } from 'renderer/stores/models/bazaar.model';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 import { useShipStore } from 'renderer/stores/ship.store';
+
 import {
   handleInstallation,
   handleResumeSuspend,

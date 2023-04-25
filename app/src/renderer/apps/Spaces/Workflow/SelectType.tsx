@@ -1,12 +1,13 @@
 import { FC, useEffect, useState } from 'react';
-import styled from 'styled-components';
+import { Button, Flex, Icon, Skeleton, Text } from '@holium/design-system';
 // import { toJS } from 'mobx';
 import { motion } from 'framer-motion';
-import { Text, Icon, Flex, Skeleton, Button } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import { SelectRow } from '../components/SelectionRow';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+import styled from 'styled-components';
+
+import { SelectRow } from '../components/SelectionRow';
 
 export const Wrapper = styled(motion.div)`
   position: absolute;

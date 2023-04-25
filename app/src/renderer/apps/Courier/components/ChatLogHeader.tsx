@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 import {
-  Flex,
   Button,
-  Text,
+  Flex,
   Icon,
   Menu,
   MenuItemProps,
+  Text,
 } from '@holium/design-system';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';

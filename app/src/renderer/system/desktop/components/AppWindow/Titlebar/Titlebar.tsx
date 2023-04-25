@@ -1,9 +1,11 @@
-import { ReactNode, PointerEvent } from 'react';
-import { Text, Flex } from '@holium/design-system';
-import { AppWindowIcon } from '../AppWindowIcon';
-import { TitlebarContainer, TitleCentered } from './Titlebar.styles';
+import { PointerEvent, ReactNode } from 'react';
+import { Flex, Text } from '@holium/design-system';
 import { useDoubleClick } from 'renderer/lib/useDoubleClick';
 import { AppWindowMobxType } from 'renderer/stores/models/window.model';
+
+import { AppWindowIcon } from '../AppWindowIcon';
+
+import { TitlebarContainer, TitleCentered } from './Titlebar.styles';
 
 type Props = {
   zIndex: number;

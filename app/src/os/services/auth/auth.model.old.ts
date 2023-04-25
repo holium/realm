@@ -1,12 +1,13 @@
 import {
-  detach,
-  Instance,
-  types,
-  flow,
   applySnapshot,
   castToSnapshot,
+  detach,
+  flow,
+  Instance,
+  types,
 } from 'mobx-state-tree';
 import { Patp } from 'os/types';
+
 import { LoaderModel } from '../../../renderer/stores/models/common.model';
 
 export const AuthShip = types

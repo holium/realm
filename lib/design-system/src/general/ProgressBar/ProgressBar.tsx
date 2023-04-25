@@ -1,6 +1,7 @@
 import styled from 'styled-components';
-import { Box, BoxProps } from '../Box/Box';
+
 import { ColorProps, colorStyle, ColorVariants } from '../../util/colors';
+import { Box, BoxProps } from '../Box/Box';
 
 const Bar = styled(Box)`
   position: relative;

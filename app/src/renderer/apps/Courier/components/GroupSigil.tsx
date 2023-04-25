@@ -1,6 +1,6 @@
 import { FC } from 'react';
+import { Avatar, Flex } from '@holium/design-system';
 import { Patp } from 'os/types';
-import { Flex, Avatar } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 interface GroupSigilProps {

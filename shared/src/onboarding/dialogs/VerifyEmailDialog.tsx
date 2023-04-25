@@ -1,11 +1,12 @@
 import { useRef, useState } from 'react';
 import { Anchor, Icon } from '@holium/design-system/general';
 import { Input } from '@holium/design-system/inputs';
+
+import { OnboardDialog } from '../components/OnboardDialog';
 import {
   OnboardDialogDescription,
   OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
-import { OnboardDialog } from '../components/OnboardDialog';
 
 type Props = {
   onResend: () => void;

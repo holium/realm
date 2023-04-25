@@ -1,20 +1,21 @@
-import { useRef, useEffect, useState, useMemo } from 'react';
-import { Fill, Bottom, Centered } from 'react-spaces';
-import { observer } from 'mobx-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Bottom, Centered, Fill } from 'react-spaces';
 import {
   Avatar,
-  Flex,
   Box,
-  Spinner,
-  TextInput,
-  Text,
   Button,
+  Flex,
   Icon,
   Menu,
   MenuItemProps,
+  Spinner,
+  Text,
+  TextInput,
 } from '@holium/design-system';
-import { ShipSelector } from './ShipSelector';
+import { observer } from 'mobx-react';
 import { useAppState } from 'renderer/stores/app.store';
+
+import { ShipSelector } from './ShipSelector';
 
 interface LoginProps {
   addShip: () => void;

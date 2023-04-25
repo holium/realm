@@ -1,5 +1,5 @@
+import { useEffect, useMemo } from 'react';
 import { AppTile, AppTileType, bgIsLightOrDark } from '@holium/design-system';
-import { useMemo, useEffect } from 'react';
 import { useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';

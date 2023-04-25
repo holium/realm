@@ -1,8 +1,9 @@
-import styled, { css } from 'styled-components';
-import { toRgbaString } from '../../util/colors';
-import { Flex, Row, Text, Icon, TextProps } from '../../../general';
-import { IconPathsType } from '../../general/Icon/icons';
 import { useMemo } from 'react';
+import styled, { css } from 'styled-components';
+
+import { Flex, Icon, Row, Text, TextProps } from '../../../general';
+import { IconPathsType } from '../../general/Icon/icons';
+import { toRgbaString } from '../../util/colors';
 
 export type MenuItemProps = {
   id?: string;

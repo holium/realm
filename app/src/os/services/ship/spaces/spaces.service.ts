@@ -1,19 +1,21 @@
-import AbstractService, { ServiceOptions } from '../../abstract.service';
-import Database from 'better-sqlite3-multiple-ciphers';
 import log from 'electron-log';
-import { APIConnection } from '../../api';
-import { SpacesDB, spacesInitSql } from './tables/spaces.table';
-import { MembersDB, spacesMembersInitSql } from './tables/members.table';
-import { humanFriendlySpaceNameSlug } from '../../../lib/text';
+import Database from 'better-sqlite3-multiple-ciphers';
+
 import { snakeify } from '../../../lib/obj';
 import { pathToObj } from '../../../lib/path';
-import { InvitationDB, spacesInvitationsInitSql } from './tables/visas.table';
-import { spacesModelQuery } from './spaces.query';
+import { humanFriendlySpaceNameSlug } from '../../../lib/text';
 import { MemberRole } from '../../../types';
+import AbstractService, { ServiceOptions } from '../../abstract.service';
+import { APIConnection } from '../../api';
+
 import {
   FeaturedSpacesDB,
   spacesFeaturedInitSql,
 } from './tables/featured.table';
+import { MembersDB, spacesMembersInitSql } from './tables/members.table';
+import { SpacesDB, spacesInitSql } from './tables/spaces.table';
+import { InvitationDB, spacesInvitationsInitSql } from './tables/visas.table';
+import { spacesModelQuery } from './spaces.query';
 import { SpacesUpdateType } from './spaces.types';
 
 export class SpacesService extends AbstractService<SpacesUpdateType> {

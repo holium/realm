@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+
 import { Flex } from '../../general/Flex/Flex';
 
 export const CommCircle = styled(Flex)<{ customBg: string }>`

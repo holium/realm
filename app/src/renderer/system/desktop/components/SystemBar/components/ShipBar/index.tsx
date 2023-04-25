@@ -1,28 +1,29 @@
-import { useEffect, useState, useCallback } from 'react';
-import { WalletTray } from './WalletTray';
-import { observer } from 'mobx-react';
-import { MessagesTray } from './MessagesTray';
-import { AccountTray } from './AccountTray';
+import { useCallback, useEffect, useState } from 'react';
 import {
-  Flex,
   BarStyle,
-  NotificationType,
-  NotificationList,
-  Button,
-  Icon,
   Box,
+  Button,
+  Flex,
+  Icon,
   NoScrollBar,
+  NotificationList,
+  NotificationType,
 } from '@holium/design-system';
-import { RoomTray } from './Rooms';
 import { AnimatePresence } from 'framer-motion';
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
-import { trackEvent } from 'renderer/lib/track';
+import { observer } from 'mobx-react';
 import { nativeApps } from 'renderer/apps/nativeApps';
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { useTrayApps } from 'renderer/apps/store';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { trackEvent } from 'renderer/lib/track';
 import { openChatToPath } from 'renderer/lib/useTrayControls';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppType } from 'renderer/stores/models/bazaar.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import { AccountTray } from './AccountTray';
+import { MessagesTray } from './MessagesTray';
+import { RoomTray } from './Rooms';
+import { WalletTray } from './WalletTray';
 
 type ExpandBarStyles = {
   height: number | 'fit-content';

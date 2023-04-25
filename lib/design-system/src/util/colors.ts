@@ -1,6 +1,6 @@
-import { css } from 'styled-components';
 import _ from 'lodash';
 import f from 'lodash/fp';
+import { css } from 'styled-components';
 // The color variants maps to CSS variables injected by Realm.
 export type ColorVariants =
   | 'base'

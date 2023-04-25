@@ -1,4 +1,5 @@
 import { InstallStatus } from 'renderer/stores/models/bazaar.model';
+
 import { shipStore } from '../../../../../stores/ship.store';
 
 export const installLabel = (status: InstallStatus) => {

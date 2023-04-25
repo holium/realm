@@ -1,9 +1,10 @@
 import { MouseEvent } from 'react';
+import { Button, Flex, Icon } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { SpacePicture } from 'renderer/components';
-import { Flex, Button, Icon } from '@holium/design-system';
-import { AppSearchApp } from '../AppInstall/AppSearch';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
+
+import { AppSearchApp } from '../AppInstall/AppSearch';
 
 interface SpaceTitlebarProps {
   space: SpaceModelType;

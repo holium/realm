@@ -1,13 +1,14 @@
 import { useMemo, useRef } from 'react';
-import styled, { css } from 'styled-components';
 import { Variants } from 'framer-motion';
+import styled, { css } from 'styled-components';
+
 import {
   Box,
   Flex,
-  Text,
-  Spinner,
   Icon,
   IconPathsType,
+  Spinner,
+  Text,
 } from '../../../general';
 import { bgIsLightOrDark } from '../../../util';
 

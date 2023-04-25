@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
-import { Position, hexToRgb, rgbToString } from '@holium/design-system';
-import { AnimatedCursor } from './AnimatedCursor';
+import { useCallback, useEffect, useState } from 'react';
+import { hexToRgb, Position, rgbToString } from '@holium/design-system';
 import { MouseState } from '@holium/realm-presence';
+
+import { AnimatedCursor } from './AnimatedCursor';
 import { CursorLabel, EphemeralChat } from './Mouse.styles';
 
 const CURSOR_TIMEOUT = 5000;

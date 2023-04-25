@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { ChooseIdDialog, OnboardingStorage } from '@holium/shared';
 import { track } from '@amplitude/analytics-browser';
-import { StepProps } from './types';
+import { ChooseIdDialog, OnboardingStorage } from '@holium/shared';
+
 import { thirdEarthApi } from '../thirdEarthApi';
+
+import { StepProps } from './types';
 
 export const ChooseIdStep = ({ setStep }: StepProps) => {
   const [patps, setPatps] = useState<string[]>([]);

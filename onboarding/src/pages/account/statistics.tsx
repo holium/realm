@@ -1,4 +1,5 @@
 import { AccountStatisticsDialog } from '@holium/shared';
+
 import { Page } from '../../components/Page';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 import { UserContextProvider, useUser } from '../../util/UserContext';

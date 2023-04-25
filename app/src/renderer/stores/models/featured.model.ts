@@ -1,4 +1,5 @@
-import { types, Instance, applySnapshot, flow } from 'mobx-state-tree';
+import { applySnapshot, flow, Instance, types } from 'mobx-state-tree';
+
 import { SpacesIPC } from '../ipc';
 
 export const SpaceListingModel = types.model('SpaceListingModel', {
