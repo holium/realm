@@ -43,6 +43,7 @@ export const AddServerStep = ({ setStep }: StepProps) => {
         status: 'online',
         theme: JSON.stringify(defaultTheme),
       },
+      passwordHash,
       shipCode
     );
 

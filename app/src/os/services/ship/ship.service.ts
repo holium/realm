@@ -72,7 +72,39 @@ export class ShipService extends AbstractService<any> {
       })
         .then((cookie) => {
           if (cookie) {
+            log.info('ship.service.ts:', 'Got cookie, setting credentials...');
             this.setCredentials(ship.url, ship.code, cookie);
+
+            // create an instance of the conduit
+            APIConnection.getInstance({
+              url: ship.url,
+              code: ship.code,
+              cookie,
+              ship: ship.patp,
+            }).conduit.on('refreshed', (session: ConduitSession) => {
+              this.shipDB?.setCredentials(
+                session.url,
+                session.code,
+                session.cookie
+              );
+            });
+
+            log.info(
+              'ship.service.ts:',
+              'Creating ship sub-services (rooms, notifications, chat, friends, spaces, bazaar)...'
+            );
+
+            this.services = {
+              rooms: new RoomsService(),
+              notifications: new NotificationsService(
+                undefined,
+                this.shipDB?.db
+              ),
+              chat: new ChatService(undefined, this.shipDB?.db),
+              friends: new FriendsService(false, this.shipDB?.db),
+              spaces: new SpacesService(undefined, this.shipDB?.db, this.patp),
+              bazaar: new BazaarService(undefined, this.shipDB?.db),
+            };
           } else {
             log.error('ship.service.ts:', 'Failed to get cookie');
           }
@@ -83,15 +115,29 @@ export class ShipService extends AbstractService<any> {
     } else {
       log.info('ship.service.ts:', 'Cookie found, setting credentials...');
       this.setCredentials(ship.url, ship.code, credentials.cookie);
-    }
 
-    // create an instance of the conduit
-    APIConnection.getInstance({
-      ...credentials,
-      ship: ship.patp,
-    }).conduit.on('refreshed', (session: ConduitSession) => {
-      this.shipDB?.setCredentials(session.url, session.code, session.cookie);
-    });
+      // create an instance of the conduit
+      APIConnection.getInstance({
+        ...credentials,
+        ship: ship.patp,
+      }).conduit.on('refreshed', (session: ConduitSession) => {
+        this.shipDB?.setCredentials(session.url, session.code, session.cookie);
+      });
+
+      log.info(
+        'ship.service.ts:',
+        'Creating ship sub-services (rooms, notifications, chat, friends, spaces, bazaar)...'
+      );
+
+      this.services = {
+        rooms: new RoomsService(),
+        notifications: new NotificationsService(undefined, this.shipDB.db),
+        chat: new ChatService(undefined, this.shipDB.db),
+        friends: new FriendsService(false, this.shipDB.db),
+        spaces: new SpacesService(undefined, this.shipDB.db, this.patp),
+        bazaar: new BazaarService(undefined, this.shipDB.db),
+      };
+    }
 
     // TODO this DROP is here until we get the agent refactor with lastTimestamp scries
     try {
@@ -106,21 +152,6 @@ export class ShipService extends AbstractService<any> {
     } catch (e) {
       log.error('ship.service.ts:', 'Failed to drop tables', e);
     }
-
-    log.info(
-      'ship.service.ts:',
-      'Creating ship sub-services (rooms, notifications, chat, friends, spaces, bazaar)...'
-    );
-
-    this.services = {
-      rooms: new RoomsService(),
-      notifications: new NotificationsService(undefined, this.shipDB.db),
-      chat: new ChatService(undefined, this.shipDB.db),
-      friends: new FriendsService(false, this.shipDB.db),
-      spaces: new SpacesService(undefined, this.shipDB.db, this.patp),
-      bazaar: new BazaarService(undefined, this.shipDB.db),
-      wallet: new WalletService(undefined, this.shipDB.db),
-    };
 
     app.on('quit', () => {
       this.shipDB?.disconnect();
