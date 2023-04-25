@@ -41,7 +41,12 @@ export default function Login({ prefilledEmail, redirectAfterLogin }: Props) {
     }
 
     if (redirectAfterLogin) goToPage(redirectAfterLogin as any);
-    else goToPage('/account');
+    else {
+      const ships = await thirdEarthApi.getUserShips(response.token);
+
+      if (ships.length > 0) goToPage('/account');
+      else goToPage('/account/download-realm');
+    }
 
     return true;
   };

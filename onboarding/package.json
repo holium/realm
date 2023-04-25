@@ -9,10 +9,11 @@
     "lint": "next lint"
   },
   "devDependencies": {
+    "@preconstruct/next": "^4.0.0",
     "@types/node": "^18.15.3",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
-    "@preconstruct/next": "^4.0.0"
+    "babel-plugin-styled-components": "^2.1.1"
   },
   "dependencies": {
     "@amplitude/analytics-browser": "^1.9.1",

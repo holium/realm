@@ -100,7 +100,7 @@ export const CreateAccountDialog = ({
               as="label"
               htmlFor="create-account-confirm-password"
             >
-              Confirm password
+              Confirm Password
             </OnboardDialogInputLabel>
             <TextInput
               height="38px"

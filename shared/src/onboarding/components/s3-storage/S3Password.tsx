@@ -11,7 +11,7 @@ export const S3Password = ({ s3Password }: Props) => {
   const showS3Password = useToggle(false);
 
   return (
-    <AccountDialogTableRow title="S3 password">
+    <AccountDialogTableRow title="S3 Password">
       <Flex flex={1}>
         <TextInput
           height="38px"
