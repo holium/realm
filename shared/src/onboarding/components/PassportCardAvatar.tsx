@@ -1,7 +1,6 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import {
   Avatar,
-  Box,
   Button,
   ErrorBox,
   Flex,
@@ -284,11 +283,11 @@ export const PassportCardAvatar = ({
                 style={{ display: 'none' }}
                 onChange={onChooseFile}
               />
-              <Box p={3}>
+              <Flex height={50} px={3} alignItems="center">
                 <Button.Primary onClick={() => fileInputRef.current?.click()}>
                   Choose file
                 </Button.Primary>
-              </Box>
+              </Flex>
             </Flex>
             {uploadError && <ErrorBox>{uploadError}</ErrorBox>}
           </Flex>
