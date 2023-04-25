@@ -17,7 +17,7 @@ export const getServerSideProps: GetServerSideProps = async ({
 }) => {
   const token = query.token as string;
   const email = query.email as string;
-  const full_account = Boolean(query.full_account as string);
+  const full_account = (query.full_account as string) === 'true';
 
   const redirectHome = () => {
     res.writeHead(302, { Location: '/' });

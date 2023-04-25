@@ -11,7 +11,7 @@ export const ChangeAccessCode = ({ shipCode }: Props) => {
   const showAccessKey = useToggle(false);
 
   return (
-    <AccountDialogTableRow title="Access code">
+    <AccountDialogTableRow title="Access Code">
       <Flex flex={1}>
         <TextInput
           id="hosting-access-code"
