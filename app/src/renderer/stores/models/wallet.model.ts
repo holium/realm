@@ -1194,7 +1194,6 @@ export const WalletStore = types
       watchUpdates: flow(function* (
         protocol?: ProtocolType
       ): Generator<PromiseLike<any>, void, any> {
-        console.log('CALLING WATCH UPDATES');
         const watchProtocol = protocol ?? self.navState.protocol;
         yield WalletIPC.watchUpdates(watchProtocol) as PromiseLike<any>;
       }),

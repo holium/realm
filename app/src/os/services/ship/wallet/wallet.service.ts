@@ -1,4 +1,3 @@
-import log from 'electron-log';
 import bcrypt from 'bcryptjs';
 import Database from 'better-sqlite3-multiple-ciphers';
 import { ethers } from 'ethers';
@@ -255,8 +254,6 @@ export class WalletService extends AbstractService {
 
   watchUpdates(protocol: ProtocolType) {
     if (!this.walletDB) throw new Error('Wallet DB not initialized');
-    log.info('GOT THE SERVICE WATCH UPDATES');
-    log.info('protocolManager', this.protocolManager);
     this.protocolManager?.watchUpdates(
       APIConnection.getInstance().conduit,
       this.walletDB,
