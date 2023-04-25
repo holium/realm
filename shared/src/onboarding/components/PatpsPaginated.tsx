@@ -56,6 +56,7 @@ export const PatpsPaginated = ({
       <Paginator>
         <button
           disabled={page === 0}
+          type="button"
           onClick={() => setPage(page - 1)}
           style={{
             border: 'none',
@@ -73,6 +74,7 @@ export const PatpsPaginated = ({
         {pages.map((i) => (
           <button
             key={`circle-button-${i}`}
+            type="button"
             onClick={() => setPage(i)}
             style={{
               border: 'none',
@@ -92,6 +94,7 @@ export const PatpsPaginated = ({
         ))}
         <button
           disabled={page === totalPages - 1}
+          type="button"
           onClick={() => setPage(page + 1)}
           style={{
             border: 'none',
