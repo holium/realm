@@ -30,7 +30,6 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
   async init() {
     const wallets = await this._fetchWallets();
-    console.log('wallets', wallets);
     this._insertWallets(wallets);
     /*const ethWallets = wallets.wallets.ethereum;
     let wallet: any;

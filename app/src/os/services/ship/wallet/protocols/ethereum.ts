@@ -1,4 +1,3 @@
-import log from 'electron-log';
 import {
   Alchemy,
   AlchemySettings,
@@ -120,9 +119,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
       }
       const wallets = walletDB.getWallets();
       // for (const walletKey of walletStore.currentStore?.wallets.keys()) {
-      console.log('WALLETS', wallets);
       for (const wallet of wallets) {
-        log.info('wallet', wallet);
         // const wallet = walletStore.ethereum.wallets.get(walletKey);
         const walletAddress = wallet?.address;
         if (!walletAddress) {

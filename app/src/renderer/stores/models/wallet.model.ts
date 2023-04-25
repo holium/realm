@@ -1206,10 +1206,14 @@ export const WalletStore = types
       },
       checkPasscode: flow(function* (
         passcode: number[]
-      ): Generator<PromiseLike<any>, void, any> {
+      ): Generator<PromiseLike<any>, boolean, any> {
         return yield WalletIPC.checkPasscodeHash(passcode) as PromiseLike<any>;
       }),
-      hasPasscode: flow(function* (): Generator<PromiseLike<any>, void, any> {
+      hasPasscode: flow(function* (): Generator<
+        PromiseLike<any>,
+        boolean,
+        any
+      > {
         return yield WalletIPC.hasPasscodeHash() as PromiseLike<any>;
       }),
       getRecipient: flow(function* (
@@ -1264,13 +1268,16 @@ export const WalletStore = types
           this.lock();
         }
       },
-      lock() {
-        const hasPasscode = self.settings.passcodeHash;
-        this.pauseUpdates();
+      lock: flow(function* (): Generator<PromiseLike<any>, void, any> {
+        // @ts-expect-error
+        const hasPasscode = yield self.hasPasscode() as PromiseLike<any>;
+        // @ts-expect-error
+        self.pauseUpdates();
         if (hasPasscode) {
-          this.navigate(WalletView.LOCKED);
+          // @ts-expect-error
+          self.navigate(WalletView.LOCKED);
         }
-      },
+      }),
       pauseUpdates: flow(function* (): Generator<PromiseLike<any>, void, any> {
         yield WalletIPC.pauseUpdates() as PromiseLike<any>;
       }),
