@@ -105,10 +105,10 @@ const configuration: webpack.Configuration = {
         'https://56fbf5e600db48cf8a785931be1ca5e4@o1327359.ingest.sentry.io/4504310987358208',
       AMPLITUDE_API_KEY: 'd6d123a2a660806abcc6b1845c475f2f',
       AMPLITUDE_API_KEY_DEV: '68e00eca14dda372e15a8aadaa0b37ac',
-      API_URL: 'https://backend-server-test.thirdearth.com',
+      API_URL: 'https://backend-server.third.earth',
       API_HEADERS_CLIENT_ID: "5",
       API_HEADERS_VERSION: "2",
-      STRIPE_KEY: "pk_test_51LIclKGa9esKD8bTeH2WlTZ8ZyJiwXfc5M6e1RdV01zH8G5x3kq0EZbN9Zuhtkm6WBXslp6MQlErpP8lkKtwSMqf00NomWTPxM",
+      STRIPE_KEY: "pk_live_51LJKtvHhoM3uGGuYMiFoGqOyPNViO8zlUwfHMsgtgPmkcTK3awIzix57nRgcr2lyCFrgJWeBz5HsSVxvIVz3aAA100KbdmBX9K",
       UNSPLASH_KEY: "QQd_ZQ6ji5LOoryWoYIqdZNYgFVV6axaFyrp_NHZ_ME",
       ...(process.env.BUILD_VERSION
         ? {
