@@ -21,7 +21,7 @@ interface TransactionProps {
   transaction: TransactionType;
 }
 const TransactionPresenter = (props: TransactionProps) => {
-  const walletStore = useShipStore();
+  const { walletStore } = useShipStore();
   const { transaction, isCoin } = props;
   const wasSent = transaction.type === 'sent';
   const isEth = transaction.network === 'ethereum';

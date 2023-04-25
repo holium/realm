@@ -209,6 +209,10 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     insertMany(btcWallets);
     insertMany(btcTestWallets);
   }
+
+  getLatestBlock() {
+    return 0;
+  }
 }
 
 export const walletInitSql = `

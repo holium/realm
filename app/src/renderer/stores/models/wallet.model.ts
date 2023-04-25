@@ -1344,6 +1344,72 @@ WalletIPC.onUpdate((payload: any) => {
         .get(balanceData.index)
         ?.setBalance(balanceData.protocol, balanceData.balance);
       break;
+    case 'apply-chain-transactions':
+      const chainTransactions = payload['apply-chain-transactions'];
+      shipStore.walletStore.ethereum.wallets
+        .get(chainTransactions.index)
+        ?.data.get(chainTransactions.protocol)
+        ?.transactionList.applyChainTransactions(
+          chainTransactions.protocol,
+          chainTransactions.index,
+          chainTransactions.address,
+          chainTransactions.transactions
+        );
+      break;
+    case 'set-block':
+      const blockData = payload['set-block'];
+      shipStore.walletStore.ethereum.wallets
+        .get(blockData.index)
+        ?.data.get(blockData.protocol)
+        ?.setBlock(blockData.block);
+      break;
+    case 'set-coin':
+      const coinData = payload['set-coin'];
+      shipStore.walletStore.ethereum.wallets
+        .get(coinData.index)
+        ?.setCoin(coinData.protocol, coinData.coin);
+      break;
+    case 'update-nft':
+      const nftData = payload['update-nft'];
+      shipStore.walletStore.ethereum.wallets
+        .get(nftData.index)
+        ?.updateNft(nftData.protocol, nftData.nft);
+      break;
+    case 'update-nft-transfers':
+      const nftUpdateData = payload['update-nft-transfers'];
+      shipStore.walletStore.ethereum.wallets
+        .get(nftUpdateData.index)
+        ?.updateNftTransfers(nftUpdateData.protocol, nftUpdateData.transfers);
+      break;
+    case 'set-coin-block':
+      const coinBlockData = payload['set-coin-block'];
+      shipStore.walletStore.ethereum.wallets
+        .get(coinBlockData.index)
+        ?.data.get(coinBlockData.protocol)
+        ?.coins.get(coinBlockData.coinAddr)
+        ?.setBlock(coinBlockData.block);
+      break;
+    case 'apply-coin-transactions':
+      const coinTransactionData = payload['apply-coin-transactions'];
+      if (
+        shipStore.walletStore.ethereum.wallets
+          .get(coinTransactionData.index)
+          ?.data.get(coinTransactionData.protocol)
+          ?.coins.has(coinTransactionData.coinAddr) &&
+        coinTransactionData.transactions.length > 0
+      ) {
+        shipStore.walletStore.ethereum.wallets
+          .get(coinTransactionData.index)
+          ?.data.get(coinTransactionData.protocol)
+          ?.coins.get(coinTransactionData.coinAddr)
+          ?.transactionList.applyChainTransactions(
+            coinTransactionData.protocol,
+            coinTransactionData.index,
+            coinTransactionData.coinAddr,
+            coinTransactionData.transactions
+          );
+      }
+      break;
     default:
       break;
   }

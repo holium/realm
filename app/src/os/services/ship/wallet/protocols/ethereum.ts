@@ -138,30 +138,33 @@ export class EthereumProtocol implements BaseBlockProtocol {
             });
           }
         });
-        /*this.getAccountTransactions(
+        this.getAccountTransactions(
           walletAddress,
-          (wallet as EthWalletType).data.get(this.protocol)?.block ?? 0,
+          walletDB.getLatestBlock() ?? 0,
           currentBlock
         ).then((response: any[]) => {
           if (response.length > 0) {
-            (wallet as EthWalletType).data
-              .get(this.protocol)
-              ?.transactionList.applyChainTransactions(
-                this.protocol,
-                wallet.index,
-                wallet.address,
-                response
-              );
+            walletDB.sendChainUpdate({
+              'apply-chain-transactions': {
+                protocol: this.protocol,
+                index: wallet.wallet_index,
+                address: wallet.address,
+                transactions: response,
+              },
+            });
             if (currentBlock) {
-              (wallet as EthWalletType).data
-                .get(this.protocol)
-                ?.setBlock(currentBlock);
+              walletDB.sendChainUpdate({
+                'set-block': {
+                  index: wallet.wallet_index,
+                  protocol: this.protocol,
+                  block: currentBlock,
+                },
+              });
             }
           }
-        });*/
+        });
         // if (walletStore.navState.networkStore === NetworkStoreType.ETHEREUM) {
         if (true) {
-          /*const ethWallet = walletStore.ethereum.wallets.get(walletKey);
           const ethWalletAddress = wallet?.address;
           if (!ethWalletAddress) {
             continue;
@@ -172,7 +175,13 @@ export class EthereumProtocol implements BaseBlockProtocol {
                 this.getAsset(asset.addr, ethWalletAddress, 'coin').then(
                   (coin: Asset | null) => {
                     if (coin) {
-                      ethWallet?.setCoin(this.protocol, coin);
+                      walletDB.sendChainUpdate({
+                        'set-coin': {
+                          index: wallet.wallet_index,
+                          protocol: this.protocol,
+                          coin,
+                        },
+                      });
                     }
                   }
                 );
@@ -181,31 +190,25 @@ export class EthereumProtocol implements BaseBlockProtocol {
                   this.getAssetTransfers(
                     asset.addr,
                     ethWalletAddress,
-                    ethWallet?.data.get(this.protocol)?.coins.get(asset.addr)
-                      ?.block || 0,
+                    walletDB.getLatestBlock() ?? 0,
                     currentBlock
                   ).then((transfers: any) => {
-                    if (
-                      ethWallet?.data
-                        .get(this.protocol)
-                        ?.coins.has(asset.addr) &&
-                      transfers.length > 0
-                    ) {
-                      ethWallet?.data
-                        .get(this.protocol)
-                        ?.coins.get(asset.addr)
-                        ?.transactionList.applyChainTransactions(
-                          conduit,
-                          this.protocol,
-                          ethWallet.index,
-                          ethWallet.address,
-                          transfers
-                        );
-                      ethWallet.data
-                        .get(this.protocol)
-                        ?.coins.get(asset.addr)
-                        ?.setBlock(currentBlock as number);
-                    }
+                    walletDB.sendChainUpdate({
+                      'apply-coin-transactions': {
+                        index: wallet.wallet_index,
+                        protocol: this.protocol,
+                        coinAddr: asset.addr,
+                        transactions: transfers,
+                      },
+                    });
+                    walletDB.sendChainUpdate({
+                      'set-coin-block': {
+                        index: wallet.wallet_index,
+                        protocol: this.protocol,
+                        coinAddr: asset.addr,
+                        block: currentBlock,
+                      },
+                    });
                   });
                 }
               }
@@ -217,15 +220,32 @@ export class EthereumProtocol implements BaseBlockProtocol {
                   (asset.data as NFTAsset).tokenId
                 ).then((nft: Asset | null) => {
                   if (nft) {
-                    ethWallet?.updateNft(this.protocol, nft);
+                    walletDB.sendChainUpdate({
+                      'update-nft': {
+                        index: wallet.wallet_index,
+                        protocol: this.protocol,
+                        nft,
+                      },
+                    });
                   }
                 });
-                /*this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(
-                  ethWallet.updateNftTransfers
-                );
+                this.getAssetTransfers(
+                  asset.addr,
+                  wallet.address,
+                  0,
+                  currentBlock ?? 0
+                ).then((transfers: any) => {
+                  walletDB.sendChainUpdate({
+                    'update-nft-transfers': {
+                      index: wallet.wallet_index,
+                      protocol: this.protocol,
+                      transfers,
+                    },
+                  });
+                });
               }
             }
-          });*/
+          });
         }
       }
     } catch (error) {
