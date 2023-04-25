@@ -1,14 +1,15 @@
-import { Patp } from 'os/types';
-import { observer } from 'mobx-react';
 import {
-  Flex,
-  Spinner,
-  IconPathsType,
-  Text,
   Button,
+  Flex,
+  IconPathsType,
   Row,
+  Spinner,
+  Text,
 } from '@holium/design-system';
+import { observer } from 'mobx-react';
+import { Patp } from 'os/types';
 import { useShipStore } from 'renderer/stores/ship.store';
+
 import { EmptyGroup } from '../SpaceRow';
 
 interface IVisaRow {

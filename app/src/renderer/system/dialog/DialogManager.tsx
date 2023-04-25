@@ -1,11 +1,12 @@
-import { useState, ReactNode, useEffect, useCallback, useMemo } from 'react';
-import { observer } from 'mobx-react';
-import { motion } from 'framer-motion';
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { AppWindow } from '../desktop/components/AppWindow/AppWindow';
-import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
-import { useAppState } from 'renderer/stores/app.store';
+import { motion } from 'framer-motion';
+import { observer } from 'mobx-react';
 import { getCenteredPosition } from 'renderer/lib/window-manager';
+import { useAppState } from 'renderer/stores/app.store';
+import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
+
+import { AppWindow } from '../desktop/components/AppWindow/AppWindow';
 
 interface DialogManagerProps {
   dialogId?: string;

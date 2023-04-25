@@ -1,23 +1,24 @@
-import { realmPreload } from '../os/realm.service';
 import { contextBridge, ipcRenderer } from 'electron';
-import { MouseState } from '@holium/realm-presence';
-import { MediaAccess, MediaAccessStatus } from '../os/types';
 import { Position } from '@holium/design-system';
-import { multiplayerPreload } from './preload.multiplayer';
+import { MouseState } from '@holium/realm-presence';
+import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
+import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
+
 import './helpers/mouseListener';
 import './helpers/keyListener';
 
-import { shipPreload } from '../os/services/ship/ship.service';
+import { realmPreload } from '../os/realm.service';
 import { authPreload } from '../os/services/auth/auth.service';
 import { onboardingPreload } from '../os/services/auth/onboarding.service';
-import { roomsPreload } from '../os/services/ship/rooms.service';
-import { notifPreload } from '../os/services/ship/notifications/notifications.service';
 import { chatPreload } from '../os/services/ship/chat/chat.service';
-
 import { walletPreload } from '../os/services/ship/wallet/wallet.service';
 import { friendsPreload } from '../os/services/ship/friends.service';
-import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
-import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
+import { notifPreload } from '../os/services/ship/notifications/notifications.service';
+import { roomsPreload } from '../os/services/ship/rooms.service';
+import { shipPreload } from '../os/services/ship/ship.service';
+import { MediaAccess, MediaAccessStatus } from '../os/types';
+
+import { multiplayerPreload } from './preload.multiplayer';
 
 const appPreload = {
   setPartitionCookie: (partition: string, cookie: any) => {

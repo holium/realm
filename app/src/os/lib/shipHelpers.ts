@@ -1,5 +1,7 @@
-import fetch from 'cross-fetch';
 import log from 'electron-log';
+import fetch from 'cross-fetch';
+import dns from 'dns';
+dns.setDefaultResultOrder('ipv4first');
 
 export interface ShipConnectionData {
   patp?: string;

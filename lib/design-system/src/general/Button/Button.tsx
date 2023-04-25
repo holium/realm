@@ -26,6 +26,7 @@ import {
   typography,
   TypographyProps,
 } from 'styled-system';
+
 import { ColorProps, colorStyle, ColorVariants } from '../../util/colors';
 
 type TextDecorationOption = 'overline' | 'line-through' | 'underline';

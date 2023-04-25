@@ -1,12 +1,13 @@
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
-import { Button, Avatar, Flex, Icon, Text } from '@holium/design-system';
-import { nativeApps } from '../nativeApps';
+import { Avatar, Button, Flex, Icon, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { useTrayApps } from '../store';
+import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
 import { AppType } from 'renderer/stores/models/bazaar.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import { nativeApps } from '../nativeApps';
+import { useTrayApps } from '../store';
 
 const AccountTrayAppPresenter = () => {
   const { shellStore, authStore } = useAppState();

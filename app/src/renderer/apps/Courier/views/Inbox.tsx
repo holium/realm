@@ -1,19 +1,20 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Box,
+  Button,
   Flex,
   Icon,
-  Button,
-  TextInput,
-  Box,
   Text,
+  TextInput,
   WindowedList,
 } from '@holium/design-system';
+import { observer } from 'mobx-react';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import { ChatModelType } from '../../../stores/models/chat.model';
 import { useTrayApps } from '../../store';
 import { ChatRow } from '../components/ChatRow';
-import { observer } from 'mobx-react';
-import { ChatModelType } from '../../../stores/models/chat.model';
-import { useShipStore } from 'renderer/stores/ship.store';
-import { useAppState } from 'renderer/stores/app.store';
 
 const rowHeight = 52;
 const heightPadding = 12;

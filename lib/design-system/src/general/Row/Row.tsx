@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
+
 import { Box, BoxProps } from '../../../general';
 
 type RowProps = {

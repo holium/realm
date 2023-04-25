@@ -1,9 +1,10 @@
-import styled from 'styled-components';
 import { Flex, Icon, Text } from '@holium/design-system';
-import { useRooms } from '../useRooms';
 import { observer } from 'mobx-react';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
+import styled from 'styled-components';
+
+import { useRooms } from '../useRooms';
 
 interface CommCircleProps {
   customBg: string;

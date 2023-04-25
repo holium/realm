@@ -1,17 +1,18 @@
 import { FC } from 'react';
+import { Button, Flex, Icon, Spinner, Text } from '@holium/design-system';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { Text, Icon, Button, Flex, Spinner } from '@holium/design-system';
 import { AppTile } from 'renderer/components';
-import { handleInstallation } from '../../AppInstall/helpers';
 import { getAppTileFlags } from 'renderer/lib/app';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 import {
   AppMobxType,
   AppType,
   InstallStatus,
 } from 'renderer/stores/models/bazaar.model';
-import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import { handleInstallation } from '../../AppInstall/helpers';
 
 interface AppPreviewProps {
   app: AppType;

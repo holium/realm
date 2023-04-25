@@ -1,19 +1,20 @@
 import { createContext, useContext } from 'react';
+import { toJS } from 'mobx';
 // import { toJS } from 'mobx';
 import {
-  flow,
-  Instance,
-  types,
-  tryReference,
   destroy,
+  flow,
   getParentOfType,
+  Instance,
+  tryReference,
+  types,
 } from 'mobx-state-tree';
-import { Chat, ChatModelType } from './models/chat.model';
-import { shipStore, ShipStore } from './ship.store';
-import { RealmIPC, ChatIPC } from 'renderer/stores/ipc';
-import { SpacesStoreType } from 'renderer/stores/models/spaces.model';
-import { toJS } from 'mobx';
 import { ChatUpdateTypes } from 'os/services/ship/chat/chat.types';
+import { ChatIPC, RealmIPC } from 'renderer/stores/ipc';
+import { SpacesStoreType } from 'renderer/stores/models/spaces.model';
+
+import { Chat, ChatModelType } from './models/chat.model';
+import { ShipStore, shipStore } from './ship.store';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
@@ -123,13 +124,8 @@ export const ChatStore = types
   .actions((self) => ({
     init: flow(function* () {
       try {
-        self.inbox = yield ChatIPC.getChatList();
         const pinnedChats = yield ChatIPC.fetchPinnedChats() as Promise<any>;
-        localStorage.setItem(
-          `${window.ship}-pinnedChats`,
-          JSON.stringify(pinnedChats)
-        );
-
+        self.inbox = yield ChatIPC.getChatList();
         const muted = yield ChatIPC.fetchMuted() as Promise<any>;
         self.inbox.forEach((chat) => {
           chat.setMuted(muted.includes(chat.path));
@@ -170,10 +166,6 @@ export const ChatStore = types
           self.pinnedChats.remove(path);
         }
         yield ChatIPC.togglePinnedChat(path, pinned) as Promise<any>;
-        localStorage.setItem(
-          `${window.ship}-pinnedChats`,
-          JSON.stringify(self.pinnedChats)
-        );
         return self.pinnedChats;
       } catch (error) {
         console.error(error);
@@ -283,21 +275,24 @@ export function useChatStore() {
 }
 
 RealmIPC.onUpdate((update) => {
+  if (update.type === 'booted') {
+    if (update.payload.session) {
+      shipStore.chatStore.init();
+    }
+  }
   if (update.type === 'auth-success') {
     shipStore.chatStore.init();
     shipStore.walletStore.init();
   }
 });
 
-// OSActions.onBoot(() => {
-//   chatStore.init();
-// });
-// OSActions.onConnected(() => {
-//   chatStore.init();
-// });
 // -------------------------------
 // Listen for changes
 ChatIPC.onUpdate(({ type, payload }: ChatUpdateTypes) => {
+  if (type === 'init') {
+    shipStore.chatStore.init();
+  }
+  console.log('ChatIPC.onUpdate', type, payload);
   if (type === 'path-added') {
     console.log('onPathsAdded', toJS(payload));
     shipStore.chatStore.onPathsAdded(payload);

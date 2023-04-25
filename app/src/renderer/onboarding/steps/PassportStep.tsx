@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { track } from '@amplitude/analytics-browser';
-import { PassportDialog, OnboardingStorage } from '@holium/shared';
-import { StepProps } from './types';
-import { AuthIPC, RealmIPC } from '../../stores/ipc';
+import { OnboardingStorage, PassportDialog } from '@holium/shared';
+
 import { FileUploadParams } from '../../../os/services/ship/ship.service';
+import { AuthIPC, RealmIPC } from '../../stores/ipc';
+
+import { StepProps } from './types';
 
 export const PassportStep = ({ setStep, onFinish }: StepProps) => {
   const { shipId, nickname, description, avatar } = OnboardingStorage.get();
@@ -72,7 +74,13 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
   ) => {
     if (!shipId) return false;
 
-    await AuthIPC.updatePassport(shipId, nickname, description, avatar);
+    await AuthIPC.updatePassport(
+      shipId,
+      nickname,
+      description,
+      avatar,
+      sigilColor
+    );
 
     // Sync friends agent
     await window.onboardingService.updatePassport(shipId, {
@@ -93,9 +101,10 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
     return true;
   };
 
-  return isReady ? (
+  return (
     <PassportDialog
       patp={shipId ?? ''}
+      loading={!isReady}
       prefilledColor={sigilColor}
       prefilledNickname={nicknameSrc ?? ''}
       prefilledDescription={descriptionSrc ?? ''}
@@ -104,5 +113,5 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
       onBack={onBack}
       onNext={handleOnNext}
     />
-  ) : null;
+  );
 };

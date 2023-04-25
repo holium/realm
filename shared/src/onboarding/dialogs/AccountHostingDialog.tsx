@@ -1,12 +1,13 @@
+import { Button, Flex, Text } from '@holium/design-system/general';
 import styled from 'styled-components';
-import { Flex, Button, Text } from '@holium/design-system/general';
+
 import { AccountDialog, SidebarSection } from '../components/AccountDialog';
 import { AccountDialogDescription } from '../components/AccountDialog.styles';
 import { AccountDialogTableRow } from '../components/AccountDialogTableRow';
-import { TABLET_WIDTH } from '../components/OnboardDialog.styles';
+import { ChangeAccessCode } from '../components/hosting/ChangeAccessCode';
 import { ChangeButton } from '../components/hosting/ChangeButton';
 import { ChangeMaintenanceWindow } from '../components/hosting/ChangeMaintenanceWindow';
-import { ChangeAccessCode } from '../components/hosting/ChangeAccessCode';
+import { TABLET_WIDTH } from '../components/OnboardDialog.styles';
 
 export const AccountDialogTable = styled(Flex)`
   flex-direction: column;

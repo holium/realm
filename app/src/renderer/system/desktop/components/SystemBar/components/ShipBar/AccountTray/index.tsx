@@ -1,11 +1,12 @@
 // import { useMemo, useState } from 'react';
+import { Avatar, Box, Flex } from '@holium/design-system';
+import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { Pulser } from 'renderer/components';
-import { Box, Flex, Avatar } from '@holium/design-system';
-import { motion } from 'framer-motion';
-import { TrayClock } from '../Clock';
-import styled from 'styled-components';
 import { useShipStore } from 'renderer/stores/ship.store';
+import styled from 'styled-components';
+
+import { TrayClock } from '../Clock';
 
 type AccountTrayProps = {
   unreadCount: number;
@@ -63,9 +64,11 @@ const AccountTrayPresenter = ({ unreadCount, onClick }: AccountTrayProps) => {
             }}
             style={{
               position: 'absolute',
-              background: '#4E9EFD',
-              border: `2px solid rgba(#4E9EFD, .25)`,
+              background: 'rgba(var(--rlm-accent-rgba))',
+              border: `2px solid rgba(var(--rlm-accent-rgba), .25)`,
               borderRadius: '50%',
+              backgroundClip: 'padding-box',
+              WebkitBackgroundClip: 'padding-box',
               right: -2,
               bottom: -2,
               height: 11,

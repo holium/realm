@@ -1,8 +1,9 @@
+import { Anchor, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { Text, Anchor } from '@holium/design-system';
-import { SettingTitle } from '../components/SettingTitle';
-import { SettingSection } from '../components/SettingSection';
+
 import { SettingPane } from '../components/SettingPane';
+import { SettingSection } from '../components/SettingSection';
+import { SettingTitle } from '../components/SettingTitle';
 
 const HelpPanelPresenter = () => {
   return (

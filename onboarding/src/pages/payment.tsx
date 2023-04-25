@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react';
-import { loadStripe, Stripe, StripeElementsOptions } from '@stripe/stripe-js';
+import { useEffect, useState } from 'react';
 import {
   OnboardingStorage,
   PaymentDialog,
   ThirdEarthProduct,
 } from '@holium/shared';
+import { loadStripe, Stripe, StripeElementsOptions } from '@stripe/stripe-js';
+
 import { Page } from '../components/Page';
 import { constants } from '../util/constants';
-import { useNavigation } from '../util/useNavigation';
 import { thirdEarthApi } from '../util/thirdEarthApi';
+import { useNavigation } from '../util/useNavigation';
 
 type ServerSideProps = {
   products: ThirdEarthProduct[];

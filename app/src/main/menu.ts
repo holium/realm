@@ -1,9 +1,9 @@
 import {
   app,
-  Menu,
-  shell,
   BrowserWindow,
+  Menu,
   MenuItemConstructorOptions,
+  shell,
 } from 'electron';
 
 import { AppUpdater } from './AppUpdater';

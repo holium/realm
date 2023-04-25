@@ -1,17 +1,18 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import styled, { css } from 'styled-components';
-import { useToggle } from '@holium/design-system/util';
 import {
-  Flex,
   Avatar,
   Button,
+  ErrorBox,
+  Flex,
   Icon,
   Spinner,
-  ErrorBox,
-  Box,
 } from '@holium/design-system/general';
 import { Input } from '@holium/design-system/inputs';
+import { useToggle } from '@holium/design-system/util';
+import styled, { css } from 'styled-components';
+
 import { AddImageIcon } from '../icons/AddImageIcon';
+
 import { MOBILE_WIDTH, OnboardDialogDescription } from './OnboardDialog.styles';
 import { defaultImages } from './passportCardDefaultImages';
 
@@ -282,11 +283,11 @@ export const PassportCardAvatar = ({
                 style={{ display: 'none' }}
                 onChange={onChooseFile}
               />
-              <Box p={3}>
+              <Flex height={50} px={3} alignItems="center">
                 <Button.Primary onClick={() => fileInputRef.current?.click()}>
                   Choose file
                 </Button.Primary>
-              </Box>
+              </Flex>
             </Flex>
             {uploadError && <ErrorBox>{uploadError}</ErrorBox>}
           </Flex>

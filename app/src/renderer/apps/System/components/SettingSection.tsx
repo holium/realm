@@ -1,4 +1,4 @@
-import { Flex, Text, Card } from '@holium/design-system';
+import { Card, Flex, Text } from '@holium/design-system';
 
 type SettingSectionProps = {
   title?: string;

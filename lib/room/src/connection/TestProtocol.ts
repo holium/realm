@@ -1,12 +1,13 @@
-import { PeerEvent } from './../peer/events';
-import { BaseProtocol, ProtocolConfig } from './BaseProtocol';
-import { Patp, RoomType } from '../types';
-import { ProtocolEvent } from './events';
 import { action, makeObservable, observable } from 'mobx';
 
-import { RemotePeer } from '../peer/RemotePeer';
-import { LocalPeer } from '../peer/LocalPeer';
 import { DataPacket } from '../helpers/data';
+import { LocalPeer } from '../peer/LocalPeer';
+import { RemotePeer } from '../peer/RemotePeer';
+import { Patp, RoomType } from '../types';
+
+import { PeerEvent } from './../peer/events';
+import { BaseProtocol, ProtocolConfig } from './BaseProtocol';
+import { ProtocolEvent } from './events';
 
 /**
  * TODO update this to use the new protocol interface

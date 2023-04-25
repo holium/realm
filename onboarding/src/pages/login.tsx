@@ -1,10 +1,11 @@
-import { GetServerSideProps } from 'next';
 import { Anchor } from '@holium/design-system/general';
 import {
   LoginDialog,
   OnboardDialogDescription,
   OnboardingStorage,
 } from '@holium/shared';
+import { GetServerSideProps } from 'next';
+
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
@@ -41,7 +42,12 @@ export default function Login({ prefilledEmail, redirectAfterLogin }: Props) {
     }
 
     if (redirectAfterLogin) goToPage(redirectAfterLogin as any);
-    else goToPage('/account');
+    else {
+      const ships = await thirdEarthApi.getUserShips(response.token);
+
+      if (ships.length > 0) goToPage('/account');
+      else goToPage('/account/download-realm');
+    }
 
     return true;
   };

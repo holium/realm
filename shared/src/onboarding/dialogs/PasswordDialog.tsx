@@ -2,12 +2,13 @@ import { ChangeEvent, useState } from 'react';
 import { Flex } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
+
+import { OnboardDialog } from '../components/OnboardDialog';
 import {
   OnboardDialogDescription,
   OnboardDialogInputLabel,
   OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
-import { OnboardDialog } from '../components/OnboardDialog';
 import { PasswordIcon } from '../icons/PasswordIcon';
 
 type Props = {

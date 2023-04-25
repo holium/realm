@@ -1,14 +1,16 @@
+import { cleanNounColor } from '@holium/design-system';
+import { toJS } from 'mobx';
 import {
-  types,
-  Instance,
-  getSnapshot,
   applySnapshot,
   flow,
+  getSnapshot,
+  Instance,
   SnapshotOut,
+  types,
 } from 'mobx-state-tree';
-import { toJS } from 'mobx';
-import { cleanNounColor } from '@holium/design-system';
+
 import { BazaarIPC } from '../ipc';
+
 import { Glob } from './docket.model';
 
 export enum InstallStatus {

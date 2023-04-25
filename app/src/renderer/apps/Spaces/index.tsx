@@ -1,20 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  Text,
-  Flex,
   Button,
+  Flex,
   Icon,
   Spinner,
+  Text,
   TextInput,
 } from '@holium/design-system';
-import { SpacesList } from './SpacesList';
-import { YouRow } from './YouRow';
 import { observer } from 'mobx-react';
-import { isValidPatp } from 'urbit-ob';
-import { useTrayApps } from '../store';
-import { FeaturedList } from './FeaturedList';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { isValidPatp } from 'urbit-ob';
+
+import { useTrayApps } from '../store';
+
+import { FeaturedList } from './FeaturedList';
+import { SpacesList } from './SpacesList';
+import { YouRow } from './YouRow';
 
 const bottomHeight = 54;
 

@@ -1,5 +1,5 @@
-import { EditorView } from 'prosemirror-view';
 import { Plugin } from 'prosemirror-state';
+import { EditorView } from 'prosemirror-view';
 
 type SendCaretPosition = (x: number, y: number) => void;
 

@@ -1,16 +1,16 @@
 import { useRef, useState } from 'react';
 import {
-  Flex,
-  Spinner,
-  Icon,
-  TextInput,
-  Text,
   Button,
+  Flex,
+  Icon,
+  Spinner,
+  Text,
+  TextInput,
 } from '@holium/design-system';
 import { useField, useForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
-import { isValidPatp } from 'urbit-ob';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { isValidPatp } from 'urbit-ob';
 
 export const RoomInvite = observer(() => {
   const inviteInputRef = useRef<HTMLInputElement>(null);

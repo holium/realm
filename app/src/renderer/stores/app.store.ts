@@ -1,10 +1,14 @@
-import { Instance, types, clone, flow } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
+import { clone, flow, Instance, types } from 'mobx-state-tree';
+import { RealmUpdateBooted } from 'os/realm.types';
+import { watchOnlineStatus } from 'renderer/lib/offline';
+import { SoundActions } from 'renderer/lib/sound';
+
 import { defaultTheme } from '../lib/defaultTheme';
+
+import { ShellModel } from './models/shell.model';
 import { Theme, ThemeType } from './models/theme.model';
 import { AuthenticationModel } from './auth.store';
-import { ShellModel } from './models/shell.model';
-import { watchOnlineStatus } from 'renderer/lib/offline';
 import {
   AuthIPC,
   BazaarIPC,
@@ -14,8 +18,6 @@ import {
   SpacesIPC,
 } from './ipc';
 import { shipStore } from './ship.store';
-import { SoundActions } from 'renderer/lib/sound';
-import { RealmUpdateBooted } from 'os/realm.types';
 
 const Screen = types.enumeration(['login', 'onboarding', 'os']);
 
@@ -44,7 +46,6 @@ const AppStateModel = types
   })
   .actions((self) => ({
     setBooted(data: RealmUpdateBooted['payload']) {
-      console.log('setBooted', data.accounts);
       self.authStore.setAccounts(data.accounts);
       self.seenSplash = data.seenSplash;
       if (data.session) {
@@ -178,6 +179,21 @@ function registerOnUpdateListener() {
       appState.setLoggedOut();
       shipStore.reset();
       SoundActions.playLogout();
+    }
+  });
+
+  window.onboardingService.onUpdate((update) => {
+    if (update.type === 'account-added') {
+      appState.authStore._onAddAccount(update.payload);
+    }
+    if (update.type === 'account-removed') {
+      appState.authStore._onRemoveAccount(update.payload);
+    }
+    if (update.type === 'account-updated') {
+      appState.authStore._onUpdateAccount(update.payload);
+    }
+    if (update.type === 'onboarding-ended') {
+      appState.authStore._onOnboardingEnded(update.payload);
     }
   });
 

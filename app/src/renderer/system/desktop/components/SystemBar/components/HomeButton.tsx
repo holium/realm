@@ -1,5 +1,5 @@
-import { observer } from 'mobx-react';
 import { BarStyle, HoliumButton } from '@holium/design-system';
+import { observer } from 'mobx-react';
 import { useAppState } from 'renderer/stores/app.store';
 
 const HomeButtonPresenter = () => {

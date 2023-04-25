@@ -1,4 +1,5 @@
 import log from 'electron-log';
+
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection, PokeParams, Scry } from '../api';
 
@@ -20,7 +21,9 @@ export class RoomsService extends AbstractService<any> {
       },
     });
 
-    log.info('rooms.service.ts:', 'Constructed.');
+    if (options?.verbose) {
+      log.info('rooms.service.ts:', 'Constructed.');
+    }
   }
   public poke(payload: PokeParams) {
     return APIConnection.getInstance().conduit.poke(payload);

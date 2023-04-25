@@ -1,24 +1,24 @@
+import { preSig } from '@urbit/aura';
 import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
-import { preSig } from '@urbit/aura';
 import { APIConnection } from '../../api';
 
 import {
+  AddRow,
+  ChatDbOps,
   ChatDbReactions,
+  ChatUpdateTypes,
+  DeleteLogRow,
+  DelMessagesRow,
+  DelPathsRow,
+  DelPeersRow,
   MessagesRow,
   PathsRow,
   PeersRow,
-  ChatDbOps,
-  AddRow,
-  DelPathsRow,
+  UpdateMessage,
   // DelPeersRow,
   UpdateRow,
-  DelMessagesRow,
-  DeleteLogRow,
-  DelPeersRow,
-  UpdateMessage,
-  ChatUpdateTypes,
 } from './chat.types';
 
 interface ChatRow {

@@ -1,8 +1,10 @@
-import { TrayAppKeys, useTrayApps } from 'renderer/apps/store';
-import { observer } from 'mobx-react';
-import { trayAppRenderers } from './components/SystemBar/apps';
 import { TrayApp } from '@holium/design-system';
+import { observer } from 'mobx-react';
+import { TrayAppKeys, useTrayApps } from 'renderer/apps/store';
+
 import { ErrorBoundary } from '../ErrorBoundary';
+
+import { trayAppRenderers } from './components/SystemBar/apps';
 
 const TrayManagerPresenter = () => {
   // const { activeApp, coords, walletApp, dimensions, setActiveApp } =

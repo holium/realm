@@ -1,4 +1,5 @@
 import Database from 'better-sqlite3-multiple-ciphers';
+
 import AbstractDataAccess from '../abstract.db';
 
 export interface MasterAccount {

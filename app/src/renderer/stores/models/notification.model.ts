@@ -1,5 +1,6 @@
 // import { toJS } from 'mobx';
-import { flow, Instance, types, applySnapshot } from 'mobx-state-tree';
+import { applySnapshot, flow, Instance, types } from 'mobx-state-tree';
+
 import { NotifIPC } from '../ipc';
 
 const sortByUpdatedAt = (a: NotifMobxType, b: NotifMobxType) => {

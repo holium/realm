@@ -1,14 +1,15 @@
 import { useEffect, useRef } from 'react';
-import { useContextMenu } from 'renderer/components/ContextMenu';
-import { usePassportMenu } from './usePassportMenu';
 import {
   Avatar,
-  Flex,
   Box,
+  Flex,
   MenuItemProps,
   Row,
   Text,
 } from '@holium/design-system';
+import { useContextMenu } from 'renderer/components/ContextMenu';
+
+import { usePassportMenu } from './usePassportMenu';
 
 interface IPersonRow {
   listId: string;

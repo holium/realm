@@ -1,11 +1,11 @@
-import { useContextMenu } from 'renderer/components/ContextMenu';
 import {
-  Portal,
-  MenuItem,
-  MenuItemProps,
   Card,
+  MenuItem,
   MenuItemDivider,
+  MenuItemProps,
+  Portal,
 } from '@holium/design-system';
+import { useContextMenu } from 'renderer/components/ContextMenu';
 
 const WIDTH = 180;
 const MAX_HEIGHT = 300;

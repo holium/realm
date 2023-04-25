@@ -1,6 +1,10 @@
+import log from 'electron-log';
+import fetch from 'cross-fetch';
 import EventEmitter, { setMaxListeners } from 'events';
 import EventSource from 'eventsource';
-import axios, { AxiosError } from 'axios';
+
+import { deSig, preSig } from '@urbit/aura';
+
 import {
   Action,
   ConduitState,
@@ -15,8 +19,6 @@ import {
   SubscribeParams,
   Thread,
 } from './types';
-import { deSig, preSig } from '@urbit/aura';
-import log from 'electron-log';
 
 // For now, set it to 20
 setMaxListeners(20);
@@ -54,8 +56,6 @@ export class Conduit extends EventEmitter {
     this.updateStatus = this.updateStatus.bind(this);
     this.reconnectToChannel = this.reconnectToChannel.bind(this);
     this.startSSE = this.startSSE.bind(this);
-    // Add a response interceptor
-    axios.interceptors.response.use(undefined, this.handleError);
   }
 
   generateUID() {
@@ -387,20 +387,14 @@ export class Conduit extends EventEmitter {
   async scry(params: Scry): Promise<any> {
     const { app, path } = params;
     try {
-      if (!this.headers.Cookie) throw new Error('headers.Cookie not set');
-      const response = await axios.get(
-        `${this.url}/~/scry/${app}${path}.json`,
-        {
-          headers: {
-            ...this.headers,
-            Cookie: this.headers.Cookie,
-          },
-        }
-      );
-      return response.data;
+      const response = await fetch(`${this.url}/~/scry/${app}${path}.json`, {
+        method: 'GET',
+        headers: this.headers,
+      });
+      return response.json();
     } catch (err: any) {
-      // console.error('scry error', app, path, err.response);
-      // console.log(err);
+      log.error('scry error', app, path, err.response);
+      Promise.reject(err);
     }
   }
 
@@ -414,14 +408,15 @@ export class Conduit extends EventEmitter {
     const { inputMark, outputMark, threadName, body, desk } = params;
 
     try {
-      const response = await axios.post(
+      const response = await fetch(
         `${this.url}/spider/${desk}/${inputMark}/${threadName}/${outputMark}.json`,
         {
+          method: 'POST',
           headers: this.headers,
-          body,
+          body: JSON.stringify(body),
         }
       );
-      return response.data;
+      return response.json();
     } catch (err) {
       console.log(err);
     }
@@ -447,10 +442,11 @@ export class Conduit extends EventEmitter {
   /**************************************************************/
   /** ************************ Getters ***************************/
   /**************************************************************/
-  private get headers() {
+  private get headers(): { [key: string]: string } {
+    if (!this.cookie) throw new Error('cookie not set');
     return {
       'Content-Type': 'application/json',
-      Cookie: this.cookie?.split('; ')[0],
+      Cookie: this.cookie.split('; ')[0],
     };
   }
 
@@ -526,11 +522,13 @@ export class Conduit extends EventEmitter {
     try {
       if (!this.headers.Cookie) throw new Error('headers.Cookie not set');
 
-      const response = await axios.put(this.channelUrl(this.uid), [body], {
+      const response = await fetch(this.channelUrl(this.uid), {
         headers: {
           ...this.headers,
           Cookie: this.headers.Cookie,
         },
+        method: 'POST',
+        body: body ? JSON.stringify([body]) : undefined,
         signal: this.abort.signal,
       });
       if (response) {
@@ -547,7 +545,7 @@ export class Conduit extends EventEmitter {
         return true;
       }
     } catch (e: any) {
-      const err = e as AxiosError;
+      const err = e;
       if (err.code === 'ECONNREFUSED') {
         // if we cannot connect to the ship, cleanup
         this.failGracefully();
@@ -618,15 +616,18 @@ export class Conduit extends EventEmitter {
   ): Promise<string | undefined> {
     let cookie;
     try {
-      const response = await axios.request({
-        url: `${url}/~/login`,
-        method: 'post',
-        data: `password=${code}`,
+      const response = await fetch(`${url}/~/login`, {
+        method: 'POST',
+        body: `password=${code}`,
         headers: {
           'Content-Type': 'text/plain',
         },
       });
-      cookie = response.headers?.['set-cookie']?.[0];
+      if (!response.ok) {
+        return Promise.reject(response);
+      }
+      cookie = response.headers.get('set-cookie')?.[0];
+      log.info('cookie', cookie);
     } catch (err: any) {
       console.log(err);
     }
@@ -688,8 +689,8 @@ export class Conduit extends EventEmitter {
               return;
             }
             err.config.headers['Cookie'] = cookie;
-            const result = await axios(err.config);
-            resolve(result);
+            // const result = await axios(err.config);
+            resolve(err);
             return;
           }
           console.log('error: could not refresh token');

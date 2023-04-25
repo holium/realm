@@ -1,10 +1,11 @@
+import { AccountDialog, SidebarSection } from '../components/AccountDialog';
 import { AccountDialogDescription } from '../components/AccountDialog.styles';
 import { AccountDialogTableRow } from '../components/AccountDialogTableRow';
-import { AccountDialog, SidebarSection } from '../components/AccountDialog';
-import { AccountDialogTable } from './AccountHostingDialog';
-import { S3Password } from '../components/s3-storage/S3Password';
-import { DataStorageIndicator } from '../components/s3-storage/DataStorageIndicator';
 import { DataSentIndicator } from '../components/s3-storage/DataSentIndicator';
+import { DataStorageIndicator } from '../components/s3-storage/DataStorageIndicator';
+import { S3Password } from '../components/s3-storage/S3Password';
+
+import { AccountDialogTable } from './AccountHostingDialog';
 
 type Props = {
   patps: string[];
@@ -54,7 +55,7 @@ export const AccountS3StorageDialog = ({
           {url as string}
         </AccountDialogDescription>
       </AccountDialogTableRow>
-      <AccountDialogTableRow title="S3 bucket">
+      <AccountDialogTableRow title="S3 Bucket">
         <AccountDialogDescription flex={1}>
           {s3Bucket as string}
         </AccountDialogDescription>

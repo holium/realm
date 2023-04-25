@@ -1,15 +1,15 @@
-import { createRef, useMemo, useCallback } from 'react';
+import { createRef, useCallback, useMemo } from 'react';
+import { BarButton, Flex } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { rgba, lighten, darken } from 'polished';
-
-import { Pulser, Divider } from 'renderer/components';
-import { SelectedSpace } from './SelectedSpace';
-import { useTrayApps } from 'renderer/apps/store';
-import { calculateAnchorPoint } from 'renderer/lib/position';
-import { Flex, BarButton } from '@holium/design-system';
-import { useShipStore } from 'renderer/stores/ship.store';
-import { useAppState } from 'renderer/stores/app.store';
+import { darken, lighten, rgba } from 'polished';
 import { SystemTrayRegistry } from 'renderer/apps/registry';
+import { useTrayApps } from 'renderer/apps/store';
+import { Divider, Pulser } from 'renderer/components';
+import { calculateAnchorPoint } from 'renderer/lib/position';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import { SelectedSpace } from './SelectedSpace';
 
 const { position, anchorOffset, dimensions } = SystemTrayRegistry.spaces;
 

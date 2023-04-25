@@ -1,16 +1,18 @@
-import { useMemo, useState, useEffect, Ref } from 'react';
-import { Flex, Text, BoxProps, Box, convertDarkText, Icon } from '../..';
-import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
-import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
-import { Reactions, OnReactionPayload } from './Reaction';
+import { Ref, useEffect, useMemo, useState } from 'react';
+
+import { Box, BoxProps, convertDarkText, Flex, Icon, Text } from '../..';
+import { chatDate } from '../../util/date';
+
+import { BUBBLE_HEIGHT, STATUS_HEIGHT } from './Bubble.constants';
+import { BubbleAuthor, BubbleFooter, BubbleStyle } from './Bubble.styles';
 import {
   FragmentReactionType,
   FragmentStatusType,
   FragmentType,
 } from './Bubble.types';
-import { chatDate } from '../../util/date';
+import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
 import { InlineStatus } from './InlineStatus';
-import { BUBBLE_HEIGHT, STATUS_HEIGHT } from './Bubble.constants';
+import { OnReactionPayload, Reactions } from './Reaction';
 
 export type BubbleProps = {
   id: string;

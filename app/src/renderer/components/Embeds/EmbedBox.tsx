@@ -1,5 +1,5 @@
-import styled, { css } from 'styled-components';
 import { Flex } from '@holium/design-system';
+import styled, { css } from 'styled-components';
 
 interface IEmbedBox {
   customTextColor?: string;

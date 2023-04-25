@@ -1,5 +1,5 @@
-import styled, { css } from 'styled-components';
 import { Flex, Text } from '@holium/design-system/general';
+import styled, { css } from 'styled-components';
 
 const PlanCard = styled.div<{ isSelected: boolean }>`
   display: flex;

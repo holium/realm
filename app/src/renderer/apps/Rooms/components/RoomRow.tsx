@@ -1,15 +1,17 @@
-import { useMemo, useEffect, MouseEvent } from 'react';
-import { observer } from 'mobx-react';
-import { Row, Text, Flex } from '@holium/design-system';
-import { AvatarRow } from './AvatarRow';
+import { MouseEvent, useEffect, useMemo } from 'react';
+import { Flex, Row, Text } from '@holium/design-system';
 import { RoomType } from '@holium/realm-room';
-import { useRooms } from '../useRooms';
+import { observer } from 'mobx-react';
 import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+import { useRooms } from '../useRooms';
+
+import { AvatarRow } from './AvatarRow';
 
 type RoomRowProps = Partial<RoomType> & {
   tray?: boolean;

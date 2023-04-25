@@ -1,6 +1,6 @@
-import styled, { css } from 'styled-components';
-import { motion } from 'framer-motion';
 import { Flex } from '@holium/design-system';
+import { motion } from 'framer-motion';
+import styled, { css } from 'styled-components';
 
 type Props = {
   hasBorder: boolean;

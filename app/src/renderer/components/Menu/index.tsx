@@ -1,3 +1,3 @@
 export * from './Menu';
-export { useMenu } from './useMenu';
 export * from './types';
+export { useMenu } from './useMenu';

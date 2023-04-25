@@ -1,13 +1,15 @@
+import { toJS } from 'mobx';
 import {
   applySnapshot,
   castToSnapshot,
+  flow,
   Instance,
   types,
-  flow,
 } from 'mobx-state-tree';
-import { FriendsIPC } from '../ipc';
+
 import { cite } from '@urbit/aura';
-import { toJS } from 'mobx';
+
+import { FriendsIPC } from '../ipc';
 
 const FriendStatus = types.enumeration('FriendStatus', [
   'fren',

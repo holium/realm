@@ -1,12 +1,13 @@
-import path from 'path';
 import { app } from 'electron';
-import Database from 'better-sqlite3-multiple-ciphers';
 import log from 'electron-log';
+import Database from 'better-sqlite3-multiple-ciphers';
 import crypto from 'crypto';
+import path from 'path';
+
+import { chatInitSql } from './chat/chat.db';
+import { notifInitSql } from './notifications/notifications.table';
 import { spacesTablesInitSql } from './spaces/spaces.service';
 import { bazaarTablesInitSql } from './spaces/tables/catalog.table';
-import { notifInitSql } from './notifications/notifications.table';
-import { chatInitSql } from './chat/chat.db';
 import { friendsInitSql } from './friends.service';
 import { walletInitSql } from './wallet/wallet.db';
 

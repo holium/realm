@@ -1,20 +1,21 @@
-import { MotionConfig } from 'framer-motion';
-import { BgImage, GlobalStyle } from './App.styles';
-import { Shell } from './system';
 // import { toJS } from 'mobx';
 import { useEffect, useMemo } from 'react';
-import { Spinner, useToggle, Flex } from '@holium/design-system';
+import { Centered, Fill, ViewPort } from 'react-spaces';
+import { Flex, Spinner, useToggle } from '@holium/design-system';
 import { OnboardingStorage } from '@holium/shared';
+import { MotionConfig } from 'framer-motion';
 import { observer } from 'mobx-react';
+
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
-import { useAppState, appState, AppStateProvider } from './stores/app.store';
 import { SelectionProvider } from './lib/selection';
 import { Onboarding } from './onboarding/Onboarding';
-import { ErrorBoundary } from './system/ErrorBoundary';
-import { Auth } from './system/authentication/index';
 import { Splash } from './onboarding/Splash';
+import { appState, AppStateProvider, useAppState } from './stores/app.store';
 import { RealmIPC } from './stores/ipc';
-import { Centered, ViewPort, Fill } from 'react-spaces';
+import { Auth } from './system/authentication/index';
+import { ErrorBoundary } from './system/ErrorBoundary';
+import { BgImage, GlobalStyle } from './App.styles';
+import { Shell } from './system';
 
 const AppContentPresenter = () => {
   const { seenSplash, authStore } = useAppState();
@@ -28,17 +29,17 @@ const AppContentPresenter = () => {
   const addShip = useToggle(Boolean(savedOnboardingStep));
   useEffect(() => {
     // handles the case where we delete the last account
-    if (hasNoAccounts) {
-      onboarding.setToggle(true);
-    } else {
-      // handles when we go to add a ship and refresh. If we dont
-      // check for this, we get stuck back at the login of onboarding
-      // if (savedOnboardingStep === '/login' || !savedOnboardingStep) {
-      //   addShip.toggleOff();
-      //   OnboardingStorage.reset();
-      // }
-      onboarding.setToggle(false);
-    }
+    // if (hasNoAccounts) {
+    //   onboarding.setToggle(true);
+    // } else {
+    //   // handles when we go to add a ship and refresh. If we dont
+    //   // check for this, we get stuck back at the login of onboarding
+    //   if (savedOnboardingStep === '/login' || !savedOnboardingStep) {
+    //     addShip.toggleOff();
+    //     OnboardingStorage.reset();
+    //   }
+    //   onboarding.setToggle(false);
+    // }
   }, [hasNoAccounts]);
 
   const onAddShip = () => {
@@ -47,13 +48,14 @@ const AppContentPresenter = () => {
   };
 
   const onFinishOnboarding = () => {
-    console.log('onFinishOnboarding');
     onboarding.toggleOff();
+    window.onboardingService.triggerOnboardingEnded();
     OnboardingStorage.reset();
   };
 
   const onFinishAddShip = () => {
     addShip.toggleOff();
+    onboarding.toggleOff();
     OnboardingStorage.reset();
   };
 
