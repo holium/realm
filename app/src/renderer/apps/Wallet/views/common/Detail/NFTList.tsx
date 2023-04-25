@@ -1,6 +1,5 @@
 import { FC } from 'react';
-
-import { Row, Flex, Text, Icon } from '@holium/design-system';
+import { Flex, Icon, Row, Text } from '@holium/design-system';
 import { ERC721Type, WalletView } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 

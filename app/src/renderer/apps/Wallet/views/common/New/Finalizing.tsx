@@ -1,8 +1,8 @@
 import { FC, useEffect } from 'react';
+import { Flex, Spinner, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { Flex, Text, Spinner } from '@holium/design-system';
-import { useShipStore } from 'renderer/stores/ship.store';
 import { WalletView } from 'renderer/stores/models/wallet.model';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface FinalizingProps {
   seedPhrase: string;

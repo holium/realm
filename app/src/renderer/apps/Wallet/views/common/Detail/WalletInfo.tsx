@@ -1,10 +1,10 @@
 import { FC, useState } from 'react';
+import { Box, Flex, Icon, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { QRCodeSVG } from 'qrcode.react';
-
-import { Flex, Box, Icon, Text } from '@holium/design-system';
-import { shortened, formatEthAmount } from '../../../lib/helpers';
 import { EthWalletType } from 'renderer/stores/models/wallet.model';
+
+import { formatEthAmount, shortened } from '../../../lib/helpers';
 
 interface WalletInfoProps {
   wallet: EthWalletType;

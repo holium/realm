@@ -1,14 +1,15 @@
+import bcrypt from 'bcryptjs';
 import {
   applySnapshot,
-  types,
-  Instance,
-  getSnapshot,
   cast,
   flow,
+  getSnapshot,
+  Instance,
+  types,
 } from 'mobx-state-tree';
+
 import { WalletIPC } from '../ipc';
 import { shipStore } from '../ship.store';
-import bcrypt from 'bcryptjs';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;

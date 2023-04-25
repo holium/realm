@@ -1,17 +1,19 @@
 import { FC } from 'react';
-import { Flex, Spinner, Icon, Text, Button } from '@holium/design-system';
+import { Button, Flex, Icon, Spinner, Text } from '@holium/design-system';
 import {
-  shortened,
-  formatEthAmount,
-  formatBtcAmount,
-} from '../../../lib/helpers';
-import {
-  WalletView,
-  TransactionType,
   ProtocolType,
+  TransactionType,
+  WalletView,
 } from 'renderer/stores/models/wallet.model';
-import { TxType } from './List';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+import {
+  formatBtcAmount,
+  formatEthAmount,
+  shortened,
+} from '../../../lib/helpers';
+
+import { TxType } from './List';
 
 interface PendingTransactionDisplayProps {
   transactions: TransactionType[];

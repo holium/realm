@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import { Box, Flex, Spinner, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { Flex, Box, Spinner, Text } from '@holium/design-system';
-import { PasscodeDisplay } from './PasscodeDisplay';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+import { PasscodeDisplay } from './PasscodeDisplay';
 
 const PASSCODE_LENGTH = 6;
 

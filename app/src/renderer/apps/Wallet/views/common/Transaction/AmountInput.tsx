@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
+import { Box, Flex, Icon, Text, TextInput } from '@holium/design-system';
 import { observer } from 'mobx-react';
-
-import { Flex, Box, Icon, Text, TextInput } from '@holium/design-system';
-import { ContainerFlex, FlexHider } from './styled';
 import { ERC20Type, ProtocolType } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+import { ContainerFlex, FlexHider } from './styled';
 
 // TODO: replace with actual exchange rate
 const ethToUsd = (eth: number, currentPrice: number) =>

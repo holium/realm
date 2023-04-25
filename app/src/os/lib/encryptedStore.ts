@@ -1,4 +1,4 @@
-import { safeStorage, app } from 'electron';
+import { app, safeStorage } from 'electron';
 import Store from 'electron-store';
 import CryptoJS from 'crypto-js';
 import fs from 'fs';

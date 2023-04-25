@@ -1,18 +1,19 @@
-import { observer } from 'mobx-react';
-import { Row, Flex, Icon, NoScrollBar, Text } from '@holium/design-system';
+import { Flex, Icon, NoScrollBar, Row, Text } from '@holium/design-system';
 import { toJS } from 'mobx';
-import {
-  monthNames,
-  formatEthAmount,
-  formatBtcAmount,
-  convertEthAmountToUsd,
-  shortened,
-} from '../../../lib/helpers';
+import { observer } from 'mobx-react';
 import {
   TransactionType,
   WalletView,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+import {
+  convertEthAmountToUsd,
+  formatBtcAmount,
+  formatEthAmount,
+  monthNames,
+  shortened,
+} from '../../../lib/helpers';
 
 export type TxType = 'coin' | 'nft' | 'general' | undefined;
 

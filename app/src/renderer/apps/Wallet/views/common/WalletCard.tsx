@@ -1,5 +1,18 @@
 import { FC, useMemo } from 'react';
-import { Text, Flex } from '@holium/design-system';
+import { Flex, Text } from '@holium/design-system';
+import {
+  BitcoinWalletType,
+  ERC20Type,
+  EthWalletType,
+  NetworkType,
+  ProtocolType,
+} from 'renderer/stores/models/wallet.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import {
+  WalletCardStyle,
+  walletCardStyleTransition,
+} from '../../components/WalletCardWrapper';
 import {
   formatEthAmount,
   formatZigAmount,
@@ -7,18 +20,6 @@ import {
   getMockCoinIcon,
   getTransactions,
 } from '../../lib/helpers';
-import {
-  EthWalletType,
-  BitcoinWalletType,
-  NetworkType,
-  ProtocolType,
-  ERC20Type,
-} from 'renderer/stores/models/wallet.model';
-import {
-  WalletCardStyle,
-  walletCardStyleTransition,
-} from '../../components/WalletCardWrapper';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 interface WalletCardProps {
   // wallet: EthWalletType | BitcoinWalletType;

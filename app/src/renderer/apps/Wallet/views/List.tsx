@@ -1,13 +1,14 @@
 import { FC } from 'react';
+import { Button, Flex, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { Flex, Text, Button } from '@holium/design-system';
-import { WalletCard } from './common/WalletCard';
 import {
   NetworkStoreType,
   NetworkType,
   WalletView,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+import { WalletCard } from './common/WalletCard';
 
 export const WalletList = observer(() => {
   const { walletStore } = useShipStore();

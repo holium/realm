@@ -1,8 +1,9 @@
-import { Dispatch, SetStateAction, useState, ChangeEvent } from 'react';
-import styled from 'styled-components';
+import { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
+import { Button, Flex, Text, TextInput } from '@holium/design-system';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import { Button, Flex, Text, TextInput } from '@holium/design-system';
+import styled from 'styled-components';
+
 import { NewWalletScreen } from './index';
 
 const NoResize = styled(Flex)`

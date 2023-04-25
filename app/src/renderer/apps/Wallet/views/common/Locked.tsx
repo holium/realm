@@ -1,7 +1,8 @@
-import { Flex, Text, Icon } from '@holium/design-system';
-import { PasscodeInput } from '../../components/PasscodeInput';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { Flex, Icon, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import { PasscodeInput } from '../../components/PasscodeInput';
 
 export const Locked = observer(() => {
   const { walletStore } = useShipStore();

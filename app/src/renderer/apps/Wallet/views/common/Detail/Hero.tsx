@@ -1,36 +1,36 @@
-import { FC, useState, useMemo } from 'react';
-import styled from 'styled-components';
+import { FC, useMemo, useState } from 'react';
+import { Box, CopyButton, Flex, Icon, Text } from '@holium/design-system';
+import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { QRCodeSVG } from 'qrcode.react';
-import { CopyButton, Flex, Box, Icon, Text } from '@holium/design-system';
-
 import {
-  shortened,
-  formatEthAmount,
-  formatZigAmount,
-  getMockCoinIcon,
-  formatCoinAmount,
-  convertBtcAmountToUsd,
-  convertEthAmountToUsd,
-  convertERC20AmountToUsd,
-  formatBtcAmount,
-} from '../../../lib/helpers';
-import {
+  BitcoinWalletType,
   ERC20Type,
   EthWalletType,
-  BitcoinWalletType,
   NetworkType,
   ProtocolType,
 } from 'renderer/stores/models/wallet.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+import styled from 'styled-components';
+
 import { CircleButton } from '../../../components/CircleButton';
-import { SendTransaction } from '../Transaction/Send';
-import { motion } from 'framer-motion';
 import {
   WalletCardStyle,
   walletCardStyleTransition,
 } from '../../../components/WalletCardWrapper';
+import {
+  convertBtcAmountToUsd,
+  convertERC20AmountToUsd,
+  convertEthAmountToUsd,
+  formatBtcAmount,
+  formatCoinAmount,
+  formatEthAmount,
+  formatZigAmount,
+  getMockCoinIcon,
+  shortened,
+} from '../../../lib/helpers';
+import { SendTransaction } from '../Transaction/Send';
 import { TransactionPasscode } from '../Transaction/TransactionPasscode';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 const BreadCrumb = styled(Text.Body)`
   transition: var(--transition);

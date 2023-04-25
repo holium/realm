@@ -1,12 +1,17 @@
 import { app } from 'electron';
 import log from 'electron-log';
 import fs from 'fs';
-import { reject } from 'lodash';
+import { reject, reject } from 'lodash';
 import moment from 'moment';
 import path from 'path';
 
-import { S3Client, StorageAcl } from '../../../renderer/lib/S3Client';
-import { getCookie } from '../../lib/shipHelpers';
+import {
+  S3Client,
+  S3Client,
+  StorageAcl,
+  StorageAcl,
+} from '../../../renderer/lib/S3Client';
+import { getCookie, getCookie } from '../../lib/shipHelpers';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection, ConduitSession } from '../api';
 
@@ -14,14 +19,10 @@ import ChatService from './chat/chat.service';
 import NotificationsService from './notifications/notifications.service';
 import BazaarService from './spaces/bazaar.service';
 import SpacesService from './spaces/spaces.service';
+import WalletService from './wallet/wallet.service';
 import { FriendsService } from './friends.service';
 import RoomsService from './rooms.service';
 import { ShipDB } from './ship.db';
-import { S3Client, StorageAcl } from '../../../renderer/lib/S3Client';
-import BazaarService from './spaces/bazaar.service';
-import { getCookie } from '../../lib/shipHelpers';
-import WalletService from './wallet/wallet.service';
-import { reject } from 'lodash';
 
 export class ShipService extends AbstractService<any> {
   public patp: string;

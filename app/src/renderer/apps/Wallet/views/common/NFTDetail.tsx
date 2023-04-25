@@ -1,5 +1,5 @@
+import { Flex, Icon, Text } from '@holium/design-system';
 import { EthWalletType } from 'renderer/stores/models/wallet.model';
-import { Flex, Text, Icon } from '@holium/design-system';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 export const NFTDetail = () => {

@@ -1,8 +1,9 @@
-import { Patp } from './types';
-import { BaseProtocol } from './BaseProtocol';
-import { EthereumProtocol } from './ethereum';
 import { WalletDB } from '../wallet.db';
 import { ProtocolType } from '../wallet.types';
+
+import { BaseProtocol } from './BaseProtocol';
+import { EthereumProtocol } from './ethereum';
+import { Patp } from './types';
 
 export class ProtocolManager {
   protocols: Map<ProtocolType, BaseProtocol>;

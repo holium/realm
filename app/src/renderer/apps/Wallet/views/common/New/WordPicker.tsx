@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
+import { Box, Flex, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { Flex, Text, Box } from '@holium/design-system';
 
 interface WordPickerProps {
   seedPhrase: string;

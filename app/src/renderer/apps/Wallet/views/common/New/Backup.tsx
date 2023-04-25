@@ -1,8 +1,9 @@
-import { useState, Dispatch, SetStateAction, useEffect } from 'react';
-import { observer } from 'mobx-react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Box, Button, Flex, Icon, Text } from '@holium/design-system';
 import { ethers } from 'ethers';
-import { Button, Flex, Text, Box, Icon } from '@holium/design-system';
+import { observer } from 'mobx-react';
 import { transparentize } from 'polished';
+
 import { NewWalletScreen } from './index';
 
 interface BackupProps {

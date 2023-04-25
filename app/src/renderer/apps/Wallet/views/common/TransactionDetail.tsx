@@ -1,31 +1,32 @@
-import { useState, ChangeEvent } from 'react';
-import { observer } from 'mobx-react';
+import { ChangeEvent, useState } from 'react';
 import {
   Avatar,
-  TextInput,
-  Flex,
-  Text,
   Button,
+  Flex,
   Icon,
   Spinner,
+  Text,
+  TextInput,
 } from '@holium/design-system';
+import { observer } from 'mobx-react';
 import {
-  shortened,
-  formatEthAmount,
-  formatBtcAmount,
-  convertEthAmountToUsd,
-  convertBtcAmountToUsd,
-  getDisplayDate,
-} from '../../lib/helpers';
-import {
-  NetworkType,
-  EthWalletType,
   BitcoinWalletType,
-  TransactionType,
+  EthWalletType,
+  NetworkType,
   ProtocolType,
+  TransactionType,
   WalletStoreType,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+import {
+  convertBtcAmountToUsd,
+  convertEthAmountToUsd,
+  formatBtcAmount,
+  formatEthAmount,
+  getDisplayDate,
+  shortened,
+} from '../../lib/helpers';
 
 const getTransaction = (
   walletStore: WalletStoreType

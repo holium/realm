@@ -1,9 +1,9 @@
 import { FC } from 'react';
-
-import { Row, Flex, Text, Icon } from '@holium/design-system';
-import { getMockCoinIcon, formatCoinAmount } from '../../../lib/helpers';
+import { Flex, Icon, Row, Text } from '@holium/design-system';
 import { ERC20Type, WalletView } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+import { formatCoinAmount, getMockCoinIcon } from '../../../lib/helpers';
 
 interface CoinListProps {
   coins: ERC20Type[];

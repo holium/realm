@@ -1,5 +1,5 @@
-import styled, { css } from 'styled-components';
 import { Card } from '@holium/design-system';
+import styled, { css } from 'styled-components';
 
 interface CardStyleProps {
   isSelected: boolean;

@@ -1,18 +1,19 @@
-import { FC, Dispatch, SetStateAction, useState, ChangeEvent } from 'react';
-import styled from 'styled-components';
-import { ethers } from 'ethers';
-import { observer } from 'mobx-react';
+import { ChangeEvent, Dispatch, FC, SetStateAction, useState } from 'react';
 import {
+  Box,
   Button,
   Flex,
-  Text,
-  Box,
   Icon,
+  Text,
   TextInput,
 } from '@holium/design-system';
+import { ethers } from 'ethers';
+import { observer } from 'mobx-react';
+import { useShipStore } from 'renderer/stores/ship.store';
+import styled from 'styled-components';
+
 import { NewWalletScreen } from './index';
 import { VerifyPasscode } from './VerifyPasscode';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 const NoResize = styled(Flex)`
   textarea {

@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Flex, Box, FlexProps, BoxProps } from '@holium/design-system';
+import { Box, BoxProps, Flex, FlexProps } from '@holium/design-system';
 import { transparentize } from 'polished';
 import styled from 'styled-components';
 

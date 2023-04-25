@@ -2,6 +2,7 @@ import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
 import { APIConnection } from '../../api';
+
 import { TransactionsRow } from './wallet.types';
 
 interface WalletRow {}

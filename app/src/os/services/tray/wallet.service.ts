@@ -1,32 +1,34 @@
 import { ipcMain, ipcRenderer } from 'electron';
-import { BaseService } from '../base.service';
-import { Realm } from '../../index';
-import {
-  WalletStore,
-  WalletStoreType,
-  WalletView,
-  NetworkType,
-  UISettingsType,
-  EthWalletType,
-  ProtocolType,
-  NetworkStoreType,
-  WalletNavOptions,
-  initialWalletState,
-} from './wallet-lib/wallet.model';
-import { BaseProtocol } from './wallet-lib/wallets/BaseProtocol';
+import axios from 'axios';
+import bcrypt from 'bcryptjs';
+import { ethers } from 'ethers';
+import { getSnapshot } from 'mobx-state-tree';
+
+import { removeDots, UqbarApi } from '../../api/uqbar';
 // import { RealmSigner } from './wallet/signers/realm';
 import { WalletApi } from '../../api/wallet';
-import { removeDots, UqbarApi } from '../../api/uqbar';
-import bcrypt from 'bcryptjs';
-import { getSnapshot } from 'mobx-state-tree';
-import { ethers } from 'ethers';
+import { Realm } from '../../index';
+import { BaseService } from '../base.service';
+import { DiskStore } from '../base.store';
+import { RealmSigner } from '../ship/wallet/signers/realm';
+
 import { EthereumProtocol } from './wallet/protocols/ethereum';
 import { UqbarProtocol } from './wallet/protocols/uqbar';
 import { Wallet } from './wallet-lib/ProtocolManager';
+import {
+  EthWalletType,
+  initialWalletState,
+  NetworkStoreType,
+  NetworkType,
+  ProtocolType,
+  UISettingsType,
+  WalletNavOptions,
+  WalletStore,
+  WalletStoreType,
+  WalletView,
+} from './wallet-lib/wallet.model';
 import { BaseBlockProtocol } from './wallet-lib/wallets/BaseBlockProtocol';
-import { DiskStore } from '../base.store';
-import axios from 'axios';
-import { RealmSigner } from '../ship/wallet/signers/realm';
+import { BaseProtocol } from './wallet-lib/wallets/BaseProtocol';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;

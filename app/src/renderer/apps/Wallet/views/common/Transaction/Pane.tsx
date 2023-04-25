@@ -1,16 +1,16 @@
 import { FC, useState } from 'react';
+import { Avatar, Box, Button, Flex, Icon, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
-
-import { Flex, Box, Icon, Text, Button, Avatar } from '@holium/design-system';
-import { RecipientInput } from './RecipientInput';
-import { AmountInput } from './AmountInput';
+import { shortened } from 'renderer/apps/Wallet/lib/helpers';
 import {
-  ProtocolType,
   ERC20Type,
+  ProtocolType,
   WalletView,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
-import { shortened } from 'renderer/apps/Wallet/lib/helpers';
+
+import { AmountInput } from './AmountInput';
+import { RecipientInput } from './RecipientInput';
 
 const abbrMap = {
   ethereum: 'ETH',

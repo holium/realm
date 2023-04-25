@@ -1,20 +1,22 @@
-import { useEffect, useState, useRef } from 'react';
-import { isValidPatp } from 'urbit-ob';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Avatar,
+  Box,
+  Flex,
+  Icon,
+  Spinner,
+  Text,
+  TextInput,
+} from '@holium/design-system';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import {
-  Icon,
-  Text,
-  Avatar,
-  Flex,
-  Box,
-  TextInput,
-  Spinner,
-} from '@holium/design-system';
-import { shortened } from '../../../lib/helpers';
 import { RecipientPayload } from 'os/services/tray/wallet.service';
-import { ContainerFlex } from './styled';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { isValidPatp } from 'urbit-ob';
+
+import { shortened } from '../../../lib/helpers';
+
+import { ContainerFlex } from './styled';
 
 export const RecipientInput = observer(
   (props: {

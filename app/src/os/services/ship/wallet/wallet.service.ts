@@ -1,16 +1,17 @@
-import { APIConnection } from '../../api';
-import AbstractService, { ServiceOptions } from '../../abstract.service';
+import log from 'electron-log';
 import Database from 'better-sqlite3-multiple-ciphers';
+import { ethers } from 'ethers';
+
+import AbstractService, { ServiceOptions } from '../../abstract.service';
+import { APIConnection } from '../../api';
+
+import { BaseBlockProtocol } from './protocols/BaseBlockProtocol';
+import { BaseProtocol } from './protocols/BaseProtocol';
+import { EthereumProtocol } from './protocols/ethereum';
+import { ProtocolManager } from './protocols/ProtocolManager';
 import { RealmSigner } from './signers/realm';
 import { WalletDB, walletDBPreload } from './wallet.db';
-import { ethers } from 'ethers';
 import { ProtocolType, UISettingsType } from './wallet.types';
-
-import { ProtocolManager } from './protocols/ProtocolManager';
-import { EthereumProtocol } from './protocols/ethereum';
-import { BaseBlockProtocol } from './protocols/BaseBlockProtocol';
-import log from 'electron-log';
-import { BaseProtocol } from './protocols/BaseProtocol';
 
 export class WalletService extends AbstractService {
   public walletDB?: WalletDB;

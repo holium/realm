@@ -1,26 +1,28 @@
-import { observer } from 'mobx-react';
-import { useEffect, useState, useMemo } from 'react';
-import { WalletSettings } from './views/common/Settings';
-import { Detail } from './views/common/Detail/Detail';
-import { WalletList } from './views/List';
-import { TransactionDetail } from './views/common/TransactionDetail';
-import { EthNew } from './views/common/New';
-import { WalletFooter } from './views/common/Footer';
-import { CreateWallet } from './views/common/Create';
-import { NFTDetail } from './views/common/NFTDetail';
-import { Locked } from './views/common/Locked';
-import { WalletHeader } from './views/common/Header';
+import { useEffect, useMemo, useState } from 'react';
 import { Flex } from '@holium/design-system';
+import { observer } from 'mobx-react';
 import {
-  EthWalletType,
   BitcoinWalletType,
+  EthWalletType,
   NetworkType,
   WalletView,
 } from 'renderer/stores/models/wallet.model';
-import { PendingTransactionDisplay } from './views/common/Transaction/Pending';
-import { getTransactions } from './lib/helpers';
 import { useShipStore } from 'renderer/stores/ship.store';
+
 import { useTrayApps } from '../store';
+
+import { getTransactions } from './lib/helpers';
+import { CreateWallet } from './views/common/Create';
+import { Detail } from './views/common/Detail/Detail';
+import { WalletFooter } from './views/common/Footer';
+import { WalletHeader } from './views/common/Header';
+import { Locked } from './views/common/Locked';
+import { EthNew } from './views/common/New';
+import { NFTDetail } from './views/common/NFTDetail';
+import { WalletSettings } from './views/common/Settings';
+import { PendingTransactionDisplay } from './views/common/Transaction/Pending';
+import { TransactionDetail } from './views/common/TransactionDetail';
+import { WalletList } from './views/List';
 
 const WalletViews: (network: NetworkType) => { [key: string]: any } = (
   network: NetworkType
