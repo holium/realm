@@ -63,10 +63,10 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
    *
    * @returns void
    */
-  public boot() {
+  public async boot() {
     let session;
     if (isDev) {
-      session = this._hydrateSessionIfExists();
+      session = await this._hydrateSessionIfExists();
       this.services?.ship?.init();
     }
 
@@ -205,75 +205,34 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     });
   }
 
-  private _hydrateSessionIfExists(): {
+  private async _hydrateSessionIfExists(): Promise<{
     url: string;
     patp: string;
     cookie: string;
-  } | null {
+  } | null> {
     if (!this.services) return null;
     const session = this.services?.auth._getLockfile();
     if (session) {
       log.info('realm.service.ts:', 'Hydrating session from session.lock');
 
-      const masterAccount = this.services.auth.getMasterAccount(session.ship);
-      if (!masterAccount) {
-        log.error('realm.service.ts:', 'No master account');
+      const account = this.services.auth.getAccount(session.ship);
+      if (!account) {
+        log.error('realm.service.ts:', 'Account not found');
         this.services.auth._clearLockfile();
-        return null;
+        return Promise.resolve(null);
       }
 
-      return {
+      // todo figure out how to get the password and encryptionKey from the lockfile
+      this.services.ship = new ShipService(session.ship, '', '');
+
+      return Promise.resolve({
         url: session.url,
         patp: session.ship,
         cookie: session.cookie,
-      };
+      });
     }
-    return null;
+    return Promise.resolve(null);
   }
-
-  // public createAccount(
-  //   accountPayload: CreateAccountPayload,
-  //   password: string,
-  //   shipCode: string
-  // ) {
-  //   if (!this.services) return false;
-
-  //   const { account, masterAccount } =
-  //     this.services.onboarding.createAccount(accountPayload);
-
-  //   if (!masterAccount) {
-  //     log.error('realm.service.ts:', 'No master account');
-  //     return false;
-  //   }
-
-  //   if (!account) {
-  //     log.error('realm.service.ts:', 'No account');
-  //     return false;
-  //   }
-
-  //   if (!this.services.ship) {
-  //     // Creates the ship database with the master account's encryption key
-  //     ShipService._createShipDB(
-  //       account.patp,
-  //       password,
-  //       masterAccount.encryptionKey,
-  //       {
-  //         url: account.url,
-  //         code: shipCode,
-  //       }
-  //     );
-
-  //     // if (this.services.ship) {
-  //     //   log.info('realm.service.ts:', 'Ship service created');
-  //     // } else {
-  //     //   log.error('realm.service.ts:', 'Failed to create ship service');
-  //     // }
-
-  //     return false;
-  //   }
-
-  //   return account;
-  // }
 
   getReleaseChannel() {
     return getReleaseChannelFromSettings();

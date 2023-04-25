@@ -47,8 +47,8 @@ const MessagesTrayPresenter = () => {
       <Badge
         wrapperHeight={iconSize}
         wrapperWidth={iconSize}
-        top={1}
-        right={1}
+        bottom={0}
+        right={0}
         minimal
         count={0}
       >

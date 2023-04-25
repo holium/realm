@@ -385,7 +385,6 @@ export class Conduit extends EventEmitter {
   async scry(params: Scry): Promise<any> {
     const { app, path } = params;
     try {
-      log.info(`${this.url}/~/scry/${app}${path}.json`);
       const response = await fetch(`${this.url}/~/scry/${app}${path}.json`, {
         method: 'GET',
         headers: this.headers,

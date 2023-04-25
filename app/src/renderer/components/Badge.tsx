@@ -23,7 +23,6 @@ interface BadgeStyleProps {
 const BadgeStyle = styled(Box)<BadgeStyleProps>`
   position: absolute;
   display: block;
-
   ${(props: BadgeStyleProps) => css`
     font-size: 13px;
     ${props.background
@@ -31,9 +30,8 @@ const BadgeStyle = styled(Box)<BadgeStyleProps>`
           background: ${lighten(0.02, props.background)};
         `
       : css`
-          background: rgba(var(--rlm-accent-rbga));
+          background: rgba(var(--rlm-accent-rbga), 0.5);
         `}
-
     border-radius: ${props.minimal ? '50%' : '3px'};
     padding: ${props.minimal ? '0' : '0.5px 3px 0.5px 3px'};
     color: ${props.textColor ? props.textColor : ' rgba(var(--rlm-text-rgba))'};
@@ -102,7 +100,9 @@ export const Badge: FC<BadgeProps> = (props: BadgeProps) => {
             transition={{
               duration: 0.25,
             }}
-            style={style}
+            style={{
+              border: '1px solid rgba(var(--rlm-dock-rgba))',
+            }}
             background={background}
             bottom={bottom}
             top={top}
