@@ -32,7 +32,12 @@ export default function Login({ prefilledEmail, redirectAfterLogin }: Props) {
       localStorage.setItem('token', response.token);
 
       if (redirectAfterLogin) goToPage(redirectAfterLogin as any);
-      else goToPage('/account');
+      else {
+        const ships = await api.getUserShips(response.token);
+
+        if (ships.length > 0) goToPage('/account');
+        else goToPage('/account/download-realm');
+      }
 
       return Boolean(response);
     } catch (error) {
