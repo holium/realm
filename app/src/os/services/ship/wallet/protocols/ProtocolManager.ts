@@ -1,8 +1,8 @@
 import { Patp } from './types';
 import { BaseProtocol } from './BaseProtocol';
-import { ProtocolType } from 'renderer/stores/models/wallet.model';
 import { EthereumProtocol } from './ethereum';
 import { WalletDB } from '../wallet.db';
+import { ProtocolType } from '../wallet.types';
 
 export class ProtocolManager {
   protocols: Map<ProtocolType, BaseProtocol>;

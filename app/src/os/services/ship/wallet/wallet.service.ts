@@ -4,17 +4,13 @@ import Database from 'better-sqlite3-multiple-ciphers';
 import { RealmSigner } from './signers/realm';
 import { WalletDB, walletDBPreload } from './wallet.db';
 import { ethers } from 'ethers';
-/*import {
-  ProtocolType,
-  UISettingsType,
-} from 'renderer/stores/models/wallet.model';*/
+import { ProtocolType, UISettingsType } from './wallet.types';
+
 import { ProtocolManager } from './protocols/ProtocolManager';
 import { EthereumProtocol } from './protocols/ethereum';
 import { BaseBlockProtocol } from './protocols/BaseBlockProtocol';
-import {
-  ProtocolType,
-  UISettingsType,
-} from 'renderer/stores/models/wallet.model';
+import log from 'electron-log';
+import { BaseProtocol } from './protocols/BaseProtocol';
 
 export class WalletService extends AbstractService {
   public walletDB?: WalletDB;
@@ -25,7 +21,7 @@ export class WalletService extends AbstractService {
       return;
     }
     this.walletDB = new WalletDB({ preload: false, db });
-    /*const protocolMap = new Map<ProtocolType, BaseProtocol>([
+    const protocolMap = new Map<ProtocolType, BaseProtocol>([
       [ProtocolType.ETH_MAIN, new EthereumProtocol(ProtocolType.ETH_MAIN)],
       [ProtocolType.ETH_GORLI, new EthereumProtocol(ProtocolType.ETH_GORLI)],
       // [ProtocolType.UQBAR, new UqbarProtocol()],
@@ -33,7 +29,7 @@ export class WalletService extends AbstractService {
     this.protocolManager = new ProtocolManager(
       protocolMap,
       ProtocolType.ETH_GORLI
-    );*/
+    );
   }
 
   public reset(): void {
@@ -236,6 +232,8 @@ export class WalletService extends AbstractService {
 
   watchUpdates(protocol: ProtocolType) {
     if (!this.walletDB) throw new Error('Wallet DB not initialized');
+    log.info('GOT THE SERVICE WATCH UPDATES');
+    log.info('protocolManager', this.protocolManager);
     this.protocolManager?.watchUpdates(
       APIConnection.getInstance().conduit,
       this.walletDB,

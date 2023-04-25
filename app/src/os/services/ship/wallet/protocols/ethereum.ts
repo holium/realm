@@ -11,17 +11,11 @@ import fetch from 'node-fetch';
 // @ts-expect-error
 import abi from 'human-standard-token-abi';
 // import nftabi from 'non-fungible-token-abi';
-import {
-  ProtocolType,
-  Asset,
-  CoinAsset,
-  NFTAsset,
-  NetworkStoreType,
-  EthWalletType,
-} from 'renderer/stores/models/wallet.model';
+import { ProtocolType, Asset, CoinAsset, NFTAsset } from '../wallet.types';
 import { ethers } from 'ethers';
 import io from 'socket.io-client';
 import { WalletDB } from '../wallet.db';
+import log from 'electron-log';
 
 declare var global: any;
 global.fetch = fetch;
@@ -122,18 +116,29 @@ export class EthereumProtocol implements BaseBlockProtocol {
       if (!currentBlock) {
         currentBlock = await this.getBlockNumber();
       }
-      for (const walletKey of walletStore.currentStore?.wallets.keys()) {
-        const wallet = walletStore.ethereum.wallets.get(walletKey);
+      const wallets = walletDB.getWallets();
+      // for (const walletKey of walletStore.currentStore?.wallets.keys()) {
+      console.log('WALLETS', wallets);
+      for (const wallet of wallets) {
+        log.info('wallet', wallet);
+        // const wallet = walletStore.ethereum.wallets.get(walletKey);
         const walletAddress = wallet?.address;
         if (!walletAddress) {
           continue;
         }
         this.getAccountBalance(walletAddress).then((balance: string) => {
           if (balance !== '-1') {
-            wallet.setBalance(this.protocol, balance);
+            // wallet.setBalance(this.protocol, balance);
+            walletDB.sendChainUpdate({
+              'set-balance': {
+                index: wallet.wallet_index,
+                protocol: this.protocol,
+                balance,
+              },
+            });
           }
         });
-        this.getAccountTransactions(
+        /*this.getAccountTransactions(
           walletAddress,
           (wallet as EthWalletType).data.get(this.protocol)?.block ?? 0,
           currentBlock
@@ -153,9 +158,10 @@ export class EthereumProtocol implements BaseBlockProtocol {
                 ?.setBlock(currentBlock);
             }
           }
-        });
-        if (walletStore.navState.networkStore === NetworkStoreType.ETHEREUM) {
-          const ethWallet = walletStore.ethereum.wallets.get(walletKey);
+        });*/
+        // if (walletStore.navState.networkStore === NetworkStoreType.ETHEREUM) {
+        if (true) {
+          /*const ethWallet = walletStore.ethereum.wallets.get(walletKey);
           const ethWalletAddress = wallet?.address;
           if (!ethWalletAddress) {
             continue;
@@ -216,10 +222,10 @@ export class EthereumProtocol implements BaseBlockProtocol {
                 });
                 /*this.getAssetTransfers(asset.addr, ethWallet.address, 0).then(
                   ethWallet.updateNftTransfers
-                );*/
+                );
               }
             }
-          });
+          });*/
         }
       }
     } catch (error) {

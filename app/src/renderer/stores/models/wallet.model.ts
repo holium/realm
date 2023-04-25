@@ -899,10 +899,7 @@ export const WalletStore = types
   }))
   .actions((self) => {
     return {
-      init() {
-        this.initFlow();
-      },
-      initFlow: flow(function* (): Generator<PromiseLike<any>, void, any> {
+      init: flow(function* (): Generator<PromiseLike<any>, void, any> {
         try {
           const wallets = yield WalletIPC.getWallets() as PromiseLike<any>;
           console.log('wallets', wallets);
@@ -916,7 +913,9 @@ export const WalletStore = types
           if (hasMnemonic) {
             console.log('has mnemonic, navigating');
             // @ts-expect-error
-            self.navigate(WalletView.LIST);
+            self.resetNavigation();
+            // @ts-expect-error
+            self.lock();
           }
         } catch (error) {
           console.error(error);
@@ -947,6 +946,7 @@ export const WalletStore = types
         this.navigate(WalletView.LIST);
         if (self.navState.network !== network) {
           this.setNetworkSetter(network);
+          this.watchUpdates(self.navState.protocol);
         }
       },
       setProtocolSetter(protocol: ProtocolType) {
@@ -1192,9 +1192,11 @@ export const WalletStore = types
         }
       },
       watchUpdates: flow(function* (
-        protocol: ProtocolType
+        protocol?: ProtocolType
       ): Generator<PromiseLike<any>, void, any> {
-        yield WalletIPC.watchUpdates(protocol) as PromiseLike<any>;
+        console.log('CALLING WATCH UPDATES');
+        const watchProtocol = protocol ?? self.navState.protocol;
+        yield WalletIPC.watchUpdates(watchProtocol) as PromiseLike<any>;
       }),
       setProtocol(_event: any, protocol: ProtocolType) {
         this.navigate(WalletView.LIST);
@@ -1333,6 +1335,14 @@ WalletIPC.onUpdate((payload: any) => {
       break;
     case 'settings':
       shipStore.walletStore.setSettingsSetter(payload.settings);
+      break;
+    case 'set-balance':
+      console.log('setting balance');
+      console.log('payload', payload);
+      const balanceData = payload['set-balance'];
+      shipStore.walletStore.ethereum.wallets
+        .get(balanceData.index)
+        ?.setBalance(balanceData.protocol, balanceData.balance);
       break;
     default:
       break;

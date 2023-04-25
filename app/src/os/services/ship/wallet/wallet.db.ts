@@ -71,6 +71,10 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     this.sendUpdate(data);
   }
 
+  sendChainUpdate(data: any) {
+    this.sendUpdate(data);
+  }
+
   private _onQuit() {
     console.log('fail!');
   }
@@ -181,21 +185,26 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     const insert = this.db.prepare(
       `REPLACE INTO wallets (
             path, 
+            wallet_index,
             address,
             nickname
-          ) VALUES (@path, @address, @nickname)`
+          ) VALUES (@path, @wallet_index, @address, @nickname)`
     );
     const insertMany = this.db.transaction((wallets: any) => {
-      for (const wallet of wallets)
+      let index: string;
+      let wallet: any;
+      for ([index, wallet] of Object.entries(wallets))
         insert.run({
           path: wallet.path,
+          wallet_index: index,
           address: wallet.address,
           nickname: wallet.nickname,
         });
     });
-    const ethWallets = Object.values(wallets.wallets.ethereum);
+    const ethWallets = wallets.wallets.ethereum;
     const btcWallets = Object.values(wallets.wallets.bitcoin);
     const btcTestWallets = Object.values(wallets.wallets.btctestnet);
+    console.log('ethWallets', ethWallets);
     insertMany(ethWallets);
     insertMany(btcWallets);
     insertMany(btcTestWallets);
@@ -223,9 +232,10 @@ create unique index if not exists hash_network_uindex
 
 create table if not exists wallets
 (
-    path                        TEXT not null,
-    address                     TEXT not null,
-    nickname                    TEXT not null
+    path                        text not null,
+    wallet_index                integer not null,
+    address                     text not null,
+    nickname                    text not null
 );
 
 create unique index if not exists path_uindex
