@@ -284,7 +284,10 @@ export const PassportCardAvatar = ({
                 onChange={onChooseFile}
               />
               <Flex height={50} px={3} alignItems="center">
-                <Button.Primary onClick={() => fileInputRef.current?.click()}>
+                <Button.Primary
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                >
                   Choose file
                 </Button.Primary>
               </Flex>
