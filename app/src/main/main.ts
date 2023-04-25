@@ -126,7 +126,7 @@ const createWindow = async () => {
   // ---------------------------------------------------------------------
   // ----------------------- Start Realm services ------------------------
   // ---------------------------------------------------------------------
-  const _realmService = new RealmService();
+  new RealmService();
 
   // TODO why is this rendering multiple times?
   mainWindow.on('ready-to-show', () => {

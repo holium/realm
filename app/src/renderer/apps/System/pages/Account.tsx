@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import {
   AvatarInput,
@@ -22,7 +22,7 @@ import { useAppState } from 'renderer/stores/app.store';
 
 const AccountPanelPresenter = () => {
   const { shellStore } = useAppState();
-  const { ship, friends } = useShipStore();
+  const { ship } = useShipStore();
   const { setActiveApp } = useTrayApps();
   const [avatarImg, setAvatarImg] = useState(ship?.avatar ?? '');
   const showAccessKey = useToggle(false);
@@ -30,10 +30,12 @@ const AccountPanelPresenter = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   // TODO
-  const url = identity.auth.currentShip?.url;
+  // const url = identity.auth.currentShip?.url;
+  const url = '';
   const isHostedShip = url?.includes('holium.network');
-  const email = identity.auth.email;
-  const [code, setCode] = useState('');
+  // const email = identity.auth.email;
+  const email = '';
+  const [code, _setCode] = useState('');
 
   useEffect(() => {
     async function getCode() {
@@ -102,13 +104,7 @@ const AccountPanelPresenter = () => {
       <Text.Custom opacity={0.7} fontSize={3} fontWeight={500}>
         PROFILE
       </Text.Custom>
-      <Card
-        p="20px"
-        elevation={0}
-        customBg={cardColor}
-        flexDirection={'column'}
-        mb={2}
-      >
+      <Card p="20px" elevation={0} flexDirection={'column'} mb={2}>
         <Flex gap={20} flexDirection={'column'} mt={2}>
           <Flex
             flexDirection={'row'}

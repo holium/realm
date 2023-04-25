@@ -1,5 +1,4 @@
 import AbstractService, { ServiceOptions } from '../abstract.service';
-import log from 'electron-log';
 // import { APIConnection, PokeParams, Scry } from 'os/services/api';
 
 export class WalletService extends AbstractService {

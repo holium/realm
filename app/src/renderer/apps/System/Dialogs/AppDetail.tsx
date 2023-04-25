@@ -23,6 +23,7 @@ import {
   UrbitApp,
 } from 'renderer/stores/models/bazaar.model';
 import { useAppState, appState } from 'renderer/stores/app.store';
+import { GlobMobxType } from 'renderer/stores/models/docket.model';
 
 const TileStyle = styled(Box)`
   position: relative;
