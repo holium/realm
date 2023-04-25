@@ -1,20 +1,19 @@
 import { createContext, useContext } from 'react';
-import { toJS } from 'mobx';
 // import { toJS } from 'mobx';
 import {
-  destroy,
   flow,
-  getParentOfType,
   Instance,
-  tryReference,
   types,
+  tryReference,
+  destroy,
+  getParentOfType,
 } from 'mobx-state-tree';
-import { ChatUpdateTypes } from 'os/services/ship/chat/chat.types';
-import { ChatIPC, RealmIPC } from 'renderer/stores/ipc';
-import { SpacesStoreType } from 'renderer/stores/models/spaces.model';
-
 import { Chat, ChatModelType } from './models/chat.model';
-import { ShipStore, shipStore } from './ship.store';
+import { shipStore, ShipStore } from './ship.store';
+import { RealmIPC, ChatIPC } from 'renderer/stores/ipc';
+import { SpacesStoreType } from 'renderer/stores/models/spaces.model';
+import { toJS } from 'mobx';
+import { ChatUpdateTypes } from 'os/services/ship/chat/chat.types';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
@@ -124,9 +123,9 @@ export const ChatStore = types
   .actions((self) => ({
     init: flow(function* () {
       try {
-        const pinnedChats = yield ChatIPC.fetchPinnedChats() as Promise<any>;
+        const pinnedChats = yield ChatIPC.fetchPinnedChats();
         self.inbox = yield ChatIPC.getChatList();
-        const muted = yield ChatIPC.fetchMuted() as Promise<any>;
+        const muted = yield ChatIPC.fetchMuted();
         self.inbox.forEach((chat) => {
           chat.setMuted(muted.includes(chat.path));
         });
