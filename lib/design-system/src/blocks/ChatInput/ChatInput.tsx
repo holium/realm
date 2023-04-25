@@ -230,7 +230,7 @@ export const ChatInput = ({
         height={
           rows === 1 ? 36 : CHAT_INPUT_LINE_HEIGHT * Math.min(rows, 5) + 20
         }
-        py="3px"
+        // py="3px"
         error={!!error}
         borderRadius={24}
         {...chatInputProps}

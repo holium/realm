@@ -1,5 +1,4 @@
 import { preSig } from '@urbit/aura';
-
 import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';

@@ -28,6 +28,7 @@ abstract class AbstractDataAccess<T, U = unknown> {
     db?: Database;
     tableName?: string;
     pKey?: string;
+    verbose?: boolean;
   }) {
     if (!params.name) throw new Error('DataAccess must have a name');
     this.name = params.name;
