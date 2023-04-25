@@ -150,7 +150,7 @@ export const ChatStore = types
     setSubroute: flow(function* (subroute: Subroutes) {
       if (subroute === 'inbox') {
         self.selectedChat = undefined;
-        self.inbox = yield ChatDBActions.getChatList();
+        self.inbox = yield ChatIPC.getChatList();
       }
       self.subroute = subroute;
     }),
@@ -244,7 +244,7 @@ export const ChatStore = types
       }
     },
     refreshInbox: flow(function* () {
-      self.inbox = yield ChatDBActions.getChatList();
+      self.inbox = yield ChatIPC.getChatList();
     }),
     reset() {
       self.subroute = 'inbox';

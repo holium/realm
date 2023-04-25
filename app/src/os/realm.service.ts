@@ -6,7 +6,6 @@ import {
   WebPreferences,
 } from 'electron';
 import log from 'electron-log';
-import bcrypt from 'bcryptjs';
 import { track } from '@amplitude/analytics-browser';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { AuthService } from './services/auth/auth.service';
@@ -17,13 +16,15 @@ import {
 } from './lib/settings';
 import { getCookie } from './lib/shipHelpers';
 import { APIConnection } from './services/api';
-import { CreateAccountPayload, RealmUpdateTypes } from './realm.types';
+import { RealmUpdateTypes } from './realm.types';
+import OnboardingService from './services/auth/onboarding.service';
 
 const isDev = process.env.NODE_ENV === 'development';
 
 export class RealmService extends AbstractService<RealmUpdateTypes> {
   public services?: {
     auth: AuthService;
+    onboarding: OnboardingService;
     ship?: ShipService;
   };
 
@@ -32,6 +33,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     if (options?.preload) return;
     this.services = {
       auth: new AuthService(),
+      onboarding: new OnboardingService(),
     };
 
     this.onWebViewAttached = this.onWebViewAttached.bind(this);
@@ -114,25 +116,17 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       return false;
     }
     if (isAuthenticated) {
+      track('login', { patp });
+      log.info('realm.service.ts:', `${patp} authenticated`);
+      const encryptionkey = await this.services.auth.deriveDbKey(password);
+      if (this.services.ship) this.services.ship.cleanup();
+      this.services.ship = new ShipService(patp, password, encryptionkey);
+
       const credentials = this.services.ship?.credentials;
       if (!credentials) {
         log.error('realm.service.ts:', 'No credentials found');
         return false;
       }
-
-      track('login', { patp });
-      log.info('realm.service.ts:', `${patp} authenticated`);
-      const encryptionkey = await this.services.auth.deriveDbKey(password);
-      if (this.services.ship) this.services.ship.cleanup();
-      this.services.ship = new ShipService(
-        {
-          url: account.url,
-          patp,
-          code: credentials.code,
-        },
-        password,
-        encryptionkey
-      );
 
       return new Promise((resolve) => {
         APIConnection.getInstance().conduit.on('connected', () => {
@@ -224,6 +218,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       const masterAccount = this.services.auth.getMasterAccount(session.ship);
       if (!masterAccount) {
         log.error('realm.service.ts:', 'No master account');
+        this.services.auth._clearLockfile();
         return null;
       }
 
@@ -236,66 +231,49 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     return null;
   }
 
-  public createAccount(
-    accountPayload: CreateAccountPayload,
-    password: string,
-    shipCode: string
-  ) {
-    if (!this.services) return false;
+  // public createAccount(
+  //   accountPayload: CreateAccountPayload,
+  //   password: string,
+  //   shipCode: string
+  // ) {
+  //   if (!this.services) return false;
 
-    const { account, masterAccount } =
-      this.services.auth.createAccount(accountPayload);
+  //   const { account, masterAccount } =
+  //     this.services.onboarding.createAccount(accountPayload);
 
-    if (!masterAccount) {
-      log.error('realm.service.ts:', 'No master account');
-      return false;
-    }
+  //   if (!masterAccount) {
+  //     log.error('realm.service.ts:', 'No master account');
+  //     return false;
+  //   }
 
-    if (!account) {
-      log.error('realm.service.ts:', 'No account');
-      return false;
-    }
+  //   if (!account) {
+  //     log.error('realm.service.ts:', 'No account');
+  //     return false;
+  //   }
 
-    if (!this.services.ship) {
-      // Creates the ship database with the master account's encryption key
-      this.services.ship = new ShipService(
-        {
-          patp: account.patp,
-          code: shipCode,
-          url: account.url,
-        },
-        password,
-        masterAccount.encryptionKey
-      );
+  //   if (!this.services.ship) {
+  //     // Creates the ship database with the master account's encryption key
+  //     ShipService._createShipDB(
+  //       account.patp,
+  //       password,
+  //       masterAccount.encryptionKey,
+  //       {
+  //         url: account.url,
+  //         code: shipCode,
+  //       }
+  //     );
 
-      if (this.services.ship) {
-        log.info('realm.service.ts:', 'Ship service created');
-      } else {
-        log.error('realm.service.ts:', 'Failed to create ship service');
-      }
+  //     // if (this.services.ship) {
+  //     //   log.info('realm.service.ts:', 'Ship service created');
+  //     // } else {
+  //     //   log.error('realm.service.ts:', 'Failed to create ship service');
+  //     // }
 
-      return false;
-    }
+  //     return false;
+  //   }
 
-    return account;
-  }
-
-  public hashPassword(password: string) {
-    return bcrypt.hashSync(password, 10);
-  }
-
-  public async getCookie(patp: string, url: string, code: string) {
-    const cookie = await getCookie({ patp, url, code });
-    if (!cookie) throw new Error('Failed to get cookie');
-    const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
-    const sanitizedCookie = cookie.split('; ')[0];
-
-    if (patp.toLowerCase() !== cookiePatp.toLowerCase()) {
-      throw new Error('Invalid code.');
-    }
-
-    return sanitizedCookie;
-  }
+  //   return account;
+  // }
 
   getReleaseChannel() {
     return getReleaseChannelFromSettings();
@@ -333,43 +311,43 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     saveReleaseChannelInSettings(channel);
   }
 
-  async installRealmAgent() {
-    if (!this.services) return false;
+  // async installRealmAgent() {
+  //   if (!this.services) return false;
 
-    const credentials = this.services.ship?.credentials;
+  //   const credentials = this.services.ship?.credentials;
 
-    if (!credentials) {
-      log.error('realm.service.ts:', 'No credentials found');
-      return false;
-    }
+  //   if (!credentials) {
+  //     log.error('realm.service.ts:', 'No credentials found');
+  //     return false;
+  //   }
 
-    const patp = this.services.ship?.patp;
+  //   const patp = this.services.ship?.patp;
 
-    if (!patp) {
-      log.error('realm.service.ts:', 'No patp found');
-      return false;
-    }
+  //   if (!patp) {
+  //     log.error('realm.service.ts:', 'No patp found');
+  //     return false;
+  //   }
 
-    try {
-      await APIConnection.getInstance({
-        ...credentials,
-        ship: patp,
-      }).conduit.poke({
-        app: 'hood',
-        mark: 'kiln-install',
-        json: {
-          ship: '~hostyv',
-          desk: 'realm',
-          local: 'realm',
-        },
-      });
-    } catch (e) {
-      log.error('realm.service.ts:', 'Failed to install Realm agent');
-      return false;
-    }
+  //   try {
+  //     await APIConnection.getInstance({
+  //       ...credentials,
+  //       ship: patp,
+  //     }).conduit.poke({
+  //       app: 'hood',
+  //       mark: 'kiln-install',
+  //       json: {
+  //         ship: '~hostyv',
+  //         desk: 'realm',
+  //         local: 'realm',
+  //       },
+  //     });
+  //   } catch (e) {
+  //     log.error('realm.service.ts:', 'Failed to install Realm agent');
+  //     return false;
+  //   }
 
-    return true;
-  }
+  //   return true;
+  // }
 
   async onWillRedirect(url: string, webContents: any) {
     try {

@@ -192,7 +192,10 @@ const ThemePanelPresenterView = ({
             { label: 'Custom url', value: 'custom' },
           ]}
           selected={wallpaperOption}
-          onClick={setWallpaperOption}
+          onClick={(val: string) => {
+            theme.setWallpaper(val);
+            setWallpaperOption(val);
+          }}
         />
         {wallpaperOption === 'gallery' && (
           <SettingControl>

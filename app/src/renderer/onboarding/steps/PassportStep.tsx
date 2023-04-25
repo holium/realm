@@ -1,13 +1,51 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { track } from '@amplitude/analytics-browser';
 import { PassportDialog, OnboardingStorage } from '@holium/shared';
 import { StepProps } from './types';
-import { AuthIPC, FriendsIPC, RealmIPC } from '../../stores/ipc';
+import { AuthIPC, RealmIPC } from '../../stores/ipc';
 import { FileUploadParams } from '../../../os/services/ship/ship.service';
 
 export const PassportStep = ({ setStep, onFinish }: StepProps) => {
   const { shipId, nickname, description, avatar } = OnboardingStorage.get();
+  const [avatarSrc, setAvatarSrc] = useState<string | null>(avatar);
+  const [descriptionSrc, setDescription] = useState<string | null>(description);
+  const [nicknameSrc, setNickname] = useState<string | null>(nickname);
+  const [sigilColor, setSigilColor] = useState<string | undefined>('#000000');
 
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    const { shipId, shipCode, shipUrl, passwordHash, clientSideEncryptionKey } =
+      OnboardingStorage.get();
+    if (
+      !shipId ||
+      !shipCode ||
+      !shipUrl ||
+      !passwordHash ||
+      !clientSideEncryptionKey
+    ) {
+      console.error('in bad state');
+      return;
+    }
+    window.onboardingService.setCredentials({
+      patp: shipId,
+      code: shipCode,
+      url: shipUrl,
+    });
+    window.onboardingService
+      .getPassport()
+      .then((ourPassport) => {
+        setNickname(ourPassport?.nickname);
+        setAvatarSrc(ourPassport?.avatar);
+        setDescription(ourPassport?.bio);
+        setSigilColor(ourPassport?.color);
+        setIsReady(true);
+      })
+      .catch((e) => {
+        console.error(e);
+        setIsReady(true);
+      });
+  }, []);
   useEffect(() => {
     track('Onboarding / Passport');
   });
@@ -37,7 +75,7 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
     await AuthIPC.updatePassport(shipId, nickname, description, avatar);
 
     // Sync friends agent
-    await FriendsIPC.saveContact(shipId, {
+    await window.onboardingService.updatePassport(shipId, {
       nickname,
       avatar,
       bio: description,
@@ -55,15 +93,16 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
     return true;
   };
 
-  return (
+  return isReady ? (
     <PassportDialog
       patp={shipId ?? ''}
-      prefilledNickname={nickname ?? ''}
-      prefilledDescription={description ?? ''}
-      prefilledAvatarSrc={avatar ?? ''}
+      prefilledColor={sigilColor}
+      prefilledNickname={nicknameSrc ?? ''}
+      prefilledDescription={descriptionSrc ?? ''}
+      prefilledAvatarSrc={avatarSrc ?? ''}
       onUploadFile={onUploadFile}
       onBack={onBack}
       onNext={handleOnNext}
     />
-  );
+  ) : null;
 };

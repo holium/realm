@@ -93,6 +93,15 @@ export class FriendsService extends AbstractDataAccess<Friend, any> {
     insertMany(friends);
   }
 
+  async fetchOne(patp: string) {
+    // Get last timestamp
+    const response = await APIConnection.getInstance().conduit.scry({
+      app: 'friends',
+      path: `/contact/${patp}`,
+    });
+    return response;
+  }
+
   private async _fetchFriends() {
     // Get last timestamp
     const response = await APIConnection.getInstance().conduit.scry({

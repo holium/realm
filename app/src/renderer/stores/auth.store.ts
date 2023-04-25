@@ -6,6 +6,7 @@ import {
   flow,
   getSnapshot,
   castToSnapshot,
+  tryReference,
 } from 'mobx-state-tree';
 import { AuthIPC } from 'renderer/stores/ipc';
 import { AccountModel } from './models/account.model';
@@ -58,12 +59,18 @@ export type LoginStatusType = typeof LoginStatus;
 
 export const AuthenticationModel = types
   .model('AuthenticationModel', {
+    selected: types.safeReference(AccountModel),
     accounts: types.array(AccountModel),
     session: types.maybeNull(types.reference(AccountModel)),
     order: types.array(types.string),
     status: LoginStatus,
   })
   .actions((self) => ({
+    setSelected(patp: string) {
+      self.selected = tryReference(() =>
+        self.accounts.find((acc) => acc.patp === patp)
+      );
+    },
     setAccounts(accounts?: AccountView[]) {
       if (!accounts) return;
       applySnapshot(self.accounts, castToSnapshot(accounts));
@@ -102,10 +109,7 @@ export const AuthenticationModel = types
       const account = self.accounts.find((a) => a.patp === patp);
       if (account) {
         try {
-          const result = yield RealmIPC.login(
-            account.patp,
-            password
-          ) as Promise<any>;
+          const result = yield RealmIPC.login(account.patp, password);
           // wait for the login to finish
           if (result) {
             self.status.setState('success');
@@ -123,7 +127,7 @@ export const AuthenticationModel = types
         return;
       }
       try {
-        yield RealmIPC.logout(self.session.patp) as Promise<any>;
+        yield RealmIPC.logout(self.session.patp);
         self.session = null;
         trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
         self.status.setState('initial');
@@ -146,18 +150,19 @@ export const AuthenticationModel = types
     }),
     removeAccount: flow(function* (patp: string) {
       // TODO implement
-      const account = self.accounts.find((a) => a.patp === patp);
+      const removeIdx = self.accounts.findIndex((a) => a.patp === patp);
+      const account = self.accounts[removeIdx];
       if (account) {
-        const result = yield AuthIPC.deleteAccount(
-          account.patp
-        ) as Promise<any>;
-        if (result) {
-          self.accounts.remove(account);
-          if (self.accounts.length === 0) {
-            self.session = null;
-          }
-        } else {
-          // TODO show error
+        yield AuthIPC.deleteAccount(account.patp);
+        if (removeIdx > 0) {
+          self.selected = self.accounts[removeIdx - 1];
+        }
+        self.accounts.remove(account);
+        if (localStorage.getItem('lastAccountLogin') === patp) {
+          localStorage.removeItem('lastAccountLogin');
+        }
+        if (self.accounts.length === 0) {
+          self.session = null;
         }
       }
     }),

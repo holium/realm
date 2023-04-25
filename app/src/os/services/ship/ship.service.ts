@@ -1,5 +1,6 @@
 import { app } from 'electron';
 import fs from 'fs';
+import path from 'path';
 import log from 'electron-log';
 import moment from 'moment';
 import AbstractService, { ServiceOptions } from '../abstract.service';
@@ -13,6 +14,7 @@ import SpacesService from './spaces/spaces.service';
 import { S3Client, StorageAcl } from '../../../renderer/lib/S3Client';
 import BazaarService from './spaces/bazaar.service';
 import { getCookie } from '../../lib/shipHelpers';
+import { reject } from 'lodash';
 
 export class ShipService extends AbstractService<any> {
   public patp: string;
@@ -27,33 +29,21 @@ export class ShipService extends AbstractService<any> {
   };
 
   constructor(
-    ship: {
-      patp: string;
-      url: string;
-      code: string;
-    },
+    patp: string,
     password: string,
     clientSideEncryptionKey: string,
     options?: ServiceOptions
   ) {
     super('shipService', options);
-    this.patp = ship.patp;
+    this.patp = patp;
     if (options?.preload) return;
 
-    this.shipDB = new ShipDB(ship.patp, password, clientSideEncryptionKey);
+    this.shipDB = new ShipDB(patp, password, clientSideEncryptionKey);
     // this.encryptDb(password);
-
-    if (!this.shipDB) {
-      log.info(
-        'ship.service.ts:',
-        `Failed to create ship database for ${ship.patp}`
-      );
-      return;
-    }
 
     log.info(
       'ship.service.ts:',
-      `Created ship database for ${ship.patp} with client-side encryption key`,
+      `Created ship database for ${patp} with client-side encryption key`,
       clientSideEncryptionKey
     );
 
@@ -64,45 +54,16 @@ export class ShipService extends AbstractService<any> {
     if (!credentials.cookie) {
       log.info('ship.service.ts:', 'No cookie found, getting cookie...');
       getCookie({
-        patp: ship.patp,
-        url: ship.url,
-        code: ship.code,
+        patp: patp,
+        url: credentials.url,
+        code: credentials.code,
       })
         .then((cookie) => {
           if (cookie) {
             log.info('ship.service.ts:', 'Got cookie, setting credentials...');
-            this.setCredentials(ship.url, ship.code, cookie);
-
-            // create an instance of the conduit
-            APIConnection.getInstance({
-              url: ship.url,
-              code: ship.code,
-              cookie,
-              ship: ship.patp,
-            }).conduit.on('refreshed', (session: ConduitSession) => {
-              this.shipDB?.setCredentials(
-                session.url,
-                session.code,
-                session.cookie
-              );
-            });
-
-            log.info(
-              'ship.service.ts:',
-              'Creating ship sub-services (rooms, notifications, chat, friends, spaces, bazaar)...'
-            );
-
-            this.services = {
-              rooms: new RoomsService(),
-              notifications: new NotificationsService(
-                undefined,
-                this.shipDB?.db
-              ),
-              chat: new ChatService(undefined, this.shipDB?.db),
-              friends: new FriendsService(false, this.shipDB?.db),
-              spaces: new SpacesService(undefined, this.shipDB?.db, this.patp),
-              bazaar: new BazaarService(undefined, this.shipDB?.db),
-            };
+            this.setCredentials(credentials.url, credentials.code, cookie);
+            this._openConduit({ ...credentials, patp, cookie });
+            this._registerServices();
           } else {
             log.error('ship.service.ts:', 'Failed to get cookie');
           }
@@ -111,30 +72,8 @@ export class ShipService extends AbstractService<any> {
           log.error('ship.service.ts:', 'Failed to get cookie', err);
         });
     } else {
-      log.info('ship.service.ts:', 'Cookie found, setting credentials...');
-      this.setCredentials(ship.url, ship.code, credentials.cookie);
-
-      // create an instance of the conduit
-      APIConnection.getInstance({
-        ...credentials,
-        ship: ship.patp,
-      }).conduit.on('refreshed', (session: ConduitSession) => {
-        this.shipDB?.setCredentials(session.url, session.code, session.cookie);
-      });
-
-      log.info(
-        'ship.service.ts:',
-        'Creating ship sub-services (rooms, notifications, chat, friends, spaces, bazaar)...'
-      );
-
-      this.services = {
-        rooms: new RoomsService(),
-        notifications: new NotificationsService(undefined, this.shipDB.db),
-        chat: new ChatService(undefined, this.shipDB.db),
-        friends: new FriendsService(false, this.shipDB.db),
-        spaces: new SpacesService(undefined, this.shipDB.db, this.patp),
-        bazaar: new BazaarService(undefined, this.shipDB.db),
-      };
+      this._openConduit(credentials);
+      this._registerServices();
     }
 
     // TODO this DROP is here until we get the agent refactor with lastTimestamp scries
@@ -154,6 +93,46 @@ export class ShipService extends AbstractService<any> {
     app.on('quit', () => {
       this.shipDB?.disconnect();
     });
+  }
+
+  _openConduit(credentials: any) {
+    return new Promise((resolve) =>
+      APIConnection.getInstance({
+        ...credentials,
+        ship: this.patp,
+      })
+        .conduit.on('connected', () => {
+          resolve(null);
+        })
+        .on('refreshed', (session: ConduitSession) => {
+          this.shipDB?.setCredentials(
+            session.url,
+            session.code,
+            session.cookie
+          );
+          resolve(null);
+        })
+        .on('error', (err: any) => {
+          log.error('ship.service.ts:', 'Conduit error', err);
+          reject(err);
+        })
+    );
+  }
+
+  private _registerServices() {
+    if (!this.shipDB) return;
+    log.info(
+      'ship.service.ts:',
+      'Creating ship sub-services (rooms, notifications, chat, friends, spaces, bazaar)...'
+    );
+    this.services = {
+      rooms: new RoomsService(),
+      notifications: new NotificationsService(undefined, this.shipDB.db),
+      chat: new ChatService(undefined, this.shipDB.db),
+      friends: new FriendsService(false, this.shipDB.db),
+      spaces: new SpacesService(undefined, this.shipDB.db, this.patp),
+      bazaar: new BazaarService(undefined, this.shipDB.db),
+    };
   }
 
   // TODO initialize the ship services here
@@ -298,6 +277,11 @@ export class ShipService extends AbstractService<any> {
     });
   }
 
+  getPassport() {
+    if (!this.services) return;
+    return this.services.friends.fetchOne(this.patp);
+  }
+
   updatePassport(nickname: string, bio?: string, avatar?: string) {
     if (!this.services) return;
 
@@ -307,22 +291,20 @@ export class ShipService extends AbstractService<any> {
       avatar,
     });
   }
+
+  static _deleteShipDB(patp: string) {
+    const dbPath = path.join(app.getPath('userData'), `${patp}.sqlite`);
+    if (fs.existsSync(dbPath)) {
+      fs.unlinkSync(dbPath);
+    }
+  }
 }
 
 export default ShipService;
 
 // Generate preload
 export const shipPreload = ShipService.preload(
-  new ShipService(
-    {
-      patp: '',
-      url: '',
-      code: '',
-    },
-    '',
-    '',
-    { preload: true }
-  )
+  new ShipService('', '', '', { preload: true })
 );
 
 export interface FileUploadParams {

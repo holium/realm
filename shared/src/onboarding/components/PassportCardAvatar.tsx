@@ -8,6 +8,7 @@ import {
   Icon,
   Spinner,
   ErrorBox,
+  Box,
 } from '@holium/design-system/general';
 import { Input } from '@holium/design-system/inputs';
 import { AddImageIcon } from '../icons/AddImageIcon';
@@ -99,6 +100,7 @@ const headers = {
 
 type Props = {
   patp: string;
+  color?: string;
   initialAvatarSrc: string | undefined;
   setAvatarSrc: (src?: string) => void;
   onUploadFile: (file: File) => Promise<string | undefined>;
@@ -106,6 +108,7 @@ type Props = {
 
 export const PassportCardAvatar = ({
   patp,
+  color = '#000000',
   initialAvatarSrc,
   setAvatarSrc,
   onUploadFile,
@@ -250,7 +253,7 @@ export const PassportCardAvatar = ({
               isSelected={selectedImage === 0}
               onClick={() => handleSetAvatar(0)}
             >
-              <Avatar patp={patp} sigilColor={['black', 'white']} size={50} />
+              <Avatar patp={patp} sigilColor={[color, 'white']} size={50} />
             </AvatarBox>
             {generatedImages?.map(({ src }, index) => (
               <AvatarBox
@@ -276,8 +279,14 @@ export const PassportCardAvatar = ({
               <FileInput
                 ref={fileInputRef}
                 type="file"
+                style={{ display: 'none' }}
                 onChange={onChooseFile}
               />
+              <Box p={3}>
+                <Button.Primary onClick={() => fileInputRef.current?.click()}>
+                  Choose file
+                </Button.Primary>
+              </Box>
             </Flex>
             {uploadError && <ErrorBox>{uploadError}</ErrorBox>}
           </Flex>
@@ -291,7 +300,7 @@ export const PassportCardAvatar = ({
         <AddImageIcon />
       </AddImageButton>
       {selectedImage === 0 && (
-        <Avatar patp={patp} sigilColor={['black', 'white']} size={68} />
+        <Avatar patp={patp} sigilColor={[color, 'white']} size={68} />
       )}
       {selectedImage > 0 && selectedImage < 21 && (
         <CustomImage src={generatedImages?.[selectedImage - 1].src} size={68} />

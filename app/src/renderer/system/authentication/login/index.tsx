@@ -22,18 +22,25 @@ interface LoginProps {
 
 const LoginPresenter = ({ addShip }: LoginProps) => {
   const { setTheme, authStore } = useAppState();
-  const { accounts, status: loginStatus } = authStore;
+  const {
+    accounts,
+    status: loginStatus,
+    selected: selectedShip,
+    setSelected: setSelectedShip,
+  } = authStore;
 
   const [password, setPassword] = useState('');
   const passwordRef = useRef<HTMLInputElement>(null);
   // const wrapperRef = useRef(null);
   const submitRef = useRef<HTMLButtonElement>(null);
 
-  const [selectedShip, setSelectedShip] = useState(
-    accounts.find(
-      (acc) => acc.patp === localStorage.getItem('lastAccountLogin')
-    ) || accounts[0]
-  );
+  useEffect(() => {
+    if (!selectedShip) {
+      setSelectedShip(
+        localStorage.getItem('lastAccountLogin') || accounts[0].patp
+      );
+    }
+  }, []);
 
   const shipName = selectedShip?.nickname || selectedShip?.patp;
 
@@ -131,15 +138,9 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
         id: `${accountMenuId}-remove`,
         icon: 'Trash',
         label: 'Remove account',
-        onClick: () => {
-          let newSelectedShip;
-          if (accounts.length === 1) {
-            newSelectedShip =
-              accounts.find((ship) => ship.patp !== selectedShip?.patp) ??
-              accounts[0];
-          }
-          authStore.removeAccount(selectedShip?.patp);
-          if (newSelectedShip) setSelectedShip(newSelectedShip);
+        onClick: (evt) => {
+          evt.stopPropagation();
+          selectedShip && authStore.removeAccount(selectedShip.patp);
         },
       },
     ];
@@ -333,10 +334,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
           justifyContent="space-between"
           alignItems="center"
         >
-          <ShipSelector
-            selectedShip={selectedShip}
-            onSelect={setSelectedShip}
-          />
+          <ShipSelector />
           <Flex gap={12}>
             <Button.TextButton
               showOnHover
