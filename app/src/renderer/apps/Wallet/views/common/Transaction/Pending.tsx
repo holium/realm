@@ -29,7 +29,7 @@ export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
     );
 
   return pendingTransactions.length ? (
-    <Flex px={1} mb={1} width="100%">
+    <Flex width="100%">
       <PendingTransaction
         transaction={pendingTransactions[0]}
         hide={props.hide}
@@ -81,21 +81,13 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   }
 
   return (
-    <Flex
-      mx={2}
-      py={2}
-      px={2}
-      width="100%"
-      justifyContent="space-between"
-      borderRadius="9px"
-    >
+    <Flex width="100%" justifyContent="space-between" borderRadius="9px">
       <Flex
-        mx={2}
         justifyContent="center"
         alignItems="center"
         onClick={goToTransaction}
       >
-        <Flex mr={4} height="100%" alignItems="center">
+        <Flex height="100%" alignItems="center">
           <Spinner size={0} />
         </Flex>
         <Flex flexDirection="column">
@@ -103,7 +95,7 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
             {props.transaction.type === 'sent' ? 'Sending' : 'Receiving'}{' '}
             {isEth ? ethAmount.eth : btcAmount.btc} {unitsDisplay}
           </Text.Body>
-          <Text.Body pt={1} variant="body" fontSize={1}>
+          <Text.Body variant="body" fontSize={1}>
             {props.transaction.type === 'sent' ? 'To:' : 'From:'} {themDisplay}{' '}
             <Icon ml="7px" name="ShareBox" size="15px" />
           </Text.Body>

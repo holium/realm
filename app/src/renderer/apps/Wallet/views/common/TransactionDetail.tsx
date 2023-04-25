@@ -103,7 +103,7 @@ const TransactionDetailPresenter = () => {
     : `${btcAmount.btc} BTC`;
 
   return (
-    <Flex width="100%" height="100%" flexDirection="column" py={1}>
+    <Flex width="100%" height="100%" flexDirection="column" gap={10}>
       <Text.Custom fontSize={2}>Transaction</Text.Custom>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
         {transaction.status === 'pending' ? (
@@ -116,7 +116,7 @@ const TransactionDetailPresenter = () => {
             >
               Pending
             </Text.Custom>
-            <Spinner ml={3} mt={1} size={0} />
+            <Spinner size={0} />
           </Flex>
         ) : (
           <Text.Custom
@@ -152,7 +152,7 @@ const TransactionDetailPresenter = () => {
           )}
         </Flex>
       </Flex>
-      <Flex mt={8} width="100%" justifyContent="space-between">
+      <Flex width="100%" justifyContent="space-between">
         <Text.Custom fontSize={1} opacity={0.7}>
           {wasSent ? 'SENT TO' : 'RECEIVED FROM'}
         </Text.Custom>
@@ -160,30 +160,25 @@ const TransactionDetailPresenter = () => {
           {!transaction.theirPatp ? (
             <Icon name="Spy" size={18} opacity={0.5} />
           ) : (
-            <Avatar simple={true} size={20} patp={transaction.theirPatp} />
+            <Avatar
+              simple={true}
+              size={20}
+              patp={transaction.theirPatp}
+              sigilColor={['#000000', 'white']}
+            />
           )}
           <Text.Custom fontSize={1} ml={2}>
             {themDisplay}
           </Text.Custom>
         </Flex>
       </Flex>
-      <Flex
-        position="relative"
-        mt={4}
-        width="100%"
-        justifyContent="space-between"
-      >
+      <Flex position="relative" width="100%" justifyContent="space-between">
         <Text.Custom fontSize={1} opacity={0.7}>
           DATE
         </Text.Custom>
         <Text.Custom fontSize={1}>{getDisplayDate(completed)}</Text.Custom>
       </Flex>
-      <Flex
-        position="relative"
-        mt={4}
-        width="100%"
-        justifyContent="space-between"
-      >
+      <Flex position="relative" width="100%" justifyContent="space-between">
         <Text.Custom fontSize={1} opacity={0.7}>
           HASH
         </Text.Custom>
@@ -197,11 +192,16 @@ const TransactionDetailPresenter = () => {
           </Text.Anchor>
         </Flex>
       </Flex>
-      <Flex flexDirection="column" mt={8}>
+      <Flex flexDirection="column" gap={10}>
         <Text.Label style={{ marginBottom: 4 }} opacity={0.7} fontSize={1}>
           Notes
         </Text.Label>
-        <Flex width="100%" flexDirection="column" justifyContent="center">
+        <Flex
+          width="100%"
+          flexDirection="column"
+          justifyContent="center"
+          gap={10}
+        >
           <TextInput
             id="transaction-notes"
             name="transaction-notes"
@@ -214,17 +214,15 @@ const TransactionDetailPresenter = () => {
             }
             placeholder="Transaction notes..."
           />
-          <Flex mt={4} width="100%" justifyContent="flex-end">
-            <Button.Primary
-              width="100%"
-              height={32}
-              justifyContent="center"
-              disabled={notes === transaction.notes && !loading}
-              onClick={saveNotes}
-            >
-              {loading ? <Spinner size={0} color="white" /> : 'Save notes'}
-            </Button.Primary>
-          </Flex>
+          <Button.Primary
+            width="100%"
+            height={32}
+            justifyContent="center"
+            disabled={notes === transaction.notes && !loading}
+            onClick={saveNotes}
+          >
+            {loading ? <Spinner size={0} color="white" /> : 'Save notes'}
+          </Button.Primary>
         </Flex>
       </Flex>
     </Flex>

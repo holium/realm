@@ -217,7 +217,7 @@ export class WalletService extends AbstractService {
       app: 'realm-wallet',
       mark: 'realm-wallet-action',
       json: {
-        'set-transaction-notes': {
+        'save-transaction-notes': {
           network,
           net,
           wallet,

@@ -1278,8 +1278,6 @@ export const WalletStore = types
 export type WalletStoreType = Instance<typeof WalletStore>;
 
 WalletIPC.onUpdate((payload: any) => {
-  console.log('got wallet update', payload);
-  // const { type, payload } = update;
   const type = Object.keys(payload)[0];
   switch (type) {
     case 'wallet':

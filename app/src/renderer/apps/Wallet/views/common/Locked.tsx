@@ -17,16 +17,13 @@ export const Locked = observer(() => {
         flexDirection="column"
         justifyContent="center"
         alignItems="center"
+        gap={10}
       >
         <Icon name="Locked" size={36} />
-        <Text.H3 mt={2} variant="h3">
-          Wallet Locked
-        </Text.H3>
+        <Text.H3 variant="h3">Wallet Locked</Text.H3>
       </Flex>
-      <Flex flex={2} flexDirection="column" alignItems="center">
-        <Text.Body mb={8} variant="body">
-          Enter your passcode to continue.
-        </Text.Body>
+      <Flex flex={2} flexDirection="column" alignItems="center" gap={20}>
+        <Text.Body variant="body">Enter your passcode to continue.</Text.Body>
         <PasscodeInput checkStored={true} onSuccess={unlock} />
       </Flex>
     </Flex>

@@ -95,9 +95,6 @@ const DetailPresenter = (props: DetailProps) => {
       height="100%"
       justifyContent="flex-start"
       flexDirection="column"
-      py={1}
-      // px={3}
-      pb={0}
     >
       <DetailHero
         wallet={wallet}
@@ -136,9 +133,8 @@ const DetailPresenter = (props: DetailProps) => {
                 opacity: { ease: 'linear' },
               }}
               flexDirection="column"
-              mt={6}
             >
-              <Text.Custom mb={2} opacity={0.5} fontWeight={500} fontSize={2}>
+              <Text.Custom opacity={0.5} fontWeight={500} fontSize={2}>
                 Transactions
               </Text.Custom>
               <TransactionList
@@ -156,7 +152,6 @@ const DetailPresenter = (props: DetailProps) => {
           width="100%"
           flexDirection="column"
           justifyContent="center"
-          pt={2}
           gap={10}
         >
           {!coin && (
@@ -203,7 +198,7 @@ function ListSelector(props: ListSelectorProps) {
     );
   };
   return (
-    <Flex mb={2} alignItems="center">
+    <Flex alignItems="center">
       {props.network === 'ethereum' && (
         <MenuButton
           selected={props.selected === 'coins'}
