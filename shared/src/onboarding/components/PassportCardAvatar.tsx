@@ -47,7 +47,7 @@ const Divider = styled.hr`
   height: 1px;
   margin: 12px 0;
   border: none;
-  background-color: rgba(var(--rlm-icon-rgba), 0.2);
+  background-color: rgba(var(--rlm-border-rgba));
 `;
 
 const CustomImage = styled.img<{ size?: number }>`
@@ -270,12 +270,12 @@ export const PassportCardAvatar = ({
             ))}
           </div>
           <Divider />
-          <Flex flexDirection="column" alignItems="center" gap={8} my={16}>
-            <OnboardDialogDescription>
+          <Flex flexDirection="column" alignItems="center" gap={2} mt={16}>
+            <OnboardDialogDescription fontSize={1}>
               Upload a custom image
             </OnboardDialogDescription>
             <Flex>
-              {uploading.isOn && <Spinner size={4} />}
+              {uploading.isOn && <Spinner size={2} />}
               {uploadedImage && <CustomImage src={uploadedImage} />}
               <FileInput
                 ref={fileInputRef}
@@ -285,6 +285,7 @@ export const PassportCardAvatar = ({
               />
               <Flex height={50} px={3} alignItems="center">
                 <Button.Primary
+                  height={28}
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                 >

@@ -6,8 +6,10 @@ export { ChangePasswordModal } from './components/hosting/modals/ChangePasswordM
 export { EjectIdModal } from './components/hosting/modals/EjectIdModal';
 export { GetNewAccessCodeModal } from './components/hosting/modals/GetNewAccessCodeModal';
 export { VerifyEmailModal } from './components/hosting/modals/VerifyEmailModal';
+export { SubmitButton } from './components/hosting/SubmitButton';
 export { OnboardDialogSkeleton } from './components/OnboardDialog';
 export { OnboardDialogDescription } from './components/OnboardDialog.styles';
+export { PassportCard } from './components/PassportCard';
 export { AccountCustomDomainDialog } from './dialogs/AccountCustomDomainDialog';
 export { AccountDownloadRealmDialog } from './dialogs/AccountDownloadRealmDialog';
 export { AccountHostingDialog } from './dialogs/AccountHostingDialog';

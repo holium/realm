@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useField, useForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
@@ -21,8 +21,6 @@ import { SettingControl } from '../components/SettingControl';
 import { SettingPane } from '../components/SettingPane';
 import { SettingSection } from '../components/SettingSection';
 import { SettingTitle } from '../components/SettingTitle';
-// import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
-// import TwitterPicker from 'react-color/lib/components/twitter/Twitter';
 
 const WallpaperPreview = styled(motion.img)`
   width: 300px;
@@ -74,16 +72,15 @@ const ThemePanelPresenterView = ({
   const { theme } = useAppState();
   const { spacesStore } = useShipStore();
   const [wpOption, setWpOption] = useState<wpOptionType>(undefined);
-  const wpGalleryKeys = Object.keys(wpGallery);
   const [wallpaperOption, setWallpaperOption] = useState<string>('gallery');
 
-  const members = space.members.list;
-  const me = members.find(
-    (member) =>
-      member.patp === ship.patp && member.roles.indexOf('admin') !== -1
-  );
-  // is 'me' (currently logged in user) an admin?
-  const canEditSpace = me !== undefined;
+  const canEditSpace = useMemo(() => {
+    const me = space.members.list.find(
+      (m) => m.patp === ship.patp && m.roles.indexOf('admin') !== -1
+    );
+
+    return Boolean(me);
+  }, [ship.patp]);
 
   const updateSpaceTheme = async (newTheme: ThemeType) => {
     const currentSpace = spacesStore.spaces.get(space.path);
@@ -101,7 +98,7 @@ const ThemePanelPresenterView = ({
         return;
       }
 
-      let newTheme: ThemeType | undefined;
+      let newTheme: ThemeType;
       if (values.customWallpaper !== '') {
         customWallpaper.actions.onChange('');
         newTheme = (await theme.setWallpaper(
@@ -141,128 +138,96 @@ const ThemePanelPresenterView = ({
   return (
     <SettingPane>
       <SettingTitle title="Theme" />
-      {/* <SettingSection>
-        <SettingControl inline label="Accent Color">
-          <Flex position="relative" justifyContent="flex-end">
-            <ColorTile
-              // id="space-color-tile"
-              size={26}
-              tileColor={'#000'}
-              onClick={(_evt: any) => {
-                // setColorPickerOpen(!colorPickerOpen);
+      <SettingSection
+        title="Wallpaper"
+        body={
+          <>
+            <SettingControl label="Current">
+              <WallpaperPreview src={theme.wallpaper} />
+            </SettingControl>
+            <RadioGroup
+              options={[
+                { label: 'Gallery', value: 'gallery' },
+                { label: 'Custom url', value: 'custom' },
+              ]}
+              selected={wallpaperOption}
+              onClick={(val: string) => {
+                theme.setWallpaper(val);
+                setWallpaperOption(val);
               }}
             />
-            <ColorTilePopover
-              // id="space-color-tile-popover"
-              size={26}
-              // isOpen={colorPickerOpen}
-              // data-is-open={colorPickerOpen}
-            >
-              <TwitterPicker
-                width="inherit"
-                className="cursor-style"
-                // color={validatedColor}
-                onChange={(newColor: { hex: string }) => {
-                  // accentColorField.actions.onChange(newColor.hex);
-                  // setWorkspaceState({
-                  //     color: newColor.hex,
-                  // });
-                  // setValidatedColor(newColor.hex);
-                }}
-                triangle="top-left"
-                colors={[
-                  '#4E9EFD',
-                  '#FFFF00',
-                  '#00FF00',
-                  '#FF0000',
-                  '#52B278',
-                  '#D9682A',
-                  '#ff3399',
-                  '#8419D9',
-                ]}
-              />
-            </ColorTilePopover>
-          </Flex>
-        </SettingControl>
-      </SettingSection> */}
-      <SettingSection title="Wallpaper">
-        <SettingControl label="Current">
-          <WallpaperPreview src={theme.wallpaper} />
-        </SettingControl>
-        <RadioGroup
-          options={[
-            { label: 'Gallery', value: 'gallery' },
-            { label: 'Custom url', value: 'custom' },
-          ]}
-          selected={wallpaperOption}
-          onClick={(val: string) => {
-            theme.setWallpaper(val);
-            setWallpaperOption(val);
-          }}
-        />
-        {wallpaperOption === 'gallery' && (
-          <SettingControl>
-            <RadioImages
-              style={{ backgroundColor: 'rgba(var(--rlm-overlay-hover-rgba))' }}
-              selected={wpOption}
-              options={wpGalleryKeys.map((key: string) => ({
-                imageSrc: wpGallery[key],
-                value: key,
-              }))}
-              onClick={async (value: wpOptionType) => {
-                if (wpOption && value === wpOption) {
-                  setWpOption(undefined);
-                } else if (value) {
-                  setWpOption(value);
-                  const newTheme = await theme.setWallpaper(wpGallery[value]);
-                  const currentSpace = spacesStore.spaces.get(space.path);
-                  if (!currentSpace) {
-                    console.warn('space not found in spacesStore');
-                    return;
+            {wallpaperOption === 'gallery' && (
+              <SettingControl>
+                <RadioImages
+                  style={{
+                    backgroundColor: 'rgba(var(--rlm-overlay-hover-rgba))',
+                  }}
+                  selected={wpOption}
+                  options={Object.keys(wpGallery).map((key) => ({
+                    imageSrc: wpGallery[key],
+                    value: key,
+                  }))}
+                  onClick={async (value: wpOptionType) => {
+                    if (wpOption && value === wpOption) {
+                      setWpOption(undefined);
+                    } else if (value) {
+                      setWpOption(value);
+                      const newTheme = await theme.setWallpaper(
+                        wpGallery[value]
+                      );
+                      const currentSpace = spacesStore.spaces.get(space.path);
+                      if (!currentSpace) {
+                        console.warn('space not found in spacesStore');
+                        return;
+                      }
+                      await currentSpace.setTheme(newTheme);
+                    }
+                  }}
+                />
+              </SettingControl>
+            )}
+            {wallpaperOption === 'custom' && (
+              <SettingControl>
+                <TextInput
+                  id="customWallpaper"
+                  name="customWallpaper"
+                  type="text"
+                  placeholder="Paste url here"
+                  style={{
+                    width: '100%',
+                    backgroundColor: 'rgba(var(--rlm-overlay-hover-rgba))',
+                  }}
+                  inputStyle={{
+                    background: 'transparent',
+                  }}
+                  defaultValue={customWallpaper.state.value}
+                  // error={!shipUrl.computed.isDirty || shipUrl.computed.error}
+                  onChange={(e) =>
+                    customWallpaper.actions.onChange(
+                      (e.target as HTMLInputElement).value
+                    )
                   }
-                  await currentSpace.setTheme(newTheme);
-                }
-              }}
-            />
-          </SettingControl>
-        )}
-        {wallpaperOption === 'custom' && (
-          <SettingControl>
-            <TextInput
-              id="customWallpaper"
-              name="customWallpaper"
-              type="text"
-              placeholder="Paste url here"
-              style={{
-                width: '100%',
-                // borderRadius: 9,
-                backgroundColor: 'rgba(var(--rlm-overlay-hover-rgba))',
-              }}
-              inputStyle={{
-                background: 'transparent',
-              }}
-              defaultValue={customWallpaper.state.value}
-              // error={!shipUrl.computed.isDirty || shipUrl.computed.error}
-              onChange={(e: any) =>
-                customWallpaper.actions.onChange(e.target.value)
-              }
-              rightAdornment={
-                canEditSpace ? (
-                  <Box>
-                    <Button.TextButton
-                      style={{ fontWeight: 400 }}
-                      disabled={!themeForm.computed.isValid || !canEditSpace}
-                      onClick={themeForm.actions.submit}
-                    >
-                      Save
-                    </Button.TextButton>
-                  </Box>
-                ) : undefined
-              }
-            />
-          </SettingControl>
-        )}
-      </SettingSection>
+                  rightAdornment={
+                    canEditSpace ? (
+                      <Box>
+                        <Button.TextButton
+                          style={{ fontWeight: 400 }}
+                          disabled={
+                            !themeForm.computed.isValid || !canEditSpace
+                          }
+                          onClick={themeForm.actions.submit}
+                        >
+                          Save
+                        </Button.TextButton>
+                      </Box>
+                    ) : undefined
+                  }
+                />
+              </SettingControl>
+            )}
+          </>
+        }
+      />
     </SettingPane>
   );
 };

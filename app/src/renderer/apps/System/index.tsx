@@ -6,11 +6,11 @@ import { Avatar, Box, Flex, RadioList, Text } from '@holium/design-system';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { AboutPanel } from './pages/About';
-import { AccountPanel } from './pages/Account';
-import { HelpPanel } from './pages/Help';
-import { SystemPanel } from './pages/System';
-import { ThemePanel } from './pages/Theme';
+import { AboutPanel } from './panels/AboutPanel';
+import { AccountPanel } from './panels/AccountPanel';
+import { HelpPanel } from './panels/HelpPanel';
+import { SystemPanel } from './panels/SystemPanel';
+import { ThemePanel } from './panels/ThemePanel';
 
 type SystemPanelType =
   | 'system'
