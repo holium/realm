@@ -143,8 +143,6 @@ export const WordPicker: FC<WordPickerProps> = observer(
 
       return (
         <Flex
-          mt={16}
-          p={16}
           justifyContent="space-evenly"
           alignItems="center"
           flexWrap="wrap"
@@ -186,9 +184,7 @@ export const WordPicker: FC<WordPickerProps> = observer(
           border={props.border}
           background={props.background}
         />
-        <Text.Body mt={1} variant="body">
-          {error}
-        </Text.Body>
+        <Text.Body variant="body">{error}</Text.Body>
       </>
     );
   }
