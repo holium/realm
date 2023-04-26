@@ -4,8 +4,6 @@ import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 import styled from 'styled-components';
 
-import { useRooms } from '../useRooms';
-
 interface CommCircleProps {
   customBg: string;
 }
@@ -34,15 +32,13 @@ interface ProviderSelectorProps {
 
 const ProviderSelectorPresenter = ({ onClick }: ProviderSelectorProps) => {
   const { theme } = useAppState();
-  const { ship } = useShipStore();
+  const { roomsStore } = useShipStore();
   const { windowColor } = theme;
-  const roomsManager = useRooms(ship?.patp);
-
   return (
     <ProviderStyle customBg={windowColor} onClick={(evt: any) => onClick(evt)}>
       <Icon size={18} opacity={0.7} name="BaseStation" />
       <Text.Custom fontSize={1} opacity={0.7}>
-        {roomsManager?.protocol.provider}
+        {roomsStore.provider}
       </Text.Custom>
     </ProviderStyle>
   );

@@ -13,7 +13,8 @@ export class RoomsService extends AbstractService<any> {
       app: 'rooms-v2',
       path: '/lib',
       onEvent: async (data, _id, mark) => {
-        this.sendUpdate({ type: mark, data });
+        const event = Object.keys(data)[0];
+        this.sendUpdate({ mark, type: event, payload: data[event] });
       },
       onError: () => console.log('rooms subscription rejected'),
       onQuit: () => {
@@ -30,6 +31,26 @@ export class RoomsService extends AbstractService<any> {
   }
   public scry(payload: Scry) {
     return APIConnection.getInstance().conduit.scry(payload);
+  }
+  public setProvider(provider: string) {
+    return APIConnection.getInstance().conduit.poke({
+      app: 'rooms-v2',
+      mark: 'rooms-v2-session-action',
+      json: {
+        'set-provider': provider,
+      },
+    });
+  }
+  async getSession(): Promise<void> {
+    try {
+      const response = await this.scry({
+        app: 'rooms-v2',
+        path: '/session',
+      });
+      return response.session;
+    } catch (e) {
+      console.error(e);
+    }
   }
 }
 

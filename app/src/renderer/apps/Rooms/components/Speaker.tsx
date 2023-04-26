@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import BeatLoader from 'react-spinners/BeatLoader';
 import { Avatar, Flex, FlexProps, Icon, Text } from '@holium/design-system';
-import { PeerConnectionState, RealmProtocol } from '@holium/realm-room';
+import { PeerConnectionState } from '@holium/realm-room';
 import { observer } from 'mobx-react';
 import {
   ContextMenuOption,
@@ -9,8 +9,6 @@ import {
 } from 'renderer/components/ContextMenu';
 import { useShipStore } from 'renderer/stores/ship.store';
 import styled from 'styled-components';
-
-import { useRooms } from '../useRooms';
 
 import { AudioWave } from './AudioWave';
 
@@ -29,17 +27,15 @@ const speakerType = {
 
 const SpeakerPresenter = (props: ISpeaker) => {
   const { person, type } = props;
-  const { ship, friends } = useShipStore();
+  const { ship, friends, roomsStore } = useShipStore();
   const speakerRef = useRef<any>(null);
-  const roomsManager = useRooms(ship?.patp);
   const { getOptions, setOptions } = useContextMenu();
   const isOur = person === ship?.patp;
   const metadata = friends.getContactAvatarMetadata(person);
 
   let name = metadata?.nickname || person;
-  const peer = isOur
-    ? roomsManager.protocol.local
-    : roomsManager.protocol.peers.get(person);
+  const peer = roomsStore.getPeer(person);
+  console.log('peer', peer);
 
   const contextMenuOptions = useMemo(
     () =>
@@ -49,23 +45,23 @@ const SpeakerPresenter = (props: ISpeaker) => {
           label: 'Reconnect',
           disabled: peer?.status === PeerConnectionState.Connected,
           onClick: (evt: any) => {
-            (roomsManager.protocol as RealmProtocol).retry(person);
+            roomsStore.retryPeer(person);
             evt.stopPropagation();
           },
         },
         // only the creator can kick people
-        ship?.patp === roomsManager.live.room?.creator && {
+        ship?.patp === roomsStore.current?.creator && {
           style: { color: '#FD4E4E' },
           id: `room-speaker-${person}-kick`,
           label: 'Kick',
           loading: false,
           onClick: (evt: any) => {
             evt.stopPropagation();
-            roomsManager.protocol.kick(person);
+            roomsStore.kickPeer(person);
           },
         },
       ].filter(Boolean) as ContextMenuOption[],
-    [peer?.status, person, roomsManager.live.room, roomsManager.protocol, ship]
+    [peer?.status, person, roomsStore.current, ship]
   );
 
   const peerState = isOur ? PeerConnectionState.Connected : peer?.status;

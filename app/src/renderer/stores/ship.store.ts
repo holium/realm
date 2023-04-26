@@ -9,6 +9,7 @@ import { NotifStore } from './models/notification.model';
 import { SpacesStore } from './models/spaces.model';
 import { ChatStore } from './chat.store';
 import { ShipIPC } from './ipc';
+import { RoomsStore } from './rooms.store';
 
 const ShipModel = types
   .model('ShipModel', {
@@ -38,6 +39,7 @@ export const ShipStore = types
     spacesStore: SpacesStore,
     bazaarStore: BazaarStore,
     featuredStore: FeaturedStore,
+    roomsStore: RoomsStore,
     loader: LoaderModel,
   })
   .actions((self) => ({
@@ -127,6 +129,10 @@ export const shipStore = ShipStore.create({
   },
   loader: {
     state: 'initial',
+  },
+  roomsStore: {
+    provider: window.ship,
+    rooms: {},
   },
 });
 

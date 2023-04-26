@@ -10,7 +10,6 @@ import { Rooms } from './List';
 import { NewRoom } from './NewRoom';
 import { Room } from './Room';
 import { Settings } from './Settings';
-import { useRooms } from './useRooms';
 
 const RoomViews: { [key: string]: any } = {
   list: () => <Rooms />,
@@ -21,9 +20,8 @@ const RoomViews: { [key: string]: any } = {
 
 export const RoomAppPresenter = () => {
   const { shellStore } = useAppState();
-  const { ship } = useShipStore();
+  const { roomsStore } = useShipStore();
   const { roomsApp, dimensions } = useTrayApps();
-  const roomsManager = useRooms(ship?.patp);
 
   useEffect(() => {
     if (shellStore.micAllowed) return;
@@ -35,10 +33,10 @@ export const RoomAppPresenter = () => {
   }, []);
 
   useEffect(() => {
-    if (roomsManager?.live.room) {
+    if (roomsStore.current) {
       roomsApp.setView('room');
     }
-  }, [roomsApp, roomsManager?.live.room]);
+  }, [roomsApp, roomsStore.current]);
   const View = RoomViews[roomsApp.currentView];
   return (
     <Flex

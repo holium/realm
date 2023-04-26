@@ -3,10 +3,7 @@ import { Button, Flex, Icon, Text, TextInput } from '@holium/design-system';
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
 import { useShipStore } from 'renderer/stores/ship.store';
-
 import { useTrayApps } from '../store';
-
-import { useRooms } from './useRooms';
 
 export const createRoomForm = (
   currentRooms: string[],
@@ -57,12 +54,11 @@ export const createRoomForm = (
 };
 
 const NewRoomPresenter = () => {
-  const { ship, spacesStore } = useShipStore();
+  const { ship, spacesStore, roomsStore } = useShipStore();
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms(ship?.patp);
 
   const { form, name } = useMemo(
-    () => createRoomForm(roomsManager.rooms.map((room) => room.title)),
+    () => createRoomForm(roomsStore.roomsList.map((room) => room.title)),
     []
   );
 
@@ -74,7 +70,7 @@ const NewRoomPresenter = () => {
       spacesStore.selected?.type !== 'our'
         ? spacesStore.selected?.path ?? ''
         : null;
-    roomsManager?.createRoom(name, isPrivate ? 'private' : 'public', spacePath);
+    roomsStore?.createRoom(name, isPrivate ? 'private' : 'public', spacePath);
     roomsApp.setView('room');
   };
 

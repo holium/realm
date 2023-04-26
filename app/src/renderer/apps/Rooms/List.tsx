@@ -1,29 +1,25 @@
 import { Button, Flex, Icon, Text, Tooltip } from '@holium/design-system';
-import { RealmProtocol, RoomType } from '@holium/realm-room';
 import { observer } from 'mobx-react';
 import { useAppState } from 'renderer/stores/app.store';
+import { RoomMobx } from 'renderer/stores/rooms.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
 
 import { ProviderSelector } from './components/ProviderSelector';
 import { RoomRow } from './components/RoomRow';
-import { useRooms } from './useRooms';
 
 const RoomsPresenter = () => {
   const { theme } = useAppState();
-  const { ship, spacesStore } = useShipStore();
+  const { spacesStore, roomsStore } = useShipStore();
   const { windowColor } = theme;
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms(ship?.patp);
 
   const ourSpace = spacesStore.selected?.type === 'our';
 
   const rooms = ourSpace
-    ? roomsManager?.rooms
-    : (roomsManager?.protocol as RealmProtocol).getSpaceRooms(
-        spacesStore.selected?.path ?? ''
-      );
+    ? roomsStore?.roomsList
+    : roomsStore.getSpaceRooms(spacesStore.selected?.path ?? '');
 
   return (
     <>
@@ -69,7 +65,7 @@ const RoomsPresenter = () => {
             </Text.Custom>
           </Flex>
         )}
-        {rooms?.map((room: RoomType, index: number) => {
+        {rooms?.map((room: RoomMobx, index: number) => {
           return (
             <RoomRow
               key={`${room.title}-${index}`}
@@ -83,8 +79,8 @@ const RoomsPresenter = () => {
               capacity={room.capacity}
               onClick={async (evt: any) => {
                 evt.stopPropagation();
-                if (roomsManager?.live.room?.rid !== room.rid) {
-                  roomsManager?.joinRoom(room.rid);
+                if (roomsStore.current?.rid !== room.rid) {
+                  roomsStore?.joinRoom(room.rid);
                 }
                 roomsApp.setView('room');
               }}

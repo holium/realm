@@ -6,18 +6,13 @@ import { useShipStore } from 'renderer/stores/ship.store';
 
 import { Speaker } from '../components/Speaker';
 import { roomTrayConfig } from '../config';
-import { useRooms } from '../useRooms';
 
 const VoiceViewPresenter = () => {
-  const { ship } = useShipStore();
-  const roomsManager = useRooms(ship?.patp);
+  const { ship, roomsStore } = useShipStore();
 
   const { setTrayAppHeight } = useTrayApps();
 
-  const our = roomsManager?.local.patp;
-  const speakers = roomsManager
-    ? [...Array.from(roomsManager.protocol.peers.keys())]
-    : []; //.filter((patp) => patp !== our);
+  const speakers = roomsStore.current ? [...Array.from(roomsStore.peers)] : []; //.filter((patp) => patp !== our);
 
   useEffect(() => {
     const regularHeight = roomTrayConfig.dimensions.height;
@@ -29,7 +24,7 @@ const VoiceViewPresenter = () => {
     }
   }, [speakers.length, setTrayAppHeight]);
 
-  if (!roomsManager?.live.room) {
+  if (!roomsStore.current) {
     return null;
   }
   return (
@@ -44,7 +39,7 @@ const VoiceViewPresenter = () => {
         gridAutoRows: '.5fr',
       }}
     >
-      <Speaker key={our} type="our" person={our ?? ''} />
+      <Speaker key={ship?.patp} type="our" person={ship?.patp ?? ''} />
       {speakers.map((person: string) => (
         <Speaker key={person} type="speaker" person={person} />
       ))}

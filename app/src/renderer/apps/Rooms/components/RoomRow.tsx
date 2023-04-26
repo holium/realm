@@ -30,8 +30,7 @@ const RoomRowPresenter = ({
   rightChildren,
 }: RoomRowProps) => {
   const { theme } = useAppState();
-  const { ship } = useShipStore();
-  const roomsManager = useRooms(ship?.patp);
+  const { ship, roomsStore } = useShipStore();
   const { getOptions, setOptions } = useContextMenu();
   const defaultOptions = getOptions('').filter(
     (o) => o.id === 'toggle-devtools'
@@ -51,7 +50,7 @@ const RoomRowPresenter = ({
   if (titleText && titleText.length > 16 && tray) {
     titleText = titleText.substring(0, 16) + '...';
   }
-  const isLive = roomsManager.presentRoom?.rid === rid;
+  const isLive = roomsStore.current?.rid === rid;
 
   const contextMenuOptions = useMemo(
     () =>
@@ -62,7 +61,7 @@ const RoomRowPresenter = ({
               label: 'Delete Room',
               onClick: (evt) => {
                 evt.stopPropagation();
-                rid && roomsManager.protocol.deleteRoom(rid);
+                rid && roomsStore.deleteRoom(rid);
               },
             } as ContextMenuOption,
             ...defaultOptions,

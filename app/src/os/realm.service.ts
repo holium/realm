@@ -326,37 +326,21 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           log.error('realm.service.ts:', 'No credentials found');
           return;
         }
-        const { url, code } = credentials;
+        const { cookie } = credentials;
         const patp = this.services?.ship?.patp;
         if (!patp) {
           log.error('realm.service.ts:', 'No patp found');
           return;
         }
-        log.info(
-          'realm.service.ts:',
-          'child window attempting to redirect to login. refreshing cookie...'
-        );
-        const cookie = await getCookie({
-          patp,
-          url,
-          code,
-        });
-        log.info(
-          'realm.service.ts:',
-          'new cookie generated. reloading child window and saving new cookie to session.'
-        );
-        if (!cookie) {
-          log.error('realm.service.ts:', 'no cookie');
-          return;
-        }
+
         await session.fromPartition(`urbit-webview`).cookies.set({
-          url: `${url}`,
-          // url: `${url}${appPath}`,
+          // url: `${url}`,
+          url: `${url}${appPath}`,
           name: `urbauth-${patp}`,
           value: cookie?.split('=')[1].split('; ')[0],
           // value: cookie,
         });
-        this.services?.ship?.updateCookie(cookie);
+        // this.services?.ship?.updateCookie(cookie);
         webContents.reload();
       }
     } catch (e) {

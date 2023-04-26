@@ -93,11 +93,12 @@ RealmIPC.onUpdate((update) => {
 // we have to signal back that we are ready to actually quit with OSActions.readyToQuit
 // OSActions.onQuitSignal(clearProtocolAndManager);
 
-RoomsIPC.onUpdate(({ data, mark }: { data: any; mark: string }) => {
-  if (protocol) {
-    protocol.onSignal(data, mark);
-  }
-});
+// RoomsIPC.onUpdate(({ data, mark }: { data: any; mark: string }) => {
+//   console.log('rooms ipc update', data, mark);
+//   if (protocol) {
+//     protocol.onSignal(data, mark);
+//   }
+// });
 
 export function useRooms(our?: Patp): RoomsManager {
   if (roomsManager) {

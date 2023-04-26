@@ -297,14 +297,22 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
 
   public async setSelectedSpace(path: string) {
     this.spacesDB?.setCurrent(path);
-    console.log('setting current space to', path, pathToObj(path));
+    log.info('setting current space to', path);
+    const pathObj = pathToObj(path);
     APIConnection.getInstance().conduit.poke({
       app: 'spaces',
       mark: 'spaces-action',
       json: {
         current: {
-          path: pathToObj(path),
+          path: pathObj,
         },
+      },
+    });
+    APIConnection.getInstance().conduit.poke({
+      app: 'rooms-v2',
+      mark: 'rooms-v2-session-action',
+      json: {
+        'set-provider': pathObj.ship,
       },
     });
   }

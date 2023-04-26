@@ -6,9 +6,6 @@ import { useTrayApps } from 'renderer/apps/store';
 import { Badge } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
-
-import { useRooms } from '../useRooms';
-
 import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
 import { VoiceView } from './Voice';
@@ -17,26 +14,25 @@ type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
 const RoomPresenter = () => {
   const { theme, shellStore } = useAppState();
-  const { ship } = useShipStore();
+  const { ship, roomsStore } = useShipStore();
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms(ship?.patp);
 
   const { dockColor, mode } = theme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
-  const isMuted = roomsManager?.protocol.local?.isMuted;
+  const isMuted = roomsStore.isMuted;
   const commButtonBg =
     mode === 'light' ? darken(0.04, dockColor) : darken(0.01, dockColor);
 
   const presentRoom = useMemo(() => {
-    if (!roomsManager?.live.room) return;
-    return roomsManager?.live.room;
-  }, [roomsManager?.live.room]);
+    if (!roomsStore.current) return;
+    return roomsStore.current;
+  }, [roomsStore.current]);
 
-  const [readChat, setReadChat] = useState(roomsManager?.live.chat.slice());
+  const [readChat, setReadChat] = useState(roomsStore.chat.slice());
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    const latestChat = roomsManager?.live.chat.slice();
+    const latestChat = roomsStore.chat.slice();
     if (roomView === 'chat') {
       setReadChat(latestChat);
       setUnreadCount(0);
@@ -44,12 +40,13 @@ const RoomPresenter = () => {
       setUnreadCount(
         latestChat
           ? latestChat.filter(
-              (msg) => !readChat?.includes(msg) && msg.author !== ship?.patp
+              (msg: any) =>
+                !readChat?.includes(msg) && msg.author !== ship?.patp
             ).length
           : 0
       );
     }
-  }, [roomView, roomsManager?.live.chat.length]);
+  }, [roomView, roomsStore.chat.length]);
 
   useEffect(() => {
     if (!presentRoom) roomsApp.setView('list');
@@ -162,9 +159,9 @@ const RoomPresenter = () => {
               onClick={(evt) => {
                 evt.stopPropagation();
                 if (presentRoom.creator === ship?.patp) {
-                  roomsManager?.deleteRoom(rid);
+                  roomsStore.deleteRoom(rid);
                 } else {
-                  roomsManager?.leaveRoom();
+                  roomsStore.leaveRoom();
                 }
               }}
             >
@@ -183,9 +180,9 @@ const RoomPresenter = () => {
               onClick={(evt) => {
                 evt.stopPropagation();
                 if (isMuted) {
-                  roomsManager?.unmute();
+                  roomsStore?.unmute();
                 } else {
-                  roomsManager?.mute();
+                  roomsStore?.mute();
                 }
               }}
             />

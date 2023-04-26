@@ -136,15 +136,15 @@ export class ShipService extends AbstractService<any> {
       'Creating ship sub-services (rooms, notifications, chat, friends, spaces, bazaar)...'
     );
     this.services = {
-      rooms: new RoomsService(this.serviceOptions),
+      chat: new ChatService(this.serviceOptions, this.shipDB.db),
       notifications: new NotificationsService(
         this.serviceOptions,
         this.shipDB.db
       ),
-      chat: new ChatService(this.serviceOptions, this.shipDB.db),
-      friends: new FriendsService(this.serviceOptions, this.shipDB.db),
       spaces: new SpacesService(this.serviceOptions, this.shipDB.db, this.patp),
       bazaar: new BazaarService(this.serviceOptions, this.shipDB.db),
+      friends: new FriendsService(this.serviceOptions, this.shipDB.db),
+      rooms: new RoomsService(this.serviceOptions),
     };
   }
 
@@ -197,6 +197,7 @@ export class ShipService extends AbstractService<any> {
     this.services?.friends.reset();
     this.services?.spaces.reset();
     this.services?.bazaar.reset();
+    APIConnection.getInstance().closeChannel();
 
     this.shipDB?.disconnect();
   }

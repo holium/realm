@@ -15,7 +15,7 @@ export class NotificationsService extends AbstractService<NotifUpdateType> {
     }
     this.notifDB = new NotificationsDB({ preload: false, name: 'notifDB', db });
 
-    log.info('notification.service.ts:', 'Constructed.');
+    if (options?.verbose) log.info('notification.service.ts:', 'Constructed.');
   }
 
   reset(): void {

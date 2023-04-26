@@ -237,6 +237,7 @@ function registerOnUpdateListener() {
     switch (type) {
       case 'initial':
         shipStore.spacesStore.init();
+        shipStore.roomsStore.init();
         break;
       case 'invitations':
         shipStore.spacesStore._onInitialInvitationsUpdate(payload);
