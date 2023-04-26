@@ -1,7 +1,8 @@
 import React, { forwardRef } from 'react';
 import { StyledComponentProps } from 'styled-components';
 
-import { BoxProps, Flex, TextInput } from '@holium/design-system';
+import { BoxProps, Flex } from '../../../general';
+import { TextInput } from '../TextInput/TextInput';
 
 type InlineEditProps = {
   id: string;
@@ -39,6 +40,12 @@ export const InlineEdit: any = forwardRef<HTMLInputElement, InlineEditProps>(
           disabled={disabled}
           aria-invalid={props.error ? 'true' : 'false'}
           onKeyDown={(event: any) => keypressHandler(event)}
+          fontWeight={props.fontWeight}
+          textAlign={props.textAlign}
+          width={props.width as number}
+          value={props.value}
+          onBlur={props.onBlur}
+          onChange={props.onChange}
         />
       </Flex>
     );

@@ -6,7 +6,6 @@ export * from './Crest';
 export * from './Divider';
 export * from './Embeds/EmbedBox';
 export * from './Embeds/LinkPreview';
-export * from './InlineEdit';
 export * from './Menu';
 export * from './People';
 export * from './Pulser';
