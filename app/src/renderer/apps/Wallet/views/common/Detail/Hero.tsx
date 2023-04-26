@@ -43,6 +43,22 @@ const BreadCrumb = styled(Text.Body)`
   }
 `;
 
+const AddressStyle = styled(Flex)`
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  border-radius: 7px;
+  gap: 6px;
+  background: rgba(var(--rlm-overlay-hover-rgba));
+  transition: var(--transition);
+  &:hover {
+    background: rgba(var(--rlm-overlay-active-rgba));
+    transition: var(--transition);
+  }
+`;
+
 interface DetailHeroProps {
   coinView?: any | null;
   wallet: EthWalletType | BitcoinWalletType;
@@ -219,27 +235,18 @@ export const DetailHero: FC<DetailHeroProps> = observer(
       />
     ) : (
       <WalletCardStyle
-        layout="size"
-        layoutId={`wallet-card-${props.wallet.address}`}
         transition={walletCardStyleTransition}
-        pb="8px"
-        px="12px"
-        // minHeight="220px"
-        height="auto"
         width="100%"
         isSelected
       >
         <Flex
-          layout="position"
-          width="100%"
           style={{ height: props.QROpen ? 242 : 38 }}
           borderRadius="8px"
           flexDirection="column"
           justifyContent="flex-start"
           alignItems="center"
-          gap={10}
         >
-          <Flex width="100%" justifyContent="space-between" alignItems="center">
+          <AddressStyle>
             <Flex>
               {walletStore.navState.network === NetworkType.ETHEREUM ? (
                 <Icon name="Ethereum" mr={2} />
@@ -262,8 +269,8 @@ export const DetailHero: FC<DetailHeroProps> = observer(
                 </Flex>
               )}
             </Flex>
-          </Flex>
-          <Box width="100%" height={204} hidden={!props.QROpen}>
+          </AddressStyle>
+          <Box mt={2} width="100%" height={204} hidden={!props.QROpen}>
             <Flex
               width="100%"
               height="200px"
@@ -279,7 +286,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           </Box>
         </Flex>
         <Box
-          layout="position"
+          // layout="position"
           transition={walletCardStyleTransition}
           width="100%"
           hidden={props.hideWalletHero}
@@ -294,12 +301,11 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         </Box>
         <Flex
           flexDirection="row"
-          layout="position"
+          // layout="position"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 1 }}
           transition={walletCardStyleTransition}
-          padding={3}
         >
           <SendReceiveButtons
             hidden={props.sendTrans}

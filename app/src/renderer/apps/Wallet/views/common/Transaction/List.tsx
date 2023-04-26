@@ -1,4 +1,3 @@
-import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 
 import { Flex, Icon, NoScrollBar, Row, Text } from '@holium/design-system';
@@ -38,7 +37,6 @@ const TransactionPresenter = (props: TransactionProps) => {
   const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
 
   const onClick = () => {
-    console.log('clicked', toJS(transaction));
     walletStore.navigate(WalletView.TRANSACTION_DETAIL, {
       detail: {
         type: 'transaction',

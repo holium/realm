@@ -198,7 +198,6 @@ function registerOnUpdateListener() {
   });
 
   AuthIPC.onUpdate((update) => {
-    console.log('AuthIPC.onUpdate', update);
     if (update.type === 'account-added') {
       appState.authStore._onAddAccount(update.payload);
     }

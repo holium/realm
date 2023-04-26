@@ -196,7 +196,7 @@ function ListSelector(props: ListSelectorProps) {
         {props.children}
       </Button.TextButton>
     ) : (
-      <Button.TextButton onClick={props.onClick} color="disabled" flex={1}>
+      <Button.TextButton onClick={props.onClick} flex={1} color="text">
         {props.children}
       </Button.TextButton>
     );

@@ -14,7 +14,8 @@ export const WalletCardStyle = styled(Card)<CardStyleProps>`
           display: flex;
           flex-direction: column;
           width: 100%;
-          padding: 16px 12px 0px 16px;
+          padding: 16px 12px 10px 16px;
+          gap: 10px;
           transition: box-shadow 0.1s ease;
           box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
         `
