@@ -3,6 +3,8 @@ import { track } from '@amplitude/analytics-browser';
 
 import { AddServerDialog, OnboardingStorage } from '@holium/shared';
 
+import { OnboardingIPC } from 'renderer/stores/ipc';
+
 import { defaultTheme } from '../../lib/defaultTheme';
 import { StepProps } from './types';
 
@@ -16,7 +18,7 @@ export const AddServerStep = ({ setStep }: StepProps) => {
   };
 
   const onNext = async (shipId: string, shipUrl: string, shipCode: string) => {
-    const sanitizedCookie = await window.onboardingService.getCookie(
+    const sanitizedCookie = await OnboardingIPC.getCookie(
       shipId,
       shipUrl,
       shipCode
@@ -30,7 +32,7 @@ export const AddServerStep = ({ setStep }: StepProps) => {
       shipCode,
     });
 
-    window.onboardingService.setCredentials({
+    OnboardingIPC.setCredentials({
       patp: shipId,
       code: shipCode,
       url: shipUrl,
@@ -40,7 +42,7 @@ export const AddServerStep = ({ setStep }: StepProps) => {
 
     if (!shipId || !passwordHash || !masterAccountId) return false;
 
-    await window.onboardingService.createAccount(
+    await OnboardingIPC.createAccount(
       {
         accountId: masterAccountId,
         passwordHash,

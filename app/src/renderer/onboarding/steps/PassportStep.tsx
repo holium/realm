@@ -4,7 +4,7 @@ import { track } from '@amplitude/analytics-browser';
 import { OnboardingStorage, PassportDialog } from '@holium/shared';
 
 import { FileUploadParams } from '../../../os/services/ship/ship.service';
-import { AuthIPC, RealmIPC } from '../../stores/ipc';
+import { AuthIPC, OnboardingIPC, RealmIPC } from '../../stores/ipc';
 import { StepProps } from './types';
 
 export const PassportStep = ({ setStep, onFinish }: StepProps) => {
@@ -19,6 +19,7 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
   useEffect(() => {
     const { shipId, shipCode, shipUrl, passwordHash, clientSideEncryptionKey } =
       OnboardingStorage.get();
+
     if (
       !shipId ||
       !shipCode ||
@@ -29,13 +30,14 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
       console.error('in bad state');
       return;
     }
-    window.onboardingService.setCredentials({
+
+    OnboardingIPC.setCredentials({
       patp: shipId,
       code: shipCode,
       url: shipUrl,
     });
-    window.onboardingService
-      .getPassport()
+
+    OnboardingIPC.getPassport()
       .then((ourPassport) => {
         setNickname(ourPassport?.nickname);
         setAvatarSrc(ourPassport?.avatar);
@@ -48,6 +50,7 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
         setIsReady(true);
       });
   }, []);
+
   useEffect(() => {
     track('Onboarding / Passport');
   });
@@ -83,7 +86,7 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
     );
 
     // Sync friends agent
-    await window.onboardingService.updatePassport(shipId, {
+    await OnboardingIPC.updatePassport(shipId, {
       nickname,
       avatar,
       bio: description,

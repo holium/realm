@@ -14,7 +14,7 @@ export const InstallationStep = ({ setStep, onFinish }: StepProps) => {
     setStep('/passport');
   };
 
-  const onInstallRealm = (): Promise<RealmInstallStatus> => {
+  const onInstallRealm = () => {
     return window.onboardingService.installRealmAgent();
   };
 

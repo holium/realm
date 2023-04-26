@@ -12,6 +12,7 @@ import {
   BazaarIPC,
   MainIPC,
   NotifIPC,
+  OnboardingIPC,
   RealmIPC,
   SpacesIPC,
 } from './ipc';
@@ -182,7 +183,7 @@ function registerOnUpdateListener() {
     }
   });
 
-  window.onboardingService.onUpdate((update) => {
+  OnboardingIPC.onUpdate((update) => {
     if (update.type === 'account-added') {
       appState.authStore._onAddAccount(update.payload);
     }

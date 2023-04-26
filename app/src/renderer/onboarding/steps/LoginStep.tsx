@@ -8,6 +8,8 @@ import {
   OnboardingStorage,
 } from '@holium/shared';
 
+import { OnboardingIPC } from 'renderer/stores/ipc';
+
 import { defaultTheme } from '../../lib/defaultTheme';
 import { thirdEarthApi } from '../thirdEarthApi';
 import { StepProps } from './types';
@@ -30,10 +32,10 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
       return false;
     }
 
-    const passwordHash = await window.onboardingService.hashPassword(password);
+    const passwordHash = await OnboardingIPC.hashPassword(password);
 
     // Create a local master account from the ThirdEarth account.
-    const masterAccount = await window.onboardingService.createMasterAccount({
+    const masterAccount = await OnboardingIPC.createMasterAccount({
       email: response.email,
       passwordHash,
       encryptionKey: response.client_side_encryption_key,
@@ -58,7 +60,7 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
       // The user can customize their passports later.
       await Promise.all(
         userShips.map((ship) =>
-          window.onboardingService.createAccount(
+          OnboardingIPC.createAccount(
             {
               accountId: masterAccount.id,
               passwordHash: masterAccount.passwordHash,
