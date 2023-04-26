@@ -1179,6 +1179,55 @@ export const WalletStore = types
           stateTx
         ) as PromiseLike<any>;
       }),
+      sendERC20Transaction: flow(function* (
+        walletIndex: string,
+        to: string,
+        amount: string,
+        contractAddress: string,
+        passcode: number[],
+        toPatp?: string
+      ): Generator<PromiseLike<any>, void, any> {
+        const path = "m/44'/60'/0'/0/0" + walletIndex;
+        const from = self.ethereum.wallets.get(walletIndex)?.address ?? '';
+        const { hash, ethAmount } = yield WalletIPC.sendERC20Transaction(
+          self.navState.protocol,
+          path,
+          self.ourPatp ?? '',
+          passcode.map(String).join(''),
+          from,
+          to,
+          amount,
+          contractAddress,
+          self.ethereum.wallets
+            .get(walletIndex)
+            ?.data.get(self.navState.protocol)
+            ?.coins.get(contractAddress)?.decimals ?? 0
+        ) as PromiseLike<any>;
+        const currentWallet = self.currentWallet as EthWalletType;
+        const fromAddress = currentWallet.address;
+        currentWallet.enqueueTransaction(
+          self.navState.protocol,
+          hash,
+          to,
+          toPatp,
+          fromAddress,
+          ethAmount,
+          new Date().toISOString(),
+          contractAddress
+        );
+        const stateTx = currentWallet.data
+          .get(self.navState.protocol)
+          ?.coins.get(contractAddress)
+          ?.transactionList.getStoredTransaction(hash);
+        yield WalletIPC.setTransaction(
+          'ethereum',
+          self.navState.protocol,
+          currentWallet.index,
+          contractAddress,
+          hash,
+          stateTx
+        ) as PromiseLike<any>;
+      }),
       toggleNetwork() {
         if (self.navState.network === NetworkType.ETHEREUM) {
           if (self.navState.protocol === ProtocolType.ETH_MAIN) {

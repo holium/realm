@@ -189,6 +189,41 @@ export class WalletService extends AbstractService {
     return { hash, tx };
   }
 
+  async sendERC20Transaction(
+    currentProtocol: ProtocolType,
+    path: string,
+    ourPatp: string,
+    passcode: string,
+    from: string,
+    to: string,
+    amount: string,
+    contractAddress: string,
+    decimals: number
+  ) {
+    const ethAmount = ethers.utils.parseEther(amount);
+    const tx = await (
+      this.protocolManager?.protocols.get(currentProtocol) as EthereumProtocol
+    ).populateERC20(contractAddress, to, amount, decimals);
+    const protocol = this.protocolManager?.protocols.get(
+      currentProtocol
+    ) as EthereumProtocol;
+    tx.from = from;
+    tx.gasLimit = await protocol.getFeeEstimate(tx);
+    tx.gasPrice = await protocol.getFeePrice();
+    tx.nonce = await protocol.getNonce(from);
+    tx.chainId = await protocol.getChainId();
+    const signedTx = await RealmSigner.signTransaction(
+      path,
+      tx,
+      ourPatp,
+      passcode
+    );
+    const hash = await (
+      this.protocolManager?.protocols.get(currentProtocol) as BaseBlockProtocol
+    ).sendTransaction(signedTx);
+    return { hash, ethAmount };
+  }
+
   async setSettings(network: string, settings: UISettingsType) {
     await APIConnection.getInstance().conduit.poke({
       app: 'realm-wallet',
