@@ -152,39 +152,6 @@ const WalletSettingsPresenter = () => {
             {saving ? <Spinner size={0} color="#FFF" /> : 'Save'}
           </Button.Primary>
         </Flex>
-
-        {/*<Flex mt={3} flexDirection="column" width="100%">
-        <Text variant="label">Provider</Text>
-        <Text
-          mt={1}
-          mb={2}
-          variant="body"
-          fontSize={1}
-          opacity={0.8}
-          color={baseTheme.colors.text.secondary}
-        >
-          The API endpoint for connecting to Ethereum nodes.
-        </Text>
-        <TextInput
-          id="wallet-provider"
-          name="wallet-provider"
-          placeholder="http://localhost:8545"
-          value={providerInput}
-          onChange={async (e: ChangeEvent<HTMLInputElement>) =>
-            await setProvider(e.target.value)
-          }
-        />
-        <Box hidden={!providerError}>
-          <Text
-            mt={1}
-            variant="body"
-            fontSize={1}
-            color={baseTheme.colors.text.error}
-          >
-            {providerError}
-          </Text>
-        </Box>
-        </Flex>*/}
         <Flex mt={3} flexDirection="column">
           <Text.Label>Address Creation Mode</Text.Label>
           <Text.Custom mt={1} mb={2} fontSize={1} opacity={0.8}>

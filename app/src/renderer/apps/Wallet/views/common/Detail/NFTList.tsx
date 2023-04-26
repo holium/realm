@@ -55,18 +55,6 @@ export const NFTList: FC<NFTListProps> = (props: NFTListProps) => {
                   {props.details.name}
                 </Text.H5>
               </Flex>
-              {/* <Flex mt={1} flexDirection="column" justifyContent="center">
-              <Text
-                variant="body"
-                fontSize={1}
-                color={baseTheme.colors.text.secondary}
-              >
-                {props.details.floorPrice ? 'Floor price' : 'Last price'}
-              </Text>
-              <Text variant="h5" fontSize={1}>
-                {props.details.floorPrice || props.details.lastPrice}
-              </Text>
-            </Flex> */}
             </Flex>
           </Flex>
           <Icon name="ChevronRight" height={20} />
