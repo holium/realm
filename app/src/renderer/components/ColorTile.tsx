@@ -13,21 +13,22 @@ export const ColorTile = styled(motion.div)<ColorTileProps>`
   outline: none;
   float: left;
   border-radius: 4px;
-  margin: 0px 6px 0px 0px;
+  margin: 0;
 `;
+
 interface ColorPopoverProps {
+  top: number;
+  left: number;
   isOpen: boolean;
   size?: number;
-  top?: number;
-  left?: number;
 }
 export const ColorTilePopover = styled(motion.div)<ColorPopoverProps>`
   position: fixed;
   z-index: 24;
-  top: ${(props) => `${props.top || 40}px`};
+  top: ${(props) => `${props.top}px`};
   left: ${(props) => {
     if (props.left) {
-      return `${props.left || -6}px`;
+      return `${props.left}px`;
     }
     return props.size ? `-${Math.ceil(props.size / 3.5)}px` : '-6px';
   }};

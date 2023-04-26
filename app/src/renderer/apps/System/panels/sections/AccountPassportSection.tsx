@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Flex, Text } from '@holium/design-system';
 import { PassportCard } from '@holium/shared';
 
+import { AuthIPC, OnboardingIPC } from 'renderer/stores/ipc';
 import { ShipMobxType } from 'renderer/stores/ship.store';
 
 import { ColorPicker } from '../../components/ColorPicker';
@@ -26,7 +27,26 @@ export const AccountPassportSection = ({ ship }: Props) => {
     return '';
   };
 
-  const onSubmit = async () => {};
+  const onSubmit = async () => {
+    if (!nickname) return false;
+
+    await AuthIPC.updatePassport(
+      ship.patp,
+      nickname,
+      description,
+      avatarSrc,
+      accentColor
+    );
+
+    // Sync friends agent
+    await OnboardingIPC.updatePassport(ship.patp, {
+      nickname,
+      avatar: avatarSrc,
+      bio: description,
+    });
+
+    return true;
+  };
 
   return (
     <SettingSection
@@ -37,7 +57,7 @@ export const AccountPassportSection = ({ ship }: Props) => {
         <>
           <PassportCard
             patp={ship.patp}
-            color={ship.color ?? '#000'}
+            color={accentColor}
             nickname={nickname}
             setNickname={setNickname}
             description={description}
@@ -48,24 +68,29 @@ export const AccountPassportSection = ({ ship }: Props) => {
             noContainer
           />
 
-          <Flex flexDirection={'row'} flex={4} justifyContent="flex-start">
-            <Text.Custom fontWeight={500} flex={1} mt={2}>
-              Accent Color
-            </Text.Custom>
-            <ColorPicker
-              swatches={[
-                '#4E9EFD',
-                '#FFFF00',
-                '#00FF00',
-                '#FF0000',
-                '#52B278',
-                '#D9682A',
-                '#ff3399',
-                '#8419D9',
-              ]}
-              initialColor={accentColor}
-              onChange={setAccentColor}
-            />
+          <Flex flexDirection="row" gap="20px">
+            <Flex width="68px" />
+            <Flex flexDirection="row" gap="8px" alignItems="center">
+              <ColorPicker
+                top={148}
+                left={138}
+                swatches={[
+                  '#4E9EFD',
+                  '#FFFF00',
+                  '#00FF00',
+                  '#FF0000',
+                  '#52B278',
+                  '#D9682A',
+                  '#ff3399',
+                  '#8419D9',
+                ]}
+                initialColor={accentColor}
+                onChange={setAccentColor}
+              />
+              <Text.Custom fontSize="14px" opacity={0.6}>
+                Accent Color
+              </Text.Custom>
+            </Flex>
           </Flex>
         </>
       }

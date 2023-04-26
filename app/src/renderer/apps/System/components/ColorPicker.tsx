@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { TwitterPicker } from 'react-color';
-import { observer } from 'mobx-react';
 
-import { Flex } from '@holium/design-system';
+import { Flex, useToggle } from '@holium/design-system';
 
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
 
@@ -16,67 +15,90 @@ const isValidHexColor = (hex: string) => {
 };
 
 export interface ColorPickerProps {
+  top?: number;
+  left?: number;
   initialColor: string;
   swatches: string[];
   onChange: (color: string) => void;
 }
 
-export const ColorPicker = observer((props: ColorPickerProps) => {
+export const ColorPicker = ({
+  top = 40,
+  left = -6,
+  initialColor,
+  swatches,
+  onChange,
+}: ColorPickerProps) => {
   const colorPickerRef = useRef(null);
 
-  const [colorPickerOpen, setColorPickerOpen] = useState(false);
-  const [validatedColor, setValidatedColor] = useState(props.initialColor);
+  const open = useToggle(false);
+
+  const [validatedColor, setValidatedColor] = useState(initialColor);
 
   useEffect(() => {
-    // TODO propogate to parent
-    props.onChange(validatedColor);
-    // console.log("NEW VALID COLOR")
+    onChange(validatedColor);
   }, [validatedColor]);
+
+  useEffect(() => {
+    // Click outside should close the popover.
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        colorPickerRef.current &&
+        !(colorPickerRef.current as any).contains(event.target)
+      ) {
+        open.toggleOff();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <Flex position="relative">
-      <ColorTile
-        // id="space-color-tile"
-        size={26}
-        tileColor={validatedColor}
-        onClick={(_evt: any) => {
-          setColorPickerOpen(!colorPickerOpen);
-        }}
-      />
+      <ColorTile size={26} tileColor={validatedColor} onClick={open.toggle} />
       <ColorTilePopover
-        // id="space-color-tile-popover"
         size={26}
         ref={colorPickerRef}
-        isOpen={colorPickerOpen}
-        data-is-open={colorPickerOpen}
+        isOpen={open.isOn}
+        top={top}
+        left={left}
       >
         <TwitterPicker
           width="inherit"
-          className="cursor-style"
+          styles={{
+            default: {
+              card: {
+                backgroundColor: 'rgba(var(--rlm-window-rgba))',
+                boxShadow: 'var(--rlm-box-shadow-3)',
+                borderRadius: '9px',
+                border: '1px solid rgba(var(--rlm-border-rgba))',
+              },
+              input: {
+                backgroundColor: 'rgba(var(--rlm-input-rgba))',
+                borderColor: 'rgba(var(--rlm-text-rgba))',
+                color: 'rgba(var(--rlm-text-rgba))',
+                height: '30px',
+              },
+              hash: {
+                backgroundColor: 'rgba(var(--rlm-text-rgba))',
+                color: 'rgba(var(--rlm-input-rgba))',
+              },
+            },
+          }}
           color={validatedColor}
           onChange={(newColor: { hex: string }) => {
-            // color.actions.onChange(newColor.hex);
-            // setWorkspaceState({
-            //     color: newColor.hex,
-            // });
             if (isValidHexColor(newColor.hex)) {
               setValidatedColor(newColor.hex);
             }
           }}
-          triangle="top-left"
-          colors={props.swatches}
-          // colors={[
-          // '#4E9EFD',
-          // '#FFFF00',
-          // '#00FF00',
-          // '#FF0000',
-          // '#52B278',
-          // '#D9682A',
-          // '#ff3399',
-          // '#8419D9',
-          // ]}
+          triangle="hide"
+          colors={swatches}
         />
       </ColorTilePopover>
     </Flex>
   );
-});
+};

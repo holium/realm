@@ -5,16 +5,17 @@ import { Card, ErrorBox, Flex, Text } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
 import { SubmitButton } from '@holium/shared';
 
-const SettingSectionForm = styled.form`
+const SettingSectionForm = styled.form<{ zIndex: number }>`
   display: flex;
   flex-direction: column;
+  z-index: ${({ zIndex }) => zIndex};
 `;
 
 type SettingSectionProps = {
   body: ReactNode;
   title?: string;
   elevation?: 0 | 1 | 2 | 3 | 4;
-  onSubmit?: () => void;
+  onSubmit?: () => Promise<boolean>;
 };
 export const SettingSection = ({
   body,
@@ -40,13 +41,16 @@ export const SettingSection = ({
       if (typeof error === 'string') setErrorMessage(error);
       else if (error.message) setErrorMessage(error.message);
       else setErrorMessage('Something went wrong.');
-
+    } finally {
       submitting.toggleOff();
     }
   };
 
   return (
-    <SettingSectionForm onSubmit={onSubmit ? handleSubmit : undefined}>
+    <SettingSectionForm
+      zIndex={elevation}
+      onSubmit={onSubmit ? handleSubmit : undefined}
+    >
       {title && (
         <Text.Custom
           fontSize={2}
