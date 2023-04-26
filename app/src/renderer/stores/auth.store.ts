@@ -204,6 +204,9 @@ export const AuthenticationModel = types
       }
 
       self.accounts.push(account);
+      self.selected = tryReference(() =>
+        self.accounts.find((acc) => acc.patp === account.patp)
+      );
       applySnapshot(self.order, accountPayload.order);
     },
     _onRemoveAccount(accountPayload: AuthUpdateAccountPayload) {
