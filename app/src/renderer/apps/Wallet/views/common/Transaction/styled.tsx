@@ -1,5 +1,6 @@
-import { Flex } from '@holium/design-system';
 import styled from 'styled-components';
+
+import { Flex } from '@holium/design-system';
 
 export const ContainerFlex = styled(Flex)`
   background-color: rgba(var(--rlm-input-rgba));

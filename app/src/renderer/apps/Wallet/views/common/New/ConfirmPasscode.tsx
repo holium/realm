@@ -1,9 +1,9 @@
 import { Dispatch, FC, SetStateAction } from 'react';
-import { Flex, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
 
-import { PasscodeInput } from '../../../components/PasscodeInput';
+import { Flex, Text } from '@holium/design-system';
 
+import { PasscodeInput } from '../../../components/PasscodeInput';
 import { NewWalletScreen } from './index';
 
 interface PasscodeProps {

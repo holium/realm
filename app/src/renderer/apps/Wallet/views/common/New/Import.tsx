@@ -1,8 +1,9 @@
 import { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
-import { Button, Flex, Text, TextInput } from '@holium/design-system';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
+
+import { Button, Flex, Text, TextInput } from '@holium/design-system';
 
 import { NewWalletScreen } from './index';
 

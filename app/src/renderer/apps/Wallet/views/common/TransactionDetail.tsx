@@ -1,4 +1,6 @@
 import { ChangeEvent, useState } from 'react';
+import { observer } from 'mobx-react';
+
 import {
   Avatar,
   Button,
@@ -8,7 +10,7 @@ import {
   Text,
   TextInput,
 } from '@holium/design-system';
-import { observer } from 'mobx-react';
+
 import {
   BitcoinWalletType,
   EthWalletType,

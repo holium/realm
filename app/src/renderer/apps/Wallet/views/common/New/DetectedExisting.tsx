@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from 'react';
-import { Box, Button, Flex, Icon, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Box, Button, Flex, Icon, Text } from '@holium/design-system';
 
 import { NewWalletScreen } from './index';
 

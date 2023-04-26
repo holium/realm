@@ -15,7 +15,6 @@ import io from 'socket.io-client';
 import { WalletDB } from '../wallet.db';
 // import nftabi from 'non-fungible-token-abi';
 import { Asset, CoinAsset, NFTAsset, ProtocolType } from '../wallet.types';
-
 import { BaseBlockProtocol } from './BaseBlockProtocol';
 
 declare var global: any;

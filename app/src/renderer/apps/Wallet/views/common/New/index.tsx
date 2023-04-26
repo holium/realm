@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Box, Button, Flex, Icon } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Box, Button, Flex, Icon } from '@holium/design-system';
+
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { Backup } from './Backup';

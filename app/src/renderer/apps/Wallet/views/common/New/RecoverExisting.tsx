@@ -1,4 +1,8 @@
 import { ChangeEvent, Dispatch, FC, SetStateAction, useState } from 'react';
+import { ethers } from 'ethers';
+import { observer } from 'mobx-react';
+import styled from 'styled-components';
+
 import {
   Box,
   Button,
@@ -7,10 +11,8 @@ import {
   Text,
   TextInput,
 } from '@holium/design-system';
-import { ethers } from 'ethers';
-import { observer } from 'mobx-react';
+
 import { useShipStore } from 'renderer/stores/ship.store';
-import styled from 'styled-components';
 
 import { NewWalletScreen } from './index';
 import { VerifyPasscode } from './VerifyPasscode';

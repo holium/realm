@@ -1,5 +1,7 @@
-import { Button, Flex, Icon, Text } from '@holium/design-system';
 import { rgba } from 'polished';
+
+import { Button, Flex, Icon, Text } from '@holium/design-system';
+
 import { useShipStore } from 'renderer/stores/ship.store';
 
 type Network = 'ethereum' | 'bitcoin';

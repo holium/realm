@@ -1,5 +1,7 @@
 import { FC, useMemo } from 'react';
+
 import { Flex, Text } from '@holium/design-system';
+
 import {
   BitcoinWalletType,
   ERC20Type,

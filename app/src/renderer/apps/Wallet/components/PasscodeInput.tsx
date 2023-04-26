@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Box, Flex, Spinner, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Box, Flex, Spinner, Text } from '@holium/design-system';
+
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { PasscodeDisplay } from './PasscodeDisplay';

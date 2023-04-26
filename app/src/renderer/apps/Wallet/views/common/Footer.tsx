@@ -1,8 +1,10 @@
-import { Box, Button, Flex, Icon } from '@holium/design-system';
 import { observer } from 'mobx-react';
+import styled from 'styled-components';
+
+import { Box, Button, Flex, Icon } from '@holium/design-system';
+
 import { WalletView } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
-import styled from 'styled-components';
 
 import { WalletNetwork } from './Network';
 

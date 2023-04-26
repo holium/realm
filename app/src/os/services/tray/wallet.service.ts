@@ -11,7 +11,6 @@ import { Realm } from '../../index';
 import { BaseService } from '../base.service';
 import { DiskStore } from '../base.store';
 import { RealmSigner } from '../ship/wallet/signers/realm';
-
 import { EthereumProtocol } from './wallet/protocols/ethereum';
 import { UqbarProtocol } from './wallet/protocols/uqbar';
 import { Wallet } from './wallet-lib/ProtocolManager';

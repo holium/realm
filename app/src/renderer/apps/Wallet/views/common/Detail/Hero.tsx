@@ -1,8 +1,11 @@
 import { FC, useMemo, useState } from 'react';
-import { Box, CopyButton, Flex, Icon, Text } from '@holium/design-system';
 import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { QRCodeSVG } from 'qrcode.react';
+import styled from 'styled-components';
+
+import { Box, CopyButton, Flex, Icon, Text } from '@holium/design-system';
+
 import {
   BitcoinWalletType,
   ERC20Type,
@@ -11,7 +14,6 @@ import {
   ProtocolType,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
-import styled from 'styled-components';
 
 import { CircleButton } from '../../../components/CircleButton';
 import {

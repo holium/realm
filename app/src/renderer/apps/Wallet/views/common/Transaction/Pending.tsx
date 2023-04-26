@@ -1,5 +1,7 @@
 import { FC } from 'react';
+
 import { Button, Flex, Icon, Spinner, Text } from '@holium/design-system';
+
 import {
   ProtocolType,
   TransactionType,
@@ -12,7 +14,6 @@ import {
   formatEthAmount,
   shortened,
 } from '../../../lib/helpers';
-
 import { TxType } from './List';
 
 interface PendingTransactionDisplayProps {

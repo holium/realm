@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Box, Button, Flex, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Box, Button, Flex, Text } from '@holium/design-system';
+
 import {
   BitcoinWalletType,
   ERC20Type,
@@ -12,7 +14,6 @@ import { useShipStore } from 'renderer/stores/ship.store';
 
 import { getCoins, getNfts, getTransactions } from '../../../lib/helpers';
 import { TransactionList } from '../Transaction/List';
-
 import { CoinList } from './CoinList';
 import { DetailHero } from './Hero';
 import { NFTList } from './NFTList';

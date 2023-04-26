@@ -1,7 +1,9 @@
 import { ChangeEvent, useState } from 'react';
-import { Button, Flex, Text, TextInput } from '@holium/design-system';
 import { useField, useForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
+
+import { Button, Flex, Text, TextInput } from '@holium/design-system';
+
 import { NetworkType } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 

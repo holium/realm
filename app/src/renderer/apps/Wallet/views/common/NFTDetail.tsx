@@ -1,4 +1,5 @@
 import { Flex, Icon, Text } from '@holium/design-system';
+
 import { EthWalletType } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 

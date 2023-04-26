@@ -1,6 +1,8 @@
-import { Flex, Icon, NoScrollBar, Row, Text } from '@holium/design-system';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
+
+import { Flex, Icon, NoScrollBar, Row, Text } from '@holium/design-system';
+
 import {
   TransactionType,
   WalletView,

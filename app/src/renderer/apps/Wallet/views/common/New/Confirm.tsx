@@ -1,7 +1,8 @@
 import { Dispatch, SetStateAction, useState } from 'react';
-import { Button, Flex, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { transparentize } from 'polished';
+
+import { Button, Flex, Text } from '@holium/design-system';
 
 import { NewWalletScreen } from './index';
 import { WordPicker } from './WordPicker';

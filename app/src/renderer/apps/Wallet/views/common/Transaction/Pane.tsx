@@ -1,6 +1,8 @@
 import { FC, useState } from 'react';
-import { Avatar, Box, Button, Flex, Icon, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Avatar, Box, Button, Flex, Icon, Text } from '@holium/design-system';
+
 import { shortened } from 'renderer/apps/Wallet/lib/helpers';
 import {
   ERC20Type,

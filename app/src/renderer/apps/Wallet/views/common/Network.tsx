@@ -1,5 +1,7 @@
-import { Box, Flex, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Box, Flex, Text } from '@holium/design-system';
+
 import { ProtocolType } from 'renderer/stores/models/wallet.model';
 
 interface WalletNetworkProps {

@@ -1,8 +1,9 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { Box, Button, Flex, Icon, Text } from '@holium/design-system';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import { transparentize } from 'polished';
+
+import { Box, Button, Flex, Icon, Text } from '@holium/design-system';
 
 import { NewWalletScreen } from './index';
 

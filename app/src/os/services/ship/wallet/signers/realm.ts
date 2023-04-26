@@ -3,7 +3,6 @@ import { ethers } from 'ethers';
 // import { safeStorage } from 'electron';
 // import { removeDots } from '../../../../api/uqbar';
 import { EncryptedStore } from '../../../../lib/encryptedStore';
-
 import { BaseSigner } from './BaseSigner';
 
 export abstract class RealmSigner implements BaseSigner {

@@ -1,6 +1,8 @@
 import { FC, useEffect } from 'react';
-import { Flex, Spinner, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Flex, Spinner, Text } from '@holium/design-system';
+
 import { WalletView } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 

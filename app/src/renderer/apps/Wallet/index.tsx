@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Flex } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Flex } from '@holium/design-system';
+
 import {
   BitcoinWalletType,
   EthWalletType,
@@ -10,7 +12,6 @@ import {
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
-
 import { getTransactions } from './lib/helpers';
 import { CreateWallet } from './views/common/Create';
 import { Detail } from './views/common/Detail/Detail';

@@ -1,4 +1,7 @@
 import { ChangeEvent, useState } from 'react';
+import { observer } from 'mobx-react';
+import { isValidPatp } from 'urbit-ob';
+
 import {
   Button,
   Flex,
@@ -9,14 +12,13 @@ import {
   Text,
   TextInput,
 } from '@holium/design-system';
-import { observer } from 'mobx-react';
+
 import {
   SharingMode,
   UISettingsType,
   WalletCreationMode,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
-import { isValidPatp } from 'urbit-ob';
 
 import { DeletePasscode } from './DeletePasscode';
 

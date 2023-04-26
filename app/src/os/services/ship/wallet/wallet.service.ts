@@ -4,7 +4,6 @@ import { ethers } from 'ethers';
 
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
-
 import { BaseBlockProtocol } from './protocols/BaseBlockProtocol';
 import { BaseProtocol } from './protocols/BaseProtocol';
 import { EthereumProtocol } from './protocols/ethereum';

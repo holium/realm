@@ -1,5 +1,7 @@
-import { Flex, Icon, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Flex, Icon, Text } from '@holium/design-system';
+
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { PasscodeInput } from '../../components/PasscodeInput';

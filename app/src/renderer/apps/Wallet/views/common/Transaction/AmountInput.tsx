@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Box, Flex, Icon, Text, TextInput } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Box, Flex, Icon, Text, TextInput } from '@holium/design-system';
+
 import { ERC20Type, ProtocolType } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
