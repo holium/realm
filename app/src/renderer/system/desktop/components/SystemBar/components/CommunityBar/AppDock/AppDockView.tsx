@@ -1,8 +1,10 @@
 import { useCallback, useState } from 'react';
-import { Flex } from '@holium/design-system';
 import { Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
+
+import { Flex } from '@holium/design-system';
+
 import { Divider } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';

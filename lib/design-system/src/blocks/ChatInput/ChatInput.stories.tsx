@@ -5,7 +5,6 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { Box, Flex } from '../../../general';
 import { Bubble } from '../Bubble/Bubble';
 import { ChatMessageType, FragmentType } from '../Bubble/Bubble.types';
-
 import { ChatInput } from './ChatInput';
 
 export default {

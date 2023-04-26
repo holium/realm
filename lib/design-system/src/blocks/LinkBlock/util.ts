@@ -1,5 +1,4 @@
 import { parseMediaType } from '../../util/links';
-
 import { LinkBlockType } from './LinkBlock';
 
 export const OPENGRAPH_API = 'https://api.holium.live/v1/opengraph/opengraph';

@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Flex, Icon, Spinner, Text } from '@holium/design-system';
 import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { darken, lighten, rgba, saturate } from 'polished';
+import styled, { css } from 'styled-components';
+
+import { Flex, Icon, Spinner, Text } from '@holium/design-system';
+
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
-import styled, { css } from 'styled-components';
 
 interface ConnStatusStyleProps {
   baseColor: string;

@@ -1,6 +1,7 @@
 import React, { forwardRef } from 'react';
-import { BoxProps, Flex, TextInput } from '@holium/design-system';
 import { StyledComponentProps } from 'styled-components';
+
+import { BoxProps, Flex, TextInput } from '@holium/design-system';
 
 type InlineEditProps = {
   id: string;

@@ -1,7 +1,6 @@
 import { Flex } from '../../general/Flex/Flex';
 import { Icon } from '../../general/Icon/Icon';
 import { IconPathsType } from '../../general/Icon/icons';
-
 import {
   RadioHighlight,
   RadioLabel,

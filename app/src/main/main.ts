@@ -16,7 +16,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { RealmService } from '../os/realm.service';
-
+import { AppUpdater } from './AppUpdater';
 import { BrowserHelper } from './helpers/browser';
 import { DevHelper } from './helpers/dev';
 import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
@@ -27,7 +27,6 @@ import { MediaHelper } from './helpers/media';
 import { MouseHelper } from './helpers/mouse';
 import { PowerHelper } from './helpers/power';
 import { WebViewHelper } from './helpers/webview';
-import { AppUpdater } from './AppUpdater';
 import { MenuBuilder } from './menu';
 import { resolveHtmlPath } from './util';
 

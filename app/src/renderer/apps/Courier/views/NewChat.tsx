@@ -1,4 +1,7 @@
 import { useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
+import styled from 'styled-components';
+
 import {
   Avatar,
   Button,
@@ -9,11 +12,10 @@ import {
   TextInput,
   Tooltip,
 } from '@holium/design-system';
-import { motion } from 'framer-motion';
+
 import { ChatPathType } from 'os/services/ship/chat/chat.types';
 import { ShipSearch } from 'renderer/components/ShipSearch';
 import { useShipStore } from 'renderer/stores/ship.store';
-import styled from 'styled-components';
 
 import { useTrayApps } from '../../store';
 

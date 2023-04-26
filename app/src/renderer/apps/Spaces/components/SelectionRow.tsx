@@ -6,6 +6,7 @@ import {
   Row,
   Text,
 } from '@holium/design-system';
+
 import { Crest, isValidHexColor, isValidImageUrl } from 'renderer/components';
 
 import { EmptyGroup } from '../SpaceRow';

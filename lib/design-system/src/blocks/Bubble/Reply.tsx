@@ -5,7 +5,6 @@ import { Box, BoxProps, Button, Flex, Icon, Text } from '../../../general';
 import { convertDarkText } from '../../../util';
 import { capitalizeFirstLetter } from '../../util/strings';
 import { convertFragmentsToPreview } from '../ChatInput/fragment-parser';
-
 import { BubbleAuthor } from './Bubble.styles';
 import { FragmentImageType, FragmentType, TEXT_TYPES } from './Bubble.types';
 import {

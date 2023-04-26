@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { OnboardingStorage, RealmOnboardingStep } from '@holium/shared';
 import { observer } from 'mobx-react';
 
+import { OnboardingStorage, RealmOnboardingStep } from '@holium/shared';
+
+import { BootingStep, ChooseIdStep, LoginStep, PaymentStep } from './steps';
 import { AddServerStep } from './steps/AddServerStep';
 import { CredentialsStep } from './steps/CredentialsStep';
 import { HostingStep } from './steps/HostingStep';
 import { InstallationStep } from './steps/InstallationStep';
 import { PassportStep } from './steps/PassportStep';
 import { PasswordStep } from './steps/PasswordStep';
-import { BootingStep, ChooseIdStep, LoginStep, PaymentStep } from './steps';
 
 export type OnboardingStepProps = {
   initialStep: RealmOnboardingStep;

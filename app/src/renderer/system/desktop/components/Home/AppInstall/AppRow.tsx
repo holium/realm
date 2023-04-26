@@ -1,7 +1,9 @@
 import { useRef } from 'react';
-import { Box, Flex, Icon, Row, Text } from '@holium/design-system';
-import { DocketAppType } from 'renderer/stores/models/bazaar.model';
 import styled from 'styled-components';
+
+import { Box, Flex, Icon, Row, Text } from '@holium/design-system';
+
+import { DocketAppType } from 'renderer/stores/models/bazaar.model';
 
 const sizes = {
   sm: 32,

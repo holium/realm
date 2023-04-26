@@ -1,12 +1,12 @@
 // Bounds are using the realm.config 1-10 scale.
-import { Dimensions } from '@holium/design-system';
 import { Instance, SnapshotIn, types } from 'mobx-state-tree';
+
+import { Dimensions } from '@holium/design-system';
 
 import {
   getMaximizedBounds,
   isMaximizedBounds,
 } from '../../lib/window-manager';
-
 import { Glob } from './docket.model';
 
 const BoundsModel = types.model({

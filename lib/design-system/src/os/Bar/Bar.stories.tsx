@@ -1,7 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { Flex, Text } from '../../../general';
-
 import { Bar } from './Bar';
 
 export default {

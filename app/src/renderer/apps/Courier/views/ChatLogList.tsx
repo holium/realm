@@ -1,11 +1,13 @@
 import { RefObject, useState } from 'react';
 import { Gallery } from 'react-photoswipe-gallery';
+
 import {
   Box,
   Text,
   WindowedList,
   WindowedListRef,
 } from '@holium/design-system';
+
 import { displayDate } from 'os/lib/time';
 
 import {

@@ -1,4 +1,3 @@
-import { cleanNounColor } from '@holium/design-system';
 import { toJS } from 'mobx';
 import {
   applySnapshot,
@@ -9,8 +8,9 @@ import {
   types,
 } from 'mobx-state-tree';
 
-import { BazaarIPC } from '../ipc';
+import { cleanNounColor } from '@holium/design-system';
 
+import { BazaarIPC } from '../ipc';
 import { Glob } from './docket.model';
 
 export enum InstallStatus {

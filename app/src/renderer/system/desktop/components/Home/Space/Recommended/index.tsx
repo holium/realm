@@ -1,5 +1,7 @@
-import { Flex, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Flex, Text } from '@holium/design-system';
+
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { AppPreview } from './AppPreview';

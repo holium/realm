@@ -5,12 +5,12 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
+
 import { ThemeType } from 'renderer/stores/models/theme.model';
 
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { ConduitSession } from '../api';
 import ShipService from '../ship/ship.service';
-
 import { Account } from './accounts.table';
 import { AuthDB } from './auth.db';
 // import { CreateMasterAccountPayload } from 'os/realm.types';

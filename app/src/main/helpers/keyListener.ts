@@ -1,4 +1,5 @@
 import { ipcRenderer } from 'electron';
+
 import { isTextElement } from 'renderer/system/mouse/getMouseState';
 
 ipcRenderer.on('add-key-listeners', () => {

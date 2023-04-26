@@ -5,6 +5,9 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { preSig } from '@urbit/aura';
+import Urbit from '@urbit/http-api';
+
 import {
   APIHandlers,
   ProtocolConfig,
@@ -12,9 +15,6 @@ import {
   RoomsManager,
   ShipConfig,
 } from '@holium/realm-room';
-
-import { preSig } from '@urbit/aura';
-import Urbit from '@urbit/http-api';
 
 const testProtocolConfig: ProtocolConfig = {
   rtc: {

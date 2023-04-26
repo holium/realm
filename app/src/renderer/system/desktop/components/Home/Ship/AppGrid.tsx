@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
-import { Box } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Box } from '@holium/design-system';
+
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { AppTileSize } from '../AppTile';
-
 import { GridAppTile } from './GridAppTile';
 
 interface AppGridProps {

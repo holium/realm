@@ -4,7 +4,6 @@ import { applySnapshot, getSnapshot, Instance, types } from 'mobx-state-tree';
 import { getInitialWindowBounds } from '../../lib/window-manager';
 import { MainIPC } from '../ipc';
 import { shipStore } from '../ship.store';
-
 import {
   AppWindowMobxType,
   AppWindowModel,

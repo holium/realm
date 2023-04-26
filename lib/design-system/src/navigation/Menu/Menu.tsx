@@ -10,7 +10,6 @@ import {
   Orientation,
   Position,
 } from '../../util/position';
-
 import { MenuItem, MenuItemProps } from './MenuItem';
 import { useMenu } from './useMenu';
 

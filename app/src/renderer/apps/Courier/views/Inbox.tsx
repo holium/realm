@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { observer } from 'mobx-react';
+
 import {
   Box,
   Button,
@@ -8,7 +10,7 @@ import {
   TextInput,
   WindowedList,
 } from '@holium/design-system';
-import { observer } from 'mobx-react';
+
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 

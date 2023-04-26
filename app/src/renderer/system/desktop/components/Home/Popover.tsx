@@ -1,10 +1,12 @@
 import { useCallback, useEffect } from 'react';
-import { Box } from '@holium/design-system';
 import { AnimatePresence, motion } from 'framer-motion';
 import { observer } from 'mobx-react';
-import { useAppState } from 'renderer/stores/app.store';
 import styled from 'styled-components';
 import { color, compose, space, typography } from 'styled-system';
+
+import { Box } from '@holium/design-system';
+
+import { useAppState } from 'renderer/stores/app.store';
 
 import { MiniAppWindow } from '../SystemBar/components/MiniAppWindow';
 

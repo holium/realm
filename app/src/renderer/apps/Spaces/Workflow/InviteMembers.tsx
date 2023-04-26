@@ -1,4 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createField, createForm } from 'mobx-easy-form';
+import { observer } from 'mobx-react';
+import styled from 'styled-components';
+import { isValidPatp } from 'urbit-ob';
+
 import {
   Avatar,
   Box,
@@ -11,16 +16,13 @@ import {
   Text,
   TextInput,
 } from '@holium/design-system';
-import { createField, createForm } from 'mobx-easy-form';
-import { observer } from 'mobx-react';
+
 import { MemberRole, MemberStatus } from 'os/types';
 import { Crest } from 'renderer/components';
 import { ShipSearch } from 'renderer/components/ShipSearch';
 import { pluralize } from 'renderer/lib/text';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import styled from 'styled-components';
-import { isValidPatp } from 'urbit-ob';
 
 interface IMemberList {
   height?: any;

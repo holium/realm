@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Avatar, Box, Flex, RadioList, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Avatar, Box, Flex, RadioList, Text } from '@holium/design-system';
+
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 

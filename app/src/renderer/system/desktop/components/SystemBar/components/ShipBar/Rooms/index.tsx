@@ -1,7 +1,9 @@
 import { useCallback, useEffect } from 'react';
+import { observer } from 'mobx-react';
+
 import { Box, RoomsDock } from '@holium/design-system';
 import { RealmProtocol } from '@holium/realm-room';
-import { observer } from 'mobx-react';
+
 import { roomTrayConfig } from 'renderer/apps/Rooms/config';
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { useTrayApps } from 'renderer/apps/store';

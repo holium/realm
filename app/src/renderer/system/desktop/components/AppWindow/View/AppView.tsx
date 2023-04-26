@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
+import styled from 'styled-components';
+
 // import { AppType } from 'renderer/stores/models/bazaar.model';
 import { genCSSVariables } from 'renderer/lib/theme';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
-import styled from 'styled-components';
 
 import { applyStyleOverrides } from './applyStyleOverrides';
 import { WebView } from './WebView';

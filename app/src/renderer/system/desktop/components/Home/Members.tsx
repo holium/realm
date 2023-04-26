@@ -1,12 +1,14 @@
 import { useMemo, useRef, useState } from 'react';
-import { Button, Flex, Icon, Text, TextInput } from '@holium/design-system';
 import { motion } from 'framer-motion';
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
-import { ShipSearch } from 'renderer/components/ShipSearch';
-import { shipStore, useShipStore } from 'renderer/stores/ship.store';
 import styled from 'styled-components';
 import { isValidPatp } from 'urbit-ob';
+
+import { Button, Flex, Icon, Text, TextInput } from '@holium/design-system';
+
+import { ShipSearch } from 'renderer/components/ShipSearch';
+import { shipStore, useShipStore } from 'renderer/stores/ship.store';
 
 import { MembersList } from './Space/MembersList';
 

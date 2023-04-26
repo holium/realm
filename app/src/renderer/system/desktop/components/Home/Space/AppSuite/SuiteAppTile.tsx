@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
-import { bgIsLightOrDark, Box, Button, Icon } from '@holium/design-system';
 import { observer } from 'mobx-react';
 import { rgba } from 'polished';
+
+import { bgIsLightOrDark, Box, Button, Icon } from '@holium/design-system';
+
 import { AppTile, ContextMenuOption } from 'renderer/components';
 import { getAppTileFlags } from 'renderer/lib/app';
 import { useAppState } from 'renderer/stores/app.store';

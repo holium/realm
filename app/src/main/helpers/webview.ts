@@ -1,7 +1,6 @@
 import { BrowserWindow, ipcMain, session } from 'electron';
 
 import { getPreloadPath } from '../main';
-
 import { isMac, isWindows } from './env';
 import { hideCursor } from './hideCursor';
 

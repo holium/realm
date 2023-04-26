@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { observer } from 'mobx-react';
+
 import {
   Button,
   Flex,
@@ -7,11 +9,10 @@ import {
   Select,
   Text,
 } from '@holium/design-system';
-import { observer } from 'mobx-react';
+
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
-
 import { useRooms } from './useRooms';
 
 const SettingsPresenter = () => {
