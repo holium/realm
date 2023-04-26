@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
-import { Button, Flex, Text } from '@holium/design-system/general';
 import styled from 'styled-components';
+
+import { Button, Flex, Text } from '@holium/design-system/general';
 
 import { MOBILE_WIDTH } from './OnboardDialog.styles';
 

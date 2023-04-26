@@ -1,4 +1,9 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useField, useForm } from 'mobx-easy-form';
+import { observer } from 'mobx-react';
+import styled from 'styled-components';
+
 import {
   Box,
   Button,
@@ -6,14 +11,11 @@ import {
   RadioImages,
   TextInput,
 } from '@holium/design-system';
-import { motion } from 'framer-motion';
-import { useField, useForm } from 'mobx-easy-form';
-import { observer } from 'mobx-react';
+
 import { useAppState } from 'renderer/stores/app.store';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 import { ThemeType } from 'renderer/stores/models/theme.model';
 import { ShipMobxType, useShipStore } from 'renderer/stores/ship.store';
-import styled from 'styled-components';
 
 import { SettingControl } from '../components/SettingControl';
 import { SettingPane } from '../components/SettingPane';

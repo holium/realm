@@ -1,5 +1,6 @@
-import { FriendType } from 'renderer/stores/models/friends.model';
 import { isValidPatp } from 'urbit-ob';
+
+import { FriendType } from 'renderer/stores/models/friends.model';
 
 type ContactMetadata = Omit<
   FriendType,

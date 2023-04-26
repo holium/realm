@@ -4,7 +4,6 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { TextInput } from '../../../inputs';
 import { Flex } from '../Flex/Flex';
 import { Text } from '../Text/Text';
-
 import { Icon } from './Icon';
 import { IconPathsType, paths } from './icons';
 

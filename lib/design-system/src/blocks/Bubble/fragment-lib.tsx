@@ -14,7 +14,6 @@ import { Bookmark } from '../../os/Bookmark/Bookmark';
 import { capitalizeFirstLetter } from '../../util/strings';
 import { BlockStyle } from '../Block/Block';
 import { convertFragmentsToPreview } from '../ChatInput/fragment-parser';
-
 import { BUBBLE_HEIGHT } from './Bubble.constants';
 import { BubbleAuthor } from './Bubble.styles';
 import {

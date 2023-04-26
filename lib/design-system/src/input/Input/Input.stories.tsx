@@ -1,7 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { Flex } from '../../general/Flex/Flex';
-
 import { Input, TextArea } from './Input';
 
 export default {

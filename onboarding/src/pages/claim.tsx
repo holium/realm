@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
-import { ClaimTokenDialog, OnboardingStorage } from '@holium/shared';
 import { GetServerSideProps } from 'next';
+
+import { ClaimTokenDialog, OnboardingStorage } from '@holium/shared';
 
 import { Page } from 'components/Page';
 

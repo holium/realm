@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react';
 import { Instance, onSnapshot, types } from 'mobx-state-tree';
+
 import { calculatePopoverAnchorById } from 'renderer/lib/position';
 import { DocketApp, DocketAppType } from 'renderer/stores/models/bazaar.model';
 

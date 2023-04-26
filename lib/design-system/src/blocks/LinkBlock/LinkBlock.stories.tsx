@@ -1,7 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { Flex } from '../../../general';
-
 import { LinkBlock } from './LinkBlock';
 
 export default {

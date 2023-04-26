@@ -1,3 +1,5 @@
+import { observer } from 'mobx-react';
+
 import {
   Button,
   Flex,
@@ -6,7 +8,7 @@ import {
   Spinner,
   Text,
 } from '@holium/design-system';
-import { observer } from 'mobx-react';
+
 import { Patp } from 'os/types';
 import { useShipStore } from 'renderer/stores/ship.store';
 

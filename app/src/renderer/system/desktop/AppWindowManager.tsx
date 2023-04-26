@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
+
 import { nativeApps } from 'renderer/apps/nativeApps';
 import {
   ContextMenuOption,

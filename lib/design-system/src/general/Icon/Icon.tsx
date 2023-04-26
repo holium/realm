@@ -18,7 +18,6 @@ import {
 
 import { ColorVariants } from '../../util/colors';
 import { BoxProps } from '../Box/Box';
-
 import { IconPathsType, paths } from './icons';
 
 export type IconProps = BoxProps &

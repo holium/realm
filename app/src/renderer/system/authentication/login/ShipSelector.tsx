@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Avatar, Flex, Tooltip } from '@holium/design-system';
 import { LayoutGroup, motion, Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
-import { useAppState } from 'renderer/stores/app.store';
 import styled from 'styled-components';
+
+import { Avatar, Flex, Tooltip } from '@holium/design-system';
+
+import { useAppState } from 'renderer/stores/app.store';
 
 // ----------------------------------------
 // -------- Local style components --------

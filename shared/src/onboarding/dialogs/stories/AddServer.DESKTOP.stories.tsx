@@ -1,6 +1,7 @@
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+
 import { Anchor } from '@holium/design-system/general';
 import { OnboardDialogDescription } from '@holium/shared';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { AddServerDialog } from '../AddServerDialog';
 import { CreateAccountDialog } from '../CreateAccountDialog';
@@ -8,7 +9,6 @@ import { HostingDialog } from '../HostingDialog';
 import { InstallationDialog } from '../InstallationDialog';
 import { LoginDialog } from '../LoginDialog';
 import { PassportDialog } from '../PassportDialog';
-
 import { OnboardingDialogWrapper } from './helpers';
 
 export default {

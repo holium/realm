@@ -1,3 +1,4 @@
+import { cite } from '@urbit/aura';
 import { toJS } from 'mobx';
 import {
   applySnapshot,
@@ -8,10 +9,7 @@ import {
   types,
 } from 'mobx-state-tree';
 
-import { cite } from '@urbit/aura';
-
 import { SpacesIPC } from '../ipc';
-
 import { LoaderModel } from './common.model';
 
 const Roles = types.enumeration(['initiate', 'member', 'admin', 'owner']);

@@ -1,7 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { Flex } from '../../general/Flex/Flex';
-
 import { Toggle } from './Toggle';
 
 export default {

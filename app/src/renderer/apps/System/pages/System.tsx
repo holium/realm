@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Button, CheckBox, Flex, Spinner, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
+import styled from 'styled-components';
+
+import { Button, CheckBox, Flex, Spinner, Text } from '@holium/design-system';
+
 import { MediaAccess, MediaAccessStatus } from 'os/types';
 import { useAppState } from 'renderer/stores/app.store';
 import { MainIPC } from 'renderer/stores/ipc';
-import styled from 'styled-components';
 
 import { SettingControl } from '../components/SettingControl';
 import { SettingPane } from '../components/SettingPane';

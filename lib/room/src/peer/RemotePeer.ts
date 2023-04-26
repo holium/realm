@@ -4,7 +4,6 @@ import SimplePeer from 'simple-peer';
 import { DataPacket } from '../helpers/data';
 import { Patp } from '../types';
 import { isFireFox, isSafari } from '../utils';
-
 import { PeerEvent } from './events';
 import { Peer, PeerConfig } from './Peer';
 import { PeerConnectionState, TrackKind } from './types';

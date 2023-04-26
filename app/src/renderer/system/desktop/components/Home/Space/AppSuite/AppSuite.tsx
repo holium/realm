@@ -1,14 +1,15 @@
 import { useMemo, useState } from 'react';
-import { Button, Flex, Text } from '@holium/design-system';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { keyframes, styled } from '@stitches/react';
 import { observer } from 'mobx-react';
+
+import { Button, Flex, Text } from '@holium/design-system';
+
 import { calculatePopoverAnchorById } from 'renderer/lib/position';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { AppRow } from '../../AppInstall/AppRow';
 import { RealmPopover } from '../../Popover';
-
 import { SuiteApp } from './SuiteApp';
 
 interface AppSuiteProps {

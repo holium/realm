@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { NoScrollBar } from '@holium/design-system';
 import { motion } from 'framer-motion';
+
+import { NoScrollBar } from '@holium/design-system';
 
 interface InboxListProps<T> {
   items: T[];

@@ -2,7 +2,6 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { Button, Flex, Icon } from '../../../general';
 import { Input } from '../Input/Input';
-
 import { InputBox } from './InputBox';
 
 export default {

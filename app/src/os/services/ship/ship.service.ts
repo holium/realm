@@ -9,14 +9,13 @@ import { S3Client, StorageAcl } from '../../../renderer/lib/S3Client';
 import { getCookie } from '../../lib/shipHelpers';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection, ConduitSession } from '../api';
-
 import ChatService from './chat/chat.service';
-import NotificationsService from './notifications/notifications.service';
-import BazaarService from './spaces/bazaar.service';
-import SpacesService from './spaces/spaces.service';
 import { FriendsService } from './friends.service';
+import NotificationsService from './notifications/notifications.service';
 import RoomsService from './rooms.service';
 import { ShipDB } from './ship.db';
+import BazaarService from './spaces/bazaar.service';
+import SpacesService from './spaces/spaces.service';
 
 export class ShipService extends AbstractService<any> {
   public patp: string;

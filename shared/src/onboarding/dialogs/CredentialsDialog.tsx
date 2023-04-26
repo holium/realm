@@ -1,5 +1,6 @@
-import { CopyButton, Flex, Text } from '@holium/design-system/general';
 import styled from 'styled-components';
+
+import { CopyButton, Flex, Text } from '@holium/design-system/general';
 
 import { OnboardDialog } from '../components/OnboardDialog';
 import {

@@ -5,6 +5,7 @@ import {
   MenuItemProps,
   Portal,
 } from '@holium/design-system';
+
 import { useContextMenu } from 'renderer/components/ContextMenu';
 
 const WIDTH = 180;

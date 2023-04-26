@@ -10,7 +10,6 @@ import {
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection } from '../api';
 import { ShipDB } from '../ship/ship.db';
-
 import { Account } from './accounts.table';
 import { AuthDB } from './auth.db';
 import { MasterAccount } from './masterAccounts.table';

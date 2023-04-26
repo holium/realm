@@ -1,7 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { Flex } from '../Flex/Flex';
-
 import { Skeleton } from './Skeleton';
 
 export default {

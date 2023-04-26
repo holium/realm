@@ -1,4 +1,8 @@
 import { useEffect, useMemo, useRef } from 'react';
+import { observer } from 'mobx-react';
+import { darken, desaturate, lighten, rgba } from 'polished';
+import styled, { css } from 'styled-components';
+
 import {
   bgIsLightOrDark,
   Box,
@@ -7,8 +11,7 @@ import {
   Spinner,
   Text,
 } from '@holium/design-system';
-import { observer } from 'mobx-react';
-import { darken, desaturate, lighten, rgba } from 'polished';
+
 import {
   ContextMenuOption,
   useContextMenu,
@@ -19,7 +22,6 @@ import {
   DevAppType,
   InstallStatus,
 } from 'renderer/stores/models/bazaar.model';
-import styled, { css } from 'styled-components';
 
 const sizes = {
   sm: 32,

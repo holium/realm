@@ -1,3 +1,4 @@
+import { cite } from '@urbit/aura';
 import { toJS } from 'mobx';
 import {
   applySnapshot,
@@ -6,8 +7,6 @@ import {
   Instance,
   types,
 } from 'mobx-state-tree';
-
-import { cite } from '@urbit/aura';
 
 import { FriendsIPC } from '../ipc';
 

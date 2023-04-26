@@ -1,11 +1,12 @@
 import { useCallback, useMemo } from 'react';
+import { useRouter } from 'next/router';
+
 import { capitalizeFirstLetter } from '@holium/design-system/util';
 import {
   OnboardingPage,
   OnboardingStorage,
   SidebarSection,
 } from '@holium/shared';
-import { useRouter } from 'next/router';
 
 export const accountPageUrl: Record<string, OnboardingPage> = {
   'Download Realm': '/account/download-realm',

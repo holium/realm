@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
+import { Reorder } from 'framer-motion';
+
 import {
   AppTile,
   AppTileType,
@@ -6,7 +8,7 @@ import {
   getAppTileFlags,
   InstallStatus,
 } from '@holium/design-system';
-import { Reorder } from 'framer-motion';
+
 import { ContextMenuOption, useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';

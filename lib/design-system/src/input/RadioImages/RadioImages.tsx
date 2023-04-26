@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 
 import { Flex } from '../../general/Flex/Flex';
-
 import { RadioHighlight, RadioImage } from './RadioImages.style';
 
 type RadioImageOption = {

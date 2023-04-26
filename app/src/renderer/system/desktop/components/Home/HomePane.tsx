@@ -2,10 +2,11 @@ import { useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { rgba } from 'polished';
+import styled from 'styled-components';
+
 import { PassportMenuProvider } from 'renderer/components/People/usePassportMenu';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
-import styled from 'styled-components';
 
 import { AppSearchPopover } from './AppInstall/AppSearchPopover';
 import { Home } from './Space';

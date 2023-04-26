@@ -6,11 +6,10 @@
  *****************/
 import { app, BrowserWindow, dialog, ipcMain, net } from 'electron';
 import log from 'electron-log';
-import { autoUpdater, UpdateInfo /*, NsisUpdater */ } from 'electron-updater';
+import { autoUpdater, UpdateInfo } from 'electron-updater';
 import path from 'path';
 
 import { getReleaseChannelFromSettings } from '../os/lib/settings';
-
 import { isDevelopment } from './helpers/env';
 import { resolveHtmlPath, resolveUpdaterPath } from './util';
 

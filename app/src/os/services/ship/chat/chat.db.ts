@@ -4,7 +4,6 @@ import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
 import { APIConnection } from '../../api';
-
 import {
   AddRow,
   ChatDbOps,

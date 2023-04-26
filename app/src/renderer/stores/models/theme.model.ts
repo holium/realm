@@ -1,4 +1,3 @@
-import { bgIsLightOrDark } from '@holium/design-system';
 import { average } from 'color.js';
 import {
   applySnapshot,
@@ -8,6 +7,8 @@ import {
   types,
 } from 'mobx-state-tree';
 import { darken, lighten, rgba } from 'polished';
+
+import { bgIsLightOrDark } from '@holium/design-system';
 
 import { defaultTheme } from '../../lib/defaultTheme';
 

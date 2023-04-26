@@ -3,7 +3,6 @@ import styled from 'styled-components';
 
 import { Button, Flex, FlexProps, Icon, Text } from '../../../general';
 import { timelineDate } from '../../util/date';
-
 import {
   NotificationButtonType,
   NotificationType,

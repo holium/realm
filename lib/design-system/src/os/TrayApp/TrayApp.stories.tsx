@@ -3,7 +3,6 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { motion } from 'framer-motion';
 
 import { Button, Flex, Icon, Row, Text } from '../../../general';
-
 import { TrayApp } from './TrayApp';
 
 export default {

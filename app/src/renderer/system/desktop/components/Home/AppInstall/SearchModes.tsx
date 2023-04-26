@@ -1,4 +1,8 @@
 import { useEffect, useState } from 'react';
+import { toJS } from 'mobx';
+import { observer } from 'mobx-react';
+import { isValidPatp } from 'urbit-ob';
+
 import {
   Button,
   Flex,
@@ -7,8 +11,7 @@ import {
   Spinner,
   Text,
 } from '@holium/design-system';
-import { toJS } from 'mobx';
-import { observer } from 'mobx-react';
+
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { appState } from 'renderer/stores/app.store';
 import {
@@ -16,7 +19,6 @@ import {
   DocketAppType,
 } from 'renderer/stores/models/bazaar.model';
 import { useShipStore } from 'renderer/stores/ship.store';
-import { isValidPatp } from 'urbit-ob';
 
 import { AppRow } from './AppRow';
 import { ProviderRow } from './ProviderRow';

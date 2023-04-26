@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Flex, Text, TextInput } from '@holium/design-system';
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
-import { useShipStore } from 'renderer/stores/ship.store';
 import { isValidPatp } from 'urbit-ob';
 import * as yup from 'yup';
+
+import { Flex, Text, TextInput } from '@holium/design-system';
+
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useAppInstaller } from './store';
 

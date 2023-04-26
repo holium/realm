@@ -9,6 +9,7 @@ import {
   tryReference,
   types,
 } from 'mobx-state-tree';
+
 import { ChatUpdateTypes } from 'os/services/ship/chat/chat.types';
 import { ChatIPC, RealmIPC } from 'renderer/stores/ipc';
 import { SpacesStoreType } from 'renderer/stores/models/spaces.model';

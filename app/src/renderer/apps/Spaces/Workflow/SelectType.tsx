@@ -1,11 +1,13 @@
 import { FC, useEffect, useState } from 'react';
-import { Button, Flex, Icon, Skeleton, Text } from '@holium/design-system';
 // import { toJS } from 'mobx';
 import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
+import styled from 'styled-components';
+
+import { Button, Flex, Icon, Skeleton, Text } from '@holium/design-system';
+
 import { useShipStore } from 'renderer/stores/ship.store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
-import styled from 'styled-components';
 
 import { SelectRow } from '../components/SelectionRow';
 

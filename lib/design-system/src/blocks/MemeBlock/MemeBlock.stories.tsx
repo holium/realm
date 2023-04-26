@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import { Flex } from '../../../general';
 import { FragmentReactionType } from '../Bubble/Bubble.types';
 import { OnReactionPayload } from '../Bubble/Reaction';
-
 import { MemeBlock } from './MemeBlock';
 
 const MemeBlockBackground = styled(Flex)`
