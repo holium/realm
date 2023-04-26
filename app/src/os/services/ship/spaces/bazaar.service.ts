@@ -4,9 +4,8 @@ import Database from 'better-sqlite3-multiple-ciphers';
 import { pathToObj } from '../../../lib/path';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
-
-import { AppCatalogDB } from './tables/catalog.table';
 import { BazaarUpdateType } from './bazaar.types';
+import { AppCatalogDB } from './tables/catalog.table';
 
 export class BazaarService extends AbstractService<BazaarUpdateType> {
   private tables?: {

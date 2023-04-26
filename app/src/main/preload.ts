@@ -1,11 +1,10 @@
 import { contextBridge, ipcRenderer } from 'electron';
+
 import { Position } from '@holium/design-system';
 import { MouseState } from '@holium/realm-presence';
+
 import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
-
-import './helpers/mouseListener';
-import './helpers/keyListener';
 
 import { realmPreload } from '../os/realm.service';
 import { authPreload } from '../os/services/auth/auth.service';
@@ -17,8 +16,10 @@ import { roomsPreload } from '../os/services/ship/rooms.service';
 import { shipPreload } from '../os/services/ship/ship.service';
 import { walletPreload } from '../os/services/ship/wallet/wallet.service';
 import { MediaAccess, MediaAccessStatus } from '../os/types';
-
 import { multiplayerPreload } from './preload.multiplayer';
+
+import './helpers/mouseListener';
+import './helpers/keyListener';
 
 const appPreload = {
   setPartitionCookie: (partition: string, cookie: any) => {

@@ -1,4 +1,7 @@
 import { useMemo } from 'react';
+import { observer } from 'mobx-react';
+import { rgba } from 'polished';
+
 import {
   Box,
   Button,
@@ -7,14 +10,12 @@ import {
   Text,
   WindowedList,
 } from '@holium/design-system';
-import { observer } from 'mobx-react';
-import { rgba } from 'polished';
+
 import { useAppState } from 'renderer/stores/app.store';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
-
 import { VisaRow } from './components/VisaRow';
 import { SpaceRow } from './SpaceRow';
 

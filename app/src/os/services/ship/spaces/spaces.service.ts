@@ -7,7 +7,8 @@ import { humanFriendlySpaceNameSlug } from '../../../lib/text';
 import { MemberRole } from '../../../types';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
-
+import { spacesModelQuery } from './spaces.query';
+import { SpacesUpdateType } from './spaces.types';
 import {
   FeaturedSpacesDB,
   spacesFeaturedInitSql,
@@ -15,8 +16,6 @@ import {
 import { MembersDB, spacesMembersInitSql } from './tables/members.table';
 import { SpacesDB, spacesInitSql } from './tables/spaces.table';
 import { InvitationDB, spacesInvitationsInitSql } from './tables/visas.table';
-import { spacesModelQuery } from './spaces.query';
-import { SpacesUpdateType } from './spaces.types';
 
 export class SpacesService extends AbstractService<SpacesUpdateType> {
   private shipDB?: Database;

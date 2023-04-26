@@ -1,7 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { Flex } from '../Flex/Flex';
-
 import { Avatar } from './Avatar';
 
 export default {

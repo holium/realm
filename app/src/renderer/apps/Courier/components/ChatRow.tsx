@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { observer } from 'mobx-react';
+
 import {
   convertFragmentsToPreview,
   Flex,
@@ -7,7 +9,7 @@ import {
   Text,
   timelineDate,
 } from '@holium/design-system';
-import { observer } from 'mobx-react';
+
 import { ChatPathType } from 'os/services/ship/chat/chat.types';
 import { useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';

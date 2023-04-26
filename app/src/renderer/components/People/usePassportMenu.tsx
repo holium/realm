@@ -5,8 +5,10 @@ import {
   useContext,
   useState,
 } from 'react';
-import { Box, Position } from '@holium/design-system';
 import { AnimatePresence } from 'framer-motion';
+
+import { Box, Position } from '@holium/design-system';
+
 import { Menu } from 'renderer/components/Menu/Menu';
 import { useAppState } from 'renderer/stores/app.store';
 

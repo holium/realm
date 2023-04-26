@@ -1,5 +1,6 @@
-import { Anchor, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Anchor, Text } from '@holium/design-system';
 
 import { SettingPane } from '../components/SettingPane';
 import { SettingSection } from '../components/SettingSection';

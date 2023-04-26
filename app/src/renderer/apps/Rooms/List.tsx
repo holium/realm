@@ -1,10 +1,11 @@
+import { observer } from 'mobx-react';
+
 import { Button, Flex, Icon, Text, Tooltip } from '@holium/design-system';
 import { RealmProtocol, RoomType } from '@holium/realm-room';
-import { observer } from 'mobx-react';
+
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
-
 import { ProviderSelector } from './components/ProviderSelector';
 import { RoomRow } from './components/RoomRow';
 import { useRooms } from './useRooms';

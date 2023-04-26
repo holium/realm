@@ -1,6 +1,8 @@
 import { FC } from 'react';
-import { Button, Flex, Spinner, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Button, Flex, Spinner, Text } from '@holium/design-system';
+
 import { useAppState } from 'renderer/stores/app.store';
 
 interface ConfirmDialogProps {

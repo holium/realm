@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
 import { Fill } from 'react-spaces';
-import { Flex } from '@holium/design-system';
 import { AnimatePresence, motion } from 'framer-motion';
 import { observer } from 'mobx-react';
+
+import { Flex } from '@holium/design-system';
+
 import { SoundActions } from 'renderer/lib/sound';
 import { useAppState } from 'renderer/stores/app.store';
 

@@ -1,8 +1,10 @@
 import { PointerEvent, useCallback, useEffect, useMemo } from 'react';
-import { Flex, useToggle } from '@holium/design-system';
 import { useDragControls, useMotionValue } from 'framer-motion';
 import { debounce } from 'lodash';
 import { observer } from 'mobx-react';
+
+import { Flex, useToggle } from '@holium/design-system';
+
 import {
   denormalizeBounds,
   normalizeBounds,
@@ -13,11 +15,10 @@ import { useShipStore } from 'renderer/stores/ship.store';
 import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
 
 import { ErrorBoundary } from '../../../ErrorBoundary';
-
-import { TitlebarByType } from './Titlebar/TitlebarByType';
 import { AppWindowContainer } from './AppWindow.styles';
 import { AppWindowByType } from './AppWindowByType';
 import { AppWindowResizeHandles } from './AppWindowResizeHandles';
+import { TitlebarByType } from './Titlebar/TitlebarByType';
 
 const CURSOR_WIDTH = 10;
 

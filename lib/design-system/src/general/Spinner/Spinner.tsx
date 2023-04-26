@@ -6,7 +6,6 @@ import {
 } from 'styled-system';
 
 import { Box } from '../Box/Box';
-
 import { StyledSpinner } from './Spinner.styles';
 
 const pxStringToNumber = (px: string) => Number(px.replace('px', ''));

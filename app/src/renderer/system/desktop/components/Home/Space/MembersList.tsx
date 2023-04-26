@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
-import { Flex, Text, WindowedList } from '@holium/design-system';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
+
+import { Flex, Text, WindowedList } from '@holium/design-system';
+
 import { PersonRow } from 'renderer/components/People/PersonRow';
 import { FriendType } from 'renderer/stores/models/friends.model';
 import { MemberType } from 'renderer/stores/models/invitations.model';

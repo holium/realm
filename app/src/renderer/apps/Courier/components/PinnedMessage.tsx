@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
+import styled from 'styled-components';
+
 import {
   convertDarkText,
   Flex,
   MenuItemProps,
   PinnedMessage,
 } from '@holium/design-system';
+
 import { useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
-import styled from 'styled-components';
 
 import { useChatStore } from '../../../stores/chat.store';
 import { ChatMessageType } from '../../../stores/models/chat.model';

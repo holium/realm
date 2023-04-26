@@ -1,4 +1,5 @@
 import { FC, PointerEvent, useEffect } from 'react';
+
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/BrowserToolbar';
 import { nativeApps } from 'renderer/apps/nativeApps';
 import { ShellModelType } from 'renderer/stores/models/shell.model';
@@ -10,7 +11,6 @@ import {
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 
 import { getNativeAppWindow, NativeAppId } from '../getNativeAppWindow';
-
 import { Titlebar } from './Titlebar';
 
 type Props = {

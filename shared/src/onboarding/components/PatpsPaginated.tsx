@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Flex, Icon, Spinner } from '@holium/design-system/general';
 import styled from 'styled-components';
+
+import { Flex, Icon, Spinner } from '@holium/design-system/general';
 
 import { PatpCard } from './PatpCard';
 

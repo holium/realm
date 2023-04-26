@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { toJS } from 'mobx';
+import { observer } from 'mobx-react';
+
 import {
   Bubble,
   convertFragmentsToText,
   MenuItemProps,
   OnReactionPayload,
 } from '@holium/design-system';
-import { toJS } from 'mobx';
-import { observer } from 'mobx-react';
+
 import { useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { MainIPC } from 'renderer/stores/ipc';

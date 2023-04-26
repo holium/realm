@@ -8,13 +8,13 @@ import {
   Instance,
   types,
 } from 'mobx-state-tree';
+
 import { MemberRole } from 'os/types';
 import { defaultTheme } from 'renderer/lib/defaultTheme';
 
 import { appState } from '../app.store';
 import { BazaarIPC, SpacesIPC } from '../ipc';
 import { shipStore } from '../ship.store';
-
 import { UrbitApp } from './bazaar.model';
 import { LoaderModel, SubscriptionModel } from './common.model';
 import { MembersModel, MembersStore, VisaModel } from './invitations.model';

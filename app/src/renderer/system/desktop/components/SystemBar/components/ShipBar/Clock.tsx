@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Flex, Text } from '@holium/design-system';
 import moment from 'moment';
+
+import { Flex, Text } from '@holium/design-system';
 
 export const TrayClock = () => {
   const [time, setTime] = useState(() => moment().format('hh:mm A'));

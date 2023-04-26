@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import { useField, useForm } from 'mobx-easy-form';
+import { observer } from 'mobx-react';
+import * as yup from 'yup';
+
 import {
   Button,
   Flex,
@@ -8,13 +12,11 @@ import {
   TextInput,
   useToggle,
 } from '@holium/design-system';
-import { useField, useForm } from 'mobx-easy-form';
-import { observer } from 'mobx-react';
+
 import { normalizeBounds } from 'renderer/lib/window-manager';
 import { appState } from 'renderer/stores/app.store';
 import { AuthIPC } from 'renderer/stores/ipc';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import * as yup from 'yup';
 
 export const ResetCodeDialogConfig: (dialogProps: any) => DialogConfig = (
   dialogProps: any

@@ -1,9 +1,11 @@
 import React from 'react';
-import { Box, BoxProps, Icon } from '@holium/design-system';
 import { rgba } from 'polished';
+import styled, { css } from 'styled-components';
+
+import { Box, BoxProps, Icon } from '@holium/design-system';
+
 import { AppType } from 'renderer/stores/models/bazaar.model';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
-import styled, { css } from 'styled-components';
 
 import { SuiteAppTile } from './SuiteAppTile';
 

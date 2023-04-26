@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import { observer } from 'mobx-react';
+import { isValidPatp } from 'urbit-ob';
+
 import {
   Button,
   Flex,
@@ -7,13 +10,11 @@ import {
   Text,
   TextInput,
 } from '@holium/design-system';
-import { observer } from 'mobx-react';
+
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
-import { isValidPatp } from 'urbit-ob';
 
 import { useTrayApps } from '../store';
-
 import { FeaturedList } from './FeaturedList';
 import { SpacesList } from './SpacesList';
 import { YouRow } from './YouRow';

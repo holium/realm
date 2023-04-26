@@ -7,6 +7,7 @@ import {
   tryReference,
   types,
 } from 'mobx-state-tree';
+
 import { LoginErrorType } from 'os/realm.types';
 import {
   AccountView,
@@ -16,9 +17,9 @@ import { OnboardingEndedPayload } from 'os/services/auth/onboarding.types';
 import { trackEvent } from 'renderer/lib/track';
 import { AuthIPC } from 'renderer/stores/ipc';
 
-import { AccountModel } from './models/account.model';
 import { appState } from './app.store';
 import { RealmIPC } from './ipc';
+import { AccountModel } from './models/account.model';
 
 export type LoginStatusStateType = 'initial' | 'loading' | 'success' | 'error';
 

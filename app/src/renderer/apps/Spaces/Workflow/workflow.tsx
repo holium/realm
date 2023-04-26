@@ -1,4 +1,5 @@
 import { toJS } from 'mobx';
+
 import { NewSpace } from 'os/services/ship/spaces/spaces.service';
 import { normalizeBounds } from 'renderer/lib/window-manager';
 import { appState } from 'renderer/stores/app.store';

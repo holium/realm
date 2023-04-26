@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
+import { observer } from 'mobx-react';
+
 import { useToggle } from '@holium/design-system';
 import { RoomManagerEvent, RoomsManager } from '@holium/realm-room';
-import { observer } from 'mobx-react';
+
 import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { genCSSVariables } from 'renderer/lib/theme';
 import { useAppState } from 'renderer/stores/app.store';

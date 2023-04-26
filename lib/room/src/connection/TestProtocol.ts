@@ -4,7 +4,6 @@ import { DataPacket } from '../helpers/data';
 import { LocalPeer } from '../peer/LocalPeer';
 import { RemotePeer } from '../peer/RemotePeer';
 import { Patp, RoomType } from '../types';
-
 import { PeerEvent } from './../peer/events';
 import { BaseProtocol, ProtocolConfig } from './BaseProtocol';
 import { ProtocolEvent } from './events';

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Flex, Text, Tooltip } from '@holium/design-system';
-import { ChatModelType } from '@holium/realm-room';
 import { observer } from 'mobx-react';
 import { darken, lighten } from 'polished';
+
+import { Flex, Text, Tooltip } from '@holium/design-system';
+import { ChatModelType } from '@holium/realm-room';
+
 import { useAppState } from 'renderer/stores/app.store';
 
 import { Bubble } from './RoomBubble';

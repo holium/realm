@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Select, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Select, Text } from '@holium/design-system';
+
 import { RealmIPC } from 'renderer/stores/ipc';
 
 import { SettingControl } from '../components/SettingControl';

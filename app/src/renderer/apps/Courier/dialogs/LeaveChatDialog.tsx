@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import { normalizeBounds } from 'renderer/lib/window-manager';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 

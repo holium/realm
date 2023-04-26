@@ -1,3 +1,5 @@
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+
 import { Anchor } from '@holium/design-system/general';
 import {
   BootingDialog,
@@ -6,13 +8,11 @@ import {
   OnboardDialogDescription,
   PaymentDialog,
 } from '@holium/shared';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { CreateAccountDialog } from '../CreateAccountDialog';
 import { HostingDialog } from '../HostingDialog';
 import { LoginDialog } from '../LoginDialog';
 import { PassportDialog } from '../PassportDialog';
-
 import {
   mockPatps,
   OnboardingDialogWrapper,

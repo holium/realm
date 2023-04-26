@@ -10,7 +10,6 @@ import { FragmentImage } from '../Bubble/fragment-lib';
 import { Reply } from '../Bubble/Reply';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
 import { MediaBlock } from '../MediaBlock/MediaBlock';
-
 import { convertFragmentsToText, parseChatInput } from './fragment-parser';
 
 const CHAT_INPUT_LINE_HEIGHT = 22;

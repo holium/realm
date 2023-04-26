@@ -1,3 +1,5 @@
+import styled from 'styled-components';
+
 import {
   Button,
   ErrorBox,
@@ -6,7 +8,6 @@ import {
   Spinner,
 } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
-import styled from 'styled-components';
 
 import { OnboardDialog } from '../components/OnboardDialog';
 import {

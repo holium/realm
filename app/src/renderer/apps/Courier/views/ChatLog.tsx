@@ -1,4 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
+import { observer } from 'mobx-react';
+import styled from 'styled-components';
+
 import {
   extractOGData,
   fetchOGData,
@@ -9,20 +13,17 @@ import {
   Text,
   WindowedListRef,
 } from '@holium/design-system';
-import { AnimatePresence } from 'framer-motion';
-import { observer } from 'mobx-react';
+
 import { useTrayApps } from 'renderer/apps/store';
 import { IuseStorage } from 'renderer/lib/useStorage';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
-import styled from 'styled-components';
 
 import { ChatMessageType } from '../../../stores/models/chat.model';
 import { ChatAvatar } from '../components/ChatAvatar';
 import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
 import { PinnedContainer } from '../components/PinnedMessage';
-
 import { ChatLogList } from './ChatLogList';
 
 const FullWidthAnimatePresence = styled(AnimatePresence)`

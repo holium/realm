@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Flex, Text } from '@holium/design-system';
-import { useBroadcast } from '@holium/realm-presence';
 import { TextSelection, Transaction } from 'prosemirror-state';
 import { Step } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
 
+import { Flex, Text } from '@holium/design-system';
+import { useBroadcast } from '@holium/realm-presence';
+
+import { EditorContainer, Header } from './App.styles';
 import { Authority } from './components/Authority';
 import { collabEditor } from './components/CollabEditor';
 import { CustomCaret } from './components/CustomCaret';
 import { Loader } from './components/Loader';
 import { schema } from './components/schema';
-import { EditorContainer, Header } from './App.styles';
 import { hoonDoc } from './hoonExample';
 
 type Carets = Record<string, { x: number; y: number }>;

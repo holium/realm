@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useField, useField, useForm, useForm } from 'mobx-easy-form';
+import { observer, observer, observer } from 'mobx-react';
+
 import {
   Anchor,
   AvatarInput,
@@ -13,8 +16,7 @@ import {
   TextInput,
   useToggle,
 } from '@holium/design-system';
-import { useField, useForm } from 'mobx-easy-form';
-import { observer, observer } from 'mobx-react';
+
 import { useTrayApps } from 'renderer/apps/store';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';

@@ -5,7 +5,6 @@ import { Icon } from '../../general/Icon/Icon';
 import { MenuItemStyle } from '../../general/MenuItem/MenuItem.styles';
 import { Text } from '../../general/Text/Text';
 import { RadioOption } from '../RadioGroup/RadioGroup';
-
 import { SelectDropdown, SelectWrapper } from './Select.styles';
 
 const animationVariants: Variants = {

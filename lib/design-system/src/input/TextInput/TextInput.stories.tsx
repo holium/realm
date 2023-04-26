@@ -3,7 +3,6 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { Button } from '../../general/Button/Button';
 import { Icon } from '../../general/Icon/Icon';
-
 import { TextInput } from './TextInput';
 
 export default {

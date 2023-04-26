@@ -2,7 +2,6 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { Flex } from '../../general/Flex/Flex';
 import { BarStyle } from '../Bar/Bar';
-
 import { RoomsDock } from './RoomsDock';
 
 export default {

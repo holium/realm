@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Bottom, Centered, Fill } from 'react-spaces';
+import { observer } from 'mobx-react';
+
 import {
   Avatar,
   Box,
@@ -12,7 +14,7 @@ import {
   Text,
   TextInput,
 } from '@holium/design-system';
-import { observer } from 'mobx-react';
+
 import { useAppState } from 'renderer/stores/app.store';
 
 import { ShipSelector } from './ShipSelector';

@@ -1,6 +1,8 @@
 import { createContext, useContext } from 'react';
 import { flow, Instance, onSnapshot, SnapshotIn, types } from 'mobx-state-tree';
 
+import { ChatStore } from './chat.store';
+import { ShipIPC } from './ipc';
 import { BazaarStore, BazaarStoreType } from './models/bazaar.model';
 import { LoaderModel } from './models/common.model';
 import { FeaturedStore } from './models/featured.model';
@@ -15,8 +17,6 @@ import {
   WalletStore,
   WalletView,
 } from './models/wallet.model';
-import { ChatStore } from './chat.store';
-import { ShipIPC } from './ipc';
 
 const ShipModel = types
   .model('ShipModel', {

@@ -2,6 +2,7 @@ import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
+
 import { getCenteredPosition } from 'renderer/lib/window-manager';
 import { useAppState } from 'renderer/stores/app.store';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';

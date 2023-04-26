@@ -1,5 +1,4 @@
 import { LocalPeer } from '../peer/LocalPeer';
-
 import { BaseAnalyser } from './BaseAnalyser';
 import { IAudioAnalyser } from './types';
 

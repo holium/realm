@@ -5,11 +5,11 @@ import crypto from 'crypto';
 import path from 'path';
 
 import { chatInitSql } from './chat/chat.db';
+import { friendsInitSql } from './friends.service';
 import { notifInitSql } from './notifications/notifications.table';
 import { spacesTablesInitSql } from './spaces/spaces.service';
 import { bazaarTablesInitSql } from './spaces/tables/catalog.table';
 import { walletInitSql } from './wallet/wallet.db';
-import { friendsInitSql } from './friends.service';
 
 export class ShipDB {
   private shipDB: Database;

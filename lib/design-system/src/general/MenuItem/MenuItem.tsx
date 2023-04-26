@@ -3,7 +3,6 @@ import { MouseEventHandler } from 'react';
 import { Box } from '../Box/Box';
 import { Spinner } from '../Spinner/Spinner';
 import { Text } from '../Text/Text';
-
 import { MenuItemStyle } from './MenuItem.styles';
 
 export type MenuItemProps = {

@@ -1,5 +1,7 @@
 import { FC } from 'react';
+
 import { Dimensions } from '@holium/design-system';
+
 import { LeaveChatDialogConfig } from 'renderer/apps/Courier/dialogs/LeaveChatDialog';
 import { spacesDialogs } from 'renderer/apps/Spaces/Workflow/workflow';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';

@@ -11,7 +11,6 @@ import { EditorState, Plugin } from 'prosemirror-state';
 import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 
 import { SendCaret, SendTransaction } from '../App';
-
 import { Authority } from './Authority';
 import { streamCaretPlugin } from './Caret';
 

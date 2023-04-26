@@ -8,7 +8,6 @@ import { parseMediaType } from '../../util/links';
 import { Block, BlockProps } from '../Block/Block';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
 import { MediaBlock } from '../MediaBlock/MediaBlock';
-
 import { TweetBlock } from './TweetBlock';
 import {
   extractOGData,

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+
 import { Flex } from '@holium/design-system/general';
 
 import { OnboardDialog } from '../components/OnboardDialog';

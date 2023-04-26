@@ -1,5 +1,6 @@
-import { ColorVariants } from '@holium/design-system/util';
 import styled from 'styled-components';
+
+import { ColorVariants } from '@holium/design-system/util';
 
 type Props = {
   fill?: ColorVariants;
