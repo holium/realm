@@ -186,6 +186,7 @@ export class RealmProtocol extends BaseProtocol {
         const payload = data['room-entered'];
         console.log(`%room-entered ${payload.ship}`);
         const room = this.rooms.get(payload.rid);
+
         if (room) {
           room.present.push(payload.ship);
           this.rooms.set(payload.rid, room);
@@ -210,6 +211,7 @@ export class RealmProtocol extends BaseProtocol {
               this.transitions.entering = null;
             }
           }
+
           // else {
           //   // if we are not in the room, we need to connect
           //   console.log('we arent in the room yet', payload.rid);
@@ -459,6 +461,7 @@ export class RealmProtocol extends BaseProtocol {
       isInitiator: isDialer(this.local.patp, peer),
       rtc: this.rtc,
     };
+
     const remotePeer = new RemotePeer(
       this.our,
       peer,

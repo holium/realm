@@ -26,13 +26,16 @@ export class RoomsService extends AbstractService<any> {
       log.info('rooms.service.ts:', 'Constructed.');
     }
   }
+
   public poke(payload: PokeParams) {
     return APIConnection.getInstance().conduit.poke(payload);
   }
+
   public scry(payload: Scry) {
     return APIConnection.getInstance().conduit.scry(payload);
   }
-  public setProvider(provider: string) {
+
+  async setProvider(provider: string) {
     return APIConnection.getInstance().conduit.poke({
       app: 'rooms-v2',
       mark: 'rooms-v2-session-action',
@@ -41,6 +44,85 @@ export class RoomsService extends AbstractService<any> {
       },
     });
   }
+
+  async createRoom(
+    rid: string,
+    title: string,
+    access: 'public' | 'private',
+    path: string | null = null
+  ) {
+    return APIConnection.getInstance().conduit.poke({
+      app: 'rooms-v2',
+      mark: 'rooms-v2-session-action',
+      json: {
+        'create-room': {
+          rid,
+          title,
+          access,
+          path,
+        },
+      },
+    });
+  }
+
+  async enterRoom(rid: string) {
+    return APIConnection.getInstance().conduit.poke({
+      app: 'rooms-v2',
+      mark: 'rooms-v2-session-action',
+      json: {
+        'enter-room': rid,
+      },
+    });
+  }
+
+  async leaveRoom(rid: string) {
+    return APIConnection.getInstance().conduit.poke({
+      app: 'rooms-v2',
+      mark: 'rooms-v2-session-action',
+      json: {
+        'leave-room': rid,
+      },
+    });
+  }
+
+  async deleteRoom(rid: string) {
+    return APIConnection.getInstance().conduit.poke({
+      app: 'rooms-v2',
+      mark: 'rooms-v2-session-action',
+      json: {
+        'delete-room': rid,
+      },
+    });
+  }
+
+  async kickPeer(rid: string, ship: string) {
+    return APIConnection.getInstance().conduit.poke({
+      app: 'rooms-v2',
+      mark: 'rooms-v2-session-action',
+      json: {
+        kick: {
+          rid,
+          ship,
+        },
+      },
+    });
+  }
+
+  async sendSignal(from: string, to: string, rid: string, msg: any) {
+    return APIConnection.getInstance().conduit.poke({
+      app: 'rooms-v2',
+      mark: 'rooms-v2-signal',
+      json: {
+        signal: {
+          from,
+          to,
+          rid,
+          data: JSON.stringify(msg),
+        },
+      },
+    });
+  }
+
   async getSession(): Promise<void> {
     try {
       const response = await this.scry({
@@ -48,6 +130,19 @@ export class RoomsService extends AbstractService<any> {
         path: '/session',
       });
       return response.session;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  async sendChat(content: string): Promise<void> {
+    try {
+      APIConnection.getInstance().conduit.poke({
+        app: 'rooms-v2',
+        mark: 'rooms-v2-session-action',
+        json: {
+          'send-chat': content,
+        },
+      });
     } catch (e) {
       console.error(e);
     }

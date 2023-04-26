@@ -1,9 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { Box, RoomsDock } from '@holium/design-system';
-import { RealmProtocol } from '@holium/realm-room';
 import { observer } from 'mobx-react';
 import { roomTrayConfig } from 'renderer/apps/Rooms/config';
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/lib/position';
 import { useAppState } from 'renderer/stores/app.store';
@@ -12,7 +10,7 @@ import { useShipStore } from 'renderer/stores/ship.store';
 
 const RoomTrayPresenter = () => {
   const { shellStore } = useAppState();
-  const { ship, friends, spacesStore } = useShipStore();
+  const { friends, spacesStore, roomsStore } = useShipStore();
   const { position, anchorOffset, dimensions } = roomTrayConfig;
 
   useEffect(() => {
@@ -30,8 +28,7 @@ const RoomTrayPresenter = () => {
     setTrayAppDimensions,
   } = useTrayApps();
 
-  const roomsManager = useRooms(ship?.patp);
-  const muted = roomsManager.protocol.local?.isMuted;
+  const muted = roomsStore.isMuted;
 
   const onButtonClick = useCallback(
     (evt: any) => {
@@ -66,15 +63,13 @@ const RoomTrayPresenter = () => {
   );
 
   const participants =
-    roomsManager?.presentRoom?.present.map((patp: string) => {
+    roomsStore.peers.map((patp: string) => {
       const metadata = friends.getContactAvatarMetadata(patp);
       return metadata;
     }) || [];
 
   const rooms = spacesStore.selected
-    ? (roomsManager?.protocol as RealmProtocol).getSpaceRooms(
-        spacesStore.selected?.path
-      )
+    ? roomsStore.getSpaceRooms(spacesStore.selected?.path)
     : [];
 
   return (
@@ -85,7 +80,7 @@ const RoomTrayPresenter = () => {
       transition={{ duration: 0.15, ease: 'easeInOut' }}
     >
       <RoomsDock
-        live={roomsManager?.live.room}
+        live={roomsStore.current}
         rooms={rooms}
         participants={participants}
         onCreate={() => {
@@ -96,9 +91,9 @@ const RoomTrayPresenter = () => {
         onOpen={onButtonClick}
         onMute={() => {
           if (muted) {
-            roomsManager?.unmute();
+            roomsStore.unmute();
           } else {
-            roomsManager?.mute();
+            roomsStore.mute();
           }
         }}
         onCursor={() => {}}

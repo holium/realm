@@ -57,6 +57,7 @@ export class RemotePeer extends Peer {
     this.setStatus(PeerConnectionState.Connecting);
     this.peer?.removeAllListeners();
     // create the peer connection
+    console.log(`%create connection to ${this.patp}`, this.rtcConfig);
     this.peer = new SimplePeer({
       initiator: this.isInitiator,
       config: this.rtcConfig,
@@ -125,10 +126,7 @@ export class RemotePeer extends Peer {
 
   _onError(err: Error) {
     // @ts-ignore
-    console.log('RemotePeer onError', err.code);
     this.setStatus(PeerConnectionState.Failed);
-    // this.pee
-    // this.removeTracks();
     this.emit(PeerEvent.Failed, err);
   }
 

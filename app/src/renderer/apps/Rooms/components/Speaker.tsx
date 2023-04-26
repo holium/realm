@@ -35,7 +35,6 @@ const SpeakerPresenter = (props: ISpeaker) => {
 
   let name = metadata?.nickname || person;
   const peer = roomsStore.getPeer(person);
-  console.log('peer', peer);
 
   const contextMenuOptions = useMemo(
     () =>

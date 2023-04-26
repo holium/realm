@@ -107,7 +107,7 @@ const SettingsPresenter = () => {
           selected={selectedSource}
           onClick={(source) => {
             setSelectedSource(source);
-            roomsStore?.setAudioInput(source);
+            roomsStore.setAudioInput(source);
           }}
         />
       </Flex>

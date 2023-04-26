@@ -12,7 +12,6 @@ import {
 import { AnimatePresence } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { nativeApps } from 'renderer/apps/nativeApps';
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { useTrayApps } from 'renderer/apps/store';
 import { trackEvent } from 'renderer/lib/track';
 import { openChatToPath } from 'renderer/lib/useTrayControls';
@@ -43,7 +42,6 @@ export const ShipBarPresenter = () => {
     dismissApp,
     dismissPath,
   } = notifStore;
-  const roomsManager = useRooms(ship?.patp);
   const { setActiveApp, activeApp } = useTrayApps();
 
   const [isAccountExpanded, setIsAccountExpanded] = useState(false);
@@ -271,7 +269,6 @@ export const ShipBarPresenter = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
                 onClick={() => {
-                  roomsManager.cleanup();
                   shellStore.setIsBlurred(true);
                   shellStore.openDialog('shutdown-dialog');
                   setActiveApp(null);
@@ -287,7 +284,6 @@ export const ShipBarPresenter = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
                 onClick={() => {
-                  roomsManager.cleanup();
                   authStore.logout();
                   setActiveApp(null);
                 }}

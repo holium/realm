@@ -24,16 +24,14 @@ export const DEFAULT_AUDIO_OPTIONS = {
 
 export class LocalPeer extends Peer {
   stream: MediaStream | null = null;
-  protocol: BaseProtocol;
   constraints: MediaStreamConstraints = {
     audio: DEFAULT_AUDIO_OPTIONS,
     video: false,
   };
   analysers: IAudioAnalyser[] = [];
 
-  constructor(protocol: BaseProtocol, our: Patp, config: PeerConfig) {
+  constructor(our: Patp, config: PeerConfig) {
     super(our, config);
-    this.protocol = protocol;
     makeObservable(this, {
       stream: observable,
       setMedia: action.bound,
