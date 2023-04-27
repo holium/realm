@@ -52,11 +52,6 @@ const AddressStyle = styled(Flex)`
   border-radius: 7px;
   gap: 6px;
   background: rgba(var(--rlm-overlay-hover-rgba));
-  transition: var(--transition);
-  &:hover {
-    background: rgba(var(--rlm-overlay-active-rgba));
-    transition: var(--transition);
-  }
 `;
 
 interface DetailHeroProps {
@@ -290,6 +285,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
           transition={walletCardStyleTransition}
           width="100%"
           hidden={props.hideWalletHero}
+          gap={10}
         >
           {accountDisplay}
           <Balance

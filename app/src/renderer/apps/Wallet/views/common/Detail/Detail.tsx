@@ -167,7 +167,7 @@ const DetailPresenter = (props: DetailProps) => {
               />
               {listView === 'transactions' && (
                 <TransactionList
-                  height={230}
+                  height={250}
                   transactions={transactions}
                   hidePending={props.hidePending}
                 />

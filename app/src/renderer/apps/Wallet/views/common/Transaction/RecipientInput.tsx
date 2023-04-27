@@ -36,7 +36,6 @@ export const RecipientInput = observer(
     const [icon, setIcon] = useState('blank');
     const [valueCache, setValueCache] = useState('');
     const [recipient, setRecipient] = useState('');
-    const [recipientError, setRecipientError] = useState('');
     useEffect(() => {
       if (walletStore.navState.to) {
         setRecipient(walletStore.navState.to);
@@ -44,7 +43,6 @@ export const RecipientInput = observer(
       }
     }, []);
 
-    // const [detailsLoading, setDetailsLoading] = useState(false);
     const [recipientDetails, setRecipientDetails] = useState<{
       failed: boolean;
       details: RecipientPayload | null;
@@ -84,7 +82,6 @@ export const RecipientInput = observer(
         .then((details: RecipientPayload) => {
           if (details && details.address) {
             setRecipientDetails({ failed: false, details });
-            setRecipientError('');
           } else {
             setRecipientDetails({ failed: true, details: { patp } });
           }
@@ -179,31 +176,38 @@ export const RecipientInput = observer(
       if (props.icon === 'spy') return <Icon name="Spy" size="24px" />;
 
       if (props.icon === 'sigil')
-        return <Avatar simple={true} size={24} patp={valueCache} />;
+        return (
+          <Avatar
+            simple={true}
+            size={24}
+            patp={valueCache}
+            sigilColor={['#000000', 'white']}
+          />
+        );
 
       return <Box height="24px" width="24px" borderRadius="5px" />;
     };
 
     return (
-      <Flex flexDirection="column">
+      <Flex flexDirection="column" gap={10}>
         <Flex width="100%" justifyContent="space-evenly" alignItems="center">
           <Text.Body fontSize={1} variant="body">
             TO
           </Text.Body>
           <ContainerFlex
             className="realm-cursor-hover"
-            px={1}
-            py={1}
             width="240px"
             height="45px"
             borderRadius="7px"
             alignItems="center"
           >
-            <Flex ml={1} mr={2}>
+            <Flex>
               <RecipientIcon icon={icon} />
             </Flex>
             <Flex flexDirection="column">
               <TextInput
+                id="recipient-input"
+                name="recipient-input"
                 width="100%"
                 placeholder="@p or recipient’s address"
                 spellCheck="false"
@@ -223,7 +227,7 @@ export const RecipientInput = observer(
             )}
           </ContainerFlex>
         </Flex>
-        <Flex mt={2} width="100%" justifyContent="flex-end">
+        <Flex width="100%" justifyContent="flex-end">
           <Text.Body variant="body" fontSize="11px">
             {recipientDetails.failed &&
               recipientDetails.details?.patp === recipient &&

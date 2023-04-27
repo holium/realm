@@ -62,7 +62,7 @@ export const WalletList = observer(() => {
           No addresses
         </Text.H3>
         <Flex width="80%" justifyContent="center">
-          <Text.Body mt={4} variant="body" textAlign="center">
+          <Text.Body variant="body" textAlign="center">
             You haven't created any{' '}
             {walletStore.navState.network === 'ethereum'
               ? 'Ethereum'
@@ -72,7 +72,7 @@ export const WalletList = observer(() => {
             addresses yet.
           </Text.Body>
         </Flex>
-        <Flex mt={9} justifyContent="center">
+        <Flex justifyContent="center">
           <Button.TextButton onClick={onClick}>
             Create address
           </Button.TextButton>
@@ -84,13 +84,7 @@ export const WalletList = observer(() => {
   return list.length ? (
     <List />
   ) : (
-    <Flex
-      p={4}
-      height="100%"
-      width="100%"
-      flexDirection="column"
-      alignItems="center"
-    >
+    <Flex height="100%" width="100%" flexDirection="column" alignItems="center">
       {walletStore.navState.network === NetworkType.BITCOIN ? (
         <Flex
           width="100%"

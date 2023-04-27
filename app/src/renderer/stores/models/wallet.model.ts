@@ -941,7 +941,7 @@ export const WalletStore = types
           }
         }
       },
-      setNetwork(_event: any, network: NetworkType) {
+      setNetwork(network: NetworkType) {
         this.navigate(WalletView.LIST);
         if (self.navState.network !== network) {
           this.setNetworkSetter(network);
@@ -1245,7 +1245,7 @@ export const WalletStore = types
         const watchProtocol = protocol ?? self.navState.protocol;
         yield WalletIPC.watchUpdates(watchProtocol) as PromiseLike<any>;
       }),
-      setProtocol(_event: any, protocol: ProtocolType) {
+      setProtocol(protocol: ProtocolType) {
         this.navigate(WalletView.LIST);
         if (self.navState.protocol !== protocol) {
           this.setProtocolSetter(protocol);

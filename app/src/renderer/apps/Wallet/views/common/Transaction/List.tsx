@@ -114,7 +114,7 @@ interface TransactionListProps {
   ethType?: string;
 }
 const TransactionListPresenter = (props: TransactionListProps) => {
-  const { height = 230, ethType } = props;
+  const { height, ethType } = props;
 
   const pending = props.transactions.filter(
     (tx) => tx.status === 'pending'
@@ -145,7 +145,7 @@ const TransactionListPresenter = (props: TransactionListProps) => {
             />
           ))
         ) : (
-          <Text.H5 mt={6} variant="h5" textAlign="center">
+          <Text.H5 variant="h5" textAlign="center">
             No transactions
           </Text.H5>
         )}
