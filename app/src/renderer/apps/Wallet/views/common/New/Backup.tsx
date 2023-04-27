@@ -1,9 +1,8 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import { transparentize } from 'polished';
 
-import { Box, Button, Flex, Icon, Text } from '@holium/design-system';
+import { Button, CopyButton, Flex, Text } from '@holium/design-system';
 
 import { NewWalletScreen } from './EthNew';
 
@@ -13,89 +12,72 @@ interface BackupProps {
   setSeedPhrase: (phrase: string) => void;
 }
 
-const BackupPresenter = (props: BackupProps) => {
+const BackupPresenter = ({
+  seedPhrase,
+  setScreen,
+  setSeedPhrase,
+}: BackupProps) => {
   useEffect(() => {
-    props.setSeedPhrase(ethers.Wallet.createRandom().mnemonic.phrase);
+    setSeedPhrase(ethers.Wallet.createRandom().mnemonic.phrase);
   }, []);
 
-  const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
-
-  const [blurred, setBlurred] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  function copy() {
-    navigator.clipboard.writeText(props.seedPhrase);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 750);
-  }
-
   return (
-    <>
-      <Flex
-        px={16}
-        height="100%"
-        width="100%"
-        flexDirection="column"
-        justifyContent="space-evenly"
-        alignItems="center"
-      >
-        <Flex flexDirection="column">
-          <Text.H5 variant="h5">Back up your Wallet</Text.H5>
-          <Text.Body mt={3} variant="body">
-            Your secret recovery phrase is used to restore your wallet.
-          </Text.Body>
-          <Text.Body mt={2} variant="body">
-            Save these 12 words and store them in a safe place. Don’t share them
-            with anyone.
-          </Text.Body>
-        </Flex>
+    <Flex
+      width="100%"
+      height="100%"
+      flexDirection="column"
+      justifyContent="space-between"
+      alignItems="center"
+    >
+      <Flex flexDirection="column" gap="12px">
+        <Text.H5 variant="h5">Back up your Wallet</Text.H5>
+        <Text.Body mt={3} variant="body">
+          Your secret recovery phrase is used to restore your wallet.
+        </Text.Body>
+        <Text.Body mt={2} variant="body">
+          Save these 12 words and store them in a safe place. Don’t share them
+          with anyone.
+        </Text.Body>
         <Flex
-          mt={2}
+          p="16px"
+          mt="32px"
+          gap="4px"
           width="100%"
           flexDirection="column"
-          border={panelBorder}
+          border="1px solid rgba(var(--rlm-icon-rgba))"
           borderRadius="9px"
         >
-          <Box px={36} paddingTop={24}>
-            <Text.Body
-              style={{
-                filter: blurred ? 'blur(7px)' : undefined,
-                wordSpacing: '7px',
-                textAlign: 'center',
-              }}
-            >
-              {props.seedPhrase}
-            </Text.Body>
-          </Box>
-          <Flex mt={5} width="100%" justifyContent="space-between">
-            <Button.IconButton
-              variant="transparent"
-              onClick={() => setBlurred(!blurred)}
-            >
-              <Icon name="Copy" mr={1} />
-              {blurred ? 'Reveal' : 'Hide'}
-            </Button.IconButton>
-            <Button.IconButton variant="transparent" onClick={copy}>
-              {copied ? (
-                'Copied!'
-              ) : (
-                <>
-                  <Icon mr={1} name="Copy" />
-                  Copy
-                </>
-              )}
-            </Button.IconButton>
+          <Text.Body
+            style={{
+              wordSpacing: '7px',
+              textAlign: 'center',
+              fontSize: '18px',
+            }}
+          >
+            {seedPhrase}
+          </Text.Body>
+          <Flex width="100%" justifyContent="flex-end">
+            <CopyButton content={seedPhrase} label="Copy" />
           </Flex>
         </Flex>
-        <Flex mt={2} width="100%" justifyContent="center">
-          <Button.TextButton
-            onClick={() => props.setScreen(NewWalletScreen.CONFIRM)}
-          >
-            I wrote it down
-          </Button.TextButton>
-        </Flex>
       </Flex>
-    </>
+      <Flex width="100%" gap={16}>
+        <Button.Transparent
+          flex={1}
+          justifyContent="center"
+          onClick={() => setScreen(NewWalletScreen.CREATE)}
+        >
+          Cancel
+        </Button.Transparent>
+        <Button.TextButton
+          flex={1}
+          justifyContent="center"
+          onClick={() => setScreen(NewWalletScreen.CONFIRM)}
+        >
+          I wrote it down
+        </Button.TextButton>
+      </Flex>
+    </Flex>
   );
 };
 

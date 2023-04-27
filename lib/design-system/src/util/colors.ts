@@ -17,8 +17,7 @@ export type ColorVariants =
   | 'brand'
   | 'intent-alert'
   | 'intent-success'
-  | 'intent-warning'
-  | 'intent-info';
+  | 'intent-caution';
 
 export interface ColorProps {
   bg?: ColorVariants;

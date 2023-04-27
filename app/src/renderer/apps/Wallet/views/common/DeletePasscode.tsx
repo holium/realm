@@ -15,7 +15,7 @@ export const DeletePasscode = ({ onSuccess }: Props) => (
       alignItems="center"
     >
       <Icon name="Locked" size={36} />
-      <Text.H3 variant="h3" color="intent-warning">
+      <Text.H3 variant="h3" color="intent-caution">
         Confirm Delete
       </Text.H3>
     </Flex>

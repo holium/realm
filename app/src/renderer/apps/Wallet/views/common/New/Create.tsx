@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
 
-import { Box, Button, Flex, Icon, Text } from '@holium/design-system';
+import { Button, Flex, Icon, Text } from '@holium/design-system';
 
 import { NewWalletScreen } from './EthNew';
 
@@ -11,38 +11,38 @@ interface CreateProps {
 
 const CreatePresenter = ({ setScreen }: CreateProps) => (
   <Flex width="100%" height="100%" flexDirection="column">
-    <Flex flex={4} flexDirection="column" alignItems="center" gap={10}>
-      <Text.H4 mt="100px" variant="h4">
-        No Wallet Found
-      </Text.H4>
-      <Text.Body px="30px" mt={2} mb={5} variant="body" textAlign="center">
-        You haven't yet configured your Realm wallet.
-      </Text.Body>
-      <Box mt={9}>
+    <Flex flex={1} flexDirection="column" gap="32px" justifyContent="center">
+      <Flex flexDirection="column" gap={10} alignItems="center">
+        <Text.H4 mt="100px" variant="h4">
+          No Wallet Found
+        </Text.H4>
+        <Text.Body px="30px" mt={2} mb={5} variant="body" textAlign="center">
+          You haven't yet configured your Realm wallet.
+        </Text.Body>
+      </Flex>
+      <Flex flexDirection="column" gap={10} alignItems="center">
         <Button.Primary onClick={() => setScreen(NewWalletScreen.BACKUP)}>
-          Create a new wallet
+          <Text.Body py="4px" px="12px" variant="body">
+            Create wallet
+          </Text.Body>
         </Button.Primary>
-      </Box>
-      <Box>
         <Button.Transparent onClick={() => setScreen(NewWalletScreen.IMPORT)}>
-          Or import an existing wallet
+          <Text.Body py="4px" px="12px" variant="body">
+            Import wallet
+          </Text.Body>
         </Button.Transparent>
-      </Box>
+      </Flex>
     </Flex>
-    <Flex mb={2} mx={3} justifyContent="center" alignItems="center">
-      <Box>
-        <Icon name="InfoCircle" />
-      </Box>
-      <Box>
-        <Text.Hint
-          ml={2}
-          variant="hint"
-          justifyContent="flex-end"
-          color="intent-warning"
-        >
-          You are using pre-release software. Only use for development purposes.
-        </Text.Hint>
-      </Box>
+    <Flex justifyContent="center" alignItems="center" gap="16px" m={3}>
+      <Icon name="InfoCircle" fill="intent-caution" />
+      <Text.Hint
+        variant="hint"
+        justifyContent="flex-end"
+        color="intent-caution"
+        fontSize="13px"
+      >
+        You are using pre-release software. Only use for development purposes.
+      </Text.Hint>
     </Flex>
   </Flex>
 );

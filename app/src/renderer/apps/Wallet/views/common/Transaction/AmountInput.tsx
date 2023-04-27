@@ -189,7 +189,7 @@ export const AmountInput = observer(
           </ContainerFlex>
         </FlexHider>
         <Box ml="72px" width="100%">
-          <Text.Custom fontSize="11px" color="intent-warning">
+          <Text.Custom fontSize="11px" color="intent-caution">
             {amountError && 'Amount greater than wallet balance.'}
           </Text.Custom>
         </Box>

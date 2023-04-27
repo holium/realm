@@ -11,6 +11,44 @@ type Props = {
   network: NetworkType;
 };
 
+type BodyProps = Props & {
+  nickname: string;
+  onChangeNickname: (e: ChangeEvent<HTMLInputElement>) => void;
+  onClickCreate: () => void;
+};
+
+export const CreateWalletPresenterBody = ({
+  network,
+  nickname,
+  onChangeNickname,
+  onClickCreate,
+}: BodyProps) => (
+  <Flex p={1} height="100%" width="100%" flexDirection="column" gap={20}>
+    <Text.H4 mt={2} variant="h4">
+      Create Address
+    </Text.H4>
+    <Text.Body mt={3} variant="body">
+      A new {network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} address will be
+      created. Give it a memorable nickname.
+    </Text.Body>
+    <Flex flexDirection="column" gap={10}>
+      <Text.Label mb={1}>Nickname</Text.Label>
+      <TextInput
+        id="wallet-nickname"
+        name="wallet-nickname"
+        value={nickname}
+        onChange={onChangeNickname}
+        placeholder="Fort Knox"
+      />
+    </Flex>
+    <Flex width="100%">
+      <Button.TextButton id="submit" width="100%" onClick={onClickCreate}>
+        Create
+      </Button.TextButton>
+    </Flex>
+  </Flex>
+);
+
 const CreateWalletPresenter = ({ network }: Props) => {
   const { walletStore } = useShipStore();
   const [_, setLoading] = useState(false);
@@ -42,40 +80,12 @@ const CreateWalletPresenter = ({ network }: Props) => {
   });
 
   return (
-    <Flex p={1} height="100%" width="100%" flexDirection="column" gap={20}>
-      <Text.H4 mt={2} variant="h4">
-        Create Address
-      </Text.H4>
-      <Text.Body mt={3} variant="body">
-        A new {network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} address will be
-        created. Give it a memorable nickname.
-      </Text.Body>
-      {/*<FormControl.FieldSet mt={8}>
-        <FormControl.Field>*/}
-      <Flex flexDirection="column" gap={10}>
-        <Text.Label mb={1}>Nickname</Text.Label>
-        <TextInput
-          id="wallet-nickname"
-          name="wallet-nickname"
-          value={nickname.state.value}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            nickname.actions.onChange(e.target.value)
-          }
-          placeholder="Fort Knox"
-        />
-      </Flex>
-      {/*</FormControl.Field>*/}
-      <Flex width="100%">
-        <Button.TextButton
-          id="submit"
-          width="100%"
-          onClick={form.actions.submit}
-        >
-          Create
-        </Button.TextButton>
-      </Flex>
-      {/*</Flex></FormControl.FieldSet>*/}
-    </Flex>
+    <CreateWalletPresenterBody
+      network={network}
+      nickname={nickname.state.value}
+      onChangeNickname={(e) => nickname.actions.onChange(e.target.value)}
+      onClickCreate={form.actions.submit}
+    />
   );
 };
 

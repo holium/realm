@@ -24,8 +24,7 @@ import {
 } from '../../lib/helpers';
 
 type Props = {
-  // wallet: EthWalletType | BitcoinWalletType;
-  walletKey: any;
+  walletKey: string;
   isSelected?: boolean;
   onSelect?: () => void;
 };

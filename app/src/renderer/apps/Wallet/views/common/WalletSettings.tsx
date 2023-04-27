@@ -117,81 +117,79 @@ const WalletSettingsPresenter = () => {
       <DeletePasscode onSuccess={deleteWallet} />
     </Flex>
   ) : (
-    <Flex
-      width="100%"
-      height="100%"
-      flexDirection="column"
-      justifyContent="space-between"
-    >
-      <Flex flexDirection="column">
-        <Flex justifyContent="space-between" alignItems="center">
-          <Flex alignItems="center">
-            <Button.IconButton
-              size={26}
-              onClick={async () => await walletStore.navigateBack()}
-            >
-              <Icon name="ArrowLeftLine" size={24} opacity={0.7} />
-            </Button.IconButton>
-            <Text.Custom
-              ml={2}
-              opacity={0.8}
-              textTransform="uppercase"
-              fontWeight={600}
-            >
-              Settings
-            </Text.Custom>
-          </Flex>
-          <Button.Primary
-            // py={1}
-            variant="minimal"
-            fontWeight={400}
-            disabled={saving}
-            height={26}
-            onClick={saveSettings}
+    <Flex width="100%" height="100%" flexDirection="column" gap="12px">
+      <Flex justifyContent="space-between" alignItems="center">
+        <Flex alignItems="center">
+          <Button.IconButton
+            size={26}
+            onClick={async () => await walletStore.navigateBack()}
           >
-            {saving ? <Spinner size={0} color="#FFF" /> : 'Save'}
-          </Button.Primary>
-        </Flex>
-        <Flex mt={3} flexDirection="column">
-          <Text.Label>Address Creation Mode</Text.Label>
-          <Text.Custom mt={1} mb={2} fontSize={1} opacity={0.8}>
-            If set to on-demand, anytime you're sent funds a new address will be
-            created to receive them.
+            <Icon name="ArrowLeftLine" size={24} opacity={0.7} />
+          </Button.IconButton>
+          <Text.Custom
+            ml={2}
+            opacity={0.8}
+            textTransform="uppercase"
+            fontWeight={600}
+          >
+            Settings
           </Text.Custom>
-          <Flex width="140px">
-            <Select
-              id="wallet-creation-mode"
-              options={[
-                { label: 'Default', value: 'default' },
-                { label: 'On-demand', value: 'on-demand' },
-              ]}
-              selected={state.walletCreationMode}
-              onClick={setCreationMode}
-            />
-          </Flex>
         </Flex>
-
-        <Flex mt={3} flexDirection="column">
-          <Text.Label>Wallet Visibility</Text.Label>
-          <Text.Custom mt={1} mb={2} fontSize={1} opacity={0.8}>
-            Determine how you want to share addresses with other people on the
-            network.
-          </Text.Custom>
-          <VisibilitySelect
-            wallets={wallets as Wallets}
-            sharingMode={state.sharingMode}
-            defaultIndex={state.defaultIndex}
-            walletCreationMode={state.walletCreationMode}
-            onChange={setWalletVisibility}
+        <Button.Primary
+          // py={1}
+          variant="minimal"
+          fontWeight={400}
+          disabled={saving}
+          height={26}
+          onClick={saveSettings}
+        >
+          {saving ? <Spinner size={0} color="#FFF" /> : 'Save'}
+        </Button.Primary>
+      </Flex>
+      <Flex flexDirection="column" gap="6px">
+        <Text.Label>Address Creation Mode</Text.Label>
+        <Text.Custom fontSize={1} opacity={0.8}>
+          If set to on-demand, anytime you're sent funds a new address will be
+          created to receive them.
+        </Text.Custom>
+        <Flex width="140px">
+          <Select
+            id="wallet-creation-mode"
+            options={[
+              { label: 'Default', value: 'default' },
+              { label: 'On-demand', value: 'on-demand' },
+            ]}
+            selected={state.walletCreationMode}
+            onClick={setCreationMode}
           />
         </Flex>
-
-        <Flex mt={3} flexDirection="column">
-          <Text.Label mb={2}>Blocked IDs</Text.Label>
-          <BlockedInput blocked={state.blocked} onChange={setBlockList} />
-        </Flex>
       </Flex>
-      <Flex flexDirection="column" mb={2}>
+
+      <Flex flexDirection="column" gap="6px">
+        <Text.Label>Wallet Visibility</Text.Label>
+        <Text.Custom fontSize={1} opacity={0.8}>
+          Determine how you want to share addresses with other people on the
+          network.
+        </Text.Custom>
+        <VisibilitySelect
+          wallets={wallets as Wallets}
+          sharingMode={state.sharingMode}
+          defaultIndex={state.defaultIndex}
+          walletCreationMode={state.walletCreationMode}
+          onChange={setWalletVisibility}
+        />
+      </Flex>
+
+      <Flex flexDirection="column" gap="6px">
+        <Text.Label>Blocked IDs</Text.Label>
+        <BlockedInput blocked={state.blocked} onChange={setBlockList} />
+      </Flex>
+
+      <Flex flexDirection="column" gap="6px">
+        <Text.Label>Delete locally</Text.Label>
+        <Text.Custom fontSize={2} opacity={0.8}>
+          Delete your HD wallet from local storage.
+        </Text.Custom>
         <Button.TextButton
           height={32}
           fontWeight={500}
@@ -201,12 +199,15 @@ const WalletSettingsPresenter = () => {
             // WalletActions.deleteLocalWallet()
           }}
         >
-          Delete Local HD Wallet
+          Delete
         </Button.TextButton>
-        <Text.Custom mt={2} mb={2} ml="2px" fontSize={2} opacity={0.8}>
-          Delete your HD wallet from local storage.
+      </Flex>
+      <Flex flexDirection="column" gap="6px">
+        <Text.Label>Delete completely</Text.Label>
+        <Text.Custom fontSize={2} opacity={0.8}>
+          Completely delete your HD wallet locally and remove all metadata from
+          your Urbit.
         </Text.Custom>
-        <br />
         <Button.TextButton
           height={32}
           fontWeight={500}
@@ -216,12 +217,8 @@ const WalletSettingsPresenter = () => {
             // WalletActions.deleteShipWallet()
           }}
         >
-          Delete Ship HD Wallet
+          Delete
         </Button.TextButton>
-        <Text.Custom mt={2} mb={2} ml="2px" fontSize={2} opacity={0.8}>
-          Completely delete your HD wallet locally and remove all metadata from
-          your Urbit.
-        </Text.Custom>
       </Flex>
     </Flex>
   );
@@ -327,29 +324,29 @@ function BlockedInput(props: BlockedInputProps) {
           }
         />
       </Flex>
-      <NoScrollBar
-        height="70px"
-        width="100%"
-        flexDirection="column"
-        margin="auto"
-        overflow="auto"
-      >
-        {props.blocked.map((patp) => (
-          <Flex
-            mt={1}
-            width="100%"
-            px={2}
-            alignItems="center"
-            justifyContent="space-between"
-            key={patp}
-          >
-            <Text.Body>{patp}</Text.Body>
-            <Button.IconButton onClick={() => props.onChange('remove', patp)}>
-              <Icon name="Close" size={15} opacity={0.7} />
-            </Button.IconButton>
-          </Flex>
-        ))}
-      </NoScrollBar>
+      {props.blocked.length > 0 && (
+        <NoScrollBar
+          height="70px"
+          width="100%"
+          flexDirection="column"
+          margin="auto"
+          overflow="auto"
+        >
+          {props.blocked.map((patp) => (
+            <Flex
+              width="100%"
+              alignItems="center"
+              justifyContent="space-between"
+              key={patp}
+            >
+              <Text.Body>{patp}</Text.Body>
+              <Button.IconButton onClick={() => props.onChange('remove', patp)}>
+                <Icon name="Close" size={15} opacity={0.7} />
+              </Button.IconButton>
+            </Flex>
+          ))}
+        </NoScrollBar>
+      )}
       {props.blocked.length > 3 && (
         <Flex pt={1} width="100%" justifyContent="center">
           <Icon name="ChevronDown" size={16} />

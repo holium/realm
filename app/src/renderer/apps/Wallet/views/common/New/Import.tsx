@@ -18,50 +18,60 @@ interface ImportProps {
   setSeedPhrase: (phrase: string) => void;
 }
 
-const ImportPresenter = (props: ImportProps) => {
+const ImportPresenter = ({ setScreen, setSeedPhrase }: ImportProps) => {
   const [phrase, setPhrase] = useState('');
 
   const saveSeedPhrase = () => {
-    props.setSeedPhrase(phrase);
-    props.setScreen(NewWalletScreen.PASSCODE);
+    setSeedPhrase(phrase);
+    setScreen(NewWalletScreen.PASSCODE);
   };
 
   return (
-    <NoResize width="100%" height="100%" flexDirection="column" gap={10}>
-      <Text.H4 mt={6} variant="h4">
-        Import Wallet
-      </Text.H4>
-      <Text.Body mt={2} variant="body">
-        If you have an existing mnemonic seed phrase, you can load it into Realm
-        now.
-      </Text.Body>
-      {/*<FormControl.FieldSet mt={9} width="100%" flexDirection="column">
-        <FormControl.Field>*/}
-      <Text.Label mb={1}>Seed phrase</Text.Label>
-      <TextInput
-        id="seed-phrase"
-        name="seed-phrase"
-        height="72px"
-        required={true}
-        type="textarea"
-        value={phrase}
-        cols={50}
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-          setPhrase(e.target.value)
-        }
-        // autoFocus={true}
-      />
-      {/*</FormControl.Field>*/}
-      <Flex width="100%">
+    <NoResize
+      width="100%"
+      height="100%"
+      flexDirection="column"
+      justifyContent="space-between"
+    >
+      <Flex flexDirection="column" gap={12}>
+        <Text.H4 mt={24} variant="h4">
+          Import Wallet
+        </Text.H4>
+        <Text.Body mt={2} variant="body">
+          If you have an existing mnemonic seed phrase, you can load it into
+          Realm now.
+        </Text.Body>
+        <Text.Label mb={1}>Seed phrase</Text.Label>
+        <TextInput
+          id="seed-phrase"
+          name="seed-phrase"
+          height="72px"
+          required={true}
+          type="textarea"
+          value={phrase}
+          cols={50}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setPhrase(e.target.value)
+          }
+        />
+      </Flex>
+      <Flex width="100%" gap="16px">
+        <Button.Transparent
+          flex={1}
+          justifyContent="center"
+          onClick={() => setScreen(NewWalletScreen.CREATE)}
+        >
+          Cancel
+        </Button.Transparent>
         <Button.TextButton
-          width="100%"
+          flex={1}
+          justifyContent="center"
           disabled={!ethers.utils.isValidMnemonic(phrase)}
           onClick={saveSeedPhrase}
         >
           Save
         </Button.TextButton>
       </Flex>
-      {/*</FormControl.FieldSet>*/}
     </NoResize>
   );
 };
