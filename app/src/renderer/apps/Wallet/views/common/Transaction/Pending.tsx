@@ -1,6 +1,6 @@
 import { FC } from 'react';
 
-import { Button, Flex, Icon, Spinner, Text } from '@holium/design-system';
+import { Button, Card, Flex, Icon, Spinner, Text } from '@holium/design-system';
 
 import {
   ProtocolType,
@@ -83,31 +83,35 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   }
 
   return (
-    <Flex width="100%" justifyContent="space-between" borderRadius="9px">
-      <Flex
-        justifyContent="center"
-        alignItems="center"
-        onClick={goToTransaction}
-      >
-        <Flex height="100%" alignItems="center">
-          <Spinner size={0} />
+    <Card width="100%" style={{ borderRadius: '9px' }}>
+      <Flex flexDirection="row" justifyContent="space-between">
+        <Flex
+          justifyContent="center"
+          alignItems="center"
+          onClick={goToTransaction}
+          gap={10}
+          padding={1}
+        >
+          <Flex height="100%" alignItems="center" ml={1}>
+            <Spinner size={0} />
+          </Flex>
+          <Flex flexDirection="column">
+            <Text.Body variant="body">
+              {props.transaction.type === 'sent' ? 'Sending' : 'Receiving'}{' '}
+              {isEth ? ethAmount.eth : btcAmount.btc} {unitsDisplay}
+            </Text.Body>
+            <Text.Body variant="body" fontSize={1}>
+              {props.transaction.type === 'sent' ? 'To:' : 'From:'}{' '}
+              {themDisplay} <Icon ml="7px" name="ShareBox" size="15px" />
+            </Text.Body>
+          </Flex>
         </Flex>
-        <Flex flexDirection="column">
-          <Text.Body variant="body">
-            {props.transaction.type === 'sent' ? 'Sending' : 'Receiving'}{' '}
-            {isEth ? ethAmount.eth : btcAmount.btc} {unitsDisplay}
-          </Text.Body>
-          <Text.Body variant="body" fontSize={1}>
-            {props.transaction.type === 'sent' ? 'To:' : 'From:'} {themDisplay}{' '}
-            <Icon ml="7px" name="ShareBox" size="15px" />
-          </Text.Body>
+        <Flex justifyContent="center" alignItems="center">
+          <Button.IconButton onClick={props.hide} mr={1}>
+            <Icon opacity={0.7} name="Close" size="15px" />
+          </Button.IconButton>
         </Flex>
       </Flex>
-      <Flex justifyContent="center" alignItems="center">
-        <Button.IconButton onClick={props.hide} mr={1}>
-          <Icon opacity={0.7} name="Close" size="15px" />
-        </Button.IconButton>
-      </Flex>
-    </Flex>
+    </Card>
   );
 };

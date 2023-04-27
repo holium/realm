@@ -128,6 +128,7 @@ const WalletAppPresenter = () => {
       height={dimensions.height - 24}
       width="100%"
       flexDirection="column"
+      gap={10}
     >
       <WalletHeader
         isOnboarding={WalletView.NEW === walletStore.navState.view}
