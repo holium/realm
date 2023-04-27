@@ -13,7 +13,7 @@ import {
 } from '@holium/design-system';
 
 import { useAppState } from 'renderer/stores/app.store';
-import { AccountModelSnapshot } from 'renderer/stores/models/account.model';
+import { MobXAccount } from 'renderer/stores/models/account.model';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 import { ThemeType } from 'renderer/stores/models/theme.model';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -62,7 +62,7 @@ const wpGallery: { [key: string]: string } = {
 };
 
 type ThemePanelPresenterViewProps = {
-  account: AccountModelSnapshot;
+  account: MobXAccount;
   space: SpaceModelType;
 };
 

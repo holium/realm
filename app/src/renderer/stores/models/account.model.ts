@@ -1,4 +1,4 @@
-import { Instance, SnapshotOut, types } from 'mobx-state-tree';
+import { SnapshotOut, types } from 'mobx-state-tree';
 
 import { Theme } from './theme.model';
 
@@ -12,10 +12,10 @@ export const AccountModel = types.model('AccountModel', {
   color: types.maybeNull(types.string),
   avatar: types.maybeNull(types.string),
   status: types.maybeNull(types.string),
+  passwordHash: types.string,
   theme: Theme,
   createdAt: types.number,
   updatedAt: types.number,
 });
 
-export type AccountModelType = Instance<typeof AccountModel>;
-export type AccountModelSnapshot = SnapshotOut<typeof AccountModel>;
+export type MobXAccount = SnapshotOut<typeof AccountModel>;

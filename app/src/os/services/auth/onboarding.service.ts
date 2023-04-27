@@ -12,7 +12,7 @@ import {
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection } from '../api';
 import { ShipDB } from '../ship/ship.db';
-import { Account } from './accounts.table';
+import { DBAccount } from './accounts.table';
 import { AuthDB } from './auth.db';
 import { MasterAccount } from './masterAccounts.table';
 import {
@@ -92,7 +92,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     password: string,
     shipCode: string
   ): Promise<{
-    account?: Account;
+    account?: DBAccount;
     masterAccount?: MasterAccount;
   }> {
     if (!this.authDB) return {};

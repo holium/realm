@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 import { Avatar, Box, Flex, Row, Text } from '@holium/design-system';
 
-import { AccountModelSnapshot } from 'renderer/stores/models/account.model';
+import { MobXAccount } from 'renderer/stores/models/account.model';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 
 const Wrapper = styled(Box)`
@@ -16,7 +16,7 @@ const Wrapper = styled(Box)`
   width: calc(100% + 24px);
 `;
 interface SpaceRowProps {
-  account: AccountModelSnapshot;
+  account: MobXAccount;
   space: SpaceModelType;
   selected?: boolean;
   onSelect: (spaceKey: string) => void;

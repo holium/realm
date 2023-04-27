@@ -1,22 +1,7 @@
-import { Account } from './accounts.table';
-
-export type Theme = {
-  mode: 'light' | 'dark';
-  backgroundColor: string;
-  accentColor: string;
-  inputColor: string;
-  dockColor: string;
-  iconColor: string;
-  textColor: string;
-  windowColor: string;
-  wallpaper: string;
-  mouseColor: string;
-};
-
-export type AccountView = Omit<Account, 'passwordHash'>;
+import { DBAccount } from './accounts.table';
 
 export type AuthUpdateAccountPayload = {
-  account: AccountView;
+  account: DBAccount;
   order: string[];
 };
 
@@ -27,7 +12,7 @@ export type AuthUpdateSeenSplash = {
 
 export type AuthUpdateInit = {
   type: 'auth-init';
-  payload: Account[];
+  payload: DBAccount[];
 };
 
 export type AuthUpdateLoginFailed = {

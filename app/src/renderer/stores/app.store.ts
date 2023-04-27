@@ -4,6 +4,7 @@ import { clone, flow, Instance, types } from 'mobx-state-tree';
 import { RealmUpdateBooted } from 'os/realm.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';
 import { SoundActions } from 'renderer/lib/sound';
+import { MobXAccount } from 'renderer/stores/models/account.model';
 
 import { defaultTheme } from '../lib/defaultTheme';
 import { AuthenticationModel } from './auth.store';
@@ -16,7 +17,6 @@ import {
   RealmIPC,
   SpacesIPC,
 } from './ipc';
-import { AccountModelSnapshot } from './models/account.model';
 import { ShellModel } from './models/shell.model';
 import { Theme, ThemeType } from './models/theme.model';
 import { shipStore } from './ship.store';
@@ -49,10 +49,6 @@ const AppStateModel = types
     setBooted(data: RealmUpdateBooted['payload']) {
       self.authStore.setAccounts(data.accounts);
       self.seenSplash = data.seenSplash;
-      if (data.session) {
-        self.authStore._setSession(data.session.patp, data.session.cookie);
-        self.shellStore.setIsBlurred(false);
-      }
       self.booted = true;
     },
     setTheme(theme: ThemeType) {
@@ -64,10 +60,12 @@ const AppStateModel = types
         localStorage.setItem('lastTheme', JSON.stringify(theme));
       }
     },
-    setLoggedIn() {
+    setLoggedIn(patp: string, cookie: string) {
+      self.authStore._setSession(patp, cookie);
       self.shellStore.setIsBlurred(false);
     },
-    setLoggedOut() {
+    setLoggedOut(patp?: string) {
+      self.authStore._clearSession(patp);
       self.shellStore.setIsBlurred(true);
     },
     reset() {
@@ -87,7 +85,7 @@ const AppStateModel = types
     }),
   }))
   .views((self) => ({
-    get loggedInAccount(): AccountModelSnapshot | undefined {
+    get loggedInAccount(): MobXAccount | undefined {
       return self.authStore.accounts.find(
         (a) => a.patp === self.authStore.session?.patp
       );
@@ -164,24 +162,23 @@ function registerOnUpdateListener() {
       shipStore.reset();
       appState.setBooted(update.payload);
       if (update.payload.session) {
-        appState.setLoggedIn();
+        appState.setLoggedIn(
+          update.payload.session.patp,
+          update.payload.session.cookie
+        );
       }
     }
     if (update.type === 'auth-success') {
       SoundActions.playLogin();
-      appState.authStore._setSession(
-        update.payload.patp,
-        update.payload.cookie
-      );
       localStorage.setItem('lastAccountLogin', update.payload.patp);
-      appState.setLoggedIn();
+      appState.setLoggedIn(update.payload.patp, update.payload.cookie);
     }
     if (update.type === 'auth-failed') {
       // SoundActions.playError();
       appState.authStore.status.setError(update.payload);
     }
     if (update.type === 'logout') {
-      appState.setLoggedOut();
+      appState.setLoggedOut(update.payload.patp);
       shipStore.reset();
       SoundActions.playLogout();
     }

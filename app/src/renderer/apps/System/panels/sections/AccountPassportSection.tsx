@@ -4,13 +4,13 @@ import { Flex, Text } from '@holium/design-system';
 import { PassportCard } from '@holium/shared';
 
 import { AuthIPC, OnboardingIPC } from 'renderer/stores/ipc';
-import { AccountModelSnapshot } from 'renderer/stores/models/account.model';
+import { MobXAccount } from 'renderer/stores/models/account.model';
 
 import { ColorPicker } from '../../components/ColorPicker';
 import { SettingSection } from '../../components/SettingSection';
 
 type Props = {
-  account: AccountModelSnapshot;
+  account: MobXAccount;
 };
 
 export const AccountPassportSection = ({ account }: Props) => {

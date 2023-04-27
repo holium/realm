@@ -162,7 +162,7 @@ export const ShellModel = types
       });
       const credentials = {
         url: appState.loggedInAccount?.url,
-        cookie: '', // TODO: fix this by storing the cookie in the store.
+        cookie: appState.authStore.cookie,
         ship: appState.loggedInAccount?.patp,
       };
       // console.log('credentials', credentials);

@@ -9,10 +9,8 @@ import {
 } from 'mobx-state-tree';
 
 import { LoginErrorType } from 'os/realm.types';
-import {
-  AccountView,
-  AuthUpdateAccountPayload,
-} from 'os/services/auth/auth.types';
+import { DBAccount } from 'os/services/auth/accounts.table';
+import { AuthUpdateAccountPayload } from 'os/services/auth/auth.types';
 import { OnboardingEndedPayload } from 'os/services/auth/onboarding.types';
 import { trackEvent } from 'renderer/lib/track';
 import { AuthIPC } from 'renderer/stores/ipc';
@@ -67,6 +65,7 @@ export const AuthenticationModel = types
     session: types.maybeNull(types.reference(AccountModel)),
     order: types.array(types.string),
     status: LoginStatus,
+    cookie: types.maybeNull(types.string),
   })
   .actions((self) => ({
     setSelected(patp: string) {
@@ -74,25 +73,26 @@ export const AuthenticationModel = types
         self.accounts.find((acc) => acc.patp === patp)
       );
     },
-    setAccounts(accounts?: AccountView[]) {
+    setAccounts(accounts?: DBAccount[]) {
       if (!accounts) return;
       applySnapshot(self.accounts, castToSnapshot(accounts));
     },
-    _setSession(patp: string, _: string) {
+    _setSession(patp: string, cookie: string) {
       const account = self.accounts.find((a) => a.patp === patp);
       if (!account) {
-        throw new Error('Account not found');
+        throw new Error('DBAccount not found');
       }
       trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
       self.status.setState('success');
       self.session = account;
+      self.cookie = cookie;
     },
-    _clearSession(patp: string) {
+    _clearSession(patp?: string) {
       if (self.session?.patp === patp) {
         trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
-        self.status.setState('initial');
-        self.session = null;
       }
+      self.status.setState('initial');
+      self.session = null;
     },
     // _authSuccess(data: AuthUpdateLogin) {
     //   // self.session = account;

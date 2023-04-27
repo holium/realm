@@ -11,7 +11,7 @@ import { ThemeType } from 'renderer/stores/models/theme.model';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { ConduitSession } from '../api';
 import ShipService from '../ship/ship.service';
-import { Account } from './accounts.table';
+import { DBAccount } from './accounts.table';
 import { AuthDB } from './auth.db';
 // import { CreateMasterAccountPayload } from 'os/realm.types';
 import { AuthUpdateTypes } from './auth.types';
@@ -42,12 +42,12 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     });
   }
 
-  public getAccounts(): Account[] {
+  public getAccounts(): DBAccount[] {
     if (!this.authDB) return [];
     return this.authDB.tables.accounts.find();
   }
 
-  public getAccount(patp: string): Account | null {
+  public getAccount(patp: string): DBAccount | null {
     if (!this.authDB) return null;
     return this.authDB.tables.accounts.findOne(patp);
   }
@@ -91,7 +91,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     });
 
     if (updatedAccount) {
-      log.info('auth.service.ts:', `Updated account for ${patp}`);
+      log.info('auth.service.ts:', `Updated passport for account ${patp}`);
       this.sendUpdate({
         type: 'account-updated',
         payload: {
@@ -120,7 +120,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     });
 
     if (updatedAccount) {
-      log.info('auth.service.ts:', `Updated account for ${patp}`);
+      log.info('auth.service.ts:', `Updated password for account ${patp}`);
       this.sendUpdate({
         type: 'account-updated',
         payload: {

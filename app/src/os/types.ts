@@ -1,9 +1,3 @@
-export interface MSTAction {
-  name: string;
-  path: string;
-  args: any[];
-}
-
 export interface PostType {
   index: string;
   author: string;
