@@ -71,8 +71,6 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       this.services?.ship?.init();
     }
 
-    const acc = this.services?.auth.getAccounts();
-    console.log('acc', acc);
     this.sendUpdate({
       type: 'booted',
       payload: {
