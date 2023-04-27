@@ -35,7 +35,6 @@ const NFTDetailPresenter = () => {
 
       <Flex mt={4} position="relative" justifyContent="center">
         <Anchor
-          fontSize={1}
           href={`https://etherscan.io/token/${nft.address}?a=${nft.tokenId}`}
           rel="noreferrer"
           target="_blank"
