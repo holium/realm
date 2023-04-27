@@ -66,7 +66,7 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
           });
           break;
         case 'dock-update':
-          const pinnedDock = this.tables?.appCatalog.updatePinned(
+          const pinnedDock = this.tables?.appCatalog.updateDock(
             data['dock-update']
           );
           this.sendUpdate({
@@ -256,7 +256,6 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
     });
     */
   async pinApp(path: string, appId: string, index: number | null) {
-    console.log('pinApp => %o', { path, appId, index });
     return APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
@@ -271,7 +270,6 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
   }
 
   async unpinApp(path: string, appId: string) {
-    console.log('unpinApp => %o', { path, appId });
     return APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
@@ -285,7 +283,6 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
   }
 
   async reorderPinnedApps(path: string, dock: string[]) {
-    console.log('reorderPinnedApps => %o', { path, dock });
     return APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',

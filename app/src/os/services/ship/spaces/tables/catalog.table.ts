@@ -243,28 +243,11 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
     this._insertStalls(update.stalls);
   }
 
-  public updatePinned(
-    update: { path: string; dock: string[] }
-    // update: { index: number; id: string; path: string }
-    // type: 'add' | 'remove'
-  ) {
+  public updateDock(update: { path: string; dock: string[] }) {
     if (!this.db) throw new Error('No db connection');
     this.db
       .prepare(`REPLACE INTO app_docks (space, dock) VALUES (?, ?)`)
       .run(update.path, JSON.stringify(update.dock));
-    // this.db
-    //   .prepare(`REPLACE INTO app_docks (space, id, idx) VALUES (?, ?, ?);`)
-    //   .run(update.path, update.id, update.index);
-
-    // if (type === 'add') {
-    //   this.db
-    //     .prepare(`INSERT INTO app_docks (space, id, idx) VALUES (?, ?, ?);`)
-    //     .run(update.path, update.id, update.index);
-    // } else {
-    //   this.db
-    //     .prepare(`DELETE FROM app_docks WHERE space = ? AND id = ?;`)
-    //     .run(update.path, update.id);
-    // }
     return this.getDock(update.path);
   }
 
