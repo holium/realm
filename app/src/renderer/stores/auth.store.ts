@@ -75,13 +75,10 @@ export const AuthenticationModel = types
       );
     },
     setAccounts(accounts?: AccountView[]) {
-      console.log('setting accounts');
       if (!accounts) return;
       applySnapshot(self.accounts, castToSnapshot(accounts));
     },
     _setSession(patp: string) {
-      console.log('set session', patp);
-      console.log(self.accounts);
       const account = self.accounts.find((a) => a.patp === patp);
       if (!account) {
         throw new Error('Account not found');
@@ -148,7 +145,7 @@ export const AuthenticationModel = types
       } else {
         console.warn('missing session');
       }
-    },
+    }),
     removeAccount: flow(function* (patp: string) {
       // TODO implement
       const removeIdx = self.accounts.findIndex((a) => a.patp === patp);
@@ -195,7 +192,6 @@ export const AuthenticationModel = types
       applySnapshot(self.order, accountsPayload.order);
     },
     _onAddAccount(accountPayload: AuthUpdateAccountPayload) {
-      console.log('onAddAccount', accountPayload);
       const account = AccountModel.create(accountPayload.account);
 
       if (self.accounts.find((a) => a.patp === account.patp)) {
