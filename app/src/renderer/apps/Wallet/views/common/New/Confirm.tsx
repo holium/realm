@@ -4,7 +4,7 @@ import { transparentize } from 'polished';
 
 import { Button, Flex, Text } from '@holium/design-system';
 
-import { NewWalletScreen } from './index';
+import { NewWalletScreen } from './EthNew';
 import { WordPicker } from './WordPicker';
 
 interface ConfirmProps {

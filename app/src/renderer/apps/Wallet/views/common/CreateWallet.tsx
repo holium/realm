@@ -7,11 +7,11 @@ import { Button, Flex, Text, TextInput } from '@holium/design-system';
 import { NetworkType } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-interface CreateWalletProps {
+type Props = {
   network: NetworkType;
-}
+};
 
-const CreateWalletPresenter = (props: CreateWalletProps) => {
+const CreateWalletPresenter = ({ network }: Props) => {
   const { walletStore } = useShipStore();
   const [_, setLoading] = useState(false);
   const form = useForm({
@@ -47,8 +47,8 @@ const CreateWalletPresenter = (props: CreateWalletProps) => {
         Create Address
       </Text.H4>
       <Text.Body mt={3} variant="body">
-        A new {props.network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} address
-        will be created. Give it a memorable nickname.
+        A new {network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} address will be
+        created. Give it a memorable nickname.
       </Text.Body>
       {/*<FormControl.FieldSet mt={8}>
         <FormControl.Field>*/}

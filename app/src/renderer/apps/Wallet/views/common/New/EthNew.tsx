@@ -44,7 +44,7 @@ const EthNewPresenter = () => {
     setScreen(NewWalletScreen.CONFIRM_PASSCODE);
   };
 
-  const components: any = {
+  const components = {
     [NewWalletScreen.CREATE]: <Create setScreen={setScreen} />,
     [NewWalletScreen.IMPORT]: (
       <Import setSeedPhrase={setSeedPhrase} setScreen={setScreen} />

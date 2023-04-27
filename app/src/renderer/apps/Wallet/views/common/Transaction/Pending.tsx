@@ -16,14 +16,16 @@ import {
 } from '../../../lib/helpers';
 import { TxType } from './List';
 
-interface PendingTransactionDisplayProps {
+type PendingTransactionDisplayProps = {
   transactions: TransactionType[];
-  hide: any;
-}
-export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
-  props: PendingTransactionDisplayProps
-) => {
-  const pendingTransactions = props.transactions
+  hide: () => void;
+};
+
+export const PendingTransactionDisplay = ({
+  transactions,
+  hide,
+}: PendingTransactionDisplayProps) => {
+  const pendingTransactions = transactions
     .filter((trans) => trans.status === 'pending')
     .sort(
       (a, b) =>
@@ -33,10 +35,7 @@ export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
 
   return pendingTransactions.length ? (
     <Flex width="100%">
-      <PendingTransaction
-        transaction={pendingTransactions[0]}
-        hide={props.hide}
-      />
+      <PendingTransaction transaction={pendingTransactions[0]} hide={hide} />
     </Flex>
   ) : null;
 };

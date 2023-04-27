@@ -17,16 +17,14 @@ const Wrapper = styled(Box)`
   padding: 12px;
   height: 50px;
   width: calc(100% + 24px);
-  display: ${(props) => (props.hidden ? 'none' : 'block')};
+  display: ${({ hidden }) => (hidden ? 'none' : 'block')};
 `;
 
-interface WalletFooterProps {
+type Props = {
   hidden?: boolean;
-}
+};
 
-export const WalletFooterPresenter = ({
-  hidden = false,
-}: WalletFooterProps) => {
+export const WalletFooterPresenter = ({ hidden = false }: Props) => {
   const { walletStore } = useShipStore();
 
   return (

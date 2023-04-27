@@ -23,18 +23,18 @@ import {
   getTransactions,
 } from '../../lib/helpers';
 
-interface WalletCardProps {
+type Props = {
   // wallet: EthWalletType | BitcoinWalletType;
   walletKey: any;
   isSelected?: boolean;
   onSelect?: () => void;
-}
+};
 
 export const WalletCard = ({
   walletKey,
   isSelected = false,
   onSelect,
-}: WalletCardProps) => {
+}: Props) => {
   const { walletStore } = useShipStore();
 
   const wallet = walletStore.currentStore.wallets.get(walletKey);

@@ -14,7 +14,7 @@ import {
 
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { NewWalletScreen } from './index';
+import { NewWalletScreen } from './EthNew';
 import { VerifyPasscode } from './VerifyPasscode';
 
 const NoResize = styled(Flex)`

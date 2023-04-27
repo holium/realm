@@ -14,7 +14,9 @@ type Props = {
   onAddWallet: () => void;
   hide: boolean;
 };
+
 const ethBg = rgba('#627EEA', 0.14);
+
 export const WalletHeader = ({
   hide,
   showBack,

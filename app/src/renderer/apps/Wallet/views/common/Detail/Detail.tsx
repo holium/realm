@@ -20,10 +20,11 @@ import { NFTList } from './NFTList';
 
 type DisplayType = 'coins' | 'nfts' | 'transactions';
 
-interface DetailProps {
-  hidePending: boolean;
-}
-const DetailPresenter = (props: DetailProps) => {
+type Props = {
+  hidePending?: boolean;
+};
+
+const DetailPresenter = ({ hidePending = false }: Props) => {
   const { walletStore } = useShipStore();
   const [QROpen, setQROpen] = useState(false);
   const sendTrans =
@@ -144,7 +145,7 @@ const DetailPresenter = (props: DetailProps) => {
               <TransactionList
                 height={200}
                 transactions={transactions}
-                hidePending={props.hidePending}
+                hidePending={hidePending}
                 ethType={coin?.address}
               />
             </Flex>
@@ -169,7 +170,7 @@ const DetailPresenter = (props: DetailProps) => {
                 <TransactionList
                   height={250}
                   transactions={transactions}
-                  hidePending={props.hidePending}
+                  hidePending={hidePending}
                 />
               )}
               {listView === 'coins' && coins && (
@@ -186,47 +187,49 @@ const DetailPresenter = (props: DetailProps) => {
 
 export const Detail = observer(DetailPresenter);
 
-interface ListSelectorProps {
+type ListSelectorProps = {
   selected: DisplayType;
   onChange: any;
   network: string;
-}
-function ListSelector(props: ListSelectorProps) {
-  const MenuButton = (props: any) => {
-    return props.selected ? (
-      <Button.TextButton onClick={props.onClick} flex={1}>
-        {props.children}
+};
+
+const ListSelector = ({ selected, onChange, network }: ListSelectorProps) => {
+  const MenuButton = ({ selected, onClick, children }: any) => {
+    return selected ? (
+      <Button.TextButton onClick={onClick} flex={1}>
+        {children}
       </Button.TextButton>
     ) : (
-      <Button.TextButton onClick={props.onClick} flex={1} color="text">
-        {props.children}
+      <Button.TextButton onClick={onClick} flex={1} color="text">
+        {children}
       </Button.TextButton>
     );
   };
+
   return (
     <Flex alignItems="center">
-      {props.network === 'ethereum' && (
+      {network === 'ethereum' && (
         <MenuButton
-          selected={props.selected === 'coins'}
-          onClick={() => props.onChange('coins')}
+          selected={selected === 'coins'}
+          onClick={() => onChange('coins')}
         >
           Coins
         </MenuButton>
       )}
-      {props.network === 'ethereum' && (
+      {network === 'ethereum' && (
         <MenuButton
-          selected={props.selected === 'nfts'}
-          onClick={() => props.onChange('nfts')}
+          selected={selected === 'nfts'}
+          onClick={() => onChange('nfts')}
         >
           NFTs
         </MenuButton>
       )}
       <MenuButton
-        selected={props.selected === 'transactions'}
-        onClick={() => props.onChange('transactions')}
+        selected={selected === 'transactions'}
+        onClick={() => onChange('transactions')}
       >
         Transactions
       </MenuButton>
     </Flex>
   );
-}
+};

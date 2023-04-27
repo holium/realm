@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import { observer } from 'mobx-react';
 
 import { Button, Flex, Text } from '@holium/design-system';
@@ -12,11 +11,11 @@ import { useShipStore } from 'renderer/stores/ship.store';
 
 import { WalletCard } from './common/WalletCard';
 
-export const WalletList = observer(() => {
+const WalletListPresenter = () => {
   const { walletStore } = useShipStore();
   const list = walletStore.currentStore.list;
 
-  const List: FC = () => {
+  const List = () => {
     return (
       <Flex
         height="100%"
@@ -103,4 +102,6 @@ export const WalletList = observer(() => {
       )}
     </Flex>
   );
-});
+};
+
+export const WalletList = observer(WalletListPresenter);

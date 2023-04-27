@@ -6,8 +6,9 @@ import { useShipStore } from 'renderer/stores/ship.store';
 
 import { PasscodeInput } from '../../components/PasscodeInput';
 
-export const Locked = observer(() => {
+const LockedPresenter = () => {
   const { walletStore } = useShipStore();
+
   const unlock = () => {
     walletStore.navigateBack();
     walletStore.getWalletsUpdate();
@@ -32,4 +33,6 @@ export const Locked = observer(() => {
       </Flex>
     </Flex>
   );
-});
+};
+
+export const Locked = observer(LockedPresenter);

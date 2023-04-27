@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 import { Button, Flex, Text, TextInput } from '@holium/design-system';
 
-import { NewWalletScreen } from './index';
+import { NewWalletScreen } from './EthNew';
 
 const NoResize = styled(Flex)`
   textarea {

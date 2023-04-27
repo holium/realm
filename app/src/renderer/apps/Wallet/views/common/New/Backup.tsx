@@ -5,7 +5,7 @@ import { transparentize } from 'polished';
 
 import { Box, Button, Flex, Icon, Text } from '@holium/design-system';
 
-import { NewWalletScreen } from './index';
+import { NewWalletScreen } from './EthNew';
 
 interface BackupProps {
   seedPhrase: string;
