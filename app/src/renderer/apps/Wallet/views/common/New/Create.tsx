@@ -22,14 +22,14 @@ const CreatePresenter = ({ setScreen }: CreateProps) => (
       </Flex>
       <Flex flexDirection="column" gap={10} alignItems="center">
         <Button.Primary onClick={() => setScreen(NewWalletScreen.BACKUP)}>
-          <Text.Body py="4px" px="12px" variant="body">
+          <Flex py="4px" px="12px">
             Create wallet
-          </Text.Body>
+          </Flex>
         </Button.Primary>
         <Button.Transparent onClick={() => setScreen(NewWalletScreen.IMPORT)}>
-          <Text.Body py="4px" px="12px" variant="body">
+          <Flex py="4px" px="12px">
             Import wallet
-          </Text.Body>
+          </Flex>
         </Button.Transparent>
       </Flex>
     </Flex>

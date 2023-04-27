@@ -1,48 +1,52 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { observer } from 'mobx-react';
-import { transparentize } from 'polished';
 
 import { Button, Flex, Text } from '@holium/design-system';
 
 import { NewWalletScreen } from './EthNew';
 import { WordPicker } from './WordPicker';
 
-interface ConfirmProps {
+type Props = {
   seedPhrase: string;
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
-}
+};
 
-const ConfirmPresenter = (props: ConfirmProps) => {
+const ConfirmPresenter = ({ seedPhrase, setScreen }: Props) => {
   const [valid, setValid] = useState(false);
-
-  const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
 
   return (
     <Flex
       width="100%"
       height="100%"
       flexDirection="column"
-      justifyContent="space-evenly"
+      justifyContent="space-between"
       alignItems="center"
     >
-      <Flex flexDirection="column">
+      <Flex flexDirection="column" alignItems="center" gap="16px">
         <Text.H5 variant="h5">Confirm words</Text.H5>
-        <Text.Body mt={3} variant="body">
+        <Text.Body variant="body">
           Verify you wrote the secret recovery phrase down correctly by clicking
           the following words in the correct order.
         </Text.Body>
-      </Flex>
-      <Flex flexDirection="column" alignItems="center">
         <WordPicker
-          seedPhrase={props.seedPhrase}
-          border={panelBorder}
+          seedPhrase={seedPhrase}
+          border="2px solid rgba(var(--rlm-border-rgba))"
           onValidChange={setValid}
         />
       </Flex>
-      <Flex justifyContent="center" alignItems="center">
+      <Flex width="100%" gap="16px">
+        <Button.Transparent
+          flex={1}
+          justifyContent="center"
+          onClick={() => setScreen(NewWalletScreen.CREATE)}
+        >
+          Cancel
+        </Button.Transparent>
         <Button.TextButton
+          flex={1}
           disabled={!valid}
-          onClick={() => props.setScreen(NewWalletScreen.PASSCODE)}
+          justifyContent="center"
+          onClick={() => setScreen(NewWalletScreen.PASSCODE)}
         >
           Confirm
         </Button.TextButton>

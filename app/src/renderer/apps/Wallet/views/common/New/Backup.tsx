@@ -41,7 +41,7 @@ const BackupPresenter = ({
         <Flex
           p="16px"
           mt="32px"
-          gap="4px"
+          gap="16px"
           width="100%"
           flexDirection="column"
           border="1px solid rgba(var(--rlm-icon-rgba))"

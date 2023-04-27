@@ -136,7 +136,6 @@ const WalletSettingsPresenter = () => {
           </Text.Custom>
         </Flex>
         <Button.Primary
-          // py={1}
           variant="minimal"
           fontWeight={400}
           disabled={saving}
