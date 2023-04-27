@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Flex, Text } from '@holium/design-system';
 import { PassportCard } from '@holium/shared';
 
-import { AuthIPC, OnboardingIPC } from 'renderer/stores/ipc';
+import { AuthIPC, ShipIPC } from 'renderer/stores/ipc';
 import { MobXAccount } from 'renderer/stores/models/account.model';
 
 import { ColorPicker } from '../../components/ColorPicker';
@@ -23,14 +23,20 @@ export const AccountPassportSection = ({ account }: Props) => {
     setAvatarSrc(src ?? '');
   };
 
-  const onUploadFile = async (_file: File) => {
-    return '';
+  const onUploadFile = async (file: File) => {
+    const src = await ShipIPC.uploadFile({
+      source: 'file',
+      content: file.path,
+      contentType: file.type,
+    });
+
+    return src;
   };
 
   const onSubmit = async () => {
     if (!nickname) return false;
 
-    await AuthIPC.updatePassport(
+    const authResult = await AuthIPC.updatePassport(
       account.patp,
       nickname,
       description,
@@ -39,13 +45,14 @@ export const AccountPassportSection = ({ account }: Props) => {
     );
 
     // Sync friends agent
-    await OnboardingIPC.updatePassport(account.patp, {
+    const shipResult = await ShipIPC.updatePassport(
       nickname,
-      avatar: avatarSrc,
-      bio: description,
-    });
+      description,
+      avatarSrc,
+      accentColor
+    );
 
-    return true;
+    return Boolean(authResult && shipResult);
   };
 
   return (

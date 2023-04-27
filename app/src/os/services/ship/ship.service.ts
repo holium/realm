@@ -297,13 +297,21 @@ export class ShipService extends AbstractService<any> {
     return this.services.friends.fetchOne(this.patp);
   }
 
-  updatePassport(nickname: string, bio?: string, avatar?: string) {
+  updatePassport(
+    nickname: string,
+    bio?: string,
+    avatar?: string,
+    color?: string,
+    cover?: string
+  ) {
     if (!this.services) return;
 
-    this.services.friends.saveContact(this.patp, {
+    return this.services.friends.saveContact(this.patp, {
       nickname,
       bio,
       avatar,
+      color,
+      cover,
     });
   }
 
