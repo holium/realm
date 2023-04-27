@@ -140,15 +140,10 @@ export const AuthenticationModel = types
       }
     }),
     shutdown: flow(function* () {
-      // TODO implement
-      try {
-        // yield RealmIPC.shutdown(self.session?.patp) as Promise<any>;
-        self.session = null;
-        trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
-        self.status.setState('initial');
-        self.session = null;
-      } catch (e) {
-        console.log(e);
+      if (self.session) {
+        yield RealmIPC.shutdown(self.session.patp) as Promise<any>;
+      } else {
+        console.warn('missing session');
       }
     }),
     removeAccount: flow(function* (patp: string) {
