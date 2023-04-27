@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react';
 
-import { Flex, Icon, Text } from '@holium/design-system';
+import { Anchor, Flex, Icon, Text } from '@holium/design-system';
 
 import { EthWalletType } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -34,12 +34,14 @@ const NFTDetailPresenter = () => {
       </Flex>
 
       <Flex mt={4} position="relative" justifyContent="center">
-        <Text.Anchor
+        <Anchor
           fontSize={1}
           href={`https://etherscan.io/token/${nft.address}?a=${nft.tokenId}`}
+          rel="noreferrer"
+          target="_blank"
         >
           {nft.address.slice(0, 18)}... <Icon mb={1} name="Link" size={1} />
-        </Text.Anchor>
+        </Anchor>
       </Flex>
     </Flex>
   );
