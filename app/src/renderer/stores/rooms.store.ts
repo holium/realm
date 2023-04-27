@@ -404,7 +404,7 @@ export const RoomsStore = types
         hangup(patp);
       }
     },
-    _onKick(rid: string, patp: string) {
+    _onKicked(rid: string, patp: string) {
       const room = self.rooms.get(rid);
       if (patp === window.ship && self.current?.rid === rid) {
         self.current = undefined;
