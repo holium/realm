@@ -38,6 +38,7 @@ export const ChatLogList = ({
   topOfListPadding,
 }: Props) => {
   const [prevHeight, setPrevHeight] = useState<number>(0);
+  const DEFAULT_SPACING = 2;
 
   const renderChatRow = (index: number, row: ChatMessageType) => {
     const isLast = selectedChat ? index === messages.length - 1 : false;
@@ -49,17 +50,14 @@ export const ChatLogList = ({
       row.sender === messages[index - 1].sender &&
       Object.keys(messages[index - 1].contents[0])[0] !== 'status';
 
-    let topSpacing = isPrevGrouped ? '3px' : 2;
-    let bottomSpacing = isNextGrouped ? '3px' : 2;
+    let topSpacing = isPrevGrouped ? '3px' : DEFAULT_SPACING;
+    let bottomSpacing = isNextGrouped ? '3px' : DEFAULT_SPACING;
 
     const thisMsgDate = new Date(row.createdAt).toDateString();
     const prevMsgDate =
       messages[index - 1] &&
       new Date(messages[index - 1].createdAt).toDateString();
     const showDate = index === 0 || thisMsgDate !== prevMsgDate;
-    if (index === messages.length - 1 && endOfListPadding) {
-      bottomSpacing = endOfListPadding;
-    }
 
     if (index === 0 && topOfListPadding) {
       topSpacing = topOfListPadding;
@@ -125,10 +123,19 @@ export const ChatLogList = ({
             listRef?.current?.scrollBy({
               top: 10,
             });
+          } else if (height - prevHeight === endOfListPadding) {
+            listRef?.current?.scrollBy({
+              top: endOfListPadding,
+            });
           }
           setPrevHeight(height);
         }}
         itemContent={renderChatRow}
+        components={{
+          Footer: () => {
+            return <div style={{ height: endOfListPadding + 'px' }}> </div>;
+          },
+        }}
         chatMode
         shiftScrollbar
       />

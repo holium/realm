@@ -203,7 +203,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     endPadding = 136;
   }
   if (selectedChat.replyingMsg) {
-    endPadding = 66;
+    endPadding = 56;
   }
 
   let pretitle;
@@ -294,7 +294,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                 endOfListPadding={endPadding}
                 selectedChat={selectedChat}
                 width={containerWidth}
-                height={dimensions.height - 104}
+                height={height}
                 ourColor={ourColor}
               />
               {showPin && (
