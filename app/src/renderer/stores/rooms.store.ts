@@ -98,6 +98,7 @@ const dialPeer = (
     from,
     to,
     peerConfig,
+    local,
     (peer: string, data: any) => {
       RoomsIPC.sendSignal(window.ship, peer, rid, data);
     }

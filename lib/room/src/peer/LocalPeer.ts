@@ -22,7 +22,7 @@ export const DEFAULT_AUDIO_OPTIONS = {
 };
 
 export class LocalPeer extends Peer {
-  stream: MediaStream | null = null;
+  stream: MediaStream | undefined = undefined;
   constraints: MediaStreamConstraints = {
     audio: DEFAULT_AUDIO_OPTIONS,
     video: false,
@@ -164,6 +164,6 @@ export class LocalPeer extends Peer {
     this.analysers.forEach((analyser: IAudioAnalyser) => {
       analyser.detach();
     });
-    this.stream = null;
+    this.stream = undefined;
   }
 }

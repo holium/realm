@@ -5,6 +5,7 @@ import { DataPacket } from '../helpers/data';
 import { Patp } from '../types';
 import { isFireFox, isSafari } from '../utils';
 import { PeerEvent } from './events';
+import { LocalPeer } from './LocalPeer';
 import { Peer, PeerConfig } from './Peer';
 import { PeerConnectionState, TrackKind } from './types';
 
@@ -13,6 +14,7 @@ type SignalData =
   | { type: 'ack-waiting' | 'waiting'; from: Patp };
 export class RemotePeer extends Peer {
   our: Patp;
+  localPeer: LocalPeer;
   peer: SimplePeer.Instance | null = null;
   isInitiator: boolean;
   isAudioAttached: boolean = false;
@@ -23,10 +25,12 @@ export class RemotePeer extends Peer {
     our: Patp,
     peer: Patp,
     config: PeerConfig & { isInitiator: boolean },
+    localPeer: LocalPeer,
     sendSignal: (peer: Patp, data: SignalData) => void
   ) {
     super(peer, config);
     this.our = our;
+    this.localPeer = localPeer;
     this.isInitiator = config.isInitiator;
     this.sendSignal = sendSignal;
     this.rtcConfig = config.rtc;
@@ -60,6 +64,7 @@ export class RemotePeer extends Peer {
     this.peer = new SimplePeer({
       initiator: this.isInitiator,
       config: this.rtcConfig,
+      stream: this.localPeer.stream,
       objectMode: true,
       trickle: true,
     });
