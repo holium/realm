@@ -4,7 +4,7 @@ import {
   ERC20Type,
   ERC721Type,
   TransactionType,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from '../../../stores/models/wallet.model';
 
 export function getDisplayDate(date: Date) {
   const options: Intl.DateTimeFormatOptions = {
