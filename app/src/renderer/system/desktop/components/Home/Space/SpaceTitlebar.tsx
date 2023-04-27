@@ -24,7 +24,7 @@ const SpaceTitlebarPresenter = ({
   onToggleApps,
 }: SpaceTitlebarProps) => {
   return (
-    <Flex style={{ position: 'relative' }} width="100%">
+    <Flex width="100%">
       <Flex flex={1}>
         <SpacePicture size={40} membersCount={membersCount} space={space} />
       </Flex>

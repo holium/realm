@@ -128,6 +128,7 @@ const HomePresenter = (props: HomePaneProps) => {
         ) : (
           <Flex
             initial={{ opacity: 0 }}
+            style={{ position: 'relative' }}
             animate={isOpen ? 'show' : 'exit'}
             exit={{ opacity: 0 }}
             maxHeight={44}

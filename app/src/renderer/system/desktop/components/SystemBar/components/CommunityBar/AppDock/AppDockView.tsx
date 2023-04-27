@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
@@ -27,10 +27,6 @@ const AppDockViewPresenter = ({
   const { shellStore, theme } = useAppState();
   const { spacesStore } = useShipStore();
   const currentSpace = spacesStore.selected;
-  // todo move this to mobx
-  const [localDockAppIds, setLocalDockAppIds] = useState(
-    currentSpace?.dockAppIds || []
-  );
 
   const onClickDockedApp = useCallback((dockedApp: AppMobxType) => {
     const appWindow = shellStore.getWindowByAppId(dockedApp.id);
@@ -45,18 +41,6 @@ const AppDockViewPresenter = ({
     }
     shellStore.closeHomePane();
   }, []);
-
-  const onOrderUpdate = useCallback(() => {
-    // First we update the dock locally so the user doesn't have to
-    // wait for the subscription to come back from Hoon side.
-    currentSpace?.reorderPinnedApps(localDockAppIds);
-  }, [localDockAppIds]);
-
-  // const onOrderUpdate = () => {
-  //   // First we update the dock locally so the user doesn't have to
-  //   // wait for the subscription to come back from Hoon side.
-  //   currentSpace?.reorderPinnedApps(localDockAppIds);
-  // };
 
   const pinnedAppTiles = pinnedDockApps.map((app) => {
     const appWindow = shellStore.getWindowByAppId(app.id);
@@ -105,9 +89,8 @@ const AppDockViewPresenter = ({
           flexDirection: 'row',
           gap: 8,
         }}
-        values={localDockAppIds}
-        onMouseUp={onOrderUpdate}
-        onReorder={setLocalDockAppIds}
+        values={currentSpace?.dockAppIds || []}
+        onReorder={(apps) => currentSpace?.reorderPinnedApps(apps)}
       >
         {pinnedAppTiles}
       </Reorder.Group>

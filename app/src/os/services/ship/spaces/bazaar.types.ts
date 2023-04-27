@@ -4,7 +4,8 @@ export type BazaarUpdateType = {
     | 'installation-update'
     | 'recommended'
     | 'unrecommended'
-    | 'pinned-update'
+    | 'pinned'
+    | 'unpinned'
     | 'pins-reordered'
     | 'dock-update'
     | 'stall-update';

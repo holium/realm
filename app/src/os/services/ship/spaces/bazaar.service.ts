@@ -65,35 +65,16 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
             payload: updatedApp,
           });
           break;
-        case 'pinned':
-          const pinnedDock = this.tables?.appCatalog.updatePinned(
-            data.pinned,
-            'add'
-          );
+        case 'dock-update':
+          const payload = data['dock-update'];
+          const pinnedDock = this.tables?.appCatalog.updateDock(payload);
           this.sendUpdate({
             type: 'dock-update',
             payload: {
-              path: data.pinned.path,
+              path: payload.path,
               dock: pinnedDock,
             },
           });
-          break;
-        case 'unpinned':
-          const unpinnedDock = this.tables?.appCatalog.updatePinned(
-            data.unpinned,
-            'remove'
-          );
-          this.sendUpdate({
-            type: 'dock-update',
-            payload: {
-              path: data.unpinned.path,
-              dock: unpinnedDock,
-            },
-          });
-          break;
-        case 'pins-reodered':
-          // TODO
-          log.info('pins-reodered => %o', data['pins-reodered']);
           break;
         case 'suite-added':
           const addedStall = this.tables?.appCatalog.updateSuite(
