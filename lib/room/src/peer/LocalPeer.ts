@@ -2,7 +2,7 @@ import { action, makeObservable, observable } from 'mobx';
 
 import { SpeakingDetectionAnalyser } from '../analysers';
 import { IAudioAnalyser } from '../analysers/types';
-import { BaseProtocol } from '../connection/BaseProtocol';
+// import { BaseProtocol } from '../connection/BaseProtocol';
 import { Patp } from '../types';
 import { PeerEvent } from './events';
 import { Peer, PeerConfig } from './Peer';
@@ -70,6 +70,8 @@ export class LocalPeer extends Peer {
       return;
     }
     const currentStream: MediaStream = this.stream;
+    console.log('current streams', this.stream.getTracks());
+    console.log('peer streams', peer.peer?.streams);
     this.stream.getTracks().forEach((track: MediaStreamTrack) => {
       if (this.isMuted && track.kind === TrackKind.Audio) {
         track.enabled = false;

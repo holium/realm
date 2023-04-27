@@ -143,6 +143,7 @@ export class RemotePeer extends Peer {
 
   _onTrack(track: MediaStreamTrack, stream: MediaStream) {
     // TODO make sure we're not adding the same track twice
+    console.log('track added', track.id, track, stream);
     this.tracks.set(track.id, track);
     if (track.kind === 'video') {
       this.videoTracks.set(track.id, track);
@@ -150,7 +151,9 @@ export class RemotePeer extends Peer {
       this.emit(PeerEvent.VideoTrackAdded, stream, track);
     }
     if (track.kind === 'audio') {
+      console.log('audio track added', track.id, track, this.audioTracks);
       if (this.audioTracks.size > 0) {
+        console.log('audio track already exists, removing', track.id);
         this.removeAudioTracks();
       }
       this.audioTracks.set(track.id, track);

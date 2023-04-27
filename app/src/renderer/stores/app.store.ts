@@ -161,7 +161,6 @@ function registerOnUpdateListener() {
       shipStore.reset();
       appState.setBooted(update.payload);
       if (update.payload.session) {
-        console.log('setting ship on boot');
         shipStore.setShip(update.payload.session);
       }
     }
@@ -170,7 +169,6 @@ function registerOnUpdateListener() {
       appState.authStore._setSession(update.payload.patp);
       localStorage.setItem('lastAccountLogin', update.payload.patp);
       appState.setLoggedIn();
-      console.log('setting ship on auth');
       shipStore.setShip(update.payload);
     }
     if (update.type === 'auth-failed') {
