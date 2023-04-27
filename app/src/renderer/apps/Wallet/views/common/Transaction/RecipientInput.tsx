@@ -13,7 +13,7 @@ import {
   TextInput,
 } from '@holium/design-system';
 
-import { RecipientPayload } from 'os/services/tray/wallet.service';
+import { RecipientPayload } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { shortened } from '../../../lib/helpers';

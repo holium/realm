@@ -14,6 +14,17 @@ import { shipStore } from '../ship.store';
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
 
+export interface RecipientPayload {
+  recipientMetadata?: {
+    color: string;
+    avatar?: string;
+    nickname?: string;
+  };
+  patp: string;
+  address?: string | null;
+  gasEstimate?: number;
+}
+
 export enum WalletView {
   LIST = 'list',
   NEW = 'new',
@@ -1352,6 +1363,7 @@ WalletIPC.onUpdate((payload: any) => {
       } else if (wallet.network === 'btctestnet') {
         shipStore.walletStore.btctest.applyWalletUpdate(wallet);
       }
+      shipStore.walletStore.watchUpdates();
       break;
     case 'wallets':
       const wallets = payload.wallets;

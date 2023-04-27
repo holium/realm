@@ -34,6 +34,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     this._insertWallets(wallets);
     const ethWallets = wallets.wallets.ethereum;
     let wallet: any;
+    log.info('wallets', wallets);
     for (wallet of Object.values(ethWallets)) {
       this._insertTransactions(wallet.transactions);
       this._insertTransactions(wallet['token-txns']);
