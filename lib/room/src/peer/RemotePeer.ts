@@ -89,7 +89,7 @@ export class RemotePeer extends Peer {
     // only the waiting peer sends the waiting signal
     if (!this.isInitiator) {
       this.createConnection();
-      console.log(`%waiting to ${this.patp}`);
+      // console.log(`%waiting to ${this.patp}`);
       this.sendSignal(this.patp, { type: 'waiting', from: this.our });
     }
   }
@@ -131,6 +131,7 @@ export class RemotePeer extends Peer {
 
   _onSignal(data: SimplePeer.SignalData) {
     this.sendSignal(this.patp, data);
+    console.log('sendSignal', data.type, data);
     if (this.status !== PeerConnectionState.Connected) {
       this.setStatus(PeerConnectionState.Connecting);
     }
