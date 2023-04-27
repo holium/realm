@@ -117,13 +117,11 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
             'host', ac.host,
             'icon', ac.icon,
             'gridIndex', ag.idx,
-            'dockIndex', ad.idx,
             'isRecommended', CASE WHEN ar.id IS NULL THEN json('false') ELSE json('true') END
             ) app
         FROM app_catalog ac
         LEFT JOIN app_grid ag ON ac.id = ag.appId
         LEFT JOIN app_recommendations ar ON ac.id = ar.id
-        LEFT JOIN app_docks ad ON ac.id = ad.id
         WHERE ac.id = ?;`
     );
     const apps: any[] = select.all(appId);
@@ -245,21 +243,11 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
     this._insertStalls(update.stalls);
   }
 
-  public updatePinned(
-    update: { index: number; id: string; path: string },
-    type: 'add' | 'remove'
-  ) {
+  public updateDock(update: { path: string; dock: string[] }) {
     if (!this.db) throw new Error('No db connection');
-
-    if (type === 'add') {
-      this.db
-        .prepare(`INSERT INTO app_docks (space, id, idx) VALUES (?, ?, ?);`)
-        .run(update.path, update.id, update.index);
-    } else {
-      this.db
-        .prepare(`DELETE FROM app_docks WHERE space = ? AND id = ?;`)
-        .run(update.path, update.id);
-    }
+    this.db
+      .prepare(`REPLACE INTO app_docks (space, dock) VALUES (?, ?)`)
+      .run(update.path, JSON.stringify(update.dock));
     return this.getDock(update.path);
   }
 
@@ -368,23 +356,15 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
     const insert = this.db.prepare(
       `REPLACE INTO app_docks (
         space,
-        id,
-        idx
+        dock
       ) VALUES (
         @space,
-        @id,
-        @idx
+        @dock
       )`
     );
     const insertMany = this.db.transaction((docks: any) => {
-      Object.entries<any>(docks).forEach(([space, ids]) => {
-        ids.forEach((id: string, idx: string) => {
-          insert.run({
-            space,
-            id,
-            idx,
-          });
-        });
+      Object.entries<any>(docks).forEach(([space, dock]) => {
+        insert.run({ space, dock: JSON.stringify(dock) });
       });
     });
     insertMany(docks);
@@ -463,10 +443,9 @@ create unique index if not exists grid_uindex on app_grid (idx, appId);
 
 create table if not exists app_docks (
     space             TEXT NOT NULL,
-    id                TEXT NOT NULL,
-    idx               INTEGER NOT NULL
+    dock              text not null default '[]'
 );
-create unique index if not exists app_docks_uindex on app_docks (space, id);
+create unique index if not exists app_docks_uindex on app_docks (space);
 
 
 create table if not exists app_recommendations (

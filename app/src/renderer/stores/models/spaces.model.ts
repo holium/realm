@@ -61,10 +61,7 @@ export const SpaceModel = types
       return self.dock.some((app) => app.id === appId);
     },
     get dockAppIds() {
-      return self.dock
-        .slice()
-        .sort((a, b) => (a.dockIndex || 0) - (b.dockIndex || 0))
-        .map((app) => app.id);
+      return self.dock.slice().map((app) => app.id);
     },
     isHost() {
       // TODO check if admin
