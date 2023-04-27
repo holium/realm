@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import {
@@ -27,15 +27,9 @@ export const InboxPresenter = () => {
   const { ship, chatStore, spacesStore } = useShipStore();
   const { dimensions } = useTrayApps();
   const [showList, setShowList] = useState<boolean>(false);
-  const { inbox, sortedChatList, setChat, setSubroute, isChatPinned } =
-    chatStore;
+  const { sortedChatList, setChat, setSubroute, isChatPinned } = chatStore;
   const [searchString, setSearchString] = useState<string>('');
-
   const currentSpace = spacesStore.selected;
-
-  useEffect(() => {
-    chatStore.init();
-  }, []);
 
   const searchFilter = useCallback(
     (preview: ChatModelType) => {
@@ -96,7 +90,7 @@ export const InboxPresenter = () => {
           <Icon name="Plus" size={24} opacity={0.5} />
         </Button.IconButton>
       </Flex>
-      {inbox.length === 0 ? (
+      {sortedChatList.length === 0 ? (
         <Flex
           flex={1}
           flexDirection="column"

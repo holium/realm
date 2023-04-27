@@ -74,6 +74,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
       // and after applying successfully, insert them into the db
       this._insertDeleteLogs(deleteLogs);
     });
+    this.fetchPathMetadata();
   }
 
   protected mapRow(row: any): ChatRow {
@@ -100,11 +101,45 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   // Fetches
   //
   async fetchMuted() {
+    if (!this.db) throw new Error('No db connection');
     const response = await APIConnection.getInstance().conduit.scry({
       app: 'realm-chat',
       path: '/mutes',
     });
+
     return response;
+  }
+
+  async fetchPathMetadata() {
+    if (!this.db) throw new Error('No db connection');
+    const allPaths = this.db.prepare(`SELECT path FROM paths`).all();
+
+    const muted = await APIConnection.getInstance().conduit.scry({
+      app: 'realm-chat',
+      path: '/mutes',
+    });
+    const pinned = await APIConnection.getInstance().conduit.scry({
+      app: 'realm-chat',
+      path: '/pins',
+    });
+
+    const insert = this.db.prepare(
+      `REPLACE INTO paths_flags (
+          path,
+          muted,
+          pinned
+        ) VALUES (@path, @muted, @pinned)`
+    );
+    const insertMany = this.db.transaction((rows: { path: string }[]) => {
+      for (const row of rows)
+        insert.run({
+          path: row.path,
+          muted: muted.includes(row.path) ? 1 : 0,
+          pinned: pinned.includes(row.path) ? 1 : 0,
+        });
+    });
+    insertMany(allPaths);
+    return { muted, pinned };
   }
 
   async fetchPinnedChats() {
@@ -369,13 +404,17 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         json_extract(pins, '$[0]') pinnedMessageId,
         lastMessage,
         lastSender,
+        pf.muted,
+        pf.pinned,
         ifnull(chat_with_messages.created_at, paths.created_at) createdAt,
         ifnull(chat_with_messages.updated_at, paths.updated_at) updatedAt,
         paths.max_expires_at_duration expiresDuration,
         paths.invites
       FROM paths
       LEFT JOIN chat_with_messages ON paths.path = chat_with_messages.path
+      LEFT JOIN paths_flags pf on paths.path = pf.path
       WHERE paths.path LIKE '%realm-chat%' OR paths.path LIKE '/spaces/%/chats/%'
+      GROUP BY paths.path
       ORDER BY
           chat_with_messages.created_at DESC,
           json_extract(json(metadata), '$.timestamp') DESC;
@@ -396,6 +435,8 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         peers: row.peers ? JSON.parse(row.peers) : [],
         metadata: row.metadata ? this._parseMetadata(row.metadata) : null,
         lastMessage,
+        pinned: row.pinned === 1,
+        muted: row.muted === 1,
       };
     });
   }
@@ -466,13 +507,17 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         json_extract(pins, '$[0]') pinnedMessageId,
         lastMessage,
         lastSender,
+        pf.muted,
+        pf.pinned,
         ifnull(chat_with_messages.created_at, paths.created_at) createdAt,
         ifnull(chat_with_messages.updated_at, paths.updated_at) updatedAt,
         paths.max_expires_at_duration expiresDuration,
         paths.invites
       FROM paths
       LEFT JOIN chat_with_messages ON paths.path = chat_with_messages.path
+      LEFT JOIN paths_flags pf on paths.path = pf.path
       WHERE paths.path = ?
+      GROUP BY paths.path
       ORDER BY
           chat_with_messages.created_at DESC,
           json_extract(json(metadata), '$.timestamp') DESC;
@@ -495,6 +540,8 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         peersGetBacklog: row.peersGetBacklog === 1,
         peers: row.peers ? JSON.parse(row.peers) : [],
         metadata: row.metadata ? this._parseMetadata(row.metadata) : null,
+        pinned: row.pinned === 1,
+        muted: row.muted === 1,
         lastMessage,
       };
     });
@@ -832,44 +879,54 @@ export const chatInitSql = `
 create table if not exists messages
 (
     path         TEXT    not null,
-    msg_id       TEXT    not null,
-    msg_part_id  integer not null,
+    msg_id       TEXT    NOT NULL,
+    msg_part_id  INTEGER NOT NULL,
     content_type TEXT,
     content_data TEXT,
     reply_to     TEXT,
     metadata     text,
-    sender       text    not null,
-    updated_at   integer not null,
-    created_at   integer not null,
-    expires_at   integer
+    sender       text    NOT NULL,
+    updated_at   INTEGER NOT NULL,
+    created_at   INTEGER NOT NULL,
+    expires_at   INTEGER
 );
 
 create unique index if not exists messages_path_msg_id_msg_part_id_uindex
     on messages (path, msg_id, msg_part_id);
 
+    
 create table if not exists paths
 (
-    path                        TEXT not null,
-    type                        TEXT not null,
+    path                        TEXT NOT NULL,
+    type                        TEXT NOT NULL,
     metadata                    TEXT,
-    invites                     TEXT default 'host' not null,
-    peers_get_backlog           integer default 1 not null,
+    invites                     TEXT default 'host' NOT NULL,
+    peers_get_backlog           INTEGER default 1 NOT NULL,
     pins                        TEXT,
-    max_expires_at_duration     integer,
-    updated_at                  integer not null,
-    created_at                  integer not null
+    max_expires_at_duration     INTEGER,
+    pinned                      INTEGER default 0 NOT NULL,
+    muted                       INTEGER default 0 NOT NULL,
+    updated_at                  INTEGER NOT NULL,
+    created_at                  INTEGER NOT NULL
 );
 
 create unique index if not exists paths_path_uindex
     on paths (path);
 
+CREATE TABLE IF NOT EXISTS paths_flags 
+(
+    path             TEXT NOT NULL,
+    pinned           INTEGER default 0 NOT NULL,
+    muted            INTEGER default 0 NOT NULL
+);
+
 create table if not exists  peers
 (
-    path        TEXT not null,
-    ship        text not null,
-    role        TEXT default 'member' not null,
-    updated_at  integer not null,
-    created_at  integer not null
+    path        TEXT NOT NULL,
+    ship        text NOT NULL,
+    role        TEXT default 'member' NOT NULL,
+    updated_at  INTEGER NOT NULL,
+    created_at  INTEGER NOT NULL
 );
 
 create unique index if not exists peers_path_ship_uindex
@@ -877,12 +934,13 @@ create unique index if not exists peers_path_ship_uindex
 
 create table if not exists delete_logs
 (
-    change        TEXT not null,
-    timestamp  integer not null
+    change        TEXT NOT NULL,
+    timestamp  INTEGER NOT NULL
 );
 
 create unique index if not exists delete_log_change_uindex
     on delete_logs (timestamp, change);
+
 `;
 
 export const chatDBPreload = ChatDB.preload(

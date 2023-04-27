@@ -1,27 +1,21 @@
 import { createContext, useContext } from 'react';
+import { toJS } from 'mobx';
 // import { toJS } from 'mobx';
 import {
-  flow,
-  Instance,
-  types,
-  tryReference,
   destroy,
+  flow,
   getParentOfType,
+  Instance,
+  tryReference,
+  types,
 } from 'mobx-state-tree';
-<<<<<<< HEAD
-=======
 
 import { ChatUpdateTypes } from 'os/services/ship/chat/chat.types';
-import { ChatIPC, RealmIPC } from 'renderer/stores/ipc';
+import { ChatIPC } from 'renderer/stores/ipc';
 import { SpacesStoreType } from 'renderer/stores/models/spaces.model';
 
->>>>>>> master
 import { Chat, ChatModelType } from './models/chat.model';
-import { shipStore, ShipStore } from './ship.store';
-import { RealmIPC, ChatIPC } from 'renderer/stores/ipc';
-import { SpacesStoreType } from 'renderer/stores/models/spaces.model';
-import { toJS } from 'mobx';
-import { ChatUpdateTypes } from 'os/services/ship/chat/chat.types';
+import { ShipStore, shipStore } from './ship.store';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
@@ -45,7 +39,7 @@ export const ChatStore = types
   })
   .views((self) => ({
     isChatPinned(path: string) {
-      return self.pinnedChats.includes(path);
+      return self.inbox.find((c) => c.path === path)?.pinned;
     },
     isChatMuted(path: string) {
       return self.inbox.find((c) => path === c.path)?.muted || false;
@@ -74,8 +68,8 @@ export const ChatStore = types
         }
 
         // Check if the chats are pinned
-        const isAPinned = self.pinnedChats.includes(a.path);
-        const isBPinned = self.pinnedChats.includes(b.path);
+        const isAPinned = a.pinned;
+        const isBPinned = b.pinned;
 
         // Compare the pinned status
         if (isAPinned !== isBPinned) {
@@ -132,8 +126,8 @@ export const ChatStore = types
     init: flow(function* () {
       try {
         const pinnedChats = yield ChatIPC.fetchPinnedChats();
-        self.inbox = yield ChatIPC.getChatList();
         const muted = yield ChatIPC.fetchMuted();
+        self.inbox = yield ChatIPC.getChatList();
         self.inbox.forEach((chat) => {
           chat.setMuted(muted.includes(chat.path));
         });
@@ -142,6 +136,16 @@ export const ChatStore = types
       } catch (error) {
         console.error(error);
         return self.pinnedChats;
+      }
+    }),
+    fetchInboxMetadata: flow(function* () {
+      yield ChatIPC.fetchPathMetadata();
+    }),
+    loadChatList: flow(function* () {
+      try {
+        self.inbox = yield ChatIPC.getChatList();
+      } catch (error) {
+        console.error(error);
       }
     }),
     setOpened() {
@@ -253,6 +257,9 @@ export const ChatStore = types
       self.selectedChat = undefined;
       self.isOpen = false;
     },
+    _onInit(payload: any) {
+      self.inbox = payload;
+    },
   }));
 
 // -------------------------------
@@ -281,24 +288,12 @@ export function useChatStore() {
   return store;
 }
 
-RealmIPC.onUpdate((update) => {
-  if (update.type === 'booted') {
-    if (update.payload.session) {
-      shipStore.chatStore.init();
-    }
-  }
-  if (update.type === 'auth-success') {
-    shipStore.chatStore.init();
-  }
-});
-
 // -------------------------------
 // Listen for changes
 ChatIPC.onUpdate(({ type, payload }: ChatUpdateTypes) => {
   if (type === 'init') {
-    shipStore.chatStore.init();
+    shipStore.chatStore._onInit(payload);
   }
-  console.log('ChatIPC.onUpdate', type, payload);
   if (type === 'path-added') {
     console.log('onPathsAdded', toJS(payload));
     shipStore.chatStore.onPathsAdded(payload);
@@ -315,7 +310,6 @@ ChatIPC.onUpdate(({ type, payload }: ChatUpdateTypes) => {
     selectedChat.removeMessage(payload['msg-id']);
   }
   if (type === 'message-received') {
-    // console.log('addMessage', payload);
     const selectedChat = shipStore.chatStore.inbox.find(
       (chat) => chat.path === payload.path
     );

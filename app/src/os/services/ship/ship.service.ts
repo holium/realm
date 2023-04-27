@@ -85,20 +85,6 @@ export class ShipService extends AbstractService<any> {
       this._registerServices();
     }
 
-    // TODO this DROP is here until we get the agent refactor with lastTimestamp scries
-    try {
-      this.shipDB.db.exec(`
-        DELETE FROM app_docks;
-        DELETE FROM app_recommendations;
-        DELETE FROM app_catalog;
-        DELETE FROM spaces_stalls;
-        DELETE FROM spaces_members;
-        DELETE FROM spaces;
-      `);
-    } catch (e) {
-      log.error('ship.service.ts:', 'Failed to drop tables', e);
-    }
-
     app.on('quit', () => {
       this.shipDB?.disconnect();
     });

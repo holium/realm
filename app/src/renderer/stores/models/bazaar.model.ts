@@ -252,6 +252,7 @@ export const BazaarStore = types
       applySnapshot(self.catalog, data);
     }),
     _onInitialLoad(catalog: any) {
+      console.log('initial loadbazaar', catalog);
       applySnapshot(self.catalog, catalog);
     },
     reset() {

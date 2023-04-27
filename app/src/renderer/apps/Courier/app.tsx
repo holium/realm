@@ -18,7 +18,8 @@ export const CourierAppPresenter = () => {
   const { chatStore } = useShipStore();
   useEffect(() => {
     if (chatStore.subroute === 'inbox') {
-      chatStore.init();
+      // ChatIPC.fetchPathMetadata();
+      // chatStore.loadChatList();
     } else {
       chatStore.selectedChat?.fetchMessages();
     }

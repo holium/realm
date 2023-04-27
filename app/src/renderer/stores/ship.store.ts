@@ -9,12 +9,7 @@ import { FeaturedStore } from './models/featured.model';
 import { FriendsStore } from './models/friends.model';
 import { NotifStore } from './models/notification.model';
 import { SpacesStore } from './models/spaces.model';
-<<<<<<< HEAD
-import { ChatStore } from './chat.store';
-import { ShipIPC } from './ipc';
 import { RoomsStore } from './rooms.store';
-=======
->>>>>>> master
 
 const ShipModel = types
   .model('ShipModel', {
@@ -57,9 +52,10 @@ export const ShipStore = types
         }
       });
       self.ship = ShipModel.create(ship);
-      self.chatStore.init();
-      self.spacesStore.init();
+      self.chatStore.loadChatList();
       self.bazaarStore.init();
+      self.spacesStore.init();
+      self.chatStore.fetchInboxMetadata();
     },
     reset() {
       self.ship = null;
