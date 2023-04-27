@@ -212,6 +212,9 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       minor: -1,
       build: -1,
     };
+    console.log(
+      `preparing build version env var '${process.env.BUILD_VERSION}'`
+    );
     if (!process.env.BUILD_VERSION) {
       console.warn(
         'BUILD_VERSION environment variable not set. skipping installation validation...'
@@ -243,18 +246,21 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
 
   async _testVersion(buildVersion: any): Promise<boolean> {
     try {
-      const version = await APIConnection.getInstance().conduit.scry({
+      const res = await APIConnection.getInstance().conduit.scry({
         app: 'bazaar',
         path: `/version`,
       });
-      const parts = version.split('.');
+      const parts = res.version.split('.');
+      console.log('testing version %o against %o', parts, buildVersion);
       if (parseInt(parts[0]) > parseInt(buildVersion.major)) {
+        console.log('passed major version check');
         return true;
       }
       if (
         parseInt(parts[0]) >= parseInt(buildVersion.major) &&
         parseInt(parts[1]) > parseInt(buildVersion.minor)
       ) {
+        console.log('passed minor version check');
         return true;
       }
       if (
@@ -262,31 +268,35 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
         parseInt(parts[1]) >= parseInt(buildVersion.minor) &&
         parseInt(parts[2]) >= parseInt(buildVersion.build)
       ) {
+        console.log('passed build check');
         return true;
       }
     } catch (e) {
-      log.error(e);
+      console.log(e);
     }
     return false;
   }
 
   async _waitForInstallRealmAgent(buildVersion: any): Promise<string> {
+    const self = this;
     return new Promise((resolve, reject) => {
       let totalWaitTime = 0,
         maxWaitTime = 300000; // 5 minutes
-      let intervalId = setInterval(async () => {
+      (async function versionCheck(totalWaitTime, maxWaitTime) {
+        console.log('before test');
+        const result = await self._testVersion(buildVersion);
+        console.log('after test');
+        if (result) {
+          resolve('continue');
+          return;
+        }
         totalWaitTime += 3000;
         if (totalWaitTime > maxWaitTime) {
           reject('error:timeout');
           return;
         }
-        const result = await this._testVersion(buildVersion);
-        if (result) {
-          clearInterval(intervalId);
-          resolve('continue');
-          return;
-        }
-      }, 3000);
+        setTimeout(() => versionCheck(totalWaitTime, maxWaitTime), 3000);
+      })(totalWaitTime, maxWaitTime);
     });
   }
 
@@ -294,15 +304,15 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     return new Promise(async (resolve, reject) => {
       await this._openConduit();
       try {
-        APIConnection.getInstance().conduit.poke({
-          app: 'hood',
-          mark: 'kiln-install',
-          json: {
-            ship: '~hostyv',
-            desk: 'realm',
-            local: 'realm',
-          },
-        });
+        // APIConnection.getInstance().conduit.poke({
+        //   app: 'hood',
+        //   mark: 'kiln-install',
+        //   json: {
+        //     ship: '~hostyv',
+        //     desk: 'realm',
+        //     local: 'realm',
+        //   },
+        // });
 
         // @note: if %realm is already installed and does not need to be updated, there is
         //   currently no way to get notified by clay (gift) that the kiln-install operation

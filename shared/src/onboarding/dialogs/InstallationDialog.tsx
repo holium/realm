@@ -53,11 +53,8 @@ export const InstallationDialog = ({
       installError.toggleOn();
       // if you want to display some detail
       // const msg = result.replace('error:'); // to get the detail
-    }
-    if (result) {
-      successfullInstall.toggleOn();
     } else {
-      installError.toggleOn();
+      successfullInstall.toggleOn();
     }
 
     installing.toggleOff();
