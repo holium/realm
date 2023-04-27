@@ -6,7 +6,6 @@ import { Flex } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useAppState } from 'renderer/stores/app.store';
 import { MainIPC } from 'renderer/stores/ipc';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 import { Rooms } from './List';
 import { NewRoom } from './NewRoom';
@@ -22,10 +21,9 @@ const RoomViews: { [key: string]: any } = {
 };
 
 export const RoomAppPresenter = () => {
-  const { shellStore } = useAppState();
-  const { ship } = useShipStore();
+  const { loggedInAccount, shellStore } = useAppState();
   const { roomsApp, dimensions } = useTrayApps();
-  const roomsManager = useRooms(ship?.patp);
+  const roomsManager = useRooms(loggedInAccount?.patp);
 
   useEffect(() => {
     if (shellStore.micAllowed) return;

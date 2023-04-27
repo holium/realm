@@ -6,28 +6,26 @@ import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppType } from 'renderer/stores/models/bazaar.model';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 import { nativeApps } from '../nativeApps';
 import { useTrayApps } from '../store';
 
 const AccountTrayAppPresenter = () => {
-  const { shellStore, authStore } = useAppState();
-  const { ship } = useShipStore();
+  const { loggedInAccount, shellStore, authStore } = useAppState();
   const { setActiveApp } = useTrayApps();
-  const roomsManager = useRooms(ship?.patp);
+  const roomsManager = useRooms(loggedInAccount?.patp);
 
   const openSettingsApp = () => {
     shellStore.openWindow(nativeApps['os-settings'] as AppType);
   };
 
-  if (!ship) return null;
+  if (!loggedInAccount) return null;
 
   let subtitle;
-  if (ship.nickname) {
+  if (loggedInAccount.nickname) {
     subtitle = (
       <Text.Custom opacity={0.7} fontSize={2} fontWeight={400}>
-        {ship.patp}
+        {loggedInAccount.patp}
       </Text.Custom>
     );
   }
@@ -54,9 +52,9 @@ const AccountTrayAppPresenter = () => {
             simple
             borderRadiusOverride="4px"
             size={32}
-            avatar={ship.avatar}
-            patp={ship.patp}
-            sigilColor={[ship.color || '#000000', 'white']}
+            avatar={loggedInAccount.avatar}
+            patp={loggedInAccount.patp}
+            sigilColor={[loggedInAccount.color || '#000000', 'white']}
           />
           <Flex ml={2} flexDirection="column">
             <Text.Custom
@@ -69,7 +67,7 @@ const AccountTrayAppPresenter = () => {
               fontWeight={500}
               variant="body"
             >
-              {ship.nickname || ship.patp}
+              {loggedInAccount.nickname || loggedInAccount.patp}
             </Text.Custom>
             {subtitle}
           </Flex>

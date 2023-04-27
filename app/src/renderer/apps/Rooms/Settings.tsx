@@ -10,15 +10,15 @@ import {
   Text,
 } from '@holium/design-system';
 
-import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 import { useTrayApps } from '../store';
 import { useRooms } from './useRooms';
 
 const SettingsPresenter = () => {
   const { roomsApp } = useTrayApps();
-  const { ship } = useShipStore();
-  const roomsManager = useRooms(ship?.patp);
+  const { loggedInAccount } = useAppState();
+  const roomsManager = useRooms(loggedInAccount?.patp);
 
   const [audioSourceOptions, setAudioSources] = useState<RadioOption[] | any[]>(
     []

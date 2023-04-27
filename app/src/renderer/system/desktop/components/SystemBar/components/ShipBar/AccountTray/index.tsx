@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { Avatar, Box, Flex } from '@holium/design-system';
 
 import { Pulser } from 'renderer/components';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 import { TrayClock } from '../Clock';
 
@@ -16,7 +16,7 @@ type AccountTrayProps = {
 };
 
 const AccountTrayPresenter = ({ unreadCount, onClick }: AccountTrayProps) => {
-  const { ship } = useShipStore();
+  const { loggedInAccount } = useAppState();
 
   return (
     <Flex gap={8} alignItems="center">
@@ -30,17 +30,17 @@ const AccountTrayPresenter = ({ unreadCount, onClick }: AccountTrayProps) => {
         transition={{ scale: 0.2 }}
         onClick={onClick}
       >
-        {ship ? (
+        {loggedInAccount ? (
           <AccountPaneStyle>
             <TrayClock />
             <Avatar
               simple
               clickable={true}
-              avatar={ship.avatar}
-              patp={ship.patp}
+              avatar={loggedInAccount.avatar}
+              patp={loggedInAccount.patp}
               size={26}
               borderRadiusOverride="4px"
-              sigilColor={[ship.color || '#000000', '#FFF']}
+              sigilColor={[loggedInAccount.color || '#000000', '#FFF']}
             />
           </AccountPaneStyle>
         ) : (

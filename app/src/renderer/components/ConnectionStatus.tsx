@@ -7,7 +7,6 @@ import styled, { css } from 'styled-components';
 import { Flex, Icon, Spinner, Text } from '@holium/design-system';
 
 import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 interface ConnStatusStyleProps {
   baseColor: string;
@@ -60,9 +59,7 @@ const ConnIndicator = styled(motion.div)`
 `;
 
 export const ConnectionStatus = observer(() => {
-  // const { online, connectionStatus } = useCore();
-  const { theme } = useAppState();
-  const { ship } = useShipStore();
+  const { loggedInAccount, theme } = useAppState();
   const [isReconnecting, setIsReconnecting] = useState(false);
   // const status = connectionStatus;
   const online = true;
@@ -118,7 +115,7 @@ export const ConnectionStatus = observer(() => {
         zIndex={20}
         initial={{ top: -50 }}
         animate={{
-          display: !ship ? 'none' : 'flex',
+          display: !loggedInAccount ? 'none' : 'flex',
           top:
             status === 'refreshed' ||
             status === 'connected' ||
@@ -171,6 +168,6 @@ export const ConnectionStatus = observer(() => {
         </ConnStatusStyle>
       </Flex>
     ),
-    [status, isReconnecting, ship?.patp]
+    [status, isReconnecting, loggedInAccount?.patp]
   );
 });

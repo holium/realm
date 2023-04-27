@@ -13,9 +13,10 @@ import {
 } from '@holium/design-system';
 
 import { useAppState } from 'renderer/stores/app.store';
+import { AccountModelSnapshot } from 'renderer/stores/models/account.model';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 import { ThemeType } from 'renderer/stores/models/theme.model';
-import { ShipMobxType, useShipStore } from 'renderer/stores/ship.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { SettingControl } from '../components/SettingControl';
 import { SettingPane } from '../components/SettingPane';
@@ -61,12 +62,12 @@ const wpGallery: { [key: string]: string } = {
 };
 
 type ThemePanelPresenterViewProps = {
-  ship: ShipMobxType;
+  account: AccountModelSnapshot;
   space: SpaceModelType;
 };
 
 const ThemePanelPresenterView = ({
-  ship,
+  account,
   space,
 }: ThemePanelPresenterViewProps) => {
   const { theme } = useAppState();
@@ -76,11 +77,11 @@ const ThemePanelPresenterView = ({
 
   const canEditSpace = useMemo(() => {
     const me = space.members.list.find(
-      (m) => m.patp === ship.patp && m.roles.indexOf('admin') !== -1
+      (m) => m.patp === account.patp && m.roles.indexOf('admin') !== -1
     );
 
     return Boolean(me);
-  }, [ship.patp]);
+  }, [account.patp]);
 
   const updateSpaceTheme = async (newTheme: ThemeType) => {
     const currentSpace = spacesStore.spaces.get(space.path);
@@ -233,11 +234,17 @@ const ThemePanelPresenterView = ({
 };
 
 const ThemePanelPresenter = () => {
-  const { ship, spacesStore } = useShipStore();
+  const { loggedInAccount } = useAppState();
+  const { spacesStore } = useShipStore();
 
-  if (!spacesStore.selected || !ship) return null;
+  if (!spacesStore.selected || !loggedInAccount) return null;
 
-  return <ThemePanelPresenterView ship={ship} space={spacesStore.selected} />;
+  return (
+    <ThemePanelPresenterView
+      account={loggedInAccount}
+      space={spacesStore.selected}
+    />
+  );
 };
 
 export const ThemePanel = observer(ThemePanelPresenter);

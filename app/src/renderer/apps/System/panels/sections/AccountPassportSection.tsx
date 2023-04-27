@@ -4,20 +4,20 @@ import { Flex, Text } from '@holium/design-system';
 import { PassportCard } from '@holium/shared';
 
 import { AuthIPC, OnboardingIPC } from 'renderer/stores/ipc';
-import { ShipMobxType } from 'renderer/stores/ship.store';
+import { AccountModelSnapshot } from 'renderer/stores/models/account.model';
 
 import { ColorPicker } from '../../components/ColorPicker';
 import { SettingSection } from '../../components/SettingSection';
 
 type Props = {
-  ship: ShipMobxType;
+  account: AccountModelSnapshot;
 };
 
-export const AccountPassportSection = ({ ship }: Props) => {
-  const [nickname, setNickname] = useState(ship.nickname ?? '');
+export const AccountPassportSection = ({ account }: Props) => {
+  const [nickname, setNickname] = useState(account.nickname ?? '');
   const [description, setDescription] = useState('');
-  const [avatarSrc, setAvatarSrc] = useState(ship.avatar ?? '');
-  const [accentColor, setAccentColor] = useState(ship.color ?? '#000');
+  const [avatarSrc, setAvatarSrc] = useState(account.avatar ?? '');
+  const [accentColor, setAccentColor] = useState(account.color ?? '#000');
 
   const handleSetAvatarSrc = (src?: string) => {
     setAvatarSrc(src ?? '');
@@ -31,7 +31,7 @@ export const AccountPassportSection = ({ ship }: Props) => {
     if (!nickname) return false;
 
     await AuthIPC.updatePassport(
-      ship.patp,
+      account.patp,
       nickname,
       description,
       avatarSrc,
@@ -39,7 +39,7 @@ export const AccountPassportSection = ({ ship }: Props) => {
     );
 
     // Sync friends agent
-    await OnboardingIPC.updatePassport(ship.patp, {
+    await OnboardingIPC.updatePassport(account.patp, {
       nickname,
       avatar: avatarSrc,
       bio: description,
@@ -56,7 +56,7 @@ export const AccountPassportSection = ({ ship }: Props) => {
       body={
         <>
           <PassportCard
-            patp={ship.patp}
+            patp={account.patp}
             color={accentColor}
             nickname={nickname}
             setNickname={setNickname}

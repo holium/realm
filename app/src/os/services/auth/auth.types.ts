@@ -13,19 +13,6 @@ export type Theme = {
   mouseColor: string;
 };
 
-export type AccountModelType = {
-  url: string;
-  patp: string;
-  type: 'hosted' | 'local';
-  nickname: string | null;
-  color: string | null;
-  avatar: string | null;
-  theme: Theme;
-  status: string | null;
-  createdAt: number;
-  updatedAt: number;
-};
-
 export type AccountView = Omit<Account, 'passwordHash'>;
 
 export type AuthUpdateAccountPayload = {

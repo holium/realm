@@ -16,6 +16,7 @@ import {
   RealmIPC,
   SpacesIPC,
 } from './ipc';
+import { AccountModelSnapshot } from './models/account.model';
 import { ShellModel } from './models/shell.model';
 import { Theme, ThemeType } from './models/theme.model';
 import { shipStore } from './ship.store';
@@ -28,7 +29,6 @@ const AppStateModel = types
     seenSplash: types.boolean,
     currentScreen: Screen,
     theme: Theme,
-    isLoggedIn: types.boolean,
     authStore: AuthenticationModel,
     shellStore: ShellModel,
     online: types.boolean,
@@ -50,9 +50,8 @@ const AppStateModel = types
       self.authStore.setAccounts(data.accounts);
       self.seenSplash = data.seenSplash;
       if (data.session) {
-        self.authStore._setSession(data.session.patp);
+        self.authStore._setSession(data.session.patp, data.session.cookie);
         self.shellStore.setIsBlurred(false);
-        self.isLoggedIn = true;
       }
       self.booted = true;
     },
@@ -66,16 +65,13 @@ const AppStateModel = types
       }
     },
     setLoggedIn() {
-      self.isLoggedIn = true;
       self.shellStore.setIsBlurred(false);
     },
     setLoggedOut() {
-      self.isLoggedIn = false;
       self.shellStore.setIsBlurred(true);
     },
     reset() {
       self.booted = false;
-      self.isLoggedIn = false;
       self.shellStore.setIsBlurred(true);
     },
     setConnectionStatus(status: any) {
@@ -89,6 +85,13 @@ const AppStateModel = types
       self.seenSplash = true;
       yield AuthIPC.setSeenSplash() as Promise<void>;
     }),
+  }))
+  .views((self) => ({
+    get loggedInAccount(): AccountModelSnapshot | undefined {
+      return self.authStore.accounts.find(
+        (a) => a.patp === self.authStore.session?.patp
+      );
+    },
   }));
 
 // const loadSnapshot = () => {
@@ -108,7 +111,6 @@ export const appState = AppStateModel.create({
   theme: lastTheme
     ? Theme.create(JSON.parse(lastTheme))
     : Theme.create(defaultTheme),
-  isLoggedIn: false,
   authStore: {
     accounts: [],
     session: null,
@@ -162,15 +164,17 @@ function registerOnUpdateListener() {
       shipStore.reset();
       appState.setBooted(update.payload);
       if (update.payload.session) {
-        shipStore.setShip(update.payload.session);
+        appState.setLoggedIn();
       }
     }
     if (update.type === 'auth-success') {
       SoundActions.playLogin();
-      appState.authStore._setSession(update.payload.patp);
+      appState.authStore._setSession(
+        update.payload.patp,
+        update.payload.cookie
+      );
       localStorage.setItem('lastAccountLogin', update.payload.patp);
       appState.setLoggedIn();
-      shipStore.setShip(update.payload);
     }
     if (update.type === 'auth-failed') {
       // SoundActions.playError();

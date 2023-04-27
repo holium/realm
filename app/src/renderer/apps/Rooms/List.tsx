@@ -11,9 +11,10 @@ import { RoomRow } from './components/RoomRow';
 import { useRooms } from './useRooms';
 
 const RoomsPresenter = () => {
-  const { ship, spacesStore } = useShipStore();
+  const { loggedInAccount } = useAppState();
+  const { spacesStore } = useShipStore();
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms(ship?.patp);
+  const roomsManager = useRooms(loggedInAccount?.patp);
 
   const ourSpace = spacesStore.selected?.type === 'our';
 

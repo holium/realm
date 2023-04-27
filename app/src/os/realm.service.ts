@@ -224,13 +224,11 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     });
   }
 
-  private async _hydrateSessionIfExists(): Promise<{
-    url: string;
-    patp: string;
-    cookie: string;
-  } | null> {
+  private _hydrateSessionIfExists() {
     if (!this.services) return null;
+
     const session = this.services?.auth._getLockfile();
+
     if (session) {
       log.info('realm.service.ts:', 'Hydrating session from session.lock');
 
@@ -238,19 +236,20 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       if (!account) {
         log.error('realm.service.ts:', 'Account not found');
         this.services.auth._clearLockfile();
-        return Promise.resolve(null);
+        return null;
       }
 
       // todo figure out how to get the password and encryptionKey from the lockfile
       this.services.ship = new ShipService(session.ship, '', '');
 
-      return Promise.resolve({
+      return {
         url: session.url,
         patp: session.ship,
         cookie: session.cookie,
-      });
+      };
     }
-    return Promise.resolve(null);
+
+    return null;
   }
 
   getReleaseChannel() {

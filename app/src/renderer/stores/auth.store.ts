@@ -78,7 +78,7 @@ export const AuthenticationModel = types
       if (!accounts) return;
       applySnapshot(self.accounts, castToSnapshot(accounts));
     },
-    _setSession(patp: string) {
+    _setSession(patp: string, _: string) {
       const account = self.accounts.find((a) => a.patp === patp);
       if (!account) {
         throw new Error('Account not found');

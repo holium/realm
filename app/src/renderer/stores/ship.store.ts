@@ -18,28 +18,8 @@ import {
   WalletView,
 } from './models/wallet.model';
 
-const ShipModel = types
-  .model('ShipModel', {
-    url: types.string,
-    patp: types.identifier,
-    cookie: types.string,
-    nickname: types.maybeNull(types.string),
-    color: types.maybeNull(types.string),
-    avatar: types.maybeNull(types.string),
-  })
-  .actions((self) => ({
-    setMetadata(metadata: any) {
-      self.nickname = metadata.nickname;
-      self.color = metadata.color;
-      self.avatar = metadata.avatar;
-    },
-  }));
-
-export type ShipMobxType = Instance<typeof ShipModel>;
-
 export const ShipStore = types
   .model('ShipStore', {
-    ship: types.maybeNull(ShipModel),
     friends: FriendsStore,
     notifStore: NotifStore,
     chatStore: ChatStore,
@@ -50,22 +30,7 @@ export const ShipStore = types
     loader: LoaderModel,
   })
   .actions((self) => ({
-    setShip(ship: any) {
-      window.ship = ship.patp;
-      self.friends.init().then(() => {
-        const myMeta = self.friends.getContactAvatarMetadata(ship.patp);
-        if (myMeta) {
-          self.ship?.setMetadata(myMeta);
-        }
-      });
-      self.ship = ShipModel.create(ship);
-      self.chatStore.init();
-      self.spacesStore.init();
-      self.bazaarStore.init();
-      self.walletStore.init();
-    },
     reset() {
-      self.ship = null;
       self.notifStore.reset();
       self.chatStore.reset();
       self.bazaarStore.reset();

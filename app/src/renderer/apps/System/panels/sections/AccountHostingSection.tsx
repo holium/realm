@@ -14,12 +14,12 @@ import {
 
 import { useTrayApps } from 'renderer/apps/store';
 import { useAppState } from 'renderer/stores/app.store';
-import { ShipMobxType } from 'renderer/stores/ship.store';
+import { AccountModelSnapshot } from 'renderer/stores/models/account.model';
 
 import { SettingSection } from '../../components/SettingSection';
 
 type Props = {
-  ship: ShipMobxType;
+  account: AccountModelSnapshot;
 };
 
 export const AccountHostingSection = ({}: Props) => {

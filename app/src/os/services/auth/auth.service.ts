@@ -91,6 +91,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     });
 
     if (updatedAccount) {
+      log.info('auth.service.ts:', `Updated account for ${patp}`);
       this.sendUpdate({
         type: 'account-updated',
         payload: {
@@ -114,15 +115,16 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
       return false;
     }
 
-    const newAccount = this.authDB.tables.accounts.update(patp, {
+    const updatedAccount = this.authDB.tables.accounts.update(patp, {
       passwordHash: bcrypt.hashSync(password, 10),
     });
 
-    if (newAccount) {
+    if (updatedAccount) {
+      log.info('auth.service.ts:', `Updated account for ${patp}`);
       this.sendUpdate({
         type: 'account-updated',
         payload: {
-          account: newAccount,
+          account: updatedAccount,
           order: this.authDB?.getOrder(),
         },
       });

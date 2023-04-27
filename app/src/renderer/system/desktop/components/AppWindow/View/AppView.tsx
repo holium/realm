@@ -24,8 +24,8 @@ type Props = {
 };
 
 const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
-  const { theme, shellStore } = useAppState();
-  const { ship, spacesStore } = useShipStore();
+  const { loggedInAccount, theme, shellStore } = useAppState();
+  const { spacesStore } = useShipStore();
   const [ready, setReady] = useState(false);
   const webViewRef = useRef<HTMLWebViewElement>(null);
 
@@ -50,7 +50,7 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
       `${appWindow.appId}-urbit-webview`
     ) as Electron.WebviewTag;
 
-    if (appWindow && ship && webView) {
+    if (appWindow && loggedInAccount && webView) {
       webView.addEventListener('did-start-loading', onStartLoading);
       webView.addEventListener('did-stop-loading', onStopLoading);
       if (process.env.NODE_ENV === 'development') {
@@ -82,10 +82,10 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
         webView.closeDevTools();
       });
 
-      let appUrl = `${ship.url}/apps/${appWindow.appId}/?spaceId=${spacesStore.selected?.path}`;
+      let appUrl = `${loggedInAccount.url}/apps/${appWindow.appId}/?spaceId=${spacesStore.selected?.path}`;
 
       if (appWindow.href?.site) {
-        appUrl = `${ship.url}${appWindow.href?.site}?spaceId=${spacesStore.selected?.path}`;
+        appUrl = `${loggedInAccount.url}${appWindow.href?.site}?spaceId=${spacesStore.selected?.path}`;
       }
       // shellStore.openWindow(toJS(app));
       setAppUrl(appUrl);
@@ -95,7 +95,7 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
       setReady(false);
     };
   }, [
-    ship,
+    loggedInAccount,
     appWindow,
     spacesStore.selected?.path,
     shellStore.mouseColor,

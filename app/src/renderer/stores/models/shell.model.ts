@@ -2,8 +2,8 @@ import { toJS } from 'mobx';
 import { applySnapshot, getSnapshot, Instance, types } from 'mobx-state-tree';
 
 import { getInitialWindowBounds } from '../../lib/window-manager';
+import { appState } from '../app.store';
 import { MainIPC } from '../ipc';
-import { shipStore } from '../ship.store';
 import {
   AppWindowMobxType,
   AppWindowModel,
@@ -161,9 +161,9 @@ export const ShellModel = types
         bounds: getInitialWindowBounds(app, self.desktopDimensions),
       });
       const credentials = {
-        url: shipStore.ship?.url,
-        cookie: shipStore.ship?.cookie,
-        ship: shipStore.ship?.patp,
+        url: appState.loggedInAccount?.url,
+        cookie: '', // TODO: fix this by storing the cookie in the store.
+        ship: appState.loggedInAccount?.patp,
       };
       // console.log('credentials', credentials);
       if (app.type === 'urbit') {

@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react';
 
-import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 import { SettingPane } from '../components/SettingPane';
 import { SettingTitle } from '../components/SettingTitle';
@@ -10,28 +10,28 @@ import { AccountPassportSection } from './sections/AccountPassportSection';
 import { AccountStorageSection } from './sections/AccountStorageSection';
 
 const AccountPanelPresenter = () => {
-  const { ship } = useShipStore();
+  const { loggedInAccount } = useAppState();
 
-  if (!ship) return null;
+  if (!loggedInAccount) return null;
 
   return (
     <SettingPane>
       <SettingTitle title="Account" />
       <AccountPassportSection
-        ship={ship}
-        key={`${ship.patp}-settings-passport`}
+        account={loggedInAccount}
+        key={`${loggedInAccount.patp}-settings-passport`}
       />
       <AccountHostingSection
-        ship={ship}
-        key={`${ship.patp}-settings-hosting`}
+        account={loggedInAccount}
+        key={`${loggedInAccount.patp}-settings-hosting`}
       />
       <AccountStorageSection
-        ship={ship}
-        key={`${ship.patp}-settings-storage`}
+        account={loggedInAccount}
+        key={`${loggedInAccount.patp}-settings-storage`}
       />
       <AccountCustomDomainSection
-        ship={ship}
-        key={`${ship.patp}-custom-domain`}
+        account={loggedInAccount}
+        key={`${loggedInAccount.patp}-custom-domain`}
       />
     </SettingPane>
   );

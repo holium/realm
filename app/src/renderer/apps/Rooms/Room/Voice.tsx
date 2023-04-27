@@ -4,15 +4,15 @@ import { observer } from 'mobx-react';
 import { Flex } from '@holium/design-system';
 
 import { useTrayApps } from 'renderer/apps/store';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 import { Speaker } from '../components/Speaker';
 import { roomTrayConfig } from '../config';
 import { useRooms } from '../useRooms';
 
 const VoiceViewPresenter = () => {
-  const { ship } = useShipStore();
-  const roomsManager = useRooms(ship?.patp);
+  const { loggedInAccount } = useAppState();
+  const roomsManager = useRooms(loggedInAccount?.patp);
 
   const { setTrayAppHeight } = useTrayApps();
 
