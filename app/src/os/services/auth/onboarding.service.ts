@@ -126,6 +126,13 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     });
 
     if (newAccount) {
+      this.sendUpdate({
+        type: 'account-added',
+        payload: {
+          account: newAccount,
+          order: [],
+        },
+      });
       return { account: newAccount, masterAccount };
     } else {
       log.info('auth.service.ts:', `Failed to create account for ${acc.patp}`);
