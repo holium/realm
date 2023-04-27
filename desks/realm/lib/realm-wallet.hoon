@@ -258,6 +258,8 @@
               [%s (scot %p blocked)]
           ['blocked' a+blocked]
       ==
+        %passcode
+      s+passcode-hash.update
     ==
   ?+  -.update  enjs-ui-update
       %address

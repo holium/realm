@@ -2,6 +2,7 @@ import { AccountTrayApp } from 'renderer/apps/Account';
 import { CourierApp } from 'renderer/apps/Courier/app';
 import { RoomApp } from 'renderer/apps/Rooms';
 import { SpacesTrayApp } from 'renderer/apps/Spaces';
+import { WalletApp } from 'renderer/apps/Wallet/WalletApp';
 import { calculateAnchorPoint } from 'renderer/lib/position';
 
 // import { WalletApp } from 'renderer/apps/Wallet';
@@ -101,8 +102,7 @@ export const trayAppRenderers: ViewRenderers = {
     },
   },
   'wallet-tray': {
-    component: () => <div />,
-    // component: () => <WalletApp />,
+    component: () => <WalletApp />,
     dimensions: defaultTrayDimensions['wallet-tray'],
   },
 };

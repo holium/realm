@@ -1,10 +1,29 @@
+import bcrypt from 'bcryptjs';
 import {
   applySnapshot,
   cast,
+  flow,
   getSnapshot,
   Instance,
   types,
 } from 'mobx-state-tree';
+
+import { WalletIPC } from '../ipc';
+import { shipStore } from '../ship.store';
+
+// 10 minutes
+const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
+
+export interface RecipientPayload {
+  recipientMetadata?: {
+    color: string;
+    avatar?: string;
+    nickname?: string;
+  };
+  patp: string;
+  address?: string | null;
+  gasEstimate?: number;
+}
 
 export enum WalletView {
   LIST = 'list',
@@ -166,8 +185,7 @@ const TransactionList = types
       }
     },
     applyChainTransactions(
-      _conduit: any,
-      _protocol: ProtocolType,
+      protocol: ProtocolType,
       index: number,
       address: string,
       transactions: any
@@ -193,9 +211,36 @@ const TransactionList = types
         };
         const previousStatus = previousTransaction?.status;
         self.transactions.set(transaction.hash, newTransaction);
-        console.log(previousStatus);
+        if (previousTransaction) {
+          if (newTransaction.status !== previousStatus) {
+            const tx = this.getStoredTransaction(transaction.hash);
+            this.setTransaction(
+              protocol,
+              index,
+              transaction.contractAddress || null,
+              transaction.hash,
+              tx
+            );
+          }
+        }
       }
     },
+    setTransaction: flow(function* (
+      protocol: ProtocolType,
+      index: number,
+      contractAddress: string | null,
+      hash: string,
+      tx: any
+    ): Generator<PromiseLike<any>, void, any> {
+      yield WalletIPC.setTransaction(
+        'ethereum',
+        protocol,
+        index,
+        contractAddress,
+        hash,
+        tx
+      ) as PromiseLike<any>;
+    }),
     getStoredTransaction(hash: string) {
       const tx: any = self.transactions.get(hash);
       return {
@@ -293,8 +338,8 @@ const BitcoinStore = types
         self.wallets.set(wallet.key, bitcoinWallet);
       }
       /*for (const transaction in wallet.transactions) {
-          self.wallets.get(wallet.key).applyTransactionUpdate(transaction);
-        }*/
+        self.wallets.get(wallet.key).applyTransactionUpdate(transaction);
+      }*/
     },
     setExchangeRate(usd: number) {
       self.conversions.setUsd(usd);
@@ -369,8 +414,8 @@ const EthWalletData = types
   })
   .actions((self) => ({
     /*setCoins(coins: any) {
-        applySnapshot(self.coins, coins);
-      },*/
+      applySnapshot(self.coins, coins);
+    },*/
     setBlock(block: number) {
       self.block = block;
     },
@@ -387,22 +432,22 @@ const EthWallet = types
   })
   .actions((self) => ({
     /*setCoins(protocol: ProtocolType, coins: any) {
-        const formattedCoins: any = {};
-        for (const Coin of coins) {
-          const coin: any = Coin;
-          formattedCoins[coin.contractAddress] = {
-            name: coin.name,
-            logo: coin.imageUrl || '',
-            address: coin.contractAddress,
-            balance: coin.balance,
-            decimals: coin.decimals,
-            conversions: {},
-          };
-        }
-        const map = types.map(ERC20);
-        const newCoins = map.create(formattedCoins);
-        applySnapshot(self.data.get(protocol).coins, getSnapshot(newCoins));
-      },*/
+      const formattedCoins: any = {};
+      for (const Coin of coins) {
+        const coin: any = Coin;
+        formattedCoins[coin.contractAddress] = {
+          name: coin.name,
+          logo: coin.imageUrl || '',
+          address: coin.contractAddress,
+          balance: coin.balance,
+          decimals: coin.decimals,
+          conversions: {},
+        };
+      }
+      const map = types.map(ERC20);
+      const newCoins = map.create(formattedCoins);
+      applySnapshot(self.data.get(protocol).coins, getSnapshot(newCoins));
+    },*/
     setNFTs(protocol: ProtocolType, nfts: any) {
       const formattedNft: any = {};
       for (const NFT of nfts) {
@@ -467,35 +512,35 @@ const EthWallet = types
       if (walletData) walletData.uqbarTokenId = tokenId;
     },
     /*clearWallet() {
-        self.coins.clear();
-        self.nfts.clear();
-      },*/
+      self.coins.clear();
+      self.nfts.clear();
+    },*/
     /* applyHistory(history: any) {
-        console.log(history);
-        let formattedHistory: any = {};
-        Object.entries(history).forEach(([key, transaction]) => {
-          const tx = transaction as any;
-          formattedHistory[tx.hash] = {
-            hash: tx.hash,
-            walletIndex: self.index,
-            amount: tx.amount,
-            network: 'ethereum',
-            type: tx.type,
-            initiatedAt: tx.initiatedAt,
-            completedAt: tx.completedAt || '',
-            ourAddress: tx.ourAddress,
-            theirPatp: tx.theirPatp,
-            theirAddress: tx.theirAddress,
-            status: tx.status,
-            failureReason: tx.failureReason || '',
-            notes: tx.notes || '',
-          };
-        });
-        console.log(formattedHistory);
-        const map = types.map(EthTransaction);
-        const newHistory = map.create(formattedHistory);
-        applySnapshot(self.transactions, getSnapshot(newHistory));
-      }, */
+      console.log(history);
+      let formattedHistory: any = {};
+      Object.entries(history).forEach(([key, transaction]) => {
+        const tx = transaction as any;
+        formattedHistory[tx.hash] = {
+          hash: tx.hash,
+          walletIndex: self.index,
+          amount: tx.amount,
+          network: 'ethereum',
+          type: tx.type,
+          initiatedAt: tx.initiatedAt,
+          completedAt: tx.completedAt || '',
+          ourAddress: tx.ourAddress,
+          theirPatp: tx.theirPatp,
+          theirAddress: tx.theirAddress,
+          status: tx.status,
+          failureReason: tx.failureReason || '',
+          notes: tx.notes || '',
+        };
+      });
+      console.log(formattedHistory);
+      const map = types.map(EthTransaction);
+      const newHistory = map.create(formattedHistory);
+      applySnapshot(self.transactions, getSnapshot(newHistory));
+    }, */
     getTransaction(protocol: ProtocolType, hash: string) {
       const tx: any = self.data
         .get(protocol)
@@ -529,7 +574,7 @@ const EthWallet = types
       const tx = {
         hash,
         walletIndex: self.index,
-        amount: gweiToEther(amount).toString(),
+        amount: contractType ? amount : gweiToEther(amount).toString(),
         network: 'ethereum',
         ethType: contractType || 'ETH',
         type: 'sent',
@@ -850,7 +895,7 @@ export const WalletStore = types
           return self.ethereum;
         case NetworkStoreType.BTC_MAIN:
           return self.bitcoin;
-        case NetworkStoreType.BTC_MAIN:
+        case NetworkStoreType.BTC_TEST:
           return self.btctest;
         default:
           return self.ethereum;
@@ -866,12 +911,34 @@ export const WalletStore = types
   }))
   .actions((self) => {
     return {
+      init: flow(function* (): Generator<PromiseLike<any>, void, any> {
+        try {
+          /*const wallets = yield WalletIPC.getWallets() as PromiseLike<any>;
+          const transactions =
+            yield WalletIPC.getTransactions() as PromiseLike<any>;*/
+          self.ourPatp = shipStore.ship?.patp;
+          if (self.ourPatp) {
+            const hasMnemonic = yield WalletIPC.hasMnemonic(self.ourPatp);
+            if (hasMnemonic) {
+              // @ts-expect-error
+              self.resetNavigation();
+              // @ts-expect-error
+              self.lock();
+            }
+          }
+          // @ts-expect-error
+          setInterval(() => self.autoLock(), AUTO_LOCK_INTERVAL);
+        } catch (error) {
+          console.error(error);
+        }
+      }),
       setInitialized(initialized: boolean) {
         self.initialized = initialized;
+        console.log('trying to set the ship', shipStore.ship?.patp);
+        self.ourPatp = shipStore.ship?.patp;
       },
-      setNetwork(network: NetworkType) {
-        /* @ts-expect-error */
-        self.resetNavigation();
+      setNetworkSetter(network: NetworkType) {
+        this.resetNavigation();
         if (network !== self.navState.network) {
           switch (network) {
             case NetworkType.ETHEREUM:
@@ -886,9 +953,15 @@ export const WalletStore = types
           }
         }
       },
-      setProtocol(protocol: ProtocolType) {
-        /* @ts-expect-error */
-        self.resetNavigation();
+      setNetwork(network: NetworkType) {
+        this.navigate(WalletView.LIST);
+        if (self.navState.network !== network) {
+          this.setNetworkSetter(network);
+          this.watchUpdates(self.navState.protocol);
+        }
+      },
+      setProtocolSetter(protocol: ProtocolType) {
+        this.resetNavigation();
         if (protocol === ProtocolType.UQBAR) {
           self.navState.lastEthProtocol =
             self.navState.protocol === ProtocolType.UQBAR
@@ -970,7 +1043,7 @@ export const WalletStore = types
       setLastInteraction(date: Date) {
         self.lastInteraction = date;
       },
-      setSettings(settings: any) {
+      setSettingsSetter(settings: any) {
         self.settings.passcodeHash = settings.passcodeHash;
         self.blacklist = settings.blocked;
         for (const network of Object.keys(settings.networks)) {
@@ -986,61 +1059,436 @@ export const WalletStore = types
           store.settings.setSharingMode(netSettings.sharingMode);
         }
       },
+      setSettings: flow(function* (
+        network: string,
+        settings: UISettingsType
+      ): Generator<PromiseLike<any>, void, any> {
+        yield WalletIPC.setSettings(network, settings) as PromiseLike<any>;
+      }),
       setForceActive(forceActive: boolean) {
         self.forceActive = forceActive;
       },
-      reset: (initialState: any) => {
-        applySnapshot(self, initialState);
+      reset() {
+        // applySnapshot(self, walletAppDefault);
       },
+      deleteShipWallet(passcode: number[]) {
+        this.deleteShipMnemonic(passcode);
+        this.reset();
+      },
+      deleteLocalWallet(passcode: number[]) {
+        this.deleteLocalMnemonic(passcode);
+        this.reset();
+      },
+      deleteLocalMnemonic: flow(function* (
+        passcode: number[]
+      ): Generator<PromiseLike<any>, void, any> {
+        const passcodeString = passcode.map(String).join('');
+        yield WalletIPC.deleteLocalMnemonic(
+          self.ourPatp ?? '',
+          passcodeString ?? ''
+        ) as PromiseLike<any>;
+      }),
+      deleteShipMnemonic: flow(function* (
+        passcode: number[]
+      ): Generator<PromiseLike<any>, void, any> {
+        const passcodeString = passcode.map(String).join('');
+        yield WalletIPC.deleteShipMnemonic(
+          self.ourPatp ?? '',
+          passcodeString ?? ''
+        ) as PromiseLike<any>;
+      }),
+      setMnemonic: flow(function* (
+        mnemonic: string,
+        passcode: number[]
+      ): Generator<PromiseLike<any>, void, any> {
+        const passcodeString = passcode.map(String).join('');
+        yield WalletIPC.setMnemonic(
+          mnemonic,
+          self.ourPatp ?? '',
+          passcodeString
+        ) as PromiseLike<any>;
+        const passcodeHash = yield bcrypt.hash(passcodeString, 12);
+        yield WalletIPC.setPasscodeHash(passcodeHash) as PromiseLike<any>;
+        yield WalletIPC.setXpub(
+          'ethereum',
+          "m/44'/60'/0'",
+          self.ourPatp ?? '',
+          passcodeString
+        ) as PromiseLike<any>;
+        yield WalletIPC.setXpub(
+          'bitcoin',
+          "m/44'/0'/0'",
+          self.ourPatp ?? '',
+          passcodeString
+        ) as PromiseLike<any>;
+        yield WalletIPC.setXpub(
+          'btctestnet',
+          "m/44'/1'/0'",
+          self.ourPatp ?? '',
+          passcodeString
+        ) as PromiseLike<any>;
+      }),
+      createWalletFlow: flow(function* (
+        nickname: string
+      ): Generator<PromiseLike<any>, void, any> {
+        const sender = self.ourPatp ?? '';
+        let network: string = self.navState.network;
+        if (
+          network === 'bitcoin' &&
+          self.navState.btcNetwork === NetworkStoreType.BTC_TEST
+        ) {
+          network = 'btctestnet';
+        }
+        yield WalletIPC.createWallet(
+          sender,
+          network,
+          nickname
+        ) as PromiseLike<any>;
+      }),
+      createWallet(nickname: string) {
+        this.createWalletFlow(nickname);
+        this.navigate(WalletView.LIST, { canReturn: false });
+      },
+      sendEthereumTransaction: flow(function* (
+        walletIndex: string,
+        to: string,
+        amount: string,
+        passcode: number[],
+        toPatp?: string
+      ): Generator<PromiseLike<any>, void, any> {
+        const path = "m/44'/60'/0'/0/0" + walletIndex;
+        const from = self.ethereum.wallets.get(walletIndex)?.address ?? '';
+        const { hash, tx } = yield WalletIPC.sendTransaction(
+          self.navState.protocol,
+          path,
+          self.ourPatp ?? '',
+          passcode.map(String).join(''),
+          from,
+          to,
+          amount
+        ) as PromiseLike<any>;
+        const currentWallet = self.currentWallet as EthWalletType;
+        const fromAddress = currentWallet.address;
+        currentWallet.enqueueTransaction(
+          self.navState.protocol,
+          hash,
+          tx.to,
+          toPatp,
+          fromAddress,
+          tx.value,
+          new Date().toISOString()
+        );
+        const stateTx = currentWallet.data
+          .get(self.navState.protocol)
+          ?.transactionList.getStoredTransaction(hash);
+
+        yield WalletIPC.setTransaction(
+          'ethereum',
+          self.navState.protocol,
+          currentWallet.index,
+          null,
+          hash,
+          stateTx
+        ) as PromiseLike<any>;
+      }),
+      sendERC20Transaction: flow(function* (
+        walletIndex: string,
+        to: string,
+        amount: string,
+        contractAddress: string,
+        passcode: number[],
+        toPatp?: string
+      ): Generator<PromiseLike<any>, void, any> {
+        const path = "m/44'/60'/0'/0/0" + walletIndex;
+        const from = self.ethereum.wallets.get(walletIndex)?.address ?? '';
+        const { hash } = yield WalletIPC.sendERC20Transaction(
+          self.navState.protocol,
+          path,
+          self.ourPatp ?? '',
+          passcode.map(String).join(''),
+          from,
+          to,
+          amount,
+          contractAddress,
+          self.ethereum.wallets
+            .get(walletIndex)
+            ?.data.get(self.navState.protocol)
+            ?.coins.get(contractAddress)?.decimals ?? 0
+        ) as PromiseLike<any>;
+        const currentWallet = self.currentWallet as EthWalletType;
+        const fromAddress = currentWallet.address;
+        currentWallet.enqueueTransaction(
+          self.navState.protocol,
+          hash,
+          to,
+          toPatp,
+          fromAddress,
+          amount,
+          new Date().toISOString(),
+          contractAddress
+        );
+        const stateTx = currentWallet.data
+          .get(self.navState.protocol)
+          ?.coins.get(contractAddress)
+          ?.transactionList.getStoredTransaction(hash);
+        yield WalletIPC.setTransaction(
+          'ethereum',
+          self.navState.protocol,
+          currentWallet.index,
+          contractAddress,
+          hash,
+          stateTx
+        ) as PromiseLike<any>;
+      }),
+      toggleNetwork() {
+        if (self.navState.network === NetworkType.ETHEREUM) {
+          if (self.navState.protocol === ProtocolType.ETH_MAIN) {
+            this.setProtocolSetter(ProtocolType.ETH_GORLI);
+            this.watchUpdates(ProtocolType.ETH_GORLI);
+          } else if (self.navState.protocol === ProtocolType.ETH_GORLI) {
+            this.setProtocolSetter(ProtocolType.ETH_MAIN);
+            this.watchUpdates(ProtocolType.ETH_MAIN);
+          }
+        }
+      },
+      watchUpdates: flow(function* (
+        protocol?: ProtocolType
+      ): Generator<PromiseLike<any>, void, any> {
+        const watchProtocol = protocol ?? self.navState.protocol;
+        yield WalletIPC.watchUpdates(watchProtocol) as PromiseLike<any>;
+      }),
+      updateWalletState: flow(function* (
+        protocol?: ProtocolType
+      ): Generator<PromiseLike<any>, void, any> {
+        const watchProtocol = protocol ?? self.navState.protocol;
+        yield WalletIPC.updateWalletState(watchProtocol) as PromiseLike<any>;
+      }),
+      setProtocol(protocol: ProtocolType) {
+        this.navigate(WalletView.LIST);
+        if (self.navState.protocol !== protocol) {
+          this.setProtocolSetter(protocol);
+        }
+      },
+      checkPasscode: flow(function* (
+        passcode: number[]
+      ): Generator<PromiseLike<any>, boolean, any> {
+        return yield WalletIPC.checkPasscodeHash(passcode) as PromiseLike<any>;
+      }),
+      hasPasscode: flow(function* (): Generator<
+        PromiseLike<any>,
+        boolean,
+        any
+      > {
+        return yield WalletIPC.hasPasscodeHash() as PromiseLike<any>;
+      }),
+      getRecipient: flow(function* (
+        ship: string
+      ): Generator<PromiseLike<any>, any, any> {
+        const patp = ship.includes('~') ? ship : `~${ship}`;
+        const recipientMetadata: {
+          color: string;
+          avatar?: string;
+          nickname?: string;
+        } = shipStore.friends.getContactAvatarMetadata(patp);
+        const address = yield WalletIPC.getAddress(
+          self.navState.network,
+          patp
+        ) as PromiseLike<any>;
+        return {
+          patp,
+          gasEstimate: 7,
+          recipientMetadata,
+          address,
+        };
+      }),
+      saveTransactionNotes: flow(function* (
+        notes: string
+      ): Generator<PromiseLike<any>, void, any> {
+        const network = self.navState.network;
+        const net = self.navState.protocol;
+        const contract =
+          self.navState.detail?.txtype === 'coin'
+            ? self.navState.detail.coinKey ?? null
+            : null;
+        const hash = self.navState.detail?.key ?? '';
+        const index = self.currentWallet?.index ?? 0;
+        yield WalletIPC.saveTransactionNotes(
+          network,
+          net,
+          index,
+          contract,
+          hash,
+          notes
+        ) as PromiseLike<any>;
+      }),
+      checkMnemonic: flow(function* (
+        mnemonic: string
+      ): Generator<PromiseLike<any>, boolean, any> {
+        return yield WalletIPC.checkMnemonic(mnemonic) as PromiseLike<any>;
+      }),
+      autoLock() {
+        const shouldLock =
+          Date.now() - AUTO_LOCK_INTERVAL > self.lastInteraction.getTime();
+        if (shouldLock) {
+          this.lock();
+        }
+      },
+      lock: flow(function* (): Generator<PromiseLike<any>, void, any> {
+        // @ts-expect-error
+        const hasPasscode = yield self.hasPasscode() as PromiseLike<any>;
+        // @ts-expect-error
+        self.pauseUpdates();
+        if (hasPasscode) {
+          // @ts-expect-error
+          self.navigate(WalletView.LOCKED);
+        }
+      }),
+      pauseUpdates: flow(function* (): Generator<PromiseLike<any>, void, any> {
+        yield WalletIPC.pauseUpdates() as PromiseLike<any>;
+      }),
+      getWalletsUpdate: flow(function* (): Generator<
+        PromiseLike<any>,
+        void,
+        any
+      > {
+        yield WalletIPC.getWalletsUpdate() as PromiseLike<any>;
+      }),
     };
   });
 
 export type WalletStoreType = Instance<typeof WalletStore>;
 
-export const initialWalletState = (ship: string) => ({
-  navState: {
-    view: WalletView.NEW,
-    protocol: ProtocolType.ETH_GORLI,
-    lastEthProtocol: ProtocolType.ETH_GORLI,
-    btcNetwork: NetworkStoreType.BTC_MAIN,
-  },
-  ethereum: {
-    gorliBlock: 0,
-    protocol: ProtocolType.ETH_GORLI,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    initialized: false,
-    conversions: {},
-  },
-  bitcoin: {
-    block: 0,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    conversions: {},
-  },
-  btctest: {
-    block: 0,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    conversions: {},
-  },
-  navHistory: [],
-  creationMode: 'default',
-  sharingMode: 'anybody',
-  lastInteraction: Date.now(),
-  initialized: false,
-  settings: {
-    passcodeHash: '',
-  },
-  ourPatp: ship,
-  forceActive: false,
+WalletIPC.onUpdate((payload: any) => {
+  const type = Object.keys(payload)[0];
+  switch (type) {
+    case 'wallet':
+      const wallet = payload.wallet;
+      if (wallet.network === 'ethereum') {
+        shipStore.walletStore.ethereum.applyWalletUpdate(wallet);
+      } else if (wallet.network === 'bitcoin') {
+        shipStore.walletStore.bitcoin.applyWalletUpdate(wallet);
+      } else if (wallet.network === 'btctestnet') {
+        shipStore.walletStore.btctest.applyWalletUpdate(wallet);
+      }
+      shipStore.walletStore.updateWalletState();
+      break;
+    case 'wallets':
+      const wallets = payload.wallets;
+      if (
+        Object.keys(wallets.ethereum).length !== 0 ||
+        Object.keys(wallets.bitcoin).length !== 0 ||
+        Object.keys(wallets.btctestnet).length !== 0
+      ) {
+        shipStore.walletStore.setInitialized(true);
+      }
+      shipStore.walletStore.ethereum.initial(wallets);
+      shipStore.walletStore.bitcoin.initial(wallets.bitcoin);
+      shipStore.walletStore.btctest.initial(wallets.btctestnet);
+      break;
+    case 'transaction':
+      const transaction = payload.transaction;
+      const network: NetworkStoreType =
+        transaction.net === ProtocolType.ETH_MAIN ||
+        transaction.net === ProtocolType.ETH_GORLI ||
+        transaction.net === ProtocolType.UQBAR
+          ? NetworkStoreType.ETHEREUM
+          : transaction.net === ProtocolType.BTC_MAIN
+          ? NetworkStoreType.BTC_MAIN
+          : NetworkStoreType.BTC_TEST;
+      if (network === NetworkStoreType.ETHEREUM) {
+        shipStore.walletStore.ethereum.wallets
+          .get(transaction.index)
+          ?.applyTransactionUpdate(
+            transaction.net,
+            transaction.contract,
+            transaction.transaction
+          );
+      } else if (network === NetworkStoreType.BTC_MAIN) {
+        /*walletState.bitcoin.wallets
+          .get(transaction.index)!
+          .applyTransactionUpdate(transaction.net, transaction.transaction);*/
+      } else if (network === NetworkStoreType.BTC_TEST) {
+        /*walletState.btctest.wallets.get(
+          transaction.index
+        ).applyTransactions(transaction.net, transaction.transaction);*/
+      }
+      break;
+    case 'settings':
+      shipStore.walletStore.setSettingsSetter(payload.settings);
+      break;
+    case 'set-balance':
+      const balanceData = payload['set-balance'];
+      shipStore.walletStore.ethereum.wallets
+        .get(balanceData.index)
+        ?.setBalance(balanceData.protocol, balanceData.balance);
+      break;
+    case 'apply-chain-transactions':
+      const chainTransactions = payload['apply-chain-transactions'];
+      shipStore.walletStore.ethereum.wallets
+        .get(chainTransactions.index)
+        ?.data.get(chainTransactions.protocol)
+        ?.transactionList.applyChainTransactions(
+          chainTransactions.protocol,
+          chainTransactions.index,
+          chainTransactions.address,
+          chainTransactions.transactions
+        );
+      break;
+    case 'set-block':
+      const blockData = payload['set-block'];
+      shipStore.walletStore.ethereum.wallets
+        .get(blockData.index)
+        ?.data.get(blockData.protocol)
+        ?.setBlock(blockData.block);
+      break;
+    case 'set-coin':
+      const coinData = payload['set-coin'];
+      shipStore.walletStore.ethereum.wallets
+        .get(coinData.index)
+        ?.setCoin(coinData.protocol, coinData.coin);
+      break;
+    case 'update-nft':
+      const nftData = payload['update-nft'];
+      shipStore.walletStore.ethereum.wallets
+        .get(nftData.index)
+        ?.updateNft(nftData.protocol, nftData.nft);
+      break;
+    case 'update-nft-transfers':
+      const nftUpdateData = payload['update-nft-transfers'];
+      shipStore.walletStore.ethereum.wallets
+        .get(nftUpdateData.index)
+        ?.updateNftTransfers(nftUpdateData.protocol, nftUpdateData.transfers);
+      break;
+    case 'set-coin-block':
+      const coinBlockData = payload['set-coin-block'];
+      shipStore.walletStore.ethereum.wallets
+        .get(coinBlockData.index)
+        ?.data.get(coinBlockData.protocol)
+        ?.coins.get(coinBlockData.coinAddr)
+        ?.setBlock(coinBlockData.block);
+      break;
+    case 'apply-coin-transactions':
+      const coinTransactionData = payload['apply-coin-transactions'];
+      if (
+        shipStore.walletStore.ethereum.wallets
+          .get(coinTransactionData.index)
+          ?.data.get(coinTransactionData.protocol)
+          ?.coins.has(coinTransactionData.coinAddr) &&
+        coinTransactionData.transactions.length > 0
+      ) {
+        shipStore.walletStore.ethereum.wallets
+          .get(coinTransactionData.index)
+          ?.data.get(coinTransactionData.protocol)
+          ?.coins.get(coinTransactionData.coinAddr)
+          ?.transactionList.applyChainTransactions(
+            coinTransactionData.protocol,
+            coinTransactionData.index,
+            coinTransactionData.coinAddr,
+            coinTransactionData.transactions
+          );
+      }
+      break;
+    default:
+      break;
+  }
 });

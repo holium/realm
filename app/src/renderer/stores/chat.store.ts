@@ -283,6 +283,7 @@ RealmIPC.onUpdate((update) => {
   }
   if (update.type === 'auth-success') {
     shipStore.chatStore.init();
+    shipStore.walletStore.init();
   }
 });
 

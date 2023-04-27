@@ -180,7 +180,6 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
               },
             },
           });
-
           break;
         case 'invite-received':
           const receivedPayload = visaData[visaType];

@@ -3,16 +3,11 @@ import styled from 'styled-components';
 
 import { Flex, Icon, Text } from '@holium/design-system';
 
-import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useRooms } from '../useRooms';
 
-interface CommCircleProps {
-  customBg: string;
-}
-
-const ProviderStyle = styled(Flex)<CommCircleProps>`
+const ProviderStyle = styled(Flex)`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -30,18 +25,15 @@ const ProviderStyle = styled(Flex)<CommCircleProps>`
 
 interface ProviderSelectorProps {
   connected?: boolean;
-  seedColor: string;
   onClick: (evt: any) => void;
 }
 
 const ProviderSelectorPresenter = ({ onClick }: ProviderSelectorProps) => {
-  const { theme } = useAppState();
   const { ship } = useShipStore();
-  const { windowColor } = theme;
   const roomsManager = useRooms(ship?.patp);
 
   return (
-    <ProviderStyle customBg={windowColor} onClick={(evt: any) => onClick(evt)}>
+    <ProviderStyle onClick={(evt: any) => onClick(evt)}>
       <Icon size={18} opacity={0.7} name="BaseStation" />
       <Text.Custom fontSize={1} opacity={0.7}>
         {roomsManager?.protocol.provider}
