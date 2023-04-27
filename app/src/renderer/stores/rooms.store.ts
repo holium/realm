@@ -195,6 +195,7 @@ class RemotePeer {
 
   createConnection() {
     // create the peer connection
+    this.setStatus(PeerConnectionState.Connecting);
     this.spInstance?.removeAllListeners();
     console.log(`create connection to ${this.patp}`);
     if (!local) {
@@ -228,6 +229,7 @@ class RemotePeer {
   }
 
   dial() {
+    this.setStatus(PeerConnectionState.New);
     // only the waiting peer sends the waiting signal
     if (!this.isInitiator) {
       this.createConnection();
@@ -250,6 +252,7 @@ class RemotePeer {
       this.spInstance?.signal(data);
     } else {
       console.log('peerSignal: peer destroyed, not signaling', this.patp);
+      this.setStatus(PeerConnectionState.Destroyed);
     }
   }
 
