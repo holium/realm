@@ -280,12 +280,6 @@ function registerOnUpdateListener() {
       case 'unrecommended':
         shipStore.bazaarStore._onUnrecommendedUpdate(payload.appId);
         break;
-      case 'pinned-update':
-        shipStore.bazaarStore._onPinnedUpdate(payload.app.id, payload.index);
-        break;
-      case 'pins-reordered':
-        shipStore.bazaarStore._onUnrecommendedUpdate(payload.appId);
-        break;
       case 'dock-update':
         shipStore.spacesStore._onDockUpdate(payload);
         break;

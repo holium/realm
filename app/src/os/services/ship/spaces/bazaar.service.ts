@@ -65,35 +65,17 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
             payload: updatedApp,
           });
           break;
-        case 'pinned':
+        case 'dock-update':
           const pinnedDock = this.tables?.appCatalog.updatePinned(
-            data.pinned,
-            'add'
+            data['dock-update']
           );
           this.sendUpdate({
             type: 'dock-update',
             payload: {
-              path: data.pinned.path,
+              path: data['dock-update'].path,
               dock: pinnedDock,
             },
           });
-          break;
-        case 'unpinned':
-          const unpinnedDock = this.tables?.appCatalog.updatePinned(
-            data.unpinned,
-            'remove'
-          );
-          this.sendUpdate({
-            type: 'dock-update',
-            payload: {
-              path: data.unpinned.path,
-              dock: unpinnedDock,
-            },
-          });
-          break;
-        case 'pins-reodered':
-          // TODO
-          log.info('pins-reodered => %o', data['pins-reodered']);
           break;
         case 'suite-added':
           const addedStall = this.tables?.appCatalog.updateSuite(
@@ -274,6 +256,7 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
     });
     */
   async pinApp(path: string, appId: string, index: number | null) {
+    console.log('pinApp => %o', { path, appId, index });
     return APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
@@ -288,6 +271,7 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
   }
 
   async unpinApp(path: string, appId: string) {
+    console.log('unpinApp => %o', { path, appId });
     return APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
@@ -301,6 +285,7 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
   }
 
   async reorderPinnedApps(path: string, dock: string[]) {
+    console.log('reorderPinnedApps => %o', { path, dock });
     return APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',

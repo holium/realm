@@ -19,8 +19,7 @@ SELECT
             'website', website,
             'license', license,
             'host', host,
-            'icon', icon,
-            'dockIndex', docks.idx
+            'icon', icon
           )
         )
     ELSE json('[]')
@@ -28,14 +27,11 @@ SELECT
 FROM (
     SELECT
       docks.space,
-      docks.idx,
       ac.*
-    FROM app_docks docks
-    LEFT JOIN app_catalog ac ON docks.id = ac.id
+    FROM app_docks docks, json_each(docks.dock)
+    LEFT JOIN app_catalog ac ON ac.id = json_each.value
     LEFT JOIN app_grid ag ON ac.id = ag.appId
     WHERE ag.idx IS NOT NULL
-    GROUP BY docks.space, docks.idx
-    ORDER BY docks.space, docks.idx
 ) AS docks`;
 
 export const spaceStallQuery = `
