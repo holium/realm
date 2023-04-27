@@ -96,8 +96,6 @@
         ~
       ::
           [%room-updates @ ~]  ::  subscribe to updates for a specific room
-        ~&  'fullpath'
-        ~&  path
         ~&  >>  "{<dap.bol>}: [on-watch]. {<src.bol>} subscribing to updates for room {<i.t.path>}"
         ?<  (is-banned:hol src.bol)
         ~
