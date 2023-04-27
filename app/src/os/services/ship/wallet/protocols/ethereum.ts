@@ -117,16 +117,13 @@ export class EthereumProtocol implements BaseBlockProtocol {
         currentBlock = await this.getBlockNumber();
       }
       const wallets = walletDB.getWallets();
-      // for (const walletKey of walletStore.currentStore?.wallets.keys()) {
       for (const wallet of wallets) {
-        // const wallet = walletStore.ethereum.wallets.get(walletKey);
         const walletAddress = wallet?.address;
         if (!walletAddress) {
           continue;
         }
         this.getAccountBalance(walletAddress).then((balance: string) => {
           if (balance !== '-1') {
-            // wallet.setBalance(this.protocol, balance);
             walletDB.sendChainUpdate({
               'set-balance': {
                 index: wallet.wallet_index,
@@ -161,7 +158,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
             }
           }
         });
-        // if (walletStore.navState.networkStore === NetworkStoreType.ETHEREUM) {
         if (true) {
           const ethWalletAddress = wallet?.address;
           if (!ethWalletAddress) {

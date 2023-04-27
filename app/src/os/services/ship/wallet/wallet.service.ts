@@ -308,6 +308,15 @@ export class WalletService extends AbstractService {
     );
   }
 
+  updateWalletState(protocol: ProtocolType) {
+    if (!this.walletDB) throw new Error('Wallet DB not initialized');
+    this.protocolManager?.updateWalletState(
+      APIConnection.getInstance().conduit,
+      this.walletDB,
+      protocol
+    );
+  }
+
   pauseUpdates() {
     this.protocolManager?.pauseUpdates();
   }

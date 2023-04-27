@@ -31,7 +31,9 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
   async init() {
     const wallets = await this._fetchWallets();
-    this._insertWallets(wallets);
+    this._insertWallets(wallets.wallets.ethereum);
+    this._insertWallets(wallets.wallets.bitcoin);
+    this._insertWallets(wallets.wallets.btctestnet);
     const ethWallets = wallets.wallets.ethereum;
     let wallet: any;
     log.info('wallets', wallets);
@@ -68,6 +70,10 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
   private _onDbUpdate(data: any /*WalletDbReactions*/, _id?: number) {
     console.log('sending update', data);
+    const type = Object.keys(data)[0];
+    if (type === 'wallet') {
+      this._insertWallets({ [data.wallet.key]: data.wallet });
+    }
     this.sendUpdate(data);
   }
 
@@ -203,12 +209,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
           nickname: wallet.nickname,
         });
     });
-    const ethWallets = wallets.wallets.ethereum;
-    const btcWallets = wallets.wallets.bitcoin;
-    const btcTestWallets = wallets.wallets.btctestnet;
-    insertMany(ethWallets);
-    insertMany(btcWallets);
-    insertMany(btcTestWallets);
+    insertMany(wallets);
   }
 
   getLatestBlock() {

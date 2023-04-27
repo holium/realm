@@ -917,13 +917,14 @@ export const WalletStore = types
           const transactions =
             yield WalletIPC.getTransactions() as PromiseLike<any>;*/
           self.ourPatp = shipStore.ship?.patp;
-          if (!self.ourPatp) throw new Error('No patp in wallet model');
-          const hasMnemonic = yield WalletIPC.hasMnemonic(self.ourPatp);
-          if (hasMnemonic) {
-            // @ts-expect-error
-            self.resetNavigation();
-            // @ts-expect-error
-            self.lock();
+          if (self.ourPatp) {
+            const hasMnemonic = yield WalletIPC.hasMnemonic(self.ourPatp);
+            if (hasMnemonic) {
+              // @ts-expect-error
+              self.resetNavigation();
+              // @ts-expect-error
+              self.lock();
+            }
           }
           // @ts-expect-error
           setInterval(() => self.autoLock(), AUTO_LOCK_INTERVAL);
@@ -1256,6 +1257,12 @@ export const WalletStore = types
         const watchProtocol = protocol ?? self.navState.protocol;
         yield WalletIPC.watchUpdates(watchProtocol) as PromiseLike<any>;
       }),
+      updateWalletState: flow(function* (
+        protocol?: ProtocolType
+      ): Generator<PromiseLike<any>, void, any> {
+        const watchProtocol = protocol ?? self.navState.protocol;
+        yield WalletIPC.updateWalletState(watchProtocol) as PromiseLike<any>;
+      }),
       setProtocol(protocol: ProtocolType) {
         this.navigate(WalletView.LIST);
         if (self.navState.protocol !== protocol) {
@@ -1363,7 +1370,7 @@ WalletIPC.onUpdate((payload: any) => {
       } else if (wallet.network === 'btctestnet') {
         shipStore.walletStore.btctest.applyWalletUpdate(wallet);
       }
-      shipStore.walletStore.watchUpdates();
+      shipStore.walletStore.updateWalletState();
       break;
     case 'wallets':
       const wallets = payload.wallets;
