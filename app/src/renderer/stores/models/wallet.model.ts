@@ -574,7 +574,7 @@ const EthWallet = types
       const tx = {
         hash,
         walletIndex: self.index,
-        amount: gweiToEther(amount).toString(),
+        amount: contractType ? amount : gweiToEther(amount).toString(),
         network: 'ethereum',
         ethType: contractType || 'ETH',
         type: 'sent',
@@ -1201,7 +1201,7 @@ export const WalletStore = types
       ): Generator<PromiseLike<any>, void, any> {
         const path = "m/44'/60'/0'/0/0" + walletIndex;
         const from = self.ethereum.wallets.get(walletIndex)?.address ?? '';
-        const { hash, ethAmount } = yield WalletIPC.sendERC20Transaction(
+        const { hash } = yield WalletIPC.sendERC20Transaction(
           self.navState.protocol,
           path,
           self.ourPatp ?? '',
@@ -1223,7 +1223,7 @@ export const WalletStore = types
           to,
           toPatp,
           fromAddress,
-          ethAmount,
+          amount,
           new Date().toISOString(),
           contractAddress
         );

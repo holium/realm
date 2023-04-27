@@ -99,9 +99,8 @@ const TransactionDetailPresenter = () => {
     transaction.completedAt || transaction.initiatedAt || ''
   );
 
-  const txAmount = transaction.amount === 'NaN' ? '0' : transaction.amount;
-  const ethAmount = formatEthAmount(isEth ? txAmount : '1');
-  const btcAmount = formatBtcAmount(!isEth ? txAmount : '1');
+  const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
+  const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
   const amountDisplay = isEth
     ? `${ethAmount.eth}` /* ETH` */
     : `${btcAmount.btc} BTC`;
