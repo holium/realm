@@ -1,3 +1,5 @@
+import log from 'electron-log';
+
 import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
@@ -30,13 +32,12 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   async init() {
     const wallets = await this._fetchWallets();
     this._insertWallets(wallets);
-    /*const ethWallets = wallets.wallets.ethereum;
+    const ethWallets = wallets.wallets.ethereum;
     let wallet: any;
     for (wallet of Object.values(ethWallets)) {
       this._insertTransactions(wallet.transactions);
       this._insertTransactions(wallet['token-txns']);
-    }*/
-    // this._insertTransactions(wallets.transactions);
+    }
   }
 
   protected mapRow(row: any): WalletRow {
@@ -127,6 +128,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
   private _insertTransactions(transactions: TransactionsRow[]) {
     if (!this.db) throw new Error('No db connection');
+    log.info('inserting transactions', transactions);
     const insert = this.db.prepare(
       `REPLACE INTO transactions (
           hash,
@@ -137,6 +139,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
           our_address,
           their_patp,
           their_address,
+          contract_address,
           status,
           failure_reason,
           notes
@@ -149,6 +152,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
           @our_address,
           @their_patp,
           @their_address,
+          @contract_address,
           @status,
           @failure_reason,
           @notes
@@ -222,6 +226,7 @@ create table if not exists transactions
   our_address    text    not null,
   their_patp     text,
   their_address  text    not null,
+  contract_address text,
   status         text    not null,
   failure_reason text,
   notes          text
