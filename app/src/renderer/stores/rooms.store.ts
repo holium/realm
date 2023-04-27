@@ -403,6 +403,17 @@ export const RoomsStore = types
         hangup(patp);
       }
     },
+    _onKick(rid: string, patp: string) {
+      const room = self.rooms.get(rid);
+      if (patp === window.ship && self.current?.rid === rid) {
+        self.current = undefined;
+        hangupAll();
+      }
+      if (patp !== window.ship) {
+        room?.removePeer(patp);
+        hangup(patp);
+      }
+    },
     _onRoomDeleted(rid: string) {
       if (self.current?.rid === rid) {
         self.current = undefined;
@@ -454,7 +465,7 @@ function registerOnUpdateListener() {
         shipStore.roomsStore._onRoomDeleted(payload.rid);
       }
       if (type === 'kicked') {
-        shipStore.roomsStore._onRoomLeft(payload.rid, payload.ship);
+        shipStore.roomsStore._onKicked(payload.rid, payload.ship);
         // SoundActions.playRoomPeerEnter();
       }
       if (type === 'chat-received') {
