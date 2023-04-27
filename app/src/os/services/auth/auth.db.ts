@@ -44,7 +44,11 @@ export class AuthDB {
   }
 
   setSeenSplash(): void {
-    this.authDB.prepare('UPDATE accounts_meta SET seenSplash = 1;').run();
+    this.authDB
+      .prepare(
+        'REPLACE INTO accounts_meta (seenSplash, migrated) VALUES (1, 0);'
+      )
+      .run();
   }
 
   _needsMigration(): boolean {
