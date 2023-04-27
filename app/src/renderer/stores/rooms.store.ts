@@ -1,5 +1,6 @@
 import { observable } from 'mobx';
 import { cast, flow, Instance, types } from 'mobx-state-tree';
+import SimplePeer from 'simple-peer';
 import { patp2dec } from 'urbit-ob';
 
 import {
@@ -9,7 +10,7 @@ import {
   LocalPeer,
   PeerConnectionState,
   PeerEvent,
-  RemotePeer,
+  // RemotePeer,
   ridFromTitle,
 } from '@holium/realm-room';
 
@@ -77,6 +78,339 @@ const sendData = (data: Partial<DataPacket>) => {
   });
 };
 
+// class emotePeer = ( our: Patp,
+//     peer: Patp,
+//     config: PeerConfig & { isInitiator: boolean },
+//     localPeer: LocalPeer,) => {
+//   const peer = new SimplePeer({
+//     initiator: this.isInitiator,
+//     config: this.rtcConfig,
+//     stream: this.localPeer.stream,
+//     objectMode: true,
+//     trickle: true,
+//   });
+// };
+export function attachToElement(
+  track: MediaStreamTrack,
+  element: HTMLMediaElement
+) {
+  let mediaStream: MediaStream;
+  if (element.srcObject instanceof MediaStream) {
+    mediaStream = element.srcObject;
+  } else {
+    mediaStream = new MediaStream();
+  }
+
+  // check if track matches existing track
+  let existingTracks: MediaStreamTrack[];
+  if (track.kind === 'audio') {
+    existingTracks = mediaStream.getAudioTracks();
+  } else {
+    existingTracks = mediaStream.getVideoTracks();
+  }
+  if (!existingTracks.includes(track)) {
+    existingTracks.forEach((et) => {
+      mediaStream.removeTrack(et);
+    });
+    mediaStream.addTrack(track);
+  }
+
+  //  avoid flicker
+  // if (element.srcObject !== mediaStream) {
+  //   element.srcObject = mediaStream;
+  //   if ((isSafari() || isFireFox()) && element instanceof HTMLVideoElement) {
+  //     // Firefox also has a timing issue where video doesn't actually get attached unless
+  //     // performed out-of-band
+  //     // Safari 15 has a bug where in certain layouts, video element renders
+  //     // black until the page is resized or other changes take place.
+  //     // Resetting the src triggers it to render.
+  //     // https://developer.apple.com/forums/thread/690523
+  //     setTimeout(() => {
+  //       element.srcObject = mediaStream;
+  //       // Safari 15 sometimes fails to start a video
+  //       // when the window is backgrounded before the first frame is drawn
+  //       // manually calling play here seems to fix that
+  //       element.play().catch(() => {
+  //         /* do nothing */
+  //       });
+  //     }, 0);
+  //   }
+  // }
+  // TODO autoplay
+  element.autoplay = true;
+  if (element instanceof HTMLVideoElement) {
+    element.playsInline = true;
+  }
+  return element;
+}
+
+/** @internal */
+export function detachTrack(
+  track: MediaStreamTrack,
+  element: HTMLMediaElement
+) {
+  if (element.srcObject instanceof MediaStream) {
+    const mediaStream = element.srcObject;
+    mediaStream.removeTrack(track);
+    if (mediaStream.getTracks().length > 0) {
+      element.srcObject = mediaStream;
+    } else {
+      element.srcObject = null;
+    }
+  }
+}
+export enum TrackKind {
+  Audio = 'audio',
+  Video = 'video',
+  Unknown = 'unknown',
+}
+
+class RemotePeer {
+  patp: string;
+  patpId: number;
+  isInitiator: boolean;
+  audioLevel: number = 0;
+  isMuted: boolean = false;
+  isSpeaking: boolean = false;
+  audioTracks: Map<string, any>;
+  status: PeerConnectionState = PeerConnectionState.New;
+  spInstance: SimplePeer.Instance | null = null;
+  rid: string;
+  rtcConfig: any;
+  isAudioAttached: boolean = false;
+  isVideoAttached: boolean = false;
+
+  constructor(
+    rid: string,
+    patp: string,
+    config: { isInitiator: boolean; rtc: any }
+  ) {
+    this.rid = rid;
+    this.patp = patp;
+    this.isInitiator = config.isInitiator;
+    this.patpId = patp2dec(patp);
+    this.rtcConfig = config.rtc;
+    this.audioTracks = new Map();
+  }
+
+  createConnection() {
+    // create the peer connection
+    console.log(`create connection to ${this.patp}`);
+    if (!local) {
+      throw new Error('No local peer created');
+    }
+    this.spInstance = new SimplePeer({
+      initiator: this.isInitiator,
+      config: this.rtcConfig,
+      stream: local.stream,
+      objectMode: true,
+      trickle: true,
+    });
+    this.spInstance.on('connect', this._onConnect.bind(this));
+    this.spInstance.on('close', this._onClose.bind(this));
+    this.spInstance.on('error', this._onError.bind(this));
+    this.spInstance.on('signal', this._onSignal.bind(this));
+    this.spInstance.on('stream', this._onStream.bind(this));
+    this.spInstance.on('track', this._onTrack.bind(this));
+    this.spInstance.on('data', this._onData.bind(this));
+  }
+
+  sendSignal(data: SimplePeer.SignalData) {
+    RoomsIPC.sendSignal(window.ship, this.patp, this.rid, data);
+  }
+
+  sendData(data: DataPacket): void {
+    if (this.status !== PeerConnectionState.Connected) {
+      console.warn("can't send data unless connected, still trying");
+    }
+    this.spInstance?.send(JSON.stringify(data));
+  }
+
+  dial() {
+    // only the waiting peer sends the waiting signal
+    if (!this.isInitiator) {
+      this.createConnection();
+      RoomsIPC.sendSignal(window.ship, this.patp, this.rid, {
+        type: 'waiting',
+        from: window.ship,
+      });
+      // this.sendSignal(this.patp, { type: 'waiting', from: this.our });
+    }
+  }
+
+  onWaiting() {
+    if (this.isInitiator) {
+      this.createConnection();
+    }
+  }
+
+  peerSignal(data: SimplePeer.SignalData) {
+    // TODO go through the flow where a peer is destroyed and attempts to reconnect
+    if (!this.spInstance?.destroyed) {
+      this.spInstance?.signal(data);
+    } else {
+      console.log('peerSignal: peer destroyed, not signaling', this.patp);
+    }
+  }
+
+  _onConnect() {
+    console.log('RemotePeer onConnect', this.patp);
+  }
+
+  _onClose() {
+    console.log('RemotePeer onClose', this.patp);
+  }
+
+  _onError(err: Error) {
+    console.log('RemotePeer onError', this.patp, err);
+    // @ts-ignore
+    this.setStatus(PeerConnectionState.Failed);
+  }
+
+  _onSignal(data: SimplePeer.SignalData) {
+    this.sendSignal(data);
+    console.log('sendSignal', data.type, data);
+    if (this.status !== PeerConnectionState.Connected) {
+      this.setStatus(PeerConnectionState.Connecting);
+    }
+  }
+
+  _onStream(stream: MediaStream) {
+    console.log('RemotePeer onStream', this.patp, stream);
+    // this.emit(PeerEvent.MediaStreamAdded, stream);
+  }
+
+  _onTrack(track: MediaStreamTrack, stream: MediaStream) {
+    console.log('track added', track.id, track, stream);
+    if (track.kind === 'audio') {
+      if (this.audioTracks.size > 0) {
+        console.log('audio track already exists, removing', track.id);
+        this.removeTracks();
+      }
+      this.audioTracks.set(track.id, track);
+      this.attach(track);
+      sendData({
+        kind: DataPacket_Kind.MUTE_STATUS,
+        value: { data: local?.isMuted },
+      });
+    }
+  }
+
+  _onData(data: any) {
+    console.log('RemotePeer onData', this.patp, data);
+    if (data.kind === DataPacket_Kind.MUTE_STATUS) {
+      const payload = data.value as DataPayload;
+      if (payload.data) {
+        this.mute();
+      } else {
+        this.unmute();
+      }
+    } else if (data.kind === DataPacket_Kind.SPEAKING_CHANGED) {
+      const payload = data.value as DataPayload;
+      this.isSpeakingChanged(payload.data);
+    }
+  }
+
+  removeTracks() {
+    this.audioTracks.forEach((track: MediaStreamTrack) => {
+      track.stop();
+      this.detach(track);
+    });
+
+    this.audioTracks.clear();
+  }
+
+  mute() {
+    this.isMuted = true;
+    this.audioTracks.forEach((track: MediaStreamTrack) => {
+      track.enabled = false;
+    });
+  }
+
+  unmute() {
+    this.isMuted = false;
+    this.audioTracks.forEach((track: MediaStreamTrack) => {
+      track.enabled = true;
+    });
+  }
+
+  isSpeakingChanged(speaking: boolean) {
+    this.isSpeaking = speaking;
+  }
+
+  hangup() {
+    this.removeTracks();
+    this.spInstance?.destroy();
+  }
+
+  setStatus(status: PeerConnectionState) {
+    this.status = status;
+  }
+  attach(track: MediaStreamTrack): HTMLMediaElement {
+    let element: HTMLMediaElement = this.getMediaElement(
+      track.kind as TrackKind
+    );
+    element = attachToElement(track, element);
+    if (element instanceof HTMLAudioElement) {
+      this.isAudioAttached = true;
+      element
+        .play()
+        .then(() => {
+          console.log('playing audio from peer', this.patp);
+        })
+        .catch((e) => {
+          console.error('ERROR: playing audio from peer', this.patp, e);
+        });
+    } else if (element instanceof HTMLVideoElement) {
+      this.isVideoAttached = true;
+    }
+    // console.log('attached', element);
+    return element;
+  }
+
+  detach(track: MediaStreamTrack): void {
+    let elementId = `audio-${this.patp}`;
+    if (track.kind === TrackKind.Video) {
+      elementId = `video-${this.patp}`;
+      this.isVideoAttached = false;
+    } else {
+      this.isAudioAttached = false;
+    }
+    const element: HTMLMediaElement | null = document.getElementById(
+      elementId
+    ) as HTMLMediaElement;
+    // console.log('detaching', element);
+    if (element) {
+      detachTrack(track, element);
+    }
+  }
+
+  getMediaElement(kind: TrackKind): HTMLMediaElement {
+    let elementType = 'audio';
+    let element: HTMLMediaElement;
+    if (kind === TrackKind.Video) {
+      elementType = 'video';
+      const elementId = `video-${this.patp}`;
+      element = document.getElementById(elementId) as HTMLVideoElement;
+      if (!element) {
+        // if the element doesn't exist, create it
+        element = document.createElement(elementType) as HTMLVideoElement;
+        element.id = elementId;
+      }
+      element.autoplay = true;
+    } else {
+      const elementId = `audio-${this.patp}`;
+      element = document.getElementById(elementId) as HTMLVideoElement;
+      if (!element) {
+        // if the element doesn't exist, create it
+        element = document.createElement(elementType) as HTMLAudioElement;
+        element.id = `audio-${this.patp}`;
+      }
+    }
+    return element;
+  }
+}
+
 const dialPeer = (
   rid: string,
   from: string,
@@ -89,53 +423,14 @@ const dialPeer = (
   }
 
   const peerConfig = {
-    isHost,
     isInitiator: isDialer(from, to),
     rtc,
   };
 
-  const remotePeer = new RemotePeer(
-    from,
-    to,
-    peerConfig,
-    local,
-    (peer: string, data: any) => {
-      RoomsIPC.sendSignal(window.ship, peer, rid, data);
-    }
-  );
+  const remotePeer = new RemotePeer(rid, to, peerConfig);
 
   peers.set(remotePeer.patp, remotePeer);
   remotePeer.dial();
-  // When we connect, lets stream our local tracks to the remote peer
-  remotePeer.on(PeerEvent.Connected, () => {
-    console.log('!!!CONNECTED to peer', remotePeer.patp);
-    if (!local) {
-      throw new Error('No local peer created');
-    }
-    local.streamTracks(remotePeer);
-    sendData({
-      kind: DataPacket_Kind.MUTE_STATUS,
-      value: { data: local?.isMuted },
-    });
-  });
-
-  remotePeer.on(PeerEvent.ReceivedData, (data: DataPacket) => {
-    if (data.kind === DataPacket_Kind.MUTE_STATUS) {
-      const payload = data.value as DataPayload;
-      if (payload.data) {
-        remotePeer.mute();
-      } else {
-        remotePeer.unmute();
-      }
-    } else if (data.kind === DataPacket_Kind.SPEAKING_CHANGED) {
-      const payload = data.value as DataPayload;
-      remotePeer.isSpeakingChanged(payload.data);
-    } else {
-      // this.emit(ProtocolEvent.PeerDataReceived, remotePeer.patp, data);
-    }
-  });
-
-  // this.emit(ProtocolEvent.PeerAdded, remotePeer);
 
   return remotePeer;
 };
@@ -157,7 +452,6 @@ const dialAll = (
 const hangup = (peer: string) => {
   const remotePeer = peers.get(peer);
   if (remotePeer) {
-    remotePeer.removeAllListeners();
     remotePeer.hangup();
     peers.delete(peer);
   }
@@ -229,7 +523,7 @@ export const RoomsStore = types
       );
       local.on(PeerEvent.AudioTrackAdded, () => {
         peers.forEach((peer: RemotePeer) => {
-          local?.streamTracks(peer);
+          console.log('AudioTrackAdded - streaming tracks to', peer.patp);
         });
       });
       local.on(PeerEvent.Muted, () => {
