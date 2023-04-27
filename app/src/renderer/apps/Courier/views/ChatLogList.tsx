@@ -116,6 +116,7 @@ export const ChatLogList = ({
           top: 200,
           bottom: 200,
         }}
+        alignToBottom
         totalListHeightChanged={(height: number) => {
           if (height - prevHeight === 10) {
             // 10 px is the height change that occurs when there's a reaction added

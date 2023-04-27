@@ -221,19 +221,12 @@ export const ChatInput = ({
     }
   };
 
-  const replyHeightBuffer = replyTo ? 46 : 0;
-
   return (
     <Flex flexDirection="column" overflow="visible" width={containerWidth}>
       <InputBox
         inputId={id}
         px={0}
         disabled={disabled}
-        height={
-          (rows === 1 ? 36 : CHAT_INPUT_LINE_HEIGHT * Math.min(rows, 5) + 20) +
-          replyHeightBuffer
-        }
-        // py="3px"
         error={!!error}
         borderRadius={24}
         {...chatInputProps}
@@ -254,6 +247,7 @@ export const ChatInput = ({
               flexDirection="row"
               height={attachmentHeight}
               overflowX="auto"
+              overflowY="hidden"
               alignItems="flex-start"
             >
               {attachments.map((attachment: string, index: number) => {
@@ -313,7 +307,7 @@ export const ChatInput = ({
           ) : null}
           {replyTo ? (
             <Flex
-              mt="0px"
+              mt="4px"
               mx="4px"
               mb="6px"
               gap={8}
