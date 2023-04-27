@@ -33,8 +33,9 @@ const TransactionPresenter = (props: TransactionProps) => {
     transaction.completedAt || transaction.initiatedAt || 0
   );
 
-  const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
-  const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
+  const txAmount = transaction.amount === 'NaN' ? '0' : transaction.amount;
+  const ethAmount = formatEthAmount(isEth ? txAmount : '0');
+  const btcAmount = formatBtcAmount(!isEth ? txAmount : '0');
 
   const onClick = () => {
     walletStore.navigate(WalletView.TRANSACTION_DETAIL, {

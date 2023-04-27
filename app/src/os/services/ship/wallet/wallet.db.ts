@@ -1,10 +1,8 @@
-import log from 'electron-log';
-
 import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
 import { APIConnection } from '../../api';
-import { TransactionsRow } from './wallet.types';
+import { ProtocolType, TransactionsRow } from './wallet.types';
 
 interface WalletRow {}
 
@@ -36,10 +34,17 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     this._insertWallets(wallets.wallets.btctestnet);
     const ethWallets = wallets.wallets.ethereum;
     let wallet: any;
-    log.info('wallets', wallets);
     for (wallet of Object.values(ethWallets)) {
-      this._insertTransactions(wallet.transactions);
-      this._insertTransactions(wallet['token-txns']);
+      this._insertTransactions(
+        wallet.transactions[ProtocolType.ETH_GORLI] ?? {}
+      );
+      let contract: string;
+      let txns: any;
+      for ([contract, txns] of Object.entries(
+        wallet['token-txns'][ProtocolType.ETH_GORLI] ?? {}
+      )) {
+        this._insertTransactions(txns, contract);
+      }
     }
   }
 
@@ -133,9 +138,11 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   // Inserts
   //
 
-  private _insertTransactions(transactions: TransactionsRow[]) {
+  private _insertTransactions(
+    transactions: TransactionsRow[],
+    contractAddress?: string
+  ) {
     if (!this.db) throw new Error('No db connection');
-    log.info('inserting transactions', transactions);
     const insert = this.db.prepare(
       `REPLACE INTO transactions (
           hash,
@@ -172,13 +179,14 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
           hash: tx.hash,
           network: tx.network,
           type: tx.type,
-          initiated_at: tx['initiated-at'],
-          completed_at: tx['completed-at'],
-          our_address: tx['our-address'],
-          their_patp: tx['their-patp'],
-          their_address: tx['their-address'],
+          initiated_at: tx['initiatedAt'],
+          completed_at: tx['completedAt'],
+          our_address: tx['ourAddress'],
+          their_patp: tx['theirPatp'],
+          their_address: tx['theirAddress'],
+          contract_address: contractAddress,
           status: tx.status,
-          failure_reason: tx['failure-reason'],
+          failure_reason: tx['failureReason'],
           notes: tx.notes,
         });
       }

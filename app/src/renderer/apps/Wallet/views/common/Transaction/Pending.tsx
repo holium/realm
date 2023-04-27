@@ -64,8 +64,10 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   };
 
   const isEth = props.transaction.network === 'ethereum';
-  const ethAmount = formatEthAmount(isEth ? props.transaction.amount : '1');
-  const btcAmount = formatBtcAmount(!isEth ? props.transaction.amount : '1');
+  const txAmount =
+    props.transaction.amount === 'NaN' ? '0' : props.transaction.amount;
+  const ethAmount = formatEthAmount(isEth ? txAmount : '0');
+  const btcAmount = formatBtcAmount(!isEth ? txAmount : '0');
   const themDisplay =
     props.transaction.theirPatp || shortened(props.transaction.theirAddress);
   let unitsDisplay = 'BTC';
