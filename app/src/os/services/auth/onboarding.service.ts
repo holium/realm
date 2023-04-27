@@ -205,22 +205,122 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     return APIConnection.getInstance().conduit.poke(payload);
   }
 
-  async installRealmAgent() {
-    await this._openConduit();
+  _prepareBuildVersionEnv() {
+    let result = {
+      success: false, // assume failure
+      major: -1,
+      minor: -1,
+      build: -1,
+    };
+    if (!process.env.BUILD_VERSION) {
+      console.warn(
+        'BUILD_VERSION environment variable not set. skipping installation validation...'
+      );
+      return result;
+    }
+    let buildVersion = process.env.BUILD_VERSION.split('.');
+    if (buildVersion.length < 3) {
+      console.warn(
+        `BUILD_VERSION '${buildVersion}' not valid. skipping installation validation...`
+      );
+      return result;
+    }
+    // move beyond the v portion of the version string
+    if (buildVersion[0].trim().startsWith('v')) {
+      buildVersion[0] = buildVersion[0].substring(1);
+    }
+    // strip the channel
+    const idx = buildVersion[2].lastIndexOf('-');
+    if (idx !== -1) {
+      buildVersion[2] = buildVersion[2].substring(0, idx);
+    }
+    result.success = true;
+    result.major = parseInt(buildVersion[0]);
+    result.minor = parseInt(buildVersion[1]);
+    result.build = parseInt(buildVersion[2]);
+    return result;
+  }
+
+  async _testVersion(buildVersion: any): Promise<boolean> {
     try {
-      APIConnection.getInstance().conduit.poke({
-        app: 'hood',
-        mark: 'kiln-install',
-        json: {
-          ship: '~hostyv',
-          desk: 'realm',
-          local: 'realm',
-        },
+      const version = await APIConnection.getInstance().conduit.scry({
+        app: 'bazaar',
+        path: `/version`,
       });
+      const parts = version.split('.');
+      if (parseInt(parts[0]) > parseInt(buildVersion.major)) {
+        return true;
+      }
+      if (
+        parseInt(parts[0]) >= parseInt(buildVersion.major) &&
+        parseInt(parts[1]) > parseInt(buildVersion.minor)
+      ) {
+        return true;
+      }
+      if (
+        parseInt(parts[0]) >= parseInt(buildVersion.major) &&
+        parseInt(parts[1]) >= parseInt(buildVersion.minor) &&
+        parseInt(parts[2]) >= parseInt(buildVersion.build)
+      ) {
+        return true;
+      }
     } catch (e) {
       log.error(e);
     }
-    return true;
+    return false;
+  }
+
+  async _waitForInstallRealmAgent(buildVersion: any): Promise<string> {
+    return new Promise((resolve, reject) => {
+      let totalWaitTime = 0,
+        maxWaitTime = 300000; // 5 minutes
+      let intervalId = setInterval(async () => {
+        totalWaitTime += 3000;
+        if (totalWaitTime > maxWaitTime) {
+          reject('error:timeout');
+          return;
+        }
+        const result = await this._testVersion(buildVersion);
+        if (result) {
+          clearInterval(intervalId);
+          resolve('continue');
+          return;
+        }
+      }, 3000);
+    });
+  }
+
+  async installRealmAgent(): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      await this._openConduit();
+      try {
+        APIConnection.getInstance().conduit.poke({
+          app: 'hood',
+          mark: 'kiln-install',
+          json: {
+            ship: '~hostyv',
+            desk: 'realm',
+            local: 'realm',
+          },
+        });
+
+        // @note: if %realm is already installed and does not need to be updated, there is
+        //   currently no way to get notified by clay (gift) that the kiln-install operation
+        //   has completed. in the meantime, a workaround is to scry the %realm agent, and
+        //   if the current version matches the agent's version, assume the install is finished
+
+        const buildVersion = this._prepareBuildVersionEnv();
+        if (!buildVersion.success) {
+          resolve(`continue`);
+          return;
+        }
+        const result = await this._waitForInstallRealmAgent(buildVersion);
+        resolve(result);
+      } catch (e) {
+        log.error(e);
+        reject('error');
+      }
+    });
   }
 
   public async getCookie(patp: string, url: string, code: string) {

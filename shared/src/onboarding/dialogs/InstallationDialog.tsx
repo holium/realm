@@ -28,7 +28,7 @@ const InstallRealmButton = styled(Button.TextButton)`
 `;
 
 type Props = {
-  onInstallRealm: () => Promise<boolean>;
+  onInstallRealm: () => Promise<string>;
   onBack: () => void;
   onNext: () => Promise<boolean>;
 };
@@ -49,6 +49,11 @@ export const InstallationDialog = ({
     installError.toggleOff();
 
     const result = await onInstallRealm();
+    if (result.startsWith('error:')) {
+      installError.toggleOn();
+      // if you want to display some detail
+      // const msg = result.replace('error:'); // to get the detail
+    }
     if (result) {
       successfullInstall.toggleOn();
     } else {
