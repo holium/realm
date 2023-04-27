@@ -100,7 +100,7 @@ const AccountPanelPresenter = () => {
 
   return (
     <Flex gap={12} flexDirection="column" p={3} width="100%" overflowY="auto">
-      <Text.Custom fontSize={7} fontWeight={600} mb={6}>
+      <Text.Custom fontSize={7} fontWeight={600} mb={2}>
         Account
       </Text.Custom>
 

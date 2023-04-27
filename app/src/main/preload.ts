@@ -14,6 +14,7 @@ import { friendsPreload } from '../os/services/ship/friends.service';
 import { notifPreload } from '../os/services/ship/notifications/notifications.service';
 import { roomsPreload } from '../os/services/ship/rooms.service';
 import { shipPreload } from '../os/services/ship/ship.service';
+import { walletPreload } from '../os/services/ship/wallet/wallet.service';
 import { MediaAccess, MediaAccessStatus } from '../os/types';
 import { multiplayerPreload } from './preload.multiplayer';
 
@@ -161,6 +162,7 @@ contextBridge.exposeInMainWorld('spacesService', spacesPreload);
 contextBridge.exposeInMainWorld('authService', authPreload);
 contextBridge.exposeInMainWorld('roomsService', roomsPreload);
 contextBridge.exposeInMainWorld('chatService', chatPreload);
+contextBridge.exposeInMainWorld('walletService', walletPreload);
 contextBridge.exposeInMainWorld('notifService', notifPreload);
 contextBridge.exposeInMainWorld('friendDb', friendsPreload);
 contextBridge.exposeInMainWorld('bazaarService', bazaarPreload);

@@ -9,6 +9,7 @@ import { friendsInitSql } from './friends.service';
 import { notifInitSql } from './notifications/notifications.table';
 import { spacesTablesInitSql } from './spaces/spaces.service';
 import { bazaarTablesInitSql } from './spaces/tables/catalog.table';
+import { walletInitSql } from './wallet/wallet.db';
 
 export class ShipDB {
   private shipDB: Database;
@@ -95,6 +96,7 @@ ${chatInitSql}
 ${notifInitSql}
 ${friendsInitSql}
 ${spacesTablesInitSql}
+${walletInitSql}
 create table if not exists credentials (
   url       TEXT PRIMARY KEY NOT NULL,
   code      TEXT NOT NULL,
