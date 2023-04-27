@@ -14,7 +14,6 @@ import {
   formatEthAmount,
   shortened,
 } from '../../../lib/helpers';
-import { TxType } from './List';
 
 type PendingTransactionDisplayProps = {
   transactions: TransactionType[];
@@ -55,8 +54,8 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
       walletIndex: props.transaction.walletIndex.toString(),
       detail: {
         type: 'transaction',
-        txtype: walletStore.navState.detail?.txtype as TxType,
-        coinKey: walletStore.navState.detail?.coinKey,
+        txtype: props.transaction.ethType ? 'coin' : 'general',
+        coinKey: props.transaction.ethType,
         key: props.transaction.hash,
       },
     });
