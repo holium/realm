@@ -159,11 +159,30 @@ export function detachTrack(
     }
   }
 }
+
 export enum TrackKind {
   Audio = 'audio',
   Video = 'video',
   Unknown = 'unknown',
 }
+
+const streamTracks = (peer: RemotePeer) => {
+  if (!local) return;
+  console.log('AudioTrackAdded - streaming tracks to', peer.patp);
+  local?.stream?.getTracks().forEach((track: MediaStreamTrack) => {
+    if (local?.isMuted && track.kind === TrackKind.Audio) {
+      track.enabled = false;
+    }
+    if (!peer.spInstance?.destroyed) {
+      // console.log(`%streaming tracks to ${peer.patp}`);
+      if (local && local.stream) {
+        peer.spInstance?.addTrack(track, local.stream);
+      } else {
+        console.error('streamTracks: local stream is null');
+      }
+    }
+  });
+};
 
 class RemotePeer {
   patp: string;
@@ -259,6 +278,11 @@ class RemotePeer {
   _onConnect() {
     console.log('RemotePeer onConnect', this.patp);
     this.setStatus(PeerConnectionState.Connected);
+    streamTracks(this);
+    sendData({
+      kind: DataPacket_Kind.MUTE_STATUS,
+      value: { data: local?.isMuted },
+    });
   }
 
   _onClose() {
@@ -528,21 +552,7 @@ export const RoomsStore = types
       );
       local.on(PeerEvent.AudioTrackAdded, () => {
         peers.forEach((peer: RemotePeer) => {
-          if (!local) return;
-          console.log('AudioTrackAdded - streaming tracks to', peer.patp);
-          local?.stream?.getTracks().forEach((track: MediaStreamTrack) => {
-            if (local?.isMuted && track.kind === TrackKind.Audio) {
-              track.enabled = false;
-            }
-            if (!peer.spInstance?.destroyed) {
-              // console.log(`%streaming tracks to ${peer.patp}`);
-              if (local && local.stream) {
-                peer.spInstance?.addTrack(track, local.stream);
-              } else {
-                console.error('streamTracks: local stream is null');
-              }
-            }
-          });
+          streamTracks(peer);
         });
       });
       local?.on(PeerEvent.Muted, () => {
