@@ -255,10 +255,12 @@ class RemotePeer {
 
   _onConnect() {
     console.log('RemotePeer onConnect', this.patp);
+    this.setStatus(PeerConnectionState.Connected);
   }
 
   _onClose() {
     console.log('RemotePeer onClose', this.patp);
+    this.setStatus(PeerConnectionState.Closed);
   }
 
   _onError(err: Error) {
