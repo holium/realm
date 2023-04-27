@@ -8,6 +8,7 @@ import {
   Box,
   Flex,
   Icon,
+  InlineEdit,
   MenuItemProps,
   NoScrollBar,
   Row,
@@ -244,7 +245,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
               flexDirection="column"
               pointerEvents={isDMType || !amHost ? 'none' : 'auto'}
             >
-              <TextInput
+              <InlineEdit
                 id="chat-title"
                 name="chat-title"
                 fontWeight={500}

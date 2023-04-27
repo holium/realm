@@ -144,6 +144,23 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
 
   /**
    * ------------------------------
+   * shutdown
+   * ------------------------------
+   * Shutdown of realm, logout the ship and quit.
+   *
+   * @param patp
+   * @returns
+   */
+  async shutdown(patp: string) {
+    if (await this.logout(patp)) {
+      app.quit();
+    } else {
+      console.warn('somehow we failed to logout while trying to shutdown');
+    }
+  }
+
+  /**
+   * ------------------------------
    * logout
    * ------------------------------
    * Logout of a ship, clear the db, and stop the ship service.
@@ -153,7 +170,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
    */
   async logout(patp: string) {
     if (!this.services) {
-      return;
+      return false;
     }
 
     this.services.ship?.cleanup();
@@ -166,6 +183,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         patp,
       },
     });
+    return true;
   }
 
   // Used in onboarding before a session exists.
