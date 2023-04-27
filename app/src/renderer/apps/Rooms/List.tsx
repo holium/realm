@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import { Button, Flex, Icon, Text, Tooltip } from '@holium/design-system';
 import { RealmProtocol, RoomType } from '@holium/realm-room';
 
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';

@@ -1,6 +1,6 @@
 import { CSSProperties, useEffect, useState } from 'react';
 
-import { Portal } from '@holium/design-system';
+import { Portal, Text } from '@holium/design-system';
 import { useToggle } from '@holium/design-system/util';
 import {
   ChangeEmailModal,
@@ -8,6 +8,7 @@ import {
   ChangePasswordModal,
   EjectIdModal,
   GetNewAccessCodeModal,
+  OnboardingStorage,
   VerifyEmailModal,
 } from '@holium/shared';
 import { AccountHostingDialogBody } from '@holium/shared/src/onboarding/dialogs/bodies/AccountHostingDialogBody';
@@ -29,6 +30,7 @@ type Props = {
 };
 
 export const AccountHostingSection = ({ account }: Props) => {
+  const error = useToggle(false);
   const changeEmailModal = useToggle(false);
   const verifyEmailModal = useToggle(false);
   const changePasswordModal = useToggle(false);
@@ -36,12 +38,10 @@ export const AccountHostingSection = ({ account }: Props) => {
   const changeMaintenanceWindowModal = useToggle(false);
   const ejectIdModal = useToggle(false);
 
+  const maintenanceWindow = 0;
   const [managePaymentLink, setManagePaymentLink] = useState<string>('');
 
-  const email = '';
-  const token = '';
-  const maintenanceWindow = 0;
-  const shipCode = '';
+  const { shipCode, email, token } = OnboardingStorage.get();
 
   const onSubmitNewEmail = async (email: string) => {
     if (!token) return Promise.resolve(false);
@@ -146,10 +146,33 @@ export const AccountHostingSection = ({ account }: Props) => {
 
   useEffect(() => {
     if (!token) return;
+
     thirdEarthApi
-      .getManagePaymentLink(token)
-      .then((response) => setManagePaymentLink(response.url));
+      .refreshToken(token)
+      .then((response) => {
+        OnboardingStorage.set({ token: response.token });
+        thirdEarthApi
+          .getManagePaymentLink(response.token)
+          .then((response) => setManagePaymentLink(response.url));
+      })
+      .catch(() => {
+        error.toggleOn();
+      });
   }, [token]);
+
+  if (error.isOn || !email || !shipCode) {
+    return (
+      <SettingSection
+        title="Account Hosting"
+        body={
+          <Text.Body>
+            There was an error loading your account hosting information. Plese
+            log out and log back in to try again.
+          </Text.Body>
+        }
+      />
+    );
+  }
 
   return (
     <>
