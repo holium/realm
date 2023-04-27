@@ -1,5 +1,5 @@
 ::
-:: %rooms-v2: is a primitive for who is currently presence.
+:: %rooms-v2: is a primitive for who is currently present.
 ::
 ::
 /-  spaces=spaces-path
@@ -22,19 +22,23 @@
       =whitelist
       capacity=@ud
       path=(unit cord)
+      type=room-type
   ==
 ::
 +$  rooms  (map rid room)
 ::
++$  campfire
+  [provider=ship =rid =room]
+::
++$  chat  (map rid room)
+::
 +$  session-state
   $:  provider=ship
-      current=(unit rid)
       =rooms
   ==
 :: 
 +$  provider-state
   $:  =rooms
-      online=?
       banned=(set ship)
   ==
 ::
@@ -43,17 +47,18 @@
       [%access =access]
   ==
 ::
++$  room-type  ?(%rooms %campfire %data)
+::
 +$  session-action
   $%  [%set-provider =ship]       
       [%reset-provider ~]
-      [%create-room =rid =access =title path=(unit cord)]
+      [%create-room =rid =access =title path=(unit cord) type=room-type]
       [%edit-room =rid =title =access]
       [%delete-room =rid]
       [%enter-room =rid]
       [%leave-room =rid]
       [%invite =rid =ship]
       [%kick =rid =ship]
-      [%send-chat content=cord]
   ==
 ::
 +$  reaction
@@ -65,12 +70,10 @@
       [%provider-changed provider=ship =rooms]
       [%invited provider=ship =rid =title =ship]
       [%kicked =rid =ship] 
-      [%chat-received from=ship content=cord] 
   ==
 ::
 +$  provider-action
-  $%  [%set-online online=?]
-      [%ban =ship]
+  $%  [%ban =ship]
       [%unban =ship]
   ==
 ::

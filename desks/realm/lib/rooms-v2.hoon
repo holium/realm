@@ -82,13 +82,6 @@
         ['rid' %s rid.rct]
         ['ship' %s (scot %p ship.rct)]
       ==
-      ::
-        %chat-received 
-      %-  pairs
-      :~
-        ['from' %s (scot %p from.rct)]
-        ['content' %s content.rct]
-      ==
     ==
   ++  view
     |=  vi=view:sur
@@ -118,7 +111,6 @@
     %-  pairs
     :~
       ['provider' s+(scot %p provider.ses)]
-      ['current' (current current.ses)]
       ['rooms' (rooms rooms.ses)]
     ==
   ::
@@ -145,6 +137,7 @@
       ['whitelist' (set-ship whitelist.room)]
       ['capacity' (numb capacity.room)]
       ['path' ?~(path.room ~ s+u.path.room)]
+      ['type' s+type.room]
     ==
   ++  set-ship
     |=  ships=(set @p)
@@ -206,7 +199,6 @@
           [%leave-room so]
           [%invite invite]
           [%kick kick]
-          [%send-chat so]
       ==
     ++  patp
       (su ;~(pfix sig fed:ag))
@@ -217,6 +209,7 @@
           [%access access]
           [%title so]
           [%path (mu so)]
+          [%type (su (perk %rooms %campfire %data ~))]
       ==
     ::
     ++  edit
@@ -262,8 +255,7 @@
     |%
     ++  decode
       %-  of
-      :~  [%set-online bo]
-          [%ban patp]
+      :~  [%ban patp]
           [%unban patp]
       ==
     ::
