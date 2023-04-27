@@ -55,8 +55,8 @@ const DetailPresenter = (props: DetailProps) => {
         );
         if (newCoin) coin = newCoin;
       }
-      coins = getCoins(ethWalletData.coins);
-      nfts = getNfts(ethWalletData.nfts);
+      coins = getCoins(ethWalletData.coins as any);
+      nfts = getNfts(ethWalletData.nfts as any);
     }
   }
 
@@ -172,8 +172,10 @@ const DetailPresenter = (props: DetailProps) => {
                   hidePending={props.hidePending}
                 />
               )}
-              {listView === 'coins' && coins && <CoinList coins={coins} />}
-              {listView === 'nfts' && nfts && <NFTList nfts={nfts} />}
+              {listView === 'coins' && coins && (
+                <CoinList coins={coins as any} />
+              )}
+              {listView === 'nfts' && nfts && <NFTList nfts={nfts as any} />}
             </>
           )}
         </Flex>

@@ -188,10 +188,10 @@ export const DetailHero: FC<DetailHeroProps> = observer(
       try {
         if (walletStore.navState.network === NetworkType.ETHEREUM) {
           if (walletStore.navState.protocol === ProtocolType.UQBAR) {
-            await walletStore.submitUqbarTransaction(
-              walletStore.currentWallet?.index.toString() ?? '',
-              passcode
-            );
+            // await walletStore.submitUqbarTransaction(
+            //   walletStore.currentWallet?.index.toString() ?? '',
+            //   passcode
+            // );
           } else {
             props.coin
               ? await walletStore.sendERC20Transaction(

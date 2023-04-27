@@ -20,18 +20,18 @@ const CreatePresenter = (props: CreateProps) => {
           You haven't yet configured your Realm wallet.
         </Text.Body>
         <Box mt={9}>
-          <Button.TextButton
+          <Button.Primary
             onClick={() => props.setScreen(NewWalletScreen.BACKUP)}
           >
             Create a new wallet
-          </Button.TextButton>
+          </Button.Primary>
         </Box>
         <Box>
-          <Button.TextButton
+          <Button.Transparent
             onClick={() => props.setScreen(NewWalletScreen.IMPORT)}
           >
             Or import an existing wallet
-          </Button.TextButton>
+          </Button.Transparent>
         </Box>
       </Flex>
       <Flex mb={2} mx={3} justifyContent="center" alignItems="center">
@@ -39,7 +39,12 @@ const CreatePresenter = (props: CreateProps) => {
           <Icon name="InfoCircle" />
         </Box>
         <Box>
-          <Text.Hint ml={2} variant="hint" justifyContent="flex-end">
+          <Text.Hint
+            ml={2}
+            variant="hint"
+            justifyContent="flex-end"
+            color="intent-warning"
+          >
             You are using pre-release software. Only use for development
             purposes.
           </Text.Hint>

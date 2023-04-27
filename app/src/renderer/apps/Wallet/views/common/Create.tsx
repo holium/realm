@@ -11,9 +11,9 @@ interface CreateWalletProps {
   network: NetworkType;
 }
 
-export const CreateWallet = observer((props: CreateWalletProps) => {
+const CreateWalletPresenter = (props: CreateWalletProps) => {
   const { walletStore } = useShipStore();
-  const [loading, setLoading] = useState(false);
+  const [_, setLoading] = useState(false);
   const form = useForm({
     async onSubmit({ values }) {
       if (form.computed.isDirty) {
@@ -77,4 +77,6 @@ export const CreateWallet = observer((props: CreateWalletProps) => {
       {/*</Flex></FormControl.FieldSet>*/}
     </Flex>
   );
-});
+};
+
+export const CreateWallet = observer(CreateWalletPresenter);

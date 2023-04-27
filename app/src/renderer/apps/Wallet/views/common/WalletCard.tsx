@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { Flex, Text } from '@holium/design-system';
 
@@ -30,9 +30,9 @@ interface WalletCardProps {
   onSelect?: () => void;
 }
 
-export const WalletCard: FC<WalletCardProps> = ({
+export const WalletCard = ({
   walletKey,
-  isSelected,
+  isSelected = false,
   onSelect,
 }: WalletCardProps) => {
   const { walletStore } = useShipStore();
@@ -43,7 +43,7 @@ export const WalletCard: FC<WalletCardProps> = ({
   if (walletStore.navState.network === NetworkType.ETHEREUM) {
     const ethWallet = wallet as EthWalletType;
     const coinMap = ethWallet.data.get(walletStore.navState.protocol)?.coins;
-    if (coinMap) coins = getCoins(coinMap);
+    if (coinMap) coins = getCoins(coinMap as any);
   }
 
   const walletTransactions =
@@ -108,17 +108,14 @@ export const WalletCard: FC<WalletCardProps> = ({
           alignItems="center"
         >
           <Flex>
-            {coins &&
-              coins
-                .slice(0, 6)
-                .map((coin: ERC20Type, index: number) => (
-                  <img
-                    alt={coin.name}
-                    src={coin.logo || getMockCoinIcon(coin.name)}
-                    style={{ height: '14px', marginRight: '4px' }}
-                    key={index}
-                  />
-                ))}
+            {coins?.slice(0, 6).map((coin: ERC20Type, index: number) => (
+              <img
+                alt={coin.name}
+                src={coin.logo || getMockCoinIcon(coin.name)}
+                style={{ height: '14px', marginRight: '4px' }}
+                key={index}
+              />
+            ))}
             {coins && coins.length > 6 && (
               <Text.Body ml={1} variant="body">
                 +{coins.length - 6}
@@ -133,8 +130,4 @@ export const WalletCard: FC<WalletCardProps> = ({
     ),
     [wallet, isSelected, coins, transactions.length]
   );
-};
-
-WalletCard.defaultProps = {
-  isSelected: false,
 };

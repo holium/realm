@@ -2,11 +2,11 @@ import { Flex, Icon, Text } from '@holium/design-system';
 
 import { PasscodeInput } from '../../components/PasscodeInput';
 
-interface PasscodeProps {
+type Props = {
   onSuccess: (passcode: number[]) => void;
-}
+};
 
-export const DeletePasscode = (props: PasscodeProps) => (
+export const DeletePasscode = ({ onSuccess }: Props) => (
   <Flex width="100%" height="100%" flexDirection="column" alignItems="center">
     <Flex
       flex={1}
@@ -15,7 +15,7 @@ export const DeletePasscode = (props: PasscodeProps) => (
       alignItems="center"
     >
       <Icon name="Locked" size={36} />
-      <Text.H3 variant="h3" color="red">
+      <Text.H3 variant="h3" color="intent-warning">
         Confirm Delete
       </Text.H3>
     </Flex>
@@ -25,7 +25,7 @@ export const DeletePasscode = (props: PasscodeProps) => (
       </Text.Body>
       <PasscodeInput
         checkStored={true}
-        onSuccess={props.onSuccess}
+        onSuccess={onSuccess}
         keepLoading={true}
       />
     </Flex>

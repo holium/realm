@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useField, useField, useForm, useForm } from 'mobx-easy-form';
-import { observer, observer, observer } from 'mobx-react';
+import { useField, useForm } from 'mobx-easy-form';
+import { observer } from 'mobx-react';
 
 import {
   Anchor,
