@@ -91,7 +91,7 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
   const width = props.mode === 'home' ? 500 : 450;
 
   return (
-    <Flex width={width}>
+    <Flex width={width} id={`${popoverId}-container`}>
       <TextInput
         ref={inputRef}
         flex={8}
@@ -139,9 +139,11 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
             searchMode !== 'dev-app-search' &&
             searchString.length === 0
           ) {
+            appInstaller.setSearchMode('none');
+            appInstaller.setSearchModeArgs([]);
+            appInstaller.setSearchString('');
             appInstaller.setSearchPlaceholder('Search...');
             appInstaller.setSelectedShip('');
-            appInstaller.setSearchString('');
             search.actions.onChange('');
           }
           if (
@@ -181,7 +183,7 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
         }}
         onFocus={(evt) => {
           evt.stopPropagation();
-          appInstaller.open(`${popoverId}-trigger`, dimensions);
+          appInstaller.open(`${popoverId}-container`, dimensions);
           if (selectedShip) {
             appInstaller.setSearchMode('dev-app-search');
             appInstaller.setSearchModeArgs([selectedShip]);
