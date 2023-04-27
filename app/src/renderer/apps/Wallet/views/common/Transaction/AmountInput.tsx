@@ -111,12 +111,14 @@ export const AmountInput = observer(
             >
               {inCrypto ? (
                 <TextInput
+                  id="amount-input"
+                  name="amount-input"
                   ref={amountRef}
                   style={{ width: '80%' }}
                   autoFocus
                   type="number"
                   placeholder="0.00000000"
-                  value={amount || ''}
+                  value={(amount ?? '').toString()}
                   onChange={onChange}
                 />
               ) : (
@@ -125,12 +127,14 @@ export const AmountInput = observer(
                     $
                   </Text.Custom>
                   <TextInput
+                    id="amount-input"
+                    name="amount-input"
                     autoFocus
                     ref={amountRef}
                     style={{ width: '80%' }}
                     type="number"
                     placeholder="0.00"
-                    value={amount || ''}
+                    value={(amount ?? '').toString()}
                     onChange={onChange}
                   />
                 </Flex>

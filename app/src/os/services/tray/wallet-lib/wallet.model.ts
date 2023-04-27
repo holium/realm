@@ -3,6 +3,7 @@ import {
   cast,
   getSnapshot,
   Instance,
+  SnapshotIn,
   types,
 } from 'mobx-state-tree';
 
@@ -342,7 +343,7 @@ const ERC20 = types
     },
   }));
 
-export type ERC20Type = Instance<typeof ERC20>;
+export type ERC20Type = SnapshotIn<typeof ERC20>;
 
 const ERC721 = types.model('ERC721', {
   name: types.string,

@@ -104,7 +104,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
   }
 
   async updateWalletState(
-    conduit: any,
+    _conduit: any,
     walletDB: WalletDB,
     currentBlock?: number
   ) {

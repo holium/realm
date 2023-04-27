@@ -81,14 +81,14 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   private _onError(err: any) {
     console.log('err!', err);
   }
-  private _parseMetadata = (metadata: string) => {
-    const mtd = JSON.parse(metadata);
-    return {
-      ...mtd,
-      timestamp: parseInt(mtd.timestamp) || 0,
-      reactions: mtd.reactions === 'true',
-    };
-  };
+  // private _parseMetadata = (metadata: string) => {
+  //   const mtd = JSON.parse(metadata);
+  //   return {
+  //     ...mtd,
+  //     timestamp: parseInt(mtd.timestamp) || 0,
+  //     reactions: mtd.reactions === 'true',
+  //   };
+  // };
   // ----------------------------------------------
   // ----------------- DB queries -----------------
   // ----------------------------------------------
