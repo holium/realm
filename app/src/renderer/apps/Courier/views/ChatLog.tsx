@@ -192,7 +192,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     );
   };
 
-  const height = dimensions.height - 104;
+  const height: number = dimensions.height - 104;
 
   let topPadding;
   let endPadding;
@@ -203,7 +203,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     endPadding = 136;
   }
   if (selectedChat.replyingMsg) {
-    endPadding = 70;
+    endPadding = 66;
   }
 
   let pretitle;
