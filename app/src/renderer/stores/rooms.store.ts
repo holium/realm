@@ -282,6 +282,15 @@ export const RoomsStore = types
         SoundActions.playRoomEnter();
         local.enableMedia();
         self.rooms.set(newRoom.rid, cast(newRoom));
+        if (self.current) {
+          if (self.current.creator === window.ship) {
+            // @ts-expect-error
+            yield self.deleteRoom(self.current.rid);
+          } else {
+            // @ts-expect-error
+            yield self.leaveRoom(self.current.rid);
+          }
+        }
         self.current = self.rooms.get(newRoom.rid);
         yield RoomsIPC.createRoom(
           newRoom.rid,

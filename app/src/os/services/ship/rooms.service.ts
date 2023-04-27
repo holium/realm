@@ -49,8 +49,7 @@ export class RoomsService extends AbstractService<any> {
     rid: string,
     title: string,
     access: 'public' | 'private',
-    path: string | null = null,
-    type: 'rooms' | 'campfire' | 'data' = 'rooms'
+    path: string | null = null
   ) {
     return APIConnection.getInstance().conduit.poke({
       app: 'rooms-v2',
@@ -61,7 +60,7 @@ export class RoomsService extends AbstractService<any> {
           title,
           access,
           path,
-          type,
+          type: 'rooms',
         },
       },
     });
