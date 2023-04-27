@@ -60,8 +60,8 @@ const AppStateModel = types
         localStorage.setItem('lastTheme', JSON.stringify(theme));
       }
     },
-    setLoggedIn(patp: string, cookie: string) {
-      self.authStore._setSession(patp, cookie);
+    setLoggedIn(patp: string) {
+      self.authStore._setSession(patp);
       self.shellStore.setIsBlurred(false);
     },
     setLoggedOut(patp?: string) {
@@ -162,16 +162,13 @@ function registerOnUpdateListener() {
       shipStore.reset();
       appState.setBooted(update.payload);
       if (update.payload.session) {
-        appState.setLoggedIn(
-          update.payload.session.patp,
-          update.payload.session.cookie
-        );
+        appState.setLoggedIn(update.payload.session.patp);
       }
     }
     if (update.type === 'auth-success') {
       SoundActions.playLogin();
       localStorage.setItem('lastAccountLogin', update.payload.patp);
-      appState.setLoggedIn(update.payload.patp, update.payload.cookie);
+      appState.setLoggedIn(update.payload.patp);
     }
     if (update.type === 'auth-failed') {
       // SoundActions.playError();

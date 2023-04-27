@@ -65,7 +65,6 @@ export const AuthenticationModel = types
     session: types.maybeNull(types.reference(AccountModel)),
     order: types.array(types.string),
     status: LoginStatus,
-    cookie: types.maybeNull(types.string),
   })
   .actions((self) => ({
     setSelected(patp: string) {
@@ -77,7 +76,7 @@ export const AuthenticationModel = types
       if (!accounts) return;
       applySnapshot(self.accounts, castToSnapshot(accounts));
     },
-    _setSession(patp: string, cookie: string) {
+    _setSession(patp: string) {
       const account = self.accounts.find((a) => a.patp === patp);
       if (!account) {
         throw new Error('DBAccount not found');
@@ -85,7 +84,6 @@ export const AuthenticationModel = types
       trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
       self.status.setState('success');
       self.session = account;
-      self.cookie = cookie;
     },
     _clearSession(patp?: string) {
       if (self.session?.patp === patp) {

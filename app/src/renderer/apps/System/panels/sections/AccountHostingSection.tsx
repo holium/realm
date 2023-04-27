@@ -1,147 +1,227 @@
-import { useEffect, useState } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 
+import { Portal } from '@holium/design-system';
+import { useToggle } from '@holium/design-system/util';
 import {
-  Anchor,
-  Button,
-  CopyButton,
-  Flex,
-  Icon,
-  Spinner,
-  Text,
-  TextInput,
-  useToggle,
-} from '@holium/design-system';
+  ChangeEmailModal,
+  ChangeMaintenanceWindowModal,
+  ChangePasswordModal,
+  EjectIdModal,
+  GetNewAccessCodeModal,
+  VerifyEmailModal,
+} from '@holium/shared';
+import { AccountHostingDialogBody } from '@holium/shared/src/onboarding/dialogs/bodies/AccountHostingDialogBody';
 
-import { useTrayApps } from 'renderer/apps/store';
-import { useAppState } from 'renderer/stores/app.store';
+import { thirdEarthApi } from 'renderer/onboarding/thirdEarthApi';
 import { MobXAccount } from 'renderer/stores/models/account.model';
 
 import { SettingSection } from '../../components/SettingSection';
+
+const forceCenterStyle: CSSProperties = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%,-50%)',
+};
 
 type Props = {
   account: MobXAccount;
 };
 
-export const AccountHostingSection = ({}: Props) => {
-  const { shellStore } = useAppState();
-  const { setActiveApp } = useTrayApps();
+export const AccountHostingSection = ({ account }: Props) => {
+  const changeEmailModal = useToggle(false);
+  const verifyEmailModal = useToggle(false);
+  const changePasswordModal = useToggle(false);
+  const getNewAccessCodeModal = useToggle(false);
+  const changeMaintenanceWindowModal = useToggle(false);
+  const ejectIdModal = useToggle(false);
 
-  const showAccessKey = useToggle(false);
+  const [managePaymentLink, setManagePaymentLink] = useState<string>('');
 
-  // TODO
-  // const url = identity.auth.currentship.url;
-  const url = '';
-  const isHostedShip = url?.includes('holium.network');
-  // const email = identity.auth.email;
   const email = '';
-  const [code, _setCode] = useState('');
+  const token = '';
+  const maintenanceWindow = 0;
+  const shipCode = '';
+
+  const onSubmitNewEmail = async (email: string) => {
+    if (!token) return Promise.resolve(false);
+    try {
+      const response = await thirdEarthApi.changeEmail(token, email);
+
+      if (response.email) {
+        changeEmailModal.toggleOff();
+        verifyEmailModal.toggleOn();
+        return true;
+      }
+    } catch (e) {
+      return false;
+    }
+
+    return false;
+  };
+
+  const onSubmitVerificationToken = async (
+    verificationToken: string,
+    password: string
+  ) => {
+    try {
+      const response = await thirdEarthApi.verifyEmail(
+        verificationToken,
+        password
+      );
+
+      if (response.token) {
+        window.location.reload();
+        return true;
+      }
+    } catch (e) {
+      return false;
+    }
+
+    return false;
+  };
+
+  const onSubmitNewPassword = async (password: string) => {
+    if (!token) return Promise.resolve(false);
+    try {
+      const response = await thirdEarthApi.changePassword(token, password);
+
+      if (response?.token) {
+        changePasswordModal.toggleOff();
+        return true;
+      }
+    } catch (e) {
+      return false;
+    }
+
+    return false;
+  };
+
+  const onSubmitNewAccessCode = async () => {
+    if (!token) return Promise.resolve(false);
+    if (!account) return Promise.resolve(false);
+
+    const response = await thirdEarthApi.resetShipCode(
+      token,
+      account.patp.toString()
+    );
+
+    if (response) return true;
+    return false;
+  };
+
+  const onSubmitNewMaintenanceWindow = async (maintenanceWindow: string) => {
+    if (!token) return Promise.resolve(false);
+    if (!account) return Promise.resolve(false);
+
+    const response = await thirdEarthApi.updateMaintenanceWindow(
+      token,
+      account.patp.toString(),
+      maintenanceWindow
+    );
+
+    if (response?.maintenance_window) return true;
+    return false;
+  };
+
+  const onClickManageBilling = () => {
+    window.open(managePaymentLink, '_blank');
+  };
+
+  const onSubmitEjectId = async (ejectAddress: string, ethAddress: string) => {
+    if (!token) return Promise.resolve(false);
+    if (!account) return Promise.resolve(false);
+
+    const response = await thirdEarthApi.ejectShip(
+      token,
+      account.patp.toString(),
+      ejectAddress,
+      ethAddress
+    );
+
+    if (response) return true;
+
+    return false;
+  };
 
   useEffect(() => {
-    async function getCode() {
-      // const code = await AuthActions.getCode();
-      // setCode(code);
-    }
-    getCode();
-  }, []);
+    if (!token) return;
+    thirdEarthApi
+      .getManagePaymentLink(token)
+      .then((response) => setManagePaymentLink(response.url));
+  }, [token]);
 
   return (
-    <SettingSection
-      title="Hosting"
-      body={
-        <>
-          <Flex flexDirection={'row'} flex={4} justifyContent="flex-start">
-            <Text.Custom fontWeight={500} flex={1} margin={'auto'}>
-              Email
-            </Text.Custom>
-            <Flex justifyContent="space-between" flex={3}>
-              <Text.Custom>{email}</Text.Custom>
-              <Button.TextButton
-                style={{ fontWeight: 400 }}
-                onClick={() => {
-                  shellStore.setIsBlurred(true);
-                  shellStore.openDialog('change-email-dialog');
-                  setActiveApp(null);
-                }}
-              >
-                Change Email
-              </Button.TextButton>
-            </Flex>
-          </Flex>
-
-          {isHostedShip && (
-            <>
-              <Flex
-                flexDirection={'row'}
-                flex={4}
-                mt={4}
-                justifyContent="flex-start"
-              >
-                <Text.Custom fontWeight={500} flex={1} margin={'auto'}>
-                  Payment
-                </Text.Custom>
-                <Flex justifyContent="space-between" flex={3}>
-                  <Text.Custom>Credit Card</Text.Custom>
-                  <Anchor href="https://billing.stripe.com/p/login/00g4gz19T9WbfxS4gg">
-                    <Button.TextButton style={{ fontWeight: 400 }}>
-                      Manage billing
-                    </Button.TextButton>
-                  </Anchor>
-                </Flex>
-              </Flex>
-            </>
-          )}
-
-          <Flex
-            flexDirection={'row'}
-            flex={4}
-            mt={4}
-            justifyContent="flex-start"
-          >
-            <Text.Custom fontWeight={500} flex={1} margin={'auto'}>
-              URL
-            </Text.Custom>
-            <Text.Custom flex={3}>{url}</Text.Custom>
-          </Flex>
-
-          <Flex
-            flexDirection={'row'}
-            flex={4}
-            mt={4}
-            justifyContent="flex-start"
-          >
-            <Text.Custom fontWeight={500} flex={1} margin={'auto'}>
-              Access Code
-            </Text.Custom>
-            {code === '' ? (
-              <Flex flex={3}>
-                <Spinner size={1} />
-              </Flex>
-            ) : (
-              <Flex flex={3} gap={6} alignItems="center">
-                <TextInput
-                  id="system-account-access-code"
-                  name="access-code"
-                  py={2}
-                  width={285}
-                  value={code}
-                  readOnly={true}
-                  type={showAccessKey.isOn ? 'text' : 'password'}
-                  rightAdornment={
-                    <Button.IconButton onClick={showAccessKey.toggle}>
-                      <Icon
-                        name={showAccessKey.isOn ? 'EyeOff' : 'EyeOn'}
-                        opacity={0.5}
-                        size={18}
-                      />
-                    </Button.IconButton>
-                  }
-                />
-                <CopyButton content={code} />
-              </Flex>
-            )}
-          </Flex>
-        </>
-      }
-    />
+    <>
+      <Portal>
+        <ChangeEmailModal
+          style={forceCenterStyle}
+          isOpen={changeEmailModal.isOn}
+          onDismiss={changeEmailModal.toggleOff}
+          onSubmit={onSubmitNewEmail}
+        />
+      </Portal>
+      <Portal>
+        <VerifyEmailModal
+          style={forceCenterStyle}
+          isOpen={verifyEmailModal.isOn}
+          onDismiss={verifyEmailModal.toggleOff}
+          onSubmit={onSubmitVerificationToken}
+        />
+      </Portal>
+      <Portal>
+        <GetNewAccessCodeModal
+          style={forceCenterStyle}
+          isOpen={getNewAccessCodeModal.isOn}
+          onDismiss={getNewAccessCodeModal.toggleOff}
+          onSubmit={onSubmitNewAccessCode}
+        />
+      </Portal>
+      <Portal>
+        <ChangePasswordModal
+          style={forceCenterStyle}
+          isOpen={changePasswordModal.isOn}
+          onDismiss={changePasswordModal.toggleOff}
+          onSubmit={onSubmitNewPassword}
+        />
+      </Portal>
+      <Portal>
+        <ChangeMaintenanceWindowModal
+          style={forceCenterStyle}
+          isOpen={changeMaintenanceWindowModal.isOn}
+          initialSelected={maintenanceWindow.toString()}
+          onDismiss={changeMaintenanceWindowModal.toggleOff}
+          onSubmit={onSubmitNewMaintenanceWindow}
+        />
+      </Portal>
+      <Portal>
+        <EjectIdModal
+          style={forceCenterStyle}
+          isOpen={ejectIdModal.isOn}
+          onDismiss={ejectIdModal.toggleOff}
+          onSubmit={onSubmitEjectId}
+        />
+      </Portal>
+      <SettingSection
+        title="Hosting"
+        body={
+          <AccountHostingDialogBody
+            selectedPatp={account.patp}
+            email={email}
+            shipUrl={account.url}
+            shipCode={shipCode}
+            shipMaintenanceWindow={maintenanceWindow}
+            onClickChangeEmail={changeEmailModal.toggleOn}
+            onClickChangePassword={changePasswordModal.toggleOn}
+            onClickManageBilling={onClickManageBilling}
+            onClickGetNewAccessCode={() => getNewAccessCodeModal.toggleOn()}
+            onClickChangeMaintenanceWindow={
+              changeMaintenanceWindowModal.toggleOn
+            }
+            onClickEjectId={ejectIdModal.toggleOn}
+          />
+        }
+      />
+    </>
   );
 };

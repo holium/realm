@@ -1,9 +1,10 @@
 import { toJS } from 'mobx';
 import { applySnapshot, getSnapshot, Instance, types } from 'mobx-state-tree';
 
+import { Credentials } from 'os/services/ship/ship.types.ts';
+
 import { getInitialWindowBounds } from '../../lib/window-manager';
-import { appState } from '../app.store';
-import { MainIPC } from '../ipc';
+import { MainIPC, ShipIPC } from '../ipc';
 import {
   AppWindowMobxType,
   AppWindowModel,
@@ -160,12 +161,8 @@ export const ShellModel = types
         type: app.type,
         bounds: getInitialWindowBounds(app, self.desktopDimensions),
       });
-      const credentials = {
-        url: appState.loggedInAccount?.url,
-        cookie: appState.authStore.cookie,
-        ship: appState.loggedInAccount?.patp,
-      };
-      // console.log('credentials', credentials);
+      const credentials = ShipIPC.credentials as Credentials;
+
       if (app.type === 'urbit') {
         const appUrl = newWindow.href?.glob
           ? `${credentials.url}/apps/${app.id}`

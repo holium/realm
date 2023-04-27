@@ -1,4 +1,4 @@
-import { ChangeEvent, useRef, useState } from 'react';
+import { ChangeEvent, CSSProperties, useRef, useState } from 'react';
 
 import { ErrorBox, Flex, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
@@ -10,11 +10,17 @@ import { SubmitButton } from '../SubmitButton';
 
 type Props = {
   isOpen: boolean;
+  style?: CSSProperties;
   onDismiss: () => void;
   onSubmit: (email: string) => Promise<boolean>;
 };
 
-export const ChangeEmailModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
+export const ChangeEmailModal = ({
+  isOpen,
+  style,
+  onDismiss,
+  onSubmit,
+}: Props) => {
   const submitting = useToggle(false);
   const confirmEmailError = useToggle(false);
 
@@ -47,7 +53,12 @@ export const ChangeEmailModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onDismiss={onDismiss} onSubmit={handleSubmit}>
+    <Modal
+      isOpen={isOpen}
+      style={style}
+      onDismiss={onDismiss}
+      onSubmit={handleSubmit}
+    >
       <Text.H5 padding="16px 0">Change email</Text.H5>
       <Flex flexDirection="column" gap={2}>
         <OnboardDialogInputLabel as="label" htmlFor="change-email">

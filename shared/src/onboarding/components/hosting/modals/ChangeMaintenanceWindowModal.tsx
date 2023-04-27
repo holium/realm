@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { CSSProperties, FormEvent, useState } from 'react';
 
 import { Flex, Text } from '@holium/design-system/general';
 import { RadioList } from '@holium/design-system/inputs';
@@ -14,6 +14,7 @@ import { SubmitButton } from '../SubmitButton';
 type Props = {
   isOpen: boolean;
   initialSelected?: string;
+  style?: CSSProperties;
   onDismiss: () => void;
   onSubmit: (maintenanceWindow: string) => Promise<boolean>;
 };
@@ -21,6 +22,7 @@ type Props = {
 export const ChangeMaintenanceWindowModal = ({
   isOpen,
   initialSelected = '0',
+  style,
   onDismiss,
   onSubmit,
 }: Props) => {
@@ -43,7 +45,12 @@ export const ChangeMaintenanceWindowModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onDismiss={onDismiss} onSubmit={handleSubmit}>
+    <Modal
+      isOpen={isOpen}
+      style={style}
+      onDismiss={onDismiss}
+      onSubmit={handleSubmit}
+    >
       <Text.H5>Change maintenance window</Text.H5>
       <Flex>
         <RadioList

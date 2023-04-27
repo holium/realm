@@ -5,6 +5,7 @@ import { ChatStore } from './chat.store';
 import { ShipIPC } from './ipc';
 import { BazaarStore, BazaarStoreType } from './models/bazaar.model';
 import { LoaderModel } from './models/common.model';
+import { CredentialsModel } from './models/credentials.model';
 import { FeaturedStore } from './models/featured.model';
 import { FriendsStore } from './models/friends.model';
 import { NotifStore } from './models/notification.model';
@@ -20,6 +21,7 @@ import {
 
 export const ShipStore = types
   .model('ShipStore', {
+    credentials: CredentialsModel,
     friends: FriendsStore,
     notifStore: NotifStore,
     chatStore: ChatStore,
@@ -79,6 +81,7 @@ const loadBazaarSnapshot = (): SnapshotIn<BazaarStoreType> => {
 };
 
 export const shipStore = ShipStore.create({
+  credentials: {},
   notifStore: {
     notifications: [],
   },
