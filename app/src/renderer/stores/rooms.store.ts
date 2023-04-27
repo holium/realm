@@ -195,6 +195,7 @@ class RemotePeer {
 
   createConnection() {
     // create the peer connection
+    this.spInstance?.removeAllListeners();
     console.log(`create connection to ${this.patp}`);
     if (!local) {
       throw new Error('No local peer created');
@@ -234,7 +235,6 @@ class RemotePeer {
         type: 'waiting',
         from: window.ship,
       });
-      // this.sendSignal(this.patp, { type: 'waiting', from: this.our });
     }
   }
 
@@ -415,7 +415,6 @@ const dialPeer = (
   rid: string,
   from: string,
   to: string,
-  isHost: boolean,
   rtc: any
 ): RemotePeer => {
   if (!local) {
@@ -430,6 +429,7 @@ const dialPeer = (
   const remotePeer = new RemotePeer(rid, to, peerConfig);
 
   peers.set(remotePeer.patp, remotePeer);
+  console.log(remotePeer);
   remotePeer.dial();
 
   return remotePeer;
@@ -443,7 +443,7 @@ const dialAll = (
   const presentPeers = room.present.filter((peer: string) => our !== peer);
   presentPeers.forEach((peer: string) => {
     // console.log('dialing peer', peer, rtc);
-    dialPeer(room.rid, our, peer, false, rtc);
+    dialPeer(room.rid, our, peer, rtc);
   });
 
   return peers;
@@ -668,13 +668,7 @@ export const RoomsStore = types
           console.log('!!!!!already have peer', patp);
         }
         if (patp !== window.ship) {
-          const remotePeer = dialPeer(
-            rid,
-            window.ship,
-            patp,
-            room?.creator === window.ship,
-            self.config.rtc
-          );
+          const remotePeer = dialPeer(rid, window.ship, patp, self.config.rtc);
           // queuedPeers are peers that are ready for us to dial them
           if (queuedPeers.includes(patp)) {
             // console.log('%room-entered in queuedPeer', patp);
@@ -747,10 +741,11 @@ function registerOnUpdateListener() {
       // console.log('rooms-v2-reaction', type, payload);
       if (type === 'room-entered') {
         SoundActions.playRoomPeerEnter();
-        // console.log(`%room-entered ${payload.ship}`);
+        console.log(`%room-entered ${payload.ship}`);
         shipStore.roomsStore._onRoomEntered(payload.rid, payload.ship);
       }
       if (type === 'room-left') {
+        console.log(`%room-left ${payload.ship}`);
         shipStore.roomsStore._onRoomLeft(payload.rid, payload.ship);
       }
       if (type === 'room-created') {
@@ -777,10 +772,10 @@ function registerOnUpdateListener() {
 
       if (signalData.type === 'waiting') {
         if (!remotePeer) {
-          // console.log(`%waiting from unknown ${payload.from}`);
+          console.log(`%waiting from unknown ${payload.from}`);
           queuedPeers.push(payload.from);
         } else {
-          // console.log(`%waiting from ${payload.from}`);
+          console.log(`%waiting from ${payload.from}`);
           remotePeer.onWaiting();
         }
       }
@@ -790,14 +785,14 @@ function registerOnUpdateListener() {
       }
       if (!['retry', 'ack-waiting', 'waiting'].includes(signalData.type)) {
         if (remotePeer) {
-          // console.log(
-          //   `%${JSON.parse(payload.data)?.type} from ${payload.from}`
-          // );
+          console.log(
+            `%${JSON.parse(payload.data)?.type} from ${payload.from}`
+          );
           remotePeer.peerSignal(payload.data);
         } else {
-          // console.log(
-          //   `%${JSON.parse(payload.data)?.type} from unknown ${payload.from}`
-          // );
+          console.log(
+            `%${JSON.parse(payload.data)?.type} from unknown ${payload.from}`
+          );
         }
       }
     }
