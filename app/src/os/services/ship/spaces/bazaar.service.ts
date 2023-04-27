@@ -66,13 +66,12 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
           });
           break;
         case 'dock-update':
-          const pinnedDock = this.tables?.appCatalog.updateDock(
-            data['dock-update']
-          );
+          const payload = data['dock-update'];
+          const pinnedDock = this.tables?.appCatalog.updateDock(payload);
           this.sendUpdate({
             type: 'dock-update',
             payload: {
-              path: data['dock-update'].path,
+              path: payload.path,
               dock: pinnedDock,
             },
           });
