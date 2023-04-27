@@ -130,7 +130,7 @@ export class WalletService extends AbstractService {
           wallet,
           contract,
           hash,
-          tx,
+          transaction: tx,
         },
       },
     };

@@ -10,7 +10,13 @@ interface PasscodeProps {
 
 const TransactionPasscodePresenter = (props: PasscodeProps) => {
   return (
-    <Flex width="100%" height="100%" flexDirection="column" alignItems="center">
+    <Flex
+      width="100%"
+      height="100%"
+      flexDirection="column"
+      alignItems="center"
+      gap={10}
+    >
       <Flex
         flex={1}
         flexDirection="column"
@@ -18,14 +24,10 @@ const TransactionPasscodePresenter = (props: PasscodeProps) => {
         alignItems="center"
       >
         <Icon name="Locked" size={36} />
-        <Text.H3 mt={2} variant="h3">
-          Submit Transaction
-        </Text.H3>
+        <Text.H3 variant="h3">Submit Transaction</Text.H3>
       </Flex>
-      <Flex flex={2} pt={8} flexDirection="column" alignItems="center">
-        <Text.Body mb={8} variant="body">
-          Enter your passcode to continue.
-        </Text.Body>
+      <Flex flex={2} flexDirection="column" alignItems="center">
+        <Text.Body variant="body">Enter your passcode to continue.</Text.Body>
         <PasscodeInput
           checkStored={true}
           onSuccess={props.onSuccess}
