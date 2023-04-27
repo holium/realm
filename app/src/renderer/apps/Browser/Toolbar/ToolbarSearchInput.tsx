@@ -5,13 +5,14 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { Box, Flex, TextInput } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Box, Flex, TextInput } from '@holium/design-system';
+
 import { useAppState } from 'renderer/stores/app.store';
 
 import { createUrl } from '../helpers/createUrl';
 import { useBrowser } from '../store';
-
 import { ToolbarLockIcon } from './ToolbarLockIcon';
 import { ToolbarSearchIcon } from './ToolbarSearchIcon';
 

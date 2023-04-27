@@ -3,7 +3,6 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { Button, Icon } from '../../';
 import { Box } from '../../general/Box/Box';
 import { Flex } from '../../general/Flex/Flex';
-
 import { Menu } from './Menu';
 
 export default {

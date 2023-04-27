@@ -1,5 +1,6 @@
-import { RemotePeer } from '@holium/realm-room';
 import { observer } from 'mobx-react';
+
+import { RemotePeer } from '@holium/realm-room';
 
 import { useRoomsManager } from 'components/RoomsManagerProvider';
 

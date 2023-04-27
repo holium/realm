@@ -1,5 +1,6 @@
-import { Avatar, Flex, Text } from '@holium/design-system/general';
 import styled, { css } from 'styled-components';
+
+import { Avatar, Flex, Text } from '@holium/design-system/general';
 
 const PatpCardView = styled(Flex)<{ isSelected: boolean }>`
   flex: 1;

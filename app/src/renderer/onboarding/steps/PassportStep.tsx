@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { track } from '@amplitude/analytics-browser';
+
 import { OnboardingStorage, PassportDialog } from '@holium/shared';
 
 import { FileUploadParams } from '../../../os/services/ship/ship.service';
 import { AuthIPC, RealmIPC } from '../../stores/ipc';
-
 import { StepProps } from './types';
 
 export const PassportStep = ({ setStep, onFinish }: StepProps) => {

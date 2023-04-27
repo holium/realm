@@ -1,8 +1,11 @@
 import { useMemo } from 'react';
-import { Button, Flex, Icon, Text, TextInput } from '@holium/design-system';
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
+
+import { Button, Flex, Icon, Text, TextInput } from '@holium/design-system';
+
 import { useShipStore } from 'renderer/stores/ship.store';
+
 import { useTrayApps } from '../store';
 
 export const createRoomForm = (
@@ -54,7 +57,7 @@ export const createRoomForm = (
 };
 
 const NewRoomPresenter = () => {
-  const { ship, spacesStore, roomsStore } = useShipStore();
+  const { spacesStore, roomsStore } = useShipStore();
   const { roomsApp } = useTrayApps();
 
   const { form, name } = useMemo(

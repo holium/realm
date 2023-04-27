@@ -1,6 +1,8 @@
 import { MouseEvent } from 'react';
-import { Button, Flex, Icon } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Button, Flex, Icon } from '@holium/design-system';
+
 import { SpacePicture } from 'renderer/components';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 
@@ -22,7 +24,7 @@ const SpaceTitlebarPresenter = ({
   onToggleApps,
 }: SpaceTitlebarProps) => {
   return (
-    <Flex style={{ position: 'relative' }} width="100%">
+    <Flex width="100%">
       <Flex flex={1}>
         <SpacePicture size={40} membersCount={membersCount} space={space} />
       </Flex>

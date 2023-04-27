@@ -1,4 +1,3 @@
-import { Flex, Spinner } from '@holium/design-system/general';
 import {
   CardCvcElement,
   CardExpiryElement,
@@ -8,6 +7,8 @@ import {
   useStripe,
 } from '@stripe/react-stripe-js';
 import { Stripe, StripeElementsOptions } from '@stripe/stripe-js';
+
+import { Flex, Spinner } from '@holium/design-system/general';
 
 import { OnboardDialog } from '../components/OnboardDialog';
 import { OnboardDialogTitle } from '../components/OnboardDialog.styles';

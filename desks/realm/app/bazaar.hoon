@@ -517,7 +517,7 @@
         =.  upd-docks               (into upd-docks index app-id)
         =.  docks.state             (~(put by docks.state) [path upd-docks])
         :_  state
-        [%give %fact [/updates ~] bazaar-reaction+!>([%pinned path app-id index])]~
+        [%give %fact [/updates ~] bazaar-reaction+!>([%dock-update path upd-docks])]~
       `state
     ::
     ++  reorder-pins
@@ -525,7 +525,7 @@
       ?>  =(our.bowl src.bowl)
       =.  docks.state             (~(put by docks.state) [path dock])
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%pins-reodered path dock])]~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%dock-update path dock])]~
     ::
     ++  rem-pin
       |=  [path=space-path:spaces-store =app-id:store]
@@ -536,7 +536,7 @@
       =.  upd-docks                 (oust [(need index) 1] upd-docks)
       =.  docks.state               (~(put by docks.state) [path upd-docks])
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%unpinned path app-id])]~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%dock-update path upd-docks])]~
     ::
     ++  add-suite
       |=  [path=space-path:spaces-store =app-id:store index=@ud]

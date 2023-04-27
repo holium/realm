@@ -1,13 +1,11 @@
 import { createContext, useContext } from 'react';
 import { clone, flow, Instance, types } from 'mobx-state-tree';
+
 import { RealmUpdateBooted } from 'os/realm.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';
 import { SoundActions } from 'renderer/lib/sound';
 
 import { defaultTheme } from '../lib/defaultTheme';
-
-import { ShellModel } from './models/shell.model';
-import { Theme, ThemeType } from './models/theme.model';
 import { AuthenticationModel } from './auth.store';
 import {
   AuthIPC,
@@ -17,6 +15,8 @@ import {
   RealmIPC,
   SpacesIPC,
 } from './ipc';
+import { ShellModel } from './models/shell.model';
+import { Theme, ThemeType } from './models/theme.model';
 import { shipStore } from './ship.store';
 
 const Screen = types.enumeration(['login', 'onboarding', 'os']);
@@ -279,12 +279,6 @@ function registerOnUpdateListener() {
         shipStore.bazaarStore._onRecommendedUpdate(payload.appId);
         break;
       case 'unrecommended':
-        shipStore.bazaarStore._onUnrecommendedUpdate(payload.appId);
-        break;
-      case 'pinned-update':
-        shipStore.bazaarStore._onPinnedUpdate(payload.app.id, payload.index);
-        break;
-      case 'pins-reordered':
         shipStore.bazaarStore._onUnrecommendedUpdate(payload.appId);
         break;
       case 'dock-update':

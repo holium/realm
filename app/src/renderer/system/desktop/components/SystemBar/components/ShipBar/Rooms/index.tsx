@@ -1,6 +1,8 @@
 import { useCallback, useEffect } from 'react';
-import { Box, RoomsDock } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Box, RoomsDock } from '@holium/design-system';
+
 import { roomTrayConfig } from 'renderer/apps/Rooms/config';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/lib/position';

@@ -1,9 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createField, createForm } from 'mobx-easy-form';
+import { observer } from 'mobx-react-lite';
+import { isValidPatp } from 'urbit-ob';
+
 import {
   Avatar,
   Box,
   Flex,
   Icon,
+  InlineEdit,
   MenuItemProps,
   NoScrollBar,
   Row,
@@ -13,8 +18,7 @@ import {
   TextInput,
   Toggle,
 } from '@holium/design-system';
-import { createField, createForm } from 'mobx-easy-form';
-import { observer } from 'mobx-react-lite';
+
 import { FileUploadParams } from 'os/services/ship/ship.service';
 import { useTrayApps } from 'renderer/apps/store';
 import { useContextMenu } from 'renderer/components';
@@ -24,7 +28,6 @@ import { IuseStorage } from 'renderer/lib/useStorage';
 import { useAppState } from 'renderer/stores/app.store';
 import { ShipIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
-import { isValidPatp } from 'urbit-ob';
 
 import {
   InvitePermissionType,
@@ -242,7 +245,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
               flexDirection="column"
               pointerEvents={isDMType || !amHost ? 'none' : 'auto'}
             >
-              <TextInput
+              <InlineEdit
                 id="chat-title"
                 name="chat-title"
                 fontWeight={500}

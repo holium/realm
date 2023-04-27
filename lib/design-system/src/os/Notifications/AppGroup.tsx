@@ -11,7 +11,6 @@ import {
   NoScrollBar,
   Text,
 } from '../../../general';
-
 import { NotifAppRow, Notification } from './Notification';
 import { NotificationType } from './Notifications.types';
 

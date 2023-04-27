@@ -1,5 +1,7 @@
 import { FC } from 'react';
+
 import { Avatar, Flex } from '@holium/design-system';
+
 import { Patp } from 'os/types';
 import { useShipStore } from 'renderer/stores/ship.store';
 

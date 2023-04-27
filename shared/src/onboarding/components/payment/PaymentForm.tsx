@@ -1,10 +1,11 @@
-import { Flex } from '@holium/design-system/general';
 import {
   CardCvcElement,
   CardExpiryElement,
   CardNumberElement,
 } from '@stripe/react-stripe-js';
 import styled, { css } from 'styled-components';
+
+import { Flex } from '@holium/design-system/general';
 
 import { OnboardDialogSubTitle } from '../OnboardDialog.styles';
 

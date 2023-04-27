@@ -1,5 +1,6 @@
 export { AvatarInput } from './src/input/AvatarInput/AvatarInput';
 export { CheckBox } from './src/input/CheckBox/CheckBox';
+export { InlineEdit } from './src/input/InlineEdit/InlineEdit';
 export { Input, TextArea } from './src/input/Input/Input';
 export { InputBox } from './src/input/InputBox/InputBox';
 export type { RadioOption } from './src/input/RadioGroup/RadioGroup';

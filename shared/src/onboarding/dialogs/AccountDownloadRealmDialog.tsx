@@ -5,7 +5,6 @@ import {
   AccountDialogDescription,
   AccountDialogTitle,
 } from '../components/AccountDialog.styles';
-
 import { DownloadRealmBodyProps, DownloadRealmButtons } from './DownloadDialog';
 
 type Props = DownloadRealmBodyProps & {

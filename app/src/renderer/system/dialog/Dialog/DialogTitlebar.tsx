@@ -1,7 +1,8 @@
 import { PointerEvent, useMemo } from 'react';
+import styled from 'styled-components';
+
 import { AppWindowIcon } from 'renderer/system/desktop/components/AppWindow/AppWindowIcon';
 import { TitlebarContainer } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
-import styled from 'styled-components';
 
 const ToolbarContainer = styled(TitlebarContainer)`
   padding: 0px 18px;

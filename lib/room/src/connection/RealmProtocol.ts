@@ -8,7 +8,6 @@ import { RemotePeer } from '../peer/RemotePeer';
 import { PeerConnectionState } from '../peer/types';
 import { Patp, RoomType } from '../types';
 import { isDialer } from '../utils';
-
 import { BaseProtocol, ProtocolConfig } from './BaseProtocol';
 import { ProtocolEvent } from './events';
 

@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
+import { observer } from 'mobx-react';
+
 import {
   BarStyle,
   Box,
@@ -9,8 +12,7 @@ import {
   NotificationList,
   NotificationType,
 } from '@holium/design-system';
-import { AnimatePresence } from 'framer-motion';
-import { observer } from 'mobx-react';
+
 import { nativeApps } from 'renderer/apps/nativeApps';
 import { useTrayApps } from 'renderer/apps/store';
 import { trackEvent } from 'renderer/lib/track';

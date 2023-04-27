@@ -29,18 +29,16 @@ module.exports = {
       'error',
       {
         groups: [
-          // Packages `react` related packages come first.
-          ['^(react|electron)', '^@?\\w'],
-          // Side effect imports.
-          ['^\\u0000'],
-          // Urbit packages
-          ['^(@urbit)', '^@?\\w'],
-          // Other internal packages.
-          ['^(@|components)(/.*|$)'],
-          // Parent imports. Put `..` last.
-          ['^\\.\\.(?!/?$)', '^\\.\\./?$'],
-          // Other relative imports. Put same-folder imports and `.` last.
-          ['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$'],
+          // React and Electron packages first, then other third-party packages.
+          ['^react', '^electron', '^@?\\w'],
+          // Holium packages.
+          ['^@holium'],
+          // Aliased internal packages.
+          [
+            '^(background|main|os|renderer|components|util|blocks|general|input|navigation|hooks|analysers|connection|helpers|peer)(/.*|$)',
+          ],
+          // Relative imports.
+          ['^\\.'],
           // Style imports.
           ['^.+\\.?(css)$'],
         ],

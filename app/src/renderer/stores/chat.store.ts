@@ -8,6 +8,14 @@ import {
   destroy,
   getParentOfType,
 } from 'mobx-state-tree';
+<<<<<<< HEAD
+=======
+
+import { ChatUpdateTypes } from 'os/services/ship/chat/chat.types';
+import { ChatIPC, RealmIPC } from 'renderer/stores/ipc';
+import { SpacesStoreType } from 'renderer/stores/models/spaces.model';
+
+>>>>>>> master
 import { Chat, ChatModelType } from './models/chat.model';
 import { shipStore, ShipStore } from './ship.store';
 import { RealmIPC, ChatIPC } from 'renderer/stores/ipc';

@@ -1,4 +1,5 @@
 import { DetailedHTMLProps, useEffect, WebViewHTMLAttributes } from 'react';
+
 import { useAppState } from 'renderer/stores/app.store';
 
 type WebViewProps = {

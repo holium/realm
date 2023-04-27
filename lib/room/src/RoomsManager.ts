@@ -4,9 +4,9 @@ import TypedEmitter from 'typed-emitter';
 
 import { BaseProtocol } from './connection/BaseProtocol';
 import { ProtocolEvent } from './connection/events';
+import { RoomManagerEvent } from './events';
 import { DataPacket } from './helpers/data';
 import { LocalPeer } from './peer/LocalPeer';
-import { RoomManagerEvent } from './events';
 import { ChatModelType, Patp, RoomState, RoomType } from './types';
 
 /**

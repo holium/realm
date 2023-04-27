@@ -1,4 +1,8 @@
 import { FC, useEffect, useState } from 'react';
+import { observer } from 'mobx-react';
+import { getSnapshot } from 'mobx-state-tree';
+import styled from 'styled-components';
+
 import {
   Box,
   Button,
@@ -8,8 +12,7 @@ import {
   InstallStatus,
   Text,
 } from '@holium/design-system';
-import { observer } from 'mobx-react';
-import { getSnapshot } from 'mobx-state-tree';
+
 import { LinkPreview } from 'renderer/components';
 import { normalizeBounds } from 'renderer/lib/window-manager';
 import { appState, useAppState } from 'renderer/stores/app.store';
@@ -22,7 +25,6 @@ import { GlobMobxType } from 'renderer/stores/models/docket.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInstall/store';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import styled from 'styled-components';
 
 const TileStyle = styled(Box)`
   position: relative;

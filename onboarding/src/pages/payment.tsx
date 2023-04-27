@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
+import { loadStripe, Stripe, StripeElementsOptions } from '@stripe/stripe-js';
+
 import {
   OnboardingStorage,
   PaymentDialog,
   ThirdEarthProduct,
 } from '@holium/shared';
-import { loadStripe, Stripe, StripeElementsOptions } from '@stripe/stripe-js';
 
 import { Page } from '../components/Page';
 import { constants } from '../util/constants';

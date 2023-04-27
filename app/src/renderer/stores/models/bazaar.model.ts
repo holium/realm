@@ -1,4 +1,3 @@
-import { cleanNounColor } from '@holium/design-system';
 import { toJS } from 'mobx';
 import {
   applySnapshot,
@@ -9,8 +8,9 @@ import {
   types,
 } from 'mobx-state-tree';
 
-import { BazaarIPC } from '../ipc';
+import { cleanNounColor } from '@holium/design-system';
 
+import { BazaarIPC } from '../ipc';
 import { Glob } from './docket.model';
 
 export enum InstallStatus {
@@ -103,7 +103,6 @@ export const UrbitApp = types
     host: types.maybeNull(types.string),
     config: types.maybeNull(RealmConfig),
     gridIndex: types.maybe(types.number),
-    dockIndex: types.maybe(types.number),
     isRecommended: types.optional(types.boolean, false),
   })
   .actions((self) => ({
@@ -118,9 +117,6 @@ export const UrbitApp = types
     },
     setGridIndex(index: number) {
       self.gridIndex = index;
-    },
-    setDockIndex(index: number | undefined) {
-      self.dockIndex = index;
     },
     setIsRecommended(isRecommended: boolean) {
       self.isRecommended = isRecommended;
@@ -646,10 +642,6 @@ export const BazaarStore = types
     _onUnrecommendedUpdate(appId: string) {
       const app = self.catalog.get(appId);
       if (app) app.setIsRecommended(false);
-    },
-    _onPinnedUpdate(appId: string, index: number | undefined) {
-      const app = self.catalog.get(appId);
-      if (app) app.setDockIndex(index);
     },
   }));
 

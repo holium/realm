@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
-import { HostingDialog, OnboardingStorage } from '@holium/shared';
 import { observer } from 'mobx-react';
 
-import { useAppState } from '../../stores/app.store';
+import { HostingDialog, OnboardingStorage } from '@holium/shared';
 
+import { useAppState } from '../../stores/app.store';
 import { StepProps } from './types';
 
 export const HostingStepPresenter = ({ setStep, onFinish }: StepProps) => {

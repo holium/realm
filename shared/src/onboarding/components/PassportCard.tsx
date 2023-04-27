@@ -1,7 +1,8 @@
 import { ChangeEvent } from 'react';
+import styled from 'styled-components';
+
 import { Flex } from '@holium/design-system/general';
 import { Input } from '@holium/design-system/inputs';
-import styled from 'styled-components';
 
 import { AccountDialogSubtitle } from './AccountDialog.styles';
 import { PassportCardAvatar } from './PassportCardAvatar';

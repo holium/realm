@@ -4,7 +4,6 @@ import { SpeakingDetectionAnalyser } from '../analysers';
 import { IAudioAnalyser } from '../analysers/types';
 import { BaseProtocol } from '../connection/BaseProtocol';
 import { Patp } from '../types';
-
 import { PeerEvent } from './events';
 import { Peer, PeerConfig } from './Peer';
 import { RemotePeer } from './RemotePeer';

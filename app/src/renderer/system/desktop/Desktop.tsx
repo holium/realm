@@ -1,12 +1,12 @@
 import { Bottom, Fill, Layer } from 'react-spaces';
 import { observer } from 'mobx-react';
+
 import { useAppState } from 'renderer/stores/app.store';
 
+import { AppWindowManager } from './AppWindowManager';
 import { HomePane } from './components/Home/HomePane';
 import { SystemBar } from './components/SystemBar/SystemBar';
-import { AppWindowManager } from './AppWindowManager';
 import { TrayManager } from './TrayManager';
-import { useMultiplayer } from './useMultiplayer';
 
 const DesktopPresenter = () => {
   const { authStore, shellStore } = useAppState();

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { ShipConfig } from '@holium/realm-room';
 import * as process from 'process';
+
+import { ShipConfig } from '@holium/realm-room';
 
 import { RoomsManagerProvider } from './components/RoomsManagerProvider';
 import { UI } from './UI';

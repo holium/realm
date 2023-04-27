@@ -1,4 +1,7 @@
 import { useMemo } from 'react';
+import { observer } from 'mobx-react';
+import styled from 'styled-components';
+
 import {
   Avatar,
   Box,
@@ -10,9 +13,8 @@ import {
   Text,
   WindowedList,
 } from '@holium/design-system';
-import { observer } from 'mobx-react';
+
 import { useShipStore } from 'renderer/stores/ship.store';
-import styled from 'styled-components';
 
 import { searchPatpOrNickname } from './helpers';
 

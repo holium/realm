@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+
 import {
   Avatar,
   Box,
@@ -7,6 +8,7 @@ import {
   Row,
   Text,
 } from '@holium/design-system';
+
 import { useContextMenu } from 'renderer/components/ContextMenu';
 
 import { usePassportMenu } from './usePassportMenu';

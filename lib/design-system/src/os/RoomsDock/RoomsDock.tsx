@@ -2,7 +2,6 @@ import styled from 'styled-components';
 
 import { ContactData } from '../../general/Avatar/AvatarRow';
 import { Flex } from '../../general/Flex/Flex';
-
 import { RoomsDockControls } from './RoomsDockControls';
 import { RoomsDockDescription } from './RoomsDockDescription';
 

@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useRef } from 'react';
 import BeatLoader from 'react-spinners/BeatLoader';
+import { observer } from 'mobx-react';
+import styled from 'styled-components';
+
 import { Avatar, Flex, FlexProps, Icon, Text } from '@holium/design-system';
 import { PeerConnectionState } from '@holium/realm-room';
-import { observer } from 'mobx-react';
+
 import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 import { useShipStore } from 'renderer/stores/ship.store';
-import styled from 'styled-components';
 
 import { AudioWave } from './AudioWave';
 

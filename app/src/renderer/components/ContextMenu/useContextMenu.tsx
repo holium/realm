@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
 } from 'react';
+
 import { useSelection } from 'renderer/lib/selection';
 import { useAppState } from 'renderer/stores/app.store';
 

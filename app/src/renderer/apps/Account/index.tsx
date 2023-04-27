@@ -1,9 +1,12 @@
-import { Avatar, Button, Flex, Icon, Text } from '@holium/design-system';
 import { observer } from 'mobx-react';
+
+import { Avatar, Button, Flex, Icon, Text } from '@holium/design-system';
+
 import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppType } from 'renderer/stores/models/bazaar.model';
 import { useShipStore } from 'renderer/stores/ship.store';
+
 import { nativeApps } from '../nativeApps';
 import { useTrayApps } from '../store';
 

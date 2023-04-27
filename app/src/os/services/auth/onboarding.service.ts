@@ -10,7 +10,6 @@ import {
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection } from '../api';
 import { ShipDB } from '../ship/ship.db';
-
 import { Account } from './accounts.table';
 import { AuthDB } from './auth.db';
 import { MasterAccount } from './masterAccounts.table';
@@ -127,6 +126,13 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     });
 
     if (newAccount) {
+      this.sendUpdate({
+        type: 'account-added',
+        payload: {
+          account: newAccount,
+          order: [],
+        },
+      });
       return { account: newAccount, masterAccount };
     } else {
       log.info('auth.service.ts:', `Failed to create account for ${acc.patp}`);

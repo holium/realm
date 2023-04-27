@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+
 import { Dimensions, useToggle } from '@holium/design-system';
 import {
   MultiplayerChat,
@@ -15,6 +16,7 @@ import {
   RoomManagerEvent,
   RoomsManager,
 } from '@holium/realm-room';
+
 import { normalizePosition } from 'renderer/lib/window-manager';
 
 type Props = {

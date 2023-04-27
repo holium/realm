@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+
 import { Button, Flex, Spinner } from '@holium/design-system/general';
 
 import { OnboardDialogButtonText } from '../OnboardDialog.styles';

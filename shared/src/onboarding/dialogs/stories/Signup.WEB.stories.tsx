@@ -7,7 +7,6 @@ import { CredentialsDialog } from '../CredentialsDialog';
 import { DownloadDialog } from '../DownloadDialog';
 import { PaymentDialog } from '../PaymentDialog';
 import { VerifyEmailDialog } from '../VerifyEmailDialog';
-
 import {
   mockPatps,
   OnboardingDialogWrapper,

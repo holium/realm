@@ -1,6 +1,5 @@
 import { Icon } from '../Icon/Icon';
 import { IconPathsType } from '../Icon/icons';
-
 import { CommCircle } from './CommButton.styles';
 
 interface CommButtonProps {

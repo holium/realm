@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
+
 import { Anchor } from '@holium/design-system/general';
 import {
   LoginDialog,
@@ -9,7 +10,6 @@ import {
 
 import { defaultTheme } from '../../lib/defaultTheme';
 import { thirdEarthApi } from '../thirdEarthApi';
-
 import { StepProps } from './types';
 
 export const LoginStep = ({ setStep, onFinish }: StepProps) => {

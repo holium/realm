@@ -1,11 +1,13 @@
 import { RefObject, useState } from 'react';
 import { Gallery } from 'react-photoswipe-gallery';
+
 import {
   Box,
   Text,
   WindowedList,
   WindowedListRef,
 } from '@holium/design-system';
+
 import { displayDate } from 'os/lib/time';
 
 import {
@@ -116,6 +118,7 @@ export const ChatLogList = ({
           top: 200,
           bottom: 200,
         }}
+        alignToBottom
         totalListHeightChanged={(height: number) => {
           if (height - prevHeight === 10) {
             // 10 px is the height change that occurs when there's a reaction added

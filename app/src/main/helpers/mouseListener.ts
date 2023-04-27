@@ -1,4 +1,5 @@
 import { ipcRenderer } from 'electron';
+
 import { getMouseState } from 'renderer/system/mouse/getMouseState';
 
 ipcRenderer.on('add-mouse-listeners', (_, isMainWindow?: boolean) => {

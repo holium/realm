@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Avatar, Box, BoxProps, Button, Icon } from '@holium/design-system';
 import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
+
+import { Avatar, Box, BoxProps, Button, Icon } from '@holium/design-system';
 
 import { GroupSigil } from '../components/GroupSigil';
 

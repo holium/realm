@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
-import { Flex } from '@holium/design-system/general';
 import styled from 'styled-components';
+
+import { Flex } from '@holium/design-system/general';
 
 import { OnboardDialogSubTitle, TABLET_WIDTH } from './OnboardDialog.styles';
 

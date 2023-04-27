@@ -2,7 +2,6 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { Flex } from '../../general/Flex/Flex';
 import { Text } from '../../general/Text/Text';
-
 import { AppGroup } from './AppGroup';
 import { Notification } from './Notification';
 

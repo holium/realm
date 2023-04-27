@@ -10,7 +10,6 @@ import { FragmentImage } from '../Bubble/fragment-lib';
 import { Reply } from '../Bubble/Reply';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
 import { MediaBlock } from '../MediaBlock/MediaBlock';
-
 import { convertFragmentsToText, parseChatInput } from './fragment-parser';
 
 const CHAT_INPUT_LINE_HEIGHT = 22;
@@ -227,10 +226,6 @@ export const ChatInput = ({
         inputId={id}
         px={0}
         disabled={disabled}
-        height={
-          rows === 1 ? 36 : CHAT_INPUT_LINE_HEIGHT * Math.min(rows, 5) + 20
-        }
-        // py="3px"
         error={!!error}
         borderRadius={24}
         {...chatInputProps}
@@ -251,6 +246,7 @@ export const ChatInput = ({
               flexDirection="row"
               height={attachmentHeight}
               overflowX="auto"
+              overflowY="hidden"
               alignItems="flex-start"
             >
               {attachments.map((attachment: string, index: number) => {
@@ -310,9 +306,9 @@ export const ChatInput = ({
           ) : null}
           {replyTo ? (
             <Flex
-              mt="6px"
+              mt="4px"
               mx="4px"
-              mb="12px"
+              mb="6px"
               gap={8}
               flexDirection="row"
               height={replyHeight}

@@ -1,13 +1,14 @@
 import { ReactNode, useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
+import NextHead from 'next/head';
+import styled from 'styled-components';
+
 import { useToggle } from '@holium/design-system/util';
 import {
   AccountDialogSkeleton,
   OnboardDialogSkeleton,
   OnboardingStorage,
 } from '@holium/shared';
-import NextHead from 'next/head';
-import styled from 'styled-components';
 
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';

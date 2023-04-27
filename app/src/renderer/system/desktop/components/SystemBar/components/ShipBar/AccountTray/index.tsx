@@ -1,10 +1,12 @@
 // import { useMemo, useState } from 'react';
-import { Avatar, Box, Flex } from '@holium/design-system';
 import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
+import styled from 'styled-components';
+
+import { Avatar, Box, Flex } from '@holium/design-system';
+
 import { Pulser } from 'renderer/components';
 import { useShipStore } from 'renderer/stores/ship.store';
-import styled from 'styled-components';
 
 import { TrayClock } from '../Clock';
 

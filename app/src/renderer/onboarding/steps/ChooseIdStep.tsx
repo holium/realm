@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { track } from '@amplitude/analytics-browser';
+
 import { ChooseIdDialog, OnboardingStorage } from '@holium/shared';
 
 import { thirdEarthApi } from '../thirdEarthApi';
-
 import { StepProps } from './types';
 
 export const ChooseIdStep = ({ setStep }: StepProps) => {

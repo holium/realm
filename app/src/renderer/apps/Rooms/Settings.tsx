@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { observer } from 'mobx-react';
+
 import {
   Button,
   Flex,
@@ -7,7 +9,7 @@ import {
   Select,
   Text,
 } from '@holium/design-system';
-import { observer } from 'mobx-react';
+
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
@@ -30,25 +32,25 @@ const getAudioInputSources = async () => {
   );
 };
 
-const getAudioOutputSources = async () => {
-  const devices: MediaDeviceInfo[] =
-    await navigator.mediaDevices.enumerateDevices();
-  return formSourceOptions(
-    devices.filter((device: MediaDeviceInfo) => {
-      return device.kind === 'audiooutput';
-    })
-  );
-};
+// const getAudioOutputSources = async () => {
+//   const devices: MediaDeviceInfo[] =
+//     await navigator.mediaDevices.enumerateDevices();
+//   return formSourceOptions(
+//     devices.filter((device: MediaDeviceInfo) => {
+//       return device.kind === 'audiooutput';
+//     })
+//   );
+// };
 
-const getVideoInputSources = async () => {
-  const devices: MediaDeviceInfo[] =
-    await navigator.mediaDevices.enumerateDevices();
-  return formSourceOptions(
-    devices.filter((device: MediaDeviceInfo) => {
-      return device.kind === 'videoinput';
-    })
-  );
-};
+// const getVideoInputSources = async () => {
+//   const devices: MediaDeviceInfo[] =
+//     await navigator.mediaDevices.enumerateDevices();
+//   return formSourceOptions(
+//     devices.filter((device: MediaDeviceInfo) => {
+//       return device.kind === 'videoinput';
+//     })
+//   );
+// };
 
 const SettingsPresenter = () => {
   const { roomsApp } = useTrayApps();

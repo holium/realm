@@ -4,7 +4,6 @@ import TypedEmitter from 'typed-emitter';
 import { patp2dec } from 'urbit-ob';
 
 import { Patp } from '../types';
-
 import { PeerEvent } from './events';
 import { PeerConnectionState } from './types';
 

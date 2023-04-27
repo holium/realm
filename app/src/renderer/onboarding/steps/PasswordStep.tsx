@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
+
 import { OnboardingStorage, PasswordDialog } from '@holium/shared';
+
 import { RealmIPC } from 'renderer/stores/ipc';
 
 import { StepProps } from './types';

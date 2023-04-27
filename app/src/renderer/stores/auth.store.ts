@@ -7,6 +7,7 @@ import {
   tryReference,
   types,
 } from 'mobx-state-tree';
+
 import { LoginErrorType } from 'os/realm.types';
 import {
   AccountView,
@@ -16,9 +17,9 @@ import { OnboardingEndedPayload } from 'os/services/auth/onboarding.types';
 import { trackEvent } from 'renderer/lib/track';
 import { AuthIPC } from 'renderer/stores/ipc';
 
-import { AccountModel } from './models/account.model';
 import { appState } from './app.store';
 import { RealmIPC } from './ipc';
+import { AccountModel } from './models/account.model';
 
 export type LoginStatusStateType = 'initial' | 'loading' | 'success' | 'error';
 
@@ -139,15 +140,10 @@ export const AuthenticationModel = types
       }
     }),
     shutdown: flow(function* () {
-      // TODO implement
-      try {
-        // yield RealmIPC.shutdown(self.session?.patp) as Promise<any>;
-        self.session = null;
-        trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
-        self.status.setState('initial');
-        self.session = null;
-      } catch (e) {
-        console.log(e);
+      if (self.session) {
+        yield RealmIPC.shutdown(self.session.patp) as Promise<any>;
+      } else {
+        console.warn('missing session');
       }
     }),
     removeAccount: flow(function* (patp: string) {
@@ -203,6 +199,9 @@ export const AuthenticationModel = types
       }
 
       self.accounts.push(account);
+      self.selected = tryReference(() =>
+        self.accounts.find((acc) => acc.patp === account.patp)
+      );
       applySnapshot(self.order, accountPayload.order);
     },
     _onRemoveAccount(accountPayload: AuthUpdateAccountPayload) {

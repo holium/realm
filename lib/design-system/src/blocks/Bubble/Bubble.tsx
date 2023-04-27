@@ -2,7 +2,6 @@ import { Ref, useEffect, useMemo, useState } from 'react';
 
 import { Box, BoxProps, convertDarkText, Flex, Icon, Text } from '../..';
 import { chatDate } from '../../util/date';
-
 import { BUBBLE_HEIGHT, STATUS_HEIGHT } from './Bubble.constants';
 import { BubbleAuthor, BubbleFooter, BubbleStyle } from './Bubble.styles';
 import {

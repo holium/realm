@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Box, Flex, Spinner } from '@holium/design-system/general';
 import styled from 'styled-components';
+
+import { Box, Flex, Spinner } from '@holium/design-system/general';
 
 import { AccountDialogSubtitle } from '../components/AccountDialog.styles';
 import { OnboardDialog } from '../components/OnboardDialog';

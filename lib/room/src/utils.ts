@@ -1,6 +1,5 @@
-import { patp2dec } from 'urbit-ob';
-
 import { Patp } from '@urbit/http-api';
+import { patp2dec } from 'urbit-ob';
 
 export function isFireFox(): boolean {
   if (!isWeb()) return false;

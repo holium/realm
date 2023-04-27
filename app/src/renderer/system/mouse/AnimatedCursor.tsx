@@ -1,7 +1,8 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
+import { motion, MotionStyle, Variant } from 'framer-motion';
+
 import { Position } from '@holium/design-system';
 import { MouseState } from '@holium/realm-presence';
-import { motion, MotionStyle, Variant } from 'framer-motion';
 
 import { IsDevice } from './isDevice';
 

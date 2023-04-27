@@ -4,6 +4,7 @@ import {
   RoomManagerEvent,
   RoomsManager,
 } from '@holium/realm-room';
+
 import { Patp } from 'os/types';
 import { SoundActions } from 'renderer/lib/sound';
 import { RealmIPC, RoomsIPC } from 'renderer/stores/ipc';

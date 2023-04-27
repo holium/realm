@@ -1,4 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
+
 import { Anchor, Flex, Text } from '@holium/design-system';
 
 type State = {
