@@ -7,16 +7,17 @@ import { Button, CommButton, Flex, Icon, Text } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { Badge } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { RoomInvite } from './Invite';
-import { RoomChat } from './NewChat';
+import { RoomChat } from './RoomChat';
 import { VoiceView } from './Voice';
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
 const RoomPresenter = () => {
   const { loggedInAccount, theme, shellStore } = useAppState();
-  const { ship, roomsStore } = useShipStore();
+  const { roomsStore } = useShipStore();
   const { roomsApp } = useTrayApps();
 
   const { dockColor, mode } = theme;
