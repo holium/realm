@@ -14,6 +14,9 @@ import {
   WindowedListRef,
 } from '@holium/design-system';
 
+import { ChatInputBox } from 'renderer/apps/Courier/components/ChatInputBox';
+import { PinnedContainer } from 'renderer/apps/Courier/components/PinnedMessage';
+import { ChatLogList } from 'renderer/apps/Courier/views/ChatLogList';
 import { useTrayApps } from 'renderer/apps/store';
 import { IuseStorage } from 'renderer/lib/useStorage';
 import { useAppState } from 'renderer/stores/app.store';
@@ -23,11 +26,6 @@ import {
   ChatMessageType,
   ChatModelType,
 } from '../../../stores/models/chat.model';
-import { ChatAvatar } from '../components/ChatAvatar';
-import { ChatInputBox } from '../components/ChatInputBox';
-import { ChatLogHeader } from '../components/ChatLogHeader';
-import { PinnedContainer } from '../components/PinnedMessage';
-import { ChatLogList } from './ChatLogList';
 
 const FullWidthAnimatePresence = styled(AnimatePresence)`
   position: absolute;
@@ -38,18 +36,19 @@ const FullWidthAnimatePresence = styled(AnimatePresence)`
   width: 100%;
 `;
 
-type ChatLogProps = {
+type RoomChatLogProps = {
   storage: IuseStorage;
   selectedChat?: ChatModelType;
   height?: number;
 };
 
-export const ChatLogPresenter = (props: ChatLogProps) => {
+export const RoomChatLogPresenter = ({
+  storage,
+  selectedChat,
+}: RoomChatLogProps) => {
   const { theme } = useAppState();
   const { dimensions, innerNavigation } = useTrayApps();
-  const { ship, notifStore, friends, chatStore, spacesStore } = useShipStore();
-  const { getChatHeader, setSubroute } = chatStore;
-  const selectedChat = props.selectedChat ?? chatStore.selectedChat;
+  const { ship, notifStore, friends, roomsStore } = useShipStore();
 
   const [showAttachments, setShowAttachments] = useState(false);
 
@@ -82,11 +81,6 @@ export const ChatLogPresenter = (props: ChatLogProps) => {
     }, 350);
   }, [selectedChat?.path, innerNavigation]);
 
-  const { title, sigil, image } = useMemo(() => {
-    if (!selectedChat || !ship?.patp) return { title: 'Error loading title' };
-    return getChatHeader(selectedChat.path);
-  }, [selectedChat?.path, window.ship]);
-
   let replyToFormatted = useMemo(() => {
     if (selectedChat?.replyingMsg) {
       const {
@@ -106,33 +100,10 @@ export const ChatLogPresenter = (props: ChatLogProps) => {
   }, [selectedChat?.replyingMsg, listRef.current]);
 
   if (!selectedChat || !ship) return null;
-  const { path, type, peers, metadata, messages } = selectedChat;
+  const { path, messages } = selectedChat;
 
   const showPin =
     selectedChat.pinnedMessageId !== null && !selectedChat.hidePinned;
-
-  let spaceTitle = undefined;
-  let avatarColor: string | undefined;
-  if (type === 'space') {
-    const space = spacesStore.getSpaceByChatPath(path);
-    if (space) {
-      spaceTitle = space.name;
-      avatarColor = space.color;
-    }
-  }
-
-  const chatAvatarEl = (
-    <ChatAvatar
-      sigil={sigil}
-      type={type}
-      path={path}
-      peers={peers.map((p) => p.ship)}
-      image={image}
-      metadata={metadata}
-      color={avatarColor}
-      canEdit={false}
-    />
-  );
 
   const containerWidth = dimensions.width - 24;
 
@@ -183,7 +154,8 @@ export const ChatLogPresenter = (props: ChatLogProps) => {
         };
       })
     );
-    selectedChat.sendMessage(path, measuredFrags);
+    // selectedChat.sendMessage(path, measuredFrags);
+    roomsStore.sendMessage(path, measuredFrags);
   };
   const onEditConfirm = (fragments: any[]) => {
     if (!selectedChat || !selectedChat.editingMsg) return;
@@ -199,7 +171,7 @@ export const ChatLogPresenter = (props: ChatLogProps) => {
     );
   };
 
-  const height: number = dimensions.height - 104;
+  // const height: number = dimensions.height - 400; //104;
 
   let topPadding;
   let endPadding;
@@ -213,65 +185,14 @@ export const ChatLogPresenter = (props: ChatLogProps) => {
     endPadding = 66;
   }
 
-  let pretitle;
-  let subtitle;
-  if (selectedChat.peers.length > 1 && selectedChat.type === 'group') {
-    subtitle = (
-      <Text.Custom
-        textAlign="left"
-        layoutId={`chat-${path}-subtitle`}
-        layout="preserve-aspect"
-        transition={{
-          duration: 0.15,
-        }}
-        width={210}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.5, lineHeight: '1' }}
-        fontSize={2}
-      >
-        {selectedChat.peers.length} members
-      </Text.Custom>
-    );
-  }
-  if (selectedChat.type === 'space') {
-    pretitle = (
-      <Text.Custom
-        textAlign="left"
-        layoutId={`chat-${path}-pretitle`}
-        layout="preserve-aspect"
-        transition={{
-          duration: 0.15,
-        }}
-        width={210}
-        initial={{ opacity: 0.5 }}
-        animate={{ opacity: 0.5, lineHeight: '1' }}
-        fontSize={1}
-        fontWeight={500}
-      >
-        {spaceTitle}
-      </Text.Custom>
-    );
-  }
-
   return (
-    <Flex flexDirection="column" height={props.height}>
+    <Flex flexDirection="column" flex={1} padding={2} alignItems="center">
       <Flex
         layout="preserve-aspect"
         layoutId={`chat-${path}-container`}
         flexDirection="column"
+        height="100%"
       >
-        {!props.selectedChat && (
-          <ChatLogHeader
-            title={title}
-            path={path}
-            isMuted={selectedChat.muted}
-            onBack={() => setSubroute('inbox')}
-            hasMenu
-            avatar={chatAvatarEl}
-            pretitle={pretitle}
-            subtitle={subtitle}
-          />
-        )}
         <Flex
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -283,7 +204,8 @@ export const ChatLogPresenter = (props: ChatLogProps) => {
               justifyContent="center"
               alignItems="center"
               width={containerWidth}
-              height={height}
+              height="100%"
+              p={5}
             >
               <Text.Custom
                 textAlign="center"
@@ -303,8 +225,9 @@ export const ChatLogPresenter = (props: ChatLogProps) => {
                 endOfListPadding={endPadding}
                 selectedChat={selectedChat}
                 width={containerWidth}
-                height={height}
+                height={350} // {height}
                 ourColor={ourColor}
+                stretch
               />
               {showPin && (
                 <FullWidthAnimatePresence>
@@ -318,12 +241,8 @@ export const ChatLogPresenter = (props: ChatLogProps) => {
         </Flex>
       </Flex>
       <Flex
-        position="absolute"
         flexDirection="column"
-        mt={6}
-        bottom={12}
-        left={12}
-        right={12}
+        justifySelf="flex-end"
         initial={{
           opacity: 0,
         }}
@@ -334,7 +253,7 @@ export const ChatLogPresenter = (props: ChatLogProps) => {
         }}
       >
         <ChatInputBox
-          storage={props.storage}
+          storage={storage}
           selectedChat={selectedChat}
           themeMode={theme.mode as 'light' | 'dark'}
           onSend={onMessageSend}
@@ -364,4 +283,4 @@ export const ChatLogPresenter = (props: ChatLogProps) => {
   );
 };
 
-export const ChatLog = observer(ChatLogPresenter);
+export const RoomChatLog = observer(RoomChatLogPresenter);

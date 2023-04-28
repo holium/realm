@@ -25,6 +25,7 @@ type Props = {
   ourColor: string;
   endOfListPadding?: number;
   topOfListPadding?: number;
+  stretch?: boolean;
 };
 
 export const ChatLogList = ({

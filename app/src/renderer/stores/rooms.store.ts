@@ -16,6 +16,7 @@ import {
 import { SoundActions } from 'renderer/lib/sound';
 
 import { RoomsIPC } from './ipc';
+import { Chat } from './models/chat.model';
 import { shipStore } from './ship.store';
 
 export const RoomModel = types
@@ -176,7 +177,7 @@ export const RoomsStore = types
     path: types.optional(types.string, ''),
     provider: types.optional(types.string, ''),
     rooms: types.map(RoomModel),
-    chat: types.array(ChatModel),
+    chat: types.maybe(Chat),
     current: types.maybe(types.reference(RoomModel)),
     config: types.optional(types.frozen(), {
       rtc: {
@@ -298,6 +299,20 @@ export const RoomsStore = types
           newRoom.access as 'public' | 'private',
           newRoom.path
         );
+        self.chat = Chat.create({
+          path: 'roomschat',
+          type: 'group',
+          host: window.ship,
+          muted: false,
+          pinned: false,
+          peersGetBacklog: true,
+          invites: 'host',
+          metadata: {
+            title: '',
+            creator: window.ship,
+            timestamp: Date.now(),
+          },
+        });
       } catch (e) {
         console.error(e);
       }
@@ -357,6 +372,9 @@ export const RoomsStore = types
     },
     setAudioInput(deviceId: string) {
       local?.setAudioInputDevice(deviceId);
+    },
+    sendMessage(path: string, measured: any) {
+      sendData({ [path]: measured });
     },
     _onSession(session: any) {
       self.provider = session.provider;

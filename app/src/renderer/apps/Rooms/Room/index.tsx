@@ -9,8 +9,8 @@ import { Badge } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
+import { RoomChat } from './NewChat';
 import { VoiceView } from './Voice';
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
@@ -31,11 +31,13 @@ const RoomPresenter = () => {
     return roomsStore.current;
   }, [roomsStore.current]);
 
-  const [readChat, setReadChat] = useState(roomsStore.chat.slice());
+  const [readChat, setReadChat] = useState(
+    roomsStore.chat?.lastMessage?.contents
+  );
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    const latestChat = roomsStore.chat.slice();
+    const latestChat = roomsStore.chat?.lastMessage?.contents;
     if (roomView === 'chat') {
       setReadChat(latestChat);
       setUnreadCount(0);
@@ -49,7 +51,7 @@ const RoomPresenter = () => {
           : 0
       );
     }
-  }, [roomView, roomsStore.chat.length]);
+  }, [roomView, roomsStore.chat?.messages.length]);
 
   useEffect(() => {
     if (!presentRoom) roomsApp.setView('list');

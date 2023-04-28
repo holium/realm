@@ -15,7 +15,6 @@ import { useTrayApps } from 'renderer/apps/store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { RoomChatMessage } from '../components/RoomChatMessage';
-import { useRooms } from '../useRooms';
 
 export const chatForm = (
   defaults: any = {
@@ -44,13 +43,11 @@ const RoomChatPresenter = () => {
   const { text } = useMemo(() => chatForm(), []);
   const { getTrayAppHeight } = useTrayApps();
   const listHeight = getTrayAppHeight() - 164;
-  const { ship } = useShipStore();
-
-  const roomsManager = useRooms(ship?.patp);
+  const { roomsStore } = useShipStore();
 
   const chatInputRef = useRef<HTMLInputElement>(null);
 
-  const chats = roomsManager.live.chat.slice(0);
+  const chats = roomsStore.chat.slice(0);
 
   const handleChat = useCallback(
     (evt: any) => {
@@ -62,7 +59,7 @@ const RoomChatPresenter = () => {
       roomsManager.sendChat(innerText);
       text.actions.onChange('');
     },
-    [roomsManager.presentRoom, text.actions]
+    [roomsStore.current, text.actions]
   );
 
   const ChatList = useMemo(() => {

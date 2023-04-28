@@ -3,7 +3,7 @@ import { applySnapshot, cast, flow, Instance, types } from 'mobx-state-tree';
 
 import { ChatPathMetadata } from 'os/services/ship/chat/chat.types';
 import { SoundActions } from 'renderer/lib/sound';
-import { ChatIPC } from 'renderer/stores/ipc';
+import { ChatIPC, RoomsIPC } from 'renderer/stores/ipc';
 
 import { expiresInMap, ExpiresValue } from '../../apps/Courier/types';
 
@@ -291,7 +291,11 @@ export const Chat = types
         console.error(error);
       }
     }),
-    sendMessage: flow(function* (path: string, fragments: any[]) {
+    sendMessage: flow(function* (
+      path: string,
+      fragments: any[],
+      rooms?: boolean
+    ) {
       SoundActions.playDMSend();
       try {
         // create temporary message
@@ -320,7 +324,9 @@ export const Chat = types
         };
         self.lastUpdatedAt = new Date().getTime();
         self.replyingMsg = null;
-        yield ChatIPC.sendMessage(path, fragments);
+        if (rooms) {
+          yield RoomsIPC.sendChat(path, fragments);
+        } else yield ChatIPC.sendMessage(path, fragments);
       } catch (error) {
         console.error(error);
       }

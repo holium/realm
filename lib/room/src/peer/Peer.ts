@@ -27,6 +27,10 @@ export abstract class Peer extends (EventEmitter as new () => TypedEmitter<PeerE
   constructor(patp: Patp, config: PeerConfig) {
     super();
     this.patp = patp;
+    console.log('patp', patp);
+    console.log('patp2dec', patp2dec('~zod'));
+    console.log('patp2dec', patp2dec('~dopmer-fopryg-novned-tidsyl'));
+    console.log('patp2dec', patp2dec('~novned-tidsyl'));
     this.patpId = patp2dec(patp);
     this.host = config.isHost;
     this.audioTracks = new Map();
