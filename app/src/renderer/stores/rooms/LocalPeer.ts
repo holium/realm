@@ -158,8 +158,8 @@ export class LocalPeer {
       if (!peer.spInstance?.destroyed) {
         // console.log(`%streaming tracks to ${peer.patp}`);
         try {
-          peer.spInstance?.addStream(currentStream);
-          // peer.spInstance?.addTrack(track, currentStream);
+          // peer.spInstance?.addStream(currentStream);
+          peer.spInstance?.addTrack(track, currentStream);
         } catch (e) {
           // catches "Track has already been added to that stream."
           console.error(e);
