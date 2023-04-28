@@ -313,7 +313,10 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
           app: 'hood',
           mark: 'kiln-install',
           json: {
-            ship: '~hostyv',
+            ship:
+              process.env.NODE_ENV === 'production'
+                ? '~hostyv'
+                : '~nimwyd-ramwyl-dozzod-hostyv',
             desk: 'realm',
             local: 'realm',
           },
