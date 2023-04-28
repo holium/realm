@@ -29,6 +29,19 @@ export class MasterAccounts extends AbstractDataAccess<MasterAccount> {
       authToken: row.authToken,
     };
   }
+
+  public update(id: number, values: Partial<MasterAccount>): MasterAccount {
+    const setClause = Object.keys(values)
+      .map((key) => `${key} = ?`)
+      .join(', ');
+    const query = `UPDATE ${this.tableName} SET ${setClause} WHERE id = ?`;
+    const stmt = this.prepare(query);
+
+    stmt.run([...Object.values(values), id]);
+    const updated = this.findOne(id);
+    if (!updated) throw new Error('Failed to update record');
+    return updated;
+  }
 }
 
 export const masterAccountsInit = `

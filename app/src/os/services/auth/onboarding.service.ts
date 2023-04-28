@@ -184,7 +184,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   updatePassword(patp: string, password: string) {
     if (!this.authDB) {
       log.error('auth.service.ts:', 'updatePassword', 'No authDB found');
-      return;
+      return false;
     }
 
     const account = this.authDB.tables.accounts.findOne(patp);
@@ -194,7 +194,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
         'updatePassword',
         `No account found for ${patp}`
       );
-      return;
+      return false;
     }
 
     const masterAccount = this.authDB.tables.masterAccounts.findOne(
@@ -206,16 +206,49 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
         'updatePassword',
         `No master account found for ${patp}`
       );
-      return;
+      return false;
     }
 
-    this.authDB.tables.accounts.update(patp, {
+    const accountResult = this.authDB.tables.accounts.update(patp, {
       passwordHash: this.hashPassword(password),
     });
+    if (accountResult) {
+      log.info(
+        'auth.service.ts:',
+        'updatePassword',
+        `Updated password for ${patp}`
+      );
+    } else {
+      log.error(
+        'auth.service.ts:',
+        'updatePassword',
+        `Failed to update password for ${patp}`
+      );
+      return false;
+    }
 
-    this.authDB.tables.masterAccounts.update(account.accountId, {
-      passwordHash: this.hashPassword(password),
-    });
+    const masterAccountResult = this.authDB.tables.masterAccounts.update(
+      account.accountId,
+      {
+        passwordHash: this.hashPassword(password),
+      }
+    );
+    if (masterAccountResult) {
+      log.info(
+        'auth.service.ts:',
+        'updatePassword',
+        `Updated password for master account ${account.accountId}`
+      );
+    } else {
+      log.error(
+        'auth.service.ts:',
+        'updatePassword',
+        `Failed to update password for master account ${account.accountId}`
+      );
+      return false;
+    }
+
+    return true;
   }
 
   async updatePassport(

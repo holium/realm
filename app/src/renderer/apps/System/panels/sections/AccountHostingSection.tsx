@@ -1,6 +1,6 @@
 import { CSSProperties } from 'react';
 
-import { Portal, Text } from '@holium/design-system/general';
+import { Portal } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
 import {
   AccountHostingDialogBody,
@@ -34,7 +34,6 @@ type Props = {
 export const AccountHostingSection = ({ account }: Props) => {
   const { ships } = useUser();
 
-  const error = useToggle(false);
   const changeEmailModal = useToggle(false);
   const verifyEmailModal = useToggle(false);
   const changePasswordModal = useToggle(false);
@@ -91,10 +90,14 @@ export const AccountHostingSection = ({ account }: Props) => {
 
       if (response?.token) {
         // Also update the password locally.
-        await OnboardingIPC.updatePassword(account.patp, password);
-        changePasswordModal.toggleOff();
+        const result = await OnboardingIPC.updatePassword(
+          account.patp,
+          password
+        );
 
-        return true;
+        if (result) changePasswordModal.toggleOff();
+
+        return result;
       }
     } catch (e) {
       return false;
@@ -169,19 +172,7 @@ export const AccountHostingSection = ({ account }: Props) => {
     return false;
   };
 
-  if (error.isOn || !email || !ship) {
-    return (
-      <SettingSection
-        title="Account Hosting"
-        body={
-          <Text.Body>
-            There was an error loading your account hosting information. Plese
-            log out and log back in to try again.
-          </Text.Body>
-        }
-      />
-    );
-  }
+  if (!email || !ship) return null;
 
   return (
     <>
