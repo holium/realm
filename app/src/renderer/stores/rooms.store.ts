@@ -57,10 +57,25 @@ export function isInitiator(localPatpId: number, remotePatp: string) {
   return localPatpId < patp2dec(remotePatp);
 }
 
+// create mobx enum from type
+
+const PeerConnState = types.enumeration([
+  'disconnected',
+  'connecting',
+  'connected',
+  'failed',
+  'new',
+  'closed',
+  'destroyed',
+  'redialing',
+  'broadcasting',
+]);
+
 const PeerMetadata = types.model('PeerMetadata', {
   isMuted: types.optional(types.boolean, false),
   isSpeaking: types.optional(types.boolean, false),
   isAudioAttached: types.optional(types.boolean, false),
+  status: types.optional(PeerConnState, 'disconnected'),
 });
 
 export const RoomsStore = types
@@ -98,6 +113,15 @@ export const RoomsStore = types
     get roomsList() {
       return Array.from(self.rooms.values());
     },
+    getPeerMetadata(patp: string) {
+      return {
+        patp,
+        isMuted: self.peersMetadata.get(patp)?.isMuted,
+        isSpeaking: self.peersMetadata.get(patp)?.isSpeaking,
+        isAudioAttached: self.peersMetadata.get(patp)?.isAudioAttached,
+        status: self.peersMetadata.get(patp)?.status,
+      };
+    },
   }))
   .actions((self) => {
     const localPeer = observable(new LocalPeer());
@@ -133,7 +157,10 @@ export const RoomsStore = types
             if (currentMtd) {
               currentMtd.isAudioAttached = isAttached;
             } else {
-              self.peersMetadata.set(to, { isAudioAttached: isAttached });
+              self.peersMetadata.set(
+                to,
+                PeerMetadata.create({ isAudioAttached: isAttached })
+              );
             }
           },
           setMuted: (isMuted: boolean) => {
@@ -141,7 +168,7 @@ export const RoomsStore = types
             if (currentMtd) {
               currentMtd.isMuted = isMuted;
             } else {
-              self.peersMetadata.set(to, { isMuted });
+              self.peersMetadata.set(to, PeerMetadata.create({ isMuted }));
             }
           },
           setSpeaking: (isSpeaking: boolean) => {
@@ -149,7 +176,18 @@ export const RoomsStore = types
             if (currentMtd) {
               currentMtd.isSpeaking = isSpeaking;
             } else {
-              self.peersMetadata.set(to, { isSpeaking });
+              self.peersMetadata.set(to, PeerMetadata.create({ isSpeaking }));
+            }
+          },
+          setStatus: (status: PeerConnectionState) => {
+            const currentMtd = self.peersMetadata.get(to);
+            if (currentMtd) {
+              currentMtd.status = status;
+            } else {
+              self.peersMetadata.set(to, PeerMetadata.create({ status }));
+            }
+            if (remotePeer) {
+              remotePeer.status = status;
             }
           },
         },
