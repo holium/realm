@@ -86,7 +86,7 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
     );
 
     // Sync friends agent
-    await OnboardingIPC.updatePassport(shipId, {
+    OnboardingIPC.updatePassport(shipId, {
       nickname,
       avatar,
       bio: description,
