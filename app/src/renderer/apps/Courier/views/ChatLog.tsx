@@ -19,10 +19,7 @@ import { IuseStorage } from 'renderer/lib/useStorage';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import {
-  ChatMessageType,
-  ChatModelType,
-} from '../../../stores/models/chat.model';
+import { ChatMessageType } from '../../../stores/models/chat.model';
 import { ChatAvatar } from '../components/ChatAvatar';
 import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
@@ -40,8 +37,6 @@ const FullWidthAnimatePresence = styled(AnimatePresence)`
 
 type ChatLogProps = {
   storage: IuseStorage;
-  selectedChat?: ChatModelType;
-  height?: number;
 };
 
 export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
@@ -253,24 +248,22 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   }
 
   return (
-    <Flex flexDirection="column" height={props.height}>
+    <Flex flexDirection="column">
       <Flex
         layout="preserve-aspect"
         layoutId={`chat-${path}-container`}
         flexDirection="column"
       >
-        {!props.selectedChat && (
-          <ChatLogHeader
-            title={title}
-            path={path}
-            isMuted={selectedChat.muted}
-            onBack={() => setSubroute('inbox')}
-            hasMenu
-            avatar={chatAvatarEl}
-            pretitle={pretitle}
-            subtitle={subtitle}
-          />
-        )}
+        <ChatLogHeader
+          title={title}
+          path={path}
+          isMuted={selectedChat.muted}
+          onBack={() => setSubroute('inbox')}
+          hasMenu
+          avatar={chatAvatarEl}
+          pretitle={pretitle}
+          subtitle={subtitle}
+        />
         <Flex
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -333,7 +326,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
         }}
       >
         <ChatInputBox
-          storage={props.storage}
+          storage={storage}
           selectedChat={selectedChat}
           themeMode={theme.mode as 'light' | 'dark'}
           onSend={onMessageSend}
