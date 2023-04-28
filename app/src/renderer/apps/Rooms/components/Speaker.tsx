@@ -36,7 +36,12 @@ const SpeakerPresenter = (props: ISpeaker) => {
   const metadata = friends.getContactAvatarMetadata(person);
 
   let name = metadata?.nickname || person;
-  const peer = roomsStore.getPeer(person);
+  let peer: any;
+  if (isOur) {
+    peer = roomsStore;
+  } else {
+    peer = roomsStore.peersMetadata.get(person);
+  }
 
   const contextMenuOptions = useMemo(
     () =>

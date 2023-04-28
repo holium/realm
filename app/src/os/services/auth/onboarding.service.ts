@@ -282,7 +282,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     return false;
   }
 
-  async _waitForInstallRealmAgent(
+  private async waitForInstallRealmAgent(
     buildVersion: any
   ): Promise<RealmInstallStatus> {
     const self = this;
@@ -307,13 +307,22 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
 
   async installRealmAgent(): Promise<RealmInstallStatus> {
     return new Promise(async (resolve, reject) => {
+      // if bypass, don't perform install and continue with onboarding. useful in development
+      if (process.env.INSTALL_MOON === 'bypass') {
+        resolve({ success: true });
+        return;
+      }
       await this._openConduit();
       try {
         APIConnection.getInstance().conduit.poke({
           app: 'hood',
           mark: 'kiln-install',
           json: {
-            ship: '~hostyv',
+            ship:
+              process.env.RELEASE_CHANNEL === 'latest' ||
+              process.env.RELEASE_CHANNEL === 'hotfix'
+                ? '~hostyv'
+                : '~nimwyd-ramwyl-dozzod-hostyv',
             desk: 'realm',
             local: 'realm',
           },
@@ -333,7 +342,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
           resolve({ success: true, message: '' });
           return;
         }
-        const result = await this._waitForInstallRealmAgent(buildVersion);
+        const result = await this.waitForInstallRealmAgent(buildVersion);
         resolve(result);
       } catch (e) {
         log.error(e);

@@ -14,7 +14,13 @@ export enum TrackKind {
   Video = 'video',
   Unknown = 'unknown',
 }
-
+type PeerSetters = {
+  setMuted: (isMuted: boolean) => void;
+  setAudioLevel?: (audioLevel: number) => void;
+  setSpeaking: (isSpeaking: boolean) => void;
+  setAudioAttached: (isAttached: boolean) => void;
+  setStatus: (status: PeerConnectionState) => void;
+};
 export class RemotePeer {
   patp: string;
   patpId: number;
@@ -31,16 +37,24 @@ export class RemotePeer {
   isAudioAttached: boolean = false;
   isVideoAttached: boolean = false;
   sendDataToPeer: (data: Partial<DataPacket>) => void = () => {};
+  setters: PeerSetters = {
+    setMuted: () => {},
+    setSpeaking: () => {},
+    setAudioAttached: () => {},
+    setStatus: () => {},
+  };
 
   constructor(
     rid: string,
     patp: string,
     localPeer: LocalPeer,
     sendDataToPeer: (data: Partial<DataPacket>) => void,
+    setters: PeerSetters,
     config: { isInitiator: boolean; rtc: any }
   ) {
     this.rid = rid;
     this.patp = patp;
+    this.setters = setters;
     this.isInitiator = config.isInitiator;
     this.localPeer = localPeer;
     this.patpId = patp2dec(patp);
@@ -198,6 +212,7 @@ export class RemotePeer {
         this.removeTracks();
       }
       this.audioTracks.set(track.id, track);
+      this.setters.setAudioAttached(true);
       this.attach(track);
       this.setStatus(PeerConnectionState.Connected);
     }
@@ -206,7 +221,6 @@ export class RemotePeer {
   _onData(data: any) {
     console.log('RemotePeer onData', this.patp, data);
     // check if we have a stream from the peer
-    console.log(this.audioTracks);
     if (data.kind === DataPacketMuteStatus) {
       const payload = data.value as DataPayload;
       if (payload.data) {
@@ -225,12 +239,14 @@ export class RemotePeer {
       track.stop();
       this.detach(track);
     });
+    this.setters.setAudioAttached(false);
 
     this.audioTracks.clear();
   }
 
   mute() {
     this.isMuted = true;
+    this.setters.setMuted(true);
     this.audioTracks.forEach((track: MediaStreamTrack) => {
       track.enabled = false;
     });
@@ -238,6 +254,7 @@ export class RemotePeer {
 
   unmute() {
     this.isMuted = false;
+    this.setters.setMuted(false);
     this.audioTracks.forEach((track: MediaStreamTrack) => {
       track.enabled = true;
     });
@@ -245,9 +262,11 @@ export class RemotePeer {
 
   isSpeakingChanged(speaking: boolean) {
     this.isSpeaking = speaking;
+    this.setters.setSpeaking(speaking);
   }
 
   setStatus(status: PeerConnectionState) {
+    this.setters.setStatus(status);
     this.status = status;
   }
 
