@@ -256,7 +256,6 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
         path: `/version`,
       });
       const parts = res.version.split('.');
-      console.log('testing version %o against %o', parts, buildVersion);
       if (parseInt(parts[0]) > parseInt(buildVersion.major)) {
         console.log('passed major version check');
         return true;
@@ -290,9 +289,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       let totalWaitTime = 0,
         maxWaitTime = 300000; // 5 minutes
       (async function versionCheck(totalWaitTime, maxWaitTime) {
-        console.log('before test');
         const result = await self._testVersion(buildVersion);
-        console.log('after test');
         if (result) {
           resolve({ success: true });
           return;
