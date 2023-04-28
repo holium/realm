@@ -3,6 +3,7 @@ import { CSSProperties, useEffect, useState } from 'react';
 import { Portal, Text } from '@holium/design-system';
 import { useToggle } from '@holium/design-system/util';
 import {
+  AccountHostingDialogBody,
   ChangeEmailModal,
   ChangeMaintenanceWindowModal,
   ChangePasswordModal,
@@ -11,7 +12,6 @@ import {
   OnboardingStorage,
   VerifyEmailModal,
 } from '@holium/shared';
-import { AccountHostingDialogBody } from '@holium/shared/src/onboarding/dialogs/bodies/AccountHostingDialogBody';
 
 import { thirdEarthApi } from 'renderer/onboarding/thirdEarthApi';
 import { OnboardingIPC } from 'renderer/stores/ipc';
@@ -88,9 +88,9 @@ export const AccountHostingSection = ({ account }: Props) => {
       const response = await thirdEarthApi.changePassword(token, password);
 
       if (response?.token) {
-        changePasswordModal.toggleOff();
         // Also update the password locally.
-        OnboardingIPC.updatePassword(account.patp, password);
+        await OnboardingIPC.updatePassword(account.patp, password);
+        changePasswordModal.toggleOff();
 
         return true;
       }

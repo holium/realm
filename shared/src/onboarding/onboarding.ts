@@ -16,6 +16,8 @@ export { AccountHostingDialog } from './dialogs/AccountHostingDialog';
 export { AccountS3StorageDialog } from './dialogs/AccountS3StorageDialog';
 export { AccountStatisticsDialog } from './dialogs/AccountStatisticsDialog';
 export { AddServerDialog } from './dialogs/AddServerDialog';
+export { AccountHostingDialogBody } from './dialogs/bodies/AccountHostingDialogBody';
+export { AccountS3StorageDialogBody } from './dialogs/bodies/AccountS3StorageDialogBody';
 export { BootingDialog } from './dialogs/BootingDialog';
 export { ChooseIdDialog } from './dialogs/ChooseIdDialog';
 export { ClaimTokenDialog } from './dialogs/ClaimTokenDialog';
