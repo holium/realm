@@ -24,12 +24,16 @@ type OnboardingCredentials = {
 export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   private authDB?: AuthDB;
   private credentials?: OnboardingCredentials;
+  private cookie?: string;
+  private cookieAt?: number;
+
   constructor(options?: ServiceOptions) {
     super('onboardingService', options);
     if (options?.preload) {
       return;
     }
     this.authDB = new AuthDB();
+    this.cookieAt = 0;
     log.info('onboarding.service.ts:', 'Constructed.');
   }
 
@@ -224,14 +228,22 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   }
 
   public async getCookie(patp: string, url: string, code: string) {
+    const now: number = Date.now();
+    if (this.cookie && this.cookieAt && now - this.cookieAt < 3000) {
+      // cache cookie for 3 seconds to prevent hammering urbit /~/login in quick succession
+      return this.cookie;
+    }
+
     const cookie = await getCookie({ patp, url, code });
     if (!cookie) throw new Error('Failed to get cookie');
     const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
     const sanitizedCookie = cookie.split('; ')[0];
-
     if (patp.toLowerCase() !== cookiePatp.toLowerCase()) {
       throw new Error('Invalid code.');
     }
+
+    this.cookie = sanitizedCookie;
+    this.cookieAt = Date.now();
 
     return sanitizedCookie;
   }
