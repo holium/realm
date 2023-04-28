@@ -189,7 +189,6 @@ export class LocalPeer {
       video: false,
     }
   ) {
-    console.log('enableMedia', options);
     if (this.stream) {
       return;
     }
@@ -212,7 +211,6 @@ export class LocalPeer {
     this.stream = stream;
     this.stream.getAudioTracks().forEach((audio: MediaStreamTrack) => {
       this.audioTracks.set(audio.id, audio);
-      console.log('setMedia', audio.id, audio.label);
     });
     // initialize the speaking detection analyser
     this.analysers[0] = SpeakingDetectionAnalyser.initialize(this);

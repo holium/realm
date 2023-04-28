@@ -11,7 +11,6 @@ import {
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { useRooms } from '../useRooms';
 import { AvatarRow } from './AvatarRow';
 
 type RoomRowProps = Partial<RoomType> & {
@@ -44,9 +43,7 @@ const RoomRowPresenter = ({
   if (presentCount === 1) {
     peopleText = 'person';
   }
-  const peopleNoHost = present?.filter(
-    (person: string) => person !== ship?.patp
-  );
+
   let titleText = title;
   if (titleText && titleText.length > 16 && tray) {
     titleText = titleText.substring(0, 16) + '...';
@@ -86,7 +83,6 @@ const RoomRowPresenter = ({
       small={tray}
       className="realm-cursor-hover"
       selected={isLive}
-      // baseBg={!tray && isLive ? isLiveColor : undefined}
       onClick={(evt: MouseEvent<HTMLDivElement>) => onClick?.(evt)}
       style={
         !onClick
@@ -148,7 +144,7 @@ const RoomRowPresenter = ({
         </Flex>
 
         <AvatarRow
-          people={peopleNoHost ?? []}
+          people={present ?? []}
           backgroundColor={tray ? dockColor : windowColor}
         />
       </Flex>

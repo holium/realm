@@ -934,7 +934,6 @@ export const WalletStore = types
       }),
       setInitialized(initialized: boolean) {
         self.initialized = initialized;
-        console.log('trying to set the ship', shipStore.ship?.patp);
         self.ourPatp = shipStore.ship?.patp;
       },
       setNetworkSetter(network: NetworkType) {

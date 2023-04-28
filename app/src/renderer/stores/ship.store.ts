@@ -127,6 +127,7 @@ export const shipStore = ShipStore.create({
     subroute: 'inbox',
     isOpen: false,
     pinnedChats: [],
+    loader: { state: 'loading' },
   },
   spacesStore: {
     spaces: {},

@@ -15,8 +15,12 @@ const VoiceViewPresenter = () => {
   const { setTrayAppHeight } = useTrayApps();
 
   const speakers = roomsStore.current
-    ? [...Array.from(roomsStore.getPeers())]
-    : []; //.filter((patp) => patp !== our);
+    ? [
+        ...Array.from(roomsStore.getPeers()).filter(
+          (patp) => patp !== window.ship
+        ),
+      ]
+    : [];
 
   useEffect(() => {
     const regularHeight = roomTrayConfig.dimensions.height;

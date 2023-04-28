@@ -82,6 +82,9 @@ export const ShipBarPresenter = () => {
       return;
     }
     initNotifications();
+    if (chatStore.inbox.length === 0) {
+      chatStore.loadChatList();
+    }
     setAccountTrayOpen(true);
   };
 

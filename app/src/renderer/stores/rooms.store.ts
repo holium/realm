@@ -1,5 +1,5 @@
 import { observable } from 'mobx';
-import { cast, flow, Instance, types } from 'mobx-state-tree';
+import { applySnapshot, cast, flow, Instance, types } from 'mobx-state-tree';
 import { patp2dec } from 'urbit-ob';
 
 import { SoundActions } from 'renderer/lib/sound';
@@ -120,8 +120,6 @@ export const RoomsStore = types
         sendDataToPeer,
         peerConfig
       );
-      console.log('dialPeer - remotePeer', remotePeer);
-      console.log('dialPeer - localPeer', localPeer);
 
       remotePeers.set(remotePeer.patp, remotePeer);
       remotePeer.dial();
@@ -149,6 +147,7 @@ export const RoomsStore = types
         hangup(peer.patp);
       });
       remotePeers.clear();
+      console.log('hangupAll', remotePeers);
       localPeer?.disableMedia();
     };
 
@@ -161,9 +160,7 @@ export const RoomsStore = types
         }
       },
       getPeers() {
-        return self.current
-          ? self.current.present.filter((peer) => peer !== window.ship)
-          : [];
+        return self.current ? self.current.present : [];
       },
       getPeer(patp: string) {
         if (patp === window.ship) return localPeer;
@@ -331,7 +328,7 @@ export const RoomsStore = types
         const room = self.rooms.get(rid);
         if (patp === window.ship && self.current?.rid === rid) {
           self.current = undefined;
-          // hangupAll();
+          hangupAll();
         }
         if (patp !== window.ship) {
           room?.removePeer(patp);
@@ -354,7 +351,7 @@ export const RoomsStore = types
           self.current = undefined;
         }
         const room = self.rooms.get(rid);
-        // console.log('_onRoomDeleted', room?.creator, window.ship);
+        console.log('_onRoomDeleted', room?.creator, window.ship);
         if (room?.creator !== window.ship) {
           // console.log('_onRoomDeleted someone else deleted');
           remotePeers.forEach((peer) => {
@@ -363,6 +360,13 @@ export const RoomsStore = types
           remotePeers.clear();
         }
         self.rooms.delete(rid);
+      },
+      _onProviderChanged(payload: {
+        provider: string;
+        rooms: Map<string, RoomMobx>;
+      }) {
+        self.provider = payload.provider;
+        applySnapshot(self.rooms, cast(payload.rooms));
       },
       _onSignal(payload: any) {
         const remotePeer = remotePeers.get(payload.from);
@@ -409,14 +413,11 @@ function registerOnUpdateListener() {
       }
     }
     if (mark === 'rooms-v2-reaction') {
-      // console.log('rooms-v2-reaction', type, payload);
       if (type === 'room-entered') {
         SoundActions.playRoomPeerEnter();
-        console.log(`%room-entered ${payload.ship}`);
         shipStore.roomsStore._onRoomEntered(payload.rid, payload.ship);
       }
       if (type === 'room-left') {
-        console.log(`%room-left ${payload.ship}`);
         shipStore.roomsStore._onRoomLeft(payload.rid, payload.ship);
       }
       if (type === 'room-created') {
@@ -427,13 +428,12 @@ function registerOnUpdateListener() {
       }
       if (type === 'kicked') {
         shipStore.roomsStore._onKicked(payload.rid, payload.ship);
-        // SoundActions.playRoomPeerEnter();
       }
       if (type === 'chat-received') {
-        // SoundActions.playRoomPeerEnter();
+        console.log(`%chat-received`, payload);
       }
       if (type === 'provider-changed') {
-        // SoundActions.playRoomPeerLeave();
+        shipStore.roomsStore._onProviderChanged(payload);
       }
     }
     if (mark === 'rooms-v2-signal') {
