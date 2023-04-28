@@ -151,6 +151,7 @@ export const AccountHostingSection = ({ account }: Props) => {
       .refreshToken(token)
       .then((response) => {
         OnboardingStorage.set({ token: response.token });
+        // const ships = await thirdEarthApi.getUserShips(token);
         thirdEarthApi
           .getManagePaymentLink(response.token)
           .then((response) => setManagePaymentLink(response.url));

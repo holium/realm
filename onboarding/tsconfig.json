@@ -9,7 +9,8 @@
     "jsx": "preserve"
   },
   "include": [
-    "src"
+    "src",
+    "../shared/src/onboarding/services/UserContext.tsx"
   ],
   "exclude": [
     "node_modules"

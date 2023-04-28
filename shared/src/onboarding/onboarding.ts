@@ -31,6 +31,7 @@ export { PaymentDialog } from './dialogs/PaymentDialog';
 export { VerifyEmailDialog } from './dialogs/VerifyEmailDialog';
 export { OnboardingStorage } from './services/OnboardingStorage';
 export { ThirdEarthApi } from './services/ThirdEarthApi';
+export { UserContextProvider, useUser } from './services/UserContext';
 export type {
   OnboardingPage,
   RealmInstallStatus,

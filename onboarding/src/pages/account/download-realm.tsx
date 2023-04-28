@@ -1,6 +1,10 @@
-import { AccountDownloadRealmDialog } from '@holium/shared';
+import {
+  AccountDownloadRealmDialog,
+  UserContextProvider,
+  useUser,
+} from '@holium/shared';
 
-import { UserContextProvider, useUser } from 'util/UserContext';
+import { thirdEarthApi } from 'util/thirdEarthApi';
 
 import { Page } from '../../components/Page';
 import { downloadLinks } from '../../util/constants';
@@ -43,7 +47,7 @@ const DownloadRealmPresenter = () => {
 export default function DownloadRealm() {
   return (
     <Page title="Account / Download Realm" isProtected>
-      <UserContextProvider>
+      <UserContextProvider api={thirdEarthApi}>
         <DownloadRealmPresenter />
       </UserContextProvider>
     </Page>
