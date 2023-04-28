@@ -57,6 +57,12 @@ export function isInitiator(localPatpId: number, remotePatp: string) {
   return localPatpId < patp2dec(remotePatp);
 }
 
+const PeerMetadata = types.model('PeerMetadata', {
+  isMuted: types.optional(types.boolean, false),
+  isSpeaking: types.optional(types.boolean, false),
+  isAudioAttached: types.optional(types.boolean, false),
+});
+
 export const RoomsStore = types
   .model('RoomsStore', {
     path: types.optional(types.string, ''),
@@ -67,6 +73,7 @@ export const RoomsStore = types
     isMuted: types.optional(types.boolean, false),
     isSpeaking: types.optional(types.boolean, false),
     isAudioAttached: types.optional(types.boolean, false),
+    peersMetadata: types.map(PeerMetadata),
     rtcConfig: types.optional(types.frozen(), {
       iceServers: [
         {
@@ -120,6 +127,32 @@ export const RoomsStore = types
         to,
         localPeer,
         sendDataToPeer,
+        {
+          setAudioAttached: (isAttached: boolean) => {
+            const currentMtd = self.peersMetadata.get(to);
+            if (currentMtd) {
+              currentMtd.isAudioAttached = isAttached;
+            } else {
+              self.peersMetadata.set(to, { isAudioAttached: isAttached });
+            }
+          },
+          setMuted: (isMuted: boolean) => {
+            const currentMtd = self.peersMetadata.get(to);
+            if (currentMtd) {
+              currentMtd.isMuted = isMuted;
+            } else {
+              self.peersMetadata.set(to, { isMuted });
+            }
+          },
+          setSpeaking: (isSpeaking: boolean) => {
+            const currentMtd = self.peersMetadata.get(to);
+            if (currentMtd) {
+              currentMtd.isSpeaking = isSpeaking;
+            } else {
+              self.peersMetadata.set(to, { isSpeaking });
+            }
+          },
+        },
         peerConfig
       );
 
@@ -166,6 +199,7 @@ export const RoomsStore = types
       },
       getPeer(patp: string) {
         if (patp === window.ship) return localPeer;
+        console.log('getPeer', patp, window.ship);
         return remotePeers.get(patp);
       },
       init: flow(function* () {

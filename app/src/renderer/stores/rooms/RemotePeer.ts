@@ -14,7 +14,12 @@ export enum TrackKind {
   Video = 'video',
   Unknown = 'unknown',
 }
-
+type PeerSetters = {
+  setMuted: (isMuted: boolean) => void;
+  setAudioLevel?: (audioLevel: number) => void;
+  setSpeaking: (isSpeaking: boolean) => void;
+  setAudioAttached: (isAttached: boolean) => void;
+};
 export class RemotePeer {
   patp: string;
   patpId: number;
@@ -31,16 +36,23 @@ export class RemotePeer {
   isAudioAttached: boolean = false;
   isVideoAttached: boolean = false;
   sendDataToPeer: (data: Partial<DataPacket>) => void = () => {};
+  setters: PeerSetters = {
+    setMuted: () => {},
+    setSpeaking: () => {},
+    setAudioAttached: () => {},
+  };
 
   constructor(
     rid: string,
     patp: string,
     localPeer: LocalPeer,
     sendDataToPeer: (data: Partial<DataPacket>) => void,
+    setters: PeerSetters,
     config: { isInitiator: boolean; rtc: any }
   ) {
     this.rid = rid;
     this.patp = patp;
+    this.setters = setters;
     this.isInitiator = config.isInitiator;
     this.localPeer = localPeer;
     this.patpId = patp2dec(patp);
@@ -206,7 +218,6 @@ export class RemotePeer {
   _onData(data: any) {
     console.log('RemotePeer onData', this.patp, data);
     // check if we have a stream from the peer
-    console.log(this.audioTracks);
     if (data.kind === DataPacketMuteStatus) {
       const payload = data.value as DataPayload;
       if (payload.data) {

@@ -1,6 +1,6 @@
 import { MultiplayerPayload, PresenceBroadcast } from '@holium/realm-presence';
 
-export declare enum DataPacket_Kind {
+export enum DataPacket_Kind {
   DATA = 0,
   CURSOR = 1,
   TRACK_META = 2,
@@ -9,7 +9,7 @@ export declare enum DataPacket_Kind {
   UNRECOGNIZED = -1,
 }
 
-export declare enum DataPacketKind {
+export enum DataPacketKind {
   DATA = 0,
   CURSOR = 1,
   TRACK_META = 2,
