@@ -104,6 +104,7 @@ export const RoomsStore = types
     isSpeaking: types.optional(types.boolean, false),
     isAudioAttached: types.optional(types.boolean, false),
     peersMetadata: types.map(PeerMetadata),
+    status: types.optional(PeerConnState, 'connected'),
     rtcConfig: types.optional(types.frozen(), {
       iceServers: [
         {
@@ -127,15 +128,6 @@ export const RoomsStore = types
     },
     get roomsList() {
       return Array.from(self.rooms.values());
-    },
-    getPeerMetadata(patp: string) {
-      return {
-        patp,
-        isMuted: self.peersMetadata.get(patp)?.isMuted,
-        isSpeaking: self.peersMetadata.get(patp)?.isSpeaking,
-        isAudioAttached: self.peersMetadata.get(patp)?.isAudioAttached,
-        status: self.peersMetadata.get(patp)?.status,
-      };
     },
   }))
   .actions((self) => {
