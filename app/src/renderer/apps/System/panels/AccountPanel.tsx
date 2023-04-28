@@ -14,6 +14,8 @@ const AccountPanelPresenter = () => {
 
   if (!loggedInAccount) return null;
 
+  const isRealmShip = loggedInAccount.type === 'hosted';
+
   return (
     <SettingPane>
       <SettingTitle title="Account" />
@@ -21,18 +23,22 @@ const AccountPanelPresenter = () => {
         account={loggedInAccount}
         key={`${loggedInAccount.patp}-settings-passport`}
       />
-      <AccountHostingSection
-        account={loggedInAccount}
-        key={`${loggedInAccount.patp}-settings-hosting`}
-      />
-      <AccountStorageSection
-        account={loggedInAccount}
-        key={`${loggedInAccount.patp}-settings-storage`}
-      />
-      <AccountCustomDomainSection
-        account={loggedInAccount}
-        key={`${loggedInAccount.patp}-custom-domain`}
-      />
+      {isRealmShip && (
+        <>
+          <AccountHostingSection
+            account={loggedInAccount}
+            key={`${loggedInAccount.patp}-settings-hosting`}
+          />
+          <AccountStorageSection
+            account={loggedInAccount}
+            key={`${loggedInAccount.patp}-settings-storage`}
+          />
+          <AccountCustomDomainSection
+            account={loggedInAccount}
+            key={`${loggedInAccount.patp}-custom-domain`}
+          />
+        </>
+      )}
     </SettingPane>
   );
 };
