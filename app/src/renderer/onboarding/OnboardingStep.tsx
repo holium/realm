@@ -33,7 +33,7 @@ export const OnboardingStepPresenter = ({
     case '/login':
       return <LoginStep setStep={handleSetStep} onFinish={onFinish} />;
     case '/hosting':
-      return <HostingStep setStep={handleSetStep} />;
+      return <HostingStep setStep={handleSetStep} onFinish={onFinish} />;
     case '/add-server':
       return <AddServerStep setStep={handleSetStep} />;
     case '/passport':
