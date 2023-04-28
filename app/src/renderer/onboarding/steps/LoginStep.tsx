@@ -2,7 +2,9 @@ import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
 
 import { Anchor } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 import {
+  LearnMoreModal,
   LoginDialog,
   OnboardDialogDescription,
   OnboardingStorage,
@@ -15,6 +17,8 @@ import { thirdEarthApi } from '../thirdEarthApi';
 import { StepProps } from './types';
 
 export const LoginStep = ({ setStep, onFinish }: StepProps) => {
+  const learnMoreModal = useToggle(false);
+
   const prefilledEmail = OnboardingStorage.get().email ?? '';
 
   useEffect(() => {
@@ -88,19 +92,34 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
   };
 
   return (
-    <LoginDialog
-      showTerms
-      prefilledEmail={prefilledEmail}
-      label={
-        <OnboardDialogDescription>
-          Don't have access?{' '}
-          <Anchor rel="noreferrer" target="_blank" href="https://holium.com">
-            Join waitlist
-          </Anchor>
-          .
-        </OnboardDialogDescription>
-      }
-      onLogin={onLogin}
-    />
+    <>
+      <LearnMoreModal
+        isOpen={learnMoreModal.isOn}
+        onDismiss={learnMoreModal.toggleOff}
+        onAccept={learnMoreModal.toggleOff}
+      />
+      <LoginDialog
+        showTerms
+        prefilledEmail={prefilledEmail}
+        label={
+          <OnboardDialogDescription>
+            Don't have access?{' '}
+            <Anchor rel="noreferrer" target="_blank" href="https://holium.com">
+              Join waitlist
+            </Anchor>
+            {' / '}
+            <Anchor
+              rel="noreferrer"
+              target="_blank"
+              style={{ textDecoration: 'underline' }}
+              onClick={learnMoreModal.toggleOn}
+            >
+              Learn more
+            </Anchor>
+          </OnboardDialogDescription>
+        }
+        onLogin={onLogin}
+      />
+    </>
   );
 };

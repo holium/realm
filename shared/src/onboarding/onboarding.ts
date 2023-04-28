@@ -7,6 +7,7 @@ export { EjectIdModal } from './components/hosting/modals/EjectIdModal';
 export { GetNewAccessCodeModal } from './components/hosting/modals/GetNewAccessCodeModal';
 export { VerifyEmailModal } from './components/hosting/modals/VerifyEmailModal';
 export { SubmitButton } from './components/hosting/SubmitButton';
+export { LearnMoreModal } from './components/LearnMoreModal';
 export { OnboardDialogSkeleton } from './components/OnboardDialog';
 export { OnboardDialogDescription } from './components/OnboardDialog.styles';
 export { PassportCard } from './components/PassportCard';
