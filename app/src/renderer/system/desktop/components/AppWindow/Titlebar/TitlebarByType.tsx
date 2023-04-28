@@ -1,4 +1,4 @@
-import { FC, PointerEvent, useEffect } from 'react';
+import { FC, PointerEvent } from 'react';
 
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/BrowserToolbar';
 import { nativeApps } from 'renderer/apps/nativeApps';
@@ -116,22 +116,17 @@ export const TitlebarByType = ({
     const onCloseDialog = dialogConfig.hasCloseButton
       ? dialogConfig.onClose
       : undefined;
-    const onOpenDialog = dialogConfig.onOpen;
-    CustomTitlebar = DialogTitlebar as FC<DialogTitlebarProps>;
     showDevToolsToggle = false;
     maximizeButton = false;
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useEffect(() => {
-      // trigger onOpen only once
-      onOpenDialog && onOpenDialog();
-    }, [onOpenDialog]);
+
     if (noTitlebar) {
       titlebar = <div />;
     } else {
       titlebar = (
-        <CustomTitlebar
+        <DialogTitlebar
           zIndex={appWindow.zIndex}
           showDevToolsToggle
+          onOpen={dialogConfig.onOpen}
           onClose={onCloseDialog}
           onDragStart={onDragStart}
           onDragEnd={onDragEnd}
