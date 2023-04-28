@@ -13,7 +13,12 @@ import { ShipDB } from '../ship/ship.db';
 import { Account } from './accounts.table';
 import { AuthDB } from './auth.db';
 import { MasterAccount } from './masterAccounts.table';
-import { OnboardingUpdateTypes } from './onboarding.types';
+import {
+  OnboardingUpdateTypes,
+  RealmInstallVersionTest,
+} from './onboarding.types';
+
+import { RealmInstallStatus } from '@holium/shared/src/onboarding/types';
 
 type OnboardingCredentials = {
   patp: string;
@@ -206,7 +211,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   }
 
   _prepareBuildVersionEnv() {
-    let result = {
+    let result: RealmInstallVersionTest = {
       success: false, // assume failure
       major: -1,
       minor: -1,
@@ -277,9 +282,11 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     return false;
   }
 
-  async _waitForInstallRealmAgent(buildVersion: any): Promise<string> {
+  async _waitForInstallRealmAgent(
+    buildVersion: any
+  ): Promise<RealmInstallStatus> {
     const self = this;
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       let totalWaitTime = 0,
         maxWaitTime = 300000; // 5 minutes
       (async function versionCheck(totalWaitTime, maxWaitTime) {
@@ -287,12 +294,12 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
         const result = await self._testVersion(buildVersion);
         console.log('after test');
         if (result) {
-          resolve('continue');
+          resolve({ success: true });
           return;
         }
         totalWaitTime += 3000;
         if (totalWaitTime > maxWaitTime) {
-          reject('error:timeout');
+          resolve({ success: false, message: 'timeout' });
           return;
         }
         setTimeout(() => versionCheck(totalWaitTime, maxWaitTime), 3000);
@@ -300,19 +307,19 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     });
   }
 
-  async installRealmAgent(): Promise<string> {
+  async installRealmAgent(): Promise<RealmInstallStatus> {
     return new Promise(async (resolve, reject) => {
       await this._openConduit();
       try {
-        // APIConnection.getInstance().conduit.poke({
-        //   app: 'hood',
-        //   mark: 'kiln-install',
-        //   json: {
-        //     ship: '~hostyv',
-        //     desk: 'realm',
-        //     local: 'realm',
-        //   },
-        // });
+        APIConnection.getInstance().conduit.poke({
+          app: 'hood',
+          mark: 'kiln-install',
+          json: {
+            ship: '~hostyv',
+            desk: 'realm',
+            local: 'realm',
+          },
+        });
 
         // @note: if %realm is already installed and does not need to be updated, there is
         //   currently no way to get notified by clay (gift) that the kiln-install operation
@@ -321,7 +328,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
 
         const buildVersion = this._prepareBuildVersionEnv();
         if (!buildVersion.success) {
-          resolve(`continue`);
+          resolve({ success: false, message: 'BUILD_VERSION env var invalid' });
           return;
         }
         const result = await this._waitForInstallRealmAgent(buildVersion);

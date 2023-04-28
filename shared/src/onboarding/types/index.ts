@@ -66,6 +66,11 @@ export type ThirdEarthPortalSession = {
   url: string;
 };
 
+export type RealmInstallStatus = {
+  success: boolean;
+  message?: string;
+};
+
 type OnboardingAccountPage =
   | '/account'
   | '/account/custom-domain'
