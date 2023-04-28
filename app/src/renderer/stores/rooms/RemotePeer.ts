@@ -89,7 +89,7 @@ export class RemotePeer {
     this.spInstance = new SimplePeer({
       initiator: this.isInitiator,
       config: this.rtcConfig,
-      stream: this.localPeer.stream,
+      // stream: this.localPeer.stream,
       objectMode: true,
       trickle: true,
     });
@@ -103,7 +103,6 @@ export class RemotePeer {
   }
 
   sendSignal(data: SimplePeer.SignalData) {
-    console.log('RemotePeer, sendSignal', this.patp, data);
     RoomsIPC.sendSignal(window.ship, this.patp, this.rid, data);
   }
 
@@ -164,7 +163,6 @@ export class RemotePeer {
       kind: DataPacketMuteStatus,
       value: { data: this.localPeer?.isMuted },
     });
-    // this.localPeer?.streamTracks(this);
   }
 
   _onClose() {
