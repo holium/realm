@@ -4,9 +4,9 @@ import { observer } from 'mobx-react';
 import { Flex } from '@holium/design-system';
 
 import { useTrayApps } from 'renderer/apps/store';
+import { useShipStore } from 'renderer/stores/ship.store';
 import { useAppState } from 'renderer/stores/app.store';
 import { MainIPC } from 'renderer/stores/ipc';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 import { Rooms } from './List';
 import { NewRoom } from './NewRoom';

@@ -14,6 +14,7 @@ import {
   Text,
   TextInput,
 } from '@holium/design-system';
+import { OnboardingStorage } from '@holium/shared';
 
 import { useAppState } from 'renderer/stores/app.store';
 
@@ -39,9 +40,8 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
 
   useEffect(() => {
     if (!selectedShip) {
-      setSelectedShip(
-        localStorage.getItem('lastAccountLogin') || accounts[0].patp
-      );
+      const { lastAccountLogin } = OnboardingStorage.get();
+      setSelectedShip(lastAccountLogin || accounts[0].patp);
     }
   }, []);
 

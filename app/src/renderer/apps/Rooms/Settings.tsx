@@ -10,7 +10,7 @@ import {
   Text,
 } from '@holium/design-system';
 
-import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 import { useTrayApps } from '../store';
 
@@ -32,28 +32,9 @@ const getAudioInputSources = async () => {
   );
 };
 
-// const getAudioOutputSources = async () => {
-//   const devices: MediaDeviceInfo[] =
-//     await navigator.mediaDevices.enumerateDevices();
-//   return formSourceOptions(
-//     devices.filter((device: MediaDeviceInfo) => {
-//       return device.kind === 'audiooutput';
-//     })
-//   );
-// };
-
-// const getVideoInputSources = async () => {
-//   const devices: MediaDeviceInfo[] =
-//     await navigator.mediaDevices.enumerateDevices();
-//   return formSourceOptions(
-//     devices.filter((device: MediaDeviceInfo) => {
-//       return device.kind === 'videoinput';
-//     })
-//   );
-// };
-
 const SettingsPresenter = () => {
   const { roomsApp } = useTrayApps();
+  const { loggedInAccount } = useAppState();
   const { roomsStore } = useShipStore();
 
   const [audioSourceOptions, setAudioSources] = useState<RadioOption[] | any[]>(

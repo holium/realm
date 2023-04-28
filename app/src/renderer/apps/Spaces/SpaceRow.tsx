@@ -28,13 +28,13 @@ interface SpaceRowProps {
 
 const SpaceRowPresenter = (props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
-  const { shellStore, theme } = useAppState();
-  const { ship, spacesStore } = useShipStore();
+  const { loggedInAccount, shellStore, theme } = useAppState();
+  const { spacesStore } = useShipStore();
   const { getOptions, setOptions } = useContextMenu();
   const spaceRowId = useMemo(() => `space-row-${space.path}`, [space.path]);
 
   const members = spacesStore.spaces.get(space.path)?.members;
-  const member = members?.all.get(ship?.patp ?? '');
+  const member = members?.all.get(loggedInAccount?.patp ?? '');
   const roles = member?.roles;
   const contextMenuOptions = useMemo(() => {
     const menu = [];
@@ -85,7 +85,14 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
     }
 
     return menu.filter(Boolean) as ContextMenuOption[];
-  }, [spacesStore.spaces, roles, ship, space.name, space.path, theme]);
+  }, [
+    spacesStore.spaces,
+    roles,
+    loggedInAccount,
+    space.name,
+    space.path,
+    theme,
+  ]);
 
   useEffect(() => {
     if (contextMenuOptions !== getOptions(spaceRowId)) {

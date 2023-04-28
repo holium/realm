@@ -1,4 +1,4 @@
-import { FormEvent, ReactNode } from 'react';
+import { CSSProperties, FormEvent, ReactNode } from 'react';
 import styled from 'styled-components';
 
 import { Button, Icon } from '@holium/design-system/general';
@@ -51,6 +51,7 @@ type Props = {
   isOpen: boolean;
   children: ReactNode;
   maxWidth?: number;
+  style?: CSSProperties;
   onDismiss: () => void;
   onSubmit?: (e: FormEvent<HTMLFormElement>) => void;
 };
@@ -59,6 +60,7 @@ export const Modal = ({
   isOpen,
   children,
   maxWidth,
+  style,
   onDismiss,
   onSubmit,
 }: Props) => {
@@ -67,7 +69,7 @@ export const Modal = ({
   return (
     <>
       <Overlay onClick={onDismiss} />
-      <ModalContainer maxWidth={maxWidth}>
+      <ModalContainer style={style} maxWidth={maxWidth}>
         <Form onSubmit={onSubmit}>
           <CloseFormContainer>
             <Button.Transparent onClick={onDismiss}>

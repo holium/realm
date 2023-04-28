@@ -194,7 +194,8 @@ export class FriendsService extends AbstractDataAccess<Friend, any> {
         },
       },
     };
-    APIConnection.getInstance().conduit.poke(payload);
+
+    return APIConnection.getInstance().conduit.poke(payload);
   }
 
   public findOne(patp: string): Friend | null {

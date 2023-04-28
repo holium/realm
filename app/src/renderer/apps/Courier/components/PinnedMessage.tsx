@@ -39,8 +39,8 @@ const BlurredBG = styled.div`
 
 export const PinnedContainer = ({ message }: PinnedContainerProps) => {
   const { selectedChat } = useChatStore();
-  const { ship, friends } = useShipStore();
-  const { theme } = useAppState();
+  const { friends } = useShipStore();
+  const { loggedInAccount, theme } = useAppState();
   // are we an admin of the chat?
   const { getOptions, setOptions } = useContextMenu();
   const [authorColor, setAuthorColor] = useState<string | undefined>();
@@ -48,8 +48,8 @@ export const PinnedContainer = ({ message }: PinnedContainerProps) => {
   const pinnedRowId = useMemo(() => `pinned-${message.id}`, [message.id]);
   const contextMenuOptions = useMemo(() => {
     const menu: MenuItemProps[] = [];
-    if (!selectedChat || !ship) return menu;
-    const isAdmin = selectedChat.isHost(ship.patp);
+    if (!selectedChat || !loggedInAccount) return menu;
+    const isAdmin = selectedChat.isHost(loggedInAccount.patp);
 
     menu.push({
       id: `${pinnedRowId}-hide-pinned`,

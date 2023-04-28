@@ -8,6 +8,7 @@ import {
   types,
 } from 'mobx-state-tree';
 
+import { appState } from '../app.store';
 import { WalletIPC } from '../ipc';
 import { shipStore } from '../ship.store';
 
@@ -916,7 +917,7 @@ export const WalletStore = types
           /*const wallets = yield WalletIPC.getWallets() as PromiseLike<any>;
           const transactions =
             yield WalletIPC.getTransactions() as PromiseLike<any>;*/
-          self.ourPatp = shipStore.ship?.patp;
+          self.ourPatp = appState.loggedInAccount?.patp;
           if (self.ourPatp) {
             const hasMnemonic = yield WalletIPC.hasMnemonic(self.ourPatp);
             if (hasMnemonic) {
@@ -934,7 +935,8 @@ export const WalletStore = types
       }),
       setInitialized(initialized: boolean) {
         self.initialized = initialized;
-        self.ourPatp = shipStore.ship?.patp;
+        console.log('trying to set the ship', appState.loggedInAccount?.patp);
+        self.ourPatp = appState.loggedInAccount?.patp;
       },
       setNetworkSetter(network: NetworkType) {
         this.resetNavigation();

@@ -223,13 +223,11 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     });
   }
 
-  private async _hydrateSessionIfExists(): Promise<{
-    url: string;
-    patp: string;
-    cookie: string;
-  } | null> {
+  private _hydrateSessionIfExists() {
     if (!this.services) return null;
+
     const session = this.services?.auth._getLockfile();
+
     if (session) {
       log.info('realm.service.ts:', 'Hydrating session from session.lock');
 
@@ -237,19 +235,20 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       if (!account) {
         log.error('realm.service.ts:', 'Account not found');
         this.services.auth._clearLockfile();
-        return Promise.resolve(null);
+        return null;
       }
 
       // todo figure out how to get the password and encryptionKey from the lockfile
       this.services.ship = new ShipService(session.ship, '', '');
 
-      return Promise.resolve({
+      return {
         url: session.url,
         patp: session.ship,
         cookie: session.cookie,
-      });
+      };
     }
-    return Promise.resolve(null);
+
+    return null;
   }
 
   getReleaseChannel() {
@@ -287,44 +286,6 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     }
     saveReleaseChannelInSettings(channel);
   }
-
-  // async installRealmAgent() {
-  //   if (!this.services) return false;
-
-  //   const credentials = this.services.ship?.credentials;
-
-  //   if (!credentials) {
-  //     log.error('realm.service.ts:', 'No credentials found');
-  //     return false;
-  //   }
-
-  //   const patp = this.services.ship?.patp;
-
-  //   if (!patp) {
-  //     log.error('realm.service.ts:', 'No patp found');
-  //     return false;
-  //   }
-
-  //   try {
-  //     await APIConnection.getInstance({
-  //       ...credentials,
-  //       ship: patp,
-  //     }).conduit.poke({
-  //       app: 'hood',
-  //       mark: 'kiln-install',
-  //       json: {
-  //         ship: '~hostyv',
-  //         desk: 'realm',
-  //         local: 'realm',
-  //       },
-  //     });
-  //   } catch (e) {
-  //     log.error('realm.service.ts:', 'Failed to install Realm agent');
-  //     return false;
-  //   }
-
-  //   return true;
-  // }
 
   async onWillRedirect(url: string, webContents: any) {
     try {

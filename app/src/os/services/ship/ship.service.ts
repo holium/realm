@@ -14,6 +14,7 @@ import { FriendsService } from './friends.service';
 import NotificationsService from './notifications/notifications.service';
 import RoomsService from './rooms.service';
 import { ShipDB } from './ship.db';
+import { Credentials } from './ship.types.ts';
 import BazaarService from './spaces/bazaar.service';
 import SpacesService from './spaces/spaces.service';
 import WalletService from './wallet/wallet.service';
@@ -156,8 +157,13 @@ export class ShipService extends AbstractService<any> {
     this.shipDB?.setCredentials(url, code, cookie);
   }
 
-  get credentials() {
-    return this.shipDB?.getCredentials();
+  get credentials(): Credentials | undefined {
+    if (!this.shipDB) {
+      log.warn('ship.service.ts:', 'No ship database found');
+      return undefined;
+    }
+
+    return this.shipDB.getCredentials();
   }
 
   public decryptDb(password: string) {
@@ -284,13 +290,21 @@ export class ShipService extends AbstractService<any> {
     return this.services.friends.fetchOne(this.patp);
   }
 
-  updatePassport(nickname: string, bio?: string, avatar?: string) {
+  updatePassport(
+    nickname: string,
+    bio?: string,
+    avatar?: string,
+    color?: string,
+    cover?: string
+  ) {
     if (!this.services) return;
 
-    this.services.friends.saveContact(this.patp, {
+    return this.services.friends.saveContact(this.patp, {
       nickname,
       bio,
       avatar,
+      color,
+      cover,
     });
   }
 

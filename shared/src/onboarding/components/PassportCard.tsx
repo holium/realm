@@ -7,13 +7,21 @@ import { Input } from '@holium/design-system/inputs';
 import { AccountDialogSubtitle } from './AccountDialog.styles';
 import { PassportCardAvatar } from './PassportCardAvatar';
 
-const PassportCardContainer = styled(Flex)`
+const PassportCardContainer = styled(Flex)<{ noContainer?: boolean }>`
   flex: 1;
   gap: 20px;
   padding: 12px;
   border-radius: 9px;
   border: 1px solid rgba(var(--rlm-border-rgba));
   background-color: rgba(var(--rlm-window-rgba));
+
+  ${({ noContainer }) =>
+    noContainer &&
+    `
+    padding: 0;
+    border: none;
+    background-color: transparent;
+  `}
 `;
 
 const NicknameInput = styled(Input)`
@@ -38,6 +46,7 @@ type Props = {
   color?: string;
   description: string;
   initialAvatarSrc: string;
+  noContainer?: boolean;
   setNickname: (nickname: string) => void;
   setDescription: (description: string) => void;
   setAvatarSrc: (src?: string) => void;
@@ -50,6 +59,7 @@ export const PassportCard = ({
   nickname,
   description,
   initialAvatarSrc,
+  noContainer,
   setNickname,
   setDescription,
   setAvatarSrc,
@@ -60,7 +70,7 @@ export const PassportCard = ({
   };
 
   return (
-    <PassportCardContainer>
+    <PassportCardContainer noContainer={noContainer}>
       <PassportCardAvatar
         patp={patp}
         color={color}

@@ -4,6 +4,7 @@ import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, Text, TextInput } from '@holium/design-system';
 
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
@@ -57,6 +58,7 @@ export const createRoomForm = (
 };
 
 const NewRoomPresenter = () => {
+  const { loggedInAccount } = useAppState();
   const { spacesStore, roomsStore } = useShipStore();
   const { roomsApp } = useTrayApps();
 

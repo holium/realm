@@ -4,13 +4,12 @@ import { observer } from 'mobx-react';
 import { Avatar, Box, Flex, RadioList, Text } from '@holium/design-system';
 
 import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
 
-import { AboutPanel } from './pages/About';
-import { AccountPanel } from './pages/Account';
-import { HelpPanel } from './pages/Help';
-import { SystemPanel } from './pages/System';
-import { ThemePanel } from './pages/Theme';
+import { AboutPanel } from './panels/AboutPanel';
+import { AccountPanel } from './panels/AccountPanel';
+import { HelpPanel } from './panels/HelpPanel';
+import { SystemPanel } from './panels/SystemPanel';
+import { ThemePanel } from './panels/ThemePanel';
 
 type SystemPanelType =
   | 'system'
@@ -22,16 +21,15 @@ type SystemPanelType =
   | undefined;
 
 const SystemAppPresenter = () => {
-  const { shellStore } = useAppState();
-  const { ship } = useShipStore();
+  const { loggedInAccount, shellStore } = useAppState();
 
   const defaultRoute: SystemPanelType =
     shellStore.nativeConfig?.get('os-settings')?.route;
   const [systemPanel, setSystemPanelType] = useState<SystemPanelType>(
-    defaultRoute || 'theme'
+    defaultRoute || 'system'
   );
 
-  if (!ship) return null;
+  if (!loggedInAccount) return null;
 
   return (
     <Flex flex={1} minHeight={0}>
@@ -46,9 +44,9 @@ const SystemAppPresenter = () => {
               style={{
                 minWidth: 40,
               }}
-              avatar={ship.avatar}
-              patp={ship.patp}
-              sigilColor={[ship.color || '#000000', 'white']}
+              avatar={loggedInAccount.avatar}
+              patp={loggedInAccount.patp}
+              sigilColor={[loggedInAccount.color || '#000000', 'white']}
             />
           </Box>
           <Flex
@@ -59,34 +57,16 @@ const SystemAppPresenter = () => {
               overflowWrap: 'break-word',
             }}
           >
-            {ship.nickname && (
+            {loggedInAccount.nickname && (
               <Text.Custom fontWeight={500} fontSize={2}>
-                {ship.nickname}
+                {loggedInAccount.nickname}
               </Text.Custom>
             )}
             <Text.Custom fontWeight={300} fontSize={2}>
-              {ship.patp}
+              {loggedInAccount.patp}
             </Text.Custom>
           </Flex>
         </Flex>
-
-        {/* <Flex width={'100%'}>
-            <Input
-            type="text"
-            placeholder="Search settings..."
-            wrapperStyle={{
-              borderRadius: 9,
-              backgroundColor: theme.currentTheme.inputColor,
-
-              // borderColor: rgba(backgroundColor, 0.7),
-            }}
-            rightIcon={
-              <Flex mr={2} flexDirection="row" alignItems="center">
-                <Icons name="Search" opacity={0.5} />
-              </Flex>
-            }
-            />
-          </Flex> */}
 
         <Flex flex={1} overflowY="auto">
           {/* menu / list  */}
@@ -112,16 +92,16 @@ const SystemAppPresenter = () => {
                 sublabel: 'Profile, hosting info',
               },
               {
-                icon: 'Holium',
-                label: 'About',
-                value: 'about',
-                sublabel: 'Build number, IDs, etc.',
-              },
-              {
                 icon: 'QuestionCircle',
                 label: 'Help',
                 value: 'help',
                 sublabel: 'Support and Documentation',
+              },
+              {
+                icon: 'Holium',
+                label: 'About',
+                value: 'about',
+                sublabel: 'Build number, IDs, etc.',
               },
             ]}
             onClick={(value: SystemPanelType) => {

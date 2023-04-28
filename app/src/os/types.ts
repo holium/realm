@@ -1,19 +1,3 @@
-export interface MSTAction {
-  name: string;
-  path: string;
-  args: any[];
-}
-export interface ShipInfoType {
-  url: string;
-  cookie: string;
-  theme?: any;
-  wallpaper?: string;
-  color?: string | null;
-  nickname?: string;
-  avatar?: string;
-  loggedIn?: boolean;
-}
-
 export interface PostType {
   index: string;
   author: string;

@@ -16,6 +16,7 @@ type Storage = {
   nickname: string;
   description: string;
   avatar: string;
+  lastAccountLogin: string;
 };
 
 const storageKeys: (keyof Storage)[] = [
@@ -32,6 +33,7 @@ const storageKeys: (keyof Storage)[] = [
   'nickname',
   'description',
   'avatar',
+  'lastAccountLogin', // Used to preselect the account on the login screen.
 ];
 
 export const OnboardingStorage = {
@@ -51,6 +53,7 @@ export const OnboardingStorage = {
       nickname: localStorage.getItem('nickname'),
       description: localStorage.getItem('description'),
       avatar: localStorage.getItem('avatar'),
+      lastAccountLogin: localStorage.getItem('lastAccountLogin'),
     };
   },
   set: (storage: Partial<Storage>) => {
@@ -64,5 +67,8 @@ export const OnboardingStorage = {
     localStorage.removeItem('nickname');
     localStorage.removeItem('description');
     localStorage.removeItem('avatar');
+  },
+  remove(key: keyof Storage) {
+    localStorage.removeItem(key);
   },
 };
