@@ -15,6 +15,7 @@ import {
   OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
 import { DownloadIcon } from '../icons/DownloadIcon';
+import { RealmInstallStatus } from '../types/index';
 
 const InstallRealmButton = styled(Button.TextButton)`
   position: relative;
@@ -28,7 +29,7 @@ const InstallRealmButton = styled(Button.TextButton)`
 `;
 
 type Props = {
-  onInstallRealm: () => Promise<boolean>;
+  onInstallRealm: () => Promise<RealmInstallStatus>;
   onBack: () => void;
   onNext: () => Promise<boolean>;
 };
@@ -48,11 +49,13 @@ export const InstallationDialog = ({
     installing.toggleOn();
     installError.toggleOff();
 
-    const result = await onInstallRealm();
-    if (result) {
-      successfullInstall.toggleOn();
-    } else {
+    const result: RealmInstallStatus = await onInstallRealm();
+    if (!result.success) {
       installError.toggleOn();
+      // if you want to display error messages
+      // result.message
+    } else {
+      successfullInstall.toggleOn();
     }
 
     installing.toggleOff();

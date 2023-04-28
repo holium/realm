@@ -13,7 +13,12 @@ import { ShipDB } from '../ship/ship.db';
 import { Account } from './accounts.table';
 import { AuthDB } from './auth.db';
 import { MasterAccount } from './masterAccounts.table';
-import { OnboardingUpdateTypes } from './onboarding.types';
+import {
+  OnboardingUpdateTypes,
+  RealmInstallVersionTest,
+} from './onboarding.types';
+
+import { RealmInstallStatus } from '@holium/shared/src/onboarding/types';
 
 type OnboardingCredentials = {
   patp: string;
@@ -209,22 +214,128 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     return APIConnection.getInstance().conduit.poke(payload);
   }
 
-  async installRealmAgent() {
-    await this._openConduit();
-    try {
-      APIConnection.getInstance().conduit.poke({
-        app: 'hood',
-        mark: 'kiln-install',
-        json: {
-          ship: '~hostyv',
-          desk: 'realm',
-          local: 'realm',
-        },
-      });
-    } catch (e) {
-      log.error(e);
+  _prepareBuildVersionEnv() {
+    let result: RealmInstallVersionTest = {
+      success: false, // assume failure
+      major: -1,
+      minor: -1,
+      build: -1,
+    };
+    console.log(
+      `preparing build version env var '${process.env.BUILD_VERSION}'`
+    );
+    if (!process.env.BUILD_VERSION) {
+      console.warn(
+        'BUILD_VERSION environment variable not set. skipping installation validation...'
+      );
+      return result;
     }
-    return true;
+    let buildVersion = process.env.BUILD_VERSION.split('.');
+    if (buildVersion.length < 3) {
+      console.warn(
+        `BUILD_VERSION '${buildVersion}' not valid. skipping installation validation...`
+      );
+      return result;
+    }
+    // move beyond the v portion of the version string
+    if (buildVersion[0].trim().startsWith('v')) {
+      buildVersion[0] = buildVersion[0].substring(1);
+    }
+    // strip the channel
+    const idx = buildVersion[2].lastIndexOf('-');
+    if (idx !== -1) {
+      buildVersion[2] = buildVersion[2].substring(0, idx);
+    }
+    result.success = true;
+    result.major = parseInt(buildVersion[0]);
+    result.minor = parseInt(buildVersion[1]);
+    result.build = parseInt(buildVersion[2]);
+    return result;
+  }
+
+  async _testVersion(buildVersion: any): Promise<boolean> {
+    try {
+      const res = await APIConnection.getInstance().conduit.scry({
+        app: 'bazaar',
+        path: `/version`,
+      });
+      const parts = res.version.split('.');
+      if (parseInt(parts[0]) > parseInt(buildVersion.major)) {
+        return true;
+      }
+      if (
+        parseInt(parts[0]) >= parseInt(buildVersion.major) &&
+        parseInt(parts[1]) > parseInt(buildVersion.minor)
+      ) {
+        return true;
+      }
+      if (
+        parseInt(parts[0]) >= parseInt(buildVersion.major) &&
+        parseInt(parts[1]) >= parseInt(buildVersion.minor) &&
+        parseInt(parts[2]) >= parseInt(buildVersion.build)
+      ) {
+        return true;
+      }
+    } catch (e) {
+      console.log(e);
+    }
+    return false;
+  }
+
+  async _waitForInstallRealmAgent(
+    buildVersion: any
+  ): Promise<RealmInstallStatus> {
+    const self = this;
+    return new Promise((resolve) => {
+      let totalWaitTime = 0,
+        maxWaitTime = 300000; // 5 minutes
+      (async function versionCheck(totalWaitTime, maxWaitTime) {
+        const result = await self._testVersion(buildVersion);
+        if (result) {
+          resolve({ success: true });
+          return;
+        }
+        totalWaitTime += 3000;
+        if (totalWaitTime > maxWaitTime) {
+          resolve({ success: false, message: 'timeout' });
+          return;
+        }
+        setTimeout(() => versionCheck(totalWaitTime, maxWaitTime), 3000);
+      })(totalWaitTime, maxWaitTime);
+    });
+  }
+
+  async installRealmAgent(): Promise<RealmInstallStatus> {
+    return new Promise(async (resolve, reject) => {
+      await this._openConduit();
+      try {
+        APIConnection.getInstance().conduit.poke({
+          app: 'hood',
+          mark: 'kiln-install',
+          json: {
+            ship: '~hostyv',
+            desk: 'realm',
+            local: 'realm',
+          },
+        });
+
+        // @note: if %realm is already installed and does not need to be updated, there is
+        //   currently no way to get notified by clay (gift) that the kiln-install operation
+        //   has completed. in the meantime, a workaround is to scry the %realm agent, and
+        //   if the current version matches the agent's version, assume the install is finished
+
+        const buildVersion = this._prepareBuildVersionEnv();
+        if (!buildVersion.success) {
+          resolve({ success: false, message: 'BUILD_VERSION env var invalid' });
+          return;
+        }
+        const result = await this._waitForInstallRealmAgent(buildVersion);
+        resolve(result);
+      } catch (e) {
+        log.error(e);
+        reject('error');
+      }
+    });
   }
 
   public async getCookie(patp: string, url: string, code: string) {
