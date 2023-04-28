@@ -71,12 +71,27 @@ const PeerConnState = types.enumeration([
   'broadcasting',
 ]);
 
-const PeerMetadata = types.model('PeerMetadata', {
-  isMuted: types.optional(types.boolean, false),
-  isSpeaking: types.optional(types.boolean, false),
-  isAudioAttached: types.optional(types.boolean, false),
-  status: types.optional(PeerConnState, 'disconnected'),
-});
+const PeerMetadata = types
+  .model('PeerMetadata', {
+    isMuted: types.optional(types.boolean, false),
+    isSpeaking: types.optional(types.boolean, false),
+    isAudioAttached: types.optional(types.boolean, false),
+    status: types.optional(PeerConnState, 'disconnected'),
+  })
+  .actions((self) => ({
+    setMute(mute: boolean) {
+      self.isMuted = mute;
+    },
+    setSpeaking(speaking: boolean) {
+      self.isSpeaking = speaking;
+    },
+    setAudioAttached(attached: boolean) {
+      self.isAudioAttached = attached;
+    },
+    setStatus(status: PeerConnectionState) {
+      self.status = status;
+    },
+  }));
 
 export const RoomsStore = types
   .model('RoomsStore', {
@@ -153,42 +168,24 @@ export const RoomsStore = types
         sendDataToPeer,
         {
           setAudioAttached: (isAttached: boolean) => {
-            const currentMtd = self.peersMetadata.get(to);
-            if (currentMtd) {
-              currentMtd.isAudioAttached = isAttached;
-            } else {
-              self.peersMetadata.set(
-                to,
-                PeerMetadata.create({ isAudioAttached: isAttached })
-              );
-            }
+            const currentMtd =
+              self.peersMetadata.get(to) || PeerMetadata.create();
+            currentMtd.setAudioAttached(isAttached);
           },
           setMuted: (isMuted: boolean) => {
-            const currentMtd = self.peersMetadata.get(to);
-            if (currentMtd) {
-              currentMtd.isMuted = isMuted;
-            } else {
-              self.peersMetadata.set(to, PeerMetadata.create({ isMuted }));
-            }
+            const currentMtd =
+              self.peersMetadata.get(to) || PeerMetadata.create();
+            currentMtd.setMute(isMuted);
           },
           setSpeaking: (isSpeaking: boolean) => {
-            const currentMtd = self.peersMetadata.get(to);
-            if (currentMtd) {
-              currentMtd.isSpeaking = isSpeaking;
-            } else {
-              self.peersMetadata.set(to, PeerMetadata.create({ isSpeaking }));
-            }
+            const currentMtd =
+              self.peersMetadata.get(to) || PeerMetadata.create();
+            currentMtd.setSpeaking(isSpeaking);
           },
           setStatus: (status: PeerConnectionState) => {
-            const currentMtd = self.peersMetadata.get(to);
-            if (currentMtd) {
-              currentMtd.status = status;
-            } else {
-              self.peersMetadata.set(to, PeerMetadata.create({ status }));
-            }
-            if (remotePeer) {
-              remotePeer.status = status;
-            }
+            const currentMtd =
+              self.peersMetadata.get(to) || PeerMetadata.create();
+            currentMtd.setStatus(status);
           },
         },
         peerConfig
