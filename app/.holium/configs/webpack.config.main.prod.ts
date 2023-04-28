@@ -67,6 +67,11 @@ const configuration: webpack.Configuration = {
           ? '~hostyv:realm'
           : '~nimwyd-ramwyl-dozzod-hostyv:realm',
       RELEASE_CHANNEL: process.env.RELEASE_CHANNEL || 'latest',
+      ...(process.env.BUILD_VERSION
+        ? {
+            BUILD_VERSION: process.env.BUILD_VERSION,
+          }
+        : {}),
     }),
   ],
   /**
