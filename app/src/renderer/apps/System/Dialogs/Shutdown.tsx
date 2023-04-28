@@ -71,7 +71,7 @@ const ShutdownDialogPresenter = () => {
           {seconds > 1 && 's'}.
         </Text.Custom>
       </Flex>
-      <Flex width="100%">
+      <Flex gap="16px">
         <Button.Secondary
           flex={1}
           justifyContent="center"
@@ -86,7 +86,7 @@ const ShutdownDialogPresenter = () => {
           }}
           variant="secondary"
         >
-          <Flex py={2}>Cancel</Flex>
+          <Flex py={1}>Cancel</Flex>
         </Button.Secondary>
         <Button.Primary
           flex={1}
@@ -94,7 +94,7 @@ const ShutdownDialogPresenter = () => {
           background="intent-alert"
           onClick={shutdown}
         >
-          <Flex py={2}>Power Off</Flex>
+          <Flex py={1}>Power Off</Flex>
         </Button.Primary>
       </Flex>
     </Flex>

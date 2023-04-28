@@ -52,11 +52,11 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
     OnboardingStorage.remove('lastAccountLogin');
 
     OnboardingStorage.set({
-      email: response.email,
-      clientSideEncryptionKey: response.client_side_encryption_key,
-      token: response.token,
-      passwordHash: masterAccount.passwordHash,
       masterAccountId: masterAccount.id,
+      email: response.email,
+      token: response.token,
+      clientSideEncryptionKey: response.client_side_encryption_key,
+      passwordHash,
     });
 
     const userShips = await thirdEarthApi.getUserShips(response.token);
