@@ -427,17 +427,21 @@ export const RoomsStore = types
         localPeer?.setAudioInputDevice(deviceId);
       },
       sendMessage(path: string, measuredFrags: any) {
-        // sendDataToPeer({ [path]: measuredFrags });
         sendDataToPeer({
           kind: DataPacket_Kind.CHAT,
-          value: { [path]: measuredFrags },
+          value: { 'message-received': { [path]: measuredFrags } },
         });
       },
       saveEditedMessage(path: string, messageId: string, measuredFrags: any) {
-        // sendDataToPeer({ [path]: measuredFrags });
         sendDataToPeer({
           kind: DataPacket_Kind.CHAT,
-          value: { [path]: measuredFrags },
+          value: { 'message-edited': { [path]: measuredFrags } },
+        });
+      },
+      deleteMessage(path: string, messageId: string) {
+        sendDataToPeer({
+          kind: DataPacket_Kind.CHAT,
+          value: { 'message-deleted': { [path]: messageId } },
         });
       },
       _onSession(session: any) {
