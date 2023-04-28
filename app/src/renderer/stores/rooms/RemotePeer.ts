@@ -19,6 +19,7 @@ type PeerSetters = {
   setAudioLevel?: (audioLevel: number) => void;
   setSpeaking: (isSpeaking: boolean) => void;
   setAudioAttached: (isAttached: boolean) => void;
+  setStatus: (status: PeerConnectionState) => void;
 };
 export class RemotePeer {
   patp: string;
@@ -40,6 +41,7 @@ export class RemotePeer {
     setMuted: () => {},
     setSpeaking: () => {},
     setAudioAttached: () => {},
+    setStatus: () => {},
   };
 
   constructor(
@@ -210,6 +212,7 @@ export class RemotePeer {
         this.removeTracks();
       }
       this.audioTracks.set(track.id, track);
+      this.setters.setAudioAttached(true);
       this.attach(track);
       this.setStatus(PeerConnectionState.Connected);
     }
@@ -236,12 +239,14 @@ export class RemotePeer {
       track.stop();
       this.detach(track);
     });
+    this.setters.setAudioAttached(false);
 
     this.audioTracks.clear();
   }
 
   mute() {
     this.isMuted = true;
+    this.setters.setMuted(true);
     this.audioTracks.forEach((track: MediaStreamTrack) => {
       track.enabled = false;
     });
@@ -249,6 +254,7 @@ export class RemotePeer {
 
   unmute() {
     this.isMuted = false;
+    this.setters.setMuted(false);
     this.audioTracks.forEach((track: MediaStreamTrack) => {
       track.enabled = true;
     });
@@ -256,9 +262,11 @@ export class RemotePeer {
 
   isSpeakingChanged(speaking: boolean) {
     this.isSpeaking = speaking;
+    this.setters.setSpeaking(speaking);
   }
 
   setStatus(status: PeerConnectionState) {
+    this.setters.setStatus(status);
     this.status = status;
   }
 
