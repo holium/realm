@@ -15,12 +15,14 @@ type SettingSectionProps = {
   body: ReactNode;
   title?: string;
   elevation?: 0 | 1 | 2 | 3 | 4;
+  hideSubmitButton?: boolean;
   onSubmit?: () => Promise<boolean>;
 };
 export const SettingSection = ({
   body,
   title,
   elevation = 1,
+  hideSubmitButton = false,
   onSubmit,
 }: SettingSectionProps) => {
   const submitting = useToggle(false);
@@ -68,7 +70,7 @@ export const SettingSection = ({
         <Flex flexDirection="column" gap={16}>
           {body}
           {errorMessage && <ErrorBox>{errorMessage}</ErrorBox>}
-          {onSubmit && (
+          {onSubmit && !hideSubmitButton && (
             <Flex justifyContent="flex-end">
               <SubmitButton text="Save" submitting={submitting.isOn} />
             </Flex>

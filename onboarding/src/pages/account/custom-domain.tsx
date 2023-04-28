@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 
+import { useToggle } from '@holium/design-system/util';
 import {
   AccountCustomDomainDialog,
   UserContextProvider,
@@ -14,6 +15,8 @@ const CustomDomainPresenter = () => {
   const { goToPage, logout } = useNavigation();
   const { token, ships, selectedPatp, setSelectedPatp } = useUser();
 
+  const submitting = useToggle(false);
+  const [domain, setDomain] = useState('');
   const [successMessage, setSuccessMessage] = useState<string>();
   const [errorMessage, setErrorMessage] = useState<string>();
 
@@ -22,9 +25,12 @@ const CustomDomainPresenter = () => {
     [ships, selectedPatp]
   );
 
-  const onClickSave = async (domain: string) => {
+  const onSubmit = async () => {
     if (!ship) return;
     if (!token) return;
+    if (!domain) return;
+
+    submitting.toggleOn();
 
     setErrorMessage(undefined);
     setSuccessMessage(undefined);
@@ -49,6 +55,8 @@ const CustomDomainPresenter = () => {
         );
       }
     }
+
+    submitting.toggleOff();
   };
 
   const onClickSidebarSection = (section: string) => {
@@ -60,11 +68,13 @@ const CustomDomainPresenter = () => {
       <AccountCustomDomainDialog
         patps={ships.map((ship) => ship.patp)}
         selectedPatp={selectedPatp}
+        domain={domain}
         dropletIp={ship?.droplet_ip}
         errorMessage={errorMessage}
         successMessage={successMessage}
         setSelectedPatp={setSelectedPatp}
-        onClickSave={onClickSave}
+        onChangeDomain={setDomain}
+        onSubmit={onSubmit}
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />
