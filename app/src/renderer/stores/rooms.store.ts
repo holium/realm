@@ -96,6 +96,7 @@ export const RoomsStore = types
     const sendDataToPeer = (data: Partial<DataPacket>) => {
       const payload = { from: localPeer?.patp, ...data } as DataPacket;
       remotePeers.forEach((peer) => {
+        console.log('sendDataToPeer ....', peer.patp, peer.status);
         if (peer.status === PeerConnectionState.Connected) {
           peer.sendData(payload);
         }

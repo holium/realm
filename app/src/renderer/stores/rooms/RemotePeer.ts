@@ -164,7 +164,7 @@ export class RemotePeer {
       kind: DataPacketMuteStatus,
       value: { data: this.localPeer?.isMuted },
     });
-    this.localPeer?.streamTracks(this);
+    // this.localPeer?.streamTracks(this);
   }
 
   _onClose() {
@@ -190,6 +190,7 @@ export class RemotePeer {
 
   _onStream(stream: MediaStream) {
     console.log('_onStream:', this.patp, stream);
+    this.setStatus(PeerConnectionState.Connected);
   }
 
   _onTrack(track: MediaStreamTrack, stream: MediaStream) {
@@ -202,6 +203,7 @@ export class RemotePeer {
       this.audioTracks.set(track.id, track);
       this.attach(track);
     }
+    this.setStatus(PeerConnectionState.Connected);
   }
 
   _onData(data: any) {
@@ -260,6 +262,7 @@ export class RemotePeer {
       track.kind as TrackKind
     );
     element = attachToElement(track, element);
+    console.log(element);
     if (element instanceof HTMLAudioElement) {
       this.isAudioAttached = true;
       element
