@@ -1,6 +1,8 @@
 import log from 'electron-log';
 import bcrypt from 'bcryptjs';
 
+import { RealmInstallStatus } from '@holium/shared';
+
 import { cleanNounColor, removeHash } from '../../lib/color';
 import { getCookie } from '../../lib/shipHelpers';
 import {
@@ -17,8 +19,6 @@ import {
   OnboardingUpdateTypes,
   RealmInstallVersionTest,
 } from './onboarding.types';
-
-import { RealmInstallStatus } from '@holium/shared/src/onboarding/types';
 
 type OnboardingCredentials = {
   patp: string;
