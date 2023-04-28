@@ -3,6 +3,8 @@ import { track } from '@amplitude/analytics-browser';
 
 import { InstallationDialog, RealmInstallStatus } from '@holium/shared';
 
+import { OnboardingIPC } from 'renderer/stores/ipc';
+
 import { StepProps } from './types';
 
 export const InstallationStep = ({ setStep, onFinish }: StepProps) => {
@@ -15,7 +17,7 @@ export const InstallationStep = ({ setStep, onFinish }: StepProps) => {
   };
 
   const onInstallRealm = () => {
-    return window.onboardingService.installRealmAgent();
+    return OnboardingIPC.installRealmAgent();
   };
 
   const onNext = async () => {

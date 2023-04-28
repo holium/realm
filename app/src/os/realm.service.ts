@@ -288,44 +288,6 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     saveReleaseChannelInSettings(channel);
   }
 
-  // async installRealmAgent() {
-  //   if (!this.services) return false;
-
-  //   const credentials = this.services.ship?.credentials;
-
-  //   if (!credentials) {
-  //     log.error('realm.service.ts:', 'No credentials found');
-  //     return false;
-  //   }
-
-  //   const patp = this.services.ship?.patp;
-
-  //   if (!patp) {
-  //     log.error('realm.service.ts:', 'No patp found');
-  //     return false;
-  //   }
-
-  //   try {
-  //     await APIConnection.getInstance({
-  //       ...credentials,
-  //       ship: patp,
-  //     }).conduit.poke({
-  //       app: 'hood',
-  //       mark: 'kiln-install',
-  //       json: {
-  //         ship: '~hostyv',
-  //         desk: 'realm',
-  //         local: 'realm',
-  //       },
-  //     });
-  //   } catch (e) {
-  //     log.error('realm.service.ts:', 'Failed to install Realm agent');
-  //     return false;
-  //   }
-
-  //   return true;
-  // }
-
   async onWillRedirect(url: string, webContents: any) {
     try {
       const delim = '/~/login?redirect=';
