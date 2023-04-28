@@ -26,6 +26,13 @@ export type OnboardingAccountUpdated = {
   payload: AuthUpdateAccountPayload;
 };
 
+export type RealmInstallVersionTest = {
+  success: boolean;
+  major: number;
+  minor: number;
+  build: number;
+};
+
 export type OnboardingUpdateTypes =
   | OnboardingAccountAdded
   | OnboardingAccountRemoved

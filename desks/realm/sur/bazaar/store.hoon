@@ -105,6 +105,7 @@
       [%allies =allies:ally:treaty]
       [%treaties treaties=(map [=ship =desk] =treaty:treaty)]
       [%app-hash hash=@uv]
+      [%version =version:docket]
   ==
 --
 

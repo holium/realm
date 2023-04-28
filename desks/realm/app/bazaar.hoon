@@ -122,6 +122,12 @@
         =/  treaties   (treaties:scry:bazaar:core ship %.y)
         ``bazaar-view+!>([%treaties treaties])
       ::
+      ::
+      [%x %version ~]     ::  ~/scry/bazaar/version
+        :: can't search for %realm in our app catalog, since we skip our own desk
+        =/  dok  (find-docket:helpers:bazaar:core %realm)
+        ?~  dok  ``json+!>(~)
+        ``bazaar-view+!>([%version version.u.dok])
     ==
   ::
   ++  on-agent
@@ -1166,6 +1172,22 @@
       ?.  =(space.path %our)
         [/update ~]
       [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    ::
+    ++  find-docket
+      |=  [=desk]
+      :: ^-  (unit docket)
+
+      :: =/  =charge-update:docket         .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
+      :: ?>  ?=([%initial *] charge-update)
+      :: =/  our-space                     [our.bowl 'our']
+      :: =/  init                          (init-catalog:helpers:bazaar:core initial.charge-update)
+      :: |=  [charges=(map desk charge:docket)]
+
+      =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
+      ?>  ?=([%initial *] charge-update)
+      =/  chg  (~(get by initial.charge-update) desk)
+      ?~  chg  ~
+      (some docket.u.chg)
     ::
     ++  init-catalog
       |=  [charges=(map desk charge:docket)]

@@ -16,6 +16,7 @@ import RoomsService from './rooms.service';
 import { ShipDB } from './ship.db';
 import BazaarService from './spaces/bazaar.service';
 import SpacesService from './spaces/spaces.service';
+import WalletService from './wallet/wallet.service';
 
 export class ShipService extends AbstractService<any> {
   public patp: string;
@@ -28,6 +29,7 @@ export class ShipService extends AbstractService<any> {
     friends: FriendsService;
     spaces: SpacesService;
     bazaar: BazaarService;
+    wallet: WalletService;
   };
 
   constructor(
@@ -130,6 +132,7 @@ export class ShipService extends AbstractService<any> {
       bazaar: new BazaarService(this.serviceOptions, this.shipDB.db),
       friends: new FriendsService(this.serviceOptions, this.shipDB.db),
       rooms: new RoomsService(this.serviceOptions),
+      wallet: new WalletService(undefined, this.shipDB.db),
     };
   }
 

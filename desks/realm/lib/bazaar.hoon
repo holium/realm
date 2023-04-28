@@ -261,6 +261,9 @@
         %app-hash
       s+(scot %uv hash.vi)
       ::
+        %version
+      (version:encode version.vi)
+      ::
     ==
   --
 ::

@@ -9,6 +9,14 @@ import { FeaturedStore } from './models/featured.model';
 import { FriendsStore } from './models/friends.model';
 import { NotifStore } from './models/notification.model';
 import { SpacesStore } from './models/spaces.model';
+import {
+  NetworkStoreType,
+  ProtocolType,
+  SharingMode,
+  WalletCreationMode,
+  WalletStore,
+  WalletView,
+} from './models/wallet.model';
 import { RoomsStore } from './rooms.store';
 
 const ShipModel = types
@@ -38,6 +46,7 @@ export const ShipStore = types
     chatStore: ChatStore,
     spacesStore: SpacesStore,
     bazaarStore: BazaarStore,
+    walletStore: WalletStore,
     featuredStore: FeaturedStore,
     roomsStore: RoomsStore,
     loader: LoaderModel,
@@ -56,6 +65,7 @@ export const ShipStore = types
       self.bazaarStore.init();
       self.spacesStore.init();
       self.chatStore.fetchInboxMetadata();
+      self.walletStore.init();
     },
     reset() {
       self.ship = null;
@@ -125,6 +135,54 @@ export const shipStore = ShipStore.create({
     },
   },
   bazaarStore: loadBazaarSnapshot(),
+  walletStore: {
+    navState: {
+      view: WalletView.NEW,
+      protocol: ProtocolType.ETH_GORLI,
+      lastEthProtocol: ProtocolType.ETH_GORLI,
+      btcNetwork: NetworkStoreType.BTC_MAIN,
+      // transSend: false,
+    },
+    ethereum: {
+      // block: 0,
+      gorliBlock: 0,
+      protocol: ProtocolType.ETH_GORLI,
+      settings: {
+        walletCreationMode: WalletCreationMode.DEFAULT,
+        sharingMode: SharingMode.ANYBODY,
+        defaultIndex: 0,
+      },
+      initialized: false,
+      conversions: {},
+    },
+    bitcoin: {
+      block: 0,
+      settings: {
+        walletCreationMode: WalletCreationMode.DEFAULT,
+        sharingMode: SharingMode.ANYBODY,
+        defaultIndex: 0,
+      },
+      conversions: {},
+    },
+    btctest: {
+      block: 0,
+      settings: {
+        walletCreationMode: WalletCreationMode.DEFAULT,
+        sharingMode: SharingMode.ANYBODY,
+        defaultIndex: 0,
+      },
+      conversions: {},
+    },
+    navHistory: [],
+    creationMode: 'default',
+    sharingMode: 'anybody',
+    lastInteraction: Date.now(),
+    initialized: false,
+    settings: {
+      passcodeHash: '',
+    },
+    forceActive: false,
+  },
   featuredStore: {
     spaces: {},
   },
