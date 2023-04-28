@@ -77,7 +77,7 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
   ) => {
     if (!shipId) return false;
 
-    await AuthIPC.updatePassport(
+    const response1 = await AuthIPC.updatePassport(
       shipId,
       nickname,
       description,
@@ -85,12 +85,16 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
       sigilColor
     );
 
+    if (!response1) return false;
+
     // Sync friends agent
-    OnboardingIPC.updatePassport(shipId, {
+    const response2 = await OnboardingIPC.updatePassport(shipId, {
       nickname,
       avatar,
       bio: description,
     });
+
+    if (!response2) return false;
 
     OnboardingStorage.set({ nickname, description, avatar });
     const { shipType } = OnboardingStorage.get();

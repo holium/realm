@@ -4,6 +4,9 @@ import { track } from '@amplitude/analytics-browser';
 import { useToggle } from '@holium/design-system/util';
 import { BootingDialog, OnboardingStorage } from '@holium/shared';
 
+import { defaultTheme } from 'renderer/lib/defaultTheme';
+import { OnboardingIPC } from 'renderer/stores/ipc';
+
 import { thirdEarthApi } from '../thirdEarthApi';
 import { StepProps } from './types';
 
@@ -54,10 +57,39 @@ export const BootingStep = ({ setStep }: StepProps) => {
     }
   }, [booting, logs]);
 
-  const onNext = useCallback(() => {
-    setStep('/credentials');
+  const onNext = useCallback(async () => {
+    const { masterAccountId, shipId, shipUrl, shipCode, passwordHash } =
+      OnboardingStorage.get();
 
-    return Promise.resolve(false);
+    if (!masterAccountId || !shipId || !shipUrl || !shipCode || !passwordHash) {
+      return false;
+    }
+
+    const newAccount = await OnboardingIPC.createAccount(
+      {
+        accountId: masterAccountId,
+        passwordHash,
+        patp: shipId,
+        avatar: '',
+        nickname: '',
+        description: '',
+        color: '#000000',
+        type: 'local',
+        url: shipUrl,
+        status: 'online',
+        theme: JSON.stringify(defaultTheme),
+      },
+      passwordHash,
+      shipCode
+    );
+
+    if (newAccount) {
+      setStep('/credentials');
+
+      return true;
+    } else {
+      return false;
+    }
   }, [setStep]);
 
   useEffect(() => {

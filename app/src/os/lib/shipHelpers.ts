@@ -24,6 +24,7 @@ export async function getCookie(ship: ShipConnectionData) {
 
     return cookie;
   } catch (e) {
-    throw new Error(`GetCookieError: ${e}`);
+    log.error(`Error getting cookie for ${ship.url}`, e);
+    return;
   }
 }

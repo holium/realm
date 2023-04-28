@@ -38,6 +38,8 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
 
     const passwordHash = await OnboardingIPC.hashPassword(password);
 
+    if (!passwordHash) return false;
+
     // Create a local master account from the ThirdEarth account.
     const masterAccount = await OnboardingIPC.createMasterAccount({
       email: response.email,
@@ -83,6 +85,7 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
           )
         )
       );
+
       onFinish?.();
     } else {
       setStep('/hosting');

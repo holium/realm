@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
 
-import { InstallationDialog, RealmInstallStatus } from '@holium/shared';
+import { InstallationDialog } from '@holium/shared';
 
 import { OnboardingIPC } from 'renderer/stores/ipc';
 
