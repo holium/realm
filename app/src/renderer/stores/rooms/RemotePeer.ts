@@ -182,8 +182,6 @@ export class RemotePeer {
     this.sendSignal(data);
     console.log('sendSignal', data.type, data);
     if (this.status !== PeerConnectionState.Connected) {
-      console.log('_onSignal: not connected, still trying');
-      console.log('_onSignal: current status', this.status);
       this.setStatus(PeerConnectionState.Connecting);
     }
   }
@@ -202,12 +200,15 @@ export class RemotePeer {
       }
       this.audioTracks.set(track.id, track);
       this.attach(track);
+      this.setStatus(PeerConnectionState.Connected);
+      this.localPeer?.streamTracks(this);
     }
-    this.setStatus(PeerConnectionState.Connected);
   }
 
   _onData(data: any) {
     console.log('RemotePeer onData', this.patp, data);
+    // check if we have a stream from the peer
+    console.log(this.audioTracks);
     if (data.kind === DataPacketMuteStatus) {
       const payload = data.value as DataPayload;
       if (payload.data) {
