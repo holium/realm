@@ -307,6 +307,11 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
 
   async installRealmAgent(): Promise<RealmInstallStatus> {
     return new Promise(async (resolve, reject) => {
+      // if bypass, don't perform install and continue with onboarding. useful in development
+      if (process.env.INSTALL_MOON === 'bypass') {
+        resolve({ success: true });
+        return;
+      }
       await this._openConduit();
       try {
         APIConnection.getInstance().conduit.poke({
