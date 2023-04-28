@@ -409,6 +409,13 @@ export const RoomsStore = types
           value: { [path]: measuredFrags },
         });
       },
+      saveEditedMessage(path: string, messageId: string, measuredFrags: any) {
+        // sendDataToPeer({ [path]: measuredFrags });
+        sendDataToPeer({
+          kind: DataPacket_Kind.CHAT,
+          value: { [path]: measuredFrags },
+        });
+      },
       _onSession(session: any) {
         self.provider = session.provider;
         self.rooms = session.rooms;

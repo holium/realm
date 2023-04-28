@@ -154,8 +154,12 @@ export const RoomChatLogPresenter = ({
         };
       })
     );
-    selectedChat.sendMessage(path, measuredFrags, true, loggedInAccount.patp);
-    roomsStore.sendMessage(path, measuredFrags);
+    selectedChat.sendMessage(
+      path,
+      measuredFrags,
+      roomsStore.sendMessage,
+      loggedInAccount.patp
+    );
   };
   const onEditConfirm = (fragments: any[]) => {
     if (!selectedChat || !selectedChat.editingMsg) return;
@@ -167,7 +171,8 @@ export const RoomChatLogPresenter = ({
           'reply-to': null,
           metadata: {},
         };
-      })
+      }),
+      roomsStore.saveEditedMessage
     );
   };
 

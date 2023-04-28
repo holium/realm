@@ -294,7 +294,7 @@ export const Chat = types
     sendMessage: flow(function* (
       path: string,
       fragments: any[],
-      rooms?: boolean,
+      roomsSend?: (path: string, measuredFrags: any) => void,
       roomsShip?: string
     ) {
       SoundActions.playDMSend();
@@ -325,7 +325,9 @@ export const Chat = types
         };
         self.lastUpdatedAt = new Date().getTime();
         self.replyingMsg = null;
-        if (!rooms) yield ChatIPC.sendMessage(path, fragments);
+        if (roomsSend) {
+          roomsSend(path, fragments);
+        } else yield ChatIPC.sendMessage(path, fragments);
       } catch (error) {
         console.error(error);
       }
@@ -476,7 +478,11 @@ export const Chat = types
       }
       self.editingMsg = message;
     },
-    saveEditedMessage: flow(function* (messageId: string, contents: any[]) {
+    saveEditedMessage: flow(function* (
+      messageId: string,
+      contents: any[],
+      roomsSend?: (path: string, messageId: string, contents: any[]) => void
+    ) {
       const oldMessages = self.messages;
       try {
         // find the message and update it
@@ -488,14 +494,25 @@ export const Chat = types
           contents.map((frag) => frag.content),
           Date.now()
         );
-        yield ChatIPC.editMessage(
-          self.path,
-          messageId,
-          contents.map((c) => ({
-            ...c,
-            metadata: { edited: 'true' },
-          }))
-        );
+        if (roomsSend) {
+          roomsSend(
+            self.path,
+            messageId,
+            contents.map((c) => ({
+              ...c,
+              metadata: { edited: 'true' },
+            }))
+          );
+        } else {
+          yield ChatIPC.editMessage(
+            self.path,
+            messageId,
+            contents.map((c) => ({
+              ...c,
+              metadata: { edited: 'true' },
+            }))
+          );
+        }
       } catch (error) {
         self.messages = oldMessages;
         console.error(error);
