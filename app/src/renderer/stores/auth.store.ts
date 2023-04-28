@@ -8,6 +8,8 @@ import {
   types,
 } from 'mobx-state-tree';
 
+import { OnboardingStorage } from '@holium/shared';
+
 import { LoginErrorType } from 'os/realm.types';
 import { DBAccount } from 'os/services/auth/accounts.table';
 import { AuthUpdateAccountPayload } from 'os/services/auth/auth.types';
@@ -154,8 +156,9 @@ export const AuthenticationModel = types
           self.selected = self.accounts[removeIdx - 1];
         }
         self.accounts.remove(account);
-        if (localStorage.getItem('lastAccountLogin') === patp) {
-          localStorage.removeItem('lastAccountLogin');
+        const { lastAccountLogin } = OnboardingStorage.get();
+        if (lastAccountLogin === patp) {
+          OnboardingStorage.remove('lastAccountLogin');
         }
         if (self.accounts.length === 0) {
           self.session = null;

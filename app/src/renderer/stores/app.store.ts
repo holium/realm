@@ -1,6 +1,8 @@
 import { createContext, useContext } from 'react';
 import { clone, flow, Instance, types } from 'mobx-state-tree';
 
+import { OnboardingStorage } from '@holium/shared';
+
 import { RealmUpdateBooted } from 'os/realm.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';
 import { SoundActions } from 'renderer/lib/sound';
@@ -167,7 +169,9 @@ function registerOnUpdateListener() {
     }
     if (update.type === 'auth-success') {
       SoundActions.playLogin();
-      localStorage.setItem('lastAccountLogin', update.payload.patp);
+      OnboardingStorage.set({
+        lastAccountLogin: update.payload.patp,
+      });
       appState.setLoggedIn(update.payload.patp);
     }
     if (update.type === 'auth-failed') {
