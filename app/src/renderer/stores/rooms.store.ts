@@ -2,6 +2,8 @@ import { observable } from 'mobx';
 import { applySnapshot, cast, flow, Instance, types } from 'mobx-state-tree';
 import { patp2dec } from 'urbit-ob';
 
+import { DataPacket_Kind } from '@holium/realm-room';
+
 import { SoundActions } from 'renderer/lib/sound';
 
 import { RoomsIPC } from './ipc';
@@ -9,11 +11,7 @@ import { Chat } from './models/chat.model';
 import { LocalPeer } from './rooms/LocalPeer';
 import { RemotePeer } from './rooms/RemotePeer';
 import { ridFromTitle } from './rooms/rooms.parsing';
-import {
-  DataPacket,
-  DataPacketKind,
-  PeerConnectionState,
-} from './rooms/rooms.types';
+import { DataPacket, PeerConnectionState } from './rooms/rooms.types';
 import { shipStore } from './ship.store';
 
 export const RoomModel = types
@@ -293,10 +291,10 @@ export const RoomsStore = types
           if (self.current) {
             if (self.current.creator === window.ship) {
               //@ts-expect-error
-              self.deleteRoom();
+              self.deleteRoom(self.current.rid);
             } else {
               //@ts-expect-error
-              self.leaveRoom();
+              self.leaveRoom(self.current.rid);
             }
           }
           self.current = self.rooms.get(newRoom.rid);
@@ -360,7 +358,7 @@ export const RoomsStore = types
       mute() {
         localPeer?.mute();
         sendDataToPeer({
-          kind: DataPacketKind.MUTE_STATUS,
+          kind: DataPacket_Kind.MUTE_STATUS,
           value: { data: true },
         });
         self.isMuted = true;
@@ -368,13 +366,20 @@ export const RoomsStore = types
       unmute() {
         localPeer?.unmute();
         sendDataToPeer({
-          kind: DataPacketKind.MUTE_STATUS,
+          kind: DataPacket_Kind.MUTE_STATUS,
           value: { data: false },
         });
         self.isMuted = false;
       },
       setAudioInput(deviceId: string) {
         localPeer?.setAudioInputDevice(deviceId);
+      },
+      sendMessage(path: string, measuredFrags: any) {
+        // sendDataToPeer({ [path]: measuredFrags });
+        sendDataToPeer({
+          kind: DataPacket_Kind.CHAT,
+          value: { [path]: measuredFrags },
+        });
       },
       _onSession(session: any) {
         self.provider = session.provider;

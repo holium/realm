@@ -131,8 +131,6 @@
   ::
   ++  on-arvo   on-arvo:def
   ::
-  ++  on-arvo   on-arvo:def
-  ::
   ++  on-fail   on-fail:def
   ::
   ++  on-leave  on-leave:def
@@ -179,9 +177,6 @@
         [%pass / %agent [to %rooms-v2] %poke rooms-v2-signal+!>([%signal from to rid data])]~
       ::  Receiving a signal from another ship
       :_  state
-      ?:  ?~  current.session  %.n
-          =(u.current.session rid)
-        [%give %fact [/lib ~] rooms-v2-signal+!>([%signal from to rid data])]~
       [%pass / %agent [src.bol dap.bol] %poke rooms-v2-session-action+!>([%leave-room rid])]~
     ::
     --

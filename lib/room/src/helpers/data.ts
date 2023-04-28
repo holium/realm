@@ -8,6 +8,7 @@ export enum DataPacket_Kind {
   TRACK_META = 2,
   MUTE_STATUS = 3,
   SPEAKING_CHANGED = 4,
+  CHAT = 5,
   UNRECOGNIZED = -1,
 }
 
