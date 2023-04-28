@@ -282,7 +282,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     return false;
   }
 
-  async _waitForInstallRealmAgent(
+  private async waitForInstallRealmAgent(
     buildVersion: any
   ): Promise<RealmInstallStatus> {
     const self = this;
@@ -329,7 +329,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
           resolve({ success: false, message: 'BUILD_VERSION env var invalid' });
           return;
         }
-        const result = await this._waitForInstallRealmAgent(buildVersion);
+        const result = await this.waitForInstallRealmAgent(buildVersion);
         resolve(result);
       } catch (e) {
         log.error(e);
