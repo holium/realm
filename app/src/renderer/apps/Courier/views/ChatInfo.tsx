@@ -71,8 +71,8 @@ type ChatInfoProps = {
 };
 
 export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
-  const { theme } = useAppState();
-  const { ship, chatStore, spacesStore, friends } = useShipStore();
+  const { loggedInAccount, theme } = useAppState();
+  const { chatStore, spacesStore, friends } = useShipStore();
   const { selectedChat, setSubroute, getChatHeader } = chatStore;
   const { dimensions } = useTrayApps();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -86,7 +86,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
 
   // TODO consolidate this
   const { title, subtitle, sigil, avatarColor, spaceTitle } = useMemo(() => {
-    if (!selectedChat || !ship)
+    if (!selectedChat || !loggedInAccount)
       return { resolvedTitle: 'Error loading title', subtitle: '' };
 
     let { title, sigil, image: chatImage } = getChatHeader(selectedChat.path);
@@ -109,13 +109,13 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
       }
     }
     return { title, subtitle, sigil, spaceTitle, avatarColor };
-  }, [selectedChat?.path, ship]);
+  }, [selectedChat?.path, loggedInAccount]);
 
   const [editTitle, setEditTitle] = useState(title || 'Error loading title');
 
   useEffect(() => {
-    if (!selectedChat || !ship) return;
-    selectedChat.fetchPeers(ship.patp);
+    if (!selectedChat || !loggedInAccount) return;
+    selectedChat.fetchPeers(loggedInAccount.patp);
   }, [selectedChat]);
 
   const { canUpload, promptUpload } = useFileUpload({ storage });
@@ -157,7 +157,8 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   };
 
   const amHost =
-    sortedPeers.find((peer) => peer.ship === ship?.patp)?.role === 'host';
+    sortedPeers.find((peer) => peer.ship === loggedInAccount?.patp)?.role ===
+    'host';
   const isSpaceChat = type === 'space';
 
   const patps = sortedPeers.map((peer) => peer.ship);
@@ -486,7 +487,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
           {sortedPeers.map((peer: PeerModelType) => {
             const id = `${path}-peer-${peer.ship}`;
             const options = [];
-            if (peer.ship !== ship?.patp) {
+            if (peer.ship !== loggedInAccount?.patp) {
               // TODO check if peer is friend
               options.push({
                 id: `${id}-add-friend`,

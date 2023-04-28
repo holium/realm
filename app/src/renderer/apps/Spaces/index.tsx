@@ -22,8 +22,8 @@ import { YouRow } from './YouRow';
 const bottomHeight = 54;
 
 const SpacesTrayAppPresenter = () => {
-  const { shellStore } = useAppState();
-  const { ship, spacesStore } = useShipStore();
+  const { loggedInAccount, shellStore } = useAppState();
+  const { spacesStore } = useShipStore();
   const { dimensions } = useTrayApps();
   const [searchString, setSearchString] = useState<string>('');
 
@@ -32,9 +32,9 @@ const SpacesTrayAppPresenter = () => {
       return false;
     }
     const pathArr = space.split('/');
-    const ship = pathArr[0];
+    const patp = pathArr[0];
     const spaceName = pathArr[1];
-    return ship.length > 1 && isValidPatp(ship) && spaceName.length > 0;
+    return patp.length > 1 && isValidPatp(patp) && spaceName.length > 0;
   };
 
   const [searchVisible, setSearchVisible] = useState(false);
@@ -198,11 +198,13 @@ const SpacesTrayAppPresenter = () => {
         flex={1}
         height={bottomHeight}
       >
-        {ship && (
+        {loggedInAccount && (
           <YouRow
-            selected={`/${ship.patp}/our` === spacesStore.selected?.path}
+            selected={
+              `/${loggedInAccount.patp}/our` === spacesStore.selected?.path
+            }
             space={spacesStore.ourSpace}
-            ship={ship}
+            account={loggedInAccount}
             onSelect={(path: string) => spacesStore.selectSpace(path)}
           />
         )}

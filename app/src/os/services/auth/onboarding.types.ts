@@ -1,8 +1,8 @@
-import { Account } from './accounts.table';
+import { DBAccount } from './accounts.table';
 import { AuthUpdateAccountPayload } from './auth.types';
 
 export type OnboardingEndedPayload = {
-  accounts: Account[];
+  accounts: DBAccount[];
   order: string[];
 };
 

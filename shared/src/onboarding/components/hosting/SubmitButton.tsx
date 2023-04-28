@@ -21,6 +21,7 @@ export const SubmitButton = ({
 }: Props) => (
   <Button.TextButton
     as="button"
+    type="submit"
     padding="5px 8px"
     disabled={submitting || disabled}
     position="relative"

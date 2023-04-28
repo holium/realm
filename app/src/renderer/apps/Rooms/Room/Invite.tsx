@@ -12,12 +12,11 @@ import {
   TextInput,
 } from '@holium/design-system';
 
-import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 export const RoomInvite = observer(() => {
   const inviteInputRef = useRef<HTMLInputElement>(null);
-
-  const { ship } = useShipStore();
+  const { loggedInAccount } = useAppState();
 
   const [loading, setLoading] = useState(false);
 
@@ -60,7 +59,7 @@ export const RoomInvite = observer(() => {
       //   return { error: 'Already added', parsed: undefined };
       // }
 
-      if (patp === ship?.patp) {
+      if (patp === loggedInAccount?.patp) {
         return { error: "You can't invite yourself!", parsed: undefined };
       }
 

@@ -23,8 +23,8 @@ const heightPadding = 12;
 const searchHeight = 40;
 
 export const InboxPresenter = () => {
-  const { theme } = useAppState();
-  const { ship, chatStore, spacesStore } = useShipStore();
+  const { loggedInAccount, theme } = useAppState();
+  const { chatStore, spacesStore } = useShipStore();
   const { dimensions } = useTrayApps();
   const [showList, setShowList] = useState<boolean>(false);
   const { sortedChatList, setChat, setSubroute, isChatPinned } = chatStore;
@@ -130,7 +130,9 @@ export const InboxPresenter = () => {
                 bottom: 400,
               }}
               itemContent={(index: number, chat: ChatModelType) => {
-                const isAdmin = ship ? chat.isHost(ship.patp) : false;
+                const isAdmin = loggedInAccount
+                  ? chat.isHost(loggedInAccount.patp)
+                  : false;
                 const height = chat.type === 'space' ? 70 : rowHeight;
                 const isLast = index === sortedChatList.length - 1;
                 const isSelectedSpaceChat =

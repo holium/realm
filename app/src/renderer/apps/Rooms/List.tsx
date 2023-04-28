@@ -2,6 +2,7 @@ import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, Text, Tooltip } from '@holium/design-system';
 
+import { useAppState } from 'renderer/stores/app.store';
 import { RoomMobx } from 'renderer/stores/rooms.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -10,6 +11,7 @@ import { ProviderSelector } from './components/ProviderSelector';
 import { RoomRow } from './components/RoomRow';
 
 const RoomsPresenter = () => {
+  const { loggedInAccount } = useAppState();
   const { spacesStore, roomsStore } = useShipStore();
   const { roomsApp } = useTrayApps();
 

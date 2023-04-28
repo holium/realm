@@ -1,24 +1,14 @@
 import Database from 'better-sqlite3-multiple-ciphers';
 
+import { MobXAccount } from 'renderer/stores/models/account.model';
+
 import AbstractDataAccess from '../abstract.db';
 
-export interface Account {
-  accountId: number;
-  type: 'local' | 'hosted';
-  patp: string;
-  url: string;
-  nickname: string;
-  description: string;
-  color: string;
-  avatar: string;
-  status: string;
+export type DBAccount = Omit<MobXAccount, 'theme'> & {
   theme: string;
-  passwordHash: string;
-  createdAt: number;
-  updatedAt: number;
-}
+};
 
-export class Accounts extends AbstractDataAccess<Account, any> {
+export class Accounts extends AbstractDataAccess<DBAccount, any> {
   constructor(db: Database) {
     super({
       preload: false,
@@ -29,7 +19,7 @@ export class Accounts extends AbstractDataAccess<Account, any> {
     });
   }
 
-  protected mapRow(row: any): Account {
+  protected mapRow(row: any): DBAccount {
     return {
       accountId: row.accountId,
       type: row.type,
@@ -47,14 +37,14 @@ export class Accounts extends AbstractDataAccess<Account, any> {
     };
   }
 
-  public findOne(patp: string): Account | null {
+  public findOne(patp: string): DBAccount | null {
     const query = `SELECT * FROM ${this.tableName} WHERE patp = ?`;
     const stmt = this.prepare(query);
     const row = stmt.get(patp);
     return row ? this.mapRow(row) : null;
   }
 
-  public create(values: Partial<Account>): Account {
+  public create(values: Partial<DBAccount>): DBAccount {
     const columns = Object.keys(values).join(', ');
     const placeholders = Object.keys(values)
       .map(() => '?')
@@ -69,7 +59,7 @@ export class Accounts extends AbstractDataAccess<Account, any> {
     return created;
   }
 
-  public update(patp: string, values: Partial<Account>): Account {
+  public update(patp: string, values: Partial<DBAccount>): DBAccount {
     const setClause = Object.keys(values)
       .map((key) => `${key} = ?`)
       .join(', ');

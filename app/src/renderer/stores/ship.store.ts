@@ -5,6 +5,7 @@ import { ChatStore } from './chat.store';
 import { ShipIPC } from './ipc';
 import { BazaarStore, BazaarStoreType } from './models/bazaar.model';
 import { LoaderModel } from './models/common.model';
+import { CredentialsModel } from './models/credentials.model';
 import { FeaturedStore } from './models/featured.model';
 import { FriendsStore } from './models/friends.model';
 import { NotifStore } from './models/notification.model';
@@ -19,28 +20,9 @@ import {
 } from './models/wallet.model';
 import { RoomsStore } from './rooms.store';
 
-const ShipModel = types
-  .model('ShipModel', {
-    url: types.string,
-    patp: types.identifier,
-    cookie: types.string,
-    nickname: types.maybeNull(types.string),
-    color: types.maybeNull(types.string),
-    avatar: types.maybeNull(types.string),
-  })
-  .actions((self) => ({
-    setMetadata(metadata: any) {
-      self.nickname = metadata.nickname;
-      self.color = metadata.color;
-      self.avatar = metadata.avatar;
-    },
-  }));
-
-export type ShipMobxType = Instance<typeof ShipModel>;
-
 export const ShipStore = types
   .model('ShipStore', {
-    ship: types.maybeNull(ShipModel),
+    credentials: CredentialsModel,
     friends: FriendsStore,
     notifStore: NotifStore,
     chatStore: ChatStore,
@@ -68,7 +50,6 @@ export const ShipStore = types
       self.walletStore.init();
     },
     reset() {
-      self.ship = null;
       self.notifStore.reset();
       self.chatStore.reset();
       self.bazaarStore.reset();
@@ -117,6 +98,7 @@ const loadBazaarSnapshot = (): SnapshotIn<BazaarStoreType> => {
 };
 
 export const shipStore = ShipStore.create({
+  credentials: {},
   notifStore: {
     notifications: [],
   },

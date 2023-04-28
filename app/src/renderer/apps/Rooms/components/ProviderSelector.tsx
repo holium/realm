@@ -1,9 +1,7 @@
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
-
-import { Flex, Icon, Text } from '@holium/design-system';
-
 import { useShipStore } from 'renderer/stores/ship.store';
+import { Flex, Icon, Text } from '@holium/design-system';
 
 const ProviderStyle = styled(Flex)`
   display: flex;
@@ -28,6 +26,7 @@ interface ProviderSelectorProps {
 
 const ProviderSelectorPresenter = ({ onClick }: ProviderSelectorProps) => {
   const { roomsStore } = useShipStore();
+
   return (
     <ProviderStyle onClick={(evt: any) => onClick(evt)}>
       <Icon size={18} opacity={0.7} name="BaseStation" />

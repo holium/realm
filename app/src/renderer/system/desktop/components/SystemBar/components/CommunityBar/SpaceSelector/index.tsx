@@ -16,8 +16,8 @@ import { SelectedSpace } from './SelectedSpace';
 const { position, anchorOffset, dimensions } = SystemTrayRegistry.spaces;
 
 const SpaceSelectorPresenter = () => {
-  const { theme } = useAppState();
-  const { ship, spacesStore } = useShipStore();
+  const { loggedInAccount, theme } = useAppState();
+  const { spacesStore } = useShipStore();
   const selectorRef = createRef<HTMLDivElement>();
 
   const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
@@ -101,7 +101,7 @@ const SpaceSelectorPresenter = () => {
           </Flex>
         </BarButton>
       )}
-      {ship && (
+      {loggedInAccount && (
         <Divider
           initial={{ backgroundColor: dividerBg }}
           animate={{ backgroundColor: dividerBg }}

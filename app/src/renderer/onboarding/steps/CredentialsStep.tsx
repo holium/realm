@@ -3,6 +3,8 @@ import { track } from '@amplitude/analytics-browser';
 
 import { CredentialsDialog, OnboardingStorage } from '@holium/shared';
 
+import { OnboardingIPC } from 'renderer/stores/ipc';
+
 import { StepProps } from './types';
 
 export const CredentialsStep = ({ setStep }: StepProps) => {
@@ -31,7 +33,7 @@ export const CredentialsStep = ({ setStep }: StepProps) => {
       url: shipUrl,
       accessCode: shipCode,
     });
-    window.onboardingService.setCredentials({
+    OnboardingIPC.setCredentials({
       patp: shipId,
       code: shipCode,
       url: shipUrl,

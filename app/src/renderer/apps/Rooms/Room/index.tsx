@@ -7,7 +7,6 @@ import { Button, CommButton, Flex, Icon, Text } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { Badge } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 import { RoomInvite } from './Invite';
 import { RoomChat } from './NewChat';
@@ -16,7 +15,7 @@ import { VoiceView } from './Voice';
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
 const RoomPresenter = () => {
-  const { theme, shellStore } = useAppState();
+  const { loggedInAccount, theme, shellStore } = useAppState();
   const { ship, roomsStore } = useShipStore();
   const { roomsApp } = useTrayApps();
 
@@ -46,7 +45,7 @@ const RoomPresenter = () => {
         latestChat
           ? latestChat.filter(
               (msg: any) =>
-                !readChat?.includes(msg) && msg.author !== ship?.patp
+                !readChat?.includes(msg) && msg.author !== loggedInAccount?.patp
             ).length
           : 0
       );
@@ -159,11 +158,13 @@ const RoomPresenter = () => {
               size={30}
               showOnHover
               iconColor={
-                presentRoom.creator === ship?.patp ? 'intent-alert' : undefined
+                presentRoom.creator === loggedInAccount?.patp
+                  ? 'intent-alert'
+                  : undefined
               }
               onClick={(evt) => {
                 evt.stopPropagation();
-                if (presentRoom.creator === ship?.patp) {
+                if (presentRoom.creator === loggedInAccount?.patp) {
                   roomsStore.deleteRoom(rid);
                 } else {
                   roomsStore.leaveRoom();

@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, CSSProperties, FormEvent, useState } from 'react';
 
 import {
   ErrorBox,
@@ -14,11 +14,12 @@ import { SubmitButton } from '../SubmitButton';
 
 type Props = {
   isOpen: boolean;
+  style?: CSSProperties;
   onDismiss: () => void;
   onSubmit: (ejectAddress: string, ethAddress: string) => Promise<boolean>;
 };
 
-export const EjectIdModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
+export const EjectIdModal = ({ isOpen, style, onDismiss, onSubmit }: Props) => {
   const submitting = useToggle(false);
 
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -59,7 +60,12 @@ export const EjectIdModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onDismiss={onDismiss} onSubmit={handleSubmit}>
+    <Modal
+      isOpen={isOpen}
+      style={style}
+      onDismiss={onDismiss}
+      onSubmit={handleSubmit}
+    >
       <Text.H5>Eject ID</Text.H5>
       <Text.Body>
         Ejecting your ID begins the process of taking cryptographic ownership of

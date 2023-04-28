@@ -12,7 +12,7 @@ import {
 } from '@holium/design-system';
 
 import { useTrayApps } from 'renderer/apps/store';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 import { RoomChatMessage } from '../components/RoomChatMessage';
 
@@ -43,7 +43,9 @@ const RoomChatPresenter = () => {
   const { text } = useMemo(() => chatForm(), []);
   const { getTrayAppHeight } = useTrayApps();
   const listHeight = getTrayAppHeight() - 164;
-  const { roomsStore } = useShipStore();
+  const { loggedInAccount } = useAppState();
+
+  const roomsManager = useRooms(loggedInAccount?.patp);
 
   const chatInputRef = useRef<HTMLInputElement>(null);
 

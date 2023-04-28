@@ -21,6 +21,7 @@ import { MemberRole, MemberStatus } from 'os/types';
 import { Crest } from 'renderer/components';
 import { ShipSearch } from 'renderer/components/ShipSearch';
 import { pluralize } from 'renderer/lib/text';
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 
@@ -71,9 +72,12 @@ export const createPeopleForm = (
   };
 };
 
-const InviteMembersPresenter = (props: BaseDialogProps) => {
-  const { ship, friends, getGroupMembers } = useShipStore();
-  const { workflowState, setState } = props;
+const InviteMembersPresenter = ({
+  workflowState,
+  setState,
+}: BaseDialogProps) => {
+  const { loggedInAccount } = useAppState();
+  const { friends, getGroupMembers } = useShipStore();
   const searchRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const { person } = useMemo(() => createPeopleForm(), []);
@@ -89,7 +93,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
       status: MemberStatus;
     };
   }>({
-    [ship?.patp ?? '']: {
+    [loggedInAccount?.patp ?? '']: {
       primaryRole: 'owner',
       roles: ['owner'],
       alias: '',
@@ -104,7 +108,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
   // Setting up options menu
   useEffect(() => {
     /*      if (props.edit) {
-        const editMembers = membership.getSpaceMembers(workflowState.path).toJSON();
+        const editMembers = memberloggedInAccount.getSpaceMembers(workflowState.path).toJSON();
         let members: any = {}
         for (var member of Object.keys(editMembers)) {
           const memberVal = editMembers[member]
@@ -121,17 +125,17 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
         setPermissionMap(members);
         setWorkspaceState({members});
       }*/
-    if (!ship) return;
+    if (!loggedInAccount) return;
     if (workflowState.type === 'group') {
       setLoading(true);
       getGroupMembers(workflowState.path).then(
         ({ members: groupMembers }: any) => {
           // Set up our ships
-          groupMembers[ship.patp].roles = ['owner'];
-          groupMembers[ship.patp].status = 'host';
-          groupMembers[ship.patp].primaryRole = 'owner';
-          selectedPatp.add(ship.patp);
-          setNicknameMap({ ...nicknameMap, [ship.patp]: '' });
+          groupMembers[loggedInAccount.patp].roles = ['owner'];
+          groupMembers[loggedInAccount.patp].status = 'host';
+          groupMembers[loggedInAccount.patp].primaryRole = 'owner';
+          selectedPatp.add(loggedInAccount.patp);
+          setNicknameMap({ ...nicknameMap, [loggedInAccount.patp]: '' });
           const newMembers: any = {
             ...groupMembers,
           };
@@ -140,7 +144,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
             ...workflowState,
             members: newMembers,
           });
-          delete groupMembers[ship.patp];
+          delete groupMembers[loggedInAccount.patp];
           for (var member of Object.keys(groupMembers)) {
             selectedPatp.add(member);
             setNicknameMap({ ...nicknameMap, [member]: '' });
@@ -152,7 +156,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
       setWorkspaceState({
         ...workflowState,
         members: {
-          [ship.patp]: {
+          [loggedInAccount.patp]: {
             roles: ['owner'],
             alias: '',
             status: 'host',
@@ -160,7 +164,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
           },
         },
       });
-      selectedPatp.add(ship.patp);
+      selectedPatp.add(loggedInAccount.patp);
     }
   }, []);
 
@@ -188,7 +192,7 @@ const InviteMembersPresenter = (props: BaseDialogProps) => {
 
   const RowRenderer = (patp: string) => {
     const nickname = nicknameMap[patp];
-    const isOur = patp === ship?.patp;
+    const isOur = patp === loggedInAccount?.patp;
     const contact = friends.getContactAvatarMetadata(patp);
 
     return (
