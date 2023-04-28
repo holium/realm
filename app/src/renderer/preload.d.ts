@@ -8,10 +8,7 @@ import { friendsPreload } from 'os/services/ship/friends.service';
 import { notifPreload } from 'os/services/ship/notifications/notifications.service';
 import { roomsPreload } from 'os/services/ship/rooms.service';
 import { shipPreload } from 'os/services/ship/ship.service';
-import {
-  bazaarPreload,
-  bazaarPreload,
-} from 'os/services/ship/spaces/bazaar.service';
+import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
 import { walletPreload } from 'os/services/ship/wallet/wallet.service';
 

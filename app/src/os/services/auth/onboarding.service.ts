@@ -181,6 +181,43 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     return passport;
   }
 
+  updatePassword(patp: string, password: string) {
+    if (!this.authDB) {
+      log.error('auth.service.ts:', 'updatePassword', 'No authDB found');
+      return;
+    }
+
+    const account = this.authDB.tables.accounts.findOne(patp);
+    if (!account) {
+      log.error(
+        'auth.service.ts:',
+        'updatePassword',
+        `No account found for ${patp}`
+      );
+      return;
+    }
+
+    const masterAccount = this.authDB.tables.masterAccounts.findOne(
+      account.accountId
+    );
+    if (!masterAccount) {
+      log.error(
+        'auth.service.ts:',
+        'updatePassword',
+        `No master account found for ${patp}`
+      );
+      return;
+    }
+
+    this.authDB.tables.accounts.update(patp, {
+      passwordHash: this.hashPassword(password),
+    });
+
+    this.authDB.tables.masterAccounts.update(account.accountId, {
+      passwordHash: this.hashPassword(password),
+    });
+  }
+
   async updatePassport(
     patp: string,
     data: {

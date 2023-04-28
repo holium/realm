@@ -7,6 +7,7 @@ interface ColorTileProps {
 }
 export const ColorTile = styled(motion.div)<ColorTileProps>`
   background: ${(props: ColorTileProps) => props.tileColor};
+  border: 1px solid rgba(var(--rlm-border-rgba));
   height: ${(props) => (props.size ? `${props.size}px` : '30px')};
   width: ${(props) => (props.size ? `${props.size}px` : '30px')};
   position: relative;

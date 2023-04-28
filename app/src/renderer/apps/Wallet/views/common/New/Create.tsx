@@ -12,11 +12,11 @@ interface CreateProps {
 const CreatePresenter = ({ setScreen }: CreateProps) => (
   <Flex width="100%" height="100%" flexDirection="column">
     <Flex flex={1} flexDirection="column" gap="32px" justifyContent="center">
-      <Flex flexDirection="column" gap={10} alignItems="center">
+      <Flex flexDirection="column" gap={16} alignItems="center">
         <Text.H4 mt="100px" variant="h4">
           No Wallet Found
         </Text.H4>
-        <Text.Body px="30px" mt={2} mb={5} variant="body" textAlign="center">
+        <Text.Body px="30px" variant="body" textAlign="center" opacity={0.7}>
           You haven't yet configured your Realm wallet.
         </Text.Body>
       </Flex>

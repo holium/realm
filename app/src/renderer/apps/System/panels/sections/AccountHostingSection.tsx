@@ -14,6 +14,7 @@ import {
 import { AccountHostingDialogBody } from '@holium/shared/src/onboarding/dialogs/bodies/AccountHostingDialogBody';
 
 import { thirdEarthApi } from 'renderer/onboarding/thirdEarthApi';
+import { OnboardingIPC } from 'renderer/stores/ipc';
 import { MobXAccount } from 'renderer/stores/models/account.model';
 
 import { SettingSection } from '../../components/SettingSection';
@@ -88,6 +89,9 @@ export const AccountHostingSection = ({ account }: Props) => {
 
       if (response?.token) {
         changePasswordModal.toggleOff();
+        // Also update the password locally.
+        OnboardingIPC.updatePassword(account.patp, password);
+
         return true;
       }
     } catch (e) {
