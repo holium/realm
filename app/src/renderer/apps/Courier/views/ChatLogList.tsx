@@ -38,7 +38,6 @@ export const ChatLogList = ({
   topOfListPadding,
 }: Props) => {
   const [prevHeight, setPrevHeight] = useState<number>(0);
-  const DEFAULT_SPACING = 2;
 
   const renderChatRow = (index: number, row: ChatMessageType) => {
     const isLast = selectedChat ? index === messages.length - 1 : false;
@@ -50,8 +49,8 @@ export const ChatLogList = ({
       row.sender === messages[index - 1].sender &&
       Object.keys(messages[index - 1].contents[0])[0] !== 'status';
 
-    let topSpacing = isPrevGrouped ? '3px' : DEFAULT_SPACING;
-    let bottomSpacing = isNextGrouped ? '3px' : DEFAULT_SPACING;
+    let topSpacing = isPrevGrouped ? 3 : 2;
+    let bottomSpacing = isNextGrouped ? 3 : 2;
 
     const thisMsgDate = new Date(row.createdAt).toDateString();
     const prevMsgDate =
