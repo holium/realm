@@ -52,9 +52,6 @@ export type RoomChatMobx = Instance<typeof ChatModel>;
 export function isInitiator(localPatpId: number, remotePatp: string) {
   return localPatpId < patp2dec(remotePatp);
 }
-export function isDialer(localPatp: string, remotePatp: string) {
-  return localPatp < remotePatp;
-}
 
 export const RoomsStore = types
   .model('RoomsStore', {
@@ -110,7 +107,7 @@ export const RoomsStore = types
         throw new Error('No local peer created');
       }
       const peerConfig = {
-        isInitiator: isDialer(localPeer.patp, to),
+        isInitiator: isInitiator(localPeer.patpId, to),
         rtc,
       };
       const remotePeer = new RemotePeer(
