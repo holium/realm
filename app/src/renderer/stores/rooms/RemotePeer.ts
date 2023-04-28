@@ -20,15 +20,19 @@ type PeerSetters = {
   setMuted: (isMuted: boolean) => void;
   setAudioLevel?: (audioLevel: number) => void;
   setSpeaking: (isSpeaking: boolean) => void;
+  setTyping: (isTyping: boolean) => void;
+  setChat: (chatData: any) => void;
   setAudioAttached: (isAttached: boolean) => void;
   setStatus: (status: PeerConnectionState) => void;
 };
+
 export class RemotePeer {
   patp: string;
   patpId: number;
   audioLevel: number = 0;
   isMuted: boolean = false;
   isSpeaking: boolean = false;
+  isTyping: boolean = false;
   audioTracks: Map<string, any>;
   status: PeerConnectionState = PeerConnectionState.New;
   isInitiator: boolean;
@@ -42,6 +46,8 @@ export class RemotePeer {
   setters: PeerSetters = {
     setMuted: () => {},
     setSpeaking: () => {},
+    setTyping: () => {},
+    setChat: () => {},
     setAudioAttached: () => {},
     setStatus: () => {},
   };
@@ -235,7 +241,10 @@ export class RemotePeer {
       this.isSpeakingChanged(payload.data);
     } else if (data.kind === DataPacketChat) {
       const payload = data.value as DataPayload;
+      this.chatReceived(payload.data);
     } else if (data.kind === DataPacketTypingStatus) {
+      const payload = data.value as DataPayload;
+      this.isTypingChanged(payload.data);
     }
   }
 
@@ -268,6 +277,15 @@ export class RemotePeer {
   isSpeakingChanged(speaking: boolean) {
     this.isSpeaking = speaking;
     this.setters.setSpeaking(speaking);
+  }
+
+  isTypingChanged(typing: boolean) {
+    this.isTyping = typing;
+    this.setters.setTyping(typing);
+  }
+
+  chatReceived(chat: any) {
+    this.setters.setChat(chat);
   }
 
   setStatus(status: PeerConnectionState) {
@@ -415,3 +433,7 @@ export function detachTrack(
     }
   }
 }
+
+export type RemotePeerEventCallbacks = {
+  chatReceived: (peer: Patp, content: string) => void;
+};

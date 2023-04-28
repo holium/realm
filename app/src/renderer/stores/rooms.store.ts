@@ -66,6 +66,7 @@ const PeerMetadata = types
   .model('PeerMetadata', {
     isMuted: types.optional(types.boolean, false),
     isSpeaking: types.optional(types.boolean, false),
+    isTyping: types.optional(types.boolean, false),
     isAudioAttached: types.optional(types.boolean, false),
     status: types.optional(PeerConnState, 'disconnected'),
   })
@@ -75,6 +76,9 @@ const PeerMetadata = types
     },
     setSpeaking(speaking: boolean) {
       self.isSpeaking = speaking;
+    },
+    setTyping(typing: boolean) {
+      self.isTyping = typing;
     },
     setAudioAttached(attached: boolean) {
       self.isAudioAttached = attached;
@@ -171,6 +175,26 @@ export const RoomsStore = types
             }
             const currentMtd = self.peersMetadata.get(to);
             currentMtd?.setSpeaking(isSpeaking);
+          },
+          setTyping: (isTyping: boolean) => {
+            if (!self.peersMetadata.has(to)) {
+              self.peersMetadata.set(to, PeerMetadata.create());
+            }
+            const currentMtd = self.peersMetadata.get(to);
+            currentMtd?.setTyping(isTyping);
+          },
+          setChat: (chatData: any) => {
+            console.log('got chat data', chatData);
+            const { type, payload } = chatData;
+            if (type === 'message-deleted') {
+              self.chat?.removeMessage(payload['msg-id']);
+            }
+            if (type === 'message-received') {
+              self.chat?.addMessage(payload);
+            }
+            if (type === 'message-edited') {
+              self.chat?.replaceMessage(payload);
+            }
           },
           setStatus: (status: PeerConnectionState) => {
             if (!self.peersMetadata.has(to)) {
