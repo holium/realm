@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import { useToggle } from '@holium/design-system';
 import { AccountCustomDomainDialogBody, useUser } from '@holium/shared';
@@ -16,15 +16,12 @@ export const AccountCustomDomainSection = ({ account }: Props) => {
   const submitting = useToggle(false);
   const [domain, setDomain] = useState('');
 
-  const { token, ships, selectedPatp } = useUser();
+  const { token, ships } = useUser();
 
   const [successMessage, setSuccessMessage] = useState<string>();
   const [errorMessage, setErrorMessage] = useState<string>();
 
-  const ship = useMemo(
-    () => ships.find((ship) => ship.patp === account.patp),
-    [ships, selectedPatp]
-  );
+  const ship = ships.find((ship) => ship.patp === account.patp);
 
   const onSubmit = async () => {
     if (!ship) return false;

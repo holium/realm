@@ -1,4 +1,4 @@
-import { CSSProperties, useEffect, useState } from 'react';
+import { CSSProperties } from 'react';
 
 import { Portal, Text } from '@holium/design-system';
 import { useToggle } from '@holium/design-system/util';
@@ -40,7 +40,6 @@ export const AccountHostingSection = ({ account }: Props) => {
   const ejectIdModal = useToggle(false);
 
   const maintenanceWindow = 0;
-  const [managePaymentLink, setManagePaymentLink] = useState<string>('');
 
   const { shipCode, email, token } = OnboardingStorage.get();
 
@@ -128,10 +127,6 @@ export const AccountHostingSection = ({ account }: Props) => {
     return false;
   };
 
-  const onClickManageBilling = () => {
-    window.open(managePaymentLink, '_blank');
-  };
-
   const onSubmitEjectId = async (ejectAddress: string, ethAddress: string) => {
     if (!token) return Promise.resolve(false);
     if (!account) return Promise.resolve(false);
@@ -148,22 +143,25 @@ export const AccountHostingSection = ({ account }: Props) => {
     return false;
   };
 
-  useEffect(() => {
-    if (!token) return;
+  const onClickManageBilling = async () => {
+    if (!token) return false;
 
-    thirdEarthApi
-      .refreshToken(token)
-      .then((response) => {
-        OnboardingStorage.set({ token: response.token });
-        // const ships = await thirdEarthApi.getUserShips(token);
-        thirdEarthApi
-          .getManagePaymentLink(response.token)
-          .then((response) => setManagePaymentLink(response.url));
-      })
-      .catch(() => {
-        error.toggleOn();
-      });
-  }, [token]);
+    const tokenResponse = await thirdEarthApi.refreshToken(token);
+
+    if (tokenResponse) {
+      OnboardingStorage.set({ token: tokenResponse.token });
+      const linkResponse = await thirdEarthApi.getManagePaymentLink(
+        tokenResponse.token
+      );
+
+      if (linkResponse.url) {
+        window.open(linkResponse.url, '_blank');
+        return true;
+      }
+    }
+
+    return false;
+  };
 
   if (error.isOn || !email || !shipCode) {
     return (
