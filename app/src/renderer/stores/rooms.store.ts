@@ -168,24 +168,32 @@ export const RoomsStore = types
         sendDataToPeer,
         {
           setAudioAttached: (isAttached: boolean) => {
-            const currentMtd =
-              self.peersMetadata.get(to) || PeerMetadata.create();
-            currentMtd.setAudioAttached(isAttached);
+            if (!self.peersMetadata.has(to)) {
+              self.peersMetadata.set(to, PeerMetadata.create());
+            }
+            const currentMtd = self.peersMetadata.get(to);
+            currentMtd?.setAudioAttached(isAttached);
           },
           setMuted: (isMuted: boolean) => {
-            const currentMtd =
-              self.peersMetadata.get(to) || PeerMetadata.create();
-            currentMtd.setMute(isMuted);
+            if (!self.peersMetadata.has(to)) {
+              self.peersMetadata.set(to, PeerMetadata.create());
+            }
+            const currentMtd = self.peersMetadata.get(to);
+            currentMtd?.setMute(isMuted);
           },
           setSpeaking: (isSpeaking: boolean) => {
-            const currentMtd =
-              self.peersMetadata.get(to) || PeerMetadata.create();
-            currentMtd.setSpeaking(isSpeaking);
+            if (!self.peersMetadata.has(to)) {
+              self.peersMetadata.set(to, PeerMetadata.create());
+            }
+            const currentMtd = self.peersMetadata.get(to);
+            currentMtd?.setSpeaking(isSpeaking);
           },
           setStatus: (status: PeerConnectionState) => {
-            const currentMtd =
-              self.peersMetadata.get(to) || PeerMetadata.create();
-            currentMtd.setStatus(status);
+            if (!self.peersMetadata.has(to)) {
+              self.peersMetadata.set(to, PeerMetadata.create());
+            }
+            const currentMtd = self.peersMetadata.get(to);
+            currentMtd?.setStatus(status);
           },
         },
         peerConfig
