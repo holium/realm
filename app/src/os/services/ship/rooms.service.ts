@@ -135,19 +135,6 @@ export class RoomsService extends AbstractService<any> {
       console.error(e);
     }
   }
-  async sendChat(content: string): Promise<void> {
-    try {
-      APIConnection.getInstance().conduit.poke({
-        app: 'rooms-v2',
-        mark: 'rooms-v2-session-action',
-        json: {
-          'send-chat': content,
-        },
-      });
-    } catch (e) {
-      console.error(e);
-    }
-  }
 }
 
 export default RoomsService;

@@ -465,6 +465,7 @@ export class RealmProtocol extends BaseProtocol {
       this.our,
       peer,
       peerConfig,
+      this.local,
       this.sendSignal
     );
 
@@ -490,6 +491,9 @@ export class RealmProtocol extends BaseProtocol {
       } else if (data.kind === DataPacket_Kind.SPEAKING_CHANGED) {
         const payload = data.value as DataPayload;
         remotePeer.isSpeakingChanged(payload.data);
+      } else if (data.kind === DataPacket_Kind.CHAT) {
+        /*const payload = data.value as DataPayload;
+        remotePeer.isSpeakingChanged(payload.data);*/
       } else {
         this.emit(ProtocolEvent.PeerDataReceived, remotePeer.patp, data);
       }

@@ -10,7 +10,7 @@ import {
   Text,
 } from '@holium/design-system';
 
-import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
 
@@ -34,7 +34,6 @@ const getAudioInputSources = async () => {
 
 const SettingsPresenter = () => {
   const { roomsApp } = useTrayApps();
-  const { loggedInAccount } = useAppState();
   const { roomsStore } = useShipStore();
 
   const [audioSourceOptions, setAudioSources] = useState<RadioOption[] | any[]>(

@@ -44,15 +44,6 @@ export const RoomModel = types
 //
 export type RoomMobx = Instance<typeof RoomModel>;
 
-export const ChatModel = types.model('ChatModel', {
-  index: types.integer,
-  author: types.string,
-  contents: types.string,
-  isRightAligned: types.boolean,
-  timeReceived: types.integer,
-});
-export type RoomChatMobx = Instance<typeof ChatModel>;
-
 export function isInitiator(localPatpId: number, remotePatp: string) {
   return localPatpId < patp2dec(remotePatp);
 }
@@ -242,6 +233,20 @@ export const RoomsStore = types
         if (!appState.loggedInAccount)
           throw new Error('No logged in ship for rooms store');
         self.our = appState.loggedInAccount.patp;
+        self.chat = Chat.create({
+          path: 'roomschat',
+          type: 'group',
+          host: self.our,
+          muted: false,
+          pinned: false,
+          peersGetBacklog: true,
+          invites: 'host',
+          metadata: {
+            title: '',
+            creator: self.our,
+            timestamp: Date.now(),
+          },
+        });
         localPeer.init(
           self.our,
           {
@@ -304,6 +309,20 @@ export const RoomsStore = types
             }
           }
           self.current = self.rooms.get(newRoom.rid);
+          self.chat = Chat.create({
+            path: 'roomschat',
+            type: 'group',
+            host: self.our,
+            muted: false,
+            pinned: false,
+            peersGetBacklog: true,
+            invites: 'host',
+            metadata: {
+              title: '',
+              creator: self.our,
+              timestamp: Date.now(),
+            },
+          });
           yield RoomsIPC.createRoom(
             newRoom.rid,
             newRoom.title,
@@ -391,10 +410,10 @@ export const RoomsStore = types
       _onSession(session: any) {
         self.provider = session.provider;
         self.rooms = session.rooms;
-        if (session.current) {
+        if (
+          Array.from(self.rooms.values()).find((r) => r.creator === self.our)
+        ) {
           self.current = self.rooms.get(session.current);
-          // local?.enableMedia();
-          // self.current && dialAll(window.ship, self.current, self.config.rtc);
         }
       },
       _onRoomCreated(room: RoomMobx) {
@@ -508,6 +527,7 @@ function registerOnUpdateListener() {
   if (areListenersRegistered) return;
 
   RoomsIPC.onUpdate(({ mark, type, payload }) => {
+    console.log('rooms-update', type);
     if (mark === 'rooms-v2-view') {
       if (type === 'session') {
         shipStore.roomsStore._onSession(payload);

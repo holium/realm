@@ -154,7 +154,7 @@ export const RoomChatLogPresenter = ({
         };
       })
     );
-    // selectedChat.sendMessage(path, measuredFrags);
+    selectedChat.sendMessage(path, measuredFrags, true, loggedInAccount.patp);
     roomsStore.sendMessage(path, measuredFrags);
   };
   const onEditConfirm = (fragments: any[]) => {
@@ -204,7 +204,6 @@ export const RoomChatLogPresenter = ({
               justifyContent="center"
               alignItems="center"
               width={containerWidth}
-              height="100%"
               p={5}
             >
               <Text.Custom
