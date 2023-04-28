@@ -10,7 +10,7 @@ export interface ShipConnectionData {
 }
 
 export async function getCookie(ship: ShipConnectionData) {
-  log.info(`Getting cookie for ${ship.url}...`);
+  log.info(`Getting cookie for ${ship.url} with code ${ship.code}`);
   try {
     const response = await fetch(`${ship.url}/~/login`, {
       method: 'POST',
