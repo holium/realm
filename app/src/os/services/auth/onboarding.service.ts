@@ -257,14 +257,12 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       });
       const parts = res.version.split('.');
       if (parseInt(parts[0]) > parseInt(buildVersion.major)) {
-        console.log('passed major version check');
         return true;
       }
       if (
         parseInt(parts[0]) >= parseInt(buildVersion.major) &&
         parseInt(parts[1]) > parseInt(buildVersion.minor)
       ) {
-        console.log('passed minor version check');
         return true;
       }
       if (
@@ -272,7 +270,6 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
         parseInt(parts[1]) >= parseInt(buildVersion.minor) &&
         parseInt(parts[2]) >= parseInt(buildVersion.build)
       ) {
-        console.log('passed build check');
         return true;
       }
     } catch (e) {
