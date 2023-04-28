@@ -6,7 +6,7 @@ import { DataPacket_Kind } from '@holium/realm-room';
 
 import { SoundActions } from 'renderer/lib/sound';
 
-import { useAppState } from './app.store';
+import { appState } from './app.store';
 import { RoomsIPC } from './ipc';
 import { Chat } from './models/chat.model';
 import { LocalPeer } from './rooms/LocalPeer';
@@ -97,6 +97,7 @@ export const RoomsStore = types
   .model('RoomsStore', {
     path: types.optional(types.string, ''),
     provider: types.optional(types.string, ''),
+    our: types.maybe(types.string),
     rooms: types.map(RoomModel),
     chat: types.maybe(Chat),
     current: types.maybe(types.reference(RoomModel)),
@@ -197,7 +198,7 @@ export const RoomsStore = types
     };
     const dialAll = (room: RoomMobx, rtc: RTCConfiguration) => {
       const presentPeers = room.present.filter(
-        (peer: string) => window.ship !== peer
+        (peer: string) => self.our !== peer
       );
       presentPeers.forEach((peer: string) => {
         dialPeer(room.rid, peer, rtc);
@@ -221,8 +222,6 @@ export const RoomsStore = types
       localPeer?.disableMedia();
     };
 
-    const { loggedInAccount } = useAppState();
-
     return {
       beforeDestroy() {
         // cleanup rooms
@@ -235,15 +234,16 @@ export const RoomsStore = types
         return self.current ? self.current.present : [];
       },
       getPeer(patp: string) {
-        if (patp === window.ship) return localPeer;
-        console.log('getPeer', patp, window.ship);
+        if (patp === self.our) return localPeer;
+        console.log('getPeer', patp, self.our);
         return remotePeers.get(patp);
       },
       init: flow(function* () {
-        if (!loggedInAccount)
-          throw new Error('No logged in account for rooms store');
+        if (!appState.loggedInAccount)
+          throw new Error('No logged in ship for rooms store');
+        self.our = appState.loggedInAccount.patp;
         localPeer.init(
-          loggedInAccount.patp,
+          self.our,
           {
             setAudioAttached: (isAttached: boolean) => {
               self.isAudioAttached = isAttached;
@@ -278,14 +278,15 @@ export const RoomsStore = types
         spacePath?: string | null
       ) {
         if (!localPeer) return;
+        if (!self.our) return;
         try {
           const newRoom = RoomModel.create({
-            rid: ridFromTitle(self.provider, window.ship, title),
+            rid: ridFromTitle(self.provider, self.our, title),
             title,
             access,
             provider: self.provider,
-            creator: window.ship,
-            present: [window.ship],
+            creator: self.our,
+            present: [self.our],
             whitelist: [],
             capacity: 6,
             path: spacePath || '',
@@ -294,7 +295,7 @@ export const RoomsStore = types
           localPeer.enableMedia();
           self.rooms.set(newRoom.rid, cast(newRoom));
           if (self.current) {
-            if (self.current.creator === window.ship) {
+            if (self.current.creator === self.our) {
               //@ts-expect-error
               self.deleteRoom(self.current.rid);
             } else {
@@ -327,9 +328,10 @@ export const RoomsStore = types
       }),
       leaveRoom: flow(function* () {
         if (!self.current) return;
+        if (!self.our) return;
         try {
           const currentRid = self.current.rid;
-          self.current.removePeer(window.ship);
+          self.current.removePeer(self.our);
           self.current = undefined;
           SoundActions.playRoomLeave();
           yield RoomsIPC.leaveRoom(currentRid);
@@ -400,7 +402,7 @@ export const RoomsStore = types
       },
       _onRoomEntered(rid: string, patp: string) {
         const room = self.rooms.get(rid);
-        if (patp === window.ship && self.current?.rid !== rid) {
+        if (patp === self.our && self.current?.rid !== rid) {
           self.current = room;
         }
         room?.addPeer(patp);
@@ -409,7 +411,7 @@ export const RoomsStore = types
           if (remotePeers.has(patp)) {
             console.log('!!!!!already have peer', patp);
           }
-          if (patp !== window.ship) {
+          if (patp !== self.our) {
             const remotePeer = dialPeer(rid, patp, self.rtcConfig);
             // queuedPeers are peers that are ready for us to dial them
             if (queuedPeers.includes(patp)) {
@@ -425,22 +427,22 @@ export const RoomsStore = types
       },
       _onRoomLeft(rid: string, patp: string) {
         const room = self.rooms.get(rid);
-        if (patp === window.ship && self.current?.rid === rid) {
+        if (patp === self.our && self.current?.rid === rid) {
           self.current = undefined;
           hangupAll();
         }
-        if (patp !== window.ship) {
+        if (patp !== self.our) {
           room?.removePeer(patp);
           hangup(patp);
         }
       },
       _onKicked(rid: string, patp: string) {
         const room = self.rooms.get(rid);
-        if (patp === window.ship && self.current?.rid === rid) {
+        if (patp === self.our && self.current?.rid === rid) {
           self.current = undefined;
           hangupAll();
         }
-        if (patp !== window.ship) {
+        if (patp !== self.our) {
           room?.removePeer(patp);
           hangup(patp);
         }
@@ -450,8 +452,8 @@ export const RoomsStore = types
           self.current = undefined;
         }
         const room = self.rooms.get(rid);
-        console.log('_onRoomDeleted', room?.creator, window.ship);
-        if (room?.creator !== window.ship) {
+        console.log('_onRoomDeleted', room?.creator, self.our);
+        if (room?.creator !== self.our) {
           // console.log('_onRoomDeleted someone else deleted');
           remotePeers.forEach((peer) => {
             hangup(peer.patp);

@@ -9,8 +9,6 @@ const RoomChatPresenter = () => {
   const storage = useStorage();
   const { roomsStore } = useShipStore();
 
-  console.log('rendering the chatlog');
-  roomsStore.chat;
   return <RoomChatLog storage={storage} selectedChat={roomsStore.chat} />;
 };
 

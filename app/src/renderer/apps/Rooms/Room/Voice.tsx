@@ -19,7 +19,7 @@ const VoiceViewPresenter = () => {
   const speakers = roomsStore.current
     ? [
         ...Array.from(roomsStore.getPeers()).filter(
-          (patp) => patp !== window.ship
+          (patp) => patp !== roomsStore.our
         ),
       ]
     : [];

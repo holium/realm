@@ -9,6 +9,7 @@ import {
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { AvatarRow } from './AvatarRow';
 
@@ -29,7 +30,7 @@ const RoomRowPresenter = ({
   rightChildren,
 }: RoomRowProps) => {
   const { loggedInAccount, theme } = useAppState();
-  const { ship, roomsStore } = useShipStore();
+  const { roomsStore } = useShipStore();
   const { getOptions, setOptions } = useContextMenu();
   const defaultOptions = getOptions('').filter(
     (o) => o.id === 'toggle-devtools'

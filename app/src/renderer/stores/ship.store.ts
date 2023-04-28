@@ -34,7 +34,7 @@ export const ShipStore = types
     loader: LoaderModel,
   })
   .actions((self) => ({
-    setShip(ship: any) {
+    /*setShip(ship: any) {
       window.ship = ship.patp;
       self.friends.init().then(() => {
         const myMeta = self.friends.getContactAvatarMetadata(ship.patp);
@@ -48,7 +48,7 @@ export const ShipStore = types
       self.spacesStore.init();
       self.chatStore.fetchInboxMetadata();
       self.walletStore.init();
-    },
+    },*/
     reset() {
       self.notifStore.reset();
       self.chatStore.reset();
