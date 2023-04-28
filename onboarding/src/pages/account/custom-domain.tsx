@@ -72,6 +72,7 @@ const CustomDomainPresenter = () => {
         dropletIp={ship?.droplet_ip}
         errorMessage={errorMessage}
         successMessage={successMessage}
+        submitting={submitting.isOn}
         setSelectedPatp={setSelectedPatp}
         onChangeDomain={setDomain}
         onSubmit={onSubmit}
