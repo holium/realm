@@ -159,6 +159,7 @@ export class RemotePeer {
   _onConnect() {
     console.log('RemotePeer onConnect', this.patp);
     this.setStatus(PeerConnectionState.Connected);
+    this.localPeer?.streamTracks(this);
     this.sendDataToPeer({
       kind: DataPacketMuteStatus,
       value: { data: this.localPeer?.isMuted },
@@ -199,7 +200,6 @@ export class RemotePeer {
       this.audioTracks.set(track.id, track);
       this.attach(track);
       this.setStatus(PeerConnectionState.Connected);
-      this.localPeer?.streamTracks(this);
     }
   }
 
