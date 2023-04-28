@@ -1,6 +1,6 @@
 import { CSSProperties } from 'react';
 
-import { Portal, Text } from '@holium/design-system';
+import { Portal, Text } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
 import {
   AccountHostingDialogBody,
@@ -149,7 +149,10 @@ export const AccountHostingSection = ({ account }: Props) => {
     const tokenResponse = await thirdEarthApi.refreshToken(token);
 
     if (tokenResponse) {
-      OnboardingStorage.set({ token: tokenResponse.token });
+      OnboardingStorage.set({
+        email: tokenResponse.email,
+        token: tokenResponse.token,
+      });
       const linkResponse = await thirdEarthApi.getManagePaymentLink(
         tokenResponse.token
       );

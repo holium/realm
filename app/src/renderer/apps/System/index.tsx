@@ -26,7 +26,7 @@ const SystemAppPresenter = () => {
   const defaultRoute: SystemPanelType =
     shellStore.nativeConfig?.get('os-settings')?.route;
   const [systemPanel, setSystemPanelType] = useState<SystemPanelType>(
-    defaultRoute || 'theme'
+    defaultRoute || 'account'
   );
 
   if (!loggedInAccount) return null;
@@ -74,6 +74,12 @@ const SystemAppPresenter = () => {
             selected={systemPanel}
             options={[
               {
+                icon: 'AccountSettings',
+                label: 'Account',
+                value: 'account',
+                sublabel: 'Profile, hosting info',
+              },
+              {
                 icon: 'System',
                 label: 'System',
                 value: 'system',
@@ -85,23 +91,18 @@ const SystemAppPresenter = () => {
                 value: 'theme',
                 sublabel: 'Colors, wallpaper, customization',
               },
+
               {
-                icon: 'AccountSettings',
-                label: 'Account',
-                value: 'account',
-                sublabel: 'Profile, hosting info',
+                icon: 'QuestionCircle',
+                label: 'Help',
+                value: 'help',
+                sublabel: 'Support and Documentation',
               },
               {
                 icon: 'Holium',
                 label: 'About',
                 value: 'about',
                 sublabel: 'Build number, IDs, etc.',
-              },
-              {
-                icon: 'QuestionCircle',
-                label: 'Help',
-                value: 'help',
-                sublabel: 'Support and Documentation',
               },
             ]}
             onClick={(value: SystemPanelType) => {
