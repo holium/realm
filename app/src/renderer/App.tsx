@@ -13,7 +13,7 @@ import { SelectionProvider } from './lib/selection';
 import { Onboarding } from './onboarding/Onboarding';
 import { Splash } from './onboarding/Splash';
 import { appState, AppStateProvider, useAppState } from './stores/app.store';
-import { RealmIPC } from './stores/ipc';
+import { OnboardingIPC, RealmIPC } from './stores/ipc';
 import { Shell } from './system';
 import { Auth } from './system/authentication/index';
 import { ErrorBoundary } from './system/ErrorBoundary';
@@ -50,7 +50,7 @@ const AppContentPresenter = () => {
 
   const onFinishOnboarding = () => {
     onboarding.toggleOff();
-    window.onboardingService.triggerOnboardingEnded();
+    OnboardingIPC.triggerOnboardingEnded();
     OnboardingStorage.reset();
   };
 

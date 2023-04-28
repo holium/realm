@@ -35,8 +35,8 @@ type ExpandBarStyles = {
 };
 
 export const ShipBarPresenter = () => {
-  const { shellStore, authStore } = useAppState();
-  const { ship, chatStore, notifStore } = useShipStore();
+  const { loggedInAccount, shellStore, authStore } = useAppState();
+  const { chatStore, notifStore } = useShipStore();
   const {
     unreadCount,
     initNotifications,
@@ -45,7 +45,7 @@ export const ShipBarPresenter = () => {
     dismissApp,
     dismissPath,
   } = notifStore;
-  const roomsManager = useRooms(ship?.patp);
+  const roomsManager = useRooms(loggedInAccount?.patp);
   const { setActiveApp, activeApp } = useTrayApps();
 
   const [isAccountExpanded, setIsAccountExpanded] = useState(false);
@@ -89,7 +89,7 @@ export const ShipBarPresenter = () => {
 
   useEffect(() => {
     initNotifications();
-  }, [ship?.patp]);
+  }, [loggedInAccount?.patp]);
 
   useEffect(() => {
     if (isAccountTrayOpen) {
@@ -145,7 +145,7 @@ export const ShipBarPresenter = () => {
     };
   }, [handleClickOutside, root]);
 
-  if (!ship) return null;
+  if (!loggedInAccount) return null;
   const apps: any = {
     'realm-chat': {
       image: 'https://cdn-icons-png.flaticon.com/512/724/724715.png',

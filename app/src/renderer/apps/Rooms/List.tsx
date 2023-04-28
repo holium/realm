@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import { Button, Flex, Icon, Text, Tooltip } from '@holium/design-system';
 import { RealmProtocol, RoomType } from '@holium/realm-room';
 
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
@@ -11,9 +12,10 @@ import { RoomRow } from './components/RoomRow';
 import { useRooms } from './useRooms';
 
 const RoomsPresenter = () => {
-  const { ship, spacesStore } = useShipStore();
+  const { loggedInAccount } = useAppState();
+  const { spacesStore } = useShipStore();
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms(ship?.patp);
+  const roomsManager = useRooms(loggedInAccount?.patp);
 
   const ourSpace = spacesStore.selected?.type === 'our';
 

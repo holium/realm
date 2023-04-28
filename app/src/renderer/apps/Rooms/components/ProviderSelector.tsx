@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { Flex, Icon, Text } from '@holium/design-system';
 
-import { useShipStore } from 'renderer/stores/ship.store';
+import { useAppState } from 'renderer/stores/app.store';
 
 import { useRooms } from '../useRooms';
 
@@ -29,8 +29,8 @@ interface ProviderSelectorProps {
 }
 
 const ProviderSelectorPresenter = ({ onClick }: ProviderSelectorProps) => {
-  const { ship } = useShipStore();
-  const roomsManager = useRooms(ship?.patp);
+  const { loggedInAccount } = useAppState();
+  const roomsManager = useRooms(loggedInAccount?.patp);
 
   return (
     <ProviderStyle onClick={(evt: any) => onClick(evt)}>

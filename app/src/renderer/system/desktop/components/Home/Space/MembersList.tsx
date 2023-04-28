@@ -5,6 +5,7 @@ import { observer } from 'mobx-react';
 import { Flex, Text, WindowedList } from '@holium/design-system';
 
 import { PersonRow } from 'renderer/components/People/PersonRow';
+import { useAppState } from 'renderer/stores/app.store';
 import { FriendType } from 'renderer/stores/models/friends.model';
 import { MemberType } from 'renderer/stores/models/invitations.model';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -14,9 +15,9 @@ interface IMembersList {
 }
 type Roles = 'initiate' | 'member' | 'admin' | 'owner';
 
-const MembersListPresenter = (props: IMembersList) => {
-  const { our } = props;
-  const { spacesStore, ship, friends } = useShipStore();
+const MembersListPresenter = ({ our }: IMembersList) => {
+  const { loggedInAccount } = useAppState();
+  const { spacesStore, friends } = useShipStore();
   const currentSpace = spacesStore.selected;
 
   const pinned = useMemo(() => friends.pinned || [], [friends.pinned]);
@@ -110,7 +111,7 @@ const MembersListPresenter = (props: IMembersList) => {
       }
     }
 
-    if (!ship) return null;
+    if (!loggedInAccount) return null;
     if (!currentSpace) return null;
 
     const setNewRole = (role: Roles) => {
@@ -132,7 +133,8 @@ const MembersListPresenter = (props: IMembersList) => {
         description={contact.bio}
         listId="member-list"
         contextMenuOptions={
-          currentSpace.members.isAdmin(ship.patp) && member.patp !== ship.patp
+          currentSpace.members.isAdmin(loggedInAccount.patp) &&
+          member.patp !== loggedInAccount.patp
             ? [
                 activeRole === 'admin'
                   ? {

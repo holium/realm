@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useRef, useState } from 'react';
+import { ChangeEvent, CSSProperties, FormEvent, useRef, useState } from 'react';
 
 import { ErrorBox, Flex, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
@@ -10,11 +10,17 @@ import { SubmitButton } from '../SubmitButton';
 
 type Props = {
   isOpen: boolean;
+  style?: CSSProperties;
   onDismiss: () => void;
   onSubmit: (password: string) => Promise<boolean>;
 };
 
-export const ChangePasswordModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
+export const ChangePasswordModal = ({
+  isOpen,
+  style,
+  onDismiss,
+  onSubmit,
+}: Props) => {
   const submitting = useToggle(false);
   const confirmPasswordError = useToggle(false);
 
@@ -55,7 +61,12 @@ export const ChangePasswordModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onDismiss={onDismiss} onSubmit={handleSubmit}>
+    <Modal
+      isOpen={isOpen}
+      style={style}
+      onDismiss={onDismiss}
+      onSubmit={handleSubmit}
+    >
       <Text.H5 padding="16px 0">Change password</Text.H5>
       <Flex flexDirection="column" gap={2}>
         <OnboardDialogInputLabel as="label" htmlFor="new-password">

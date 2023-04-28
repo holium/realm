@@ -8,13 +8,14 @@ import {
   ChangePasswordModal,
   EjectIdModal,
   GetNewAccessCodeModal,
+  UserContextProvider,
+  useUser,
   VerifyEmailModal,
 } from '@holium/shared';
 
 import { Page } from '../../components/Page';
 import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
-import { UserContextProvider, useUser } from '../../util/UserContext';
 
 const HostingPresenter = () => {
   const { goToPage, logout } = useNavigation();
@@ -203,7 +204,7 @@ const HostingPresenter = () => {
 export default function Hosting() {
   return (
     <Page title="Account / Hosting" isProtected>
-      <UserContextProvider>
+      <UserContextProvider api={thirdEarthApi}>
         <HostingPresenter />
       </UserContextProvider>
     </Page>

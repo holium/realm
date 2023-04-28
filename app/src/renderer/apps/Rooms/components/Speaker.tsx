@@ -10,6 +10,7 @@ import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useRooms } from '../useRooms';
@@ -28,13 +29,13 @@ const speakerType = {
   listener: 'Listener',
 };
 
-const SpeakerPresenter = (props: ISpeaker) => {
-  const { person, type } = props;
-  const { ship, friends } = useShipStore();
+const SpeakerPresenter = ({ person, type }: ISpeaker) => {
+  const { loggedInAccount } = useAppState();
+  const { friends } = useShipStore();
   const speakerRef = useRef<any>(null);
-  const roomsManager = useRooms(ship?.patp);
+  const roomsManager = useRooms(loggedInAccount?.patp);
   const { getOptions, setOptions } = useContextMenu();
-  const isOur = person === ship?.patp;
+  const isOur = person === loggedInAccount?.patp;
   const metadata = friends.getContactAvatarMetadata(person);
 
   let name = metadata?.nickname || person;
@@ -55,7 +56,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
           },
         },
         // only the creator can kick people
-        ship?.patp === roomsManager.live.room?.creator && {
+        loggedInAccount?.patp === roomsManager.live.room?.creator && {
           style: { color: '#FD4E4E' },
           id: `room-speaker-${person}-kick`,
           label: 'Kick',
@@ -66,7 +67,13 @@ const SpeakerPresenter = (props: ISpeaker) => {
           },
         },
       ].filter(Boolean) as ContextMenuOption[],
-    [peer?.status, person, roomsManager.live.room, roomsManager.protocol, ship]
+    [
+      peer?.status,
+      person,
+      roomsManager.live.room,
+      roomsManager.protocol,
+      loggedInAccount,
+    ]
   );
 
   const peerState = isOur ? PeerConnectionState.Connected : peer?.status;
@@ -91,12 +98,18 @@ const SpeakerPresenter = (props: ISpeaker) => {
 
   useEffect(() => {
     if (
-      person !== ship?.patp &&
+      person !== loggedInAccount?.patp &&
       contextMenuOptions !== getOptions(`room-speaker-${person}`)
     ) {
       setOptions(`room-speaker-${person}`, contextMenuOptions);
     }
-  }, [contextMenuOptions, getOptions, person, setOptions, ship?.patp]);
+  }, [
+    contextMenuOptions,
+    getOptions,
+    person,
+    setOptions,
+    loggedInAccount?.patp,
+  ]);
 
   return (
     <SpeakerWrapper

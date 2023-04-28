@@ -13,8 +13,8 @@ import { MainIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 const RoomTrayPresenter = () => {
-  const { shellStore } = useAppState();
-  const { ship, friends, spacesStore } = useShipStore();
+  const { loggedInAccount, shellStore } = useAppState();
+  const { friends, spacesStore } = useShipStore();
   const { position, anchorOffset, dimensions } = roomTrayConfig;
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const RoomTrayPresenter = () => {
     setTrayAppDimensions,
   } = useTrayApps();
 
-  const roomsManager = useRooms(ship?.patp);
+  const roomsManager = useRooms(loggedInAccount?.patp);
   const muted = roomsManager.protocol.local?.isMuted;
 
   const onButtonClick = useCallback(

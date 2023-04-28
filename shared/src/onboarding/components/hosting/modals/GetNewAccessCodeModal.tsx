@@ -1,4 +1,4 @@
-import { FormEvent } from 'react';
+import { CSSProperties, FormEvent } from 'react';
 
 import { Flex, Text } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
@@ -8,12 +8,14 @@ import { SubmitButton } from '../SubmitButton';
 
 type Props = {
   isOpen: boolean;
+  style?: CSSProperties;
   onDismiss: () => void;
   onSubmit: () => Promise<boolean>;
 };
 
 export const GetNewAccessCodeModal = ({
   isOpen,
+  style,
   onDismiss,
   onSubmit,
 }: Props) => {
@@ -33,7 +35,12 @@ export const GetNewAccessCodeModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onDismiss={onDismiss} onSubmit={handleSubmit}>
+    <Modal
+      isOpen={isOpen}
+      style={style}
+      onDismiss={onDismiss}
+      onSubmit={handleSubmit}
+    >
       <Text.H5>New Access Code</Text.H5>
       <Text.Body>
         Generating a new access code will disconect all active sessions for this

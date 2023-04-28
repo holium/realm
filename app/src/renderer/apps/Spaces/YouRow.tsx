@@ -2,8 +2,8 @@ import styled from 'styled-components';
 
 import { Avatar, Box, Flex, Row, Text } from '@holium/design-system';
 
+import { MobXAccount } from 'renderer/stores/models/account.model';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
-import { ShipMobxType, useShipStore } from 'renderer/stores/ship.store';
 
 const Wrapper = styled(Box)`
   position: absolute;
@@ -16,17 +16,19 @@ const Wrapper = styled(Box)`
   width: calc(100% + 24px);
 `;
 interface SpaceRowProps {
-  ship: ShipMobxType;
+  account: MobXAccount;
   space: SpaceModelType;
   selected?: boolean;
   onSelect: (spaceKey: string) => void;
 }
 
-export const YouRow = (props: SpaceRowProps) => {
-  const { selected, onSelect, space } = props;
-  const { ship } = useShipStore();
-
-  if (!ship) return null;
+export const YouRow = ({
+  account,
+  selected,
+  space,
+  onSelect,
+}: SpaceRowProps) => {
+  if (!account) return null;
 
   return (
     <Wrapper>
@@ -44,13 +46,13 @@ export const YouRow = (props: SpaceRowProps) => {
             simple
             borderRadiusOverride="6px"
             size={32}
-            avatar={ship.avatar}
-            patp={ship.patp}
-            sigilColor={[ship.color || '#000000', 'white']}
+            avatar={account.avatar}
+            patp={account.patp}
+            sigilColor={[account.color || '#000000', 'white']}
           />
           <Flex ml={2} flexDirection="column">
             <Text.Custom fontSize={3} fontWeight={500}>
-              {ship.nickname || ship.patp}
+              {account.nickname || account.patp}
             </Text.Custom>
           </Flex>
         </Flex>

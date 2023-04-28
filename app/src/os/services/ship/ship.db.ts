@@ -7,6 +7,7 @@ import path from 'path';
 import { chatInitSql } from './chat/chat.db';
 import { friendsInitSql } from './friends.service';
 import { notifInitSql } from './notifications/notifications.table';
+import { Credentials } from './ship.types.ts';
 import { spacesTablesInitSql } from './spaces/spaces.service';
 import { bazaarTablesInitSql } from './spaces/tables/catalog.table';
 import { walletInitSql } from './wallet/wallet.db';
@@ -62,14 +63,13 @@ export class ShipDB {
     this.db.exec(`PRAGMA rekey = '${password}'`);
   }
 
-  getCredentials(): {
-    url: string;
-    code: string;
-    cookie: string;
-  } {
-    const result: any = this.shipDB
+  getCredentials(): Credentials {
+    const result = this.shipDB
       .prepare('SELECT * FROM credentials LIMIT 1;')
       .get();
+
+    log.info('ship.db.ts:', 'getCredentials', result);
+
     return { ...result, ship: this.patp };
   }
 

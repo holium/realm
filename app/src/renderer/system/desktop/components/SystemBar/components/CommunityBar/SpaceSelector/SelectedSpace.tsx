@@ -43,8 +43,8 @@ const FadeInMotion = {
 };
 
 const SelectedSpacePresenter = ({ onClick }: SelectedSpaceProps) => {
-  const { theme } = useAppState();
-  const { ship, spacesStore } = useShipStore();
+  const { loggedInAccount, theme } = useAppState();
+  const { spacesStore } = useShipStore();
   const selectedSpace = spacesStore.selected;
   const { textColor } = theme;
 
@@ -53,7 +53,7 @@ const SelectedSpacePresenter = ({ onClick }: SelectedSpaceProps) => {
   if (!selectedSpace) return null;
 
   if (selectedSpace.type === 'our') {
-    if (!ship) return null;
+    if (!loggedInAccount) return null;
     innerContent = (
       <Flex
         style={{ pointerEvents: 'none' }}
@@ -65,9 +65,9 @@ const SelectedSpacePresenter = ({ onClick }: SelectedSpaceProps) => {
         <Avatar
           simple
           size={28}
-          avatar={ship.avatar}
-          patp={ship.patp}
-          sigilColor={[ship.color || '#000000', 'white']}
+          avatar={loggedInAccount.avatar}
+          patp={loggedInAccount.patp}
+          sigilColor={[loggedInAccount.color || '#000000', 'white']}
         />
 
         <Flex
@@ -96,7 +96,7 @@ const SelectedSpacePresenter = ({ onClick }: SelectedSpaceProps) => {
             animate={{ color: textColor }}
             transition={{ color: { duration: 0.2 } }}
           >
-            {ship?.nickname || ship?.patp}
+            {loggedInAccount.nickname || loggedInAccount.patp}
           </Text.Custom>
         </Flex>
       </Flex>

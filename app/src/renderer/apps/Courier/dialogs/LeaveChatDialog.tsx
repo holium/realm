@@ -1,10 +1,9 @@
 import { useState } from 'react';
 
+import { ConfirmDialog } from 'renderer/apps/System/Dialogs/Confirm';
 import { normalizeBounds } from 'renderer/lib/window-manager';
+import { useChatStore } from 'renderer/stores/chat.store';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-
-import { useChatStore } from '../../../stores/chat.store';
-import { ConfirmDialog } from '../../System/Dialogs/Confirm';
 
 type LeaveChatDialogConfigComponentProps = {
   path: string;

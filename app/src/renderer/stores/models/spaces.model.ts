@@ -399,7 +399,7 @@ export const SpacesStore = types
       }
     },
     _onSpaceRemoved: (removePayload: any) => {
-      if (!removePayload.path.includes(shipStore.ship?.patp)) {
+      if (!removePayload.path.includes(appState.loggedInAccount?.patp)) {
         // TODO its not our space so we need to notify the user they were kicked
         console.warn('we were kicked from a space', removePayload.path);
       }

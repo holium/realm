@@ -1,8 +1,7 @@
-import { Account } from './services/auth/accounts.table';
-import { AccountView } from './services/auth/auth.types';
+import { DBAccount } from './services/auth/accounts.table';
 import { MasterAccount } from './services/auth/masterAccounts.table';
 
-export type CreateAccountPayload = Omit<Account, 'updatedAt' | 'createdAt'>;
+export type CreateAccountPayload = Omit<DBAccount, 'updatedAt' | 'createdAt'>;
 
 export type CreateMasterAccountPayload = Omit<MasterAccount, 'id'>;
 
@@ -23,7 +22,7 @@ export type RealmSession = {
 export type RealmUpdateBooted = {
   type: 'booted';
   payload: {
-    accounts: AccountView[] | undefined;
+    accounts: DBAccount[] | undefined;
     session?: RealmSession | null;
     seenSplash: boolean;
   };

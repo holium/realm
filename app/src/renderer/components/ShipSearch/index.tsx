@@ -14,6 +14,7 @@ import {
   WindowedList,
 } from '@holium/design-system';
 
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { searchPatpOrNickname } from './helpers';
@@ -48,11 +49,17 @@ const ShipSearchPresenter = ({
   selected,
   onSelected,
 }: ShipSearchProps) => {
-  const { ship, friends } = useShipStore();
+  const { loggedInAccount } = useAppState();
+  const { friends } = useShipStore();
 
   const results = useMemo(() => {
-    return searchPatpOrNickname(search, friends.search, selected, ship?.patp);
-  }, [friends.all, search, selected, ship]);
+    return searchPatpOrNickname(
+      search,
+      friends.search,
+      selected,
+      loggedInAccount?.patp
+    );
+  }, [friends.all, search, selected, loggedInAccount]);
 
   const isOpen = useMemo(
     () => search.length && results.length,

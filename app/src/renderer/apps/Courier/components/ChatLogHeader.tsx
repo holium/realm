@@ -35,8 +35,8 @@ export const ChatLogHeader = ({
   isMuted,
   hasMenu = true,
 }: ChatLogHeaderProps) => {
-  const { shellStore } = useAppState();
-  const { ship, chatStore } = useShipStore();
+  const { loggedInAccount, shellStore } = useAppState();
+  const { chatStore } = useShipStore();
   const { selectedChat, setSubroute, toggleMuted } = chatStore;
   const isSpaceChat = selectedChat?.type === 'space';
 
@@ -44,8 +44,8 @@ export const ChatLogHeader = ({
 
   const contextMenuOptions = useMemo(() => {
     const menu: MenuItemProps[] = [];
-    if (!selectedChat || !ship) return menu;
-    const isAdmin = selectedChat.isHost(ship.patp);
+    if (!selectedChat || !loggedInAccount) return menu;
+    const isAdmin = selectedChat.isHost(loggedInAccount.patp);
     menu.push({
       id: `${chatLogId}-chat-info`,
       icon: 'Info',
@@ -105,7 +105,7 @@ export const ChatLogHeader = ({
           shellStore.openDialogWithStringProps('leave-chat-dialog', {
             path,
             amHost: isAdmin.toString(),
-            our: ship.patp,
+            our: loggedInAccount.patp,
           });
         },
       });
