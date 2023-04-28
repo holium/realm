@@ -157,11 +157,6 @@ export class RealmProtocol extends BaseProtocol {
     }
 
     if (mark === 'rooms-v2-reaction') {
-      // console.log('%rooms', data);
-      if (data['chat-received']) {
-        const payload = data['chat-received'];
-        this.emit(ProtocolEvent.ChatReceived, payload.from, payload.content);
-      }
       if (data['provider-changed']) {
         const payload = data['provider-changed'];
         this.provider = payload.provider;
@@ -302,6 +297,18 @@ export class RealmProtocol extends BaseProtocol {
       this.sendData({
         kind: DataPacket_Kind.SPEAKING_CHANGED,
         value: { data: speaking },
+      });
+    });
+    this.local.on(PeerEvent.ChatReceived, (message: any) => {
+      this.sendData({
+        kind: DataPacket_Kind.CHAT,
+        value: { data: message },
+      });
+    });
+    this.local.on(PeerEvent.IsTypingChanged, (typing: boolean) => {
+      this.sendData({
+        kind: DataPacket_Kind.TYPING_STATUS,
+        value: { data: typing },
       });
     });
   }

@@ -9,6 +9,7 @@ export enum DataPacket_Kind {
   MUTE_STATUS = 3,
   SPEAKING_CHANGED = 4,
   CHAT = 5,
+  TYPING_STATUS = 6,
   UNRECOGNIZED = -1,
 }
 

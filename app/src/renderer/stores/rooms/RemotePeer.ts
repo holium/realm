@@ -8,6 +8,8 @@ import { DataPacket, DataPayload, PeerConnectionState } from './rooms.types';
 
 const DataPacketMuteStatus = 3;
 const DataPacketSpeakingChanged = 4;
+const DataPacketChat = 5;
+const DataPacketTypingStatus = 6;
 
 export enum TrackKind {
   Audio = 'audio',
@@ -231,6 +233,9 @@ export class RemotePeer {
     } else if (data.kind === DataPacketSpeakingChanged) {
       const payload = data.value as DataPayload;
       this.isSpeakingChanged(payload.data);
+    } else if (data.kind === DataPacketChat) {
+      const payload = data.value as DataPayload;
+    } else if (data.kind === DataPacketTypingStatus) {
     }
   }
 

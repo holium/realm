@@ -109,6 +109,8 @@ export type PeerEventCallbacks = {
   audioPlaybackFailed: (err: Error) => void;
   receivedData: (data: any) => void;
   isSpeakingChanged: (speaking: boolean) => void;
+  chatReceived: (message: string) => void;
+  isTypingChanged: (typing: boolean) => void;
   muted: () => void;
   unmuted: () => void;
 };

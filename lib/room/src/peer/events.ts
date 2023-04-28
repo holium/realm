@@ -16,6 +16,8 @@ export enum PeerEvent {
   AudioPlaybackStopped = 'audioPlaybackStopped',
   AudioPlaybackFailed = 'audioPlaybackFailed',
   IsSpeakingChanged = 'isSpeakingChanged',
+  ChatReceived = 'chatReceived',
+  IsTypingChanged = 'isTypingChanged',
   ReceivedData = 'receivedData',
   Muted = 'muted',
   Unmuted = 'unmuted',
