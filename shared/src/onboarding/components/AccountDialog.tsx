@@ -61,7 +61,7 @@ export const AccountDialog = ({
       ? [
           SidebarSection.Hosting,
           SidebarSection.S3Storage,
-          SidebarSection.Statistics,
+          // SidebarSection.Statistics,
           SidebarSection.CustomDomain,
           SidebarSection.DownloadRealm,
         ]
