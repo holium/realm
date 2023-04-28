@@ -226,7 +226,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
         pb={2}
       >
         {/* Chat Info */}
-        <Flex flexDirection="column" gap={4} pt={3} pb={4}>
+        <Flex flexDirection="column" gap={4} pt={3} pb={3}>
           <Flex
             flexDirection="column"
             justifyContent="center"
@@ -451,16 +451,13 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                     mt={1}
                     mb={2}
                     p={2}
-                    border="1px solid"
-                    borderColor="intent-info"
+                    border="1px solid rgba(0, 0, 0, 0.1)"
+                    background={
+                      theme.mode === 'dark'
+                        ? 'rgba(0, 0, 0, 0.125)'
+                        : 'rgba(0, 0, 0, 0.065)'
+                    }
                     borderRadius={6}
-                    style={{
-                      borderColor: 'rgba(0, 0, 0, 0.1)',
-                      backgroundColor:
-                        theme.mode === 'dark'
-                          ? 'rgba(0, 0, 0, 0.125)'
-                          : 'rgba(0, 0, 0, 0.065)',
-                    }}
                   >
                     <Icon name="InfoCircle" color="icon" mr={2} opacity={0.7} />
                     <Text.Hint lineHeight={1.25} opacity={0.7}>

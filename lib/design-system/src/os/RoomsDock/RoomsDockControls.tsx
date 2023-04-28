@@ -52,7 +52,7 @@ export const RoomsDockControls = ({
       }}
     >
       <Icon
-        fill={isMuted ? 'intent-warning' : 'text'}
+        fill={isMuted ? 'intent-caution' : 'text'}
         name={isMuted ? 'Unmute' : 'Mute'}
         size={26}
       />

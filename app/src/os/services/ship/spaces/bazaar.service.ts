@@ -56,6 +56,11 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
             DELETE FROM app_catalog;
           `);
           this.tables?.appCatalog.insertAll(data['initial']);
+          // log.info(
+          //   'bazaar.service.ts:',
+          //   'Initial catalog received. # of apps:',
+          //   this.tables?.appCatalog.getCatalog()
+          // );
           this.sendUpdate({
             type: 'initial',
             payload: this.tables?.appCatalog.getCatalog(),

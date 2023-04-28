@@ -5,6 +5,8 @@ import { InstallationDialog } from '@holium/shared';
 
 import { StepProps } from './types';
 
+import { RealmInstallStatus } from '@holium/shared/src/onboarding/types';
+
 export const InstallationStep = ({ setStep, onFinish }: StepProps) => {
   useEffect(() => {
     track('Onboarding / Installation');
@@ -14,7 +16,7 @@ export const InstallationStep = ({ setStep, onFinish }: StepProps) => {
     setStep('/passport');
   };
 
-  const onInstallRealm = () => {
+  const onInstallRealm = (): Promise<RealmInstallStatus> => {
     return window.onboardingService.installRealmAgent();
   };
 

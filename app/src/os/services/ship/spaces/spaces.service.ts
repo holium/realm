@@ -186,7 +186,6 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
               },
             },
           });
-
           break;
         case 'invite-received':
           const receivedPayload = visaData[visaType];
@@ -364,20 +363,27 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
         path: pathToObj(path),
       },
     });
+    const pathObj = pathToObj(path);
     return await new Promise((resolve, reject) => {
       APIConnection.getInstance().conduit.poke({
         app: 'spaces',
         mark: 'spaces-action',
         json: {
           join: {
-            path: pathToObj(path),
+            path: pathObj,
           },
         },
         reaction: 'spaces-reaction.remote-space',
         onReaction: (data: any) => {
           console.log('joined space -> success');
-          // TODO: add to db
           // check if matches path
+          APIConnection.getInstance().conduit.poke({
+            app: 'rooms-v2',
+            mark: 'rooms-v2-session-action',
+            json: {
+              'set-provider': pathObj.ship,
+            },
+          });
           resolve(data);
         },
         onError: (e: any) => {

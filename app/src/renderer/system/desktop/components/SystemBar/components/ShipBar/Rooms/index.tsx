@@ -65,7 +65,7 @@ const RoomTrayPresenter = () => {
   );
 
   const participants =
-    roomsStore.peers.map((patp: string) => {
+    roomsStore.getPeers().map((patp: string) => {
       const metadata = friends.getContactAvatarMetadata(patp);
       return metadata;
     }) || [];

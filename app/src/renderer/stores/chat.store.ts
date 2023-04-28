@@ -1,4 +1,3 @@
-import { createContext, useContext } from 'react';
 import { toJS } from 'mobx';
 // import { toJS } from 'mobx';
 import {
@@ -15,6 +14,7 @@ import { ChatIPC } from 'renderer/stores/ipc';
 import { SpacesStoreType } from 'renderer/stores/models/spaces.model';
 
 import { Chat, ChatModelType } from './models/chat.model';
+import { LoaderModel } from './models/common.model';
 import { ShipStore, shipStore } from './ship.store';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
@@ -36,6 +36,7 @@ export const ChatStore = types
     inbox: types.array(Chat),
     selectedChat: types.maybe(types.reference(Chat)),
     isOpen: types.boolean,
+    loader: LoaderModel,
   })
   .views((self) => ({
     isChatPinned(path: string) {
@@ -138,9 +139,7 @@ export const ChatStore = types
         return self.pinnedChats;
       }
     }),
-    fetchInboxMetadata: flow(function* () {
-      yield ChatIPC.fetchPathMetadata();
-    }),
+    fetchInboxMetadata: ChatIPC.fetchPathMetadata,
     loadChatList: flow(function* () {
       try {
         self.inbox = yield ChatIPC.getChatList();
@@ -265,28 +264,10 @@ export const ChatStore = types
 // -------------------------------
 // TODO Write a caching layer for the inbox
 
-export const chatStore = ChatStore.create({
-  subroute: 'inbox',
-  isOpen: false,
-  pinnedChats: [],
-});
-
 // -------------------------------
 // Create core context
 // -------------------------------
 export type ChatStoreInstance = Instance<typeof ChatStore>;
-export const ChatStoreContext = createContext<null | ChatStoreInstance>(
-  chatStore
-);
-
-export const ChatProvider = ChatStoreContext.Provider;
-export function useChatStore() {
-  const store = useContext(ChatStoreContext);
-  if (store === null) {
-    throw new Error('Store cannot be null, please add a context provider');
-  }
-  return store;
-}
 
 // -------------------------------
 // Listen for changes
@@ -315,7 +296,8 @@ ChatIPC.onUpdate(({ type, payload }: ChatUpdateTypes) => {
     );
 
     if (selectedChat) selectedChat.addMessage(payload);
-    if (chatStore.subroute === 'inbox') chatStore.refreshInbox();
+    if (shipStore.chatStore.subroute === 'inbox')
+      shipStore.chatStore.refreshInbox();
 
     return;
   }

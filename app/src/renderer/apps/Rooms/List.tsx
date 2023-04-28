@@ -2,7 +2,6 @@ import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, Text, Tooltip } from '@holium/design-system';
 
-import { useAppState } from 'renderer/stores/app.store';
 import { RoomMobx } from 'renderer/stores/rooms.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -11,9 +10,7 @@ import { ProviderSelector } from './components/ProviderSelector';
 import { RoomRow } from './components/RoomRow';
 
 const RoomsPresenter = () => {
-  const { theme } = useAppState();
   const { spacesStore, roomsStore } = useShipStore();
-  const { windowColor } = theme;
   const { roomsApp } = useTrayApps();
 
   const ourSpace = spacesStore.selected?.type === 'our';
@@ -96,7 +93,6 @@ const RoomsPresenter = () => {
           content="This is your room provider."
         >
           <ProviderSelector
-            seedColor={windowColor}
             onClick={() => {
               console.log('show provider setup');
             }}

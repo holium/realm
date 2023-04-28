@@ -210,7 +210,7 @@ export const ChatLogPresenter = (props: ChatLogProps) => {
     endPadding = 136;
   }
   if (selectedChat.replyingMsg) {
-    endPadding = 66;
+    endPadding = 56;
   }
 
   let pretitle;
