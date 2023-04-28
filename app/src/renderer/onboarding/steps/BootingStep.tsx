@@ -74,7 +74,7 @@ export const BootingStep = ({ setStep }: StepProps) => {
         nickname: '',
         description: '',
         color: '#000000',
-        type: 'local',
+        type: 'hosted',
         url: shipUrl,
         status: 'online',
         theme: JSON.stringify(defaultTheme),
