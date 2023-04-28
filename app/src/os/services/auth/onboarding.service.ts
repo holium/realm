@@ -314,7 +314,8 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
           mark: 'kiln-install',
           json: {
             ship:
-              process.env.NODE_ENV === 'production'
+              process.env.RELEASE_CHANNEL === 'latest' ||
+              process.env.RELEASE_CHANNEL === 'hotfix'
                 ? '~hostyv'
                 : '~nimwyd-ramwyl-dozzod-hostyv',
             desk: 'realm',
