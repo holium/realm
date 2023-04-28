@@ -10,6 +10,7 @@ import {
   EjectIdModal,
   GetNewAccessCodeModal,
   OnboardingStorage,
+  useUser,
   VerifyEmailModal,
 } from '@holium/shared';
 
@@ -31,6 +32,8 @@ type Props = {
 };
 
 export const AccountHostingSection = ({ account }: Props) => {
+  const { ships } = useUser();
+
   const error = useToggle(false);
   const changeEmailModal = useToggle(false);
   const verifyEmailModal = useToggle(false);
@@ -39,9 +42,9 @@ export const AccountHostingSection = ({ account }: Props) => {
   const changeMaintenanceWindowModal = useToggle(false);
   const ejectIdModal = useToggle(false);
 
-  const maintenanceWindow = 0;
+  const ship = ships.find((s) => s.patp === account.patp);
 
-  const { shipCode, email, token } = OnboardingStorage.get();
+  const { email, token } = OnboardingStorage.get();
 
   const onSubmitNewEmail = async (email: string) => {
     if (!token) return Promise.resolve(false);
@@ -166,7 +169,7 @@ export const AccountHostingSection = ({ account }: Props) => {
     return false;
   };
 
-  if (error.isOn || !email || !shipCode) {
+  if (error.isOn || !email || !ship) {
     return (
       <SettingSection
         title="Account Hosting"
@@ -218,7 +221,7 @@ export const AccountHostingSection = ({ account }: Props) => {
         <ChangeMaintenanceWindowModal
           style={forceCenterStyle}
           isOpen={changeMaintenanceWindowModal.isOn}
-          initialSelected={maintenanceWindow.toString()}
+          initialSelected={ship.maintenance_window.toString()}
           onDismiss={changeMaintenanceWindowModal.toggleOff}
           onSubmit={onSubmitNewMaintenanceWindow}
         />
@@ -235,11 +238,11 @@ export const AccountHostingSection = ({ account }: Props) => {
         title="Hosting"
         body={
           <AccountHostingDialogBody
-            selectedPatp={account.patp}
-            email={email}
-            shipUrl={account.url}
-            shipCode={shipCode}
-            shipMaintenanceWindow={maintenanceWindow}
+            selectedPatp={ship.patp}
+            email={ship.email}
+            shipUrl={ship.link}
+            shipCode={ship.code}
+            shipMaintenanceWindow={ship.maintenance_window}
             onClickChangeEmail={changeEmailModal.toggleOn}
             onClickChangePassword={changePasswordModal.toggleOn}
             onClickManageBilling={onClickManageBilling}
