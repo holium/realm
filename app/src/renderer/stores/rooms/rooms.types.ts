@@ -9,6 +9,14 @@ export declare enum DataPacket_Kind {
   UNRECOGNIZED = -1,
 }
 
+export declare enum DataPacketKind {
+  DATA = 0,
+  CURSOR = 1,
+  TRACK_META = 2,
+  MUTE_STATUS = 3,
+  SPEAKING_CHANGED = 4,
+  UNRECOGNIZED = -1,
+}
 export interface DataPayload {
   app?: string;
   data?: any;
@@ -65,7 +73,7 @@ export enum PeerConnectionState {
 }
 export interface DataPacket {
   from: string;
-  kind: DataPacket_Kind;
+  kind: DataPacketKind;
   value: {
     multiplayer?: MultiplayerPayload;
     broadcast?: PresenceBroadcast;

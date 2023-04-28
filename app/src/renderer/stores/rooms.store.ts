@@ -10,7 +10,7 @@ import { RemotePeer } from './rooms/RemotePeer';
 import { ridFromTitle } from './rooms/rooms.parsing';
 import {
   DataPacket,
-  DataPacket_Kind,
+  DataPacketKind,
   PeerConnectionState,
 } from './rooms/rooms.types';
 import { shipStore } from './ship.store';
@@ -281,7 +281,7 @@ export const RoomsStore = types
       mute() {
         localPeer?.mute();
         sendDataToPeer({
-          kind: DataPacket_Kind.MUTE_STATUS,
+          kind: DataPacketKind.MUTE_STATUS,
           value: { data: true },
         });
         self.isMuted = true;
@@ -289,7 +289,7 @@ export const RoomsStore = types
       unmute() {
         localPeer?.unmute();
         sendDataToPeer({
-          kind: DataPacket_Kind.MUTE_STATUS,
+          kind: DataPacketKind.MUTE_STATUS,
           value: { data: false },
         });
         self.isMuted = false;
