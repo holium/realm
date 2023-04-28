@@ -6,6 +6,7 @@ import { DataPacket_Kind } from '@holium/realm-room';
 
 import { SoundActions } from 'renderer/lib/sound';
 
+import { useAppState } from './app.store';
 import { RoomsIPC } from './ipc';
 import { Chat } from './models/chat.model';
 import { LocalPeer } from './rooms/LocalPeer';
@@ -220,6 +221,8 @@ export const RoomsStore = types
       localPeer?.disableMedia();
     };
 
+    const { loggedInAccount } = useAppState();
+
     return {
       beforeDestroy() {
         // cleanup rooms
@@ -237,8 +240,10 @@ export const RoomsStore = types
         return remotePeers.get(patp);
       },
       init: flow(function* () {
+        if (!loggedInAccount)
+          throw new Error('No logged in account for rooms store');
         localPeer.init(
-          window.ship,
+          loggedInAccount.patp,
           {
             setAudioAttached: (isAttached: boolean) => {
               self.isAudioAttached = isAttached;

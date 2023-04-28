@@ -5,13 +5,14 @@ import { Flex } from '@holium/design-system';
 
 import { useTrayApps } from 'renderer/apps/store';
 import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { Speaker } from '../components/Speaker';
 import { roomTrayConfig } from '../config';
 
 const VoiceViewPresenter = () => {
   const { loggedInAccount } = useAppState();
-  const { ship, roomsStore } = useShipStore();
+  const { roomsStore } = useShipStore();
 
   const { setTrayAppHeight } = useTrayApps();
 
@@ -48,7 +49,11 @@ const VoiceViewPresenter = () => {
         gridAutoRows: '.5fr',
       }}
     >
-      <Speaker key={ship?.patp} type="our" person={ship?.patp ?? ''} />
+      <Speaker
+        key={loggedInAccount?.patp}
+        type="our"
+        person={loggedInAccount?.patp ?? ''}
+      />
       {speakers.map((person: string) => (
         <Speaker key={person} type="speaker" person={person} />
       ))}

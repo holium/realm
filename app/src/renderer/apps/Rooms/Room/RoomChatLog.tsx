@@ -39,7 +39,6 @@ const FullWidthAnimatePresence = styled(AnimatePresence)`
 type RoomChatLogProps = {
   storage: IuseStorage;
   selectedChat?: ChatModelType;
-  height?: number;
 };
 
 export const RoomChatLogPresenter = ({
@@ -48,19 +47,20 @@ export const RoomChatLogPresenter = ({
 }: RoomChatLogProps) => {
   const { theme } = useAppState();
   const { dimensions, innerNavigation } = useTrayApps();
-  const { ship, notifStore, friends, roomsStore } = useShipStore();
+  const { loggedInAccount } = useAppState();
+  const { notifStore, friends, roomsStore } = useShipStore();
 
   const [showAttachments, setShowAttachments] = useState(false);
 
   const listRef = useRef<WindowedListRef>(null);
 
   const { color: ourColor } = useMemo(() => {
-    if (!ship) return { color: '#000' };
-    return friends.getContactAvatarMetadata(ship.patp);
+    if (!loggedInAccount) return { color: '#000' };
+    return friends.getContactAvatarMetadata(loggedInAccount.patp);
   }, []);
 
   useEffect(() => {
-    if (!selectedChat || !ship?.patp) return;
+    if (!selectedChat || !loggedInAccount?.patp) return;
     selectedChat.fetchMessages();
     const unreadCount = notifStore.getUnreadCountByPath(selectedChat.path);
     if (unreadCount > 0) {
@@ -99,7 +99,7 @@ export const RoomChatLogPresenter = ({
     return null;
   }, [selectedChat?.replyingMsg, listRef.current]);
 
-  if (!selectedChat || !ship) return null;
+  if (!selectedChat || !loggedInAccount) return null;
   const { path, messages } = selectedChat;
 
   const showPin =
