@@ -270,10 +270,12 @@ export const RoomsStore = types
         if (session) {
           self.provider = session.provider;
           self.rooms = session.rooms;
-          if (session.current) {
-            self.current = self.rooms.get(session.current);
+          const current = Array.from(self.rooms.values()).find(
+            (r) => r.creator === self.our
+          );
+          if (current) {
+            self.current = current;
             yield localPeer.enableMedia();
-            // self.current && dialAll(window.ship, self.current, self.config.rtc);
           }
         }
       }),
@@ -410,10 +412,11 @@ export const RoomsStore = types
       _onSession(session: any) {
         self.provider = session.provider;
         self.rooms = session.rooms;
-        if (
-          Array.from(self.rooms.values()).find((r) => r.creator === self.our)
-        ) {
-          self.current = self.rooms.get(session.current);
+        const current = Array.from(self.rooms.values()).find(
+          (r) => r.creator === self.our
+        );
+        if (current) {
+          self.current = current;
         }
       },
       _onRoomCreated(room: RoomMobx) {

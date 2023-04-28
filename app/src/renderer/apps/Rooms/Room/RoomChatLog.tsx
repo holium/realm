@@ -78,7 +78,7 @@ export const RoomChatLogPresenter = ({
         align: 'start',
         behavior: innerNavigation === '' ? 'auto' : 'smooth',
       });
-    }, 350);
+    }, 340);
   }, [selectedChat?.path, innerNavigation]);
 
   let replyToFormatted = useMemo(() => {
@@ -204,7 +204,6 @@ export const RoomChatLogPresenter = ({
               justifyContent="center"
               alignItems="center"
               width={containerWidth}
-              p={5}
             >
               <Text.Custom
                 textAlign="center"
@@ -224,7 +223,7 @@ export const RoomChatLogPresenter = ({
                 endOfListPadding={endPadding}
                 selectedChat={selectedChat}
                 width={containerWidth}
-                height={350} // {height}
+                height={340}
                 ourColor={ourColor}
                 stretch
               />
