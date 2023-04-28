@@ -31,6 +31,7 @@ export { OnboardingStorage } from './services/OnboardingStorage';
 export { ThirdEarthApi } from './services/ThirdEarthApi';
 export type {
   OnboardingPage,
+  RealmInstallStatus,
   RealmOnboardingStep,
   ThirdEarthPortalSession,
   ThirdEarthProduct,

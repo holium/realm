@@ -1,6 +1,8 @@
 import log from 'electron-log';
 import bcrypt from 'bcryptjs';
 
+import { RealmInstallStatus } from '@holium/shared';
+
 import { cleanNounColor, removeHash } from '../../lib/color';
 import { getCookie } from '../../lib/shipHelpers';
 import {
@@ -17,8 +19,6 @@ import {
   OnboardingUpdateTypes,
   RealmInstallVersionTest,
 } from './onboarding.types';
-
-import { RealmInstallStatus } from '@holium/shared/src/onboarding/types';
 
 type OnboardingCredentials = {
   patp: string;
@@ -282,7 +282,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     return false;
   }
 
-  async _waitForInstallRealmAgent(
+  private async waitForInstallRealmAgent(
     buildVersion: any
   ): Promise<RealmInstallStatus> {
     const self = this;
@@ -333,7 +333,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
           resolve({ success: false, message: 'BUILD_VERSION env var invalid' });
           return;
         }
-        const result = await this._waitForInstallRealmAgent(buildVersion);
+        const result = await this.waitForInstallRealmAgent(buildVersion);
         resolve(result);
       } catch (e) {
         log.error(e);
