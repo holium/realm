@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { CSSProperties, useRef, useState } from 'react';
 
 import { ErrorBox, Flex, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
@@ -10,11 +10,17 @@ import { SubmitButton } from '../SubmitButton';
 
 type Props = {
   isOpen: boolean;
+  style?: CSSProperties;
   onDismiss: () => void;
   onSubmit: (token: string, password: string) => Promise<boolean>;
 };
 
-export const VerifyEmailModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
+export const VerifyEmailModal = ({
+  isOpen,
+  style,
+  onDismiss,
+  onSubmit,
+}: Props) => {
   const submitting = useToggle(false);
 
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -43,7 +49,12 @@ export const VerifyEmailModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onDismiss={onDismiss} onSubmit={handleSubmit}>
+    <Modal
+      isOpen={isOpen}
+      style={style}
+      onDismiss={onDismiss}
+      onSubmit={handleSubmit}
+    >
       <Text.H5 padding="16px 0">Verify new email</Text.H5>
       <Flex flexDirection="column" gap={2}>
         <OnboardDialogInputLabel as="label" htmlFor="verify-email-auth-token">

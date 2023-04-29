@@ -29,8 +29,8 @@ const RoomRowPresenter = ({
   onClick,
   rightChildren,
 }: RoomRowProps) => {
-  const { theme } = useAppState();
-  const { ship, roomsStore } = useShipStore();
+  const { loggedInAccount, theme } = useAppState();
+  const { roomsStore } = useShipStore();
   const { getOptions, setOptions } = useContextMenu();
   const defaultOptions = getOptions('').filter(
     (o) => o.id === 'toggle-devtools'
@@ -43,7 +43,6 @@ const RoomRowPresenter = ({
   if (presentCount === 1) {
     peopleText = 'person';
   }
-
   let titleText = title;
   if (titleText && titleText.length > 16 && tray) {
     titleText = titleText.substring(0, 16) + '...';
@@ -52,7 +51,7 @@ const RoomRowPresenter = ({
 
   const contextMenuOptions = useMemo(
     () =>
-      ship?.patp === provider
+      loggedInAccount?.patp === provider
         ? [
             {
               id: `room-delete-${rid}`,
@@ -65,7 +64,7 @@ const RoomRowPresenter = ({
             ...defaultOptions,
           ]
         : defaultOptions,
-    [rid, ship, provider]
+    [rid, loggedInAccount, provider]
   );
 
   useEffect(() => {
@@ -122,9 +121,9 @@ const RoomRowPresenter = ({
               {/* <Icons mr={1} opacity={0.5} name="Friends" /> */}
               <Text.Custom opacity={0.5} fontWeight={400} fontSize={2}>
                 {presentCount} {peopleText}{' '}
-                {/* {present.includes(ship.patp) && ` - (You)`} */}
+                {/* {present.includes(loggedInAccount.patp) && ` - (You)`} */}
               </Text.Custom>
-              {creator === ship?.patp && (
+              {creator === loggedInAccount?.patp && (
                 <>
                   <Text.Custom
                     mx="6px"
@@ -149,7 +148,7 @@ const RoomRowPresenter = ({
         />
       </Flex>
       {/* room deletion button */}
-      {/* {tray !== true && (creator === ship.patp || provider === ship.patp) && (
+      {/* {tray !== true && (creator === loggedInAccount.patp || provider === loggedInAccount.patp) && (
         <IconButton
           size={26}
           customBg={bgColor}

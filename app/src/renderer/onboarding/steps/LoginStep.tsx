@@ -2,17 +2,23 @@ import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
 
 import { Anchor } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 import {
+  LearnMoreModal,
   LoginDialog,
   OnboardDialogDescription,
   OnboardingStorage,
 } from '@holium/shared';
+
+import { OnboardingIPC } from 'renderer/stores/ipc';
 
 import { defaultTheme } from '../../lib/defaultTheme';
 import { thirdEarthApi } from '../thirdEarthApi';
 import { StepProps } from './types';
 
 export const LoginStep = ({ setStep, onFinish }: StepProps) => {
+  const learnMoreModal = useToggle(false);
+
   const prefilledEmail = OnboardingStorage.get().email ?? '';
 
   useEffect(() => {
@@ -30,10 +36,12 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
       return false;
     }
 
-    const passwordHash = await window.onboardingService.hashPassword(password);
+    const passwordHash = await OnboardingIPC.hashPassword(password);
+
+    if (!passwordHash) return false;
 
     // Create a local master account from the ThirdEarth account.
-    const masterAccount = await window.onboardingService.createMasterAccount({
+    const masterAccount = await OnboardingIPC.createMasterAccount({
       email: response.email,
       passwordHash,
       encryptionKey: response.client_side_encryption_key,
@@ -41,14 +49,14 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
     });
 
     if (!masterAccount) return false;
-    localStorage.removeItem('lastAccountLogin');
+    OnboardingStorage.remove('lastAccountLogin');
 
     OnboardingStorage.set({
-      email: response.email,
-      clientSideEncryptionKey: response.client_side_encryption_key,
-      token: response.token,
-      passwordHash: masterAccount.passwordHash,
       masterAccountId: masterAccount.id,
+      email: response.email,
+      token: response.token,
+      clientSideEncryptionKey: response.client_side_encryption_key,
+      passwordHash,
     });
 
     const userShips = await thirdEarthApi.getUserShips(response.token);
@@ -58,7 +66,7 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
       // The user can customize their passports later.
       await Promise.all(
         userShips.map((ship) =>
-          window.onboardingService.createAccount(
+          OnboardingIPC.createAccount(
             {
               accountId: masterAccount.id,
               passwordHash: masterAccount.passwordHash,
@@ -77,6 +85,7 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
           )
         )
       );
+
       onFinish?.();
     } else {
       setStep('/hosting');
@@ -86,19 +95,34 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
   };
 
   return (
-    <LoginDialog
-      showTerms
-      prefilledEmail={prefilledEmail}
-      label={
-        <OnboardDialogDescription>
-          Don't have access?{' '}
-          <Anchor rel="noreferrer" target="_blank" href="https://holium.com">
-            Join waitlist
-          </Anchor>
-          .
-        </OnboardDialogDescription>
-      }
-      onLogin={onLogin}
-    />
+    <>
+      <LearnMoreModal
+        isOpen={learnMoreModal.isOn}
+        onDismiss={learnMoreModal.toggleOff}
+        onAccept={learnMoreModal.toggleOff}
+      />
+      <LoginDialog
+        showTerms
+        prefilledEmail={prefilledEmail}
+        label={
+          <OnboardDialogDescription>
+            Don't have access?{' '}
+            <Anchor rel="noreferrer" target="_blank" href="https://holium.com">
+              Join waitlist
+            </Anchor>
+            {' / '}
+            <Anchor
+              rel="noreferrer"
+              target="_blank"
+              style={{ textDecoration: 'underline' }}
+              onClick={learnMoreModal.toggleOn}
+            >
+              Learn more
+            </Anchor>
+          </OnboardDialogDescription>
+        }
+        onLogin={onLogin}
+      />
+    </>
   );
 };

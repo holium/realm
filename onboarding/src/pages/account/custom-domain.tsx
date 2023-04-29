@@ -1,16 +1,22 @@
 import { useMemo, useState } from 'react';
 
-import { AccountCustomDomainDialog } from '@holium/shared';
+import { useToggle } from '@holium/design-system/util';
+import {
+  AccountCustomDomainDialog,
+  UserContextProvider,
+  useUser,
+} from '@holium/shared';
 
 import { Page } from '../../components/Page';
 import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
-import { UserContextProvider, useUser } from '../../util/UserContext';
 
 const CustomDomainPresenter = () => {
   const { goToPage, logout } = useNavigation();
   const { token, ships, selectedPatp, setSelectedPatp } = useUser();
 
+  const submitting = useToggle(false);
+  const [domain, setDomain] = useState('');
   const [successMessage, setSuccessMessage] = useState<string>();
   const [errorMessage, setErrorMessage] = useState<string>();
 
@@ -19,9 +25,12 @@ const CustomDomainPresenter = () => {
     [ships, selectedPatp]
   );
 
-  const onClickSave = async (domain: string) => {
+  const onSubmit = async () => {
     if (!ship) return;
     if (!token) return;
+    if (!domain) return;
+
+    submitting.toggleOn();
 
     setErrorMessage(undefined);
     setSuccessMessage(undefined);
@@ -46,6 +55,8 @@ const CustomDomainPresenter = () => {
         );
       }
     }
+
+    submitting.toggleOff();
   };
 
   const onClickSidebarSection = (section: string) => {
@@ -57,11 +68,14 @@ const CustomDomainPresenter = () => {
       <AccountCustomDomainDialog
         patps={ships.map((ship) => ship.patp)}
         selectedPatp={selectedPatp}
+        domain={domain}
         dropletIp={ship?.droplet_ip}
         errorMessage={errorMessage}
         successMessage={successMessage}
+        submitting={submitting.isOn}
         setSelectedPatp={setSelectedPatp}
-        onClickSave={onClickSave}
+        onChangeDomain={setDomain}
+        onSubmit={onSubmit}
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />
@@ -72,7 +86,7 @@ const CustomDomainPresenter = () => {
 export default function CustomDomain() {
   return (
     <Page title="Account / Custom domain" isProtected>
-      <UserContextProvider>
+      <UserContextProvider api={thirdEarthApi}>
         <CustomDomainPresenter />
       </UserContextProvider>
     </Page>

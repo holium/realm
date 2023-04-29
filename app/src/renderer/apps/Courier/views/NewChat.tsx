@@ -15,12 +15,14 @@ import {
 
 import { ChatPathType } from 'os/services/ship/chat/chat.types';
 import { ShipSearch } from 'renderer/components/ShipSearch';
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../../store';
 
 export const NewChat = () => {
-  const { ship, friends, chatStore } = useShipStore();
+  const { loggedInAccount } = useAppState();
+  const { friends, chatStore } = useShipStore();
   const { dimensions } = useTrayApps();
   const { inbox, setSubroute, createChat } = chatStore;
   const [creating, setCreating] = useState<boolean>(false);
@@ -30,7 +32,7 @@ export const NewChat = () => {
   const onCreateChat = () => {
     let title: string;
     let chatType: ChatPathType;
-    if (!ship) return;
+    if (!loggedInAccount) return;
     if (selectedPatp.size === 1) {
       chatType = 'dm';
       const metadata = friends.getContactAvatarMetadata(
@@ -47,7 +49,7 @@ export const NewChat = () => {
       chatType = 'group';
     }
     setCreating(true);
-    createChat(title, ship.patp, chatType, Array.from(selectedPatp))
+    createChat(title, loggedInAccount.patp, chatType, Array.from(selectedPatp))
       .then(() => {
         setSubroute('inbox');
         setCreating(false);

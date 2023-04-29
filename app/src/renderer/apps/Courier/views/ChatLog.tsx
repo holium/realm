@@ -40,21 +40,21 @@ type ChatLogProps = {
 };
 
 export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
-  const { theme } = useAppState();
+  const { loggedInAccount, theme } = useAppState();
   const { dimensions, innerNavigation } = useTrayApps();
-  const { ship, notifStore, friends, chatStore, spacesStore } = useShipStore();
+  const { notifStore, friends, chatStore, spacesStore } = useShipStore();
   const { selectedChat, getChatHeader, setSubroute } = chatStore;
   const [showAttachments, setShowAttachments] = useState(false);
 
   const listRef = useRef<WindowedListRef>(null);
 
   const { color: ourColor } = useMemo(() => {
-    if (!ship) return { color: '#000' };
-    return friends.getContactAvatarMetadata(ship.patp);
+    if (!loggedInAccount) return { color: '#000' };
+    return friends.getContactAvatarMetadata(loggedInAccount.patp);
   }, []);
 
   useEffect(() => {
-    if (!selectedChat || !ship?.patp) return;
+    if (!selectedChat || !loggedInAccount?.patp) return;
     selectedChat.fetchMessages();
     const unreadCount = notifStore.getUnreadCountByPath(selectedChat.path);
     if (unreadCount > 0) {
@@ -76,7 +76,8 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   }, [selectedChat?.path, innerNavigation]);
 
   const { title, sigil, image } = useMemo(() => {
-    if (!selectedChat || !ship?.patp) return { title: 'Error loading title' };
+    if (!selectedChat || !loggedInAccount?.patp)
+      return { title: 'Error loading title' };
     return getChatHeader(selectedChat.path);
   }, [selectedChat?.path, window.ship]);
 
@@ -98,7 +99,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     return null;
   }, [selectedChat?.replyingMsg, listRef.current]);
 
-  if (!selectedChat || !ship) return null;
+  if (!selectedChat || !loggedInAccount) return null;
   const { path, type, peers, metadata, messages } = selectedChat;
 
   const showPin =

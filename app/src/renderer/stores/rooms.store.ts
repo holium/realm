@@ -47,7 +47,7 @@ export type RoomMobx = Instance<typeof RoomModel>;
 export const ChatModel = types.model('ChatModel', {
   index: types.integer,
   author: types.string,
-  contents: types.string,
+  content: types.string,
   isRightAligned: types.boolean,
   timeReceived: types.integer,
 });
@@ -237,6 +237,18 @@ export const RoomsStore = types
         console.log('getPeer', patp, window.ship);
         return remotePeers.get(patp);
       },
+      sendChat: flow(function* (message: string) {
+        if (!self.current) return;
+        const chatMessage = ChatModel.create({
+          index: self.chat.length,
+          content: message,
+          author: window.ship,
+          isRightAligned: true,
+          timeReceived: new Date().getTime(),
+        });
+        self.chat.push(chatMessage);
+        yield RoomsIPC.sendChat(message);
+      }),
       init: flow(function* () {
         localPeer.init(
           window.ship,
@@ -268,6 +280,7 @@ export const RoomsStore = types
           }
         }
       }),
+      // rooms actions
       createRoom: flow(function* (
         title: string,
         access: 'public' | 'private',
@@ -447,6 +460,16 @@ export const RoomsStore = types
         self.provider = payload.provider;
         applySnapshot(self.rooms, cast(payload.rooms));
       },
+      _onChatReceived(payload: { from: string; content: string }) {
+        const chatMessage = ChatModel.create({
+          index: self.chat.length,
+          content: payload.content,
+          author: payload.from,
+          isRightAligned: false,
+          timeReceived: new Date().getTime(),
+        });
+        self.chat.push(chatMessage);
+      },
       _onSignal(payload: any) {
         const remotePeer = remotePeers.get(payload.from);
         const signalData = JSON.parse(payload.data);
@@ -510,6 +533,7 @@ function registerOnUpdateListener() {
       }
       if (type === 'chat-received') {
         console.log(`%chat-received`, payload);
+        shipStore.roomsStore._onChatReceived(payload);
       }
       if (type === 'provider-changed') {
         shipStore.roomsStore._onProviderChanged(payload);

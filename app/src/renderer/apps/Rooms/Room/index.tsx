@@ -16,8 +16,8 @@ import { VoiceView } from './Voice';
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
 const RoomPresenter = () => {
-  const { theme, shellStore } = useAppState();
-  const { ship, roomsStore } = useShipStore();
+  const { loggedInAccount, theme, shellStore } = useAppState();
+  const { roomsStore } = useShipStore();
   const { roomsApp } = useTrayApps();
 
   const { dockColor, mode } = theme;
@@ -43,8 +43,8 @@ const RoomPresenter = () => {
       setUnreadCount(
         latestChat
           ? latestChat.filter(
-              (msg: any) =>
-                !readChat?.includes(msg) && msg.author !== ship?.patp
+              (msg) =>
+                !readChat?.includes(msg) && msg.author !== loggedInAccount?.patp
             ).length
           : 0
       );
@@ -157,11 +157,13 @@ const RoomPresenter = () => {
               size={30}
               showOnHover
               iconColor={
-                presentRoom.creator === ship?.patp ? 'intent-alert' : undefined
+                presentRoom.creator === loggedInAccount?.patp
+                  ? 'intent-alert'
+                  : undefined
               }
               onClick={(evt) => {
                 evt.stopPropagation();
-                if (presentRoom.creator === ship?.patp) {
+                if (presentRoom.creator === loggedInAccount?.patp) {
                   roomsStore.deleteRoom(rid);
                 } else {
                   roomsStore.leaveRoom();

@@ -1,4 +1,4 @@
-import { PointerEvent, useMemo } from 'react';
+import { PointerEvent, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { AppWindowIcon } from 'renderer/system/desktop/components/AppWindow/AppWindowIcon';
@@ -17,6 +17,7 @@ export interface DialogTitlebarProps {
   onDragEnd: () => void;
   zIndex: number;
   showDevToolsToggle: boolean;
+  onOpen?: () => void;
   onClose?: () => void;
 }
 
@@ -24,8 +25,14 @@ export const DialogTitlebar = ({
   onDragEnd,
   onDragStart,
   zIndex,
+  onOpen,
   onClose,
 }: DialogTitlebarProps) => {
+  useEffect(() => {
+    // trigger onOpen only once
+    onOpen?.();
+  }, [onOpen]);
+
   return useMemo(() => {
     return (
       <ToolbarContainer

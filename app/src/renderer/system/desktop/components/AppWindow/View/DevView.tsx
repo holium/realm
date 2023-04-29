@@ -8,7 +8,6 @@ import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { genCSSVariables } from 'renderer/lib/theme';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppWindowMobxType } from 'renderer/stores/models/window.model';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 import { WebView } from './WebView';
 
@@ -47,8 +46,7 @@ type Props = {
 };
 
 const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
-  const { theme } = useAppState();
-  const { ship } = useShipStore();
+  const { loggedInAccount, theme } = useAppState();
 
   const roomsManager = useRooms();
 
@@ -67,11 +65,11 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
       webviewId
     ) as Electron.WebviewTag | null;
 
-    if (!webview || !ship || !roomsManager) return;
+    if (!webview || !loggedInAccount || !roomsManager) return;
 
     const onDomReady = () => {
       setReadyWebview(webview);
-      connectWebviewToMultiplayer(ship.patp, roomsManager, webview);
+      connectWebviewToMultiplayer(loggedInAccount.patp, roomsManager, webview);
     };
 
     webview.addEventListener('dom-ready', onDomReady);
@@ -79,7 +77,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
     return () => {
       webview.removeEventListener('dom-ready', onDomReady);
     };
-  }, [appWindow.appId, ship, roomsManager]);
+  }, [appWindow.appId, loggedInAccount, roomsManager]);
 
   useEffect(() => {
     if (!readyWebview) return;
@@ -103,7 +101,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
       readyWebview.removeEventListener('did-stop-loading', loading.toggleOff);
       readyWebview.removeEventListener('close', readyWebview.closeDevTools);
     };
-  }, [readyWebview, themeCss, ship, loading]);
+  }, [readyWebview, themeCss, loggedInAccount, loading]);
 
   return useMemo(
     () => (

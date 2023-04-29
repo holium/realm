@@ -3,6 +3,8 @@ import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
 
 import {
+  Box,
+  Bubble,
   Button,
   Flex,
   Icon,
@@ -12,10 +14,8 @@ import {
 } from '@holium/design-system';
 
 import { useTrayApps } from 'renderer/apps/store';
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
-
-import { RoomChatMessage } from '../components/RoomChatMessage';
-import { useRooms } from '../useRooms';
 
 export const chatForm = (
   defaults: any = {
@@ -42,15 +42,15 @@ export const chatForm = (
 
 const RoomChatPresenter = () => {
   const { text } = useMemo(() => chatForm(), []);
+  const { loggedInAccount } = useAppState();
+  const { roomsStore } = useShipStore();
   const { getTrayAppHeight } = useTrayApps();
   const listHeight = getTrayAppHeight() - 164;
-  const { ship } = useShipStore();
-
-  const roomsManager = useRooms(ship?.patp);
 
   const chatInputRef = useRef<HTMLInputElement>(null);
 
-  const chats = roomsManager.live.chat.slice(0);
+  const chats = roomsStore.chat.slice(0);
+  const ourColor = loggedInAccount?.color || '#000';
 
   const handleChat = useCallback(
     (evt: any) => {
@@ -59,10 +59,10 @@ const RoomChatPresenter = () => {
       if (chatInputRef.current === null) return;
       const innerText = chatInputRef.current.value;
       if (innerText === '') return;
-      roomsManager.sendChat(innerText);
+      roomsStore.sendChat(innerText);
       text.actions.onChange('');
     },
-    [roomsManager.presentRoom, text.actions]
+    [roomsStore.current, text.actions]
   );
 
   const ChatList = useMemo(() => {
@@ -87,26 +87,38 @@ const RoomChatPresenter = () => {
         height={listHeight}
         data={chats.sort((a, b) => a.timeReceived - b.timeReceived)}
         itemContent={(index, chat) => (
-          <RoomChatMessage
-            key={chat.index}
-            chat={chat}
-            doesPack={
-              chats[index - 1] &&
-              // pack if last guy is the same as the current guy
-              chats[index - 1].author === chat.author
-              // and the last guy isn't too old (2 minutes)
-              // chats[index - 1].timeReceived + 1000 < chat.timeReceived
-            }
-          />
+          <Box pt="2px">
+            <Bubble
+              id={`chat-${chat.index}`}
+              isOur={chat.author === window.ship}
+              author={chat.author}
+              ourColor={ourColor}
+              authorColor="#000"
+              sentAt={new Date(chat.timeReceived).toISOString()}
+              isPrevGrouped={
+                chats[index - 1] && chats[index - 1].author === chat.author
+              }
+              message={[
+                {
+                  plain: chat.content,
+                },
+              ]}
+              onReaction={() => {}}
+            />
+          </Box>
         )}
       />
     );
   }, [chats]);
 
   return (
-    <Flex flex={1} flexDirection="column">
+    <Flex position="relative" flex={1} flexDirection="column">
       {ChatList}
       <Flex
+        position="absolute"
+        bottom={0}
+        left={0}
+        right={0}
         flexDirection="row"
         alignItems="center"
         pt={2}

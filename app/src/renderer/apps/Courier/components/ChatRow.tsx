@@ -42,8 +42,8 @@ export const ChatRowPresenter = ({
   height,
   onClick,
 }: ChatRowProps) => {
-  const { shellStore } = useAppState();
-  const { ship, notifStore, chatStore, spacesStore } = useShipStore();
+  const { loggedInAccount, shellStore } = useAppState();
+  const { notifStore, chatStore, spacesStore } = useShipStore();
   const {
     inbox,
     getChatHeader,
@@ -101,7 +101,7 @@ export const ChatRowPresenter = ({
   }, [chat?.lastMessage?.id]);
 
   const contextMenuOptions = useMemo(() => {
-    if (!ship) return [];
+    if (!loggedInAccount) return [];
     const menu = [];
     menu.push({
       id: `${chatRowId}-pin-chat`,
@@ -156,7 +156,7 @@ export const ChatRowPresenter = ({
           shellStore.openDialogWithStringProps('leave-chat-dialog', {
             path,
             amHost: isAdmin.toString(),
-            our: ship.patp,
+            our: loggedInAccount.patp,
           });
         },
       });

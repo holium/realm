@@ -31,13 +31,9 @@ export const TermsModal = ({ isOpen, onDismiss, onAccept }: Props) => (
     <OnboardDialogDescription>
       Possible addition, or separate instruction to users: Alpha users are
       encouraged to report any perceived bugs or problems in the software and
-      system to Holium Corporation on Twitter{' '}
-      <Anchor
-        href="https://twitter.com/HoliumCorp"
-        rel="noreferrer"
-        target="_blank"
-      >
-        @HoliumCorp
+      system to Holium Corporation via email:{' '}
+      <Anchor href="mailto:support@holium.com" rel="noreferrer" target="_blank">
+        support@holium.com
       </Anchor>
       .
     </OnboardDialogDescription>

@@ -3,9 +3,9 @@ import { track } from '@amplitude/analytics-browser';
 
 import { InstallationDialog } from '@holium/shared';
 
-import { StepProps } from './types';
+import { OnboardingIPC } from 'renderer/stores/ipc';
 
-import { RealmInstallStatus } from '@holium/shared/src/onboarding/types';
+import { StepProps } from './types';
 
 export const InstallationStep = ({ setStep, onFinish }: StepProps) => {
   useEffect(() => {
@@ -16,8 +16,8 @@ export const InstallationStep = ({ setStep, onFinish }: StepProps) => {
     setStep('/passport');
   };
 
-  const onInstallRealm = (): Promise<RealmInstallStatus> => {
-    return window.onboardingService.installRealmAgent();
+  const onInstallRealm = () => {
+    return OnboardingIPC.installRealmAgent();
   };
 
   const onNext = async () => {

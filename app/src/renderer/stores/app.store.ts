@@ -1,9 +1,12 @@
 import { createContext, useContext } from 'react';
 import { clone, flow, Instance, types } from 'mobx-state-tree';
 
+import { OnboardingStorage } from '@holium/shared';
+
 import { RealmUpdateBooted } from 'os/realm.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';
 import { SoundActions } from 'renderer/lib/sound';
+import { MobXAccount } from 'renderer/stores/models/account.model';
 
 import { defaultTheme } from '../lib/defaultTheme';
 import { AuthenticationModel } from './auth.store';
@@ -12,6 +15,7 @@ import {
   BazaarIPC,
   MainIPC,
   NotifIPC,
+  OnboardingIPC,
   RealmIPC,
   SpacesIPC,
 } from './ipc';
@@ -27,7 +31,6 @@ const AppStateModel = types
     seenSplash: types.boolean,
     currentScreen: Screen,
     theme: Theme,
-    isLoggedIn: types.boolean,
     authStore: AuthenticationModel,
     shellStore: ShellModel,
     online: types.boolean,
@@ -48,11 +51,6 @@ const AppStateModel = types
     setBooted(data: RealmUpdateBooted['payload']) {
       self.authStore.setAccounts(data.accounts);
       self.seenSplash = data.seenSplash;
-      if (data.session) {
-        self.authStore._setSession(data.session.patp);
-        self.shellStore.setIsBlurred(false);
-        self.isLoggedIn = true;
-      }
       self.booted = true;
     },
     setTheme(theme: ThemeType) {
@@ -64,17 +62,16 @@ const AppStateModel = types
         localStorage.setItem('lastTheme', JSON.stringify(theme));
       }
     },
-    setLoggedIn() {
-      self.isLoggedIn = true;
+    setLoggedIn(patp: string) {
+      self.authStore._setSession(patp);
       self.shellStore.setIsBlurred(false);
     },
-    setLoggedOut() {
-      self.isLoggedIn = false;
+    setLoggedOut(patp?: string) {
+      self.authStore._clearSession(patp);
       self.shellStore.setIsBlurred(true);
     },
     reset() {
       self.booted = false;
-      self.isLoggedIn = false;
       self.shellStore.setIsBlurred(true);
     },
     setConnectionStatus(status: any) {
@@ -88,6 +85,13 @@ const AppStateModel = types
       self.seenSplash = true;
       yield AuthIPC.setSeenSplash() as Promise<void>;
     }),
+  }))
+  .views((self) => ({
+    get loggedInAccount(): MobXAccount | undefined {
+      return self.authStore.accounts.find(
+        (a) => a.patp === self.authStore.session?.patp
+      );
+    },
   }));
 
 // const loadSnapshot = () => {
@@ -107,7 +111,6 @@ export const appState = AppStateModel.create({
   theme: lastTheme
     ? Theme.create(JSON.parse(lastTheme))
     : Theme.create(defaultTheme),
-  isLoggedIn: false,
   authStore: {
     accounts: [],
     session: null,
@@ -161,28 +164,30 @@ function registerOnUpdateListener() {
       shipStore.reset();
       appState.setBooted(update.payload);
       if (update.payload.session) {
-        shipStore.setShip(update.payload.session);
+        appState.setLoggedIn(update.payload.session.patp);
+        shipStore.init();
+        window.ship = update.payload.session.patp;
       }
     }
     if (update.type === 'auth-success') {
       SoundActions.playLogin();
-      appState.authStore._setSession(update.payload.patp);
-      localStorage.setItem('lastAccountLogin', update.payload.patp);
-      appState.setLoggedIn();
-      shipStore.setShip(update.payload);
+      OnboardingStorage.set({
+        lastAccountLogin: update.payload.patp,
+      });
+      appState.setLoggedIn(update.payload.patp);
     }
     if (update.type === 'auth-failed') {
       // SoundActions.playError();
       appState.authStore.status.setError(update.payload);
     }
     if (update.type === 'logout') {
-      appState.setLoggedOut();
+      appState.setLoggedOut(update.payload.patp);
       shipStore.reset();
       SoundActions.playLogout();
     }
   });
 
-  window.onboardingService.onUpdate((update) => {
+  OnboardingIPC.onUpdate((update) => {
     if (update.type === 'account-added') {
       appState.authStore._onAddAccount(update.payload);
     }

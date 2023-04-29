@@ -4,6 +4,7 @@ import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, NoScrollBar } from '@holium/design-system';
 
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { AppSearchApp } from '../AppInstall/AppSearch';
@@ -20,9 +21,9 @@ interface HomePaneProps {
 
 type SidebarType = 'members' | 'friends' | null;
 
-const HomePresenter = (props: HomePaneProps) => {
-  const { isOpen, isOur } = props;
-  const { ship, spacesStore } = useShipStore();
+const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
+  const { loggedInAccount } = useAppState();
+  const { spacesStore } = useShipStore();
   const currentSpace = spacesStore.selected;
   const [sidebar, setSidebar] = useState<SidebarType>(null);
   const [appGrid, showAppGrid] = useState(isOur ? true : false);
@@ -50,13 +51,13 @@ const HomePresenter = (props: HomePaneProps) => {
     );
   }, [sidebar, isOur]);
 
-  if (!ship) return null;
+  if (!loggedInAccount) return null;
   if (!currentSpace) return null;
 
   const membersCount = currentSpace.members.count;
   const maxWidth = 880;
 
-  const isAdmin = currentSpace.members.isAdmin(ship.patp);
+  const isAdmin = currentSpace.members.isAdmin(loggedInAccount.patp);
 
   const shouldShowAppGrid = appGrid || isOur;
 
@@ -108,9 +109,9 @@ const HomePresenter = (props: HomePaneProps) => {
               <Avatar
                 simple
                 size={32}
-                avatar={ship.avatar}
-                patp={ship.patp}
-                sigilColor={[ship.color || '#000000', 'white']}
+                avatar={loggedInAccount.avatar}
+                patp={loggedInAccount.patp}
+                sigilColor={[loggedInAccount.color || '#000000', 'white']}
               />
             )} */}
             <AppSearchApp mode="home" />
@@ -252,7 +253,10 @@ const HomePresenter = (props: HomePaneProps) => {
                 },
               }}
             >
-              <AppSuite patp={ship.patp} isAdmin={isAdmin as boolean} />
+              <AppSuite
+                patp={loggedInAccount.patp}
+                isAdmin={isAdmin as boolean}
+              />
               <RecommendedApps />
               {/* <RecentActivity /> */}
             </Flex>

@@ -33,11 +33,11 @@ export const ChatMessagePresenter = ({
   isNextGrouped,
   onReplyClick,
 }: ChatMessageProps) => {
-  const { theme } = useAppState();
-  const { ship, chatStore, friends } = useShipStore();
+  const { loggedInAccount, theme } = useAppState();
+  const { chatStore, friends } = useShipStore();
   const { selectedChat } = chatStore;
   const messageRef = useRef<HTMLDivElement>(null);
-  const ourShip = useMemo(() => ship?.patp, [ship]);
+  const ourShip = useMemo(() => loggedInAccount?.patp, [loggedInAccount]);
   const isOur = message.sender === ourShip;
   const { getOptions, setOptions, defaultOptions } = useContextMenu();
 
@@ -73,8 +73,8 @@ export const ChatMessagePresenter = ({
 
   const contextMenuOptions = useMemo(() => {
     const menu: MenuItemProps[] = [defaultOptions[0]];
-    if (!selectedChat || !ship) return menu;
-    const isAdmin = selectedChat.isHost(ship.patp);
+    if (!selectedChat || !loggedInAccount) return menu;
+    const isAdmin = selectedChat.isHost(loggedInAccount.patp);
     let hasLink = false;
     let hasImage = false;
     msgModel?.contents.forEach((content) => {

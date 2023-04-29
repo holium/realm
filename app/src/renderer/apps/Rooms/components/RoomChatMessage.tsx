@@ -3,14 +3,14 @@ import { observer } from 'mobx-react';
 import { darken, lighten } from 'polished';
 
 import { Flex, Text, Tooltip } from '@holium/design-system';
-import { ChatModelType } from '@holium/realm-room';
 
 import { useAppState } from 'renderer/stores/app.store';
+import { RoomChatMobx } from 'renderer/stores/rooms.store';
 
 import { Bubble } from './RoomBubble';
 
 interface RoomChatMessageProps {
-  chat: ChatModelType;
+  chat: RoomChatMobx;
   doesPack: boolean;
 }
 

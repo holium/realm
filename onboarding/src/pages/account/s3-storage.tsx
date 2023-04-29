@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 
-import { AccountS3StorageDialog } from '@holium/shared';
+import {
+  AccountS3StorageDialog,
+  UserContextProvider,
+  useUser,
+} from '@holium/shared';
 
 import { Page } from '../../components/Page';
 import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
-import { UserContextProvider, useUser } from '../../util/UserContext';
 
 type GetUserS3InfoResponse = Awaited<
   ReturnType<typeof thirdEarthApi.getUserS3Info>
@@ -63,7 +66,7 @@ const S3StoragePresenter = () => {
 export default function S3Storage() {
   return (
     <Page title="Account / S3 Storage" isProtected>
-      <UserContextProvider>
+      <UserContextProvider api={thirdEarthApi}>
         <S3StoragePresenter />
       </UserContextProvider>
     </Page>

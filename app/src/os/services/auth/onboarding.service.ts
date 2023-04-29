@@ -12,7 +12,7 @@ import {
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection } from '../api';
 import { ShipDB } from '../ship/ship.db';
-import { Account } from './accounts.table';
+import { DBAccount } from './accounts.table';
 import { AuthDB } from './auth.db';
 import { MasterAccount } from './masterAccounts.table';
 import {
@@ -92,7 +92,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     password: string,
     shipCode: string
   ): Promise<{
-    account?: Account;
+    account?: DBAccount;
     masterAccount?: MasterAccount;
   }> {
     if (!this.authDB) return {};
@@ -179,6 +179,76 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       passport.color = cleanNounColor(passport.color);
     }
     return passport;
+  }
+
+  updatePassword(patp: string, password: string) {
+    if (!this.authDB) {
+      log.error('auth.service.ts:', 'updatePassword', 'No authDB found');
+      return false;
+    }
+
+    const account = this.authDB.tables.accounts.findOne(patp);
+    if (!account) {
+      log.error(
+        'auth.service.ts:',
+        'updatePassword',
+        `No account found for ${patp}`
+      );
+      return false;
+    }
+
+    const masterAccount = this.authDB.tables.masterAccounts.findOne(
+      account.accountId
+    );
+    if (!masterAccount) {
+      log.error(
+        'auth.service.ts:',
+        'updatePassword',
+        `No master account found for ${patp}`
+      );
+      return false;
+    }
+
+    const accountResult = this.authDB.tables.accounts.update(patp, {
+      passwordHash: this.hashPassword(password),
+    });
+    if (accountResult) {
+      log.info(
+        'auth.service.ts:',
+        'updatePassword',
+        `Updated password for ${patp}`
+      );
+    } else {
+      log.error(
+        'auth.service.ts:',
+        'updatePassword',
+        `Failed to update password for ${patp}`
+      );
+      return false;
+    }
+
+    const masterAccountResult = this.authDB.tables.masterAccounts.update(
+      account.accountId,
+      {
+        passwordHash: this.hashPassword(password),
+      }
+    );
+    if (masterAccountResult) {
+      log.info(
+        'auth.service.ts:',
+        'updatePassword',
+        `Updated password for master account ${account.accountId}`
+      );
+    } else {
+      log.error(
+        'auth.service.ts:',
+        'updatePassword',
+        `Failed to update password for master account ${account.accountId}`
+      );
+      return false;
+    }
+
+    return true;
   }
 
   async updatePassport(
@@ -282,7 +352,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     return false;
   }
 
-  async _waitForInstallRealmAgent(
+  private async waitForInstallRealmAgent(
     buildVersion: any
   ): Promise<RealmInstallStatus> {
     const self = this;
@@ -307,13 +377,22 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
 
   async installRealmAgent(): Promise<RealmInstallStatus> {
     return new Promise(async (resolve, reject) => {
+      // if bypass, don't perform install and continue with onboarding. useful in development
+      if (process.env.INSTALL_MOON === 'bypass') {
+        resolve({ success: true });
+        return;
+      }
       await this._openConduit();
       try {
         APIConnection.getInstance().conduit.poke({
           app: 'hood',
           mark: 'kiln-install',
           json: {
-            ship: '~hostyv',
+            ship:
+              process.env.RELEASE_CHANNEL === 'latest' ||
+              process.env.RELEASE_CHANNEL === 'hotfix'
+                ? '~hostyv'
+                : '~nimwyd-ramwyl-dozzod-hostyv',
             desk: 'realm',
             local: 'realm',
           },
@@ -333,7 +412,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
           resolve({ success: true, message: '' });
           return;
         }
-        const result = await this._waitForInstallRealmAgent(buildVersion);
+        const result = await this.waitForInstallRealmAgent(buildVersion);
         resolve(result);
       } catch (e) {
         log.error(e);

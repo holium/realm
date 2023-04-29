@@ -10,6 +10,7 @@ import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { AudioWave } from './AudioWave';
@@ -29,10 +30,11 @@ const speakerType = {
 
 const SpeakerPresenter = (props: ISpeaker) => {
   const { person, type } = props;
-  const { ship, friends, roomsStore } = useShipStore();
+  const { loggedInAccount } = useAppState();
+  const { friends, roomsStore } = useShipStore();
   const speakerRef = useRef<any>(null);
   const { getOptions, setOptions } = useContextMenu();
-  const isOur = person === ship?.patp;
+  const isOur = person === loggedInAccount?.patp;
   const metadata = friends.getContactAvatarMetadata(person);
 
   let name = metadata?.nickname || person;
@@ -56,7 +58,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
           },
         },
         // only the creator can kick people
-        ship?.patp === roomsStore.current?.creator && {
+        loggedInAccount?.patp === roomsStore.current?.creator && {
           style: { color: '#FD4E4E' },
           id: `room-speaker-${person}-kick`,
           label: 'Kick',
@@ -67,7 +69,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
           },
         },
       ].filter(Boolean) as ContextMenuOption[],
-    [peer?.status, person, roomsStore.current, ship]
+    [peer?.status, person, roomsStore.current, loggedInAccount]
   );
 
   const peerState = isOur ? PeerConnectionState.Connected : peer?.status;
@@ -92,12 +94,18 @@ const SpeakerPresenter = (props: ISpeaker) => {
 
   useEffect(() => {
     if (
-      person !== ship?.patp &&
+      person !== loggedInAccount?.patp &&
       contextMenuOptions !== getOptions(`room-speaker-${person}`)
     ) {
       setOptions(`room-speaker-${person}`, contextMenuOptions);
     }
-  }, [contextMenuOptions, getOptions, person, setOptions, ship?.patp]);
+  }, [
+    contextMenuOptions,
+    getOptions,
+    person,
+    setOptions,
+    loggedInAccount?.patp,
+  ]);
 
   return (
     <SpeakerWrapper

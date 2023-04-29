@@ -8,7 +8,7 @@ export type CardProps = {
   elevation?: 0 | 1 | 2 | 3 | 4;
 } & BoxProps;
 
-const elevation = [
+const boxShadows = [
   '0px 0px 0px rgba(0, 0, 0, 0)',
   'var(--rlm-box-shadow-1)',
   'var(--rlm-box-shadow-2)',
@@ -17,24 +17,18 @@ const elevation = [
 ];
 
 export const Card = styled(Box)<CardProps>`
-  margin-top: 1px;
   flex-direction: column;
   backdrop-filter: var(--blur);
-  background: ${(props) => props.customBg || 'rgba(var(--rlm-card-rgba))'};
+  background: ${({ customBg = 'rgba(var(--rlm-card-rgba))' }) => customBg};
   border-width: 1px;
   border-style: solid;
-  border-color: ${(props) => props.customBg || 'rgba(var(--rlm-border-rgba))'};
+  border-color: ${({ borderColor = 'rgba(var(--rlm-border-rgba))' }) =>
+    borderColor};
   transition: var(--transition);
   box-sizing: border-box;
   border-radius: 12px;
-  ${(props: CardProps) => css`
-    display: ${props.fill ? 'flex' : 'inline-flex'};
-    box-shadow: ${elevation[props.elevation || 0]};
+  ${({ fill, elevation = 0 }) => css`
+    display: ${fill ? 'flex' : 'inline-flex'};
+    box-shadow: ${boxShadows[elevation]};
   `}
 `;
-
-Card.defaultProps = {
-  elevation: 0,
-  borderRadius: 12,
-  borderColor: 'border',
-};
