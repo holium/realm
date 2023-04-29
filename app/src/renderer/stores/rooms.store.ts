@@ -429,19 +429,19 @@ export const RoomsStore = types
       sendMessage(path: string, measuredFrags: any) {
         sendDataToPeer({
           kind: DataPacket_Kind.CHAT,
-          value: { 'message-received': { [path]: measuredFrags } },
+          value: { data: { 'message-received': { [path]: measuredFrags } } },
         });
       },
       saveEditedMessage(path: string, messageId: string, measuredFrags: any) {
         sendDataToPeer({
           kind: DataPacket_Kind.CHAT,
-          value: { 'message-edited': { [path]: measuredFrags } },
+          value: { data: { 'message-edited': { [path]: measuredFrags } } },
         });
       },
       deleteMessage(path: string, messageId: string) {
         sendDataToPeer({
           kind: DataPacket_Kind.CHAT,
-          value: { 'message-deleted': { [path]: messageId } },
+          value: { data: { 'message-deleted': { [path]: messageId } } },
         });
       },
       _onSession(session: any) {
