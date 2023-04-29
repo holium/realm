@@ -163,34 +163,29 @@ export const RoomsStore = types
             if (!self.peersMetadata.has(to)) {
               self.peersMetadata.set(to, PeerMetadata.create());
             }
-            const currentMtd = self.peersMetadata.get(to);
-            currentMtd?.setAudioAttached(isAttached);
+            self.peersMetadata.get(to)?.setAudioAttached(isAttached);
           },
           setMuted: (isMuted: boolean) => {
             if (!self.peersMetadata.has(to)) {
               self.peersMetadata.set(to, PeerMetadata.create());
             }
-            const currentMtd = self.peersMetadata.get(to);
-            currentMtd?.setMute(isMuted);
+            self.peersMetadata.get(to)?.setMute(isMuted);
           },
           setSpeaking: (isSpeaking: boolean) => {
             if (!self.peersMetadata.has(to)) {
               self.peersMetadata.set(to, PeerMetadata.create());
             }
-            const currentMtd = self.peersMetadata.get(to);
-            currentMtd?.setSpeaking(isSpeaking);
+            self.peersMetadata.get(to)?.setSpeaking(isSpeaking);
           },
           setStatus: (status: PeerConnectionState) => {
             if (!self.peersMetadata.has(to)) {
               self.peersMetadata.set(to, PeerMetadata.create());
             }
-            const currentMtd = self.peersMetadata.get(to);
-            currentMtd?.setStatus(status);
+            self.peersMetadata.get(to)?.setStatus(status);
           },
         },
         peerConfig
       );
-
       remotePeers.set(remotePeer.patp, remotePeer);
       remotePeer.dial();
       return remotePeer;
@@ -217,7 +212,6 @@ export const RoomsStore = types
         hangup(peer.patp);
       });
       remotePeers.clear();
-      console.log('hangupAll', remotePeers);
       localPeer?.disableMedia();
     };
 
@@ -399,20 +393,13 @@ export const RoomsStore = types
         room?.addPeer(patp);
         if (self.current?.rid === rid) {
           // if we are in the room, dial the new peer
-          if (remotePeers.has(patp)) {
-            console.log('!!!!!already have peer', patp);
-          }
           if (patp !== window.ship) {
             const remotePeer = dialPeer(rid, patp, self.rtcConfig);
             // queuedPeers are peers that are ready for us to dial them
             if (queuedPeers.includes(patp)) {
-              // console.log('%room-entered in queuedPeer', patp);
               remotePeer.onWaiting();
               queuedPeers.splice(queuedPeers.indexOf(patp), 1);
             }
-          } else {
-            // this.emit(ProtocolEvent.RoomEntered, room);
-            // this.transitions.entering = null;
           }
         }
       },
@@ -443,9 +430,7 @@ export const RoomsStore = types
           self.current = undefined;
         }
         const room = self.rooms.get(rid);
-        console.log('_onRoomDeleted', room?.creator, window.ship);
         if (room?.creator !== window.ship) {
-          // console.log('_onRoomDeleted someone else deleted');
           remotePeers.forEach((peer) => {
             hangup(peer.patp);
           });
@@ -488,9 +473,6 @@ export const RoomsStore = types
         }
         if (!['retry', 'ack-waiting', 'waiting'].includes(signalData.type)) {
           if (remotePeer) {
-            console.log(
-              `%${JSON.parse(payload.data)?.type} from ${payload.from}`
-            );
             remotePeer.peerSignal(payload.data);
           } else {
             console.log(
