@@ -35,13 +35,13 @@ export const ShipStore = types
   })
   .actions((self) => ({
     init() {
-      // TODO do we need this anymore?
-      // self.friends.init().then(() => {
-      //   const myMeta = self.friends.getContactAvatarMetadata(ship.patp);
-      //   if (myMeta) {
-      //     self.ship?.setMetadata(myMeta);
-      //   }
-      // });
+      self.friends.init().then(() => {
+        // TODO do we need to set this still?
+        // const myMeta = self.friends.getContactAvatarMetadata(ship.patp);
+        // if (myMeta) {
+        //   self.ship?.setMetadata(myMeta);
+        // }
+      });
       self.chatStore.loadChatList();
       self.bazaarStore.init();
       self.spacesStore.init();

@@ -50,6 +50,7 @@ const AppStateModel = types
   .actions((self) => ({
     setBooted(data: RealmUpdateBooted['payload']) {
       self.authStore.setAccounts(data.accounts);
+      if (data.session?.patp) window.ship = data.session.patp;
       self.seenSplash = data.seenSplash;
       self.booted = true;
     },
@@ -166,7 +167,6 @@ function registerOnUpdateListener() {
       if (update.payload.session) {
         appState.setLoggedIn(update.payload.session.patp);
         shipStore.init();
-        window.ship = update.payload.session.patp;
       }
     }
     if (update.type === 'auth-success') {
