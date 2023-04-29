@@ -23,6 +23,7 @@ type ChatMessageProps = {
   isPrevGrouped: boolean;
   isNextGrouped: boolean;
   onReplyClick?: (msgId: string) => void;
+  roomsDelete?: (path: string, messageId: string) => void;
 };
 
 export const ChatMessagePresenter = ({
@@ -32,6 +33,7 @@ export const ChatMessagePresenter = ({
   isPrevGrouped,
   isNextGrouped,
   onReplyClick,
+  roomsDelete,
 }: ChatMessageProps) => {
   const { loggedInAccount, theme } = useAppState();
   const { chatStore, friends } = useShipStore();
@@ -237,7 +239,7 @@ export const ChatMessagePresenter = ({
         labelColor: '#ff6240',
         onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
-          selectedChat.deleteMessage(message.id);
+          selectedChat.deleteMessage(message.id, roomsDelete);
         },
       });
     }

@@ -26,6 +26,7 @@ type Props = {
   endOfListPadding?: number;
   topOfListPadding?: number;
   stretch?: boolean;
+  roomsDelete?: () => void;
 };
 
 export const ChatLogList = ({
@@ -37,6 +38,7 @@ export const ChatLogList = ({
   ourColor,
   endOfListPadding,
   topOfListPadding,
+  roomsDelete,
 }: Props) => {
   const [prevHeight, setPrevHeight] = useState<number>(0);
 
@@ -98,6 +100,7 @@ export const ChatLogList = ({
               behavior: 'smooth',
             });
           }}
+          roomsDelete={roomsDelete}
         />
       </Box>
     );

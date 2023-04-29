@@ -377,13 +377,18 @@ export const Chat = types
       }
       // self.lastUpdatedAt = new Date().getTime();
     },
-    deleteMessage: flow(function* (messageId: string) {
+    deleteMessage: flow(function* (
+      messageId: string,
+      roomsDelete?: (path: string, messageid: string) => void
+    ) {
       const oldMessages = self.messages;
       try {
         const message = self.messages.find((m) => m.id === messageId);
         if (!message) return;
         self.messages.remove(message);
-        yield ChatIPC.deleteMessage(self.path, messageId);
+        if (roomsDelete) {
+          roomsDelete(self.path, messageId);
+        } else yield ChatIPC.deleteMessage(self.path, messageId);
       } catch (error) {
         self.messages = oldMessages;
         console.error(error);
