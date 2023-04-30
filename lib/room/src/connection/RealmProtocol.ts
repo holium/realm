@@ -464,6 +464,8 @@ export class RealmProtocol extends BaseProtocol {
     const remotePeer = new RemotePeer(
       this.our,
       peer,
+      // @ts-ignore
+      null, // TODO: assign actual localPeer
       peerConfig,
       this.sendSignal
     );

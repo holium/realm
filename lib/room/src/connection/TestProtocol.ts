@@ -171,6 +171,8 @@ export class TestProtocol extends BaseProtocol {
     const remotePeer = new RemotePeer(
       this.our,
       peer,
+      // @ts-ignore
+      null, // TODO: assign actual localPeer
       {
         isHost,
         // @ts-ignore

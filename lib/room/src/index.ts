@@ -26,7 +26,8 @@ export type { ProtocolConfig } from './connection/BaseProtocol';
 export type { APIHandlers } from './connection/RealmProtocol';
 export type { DataPacket } from './helpers/data';
 export type { DataPayload } from './helpers/data';
-
+export { ridFromTitle } from './helpers/parsing';
+export { PeerEvent } from './peer/events';
 export type {
   ChatModelType,
   DiffType,
@@ -37,5 +38,3 @@ export type {
   ShipConfig,
   SlipType,
 } from './types';
-export { PeerEvent } from './peer/events';
-export { ridFromTitle } from './helpers/parsing';

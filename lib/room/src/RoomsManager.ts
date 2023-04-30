@@ -29,7 +29,7 @@ export class RoomsManager extends (EventEmitter as new () => TypedEmitter<RoomsM
   constructor(protocol: BaseProtocol) {
     super();
     this.protocol = protocol;
-    this.local = new LocalPeer(this.protocol, this.protocol.our, {
+    this.local = new LocalPeer(this.protocol.our, {
       isHost: false,
       rtc: this.protocol.rtc,
     });
