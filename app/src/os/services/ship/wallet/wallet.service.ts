@@ -55,25 +55,11 @@ export class WalletService extends AbstractService {
   }
 
   async checkPasscodeHash(passcode: number[]) {
-    const response = await APIConnection.getInstance().conduit.scry({
-      app: 'realm-wallet',
-      path: '/passcode',
-    });
-    console.log('response', response);
-    console.log(
-      'trying',
-      (
-        await APIConnection.getInstance().conduit.scry({
-          app: 'realm-wallet',
-          path: '/passcode',
-        })
-      ).passcode ?? ''
-    );
     const passcodeHash =
       (
         await APIConnection.getInstance().conduit.scry({
           app: 'realm-wallet',
-          path: '/passcode',
+          path: '/passcode-hash',
         })
       ).passcode ?? '';
     return await bcrypt.compare(passcode.map(String).join(''), passcodeHash);
@@ -83,7 +69,7 @@ export class WalletService extends AbstractService {
     return (
       (await APIConnection.getInstance().conduit.scry({
         app: 'realm-wallet',
-        path: '/passcode',
+        path: '/passcode-hash',
       })) !== null
     );
   }
@@ -229,7 +215,7 @@ export class WalletService extends AbstractService {
       app: 'realm-wallet',
       mark: 'realm-wallet-action',
       json: {
-        'set-network-settings': {
+        'set-chain-settings': {
           network,
           mode: settings.walletCreationMode,
           who: settings.sharingMode,

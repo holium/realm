@@ -13,7 +13,7 @@
 +$  action
   $%  [%initialize ~]
       [%set-xpub =chain xpub=@t]
-      [%set-network-settings =chain =mode who=?(%nobody %friends %anybody) blocked=(set who=@p) share-index=@ud =sharing]
+      [%set-chain-settings =chain =mode who=?(%nobody %friends %anybody) blocked=(set who=@p) share-index=@ud =sharing]
       [%set-passcode-hash hash=@t]
       [%set-wallet-creation-mode =chain =mode]
       [%set-sharing-mode =chain who=?(%nobody %friends %anybody)]

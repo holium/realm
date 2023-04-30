@@ -122,7 +122,7 @@
       (~(put by chains.settings.state) [chain.act net])
     `state
     ::
-      %set-network-settings
+      %set-chain-settings
     ?>  (team:title our.bowl src.bowl)
     =.  chains.settings
       =/  net-settings  (~(got by chains.settings) chain.act)

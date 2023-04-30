@@ -99,7 +99,7 @@
   %-  of
   :~  [%initialize ul]
       [%set-xpub (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) xpub+so])]
-      [%set-network-settings (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) mode+(su (perk %default %on-demand ~)) who+(su (perk %nobody %friends %anybody ~)) blocked+(as (se %p)) share-index+ni who+(su (perk %nobody %friends %anybody ~)) mode+(su (perk %on-demand %default ~))])]
+      [%set-chain-settings (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) mode+(su (perk %default %on-demand ~)) who+(su (perk %nobody %friends %anybody ~)) blocked+(as (se %p)) share-index+ni who+(su (perk %nobody %friends %anybody ~)) mode+(su (perk %on-demand %default ~))])]
       [%set-passcode-hash (ot ~[hash+so])]
       [%set-wallet-creation-mode (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) mode+(su (perk %on-demand %default ~))])]
       [%set-sharing-mode (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) who+(su (perk %nobody %friends %anybody ~))])]
