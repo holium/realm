@@ -1,3 +1,4 @@
+import log from 'electron-log';
 import { preSig } from '@urbit/aura';
 
 import AbstractDataAccess, {
@@ -101,7 +102,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   // Fetches
   //
   async fetchMuted() {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const response = await APIConnection.getInstance().conduit.scry({
       app: 'realm-chat',
       path: '/mutes',
@@ -111,35 +112,40 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   async fetchPathMetadata() {
-    if (!this.db) throw new Error('No db connection');
-    const allPaths = this.db.prepare(`SELECT path FROM paths`).all();
+    try {
+      if (!this.db?.open) return;
+      const allPaths = this.db.prepare(`SELECT path FROM paths`).all();
 
-    const muted = await APIConnection.getInstance().conduit.scry({
-      app: 'realm-chat',
-      path: '/mutes',
-    });
-    const pinned = await APIConnection.getInstance().conduit.scry({
-      app: 'realm-chat',
-      path: '/pins',
-    });
+      const muted = await APIConnection.getInstance().conduit.scry({
+        app: 'realm-chat',
+        path: '/mutes',
+      });
+      const pinned = await APIConnection.getInstance().conduit.scry({
+        app: 'realm-chat',
+        path: '/pins',
+      });
 
-    const insert = this.db.prepare(
-      `REPLACE INTO paths_flags (
+      const insert = this.db.prepare(
+        `REPLACE INTO paths_flags (
           path,
           muted,
           pinned
         ) VALUES (@path, @muted, @pinned)`
-    );
-    const insertMany = this.db.transaction((rows: { path: string }[]) => {
-      for (const row of rows)
-        insert.run({
-          path: row.path,
-          muted: muted.includes(row.path) ? 1 : 0,
-          pinned: pinned.includes(row.path) ? 1 : 0,
-        });
-    });
-    insertMany(allPaths);
-    return { muted, pinned };
+      );
+      const insertMany = this.db.transaction((rows: { path: string }[]) => {
+        for (const row of rows)
+          insert.run({
+            path: row.path,
+            muted: muted.includes(row.path) ? 1 : 0,
+            pinned: pinned.includes(row.path) ? 1 : 0,
+          });
+      });
+      insertMany(allPaths);
+      return { muted, pinned };
+    } catch (e) {
+      log.error(e);
+      return { muted: [], pinned: [] };
+    }
   }
 
   async fetchPinnedChats() {
@@ -339,7 +345,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   // ----------------------------------------------
 
   getChatList() {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const query = this.db.prepare(`
       WITH formed_messages AS (
         WITH formed_fragments AS (
@@ -442,7 +448,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   getChat(path: string) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const query = this.db.prepare(`
       WITH formed_messages AS (
         WITH formed_fragments AS (
@@ -550,7 +556,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   getChatLog(path: string, _params?: { start: number; amount: number }) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const query = this.db.prepare(`
       WITH formed_fragments AS (
         WITH realm_chat as (
@@ -633,7 +639,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   getChatMessage(msgId: string) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const query = this.db.prepare(`
       SELECT
         path,
@@ -683,7 +689,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   getLastTimestamp(
     table: 'paths' | 'messages' | 'peers' | 'delete_logs' | 'notifications'
   ): number {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return 0;
     const column = table === 'delete_logs' ? 'timestamp' : 'updated_at';
     const query = this.db.prepare(`
       SELECT max(${column}) as lastTimestamp
@@ -695,7 +701,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   getChatPeers(path: string) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const query = this.db.prepare(`
       SELECT ship, role
       FROM peers
@@ -710,7 +716,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   //
 
   private _insertMessages(messages: MessagesRow[]) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const insert = this.db.prepare(
       `REPLACE INTO messages (
         path, 
@@ -759,7 +765,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   private _insertPaths(paths: PathsRow[]) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     if (!paths) return;
     const insert = this.db.prepare(
       `REPLACE INTO paths (
@@ -792,7 +798,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   private _insertPeers(peers: PeersRow[]) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     if (!peers) return;
     const insert = this.db.prepare(
       `REPLACE INTO peers (
@@ -823,7 +829,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   private _insertDeleteLogs(deleteLogs: DeleteLogRow[]) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const insert = this.db.prepare(
       `REPLACE INTO delete_logs (
           change, 
@@ -841,7 +847,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   private _deletePathsRow(path: string) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const deletePath = this.db.prepare('DELETE FROM paths WHERE path = ?');
     console.log('deleting path', path);
     deletePath.run(path);
@@ -856,7 +862,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   private _deletePeersRow(path: string, peer: string) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const deletePath = this.db.prepare(
       'DELETE FROM peers WHERE path = ? AND ship = ?'
     );
@@ -865,7 +871,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   private _deleteMessagesRow(msgId: string) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const deleteMessage = this.db.prepare(
       'DELETE FROM messages WHERE msg_id = ?'
     );

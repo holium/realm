@@ -129,18 +129,17 @@ export class ShipService extends AbstractService<any> {
         this.serviceOptions,
         this.shipDB.db
       ),
-      spaces: new SpacesService(this.serviceOptions, this.shipDB.db, this.patp),
       bazaar: new BazaarService(this.serviceOptions, this.shipDB.db),
+      spaces: new SpacesService(this.serviceOptions, this.shipDB.db, this.patp),
       friends: new FriendsService(this.serviceOptions, this.shipDB.db),
       rooms: new RoomsService(this.serviceOptions),
       wallet: new WalletService(undefined, this.shipDB.db),
     };
   }
 
-  // TODO initialize the ship services here
   public init() {
-    this.services?.spaces.init();
     this.services?.bazaar.init();
+    this.services?.spaces.init();
   }
 
   public updateCookie(cookie: string) {

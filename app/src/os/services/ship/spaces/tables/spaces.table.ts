@@ -45,7 +45,7 @@ export class SpacesDB extends AbstractDataAccess<Space, any> {
   }
 
   public insertAll(spaces: { [path: string]: Space }) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
 
     const insert = this.db.prepare(
       `REPLACE INTO spaces (

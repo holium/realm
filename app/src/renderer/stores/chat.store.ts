@@ -139,7 +139,9 @@ export const ChatStore = types
         return self.pinnedChats;
       }
     }),
-    fetchInboxMetadata: ChatIPC.fetchPathMetadata,
+    fetchInboxMetadata: flow(function* () {
+      yield ChatIPC.fetchPathMetadata();
+    }),
     loadChatList: flow(function* () {
       try {
         self.inbox = yield ChatIPC.getChatList();

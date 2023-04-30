@@ -80,11 +80,12 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
       switch (spacesType) {
         case 'initial':
           // TODO this DROP is here until we get the agent refactor with lastTimestamp scries
-          this.shipDB?.exec(`
-            DELETE FROM spaces_stalls;
-            DELETE FROM spaces_members;
-            DELETE FROM spaces;
-          `);
+          if (this.shipDB?.open) {
+            this.shipDB?.exec(`
+              DELETE FROM spaces_members;
+              DELETE FROM spaces;
+            `);
+          }
           this.spacesDB?.insertAll(data['initial'].spaces);
           this.spacesDB?.setCurrent(data['initial'].current.path);
           this.membersDB?.insertAll(data['initial'].membership);

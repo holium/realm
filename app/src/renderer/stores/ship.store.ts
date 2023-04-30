@@ -1,6 +1,8 @@
 import { createContext, useContext } from 'react';
 import { flow, Instance, onSnapshot, SnapshotIn, types } from 'mobx-state-tree';
 
+import { RealmSession } from 'os/realm.types';
+
 import { ChatStore } from './chat.store';
 import { ShipIPC } from './ipc';
 import { BazaarStore, BazaarStoreType } from './models/bazaar.model';
@@ -34,19 +36,15 @@ export const ShipStore = types
     loader: LoaderModel,
   })
   .actions((self) => ({
-    init() {
-      self.friends.init().then(() => {
-        // TODO do we need to set this still?
-        // const myMeta = self.friends.getContactAvatarMetadata(ship.patp);
-        // if (myMeta) {
-        //   self.ship?.setMetadata(myMeta);
-        // }
-      });
+    init(session: RealmSession) {
+      self.credentials = CredentialsModel.create(session);
+      self.friends.init();
       self.chatStore.loadChatList();
       self.bazaarStore.init();
       self.spacesStore.init();
       self.chatStore.fetchInboxMetadata();
       self.walletStore.init();
+      self.roomsStore.init();
     },
     reset() {
       self.notifStore.reset();
