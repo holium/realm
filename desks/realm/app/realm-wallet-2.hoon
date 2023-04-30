@@ -72,10 +72,6 @@
       this
         [%updates ~]
       `this
-      :: :_  this
-      :: :~  [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%wallets wallets.state])]
-      ::     [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]
-      :: ==
     ==
   ++  on-leave  on-leave:def
   ++  on-peek
@@ -87,10 +83,6 @@
       :^  ~  ~  %realm-wallet-update
       !>  ^-  update
       [%eth-xpub xpub:(~(got by networks.settings) %ethereum)]
-        [%x %wallets ~]
-      :^  ~  ~  %realm-wallet-update
-      !>  ^-  update
-      [%wallets wallets.state]
         [%x %settings ~]
       :^  ~  ~  %realm-wallet-update
       !>  ^-  update
@@ -113,12 +105,6 @@
   ?-  -.act
       %initialize
     ?>  (team:title our.bowl src.bowl)
-    =.  wallets.state
-      (~(put by wallets.state) [%ethereum ~])
-    =.  wallets.state
-      (~(put by wallets.state) [%bitcoin ~])
-    =.  wallets.state
-      (~(put by wallets.state) [%btctestnet ~])
     =/  default-net-settings  [~ 0 %anybody %default]
     =.  networks.settings.state
       (~(put by networks.settings.state) [%ethereum default-net-settings])
@@ -192,16 +178,6 @@
       (~(put by networks.settings.state) [network.act [xpub.prev-set index.act sharing.prev-set]])
     :_  state
     [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]~
-    ::
-      %set-wallet-nickname
-    ?>  (team:title our.bowl src.bowl)
-    =.  wallets.state
-      =/  net-walls  (~(got by wallets.state) network.act)
-      =/  wall  (~(got by net-walls) index.act)
-      =.  nickname.wall  nickname.act
-      =.  net-walls  (~(put by net-walls) [index.act wall])
-      (~(put by wallets.state) [network.act net-walls])
-    `state
     ::
       %create-wallet
     ^-  (quip card _state)
@@ -297,111 +273,6 @@
           [%give %kick ~[update-path] ~]
       ==
     state
-    ::
-      %set-transaction
-    =/  tid=@ta
-      :((cury cat 3) dap.bowl '--' (scot %uv eny.bowl))
-    =.  wallets.state
-      =/  network-map  (~(got by wallets.state) network.act)
-      =/  prev-wallet  (~(got by network-map) wallet.act)
-      =.  prev-wallet
-        ?~  contract.act
-          =.  transactions.prev-wallet
-            =/  net-map  (~(get by transactions.prev-wallet) net.act)
-            =/  net-map
-              ?~  net-map
-                (my [hash.transaction.act transaction.act]~)
-              (~(put by u.net-map) [hash.transaction.act transaction.act])
-            (~(put by transactions.prev-wallet) [net.act net-map])
-          prev-wallet
-        =.  token-txns.prev-wallet
-          =/  net-map  (~(get by token-txns.prev-wallet) net.act)
-          =/  net-map
-            ?~  net-map
-              (my [u.contract.act (my [hash.transaction.act transaction.act]~)]~)
-            =/  contract-map  (~(get by u.net-map) u.contract.act)
-            =/  contract-map
-              ^-  (map @t transaction)
-              ?~  contract-map  (my [hash.transaction.act transaction.act]~)
-              (~(put by u.contract-map) [hash.transaction.act transaction.act])
-            (~(put by u.net-map) [u.contract.act contract-map])
-          (~(put by token-txns.prev-wallet) [net.act net-map])
-        prev-wallet
-      =.  network-map  (~(put by network-map) [wallet.act prev-wallet])
-      (~(put by wallets.state) [network.act network-map])
-    =/  cards  *(list card)
-    =?  cards
-        ?&  (team:title our.bowl src.bowl)
-            =/  their-patp  their-patp.transaction.act
-            !=(~ their-patp)
-        ==
-      ?~  their-patp.transaction.act  !!
-        =/  to=@p  u.their-patp.transaction.act
-        =.  transaction.act
-          =.  type.transaction.act  %received
-          =.  their-patp.transaction.act  `our.bowl
-          =/  their-address  their-address.transaction.act
-          =.  their-address.transaction.act  our-address.transaction.act
-          =.  our-address.transaction.act  their-address
-          transaction.act
-        =/  wall-act=action  [%set-transaction network.act net.act wallet.act contract.act hash.act transaction.act]
-        =/  task  [%poke %realm-wallet-action !>(wall-act)]
-        =/  new-card
-          ^-  (list card)
-          :~  `card`[%pass /addr/(scot %p to) %agent [to dap.bowl] task]
-          ==
-        (weld cards new-card)
-    =?  cards
-        !(team:title our.bowl src.bowl)
-      =/  new-card
-        ^-  (list card)
-        :~  `card`[%give %fact ~[/updates] %realm-wallet-update !>(`update`[%transaction network.act net.act wallet.act contract.act hash.act transaction.act])]
-        ==
-      (weld cards new-card)
-    [cards state]
-    ::
-      %save-transaction-notes
-    =/  network-map  (~(got by wallets) %ethereum)
-    =/  wall-map  (~(got by network-map) wallet.act)
-    =/  net-map
-      ?~  contract.act  (~(get by transactions.wall-map) net.act)
-      =/  net-map  (~(get by token-txns.wall-map) net.act)
-      ?~  net-map  ~
-      (~(get by u.net-map) u.contract.act)
-    =/  tx
-      ?~  net-map
-        =/  tx  *transaction
-        =.  hash.tx  hash.act
-        tx
-      =/  tx  (~(get by u.net-map) hash.act)
-      ?~  tx
-        =/  tx  *transaction
-        =.  hash.tx  hash.act
-        tx
-      u.tx
-    =.  tx
-      =.  notes.tx  notes.act
-      tx
-    =/  net-map
-      ?~  net-map
-        (my [hash.act tx]~)
-      (~(put by u.net-map) [hash.act tx])
-    =.  wallets
-      =.  wall-map
-        ?~  contract.act
-          =.  transactions.wall-map  (~(put by transactions.wall-map) [net.act net-map])
-          wall-map
-        =.  token-txns.wall-map
-          =/  map-net  (~(get by token-txns.wall-map) net.act)
-          ?~  map-net
-            (~(put by token-txns.wall-map) [net.act (my [u.contract.act net-map]~)])
-          =/  map-net  (~(put by u.map-net) [u.contract.act net-map])
-          (~(put by token-txns.wall-map) [net.act map-net])
-        wall-map
-      =.  network-map  (~(put by network-map) [wallet.act wall-map])
-      (~(put by wallets) [%ethereum network-map])
-    :_  state
-    [%give %fact ~[/updates] %realm-wallet-update !>(`update`[%transaction %ethereum net.act wallet.act contract.act hash.act tx])]~
     ::
   ==
 ::
