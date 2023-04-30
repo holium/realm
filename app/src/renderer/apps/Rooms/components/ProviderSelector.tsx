@@ -3,9 +3,7 @@ import styled from 'styled-components';
 
 import { Flex, Icon, Text } from '@holium/design-system';
 
-import { useAppState } from 'renderer/stores/app.store';
-
-import { useRooms } from '../useRooms';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const ProviderStyle = styled(Flex)`
   display: flex;
@@ -29,14 +27,12 @@ interface ProviderSelectorProps {
 }
 
 const ProviderSelectorPresenter = ({ onClick }: ProviderSelectorProps) => {
-  const { loggedInAccount } = useAppState();
-  const roomsManager = useRooms(loggedInAccount?.patp);
-
+  const { roomsStore } = useShipStore();
   return (
     <ProviderStyle onClick={(evt: any) => onClick(evt)}>
       <Icon size={18} opacity={0.7} name="BaseStation" />
-      <Text.Custom fontSize={1} opacity={0.7}>
-        {roomsManager?.protocol.provider}
+      <Text.Custom fontSize={1} opacity={0.7} isSkeleton={!roomsStore.provider}>
+        {roomsStore.provider}
       </Text.Custom>
     </ProviderStyle>
   );

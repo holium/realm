@@ -162,17 +162,21 @@ function registerOnUpdateListener() {
     if (update.type === 'booted') {
       appState.reset();
       shipStore.reset();
+      if (update.payload.session) window.ship = update.payload.session.patp;
       appState.setBooted(update.payload);
       if (update.payload.session) {
         appState.setLoggedIn(update.payload.session.patp);
+        shipStore.init(update.payload.session);
       }
     }
     if (update.type === 'auth-success') {
       SoundActions.playLogin();
+      window.ship = update.payload.patp;
       OnboardingStorage.set({
         lastAccountLogin: update.payload.patp,
       });
       appState.setLoggedIn(update.payload.patp);
+      shipStore.init(update.payload);
     }
     if (update.type === 'auth-failed') {
       // SoundActions.playError();

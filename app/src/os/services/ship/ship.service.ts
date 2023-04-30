@@ -88,20 +88,6 @@ export class ShipService extends AbstractService<any> {
       this._registerServices();
     }
 
-    // TODO this DROP is here until we get the agent refactor with lastTimestamp scries
-    try {
-      this.shipDB.db.exec(`
-        DELETE FROM app_docks;
-        DELETE FROM app_recommendations;
-        DELETE FROM app_catalog;
-        DELETE FROM spaces_stalls;
-        DELETE FROM spaces_members;
-        DELETE FROM spaces;
-      `);
-    } catch (e) {
-      log.error('ship.service.ts:', 'Failed to drop tables', e);
-    }
-
     app.on('quit', () => {
       this.shipDB?.disconnect();
     });
@@ -138,23 +124,22 @@ export class ShipService extends AbstractService<any> {
       'Creating ship sub-services (rooms, notifications, chat, friends, spaces, bazaar)...'
     );
     this.services = {
-      rooms: new RoomsService(this.serviceOptions),
+      chat: new ChatService(this.serviceOptions, this.shipDB.db),
       notifications: new NotificationsService(
         this.serviceOptions,
         this.shipDB.db
       ),
-      chat: new ChatService(this.serviceOptions, this.shipDB.db),
-      friends: new FriendsService(this.serviceOptions, this.shipDB.db),
-      spaces: new SpacesService(this.serviceOptions, this.shipDB.db, this.patp),
       bazaar: new BazaarService(this.serviceOptions, this.shipDB.db),
+      spaces: new SpacesService(this.serviceOptions, this.shipDB.db, this.patp),
+      friends: new FriendsService(this.serviceOptions, this.shipDB.db),
+      rooms: new RoomsService(this.serviceOptions),
       wallet: new WalletService(undefined, this.shipDB.db),
     };
   }
 
-  // TODO initialize the ship services here
   public init() {
-    this.services?.spaces.init();
     this.services?.bazaar.init();
+    this.services?.spaces.init();
   }
 
   public updateCookie(cookie: string) {
@@ -205,6 +190,7 @@ export class ShipService extends AbstractService<any> {
     this.services?.friends.reset();
     this.services?.spaces.reset();
     this.services?.bazaar.reset();
+    APIConnection.getInstance().closeChannel();
 
     this.shipDB?.disconnect();
   }

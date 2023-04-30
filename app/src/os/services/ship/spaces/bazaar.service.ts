@@ -11,6 +11,7 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
   private tables?: {
     appCatalog: AppCatalogDB;
   };
+  private shipDB?: Database;
   constructor(options?: ServiceOptions, db?: Database) {
     super('bazaarService', options);
     if (options?.preload) {
@@ -49,7 +50,18 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
       const spacesType = Object.keys(data)[0];
       switch (spacesType) {
         case 'initial':
+          this.shipDB?.exec(`
+            DELETE FROM spaces_stalls;
+            DELETE FROM app_docks;
+            DELETE FROM app_recommendations;
+            DELETE FROM app_catalog;
+          `);
           this.tables?.appCatalog.insertAll(data['initial']);
+          // log.info(
+          //   'bazaar.service.ts:',
+          //   'Initial catalog received. # of apps:',
+          //   this.tables?.appCatalog.getCatalog()
+          // );
           this.sendUpdate({
             type: 'initial',
             payload: this.tables?.appCatalog.getCatalog(),

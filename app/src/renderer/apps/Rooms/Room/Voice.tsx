@@ -5,21 +5,24 @@ import { Flex } from '@holium/design-system';
 
 import { useTrayApps } from 'renderer/apps/store';
 import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { Speaker } from '../components/Speaker';
 import { roomTrayConfig } from '../config';
-import { useRooms } from '../useRooms';
 
 const VoiceViewPresenter = () => {
+  const { roomsStore } = useShipStore();
   const { loggedInAccount } = useAppState();
-  const roomsManager = useRooms(loggedInAccount?.patp);
 
   const { setTrayAppHeight } = useTrayApps();
 
-  const our = roomsManager?.local.patp;
-  const speakers = roomsManager
-    ? [...Array.from(roomsManager.protocol.peers.keys())]
-    : []; //.filter((patp) => patp !== our);
+  const speakers = roomsStore.current
+    ? [
+        ...Array.from(roomsStore.getPeers()).filter(
+          (patp) => patp !== window.ship
+        ),
+      ]
+    : [];
 
   useEffect(() => {
     const regularHeight = roomTrayConfig.dimensions.height;
@@ -31,7 +34,7 @@ const VoiceViewPresenter = () => {
     }
   }, [speakers.length, setTrayAppHeight]);
 
-  if (!roomsManager?.live.room) {
+  if (!roomsStore.current) {
     return null;
   }
   return (
@@ -46,7 +49,11 @@ const VoiceViewPresenter = () => {
         gridAutoRows: '.5fr',
       }}
     >
-      <Speaker key={our} type="our" person={our ?? ''} />
+      <Speaker
+        key={loggedInAccount?.patp}
+        type="our"
+        person={loggedInAccount?.patp ?? ''}
+      />
       {speakers.map((person: string) => (
         <Speaker key={person} type="speaker" person={person} />
       ))}

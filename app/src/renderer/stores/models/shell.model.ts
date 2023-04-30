@@ -1,10 +1,7 @@
 import { toJS } from 'mobx';
 import { applySnapshot, getSnapshot, Instance, types } from 'mobx-state-tree';
 
-import { Credentials } from 'os/services/ship/ship.types.ts';
-
 import { getInitialWindowBounds } from '../../lib/window-manager';
-import { MainIPC, ShipIPC } from '../ipc';
 import {
   AppWindowMobxType,
   AppWindowModel,
@@ -144,11 +141,10 @@ export const ShellModel = types
       }
 
       if (app.type === 'dev') {
-        // app as DevApp
         href = { site: app.web.url };
       }
+
       if (app.type === 'native' && nativeConfig) {
-        // app as NativeApp
         self.nativeConfig.set(app.id, nativeConfig);
       }
       const newWindow = AppWindowModel.create({
@@ -161,27 +157,6 @@ export const ShellModel = types
         type: app.type,
         bounds: getInitialWindowBounds(app, self.desktopDimensions),
       });
-      const credentials = ShipIPC.credentials as Credentials;
-
-      if (app.type === 'urbit') {
-        const appUrl = newWindow.href?.glob
-          ? `${credentials.url}/apps/${app.id}`
-          : `${credentials.url}${newWindow.href?.site}`;
-
-        MainIPC.setPartitionCookie(`${app.type}-webview`, {
-          url: appUrl,
-          name: `urbauth-${credentials.ship}`,
-          value: credentials.cookie?.split('=')[1].split('; ')[0],
-        });
-      } else if (app.type === 'dev') {
-        const appUrl = app.web.url;
-        // Hit the main process handler for setting partition cookies
-        MainIPC.setPartitionCookie(`${app.type}-webview`, {
-          url: appUrl,
-          name: `urbauth-${credentials.ship}`,
-          value: credentials.cookie?.split('=')[1].split('; ')[0],
-        });
-      }
 
       self.windows.set(newWindow.appId, newWindow);
       this.setActive(newWindow.appId);

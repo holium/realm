@@ -201,6 +201,7 @@ export const Chat = types
     host: types.string,
     peers: types.array(PeerModel),
     muted: types.optional(types.boolean, false),
+    pinned: types.optional(types.boolean, false),
     peersGetBacklog: types.boolean,
     pinnedMessageId: types.maybeNull(types.string),
     lastMessage: types.maybeNull(

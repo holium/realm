@@ -4,7 +4,7 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
 import { Avatar, Flex, FlexProps, Icon, Text } from '@holium/design-system';
-import { PeerConnectionState, RealmProtocol } from '@holium/realm-room';
+import { PeerConnectionState } from '@holium/realm-room';
 
 import {
   ContextMenuOption,
@@ -13,7 +13,6 @@ import {
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { useRooms } from '../useRooms';
 import { AudioWave } from './AudioWave';
 
 interface ISpeaker {
@@ -29,19 +28,22 @@ const speakerType = {
   listener: 'Listener',
 };
 
-const SpeakerPresenter = ({ person, type }: ISpeaker) => {
+const SpeakerPresenter = (props: ISpeaker) => {
+  const { person, type } = props;
   const { loggedInAccount } = useAppState();
-  const { friends } = useShipStore();
+  const { friends, roomsStore } = useShipStore();
   const speakerRef = useRef<any>(null);
-  const roomsManager = useRooms(loggedInAccount?.patp);
   const { getOptions, setOptions } = useContextMenu();
   const isOur = person === loggedInAccount?.patp;
   const metadata = friends.getContactAvatarMetadata(person);
 
   let name = metadata?.nickname || person;
-  const peer = isOur
-    ? roomsManager.protocol.local
-    : roomsManager.protocol.peers.get(person);
+  let peer: any;
+  if (isOur) {
+    peer = roomsStore;
+  } else {
+    peer = roomsStore.peersMetadata.get(person);
+  }
 
   const contextMenuOptions = useMemo(
     () =>
@@ -51,29 +53,23 @@ const SpeakerPresenter = ({ person, type }: ISpeaker) => {
           label: 'Reconnect',
           disabled: peer?.status === PeerConnectionState.Connected,
           onClick: (evt: any) => {
-            (roomsManager.protocol as RealmProtocol).retry(person);
+            roomsStore.retryPeer(person);
             evt.stopPropagation();
           },
         },
         // only the creator can kick people
-        loggedInAccount?.patp === roomsManager.live.room?.creator && {
+        loggedInAccount?.patp === roomsStore.current?.creator && {
           style: { color: '#FD4E4E' },
           id: `room-speaker-${person}-kick`,
           label: 'Kick',
           loading: false,
           onClick: (evt: any) => {
             evt.stopPropagation();
-            roomsManager.protocol.kick(person);
+            roomsStore.kickPeer(person);
           },
         },
       ].filter(Boolean) as ContextMenuOption[],
-    [
-      peer?.status,
-      person,
-      roomsManager.live.room,
-      roomsManager.protocol,
-      loggedInAccount,
-    ]
+    [peer?.status, person, roomsStore.current, loggedInAccount]
   );
 
   const peerState = isOur ? PeerConnectionState.Connected : peer?.status;

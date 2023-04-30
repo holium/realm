@@ -5,6 +5,7 @@ import { DataPacket } from '../helpers/data';
 import { Patp } from '../types';
 import { isFireFox, isSafari } from '../utils';
 import { PeerEvent } from './events';
+import { LocalPeer } from './LocalPeer';
 import { Peer, PeerConfig } from './Peer';
 import { PeerConnectionState, TrackKind } from './types';
 
@@ -13,6 +14,7 @@ type SignalData =
   | { type: 'ack-waiting' | 'waiting'; from: Patp };
 export class RemotePeer extends Peer {
   our: Patp;
+  localPeer: LocalPeer;
   peer: SimplePeer.Instance | null = null;
   isInitiator: boolean;
   isAudioAttached: boolean = false;
@@ -23,10 +25,12 @@ export class RemotePeer extends Peer {
     our: Patp,
     peer: Patp,
     config: PeerConfig & { isInitiator: boolean },
+    localPeer: LocalPeer,
     sendSignal: (peer: Patp, data: SignalData) => void
   ) {
     super(peer, config);
     this.our = our;
+    this.localPeer = localPeer;
     this.isInitiator = config.isInitiator;
     this.sendSignal = sendSignal;
     this.rtcConfig = config.rtc;
@@ -56,9 +60,11 @@ export class RemotePeer extends Peer {
     this.setStatus(PeerConnectionState.Connecting);
     this.peer?.removeAllListeners();
     // create the peer connection
+    console.log(`%create connection to ${this.patp}`, this.rtcConfig);
     this.peer = new SimplePeer({
       initiator: this.isInitiator,
       config: this.rtcConfig,
+      stream: this.localPeer.stream,
       objectMode: true,
       trickle: true,
     });
@@ -88,7 +94,7 @@ export class RemotePeer extends Peer {
     // only the waiting peer sends the waiting signal
     if (!this.isInitiator) {
       this.createConnection();
-      console.log(`%waiting to ${this.patp}`);
+      // console.log(`%waiting to ${this.patp}`);
       this.sendSignal(this.patp, { type: 'waiting', from: this.our });
     }
   }
@@ -124,15 +130,13 @@ export class RemotePeer extends Peer {
 
   _onError(err: Error) {
     // @ts-ignore
-    console.log('RemotePeer onError', err.code);
     this.setStatus(PeerConnectionState.Failed);
-    // this.pee
-    // this.removeTracks();
     this.emit(PeerEvent.Failed, err);
   }
 
   _onSignal(data: SimplePeer.SignalData) {
     this.sendSignal(this.patp, data);
+    console.log('sendSignal', data.type, data);
     if (this.status !== PeerConnectionState.Connected) {
       this.setStatus(PeerConnectionState.Connecting);
     }
@@ -144,6 +148,7 @@ export class RemotePeer extends Peer {
 
   _onTrack(track: MediaStreamTrack, stream: MediaStream) {
     // TODO make sure we're not adding the same track twice
+    console.log('track added', track.id, track, stream);
     this.tracks.set(track.id, track);
     if (track.kind === 'video') {
       this.videoTracks.set(track.id, track);
@@ -151,7 +156,9 @@ export class RemotePeer extends Peer {
       this.emit(PeerEvent.VideoTrackAdded, stream, track);
     }
     if (track.kind === 'audio') {
+      console.log('audio track added', track.id, track, this.audioTracks);
       if (this.audioTracks.size > 0) {
+        console.log('audio track already exists, removing', track.id);
         this.removeAudioTracks();
       }
       this.audioTracks.set(track.id, track);

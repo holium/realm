@@ -57,7 +57,7 @@ export class FriendsService extends AbstractDataAccess<Friend, any> {
   private async _init() {
     const friends: any[] = await this._fetchFriends();
     if (!friends) return;
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const insert = this.db.prepare(
       `REPLACE INTO friends (
         patp,

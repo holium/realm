@@ -28,8 +28,8 @@ export class APIConnection {
       });
 
     app.on('quit', () => {
+      this.closeChannel();
       APIConnection.getInstance().conduit.removeAllListeners();
-      // this.closeChannel()
     });
   }
 

@@ -61,7 +61,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
   }
 
   public getCatalog() {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const select = this.db.prepare(
       `SELECT
         json_group_object(
@@ -97,7 +97,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
   }
 
   public getApp(appId: string) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const select = this.db.prepare(
       `SELECT
         json_object(
@@ -132,7 +132,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
   }
 
   getDock(spacePath: string) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const select = this.db.prepare(
       `${spaceDockQuery}
       WHERE space = ?;`
@@ -143,7 +143,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
   }
 
   getStall(spacePath: string) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const select = this.db.prepare(
       `${spaceStallQuery}
       WHERE stalls.space = ?;`
@@ -154,7 +154,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
   }
 
   public updateInstallStatus(id: string, status: string) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const update = this.db.prepare(
       `UPDATE app_catalog SET installStatus = ? WHERE id = ?;`
     );
@@ -168,7 +168,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
     payload: { id: string; index: number; path: string },
     type: 'add' | 'remove'
   ) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     // get suite column
     const select = this.db.prepare(
       `SELECT json(suite) suite FROM spaces_stalls WHERE space = ?;`
@@ -197,7 +197,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
       suite: any;
     }
   ) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     // update recommended
     const update = this.db.prepare(
       `UPDATE spaces_stalls SET suite = ?, recommended = ? WHERE space = ?;`
@@ -213,17 +213,17 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
   }
 
   public updateCatalog(catalogUpdate: { [appId: string]: App }) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     this._insertAppCatalog(catalogUpdate);
   }
 
   public updateApp(appId: string, app: App) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     this._insertAppCatalog({ [appId]: app });
   }
 
   public updateGrid(grid: { [idx: string]: string }) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     this._insertGrid(grid);
   }
 
@@ -231,7 +231,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
     update: { id: string; stalls: any },
     type: 'add' | 'remove'
   ) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     if (type === 'add') {
       this._insertRecommendations([update.id]);
     } else {
@@ -244,7 +244,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
   }
 
   public updateDock(update: { path: string; dock: string[] }) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     this.db
       .prepare(`REPLACE INTO app_docks (space, dock) VALUES (?, ?)`)
       .run(update.path, JSON.stringify(update.dock));
@@ -264,7 +264,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
   }
 
   private _insertAppCatalog(catalog: { [key: string]: App }) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
 
     const insert = this.db.prepare(
       `REPLACE INTO app_catalog (
@@ -329,7 +329,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
   }
 
   private _insertGrid(grid: { [idx: string]: string }) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const insert = this.db.prepare(
       `REPLACE INTO app_grid (
         idx,
@@ -352,7 +352,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
   }
 
   private _insertDocks(docks: { [key: string]: string[] }) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const insert = this.db.prepare(
       `REPLACE INTO app_docks (
         space,
@@ -371,7 +371,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
   }
 
   private _insertRecommendations(recommendations: string[]) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const insert = this.db.prepare(
       `REPLACE INTO app_recommendations (
         id
@@ -390,7 +390,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
   }
 
   private _insertStalls(stalls: { [key: string]: string[] }) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const insert = this.db.prepare(
       `REPLACE INTO spaces_stalls (
         space,

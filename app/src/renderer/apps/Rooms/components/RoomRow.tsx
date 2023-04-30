@@ -9,8 +9,8 @@ import {
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
-import { useRooms } from '../useRooms';
 import { AvatarRow } from './AvatarRow';
 
 type RoomRowProps = Partial<RoomType> & {
@@ -30,7 +30,7 @@ const RoomRowPresenter = ({
   rightChildren,
 }: RoomRowProps) => {
   const { loggedInAccount, theme } = useAppState();
-  const roomsManager = useRooms(loggedInAccount?.patp);
+  const { roomsStore } = useShipStore();
   const { getOptions, setOptions } = useContextMenu();
   const defaultOptions = getOptions('').filter(
     (o) => o.id === 'toggle-devtools'
@@ -43,14 +43,11 @@ const RoomRowPresenter = ({
   if (presentCount === 1) {
     peopleText = 'person';
   }
-  const peopleNoHost = present?.filter(
-    (person: string) => person !== loggedInAccount?.patp
-  );
   let titleText = title;
   if (titleText && titleText.length > 16 && tray) {
     titleText = titleText.substring(0, 16) + '...';
   }
-  const isLive = roomsManager.presentRoom?.rid === rid;
+  const isLive = roomsStore.current?.rid === rid;
 
   const contextMenuOptions = useMemo(
     () =>
@@ -61,7 +58,7 @@ const RoomRowPresenter = ({
               label: 'Delete Room',
               onClick: (evt) => {
                 evt.stopPropagation();
-                rid && roomsManager.protocol.deleteRoom(rid);
+                rid && roomsStore.deleteRoom(rid);
               },
             } as ContextMenuOption,
             ...defaultOptions,
@@ -85,7 +82,6 @@ const RoomRowPresenter = ({
       small={tray}
       className="realm-cursor-hover"
       selected={isLive}
-      // baseBg={!tray && isLive ? isLiveColor : undefined}
       onClick={(evt: MouseEvent<HTMLDivElement>) => onClick?.(evt)}
       style={
         !onClick
@@ -147,7 +143,7 @@ const RoomRowPresenter = ({
         </Flex>
 
         <AvatarRow
-          people={peopleNoHost ?? []}
+          people={present ?? []}
           backgroundColor={tray ? dockColor : windowColor}
         />
       </Flex>

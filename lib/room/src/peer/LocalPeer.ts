@@ -2,7 +2,7 @@ import { action, makeObservable, observable } from 'mobx';
 
 import { SpeakingDetectionAnalyser } from '../analysers';
 import { IAudioAnalyser } from '../analysers/types';
-import { BaseProtocol } from '../connection/BaseProtocol';
+// import { BaseProtocol } from '../connection/BaseProtocol';
 import { Patp } from '../types';
 import { PeerEvent } from './events';
 import { Peer, PeerConfig } from './Peer';
@@ -22,17 +22,15 @@ export const DEFAULT_AUDIO_OPTIONS = {
 };
 
 export class LocalPeer extends Peer {
-  stream: MediaStream | null = null;
-  protocol: BaseProtocol;
+  stream: MediaStream | undefined = undefined;
   constraints: MediaStreamConstraints = {
     audio: DEFAULT_AUDIO_OPTIONS,
     video: false,
   };
   analysers: IAudioAnalyser[] = [];
 
-  constructor(protocol: BaseProtocol, our: Patp, config: PeerConfig) {
+  constructor(our: Patp, config: PeerConfig) {
     super(our, config);
-    this.protocol = protocol;
     makeObservable(this, {
       stream: observable,
       setMedia: action.bound,
@@ -72,6 +70,8 @@ export class LocalPeer extends Peer {
       return;
     }
     const currentStream: MediaStream = this.stream;
+    console.log('current streams', this.stream.getTracks());
+    console.log('peer streams', peer.peer?.streams);
     this.stream.getTracks().forEach((track: MediaStreamTrack) => {
       if (this.isMuted && track.kind === TrackKind.Audio) {
         track.enabled = false;
@@ -164,6 +164,6 @@ export class LocalPeer extends Peer {
     this.analysers.forEach((analyser: IAudioAnalyser) => {
       analyser.detach();
     });
-    this.stream = null;
+    this.stream = undefined;
   }
 }

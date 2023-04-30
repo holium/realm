@@ -231,11 +231,12 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     },
     [mouseDragX, mouseDragY]
   );
-
+  const appId = useMemo(() => appWindow.appId, [appWindow]);
   const updateWindowBounds = useCallback(
     debounce(() => {
+      if (!shellStore.windows.has(appId)) return;
       shellStore.setWindowBounds(
-        appWindow.appId,
+        appId,
         normalizeBounds(
           {
             x: motionX.get(),

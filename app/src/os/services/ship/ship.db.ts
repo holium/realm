@@ -68,7 +68,7 @@ export class ShipDB {
       .prepare('SELECT * FROM credentials LIMIT 1;')
       .get();
 
-    log.info('ship.db.ts:', 'getCredentials', result);
+    // log.info('ship.db.ts:', 'getCredentials', result);
 
     return { ...result, ship: this.patp };
   }
