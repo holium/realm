@@ -42,7 +42,6 @@
 +$  pending-tx  [txh=(unit @ux) from=@ux to=@ux amount=@ud]
 +$  txn  [block=@ud txh=@ux log-index=@ud from=@ux to=@ux amount=@ud]
 +$  txn-log  (list txn)
-+$  contract-type  ?(%erc20 %erc721)
 +$  sharing
   $:  who=?(%nobody %friends %anybody)
       wallet-creation=mode

@@ -4,6 +4,7 @@
     %bazaar
     %rooms-v2
     %realm-wallet
+    %wallet-db
     %bulletin
     %realm-chat
     %spaces-chat

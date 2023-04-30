@@ -1,26 +1,12 @@
 ::  wallet-db [realm]
 ::
 |%
-::  3 bits of info in a txn-id: timestamp, sender, txn-id
-::  order by timestamp first
-::  then sender
-::  then txn-id
-++  idx-sort
-  |=  [a=txn-id b=txn-id]
-  ?.  =(timestamp.txn-id.a timestamp.txn-id.b)
-    (gth timestamp.txn-id.a timestamp.txn-id.b)
-  :: same timestamp, so either ships sent msg at same time, or order by
-  :: txn-id
-  ?:  =(sender.msg-id.a sender.msg-id.b)
-    :: they are the same ship, so order by txn-id
-    (gth txn-id.a txn-id.b)
-  :: they are different ships, so just order by ship id
-  (gth sender.msg-id.a sender.msg-id.b)
+++  address  @u
 ::
 ::  database types
 ::
 +$  wallet-row
-  $:  =network
+  $:  =chain
       =wallet-index
       =address
       path=@t
@@ -28,18 +14,19 @@
   ==
 ::
 +$  wallet-index  @ud
-+$  wallets-table  (map wallet-index wallet-row)
++$  wallet-id  [=network =wallet-index]
++$  wallets-table  (map =wallet-id wallet-row)
 ::
 +$  chain  ?(%bitcoin %btctestnet %ethereum)
 +$  network  ?(%eth-main %eth-gorli)
-+$  uniq-network  [=chain (unit =network)]
++$  uniq-network  [=chain network=(unit network)]
 +$  txn-id  [uniq-network hash=@t]
 +$  status  ?(%pending %failed %succeeded)
-+$  transaction
-  $:  =uniq-network
++$  transaction-row
+  $:  uniq-network
       hash=@t
+      =wallet-id
       eth-type=(unit ?(%eth %erc20 %erc721))
-      contract-type
       type=?(%sent %received)
       initiated-at=@da
       completed-at=(unit @da)
@@ -51,10 +38,9 @@
       notes=@t
   ==
 ::
-+$  transactions-table  ((mop txn-id transaction) idx-sort)
-++  txnon           ((on txn-id transaction) idx-sort)
++$  transactions-table  (map txn-id transaction-row)
 +$  tbl-and-ids     [tbl=transactions-table ids=(list txn-id)]
-+$  msg-kvs         (list [k=txn-id v=transaction])
++$  txn-kvs         (list [k=txn-id v=transaction-row])
 ::
 +$  table-name   ?(%wallets %transactions)
 +$  table
@@ -68,13 +54,11 @@
 +$  action
   $%  
       [%add-wallet =wallet-row]
-      [%edit-wallet =wallet-index metadata=(map cord cord) peers-get-backlog=? invites=@tas max-expires-at-duration=@dr]
-      [%insert =insert-transaction-action]
-      [%complete-transaction =network ]
-      [%save-transaction-notes ~]
+      [%edit-wallet =wallet-row]
+      [%insert-transaction =transaction-row]
+      [%complete-transaction =txn-id]
+      [%save-transaction-notes =txn-id notes=@t]
   ==
-+$  insert-transaction-action   [timestamp=@da =path fragments=(list minimal-fragment) expires-at=@da]
-+$  edit-transaction-action     [=msg-id =path fragments=(list minimal-fragment)]
 ::
 +$  db-dump
   $%  
@@ -83,24 +67,19 @@
 +$  db-change-type
   $%
     [%add-row =db-row]
-    [%upd-transactions-row =msg-id =message]
+    [%upd-transactions-row =txn-id =transaction-row]
     [%upd-wallets-row =wallet-row old=wallet-row]
   ==
 +$  db-row
   $%  [%wallets =wallet-row]
-      [%transactions =transaction]
+      [%transactions =transaction-row]
   ==
 +$  db-change  (list db-change-type)
-+$  del-log  ((mop time db-change-type) gth)
 ++  delon  ((on time db-change-type) gth)
-:: old versions
-+$  del-log-0  ((mop time db-change-type-0) gth)
-+$  db-change-type-0
-  $%
-    [%add-row =db-row]
-    [%upd-transactions =txn-id =transaction]
-    [%upd-wallets-row =wallet-row]
-    [%del-wallets-row =path timestamp=@da]
-    [%del-transactions-row =wallet-index =txn-id timestamp=@da]
+::
+::
++$  state-0  [%0 =wallets-table =transactions-table]
++$  versioned-state
+  $%  state-0
   ==
 --
