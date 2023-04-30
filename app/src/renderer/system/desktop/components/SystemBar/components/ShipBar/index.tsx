@@ -14,7 +14,6 @@ import {
 } from '@holium/design-system';
 
 import { nativeApps } from 'renderer/apps/nativeApps';
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { useTrayApps } from 'renderer/apps/store';
 import { trackEvent } from 'renderer/lib/track';
 import { openChatToPath } from 'renderer/lib/useTrayControls';
@@ -45,7 +44,6 @@ export const ShipBarPresenter = () => {
     dismissApp,
     dismissPath,
   } = notifStore;
-  const roomsManager = useRooms(loggedInAccount?.patp);
   const { setActiveApp, activeApp } = useTrayApps();
 
   const [isAccountExpanded, setIsAccountExpanded] = useState(false);
@@ -84,6 +82,9 @@ export const ShipBarPresenter = () => {
       return;
     }
     initNotifications();
+    if (chatStore.inbox.length === 0) {
+      chatStore.loadChatList();
+    }
     setAccountTrayOpen(true);
   };
 
@@ -273,7 +274,6 @@ export const ShipBarPresenter = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
                 onClick={() => {
-                  roomsManager.cleanup();
                   shellStore.setIsBlurred(true);
                   shellStore.openDialog('shutdown-dialog');
                   setActiveApp(null);
@@ -289,7 +289,6 @@ export const ShipBarPresenter = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
                 onClick={() => {
-                  roomsManager.cleanup();
                   authStore.logout();
                   setActiveApp(null);
                 }}

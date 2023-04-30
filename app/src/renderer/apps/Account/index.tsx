@@ -2,7 +2,6 @@ import { observer } from 'mobx-react';
 
 import { Avatar, Button, Flex, Icon, Text } from '@holium/design-system';
 
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppType } from 'renderer/stores/models/bazaar.model';
@@ -13,7 +12,6 @@ import { useTrayApps } from '../store';
 const AccountTrayAppPresenter = () => {
   const { loggedInAccount, shellStore, authStore } = useAppState();
   const { setActiveApp } = useTrayApps();
-  const roomsManager = useRooms(loggedInAccount?.patp);
 
   const openSettingsApp = () => {
     shellStore.openWindow(nativeApps['os-settings'] as AppType);
@@ -77,7 +75,6 @@ const AccountTrayAppPresenter = () => {
             size={28}
             className="realm-cursor-hover"
             onClick={() => {
-              roomsManager.cleanup();
               authStore.logout();
               setActiveApp(null);
               trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
@@ -89,7 +86,6 @@ const AccountTrayAppPresenter = () => {
             size={28}
             className="realm-cursor-hover"
             onClick={() => {
-              roomsManager.cleanup();
               authStore.logout();
               setActiveApp(null);
               // trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');

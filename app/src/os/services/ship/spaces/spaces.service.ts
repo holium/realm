@@ -79,6 +79,13 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
       const spacesType = Object.keys(data)[0];
       switch (spacesType) {
         case 'initial':
+          // TODO this DROP is here until we get the agent refactor with lastTimestamp scries
+          if (this.shipDB?.open) {
+            this.shipDB?.exec(`
+              DELETE FROM spaces_members;
+              DELETE FROM spaces;
+            `);
+          }
           this.spacesDB?.insertAll(data['initial'].spaces);
           this.spacesDB?.setCurrent(data['initial'].current.path);
           this.membersDB?.insertAll(data['initial'].membership);
@@ -295,14 +302,22 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
 
   public async setSelectedSpace(path: string) {
     this.spacesDB?.setCurrent(path);
-    console.log('setting current space to', path, pathToObj(path));
+    log.info('setting current space to', path);
+    const pathObj = pathToObj(path);
     APIConnection.getInstance().conduit.poke({
       app: 'spaces',
       mark: 'spaces-action',
       json: {
         current: {
-          path: pathToObj(path),
+          path: pathObj,
         },
+      },
+    });
+    APIConnection.getInstance().conduit.poke({
+      app: 'rooms-v2',
+      mark: 'rooms-v2-session-action',
+      json: {
+        'set-provider': pathObj.ship,
       },
     });
   }
@@ -349,20 +364,27 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
         path: pathToObj(path),
       },
     });
+    const pathObj = pathToObj(path);
     return await new Promise((resolve, reject) => {
       APIConnection.getInstance().conduit.poke({
         app: 'spaces',
         mark: 'spaces-action',
         json: {
           join: {
-            path: pathToObj(path),
+            path: pathObj,
           },
         },
         reaction: 'spaces-reaction.remote-space',
         onReaction: (data: any) => {
           console.log('joined space -> success');
-          // TODO: add to db
           // check if matches path
+          APIConnection.getInstance().conduit.poke({
+            app: 'rooms-v2',
+            mark: 'rooms-v2-session-action',
+            json: {
+              'set-provider': pathObj.ship,
+            },
+          });
           resolve(data);
         },
         onError: (e: any) => {

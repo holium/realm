@@ -1,6 +1,8 @@
 import { createContext, useContext } from 'react';
 import { flow, Instance, onSnapshot, SnapshotIn, types } from 'mobx-state-tree';
 
+import { RealmSession } from 'os/realm.types';
+
 import { ChatStore } from './chat.store';
 import { ShipIPC } from './ipc';
 import { BazaarStore, BazaarStoreType } from './models/bazaar.model';
@@ -18,6 +20,7 @@ import {
   WalletStore,
   WalletView,
 } from './models/wallet.model';
+import { RoomsStore } from './rooms.store';
 
 export const ShipStore = types
   .model('ShipStore', {
@@ -29,9 +32,20 @@ export const ShipStore = types
     bazaarStore: BazaarStore,
     walletStore: WalletStore,
     featuredStore: FeaturedStore,
+    roomsStore: RoomsStore,
     loader: LoaderModel,
   })
   .actions((self) => ({
+    init(session: RealmSession) {
+      self.credentials = CredentialsModel.create(session);
+      self.friends.init();
+      self.chatStore.loadChatList();
+      self.bazaarStore.init();
+      self.spacesStore.init();
+      self.chatStore.fetchInboxMetadata();
+      self.walletStore.init();
+      self.roomsStore.init();
+    },
     reset() {
       self.notifStore.reset();
       self.chatStore.reset();
@@ -92,6 +106,7 @@ export const shipStore = ShipStore.create({
     subroute: 'inbox',
     isOpen: false,
     pinnedChats: [],
+    loader: { state: 'loading' },
   },
   spacesStore: {
     spaces: {},
@@ -153,6 +168,10 @@ export const shipStore = ShipStore.create({
   },
   loader: {
     state: 'initial',
+  },
+  roomsStore: {
+    provider: window.ship,
+    rooms: {},
   },
 });
 

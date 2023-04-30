@@ -10,15 +10,51 @@ import {
   Text,
 } from '@holium/design-system';
 
-import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
-import { useRooms } from './useRooms';
+
+const formSourceOptions = (sources: MediaDeviceInfo[]) => {
+  return sources.map((source) => {
+    return {
+      label: source.label,
+      value: source.deviceId,
+    };
+  });
+};
+const getAudioInputSources = async () => {
+  const devices: MediaDeviceInfo[] =
+    await navigator.mediaDevices.enumerateDevices();
+  return formSourceOptions(
+    devices.filter((device: MediaDeviceInfo) => {
+      return device.kind === 'audioinput';
+    })
+  );
+};
+
+// const getAudioOutputSources = async () => {
+//   const devices: MediaDeviceInfo[] =
+//     await navigator.mediaDevices.enumerateDevices();
+//   return formSourceOptions(
+//     devices.filter((device: MediaDeviceInfo) => {
+//       return device.kind === 'audiooutput';
+//     })
+//   );
+// };
+
+// const getVideoInputSources = async () => {
+//   const devices: MediaDeviceInfo[] =
+//     await navigator.mediaDevices.enumerateDevices();
+//   return formSourceOptions(
+//     devices.filter((device: MediaDeviceInfo) => {
+//       return device.kind === 'videoinput';
+//     })
+//   );
+// };
 
 const SettingsPresenter = () => {
   const { roomsApp } = useTrayApps();
-  const { loggedInAccount } = useAppState();
-  const roomsManager = useRooms(loggedInAccount?.patp);
+  const { roomsStore } = useShipStore();
 
   const [audioSourceOptions, setAudioSources] = useState<RadioOption[] | any[]>(
     []
@@ -26,7 +62,7 @@ const SettingsPresenter = () => {
   const [selectedSource, setSelectedSource] = useState('');
 
   useEffect(() => {
-    roomsManager?.getAudioInputSources().then((sources: any[]) => {
+    getAudioInputSources().then((sources: any[]) => {
       setAudioSources(sources as RadioOption[]);
       const deviceId =
         localStorage.getItem('rooms-audio-input') ||
@@ -73,7 +109,7 @@ const SettingsPresenter = () => {
           selected={selectedSource}
           onClick={(source) => {
             setSelectedSource(source);
-            roomsManager?.setAudioInput(source);
+            roomsStore.setAudioInput(source);
           }}
         />
       </Flex>

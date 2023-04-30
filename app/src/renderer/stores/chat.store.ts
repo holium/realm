@@ -1,4 +1,3 @@
-import { createContext, useContext } from 'react';
 import { toJS } from 'mobx';
 // import { toJS } from 'mobx';
 import {
@@ -11,10 +10,11 @@ import {
 } from 'mobx-state-tree';
 
 import { ChatUpdateTypes } from 'os/services/ship/chat/chat.types';
-import { ChatIPC, RealmIPC } from 'renderer/stores/ipc';
+import { ChatIPC } from 'renderer/stores/ipc';
 import { SpacesStoreType } from 'renderer/stores/models/spaces.model';
 
 import { Chat, ChatModelType } from './models/chat.model';
+import { LoaderModel } from './models/common.model';
 import { ShipStore, shipStore } from './ship.store';
 
 type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
@@ -36,10 +36,11 @@ export const ChatStore = types
     inbox: types.array(Chat),
     selectedChat: types.maybe(types.reference(Chat)),
     isOpen: types.boolean,
+    loader: LoaderModel,
   })
   .views((self) => ({
     isChatPinned(path: string) {
-      return self.pinnedChats.includes(path);
+      return self.inbox.find((c) => c.path === path)?.pinned;
     },
     isChatMuted(path: string) {
       return self.inbox.find((c) => path === c.path)?.muted || false;
@@ -68,8 +69,8 @@ export const ChatStore = types
         }
 
         // Check if the chats are pinned
-        const isAPinned = self.pinnedChats.includes(a.path);
-        const isBPinned = self.pinnedChats.includes(b.path);
+        const isAPinned = a.pinned;
+        const isBPinned = b.pinned;
 
         // Compare the pinned status
         if (isAPinned !== isBPinned) {
@@ -125,9 +126,9 @@ export const ChatStore = types
   .actions((self) => ({
     init: flow(function* () {
       try {
-        const pinnedChats = yield ChatIPC.fetchPinnedChats() as Promise<any>;
+        const pinnedChats = yield ChatIPC.fetchPinnedChats();
+        const muted = yield ChatIPC.fetchMuted();
         self.inbox = yield ChatIPC.getChatList();
-        const muted = yield ChatIPC.fetchMuted() as Promise<any>;
         self.inbox.forEach((chat) => {
           chat.setMuted(muted.includes(chat.path));
         });
@@ -136,6 +137,16 @@ export const ChatStore = types
       } catch (error) {
         console.error(error);
         return self.pinnedChats;
+      }
+    }),
+    fetchInboxMetadata: flow(function* () {
+      yield ChatIPC.fetchPathMetadata();
+    }),
+    loadChatList: flow(function* () {
+      try {
+        self.inbox = yield ChatIPC.getChatList();
+      } catch (error) {
+        console.error(error);
       }
     }),
     setOpened() {
@@ -247,53 +258,25 @@ export const ChatStore = types
       self.selectedChat = undefined;
       self.isOpen = false;
     },
+    _onInit(payload: any) {
+      self.inbox = payload;
+    },
   }));
 
 // -------------------------------
 // TODO Write a caching layer for the inbox
 
-export const chatStore = ChatStore.create({
-  subroute: 'inbox',
-  isOpen: false,
-  pinnedChats: [],
-});
-
 // -------------------------------
 // Create core context
 // -------------------------------
 export type ChatStoreInstance = Instance<typeof ChatStore>;
-export const ChatStoreContext = createContext<null | ChatStoreInstance>(
-  chatStore
-);
-
-export const ChatProvider = ChatStoreContext.Provider;
-export function useChatStore() {
-  const store = useContext(ChatStoreContext);
-  if (store === null) {
-    throw new Error('Store cannot be null, please add a context provider');
-  }
-  return store;
-}
-
-RealmIPC.onUpdate((update) => {
-  if (update.type === 'booted') {
-    if (update.payload.session) {
-      shipStore.chatStore.init();
-    }
-  }
-  if (update.type === 'auth-success') {
-    shipStore.chatStore.init();
-    shipStore.walletStore.init();
-  }
-});
 
 // -------------------------------
 // Listen for changes
 ChatIPC.onUpdate(({ type, payload }: ChatUpdateTypes) => {
   if (type === 'init') {
-    shipStore.chatStore.init();
+    shipStore.chatStore._onInit(payload);
   }
-  console.log('ChatIPC.onUpdate', type, payload);
   if (type === 'path-added') {
     console.log('onPathsAdded', toJS(payload));
     shipStore.chatStore.onPathsAdded(payload);
@@ -310,13 +293,13 @@ ChatIPC.onUpdate(({ type, payload }: ChatUpdateTypes) => {
     selectedChat.removeMessage(payload['msg-id']);
   }
   if (type === 'message-received') {
-    // console.log('addMessage', payload);
     const selectedChat = shipStore.chatStore.inbox.find(
       (chat) => chat.path === payload.path
     );
 
     if (selectedChat) selectedChat.addMessage(payload);
-    if (chatStore.subroute === 'inbox') chatStore.refreshInbox();
+    if (shipStore.chatStore.subroute === 'inbox')
+      shipStore.chatStore.refreshInbox();
 
     return;
   }

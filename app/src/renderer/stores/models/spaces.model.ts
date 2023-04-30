@@ -1,4 +1,3 @@
-import { toJS } from 'mobx';
 import {
   applySnapshot,
   castToSnapshot,
@@ -187,7 +186,6 @@ export const SpacesStore = types
   }))
   .actions((self) => ({
     init: flow(function* () {
-      self.loader.set('loading');
       try {
         const { current, spaces } = yield SpacesIPC.getInitial();
         spaces.forEach((space: any) => {
@@ -198,6 +196,7 @@ export const SpacesStore = types
         self.selected = self.spaces.get(current);
         if (self.selected) {
           appState.setTheme(self.selected.theme);
+          self.loader.set('loaded');
         }
       } catch (e) {
         console.error(e);
@@ -249,7 +248,6 @@ export const SpacesStore = types
       }
     }),
     updateSpace: flow(function* (spacePath: string, space: SpaceModelType) {
-      console.log(toJS(space));
       const oldSpace = self.spaces.get(spacePath);
       const updatedSpace = self.spaces.get(spacePath);
       if (!oldSpace || !updatedSpace) return;

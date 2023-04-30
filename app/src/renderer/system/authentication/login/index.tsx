@@ -63,7 +63,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
     //     setHasFailed(true);
     //   }
     // });
-  }, [passwordRef.current]);
+  }, [selectedShip, passwordRef.current]);
 
   useEffect(() => {
     loginStatus.reset();

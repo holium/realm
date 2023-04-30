@@ -6,7 +6,6 @@ import { useTrayApps } from 'renderer/apps/store';
 import { useStorage } from 'renderer/lib/useStorage';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { ChatProvider } from '../../stores/chat.store';
 import { ChatInfo } from './views/ChatInfo';
 import { ChatLog } from './views/ChatLog';
 import { Inbox } from './views/Inbox';
@@ -18,7 +17,10 @@ export const CourierAppPresenter = () => {
   const { chatStore } = useShipStore();
   useEffect(() => {
     if (chatStore.subroute === 'inbox') {
-      chatStore.init();
+      // ChatIPC.fetchPathMetadata();
+      if (chatStore.inbox.length === 0) {
+        chatStore.loadChatList();
+      }
     } else {
       chatStore.selectedChat?.fetchMessages();
     }
@@ -29,14 +31,12 @@ export const CourierAppPresenter = () => {
   }, [chatStore.subroute]);
 
   return (
-    <ChatProvider value={chatStore}>
-      <LayoutGroup>
-        {chatStore.subroute === 'inbox' && <Inbox />}
-        {chatStore.subroute === 'chat' && <ChatLog storage={storage} />}
-        {chatStore.subroute === 'chat-info' && <ChatInfo storage={storage} />}
-        {chatStore.subroute === 'new' && <NewChat />}
-      </LayoutGroup>
-    </ChatProvider>
+    <LayoutGroup>
+      {chatStore.subroute === 'inbox' && <Inbox />}
+      {chatStore.subroute === 'chat' && <ChatLog storage={storage} />}
+      {chatStore.subroute === 'chat-info' && <ChatInfo storage={storage} />}
+      {chatStore.subroute === 'new' && <NewChat />}
+    </LayoutGroup>
   );
 };
 

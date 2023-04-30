@@ -115,6 +115,7 @@ const AppPresenter = () => {
               {contextMenuMemo}
               <div id="portal-root" />
               <div id="menu-root" />
+              <div id="audio-root" />
             </ErrorBoundary>
           </ContextMenuProvider>
         </SelectionProvider>

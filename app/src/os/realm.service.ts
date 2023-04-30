@@ -1,10 +1,4 @@
-import {
-  app,
-  BrowserWindow,
-  session,
-  WebContents,
-  WebPreferences,
-} from 'electron';
+import { app, BrowserWindow, session, WebContents } from 'electron';
 import log from 'electron-log';
 import { track } from '@amplitude/analytics-browser';
 
@@ -12,7 +6,6 @@ import {
   getReleaseChannelFromSettings,
   saveReleaseChannelInSettings,
 } from './lib/settings';
-import { getCookie } from './lib/shipHelpers';
 import { RealmUpdateTypes } from './realm.types';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { APIConnection } from './services/api';
@@ -46,12 +39,6 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     const windows = BrowserWindow.getAllWindows();
     windows.forEach((window) => {
       window.webContents.on('did-attach-webview', this.onWebViewAttached);
-      window.webContents.on(
-        'will-attach-webview',
-        (_event: Electron.Event, webPreferences: WebPreferences) => {
-          webPreferences.partition = 'urbit-webview';
-        }
-      );
     });
   }
 
@@ -67,7 +54,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   public async boot() {
     let session;
     if (isDev) {
-      session = await this._hydrateSessionIfExists();
+      session = this._hydrateSessionIfExists();
       this.services?.ship?.init();
     }
 
@@ -288,7 +275,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     saveReleaseChannelInSettings(channel);
   }
 
-  async onWillRedirect(url: string, webContents: any) {
+  async onWillRedirect(url: string) {
     try {
       const delim = '/~/login?redirect=';
       const parts = url.split(delim);
@@ -305,38 +292,26 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           log.error('realm.service.ts:', 'No credentials found');
           return;
         }
-        const { url, code } = credentials;
+        const { cookie } = credentials;
         const patp = this.services?.ship?.patp;
         if (!patp) {
           log.error('realm.service.ts:', 'No patp found');
           return;
         }
+
         log.info(
           'realm.service.ts:',
-          'child window attempting to redirect to login. refreshing cookie...'
+          'Setting cookie',
+          cookie?.split('=')[1].split('; ')[0]
         );
-        const cookie = await getCookie({
-          patp,
-          url,
-          code,
-        });
-        log.info(
-          'realm.service.ts:',
-          'new cookie generated. reloading child window and saving new cookie to session.'
-        );
-        if (!cookie) {
-          log.error('realm.service.ts:', 'no cookie');
-          return;
-        }
-        await session.fromPartition(`urbit-webview`).cookies.set({
+        await session.fromPartition(`persist:default`).cookies.set({
           url: `${url}`,
-          // url: `${url}${appPath}`,
           name: `urbauth-${patp}`,
           value: cookie?.split('=')[1].split('; ')[0],
-          // value: cookie,
         });
+
         this.services?.ship?.updateCookie(cookie);
-        webContents.reload();
+        // webContents.reload();
       }
     } catch (e) {
       console.error(e);
@@ -345,8 +320,12 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
 
   async onWebViewAttached(_: Event, webContents: WebContents) {
     webContents.on('will-redirect', (_e: Event, url: string) =>
-      this.onWillRedirect(url, webContents)
+      this.onWillRedirect(url)
     );
+
+    webContents.on('dom-ready', () => {
+      // TODO wire up libs here
+    });
   }
   // private startBackgroundProcess(): void {
   //   if (this.realmProcess) {
