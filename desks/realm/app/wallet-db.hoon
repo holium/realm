@@ -72,6 +72,8 @@
   ::
       [%x %db ~]
         ``wallet-db-dump+!>(tables+all-tables:core)
+      [%x %num-wallets =chain:sur ~]
+        ``wallet-db-view+!>(num-wallets+(lent wallets-table))
     ==
     ::
 ::      [%x %db %wallets ~]
