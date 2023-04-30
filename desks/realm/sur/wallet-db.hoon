@@ -14,7 +14,7 @@
   ==
 ::
 +$  wallet-index  @ud
-+$  wallet-id  [=network =wallet-index]
++$  wallet-id  [=chain =wallet-index]
 +$  wallets-table  (map =wallet-id wallet-row)
 ::
 +$  chain  ?(%bitcoin %btctestnet %ethereum)
@@ -53,8 +53,7 @@
 ::
 +$  action
   $%  
-      [%add-wallet =wallet-row]
-      [%edit-wallet =wallet-row]
+      [%set-wallet =wallet-row]
       [%insert-transaction =transaction-row]
       [%complete-transaction =txn-id]
       [%save-transaction-notes =txn-id notes=@t]

@@ -4,154 +4,47 @@
 ::
 /-  sur=wallet-db
 |%
++$  card  card:agent:gall
 ::
 ::  random helpers
 ::
-++  is-valid-inviter
-  |=  [=path-row:sur peers=(list peer-row:sur) src=ship]
-  ^-  ?
-  :: add-peer pokes are only valid from:
-  :: a ship within the peers list
-  =/  src-peer  (snag 0 (skim peers |=(p=peer-row:sur =(patp.p src)))) :: will crash if src not in list
-  :: AND
-  :: any peer-ship if set to %anyone
-  :: OR a ship whose role matches the path-row `invites` setting
-  :: OR whose role is the %host
-  |(=(invites.path-row %anyone) =(role.src-peer invites.path-row) =(role.src-peer %host))
-::
 ++  add-transaction-to-table
-  |=  [tbl=transactions-table:sur txn=transaction-row:sur]
+  |=  [tbl=transactions-table:sur =transaction-row:sur]
   ^-  transactions-table:sur
   =/  =txn-id:sur  [[chain.transaction-row network.transaction-row] hash.transaction-row]
-  (~(put by transactions-table) [txn-id transaction-row])
-::
-++  keys-from-kvs  |=(kvs=msg-kvs:sur (turn kvs |=(kv=[k=uniq-id:sur v=msg-part:sur] k.kv)))
-::
-++  rm-msg-parts
-  |=  [ids=(list uniq-id:sur) tbl=messages-table:sur]
-  ^-  messages-table:sur
-  |-
-  ?:  =(0 (lent ids))
-    tbl
-  $(tbl +:(del:msgon:sur tbl (snag 0 ids)), ids +:ids)
-::
-++  remove-ids-from-pins
-  |=  [ids=(list msg-id:sur) state=state-1 now=@da]
-  ^-  state-and-changes
-  =/  tbl  paths-table.state
-  =/  changes=db-change:sur  *db-change:sur
-  =/  result
-    |-
-    ?:  =(0 (lent ids))
-      [tbl changes]
-    =/  current  (snag 0 ids)
-    =/  msg=msg-part:sur  (got:msgon:sur messages-table.state [current 0])
-    =/  pathrow=path-row:sur  (~(got by tbl) path.msg)
-    =/  oldrow=path-row:sur   (~(got by tbl) path.msg)
-    =/  pinned                (~(has in pins.pathrow) current)
-    =.  pins.pathrow          ?:(pinned (~(del in pins.pathrow) current) pins.pathrow)
-    =.  updated-at.pathrow    ?:(pinned now updated-at.pathrow)
-    $(tbl (~(put by tbl) path.msg pathrow), ids +:ids, changes ?:(pinned [[%upd-paths-row pathrow oldrow] changes] changes))
-  =.  paths-table.state  -:result
-  [state +:result]
-::
-++  messages-start-paths
-  |=  [=bowl:gall]
-  ^-  (list path)
-  =/  len-three  (skim ~(val by sup.bowl) |=(a=[p=ship q=path] (gte (lent q.a) 3)))
-  =/  matching  (skim len-three |=(a=[p=ship q=path] =([-:q.a +<:q.a +>-:q.a ~] /db/messages/start)))
-  (turn matching |=(a=[p=ship q=path] q.a))
-::
+  (~(put by tbl) [txn-id transaction-row])
 ::
 ::  poke actions
 ::
-++  add-wallet
-  |=  [[row=path-row:sur peers=ship-roles:sur] state=state-0:sur =bowl:gall]
+++  set-wallet
+  |=  [row=wallet-row:sur state=state-0:sur =bowl:gall]
   ^-  (quip card state-0:sur)
-  ?>  ?!((~(has by wallets-table.state) [network.row wallet-index.row]))  :: ensure the path doesn't already exist!!!
-  =.  wallets-table.state  (~(put by wallets-table.state) [network.row wallet-index.row] row)
-  =/  thechange  chat-db-change+!>((limo [[%add-row %paths row] (turn thepeers |=(p=peer-row:sur [%add-row %peers p]))]))
-  =/  gives  :~
-    [%give %fact [/db (weld /db/path path.row) ~] thechange]
-  ==
-  [gives state]
+  ?>  ?!((~(has by wallets-table.state) [chain.row wallet-index.row]))  :: ensure the path doesn't already exist!!!
+  =.  wallets-table.state  (~(put by wallets-table.state) [chain.row wallet-index.row] row)
+  `state
 ::
 ++  insert-transaction
   |=  [=transaction-row:sur state=state-0:sur =bowl:gall]
   ^-  (quip card state-0:sur)
-  =/  thewallet   (~(got by wallets-table.state) wallet-id.transaction-row)
-  =/  add-result  (add-transaction-to-table transactions-table.state transaction-row)
-  =.  transactions-table.state  add-result
+  =.  transactions-table.state  (add-transaction-to-table transactions-table.state transaction-row)
   =/  thechange  wallet-db-change+!>([%add-row [%transactions transaction-row]]~)
-  =/  message-paths  (messages-start-paths bowl)
-  :_  state
-  [%give %fact (weld message-paths (limo [/db (weld /db/path path.msg-act) ~])) thechange]~
+  `state
+::
+++  complete-transaction
+  |=  [=txn-id:sur state=state-0:sur =bowl:gall]
+  ^-  (quip card state-0:sur)
+  `state
+::
+++  save-transaction-notes
+  |=  [[=txn-id:sur notes=@t] state=state-0:sur =bowl:gall]
+  ^-  (quip card state-0:sur)
+  `state
 ::
 ::  mini helper lib
 ::
 ++  from
   |%
-  ++  start-lot
-    :: this is very efficient, but does not capture the updated-at rows
-    :: so we will use ++start (below) until this is necessary
-    |=  [=msg-id:sur tbl=messages-table:sur]
-    ^-  messages-table:sur
-    =/  start=uniq-id:sur  [msg-id 0]
-    (lot:msgon:sur tbl ~ `start)
   ::
-  ++  start
-    |=  [t=time tbl=messages-table:sur]
-    ^-  messages-table:sur
-    %+  gas:msgon:sur
-      *messages-table:sur
-    %+  skim
-      (tap:msgon:sur tbl)
-    |=([k=uniq-id:sur v=msg-part:sur] |((gth created-at.v t) (gth updated-at.v t)))
-  ::
-  ++  path-msgs
-    |=  [tbl=messages-table:sur =path]
-    ^-  messages-table:sur
-    %+  gas:msgon:sur
-      *messages-table:sur
-    %+  skim
-      (tap:msgon:sur tbl)
-    |=([k=uniq-id:sur v=msg-part:sur] =(path.v path))
-  ::
-  ++  path-start
-    |=  [t=time tbl=paths-table:sur]
-    ^-  paths-table:sur
-    %-  malt
-    %+  skim
-      ~(tap by tbl)
-    |=([k=path v=path-row:sur] |((gth created-at.v t) (gth updated-at.v t)))
-  ::
-  ++  peer-start
-    |=  [t=time tbl=peers-table:sur]
-    ^-  peers-table:sur
-
-    =/  individual-rows=(list peer-row:sur)  (zing ~(val by tbl))
-    =/  valid-rows
-      %+  skim
-        individual-rows
-      |=(r=peer-row:sur |((gth created-at.r t) (gth updated-at.r t)))
-
-    =/  index=@ud  0
-    =/  len=@ud    (lent valid-rows)
-    =/  result=peers-table:sur  *peers-table:sur
-    |-
-    ?:  =(index len)
-      result
-    =/  i  (snag index valid-rows)
-    =/  pre  (~(get by result) path.i)
-    =/  lis
-    ?~  pre
-      (limo ~[i])
-    (snoc (need pre) i)
-    $(result (~(put by result) path.i lis), index +(index))
-  ++  paths-list
-    |=  [tbl=paths-table:sur]
-    ^-  (list path)
-    (turn ~(val by tbl) |=(a=path-row:sur path.a))
   --
 ::
 ::  JSON

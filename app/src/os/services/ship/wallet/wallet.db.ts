@@ -18,8 +18,8 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     this._onDbUpdate = this._onDbUpdate.bind(this);
     this.init = this.init.bind(this);
     APIConnection.getInstance().conduit.watch({
-      app: 'realm-wallet',
-      path: '/updates',
+      app: 'wallet-db',
+      path: '/db',
       onEvent: this._onDbUpdate,
       onQuit: this._onQuit,
       onError: this._onError,
