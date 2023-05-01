@@ -9,7 +9,11 @@ import { Chat } from './models/chat.model';
 import { LocalPeer } from './rooms/LocalPeer';
 import { RemotePeer } from './rooms/RemotePeer';
 import { ridFromTitle } from './rooms/rooms.parsing';
-import { DataPacket, PeerConnectionState } from './rooms/rooms.types';
+import {
+  DataPacket,
+  DataPacket_Kind,
+  PeerConnectionState,
+} from './rooms/rooms.types';
 import { shipStore } from './ship.store';
 
 export const RoomModel = types
@@ -417,7 +421,9 @@ export const RoomsStore = types
       unmute() {
         localPeer?.unmute();
         sendDataToPeer({
-          kind: DataPacket_Kind.MUTE_STATUS,
+          kind: {
+            from: window.ship,
+            DataPacket_Kind.MUTE_STATUS},
           value: { data: false },
         });
         self.isMuted = false;
