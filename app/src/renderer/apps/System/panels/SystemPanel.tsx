@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import styled from 'styled-components';
 
-import { Button, CheckBox, Flex, Spinner, Text } from '@holium/design-system';
+import { Button, CheckBox, Flex, Text } from '@holium/design-system';
 
 import { MediaAccess, MediaAccessStatus } from 'os/types';
 import { useAppState } from 'renderer/stores/app.store';
@@ -22,13 +21,13 @@ const colorMap: Record<MediaAccessStatus, string> = {
   unknown: '#ae2828',
 };
 
-const StatusIndicator = styled.div<{ isSubscribed: boolean }>`
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: ${({ isSubscribed }) =>
-    isSubscribed ? '#38CD7C' : '#EA2424'};
-`;
+// const StatusIndicator = styled.div<{ isSubscribed: boolean }>`
+//   width: 8px;
+//   height: 8px;
+//   border-radius: 50%;
+//   background-color: ${({ isSubscribed }) =>
+//     isSubscribed ? '#38CD7C' : '#EA2424'};
+// `;
 
 const SystemPanelPresenter = () => {
   const { shellStore } = useAppState();
@@ -43,42 +42,42 @@ const SystemPanelPresenter = () => {
     MainIPC.getMediaStatus().then(setMediaStatus);
   }, []);
 
-  const apps: any = [
-    // {
-    //   name: '%spaces',
-    //   path: '/updates',
-    //   subscriptionState: spaces.subscriptionState,
-    //   subscribing: () => spaces.setSubscriptionStatus('subscribing'),
-    // },
-    // {
-    //   name: '%bazaar',
-    //   path: '/updates',
-    //   subscriptionState: bazaar.subscriptionState,
-    //   subscribing: () => bazaar.setSubscriptionStatus('subscribing'),
-    // },
-    // {
-    //   name: '%bulletin',
-    //   path: '/ui',
-    //   subscriptionState: bulletin.subscriptionState,
-    //   subscribing: () => bulletin.setSubscriptionStatus('subscribing'),
-    // },
-    // {
-    //   name: '%friends',
-    //   path: '/all',
-    //   subscriptionState: friends.subscriptionState,
-    //   subscribing: () => friends.setSubscriptionStatus('subscribing'),
-    // },
-  ];
+  // const apps: any = [
+  // {
+  //   name: '%spaces',
+  //   path: '/updates',
+  //   subscriptionState: spaces.subscriptionState,
+  //   subscribing: () => spaces.setSubscriptionStatus('subscribing'),
+  // },
+  // {
+  //   name: '%bazaar',
+  //   path: '/updates',
+  //   subscriptionState: bazaar.subscriptionState,
+  //   subscribing: () => bazaar.setSubscriptionStatus('subscribing'),
+  // },
+  // {
+  //   name: '%bulletin',
+  //   path: '/ui',
+  //   subscriptionState: bulletin.subscriptionState,
+  //   subscribing: () => bulletin.setSubscriptionStatus('subscribing'),
+  // },
+  // {
+  //   name: '%friends',
+  //   path: '/all',
+  //   subscriptionState: friends.subscriptionState,
+  //   subscribing: () => friends.setSubscriptionStatus('subscribing'),
+  // },
+  // ];
 
-  const resubscribe = async (appName: string) => {
-    const app = apps.find((a: any) => a.name === appName);
-    if (app) app.subscribing();
-    // await OSActions.resubscribe(appName);
-  };
+  // const resubscribe = async (appName: string) => {
+  //   const app = apps.find((a: any) => a.name === appName);
+  //   if (app) app.subscribing();
+  //   // await OSActions.resubscribe(appName);
+  // };
 
-  const isSubscribing = apps.some(
-    (a: any) => a.subscriptionState === 'subscribing'
-  );
+  // const isSubscribing = apps.some(
+  //   (a: any) => a.subscriptionState === 'subscribing'
+  // );
 
   return (
     <SettingPane>
