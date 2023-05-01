@@ -156,6 +156,21 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     return response;
   }
 
+  async refreshMessagesOnPath(path: string, patp: string) {
+    const lastTimestamp = this.getLastTimestamp('messages', path, patp);
+    let messages;
+    try {
+      const response = await APIConnection.getInstance().conduit.scry({
+        app: 'chat-db',
+        path: `/db/messages/start-ms/${lastTimestamp}`,
+      });
+      messages = response.tables.messages;
+    } catch (e) {
+      messages = [];
+    }
+    this._insertMessages(messages);
+  }
+
   private async _fetchMessages() {
     const lastTimestamp = this.getLastTimestamp('messages');
     try {
@@ -687,17 +702,21 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   getLastTimestamp(
-    table: 'paths' | 'messages' | 'peers' | 'delete_logs' | 'notifications'
+    table: 'paths' | 'messages' | 'peers' | 'delete_logs' | 'notifications',
+    path?: string,
+    patp?: string
   ): number {
     if (!this.db?.open) return 0;
+    const where =
+      path && patp ? ` WHERE path = '${path}' and sender != '${patp}'` : '';
     const column = table === 'delete_logs' ? 'timestamp' : 'updated_at';
     const query = this.db.prepare(`
       SELECT max(${column}) as lastTimestamp
-      FROM ${table};
+      FROM ${table}${where};
     `);
     const result: any = query.all();
-    // add 1 to avoid getting same timestamp again
-    return result[0]?.lastTimestamp + 1 || 0;
+    // subtract 1 to ensure re-fetching that same timestamp so we don't have timing issues
+    return Math.max(result[0]?.lastTimestamp - 1, 0) || 0;
   }
 
   getChatPeers(path: string) {

@@ -162,14 +162,15 @@ export const ChatStore = types
       }
       self.subroute = subroute;
     }),
-    setChat(path: string) {
+    setChat: flow(function* (path: string) {
       self.selectedChat = tryReference(() =>
         self.inbox.find((chat) => chat.path === path)
       );
       if (self.subroute === 'inbox') {
         self.subroute = 'chat';
       }
-    },
+      yield ChatIPC.refreshMessagesOnPath(path, window.ship);
+    }),
     togglePinned: flow(function* (path: string, pinned: boolean) {
       try {
         if (pinned) {
