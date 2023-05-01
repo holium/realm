@@ -4,13 +4,13 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
 import { Avatar, Flex, FlexProps, Icon, Text } from '@holium/design-system';
-import { PeerConnectionState } from '@holium/realm-room';
 
 import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 import { useAppState } from 'renderer/stores/app.store';
+import { PeerConnectionState } from 'renderer/stores/rooms/rooms.types';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { AudioWave } from './AudioWave';
