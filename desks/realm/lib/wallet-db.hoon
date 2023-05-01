@@ -27,25 +27,26 @@
   |=  [=transaction-row:sur state=state-0:sur =bowl:gall]
   ^-  (quip card state-0:sur)
   =.  transactions-table.state  (add-transaction-to-table transactions-table.state transaction-row)
-  =/  thechange  wallet-db-change+!>([%add-row [%transactions transaction-row]]~)
+  =/  thechange  realm-wallet-db-change+!>([%add-row [%transactions transaction-row]]~)
   `state
 ::
 ++  complete-transaction
-  |=  [=txn-id:sur state=state-0:sur =bowl:gall]
+  |=  [=txn-id:sur success=? state=state-0:sur =bowl:gall]
   ^-  (quip card state-0:sur)
+  =/  txn  (~(got by transactions-table.state) txn-id)
+  =.  status.txn
+    ?:  success  %succeeded
+      %failed
+  =.  transactions-table.state  (~(put by transactions-table.state) [txn-id txn])
   `state
 ::
 ++  save-transaction-notes
   |=  [[=txn-id:sur notes=@t] state=state-0:sur =bowl:gall]
   ^-  (quip card state-0:sur)
+  =/  txn  (~(got by transactions-table.state) txn-id)
+  =.  notes.txn  notes
+  =.  transactions-table.state  (~(put by transactions-table.state) [txn-id txn])
   `state
-::
-::  mini helper lib
-::
-++  from
-  |%
-  ::
-  --
 ::
 ::  JSON
 ::

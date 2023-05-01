@@ -37,7 +37,7 @@
   ++  on-poke
     |=  [=mark =vase]
     ^-  (quip card _this)
-    ?>  ?=(%wallet-db-action mark)
+    ?>  ?=(%realm-wallet-db-action mark)
     =/  act  !<(action:sur vase)
     =^  cards  state
       ?-  -.act  :: each handler function here should return [(list card) state]
@@ -71,9 +71,9 @@
     ?+  path  !!
   ::
       [%x %db ~]
-        ``wallet-db-dump+!>(tables+all-tables:core)
+        ``realm-wallet-db-dump+!>(tables+all-tables:core)
       [%x %num-wallets =chain:sur ~]
-        ``wallet-db-view+!>(num-wallets+(lent wallets-table))
+        ``realm-wallet-db-view+!>(num-wallets+(lent wallets-table))
     ==
     ::
 ::      [%x %db %wallets ~]
