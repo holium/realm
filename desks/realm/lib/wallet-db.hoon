@@ -31,7 +31,7 @@
   `state
 ::
 ++  complete-transaction
-  |=  [=txn-id:sur success=? state=state-0:sur =bowl:gall]
+  |=  [[=txn-id:sur success=?] state=state-0:sur =bowl:gall]
   ^-  (quip card state-0:sur)
   =/  txn  (~(got by transactions-table.state) txn-id)
   =.  status.txn
