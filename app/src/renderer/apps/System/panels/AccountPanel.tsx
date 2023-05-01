@@ -10,6 +10,7 @@ import { SettingTitle } from '../components/SettingTitle';
 import { AccountCustomDomainSection } from './sections/AccountCustomDomainSection';
 import { AccountHostingSection } from './sections/AccountHostingSection';
 import { AccountPassportSection } from './sections/AccountPassportSection';
+import { AccountSelfHostingSection } from './sections/AccountSelfHostingSection';
 import { AccountStorageSection } from './sections/AccountStorageSection';
 import { MaybeLogin } from './sections/MaybeLogin';
 
@@ -27,7 +28,7 @@ const AccountPanelPresenter = () => {
         account={loggedInAccount}
         key={`${loggedInAccount.patp}-settings-passport`}
       />
-      {isRealmShip && (
+      {isRealmShip ? (
         <MaybeLogin>
           <UserContextProvider api={thirdEarthApi}>
             <AccountHostingSection
@@ -40,10 +41,15 @@ const AccountPanelPresenter = () => {
             />
             <AccountCustomDomainSection
               account={loggedInAccount}
-              key={`${loggedInAccount.patp}-custom-domain`}
+              key={`${loggedInAccount.patp}-settings-custom-domain`}
             />
           </UserContextProvider>
         </MaybeLogin>
+      ) : (
+        <AccountSelfHostingSection
+          account={loggedInAccount}
+          key={`${loggedInAccount.patp}-settings-self-hosting`}
+        />
       )}
     </SettingPane>
   );
