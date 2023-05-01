@@ -12,7 +12,6 @@ import { useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { useChatStore } from '../../../stores/chat.store';
 import { ChatMessageType } from '../../../stores/models/chat.model';
 type PinnedContainerProps = {
   message: ChatMessageType;
@@ -38,7 +37,8 @@ const BlurredBG = styled.div`
 `;
 
 export const PinnedContainer = ({ message }: PinnedContainerProps) => {
-  const { selectedChat } = useChatStore();
+  const { chatStore } = useShipStore();
+  const { selectedChat } = chatStore;
   const { friends } = useShipStore();
   const { loggedInAccount, theme } = useAppState();
   // are we an admin of the chat?
