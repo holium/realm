@@ -1,5 +1,5 @@
 import { AccountDialog, SidebarSection } from '../components/AccountDialog';
-import { AccountHostingDialogBody } from './bodies/AccountHostingDialogBody asdf';
+import { AccountHostingDialogBody } from './bodies/AccountHostingDialogBody';
 
 type Props = {
   patps: string[];

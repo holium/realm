@@ -18,7 +18,7 @@ export { AccountS3StorageDialog } from './dialogs/AccountS3StorageDialog';
 export { AccountStatisticsDialog } from './dialogs/AccountStatisticsDialog';
 export { AddServerDialog } from './dialogs/AddServerDialog';
 export { AccountCustomDomainDialogBody } from './dialogs/bodies/AccountCustomDomainDialogBody';
-export { AccountHostingDialogBody } from './dialogs/bodies/AccountHostingDialogBody asdf';
+export { AccountHostingDialogBody } from './dialogs/bodies/AccountHostingDialogBody';
 export { AccountS3StorageDialogBody } from './dialogs/bodies/AccountS3StorageDialogBody';
 export { AccountSelfHostingDialogBody } from './dialogs/bodies/AccountSelfHostingDialogBody';
 export { ServerSelfHostingDialogBody } from './dialogs/bodies/ServerSelfHostingDialogBody';

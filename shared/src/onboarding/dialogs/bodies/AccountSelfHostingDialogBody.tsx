@@ -4,7 +4,7 @@ import { ChangeButton } from '../../components/hosting/ChangeButton';
 import {
   AccountDialogTable,
   AccountDialogTableRowContainer,
-} from './AccountHostingDialogBody asdf';
+} from './AccountHostingDialogBody';
 
 type Props = {
   email: string;

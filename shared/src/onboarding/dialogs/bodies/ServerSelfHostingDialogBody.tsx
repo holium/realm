@@ -1,6 +1,6 @@
 import { AccountDialogDescription } from '../../components/AccountDialog.styles';
 import { AccountDialogTableRow } from '../../components/AccountDialogTableRow';
-import { AccountDialogTable } from './AccountHostingDialogBody asdf';
+import { AccountDialogTable } from './AccountHostingDialogBody';
 
 type Props = {
   serverId: string;
