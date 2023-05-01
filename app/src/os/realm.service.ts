@@ -117,6 +117,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         return false;
       }
 
+      this.setSessionCookie(credentials);
       return new Promise((resolve) => {
         APIConnection.getInstance().conduit.on('connected', () => {
           if (!this.services) return;
