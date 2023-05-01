@@ -141,7 +141,9 @@ export const RoomsStore = types
       self.isAudioAttached = isAttached;
     },
     _onDataChannel(_payload: DataPacket) {
-      // this is an event handler for the data channel
+      // DON'T REMOVE this is an event handler for the data channel
+      // it doesnt need to do anything, but it needs to exist in order
+      // for onAction listeners to be called
     },
   }))
   .actions((self) => {
@@ -152,7 +154,7 @@ export const RoomsStore = types
     const sendDataToPeer = (data: Partial<DataPacket>) => {
       const payload = { from: localPeer?.patp, ...data } as DataPacket;
       remotePeers.forEach((peer) => {
-        console.log('sendDataToPeer ....', peer.patp, peer.status);
+        // console.log('sendDataToPeer ....', peer.patp, peer.status);
         if (peer.status === PeerConnectionState.Connected) {
           peer.sendData(payload);
         }

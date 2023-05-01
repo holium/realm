@@ -159,9 +159,7 @@ export class LocalPeer {
         track.enabled = false;
       }
       if (!peer.spInstance?.destroyed) {
-        // console.log(`%streaming tracks to ${peer.patp}`);
         try {
-          // peer.spInstance?.addStream(currentStream);
           peer.spInstance?.addTrack(track, currentStream);
         } catch (e) {
           // catches "Track has already been added to that stream."
@@ -217,7 +215,6 @@ export class LocalPeer {
     });
     // initialize the speaking detection analyser
     this.analysers[0] = SpeakingDetectionAnalyser.initialize(this);
-    console.log('setMedia: stream', this.stream);
     this.status = PeerConnectionState.Broadcasting;
   }
 

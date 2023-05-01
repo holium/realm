@@ -71,13 +71,11 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
         `;
 
       webView.addEventListener('did-attach', () => {
-        webView.insertCSS(css);
-        webView.send('mouse-color', shellStore.mouseColor);
+        // webView.insertCSS(css);
         setReady(true);
       });
       webView.addEventListener('dom-ready', () => {
         webView.insertCSS(css);
-        webView.send('mouse-color', shellStore.mouseColor);
       });
 
       webView.addEventListener('close', () => {
