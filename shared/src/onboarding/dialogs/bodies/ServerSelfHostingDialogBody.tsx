@@ -1,5 +1,6 @@
 import { AccountDialogDescription } from '../../components/AccountDialog.styles';
 import { AccountDialogTableRow } from '../../components/AccountDialogTableRow';
+import { ChangeAccessCode } from '../../components/hosting/ChangeAccessCode';
 import { AccountDialogTable } from './AccountHostingDialogBody';
 
 type Props = {
@@ -20,8 +21,6 @@ export const ServerSelfHostingDialogBody = ({
     <AccountDialogTableRow title="Server URL">
       <AccountDialogDescription flex={1}>{serverUrl}</AccountDialogDescription>
     </AccountDialogTableRow>
-    <AccountDialogTableRow title="Server Code">
-      <AccountDialogDescription flex={1}>{serverCode}</AccountDialogDescription>
-    </AccountDialogTableRow>
+    <ChangeAccessCode label="Server Code" shipCode={serverCode} />
   </AccountDialogTable>
 );

@@ -6,13 +6,17 @@ import { AccountDialogTableRow } from '../../components/AccountDialogTableRow';
 
 type Props = {
   shipCode: string;
+  label?: string;
 };
 
-export const ChangeAccessCode = ({ shipCode }: Props) => {
+export const ChangeAccessCode = ({
+  shipCode,
+  label = 'Access Code',
+}: Props) => {
   const showAccessKey = useToggle(false);
 
   return (
-    <AccountDialogTableRow title="Access Code">
+    <AccountDialogTableRow title={label}>
       <Flex flex={1}>
         <TextInput
           width="100%"
