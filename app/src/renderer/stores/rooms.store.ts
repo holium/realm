@@ -130,6 +130,20 @@ export const RoomsStore = types
       return Array.from(self.rooms.values());
     },
   }))
+  .actions((self) => ({
+    setMuted: (isMuted: boolean) => {
+      self.isMuted = isMuted;
+    },
+    setSpeaking: (isSpeaking: boolean) => {
+      self.isSpeaking = isSpeaking;
+    },
+    setAudioAttached: (isAttached: boolean) => {
+      self.isAudioAttached = isAttached;
+    },
+    _onDataChannel(_payload: DataPacket) {
+      // this is an event handler for the data channel
+    },
+  }))
   .actions((self) => {
     const localPeer = observable(new LocalPeer());
     const remotePeers = observable(new Map<string, RemotePeer>());
@@ -183,6 +197,7 @@ export const RoomsStore = types
             }
             self.peersMetadata.get(to)?.setStatus(status);
           },
+          onDataChannel: self._onDataChannel,
         },
         peerConfig
       );
@@ -223,6 +238,9 @@ export const RoomsStore = types
           RoomsIPC.leaveRoom(self.current.rid);
         }
       },
+      sendData(data: Partial<DataPacket>) {
+        sendDataToPeer(data);
+      },
       getPeers() {
         return self.current ? self.current.present : [];
       },
@@ -247,16 +265,9 @@ export const RoomsStore = types
         localPeer.init(
           window.ship,
           {
-            setAudioAttached: (isAttached: boolean) => {
-              self.isAudioAttached = isAttached;
-            },
-            setMuted: (isMuted: boolean) => {
-              console.log('afterCreate setMuted', isMuted);
-              self.isMuted = isMuted;
-            },
-            setSpeaking: (isSpeaking: boolean) => {
-              self.isSpeaking = isSpeaking;
-            },
+            setAudioAttached: self.setAudioAttached,
+            setMuted: self.setMuted,
+            setSpeaking: self.setSpeaking,
           },
           {
             isHost: false,
@@ -294,9 +305,9 @@ export const RoomsStore = types
             path: spacePath || '',
           });
           SoundActions.playRoomEnter();
-          localPeer.enableMedia();
           self.rooms.set(newRoom.rid, cast(newRoom));
           self.current = self.rooms.get(newRoom.rid);
+          yield localPeer.enableMedia();
           yield RoomsIPC.createRoom(
             newRoom.rid,
             newRoom.title,
@@ -312,8 +323,8 @@ export const RoomsStore = types
         if (room) {
           SoundActions.playRoomEnter();
           self.current = room;
-          dialAll(room, self.rtcConfig);
           yield localPeer?.enableMedia();
+          dialAll(room, self.rtcConfig);
           yield RoomsIPC.enterRoom(rid);
         } else {
           console.error('Room not found');

@@ -12,6 +12,7 @@ type InlineStatusProps = {
 const createdChatRegex = /created the chat/;
 const joinedChatRegex = /joined the chat/;
 const leftChatRegex = /left the chat/;
+const addedPeersRegex = /added \d+ peers/;
 const parseCreatedJoinedLeftChat = (id: string, text: string) => {
   let patp: string = '';
   let status: string = '';
@@ -24,6 +25,11 @@ const parseCreatedJoinedLeftChat = (id: string, text: string) => {
   } else if (leftChatRegex.test(text)) {
     status = 'left the chat';
     patp = text.replace(status, '').trim();
+  } else if (addedPeersRegex.test(text)) {
+    // split the text into the status and the patp
+    status = `added ${text.split('added')[1].trim()}`;
+
+    patp = text.replace(addedPeersRegex, '').trim();
   }
   if (!patp) return null;
   return (

@@ -99,6 +99,7 @@ export class LocalPeer {
     this.audioTracks.forEach((track: MediaStreamTrack) => {
       track.enabled = false;
     });
+    this.setters.setMuted(true);
   }
 
   unmute() {
@@ -106,6 +107,7 @@ export class LocalPeer {
     this.audioTracks.forEach((track: MediaStreamTrack) => {
       track.enabled = true;
     });
+    this.setters.setMuted(false);
   }
 
   setStatus(status: PeerConnectionState) {
@@ -114,6 +116,7 @@ export class LocalPeer {
 
   isSpeakingChanged(speaking: boolean) {
     this.isSpeaking = speaking;
+    this.setters.setSpeaking(speaking);
   }
 
   setAudioInputDevice(deviceId: string) {
@@ -214,6 +217,7 @@ export class LocalPeer {
     });
     // initialize the speaking detection analyser
     this.analysers[0] = SpeakingDetectionAnalyser.initialize(this);
+    console.log('setMedia: stream', this.stream);
     this.status = PeerConnectionState.Broadcasting;
   }
 
