@@ -12,6 +12,7 @@ import { APIConnection } from './services/api';
 import { AuthService } from './services/auth/auth.service';
 import OnboardingService from './services/auth/onboarding.service';
 import { FileUploadParams, ShipService } from './services/ship/ship.service';
+import { Credentials } from './services/ship/ship.types.ts';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -127,6 +128,14 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       });
     }
     return isAuthenticated;
+  }
+
+  async setSessionCookie(credentials: Credentials) {
+    await session.fromPartition(`persist:default`).cookies.set({
+      url: `${credentials.url}`,
+      name: `urbauth-${credentials.ship}`,
+      value: credentials.cookie?.split('=')[1].split('; ')[0],
+    });
   }
 
   /**

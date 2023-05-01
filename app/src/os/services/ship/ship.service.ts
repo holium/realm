@@ -150,12 +150,6 @@ export class ShipService extends AbstractService<any> {
       this.credentials.code,
       cookie
     );
-    // set cookie in electron session
-    session.fromPartition(`persist:default`).cookies.set({
-      url: `${this.credentials.url}`,
-      name: `urbauth-${this.patp}`,
-      value: cookie?.split('=')[1].split('; ')[0],
-    });
   }
 
   public setCredentials(url: string, code: string, cookie: string) {
