@@ -49,7 +49,8 @@ const RoomPresenter = () => {
         latestChat
           ? latestChat.filter(
               (msg) =>
-                !readChat?.includes(msg) && msg.author !== loggedInAccount?.patp
+                !readChat?.includes(msg) &&
+                msg.author !== loggedInAccount?.serverId
             ).length
           : 0
       );
@@ -162,13 +163,13 @@ const RoomPresenter = () => {
               size={30}
               showOnHover
               iconColor={
-                presentRoom.creator === loggedInAccount?.patp
+                presentRoom.creator === loggedInAccount?.serverId
                   ? 'intent-alert'
                   : undefined
               }
               onClick={(evt) => {
                 evt.stopPropagation();
-                if (presentRoom.creator === loggedInAccount?.patp) {
+                if (presentRoom.creator === loggedInAccount?.serverId) {
                   roomsStore.deleteRoom(rid);
                 } else {
                   roomsStore.leaveRoom();

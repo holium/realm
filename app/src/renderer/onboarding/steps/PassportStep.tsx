@@ -32,9 +32,9 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
     }
 
     OnboardingIPC.setCredentials({
-      patp: shipId,
-      code: shipCode,
-      url: shipUrl,
+      serverId: shipId,
+      serverCode: shipCode,
+      serverUrl: shipUrl,
     });
 
     OnboardingIPC.getPassport()

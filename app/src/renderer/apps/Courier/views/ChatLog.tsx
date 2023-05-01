@@ -15,6 +15,7 @@ import {
 } from '@holium/design-system';
 
 import { useTrayApps } from 'renderer/apps/store';
+import { trackEvent } from 'renderer/lib/track';
 import { IuseStorage } from 'renderer/lib/useStorage';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -25,7 +26,6 @@ import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
 import { PinnedContainer } from '../components/PinnedMessage';
 import { ChatLogList } from './ChatLogList';
-import { trackEvent } from 'renderer/lib/track';
 
 const FullWidthAnimatePresence = styled(AnimatePresence)`
   position: absolute;
@@ -51,7 +51,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
 
   const { color: ourColor } = useMemo(() => {
     if (!loggedInAccount) return { color: '#000' };
-    return friends.getContactAvatarMetadata(loggedInAccount.patp);
+    return friends.getContactAvatarMetadata(loggedInAccount.serverId);
   }, []);
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   }, []);
 
   useEffect(() => {
-    if (!selectedChat || !loggedInAccount?.patp) return;
+    if (!selectedChat || !loggedInAccount?.serverId) return;
     selectedChat.fetchMessages();
     const unreadCount = notifStore.getUnreadCountByPath(selectedChat.path);
     if (unreadCount > 0) {
@@ -81,7 +81,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   }, [selectedChat?.path, innerNavigation]);
 
   const { title, sigil, image } = useMemo(() => {
-    if (!selectedChat || !loggedInAccount?.patp)
+    if (!selectedChat || !loggedInAccount?.serverId)
       return { title: 'Error loading title' };
     return getChatHeader(selectedChat.path);
   }, [selectedChat?.path, window.ship]);

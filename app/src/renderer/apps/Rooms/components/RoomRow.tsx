@@ -50,7 +50,7 @@ const RoomRowPresenter = ({
 
   const contextMenuOptions = useMemo(
     () =>
-      loggedInAccount?.patp === provider
+      loggedInAccount?.serverId === provider
         ? [
             {
               id: `room-delete-${rid}`,
@@ -120,9 +120,9 @@ const RoomRowPresenter = ({
               {/* <Icons mr={1} opacity={0.5} name="Friends" /> */}
               <Text.Custom opacity={0.5} fontWeight={400} fontSize={2}>
                 {presentCount} {peopleText}{' '}
-                {/* {present.includes(loggedInAccount.patp) && ` - (You)`} */}
+                {/* {present.includes(loggedInAccount.serverId) && ` - (You)`} */}
               </Text.Custom>
-              {creator === loggedInAccount?.patp && (
+              {creator === loggedInAccount?.serverId && (
                 <>
                   <Text.Custom
                     mx="6px"
@@ -147,7 +147,7 @@ const RoomRowPresenter = ({
         />
       </Flex>
       {/* room deletion button */}
-      {/* {tray !== true && (creator === loggedInAccount.patp || provider === loggedInAccount.patp) && (
+      {/* {tray !== true && (creator === loggedInAccount.serverId || provider === loggedInAccount.serverId) && (
         <IconButton
           size={26}
           customBg={bgColor}

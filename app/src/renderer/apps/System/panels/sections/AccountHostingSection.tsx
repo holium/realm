@@ -41,7 +41,7 @@ export const AccountHostingSection = ({ account }: Props) => {
   const changeMaintenanceWindowModal = useToggle(false);
   const ejectIdModal = useToggle(false);
 
-  const ship = ships.find((s) => s.patp === account.patp);
+  const ship = ships.find((s) => s.patp === account.serverId);
 
   const { email, token } = OnboardingStorage.get();
 
@@ -91,7 +91,7 @@ export const AccountHostingSection = ({ account }: Props) => {
       if (response?.token) {
         // Also update the password locally.
         const result = await OnboardingIPC.updatePassword(
-          account.patp,
+          account.serverId,
           password
         );
 
@@ -112,7 +112,7 @@ export const AccountHostingSection = ({ account }: Props) => {
 
     const response = await thirdEarthApi.resetShipCode(
       token,
-      account.patp.toString()
+      account.serverId.toString()
     );
 
     if (response) return true;
@@ -125,7 +125,7 @@ export const AccountHostingSection = ({ account }: Props) => {
 
     const response = await thirdEarthApi.updateMaintenanceWindow(
       token,
-      account.patp.toString(),
+      account.serverId.toString(),
       maintenanceWindow
     );
 
@@ -139,7 +139,7 @@ export const AccountHostingSection = ({ account }: Props) => {
 
     const response = await thirdEarthApi.ejectShip(
       token,
-      account.patp.toString(),
+      account.serverId.toString(),
       ejectAddress,
       ethAddress
     );

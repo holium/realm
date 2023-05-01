@@ -40,7 +40,7 @@ export const AccountPassportSection = ({ account }: Props) => {
     if (!nickname) return false;
 
     const authResult = await AuthIPC.updatePassport(
-      account.patp,
+      account.serverId,
       nickname,
       description,
       avatarSrc,
@@ -89,7 +89,7 @@ export const AccountPassportSection = ({ account }: Props) => {
         ) : (
           <>
             <PassportCard
-              patp={account.patp}
+              patp={account.serverId}
               color={accentColor}
               nickname={nickname}
               setNickname={setNickname}

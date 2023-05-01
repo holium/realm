@@ -45,7 +45,6 @@ const AppStateModel = types
       'refreshed',
     ]),
     error: types.maybeNull(types.string),
-    //
   })
   .actions((self) => ({
     setBooted(data: RealmUpdateBooted['payload']) {
@@ -62,12 +61,12 @@ const AppStateModel = types
         localStorage.setItem('lastTheme', JSON.stringify(theme));
       }
     },
-    setLoggedIn(patp: string) {
-      self.authStore._setSession(patp);
+    setLoggedIn(serverId: string) {
+      self.authStore._setSession(serverId);
       self.shellStore.setIsBlurred(false);
     },
-    setLoggedOut(patp?: string) {
-      self.authStore._clearSession(patp);
+    setLoggedOut(serverId?: string) {
+      self.authStore._clearSession(serverId);
       self.shellStore.setIsBlurred(true);
     },
     reset() {
@@ -89,7 +88,7 @@ const AppStateModel = types
   .views((self) => ({
     get loggedInAccount(): MobXAccount | undefined {
       return self.authStore.accounts.find(
-        (a) => a.patp === self.authStore.session?.patp
+        (a) => a.serverId === self.authStore.session?.serverId
       );
     },
   }));
@@ -162,20 +161,20 @@ function registerOnUpdateListener() {
     if (update.type === 'booted') {
       appState.reset();
       shipStore.reset();
-      if (update.payload.session) window.ship = update.payload.session.patp;
+      if (update.payload.session) window.ship = update.payload.session.serverId;
       appState.setBooted(update.payload);
       if (update.payload.session) {
-        appState.setLoggedIn(update.payload.session.patp);
+        appState.setLoggedIn(update.payload.session.serverId);
         shipStore.init(update.payload.session);
       }
     }
     if (update.type === 'auth-success') {
       SoundActions.playLogin();
-      window.ship = update.payload.patp;
+      window.ship = update.payload.serverId;
       OnboardingStorage.set({
-        lastAccountLogin: update.payload.patp,
+        lastAccountLogin: update.payload.serverId,
       });
-      appState.setLoggedIn(update.payload.patp);
+      appState.setLoggedIn(update.payload.serverId);
       shipStore.init(update.payload);
     }
     if (update.type === 'auth-failed') {
@@ -183,7 +182,7 @@ function registerOnUpdateListener() {
       appState.authStore.status.setError(update.payload);
     }
     if (update.type === 'logout') {
-      appState.setLoggedOut(update.payload.patp);
+      appState.setLoggedOut(update.payload.serverId);
       shipStore.reset();
       SoundActions.playLogout();
     }

@@ -59,7 +59,7 @@ export const RoomInvite = observer(() => {
       //   return { error: 'Already added', parsed: undefined };
       // }
 
-      if (patp === loggedInAccount?.patp) {
+      if (patp === loggedInAccount?.serverId) {
         return { error: "You can't invite yourself!", parsed: undefined };
       }
 

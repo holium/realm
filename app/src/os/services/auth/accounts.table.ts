@@ -15,16 +15,17 @@ export class Accounts extends AbstractDataAccess<DBAccount, any> {
       db,
       name: 'accounts',
       tableName: 'accounts',
-      pKey: 'patp',
+      pKey: 'serverId',
     });
   }
 
   protected mapRow(row: any): DBAccount {
     return {
       accountId: row.accountId,
-      type: row.type,
-      patp: row.patp,
-      url: row.url,
+      serverId: row.serverId,
+      serverUrl: row.serverUrl,
+      serverCode: row.serverCode,
+      serverType: row.type,
       nickname: row.nickname,
       description: row.description,
       color: row.color,
@@ -37,10 +38,10 @@ export class Accounts extends AbstractDataAccess<DBAccount, any> {
     };
   }
 
-  public findOne(patp: string): DBAccount | null {
-    const query = `SELECT * FROM ${this.tableName} WHERE patp = ?`;
+  public findOne(serverId: string): DBAccount | null {
+    const query = `SELECT * FROM ${this.tableName} WHERE serverId = ?`;
     const stmt = this.prepare(query);
-    const row = stmt.get(patp);
+    const row = stmt.get(serverId);
     return row ? this.mapRow(row) : null;
   }
 
@@ -53,30 +54,30 @@ export class Accounts extends AbstractDataAccess<DBAccount, any> {
     const stmt = this.prepare(query);
 
     stmt.run(Object.values(values));
-    if (!values.patp) throw new Error('Failed to create new record');
-    const created = this.findOne(values.patp);
+    if (!values.serverId) throw new Error('Failed to create new record');
+    const created = this.findOne(values.serverId);
     if (!created) throw new Error('Failed to create new record');
     return created;
   }
 
-  public update(patp: string, values: Partial<DBAccount>): DBAccount {
+  public update(serverId: string, values: Partial<DBAccount>): DBAccount {
     const setClause = Object.keys(values)
       .map((key) => `${key} = ?`)
       .join(', ');
-    const query = `UPDATE ${this.tableName} SET ${setClause} WHERE patp = ?`;
+    const query = `UPDATE ${this.tableName} SET ${setClause} WHERE serverId = ?`;
     const stmt = this.prepare(query);
 
-    stmt.run([...Object.values(values), patp]);
-    const updated = this.findOne(patp);
+    stmt.run([...Object.values(values), serverId]);
+    const updated = this.findOne(serverId);
     if (!updated) throw new Error('Failed to update record');
     return updated;
   }
 
-  public delete(patp: string): void {
-    const query = `DELETE FROM ${this.tableName} WHERE patp = ?`;
+  public delete(serverId: string): void {
+    const query = `DELETE FROM ${this.tableName} WHERE serverId = ?`;
     const stmt = this.prepare(query);
 
-    const result = stmt.run(patp);
+    const result = stmt.run(serverId);
     if (result.changes !== 1) throw new Error('Failed to delete record');
   }
 }
@@ -84,9 +85,10 @@ export class Accounts extends AbstractDataAccess<DBAccount, any> {
 export const accountsInit = `
   create table if not exists accounts (
     accountId       INTEGER,
-    patp            TEXT PRIMARY KEY NOT NULL,
-    type            TEXT NOT NULL DEFAULT 'local',
-    url             TEXT NOT NULL,
+    serverId        TEXT PRIMARY KEY NOT NULL,
+    serverUrl       TEXT NOT NULL,
+    serverCode      TEXT NOT NULL,
+    serverType      TEXT NOT NULL DEFAULT 'local',
     nickname        TEXT,
     description     TEXT,
     color           TEXT default '#000000',
@@ -99,5 +101,5 @@ export const accountsInit = `
     FOREIGN KEY (accountId) REFERENCES master_accounts(id) ON DELETE CASCADE
 
   );
-  create unique index if not exists accounts_patp_uindex on accounts (patp);
+  create unique index if not exists accounts_server_id_uindex on accounts (serverId);
 `;

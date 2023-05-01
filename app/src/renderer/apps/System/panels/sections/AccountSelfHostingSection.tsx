@@ -12,7 +12,10 @@ export const AccountSelfHostingSection = ({ account }: Props) => (
   <SettingSection
     title="Server"
     body={
-      <AccountSelfHostingDialogBody patp={account.patp} url={account.url} />
+      <AccountSelfHostingDialogBody
+        patp={account.serverId}
+        url={account.serverId}
+      />
     }
   />
 );

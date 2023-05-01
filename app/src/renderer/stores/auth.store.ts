@@ -69,17 +69,17 @@ export const AuthenticationModel = types
     status: LoginStatus,
   })
   .actions((self) => ({
-    setSelected(patp: string) {
+    setSelected(serverId: string) {
       self.selected = tryReference(() =>
-        self.accounts.find((acc) => acc.patp === patp)
+        self.accounts.find((acc) => acc.serverId === serverId)
       );
     },
     setAccounts(accounts?: DBAccount[]) {
       if (!accounts) return;
       applySnapshot(self.accounts, castToSnapshot(accounts));
     },
-    _setSession(patp: string) {
-      const account = self.accounts.find((a) => a.patp === patp);
+    _setSession(serverId: string) {
+      const account = self.accounts.find((a) => a.serverId === serverId);
       if (!account) {
         throw new Error('DBAccount not found');
       }
@@ -87,8 +87,8 @@ export const AuthenticationModel = types
       self.status.setState('success');
       self.session = account;
     },
-    _clearSession(patp?: string) {
-      if (self.session?.patp === patp) {
+    _clearSession(serverId?: string) {
+      if (self.session?.serverId === serverId) {
         trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
       }
       self.status.setState('initial');
@@ -100,19 +100,21 @@ export const AuthenticationModel = types
     // _authError(data: AuthUpdateLogin) {},
     // //
     setAccountCurrentTheme(theme: any) {
-      const account = self.accounts.find((a) => a.patp === self.session?.patp);
+      const account = self.accounts.find(
+        (a) => a.serverId === self.session?.serverId
+      );
       if (account) {
         account.theme = clone(theme);
-        AuthIPC.setAccountTheme(account.patp, getSnapshot(theme));
+        AuthIPC.setAccountTheme(account.serverId, getSnapshot(theme));
       }
     },
     // use flow to login the account
-    login: flow(function* (patp: string, password: string) {
+    login: flow(function* (serverId: string, password: string) {
       self.status.setState('loading');
-      const account = self.accounts.find((a) => a.patp === patp);
+      const account = self.accounts.find((a) => a.serverId === serverId);
       if (account) {
         try {
-          const result = yield RealmIPC.login(account.patp, password);
+          const result = yield RealmIPC.login(account.serverId, password);
           // wait for the login to finish
           if (result) {
             self.status.setState('success');
@@ -130,7 +132,7 @@ export const AuthenticationModel = types
         return;
       }
       try {
-        yield RealmIPC.logout(self.session.patp);
+        yield RealmIPC.logout(self.session.serverId);
         self.session = null;
         trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
         self.status.setState('initial');
@@ -141,23 +143,23 @@ export const AuthenticationModel = types
     }),
     shutdown: flow(function* () {
       if (self.session) {
-        yield RealmIPC.shutdown(self.session.patp) as Promise<any>;
+        yield RealmIPC.shutdown(self.session.serverId) as Promise<any>;
       } else {
         console.warn('missing session');
       }
     }),
-    removeAccount: flow(function* (patp: string) {
+    removeAccount: flow(function* (serverId: string) {
       // TODO implement
-      const removeIdx = self.accounts.findIndex((a) => a.patp === patp);
+      const removeIdx = self.accounts.findIndex((a) => a.serverId === serverId);
       const account = self.accounts[removeIdx];
       if (account) {
-        yield AuthIPC.deleteAccount(account.patp);
+        yield AuthIPC.deleteAccount(account.serverId);
         if (removeIdx > 0) {
           self.selected = self.accounts[removeIdx - 1];
         }
         self.accounts.remove(account);
         const { lastAccountLogin } = OnboardingStorage.get();
-        if (lastAccountLogin === patp) {
+        if (lastAccountLogin === serverId) {
           OnboardingStorage.remove('lastAccountLogin');
         }
         if (self.accounts.length === 0) {
@@ -165,12 +167,12 @@ export const AuthenticationModel = types
         }
       }
     }),
-    // changePassword: flow(function* (patp: string, password: string) {
+    // changePassword: flow(function* (serverId: string, password: string) {
     //   // TODO implement
-    //   const account = self.accounts.find((a) => a.patp === patp);
+    //   const account = self.accounts.find((a) => a.serverId === serverId);
     //   if (account) {
     //     const result = yield AuthIPC.changePassword(
-    //       account.patp,
+    //       account.serverId,
     //       password
     //     ) as Promise<any>;
     //     if (result) {
@@ -183,7 +185,7 @@ export const AuthenticationModel = types
     _onOnboardingEnded(accountsPayload: OnboardingEndedPayload) {
       accountsPayload.accounts.forEach((account) => {
         const existingAccount = self.accounts.find(
-          (a) => a.patp === account.patp
+          (a) => a.serverId === account.serverId
         );
         if (!existingAccount) {
           self.accounts.push(AccountModel.create(account));
@@ -195,19 +197,19 @@ export const AuthenticationModel = types
     _onAddAccount(accountPayload: AuthUpdateAccountPayload) {
       const account = AccountModel.create(accountPayload.account);
 
-      if (self.accounts.find((a) => a.patp === account.patp)) {
+      if (self.accounts.find((a) => a.serverId === account.serverId)) {
         return;
       }
 
       self.accounts.push(account);
       self.selected = tryReference(() =>
-        self.accounts.find((acc) => acc.patp === account.patp)
+        self.accounts.find((acc) => acc.serverId === account.serverId)
       );
       applySnapshot(self.order, accountPayload.order);
     },
     _onRemoveAccount(accountPayload: AuthUpdateAccountPayload) {
       const account = self.accounts.find(
-        (a) => a.patp === accountPayload.account.patp
+        (a) => a.serverId === accountPayload.account.serverId
       );
       if (account) {
         self.accounts.remove(account);
@@ -216,7 +218,7 @@ export const AuthenticationModel = types
     },
     _onUpdateAccount(accountPayload: AuthUpdateAccountPayload) {
       const account = self.accounts.find(
-        (a) => a.patp === accountPayload.account.patp
+        (a) => a.serverId === accountPayload.account.serverId
       );
       if (account) {
         applySnapshot(account, accountPayload.account);

@@ -33,7 +33,8 @@ const ThemePanelPresenter = () => {
 
   const canEditSpace =
     spacesStore.selected.members.list.findIndex(
-      (m) => m.patp === loggedInAccount.patp && m.roles.indexOf('admin') !== -1
+      (m) =>
+        m.patp === loggedInAccount.serverId && m.roles.indexOf('admin') !== -1
     ) !== -1;
 
   const setNewTheme = async (wallpaperSrc: string) => {

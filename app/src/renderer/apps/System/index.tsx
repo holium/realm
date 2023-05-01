@@ -45,7 +45,7 @@ const SystemAppPresenter = () => {
                 minWidth: 40,
               }}
               avatar={loggedInAccount.avatar}
-              patp={loggedInAccount.patp}
+              patp={loggedInAccount.serverId}
               sigilColor={[loggedInAccount.color || '#000000', 'white']}
             />
           </Box>
@@ -63,7 +63,7 @@ const SystemAppPresenter = () => {
               </Text.Custom>
             )}
             <Text.Custom fontWeight={300} fontSize={2}>
-              {loggedInAccount.patp}
+              {loggedInAccount.serverId}
             </Text.Custom>
           </Flex>
         </Flex>

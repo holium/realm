@@ -136,7 +136,7 @@ export const InboxPresenter = () => {
               }}
               itemContent={(index: number, chat: ChatModelType) => {
                 const isAdmin = loggedInAccount
-                  ? chat.isHost(loggedInAccount.patp)
+                  ? chat.isHost(loggedInAccount.serverId)
                   : false;
                 const height = chat.type === 'space' ? 70 : rowHeight;
                 const isLast = index === sortedChatList.length - 1;

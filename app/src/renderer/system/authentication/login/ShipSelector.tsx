@@ -25,7 +25,9 @@ const ShipSelectorPresenter = () => {
   const { setTheme, authStore } = useAppState();
   const { accounts, selected: selectedShip, setSelected: onSelect } = authStore;
 
-  const [orderedList, _setOrder] = useState(accounts.map((a) => a.patp) || []);
+  const [orderedList, _setOrder] = useState(
+    accounts.map((a) => a.serverId) || []
+  );
   const [dragging, setDragging] = useState(false);
 
   // useEffect(() => {
@@ -34,32 +36,33 @@ const ShipSelectorPresenter = () => {
 
   const shipList = orderedList
     .map((shipKey: any) => {
-      const ship = accounts.find((a) => a.patp === shipKey);
-      if (!ship) return null;
+      const account = accounts.find((a) => a.serverId === shipKey);
+      if (!account) return null;
 
-      const selected = selectedShip && ship.patp === selectedShip.patp;
+      const selected =
+        selectedShip && account.serverId === selectedShip.serverId;
       return (
         <Reorder.Item
-          key={ship.patp}
+          key={account.serverId}
           value={shipKey}
           style={{ zIndex: 1 }}
           whileDrag={{ zIndex: 20 }}
           onDragStart={() => setDragging(true)}
           onClick={async () => {
-            onSelect(ship.patp);
+            onSelect(account.serverId);
             if (!dragging) {
-              onSelect(ship.patp);
-              setTheme(ship.theme);
+              onSelect(account.serverId);
+              setTheme(account.theme);
               // const selectedPatp = await AuthActions.getSelected();
               // if (selectedPatp) {
-              //   if (selectedPatp !== ship.patp) {
-              //     !dragging && AuthActions.setSelected(ship.patp);
+              //   if (selectedPatp !== account.serverId) {
+              //     !dragging && AuthActions.setSelected(account.serverId);
               //     setLoginError('');
-              //     const currTheme = await AuthActions.getShipTheme(ship.patp);
+              //     const currTheme = await AuthActions.getShipTheme(account.serverId);
               //     if (currTheme) {
               //       theme.setCurrentTheme(currTheme);
               //     } else {
-              //       console.error('Error: no theme found for ship:', ship.patp);
+              //       console.error('Error: no theme found for account:', account.serverId);
               //     }
               //   }
             }
@@ -76,9 +79,9 @@ const ShipSelectorPresenter = () => {
         >
           <Flex position="relative" height="100%">
             <Tooltip
-              id={ship.patp}
+              id={account.serverId}
               placement="top-right"
-              content={ship.patp || ship.nickname}
+              content={account.serverId || account.nickname}
             >
               <motion.div
                 className="realm-cursor-hover"
@@ -95,9 +98,9 @@ const ShipSelectorPresenter = () => {
                   simple
                   isLogin
                   size={32}
-                  avatar={ship.avatar}
-                  patp={ship.patp}
-                  sigilColor={[ship.color || '#000000', 'white']}
+                  avatar={account.avatar}
+                  patp={account.serverId}
+                  sigilColor={[account.color || '#000000', 'white']}
                 />
               </motion.div>
             </Tooltip>

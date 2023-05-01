@@ -917,7 +917,7 @@ export const WalletStore = types
           /*const wallets = yield WalletIPC.getWallets() as PromiseLike<any>;
           const transactions =
             yield WalletIPC.getTransactions() as PromiseLike<any>;*/
-          self.ourPatp = appState.loggedInAccount?.patp;
+          self.ourPatp = appState.loggedInAccount?.serverId;
           if (self.ourPatp) {
             const hasMnemonic = yield WalletIPC.hasMnemonic(self.ourPatp);
             if (hasMnemonic) {
@@ -935,7 +935,7 @@ export const WalletStore = types
       }),
       setInitialized(initialized: boolean) {
         self.initialized = initialized;
-        self.ourPatp = appState.loggedInAccount?.patp;
+        self.ourPatp = appState.loggedInAccount?.serverId;
       },
       setNetworkSetter(network: NetworkType) {
         this.resetNavigation();

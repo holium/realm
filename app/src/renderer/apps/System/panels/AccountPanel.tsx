@@ -19,36 +19,36 @@ const AccountPanelPresenter = () => {
 
   if (!loggedInAccount) return null;
 
-  const isRealmShip = loggedInAccount.type === 'hosted';
+  const isRealmShip = loggedInAccount.serverType === 'hosted';
 
   return (
     <SettingPane>
       <SettingTitle title="Account" />
       <AccountPassportSection
         account={loggedInAccount}
-        key={`${loggedInAccount.patp}-settings-passport`}
+        key={`${loggedInAccount.serverId}-settings-passport`}
       />
       {isRealmShip ? (
         <MaybeLogin>
           <UserContextProvider api={thirdEarthApi}>
             <AccountHostingSection
               account={loggedInAccount}
-              key={`${loggedInAccount.patp}-settings-hosting`}
+              key={`${loggedInAccount.serverId}-settings-hosting`}
             />
             <AccountStorageSection
               account={loggedInAccount}
-              key={`${loggedInAccount.patp}-settings-storage`}
+              key={`${loggedInAccount.serverId}-settings-storage`}
             />
             <AccountCustomDomainSection
               account={loggedInAccount}
-              key={`${loggedInAccount.patp}-settings-custom-domain`}
+              key={`${loggedInAccount.serverId}-settings-custom-domain`}
             />
           </UserContextProvider>
         </MaybeLogin>
       ) : (
         <AccountSelfHostingSection
           account={loggedInAccount}
-          key={`${loggedInAccount.patp}-settings-self-hosting`}
+          key={`${loggedInAccount.serverId}-settings-self-hosting`}
         />
       )}
     </SettingPane>

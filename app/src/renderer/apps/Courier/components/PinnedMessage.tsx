@@ -49,7 +49,7 @@ export const PinnedContainer = ({ message }: PinnedContainerProps) => {
   const contextMenuOptions = useMemo(() => {
     const menu: MenuItemProps[] = [];
     if (!selectedChat || !loggedInAccount) return menu;
-    const isAdmin = selectedChat.isHost(loggedInAccount.patp);
+    const isAdmin = selectedChat.isHost(loggedInAccount.serverId);
 
     menu.push({
       id: `${pinnedRowId}-hide-pinned`,
