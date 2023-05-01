@@ -2,11 +2,8 @@ import { observable } from 'mobx';
 import { applySnapshot, cast, flow, Instance, types } from 'mobx-state-tree';
 import { patp2dec } from 'urbit-ob';
 
-import { DataPacket_Kind } from '@holium/realm-room';
-
 import { SoundActions } from 'renderer/lib/sound';
 
-import { appState } from './app.store';
 import { RoomsIPC } from './ipc';
 import { Chat } from './models/chat.model';
 import { LocalPeer } from './rooms/LocalPeer';
@@ -92,7 +89,6 @@ export const RoomsStore = types
   .model('RoomsStore', {
     path: types.optional(types.string, ''),
     provider: types.optional(types.string, ''),
-    our: types.maybe(types.string),
     rooms: types.map(RoomModel),
     chat: types.maybe(Chat),
     current: types.maybe(types.reference(RoomModel)),
@@ -209,26 +205,6 @@ export const RoomsStore = types
               self.chat?.replaceMessage(payload);
             }
           },
-          setTyping: (isTyping: boolean) => {
-            if (!self.peersMetadata.has(to)) {
-              self.peersMetadata.set(to, PeerMetadata.create());
-            }
-            const currentMtd = self.peersMetadata.get(to);
-            currentMtd?.setTyping(isTyping);
-          },
-          setChat: (chatData: any) => {
-            console.log('got chat data', chatData);
-            const { type, payload } = chatData;
-            if (type === 'message-deleted') {
-              self.chat?.removeMessage(payload['msg-id']);
-            }
-            if (type === 'message-received') {
-              self.chat?.addMessage(payload);
-            }
-            if (type === 'message-edited') {
-              self.chat?.replaceMessage(payload);
-            }
-          },
           setStatus: (status: PeerConnectionState) => {
             if (!self.peersMetadata.has(to)) {
               self.peersMetadata.set(to, PeerMetadata.create());
@@ -245,7 +221,7 @@ export const RoomsStore = types
     };
     const dialAll = (room: RoomMobx, rtc: RTCConfiguration) => {
       const presentPeers = room.present.filter(
-        (peer: string) => self.our !== peer
+        (peer: string) => window.ship !== peer
       );
       presentPeers.forEach((peer: string) => {
         dialPeer(room.rid, peer, rtc);
@@ -283,42 +259,27 @@ export const RoomsStore = types
         return self.current ? self.current.present : [];
       },
       getPeer(patp: string) {
-        if (patp === self.our) return localPeer;
-        console.log('getPeer', patp, self.our);
+        if (patp === window.ship) return localPeer;
+        console.log('getPeer', patp, window.ship);
         return remotePeers.get(patp);
       },
-      sendChat: flow(function* (message: string) {
-        if (!self.current) return;
-        const chatMessage = ChatModel.create({
-          index: self.chat.length,
-          content: message,
-          author: window.ship,
-          isRightAligned: true,
-          timeReceived: new Date().getTime(),
-        });
-        self.chat.push(chatMessage);
-        yield RoomsIPC.sendChat(message);
-      }),
       init: flow(function* () {
-        if (!appState.loggedInAccount)
-          throw new Error('No logged in ship for rooms store');
-        self.our = appState.loggedInAccount.patp;
         self.chat = Chat.create({
           path: 'roomschat',
           type: 'group',
-          host: self.our,
+          host: window.ship,
           muted: false,
           pinned: false,
           peersGetBacklog: true,
           invites: 'host',
           metadata: {
             title: '',
-            creator: self.our,
+            creator: window.ship,
             timestamp: Date.now(),
           },
         });
         localPeer.init(
-          self.our,
+          window.ship,
           {
             setAudioAttached: self.setAudioAttached,
             setMuted: self.setMuted,
@@ -334,7 +295,7 @@ export const RoomsStore = types
           self.provider = session.provider;
           self.rooms = session.rooms;
           const current = Array.from(self.rooms.values()).find(
-            (r) => r.creator === self.our
+            (r) => r.creator === window.ship
           );
           if (current) {
             self.current = current;
@@ -349,15 +310,14 @@ export const RoomsStore = types
         spacePath?: string | null
       ) {
         if (!localPeer) return;
-        if (!self.our) return;
         try {
           const newRoom = RoomModel.create({
-            rid: ridFromTitle(self.provider, self.our, title),
+            rid: ridFromTitle(self.provider, window.ship, title),
             title,
             access,
             provider: self.provider,
-            creator: self.our,
-            present: [self.our],
+            creator: window.ship,
+            present: [window.ship],
             whitelist: [],
             capacity: 6,
             path: spacePath || '',
@@ -365,7 +325,7 @@ export const RoomsStore = types
           SoundActions.playRoomEnter();
           self.rooms.set(newRoom.rid, cast(newRoom));
           if (self.current) {
-            if (self.current.creator === self.our) {
+            if (self.current.creator === window.ship) {
               //@ts-expect-error
               self.deleteRoom(self.current.rid);
             } else {
@@ -378,14 +338,14 @@ export const RoomsStore = types
           self.chat = Chat.create({
             path: 'roomschat',
             type: 'group',
-            host: self.our,
+            host: window.ship,
             muted: false,
             pinned: false,
             peersGetBacklog: true,
             invites: 'host',
             metadata: {
               title: '',
-              creator: self.our,
+              creator: window.ship,
               timestamp: Date.now(),
             },
           });
@@ -413,10 +373,9 @@ export const RoomsStore = types
       }),
       leaveRoom: flow(function* () {
         if (!self.current) return;
-        if (!self.our) return;
         try {
           const currentRid = self.current.rid;
-          self.current.removePeer(self.our);
+          self.current.removePeer(window.ship);
           self.current = undefined;
           SoundActions.playRoomLeave();
           yield RoomsIPC.leaveRoom(currentRid);
@@ -488,7 +447,7 @@ export const RoomsStore = types
         self.provider = session.provider;
         self.rooms = session.rooms;
         const current = Array.from(self.rooms.values()).find(
-          (r) => r.creator === self.our
+          (r) => r.creator === window.ship
         );
         if (current) {
           self.current = current;
@@ -499,7 +458,7 @@ export const RoomsStore = types
       },
       _onRoomEntered(rid: string, patp: string) {
         const room = self.rooms.get(rid);
-        if (patp === self.our && self.current?.rid !== rid) {
+        if (patp === window.ship && self.current?.rid !== rid) {
           self.current = room;
         }
         room?.addPeer(patp);
@@ -517,22 +476,22 @@ export const RoomsStore = types
       },
       _onRoomLeft(rid: string, patp: string) {
         const room = self.rooms.get(rid);
-        if (patp === self.our && self.current?.rid === rid) {
+        if (patp === window.ship && self.current?.rid === rid) {
           self.current = undefined;
           hangupAll();
         }
-        if (patp !== self.our) {
+        if (patp !== window.ship) {
           room?.removePeer(patp);
           hangup(patp);
         }
       },
       _onKicked(rid: string, patp: string) {
         const room = self.rooms.get(rid);
-        if (patp === self.our && self.current?.rid === rid) {
+        if (patp === window.ship && self.current?.rid === rid) {
           self.current = undefined;
           hangupAll();
         }
-        if (patp !== self.our) {
+        if (patp !== window.ship) {
           room?.removePeer(patp);
           hangup(patp);
         }
@@ -556,16 +515,6 @@ export const RoomsStore = types
       }) {
         self.provider = payload.provider;
         applySnapshot(self.rooms, cast(payload.rooms));
-      },
-      _onChatReceived(payload: { from: string; content: string }) {
-        const chatMessage = ChatModel.create({
-          index: self.chat.length,
-          content: payload.content,
-          author: payload.from,
-          isRightAligned: false,
-          timeReceived: new Date().getTime(),
-        });
-        self.chat.push(chatMessage);
       },
       _onSignal(payload: any) {
         const remotePeer = remotePeers.get(payload.from);
@@ -625,10 +574,6 @@ function registerOnUpdateListener() {
       }
       if (type === 'kicked') {
         shipStore.roomsStore._onKicked(payload.rid, payload.ship);
-      }
-      if (type === 'chat-received') {
-        console.log(`%chat-received`, payload);
-        shipStore.roomsStore._onChatReceived(payload);
       }
       if (type === 'provider-changed') {
         shipStore.roomsStore._onProviderChanged(payload);

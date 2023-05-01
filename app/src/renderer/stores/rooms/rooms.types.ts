@@ -1,6 +1,24 @@
 import { MultiplayerPayload, PresenceBroadcast } from '@holium/realm-presence';
-import { DataPacket_Kind } from '@holium/realm-room';
 
+export enum DataPacket_Kind {
+  DATA = 0,
+  CURSOR = 1,
+  TRACK_META = 2,
+  MUTE_STATUS = 3,
+  SPEAKING_CHANGED = 4,
+  CHAT = 5,
+  TYPING_STATUS = 6,
+  UNRECOGNIZED = -1,
+}
+
+export enum DataPacketKind {
+  DATA = 0,
+  CURSOR = 1,
+  TRACK_META = 2,
+  MUTE_STATUS = 3,
+  SPEAKING_CHANGED = 4,
+  UNRECOGNIZED = -1,
+}
 export interface DataPayload {
   app?: string;
   data?: any;
@@ -57,7 +75,7 @@ export enum PeerConnectionState {
 }
 export interface DataPacket {
   from: string;
-  kind: DataPacket_Kind;
+  kind: DataPacketKind;
   value: {
     multiplayer?: MultiplayerPayload;
     broadcast?: PresenceBroadcast;
