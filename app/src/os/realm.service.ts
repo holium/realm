@@ -63,11 +63,13 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       type: 'booted',
       payload: {
         accounts: this.services?.auth.getAccounts() || undefined,
-        session: {
-          serverId: session?.patp ?? '',
-          serverUrl: session?.url ?? '',
-          cookie: session?.cookie ?? '',
-        },
+        session: session
+          ? {
+              serverId: session.patp,
+              serverUrl: session.url,
+              cookie: session.cookie,
+            }
+          : undefined,
         seenSplash: this.services?.auth.hasSeenSplash() || false,
       },
     });

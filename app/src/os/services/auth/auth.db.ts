@@ -163,10 +163,4 @@ create table if not exists accounts_meta (
   migrated      INTEGER NOT NULL DEFAULT 0,
   migratedAt    INTEGER
 );
-
-create table if not exists accounts_session (
-  serverId      TEXT PRIMARY KEY NOT NULL,
-  key           TEXT NOT NULL,
-  createdAt     INTEGER
-);
 `;

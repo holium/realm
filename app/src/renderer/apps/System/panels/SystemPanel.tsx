@@ -162,7 +162,7 @@ const SystemPanelPresenter = () => {
           </>
         }
       />
-      <SettingSection
+      {/* <SettingSection
         title="Subscriptions"
         body={
           <>
@@ -200,7 +200,7 @@ const SystemPanelPresenter = () => {
             ))}
           </>
         }
-      />
+      /> */}
       {/* <SettingSection title="Mouse">
         <SettingControl label="Cursor type">
           <RadioGroup
@@ -215,10 +215,10 @@ const SystemPanelPresenter = () => {
           />
         </SettingControl>
       </SettingSection> */}
-      <SettingSection
+      {/* <SettingSection
         title="Sounds"
         body={<Text.Custom fontSize={2}>Coming Soon</Text.Custom>}
-      />
+      /> */}
     </SettingPane>
   );
 };
