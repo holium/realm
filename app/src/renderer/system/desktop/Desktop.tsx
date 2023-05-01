@@ -9,9 +9,9 @@ import { SystemBar } from './components/SystemBar/SystemBar';
 import { TrayManager } from './TrayManager';
 
 const DesktopPresenter = () => {
-  const { authStore, shellStore } = useAppState();
-  const { session } = authStore;
-  const roomsManager = undefined;
+  const { shellStore } = useAppState();
+  // const { session } = authStore;
+  // const roomsManager = undefined;
 
   // useMultiplayer({
   //   patp: session?.patp,

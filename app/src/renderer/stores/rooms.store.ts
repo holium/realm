@@ -159,22 +159,39 @@ export const RoomsStore = types
             if (!self.peersMetadata.has(to)) {
               self.peersMetadata.set(to, PeerMetadata.create());
             }
-            const currentMtd = self.peersMetadata.get(to);
-            currentMtd?.setAudioAttached(isAttached);
+            self.peersMetadata.get(to)?.setAudioAttached(isAttached);
           },
           setMuted: (isMuted: boolean) => {
             if (!self.peersMetadata.has(to)) {
               self.peersMetadata.set(to, PeerMetadata.create());
             }
-            const currentMtd = self.peersMetadata.get(to);
-            currentMtd?.setMute(isMuted);
+            self.peersMetadata.get(to)?.setMute(isMuted);
           },
           setSpeaking: (isSpeaking: boolean) => {
             if (!self.peersMetadata.has(to)) {
               self.peersMetadata.set(to, PeerMetadata.create());
             }
+            self.peersMetadata.get(to)?.setSpeaking(isSpeaking);
+          },
+          setTyping: (isTyping: boolean) => {
+            if (!self.peersMetadata.has(to)) {
+              self.peersMetadata.set(to, PeerMetadata.create());
+            }
             const currentMtd = self.peersMetadata.get(to);
-            currentMtd?.setSpeaking(isSpeaking);
+            currentMtd?.setTyping(isTyping);
+          },
+          setChat: (chatData: any) => {
+            console.log('got chat data', chatData);
+            const { type, payload } = chatData;
+            if (type === 'message-deleted') {
+              self.chat?.removeMessage(payload['msg-id']);
+            }
+            if (type === 'message-received') {
+              self.chat?.addMessage(payload);
+            }
+            if (type === 'message-edited') {
+              self.chat?.replaceMessage(payload);
+            }
           },
           setTyping: (isTyping: boolean) => {
             if (!self.peersMetadata.has(to)) {
@@ -200,13 +217,11 @@ export const RoomsStore = types
             if (!self.peersMetadata.has(to)) {
               self.peersMetadata.set(to, PeerMetadata.create());
             }
-            const currentMtd = self.peersMetadata.get(to);
-            currentMtd?.setStatus(status);
+            self.peersMetadata.get(to)?.setStatus(status);
           },
         },
         peerConfig
       );
-
       remotePeers.set(remotePeer.patp, remotePeer);
       remotePeer.dial();
       return remotePeer;
@@ -233,7 +248,6 @@ export const RoomsStore = types
         hangup(peer.patp);
       });
       remotePeers.clear();
-      console.log('hangupAll', remotePeers);
       localPeer?.disableMedia();
     };
 
@@ -253,6 +267,18 @@ export const RoomsStore = types
         console.log('getPeer', patp, self.our);
         return remotePeers.get(patp);
       },
+      sendChat: flow(function* (message: string) {
+        if (!self.current) return;
+        const chatMessage = ChatModel.create({
+          index: self.chat.length,
+          content: message,
+          author: window.ship,
+          isRightAligned: true,
+          timeReceived: new Date().getTime(),
+        });
+        self.chat.push(chatMessage);
+        yield RoomsIPC.sendChat(message);
+      }),
       init: flow(function* () {
         if (!appState.loggedInAccount)
           throw new Error('No logged in ship for rooms store');
@@ -303,6 +329,7 @@ export const RoomsStore = types
           }
         }
       }),
+      // rooms actions
       createRoom: flow(function* (
         title: string,
         access: 'public' | 'private',
@@ -465,20 +492,13 @@ export const RoomsStore = types
         room?.addPeer(patp);
         if (self.current?.rid === rid) {
           // if we are in the room, dial the new peer
-          if (remotePeers.has(patp)) {
-            console.log('!!!!!already have peer', patp);
-          }
-          if (patp !== self.our) {
+          if (patp !== window.ship) {
             const remotePeer = dialPeer(rid, patp, self.rtcConfig);
             // queuedPeers are peers that are ready for us to dial them
             if (queuedPeers.includes(patp)) {
-              // console.log('%room-entered in queuedPeer', patp);
               remotePeer.onWaiting();
               queuedPeers.splice(queuedPeers.indexOf(patp), 1);
             }
-          } else {
-            // this.emit(ProtocolEvent.RoomEntered, room);
-            // this.transitions.entering = null;
           }
         }
       },
@@ -509,9 +529,7 @@ export const RoomsStore = types
           self.current = undefined;
         }
         const room = self.rooms.get(rid);
-        console.log('_onRoomDeleted', room?.creator, self.our);
-        if (room?.creator !== self.our) {
-          // console.log('_onRoomDeleted someone else deleted');
+        if (room?.creator !== window.ship) {
           remotePeers.forEach((peer) => {
             hangup(peer.patp);
           });
@@ -525,6 +543,16 @@ export const RoomsStore = types
       }) {
         self.provider = payload.provider;
         applySnapshot(self.rooms, cast(payload.rooms));
+      },
+      _onChatReceived(payload: { from: string; content: string }) {
+        const chatMessage = ChatModel.create({
+          index: self.chat.length,
+          content: payload.content,
+          author: payload.from,
+          isRightAligned: false,
+          timeReceived: new Date().getTime(),
+        });
+        self.chat.push(chatMessage);
       },
       _onSignal(payload: any) {
         const remotePeer = remotePeers.get(payload.from);
@@ -544,9 +572,6 @@ export const RoomsStore = types
         }
         if (!['retry', 'ack-waiting', 'waiting'].includes(signalData.type)) {
           if (remotePeer) {
-            console.log(
-              `%${JSON.parse(payload.data)?.type} from ${payload.from}`
-            );
             remotePeer.peerSignal(payload.data);
           } else {
             console.log(
@@ -590,6 +615,7 @@ function registerOnUpdateListener() {
       }
       if (type === 'chat-received') {
         console.log(`%chat-received`, payload);
+        shipStore.roomsStore._onChatReceived(payload);
       }
       if (type === 'provider-changed') {
         shipStore.roomsStore._onProviderChanged(payload);

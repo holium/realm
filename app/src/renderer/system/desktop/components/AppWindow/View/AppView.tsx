@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
+import { Flex, Spinner } from '@holium/design-system';
+
 // import { AppType } from 'renderer/stores/models/bazaar.model';
 import { genCSSVariables } from 'renderer/lib/theme';
 import { useAppState } from 'renderer/stores/app.store';
@@ -31,7 +33,6 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
 
   const [appUrl, setAppUrl] = useState<string | null>(null);
 
-  // const app = bazaarStore.getApp(appWindow.appId) as AppType;
   const isActive = shellStore.getWindowByAppId(appWindow.appId)?.isActive;
 
   const [loading, setLoading] = useState(true);
@@ -53,6 +54,7 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
     if (appWindow && loggedInAccount && webView) {
       webView.addEventListener('did-start-loading', onStartLoading);
       webView.addEventListener('did-stop-loading', onStopLoading);
+
       if (process.env.NODE_ENV === 'development') {
         webView.addEventListener(
           'console-message',
@@ -71,11 +73,11 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
       webView.addEventListener('did-attach', () => {
         webView.insertCSS(css);
         webView.send('mouse-color', shellStore.mouseColor);
+        setReady(true);
       });
       webView.addEventListener('dom-ready', () => {
         webView.insertCSS(css);
         webView.send('mouse-color', shellStore.mouseColor);
-        setReady(true);
       });
 
       webView.addEventListener('close', () => {
@@ -87,7 +89,7 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
       if (appWindow.href?.site) {
         appUrl = `${loggedInAccount.url}${appWindow.href?.site}?spaceId=${spacesStore.selected?.path}`;
       }
-      // shellStore.openWindow(toJS(app));
+
       setAppUrl(appUrl);
     }
 
@@ -102,17 +104,6 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
     theme.backgroundColor,
     theme.mode,
   ]);
-
-  // Set mouse color
-  useEffect(() => {
-    if (ready) {
-      const webView: Electron.WebviewTag = document.getElementById(
-        `${appWindow.appId}-urbit-webview`
-      ) as Electron.WebviewTag;
-
-      webView?.send('mouse-color', shellStore.mouseColor);
-    }
-  }, [shellStore.mouseColor, ready]);
 
   // Set theme on change
   useEffect(() => {
@@ -135,11 +126,16 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
   return useMemo(
     () => (
       <AppViewContainer>
+        {loading && (
+          <Flex width="100%" height="100%" justify="center" align="center">
+            <Spinner size={1} color="#FFF" />
+          </Flex>
+        )}
         <WebView
           innerRef={webViewRef}
           id={`${appWindow.appId}-urbit-webview`}
           appId={appWindow.appId}
-          partition="urbit-webview"
+          partition="persist:default"
           webpreferences="sandbox=false, nativeWindowOpen=yes"
           // @ts-ignore
           allowpopups="true"

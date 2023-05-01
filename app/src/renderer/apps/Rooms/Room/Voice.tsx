@@ -5,14 +5,14 @@ import { Flex } from '@holium/design-system';
 
 import { useTrayApps } from 'renderer/apps/store';
 import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { useShipStore, useShipStore } from 'renderer/stores/ship.store';
 
 import { Speaker } from '../components/Speaker';
 import { roomTrayConfig } from '../config';
 
 const VoiceViewPresenter = () => {
-  const { loggedInAccount } = useAppState();
   const { roomsStore } = useShipStore();
+  const { loggedInAccount } = useAppState();
 
   const { setTrayAppHeight } = useTrayApps();
 

@@ -70,7 +70,7 @@ export class FeaturedSpacesDB extends AbstractDataAccess<FeaturedSpace, any> {
   }
 
   public getFeaturedSpaces(): { [path: string]: FeaturedSpace } {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return {};
     const query = this.db.prepare(
       `
       SELECT 
@@ -92,7 +92,7 @@ export class FeaturedSpacesDB extends AbstractDataAccess<FeaturedSpace, any> {
   }
 
   public insertAll(featuredSpaces: { [key: string]: FeaturedSpace }) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const insert = this.db.prepare(
       `REPLACE INTO spaces_featured (
         path,

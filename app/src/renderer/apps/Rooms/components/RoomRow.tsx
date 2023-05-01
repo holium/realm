@@ -9,7 +9,7 @@ import {
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { useShipStore, useShipStore } from 'renderer/stores/ship.store';
 
 import { AvatarRow } from './AvatarRow';
 
@@ -43,9 +43,6 @@ const RoomRowPresenter = ({
   if (presentCount === 1) {
     peopleText = 'person';
   }
-  const peopleNoHost = present?.filter(
-    (person: string) => person !== loggedInAccount?.patp
-  );
   let titleText = title;
   if (titleText && titleText.length > 16 && tray) {
     titleText = titleText.substring(0, 16) + '...';

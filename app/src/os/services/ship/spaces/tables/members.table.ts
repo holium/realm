@@ -38,7 +38,7 @@ export class MembersDB extends AbstractDataAccess<Member, any> {
   }
 
   public insertAll(spacesMembers: { [key: string]: Member[] }) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const insert = this.db.prepare(
       `REPLACE INTO spaces_members (
         space,

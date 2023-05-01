@@ -7,7 +7,7 @@ import { Button, CommButton, Flex, Icon, Text } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { Badge } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { useShipStore, useShipStore } from 'renderer/stores/ship.store';
 
 import { RoomInvite } from './Invite';
 import { RoomChat } from './RoomChat';
@@ -45,7 +45,7 @@ const RoomPresenter = () => {
       setUnreadCount(
         latestChat
           ? latestChat.filter(
-              (msg: any) =>
+              (msg) =>
                 !readChat?.includes(msg) && msg.author !== loggedInAccount?.patp
             ).length
           : 0

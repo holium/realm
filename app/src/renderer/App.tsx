@@ -18,6 +18,8 @@ import { Shell } from './system';
 import { Auth } from './system/authentication/index';
 import { ErrorBoundary } from './system/ErrorBoundary';
 
+import './app.css';
+
 const AppContentPresenter = () => {
   const { seenSplash, authStore } = useAppState();
 
@@ -115,6 +117,7 @@ const AppPresenter = () => {
               {contextMenuMemo}
               <div id="portal-root" />
               <div id="menu-root" />
+              <div id="audio-root" />
             </ErrorBoundary>
           </ContextMenuProvider>
         </SelectionProvider>

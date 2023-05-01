@@ -28,9 +28,10 @@ const speakerType = {
   listener: 'Listener',
 };
 
-const SpeakerPresenter = ({ person, type }: ISpeaker) => {
+const SpeakerPresenter = (props: ISpeaker) => {
+  const { person, type } = props;
   const { loggedInAccount } = useAppState();
-  const { ship, friends, roomsStore } = useShipStore();
+  const { friends, roomsStore } = useShipStore();
   const speakerRef = useRef<any>(null);
   const { getOptions, setOptions } = useContextMenu();
   const isOur = person === loggedInAccount?.patp;

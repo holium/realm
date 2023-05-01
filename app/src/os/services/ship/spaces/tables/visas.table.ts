@@ -47,7 +47,7 @@ export class InvitationDB extends AbstractDataAccess<Invitation, any> {
   }
 
   public insertAll(spacesInvitations: { [key: string]: Invitation }) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db?.open) return;
     const insert = this.db.prepare(
       `REPLACE INTO spaces_invitations (
         path,
@@ -92,7 +92,7 @@ export class InvitationDB extends AbstractDataAccess<Invitation, any> {
   }
 
   removeInvite(path: string) {
-    if (!this.db) throw new Error('No db connection');
+    if (!this.db) return;
     const deleteInvite = this.db.prepare(
       `DELETE FROM spaces_invitations WHERE path = ?`
     );

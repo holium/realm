@@ -51,6 +51,7 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
       switch (spacesType) {
         case 'initial':
           this.shipDB?.exec(`
+            DELETE FROM spaces_stalls;
             DELETE FROM app_docks;
             DELETE FROM app_recommendations;
             DELETE FROM app_catalog;
