@@ -49,8 +49,9 @@ export const ChatLogList = ({
       row.sender === messages[index - 1].sender &&
       Object.keys(messages[index - 1].contents[0])[0] !== 'status';
 
-    let topSpacing = isPrevGrouped ? 3 : 2;
-    let bottomSpacing = isNextGrouped ? 3 : 2;
+    // we need to use 3px here because numbers are increments of 4px -- so 3 is 12px actually
+    let topSpacing = isPrevGrouped ? '3px' : 2;
+    let bottomSpacing = isNextGrouped ? '3px' : 2;
 
     const thisMsgDate = new Date(row.createdAt).toDateString();
     const prevMsgDate =

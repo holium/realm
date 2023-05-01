@@ -18,6 +18,8 @@ import { Shell } from './system';
 import { Auth } from './system/authentication/index';
 import { ErrorBoundary } from './system/ErrorBoundary';
 
+import './app.css';
+
 const AppContentPresenter = () => {
   const { seenSplash, authStore } = useAppState();
 

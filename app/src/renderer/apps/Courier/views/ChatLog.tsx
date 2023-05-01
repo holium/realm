@@ -25,6 +25,7 @@ import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
 import { PinnedContainer } from '../components/PinnedMessage';
 import { ChatLogList } from './ChatLogList';
+import { trackEvent } from 'renderer/lib/track';
 
 const FullWidthAnimatePresence = styled(AnimatePresence)`
   position: absolute;
@@ -51,6 +52,10 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   const { color: ourColor } = useMemo(() => {
     if (!loggedInAccount) return { color: '#000' };
     return friends.getContactAvatarMetadata(loggedInAccount.patp);
+  }, []);
+
+  useEffect(() => {
+    trackEvent('OPENED', 'CHAT_LOG');
   }, []);
 
   useEffect(() => {

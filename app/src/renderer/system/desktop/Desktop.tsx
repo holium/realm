@@ -2,24 +2,26 @@ import { Bottom, Fill, Layer } from 'react-spaces';
 import { observer } from 'mobx-react';
 
 import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { AppWindowManager } from './AppWindowManager';
 import { HomePane } from './components/Home/HomePane';
 import { SystemBar } from './components/SystemBar/SystemBar';
 import { TrayManager } from './TrayManager';
+import { useMultiplayer } from './useMultiplayer';
 
 const DesktopPresenter = () => {
-  const { shellStore } = useAppState();
-  // const { session } = authStore;
-  // const roomsManager = undefined;
+  const { shellStore, authStore } = useAppState();
+  const shipStore = useShipStore();
+  const { session } = authStore;
 
-  // useMultiplayer({
-  //   patp: session?.patp,
-  //   shipColor: session?.color ?? '#000000',
-  //   desktopDimensions: shellStore.desktopDimensions,
-  //   isMultiplayerEnabled: shellStore.multiplayerEnabled,
-  //   roomsManager,
-  // });
+  useMultiplayer({
+    patp: session?.patp,
+    shipColor: session?.color ?? '#000000',
+    desktopDimensions: shellStore.desktopDimensions,
+    isMultiplayerEnabled: shellStore.multiplayerEnabled,
+    shipStore,
+  });
 
   return (
     <Fill>

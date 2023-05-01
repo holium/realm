@@ -102,7 +102,7 @@ export const UrbitApp = types
     icon: types.maybeNull(types.string), // native app only
     host: types.maybeNull(types.string),
     config: types.maybeNull(RealmConfig),
-    gridIndex: types.maybe(types.number),
+    gridIndex: types.maybe(types.maybeNull(types.number)),
     isRecommended: types.optional(types.boolean, false),
   })
   .actions((self) => ({
@@ -185,8 +185,8 @@ export const BazaarStore = types
         .slice()
         .sort((a, b) => {
           if (a.gridIndex === undefined && b.gridIndex === undefined) return 0;
-          if (a.gridIndex === undefined) return 1;
-          if (b.gridIndex === undefined) return -1;
+          if (a.gridIndex === undefined || a.gridIndex === null) return 1;
+          if (b.gridIndex === undefined || b.gridIndex === null) return -1;
           return a.gridIndex - b.gridIndex;
         });
       return apps;

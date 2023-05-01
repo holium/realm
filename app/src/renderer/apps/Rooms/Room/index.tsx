@@ -12,6 +12,7 @@ import { useShipStore } from 'renderer/stores/ship.store';
 import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
 import { VoiceView } from './Voice';
+import { trackEvent } from 'renderer/lib/track';
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
@@ -30,6 +31,10 @@ const RoomPresenter = () => {
     if (!roomsStore.current) return;
     return roomsStore.current;
   }, [roomsStore.current]);
+
+  useEffect(() => {
+    trackEvent('OPENED', 'ROOMS_VOICE');
+  }, []);
 
   const [readChat, setReadChat] = useState(roomsStore.chat.slice());
   const [unreadCount, setUnreadCount] = useState(0);

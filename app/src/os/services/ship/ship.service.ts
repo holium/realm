@@ -1,4 +1,4 @@
-import { app } from 'electron';
+import { app, session } from 'electron';
 import log from 'electron-log';
 import fs from 'fs';
 import { reject } from 'lodash';

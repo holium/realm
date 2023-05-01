@@ -1,39 +1,41 @@
 import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
+import { onAction } from 'mobx-state-tree';
 
 import { useToggle } from '@holium/design-system';
-import { RoomManagerEvent, RoomsManager } from '@holium/realm-room';
 
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { genCSSVariables } from 'renderer/lib/theme';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppWindowMobxType } from 'renderer/stores/models/window.model';
+import { ShipStoreInstance, useShipStore } from 'renderer/stores/ship.store';
 
 import { WebView } from './WebView';
 
 const connectWebviewToMultiplayer = async (
   ship: string,
-  roomsManager: RoomsManager,
+  shipStore: ShipStoreInstance,
   webview: Electron.WebviewTag
 ) => {
   console.log('Connecting webview to presence.');
+  const onDataChannel = (_rid: string, _peer: string, { value }: any) => {
+    if (!value) return;
+    if (value.multiplayer && value.multiplayer.event === 'mouse-click') {
+      const { patp, elementId } = value.multiplayer;
+      webview.send('multiplayer.realm-to-app.mouse-click', patp, elementId);
+    } else if (value.broadcast) {
+      webview.send('presence.realm-to-app.broadcast', ...value.broadcast.data);
+    }
+  };
 
-  roomsManager.on(
-    RoomManagerEvent.OnDataChannel,
-    async (_rid: string, _peer: string, { value }) => {
-      if (!value) return;
-
-      if (value.multiplayer && value.multiplayer.event === 'mouse-click') {
-        const { patp, elementId } = value.multiplayer;
-        webview.send('multiplayer.realm-to-app.mouse-click', patp, elementId);
-      } else if (value.broadcast) {
-        webview.send(
-          'presence.realm-to-app.broadcast',
-          ...value.broadcast.data
-        );
+  onAction(shipStore, (call) => {
+    if (call.path === '/roomsStore') {
+      if (call.name === '_onDataChannel') {
+        if (call.args) {
+          onDataChannel('', '', call.args[0]);
+        }
       }
     }
-  );
+  });
 
   webview.executeJavaScript(`
     window.ship = '${ship}';
@@ -47,8 +49,7 @@ type Props = {
 
 const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
   const { loggedInAccount, theme } = useAppState();
-
-  const roomsManager = useRooms();
+  const shipStore = useShipStore();
 
   const loading = useToggle(false);
   const [readyWebview, setReadyWebview] = useState<Electron.WebviewTag>();
@@ -65,11 +66,11 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
       webviewId
     ) as Electron.WebviewTag | null;
 
-    if (!webview || !loggedInAccount || !roomsManager) return;
+    if (!webview || !loggedInAccount) return;
 
     const onDomReady = () => {
       setReadyWebview(webview);
-      connectWebviewToMultiplayer(loggedInAccount.patp, roomsManager, webview);
+      connectWebviewToMultiplayer(loggedInAccount.patp, shipStore, webview);
     };
 
     webview.addEventListener('dom-ready', onDomReady);
@@ -77,7 +78,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
     return () => {
       webview.removeEventListener('dom-ready', onDomReady);
     };
-  }, [appWindow.appId, loggedInAccount, roomsManager]);
+  }, [appWindow.appId, loggedInAccount, shipStore.roomsStore]);
 
   useEffect(() => {
     if (!readyWebview) return;

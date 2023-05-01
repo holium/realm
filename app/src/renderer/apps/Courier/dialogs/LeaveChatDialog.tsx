@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { ConfirmDialog } from 'renderer/apps/System/Dialogs/Confirm';
 import { normalizeBounds } from 'renderer/lib/window-manager';
-import { useChatStore } from 'renderer/stores/chat.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 
 type LeaveChatDialogConfigComponentProps = {
@@ -16,7 +16,8 @@ const LeaveChatDialogConfigComponent = ({
   ...props
 }: LeaveChatDialogConfigComponentProps) => {
   const [loading, setLoading] = useState(false);
-  const { getChatHeader, leaveChat } = useChatStore();
+  const { chatStore } = useShipStore();
+  const { getChatHeader, leaveChat } = chatStore;
   const onConfirm = async () => {
     if (path) {
       setLoading(true);
