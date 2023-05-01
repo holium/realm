@@ -20,7 +20,7 @@ import { MobXAccount } from 'renderer/stores/models/account.model';
 
 import { SettingSection } from '../../components/SettingSection';
 
-const forceCenterStyle: CSSProperties = {
+export const forceCenterStyle: CSSProperties = {
   position: 'absolute',
   top: '50%',
   left: '50%',

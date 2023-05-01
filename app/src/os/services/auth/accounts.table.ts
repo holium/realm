@@ -25,7 +25,7 @@ export class Accounts extends AbstractDataAccess<DBAccount, any> {
       serverId: row.serverId,
       serverUrl: row.serverUrl,
       serverCode: row.serverCode,
-      serverType: row.type,
+      serverType: row.serverType,
       nickname: row.nickname,
       description: row.description,
       color: row.color,

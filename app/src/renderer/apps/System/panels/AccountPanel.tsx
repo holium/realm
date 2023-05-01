@@ -13,6 +13,7 @@ import { AccountPassportSection } from './sections/AccountPassportSection';
 import { AccountSelfHostingSection } from './sections/AccountSelfHostingSection';
 import { AccountStorageSection } from './sections/AccountStorageSection';
 import { MaybeLogin } from './sections/MaybeLogin';
+import { ServerSelfHostingSection } from './sections/ServerSelfHostingSection';
 
 const AccountPanelPresenter = () => {
   const { loggedInAccount } = useAppState();
@@ -46,10 +47,20 @@ const AccountPanelPresenter = () => {
           </UserContextProvider>
         </MaybeLogin>
       ) : (
-        <AccountSelfHostingSection
-          account={loggedInAccount}
-          key={`${loggedInAccount.serverId}-settings-self-hosting`}
-        />
+        <>
+          <MaybeLogin>
+            <UserContextProvider api={thirdEarthApi}>
+              <AccountSelfHostingSection
+                account={loggedInAccount}
+                key={`${loggedInAccount.serverId}-settings-hosting-self-hosting`}
+              />
+            </UserContextProvider>
+          </MaybeLogin>
+          <ServerSelfHostingSection
+            account={loggedInAccount}
+            key={`${loggedInAccount.serverId}-settings-account-self-hosting`}
+          />
+        </>
       )}
     </SettingPane>
   );

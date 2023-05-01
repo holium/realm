@@ -7,7 +7,7 @@ export const AccountModel = types.model('AccountModel', {
   serverId: types.identifier,
   serverUrl: types.string,
   serverCode: types.string,
-  serverType: types.optional(types.enumeration(['local', 'hosted']), 'local'),
+  serverType: types.string,
   nickname: types.maybeNull(types.string),
   description: types.maybeNull(types.string),
   color: types.maybeNull(types.string),
