@@ -6,13 +6,13 @@ import { Button, CommButton, Flex, Icon, Text } from '@holium/design-system';
 
 import { useTrayApps } from 'renderer/apps/store';
 import { Badge } from 'renderer/components';
+import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
 import { VoiceView } from './Voice';
-import { trackEvent } from 'renderer/lib/track';
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
