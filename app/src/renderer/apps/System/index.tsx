@@ -89,7 +89,7 @@ const SystemAppPresenter = () => {
                 icon: 'AccountSettings',
                 label: 'Account',
                 value: 'account',
-                sublabel: 'Profile, hosting info',
+                sublabel: 'Passport, server info',
               },
               {
                 icon: 'QuestionCircle',
