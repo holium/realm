@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import {
@@ -17,6 +17,7 @@ import { useShipStore } from 'renderer/stores/ship.store';
 import { ChatModelType } from '../../../stores/models/chat.model';
 import { useTrayApps } from '../../store';
 import { ChatRow } from '../components/ChatRow';
+import { trackEvent } from 'renderer/lib/track';
 
 const rowHeight = 52;
 const heightPadding = 12;
@@ -30,6 +31,10 @@ export const InboxPresenter = () => {
   const { sortedChatList, setChat, setSubroute, isChatPinned } = chatStore;
   const [searchString, setSearchString] = useState<string>('');
   const currentSpace = spacesStore.selected;
+
+  useEffect(() => {
+    trackEvent('OPENED', 'CHAT_INBOX');
+  }, []);
 
   const searchFilter = useCallback(
     (preview: ChatModelType) => {
