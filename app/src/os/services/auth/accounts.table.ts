@@ -45,6 +45,13 @@ export class Accounts extends AbstractDataAccess<DBAccount, any> {
     return row ? this.mapRow(row) : null;
   }
 
+  public findAll(accountId: number): DBAccount[] {
+    const query = `SELECT * FROM ${this.tableName} WHERE accountId = ?`;
+    const stmt = this.prepare(query);
+    const rows = stmt.all(accountId);
+    return rows.map((row) => this.mapRow(row));
+  }
+
   public create(values: Partial<DBAccount>): DBAccount {
     const columns = Object.keys(values).join(', ');
     const placeholders = Object.keys(values)

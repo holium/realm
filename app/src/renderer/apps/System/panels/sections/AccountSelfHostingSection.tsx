@@ -9,16 +9,11 @@ import {
 
 import { thirdEarthApi } from 'renderer/onboarding/thirdEarthApi';
 import { OnboardingIPC } from 'renderer/stores/ipc';
-import { MobXAccount } from 'renderer/stores/models/account.model';
 
 import { SettingSection } from '../../components/SettingSection';
 import { forceCenterStyle } from './AccountHostingSection';
 
-type Props = {
-  account: MobXAccount;
-};
-
-export const AccountSelfHostingSection = ({ account }: Props) => {
+export const AccountSelfHostingSection = () => {
   const { token, email } = useUser();
 
   const changeEmail = useToggle(false);
@@ -64,16 +59,15 @@ export const AccountSelfHostingSection = ({ account }: Props) => {
   };
 
   const onSubmitNewPassword = async (password: string) => {
-    if (!token) return Promise.resolve(false);
+    if (!token) return false;
+    if (!email) return false;
+
     try {
       const response = await thirdEarthApi.changePassword(token, password);
 
       if (response?.token) {
         // Also update the password locally.
-        const result = await OnboardingIPC.updatePassword(
-          account.serverId,
-          password
-        );
+        const result = await OnboardingIPC.updatePassword(email, password);
 
         if (result) changePassword.toggleOff();
 

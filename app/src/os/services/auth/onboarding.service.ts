@@ -196,54 +196,36 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     return passport;
   }
 
-  updatePassword(serverId: string, password: string) {
+  updatePassword(email: string, password: string) {
     if (!this.authDB) {
       log.error('auth.service.ts:', 'updatePassword', 'No authDB found');
       return false;
     }
 
-    const account = this.authDB.tables.accounts.findOne(serverId);
-    if (!account) {
-      log.error(
-        'auth.service.ts:',
-        'updatePassword',
-        `No account found for ${serverId}`
-      );
-      return false;
-    }
-
-    const masterAccount = this.authDB.tables.masterAccounts.findOne(
-      account.accountId
+    const masterAccount = this.authDB.tables.masterAccounts.findFirst(
+      "email = '" + email + "'"
     );
     if (!masterAccount) {
       log.error(
         'auth.service.ts:',
         'updatePassword',
-        `No master account found for ${serverId}`
+        `No master account found for ${email}`
       );
       return false;
     }
 
-    const accountResult = this.authDB.tables.accounts.update(serverId, {
-      passwordHash: this.hashPassword(password),
-    });
-    if (accountResult) {
-      log.info(
-        'auth.service.ts:',
-        'updatePassword',
-        `Updated password for ${serverId}`
-      );
-    } else {
+    const accounts = this.authDB.tables.accounts.findAll(masterAccount.id);
+    if (!accounts || accounts.length === 0) {
       log.error(
         'auth.service.ts:',
         'updatePassword',
-        `Failed to update password for ${serverId}`
+        `No accounts found for masterAccount ${masterAccount.id}`
       );
       return false;
     }
 
     const masterAccountResult = this.authDB.tables.masterAccounts.update(
-      account.accountId,
+      masterAccount.id,
       {
         passwordHash: this.hashPassword(password),
       }
@@ -252,18 +234,42 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       log.info(
         'auth.service.ts:',
         'updatePassword',
-        `Updated password for master account ${account.accountId}`
+        `Updated password for masterAccount ${masterAccount.id}`
       );
     } else {
       log.error(
         'auth.service.ts:',
         'updatePassword',
-        `Failed to update password for master account ${account.accountId}`
+        `Failed to update password for masterAccount ${masterAccount.id}`
       );
       return false;
     }
 
-    return true;
+    const results = accounts.map((account) => {
+      const accountResult = this.authDB?.tables.accounts.update(
+        account.serverId,
+        {
+          passwordHash: this.hashPassword(password),
+        }
+      );
+      if (accountResult) {
+        log.info(
+          'auth.service.ts:',
+          'updatePassword',
+          `Updated password for ${account.serverId}`
+        );
+        return true;
+      } else {
+        log.error(
+          'auth.service.ts:',
+          'updatePassword',
+          `Failed to update password for ${account.serverId}`
+        );
+        return false;
+      }
+    });
+
+    return results.every((result) => result);
   }
 
   async updatePassport(

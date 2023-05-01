@@ -84,16 +84,15 @@ export const AccountHostingSection = ({ account }: Props) => {
   };
 
   const onSubmitNewPassword = async (password: string) => {
-    if (!token) return Promise.resolve(false);
+    if (!token) return false;
+    if (!email) return false;
+
     try {
       const response = await thirdEarthApi.changePassword(token, password);
 
       if (response?.token) {
         // Also update the password locally.
-        const result = await OnboardingIPC.updatePassword(
-          account.serverId,
-          password
-        );
+        const result = await OnboardingIPC.updatePassword(email, password);
 
         if (result) changePasswordModal.toggleOff();
 

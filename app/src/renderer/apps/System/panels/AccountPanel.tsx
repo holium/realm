@@ -51,7 +51,6 @@ const AccountPanelPresenter = () => {
           <MaybeLogin>
             <UserContextProvider api={thirdEarthApi}>
               <AccountSelfHostingSection
-                account={loggedInAccount}
                 key={`${loggedInAccount.serverId}-settings-hosting-self-hosting`}
               />
             </UserContextProvider>
