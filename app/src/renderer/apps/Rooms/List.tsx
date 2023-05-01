@@ -8,12 +8,18 @@ import { useShipStore } from 'renderer/stores/ship.store';
 import { useTrayApps } from '../store';
 import { ProviderSelector } from './components/ProviderSelector';
 import { RoomRow } from './components/RoomRow';
+import { useEffect } from 'react';
+import { trackEvent } from 'renderer/lib/track';
 
 const RoomsPresenter = () => {
   const { spacesStore, roomsStore } = useShipStore();
   const { roomsApp } = useTrayApps();
 
   const ourSpace = spacesStore.selected?.type === 'our';
+
+  useEffect(() => {
+    trackEvent('OPENED', 'ROOMS_LIST');
+  }, []);
 
   const rooms = ourSpace
     ? roomsStore?.roomsList
