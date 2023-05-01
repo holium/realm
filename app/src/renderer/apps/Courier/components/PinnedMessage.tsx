@@ -38,7 +38,7 @@ const BlurredBG = styled.div`
 
 export const PinnedContainer = ({ message }: PinnedContainerProps) => {
   const { chatStore } = useShipStore();
-  const { selectedChat } = chatStore;
+  const selectedChat = chatStore.selectedChat;
   const { friends } = useShipStore();
   const { loggedInAccount, theme } = useAppState();
   // are we an admin of the chat?
