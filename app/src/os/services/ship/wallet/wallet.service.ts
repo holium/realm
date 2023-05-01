@@ -61,7 +61,7 @@ export class WalletService extends AbstractService {
           app: 'realm-wallet',
           path: '/passcode-hash',
         })
-      ).passcode ?? '';
+      )['passcode-hash'] ?? '';
     return await bcrypt.compare(passcode.map(String).join(''), passcodeHash);
   }
 
@@ -325,7 +325,7 @@ export class WalletService extends AbstractService {
   }
 
   async getWalletsUpdate() {
-    this.walletDB?.sendChainUpdate(await this.walletDB._fetchWallets());
+    // this.walletDB?.sendChainUpdate(await this.walletDB._fetchWallets());
   }
 }
 

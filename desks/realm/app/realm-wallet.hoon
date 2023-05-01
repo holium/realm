@@ -79,16 +79,16 @@
     ?>  (team:title our.bowl src.bowl)
     ?+    path  (on-peek:def path)
         [%x %eth-xpub ~]
-      :^  ~  ~  %realm-wallet-view
-      !>  ^-  view
+      :^  ~  ~  %realm-wallet-update
+      !>  ^-  update
       [%eth-xpub xpub:(~(got by chains.settings) %ethereum)]
         [%x %settings ~]
-      :^  ~  ~  %realm-wallet-view
-      !>  ^-  view
+      :^  ~  ~  %realm-wallet-update
+      !>  ^-  update
       [%settings settings.state]
         [%x %passcode-hash ~]
-      :^  ~  ~  %realm-wallet-view
-      !>  ^-  view
+      :^  ~  ~  %realm-wallet-update
+      !>  ^-  update
       [%passcode-hash passcode-hash.settings.state]
     ==
   ++  on-agent  on-agent:def
@@ -191,14 +191,13 @@
     ::  send default wallet if requested
     ::
     =/  net-settings  (~(got by chains.settings.state) chain.act)
-    =/  num-wallets  .^(@ud %gx /(scot %p our.bowl)/realm/(scot %da now.bowl)/num-wallets/[chain.act]/noun)
+    =/  num-wallets  .^(@ud %gx /(scot %p our.bowl)/wallet-db/(scot %da now.bowl)/num-wallets/[chain.act]/noun)
     ?:  ?&  !(team:title our.bowl src.bowl)
             =(%default wallet-creation.sharing.net-settings)
-            =/  num-wallets  .^(@ud %gx /(scot %p our.bowl)/realm/(scot %da now.bowl)/num-wallets/[chain.act]/noun)
             (gth num-wallets 0)
         ==
       =/  default-idx  default-index.net-settings
-      =/  default-wallet  .^(wallet-row:db %gx /(scot %p our.bowl)/realm/(scot %da now.bowl)/num-wallets/[chain.act]/[default-idx]/noun)
+      =/  default-wallet  .^(wallet-row:db %gx /(scot %p our.bowl)/wallet-db/(scot %da now.bowl)/num-wallets/[chain.act]/[default-idx]/noun)
       :_  state
       ^-  (list card)
       =/  wall-act=action  [%receive-address chain.act `address.default-wallet]
@@ -231,13 +230,15 @@
         =/  task  [%poke %realm-wallet-action !>(`action`[%receive-address chain.act ~])]
         [%pass /addr/(scot %p src.bowl) %agent [src.bowl dap.bowl] task]~
       ~
+    =/  cards
+      =/  task  [%poke %realm-wallet-db-action !>(`action:db`[%set-wallet u.wallet])]
+      [%pass / %agent [src.bowl %wallet-db] task]~
     ::  send wallet to requester if not our
-    =/  cards  ~
     ?:  !(team:title our.bowl src.bowl)
       =/  task  [%poke %realm-wallet-action !>(`action`[%receive-address chain.act `address:u.wallet])]
       :_  state
-      [%pass /addr/(scot %p src.bowl) %agent [src.bowl dap.bowl] task]~
-    `state
+      (welp cards [%pass /addr/(scot %p src.bowl) %agent [src.bowl dap.bowl] task]~)
+    [cards state]
     ::
       %request-address
     =/  task  [%poke %realm-wallet-action !>(`action`[%create-wallet our.bowl chain.act (crip (scow %p our.bowl))])]

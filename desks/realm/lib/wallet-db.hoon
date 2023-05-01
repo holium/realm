@@ -21,14 +21,17 @@
   ^-  (quip card state-0:sur)
   ?>  ?!((~(has by wallets-table.state) [chain.row wallet-index.row]))  :: ensure the path doesn't already exist!!!
   =.  wallets-table.state  (~(put by wallets-table.state) [chain.row wallet-index.row] row)
-  `state
+  =/  change  realm-wallet-db-change+!>([%add-row [%wallets row]]~)
+  :_  state
+  [%give %fact [/db]~ change]~
 ::
 ++  insert-transaction
   |=  [=transaction-row:sur state=state-0:sur =bowl:gall]
   ^-  (quip card state-0:sur)
   =.  transactions-table.state  (add-transaction-to-table transactions-table.state transaction-row)
-  =/  thechange  realm-wallet-db-change+!>([%add-row [%transactions transaction-row]]~)
-  `state
+  =/  change  realm-wallet-db-change+!>([%add-row [%transactions transaction-row]]~)
+  :_  state
+  [%give %fact [/db]~ change]~
 ::
 ++  complete-transaction
   |=  [[=txn-id:sur success=?] state=state-0:sur =bowl:gall]
@@ -38,7 +41,9 @@
     ?:  success  %succeeded
       %failed
   =.  transactions-table.state  (~(put by transactions-table.state) [txn-id txn])
-  `state
+  =/  change  realm-wallet-db-change+!>([%upd-transactions-row [%transactions txn-id txn]]~)
+  :_  state
+  [%give %fact [/db]~ change]~
 ::
 ++  save-transaction-notes
   |=  [[=txn-id:sur notes=@t] state=state-0:sur =bowl:gall]
@@ -53,8 +58,8 @@
 ++  enjs
   =,  enjs:format
   |%
-    ++  db-dump :: encodes for on-watch
-      |=  db=db-dump:sur
+    ++  db-view :: encodes for on-watch
+      |=  db=db-view:sur
       ^-  json
       %-  pairs
       :_  ~
@@ -63,6 +68,8 @@
       ?-  -.db
         %tables
           (all-tables:encode tables.db)
+        %num-wallets
+          (num-wallets:encode num.db)
       ==
     ++  db-change :: encodes for on-watch
       |=  db=db-change:sur
@@ -92,6 +99,11 @@
           %wallets      wallets+(wallets-table +.table)
           %transactions   transactions+(transactions-table +.table)
         ==
+    ::
+    ++  num-wallets
+      |=  num=@ud
+      ^-  json
+      (numb num)
     ::
     ++  wallets-table
       |=  tbl=wallets-table:sur
@@ -126,7 +138,6 @@
             ['type' %s %update]
             ['table' %s %wallets]
             ['row' (wallet-row wallet-row.ch)]
-            ['old-row' (wallet-row old.ch)]
           ==
       ==
     ::

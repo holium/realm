@@ -70,10 +70,10 @@
     ^-  (unit (unit cage))
     ?+  path  !!
   ::
-      [%x %db ~]
-        ``realm-wallet-db-dump+!>(tables+all-tables:core)
-      [%x %num-wallets =chain:sur ~]
-        ``realm-wallet-db-view+!>(num-wallets+(lent wallets-table))
+        [%x %db ~]
+      ``realm-wallet-db-dump+!>(tables+all-tables:core)
+        [%x %num-wallets @ ~]
+      ``noun+!>(`@ud`(lent wallets-table))
     ==
     ::
 ::      [%x %db %wallets ~]

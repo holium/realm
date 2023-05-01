@@ -28,9 +28,7 @@
 +$  update
   $%  [%address =ship =chain address=(unit address)]
       [%settings settings]
-  ==
-+$  view
-  $%  [%eth-xpub xpub=(unit @t)]
+      [%eth-xpub xpub=(unit @t)]
       [%settings settings]
       [%passcode-hash passcode-hash=@t]
   ==

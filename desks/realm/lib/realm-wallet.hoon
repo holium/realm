@@ -73,6 +73,10 @@
   :_  ~
   :-  `cord`-.update
   ?-   -.update
+      %eth-xpub
+    ?~  xpub.update  ~
+    [%s u.xpub.update]
+  ::
       %settings
     %-  pairs
     ^-  (list [@t json])
@@ -96,6 +100,9 @@
             [%s (scot %p blocked)]
         ['blocked' a+blocked]
     ==
+  ::
+      %passcode-hash
+    s+passcode-hash.update
   ::
       %address
     %-  pairs
