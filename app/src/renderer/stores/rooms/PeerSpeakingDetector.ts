@@ -1,8 +1,12 @@
-import { LocalPeer } from '../peer/LocalPeer';
-import { BaseAnalyser } from './BaseAnalyser';
-import { IAudioAnalyser } from './types';
+import { RemotePeer } from './RemotePeer';
 
-export class SpeakingDetectionAnalyser extends BaseAnalyser {
+export interface IAudioAnalyser {
+  attach: (peer: RemotePeer) => void;
+  detach: () => void;
+}
+
+export class PeerSpeakingDetectionAnalyser {
+  peer: RemotePeer | null = null;
   audioContext: AudioContext | null = null;
   mediaStreamSource: MediaStreamAudioSourceNode | null = null;
   analyser: AnalyserNode | null = null;
@@ -12,8 +16,8 @@ export class SpeakingDetectionAnalyser extends BaseAnalyser {
   averageFrequency: number = 0;
   lo: number = 0;
   hi: number = 0;
-  static initialize(peer: LocalPeer): IAudioAnalyser {
-    const analyser = new SpeakingDetectionAnalyser();
+  static initialize(peer: RemotePeer): IAudioAnalyser {
+    const analyser = new PeerSpeakingDetectionAnalyser();
     analyser.attach(peer);
     return analyser;
   }
@@ -39,14 +43,14 @@ export class SpeakingDetectionAnalyser extends BaseAnalyser {
       }
     }
   }
-  override attach(peer: LocalPeer) {
-    super.attach(peer);
+  attach(peer: RemotePeer) {
+    this.peer = peer;
     this.audioContext = new (window.AudioContext ||
       window.webkitAudioContext)();
     this.analyser = this.audioContext.createAnalyser();
-    if (!peer.stream) throw new Error('No stream');
+    if (!peer.audioStream) throw new Error('No stream');
     this.mediaStreamSource = this.audioContext.createMediaStreamSource(
-      peer.stream
+      peer.audioStream
     );
     this.mediaStreamSource?.connect(this.analyser);
     this.analyser.minDecibels = -90;
@@ -57,11 +61,10 @@ export class SpeakingDetectionAnalyser extends BaseAnalyser {
     this.dataArray = new Uint8Array(this.bufferLength);
     requestAnimationFrame(this.detect.bind(this));
   }
-  override detach() {
+  detach() {
     if (this.currentFrameId !== 0) {
       cancelAnimationFrame(this.currentFrameId);
       this.currentFrameId = 0;
     }
-    super.detach();
   }
 }

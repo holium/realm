@@ -2,7 +2,6 @@ import { MouseEvent, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 
 import { Flex, Row, Text } from '@holium/design-system';
-import { RoomType } from '@holium/realm-room';
 
 import {
   ContextMenuOption,
@@ -13,7 +12,7 @@ import { useShipStore, useShipStore } from 'renderer/stores/ship.store';
 
 import { AvatarRow } from './AvatarRow';
 
-type RoomRowProps = Partial<RoomType> & {
+type RoomRowProps = Partial<any> & {
   tray?: boolean;
   onClick?: (evt: any) => any;
   rightChildren?: any;

@@ -188,7 +188,7 @@ onSnapshot(shipStore, (snapshot) => {
 // -------------------------------
 // Create core context
 // -------------------------------
-type ShipStoreInstance = Instance<typeof ShipStore>;
+export type ShipStoreInstance = Instance<typeof ShipStore>;
 export const ShipStoreContext = createContext<null | ShipStoreInstance>(
   shipStore
 );

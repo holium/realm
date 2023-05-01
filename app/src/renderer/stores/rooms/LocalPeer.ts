@@ -99,6 +99,7 @@ export class LocalPeer {
     this.audioTracks.forEach((track: MediaStreamTrack) => {
       track.enabled = false;
     });
+    this.setters.setMuted(true);
   }
 
   unmute() {
@@ -106,6 +107,7 @@ export class LocalPeer {
     this.audioTracks.forEach((track: MediaStreamTrack) => {
       track.enabled = true;
     });
+    this.setters.setMuted(false);
   }
 
   setStatus(status: PeerConnectionState) {
@@ -114,6 +116,7 @@ export class LocalPeer {
 
   isSpeakingChanged(speaking: boolean) {
     this.isSpeaking = speaking;
+    this.setters.setSpeaking(speaking);
   }
 
   setAudioInputDevice(deviceId: string) {
@@ -156,9 +159,7 @@ export class LocalPeer {
         track.enabled = false;
       }
       if (!peer.spInstance?.destroyed) {
-        // console.log(`%streaming tracks to ${peer.patp}`);
         try {
-          // peer.spInstance?.addStream(currentStream);
           peer.spInstance?.addTrack(track, currentStream);
         } catch (e) {
           // catches "Track has already been added to that stream."

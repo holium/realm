@@ -4,6 +4,10 @@ import { patp2dec } from 'urbit-ob';
 
 import { RoomsIPC } from '../ipc';
 import { LocalPeer } from './LocalPeer';
+import {
+  IAudioAnalyser,
+  PeerSpeakingDetectionAnalyser,
+} from './PeerSpeakingDetector';
 import { DataPacket, DataPayload, PeerConnectionState } from './rooms.types';
 
 const DataPacketMuteStatus = 3;
@@ -16,6 +20,7 @@ export enum TrackKind {
   Video = 'video',
   Unknown = 'unknown',
 }
+
 type PeerSetters = {
   setMuted: (isMuted: boolean) => void;
   setAudioLevel?: (audioLevel: number) => void;
@@ -24,6 +29,11 @@ type PeerSetters = {
   setChat: (chatData: any) => void;
   setAudioAttached: (isAttached: boolean) => void;
   setStatus: (status: PeerConnectionState) => void;
+  onDataChannel: (data: DataPacket) => void;
+};
+
+type ConnectionSetupOptions = {
+  dataChannelOnly?: boolean;
 };
 
 export class RemotePeer {
@@ -43,6 +53,7 @@ export class RemotePeer {
   rtcConfig: any;
   isAudioAttached: boolean = false;
   isVideoAttached: boolean = false;
+  analysers: IAudioAnalyser[] = [];
   sendDataToPeer: (data: Partial<DataPacket>) => void = () => {};
   setters: PeerSetters = {
     setMuted: () => {},
@@ -51,6 +62,7 @@ export class RemotePeer {
     setChat: () => {},
     setAudioAttached: () => {},
     setStatus: () => {},
+    onDataChannel: () => {},
   };
 
   constructor(
@@ -86,23 +98,16 @@ export class RemotePeer {
       spInstance: observable,
       isAudioAttached: observable,
       isVideoAttached: observable,
-      attach: action.bound,
+      // attach: action.bound,
       detach: action.bound,
       removeTracks: action.bound,
       createConnection: action.bound,
       dial: action.bound,
-      _onConnect: action.bound,
-      _onClose: action.bound,
-      _onError: action.bound,
-      _onSignal: action.bound,
-      _onStream: action.bound,
-      _onTrack: action.bound,
-      _onData: action.bound,
       onWaiting: action.bound,
     });
   }
 
-  createConnection() {
+  createConnection(_options?: ConnectionSetupOptions) {
     // create the peer connection
     this.setStatus(PeerConnectionState.Connecting);
     if (this.spInstance?.connected) {
@@ -112,6 +117,7 @@ export class RemotePeer {
     if (!this.localPeer) {
       throw new Error('No local peer created');
     }
+
     this.spInstance = new SimplePeer({
       initiator: this.isInitiator,
       config: this.rtcConfig,
@@ -119,13 +125,78 @@ export class RemotePeer {
       objectMode: true,
       trickle: true,
     });
-    this.spInstance.on('connect', this._onConnect.bind(this));
-    this.spInstance.on('close', this._onClose.bind(this));
-    this.spInstance.on('error', this._onError.bind(this));
-    this.spInstance.on('signal', this._onSignal.bind(this));
-    this.spInstance.on('stream', this._onStream.bind(this));
-    this.spInstance.on('track', this._onTrack.bind(this));
-    this.spInstance.on('data', this._onData.bind(this));
+    this.spInstance.on('connect', () => {
+      this.setStatus(PeerConnectionState.Connected);
+      // this.localPeer?.streamTracks(this);
+      this.sendDataToPeer({
+        kind: DataPacketMuteStatus,
+        value: { data: this.localPeer?.isMuted },
+      });
+    });
+    this.spInstance.on('close', () => {
+      this.setStatus(PeerConnectionState.Closed);
+    });
+    this.spInstance.on('error', (err) => {
+      console.error('RemotePeer error:', err);
+      this.setStatus(PeerConnectionState.Failed);
+    });
+    this.spInstance.on('signal', (data: SimplePeer.SignalData) => {
+      this.sendSignal(data);
+      if (this.status !== PeerConnectionState.Connected) {
+        this.setStatus(PeerConnectionState.Connecting);
+      }
+    });
+    this.spInstance.on('stream', (stream: MediaStream) => {
+      console.log('RemotePeer: got stream');
+      if (stream.getAudioTracks().length > 0) {
+        this.audioStream = stream;
+        const track = stream.getAudioTracks()[0];
+        this.audioTracks.set(track.id, track);
+        this.analysers[0] = PeerSpeakingDetectionAnalyser.initialize(this);
+        let audioElement: HTMLMediaElement = this.getMediaElement(
+          TrackKind.Audio
+        );
+        document.body.appendChild(audioElement);
+        audioElement.srcObject = stream;
+        audioElement.play();
+        this.setters.setAudioAttached(true);
+      }
+      this.setStatus(PeerConnectionState.Connected);
+    });
+    // this.spInstance.on(
+    //   'track',
+    //   (track: MediaStreamTrack, stream: MediaStream) => {
+    //     // console.log('_onTrack track added', track.id, track, stream);
+    //     // this.setStatus(PeerConnectionState.Connected);
+    //     // if (track.kind === 'audio') {
+    //     //   if (this.audioTracks.size > 0) {
+    //     //     console.log('this.audioTracks.size > 0, rmeoving tracks', track.id);
+    //     //     this.removeTracks();
+    //     //   }
+    //     //   this.audioTracks.set(track.id, track);
+    //     //   this.audioStream = stream;
+    //     //   this.analysers[0] = PeerSpeakingDetectionAnalyser.initialize(this);
+    //     //   this.attach(track);
+    //     //   this.setters.setAudioAttached(true);
+    //     // }
+    //   }
+    // );
+    this.spInstance.on('data', (data) => {
+      const dataPacket = JSON.parse(data.toString()) as DataPacket;
+      if (dataPacket.kind === DataPacketMuteStatus) {
+        const payload = dataPacket.value as DataPayload;
+        if (payload.data) {
+          this.mute();
+        } else {
+          this.unmute();
+        }
+      } else if (dataPacket.kind === DataPacketSpeakingChanged) {
+        const payload = dataPacket.value as DataPayload;
+        this.isSpeakingChanged(payload.data);
+      } else {
+        this.setters.onDataChannel(dataPacket);
+      }
+    });
   }
 
   sendSignal(data: SimplePeer.SignalData) {
@@ -139,11 +210,11 @@ export class RemotePeer {
     this.spInstance?.send(JSON.stringify(data));
   }
 
-  dial() {
+  dial(options?: ConnectionSetupOptions) {
     this.setStatus(PeerConnectionState.New);
     // only the waiting peer sends the waiting signal
     if (!this.isInitiator) {
-      this.createConnection();
+      this.createConnection(options);
       RoomsIPC.sendSignal(window.ship, this.patp, this.rid, {
         type: 'waiting',
         from: window.ship,
@@ -179,75 +250,6 @@ export class RemotePeer {
     } else {
       console.log('peerSignal: peer destroyed, not signaling', this.patp);
       this.setStatus(PeerConnectionState.Destroyed);
-    }
-  }
-
-  _onConnect() {
-    console.log('RemotePeer onConnect', this.patp);
-    this.setStatus(PeerConnectionState.Connected);
-    // this.localPeer?.streamTracks(this);
-    this.sendDataToPeer({
-      kind: DataPacketMuteStatus,
-      value: { data: this.localPeer?.isMuted },
-    });
-  }
-
-  _onClose() {
-    console.log('RemotePeer onClose', this.patp);
-    this.setStatus(PeerConnectionState.Closed);
-  }
-
-  _onError(err: Error) {
-    console.log('RemotePeer onError', this.patp, err);
-    // @ts-ignore
-    this.setStatus(PeerConnectionState.Failed);
-  }
-
-  _onSignal(data: SimplePeer.SignalData) {
-    this.sendSignal(data);
-    console.log('sendSignal', data.type, data);
-    if (this.status !== PeerConnectionState.Connected) {
-      this.setStatus(PeerConnectionState.Connecting);
-    }
-  }
-
-  _onStream(stream: MediaStream) {
-    console.log('_onStream:', this.patp, stream);
-    this.setStatus(PeerConnectionState.Connected);
-  }
-
-  _onTrack(track: MediaStreamTrack, stream: MediaStream) {
-    console.log('_onTrack track added', track.id, track, stream);
-    this.setStatus(PeerConnectionState.Connected);
-    if (track.kind === 'audio') {
-      if (this.audioTracks.size > 0) {
-        console.log('this.audioTracks.size > 0, rmeoving tracks', track.id);
-        this.removeTracks();
-      }
-      this.audioTracks.set(track.id, track);
-      this.attach(track);
-      this.setters.setAudioAttached(true);
-    }
-  }
-
-  _onData(data: any) {
-    const dataPacket = JSON.parse(data.toString()) as DataPacket;
-    if (dataPacket.kind === DataPacketMuteStatus) {
-      const payload = dataPacket.value as DataPayload;
-      if (payload.data) {
-        this.mute();
-      } else {
-        this.unmute();
-      }
-    } else if (dataPacket.kind === DataPacketSpeakingChanged) {
-      const payload = dataPacket.value as DataPayload;
-      this.isSpeakingChanged(payload.data);
-    } else if (data.kind === DataPacketChat) {
-      const payload = data.value as DataPayload;
-      this.chatReceived(payload.data);
-    } else if (data.kind === DataPacketTypingStatus) {
-      const payload = data.value as DataPayload;
-      this.isTypingChanged(payload.data);
     }
   }
 
@@ -300,29 +302,29 @@ export class RemotePeer {
     this.spInstance?.destroy();
   }
 
-  attach(track: MediaStreamTrack): HTMLMediaElement {
-    let element: HTMLMediaElement = this.getMediaElement(
-      track.kind as TrackKind
-    );
-    element = attachToElement(track, element);
-    console.log(element);
-    if (element instanceof HTMLAudioElement) {
-      this.isAudioAttached = true;
-      // element
-      //   .play()
-      //   .then(() => {
-      //     console.log('playing audio from peer', this.patp);
-      //   })
-      //   .catch((e) => {
-      //     console.error('ERROR: playing audio from peer', this.patp, e);
-      //   });
-    } else if (element instanceof HTMLVideoElement) {
-      this.isVideoAttached = true;
-    }
-    document.getElementById('audio-root')?.appendChild(element);
-    // console.log('attached', element);
-    return element;
-  }
+  // attach(track: MediaStreamTrack): HTMLMediaElement {
+  //   let element: HTMLMediaElement = this.getMediaElement(
+  //     track.kind as TrackKind
+  //   );
+  //   element = attachToElement(track, element);
+  //   console.log(element);
+  //   if (element instanceof HTMLAudioElement) {
+  //     this.isAudioAttached = true;
+  //     // element
+  //     //   .play()
+  //     //   .then(() => {
+  //     //     console.log('playing audio from peer', this.patp);
+  //     //   })
+  //     //   .catch((e) => {
+  //     //     console.error('ERROR: playing audio from peer', this.patp, e);
+  //     //   });
+  //   } else if (element instanceof HTMLVideoElement) {
+  //     this.isVideoAttached = true;
+  //   }
+  //   document.body.appendChild(element);
+  //   // console.log('attached', element);
+  //   return element;
+  // }
 
   detach(track: MediaStreamTrack): void {
     let elementId = `audio-${this.patp}`;
@@ -342,7 +344,7 @@ export class RemotePeer {
     if (element) {
       detachTrack(track, element);
     }
-    document.getElementById('audio-root')?.removeChild(element);
+    document.body.removeChild(element);
   }
 
   getMediaElement(kind: TrackKind): HTMLMediaElement {
