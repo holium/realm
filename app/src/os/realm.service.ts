@@ -63,7 +63,13 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       type: 'booted',
       payload: {
         accounts: this.services?.auth.getAccounts() || undefined,
-        session,
+        session: session
+          ? {
+              serverId: session.patp,
+              serverUrl: session.url,
+              cookie: session.cookie,
+            }
+          : undefined,
         seenSplash: this.services?.auth.hasSeenSplash() || false,
       },
     });
@@ -165,7 +171,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
    * @param patp
    * @returns
    */
-  async logout(patp: string) {
+  async logout(serverId: string) {
     if (!this.services) {
       return false;
     }
@@ -177,7 +183,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     this.sendUpdate({
       type: 'logout',
       payload: {
-        patp,
+        serverId,
       },
     });
     return true;
@@ -210,12 +216,16 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     return this.services.auth.updatePassword(patp, password);
   }
 
-  private _sendAuthenticated(patp: string, url: string, cookie: string) {
+  private _sendAuthenticated(
+    serverId: string,
+    serverUrl: string,
+    cookie: string
+  ) {
     this.sendUpdate({
       type: 'auth-success',
       payload: {
-        patp,
-        url,
+        serverId,
+        serverUrl,
         cookie,
       },
     });

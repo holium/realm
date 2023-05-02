@@ -70,7 +70,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
 
     const onDomReady = () => {
       setReadyWebview(webview);
-      connectWebviewToMultiplayer(loggedInAccount.patp, shipStore, webview);
+      connectWebviewToMultiplayer(loggedInAccount.serverId, shipStore, webview);
     };
 
     webview.addEventListener('dom-ready', onDomReady);

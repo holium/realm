@@ -3,7 +3,8 @@ import { useDragControls, useMotionValue } from 'framer-motion';
 import { debounce } from 'lodash';
 import { observer } from 'mobx-react';
 
-import { Flex, useToggle } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 
 import {
   denormalizeBounds,
@@ -231,7 +232,8 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     },
     [mouseDragX, mouseDragY]
   );
-  const appId = useMemo(() => appWindow.appId, [appWindow]);
+  const appId = useMemo(() => appWindow.appId, [appWindow.appId]);
+
   const updateWindowBounds = useCallback(
     debounce(() => {
       if (!shellStore.windows.has(appId)) return;
@@ -257,7 +259,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       resizeBottomRightX.set(motionX.get() + motionWidth.get());
       resizeBottomRightY.set(motionY.get() + motionHeight.get());
     }, 100),
-    [motionX, motionY, motionWidth, motionHeight]
+    [appId, motionX, motionY, motionWidth, motionHeight]
   );
 
   const onDragStart = (e: PointerEvent<HTMLDivElement>) => {

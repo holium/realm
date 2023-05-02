@@ -20,7 +20,7 @@ import { MobXAccount } from 'renderer/stores/models/account.model';
 
 import { SettingSection } from '../../components/SettingSection';
 
-const forceCenterStyle: CSSProperties = {
+export const forceCenterStyle: CSSProperties = {
   position: 'absolute',
   top: '50%',
   left: '50%',
@@ -41,7 +41,7 @@ export const AccountHostingSection = ({ account }: Props) => {
   const changeMaintenanceWindowModal = useToggle(false);
   const ejectIdModal = useToggle(false);
 
-  const ship = ships.find((s) => s.patp === account.patp);
+  const ship = ships.find((s) => s.patp === account.serverId);
 
   const { email, token } = OnboardingStorage.get();
 
@@ -84,16 +84,15 @@ export const AccountHostingSection = ({ account }: Props) => {
   };
 
   const onSubmitNewPassword = async (password: string) => {
-    if (!token) return Promise.resolve(false);
+    if (!token) return false;
+    if (!email) return false;
+
     try {
       const response = await thirdEarthApi.changePassword(token, password);
 
       if (response?.token) {
         // Also update the password locally.
-        const result = await OnboardingIPC.updatePassword(
-          account.patp,
-          password
-        );
+        const result = await OnboardingIPC.updatePassword(email, password);
 
         if (result) changePasswordModal.toggleOff();
 
@@ -112,7 +111,7 @@ export const AccountHostingSection = ({ account }: Props) => {
 
     const response = await thirdEarthApi.resetShipCode(
       token,
-      account.patp.toString()
+      account.serverId.toString()
     );
 
     if (response) return true;
@@ -125,7 +124,7 @@ export const AccountHostingSection = ({ account }: Props) => {
 
     const response = await thirdEarthApi.updateMaintenanceWindow(
       token,
-      account.patp.toString(),
+      account.serverId.toString(),
       maintenanceWindow
     );
 
@@ -139,7 +138,7 @@ export const AccountHostingSection = ({ account }: Props) => {
 
     const response = await thirdEarthApi.ejectShip(
       token,
-      account.patp.toString(),
+      account.serverId.toString(),
       ejectAddress,
       ethAddress
     );

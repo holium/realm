@@ -11,13 +11,13 @@ import {
   WindowedList,
 } from '@holium/design-system';
 
+import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ChatModelType } from '../../../stores/models/chat.model';
 import { useTrayApps } from '../../store';
 import { ChatRow } from '../components/ChatRow';
-import { trackEvent } from 'renderer/lib/track';
 
 const rowHeight = 52;
 const heightPadding = 12;
@@ -136,7 +136,7 @@ export const InboxPresenter = () => {
               }}
               itemContent={(index: number, chat: ChatModelType) => {
                 const isAdmin = loggedInAccount
-                  ? chat.isHost(loggedInAccount.patp)
+                  ? chat.isHost(loggedInAccount.serverId)
                   : false;
                 const height = chat.type === 'space' ? 70 : rowHeight;
                 const isLast = index === sortedChatList.length - 1;

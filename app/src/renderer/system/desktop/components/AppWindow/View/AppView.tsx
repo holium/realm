@@ -82,10 +82,10 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
         webView.closeDevTools();
       });
 
-      let appUrl = `${loggedInAccount.url}/apps/${appWindow.appId}/?spaceId=${spacesStore.selected?.path}`;
+      let appUrl = `${loggedInAccount.serverUrl}/apps/${appWindow.appId}/?spaceId=${spacesStore.selected?.path}`;
 
       if (appWindow.href?.site) {
-        appUrl = `${loggedInAccount.url}${appWindow.href?.site}?spaceId=${spacesStore.selected?.path}`;
+        appUrl = `${loggedInAccount.serverUrl}${appWindow.href?.site}?spaceId=${spacesStore.selected?.path}`;
       }
 
       setAppUrl(appUrl);

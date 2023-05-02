@@ -90,7 +90,7 @@ export const ShipBarPresenter = () => {
 
   useEffect(() => {
     initNotifications();
-  }, [loggedInAccount?.patp]);
+  }, [loggedInAccount?.serverId]);
 
   useEffect(() => {
     if (isAccountTrayOpen) {

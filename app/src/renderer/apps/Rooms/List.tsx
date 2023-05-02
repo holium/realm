@@ -1,15 +1,15 @@
+import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, Text, Tooltip } from '@holium/design-system';
 
+import { trackEvent } from 'renderer/lib/track';
 import { RoomMobx } from 'renderer/stores/rooms.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
 import { ProviderSelector } from './components/ProviderSelector';
 import { RoomRow } from './components/RoomRow';
-import { useEffect } from 'react';
-import { trackEvent } from 'renderer/lib/track';
 
 const RoomsPresenter = () => {
   const { spacesStore, roomsStore } = useShipStore();

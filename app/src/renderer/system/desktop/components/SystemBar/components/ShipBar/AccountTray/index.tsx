@@ -1,4 +1,3 @@
-// import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
@@ -37,7 +36,7 @@ const AccountTrayPresenter = ({ unreadCount, onClick }: AccountTrayProps) => {
               simple
               clickable={true}
               avatar={loggedInAccount.avatar}
-              patp={loggedInAccount.patp}
+              patp={loggedInAccount.serverId}
               size={26}
               borderRadiusOverride="4px"
               sigilColor={[loggedInAccount.color || '#000000', '#FFF']}

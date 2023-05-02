@@ -66,7 +66,7 @@ const SelectedSpacePresenter = ({ onClick }: SelectedSpaceProps) => {
           simple
           size={28}
           avatar={loggedInAccount.avatar}
-          patp={loggedInAccount.patp}
+          patp={loggedInAccount.serverId}
           sigilColor={[loggedInAccount.color || '#000000', 'white']}
         />
 
@@ -96,7 +96,7 @@ const SelectedSpacePresenter = ({ onClick }: SelectedSpaceProps) => {
             animate={{ color: textColor }}
             transition={{ color: { duration: 0.2 } }}
           >
-            {loggedInAccount.nickname || loggedInAccount.patp}
+            {loggedInAccount.nickname || loggedInAccount.serverId}
           </Text.Custom>
         </Flex>
       </Flex>

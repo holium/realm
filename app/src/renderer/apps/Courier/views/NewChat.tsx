@@ -49,7 +49,12 @@ export const NewChat = () => {
       chatType = 'group';
     }
     setCreating(true);
-    createChat(title, loggedInAccount.patp, chatType, Array.from(selectedPatp))
+    createChat(
+      title,
+      loggedInAccount.serverId,
+      chatType,
+      Array.from(selectedPatp)
+    )
       .then(() => {
         setSubroute('inbox');
         setCreating(false);

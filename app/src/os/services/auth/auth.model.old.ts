@@ -29,7 +29,7 @@ export const AuthShip = types
     },
   }));
 
-export type AuthShipType = Instance<typeof AuthShip>;
+export type OldAuthShipType = Instance<typeof AuthShip>;
 
 export const AuthStore = types
   .model('AuthStore', {
@@ -129,7 +129,7 @@ export const AuthStore = types
         self.order.push(id.toString());
       }
     },
-    setShip(newShip: AuthShipType) {
+    setShip(newShip: OldAuthShipType) {
       self.ships.set(newShip.id, newShip);
     },
     setShipProfile(
@@ -145,7 +145,7 @@ export const AuthStore = types
       ship.avatar = avatar;
       self.ships.set(id, ship);
     },
-    setSelected(newShip: AuthShipType) {
+    setSelected(newShip: OldAuthShipType) {
       self.selected = newShip;
     },
     deleteShip(patp: string) {

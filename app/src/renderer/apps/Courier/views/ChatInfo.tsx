@@ -115,7 +115,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
 
   useEffect(() => {
     if (!selectedChat || !loggedInAccount) return;
-    selectedChat.fetchPeers(loggedInAccount.patp);
+    selectedChat.fetchPeers(loggedInAccount.serverId);
   }, [selectedChat]);
 
   const { canUpload, promptUpload } = useFileUpload({ storage });
@@ -157,8 +157,8 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   };
 
   const amHost =
-    sortedPeers.find((peer) => peer.ship === loggedInAccount?.patp)?.role ===
-    'host';
+    sortedPeers.find((peer) => peer.ship === loggedInAccount?.serverId)
+      ?.role === 'host';
   const isSpaceChat = type === 'space';
 
   const patps = sortedPeers.map((peer) => peer.ship);
@@ -487,7 +487,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
           {sortedPeers.map((peer: PeerModelType) => {
             const id = `${path}-peer-${peer.ship}`;
             const options = [];
-            if (peer.ship !== loggedInAccount?.patp) {
+            if (peer.ship !== loggedInAccount?.serverId) {
               // TODO check if peer is friend
               options.push({
                 id: `${id}-add-friend`,

@@ -1,7 +1,7 @@
 import { ViewPort } from 'react-spaces';
 import { observer } from 'mobx-react';
 
-import { Login } from './login';
+import { Login } from './login/Login';
 
 type Props = {
   onAddShip: () => void;

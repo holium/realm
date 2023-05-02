@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 import { flow, Instance, onSnapshot, SnapshotIn, types } from 'mobx-state-tree';
 
-import { RealmSession } from 'os/realm.types';
+import { RealmSessionCredentials } from 'os/realm.types';
 
 import { ChatStore } from './chat.store';
 import { ShipIPC } from './ipc';
@@ -36,7 +36,7 @@ export const ShipStore = types
     loader: LoaderModel,
   })
   .actions((self) => ({
-    init(session: RealmSession) {
+    init(session: RealmSessionCredentials) {
       self.credentials = CredentialsModel.create(session);
       self.friends.init();
       self.chatStore.loadChatList();

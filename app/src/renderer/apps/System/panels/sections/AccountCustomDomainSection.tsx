@@ -21,7 +21,7 @@ export const AccountCustomDomainSection = ({ account }: Props) => {
   const [successMessage, setSuccessMessage] = useState<string>();
   const [errorMessage, setErrorMessage] = useState<string>();
 
-  const ship = ships.find((ship) => ship.patp === account.patp);
+  const ship = ships.find((ship) => ship.patp === account.serverId);
 
   const onSubmit = async () => {
     if (!ship) return false;

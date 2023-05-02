@@ -168,6 +168,6 @@ export const ConnectionStatus = observer(() => {
         </ConnStatusStyle>
       </Flex>
     ),
-    [status, isReconnecting, loggedInAccount?.patp]
+    [status, isReconnecting, loggedInAccount?.serverId]
   );
 });

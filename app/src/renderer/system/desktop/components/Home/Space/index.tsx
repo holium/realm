@@ -57,7 +57,7 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
   const membersCount = currentSpace.members.count;
   const maxWidth = 880;
 
-  const isAdmin = currentSpace.members.isAdmin(loggedInAccount.patp);
+  const isAdmin = currentSpace.members.isAdmin(loggedInAccount.serverId);
 
   const shouldShowAppGrid = appGrid || isOur;
 
@@ -110,7 +110,7 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
                 simple
                 size={32}
                 avatar={loggedInAccount.avatar}
-                patp={loggedInAccount.patp}
+                patp={loggedInAccount.serverId}
                 sigilColor={[loggedInAccount.color || '#000000', 'white']}
               />
             )} */}
@@ -254,7 +254,7 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
               }}
             >
               <AppSuite
-                patp={loggedInAccount.patp}
+                patp={loggedInAccount.serverId}
                 isAdmin={isAdmin as boolean}
               />
               <RecommendedApps />

@@ -34,9 +34,9 @@ export const CredentialsStep = ({ setStep }: StepProps) => {
       accessCode: shipCode,
     });
     OnboardingIPC.setCredentials({
-      patp: shipId,
-      code: shipCode,
-      url: shipUrl,
+      serverId: shipId,
+      serverCode: shipCode,
+      serverUrl: shipUrl,
     });
   }, []);
 

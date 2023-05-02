@@ -34,7 +34,7 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
   const spaceRowId = useMemo(() => `space-row-${space.path}`, [space.path]);
 
   const members = spacesStore.spaces.get(space.path)?.members;
-  const member = members?.all.get(loggedInAccount?.patp ?? '');
+  const member = members?.all.get(loggedInAccount?.serverId ?? '');
   const roles = member?.roles;
   const contextMenuOptions = useMemo(() => {
     const menu = [];

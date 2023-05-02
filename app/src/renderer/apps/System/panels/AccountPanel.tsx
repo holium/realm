@@ -10,40 +10,56 @@ import { SettingTitle } from '../components/SettingTitle';
 import { AccountCustomDomainSection } from './sections/AccountCustomDomainSection';
 import { AccountHostingSection } from './sections/AccountHostingSection';
 import { AccountPassportSection } from './sections/AccountPassportSection';
+import { AccountSelfHostingSection } from './sections/AccountSelfHostingSection';
 import { AccountStorageSection } from './sections/AccountStorageSection';
 import { MaybeLogin } from './sections/MaybeLogin';
+import { ServerSelfHostingSection } from './sections/ServerSelfHostingSection';
 
 const AccountPanelPresenter = () => {
   const { loggedInAccount } = useAppState();
 
   if (!loggedInAccount) return null;
 
-  const isRealmShip = loggedInAccount.type === 'hosted';
+  const isRealmShip = loggedInAccount.serverType === 'hosted';
 
   return (
     <SettingPane>
       <SettingTitle title="Account" />
       <AccountPassportSection
         account={loggedInAccount}
-        key={`${loggedInAccount.patp}-settings-passport`}
+        key={`${loggedInAccount.serverId}-settings-passport`}
       />
-      {isRealmShip && (
+      {isRealmShip ? (
         <MaybeLogin>
           <UserContextProvider api={thirdEarthApi}>
             <AccountHostingSection
               account={loggedInAccount}
-              key={`${loggedInAccount.patp}-settings-hosting`}
+              key={`${loggedInAccount.serverId}-settings-hosting`}
             />
             <AccountStorageSection
               account={loggedInAccount}
-              key={`${loggedInAccount.patp}-settings-storage`}
+              key={`${loggedInAccount.serverId}-settings-storage`}
             />
             <AccountCustomDomainSection
               account={loggedInAccount}
-              key={`${loggedInAccount.patp}-custom-domain`}
+              key={`${loggedInAccount.serverId}-settings-custom-domain`}
             />
           </UserContextProvider>
         </MaybeLogin>
+      ) : (
+        <>
+          <MaybeLogin>
+            <UserContextProvider api={thirdEarthApi}>
+              <AccountSelfHostingSection
+                key={`${loggedInAccount.serverId}-settings-hosting-self-hosting`}
+              />
+            </UserContextProvider>
+          </MaybeLogin>
+          <ServerSelfHostingSection
+            account={loggedInAccount}
+            key={`${loggedInAccount.serverId}-settings-account-self-hosting`}
+          />
+        </>
       )}
     </SettingPane>
   );

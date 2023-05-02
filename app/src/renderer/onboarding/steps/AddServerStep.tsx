@@ -33,9 +33,9 @@ export const AddServerStep = ({ setStep }: StepProps) => {
     });
 
     OnboardingIPC.setCredentials({
-      patp: shipId,
-      code: shipCode,
-      url: shipUrl,
+      serverId: shipId,
+      serverCode: shipCode,
+      serverUrl: shipUrl,
     });
 
     const { passwordHash, masterAccountId } = OnboardingStorage.get();
@@ -46,14 +46,15 @@ export const AddServerStep = ({ setStep }: StepProps) => {
       {
         accountId: masterAccountId,
         passwordHash,
-        patp: shipId,
+        serverId: shipId,
+        serverUrl: shipUrl,
+        serverCode: shipCode,
+        serverType: 'local',
         avatar: '',
         nickname: '',
         description: '',
         color: '#000000',
-        type: 'local',
-        url: shipUrl,
-        status: 'online',
+        status: 'initial',
         theme: JSON.stringify(defaultTheme),
       },
       passwordHash,

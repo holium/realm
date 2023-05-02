@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { Avatar, Box, Flex, RadioList, Text } from '@holium/design-system';
+import { Avatar, Box, Flex, Text } from '@holium/design-system/general';
+import { RadioList } from '@holium/design-system/inputs';
 
 import { useAppState } from 'renderer/stores/app.store';
 
@@ -45,7 +46,7 @@ const SystemAppPresenter = () => {
                 minWidth: 40,
               }}
               avatar={loggedInAccount.avatar}
-              patp={loggedInAccount.patp}
+              patp={loggedInAccount.serverId}
               sigilColor={[loggedInAccount.color || '#000000', 'white']}
             />
           </Box>
@@ -63,7 +64,7 @@ const SystemAppPresenter = () => {
               </Text.Custom>
             )}
             <Text.Custom fontWeight={300} fontSize={2}>
-              {loggedInAccount.patp}
+              {loggedInAccount.serverId}
             </Text.Custom>
           </Flex>
         </Flex>
@@ -89,7 +90,7 @@ const SystemAppPresenter = () => {
                 icon: 'AccountSettings',
                 label: 'Account',
                 value: 'account',
-                sublabel: 'Profile, hosting info',
+                sublabel: 'Passport, server info',
               },
               {
                 icon: 'QuestionCircle',
