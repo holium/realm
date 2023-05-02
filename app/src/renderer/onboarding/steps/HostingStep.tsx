@@ -5,6 +5,7 @@ import { observer } from 'mobx-react';
 import { HostingDialog, OnboardingStorage } from '@holium/shared';
 
 import { useAppState } from '../../stores/app.store';
+import { thirdEarthApi } from '../thirdEarthApi';
 import { StepProps } from './types';
 
 export const HostingStepPresenter = ({ setStep, onFinish }: StepProps) => {
@@ -22,9 +23,25 @@ export const HostingStepPresenter = ({ setStep, onFinish }: StepProps) => {
     }
   };
 
-  const onGetHosting = () => {
+  const onGetHosting = async () => {
     OnboardingStorage.set({ serverType: 'hosted' });
-    setStep('/choose-id');
+
+    // Check if authenticated.
+    const usedToken = OnboardingStorage.get().token;
+    if (!usedToken) setStep('/intermediary-login');
+
+    try {
+      const { email, token } = await thirdEarthApi.refreshToken(
+        usedToken as string
+      );
+      OnboardingStorage.set({ email, token });
+
+      setStep('/choose-id');
+    } catch (error) {
+      console.error(error);
+
+      setStep('/intermediary-login');
+    }
   };
 
   const onAddExistingServer = () => {

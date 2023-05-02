@@ -70,10 +70,10 @@ export const OnboardDialog = ({
         </OnboardDialogBodyContainer>
       </OnboardDialogBody>
       <OnboardDialogFooter>
-        <Flex flex={1} gap="16px" alignItems="center">
+        <Flex flex={1} alignItems="center">
           <OnboardDialogFooterBackButtonFlex>
             {onBack && (
-              <OnboardDialogBackButton onClick={onBack} type="button">
+              <OnboardDialogBackButton type="button" onClick={onBack}>
                 <Icon
                   name="ArrowLeftLine"
                   size={20}

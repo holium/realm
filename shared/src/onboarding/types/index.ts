@@ -96,6 +96,7 @@ export type RealmOnboardingStep =
   | '/passport'
   | '/password'
   | '/hosting'
+  | '/intermediary-login'
   | '/choose-id'
   | '/payment'
   | '/booting'
