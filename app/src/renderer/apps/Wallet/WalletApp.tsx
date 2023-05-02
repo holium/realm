@@ -123,7 +123,7 @@ const WalletAppPresenter = () => {
 
   return (
     <Flex
-      onClick={(evt: any) => evt.stopPropagation()}
+      onClick={(evt) => evt.stopPropagation()}
       position="relative"
       height={dimensions.height - 24}
       width="100%"
@@ -136,12 +136,8 @@ const WalletAppPresenter = () => {
         network={
           walletStore.navState.network === 'ethereum' ? 'ethereum' : 'bitcoin'
         }
-        onAddWallet={async () =>
-          await walletStore.navigate(WalletView.CREATE_WALLET)
-        }
-        onSetNetwork={async (network: any) =>
-          await walletStore.setNetwork(network)
-        }
+        onAddWallet={() => walletStore.navigate(WalletView.CREATE_WALLET)}
+        onSetNetwork={(network) => walletStore.setNetwork(network)}
         hide={hideHeader}
       />
       {pendingIsVisible &&
