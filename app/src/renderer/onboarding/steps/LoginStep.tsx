@@ -88,10 +88,14 @@ export const LoginStep = ({ forcedNextStep, setStep, onFinish }: StepProps) => {
         )
       );
 
-      onFinish?.();
+      if (forcedNextStep) {
+        setStep(forcedNextStep);
+      } else {
+        onFinish?.();
+      }
+    } else {
+      setStep(forcedNextStep ?? '/hosting');
     }
-
-    setStep(forcedNextStep ?? '/hosting');
 
     return true;
   };
