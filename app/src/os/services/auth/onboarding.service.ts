@@ -134,7 +134,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     this.authDB.addToOrder(acc.serverId);
 
     const cookie = await this.getCookie(acc.serverId, acc.serverUrl, shipCode);
-    log.info('auth.service.ts:', `Got cookie for ${acc.serverId}`)
+    log.info('auth.service.ts:', `Got cookie for ${acc.serverId}`);
     this._createShipDB(
       newAccount.serverId,
       password,
@@ -448,31 +448,31 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     serverCode: string
   ) {
     try {
-
       const now: number = Date.now();
       if (this.cookie && this.cookieAt && now - this.cookieAt < 3000) {
         // cache cookie for 3 seconds to prevent hammering urbit /~/login in quick succession
         return this.cookie;
       }
-  
+
       const cookie = await getCookie({ serverId, serverUrl, serverCode });
       if (!cookie) throw new Error('Failed to get cookie');
       const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
       const sanitizedCookie = cookie.split('; ')[0];
       log.info('ship.service.ts:', 'cookie', sanitizedCookie);
-            log.info(
-              'ship.service.ts:',
-              'ids',
-              serverId.toLowerCase(),cookiePatp.toLowerCase()
-            );
+      log.info(
+        'ship.service.ts:',
+        'ids',
+        serverId.toLowerCase(),
+        cookiePatp.toLowerCase()
+      );
 
       if (serverId.toLowerCase() !== cookiePatp.toLowerCase()) {
         throw new Error('Invalid serverCode.');
       }
-  
+
       this.cookie = sanitizedCookie;
       this.cookieAt = Date.now();
-  
+
       return sanitizedCookie;
     } catch (e) {
       log.error('ship.service.ts:', 'Failed to get cookie', e);
@@ -512,7 +512,13 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       cookie: string;
     }
   ) {
-    log.info('Creating ship database', serverId, encryptionKey, password, credentials)
+    log.info(
+      'Creating ship database',
+      serverId,
+      encryptionKey,
+      password,
+      credentials
+    );
     const newShipDB = new ShipDB(serverId, password, encryptionKey);
     newShipDB.setCredentials(
       credentials.serverUrl,
