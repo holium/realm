@@ -46,7 +46,12 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
         navigator.clipboard.writeText(space.path.substring(1));
       },
     });
-    if (roles?.includes('owner') || roles?.includes('admin')) {
+    const owner = space.path.split('/')[1];
+    if (
+      roles?.includes('owner') ||
+      roles?.includes('admin') ||
+      loggedInAccount?.serverId === owner
+    ) {
       menu.push({
         id: `space-row-${space.path}-btn-edit`,
         label: 'Edit',
@@ -58,7 +63,8 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
         },
       });
     }
-    if (member?.roles.includes('owner')) {
+
+    if (loggedInAccount?.serverId === owner) {
       menu.push({
         id: `space-row-${space.path}-btn-delete`,
         label: 'Delete',

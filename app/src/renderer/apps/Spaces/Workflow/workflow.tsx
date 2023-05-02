@@ -154,6 +154,7 @@ export const spacesDialogs: DialogRenderers = {
     hasPrevious: () => true,
     nextButtonText: 'Create Space',
     onNext: (_evt: any, state: any, setState: any) => {
+      console.log('state', state);
       setState({
         ...state,
         loading: true,
@@ -162,6 +163,9 @@ export const spacesDialogs: DialogRenderers = {
       state.description = state.description || '';
       if (state.crestOption === 'color') {
         state.picture = '';
+      } else {
+        state.picture = state.image;
+        delete state.image;
       }
       const createForm: NewSpace = state;
       shipStore.spacesStore.createSpace(createForm).then(() => {
