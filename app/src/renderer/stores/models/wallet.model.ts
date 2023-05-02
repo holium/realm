@@ -1357,11 +1357,16 @@ WalletIPC.onUpdate((payload: any) => {
   const type = Object.keys(payload)[0];
   if (type === '0') {
     if (payload.tables.wallets) {
-      const wallets = payload.tables.wallets;
-      if (wallets.length > 0) {
-        shipStore.walletStore.setInitialized(true);
+      const wallet = payload.wallet;
+      console.log('payload wallet update', wallet);
+      if (wallet.chain === 'ethereum') {
+        shipStore.walletStore.ethereum.applyWalletUpdate(wallet);
+      } else if (wallet.chain === 'bitcoin') {
+        shipStore.walletStore.bitcoin.applyWalletUpdate(wallet);
+      } else if (wallet.chain === 'btctestnet') {
+        shipStore.walletStore.btctest.applyWalletUpdate(wallet);
       }
-      // shipStore.walletStore.applyWalletUpdate(wallets);
+      shipStore.walletStore.updateWalletState();
     }
   } else {
     switch (type) {
@@ -1375,19 +1380,6 @@ WalletIPC.onUpdate((payload: any) => {
           shipStore.walletStore.btctest.applyWalletUpdate(wallet);
         }
         shipStore.walletStore.updateWalletState();
-        break;
-      case 'wallets':
-        const wallets = payload.wallets;
-        if (
-          Object.keys(wallets.ethereum).length !== 0 ||
-          Object.keys(wallets.bitcoin).length !== 0 ||
-          Object.keys(wallets.btctestnet).length !== 0
-        ) {
-          shipStore.walletStore.setInitialized(true);
-        }
-        shipStore.walletStore.ethereum.initial(wallets);
-        shipStore.walletStore.bitcoin.initial(wallets.bitcoin);
-        shipStore.walletStore.btctest.initial(wallets.btctestnet);
         break;
       case 'transaction':
         const transaction = payload.transaction;

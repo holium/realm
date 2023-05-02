@@ -77,10 +77,26 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
   private _onDbUpdate(data: any /*WalletDbReactions*/, _id?: number) {
     console.log('sending update', data);
-    const type = Object.keys(data)[0];
-    if (type === 'wallet') {
-      this._insertWallets({ [data.wallet.key]: data.wallet });
+    if (data.type === 'add-row') {
+      const addRow = data; // as AddRow;
+      switch (addRow.table) {
+        case 'wallets':
+          /*const message = addRow.row as WalletsRow;
+          this._insertWallets([wallet]);
+          // const msg = this.getChatMessage(message['msg-id']);
+          this.sendUpdate({ type: 'wallet', payload: msg });*/
+          break;
+        case 'transactions':
+          break;
+        default:
+          break;
+      }
     }
+    /*const type = Object.keys(data)[0];
+    if (type === 'wallet') {
+      console.log(data);
+      this._insertWallets(data.tables.wallets);
+    }*/
     this.sendUpdate(data);
   }
 
@@ -149,7 +165,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
       `REPLACE INTO transactions (
           chain,
           network,
-          wallet_index,
+          wallet_id,
           hash,
           eth_type,
           contract_address,
@@ -165,6 +181,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
         ) VALUES (
           @chain,
           @network,
+          @wallet_id,
           @hash,
           @eth_type,
           @contract_address,
@@ -185,7 +202,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
         insert.run({
           chain: tx.chain,
           network: tx.network,
-          wallet_index: tx['wallet-index'],
+          wallet_index: tx['wallet-id'],
           hash: tx.hash,
           eth_type: tx['eth-type'],
           contract_address: contractAddress,
@@ -206,6 +223,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
   private _insertWallets(wallets: any) {
     if (!this.db) throw new Error('No db connection');
+    console.log('inserting wallets');
     if (!wallets) return;
 
     const insert = this.db.prepare(
@@ -227,6 +245,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
           nickname: wallet.nickname,
         });
     });
+    console.log('inserting wallets');
     insertMany(wallets);
   }
 
@@ -240,7 +259,7 @@ create table if not exists transactions
 (
   chain          text    not null,
   network        text,
-  wallet_index   integer,
+  wallet_id      integer,
   hash           text    not null,
   eth_type       text,
   type           text not null,
