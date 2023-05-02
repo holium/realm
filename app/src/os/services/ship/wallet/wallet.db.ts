@@ -2,7 +2,7 @@ import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
 import { APIConnection } from '../../api';
-import { ProtocolType, TransactionsRow } from './wallet.types';
+import { TransactionsRow } from './wallet.types';
 
 interface WalletRow {}
 
@@ -29,23 +29,11 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
   async init() {
     const wallets = await this._fetchWallets();
-    this._insertWallets(wallets.wallets.ethereum);
-    this._insertWallets(wallets.wallets.bitcoin);
-    this._insertWallets(wallets.wallets.btctestnet);
-    const ethWallets = wallets.wallets.ethereum;
-    let wallet: any;
-    for (wallet of Object.values(ethWallets)) {
-      this._insertTransactions(
-        wallet.transactions[ProtocolType.ETH_GORLI] ?? {}
-      );
-      let contract: string;
-      let txns: any;
-      for ([contract, txns] of Object.entries(
-        wallet['token-txns'][ProtocolType.ETH_GORLI] ?? {}
-      )) {
-        this._insertTransactions(txns, contract);
-      }
-    }
+    console.log('wallets', wallets);
+    this._insertWallets(wallets);
+    const transactions = await this._fetchTransactions();
+    console.log('transactions', transactions);
+    this._insertTransactions(transactions);
   }
 
   protected mapRow(row: any): WalletRow {
@@ -64,13 +52,27 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     return response;
   }
 
-  async _fetchWallets() {
-    // const lastTimestamp = this.getLastTimestamp('wallets');
-    const response = await APIConnection.getInstance().conduit.scry({
-      app: 'realm-wallet',
-      path: '/wallets', // `/${lastTimestamp}`,
+  async _fetchAll() {
+    return await APIConnection.getInstance().conduit.scry({
+      app: 'wallet-db',
+      path: '/db', // `/${lastTimestamp}`,
     });
-    return response;
+  }
+
+  async _fetchWallets() {
+    const response = await APIConnection.getInstance().conduit.scry({
+      app: 'wallet-db',
+      path: '/db/wallets',
+    });
+    return response.tables.wallets;
+  }
+
+  async _fetchTransactions() {
+    const response = await APIConnection.getInstance().conduit.scry({
+      app: 'wallet-db',
+      path: '/db/transactions',
+    });
+    return response.tables.transactions;
   }
 
   private _onDbUpdate(data: any /*WalletDbReactions*/, _id?: number) {
@@ -147,8 +149,9 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
       `REPLACE INTO transactions (
           chain,
           network,
+          wallet_index,
           hash,
-          eth-type,
+          eth_type,
           contract_address,
           type,
           initiated_at,
@@ -163,7 +166,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
           @chain,
           @network,
           @hash,
-          @eth-type,
+          @eth_type,
           @contract_address,
           @type,
           @initiated_at,
@@ -182,6 +185,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
         insert.run({
           chain: tx.chain,
           network: tx.network,
+          wallet_index: tx['wallet-index'],
           hash: tx.hash,
           eth_type: tx['eth-type'],
           contract_address: contractAddress,
@@ -214,12 +218,10 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
           ) VALUES (@chain, @wallet_index, @path, @address, @nickname)`
     );
     const insertMany = this.db.transaction((wallets: any) => {
-      let index: string;
-      let wallet: any;
-      for ([index, wallet] of Object.entries(wallets))
+      for (const wallet of wallets)
         insert.run({
           chain: wallet.chain,
-          wallet_index: index,
+          wallet_index: wallet.index,
           path: wallet.path,
           address: wallet.address,
           nickname: wallet.nickname,
@@ -238,8 +240,9 @@ create table if not exists transactions
 (
   chain          text    not null,
   network        text,
+  wallet_index   integer,
   hash           text    not null,
-  eth-type       text,
+  eth_type       text,
   type           text not null,
   initiated_at   integer not null,
   completed_at   integer,

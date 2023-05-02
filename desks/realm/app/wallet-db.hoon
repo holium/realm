@@ -72,8 +72,12 @@
   ::
         [%x %db ~]
       ``realm-wallet-db-dump+!>(tables+all-tables:core)
+        [%x %db %wallets ~]
+      ``realm-wallet-db-dump+!>(tables+[[%wallets wallets-table.state] ~])
+        [%x %db %transactions ~]
+      ``realm-wallet-db-dump+!>(tables+[[%transactions transactions-table.state] ~])
         [%x %num-wallets @ ~]
-      ``noun+!>(`@ud`(lent wallets-table))
+      ``noun+!>(`@ud`(lent ~(tap by wallets-table)))
     ==
     ::
 ::      [%x %db %wallets ~]

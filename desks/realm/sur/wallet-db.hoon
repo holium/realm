@@ -60,9 +60,8 @@
       [%save-transaction-notes =txn-id notes=@t]
   ==
 ::
-+$  db-view
++$  db-dump
   $%  [%tables =tables]
-      [%num-wallets num=@ud]
   ==
 +$  db-change-type
   $%

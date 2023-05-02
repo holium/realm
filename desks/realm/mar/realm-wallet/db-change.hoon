@@ -1,5 +1,5 @@
 /-  wallet-db
-/+  db-lib=walle-db
+/+  db-lib=wallet-db
 ::
 |_  db=db-change:wallet-db
 ++  grad  %noun

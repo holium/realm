@@ -58,8 +58,8 @@
 ++  enjs
   =,  enjs:format
   |%
-    ++  db-view :: encodes for on-watch
-      |=  db=db-view:sur
+    ++  db-dump :: encodes for on-watch
+      |=  db=db-dump:sur
       ^-  json
       %-  pairs
       :_  ~
@@ -68,8 +68,6 @@
       ?-  -.db
         %tables
           (all-tables:encode tables.db)
-        %num-wallets
-          (num-wallets:encode num.db)
       ==
     ++  db-change :: encodes for on-watch
       |=  db=db-change:sur
@@ -175,6 +173,7 @@
             ?~  network.transaction-row  ~
             [%s u.network.transaction-row]
           ['hash' [%s hash.transaction-row]]
+          ['wallet-id' (wallet-id-to-json wallet-id.transaction-row)]
           :-  'eth-type'
             ?~  eth-type.transaction-row  ~
             [%s u.eth-type.transaction-row]
@@ -201,6 +200,18 @@
         ~
       (time t)
     ::
+    ++  wallet-id-to-json
+      |=  =wallet-id:sur
+      ^-  json
+      s+(wallet-id-to-cord wallet-id)
+    ::
+    ++  wallet-id-to-cord
+      |=  =wallet-id:sur
+      ^-  cord
+      =/  wallet-id-list
+        ~[chain.wallet-id (scot %ud wallet-index.wallet-id)]
+      (spat wallet-id-list)
+    ::
     ++  txn-id-to-json
       |=  =txn-id:sur
       ^-  json
@@ -210,13 +221,8 @@
       |=  =txn-id:sur
       ^-  cord
       =/  txn-id-list
-      ?~  network.txn-id
-        ~[chain.txn-id hash.txn-id]
-      :~  chain.txn-id
-          u.network.txn-id
-          hash.txn-id
-      ==
-      %-  spat  txn-id-list
+          ~[chain.txn-id hash.txn-id]
+      (spat txn-id-list)
     ::
   --
 ++  dejs-action

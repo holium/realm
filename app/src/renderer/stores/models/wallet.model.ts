@@ -8,7 +8,6 @@ import {
   types,
 } from 'mobx-state-tree';
 
-import { appState } from '../app.store';
 import { WalletIPC } from '../ipc';
 import { shipStore } from '../ship.store';
 
@@ -878,7 +877,6 @@ export const WalletStore = types
     sharingMode: types.string,
     whitelist: types.map(types.string),
     blacklist: types.array(types.string),
-    ourPatp: types.maybe(types.string),
     passcodeHash: types.maybe(types.string),
     lastInteraction: types.Date,
     initialized: types.boolean,
@@ -914,18 +912,16 @@ export const WalletStore = types
     return {
       init: flow(function* (): Generator<PromiseLike<any>, void, any> {
         try {
-          /*const wallets = yield WalletIPC.getWallets() as PromiseLike<any>;
-          const transactions =
+          const wallets = yield WalletIPC.getWallets() as PromiseLike<any>;
+          console.log('got wallets', wallets);
+          /*const transactions =
             yield WalletIPC.getTransactions() as PromiseLike<any>;*/
-          self.ourPatp = appState.loggedInAccount?.serverId;
-          if (self.ourPatp) {
-            const hasMnemonic = yield WalletIPC.hasMnemonic(self.ourPatp);
-            if (hasMnemonic) {
-              // @ts-expect-error
-              self.resetNavigation();
-              // @ts-expect-error
-              self.lock();
-            }
+          const hasMnemonic = yield WalletIPC.hasMnemonic(window.ship);
+          if (hasMnemonic) {
+            // @ts-expect-error
+            self.resetNavigation();
+            // @ts-expect-error
+            self.lock();
           }
           // @ts-expect-error
           setInterval(() => self.autoLock(), AUTO_LOCK_INTERVAL);
@@ -935,7 +931,6 @@ export const WalletStore = types
       }),
       setInitialized(initialized: boolean) {
         self.initialized = initialized;
-        self.ourPatp = appState.loggedInAccount?.serverId;
       },
       setNetworkSetter(network: NetworkType) {
         this.resetNavigation();
@@ -1084,7 +1079,7 @@ export const WalletStore = types
       ): Generator<PromiseLike<any>, void, any> {
         const passcodeString = passcode.map(String).join('');
         yield WalletIPC.deleteLocalMnemonic(
-          self.ourPatp ?? '',
+          window.ship,
           passcodeString ?? ''
         ) as PromiseLike<any>;
       }),
@@ -1093,7 +1088,7 @@ export const WalletStore = types
       ): Generator<PromiseLike<any>, void, any> {
         const passcodeString = passcode.map(String).join('');
         yield WalletIPC.deleteShipMnemonic(
-          self.ourPatp ?? '',
+          window.ship,
           passcodeString ?? ''
         ) as PromiseLike<any>;
       }),
@@ -1104,7 +1099,7 @@ export const WalletStore = types
         const passcodeString = passcode.map(String).join('');
         yield WalletIPC.setMnemonic(
           mnemonic,
-          self.ourPatp ?? '',
+          window.ship,
           passcodeString
         ) as PromiseLike<any>;
         const passcodeHash = yield bcrypt.hash(passcodeString, 12);
@@ -1112,26 +1107,26 @@ export const WalletStore = types
         yield WalletIPC.setXpub(
           'ethereum',
           "m/44'/60'/0'",
-          self.ourPatp ?? '',
+          window.ship,
           passcodeString
         ) as PromiseLike<any>;
         yield WalletIPC.setXpub(
           'bitcoin',
           "m/44'/0'/0'",
-          self.ourPatp ?? '',
+          window.ship,
           passcodeString
         ) as PromiseLike<any>;
         yield WalletIPC.setXpub(
           'btctestnet',
           "m/44'/1'/0'",
-          self.ourPatp ?? '',
+          window.ship,
           passcodeString
         ) as PromiseLike<any>;
       }),
       createWalletFlow: flow(function* (
         nickname: string
       ): Generator<PromiseLike<any>, void, any> {
-        const sender = self.ourPatp ?? '';
+        const sender = window.ship;
         let network: string = self.navState.network;
         if (
           network === 'bitcoin' &&
@@ -1161,7 +1156,7 @@ export const WalletStore = types
         const { hash, tx } = yield WalletIPC.sendTransaction(
           self.navState.protocol,
           path,
-          self.ourPatp ?? '',
+          window.ship,
           passcode.map(String).join(''),
           from,
           to,
@@ -1182,7 +1177,7 @@ export const WalletStore = types
           .get(self.navState.protocol)
           ?.transactionList.getStoredTransaction(hash);
 
-        yield WalletIPC.setTransaction(
+        yield WalletIPC.insertTransaction(
           'ethereum',
           self.navState.protocol,
           currentWallet.index,
@@ -1204,7 +1199,7 @@ export const WalletStore = types
         const { hash } = yield WalletIPC.sendERC20Transaction(
           self.navState.protocol,
           path,
-          self.ourPatp ?? '',
+          window.ship,
           passcode.map(String).join(''),
           from,
           to,
@@ -1231,7 +1226,7 @@ export const WalletStore = types
           .get(self.navState.protocol)
           ?.coins.get(contractAddress)
           ?.transactionList.getStoredTransaction(hash);
-        yield WalletIPC.setTransaction(
+        yield WalletIPC.insertTransaction(
           'ethereum',
           self.navState.protocol,
           currentWallet.index,
