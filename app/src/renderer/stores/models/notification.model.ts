@@ -88,6 +88,8 @@ export const NotifStore = types
     initNotifications: flow(function* () {
       try {
         const notifications = yield NotifIPC.getNotifications() as Promise<any>;
+        self.unreadByPaths.clear();
+        self.unreadByApps.clear();
         self.unreadByPaths = notifications.reduce(
           (acc: Map<string, number>, n: NotifMobxType) => {
             if (!n.read) {
@@ -188,6 +190,26 @@ export const NotifStore = types
     // onChangeHandlers
     _onInit(notifs: any) {
       self.notifications = notifs;
+      self.unreadByPaths.clear();
+      self.unreadByApps.clear();
+      self.unreadByPaths = notifs.reduce(
+        (acc: Map<string, number>, n: NotifMobxType) => {
+          if (!n.read) {
+            acc.set(n.path, (acc.get(n.path) || 0) + 1);
+          }
+          return acc;
+        },
+        self.unreadByPaths
+      );
+      self.unreadByApps = notifs.reduce(
+        (acc: Map<string, number>, n: NotifMobxType) => {
+          if (!n.read) {
+            acc.set(n.app, (acc.get(n.app) || 0) + 1);
+          }
+          return acc;
+        },
+        self.unreadByApps
+      );
     },
     _onNotifAdded(notif: NotifMobxType) {
       self.notifications.push(notif);
