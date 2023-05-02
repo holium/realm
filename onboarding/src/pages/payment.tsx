@@ -29,7 +29,7 @@ export async function getServerSideProps() {
 export default function Payment({ products }: ServerSideProps) {
   const { goToPage } = useNavigation();
 
-  const [shipId, setShipId] = useState('');
+  const [serverId, setServerId] = useState('');
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
 
@@ -40,11 +40,11 @@ export default function Payment({ products }: ServerSideProps) {
   const [invoiceId, setInvoiceId] = useState<string>();
 
   useEffect(() => {
-    const { shipId, email, token } = OnboardingStorage.get();
+    const { serverId, email, token } = OnboardingStorage.get();
 
-    if (!shipId || !email || !token) return;
+    if (!serverId || !email || !token) return;
 
-    setShipId(shipId);
+    setServerId(serverId);
     setEmail(email);
     setToken(token);
 
@@ -52,7 +52,7 @@ export default function Payment({ products }: ServerSideProps) {
       const response = await thirdEarthApi.stripeMakePayment(
         token,
         productId.toString(),
-        shipId
+        serverId
       );
       setClientSecret(response.clientSecret);
       setInvoiceId(response.invoiceId);
@@ -78,12 +78,12 @@ export default function Payment({ products }: ServerSideProps) {
   const onBack = () => goToPage('/choose-id');
 
   const onNext = async () => {
-    if (!token || !shipId || !invoiceId || !productId)
+    if (!token || !serverId || !invoiceId || !productId)
       return Promise.resolve(false);
 
     await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
-    await thirdEarthApi.updatePlanetStatus(token, shipId, 'sold');
-    await thirdEarthApi.ship(token, shipId, productId.toString(), invoiceId);
+    await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
+    await thirdEarthApi.ship(token, serverId, productId.toString(), invoiceId);
 
     goToPage('/booting');
 
@@ -95,7 +95,7 @@ export default function Payment({ products }: ServerSideProps) {
       <PaymentDialog
         products={products}
         productId={productId}
-        patp={shipId}
+        patp={serverId}
         email={email}
         stripe={stripe as any}
         stripeOptions={stripeOptions as any}

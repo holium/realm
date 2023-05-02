@@ -29,8 +29,8 @@ export const ChooseIdStep = ({ setStep }: StepProps) => {
     getAndSetPatps();
   }, []);
 
-  const onSelectPatp = (shipId: string) => {
-    OnboardingStorage.set({ shipId });
+  const onSelectPatp = (serverId: string) => {
+    OnboardingStorage.set({ serverId });
   };
 
   const onBack = () => {

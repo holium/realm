@@ -23,12 +23,12 @@ export const HostingStepPresenter = ({ setStep, onFinish }: StepProps) => {
   };
 
   const onGetHosting = () => {
-    OnboardingStorage.set({ shipType: 'hosted' });
+    OnboardingStorage.set({ serverType: 'hosted' });
     setStep('/choose-id');
   };
 
   const onAddExistingServer = () => {
-    OnboardingStorage.set({ shipType: 'local' });
+    OnboardingStorage.set({ serverType: 'local' });
     setStep('/add-server');
   };
 

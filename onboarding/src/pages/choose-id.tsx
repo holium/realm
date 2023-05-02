@@ -36,8 +36,8 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
 export default function ChooseId({ patps, back_url }: ServerSideProps) {
   const { goToPage } = useNavigation();
 
-  const onSelectPatp = (shipId: string) => {
-    OnboardingStorage.set({ shipId });
+  const onSelectPatp = (serverId: string) => {
+    OnboardingStorage.set({ serverId });
   };
 
   const onBack =

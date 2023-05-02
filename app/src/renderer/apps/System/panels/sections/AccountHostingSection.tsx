@@ -230,9 +230,9 @@ export const AccountHostingSection = ({ account }: Props) => {
           <AccountHostingDialogBody
             selectedPatp={ship.patp}
             email={ship.email}
-            shipUrl={ship.link}
-            shipCode={ship.code}
-            shipMaintenanceWindow={ship.maintenance_window}
+            serverUrl={ship.link}
+            serverCode={ship.code}
+            serverMaintenanceWindow={ship.maintenance_window}
             onClickChangeEmail={changeEmailModal.toggleOn}
             onClickChangePassword={changePasswordModal.toggleOn}
             onClickManageBilling={onClickManageBilling}

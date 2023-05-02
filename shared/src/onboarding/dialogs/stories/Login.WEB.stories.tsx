@@ -41,9 +41,9 @@ export const AccountHostingDialogStory: ComponentStory<
       selectedPatp="~pasren-satmex"
       setSelectedPatp={() => {}}
       email="rubberducky12@protonmail.com"
-      shipUrl="https://pasren-satmex.holium.network/"
-      shipCode="tolnym-rilmug-ricnep-marlyx"
-      shipMaintenanceWindow={7}
+      serverUrl="https://pasren-satmex.holium.network/"
+      serverCode="tolnym-rilmug-ricnep-marlyx"
+      serverMaintenanceWindow={7}
       onClickChangeEmail={() => {}}
       onClickChangePassword={() => {}}
       onClickManageBilling={() => {}}
