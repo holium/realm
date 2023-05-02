@@ -225,7 +225,7 @@ export const AccountHostingSection = ({ account }: Props) => {
         />
       </Portal>
       <SettingSection
-        title="Hosting"
+        title="Configure your server"
         body={
           <AccountHostingDialogBody
             selectedPatp={ship.patp}

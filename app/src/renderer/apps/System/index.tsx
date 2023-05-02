@@ -2,35 +2,117 @@ import { useState } from 'react';
 import { observer } from 'mobx-react';
 
 import { Avatar, Box, Flex, Text } from '@holium/design-system/general';
-import { RadioList } from '@holium/design-system/inputs';
+import { RadioList, RadioOption } from '@holium/design-system/inputs';
 
 import { useAppState } from 'renderer/stores/app.store';
 
 import { AboutPanel } from './panels/AboutPanel';
-import { AccountPanel } from './panels/AccountPanel';
+import { CustomDomainPanel } from './panels/CustomDomainPanel';
 import { HelpPanel } from './panels/HelpPanel';
+import { HostingPanel } from './panels/HostingPanel';
+import { PassportPanel } from './panels/PassportPanel';
+import { SelfHostingAccountPanel } from './panels/SelfHostingAccountPanel';
+import { StoragePanel } from './panels/StoragePanel';
 import { SystemPanel } from './panels/SystemPanel';
 import { ThemePanel } from './panels/ThemePanel';
 
 type SystemPanelType =
   | 'system'
   | 'theme'
-  | 'account'
+  | 'custom-domain'
+  | 'hosting'
+  | 'passport'
+  | 'self-hosting-account'
+  | 'storage'
   | 'about'
-  | 'help'
-  | string
-  | undefined;
+  | 'help';
 
 const SystemAppPresenter = () => {
   const { loggedInAccount, shellStore } = useAppState();
 
-  const defaultRoute: SystemPanelType =
-    shellStore.nativeConfig?.get('os-settings')?.route;
-  const [systemPanel, setSystemPanelType] = useState<SystemPanelType>(
-    defaultRoute || 'system'
-  );
+  const defaultRoute = (shellStore.nativeConfig?.get('os-settings')?.route ??
+    'system') as SystemPanelType;
+  const [systemPanel, setSystemPanelType] =
+    useState<SystemPanelType>(defaultRoute);
 
   if (!loggedInAccount) return null;
+
+  const isSelfHosted = loggedInAccount.serverType === 'local';
+
+  const selfHostedOptions: RadioOption[] = [
+    {
+      icon: 'AccountSettings',
+      label: 'Account',
+      value: 'self-hosting-account',
+      sublabel: 'Account, passport, server',
+    },
+  ];
+
+  const holiumServerOptions: RadioOption[] = [
+    {
+      icon: 'AccountSettings',
+      label: 'Passport',
+      value: 'passport',
+      sublabel: 'Your persistent identity',
+    },
+    {
+      icon: 'Folder',
+      label: 'Hosting',
+      value: 'hosting',
+      sublabel: 'Configure your server',
+    },
+    {
+      icon: 'UrlLink',
+      label: 'Custom Domain',
+      value: 'custom-domain',
+      sublabel: 'Custom server domain',
+    },
+    {
+      icon: 'CloudDownload',
+      label: 'Storage',
+      value: 'storage',
+      sublabel: 'S3 Storage',
+    },
+  ];
+
+  const baseOptions: RadioOption[] = [
+    {
+      icon: 'System',
+      label: 'System',
+      value: 'system',
+      sublabel: 'Display, sounds, notifications',
+    },
+    {
+      icon: 'Palette',
+      label: 'Theme',
+      value: 'theme',
+      sublabel: 'Colors, wallpaper, customization',
+    },
+    {
+      icon: 'QuestionCircle',
+      label: 'Help',
+      value: 'help',
+      sublabel: 'Support and documentation',
+    },
+    {
+      icon: 'Holium',
+      label: 'About',
+      value: 'about',
+      sublabel: 'Build number, IDs, etc.',
+    },
+  ];
+
+  const options: RadioOption[] = isSelfHosted
+    ? [
+        ...baseOptions.slice(0, 2),
+        ...selfHostedOptions,
+        ...baseOptions.slice(2),
+      ]
+    : [
+        ...baseOptions.slice(0, 2),
+        ...holiumServerOptions,
+        ...baseOptions.slice(2),
+      ];
 
   return (
     <Flex flex={1} minHeight={0}>
@@ -73,38 +155,7 @@ const SystemAppPresenter = () => {
           {/* menu / list  */}
           <RadioList
             selected={systemPanel}
-            options={[
-              {
-                icon: 'System',
-                label: 'System',
-                value: 'system',
-                sublabel: 'Display, sounds, notifications',
-              },
-              {
-                icon: 'Palette',
-                label: 'Theme',
-                value: 'theme',
-                sublabel: 'Colors, wallpaper, customization',
-              },
-              {
-                icon: 'AccountSettings',
-                label: 'Account',
-                value: 'account',
-                sublabel: 'Passport, server info',
-              },
-              {
-                icon: 'QuestionCircle',
-                label: 'Help',
-                value: 'help',
-                sublabel: 'Support and Documentation',
-              },
-              {
-                icon: 'Holium',
-                label: 'About',
-                value: 'about',
-                sublabel: 'Build number, IDs, etc.',
-              },
-            ]}
+            options={options}
             onClick={(value: SystemPanelType) => {
               setSystemPanelType(value);
             }}
@@ -115,7 +166,11 @@ const SystemAppPresenter = () => {
       <Flex flex={3} overflowX="hidden">
         {systemPanel === 'system' && <SystemPanel />}
         {systemPanel === 'theme' && <ThemePanel />}
-        {systemPanel === 'account' && <AccountPanel />}
+        {systemPanel === 'custom-domain' && <CustomDomainPanel />}
+        {systemPanel === 'hosting' && <HostingPanel />}
+        {systemPanel === 'passport' && <PassportPanel />}
+        {systemPanel === 'self-hosting-account' && <SelfHostingAccountPanel />}
+        {systemPanel === 'storage' && <StoragePanel />}
         {systemPanel === 'about' && <AboutPanel />}
         {systemPanel === 'help' && <HelpPanel />}
       </Flex>
