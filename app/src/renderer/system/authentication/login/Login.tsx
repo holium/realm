@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Bottom, Centered, Fill } from 'react-spaces';
 import { observer } from 'mobx-react';
 
@@ -8,12 +8,11 @@ import {
   Button,
   Flex,
   Icon,
-  Menu,
-  MenuItemProps,
   Spinner,
   Text,
-  TextInput,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
+import { Menu, MenuItemProps } from '@holium/design-system/navigation';
 import { OnboardingStorage } from '@holium/shared';
 
 import { useAppState } from 'renderer/stores/app.store';
@@ -29,26 +28,25 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   const {
     accounts,
     status: loginStatus,
-    selected: selectedShip,
-    setSelected: setSelectedShip,
+    selected: selectedAccount,
+    setSelected: setSelectedAccount,
   } = authStore;
 
   const [password, setPassword] = useState('');
   const passwordRef = useRef<HTMLInputElement>(null);
-  // const wrapperRef = useRef(null);
   const submitRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (!selectedShip) {
+    if (!selectedAccount) {
       const { lastAccountLogin } = OnboardingStorage.get();
-      setSelectedShip(lastAccountLogin || accounts[0].patp);
+      setSelectedAccount(lastAccountLogin ?? accounts[0].serverId);
     }
   }, []);
 
-  const shipName = selectedShip?.nickname || selectedShip?.patp;
+  const shipName = selectedAccount?.nickname || selectedAccount?.serverId;
 
   useEffect(() => {
-    selectedShip && setTheme(selectedShip?.theme);
+    selectedAccount && setTheme(selectedAccount?.theme);
     if (passwordRef.current) {
       passwordRef.current?.focus();
     }
@@ -63,7 +61,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
     //     setHasFailed(true);
     //   }
     // });
-  }, [selectedShip, passwordRef.current]);
+  }, [selectedAccount, passwordRef.current]);
 
   useEffect(() => {
     loginStatus.reset();
@@ -74,24 +72,23 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
       passwordRef.current.blur();
       passwordRef.current.focus();
     }
-  }, [selectedShip]);
+  }, [selectedAccount]);
 
   const login = async () => {
-    if (!selectedShip) return;
+    if (!selectedAccount) return;
 
     const status = await authStore.login(
-      selectedShip?.patp ?? '',
+      selectedAccount.serverId ?? '',
       passwordRef.current?.value ?? ''
     );
     // trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
 
     if (status) {
-      // setAccount(selectedShip);
+      // setAccount(selectedAccount);
     }
 
     if (status && status.state === 'error') {
       if (submitRef.current) {
-        // @ts-ignore
         submitRef.current.blur();
       }
       // const parts = status.split(':');
@@ -100,7 +97,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
       // if (parts.length > 1 && parseInt(parts[1]) === 400) {
       //   setLoginError('missing');
       //   ShellActions.openDialogWithStringProps('reset-code-dialog', {
-      //     ship: selectedShip?.patp,
+      //     ship: selectedAccount.serverId,
       //     // @ts-ignore
       //     password: passwordRef.current?.value,
       //   });
@@ -111,12 +108,12 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
     }
     // trackEvent('CLICK_LOG_IN', 'LOGIN_SCREEN');
   };
-  const clickSubmit = async (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const clickSubmit = async (event: KeyboardEvent<HTMLInputElement>) => {
     event.stopPropagation();
     login();
   };
 
-  const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     event.stopPropagation();
     if (event.key === 'Backspace') {
       loginStatus.reset();
@@ -132,8 +129,8 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   };
 
   const accountMenuId = useMemo(
-    () => `${selectedShip?.patp}-account-menu`,
-    [selectedShip]
+    () => `${selectedAccount?.serverId}-account-menu`,
+    [selectedAccount]
   );
   const contextMenuOptions: MenuItemProps[] = useMemo(() => {
     return [
@@ -143,7 +140,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
         label: 'Remove account',
         onClick: (evt) => {
           evt.stopPropagation();
-          selectedShip && authStore.removeAccount(selectedShip.patp);
+          selectedAccount && authStore.removeAccount(selectedAccount.serverId);
         },
       },
     ];
@@ -154,7 +151,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   return (
     <Fill>
       <Centered>
-        {selectedShip && (
+        {selectedAccount && (
           <Flex
             position="relative"
             mt={20}
@@ -172,9 +169,9 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                   size={72}
                   simple={false}
                   borderRadiusOverride="8px"
-                  avatar={selectedShip?.avatar}
-                  patp={selectedShip?.patp}
-                  sigilColor={[selectedShip?.color || '#000000', 'white']}
+                  avatar={selectedAccount.avatar}
+                  patp={selectedAccount.serverId}
+                  sigilColor={[selectedAccount.color || '#000000', 'white']}
                 />
               </Box>
               <Flex flexDirection="column" gap={10}>
@@ -187,7 +184,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                   animate={{ height: 'auto' }}
                 >
                   <Text.Custom
-                    key={`${selectedShip?.patp}`}
+                    key={`${selectedAccount.serverId}`}
                     initial={{ opacity: 0 }}
                     exit={{ opacity: 0.75 }}
                     animate={{
@@ -199,7 +196,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                   >
                     {shipName}
                   </Text.Custom>
-                  {selectedShip?.nickname && (
+                  {selectedAccount?.serverId && (
                     <Text.Custom
                       initial={{ opacity: 0 }}
                       exit={{ opacity: 0.35 }}
@@ -213,7 +210,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
                       fontSize={16}
                       opacity={0.35}
                     >
-                      {selectedShip?.patp}
+                      {selectedAccount.serverId}
                     </Text.Custom>
                   )}
                 </Flex>

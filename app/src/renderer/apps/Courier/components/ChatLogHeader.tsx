@@ -45,7 +45,7 @@ export const ChatLogHeader = ({
   const contextMenuOptions = useMemo(() => {
     const menu: MenuItemProps[] = [];
     if (!selectedChat || !loggedInAccount) return menu;
-    const isAdmin = selectedChat.isHost(loggedInAccount.patp);
+    const isAdmin = selectedChat.isHost(loggedInAccount.serverId);
     menu.push({
       id: `${chatLogId}-chat-info`,
       icon: 'Info',
@@ -105,7 +105,7 @@ export const ChatLogHeader = ({
           shellStore.openDialogWithStringProps('leave-chat-dialog', {
             path,
             amHost: isAdmin.toString(),
-            our: loggedInAccount.patp,
+            our: loggedInAccount.serverId,
           });
         },
       });

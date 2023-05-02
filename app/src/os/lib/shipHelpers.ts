@@ -1,20 +1,23 @@
 import log from 'electron-log';
 import fetch from 'cross-fetch';
 import dns from 'dns';
+
 dns.setDefaultResultOrder('ipv4first');
 
-export interface ShipConnectionData {
-  patp?: string;
-  url: string;
-  code: string;
+interface ShipConnectionData {
+  serverId?: string;
+  serverUrl: string;
+  serverCode: string;
 }
 
-export async function getCookie(ship: ShipConnectionData) {
-  log.info(`Getting cookie for ${ship.url} with code ${ship.code}`);
+export async function getCookie(server: ShipConnectionData) {
+  log.info(
+    `Getting cookie for ${server.serverUrl} with code ${server.serverCode}`
+  );
   try {
-    const response = await fetch(`${ship.url}/~/login`, {
+    const response = await fetch(`${server.serverUrl}/~/login`, {
       method: 'POST',
-      body: `password=${ship.code.trim()}`,
+      body: `password=${server.serverCode.trim()}`,
       headers: {
         'Content-Type': 'text/plain',
       },
@@ -24,7 +27,7 @@ export async function getCookie(ship: ShipConnectionData) {
 
     return cookie;
   } catch (e) {
-    log.error(`Error getting cookie for ${ship.url}`, e);
+    log.error(`Error getting cookie for ${server.serverUrl}`, e);
     return;
   }
 }

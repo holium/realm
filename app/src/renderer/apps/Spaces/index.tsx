@@ -201,7 +201,7 @@ const SpacesTrayAppPresenter = () => {
         {loggedInAccount && (
           <YouRow
             selected={
-              `/${loggedInAccount.patp}/our` === spacesStore.selected?.path
+              `/${loggedInAccount.serverId}/our` === spacesStore.selected?.path
             }
             space={spacesStore.ourSpace}
             account={loggedInAccount}

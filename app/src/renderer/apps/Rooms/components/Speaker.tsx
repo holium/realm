@@ -34,7 +34,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
   const { friends, roomsStore } = useShipStore();
   const speakerRef = useRef<any>(null);
   const { getOptions, setOptions } = useContextMenu();
-  const isOur = person === loggedInAccount?.patp;
+  const isOur = person === loggedInAccount?.serverId;
   const metadata = friends.getContactAvatarMetadata(person);
 
   let name = metadata?.nickname || person;
@@ -58,7 +58,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
           },
         },
         // only the creator can kick people
-        loggedInAccount?.patp === roomsStore.current?.creator && {
+        loggedInAccount?.serverId === roomsStore.current?.creator && {
           style: { color: '#FD4E4E' },
           id: `room-speaker-${person}-kick`,
           label: 'Kick',
@@ -94,7 +94,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
 
   useEffect(() => {
     if (
-      person !== loggedInAccount?.patp &&
+      person !== loggedInAccount?.serverId &&
       contextMenuOptions !== getOptions(`room-speaker-${person}`)
     ) {
       setOptions(`room-speaker-${person}`, contextMenuOptions);
@@ -104,7 +104,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
     getOptions,
     person,
     setOptions,
-    loggedInAccount?.patp,
+    loggedInAccount?.serverId,
   ]);
 
   return (

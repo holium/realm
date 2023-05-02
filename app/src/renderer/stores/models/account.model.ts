@@ -4,9 +4,10 @@ import { Theme } from './theme.model';
 
 export const AccountModel = types.model('AccountModel', {
   accountId: types.number,
-  type: types.enumeration(['local', 'hosted']),
-  patp: types.identifier,
-  url: types.string,
+  serverId: types.identifier,
+  serverUrl: types.string,
+  serverCode: types.string,
+  serverType: types.string,
   nickname: types.maybeNull(types.string),
   description: types.maybeNull(types.string),
   color: types.maybeNull(types.string),

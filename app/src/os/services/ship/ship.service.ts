@@ -1,4 +1,4 @@
-import { app, session } from 'electron';
+import { app } from 'electron';
 import log from 'electron-log';
 import fs from 'fs';
 import { reject } from 'lodash';
@@ -61,9 +61,9 @@ export class ShipService extends AbstractService<any> {
         log.info('ship.service.ts:', 'No cookie found, getting cookie...');
       }
       getCookie({
-        patp: patp,
-        url: credentials.url,
-        code: credentials.code,
+        serverId: patp,
+        serverUrl: credentials.url,
+        serverCode: credentials.code,
       })
         .then((cookie) => {
           if (cookie) {

@@ -50,9 +50,9 @@ const VoiceViewPresenter = () => {
       }}
     >
       <Speaker
-        key={loggedInAccount?.patp}
+        key={loggedInAccount?.serverId}
         type="our"
-        person={loggedInAccount?.patp ?? ''}
+        person={loggedInAccount?.serverId ?? ''}
       />
       {speakers.map((person: string) => (
         <Speaker key={person} type="speaker" person={person} />

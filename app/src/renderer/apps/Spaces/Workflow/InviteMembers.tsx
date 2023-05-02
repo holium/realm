@@ -93,7 +93,7 @@ const InviteMembersPresenter = ({
       status: MemberStatus;
     };
   }>({
-    [loggedInAccount?.patp ?? '']: {
+    [loggedInAccount?.serverId ?? '']: {
       primaryRole: 'owner',
       roles: ['owner'],
       alias: '',
@@ -131,11 +131,11 @@ const InviteMembersPresenter = ({
       getGroupMembers(workflowState.path).then(
         ({ members: groupMembers }: any) => {
           // Set up our ships
-          groupMembers[loggedInAccount.patp].roles = ['owner'];
-          groupMembers[loggedInAccount.patp].status = 'host';
-          groupMembers[loggedInAccount.patp].primaryRole = 'owner';
-          selectedPatp.add(loggedInAccount.patp);
-          setNicknameMap({ ...nicknameMap, [loggedInAccount.patp]: '' });
+          groupMembers[loggedInAccount.serverId].roles = ['owner'];
+          groupMembers[loggedInAccount.serverId].status = 'host';
+          groupMembers[loggedInAccount.serverId].primaryRole = 'owner';
+          selectedPatp.add(loggedInAccount.serverId);
+          setNicknameMap({ ...nicknameMap, [loggedInAccount.serverId]: '' });
           const newMembers: any = {
             ...groupMembers,
           };
@@ -144,7 +144,7 @@ const InviteMembersPresenter = ({
             ...workflowState,
             members: newMembers,
           });
-          delete groupMembers[loggedInAccount.patp];
+          delete groupMembers[loggedInAccount.serverId];
           for (var member of Object.keys(groupMembers)) {
             selectedPatp.add(member);
             setNicknameMap({ ...nicknameMap, [member]: '' });
@@ -156,7 +156,7 @@ const InviteMembersPresenter = ({
       setWorkspaceState({
         ...workflowState,
         members: {
-          [loggedInAccount.patp]: {
+          [loggedInAccount.serverId]: {
             roles: ['owner'],
             alias: '',
             status: 'host',
@@ -164,7 +164,7 @@ const InviteMembersPresenter = ({
           },
         },
       });
-      selectedPatp.add(loggedInAccount.patp);
+      selectedPatp.add(loggedInAccount.serverId);
     }
   }, []);
 
@@ -192,7 +192,7 @@ const InviteMembersPresenter = ({
 
   const RowRenderer = (patp: string) => {
     const nickname = nicknameMap[patp];
-    const isOur = patp === loggedInAccount?.patp;
+    const isOur = patp === loggedInAccount?.serverId;
     const contact = friends.getContactAvatarMetadata(patp);
 
     return (

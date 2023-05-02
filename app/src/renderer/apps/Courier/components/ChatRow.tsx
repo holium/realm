@@ -156,7 +156,7 @@ export const ChatRowPresenter = ({
           shellStore.openDialogWithStringProps('leave-chat-dialog', {
             path,
             amHost: isAdmin.toString(),
-            our: loggedInAccount.patp,
+            our: loggedInAccount.serverId,
           });
         },
       });

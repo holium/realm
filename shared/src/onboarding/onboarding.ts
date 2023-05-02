@@ -20,6 +20,8 @@ export { AddServerDialog } from './dialogs/AddServerDialog';
 export { AccountCustomDomainDialogBody } from './dialogs/bodies/AccountCustomDomainDialogBody';
 export { AccountHostingDialogBody } from './dialogs/bodies/AccountHostingDialogBody';
 export { AccountS3StorageDialogBody } from './dialogs/bodies/AccountS3StorageDialogBody';
+export { AccountSelfHostingDialogBody } from './dialogs/bodies/AccountSelfHostingDialogBody';
+export { ServerSelfHostingDialogBody } from './dialogs/bodies/ServerSelfHostingDialogBody';
 export { BootingDialog } from './dialogs/BootingDialog';
 export { ChooseIdDialog } from './dialogs/ChooseIdDialog';
 export { ClaimTokenDialog } from './dialogs/ClaimTokenDialog';

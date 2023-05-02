@@ -47,12 +47,12 @@ export const YouRow = ({
             borderRadiusOverride="6px"
             size={32}
             avatar={account.avatar}
-            patp={account.patp}
+            patp={account.serverId}
             sigilColor={[account.color || '#000000', 'white']}
           />
           <Flex ml={2} flexDirection="column">
             <Text.Custom fontSize={3} fontWeight={500}>
-              {account.nickname || account.patp}
+              {account.nickname || account.serverId}
             </Text.Custom>
           </Flex>
         </Flex>

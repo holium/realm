@@ -17,7 +17,7 @@ export const AccountDialogTable = styled(Flex)`
   }
 `;
 
-const AccountDialogTableRowContainer = styled(Flex)`
+export const AccountDialogTableRowContainer = styled(Flex)`
   flex: 1;
   align-items: center;
   justify-content: space-between;

@@ -23,7 +23,7 @@ export const AccountStorageSection = ({ account }: Props) => {
   const [minioUsage, setMinioUsage] = useState<number>(0);
 
   useEffect(() => {
-    const selectedShip = ships.find((ship) => ship.patp === account.patp);
+    const selectedShip = ships.find((ship) => ship.patp === account.serverId);
 
     if (!token) return;
     if (!selectedShip) return;
@@ -38,7 +38,7 @@ export const AccountStorageSection = ({ account }: Props) => {
         setNetworkUsage(response.networkUsage?.network_sent_total ?? 0);
         setMinioUsage(response.networkUsage?.minio_sent_total ?? 0);
       });
-  }, [token, ships, account.patp]);
+  }, [token, ships, account.serverId]);
 
   return (
     <SettingSection
