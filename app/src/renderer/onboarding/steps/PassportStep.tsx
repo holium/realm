@@ -8,7 +8,7 @@ import { AuthIPC, OnboardingIPC, RealmIPC } from '../../stores/ipc';
 import { StepProps } from './types';
 
 export const PassportStep = ({ setStep, onFinish }: StepProps) => {
-  const { shipId, nickname, description, avatar } = OnboardingStorage.get();
+  const { serverId, nickname, description, avatar } = OnboardingStorage.get();
   const [avatarSrc, setAvatarSrc] = useState<string | null>(avatar);
   const [descriptionSrc, setDescription] = useState<string | null>(description);
   const [nicknameSrc, setNickname] = useState<string | null>(nickname);
@@ -16,14 +16,22 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
 
   const [isReady, setIsReady] = useState(false);
 
+  const { serverType } = OnboardingStorage.get();
+  const isHoliumHosted = serverType === 'hosted';
+
   useEffect(() => {
-    const { shipId, shipCode, shipUrl, passwordHash, clientSideEncryptionKey } =
-      OnboardingStorage.get();
+    const {
+      serverId,
+      serverCode,
+      serverUrl,
+      passwordHash,
+      clientSideEncryptionKey,
+    } = OnboardingStorage.get();
 
     if (
-      !shipId ||
-      !shipCode ||
-      !shipUrl ||
+      !serverId ||
+      !serverCode ||
+      !serverUrl ||
       !passwordHash ||
       !clientSideEncryptionKey
     ) {
@@ -32,9 +40,9 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
     }
 
     OnboardingIPC.setCredentials({
-      serverId: shipId,
-      serverCode: shipCode,
-      serverUrl: shipUrl,
+      serverId: serverId,
+      serverCode: serverCode,
+      serverUrl: serverUrl,
     });
 
     OnboardingIPC.getPassport()
@@ -66,19 +74,21 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
     return url;
   };
 
-  const onBack = () => {
-    setStep('/login');
-  };
+  const onBack = isHoliumHosted
+    ? () => {
+        setStep('/credentials');
+      }
+    : undefined;
 
   const handleOnNext = async (
     nickname: string,
     description?: string,
     avatar?: string
   ) => {
-    if (!shipId) return false;
+    if (!serverId) return false;
 
     const response1 = await AuthIPC.updatePassport(
-      shipId,
+      serverId,
       nickname,
       description,
       avatar,
@@ -88,7 +98,7 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
     if (!response1) return false;
 
     // Sync friends agent
-    const response2 = await OnboardingIPC.updatePassport(shipId, {
+    const response2 = await OnboardingIPC.updatePassport(serverId, {
       nickname,
       avatar,
       bio: description,
@@ -97,9 +107,9 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
     if (!response2) return false;
 
     OnboardingStorage.set({ nickname, description, avatar });
-    const { shipType } = OnboardingStorage.get();
+    const { serverType } = OnboardingStorage.get();
 
-    if (shipType === 'hosted') {
+    if (serverType === 'hosted') {
       onFinish?.();
     } else {
       setStep('/installation');
@@ -110,7 +120,7 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
 
   return (
     <PassportDialog
-      patp={shipId ?? ''}
+      patp={serverId ?? ''}
       loading={!isReady}
       prefilledColor={sigilColor}
       prefilledNickname={nicknameSrc ?? ''}

@@ -17,38 +17,43 @@ export const AddServerStep = ({ setStep }: StepProps) => {
     setStep('/hosting');
   };
 
-  const onNext = async (shipId: string, shipUrl: string, shipCode: string) => {
+  const onNext = async (
+    serverId: string,
+    serverUrl: string,
+    serverCode: string
+  ) => {
     const sanitizedCookie = await OnboardingIPC.getCookie(
-      shipId,
-      shipUrl,
-      shipCode
+      serverId,
+      serverUrl,
+      serverCode
     );
 
-    if (!sanitizedCookie || !shipId || !shipUrl || !shipCode) return false;
+    if (!sanitizedCookie || !serverId || !serverUrl || !serverCode)
+      return false;
 
     OnboardingStorage.set({
-      shipId,
-      shipUrl,
-      shipCode,
+      serverId,
+      serverUrl,
+      serverCode,
     });
 
     OnboardingIPC.setCredentials({
-      serverId: shipId,
-      serverCode: shipCode,
-      serverUrl: shipUrl,
+      serverId: serverId,
+      serverCode: serverCode,
+      serverUrl: serverUrl,
     });
 
     const { passwordHash, masterAccountId } = OnboardingStorage.get();
 
-    if (!shipId || !passwordHash || !masterAccountId) return false;
+    if (!serverId || !passwordHash || !masterAccountId) return false;
 
     await OnboardingIPC.createAccount(
       {
         accountId: masterAccountId,
         passwordHash,
-        serverId: shipId,
-        serverUrl: shipUrl,
-        serverCode: shipCode,
+        serverId,
+        serverUrl,
+        serverCode,
         serverType: 'local',
         avatar: '',
         nickname: '',
@@ -58,7 +63,7 @@ export const AddServerStep = ({ setStep }: StepProps) => {
         theme: JSON.stringify(defaultTheme),
       },
       passwordHash,
-      shipCode
+      serverCode
     );
 
     setStep('/passport');

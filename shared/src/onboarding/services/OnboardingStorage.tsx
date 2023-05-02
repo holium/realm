@@ -8,10 +8,10 @@ type Storage = {
   token: string;
   clientSideEncryptionKey: string;
   /* Ship info */
-  shipId: string;
-  shipUrl: string;
-  shipCode: string;
-  shipType: 'hosted' | 'local';
+  serverId: string;
+  serverUrl: string;
+  serverCode: string;
+  serverType: 'hosted' | 'local';
   /* Passport info */
   nickname: string;
   description: string;
@@ -26,10 +26,10 @@ const storageKeys: (keyof Storage)[] = [
   'masterAccountId',
   'token',
   'clientSideEncryptionKey',
-  'shipId',
-  'shipUrl',
-  'shipCode',
-  'shipType',
+  'serverId',
+  'serverUrl',
+  'serverCode',
+  'serverType',
   'nickname',
   'description',
   'avatar',
@@ -45,11 +45,11 @@ export const OnboardingStorage = {
       masterAccountId: Number(localStorage.getItem('masterAccountId')),
       token: localStorage.getItem('token'),
       clientSideEncryptionKey: localStorage.getItem('clientSideEncryptionKey'),
-      shipId: localStorage.getItem('shipId'),
-      shipUrl: localStorage.getItem('shipUrl'),
-      shipCode: localStorage.getItem('shipCode'),
-      shipType:
-        (localStorage.getItem('shipType') as 'hosted' | 'local') ?? 'local',
+      serverId: localStorage.getItem('serverId'),
+      serverUrl: localStorage.getItem('serverUrl'),
+      serverCode: localStorage.getItem('serverCode'),
+      serverType:
+        (localStorage.getItem('serverType') as 'hosted' | 'local') ?? 'local',
       nickname: localStorage.getItem('nickname'),
       description: localStorage.getItem('description'),
       avatar: localStorage.getItem('avatar'),

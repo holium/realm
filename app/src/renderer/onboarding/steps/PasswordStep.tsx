@@ -8,7 +8,7 @@ import { RealmIPC } from 'renderer/stores/ipc';
 import { StepProps } from './types';
 
 export const PasswordStep = ({ setStep }: StepProps) => {
-  const { shipCode } = OnboardingStorage.get();
+  const { serverCode } = OnboardingStorage.get();
 
   useEffect(() => {
     track('Onboarding / Password');
@@ -19,9 +19,9 @@ export const PasswordStep = ({ setStep }: StepProps) => {
   };
 
   const handleOnNext = async (password: string) => {
-    if (!shipCode) return false;
+    if (!serverCode) return false;
 
-    RealmIPC.updatePassword(shipCode, password);
+    RealmIPC.updatePassword(serverCode, password);
 
     setStep('/installation');
 

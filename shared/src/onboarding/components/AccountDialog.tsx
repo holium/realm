@@ -73,7 +73,7 @@ export const AccountDialog = ({
   };
 
   const onClickHoliumButton = () => {
-    window.open('https://holium.com', '_blank');
+    window.location.href = 'https://holium.com';
   };
 
   return (

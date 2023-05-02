@@ -21,6 +21,6 @@ export const ServerSelfHostingDialogBody = ({
     <AccountDialogTableRow title="Server URL">
       <AccountDialogDescription flex={1}>{serverUrl}</AccountDialogDescription>
     </AccountDialogTableRow>
-    <ChangeAccessCode label="Server Code" shipCode={serverCode} />
+    <ChangeAccessCode label="Server Code" serverCode={serverCode} />
   </AccountDialogTable>
 );

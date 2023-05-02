@@ -5,12 +5,12 @@ import { useToggle } from '@holium/design-system/util';
 import { AccountDialogTableRow } from '../../components/AccountDialogTableRow';
 
 type Props = {
-  shipCode: string;
+  serverCode: string;
   label?: string;
 };
 
 export const ChangeAccessCode = ({
-  shipCode,
+  serverCode,
   label = 'Access Code',
 }: Props) => {
   const showAccessKey = useToggle(false);
@@ -23,7 +23,7 @@ export const ChangeAccessCode = ({
           height="38px"
           id="hosting-access-code"
           name="hosting-access-code"
-          value={shipCode}
+          value={serverCode}
           readOnly={true}
           type={showAccessKey.isOn ? 'text' : 'password'}
           rightAdornment={

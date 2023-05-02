@@ -14,7 +14,6 @@ import ShipService from '../ship/ship.service';
 import { DBAccount } from './accounts.table';
 import { AuthDB } from './auth.db';
 import { AuthUpdateTypes } from './auth.types';
-import { MasterAccount } from './masterAccounts.table';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -49,11 +48,6 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
   public getAccount(serverId: string): DBAccount | null {
     if (!this.authDB) return null;
     return this.authDB.tables.accounts.findOne(serverId);
-  }
-
-  public getMasterAccount(id: string): MasterAccount | null {
-    if (!this.authDB) return null;
-    return this.authDB.tables.masterAccounts.findOne(`id = "${id}"`);
   }
 
   public async setAccountTheme(serverId: string, theme: ThemeType) {

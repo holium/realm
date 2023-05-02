@@ -34,7 +34,7 @@ type Props = {
   prefilledDescription: string;
   prefilledAvatarSrc: string;
   onUploadFile: (file: File) => Promise<string | undefined>;
-  onBack: () => void;
+  onBack?: () => void;
   onNext: (
     nickname: string,
     description?: string,

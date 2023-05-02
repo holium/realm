@@ -20,10 +20,10 @@ import { useAppState } from 'renderer/stores/app.store';
 import { ShipSelector } from './ShipSelector';
 
 interface LoginProps {
-  addShip: () => void;
+  addServer: () => void;
 }
 
-const LoginPresenter = ({ addShip }: LoginProps) => {
+const LoginPresenter = ({ addServer }: LoginProps) => {
   const { setTheme, authStore } = useAppState();
   const {
     accounts,
@@ -340,7 +340,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
               showOnHover
               color="text"
               style={{ padding: '6px 10px', borderRadius: 6 }}
-              onClick={() => addShip()}
+              onClick={() => addServer()}
             >
               <Flex
                 gap={8}

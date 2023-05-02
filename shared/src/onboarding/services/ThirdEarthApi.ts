@@ -213,6 +213,17 @@ export class ThirdEarthApi {
     });
   }
 
+  forgotPassword(email: string, realm_invite = false) {
+    return http<ResetPasswordResponse>(`${this.apiBaseUrl}/forgot-password`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({
+        email,
+        realm_invite,
+      }),
+    });
+  }
+
   getProducts() {
     return http<GetProductsResponse>(`${this.apiBaseUrl}/products/en`, {
       method: 'GET',

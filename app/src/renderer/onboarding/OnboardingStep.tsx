@@ -32,6 +32,8 @@ export const OnboardingStepPresenter = ({
   switch (step) {
     case '/login':
       return <LoginStep setStep={handleSetStep} onFinish={onFinish} />;
+    case '/intermediary-login':
+      return <LoginStep forcedNextStep="/choose-id" setStep={handleSetStep} />;
     case '/hosting':
       return <HostingStep setStep={handleSetStep} onFinish={onFinish} />;
     case '/add-server':

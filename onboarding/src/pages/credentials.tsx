@@ -16,12 +16,12 @@ export default function Credentials() {
   const onNext = () => goToPage('/download');
 
   useEffect(() => {
-    const { shipId, shipUrl, shipCode } = OnboardingStorage.get();
-    if (!shipId || !shipUrl || !shipCode) return;
+    const { serverId, serverUrl, serverCode } = OnboardingStorage.get();
+    if (!serverId || !serverUrl || !serverCode) return;
     setCredentials({
-      id: shipId,
-      url: shipUrl,
-      accessCode: shipCode,
+      id: serverId,
+      url: serverUrl,
+      accessCode: serverCode,
     });
   }, []);
 

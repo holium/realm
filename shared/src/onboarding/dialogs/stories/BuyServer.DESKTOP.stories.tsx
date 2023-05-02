@@ -9,6 +9,7 @@ import {
   PaymentDialog,
 } from '@holium/shared';
 
+import { TermsDisclaimer } from '../../components/TermsDisclaimer';
 import { CreateAccountDialog } from '../CreateAccountDialog';
 import { HostingDialog } from '../HostingDialog';
 import { LoginDialog } from '../LoginDialog';
@@ -27,12 +28,12 @@ export default {
 export const LoginDialogStory: ComponentStory<typeof LoginDialog> = () => (
   <OnboardingDialogWrapper>
     <LoginDialog
-      showTerms
       label={
         <OnboardDialogDescription>
           Don't have access? <Anchor>Join waitlist</Anchor>.
         </OnboardDialogDescription>
       }
+      footer={<TermsDisclaimer onClick={() => {}} />}
       onLogin={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
