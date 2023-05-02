@@ -57,7 +57,7 @@ export const AccountPassportSection = ({ account }: Props) => {
 
   return (
     <SettingSection
-      title="Passport"
+      title="Your persistent identity"
       elevation={2}
       onSubmit={onSubmit}
       body={

@@ -63,7 +63,7 @@ export const AccountCustomDomainSection = ({ account }: Props) => {
 
   return (
     <SettingSection
-      title="Custom Domain"
+      title="Set a custom domain for your server"
       body={
         <AccountCustomDomainDialogBody
           dropletIp={ship?.droplet_ip}
