@@ -598,8 +598,8 @@
         =/  watch-path                    [/spaces/(scot %p ship.path)/(scot %tas space.path) ~]
         :_  state
         :~
-          [%give %fact watch-path spaces-reaction+!>([%remove path])]
           [%give %kick watch-path ~]
+          [%give %fact watch-path spaces-reaction+!>([%remove path])]
         ==
     ::
     ++  on-remote-space

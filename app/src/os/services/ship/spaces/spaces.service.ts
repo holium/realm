@@ -325,6 +325,7 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
   public async createSpace(newSpace: NewSpace) {
     const members = newSpace.members;
     const slug = humanFriendlySpaceNameSlug(newSpace.name);
+
     const spacePath: string = await new Promise((resolve, reject) => {
       APIConnection.getInstance().conduit.poke({
         app: 'spaces',
@@ -347,7 +348,6 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
         reaction: 'spaces-reaction.add',
         onReaction: (data: any) => {
           // TODO: add to db
-          log.info('created space', data.add.space.path);
           resolve(data.add.space.path);
         },
         onError: (e: any) => {
@@ -355,7 +355,7 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
         },
       });
     });
-    return spacePath;
+    return { spacePath, members };
   }
 
   public async joinSpace(path: string): Promise<void> {
