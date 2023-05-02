@@ -8,6 +8,7 @@ import {
   LoginDialog,
   OnboardDialogDescription,
   OnboardingStorage,
+  TermsDisclaimer,
 } from '@holium/shared';
 
 import { OnboardingIPC } from 'renderer/stores/ipc';
@@ -103,7 +104,6 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
         onAccept={learnMoreModal.toggleOff}
       />
       <LoginDialog
-        showTerms
         prefilledEmail={prefilledEmail}
         label={
           <OnboardDialogDescription>
@@ -122,6 +122,7 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
             </Anchor>
           </OnboardDialogDescription>
         }
+        footer={<TermsDisclaimer onClick={() => {}} />}
         onLogin={onLogin}
       />
     </>

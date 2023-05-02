@@ -2,12 +2,12 @@ import styled from 'styled-components';
 
 import { OnboardDialogDescription } from './OnboardDialog.styles';
 
-const OnboardDialogTerms = styled(OnboardDialogDescription)`
+export const OnboardDialogFooter = styled(OnboardDialogDescription)`
   font-size: 12px;
   opacity: 0.8;
 `;
 
-const OnboardDialogTermsLink = styled(OnboardDialogTerms)`
+export const OnboardDialogFooterLink = styled(OnboardDialogFooter)`
   display: inline;
   text-decoration: underline;
   cursor: pointer;
@@ -18,11 +18,11 @@ type Props = {
 };
 
 export const TermsDisclaimer = ({ onClick }: Props) => (
-  <OnboardDialogTerms>
+  <OnboardDialogFooter>
     By using Realm, you agree to our{' '}
-    <OnboardDialogTermsLink onClick={onClick}>
+    <OnboardDialogFooterLink onClick={onClick}>
       Terms of Service
-    </OnboardDialogTermsLink>
+    </OnboardDialogFooterLink>
     .
-  </OnboardDialogTerms>
+  </OnboardDialogFooter>
 );
