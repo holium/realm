@@ -7,6 +7,7 @@ import { useAppState } from 'renderer/stores/app.store';
 
 import { SettingPane } from '../components/SettingPane';
 import { SettingTitle } from '../components/SettingTitle';
+import { AccountPassportSection } from './sections/AccountPassportSection';
 import { AccountSelfHostingSection } from './sections/AccountSelfHostingSection';
 import { MaybeLogin } from './sections/MaybeLogin';
 import { ServerSelfHostingSection } from './sections/ServerSelfHostingSection';
@@ -19,6 +20,10 @@ const SelfHostingAccountPanelPresenter = () => {
   return (
     <SettingPane>
       <SettingTitle title="Account" />
+      <AccountPassportSection
+        account={loggedInAccount}
+        key={`${loggedInAccount.serverId}-settings-passport`}
+      />
       <MaybeLogin>
         <UserContextProvider api={thirdEarthApi}>
           <AccountSelfHostingSection

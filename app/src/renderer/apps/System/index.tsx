@@ -44,7 +44,7 @@ const SystemAppPresenter = () => {
       icon: 'AccountSettings',
       label: 'Account',
       value: 'self-hosting-account',
-      sublabel: 'Passport and server',
+      sublabel: 'Account, passport, server',
     },
   ];
 
