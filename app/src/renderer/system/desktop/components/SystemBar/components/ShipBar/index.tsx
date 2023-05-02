@@ -11,7 +11,6 @@ import {
   NoScrollBar,
   NotificationList,
   NotificationType,
-  Text,
 } from '@holium/design-system';
 
 import { nativeApps } from 'renderer/apps/nativeApps';
@@ -195,7 +194,7 @@ export const ShipBarPresenter = () => {
         {isAccountTrayOpen && (
           <Flex
             flexDirection="column"
-            minHeight={minHeight - 40}
+            minHeight={minHeight - 24}
             pt="8px"
             pb="6px"
             pl="3px"
@@ -228,15 +227,12 @@ export const ShipBarPresenter = () => {
                   position="absolute"
                   justify="center"
                   align="center"
-                  left={0}
-                  right={0}
-                  top={0}
-                  bottom={60}
-                >
-                  <Text.Hint opacity={0.4}>
-                    Fetching initial data from {window.ship}
-                  </Text.Hint>
-                </Flex>
+                  width="calc(100% - 24px)"
+                  left={12}
+                  right={12}
+                  top={12}
+                  height={50}
+                />
               ) : (
                 <NotificationList
                   justifyContent="flex-end"

@@ -220,8 +220,11 @@ function registerOnUpdateListener() {
 
   NotifIPC.onUpdate(({ type, payload }) => {
     switch (type) {
+      case 'init':
+        shipStore.notifStore._onInit(payload);
+        break;
       case 'notification-added':
-        shipStore.notifStore.onNotifAdded(payload);
+        shipStore.notifStore._onNotifAdded(payload);
         if (
           shipStore.chatStore.isChatSelected(payload.path) &&
           payload.app === 'realm-chat'
@@ -230,10 +233,10 @@ function registerOnUpdateListener() {
         }
         break;
       case 'notification-updated':
-        shipStore.notifStore.onNotifUpdated(payload);
+        shipStore.notifStore._onNotifUpdated(payload);
         break;
       case 'notification-deleted':
-        shipStore.notifStore.onNotifDeleted(payload);
+        shipStore.notifStore._onNotifDeleted(payload);
         break;
     }
   });

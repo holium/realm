@@ -261,7 +261,6 @@ export const ChatStore = types
     },
     _onInit(payload: any) {
       self.inbox = payload;
-      console.log('chatstore onInit');
       if (self.loader.isFirstLoad) {
         localStorage.setItem(`${window.ship}-firstLoad`, 'true');
         self.loader.set('loaded');

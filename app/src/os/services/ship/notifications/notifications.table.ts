@@ -58,8 +58,6 @@ export class NotificationsDB extends AbstractDataAccess<
     this.onDbUpdate = this.onDbUpdate.bind(this);
     this.handleDBChange = this.handleDBChange.bind(this);
     this.init = this.init.bind(this);
-
-    this.init();
   }
 
   async init() {
@@ -78,6 +76,7 @@ export class NotificationsDB extends AbstractDataAccess<
       onQuit: this.onQuit,
       onError: this.onError,
     });
+    this.sendUpdate({ type: 'init', payload: this.getNotifications() });
   }
 
   protected mapRow(row: any): NotificationRow {
@@ -457,7 +456,7 @@ export const QUERY_NOTIFICATIONS = `
     buttons,
     link,
     notifications.metadata,
-    paths.metadata pathMetadata,
+    chat_paths.metadata pathMetadata,
     notifications.created_at   createdAt,
     notifications.updated_at   updatedAt,
     read_at      readAt,
@@ -465,7 +464,7 @@ export const QUERY_NOTIFICATIONS = `
     dismissed_at dismissedAt,
     dismissed
   FROM notifications 
-  LEFT OUTER JOIN paths ON notifications.path = paths.path
+  LEFT OUTER JOIN chat_paths ON notifications.path = chat_paths.path
 `;
 
 export const notifDBPreload = NotificationsDB.preload(

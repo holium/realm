@@ -186,7 +186,10 @@ export const NotifStore = types
     }),
 
     // onChangeHandlers
-    onNotifAdded(notif: NotifMobxType) {
+    _onInit(notifs: any) {
+      self.notifications = notifs;
+    },
+    _onNotifAdded(notif: NotifMobxType) {
       self.notifications.push(notif);
       self.unreadByPaths.set(
         notif.path,
@@ -197,7 +200,7 @@ export const NotifStore = types
         (self.unreadByApps.get(notif.app) || 0) + 1
       );
     },
-    onNotifUpdated(notif: NotifMobxType) {
+    _onNotifUpdated(notif: NotifMobxType) {
       self.notifications.find((n) => n.id === notif.id)?.update(notif);
       // if the notification is read, decrement the unread count
       if (notif.read || notif.dismissed) {
@@ -210,7 +213,7 @@ export const NotifStore = types
         self.unreadByApps.set(notif.app, unreadByApps ? unreadByApps - 1 : 0);
       }
     },
-    onNotifDeleted(delId: number) {
+    _onNotifDeleted(delId: number) {
       const notif = self.notifications.find((n) => n.id === delId);
       if (!notif) return;
       const index = self.notifications.indexOf(notif);

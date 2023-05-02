@@ -138,8 +138,18 @@ export class ShipService extends AbstractService<any> {
   }
 
   public async init() {
+    this.initSpaces();
+    this.initChat();
+  }
+
+  private async initSpaces() {
     await this.services?.bazaar.init();
     this.services?.spaces.init();
+  }
+
+  private async initChat() {
+    await this.services?.chat.init();
+    this.services?.notifications.init();
   }
 
   public updateCookie(cookie: string) {
