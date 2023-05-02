@@ -1,7 +1,7 @@
 ::  app/chat-db.hoon
 /-  *versioned-state, sur=chat-db
 /+  dbug, db-lib=chat-db
-=|  state-1
+=|  state-2
 =*  state  -
 :: ^-  agent:gall
 =<
@@ -12,8 +12,8 @@
   ::
   ++  on-init
     ^-  (quip card _this)
-    =/  default-state=state-1
-      [%1 *paths-table:sur *messages-table:sur *peers-table:sur *del-log:sur]
+    =/  default-state=state-2
+      [%2 *paths-table:sur *messages-table:sur *peers-table:sur *del-log:sur]
     :_  this(state default-state)
     [%pass /timer %arvo %b %wait next-expire-time:core]~
   ++  on-save   !>(state)
@@ -26,15 +26,90 @@
     :: this agent every time the agent gets updated
     =/  default-cards
       [[%pass /timer %arvo %b %rest next-expire-time:core] [%pass /timer %arvo %b %wait next-expire-time:core] ~]
-    =^  cards  state
     ?-  -.old
       %0  
-        =/  new  [%1 paths-table.old messages-table.old peers-table.old *del-log:sur]
-        [default-cards new]
+        =/  new  [%1 paths-table-1.old messages-table-1.old peers-table-1.old *del-log-1:sur]
+        (on-load !>(new))
+
       %1
-        [default-cards old]
+        =/  paths
+          %-  ~(gas by *paths-table:sur)
+          %+  turn
+            ~(tap by paths-table-1.old)
+          |=  kv=[k=path v=path-row-1:sur]
+          ^-  [k=path:sur v=path-row:sur]
+          [
+            k.kv
+            [
+              path.v.kv
+              metadata.v.kv
+              type.v.kv
+              created-at.v.kv
+              updated-at.v.kv
+              pins.v.kv
+              invites.v.kv
+              peers-get-backlog.v.kv
+              max-expires-at-duration.v.kv
+              created-at.v.kv :: set received-at to be the created-at, since we don't actually know when it was recieved
+            ]
+          ]
+
+        =/  peers
+          %-  ~(gas by *peers-table:sur)
+          %+  turn
+            ~(tap by peers-table-1.old)
+          |=  kv=[k=path v=(list peer-row-1:sur)]
+          ^-  [k=path:sur v=(list peer-row:sur)]
+          =/  peers=(list peer-row:sur)
+            %+  turn
+              v.kv
+            |=  p=peer-row-1:sur
+            ^-  peer-row:sur
+            [
+              path.p
+              patp.p
+              role.p
+              created-at.p
+              updated-at.p
+              created-at.p :: set received-at to be the created-at, since we don't actually know when it was recieved
+            ]
+          [
+            k.kv
+            peers
+          ]
+
+        =/  msgs
+          %+  gas:msgon
+            *messages-table:sur
+          %+  turn
+            (tap:msgon-1 messages-table-1.old)
+          |=  kv=[k=uniq-id:sur v=msg-part-1:sur]
+          ^-  [k=uniq-id:sur v=msg-part:sur]
+          [
+            k.kv
+            [
+              path.v.kv
+              msg-id.v.kv
+              msg-part-id.v.kv
+              content.v.kv
+              reply-to.v.kv
+              metadata.v.kv
+              created-at.v.kv
+              updated-at.v.kv
+              expires-at.v.kv
+              created-at.v.kv :: set received-at to be the created-at, since we don't actually know when it was recieved
+            ]
+          ]
+        =/  new-state  [
+          %2
+          paths
+          msgs
+          peers
+          *del-log:sur :: technically we don't NEED to wipe this in order to upgrade... but who cares about the delete log.
+        ]
+        [default-cards this(state new-state)]
+      %2  [default-cards this(state old)]
     ==
-    [cards this]
   ::
   ++  on-poke
     |=  [=mark =vase]
@@ -131,7 +206,8 @@
         ``chat-db-dump+!>(tables+[messages+messages-table.state ~])
     ::
     :: /db/start-ms/<time>.json
-    :: all tables, but only with created-at or updated-at after <time>
+    :: all tables, but only with received-at after <time> (updated on
+    :: both create and update)
       [%x %db %start-ms @ ~]
         =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
         =/  msgs            messages+(start:from:db-lib timestamp messages-table.state)
@@ -140,7 +216,7 @@
         ``chat-db-dump+!>(tables+[msgs paths peers ~])
     ::
     :: /db/start-ms/<messages-time>/<paths-time>/<peers-time>.json
-    :: all tables, but only with created-at or updated-at after <time>,
+    :: all tables, but only with received-at after <time>,
     :: allowing you to specify a different timestamp for each table
       [%x %db %start-ms @ @ @ ~]
         =/  msgs-t=@da      (di:dejs:format n+i.t.t.t.path)
@@ -170,7 +246,7 @@
         ``chat-db-dump+!>(tables+[messages+(start:from:db-lib timestamp messages-table.state) ~])
     ::
     :: /db/start/<time>.json
-    :: all tables, but only with created-at or updated-at after <time>
+    :: all tables, but only with received-at after <time>
       [%x %db %start @ ~]
         =/  timestamp=@da   `@da`(slav %da i.t.t.t.path)
         =/  msgs            messages+(start:from:db-lib timestamp messages-table.state)
@@ -205,7 +281,7 @@
   ++  on-agent
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
-    !!
+    `this
   ::
   ++  on-leave
     |=  path

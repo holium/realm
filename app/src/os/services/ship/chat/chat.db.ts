@@ -709,7 +709,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     if (!this.db?.open) return 0;
     const where =
       path && patp ? ` WHERE path = '${path}' and sender != '${patp}'` : '';
-    const column = table === 'delete_logs' ? 'timestamp' : 'updated_at';
+    const column = table === 'delete_logs' ? 'timestamp' : 'received_at';
     const query = this.db.prepare(`
       SELECT max(${column}) as lastTimestamp
       FROM ${table}${where};
@@ -748,7 +748,8 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         sender,
         created_at, 
         updated_at,
-        expires_at
+        expires_at,
+        received_at
       ) VALUES (
         @path, 
         @msg_id, 
@@ -760,7 +761,8 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         @sender,
         @created_at,
         @updated_at,
-        @expires_at
+        @expires_at,
+        @received_at
       )`
     );
     const insertMany = this.db.transaction((messages: any) => {
@@ -777,6 +779,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
           created_at: message['created-at'],
           updated_at: message['updated-at'],
           expires_at: message['expires-at'],
+          received_at: message['received-at'],
         });
       }
     });
@@ -796,8 +799,9 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
           max_expires_at_duration,
           invites,
           created_at, 
-          updated_at
-        ) VALUES (@path, @type, @metadata, @peers_get_backlog, @pins, @max_expires_at_duration, @invites, @created_at, @updated_at)`
+          updated_at,
+          received_at
+        ) VALUES (@path, @type, @metadata, @peers_get_backlog, @pins, @max_expires_at_duration, @invites, @created_at, @updated_at, @received_at)`
     );
     const insertMany = this.db.transaction((paths: any) => {
       for (const path of paths)
@@ -811,6 +815,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
           max_expires_at_duration: path['max-expires-at-duration'] ?? null,
           created_at: path['created-at'],
           updated_at: path['updated-at'],
+          received_at: path['received-at'],
         });
     });
     insertMany(paths);
@@ -825,8 +830,9 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
           ship, 
           role,
           created_at, 
-          updated_at
-        ) VALUES (@path, @ship, @role, @created_at, @updated_at)`
+          updated_at,
+          received_at
+        ) VALUES (@path, @ship, @role, @created_at, @updated_at, @received_at)`
     );
     const insertMany = this.db.transaction((peers: any) => {
       for (const peer of peers)
@@ -836,6 +842,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
           role: peer.role,
           created_at: peer['created-at'],
           updated_at: peer['updated-at'],
+          received_at: peer['received-at'],
         });
     });
     insertMany(peers);
@@ -913,7 +920,8 @@ create table if not exists messages
     sender       text    NOT NULL,
     updated_at   INTEGER NOT NULL,
     created_at   INTEGER NOT NULL,
-    expires_at   INTEGER
+    expires_at   INTEGER,
+    received_at   INTEGER NOT NULL
 );
 
 create unique index if not exists messages_path_msg_id_msg_part_id_uindex
@@ -932,7 +940,8 @@ create table if not exists paths
     pinned                      INTEGER default 0 NOT NULL,
     muted                       INTEGER default 0 NOT NULL,
     updated_at                  INTEGER NOT NULL,
-    created_at                  INTEGER NOT NULL
+    created_at                  INTEGER NOT NULL,
+    received_at                 INTEGER NOT NULL
 );
 
 create unique index if not exists paths_path_uindex
@@ -951,7 +960,8 @@ create table if not exists  peers
     ship        text NOT NULL,
     role        TEXT default 'member' NOT NULL,
     updated_at  INTEGER NOT NULL,
-    created_at  INTEGER NOT NULL
+    created_at  INTEGER NOT NULL,
+    received_at  INTEGER NOT NULL
 );
 
 create unique index if not exists peers_path_ship_uindex
