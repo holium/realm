@@ -261,6 +261,10 @@ export const ChatStore = types
     },
     _onInit(payload: any) {
       self.inbox = payload;
+      if (self.loader.isFirstLoad) {
+        localStorage.setItem(`${window.ship}-firstLoad`, 'true');
+        self.loader.set('loaded');
+      }
     },
   }));
 
@@ -279,11 +283,11 @@ ChatIPC.onUpdate(({ type, payload }: ChatUpdateTypes) => {
     shipStore.chatStore._onInit(payload);
   }
   if (type === 'path-added') {
-    console.log('onPathsAdded', toJS(payload));
+    // console.log('onPathsAdded', toJS(payload));
     shipStore.chatStore.onPathsAdded(payload);
   }
   if (type === 'path-deleted') {
-    console.log('onPathDeleted', payload);
+    // console.log('onPathDeleted', payload);
     shipStore.chatStore.onPathDeleted(payload);
   }
   if (type === 'message-deleted') {
@@ -316,7 +320,7 @@ ChatIPC.onUpdate(({ type, payload }: ChatUpdateTypes) => {
       (chat) => chat.path === payload.path
     );
     if (!selectedChat) return;
-    console.log('onPeerAdded', toJS(payload));
+    // console.log('onPeerAdded', toJS(payload));
     selectedChat.onPeerAdded(payload.ship, payload.role);
   }
   if (type === 'peer-deleted') {
@@ -324,7 +328,7 @@ ChatIPC.onUpdate(({ type, payload }: ChatUpdateTypes) => {
       (chat) => chat.path === payload.row
     );
     if (!selectedChat) return;
-    console.log('onPeerDeleted', toJS(payload));
+    // console.log('onPeerDeleted', toJS(payload));
     selectedChat.onPeerDeleted(payload.ship);
   }
 });
