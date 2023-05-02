@@ -295,7 +295,7 @@ function BlockedInput(props: BlockedInputProps) {
 
   return (
     <Flex flexDirection="column">
-      <Flex display="inline-block" mb={1} position="relative">
+      <Flex display="inline-block" position="relative">
         <TextInput
           id="blocked-input"
           name="blocked-input"
@@ -347,7 +347,7 @@ function BlockedInput(props: BlockedInputProps) {
         </NoScrollBar>
       )}
       {props.blocked.length > 3 && (
-        <Flex pt={1} width="100%" justifyContent="center">
+        <Flex width="100%" justifyContent="center">
           <Icon name="ChevronDown" size={16} />
         </Flex>
       )}
