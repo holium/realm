@@ -42,7 +42,7 @@ export const AccountStorageSection = ({ account }: Props) => {
 
   return (
     <SettingSection
-      title="S3 Storage settings"
+      title="S3 Storage"
       body={
         <AccountS3StorageDialogBody
           url={s3Info?.consoleUrl ?? ''}

@@ -65,13 +65,13 @@ const SystemAppPresenter = () => {
       icon: 'UrlLink',
       label: 'Custom Domain',
       value: 'custom-domain',
-      sublabel: 'Set a custom domain for your server',
+      sublabel: 'Custom server domain',
     },
     {
       icon: 'CloudDownload',
       label: 'Storage',
       value: 'storage',
-      sublabel: 'S3 Storage settings',
+      sublabel: 'S3 Storage',
     },
   ];
 
