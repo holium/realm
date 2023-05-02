@@ -8,7 +8,6 @@ module.exports = {
       path.resolve(__dirname, '../onboarding/src'),
       path.resolve(__dirname, '../lib/design-system/src'),
       path.resolve(__dirname, '../lib/presence/src'),
-      path.resolve(__dirname, '../lib/room/src'),
     ];
 
     config.resolve.modules.push(...modules);
@@ -22,7 +21,6 @@ module.exports = {
     '../onboarding/src/**/*.stories.@(js|jsx|ts|tsx)',
     '../lib/design-system/src/**/*.stories.@(js|jsx|ts|tsx)',
     '../lib/presence/src/**/*.stories.@(js|jsx|ts|tsx)',
-    '../lib/room/src/**/*.stories.@(js|jsx|ts|tsx)',
   ],
   addons: [
     '@storybook/addon-links',
