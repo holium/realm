@@ -27,6 +27,7 @@
       hash=@t
       =wallet-id
       eth-type=(unit ?(%eth %erc20 %erc721))
+      contract-address=(unit @t)
       type=?(%sent %received)
       initiated-at=@da
       completed-at=(unit @da)

@@ -228,9 +228,11 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 export const walletInitSql = `
 create table if not exists transactions
 (
+  chain          text    not null,
+  network        text,
   hash           text    not null,
-  network        text    not null,
-  type           text    not null,
+  eth-type       text,
+  type           text not null,
   initiated_at   integer not null,
   completed_at   integer,
   our_address    text    not null,
@@ -243,13 +245,14 @@ create table if not exists transactions
 );
 
 create unique index if not exists hash_network_uindex
-    on transactions (hash, network);
+    on transactions (chain, network, hash);
 
 create table if not exists wallets
 (
-    path                        text not null,
+    chain                       text not null,
     wallet_index                integer not null,
     address                     text not null,
+    path                        text not null,
     nickname                    text not null
 );
 

@@ -219,4 +219,27 @@
       %-  spat  txn-id-list
     ::
   --
+++  dejs-action
+  =,  dejs:format
+  |=  jon=json
+  ^-  action:sur
+  *action:sur
+::  %.  jon
+::  %-  of
+::  :~  [%set-wallet wallet-row]
+::      [%insert-transaction transaction-row]
+::      [%complete-transaction txn-id success+bo]
+::      [%save-transaction-notes txn-id notes+so]
+::  ==
+::++  wallet-row
+::  =,  dejs:format
+::  (ot ~[chain+(su (perk %ethereum %bitcoin %btctestnet ~)) wallet-index+ni address+so path+so nickname+so])
+::++  transaction-row
+::  =,  dejs:format
+::  (ot ~[[chain+(su (perk %ethereum %bictoin %btctestnet ~)) network+((su perk %eth %erc20 %erc721))] wallet-index+ni address+so path+so nickname+so])
+::++  txn-id
+::  =,  dejs:format
+::  |=  jon=json
+::  ^-  txn-id
+::  *txn-id
 --

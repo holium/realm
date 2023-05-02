@@ -11,6 +11,7 @@
 ++  grab
   |%
   ++  noun  action:wallet-db
+  ++  json  dejs-action:db-lib
   --
 --
 
