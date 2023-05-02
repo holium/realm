@@ -184,9 +184,9 @@ const HostingPresenter = () => {
         patps={ships.map((ship) => ship.patp)}
         selectedPatp={selectedPatp}
         email={email}
-        shipUrl={selectedShip?.link}
-        shipCode={selectedShip?.code}
-        shipMaintenanceWindow={selectedShip?.maintenance_window}
+        serverUrl={selectedShip?.link}
+        serverCode={selectedShip?.code}
+        serverMaintenanceWindow={selectedShip?.maintenance_window}
         setSelectedPatp={setSelectedPatp}
         onClickChangeEmail={changeEmailModal.toggleOn}
         onClickChangePassword={changePasswordModal.toggleOn}

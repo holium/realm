@@ -15,6 +15,11 @@ const DownloadRealmPresenter = () => {
   const { ships, selectedPatp, setSelectedPatp } = useUser();
 
   const onClickSidebarSection = (section: string) => {
+    if (section === 'Get Hosting') {
+      goToPage(accountPageUrl[section], {
+        back_url: '/account/download-realm',
+      });
+    }
     goToPage(accountPageUrl[section]);
   };
 

@@ -8,6 +8,7 @@ import {
   LoginDialog,
   OnboardDialogDescription,
   OnboardingStorage,
+  TermsDisclaimer,
 } from '@holium/shared';
 
 import { OnboardingIPC } from 'renderer/stores/ipc';
@@ -16,7 +17,7 @@ import { defaultTheme } from '../../lib/defaultTheme';
 import { thirdEarthApi } from '../thirdEarthApi';
 import { StepProps } from './types';
 
-export const LoginStep = ({ setStep, onFinish }: StepProps) => {
+export const LoginStep = ({ forcedNextStep, setStep, onFinish }: StepProps) => {
   const learnMoreModal = useToggle(false);
 
   const prefilledEmail = OnboardingStorage.get().email ?? '';
@@ -88,9 +89,9 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
       );
 
       onFinish?.();
-    } else {
-      setStep('/hosting');
     }
+
+    setStep(forcedNextStep ?? '/hosting');
 
     return true;
   };
@@ -103,7 +104,6 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
         onAccept={learnMoreModal.toggleOff}
       />
       <LoginDialog
-        showTerms
         prefilledEmail={prefilledEmail}
         label={
           <OnboardDialogDescription>
@@ -122,6 +122,7 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
             </Anchor>
           </OnboardDialogDescription>
         }
+        footer={<TermsDisclaimer onClick={() => {}} />}
         onLogin={onLogin}
       />
     </>

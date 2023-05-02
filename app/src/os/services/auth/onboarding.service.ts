@@ -164,19 +164,6 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     }
   }
 
-  public triggerOnboardingEnded() {
-    if (!this.authDB) {
-      throw new Error('No authDB found');
-    }
-    this.sendUpdate({
-      type: 'onboarding-ended',
-      payload: {
-        accounts: this.authDB.tables.accounts.find(),
-        order: this.authDB?.getOrder(),
-      },
-    });
-  }
-
   public hashPassword(password: string) {
     return bcrypt.hashSync(password, 10);
   }
@@ -478,6 +465,15 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       log.error('ship.service.ts:', 'Failed to get cookie', e);
       throw e;
     }
+  }
+
+  public getMasterAccount(id: number) {
+    if (!this.authDB) {
+      log.error('onboarding.service.ts:', 'No authDB');
+      return;
+    }
+
+    return this.authDB.tables.masterAccounts.findFirst("id = '" + id + "'");
   }
 
   private async _openConduit() {

@@ -23,7 +23,7 @@ import { ShellModel } from './models/shell.model';
 import { Theme, ThemeType } from './models/theme.model';
 import { shipStore } from './ship.store';
 
-const Screen = types.enumeration(['login', 'onboarding', 'os']);
+const Screen = types.enumeration(['login', 'onboarding', 'add-server', 'os']);
 
 const AppStateModel = types
   .model('AppStateModel', {
@@ -84,6 +84,9 @@ const AppStateModel = types
       self.seenSplash = true;
       yield AuthIPC.setSeenSplash() as Promise<void>;
     }),
+    setCurrentScreen(screen: Instance<typeof Screen>) {
+      self.currentScreen = screen;
+    },
   }))
   .views((self) => ({
     get loggedInAccount(): MobXAccount | undefined {
@@ -106,7 +109,7 @@ const lastTheme = localStorage.getItem('lastTheme');
 export const appState = AppStateModel.create({
   booted: false,
   seenSplash: false,
-  currentScreen: 'onboarding',
+  currentScreen: 'login',
   theme: lastTheme
     ? Theme.create(JSON.parse(lastTheme))
     : Theme.create(defaultTheme),
@@ -197,9 +200,6 @@ function registerOnUpdateListener() {
     }
     if (update.type === 'account-updated') {
       appState.authStore._onUpdateAccount(update.payload);
-    }
-    if (update.type === 'onboarding-ended') {
-      appState.authStore._onOnboardingEnded(update.payload);
     }
   });
 

@@ -3,6 +3,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { Anchor } from '@holium/design-system/general';
 import { OnboardDialogDescription } from '@holium/shared';
 
+import { TermsDisclaimer } from '../../components/TermsDisclaimer';
 import { AddServerDialog } from '../AddServerDialog';
 import { CreateAccountDialog } from '../CreateAccountDialog';
 import { HostingDialog } from '../HostingDialog';
@@ -19,12 +20,12 @@ export default {
 export const LoginDialogStory: ComponentStory<typeof LoginDialog> = () => (
   <OnboardingDialogWrapper>
     <LoginDialog
-      showTerms
       label={
         <OnboardDialogDescription>
           Don't have access? <Anchor>Join waitlist</Anchor>.
         </OnboardDialogDescription>
       }
+      footer={<TermsDisclaimer onClick={() => {}} />}
       onLogin={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
@@ -88,7 +89,11 @@ export const InstallationDialogStory: ComponentStory<
   <OnboardingDialogWrapper>
     <InstallationDialog
       onBack={() => {}}
-      onInstallRealm={() => Promise.resolve(false)}
+      onInstallRealm={() =>
+        Promise.resolve({
+          success: true,
+        })
+      }
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>

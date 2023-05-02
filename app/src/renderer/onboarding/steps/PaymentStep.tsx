@@ -17,7 +17,7 @@ type PaymentStepViewProps = StepProps & {
 };
 
 const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
-  const [shipId, setShipId] = useState('');
+  const [serverId, setserverId] = useState('');
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
 
@@ -29,14 +29,14 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
 
   useEffect(() => {
     const {
-      shipId: storedShipId,
+      serverId: storedserverId,
       email: storedEmail,
       token: storedToken,
     } = OnboardingStorage.get();
 
-    if (!storedShipId || !storedEmail || !storedToken) return;
+    if (!storedserverId || !storedEmail || !storedToken) return;
 
-    setShipId(storedShipId);
+    setserverId(storedserverId);
     setEmail(storedEmail);
     setToken(storedToken);
 
@@ -44,7 +44,7 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
       const response = await thirdEarthApi.stripeMakePayment(
         storedToken,
         productId.toString(),
-        storedShipId
+        storedserverId
       );
       setClientSecret(response.clientSecret);
       setInvoiceId(response.invoiceId);
@@ -70,13 +70,13 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
   const onBack = () => setStep('/choose-id');
 
   const onNext = async () => {
-    if (!token || !shipId || !invoiceId || !productId) {
+    if (!token || !serverId || !invoiceId || !productId) {
       return Promise.resolve(false);
     }
 
     await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
-    await thirdEarthApi.updatePlanetStatus(token, shipId, 'sold');
-    await thirdEarthApi.ship(token, shipId, productId.toString(), invoiceId);
+    await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
+    await thirdEarthApi.ship(token, serverId, productId.toString(), invoiceId);
 
     setStep('/booting');
 
@@ -87,7 +87,7 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
     <PaymentDialog
       products={products}
       productId={productId}
-      patp={shipId}
+      patp={serverId}
       email={email}
       stripe={stripe as any}
       stripeOptions={stripeOptions as any}
