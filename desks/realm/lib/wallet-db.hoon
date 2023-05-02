@@ -169,9 +169,7 @@
       ^-  json
       %-  pairs
       :~  ['chain' [%s chain.transaction-row]]
-          :-  'network'
-            ?~  network.transaction-row  ~
-            [%s u.network.transaction-row]
+          ['network' s+network.transaction-row]
           ['hash' [%s hash.transaction-row]]
           ['wallet-id' (wallet-id-to-json wallet-id.transaction-row)]
           :-  'eth-type'
