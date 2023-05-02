@@ -74,10 +74,11 @@
 
 // export default useMenu;
 
-import { useState, useEffect, useRef } from 'react';
-import { getAnchorPointByTarget } from '../../util/position';
-import { Dimensions, Position } from '../../../util';
+import { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
+
+import { Dimensions, Position } from '../../../util';
+import { getAnchorPointByTarget } from '../../util/position';
 
 interface MenuState {
   isOpen: boolean;

@@ -1,4 +1,4 @@
-import { Flex, BoxProps } from '../../';
+import { BoxProps, Flex } from '../../';
 
 type TreeItemProps = {
   myProp?: string;

@@ -1,77 +1,73 @@
 import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Box, TextButton } from 'renderer/components';
-import { Text } from '@holium/design-system';
-import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
-import { ThemeModelType } from 'os/services/theme.model';
-import {
-  getBaseTheme,
-  getTransactions,
-  getCoins,
-  getNfts,
-} from '../../../lib/helpers';
-import { DetailHero } from './Hero';
-import { TransactionList } from '../Transaction/List';
+
+import { Box, Button, Flex, Text } from '@holium/design-system';
+
 import {
   BitcoinWalletType,
   ERC20Type,
   EthWalletType,
   NetworkType,
   WalletView,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from 'renderer/stores/models/wallet.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import { getCoins, getNfts, getTransactions } from '../../../lib/helpers';
+import { TransactionList } from '../Transaction/List';
 import { CoinList } from './CoinList';
+import { DetailHero } from './Hero';
 import { NFTList } from './NFTList';
-import { WalletActions } from 'renderer/logic/actions/wallet';
 
 type DisplayType = 'coins' | 'nfts' | 'transactions';
 
-interface DetailProps {
-  theme: ThemeModelType;
-  hidePending: boolean;
-}
-const DetailPresenter = (props: DetailProps) => {
-  const { walletApp } = useTrayApps();
+type Props = {
+  hidePending?: boolean;
+};
+
+const DetailPresenter = ({ hidePending = false }: Props) => {
+  const { walletStore } = useShipStore();
   const [QROpen, setQROpen] = useState(false);
   const sendTrans =
-    walletApp.navState.view === WalletView.TRANSACTION_SEND ||
-    walletApp.navState.view === WalletView.TRANSACTION_CONFIRM;
+    walletStore.navState.view === WalletView.TRANSACTION_SEND ||
+    walletStore.navState.view === WalletView.TRANSACTION_CONFIRM;
   const hideWalletHero =
-    walletApp.navState.view === WalletView.TRANSACTION_CONFIRM;
+    walletStore.navState.view === WalletView.TRANSACTION_CONFIRM;
   const [listView, setListView] = useState<DisplayType>('transactions'); // TODO default to coins or nfts if they have those
 
   const onScreenChange = () => {};
   const close = async () => {
-    await WalletActions.navigateBack();
+    await walletStore.navigateBack();
   };
 
-  const wallet = walletApp.currentWallet;
+  const wallet = walletStore.currentWallet;
   let coins = null;
   let nfts = null;
   const hasCoin =
-    walletApp.navState.detail && walletApp.navState.detail.type === 'coin';
+    walletStore.navState.detail && walletStore.navState.detail.type === 'coin';
   let coin: ERC20Type | null = null;
-  if (walletApp.navState.network === 'ethereum') {
+  if (walletStore.navState.network === 'ethereum') {
     const ethWalletData = (wallet as EthWalletType).data.get(
-      walletApp.navState.protocol
+      walletStore.navState.protocol
     );
     if (ethWalletData) {
-      if (hasCoin && walletApp.navState.detail?.key) {
-        const newCoin = ethWalletData.coins.get(walletApp.navState.detail?.key);
+      if (hasCoin && walletStore.navState.detail?.key) {
+        const newCoin = ethWalletData.coins.get(
+          walletStore.navState.detail?.key
+        );
         if (newCoin) coin = newCoin;
       }
-      coins = getCoins(ethWalletData.coins);
-      nfts = getNfts(ethWalletData.nfts);
+      coins = getCoins(ethWalletData.coins as any);
+      nfts = getNfts(ethWalletData.nfts as any);
     }
   }
 
   const walletTransactions =
-    walletApp.navState.network === NetworkType.ETHEREUM
+    walletStore.navState.network === NetworkType.ETHEREUM
       ? coin
         ? (wallet as EthWalletType).data
-            ?.get(walletApp.navState.protocol ?? '')
+            ?.get(walletStore.navState.protocol ?? '')
             ?.coins.get(coin.address)?.transactionList.transactions
-        : (wallet as EthWalletType).data.get(walletApp.navState.protocol)
+        : (wallet as EthWalletType).data.get(walletStore.navState.protocol)
             ?.transactionList.transactions
       : (wallet as BitcoinWalletType).transactionList.transactions;
 
@@ -103,9 +99,7 @@ const DetailPresenter = (props: DetailProps) => {
       height="100%"
       justifyContent="flex-start"
       flexDirection="column"
-      py={1}
-      // px={3}
-      pb={0}
+      gap={10}
     >
       <DetailHero
         wallet={wallet}
@@ -117,9 +111,9 @@ const DetailPresenter = (props: DetailProps) => {
         onScreenChange={onScreenChange}
         setSendTrans={(send: boolean) => {
           if (send) {
-            WalletActions.navigate(WalletView.TRANSACTION_SEND, {
+            walletStore.navigate(WalletView.TRANSACTION_SEND, {
               walletIndex: `${wallet.index}`,
-              protocol: walletApp.navState.protocol,
+              protocol: walletStore.navState.protocol,
               ...(coin && {
                 detail: {
                   type: 'coin',
@@ -130,7 +124,7 @@ const DetailPresenter = (props: DetailProps) => {
               }),
             });
           } else {
-            WalletActions.navigateBack();
+            walletStore.navigateBack();
           }
         }}
         close={close}
@@ -144,15 +138,14 @@ const DetailPresenter = (props: DetailProps) => {
                 opacity: { ease: 'linear' },
               }}
               flexDirection="column"
-              mt={6}
             >
-              <Text.Custom mb={2} opacity={0.5} fontWeight={500} fontSize={2}>
+              <Text.Custom opacity={0.5} fontWeight={500} fontSize={2}>
                 Transactions
               </Text.Custom>
               <TransactionList
                 height={200}
                 transactions={transactions}
-                hidePending={props.hidePending}
+                hidePending={hidePending}
                 ethType={coin?.address}
               />
             </Flex>
@@ -162,26 +155,28 @@ const DetailPresenter = (props: DetailProps) => {
       <Box width="100%" hidden={QROpen || sendTrans}>
         <Flex
           width="100%"
-          pt={4}
           flexDirection="column"
           justifyContent="center"
+          gap={10}
         >
           {!coin && (
             <>
               <ListSelector
-                network={walletApp.navState.network}
+                network={walletStore.navState.network}
                 selected={listView}
                 onChange={(newView: DisplayType) => setListView(newView)}
               />
               {listView === 'transactions' && (
                 <TransactionList
-                  height={230}
+                  height={250}
                   transactions={transactions}
-                  hidePending={props.hidePending}
+                  hidePending={hidePending}
                 />
               )}
-              {listView === 'coins' && coins && <CoinList coins={coins} />}
-              {listView === 'nfts' && nfts && <NFTList nfts={nfts} />}
+              {listView === 'coins' && coins && (
+                <CoinList coins={coins as any} />
+              )}
+              {listView === 'nfts' && nfts && <NFTList nfts={nfts as any} />}
             </>
           )}
         </Flex>
@@ -192,52 +187,49 @@ const DetailPresenter = (props: DetailProps) => {
 
 export const Detail = observer(DetailPresenter);
 
-interface ListSelectorProps {
+type ListSelectorProps = {
   selected: DisplayType;
   onChange: any;
   network: string;
-}
-function ListSelector(props: ListSelectorProps) {
-  const { theme } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
+};
 
-  const MenuButton = (props: any) => {
-    return props.selected ? (
-      <TextButton onClick={props.onClick}>{props.children}</TextButton>
+const ListSelector = ({ selected, onChange, network }: ListSelectorProps) => {
+  const MenuButton = ({ selected, onClick, children }: any) => {
+    return selected ? (
+      <Button.TextButton onClick={onClick} flex={1}>
+        {children}
+      </Button.TextButton>
     ) : (
-      <TextButton
-        onClick={props.onClick}
-        textColor={baseTheme.colors.text.disabled}
-        fontWeight={500}
-      >
-        {props.children}
-      </TextButton>
+      <Button.TextButton onClick={onClick} flex={1} color="text">
+        {children}
+      </Button.TextButton>
     );
   };
+
   return (
-    <Flex mb={2} alignItems="center">
-      {props.network === 'ethereum' && (
+    <Flex alignItems="center">
+      {network === 'ethereum' && (
         <MenuButton
-          selected={props.selected === 'coins'}
-          onClick={() => props.onChange('coins')}
+          selected={selected === 'coins'}
+          onClick={() => onChange('coins')}
         >
           Coins
         </MenuButton>
       )}
-      {props.network === 'ethereum' && (
+      {network === 'ethereum' && (
         <MenuButton
-          selected={props.selected === 'nfts'}
-          onClick={() => props.onChange('nfts')}
+          selected={selected === 'nfts'}
+          onClick={() => onChange('nfts')}
         >
           NFTs
         </MenuButton>
       )}
       <MenuButton
-        selected={props.selected === 'transactions'}
-        onClick={() => props.onChange('transactions')}
+        selected={selected === 'transactions'}
+        onClick={() => onChange('transactions')}
       >
         Transactions
       </MenuButton>
     </Flex>
   );
-}
+};

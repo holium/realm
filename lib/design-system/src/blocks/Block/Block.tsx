@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
-import { Text } from '../../general/Text/Text';
 import {
   background,
   BackgroundProps,
@@ -25,6 +24,8 @@ import {
   typography,
   TypographyProps,
 } from 'styled-system';
+
+import { Text } from '../../general/Text/Text';
 import { ColorProps, colorStyle } from '../../util/colors';
 
 type BlockMode = 'embed' | 'display';

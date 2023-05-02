@@ -1,10 +1,12 @@
 import { useCallback } from 'react';
 import { observer } from 'mobx-react';
-import { Badge, Flex } from 'renderer/components';
-import { useTrayApps } from 'renderer/apps/store';
-import { calculateAnchorPoint } from 'renderer/logic/lib/position';
-import { Icon, BarButton } from '@holium/design-system';
+
+import { BarButton, Flex, Icon } from '@holium/design-system';
+
 import { AppRegistry } from 'renderer/apps/registry';
+import { useTrayApps } from 'renderer/apps/store';
+import { Badge } from 'renderer/components';
+import { calculateAnchorPoint } from 'renderer/lib/position';
 
 const MessagesTrayPresenter = () => {
   const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
@@ -47,8 +49,8 @@ const MessagesTrayPresenter = () => {
       <Badge
         wrapperHeight={iconSize}
         wrapperWidth={iconSize}
-        top={1}
-        right={1}
+        bottom={0}
+        right={0}
         minimal
         count={0}
       >

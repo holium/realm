@@ -1,20 +1,28 @@
 import { useEffect, useState } from 'react';
+
 import { Flex } from '@holium/design-system/general';
-import { IdentityIcon } from '../icons/IdentityIcon';
+
+import { OnboardDialog } from '../components/OnboardDialog';
 import {
-  OnboardDialogTitle,
   OnboardDialogDescription,
+  OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
 import { PatpsPaginated } from '../components/PatpsPaginated';
-import { OnboardDialog } from '../components/OnboardDialog';
+import { IdentityIcon } from '../icons/IdentityIcon';
 
 type Props = {
   patps: string[];
   onSelectPatp: (patp: string) => void;
+  onBack?: () => void;
   onNext: () => Promise<boolean>;
 };
 
-export const ChooseIdDialog = ({ patps, onSelectPatp, onNext }: Props) => {
+export const ChooseIdDialog = ({
+  patps,
+  onSelectPatp,
+  onBack,
+  onNext,
+}: Props) => {
   const [selectedPatp, setSelectedPatp] = useState<string>();
 
   const handleOnSelectPatp = (patp: string) => {
@@ -45,6 +53,7 @@ export const ChooseIdDialog = ({ patps, onSelectPatp, onNext }: Props) => {
           />
         </>
       }
+      onBack={onBack}
       onNext={onNext}
     />
   );

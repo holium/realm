@@ -1,55 +1,13 @@
-import styled from 'styled-components';
-import { Flex, Button, Text } from '@holium/design-system/general';
 import { AccountDialog, SidebarSection } from '../components/AccountDialog';
-import { AccountDialogDescription } from '../components/AccountDialog.styles';
-import { AccountDialogTableRow } from '../components/AccountDialogTableRow';
-import { TABLET_WIDTH } from '../components/OnboardDialog.styles';
-import { ChangeButton } from '../components/hosting/ChangeButton';
-import { ChangeMaintenanceWindow } from '../components/hosting/ChangeMaintenanceWindow';
-import { ChangeAccessCode } from '../components/hosting/ChangeAccessCode';
-
-export const AccountDialogTable = styled(Flex)`
-  flex-direction: column;
-
-  @media (max-width: ${TABLET_WIDTH}px) {
-    gap: 24px;
-  }
-`;
-
-const AccountDialogTableRowContainer = styled(Flex)`
-  flex: 1;
-  align-items: center;
-  justify-content: space-between;
-
-  @media (max-width: ${TABLET_WIDTH}px) {
-    width: 100%;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-`;
-
-const GetNewAccessCodeContainer = styled(Flex)`
-  width: 100%;
-  height: 40px;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: center;
-
-  @media (max-width: ${TABLET_WIDTH}px) {
-    height: auto;
-    align-items: flex-start;
-    margin-top: -12px;
-  }
-`;
+import { AccountHostingDialogBody } from './bodies/AccountHostingDialogBody';
 
 type Props = {
   patps: string[];
   selectedPatp: string;
   email: string | null;
-  shipUrl: string | undefined;
-  shipCode: string | undefined;
-  shipMaintenanceWindow: number | undefined;
+  serverUrl: string | undefined;
+  serverCode: string | undefined;
+  serverMaintenanceWindow: number | undefined;
   setSelectedPatp: (patp: string) => void;
   onClickChangeEmail: () => void;
   onClickChangePassword: () => void;
@@ -65,9 +23,9 @@ export const AccountHostingDialog = ({
   patps,
   selectedPatp,
   email,
-  shipUrl,
-  shipCode,
-  shipMaintenanceWindow,
+  serverUrl,
+  serverCode,
+  serverMaintenanceWindow,
   setSelectedPatp,
   onClickChangeEmail,
   onClickChangePassword,
@@ -83,67 +41,22 @@ export const AccountHostingDialog = ({
     selectedPatp={selectedPatp}
     setSelectedPatp={setSelectedPatp}
     currentSection={SidebarSection.Hosting}
-    isLoading={!email || !shipUrl || !shipCode || !shipMaintenanceWindow}
+    isLoading={!email || !serverUrl || !serverCode || !serverMaintenanceWindow}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >
-    <AccountDialogTable>
-      <AccountDialogTableRow title="Server ID">
-        <AccountDialogDescription flex={1}>
-          {selectedPatp}
-        </AccountDialogDescription>
-      </AccountDialogTableRow>
-      <AccountDialogTableRow title="Email">
-        <AccountDialogTableRowContainer>
-          <AccountDialogDescription>{email}</AccountDialogDescription>
-          <ChangeButton type="button" onClick={onClickChangeEmail}>
-            Change email
-          </ChangeButton>
-        </AccountDialogTableRowContainer>
-      </AccountDialogTableRow>
-      <AccountDialogTableRow title="Password">
-        <AccountDialogTableRowContainer>
-          <AccountDialogDescription>• • • • • • • •</AccountDialogDescription>
-          <ChangeButton type="button" onClick={onClickChangePassword}>
-            Change password
-          </ChangeButton>
-        </AccountDialogTableRowContainer>
-      </AccountDialogTableRow>
-      <AccountDialogTableRow title="Payment">
-        <AccountDialogTableRowContainer>
-          <AccountDialogDescription flex={1}>
-            Credit Card
-          </AccountDialogDescription>
-          <ChangeButton type="button" onClick={onClickManageBilling}>
-            Manage billing
-          </ChangeButton>
-        </AccountDialogTableRowContainer>
-      </AccountDialogTableRow>
-      <AccountDialogTableRow title="URL">
-        <AccountDialogDescription flex={1}>{shipUrl}</AccountDialogDescription>
-      </AccountDialogTableRow>
-      <ChangeAccessCode shipCode={shipCode as string} />
-      <GetNewAccessCodeContainer>
-        <ChangeButton type="button" onClick={onClickGetNewAccessCode}>
-          Get new access code
-        </ChangeButton>
-      </GetNewAccessCodeContainer>
-
-      <ChangeMaintenanceWindow
-        maintenanceWindow={shipMaintenanceWindow as number}
-        onClick={onClickChangeMaintenanceWindow}
-      />
-    </AccountDialogTable>
-    <Flex
-      flex={1}
-      width="100%"
-      alignContent="flex-end"
-      justifyContent="center"
-      flexWrap="wrap"
-    >
-      <Button.Transparent height="15px" onClick={onClickEjectId}>
-        <Text.Body color="intent-alert">Eject ID</Text.Body>
-      </Button.Transparent>
-    </Flex>
+    <AccountHostingDialogBody
+      selectedPatp={selectedPatp}
+      email={email as string}
+      serverUrl={serverUrl as string}
+      serverCode={serverCode as string}
+      serverMaintenanceWindow={serverMaintenanceWindow as number}
+      onClickChangeEmail={onClickChangeEmail}
+      onClickChangePassword={onClickChangePassword}
+      onClickManageBilling={onClickManageBilling}
+      onClickGetNewAccessCode={onClickGetNewAccessCode}
+      onClickChangeMaintenanceWindow={onClickChangeMaintenanceWindow}
+      onClickEjectId={onClickEjectId}
+    />
   </AccountDialog>
 );

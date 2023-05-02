@@ -1,16 +1,22 @@
 import {
-  useState,
-  useCallback,
   ClipboardEvent,
-  useRef,
+  useCallback,
   useEffect,
+  useRef,
+  useState,
 } from 'react';
+
 import { Box, ChatInput } from '@holium/design-system';
-import { ChatMessageType, ChatModelType } from '../models';
-import { useFileUpload } from 'renderer/logic/lib/useFileUpload';
-import { FileUploadParams } from 'os/services/ship/models/ship';
-import { ShipActions } from 'renderer/logic/actions/ship';
-import { IuseStorage } from 'renderer/logic/lib/useStorage';
+
+import { FileUploadParams } from 'os/services/ship/ship.service';
+import { useFileUpload } from 'renderer/lib/useFileUpload';
+import { IuseStorage } from 'renderer/lib/useStorage';
+import { ShipIPC } from 'renderer/stores/ipc';
+
+import {
+  ChatMessageType,
+  ChatModelType,
+} from '../../../stores/models/chat.model';
 
 type CourierInputProps = {
   replyTo?: any;
@@ -60,7 +66,7 @@ export const ChatInputBox = ({
     (params: FileUploadParams) => {
       setIsUploading(true);
       setUploadError('');
-      ShipActions.uploadFile(params)
+      (ShipIPC.uploadFile(params) as Promise<any>)
         .then((url) => {
           console.log(url);
           setAttachment([...attachments, url]);

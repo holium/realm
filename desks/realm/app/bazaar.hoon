@@ -3,7 +3,6 @@
 ::
 ::  A store for metadata on app dockets and installs.
 ::
-::
 /-  store=bazaar-store, docket, spaces-store, vstore=visas
 /-  membership-store=membership, hark=hark-store
 /-  treaty, hood
@@ -123,6 +122,12 @@
         =/  treaties   (treaties:scry:bazaar:core ship %.y)
         ``bazaar-view+!>([%treaties treaties])
       ::
+      ::
+      [%x %version ~]     ::  ~/scry/bazaar/version
+        :: can't search for %realm in our app catalog, since we skip our own desk
+        =/  dok  (find-docket:helpers:bazaar:core %realm)
+        ?~  dok  ``json+!>(~)
+        ``bazaar-view+!>([%version version.u.dok])
     ==
   ::
   ++  on-agent
@@ -518,7 +523,7 @@
         =.  upd-docks               (into upd-docks index app-id)
         =.  docks.state             (~(put by docks.state) [path upd-docks])
         :_  state
-        [%give %fact [/updates ~] bazaar-reaction+!>([%pinned path app-id index])]~
+        [%give %fact [/updates ~] bazaar-reaction+!>([%dock-update path upd-docks])]~
       `state
     ::
     ++  reorder-pins
@@ -526,7 +531,7 @@
       ?>  =(our.bowl src.bowl)
       =.  docks.state             (~(put by docks.state) [path dock])
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%pins-reodered path dock])]~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%dock-update path dock])]~
     ::
     ++  rem-pin
       |=  [path=space-path:spaces-store =app-id:store]
@@ -537,7 +542,7 @@
       =.  upd-docks                 (oust [(need index) 1] upd-docks)
       =.  docks.state               (~(put by docks.state) [path upd-docks])
       :_  state
-      [%give %fact [/updates ~] bazaar-reaction+!>([%unpinned path app-id])]~
+      [%give %fact [/updates ~] bazaar-reaction+!>([%dock-update path upd-docks])]~
     ::
     ++  add-suite
       |=  [path=space-path:spaces-store =app-id:store index=@ud]
@@ -1167,6 +1172,22 @@
       ?.  =(space.path %our)
         [/update ~]
       [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
+    ::
+    ++  find-docket
+      |=  [=desk]
+      :: ^-  (unit docket)
+
+      :: =/  =charge-update:docket         .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
+      :: ?>  ?=([%initial *] charge-update)
+      :: =/  our-space                     [our.bowl 'our']
+      :: =/  init                          (init-catalog:helpers:bazaar:core initial.charge-update)
+      :: |=  [charges=(map desk charge:docket)]
+
+      =/  =charge-update:docket  .^(charge-update:docket %gx /(scot %p our.bowl)/docket/(scot %da now.bowl)/charges/noun)
+      ?>  ?=([%initial *] charge-update)
+      =/  chg  (~(get by initial.charge-update) desk)
+      ?~  chg  ~
+      (some docket.u.chg)
     ::
     ++  init-catalog
       |=  [charges=(map desk charge:docket)]

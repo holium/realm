@@ -7,9 +7,10 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { useSelection } from 'renderer/logic/lib/selection';
-import { useServices } from 'renderer/logic/store';
+
+import { useSelection } from 'renderer/lib/selection';
+import { useAppState } from 'renderer/stores/app.store';
+
 import { ContextMenuOption } from './ContextMenu';
 
 type ContextMenuOptionsMap = {
@@ -44,8 +45,8 @@ type ContextMenuProviderProps = {
 export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
   const root = document.getElementById('root');
   const { selectedText, selectedElement } = useSelection();
-  const { theme } = useServices();
-  const { textColor, windowColor } = theme.currentTheme;
+  const { theme, shellStore } = useAppState();
+  const { textColor, windowColor } = theme;
   const [mouseRef, setMouseRef] = useState<MouseEvent | null>(null);
   const [menuOptions, setMenuOptions] = useState<ContextMenuOptionsMap>();
   const [menuColors, setMenuColors] = useState<ContextMenuColorsMap>();
@@ -114,7 +115,7 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
           id: 'toggle-devtools',
           icon: 'DevBox',
           label: 'Toggle devtools',
-          onClick: DesktopActions.toggleDevTools,
+          onClick: shellStore.toggleDevTools,
         },
       ].filter(Boolean) as ContextMenuOption[],
     [

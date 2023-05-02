@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
-import { EditorView } from 'prosemirror-view';
 import { TextSelection, Transaction } from 'prosemirror-state';
 import { Step } from 'prosemirror-transform';
-import { Text, Flex } from '@holium/design-system';
+import { EditorView } from 'prosemirror-view';
+
+import { Flex, Text } from '@holium/design-system';
 import { useBroadcast } from '@holium/realm-presence';
-import { schema } from './components/schema';
-import { Loader } from './components/Loader';
+
+import { EditorContainer, Header } from './App.styles';
 import { Authority } from './components/Authority';
 import { collabEditor } from './components/CollabEditor';
-import { hoonDoc } from './hoonExample';
-import { Header, EditorContainer } from './App.styles';
 import { CustomCaret } from './components/CustomCaret';
+import { Loader } from './components/Loader';
+import { schema } from './components/schema';
+import { hoonDoc } from './hoonExample';
 
 type Carets = Record<string, { x: number; y: number }>;
 
@@ -23,7 +25,7 @@ export type SendTransaction = (
   clientID: string | number
 ) => void;
 
-const filePath = 'desks/courier/mar/graph/validator/dm.hoon';
+const filePath = 'desks/realm/mar/bazaar/action.hoon';
 
 export const App = () => {
   const [editorView, setEditorView] = useState<EditorView>();

@@ -1,4 +1,5 @@
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+
 import { BootingDialog } from '../BootingDialog';
 import { ChooseIdDialog } from '../ChooseIdDialog';
 import { CreateAccountDialog } from '../CreateAccountDialog';
@@ -6,8 +7,11 @@ import { CredentialsDialog } from '../CredentialsDialog';
 import { DownloadDialog } from '../DownloadDialog';
 import { PaymentDialog } from '../PaymentDialog';
 import { VerifyEmailDialog } from '../VerifyEmailDialog';
-import { OnboardingDialogWrapper } from './helpers';
-import { ThirdEarthProduct } from '../../types/index';
+import {
+  mockPatps,
+  OnboardingDialogWrapper,
+  thirdEarthMockProducts,
+} from './helpers';
 
 export default {
   component: CreateAccountDialog,
@@ -46,17 +50,7 @@ export const ChooseIdDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <ChooseIdDialog
-      patps={[
-        '~zod',
-        '~bus',
-        '~wicdev-wisryt',
-        '~nidsut-tomdun',
-        '~fipfep-foslup',
-        '~norsyr-tomdun',
-        '~lopsyp-doztun',
-        '~lomder-librun',
-        '~littel-wolfur',
-      ]}
+      patps={mockPatps}
       onSelectPatp={() => {}}
       onNext={() => Promise.resolve(false)}
     />
@@ -65,40 +59,10 @@ export const ChooseIdDialogStory: ComponentStory<
 
 ChooseIdDialogStory.storyName = '3. Choose ID';
 
-const thirdEarthProductMock: ThirdEarthProduct = {
-  id: 1,
-  client_id: 1,
-  droplet_class_id: 1,
-  is_migration: false,
-  is_planet: true,
-  lang_code: 'en',
-  priority: 1,
-  product_status: 'active',
-  product_type: 'subscription',
-  threshold: 0,
-  comet_count: '0',
-  title: 'Monthly',
-  description: 'Monthly subscription',
-  long_description: 'Monthly subscription',
-  price_id: '11',
-  subscription_price: 15,
-};
-
 export const PaymentDialogStory: ComponentStory<typeof PaymentDialog> = () => (
   <OnboardingDialogWrapper>
     <PaymentDialog
-      products={[
-        thirdEarthProductMock,
-        {
-          ...thirdEarthProductMock,
-          id: 2,
-          title: 'Yearly',
-          description: 'Yearly subscription',
-          long_description: 'Yearly subscription',
-          price_id: '12',
-          subscription_price: 150,
-        },
-      ]}
+      products={thirdEarthMockProducts}
       productId={1}
       setProductId={() => {}}
       patp="~zod"
@@ -171,4 +135,4 @@ export const DownloadDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-DownloadDialogStory.storyName = '7. Download';
+DownloadDialogStory.storyName = '7. Download Realm for Desktop';

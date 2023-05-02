@@ -1,5 +1,3 @@
-import { Box, Position } from '@holium/design-system';
-import { AnimatePresence } from 'framer-motion';
 import {
   createContext,
   ReactNode,
@@ -7,8 +5,13 @@ import {
   useContext,
   useState,
 } from 'react';
-import { useServices } from 'renderer/logic/store';
-import { Menu } from '../Menu';
+import { AnimatePresence } from 'framer-motion';
+
+import { Box, Position } from '@holium/design-system';
+
+import { Menu } from 'renderer/components/Menu/Menu';
+import { useAppState } from 'renderer/stores/app.store';
+
 import { PassportCard } from './PassportCard';
 
 type PassportMenuOptions = {
@@ -59,7 +62,7 @@ const calculateCoordinates = (config: PassportMenuConfig) => {
 export const PassportMenuProvider = ({
   children,
 }: PassportMenuProviderProps) => {
-  const { theme } = useServices();
+  const { theme } = useAppState();
   const [menu, setMenu] = useState<PassportMenuConfig | null>(null);
 
   const setMenuConfig = useCallback((config: PassportMenuConfig) => {
@@ -84,7 +87,7 @@ export const PassportMenuProvider = ({
         <AnimatePresence>
           {menu && (
             <Menu
-              customBg={theme.currentTheme.windowColor}
+              customBg={theme.windowColor}
               style={{
                 ...calculateCoordinates(menu),
                 width: WIDTH,
@@ -95,11 +98,7 @@ export const PassportMenuProvider = ({
               isOpen
               onClose={() => setMenu(null)}
             >
-              <PassportCard
-                {...menu.options}
-                theme={theme.currentTheme}
-                onClose={() => setMenu(null)}
-              />
+              <PassportCard {...menu.options} onClose={() => setMenu(null)} />
             </Menu>
           )}
         </AnimatePresence>

@@ -1,22 +1,49 @@
 import _ from 'lodash';
 import f from 'lodash/fp';
-/**
- *  shouldTextBeLightOrDark
- *
- *  Given the background luminosity, what should the text be?
- *
- * @param bgTheme
- * @returns
- */
-export function detectTextTheme(bgTheme: 'light' | 'dark') {
-  // Using the HSP value, determine whether the color is light or dark
-  if (bgTheme === 'dark') {
-    // the background image is too light
-    return 'light';
-  } else {
-    return 'dark';
-  }
+import { css } from 'styled-components';
+// The color variants maps to CSS variables injected by Realm.
+export type ColorVariants =
+  | 'base'
+  | 'accent'
+  | 'input'
+  | 'border'
+  | 'window'
+  | 'window-bg'
+  | 'card'
+  | 'text'
+  | 'icon'
+  | 'dock'
+  | 'mouse'
+  | 'brand'
+  | 'intent-alert'
+  | 'intent-success'
+  | 'intent-caution';
+
+export interface ColorProps {
+  bg?: ColorVariants;
+  fill?: ColorVariants;
+  color?: ColorVariants;
+  stroke?: ColorVariants;
+  borderColor?: ColorVariants;
 }
+
+export const colorStyle = css<ColorProps>`
+  ${(props) =>
+    props.bg &&
+    css`
+      background-color: rgba(var(--rlm-${props.bg}-rgba));
+    `}
+  ${(props) =>
+    props.color &&
+    css`
+      color: rgba(var(--rlm-${props.color}-rgba));
+    `}
+  ${(props) =>
+    props.borderColor &&
+    css`
+      border-color: rgba(var(--rlm-${props.borderColor}-rgba));
+    `}
+`;
 
 /**
  *  bgIsLightOrDark
@@ -48,9 +75,53 @@ export function bgIsLightOrDark(hexColor: string) {
   }
 }
 
+export function convertDarkText(hexColor: string, themeMode: string = 'light') {
+  let color = hexColor;
+  if (themeMode === 'dark') {
+    var c = hexColor.substring(1); // strip #
+    var rgb = parseInt(c, 16); // convert rrggbb to decimal
+    var r = (rgb >> 16) & 0xff; // extract red
+    var g = (rgb >> 8) & 0xff; // extract green
+    var b = (rgb >> 0) & 0xff; // extract blue
+
+    var luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
+
+    if (luma < 40) {
+      // pick a different colour
+      color = '#ffffff90';
+    }
+  }
+
+  return color;
+}
+
+export const opacifyHexColor = (hexColor: string, opacity: number) =>
+  hexColor + Math.round(opacity * 255).toString(16);
+
+/**
+ *  shouldTextBeLightOrDark
+ *
+ *  Given the background luminosity, what should the text be?
+ *
+ * @param bgTheme
+ * @returns
+ */
+export function detectTextTheme(bgTheme: 'light' | 'dark') {
+  // Using the HSP value, determine whether the color is light or dark
+  if (bgTheme === 'dark') {
+    // the background image is too light
+    return 'light';
+  } else {
+    return 'dark';
+  }
+}
+
 export function cleanNounColor(ux: string) {
   if (ux === '') {
     return '#000';
+  }
+  if (ux.startsWith('#')) {
+    return ux;
   }
   if (ux.length > 2 && ux.substring(0, 2) === '0x') {
     const value = ux.substring(2).replace('.', '').padStart(6, '0');

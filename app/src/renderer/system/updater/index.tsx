@@ -1,9 +1,12 @@
 import { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ProgressInfo, UpdateInfo } from 'electron-updater';
-import { Flex, ProgressBar, Button, Text } from '@holium/design-system';
-import { HoliumLogo } from './holium-logo';
+
+import { Button, Flex, ProgressBar, Text } from '@holium/design-system';
+
 import { StandAloneMouse } from '../mouse/StandAloneMouse';
+import { HoliumLogo } from './holium-logo';
+
 import './installer.css';
 
 declare global {

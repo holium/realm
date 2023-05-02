@@ -1,28 +1,25 @@
-import { useEffect, useState } from 'react';
-import { observer } from 'mobx-react';
+import { KeyboardEventHandler, useEffect, useState } from 'react';
 import emailValidator from 'email-validator';
+import { observer } from 'mobx-react';
+
 import {
-  Input,
-  TextButton,
-  Text,
-  Label,
-  BigInput,
+  Box,
   Button,
-} from 'renderer/components';
-import { Box, Flex, Spinner } from '@holium/design-system';
-import { ThemeType } from 'renderer/theme';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { useServices } from 'renderer/logic/store';
+  Flex,
+  Spinner,
+  Text,
+  TextInput,
+} from '@holium/design-system';
+
+import { normalizeBounds } from 'renderer/lib/window-manager';
+import { appState } from 'renderer/stores/app.store';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { AuthActions } from 'renderer/logic/actions/auth';
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 
 export const ChangeEmailDialogConfig: DialogConfig = {
   component: (props: any) => <ChangeEmailDialog {...props} />,
   onClose: () => {
-    ShellActions.closeDialog();
-    ShellActions.setBlur(false);
+    appState.shellStore.closeDialog();
+    appState.shellStore.setIsBlurred(false);
   },
   getWindowProps: (desktopDimensions) => ({
     appId: 'change-email-dialog',
@@ -45,28 +42,20 @@ export const ChangeEmailDialogConfig: DialogConfig = {
 };
 
 const ChangeEmailDialogPresenter = () => {
-  const { theme } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
   const [view, setView] = useState('initial');
-
-  const transitionToVerify = () => {
-    setView('verify');
-  };
 
   const emailVerified = () => {
     setView('success');
     setTimeout(() => {
-      ShellActions.closeDialog();
-      ShellActions.setBlur(false);
+      appState.shellStore.closeDialog();
+      appState.shellStore.setIsBlurred(false);
     }, 2000);
   };
 
   const screens = {
-    initial: <InitialScreen done={transitionToVerify} baseTheme={baseTheme} />,
-    verify: (
-      <VerifyScreen done={emailVerified} theme={baseTheme as ThemeType} />
-    ),
-    success: <SuccessScreen baseTheme={baseTheme} />,
+    initial: <InitialScreen />,
+    verify: <VerifyScreen done={emailVerified} />,
+    success: <SuccessScreen />,
   };
 
   const Screen = screens[view as 'initial' | 'verify' | 'success'];
@@ -80,9 +69,11 @@ const ChangeEmailDialogPresenter = () => {
 
 const ChangeEmailDialog = observer(ChangeEmailDialogPresenter);
 
-function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
-  const { identity } = useServices();
-  const [email, setEmail] = useState(identity.auth.email);
+function InitialScreen() {
+  // TODO: add email validation --------------------
+  // const { identity } = useServices();
+  const currentEmail = 'email@email.com';
+  const [email, setEmail] = useState(currentEmail);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -96,52 +87,53 @@ function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
     if (!email) return;
     console.log(`setting email: ${email}`);
     setLoading(true);
-    const result = await AuthActions.changeEmail(email);
+    // const result = await AuthActions.changeEmail(email);
     setLoading(false);
 
-    if (result.verificationCode) {
-      props.done();
-    } else {
-      setError(result.error || 'Something went wrong, please try again.');
-    }
+    // if (result.verificationCode) {
+    //   props.done();
+    // } else {
+    //   setError(result.error || 'Something went wrong, please try again.');
+    // }
   };
 
   return (
     <>
       <Flex flexDirection="column">
-        <Text fontSize={3} fontWeight={500} mb={20}>
+        <Text.Custom fontSize={3} fontWeight={500} mb={20}>
           Change Email
-        </Text>
-        <Text fontSize={2} lineHeight="copy" variant="body">
+        </Text.Custom>
+        <Text.Custom fontSize={2} lineHeight="copy" variant="body">
           Which email would you like to use for your account?
-        </Text>
+        </Text.Custom>
       </Flex>
       <Flex mt={8} flexDirection="column">
-        <Label mb={3} required={true}>
-          Email
-        </Label>
-        <Input onChange={onChange} type="email" required={true} />
+        <Text.Label mb={3}>
+          Email <span style={{ opacity: 0.5, fontWeight: '500' }}>*</span>
+        </Text.Label>
+        <TextInput
+          id="email-change"
+          name="email-change"
+          type="email"
+          required={true}
+          onChange={onChange}
+        />
         <Box mt={7} width="100%">
-          <Button
+          <Button.Primary
             width="100%"
             disabled={
               !email ||
               !emailValidator.validate(email) ||
-              email.toLowerCase() === identity.auth.email?.toLowerCase()
+              email.toLowerCase() === currentEmail?.toLowerCase()
             }
-            isLoading={loading}
             onClick={onClick}
           >
-            Submit
-          </Button>
+            {loading ? <Spinner color="white" size={0} /> : 'Submit'}
+          </Button.Primary>
         </Box>
-        <Text
-          variant="body"
-          color={props.baseTheme.colors.text.error}
-          fontSize={1}
-        >
+        <Text.Custom variant="body" fontSize={1}>
           {error}
-        </Text>
+        </Text.Custom>
       </Flex>
     </>
   );
@@ -150,12 +142,13 @@ function InitialScreen(props: { done: any; baseTheme: ThemeType }) {
 const validChars =
   'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-function VerifyScreen(props: { theme: ThemeType; done: any }) {
+function VerifyScreen(props: { done: any }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState(false);
 
-  const submit = async (code: string) => {
-    const wasCorrect = await AuthActions.verifyNewEmail(code);
+  const submit = async (_code: string) => {
+    // const wasCorrect = await AuthActions.verifyNewEmail(code);
+    const wasCorrect = true;
     wasCorrect ? props.done() : setError(true);
   };
 
@@ -176,40 +169,41 @@ function VerifyScreen(props: { theme: ThemeType; done: any }) {
   return (
     <>
       <Flex mt={7} mb={5} flexDirection="column">
-        <Text fontSize={3} fontWeight={500} mb={20}>
+        <Text.Custom fontSize={3} fontWeight={500} mb={20}>
           Verify Email
-        </Text>
-        <Text fontSize={2} lineHeight="copy" variant="body">
+        </Text.Custom>
+        <Text.Custom fontSize={2} lineHeight="copy" variant="body">
           We sent a verification code to your email. Once you receive the code,
           confirm it below.
-        </Text>
+        </Text.Custom>
       </Flex>
       <Flex flexDirection="column">
         <Flex mt={5} width="100%" justifyContent="center">
           <BigInput
             mt={7}
+            id="change-email-verification-code"
             placeholder="A1F9C5"
             value={code}
             onChange={onChange}
           />
         </Flex>
         <Flex mt={4} flexDirection="column">
-          <ResendCodeButton theme={props.theme} />
-          <Text mt={3} fontSize={1} color={props.theme.colors.text.error}>
+          <ResendCodeButton />
+          <Text.Custom mt={3} fontSize={1} color="intent-alert">
             {error && 'Verification code was incorrect.'}
-          </Text>
+          </Text.Custom>
         </Flex>
       </Flex>
     </>
   );
 }
 
-function ResendCodeButton(props: { theme: ThemeType }) {
+function ResendCodeButton() {
   const [state, setState] = useState('initial');
 
   const resendCode = async () => {
     setState('loading');
-    await AuthActions.resendNewEmailVerificationCode();
+    // await AuthActions.resendNewEmailVerificationCode();
     setState('resent');
   };
 
@@ -226,41 +220,26 @@ function ResendCodeButton(props: { theme: ThemeType }) {
     >
       {state === 'initial' || state === 'loading' ? (
         <>
-          <TextButton
+          <Button.TextButton
             fontSize={1}
             fontWeight={400}
             disabled={state === 'loading'}
-            textColor={
-              state === 'loading'
-                ? props.theme.colors.text.disabled
-                : props.theme.colors.brand.secondary
-            }
             onClick={resendCode}
           >
             send another code
-          </TextButton>
-          {state === 'loading' && (
-            <Spinner
-              ml={1}
-              size="8px"
-              color={props.theme.colors.brand.secondary}
-            />
-          )}
+          </Button.TextButton>
+          {state === 'loading' && <Spinner ml={1} size={0} />}
         </>
       ) : (
-        <Text
-          variant="body"
-          fontSize={1}
-          color={props.theme.colors.text.success}
-        >
+        <Text.Custom variant="body" fontSize={1} color="intent-success">
           Another verification code was sent.
-        </Text>
+        </Text.Custom>
       )}
     </Flex>
   );
 }
 
-function SuccessScreen(props: { baseTheme: ThemeType }) {
+function SuccessScreen() {
   return (
     <Flex
       width="100%"
@@ -268,9 +247,61 @@ function SuccessScreen(props: { baseTheme: ThemeType }) {
       justifyContent="center"
       alignItems="center"
     >
-      <Text color={props.baseTheme.colors.text.success}>
-        Email successfully updated.
-      </Text>
+      <Text.Custom fontSize={3}>Email successfully updated.</Text.Custom>
     </Flex>
   );
 }
+
+interface BigInputProps {
+  id: string;
+  m?: number | string;
+  mt?: number | string;
+  mb?: number | string;
+  mx?: number | string;
+  my?: number | string;
+  placeholder: string;
+  value: string;
+  onChange: (value: any) => void;
+  onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
+}
+
+export const BigInput = ({
+  id,
+  m,
+  mt,
+  mb,
+  mx,
+  my,
+  placeholder,
+  value,
+  onKeyDown,
+  onChange,
+}: BigInputProps) => (
+  <Flex
+    m={m}
+    mt={mt}
+    mb={mb}
+    mx={mx}
+    my={my}
+    flexDirection="row"
+    alignItems="space-between"
+    justifyContent="center"
+  >
+    <Box width={300} height={50}>
+      <TextInput
+        autoFocus
+        id={id || 'big-input'}
+        name={id || 'big-input'}
+        spellCheck={false}
+        textAlign="center"
+        fontSize={24}
+        fontWeight={500}
+        placeholder={placeholder}
+        value={value}
+        // @ts-ignore
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={onKeyDown}
+      />
+    </Box>
+  </Flex>
+);

@@ -1,22 +1,24 @@
 import { useCallback, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { calculateAnchorPoint } from 'renderer/logic/lib/position';
-import { useTrayApps } from 'renderer/apps/store';
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
+
+import { Box, RoomsDock } from '@holium/design-system';
+
 import { roomTrayConfig } from 'renderer/apps/Rooms/config';
-import { RoomsDock, Box } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { RealmProtocol } from '@holium/realm-room';
-import { RealmActions } from 'renderer/logic/actions/main';
+import { useTrayApps } from 'renderer/apps/store';
+import { calculateAnchorPoint } from 'renderer/lib/position';
+import { useAppState } from 'renderer/stores/app.store';
+import { MainIPC } from 'renderer/stores/ipc';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 const RoomTrayPresenter = () => {
-  const { ship, friends, spaces, desktop } = useServices();
+  const { shellStore } = useAppState();
+  const { friends, spacesStore, roomsStore } = useShipStore();
   const { position, anchorOffset, dimensions } = roomTrayConfig;
 
   useEffect(() => {
-    RealmActions.getMediaStatus().then((status) => {
-      if (status.mic === 'denied') desktop.setMicAllowed(false);
-      else desktop.setMicAllowed(true);
+    MainIPC.getMediaStatus().then((status) => {
+      if (status.mic === 'denied') shellStore.setMicAllowed(false);
+      else shellStore.setMicAllowed(true);
     });
   }, []);
 
@@ -28,8 +30,7 @@ const RoomTrayPresenter = () => {
     setTrayAppDimensions,
   } = useTrayApps();
 
-  const roomsManager = useRooms(ship?.patp);
-  const muted = roomsManager.protocol.local?.isMuted;
+  const muted = roomsStore.isMuted;
 
   const onButtonClick = useCallback(
     (evt: any) => {
@@ -64,15 +65,13 @@ const RoomTrayPresenter = () => {
   );
 
   const participants =
-    roomsManager?.presentRoom?.present.map((patp: string) => {
+    roomsStore.getPeers().map((patp: string) => {
       const metadata = friends.getContactAvatarMetadata(patp);
       return metadata;
     }) || [];
 
-  const rooms = spaces.selected
-    ? (roomsManager?.protocol as RealmProtocol).getSpaceRooms(
-        spaces.selected?.path
-      )
+  const rooms = spacesStore.selected
+    ? roomsStore.getSpaceRooms(spacesStore.selected?.path)
     : [];
 
   return (
@@ -83,20 +82,20 @@ const RoomTrayPresenter = () => {
       transition={{ duration: 0.15, ease: 'easeInOut' }}
     >
       <RoomsDock
-        live={roomsManager?.live.room}
+        live={roomsStore.current}
         rooms={rooms}
         participants={participants}
         onCreate={() => {
           console.log('create room');
         }}
         isMuted={muted}
-        hasMicPermissions={desktop.micAllowed}
+        hasMicPermissions={shellStore.micAllowed}
         onOpen={onButtonClick}
         onMute={() => {
           if (muted) {
-            roomsManager?.unmute();
+            roomsStore.unmute();
           } else {
-            roomsManager?.mute();
+            roomsStore.mute();
           }
         }}
         onCursor={() => {}}

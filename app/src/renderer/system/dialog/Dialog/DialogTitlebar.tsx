@@ -1,8 +1,8 @@
-import { useMemo, PointerEvent } from 'react';
+import { PointerEvent, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
-import { TitlebarContainer } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
+
 import { AppWindowIcon } from 'renderer/system/desktop/components/AppWindow/AppWindowIcon';
-import { useServices } from 'renderer/logic/store';
+import { TitlebarContainer } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
 
 const ToolbarContainer = styled(TitlebarContainer)`
   padding: 0px 18px;
@@ -17,6 +17,7 @@ export interface DialogTitlebarProps {
   onDragEnd: () => void;
   zIndex: number;
   showDevToolsToggle: boolean;
+  onOpen?: () => void;
   onClose?: () => void;
 }
 
@@ -24,11 +25,13 @@ export const DialogTitlebar = ({
   onDragEnd,
   onDragStart,
   zIndex,
+  onOpen,
   onClose,
 }: DialogTitlebarProps) => {
-  const { theme } = useServices();
-
-  const { iconColor } = theme.currentTheme;
+  useEffect(() => {
+    // trigger onOpen only once
+    onOpen?.();
+  }, [onOpen]);
 
   return useMemo(() => {
     return (
@@ -43,9 +46,7 @@ export const DialogTitlebar = ({
           <AppWindowIcon
             icon="Close"
             size={26}
-            iconColor={iconColor}
-            bg="#FF6240"
-            fillWithBg
+            iconColor="intent-alert"
             onClick={(evt: any) => {
               evt.stopPropagation();
               onClose && onClose();
@@ -54,5 +55,5 @@ export const DialogTitlebar = ({
         )}
       </ToolbarContainer>
     );
-  }, [iconColor, onClose, onDragStart, onDragEnd, zIndex]);
+  }, [onClose, onDragStart, onDragEnd, zIndex]);
 };

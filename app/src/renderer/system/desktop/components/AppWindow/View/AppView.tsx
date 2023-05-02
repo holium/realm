@@ -1,14 +1,16 @@
-import { useRef, useEffect, useState, useMemo } from 'react';
-import styled from 'styled-components';
-import { AppWindowType } from 'os/services/shell/desktop.model';
-import { toJS } from 'mobx';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
+import styled from 'styled-components';
+
+import { Flex, Spinner } from '@holium/design-system';
+
+// import { AppType } from 'renderer/stores/models/bazaar.model';
+import { genCSSVariables } from 'renderer/lib/theme';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+
 import { applyStyleOverrides } from './applyStyleOverrides';
-import { genCSSVariables } from 'renderer/logic/theme';
 import { WebView } from './WebView';
-import { AppType } from 'os/services/spaces/models/bazaar';
 
 const AppViewContainer = styled.div`
   overflow: hidden;
@@ -18,20 +20,20 @@ const AppViewContainer = styled.div`
 `;
 
 type Props = {
-  appWindow: AppWindowType;
+  appWindow: any;
   isResizing: boolean;
   isDragging: boolean;
 };
 
 const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
-  const { ship, desktop, theme, spaces, bazaar } = useServices();
+  const { loggedInAccount, theme, shellStore } = useAppState();
+  const { spacesStore } = useShipStore();
   const [ready, setReady] = useState(false);
   const webViewRef = useRef<HTMLWebViewElement>(null);
 
   const [appUrl, setAppUrl] = useState<string | null>(null);
 
-  const app = bazaar.getApp(appWindow.appId) as AppType;
-  const isActive = desktop.getWindowByAppId(appWindow.appId)?.isActive;
+  const isActive = shellStore.getWindowByAppId(appWindow.appId)?.isActive;
 
   const [loading, setLoading] = useState(true);
 
@@ -49,9 +51,10 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
       `${appWindow.appId}-urbit-webview`
     ) as Electron.WebviewTag;
 
-    if (appWindow && ship && webView) {
+    if (appWindow && loggedInAccount && webView) {
       webView.addEventListener('did-start-loading', onStartLoading);
       webView.addEventListener('did-stop-loading', onStopLoading);
+
       if (process.env.NODE_ENV === 'development') {
         webView.addEventListener(
           'console-message',
@@ -63,31 +66,28 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
         );
       }
       const css = `
-          ${genCSSVariables(theme.currentTheme)}
-          ${applyStyleOverrides(appWindow.appId, theme.currentTheme)}
+          ${genCSSVariables(theme)}
+          ${applyStyleOverrides(appWindow.appId, theme)}
         `;
 
       webView.addEventListener('did-attach', () => {
-        webView.insertCSS(css);
-        webView.send('mouse-color', desktop.mouseColor);
+        // webView.insertCSS(css);
+        setReady(true);
       });
       webView.addEventListener('dom-ready', () => {
         webView.insertCSS(css);
-        webView.send('mouse-color', desktop.mouseColor);
-        setReady(true);
       });
 
       webView.addEventListener('close', () => {
         webView.closeDevTools();
       });
 
-      let appUrl = `${ship.url}/apps/${appWindow.appId}/?spaceId=${spaces.selected?.path}`;
+      let appUrl = `${loggedInAccount.serverUrl}/apps/${appWindow.appId}/?spaceId=${spacesStore.selected?.path}`;
 
       if (appWindow.href?.site) {
-        appUrl = `${ship.url}${appWindow.href?.site}?spaceId=${spaces.selected?.path}`;
+        appUrl = `${loggedInAccount.serverUrl}${appWindow.href?.site}?spaceId=${spacesStore.selected?.path}`;
       }
 
-      DesktopActions.openAppWindow(toJS(app));
       setAppUrl(appUrl);
     }
 
@@ -95,31 +95,20 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
       setReady(false);
     };
   }, [
-    ship,
+    loggedInAccount,
     appWindow,
-    spaces.selected?.path,
-    desktop.mouseColor,
-    theme.currentTheme.backgroundColor,
-    theme.currentTheme.mode,
+    spacesStore.selected?.path,
+    shellStore.mouseColor,
+    theme.backgroundColor,
+    theme.mode,
   ]);
-
-  // Set mouse color
-  useEffect(() => {
-    if (ready) {
-      const webView: Electron.WebviewTag = document.getElementById(
-        `${appWindow.appId}-urbit-webview`
-      ) as Electron.WebviewTag;
-
-      webView?.send('mouse-color', desktop.mouseColor);
-    }
-  }, [desktop.mouseColor, ready]);
 
   // Set theme on change
   useEffect(() => {
     if (ready) {
       const css = `
-        ${genCSSVariables(theme.currentTheme)}
-        ${applyStyleOverrides(appWindow.appId, theme.currentTheme)}
+        ${genCSSVariables(theme)}
+        ${applyStyleOverrides(appWindow.appId, theme)}
       `;
       const webView: Electron.WebviewTag = document.getElementById(
         `${appWindow.appId}-urbit-webview`
@@ -130,16 +119,21 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
         console.error(e);
       }
     }
-  }, [theme.currentTheme.backgroundColor, theme.currentTheme.mode, ready]);
+  }, [theme.backgroundColor, theme.mode, ready]);
 
   return useMemo(
     () => (
       <AppViewContainer>
+        {loading && (
+          <Flex width="100%" height="100%" justify="center" align="center">
+            <Spinner size={1} color="#FFF" />
+          </Flex>
+        )}
         <WebView
           innerRef={webViewRef}
           id={`${appWindow.appId}-urbit-webview`}
           appId={appWindow.appId}
-          partition="urbit-webview"
+          partition="persist:default"
           webpreferences="sandbox=false, nativeWindowOpen=yes"
           // @ts-ignore
           allowpopups="true"

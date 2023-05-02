@@ -1,17 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { loadStripe, Stripe, StripeElementsOptions } from '@stripe/stripe-js';
-import { PaymentDialog, ThirdEarthProduct } from '@holium/shared';
-import { Page } from 'components/Page';
+
+import {
+  OnboardingStorage,
+  PaymentDialog,
+  ThirdEarthProduct,
+} from '@holium/shared';
+
+import { Page } from '../components/Page';
 import { constants } from '../util/constants';
+import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
-import { api } from '../util/api';
 
 type ServerSideProps = {
   products: ThirdEarthProduct[];
 };
 
 export async function getServerSideProps() {
-  const products = await api.getProducts();
+  const products = await thirdEarthApi.getProducts();
 
   return {
     props: {
@@ -23,7 +29,7 @@ export async function getServerSideProps() {
 export default function Payment({ products }: ServerSideProps) {
   const { goToPage } = useNavigation();
 
-  const [patp, setPatp] = useState('');
+  const [serverId, setServerId] = useState('');
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
 
@@ -34,21 +40,19 @@ export default function Payment({ products }: ServerSideProps) {
   const [invoiceId, setInvoiceId] = useState<string>();
 
   useEffect(() => {
-    const patp = localStorage.getItem('patp');
-    const email = localStorage.getItem('email');
-    const token = localStorage.getItem('token');
+    const { serverId, email, token } = OnboardingStorage.get();
 
-    if (!token || !patp || !email) return;
+    if (!serverId || !email || !token) return;
 
-    setPatp(patp);
+    setServerId(serverId);
     setEmail(email);
     setToken(token);
 
     const getSecretAndSetupStripe = async () => {
-      const response = await api.stripeMakePayment(
+      const response = await thirdEarthApi.stripeMakePayment(
         token,
         productId.toString(),
-        patp
+        serverId
       );
       setClientSecret(response.clientSecret);
       setInvoiceId(response.invoiceId);
@@ -74,21 +78,16 @@ export default function Payment({ products }: ServerSideProps) {
   const onBack = () => goToPage('/choose-id');
 
   const onNext = async () => {
-    if (!token || !patp || !invoiceId || !productId) return false;
+    if (!token || !serverId || !invoiceId || !productId)
+      return Promise.resolve(false);
 
-    try {
-      await api.updatePaymentStatus(token, invoiceId, 'OK');
-      await api.updatePlanetStatus(token, patp, 'sold');
-      await api.ship(token, patp, productId.toString(), invoiceId);
+    await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
+    await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
+    await thirdEarthApi.ship(token, serverId, productId.toString(), invoiceId);
 
-      goToPage('/booting');
+    goToPage('/booting');
 
-      return true;
-    } catch (error) {
-      console.error(error);
-
-      return false;
-    }
+    return true;
   };
 
   return (
@@ -96,7 +95,7 @@ export default function Payment({ products }: ServerSideProps) {
       <PaymentDialog
         products={products}
         productId={productId}
-        patp={patp}
+        patp={serverId}
         email={email}
         stripe={stripe as any}
         stripeOptions={stripeOptions as any}

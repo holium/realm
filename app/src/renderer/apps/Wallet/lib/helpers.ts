@@ -1,12 +1,10 @@
-import { utils, BigNumber } from 'ethers';
+import { BigNumber, utils } from 'ethers';
+
 import {
   ERC20Type,
   ERC721Type,
   TransactionType,
-} from 'os/services/tray/wallet-lib/wallet.model';
-
-import { ThemeType } from 'renderer/logic/theme';
-import { theme } from '../../../theme';
+} from '../../../stores/models/wallet.model';
 
 export function getDisplayDate(date: Date) {
   const options: Intl.DateTimeFormatOptions = {
@@ -18,11 +16,6 @@ export function getDisplayDate(date: Date) {
     'en-US',
     options
   )} ${date.toLocaleTimeString()}`;
-}
-
-export function getBaseTheme(currentTheme: ThemeType) {
-  // @ts-expect-error
-  return theme[currentTheme.mode];
 }
 
 export function shortened(address: string) {

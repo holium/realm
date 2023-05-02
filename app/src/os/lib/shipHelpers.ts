@@ -1,24 +1,33 @@
-import axios from 'axios';
-import http from 'http';
+import log from 'electron-log';
+import fetch from 'cross-fetch';
 import dns from 'dns';
 
-export interface ShipConnectionData {
-  patp: string;
-  url: string;
-  code: string;
-}
-
-const httpAgent = new http.Agent({ family: 4 });
-// fixes ipv6 resolution bug on macOS for now
 dns.setDefaultResultOrder('ipv4first');
 
-export async function getCookie(ship: ShipConnectionData) {
-  const response = await axios.post(
-    `${ship.url}/~/login`,
-    `password=${ship.code.trim()}`,
-    { withCredentials: true, httpAgent }
-  );
+interface ShipConnectionData {
+  serverId?: string;
+  serverUrl: string;
+  serverCode: string;
+}
 
-  const cookie = response.headers['set-cookie']?.[0];
-  return cookie;
+export async function getCookie(server: ShipConnectionData) {
+  log.info(
+    `Getting cookie for ${server.serverUrl} with code ${server.serverCode}`
+  );
+  try {
+    const response = await fetch(`${server.serverUrl}/~/login`, {
+      method: 'POST',
+      body: `password=${server.serverCode.trim()}`,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    });
+
+    const cookie = response.headers.get('set-cookie')?.split(';')[0];
+
+    return cookie;
+  } catch (e) {
+    log.error(`Error getting cookie for ${server.serverUrl}`, e);
+    return;
+  }
 }

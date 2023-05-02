@@ -1,9 +1,11 @@
 import { MutableRefObject, useMemo, useState } from 'react';
 import { Item } from 'react-photoswipe-gallery';
-import 'photoswipe/dist/photoswipe.css';
+
 import { Flex, Text } from '../../../general';
-import { BlockProps, Block } from '../Block/Block';
+import { Block, BlockProps } from '../Block/Block';
 import { FragmentImage } from '../Bubble/fragment-lib';
+
+import 'photoswipe/dist/photoswipe.css';
 
 type ImageBlockProps = {
   showLoader?: boolean;
@@ -54,7 +56,6 @@ export const ImageBlock = ({
       >
         {({ ref, open }) => (
           <FragmentImage
-            id={id}
             ref={ref as MutableRefObject<HTMLImageElement>}
             loading="eager"
             {...(showLoader && { isSkeleton: !isLoaded })}

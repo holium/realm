@@ -1,12 +1,14 @@
 import styled from 'styled-components';
+
 import { Flex } from '@holium/design-system/general';
-import { AccountDialogDescription } from '../AccountDialog.styles';
-import { TABLET_WIDTH } from '../OnboardDialog.styles';
-import { ChangeButtonGray } from './ChangeButton';
+
 import {
   maintenanceWindows,
   maintenanceWindowToString,
 } from '../../dialogs/util/maintenanceWindows';
+import { AccountDialogDescription } from '../AccountDialog.styles';
+import { TABLET_WIDTH } from '../OnboardDialog.styles';
+import { ChangeButtonGray } from './ChangeButton';
 
 const ChangeMaintenanceWindowContainer = styled(Flex)`
   width: 100%;

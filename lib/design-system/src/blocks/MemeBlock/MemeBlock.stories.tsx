@@ -1,10 +1,11 @@
-import styled from 'styled-components';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { useState } from 'react';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+import styled from 'styled-components';
+
 import { Flex } from '../../../general';
-import { MemeBlock } from './MemeBlock';
 import { FragmentReactionType } from '../Bubble/Bubble.types';
 import { OnReactionPayload } from '../Bubble/Reaction';
+import { MemeBlock } from './MemeBlock';
 
 const MemeBlockBackground = styled(Flex)`
   flex-direction: column;

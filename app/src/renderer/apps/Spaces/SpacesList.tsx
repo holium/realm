@@ -1,14 +1,23 @@
 import { useMemo } from 'react';
 import { observer } from 'mobx-react';
-import { WindowedList } from '@holium/design-system';
-import { SpaceModelType } from 'os/services/spaces/models/spaces';
-import { Flex, Text, ActionButton, Icons } from 'renderer/components';
-import { SpaceRow } from './SpaceRow';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { useServices } from 'renderer/logic/store';
-import { VisaRow } from './components/VisaRow';
 import { rgba } from 'polished';
+
+import {
+  Box,
+  Button,
+  Flex,
+  Icon,
+  Text,
+  WindowedList,
+} from '@holium/design-system';
+
+import { useAppState } from 'renderer/stores/app.store';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+
 import { useTrayApps } from '../store';
+import { VisaRow } from './components/VisaRow';
+import { SpaceRow } from './SpaceRow';
 
 export interface Space {
   color?: string;
@@ -33,14 +42,15 @@ const SpacesListPresenter = ({
   onSelect,
   onFindMore,
 }: SpacesListProps) => {
-  const { theme, visas } = useServices();
+  const { shellStore } = useAppState();
+  const { spacesStore } = useShipStore();
+  const { invitations } = spacesStore;
   const { dimensions } = useTrayApps();
-  const { textColor } = theme.currentTheme;
   const listWidth = useMemo(() => dimensions.width - 28, [dimensions.width]);
 
   const highlightColor = useMemo(() => rgba('#4E9EFD', 0.05), []);
 
-  const incoming = Array.from(visas.incoming.values());
+  const incoming = Array.from(invitations.incoming.values());
 
   type SpaceRowValue = (typeof spaces)[number];
   type VisaRowValue = (typeof incoming)[number];
@@ -71,39 +81,45 @@ const SpacesListPresenter = ({
         width={dimensions.width - 28}
         gap={24}
       >
-        <Text color={textColor} width={200} textAlign="center" opacity={0.5}>
+        <Text.Custom width={200} textAlign="center" opacity={0.5}>
           None of your groups have Spaces enabled.
-        </Text>
+        </Text.Custom>
         <Flex
           flexDirection="column"
           justifyContent="center"
           alignItems="center"
           gap={12}
         >
-          <ActionButton
-            style={{ width: 162, paddingRight: 8 }}
+          <Button.TextButton
+            style={{
+              width: 162,
+              paddingRight: 8,
+              justifyContent: 'space-between',
+            }}
             tabIndex={-1}
             height={36}
-            rightContent={<Icons size={2} name="Plus" />}
             data-close-tray="true"
             onClick={() => {
-              ShellActions.openDialog('create-space-1');
+              shellStore.openDialog('create-space-1');
             }}
           >
-            Create one
-          </ActionButton>
-          <ActionButton
-            style={{ width: 162, paddingRight: 8 }}
+            Create one <Icon size={22} name="Plus" />
+          </Button.TextButton>
+          <Button.TextButton
+            style={{
+              width: 162,
+              paddingRight: 8,
+              justifyContent: 'space-between',
+            }}
             tabIndex={-1}
             height={36}
-            rightContent={<Icons mr="2px" size="22px" name="ArrowRightLine" />}
             onClick={(evt) => {
               evt.stopPropagation();
               onFindMore();
             }}
           >
-            Find spaces
-          </ActionButton>
+            Find spaces <Icon mr="2px" size={20} name="ArrowRightLine" />
+          </Button.TextButton>
         </Flex>
       </Flex>
     );
@@ -115,7 +131,7 @@ const SpacesListPresenter = ({
       width={listWidth + scrollbarWidth}
       data={rows}
       style={{ marginRight: -scrollbarWidth }}
-      itemContent={(_, { space, visa }) => {
+      itemContent={(index, { space, visa }) => {
         if (space) {
           return (
             <SpaceRow
@@ -127,16 +143,27 @@ const SpacesListPresenter = ({
           );
         }
         const visaRowValue = visa as VisaRowValue;
+        let dividerStyle = {};
+        if (index < rows.length - 1) {
+          dividerStyle = {
+            paddingBottom: 8,
+            marginBottom: 8,
+            borderBottom: '1px solid rgba(var(--rlm-border-rgba), 0.8)',
+          };
+        }
+
         return (
-          <VisaRow
-            key={`visa-${visaRowValue.path}`}
-            image={visaRowValue.picture}
-            color={visaRowValue.color}
-            path={visaRowValue.path}
-            customBg={highlightColor}
-            invitedBy={visaRowValue.inviter}
-            title={visaRowValue.name}
-          />
+          <Box style={dividerStyle} key={`visa-${visaRowValue.path}`}>
+            <VisaRow
+              key={`visa-${visaRowValue.path}`}
+              image={visaRowValue.picture}
+              color={visaRowValue.color}
+              path={visaRowValue.path}
+              customBg={highlightColor}
+              invitedBy={visaRowValue.inviter}
+              title={visaRowValue.name}
+            />
+          </Box>
         );
       }}
     />

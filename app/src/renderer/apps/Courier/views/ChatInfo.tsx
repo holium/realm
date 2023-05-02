@@ -1,34 +1,41 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Flex,
-  Text,
-  Box,
-  SectionDivider,
-  Row,
-  Avatar,
-  MenuItemProps,
-  Toggle,
-  Select,
-  Icon,
-  TextInput,
-  NoScrollBar,
-} from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { InlineEdit, ShipSearch, useContextMenu } from 'renderer/components';
-import { isValidPatp } from 'urbit-ob';
 import { createField, createForm } from 'mobx-easy-form';
-import { ChatLogHeader } from '../components/ChatLogHeader';
-import { useChatStore } from '../store';
-import { ChatDBActions } from 'renderer/logic/actions/chat-db';
-import { ChatAvatar } from '../components/ChatAvatar';
-import { FileUploadParams } from 'os/services/ship/models/ship';
-import { useFileUpload } from 'renderer/logic/lib/useFileUpload';
-import { ShipActions } from 'renderer/logic/actions/ship';
-import { IuseStorage } from 'renderer/logic/lib/useStorage';
 import { observer } from 'mobx-react-lite';
-import { InvitePermissionType, PeerModelType } from '../models';
-import { ExpiresValue, millisecondsToExpires } from '../types';
+import { isValidPatp } from 'urbit-ob';
+
+import {
+  Avatar,
+  Box,
+  Flex,
+  Icon,
+  InlineEdit,
+  MenuItemProps,
+  NoScrollBar,
+  Row,
+  SectionDivider,
+  Select,
+  Text,
+  TextInput,
+  Toggle,
+} from '@holium/design-system';
+
+import { FileUploadParams } from 'os/services/ship/ship.service';
 import { useTrayApps } from 'renderer/apps/store';
+import { useContextMenu } from 'renderer/components';
+import { ShipSearch } from 'renderer/components/ShipSearch';
+import { useFileUpload } from 'renderer/lib/useFileUpload';
+import { IuseStorage } from 'renderer/lib/useStorage';
+import { useAppState } from 'renderer/stores/app.store';
+import { ShipIPC } from 'renderer/stores/ipc';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import {
+  InvitePermissionType,
+  PeerModelType,
+} from '../../../stores/models/chat.model';
+import { ChatAvatar } from '../components/ChatAvatar';
+import { ChatLogHeader } from '../components/ChatLogHeader';
+import { ExpiresValue, millisecondsToExpires } from '../types';
 
 export const createPeopleForm = (
   defaults: any = {
@@ -64,9 +71,10 @@ type ChatInfoProps = {
 };
 
 export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
-  const { selectedChat, setSubroute, getChatHeader } = useChatStore();
+  const { loggedInAccount, theme } = useAppState();
+  const { chatStore, spacesStore, friends } = useShipStore();
+  const { selectedChat, setSubroute, getChatHeader } = chatStore;
   const { dimensions } = useTrayApps();
-  const { ship, spaces, theme } = useServices();
   const containerRef = useRef<HTMLDivElement>(null);
   const [_isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string>();
@@ -78,7 +86,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
 
   // TODO consolidate this
   const { title, subtitle, sigil, avatarColor, spaceTitle } = useMemo(() => {
-    if (!selectedChat || !ship)
+    if (!selectedChat || !loggedInAccount)
       return { resolvedTitle: 'Error loading title', subtitle: '' };
 
     let { title, sigil, image: chatImage } = getChatHeader(selectedChat.path);
@@ -92,7 +100,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
     let avatarColor: string | undefined;
     let spaceTitle: string | undefined;
     if (selectedChat.type === 'space') {
-      const space = spaces.getSpaceByChatPath(selectedChat.path);
+      const space = spacesStore.getSpaceByChatPath(selectedChat.path);
       if (space) {
         spaceTitle = space.name;
         subtitle = spaceTitle;
@@ -101,13 +109,13 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
       }
     }
     return { title, subtitle, sigil, spaceTitle, avatarColor };
-  }, [selectedChat?.path, ship]);
+  }, [selectedChat?.path, loggedInAccount]);
 
   const [editTitle, setEditTitle] = useState(title || 'Error loading title');
 
   useEffect(() => {
-    if (!selectedChat || !ship) return;
-    selectedChat.fetchPeers(ship.patp);
+    if (!selectedChat || !loggedInAccount) return;
+    selectedChat.fetchPeers(loggedInAccount.serverId);
   }, [selectedChat]);
 
   const { canUpload, promptUpload } = useFileUpload({ storage });
@@ -137,7 +145,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const uploadFile = (params: FileUploadParams) => {
     setIsUploading(true);
     setUploadError('');
-    ShipActions.uploadFile(params)
+    (ShipIPC.uploadFile(params) as Promise<any>)
       .then((url: string) => {
         setImage(url);
         editMetadata({ image: url });
@@ -149,7 +157,8 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   };
 
   const amHost =
-    sortedPeers.find((peer) => peer.ship === ship?.patp)?.role === 'host';
+    sortedPeers.find((peer) => peer.ship === loggedInAccount?.serverId)
+      ?.role === 'host';
   const isSpaceChat = type === 'space';
 
   const patps = sortedPeers.map((peer) => peer.ship);
@@ -185,7 +194,8 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
     const patp = contact[0];
     selectedPatp.add(patp);
     setSelected(new Set(selectedPatp));
-    ChatDBActions.addPeer(path, patp)
+    selectedChat
+      .addPeer(patp)
       .then(() => {
         console.log('adding peer', patp);
       })
@@ -217,7 +227,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
         pb={2}
       >
         {/* Chat Info */}
-        <Flex flexDirection="column" gap={4} pt={3} pb={4}>
+        <Flex flexDirection="column" gap={4} pt={3} pb={3}>
           <Flex
             flexDirection="column"
             justifyContent="center"
@@ -234,11 +244,14 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
             )}
             <Flex
               flexDirection="column"
+              gap={4}
               pointerEvents={isDMType || !amHost ? 'none' : 'auto'}
             >
               <InlineEdit
+                id="chat-title"
+                name="chat-title"
                 fontWeight={500}
-                fontSize={3}
+                fontSize="1.125rem" // in rem units (base 16px) so 1.125rem
                 textAlign="center"
                 width={350}
                 value={editTitle}
@@ -410,7 +423,6 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                       name="new-chat-patp-search"
                       tabIndex={1}
                       width="100%"
-                      className="realm-cursor-text-cursor"
                       placeholder="Add someone?"
                       // TODO disable if not permissioned
                       value={person.state.value}
@@ -442,16 +454,13 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                     mt={1}
                     mb={2}
                     p={2}
-                    border="1px solid"
-                    borderColor="intent-info"
+                    border="1px solid rgba(0, 0, 0, 0.1)"
+                    background={
+                      theme.mode === 'dark'
+                        ? 'rgba(0, 0, 0, 0.125)'
+                        : 'rgba(0, 0, 0, 0.065)'
+                    }
                     borderRadius={6}
-                    style={{
-                      borderColor: 'rgba(0, 0, 0, 0.1)',
-                      backgroundColor:
-                        theme.currentTheme.mode === 'dark'
-                          ? 'rgba(0, 0, 0, 0.125)'
-                          : 'rgba(0, 0, 0, 0.065)',
-                    }}
                   >
                     <Icon name="InfoCircle" color="icon" mr={2} opacity={0.7} />
                     <Text.Hint lineHeight={1.25} opacity={0.7}>
@@ -480,14 +489,14 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
           {sortedPeers.map((peer: PeerModelType) => {
             const id = `${path}-peer-${peer.ship}`;
             const options = [];
-            if (peer.ship !== ship?.patp) {
+            if (peer.ship !== loggedInAccount?.serverId) {
               // TODO check if peer is friend
               options.push({
                 id: `${id}-add-friend`,
                 label: 'Add as friend',
                 onClick: (evt: any) => {
                   evt.stopPropagation();
-                  ShipActions.addFriend(peer.ship);
+                  friends.addFriend(peer.ship);
                 },
               });
             }
@@ -497,7 +506,8 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 label: 'Remove',
                 onClick: (evt: any) => {
                   evt.stopPropagation();
-                  ChatDBActions.removePeer(path, peer.ship)
+                  selectedChat
+                    .removePeer(peer.ship)
                     .then(() => {
                       console.log('removed peer');
                     })
@@ -544,7 +554,7 @@ const LabelMap = {
 const PeerRow = ({ id, peer, options, role }: PeerRowProps) => {
   const { getOptions, setOptions } = useContextMenu();
 
-  const { friends } = useServices();
+  const { friends } = useShipStore();
 
   useEffect(() => {
     if (options && options.length && options !== getOptions(id)) {

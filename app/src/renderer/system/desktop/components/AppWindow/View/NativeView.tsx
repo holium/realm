@@ -1,8 +1,9 @@
-import { AppWindowType } from 'os/services/shell/desktop.model';
-import { NativeAppId, getNativeAppWindow } from '../getNativeAppWindow';
+import { AppWindowMobxType } from 'renderer/stores/models/window.model';
+
+import { getNativeAppWindow, NativeAppId } from '../getNativeAppWindow';
 
 type Props = {
-  appWindow: AppWindowType;
+  appWindow: AppWindowMobxType;
   isResizing: boolean;
   isDragging: boolean;
 };

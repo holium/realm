@@ -1,5 +1,7 @@
 import { observer } from 'mobx-react';
-import { Flex, Text, Icons } from 'renderer/components';
+
+import { Flex, Icon, Text } from '@holium/design-system';
+
 import { PasscodeInput } from '../../../components/PasscodeInput';
 
 interface PasscodeProps {
@@ -8,22 +10,24 @@ interface PasscodeProps {
 
 const TransactionPasscodePresenter = (props: PasscodeProps) => {
   return (
-    <Flex width="100%" height="100%" flexDirection="column" alignItems="center">
+    <Flex
+      width="100%"
+      height="100%"
+      flexDirection="column"
+      alignItems="center"
+      gap={10}
+    >
       <Flex
         flex={1}
         flexDirection="column"
         justifyContent="center"
         alignItems="center"
       >
-        <Icons name="Locked" size={36} />
-        <Text mt={2} variant="h3">
-          Submit Transaction
-        </Text>
+        <Icon name="Locked" size={36} />
+        <Text.H3 variant="h3">Submit Transaction</Text.H3>
       </Flex>
-      <Flex flex={2} pt={8} flexDirection="column" alignItems="center">
-        <Text mb={8} variant="body">
-          Enter your passcode to continue.
-        </Text>
+      <Flex flex={2} flexDirection="column" alignItems="center">
+        <Text.Body variant="body">Enter your passcode to continue.</Text.Body>
         <PasscodeInput
           checkStored={true}
           onSuccess={props.onSuccess}

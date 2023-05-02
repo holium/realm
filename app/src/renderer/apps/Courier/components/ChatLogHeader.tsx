@@ -1,15 +1,16 @@
 import { useMemo } from 'react';
+
 import {
-  Flex,
   Button,
-  Text,
+  Flex,
   Icon,
   Menu,
   MenuItemProps,
+  Text,
 } from '@holium/design-system';
-import { useChatStore } from '../store';
-import { useServices } from 'renderer/logic/store';
-import { ShellActions } from 'renderer/logic/actions/shell';
+
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type ChatLogHeaderProps = {
   path: string;
@@ -34,21 +35,23 @@ export const ChatLogHeader = ({
   isMuted,
   hasMenu = true,
 }: ChatLogHeaderProps) => {
-  const { ship } = useServices();
-  const { selectedChat, setSubroute, toggleMuted } = useChatStore();
+  const { loggedInAccount, shellStore } = useAppState();
+  const { chatStore } = useShipStore();
+  const { selectedChat, setSubroute, toggleMuted } = chatStore;
   const isSpaceChat = selectedChat?.type === 'space';
+
   const chatLogId = useMemo(() => `chat-log-${path}`, [path]);
 
   const contextMenuOptions = useMemo(() => {
     const menu: MenuItemProps[] = [];
-    if (!selectedChat || !ship) return menu;
-    const isAdmin = selectedChat.isHost(ship.patp);
+    if (!selectedChat || !loggedInAccount) return menu;
+    const isAdmin = selectedChat.isHost(loggedInAccount.serverId);
     menu.push({
       id: `${chatLogId}-chat-info`,
       icon: 'Info',
       label: 'Info',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         setSubroute('chat-info');
       },
@@ -57,7 +60,7 @@ export const ChatLogHeader = ({
       id: `${chatLogId}-mute-chat`,
       icon: isMuted ? 'NotificationOff' : 'Notification',
       label: isMuted ? 'Unmute' : 'Mute',
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         toggleMuted(path, !isMuted);
       },
@@ -68,7 +71,7 @@ export const ChatLogHeader = ({
         icon: 'EyeOn',
         label: 'Show hidden pins',
         disabled: false,
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
           selectedChat.setHidePinned(false);
         },
@@ -81,7 +84,7 @@ export const ChatLogHeader = ({
         section: 2,
         label: 'Clear history',
         disabled: false,
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
           selectedChat.clearChatBacklog();
         },
@@ -98,11 +101,11 @@ export const ChatLogHeader = ({
         disabled: false,
         onClick: () => {
           // evt.stopPropagation();
-          ShellActions.setBlur(true);
-          ShellActions.openDialogWithStringProps('leave-chat-dialog', {
+          shellStore.setIsBlurred(true);
+          shellStore.openDialogWithStringProps('leave-chat-dialog', {
             path,
             amHost: isAdmin.toString(),
-            our: ship.patp,
+            our: loggedInAccount.serverId,
           });
         },
       });

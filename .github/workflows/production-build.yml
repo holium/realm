@@ -104,7 +104,7 @@ jobs:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - name: Build and publish
-        run: npx cross-env PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true npx cross-env yarn package:release:mac
+        run: npx cross-env USE_HARD_LINKS=false PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true npx cross-env yarn package:release:mac
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -165,7 +165,7 @@ jobs:
       - name: Build linux version
         run: |
           sudo apt-get install --no-install-recommends -y libopenjp2-tools
-          npx yarn package:release:linux
+          npx cross-env USE_HARD_LINKS=false yarn package:release:linux
         env:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
@@ -192,8 +192,8 @@ jobs:
           sentry-cli sourcemaps inject ./app/release/app/dist/renderer
           sentry-cli sourcemaps upload --org $SENTRY_ORG --auth-token $SENTRY_AUTH_TOKEN --project $SENTRY_PROJECT --use-artifact-bundle --release $BUILD_VERSION --dist $BUILD_VERSION ./app/release/app/dist/renderer
           # legacy method
-          sentry-cli releases files $BUILD_VERSION upload-sourcemaps ./app/release/app/dist/renderer
-          sentry-cli releases finalize $BUILD_VERSION
+          #sentry-cli releases files $BUILD_VERSION upload-sourcemaps ./app/release/app/dist/renderer
+          #sentry-cli releases finalize $BUILD_VERSION
         env:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}

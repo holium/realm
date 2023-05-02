@@ -1,28 +1,29 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { onAction } from 'mobx-state-tree';
+
+import { Dimensions, useToggle } from '@holium/design-system';
 import {
-  MultiplayerOut,
-  MultiplayerDown,
-  MultiplayerUp,
-  MultiplayerMove,
-  MultiplayerClick,
   MultiplayerChat,
+  MultiplayerClick,
+  MultiplayerDown,
+  MultiplayerMove,
+  MultiplayerOut,
+  MultiplayerUp,
   PresenceBroadcast,
 } from '@holium/realm-presence';
-import {
-  DataPacket,
-  DataPacket_Kind,
-  RoomManagerEvent,
-  RoomsManager,
-} from '@holium/realm-room';
-import { normalizePosition } from 'os/services/shell/lib/window-manager';
-import { Dimensions, useToggle } from '@holium/design-system';
+
+import { normalizePosition } from 'renderer/lib/window-manager';
+import { DataPacket, DataPacketKind } from 'renderer/stores/rooms/rooms.types';
+import { ShipStoreInstance } from 'renderer/stores/ship.store';
+
+import { RoomsMobxType } from './../../stores/rooms.store';
 
 type Props = {
   patp: string | undefined;
   shipColor: string;
   desktopDimensions: Dimensions;
   isMultiplayerEnabled: boolean;
-  roomsManager: RoomsManager;
+  shipStore: ShipStoreInstance;
 };
 
 export const useMultiplayer = ({
@@ -30,16 +31,17 @@ export const useMultiplayer = ({
   shipColor,
   desktopDimensions,
   isMultiplayerEnabled,
-  roomsManager,
+  shipStore,
 }: Props) => {
   const chat = useRef('');
   const ephemeralChat = useToggle(false);
+  const roomsStore = shipStore.roomsStore as RoomsMobxType;
 
   const timeout = useRef<NodeJS.Timeout | null>(null);
 
   const isInRoom = useMemo(
-    () => Boolean(roomsManager.presentRoom),
-    [roomsManager.presentRoom]
+    () => Boolean(roomsStore.current),
+    [roomsStore.current]
   );
 
   const broadcastChat = useCallback((patp: string, message: string) => {
@@ -48,8 +50,8 @@ export const useMultiplayer = ({
       message,
       event: 'chat',
     };
-    roomsManager.sendData({
-      kind: DataPacket_Kind.DATA,
+    roomsStore.sendData({
+      kind: DataPacketKind.DATA,
       value: { multiplayer: multiplayerChat },
     });
   }, []);
@@ -138,8 +140,8 @@ export const useMultiplayer = ({
         patp,
         event: 'mouse-out',
       };
-      roomsManager.sendData({
-        kind: DataPacket_Kind.DATA,
+      roomsStore.sendData({
+        kind: DataPacketKind.DATA,
         value: { multiplayer: multiplayerOut },
       });
     }
@@ -154,8 +156,8 @@ export const useMultiplayer = ({
         patp,
         event: 'mouse-out',
       };
-      roomsManager.sendData({
-        kind: DataPacket_Kind.DATA,
+      roomsStore.sendData({
+        kind: DataPacketKind.DATA,
         value: { multiplayer: multiplayerOut },
       });
     });
@@ -166,8 +168,8 @@ export const useMultiplayer = ({
         patp,
         event: 'mouse-down',
       };
-      roomsManager.sendData({
-        kind: DataPacket_Kind.DATA,
+      roomsStore.sendData({
+        kind: DataPacketKind.DATA,
         value: {
           multiplayer: multiplayerDown,
         },
@@ -180,8 +182,8 @@ export const useMultiplayer = ({
         patp,
         event: 'mouse-up',
       };
-      roomsManager.sendData({
-        kind: DataPacket_Kind.DATA,
+      roomsStore.sendData({
+        kind: DataPacketKind.DATA,
         value: { multiplayer: multiplayerUp },
       });
     });
@@ -195,8 +197,8 @@ export const useMultiplayer = ({
         state,
         hexColor: shipColor,
       };
-      roomsManager.sendData({
-        kind: DataPacket_Kind.DATA,
+      roomsStore.sendData({
+        kind: DataPacketKind.DATA,
         value: { multiplayer: multiplayerMove },
       });
     });
@@ -208,8 +210,8 @@ export const useMultiplayer = ({
         elementId,
         event: 'mouse-click',
       };
-      roomsManager.sendData({
-        kind: DataPacket_Kind.DATA,
+      roomsStore.sendData({
+        kind: DataPacketKind.DATA,
         value: { multiplayer: multiplayerClick },
       });
     });
@@ -220,8 +222,8 @@ export const useMultiplayer = ({
         event: 'broadcast',
         data: [...data],
       };
-      roomsManager.sendData({
-        kind: DataPacket_Kind.DATA,
+      roomsStore.sendData({
+        kind: DataPacketKind.DATA,
         value: { broadcast },
       });
     });
@@ -231,8 +233,8 @@ export const useMultiplayer = ({
         patp,
         event: 'mouse-out',
       };
-      roomsManager.sendData({
-        kind: DataPacket_Kind.DATA,
+      roomsStore.sendData({
+        kind: DataPacketKind.DATA,
         value: { multiplayer: multiplayerOut },
       });
     };
@@ -268,8 +270,31 @@ export const useMultiplayer = ({
       }
     };
 
-    roomsManager.on(RoomManagerEvent.LeftRoom, onLeftRoom);
-    roomsManager.on(RoomManagerEvent.OnDataChannel, onDataChannel);
+    onAction(shipStore, (call) => {
+      if (call.path === '/roomsStore') {
+        if (call.name === 'deleteRoom') {
+          // we deleted our created room, so we should remove all cursors
+          onLeftRoom('', window.ship);
+        }
+        if (call.name === 'leaveRoom') {
+          // we left the room, so we should remove all cursors
+          onLeftRoom('', window.ship);
+        }
+        if (call.name === '_onRoomLeft') {
+          // called when we or someone else leaves the room
+          if (call.args) {
+            const rid = call.args[0];
+            const patp = call.args[1];
+            onLeftRoom(rid, patp);
+          }
+        }
+        if (call.name === '_onDataChannel') {
+          if (call.args) {
+            onDataChannel('', '', call.args[0]);
+          }
+        }
+      }
+    });
 
     return () => {
       window.electron.app.removeOnMouseOut();
@@ -278,12 +303,6 @@ export const useMultiplayer = ({
       window.electron.app.removeOnMouseMove();
       window.electron.multiplayer.removeOnAppToRealmMouseClick();
       window.electron.multiplayer.removeOnAppToRealmBroadcast();
-
-      roomsManager.removeListener(RoomManagerEvent.LeftRoom, onLeftRoom);
-      roomsManager.removeListener(
-        RoomManagerEvent.OnDataChannel,
-        onDataChannel
-      );
     };
   }, [shipColor, patp, isMultiplayerEnabled, desktopDimensions]);
 };

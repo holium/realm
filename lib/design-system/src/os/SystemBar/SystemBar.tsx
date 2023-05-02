@@ -1,8 +1,8 @@
-import { BarStyle } from '../Bar/Bar';
 import { Avatar, Flex, Icon } from '../../../general';
-import { HoliumButton } from './HoliumButton';
-import { BarButton } from './BarButton';
+import { BarStyle } from '../Bar/Bar';
 import { RoomsDock } from '../RoomsDock/RoomsDock';
+import { BarButton } from './BarButton';
+import { HoliumButton } from './HoliumButton';
 
 export const SystemBar = () => {
   return (

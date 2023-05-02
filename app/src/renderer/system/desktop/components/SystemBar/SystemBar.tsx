@@ -1,6 +1,7 @@
+import { Flex } from '@holium/design-system';
+
 import { CommunityBar } from './components/CommunityBar';
 import { HomeButton } from './components/HomeButton';
-import { Flex } from 'renderer/components';
 import { ShipBar } from './components/ShipBar';
 
 export const SystemBar = () => (

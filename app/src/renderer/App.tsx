@@ -1,75 +1,48 @@
-import { ThemeProvider } from 'styled-components';
-import { MotionConfig } from 'framer-motion';
-import { GlobalStyle } from './App.styles';
-import { Shell } from './system';
 import { useEffect, useMemo } from 'react';
+import { MotionConfig } from 'framer-motion';
 import { observer } from 'mobx-react';
-import { theme as baseTheme } from './theme';
-import {
-  CoreProvider,
-  useCore,
-  coreStore,
-  ServiceProvider,
-  servicesStore,
-  useServices,
-} from './logic/store';
-import { ShellActions } from './logic/actions/shell';
+
+import { BgImage, GlobalStyle } from './App.styles';
+import { AppContent } from './AppContent';
+import { AppLoading } from './AppLoading';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
-import { SelectionProvider } from './logic/lib/selection';
-import { ErrorBoundary } from './logic/ErrorBoundary';
-import { AccountProvider, accountStore } from './apps/Account/store';
+import { SelectionProvider } from './lib/selection';
+import { appState, AppStateProvider, useAppState } from './stores/app.store';
+import { RealmIPC } from './stores/ipc';
+import { ErrorBoundary } from './system/ErrorBoundary';
+
+import './app.css';
 
 const AppPresenter = () => {
-  const { booted } = useCore();
-  const { theme } = useServices();
-
-  const themeMode = theme.currentTheme.mode;
-
-  const shellMemo = useMemo(
-    () =>
-      booted ? (
-        <Shell />
-      ) : (
-        <div
-          style={{
-            height: '100vh',
-            background: theme.currentTheme.backgroundColor,
-          }}
-        />
-      ),
-    [booted, theme.currentTheme.backgroundColor]
-  );
-
+  const { theme, shellStore, booted } = useAppState();
   const contextMenuMemo = useMemo(() => <ContextMenu />, []);
+  const bgImage = useMemo(() => theme.wallpaper, [theme.wallpaper]);
 
   useEffect(() => {
+    RealmIPC.boot();
     return () => {
-      ShellActions.closeDialog();
+      shellStore.closeDialog();
     };
   }, []);
+
   return (
-    <CoreProvider value={coreStore}>
-      <ThemeProvider theme={baseTheme[themeMode as 'light' | 'dark']}>
-        <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
-          <GlobalStyle blur={true} realmTheme={theme.currentTheme} />
-          {/* Modal provider */}
-          <AccountProvider value={accountStore}>
-            <ServiceProvider value={servicesStore}>
-              <SelectionProvider>
-                <ContextMenuProvider>
-                  <ErrorBoundary>
-                    {shellMemo}
-                    {contextMenuMemo}
-                    <div id="portal-root" />
-                    <div id="menu-root" />
-                  </ErrorBoundary>
-                </ContextMenuProvider>
-              </SelectionProvider>
-            </ServiceProvider>
-          </AccountProvider>
-        </MotionConfig>
-      </ThemeProvider>
-    </CoreProvider>
+    <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
+      <AppStateProvider value={appState}>
+        <GlobalStyle blur={true} realmTheme={theme} />
+        <BgImage blurred={shellStore.isBlurred} wallpaper={bgImage} />
+        <SelectionProvider>
+          <ContextMenuProvider>
+            <ErrorBoundary>
+              {!booted ? <AppLoading /> : <AppContent />}
+              {contextMenuMemo}
+              <div id="portal-root" />
+              <div id="menu-root" />
+              <div id="audio-root" />
+            </ErrorBoundary>
+          </ContextMenuProvider>
+        </SelectionProvider>
+      </AppStateProvider>
+    </MotionConfig>
   );
 };
 

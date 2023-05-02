@@ -1,18 +1,11 @@
-import {
-  useMemo,
-  Dispatch,
-  SetStateAction,
-  useState,
-  ChangeEvent,
-} from 'react';
-import styled from 'styled-components';
+import { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
-import { Button, Flex, Text, Label, FormControl } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
-import { NewWalletScreen } from './index';
-import { TextInput } from '@holium/design-system';
+import styled from 'styled-components';
+
+import { Button, Flex, Text, TextInput } from '@holium/design-system';
+
+import { NewWalletScreen } from './EthNew';
 
 const NoResize = styled(Flex)`
   textarea {
@@ -25,57 +18,60 @@ interface ImportProps {
   setSeedPhrase: (phrase: string) => void;
 }
 
-const ImportPresenter = (props: ImportProps) => {
-  const { theme } = useServices();
-  const themeData = useMemo(
-    () => getBaseTheme(theme.currentTheme),
-    [theme.currentTheme]
-  );
+const ImportPresenter = ({ setScreen, setSeedPhrase }: ImportProps) => {
   const [phrase, setPhrase] = useState('');
 
   const saveSeedPhrase = () => {
-    props.setSeedPhrase(phrase);
-    props.setScreen(NewWalletScreen.PASSCODE);
+    setSeedPhrase(phrase);
+    setScreen(NewWalletScreen.PASSCODE);
   };
 
   return (
-    <NoResize width="100%" height="100%" flexDirection="column">
-      <Text mt={6} variant="h4">
-        Import Wallet
-      </Text>
-      <Text mt={2} variant="body" color={themeData.colors.text.secondary}>
-        If you have an existing mnemonic seed phrase, you can load it into Realm
-        now.
-      </Text>
-      <FormControl.FieldSet mt={9} width="100%" flexDirection="column">
-        <FormControl.Field>
-          <Label mb={1} required={true}>
-            Seed phrase
-          </Label>
-          <TextInput
-            id="seed-phrase"
-            name="seed-phrase"
-            height="72px"
-            required={true}
-            type="textarea"
-            value={phrase}
-            cols={50}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setPhrase(e.target.value)
-            }
-            // autoFocus={true}
-          />
-        </FormControl.Field>
-        <Flex mt={7} width="100%">
-          <Button
-            width="100%"
-            disabled={!ethers.utils.isValidMnemonic(phrase)}
-            onClick={saveSeedPhrase}
-          >
-            Save
-          </Button>
-        </Flex>
-      </FormControl.FieldSet>
+    <NoResize
+      width="100%"
+      height="100%"
+      flexDirection="column"
+      justifyContent="space-between"
+    >
+      <Flex flexDirection="column" gap={12}>
+        <Text.H4 mt={24} variant="h4">
+          Import Wallet
+        </Text.H4>
+        <Text.Body mt={2} variant="body">
+          If you have an existing mnemonic seed phrase, you can load it into
+          Realm now.
+        </Text.Body>
+        <Text.Label mb={1}>Seed phrase</Text.Label>
+        <TextInput
+          id="seed-phrase"
+          name="seed-phrase"
+          height="72px"
+          required={true}
+          type="textarea"
+          value={phrase}
+          cols={50}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setPhrase(e.target.value)
+          }
+        />
+      </Flex>
+      <Flex width="100%" gap="16px">
+        <Button.Transparent
+          flex={1}
+          justifyContent="center"
+          onClick={() => setScreen(NewWalletScreen.CREATE)}
+        >
+          Cancel
+        </Button.Transparent>
+        <Button.TextButton
+          flex={1}
+          justifyContent="center"
+          disabled={!ethers.utils.isValidMnemonic(phrase)}
+          onClick={saveSeedPhrase}
+        >
+          Save
+        </Button.TextButton>
+      </Flex>
     </NoResize>
   );
 };

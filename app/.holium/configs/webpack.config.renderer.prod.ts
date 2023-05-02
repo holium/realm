@@ -99,12 +99,22 @@ const configuration: webpack.Configuration = {
      */
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production',
-      INSTALL_MOON: '~hostyv',
+      INSTALL_MOON:
+        process.env.RELEASE_CHANNEL === 'latest' ||
+        process.env.RELEASE_CHANNEL === 'hotfix'
+          ? '~hostyv:realm'
+          : '~nimwyd-ramwyl-dozzod-hostyv:realm',
       DEBUG_PROD: false,
       SENTRY_DSN:
         'https://56fbf5e600db48cf8a785931be1ca5e4@o1327359.ingest.sentry.io/4504310987358208',
       AMPLITUDE_API_KEY: 'd6d123a2a660806abcc6b1845c475f2f',
       AMPLITUDE_API_KEY_DEV: '68e00eca14dda372e15a8aadaa0b37ac',
+      API_URL: 'https://backend-server.third.earth',
+      API_HEADERS_CLIENT_ID: '5',
+      API_HEADERS_VERSION: '2',
+      STRIPE_KEY:
+        'pk_live_51LJKtvHhoM3uGGuYMiFoGqOyPNViO8zlUwfHMsgtgPmkcTK3awIzix57nRgcr2lyCFrgJWeBz5HsSVxvIVz3aAA100KbdmBX9K',
+      UNSPLASH_KEY: 'QQd_ZQ6ji5LOoryWoYIqdZNYgFVV6axaFyrp_NHZ_ME',
       ...(process.env.BUILD_VERSION
         ? {
             BUILD_VERSION: process.env.BUILD_VERSION,

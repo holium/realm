@@ -1,76 +1,50 @@
-import { useMemo, Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
-import {
-  Button,
-  Flex,
-  Text,
-  Box,
-  Icons,
-  TextButton,
-} from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
-import { NewWalletScreen } from './index';
+
+import { Button, Flex, Icon, Text } from '@holium/design-system';
+
+import { NewWalletScreen } from './EthNew';
 
 interface CreateProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
 }
 
-const CreatePresenter = (props: CreateProps) => {
-  const { theme } = useServices();
-  const themeData = useMemo(
-    () => getBaseTheme(theme.currentTheme),
-    [theme.currentTheme]
-  );
-
-  return (
-    <Flex width="100%" height="100%" flexDirection="column">
-      <Flex flex={4} flexDirection="column" alignItems="center">
-        <Text mt="100px" variant="h4">
+const CreatePresenter = ({ setScreen }: CreateProps) => (
+  <Flex width="100%" height="100%" flexDirection="column">
+    <Flex flex={1} flexDirection="column" gap="32px" justifyContent="center">
+      <Flex flexDirection="column" gap={16} alignItems="center">
+        <Text.H4 mt="100px" variant="h4">
           No Wallet Found
-        </Text>
-        <Text
-          px="30px"
-          mt={2}
-          mb={5}
-          variant="body"
-          color={themeData.colors.text.secondary}
-          textAlign="center"
-        >
+        </Text.H4>
+        <Text.Body px="30px" variant="body" textAlign="center" opacity={0.7}>
           You haven't yet configured your Realm wallet.
-        </Text>
-        <Box mt={9}>
-          <Button onClick={() => props.setScreen(NewWalletScreen.BACKUP)}>
-            Create a new wallet
-          </Button>
-        </Box>
-        <Box mt={3}>
-          <TextButton
-            textColor={themeData.colors.text.secondary}
-            onClick={() => props.setScreen(NewWalletScreen.IMPORT)}
-          >
-            Or import an existing wallet
-          </TextButton>
-        </Box>
+        </Text.Body>
       </Flex>
-      <Flex mb={6} mx={3} justifyContent="center" alignItems="center">
-        <Box>
-          <Icons name="InfoCircle" color={themeData.colors.brand.secondary} />
-        </Box>
-        <Box>
-          <Text
-            ml={2}
-            variant="hint"
-            justifyContent="flex-end"
-            color={themeData.colors.brand.secondary}
-          >
-            You are using pre-release software. Only use for development
-            purposes.
-          </Text>
-        </Box>
+      <Flex flexDirection="column" gap={10} alignItems="center">
+        <Button.Primary onClick={() => setScreen(NewWalletScreen.BACKUP)}>
+          <Flex py="4px" px="12px">
+            Create wallet
+          </Flex>
+        </Button.Primary>
+        <Button.Transparent onClick={() => setScreen(NewWalletScreen.IMPORT)}>
+          <Flex py="4px" px="12px">
+            Import wallet
+          </Flex>
+        </Button.Transparent>
       </Flex>
     </Flex>
-  );
-};
+    <Flex justifyContent="center" alignItems="center" gap="16px" m={3}>
+      <Icon name="InfoCircle" fill="intent-caution" />
+      <Text.Hint
+        variant="hint"
+        justifyContent="flex-end"
+        color="intent-caution"
+        fontSize="13px"
+      >
+        You are using pre-release software. Only use for development purposes.
+      </Text.Hint>
+    </Flex>
+  </Flex>
+);
 
 export const Create = observer(CreatePresenter);

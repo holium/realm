@@ -65,3 +65,41 @@ export type ThirdEarthPortalSession = {
   return_url: string;
   url: string;
 };
+
+export type RealmInstallStatus = {
+  success: boolean;
+  message?: string;
+};
+
+type OnboardingAccountPage =
+  | '/account'
+  | '/account/custom-domain'
+  | '/account/download-realm'
+  | '/account/s3-storage'
+  | '/account/statistics';
+
+type OnboardingSignupPage =
+  | '/'
+  | '/login'
+  | '/verify-email'
+  | '/choose-id'
+  | '/payment'
+  | '/booting'
+  | '/credentials'
+  | '/download';
+
+export type OnboardingPage = OnboardingAccountPage | OnboardingSignupPage;
+
+export type RealmOnboardingStep =
+  | '/login'
+  | '/add-server'
+  | '/passport'
+  | '/hosting'
+  | '/intermediary-login'
+  | '/choose-id'
+  | '/payment'
+  | '/booting'
+  | '/credentials'
+  | '/installation';
+
+export type Nullable<T> = { [P in keyof T]: T[P] | null };

@@ -142,20 +142,7 @@
         %app-install-update
       (urbit-app-update:encode app-id.rct urbit-app.rct grid-index.rct)
       ::
-        %pinned
-      %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%id s+app-id.rct]
-          [%index (numb index.rct)]
-      ==
-      ::
-        %unpinned
-      %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%id s+app-id.rct]
-      ==
-      ::
-        %pins-reodered
+        %dock-update
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%dock a+(turn dock.rct |=(=app-id:store s+app-id))]
@@ -273,6 +260,9 @@
       ::
         %app-hash
       s+(scot %uv hash.vi)
+      ::
+        %version
+      (version:encode version.vi)
       ::
     ==
   --

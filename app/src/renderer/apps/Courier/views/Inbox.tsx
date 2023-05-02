@@ -1,35 +1,40 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { observer } from 'mobx-react';
+
 import {
+  Box,
+  Button,
   Flex,
   Icon,
-  Button,
-  TextInput,
-  Box,
   Text,
+  TextInput,
   WindowedList,
 } from '@holium/design-system';
-// import { toJS } from 'mobx';
+
+import { trackEvent } from 'renderer/lib/track';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import { ChatModelType } from '../../../stores/models/chat.model';
 import { useTrayApps } from '../../store';
 import { ChatRow } from '../components/ChatRow';
-import { useChatStore } from '../store';
-import { observer } from 'mobx-react';
-import { ChatModelType } from '../models';
-import { useServices } from 'renderer/logic/store';
-const rowHeight = 52;
 
-const scrollbarWidth = 12;
+const rowHeight = 52;
 const heightPadding = 12;
 const searchHeight = 40;
 
 export const InboxPresenter = () => {
-  const { ship, spaces, theme } = useServices();
+  const { loggedInAccount, theme } = useAppState();
+  const { chatStore, spacesStore } = useShipStore();
   const { dimensions } = useTrayApps();
   const [showList, setShowList] = useState<boolean>(false);
-  const { inbox, sortedChatList, setChat, setSubroute, isChatPinned } =
-    useChatStore();
+  const { sortedChatList, setChat, setSubroute, isChatPinned } = chatStore;
   const [searchString, setSearchString] = useState<string>('');
+  const currentSpace = spacesStore.selected;
 
-  const currentSpace = spaces.selected;
+  useEffect(() => {
+    trackEvent('OPENED', 'CHAT_INBOX');
+  }, []);
 
   const searchFilter = useCallback(
     (preview: ChatModelType) => {
@@ -90,7 +95,7 @@ export const InboxPresenter = () => {
           <Icon name="Plus" size={24} opacity={0.5} />
         </Button.IconButton>
       </Flex>
-      {inbox.length === 0 ? (
+      {sortedChatList.length === 0 ? (
         <Flex
           flex={1}
           flexDirection="column"
@@ -121,18 +126,18 @@ export const InboxPresenter = () => {
           <Box height={dimensions.height - heightPadding} width={listWidth}>
             <WindowedList
               data={sortedChatList.filter(searchFilter)}
-              followOutput="smooth"
-              width={listWidth + scrollbarWidth}
-              hideScrollbar
+              width={listWidth}
+              shiftScrollbar
               height={listHeight}
+              overscan={25}
               increaseViewportBy={{
-                top: 300,
-                bottom: 300,
+                top: 400,
+                bottom: 400,
               }}
-              alignToBottom={false}
-              style={{ marginRight: -scrollbarWidth }}
               itemContent={(index: number, chat: ChatModelType) => {
-                const isAdmin = ship ? chat.isHost(ship.patp) : false;
+                const isAdmin = loggedInAccount
+                  ? chat.isHost(loggedInAccount.serverId)
+                  : false;
                 const height = chat.type === 'space' ? 70 : rowHeight;
                 const isLast = index === sortedChatList.length - 1;
                 const isSelectedSpaceChat =
@@ -153,14 +158,12 @@ export const InboxPresenter = () => {
                 } else if (isPinned) {
                   outerStyle = {
                     height,
-                    // height: height + 4,
-                    // marginBottom: 4,
                   };
                   customStyle = {
                     borderRadius: 6,
                     height,
                     background:
-                      theme.currentTheme.mode === 'dark'
+                      theme.mode === 'dark'
                         ? 'rgba(0,0,0,0.07)'
                         : 'rgba(0,0,0,0.03)',
                   };
@@ -177,11 +180,10 @@ export const InboxPresenter = () => {
 
                 return (
                   <Box
-                    style={outerStyle}
                     key={`${window.ship}-${chat.path}-${index}-unpinned`}
+                    style={outerStyle}
                   >
                     <Box
-                      key={`${window.ship}-${chat.path}-${index}-unpinned`}
                       width={listWidth}
                       zIndex={2}
                       layout="preserve-aspect"

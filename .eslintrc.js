@@ -1,6 +1,6 @@
 module.exports = {
   extends: ['react-app', 'plugin:prettier/recommended'],
-  plugins: ['unused-imports'],
+  plugins: ['unused-imports', 'simple-import-sort'],
   parser: '@typescript-eslint/parser',
   root: true,
   parserOptions: { project: './tsconfig.json' },
@@ -25,6 +25,26 @@ module.exports = {
     '@typescript-eslint/no-non-null-assertion': 'error',
     '@typescript-eslint/no-unused-expressions': 'off',
     '@typescript-eslint/no-unused-vars': 'off',
+    'simple-import-sort/imports': [
+      'error',
+      {
+        groups: [
+          // React and Electron packages first, then other third-party packages.
+          ['^react', '^electron', '^@?\\w'],
+          // Holium packages.
+          ['^@holium'],
+          // Aliased internal packages.
+          [
+            '^(background|main|os|renderer|components|util|blocks|general|input|navigation|hooks|analysers|connection|helpers|peer)(/.*|$)',
+          ],
+          // Relative imports.
+          ['^\\.'],
+          // Style imports.
+          ['^.+\\.?(css)$'],
+        ],
+      },
+    ],
+    'simple-import-sort/exports': 'error',
   },
   settings: {
     react: {

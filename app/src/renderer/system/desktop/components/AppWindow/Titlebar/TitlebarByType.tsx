@@ -1,21 +1,21 @@
-import { FC, useEffect, PointerEvent } from 'react';
-import { Titlebar } from './Titlebar';
-import { nativeApps } from 'renderer/apps/nativeApps';
+import { FC, PointerEvent } from 'react';
+
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/BrowserToolbar';
-import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
+import { nativeApps } from 'renderer/apps/nativeApps';
+import { ShellModelType } from 'renderer/stores/models/shell.model';
+import { AppWindowMobxType } from 'renderer/stores/models/window.model';
 import {
   DialogTitlebar,
   DialogTitlebarProps,
 } from 'renderer/system/dialog/Dialog/DialogTitlebar';
-import { AppWindowType } from 'os/services/shell/desktop.model';
-import { ShellStoreType } from 'os/services/shell/shell.model';
-import { ThemeType } from 'renderer/logic/theme';
-import { NativeAppId, getNativeAppWindow } from '../getNativeAppWindow';
+import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
+
+import { getNativeAppWindow, NativeAppId } from '../getNativeAppWindow';
+import { Titlebar } from './Titlebar';
 
 type Props = {
-  appWindow: AppWindowType;
-  shell: ShellStoreType;
-  currentTheme: ThemeType;
+  appWindow: AppWindowMobxType;
+  shell: ShellModelType;
   hideTitlebarBorder: boolean;
   onClose: () => void;
   onMaximize: () => void;
@@ -28,7 +28,6 @@ type Props = {
 export const TitlebarByType = ({
   appWindow,
   shell,
-  currentTheme,
   hideTitlebarBorder,
   onDevTools,
   onDragStart,
@@ -58,7 +57,6 @@ export const TitlebarByType = ({
       onClose={onClose}
       onMaximize={onMaximize}
       onMinimize={onMinimize}
-      theme={currentTheme}
       appWindow={appWindow}
     />
   );
@@ -101,7 +99,6 @@ export const TitlebarByType = ({
           onClose={onClose}
           onMinimize={onMinimize}
           onMaximize={onMaximize}
-          theme={currentTheme}
           appWindow={appWindow}
         />
       );
@@ -119,22 +116,17 @@ export const TitlebarByType = ({
     const onCloseDialog = dialogConfig.hasCloseButton
       ? dialogConfig.onClose
       : undefined;
-    const onOpenDialog = dialogConfig.onOpen;
-    CustomTitlebar = DialogTitlebar as FC<DialogTitlebarProps>;
     showDevToolsToggle = false;
     maximizeButton = false;
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useEffect(() => {
-      // trigger onOpen only once
-      onOpenDialog && onOpenDialog();
-    }, [onOpenDialog]);
+
     if (noTitlebar) {
       titlebar = <div />;
     } else {
       titlebar = (
-        <CustomTitlebar
+        <DialogTitlebar
           zIndex={appWindow.zIndex}
           showDevToolsToggle
+          onOpen={dialogConfig.onOpen}
           onClose={onCloseDialog}
           onDragStart={onDragStart}
           onDragEnd={onDragEnd}

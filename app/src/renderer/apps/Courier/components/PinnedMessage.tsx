@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
+import styled from 'styled-components';
+
 import {
   convertDarkText,
   Flex,
   MenuItemProps,
   PinnedMessage,
 } from '@holium/design-system';
+
 import { useContextMenu } from 'renderer/components';
-import { useChatStore } from '../store';
-import { ChatMessageType } from '../models';
-import { useServices } from 'renderer/logic/store';
-import styled from 'styled-components';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import { ChatMessageType } from '../../../stores/models/chat.model';
 type PinnedContainerProps = {
   message: ChatMessageType;
 };
@@ -34,8 +37,10 @@ const BlurredBG = styled.div`
 `;
 
 export const PinnedContainer = ({ message }: PinnedContainerProps) => {
-  const { selectedChat } = useChatStore();
-  const { ship, friends, theme } = useServices();
+  const { chatStore } = useShipStore();
+  const selectedChat = chatStore.selectedChat;
+  const { friends } = useShipStore();
+  const { loggedInAccount, theme } = useAppState();
   // are we an admin of the chat?
   const { getOptions, setOptions } = useContextMenu();
   const [authorColor, setAuthorColor] = useState<string | undefined>();
@@ -43,15 +48,15 @@ export const PinnedContainer = ({ message }: PinnedContainerProps) => {
   const pinnedRowId = useMemo(() => `pinned-${message.id}`, [message.id]);
   const contextMenuOptions = useMemo(() => {
     const menu: MenuItemProps[] = [];
-    if (!selectedChat || !ship) return menu;
-    const isAdmin = selectedChat.isHost(ship.patp);
+    if (!selectedChat || !loggedInAccount) return menu;
+    const isAdmin = selectedChat.isHost(loggedInAccount.serverId);
 
     menu.push({
       id: `${pinnedRowId}-hide-pinned`,
       icon: 'EyeOff',
       label: 'Hide pin',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         selectedChat.setHidePinned(true);
       },
@@ -62,7 +67,7 @@ export const PinnedContainer = ({ message }: PinnedContainerProps) => {
         icon: 'Unpin',
         label: 'Unpin',
         disabled: false,
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
           selectedChat.clearPinnedMessage(message.id);
         },
@@ -82,8 +87,7 @@ export const PinnedContainer = ({ message }: PinnedContainerProps) => {
     // NOTE: #000 is the default color, so we want to default to undefined
     // and use the accent color instead
     const authorColorDisplay =
-      (contact.color &&
-        convertDarkText(contact.color, theme.currentTheme.mode)) ||
+      (contact.color && convertDarkText(contact.color, theme.mode)) ||
       'rgba(var(--rlm-text-rgba))';
 
     setAuthorColor(authorColorDisplay);

@@ -1,8 +1,9 @@
 import { MouseEventHandler } from 'react';
-import { MenuItemStyle } from './MenuItem.styles';
-import { Spinner } from '../Spinner/Spinner';
+
 import { Box } from '../Box/Box';
+import { Spinner } from '../Spinner/Spinner';
 import { Text } from '../Text/Text';
+import { MenuItemStyle } from './MenuItem.styles';
 
 export type MenuItemProps = {
   id?: string;

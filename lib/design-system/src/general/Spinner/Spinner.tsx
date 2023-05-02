@@ -4,6 +4,7 @@ import {
   PositionProps,
   SpaceProps,
 } from 'styled-system';
+
 import { Box } from '../Box/Box';
 import { StyledSpinner } from './Spinner.styles';
 

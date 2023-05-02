@@ -1,36 +1,41 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useServices } from 'renderer/logic/store';
-import { WebView } from './WebView';
-import { AppWindowType } from 'os/services/shell/desktop.model';
 import { observer } from 'mobx-react';
+import { onAction } from 'mobx-state-tree';
+
 import { useToggle } from '@holium/design-system';
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
-import { RoomManagerEvent, RoomsManager } from '@holium/realm-room';
-import { genCSSVariables } from 'renderer/logic/theme';
+
+import { genCSSVariables } from 'renderer/lib/theme';
+import { useAppState } from 'renderer/stores/app.store';
+import { AppWindowMobxType } from 'renderer/stores/models/window.model';
+import { ShipStoreInstance, useShipStore } from 'renderer/stores/ship.store';
+
+import { WebView } from './WebView';
 
 const connectWebviewToMultiplayer = async (
   ship: string,
-  roomsManager: RoomsManager,
+  shipStore: ShipStoreInstance,
   webview: Electron.WebviewTag
 ) => {
   console.log('Connecting webview to presence.');
+  const onDataChannel = (_rid: string, _peer: string, { value }: any) => {
+    if (!value) return;
+    if (value.multiplayer && value.multiplayer.event === 'mouse-click') {
+      const { patp, elementId } = value.multiplayer;
+      webview.send('multiplayer.realm-to-app.mouse-click', patp, elementId);
+    } else if (value.broadcast) {
+      webview.send('presence.realm-to-app.broadcast', ...value.broadcast.data);
+    }
+  };
 
-  roomsManager.on(
-    RoomManagerEvent.OnDataChannel,
-    async (_rid: string, _peer: string, { value }) => {
-      if (!value) return;
-
-      if (value.multiplayer && value.multiplayer.event === 'mouse-click') {
-        const { patp, elementId } = value.multiplayer;
-        webview.send('multiplayer.realm-to-app.mouse-click', patp, elementId);
-      } else if (value.broadcast) {
-        webview.send(
-          'presence.realm-to-app.broadcast',
-          ...value.broadcast.data
-        );
+  onAction(shipStore, (call) => {
+    if (call.path === '/roomsStore') {
+      if (call.name === '_onDataChannel') {
+        if (call.args) {
+          onDataChannel('', '', call.args[0]);
+        }
       }
     }
-  );
+  });
 
   webview.executeJavaScript(`
     window.ship = '${ship}';
@@ -38,18 +43,18 @@ const connectWebviewToMultiplayer = async (
 };
 
 type Props = {
-  appWindow: AppWindowType;
+  appWindow: AppWindowMobxType;
   isResizing: boolean;
 };
 
 const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
-  const { theme, ship } = useServices();
-  const roomsManager = useRooms();
+  const { loggedInAccount, theme } = useAppState();
+  const shipStore = useShipStore();
 
   const loading = useToggle(false);
   const [readyWebview, setReadyWebview] = useState<Electron.WebviewTag>();
 
-  const currentTheme = useMemo(() => theme.currentTheme, [theme.currentTheme]);
+  const currentTheme = useMemo(() => theme, [theme]);
   const webviewId = useMemo(
     () => `${appWindow.appId}-web-webview`,
     [appWindow.appId]
@@ -61,11 +66,11 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
       webviewId
     ) as Electron.WebviewTag | null;
 
-    if (!webview || !ship || !roomsManager) return;
+    if (!webview || !loggedInAccount) return;
 
     const onDomReady = () => {
       setReadyWebview(webview);
-      connectWebviewToMultiplayer(ship.patp, roomsManager, webview);
+      connectWebviewToMultiplayer(loggedInAccount.serverId, shipStore, webview);
     };
 
     webview.addEventListener('dom-ready', onDomReady);
@@ -73,7 +78,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
     return () => {
       webview.removeEventListener('dom-ready', onDomReady);
     };
-  }, [appWindow.appId, ship, roomsManager]);
+  }, [appWindow.appId, loggedInAccount, shipStore.roomsStore]);
 
   useEffect(() => {
     if (!readyWebview) return;
@@ -97,7 +102,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
       readyWebview.removeEventListener('did-stop-loading', loading.toggleOff);
       readyWebview.removeEventListener('close', readyWebview.closeDevTools);
     };
-  }, [readyWebview, themeCss, ship, loading]);
+  }, [readyWebview, themeCss, loggedInAccount, loading]);
 
   return useMemo(
     () => (
@@ -113,7 +118,6 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
           id={webviewId}
           appId={appWindow.appId}
           src={appWindow.href?.site}
-          partition="persist:dev-webview"
           webpreferences="sandbox=false"
           isLocked={isResizing || loading.isOn}
           style={{

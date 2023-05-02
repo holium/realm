@@ -1,14 +1,25 @@
-import { AccountDownloadRealmDialog } from '@holium/shared';
-import { useUser, UserContextProvider } from 'util/UserContext';
+import {
+  AccountDownloadRealmDialog,
+  UserContextProvider,
+  useUser,
+} from '@holium/shared';
+
+import { thirdEarthApi } from 'util/thirdEarthApi';
+
 import { Page } from '../../components/Page';
-import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 import { downloadLinks } from '../../util/constants';
+import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
 const DownloadRealmPresenter = () => {
   const { goToPage, logout } = useNavigation();
   const { ships, selectedPatp, setSelectedPatp } = useUser();
 
   const onClickSidebarSection = (section: string) => {
+    if (section === 'Get Hosting') {
+      goToPage(accountPageUrl[section], {
+        back_url: '/account/download-realm',
+      });
+    }
     goToPage(accountPageUrl[section]);
   };
 
@@ -41,7 +52,7 @@ const DownloadRealmPresenter = () => {
 export default function DownloadRealm() {
   return (
     <Page title="Account / Download Realm" isProtected>
-      <UserContextProvider>
+      <UserContextProvider api={thirdEarthApi}>
         <DownloadRealmPresenter />
       </UserContextProvider>
     </Page>

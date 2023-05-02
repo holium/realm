@@ -1,18 +1,21 @@
-import { VerifyEmailDialog } from '@holium/shared';
-import { Page } from 'components/Page';
-import { api } from '../util/api';
+import { OnboardingStorage, VerifyEmailDialog } from '@holium/shared';
+
+import { Page } from '../components/Page';
+import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
 export default function VerifyEmail() {
   const { goToPage } = useNavigation();
 
   const onResend = () => {
-    const email = localStorage.getItem('email');
-    const password = localStorage.getItem('password');
+    const { email, passwordHash } = OnboardingStorage.get();
+
+    // TODO: unhash
+    const password = passwordHash;
 
     if (email && password) {
       try {
-        api.register(email, password);
+        thirdEarthApi.register(email, password);
       } catch (error) {
         console.error(error);
         goToPage('/');
@@ -24,10 +27,10 @@ export default function VerifyEmail() {
 
   const onNext = async (verificationcode: string) => {
     try {
-      const result = await api.verifyEmail(verificationcode);
-      localStorage.setItem('token', result.token);
+      const result = await thirdEarthApi.verifyEmail(verificationcode);
+      OnboardingStorage.set({ token: result.token });
 
-      goToPage('/choose-id');
+      if (Boolean(result)) goToPage('/choose-id');
 
       return Boolean(result);
     } catch (error) {

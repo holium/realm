@@ -1,37 +1,36 @@
 import { FC } from 'react';
-import { Flex, Box } from 'renderer/components';
-import { darken, transparentize } from 'polished';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from '../lib/helpers';
+import { transparentize } from 'polished';
+import styled from 'styled-components';
+
+import { Box, BoxProps, Flex, FlexProps } from '@holium/design-system';
 
 interface PasscodeDisplayProps {
   digits: number;
   filled: number;
 }
 
+const FilledFlex = styled(Flex)<FlexProps>`
+  border: 2px solid rgba(var(--rlm-accent-rgba));
+`;
+
+const FilledBox = styled(Box)<BoxProps>`
+  background-color: rgba(var(--rlm-accent-rgba));
+`;
+
 export const PasscodeDisplay: FC<PasscodeDisplayProps> = (
   props: PasscodeDisplayProps
 ) => {
-  const { theme } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
-
   const Filled = () => (
-    <Flex
+    <FilledFlex
       mx="6px"
       height={35}
       width={32}
-      border={`solid 2px ${baseTheme.colors.brand.primary}`}
       borderRadius={4}
       alignItems="center"
       justifyContent="center"
     >
-      <Box
-        height="8px"
-        width="8px"
-        backgroundColor={baseTheme.colors.text.primary}
-        borderRadius="50%"
-      ></Box>
-    </Flex>
+      <FilledBox height="8px" width="8px" borderRadius="50%"></FilledBox>
+    </FilledFlex>
   );
 
   const Empty = (props: any) => (
@@ -54,7 +53,6 @@ export const PasscodeDisplay: FC<PasscodeDisplayProps> = (
           <Empty
             key={index}
             border={`2px solid ${transparentize(0.9, '#000000')}`}
-            background={darken(0.02, theme.currentTheme.windowColor)}
           />
         );
       })}

@@ -84,9 +84,7 @@
 ::
 +$  reaction
   $%  [%initial =catalog =stalls =docks =recommendations =grid-index]
-      [%pinned path=space-path:spaces =app-id index=@ud]
-      [%unpinned path=space-path:spaces =app-id]
-      [%pins-reodered path=space-path:spaces =dock]
+      [%dock-update path=space-path:spaces =dock]
       [%recommended =app-id =stalls]
       [%unrecommended =app-id =stalls]
       [%suite-added path=space-path:spaces =app-id =app index=@ud]
@@ -107,6 +105,7 @@
       [%allies =allies:ally:treaty]
       [%treaties treaties=(map [=ship =desk] =treaty:treaty)]
       [%app-hash hash=@uv]
+      [%version =version:docket]
   ==
 --
 

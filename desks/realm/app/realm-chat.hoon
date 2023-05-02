@@ -246,7 +246,7 @@
   ++  on-arvo
     |=  [=wire =sign-arvo]
     ^-  (quip card _this)
-    !!
+    `this
   ::
   ++  on-fail
     |=  [=term =tang]

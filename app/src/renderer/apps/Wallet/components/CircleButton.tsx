@@ -1,20 +1,13 @@
 import { FC } from 'react';
-import { darken } from 'polished';
-
-import { Flex, Icons, Text } from '../../../components';
-import { IconPathsType } from '../../../components/Icons/icons';
-import styled, { css } from 'styled-components';
 import { motion } from 'framer-motion';
-import { ThemeType } from '../../../theme';
+import styled from 'styled-components';
+
+import { Flex, Icon, IconPathsType, Text } from '@holium/design-system';
 
 interface CircleButtonProps {
   icon: IconPathsType;
   iconColor?: string;
   title?: string;
-}
-
-interface StyleProps {
-  theme: ThemeType;
 }
 
 const CircleBtn = styled(motion.div)`
@@ -27,47 +20,38 @@ const CircleBtn = styled(motion.div)`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  ${(props: StyleProps) =>
-    css`
-      background-color: ${props.theme.colors.brand.primary};
-      transition: ${props.theme.transition};
-      /* &:hover {
-        transition: ${props.theme.transition};
-        background-color: ${darken(0.05, props.theme.colors.brand.primary)};
+  background-color: rgba(var(--rlm-overlay-hover-rgba));
+  transition: var(--transition);
+  /* &:hover {
+        transition: var(--transition);
+        background-color: rgba(var(--rlm-overlay-hover-rgba));
       } */
-      svg: {
-        path: {
-          fill: white;
-        }
-      }
-    `}
+  svg: {
+    path: {
+      fill: white;
+    }
+  }
 `;
 
 const FullButton = styled(Flex)`
-  ${(props: StyleProps) =>
-    css`
-      cursor: pointer;
+  cursor: pointer;
 
-      &:hover {
-        transition: ${props.theme.transition};
-        ${CircleBtn} {
-          transition: ${props.theme.transition};
-          background-color: ${darken(0.05, props.theme.colors.brand.primary)};
-        }
-        ${Text} {
-          transition: ${props.theme.transition};
-          color: ${darken(0.05, props.theme.colors.brand.primary)};
-        }
-      }
-    `}
+  &:hover {
+    transition: var(--transition);
+    ${CircleBtn} {
+      transition: var(--transition);
+      background-color: rgba(var(--rlm-accent-rgba));
+    }
+    ${Text} {
+      transition: var(--transition);
+    }
+  }
 `;
 
 export const CircleButton: FC<CircleButtonProps> = (
   props: CircleButtonProps
 ) => {
-  const { icon, title, iconColor } = props;
-  // const { walletStore } = useMst();
-
+  const { icon, title } = props;
   return (
     <FullButton
       flexDirection="column"
@@ -75,12 +59,12 @@ export const CircleButton: FC<CircleButtonProps> = (
       justifyContent="center"
     >
       <CircleBtn>
-        <Icons name={icon} size={24} color={iconColor || 'inherit'} />
+        <Icon name={icon} size={24} />
       </CircleBtn>
       {title && (
-        <Text mt={2} fontWeight={300} color="brand.primary" fontSize={2}>
+        <Text.Body mt={2} fontWeight={300} fontSize={2}>
           {title}
-        </Text>
+        </Text.Body>
       )}
     </FullButton>
   );

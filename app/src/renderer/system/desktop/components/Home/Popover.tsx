@@ -1,11 +1,14 @@
-import { useEffect, useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import styled from 'styled-components';
-import { compose, space, color, typography } from 'styled-system';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
-import { MiniAppWindow } from '../SystemBar/components/MiniAppWindow';
+import styled from 'styled-components';
+import { color, compose, space, typography } from 'styled-system';
+
 import { Box } from '@holium/design-system';
+
+import { useAppState } from 'renderer/stores/app.store';
+
+import { MiniAppWindow } from '../SystemBar/components/MiniAppWindow';
 
 export interface RealmPopoverProps {
   id: string;
@@ -40,8 +43,8 @@ export const RealmPopoverWrapper = styled(styled.div<
 
 const RealmPopoverPresenter = (props: RealmPopoverProps) => {
   const { id, isOpen, style, children, coords, dimensions, onClose } = props;
-  const { theme } = useServices();
-  const { textColor, windowColor } = theme.currentTheme;
+  const { theme } = useAppState();
+  const { textColor, windowColor } = theme;
 
   const handleClickOutside = useCallback(
     (event: any) => {

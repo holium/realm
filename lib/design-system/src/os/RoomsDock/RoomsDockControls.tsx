@@ -1,7 +1,7 @@
-import { BarButton } from '../SystemBar/BarButton';
 import { Flex } from '../../general/Flex/Flex';
 import { Icon } from '../../general/Icon/Icon';
 import { Tooltip } from '../../general/Tooltip/Tooltip';
+import { BarButton } from '../SystemBar/BarButton';
 
 type Props = {
   live: any;
@@ -52,7 +52,7 @@ export const RoomsDockControls = ({
       }}
     >
       <Icon
-        fill={isMuted ? 'intent-warning' : 'text'}
+        fill={isMuted ? 'intent-caution' : 'text'}
         name={isMuted ? 'Unmute' : 'Mute'}
         size={26}
       />

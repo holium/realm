@@ -1,5 +1,5 @@
-import { LinkBlockType } from './LinkBlock';
 import { parseMediaType } from '../../util/links';
+import { LinkBlockType } from './LinkBlock';
 
 export const OPENGRAPH_API = 'https://api.holium.live/v1/opengraph/opengraph';
 export const RAW_LINK_HEIGHT = '2.5rem';

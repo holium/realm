@@ -1,7 +1,9 @@
-import { useRef, useCallback, useEffect, Fragment, useMemo } from 'react';
-import { MotionStyle, motion, Variant } from 'framer-motion';
-import { MouseState } from '@holium/realm-presence';
+import { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
+import { motion, MotionStyle, Variant } from 'framer-motion';
+
 import { Position } from '@holium/design-system';
+import { MouseState } from '@holium/realm-presence';
+
 import { IsDevice } from './isDevice';
 
 const innerSize = 10;

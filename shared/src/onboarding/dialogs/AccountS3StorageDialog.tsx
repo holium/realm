@@ -1,10 +1,5 @@
-import { AccountDialogDescription } from '../components/AccountDialog.styles';
-import { AccountDialogTableRow } from '../components/AccountDialogTableRow';
 import { AccountDialog, SidebarSection } from '../components/AccountDialog';
-import { AccountDialogTable } from './AccountHostingDialog';
-import { S3Password } from '../components/s3-storage/S3Password';
-import { DataStorageIndicator } from '../components/s3-storage/DataStorageIndicator';
-import { DataSentIndicator } from '../components/s3-storage/DataSentIndicator';
+import { AccountS3StorageDialogBody } from './bodies/AccountS3StorageDialogBody';
 
 type Props = {
   patps: string[];
@@ -46,20 +41,12 @@ export const AccountS3StorageDialog = ({
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >
-    <AccountDialogTable>
-      <DataStorageIndicator dataStorage={dataStorage} />
-      <DataSentIndicator dataSent={dataSent} />
-      <AccountDialogTableRow title="URL">
-        <AccountDialogDescription flex={1}>
-          {url as string}
-        </AccountDialogDescription>
-      </AccountDialogTableRow>
-      <AccountDialogTableRow title="S3 bucket">
-        <AccountDialogDescription flex={1}>
-          {s3Bucket as string}
-        </AccountDialogDescription>
-      </AccountDialogTableRow>
-      <S3Password s3Password={s3Password as string} />
-    </AccountDialogTable>
+    <AccountS3StorageDialogBody
+      url={url as string}
+      s3Bucket={s3Bucket as string}
+      s3Password={s3Password as string}
+      dataStorage={dataStorage}
+      dataSent={dataSent}
+    />
   </AccountDialog>
 );

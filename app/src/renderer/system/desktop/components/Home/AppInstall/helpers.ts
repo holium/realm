@@ -1,5 +1,6 @@
-import { InstallStatus } from 'os/services/spaces/models/bazaar';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
+import { InstallStatus } from 'renderer/stores/models/bazaar.model';
+
+import { shipStore } from '../../../../../stores/ship.store';
 
 export const installLabel = (status: InstallStatus) => {
   switch (status) {
@@ -33,20 +34,27 @@ export const handleInstallation = (
     console.error('No host found for app', desk);
     return;
   }
+  const { bazaarStore } = shipStore;
   switch (status) {
     case InstallStatus.installed:
     case InstallStatus.suspended:
-      SpacesActions.uninstallApp(desk);
+      bazaarStore.uninstallApp(desk);
       return;
     case InstallStatus.uninstalled:
     case InstallStatus.desktop:
-      if (host) SpacesActions.installApp(host, desk);
+      if (host) bazaarStore.installApp(host, desk);
       return;
     case InstallStatus.started:
-      SpacesActions.uninstallApp(desk);
+      bazaarStore.uninstallApp(desk);
       return;
     case InstallStatus.failed:
-      SpacesActions.uninstallApp(desk);
+      bazaarStore.uninstallApp(desk);
+      return;
+    case InstallStatus.reviving:
+      bazaarStore.uninstallApp(desk);
+      return;
+    case InstallStatus.suspending:
+      bazaarStore.uninstallApp(desk);
       return;
     default:
       console.error('Unknown install status', status);
@@ -62,9 +70,10 @@ export const resumeSuspendLabel = (status: InstallStatus) => {
 };
 
 export const handleResumeSuspend = (desk: string, status: InstallStatus) => {
+  const { bazaarStore } = shipStore;
   if (status === InstallStatus.installed) {
-    SpacesActions.suspendApp(desk);
+    bazaarStore.suspendApp(desk);
   } else {
-    SpacesActions.reviveApp(desk);
+    bazaarStore.reviveApp(desk);
   }
 };

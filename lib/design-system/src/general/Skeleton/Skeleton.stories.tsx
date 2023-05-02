@@ -1,6 +1,7 @@
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Skeleton } from './Skeleton';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+
 import { Flex } from '../Flex/Flex';
+import { Skeleton } from './Skeleton';
 
 export default {
   component: Skeleton,

@@ -1,18 +1,21 @@
-import { FormEvent } from 'react';
-import { Text, Flex } from '@holium/design-system/general';
-import { useToggle } from '@holium/design-system/util';
-import { Modal } from '../../Modal';
+import { CSSProperties, FormEvent } from 'react';
 
+import { Flex, Text } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
+
+import { Modal } from '../../Modal';
 import { SubmitButton } from '../SubmitButton';
 
 type Props = {
   isOpen: boolean;
+  style?: CSSProperties;
   onDismiss: () => void;
   onSubmit: () => Promise<boolean>;
 };
 
 export const GetNewAccessCodeModal = ({
   isOpen,
+  style,
   onDismiss,
   onSubmit,
 }: Props) => {
@@ -32,12 +35,17 @@ export const GetNewAccessCodeModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onDismiss={onDismiss} onSubmit={handleSubmit}>
+    <Modal
+      isOpen={isOpen}
+      style={style}
+      onDismiss={onDismiss}
+      onSubmit={handleSubmit}
+    >
       <Text.H5>New Access Code</Text.H5>
       <Text.Body>
         Generating a new access code will disconect all active sessions for this
         ID and require re-authentication with your new access code (you will
-        remain connected to your ThirdEarth account).
+        remain connected to your Holium account).
       </Text.Body>
       <Flex justifyContent="flex-end" paddingTop="8px">
         <SubmitButton text="Confirm" submitting={submitting.isOn} />

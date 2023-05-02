@@ -1,27 +1,30 @@
-import { useMemo, useEffect, useState, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
-import { AnimatePresence } from 'framer-motion';
+
 import {
-  Flex,
-  Text,
-  measureImage,
-  fetchOGData,
   extractOGData,
-  parseMediaType,
+  fetchOGData,
+  Flex,
+  measureImage,
   measureTweet,
+  parseMediaType,
+  Text,
   WindowedListRef,
 } from '@holium/design-system';
-import { useChatStore } from '../store';
+
 import { useTrayApps } from 'renderer/apps/store';
+import { trackEvent } from 'renderer/lib/track';
+import { IuseStorage } from 'renderer/lib/useStorage';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import { ChatMessageType } from '../../../stores/models/chat.model';
+import { ChatAvatar } from '../components/ChatAvatar';
 import { ChatInputBox } from '../components/ChatInputBox';
 import { ChatLogHeader } from '../components/ChatLogHeader';
-import { ChatAvatar } from '../components/ChatAvatar';
-import { IuseStorage } from 'renderer/logic/lib/useStorage';
 import { PinnedContainer } from '../components/PinnedMessage';
-import { useServices } from 'renderer/logic/store';
-import { ChatMessageType } from '../models';
-import { useAccountStore } from 'renderer/apps/Account/store';
 import { ChatLogList } from './ChatLogList';
 
 const FullWidthAnimatePresence = styled(AnimatePresence)`
@@ -38,25 +41,29 @@ type ChatLogProps = {
 };
 
 export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
+  const { loggedInAccount, theme } = useAppState();
   const { dimensions, innerNavigation } = useTrayApps();
-  const { selectedChat, getChatHeader, setSubroute } = useChatStore();
-  const accountStore = useAccountStore();
-  const { ship, friends, spaces, theme } = useServices();
+  const { notifStore, friends, chatStore, spacesStore } = useShipStore();
+  const { selectedChat, getChatHeader, setSubroute } = chatStore;
   const [showAttachments, setShowAttachments] = useState(false);
 
   const listRef = useRef<WindowedListRef>(null);
 
   const { color: ourColor } = useMemo(() => {
-    if (!ship) return { color: '#000' };
-    return friends.getContactAvatarMetadata(ship.patp);
+    if (!loggedInAccount) return { color: '#000' };
+    return friends.getContactAvatarMetadata(loggedInAccount.serverId);
   }, []);
 
   useEffect(() => {
-    if (!selectedChat || !ship?.patp) return;
+    trackEvent('OPENED', 'CHAT_LOG');
+  }, []);
+
+  useEffect(() => {
+    if (!selectedChat || !loggedInAccount?.serverId) return;
     selectedChat.fetchMessages();
-    const unreadCount = accountStore.getUnreadCountByPath(selectedChat.path);
+    const unreadCount = notifStore.getUnreadCountByPath(selectedChat.path);
     if (unreadCount > 0) {
-      accountStore.readPath('realm-chat', selectedChat.path);
+      notifStore.readPath('realm-chat', selectedChat.path);
     }
 
     setTimeout(() => {
@@ -74,7 +81,8 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   }, [selectedChat?.path, innerNavigation]);
 
   const { title, sigil, image } = useMemo(() => {
-    if (!selectedChat || !ship?.patp) return { title: 'Error loading title' };
+    if (!selectedChat || !loggedInAccount?.serverId)
+      return { title: 'Error loading title' };
     return getChatHeader(selectedChat.path);
   }, [selectedChat?.path, window.ship]);
 
@@ -96,7 +104,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     return null;
   }, [selectedChat?.replyingMsg, listRef.current]);
 
-  if (!selectedChat || !ship) return null;
+  if (!selectedChat || !loggedInAccount) return null;
   const { path, type, peers, metadata, messages } = selectedChat;
 
   const showPin =
@@ -105,7 +113,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   let spaceTitle = undefined;
   let avatarColor: string | undefined;
   if (type === 'space') {
-    const space = spaces.getSpaceByChatPath(path);
+    const space = spacesStore.getSpaceByChatPath(path);
     if (space) {
       spaceTitle = space.name;
       avatarColor = space.color;
@@ -190,7 +198,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     );
   };
 
-  const height = dimensions.height - 104;
+  const height: number = dimensions.height - 104;
 
   let topPadding;
   let endPadding;
@@ -201,7 +209,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     endPadding = 136;
   }
   if (selectedChat.replyingMsg) {
-    endPadding = 70;
+    endPadding = 56;
   }
 
   let pretitle;
@@ -264,7 +272,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
         <Flex
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.2 }}
+          transition={{ delay: 0.1, duration: 0.1 }}
         >
           {messages.length === 0 ? (
             <Flex
@@ -292,7 +300,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
                 endOfListPadding={endPadding}
                 selectedChat={selectedChat}
                 width={containerWidth}
-                height={dimensions.height - 104}
+                height={height}
                 ourColor={ourColor}
               />
               {showPin && (
@@ -325,7 +333,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
         <ChatInputBox
           storage={storage}
           selectedChat={selectedChat}
-          themeMode={theme.currentTheme.mode as 'light' | 'dark'}
+          themeMode={theme.mode as 'light' | 'dark'}
           onSend={onMessageSend}
           onEditConfirm={onEditConfirm}
           editMessage={selectedChat.editingMsg}

@@ -1,11 +1,18 @@
-import { Flex, Text, Icons } from 'renderer/components';
-import { WalletActions } from 'renderer/logic/actions/wallet';
+import { observer } from 'mobx-react';
+
+import { Flex, Icon, Text } from '@holium/design-system';
+
+import { useShipStore } from 'renderer/stores/ship.store';
+
 import { PasscodeInput } from '../../components/PasscodeInput';
 
-export const Locked = () => {
+const LockedPresenter = () => {
+  const { walletStore } = useShipStore();
+
   const unlock = () => {
-    WalletActions.navigateBack();
-    WalletActions.watchUpdates();
+    walletStore.navigateBack();
+    walletStore.getWalletsUpdate();
+    walletStore.watchUpdates();
   };
 
   return (
@@ -15,18 +22,17 @@ export const Locked = () => {
         flexDirection="column"
         justifyContent="center"
         alignItems="center"
+        gap={10}
       >
-        <Icons name="Locked" size={36} />
-        <Text mt={2} variant="h3">
-          Wallet Locked
-        </Text>
+        <Icon name="Locked" size={36} />
+        <Text.H3 variant="h3">Wallet Locked</Text.H3>
       </Flex>
-      <Flex flex={2} pt={8} flexDirection="column" alignItems="center">
-        <Text mb={8} variant="body">
-          Enter your passcode to continue.
-        </Text>
+      <Flex flex={2} flexDirection="column" alignItems="center" gap={20}>
+        <Text.Body variant="body">Enter your passcode to continue.</Text.Body>
         <PasscodeInput checkStored={true} onSuccess={unlock} />
       </Flex>
     </Flex>
   );
 };
+
+export const Locked = observer(LockedPresenter);

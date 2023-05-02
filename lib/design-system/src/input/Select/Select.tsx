@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Variants } from 'framer-motion';
+
 import { Icon } from '../../general/Icon/Icon';
-import { Text } from '../../general/Text/Text';
 import { MenuItemStyle } from '../../general/MenuItem/MenuItem.styles';
-import { SelectDropdown, SelectWrapper } from './Select.styles';
+import { Text } from '../../general/Text/Text';
 import { RadioOption } from '../RadioGroup/RadioGroup';
+import { SelectDropdown, SelectWrapper } from './Select.styles';
 
 const animationVariants: Variants = {
   enter: {

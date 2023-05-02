@@ -1,24 +1,14 @@
 import { toJS } from 'mobx';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { DialogRenderers } from 'renderer/system/dialog/dialogs';
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
-import { CreateSpaceModal } from './SelectType';
-import { SpacesCreateForm } from './Details';
-import { SelectArchetype } from './SelectArchetype';
-import { InviteMembers } from './InviteMembers';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
 
-interface NewSpace {
-  access: 'public' | 'antechamber' | 'private';
-  archetype: 'home' | 'community';
-  archetypeTitle?: 'Home' | 'Community';
-  color?: string;
-  picture?: string;
-  members: { [patp: string]: 'owner' | 'initiate' | 'admin' | 'member' };
-  name: string;
-  description: string;
-  type: 'our' | 'group' | 'space';
-}
+import { NewSpace } from 'os/services/ship/spaces/spaces.service';
+import { normalizeBounds } from 'renderer/lib/window-manager';
+import { appState } from 'renderer/stores/app.store';
+import { shipStore } from 'renderer/stores/ship.store';
+import { DialogRenderers } from 'renderer/system/dialog/dialogs';
+
+import { SpacesCreateForm } from './Details';
+import { InviteMembers } from './InviteMembers';
+import { CreateSpaceModal } from './SelectType';
 
 export const spacesDialogs: DialogRenderers = {
   'create-space-1': {
@@ -29,55 +19,17 @@ export const spacesDialogs: DialogRenderers = {
     component: (props: any) => <CreateSpaceModal {...props} />,
     hasPrevious: () => true,
     onOpen: () => {
-      ShellActions.setBlur(true, true);
+      appState.shellStore.setIsBlurred(true);
     },
     onNext: (_evt: any) => {
-      ShellActions.nextDialog('create-space-3');
+      appState.shellStore.openDialog('create-space-3');
     },
     onClose: () => {
-      ShellActions.setBlur(false, true);
-      ShellActions.closeDialog();
+      appState.shellStore.setIsBlurred(false);
+      appState.shellStore.closeDialog();
     },
     getWindowProps: (desktopDimensions) => ({
       appId: 'create-space-1',
-      zIndex: 13,
-      type: 'dialog',
-      bounds: normalizeBounds(
-        {
-          x: 0,
-          y: 0,
-          width: 550,
-          height: 570,
-        },
-        desktopDimensions
-      ),
-    }),
-  },
-  'create-space-2': {
-    workflow: true,
-    customNext: false,
-    hasCloseButton: true,
-    component: (props: any) => <SelectArchetype {...props} />,
-    hasPrevious: () => true,
-    isValidated: (data: any) => {
-      if (data.archetype) {
-        return true;
-      } else {
-        return false;
-      }
-    },
-    onNext: (_evt: any, _state: any) => {
-      ShellActions.nextDialog('create-space-3');
-    },
-    onPrevious: () => {
-      ShellActions.nextDialog('create-space-1');
-    },
-    onClose: () => {
-      ShellActions.setBlur(false);
-      ShellActions.closeDialog();
-    },
-    getWindowProps: (desktopDimensions) => ({
-      appId: 'create-space-2',
       zIndex: 13,
       type: 'dialog',
       bounds: normalizeBounds(
@@ -97,14 +49,14 @@ export const spacesDialogs: DialogRenderers = {
     component: (props: any) => <SpacesCreateForm {...props} />,
     hasPrevious: () => true,
     onNext: (_evt: any, _state: any, _setState: any) => {
-      ShellActions.nextDialog('create-space-4');
+      appState.shellStore.openDialog('create-space-4');
     },
     onPrevious: () => {
-      ShellActions.nextDialog('create-space-1');
+      appState.shellStore.openDialog('create-space-1');
     },
     onClose: () => {
-      ShellActions.setBlur(false);
-      ShellActions.closeDialog();
+      appState.shellStore.setIsBlurred(false);
+      appState.shellStore.closeDialog();
     },
     isValidated: (state: any) => {
       if (
@@ -157,14 +109,16 @@ export const spacesDialogs: DialogRenderers = {
         color: createForm.color,
         theme: toJS(createForm.theme),
       };
-      SpacesActions.updateSpace(state.path, createForm).then(() => {
+      shipStore.spacesStore.updateSpace(state.path, createForm).then(() => {
         setState({ loading: false });
+        appState.shellStore.setIsBlurred(false);
+        appState.shellStore.closeDialog();
       });
     },
     onPrevious: () => {},
     onClose: () => {
-      ShellActions.setBlur(false);
-      ShellActions.closeDialog();
+      appState.shellStore.setIsBlurred(false);
+      appState.shellStore.closeDialog();
     },
     isValidated: (state: any) => {
       if (
@@ -200,6 +154,7 @@ export const spacesDialogs: DialogRenderers = {
     hasPrevious: () => true,
     nextButtonText: 'Create Space',
     onNext: (_evt: any, state: any, setState: any) => {
+      console.log('state', state);
       setState({
         ...state,
         loading: true,
@@ -207,19 +162,24 @@ export const spacesDialogs: DialogRenderers = {
       delete state.archetypeTitle;
       state.description = state.description || '';
       if (state.crestOption === 'color') {
-        state.image = '';
+        state.picture = '';
+      } else {
+        state.picture = state.image;
+        delete state.image;
       }
       const createForm: NewSpace = state;
-      SpacesActions.createSpace(createForm).then(() => {
+      shipStore.spacesStore.createSpace(createForm).then(() => {
         setState({ loading: false });
+        appState.shellStore.closeDialog();
+        appState.shellStore.setIsBlurred(false);
       });
     },
     onPrevious: () => {
-      ShellActions.nextDialog('create-space-3');
+      appState.shellStore.openDialog('create-space-3');
     },
     onClose: () => {
-      ShellActions.setBlur(false);
-      ShellActions.closeDialog();
+      appState.shellStore.setIsBlurred(false);
+      appState.shellStore.closeDialog();
     },
     isValidated: (state: any) => {
       return state && state.members;

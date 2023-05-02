@@ -1,23 +1,29 @@
 import { Button, Flex, Icon } from '@holium/design-system/general';
-import { useToggle } from '@holium/design-system/util';
 import { TextInput } from '@holium/design-system/inputs';
+import { useToggle } from '@holium/design-system/util';
+
 import { AccountDialogTableRow } from '../../components/AccountDialogTableRow';
 
 type Props = {
-  shipCode: string;
+  serverCode: string;
+  label?: string;
 };
 
-export const ChangeAccessCode = ({ shipCode }: Props) => {
+export const ChangeAccessCode = ({
+  serverCode,
+  label = 'Access Code',
+}: Props) => {
   const showAccessKey = useToggle(false);
 
   return (
-    <AccountDialogTableRow title="Access code">
+    <AccountDialogTableRow title={label}>
       <Flex flex={1}>
         <TextInput
+          width="100%"
+          height="38px"
           id="hosting-access-code"
           name="hosting-access-code"
-          value={shipCode}
-          width="100%"
+          value={serverCode}
           readOnly={true}
           type={showAccessKey.isOn ? 'text' : 'password'}
           rightAdornment={

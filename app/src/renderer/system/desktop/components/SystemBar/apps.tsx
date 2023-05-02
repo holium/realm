@@ -1,10 +1,12 @@
+import { AccountTrayApp } from 'renderer/apps/Account';
+import { CourierApp } from 'renderer/apps/Courier/app';
 import { RoomApp } from 'renderer/apps/Rooms';
 import { SpacesTrayApp } from 'renderer/apps/Spaces';
-import { AccountTrayApp } from 'renderer/apps/Account';
-import { WalletApp } from 'renderer/apps/Wallet';
+import { WalletApp } from 'renderer/apps/Wallet/WalletApp';
+import { calculateAnchorPoint } from 'renderer/lib/position';
+
+// import { WalletApp } from 'renderer/apps/Wallet';
 import { trayStore } from '../../../../apps/store';
-import { calculateAnchorPoint } from 'renderer/logic/lib/position';
-import { CourierApp } from 'renderer/apps/Courier/app';
 
 export interface ViewRenderers {
   [key: string]: {

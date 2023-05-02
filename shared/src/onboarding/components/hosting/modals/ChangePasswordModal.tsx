@@ -1,20 +1,26 @@
-import { ChangeEvent, FormEvent, useRef, useState } from 'react';
-import { Text, Flex, ErrorBox } from '@holium/design-system/general';
+import { ChangeEvent, CSSProperties, FormEvent, useRef, useState } from 'react';
+
+import { ErrorBox, Flex, Text } from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
+
 import { Modal } from '../../Modal';
-import {
-  OnboardDialogInputLabel,
-  OnboardDialogInput,
-} from '../../OnboardDialog.styles';
+import { OnboardDialogInputLabel } from '../../OnboardDialog.styles';
 import { SubmitButton } from '../SubmitButton';
 
 type Props = {
   isOpen: boolean;
+  style?: CSSProperties;
   onDismiss: () => void;
   onSubmit: (password: string) => Promise<boolean>;
 };
 
-export const ChangePasswordModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
+export const ChangePasswordModal = ({
+  isOpen,
+  style,
+  onDismiss,
+  onSubmit,
+}: Props) => {
   const submitting = useToggle(false);
   const confirmPasswordError = useToggle(false);
 
@@ -55,13 +61,21 @@ export const ChangePasswordModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onDismiss={onDismiss} onSubmit={handleSubmit}>
+    <Modal
+      isOpen={isOpen}
+      style={style}
+      onDismiss={onDismiss}
+      onSubmit={handleSubmit}
+    >
       <Text.H5 padding="16px 0">Change password</Text.H5>
       <Flex flexDirection="column" gap={2}>
-        <OnboardDialogInputLabel as="label" htmlFor="email">
+        <OnboardDialogInputLabel as="label" htmlFor="new-password">
           New password
         </OnboardDialogInputLabel>
-        <OnboardDialogInput
+        <TextInput
+          height="38px"
+          id="new-password"
+          name="new-password"
           ref={passwordRef}
           type="password"
           placeholder="• • • • • • • •"
@@ -69,15 +83,18 @@ export const ChangePasswordModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
         />
       </Flex>
       <Flex flexDirection="column" gap={2}>
-        <OnboardDialogInputLabel as="label" htmlFor="email">
-          Confirm password
+        <OnboardDialogInputLabel as="label" htmlFor="confirm-password">
+          Confirm Password
         </OnboardDialogInputLabel>
-        <OnboardDialogInput
+        <TextInput
+          height="38px"
+          id="confirm-password"
+          name="confirm-password"
           ref={confirmpasswordRef}
           type="password"
           placeholder="• • • • • • • •"
           onChange={onChangeConfirmPassword}
-          isError={confirmPasswordError.isOn}
+          error={confirmPasswordError.isOn}
         />
       </Flex>
       <Flex justifyContent="flex-end" paddingTop="8px">

@@ -1,17 +1,21 @@
-import { Stripe, StripeElementsOptions } from '@stripe/stripe-js';
 import {
+  CardCvcElement,
+  CardExpiryElement,
   CardNumberElement,
-  useStripe,
-  useElements,
   Elements,
+  useElements,
+  useStripe,
 } from '@stripe/react-stripe-js';
+import { Stripe, StripeElementsOptions } from '@stripe/stripe-js';
+
 import { Flex, Spinner } from '@holium/design-system/general';
-import { OnboardDialogTitle } from '../components/OnboardDialog.styles';
-import { PaymentIcon } from '../icons/PaymentIcon';
+
 import { OnboardDialog } from '../components/OnboardDialog';
+import { OnboardDialogTitle } from '../components/OnboardDialog.styles';
+import { AccountInformation } from '../components/payment/AccountInformation';
 import { PaymentForm } from '../components/payment/PaymentForm';
 import { ProductCards } from '../components/payment/ProductCards';
-import { AccountInformation } from '../components/payment/AccountInformation';
+import { PaymentIcon } from '../icons/PaymentIcon';
 import { ThirdEarthProduct } from '../types';
 
 type Props = {
@@ -42,45 +46,40 @@ const PaymentDialogPresenter = ({
   const handleOnNext = async () => {
     if (!stripe || !elements) return Promise.resolve(false);
 
-    const card = elements.getElement(CardNumberElement);
+    const cardNumberElement = elements.getElement(CardNumberElement);
+    const cardExpiryElement = elements.getElement(CardExpiryElement);
+    const cardCvcElement = elements.getElement(CardCvcElement);
 
-    if (!card) return Promise.resolve(false);
-
-    const payload = await stripe.createPaymentMethod({
-      type: 'card',
-      card,
-    });
-
-    // Execute the payment.
-    try {
-      if (!stripeOptions?.clientSecret) return Promise.resolve(false);
-
-      const result = await stripe.confirmCardPayment(
-        stripeOptions.clientSecret,
-        {
-          payment_method: payload.paymentMethod?.id,
-        }
-      );
-
-      if (result.error) {
-        console.error(result.error);
-      } else {
-        if (result.paymentIntent?.status === 'succeeded') {
-          return onNext();
-        }
-      }
-    } catch (e) {
-      console.error(e);
+    if (!cardNumberElement || !cardExpiryElement || !cardCvcElement) {
+      return Promise.resolve(false);
     }
 
-    return Promise.resolve(false);
+    const paymentMethodResult = await stripe.createPaymentMethod({
+      type: 'card',
+      card: cardNumberElement,
+    });
+
+    if (!paymentMethodResult.paymentMethod || paymentMethodResult.error) {
+      return false;
+    }
+    if (!stripeOptions?.clientSecret) return false;
+
+    const result = await stripe.confirmCardPayment(stripeOptions.clientSecret, {
+      payment_method: paymentMethodResult.paymentMethod?.id,
+    });
+
+    if (!result.error && result.paymentIntent?.status === 'succeeded') {
+      return onNext();
+    }
+
+    return false;
   };
 
   return (
     <OnboardDialog
       icon={<PaymentIcon />}
       body={
-        <Flex flexDirection="column" gap={16} marginBottom={30}>
+        <>
           <OnboardDialogTitle>Payment</OnboardDialogTitle>
           <ProductCards
             products={products}
@@ -89,7 +88,7 @@ const PaymentDialogPresenter = ({
           />
           <AccountInformation patp={patp} email={email} />
           <PaymentForm />
-        </Flex>
+        </>
       }
       nextText="Submit"
       onBack={onBack}
@@ -104,7 +103,7 @@ export const PaymentDialog = ({ stripe, stripeOptions, ...props }: Props) => {
       <OnboardDialog
         icon={<PaymentIcon />}
         body={
-          <Flex flexDirection="column" gap={16} marginBottom={30}>
+          <>
             <OnboardDialogTitle>Payment</OnboardDialogTitle>
             <ProductCards
               products={props.products}
@@ -115,7 +114,7 @@ export const PaymentDialog = ({ stripe, stripeOptions, ...props }: Props) => {
             <Flex justifyContent="center" alignItems="center" my={30}>
               <Spinner size={3} />
             </Flex>
-          </Flex>
+          </>
         }
         nextText="Submit"
         onBack={props.onBack}

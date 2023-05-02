@@ -1,7 +1,10 @@
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
-import { useServices } from 'renderer/logic/store';
-import { Flex, Text, Avatar, BarButton } from '@holium/design-system';
+
+import { Avatar, BarButton, Flex, Text } from '@holium/design-system';
+
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type EmptyPictureProps = {
   color?: string;
@@ -40,16 +43,17 @@ const FadeInMotion = {
 };
 
 const SelectedSpacePresenter = ({ onClick }: SelectedSpaceProps) => {
-  const { spaces, ship, theme } = useServices();
-  const selectedSpace = spaces.selected;
-  const { textColor } = theme.currentTheme;
+  const { loggedInAccount, theme } = useAppState();
+  const { spacesStore } = useShipStore();
+  const selectedSpace = spacesStore.selected;
+  const { textColor } = theme;
 
   let innerContent: JSX.Element | null;
 
   if (!selectedSpace) return null;
 
   if (selectedSpace.type === 'our') {
-    if (!ship) return null;
+    if (!loggedInAccount) return null;
     innerContent = (
       <Flex
         style={{ pointerEvents: 'none' }}
@@ -61,9 +65,9 @@ const SelectedSpacePresenter = ({ onClick }: SelectedSpaceProps) => {
         <Avatar
           simple
           size={28}
-          avatar={ship.avatar}
-          patp={ship.patp}
-          sigilColor={[ship.color || '#000000', 'white']}
+          avatar={loggedInAccount.avatar}
+          patp={loggedInAccount.serverId}
+          sigilColor={[loggedInAccount.color || '#000000', 'white']}
         />
 
         <Flex
@@ -92,7 +96,7 @@ const SelectedSpacePresenter = ({ onClick }: SelectedSpaceProps) => {
             animate={{ color: textColor }}
             transition={{ color: { duration: 0.2 } }}
           >
-            {ship?.nickname || ship?.patp}
+            {loggedInAccount.nickname || loggedInAccount.serverId}
           </Text.Custom>
         </Flex>
       </Flex>

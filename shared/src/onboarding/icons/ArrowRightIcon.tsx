@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+
 import { ColorVariants } from '@holium/design-system/util';
 
 type Props = {

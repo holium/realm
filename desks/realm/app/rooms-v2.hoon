@@ -14,8 +14,6 @@
   ==
 ::
 +$  card  card:agent:gall
-++  step  ~m1
-++  peak  1.000
 --
 ::
 %-  agent:dbug
@@ -130,18 +128,7 @@
         ==
     ==
   ::
-  ++  on-arvo
-    |=  [=wire =sign-arvo]
-    ^-  (quip card _this)
-    ?+    wire  (on-arvo:def wire sign-arvo)
-        [%clear-signal-tally ~]
-      ?+    sign-arvo  (on-arvo:def wire sign-arvo)
-          [%behn %wake *]
-        ?~  error.sign-arvo
-          `this(active-timer |, signal-tally ~)
-        (on-arvo:def wire sign-arvo)
-      ==
-    ==
+  ++  on-arvo   on-arvo:def
   ::
   ++  on-fail   on-fail:def
   ::
@@ -182,25 +169,14 @@
     ++  handle-signal
       |=  [from=ship to=ship rid=cord data=cord]
       ^-  (quip card _state)
+      ~&  >  "{<dap.bol>}: signal from {<from>} to {<to>}"
       ?:  =(from our.bol)
-        =/  signal  [%signal from to rid data]
-        =/  count  (~(gut by signal-tally) signal 0)
-        ?:  (gte count peak)  `state
         ::  Sending a signal to another ship
-        :_  %=  state
-              active-timer  %.y
-              signal-tally  (~(put by signal-tally) signal +(count))
-            ==
-        %+  welp
-          ?:  active-timer  ~
-          [%pass /clear-signal-tally %arvo %b %wait (add now.bol step)]~
+        :_  state
         [%pass / %agent [to %rooms-v2] %poke rooms-v2-signal+!>([%signal from to rid data])]~
       ::  Receiving a signal from another ship
       :_  state
-      ?:  ?~  current.session  %.n
-          =(u.current.session rid)
-        [%give %fact [/lib ~] rooms-v2-signal+!>([%signal from to rid data])]~
-      [%pass / %agent [src.bol dap.bol] %poke rooms-v2-session-action+!>([%leave-room rid])]~
+      [%give %fact [/lib ~] rooms-v2-signal+!>([%signal from to rid data])]~
     ::
     --
   --

@@ -1,7 +1,13 @@
-import { AccountStatisticsDialog } from '@holium/shared';
+import {
+  AccountStatisticsDialog,
+  UserContextProvider,
+  useUser,
+} from '@holium/shared';
+
+import { thirdEarthApi } from 'util/thirdEarthApi';
+
 import { Page } from '../../components/Page';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
-import { UserContextProvider, useUser } from '../../util/UserContext';
 
 const StatisticsPresenter = () => {
   const { goToPage, logout } = useNavigation();
@@ -27,7 +33,7 @@ const StatisticsPresenter = () => {
 export default function Statistics() {
   return (
     <Page title="Account / Statistics" isProtected>
-      <UserContextProvider>
+      <UserContextProvider api={thirdEarthApi}>
         <StatisticsPresenter />
       </UserContextProvider>
     </Page>

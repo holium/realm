@@ -1,27 +1,17 @@
-import { FormEvent, useRef } from 'react';
-import styled from 'styled-components';
-import { ErrorBox, SuccessBox, Flex } from '@holium/design-system/general';
-import { useToggle } from '@holium/design-system/util';
-import { Input } from '@holium/design-system/inputs';
 import { AccountDialog, SidebarSection } from '../components/AccountDialog';
-import { AccountDialogDescription } from '../components/AccountDialog.styles';
-import { SubmitButton } from '../components/hosting/SubmitButton';
-
-const DomainInput = styled(Input)`
-  display: block;
-  width: 100%;
-  line-height: 32px;
-  text-align: center;
-`;
+import { AccountCustomDomainDialogBody } from './bodies/AccountCustomDomainDialogBody';
 
 type Props = {
   patps: string[];
   selectedPatp: string;
+  domain: string;
   dropletIp: string | undefined;
+  submitting: boolean;
   errorMessage?: string;
   successMessage?: string;
   setSelectedPatp: (patp: string) => void;
-  onClickSave: (domain: string) => Promise<void>;
+  onChangeDomain: (domain: string) => void;
+  onSubmit: () => Promise<void>;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -30,67 +20,33 @@ export const AccountCustomDomainDialog = ({
   patps,
   selectedPatp,
   dropletIp,
+  domain,
+  submitting,
   errorMessage,
   successMessage,
   setSelectedPatp,
-  onClickSave,
+  onChangeDomain,
+  onSubmit,
   onClickSidebarSection,
   onExit,
-}: Props) => {
-  const disabled = useToggle(true);
-  const submitting = useToggle(false);
-  const emailInputRef = useRef<HTMLInputElement>(null);
-
-  const onChangeInput = (event: FormEvent<HTMLInputElement>) => {
-    const parts = event.currentTarget.value.split('.');
-    const isValidDomain =
-      parts.length > 1 && parts[0].length > 0 && parts[1].length > 0;
-    disabled.setToggle(!isValidDomain);
-  };
-
-  const handleSubmit = async () => {
-    if (!emailInputRef.current) return;
-
-    submitting.toggleOn();
-
-    await onClickSave(emailInputRef.current.value);
-
-    submitting.toggleOff();
-  };
-
-  return (
-    <AccountDialog
-      patps={patps}
-      selectedPatp={selectedPatp}
-      setSelectedPatp={setSelectedPatp}
-      currentSection={SidebarSection.CustomDomain}
-      isLoading={!dropletIp}
-      onClickSidebarSection={onClickSidebarSection}
-      onSubmit={handleSubmit}
-      onExit={onExit}
-    >
-      <AccountDialogDescription>
-        You may use a domain name you already own or control as an alternate
-        address for this ship. The domain name must be set to resolve to{' '}
-        {dropletIp}.
-      </AccountDialogDescription>
-      <AccountDialogDescription>
-        Once it is resolving to the correct IP, enter the domain name here.
-      </AccountDialogDescription>
-      <Flex flexDirection="column" alignItems="flex-end" gap="8px">
-        <DomainInput
-          placeholder="my.domain.com"
-          ref={emailInputRef}
-          onChange={onChangeInput}
-        />
-        <SubmitButton
-          text="Save"
-          submitting={submitting.isOn}
-          disabled={disabled.isOn}
-        />
-      </Flex>
-      {errorMessage && <ErrorBox>{errorMessage}</ErrorBox>}
-      {successMessage && <SuccessBox>{successMessage}</SuccessBox>}
-    </AccountDialog>
-  );
-};
+}: Props) => (
+  <AccountDialog
+    patps={patps}
+    selectedPatp={selectedPatp}
+    setSelectedPatp={setSelectedPatp}
+    currentSection={SidebarSection.CustomDomain}
+    isLoading={!dropletIp}
+    onClickSidebarSection={onClickSidebarSection}
+    onSubmit={onSubmit}
+    onExit={onExit}
+  >
+    <AccountCustomDomainDialogBody
+      dropletIp={dropletIp}
+      errorMessage={errorMessage}
+      successMessage={successMessage}
+      domain={domain}
+      submitting={submitting}
+      onChangeDomain={onChangeDomain}
+    />
+  </AccountDialog>
+);

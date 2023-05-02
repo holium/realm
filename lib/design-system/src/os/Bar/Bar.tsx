@@ -1,20 +1,20 @@
 import { FC } from 'react';
-import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import styled from 'styled-components';
 import {
-  compose,
-  space,
-  layout,
-  flexbox,
-  border,
-  position,
-  color,
-  SpaceProps,
-  LayoutProps,
-  FlexboxProps,
-  BorderProps,
-  PositionProps,
   BackgroundColorProps,
+  border,
+  BorderProps,
+  color,
+  compose,
+  flexbox,
+  FlexboxProps,
+  layout,
+  LayoutProps,
+  position,
+  PositionProps,
+  space,
+  SpaceProps,
 } from 'styled-system';
 
 export type BarStyleProps = SpaceProps &

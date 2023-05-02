@@ -1,8 +1,12 @@
-import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import styled from 'styled-components';
 
-export const Input = styled(motion.input)`
-  /* border-radius: var(--rlm-border-radius-4); */
+type Props = {
+  isError?: boolean;
+};
+
+export const Input = styled(motion.input)<Props>`
+  font-family: var(--rlm-font);
   background-color: rgba(var(--rlm-input-rgba));
   color: rgba(var(--rlm-text-rgba));
   pointer-events: all;
@@ -11,14 +15,18 @@ export const Input = styled(motion.input)`
   padding: 0 6px;
   appearance: none;
   outline: none;
-  border: 1px transparent;
+  border: ${({ isError }) =>
+    isError
+      ? '1px solid rgba(var(--rlm-intent-alert-rgba))'
+      : '1px transparent'};
+
   &::placeholder {
-    opacity: 0.5;
+    color: rgba(var(--rlm-text-rgba), 0.5);
   }
 `;
 
-export const TextArea = styled(motion.textarea)`
-  /* border-radius: var(--rlm-border-radius-4); */
+export const TextArea = styled(motion.textarea)<Props>`
+  font-family: var(--rlm-font);
   background-color: rgba(var(--rlm-input-rgba));
   color: rgba(var(--rlm-text-rgba));
   width: 100%;
@@ -26,8 +34,12 @@ export const TextArea = styled(motion.textarea)`
   appearance: none;
   height: inherit;
   outline: none;
-  border: 1px transparent;
+  border: ${({ isError }) =>
+    isError
+      ? '1px solid rgba(var(--rlm-intent-alert-rgba))'
+      : '1px transparent'};
+
   &::placeholder {
-    opacity: 0.5;
+    color: rgba(var(--rlm-text-rgba), 0.5);
   }
 `;

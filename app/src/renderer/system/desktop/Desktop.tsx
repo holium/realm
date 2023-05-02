@@ -1,22 +1,26 @@
+import { Bottom, Fill, Layer } from 'react-spaces';
 import { observer } from 'mobx-react';
-import { Bottom, Layer, Fill } from 'react-spaces';
-import { SystemBar } from './components/SystemBar/SystemBar';
+
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+
 import { AppWindowManager } from './AppWindowManager';
 import { HomePane } from './components/Home/HomePane';
-import { useServices } from 'renderer/logic/store';
+import { SystemBar } from './components/SystemBar/SystemBar';
 import { TrayManager } from './TrayManager';
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
 import { useMultiplayer } from './useMultiplayer';
 
 const DesktopPresenter = () => {
-  const { ship, shell, desktop } = useServices();
-  const roomsManager = useRooms(ship?.patp);
+  const { shellStore, authStore } = useAppState();
+  const shipStore = useShipStore();
+  const { session } = authStore;
+
   useMultiplayer({
-    patp: ship?.patp,
-    shipColor: ship?.color ?? '#000000',
-    desktopDimensions: shell.desktopDimensions,
-    isMultiplayerEnabled: desktop.multiplayerEnabled,
-    roomsManager,
+    patp: session?.serverId,
+    shipColor: session?.color ?? '#000000',
+    desktopDimensions: shellStore.desktopDimensions,
+    isMultiplayerEnabled: shellStore.multiplayerEnabled,
+    shipStore,
   });
 
   return (
@@ -27,7 +31,7 @@ const DesktopPresenter = () => {
       <Layer zIndex={0}>
         <AppWindowManager />
       </Layer>
-      <Layer zIndex={1}>{desktop.isHomePaneOpen && <HomePane />}</Layer>
+      <Layer zIndex={16}>{shellStore.isHomePaneOpen && <HomePane />}</Layer>
       <Layer zIndex={14}>
         <Bottom size={56}>
           <SystemBar />
