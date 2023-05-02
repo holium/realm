@@ -99,7 +99,7 @@ export const InstallationDialog = ({
           )}
         </>
       }
-      onBack={onBack}
+      onBack={!installing.isOn ? onBack : undefined}
       onNext={!installing.isOn && successfullInstall.isOn ? onNext : undefined}
     />
   );
