@@ -52,13 +52,6 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     this._onDbUpdate = this._onDbUpdate.bind(this);
     this._handleDBChange = this._handleDBChange.bind(this);
     this.init = this.init.bind(this);
-    APIConnection.getInstance().conduit.watch({
-      app: 'chat-db',
-      path: '/db',
-      onEvent: this._onDbUpdate,
-      onQuit: this._onQuit,
-      onError: this._onError,
-    });
     this.init();
   }
 
@@ -76,6 +69,13 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
       this._insertDeleteLogs(deleteLogs);
     });
     this.fetchPathMetadata();
+    APIConnection.getInstance().conduit.watch({
+      app: 'chat-db',
+      path: '/db',
+      onEvent: this._onDbUpdate,
+      onQuit: this._onQuit,
+      onError: this._onError,
+    });
   }
 
   protected mapRow(row: any): ChatRow {

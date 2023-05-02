@@ -164,7 +164,6 @@ function registerOnUpdateListener() {
       if (update.payload.session) window.ship = update.payload.session.serverId;
       appState.setBooted(update.payload);
       if (update.payload.session) {
-        console.log('booted with session', update.payload.session);
         appState.setLoggedIn(update.payload.session.serverId);
         shipStore.init(update.payload.session);
       }

@@ -244,16 +244,18 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
             )}
             <Flex
               flexDirection="column"
+              gap={4}
               pointerEvents={isDMType || !amHost ? 'none' : 'auto'}
             >
               <InlineEdit
                 id="chat-title"
                 name="chat-title"
                 fontWeight={500}
+                fontSize="1.125rem" // in rem units (base 16px) so 1.125rem
                 textAlign="center"
                 width={350}
                 value={editTitle}
-                // editable={amHost}
+                editable={amHost}
                 onBlur={() => {
                   if (editTitle.length > 1) {
                     editMetadata({ title: editTitle });
