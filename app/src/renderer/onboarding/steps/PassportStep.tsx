@@ -16,6 +16,9 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
 
   const [isReady, setIsReady] = useState(false);
 
+  const { shipType } = OnboardingStorage.get();
+  const isHoliumHosted = shipType === 'hosted';
+
   useEffect(() => {
     const { shipId, shipCode, shipUrl, passwordHash, clientSideEncryptionKey } =
       OnboardingStorage.get();
@@ -66,9 +69,11 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
     return url;
   };
 
-  const onBack = () => {
-    setStep('/login');
-  };
+  const onBack = isHoliumHosted
+    ? () => {
+        setStep('/credentials');
+      }
+    : undefined;
 
   const handleOnNext = async (
     nickname: string,
