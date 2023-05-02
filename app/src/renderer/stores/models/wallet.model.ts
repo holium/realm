@@ -919,7 +919,6 @@ export const WalletStore = types
           const wallets = yield WalletIPC.getWallets() as PromiseLike<any>;
           console.log('got wallets', wallets);
           for (const wallet of wallets) {
-            console.log('loading wallet', wallet);
             if (wallet.chain === 'ethereum') {
               shipStore.walletStore.ethereum.applyWalletUpdate(wallet);
             } else if (wallet.chain === 'bitcoin') {
@@ -1371,29 +1370,12 @@ export const WalletStore = types
 export type WalletStoreType = Instance<typeof WalletStore>;
 
 WalletIPC.onUpdate((payload: any) => {
-  const type = Object.keys(payload)[0];
-  if (payload.type) {
-    switch (payload.type) {
-      case 'wallet':
-        const wallet = payload.payload;
-        if (wallet.chain === 'ethereum') {
-          shipStore.walletStore.ethereum.applyWalletUpdate(wallet);
-        } else if (wallet.chain === 'bitcoin') {
-          shipStore.walletStore.bitcoin.applyWalletUpdate(wallet);
-        } else if (wallet.chain === 'btctestnet') {
-          shipStore.walletStore.btctest.applyWalletUpdate(wallet);
-        }
-        shipStore.walletStore.updateWalletState();
-        break;
-      default:
-        break;
-    }
-  }
+  const type = payload.type ?? Object.keys(payload)[0];
   switch (type) {
     case 'wallet':
-      console.log('got wallet type');
-      const wallet = payload.wallet;
+      const wallet = payload.payload;
       if (wallet.chain === 'ethereum') {
+        console.log('applying wallet update');
         shipStore.walletStore.ethereum.applyWalletUpdate(wallet);
       } else if (wallet.chain === 'bitcoin') {
         shipStore.walletStore.bitcoin.applyWalletUpdate(wallet);

@@ -19,7 +19,7 @@
 ::
 +$  chain  ?(%bitcoin %btctestnet %ethereum)
 +$  network  ?(%eth-main %eth-gorli)
-+$  uniq-network  [=chain network=(unit network)]
++$  uniq-network  [=chain =network]
 +$  txn-id  [uniq-network hash=@t]
 +$  status  ?(%pending %failed %succeeded)
 +$  transaction-row

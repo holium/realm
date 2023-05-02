@@ -77,8 +77,9 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
       switch (addRow.table) {
         case 'wallets':
           /*const message = addRow.row as WalletsRow;
-          this._insertWallets([wallet]);
           // const msg = this.getChatMessage(message['msg-id']);*/
+          this._insertWallets([addRow.row]);
+          console.log('sending update');
           this.sendUpdate({ type: 'wallet', payload: addRow.row });
           break;
         case 'transactions':
@@ -221,8 +222,9 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
             wallet_index,
             path, 
             address,
-            nickname
-          ) VALUES (@chain, @wallet_index, @path, @address, @nickname)`
+            nickname,
+            balance
+          ) VALUES (@chain, @wallet_index, @path, @address, @nickname, @balance)`
     );
     const insertMany = this.db.transaction((wallets: any) => {
       for (const wallet of wallets)
@@ -232,6 +234,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
           path: wallet.path,
           address: wallet.address,
           nickname: wallet.nickname,
+          balance: 0,
         });
     });
     console.log('inserting wallets');
@@ -266,13 +269,15 @@ create table if not exists transactions
 create unique index if not exists hash_network_uindex
     on transactions (chain, network, hash);
 
+drop table if exists wallets;
 create table if not exists wallets
 (
     chain                       text not null,
     wallet_index                integer not null,
     path                        text not null,
     address                     text not null,
-    nickname                    text not null
+    nickname                    text not null,
+    balance                     real not null
 );
 
 create unique index if not exists path_uindex
