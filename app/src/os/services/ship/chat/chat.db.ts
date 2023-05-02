@@ -76,6 +76,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
       onQuit: this._onQuit,
       onError: this._onError,
     });
+    this.sendUpdate({ type: 'init', payload: this.getChatList() });
   }
 
   protected mapRow(row: any): ChatRow {
@@ -205,7 +206,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   private async _fetchDeleteLogs() {
-    const lastTimestamp = this.getLastTimestamp('delete_logs');
+    const lastTimestamp = this.getLastTimestamp('chat_delete_logs');
     const response = await APIConnection.getInstance().conduit.scry({
       app: 'chat-db',
       path: `/delete-log/start-ms/${lastTimestamp}`,
@@ -302,7 +303,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   private _handleDeletes(dbChange: DelMessagesRow | DelPathsRow | DelPeersRow) {
-    // insert into delete_logs
+    // insert into chat_delete_logs
     if (dbChange.type === 'del-messages-row') {
       // console.log('del-messages-row', dbChange);
       const delMessagesRow = dbChange as DelMessagesRow;
@@ -702,14 +703,19 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   getLastTimestamp(
-    table: 'paths' | 'messages' | 'peers' | 'delete_logs' | 'notifications',
+    table:
+      | 'paths'
+      | 'messages'
+      | 'peers'
+      | 'chat_delete_logs'
+      | 'notifications',
     path?: string,
     patp?: string
   ): number {
     if (!this.db?.open) return 0;
     const where =
       path && patp ? ` WHERE path = '${path}' and sender != '${patp}'` : '';
-    const column = table === 'delete_logs' ? 'timestamp' : 'updated_at';
+    const column = table === 'chat_delete_logs' ? 'timestamp' : 'updated_at';
     const query = this.db.prepare(`
       SELECT max(${column}) as lastTimestamp
       FROM ${table}${where};
@@ -850,7 +856,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   private _insertDeleteLogs(deleteLogs: DeleteLogRow[]) {
     if (!this.db?.open) return;
     const insert = this.db.prepare(
-      `REPLACE INTO delete_logs (
+      `REPLACE INTO chat_delete_logs (
           change, 
           timestamp
         ) VALUES (@change, @timestamp)`
@@ -868,7 +874,6 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   private _deletePathsRow(path: string) {
     if (!this.db?.open) return;
     const deletePath = this.db.prepare('DELETE FROM paths WHERE path = ?');
-    console.log('deleting path', path);
     deletePath.run(path);
     // delete all messages in that path
     const deleteMessages = this.db.prepare(
@@ -885,7 +890,6 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     const deletePath = this.db.prepare(
       'DELETE FROM peers WHERE path = ? AND ship = ?'
     );
-    console.log(`deleting peer ${peer} on ${path}`);
     deletePath.run(path, peer);
   }
 
@@ -894,7 +898,6 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     const deleteMessage = this.db.prepare(
       'DELETE FROM messages WHERE msg_id = ?'
     );
-    console.log('deleting msgId', msgId);
     deleteMessage.run(msgId);
     // insert into delete logs
   }
@@ -945,7 +948,7 @@ CREATE TABLE IF NOT EXISTS paths_flags
     muted            INTEGER default 0 NOT NULL
 );
 
-create table if not exists  peers
+create table if not exists peers
 (
     path        TEXT NOT NULL,
     ship        text NOT NULL,
@@ -957,14 +960,14 @@ create table if not exists  peers
 create unique index if not exists peers_path_ship_uindex
     on peers (path, ship);
 
-create table if not exists delete_logs
+create table if not exists chat_delete_logs
 (
     change        TEXT NOT NULL,
     timestamp  INTEGER NOT NULL
 );
 
-create unique index if not exists delete_log_change_uindex
-    on delete_logs (timestamp, change);
+create unique index if not exists chat_delete_log_change_uindex
+    on chat_delete_logs (timestamp, change);
 
 `;
 

@@ -137,8 +137,8 @@ export class ShipService extends AbstractService<any> {
     };
   }
 
-  public init() {
-    this.services?.bazaar.init();
+  public async init() {
+    await this.services?.bazaar.init();
     this.services?.spaces.init();
   }
 

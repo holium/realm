@@ -29,13 +29,25 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
     }
   }
 
-  init() {
-    APIConnection.getInstance().conduit.watch({
-      app: 'bazaar',
-      path: `/updates`,
-      onEvent: this._onEvent,
-      onError: this._onError,
-      onQuit: this._onQuit,
+  async init() {
+    return new Promise((resolve, reject) => {
+      APIConnection.getInstance().conduit.watch({
+        app: 'bazaar',
+        path: `/updates`,
+        onEvent: (
+          data: any,
+          id?: number | undefined,
+          mark?: string | undefined
+        ) => {
+          this._onEvent(data, id, mark);
+          resolve(true);
+        },
+        onError: (_id, e) => {
+          reject(e);
+          this._onError(e);
+        },
+        onQuit: this._onQuit,
+      });
     });
   }
 

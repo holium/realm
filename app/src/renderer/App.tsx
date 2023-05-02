@@ -30,20 +30,6 @@ const AppContentPresenter = () => {
 
   const onboarding = useToggle(hasNoAccounts);
   const addShip = useToggle(Boolean(savedOnboardingStep));
-  useEffect(() => {
-    // handles the case where we delete the last account
-    // if (hasNoAccounts) {
-    //   onboarding.setToggle(true);
-    // } else {
-    //   // handles when we go to add a ship and refresh. If we dont
-    //   // check for this, we get stuck back at the login of onboarding
-    //   if (savedOnboardingStep === '/login' || !savedOnboardingStep) {
-    //     addShip.toggleOff();
-    //     OnboardingStorage.reset();
-    //   }
-    //   onboarding.setToggle(false);
-    // }
-  }, [hasNoAccounts]);
 
   const onAddShip = () => {
     addShip.toggleOn();

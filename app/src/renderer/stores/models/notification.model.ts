@@ -231,5 +231,7 @@ export const NotifStore = types
 
     reset() {
       self.notifications.clear();
+      self.unreadByPaths.clear();
+      self.unreadByApps.clear();
     },
   }));
