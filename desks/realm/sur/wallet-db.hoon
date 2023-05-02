@@ -8,8 +8,8 @@
 +$  wallet-row
   $:  =chain
       =wallet-index
-      =address
       path=@t
+      =address
       nickname=@t
   ==
 ::

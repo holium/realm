@@ -145,28 +145,32 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     if (!this.db) throw new Error('No db connection');
     const insert = this.db.prepare(
       `REPLACE INTO transactions (
-          hash,
+          chain,
           network,
+          hash,
+          eth-type,
+          contract_address,
           type,
           initiated_at,
           completed_at,
           our_address,
           their_patp,
           their_address,
-          contract_address,
           status,
           failure_reason,
           notes
         ) VALUES (
-          @hash,
+          @chain,
           @network,
+          @hash,
+          @eth-type,
+          @contract_address,
           @type,
           @initiated_at,
           @completed_at,
           @our_address,
           @their_patp,
           @their_address,
-          @contract_address,
           @status,
           @failure_reason,
           @notes
@@ -176,15 +180,17 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
       let tx: any;
       for (tx of Object.values(transactions)) {
         insert.run({
-          hash: tx.hash,
+          chain: tx.chain,
           network: tx.network,
+          hash: tx.hash,
+          eth_type: tx['eth-type'],
+          contract_address: contractAddress,
           type: tx.type,
           initiated_at: tx['initiatedAt'],
           completed_at: tx['completedAt'],
           our_address: tx['ourAddress'],
           their_patp: tx['theirPatp'],
           their_address: tx['theirAddress'],
-          contract_address: contractAddress,
           status: tx.status,
           failure_reason: tx['failureReason'],
           notes: tx.notes,
@@ -200,19 +206,21 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
     const insert = this.db.prepare(
       `REPLACE INTO wallets (
-            path, 
+            chain,
             wallet_index,
+            path, 
             address,
             nickname
-          ) VALUES (@path, @wallet_index, @address, @nickname)`
+          ) VALUES (@chain, @wallet_index, @path, @address, @nickname)`
     );
     const insertMany = this.db.transaction((wallets: any) => {
       let index: string;
       let wallet: any;
       for ([index, wallet] of Object.entries(wallets))
         insert.run({
-          path: wallet.path,
+          chain: wallet.chain,
           wallet_index: index,
+          path: wallet.path,
           address: wallet.address,
           nickname: wallet.nickname,
         });
@@ -251,8 +259,8 @@ create table if not exists wallets
 (
     chain                       text not null,
     wallet_index                integer not null,
-    address                     text not null,
     path                        text not null,
+    address                     text not null,
     nickname                    text not null
 );
 

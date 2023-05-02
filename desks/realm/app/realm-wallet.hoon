@@ -216,8 +216,8 @@
         ^-  wallet-row
         :*  chain.act
             num-wallets
-            address
             path
+            address
             nickname.act
         ==
       `wallet
