@@ -1,4 +1,4 @@
-/-  *realm-wallet, db=wallet-db
+/-  *realm-wallet, db=wallet-db, realm-chat
 /+  default-agent, dbug, *realm-wallet
 ^-  agent:gall
 ::
@@ -252,7 +252,35 @@
           [%give %kick ~[update-path] ~]
       ==
     state
-    ::
+  ::
+      %insert-transaction
+    =/  db-task  [%poke %realm-wallet-db-action !>(`action:db`[%insert-transaction transaction-row.act])]
+    =/  db-poke  [%pass / %agent [our.bowl %wallet-db] db-task]~
+    =/  poke-cards
+      ?~  their-patp.transaction-row.act  db-poke
+      =/  chat-action=action:realm-chat  *action:realm-chat
+      =/  chat-poke  ~ :: [%pass / %agent [our.bowl %realm-chat] %poke %realm-chat-action !>(chat-action)]~
+      ?.  =(%sent type.transaction-row.act)
+        (welp db-poke chat-poke)
+      =/  their-transaction
+        %=  transaction-row.act
+          type  %received
+          our-address  their-address.transaction-row.act
+          their-patp  `our.bowl
+          their-address  our-address.transaction-row.act
+        ==
+      =/  their-poke-action=action:db  [%insert-transaction their-transaction]
+      =/  their-db-poke  [%poke %realm-wallet-db-action !>(their-poke-action)]
+      :(welp db-poke chat-poke [%pass / %agent [our.bowl dap.bowl] their-db-poke]~)
+    [poke-cards state]
+      %complete-transaction
+    :_  state
+    =/  poke-action=action:db  [%complete-transaction +.act]
+    [%pass / %agent [our.bowl %wallet-db] %poke %realm-wallet-db-action !>(poke-action)]~
+      %save-transaction-notes
+    :_  state
+    =/  poke-action=action:db  [%save-transaction-notes +.act]
+    [%pass / %agent [our.bowl %wallet-db] %poke %realm-wallet-db-action !>(poke-action)]~
   ==
 ::
 --

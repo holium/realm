@@ -269,15 +269,15 @@ export class WalletService extends AbstractService {
     notes: string
   ) {
     const payload = {
-      app: 'wallet-db',
-      mark: 'wallet-db-action',
+      app: 'realm-wallet',
+      mark: 'realm-wallet-action',
       json: {
         'save-transaction-notes': {
-          network,
-          net,
-          wallet,
-          contract,
-          hash,
+          'txn-id': {
+            chain: network,
+            network: net,
+            hash,
+          },
           notes,
         },
       },

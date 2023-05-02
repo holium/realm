@@ -1,4 +1,4 @@
-/-  *realm-wallet
+/-  *realm-wallet, wallet-db
 /+  bech32=bip-b173, bip32, ethereum
 |%
 ++  bip44-codes
@@ -55,6 +55,28 @@
       [%set-sharing-permissions (ot ~[type+(su (perk %block ~)) who+(se %p)])]
       [%set-default-index (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) index+ni])]
       [%create-wallet (ot ~[sndr+(se %p) network+(su (perk %bitcoin %btctestnet %ethereum ~)) nickname+so])]
+      [%insert-transaction (ot ~[transaction-row+json-to-transaction-row])]
+      [%complete-transaction (ot ~[txn-id+json-to-txn-id success+bo])]
+      [%save-transaction-notes (ot ~[txn-id+json-to-txn-id notes+so])]
+  ==
+::
+++  json-to-transaction-row
+  =,  dejs:format
+  %-  ot
+  :~  :-  chain+(su (perk %ethereum %bitcoin %btctestnet ~))
+        network+(su:dejs-soft:format (perk [%eth-main %eth-gorli ~]))
+      wallet-index+ni
+      address+so
+      path+so
+      nickname+so
+  ==
+::
+++  json-to-txn-id
+  =,  dejs:format
+  %-  ot
+  :~  chain+(su (perk %ethereum %bitcoin %btctestnet ~))
+      network+%eth-main :: (su:dejs-soft:format (perk [%eth-main %eth-gorli ~]))
+      hash+so
   ==
 ::
 ++  json-to-ux

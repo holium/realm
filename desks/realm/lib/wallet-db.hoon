@@ -2,7 +2,7 @@
 ::
 ::  Wallet message lib within Realm. Mostly handles [de]serialization
 ::
-/-  sur=wallet-db
+/-  sur=wallet-db, chat-db
 |%
 +$  card  card:agent:gall
 ::

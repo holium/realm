@@ -232,7 +232,7 @@ const TransactionList = types
       hash: string,
       tx: any
     ): Generator<PromiseLike<any>, void, any> {
-      yield WalletIPC.setTransaction(
+      yield WalletIPC.insertTransaction(
         'ethereum',
         protocol,
         index,
@@ -326,7 +326,7 @@ const BitcoinStore = types
       let walletObj;
       if (!self.wallets.has(wallet.key)) {
         walletObj = {
-          index: Number(wallet.key),
+          index: Number(wallet['wallet_index']),
           network: 'bitcoin',
           path: wallet.path,
           address: wallet.address,
@@ -646,12 +646,16 @@ export const EthStore = types
   })
   .views((self) => ({
     get list() {
-      return Array.from(self.wallets).map(([key, wallet]) => ({
-        key,
-        nickname: wallet.nickname,
-        address: wallet.address,
-        balance: wallet.data.get(self.protocol)?.balance,
-      }));
+      return Array.from(self.wallets)
+        .map(([key, wallet]) => ({
+          key,
+          nickname: wallet.nickname,
+          address: wallet.address,
+          balance: wallet.data.get(self.protocol)?.balance,
+        }))
+        .sort((a: any, b: any) => {
+          return a.key > b.key ? 1 : -1;
+        });
     },
   }))
   .actions((self) => ({
@@ -679,9 +683,9 @@ export const EthStore = types
     },
     applyWalletUpdate(wallet: any) {
       let walletObj;
-      if (!self.wallets.has(wallet.key)) {
+      if (!self.wallets.has(wallet['wallet_index'])) {
         walletObj = {
-          index: Number(wallet.key),
+          index: Number(wallet['wallet_index']),
           network: 'ethereum',
           path: wallet.path,
           address: '0x' + wallet.address.substring(2).padStart(40, '0'),
@@ -711,7 +715,7 @@ export const EthStore = types
           },
         };
         const ethWallet = EthWallet.create(walletObj);
-        self.wallets.set(wallet.key, ethWallet);
+        self.wallets.set(wallet['wallet_index'], ethWallet);
       }
       if (wallet.transactions) {
         for (const protocol of Object.keys(wallet.transactions)) {
@@ -914,6 +918,19 @@ export const WalletStore = types
         try {
           const wallets = yield WalletIPC.getWallets() as PromiseLike<any>;
           console.log('got wallets', wallets);
+          for (const wallet of wallets) {
+            console.log('loading wallet', wallet);
+            if (wallet.chain === 'ethereum') {
+              shipStore.walletStore.ethereum.applyWalletUpdate(wallet);
+            } else if (wallet.chain === 'bitcoin') {
+              shipStore.walletStore.bitcoin.applyWalletUpdate(wallet);
+            } else if (wallet.chain === 'btctestnet') {
+              shipStore.walletStore.btctest.applyWalletUpdate(wallet);
+            }
+          }
+          console.log('wallets', shipStore.walletStore.ethereum.wallets);
+          // @ts-expect-error
+          self.updateWalletState();
           /*const transactions =
             yield WalletIPC.getTransactions() as PromiseLike<any>;*/
           const hasMnemonic = yield WalletIPC.hasMnemonic(window.ship);
@@ -1355,10 +1372,27 @@ export type WalletStoreType = Instance<typeof WalletStore>;
 
 WalletIPC.onUpdate((payload: any) => {
   const type = Object.keys(payload)[0];
-  if (type === '0') {
-    if (payload.tables.wallets) {
+  if (payload.type) {
+    switch (payload.type) {
+      case 'wallet':
+        const wallet = payload.payload;
+        if (wallet.chain === 'ethereum') {
+          shipStore.walletStore.ethereum.applyWalletUpdate(wallet);
+        } else if (wallet.chain === 'bitcoin') {
+          shipStore.walletStore.bitcoin.applyWalletUpdate(wallet);
+        } else if (wallet.chain === 'btctestnet') {
+          shipStore.walletStore.btctest.applyWalletUpdate(wallet);
+        }
+        shipStore.walletStore.updateWalletState();
+        break;
+      default:
+        break;
+    }
+  }
+  switch (type) {
+    case 'wallet':
+      console.log('got wallet type');
       const wallet = payload.wallet;
-      console.log('payload wallet update', wallet);
       if (wallet.chain === 'ethereum') {
         shipStore.walletStore.ethereum.applyWalletUpdate(wallet);
       } else if (wallet.chain === 'bitcoin') {
@@ -1367,125 +1401,111 @@ WalletIPC.onUpdate((payload: any) => {
         shipStore.walletStore.btctest.applyWalletUpdate(wallet);
       }
       shipStore.walletStore.updateWalletState();
-    }
-  } else {
-    switch (type) {
-      case 'wallet':
-        const wallet = payload.wallet;
-        if (wallet.network === 'ethereum') {
-          shipStore.walletStore.ethereum.applyWalletUpdate(wallet);
-        } else if (wallet.network === 'bitcoin') {
-          shipStore.walletStore.bitcoin.applyWalletUpdate(wallet);
-        } else if (wallet.network === 'btctestnet') {
-          shipStore.walletStore.btctest.applyWalletUpdate(wallet);
-        }
-        shipStore.walletStore.updateWalletState();
-        break;
-      case 'transaction':
-        const transaction = payload.transaction;
-        const network: NetworkStoreType =
-          transaction.net === ProtocolType.ETH_MAIN ||
-          transaction.net === ProtocolType.ETH_GORLI ||
-          transaction.net === ProtocolType.UQBAR
-            ? NetworkStoreType.ETHEREUM
-            : transaction.net === ProtocolType.BTC_MAIN
-            ? NetworkStoreType.BTC_MAIN
-            : NetworkStoreType.BTC_TEST;
-        if (network === NetworkStoreType.ETHEREUM) {
-          shipStore.walletStore.ethereum.wallets
-            .get(transaction.index)
-            ?.applyTransactionUpdate(
-              transaction.net,
-              transaction.contract,
-              transaction.transaction
-            );
-        } else if (network === NetworkStoreType.BTC_MAIN) {
-          /*walletState.bitcoin.wallets
+      break;
+    case 'transaction':
+      const transaction = payload.transaction;
+      const network: NetworkStoreType =
+        transaction.network === ProtocolType.ETH_MAIN ||
+        transaction.network === ProtocolType.ETH_GORLI ||
+        transaction.network === ProtocolType.UQBAR
+          ? NetworkStoreType.ETHEREUM
+          : transaction.network === ProtocolType.BTC_MAIN
+          ? NetworkStoreType.BTC_MAIN
+          : NetworkStoreType.BTC_TEST;
+      if (network === NetworkStoreType.ETHEREUM) {
+        shipStore.walletStore.ethereum.wallets
+          .get(transaction.index)
+          ?.applyTransactionUpdate(
+            transaction.network,
+            transaction.contract,
+            transaction.transaction
+          );
+      } else if (network === NetworkStoreType.BTC_MAIN) {
+        /*walletState.bitcoin.wallets
           .get(transaction.index)!
           .applyTransactionUpdate(transaction.net, transaction.transaction);*/
-        } else if (network === NetworkStoreType.BTC_TEST) {
-          /*walletState.btctest.wallets.get(
+      } else if (network === NetworkStoreType.BTC_TEST) {
+        /*walletState.btctest.wallets.get(
           transaction.index
         ).applyTransactions(transaction.net, transaction.transaction);*/
-        }
-        break;
-      case 'settings':
-        shipStore.walletStore.setSettingsSetter(payload.settings);
-        break;
-      case 'set-balance':
-        const balanceData = payload['set-balance'];
+      }
+      break;
+    case 'settings':
+      shipStore.walletStore.setSettingsSetter(payload.settings);
+      break;
+    case 'set-balance':
+      const balanceData = payload['set-balance'];
+      shipStore.walletStore.ethereum.wallets
+        .get(balanceData.index)
+        ?.setBalance(balanceData.protocol, balanceData.balance);
+      break;
+    case 'apply-chain-transactions':
+      const chainTransactions = payload['apply-chain-transactions'];
+      shipStore.walletStore.ethereum.wallets
+        .get(chainTransactions.index)
+        ?.data.get(chainTransactions.protocol)
+        ?.transactionList.applyChainTransactions(
+          chainTransactions.protocol,
+          chainTransactions.index,
+          chainTransactions.address,
+          chainTransactions.transactions
+        );
+      break;
+    case 'set-block':
+      const blockData = payload['set-block'];
+      shipStore.walletStore.ethereum.wallets
+        .get(blockData.index)
+        ?.data.get(blockData.protocol)
+        ?.setBlock(blockData.block);
+      break;
+    case 'set-coin':
+      const coinData = payload['set-coin'];
+      shipStore.walletStore.ethereum.wallets
+        .get(coinData.index)
+        ?.setCoin(coinData.protocol, coinData.coin);
+      break;
+    case 'update-nft':
+      const nftData = payload['update-nft'];
+      shipStore.walletStore.ethereum.wallets
+        .get(nftData.index)
+        ?.updateNft(nftData.protocol, nftData.nft);
+      break;
+    case 'update-nft-transfers':
+      const nftUpdateData = payload['update-nft-transfers'];
+      shipStore.walletStore.ethereum.wallets
+        .get(nftUpdateData.index)
+        ?.updateNftTransfers(nftUpdateData.protocol, nftUpdateData.transfers);
+      break;
+    case 'set-coin-block':
+      const coinBlockData = payload['set-coin-block'];
+      shipStore.walletStore.ethereum.wallets
+        .get(coinBlockData.index)
+        ?.data.get(coinBlockData.protocol)
+        ?.coins.get(coinBlockData.coinAddr)
+        ?.setBlock(coinBlockData.block);
+      break;
+    case 'apply-coin-transactions':
+      const coinTransactionData = payload['apply-coin-transactions'];
+      if (
         shipStore.walletStore.ethereum.wallets
-          .get(balanceData.index)
-          ?.setBalance(balanceData.protocol, balanceData.balance);
-        break;
-      case 'apply-chain-transactions':
-        const chainTransactions = payload['apply-chain-transactions'];
+          .get(coinTransactionData.index)
+          ?.data.get(coinTransactionData.protocol)
+          ?.coins.has(coinTransactionData.coinAddr) &&
+        coinTransactionData.transactions.length > 0
+      ) {
         shipStore.walletStore.ethereum.wallets
-          .get(chainTransactions.index)
-          ?.data.get(chainTransactions.protocol)
+          .get(coinTransactionData.index)
+          ?.data.get(coinTransactionData.protocol)
+          ?.coins.get(coinTransactionData.coinAddr)
           ?.transactionList.applyChainTransactions(
-            chainTransactions.protocol,
-            chainTransactions.index,
-            chainTransactions.address,
-            chainTransactions.transactions
+            coinTransactionData.protocol,
+            coinTransactionData.index,
+            coinTransactionData.coinAddr,
+            coinTransactionData.transactions
           );
-        break;
-      case 'set-block':
-        const blockData = payload['set-block'];
-        shipStore.walletStore.ethereum.wallets
-          .get(blockData.index)
-          ?.data.get(blockData.protocol)
-          ?.setBlock(blockData.block);
-        break;
-      case 'set-coin':
-        const coinData = payload['set-coin'];
-        shipStore.walletStore.ethereum.wallets
-          .get(coinData.index)
-          ?.setCoin(coinData.protocol, coinData.coin);
-        break;
-      case 'update-nft':
-        const nftData = payload['update-nft'];
-        shipStore.walletStore.ethereum.wallets
-          .get(nftData.index)
-          ?.updateNft(nftData.protocol, nftData.nft);
-        break;
-      case 'update-nft-transfers':
-        const nftUpdateData = payload['update-nft-transfers'];
-        shipStore.walletStore.ethereum.wallets
-          .get(nftUpdateData.index)
-          ?.updateNftTransfers(nftUpdateData.protocol, nftUpdateData.transfers);
-        break;
-      case 'set-coin-block':
-        const coinBlockData = payload['set-coin-block'];
-        shipStore.walletStore.ethereum.wallets
-          .get(coinBlockData.index)
-          ?.data.get(coinBlockData.protocol)
-          ?.coins.get(coinBlockData.coinAddr)
-          ?.setBlock(coinBlockData.block);
-        break;
-      case 'apply-coin-transactions':
-        const coinTransactionData = payload['apply-coin-transactions'];
-        if (
-          shipStore.walletStore.ethereum.wallets
-            .get(coinTransactionData.index)
-            ?.data.get(coinTransactionData.protocol)
-            ?.coins.has(coinTransactionData.coinAddr) &&
-          coinTransactionData.transactions.length > 0
-        ) {
-          shipStore.walletStore.ethereum.wallets
-            .get(coinTransactionData.index)
-            ?.data.get(coinTransactionData.protocol)
-            ?.coins.get(coinTransactionData.coinAddr)
-            ?.transactionList.applyChainTransactions(
-              coinTransactionData.protocol,
-              coinTransactionData.index,
-              coinTransactionData.coinAddr,
-              coinTransactionData.transactions
-            );
-        }
-        break;
-      default:
-        break;
-    }
+      }
+      break;
+    default:
+      break;
   }
 });

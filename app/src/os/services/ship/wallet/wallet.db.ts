@@ -16,6 +16,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     this._onQuit = this._onQuit.bind(this);
     this._onError = this._onError.bind(this);
     this._onDbUpdate = this._onDbUpdate.bind(this);
+    this._handleDBChange = this._handleDBChange.bind(this);
     this.init = this.init.bind(this);
     APIConnection.getInstance().conduit.watch({
       app: 'wallet-db',
@@ -41,21 +42,11 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
       id: row.id,
     };
   }
-  //
-  // Fetches
-  //
-  async fetchMuted() {
-    const response = await APIConnection.getInstance().conduit.scry({
-      app: 'realm-chat',
-      path: '/mutes',
-    });
-    return response;
-  }
 
   async _fetchAll() {
     return await APIConnection.getInstance().conduit.scry({
       app: 'wallet-db',
-      path: '/db', // `/${lastTimestamp}`,
+      path: '/db',
     });
   }
 
@@ -76,15 +67,19 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   }
 
   private _onDbUpdate(data: any /*WalletDbReactions*/, _id?: number) {
-    console.log('sending update', data);
+    data.forEach(this._handleDBChange);
+  }
+
+  private _handleDBChange(data: any) {
     if (data.type === 'add-row') {
       const addRow = data; // as AddRow;
+      console.log('got add-row', addRow);
       switch (addRow.table) {
         case 'wallets':
           /*const message = addRow.row as WalletsRow;
           this._insertWallets([wallet]);
-          // const msg = this.getChatMessage(message['msg-id']);
-          this.sendUpdate({ type: 'wallet', payload: msg });*/
+          // const msg = this.getChatMessage(message['msg-id']);*/
+          this.sendUpdate({ type: 'wallet', payload: addRow.row });
           break;
         case 'transactions':
           break;
@@ -92,12 +87,6 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
           break;
       }
     }
-    /*const type = Object.keys(data)[0];
-    if (type === 'wallet') {
-      console.log(data);
-      this._insertWallets(data.tables.wallets);
-    }*/
-    this.sendUpdate(data);
   }
 
   sendChainUpdate(data: any) {
