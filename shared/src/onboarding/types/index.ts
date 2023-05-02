@@ -94,7 +94,6 @@ export type RealmOnboardingStep =
   | '/login'
   | '/add-server'
   | '/passport'
-  | '/password'
   | '/hosting'
   | '/intermediary-login'
   | '/choose-id'
