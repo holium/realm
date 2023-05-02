@@ -33,6 +33,10 @@ export default function Login({ prefilledEmail, redirectAfterLogin }: Props) {
 
   const onNoAccount = () => goToPage('/');
 
+  const onBack = () => {
+    window.location.href = 'https://holium.com';
+  };
+
   const onLogin = async (email: string, password: string) => {
     const response = await thirdEarthApi.login(email, password);
 
@@ -63,6 +67,7 @@ export default function Login({ prefilledEmail, redirectAfterLogin }: Props) {
           </OnboardDialogDescription>
         }
         prefilledEmail={prefilledEmail}
+        onBack={onBack}
         onLogin={onLogin}
       />
     </Page>

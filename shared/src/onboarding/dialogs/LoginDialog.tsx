@@ -15,6 +15,7 @@ type Props = {
   // Terms are only necessary in Realm, not on the web.
   showTerms?: boolean;
   label?: ReactNode;
+  onBack?: () => void;
   onLogin: (email: string, password: string) => Promise<boolean>;
 };
 
@@ -22,6 +23,7 @@ export const LoginDialog = ({
   prefilledEmail = '',
   showTerms = false,
   label,
+  onBack,
   onLogin,
 }: Props) => {
   const terms = useToggle(false);
@@ -75,6 +77,7 @@ export const LoginDialog = ({
         }
         footerText={showTerms && <TermsDisclaimer onClick={terms.toggleOn} />}
         nextText="Login"
+        onBack={onBack}
         onNext={handleOnLogin}
       />
       <TermsModal
