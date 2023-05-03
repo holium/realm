@@ -456,7 +456,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
         return this.cookie;
       }
 
-      const cookie = await getCookie({ serverId, serverUrl, serverCode });
+      const cookie = await getCookie({ serverUrl, serverCode });
       if (!cookie) throw new Error('Failed to get cookie');
       const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
       const sanitizedCookie = cookie.split('; ')[0];
