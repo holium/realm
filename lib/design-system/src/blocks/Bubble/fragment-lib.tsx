@@ -1,3 +1,4 @@
+import { Emoji } from 'emoji-picker-react';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
 
@@ -23,6 +24,7 @@ import {
   FragmentBoldStrikeType,
   FragmentBoldType,
   FragmentCodeType,
+  FragmentCustomType,
   FragmentImageType,
   FragmentInlineCodeType,
   FragmentItalicsStrikeType,
@@ -406,6 +408,7 @@ export const renderFragment = (
       if (
         !TEXT_TYPES.includes(fragmentType) &&
         fragmentType !== 'image' &&
+        fragmentType !== 'emoji' &&
         fragmentType !== 'reply'
       ) {
         replyContent = (
@@ -461,6 +464,24 @@ export const renderFragment = (
             </Text.Custom>
           </Flex>
         </FragmentBlockquote>
+      );
+    case 'custom':
+      const cust = (fragment as FragmentCustomType).custom;
+      if (cust.name === 'emoji') {
+        return (
+          <span style={{ position: 'relative', top: '3px' }}>
+            <Emoji unified={cust.value} size={16} />
+          </span>
+        );
+      } else {
+        return <span>UNKNOWN CUSTOM TYPE</span>;
+      }
+    case 'emoji':
+      const emo = (fragment as any).emoji as string;
+      return (
+        <span style={{ position: 'relative', top: '3px' }}>
+          <Emoji unified={emo} size={16} />
+        </span>
       );
     case 'tab':
       const { url, favicon, title } = (fragment as FragmentTabType).tab;

@@ -4,9 +4,15 @@ import styled from 'styled-components';
 
 import { BoxProps, Button, Flex, Icon, Spinner } from '../../../general';
 import { InputBox, TextArea } from '../../../inputs';
+import { useMenu } from '../../navigation/Menu/useMenu';
 import { isImageLink, parseMediaType } from '../../util/links';
 import { FragmentType } from '../Bubble/Bubble.types';
 import { FragmentImage } from '../Bubble/fragment-lib';
+import {
+  AnimatedReactionPicker,
+  DEFAULT_EMOJI_PICKER_HEIGHT,
+  DEFAULT_EMOJI_PICKER_WIDTH,
+} from '../Bubble/Reaction';
 import { Reply } from '../Bubble/Reply';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
 import { MediaBlock } from '../MediaBlock/MediaBlock';
@@ -113,6 +119,13 @@ export const ChatInput = ({
   const [rows, setRows] = useState(1);
   const [value, setValue] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const { isOpen, menuRef, position, toggleMenu, closeMenu } = useMenu(
+    'top-left',
+    { width: DEFAULT_EMOJI_PICKER_WIDTH, height: DEFAULT_EMOJI_PICKER_HEIGHT },
+    { x: 0, y: 2 },
+    [], // closeableIds
+    [] // closeableClasses
+  );
 
   useEffect(() => {
     if (inputRef.current && isFocused) {
@@ -218,6 +231,18 @@ export const ChatInput = ({
       onSend(parsedFragments);
       setRows(1);
     }
+  };
+
+  const onEmojiPick = (p: string) => {
+    console.log('onEmojiPick', p);
+    const isNew = editingMessage ? false : true;
+    const newval = `${value}:\\u${p}:`;
+    setValue(newval);
+    localStorage.setItem(
+      selectedChatPath,
+      JSON.stringify({ isNew: isNew, value: newval })
+    );
+    closeMenu();
   };
 
   return (
@@ -342,6 +367,15 @@ export const ChatInput = ({
                   <Icon name="Attachment" size={20} opacity={0.5} />
                 )}
               </Button.IconButton>
+              <AnimatedReactionPicker
+                id={id}
+                isOpen={isOpen}
+                position={position}
+                onClick={onEmojiPick}
+                toggleMenu={toggleMenu}
+                menuRef={menuRef}
+                customButtonType="icon"
+              />
             </Flex>
             <ChatBox
               id={id}

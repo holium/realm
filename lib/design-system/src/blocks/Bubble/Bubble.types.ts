@@ -79,6 +79,14 @@ export type FragmentTabType = {
   };
 };
 
+export type FragmentCustomType = {
+  custom: {
+    name: string;
+    value: string;
+  };
+  metadata?: any;
+};
+
 export type FragmentType =
   | FragmentPlainType
   | FragmentBoldType
@@ -98,6 +106,7 @@ export type FragmentType =
   | FragmentBreakType
   | FragmentReplyType
   | FragmentTabType
+  | FragmentCustomType
   | FragmentStatusType;
 
 export type FragmentKey = keyof FragmentType;
