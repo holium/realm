@@ -16,7 +16,7 @@ const DesktopPresenter = () => {
   const { session } = authStore;
 
   useMultiplayer({
-    patp: session?.patp,
+    patp: session?.serverId,
     shipColor: session?.color ?? '#000000',
     desktopDimensions: shellStore.desktopDimensions,
     isMultiplayerEnabled: shellStore.multiplayerEnabled,

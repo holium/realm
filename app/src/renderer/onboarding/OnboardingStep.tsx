@@ -9,7 +9,6 @@ import { CredentialsStep } from './steps/CredentialsStep';
 import { HostingStep } from './steps/HostingStep';
 import { InstallationStep } from './steps/InstallationStep';
 import { PassportStep } from './steps/PassportStep';
-import { PasswordStep } from './steps/PasswordStep';
 
 export type OnboardingStepProps = {
   initialStep: RealmOnboardingStep;
@@ -32,14 +31,14 @@ export const OnboardingStepPresenter = ({
   switch (step) {
     case '/login':
       return <LoginStep setStep={handleSetStep} onFinish={onFinish} />;
+    case '/intermediary-login':
+      return <LoginStep forcedNextStep="/choose-id" setStep={handleSetStep} />;
     case '/hosting':
       return <HostingStep setStep={handleSetStep} onFinish={onFinish} />;
     case '/add-server':
       return <AddServerStep setStep={handleSetStep} />;
     case '/passport':
       return <PassportStep setStep={handleSetStep} onFinish={onFinish} />;
-    case '/password':
-      return <PasswordStep setStep={handleSetStep} />;
     case '/installation':
       return <InstallationStep setStep={handleSetStep} onFinish={onFinish} />;
     case '/choose-id':

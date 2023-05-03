@@ -12,6 +12,11 @@ import {
   UpdateRow,
 } from './notifications.types';
 
+export type NotifDeleteLogRow = {
+  change: { id: number; type: 'del-row' };
+  timestamp: number;
+};
+
 interface NotificationRow {
   id: number;
   app: string;
@@ -53,6 +58,17 @@ export class NotificationsDB extends AbstractDataAccess<
     this.onDbUpdate = this.onDbUpdate.bind(this);
     this.handleDBChange = this.handleDBChange.bind(this);
     this.init = this.init.bind(this);
+  }
+
+  async init() {
+    const notifications = await this.fetchNotifications();
+    this.insertNotifications(notifications);
+    const deleteLogs = await this.fetchDeleteLogs();
+    // Missed delete events must be applied after inserts
+    this._applyDeleteLogs(deleteLogs).then(() => {
+      // and after applying successfully, insert them into the db
+      this._insertDeleteLogs(deleteLogs);
+    });
     APIConnection.getInstance().conduit.watch({
       app: 'notif-db',
       path: '/db',
@@ -60,13 +76,7 @@ export class NotificationsDB extends AbstractDataAccess<
       onQuit: this.onQuit,
       onError: this.onError,
     });
-    this.init();
-  }
-
-  async init() {
-    const notifications = await this.fetchNotifications();
-    this.insertNotifications(notifications);
-    // Missed delete events must be applied after inserts
+    this.sendUpdate({ type: 'init', payload: this.getNotifications() });
   }
 
   protected mapRow(row: any): NotificationRow {
@@ -91,12 +101,51 @@ export class NotificationsDB extends AbstractDataAccess<
   }
 
   async fetchNotifications() {
-    const lastTimestamp = this.getLastTimestamp();
+    const lastTimestamp = this.getLastTimestamp('notifications');
     const response = await APIConnection.getInstance().conduit.scry({
       app: 'notif-db',
       path: `/db/since-ms/${lastTimestamp}`,
     });
     return response;
+  }
+
+  async fetchDeleteLogs() {
+    const lastTimestamp = this.getLastTimestamp('notifications_delete_logs');
+    const response = await APIConnection.getInstance().conduit.scry({
+      app: 'notif-db',
+      path: `/delete-log/start-ms/${lastTimestamp}`,
+    });
+    return response;
+  }
+
+  private async _applyDeleteLogs(deleteLogs: NotifDeleteLogRow[]) {
+    deleteLogs.forEach((deleteLog) => {
+      this._handleDeletes(deleteLog.change);
+    });
+  }
+
+  private _handleDeletes(dbChange: NotifDeleteLogRow['change']) {
+    if (dbChange.type === 'del-row') {
+      this.deleteNotificationsRow(dbChange.id);
+      this.sendUpdate({ type: 'notification-deleted', payload: dbChange.id });
+    }
+  }
+  private _insertDeleteLogs(deleteLogs: NotifDeleteLogRow[]) {
+    if (!this.db?.open) return;
+    const insert = this.db.prepare(
+      `REPLACE INTO notifications_delete_logs (
+          change, 
+          timestamp
+        ) VALUES (@change, @timestamp)`
+    );
+    const insertMany = this.db.transaction((deleteLogs: any) => {
+      for (const deleteLog of deleteLogs)
+        insert.run({
+          change: JSON.stringify(deleteLog.change),
+          timestamp: deleteLog.timestamp,
+        });
+    });
+    insertMany(deleteLogs);
   }
 
   onDbUpdate(data: NotifDbChangeReactions, _id?: number) {
@@ -128,7 +177,7 @@ export class NotificationsDB extends AbstractDataAccess<
         payload: notifUpdatedQueried,
       });
     } else if (dbChange.type === 'del-row') {
-      console.log('del-row', dbChange);
+      // console.log('del-row', dbChange);
       const del = dbChange as DelRow;
       this.deleteNotificationsRow(del.id);
       this.sendUpdate({ type: 'notification-deleted', payload: del.id });
@@ -214,7 +263,6 @@ export class NotificationsDB extends AbstractDataAccess<
     const deleteQuery = this.db.prepare(
       'DELETE FROM notifications WHERE id = ?'
     );
-    console.log('deleting notif id', id);
     deleteQuery.run(id);
   }
 
@@ -222,11 +270,16 @@ export class NotificationsDB extends AbstractDataAccess<
   // ----------------- DB queries -----------------
   // ----------------------------------------------
 
-  getLastTimestamp(): number {
+  getLastTimestamp(
+    table: 'notifications' | 'notifications_delete_logs'
+  ): number {
     if (!this.db) throw new Error('No db connection');
+    const column =
+      table === 'notifications_delete_logs' ? 'timestamp' : 'updated_at';
+
     const query = this.db.prepare(`
-      SELECT max(updated_at) as lastTimestamp
-      FROM notifications;
+      SELECT max(${column}) as lastTimestamp
+      FROM ${table};
     `);
     const result: any = query.all();
     // add 1 to avoid getting same timestamp again
@@ -383,6 +436,12 @@ create unique index if not exists notifications_id_uindex
 
 create index if not exists notifications_read_dismissed_index
     on notifications (read, dismissed);
+
+create table if not exists notifications_delete_logs
+(
+    change        TEXT not null,
+    timestamp     INTEGER not null
+);
 `;
 
 export const QUERY_NOTIFICATIONS = `
@@ -396,7 +455,7 @@ export const QUERY_NOTIFICATIONS = `
     buttons,
     link,
     notifications.metadata,
-    paths.metadata pathMetadata,
+    chat_paths.metadata pathMetadata,
     notifications.created_at   createdAt,
     notifications.updated_at   updatedAt,
     read_at      readAt,
@@ -404,7 +463,7 @@ export const QUERY_NOTIFICATIONS = `
     dismissed_at dismissedAt,
     dismissed
   FROM notifications 
-  LEFT OUTER JOIN paths ON notifications.path = paths.path
+  LEFT OUTER JOIN chat_paths ON notifications.path = chat_paths.path
 `;
 
 export const notifDBPreload = NotificationsDB.preload(

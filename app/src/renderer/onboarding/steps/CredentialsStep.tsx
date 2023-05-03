@@ -25,18 +25,18 @@ export const CredentialsStep = ({ setStep }: StepProps) => {
   });
 
   useEffect(() => {
-    const { shipId, shipUrl, shipCode } = OnboardingStorage.get();
-    if (!shipId || !shipUrl || !shipCode) return;
+    const { serverId, serverUrl, serverCode } = OnboardingStorage.get();
+    if (!serverId || !serverUrl || !serverCode) return;
 
     setCredentials({
-      id: shipId,
-      url: shipUrl,
-      accessCode: shipCode,
+      id: serverId,
+      url: serverUrl,
+      accessCode: serverCode,
     });
     OnboardingIPC.setCredentials({
-      patp: shipId,
-      code: shipCode,
-      url: shipUrl,
+      serverId: serverId,
+      serverCode: serverCode,
+      serverUrl: serverUrl,
     });
   }, []);
 

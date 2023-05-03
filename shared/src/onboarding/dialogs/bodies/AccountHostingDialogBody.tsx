@@ -17,7 +17,7 @@ export const AccountDialogTable = styled(Flex)`
   }
 `;
 
-const AccountDialogTableRowContainer = styled(Flex)`
+export const AccountDialogTableRowContainer = styled(Flex)`
   flex: 1;
   align-items: center;
   justify-content: space-between;
@@ -47,9 +47,9 @@ const GetNewAccessCodeContainer = styled(Flex)`
 type Props = {
   selectedPatp: string;
   email: string;
-  shipUrl: string;
-  shipCode: string;
-  shipMaintenanceWindow: number;
+  serverUrl: string;
+  serverCode: string;
+  serverMaintenanceWindow: number;
   onClickChangeEmail: () => void;
   onClickChangePassword: () => void;
   onClickManageBilling: () => void;
@@ -61,9 +61,9 @@ type Props = {
 export const AccountHostingDialogBody = ({
   selectedPatp,
   email,
-  shipUrl,
-  shipCode,
-  shipMaintenanceWindow,
+  serverUrl,
+  serverCode,
+  serverMaintenanceWindow,
   onClickChangeEmail,
   onClickChangePassword,
   onClickManageBilling,
@@ -105,9 +105,11 @@ export const AccountHostingDialogBody = ({
         </AccountDialogTableRowContainer>
       </AccountDialogTableRow>
       <AccountDialogTableRow title="URL">
-        <AccountDialogDescription flex={1}>{shipUrl}</AccountDialogDescription>
+        <AccountDialogDescription flex={1}>
+          {serverUrl}
+        </AccountDialogDescription>
       </AccountDialogTableRow>
-      <ChangeAccessCode shipCode={shipCode} />
+      <ChangeAccessCode serverCode={serverCode} />
       <GetNewAccessCodeContainer>
         <ChangeButton type="button" onClick={onClickGetNewAccessCode}>
           Get new access code
@@ -115,7 +117,7 @@ export const AccountHostingDialogBody = ({
       </GetNewAccessCodeContainer>
 
       <ChangeMaintenanceWindow
-        maintenanceWindow={shipMaintenanceWindow}
+        maintenanceWindow={serverMaintenanceWindow}
         onClick={onClickChangeMaintenanceWindow}
       />
     </AccountDialogTable>

@@ -61,9 +61,9 @@ export class ShipService extends AbstractService<any> {
         log.info('ship.service.ts:', 'No cookie found, getting cookie...');
       }
       getCookie({
-        patp: patp,
-        url: credentials.url,
-        code: credentials.code,
+        serverId: patp,
+        serverUrl: credentials.url,
+        serverCode: credentials.code,
       })
         .then((cookie) => {
           if (cookie) {
@@ -137,9 +137,19 @@ export class ShipService extends AbstractService<any> {
     };
   }
 
-  public init() {
-    this.services?.bazaar.init();
+  public async init() {
+    this.initSpaces();
+    this.initChat();
+  }
+
+  private async initSpaces() {
+    await this.services?.bazaar.init();
     this.services?.spaces.init();
+  }
+
+  private async initChat() {
+    await this.services?.chat.init();
+    this.services?.notifications.init();
   }
 
   public updateCookie(cookie: string) {

@@ -34,7 +34,7 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
   const spaceRowId = useMemo(() => `space-row-${space.path}`, [space.path]);
 
   const members = spacesStore.spaces.get(space.path)?.members;
-  const member = members?.all.get(loggedInAccount?.patp ?? '');
+  const member = members?.all.get(loggedInAccount?.serverId ?? '');
   const roles = member?.roles;
   const contextMenuOptions = useMemo(() => {
     const menu = [];
@@ -46,7 +46,7 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
         navigator.clipboard.writeText(space.path.substring(1));
       },
     });
-    if (roles?.includes('owner') || roles?.includes('admin')) {
+    if (space.isAdmin()) {
       menu.push({
         id: `space-row-${space.path}-btn-edit`,
         label: 'Edit',
@@ -58,7 +58,8 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
         },
       });
     }
-    if (member?.roles.includes('owner')) {
+
+    if (space.isHost()) {
       menu.push({
         id: `space-row-${space.path}-btn-delete`,
         label: 'Delete',

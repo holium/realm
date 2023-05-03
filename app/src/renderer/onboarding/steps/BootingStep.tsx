@@ -16,52 +16,61 @@ export const BootingStep = ({ setStep }: StepProps) => {
   const booting = useToggle(true);
 
   const pollShipStatus = useCallback(async () => {
-    const shipId = OnboardingStorage.get().shipId;
+    const serverId = OnboardingStorage.get().serverId;
     const token = OnboardingStorage.get().token;
 
-    if (!shipId || !token) return;
+    if (!serverId || !token) return;
 
     const ships = await thirdEarthApi.getUserShips(token);
-    const ship = Object.values(ships).find((s) => s.patp === shipId);
+    const ship = Object.values(ships).find((s) => s.patp === serverId);
 
     if (!ship) return;
 
     if (logs.length === 1) {
-      setLogs((logs) => [...logs, `${shipId} will be ready in a few minutes.`]);
+      setLogs((logs) => [
+        ...logs,
+        `${serverId} will be ready in a few minutes.`,
+      ]);
     } else if (logs.length === 2) {
       setLogs((logs) => [...logs, 'Go touch some grass.']);
     }
 
-    const shipCode = ship.code;
-    if (shipCode) {
+    const serverCode = ship.code;
+    if (serverCode) {
       setLogs((logs) => [...logs, 'Assigning a domain.']);
     }
 
-    const shipUrl = ship.link;
-    const isBooted = shipUrl.includes('https://');
+    const serverUrl = ship.link;
+    const isBooted = serverUrl.includes('https://');
     if (isBooted) {
       booting.toggleOff();
       if (intervalRef.current) clearInterval(intervalRef.current);
 
       setLogs((logs) => [
         ...logs,
-        `Successfully assigned a domain: ${shipUrl}.`,
+        `Successfully assigned a domain: ${serverUrl}.`,
         'Booting complete.',
       ]);
 
       // Store credentials for next step.
       OnboardingStorage.set({
-        shipUrl,
-        shipCode,
+        serverUrl,
+        serverCode,
       });
     }
   }, [booting, logs]);
 
   const onNext = useCallback(async () => {
-    const { masterAccountId, shipId, shipUrl, shipCode, passwordHash } =
+    const { masterAccountId, serverId, serverUrl, serverCode, passwordHash } =
       OnboardingStorage.get();
 
-    if (!masterAccountId || !shipId || !shipUrl || !shipCode || !passwordHash) {
+    if (
+      !masterAccountId ||
+      !serverId ||
+      !serverUrl ||
+      !serverCode ||
+      !passwordHash
+    ) {
       return false;
     }
 
@@ -69,18 +78,19 @@ export const BootingStep = ({ setStep }: StepProps) => {
       {
         accountId: masterAccountId,
         passwordHash,
-        patp: shipId,
+        serverId: serverId,
+        serverUrl: serverUrl,
+        serverCode: serverCode,
+        serverType: 'hosted',
         avatar: '',
         nickname: '',
         description: '',
         color: '#000000',
-        type: 'hosted',
-        url: shipUrl,
-        status: 'online',
+        status: 'initial',
         theme: JSON.stringify(defaultTheme),
       },
       passwordHash,
-      shipCode
+      serverCode
     );
 
     if (newAccount) {

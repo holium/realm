@@ -23,6 +23,10 @@ export class ChatService extends AbstractService<ChatUpdateTypes> {
     this.sendUpdate({ type: 'init', payload: this.chatDB.getChatList() });
   }
 
+  async init() {
+    return this.chatDB?.init();
+  }
+
   reset(): void {
     super.removeHandlers();
     this.chatDB?.reset();

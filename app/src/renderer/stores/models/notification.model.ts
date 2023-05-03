@@ -88,6 +88,8 @@ export const NotifStore = types
     initNotifications: flow(function* () {
       try {
         const notifications = yield NotifIPC.getNotifications() as Promise<any>;
+        self.unreadByPaths.clear();
+        self.unreadByApps.clear();
         self.unreadByPaths = notifications.reduce(
           (acc: Map<string, number>, n: NotifMobxType) => {
             if (!n.read) {
@@ -186,7 +188,30 @@ export const NotifStore = types
     }),
 
     // onChangeHandlers
-    onNotifAdded(notif: NotifMobxType) {
+    _onInit(notifs: any) {
+      self.notifications = notifs;
+      self.unreadByPaths.clear();
+      self.unreadByApps.clear();
+      self.unreadByPaths = notifs.reduce(
+        (acc: Map<string, number>, n: NotifMobxType) => {
+          if (!n.read) {
+            acc.set(n.path, (acc.get(n.path) || 0) + 1);
+          }
+          return acc;
+        },
+        self.unreadByPaths
+      );
+      self.unreadByApps = notifs.reduce(
+        (acc: Map<string, number>, n: NotifMobxType) => {
+          if (!n.read) {
+            acc.set(n.app, (acc.get(n.app) || 0) + 1);
+          }
+          return acc;
+        },
+        self.unreadByApps
+      );
+    },
+    _onNotifAdded(notif: NotifMobxType) {
       self.notifications.push(notif);
       self.unreadByPaths.set(
         notif.path,
@@ -197,7 +222,7 @@ export const NotifStore = types
         (self.unreadByApps.get(notif.app) || 0) + 1
       );
     },
-    onNotifUpdated(notif: NotifMobxType) {
+    _onNotifUpdated(notif: NotifMobxType) {
       self.notifications.find((n) => n.id === notif.id)?.update(notif);
       // if the notification is read, decrement the unread count
       if (notif.read || notif.dismissed) {
@@ -210,7 +235,7 @@ export const NotifStore = types
         self.unreadByApps.set(notif.app, unreadByApps ? unreadByApps - 1 : 0);
       }
     },
-    onNotifDeleted(delId: number) {
+    _onNotifDeleted(delId: number) {
       const notif = self.notifications.find((n) => n.id === delId);
       if (!notif) return;
       const index = self.notifications.indexOf(notif);
@@ -231,5 +256,7 @@ export const NotifStore = types
 
     reset() {
       self.notifications.clear();
+      self.unreadByPaths.clear();
+      self.unreadByApps.clear();
     },
   }));

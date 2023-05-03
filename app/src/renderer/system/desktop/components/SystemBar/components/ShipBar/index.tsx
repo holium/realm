@@ -59,7 +59,6 @@ export const ShipBarPresenter = () => {
 
   const onNotifLinkClick = (app: string, path: string, link?: string) => {
     trackEvent('CLICK_NOTIFICATION', 'DESKTOP_SCREEN', { app });
-    console.log('clicked notification', app, path, link);
     switch (app) {
       case 'os-settings':
         shellStore.openWindow(nativeApps['os-settings'] as AppType);
@@ -81,7 +80,6 @@ export const ShipBarPresenter = () => {
       evt.stopPropagation();
       return;
     }
-    initNotifications();
     if (chatStore.inbox.length === 0) {
       chatStore.loadChatList();
     }
@@ -89,8 +87,9 @@ export const ShipBarPresenter = () => {
   };
 
   useEffect(() => {
+    if (!loggedInAccount) return;
     initNotifications();
-  }, [loggedInAccount?.patp]);
+  }, [loggedInAccount?.serverId]);
 
   useEffect(() => {
     if (isAccountTrayOpen) {
@@ -195,7 +194,7 @@ export const ShipBarPresenter = () => {
         {isAccountTrayOpen && (
           <Flex
             flexDirection="column"
-            minHeight={minHeight - 40}
+            minHeight={minHeight - 24}
             pt="8px"
             pb="6px"
             pl="3px"
@@ -220,38 +219,55 @@ export const ShipBarPresenter = () => {
               overflowX="hidden"
               width={width - 15}
             >
-              <NotificationList
-                justifyContent="flex-end"
-                onPathLookup={(app: string, path: string) => {
-                  if (app === 'realm-chat') {
-                    let { title, sigil, image } = chatStore.getChatHeader(path);
-                    return {
-                      title,
-                      sigil,
-                      image,
-                    };
-                  }
-                  return null;
-                  // return getNotificationPath(app, path);
-                }}
-                onAppLookup={(app: string) => {
-                  return apps[app];
-                }}
-                onDismiss={(app: string, path: string, id: number) => {
-                  console.log(`dismissed - ${app} ${path} ${id}`);
-                  dismissOne(id);
-                }}
-                onDismissAll={(app: string, path?: string) => {
-                  if (path) {
-                    dismissPath(app, path);
-                  } else {
-                    dismissApp(app);
-                  }
-                }}
-                onLinkClick={onNotifLinkClick}
-                containerWidth={width - 15}
-                notifications={undismissedNotifications as NotificationType[]}
-              />
+              {chatStore.loader.isFirstLoad ? (
+                <Flex
+                  isSkeleton
+                  flexDirection="column"
+                  gap={12}
+                  position="absolute"
+                  justify="center"
+                  align="center"
+                  width="calc(100% - 24px)"
+                  left={12}
+                  right={12}
+                  top={12}
+                  height={50}
+                />
+              ) : (
+                <NotificationList
+                  justifyContent="flex-end"
+                  onPathLookup={(app: string, path: string) => {
+                    if (app === 'realm-chat') {
+                      let { title, sigil, image } =
+                        chatStore.getChatHeader(path);
+                      return {
+                        title,
+                        sigil,
+                        image,
+                      };
+                    }
+                    return null;
+                    // return getNotificationPath(app, path);
+                  }}
+                  onAppLookup={(app: string) => {
+                    return apps[app];
+                  }}
+                  onDismiss={(app: string, path: string, id: number) => {
+                    console.log(`dismissed - ${app} ${path} ${id}`);
+                    dismissOne(id);
+                  }}
+                  onDismissAll={(app: string, path?: string) => {
+                    if (path) {
+                      dismissPath(app, path);
+                    } else {
+                      dismissApp(app);
+                    }
+                  }}
+                  onLinkClick={onNotifLinkClick}
+                  containerWidth={width - 15}
+                  notifications={undismissedNotifications as NotificationType[]}
+                />
+              )}
             </NoScrollBar>
             <Flex
               animate={{

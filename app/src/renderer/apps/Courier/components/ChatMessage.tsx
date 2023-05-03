@@ -37,7 +37,7 @@ export const ChatMessagePresenter = ({
   const { chatStore, friends } = useShipStore();
   const { selectedChat } = chatStore;
   const messageRef = useRef<HTMLDivElement>(null);
-  const ourShip = useMemo(() => loggedInAccount?.patp, [loggedInAccount]);
+  const ourShip = useMemo(() => loggedInAccount?.serverId, [loggedInAccount]);
   const isOur = message.sender === ourShip;
   const { getOptions, setOptions, defaultOptions } = useContextMenu();
 
@@ -74,7 +74,7 @@ export const ChatMessagePresenter = ({
   const contextMenuOptions = useMemo(() => {
     const menu: MenuItemProps[] = [defaultOptions[0]];
     if (!selectedChat || !loggedInAccount) return menu;
-    const isAdmin = selectedChat.isHost(loggedInAccount.patp);
+    const isAdmin = selectedChat.isHost(loggedInAccount.serverId);
     let hasLink = false;
     let hasImage = false;
     msgModel?.contents.forEach((content) => {

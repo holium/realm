@@ -70,9 +70,9 @@ export const Modal = ({
     <>
       <Overlay onClick={onDismiss} />
       <ModalContainer style={style} maxWidth={maxWidth}>
-        <Form onSubmit={onSubmit}>
+        <Form autoComplete="off" onSubmit={onSubmit}>
           <CloseFormContainer>
-            <Button.Transparent onClick={onDismiss}>
+            <Button.Transparent type="button" onClick={onDismiss}>
               <Icon name="Close" size={20} fill="text" opacity={0.5} />
             </Button.Transparent>
           </CloseFormContainer>

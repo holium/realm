@@ -77,16 +77,17 @@ export class AuthDB {
         accessPropertiesByDotNotation: true,
       });
       // loop through ships and insert into accounts table
-      Object.values(oldAuth.store.ships).forEach((ship: any) => {
+      oldAuth.store.ships.forEach((ship) => {
         const theme = oldTheme.store[ship.patp];
         const query = this.authDB.prepare(`
-        INSERT INTO accounts (accountId, url, patp, nickname, color, avatar, status, theme, passwordHash)
+        INSERT INTO accounts (accountId, serverUrl, serverId, serverType, nickname, color, avatar, status, theme, passwordHash)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
       `);
         query.run(
           masterAccountId,
           ship.url,
           ship.patp,
+          'local',
           ship.nickname,
           ship.color,
           ship.avatar,
@@ -95,12 +96,12 @@ export class AuthDB {
           ship.passwordHash
         );
       });
-      oldAuth.store.order.forEach((patp: string, index: number) => {
+      oldAuth.store.order.forEach((serverId: string, index: number) => {
         const query = this.authDB.prepare(`
-        REPLACE INTO accounts_order (patp, idx)
+        REPLACE INTO accounts_order (serverId, idx)
         VALUES (?, ?);
       `);
-        query.run(patp.replace('auth', ''), index);
+        query.run(serverId.replace('auth', ''), index);
       });
       // TODO clear old auth store
     } catch (error) {
@@ -113,35 +114,35 @@ export class AuthDB {
       .run(Date.now());
   }
 
-  public addToOrder(patp: string): void {
+  public addToOrder(serverId: string): void {
     const query = this.authDB.prepare(`
-      REPLACE INTO accounts_order (patp, idx)
+      REPLACE INTO accounts_order (serverId, idx)
       VALUES (?, ?);
     `);
-    query.run(patp, this.getOrder().length);
+    query.run(serverId, this.getOrder().length);
   }
 
-  public removeFromOrder(patp: string): void {
+  public removeFromOrder(serverId: string): void {
     const query = this.authDB.prepare(`
-      DELETE FROM accounts_order WHERE patp = ?;
+      DELETE FROM accounts_order WHERE serverId = ?;
     `);
-    query.run(patp);
+    query.run(serverId);
   }
 
   public getOrder(): string[] {
     const query = this.authDB.prepare(`
-      SELECT patp FROM accounts_order ORDER BY idx ASC;
+      SELECT serverId FROM accounts_order ORDER BY idx ASC;
     `);
     const result: any = query.all();
-    return result.map((r: { patp: string }) => r.patp);
+    return result.map((r: { serverId: string }) => r.serverId);
   }
 
-  public setOrder(patp: string, idx: number): void {
+  public setOrder(serverId: string, idx: number): void {
     const query = this.authDB.prepare(`
-      REPLACE INTO accounts_order (patp, idx)
+      REPLACE INTO accounts_order (serverId, idx)
       VALUES (?, ?);
     `);
-    query.run(patp, idx);
+    query.run(serverId, idx);
   }
 
   disconnect() {
@@ -153,19 +154,13 @@ const initSql = `
 ${accountsInit}
 ${masterAccountsInit}
 create table if not exists accounts_order (
-  patp          TEXT PRIMARY KEY NOT NULL,
+  serverId      TEXT PRIMARY KEY NOT NULL,
   idx           INTEGER NOT NULL
 );
 
 create table if not exists accounts_meta (
-  seenSplash          INTEGER NOT NULL DEFAULT 0,
-  migrated            INTEGER NOT NULL DEFAULT 0,
-  migratedAt          INTEGER
-);
-
-create table if not exists accounts_session (
-  patp          TEXT PRIMARY KEY NOT NULL,
-  key           TEXT NOT NULL,
-  createdAt     INTEGER
+  seenSplash    INTEGER NOT NULL DEFAULT 0,
+  migrated      INTEGER NOT NULL DEFAULT 0,
+  migratedAt    INTEGER
 );
 `;

@@ -8,6 +8,7 @@ import {
   LoginDialog,
   OnboardDialogDescription,
   OnboardingStorage,
+  TermsDisclaimer,
 } from '@holium/shared';
 
 import { OnboardingIPC } from 'renderer/stores/ipc';
@@ -16,7 +17,7 @@ import { defaultTheme } from '../../lib/defaultTheme';
 import { thirdEarthApi } from '../thirdEarthApi';
 import { StepProps } from './types';
 
-export const LoginStep = ({ setStep, onFinish }: StepProps) => {
+export const LoginStep = ({ forcedNextStep, setStep, onFinish }: StepProps) => {
   const learnMoreModal = useToggle(false);
 
   const prefilledEmail = OnboardingStorage.get().email ?? '';
@@ -70,14 +71,15 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
             {
               accountId: masterAccount.id,
               passwordHash: masterAccount.passwordHash,
-              patp: ship.patp,
-              url: ship.link,
+              serverId: ship.patp,
+              serverUrl: ship.link,
+              serverCode: ship.code,
+              serverType: 'hosted',
               avatar: '',
               nickname: ship.screen_name,
               description: '',
               color: '#000000',
-              type: 'hosted',
-              status: 'online',
+              status: 'initial',
               theme: JSON.stringify(defaultTheme),
             },
             password,
@@ -86,9 +88,13 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
         )
       );
 
-      onFinish?.();
+      if (forcedNextStep) {
+        setStep(forcedNextStep);
+      } else {
+        onFinish?.();
+      }
     } else {
-      setStep('/hosting');
+      setStep(forcedNextStep ?? '/hosting');
     }
 
     return true;
@@ -102,7 +108,6 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
         onAccept={learnMoreModal.toggleOff}
       />
       <LoginDialog
-        showTerms
         prefilledEmail={prefilledEmail}
         label={
           <OnboardDialogDescription>
@@ -121,6 +126,7 @@ export const LoginStep = ({ setStep, onFinish }: StepProps) => {
             </Anchor>
           </OnboardDialogDescription>
         }
+        footer={<TermsDisclaimer onClick={() => {}} />}
         onLogin={onLogin}
       />
     </>

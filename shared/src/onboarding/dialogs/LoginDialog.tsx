@@ -7,21 +7,22 @@ import { useToggle } from '@holium/design-system/util';
 
 import { OnboardDialog } from '../components/OnboardDialog';
 import { OnboardDialogInputLabel } from '../components/OnboardDialog.styles';
-import { TermsDisclaimer } from '../components/TermsDisclaimer';
 import { TermsModal } from '../components/TermsModal';
 
 type Props = {
   prefilledEmail?: string;
   // Terms are only necessary in Realm, not on the web.
-  showTerms?: boolean;
+  footer?: ReactNode;
   label?: ReactNode;
+  onBack?: () => void;
   onLogin: (email: string, password: string) => Promise<boolean>;
 };
 
 export const LoginDialog = ({
   prefilledEmail = '',
-  showTerms = false,
+  footer,
   label,
+  onBack,
   onLogin,
 }: Props) => {
   const terms = useToggle(false);
@@ -73,8 +74,9 @@ export const LoginDialog = ({
             {label}
           </>
         }
-        footerText={showTerms && <TermsDisclaimer onClick={terms.toggleOn} />}
+        footer={footer}
         nextText="Login"
+        onBack={onBack}
         onNext={handleOnLogin}
       />
       <TermsModal

@@ -83,10 +83,12 @@ export const Bubble = ({
     [authorColor]
   );
 
-  const innerWidth = useMemo(
-    () => (containerWidth ? containerWidth - 16 : undefined),
-    [containerWidth]
-  );
+  const innerWidth = useMemo(() => {
+    if (!containerWidth) return undefined;
+
+    const removePercentageWidth = containerWidth * 0.1;
+    return containerWidth - 16 - removePercentageWidth;
+  }, [containerWidth]);
 
   const footerHeight = useMemo(() => {
     if (reactions.length > 0) {

@@ -133,8 +133,8 @@ const MembersListPresenter = ({ our }: IMembersList) => {
         description={contact.bio}
         listId="member-list"
         contextMenuOptions={
-          currentSpace.members.isAdmin(loggedInAccount.patp) &&
-          member.patp !== loggedInAccount.patp
+          currentSpace.members.isAdmin(loggedInAccount.serverId) &&
+          member.patp !== loggedInAccount.serverId
             ? [
                 activeRole === 'admin'
                   ? {

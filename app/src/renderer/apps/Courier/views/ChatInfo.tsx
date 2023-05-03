@@ -115,7 +115,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
 
   useEffect(() => {
     if (!selectedChat || !loggedInAccount) return;
-    selectedChat.fetchPeers(loggedInAccount.patp);
+    selectedChat.fetchPeers(loggedInAccount.serverId);
   }, [selectedChat]);
 
   const { canUpload, promptUpload } = useFileUpload({ storage });
@@ -157,8 +157,8 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   };
 
   const amHost =
-    sortedPeers.find((peer) => peer.ship === loggedInAccount?.patp)?.role ===
-    'host';
+    sortedPeers.find((peer) => peer.ship === loggedInAccount?.serverId)
+      ?.role === 'host';
   const isSpaceChat = type === 'space';
 
   const patps = sortedPeers.map((peer) => peer.ship);
@@ -244,16 +244,18 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
             )}
             <Flex
               flexDirection="column"
+              gap={4}
               pointerEvents={isDMType || !amHost ? 'none' : 'auto'}
             >
               <InlineEdit
                 id="chat-title"
                 name="chat-title"
                 fontWeight={500}
+                fontSize="1.125rem" // in rem units (base 16px) so 1.125rem
                 textAlign="center"
                 width={350}
                 value={editTitle}
-                // editable={amHost}
+                editable={amHost}
                 onBlur={() => {
                   if (editTitle.length > 1) {
                     editMetadata({ title: editTitle });
@@ -487,7 +489,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
           {sortedPeers.map((peer: PeerModelType) => {
             const id = `${path}-peer-${peer.ship}`;
             const options = [];
-            if (peer.ship !== loggedInAccount?.patp) {
+            if (peer.ship !== loggedInAccount?.serverId) {
               // TODO check if peer is friend
               options.push({
                 id: `${id}-add-friend`,

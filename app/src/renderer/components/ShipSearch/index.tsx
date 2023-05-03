@@ -57,7 +57,7 @@ const ShipSearchPresenter = ({
       search,
       friends.search,
       selected,
-      loggedInAccount?.patp
+      loggedInAccount?.serverId
     );
   }, [friends.all, search, selected, loggedInAccount]);
 

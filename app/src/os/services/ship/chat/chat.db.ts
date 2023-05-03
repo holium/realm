@@ -44,7 +44,7 @@ interface ChatRow {
 export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   constructor(params: DataAccessContructorParams) {
     params.name = 'chatDB';
-    params.tableName = 'paths';
+    params.tableName = 'chat_paths';
     super(params);
     if (params.preload) return;
     this._onQuit = this._onQuit.bind(this);
@@ -52,14 +52,6 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     this._onDbUpdate = this._onDbUpdate.bind(this);
     this._handleDBChange = this._handleDBChange.bind(this);
     this.init = this.init.bind(this);
-    APIConnection.getInstance().conduit.watch({
-      app: 'chat-db',
-      path: '/db',
-      onEvent: this._onDbUpdate,
-      onQuit: this._onQuit,
-      onError: this._onError,
-    });
-    this.init();
   }
 
   async init() {
@@ -75,7 +67,16 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
       // and after applying successfully, insert them into the db
       this._insertDeleteLogs(deleteLogs);
     });
-    this.fetchPathMetadata();
+    APIConnection.getInstance().conduit.watch({
+      app: 'chat-db',
+      path: '/db',
+      onEvent: this._onDbUpdate,
+      onQuit: this._onQuit,
+      onError: this._onError,
+    });
+    await this.fetchPathMetadata();
+    this.sendUpdate({ type: 'init', payload: this.getChatList() });
+    return;
   }
 
   protected mapRow(row: any): ChatRow {
@@ -114,7 +115,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   async fetchPathMetadata() {
     try {
       if (!this.db?.open) return;
-      const allPaths = this.db.prepare(`SELECT path FROM paths`).all();
+      const allPaths = this.db.prepare(`SELECT path FROM chat_paths`).all();
 
       const muted = await APIConnection.getInstance().conduit.scry({
         app: 'realm-chat',
@@ -126,7 +127,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
       });
 
       const insert = this.db.prepare(
-        `REPLACE INTO paths_flags (
+        `REPLACE INTO chat_paths_flags (
           path,
           muted,
           pinned
@@ -157,7 +158,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   async refreshMessagesOnPath(path: string, patp: string) {
-    const lastTimestamp = this.getLastTimestamp('messages', path, patp);
+    const lastTimestamp = this.getLastTimestamp('chat_messages', path, patp);
     let messages;
     try {
       const response = await APIConnection.getInstance().conduit.scry({
@@ -172,7 +173,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   private async _fetchMessages() {
-    const lastTimestamp = this.getLastTimestamp('messages');
+    const lastTimestamp = this.getLastTimestamp('chat_messages');
     try {
       const response = await APIConnection.getInstance().conduit.scry({
         app: 'chat-db',
@@ -185,7 +186,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   private async _fetchPaths() {
-    const lastTimestamp = this.getLastTimestamp('paths');
+    const lastTimestamp = this.getLastTimestamp('chat_paths');
     const response = await APIConnection.getInstance().conduit.scry({
       app: 'chat-db',
       path: `/db/paths/start-ms/${lastTimestamp}`,
@@ -195,7 +196,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   private async _fetchPeers() {
-    const lastTimestamp = this.getLastTimestamp('peers');
+    const lastTimestamp = this.getLastTimestamp('chat_peers');
     const response = await APIConnection.getInstance().conduit.scry({
       app: 'chat-db',
       path: `/db/peers/start-ms/${lastTimestamp}`,
@@ -205,10 +206,11 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   private async _fetchDeleteLogs() {
-    const lastTimestamp = this.getLastTimestamp('delete_logs');
+    const lastTimestamp = this.getLastTimestamp('chat_delete_logs');
+    // we have to add two because the delete log is inclusive
     const response = await APIConnection.getInstance().conduit.scry({
       app: 'chat-db',
-      path: `/delete-log/start-ms/${lastTimestamp}`,
+      path: `/delete-log/start-ms/${lastTimestamp + 2}`,
     });
     if (!response) return [];
 
@@ -302,7 +304,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   private _handleDeletes(dbChange: DelMessagesRow | DelPathsRow | DelPeersRow) {
-    // insert into delete_logs
+    // insert into chat_delete_logs
     if (dbChange.type === 'del-messages-row') {
       // console.log('del-messages-row', dbChange);
       const delMessagesRow = dbChange as DelMessagesRow;
@@ -366,7 +368,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         WITH formed_fragments AS (
             WITH realm_chat as (
                 SELECT *
-                FROM messages
+                FROM chat_messages
                 WHERE (path LIKE '%realm-chat%' OR path LIKE '/spaces/%/chats/%') AND content_type != 'react' AND content_type != 'status'
                 ORDER BY msg_part_id, created_at DESC
             )
@@ -412,30 +414,30 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         GROUP BY formed_messages.path
       )
       SELECT
-        paths.path,
+        chat_paths.path,
         type,
         metadata,
         (
             SELECT json_group_array(json_object('ship', ship, 'role', role))
-            FROM peers
-            WHERE peers.path = paths.path
+            FROM chat_peers
+            WHERE chat_peers.path = chat_paths.path
         ) AS peers,
         json_extract(metadata, '$.creator') AS host,
-        paths.peers_get_backlog peersGetBacklog,
+        chat_paths.peers_get_backlog peersGetBacklog,
         json_extract(pins, '$[0]') pinnedMessageId,
         lastMessage,
         lastSender,
         pf.muted,
         pf.pinned,
-        ifnull(chat_with_messages.created_at, paths.created_at) createdAt,
-        ifnull(chat_with_messages.updated_at, paths.updated_at) updatedAt,
-        paths.max_expires_at_duration expiresDuration,
-        paths.invites
-      FROM paths
-      LEFT JOIN chat_with_messages ON paths.path = chat_with_messages.path
-      LEFT JOIN paths_flags pf on paths.path = pf.path
-      WHERE paths.path LIKE '%realm-chat%' OR paths.path LIKE '/spaces/%/chats/%'
-      GROUP BY paths.path
+        ifnull(chat_with_messages.created_at, chat_paths.created_at) createdAt,
+        ifnull(chat_with_messages.updated_at, chat_paths.updated_at) updatedAt,
+        chat_paths.max_expires_at_duration expiresDuration,
+        chat_paths.invites
+      FROM chat_paths
+      LEFT JOIN chat_with_messages ON chat_paths.path = chat_with_messages.path
+      LEFT JOIN chat_paths_flags pf on chat_paths.path = pf.path
+      WHERE chat_paths.path LIKE '%realm-chat%' OR chat_paths.path LIKE '/spaces/%/chats/%'
+      GROUP BY chat_paths.path
       ORDER BY
           chat_with_messages.created_at DESC,
           json_extract(json(metadata), '$.timestamp') DESC;
@@ -469,7 +471,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         WITH formed_fragments AS (
             WITH realm_chat as (
                 SELECT *
-                FROM messages
+                FROM chat_messages
                 WHERE (path LIKE '%realm-chat%' OR path LIKE '/spaces/%/chats/%') AND content_type != 'react' AND content_type != 'status'
                 ORDER BY msg_part_id, created_at DESC
             )
@@ -515,30 +517,30 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         GROUP BY formed_messages.path
       )
       SELECT
-        paths.path,
+        chat_paths.path,
         type,
         metadata,
         (
             SELECT json_group_array(json_object('ship', ship, 'role', role))
-            FROM peers
-            WHERE peers.path = paths.path AND ship != ?
+            FROM chat_peers
+            WHERE chat_peers.path = chat_paths.path AND ship != ?
         ) AS peers,
         json_extract(metadata, '$.creator') AS host,
-        paths.peers_get_backlog peersGetBacklog,
+        chat_paths.peers_get_backlog peersGetBacklog,
         json_extract(pins, '$[0]') pinnedMessageId,
         lastMessage,
         lastSender,
         pf.muted,
         pf.pinned,
-        ifnull(chat_with_messages.created_at, paths.created_at) createdAt,
-        ifnull(chat_with_messages.updated_at, paths.updated_at) updatedAt,
-        paths.max_expires_at_duration expiresDuration,
-        paths.invites
-      FROM paths
-      LEFT JOIN chat_with_messages ON paths.path = chat_with_messages.path
-      LEFT JOIN paths_flags pf on paths.path = pf.path
-      WHERE paths.path = ?
-      GROUP BY paths.path
+        ifnull(chat_with_messages.created_at, chat_paths.created_at) createdAt,
+        ifnull(chat_with_messages.updated_at, chat_paths.updated_at) updatedAt,
+        chat_paths.max_expires_at_duration expiresDuration,
+        chat_paths.invites
+      FROM chat_paths
+      LEFT JOIN chat_with_messages ON chat_paths.path = chat_with_messages.path
+      LEFT JOIN paths_flags pf on chat_paths.path = pf.path
+      WHERE chat_paths.path = ?
+      GROUP BY chat_paths.path
       ORDER BY
           chat_with_messages.created_at DESC,
           json_extract(json(metadata), '$.timestamp') DESC;
@@ -576,7 +578,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
       WITH formed_fragments AS (
         WITH realm_chat as (
             SELECT *
-            FROM messages
+            FROM chat_messages
             WHERE path = ? AND content_type != 'react'
             ORDER BY msg_part_id, created_at DESC
         )
@@ -599,15 +601,15 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         ),
         reactions AS (
             SELECT
-              json_extract(messages.reply_to, '$."msg-id"') reply_msg_id,
+              json_extract(chat_messages.reply_to, '$."msg-id"') reply_msg_id,
               json_group_array(
                   json_object(
-                      'msgId', messages.msg_id,
-                      'by', messages.sender,
-                      'emoji', messages.content_data
+                      'msgId', chat_messages.msg_id,
+                      'by', chat_messages.sender,
+                      'emoji', chat_messages.content_data
                       )
               ) reacts
-            FROM messages
+            FROM chat_messages
             WHERE content_type = 'react'
             GROUP BY reply_msg_id
         )
@@ -676,7 +678,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
                   created_at,
                   updated_at,
                   expires_at
-            FROM messages
+            FROM chat_messages
             WHERE msg_id = ?
             ORDER BY msg_id, msg_part_id)
       GROUP BY msg_id
@@ -702,14 +704,19 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   getLastTimestamp(
-    table: 'paths' | 'messages' | 'peers' | 'delete_logs' | 'notifications',
+    table:
+      | 'chat_paths'
+      | 'chat_messages'
+      | 'chat_peers'
+      | 'chat_delete_logs'
+      | 'notifications',
     path?: string,
     patp?: string
   ): number {
     if (!this.db?.open) return 0;
     const where =
       path && patp ? ` WHERE path = '${path}' and sender != '${patp}'` : '';
-    const column = table === 'delete_logs' ? 'timestamp' : 'received_at';
+    const column = table === 'chat_delete_logs' ? 'timestamp' : 'received_at';
     const query = this.db.prepare(`
       SELECT max(${column}) as lastTimestamp
       FROM ${table}${where};
@@ -723,7 +730,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     if (!this.db?.open) return;
     const query = this.db.prepare(`
       SELECT ship, role
-      FROM peers
+      FROM chat_peers
       WHERE path = ?;
     `);
     const result = query.all(path);
@@ -737,7 +744,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   private _insertMessages(messages: MessagesRow[]) {
     if (!this.db?.open) return;
     const insert = this.db.prepare(
-      `REPLACE INTO messages (
+      `REPLACE INTO chat_messages (
         path, 
         msg_id, 
         msg_part_id, 
@@ -790,7 +797,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     if (!this.db?.open) return;
     if (!paths) return;
     const insert = this.db.prepare(
-      `REPLACE INTO paths (
+      `REPLACE INTO chat_paths (
           path, 
           type, 
           metadata, 
@@ -825,7 +832,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     if (!this.db?.open) return;
     if (!peers) return;
     const insert = this.db.prepare(
-      `REPLACE INTO peers (
+      `REPLACE INTO chat_peers (
           path, 
           ship, 
           role,
@@ -857,7 +864,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   private _insertDeleteLogs(deleteLogs: DeleteLogRow[]) {
     if (!this.db?.open) return;
     const insert = this.db.prepare(
-      `REPLACE INTO delete_logs (
+      `REPLACE INTO chat_delete_logs (
           change, 
           timestamp
         ) VALUES (@change, @timestamp)`
@@ -874,41 +881,40 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
 
   private _deletePathsRow(path: string) {
     if (!this.db?.open) return;
-    const deletePath = this.db.prepare('DELETE FROM paths WHERE path = ?');
-    console.log('deleting path', path);
+    const deletePath = this.db.prepare('DELETE FROM chat_paths WHERE path = ?');
     deletePath.run(path);
     // delete all messages in that path
     const deleteMessages = this.db.prepare(
-      'DELETE FROM messages WHERE path = ?'
+      'DELETE FROM chat_messages WHERE path = ?'
     );
     deleteMessages.run(path);
     // delete all peers in that path
-    const deletePeers = this.db.prepare('DELETE FROM peers WHERE path = ?');
+    const deletePeers = this.db.prepare(
+      'DELETE FROM chat_peers WHERE path = ?'
+    );
     deletePeers.run(path);
   }
 
   private _deletePeersRow(path: string, peer: string) {
     if (!this.db?.open) return;
     const deletePath = this.db.prepare(
-      'DELETE FROM peers WHERE path = ? AND ship = ?'
+      'DELETE FROM chat_peers WHERE path = ? AND ship = ?'
     );
-    console.log(`deleting peer ${peer} on ${path}`);
     deletePath.run(path, peer);
   }
 
   private _deleteMessagesRow(msgId: string) {
     if (!this.db?.open) return;
     const deleteMessage = this.db.prepare(
-      'DELETE FROM messages WHERE msg_id = ?'
+      'DELETE FROM chat_messages WHERE msg_id = ?'
     );
-    console.log('deleting msgId', msgId);
     deleteMessage.run(msgId);
     // insert into delete logs
   }
 }
 
 export const chatInitSql = `
-create table if not exists messages
+create table if not exists chat_messages
 (
     path         TEXT    not null,
     msg_id       TEXT    NOT NULL,
@@ -924,11 +930,11 @@ create table if not exists messages
     received_at   INTEGER NOT NULL
 );
 
-create unique index if not exists messages_path_msg_id_msg_part_id_uindex
-    on messages (path, msg_id, msg_part_id);
+create unique index if not exists chat_messages_path_msg_id_msg_part_id_uindex
+    on chat_messages (path, msg_id, msg_part_id);
 
     
-create table if not exists paths
+create table if not exists chat_paths
 (
     path                        TEXT NOT NULL,
     type                        TEXT NOT NULL,
@@ -944,17 +950,17 @@ create table if not exists paths
     received_at                 INTEGER NOT NULL
 );
 
-create unique index if not exists paths_path_uindex
-    on paths (path);
+create unique index if not exists chat_paths_path_uindex
+    on chat_paths (path);
 
-CREATE TABLE IF NOT EXISTS paths_flags 
+CREATE TABLE IF NOT EXISTS chat_paths_flags 
 (
     path             TEXT NOT NULL,
     pinned           INTEGER default 0 NOT NULL,
     muted            INTEGER default 0 NOT NULL
 );
 
-create table if not exists  peers
+create table if not exists chat_peers
 (
     path        TEXT NOT NULL,
     ship        text NOT NULL,
@@ -964,17 +970,17 @@ create table if not exists  peers
     received_at  INTEGER NOT NULL
 );
 
-create unique index if not exists peers_path_ship_uindex
-    on peers (path, ship);
+create unique index if not exists chat_peers_path_ship_uindex
+    on chat_peers (path, ship);
 
-create table if not exists delete_logs
+create table if not exists chat_delete_logs
 (
     change        TEXT NOT NULL,
     timestamp  INTEGER NOT NULL
 );
 
-create unique index if not exists delete_log_change_uindex
-    on delete_logs (timestamp, change);
+create unique index if not exists chat_delete_log_change_uindex
+    on chat_delete_logs (timestamp, change);
 
 `;
 

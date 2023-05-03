@@ -1,7 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { Anchor } from '@holium/design-system/general';
-import { OnboardDialogDescription } from '@holium/shared';
+import { ForgotPassword, OnboardDialogDescription } from '@holium/shared';
 
 import { AccountCustomDomainDialog } from '../AccountCustomDomainDialog';
 import { AccountDownloadRealmDialog } from '../AccountDownloadRealmDialog';
@@ -24,6 +24,7 @@ export const LoginDialogStory: ComponentStory<typeof LoginDialog> = () => (
           Don't have an account yet? <Anchor>Sign up</Anchor>.
         </OnboardDialogDescription>
       }
+      footer={<ForgotPassword onClick={() => {}} />}
       onLogin={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
@@ -40,9 +41,9 @@ export const AccountHostingDialogStory: ComponentStory<
       selectedPatp="~pasren-satmex"
       setSelectedPatp={() => {}}
       email="rubberducky12@protonmail.com"
-      shipUrl="https://pasren-satmex.holium.network/"
-      shipCode="tolnym-rilmug-ricnep-marlyx"
-      shipMaintenanceWindow={7}
+      serverUrl="https://pasren-satmex.holium.network/"
+      serverCode="tolnym-rilmug-ricnep-marlyx"
+      serverMaintenanceWindow={7}
       onClickChangeEmail={() => {}}
       onClickChangePassword={() => {}}
       onClickManageBilling={() => {}}
@@ -105,8 +106,11 @@ export const AccountCustomDomainDialogStory: ComponentStory<
       patps={['~pasren-satmex']}
       selectedPatp="~pasren-satmex"
       dropletIp="123.123.123.123"
+      domain="holium.network"
+      submitting={false}
+      onChangeDomain={() => {}}
+      onSubmit={() => Promise.resolve()}
       setSelectedPatp={() => {}}
-      onClickSave={() => Promise.resolve()}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />

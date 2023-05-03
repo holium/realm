@@ -17,47 +17,53 @@ export const AddServerStep = ({ setStep }: StepProps) => {
     setStep('/hosting');
   };
 
-  const onNext = async (shipId: string, shipUrl: string, shipCode: string) => {
+  const onNext = async (
+    serverId: string,
+    serverUrl: string,
+    serverCode: string
+  ) => {
     const sanitizedCookie = await OnboardingIPC.getCookie(
-      shipId,
-      shipUrl,
-      shipCode
+      serverId,
+      serverUrl,
+      serverCode
     );
 
-    if (!sanitizedCookie || !shipId || !shipUrl || !shipCode) return false;
+    if (!sanitizedCookie || !serverId || !serverUrl || !serverCode)
+      return false;
 
     OnboardingStorage.set({
-      shipId,
-      shipUrl,
-      shipCode,
+      serverId,
+      serverUrl,
+      serverCode,
     });
 
     OnboardingIPC.setCredentials({
-      patp: shipId,
-      code: shipCode,
-      url: shipUrl,
+      serverId: serverId,
+      serverCode: serverCode,
+      serverUrl: serverUrl,
     });
 
     const { passwordHash, masterAccountId } = OnboardingStorage.get();
 
-    if (!shipId || !passwordHash || !masterAccountId) return false;
+    if (!serverId || !passwordHash || !masterAccountId) return false;
 
     await OnboardingIPC.createAccount(
       {
         accountId: masterAccountId,
         passwordHash,
-        patp: shipId,
+        serverId,
+        serverUrl,
+        serverCode,
+        serverType: 'local',
         avatar: '',
         nickname: '',
         description: '',
         color: '#000000',
-        type: 'local',
-        url: shipUrl,
-        status: 'online',
+        status: 'initial',
         theme: JSON.stringify(defaultTheme),
       },
       passwordHash,
-      shipCode
+      serverCode
     );
 
     setStep('/passport');

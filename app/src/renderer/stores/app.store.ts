@@ -23,7 +23,7 @@ import { ShellModel } from './models/shell.model';
 import { Theme, ThemeType } from './models/theme.model';
 import { shipStore } from './ship.store';
 
-const Screen = types.enumeration(['login', 'onboarding', 'os']);
+const Screen = types.enumeration(['login', 'onboarding', 'add-server', 'os']);
 
 const AppStateModel = types
   .model('AppStateModel', {
@@ -45,7 +45,6 @@ const AppStateModel = types
       'refreshed',
     ]),
     error: types.maybeNull(types.string),
-    //
   })
   .actions((self) => ({
     setBooted(data: RealmUpdateBooted['payload']) {
@@ -62,12 +61,12 @@ const AppStateModel = types
         localStorage.setItem('lastTheme', JSON.stringify(theme));
       }
     },
-    setLoggedIn(patp: string) {
-      self.authStore._setSession(patp);
+    setLoggedIn(serverId: string) {
+      self.authStore._setSession(serverId);
       self.shellStore.setIsBlurred(false);
     },
-    setLoggedOut(patp?: string) {
-      self.authStore._clearSession(patp);
+    setLoggedOut(serverId?: string) {
+      self.authStore._clearSession(serverId);
       self.shellStore.setIsBlurred(true);
     },
     reset() {
@@ -85,11 +84,14 @@ const AppStateModel = types
       self.seenSplash = true;
       yield AuthIPC.setSeenSplash() as Promise<void>;
     }),
+    setCurrentScreen(screen: Instance<typeof Screen>) {
+      self.currentScreen = screen;
+    },
   }))
   .views((self) => ({
     get loggedInAccount(): MobXAccount | undefined {
       return self.authStore.accounts.find(
-        (a) => a.patp === self.authStore.session?.patp
+        (a) => a.serverId === self.authStore.session?.serverId
       );
     },
   }));
@@ -107,7 +109,7 @@ const lastTheme = localStorage.getItem('lastTheme');
 export const appState = AppStateModel.create({
   booted: false,
   seenSplash: false,
-  currentScreen: 'onboarding',
+  currentScreen: 'login',
   theme: lastTheme
     ? Theme.create(JSON.parse(lastTheme))
     : Theme.create(defaultTheme),
@@ -162,20 +164,20 @@ function registerOnUpdateListener() {
     if (update.type === 'booted') {
       appState.reset();
       shipStore.reset();
-      if (update.payload.session) window.ship = update.payload.session.patp;
+      if (update.payload.session) window.ship = update.payload.session.serverId;
       appState.setBooted(update.payload);
       if (update.payload.session) {
-        appState.setLoggedIn(update.payload.session.patp);
+        appState.setLoggedIn(update.payload.session.serverId);
         shipStore.init(update.payload.session);
       }
     }
     if (update.type === 'auth-success') {
       SoundActions.playLogin();
-      window.ship = update.payload.patp;
+      window.ship = update.payload.serverId;
       OnboardingStorage.set({
-        lastAccountLogin: update.payload.patp,
+        lastAccountLogin: update.payload.serverId,
       });
-      appState.setLoggedIn(update.payload.patp);
+      appState.setLoggedIn(update.payload.serverId);
       shipStore.init(update.payload);
     }
     if (update.type === 'auth-failed') {
@@ -183,7 +185,7 @@ function registerOnUpdateListener() {
       appState.authStore.status.setError(update.payload);
     }
     if (update.type === 'logout') {
-      appState.setLoggedOut(update.payload.patp);
+      appState.setLoggedOut(update.payload.serverId);
       shipStore.reset();
       SoundActions.playLogout();
     }
@@ -198,9 +200,6 @@ function registerOnUpdateListener() {
     }
     if (update.type === 'account-updated') {
       appState.authStore._onUpdateAccount(update.payload);
-    }
-    if (update.type === 'onboarding-ended') {
-      appState.authStore._onOnboardingEnded(update.payload);
     }
   });
 
@@ -221,8 +220,11 @@ function registerOnUpdateListener() {
 
   NotifIPC.onUpdate(({ type, payload }) => {
     switch (type) {
+      case 'init':
+        shipStore.notifStore._onInit(payload);
+        break;
       case 'notification-added':
-        shipStore.notifStore.onNotifAdded(payload);
+        shipStore.notifStore._onNotifAdded(payload);
         if (
           shipStore.chatStore.isChatSelected(payload.path) &&
           payload.app === 'realm-chat'
@@ -231,10 +233,10 @@ function registerOnUpdateListener() {
         }
         break;
       case 'notification-updated':
-        shipStore.notifStore.onNotifUpdated(payload);
+        shipStore.notifStore._onNotifUpdated(payload);
         break;
       case 'notification-deleted':
-        shipStore.notifStore.onNotifDeleted(payload);
+        shipStore.notifStore._onNotifDeleted(payload);
         break;
     }
   });
@@ -292,6 +294,9 @@ function registerOnUpdateListener() {
         break;
       case 'stall-update':
         shipStore.spacesStore._onStallUpdate(payload);
+        break;
+      case 'joined-bazaar':
+        shipStore.spacesStore._onJoinedBazaar(payload);
         break;
     }
   });

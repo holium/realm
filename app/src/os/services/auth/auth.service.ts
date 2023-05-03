@@ -13,9 +13,7 @@ import { ConduitSession } from '../api';
 import ShipService from '../ship/ship.service';
 import { DBAccount } from './accounts.table';
 import { AuthDB } from './auth.db';
-// import { CreateMasterAccountPayload } from 'os/realm.types';
 import { AuthUpdateTypes } from './auth.types';
-import { MasterAccount } from './masterAccounts.table';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -47,28 +45,23 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     return this.authDB.tables.accounts.find();
   }
 
-  public getAccount(patp: string): DBAccount | null {
+  public getAccount(serverId: string): DBAccount | null {
     if (!this.authDB) return null;
-    return this.authDB.tables.accounts.findOne(patp);
+    return this.authDB.tables.accounts.findOne(serverId);
   }
 
-  public getMasterAccount(patp: string): MasterAccount | null {
-    if (!this.authDB) return null;
-    return this.authDB.tables.masterAccounts.findOne(`patp = "${patp}"`);
-  }
-
-  public async setAccountTheme(patp: string, theme: ThemeType) {
+  public async setAccountTheme(serverId: string, theme: ThemeType) {
     if (!this.authDB) return;
-    const account = this.authDB.tables.accounts.findOne(patp);
+    const account = this.authDB.tables.accounts.findOne(serverId);
     if (account) {
-      this.authDB.tables.accounts.update(patp, {
+      this.authDB.tables.accounts.update(serverId, {
         theme: JSON.stringify(theme),
       });
     }
   }
 
   public updatePassport(
-    patp: string,
+    serverId: string,
     nickname: string,
     description?: string,
     avatar?: string,
@@ -76,14 +69,14 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
   ) {
     if (!this.authDB) return false;
 
-    const account = this.authDB.tables.accounts.findOne(patp);
+    const account = this.authDB.tables.accounts.findOne(serverId);
 
     if (!account) {
-      log.info('auth.service.ts:', `No account found for ${patp}`);
+      log.info('auth.service.ts:', `No account found for ${serverId}`);
       return false;
     }
 
-    const updatedAccount = this.authDB.tables.accounts.update(patp, {
+    const updatedAccount = this.authDB.tables.accounts.update(serverId, {
       nickname,
       description,
       avatar,
@@ -91,7 +84,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     });
 
     if (updatedAccount) {
-      log.info('auth.service.ts:', `Updated passport for account ${patp}`);
+      log.info('auth.service.ts:', `Updated passport for account ${serverId}`);
       this.sendUpdate({
         type: 'account-updated',
         payload: {
@@ -105,22 +98,22 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     return false;
   }
 
-  public updatePassword(patp: string, password: string) {
+  public updatePassword(serverId: string, password: string) {
     if (!this.authDB) return false;
 
-    const account = this.authDB.tables.accounts.findOne(patp);
+    const account = this.authDB.tables.accounts.findOne(serverId);
 
     if (!account) {
-      log.info('auth.service.ts:', `No account found for ${patp}`);
+      log.info('auth.service.ts:', `No account found for ${serverId}`);
       return false;
     }
 
-    const updatedAccount = this.authDB.tables.accounts.update(patp, {
+    const updatedAccount = this.authDB.tables.accounts.update(serverId, {
       passwordHash: bcrypt.hashSync(password, 10),
     });
 
     if (updatedAccount) {
-      log.info('auth.service.ts:', `Updated password for account ${patp}`);
+      log.info('auth.service.ts:', `Updated password for account ${serverId}`);
       this.sendUpdate({
         type: 'account-updated',
         payload: {
@@ -134,16 +127,16 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     return false;
   }
 
-  public deleteAccount(patp: string): void {
+  public deleteAccount(serverId: string): void {
     if (!this.authDB) return;
-    const account = this.authDB.tables.accounts.findOne(patp);
+    const account = this.authDB.tables.accounts.findOne(serverId);
     if (!account) {
-      log.info('auth.service.ts:', `No account found for ${patp}`);
+      log.info('auth.service.ts:', `No account found for ${serverId}`);
       return;
     }
 
-    this.authDB.tables.accounts.delete(patp);
-    this.authDB.removeFromOrder(patp);
+    this.authDB.tables.accounts.delete(serverId);
+    this.authDB.removeFromOrder(serverId);
 
     this.sendUpdate({
       type: 'account-removed',
@@ -152,19 +145,19 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
         order: this.authDB?.getOrder(),
       },
     });
-    ShipService._deleteShipDB(patp);
+    ShipService._deleteShipDB(serverId);
   }
   /**
    *
-   * @param patp
+   * @param serverId
    * @param password
    * @returns boolean - true if login was successful, false otherwise
    */
-  public login(patp: string, password: string): boolean {
-    const account = this.authDB?.tables.accounts.findOne(patp);
+  public login(serverId: string, password: string): boolean {
+    const account = this.authDB?.tables.accounts.findOne(serverId);
 
     if (!account) {
-      log.info('auth.service.ts:', `No account found for ${patp}`);
+      log.info('auth.service.ts:', `No account found for ${serverId}`);
       return false;
     }
     // TODO Add amplitude logging here
@@ -173,7 +166,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
       // this.sendUpdate({
       //   type: 'login',
       //   payload: {
-      //     patp,
+      //     serverId,
       //     token: 'TODO',
       //   },
       // });
@@ -190,10 +183,10 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
   }
 
   // TODO FINISH THIS FUNCTION REFACTOR
-  public async updateShipCode(patp: string, password: string) {
+  public async updateShipCode(serverId: string, password: string) {
     let result = '';
     try {
-      const ship = this.authDB?.tables.accounts.findOne(patp);
+      const ship = this.authDB?.tables.accounts.findOne(serverId);
       if (!ship) {
         throw new Error('ship not found');
       }
@@ -207,9 +200,9 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
         throw new Error('login: password is incorrect');
       }
 
-      // this.core.passwords.setPassword(patp, password);
+      // this.core.passwords.setPassword(serverId, password);
 
-      // this.core.services.identity.auth.storeCredentials(ship.patp, password, {
+      // this.core.services.identity.auth.storeCredentials(ship.serverId, password, {
       //   code: code,
       // });
 
@@ -220,7 +213,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
         process.env.DEBUG_PROD === 'true'
       ) {
         // cookie = await getCookie({
-        //   patp,
+        //   serverId,
         //   url: ship.url,
         //   code: code,
         // });
@@ -229,7 +222,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
 
       // this.core.setSession(
       //   {
-      //     ship: ship.patp,
+      //     ship: ship.serverId,
       //     url: ship.url,
       //     code,
       //     cookie: cookie ?? '',
@@ -300,14 +293,14 @@ export const authPreload = AuthService.preload(
   new AuthService({ preload: true })
 );
 
-// public register(patp: string, password: string): boolean {
-//   const account = this.authDB.models.accounts.findOne(patp);
+// public register(serverId: string, password: string): boolean {
+//   const account = this.authDB.models.accounts.findOne(serverId);
 //   if (account) {
-//     log.info('auth.service.ts:', `Account already exists for ${patp}`);
+//     log.info('auth.service.ts:', `Account already exists for ${serverId}`);
 //     return false;
 //   }
 //   const passwordHash = bcrypt.hashSync(password, 10);
-//   this.authDB.models.accounts.create({ patp, passwordHash });
+//   this.authDB.models.accounts.create({ serverId, passwordHash });
 //   // TODO Add amplitude logging here
 //   return true;
 // }

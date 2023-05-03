@@ -5,9 +5,9 @@ type Props = {
   patps: string[];
   selectedPatp: string;
   email: string | null;
-  shipUrl: string | undefined;
-  shipCode: string | undefined;
-  shipMaintenanceWindow: number | undefined;
+  serverUrl: string | undefined;
+  serverCode: string | undefined;
+  serverMaintenanceWindow: number | undefined;
   setSelectedPatp: (patp: string) => void;
   onClickChangeEmail: () => void;
   onClickChangePassword: () => void;
@@ -23,9 +23,9 @@ export const AccountHostingDialog = ({
   patps,
   selectedPatp,
   email,
-  shipUrl,
-  shipCode,
-  shipMaintenanceWindow,
+  serverUrl,
+  serverCode,
+  serverMaintenanceWindow,
   setSelectedPatp,
   onClickChangeEmail,
   onClickChangePassword,
@@ -41,16 +41,16 @@ export const AccountHostingDialog = ({
     selectedPatp={selectedPatp}
     setSelectedPatp={setSelectedPatp}
     currentSection={SidebarSection.Hosting}
-    isLoading={!email || !shipUrl || !shipCode || !shipMaintenanceWindow}
+    isLoading={!email || !serverUrl || !serverCode || !serverMaintenanceWindow}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >
     <AccountHostingDialogBody
       selectedPatp={selectedPatp}
       email={email as string}
-      shipUrl={shipUrl as string}
-      shipCode={shipCode as string}
-      shipMaintenanceWindow={shipMaintenanceWindow as number}
+      serverUrl={serverUrl as string}
+      serverCode={serverCode as string}
+      serverMaintenanceWindow={serverMaintenanceWindow as number}
       onClickChangeEmail={onClickChangeEmail}
       onClickChangePassword={onClickChangePassword}
       onClickManageBilling={onClickManageBilling}

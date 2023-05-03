@@ -23,7 +23,7 @@ const AccountTrayAppPresenter = () => {
   if (loggedInAccount.nickname) {
     subtitle = (
       <Text.Custom opacity={0.7} fontSize={2} fontWeight={400}>
-        {loggedInAccount.patp}
+        {loggedInAccount.serverId}
       </Text.Custom>
     );
   }
@@ -51,7 +51,7 @@ const AccountTrayAppPresenter = () => {
             borderRadiusOverride="4px"
             size={32}
             avatar={loggedInAccount.avatar}
-            patp={loggedInAccount.patp}
+            patp={loggedInAccount.serverId}
             sigilColor={[loggedInAccount.color || '#000000', 'white']}
           />
           <Flex ml={2} flexDirection="column">
@@ -65,7 +65,7 @@ const AccountTrayAppPresenter = () => {
               fontWeight={500}
               variant="body"
             >
-              {loggedInAccount.nickname || loggedInAccount.patp}
+              {loggedInAccount.nickname || loggedInAccount.serverId}
             </Text.Custom>
             {subtitle}
           </Flex>

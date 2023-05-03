@@ -21,9 +21,9 @@ import {
 } from './onboarding.types';
 
 type OnboardingCredentials = {
-  patp: string;
-  url: string;
-  code: string;
+  serverId: string;
+  serverUrl: string;
+  serverCode: string;
 };
 
 export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
@@ -101,38 +101,50 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       acc.accountId
     );
     if (!masterAccount) {
-      log.info('auth.service.ts:', `No master account found for ${acc.patp}`);
+      log.info(
+        'auth.service.ts:',
+        `No master account found for ${acc.serverId}`
+      );
       return {};
     }
 
-    const existing = this.authDB.tables.accounts.findOne(acc.patp);
+    const existing = this.authDB.tables.accounts.findOne(acc.serverId);
     if (existing) {
-      log.info('auth.service.ts:', `Account already exists for ${acc.patp}`);
+      log.info(
+        'auth.service.ts:',
+        `Account already exists for ${acc.serverId}`
+      );
       return { account: existing, masterAccount };
     }
 
     const newAccount = this.authDB.tables.accounts.create({
       accountId: acc.accountId,
-      patp: acc.patp,
-      url: acc.url,
+      serverId: acc.serverId,
+      serverUrl: acc.serverUrl,
+      serverCode: acc.serverCode,
+      serverType: acc.serverType,
       avatar: acc.avatar,
       nickname: acc.nickname,
       description: acc.description,
       color: acc.color,
-      type: acc.type,
       status: acc.status,
       theme: acc.theme,
       passwordHash: masterAccount?.passwordHash,
     });
-    this.authDB.addToOrder(acc.patp);
+    this.authDB.addToOrder(acc.serverId);
 
-    const cookie = await this.getCookie(acc.patp, acc.url, shipCode);
-
-    this._createShipDB(newAccount.patp, password, masterAccount.encryptionKey, {
-      url: newAccount.url,
-      code: shipCode,
-      cookie,
-    });
+    const cookie = await this.getCookie(acc.serverId, acc.serverUrl, shipCode);
+    log.info('auth.service.ts:', `Got cookie for ${acc.serverId}`);
+    this._createShipDB(
+      newAccount.serverId,
+      password,
+      masterAccount.encryptionKey,
+      {
+        serverUrl: newAccount.serverUrl,
+        serverCode: shipCode,
+        cookie,
+      }
+    );
 
     if (newAccount) {
       this.sendUpdate({
@@ -144,22 +156,12 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       });
       return { account: newAccount, masterAccount };
     } else {
-      log.info('auth.service.ts:', `Failed to create account for ${acc.patp}`);
+      log.info(
+        'auth.service.ts:',
+        `Failed to create account for ${acc.serverId}`
+      );
       return { masterAccount };
     }
-  }
-
-  public triggerOnboardingEnded() {
-    if (!this.authDB) {
-      throw new Error('No authDB found');
-    }
-    this.sendUpdate({
-      type: 'onboarding-ended',
-      payload: {
-        accounts: this.authDB.tables.accounts.find(),
-        order: this.authDB?.getOrder(),
-      },
-    });
   }
 
   public hashPassword(password: string) {
@@ -167,13 +169,14 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   }
 
   async getPassport() {
-    if (!this.credentials) return;
+    if (!this.credentials)
+      return Promise.reject('getPassport: No credentials found');
     log.info('onboarding.service.ts:', 'Getting passport');
     await this._openConduit();
     log.info('onboarding.service.ts:', 'got conduit');
     const passport = await APIConnection.getInstance().conduit.scry({
       app: 'friends',
-      path: `/contact/${this.credentials.patp}`,
+      path: `/contact/${this.credentials.serverId}`,
     });
     if (passport) {
       passport.color = cleanNounColor(passport.color);
@@ -181,54 +184,36 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     return passport;
   }
 
-  updatePassword(patp: string, password: string) {
+  updatePassword(email: string, password: string) {
     if (!this.authDB) {
       log.error('auth.service.ts:', 'updatePassword', 'No authDB found');
       return false;
     }
 
-    const account = this.authDB.tables.accounts.findOne(patp);
-    if (!account) {
-      log.error(
-        'auth.service.ts:',
-        'updatePassword',
-        `No account found for ${patp}`
-      );
-      return false;
-    }
-
-    const masterAccount = this.authDB.tables.masterAccounts.findOne(
-      account.accountId
+    const masterAccount = this.authDB.tables.masterAccounts.findFirst(
+      "email = '" + email + "'"
     );
     if (!masterAccount) {
       log.error(
         'auth.service.ts:',
         'updatePassword',
-        `No master account found for ${patp}`
+        `No master account found for ${email}`
       );
       return false;
     }
 
-    const accountResult = this.authDB.tables.accounts.update(patp, {
-      passwordHash: this.hashPassword(password),
-    });
-    if (accountResult) {
-      log.info(
-        'auth.service.ts:',
-        'updatePassword',
-        `Updated password for ${patp}`
-      );
-    } else {
+    const accounts = this.authDB.tables.accounts.findAll(masterAccount.id);
+    if (!accounts || accounts.length === 0) {
       log.error(
         'auth.service.ts:',
         'updatePassword',
-        `Failed to update password for ${patp}`
+        `No accounts found for masterAccount ${masterAccount.id}`
       );
       return false;
     }
 
     const masterAccountResult = this.authDB.tables.masterAccounts.update(
-      account.accountId,
+      masterAccount.id,
       {
         passwordHash: this.hashPassword(password),
       }
@@ -237,22 +222,46 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       log.info(
         'auth.service.ts:',
         'updatePassword',
-        `Updated password for master account ${account.accountId}`
+        `Updated password for masterAccount ${masterAccount.id}`
       );
     } else {
       log.error(
         'auth.service.ts:',
         'updatePassword',
-        `Failed to update password for master account ${account.accountId}`
+        `Failed to update password for masterAccount ${masterAccount.id}`
       );
       return false;
     }
 
-    return true;
+    const results = accounts.map((account) => {
+      const accountResult = this.authDB?.tables.accounts.update(
+        account.serverId,
+        {
+          passwordHash: this.hashPassword(password),
+        }
+      );
+      if (accountResult) {
+        log.info(
+          'auth.service.ts:',
+          'updatePassword',
+          `Updated password for ${account.serverId}`
+        );
+        return true;
+      } else {
+        log.error(
+          'auth.service.ts:',
+          'updatePassword',
+          `Failed to update password for ${account.serverId}`
+        );
+        return false;
+      }
+    });
+
+    return results.every((result) => result);
   }
 
   async updatePassport(
-    patp: string,
+    serverId: string,
     data: {
       nickname: string;
       avatar?: string;
@@ -261,7 +270,8 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       cover?: string;
     }
   ) {
-    if (!this.credentials) return;
+    if (!this.credentials)
+      return Promise.reject('updatePassport: No credentials found');
     log.info('onboarding.service.ts:', 'Getting passport');
     await this._openConduit();
     const preparedData: Record<string, any> = {
@@ -276,12 +286,17 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       mark: 'friends-action',
       json: {
         'set-contact': {
-          ship: patp,
+          ship: serverId,
           'contact-info': preparedData,
         },
       },
     };
-    return APIConnection.getInstance().conduit.poke(payload);
+    try {
+      APIConnection.getInstance().conduit.poke(payload);
+    } catch (e) {
+      log.error('onboarding.service.ts:', 'updatePassport', e);
+    }
+    return preparedData;
   }
 
   _prepareBuildVersionEnv() {
@@ -323,26 +338,33 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     return result;
   }
 
-  async _testVersion(buildVersion: any): Promise<boolean> {
+  async _testVersion(buildVersion: RealmInstallVersionTest): Promise<boolean> {
     try {
       const res = await APIConnection.getInstance().conduit.scry({
         app: 'bazaar',
         path: `/version`,
       });
+      log.info(
+        'onboarding.service.ts:',
+        'testVersion',
+        res.version,
+        'vs',
+        `${buildVersion.major}.${buildVersion.minor}.${buildVersion.build}`
+      );
       const parts = res.version.split('.');
-      if (parseInt(parts[0]) > parseInt(buildVersion.major)) {
+      if (parseInt(parts[0]) > buildVersion.major) {
         return true;
       }
       if (
-        parseInt(parts[0]) >= parseInt(buildVersion.major) &&
-        parseInt(parts[1]) > parseInt(buildVersion.minor)
+        parseInt(parts[0]) >= buildVersion.major &&
+        parseInt(parts[1]) > buildVersion.minor
       ) {
         return true;
       }
       if (
-        parseInt(parts[0]) >= parseInt(buildVersion.major) &&
-        parseInt(parts[1]) >= parseInt(buildVersion.minor) &&
-        parseInt(parts[2]) >= parseInt(buildVersion.build)
+        parseInt(parts[0]) >= buildVersion.major &&
+        parseInt(parts[1]) >= buildVersion.minor &&
+        parseInt(parts[2]) >= buildVersion.build
       ) {
         return true;
       }
@@ -353,7 +375,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   }
 
   private async waitForInstallRealmAgent(
-    buildVersion: any
+    buildVersion: RealmInstallVersionTest
   ): Promise<RealmInstallStatus> {
     const self = this;
     return new Promise((resolve) => {
@@ -397,6 +419,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
             local: 'realm',
           },
         });
+        log.info('onboarding.service.ts:', 'installRealmAgent', 'poke sent');
 
         // @note: if %realm is already installed and does not need to be updated, there is
         //   currently no way to get notified by clay (gift) that the kiln-install operation
@@ -421,37 +444,63 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     });
   }
 
-  public async getCookie(patp: string, url: string, code: string) {
-    const now: number = Date.now();
-    if (this.cookie && this.cookieAt && now - this.cookieAt < 3000) {
-      // cache cookie for 3 seconds to prevent hammering urbit /~/login in quick succession
-      return this.cookie;
+  public async getCookie(
+    serverId: string,
+    serverUrl: string,
+    serverCode: string
+  ) {
+    try {
+      const now: number = Date.now();
+      if (this.cookie && this.cookieAt && now - this.cookieAt < 3000) {
+        // cache cookie for 3 seconds to prevent hammering urbit /~/login in quick succession
+        return this.cookie;
+      }
+
+      const cookie = await getCookie({ serverId, serverUrl, serverCode });
+      if (!cookie) throw new Error('Failed to get cookie');
+      const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
+      const sanitizedCookie = cookie.split('; ')[0];
+      log.info('ship.service.ts:', 'cookie', sanitizedCookie);
+      log.info(
+        'ship.service.ts:',
+        'ids',
+        serverId.toLowerCase(),
+        cookiePatp.toLowerCase()
+      );
+
+      if (serverId.toLowerCase() !== cookiePatp.toLowerCase()) {
+        throw new Error('Invalid serverCode.');
+      }
+
+      this.cookie = sanitizedCookie;
+      this.cookieAt = Date.now();
+
+      return sanitizedCookie;
+    } catch (e) {
+      log.error('ship.service.ts:', 'Failed to get cookie', e);
+      throw e;
+    }
+  }
+
+  public getMasterAccount(id: number) {
+    if (!this.authDB) {
+      log.error('onboarding.service.ts:', 'No authDB');
+      return;
     }
 
-    const cookie = await getCookie({ patp, url, code });
-    if (!cookie) throw new Error('Failed to get cookie');
-    const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
-    const sanitizedCookie = cookie.split('; ')[0];
-    if (patp.toLowerCase() !== cookiePatp.toLowerCase()) {
-      throw new Error('Invalid code.');
-    }
-
-    this.cookie = sanitizedCookie;
-    this.cookieAt = Date.now();
-
-    return sanitizedCookie;
+    return this.authDB.tables.masterAccounts.findFirst("id = '" + id + "'");
   }
 
   private async _openConduit() {
-    if (!this.credentials) return;
-    const { url, code, patp } = this.credentials;
-    const cookie = await this.getCookie(patp, url, code);
+    if (!this.credentials)
+      return Promise.reject('_openConduit: No credentials');
+    const { serverUrl, serverCode, serverId } = this.credentials;
+    const cookie = await this.getCookie(serverId, serverUrl, serverCode);
     return new Promise((resolve, reject) => {
-      if (!this.credentials) return;
       APIConnection.getInstance({
-        url: url,
-        code: code,
-        ship: patp,
+        url: serverUrl,
+        code: serverCode,
+        ship: serverId,
         cookie,
       })
         .conduit.on('connected', () => {
@@ -465,24 +514,31 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   }
 
   private _createShipDB(
-    patp: string,
+    serverId: string,
     password: string,
     encryptionKey: string,
     credentials: {
-      url: string;
-      code: string;
+      serverUrl: string;
+      serverCode: string;
       cookie: string;
     }
   ) {
-    const newShipDB = new ShipDB(patp, password, encryptionKey);
+    log.info(
+      'Creating ship database',
+      serverId,
+      encryptionKey,
+      password,
+      credentials
+    );
+    const newShipDB = new ShipDB(serverId, password, encryptionKey);
     newShipDB.setCredentials(
-      credentials.url,
-      credentials.code,
+      credentials.serverUrl,
+      credentials.serverCode,
       credentials.cookie
     );
 
     log.info(
-      `Created ship database for ${patp} with encryption key`,
+      `Created ship database for ${serverId} with encryption key`,
       encryptionKey
     );
     return;

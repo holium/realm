@@ -13,9 +13,9 @@ export type LoginErrorType =
   | 'unknown'
   | '';
 
-export type RealmSession = {
-  url: string;
-  patp: string;
+export type RealmSessionCredentials = {
+  serverId: string;
+  serverUrl: string;
   cookie: string;
 };
 
@@ -23,7 +23,7 @@ export type RealmUpdateBooted = {
   type: 'booted';
   payload: {
     accounts: DBAccount[] | undefined;
-    session?: RealmSession | null;
+    session?: RealmSessionCredentials | null;
     seenSplash: boolean;
   };
 };
@@ -31,8 +31,8 @@ export type RealmUpdateBooted = {
 export type RealmUpdateAuthSuccess = {
   type: 'auth-success';
   payload: {
-    url: string;
-    patp: string;
+    serverId: string;
+    serverUrl: string;
     cookie: string;
   };
 };
@@ -45,7 +45,7 @@ export type RealmUpdateAuthFailed = {
 export type RealmUpdateLogout = {
   type: 'logout';
   payload: {
-    patp: string;
+    serverId: string;
   };
 };
 
