@@ -1,7 +1,8 @@
-import { useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { OnboardingStorage, RealmOnboardingStep } from '@holium/shared';
+import { OnboardingStorage } from '@holium/shared';
+
+import { useAppState } from 'renderer/stores/app.store';
 
 import { BootingStep, ChooseIdStep, LoginStep, PaymentStep } from './steps';
 import { AddServerStep } from './steps/AddServerStep';
@@ -10,47 +11,59 @@ import { HostingStep } from './steps/HostingStep';
 import { InstallationStep } from './steps/InstallationStep';
 import { PassportStep } from './steps/PassportStep';
 
-export type OnboardingStepProps = {
-  initialStep: RealmOnboardingStep;
-  onFinish: () => void;
-};
+export const OnboardingStepPresenter = () => {
+  const { onboardingStep, setCurrentScreen, setOnboardingStep } = useAppState();
 
-export const OnboardingStepPresenter = ({
-  initialStep,
-  onFinish,
-}: OnboardingStepProps) => {
-  const [step, setStep] = useState(initialStep);
-
-  const handleSetStep = (step: RealmOnboardingStep) => {
-    setStep(step);
-    // Persist step in local storage so the user can resume onboarding
-    // even if they close the app.
-    OnboardingStorage.set({ step });
+  const finishOnboarding = () => {
+    setCurrentScreen('login');
+    OnboardingStorage.reset();
   };
 
-  switch (step) {
+  switch (onboardingStep) {
     case '/login':
-      return <LoginStep setStep={handleSetStep} onFinish={onFinish} />;
+      return (
+        <LoginStep
+          setStep={setOnboardingStep}
+          finishOnboarding={finishOnboarding}
+        />
+      );
     case '/intermediary-login':
-      return <LoginStep forcedNextStep="/choose-id" setStep={handleSetStep} />;
+      return (
+        <LoginStep forcedNextStep="/choose-id" setStep={setOnboardingStep} />
+      );
     case '/hosting':
-      return <HostingStep setStep={handleSetStep} onFinish={onFinish} />;
+      return (
+        <HostingStep
+          setStep={setOnboardingStep}
+          finishOnboarding={finishOnboarding}
+        />
+      );
     case '/add-server':
-      return <AddServerStep setStep={handleSetStep} />;
+      return <AddServerStep setStep={setOnboardingStep} />;
     case '/passport':
-      return <PassportStep setStep={handleSetStep} onFinish={onFinish} />;
+      return (
+        <PassportStep
+          setStep={setOnboardingStep}
+          finishOnboarding={finishOnboarding}
+        />
+      );
     case '/installation':
-      return <InstallationStep setStep={handleSetStep} onFinish={onFinish} />;
+      return (
+        <InstallationStep
+          setStep={setOnboardingStep}
+          finishOnboarding={finishOnboarding}
+        />
+      );
     case '/choose-id':
-      return <ChooseIdStep setStep={handleSetStep} />;
+      return <ChooseIdStep setStep={setOnboardingStep} />;
     case '/payment':
-      return <PaymentStep setStep={handleSetStep} />;
+      return <PaymentStep setStep={setOnboardingStep} />;
     case '/booting':
-      return <BootingStep setStep={handleSetStep} />;
+      return <BootingStep setStep={setOnboardingStep} />;
     case '/credentials':
-      return <CredentialsStep setStep={handleSetStep} />;
+      return <CredentialsStep setStep={setOnboardingStep} />;
     default:
-      return <LoginStep setStep={handleSetStep} />;
+      return <LoginStep setStep={setOnboardingStep} />;
   }
 };
 

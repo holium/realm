@@ -33,7 +33,7 @@ const AppPresenter = () => {
         <SelectionProvider>
           <ContextMenuProvider>
             <ErrorBoundary>
-              {!booted ? <AppLoading /> : <AppContent />}
+              {booted ? <AppContent /> : <AppLoading />}
               {contextMenuMemo}
               <div id="portal-root" />
               <div id="menu-root" />

@@ -3,13 +3,9 @@ import { observer } from 'mobx-react';
 
 import { Login } from './login/Login';
 
-type Props = {
-  onAddServer: () => void;
-};
-
-const AuthPresenter = ({ onAddServer }: Props) => (
+const AuthPresenter = () => (
   <ViewPort>
-    <Login addServer={onAddServer} />
+    <Login />
   </ViewPort>
 );
 

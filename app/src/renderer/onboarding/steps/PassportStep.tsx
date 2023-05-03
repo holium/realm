@@ -7,7 +7,7 @@ import { FileUploadParams } from '../../../os/services/ship/ship.service';
 import { AuthIPC, OnboardingIPC, RealmIPC } from '../../stores/ipc';
 import { StepProps } from './types';
 
-export const PassportStep = ({ setStep, onFinish }: StepProps) => {
+export const PassportStep = ({ setStep, finishOnboarding }: StepProps) => {
   const { serverId, nickname, description, avatar } = OnboardingStorage.get();
   const [avatarSrc, setAvatarSrc] = useState<string | null>(avatar);
   const [descriptionSrc, setDescription] = useState<string | null>(description);
@@ -114,7 +114,7 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
     const { serverType } = OnboardingStorage.get();
 
     if (serverType === 'hosted') {
-      onFinish?.();
+      finishOnboarding?.();
     } else {
       setStep('/installation');
     }

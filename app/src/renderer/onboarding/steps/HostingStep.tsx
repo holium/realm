@@ -8,7 +8,10 @@ import { useAppState } from '../../stores/app.store';
 import { thirdEarthApi } from '../thirdEarthApi';
 import { StepProps } from './types';
 
-export const HostingStepPresenter = ({ setStep, onFinish }: StepProps) => {
+export const HostingStepPresenter = ({
+  setStep,
+  finishOnboarding,
+}: StepProps) => {
   const { authStore } = useAppState();
 
   useEffect(() => {
@@ -17,7 +20,7 @@ export const HostingStepPresenter = ({ setStep, onFinish }: StepProps) => {
 
   const onBack = () => {
     if (authStore.accounts.length > 0) {
-      onFinish?.();
+      finishOnboarding?.();
     } else {
       setStep('/login');
     }

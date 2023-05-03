@@ -19,12 +19,9 @@ import { useAppState } from 'renderer/stores/app.store';
 
 import { ShipSelector } from './ShipSelector';
 
-interface LoginProps {
-  addServer: () => void;
-}
-
-const LoginPresenter = ({ addServer }: LoginProps) => {
-  const { setTheme, authStore } = useAppState();
+const LoginPresenter = () => {
+  const { setTheme, authStore, setCurrentScreen, setOnboardingStep } =
+    useAppState();
   const {
     accounts,
     status: loginStatus,
@@ -35,6 +32,11 @@ const LoginPresenter = ({ addServer }: LoginProps) => {
   const [password, setPassword] = useState('');
   const passwordRef = useRef<HTMLInputElement>(null);
   const submitRef = useRef<HTMLButtonElement>(null);
+
+  const addServer = () => {
+    setCurrentScreen('onboarding');
+    setOnboardingStep('/hosting');
+  };
 
   useEffect(() => {
     if (!selectedAccount) {
@@ -343,7 +345,7 @@ const LoginPresenter = ({ addServer }: LoginProps) => {
               showOnHover
               color="text"
               style={{ padding: '6px 10px', borderRadius: 6 }}
-              onClick={() => addServer()}
+              onClick={addServer}
             >
               <Flex
                 gap={8}

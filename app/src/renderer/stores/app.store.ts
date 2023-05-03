@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 import { clone, flow, Instance, types } from 'mobx-state-tree';
 
-import { OnboardingStorage } from '@holium/shared';
+import { OnboardingStorage, RealmOnboardingStep } from '@holium/shared';
 
 import { RealmUpdateBooted } from 'os/realm.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';
@@ -23,13 +23,14 @@ import { ShellModel } from './models/shell.model';
 import { Theme, ThemeType } from './models/theme.model';
 import { shipStore } from './ship.store';
 
-const Screen = types.enumeration(['login', 'onboarding', 'add-server', 'os']);
+const Screen = types.enumeration(['login', 'onboarding', 'os']);
 
 const AppStateModel = types
   .model('AppStateModel', {
     booted: types.boolean,
     seenSplash: types.boolean,
     currentScreen: Screen,
+    onboardingStep: types.string,
     theme: Theme,
     authStore: AuthenticationModel,
     shellStore: ShellModel,
@@ -87,6 +88,9 @@ const AppStateModel = types
     setCurrentScreen(screen: Instance<typeof Screen>) {
       self.currentScreen = screen;
     },
+    setOnboardingStep(step: RealmOnboardingStep) {
+      self.onboardingStep = step;
+    },
   }))
   .views((self) => ({
     get loggedInAccount(): MobXAccount | undefined {
@@ -110,6 +114,7 @@ export const appState = AppStateModel.create({
   booted: false,
   seenSplash: false,
   currentScreen: 'login',
+  onboardingStep: '/login',
   theme: lastTheme
     ? Theme.create(JSON.parse(lastTheme))
     : Theme.create(defaultTheme),
