@@ -47,6 +47,10 @@ export const PassportStep = ({ setStep, onFinish }: StepProps) => {
 
     OnboardingIPC.getPassport()
       .then((ourPassport) => {
+        if (!ourPassport) {
+          setIsReady(true);
+          return;
+        }
         setNickname(ourPassport?.nickname);
         setAvatarSrc(ourPassport?.avatar);
         setDescription(ourPassport?.bio);
