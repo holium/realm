@@ -169,7 +169,8 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   }
 
   async getPassport() {
-    if (!this.credentials) return Promise.reject('No credentials found');
+    if (!this.credentials)
+      return Promise.reject('getPassport: No credentials found');
     log.info('onboarding.service.ts:', 'Getting passport');
     await this._openConduit();
     log.info('onboarding.service.ts:', 'got conduit');
@@ -269,7 +270,8 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       cover?: string;
     }
   ) {
-    if (!this.credentials) return;
+    if (!this.credentials)
+      return Promise.reject('updatePassport: No credentials found');
     log.info('onboarding.service.ts:', 'Getting passport');
     await this._openConduit();
     const preparedData: Record<string, any> = {
@@ -490,11 +492,11 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   }
 
   private async _openConduit() {
-    if (!this.credentials) return Promise.reject('No credentials');
+    if (!this.credentials)
+      return Promise.reject('_openConduit: No credentials');
     const { serverUrl, serverCode, serverId } = this.credentials;
     const cookie = await this.getCookie(serverId, serverUrl, serverCode);
     return new Promise((resolve, reject) => {
-      if (!this.credentials) return reject('No credentials');
       APIConnection.getInstance({
         url: serverUrl,
         code: serverCode,
