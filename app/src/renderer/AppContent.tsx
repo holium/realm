@@ -6,7 +6,7 @@ import { Splash } from './onboarding/Splash';
 import { useAppState } from './stores/app.store';
 import { OnboardingIPC } from './stores/ipc';
 import { Shell } from './system';
-import { Auth } from './system/authentication/index';
+import { Auth } from './system/authentication/Auth';
 
 const AppContentPresenter = () => {
   const { authStore, seenSplash, currentScreen, setCurrentScreen } =
