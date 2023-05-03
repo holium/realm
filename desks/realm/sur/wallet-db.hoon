@@ -19,14 +19,14 @@
 ::
 +$  chain  ?(%bitcoin %btctestnet %ethereum)
 +$  network  ?(%eth-main %eth-gorli)
-+$  uniq-network  [=chain =network]
-+$  txn-id  [uniq-network hash=@t]
++$  txn-id  [=chain =network hash=@t]
 +$  status  ?(%pending %failed %succeeded)
 +$  transaction-row
-  $:  uniq-network
+  $:  =chain
+      =network
       hash=@t
       =wallet-id
-      eth-type=(unit ?(%eth %erc20 %erc721))
+      eth-type=?(%eth %erc20 %erc721)
       contract-address=(unit @t)
       type=?(%sent %received)
       initiated-at=@da

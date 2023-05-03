@@ -11,7 +11,7 @@
 ++  add-transaction-to-table
   |=  [tbl=transactions-table:sur =transaction-row:sur]
   ^-  transactions-table:sur
-  =/  =txn-id:sur  [[chain.transaction-row network.transaction-row] hash.transaction-row]
+  =/  =txn-id:sur  [chain.transaction-row network.transaction-row hash.transaction-row]
   (~(put by tbl) [txn-id transaction-row])
 ::
 ::  poke actions
@@ -19,7 +19,6 @@
 ++  set-wallet
   |=  [row=wallet-row:sur state=state-0:sur =bowl:gall]
   ^-  (quip card state-0:sur)
-  ?>  ?!((~(has by wallets-table.state) [chain.row wallet-index.row]))  :: ensure the path doesn't already exist!!!
   =.  wallets-table.state  (~(put by wallets-table.state) [chain.row wallet-index.row] row)
   =/  change  realm-wallet-db-change+!>([%add-row [%wallets row]]~)
   :_  state
@@ -172,9 +171,7 @@
           ['network' s+network.transaction-row]
           ['hash' [%s hash.transaction-row]]
           ['wallet-id' (wallet-id-to-json wallet-id.transaction-row)]
-          :-  'eth-type'
-            ?~  eth-type.transaction-row  ~
-            [%s u.eth-type.transaction-row]
+          ['eth-type' [%s eth-type.transaction-row]]
           ['type' [%s type.transaction-row]]
           ['initiatedAt' (time initiated-at.transaction-row)]
           :-  'completedAt'
@@ -223,27 +220,4 @@
       (spat txn-id-list)
     ::
   --
-++  dejs-action
-  =,  dejs:format
-  |=  jon=json
-  ^-  action:sur
-  *action:sur
-::  %.  jon
-::  %-  of
-::  :~  [%set-wallet wallet-row]
-::      [%insert-transaction transaction-row]
-::      [%complete-transaction txn-id success+bo]
-::      [%save-transaction-notes txn-id notes+so]
-::  ==
-::++  wallet-row
-::  =,  dejs:format
-::  (ot ~[chain+(su (perk %ethereum %bitcoin %btctestnet ~)) wallet-index+ni address+so path+so nickname+so])
-::++  transaction-row
-::  =,  dejs:format
-::  (ot ~[[chain+(su (perk %ethereum %bictoin %btctestnet ~)) network+((su perk %eth %erc20 %erc721))] wallet-index+ni address+so path+so nickname+so])
-::++  txn-id
-::  =,  dejs:format
-::  |=  jon=json
-::  ^-  txn-id
-::  *txn-id
 --

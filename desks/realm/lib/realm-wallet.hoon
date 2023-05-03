@@ -55,22 +55,32 @@
       [%set-sharing-permissions (ot ~[type+(su (perk %block ~)) who+(se %p)])]
       [%set-default-index (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) index+ni])]
       [%create-wallet (ot ~[sndr+(se %p) network+(su (perk %bitcoin %btctestnet %ethereum ~)) nickname+so])]
-      :: [%insert-transaction (ot ~[transaction-row+json-to-transaction-row])]
-      :: [%complete-transaction (ot ~[txn-id+json-to-txn-id success+bo])]
-      :: [%save-transaction-notes (ot ~[txn-id+json-to-txn-id notes+so])]
+      [%insert-transaction (ot ~[transaction-row+json-to-transaction-row])]
+      [%complete-transaction (ot ~[txn-id+json-to-txn-id success+bo])]
+      [%save-transaction-notes (ot ~[txn-id+json-to-txn-id notes+so])]
   ==
 ::
 ++  json-to-transaction-row
   =,  dejs:format
   |=  jon=json
+  ^-  transaction-row
   %.  jon
   %-  ot
   :~  chain+(su (perk %ethereum %bitcoin %btctestnet ~))
       network+(su (perk %eth-main %eth-gorli ~))
-      wallet-index+ni
-      address+so
-      path+so
-      nickname+so
+      hash+so
+      wallet-id+(ot ~[chain+(su (perk %bitcoin %btctestnet %ethereum ~)) wallet-index+ni])
+      eth-type+(su (perk %eth %erc20 %erc721 ~))
+      contract-address+so:dejs-soft:format
+      type+(su (perk %sent %received ~))
+      initiated-at+di
+      completed-at+ul
+      our-address+so
+      their-patp+(unit @p)
+      their-address+so
+      status+?(%failed %pending %succeeded)
+      failure-reason+so:dejs-soft:format
+      notes+so
   ==
 ::
 ++  json-to-txn-id

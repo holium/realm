@@ -211,7 +211,6 @@ const TransactionDetailPresenter = () => {
             id="transaction-notes"
             name="transaction-notes"
             type="textarea"
-            rows={4}
             cols={50}
             value={notes}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>

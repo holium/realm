@@ -269,7 +269,6 @@ create table if not exists transactions
 create unique index if not exists hash_network_uindex
     on transactions (chain, network, hash);
 
-drop table if exists wallets;
 create table if not exists wallets
 (
     chain                       text not null,

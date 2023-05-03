@@ -61,7 +61,16 @@ const TransactionPresenter = (props: TransactionProps) => {
               : 'Receiving'}
           </Text.Custom>
           <Flex>
-            <Text.Body variant="body" fontSize={1}>
+            <Text.Body
+              fontSize={1}
+              color={
+                transaction.status !== 'pending'
+                  ? transaction.status === 'succeeded'
+                    ? 'intent-success'
+                    : 'intent-alert'
+                  : 'brand'
+              }
+            >
               {`${
                 monthNames[completedDate.getMonth()]
               } ${completedDate.getDate()}`}

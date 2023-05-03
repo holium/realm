@@ -111,8 +111,8 @@ export class WalletService extends AbstractService {
       mark: 'realm-wallet-action',
       json: {
         'insert-transaction': {
-          chain,
-          network,
+          chain: network,
+          network: net,
           wallet,
           contract,
           hash,
