@@ -1,6 +1,6 @@
 import { ChangeEvent, useRef } from 'react';
 
-import { Anchor, Flex } from '@holium/design-system/general';
+import { Flex } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 import { HoliumButton } from '@holium/design-system/os';
 import { useToggle } from '@holium/design-system/util';
@@ -14,15 +14,10 @@ import {
 
 type Props = {
   email: string;
-  onAlreadyHaveAccount: () => void;
   onClaim: (password: string) => Promise<boolean>;
 };
 
-export const ClaimTokenDialog = ({
-  email,
-  onAlreadyHaveAccount,
-  onClaim,
-}: Props) => {
+export const ClaimTokenDialog = ({ email, onClaim }: Props) => {
   const passwordRef = useRef<HTMLInputElement>(null);
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
 
@@ -104,10 +99,6 @@ export const ClaimTokenDialog = ({
               onChange={onChangeConfirmPassword}
             />
           </Flex>
-          <OnboardDialogDescription>
-            Already have an account?{' '}
-            <Anchor onClick={onAlreadyHaveAccount}>Log in</Anchor>.
-          </OnboardDialogDescription>
         </>
       }
       nextText="Claim"

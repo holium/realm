@@ -16,7 +16,6 @@ export const CreateAccountDialogStory: ComponentStory<
   <OnboardingDialogWrapper>
     <ClaimTokenDialog
       email="man@email.com"
-      onAlreadyHaveAccount={() => {}}
       onClaim={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
