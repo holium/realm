@@ -8,6 +8,7 @@ export type BazaarUpdateType = {
     | 'unpinned'
     | 'pins-reordered'
     | 'dock-update'
-    | 'stall-update';
+    | 'stall-update'
+    | 'joined-bazaar';
   payload: any;
 };

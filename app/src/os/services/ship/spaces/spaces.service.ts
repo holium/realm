@@ -123,12 +123,9 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
           break;
         case 'replace':
           const replacePayload = data['replace'];
-          log.info('replace', replacePayload);
+          // log.info('replace', replacePayload);
           const replacePath = replacePayload.space.path;
           this.spacesDB?.update(replacePath, replacePayload.space);
-          // const updatedSpace = this.getSpace(replacePath);
-
-          // log.info(updatedSpace);
           this.sendUpdate({
             type: 'replace',
             payload: this.getSpace(replacePath),
@@ -397,17 +394,6 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
 
   public async updateSpace(path: string, payload: any): Promise<string> {
     return await new Promise((resolve, reject) => {
-      console.log({
-        path: pathToObj(path),
-        payload: {
-          name: payload.name,
-          description: payload.description,
-          access: payload.access,
-          picture: payload.picture,
-          color: payload.color,
-          theme: snakeify(payload.theme),
-        },
-      });
       APIConnection.getInstance().conduit.poke({
         app: 'spaces',
         mark: 'spaces-action',

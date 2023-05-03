@@ -57,7 +57,6 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
   }
 
   private _onEvent = (data: any, _id?: number, mark?: string) => {
-    // log.info('bazaar event => %o', data);
     if (mark === 'bazaar-reaction') {
       const spacesType = Object.keys(data)[0];
       switch (spacesType) {
@@ -69,11 +68,6 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
             DELETE FROM app_catalog;
           `);
           this.tables?.appCatalog.insertAll(data['initial']);
-          // log.info(
-          //   'bazaar.service.ts:',
-          //   'Initial catalog received. # of apps:',
-          //   this.tables?.appCatalog.getCatalog()
-          // );
           this.sendUpdate({
             type: 'initial',
             payload: this.tables?.appCatalog.getCatalog(),
@@ -151,7 +145,6 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
           });
           break;
         case 'stall-update':
-          log.info('stall-update => %o', data['stall-update']);
           const stallUpdate = data['stall-update'];
           // TODO come up with better solution for p2p app discovery
           if ('add-app' in stallUpdate) {
@@ -188,7 +181,7 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
             joinedBazaar.stall
           );
           this.sendUpdate({
-            type: 'stall-update',
+            type: 'joined-bazaar',
             payload: {
               path: joinedBazaar.path,
               stall: joinedStallUpdate,

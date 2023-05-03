@@ -177,7 +177,7 @@ export class NotificationsDB extends AbstractDataAccess<
         payload: notifUpdatedQueried,
       });
     } else if (dbChange.type === 'del-row') {
-      console.log('del-row', dbChange);
+      // console.log('del-row', dbChange);
       const del = dbChange as DelRow;
       this.deleteNotificationsRow(del.id);
       this.sendUpdate({ type: 'notification-deleted', payload: del.id });
@@ -263,7 +263,6 @@ export class NotificationsDB extends AbstractDataAccess<
     const deleteQuery = this.db.prepare(
       'DELETE FROM notifications WHERE id = ?'
     );
-    console.log('deleting notif id', id);
     deleteQuery.run(id);
   }
 
