@@ -207,9 +207,10 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
 
   private async _fetchDeleteLogs() {
     const lastTimestamp = this.getLastTimestamp('chat_delete_logs');
+    // we have to add two because the delete log is inclusive
     const response = await APIConnection.getInstance().conduit.scry({
       app: 'chat-db',
-      path: `/delete-log/start-ms/${lastTimestamp}`,
+      path: `/delete-log/start-ms/${lastTimestamp + 2}`,
     });
     if (!response) return [];
 
@@ -537,7 +538,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         chat_paths.invites
       FROM chat_paths
       LEFT JOIN chat_with_messages ON chat_paths.path = chat_with_messages.path
-      LEFT JOIN chat_paths_flags pf on chat_paths.path = pf.path
+      LEFT JOIN paths_flags pf on chat_paths.path = pf.path
       WHERE chat_paths.path = ?
       GROUP BY chat_paths.path
       ORDER BY

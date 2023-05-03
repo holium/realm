@@ -25,7 +25,7 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
   box-sizing: border-box;
   padding: ${BUBBLE_HEIGHT.rem.paddingY} ${BUBBLE_WIDTH.rem.paddingX};
   min-width: 150px;
-  max-width: 100%;
+  max-width: 92.5%;
   color: rgba(var(--rlm-text-rgba));
   background: rgba(var(--rlm-input-rgba));
   border-radius: ${(props) => {

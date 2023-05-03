@@ -463,7 +463,7 @@ export const SpacesStore = types
       if (!space) return;
       space._setStall(joinedPayload.stall);
       const refreshedSpace = yield SpacesIPC.getSpace(joinedPayload.path);
-      applySnapshot(space, spaceRowToModel(refreshedSpace));
+      self.spaces.set(space.path, spaceRowToModel(refreshedSpace));
     }),
   }));
 
