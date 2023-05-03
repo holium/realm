@@ -21,9 +21,9 @@
   |(=(invites.path-row %anyone) =(role.src-peer invites.path-row) =(role.src-peer %host))
 ::
 ++  fill-out-minimal-fragment
-  |=  [frag=minimal-fragment:sur =path =msg-id:sur index=@ud updated-at=@da expires-at=@da]
+  |=  [frag=minimal-fragment:sur =path =msg-id:sur index=@ud updated-at=@da expires-at=@da now=@da]
   ^-  msg-part:sur
-  [path msg-id index content.frag reply-to.frag metadata.frag timestamp.msg-id updated-at expires-at]
+  [path msg-id index content.frag reply-to.frag metadata.frag timestamp.msg-id updated-at expires-at now]
 ::
 ++  get-full-message
   |=  [tbl=messages-table:sur =msg-id:sur]
@@ -36,18 +36,18 @@
   $(index +(index), result (snoc result (got:msgon:sur tbl [msg-id index])))
 ::
 ++  make-msg-from-minimal-frags
-  |=  [msg-act=insert-message-action:sur id=msg-id:sur updated-at=@da]
+  |=  [msg-act=insert-message-action:sur id=msg-id:sur updated-at=@da now=@da]
   ^-  message:sur
   =/  result        *message:sur
   =/  counter=@ud   0
   |-
   ?:  =(counter (lent fragments.msg-act)) :: stop condition
     result
-  $(result (snoc result (fill-out-minimal-fragment (snag counter fragments.msg-act) path.msg-act id counter updated-at expires-at.msg-act)), counter +(counter))
+  $(result (snoc result (fill-out-minimal-fragment (snag counter fragments.msg-act) path.msg-act id counter updated-at expires-at.msg-act now)), counter +(counter))
 ::
 ++  add-message-to-table
-  |=  [tbl=messages-table:sur msg-act=insert-message-action:sur sender=@p updated-at=@da]
-  =/  msg=message:sur     (make-msg-from-minimal-frags msg-act [timestamp.msg-act sender] updated-at)
+  |=  [tbl=messages-table:sur msg-act=insert-message-action:sur sender=@p updated-at=@da now=@da]
+  =/  msg=message:sur     (make-msg-from-minimal-frags msg-act [timestamp.msg-act sender] updated-at now)
   =/  key-vals            (turn msg |=(a=msg-part:sur [[msg-id.a msg-part-id.a] a]))
   [(gas:msgon:sur tbl key-vals) msg]
 ::
@@ -62,7 +62,7 @@
   $(tbl +:(del:msgon:sur tbl (snag 0 ids)), ids +:ids)
 ::
 ++  remove-ids-from-pins
-  |=  [ids=(list msg-id:sur) state=state-1 now=@da]
+  |=  [ids=(list msg-id:sur) state=state-2 now=@da]
   ^-  state-and-changes
   =/  tbl  paths-table.state
   =/  changes=db-change:sur  *db-change:sur
@@ -85,7 +85,7 @@
 :: then add the del-log,
 :: and then remove the actual messages
 ++  remove-messages
-  |=  [messages=msg-kvs:sur state=state-1 now=@da]
+  |=  [messages=msg-kvs:sur state=state-2 now=@da]
   ^-  state-and-changes
   =/  keys=(list uniq-id:sur)  (keys-from-kvs messages)
 
@@ -106,7 +106,7 @@
 ::
 :: given a msg-id, remove all the `msg-part`s associated with it
 ++  remove-message
-  |=  [state=state-1 =msg-id:sur now=@da]
+  |=  [state=state-2 =msg-id:sur now=@da]
   ^-  state-and-changes
 
   =/  part-counter=@ud  0
@@ -121,7 +121,7 @@
 ::
 :: remove all `msg-part`s associated with a given path
 ++  remove-messages-for-path
-  |=  [state=state-1 =path now=@da]
+  |=  [state=state-2 =path now=@da]
   ^-  state-and-changes
   %^  remove-messages
       (skim (tap:msgon:sur messages-table.state) |=(kv=[k=uniq-id:sur v=msg-part:sur] =(path.v.kv path)))
@@ -129,7 +129,7 @@
   now
 ::
 ++  remove-messages-for-path-before
-  |=  [state=state-1 =path before=time now=@da]
+  |=  [state=state-2 =path before=time now=@da]
   ^-  state-and-changes
 
   =/  start=uniq-id:sur  [[before ~zod] 0]
@@ -141,7 +141,7 @@
   (remove-messages badkvs state now)
 ::
 ++  expire-old-msgs
-  |=  [state=state-1 now=@da]
+  |=  [state=state-2 now=@da]
   ^-  state-and-changes
   =/  old-msgs=msg-kvs:sur
     %+  skim
@@ -153,7 +153,7 @@
   (remove-messages old-msgs state now)
 ::
 ++  log-deletes-for-msg-parts
-  |=  [state=state-1 ids=(list uniq-id:sur) now=@da]
+  |=  [state=state-2 ids=(list uniq-id:sur) now=@da]
   ^-  [del-log:sur db-change:sur]
   =/  change-rows=db-change:sur
     %+  turn
@@ -178,7 +178,7 @@
   (turn matching |=(a=[p=ship q=path] q.a))
 ::
 ++  delete-logs-for-path :: used for clearing del-log when the path itself is deleted, to keep things clean
-  |=  [state=state-1 =path]
+  |=  [state=state-2 =path]
   ^-  del-log:sur
   =/  removables
     %+  skim :: get all the [k v] pairs of logs we can remove
@@ -200,17 +200,18 @@
 ::
 :: MUST EXPLICITLY INCLUDE SELF, this function will not add self into peers list
 ++  create-path
-::chat-db &db-action [%create-path /a/path/to/a/chat ~ %chat *@da *@da ~ %host *@dr ~[[~zod %host] [~bus %member]]]
-  |=  [[row=path-row:sur peers=ship-roles:sur] state=state-1 =bowl:gall]
-  ^-  (quip card state-1)
+::chat-db &db-action [%create-path /a/path/to/a/chat ~ %chat *@da *@da ~ %host *@dr *@dr ~[[~zod %host] [~bus %member]]]
+  |=  [[row=path-row:sur peers=ship-roles:sur] state=state-2 =bowl:gall]
+  ^-  (quip card state-2)
 
   ?>  ?!((~(has by paths-table.state) path.row))  :: ensure the path doesn't already exist!!!
-  =.  paths-table.state  (~(put by paths-table.state) path.row row)
+  =.  received-at.row     now.bowl
+  =.  paths-table.state   (~(put by paths-table.state) path.row row)
 
   =/  thepeers=(list peer-row:sur)
     %+  turn
       peers
-    |=([s=@p role=@tas] [path.row s role now.bowl now.bowl])
+    |=([s=@p role=@tas] [path.row s role now.bowl now.bowl now.bowl])
 
   =.  peers-table.state  (~(put by peers-table.state) path.row thepeers)
   =/  thechange  chat-db-change+!>((limo [[%add-row %paths row] (turn thepeers |=(p=peer-row:sur [%add-row %peers p]))]))
@@ -221,8 +222,8 @@
 ::
 ++  edit-path
 ::  :chat-db &db-action [%edit-path /a/path/to/a/chat ~ %.n %host *@dr]
-  |=  [[=path metadata=(map cord cord) peers-get-backlog=? invites=@tas max-expires-at-duration=@dr] state=state-1 =bowl:gall]
-  ^-  (quip card state-1)
+  |=  [[=path metadata=(map cord cord) peers-get-backlog=? invites=@tas max-expires-at-duration=@dr] state=state-2 =bowl:gall]
+  ^-  (quip card state-2)
 
   =/  original-peers-list   (~(got by peers-table.state) path)
   :: edit-path-metadata pokes are only valid from the ship which is
@@ -233,6 +234,7 @@
   =/  row=path-row:sur        (~(got by paths-table.state) path)
   =/  oldrow=path-row:sur     (~(got by paths-table.state) path)
   =.  updated-at.row          now.bowl
+  =.  received-at.row         now.bowl
   =.  metadata.row            metadata
   =.  peers-get-backlog.row   peers-get-backlog
   =.  invites.row             invites
@@ -248,8 +250,8 @@
 ::
 ++  edit-path-pins
 ::  :chat-db &db-action [%edit-path-pins /a/path/to/a/chat ~]
-  |=  [[=path =pins:sur] state=state-1 =bowl:gall]
-  ^-  (quip card state-1)
+  |=  [[=path =pins:sur] state=state-2 =bowl:gall]
+  ^-  (quip card state-2)
 
   =/  original-peers-list   (~(got by peers-table.state) path)
   :: edit-path-pins pokes are only valid from the ship which is
@@ -260,6 +262,7 @@
   =/  row=path-row:sur   (~(got by paths-table.state) path)
   =/  oldrow=path-row:sur     (~(got by paths-table.state) path)
   =.  pins.row           pins
+  =.  received-at.row    now.bowl
   =.  updated-at.row     now.bowl
   =.  paths-table.state  (~(put by paths-table.state) path row)
 
@@ -271,8 +274,8 @@
 ::
 ++  leave-path
 ::  :chat-db &db-action [%leave-path /a/path/to/a/chat]
-  |=  [=path state=state-1 =bowl:gall]
-  ^-  (quip card state-1)
+  |=  [=path state=state-2 =bowl:gall]
+  ^-  (quip card state-2)
   ?>  =(our.bowl src.bowl)  :: leave pokes are only valid from ourselves. if others want to kick us, that is a different matter
   =.  messages-table.state  messages-table:s:(remove-messages-for-path state path now.bowl)
   =.  paths-table.state  (~(del by paths-table.state) path)
@@ -291,8 +294,8 @@
 ::
 ++  insert
 :: :chat-db &db-action [%insert ~2023.2.2..23.11.10..234a /a/path/to/a/chat (limo [[[%plain '0'] ~ ~] [[%plain '1'] ~ ~] [[%plain '1'] ~ ~] [[%plain '3'] ~ ~] ~]) ~2000.1.1]
-  |=  [msg-act=insert-message-action:sur state=state-1 =bowl:gall]
-  ^-  (quip card state-1)
+  |=  [msg-act=insert-message-action:sur state=state-2 =bowl:gall]
+  ^-  (quip card state-2)
 
   =/  thepeers   (silt (turn (~(got by peers-table.state) path.msg-act) |=(a=peer-row:sur patp.a)))
   ?>  (~(has in thepeers) src.bowl)  :: messages can only be inserted by ships which are in the peers-list
@@ -308,7 +311,7 @@
     ?:  (lte expires-at.msg-act max-exp)  expires-at.msg-act :: otherwise, ensure the expires-at is less than the max-expiration
     max-exp  :: else, set it to the max-expiration based on the max-expires-at-duration defined in thepath
 
-  =/  add-result  (add-message-to-table messages-table.state msg-act src.bowl timestamp.msg-act)
+  =/  add-result  (add-message-to-table messages-table.state msg-act src.bowl timestamp.msg-act now.bowl)
   =.  messages-table.state  -.add-result
   =/  thechange  chat-db-change+!>((turn +.add-result |=(a=msg-part:sur [%add-row [%messages a]])))
   :: message-paths is all the sup.bowl paths that start with
@@ -322,11 +325,11 @@
 ::
 ++  insert-backlog
 :: :chat-db &db-action [%insert-backlog list-of-msg-parts]
-  |=  [=message:sur state=state-1 =bowl:gall]
-  ^-  (quip card state-1)
+  |=  [=message:sur state=state-2 =bowl:gall]
+  ^-  (quip card state-2)
   =/  index=@ud   0
   =/  changes=db-change:sur  *db-change:sur
-  =/  changes-and-state=[db-change:sur state-1]
+  =/  changes-and-state=[db-change:sur state-2]
     |-
       ?:  =(index (lent message))
         [changes state]
@@ -346,6 +349,7 @@
       ?>  (is-valid-inviter pathrow peers src.bowl)
       :: the path has to be %.y on peers-get-backlog
       ?>  peers-get-backlog.pathrow
+      =.  received-at.msg   now.bowl
 
       $(messages-table.state (put:msgon:sur messages-table.state [msg-id.msg msg-part-id.msg] msg), index +(index), changes [[%add-row %messages msg] changes])
 
@@ -361,8 +365,8 @@
 ::
 ++  edit
 ::  :chat-db &db-action [%edit [[~2023.2.2..23.11.10..234a ~zod] /a/path/to/a/chat (limo [[[%plain 'poop'] ~ ~] ~])]]
-  |=  [[=msg-id:sur p=path fragments=(list minimal-fragment:sur)] state=state-1 =bowl:gall]
-  ^-  (quip card state-1)
+  |=  [[=msg-id:sur p=path fragments=(list minimal-fragment:sur)] state=state-2 =bowl:gall]
+  ^-  (quip card state-2)
 
   ?>  =(sender.msg-id src.bowl)  :: edit pokes are only valid from the ship which is the original sender
   ?>  (has:msgon:sur messages-table.state [msg-id 0])  :: edit pokes are only valid if there is a fragment 0 in the table for the msg-id
@@ -373,7 +377,7 @@
   :: tables we do want to update
   =.  messages-table.state          messages-table.s.remove-result
 
-  =/  add-result            (add-message-to-table messages-table.state [timestamp.msg-id p fragments original-expires-at] sender.msg-id now.bowl)
+  =/  add-result            (add-message-to-table messages-table.state [timestamp.msg-id p fragments original-expires-at] sender.msg-id now.bowl now.bowl)
   =.  messages-table.state  -.add-result
 
   =/  thechange   chat-db-change+!>(~[[%upd-messages msg-id +.add-result]])
@@ -390,8 +394,8 @@
 ::
 ++  delete
 ::  :chat-db &db-action [%delete [timestamp=~2023.2.2..23.11.10..234a sender=~zod]]
-  |=  [=msg-id:sur state=state-1 =bowl:gall]
-  ^-  (quip card state-1)
+  |=  [=msg-id:sur state=state-2 =bowl:gall]
+  ^-  (quip card state-2)
 
   ?>  =(sender.msg-id src.bowl)  :: delete pokes are only valid from the ship which is the original sender
   ?>  (has:msgon:sur messages-table.state [msg-id 0])  :: delete pokes are only valid if there is a fragment 0 in the table for the msg-id
@@ -415,8 +419,8 @@
 ++  delete-backlog
 :: deletes all messages from all users before a certain time for a path
 ::chat-db &db-action [%delete-backlog path=/a/path/to/a/chat before=~2023.2.2..23.11.10..234a]
-  |=  [[=path before=time] state=state-1 =bowl:gall]
-  ^-  (quip card state-1)
+  |=  [[=path before=time] state=state-2 =bowl:gall]
+  ^-  (quip card state-2)
 
   =/  peers     (~(got by peers-table.state) path)
   =/  host-peer  (snag 0 (skim peers |=(p=peer-row:sur =(%host role.p))))
@@ -432,8 +436,8 @@
 ::
 ++  add-peer
 ::  :chat-db &db-action [%add-peer [/a/path/to/a/chat ~bus]]
-  |=  [act=[=path patp=ship] state=state-1 =bowl:gall]
-  ^-  (quip card state-1)
+  |=  [act=[=path patp=ship] state=state-2 =bowl:gall]
+  ^-  (quip card state-2)
 
   =/  original-peers-list   (~(got by peers-table.state) path.act)
   =/  pathrow               (~(got by paths-table.state) path.act)
@@ -443,6 +447,7 @@
     path.act
     patp.act
     %member
+    now.bowl
     now.bowl
     now.bowl
   ]
@@ -456,8 +461,8 @@
 ::
 ++  kick-peer
 ::  :chat-db &db-action [%kick-peer /a/path/to/a/chat ~bus]
-  |=  [act=[=path patp=ship] state=state-1 =bowl:gall]
-  ^-  (quip card state-1)
+  |=  [act=[=path patp=ship] state=state-2 =bowl:gall]
+  ^-  (quip card state-2)
   ?.  (~(has by paths-table.state) path.act)
     `state  :: do nothing if we get a kick-peer on a path we have already left
 
@@ -504,7 +509,7 @@
       *messages-table:sur
     %+  skim
       (tap:msgon:sur tbl)
-    |=([k=uniq-id:sur v=msg-part:sur] |((gth created-at.v t) (gth updated-at.v t)))
+    |=([k=uniq-id:sur v=msg-part:sur] (gth received-at.v t))
   ::
   ++  path-msgs
     |=  [tbl=messages-table:sur =path]
@@ -521,7 +526,7 @@
     %-  malt
     %+  skim
       ~(tap by tbl)
-    |=([k=path v=path-row:sur] |((gth created-at.v t) (gth updated-at.v t)))
+    |=([k=path v=path-row:sur] (gth received-at.v t))
   ::
   ++  peer-start
     |=  [t=time tbl=peers-table:sur]
@@ -531,7 +536,7 @@
     =/  valid-rows
       %+  skim
         individual-rows
-      |=(r=peer-row:sur |((gth created-at.r t) (gth updated-at.r t)))
+      |=(r=peer-row:sur (gth received-at.r t))
 
     =/  index=@ud  0
     =/  len=@ud    (lent valid-rows)
@@ -691,6 +696,7 @@
           peers-get-backlog+b+peers-get-backlog.path-row
           :: return as integer millisecond duration
           max-expires-at-duration+(numb (|=(t=@dr ^-(@ud (mul (div t ~s1) 1.000))) max-expires-at-duration.path-row))
+          received-at+(time received-at.path-row)
       ==
     ::
     ++  messages-row
@@ -708,6 +714,7 @@
           created-at+(time created-at.msg-part)
           updated-at+(time updated-at.msg-part)
           expires-at+(time-bunt-null expires-at.msg-part)
+          received-at+(time received-at.msg-part)
       ==
     ::
     ++  time-bunt-null
@@ -769,6 +776,7 @@
           role+s+role.peer-row
           created-at+(time created-at.peer-row)
           updated-at+(time updated-at.peer-row)
+          received-at+(time received-at.peer-row)
       ==
   --
 --

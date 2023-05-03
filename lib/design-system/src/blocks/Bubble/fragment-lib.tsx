@@ -29,6 +29,7 @@ import {
   FragmentItalicsType,
   FragmentKey,
   FragmentLinkType,
+  FragmentMarkdownType,
   FragmentPlainType,
   FragmentReplyType,
   FragmentShipType,
@@ -269,6 +270,12 @@ export const renderFragment = (
 ) => {
   const key = Object.keys(fragment)[0] as FragmentKey;
   switch (key) {
+    case 'markdown':
+      return (
+        <FragmentPlain id={id} key={index}>
+          {(fragment as FragmentMarkdownType).markdown}
+        </FragmentPlain>
+      );
     case 'plain':
       return (
         <FragmentPlain id={id} key={index}>

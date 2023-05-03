@@ -143,7 +143,7 @@
   ?>  =(src.bowl our.bowl)
   =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
   =/  t=@da  now.bowl
-  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t ~ invites.act %.n max-expires-at-duration.act]
+  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t ~ invites.act %.n max-expires-at-duration.act now.bowl]
   =/  all-ships
     ?:  (~(has in (silt peers.act)) our.bowl)  peers.act
     [our.bowl peers.act]
@@ -536,6 +536,7 @@
       %-  of
       :~  
           [%plain so]
+          [%markdown so]
           [%bold so]
           [%italics so]
           [%strike so]
