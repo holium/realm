@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const withPreconstruct = require('@preconstruct/next');
+const { withSentryConfig } = require('@sentry/nextjs');
 
 const nextConfig = {
   compiler: {
@@ -15,4 +16,11 @@ const nextConfig = {
   },
 };
 
-module.exports = withPreconstruct(nextConfig);
+const sentryWebpackPluginOptions = {
+  org: 'assembly-capital',
+  project: 'hostin-holium-com',
+};
+
+module.exports = withPreconstruct(
+  withSentryConfig(nextConfig, sentryWebpackPluginOptions)
+);
