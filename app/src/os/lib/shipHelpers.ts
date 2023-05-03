@@ -26,11 +26,11 @@ export async function getCookie(server: ShipConnectionData) {
       headers: {
         'Content-Type': 'text/plain',
       },
+      signal: controller.signal,
     });
     cookie = response.headers.get('set-cookie')?.split(';')[0];
   } catch (e) {
     log.error(`Error getting cookie for ${server.serverUrl}`, e);
-
     return Promise.reject(e);
   } finally {
     clearTimeout(timeout);
