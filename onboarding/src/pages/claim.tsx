@@ -19,7 +19,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   query,
 }) => {
   const inviteToken = query.token as string | undefined;
-  const email = query.email as string;
+  const email = query.email as string | undefined;
   const full_account = (query.full_account as string) === 'true';
 
   const redirectHome = () => {
