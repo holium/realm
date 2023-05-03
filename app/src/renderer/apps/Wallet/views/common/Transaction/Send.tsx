@@ -7,7 +7,7 @@ import {
   BitcoinWalletType,
   ERC20Type,
   EthWalletType,
-  ProtocolType,
+  NetworkType,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -36,7 +36,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
     const { coin } = props;
     const { walletStore } = useShipStore();
     const pendingTx =
-      walletStore.navState.protocol === ProtocolType.UQBAR
+      walletStore.navState.protocol === NetworkType.UQBAR
         ? walletStore.uqTx
         : null;
     const uqbarContract: boolean = pendingTx
@@ -73,7 +73,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
               {`Send ${
                 coin
                   ? coin.name
-                  : walletStore.navState.protocol === ProtocolType.UQBAR
+                  : walletStore.navState.protocol === NetworkType.UQBAR
                   ? 'zigs'
                   : abbrMap[
                       walletStore.navState.network as 'bitcoin' | 'ethereum'

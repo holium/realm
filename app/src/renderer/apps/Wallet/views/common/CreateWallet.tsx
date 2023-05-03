@@ -4,11 +4,11 @@ import { observer } from 'mobx-react';
 
 import { Button, Flex, Text, TextInput } from '@holium/design-system';
 
-import { NetworkType } from 'renderer/stores/models/wallet.model';
+import { ChainType } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 type Props = {
-  network: NetworkType;
+  network: ChainType;
 };
 
 type BodyProps = Props & {

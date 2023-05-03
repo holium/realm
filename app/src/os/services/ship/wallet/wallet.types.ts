@@ -35,7 +35,12 @@ export type MultiAsset = {
   properties: { [key: string]: string | object };
 };
 
-export enum ProtocolType {
+export enum ChainType {
+  ETHEREUM = 'ethereum',
+  BITCOIN = 'bitcoin',
+}
+
+export enum NetworkType {
   ETH_MAIN = 'Ethereum Mainnet',
   ETH_GORLI = 'Görli Testnet',
   BTC_MAIN = 'Bitcoin Mainnet',

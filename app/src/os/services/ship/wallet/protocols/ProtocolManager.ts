@@ -1,16 +1,16 @@
 import { WalletDB } from '../wallet.db';
-import { ProtocolType } from '../wallet.types';
+import { NetworkType } from '../wallet.types';
 import { BaseProtocol } from './BaseProtocol';
 import { EthereumProtocol } from './ethereum';
 import { Patp } from './types';
 
 export class ProtocolManager {
-  protocols: Map<ProtocolType, BaseProtocol>;
-  currentProtocol: ProtocolType;
+  protocols: Map<NetworkType, BaseProtocol>;
+  currentProtocol: NetworkType;
 
   constructor(
-    protocols: Map<ProtocolType, BaseProtocol>,
-    currentProtocol: ProtocolType
+    protocols: Map<NetworkType, BaseProtocol>,
+    currentProtocol: NetworkType
   ) {
     this.protocols = protocols;
     this.currentProtocol = currentProtocol;
@@ -18,8 +18,8 @@ export class ProtocolManager {
 
   pauseUpdates() {
     if (
-      this.currentProtocol === ProtocolType.ETH_MAIN ||
-      this.currentProtocol === ProtocolType.ETH_GORLI
+      this.currentProtocol === NetworkType.ETH_MAIN ||
+      this.currentProtocol === NetworkType.ETH_GORLI
     ) {
       (
         this.protocols.get(this.currentProtocol) as EthereumProtocol
@@ -27,10 +27,10 @@ export class ProtocolManager {
     }
   }
 
-  watchUpdates(conduit: any, walletState: WalletDB, protocol: ProtocolType) {
+  watchUpdates(conduit: any, walletState: WalletDB, protocol: NetworkType) {
     if (
-      this.currentProtocol === ProtocolType.ETH_MAIN ||
-      this.currentProtocol === ProtocolType.ETH_GORLI
+      this.currentProtocol === NetworkType.ETH_MAIN ||
+      this.currentProtocol === NetworkType.ETH_GORLI
     ) {
       const lastProtocol = this.protocols.get(
         this.currentProtocol
@@ -39,13 +39,13 @@ export class ProtocolManager {
     }
     this.currentProtocol = protocol;
     if (
-      this.currentProtocol === ProtocolType.ETH_MAIN ||
-      this.currentProtocol === ProtocolType.ETH_GORLI
+      this.currentProtocol === NetworkType.ETH_MAIN ||
+      this.currentProtocol === NetworkType.ETH_GORLI
     ) {
       (
         this.protocols.get(this.currentProtocol) as EthereumProtocol
       ).watchUpdates(conduit, walletState);
-    } else if (this.currentProtocol === ProtocolType.UQBAR) {
+    } else if (this.currentProtocol === NetworkType.UQBAR) {
       this.protocols
         .get(this.currentProtocol)
         ?.updateWalletState(conduit, walletState);
@@ -55,7 +55,7 @@ export class ProtocolManager {
   updateWalletState(
     conduit: any,
     walletState: WalletDB,
-    protocol: ProtocolType
+    protocol: NetworkType
   ) {
     (this.protocols.get(protocol) as EthereumProtocol).updateWalletState(
       conduit,

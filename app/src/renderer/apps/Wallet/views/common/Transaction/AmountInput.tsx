@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 
 import { Box, Flex, Icon, Text, TextInput } from '@holium/design-system';
 
-import { ERC20Type, ProtocolType } from 'renderer/stores/models/wallet.model';
+import { ERC20Type, NetworkType } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ContainerFlex, FlexHider } from './styled';
@@ -30,8 +30,8 @@ export const AmountInput = observer(
 
     const [inCryptoToggle, setInCryptoToggle] = useState(true);
     const showUsd =
-      walletStore.navState.protocol === ProtocolType.ETH_MAIN ||
-      (walletStore.navState.protocol === ProtocolType.ETH_GORLI && !props.coin);
+      walletStore.navState.protocol === NetworkType.ETH_MAIN ||
+      (walletStore.navState.protocol === NetworkType.ETH_GORLI && !props.coin);
 
     const inCrypto = showUsd ? inCryptoToggle : true;
 
@@ -159,7 +159,7 @@ export const AmountInput = observer(
                             props.coin
                               ? props.coin.name
                               : walletStore.navState.protocol ===
-                                ProtocolType.UQBAR
+                                NetworkType.UQBAR
                               ? 'zigs'
                               : abbrMap[
                                   walletStore.navState.network as
@@ -181,7 +181,7 @@ export const AmountInput = observer(
                 {inCrypto
                   ? props.coin
                     ? props.coin.name
-                    : walletStore.navState.protocol === ProtocolType.UQBAR
+                    : walletStore.navState.protocol === NetworkType.UQBAR
                     ? 'zigs'
                     : abbrMap[
                         walletStore.navState.network as 'bitcoin' | 'ethereum'

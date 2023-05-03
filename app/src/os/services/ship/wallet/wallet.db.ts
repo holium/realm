@@ -2,7 +2,7 @@ import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
 import { APIConnection } from '../../api';
-import { TransactionsRow } from './wallet.types';
+import { ChainType, NetworkType, TransactionsRow } from './wallet.types';
 
 interface WalletRow {}
 
@@ -193,10 +193,11 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     const insertMany = this.db.transaction((transactions: any) => {
       let tx: any;
       for (tx of Object.values(transactions)) {
+        console.log('this is tx', tx);
         insert.run({
           chain: tx.chain,
           network: tx.network,
-          wallet_index: tx['wallet-id'],
+          wallet_id: tx['wallet-id'],
           hash: tx.hash,
           eth_type: tx['eth-type'],
           contract_address: contractAddress,
@@ -245,8 +246,39 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     insertMany(wallets);
   }
 
-  getLatestBlock() {
-    return 0;
+  getLatestBlock(chain: ChainType, network: NetworkType) {
+    if (!this.db?.open) return;
+    const query = this.db.prepare(
+      `select * from blocks
+      where chain = '${chain}' and network = '${network}'
+      order by block_number desc limit 1`
+    );
+    const result = query.get(chain, network);
+    console.log('latest block', result);
+    return result;
+  }
+
+  setLatestBlock(
+    chain: ChainType,
+    network: NetworkType,
+    walletIndex: number,
+    block: number
+  ) {
+    if (!this.db?.open) return;
+    const insert = this.db.prepare(
+      `REPLACE INTO blocks (
+        chain,
+        network,
+        wallet_index,
+        block_number
+      ) VALUES (@chain, @network, @wallet_index, @block_number)`
+    );
+    insert.run({
+      chain,
+      network,
+      wallet_index: walletIndex,
+      block_number: block,
+    });
   }
 }
 
@@ -271,20 +303,32 @@ create table if not exists transactions
 );
 
 create unique index if not exists hash_network_uindex
-    on transactions (chain, network, hash);
+  on transactions (chain, network, hash);
 
 create table if not exists wallets
 (
-    chain                       text not null,
-    wallet_index                integer not null,
-    path                        text not null,
-    address                     text not null,
-    nickname                    text not null,
-    balance                     real not null
+  chain                       text not null,
+  wallet_index                integer not null,
+  path                        text not null,
+  address                     text not null,
+  nickname                    text not null,
+  balance                     real not null
 );
 
-create unique index if not exists path_uindex
-    on wallets (path);
+create unique index if not exists chain_wallet_index_uindex
+  on wallets (chain, wallet_index);
+
+create table if not exists blocks
+(
+  chain          text    not null,
+  network        text    not null,
+  wallet_index   integer not null,
+  type           text    not null,
+  block_number   integer not null,
+);
+
+create unique index if not exists chain_network_wallet_index_uindex
+  on wallets (chain, network, wallet_index);
 `;
 
 export const walletDBPreload = WalletDB.preload(

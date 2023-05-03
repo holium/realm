@@ -6,7 +6,7 @@ import { Dimensions } from '@holium/design-system';
 import { RealmIPC } from 'renderer/stores/ipc';
 import {
   NetworkStoreType,
-  ProtocolType,
+  NetworkType,
   SharingMode,
   WalletCreationMode,
   WalletStore,
@@ -110,15 +110,15 @@ const persistedState = loadSnapshot();
 export const walletAppDefault = {
   navState: {
     view: WalletView.NEW,
-    protocol: ProtocolType.ETH_GORLI,
-    lastEthProtocol: ProtocolType.ETH_GORLI,
+    protocol: NetworkType.ETH_GORLI,
+    lastEthProtocol: NetworkType.ETH_GORLI,
     btcNetwork: NetworkStoreType.BTC_MAIN,
     transSend: false,
   },
   ethereum: {
     block: 0,
     gorliBlock: 0,
-    protocol: ProtocolType.ETH_GORLI,
+    protocol: NetworkType.ETH_GORLI,
     settings: {
       walletCreationMode: WalletCreationMode.DEFAULT,
       sharingMode: SharingMode.ANYBODY,

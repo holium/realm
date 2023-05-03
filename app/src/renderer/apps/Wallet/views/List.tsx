@@ -3,8 +3,8 @@ import { observer } from 'mobx-react';
 import { Button, Flex, Text } from '@holium/design-system';
 
 import {
+  ChainType,
   NetworkStoreType,
-  NetworkType,
   WalletView,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -84,7 +84,7 @@ const WalletListPresenter = () => {
     <List />
   ) : (
     <Flex height="100%" width="100%" flexDirection="column" alignItems="center">
-      {walletStore.navState.network === NetworkType.BITCOIN ? (
+      {walletStore.navState.network === ChainType.BITCOIN ? (
         <Flex
           width="100%"
           height="100%"

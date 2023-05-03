@@ -5,8 +5,8 @@ import { Flex } from '@holium/design-system';
 
 import {
   BitcoinWalletType,
+  ChainType,
   EthWalletType,
-  NetworkType,
   TransactionType,
   WalletView,
 } from 'renderer/stores/models/wallet.model';
@@ -26,8 +26,8 @@ import { TransactionDetail } from './views/common/TransactionDetail';
 import { WalletSettings } from './views/common/WalletSettings';
 import { WalletList } from './views/List';
 
-const WalletViews: (network: NetworkType) => { [key: string]: any } = (
-  network: NetworkType
+const WalletViews: (network: ChainType) => { [key: string]: any } = (
+  network: ChainType
 ) => ({
   [WalletView.LIST]: () => <WalletList />,
   [WalletView.WALLET_DETAIL]: () => <Detail />,
@@ -52,13 +52,13 @@ const WalletAppPresenter = () => {
     const wallet = walletStore.currentStore.wallets.get(key);
     if (!wallet) continue;
     const walletTransactions = getTransactions(
-      (walletStore.navState.network === NetworkType.ETHEREUM
+      (walletStore.navState.network === ChainType.ETHEREUM
         ? (wallet as EthWalletType).data.get(walletStore.navState.protocol)
             ?.transactionList.transactions
         : (wallet as BitcoinWalletType).transactionList.transactions) ||
         new Map()
     );
-    if (walletStore.navState.network === NetworkType.ETHEREUM) {
+    if (walletStore.navState.network === ChainType.ETHEREUM) {
       for (const key of walletStore.currentStore.wallets.keys()) {
         const coinKeys = (
           walletStore.currentStore.wallets.get(key) as EthWalletType

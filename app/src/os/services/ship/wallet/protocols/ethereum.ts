@@ -14,14 +14,20 @@ import io from 'socket.io-client';
 
 import { WalletDB } from '../wallet.db';
 // import nftabi from 'non-fungible-token-abi';
-import { Asset, CoinAsset, NFTAsset, ProtocolType } from '../wallet.types';
+import {
+  Asset,
+  ChainType,
+  CoinAsset,
+  NetworkType,
+  NFTAsset,
+} from '../wallet.types';
 import { BaseBlockProtocol } from './BaseBlockProtocol';
 
 declare var global: any;
 global.fetch = fetch;
 
 export class EthereumProtocol implements BaseBlockProtocol {
-  private protocol: ProtocolType;
+  private protocol: NetworkType;
   private ethProvider: ethers.providers.JsonRpcProvider;
   private alchemy: Alchemy;
   private interval: any;
@@ -29,7 +35,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
   private nodeURL: string;
   private updating: boolean = false;
 
-  constructor(protocol: ProtocolType) {
+  constructor(protocol: NetworkType) {
     this.protocol = protocol;
     this.baseURL = `https://realm-api-staging-2-ugw49.ondigitalocean.app`; // staging URL
     if (process.env.NODE_ENV === 'production') {
@@ -45,7 +51,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
     // } else {
     //   this.baseURL = 'http://localhost:3300/v1/alchemy';
     // }
-    if (this.protocol === ProtocolType.ETH_MAIN) {
+    if (this.protocol === NetworkType.ETH_MAIN) {
       this.nodeURL = this.baseURL + '/eth';
     } else {
       this.nodeURL = this.baseURL + '/gorli';
@@ -54,7 +60,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
     this.ethProvider = new ethers.providers.JsonRpcProvider({
       url: this.nodeURL,
     });
-    if (this.protocol === ProtocolType.ETH_MAIN) {
+    if (this.protocol === NetworkType.ETH_MAIN) {
       alchemySettings = {
         url: this.nodeURL,
         network: Network.ETH_MAINNET,
@@ -81,7 +87,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
     try {
       const socket = io(this.baseURL);
       socket.on('connect', () => {
-        const room = this.protocol === ProtocolType.ETH_MAIN ? 'main' : 'gorli';
+        const room = this.protocol === NetworkType.ETH_MAIN ? 'main' : 'gorli';
         console.log('connected to ' + room + ' socket');
         socket.emit('join', room);
       });
@@ -135,7 +141,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
         });
         this.getAccountTransactions(
           walletAddress,
-          walletDB.getLatestBlock() ?? 0,
+          walletDB.getLatestBlock(ChainType.ETHEREUM, this.protocol) ?? 0,
           currentBlock
         ).then((response: any[]) => {
           if (response.length > 0) {
@@ -155,6 +161,13 @@ export class EthereumProtocol implements BaseBlockProtocol {
                   block: currentBlock,
                 },
               });
+              walletDB.setLatestBlock(
+                ChainType.ETHEREUM,
+                this.protocol,
+                wallet.wallet_index,
+                'eth',
+                currentBlock
+              );
             }
           }
         });
@@ -184,7 +197,10 @@ export class EthereumProtocol implements BaseBlockProtocol {
                   this.getAssetTransfers(
                     asset.addr,
                     ethWalletAddress,
-                    walletDB.getLatestBlock() ?? 0,
+                    walletDB.getLatestBlock(
+                      ChainType.ETHEREUM,
+                      this.protocol
+                    ) ?? 0,
                     currentBlock
                   ).then((transfers: any) => {
                     walletDB.sendChainUpdate({

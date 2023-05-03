@@ -3,7 +3,7 @@ import { FC } from 'react';
 import { Button, Card, Flex, Icon, Spinner, Text } from '@holium/design-system';
 
 import {
-  ProtocolType,
+  NetworkType,
   TransactionType,
   WalletView,
 } from 'renderer/stores/models/wallet.model';
@@ -72,7 +72,7 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
     console.log(props.transaction.ethType);
     unitsDisplay =
       props.transaction.ethType === 'ETH'
-        ? walletStore.navState.protocol === ProtocolType.UQBAR
+        ? walletStore.navState.protocol === NetworkType.UQBAR
           ? 'zigs'
           : 'ETH'
         : walletStore.ethereum.wallets

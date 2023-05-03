@@ -4,10 +4,10 @@ import { Flex, Text } from '@holium/design-system';
 
 import {
   BitcoinWalletType,
+  ChainType,
   ERC20Type,
   EthWalletType,
   NetworkType,
-  ProtocolType,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -39,14 +39,14 @@ export const WalletCard = ({
   const wallet = walletStore.currentStore.wallets.get(walletKey);
 
   let coins: any = null;
-  if (walletStore.navState.network === NetworkType.ETHEREUM) {
+  if (walletStore.navState.network === ChainType.ETHEREUM) {
     const ethWallet = wallet as EthWalletType;
     const coinMap = ethWallet.data.get(walletStore.navState.protocol)?.coins;
     if (coinMap) coins = getCoins(coinMap as any);
   }
 
   const walletTransactions =
-    walletStore.navState.network === NetworkType.ETHEREUM
+    walletStore.navState.network === ChainType.ETHEREUM
       ? (wallet as EthWalletType).data.get(walletStore.navState.protocol)
           ?.transactionList.transactions
       : (wallet as BitcoinWalletType).transactionList.transactions;
@@ -54,8 +54,8 @@ export const WalletCard = ({
   const transactions = getTransactions(walletTransactions || new Map());
 
   const amountDisplay =
-    walletStore.navState.network === NetworkType.ETHEREUM
-      ? walletStore.navState.protocol === ProtocolType.UQBAR
+    walletStore.navState.network === ChainType.ETHEREUM
+      ? walletStore.navState.protocol === NetworkType.UQBAR
         ? `${formatZigAmount(
             (wallet as EthWalletType).data.get(walletStore.navState.protocol)
               ?.balance ?? ''

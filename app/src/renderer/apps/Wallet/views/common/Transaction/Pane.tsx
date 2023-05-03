@@ -6,7 +6,7 @@ import { Avatar, Box, Button, Flex, Icon, Text } from '@holium/design-system';
 import { shortened } from 'renderer/apps/Wallet/lib/helpers';
 import {
   ERC20Type,
-  ProtocolType,
+  NetworkType,
   WalletView,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -59,7 +59,7 @@ const TransactionPanePresenter = ({
   const [recipientValid, setRecipientValid] = useState(false);
 
   const next = () => {
-    if (walletStore.navState.protocol === ProtocolType.UQBAR) {
+    if (walletStore.navState.protocol === NetworkType.UQBAR) {
       // walletStore.enqueueUqbarTransaction(
       //   walletStore.navState.walletIndex ?? '',
       //   transactionAmount
@@ -137,11 +137,11 @@ const TransactionPanePresenter = ({
                 {transactionAmount}{' '}
                 {coin
                   ? coin.name
-                  : walletStore.navState.protocol === ProtocolType.UQBAR
+                  : walletStore.navState.protocol === NetworkType.UQBAR
                   ? 'zigs'
                   : abbrMap[walletStore.navState.network]}
               </Text.Body>
-              {walletStore.navState.protocol === ProtocolType.ETH_MAIN && (
+              {walletStore.navState.protocol === NetworkType.ETH_MAIN && (
                 <Text.Body>
                   $
                   {ethToUsd(
@@ -221,8 +221,7 @@ const TransactionPanePresenter = ({
                   <Text.Body variant="body">NETWORK FEE</Text.Body>
                   <Flex flexDirection="column">
                     <Text.Body variant="body">0.001 ETH</Text.Body>
-                    {walletStore.navState.protocol ===
-                      ProtocolType.ETH_MAIN && (
+                    {walletStore.navState.protocol === NetworkType.ETH_MAIN && (
                       <Text.Body fontSize={1}>
                         ≈{' '}
                         {ethToUsd(
@@ -240,8 +239,7 @@ const TransactionPanePresenter = ({
                     <Text.Body variant="body">
                       {transactionAmount + 0.0005} {coin ? coin.name : 'ETH'}
                     </Text.Body>
-                    {walletStore.navState.protocol ===
-                      ProtocolType.ETH_MAIN && (
+                    {walletStore.navState.protocol === NetworkType.ETH_MAIN && (
                       <Text.Body fontSize={1}>
                         ≈{' '}
                         {ethToUsd(

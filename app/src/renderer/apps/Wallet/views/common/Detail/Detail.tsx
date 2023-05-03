@@ -5,9 +5,9 @@ import { Box, Button, Flex, Text } from '@holium/design-system';
 
 import {
   BitcoinWalletType,
+  ChainType,
   ERC20Type,
   EthWalletType,
-  NetworkType,
   WalletView,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -62,7 +62,7 @@ const DetailPresenter = ({ hidePending = false }: Props) => {
   }
 
   const walletTransactions =
-    walletStore.navState.network === NetworkType.ETHEREUM
+    walletStore.navState.network === ChainType.ETHEREUM
       ? coin
         ? (wallet as EthWalletType).data
             ?.get(walletStore.navState.protocol ?? '')

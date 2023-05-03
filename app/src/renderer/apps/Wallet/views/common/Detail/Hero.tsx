@@ -8,10 +8,10 @@ import { Box, CopyButton, Flex, Icon, Text } from '@holium/design-system';
 
 import {
   BitcoinWalletType,
+  ChainType,
   ERC20Type,
   EthWalletType,
   NetworkType,
-  ProtocolType,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -84,9 +84,9 @@ export const DetailHero: FC<DetailHeroProps> = observer(
     const [showPasscode, setShowPasscode] = useState(false);
 
     const amountDisplay =
-      walletStore.navState.network === NetworkType.ETHEREUM
+      walletStore.navState.network === ChainType.ETHEREUM
         ? !props.coin
-          ? walletStore.navState.protocol === ProtocolType.UQBAR
+          ? walletStore.navState.protocol === NetworkType.UQBAR
             ? `${formatZigAmount(
                 (props.wallet as EthWalletType).data.get(
                   walletStore.navState.protocol
@@ -186,8 +186,8 @@ export const DetailHero: FC<DetailHeroProps> = observer(
 
     const sendTransaction = async (passcode: number[]) => {
       try {
-        if (walletStore.navState.network === NetworkType.ETHEREUM) {
-          if (walletStore.navState.protocol === ProtocolType.UQBAR) {
+        if (walletStore.navState.network === ChainType.ETHEREUM) {
+          if (walletStore.navState.protocol === NetworkType.UQBAR) {
             // await walletStore.submitUqbarTransaction(
             //   walletStore.currentWallet?.index.toString() ?? '',
             //   passcode
@@ -243,7 +243,7 @@ export const DetailHero: FC<DetailHeroProps> = observer(
         >
           <AddressStyle>
             <Flex>
-              {walletStore.navState.network === NetworkType.ETHEREUM ? (
+              {walletStore.navState.network === ChainType.ETHEREUM ? (
                 <Icon name="Ethereum" mr={2} />
               ) : (
                 <Icon name="Bitcoin" mr={2} />

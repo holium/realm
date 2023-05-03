@@ -10,7 +10,7 @@ import { EthereumProtocol } from './protocols/ethereum';
 import { ProtocolManager } from './protocols/ProtocolManager';
 import { RealmSigner } from './signers/realm';
 import { WalletDB, walletDBPreload } from './wallet.db';
-import { ProtocolType, UISettingsType } from './wallet.types';
+import { NetworkType, UISettingsType } from './wallet.types';
 
 export class WalletService extends AbstractService {
   public walletDB?: WalletDB;
@@ -21,14 +21,14 @@ export class WalletService extends AbstractService {
       return;
     }
     this.walletDB = new WalletDB({ preload: false, db });
-    const protocolMap = new Map<ProtocolType, BaseProtocol>([
-      [ProtocolType.ETH_MAIN, new EthereumProtocol(ProtocolType.ETH_MAIN)],
-      [ProtocolType.ETH_GORLI, new EthereumProtocol(ProtocolType.ETH_GORLI)],
+    const protocolMap = new Map<NetworkType, BaseProtocol>([
+      [NetworkType.ETH_MAIN, new EthereumProtocol(NetworkType.ETH_MAIN)],
+      [NetworkType.ETH_GORLI, new EthereumProtocol(NetworkType.ETH_GORLI)],
       // [ProtocolType.UQBAR, new UqbarProtocol()],
     ]);
     this.protocolManager = new ProtocolManager(
       protocolMap,
-      ProtocolType.ETH_GORLI
+      NetworkType.ETH_GORLI
     );
   }
 
@@ -99,24 +99,42 @@ export class WalletService extends AbstractService {
   }
 
   async insertTransaction(
+    chain: string,
     network: string,
-    net: string,
-    wallet: number,
-    contract: string | null,
+    walletId: number,
     hash: string,
-    tx: any
+    ethType: string,
+    contractAddress: string,
+    type: 'sent' | 'received',
+    initiatedAt: number,
+    completedAt: number,
+    ourAddress: string,
+    theirPatp: string,
+    theirAddress: string,
+    status: string,
+    failureReason: string,
+    notes: string
   ) {
     const payload = {
       app: 'realm-wallet',
       mark: 'realm-wallet-action',
       json: {
         'insert-transaction': {
-          chain: network,
-          network: net,
-          wallet,
-          contract,
+          chain,
+          network,
+          'wallet-id': walletId,
           hash,
-          transaction: tx,
+          'eth-type': ethType,
+          'contract-address': contractAddress,
+          type,
+          'initiated-at': initiatedAt,
+          'completed-at': completedAt,
+          'our-address': ourAddress,
+          'their-patp': theirPatp,
+          'their-address': theirAddress,
+          status,
+          'failure-reason': failureReason,
+          notes,
         },
       },
     };
@@ -139,7 +157,7 @@ export class WalletService extends AbstractService {
   }
 
   async sendTransaction(
-    currentProtocol: ProtocolType,
+    currentProtocol: NetworkType,
     path: string,
     ourPatp: string,
     passcode: string,
@@ -176,7 +194,7 @@ export class WalletService extends AbstractService {
   }
 
   async sendERC20Transaction(
-    currentProtocol: ProtocolType,
+    currentProtocol: NetworkType,
     path: string,
     ourPatp: string,
     passcode: string,
@@ -260,33 +278,7 @@ export class WalletService extends AbstractService {
     }
   }
 
-  async saveTransactionNotes(
-    network: string,
-    net: string,
-    wallet: number,
-    contract: string | null,
-    hash: string,
-    notes: string
-  ) {
-    const payload = {
-      app: 'realm-wallet',
-      mark: 'realm-wallet-action',
-      json: {
-        'save-transaction-notes': {
-          'txn-id': {
-            chain: network,
-            network: net === ProtocolType.ETH_MAIN ? 'eth-main' : 'eth-gorli',
-            hash,
-          },
-          notes,
-        },
-      },
-    };
-    console.log('payload', JSON.stringify(payload));
-    await APIConnection.getInstance().conduit.poke(payload);
-  }
-
-  watchUpdates(protocol: ProtocolType) {
+  watchUpdates(protocol: NetworkType) {
     if (!this.walletDB) throw new Error('Wallet DB not initialized');
     this.protocolManager?.watchUpdates(
       APIConnection.getInstance().conduit,
@@ -295,7 +287,7 @@ export class WalletService extends AbstractService {
     );
   }
 
-  updateWalletState(protocol: ProtocolType) {
+  updateWalletState(protocol: NetworkType) {
     if (!this.walletDB) throw new Error('Wallet DB not initialized');
     this.protocolManager?.updateWalletState(
       APIConnection.getInstance().conduit,

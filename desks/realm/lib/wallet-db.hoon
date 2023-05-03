@@ -50,9 +50,7 @@
   =/  txn  (~(got by transactions-table.state) txn-id)
   =.  notes.txn  notes
   =.  transactions-table.state  (~(put by transactions-table.state) [txn-id txn])
-  =/  change  realm-wallet-db-change+!>(`(list db-change-type:sur)`[%set-row [%transactions txn]]~)
-  :_  state
-  [%give %fact [/db]~ change]~
+  `state
 ::
 ::  JSON
 ::

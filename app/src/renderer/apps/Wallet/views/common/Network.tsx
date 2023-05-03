@@ -2,10 +2,10 @@ import { observer } from 'mobx-react';
 
 import { Box, Flex, Text } from '@holium/design-system';
 
-import { ProtocolType } from 'renderer/stores/models/wallet.model';
+import { NetworkType } from 'renderer/stores/models/wallet.model';
 
 type Props = {
-  network: ProtocolType;
+  network: NetworkType;
 };
 
 const WalletNetworkPresenter = ({ network }: Props) => (

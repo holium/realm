@@ -14,9 +14,9 @@ import {
 
 import {
   BitcoinWalletType,
+  ChainType,
   EthWalletType,
   NetworkType,
-  ProtocolType,
   TransactionType,
   WalletStoreType,
 } from 'renderer/stores/models/wallet.model';
@@ -34,7 +34,7 @@ import {
 const getTransaction = (
   walletStore: WalletStoreType
 ): TransactionType | null => {
-  const isEthereum = walletStore.navState.network === NetworkType.ETHEREUM;
+  const isEthereum = walletStore.navState.network === ChainType.ETHEREUM;
   const isCoin = walletStore.navState.detail?.txtype === 'coin';
   const currentWallet = walletStore.currentWallet;
 
@@ -85,7 +85,7 @@ const TransactionDetailPresenter = () => {
 
   const saveNotes = () => {
     setLoading(true);
-    walletStore.saveTransactionNotes(notes).then(() => {
+    walletStore.saveTransactionNotes(transaction, notes).then(() => {
       setLoading(false);
     });
   };
@@ -140,7 +140,7 @@ const TransactionDetailPresenter = () => {
           <Text.Custom fontSize={4}>
             {wasSent && '-'} {amountDisplay}
           </Text.Custom>
-          {walletStore.navState.protocol === ProtocolType.ETH_MAIN && (
+          {walletStore.navState.protocol === NetworkType.ETH_MAIN && (
             <Text.Custom fontSize={2}>
               $
               {isEth
