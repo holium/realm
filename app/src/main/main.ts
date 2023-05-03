@@ -150,6 +150,11 @@ const createWindow = async () => {
     mainWindow.webContents.send('set-dimensions', initialDimensions);
   });
 
+  // Only have titleBarStyle: hidden when in fullscreen.
+  mainWindow.on('enter-full-screen', () => {});
+
+  mainWindow.on('leave-full-screen', () => {});
+
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
 
