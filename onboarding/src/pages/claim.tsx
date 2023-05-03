@@ -49,8 +49,6 @@ export default function ClaimInvite({
 }: Props) {
   const { goToPage } = useNavigation();
 
-  const onAlreadyHaveAccount = () => goToPage('/login');
-
   const onClaim = async (password: string) => {
     try {
       const { token } = await thirdEarthApi.resetPassword(
@@ -81,13 +79,7 @@ export default function ClaimInvite({
 
   return (
     <Page title="Claim your Realm invite">
-      {!full_account && (
-        <ClaimTokenDialog
-          email={email}
-          onAlreadyHaveAccount={onAlreadyHaveAccount}
-          onClaim={onClaim}
-        />
-      )}
+      {!full_account && <ClaimTokenDialog email={email} onClaim={onClaim} />}
     </Page>
   );
 }
