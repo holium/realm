@@ -86,7 +86,7 @@ export const Bubble = ({
   const innerWidth = useMemo(() => {
     if (!containerWidth) return undefined;
 
-    const removePercentageWidth = containerWidth * 0.075;
+    const removePercentageWidth = containerWidth * 0.1;
     return containerWidth - 16 - removePercentageWidth;
   }, [containerWidth]);
 
