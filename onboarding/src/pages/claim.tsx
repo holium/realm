@@ -18,7 +18,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   res,
   query,
 }) => {
-  const inviteToken = query.token as string;
+  const inviteToken = query.token as string | undefined;
   const email = query.email as string;
   const full_account = (query.full_account as string) === 'true';
 
@@ -28,9 +28,16 @@ export const getServerSideProps: GetServerSideProps = async ({
   };
 
   // If the token is not present, redirect to the home page.
-  if (!inviteToken) {
+  if (!inviteToken || !email) {
     redirectHome();
-    return { props: {} };
+
+    return {
+      props: {
+        inviteToken: '',
+        email: '',
+        full_account: false,
+      },
+    };
   }
 
   return {
