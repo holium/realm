@@ -389,6 +389,7 @@ export class Conduit extends EventEmitter {
       const response = await fetch(`${this.url}/~/scry/${app}${path}.json`, {
         method: 'GET',
         headers: this.headers,
+        signal: this.abort.signal,
       });
       return response.json();
     } catch (err: any) {
@@ -413,6 +414,7 @@ export class Conduit extends EventEmitter {
           method: 'POST',
           headers: this.headers,
           body: JSON.stringify(body),
+          signal: this.abort.signal,
         }
       );
       return response.json();
@@ -614,6 +616,13 @@ export class Conduit extends EventEmitter {
     code: Patp
   ): Promise<string | undefined> {
     let cookie;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => {
+      controller.abort();
+      log.error('fetchCookie timed out');
+    }, 10000);
+
     try {
       const response = await fetch(`${url}/~/login`, {
         method: 'POST',
@@ -621,6 +630,7 @@ export class Conduit extends EventEmitter {
         headers: {
           'Content-Type': 'text/plain',
         },
+        signal: controller.signal,
       });
       if (!response.ok) {
         return Promise.reject(response);
@@ -629,6 +639,8 @@ export class Conduit extends EventEmitter {
       log.info('cookie', cookie);
     } catch (err: any) {
       console.log(err);
+    } finally {
+      clearTimeout(timeout);
     }
     return cookie;
   }

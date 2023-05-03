@@ -260,8 +260,8 @@ export const ChatStore = types
       self.isOpen = false;
     },
     _onInit(payload: any) {
-      self.inbox = payload;
       if (self.loader.isFirstLoad) {
+        self.inbox = payload;
         localStorage.setItem(`${window.ship}-firstLoad`, 'true');
         self.loader.set('loaded');
       }

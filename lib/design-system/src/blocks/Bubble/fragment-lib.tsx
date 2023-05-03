@@ -156,6 +156,7 @@ export const FragmentCodeBlock = styled(Text.Custom)`
   border-radius: 4px;
   width: 100%;
   white-space: pre-wrap;
+  word-wrap: break-word;
 `;
 
 type FragmentImageProps = {

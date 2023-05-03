@@ -295,6 +295,9 @@ function registerOnUpdateListener() {
       case 'stall-update':
         shipStore.spacesStore._onStallUpdate(payload);
         break;
+      case 'joined-bazaar':
+        shipStore.spacesStore._onJoinedBazaar(payload);
+        break;
     }
   });
 
