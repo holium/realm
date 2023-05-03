@@ -67,13 +67,14 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   }
 
   private _onDbUpdate(data: any /*WalletDbReactions*/, _id?: number) {
+    console.log('GOT DB UPDATE');
     data.forEach(this._handleDBChange);
   }
 
   private _handleDBChange(data: any) {
-    if (data.type === 'add-row') {
+    if (data.type === 'set-row') {
       const addRow = data; // as AddRow;
-      console.log('got add-row', addRow);
+      console.log('got set-row', addRow);
       switch (addRow.table) {
         case 'wallets':
           /*const message = addRow.row as WalletsRow;
@@ -83,6 +84,9 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
           this.sendUpdate({ type: 'wallet', payload: addRow.row });
           break;
         case 'transactions':
+          this._insertTransactions([addRow.row]);
+          console.log('sending update');
+          this.sendUpdate({ type: 'wallet', payload: addRow.row });
           break;
         default:
           break;

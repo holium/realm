@@ -89,7 +89,11 @@ export const AmountInput = observer(
 
     return (
       <Flex flexDirection="column">
-        <FlexHider width="100%" justifyContent="space-between">
+        <FlexHider
+          width="100%"
+          justifyContent="space-between"
+          alignItems="center"
+        >
           <Text.Body fontSize={1} variant="body">
             AMOUNT
           </Text.Body>
@@ -189,7 +193,7 @@ export const AmountInput = observer(
           </ContainerFlex>
         </FlexHider>
         <Box ml="72px" width="100%">
-          <Text.Custom fontSize="11px" color="intent-caution">
+          <Text.Custom fontSize="11px" color="intent-alert">
             {amountError && 'Amount greater than wallet balance.'}
           </Text.Custom>
         </Box>

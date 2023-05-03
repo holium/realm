@@ -63,10 +63,7 @@
   $%  [%tables =tables]
   ==
 +$  db-change-type
-  $%
-    [%add-row =db-row]
-    [%upd-transactions-row =txn-id =transaction-row]
-    [%upd-wallets-row =wallet-row]
+  $%  [%set-row =db-row]
   ==
 +$  db-row
   $%  [%wallets =wallet-row]

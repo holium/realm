@@ -107,7 +107,7 @@ const TransactionPanePresenter = ({
   return (
     <>
       {screen === 'initial' ? (
-        <Flex flexDirection="column">
+        <Flex flexDirection="column" gap={10}>
           <AmountInput max={max} coin={coin} setValid={amountValidator} />
           <Box width="100%">
             <RecipientInput setValid={recipientValidator} />

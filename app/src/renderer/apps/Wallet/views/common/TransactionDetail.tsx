@@ -186,7 +186,7 @@ const TransactionDetailPresenter = () => {
         <Text.Custom fontSize={1} opacity={0.7}>
           HASH
         </Text.Custom>
-        <Flex position="relative" left="10px">
+        <Flex position="relative" left="10px" fontSize={1}>
           <Anchor
             href={`https://goerli.etherscan.io/tx/${transaction.hash}`}
             rel="noreferrer"
@@ -211,7 +211,9 @@ const TransactionDetailPresenter = () => {
             id="transaction-notes"
             name="transaction-notes"
             type="textarea"
+            height="72px"
             cols={50}
+            rows={4}
             value={notes}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setNotes(e.target.value)

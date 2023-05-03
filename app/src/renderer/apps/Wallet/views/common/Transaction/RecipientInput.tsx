@@ -188,7 +188,7 @@ const RecipientInputPresenter = (props: {
   };
 
   return (
-    <Flex flexDirection="column" gap={10}>
+    <Flex flexDirection="column">
       <Flex width="100%" justifyContent="space-evenly" alignItems="center">
         <Text.Body fontSize={1} variant="body">
           TO
@@ -227,7 +227,7 @@ const RecipientInputPresenter = (props: {
         </ContainerFlex>
       </Flex>
       <Flex width="100%" justifyContent="flex-end">
-        <Text.Body variant="body" fontSize="11px">
+        <Text.Body fontSize={1} color="intent-alert">
           {recipientDetails.failed &&
             recipientDetails.details?.patp === recipient &&
             `${recipient} doesn't have a Realm wallet.`}

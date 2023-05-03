@@ -15,7 +15,7 @@ const WalletNetworkPresenter = ({ network }: Props) => (
     alignItems="center"
     justifyContent="center"
     borderRadius="33px"
-    //onClick={WalletActions.toggleNetwork}
+    bg="border"
   >
     <Box
       height="8px"

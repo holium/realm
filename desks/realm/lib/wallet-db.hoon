@@ -20,7 +20,7 @@
   |=  [row=wallet-row:sur state=state-0:sur =bowl:gall]
   ^-  (quip card state-0:sur)
   =.  wallets-table.state  (~(put by wallets-table.state) [chain.row wallet-index.row] row)
-  =/  change  realm-wallet-db-change+!>([%add-row [%wallets row]]~)
+  =/  change  realm-wallet-db-change+!>(`(list db-change-type:sur)`[%set-row [%wallets row]]~)
   :_  state
   [%give %fact [/db]~ change]~
 ::
@@ -28,7 +28,7 @@
   |=  [=transaction-row:sur state=state-0:sur =bowl:gall]
   ^-  (quip card state-0:sur)
   =.  transactions-table.state  (add-transaction-to-table transactions-table.state transaction-row)
-  =/  change  realm-wallet-db-change+!>([%add-row [%transactions transaction-row]]~)
+  =/  change  realm-wallet-db-change+!>(`(list db-change-type:sur)`[%set-row [%transactions transaction-row]]~)
   :_  state
   [%give %fact [/db]~ change]~
 ::
@@ -40,7 +40,7 @@
     ?:  success  %succeeded
       %failed
   =.  transactions-table.state  (~(put by transactions-table.state) [txn-id txn])
-  =/  change  realm-wallet-db-change+!>([%upd-transactions-row [%transactions txn-id txn]]~)
+  =/  change  realm-wallet-db-change+!>(`(list db-change-type:sur)`[%set-row [%transactions txn]]~)
   :_  state
   [%give %fact [/db]~ change]~
 ::
@@ -48,9 +48,11 @@
   |=  [[=txn-id:sur notes=@t] state=state-0:sur =bowl:gall]
   ^-  (quip card state-0:sur)
   =/  txn  (~(got by transactions-table.state) txn-id)
-  =.  notes.txn  notes
-  =.  transactions-table.state  (~(put by transactions-table.state) [txn-id txn])
-  `state
+  =.  notes.u.txn  notes
+  =.  transactions-table.state  (~(put by transactions-table.state) [txn-id u.txn])
+  =/  change  realm-wallet-db-change+!>(`(list db-change-type:sur)`[%set-row [%transactions u.txn]]~)
+  :_  state
+  [%give %fact [/db]~ change]~
 ::
 ::  JSON
 ::
@@ -121,20 +123,10 @@
       |=  ch=db-change-type:sur
       %-  pairs
       ?-  -.ch
-        %add-row
-          :~(['type' %s -.ch] ['table' %s -.+.ch] ['row' (any-row db-row.ch)])
-        %upd-transactions-row
-          :~
-            ['type' %s %update]
-            ['table' %s %transactions]
-            ['txn-id' (txn-id-to-json txn-id.ch)]
-            ['transaction' (transaction-row transaction-row.ch)]
-          ==
-        %upd-wallets-row
-          :~
-            ['type' %s %update]
-            ['table' %s %wallets]
-            ['row' (wallet-row wallet-row.ch)]
+        %set-row
+          :~  ['type' %s -.ch]
+              ['table' %s -.+.ch]
+              ['row' (any-row db-row.ch)]
           ==
       ==
     ::

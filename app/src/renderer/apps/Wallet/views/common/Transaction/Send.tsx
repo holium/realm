@@ -88,7 +88,7 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
 
     return (
       <Box width="100%" hidden={props.hidden} color="card">
-        <Flex flexDirection="column" gap={10}>
+        <Flex flexDirection="column" gap={20}>
           <Separator />
           <TransactionPane
             onConfirm={props.onConfirm}

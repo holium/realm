@@ -82,7 +82,7 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   }
 
   return (
-    <Card width="100%" style={{ borderRadius: '9px' }}>
+    <Card width="100%" style={{ borderRadius: '9px' }} color="border">
       <Flex flexDirection="row" justifyContent="space-between">
         <Flex
           justifyContent="center"
@@ -95,7 +95,7 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
             <Spinner size={0} />
           </Flex>
           <Flex flexDirection="column">
-            <Text.Body variant="body">
+            <Text.Body color="accent">
               {props.transaction.type === 'sent' ? 'Sending' : 'Receiving'}{' '}
               {isEth ? ethAmount.eth : btcAmount.btc} {unitsDisplay}
             </Text.Body>

@@ -38,7 +38,6 @@ export type TextProps = {
   fontSize?: string | number;
   truncate?: boolean;
   noSelection?: boolean;
-  color?: string;
 } & BoxProps;
 
 const customStyling = css<TextProps>`

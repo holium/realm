@@ -275,13 +275,14 @@ export class WalletService extends AbstractService {
         'save-transaction-notes': {
           'txn-id': {
             chain: network,
-            network: net,
+            network: net === ProtocolType.ETH_MAIN ? 'eth-main' : 'eth-gorli',
             hash,
           },
           notes,
         },
       },
     };
+    console.log('payload', JSON.stringify(payload));
     await APIConnection.getInstance().conduit.poke(payload);
   }
 
