@@ -538,7 +538,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         chat_paths.invites
       FROM chat_paths
       LEFT JOIN chat_with_messages ON chat_paths.path = chat_with_messages.path
-      LEFT JOIN paths_flags pf on chat_paths.path = pf.path
+      LEFT JOIN chat_paths_flags pf on chat_paths.path = pf.path
       WHERE chat_paths.path = ?
       GROUP BY chat_paths.path
       ORDER BY
