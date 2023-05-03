@@ -140,7 +140,10 @@ const LoginPresenter = ({ addServer }: LoginProps) => {
         label: 'Remove account',
         onClick: (evt) => {
           evt.stopPropagation();
-          selectedAccount && authStore.removeAccount(selectedAccount.serverId);
+          if (selectedAccount) {
+            localStorage.removeItem(`${selectedAccount.serverId}-firstLoad`);
+            authStore.removeAccount(selectedAccount.serverId);
+          }
         },
       },
     ];

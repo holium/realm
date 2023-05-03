@@ -169,7 +169,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   }
 
   async getPassport() {
-    if (!this.credentials) return;
+    if (!this.credentials) return Promise.reject('No credentials found');
     log.info('onboarding.service.ts:', 'Getting passport');
     await this._openConduit();
     log.info('onboarding.service.ts:', 'got conduit');
@@ -289,7 +289,12 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
         },
       },
     };
-    return APIConnection.getInstance().conduit.poke(payload);
+    try {
+      APIConnection.getInstance().conduit.poke(payload);
+    } catch (e) {
+      log.error('onboarding.service.ts:', 'updatePassport', e);
+    }
+    return preparedData;
   }
 
   _prepareBuildVersionEnv() {
@@ -331,26 +336,33 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     return result;
   }
 
-  async _testVersion(buildVersion: any): Promise<boolean> {
+  async _testVersion(buildVersion: RealmInstallVersionTest): Promise<boolean> {
     try {
       const res = await APIConnection.getInstance().conduit.scry({
         app: 'bazaar',
         path: `/version`,
       });
+      log.info(
+        'onboarding.service.ts:',
+        'testVersion',
+        res.version,
+        'vs',
+        `${buildVersion.major}.${buildVersion.minor}.${buildVersion.build}`
+      );
       const parts = res.version.split('.');
-      if (parseInt(parts[0]) > parseInt(buildVersion.major)) {
+      if (parseInt(parts[0]) > buildVersion.major) {
         return true;
       }
       if (
-        parseInt(parts[0]) >= parseInt(buildVersion.major) &&
-        parseInt(parts[1]) > parseInt(buildVersion.minor)
+        parseInt(parts[0]) >= buildVersion.major &&
+        parseInt(parts[1]) > buildVersion.minor
       ) {
         return true;
       }
       if (
-        parseInt(parts[0]) >= parseInt(buildVersion.major) &&
-        parseInt(parts[1]) >= parseInt(buildVersion.minor) &&
-        parseInt(parts[2]) >= parseInt(buildVersion.build)
+        parseInt(parts[0]) >= buildVersion.major &&
+        parseInt(parts[1]) >= buildVersion.minor &&
+        parseInt(parts[2]) >= buildVersion.build
       ) {
         return true;
       }
@@ -361,7 +373,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   }
 
   private async waitForInstallRealmAgent(
-    buildVersion: any
+    buildVersion: RealmInstallVersionTest
   ): Promise<RealmInstallStatus> {
     const self = this;
     return new Promise((resolve) => {
@@ -405,6 +417,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
             local: 'realm',
           },
         });
+        log.info('onboarding.service.ts:', 'installRealmAgent', 'poke sent');
 
         // @note: if %realm is already installed and does not need to be updated, there is
         //   currently no way to get notified by clay (gift) that the kiln-install operation
@@ -477,11 +490,11 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   }
 
   private async _openConduit() {
-    if (!this.credentials) return;
+    if (!this.credentials) return Promise.reject('No credentials');
     const { serverUrl, serverCode, serverId } = this.credentials;
     const cookie = await this.getCookie(serverId, serverUrl, serverCode);
     return new Promise((resolve, reject) => {
-      if (!this.credentials) return;
+      if (!this.credentials) return reject('No credentials');
       APIConnection.getInstance({
         url: serverUrl,
         code: serverCode,
