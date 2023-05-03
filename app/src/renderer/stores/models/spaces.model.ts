@@ -82,6 +82,14 @@ export const SpaceModel = types
       // TODO check if admin
       return self.path.includes(window.ship);
     },
+    isAdmin() {
+      // if host
+      if (self.path.includes(window.ship)) return true;
+      // check member
+      const member = self.members.all.get(window.ship);
+      if (!member) return false;
+      return member.roles.includes('admin');
+    },
   }))
   .actions((self) => ({
     setTheme: flow(function* (theme: any) {
@@ -450,6 +458,13 @@ export const SpacesStore = types
       if (!space) return;
       space._setStall(stallPayload.stall);
     },
+    _onJoinedBazaar: flow(function* (joinedPayload: any) {
+      const space = self.spaces.get(joinedPayload.path);
+      if (!space) return;
+      space._setStall(joinedPayload.stall);
+      const refreshedSpace = yield SpacesIPC.getSpace(joinedPayload.path);
+      applySnapshot(space, spaceRowToModel(refreshedSpace));
+    }),
   }));
 
 export type SpacesStoreType = Instance<typeof SpacesStore>;

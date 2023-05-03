@@ -59,7 +59,6 @@ export const ShipBarPresenter = () => {
 
   const onNotifLinkClick = (app: string, path: string, link?: string) => {
     trackEvent('CLICK_NOTIFICATION', 'DESKTOP_SCREEN', { app });
-    console.log('clicked notification', app, path, link);
     switch (app) {
       case 'os-settings':
         shellStore.openWindow(nativeApps['os-settings'] as AppType);
@@ -88,6 +87,7 @@ export const ShipBarPresenter = () => {
   };
 
   useEffect(() => {
+    if (!loggedInAccount) return;
     initNotifications();
   }, [loggedInAccount?.serverId]);
 

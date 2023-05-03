@@ -31,11 +31,7 @@ const ThemePanelPresenter = () => {
 
   if (!spacesStore.selected || !loggedInAccount) return null;
 
-  const canEditSpace =
-    spacesStore.selected.members.list.findIndex(
-      (m) =>
-        m.patp === loggedInAccount.serverId && m.roles.indexOf('admin') !== -1
-    ) !== -1;
+  const canEditSpace = spacesStore.selected.isAdmin();
 
   const setNewTheme = async (wallpaperSrc: string) => {
     const newTheme = await theme.setWallpaper(wallpaperSrc);
