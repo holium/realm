@@ -46,17 +46,17 @@ export class ShipDB {
 
     // update db schemas if we need to
     this.addColumnIfNotExists(
-      'messages',
+      'chat_messages',
       'received_at',
       'INTEGER NOT NULL DEFAULT 0'
     );
     this.addColumnIfNotExists(
-      'peers',
+      'chat_peers',
       'received_at',
       'INTEGER NOT NULL DEFAULT 0'
     );
     this.addColumnIfNotExists(
-      'paths',
+      'chat_paths',
       'received_at',
       'INTEGER NOT NULL DEFAULT 0'
     );
