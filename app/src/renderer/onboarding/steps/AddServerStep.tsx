@@ -22,11 +22,11 @@ export const AddServerStep = ({ setStep }: StepProps) => {
     serverUrl: string,
     serverCode: string
   ) => {
-    const sanitizedCookie = await OnboardingIPC.getCookie(
+    const sanitizedCookie = await OnboardingIPC.getCookie({
       serverId,
       serverUrl,
-      serverCode
-    );
+      serverCode,
+    });
 
     if (!sanitizedCookie || !serverId || !serverUrl || !serverCode)
       return false;
