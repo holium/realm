@@ -160,13 +160,13 @@
       :~  ['chain' [%s chain.transaction-row]]
           ['network' s+network.transaction-row]
           ['hash' [%s hash.transaction-row]]
-          ['wallet-id' (wallet-id-to-json wallet-id.transaction-row)]
+          ['wallet-id' (wallet-id-to-json [chain.transaction-row wallet-index.transaction-row])]
           ['eth-type' [%s eth-type.transaction-row]]
           ['type' [%s type.transaction-row]]
-          ['initiatedAt' (time initiated-at.transaction-row)]
+          ['initiatedAt' s+initiated-at.transaction-row]
           :-  'completedAt'
             ?~  completed-at.transaction-row  ~
-            (time u.completed-at.transaction-row)
+            s+u.completed-at.transaction-row
           ['ourAddress' [%s our-address.transaction-row]]
           :-  'theirPatp'
             ?~  their-patp.transaction-row  ~

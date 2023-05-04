@@ -104,16 +104,16 @@ export class WalletService extends AbstractService {
     walletId: number,
     hash: string,
     ethType: string,
-    contractAddress: string,
+    contractAddress: string | null,
     type: 'sent' | 'received',
-    initiatedAt: number,
-    completedAt: number,
+    initiatedAt: string,
+    completedAt: string | null,
     ourAddress: string,
-    theirPatp: string,
+    theirPatp: string | null,
     theirAddress: string,
     status: string,
-    failureReason: string,
-    notes: string
+    failureReason: string | null,
+    notes: string | null
   ) {
     const payload = {
       app: 'realm-wallet',

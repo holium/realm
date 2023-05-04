@@ -69,12 +69,12 @@
   :~  chain+(su (perk %ethereum %bitcoin %btctestnet ~))
       network+(su (perk %eth-main %eth-gorli ~))
       hash+so
-      wallet-id+(ot ~[chain+(su (perk %bitcoin %btctestnet %ethereum ~)) wallet-index+ni])
+      wallet-index+ni
       eth-type+(su (perk %eth %erc20 %erc721 ~))
       contract-address+so:dejs-soft:format
       type+(su (perk %sent %received ~))
-      initiated-at+di
-      completed-at+ul
+      initiated-at+so
+      completed-at+so:dejs-soft:format
       our-address+so
       their-patp+(unit @p)
       their-address+so

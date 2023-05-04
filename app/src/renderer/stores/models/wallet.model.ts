@@ -185,7 +185,7 @@ const TransactionList = types
       }
     },
     applyChainTransactions(
-      protocol: NetworkType,
+      network: NetworkType,
       index: number,
       address: string,
       transactions: any
@@ -198,7 +198,7 @@ const TransactionList = types
           walletIndex: index,
           amount: transaction.value?.toString() || '0',
           network: 'ethereum',
-          ethType: transaction.contractAddress || 'ETH',
+          ethType: transaction.contractAddress || 'eth',
           type: sent ? 'sent' : 'received',
           initiatedAt: previousTransaction?.initiatedAt || '',
           completedAt: transaction.metadata.blockTimestamp,
@@ -213,32 +213,61 @@ const TransactionList = types
         self.transactions.set(transaction.hash, newTransaction);
         if (previousTransaction) {
           if (newTransaction.status !== previousStatus) {
-            const tx = this.getStoredTransaction(transaction.hash);
+            // const tx = this.getStoredTransaction(transaction.hash);
             this.setTransaction(
-              protocol,
+              ChainType.ETHEREUM,
+              network,
               index,
-              transaction.contractAddress || null,
               transaction.hash,
-              tx
+              transaction.contractAddress || 'eth',
+              transaction.contractAddress,
+              sent ? 'sent' : 'received',
+              previousTransaction?.initiatedAt || '',
+              transaction.metadata.blockTimestamp,
+              newTransaction.ourAddress,
+              newTransaction.theirPatp ?? null,
+              newTransaction.theirAddress,
+              newTransaction.status,
+              newTransaction.failureReason ?? null,
+              newTransaction.notes
             );
           }
         }
       }
     },
     setTransaction: flow(function* (
+      chain: ChainType,
       network: NetworkType,
       index: number,
-      contractAddress: string | null,
       hash: string,
-      tx: any
+      ethType: string,
+      contractAddress: string | null,
+      type: 'sent' | 'received',
+      initiatedAt: string,
+      completedAt: string | null,
+      fromAddress: string,
+      toPatp: string | null,
+      toAddress: string,
+      status: string,
+      failureReason: string | null,
+      notes: string | null
     ): Generator<PromiseLike<any>, void, any> {
       yield WalletIPC.setTransaction(
-        'ethereum',
+        chain,
         network,
         index,
-        contractAddress,
         hash,
-        tx
+        ethType,
+        contractAddress,
+        type,
+        initiatedAt,
+        completedAt,
+        fromAddress,
+        toPatp,
+        toAddress,
+        status,
+        failureReason,
+        notes
       ) as PromiseLike<any>;
     }),
     getStoredTransaction(hash: string) {
@@ -1196,14 +1225,24 @@ export const WalletStore = types
           .get(self.navState.protocol)
           ?.transactionList.getStoredTransaction(hash);
 
-        yield WalletIPC.setTransaction(
-          'ethereum',
-          self.navState.protocol,
-          currentWallet.index,
-          null,
-          hash,
-          stateTx
-        ) as PromiseLike<any>;
+        if (stateTx)
+          yield WalletIPC.setTransaction(
+            'ethereum',
+            self.navState.protocol,
+            currentWallet.index,
+            hash,
+            'eth',
+            null,
+            'sent',
+            stateTx['initiated-at'],
+            null,
+            fromAddress,
+            toPatp ?? null,
+            tx.to,
+            'pending',
+            null,
+            null
+          ) as PromiseLike<any>;
       }),
       sendERC20Transaction: flow(function* (
         walletIndex: string,
@@ -1245,14 +1284,24 @@ export const WalletStore = types
           .get(self.navState.protocol)
           ?.coins.get(contractAddress)
           ?.transactionList.getStoredTransaction(hash);
-        yield WalletIPC.setTransaction(
-          'ethereum',
-          self.navState.protocol,
-          currentWallet.index,
-          contractAddress,
-          hash,
-          stateTx
-        ) as PromiseLike<any>;
+        if (stateTx)
+          yield WalletIPC.setTransaction(
+            'ethereum',
+            self.navState.protocol,
+            currentWallet.index,
+            hash,
+            'erc20',
+            contractAddress,
+            'sent',
+            stateTx['initiated-at'],
+            null,
+            fromAddress,
+            toPatp ?? null,
+            to,
+            'pending',
+            null,
+            null
+          ) as PromiseLike<any>;
       }),
       toggleNetwork() {
         if (self.navState.network === ChainType.ETHEREUM) {
@@ -1331,8 +1380,17 @@ export const WalletStore = types
           chain,
           network,
           index,
-          contract,
           hash,
+          contract ? 'erc20' : 'eth',
+          contract,
+          'sent',
+          transaction.initiatedAt,
+          transaction.completedAt,
+          transaction.fromAddress,
+          transaction.toPatp,
+          transaction.to,
+          'pending',
+          null,
           notes
         ) as PromiseLike<any>;
       }),

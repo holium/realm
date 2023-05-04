@@ -22,6 +22,7 @@ interface TransactionProps {
   isCoin?: boolean;
   transaction: TransactionType;
 }
+
 const TransactionPresenter = (props: TransactionProps) => {
   const { walletStore } = useShipStore();
   const { transaction, isCoin } = props;

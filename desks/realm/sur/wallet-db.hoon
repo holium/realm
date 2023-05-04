@@ -25,12 +25,12 @@
   $:  =chain
       =network
       hash=@t
-      =wallet-id
+      =wallet-index
       eth-type=?(%eth %erc20 %erc721)
       contract-address=(unit @t)
       type=?(%sent %received)
-      initiated-at=@da
-      completed-at=(unit @da)
+      initiated-at=@t
+      completed-at=(unit @t)
       our-address=@t
       their-patp=(unit @p)
       their-address=@t

@@ -254,7 +254,7 @@
     state
   ::
       %set-transaction
-    =/  db-task  [%poke %realm-wallet-db-action !>(`action:db`[%insert-transaction transaction-row.act])]
+    =/  db-task  [%poke %realm-wallet-db-action !>(`action:db`[%set-transaction transaction-row.act])]
     =/  db-poke  [%pass / %agent [our.bowl %wallet-db] db-task]~
     =/  poke-cards
       ?~  their-patp.transaction-row.act  db-poke
@@ -269,7 +269,7 @@
           their-patp  `our.bowl
           their-address  our-address.transaction-row.act
         ==
-      =/  their-poke-action=action:db  [%insert-transaction their-transaction]
+      =/  their-poke-action=action:db  [%set-transaction their-transaction]
       =/  their-db-poke  [%poke %realm-wallet-db-action !>(their-poke-action)]
       :(welp db-poke chat-poke [%pass / %agent [our.bowl dap.bowl] their-db-poke]~)
     [poke-cards state]
