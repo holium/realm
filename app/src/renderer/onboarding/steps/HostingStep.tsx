@@ -4,11 +4,13 @@ import { observer } from 'mobx-react';
 
 import { HostingDialog, OnboardingStorage } from '@holium/shared';
 
+import { OnboardingIPC } from 'renderer/stores/ipc';
+
 import { useAppState } from '../../stores/app.store';
 import { thirdEarthApi } from '../thirdEarthApi';
 import { StepProps } from './types';
 
-export const HostingStepPresenter = ({ setStep, onFinish }: StepProps) => {
+export const HostingStepPresenter = ({ setStep }: StepProps) => {
   const { authStore } = useAppState();
 
   useEffect(() => {
@@ -17,7 +19,7 @@ export const HostingStepPresenter = ({ setStep, onFinish }: StepProps) => {
 
   const onBack = () => {
     if (authStore.accounts.length > 0) {
-      onFinish?.();
+      OnboardingIPC.finishOnboarding();
     } else {
       setStep('/login');
     }

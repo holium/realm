@@ -2,12 +2,12 @@ import { Fill } from 'react-spaces';
 
 import { Flex } from '@holium/design-system';
 
-import { OnboardingStep, OnboardingStepProps } from './OnboardingStep';
+import { OnboardingStep } from './OnboardingStep';
 
-export const Onboarding = ({ initialStep, onFinish }: OnboardingStepProps) => (
+export const Onboarding = () => (
   <Fill>
     <Flex height="100vh" alignItems="center" justifyContent="center">
-      <OnboardingStep initialStep={initialStep} onFinish={onFinish} />
+      <OnboardingStep />
     </Flex>
   </Fill>
 );
