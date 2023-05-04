@@ -162,14 +162,23 @@ type AccountDialogSkeletonProps = {
 
 export const AccountDialogSkeleton = ({
   currentSection,
-}: AccountDialogSkeletonProps) => (
-  <AccountDialog
-    patps={[]}
-    selectedPatp=""
-    currentSection={currentSection}
-    isLoading
-    setSelectedPatp={() => {}}
-    onClickSidebarSection={() => {}}
-    onExit={() => {}}
-  />
-);
+}: AccountDialogSkeletonProps) => {
+  const isBlankBody =
+    currentSection &&
+    [SidebarSection.GetRealm, SidebarSection.DownloadRealm].includes(
+      currentSection
+    );
+
+  return (
+    <AccountDialog
+      patps={[]}
+      selectedPatp=""
+      currentSection={currentSection}
+      isLoading
+      customBody={isBlankBody ? <Flex flex={5} /> : undefined}
+      setSelectedPatp={() => {}}
+      onClickSidebarSection={() => {}}
+      onExit={() => {}}
+    />
+  );
+};
