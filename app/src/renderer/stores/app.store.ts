@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 import { clone, flow, Instance, types } from 'mobx-state-tree';
 
-import { OnboardingStorage } from '@holium/shared';
+import { OnboardingStorage, RealmOnboardingStep } from '@holium/shared';
 
 import { RealmUpdateBooted } from 'os/realm.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';
@@ -30,6 +30,7 @@ const AppStateModel = types
     booted: types.boolean,
     seenSplash: types.boolean,
     currentScreen: Screen,
+    onboardingStep: types.string,
     theme: Theme,
     authStore: AuthenticationModel,
     shellStore: ShellModel,
@@ -84,6 +85,12 @@ const AppStateModel = types
       self.seenSplash = true;
       yield AuthIPC.setSeenSplash() as Promise<void>;
     }),
+    setCurrentScreen(screen: Instance<typeof Screen>) {
+      self.currentScreen = screen;
+    },
+    setOnboardingStep(step: RealmOnboardingStep) {
+      self.onboardingStep = step;
+    },
   }))
   .views((self) => ({
     get loggedInAccount(): MobXAccount | undefined {
@@ -106,7 +113,8 @@ const lastTheme = localStorage.getItem('lastTheme');
 export const appState = AppStateModel.create({
   booted: false,
   seenSplash: false,
-  currentScreen: 'onboarding',
+  currentScreen: 'login',
+  onboardingStep: '/login',
   theme: lastTheme
     ? Theme.create(JSON.parse(lastTheme))
     : Theme.create(defaultTheme),
@@ -156,16 +164,30 @@ function registerOnUpdateListener() {
   MainIPC.onInitialDimensions((_e: any, dims: any) => {
     appState.shellStore.setDesktopDimensions(dims.width, dims.height);
   });
-  // updates
-  RealmIPC.onUpdate((update) => {
+
+  RealmIPC.onUpdate(async (update) => {
     if (update.type === 'booted') {
       appState.reset();
       shipStore.reset();
-      if (update.payload.session) window.ship = update.payload.session.serverId;
       appState.setBooted(update.payload);
       if (update.payload.session) {
+        window.ship = update.payload.session.serverId;
         appState.setLoggedIn(update.payload.session.serverId);
         shipStore.init(update.payload.session);
+
+        appState.setCurrentScreen('os');
+      }
+
+      if (update.payload.accounts?.length) {
+        const masterAccount = await OnboardingIPC.getMasterAccount(
+          update.payload.accounts[0].accountId
+        );
+
+        if (!masterAccount) {
+          appState.setCurrentScreen('onboarding');
+        }
+      } else {
+        appState.setCurrentScreen('onboarding');
       }
     }
     if (update.type === 'auth-success') {
@@ -176,6 +198,8 @@ function registerOnUpdateListener() {
       });
       appState.setLoggedIn(update.payload.serverId);
       shipStore.init(update.payload);
+
+      appState.setCurrentScreen('os');
     }
     if (update.type === 'auth-failed') {
       // SoundActions.playError();
@@ -185,6 +209,8 @@ function registerOnUpdateListener() {
       appState.setLoggedOut(update.payload.serverId);
       shipStore.reset();
       SoundActions.playLogout();
+
+      appState.setCurrentScreen('login');
     }
   });
 
@@ -198,8 +224,15 @@ function registerOnUpdateListener() {
     if (update.type === 'account-updated') {
       appState.authStore._onUpdateAccount(update.payload);
     }
-    if (update.type === 'onboarding-ended') {
-      appState.authStore._onOnboardingEnded(update.payload);
+    if (update.type === 'add-server') {
+      appState.setOnboardingStep('/hosting');
+      appState.setCurrentScreen('onboarding');
+    }
+    if (update.type === 'onboarding-finished') {
+      appState.setOnboardingStep('/login');
+      appState.setCurrentScreen('login');
+
+      OnboardingStorage.reset();
     }
   });
 
@@ -220,8 +253,11 @@ function registerOnUpdateListener() {
 
   NotifIPC.onUpdate(({ type, payload }) => {
     switch (type) {
+      case 'init':
+        shipStore.notifStore._onInit(payload);
+        break;
       case 'notification-added':
-        shipStore.notifStore.onNotifAdded(payload);
+        shipStore.notifStore._onNotifAdded(payload);
         if (
           shipStore.chatStore.isChatSelected(payload.path) &&
           payload.app === 'realm-chat'
@@ -230,10 +266,10 @@ function registerOnUpdateListener() {
         }
         break;
       case 'notification-updated':
-        shipStore.notifStore.onNotifUpdated(payload);
+        shipStore.notifStore._onNotifUpdated(payload);
         break;
       case 'notification-deleted':
-        shipStore.notifStore.onNotifDeleted(payload);
+        shipStore.notifStore._onNotifDeleted(payload);
         break;
     }
   });
@@ -291,6 +327,9 @@ function registerOnUpdateListener() {
         break;
       case 'stall-update':
         shipStore.spacesStore._onStallUpdate(payload);
+        break;
+      case 'joined-bazaar':
+        shipStore.spacesStore._onJoinedBazaar(payload);
         break;
     }
   });

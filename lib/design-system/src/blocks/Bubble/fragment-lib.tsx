@@ -29,6 +29,7 @@ import {
   FragmentItalicsType,
   FragmentKey,
   FragmentLinkType,
+  FragmentMarkdownType,
   FragmentPlainType,
   FragmentReplyType,
   FragmentShipType,
@@ -156,6 +157,7 @@ export const FragmentCodeBlock = styled(Text.Custom)`
   border-radius: 4px;
   width: 100%;
   white-space: pre-wrap;
+  word-wrap: break-word;
 `;
 
 type FragmentImageProps = {
@@ -268,6 +270,12 @@ export const renderFragment = (
 ) => {
   const key = Object.keys(fragment)[0] as FragmentKey;
   switch (key) {
+    case 'markdown':
+      return (
+        <FragmentPlain id={id} key={index}>
+          {(fragment as FragmentMarkdownType).markdown}
+        </FragmentPlain>
+      );
     case 'plain':
       return (
         <FragmentPlain id={id} key={index}>

@@ -1,4 +1,5 @@
 export type NotifUpdateType =
+  | { type: 'init'; payload: any }
   | { type: 'notification-added'; payload: any }
   | { type: 'notification-updated'; payload: any }
   | { type: 'notification-deleted'; payload: any };

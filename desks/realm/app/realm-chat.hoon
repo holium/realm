@@ -1,5 +1,5 @@
 ::  app/realm-chat.hoon
-/-  *realm-chat, db-sur=chat-db, notify, ndb=notif-db
+/-  *realm-chat, db-sur=chat-db, notify, ndb=notif-db, fr=friends
 /+  dbug, lib=realm-chat, db-lib=chat-db
 =|  state-0
 =*  state  -
@@ -186,7 +186,7 @@
                   ?&  push-enabled.state                  :: push is enabled
                       (gth (lent ~(tap by devices.state)) 0) :: there is at least one device
                   ==
-                    =/  push-card  (push-notification-card:lib bowl state thepath (notif-msg parts) (crip "from {(scow %p sender.id)}"))
+                    =/  push-card  (push-notification-card:lib bowl state thepath (notif-msg parts) (notif-from-nickname-or-patp sender.id))
                     [push-card notif-db-card ~]
                   :: otherwise, just send to notif-db
                   [notif-db-card ~]
@@ -278,7 +278,7 @@
   ^-  card
   =/  msg-part  (snag 0 message)
   =/  title     (notif-msg message)
-  =/  content   (crip "from {(scow %p sender.msg-id.msg-part)}")
+  =/  content   (notif-from-nickname-or-patp sender.msg-id.msg-part)
   =/  link      (msg-id-to-cord:encode:db-lib msg-id.msg-part)
   ~&  >  link
   [
@@ -293,8 +293,14 @@
 ++  notif-msg
   |=  =message:db-sur
   ^-  @t
-  ?.  msg-preview-notif.state
-    'New Message'
+  =/  msg-path    path:(snag 0 message)
+  =/  pathrow     (scry-path-row:lib msg-path bowl)
+  =/  title       (~(get by metadata.pathrow) 'title')
+  =/  default     :: use title if available or fallback to New Message
+    ?:  =(type.pathrow %dm)   'New DM'
+    ?~  title     'New Message'
+      (need title)
+  ?.  msg-preview-notif.state  default
   =/  str=tape
     ^-  tape
     %+  join
@@ -320,4 +326,20 @@
       %status               p.content.part
     ==
   (crip `tape`(swag [0 140] str)) :: only show the first 140 characters of the message in the preview
+++  notif-from-nickname-or-patp
+  |=  patp=ship
+  ^-  @t
+  =/  cv=view:fr
+    .^  view:fr
+        %gx
+        /(scot %p our.bowl)/friends/(scot %da now.bowl)/contact-hoon/(scot %p patp)/noun
+    ==
+  =/  nickname=@t
+    ?+  -.cv  (scot %p patp) :: if the scry came back wonky, just fall back to patp
+      %contact-info
+        nickname.contact-info.cv
+    ==
+  ?:  =('' nickname)
+    (scot %p patp)
+  nickname
 --

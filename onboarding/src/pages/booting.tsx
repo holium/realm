@@ -15,42 +15,45 @@ export default function Booting() {
   const booting = useToggle(true);
 
   const pollShipStatus = useCallback(async () => {
-    const { shipId, token } = OnboardingStorage.get();
+    const { serverId, token } = OnboardingStorage.get();
 
-    if (!shipId || !token) return;
+    if (!serverId || !token) return;
 
     const ships = await thirdEarthApi.getUserShips(token);
-    const ship = Object.values(ships).find((s) => s.patp === shipId);
+    const ship = Object.values(ships).find((s) => s.patp === serverId);
 
     if (!ship) return;
 
     if (logs.length === 1) {
-      setLogs((logs) => [...logs, `${shipId} will be ready in a few minutes.`]);
+      setLogs((logs) => [
+        ...logs,
+        `${serverId} will be ready in a few minutes.`,
+      ]);
     } else if (logs.length === 2) {
       setLogs((logs) => [...logs, 'Go touch some grass.']);
     }
 
-    const shipCode = ship.code;
-    if (shipCode) {
+    const serverCode = ship.code;
+    if (serverCode) {
       setLogs((logs) => [...logs, 'Assigning a domain.']);
     }
 
-    const shipUrl = ship.link;
-    const isBooted = shipUrl.includes('https://');
+    const serverUrl = ship.link;
+    const isBooted = serverUrl.includes('https://');
     if (isBooted) {
       booting.toggleOff();
       if (intervalRef.current) clearInterval(intervalRef.current);
 
       setLogs((logs) => [
         ...logs,
-        `Successfully assigned a domain: ${shipUrl}.`,
+        `Successfully assigned a domain: ${serverUrl}.`,
         'Booting complete.',
       ]);
 
       // Store credentials for next page.
       OnboardingStorage.set({
-        shipUrl,
-        shipCode,
+        serverUrl,
+        serverCode,
       });
     }
   }, [booting, logs]);

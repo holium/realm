@@ -16,14 +16,11 @@ import { Menu, MenuItemProps } from '@holium/design-system/navigation';
 import { OnboardingStorage } from '@holium/shared';
 
 import { useAppState } from 'renderer/stores/app.store';
+import { OnboardingIPC } from 'renderer/stores/ipc';
 
 import { ShipSelector } from './ShipSelector';
 
-interface LoginProps {
-  addShip: () => void;
-}
-
-const LoginPresenter = ({ addShip }: LoginProps) => {
+const LoginPresenter = () => {
   const { setTheme, authStore } = useAppState();
   const {
     accounts,
@@ -35,6 +32,10 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
   const [password, setPassword] = useState('');
   const passwordRef = useRef<HTMLInputElement>(null);
   const submitRef = useRef<HTMLButtonElement>(null);
+
+  const addServer = () => {
+    OnboardingIPC.addServer();
+  };
 
   useEffect(() => {
     if (!selectedAccount) {
@@ -140,7 +141,10 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
         label: 'Remove account',
         onClick: (evt) => {
           evt.stopPropagation();
-          selectedAccount && authStore.removeAccount(selectedAccount.serverId);
+          if (selectedAccount) {
+            localStorage.removeItem(`${selectedAccount.serverId}-firstLoad`);
+            authStore.removeAccount(selectedAccount.serverId);
+          }
         },
       },
     ];
@@ -340,7 +344,7 @@ const LoginPresenter = ({ addShip }: LoginProps) => {
               showOnHover
               color="text"
               style={{ padding: '6px 10px', borderRadius: 6 }}
-              onClick={() => addShip()}
+              onClick={addServer}
             >
               <Flex
                 gap={8}

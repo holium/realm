@@ -1,17 +1,16 @@
-import { Nullable, RealmOnboardingStep } from '../types';
+import { Nullable } from '../types';
 
 type Storage = {
-  step: RealmOnboardingStep;
   email: string;
   passwordHash: string;
   masterAccountId: number;
   token: string;
   clientSideEncryptionKey: string;
   /* Ship info */
-  shipId: string;
-  shipUrl: string;
-  shipCode: string;
-  shipType: 'hosted' | 'local';
+  serverId: string;
+  serverUrl: string;
+  serverCode: string;
+  serverType: 'hosted' | 'local';
   /* Passport info */
   nickname: string;
   description: string;
@@ -20,16 +19,15 @@ type Storage = {
 };
 
 const storageKeys: (keyof Storage)[] = [
-  'step',
   'email',
   'passwordHash',
   'masterAccountId',
   'token',
   'clientSideEncryptionKey',
-  'shipId',
-  'shipUrl',
-  'shipCode',
-  'shipType',
+  'serverId',
+  'serverUrl',
+  'serverCode',
+  'serverType',
   'nickname',
   'description',
   'avatar',
@@ -39,17 +37,16 @@ const storageKeys: (keyof Storage)[] = [
 export const OnboardingStorage = {
   get: (): Nullable<Storage> => {
     return {
-      step: localStorage.getItem('step') as RealmOnboardingStep | null,
       email: localStorage.getItem('email'),
       passwordHash: localStorage.getItem('passwordHash'),
       masterAccountId: Number(localStorage.getItem('masterAccountId')),
       token: localStorage.getItem('token'),
       clientSideEncryptionKey: localStorage.getItem('clientSideEncryptionKey'),
-      shipId: localStorage.getItem('shipId'),
-      shipUrl: localStorage.getItem('shipUrl'),
-      shipCode: localStorage.getItem('shipCode'),
-      shipType:
-        (localStorage.getItem('shipType') as 'hosted' | 'local') ?? 'local',
+      serverId: localStorage.getItem('serverId'),
+      serverUrl: localStorage.getItem('serverUrl'),
+      serverCode: localStorage.getItem('serverCode'),
+      serverType:
+        (localStorage.getItem('serverType') as 'hosted' | 'local') ?? 'local',
       nickname: localStorage.getItem('nickname'),
       description: localStorage.getItem('description'),
       avatar: localStorage.getItem('avatar'),
@@ -63,10 +60,10 @@ export const OnboardingStorage = {
     });
   },
   reset: () => {
-    localStorage.removeItem('step');
     localStorage.removeItem('nickname');
     localStorage.removeItem('description');
     localStorage.removeItem('avatar');
+    localStorage.removeItem('shipCode');
   },
   remove(key: keyof Storage) {
     localStorage.removeItem(key);

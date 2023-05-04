@@ -1,4 +1,10 @@
-import { ChooseIdDialog, OnboardingStorage } from '@holium/shared';
+import { GetServerSideProps } from 'next';
+
+import {
+  ChooseIdDialog,
+  OnboardingPage,
+  OnboardingStorage,
+} from '@holium/shared';
 
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
@@ -6,9 +12,11 @@ import { useNavigation } from '../util/useNavigation';
 
 type ServerSideProps = {
   patps: string[];
+  back_url: string;
 };
 
-export async function getServerSideProps() {
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+  const back_url = query.back_url ?? ('' as string);
   const products = await thirdEarthApi.getProducts();
   const productId = products[0].id;
 
@@ -20,16 +28,22 @@ export async function getServerSideProps() {
   return {
     props: {
       patps,
+      back_url,
     } as ServerSideProps,
   };
-}
+};
 
-export default function ChooseId({ patps }: ServerSideProps) {
+export default function ChooseId({ patps, back_url }: ServerSideProps) {
   const { goToPage } = useNavigation();
 
-  const onSelectPatp = (shipId: string) => {
-    OnboardingStorage.set({ shipId });
+  const onSelectPatp = (serverId: string) => {
+    OnboardingStorage.set({ serverId });
   };
+
+  const onBack =
+    back_url.length > 0
+      ? () => goToPage(back_url as OnboardingPage)
+      : undefined;
 
   const onNext = () => goToPage('/payment');
 
@@ -38,6 +52,7 @@ export default function ChooseId({ patps }: ServerSideProps) {
       <ChooseIdDialog
         patps={patps}
         onSelectPatp={onSelectPatp}
+        onBack={onBack}
         onNext={onNext}
       />
     </Page>

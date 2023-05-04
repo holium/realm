@@ -31,6 +31,22 @@ const spaceRowToModel = (space: any) => {
   };
 };
 
+const createMembersToModel = (members: any) => {
+  return {
+    all: Object.entries(members).reduce(
+      (map: any, entry: [patp: string, mem: any]) => {
+        map[entry[0]] = {
+          alias: entry[1].alias,
+          roles: entry[1].roles,
+          status: entry[1].status,
+        };
+        return map;
+      },
+      {}
+    ),
+  };
+};
+
 const StallModel = types.model('StallModel', {
   suite: types.map(UrbitApp),
   recommended: types.array(UrbitApp),
@@ -65,6 +81,14 @@ export const SpaceModel = types
     isHost() {
       // TODO check if admin
       return self.path.includes(window.ship);
+    },
+    isAdmin() {
+      // if host
+      if (self.path.includes(window.ship)) return true;
+      // check member
+      const member = self.members.all.get(window.ship);
+      if (!member) return false;
+      return member.roles.includes('admin');
     },
   }))
   .actions((self) => ({
@@ -226,7 +250,8 @@ export const SpacesStore = types
     createSpace: flow(function* (newSpace: any) {
       self.creating.set('loading');
       try {
-        const spacePath = yield SpacesIPC.createSpace(newSpace);
+        const { spacePath, members }: { spacePath: string; members: any } =
+          yield SpacesIPC.createSpace(newSpace);
         const created = SpaceModel.create(
           castToSnapshot({
             ...newSpace,
@@ -234,6 +259,7 @@ export const SpacesStore = types
             theme: defaultTheme,
             stall: StallModel.create({}),
             docks: [],
+            members: createMembersToModel(members),
           })
         );
         self.spaces.set(spacePath, created);
@@ -244,7 +270,7 @@ export const SpacesStore = types
       } catch (e) {
         console.error(e);
         self.creating.set('error');
-        // TODO notify user it failed
+        return null;
       }
     }),
     updateSpace: flow(function* (spacePath: string, space: SpaceModelType) {
@@ -432,6 +458,13 @@ export const SpacesStore = types
       if (!space) return;
       space._setStall(stallPayload.stall);
     },
+    _onJoinedBazaar: flow(function* (joinedPayload: any) {
+      const space = self.spaces.get(joinedPayload.path);
+      if (!space) return;
+      space._setStall(joinedPayload.stall);
+      const refreshedSpace = yield SpacesIPC.getSpace(joinedPayload.path);
+      self.spaces.set(space.path, spaceRowToModel(refreshedSpace));
+    }),
   }));
 
 export type SpacesStoreType = Instance<typeof SpacesStore>;

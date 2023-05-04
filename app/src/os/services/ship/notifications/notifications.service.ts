@@ -17,6 +17,10 @@ export class NotificationsService extends AbstractService<NotifUpdateType> {
     if (options?.verbose) log.info('notification.service.ts:', 'Constructed.');
   }
 
+  init() {
+    this.notifDB?.init();
+  }
+
   reset(): void {
     super.removeHandlers();
     this.notifDB?.reset();

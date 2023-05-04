@@ -1,7 +1,7 @@
 import log from 'electron-log';
 import bcrypt from 'bcryptjs';
 
-import { RealmInstallStatus } from '@holium/shared/src/onboarding/types';
+import { RealmInstallStatus } from '@holium/shared';
 
 import { cleanNounColor, removeHash } from '../../lib/color';
 import { getCookie } from '../../lib/shipHelpers';
@@ -134,7 +134,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     this.authDB.addToOrder(acc.serverId);
 
     const cookie = await this.getCookie(acc.serverId, acc.serverUrl, shipCode);
-
+    log.info('auth.service.ts:', `Got cookie for ${acc.serverId}`);
     this._createShipDB(
       newAccount.serverId,
       password,
@@ -164,25 +164,13 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     }
   }
 
-  public triggerOnboardingEnded() {
-    if (!this.authDB) {
-      throw new Error('No authDB found');
-    }
-    this.sendUpdate({
-      type: 'onboarding-ended',
-      payload: {
-        accounts: this.authDB.tables.accounts.find(),
-        order: this.authDB?.getOrder(),
-      },
-    });
-  }
-
   public hashPassword(password: string) {
     return bcrypt.hashSync(password, 10);
   }
 
   async getPassport() {
-    if (!this.credentials) return;
+    if (!this.credentials)
+      return Promise.reject('getPassport: No credentials found');
     log.info('onboarding.service.ts:', 'Getting passport');
     await this._openConduit();
     log.info('onboarding.service.ts:', 'got conduit');
@@ -282,7 +270,8 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       cover?: string;
     }
   ) {
-    if (!this.credentials) return;
+    if (!this.credentials)
+      return Promise.reject('updatePassport: No credentials found');
     log.info('onboarding.service.ts:', 'Getting passport');
     await this._openConduit();
     const preparedData: Record<string, any> = {
@@ -302,7 +291,12 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
         },
       },
     };
-    return APIConnection.getInstance().conduit.poke(payload);
+    try {
+      APIConnection.getInstance().conduit.poke(payload);
+    } catch (e) {
+      log.error('onboarding.service.ts:', 'updatePassport', e);
+    }
+    return preparedData;
   }
 
   _prepareBuildVersionEnv() {
@@ -344,26 +338,33 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     return result;
   }
 
-  async _testVersion(buildVersion: any): Promise<boolean> {
+  async _testVersion(buildVersion: RealmInstallVersionTest): Promise<boolean> {
     try {
       const res = await APIConnection.getInstance().conduit.scry({
         app: 'bazaar',
         path: `/version`,
       });
+      log.info(
+        'onboarding.service.ts:',
+        'testVersion',
+        res.version,
+        'vs',
+        `${buildVersion.major}.${buildVersion.minor}.${buildVersion.build}`
+      );
       const parts = res.version.split('.');
-      if (parseInt(parts[0]) > parseInt(buildVersion.major)) {
+      if (parseInt(parts[0]) > buildVersion.major) {
         return true;
       }
       if (
-        parseInt(parts[0]) >= parseInt(buildVersion.major) &&
-        parseInt(parts[1]) > parseInt(buildVersion.minor)
+        parseInt(parts[0]) >= buildVersion.major &&
+        parseInt(parts[1]) > buildVersion.minor
       ) {
         return true;
       }
       if (
-        parseInt(parts[0]) >= parseInt(buildVersion.major) &&
-        parseInt(parts[1]) >= parseInt(buildVersion.minor) &&
-        parseInt(parts[2]) >= parseInt(buildVersion.build)
+        parseInt(parts[0]) >= buildVersion.major &&
+        parseInt(parts[1]) >= buildVersion.minor &&
+        parseInt(parts[2]) >= buildVersion.build
       ) {
         return true;
       }
@@ -374,7 +375,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   }
 
   private async waitForInstallRealmAgent(
-    buildVersion: any
+    buildVersion: RealmInstallVersionTest
   ): Promise<RealmInstallStatus> {
     const self = this;
     return new Promise((resolve) => {
@@ -418,6 +419,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
             local: 'realm',
           },
         });
+        log.info('onboarding.service.ts:', 'installRealmAgent', 'poke sent');
 
         // @note: if %realm is already installed and does not need to be updated, there is
         //   currently no way to get notified by clay (gift) that the kiln-install operation
@@ -447,32 +449,66 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     serverUrl: string,
     serverCode: string
   ) {
-    const now: number = Date.now();
-    if (this.cookie && this.cookieAt && now - this.cookieAt < 3000) {
-      // cache cookie for 3 seconds to prevent hammering urbit /~/login in quick succession
-      return this.cookie;
+    try {
+      const now: number = Date.now();
+      if (this.cookie && this.cookieAt && now - this.cookieAt < 3000) {
+        // cache cookie for 3 seconds to prevent hammering urbit /~/login in quick succession
+        return this.cookie;
+      }
+
+      const cookie = await getCookie({ serverUrl, serverCode });
+      if (!cookie) throw new Error('Failed to get cookie');
+      const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
+      const sanitizedCookie = cookie.split('; ')[0];
+      log.info('ship.service.ts:', 'cookie', sanitizedCookie);
+      log.info(
+        'ship.service.ts:',
+        'ids',
+        serverId.toLowerCase(),
+        cookiePatp.toLowerCase()
+      );
+
+      if (serverId.toLowerCase() !== cookiePatp.toLowerCase()) {
+        throw new Error('Invalid serverCode.');
+      }
+
+      this.cookie = sanitizedCookie;
+      this.cookieAt = Date.now();
+
+      return sanitizedCookie;
+    } catch (e) {
+      log.error('ship.service.ts:', 'Failed to get cookie', e);
+      throw e;
+    }
+  }
+
+  public getMasterAccount(id: number) {
+    if (!this.authDB) {
+      log.error('onboarding.service.ts:', 'No authDB');
+      return;
     }
 
-    const cookie = await getCookie({ serverId, serverUrl, serverCode });
-    if (!cookie) throw new Error('Failed to get cookie');
-    const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
-    const sanitizedCookie = cookie.split('; ')[0];
-    if (serverId.toLowerCase() !== cookiePatp.toLowerCase()) {
-      throw new Error('Invalid serverCode.');
-    }
+    return this.authDB.tables.masterAccounts.findFirst("id = '" + id + "'");
+  }
 
-    this.cookie = sanitizedCookie;
-    this.cookieAt = Date.now();
+  public finishOnboarding() {
+    this.sendUpdate({
+      type: 'onboarding-finished',
+    });
+  }
 
-    return sanitizedCookie;
+  public addServer() {
+    this.sendUpdate({
+      type: 'add-server',
+    });
   }
 
   private async _openConduit() {
-    if (!this.credentials) return;
+    if (!this.credentials)
+      return Promise.reject('_openConduit: No credentials');
     const { serverUrl, serverCode, serverId } = this.credentials;
     const cookie = await this.getCookie(serverId, serverUrl, serverCode);
     return new Promise((resolve, reject) => {
-      if (!this.credentials) return;
       APIConnection.getInstance({
         url: serverUrl,
         code: serverCode,
@@ -499,6 +535,13 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       cookie: string;
     }
   ) {
+    log.info(
+      'Creating ship database',
+      serverId,
+      encryptionKey,
+      password,
+      credentials
+    );
     const newShipDB = new ShipDB(serverId, password, encryptionKey);
     newShipDB.setCredentials(
       credentials.serverUrl,

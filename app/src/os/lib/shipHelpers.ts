@@ -4,16 +4,20 @@ import dns from 'dns';
 
 dns.setDefaultResultOrder('ipv4first');
 
-interface ShipConnectionData {
-  serverId?: string;
+type ServerConnectionData = {
   serverUrl: string;
   serverCode: string;
-}
+};
 
-export async function getCookie(server: ShipConnectionData) {
+export async function getCookie(server: ServerConnectionData) {
   log.info(
     `Getting cookie for ${server.serverUrl} with code ${server.serverCode}`
   );
+  let cookie: string | undefined;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, 10000);
   try {
     const response = await fetch(`${server.serverUrl}/~/login`, {
       method: 'POST',
@@ -21,13 +25,16 @@ export async function getCookie(server: ShipConnectionData) {
       headers: {
         'Content-Type': 'text/plain',
       },
+      // credentials: 'include', // TODO test this
+      signal: controller.signal,
     });
-
-    const cookie = response.headers.get('set-cookie')?.split(';')[0];
-
-    return cookie;
+    cookie = response.headers.get('set-cookie')?.split(';')[0];
+    log.info(`Got cookie for ${server.serverUrl}`);
   } catch (e) {
     log.error(`Error getting cookie for ${server.serverUrl}`, e);
-    return;
+    return Promise.reject(e);
+  } finally {
+    clearTimeout(timeout);
   }
+  return cookie;
 }

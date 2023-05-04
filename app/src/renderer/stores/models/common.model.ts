@@ -1,6 +1,7 @@
 import { Instance, types } from 'mobx-state-tree';
 
 const LoaderStates = types.enumeration('LoaderState', [
+  'first-load',
   'initial',
   'loading',
   'error',
@@ -18,6 +19,9 @@ export const LoaderModel = types
     },
     get isLoaded() {
       return self.state === 'loaded';
+    },
+    get isFirstLoad() {
+      return self.state === 'first-load';
     },
   }))
   .actions((self) => ({

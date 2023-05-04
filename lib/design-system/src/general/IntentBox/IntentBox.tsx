@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components';
 const BaseCss = css`
   padding: 16px;
   border-radius: 4px;
-  font: var(--rlm-font-body);
+  font: var(--rlm-font);
 `;
 
 export const ErrorBox = styled.div`

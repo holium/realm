@@ -4,7 +4,7 @@ import Database from 'better-sqlite3-multiple-ciphers';
 import crypto from 'crypto';
 import path from 'path';
 
-import { chatInitSql } from './chat/chat.db';
+import { CHAT_TABLES, chatInitSql } from './chat/chat.schema';
 import { friendsInitSql } from './friends.service';
 import { notifInitSql } from './notifications/notifications.table';
 import { Credentials } from './ship.types.ts';
@@ -42,6 +42,37 @@ export class ShipDB {
         key: passwordHash,
       });
       this.shipDB.exec(initSql);
+    }
+
+    // update db schemas if we need to
+    this.addColumnIfNotExists(
+      CHAT_TABLES.MESSAGES,
+      'received_at',
+      'INTEGER NOT NULL DEFAULT 0'
+    );
+    this.addColumnIfNotExists(
+      CHAT_TABLES.PEERS,
+      'received_at',
+      'INTEGER NOT NULL DEFAULT 0'
+    );
+    this.addColumnIfNotExists(
+      CHAT_TABLES.PATHS,
+      'received_at',
+      'INTEGER NOT NULL DEFAULT 0'
+    );
+  }
+
+  private addColumnIfNotExists(table: string, column: string, type: string) {
+    const queryResult = this.shipDB
+      .prepare(
+        `select count(*) as found from pragma_table_info('${table}') where name='${column}'`
+      )
+      .all();
+    const found: boolean = queryResult?.[0].found > 0;
+    if (found) {
+      log.info('did not need to add colum, it already exists', table, column);
+    } else {
+      this.shipDB.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${type};`);
     }
   }
 

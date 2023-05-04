@@ -6,11 +6,6 @@ export type OnboardingEndedPayload = {
   order: string[];
 };
 
-export type OnboardingEnded = {
-  type: 'onboarding-ended';
-  payload: OnboardingEndedPayload;
-};
-
 export type OnboardingAccountAdded = {
   type: 'account-added';
   payload: AuthUpdateAccountPayload;
@@ -33,8 +28,17 @@ export type RealmInstallVersionTest = {
   build: number;
 };
 
+type OnboardingAddServer = {
+  type: 'add-server';
+};
+
+type OnboardingFinished = {
+  type: 'onboarding-finished';
+};
+
 export type OnboardingUpdateTypes =
   | OnboardingAccountAdded
   | OnboardingAccountRemoved
   | OnboardingAccountUpdated
-  | OnboardingEnded;
+  | OnboardingAddServer
+  | OnboardingFinished;
