@@ -335,7 +335,7 @@
         /(scot %p our.bowl)/friends/(scot %da now.bowl)/contact-hoon/(scot %p patp)/noun
     ==
   =/  nickname=@t
-    ?+  -.cv  !!
+    ?+  -.cv  (scot %p patp) :: if the scry came back wonky, just fall back to patp
       %contact-info
         nickname.contact-info.cv
     ==
