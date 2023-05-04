@@ -133,7 +133,11 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     });
     this.authDB.addToOrder(acc.serverId);
 
-    const cookie = await this.getCookie(acc.serverId, acc.serverUrl, shipCode);
+    const cookie = await this.getCookie({
+      serverId: acc.serverId,
+      serverUrl: acc.serverUrl,
+      serverCode: shipCode,
+    });
     log.info('auth.service.ts:', `Got cookie for ${acc.serverId}`);
     this._createShipDB(
       newAccount.serverId,
@@ -444,11 +448,15 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     });
   }
 
-  public async getCookie(
-    serverId: string,
-    serverUrl: string,
-    serverCode: string
-  ) {
+  public async getCookie({
+    serverId,
+    serverUrl,
+    serverCode,
+  }: {
+    serverId: string;
+    serverUrl: string;
+    serverCode: string;
+  }) {
     try {
       const now: number = Date.now();
       if (this.cookie && this.cookieAt && now - this.cookieAt < 3000) {
@@ -504,10 +512,12 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   }
 
   private async _openConduit() {
-    if (!this.credentials)
+    if (!this.credentials) {
       return Promise.reject('_openConduit: No credentials');
+    }
+
     const { serverUrl, serverCode, serverId } = this.credentials;
-    const cookie = await this.getCookie(serverId, serverUrl, serverCode);
+    const cookie = await this.getCookie({ serverId, serverUrl, serverCode });
     return new Promise((resolve, reject) => {
       APIConnection.getInstance({
         url: serverUrl,
