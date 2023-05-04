@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { AccountDownloadRealmDialog } from '../AccountDownloadRealmDialog';
+import { AccountGetRealmDialog } from '../AccountGetRealmDialog';
 import { ClaimTokenDialog } from '../ClaimTokenDialog';
 import { CreateAccountDialog } from '../CreateAccountDialog';
 import { OnboardingDialogWrapper } from './helpers';
@@ -23,22 +23,16 @@ export const CreateAccountDialogStory: ComponentStory<
 
 CreateAccountDialogStory.storyName = '1. Claim token';
 
-export const AccountDownloadRealmDialogStory: ComponentStory<
-  typeof AccountDownloadRealmDialog
+export const AccountGetRealmDialogStory: ComponentStory<
+  typeof AccountGetRealmDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <AccountDownloadRealmDialog
-      patps={undefined}
-      selectedPatp={undefined}
-      setSelectedPatp={() => {}}
+    <AccountGetRealmDialog
+      onClickGetHosting={() => {}}
       onClickSidebarSection={() => {}}
-      onDownloadMacM1={() => {}}
-      onDownloadMacIntel={() => {}}
-      onDownloadWindows={() => {}}
-      onDownloadLinux={() => {}}
       onExit={() => {}}
     />
   </OnboardingDialogWrapper>
 );
 
-AccountDownloadRealmDialogStory.storyName = '2. Download Realm';
+AccountGetRealmDialogStory.storyName = '2. Get Realm';

@@ -75,6 +75,7 @@ type OnboardingAccountPage =
   | '/account'
   | '/account/custom-domain'
   | '/account/download-realm'
+  | '/account/get-realm'
   | '/account/s3-storage'
   | '/account/statistics';
 
