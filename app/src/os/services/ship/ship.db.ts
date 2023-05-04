@@ -69,9 +69,7 @@ export class ShipDB {
       )
       .all();
     const found: boolean = queryResult?.[0].found > 0;
-    if (found) {
-      log.info('did not need to add colum, it already exists', table, column);
-    } else {
+    if (!found) {
       this.shipDB.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${type};`);
     }
   }

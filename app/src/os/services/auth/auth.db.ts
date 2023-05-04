@@ -24,6 +24,9 @@ export class AuthDB {
     this.authDB.pragma('journal_mode = WAL');
     this.authDB.pragma('foreign_keys = ON');
     this.authDB.exec(initSql);
+    // Migration and cleanup
+    // TODO need to define a better migration strategy
+    this.removeShipCodeColumnIfExist();
 
     this.tables = {
       accounts: new Accounts(this.authDB),
@@ -33,6 +36,29 @@ export class AuthDB {
     app.on('quit', () => {
       this.disconnect();
     });
+  }
+
+  private removeShipCodeColumnIfExist(): void {
+    const query = this.authDB.prepare(`
+      select count(*) as found from pragma_table_info('accounts') where name='serverCode'
+    `);
+    const result = query.all();
+    const found: boolean = result?.[0].found > 0;
+    if (found) {
+      log.info(
+        'auth.db.ts:',
+        'Removing "serverCode" column from accounts table'
+      );
+      this.authDB.prepare('ALTER TABLE accounts RENAME TO accounts_old;').run();
+      this.authDB.exec(accountsInit);
+      this.authDB
+        .prepare(
+          'INSERT INTO accounts (accountId, serverUrl, serverId, serverType, nickname, color, avatar, status, theme, passwordHash) SELECT accountId, serverUrl, serverId, serverType, nickname, color, avatar, status, theme, passwordHash FROM accounts_old;'
+        )
+
+        .run();
+      this.authDB.prepare('DROP TABLE accounts_old;').run();
+    }
   }
 
   hasSeenSplash(): boolean {
