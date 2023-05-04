@@ -397,8 +397,11 @@
   |=  [=msg-id:sur state=state-2 =bowl:gall]
   ^-  (quip card state-2)
 
-  ?>  =(sender.msg-id src.bowl)  :: delete pokes are only valid from the ship which is the original sender
-  ?>  (has:msgon:sur messages-table.state [msg-id 0])  :: delete pokes are only valid if there is a fragment 0 in the table for the msg-id
+  ?.  ?&  =(sender.msg-id src.bowl)  :: delete pokes are only valid from the ship which is the original sender
+          (has:msgon:sur messages-table.state [msg-id 0])  :: delete pokes are only valid if there is a fragment 0 in the table for the msg-id
+      ==
+      ~&  >>>  "an invalid :delete poke was received from {(scow %p src.bowl)}... ignoring."
+      `state   :: we just no-op instead of crashing
 
   =/  msg-part=msg-part:sur       (got:msgon:sur messages-table.state `uniq-id:sur`[msg-id 0])
   =/  remove-result   (remove-message state msg-id now.bowl)
