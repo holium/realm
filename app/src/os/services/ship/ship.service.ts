@@ -61,7 +61,6 @@ export class ShipService extends AbstractService<any> {
         log.info('ship.service.ts:', 'No cookie found, getting cookie...');
       }
       getCookie({
-        serverId: patp,
         serverUrl: credentials.url,
         serverCode: credentials.code,
       })
