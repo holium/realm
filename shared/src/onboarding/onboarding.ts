@@ -17,6 +17,7 @@ export { PassportCard } from './components/PassportCard';
 export { TermsDisclaimer } from './components/TermsDisclaimer';
 export { AccountCustomDomainDialog } from './dialogs/AccountCustomDomainDialog';
 export { AccountDownloadRealmDialog } from './dialogs/AccountDownloadRealmDialog';
+export { AccountGetRealmDialog } from './dialogs/AccountGetRealmDialog';
 export { AccountHostingDialog } from './dialogs/AccountHostingDialog';
 export { AccountS3StorageDialog } from './dialogs/AccountS3StorageDialog';
 export { AccountStatisticsDialog } from './dialogs/AccountStatisticsDialog';

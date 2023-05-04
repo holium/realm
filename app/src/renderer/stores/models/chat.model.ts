@@ -410,6 +410,9 @@ export const Chat = types
     setMuted(muted: boolean) {
       self.muted = muted;
     },
+    setPinned(pinned: boolean) {
+      self.pinned = pinned;
+    },
     clearPinnedMessage: flow(function* (_msgId: string) {
       const oldId = self.pinnedMessageId;
       try {

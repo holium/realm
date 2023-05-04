@@ -42,10 +42,10 @@ export const ShipStore = types
       }
       self.credentials = CredentialsModel.create(session);
       self.friends.init();
+      self.chatStore.fetchInboxMetadata();
       self.chatStore.loadChatList();
       self.bazaarStore.init();
       self.spacesStore.init();
-      self.chatStore.fetchInboxMetadata();
       self.walletStore.init();
       self.roomsStore.init();
     },
