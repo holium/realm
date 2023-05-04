@@ -1410,7 +1410,7 @@
       ?:  %-  ~(all in u.alli)
           |=  [[=ship =desk]]
             (~(has by treats) [ship desk])
-        :: ~&  >>  "{<dap.bowl>}: sending treaties-loaded..."
+        ~&  >>  "{<dap.bowl>}: sending treaties-loaded..."
         (snoc effects [%give %fact [/updates ~] bazaar-reaction+!>([%treaties-loaded ship.treaty])])
       effects
     [effects state]
@@ -1429,6 +1429,7 @@
   ++  on-new
     |=  [=ship =alliance:treaty]
     ^-  (quip card _state)
+    %-  (slog leaf+">> {<dap.bowl>}: [on-new] => {<[ship alliance]>}" ~)
     :_  state
     :~
       [%give %fact [/updates ~] bazaar-reaction+!>([%new-ally ship alliance])]

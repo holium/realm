@@ -643,6 +643,9 @@ export const BazaarStore = types
       const app = self.catalog.get(appId);
       if (app) app.setIsRecommended(false);
     },
+    _setTreatiesLoaded(treatiesLoaded: boolean) {
+      self.treatiesLoaded = treatiesLoaded;
+    },
   }));
 
 export type AppMobxType = Instance<typeof UrbitApp>;

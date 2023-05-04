@@ -9,6 +9,7 @@ export type BazaarUpdateType = {
     | 'pins-reordered'
     | 'dock-update'
     | 'stall-update'
-    | 'joined-bazaar';
+    | 'joined-bazaar'
+    | 'treaties-loaded';
   payload: any;
 };

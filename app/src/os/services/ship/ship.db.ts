@@ -21,45 +21,49 @@ export class ShipDB {
     process.env.DONT_ENCRYPT_DB === 'true';
 
   constructor(patp: string, password: string, clientSideEncryptionKey: string) {
-    this.patp = patp;
-    this.dbPath = path.join(app.getPath('userData'), `${patp}.sqlite`);
+    try {
+      this.patp = patp;
+      this.dbPath = path.join(app.getPath('userData'), `${patp}.sqlite`);
 
-    // Create the database if it doesn't exist
-    log.info('ship.db.ts:', 'ship db file doesnt exist');
-    if (this.dontEncryptDb) {
-      this.shipDB = new Database(this.dbPath);
-      this.shipDB.exec(initSql);
-      return;
-    } else {
-      log.info('ship.db.ts:', 'Encrypting ship db');
-      const hashGenerator = crypto.createHmac(
-        'sha256',
-        clientSideEncryptionKey
+      // Create the database if it doesn't exist
+      log.info('ship.db.ts:', 'ship db file doesnt exist');
+      if (this.dontEncryptDb) {
+        this.shipDB = new Database(this.dbPath);
+        this.shipDB.exec(initSql);
+        return;
+      } else {
+        log.info('ship.db.ts:', 'Encrypting ship db');
+        const hashGenerator = crypto.createHmac(
+          'sha256',
+          clientSideEncryptionKey
+        );
+        const passwordHash = hashGenerator.update(password).digest('hex');
+
+        this.shipDB = new Database(this.dbPath, {
+          key: passwordHash,
+        });
+        this.shipDB.exec(initSql);
+      }
+
+      // update db schemas if we need to
+      this.addColumnIfNotExists(
+        'messages',
+        'received_at',
+        'INTEGER NOT NULL DEFAULT 0'
       );
-      const passwordHash = hashGenerator.update(password).digest('hex');
-
-      this.shipDB = new Database(this.dbPath, {
-        key: passwordHash,
-      });
-      this.shipDB.exec(initSql);
+      this.addColumnIfNotExists(
+        'peers',
+        'received_at',
+        'INTEGER NOT NULL DEFAULT 0'
+      );
+      this.addColumnIfNotExists(
+        'paths',
+        'received_at',
+        'INTEGER NOT NULL DEFAULT 0'
+      );
+    } catch (e) {
+      console.log(e);
     }
-
-    // update db schemas if we need to
-    this.addColumnIfNotExists(
-      'messages',
-      'received_at',
-      'INTEGER NOT NULL DEFAULT 0'
-    );
-    this.addColumnIfNotExists(
-      'peers',
-      'received_at',
-      'INTEGER NOT NULL DEFAULT 0'
-    );
-    this.addColumnIfNotExists(
-      'paths',
-      'received_at',
-      'INTEGER NOT NULL DEFAULT 0'
-    );
   }
 
   private addColumnIfNotExists(table: string, column: string, type: string) {

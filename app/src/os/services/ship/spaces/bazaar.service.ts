@@ -204,6 +204,13 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
           // model._clearStall(data['clear-stall']);
           // model._allyDeleted(data['ally-deleted'].ship);
           break;
+        case 'treaties-loaded':
+          log.info('treaties-loaded => %o', data['treaties-loaded']);
+          this.sendUpdate({
+            type: 'treaties-loaded',
+            payload: data['treaties-loaded'],
+          });
+          break;
         default:
           break;
       }

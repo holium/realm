@@ -298,6 +298,10 @@ function registerOnUpdateListener() {
       case 'joined-bazaar':
         shipStore.spacesStore._onJoinedBazaar(payload);
         break;
+      case 'treaties-loaded':
+        console.log(`treaties-loaded => %o`, payload);
+        shipStore.bazaarStore._setTreatiesLoaded(true);
+        break;
     }
   });
 
