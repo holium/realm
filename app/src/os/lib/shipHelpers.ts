@@ -11,9 +11,6 @@ interface ShipConnectionData {
 }
 
 export async function getCookie(server: ShipConnectionData) {
-  log.info(
-    `Getting cookie for ${server.serverUrl} with code ${server.serverCode}`
-  );
   let cookie: string | undefined;
   const controller = new AbortController();
   const timeout = setTimeout(() => {
@@ -26,6 +23,7 @@ export async function getCookie(server: ShipConnectionData) {
       headers: {
         'Content-Type': 'text/plain',
       },
+      // credentials: 'include', // TODO test this
       signal: controller.signal,
     });
     cookie = response.headers.get('set-cookie')?.split(';')[0];

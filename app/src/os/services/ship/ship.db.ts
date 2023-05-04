@@ -4,7 +4,7 @@ import Database from 'better-sqlite3-multiple-ciphers';
 import crypto from 'crypto';
 import path from 'path';
 
-import { chatInitSql } from './chat/chat.db';
+import { CHAT_TABLES, chatInitSql } from './chat/chat.schema';
 import { friendsInitSql } from './friends.service';
 import { notifInitSql } from './notifications/notifications.table';
 import { Credentials } from './ship.types.ts';
@@ -21,49 +21,45 @@ export class ShipDB {
     process.env.DONT_ENCRYPT_DB === 'true';
 
   constructor(patp: string, password: string, clientSideEncryptionKey: string) {
-    try {
-      this.patp = patp;
-      this.dbPath = path.join(app.getPath('userData'), `${patp}.sqlite`);
+    this.patp = patp;
+    this.dbPath = path.join(app.getPath('userData'), `${patp}.sqlite`);
 
-      // Create the database if it doesn't exist
-      log.info('ship.db.ts:', 'ship db file doesnt exist');
-      if (this.dontEncryptDb) {
-        this.shipDB = new Database(this.dbPath);
-        this.shipDB.exec(initSql);
-        return;
-      } else {
-        log.info('ship.db.ts:', 'Encrypting ship db');
-        const hashGenerator = crypto.createHmac(
-          'sha256',
-          clientSideEncryptionKey
-        );
-        const passwordHash = hashGenerator.update(password).digest('hex');
+    // Create the database if it doesn't exist
+    log.info('ship.db.ts:', 'ship db file doesnt exist');
+    if (this.dontEncryptDb) {
+      this.shipDB = new Database(this.dbPath);
+      this.shipDB.exec(initSql);
+      return;
+    } else {
+      log.info('ship.db.ts:', 'Encrypting ship db');
+      const hashGenerator = crypto.createHmac(
+        'sha256',
+        clientSideEncryptionKey
+      );
+      const passwordHash = hashGenerator.update(password).digest('hex');
 
-        this.shipDB = new Database(this.dbPath, {
-          key: passwordHash,
-        });
-        this.shipDB.exec(initSql);
-      }
-
-      // update db schemas if we need to
-      this.addColumnIfNotExists(
-        'messages',
-        'received_at',
-        'INTEGER NOT NULL DEFAULT 0'
-      );
-      this.addColumnIfNotExists(
-        'peers',
-        'received_at',
-        'INTEGER NOT NULL DEFAULT 0'
-      );
-      this.addColumnIfNotExists(
-        'paths',
-        'received_at',
-        'INTEGER NOT NULL DEFAULT 0'
-      );
-    } catch (e) {
-      console.log(e);
+      this.shipDB = new Database(this.dbPath, {
+        key: passwordHash,
+      });
+      this.shipDB.exec(initSql);
     }
+
+    // update db schemas if we need to
+    this.addColumnIfNotExists(
+      CHAT_TABLES.MESSAGES,
+      'received_at',
+      'INTEGER NOT NULL DEFAULT 0'
+    );
+    this.addColumnIfNotExists(
+      CHAT_TABLES.PEERS,
+      'received_at',
+      'INTEGER NOT NULL DEFAULT 0'
+    );
+    this.addColumnIfNotExists(
+      CHAT_TABLES.PATHS,
+      'received_at',
+      'INTEGER NOT NULL DEFAULT 0'
+    );
   }
 
   private addColumnIfNotExists(table: string, column: string, type: string) {
