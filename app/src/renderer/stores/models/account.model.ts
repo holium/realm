@@ -6,7 +6,6 @@ export const AccountModel = types.model('AccountModel', {
   accountId: types.number,
   serverId: types.identifier,
   serverUrl: types.string,
-  serverCode: types.string,
   serverType: types.string,
   nickname: types.maybeNull(types.string),
   description: types.maybeNull(types.string),
