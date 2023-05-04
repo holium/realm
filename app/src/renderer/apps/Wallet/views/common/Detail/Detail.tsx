@@ -200,7 +200,7 @@ const ListSelector = ({ selected, onChange, network }: ListSelectorProps) => {
         {children}
       </Button.TextButton>
     ) : (
-      <Button.TextButton onClick={onClick} flex={1} color="text">
+      <Button.TextButton onClick={onClick} flex={1} color="icon">
         {children}
       </Button.TextButton>
     );
