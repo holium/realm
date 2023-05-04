@@ -14,7 +14,6 @@ import { ServerSelfHostingSection } from './sections/ServerSelfHostingSection';
 
 const SelfHostingAccountPanelPresenter = () => {
   const { loggedInAccount } = useAppState();
-
   if (!loggedInAccount) return null;
 
   return (

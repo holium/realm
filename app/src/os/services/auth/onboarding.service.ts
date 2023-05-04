@@ -121,7 +121,6 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       accountId: acc.accountId,
       serverId: acc.serverId,
       serverUrl: acc.serverUrl,
-      serverCode: acc.serverCode,
       serverType: acc.serverType,
       avatar: acc.avatar,
       nickname: acc.nickname,
