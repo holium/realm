@@ -792,7 +792,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
           created_at: message['created-at'],
           updated_at: message['updated-at'],
           expires_at: message['expires-at'],
-          received_at: message['received-at'],
+          received_at: message['received-at'] || 0, // fall bock to zero since we have not-null constraint
         });
       }
     });
@@ -828,7 +828,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
           max_expires_at_duration: path['max-expires-at-duration'] ?? null,
           created_at: path['created-at'],
           updated_at: path['updated-at'],
-          received_at: path['received-at'],
+          received_at: path['received-at'] || 0, // fall bock to zero since we have not-null constraint
         });
     });
     insertMany(paths);
@@ -855,7 +855,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
           role: peer.role,
           created_at: peer['created-at'],
           updated_at: peer['updated-at'],
-          received_at: peer['received-at'],
+          received_at: peer['received-at'] || 0, // fall bock to zero since we have not-null constraint
         });
     });
     insertMany(peers);
