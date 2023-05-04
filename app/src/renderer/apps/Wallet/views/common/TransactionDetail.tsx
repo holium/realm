@@ -1,5 +1,6 @@
 import { ChangeEvent, useState } from 'react';
 import { observer } from 'mobx-react';
+import styled from 'styled-components';
 
 import {
   Anchor,
@@ -30,6 +31,12 @@ import {
   getDisplayDate,
   shortened,
 } from '../../lib/helpers';
+
+const NoResize = styled(Flex)`
+  textarea {
+    resize: none;
+  }
+`;
 
 const getTransaction = (
   walletStore: WalletStoreType
@@ -107,7 +114,7 @@ const TransactionDetailPresenter = () => {
     : `${btcAmount.btc} BTC`;
 
   return (
-    <Flex width="100%" height="100%" flexDirection="column" gap={10}>
+    <NoResize width="100%" height="100%" flexDirection="column" gap={10}>
       <Text.Custom fontSize={2}>Transaction</Text.Custom>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
         {transaction.status === 'pending' ? (
@@ -213,7 +220,6 @@ const TransactionDetailPresenter = () => {
             type="textarea"
             height="72px"
             cols={50}
-            rows={4}
             value={notes}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setNotes(e.target.value)
@@ -231,7 +237,7 @@ const TransactionDetailPresenter = () => {
           </Button.Primary>
         </Flex>
       </Flex>
-    </Flex>
+    </NoResize>
   );
 };
 

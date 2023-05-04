@@ -682,6 +682,7 @@ export const EthStore = types
       self.settings.defaultIndex = index;
     },
     applyWalletUpdate(wallet: any) {
+      console.log('wallet update', wallet);
       let walletObj;
       if (!self.wallets.has(wallet['wallet_index'])) {
         walletObj = {
@@ -715,6 +716,8 @@ export const EthStore = types
           },
         };
         const ethWallet = EthWallet.create(walletObj);
+        console.log('ethWallet', ethWallet);
+        console.log('index', wallet['wallet_index']);
         self.wallets.set(wallet['wallet_index'], ethWallet);
       }
       if (wallet.transactions) {
@@ -1374,10 +1377,22 @@ export type WalletStoreType = Instance<typeof WalletStore>;
 WalletIPC.onUpdate((payload: any) => {
   const type = payload.type ?? Object.keys(payload)[0];
   switch (type) {
+    case 'wallets':
+      const wallets = payload.payload;
+      for (const wallet of wallets) {
+        if (wallet.chain === 'ethereum') {
+          shipStore.walletStore.ethereum.applyWalletUpdate(wallet);
+        } else if (wallet.chain === 'bitcoin') {
+          shipStore.walletStore.bitcoin.applyWalletUpdate(wallet);
+        } else if (wallet.chain === 'btctestnet') {
+          shipStore.walletStore.btctest.applyWalletUpdate(wallet);
+        }
+        shipStore.walletStore.updateWalletState();
+      }
+      break;
     case 'wallet':
       const wallet = payload.payload;
       if (wallet.chain === 'ethereum') {
-        console.log('applying wallet update');
         shipStore.walletStore.ethereum.applyWalletUpdate(wallet);
       } else if (wallet.chain === 'bitcoin') {
         shipStore.walletStore.bitcoin.applyWalletUpdate(wallet);

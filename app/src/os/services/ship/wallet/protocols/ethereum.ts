@@ -137,11 +137,22 @@ export class EthereumProtocol implements BaseBlockProtocol {
                 balance,
               },
             });
+            walletDB.setBalance(
+              'ethereum',
+              this.protocol,
+              wallet.wallet_index,
+              balance
+            );
           }
         });
         this.getAccountTransactions(
           walletAddress,
-          walletDB.getLatestBlock(ChainType.ETHEREUM, this.protocol) ?? 0,
+          walletDB.getLatestBlock(
+            ChainType.ETHEREUM,
+            this.protocol,
+            wallet.wallet_index,
+            'eth'
+          ) ?? 0,
           currentBlock
         ).then((response: any[]) => {
           if (response.length > 0) {
@@ -199,7 +210,9 @@ export class EthereumProtocol implements BaseBlockProtocol {
                     ethWalletAddress,
                     walletDB.getLatestBlock(
                       ChainType.ETHEREUM,
-                      this.protocol
+                      this.protocol,
+                      wallet.wallet_index,
+                      asset.addr
                     ) ?? 0,
                     currentBlock
                   ).then((transfers: any) => {
@@ -211,14 +224,23 @@ export class EthereumProtocol implements BaseBlockProtocol {
                         transactions: transfers,
                       },
                     });
-                    walletDB.sendChainUpdate({
-                      'set-coin-block': {
-                        index: wallet.wallet_index,
-                        protocol: this.protocol,
-                        coinAddr: asset.addr,
-                        block: currentBlock,
-                      },
-                    });
+                    if (currentBlock) {
+                      walletDB.sendChainUpdate({
+                        'set-coin-block': {
+                          index: wallet.wallet_index,
+                          protocol: this.protocol,
+                          coinAddr: asset.addr,
+                          block: currentBlock,
+                        },
+                      });
+                      walletDB.setLatestBlock(
+                        ChainType.ETHEREUM,
+                        this.protocol,
+                        wallet.wallet_index,
+                        asset.addr,
+                        currentBlock
+                      );
+                    }
                   });
                 }
               }

@@ -143,11 +143,11 @@
       ^-  json
       %-  pairs
       :~  ['chain' [%s chain.wallet-row]]
-          ['index' (numb wallet-index.wallet-row)]
+          ['wallet_index' (numb wallet-index.wallet-row)]
           ?:  ?|  =(chain.wallet-row %bitcoin)
                   =(chain.wallet-row %btctestnet)
               ==
-            ['address' [%s (crip q:(trim 2 (scow %uc address.wallet-row)))]]
+          ['address' [%s (crip q:(trim 2 (scow %uc address.wallet-row)))]]
           ['path' [%s path.wallet-row]]
           ['address' [%s (crip (z-co:co address.wallet-row))]]
           ['nickname' [%s nickname.wallet-row]]

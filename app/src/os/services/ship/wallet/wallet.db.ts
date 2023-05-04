@@ -1,3 +1,5 @@
+import log from 'electron-log';
+
 import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
@@ -30,10 +32,9 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
   async init() {
     const wallets = await this._fetchWallets();
-    console.log('wallets', wallets);
     this._insertWallets(wallets);
+    this.sendUpdate({ type: 'wallets', payload: wallets });
     const transactions = await this._fetchTransactions();
-    console.log('transactions', transactions);
     this._insertTransactions(transactions);
   }
 
@@ -67,7 +68,6 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   }
 
   private _onDbUpdate(data: any /*WalletDbReactions*/, _id?: number) {
-    console.log('GOT DB UPDATE');
     data.forEach(this._handleDBChange);
   }
 
@@ -77,15 +77,11 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
       console.log('got set-row', addRow);
       switch (addRow.table) {
         case 'wallets':
-          /*const message = addRow.row as WalletsRow;
-          // const msg = this.getChatMessage(message['msg-id']);*/
           this._insertWallets([addRow.row]);
-          console.log('sending update');
           this.sendUpdate({ type: 'wallet', payload: addRow.row });
           break;
         case 'transactions':
           this._insertTransactions([addRow.row]);
-          console.log('sending update');
           this.sendUpdate({ type: 'wallet', payload: addRow.row });
           break;
         default:
@@ -104,14 +100,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   private _onError(err: any) {
     console.log('err!', err);
   }
-  // private _parseMetadata = (metadata: string) => {
-  //   const mtd = JSON.parse(metadata);
-  //   return {
-  //     ...mtd,
-  //     timestamp: parseInt(mtd.timestamp) || 0,
-  //     reactions: mtd.reactions === 'true',
-  //   };
-  // };
+
   // ----------------------------------------------
   // ----------------- DB queries -----------------
   // ----------------------------------------------
@@ -218,7 +207,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
 
   private _insertWallets(wallets: any) {
     if (!this.db) throw new Error('No db connection');
-    console.log('inserting wallets');
+    log.info('inserting wallets');
     if (!wallets) return;
 
     const insert = this.db.prepare(
@@ -227,57 +216,88 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
             wallet_index,
             path, 
             address,
-            nickname,
-            balance
-          ) VALUES (@chain, @wallet_index, @path, @address, @nickname, @balance)`
+            nickname
+          ) VALUES (@chain, @wallet_index, @path, @address, @nickname)`
     );
     const insertMany = this.db.transaction((wallets: any) => {
       for (const wallet of wallets)
         insert.run({
           chain: wallet.chain,
-          wallet_index: wallet.index,
+          wallet_index: wallet['wallet_index'],
           path: wallet.path,
           address: wallet.address,
           nickname: wallet.nickname,
-          balance: 0,
         });
     });
     console.log('inserting wallets');
     insertMany(wallets);
   }
 
-  getLatestBlock(chain: ChainType, network: NetworkType) {
+  getLatestBlock(
+    chain: ChainType,
+    network: NetworkType,
+    walletIndex: number,
+    type: string
+  ) {
     if (!this.db?.open) return;
     const query = this.db.prepare(
-      `select * from blocks
-      where chain = '${chain}' and network = '${network}'
+      `select * from chain_info
+      where chain = '${chain}' and network = '${network}' and wallet_index = ${walletIndex} and type = '${type}'
       order by block_number desc limit 1`
     );
-    const result = query.get(chain, network);
-    console.log('latest block', result);
-    return result;
+    const result = query.get();
+    return result && result['block_number'];
   }
 
   setLatestBlock(
     chain: ChainType,
     network: NetworkType,
     walletIndex: number,
+    type: string,
     block: number
   ) {
     if (!this.db?.open) return;
     const insert = this.db.prepare(
-      `REPLACE INTO blocks (
+      `REPLACE INTO chain_info (
         chain,
         network,
         wallet_index,
+        type,
         block_number
-      ) VALUES (@chain, @network, @wallet_index, @block_number)`
+      ) VALUES (@chain, @network, @wallet_index, @type, @block_number)`
     );
     insert.run({
       chain,
       network,
       wallet_index: walletIndex,
+      type,
       block_number: block,
+    });
+  }
+
+  setBalance(
+    chain: ChainType,
+    network: NetworkType,
+    walletIndex: number,
+    type: string,
+    balance: string
+  ) {
+    if (!this.db?.open) return;
+    const insert = this.db.prepare(
+      `REPLACE INTO chain_info (
+        chain,
+        network,
+        wallet_index,
+        type,
+        balance
+      ) VALUES (@chain, @network, @wallet_index, @type, @balance)`
+    );
+    insert.run({
+      chain,
+      network,
+      wallet_index: walletIndex,
+      type,
+      balance,
     });
   }
 }
@@ -305,30 +325,33 @@ create table if not exists transactions
 create unique index if not exists hash_network_uindex
   on transactions (chain, network, hash);
 
+drop table if exists wallets;
 create table if not exists wallets
 (
   chain                       text not null,
   wallet_index                integer not null,
   path                        text not null,
   address                     text not null,
-  nickname                    text not null,
-  balance                     real not null
+  nickname                    text not null
 );
 
 create unique index if not exists chain_wallet_index_uindex
   on wallets (chain, wallet_index);
 
-create table if not exists blocks
+drop table if exists blocks;
+drop table if exists chain_info;
+create table if not exists chain_info
 (
   chain          text    not null,
   network        text    not null,
   wallet_index   integer not null,
   type           text    not null,
-  block_number   integer not null,
+  balance        real,
+  block_number   integer
 );
 
-create unique index if not exists chain_network_wallet_index_uindex
-  on wallets (chain, network, wallet_index);
+create unique index if not exists chain_network_wallet_index_type_uindex
+  on chain_info (chain, network, wallet_index, type);
 `;
 
 export const walletDBPreload = WalletDB.preload(
