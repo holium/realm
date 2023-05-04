@@ -11,7 +11,6 @@ import { download } from 'electron-dl';
 import isDev from 'electron-is-dev';
 import log from 'electron-log';
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
-import fetch from 'cross-fetch';
 import fs from 'fs';
 import path from 'path';
 

@@ -1,5 +1,4 @@
 import log from 'electron-log';
-import fetch from 'cross-fetch';
 import dns from 'dns';
 
 dns.setDefaultResultOrder('ipv4first');
@@ -9,19 +8,20 @@ type ServerConnectionData = {
   serverCode: string;
 };
 
-export async function getCookie(server: ServerConnectionData) {
-  log.info(
-    `Getting cookie for ${server.serverUrl} with code ${server.serverCode}`
-  );
+export async function getCookie({
+  serverUrl,
+  serverCode,
+}: ServerConnectionData) {
+  log.info(`Getting cookie for ${serverUrl} with code ${serverCode}`);
   let cookie: string | undefined;
   const controller = new AbortController();
   const timeout = setTimeout(() => {
     controller.abort();
   }, 10000);
   try {
-    const response = await fetch(`${server.serverUrl}/~/login`, {
+    const response = await fetch(`${serverUrl}/~/login`, {
       method: 'POST',
-      body: `password=${server.serverCode.trim()}`,
+      body: `password=${serverCode.trim()}`,
       headers: {
         'Content-Type': 'text/plain',
       },
@@ -29,9 +29,9 @@ export async function getCookie(server: ServerConnectionData) {
       signal: controller.signal,
     });
     cookie = response.headers.get('set-cookie')?.split(';')[0];
-    log.info(`Got cookie for ${server.serverUrl}`);
+    log.info(`Got cookie for ${serverUrl}`);
   } catch (e) {
-    log.error(`Error getting cookie for ${server.serverUrl}`, e);
+    log.error(`Error getting cookie for ${serverUrl}`, e);
     return Promise.reject(e);
   } finally {
     clearTimeout(timeout);
