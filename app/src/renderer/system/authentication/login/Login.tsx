@@ -16,14 +16,11 @@ import { Menu, MenuItemProps } from '@holium/design-system/navigation';
 import { OnboardingStorage } from '@holium/shared';
 
 import { useAppState } from 'renderer/stores/app.store';
+import { OnboardingIPC } from 'renderer/stores/ipc';
 
 import { ShipSelector } from './ShipSelector';
 
-interface LoginProps {
-  addServer: () => void;
-}
-
-const LoginPresenter = ({ addServer }: LoginProps) => {
+const LoginPresenter = () => {
   const { setTheme, authStore } = useAppState();
   const {
     accounts,
@@ -35,6 +32,10 @@ const LoginPresenter = ({ addServer }: LoginProps) => {
   const [password, setPassword] = useState('');
   const passwordRef = useRef<HTMLInputElement>(null);
   const submitRef = useRef<HTMLButtonElement>(null);
+
+  const addServer = () => {
+    OnboardingIPC.addServer();
+  };
 
   useEffect(() => {
     if (!selectedAccount) {
@@ -343,7 +344,7 @@ const LoginPresenter = ({ addServer }: LoginProps) => {
               showOnHover
               color="text"
               style={{ padding: '6px 10px', borderRadius: 6 }}
-              onClick={() => addServer()}
+              onClick={addServer}
             >
               <Flex
                 gap={8}

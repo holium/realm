@@ -18,7 +18,8 @@ import { wallpapers } from '../components/wallpapers';
 
 const WallpaperPreview = styled(motion.img)`
   width: 300px;
-  height: 'auto';
+  height: 200px;
+  object-fit: cover;
   border-radius: 6px;
   transition: all 0.25s ease;
   -webkit-user-drag: none;

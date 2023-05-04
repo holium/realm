@@ -37,11 +37,11 @@
     "babel-plugin-styled-components": "^2.0.7"
   },
   "peerDependencies": {
+    "lodash": "^4.17.21",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "styled-components": "^5.3.6",
-    "styled-system": "^5.1.5",
-    "lodash": "^4.17.21"
+    "styled-system": "^5.1.5"
   },
   "keywords": [
     "realm",

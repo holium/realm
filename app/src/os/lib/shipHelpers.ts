@@ -4,13 +4,12 @@ import dns from 'dns';
 
 dns.setDefaultResultOrder('ipv4first');
 
-interface ShipConnectionData {
-  serverId?: string;
+type ServerConnectionData = {
   serverUrl: string;
   serverCode: string;
-}
+};
 
-export async function getCookie(server: ShipConnectionData) {
+export async function getCookie(server: ServerConnectionData) {
   log.info(
     `Getting cookie for ${server.serverUrl} with code ${server.serverCode}`
   );
@@ -26,9 +25,11 @@ export async function getCookie(server: ShipConnectionData) {
       headers: {
         'Content-Type': 'text/plain',
       },
+      // credentials: 'include', // TODO test this
       signal: controller.signal,
     });
     cookie = response.headers.get('set-cookie')?.split(';')[0];
+    log.info(`Got cookie for ${server.serverUrl}`);
   } catch (e) {
     log.error(`Error getting cookie for ${server.serverUrl}`, e);
     return Promise.reject(e);

@@ -1,3 +1,7 @@
+export type FragmentMarkdownType = {
+  markdown: string;
+  metadata?: any;
+};
 export type FragmentPlainType = {
   plain: string;
   metadata?: any;
@@ -80,6 +84,7 @@ export type FragmentTabType = {
 };
 
 export type FragmentType =
+  | FragmentMarkdownType
   | FragmentPlainType
   | FragmentBoldType
   | FragmentItalicsType
@@ -132,6 +137,7 @@ export const BLOCK_TYPES = [
   'link',
   'blockquote',
   'code',
+  'markdown',
 ];
 export const TEXT_TYPES = [
   'plain',
@@ -147,6 +153,7 @@ export const TEXT_TYPES = [
 ];
 
 export type FragmentKeyTypes =
+  | 'markdown'
   | 'plain'
   | 'bold'
   | 'italics'

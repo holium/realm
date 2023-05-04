@@ -1,7 +1,6 @@
-import { Nullable, RealmOnboardingStep } from '../types';
+import { Nullable } from '../types';
 
 type Storage = {
-  step: RealmOnboardingStep;
   email: string;
   passwordHash: string;
   masterAccountId: number;
@@ -20,7 +19,6 @@ type Storage = {
 };
 
 const storageKeys: (keyof Storage)[] = [
-  'step',
   'email',
   'passwordHash',
   'masterAccountId',
@@ -39,7 +37,6 @@ const storageKeys: (keyof Storage)[] = [
 export const OnboardingStorage = {
   get: (): Nullable<Storage> => {
     return {
-      step: localStorage.getItem('step') as RealmOnboardingStep | null,
       email: localStorage.getItem('email'),
       passwordHash: localStorage.getItem('passwordHash'),
       masterAccountId: Number(localStorage.getItem('masterAccountId')),
@@ -63,7 +60,6 @@ export const OnboardingStorage = {
     });
   },
   reset: () => {
-    localStorage.removeItem('step');
     localStorage.removeItem('nickname');
     localStorage.removeItem('description');
     localStorage.removeItem('avatar');
