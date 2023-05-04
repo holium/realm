@@ -4,7 +4,7 @@ import Database from 'better-sqlite3-multiple-ciphers';
 import crypto from 'crypto';
 import path from 'path';
 
-import { chatInitSql } from './chat/chat.db';
+import { CHAT_TABLES, chatInitSql } from './chat/chat.schema';
 import { friendsInitSql } from './friends.service';
 import { notifInitSql } from './notifications/notifications.table';
 import { Credentials } from './ship.types.ts';
@@ -46,17 +46,17 @@ export class ShipDB {
 
     // update db schemas if we need to
     this.addColumnIfNotExists(
-      'chat_messages',
+      CHAT_TABLES.MESSAGES,
       'received_at',
       'INTEGER NOT NULL DEFAULT 0'
     );
     this.addColumnIfNotExists(
-      'chat_peers',
+      CHAT_TABLES.PEERS,
       'received_at',
       'INTEGER NOT NULL DEFAULT 0'
     );
     this.addColumnIfNotExists(
-      'chat_paths',
+      CHAT_TABLES.PATHS,
       'received_at',
       'INTEGER NOT NULL DEFAULT 0'
     );

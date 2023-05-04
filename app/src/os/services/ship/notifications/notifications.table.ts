@@ -2,6 +2,7 @@ import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
 import { APIConnection } from '../../api';
+import { CHAT_TABLES } from '../chat/chat.schema';
 import {
   AddRow,
   DelRow,
@@ -455,7 +456,7 @@ export const QUERY_NOTIFICATIONS = `
     buttons,
     link,
     notifications.metadata,
-    chat_paths.metadata pathMetadata,
+    pths.metadata pathMetadata,
     notifications.created_at   createdAt,
     notifications.updated_at   updatedAt,
     read_at      readAt,
@@ -463,7 +464,7 @@ export const QUERY_NOTIFICATIONS = `
     dismissed_at dismissedAt,
     dismissed
   FROM notifications 
-  LEFT OUTER JOIN chat_paths ON notifications.path = chat_paths.path
+  LEFT OUTER JOIN ${CHAT_TABLES.PATHS} pths ON notifications.path = pths.path
 `;
 
 export const notifDBPreload = NotificationsDB.preload(
