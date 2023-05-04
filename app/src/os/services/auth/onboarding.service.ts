@@ -1,7 +1,7 @@
 import log from 'electron-log';
 import bcrypt from 'bcryptjs';
 
-import { RealmInstallStatus } from '@holium/shared/src/onboarding/types';
+import { RealmInstallStatus } from '@holium/shared';
 
 import { cleanNounColor, removeHash } from '../../lib/color';
 import { getCookie } from '../../lib/shipHelpers';
@@ -489,6 +489,18 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     }
 
     return this.authDB.tables.masterAccounts.findFirst("id = '" + id + "'");
+  }
+
+  public finishOnboarding() {
+    this.sendUpdate({
+      type: 'onboarding-finished',
+    });
+  }
+
+  public addServer() {
+    this.sendUpdate({
+      type: 'add-server',
+    });
   }
 
   private async _openConduit() {

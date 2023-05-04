@@ -17,11 +17,7 @@ import { defaultTheme } from '../../lib/defaultTheme';
 import { thirdEarthApi } from '../thirdEarthApi';
 import { StepProps } from './types';
 
-export const LoginStep = ({
-  forcedNextStep,
-  setStep,
-  finishOnboarding,
-}: StepProps) => {
+export const LoginStep = ({ forcedNextStep, setStep }: StepProps) => {
   const learnMoreModal = useToggle(false);
 
   const prefilledEmail = OnboardingStorage.get().email ?? '';
@@ -95,7 +91,7 @@ export const LoginStep = ({
       if (forcedNextStep) {
         setStep(forcedNextStep);
       } else {
-        finishOnboarding?.();
+        OnboardingIPC.finishOnboarding();
       }
     } else {
       setStep(forcedNextStep ?? '/hosting');

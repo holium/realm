@@ -7,7 +7,7 @@ import { OnboardingIPC } from 'renderer/stores/ipc';
 
 import { StepProps } from './types';
 
-export const InstallationStep = ({ setStep, finishOnboarding }: StepProps) => {
+export const InstallationStep = ({ setStep }: StepProps) => {
   useEffect(() => {
     track('Onboarding / Installation');
   });
@@ -30,7 +30,7 @@ export const InstallationStep = ({ setStep, finishOnboarding }: StepProps) => {
   };
 
   const onNext = async () => {
-    finishOnboarding?.();
+    OnboardingIPC.finishOnboarding();
 
     return true;
   };

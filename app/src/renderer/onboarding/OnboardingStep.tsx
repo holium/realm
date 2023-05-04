@@ -1,7 +1,5 @@
 import { observer } from 'mobx-react';
 
-import { OnboardingStorage } from '@holium/shared';
-
 import { useAppState } from 'renderer/stores/app.store';
 
 import { BootingStep, ChooseIdStep, LoginStep, PaymentStep } from './steps';
@@ -12,48 +10,23 @@ import { InstallationStep } from './steps/InstallationStep';
 import { PassportStep } from './steps/PassportStep';
 
 export const OnboardingStepPresenter = () => {
-  const { onboardingStep, setCurrentScreen, setOnboardingStep } = useAppState();
-
-  const finishOnboarding = () => {
-    setCurrentScreen('login');
-    OnboardingStorage.reset();
-  };
+  const { onboardingStep, setOnboardingStep } = useAppState();
 
   switch (onboardingStep) {
     case '/login':
-      return (
-        <LoginStep
-          setStep={setOnboardingStep}
-          finishOnboarding={finishOnboarding}
-        />
-      );
+      return <LoginStep setStep={setOnboardingStep} />;
     case '/intermediary-login':
       return (
         <LoginStep forcedNextStep="/choose-id" setStep={setOnboardingStep} />
       );
     case '/hosting':
-      return (
-        <HostingStep
-          setStep={setOnboardingStep}
-          finishOnboarding={finishOnboarding}
-        />
-      );
+      return <HostingStep setStep={setOnboardingStep} />;
     case '/add-server':
       return <AddServerStep setStep={setOnboardingStep} />;
     case '/passport':
-      return (
-        <PassportStep
-          setStep={setOnboardingStep}
-          finishOnboarding={finishOnboarding}
-        />
-      );
+      return <PassportStep setStep={setOnboardingStep} />;
     case '/installation':
-      return (
-        <InstallationStep
-          setStep={setOnboardingStep}
-          finishOnboarding={finishOnboarding}
-        />
-      );
+      return <InstallationStep setStep={setOnboardingStep} />;
     case '/choose-id':
       return <ChooseIdStep setStep={setOnboardingStep} />;
     case '/payment':
