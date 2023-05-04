@@ -1,6 +1,6 @@
 import { FC } from 'react';
 
-import { Button, Card, Flex, Icon, Spinner, Text } from '@holium/design-system';
+import { Button, Flex, Icon, Spinner, Text } from '@holium/design-system';
 
 import {
   NetworkType,
@@ -82,7 +82,7 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
   }
 
   return (
-    <Card width="100%" style={{ borderRadius: '9px' }} color="border">
+    <Flex width="100%" style={{ borderRadius: '9px' }} color="border">
       <Flex flexDirection="row" justifyContent="space-between">
         <Flex
           justifyContent="center"
@@ -111,6 +111,6 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
           </Button.IconButton>
         </Flex>
       </Flex>
-    </Card>
+    </Flex>
   );
 };

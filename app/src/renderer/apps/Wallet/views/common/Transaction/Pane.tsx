@@ -125,7 +125,7 @@ const TransactionPanePresenter = ({
           </Flex>
         </Flex>
       ) : (
-        <Flex flexDirection="column">
+        <Flex flexDirection="column" gap={20}>
           {!uqbarContract && (
             <>
               <Text.Body
@@ -156,6 +156,7 @@ const TransactionPanePresenter = ({
                 flexDirection="column"
                 justifyContent="space-evenly"
                 alignItems="center"
+                gap={10}
               >
                 <Flex width="100%" justifyContent="space-between">
                   <Text.Body variant="body">TO</Text.Body>
@@ -255,7 +256,7 @@ const TransactionPanePresenter = ({
             </>
           )}
           <Flex justifyContent="space-between">
-            <Button.TextButton variant="transparent" onClick={() => prev()}>
+            <Button.TextButton color="input" onClick={() => prev()}>
               Reject
             </Button.TextButton>
             <Button.TextButton

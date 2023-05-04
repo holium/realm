@@ -98,7 +98,7 @@ export class WalletService extends AbstractService {
     RealmSigner.setMnemonic(mnemonic, ourPatp, passcode);
   }
 
-  async insertTransaction(
+  async setTransaction(
     chain: string,
     network: string,
     walletId: number,
@@ -119,7 +119,7 @@ export class WalletService extends AbstractService {
       app: 'realm-wallet',
       mark: 'realm-wallet-action',
       json: {
-        'insert-transaction': {
+        'set-transaction': {
           chain,
           network,
           'wallet-id': walletId,

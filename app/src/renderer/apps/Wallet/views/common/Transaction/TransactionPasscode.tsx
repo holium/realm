@@ -22,11 +22,12 @@ const TransactionPasscodePresenter = (props: PasscodeProps) => {
         flexDirection="column"
         justifyContent="center"
         alignItems="center"
+        gap={10}
       >
         <Icon name="Locked" size={36} />
         <Text.H3 variant="h3">Submit Transaction</Text.H3>
       </Flex>
-      <Flex flex={2} flexDirection="column" alignItems="center">
+      <Flex flex={2} flexDirection="column" alignItems="center" gap={10}>
         <Text.Body variant="body">Enter your passcode to continue.</Text.Body>
         <PasscodeInput
           checkStored={true}

@@ -55,7 +55,7 @@
       [%set-sharing-permissions (ot ~[type+(su (perk %block ~)) who+(se %p)])]
       [%set-default-index (ot ~[network+(su (perk %bitcoin %btctestnet %ethereum ~)) index+ni])]
       [%create-wallet (ot ~[sndr+(se %p) network+(su (perk %bitcoin %btctestnet %ethereum ~)) nickname+so])]
-      [%insert-transaction (ot ~[transaction-row+json-to-transaction-row])]
+      [%set-transaction (ot ~[transaction-row+json-to-transaction-row])]
       [%complete-transaction (ot ~[txn-id+json-to-txn-id success+bo])]
       [%save-transaction-notes (ot ~[txn-id+json-to-txn-id notes+so])]
   ==

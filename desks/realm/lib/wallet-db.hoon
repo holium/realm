@@ -24,7 +24,7 @@
   :_  state
   [%give %fact [/db]~ change]~
 ::
-++  insert-transaction
+++  set-transaction
   |=  [=transaction-row:sur state=state-0:sur =bowl:gall]
   ^-  (quip card state-0:sur)
   =.  transactions-table.state  (add-transaction-to-table transactions-table.state transaction-row)

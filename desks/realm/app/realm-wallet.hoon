@@ -253,7 +253,7 @@
       ==
     state
   ::
-      %insert-transaction
+      %set-transaction
     =/  db-task  [%poke %realm-wallet-db-action !>(`action:db`[%insert-transaction transaction-row.act])]
     =/  db-poke  [%pass / %agent [our.bowl %wallet-db] db-task]~
     =/  poke-cards

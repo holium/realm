@@ -22,7 +22,7 @@
       [%create-wallet sndr=ship =chain nickname=@t]
       [%request-address =chain from=@p]
       [%receive-address =chain address=(unit address)]
-      [%insert-transaction =transaction-row]
+      [%set-transaction =transaction-row]
       [%complete-transaction =txn-id success=?]
       [%save-transaction-notes =txn-id notes=@t]
   ==

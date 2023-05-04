@@ -232,7 +232,7 @@ const TransactionList = types
       hash: string,
       tx: any
     ): Generator<PromiseLike<any>, void, any> {
-      yield WalletIPC.insertTransaction(
+      yield WalletIPC.setTransaction(
         'ethereum',
         network,
         index,
@@ -1196,7 +1196,7 @@ export const WalletStore = types
           .get(self.navState.protocol)
           ?.transactionList.getStoredTransaction(hash);
 
-        yield WalletIPC.insertTransaction(
+        yield WalletIPC.setTransaction(
           'ethereum',
           self.navState.protocol,
           currentWallet.index,
@@ -1245,7 +1245,7 @@ export const WalletStore = types
           .get(self.navState.protocol)
           ?.coins.get(contractAddress)
           ?.transactionList.getStoredTransaction(hash);
-        yield WalletIPC.insertTransaction(
+        yield WalletIPC.setTransaction(
           'ethereum',
           self.navState.protocol,
           currentWallet.index,
@@ -1319,23 +1319,22 @@ export const WalletStore = types
         transaction: any,
         notes: string
       ): Generator<PromiseLike<any>, void, any> {
-        const network = self.navState.network;
-        const net = self.navState.protocol;
+        const chain = self.navState.network;
+        const network = self.navState.protocol;
         const contract =
           self.navState.detail?.txtype === 'coin'
             ? self.navState.detail.coinKey ?? null
             : null;
         const hash = self.navState.detail?.key ?? '';
         const index = self.currentWallet?.index ?? 0;
-        yield WalletIPC.saveTransactionNotes(
+        yield WalletIPC.setTransaction(
+          chain,
           network,
-          net,
           index,
           contract,
           hash,
           notes
         ) as PromiseLike<any>;
-        yield WalletIPC.insertTransaction(net);
       }),
       checkMnemonic: flow(function* (
         mnemonic: string

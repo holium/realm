@@ -54,7 +54,7 @@
 ::
 +$  action
   $%  [%set-wallet =wallet-row]
-      [%insert-transaction =transaction-row]
+      [%set-transaction =transaction-row]
       [%complete-transaction =txn-id success=?]
       [%save-transaction-notes =txn-id notes=@t]
   ==
