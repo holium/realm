@@ -17,8 +17,9 @@ const GetRealmPresenter = () => {
   const onClickSidebarSection = (section: string) => {
     if (section === 'Get Hosting') {
       goToGetHosting();
+    } else {
+      goToPage(accountPageUrl[section]);
     }
-    goToPage(accountPageUrl[section]);
   };
 
   return (
