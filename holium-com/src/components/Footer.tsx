@@ -8,6 +8,7 @@ const FooterContainer = styled.header`
   display: flex;
   align-items: center;
   gap: 16px;
+  padding: 8px;
 
   @media (max-width: ${MOBILE_WIDTH}px) {
     display: none;
