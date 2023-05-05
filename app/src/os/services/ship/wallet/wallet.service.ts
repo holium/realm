@@ -1,3 +1,4 @@
+import log from 'electron-log';
 import bcrypt from 'bcryptjs';
 import Database from 'better-sqlite3-multiple-ciphers';
 import { ethers } from 'ethers';
@@ -101,7 +102,7 @@ export class WalletService extends AbstractService {
   async setTransaction(
     chain: string,
     network: string,
-    walletId: number,
+    walletIndex: number,
     hash: string,
     ethType: string,
     contractAddress: string | null,
@@ -121,8 +122,8 @@ export class WalletService extends AbstractService {
       json: {
         'set-transaction': {
           chain,
-          network,
-          'wallet-id': walletId,
+          network: network === NetworkType.ETH_MAIN ? 'eth-main' : 'eth-gorli',
+          'wallet-index': walletIndex,
           hash,
           'eth-type': ethType,
           'contract-address': contractAddress,
@@ -138,6 +139,8 @@ export class WalletService extends AbstractService {
         },
       },
     };
+    log.info(JSON.stringify(payload.json));
+    log.info('our-add', ourAddress);
     await APIConnection.getInstance().conduit.poke(payload);
   }
 

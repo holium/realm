@@ -1376,6 +1376,7 @@ export const WalletStore = types
             : null;
         const hash = self.navState.detail?.key ?? '';
         const index = self.currentWallet?.index ?? 0;
+        console.log('transaction', transaction);
         yield WalletIPC.setTransaction(
           chain,
           network,
@@ -1386,9 +1387,9 @@ export const WalletStore = types
           'sent',
           transaction.initiatedAt,
           transaction.completedAt,
-          transaction.fromAddress,
-          transaction.toPatp,
-          transaction.to,
+          transaction.ourAddress,
+          transaction.theirPatp,
+          transaction.theirAddress,
           'pending',
           null,
           notes
@@ -1459,28 +1460,33 @@ WalletIPC.onUpdate((payload: any) => {
       shipStore.walletStore.updateWalletState();
       break;
     case 'transaction':
-      const transaction = payload.transaction;
-      const network: NetworkStoreType =
-        transaction.network === NetworkType.ETH_MAIN ||
-        transaction.network === NetworkType.ETH_GORLI ||
-        transaction.network === NetworkType.UQBAR
+      console.log('got payload', payload);
+      const transaction = payload.payload;
+      const network =
+        transaction.network === 'eth-main'
+          ? NetworkType.ETH_MAIN
+          : NetworkType.ETH_GORLI;
+      const networkStore: NetworkStoreType =
+        network === NetworkType.ETH_MAIN ||
+        network === NetworkType.ETH_GORLI ||
+        network === NetworkType.UQBAR
           ? NetworkStoreType.ETHEREUM
-          : transaction.network === NetworkType.BTC_MAIN
+          : network === NetworkType.BTC_MAIN
           ? NetworkStoreType.BTC_MAIN
           : NetworkStoreType.BTC_TEST;
-      if (network === NetworkStoreType.ETHEREUM) {
+      if (networkStore === NetworkStoreType.ETHEREUM) {
         shipStore.walletStore.ethereum.wallets
           .get(transaction.index)
           ?.applyTransactionUpdate(
-            transaction.network,
-            transaction.contract,
-            transaction.transaction
+            network,
+            transaction['eth-type'],
+            transaction
           );
-      } else if (network === NetworkStoreType.BTC_MAIN) {
+      } else if (networkStore === NetworkStoreType.BTC_MAIN) {
         /*walletState.bitcoin.wallets
           .get(transaction.index)!
           .applyTransactionUpdate(transaction.net, transaction.transaction);*/
-      } else if (network === NetworkStoreType.BTC_TEST) {
+      } else if (networkStore === NetworkStoreType.BTC_TEST) {
         /*walletState.btctest.wallets.get(
           transaction.index
         ).applyTransactions(transaction.net, transaction.transaction);*/

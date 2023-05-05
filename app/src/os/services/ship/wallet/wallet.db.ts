@@ -82,7 +82,11 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
           break;
         case 'transactions':
           this._insertTransactions([addRow.row]);
-          this.sendUpdate({ type: 'wallet', payload: addRow.row });
+          log.info('sending tx update', {
+            type: 'transaction',
+            payload: addRow.row,
+          });
+          this.sendUpdate({ type: 'transaction', payload: addRow.row });
           break;
         default:
           break;
