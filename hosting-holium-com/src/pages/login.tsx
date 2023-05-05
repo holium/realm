@@ -80,15 +80,27 @@ export default function Login({ prefilledEmail, redirectAfterLogin }: Props) {
     if (!response.token || !response.email) {
       return false;
     } else {
-      OnboardingStorage.set({ token: response.token, email: response.email });
+      OnboardingStorage.set({
+        token: response.token,
+        email: response.email,
+        clientSideEncryptionKey: response.client_side_encryption_key,
+      });
     }
 
     if (redirectAfterLogin) goToPage(redirectAfterLogin as any);
     else {
       const ships = await thirdEarthApi.getUserShips(response.token);
 
-      if (ships.length > 0) goToPage('/account');
-      else goToPage('/account/download-realm');
+      if (ships.length) {
+        // Ships imply Realm access.
+        goToPage('/account');
+      } else if (response.client_side_encryption_key) {
+        // CSEK without ships still implies Realm access.
+        goToPage('/account/download-realm');
+      } else {
+        // No ships or CSEK implies no Realm access.
+        goToPage('/account/get-realm');
+      }
     }
 
     return true;

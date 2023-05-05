@@ -179,14 +179,14 @@
                   ?:  =(sender.id our.bowl) :: if it's our message, don't do anything
                     ~
                   ?:  (~(has in mutes.state) thepath)               :: if it's a muted path, send a pre-dismissed notif to notif-db
-                    =/  notif-db-card  (notif-new-msg:core parts our.bowl %.y)
+                    =/  notif-db-card  (notif-new-msg:core parts our.bowl %.y bowl)
                     [notif-db-card ~]
-                  =/  notif-db-card  (notif-new-msg:core parts our.bowl %.n)
+                  =/  notif-db-card  (notif-new-msg:core parts our.bowl %.n bowl)
                   ?:  :: if we should do a push notification also,
                   ?&  push-enabled.state                  :: push is enabled
                       (gth (lent ~(tap by devices.state)) 0) :: there is at least one device
                   ==
-                    =/  push-card  (push-notification-card:lib bowl state thepath (notif-msg parts) (notif-from-nickname-or-patp sender.id))
+                    =/  push-card  (push-notification-card:lib bowl state thepath (notif-msg parts bowl) (notif-from-nickname-or-patp sender.id bowl))
                     [push-card notif-db-card ~]
                   :: otherwise, just send to notif-db
                   [notif-db-card ~]
@@ -274,11 +274,11 @@
   ==
 ::
 ++  notif-new-msg
-  |=  [=message:db-sur =ship dismissed=?]
+  |=  [=message:db-sur =ship dismissed=? =bowl:gall]
   ^-  card
   =/  msg-part  (snag 0 message)
-  =/  title     (notif-msg message)
-  =/  content   (notif-from-nickname-or-patp sender.msg-id.msg-part)
+  =/  title     (notif-msg message bowl)
+  =/  content   (notif-from-nickname-or-patp sender.msg-id.msg-part bowl)
   =/  link      (msg-id-to-cord:encode:db-lib msg-id.msg-part)
   ~&  >  link
   [
@@ -291,7 +291,7 @@
     !>([%create %realm-chat path.msg-part %message title content '' ~ link ~ dismissed])
   ]
 ++  notif-msg
-  |=  =message:db-sur
+  |=  [=message:db-sur =bowl:gall]
   ^-  @t
   =/  msg-path    path:(snag 0 message)
   =/  pathrow     (scry-path-row:lib msg-path bowl)
@@ -327,7 +327,7 @@
     ==
   (crip `tape`(swag [0 140] str)) :: only show the first 140 characters of the message in the preview
 ++  notif-from-nickname-or-patp
-  |=  patp=ship
+  |=  [patp=ship =bowl:gall]
   ^-  @t
   =/  cv=view:fr
     .^  view:fr

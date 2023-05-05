@@ -174,6 +174,15 @@ export class ShipService extends AbstractService<any> {
     return this.shipDB.getCredentials();
   }
 
+  public getServerCode(): string | undefined {
+    if (!this.shipDB) {
+      log.warn('ship.service.ts:', 'No ship database found');
+      return undefined;
+    }
+
+    return this.shipDB.getCredentials().code;
+  }
+
   public decryptDb(password: string) {
     if (!this.shipDB) return;
 

@@ -15,6 +15,7 @@ type Props = {
   onClickGetNewAccessCode: () => void;
   onClickChangeMaintenanceWindow: () => void;
   onClickEjectId: () => void;
+  onClickBuyServer: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -33,6 +34,7 @@ export const AccountHostingDialog = ({
   onClickGetNewAccessCode,
   onClickChangeMaintenanceWindow,
   onClickEjectId,
+  onClickBuyServer,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -42,6 +44,7 @@ export const AccountHostingDialog = ({
     setSelectedPatp={setSelectedPatp}
     currentSection={SidebarSection.Hosting}
     isLoading={!email || !serverUrl || !serverCode || !serverMaintenanceWindow}
+    onClickBuyServer={onClickBuyServer}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >

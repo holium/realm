@@ -26,6 +26,12 @@ const S3StoragePresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
+  const onClickBuyServer = () => {
+    goToPage(accountPageUrl['Get Hosting'], {
+      back_url: accountPageUrl['S3 Storage'],
+    });
+  };
+
   useEffect(() => {
     const selectedShip = ships.find((ship) => ship.patp === selectedPatp);
 
@@ -57,6 +63,7 @@ const S3StoragePresenter = () => {
         total: Number(s3Info?.storageCapacity),
       }}
       dataSent={{ networkUsage, minioUsage }}
+      onClickBuyServer={onClickBuyServer}
       onClickSidebarSection={onClickSidebarSection}
       onExit={logout}
     />

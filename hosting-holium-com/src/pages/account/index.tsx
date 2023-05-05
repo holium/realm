@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import { useToggle } from '@holium/design-system/util';
 import {
@@ -8,6 +8,7 @@ import {
   ChangePasswordModal,
   EjectIdModal,
   GetNewAccessCodeModal,
+  OnboardingStorage,
   UserContextProvider,
   useUser,
   VerifyEmailModal,
@@ -32,8 +33,6 @@ const HostingPresenter = () => {
     () => ships.find((ship) => ship.patp === selectedPatp),
     [ships, selectedPatp]
   );
-
-  const [managePaymentLink, setManagePaymentLink] = useState<string>('');
 
   const onClickSidebarSection = (section: string) => {
     goToPage(accountPageUrl[section]);
@@ -120,8 +119,27 @@ const HostingPresenter = () => {
     return false;
   };
 
-  const onClickManageBilling = () => {
-    window.open(managePaymentLink, '_blank');
+  const onClickManageBilling = async () => {
+    if (!token) return false;
+
+    const tokenResponse = await thirdEarthApi.refreshToken(token);
+
+    if (tokenResponse) {
+      OnboardingStorage.set({
+        email: tokenResponse.email,
+        token: tokenResponse.token,
+      });
+      const linkResponse = await thirdEarthApi.getManagePaymentLink(
+        tokenResponse.token
+      );
+
+      if (linkResponse.url) {
+        window.open(linkResponse.url, '_blank');
+        return true;
+      }
+    }
+
+    return false;
   };
 
   const onSubmitEjectId = async (ejectAddress: string, ethAddress: string) => {
@@ -140,12 +158,11 @@ const HostingPresenter = () => {
     return false;
   };
 
-  useEffect(() => {
-    if (!token) return;
-    thirdEarthApi
-      .getManagePaymentLink(token)
-      .then((response) => setManagePaymentLink(response.url));
-  }, [token]);
+  const onClickBuyServer = () => {
+    goToPage(accountPageUrl['Get Hosting'], {
+      back_url: accountPageUrl['Hosting'],
+    });
+  };
 
   return (
     <Page title="Account / Hosting" isProtected>
@@ -187,6 +204,7 @@ const HostingPresenter = () => {
         serverUrl={selectedShip?.link}
         serverCode={selectedShip?.code}
         serverMaintenanceWindow={selectedShip?.maintenance_window}
+        onClickBuyServer={onClickBuyServer}
         setSelectedPatp={setSelectedPatp}
         onClickChangeEmail={changeEmailModal.toggleOn}
         onClickChangePassword={changePasswordModal.toggleOn}

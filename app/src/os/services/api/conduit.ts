@@ -1,6 +1,5 @@
 import log from 'electron-log';
 import { deSig, preSig } from '@urbit/aura';
-import fetch from 'cross-fetch';
 import EventEmitter, { setMaxListeners } from 'events';
 import EventSource from 'eventsource';
 

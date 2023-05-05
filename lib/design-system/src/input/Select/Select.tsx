@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { Variants } from 'framer-motion';
 
 import { Icon } from '../../general/Icon/Icon';
@@ -38,6 +38,7 @@ type Props = {
   maxWidth?: number;
   width?: number;
   backgroundColor?: string;
+  extraSection?: ReactNode;
   onClick: (value: string) => void;
 };
 
@@ -49,6 +50,7 @@ export const Select = ({
   placeholder = 'Select one',
   disabled,
   backgroundColor,
+  extraSection,
   width,
   onClick,
 }: Props) => {
@@ -125,6 +127,7 @@ export const Select = ({
             {option.label}
           </MenuItemStyle>
         ))}
+        {extraSection}
       </SelectDropdown>
     </SelectWrapper>
   );

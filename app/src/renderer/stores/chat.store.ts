@@ -40,7 +40,7 @@ export const ChatStore = types
   })
   .views((self) => ({
     isChatPinned(path: string) {
-      return self.inbox.find((c) => c.path === path)?.pinned;
+      return self.inbox.find((c) => path === c.path)?.pinned || false;
     },
     isChatMuted(path: string) {
       return self.inbox.find((c) => path === c.path)?.muted || false;
@@ -131,6 +131,7 @@ export const ChatStore = types
         self.inbox = yield ChatIPC.getChatList();
         self.inbox.forEach((chat) => {
           chat.setMuted(muted.includes(chat.path));
+          chat.setPinned(pinnedChats.includes(chat.path));
         });
         self.pinnedChats = pinnedChats;
         return self.pinnedChats;
@@ -178,6 +179,9 @@ export const ChatStore = types
         } else {
           self.pinnedChats.remove(path);
         }
+        self.inbox.forEach((chat) => {
+          chat.setPinned(self.pinnedChats.includes(chat.path));
+        });
         yield ChatIPC.togglePinnedChat(path, pinned) as Promise<any>;
         return self.pinnedChats;
       } catch (error) {
