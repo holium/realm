@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "tsc": "yarn workspace @holium/realm tsc && yarn workspace @holium/design-system tsc && yarn workspace @holium/realm-presence tsc && yarn workspace @holium/realm-presence-notes tsc",
-    "postinstall": "yarn workspace @holium/realm electron-rebuild better-sqlite3",
+    "postinstall": "yarn workspace @holium/realm postinstall",
     "build": "yarn build:app",
     "build:app": "yarn workspace @holium/realm build",
     "build:design-system": "yarn workspace @holium/design-system build",
