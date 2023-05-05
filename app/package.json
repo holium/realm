@@ -52,7 +52,7 @@
     "email-validator": "^2.0.4",
     "ethers": "^5.7.0",
     "eventsource": "^2.0.2",
-    "framer-motion": "^7.6.7",
+    "framer-motion": "^6.2.10",
     "human-standard-token-abi": "^2.0.0",
     "lodash": "^4.17.21",
     "mobx": "^6.5.0",
