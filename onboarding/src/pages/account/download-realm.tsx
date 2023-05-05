@@ -23,6 +23,12 @@ const DownloadRealmPresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
+  const onClickBuyServer = () => {
+    goToPage(accountPageUrl['Get Hosting'], {
+      back_url: accountPageUrl['Download Realm'],
+    });
+  };
+
   const onDownloadMacM1 = () => window.open(downloadLinks.macM1, '_blank');
 
   const onDownloadMacIntel = () =>
@@ -42,6 +48,7 @@ const DownloadRealmPresenter = () => {
         onDownloadMacIntel={onDownloadMacIntel}
         onDownloadWindows={onDownloadWindows}
         onDownloadLinux={onDownloadLinux}
+        onClickBuyServer={onClickBuyServer}
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />

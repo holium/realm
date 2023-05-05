@@ -27,6 +27,7 @@ const GetRealmPresenter = () => {
       <AccountGetRealmDialog
         onClickGetHosting={goToGetHosting}
         onClickSidebarSection={onClickSidebarSection}
+        onClickBuyServer={() => {}}
         onExit={logout}
       />
     </Page>

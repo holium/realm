@@ -11,6 +11,7 @@ type Props = DownloadRealmBodyProps & {
   patps: string[] | undefined;
   selectedPatp: string | undefined;
   setSelectedPatp: (patp: string) => void;
+  onClickBuyServer: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -23,6 +24,7 @@ export const AccountDownloadRealmDialog = ({
   onDownloadMacIntel,
   onDownloadWindows,
   onDownloadLinux,
+  onClickBuyServer,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -55,6 +57,7 @@ export const AccountDownloadRealmDialog = ({
         />
       </Flex>
     }
+    onClickBuyServer={onClickBuyServer}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   />

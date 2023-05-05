@@ -140,6 +140,12 @@ const HostingPresenter = () => {
     return false;
   };
 
+  const onClickBuyServer = () => {
+    goToPage(accountPageUrl['Get Hosting'], {
+      back_url: accountPageUrl['Hosting'],
+    });
+  };
+
   useEffect(() => {
     if (!token) return;
     thirdEarthApi
@@ -187,6 +193,7 @@ const HostingPresenter = () => {
         serverUrl={selectedShip?.link}
         serverCode={selectedShip?.code}
         serverMaintenanceWindow={selectedShip?.maintenance_window}
+        onClickBuyServer={onClickBuyServer}
         setSelectedPatp={setSelectedPatp}
         onClickChangeEmail={changeEmailModal.toggleOn}
         onClickChangePassword={changePasswordModal.toggleOn}
