@@ -12,6 +12,7 @@ type Props = {
   setSelectedPatp: (patp: string) => void;
   onChangeDomain: (domain: string) => void;
   onSubmit: () => Promise<void>;
+  onClickBuyServer: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -27,6 +28,7 @@ export const AccountCustomDomainDialog = ({
   setSelectedPatp,
   onChangeDomain,
   onSubmit,
+  onClickBuyServer,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -36,6 +38,7 @@ export const AccountCustomDomainDialog = ({
     setSelectedPatp={setSelectedPatp}
     currentSection={SidebarSection.CustomDomain}
     isLoading={!dropletIp}
+    onClickBuyServer={onClickBuyServer}
     onClickSidebarSection={onClickSidebarSection}
     onSubmit={onSubmit}
     onExit={onExit}

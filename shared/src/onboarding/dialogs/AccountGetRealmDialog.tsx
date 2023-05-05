@@ -25,12 +25,14 @@ const BulletPointRow = styled(Flex)`
 
 type Props = {
   onClickGetHosting: () => void;
+  onClickBuyServer: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
 
 export const AccountGetRealmDialog = ({
   onClickGetHosting,
+  onClickBuyServer,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -86,6 +88,7 @@ export const AccountGetRealmDialog = ({
         </Flex>
       </Flex>
     }
+    onClickBuyServer={onClickBuyServer}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   />
