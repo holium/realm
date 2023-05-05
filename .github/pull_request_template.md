@@ -2,10 +2,6 @@ Ticket: RE-
 
 ## Description
 
-Reviewers:
-
-Visibility:
-
 **Reviewer Checklist**
 
 - [ ] Pipeline passes
