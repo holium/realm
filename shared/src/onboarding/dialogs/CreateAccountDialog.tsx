@@ -1,6 +1,6 @@
 import { ChangeEvent, useRef } from 'react';
 
-import { Anchor, Flex } from '@holium/design-system/general';
+import { Anchor, Button, Flex, Icon } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 import { HoliumButton } from '@holium/design-system/os';
 import { isValidEmail, useToggle } from '@holium/design-system/util';
@@ -24,6 +24,9 @@ export const CreateAccountDialog = ({
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
+
+  const showPassword = useToggle(false);
+  const showConfirmPassword = useToggle(false);
 
   const emailError = useToggle(false);
   const confirmPasswordError = useToggle(false);
@@ -92,9 +95,18 @@ export const CreateAccountDialog = ({
               id="create-account-password"
               name="create-account-password"
               ref={passwordRef}
-              type="password"
+              type={showPassword.isOn ? 'text' : 'password'}
               placeholder="• • • • • • • •"
               onChange={onChangePassword}
+              rightAdornment={
+                <Button.IconButton type="button" onClick={showPassword.toggle}>
+                  <Icon
+                    name={showPassword.isOn ? 'EyeOff' : 'EyeOn'}
+                    opacity={0.5}
+                    size={18}
+                  />
+                </Button.IconButton>
+              }
             />
           </Flex>
           <Flex flexDirection="column" gap={2}>
@@ -109,10 +121,22 @@ export const CreateAccountDialog = ({
               id="create-account-confirm-password"
               name="create-account-confirm-password"
               ref={confirmPasswordRef}
-              type="password"
+              type={showConfirmPassword.isOn ? 'text' : 'password'}
               placeholder="• • • • • • • •"
               error={confirmPasswordError.isOn}
               onChange={onChangeConfirmPassword}
+              rightAdornment={
+                <Button.IconButton
+                  type="button"
+                  onClick={showConfirmPassword.toggle}
+                >
+                  <Icon
+                    name={showPassword.isOn ? 'EyeOff' : 'EyeOn'}
+                    opacity={0.5}
+                    size={18}
+                  />
+                </Button.IconButton>
+              }
             />
           </Flex>
           <OnboardDialogDescription>
