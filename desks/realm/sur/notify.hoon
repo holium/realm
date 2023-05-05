@@ -18,8 +18,9 @@
 +$  notification
   $:  =app-id                       ::  the onesignal app-id for realm
       data=mtd                      ::  { path: "/dm-inbox/~lomder-librun" }
-      subtitle=(map cord cord)      ::  {"en": "New message"}
-      contents=(map cord cord)      ::  {"en": "from ~dev"}
+      title=(map cord cord)         ::  {"en": "Sender Name"}
+      subtitle=(map cord cord)      ::  (optional) {"en": "Group title"}
+      contents=(map cord cord)      ::  {"en": "New Message"} or the actual message
   ==
 ::
 +$  mtd
