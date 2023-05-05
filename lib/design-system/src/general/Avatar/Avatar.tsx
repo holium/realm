@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
 import { BorderRadiusProps } from 'styled-system';
 
+import { contrastAwareBlackOrWhite } from '../../../util';
 import { isImgValid } from '../../util/image';
 import { Box, BoxProps } from '../Box/Box';
 
@@ -98,6 +99,7 @@ export const Avatar = ({
   ...rest
 }: AvatarProps) => {
   const [_isValid, setIsValid] = useState(false);
+  const [_sigilColor, setSigilColor] = useState(sigilColor);
 
   useEffect(() => {
     if (avatar) {
@@ -106,6 +108,13 @@ export const Avatar = ({
       });
     }
   }, [avatar]);
+
+  useEffect(() => {
+    setSigilColor([
+      sigilColor[0],
+      contrastAwareBlackOrWhite(sigilColor[0], 'white'),
+    ]);
+  }, [sigilColor]);
 
   let innerContent = null;
   if (avatar) {
@@ -127,7 +136,7 @@ export const Avatar = ({
       <motion.div
         style={{
           padding: innerPadding,
-          backgroundColor: sigilColor[0],
+          backgroundColor: _sigilColor[0],
           width: size,
           height: size,
         }}
@@ -139,7 +148,7 @@ export const Avatar = ({
             size: sigilSize,
             icon: simple,
             margin: false,
-            colors: sigilColor,
+            colors: _sigilColor,
           })}
       </motion.div>
     );

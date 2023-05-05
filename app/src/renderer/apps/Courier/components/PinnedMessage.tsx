@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import {
-  convertDarkText,
   Flex,
+  flipColorIfLowContrast,
   MenuItemProps,
   PinnedMessage,
 } from '@holium/design-system';
@@ -87,7 +87,7 @@ export const PinnedContainer = ({ message }: PinnedContainerProps) => {
     // NOTE: #000 is the default color, so we want to default to undefined
     // and use the accent color instead
     const authorColorDisplay =
-      (contact.color && convertDarkText(contact.color, theme.mode)) ||
+      (contact.color && flipColorIfLowContrast(contact.color, theme.mode)) ||
       'rgba(var(--rlm-text-rgba))';
 
     setAuthorColor(authorColorDisplay);

@@ -75,46 +75,52 @@ export function bgIsLightOrDark(hexColor: string) {
   }
 }
 
-export function convertDarkText(hexColor: string, themeMode: string = 'light') {
-  let color = hexColor;
-  if (themeMode === 'dark') {
-    var c = hexColor.substring(1); // strip #
-    var rgb = parseInt(c, 16); // convert rrggbb to decimal
-    var r = (rgb >> 16) & 0xff; // extract red
-    var g = (rgb >> 8) & 0xff; // extract green
-    var b = (rgb >> 0) & 0xff; // extract blue
+function luminosity(hexColor: string) {
+  var c = hexColor.substring(1); // strip #
+  var rgb = parseInt(c, 16); // convert rrggbb to decimal
+  var r = (rgb >> 16) & 0xff; // extract red
+  var g = (rgb >> 8) & 0xff; // extract green
+  var b = (rgb >> 0) & 0xff; // extract blue
 
-    var luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
+  var luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
+  return luma;
+}
 
-    if (luma < 40) {
-      // pick a different colour
-      color = '#ffffff90';
-    }
+export function contrastAwareBlackOrWhite(
+  hexColor: string,
+  targetColor: 'black' | 'white'
+) {
+  let color = targetColor === 'black' ? '#000000' : '#ffffff';
+  let luma = luminosity(hexColor);
+  if (luma < 40 && targetColor === 'black') {
+    color = '#ffffff';
   }
+  if (luma > 215 && targetColor === 'white') {
+    color = '#000000';
+  }
+  return color;
+}
 
+/*
+ *  If contrast is too low, override the color to be white or black.
+ */
+export function flipColorIfLowContrast(
+  hexColor: string,
+  themeMode: 'light' | 'dark' | undefined
+) {
+  let color = hexColor;
+  let luma = luminosity(hexColor);
+  if (luma < 40 && themeMode === 'dark') {
+    color = '#ffffff';
+  }
+  if (luma > 215 && themeMode === 'light') {
+    color = '#000000';
+  }
   return color;
 }
 
 export const opacifyHexColor = (hexColor: string, opacity: number) =>
   hexColor + Math.round(opacity * 255).toString(16);
-
-/**
- *  shouldTextBeLightOrDark
- *
- *  Given the background luminosity, what should the text be?
- *
- * @param bgTheme
- * @returns
- */
-export function detectTextTheme(bgTheme: 'light' | 'dark') {
-  // Using the HSP value, determine whether the color is light or dark
-  if (bgTheme === 'dark') {
-    // the background image is too light
-    return 'light';
-  } else {
-    return 'dark';
-  }
-}
 
 export function cleanNounColor(ux: string) {
   if (ux === '') {

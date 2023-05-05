@@ -1,6 +1,6 @@
 import { Ref, useEffect, useMemo, useState } from 'react';
 
-import { Box, BoxProps, convertDarkText, Flex, Icon, Text } from '../..';
+import { Box, BoxProps, Flex, flipColorIfLowContrast, Icon, Text } from '../..';
 import { chatDate } from '../../util/date';
 import { BUBBLE_HEIGHT, STATUS_HEIGHT } from './Bubble.constants';
 import { BubbleAuthor, BubbleFooter, BubbleStyle } from './Bubble.styles';
@@ -78,7 +78,7 @@ export const Bubble = ({
 
   const authorColorDisplay = useMemo(
     () =>
-      (authorColor && convertDarkText(authorColor, themeMode)) ||
+      (authorColor && flipColorIfLowContrast(authorColor, themeMode)) ||
       'rgba(var(--rlm-text-rgba))',
     [authorColor]
   );
