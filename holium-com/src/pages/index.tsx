@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Text } from '@holium/design-system/general';
+import { Button, Text } from '@holium/design-system/general';
 
 import { AnimatedText } from '../components/AnimatedText';
 import { Page } from '../components/Page';
@@ -64,6 +64,11 @@ export default function CreateAccount() {
           <AnimatedText text={futureOfText} />
         </Text.Custom>
       </Text.Custom>
+      <Text.Body>
+        A home for communities, a platform for building new social experiences,
+        and a crypto user's dream.
+      </Text.Body>
+      <Button.Primary>Get Realm</Button.Primary>
     </Page>
   );
 }

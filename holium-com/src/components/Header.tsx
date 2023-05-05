@@ -1,53 +1,53 @@
-import styled from 'styled-components';
+import { Button } from '@holium/design-system/general';
 
-import { MOBILE_WIDTH } from '../consts';
+import {
+  HeaderContainer,
+  HeaderCTAs,
+  HeaderMenuLink,
+  HeaderNavigation,
+  UnstyledLink,
+} from './Header.styles';
 
-const HeaderContainer = styled.header`
-  width: 100%;
-  height: 70px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+export const Header = () => {
+  const onClickLogin = () => {
+    window.location.href = 'https://hosting.holium.com/login';
+  };
 
-  @media (max-width: ${MOBILE_WIDTH}px) {
-    flex-direction: column;
-  }
-`;
-
-const Navigation = styled.nav`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  ul {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    list-style: none;
-  }
-`;
-
-const CTAs = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-`;
-
-export const Header = () => (
-  <HeaderContainer>
-    <img src="/wordmark.svg" alt="Holium" />
-    <Navigation>
-      <ul>
-        <li>Realm</li>
-        <li>Developers</li>
-        <li>Support</li>
-      </ul>
-    </Navigation>
-    <CTAs>
-      <button>Get Realm</button>
-      <button>Login</button>
-    </CTAs>
-  </HeaderContainer>
-);
+  return (
+    <HeaderContainer>
+      <UnstyledLink href="/" id="holium-logo">
+        <img src="/wordmark.svg" alt="Holium" />
+      </UnstyledLink>
+      <HeaderNavigation>
+        <ul>
+          <li>
+            <HeaderMenuLink href="/" current>
+              Realm
+            </HeaderMenuLink>
+          </li>
+          <li>
+            <HeaderMenuLink
+              target="_blank"
+              rel="noreferrer"
+              href="https://holium.gitbook.io/tomedb/"
+            >
+              Docs
+            </HeaderMenuLink>
+          </li>
+          <li>
+            <HeaderMenuLink
+              target="_blank"
+              rel="noreferrer"
+              href="https://holium.gitbook.io/realm/"
+            >
+              Support
+            </HeaderMenuLink>
+          </li>
+        </ul>
+      </HeaderNavigation>
+      <HeaderCTAs>
+        <Button.Secondary onClick={onClickLogin}>Login</Button.Secondary>
+      </HeaderCTAs>
+    </HeaderContainer>
+  );
+};

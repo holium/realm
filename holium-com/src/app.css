@@ -4,6 +4,8 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  transition: var(--transition);
+  color: rgba(var(--rlm-text-rgba));
 }
 
 body {
