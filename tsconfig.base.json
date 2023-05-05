@@ -41,7 +41,10 @@
       "path": "./shared"
     },
     {
-      "path": "./onboarding"
+      "path": "./holium-com"
+    },
+    {
+      "path": "./hosting-holium-com"
     },
     {
       "path": "./lib/design-system"

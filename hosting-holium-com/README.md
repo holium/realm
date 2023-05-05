@@ -1,6 +1,6 @@
-# @holium/onboarding
+# @holium/hosting-holium-com
 
-The onboarding flow at https://hosted.holium.com.
+The web onboarding flow to Realm at https://hosted.holium.com.
 
 ## Dev setup
 
