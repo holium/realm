@@ -16,6 +16,7 @@ type Props = {
     minioUsage: number; // MB
   };
   setSelectedPatp: (patp: string) => void;
+  onClickBuyServer: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -29,6 +30,7 @@ export const AccountS3StorageDialog = ({
   dataStorage,
   dataSent,
   setSelectedPatp,
+  onClickBuyServer,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -38,6 +40,7 @@ export const AccountS3StorageDialog = ({
     currentSection={SidebarSection.S3Storage}
     isLoading={!url || !s3Bucket || !s3Password}
     setSelectedPatp={setSelectedPatp}
+    onClickBuyServer={onClickBuyServer}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >

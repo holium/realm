@@ -186,7 +186,7 @@
                   ?&  push-enabled.state                  :: push is enabled
                       (gth (lent ~(tap by devices.state)) 0) :: there is at least one device
                   ==
-                    =/  push-card  (push-notification-card:lib bowl state thepath (notif-msg parts bowl) (notif-from-nickname-or-patp sender.id))
+                    =/  push-card  (push-notification-card:lib bowl state thepath (notif-msg parts bowl) (notif-from-nickname-or-patp sender.id bowl))
                     [push-card notif-db-card ~]
                   :: otherwise, just send to notif-db
                   [notif-db-card ~]
@@ -278,7 +278,7 @@
   ^-  card
   =/  msg-part  (snag 0 message)
   =/  title     (notif-msg message bowl)
-  =/  content   (notif-from-nickname-or-patp sender.msg-id.msg-part)
+  =/  content   (notif-from-nickname-or-patp sender.msg-id.msg-part bowl)
   =/  link      (msg-id-to-cord:encode:db-lib msg-id.msg-part)
   ~&  >  link
   [
@@ -327,7 +327,7 @@
     ==
   (crip `tape`(swag [0 140] str)) :: only show the first 140 characters of the message in the preview
 ++  notif-from-nickname-or-patp
-  |=  patp=ship
+  |=  [patp=ship =bowl:gall]
   ^-  @t
   =/  cv=view:fr
     .^  view:fr

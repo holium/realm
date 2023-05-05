@@ -63,6 +63,12 @@ const CustomDomainPresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
+  const onClickBuyServer = () => {
+    goToPage(accountPageUrl['Get Hosting'], {
+      back_url: accountPageUrl['Custom Domain'],
+    });
+  };
+
   return (
     <Page title="Account / Download Realm" isProtected>
       <AccountCustomDomainDialog
@@ -76,6 +82,7 @@ const CustomDomainPresenter = () => {
         setSelectedPatp={setSelectedPatp}
         onChangeDomain={setDomain}
         onSubmit={onSubmit}
+        onClickBuyServer={onClickBuyServer}
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />

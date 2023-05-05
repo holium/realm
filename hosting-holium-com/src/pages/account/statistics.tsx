@@ -17,12 +17,19 @@ const StatisticsPresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
+  const onClickBuyServer = () => {
+    goToPage(accountPageUrl['Get Hosting'], {
+      back_url: accountPageUrl['Statistics'],
+    });
+  };
+
   return (
     <Page title="Account / Statistics" isProtected>
       <AccountStatisticsDialog
         patps={ships.map((ship) => ship.patp)}
         selectedPatp={selectedPatp}
         setSelectedPatp={setSelectedPatp}
+        onClickBuyServer={onClickBuyServer}
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />

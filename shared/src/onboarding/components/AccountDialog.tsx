@@ -6,6 +6,7 @@ import {
   Icon,
   Skeleton,
   Spinner,
+  Text,
 } from '@holium/design-system/general';
 import { Select } from '@holium/design-system/inputs';
 import { HoliumButton } from '@holium/design-system/os';
@@ -39,6 +40,7 @@ type Props = {
   children?: ReactNode;
   customBody?: ReactNode;
   isLoading?: boolean;
+  onClickBuyServer: () => void;
   setSelectedPatp: (patp: string) => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onSubmit?: () => void;
@@ -52,6 +54,7 @@ export const AccountDialog = ({
   children,
   customBody,
   isLoading,
+  onClickBuyServer,
   setSelectedPatp,
   onClickSidebarSection,
   onSubmit,
@@ -113,6 +116,21 @@ export const AccountDialog = ({
                   value: patp,
                   label: patp,
                 }))}
+                extraSection={
+                  <Flex
+                    flexDirection="column"
+                    mt="8px"
+                    pt="8px"
+                    borderTop="1px solid rgba(var(--rlm-border-rgba))"
+                  >
+                    <Button.Transparent width="100%" onClick={onClickBuyServer}>
+                      <Flex alignItems="center" gap="8px">
+                        <Icon name="AddCircleLine" size={16} />
+                        <Text.Body>Buy Server</Text.Body>
+                      </Flex>
+                    </Button.Transparent>
+                  </Flex>
+                }
                 selected={selectedPatp}
                 onClick={(newPatp) => setSelectedPatp(newPatp)}
               />
@@ -177,6 +195,7 @@ export const AccountDialogSkeleton = ({
       isLoading
       customBody={isBlankBody ? <Flex flex={5} /> : undefined}
       setSelectedPatp={() => {}}
+      onClickBuyServer={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />

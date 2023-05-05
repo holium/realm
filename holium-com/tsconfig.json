@@ -1,0 +1,28 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
