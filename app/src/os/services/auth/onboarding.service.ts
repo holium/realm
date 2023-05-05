@@ -447,6 +447,25 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     });
   }
 
+  public async getCookieAndOpenConduit({
+    serverId,
+    serverUrl,
+    serverCode,
+  }: {
+    serverId: string;
+    serverUrl: string;
+    serverCode: string;
+  }) {
+    const coo = await this.getCookie({ serverId, serverUrl, serverCode });
+    try {
+      await this._openConduit({ serverId, serverUrl, serverCode });
+    } catch (e) {
+      log.error('ship.service.ts:', 'Failed to open the conduit', e);
+      throw e;
+    }
+    return coo;
+  }
+
   public async getCookie({
     serverId,
     serverUrl,
@@ -510,14 +529,20 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     });
   }
 
-  private async _openConduit() {
-    if (!this.credentials) {
+  private async _openConduit(creds?: any) {
+    if (!this.credentials && !creds) {
       return Promise.reject('_openConduit: No credentials');
     }
 
-    const { serverUrl, serverCode, serverId } = this.credentials;
+    const { serverUrl, serverCode, serverId } = this.credentials || creds;
     const cookie = await this.getCookie({ serverId, serverUrl, serverCode });
     return new Promise((resolve, reject) => {
+      // after 10 seconds, give up
+      setTimeout(() => {
+        reject(
+          'conduit took too long to open (is the url supposed to be https instead of http?)'
+        );
+      }, 10000);
       APIConnection.getInstance({
         url: serverUrl,
         code: serverCode,

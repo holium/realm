@@ -22,7 +22,7 @@ export const AddServerStep = ({ setStep }: StepProps) => {
     serverUrl: string,
     serverCode: string
   ) => {
-    const sanitizedCookie = await OnboardingIPC.getCookie({
+    const sanitizedCookie = await OnboardingIPC.getCookieAndOpenConduit({
       serverId,
       serverUrl,
       serverCode,
