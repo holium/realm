@@ -73,7 +73,6 @@ export const LoginStep = ({ forcedNextStep, setStep }: StepProps) => {
               passwordHash: masterAccount.passwordHash,
               serverId: ship.patp,
               serverUrl: ship.link,
-              serverCode: ship.code,
               serverType: 'hosted',
               avatar: '',
               nickname: ship.screen_name,
