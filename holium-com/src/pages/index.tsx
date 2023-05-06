@@ -12,16 +12,17 @@ const GetRealmButton = styled(Button.Primary)`
   padding: 10px 16px;
   border-radius: 999px;
   gap: 8px;
+  margin-top: 16px;
 `;
 
 export default function CreateAccount() {
   return (
     <Page title="Holium">
-      <Flex width="100%" maxWidth="1200px" justifyContent="flex-start">
+      <Flex width="100%" maxWidth="1480px" justifyContent="flex-start">
         <Flex
           flexDirection="column"
           alignSelf="flex-start"
-          maxWidth="700px"
+          maxWidth="740px"
           gap="16px"
           padding="16px"
         >
