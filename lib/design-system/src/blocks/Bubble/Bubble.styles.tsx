@@ -13,6 +13,7 @@ import {
 export type BubbleStyleProps = {
   isPrevGrouped?: boolean;
   isNextGrouped?: boolean;
+  ourTextColor?: string;
 } & BoxProps;
 
 export const BubbleStyle = styled(Box)<BubbleStyleProps>`
@@ -54,15 +55,31 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
     }} !important;
 
     ${Text.Custom} {
-      color: #ffffff !important;
+      color: ${(props) => {
+        if (props.ourTextColor) {
+          return props.ourTextColor;
+        }
+        return '#ffffff';
+      }} !important;
     }
     ${Icon} {
       line-height: 1.1;
       fill: #ffffff !important;
     }
     ${FragmentBlockquote} {
-      color: #ffffff;
-      border-left: 2px solid #ffffff70;
+      color: ${(props) => {
+        if (props.ourTextColor) {
+          return props.ourTextColor;
+        }
+        return '#ffffff';
+      }};
+      border-left: 2px solid
+        ${(props) => {
+          if (props.ourTextColor) {
+            return props.ourTextColor;
+          }
+          return '#ffffff';
+        }}70;
     }
     ${CodeWrapper} {
       background-color: rgba(0, 0, 0, 0.12);
@@ -72,9 +89,19 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
       }
     }
     ${FragmentShip} {
-      background: #ffffff30;
+      background: ${(props) => {
+        if (props.ourTextColor && props.ourTextColor === '#000000') {
+          return '#00000015';
+        }
+        return '#ffffff30';
+      }};
       &:hover {
-        background: #ffffff45;
+        background: ${(props) => {
+          if (props.ourTextColor && props.ourTextColor === '#000000') {
+            return '#00000025';
+          }
+          return '#ffffff45';
+        }};
       }
     }
     ${BlockWrapper} {

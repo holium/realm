@@ -1,6 +1,14 @@
 import { Ref, useEffect, useMemo, useState } from 'react';
 
-import { Box, BoxProps, Flex, flipColorIfLowContrast, Icon, Text } from '../..';
+import {
+  Box,
+  BoxProps,
+  contrastAwareBlackOrWhiteHex,
+  Flex,
+  flipColorIfLowContrast,
+  Icon,
+  Text,
+} from '../..';
 import { chatDate } from '../../util/date';
 import { BUBBLE_HEIGHT, STATUS_HEIGHT } from './Bubble.constants';
 import { BubbleAuthor, BubbleFooter, BubbleStyle } from './Bubble.styles';
@@ -194,6 +202,10 @@ export const Bubble = ({
           id={id}
           isPrevGrouped={isPrevGrouped}
           isNextGrouped={isNextGrouped}
+          ourTextColor={contrastAwareBlackOrWhiteHex(
+            ourColor ?? '#ffffff',
+            'white'
+          )}
           style={
             isOur
               ? {

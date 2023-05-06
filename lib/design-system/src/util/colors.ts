@@ -85,13 +85,31 @@ function luminosity(hexColor: string) {
   var luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
   return luma;
 }
+/*
+ *  Same as below hex function, but accepts a '0, 0, 0' rgb string.
+ */
+export function contrastAwareBlackOrWhiteRgb(
+  rgbColor: string,
+  targetColor: 'black' | 'white'
+) {
+  let color = targetColor === 'black' ? '#000000' : '#ffffff';
+  let rgb = rgbColor.split(', ');
+  var luma = 0.2126 * +rgb[0] + 0.7152 * +rgb[1] + 0.0722 * +rgb[2]; // per ITU-R BT.709
+  if (luma < 40 && targetColor === 'black') {
+    color = '#ffffff';
+  }
+  if (luma > 215 && targetColor === 'white') {
+    color = '#000000';
+  }
+  return color;
+}
 
-export function contrastAwareBlackOrWhite(
+export function contrastAwareBlackOrWhiteHex(
   hexColor: string,
   targetColor: 'black' | 'white'
 ) {
   let color = targetColor === 'black' ? '#000000' : '#ffffff';
-  let luma = luminosity(hexColor);
+  const luma = luminosity(hexColor);
   if (luma < 40 && targetColor === 'black') {
     color = '#ffffff';
   }

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
 import { BorderRadiusProps } from 'styled-system';
 
-import { contrastAwareBlackOrWhite } from '../../../util';
+import { contrastAwareBlackOrWhiteHex } from '../../../util';
 import { isImgValid } from '../../util/image';
 import { Box, BoxProps } from '../Box/Box';
 
@@ -112,7 +112,7 @@ export const Avatar = ({
   useEffect(() => {
     setSigilColor([
       sigilColor[0],
-      contrastAwareBlackOrWhite(sigilColor[0], 'white'),
+      contrastAwareBlackOrWhiteHex(sigilColor[0], 'white'),
     ]);
   }, [sigilColor]);
 
