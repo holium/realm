@@ -39,7 +39,7 @@ export const HeaderCTAs = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 24px;
+  gap: 8px;
 `;
 
 export const HeaderMenuLink = styled(UnstyledLink)<{

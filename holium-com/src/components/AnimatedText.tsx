@@ -1,15 +1,9 @@
 import { motion } from 'framer-motion';
 
-// Word wrapper
-const Wrapper = (props: any) => {
-  // We'll do this to prevent wrapping of words using CSS
-  return <span className="word-wrapper">{props.children}</span>;
-};
-
 // AnimatedText
 // Handles the deconstruction of each word and character to setup for the
 // individual character animations
-export const AnimatedText = (props: { text: string }) => {
+export const AnimatedText = (props: { text: string; replay: boolean }) => {
   // Framer Motion variant object, for controlling animation
   const item = {
     hidden: {
@@ -42,32 +36,37 @@ export const AnimatedText = (props: { text: string }) => {
   });
 
   return (
-    <>
-      {words.map((word, index) => {
-        return (
-          // Wrap each word in the Wrapper component
-          <Wrapper key={`${word}-${index}`}>
-            {words[index].flat().map((element: any, index: number) => {
-              return (
-                <span
-                  style={{
-                    overflow: 'hidden',
-                    display: 'inline-block',
-                  }}
-                  key={index}
-                >
-                  <motion.span
-                    style={{ display: 'inline-block' }}
-                    variants={item}
-                  >
-                    {element}
-                  </motion.span>
-                </span>
-              );
-            })}
-          </Wrapper>
-        );
+    <motion.span
+      initial="hidden"
+      animate={props.replay ? 'visible' : 'hidden'}
+      variants={{
+        visible: {
+          transition: {
+            staggerChildren: 0.025,
+          },
+        },
+        hidden: {
+          transition: {
+            staggerChildren: 0.025,
+          },
+        },
+      }}
+    >
+      {words.map((word) => {
+        return word.flat().map((character: any, index: number) => (
+          <span
+            style={{
+              overflow: 'hidden',
+              display: 'inline-block',
+            }}
+            key={index}
+          >
+            <motion.span style={{ display: 'inline-block' }} variants={item}>
+              {character}
+            </motion.span>
+          </span>
+        ));
       })}
-    </>
+    </motion.span>
   );
 };
