@@ -75,46 +75,70 @@ export function bgIsLightOrDark(hexColor: string) {
   }
 }
 
-export function convertDarkText(hexColor: string, themeMode: string = 'light') {
-  let color = hexColor;
-  if (themeMode === 'dark') {
-    var c = hexColor.substring(1); // strip #
-    var rgb = parseInt(c, 16); // convert rrggbb to decimal
-    var r = (rgb >> 16) & 0xff; // extract red
-    var g = (rgb >> 8) & 0xff; // extract green
-    var b = (rgb >> 0) & 0xff; // extract blue
+function luminosity(hexColor: string) {
+  var c = hexColor.substring(1); // strip #
+  var rgb = parseInt(c, 16); // convert rrggbb to decimal
+  var r = (rgb >> 16) & 0xff; // extract red
+  var g = (rgb >> 8) & 0xff; // extract green
+  var b = (rgb >> 0) & 0xff; // extract blue
 
-    var luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
-
-    if (luma < 40) {
-      // pick a different colour
-      color = '#ffffff90';
-    }
+  var luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
+  return luma;
+}
+/*
+ *  Same as below hex function, but accepts a '0, 0, 0' rgb string.
+ */
+export function contrastAwareBlackOrWhiteRgb(
+  rgbColor: string,
+  targetColor: 'black' | 'white'
+) {
+  let color = targetColor === 'black' ? '#000000' : '#ffffff';
+  let rgb = rgbColor.split(', ');
+  var luma = 0.2126 * +rgb[0] + 0.7152 * +rgb[1] + 0.0722 * +rgb[2]; // per ITU-R BT.709
+  if (luma < 40 && targetColor === 'black') {
+    color = '#ffffff';
   }
+  if (luma > 215 && targetColor === 'white') {
+    color = '#000000';
+  }
+  return color;
+}
 
+export function contrastAwareBlackOrWhiteHex(
+  hexColor: string,
+  targetColor: 'black' | 'white'
+) {
+  let color = targetColor === 'black' ? '#000000' : '#ffffff';
+  const luma = luminosity(hexColor);
+  if (luma < 40 && targetColor === 'black') {
+    color = '#ffffff';
+  }
+  if (luma > 215 && targetColor === 'white') {
+    color = '#000000';
+  }
+  return color;
+}
+
+/*
+ *  If contrast is too low, override the color to be white or black.
+ */
+export function flipColorIfLowContrast(
+  hexColor: string,
+  themeMode: string | undefined
+) {
+  let color = hexColor;
+  let luma = luminosity(hexColor);
+  if (luma < 40 && themeMode === 'dark') {
+    color = '#ffffff';
+  }
+  if (luma > 215 && themeMode === 'light') {
+    color = '#000000';
+  }
   return color;
 }
 
 export const opacifyHexColor = (hexColor: string, opacity: number) =>
   hexColor + Math.round(opacity * 255).toString(16);
-
-/**
- *  shouldTextBeLightOrDark
- *
- *  Given the background luminosity, what should the text be?
- *
- * @param bgTheme
- * @returns
- */
-export function detectTextTheme(bgTheme: 'light' | 'dark') {
-  // Using the HSP value, determine whether the color is light or dark
-  if (bgTheme === 'dark') {
-    // the background image is too light
-    return 'light';
-  } else {
-    return 'dark';
-  }
-}
 
 export function cleanNounColor(ux: string) {
   if (ux === '') {
