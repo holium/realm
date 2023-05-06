@@ -124,7 +124,7 @@ export function contrastAwareBlackOrWhiteHex(
  */
 export function flipColorIfLowContrast(
   hexColor: string,
-  themeMode: 'light' | 'dark' | undefined
+  themeMode: string | undefined
 ) {
   let color = hexColor;
   let luma = luminosity(hexColor);
