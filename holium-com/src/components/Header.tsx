@@ -1,4 +1,4 @@
-import { Button } from '@holium/design-system/general';
+import { Button, Text } from '@holium/design-system/general';
 
 import { onClickGetRealm, onClickLogin } from '../consts';
 import {
@@ -42,8 +42,16 @@ export const Header = () => (
       </ul>
     </HeaderNavigation>
     <HeaderCTAs>
-      <Button.Secondary onClick={onClickLogin}>Login</Button.Secondary>
-      <Button.Primary onClick={onClickGetRealm}>Get Realm</Button.Primary>
+      <Button.Secondary onClick={onClickLogin}>
+        <Text.Body color="text" fontWeight={500}>
+          Login
+        </Text.Body>
+      </Button.Secondary>
+      <Button.Primary onClick={onClickGetRealm}>
+        <Text.Body color="window" fontWeight={500}>
+          Get Realm
+        </Text.Body>
+      </Button.Primary>
     </HeaderCTAs>
   </HeaderContainer>
 );

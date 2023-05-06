@@ -5,7 +5,7 @@ import { Button, Flex, Icon, Text } from '@holium/design-system/general';
 import { H1 } from '../components/H1';
 import { HoveringCursors } from '../components/HoveringCursors';
 import { Page } from '../components/Page';
-import { DESKTOP_WIDTH, onClickGetRealm } from '../consts';
+import { DESKTOP_WIDTH, MOBILE_WIDTH, onClickGetRealm } from '../consts';
 
 const GetRealmButton = styled(Button.Primary)`
   display: flex;
@@ -27,6 +27,10 @@ const HeroContainer = styled(Flex)`
     text-align: center;
     max-width: 814px;
   }
+
+  @media (max-width: 814px) {
+    max-width: 100%;
+  }
 `;
 
 const H1Container = styled(Flex)`
@@ -39,22 +43,33 @@ const H1Container = styled(Flex)`
   @media (max-width: ${DESKTOP_WIDTH}px) {
     align-items: center;
     align-self: center;
+    width: 100%;
   }
 `;
 
-export default function CreateAccount() {
+const P = styled(Text.Body)`
+  font-size: 28px;
+
+  @media (max-width: ${MOBILE_WIDTH}px) {
+    font-size: 24px;
+  }
+`;
+
+export default function HomePage() {
   return (
     <Page title="Holium">
       <HeroContainer>
         <H1Container>
           <H1 />
-          <Text.Body fontSize={28}>
+          <P>
             A home for communities, a platform for building new social
             experiences, and a crypto user's dream.
-          </Text.Body>
+          </P>
           <GetRealmButton onClick={onClickGetRealm}>
-            Get Realm
-            <Icon name="ArrowRightLine" fill="accent" />
+            <Text.Body color="window" fontWeight={500}>
+              Get Realm
+            </Text.Body>
+            <Icon name="ArrowRightLine" />
           </GetRealmButton>
         </H1Container>
         <Flex flex={1} justifyContent="center" padding="16px">
