@@ -15,6 +15,12 @@ const futureOfTexts = [
 
 const H1Text = styled(Text.H1)`
   line-height: 1.2em;
+
+  span {
+    display: inline-flex;
+    // Allow the text to wrap.
+    overflow-wrap: break-word;
+  }
 `;
 
 export const H1 = () => {
