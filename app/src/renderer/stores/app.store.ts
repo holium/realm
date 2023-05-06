@@ -169,6 +169,10 @@ function registerOnUpdateListener() {
     appState.shellStore.setDesktopDimensions(dims.width, dims.height);
   });
 
+  MainIPC.onSetFullScreen((isFullScreen) => {
+    appState.shellStore.setFullscreen(isFullScreen);
+  });
+
   RealmIPC.onUpdate(async (update) => {
     if (update.type === 'booted') {
       appState.reset();

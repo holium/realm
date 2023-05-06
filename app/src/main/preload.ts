@@ -28,9 +28,6 @@ const appPreload = {
   downloadUrlAsFile: (url: string) =>
     ipcRenderer.send('download-url-as-file', { url }),
   /* Senders */
-  setFullscreen(callback: any) {
-    ipcRenderer.on('set-fullscreen', callback);
-  },
   openApp: (app: any, partition: string) => {
     return ipcRenderer.invoke('open-app', app, partition);
   },
@@ -68,6 +65,11 @@ const appPreload = {
     ipcRenderer.invoke('realm-to-app.ephemeral-chat', patp, message);
   },
   /* Receivers */
+  onSetFullScreen(callback: (isFullscreen: boolean) => void) {
+    ipcRenderer.on('set-fullscreen', (_, isFullscreen) => {
+      callback(isFullscreen);
+    });
+  },
   onBrowserOpen(callback: any) {
     ipcRenderer.on('realm.browser.open', callback);
   },
