@@ -5,6 +5,7 @@ module.exports = {
     const modules = [
       path.resolve(__dirname, '../app/src'),
       path.resolve(__dirname, '../shared/src'),
+      path.resolve(__dirname, '../hosting-holium-com/src'),
       path.resolve(__dirname, '../lib/design-system/src'),
       path.resolve(__dirname, '../lib/presence/src'),
     ];
@@ -17,6 +18,7 @@ module.exports = {
   stories: [
     '../app/src/**/*.stories.@(js|jsx|ts|tsx)',
     '../shared/src/**/*.stories.@(js|jsx|ts|tsx)',
+    '../hosting-holium-com/src/**/*.stories.@(js|jsx|ts|tsx)',
     '../lib/design-system/src/**/*.stories.@(js|jsx|ts|tsx)',
     '../lib/presence/src/**/*.stories.@(js|jsx|ts|tsx)',
   ],
