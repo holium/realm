@@ -34,7 +34,7 @@ const H1Container = styled(Flex)`
   flex-direction: column;
   align-self: flex-start;
   gap: 16px;
-  padding: 16px;
+  padding: 32px 16px;
 
   @media (max-width: ${DESKTOP_WIDTH}px) {
     align-items: center;

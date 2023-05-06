@@ -27,6 +27,10 @@ export const HeaderNavigation = styled.nav`
     justify-content: center;
     gap: 16px;
     list-style: none;
+
+    @media (max-width: ${MOBILE_WIDTH}px) {
+      gap: 12px;
+    }
   }
 `;
 
