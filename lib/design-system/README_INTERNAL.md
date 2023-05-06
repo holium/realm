@@ -10,21 +10,13 @@ yarn storybook
 ## Directory structure
 
 ```
-/src
-  /blocks
-  /general
-  /input
-  /navigation
-  /os
-  /util
-  index.ts    (@holium/design-system)
-
-blocks.ts     (@holium/design-system/blocks)
-general.ts    (@holium/design-system/general)
-input.ts      (@holium/design-system/input)
-navigation.ts (@holium/design-system/navigation)
-os.ts         (@holium/design-system/os)
-util.ts       (@holium/design-system/util)
+/blocks.ts      (@holium/design-system/blocks)
+/general.ts     (@holium/design-system/general)
+/input.ts       (@holium/design-system/input)
+/navigation.ts  (@holium/design-system/navigation)
+/os.ts          (@holium/design-system/os)
+/util.ts        (@holium/design-system/util)
+index.ts        (@holium/design-system)
 ```
 
 ## Component structure
