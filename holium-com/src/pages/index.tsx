@@ -1,74 +1,40 @@
-import { useEffect, useState } from 'react';
+import styled from 'styled-components';
 
-import { Button, Text } from '@holium/design-system/general';
+import { Button, Flex, Icon, Text } from '@holium/design-system/general';
 
-import { AnimatedText } from '../components/AnimatedText';
+import { H1 } from '../components/H1';
 import { Page } from '../components/Page';
 
-const futureOfTexts = [
-  'collaborative computing',
-  'online communities',
-  'Web 3',
-  'P2P networks',
-  'DAOs',
-];
+const GetRealmButton = styled(Button.Primary)`
+  display: flex;
+  font-size: 18px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  gap: 8px;
+`;
 
 export default function CreateAccount() {
-  const [msgIdx, setMsgIdx] = useState(0);
-  const [replay, setReplay] = useState(true);
-  const [futureOfText, setFutureOfText] = useState('');
-
-  useEffect(() => {
-    setFutureOfText(futureOfTexts[msgIdx]);
-    setReplay(true);
-    const interval = setInterval(() => {
-      setMsgIdx((idx) => (idx + 1) % futureOfTexts.length);
-    }, 7000);
-    const replayInterval = setInterval(() => {
-      setReplay(false);
-    }, 6000);
-    return () => {
-      clearInterval(interval);
-      clearInterval(replayInterval);
-    };
-  }, [msgIdx]);
-
   return (
     <Page title="Holium">
-      <Text.Custom
-        className="realm-is-text"
-        fontWeight={600}
-        style={{
-          lineHeight: '70px',
-          // textShadow: theme.mode === 'light' ? undefined : '0px 4px 4px rgba(0, 0, 0, 0.15)',
-        }}
-      >
-        Realm is the future of{' '}
-        <Text.Custom
-          initial="hidden"
-          fontWeight={700}
-          animate={replay ? 'visible' : 'hidden'}
-          variants={{
-            visible: {
-              transition: {
-                staggerChildren: 0.025,
-              },
-            },
-            hidden: {
-              transition: {
-                staggerChildren: 0.025,
-              },
-            },
-          }}
+      <Flex width="100%" maxWidth="1200px" justifyContent="flex-start">
+        <Flex
+          flexDirection="column"
+          alignSelf="flex-start"
+          maxWidth="700px"
+          gap="16px"
+          padding="16px"
         >
-          <AnimatedText text={futureOfText} />
-        </Text.Custom>
-      </Text.Custom>
-      <Text.Body>
-        A home for communities, a platform for building new social experiences,
-        and a crypto user's dream.
-      </Text.Body>
-      <Button.Primary>Get Realm</Button.Primary>
+          <H1 />
+          <Text.Body fontSize={28}>
+            A home for communities, a platform for building new social
+            experiences, and a crypto user's dream.
+          </Text.Body>
+          <GetRealmButton>
+            Get Realm
+            <Icon name="ArrowRightLine" fill="accent" />
+          </GetRealmButton>
+        </Flex>
+      </Flex>
     </Page>
   );
 }

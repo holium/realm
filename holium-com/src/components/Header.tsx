@@ -47,6 +47,7 @@ export const Header = () => {
       </HeaderNavigation>
       <HeaderCTAs>
         <Button.Secondary onClick={onClickLogin}>Login</Button.Secondary>
+        <Button.Primary>Get Realm</Button.Primary>
       </HeaderCTAs>
     </HeaderContainer>
   );
