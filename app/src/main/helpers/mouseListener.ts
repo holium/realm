@@ -9,6 +9,10 @@ ipcRenderer.on('add-mouse-listeners', (_, isMainWindow?: boolean) => {
 
     ipcRenderer.invoke('mouse-move', mouseState, isDragging);
   };
+  const handleMouseScroll = (_e: Event) => {
+    ipcRenderer.invoke('mouse-move', null, true);
+  };
+
   const handleMouseDown = () => ipcRenderer.invoke('mouse-down');
   const handleMouseUp = () => ipcRenderer.invoke('mouse-up');
   const handleMouseOut = (e: MouseEvent) => {
@@ -21,4 +25,5 @@ ipcRenderer.on('add-mouse-listeners', (_, isMainWindow?: boolean) => {
   window.addEventListener('mousemove', handleMouseMove);
   window.addEventListener('mousedown', handleMouseDown);
   window.addEventListener('mouseup', handleMouseUp);
+  window.addEventListener('scroll', handleMouseScroll, true);
 });
