@@ -4,6 +4,7 @@ import { Button, Flex, Icon, Text } from '@holium/design-system/general';
 
 import { H1 } from '../components/H1';
 import { Page } from '../components/Page';
+import { onClickGetRealm } from '../consts';
 
 const GetRealmButton = styled(Button.Primary)`
   display: flex;
@@ -29,7 +30,7 @@ export default function CreateAccount() {
             A home for communities, a platform for building new social
             experiences, and a crypto user's dream.
           </Text.Body>
-          <GetRealmButton>
+          <GetRealmButton onClick={onClickGetRealm}>
             Get Realm
             <Icon name="ArrowRightLine" fill="accent" />
           </GetRealmButton>
