@@ -14,12 +14,22 @@ const futureOfTexts = [
 ];
 
 const H1Text = styled(Text.H1)`
+  font-size: 64px;
   line-height: 1.2em;
+  width: 100%;
 
   span {
     display: inline-flex;
     // Allow the text to wrap.
     overflow-wrap: break-word;
+  }
+
+  @media screen and (max-width: 768px) {
+    font-size: 48px;
+  }
+
+  @media screen and (max-width: 480px) {
+    font-size: 32px;
   }
 `;
 
@@ -45,7 +55,6 @@ export const H1 = () => {
 
   return (
     <H1Text
-      fontSize={64}
       style={
         {
           // textShadow: theme.mode === 'light' ? undefined : '0px 4px 4px rgba(0, 0, 0, 0.15)',

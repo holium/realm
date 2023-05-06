@@ -21,6 +21,7 @@ export const HeaderNavigation = styled.nav`
   display: flex;
   align-items: center;
   justify-content: center;
+
   ul {
     display: flex;
     align-items: center;
