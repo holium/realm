@@ -68,10 +68,12 @@ export class WalletService extends AbstractService {
 
   async hasPasscodeHash() {
     return (
-      (await APIConnection.getInstance().conduit.scry({
-        app: 'realm-wallet',
-        path: '/passcode-hash',
-      })) !== null
+      (
+        await APIConnection.getInstance().conduit.scry({
+          app: 'realm-wallet',
+          path: '/passcode-hash',
+        })
+      )['passcode-hash'] !== ''
     );
   }
 

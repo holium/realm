@@ -965,7 +965,8 @@ export const WalletStore = types
           /*const transactions =
             yield WalletIPC.getTransactions() as PromiseLike<any>;*/
           const hasMnemonic = yield WalletIPC.hasMnemonic(window.ship);
-          if (hasMnemonic) {
+          const hasPasscodeHash = yield WalletIPC.hasPasscodeHash();
+          if (hasMnemonic && hasPasscodeHash) {
             // @ts-expect-error
             self.resetNavigation();
             // @ts-expect-error
