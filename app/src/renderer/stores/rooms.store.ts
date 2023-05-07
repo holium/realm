@@ -1,5 +1,6 @@
 import { observable } from 'mobx';
 import { applySnapshot, cast, flow, Instance, types } from 'mobx-state-tree';
+import { io } from 'socket.io-client';
 import { patp2dec } from 'urbit-ob';
 
 import { SoundActions } from 'renderer/lib/sound';
@@ -147,6 +148,7 @@ export const RoomsStore = types
     },
   }))
   .actions((self) => {
+    let socket: undefined | Socket<DefaultEventsMap, DefaultEventsMap>;
     const localPeer = observable(new LocalPeer());
     const remotePeers = observable(new Map<string, RemotePeer>());
     const queuedPeers = observable([]) as string[]; // peers that we have queued to dial
@@ -233,8 +235,20 @@ export const RoomsStore = types
     };
 
     return {
+      afterCreate() {
+        console.log('creating room store');
+        const url = 'https://socket.holium.live';
+        socket = io(url, {
+          transports: ['websocket'],
+          path: '/socket-io/',
+          query: {
+            serverId: window.ship,
+          },
+        });
+      },
       beforeDestroy() {
         // cleanup rooms
+        console.log('destroying room store');
         hangupAll();
         if (self.current) {
           RoomsIPC.leaveRoom(self.current.rid);
