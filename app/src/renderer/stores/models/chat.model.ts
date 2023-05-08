@@ -9,6 +9,17 @@ import { expiresInMap, ExpiresValue } from '../../apps/Courier/types';
 
 const ChatFragment = types.union(
   { eager: true },
+  types.model('FragmentEmoji', {
+    emoji: types.string,
+    metadata: types.optional(types.frozen(), {}),
+  }),
+  types.model('FragmentCustom', {
+    custom: types.model({
+      name: types.string,
+      value: types.string,
+    }),
+    metadata: types.optional(types.frozen(), {}),
+  }),
   types.model('FragmentPlain', {
     plain: types.string,
     metadata: types.optional(types.frozen(), {}),

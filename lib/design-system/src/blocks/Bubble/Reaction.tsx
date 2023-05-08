@@ -13,8 +13,8 @@ import { useMenu } from '../../navigation/Menu/useMenu';
 import { opacifyHexColor } from '../../util/colors';
 import { FragmentReactionType } from './Bubble.types';
 
-const WIDTH = 300;
-const HEIGHT = 350;
+export const DEFAULT_EMOJI_PICKER_WIDTH = 300;
+export const DEFAULT_EMOJI_PICKER_HEIGHT = 350;
 const defaultShip =
   typeof window !== 'undefined' ? (window as any)?.ship ?? 'zod' : 'zod';
 
@@ -23,7 +23,7 @@ const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`
   position: relative;
   flex-direction: row;
   width: 100%;
-  max-width: ${WIDTH}px;
+  max-width: ${DEFAULT_EMOJI_PICKER_WIDTH}px;
   flex-wrap: wrap;
   gap: 2px;
   z-index: 15;
@@ -71,6 +71,7 @@ type ReactionButtonProps = {
   size?: keyof typeof ReactionSizes;
   ourColor?: string;
   selected?: boolean;
+  customButtonType?: any;
 };
 
 export const ReactionButton = styled(Box)<ReactionButtonProps>`
@@ -79,14 +80,18 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
   align-items: center;
   justify-content: center;
   color: rgba(var(--rlm-text-rgba));
-  background: ${({ selected, ourColor }) =>
-    selected
+  background: ${({ selected, ourColor, customButtonType }) =>
+    customButtonType === 'icon'
+      ? 'none'
+      : selected
       ? ourColor
         ? opacifyHexColor(ourColor, 0.3)
         : 'gba(var(--rlm-accent-rgba))'
       : 'rgba(0, 0, 0, 0.08)'};
-  box-shadow: ${({ selected }) =>
-    selected
+  box-shadow: ${({ selected, customButtonType }) =>
+    customButtonType === 'icon'
+      ? 'none'
+      : selected
       ? 'inset 0px 0px 0px 1px rgba(0, 0, 0, 0.1)'
       : 'inset 0px 0px 0px 1px rgba(0, 0, 0, 0.15)'};
 
@@ -94,12 +99,15 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
   /* background: ${({ selected }) =>
     selected ? 'rgba(var(--rlm-accent-rgba))' : 'rgba(var(--rlm-input-rgba))'};
   filter: ${({ selected }) => (selected ? 'brightness(1.3)' : 'brightness(1)')};
-  border: ${({ selected }) =>
-    selected
+  border: ${({ selected, customButtonType }) =>
+    customButtonType === 'icon'
+      ? 'none'
+      : selected
       ? '1px solid rgba(var(--rlm-accent-rgba))'
       : '1px solid rgba(var(--rlm-window-rgba))'}; */
 
-  border-radius: 16px;
+  border-radius: ${({ customButtonType }) =>
+    customButtonType === 'icon' ? '4px' : '16px'};
   transition: var(--transition);
   ${({ size, selected, isOur }) =>
     size
@@ -141,6 +149,8 @@ export const ReactionButton = styled(Box)<ReactionButtonProps>`
     transition: var(--transition);
     cursor: pointer;
     filter: brightness(0.96);
+    ${({ customButtonType }) =>
+      customButtonType === 'icon' ? 'background: rgba(0, 0, 0, 0.05);' : ''}
   }
   ${({ isOur, ourColor, selected }) =>
     isOur &&
@@ -204,7 +214,7 @@ export const Reactions = ({
   const reactIds = reactions.map((r) => r.msgId);
   const { isOpen, menuRef, position, toggleMenu, closeMenu } = useMenu(
     'top-left',
-    { width: WIDTH, height: HEIGHT },
+    { width: DEFAULT_EMOJI_PICKER_WIDTH, height: DEFAULT_EMOJI_PICKER_HEIGHT },
     { x: 0, y: 2 },
     [], // closeableIds
     [] // closeableClasses
@@ -364,8 +374,8 @@ export const Reactions = ({
                   y: position.y,
                   x: position.x,
                   border: 'none',
-                  width: WIDTH,
-                  height: HEIGHT,
+                  width: DEFAULT_EMOJI_PICKER_WIDTH,
+                  height: DEFAULT_EMOJI_PICKER_HEIGHT,
                   overflowY: 'hidden',
                 }}
               >
@@ -378,8 +388,8 @@ export const Reactions = ({
                 >
                   <EmojiPicker
                     emojiVersion="0.6"
-                    height={HEIGHT}
-                    width={WIDTH}
+                    height={DEFAULT_EMOJI_PICKER_HEIGHT}
+                    width={DEFAULT_EMOJI_PICKER_WIDTH}
                     lazyLoadEmojis
                     previewConfig={{
                       showPreview: false,
@@ -460,8 +470,8 @@ export const ReactionPicker = ({
     >
       <EmojiPicker
         emojiVersion="0.6"
-        height={HEIGHT}
-        width={WIDTH}
+        height={DEFAULT_EMOJI_PICKER_HEIGHT}
+        width={DEFAULT_EMOJI_PICKER_WIDTH}
         previewConfig={{
           showPreview: false,
         }}
@@ -474,5 +484,112 @@ export const ReactionPicker = ({
         autoFocusSearch={false}
       />
     </ReactionPickerStyle>
+  );
+};
+
+type AnimatedReactionPickerProps = {
+  onClick: (emoji: string) => void;
+  toggleMenu: (evt: any) => void;
+  id?: string;
+  isOur?: boolean;
+  isOpen?: boolean;
+  ourColor?: string;
+  position?: any;
+  size?: keyof typeof ReactionSizes;
+  menuRef?: any;
+  customButtonType?: any;
+};
+
+export const AnimatedReactionPicker = ({
+  id = 'reaction-menu',
+  size = 'medium',
+  isOur = false,
+  isOpen = false,
+  position,
+  ourColor,
+  onClick,
+  toggleMenu,
+  menuRef,
+  customButtonType,
+}: AnimatedReactionPickerProps) => {
+  return (
+    <>
+      <ReactionButton
+        id={id}
+        isOur={isOur}
+        ourColor={ourColor}
+        size={size}
+        className="bubble-reactions"
+        onClick={toggleMenu}
+        customButtonType={customButtonType}
+      >
+        <Icon pointerEvents="none" size={18} opacity={0.5} name="Reaction" />
+      </ReactionButton>
+      <Portal>
+        <AnimatePresence>
+          {isOpen && position && (
+            <Card
+              ref={menuRef}
+              p={0}
+              elevation={2}
+              position="absolute"
+              id={id}
+              zIndex={100}
+              initial={{
+                opacity: 0,
+              }}
+              animate={{
+                opacity: 1,
+                transition: {
+                  duration: 0.1,
+                },
+              }}
+              exit={{
+                opacity: 0,
+                transition: {
+                  duration: 0.1,
+                },
+              }}
+              gap={0}
+              style={{
+                y: position.y,
+                x: position.x,
+                border: 'none',
+                width: DEFAULT_EMOJI_PICKER_WIDTH,
+                height: DEFAULT_EMOJI_PICKER_HEIGHT,
+                overflowY: 'hidden',
+              }}
+            >
+              <ReactionPickerStyle
+                zIndex={20}
+                transition={{ duration: 0.15 }}
+                onClick={(evt) => {
+                  evt.stopPropagation();
+                }}
+              >
+                <EmojiPicker
+                  emojiVersion="0.6"
+                  height={DEFAULT_EMOJI_PICKER_HEIGHT}
+                  width={DEFAULT_EMOJI_PICKER_WIDTH}
+                  lazyLoadEmojis
+                  previewConfig={{
+                    showPreview: false,
+                  }}
+                  defaultSkinTone={SkinTones.NEUTRAL}
+                  onEmojiClick={(
+                    emojiData: EmojiClickData,
+                    evt: MouseEvent
+                  ) => {
+                    onClick(emojiData?.unified);
+                    evt.stopPropagation();
+                  }}
+                  autoFocusSearch
+                />
+              </ReactionPickerStyle>
+            </Card>
+          )}
+        </AnimatePresence>
+      </Portal>
+    </>
   );
 };
