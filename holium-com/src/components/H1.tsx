@@ -17,6 +17,7 @@ const H1Text = styled(Text.H1)`
   font-size: 64px;
   line-height: 1.2em;
   width: 100%;
+  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
 
   span {
     display: inline-flex;
@@ -30,6 +31,10 @@ const H1Text = styled(Text.H1)`
 
   @media screen and (max-width: 480px) {
     font-size: 32px;
+  }
+
+  @media screen and (max-width: 400px) {
+    font-size: 28px;
   }
 `;
 
@@ -54,11 +59,7 @@ export const H1 = () => {
   }, [msgIdx]);
 
   return (
-    <H1Text
-      style={{
-        textShadow: '0px 4px 4px rgba(0, 0, 0, 0.15)',
-      }}
-    >
+    <H1Text>
       Realm is the future of{' '}
       <AnimatedText text={futureOfText} replay={replay} />
     </H1Text>

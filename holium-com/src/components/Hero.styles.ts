@@ -7,10 +7,24 @@ import { DESKTOP_WIDTH, MOBILE_WIDTH } from '../consts';
 export const GetRealmButton = styled(Button.Primary)`
   display: flex;
   font-size: 18px;
-  padding: 10px 16px;
+  padding: 10px 10px 10px 16px;
   border-radius: 999px;
-  gap: 8px;
+  gap: 12px;
   margin-top: 16px;
+`;
+
+export const RoundArrow = styled.div`
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    fill: var(--rlm-accent-color);
+  }
 `;
 
 export const HeroContainer = styled(Flex)`
@@ -35,7 +49,7 @@ export const H1Container = styled(Flex)`
   flex-direction: column;
   align-self: flex-start;
   gap: 16px;
-  padding: 32px 16px;
+  padding: 64px 16px;
 
   @media (max-width: ${DESKTOP_WIDTH}px) {
     align-items: center;
@@ -48,6 +62,6 @@ export const P = styled(Text.Body)`
   font-size: 28px;
 
   @media (max-width: ${MOBILE_WIDTH}px) {
-    font-size: 24px;
+    font-size: 22px;
   }
 `;

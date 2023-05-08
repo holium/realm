@@ -1,5 +1,6 @@
 import { Button, Text } from '@holium/design-system/general';
 
+import { Holium } from '../../public/Holium';
 import { onClickGetRealm, onClickLogin } from '../consts';
 import {
   HeaderContainer,
@@ -8,7 +9,6 @@ import {
   HeaderNavigation,
   UnstyledLink,
 } from './Header.styles';
-import { Holium } from './Holium';
 
 export const Header = () => (
   <HeaderContainer>

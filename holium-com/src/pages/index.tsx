@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { spaces } from 'spaces';
+import styled from 'styled-components';
 import { SpaceKeys, TrayAppType } from 'types';
 
 import { Flex } from '@holium/design-system/general';
-import { ThemeType } from '@holium/shared';
 
 import { Footer } from 'components/Footer';
 import { GlobalStyle } from 'components/GlobalStyle';
@@ -16,13 +16,18 @@ import { SpacesApp } from 'components/TrayApps/Spaces';
 import { WalletApp } from 'components/TrayApps/Wallet';
 
 import { Page } from '../components/Page';
-import { Main } from './index.styles';
 
-// Key types of the spaces object
+const Main = styled.main`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
 
 export default function HomePage() {
   const [currentSpace, setCurrentSpace] = useState<SpaceKeys>('cyberpunk');
-  const [theme, setTheme] = useState<ThemeType>(spaces[currentSpace].theme);
+  const [theme, setTheme] = useState(spaces[currentSpace].theme);
   const [trayApp, setTrayApp] = useState<TrayAppType | null>(null);
 
   return (

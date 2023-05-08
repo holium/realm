@@ -58,4 +58,8 @@ export const HeaderMenuLink = styled(UnstyledLink)<{
   &:hover {
     opacity: 1;
   }
+
+  @media (max-width: ${MOBILE_WIDTH}px) {
+    font-size: 16px;
+  }
 `;
