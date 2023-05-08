@@ -58,14 +58,19 @@
         ['app_id' s+app-id.notif]
         ['data' (mtd data.notif)]
         ['include_player_ids' a+(turn player-ids |=([id=@t] s+id))]
-        ['subtitle' (contents subtitle.notif)]
+        ['headings' (contents title.notif)]
     ==
+    =/  extended-list
+      ?~  subtitle.notif  base-list
+      :-  ['subtitle' (contents subtitle.notif)]
+      base-list
+
     ?~  contents.notif
-      (pairs base-list)
+      (pairs extended-list)
     %-  pairs
     :-
       ['contents' (contents contents.notif)]
-      base-list
+      extended-list
     ++  mtd 
       |=  =mtd:sur
       ^-  json
