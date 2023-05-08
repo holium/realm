@@ -1,6 +1,6 @@
 {
-  "name": "@holium/onboarding",
-  "version": "0.1.0",
+  "name": "@holium/holium-com",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -16,13 +16,10 @@
     "babel-plugin-styled-components": "^2.1.1"
   },
   "dependencies": {
-    "@amplitude/analytics-browser": "^1.9.1",
-    "@sentry/nextjs": "^7.50.0",
-    "@stripe/react-stripe-js": "^2.1.0",
-    "@stripe/stripe-js": "^1.51.0",
-    "next": "^13.2.4",
-    "next-progress": "^2.3.1",
+    "framer-motion": "^7.6.7",
+    "next": "^13.4.1",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "styled-components": "^5.3.6"
   }
 }

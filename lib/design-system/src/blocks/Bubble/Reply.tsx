@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { Box, BoxProps, Button, Flex, Icon, Text } from '../../../general';
-import { convertDarkText } from '../../../util';
+import { flipColorIfLowContrast } from '../../../util';
 import { capitalizeFirstLetter } from '../../util/strings';
 import { convertFragmentsToPreview } from '../ChatInput/fragment-parser';
 import { BubbleAuthor } from './Bubble.styles';
@@ -50,7 +50,7 @@ export const Reply = (props: ReplyProps) => {
 
   const authorColorDisplay = useMemo(
     () =>
-      (authorColor && convertDarkText(authorColor, themeMode)) ||
+      (authorColor && flipColorIfLowContrast(authorColor, themeMode)) ||
       'rgba(var(--rlm-text-rgba))',
     [authorColor]
   );

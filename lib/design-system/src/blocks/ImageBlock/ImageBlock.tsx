@@ -73,6 +73,7 @@ export const ImageBlock = ({
                 setNaturalHeight(curr.naturalHeight);
             }}
             onClick={open}
+            style={{ pointerEvents: 'none' }}
           />
         )}
       </Item>

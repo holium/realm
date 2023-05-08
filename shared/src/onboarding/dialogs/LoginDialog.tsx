@@ -1,6 +1,6 @@
 import { ReactNode, useRef } from 'react';
 
-import { Flex } from '@holium/design-system/general';
+import { Button, Flex, Icon } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 import { HoliumButton } from '@holium/design-system/os';
 import { useToggle } from '@holium/design-system/util';
@@ -26,6 +26,7 @@ export const LoginDialog = ({
   onLogin,
 }: Props) => {
   const terms = useToggle(false);
+  const showPassword = useToggle(false);
 
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -67,8 +68,20 @@ export const LoginDialog = ({
                 id="login-password"
                 name="login-password"
                 ref={passwordRef}
-                type="password"
+                type={showPassword.isOn ? 'text' : 'password'}
                 placeholder="• • • • • • • •"
+                rightAdornment={
+                  <Button.IconButton
+                    type="button"
+                    onClick={showPassword.toggle}
+                  >
+                    <Icon
+                      name={showPassword.isOn ? 'EyeOff' : 'EyeOn'}
+                      opacity={0.5}
+                      size={18}
+                    />
+                  </Button.IconButton>
+                }
               />
             </Flex>
             {label}

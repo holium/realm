@@ -53,7 +53,6 @@ export const AddServerStep = ({ setStep }: StepProps) => {
         passwordHash,
         serverId,
         serverUrl,
-        serverCode,
         serverType: 'local',
         avatar: '',
         nickname: '',

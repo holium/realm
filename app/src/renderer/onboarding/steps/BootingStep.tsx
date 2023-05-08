@@ -80,7 +80,6 @@ export const BootingStep = ({ setStep }: StepProps) => {
         passwordHash,
         serverId: serverId,
         serverUrl: serverUrl,
-        serverCode: serverCode,
         serverType: 'hosted',
         avatar: '',
         nickname: '',

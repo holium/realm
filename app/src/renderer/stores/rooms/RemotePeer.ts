@@ -2,7 +2,6 @@ import { action, makeObservable, observable } from 'mobx';
 import SimplePeer from 'simple-peer';
 import { patp2dec } from 'urbit-ob';
 
-import { RoomsIPC } from '../ipc';
 import { LocalPeer } from './LocalPeer';
 import {
   IAudioAnalyser,
@@ -50,6 +49,7 @@ export class RemotePeer {
   isVideoAttached: boolean = false;
   analysers: IAudioAnalyser[] = [];
   sendDataToPeer: (data: Partial<DataPacket>) => void = () => {};
+  sendSignalToPeer: (to: string, rid: string, signal: any) => void = () => {};
   setters: PeerSetters = {
     setMuted: () => {},
     setSpeaking: () => {},
@@ -63,6 +63,7 @@ export class RemotePeer {
     patp: string,
     localPeer: LocalPeer,
     sendDataToPeer: (data: Partial<DataPacket>) => void,
+    sendSignalToPeer: (to: string, rid: string, signal: any) => void,
     setters: PeerSetters,
     config: { isInitiator: boolean; rtc: any }
   ) {
@@ -74,6 +75,7 @@ export class RemotePeer {
     this.patpId = patp2dec(patp);
     this.rtcConfig = config.rtc;
     this.audioTracks = new Map();
+    this.sendSignalToPeer = sendSignalToPeer.bind(this);
     this.sendDataToPeer = sendDataToPeer.bind(this);
     this.mute = this.mute.bind(this);
     this.unmute = this.unmute.bind(this);
@@ -192,8 +194,8 @@ export class RemotePeer {
     });
   }
 
-  sendSignal(data: SimplePeer.SignalData) {
-    RoomsIPC.sendSignal(window.ship, this.patp, this.rid, data);
+  sendSignal(data: SimplePeer.SignalData | any) {
+    this.sendSignalToPeer(this.patp, this.rid, data);
   }
 
   sendData(data: DataPacket): void {
@@ -208,7 +210,7 @@ export class RemotePeer {
     // only the waiting peer sends the waiting signal
     if (!this.isInitiator) {
       this.createConnection(options);
-      RoomsIPC.sendSignal(window.ship, this.patp, this.rid, {
+      this.sendSignal({
         type: 'waiting',
         from: window.ship,
       });
@@ -217,13 +219,13 @@ export class RemotePeer {
 
   retry() {
     if (this.isInitiator) {
-      RoomsIPC.sendSignal(window.ship, this.patp, this.rid, {
+      this.sendSignal({
         type: 'retry',
         from: window.ship,
       });
     } else {
       this.createConnection();
-      RoomsIPC.sendSignal(window.ship, this.patp, this.rid, {
+      this.sendSignal({
         type: 'waiting',
         from: window.ship,
       });

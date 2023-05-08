@@ -1,6 +1,6 @@
 import { observable } from 'mobx';
 import { applySnapshot, cast, flow, Instance, types } from 'mobx-state-tree';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { patp2dec } from 'urbit-ob';
 
 import { SoundActions } from 'renderer/lib/sound';
@@ -148,7 +148,7 @@ export const RoomsStore = types
     },
   }))
   .actions((self) => {
-    let socket: undefined | Socket<DefaultEventsMap, DefaultEventsMap>;
+    let socket: undefined | Socket<any, any>;
     const localPeer = observable(new LocalPeer());
     const remotePeers = observable(new Map<string, RemotePeer>());
     const queuedPeers = observable([]) as string[]; // peers that we have queued to dial
@@ -161,6 +161,10 @@ export const RoomsStore = types
           peer.sendData(payload);
         }
       });
+    };
+
+    const sendSignal = (to: string, rid: string, signal: any) => {
+      socket?.emit('signal', { from: window.ship, to, rid, data: signal });
     };
 
     const dialPeer = (rid: string, to: string, rtc: any) => {
@@ -176,6 +180,7 @@ export const RoomsStore = types
         to,
         localPeer,
         sendDataToPeer,
+        sendSignal,
         {
           setAudioAttached: (isAttached: boolean) => {
             if (!self.peersMetadata.has(to)) {
@@ -235,16 +240,15 @@ export const RoomsStore = types
     };
 
     return {
-      afterCreate() {
-        console.log('creating room store');
-        const url = 'https://socket.holium.live';
-        socket = io(url, {
-          transports: ['websocket'],
-          path: '/socket-io/',
-          query: {
-            serverId: window.ship,
-          },
-        });
+      afterCreate() {},
+      reset() {
+        // cleanup rooms
+        console.log('destroying room store');
+        hangupAll();
+        if (self.current) {
+          RoomsIPC.leaveRoom(self.current.rid);
+        }
+        applySnapshot(self, {});
       },
       beforeDestroy() {
         // cleanup rooms
@@ -290,6 +294,48 @@ export const RoomsStore = types
             rtc: self.rtcConfig,
           }
         );
+        console.log('creating room store');
+        const url = 'https://socket.holium.live';
+        socket = io(url, {
+          transports: ['websocket'],
+          path: '/socket-io/',
+          query: {
+            serverId: window.ship,
+          },
+        });
+        socket.on('connect', () => {
+          console.log('connected');
+        });
+
+        socket.on('signal', (payload: any) => {
+          console.log('signal', payload);
+          const remotePeer = remotePeers.get(payload.from);
+          const signalData = payload.data;
+          if (signalData.type === 'waiting') {
+            if (!remotePeer) {
+              console.log(`%waiting from unknown ${payload.from}`);
+              queuedPeers.push(payload.from);
+            } else {
+              console.log(`%waiting from ${payload.from}`);
+              remotePeer.onWaiting();
+            }
+          }
+          if (signalData.type === 'retry') {
+            const retryingPeer = remotePeers.get(payload.from);
+            retryingPeer?.dial();
+          }
+          if (!['retry', 'ack-waiting', 'waiting'].includes(signalData.type)) {
+            if (remotePeer) {
+              remotePeer.peerSignal(signalData);
+            } else {
+              console.log(`%${signalData.type} from unknown ${payload.from}`);
+            }
+          }
+        });
+
+        socket.on('disconnect', () => {
+          console.log(socket?.id); // undefined
+        });
         const session = yield RoomsIPC.getSession();
         if (session) {
           self.provider = session.provider;

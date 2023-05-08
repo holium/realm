@@ -40,10 +40,9 @@ export default function ChooseId({ patps, back_url }: ServerSideProps) {
     OnboardingStorage.set({ serverId });
   };
 
-  const onBack =
-    back_url.length > 0
-      ? () => goToPage(back_url as OnboardingPage)
-      : undefined;
+  const onBack = back_url.length
+    ? () => goToPage(back_url as OnboardingPage)
+    : undefined;
 
   const onNext = () => goToPage('/payment');
 
