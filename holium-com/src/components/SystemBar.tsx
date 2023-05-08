@@ -138,30 +138,6 @@ export const SystemBar = ({ currentSpace, setCurrentApp }: SystemBarProps) => {
             </Text.Custom>
           </Flex>
         </SelectedSpaceRow>
-        <BarButton
-          id="chat-icon"
-          height={26}
-          width={26}
-          onClick={() => {
-            const coords = calculateAnchorPointById(
-              'chat',
-              chatConfig.anchorOffset,
-              chatConfig.position,
-              chatConfig.dimensions
-            );
-            const height = document.body.clientHeight;
-            setCurrentApp({
-              id: 'chat',
-              coords: {
-                x: coords.left,
-                y: height - chatConfig.dimensions.height - coords.bottom,
-                ...chatConfig.dimensions,
-              },
-            });
-          }}
-        >
-          <Icon name="Messages" size={22} />
-        </BarButton>
       </BarStyle>
       <BarStyle pl="3px" pr={1} style={{ justifyContent: 'space-between' }}>
         <Flex gap={8} align="center">
@@ -223,6 +199,30 @@ export const SystemBar = ({ currentSpace, setCurrentApp }: SystemBarProps) => {
             }}
           >
             <Icon name="WalletTray" size={22} />
+          </BarButton>
+          <BarButton
+            id="chat-icon"
+            height={26}
+            width={26}
+            onClick={() => {
+              const coords = calculateAnchorPointById(
+                'chat',
+                chatConfig.anchorOffset,
+                chatConfig.position,
+                chatConfig.dimensions
+              );
+              const height = document.body.clientHeight;
+              setCurrentApp({
+                id: 'chat',
+                coords: {
+                  x: coords.left,
+                  y: height - chatConfig.dimensions.height - coords.bottom,
+                  ...chatConfig.dimensions,
+                },
+              });
+            }}
+          >
+            <Icon name="Messages" size={22} />
           </BarButton>
           <Flex
             id="notifications-icon"
