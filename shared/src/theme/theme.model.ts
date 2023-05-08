@@ -65,6 +65,7 @@ export const Theme = types
   }));
 
 export type ThemeType = Instance<typeof Theme>;
+export type ThemeSnapshotIn = typeof Theme.SnapshotType;
 
 const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
   const windowColor =

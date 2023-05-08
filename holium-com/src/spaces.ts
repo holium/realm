@@ -1,4 +1,6 @@
-export const spaces = {
+import { Space, SpaceKeys } from './types';
+
+export const spaces: Record<SpaceKeys, Space> = {
   'realm-forerunners': {
     id: 'realm-forerunners',
     title: 'Realm Forerunners',

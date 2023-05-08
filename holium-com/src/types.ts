@@ -1,4 +1,25 @@
-import { spaces } from './spaces';
+import { ThemeSnapshotIn } from '@holium/shared';
+
+export type SpaceKeys =
+  | 'realm-forerunners'
+  | 'cyberpunk'
+  | 'holy-order'
+  | 'spacebros'
+  | 'amish'
+  | 'athiest'
+  | 'islam'
+  | 'english'
+  | 'mums'
+  | 'flat-earth-society';
+
+export type Space = {
+  id: SpaceKeys;
+  title: string;
+  members: number;
+  picture: string;
+  theme: ThemeSnapshotIn & { id: SpaceKeys };
+};
+
 export type TrayAppType = {
   coords: {
     x: number;
@@ -8,8 +29,6 @@ export type TrayAppType = {
   };
   id: TrayAppIDs;
 };
-
-export type SpaceKeys = keyof typeof spaces;
 
 export type TrayAppIDs =
   | 'spaces'
