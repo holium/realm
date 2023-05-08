@@ -48,7 +48,13 @@ export const Header = () => (
           Login
         </Text.Body>
       </Button.Secondary>
-      <Button.Primary onClick={onClickGetRealm}>
+      <Button.Primary
+        display="flex"
+        width="90px"
+        justifyContent="center"
+        flexWrap="nowrap"
+        onClick={onClickGetRealm}
+      >
         <Text.Body fontWeight={500} style={{ color: '#fff' }}>
           Get Realm
         </Text.Body>
