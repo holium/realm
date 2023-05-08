@@ -451,11 +451,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     serverId,
     serverUrl,
     serverCode,
-  }: {
-    serverId: string;
-    serverUrl: string;
-    serverCode: string;
-  }) {
+  }: OnboardingCredentials) {
     const coo = await this.getCookie({ serverId, serverUrl, serverCode });
     try {
       await this._openConduit({ serverId, serverUrl, serverCode });
@@ -529,12 +525,13 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     });
   }
 
-  private async _openConduit(creds?: any) {
+  private async _openConduit(creds?: OnboardingCredentials) {
     if (!this.credentials && !creds) {
       return Promise.reject('_openConduit: No credentials');
     }
 
-    const { serverUrl, serverCode, serverId } = this.credentials || creds;
+    const { serverUrl, serverCode, serverId } = (this.credentials ||
+      creds) as OnboardingCredentials;
     const cookie = await this.getCookie({ serverId, serverUrl, serverCode });
     return new Promise((resolve, reject) => {
       // after 10 seconds, give up
