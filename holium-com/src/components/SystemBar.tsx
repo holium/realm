@@ -105,6 +105,7 @@ export const SystemBar = ({ currentSpace, setCurrentApp }: SystemBarProps) => {
               backgroundRepeat: 'no-repeat',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
+              pointerEvents: 'none',
             }}
             height="26px"
             width="26px"
