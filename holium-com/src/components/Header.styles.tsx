@@ -36,8 +36,10 @@ export const HeaderNavigation = styled.nav`
 `;
 
 export const UnstyledLink = styled.a`
+  display: flex;
   color: inherit;
   text-decoration: none;
+  justify-content: center;
 `;
 
 export const HeaderCTAs = styled.div`
@@ -51,7 +53,7 @@ export const HeaderMenuLink = styled(UnstyledLink)<{
   current?: boolean;
 }>`
   font-size: 18px;
-  padding: 2px 0;
+  padding-bottom: 2px;
   opacity: ${({ current }) => (current ? 1 : 0.5)};
   border-bottom: ${({ current }) => (current ? '2px solid' : 'none')};
 
