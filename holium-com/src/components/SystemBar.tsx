@@ -65,7 +65,7 @@ export const SystemBar = ({ currentSpace, setCurrentApp }: SystemBarProps) => {
   const currentRoom = rooms[currentSpace];
 
   return (
-    <Flex flex={1} position="relative" flexDirection="row" width="auto" gap={8}>
+    <Flex flex={1} position="relative" width="auto" gap={8}>
       <BarStyle style={{ justifyContent: 'center' }} width={40}>
         <HoliumButton />
       </BarStyle>
@@ -78,7 +78,7 @@ export const SystemBar = ({ currentSpace, setCurrentApp }: SystemBarProps) => {
         <SelectedSpaceRow
           gap={8}
           id="spaces-icon"
-          alignItems="center"
+          align="center"
           whileTap={{ scale: 0.975 }}
           transition={{ scale: 0.2 }}
           onClick={() => {
@@ -112,9 +112,9 @@ export const SystemBar = ({ currentSpace, setCurrentApp }: SystemBarProps) => {
             src={spaces[currentSpace].picture}
           />
           <Flex
-            style={{ pointerEvents: 'none' }}
-            flexDirection="column"
-            justifyContent="center"
+            style={{ flexDirection: 'column', pointerEvents: 'none' }}
+            justify="center"
+            align="flex-start"
           >
             <Text.Custom
               style={{
@@ -165,7 +165,7 @@ export const SystemBar = ({ currentSpace, setCurrentApp }: SystemBarProps) => {
         </BarButton>
       </BarStyle>
       <BarStyle pl="3px" pr={1} style={{ justifyContent: 'space-between' }}>
-        <Flex gap={8} alignItems="center">
+        <Flex gap={8} align="center">
           <RoomsDock
             participants={currentRoom ? currentRoom.present : []}
             live={
@@ -248,7 +248,6 @@ export const SystemBar = ({ currentSpace, setCurrentApp }: SystemBarProps) => {
             <Avatar
               simple
               clickable
-              pointerEvents="none"
               patp="~lomder-librun"
               size={26}
               borderRadiusOverride="4px"

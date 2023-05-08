@@ -109,7 +109,6 @@ export const NotificationApp = ({
             <Avatar
               simple
               clickable
-              pointerEvents="none"
               patp="~lomder-librun"
               size={26}
               borderRadiusOverride="4px"

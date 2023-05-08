@@ -27,9 +27,7 @@ export const Footer = () => {
       <SystemBar
         currentSpace={currentSpace}
         currentApp={trayApp}
-        setCurrentApp={(app: TrayAppType) => {
-          setTrayApp(app);
-        }}
+        setCurrentApp={setTrayApp}
       />
     </FooterContainer>
   );

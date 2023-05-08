@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { Box, BoxProps } from '../Box/Box';
 
 export type FlexProps = {
-  gap?: string | number;
   inline?: boolean;
   col?: boolean;
   row?: boolean;

@@ -34,7 +34,7 @@ const AccountTrayPresenter = ({ unreadCount, onClick }: AccountTrayProps) => {
             <TrayClock />
             <Avatar
               simple
-              clickable={true}
+              clickable
               avatar={loggedInAccount.avatar}
               patp={loggedInAccount.serverId}
               size={26}
