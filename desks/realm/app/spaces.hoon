@@ -365,7 +365,18 @@
     ++  handle-update
       |=  [path=space-path:store edit-payload=edit-payload:store]
       ^-  (quip card _state)
-      ?>  (has-auth:security path src.bowl %admin)
+      ?>  (has-at-least-auth:security path src.bowl %admin)
+      ?:  (is-host:core ship.path)
+        (host-handle-update path edit-payload)
+      (member-handle-update path)
+    ++  member-handle-update
+      |=  [path=space-path:store]
+      ^-  (quip card _state)
+      :_  state
+      [%pass / %agent [ship.path dap.bowl] %poke spaces-action+!>(act)]~
+    ++  host-handle-update
+      |=  [path=space-path:store edit-payload=edit-payload:store]
+      ^-  (quip card _state)
       =/  old                   (~(got by spaces.state) path)
       =/  updated               `space:store`(edit-space old edit-payload)
       ?:  =(old updated)        :: if the old type equals new
@@ -665,8 +676,9 @@
     ++  handle-send  ::  Sends an invite to a ship
       |=  [path=space-path:store =ship =role:membership-store message=@t]
       ^-  (quip card _state)
-      ?>  (check-member:security path src.bowl) ::  only members should invite
-      ?:  (check-member:security path ship)     ::  must not be a member to invite
+      ?>  (check-member:security path src.bowl) ::  only members can invite
+      ?>  (has-at-least-auth:security path src.bowl %admin)   :: and they have to be at least an admin
+      ?:  (check-member:security path ship)     ::  target ship must not be a member already to be invited
         `state
       =/  space                (~(got by spaces.state) path)
       =/  new-visa             (new-visa:visa-lib path src.bowl ship role space message now.bowl)
@@ -681,7 +693,7 @@
       ::
       ++  host-handle-send
         |=  [path=space-path:store =ship =role:membership-store new-visa=invite:vstore]
-        ?>  =(our.bowl src.bowl)        ::  Dont invite yourself
+        ?>  ?!(=(our.bowl ship))        ::  Dont invite yourself
         =/  members                   (~(gut by membership.state) path `members:membership-store`[~])
         =/  new-member
           [
@@ -780,14 +792,16 @@
     ++  group-handle-kick
       |=  [path=space-path:store =ship]
       ^-  (quip card _state)
-      ?>  (has-auth:security path src.bowl %admin)
+      ?>  (has-at-least-auth:security path src.bowl %admin)
+      ?>  ?!((has-auth:security path ship.path %owner))  :: cannot be trying to kick the owner
       ?>  (is-host:core ship.path)
       (host-handle-kick path ship %.y)
     ::
     ++  handle-kick
       |=  [path=space-path:store =ship]
       ^-  (quip card _state)
-      ?>  (has-auth:security path src.bowl %admin)
+      ?>  (has-at-least-auth:security path src.bowl %admin)
+      ?>  ?!((has-auth:security path ship %owner))  :: cannot be trying to kick the owner
       ?.  (is-host:core ship.path)
         (member-handle-kick path)
       (host-handle-kick path ship %.n)
@@ -829,8 +843,25 @@
     ++  handle-edit-role
       |=  [path=space-path:store member=ship role-set=(set role:membership-store)]
       ^-  (quip card _state)
+      ?>  (has-at-least-auth:security path src.bowl %admin)
+      ?>  ?!((has-auth:security path member %owner))  :: cannot be trying to edit the owner
+      ?.  (is-host:core ship.path)
+        (member-handle-edit-role path)
+      (host-handle-edit-role path member role-set)
+      ::
+      ++  member-handle-edit-role
+        |=  [path=space-path:store]
+        :_  state
+        [%pass / %agent [ship.path %spaces] %poke visa-action+!>(act)]~
+    ++  host-handle-edit-role
+      |=  [path=space-path:store member=ship role-set=(set role:membership-store)]
+      ^-  (quip card _state)
       =/  src-roles           roles:(~(got by (~(got by membership) path)) src.bowl)
-      ?>  (~(has in src-roles) %admin)
+      =/  target-roles        roles:(~(got by (~(got by membership) path)) member)
+      ?>  ?!((~(has in target-roles) %owner))  :: can't edit owner's roles
+      ?>  ?|  (~(has in src-roles) %admin)
+              (~(has in src-roles) %owner)
+          ==
       =/  space-members       (~(got by membership) path)
       =/  member-state        (~(got by space-members) member)
       =.  roles.member-state  role-set
@@ -887,6 +918,7 @@
     ++  on-kicked
       |=  [path=space-path:store =ship]
       ^-  (quip card _state)
+      ?>  (has-auth:security path src.bowl %owner)  :: only pay attantion to kicked signals from the owner, since other ships could be lying/wrong
       ?:  =(our.bowl ship)            ::  we've been kicked
         =.  spaces.state              (~(del by spaces.state) path)
         =.  membership.state          (~(del by membership.state) path)
@@ -919,7 +951,7 @@
       =.  members  (~(put by members) [ship member])
       =.  membership.state  (~(put by membership.state) [path members])
       :_  state
-      [%give %fact [/updates ~] visa-reaction+!>([%edited path ship member])]~
+      [%give %fact [/updates ~] visa-reaction+!>([%edited path ship roles.member])]~
     --
   ::
   ++  helpers
@@ -936,6 +968,25 @@
 ::
 ++  security
   |%
+  :: %initiate < %member < %admin < %owner, so passing in %initiate
+  :: always returns true, if they are in the membership list
+  ++  has-at-least-auth
+    |=  [path=space-path:store =ship =role:membership-store]
+    ^-  ?
+    =/  member        (~(got by (~(got by membership.state) path)) ship)
+    ?-  role
+      %initiate       %.y
+      %member
+        ?|  (~(has in roles.member) %member)
+            (~(has in roles.member) %admin)
+            (~(has in roles.member) %owner)
+        ==
+      %admin
+        ?|  (~(has in roles.member) %admin)
+            (~(has in roles.member) %owner)
+        ==
+      %owner          (~(has in roles.member) role)
+    ==
   ++  has-auth
     |=  [path=space-path:store =ship =role:membership-store]
     ^-  ?
