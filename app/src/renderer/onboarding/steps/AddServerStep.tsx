@@ -68,7 +68,7 @@ export const AddServerStep = ({ setStep }: StepProps) => {
       serverCode
     );
 
-    setStep('/passport');
+    setStep('/installation');
 
     return true;
   };

@@ -30,15 +30,10 @@ const InstallRealmButton = styled(Button.TextButton)`
 
 type Props = {
   onInstallRealm: () => Promise<RealmInstallStatus>;
-  onBack: () => void;
   onNext: () => Promise<boolean>;
 };
 
-export const InstallationDialog = ({
-  onInstallRealm,
-  onBack,
-  onNext,
-}: Props) => {
+export const InstallationDialog = ({ onInstallRealm, onNext }: Props) => {
   const installing = useToggle(false);
   const installError = useToggle(false);
   const successfullInstall = useToggle(false);
@@ -99,7 +94,6 @@ export const InstallationDialog = ({
           )}
         </>
       }
-      onBack={!installing.isOn ? onBack : undefined}
       onNext={!installing.isOn && successfullInstall.isOn ? onNext : undefined}
     />
   );
