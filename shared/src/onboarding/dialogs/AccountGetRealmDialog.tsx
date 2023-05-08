@@ -1,10 +1,10 @@
 import styled from 'styled-components';
 
 import { Button, Flex } from '@holium/design-system/general';
-import { TextInput } from '@holium/design-system/inputs';
 
 import { AccountDialog, SidebarSection } from '../components/AccountDialog';
 import { AccountDialogDescription } from '../components/AccountDialog.styles';
+import { JoinWaitlist } from '../components/JoinWaitlist';
 import { GetIdIcon } from '../icons/GetIdIcon';
 
 const DividerSection = styled.div`
@@ -27,6 +27,7 @@ const Divider = styled.div`
 type Props = {
   onClickGetHosting: () => void;
   onClickBuyServer: () => void;
+  onClickJoinWaitlist: (email: string) => Promise<boolean>;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -34,6 +35,7 @@ type Props = {
 export const AccountGetRealmDialog = ({
   onClickGetHosting,
   onClickBuyServer,
+  onClickJoinWaitlist,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -60,17 +62,7 @@ export const AccountGetRealmDialog = ({
             <AccountDialogDescription>or</AccountDialogDescription>
             <Divider />
           </DividerSection>
-
-          <TextInput
-            id="waitlist-email"
-            name="waitlist-email"
-            type="email"
-            placeholder="Email"
-            width="100%"
-            rightAdornment={
-              <Button.TextButton>Join waitlist</Button.TextButton>
-            }
-          />
+          <JoinWaitlist onClickJoinWaitlist={onClickJoinWaitlist} />
           <AccountDialogDescription style={{ fontSize: 12 }}>
             Sign up for the waitlist if you aren’t hosted on Holium.
           </AccountDialogDescription>
