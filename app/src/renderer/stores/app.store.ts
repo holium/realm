@@ -2,12 +2,12 @@ import { createContext, useContext } from 'react';
 import { clone, flow, Instance, types } from 'mobx-state-tree';
 
 import {
+  defaultTheme,
   OnboardingStorage,
   RealmOnboardingStep,
   Theme,
   ThemeType,
 } from '@holium/shared';
-import { defaultTheme } from '@holium/shared/src/theme/defaultTheme';
 
 import { RealmUpdateBooted } from 'os/realm.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';

@@ -4,13 +4,13 @@ import { track } from '@amplitude/analytics-browser';
 import { Anchor } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
 import {
+  defaultTheme,
   LearnMoreModal,
   LoginDialog,
   OnboardDialogDescription,
   OnboardingStorage,
   TermsDisclaimer,
 } from '@holium/shared';
-import { defaultTheme } from '@holium/shared/src/theme/defaultTheme';
 
 import { OnboardingIPC } from 'renderer/stores/ipc';
 
