@@ -3,8 +3,8 @@ import { observer } from 'mobx-react';
 import { onAction } from 'mobx-state-tree';
 
 import { useToggle } from '@holium/design-system';
+import { genCSSVariables } from '@holium/shared';
 
-import { genCSSVariables } from 'renderer/lib/theme';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppWindowMobxType } from 'renderer/stores/models/window.model';
 import { ShipStoreInstance, useShipStore } from 'renderer/stores/ship.store';

@@ -10,7 +10,7 @@ import { darken, lighten, rgba } from 'polished';
 
 import { bgIsLightOrDark } from '@holium/design-system';
 
-import { defaultTheme } from '../../lib/defaultTheme';
+import { defaultTheme } from './defaultTheme';
 
 export const Theme = types
   .model('Theme', {
@@ -65,6 +65,7 @@ export const Theme = types
   }));
 
 export type ThemeType = Instance<typeof Theme>;
+export type ThemeSnapshotIn = typeof Theme.SnapshotType;
 
 const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
   const windowColor =

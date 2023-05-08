@@ -96,7 +96,6 @@ const ShipSelectorPresenter = () => {
               >
                 <Avatar
                   simple
-                  isLogin
                   size={32}
                   avatar={account.avatar}
                   patp={account.serverId}

@@ -40,6 +40,7 @@ export const AccountHostingDialogStory: ComponentStory<
       patps={['~pasren-satmex']}
       selectedPatp="~pasren-satmex"
       setSelectedPatp={() => {}}
+      onClickBuyServer={() => {}}
       email="rubberducky12@protonmail.com"
       serverUrl="https://pasren-satmex.holium.network/"
       serverCode="tolnym-rilmug-ricnep-marlyx"
@@ -66,6 +67,7 @@ export const AccountS3StorageDialogStory: ComponentStory<
       patps={['~pasren-satmex']}
       selectedPatp="~pasren-satmex"
       setSelectedPatp={() => {}}
+      onClickBuyServer={() => {}}
       url="https://console.s31.holium.network"
       s3Bucket="pasren-satmex"
       s3Password="1234567890"
@@ -90,6 +92,7 @@ export const AccountStatisticsDialogStory: ComponentStory<
       patps={['~pasren-satmex']}
       selectedPatp="~pasren-satmex"
       setSelectedPatp={() => {}}
+      onClickBuyServer={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />
@@ -111,6 +114,7 @@ export const AccountCustomDomainDialogStory: ComponentStory<
       onChangeDomain={() => {}}
       onSubmit={() => Promise.resolve()}
       setSelectedPatp={() => {}}
+      onClickBuyServer={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />
@@ -127,6 +131,7 @@ export const AccountDownloadRealmDialogStory: ComponentStory<
       patps={['~pasren-satmex']}
       selectedPatp="~pasren-satmex"
       setSelectedPatp={() => {}}
+      onClickBuyServer={() => {}}
       onClickSidebarSection={() => {}}
       onDownloadMacM1={() => {}}
       onDownloadMacIntel={() => {}}

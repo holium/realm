@@ -11,9 +11,9 @@ type Props = {
 export const RoomsDockDescription = ({ live, rooms, participants }: Props) => {
   if (!live) {
     return (
-      <Flex pointerEvents="none" gap={12} alignItems="center">
+      <Flex pointerEvents="none" gap={12} align="center">
         <Icon name="Connect" size={20} />
-        <Flex flexDirection="column" gap={1}>
+        <Flex>
           {rooms.length > 0 ? (
             <Text.Custom fontSize={2}>
               {rooms.length} {pluralize('room', rooms.length)}
@@ -29,7 +29,7 @@ export const RoomsDockDescription = ({ live, rooms, participants }: Props) => {
   }
 
   return (
-    <Flex pointerEvents="none" flexDirection="column" gap={1}>
+    <Flex pointerEvents="none" style={{ flexDirection: 'column' }} gap={1}>
       <Text.Custom
         fontWeight={500}
         fontSize={1}
@@ -38,11 +38,12 @@ export const RoomsDockDescription = ({ live, rooms, participants }: Props) => {
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
+          textAlign: 'left',
         }}
       >
         {live.title}
       </Text.Custom>
-      <Flex gap={6} alignItems="center">
+      <Flex gap={6} align="center">
         <AvatarRow
           people={participants}
           size={13}

@@ -2,16 +2,24 @@ import { ReactNode, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
 export const Portal = ({ children }: { children: ReactNode }) => {
-  const mount = document.getElementById('portal-root');
-
-  const el = document.createElement('div');
+  // Make it SSR compatible.
+  const mount =
+    typeof window === 'undefined'
+      ? null
+      : document.getElementById('portal-root');
+  const el =
+    typeof window === 'undefined' ? null : document.createElement('div');
 
   useEffect(() => {
-    mount && mount.appendChild(el);
+    if (!mount || !el) return;
+
+    mount.appendChild(el);
     return () => {
-      mount && mount.removeChild(el);
+      mount.removeChild(el);
     };
   }, [el, mount]);
+
+  if (!el) return null;
 
   return createPortal(children, el);
 };

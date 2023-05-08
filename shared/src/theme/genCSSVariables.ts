@@ -2,7 +2,7 @@ import { darken, lighten, rgba } from 'polished';
 
 import { toRgbaString } from '@holium/design-system';
 
-import { ThemeType } from 'renderer/stores/models/theme.model';
+import { ThemeType } from './theme.model';
 
 export const genCSSVariables = (theme: ThemeType) => {
   /**
@@ -68,8 +68,8 @@ export const genCSSVariables = (theme: ThemeType) => {
       --theme-mode: ${themeMode};
       --rlm-font: 'Rubik', sans-serif;
       --blur: blur(24px);
-      --transition-fast: 0.4s ease;
-      --transition: all 0.25s ease;
+      --transition-fast: all 0.25s ease;
+      --transition: 0.4s ease;
       --transition-2x: all 0.5s ease;
       --rlm-border-radius-4: 4px;
       --rlm-border-radius-6: 6px;

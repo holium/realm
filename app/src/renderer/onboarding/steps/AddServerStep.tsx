@@ -2,10 +2,10 @@ import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
 
 import { AddServerDialog, OnboardingStorage } from '@holium/shared';
+import { defaultTheme } from '@holium/shared/src/theme/defaultTheme';
 
 import { OnboardingIPC } from 'renderer/stores/ipc';
 
-import { defaultTheme } from '../../lib/defaultTheme';
 import { StepProps } from './types';
 
 export const AddServerStep = ({ setStep }: StepProps) => {

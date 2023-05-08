@@ -124,9 +124,6 @@ const SystemAppPresenter = () => {
             <Avatar
               simple
               size={40}
-              style={{
-                minWidth: 40,
-              }}
               avatar={loggedInAccount.avatar}
               patp={loggedInAccount.serverId}
               sigilColor={[loggedInAccount.color || '#000000', 'white']}

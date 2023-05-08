@@ -132,7 +132,6 @@ const SpeakerPresenter = (props: ISpeaker) => {
         >
           <Avatar
             clickable={false}
-            opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
             borderRadiusOverride="6px"
             simple
             size={36}
