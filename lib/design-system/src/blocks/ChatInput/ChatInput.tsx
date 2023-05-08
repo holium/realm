@@ -221,7 +221,7 @@ export const ChatInput = ({
   };
 
   return (
-    <Flex flexDirection="column" overflow="visible" width={containerWidth}>
+    <Flex width="100%" flexDirection="column" overflow="visible">
       <InputBox
         inputId={id}
         px={0}
@@ -231,8 +231,8 @@ export const ChatInput = ({
         {...chatInputProps}
       >
         <Flex
+          flex={1}
           flexDirection="column"
-          width={containerWidth ? containerWidth - 2 : undefined}
           py={2}
           px={2}
           justifyContent="flex-end"
@@ -329,7 +329,7 @@ export const ChatInput = ({
               />
             </Flex>
           ) : null}
-          <Flex width="100%" flexDirection="row" alignItems="flex-end" gap={4}>
+          <Flex flex={1} flexDirection="row" alignItems="flex-end" gap={4}>
             <Flex>
               <Button.IconButton
                 size={22}
