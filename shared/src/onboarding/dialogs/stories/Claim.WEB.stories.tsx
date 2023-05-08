@@ -28,6 +28,7 @@ export const AccountGetRealmDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <AccountGetRealmDialog
+      onClickBuyServer={() => {}}
       onClickGetHosting={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
