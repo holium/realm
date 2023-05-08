@@ -113,11 +113,11 @@ export const RoomsStore = types
           credential: 'zQzjNHC34Y8RqdLW',
           urls: 'turn:coturn.holium.live:3478?transport=tcp',
         },
-        {
-          username: 'realm',
-          credential: 'zQzjNHC34Y8RqdLW',
-          urls: 'turn:coturn.holium.live:3478?transport=udp',
-        },
+        // {
+        //   username: 'realm',
+        //   credential: 'zQzjNHC34Y8RqdLW',
+        //   urls: 'turn:coturn.holium.live:3478?transport=udp',
+        // },
       ],
     }),
   })
