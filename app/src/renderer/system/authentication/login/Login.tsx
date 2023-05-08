@@ -169,7 +169,6 @@ const LoginPresenter = () => {
             >
               <Box>
                 <Avatar
-                  isLogin
                   size={72}
                   simple={false}
                   borderRadiusOverride="8px"

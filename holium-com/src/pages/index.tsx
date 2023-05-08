@@ -72,7 +72,7 @@ export default function HomePage() {
             <Icon name="ArrowRightLine" />
           </GetRealmButton>
         </H1Container>
-        <Flex flex={1} justifyContent="center" padding="16px">
+        <Flex flex={1} justify="center" padding="16px">
           <HoveringCursors />
         </Flex>
       </HeroContainer>

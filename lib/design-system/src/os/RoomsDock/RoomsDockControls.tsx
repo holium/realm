@@ -23,12 +23,7 @@ export const RoomsDockControls = ({
         content="No mic permissions"
         placement="top"
       >
-        <Flex
-          width={28}
-          height={28}
-          alignItems="center"
-          justifyContent="center"
-        >
+        <Flex width={28} height={28} align="center" justify="center">
           <Icon name="InfoCircle" fill="intent-alert" size={20} />
         </Flex>
       </Tooltip>

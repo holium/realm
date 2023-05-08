@@ -1,6 +1,8 @@
-import { FC } from 'react';
+import { CSSProperties } from 'react';
 
-import { Avatar, Box, Flex } from '../../../general';
+import { Box } from '../Box/Box';
+import { Flex } from '../Flex/Flex';
+import { Avatar } from './Avatar';
 
 export type ContactData = {
   patp: string;
@@ -9,27 +11,28 @@ export type ContactData = {
   avatar?: string;
 };
 
-interface AvatarRowProps {
+type Props = {
   direction?: 'horizontal' | 'vertical';
   people: ContactData[];
   size: number;
   borderRadiusOverride?: string;
   offset?: number;
-}
+};
 
-export const AvatarRow: FC<AvatarRowProps> = ({
+export const AvatarRow = ({
   people,
   direction = 'horizontal',
   size,
   borderRadiusOverride,
   offset = 6,
-}: AvatarRowProps) => {
-  const directionStyle: any =
+}: Props) => {
+  const directionStyle: CSSProperties =
     direction === 'horizontal'
-      ? { flexDirection: 'row', ml: `${offset}px` }
-      : { flexDirection: 'column', mt: `${offset}px` };
+      ? { flexDirection: 'row', marginLeft: `${offset}px` }
+      : { flexDirection: 'column', marginTop: `${offset}px` };
+
   return (
-    <Flex {...directionStyle} alignItems="center">
+    <Flex align="center" style={directionStyle}>
       {people.map((person: ContactData, index: number) => {
         let offsetStyle: any = {
           marginLeft: `-${offset}px`,
@@ -49,18 +52,19 @@ export const AvatarRow: FC<AvatarRowProps> = ({
         }
         return (
           <Box
-            style={offsetStyle}
             key={`${person.patp} - ${index}`}
-            zIndex={people.length - index}
+            style={{
+              zIndex: people.length - index,
+              ...offsetStyle,
+            }}
           >
             <Avatar
               patp={person.patp}
               size={size}
               avatar={person.avatar}
-              nickname={person.nickname}
               borderRadiusOverride={borderRadiusOverride}
               sigilColor={[person.color, '#FFF']}
-              simple
+              simple={true}
             />
           </Box>
         );
