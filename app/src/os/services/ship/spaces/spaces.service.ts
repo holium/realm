@@ -543,6 +543,7 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
       return response;
     } catch (e) {
       log.error(e);
+      throw e;
     }
   }
 

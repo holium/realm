@@ -345,13 +345,11 @@ export const SpacesStore = types
     kickMember: flow(function* (spacePath: string, patp: string) {
       const space = self.spaces.get(spacePath);
       if (!space) return;
-      const member = space.members.all.get(patp);
       try {
-        space.members.remove(patp);
         yield SpacesIPC.kickMember(spacePath, patp);
+        space.members.remove(patp);
       } catch (e) {
         console.error(e);
-        space.members.add(patp, MembersModel.create(member));
       }
     }),
     setRoles: flow(function* (
