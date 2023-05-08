@@ -6,7 +6,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
-import { ThemeType } from 'renderer/stores/models/theme.model';
+import { ThemeType } from '@holium/shared';
 
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { ConduitSession } from '../api';

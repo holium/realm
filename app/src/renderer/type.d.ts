@@ -1,6 +1,5 @@
 declare module 'urbit-ob';
 declare module 'whatwg-fetch';
-declare module 'color.js';
 
 declare module 'better-sqlite3-multiple-ciphers' {
   // You can declare the types for the 'better-sqlite3-multiple-ciphers' module here.

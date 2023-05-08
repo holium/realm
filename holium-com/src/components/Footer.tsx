@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import styled from 'styled-components';
 
 import { MOBILE_WIDTH } from '../consts';
@@ -16,19 +15,13 @@ const FooterContainer = styled.footer`
   }
 `;
 
-export const Footer = () => {
-  const [currentSpace, _setCurrentSpace] =
-    useState<SpaceKeys>('realm-forerunners');
-  // const [theme, setTheme] = useState<ThemeProps>(spaces[currentSpace].theme);
-  const [trayApp, setTrayApp] = useState<TrayAppType | null>(null);
-
-  return (
-    <FooterContainer>
-      <SystemBar
-        currentSpace={currentSpace}
-        currentApp={trayApp}
-        setCurrentApp={setTrayApp}
-      />
-    </FooterContainer>
-  );
+type Props = {
+  currentSpace: SpaceKeys;
+  setCurrentApp: (app: TrayAppType) => void;
 };
+
+export const Footer = ({ currentSpace, setCurrentApp }: Props) => (
+  <FooterContainer>
+    <SystemBar currentSpace={currentSpace} setCurrentApp={setCurrentApp} />
+  </FooterContainer>
+);

@@ -3,16 +3,16 @@ import { AnimatePresence } from 'framer-motion';
 import { darken } from 'polished';
 import { createGlobalStyle, css } from 'styled-components';
 
-import { genCSSVariables } from './lib/theme';
-import { ThemeType } from './stores/models/theme.model';
+import { genCSSVariables, ThemeType } from '@holium/shared';
+
 import { BackgroundImage } from './system/system.styles';
 
-interface StyleProps {
+type Props = {
   realmTheme: ThemeType;
   blur: boolean;
-}
+};
 
-export const GlobalStyle = createGlobalStyle<StyleProps>`
+export const GlobalStyle = createGlobalStyle<Props>`
   ${(props) =>
     css`
       ${genCSSVariables(props.realmTheme)}

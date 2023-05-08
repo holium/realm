@@ -1,81 +1,104 @@
-import styled from 'styled-components';
+import { useState } from 'react';
+import { spaces } from 'spaces';
+import { SpaceKeys, TrayAppType } from 'types';
 
-import { Button, Flex, Icon, Text } from '@holium/design-system/general';
+import { Flex } from '@holium/design-system/general';
+import { ThemeType } from '@holium/shared';
 
-import { H1 } from '../components/H1';
-import { HoveringCursors } from '../components/HoveringCursors';
+import { Footer } from 'components/Footer';
+import { GlobalStyle } from 'components/GlobalStyle';
+import { Header } from 'components/Header';
+import { Hero } from 'components/Hero';
+import { ChatApp } from 'components/TrayApps/Chat';
+import { NotificationApp } from 'components/TrayApps/Notifications';
+import { RoomApp } from 'components/TrayApps/Rooms';
+import { SpacesApp } from 'components/TrayApps/Spaces';
+import { WalletApp } from 'components/TrayApps/Wallet';
+
 import { Page } from '../components/Page';
-import { DESKTOP_WIDTH, MOBILE_WIDTH, onClickGetRealm } from '../consts';
+import { Main } from './index.styles';
 
-const GetRealmButton = styled(Button.Primary)`
-  display: flex;
-  font-size: 18px;
-  padding: 10px 16px;
-  border-radius: 999px;
-  gap: 8px;
-  margin-top: 16px;
-`;
-
-const HeroContainer = styled(Flex)`
-  width: 100%;
-  max-width: ${DESKTOP_WIDTH}px;
-  justify-content: space-between;
-  align-items: center;
-
-  @media (max-width: ${DESKTOP_WIDTH}px) {
-    flex-direction: column;
-    text-align: center;
-    max-width: 814px;
-  }
-
-  @media (max-width: 814px) {
-    max-width: 100%;
-  }
-`;
-
-const H1Container = styled(Flex)`
-  flex: 1;
-  flex-direction: column;
-  align-self: flex-start;
-  gap: 16px;
-  padding: 32px 16px;
-
-  @media (max-width: ${DESKTOP_WIDTH}px) {
-    align-items: center;
-    align-self: center;
-    width: 100%;
-  }
-`;
-
-const P = styled(Text.Body)`
-  font-size: 28px;
-
-  @media (max-width: ${MOBILE_WIDTH}px) {
-    font-size: 24px;
-  }
-`;
+// Key types of the spaces object
 
 export default function HomePage() {
+  const [currentSpace, setCurrentSpace] = useState<SpaceKeys>('cyberpunk');
+  const [theme, setTheme] = useState<ThemeType>(spaces[currentSpace].theme);
+  const [trayApp, setTrayApp] = useState<TrayAppType | null>(null);
+
   return (
-    <Page title="Holium">
-      <HeroContainer>
-        <H1Container>
-          <H1 />
-          <P>
-            A home for communities, a platform for building new social
-            experiences, and a crypto user's dream.
-          </P>
-          <GetRealmButton onClick={onClickGetRealm}>
-            <Text.Body color="window" fontWeight={500}>
-              Get Realm
-            </Text.Body>
-            <Icon name="ArrowRightLine" />
-          </GetRealmButton>
-        </H1Container>
-        <Flex flex={1} justify="center" padding="16px">
-          <HoveringCursors />
-        </Flex>
-      </HeroContainer>
-    </Page>
+    <>
+      <GlobalStyle theme={theme} />
+      <Page title="Holium">
+        <Flex
+          className="wallpaper"
+          backgroundImage={`url(${theme.wallpaper})`}
+        />
+        <Header />
+        <Main>
+          <Hero />
+        </Main>
+        <Footer currentSpace={currentSpace} setCurrentApp={setTrayApp} />
+      </Page>
+      {trayApp?.id === 'spaces' && (
+        <SpacesApp
+          coords={trayApp.coords}
+          isOpen={trayApp?.id === 'spaces'}
+          closeTray={() => setTrayApp(null)}
+          currentSpace={currentSpace}
+          setCurrentSpace={(space) => {
+            setCurrentSpace(space);
+            setTheme(spaces[space].theme);
+          }}
+        />
+      )}
+      {trayApp?.id === 'chat' && (
+        <ChatApp
+          coords={trayApp.coords}
+          isOpen={trayApp?.id === 'chat'}
+          closeTray={() => setTrayApp(null)}
+          currentSpace={currentSpace}
+          setCurrentSpace={(space) => {
+            setCurrentSpace(space);
+            setTheme(spaces[space].theme);
+          }}
+        />
+      )}
+      {trayApp?.id === 'rooms-tray' && (
+        <RoomApp
+          coords={trayApp.coords}
+          isOpen={trayApp?.id === 'rooms-tray'}
+          closeTray={() => setTrayApp(null)}
+          currentSpace={currentSpace}
+          setCurrentSpace={(space) => {
+            setCurrentSpace(space);
+            setTheme(spaces[space].theme);
+          }}
+        />
+      )}
+      {trayApp?.id === 'wallet' && (
+        <WalletApp
+          coords={trayApp.coords}
+          isOpen={trayApp?.id === 'wallet'}
+          closeTray={() => setTrayApp(null)}
+          currentSpace={currentSpace}
+          setCurrentSpace={(space) => {
+            setCurrentSpace(space);
+            setTheme(spaces[space].theme);
+          }}
+        />
+      )}
+      {trayApp?.id === 'notifications' && (
+        <NotificationApp
+          coords={trayApp.coords}
+          isOpen={trayApp?.id === 'notifications'}
+          closeTray={() => setTrayApp(null)}
+          currentSpace={currentSpace}
+          setCurrentSpace={(space) => {
+            setCurrentSpace(space);
+            setTheme(spaces[space].theme);
+          }}
+        />
+      )}
+    </>
   );
 }

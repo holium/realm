@@ -19,7 +19,6 @@ import { walletConfig } from './TrayApps/Wallet';
 
 type SystemBarProps = {
   currentSpace: SpaceKeys;
-  currentApp: TrayAppType | null;
   setCurrentApp: (app: TrayAppType) => void;
 };
 
@@ -176,6 +175,7 @@ export const SystemBar = ({ currentSpace, setCurrentApp }: SystemBarProps) => {
                 capacity: 6,
               }
             }
+            hasMicPermissions
             onCreate={() => {}}
             onMute={() => {}}
             onCursor={() => {}}

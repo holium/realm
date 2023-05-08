@@ -24,7 +24,7 @@ type ChatAppProps = {
     height: number;
   };
   currentSpace: SpaceKeys;
-  setIsOpen: (isOpen: boolean) => void;
+  closeTray: () => void;
   setCurrentSpace: (space: SpaceKeys) => void;
 };
 
@@ -43,7 +43,7 @@ type ListTypes = 'coins' | 'transactions' | 'nft';
 
 export const WalletApp = ({
   isOpen = false,
-  setIsOpen,
+  closeTray,
   coords,
 }: ChatAppProps) => {
   const wallet = {
@@ -85,21 +85,13 @@ export const WalletApp = ({
   const [listType, setListType] = useState<ListTypes>('transactions');
 
   return (
-    <TrayApp
-      id="wallet"
-      isOpen={isOpen}
-      coords={coords}
-      closeTray={() => {
-        setIsOpen(false);
-      }}
-    >
+    <TrayApp id="wallet" isOpen={isOpen} coords={coords} closeTray={closeTray}>
       <Flex
         width="100%"
         height="100%"
         justifyContent="flex-start"
         flexDirection="column"
         py={1}
-        // px={3}
         pb={0}
       >
         <WalletCard wallet={wallet} />

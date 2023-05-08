@@ -23,7 +23,7 @@ type ChatAppProps = {
     height: number;
   };
   currentSpace: SpaceKeys;
-  setIsOpen: (isOpen: boolean) => void;
+  closeTray: () => void;
   setCurrentSpace: (space: SpaceKeys) => void;
 };
 
@@ -39,7 +39,7 @@ export const chatConfig = {
 
 export const ChatApp = ({
   isOpen = false,
-  setIsOpen,
+  closeTray,
   coords,
   currentSpace,
 }: ChatAppProps) => {
@@ -50,14 +50,7 @@ export const ChatApp = ({
   }, [currentSpace]);
 
   return (
-    <TrayApp
-      id="chat"
-      isOpen={isOpen}
-      coords={coords}
-      closeTray={() => {
-        setIsOpen(false);
-      }}
-    >
+    <TrayApp id="chat" isOpen={isOpen} coords={coords} closeTray={closeTray}>
       <Flex gap={12} flexDirection="column">
         <Flex ml={1} flexDirection="row" alignItems="center">
           <Flex width={26}>

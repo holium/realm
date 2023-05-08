@@ -8,11 +8,12 @@ import {
   HeaderNavigation,
   UnstyledLink,
 } from './Header.styles';
+import { Holium } from './Holium';
 
 export const Header = () => (
   <HeaderContainer>
     <UnstyledLink href="/" id="holium-logo">
-      <img src="/wordmark.svg" alt="Holium" />
+      <Holium />
     </UnstyledLink>
     <HeaderNavigation>
       <ul>
@@ -48,7 +49,7 @@ export const Header = () => (
         </Text.Body>
       </Button.Secondary>
       <Button.Primary onClick={onClickGetRealm}>
-        <Text.Body color="window" fontWeight={500}>
+        <Text.Body fontWeight={500} style={{ color: '#fff' }}>
           Get Realm
         </Text.Body>
       </Button.Primary>
