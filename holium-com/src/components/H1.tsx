@@ -55,11 +55,9 @@ export const H1 = () => {
 
   return (
     <H1Text
-      style={
-        {
-          // textShadow: theme.mode === 'light' ? undefined : '0px 4px 4px rgba(0, 0, 0, 0.15)',
-        }
-      }
+      style={{
+        textShadow: '0px 4px 4px rgba(0, 0, 0, 0.15)',
+      }}
     >
       Realm is the future of{' '}
       <AnimatedText text={futureOfText} replay={replay} />

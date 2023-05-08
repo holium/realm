@@ -1,17 +1,4 @@
-export type ThemeProps = {
-  id: string;
-  backgroundColor: string;
-  accentColor: string;
-  inputColor: string;
-  dockColor: string;
-  windowColor: string;
-  mode: string;
-  textColor: string;
-  iconColor: string;
-  mouseColor: string;
-  wallpaper: string;
-};
-
+import { spaces } from './spaces';
 export type TrayAppType = {
   coords: {
     x: number;
@@ -22,13 +9,7 @@ export type TrayAppType = {
   id: TrayAppIDs;
 };
 
-export type SpaceKeys =
-  | 'realm-forerunners'
-  | 'minecrafters'
-  | 'solarpunks'
-  | 'retro-mac'
-  | 'eth-underworld'
-  | 'hacker-den';
+export type SpaceKeys = keyof typeof spaces;
 
 export type TrayAppIDs =
   | 'spaces'

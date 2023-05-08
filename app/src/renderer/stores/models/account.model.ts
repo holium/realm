@@ -1,6 +1,6 @@
 import { SnapshotOut, types } from 'mobx-state-tree';
 
-import { Theme } from './theme.model';
+import { Theme } from '@holium/shared';
 
 export const AccountModel = types.model('AccountModel', {
   accountId: types.number,

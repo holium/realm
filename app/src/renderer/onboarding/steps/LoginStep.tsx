@@ -10,10 +10,10 @@ import {
   OnboardingStorage,
   TermsDisclaimer,
 } from '@holium/shared';
+import { defaultTheme } from '@holium/shared/src/theme/defaultTheme';
 
 import { OnboardingIPC } from 'renderer/stores/ipc';
 
-import { defaultTheme } from '../../lib/defaultTheme';
 import { thirdEarthApi } from '../thirdEarthApi';
 import { StepProps } from './types';
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import styled from 'styled-components';
 
@@ -47,6 +47,8 @@ export const TrayApp = ({
   closeTray,
   coords,
 }: TrayAppProps) => {
+  const appId = useMemo(() => `${id}-app`, [id]);
+
   const handleClickOutside = useCallback(
     (event: any) => {
       // If we aren't clicking on a tray icon, close tray
@@ -81,11 +83,12 @@ export const TrayApp = ({
 
   useEffect(() => {
     document.addEventListener('click', handleClickOutside);
+
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
   }, [handleClickOutside]);
-  const appId = `${id}-app`;
+
   return (
     <AnimatePresence>
       {isOpen && (

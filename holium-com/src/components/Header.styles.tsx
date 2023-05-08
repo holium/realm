@@ -50,6 +50,7 @@ export const HeaderCTAs = styled.div`
 export const HeaderMenuLink = styled(UnstyledLink)<{
   current?: boolean;
 }>`
+  font-size: 18px;
   padding: 2px 0;
   opacity: ${({ current }) => (current ? 1 : 0.5)};
   border-bottom: ${({ current }) => (current ? '2px solid' : 'none')};

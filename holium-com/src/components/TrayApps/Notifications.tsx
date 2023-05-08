@@ -18,7 +18,7 @@ type ChatAppProps = {
     height: number;
   };
   currentSpace: SpaceKeys;
-  setIsOpen: (isOpen: boolean) => void;
+  closeTray: () => void;
   setCurrentSpace: (space: SpaceKeys) => void;
 };
 
@@ -34,7 +34,7 @@ export const notifConfig = {
 
 export const NotificationApp = ({
   isOpen = false,
-  setIsOpen,
+  closeTray,
   coords,
 }: ChatAppProps) => {
   return (
@@ -42,9 +42,7 @@ export const NotificationApp = ({
       id="notifications"
       isOpen={isOpen}
       coords={coords}
-      closeTray={() => {
-        setIsOpen(false);
-      }}
+      closeTray={closeTray}
     >
       <Flex p={1} flexDirection="column">
         <Flex flexDirection="row" alignItems="center">

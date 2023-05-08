@@ -17,7 +17,7 @@ type ChatAppProps = {
     height: number;
   };
   currentSpace: SpaceKeys;
-  setIsOpen: (isOpen: boolean) => void;
+  closeTray: () => void;
   setCurrentSpace: (space: SpaceKeys) => void;
 };
 
@@ -33,24 +33,24 @@ export const roomConfig = {
 
 export const RoomApp = ({
   isOpen = false,
-  setIsOpen,
+  closeTray,
   coords,
   currentSpace,
 }: ChatAppProps) => {
   const [muted, setMuted] = useState(false);
   const [room, setRoom] = useState<any>(null);
+
   useEffect(() => {
     setMuted(false);
     setRoom(rooms[currentSpace]);
   }, [currentSpace]);
+
   return (
     <TrayApp
       id="rooms-tray"
       isOpen={isOpen}
       coords={coords}
-      closeTray={() => {
-        setIsOpen(false);
-      }}
+      closeTray={closeTray}
     >
       <>
         <Flex

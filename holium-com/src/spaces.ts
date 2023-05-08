@@ -1,14 +1,4 @@
-import { ThemeProps } from './types';
-
-type SpaceEntry = {
-  id: string;
-  title: string;
-  members: number;
-  picture: string;
-  theme: ThemeProps;
-};
-
-export const spaces: { [key: string]: SpaceEntry } = {
+export const spaces = {
   'realm-forerunners': {
     id: 'realm-forerunners',
     title: 'Realm Forerunners',
@@ -26,17 +16,6 @@ export const spaces: { [key: string]: SpaceEntry } = {
       iconColor: 'rgba(229,216,219,0.4)',
       accentColor: '#4E9EFD',
       mouseColor: '#4E9EFD',
-      // wallpaper:
-      //   'https://images.unsplash.com/photo-1680792563719-288027b2a090?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3293&q=80',
-      // mode: 'light',
-      // backgroundColor: '#c4c3bf',
-      // inputColor: '#FFFFFF',
-      // dockColor: '#F5F5F4',
-      // windowColor: '#f5f5f4',
-      // textColor: '#2a2927',
-      // iconColor: 'rgba(229,216,219,0.4)',
-      // accentColor: '#4E9EFD',
-      // mouseColor: '#4E9EFD',
       wallpaper:
         'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
     },

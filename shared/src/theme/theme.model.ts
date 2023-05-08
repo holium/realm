@@ -10,7 +10,7 @@ import { darken, lighten, rgba } from 'polished';
 
 import { bgIsLightOrDark } from '@holium/design-system';
 
-import { defaultTheme } from '../../lib/defaultTheme';
+import { defaultTheme } from './defaultTheme';
 
 export const Theme = types
   .model('Theme', {
