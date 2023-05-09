@@ -459,7 +459,6 @@ export const SpacesStore = types
     _onJoinedBazaar: flow(function* (joinedPayload: any) {
       const space = self.spaces.get(joinedPayload.path);
       if (!space) return;
-      space._setStall(joinedPayload.stall);
       const refreshedSpace = yield SpacesIPC.getSpace(joinedPayload.path);
       self.spaces.set(space.path, spaceRowToModel(refreshedSpace));
     }),
