@@ -60,15 +60,16 @@ export const JoinWaitlist = ({ onClickJoinWaitlist }: Props) => {
         type="email"
         placeholder="Enter email"
         width="100%"
+        style={{ boxSizing: 'border-box' }}
         value={email}
         onChange={(e) => setEmail((e.target as any).value)}
         rightAdornment={
-          <Button.Primary
+          <Button.TextButton
             disabled={loading.isOn}
             onClick={handleClickJoinWaitlist}
           >
             {loading.isOn ? <Spinner size={0} /> : 'Join waitlist'}
-          </Button.Primary>
+          </Button.TextButton>
         }
       />
       {error.isOn && <ErrorBox>Something went wrong</ErrorBox>}
