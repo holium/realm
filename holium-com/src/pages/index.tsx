@@ -26,7 +26,7 @@ const Main = styled.main`
 `;
 
 export default function HomePage() {
-  const [currentSpace, setCurrentSpace] = useState<SpaceKeys>('cyberpunk');
+  const [currentSpace, setCurrentSpace] = useState<SpaceKeys>('spacebros');
   const [theme, setTheme] = useState(spaces[currentSpace].theme);
   const [trayApp, setTrayApp] = useState<TrayAppType | null>(null);
 
