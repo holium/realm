@@ -159,7 +159,18 @@ export class LocalPeer {
       if (!peer.spInstance?.destroyed) {
         try {
           console.log('streamTracks: streaming our audio to ', peer.patp);
-          peer.spInstance?.addTrack(track, currentStream);
+          let exists = false;
+          peer.spInstance?.streams.forEach((stream: MediaStream) => {
+            if (stream.id === currentStream.id) {
+              if (stream.getTracks().includes(track)) {
+                console.log('streamTracks: track already exists');
+                exists = true;
+              }
+            }
+          });
+          if (!exists) {
+            peer.spInstance?.addTrack(track, currentStream);
+          }
         } catch (e) {
           // catches "Track has already been added to that stream."
           console.error(e);
