@@ -56,6 +56,7 @@ export const ShipStore = types
       self.spacesStore.reset();
       self.friends.reset();
       self.featuredStore.reset();
+      self.roomsStore.reset();
     },
     getOurGroups: flow(function* () {
       try {

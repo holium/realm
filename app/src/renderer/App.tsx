@@ -27,6 +27,18 @@ const Titlebar = styled.div`
   -webkit-app-region: drag;
 `;
 
+const Titlebar = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 28px;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+`;
+
 const AppPresenter = () => {
   const { theme, shellStore, booted } = useAppState();
   const contextMenuMemo = useMemo(() => <ContextMenu />, []);
