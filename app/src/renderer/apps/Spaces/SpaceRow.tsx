@@ -102,7 +102,10 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
   }, [contextMenuOptions, getOptions, setOptions, spaceRowId]);
 
   const contextMenuButtonIds = contextMenuOptions.map((item) => item?.id);
-  const memberCount = members?.all.size;
+  let memberCount = 0;
+  members?.all.forEach((m) =>
+    m.status !== 'invited' ? (memberCount += 1) : null
+  );
   return (
     <Row
       id={spaceRowId}
