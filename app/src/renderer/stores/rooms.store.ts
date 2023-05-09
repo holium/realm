@@ -1,5 +1,6 @@
 import { observable } from 'mobx';
 import { applySnapshot, cast, flow, Instance, types } from 'mobx-state-tree';
+import { io, Socket } from 'socket.io-client';
 import { patp2dec } from 'urbit-ob';
 
 import { SoundActions } from 'renderer/lib/sound';
@@ -110,12 +111,10 @@ export const RoomsStore = types
         {
           username: 'realm',
           credential: 'zQzjNHC34Y8RqdLW',
-          urls: 'turn:coturn.holium.live:3478?transport=tcp',
+          urls: ['turn:coturn.holium.live:3478'],
         },
         {
-          username: 'realm',
-          credential: 'zQzjNHC34Y8RqdLW',
-          urls: 'turn:coturn.holium.live:3478?transport=udp',
+          urls: ['stun:coturn.holium.live:3478'],
         },
       ],
     }),
@@ -147,6 +146,7 @@ export const RoomsStore = types
     },
   }))
   .actions((self) => {
+    let socket: undefined | Socket<any, any>;
     const localPeer = observable(new LocalPeer());
     const remotePeers = observable(new Map<string, RemotePeer>());
     const queuedPeers = observable([]) as string[]; // peers that we have queued to dial
@@ -159,6 +159,10 @@ export const RoomsStore = types
           peer.sendData(payload);
         }
       });
+    };
+
+    const sendSignal = (to: string, rid: string, signal: any) => {
+      socket?.emit('signal', { from: window.ship, to, rid, data: signal });
     };
 
     const dialPeer = (rid: string, to: string, rtc: any) => {
@@ -174,6 +178,7 @@ export const RoomsStore = types
         to,
         localPeer,
         sendDataToPeer,
+        sendSignal,
         {
           setAudioAttached: (isAttached: boolean) => {
             if (!self.peersMetadata.has(to)) {
@@ -203,6 +208,7 @@ export const RoomsStore = types
         },
         peerConfig
       );
+      // console.log('dialing', remotePeer.patp, 'old peer', remotePeers.get(to));
       remotePeers.set(remotePeer.patp, remotePeer);
       remotePeer.dial();
       return remotePeer;
@@ -218,6 +224,7 @@ export const RoomsStore = types
 
     const hangup = (peer: string) => {
       const remotePeer = remotePeers.get(peer);
+      // console.log('hanging up', remotePeer?.patp);
       if (remotePeer) {
         remotePeer.hangup();
         remotePeers.delete(peer);
@@ -229,12 +236,21 @@ export const RoomsStore = types
         hangup(peer.patp);
       });
       remotePeers.clear();
-      localPeer?.disableMedia();
+      localPeer.disableMedia();
     };
 
     return {
+      afterCreate() {},
+      reset() {
+        hangupAll();
+        if (self.current) {
+          RoomsIPC.leaveRoom(self.current.rid);
+        }
+        applySnapshot(self, {});
+      },
       beforeDestroy() {
         // cleanup rooms
+        // console.log('destroying room store');
         hangupAll();
         if (self.current) {
           RoomsIPC.leaveRoom(self.current.rid);
@@ -248,9 +264,27 @@ export const RoomsStore = types
       },
       getPeer(patp: string) {
         if (patp === window.ship) return localPeer;
-        console.log('getPeer', patp, window.ship);
         return remotePeers.get(patp);
       },
+      setProvider: flow(function* (provider: string) {
+        if (self.provider !== provider) {
+          if (self.current) {
+            // console.log('switching provider, leaving room', self.current?.rid);
+            yield RoomsIPC.leaveRoom(self.current?.rid);
+            self.current.removePeer(window.ship);
+            hangupAll();
+            self.current = undefined;
+            SoundActions.playRoomLeave();
+          }
+          self.provider = provider;
+          // const session = yield RoomsIPC.getSession();
+          // if (session) {
+          //   console.log('setting provider', provider);
+
+          // }
+        }
+        yield RoomsIPC.setProvider(provider);
+      }),
       sendChat: flow(function* (message: string) {
         if (!self.current) return;
         const chatMessage = ChatModel.create({
@@ -276,6 +310,50 @@ export const RoomsStore = types
             rtc: self.rtcConfig,
           }
         );
+        // console.log('creating room store');
+        const url = 'https://socket.holium.live';
+        socket = io(url, {
+          transports: ['websocket'],
+          path: '/socket-io/',
+          query: {
+            serverId: window.ship,
+          },
+        });
+
+        socket.on('connect', () => {
+          console.log('connected to socket.holium.live');
+        });
+
+        socket.on('signal', (payload: any) => {
+          // console.log('signal', payload);
+          const remotePeer = remotePeers.get(payload.from);
+          const signalData = payload.data;
+          if (signalData.type === 'waiting') {
+            if (!remotePeer) {
+              console.log(`%waiting from unknown ${payload.from}`);
+              queuedPeers.push(payload.from);
+            } else {
+              console.log(`%waiting from ${payload.from}`);
+              remotePeer.onWaiting();
+            }
+          }
+          if (signalData.type === 'retry') {
+            const retryingPeer = remotePeers.get(payload.from);
+            retryingPeer?.dial();
+          }
+          if (!['retry', 'ack-waiting', 'waiting'].includes(signalData.type)) {
+            if (remotePeer) {
+              remotePeer.peerSignal(signalData);
+            } else {
+              console.log(`%${signalData.type} from unknown ${payload.from}`);
+            }
+          }
+        });
+
+        socket.on('disconnect', () => {
+          console.log('disconnected from socket.holium.live');
+        });
+
         const session = yield RoomsIPC.getSession();
         if (session) {
           self.provider = session.provider;
@@ -387,6 +465,7 @@ export const RoomsStore = types
         localPeer?.setAudioInputDevice(deviceId);
       },
       _onSession(session: any) {
+        // console.log('onSession', session);
         self.provider = session.provider;
         self.rooms = session.rooms;
         if (session.current) {
@@ -403,10 +482,13 @@ export const RoomsStore = types
         if (patp === window.ship && self.current?.rid !== rid) {
           self.current = room;
         }
-        room?.addPeer(patp);
+        if (!room?.present.includes(patp)) {
+          room?.addPeer(patp);
+        }
         if (self.current?.rid === rid) {
           // if we are in the room, dial the new peer
           if (patp !== window.ship) {
+            SoundActions.playRoomPeerEnter();
             const remotePeer = dialPeer(rid, patp, self.rtcConfig);
             // queuedPeers are peers that are ready for us to dial them
             if (queuedPeers.includes(patp)) {
@@ -418,36 +500,45 @@ export const RoomsStore = types
       },
       _onRoomLeft(rid: string, patp: string) {
         const room = self.rooms.get(rid);
+        if (patp !== window.ship) {
+          if (self.current?.rid === rid) {
+            if (room?.present.includes(patp)) {
+              SoundActions.playRoomPeerLeave();
+            }
+            hangup(patp);
+          }
+          room?.removePeer(patp);
+        }
         if (patp === window.ship && self.current?.rid === rid) {
           self.current = undefined;
           hangupAll();
-        }
-        if (patp !== window.ship) {
-          room?.removePeer(patp);
-          hangup(patp);
         }
       },
       _onKicked(rid: string, patp: string) {
         const room = self.rooms.get(rid);
+        if (patp !== window.ship) {
+          room?.removePeer(patp);
+          if (self.current?.rid === rid) {
+            SoundActions.playRoomPeerLeave();
+            hangup(patp);
+          }
+        }
         if (patp === window.ship && self.current?.rid === rid) {
           self.current = undefined;
           hangupAll();
         }
-        if (patp !== window.ship) {
-          room?.removePeer(patp);
-          hangup(patp);
-        }
       },
       _onRoomDeleted(rid: string) {
-        if (self.current?.rid === rid) {
-          self.current = undefined;
-        }
         const room = self.rooms.get(rid);
-        if (room?.creator !== window.ship) {
+        if (room?.creator !== window.ship && self.current?.rid === rid) {
           remotePeers.forEach((peer) => {
             hangup(peer.patp);
           });
           remotePeers.clear();
+        }
+        if (self.current?.rid === rid) {
+          self.current = undefined;
+          SoundActions.playRoomLeave();
         }
         self.rooms.delete(rid);
       },
@@ -511,7 +602,6 @@ function registerOnUpdateListener() {
     }
     if (mark === 'rooms-v2-reaction') {
       if (type === 'room-entered') {
-        SoundActions.playRoomPeerEnter();
         shipStore.roomsStore._onRoomEntered(payload.rid, payload.ship);
       }
       if (type === 'room-left') {
@@ -527,7 +617,7 @@ function registerOnUpdateListener() {
         shipStore.roomsStore._onKicked(payload.rid, payload.ship);
       }
       if (type === 'chat-received') {
-        console.log(`%chat-received`, payload);
+        // console.log(`%chat-received`, payload);
         shipStore.roomsStore._onChatReceived(payload);
       }
       if (type === 'provider-changed') {

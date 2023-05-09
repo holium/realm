@@ -8,6 +8,7 @@ type Props = {
   text: string;
   submitting: boolean;
   icon?: ReactNode;
+  form?: string;
   disabled?: boolean;
   onSubmit?: () => void;
 };
@@ -16,10 +17,12 @@ export const SubmitButton = ({
   submitting,
   text,
   icon,
+  form,
   disabled,
   onSubmit,
 }: Props) => (
   <Button.TextButton
+    form={form}
     as="button"
     type="submit"
     padding="5px 8px"

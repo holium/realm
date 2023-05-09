@@ -231,6 +231,8 @@ export const SpacesStore = types
       self.selected = self.spaces.get(spacePath);
       if (self.selected) {
         appState.setTheme(self.selected.theme);
+        const host = spacePath.split('/')[1];
+        shipStore.roomsStore.setProvider(host);
         SpacesIPC.setSelectedSpace(spacePath);
       }
       return self.selected;
@@ -239,6 +241,8 @@ export const SpacesStore = types
       self.join.set('loading');
       try {
         const space = yield SpacesIPC.joinSpace(spacePath);
+        const host = spacePath.split('/')[1];
+        shipStore.roomsStore.setProvider(host);
         self.join.set('loaded');
         return space;
       } catch (e) {
@@ -311,6 +315,8 @@ export const SpacesStore = types
       try {
         if (self.selected === self.spaces.get(spacePath)) {
           appState.setTheme(self.ourSpace.theme);
+          const host = spacePath.split('/')[1];
+          shipStore.roomsStore.setProvider(host);
           self.selected = self.ourSpace;
         }
         self.spaces.delete(spacePath);

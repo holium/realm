@@ -134,6 +134,7 @@ export class RoomsService extends AbstractService<any> {
       console.error(e);
     }
   }
+
   async sendChat(content: string): Promise<void> {
     try {
       APIConnection.getInstance().conduit.poke({

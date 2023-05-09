@@ -86,6 +86,9 @@ const RoomChatPresenter = () => {
         width={354}
         height={listHeight}
         data={chats.sort((a, b) => a.timeReceived - b.timeReceived)}
+        alignToBottom
+        chatMode
+        shiftScrollbar
         itemContent={(index, chat) => (
           <Box pt="2px">
             <Bubble
@@ -123,7 +126,7 @@ const RoomChatPresenter = () => {
         alignItems="center"
         pt={2}
         pb={2}
-        px={3}
+        // px={3}
         style={{
           gap: 8,
         }}
@@ -133,14 +136,18 @@ const RoomChatPresenter = () => {
           id="chat-input"
           name="chat-input"
           type="text"
-          placeholder="whats up dawg"
+          placeholder="New message"
           autoFocus
           ref={chatInputRef}
           spellCheck={false}
+          inputStyle={{
+            paddingLeft: 8,
+            paddingRight: 6,
+          }}
           style={{
             width: '100%',
             height: 24,
-            borderRadius: 6,
+            borderRadius: 16,
           }}
           value={text.state.value}
           error={

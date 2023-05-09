@@ -16,7 +16,7 @@ type ServerSideProps = {
 };
 
 export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-  const back_url = query.back_url ?? ('' as string);
+  const back_url = (query.back_url ?? '') as string;
   const products = await thirdEarthApi.getProducts();
   const productId = products[0].id;
 

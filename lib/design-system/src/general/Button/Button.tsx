@@ -99,6 +99,7 @@ const Base = styled(motion.button)<ButtonProps>`
   align-items: center;
   flex-basis: initial;
   font-size: 0.889rem;
+  font-family: var(--rlm-font);
   gap: 4px;
   border: 1px solid transparent;
   border-radius: var(--rlm-border-radius-4);
