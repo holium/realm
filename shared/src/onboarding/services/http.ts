@@ -22,9 +22,6 @@ export function http<T>(
 ): Promise<T> {
   return timeoutPromise(
     fetch(input, init).then((response) => {
-      if (!response.ok) {
-        throw new Error(response.statusText);
-      }
       return response.json();
     })
   );
