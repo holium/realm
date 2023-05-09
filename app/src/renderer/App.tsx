@@ -13,6 +13,7 @@ import { RealmIPC } from './stores/ipc';
 import { ErrorBoundary } from './system/ErrorBoundary';
 
 import './app.css';
+import 'photoswipe/dist/photoswipe.css';
 
 const Titlebar = styled.div`
   position: absolute;
