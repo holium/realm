@@ -5,8 +5,6 @@ import { Flex, Text } from '../../../general';
 import { Block, BlockProps } from '../Block/Block';
 import { FragmentImage } from '../Bubble/fragment-lib';
 
-import './photoswipe.module.css';
-
 type ImageBlockProps = {
   showLoader?: boolean;
   image: string;
@@ -56,6 +54,7 @@ export const ImageBlock = ({
       >
         {({ ref, open }) => (
           <FragmentImage
+            id={id}
             ref={ref as MutableRefObject<HTMLImageElement>}
             loading="eager"
             {...(showLoader && { isSkeleton: !isLoaded })}
@@ -73,7 +72,6 @@ export const ImageBlock = ({
                 setNaturalHeight(curr.naturalHeight);
             }}
             onClick={open}
-            style={{ pointerEvents: 'none' }}
           />
         )}
       </Item>
