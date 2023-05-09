@@ -8,7 +8,8 @@ import { AuthIPC, OnboardingIPC, RealmIPC } from '../../stores/ipc';
 import { StepProps } from './types';
 
 export const PassportStep = ({ setStep }: StepProps) => {
-  const { serverId, nickname, description, avatar } = OnboardingStorage.get();
+  const { serverId, nickname, description, avatar, serverType } =
+    OnboardingStorage.get();
   const [avatarSrc, setAvatarSrc] = useState<string | null>(avatar);
   const [descriptionSrc, setDescription] = useState<string | null>(description);
   const [nicknameSrc, setNickname] = useState<string | null>(nickname);
@@ -16,7 +17,6 @@ export const PassportStep = ({ setStep }: StepProps) => {
 
   const [isReady, setIsReady] = useState(false);
 
-  const { serverType } = OnboardingStorage.get();
   const isHoliumHosted = serverType === 'hosted';
 
   useEffect(() => {
@@ -78,11 +78,9 @@ export const PassportStep = ({ setStep }: StepProps) => {
     return url;
   };
 
-  const onBack = isHoliumHosted
-    ? () => {
-        setStep('/credentials');
-      }
-    : undefined;
+  const onBack = () => {
+    isHoliumHosted ? setStep('/credentials') : setStep('/installation');
+  };
 
   const handleOnNext = async (
     nickname: string,
@@ -111,13 +109,8 @@ export const PassportStep = ({ setStep }: StepProps) => {
     if (!response2) return false;
 
     OnboardingStorage.set({ nickname, description, avatar });
-    const { serverType } = OnboardingStorage.get();
 
-    if (serverType === 'hosted') {
-      OnboardingIPC.finishOnboarding();
-    } else {
-      setStep('/installation');
-    }
+    OnboardingIPC.finishOnboarding();
 
     return true;
   };

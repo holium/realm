@@ -12,10 +12,6 @@ export const InstallationStep = ({ setStep }: StepProps) => {
     track('Onboarding / Installation');
   });
 
-  const onBack = () => {
-    setStep('/passport');
-  };
-
   const onInstallRealm = () => {
     const { serverId, serverUrl, serverCode } = OnboardingStorage.get();
     if (serverId && serverUrl && serverCode) {
@@ -30,16 +26,10 @@ export const InstallationStep = ({ setStep }: StepProps) => {
   };
 
   const onNext = async () => {
-    OnboardingIPC.finishOnboarding();
+    setStep('/passport');
 
     return true;
   };
 
-  return (
-    <InstallationDialog
-      onInstallRealm={onInstallRealm}
-      onBack={onBack}
-      onNext={onNext}
-    />
-  );
+  return <InstallationDialog onInstallRealm={onInstallRealm} onNext={onNext} />;
 };

@@ -1,8 +1,11 @@
 import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
 
-import { AddServerDialog, OnboardingStorage } from '@holium/shared';
-import { defaultTheme } from '@holium/shared/src/theme/defaultTheme';
+import {
+  AddServerDialog,
+  defaultTheme,
+  OnboardingStorage,
+} from '@holium/shared';
 
 import { OnboardingIPC } from 'renderer/stores/ipc';
 
@@ -65,7 +68,7 @@ export const AddServerStep = ({ setStep }: StepProps) => {
       serverCode
     );
 
-    setStep('/passport');
+    setStep('/installation');
 
     return true;
   };
