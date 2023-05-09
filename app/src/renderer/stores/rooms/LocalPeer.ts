@@ -48,12 +48,10 @@ export class LocalPeer {
       {
         username: 'realm',
         credential: 'zQzjNHC34Y8RqdLW',
-        urls: 'turn:coturn.holium.live:3478?transport=tcp',
+        urls: ['turn:coturn.holium.live:3478'],
       },
       {
-        username: 'realm',
-        credential: 'zQzjNHC34Y8RqdLW',
-        urls: 'turn:coturn.holium.live:3478?transport=udp',
+        urls: ['stun:coturn.holium.live:3478'],
       },
     ],
   };
@@ -152,14 +150,15 @@ export class LocalPeer {
       return;
     }
     const currentStream: MediaStream = this.stream;
-    console.log('current streams', this.stream.getTracks());
-    console.log('peer streams', peer.spInstance?.streams);
-    this.stream.getTracks().forEach((track: MediaStreamTrack) => {
+    // console.log('current streams', this.stream.getTracks());
+    // console.log('peer streams', peer.spInstance?.streams);
+    currentStream.getTracks().forEach((track: MediaStreamTrack) => {
       if (this.isMuted && track.kind === TrackKind.Audio) {
         track.enabled = false;
       }
       if (!peer.spInstance?.destroyed) {
         try {
+          console.log('streamTracks: streaming our audio to ', peer.patp);
           peer.spInstance?.addTrack(track, currentStream);
         } catch (e) {
           // catches "Track has already been added to that stream."

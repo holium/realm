@@ -111,13 +111,11 @@ export const RoomsStore = types
         {
           username: 'realm',
           credential: 'zQzjNHC34Y8RqdLW',
-          urls: 'turn:coturn.holium.live:3478?transport=tcp',
+          urls: ['turn:coturn.holium.live:3478'],
         },
-        // {
-        //   username: 'realm',
-        //   credential: 'zQzjNHC34Y8RqdLW',
-        //   urls: 'turn:coturn.holium.live:3478?transport=udp',
-        // },
+        {
+          urls: ['stun:coturn.holium.live:3478'],
+        },
       ],
     }),
   })
@@ -236,14 +234,12 @@ export const RoomsStore = types
         hangup(peer.patp);
       });
       remotePeers.clear();
-      localPeer?.disableMedia();
+      localPeer.disableMedia();
     };
 
     return {
       afterCreate() {},
       reset() {
-        // cleanup rooms
-        console.log('destroying room store');
         hangupAll();
         if (self.current) {
           RoomsIPC.leaveRoom(self.current.rid);
@@ -266,7 +262,6 @@ export const RoomsStore = types
       },
       getPeer(patp: string) {
         if (patp === window.ship) return localPeer;
-        console.log('getPeer', patp, window.ship);
         return remotePeers.get(patp);
       },
       sendChat: flow(function* (message: string) {
@@ -303,8 +298,9 @@ export const RoomsStore = types
             serverId: window.ship,
           },
         });
+
         socket.on('connect', () => {
-          console.log('connected');
+          console.log('connected to socket.holium.live');
         });
 
         socket.on('signal', (payload: any) => {
@@ -334,8 +330,9 @@ export const RoomsStore = types
         });
 
         socket.on('disconnect', () => {
-          console.log(socket?.id); // undefined
+          console.log('disconnected to socket.holium.live');
         });
+
         const session = yield RoomsIPC.getSession();
         if (session) {
           self.provider = session.provider;
@@ -463,7 +460,9 @@ export const RoomsStore = types
         if (patp === window.ship && self.current?.rid !== rid) {
           self.current = room;
         }
-        room?.addPeer(patp);
+        if (!room?.present.includes(patp)) {
+          room?.addPeer(patp);
+        }
         if (self.current?.rid === rid) {
           // if we are in the room, dial the new peer
           if (patp !== window.ship) {
@@ -478,36 +477,36 @@ export const RoomsStore = types
       },
       _onRoomLeft(rid: string, patp: string) {
         const room = self.rooms.get(rid);
-        if (patp === window.ship && self.current?.rid === rid) {
-          self.current = undefined;
-          hangupAll();
-        }
         if (patp !== window.ship) {
           room?.removePeer(patp);
           hangup(patp);
+        }
+        if (patp === window.ship && self.current?.rid === rid) {
+          self.current = undefined;
+          hangupAll();
         }
       },
       _onKicked(rid: string, patp: string) {
         const room = self.rooms.get(rid);
-        if (patp === window.ship && self.current?.rid === rid) {
-          self.current = undefined;
-          hangupAll();
-        }
         if (patp !== window.ship) {
           room?.removePeer(patp);
           hangup(patp);
         }
+        if (patp === window.ship && self.current?.rid === rid) {
+          self.current = undefined;
+          hangupAll();
+        }
       },
       _onRoomDeleted(rid: string) {
-        if (self.current?.rid === rid) {
-          self.current = undefined;
-        }
         const room = self.rooms.get(rid);
         if (room?.creator !== window.ship) {
           remotePeers.forEach((peer) => {
             hangup(peer.patp);
           });
           remotePeers.clear();
+        }
+        if (self.current?.rid === rid) {
+          self.current = undefined;
         }
         self.rooms.delete(rid);
       },
