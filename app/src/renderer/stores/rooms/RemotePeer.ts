@@ -2,7 +2,6 @@ import { action, makeObservable, observable } from 'mobx';
 import SimplePeer from 'simple-peer';
 import { patp2dec } from 'urbit-ob';
 
-import { RoomsIPC } from '../ipc';
 import { LocalPeer } from './LocalPeer';
 import {
   IAudioAnalyser,
@@ -50,6 +49,7 @@ export class RemotePeer {
   isVideoAttached: boolean = false;
   analysers: IAudioAnalyser[] = [];
   sendDataToPeer: (data: Partial<DataPacket>) => void = () => {};
+  sendSignalToPeer: (to: string, rid: string, signal: any) => void = () => {};
   setters: PeerSetters = {
     setMuted: () => {},
     setSpeaking: () => {},
@@ -63,6 +63,7 @@ export class RemotePeer {
     patp: string,
     localPeer: LocalPeer,
     sendDataToPeer: (data: Partial<DataPacket>) => void,
+    sendSignalToPeer: (to: string, rid: string, signal: any) => void,
     setters: PeerSetters,
     config: { isInitiator: boolean; rtc: any }
   ) {
@@ -74,6 +75,7 @@ export class RemotePeer {
     this.patpId = patp2dec(patp);
     this.rtcConfig = config.rtc;
     this.audioTracks = new Map();
+    this.sendSignalToPeer = sendSignalToPeer.bind(this);
     this.sendDataToPeer = sendDataToPeer.bind(this);
     this.mute = this.mute.bind(this);
     this.unmute = this.unmute.bind(this);
@@ -114,17 +116,20 @@ export class RemotePeer {
     this.spInstance = new SimplePeer({
       initiator: this.isInitiator,
       config: this.rtcConfig,
-      stream: this.localPeer.stream,
+      // stream: this.localPeer.stream,
       objectMode: true,
       trickle: true,
     });
     this.spInstance.on('connect', () => {
-      this.setStatus(PeerConnectionState.Connected);
-      // this.localPeer?.streamTracks(this);
+      if (!this.localPeer) {
+        throw new Error('No local peer created, cannot stream tracks');
+      }
+      this.localPeer?.streamTracks(this);
       this.sendDataToPeer({
         kind: DataPacketMuteStatus,
         value: { data: this.localPeer?.isMuted },
       });
+      this.setStatus(PeerConnectionState.Connected);
     });
     this.spInstance.on('close', () => {
       this.setStatus(PeerConnectionState.Closed);
@@ -139,41 +144,49 @@ export class RemotePeer {
         this.setStatus(PeerConnectionState.Connecting);
       }
     });
-    this.spInstance.on('stream', (stream: MediaStream) => {
-      console.log('RemotePeer: got stream');
-      if (stream.getAudioTracks().length > 0) {
-        this.audioStream = stream;
-        const track = stream.getAudioTracks()[0];
-        this.audioTracks.set(track.id, track);
-        this.analysers[0] = PeerSpeakingDetectionAnalyser.initialize(this);
-        let audioElement: HTMLMediaElement = this.getMediaElement(
-          TrackKind.Audio
-        );
-        document.body.appendChild(audioElement);
-        audioElement.srcObject = stream;
-        audioElement.play();
-        this.setters.setAudioAttached(true);
-      }
-      this.setStatus(PeerConnectionState.Connected);
-    });
-    // this.spInstance.on(
-    //   'track',
-    //   (track: MediaStreamTrack, stream: MediaStream) => {
-    //     // console.log('_onTrack track added', track.id, track, stream);
-    //     // this.setStatus(PeerConnectionState.Connected);
-    //     // if (track.kind === 'audio') {
-    //     //   if (this.audioTracks.size > 0) {
-    //     //     console.log('this.audioTracks.size > 0, rmeoving tracks', track.id);
-    //     //     this.removeTracks();
-    //     //   }
-    //     //   this.audioTracks.set(track.id, track);
-    //     //   this.audioStream = stream;
-    //     //   this.analysers[0] = PeerSpeakingDetectionAnalyser.initialize(this);
-    //     //   this.attach(track);
-    //     //   this.setters.setAudioAttached(true);
-    //     // }
+    // this.spInstance.on('stream', (stream: MediaStream) => {
+    //   console.log('RemotePeer: got stream');
+    //   if (stream.getAudioTracks().length > 0) {
+    //     this.audioStream = stream;
+    //     const track = stream.getAudioTracks()[0];
+    //     this.audioTracks.set(track.id, track);
+    //     this.analysers[0] = PeerSpeakingDetectionAnalyser.initialize(this);
+    //     let audioElement: HTMLMediaElement = this.getMediaElement(
+    //       TrackKind.Audio
+    //     );
+    //     document.body.appendChild(audioElement);
+    //     audioElement.srcObject = stream;
+    //     audioElement.play();
+    //     this.setters.setAudioAttached(true);
     //   }
-    // );
+    //   this.setStatus(PeerConnectionState.Connected);
+    // });
+    this.spInstance.on(
+      'track',
+      (track: MediaStreamTrack, stream: MediaStream) => {
+        console.log('_onTrack track added', track.kind, this.patp);
+        if (track.kind === TrackKind.Audio) {
+          if (this.audioTracks.size > 0) {
+            this.removeTracks();
+          }
+          this.audioStream = stream;
+          this.audioTracks.set(track.id, track);
+          this.analysers[0] = PeerSpeakingDetectionAnalyser.initialize(this);
+          let audioElement: HTMLMediaElement = this.getMediaElement(
+            TrackKind.Audio
+          );
+          document.body.appendChild(audioElement);
+          audioElement.srcObject = stream;
+          audioElement.play();
+          this.setters.setAudioAttached(true);
+          this.localPeer?.streamTracks(this);
+        } else {
+          console.log('RemotePeer: got stream, but no audio tracks');
+        }
+        this.setStatus(PeerConnectionState.Connected);
+      }
+    );
+
     this.spInstance.on('data', (data) => {
       const dataPacket = JSON.parse(data.toString()) as DataPacket;
       if (dataPacket.kind === DataPacketMuteStatus) {
@@ -192,8 +205,8 @@ export class RemotePeer {
     });
   }
 
-  sendSignal(data: SimplePeer.SignalData) {
-    RoomsIPC.sendSignal(window.ship, this.patp, this.rid, data);
+  sendSignal(data: SimplePeer.SignalData | any) {
+    this.sendSignalToPeer(this.patp, this.rid, data);
   }
 
   sendData(data: DataPacket): void {
@@ -208,7 +221,7 @@ export class RemotePeer {
     // only the waiting peer sends the waiting signal
     if (!this.isInitiator) {
       this.createConnection(options);
-      RoomsIPC.sendSignal(window.ship, this.patp, this.rid, {
+      this.sendSignal({
         type: 'waiting',
         from: window.ship,
       });
@@ -217,13 +230,13 @@ export class RemotePeer {
 
   retry() {
     if (this.isInitiator) {
-      RoomsIPC.sendSignal(window.ship, this.patp, this.rid, {
+      this.sendSignal({
         type: 'retry',
         from: window.ship,
       });
     } else {
       this.createConnection();
-      RoomsIPC.sendSignal(window.ship, this.patp, this.rid, {
+      this.sendSignal({
         type: 'waiting',
         from: window.ship,
       });
