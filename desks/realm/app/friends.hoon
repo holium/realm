@@ -446,8 +446,8 @@
 ++  sour  (scot %p our.bowl)
 ++  snow  (scot %da now.bowl)
 ::
-++  has-pals           .^(? %gu /[sour]/pals/[snow])
-++  has-contact-store  .^(? %gu /[sour]/contact-store/[snow])
+++  has-pals           .^(? %gu /[sour]/pals/[snow]/$)
+++  has-contact-store  .^(? %gu /[sour]/contact-store/[snow]/$)
 ++  pals-targets  .^((set ship) %gx /[sour]/pals/[snow]/targets/noun)
 ++  pals-leeches  .^((set ship) %gx /[sour]/pals/[snow]/leeches/noun)
 ++  pals-mutuals  .^((set ship) %gx /[sour]/pals/[snow]/mutuals/noun)
