@@ -336,6 +336,13 @@ function registerOnUpdateListener() {
         shipStore.spacesStore._onJoinedBazaar(payload);
         break;
       case 'new-ally':
+        if (!payload.desks || payload.desks?.length === 0) {
+          // if there are no published apps, we will never get the
+          //  'treaties-loaded' event (see below); therefore scry just in
+          //  case and set the loading state to loaded
+          shipStore.bazaarStore.scryTreaties(payload.ship);
+          shipStore.bazaarStore.setLoadingState('published-apps-loaded');
+        }
         shipStore.bazaarStore._addAlly(payload.ship, payload);
         break;
       case 'ally-deleted':
