@@ -313,6 +313,7 @@ function registerOnUpdateListener() {
 
   BazaarIPC.onUpdate(({ type, payload }) => {
     // on update we need to requery the store
+    console.log('BazaarIPC.onUpdate => %o', { type, payload });
     switch (type) {
       case 'initial':
         shipStore.bazaarStore._onInitialLoad(payload);
@@ -334,6 +335,15 @@ function registerOnUpdateListener() {
         break;
       case 'joined-bazaar':
         shipStore.spacesStore._onJoinedBazaar(payload);
+        break;
+      case 'new-ally':
+        console.log('new-ally => %o', payload[type]);
+        break;
+      case 'ally-deleted':
+        console.log('ally-deleted => %o', payload[type]);
+        break;
+      case 'treaties-loaded':
+        console.log('treaties-loaded => %o', payload[type]);
         break;
     }
   });

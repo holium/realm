@@ -116,6 +116,13 @@ export const AppInstallStore = types
         centered: true,
       });
     },
+    reset() {
+      self.setSearchMode('none');
+      self.setSearchModeArgs([]);
+      self.setSearchString('');
+      self.setSearchPlaceholder('Search...');
+      self.setSelectedShip('');
+    },
   }));
 
 const loadSnapshot = () => {

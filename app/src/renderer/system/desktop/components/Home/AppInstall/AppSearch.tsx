@@ -49,16 +49,16 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
   const searchPlaceholder = appInstaller.searchPlaceholder;
   const selectedShip = appInstaller.selectedShip;
 
+  console.log('AppSearchAppPresenter render');
+
   useEffect(() => {
+    console.log('scrying allies...');
     bazaarStore.scryAllies();
   }, []);
 
   useEffect(() => {
-    appInstaller.setSearchMode('none');
-    appInstaller.setSearchModeArgs([]);
-    appInstaller.setSearchString('');
-    appInstaller.setSearchPlaceholder('Search...');
-    appInstaller.setSelectedShip('');
+    console.log('appInstaller change. setting vars...');
+    appInstaller.reset();
   }, [appInstaller]);
 
   const { search } = useMemo(() => searchForm(), []);
@@ -73,6 +73,7 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
   }, [selectedShip]);
 
   useEffect(() => {
+    console.log('fields changed');
     if (searchString === '' && search.state.value !== '') {
       search.actions.onChange('');
       clearInput();
@@ -147,11 +148,7 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
               searchMode !== 'dev-app-search' &&
               searchString.length === 0
             ) {
-              appInstaller.setSearchMode('none');
-              appInstaller.setSearchModeArgs([]);
-              appInstaller.setSearchString('');
-              appInstaller.setSearchPlaceholder('Search...');
-              appInstaller.setSelectedShip('');
+              appInstaller.reset();
               search.actions.onChange('');
             }
             if (
@@ -207,6 +204,7 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
             search.actions.onFocus();
           }}
           onBlur={() => {
+            appInstaller.reset();
             search.actions.onBlur();
           }}
         />

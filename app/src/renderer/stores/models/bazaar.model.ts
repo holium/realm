@@ -502,7 +502,9 @@ export const BazaarStore = types
     }),
     addAlly: flow(function* (ship: string) {
       try {
+        console.log('bazaar.mode.ts addAlly => %o', ship);
         if (self.allies.has(ship)) return;
+        console.log('bazaar.mode.ts loading treaties => %o', ship);
         self.loadingTreaties = true;
         self.addingAlly.set(ship, 'adding');
         const result: any = yield BazaarIPC.addAlly(ship);
