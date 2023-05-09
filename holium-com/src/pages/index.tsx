@@ -36,6 +36,7 @@ export default function HomePage() {
       <Page title="Holium">
         <Flex
           className="wallpaper"
+          style={{ backgroundColor: theme.backgroundColor }}
           backgroundImage={`url(${theme.wallpaper})`}
         />
         <Header />
