@@ -429,10 +429,6 @@ export const BazaarStore = types
     installApp: flow(function* (ship: string, desk: string) {
       let app: any | undefined = self.catalog.get(desk);
       if (!app) {
-        console.log(
-          'app not found searching treaties...%o',
-          toJS(self.treaties)
-        );
         app = UrbitApp.create({
           ...toJS(self.treaties.get(`${ship}/${desk}`)),
           type: AppTypes.Urbit,
@@ -460,7 +456,6 @@ export const BazaarStore = types
       if (app) {
         app.setStatus(InstallStatus.uninstalled);
         self.gridIndex.delete(desk);
-        console.log('uninstalling app', desk);
         try {
           return yield BazaarIPC.uninstallApp(desk);
         } catch (error) {

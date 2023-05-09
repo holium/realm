@@ -313,7 +313,6 @@ function registerOnUpdateListener() {
 
   BazaarIPC.onUpdate(({ type, payload }) => {
     // on update we need to requery the store
-    console.log('BazaarIPC.onUpdate => %o', { type, payload });
     switch (type) {
       case 'initial':
         shipStore.bazaarStore._onInitialLoad(payload);

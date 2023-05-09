@@ -49,15 +49,11 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
   const searchPlaceholder = appInstaller.searchPlaceholder;
   const selectedShip = appInstaller.selectedShip;
 
-  console.log('AppSearchAppPresenter render');
-
   useEffect(() => {
-    console.log('scrying allies...');
     bazaarStore.scryAllies();
   }, []);
 
   useEffect(() => {
-    console.log('appInstaller change. setting vars...');
     appInstaller.reset();
   }, [appInstaller]);
 
@@ -73,11 +69,9 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
   }, [selectedShip]);
 
   useEffect(() => {
-    console.log('fields changed');
     if (searchString === '' && search.state.value !== '') {
       search.actions.onChange('');
       clearInput();
-      console.log('selectedShip', selectedShip);
     }
   }, [
     clearInput,
