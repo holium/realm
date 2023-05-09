@@ -103,12 +103,12 @@ export const TileHighlight = styled(Box)<TileHighlightProps>`
   ${(props: TileHighlightProps) =>
     props.isOpen &&
     css`
-      background-color: rgba((var(--rlm-icon-rgb)), 0.5);
+      background-color: var(--rlm-icon-color);
     `}
   ${(props: TileHighlightProps) =>
     props.isActive &&
     css`
-      background-color: rgba((var(--rlm-accent-rgb)), 0.5);
+      background-color: rgba(var(--rlm-accent-rgba), 0.7);
     `}
 `;
 
