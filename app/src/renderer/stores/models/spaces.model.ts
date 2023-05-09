@@ -82,11 +82,12 @@ export const SpaceModel = types
       // TODO check if admin
       return self.path.includes(window.ship);
     },
-    isAdmin() {
+    isAdmin(patp?: string) {
+      patp = patp || window.ship;
       // if host
-      if (self.path.includes(window.ship)) return true;
+      if (self.path.includes(patp)) return true;
       // check member
-      const member = self.members.all.get(window.ship);
+      const member = self.members.all.get(patp);
       if (!member) return false;
       return member.roles.includes('admin');
     },
