@@ -72,7 +72,7 @@ export const DevAppModel = types.model('DevApp', {
 });
 
 export const WebApp = types.model('WebApp', {
-  id: types.identifier,
+  id: types.string,
   title: types.string,
   href: types.string,
   favicon: types.maybeNull(types.string),
@@ -83,7 +83,7 @@ export const WebApp = types.model('WebApp', {
 
 export const UrbitApp = types
   .model('UrbitApp', {
-    id: types.identifier,
+    id: types.string,
     title: types.string,
     info: types.maybeNull(types.string),
     color: types.string,
@@ -124,7 +124,7 @@ export const UrbitApp = types
   }));
 
 const NativeApp = types.model('NativeApp', {
-  id: types.identifier,
+  id: types.string,
   title: types.string,
   info: types.string,
   color: types.string,

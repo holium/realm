@@ -5,7 +5,7 @@ import { Flex, Text } from '../../../general';
 import { Block, BlockProps } from '../Block/Block';
 import { FragmentImage } from '../Bubble/fragment-lib';
 
-import 'photoswipe/dist/photoswipe.css';
+import './photoswipe.module.css';
 
 type ImageBlockProps = {
   showLoader?: boolean;

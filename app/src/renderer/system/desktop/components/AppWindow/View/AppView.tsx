@@ -3,9 +3,9 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
 import { Flex, Spinner } from '@holium/design-system';
+import { genCSSVariables } from '@holium/shared';
 
 // import { AppType } from 'renderer/stores/models/bazaar.model';
-import { genCSSVariables } from 'renderer/lib/theme';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 

@@ -2,9 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { track } from '@amplitude/analytics-browser';
 
 import { useToggle } from '@holium/design-system/util';
-import { BootingDialog, OnboardingStorage } from '@holium/shared';
+import { BootingDialog, defaultTheme, OnboardingStorage } from '@holium/shared';
 
-import { defaultTheme } from 'renderer/lib/defaultTheme';
 import { OnboardingIPC } from 'renderer/stores/ipc';
 
 import { thirdEarthApi } from '../thirdEarthApi';

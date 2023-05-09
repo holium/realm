@@ -13,7 +13,7 @@
     "lib/room/test-ui"
   ],
   "scripts": {
-    "tsc": "yarn workspace @holium/realm tsc && yarn workspace @holium/design-system tsc && yarn workspace @holium/realm-presence tsc && yarn workspace @holium/realm-presence-notes tsc",
+    "tsc": "yarn workspace @holium/realm tsc && yarn workspace @holium/design-system tsc && yarn workspace @holium/realm-presence tsc && yarn workspace @holium/realm-presence-notes tsc && yarn workspace @holium/shared tsc && yarn workspace @holium/holium-com tsc && yarn workspace @holium/hosting-holium-com tsc",
     "postinstall": "yarn workspace @holium/realm postinstall",
     "build": "yarn build:app",
     "build:app": "yarn workspace @holium/realm build",

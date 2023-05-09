@@ -1,69 +1,109 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { spaces } from 'spaces';
+import styled from 'styled-components';
+import { SpaceKeys, TrayAppType } from 'types';
 
-import { Text } from '@holium/design-system/general';
+import { Flex } from '@holium/design-system/general';
 
-import { AnimatedText } from '../components/AnimatedText';
+import { Footer } from 'components/Footer';
+import { GlobalStyle } from 'components/GlobalStyle';
+import { Header } from 'components/Header';
+import { Hero } from 'components/Hero';
+import { ChatApp } from 'components/TrayApps/Chat';
+import { NotificationApp } from 'components/TrayApps/Notifications';
+import { RoomApp } from 'components/TrayApps/Rooms';
+import { SpacesApp } from 'components/TrayApps/Spaces';
+import { WalletApp } from 'components/TrayApps/Wallet';
+
 import { Page } from '../components/Page';
 
-const futureOfTexts = [
-  'collaborative computing',
-  'online communities',
-  'Web 3',
-  'P2P networks',
-  'DAOs',
-];
+const Main = styled.main`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
 
-export default function CreateAccount() {
-  const [msgIdx, setMsgIdx] = useState(0);
-  const [replay, setReplay] = useState(true);
-  const [futureOfText, setFutureOfText] = useState('');
-
-  useEffect(() => {
-    setFutureOfText(futureOfTexts[msgIdx]);
-    setReplay(true);
-    const interval = setInterval(() => {
-      setMsgIdx((idx) => (idx + 1) % futureOfTexts.length);
-    }, 7000);
-    const replayInterval = setInterval(() => {
-      setReplay(false);
-    }, 6000);
-    return () => {
-      clearInterval(interval);
-      clearInterval(replayInterval);
-    };
-  }, [msgIdx]);
+export default function HomePage() {
+  const [currentSpace, setCurrentSpace] = useState<SpaceKeys>('cyberpunk');
+  const [theme, setTheme] = useState(spaces[currentSpace].theme);
+  const [trayApp, setTrayApp] = useState<TrayAppType | null>(null);
 
   return (
-    <Page title="Holium">
-      <Text.Custom
-        className="realm-is-text"
-        fontWeight={600}
-        style={{
-          lineHeight: '70px',
-          // textShadow: theme.mode === 'light' ? undefined : '0px 4px 4px rgba(0, 0, 0, 0.15)',
-        }}
-      >
-        Realm is the future of{' '}
-        <Text.Custom
-          initial="hidden"
-          fontWeight={700}
-          animate={replay ? 'visible' : 'hidden'}
-          variants={{
-            visible: {
-              transition: {
-                staggerChildren: 0.025,
-              },
-            },
-            hidden: {
-              transition: {
-                staggerChildren: 0.025,
-              },
-            },
+    <>
+      <GlobalStyle theme={theme} />
+      <Page title="Holium">
+        <Flex
+          className="wallpaper"
+          backgroundImage={`url(${theme.wallpaper})`}
+        />
+        <Header />
+        <Main>
+          <Hero />
+        </Main>
+        <Footer currentSpace={currentSpace} setCurrentApp={setTrayApp} />
+      </Page>
+      {trayApp?.id === 'spaces' && (
+        <SpacesApp
+          coords={trayApp.coords}
+          isOpen={trayApp?.id === 'spaces'}
+          closeTray={() => setTrayApp(null)}
+          currentSpace={currentSpace}
+          setCurrentSpace={(space) => {
+            setCurrentSpace(space);
+            setTheme(spaces[space].theme);
           }}
-        >
-          <AnimatedText text={futureOfText} />
-        </Text.Custom>
-      </Text.Custom>
-    </Page>
+        />
+      )}
+      {trayApp?.id === 'chat' && (
+        <ChatApp
+          coords={trayApp.coords}
+          isOpen={trayApp?.id === 'chat'}
+          closeTray={() => setTrayApp(null)}
+          currentSpace={currentSpace}
+          setCurrentSpace={(space) => {
+            setCurrentSpace(space);
+            setTheme(spaces[space].theme);
+          }}
+        />
+      )}
+      {trayApp?.id === 'rooms-tray' && (
+        <RoomApp
+          coords={trayApp.coords}
+          isOpen={trayApp?.id === 'rooms-tray'}
+          closeTray={() => setTrayApp(null)}
+          currentSpace={currentSpace}
+          setCurrentSpace={(space) => {
+            setCurrentSpace(space);
+            setTheme(spaces[space].theme);
+          }}
+        />
+      )}
+      {trayApp?.id === 'wallet' && (
+        <WalletApp
+          coords={trayApp.coords}
+          isOpen={trayApp?.id === 'wallet'}
+          closeTray={() => setTrayApp(null)}
+          currentSpace={currentSpace}
+          setCurrentSpace={(space) => {
+            setCurrentSpace(space);
+            setTheme(spaces[space].theme);
+          }}
+        />
+      )}
+      {trayApp?.id === 'notifications' && (
+        <NotificationApp
+          coords={trayApp.coords}
+          isOpen={trayApp?.id === 'notifications'}
+          closeTray={() => setTrayApp(null)}
+          currentSpace={currentSpace}
+          setCurrentSpace={(space) => {
+            setCurrentSpace(space);
+            setTheme(spaces[space].theme);
+          }}
+        />
+      )}
+    </>
   );
 }

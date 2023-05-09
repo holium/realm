@@ -175,7 +175,10 @@
                   |=  id=msg-id:db-sur
                   ^-  (list card)
                   =/  parts     (skim new-msg-parts |=(p=msg-part:db-sur =(msg-id.p id)))
-                  =/  thepath   path:(snag 0 parts)
+                  =/  first-msg-part  (snag 0 parts)
+                  ?:  =(-.content.first-msg-part %status) :: don't send notifs on %status msgs
+                    ~
+                  =/  thepath   path.first-msg-part
                   ?:  =(sender.id our.bowl) :: if it's our message, don't do anything
                     ~
                   ?:  (~(has in mutes.state) thepath)               :: if it's a muted path, send a pre-dismissed notif to notif-db
@@ -186,7 +189,10 @@
                   ?&  push-enabled.state                  :: push is enabled
                       (gth (lent ~(tap by devices.state)) 0) :: there is at least one device
                   ==
-                    =/  push-card  (push-notification-card:lib bowl state thepath (notif-msg parts bowl) (notif-from-nickname-or-patp sender.id bowl))
+                    =/  push-title      (notif-from-nickname-or-patp sender.id bowl)
+                    =/  push-subtitle   (group-name-or-blank parts bowl)
+                    =/  push-contents   (notif-msg parts bowl)
+                    =/  push-card  (push-notification-card:lib bowl state thepath push-title push-subtitle push-contents)
                     [push-card notif-db-card ~]
                   :: otherwise, just send to notif-db
                   [notif-db-card ~]
@@ -290,17 +296,12 @@
     %notif-db-poke
     !>([%create %realm-chat path.msg-part %message title content '' ~ link ~ dismissed])
   ]
+::  returns either 'New Message' or a preview of the actual message
+::  depending on `msg-preview-notif.state` flag
 ++  notif-msg
   |=  [=message:db-sur =bowl:gall]
   ^-  @t
-  =/  msg-path    path:(snag 0 message)
-  =/  pathrow     (scry-path-row:lib msg-path bowl)
-  =/  title       (~(get by metadata.pathrow) 'title')
-  =/  default     :: use title if available or fallback to New Message
-    ?:  =(type.pathrow %dm)   'New DM'
-    ?~  title     'New Message'
-      (need title)
-  ?.  msg-preview-notif.state  default
+  ?.  msg-preview-notif.state  'New Message'
   =/  str=tape
     ^-  tape
     %+  join
@@ -326,6 +327,15 @@
       %status               p.content.part
     ==
   (crip `tape`(swag [0 140] str)) :: only show the first 140 characters of the message in the preview
+++  group-name-or-blank
+  |=  [=message:db-sur =bowl:gall]
+  ^-  @t
+  =/  msg-path    path:(snag 0 message)
+  =/  pathrow     (scry-path-row:lib msg-path bowl)
+  =/  title       (~(get by metadata.pathrow) 'title')
+  ?:  =(type.pathrow %dm)   ''  :: always blank for DMs
+  ?~  title     'Group Chat'    :: if it's a group chat without a title, just say "group chat"
+  (need title)                  :: otherwise, return the title of the group
 ++  notif-from-nickname-or-patp
   |=  [patp=ship =bowl:gall]
   ^-  @t

@@ -8,8 +8,9 @@ import {
   types,
 } from 'mobx-state-tree';
 
+import { defaultTheme, Theme } from '@holium/shared';
+
 import { MemberRole } from 'os/types';
-import { defaultTheme } from 'renderer/lib/defaultTheme';
 
 import { appState } from '../app.store';
 import { BazaarIPC, SpacesIPC } from '../ipc';
@@ -17,7 +18,6 @@ import { shipStore } from '../ship.store';
 import { UrbitApp } from './bazaar.model';
 import { LoaderModel, SubscriptionModel } from './common.model';
 import { MembersModel, MembersStore, VisaModel } from './invitations.model';
-import { Theme } from './theme.model';
 
 const spaceRowToModel = (space: any) => {
   return {
@@ -345,13 +345,11 @@ export const SpacesStore = types
     kickMember: flow(function* (spacePath: string, patp: string) {
       const space = self.spaces.get(spacePath);
       if (!space) return;
-      const member = space.members.all.get(patp);
       try {
-        space.members.remove(patp);
         yield SpacesIPC.kickMember(spacePath, patp);
+        space.members.remove(patp);
       } catch (e) {
         console.error(e);
-        space.members.add(patp, MembersModel.create(member));
       }
     }),
     setRoles: flow(function* (
@@ -461,7 +459,6 @@ export const SpacesStore = types
     _onJoinedBazaar: flow(function* (joinedPayload: any) {
       const space = self.spaces.get(joinedPayload.path);
       if (!space) return;
-      space._setStall(joinedPayload.stall);
       const refreshedSpace = yield SpacesIPC.getSpace(joinedPayload.path);
       self.spaces.set(space.path, spaceRowToModel(refreshedSpace));
     }),

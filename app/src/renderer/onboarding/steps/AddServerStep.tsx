@@ -1,11 +1,14 @@
 import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
 
-import { AddServerDialog, OnboardingStorage } from '@holium/shared';
+import {
+  AddServerDialog,
+  defaultTheme,
+  OnboardingStorage,
+} from '@holium/shared';
 
 import { OnboardingIPC } from 'renderer/stores/ipc';
 
-import { defaultTheme } from '../../lib/defaultTheme';
 import { StepProps } from './types';
 
 export const AddServerStep = ({ setStep }: StepProps) => {
@@ -22,7 +25,7 @@ export const AddServerStep = ({ setStep }: StepProps) => {
     serverUrl: string,
     serverCode: string
   ) => {
-    const sanitizedCookie = await OnboardingIPC.getCookie({
+    const sanitizedCookie = await OnboardingIPC.getCookieAndOpenConduit({
       serverId,
       serverUrl,
       serverCode,
@@ -65,7 +68,7 @@ export const AddServerStep = ({ setStep }: StepProps) => {
       serverCode
     );
 
-    setStep('/passport');
+    setStep('/installation');
 
     return true;
   };

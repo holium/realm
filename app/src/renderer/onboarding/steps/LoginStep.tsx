@@ -4,6 +4,7 @@ import { track } from '@amplitude/analytics-browser';
 import { Anchor } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
 import {
+  defaultTheme,
   LearnMoreModal,
   LoginDialog,
   OnboardDialogDescription,
@@ -13,7 +14,6 @@ import {
 
 import { OnboardingIPC } from 'renderer/stores/ipc';
 
-import { defaultTheme } from '../../lib/defaultTheme';
 import { thirdEarthApi } from '../thirdEarthApi';
 import { StepProps } from './types';
 

@@ -1,14 +1,19 @@
 import { createContext, useContext } from 'react';
 import { clone, flow, Instance, types } from 'mobx-state-tree';
 
-import { OnboardingStorage, RealmOnboardingStep } from '@holium/shared';
+import {
+  defaultTheme,
+  OnboardingStorage,
+  RealmOnboardingStep,
+  Theme,
+  ThemeType,
+} from '@holium/shared';
 
 import { RealmUpdateBooted } from 'os/realm.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';
 import { SoundActions } from 'renderer/lib/sound';
 import { MobXAccount } from 'renderer/stores/models/account.model';
 
-import { defaultTheme } from '../lib/defaultTheme';
 import { AuthenticationModel } from './auth.store';
 import {
   AuthIPC,
@@ -20,7 +25,6 @@ import {
   SpacesIPC,
 } from './ipc';
 import { ShellModel } from './models/shell.model';
-import { Theme, ThemeType } from './models/theme.model';
 import { shipStore } from './ship.store';
 
 const Screen = types.enumeration(['login', 'onboarding', 'os']);
@@ -163,6 +167,10 @@ function registerOnUpdateListener() {
 
   MainIPC.onInitialDimensions((_e: any, dims: any) => {
     appState.shellStore.setDesktopDimensions(dims.width, dims.height);
+  });
+
+  MainIPC.onSetFullScreen((isFullScreen) => {
+    appState.shellStore.setFullscreen(isFullScreen);
   });
 
   RealmIPC.onUpdate(async (update) => {

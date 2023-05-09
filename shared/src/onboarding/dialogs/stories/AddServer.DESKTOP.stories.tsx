@@ -55,6 +55,23 @@ export const AddServerDialogStory: ComponentStory<
 
 AddServerDialogStory.storyName = '3. Add server';
 
+export const InstallationDialogStory: ComponentStory<
+  typeof InstallationDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <InstallationDialog
+      onInstallRealm={() =>
+        Promise.resolve({
+          success: true,
+        })
+      }
+      onNext={() => Promise.resolve(false)}
+    />
+  </OnboardingDialogWrapper>
+);
+
+InstallationDialogStory.storyName = '4. Installation';
+
 export const PassportDialogStory: ComponentStory<
   typeof PassportDialog
 > = () => (
@@ -71,32 +88,4 @@ export const PassportDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-PassportDialogStory.storyName = '4. Create your Passport';
-
-// export const PasswordDialogStory: ComponentStory<
-//   typeof PassportDialog
-// > = () => (
-//   <OnboardingDialogWrapper>
-//     <PasswordDialog onBack={() => {}} onNext={() => Promise.resolve(false)} />
-//   </OnboardingDialogWrapper>
-// );
-
-// PasswordDialogStory.storyName = '5. Password';
-
-export const InstallationDialogStory: ComponentStory<
-  typeof InstallationDialog
-> = () => (
-  <OnboardingDialogWrapper>
-    <InstallationDialog
-      onBack={() => {}}
-      onInstallRealm={() =>
-        Promise.resolve({
-          success: true,
-        })
-      }
-      onNext={() => Promise.resolve(false)}
-    />
-  </OnboardingDialogWrapper>
-);
-
-InstallationDialogStory.storyName = '5. Installation';
+PassportDialogStory.storyName = '5. Create your Passport';

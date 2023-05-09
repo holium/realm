@@ -105,14 +105,15 @@
   |=(peer=ship [%pass /dbpoke %agent [s %chat-db] %poke %chat-db-action !>([%add-peer path peer])])
 ::
 ++  push-notification-card
-  |=  [=bowl:gall state=state-0 chat-path=path subtitle=@t content=@t]
+  |=  [=bowl:gall state=state-0 chat-path=path title=@t subtitle=@t content=@t]
   ^-  card
   =/  note=notification:notify
   ^-  notification:notify
     [
       app-id=app-id.state
       data=[path=(spat chat-path) member-meta=*mem-meta:notify]
-      subtitle=(malt ~[['en' subtitle]])
+      title=(malt ~[['en' title]])
+      subtitle=?:(=(subtitle '') ~ (malt ~[['en' subtitle]]))
       contents=(malt ~[['en' content]])
     ]
   ::  send http request

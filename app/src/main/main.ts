@@ -91,6 +91,7 @@ const createWindow = async () => {
     title: 'Realm',
     fullscreen: true,
     acceptFirstMouse: true,
+    titleBarStyle: 'hidden',
     webPreferences: {
       nodeIntegration: false,
       webviewTag: true,
@@ -141,10 +142,6 @@ const createWindow = async () => {
     } else {
       isDev ? mainWindow.showInactive() : mainWindow.show();
     }
-    mainWindow.webContents.send(
-      'realm.shell.set-fullscreen',
-      mainWindow.isFullScreen()
-    );
     const initialDimensions = mainWindow.getBounds();
     mainWindow.webContents.send('set-dimensions', initialDimensions);
   });
