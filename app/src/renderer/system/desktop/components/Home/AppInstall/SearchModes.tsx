@@ -36,20 +36,22 @@ const SearchModesPresenter = () => {
     setLoadingState,
   } = useAppInstaller();
 
-  useEffect(() => {
-    if (searchMode === 'dev-app-search' && selectedShip) {
-      bazaarStore
-        .scryTreaties(selectedShip)
-        .catch((e) => console.error(e))
-        .finally(() => setLoadingState(''));
-    }
-  }, [bazaarStore.treatiesLoaded, searchMode, selectedShip, setLoadingState]);
+  // useEffect(() => {
+  //   if (searchMode === 'dev-app-search' && selectedShip) {
+  //     console.log('scryTreaties => %o', selectedShip);
+  //     bazaarStore
+  //       .scryTreaties(selectedShip)
+  //       .catch((e) => console.error(e))
+  //       .finally(() => setLoadingState(''));
+  //   }
+  // }, [bazaarStore.treatiesLoaded, searchMode, selectedShip]);
 
   useEffect(() => {
     if (searchMode === 'dev-app-search' && selectedShip) {
       if (!bazaarStore.hasAlly(selectedShip)) {
         if (loadingState !== 'loading-published-apps') {
           setLoadingState('loading-published-apps');
+          console.log('scryTreaties => %o', selectedShip);
           bazaarStore
             .addAlly(selectedShip)
             .then(() => {
@@ -59,10 +61,11 @@ const SearchModesPresenter = () => {
           // .finally(() => appInstaller.setLoadingState(''));
         }
       } else {
+        console.log('scryTreaties => %o', selectedShip);
         bazaarStore.scryTreaties(selectedShip);
       }
     }
-  }, [bazaarStore, loadingState, searchMode, selectedShip, setLoadingState]);
+  }, [bazaarStore, searchMode, selectedShip]);
 
   useEffect(() => {
     if (searchMode === 'app-search') {

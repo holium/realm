@@ -10,6 +10,7 @@ export type BazaarUpdateType = {
     | 'dock-update'
     | 'stall-update'
     | 'joined-bazaar'
-    | 'treaties-loaded';
+    | 'treaties-loaded'
+    | 'new-ally';
   payload: any;
 };

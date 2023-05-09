@@ -211,6 +211,13 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
             payload: data['treaties-loaded'],
           });
           break;
+        case 'new-ally':
+          log.info('new-ally => %o', data['new-ally']);
+          this.sendUpdate({
+            type: 'new-ally',
+            payload: data['new-ally'],
+          });
+          break;
         default:
           break;
       }

@@ -409,8 +409,12 @@ export const BazaarStore = types
     // Pokes
     //
     installApp: flow(function* (ship: string, desk: string) {
-      const app = self.catalog.get(desk);
+      let app: any | undefined = self.catalog.get(desk);
+      if (!app) {
+        app = self.treaties.get(desk);
+      }
       try {
+        console.log('install app => %o', app);
         if (app) {
           app.setStatus(InstallStatus.started);
           self.installations.set(app.id, InstallStatus.started);
@@ -549,7 +553,7 @@ export const BazaarStore = types
       }
     }),
     scryTreaties: flow(function* (ship: string) {
-      self.loadingTreaties = true;
+      // self.loadingTreaties = true;
       try {
         self.treaties.clear();
         const treaties = yield BazaarIPC.scryTreaties(ship);
@@ -568,7 +572,7 @@ export const BazaarStore = types
             id: key,
           });
         }
-        self.loadingTreaties = false;
+        // self.loadingTreaties = false;
         return formedTreaties;
       } catch (error) {
         console.error(error);
@@ -619,6 +623,7 @@ export const BazaarStore = types
     // onUpdate handlers
     _onInstallationUpdate(update: any) {
       const app = self.catalog.get(update.id);
+      console.log('_onInstallationUpdate => %o', { app, update });
       const curStatus = self.installations.get(update.id);
       // Handles the case where the agent update is suspended on reviving
       if (
@@ -644,7 +649,11 @@ export const BazaarStore = types
       if (app) app.setIsRecommended(false);
     },
     _setTreatiesLoaded(treatiesLoaded: boolean) {
+      self.loadingTreaties = !treatiesLoaded;
       self.treatiesLoaded = treatiesLoaded;
+    },
+    _addAlly(ship: string, data: any) {
+      self.allies.set(ship, data);
     },
   }));
 

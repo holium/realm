@@ -9,6 +9,8 @@ const AppSearchPopoverPresenter = () => {
   const appInstaller = useAppInstaller();
   if (appInstaller.searchMode === 'none') return null;
 
+  console.log('searchMode => %o', appInstaller.searchMode);
+
   return (
     <RealmPopover
       id="app-install"

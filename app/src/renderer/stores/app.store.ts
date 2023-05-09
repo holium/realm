@@ -300,7 +300,12 @@ function registerOnUpdateListener() {
         break;
       case 'treaties-loaded':
         console.log(`treaties-loaded => %o`, payload);
+        shipStore.bazaarStore.scryTreaties(payload.ship);
         shipStore.bazaarStore._setTreatiesLoaded(true);
+        break;
+      case 'new-ally':
+        console.log(`new-ally => %o`, payload);
+        shipStore.bazaarStore._addAlly(payload.ship, payload);
         break;
     }
   });

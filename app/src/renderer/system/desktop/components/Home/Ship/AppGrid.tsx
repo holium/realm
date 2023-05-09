@@ -16,14 +16,13 @@ interface AppGridProps {
 const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
   const { bazaarStore, spacesStore } = useShipStore();
   const currentSpace = spacesStore.selected;
-  const apps = useMemo(
-    () =>
-      [
-        ...bazaarStore.installed,
-        // ...bazaarStore.devApps,
-      ] as AppMobxType[],
-    [bazaarStore.catalog, bazaarStore.installations.values()]
-  );
+  const apps = useMemo(() => {
+    console.log('app grid re-render');
+    return [
+      ...bazaarStore.installed,
+      // ...bazaarStore.devApps,
+    ] as AppMobxType[];
+  }, [bazaarStore.catalog, bazaarStore.installations]);
 
   if (!currentSpace) return null;
 
@@ -41,7 +40,7 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
             />
           </Box>
         );
-      })}{' '}
+      })}
     </>
   );
 };
