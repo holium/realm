@@ -2,12 +2,15 @@ import { observer } from 'mobx-react';
 
 import { useAppState } from 'renderer/stores/app.store';
 
-import { BootingStep, ChooseIdStep, LoginStep, PaymentStep } from './steps';
 import { AddServerStep } from './steps/AddServerStep';
+import { BootingStep } from './steps/BootingStep';
+import { ChooseIdStep } from './steps/ChooseIdStep';
 import { CredentialsStep } from './steps/CredentialsStep';
 import { HostingStep } from './steps/HostingStep';
 import { InstallationStep } from './steps/InstallationStep';
+import { LoginStep } from './steps/LoginStep';
 import { PassportStep } from './steps/PassportStep';
+import { PaymentStep } from './steps/PaymentStep';
 
 export const OnboardingStepPresenter = () => {
   const { onboardingStep, setOnboardingStep } = useAppState();
