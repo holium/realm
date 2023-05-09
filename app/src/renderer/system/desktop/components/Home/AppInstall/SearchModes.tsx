@@ -27,67 +27,33 @@ import { useAppInstaller } from './store';
 const SearchModesPresenter = () => {
   const { bazaarStore } = useShipStore();
   const [data, setData] = useState<any>([]);
-  const {
-    searchMode,
-    searchString,
-    selectedShip,
-    selectedDesk,
-    loadingState,
-    setLoadingState,
-  } = useAppInstaller();
-
-  console.log('SearchModePresenter render');
-
-  // useEffect(() => {
-  //   console.log('SearchModePresenter: scrying treaties %o', {
-  //     searchMode,
-  //     selectedShip,
-  //   });
-  //   if (searchMode === 'dev-app-search' && selectedShip) {
-  //     bazaarStore
-  //       .scryTreaties(selectedShip)
-  //       .catch((e) => console.error(e))
-  //       .finally(() => setLoadingState(''));
-  //   }
-  // }, [bazaarStore.treatiesLoaded, searchMode, selectedShip, setLoadingState]);
+  const { searchMode, searchString, selectedShip, selectedDesk } =
+    useAppInstaller();
 
   useEffect(() => {
-    console.log('SearchModePresenter: scrying treaties %o', {
-      searchMode,
-      selectedShip,
-    });
     if (searchMode === 'dev-app-search' && selectedShip) {
       if (!bazaarStore.hasAlly(selectedShip)) {
-        console.log('SearchModePresenter: adding ally %o', {
-          selectedShip,
-          loadingState,
-        });
-        if (loadingState !== 'loading-published-apps') {
-          setLoadingState('loading-published-apps');
+        if (bazaarStore.loadingState !== 'loading-published-apps') {
+          bazaarStore.setLoadingState('loading-published-apps');
           bazaarStore
             .addAlly(selectedShip)
             .then(() => {
               bazaarStore.scryTreaties(selectedShip);
             })
             .catch((e) => console.error(e));
-          // .finally(() => appInstaller.setLoadingState(''));
         }
       } else {
         bazaarStore.scryTreaties(selectedShip);
+        bazaarStore.setLoadingState('published-apps-loaded');
       }
     }
-  }, [bazaarStore, loadingState, searchMode, selectedShip, setLoadingState]);
+  }, [searchMode, selectedShip]);
 
   useEffect(() => {
     if (searchMode === 'app-search') {
-      console.log('SearchModePresenter: searching apps', { searchString });
       const apps = bazaarStore.searchApps(searchString);
       setData(apps);
     } else if (searchMode === 'dev-app-search') {
-      console.log('SearchModePresenter: searching treaties', {
-        selectedShip,
-        searchString,
-      });
       const apps = bazaarStore.searchTreaties(selectedShip, searchString);
       setData(apps);
     }
@@ -96,15 +62,10 @@ const SearchModesPresenter = () => {
   useEffect(() => {
     if (searchMode === 'ship-search') {
       setData([]);
-      console.log('SearchModePresenter: fetching allies');
       const allies = bazaarStore.getAllies();
       setData(allies);
     } else if (searchMode === 'dev-app-detail') {
       setData([]);
-      console.log('SearchModePresenter: getTreaty %o', {
-        selectedShip,
-        selectedDesk,
-      });
       const treaty = bazaarStore.getTreaty(selectedShip, selectedDesk);
       if (treaty) {
         setData([treaty]);
@@ -128,8 +89,6 @@ export const SearchModes = observer(SearchModesPresenter);
 const AppInstallStartPresenter = () => {
   const { bazaarStore } = useShipStore();
   const appInstaller = useAppInstaller();
-
-  console.log('AppInstallStartPresenter render');
 
   return (
     <NoScrollBar flexDirection="column">
@@ -165,7 +124,6 @@ const AppInstallStartPresenter = () => {
 const AppInstallStart = observer(AppInstallStartPresenter);
 
 const renderApps = (apps: AppMobxType[]) => {
-  console.log('renderApps');
   if (!apps || apps.length === 0) {
     return <Text.Custom opacity={0.4}>{`No apps found`}</Text.Custom>;
   }
@@ -204,7 +162,6 @@ const renderDevs = (
   devs: any,
   appInstaller: ReturnType<typeof useAppInstaller>
 ) => {
-  console.log('renderDevs %o', { devs });
   if (!devs || devs.length === 0) {
     return <Text.Custom opacity={0.4}>{`No recent devs`}</Text.Custom>;
   }
@@ -308,18 +265,7 @@ const DevAppsPresenter = () => {
     setApp,
   } = useAppInstaller();
 
-  console.log('DevAppsPresenter %o', {
-    selectedShip,
-    searchString,
-    loadingTreaties: bazaarStore.loadingTreaties,
-  });
-
-  const apps: DocketAppType[] = bazaarStore.searchTreaties(
-    selectedShip,
-    searchString
-  );
-
-  if (bazaarStore.loadingTreaties) {
+  if (!['published-apps-loaded'].includes(bazaarStore.loadingState)) {
     return (
       <Flex flex={1} verticalAlign="middle">
         <Spinner size={0} />
@@ -358,6 +304,11 @@ const DevAppsPresenter = () => {
       </Button.Primary>
     );
   };
+
+  const apps: DocketAppType[] = bazaarStore.searchTreaties(
+    selectedShip,
+    searchString
+  );
 
   if (!apps || apps.length === 0) {
     return <Text.Custom opacity={0.4}>{`No apps found`}</Text.Custom>;

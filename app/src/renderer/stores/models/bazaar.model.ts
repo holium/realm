@@ -147,6 +147,20 @@ const AllyModel = types.model('AllyModel', {
   desks: types.optional(types.array(types.string), []),
 });
 
+const loadingState = types.optional(
+  types.enumeration([
+    'loading-published-apps',
+    'published-apps-loaded',
+    'loading-app-publishers',
+    'app-publishers-loaded',
+    'adding-app-publisher',
+    '',
+  ]),
+  ''
+);
+
+export type LoadingState = Instance<typeof loadingState>;
+
 export const BazaarStore = types
   .model('BazaarStore', {
     recommendations: types.array(AppId),
@@ -154,8 +168,7 @@ export const BazaarStore = types
     gridIndex: types.map(AppId),
     treaties: types.map(DocketApp),
     allies: types.map(AllyModel),
-    loadingAllies: false,
-    loadingTreaties: false,
+    loadingState,
     addingAlly: types.map(types.string),
     devAppMap: types.map(DevAppModel),
     installations: types.map(types.string),
@@ -171,6 +184,8 @@ export const BazaarStore = types
           if (app.type === 'urbit') {
             const urb = app as AppMobxType;
             return (
+              // 'started' installs should show on the desktop no?
+              urb.installStatus === 'started' ||
               urb.installStatus === 'installed' ||
               urb.installStatus === 'suspended' ||
               urb.installStatus === 'resuming' ||
@@ -259,6 +274,9 @@ export const BazaarStore = types
       self.gridIndex.clear();
       self.recentApps.clear();
       self.recentDevs.clear();
+    },
+    setLoadingState(state: LoadingState) {
+      self.loadingState = state;
     },
     // Updates
     // _setAppStatus(appId: string, app: UrbitAppType, gridIndex: any) {
@@ -409,7 +427,17 @@ export const BazaarStore = types
     // Pokes
     //
     installApp: flow(function* (ship: string, desk: string) {
-      const app = self.catalog.get(desk);
+      let app: any | undefined = self.catalog.get(desk);
+      if (!app) {
+        console.log(
+          'app not found searching treaties...%o',
+          toJS(self.treaties)
+        );
+        app = UrbitApp.create({
+          ...toJS(self.treaties.get(`${ship}/${desk}`)),
+          type: AppTypes.Urbit,
+        });
+      }
       try {
         if (app) {
           app.setStatus(InstallStatus.started);
@@ -502,17 +530,12 @@ export const BazaarStore = types
     }),
     addAlly: flow(function* (ship: string) {
       try {
-        console.log('bazaar.mode.ts addAlly => %o', ship);
         if (self.allies.has(ship)) return;
-        console.log('bazaar.mode.ts loading treaties => %o', ship);
-        self.loadingTreaties = true;
         self.addingAlly.set(ship, 'adding');
         const result: any = yield BazaarIPC.addAlly(ship);
-        // self.loadingTreaties = false;
         return result;
       } catch (error) {
         console.error(error);
-        self.loadingTreaties = false;
       }
     }),
 
@@ -551,7 +574,6 @@ export const BazaarStore = types
       }
     }),
     scryTreaties: flow(function* (ship: string) {
-      self.loadingTreaties = true;
       try {
         self.treaties.clear();
         const treaties = yield BazaarIPC.scryTreaties(ship);
@@ -570,11 +592,9 @@ export const BazaarStore = types
             id: key,
           });
         }
-        self.loadingTreaties = false;
         return formedTreaties;
       } catch (error) {
         console.error(error);
-        self.loadingTreaties = false;
         throw error;
       }
     }),
@@ -644,6 +664,12 @@ export const BazaarStore = types
     _onUnrecommendedUpdate(appId: string) {
       const app = self.catalog.get(appId);
       if (app) app.setIsRecommended(false);
+    },
+    _addAlly(ship: string, data: any) {
+      self.allies.set(ship, data);
+    },
+    _removeAlly(ship: string) {
+      self.allies.delete(ship);
     },
   }));
 

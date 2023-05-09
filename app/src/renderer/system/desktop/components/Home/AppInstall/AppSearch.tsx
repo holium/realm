@@ -204,7 +204,6 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
             search.actions.onFocus();
           }}
           onBlur={() => {
-            appInstaller.reset();
             search.actions.onBlur();
           }}
         />

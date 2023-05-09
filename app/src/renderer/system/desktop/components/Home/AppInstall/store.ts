@@ -16,7 +16,12 @@ const searchMode = types.enumeration([
 
 export type SearchMode = Instance<typeof searchMode>;
 
-const loadingState = types.enumeration(['loading-published-apps', '']);
+const loadingState = types.enumeration([
+  'loading-published-apps',
+  'published-apps-loaded',
+  'adding-app-publisher',
+  '',
+]);
 
 export type LoadingState = Instance<typeof loadingState>;
 

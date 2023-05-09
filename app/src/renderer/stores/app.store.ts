@@ -337,13 +337,14 @@ function registerOnUpdateListener() {
         shipStore.spacesStore._onJoinedBazaar(payload);
         break;
       case 'new-ally':
-        console.log('new-ally => %o', payload[type]);
+        shipStore.bazaarStore._addAlly(payload.ship, payload);
         break;
       case 'ally-deleted':
-        console.log('ally-deleted => %o', payload[type]);
+        shipStore.bazaarStore._removeAlly(payload.ship);
         break;
       case 'treaties-loaded':
-        console.log('treaties-loaded => %o', payload[type]);
+        shipStore.bazaarStore.scryTreaties(payload.ship);
+        shipStore.bazaarStore.setLoadingState('published-apps-loaded');
         break;
     }
   });
