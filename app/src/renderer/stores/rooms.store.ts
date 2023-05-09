@@ -264,6 +264,22 @@ export const RoomsStore = types
         if (patp === window.ship) return localPeer;
         return remotePeers.get(patp);
       },
+      setProvider: flow(function* (provider: string) {
+        if (self.provider !== provider) {
+          if (self.current) {
+            RoomsIPC.leaveRoom(self.current?.rid);
+            self.current = undefined;
+            SoundActions.playRoomLeave();
+            hangupAll();
+          }
+          const session = yield RoomsIPC.getSession();
+          if (session) {
+            console.log('setting provider', provider);
+          }
+        }
+        yield RoomsIPC.setProvider(provider);
+        self.provider = provider;
+      }),
       sendChat: flow(function* (message: string) {
         if (!self.current) return;
         const chatMessage = ChatModel.create({
@@ -330,7 +346,7 @@ export const RoomsStore = types
         });
 
         socket.on('disconnect', () => {
-          console.log('disconnected to socket.holium.live');
+          console.log('disconnected from socket.holium.live');
         });
 
         const session = yield RoomsIPC.getSession();
@@ -444,6 +460,7 @@ export const RoomsStore = types
         localPeer?.setAudioInputDevice(deviceId);
       },
       _onSession(session: any) {
+        console.log('onSession', session);
         self.provider = session.provider;
         self.rooms = session.rooms;
         if (session.current) {
@@ -466,6 +483,7 @@ export const RoomsStore = types
         if (self.current?.rid === rid) {
           // if we are in the room, dial the new peer
           if (patp !== window.ship) {
+            SoundActions.playRoomPeerEnter();
             const remotePeer = dialPeer(rid, patp, self.rtcConfig);
             // queuedPeers are peers that are ready for us to dial them
             if (queuedPeers.includes(patp)) {
@@ -479,7 +497,10 @@ export const RoomsStore = types
         const room = self.rooms.get(rid);
         if (patp !== window.ship) {
           room?.removePeer(patp);
-          hangup(patp);
+          if (self.current?.rid === rid) {
+            SoundActions.playRoomPeerLeave();
+            hangup(patp);
+          }
         }
         if (patp === window.ship && self.current?.rid === rid) {
           self.current = undefined;
@@ -490,7 +511,10 @@ export const RoomsStore = types
         const room = self.rooms.get(rid);
         if (patp !== window.ship) {
           room?.removePeer(patp);
-          hangup(patp);
+          if (self.current?.rid === rid) {
+            SoundActions.playRoomPeerLeave();
+            hangup(patp);
+          }
         }
         if (patp === window.ship && self.current?.rid === rid) {
           self.current = undefined;
@@ -499,7 +523,7 @@ export const RoomsStore = types
       },
       _onRoomDeleted(rid: string) {
         const room = self.rooms.get(rid);
-        if (room?.creator !== window.ship) {
+        if (room?.creator !== window.ship && self.current?.rid === rid) {
           remotePeers.forEach((peer) => {
             hangup(peer.patp);
           });
@@ -507,6 +531,7 @@ export const RoomsStore = types
         }
         if (self.current?.rid === rid) {
           self.current = undefined;
+          SoundActions.playRoomLeave();
         }
         self.rooms.delete(rid);
       },
@@ -570,7 +595,6 @@ function registerOnUpdateListener() {
     }
     if (mark === 'rooms-v2-reaction') {
       if (type === 'room-entered') {
-        SoundActions.playRoomPeerEnter();
         shipStore.roomsStore._onRoomEntered(payload.rid, payload.ship);
       }
       if (type === 'room-left') {
