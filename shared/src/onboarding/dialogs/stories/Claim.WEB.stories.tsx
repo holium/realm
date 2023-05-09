@@ -28,6 +28,7 @@ export const AccountGetRealmDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <AccountGetRealmDialog
+      onClickJoinWaitlist={() => Promise.resolve(false)}
       onClickBuyServer={() => {}}
       onClickGetHosting={() => {}}
       onClickSidebarSection={() => {}}

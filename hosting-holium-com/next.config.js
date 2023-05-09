@@ -13,6 +13,7 @@ const nextConfig = {
     API_HEADERS_CLIENT_ID: process.env.API_HEADERS_CLIENT_ID,
     STRIPE_KEY: process.env.STRIPE_KEY,
     AMPLITUDE_API_KEY: process.env.AMPLITUDE_API_KEY,
+    CONVERTKIT_API_KEY: process.env.CONVERTKIT_API_KEY,
   },
 };
 
