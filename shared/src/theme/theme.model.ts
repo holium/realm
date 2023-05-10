@@ -6,9 +6,9 @@ import {
   Instance,
   types,
 } from 'mobx-state-tree';
-import { darken, lighten, rgba } from 'polished';
+import { darken, lighten, mix, rgba } from 'polished';
 
-import { bgIsLightOrDark } from '@holium/design-system';
+import { bgIsLightOrDark, luminosity } from '@holium/design-system';
 
 import { defaultTheme } from './defaultTheme';
 
@@ -69,22 +69,40 @@ export const Theme = types
 export type ThemeType = Instance<typeof Theme>;
 export type ThemeSnapshotIn = typeof Theme.SnapshotType;
 
-const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
-  const windowColor =
-    bgLuminosity === 'dark' ? darken(0.05, baseColor) : lighten(0.3, baseColor);
+const generateColors = (color: string, bgLuminosity: 'light' | 'dark') => {
+  /* Generate base color using semi-intelligent hue / contrast logic.
+     This is used as the base for  */
+  const genBaseColor = () => {
+    const luma = luminosity(color);
+    if (bgLuminosity === 'dark') {
+      /* 0 - 128 */
+      const shift = 64 - luma;
+      return mix(0.5, '#000', darken(Math.abs(shift) / 256, color));
+    } else {
+      /* 128 - 255 */
+      const shift = 192 - luma;
+      return mix(0.5, '#FFF', lighten(Math.abs(shift) / 256, color));
+    }
+  };
+
+  const baseColor = genBaseColor();
+
   return {
     // TODO add window border color
     mode: bgLuminosity,
     backgroundColor: baseColor,
     inputColor:
       bgLuminosity === 'dark'
-        ? darken(0.06, windowColor)
-        : lighten(0.05, windowColor),
+        ? darken(0.11, baseColor)
+        : lighten(0.35, baseColor),
     dockColor:
       bgLuminosity === 'dark'
         ? lighten(0.05, baseColor)
         : lighten(0.4, baseColor),
-    windowColor,
+    windowColor:
+      bgLuminosity === 'dark'
+        ? darken(0.05, baseColor)
+        : lighten(0.3, baseColor),
     textColor:
       bgLuminosity === 'dark'
         ? lighten(0.9, baseColor)
