@@ -325,6 +325,7 @@ export const ChatMessagePresenter = ({
       reactions={reactionList}
       onReaction={canReact ? onReaction : undefined}
       onReplyClick={onReplyClick}
+      error={message.error}
     />
   );
 };
