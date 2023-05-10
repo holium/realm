@@ -211,6 +211,7 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
           });
           break;
         case 'new-ally':
+          log.info('new-ally => %o', data['new-ally']);
           this.sendUpdate({
             type: 'new-ally',
             payload: data['new-ally'],
@@ -377,14 +378,27 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
   }
 
   async addAlly(ship: string) {
-    const ally = APIConnection.getInstance().conduit.poke({
-      app: 'treaty',
-      mark: 'ally-update-0',
-      json: {
-        add: ship,
-      },
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        reject('timed out after 10 seconds');
+      }, 10000);
+      APIConnection.getInstance().conduit.poke({
+        app: 'treaty',
+        mark: 'ally-update-0',
+        json: {
+          add: ship,
+        },
+        reaction: 'bazaar-reaction.new-ally',
+        onReaction: (data) => {
+          log.info('new-ally', data);
+          resolve(data['new-ally']);
+        },
+        onError: (err) => {
+          log.info('new-ally error', err);
+          reject(err);
+        },
+      });
     });
-    log.info('addAlly', ally);
   }
 
   async removeAlly(ship: string) {
@@ -408,21 +422,20 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
 
   async scryAllies() {
     // todo error handle
-    return (
-      await APIConnection.getInstance().conduit.scry({
-        app: 'bazaar',
-        path: '/allies',
-      })
-    ).allies;
+    const result = await APIConnection.getInstance().conduit.scry({
+      app: 'bazaar',
+      path: '/allies',
+    });
+    return result.allies;
   }
 
   async scryTreaties(ship: string) {
-    return (
-      await APIConnection.getInstance().conduit.scry({
-        app: 'bazaar',
-        path: `/treaties/${ship}`,
-      })
-    ).treaties;
+    const result = await APIConnection.getInstance().conduit.scry({
+      app: 'bazaar',
+      path: `/treaties/${ship}`,
+    });
+    log.info('scryTreaties', result);
+    return result.treaties;
   }
 
   // async addRecentApp(appId: string) {

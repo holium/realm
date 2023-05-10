@@ -33,8 +33,7 @@ const SearchModesPresenter = () => {
   useEffect(() => {
     if (searchMode === 'dev-app-search' && selectedShip) {
       if (!bazaarStore.hasAlly(selectedShip)) {
-        if (bazaarStore.loadingState !== 'loading-published-apps') {
-          bazaarStore.setLoadingState('loading-published-apps');
+        if (!bazaarStore.alliesLoader.isLoading) {
           bazaarStore
             .addAlly(selectedShip)
             .then(() => {
@@ -44,7 +43,7 @@ const SearchModesPresenter = () => {
         }
       } else {
         bazaarStore.scryTreaties(selectedShip);
-        bazaarStore.setLoadingState('published-apps-loaded');
+        // bazaarStore.setLoadingState('published-apps-loaded');
       }
     }
   }, [searchMode, selectedShip]);
@@ -214,13 +213,13 @@ const AppProvidersPresenter = () => {
     }
   };
   return (
-    bazaarStore.allies && (
+    bazaarStore.getAllies() && (
       <>
-        {Array.from(bazaarStore.allies.values())
-          .filter(
-            (item: any) =>
-              item.ship && item.ship.startsWith(appInstaller.searchString)
-          )
+        {bazaarStore
+          .getAllies()
+          .filter((item: any) => {
+            return item.ship && item.ship.startsWith(appInstaller.searchString);
+          })
           .map((item: any, index: number) => (
             <ProviderRow
               key={`provider-${index}`}
@@ -265,7 +264,7 @@ const DevAppsPresenter = () => {
     setApp,
   } = useAppInstaller();
 
-  if (!['published-apps-loaded'].includes(bazaarStore.loadingState)) {
+  if (bazaarStore.treatyLoader.isLoading) {
     return (
       <Flex flex={1} verticalAlign="middle">
         <Spinner size={0} />
