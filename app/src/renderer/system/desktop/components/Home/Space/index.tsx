@@ -57,7 +57,7 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
   const membersCount = currentSpace.members.count;
   const maxWidth = 880;
 
-  const isAdmin = currentSpace.isAdmin();
+  const isAdmin = currentSpace.isAdmin(loggedInAccount.serverId);
 
   const shouldShowAppGrid = appGrid || isOur;
 

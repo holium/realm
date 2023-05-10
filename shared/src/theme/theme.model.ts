@@ -20,6 +20,7 @@ export const Theme = types
     ),
     backgroundColor: types.optional(types.string, defaultTheme.backgroundColor),
     accentColor: types.optional(types.string, defaultTheme.accentColor),
+    offAccentColor: types.optional(types.string, defaultTheme.offAccentColor),
     inputColor: types.optional(types.string, defaultTheme.inputColor),
     dockColor: types.optional(types.string, defaultTheme.dockColor),
     iconColor: types.optional(types.string, defaultTheme.iconColor),
@@ -33,6 +34,7 @@ export const Theme = types
       return {
         backgroundColor: self.backgroundColor,
         accentColor: self.accentColor,
+        offAccentColor: self.offAccentColor,
         inputColor: self.inputColor,
         dockColor: self.dockColor,
         windowColor: self.windowColor,
