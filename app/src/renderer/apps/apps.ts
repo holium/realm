@@ -23,16 +23,15 @@ type AppType = {
 type AppManifestMap = Record<string, AppType>;
 
 export const devApps: AppManifestMap = {
-  'ballot-dev': {
-    id: 'ballot-dev',
-    title: 'Ballot - Dev',
+  gdelt: {
+    id: 'gdelt',
+    title: 'GDELT',
     type: 'dev',
-    color: '#cebef0',
-    icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/ballot-app-tile.svg',
+    color: '#00ccff',
+    icon: 'Globe',
     web: {
       openFullscreen: true,
-      url: 'http://localhost:3001/apps/ballot/',
-      development: true,
+      url: 'https://gdelt.github.io/',
     },
   },
 };
