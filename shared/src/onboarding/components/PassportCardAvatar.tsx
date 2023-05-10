@@ -178,6 +178,8 @@ export const PassportCardAvatar = ({
       if (generatedImages?.[index - 1]?.downloadLink) {
         fetch(generatedImages[index - 1].downloadLink, { headers });
       }
+
+      avatarModal.toggleOff();
     }
   };
 
@@ -199,6 +201,8 @@ export const PassportCardAvatar = ({
 
             setAuthor(undefined);
             setAuthorLink(undefined);
+
+            avatarModal.toggleOff();
           }
         })
         .catch(() => {
@@ -307,7 +311,7 @@ export const PassportCardAvatar = ({
       {selectedImage === 0 && (
         <Avatar patp={patp} sigilColor={[color, 'white']} size={68} />
       )}
-      {selectedImage > 0 && selectedImage < 21 && (
+      {selectedImage > 0 && selectedImage < 21 && !uploadedImage && (
         <CustomImage src={generatedImages?.[selectedImage - 1].src} size={68} />
       )}
       {uploadedImage && <CustomImage src={uploadedImage} size={68} />}
