@@ -72,8 +72,8 @@ const AppWindowManagerPresenter = () => {
         paddingTop: shellStore.isFullscreen ? 0 : 30,
       }}
     >
-      {windows.map((appWindow, index: number) => (
-        <AppWindow key={`${appWindow.appId}-${index}`} appWindow={appWindow} />
+      {windows.map((appWindow) => (
+        <AppWindow key={appWindow.appId} appWindow={appWindow} />
       ))}
     </motion.div>
   );
