@@ -77,11 +77,36 @@ const generateColors = (color: string, bgLuminosity: 'light' | 'dark') => {
     if (bgLuminosity === 'dark') {
       /* 0 - 128 */
       const shift = 64 - luma;
-      return mix(0.5, '#000', darken(Math.abs(shift) / 256, color));
+      if (shift > 0) {
+        return mix(
+          0.25,
+          '#000',
+          lighten(Math.max(0.0001 * Math.pow(shift, 2), 0.4), color)
+        );
+      } else {
+        return mix(
+          0.25,
+          '#000',
+          darken(Math.max(0.0001 * Math.pow(shift, 2), 0.4), color)
+        );
+      }
     } else {
       /* 128 - 255 */
-      const shift = 192 - luma;
-      return mix(0.5, '#FFF', lighten(Math.abs(shift) / 256, color));
+      const shift = luma - 192;
+      console.log(shift);
+      if (shift > 0) {
+        return mix(
+          0.25,
+          '#FFF',
+          darken(Math.max(0.0001 * Math.pow(shift, 2), 0.4), color)
+        );
+      } else {
+        return mix(
+          0.25,
+          '#FFF',
+          lighten(Math.max(0.0001 * Math.pow(shift, 2), 0.4), color)
+        );
+      }
     }
   };
 
