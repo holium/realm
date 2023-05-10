@@ -20,6 +20,7 @@ export const genCSSVariables = (theme: ThemeType) => {
     : rgba(darken(0.15, theme.dockColor), 0.6);
   const baseColor = theme.backgroundColor;
   const accentColor = theme.accentColor;
+  const offAccentColor = theme.offAccentColor;
   const inputColor = theme.inputColor;
   const borderColor = isLight
     ? darken(0.1, theme.windowColor)
@@ -47,6 +48,7 @@ export const genCSSVariables = (theme: ThemeType) => {
   const homeButtonRgba = toRgbaString(homeButtonColor);
   const baseRgba = toRgbaString(baseColor);
   const accentRgba = toRgbaString(accentColor);
+  const offAccentRgba = toRgbaString(offAccentColor);
   const inputRgba = toRgbaString(inputColor);
   const borderRgba = toRgbaString(borderColor);
   const windowRgba = toRgbaString(windowColor);
@@ -86,6 +88,7 @@ export const genCSSVariables = (theme: ThemeType) => {
       --rlm-dock-rgba: ${dockRgba};
       --rlm-base-rgba: ${baseRgba};
       --rlm-accent-rgba: ${accentRgba};
+      --rlm-off-accent-rgba: ${offAccentRgba};
       --rlm-input-rgba: ${inputRgba};
       --rlm-border-rgba: ${borderRgba};
       --rlm-window-rgba: ${windowRgba};
@@ -106,6 +109,7 @@ export const genCSSVariables = (theme: ThemeType) => {
       --rlm-dock-color: ${dockColor};
       --rlm-base-color: ${baseColor};
       --rlm-accent-color: ${accentColor};
+      --rlm-off-accent-color: ${offAccentColor};
       --rlm-input-color: ${inputColor};
       --rlm-border-color: ${borderColor};
       --rlm-window-color: ${windowColor};
