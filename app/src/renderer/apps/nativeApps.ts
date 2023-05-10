@@ -22,21 +22,6 @@ type NativeAppType = {
 
 type AppManifestMap = Record<string, NativeAppType>;
 
-const devApps: AppManifestMap = {
-  'ballot-dev': {
-    id: 'ballot-dev',
-    title: 'Ballot - Dev',
-    type: 'web',
-    color: '#cebef0',
-    icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/ballot-app-tile.svg',
-    web: {
-      openFullscreen: true,
-      url: 'http://localhost:3001/apps/ballot/',
-      development: true,
-    },
-  },
-};
-
 export const nativeApps: AppManifestMap = {
   'os-browser': {
     id: 'os-browser',
@@ -60,5 +45,4 @@ export const nativeApps: AppManifestMap = {
       hideTitlebarBorder: true,
     },
   },
-  ...devApps,
 };

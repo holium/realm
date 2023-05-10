@@ -19,7 +19,6 @@ import {
 import { getAppTileFlags } from 'renderer/lib/app';
 import {
   AppType,
-  DevAppType,
   InstallStatus,
 } from 'renderer/stores/models/bazaar.model';
 
@@ -122,7 +121,7 @@ interface AppTileProps {
   onAppClick?: (app: AppType) => void;
   selected?: boolean;
   open?: boolean;
-  app: AppType | DevAppType;
+  app: AppType;
   tileId: string;
   variants?: any;
   isAnimated?: boolean;

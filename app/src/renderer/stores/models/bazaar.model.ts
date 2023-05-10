@@ -56,21 +56,6 @@ export const DocketApp = types.model('DocketApp', {
   installStatus: types.optional(types.string, InstallStatus.installed),
 });
 
-export const DevAppModel = types.model('DevApp', {
-  id: types.identifier,
-  title: types.string,
-  type: types.literal(AppTypes.Dev),
-  info: types.optional(types.string, ''),
-  color: types.string,
-  icon: types.string,
-  installStatus: types.optional(types.string, InstallStatus.installed),
-  config: types.maybeNull(RealmConfig),
-  web: types.model('WebConfig', {
-    url: types.string,
-    openFullscreen: types.optional(types.boolean, false),
-  }),
-});
-
 export const WebApp = types.model('WebApp', {
   id: types.string,
   title: types.string,
@@ -157,11 +142,9 @@ export const BazaarStore = types
     loadingAllies: false,
     loadingTreaties: false,
     addingAlly: types.map(types.string),
-    devAppMap: types.map(DevAppModel),
     installations: types.map(types.string),
     treatiesLoaded: types.optional(types.boolean, false),
     recentApps: types.array(types.string),
-    recentDevs: types.array(types.string),
   })
   .views((self) => ({
     get installed(): SnapshotOut<AppMobxType>[] {
@@ -169,6 +152,9 @@ export const BazaarStore = types
         .map((app) => getSnapshot(app))
         .filter((app: SnapshotOut<AppMobxType>) => {
           if (app.type === 'urbit') {
+            // workaround
+            if (app.id === 'landscape') return false;
+
             const urb = app as AppMobxType;
             return (
               urb.installStatus === 'installed' ||
@@ -191,15 +177,8 @@ export const BazaarStore = types
         });
       return apps;
     },
-    get devApps() {
-      if (self.devAppMap.size === 0) return [];
-      return Array.from(self.devAppMap.values()) || [];
-    },
     getRecentApps() {
       return self.recentApps.map((appId) => self.catalog.get(appId));
-    },
-    getRecentDevs() {
-      return self.recentDevs;
     },
     getAllies() {
       return Array.from(Object.values(getSnapshot(self.allies)));
@@ -242,8 +221,7 @@ export const BazaarStore = types
     },
     getApp(appId: string) {
       const app = self.catalog.get(appId);
-      if (app) return toJS(app);
-      return self.devAppMap.get(appId);
+      return toJS(app);
     },
   }))
   .actions((self) => ({
@@ -258,7 +236,6 @@ export const BazaarStore = types
       self.catalog.clear();
       self.gridIndex.clear();
       self.recentApps.clear();
-      self.recentDevs.clear();
     },
     // Updates
     // _setAppStatus(appId: string, app: UrbitAppType, gridIndex: any) {
@@ -395,15 +372,6 @@ export const BazaarStore = types
       if (idx !== -1) self.recentApps.splice(idx, 1);
       // add app to front of list
       self.recentApps.splice(0, 0, appId);
-    },
-    addRecentDev(shipId: string) {
-      // keep no more than 5 recent app entries
-      if (self.recentDevs.length >= 5) {
-        self.recentDevs.pop();
-      }
-      const idx = self.recentDevs.findIndex((item) => item === shipId);
-      if (idx !== -1) self.recentDevs.splice(idx, 1);
-      self.recentDevs.splice(0, 0, shipId);
     },
     //
     // Pokes
@@ -576,11 +544,6 @@ export const BazaarStore = types
         throw error;
       }
     }),
-    loadDevApps(devApps: Record<string, DevAppType>) {
-      Object.values(devApps).forEach((app) => {
-        self.devAppMap.set(app.id, DevAppModel.create(app));
-      });
-    },
     // helpers
     setAppDuringInstallation(app: AppType, status: InstallStatus) {
       const install = self.installations.get(app.id);
@@ -650,7 +613,6 @@ export type WebAppType = Instance<typeof WebApp>;
 
 export type DocketAppType = Instance<typeof DocketApp>;
 export type NativeAppType = Instance<typeof NativeApp>;
-export type DevAppType = Instance<typeof DevAppModel>;
 export type AppType = Instance<typeof AppModel>;
 export type AllyType = Instance<typeof AllyModel>;
 export type BazaarStoreType = Instance<typeof BazaarStore>;

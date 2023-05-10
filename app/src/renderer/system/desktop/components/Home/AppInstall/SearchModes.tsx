@@ -92,7 +92,6 @@ const SearchModesPresenter = () => {
     <>
       {searchMode === 'start' && <AppInstallStart />}
       {searchMode === 'ship-search' && <ShipSearch />}
-      {searchMode === 'dev-app-search' && <DevAppSearch />}
       {searchMode === 'app-search' && renderAppSearch(data)}
       {searchMode === 'app-summary' && renderAppSummary()}
     </>
@@ -128,9 +127,6 @@ const AppInstallStartPresenter = () => {
         <Text.Custom opacity={0.7} fontWeight={500}>
           Recent Developers
         </Text.Custom>
-        <Flex flexDirection="column" gap={12}>
-          {renderDevs(bazaarStore.recentDevs, appInstaller)}
-        </Flex>
       </Flex>
     </NoScrollBar>
   );
@@ -173,37 +169,6 @@ const renderAppSummary = () => {
   return <ViewComponent />;
 };
 
-const renderDevs = (
-  devs: any,
-  appInstaller: ReturnType<typeof useAppInstaller>
-) => {
-  if (!devs || devs.length === 0) {
-    return <Text.Custom opacity={0.4}>{`No recent devs`}</Text.Custom>;
-  }
-  const onProviderClick = (ship: string) => {
-    if (isValidPatp(ship)) {
-      appInstaller.setSearchMode('dev-app-search');
-      appInstaller.setSearchPlaceholder('Search...');
-      appInstaller.setSelectedShip(ship);
-      appInstaller.setSearchModeArgs([ship]);
-      appInstaller.setSearchString('');
-    }
-  };
-
-  return devs?.map((item: any, index: number) => {
-    return (
-      <ProviderRow
-        key={`provider-${index}`}
-        id={`provider-${index}`}
-        ship={item}
-        color={'#000'}
-        onClick={(ship: string) => {
-          onProviderClick(ship);
-        }}
-      />
-    );
-  });
-};
 const renderAppSearch = (apps: AppMobxType[]) => {
   return (
     <Flex flexDirection="column" gap={12}>
@@ -268,119 +233,3 @@ const ShipSearchPresenter = () => {
 };
 
 const ShipSearch = observer(ShipSearchPresenter);
-
-const DevAppsPresenter = () => {
-  const { bazaarStore } = useShipStore();
-  const {
-    searchString,
-    selectedShip,
-    setSelectedShip,
-    setSearchString,
-    setSearchMode,
-    setApp,
-  } = useAppInstaller();
-
-  const apps: DocketAppType[] = bazaarStore.searchTreaties(
-    selectedShip,
-    searchString
-  );
-
-  if (bazaarStore.loadingTreaties) {
-    return (
-      <Flex flex={1} verticalAlign="middle">
-        <Spinner size={0} />
-        <Text.Custom
-          marginLeft={2}
-          opacity={0.4}
-        >{`Loading published apps...`}</Text.Custom>
-      </Flex>
-    );
-  }
-
-  const InstallButton = ({ app }: any) => {
-    const { bazaarStore } = useShipStore();
-    const parts = app.id.split('/');
-    let appEntry;
-    let installed = false;
-    if (bazaarStore.catalog.has(parts[1])) {
-      appEntry = bazaarStore.catalog.get(parts[1]) as AppMobxType;
-      installed = appEntry.installStatus === 'installed';
-    }
-    return (
-      <Button.Primary
-        borderRadius={6}
-        paddingTop="6px"
-        paddingBottom="6px"
-        disabled={installed}
-        fontWeight={500}
-        onClick={(e) => {
-          e.stopPropagation();
-          !installed && bazaarStore.installApp(parts[0], parts[1]);
-          // TODO should we close app search on install?
-          setSearchMode('none');
-        }}
-      >
-        {installed ? 'Installed' : 'Install'}
-      </Button.Primary>
-    );
-  };
-
-  if (!apps || apps.length === 0) {
-    return <Text.Custom opacity={0.4}>{`No apps found`}</Text.Custom>;
-  }
-
-  const onAppClick = (app: DocketAppType) => {
-    setApp(app);
-    setSearchMode('app-summary');
-  };
-
-  return (
-    <>
-      {apps?.map((app: DocketAppType, index: number) => (
-        <div key={index}>
-          <AppRow
-            app={app}
-            actionRenderer={(app: DocketAppType) =>
-              app.id && <InstallButton app={app} />
-            }
-            onClick={(
-              evt: React.MouseEvent<HTMLElement>,
-              app: DocketAppType
-            ) => {
-              evt.stopPropagation();
-              onAppClick(app);
-              setSelectedShip(app.id.split('/')[0]);
-              // setSearchModeArgs([app.host, app.id]);
-              setSearchString(app.id.split('/')[1]);
-              // setApp(app);
-              // setSearchMode('app-summary');
-              // setSelectedShip(selectedShip);
-              // setSearchModeArgs([selectedShip]);
-              // setSearchString(app.id);
-            }}
-          />
-        </div>
-      ))}
-    </>
-  );
-};
-
-const DevApps = observer(DevAppsPresenter);
-
-const DevAppSearchPresenter = () => {
-  const { selectedShip } = useAppInstaller();
-
-  return (
-    <Flex flexDirection="column" gap={12}>
-      <Text.Custom
-        fontWeight={500}
-        opacity={0.7}
-      >{`Software developed by ${selectedShip}...`}</Text.Custom>
-      <Flex flexDirection="column" gap={12}>
-        <DevApps />
-      </Flex>
-    </Flex>
-  );
-};
-
-const DevAppSearch = observer(DevAppSearchPresenter);

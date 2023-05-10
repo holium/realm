@@ -83,15 +83,11 @@ export const ShipStore = types
 // TODO better snapshot loading
 
 const loadBazaarSnapshot = (): SnapshotIn<BazaarStoreType> => {
-  const recentDevsSnapshot = localStorage.getItem('recentAppDevs');
   const recentAppsSnapshot = localStorage.getItem('recentApps');
-  let recentDevs: string[] = [];
   let recentApps: string[] = [];
-  if (recentDevsSnapshot) recentDevs = JSON.parse(recentDevsSnapshot);
   if (recentAppsSnapshot) recentApps = JSON.parse(recentAppsSnapshot);
 
   return {
-    recentDevs: recentDevs || [],
     recentApps: recentApps || [],
     catalog: {},
   };
@@ -182,10 +178,6 @@ onSnapshot(shipStore, (snapshot) => {
   localStorage.setItem(
     'recentApps',
     JSON.stringify(snapshot.bazaarStore.recentApps)
-  );
-  localStorage.setItem(
-    'recentAppDevs',
-    JSON.stringify(snapshot.bazaarStore.recentDevs)
   );
 });
 // -------------------------------
