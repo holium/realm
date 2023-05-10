@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 
@@ -6,6 +7,12 @@ import { Flex } from '@holium/design-system/general';
 import { useBrowser } from 'renderer/apps/Browser/store';
 import { useAppState } from 'renderer/stores/app.store';
 
+const getFavicon = (url: string) => {
+  const { protocol, host } = new URL(url);
+
+  return `${protocol}//${host}/favicon.ico`;
+};
+
 type Props = {
   url: string;
 };
@@ -13,6 +20,8 @@ type Props = {
 const PinnedWebAppPresenter = ({ url }: Props) => {
   const { setUrl } = useBrowser();
   const { shellStore } = useAppState();
+
+  const [favicon, setFavicon] = useState<string | null>(getFavicon(url));
 
   // First uppercase letter of the website name.
   // Remove any protocol and www. from the url.
@@ -55,7 +64,20 @@ const PinnedWebAppPresenter = ({ url }: Props) => {
         }}
         onClick={onClick}
       >
-        {character}
+        {favicon ? (
+          <img
+            alt="favicon"
+            src={favicon}
+            style={{
+              width: 16,
+              height: 16,
+              borderRadius: 4,
+            }}
+            onError={() => setFavicon(null)}
+          />
+        ) : (
+          character
+        )}
       </Flex>
     </Reorder.Item>
   );
