@@ -10,6 +10,7 @@ import { observer } from 'mobx-react';
 import { Box, Flex, TextInput } from '@holium/design-system';
 
 import { useAppState } from 'renderer/stores/app.store';
+import { SpacesIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { createUrl } from '../helpers/createUrl';
@@ -33,10 +34,13 @@ const ToolbarSearchInputPresenter = ({ innerRef, readyWebview }: Props) => {
   const starred = Boolean(currentSpace?.isWebAppPinned(currentTab.inPageNav));
 
   const handleStarClick = () => {
+    const spacePath = currentSpace?.path;
+    if (!spacePath) return;
+
     if (starred) {
-      currentSpace?.unpinWebApp(input);
+      SpacesIPC.removeBookmark(spacePath, input);
     } else {
-      currentSpace?.pinWebApp(input);
+      SpacesIPC.addBookmark(spacePath, input);
     }
   };
 

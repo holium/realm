@@ -11,7 +11,7 @@ import { CredentialsModel } from './models/credentials.model';
 import { FeaturedStore } from './models/featured.model';
 import { FriendsStore } from './models/friends.model';
 import { NotifStore } from './models/notification.model';
-import { SpacesStore, SpacesStoreType } from './models/spaces.model';
+import { SpacesStore } from './models/spaces.model';
 import {
   NetworkStoreType,
   ProtocolType,
@@ -98,19 +98,6 @@ const loadBazaarSnapshot = (): SnapshotIn<BazaarStoreType> => {
   };
 };
 
-const loadSpacesSnapshot = (): SnapshotIn<SpacesStoreType> => {
-  const spacesSnapshot = localStorage.getItem('spaces');
-  let spaces: any = {};
-  if (spacesSnapshot) spaces = JSON.parse(spacesSnapshot);
-
-  return {
-    spaces,
-    loader: {
-      state: 'initial',
-    },
-  };
-};
-
 export const shipStore = ShipStore.create({
   credentials: {},
   notifStore: {
@@ -125,7 +112,12 @@ export const shipStore = ShipStore.create({
     pinnedChats: [],
     loader: { state: 'loading' },
   },
-  spacesStore: loadSpacesSnapshot(),
+  spacesStore: {
+    spaces: {},
+    loader: {
+      state: 'loading',
+    },
+  },
   bazaarStore: loadBazaarSnapshot(),
   walletStore: {
     navState: {
@@ -196,7 +188,6 @@ onSnapshot(shipStore, (snapshot) => {
     'recentAppDevs',
     JSON.stringify(snapshot.bazaarStore.recentDevs)
   );
-  localStorage.setItem('spaces', JSON.stringify(snapshot.spacesStore.spaces));
 });
 // -------------------------------
 // Create core context

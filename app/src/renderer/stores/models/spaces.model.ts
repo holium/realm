@@ -10,6 +10,7 @@ import {
 
 import { defaultTheme, Theme } from '@holium/shared';
 
+import { Bookmark } from 'os/services/ship/spaces/tables/bookmarks.table';
 import { MemberRole } from 'os/types';
 
 import { appState } from '../app.store';
@@ -136,13 +137,6 @@ export const SpaceModel = types
         console.error(error);
       }
     }),
-    pinWebApp(url: string) {
-      self.webAppDock.push(url);
-    },
-    unpinWebApp(url: string) {
-      const index = self.webAppDock.findIndex((webAppUrl) => webAppUrl === url);
-      self.webAppDock.splice(index, 1);
-    },
     reorderWebApps(webAppDock: string[]) {
       const webAppDockUrls = self.webAppDock.sort((a, b) => {
         const aIndex = webAppDock.findIndex((url) => url === a);
@@ -177,6 +171,13 @@ export const SpaceModel = types
     },
     _setStall(stall: any) {
       self.stall = StallModel.create(stall);
+    },
+    _onBookmarkAdded(url: string) {
+      self.webAppDock.push(url);
+    },
+    _onBookmarkRemoved(url: string) {
+      const index = self.webAppDock.findIndex((webAppUrl) => webAppUrl === url);
+      self.webAppDock.splice(index, 1);
     },
   }));
 
@@ -233,7 +234,7 @@ export const SpacesStore = types
   .actions((self) => ({
     init: flow(function* () {
       try {
-        const { current, spaces } = yield SpacesIPC.getInitial();
+        const { current, spaces, bookmarks } = yield SpacesIPC.getInitial();
         spaces.forEach((space: any) => {
           space.theme.id = space.path;
           const spaceModel = SpaceModel.create(spaceRowToModel(space));
@@ -244,6 +245,13 @@ export const SpacesStore = types
           appState.setTheme(self.selected.theme);
           self.loader.set('loaded');
         }
+        console.log('bookmarks', bookmarks);
+        (Object.values(bookmarks) as Bookmark[]).forEach(({ path, url }) => {
+          const space = self.spaces.get(path);
+          if (space) {
+            space.webAppDock.push(url);
+          }
+        });
       } catch (e) {
         console.error(e);
         self.loader.set('error');
@@ -490,6 +498,16 @@ export const SpacesStore = types
       const refreshedSpace = yield SpacesIPC.getSpace(joinedPayload.path);
       self.spaces.set(space.path, spaceRowToModel(refreshedSpace));
     }),
+    _onBookmarkAdded: (bookmarkPayload: { path: string; url: string }) => {
+      const space = self.spaces.get(bookmarkPayload.path);
+      if (!space) return;
+      space._onBookmarkAdded(bookmarkPayload.url);
+    },
+    _onBookmarkRemoved: (bookmarkPayload: { path: string; url: string }) => {
+      const space = self.spaces.get(bookmarkPayload.path);
+      if (!space) return;
+      space._onBookmarkRemoved(bookmarkPayload.url);
+    },
   }));
 
 export type SpacesStoreType = Instance<typeof SpacesStore>;
