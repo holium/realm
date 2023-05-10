@@ -39,7 +39,7 @@ export const AppInstallStore = types
   .model('AppInstallStore', {
     popoverId: types.string,
     searchMode,
-    searchModeArgs: types.array(types.string),
+    searchModeArgs: types.optional(types.array(types.string), []),
     searchString: types.string,
     searchPlaceholder: types.string,
     selectedShip: types.string,
