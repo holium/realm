@@ -1553,7 +1553,7 @@
 ++  get-pikes
   ^-  pikes:hood
   :: ~&  >>  "{<dap.bowl>}: [get-pikes]"
-  =/  res  .^(* %gx (welp pre /kiln/pikes/kiln-pikes))
+  =/  res  .^(pikes:hood %gx (welp pre /kiln/pikes/kiln-pikes))
   ~&  >>  "{<dap.bowl>}: {<res>}"
   res
   :: .^(pikes:hood %gx (welp pre /kiln/pikes/kiln-pikes))
