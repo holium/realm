@@ -2,6 +2,7 @@ export const defaultTheme: {
   mode: 'light' | 'dark';
   backgroundColor: string;
   accentColor: string;
+  offAccentColor: string;
   inputColor: string;
   dockColor: string;
   iconColor: string;
@@ -13,6 +14,7 @@ export const defaultTheme: {
   mode: 'light',
   backgroundColor: '#C4C3BF',
   accentColor: '#4E9EFD',
+  offAccentColor: '#BDBDBD',
   inputColor: '#FFFFFF',
   dockColor: '#FFFFFF',
   iconColor: '#CECECC',
