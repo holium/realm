@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { Instance, onSnapshot, types } from 'mobx-state-tree';
+import { Instance, onSnapshot, types, cast } from 'mobx-state-tree';
 
 import { calculatePopoverAnchorById } from 'renderer/lib/position';
 import { DocketApp, DocketAppType } from 'renderer/stores/models/bazaar.model';
@@ -39,7 +39,7 @@ export const AppInstallStore = types
   .model('AppInstallStore', {
     popoverId: types.string,
     searchMode,
-    searchModeArgs: types.optional(types.array(types.string), []),
+    searchModeArgs: types.array(types.string),
     searchString: types.string,
     searchPlaceholder: types.string,
     selectedShip: types.string,
@@ -123,7 +123,7 @@ export const AppInstallStore = types
     },
     reset() {
       self.searchMode = 'none';
-      self.searchModeArgs = [];
+      self.searchModeArgs = cast([]);
       self.searchString = '';
       self.searchPlaceholder = 'Search...';
       self.selectedShip = '';
