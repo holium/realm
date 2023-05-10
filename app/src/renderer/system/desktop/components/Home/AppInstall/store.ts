@@ -122,11 +122,11 @@ export const AppInstallStore = types
       });
     },
     reset() {
-      self.setSearchMode('none');
-      self.setSearchModeArgs([]);
-      self.setSearchString('');
-      self.setSearchPlaceholder('Search...');
-      self.setSelectedShip('');
+      self.searchMode = 'none';
+      self.searchModeArgs = [];
+      self.searchString = '';
+      self.searchPlaceholder = 'Search...';
+      self.selectedShip = '';
     },
   }));
 

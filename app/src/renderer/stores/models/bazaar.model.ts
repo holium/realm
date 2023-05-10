@@ -429,8 +429,9 @@ export const BazaarStore = types
     installApp: flow(function* (ship: string, desk: string) {
       let app: any | undefined = self.catalog.get(desk);
       if (!app) {
+        const treaty: DocketAppType = self.treaties.get(`${ship}/${desk}`);
         app = UrbitApp.create({
-          ...toJS(self.treaties.get(`${ship}/${desk}`)),
+          ...treaty,
           type: AppTypes.Urbit,
         });
       }
