@@ -10,11 +10,12 @@ import { observer } from 'mobx-react';
 import { Box, Flex, TextInput } from '@holium/design-system';
 
 import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { createUrl } from '../helpers/createUrl';
 import { useBrowser } from '../store';
 import { ToolbarLockIcon } from './ToolbarLockIcon';
-import { ToolbarSearchIcon } from './ToolbarSearchIcon';
+import { ToolbarStarIcon } from './ToolbarStarIcon';
 
 type Props = {
   innerRef: RefObject<HTMLDivElement>;
@@ -23,24 +24,41 @@ type Props = {
 
 const ToolbarSearchInputPresenter = ({ innerRef, readyWebview }: Props) => {
   const { theme } = useAppState();
-  const { currentTab, setUrl } = useBrowser();
-  const [input, setInput] = useState(currentTab.url ?? '');
+  const { spacesStore } = useShipStore();
+  const currentSpace = spacesStore.selected;
+
+  const { currentTab, setInPageNav, setUrl } = useBrowser();
+  const [input, setInput] = useState(currentTab.inPageNav ?? '');
+
+  const starred = Boolean(currentSpace?.isWebAppPinned(currentTab.inPageNav));
+
+  const handleStarClick = () => {
+    if (starred) {
+      currentSpace?.unpinWebApp(input);
+    } else {
+      currentSpace?.pinWebApp(input);
+    }
+  };
 
   useEffect(() => {
     if (!readyWebview) return;
 
-    readyWebview.addEventListener('did-navigate', (e) => setInput(e.url));
-    readyWebview.addEventListener('did-navigate-in-page', (e) =>
-      setInput(e.url)
-    );
+    const handleNavigation = (e: Electron.DidNavigateEvent) => {
+      setInput(e.url);
+      setInPageNav(e.url);
+    };
+
+    readyWebview.addEventListener('did-navigate', handleNavigation);
+    readyWebview.addEventListener('did-navigate-in-page', handleNavigation);
 
     return () => {
-      readyWebview.removeEventListener('did-navigate', (e) => setInput(e.url));
-      readyWebview.removeEventListener('did-navigate-in-page', (e) =>
-        setInput(e.url)
+      readyWebview.removeEventListener('did-navigate', handleNavigation);
+      readyWebview.removeEventListener(
+        'did-navigate-in-page',
+        handleNavigation
       );
     };
-  }, [readyWebview, readyWebview]);
+  }, [readyWebview]);
 
   const onInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setInput(e.target.value);
@@ -76,7 +94,11 @@ const ToolbarSearchInputPresenter = ({ innerRef, readyWebview }: Props) => {
             />
           </Box>
         }
-        rightAdornment={<ToolbarSearchIcon onClick={search} />}
+        rightAdornment={
+          <Flex mr="8px">
+            <ToolbarStarIcon starred={starred} onClick={handleStarClick} />
+          </Flex>
+        }
         placeholder="Search DuckDuckGo or enter url"
         width="100%"
         style={{

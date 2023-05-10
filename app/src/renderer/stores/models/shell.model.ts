@@ -1,8 +1,14 @@
 import { toJS } from 'mobx';
 import { applySnapshot, getSnapshot, Instance, types } from 'mobx-state-tree';
 
-import { getInitialWindowBounds } from '../../lib/window-manager';
+import { getDefaultAppDimensions } from 'renderer/lib/dimensions';
+
+import {
+  getCenteredPosition,
+  getInitialWindowBounds,
+} from '../../lib/window-manager';
 import { shipStore } from '../ship.store';
+import { AppMobxType } from './bazaar.model';
 import {
   AppWindowMobxType,
   AppWindowModel,
@@ -137,15 +143,18 @@ export const ShellModel = types
       const windowBounds = self.getWindowByAppId(appId)?.bounds;
       if (windowBounds) applySnapshot(windowBounds, bounds);
     },
-    openWindow(app: any, nativeConfig?: any) {
+    openWindow(app: AppMobxType, nativeConfig?: any) {
       let glob;
       let href;
       if (app.type === 'urbit') {
-        glob = app.href.glob ? true : false;
+        // @ts-ignore
+        glob = app.href?.glob ? true : false;
         href = app.href;
       }
 
+      // @ts-ignore
       if (app.type === 'dev') {
+        // @ts-ignore
         href = { site: app.web.url };
       }
 
@@ -164,6 +173,36 @@ export const ShellModel = types
       });
 
       shipStore.bazaarStore.addRecentApp(app.id);
+
+      self.windows.set(newWindow.appId, newWindow);
+      this.setActive(newWindow.appId);
+      if (self.homePaneOpen) self.homePaneOpen = false;
+
+      return newWindow;
+    },
+    openRelicWindow() {
+      const dimensions = getDefaultAppDimensions(
+        'os-browser',
+        self.desktopDimensions
+      );
+      if (!dimensions) {
+        console.error('Could not get default dimensions');
+        return;
+      }
+      const position = getCenteredPosition(dimensions);
+
+      const newWindow = AppWindowModel.create({
+        appId: 'os-browser',
+        title: 'Relic Browser',
+        glob: false,
+        state: 'normal',
+        type: 'native',
+        zIndex: self.windows.size + 1,
+        bounds: {
+          ...dimensions,
+          ...position,
+        },
+      });
 
       self.windows.set(newWindow.appId, newWindow);
       this.setActive(newWindow.appId);

@@ -70,13 +70,20 @@ export const SpaceModel = types
     members: types.optional(MembersStore, { all: {} }),
     stall: StallModel,
     dock: types.array(UrbitApp),
+    webAppDock: types.array(types.string),
   })
   .views((self) => ({
     isPinned(appId: string) {
       return self.dock.some((app) => app.id === appId);
     },
+    isWebAppPinned(url: string) {
+      return self.webAppDock.includes(url);
+    },
     get dockAppIds() {
       return self.dock.slice().map((app) => app.id);
+    },
+    get webAppDockUrls() {
+      return self.webAppDock.slice();
     },
     isHost() {
       // TODO check if admin
@@ -129,6 +136,21 @@ export const SpaceModel = types
         console.error(error);
       }
     }),
+    pinWebApp(url: string) {
+      self.webAppDock.push(url);
+    },
+    unpinWebApp(url: string) {
+      const index = self.webAppDock.findIndex((webAppUrl) => webAppUrl === url);
+      self.webAppDock.splice(index, 1);
+    },
+    reorderWebApps(webAppDock: string[]) {
+      const webAppDockUrls = self.webAppDock.sort((a, b) => {
+        const aIndex = webAppDock.findIndex((url) => url === a);
+        const bIndex = webAppDock.findIndex((url) => url === b);
+        return aIndex - bIndex;
+      });
+      applySnapshot(self.webAppDock, webAppDockUrls);
+    },
     addToSuite: flow(function* (appId: string, index: number) {
       try {
         return yield BazaarIPC.addToSuite(self.path, appId, index);
