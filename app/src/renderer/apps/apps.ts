@@ -1,7 +1,7 @@
-type NativeAppType = {
+type AppType = {
   id: string;
   title: string;
-  type: 'native' | 'web' | 'urbit';
+  type: 'native' | 'web' | 'urbit' | 'dev';
   color: string;
   icon?: string;
   native?: {
@@ -20,13 +20,13 @@ type NativeAppType = {
   };
 };
 
-type AppManifestMap = Record<string, NativeAppType>;
+type AppManifestMap = Record<string, AppType>;
 
-const devApps: AppManifestMap = {
+export const devApps: AppManifestMap = {
   'ballot-dev': {
     id: 'ballot-dev',
     title: 'Ballot - Dev',
-    type: 'web',
+    type: 'dev',
     color: '#cebef0',
     icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/ballot-app-tile.svg',
     web: {
@@ -60,5 +60,4 @@ export const nativeApps: AppManifestMap = {
       hideTitlebarBorder: true,
     },
   },
-  ...devApps,
 };

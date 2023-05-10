@@ -13,7 +13,7 @@ import {
   NotificationType,
 } from '@holium/design-system';
 
-import { nativeApps } from 'renderer/apps/nativeApps';
+import { nativeApps } from 'renderer/apps/apps';
 import { useTrayApps } from 'renderer/apps/store';
 import { trackEvent } from 'renderer/lib/track';
 import { openChatToPath } from 'renderer/lib/useTrayControls';

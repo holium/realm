@@ -17,11 +17,7 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
   const { bazaarStore, spacesStore } = useShipStore();
   const currentSpace = spacesStore.selected;
   const apps = useMemo(
-    () =>
-      [
-        ...bazaarStore.installed,
-        // ...bazaarStore.devApps,
-      ] as AppMobxType[],
+    () => [...bazaarStore.installed, ...bazaarStore.devApps] as AppMobxType[],
     [bazaarStore.catalog, bazaarStore.installations.values()]
   );
 

@@ -1,7 +1,7 @@
 import { FC, PointerEvent } from 'react';
 
+import { nativeApps } from 'renderer/apps/apps';
 import { BrowserToolbarProps } from 'renderer/apps/Browser/Toolbar/BrowserToolbar';
-import { nativeApps } from 'renderer/apps/nativeApps';
 import { ShellModelType } from 'renderer/stores/models/shell.model';
 import { AppWindowMobxType } from 'renderer/stores/models/window.model';
 import {

@@ -10,6 +10,8 @@ import {
 
 import { cleanNounColor } from '@holium/design-system';
 
+import { devApps } from 'renderer/apps/apps';
+
 import { BazaarIPC } from '../ipc';
 import { Glob } from './docket.model';
 
@@ -56,7 +58,7 @@ export const DocketApp = types.model('DocketApp', {
   installStatus: types.optional(types.string, InstallStatus.installed),
 });
 
-export const DevAppModel = types.model('DevApp', {
+export const DevApp = types.model('DevApp', {
   id: types.identifier,
   title: types.string,
   type: types.literal(AppTypes.Dev),
@@ -157,7 +159,7 @@ export const BazaarStore = types
     loadingAllies: false,
     loadingTreaties: false,
     addingAlly: types.map(types.string),
-    devAppMap: types.map(DevAppModel),
+    devAppMap: types.map(DevApp),
     installations: types.map(types.string),
     treatiesLoaded: types.optional(types.boolean, false),
     recentApps: types.array(types.string),
@@ -250,6 +252,7 @@ export const BazaarStore = types
     init: flow(function* () {
       const data = yield BazaarIPC.fetchAppCatalog();
       applySnapshot(self.catalog, data);
+      applySnapshot(self.devAppMap, devApps);
     }),
     _onInitialLoad(catalog: any) {
       applySnapshot(self.catalog, catalog);
@@ -576,11 +579,6 @@ export const BazaarStore = types
         throw error;
       }
     }),
-    loadDevApps(devApps: Record<string, DevAppType>) {
-      Object.values(devApps).forEach((app) => {
-        self.devAppMap.set(app.id, DevAppModel.create(app));
-      });
-    },
     // helpers
     setAppDuringInstallation(app: AppType, status: InstallStatus) {
       const install = self.installations.get(app.id);
@@ -650,7 +648,7 @@ export type WebAppType = Instance<typeof WebApp>;
 
 export type DocketAppType = Instance<typeof DocketApp>;
 export type NativeAppType = Instance<typeof NativeApp>;
-export type DevAppType = Instance<typeof DevAppModel>;
+export type DevAppType = Instance<typeof DevApp>;
 export type AppType = Instance<typeof AppModel>;
 export type AllyType = Instance<typeof AllyModel>;
 export type BazaarStoreType = Instance<typeof BazaarStore>;

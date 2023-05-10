@@ -6,7 +6,7 @@ import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppType } from 'renderer/stores/models/bazaar.model';
 
-import { nativeApps } from '../nativeApps';
+import { nativeApps } from '../apps';
 import { useTrayApps } from '../store';
 
 const AccountTrayAppPresenter = () => {
