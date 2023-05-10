@@ -46,7 +46,7 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
         navigator.clipboard.writeText(space.path.substring(1));
       },
     });
-    if (space.isAdmin()) {
+    if (loggedInAccount && space.isAdmin(loggedInAccount.serverId)) {
       menu.push({
         id: `space-row-${space.path}-btn-edit`,
         label: 'Edit',
@@ -102,7 +102,10 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
   }, [contextMenuOptions, getOptions, setOptions, spaceRowId]);
 
   const contextMenuButtonIds = contextMenuOptions.map((item) => item?.id);
-  const memberCount = members?.all.size;
+  let memberCount = 0;
+  members?.all.forEach((m) =>
+    m.status !== 'invited' ? (memberCount += 1) : null
+  );
   return (
     <Row
       id={spaceRowId}

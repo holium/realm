@@ -17,6 +17,7 @@ export const spaces: Record<SpaceKeys, Space> = {
       textColor: '#2a2927',
       iconColor: 'rgba(229,216,219,0.4)',
       accentColor: '#4E9EFD',
+      offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
       wallpaper:
         'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
@@ -37,6 +38,7 @@ export const spaces: Record<SpaceKeys, Space> = {
       textColor: '#fff',
       iconColor: 'rgba(146,172,207,0.4)',
       accentColor: '#4E9EFD',
+      offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
       wallpaper:
         'https://images.unsplash.com/photo-1668211834355-2cdf073f2351?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2970&q=80',
@@ -57,6 +59,7 @@ export const spaces: Record<SpaceKeys, Space> = {
       textColor: '#fff',
       iconColor: 'rgba(247,247,247,0.4)',
       accentColor: '#4E9EFD',
+      offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
       wallpaper:
         'https://images.unsplash.com/photo-1660235029768-f50fb2e954d6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2969&q=80',
@@ -77,6 +80,7 @@ export const spaces: Record<SpaceKeys, Space> = {
       textColor: '#fff',
       iconColor: 'rgba(185,174,201,0.4)',
       accentColor: '#4E9EFD',
+      offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
       wallpaper:
         'https://lomder-librun.sfo3.digitaloceanspaces.com/Images/fasnut-famden/2023.2.20..19.16.36-black-hole.jpg',
@@ -97,6 +101,7 @@ export const spaces: Record<SpaceKeys, Space> = {
   //     textColor: '#fff',
   //     iconColor: 'rgba(146,172,207,0.4)',
   //     accentColor: '#4E9EFD',
+  //     offAccentColor: '#BDBDBD',
   //     mouseColor: '#4E9EFD',
   //     wallpaper:
   //       'https://lomder-librun.sfo3.digitaloceanspaces.com/Images/fasnut-famden/2023.2.20..22.49.25-Return%20to%20Monke%201.png',
@@ -118,6 +123,7 @@ export const spaces: Record<SpaceKeys, Space> = {
       textColor: '#fff',
       iconColor: 'rgba(146,172,207,0.4)',
       accentColor: '#4E9EFD',
+      offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
       wallpaper:
         'https://lomder-librun.sfo3.digitaloceanspaces.com/Images/fasnut-famden/2023.2.20..21.12.38-521657.jpg',
@@ -159,6 +165,7 @@ export const spaces: Record<SpaceKeys, Space> = {
       textColor: '#fff',
       iconColor: 'rgba(206,208,184,0.4)',
       accentColor: '#4E9EFD',
+      offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
       wallpaper:
         'https://img5.goodfon.com/original/1920x1080/0/dc/chudak-irena-zhenshchina-mama-mat-rebionok-malysh-materinstv.jpg',
@@ -180,6 +187,7 @@ export const spaces: Record<SpaceKeys, Space> = {
       textColor: '#fff',
       iconColor: 'rgba(146,172,207,0.4)',
       accentColor: '#4E9EFD',
+      offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
       wallpaper:
         'https://lomder-librun.sfo3.digitaloceanspaces.com/Images/fasnut-famden/2023.2.20..21.30.43-pexels-vishnudeep-dixit-1260801.jpg',
@@ -201,6 +209,7 @@ export const spaces: Record<SpaceKeys, Space> = {
       textColor: '#fff',
       iconColor: 'rgba(146,172,207,0.4)',
       accentColor: '#4E9EFD',
+      offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
       wallpaper:
         'https://lomder-librun.sfo3.digitaloceanspaces.com/Images/fasnut-famden/2023.2.20..19.28.24-FgUwJaQ-atheism-wallpaper.jpg',
@@ -221,6 +230,7 @@ export const spaces: Record<SpaceKeys, Space> = {
       textColor: '#fff',
       iconColor: 'rgba(185,174,201,0.4)',
       accentColor: '#4E9EFD',
+      offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
       wallpaper:
         'https://lomder-librun.sfo3.cdn.digitaloceanspaces.com/Images%2Fflat-earth.png',
@@ -242,6 +252,7 @@ export const spaces: Record<SpaceKeys, Space> = {
       textColor: '#fff',
       iconColor: 'rgba(146,172,207,0.4)',
       accentColor: '#4E9EFD',
+      offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
       wallpaper:
         'https://lomder-librun.sfo3.digitaloceanspaces.com/Images/fasnut-famden/2023.2.20..23.04.26-dusty-sunflower-laptop-zig4pj6kzo0en3wn.jpg',
