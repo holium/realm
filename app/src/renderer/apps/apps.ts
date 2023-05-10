@@ -28,7 +28,7 @@ export const devApps: AppManifestMap = {
     title: 'GDELT',
     type: 'dev',
     color: '#00ccff',
-    icon: 'Globe',
+    icon: 'AppIconCompass',
     web: {
       openFullscreen: true,
       url: 'https://gdelt.github.io/',
