@@ -1553,7 +1553,23 @@
 ++  get-pikes
   ^-  pikes:hood
   :: ~&  >>  "{<dap.bowl>}: [get-pikes]"
-  .^(pikes:hood %gx (welp pre /kiln/pikes/noun))
+  =/  res  .^(* %gx (welp pre /kiln/pikes/kiln-pikes))
+  ~&  >>  "{<dap.bowl>}: {<res>}"
+  res
+  :: .^(pikes:hood %gx (welp pre /kiln/pikes/kiln-pikes))
+    :: =+  .^(=rock:store %cx /(scot %p our.bowl)//(scot %da now.bowl)/tire)
+    :: :: :^  ~  ~  %kiln-pikes
+    :: :: !>  ^-  pikes
+    :: =/  res
+    :: %-  ~(rut by rock)
+    :: |=  [=desk =zest:store wic=(set weft)]
+    :: ^-  pike:hood
+    :: =+  .^(hash=@uv %cz /(scot %p our.bowl)/[desk]/(scot %da now.bowl))
+    :: =/  sync  (~(get by sources) desk)
+    :: ~&  >>  "{<[sync hash zest wic]>}"
+    :: [sync hash zest wic]
+    :: ~&  >>  "{<dap.bowl>}: {<res>}"
+    :: res
 ::
 ::  +get-syncs:
 ::
