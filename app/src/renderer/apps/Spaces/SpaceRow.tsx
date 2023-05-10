@@ -46,7 +46,7 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
         navigator.clipboard.writeText(space.path.substring(1));
       },
     });
-    if (space.isAdmin()) {
+    if (loggedInAccount && space.isAdmin(loggedInAccount.serverId)) {
       menu.push({
         id: `space-row-${space.path}-btn-edit`,
         label: 'Edit',
