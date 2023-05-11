@@ -6,9 +6,9 @@ import {
   Instance,
   types,
 } from 'mobx-state-tree';
-import { darken, lighten, rgba } from 'polished';
+import { darken, lighten, mix, rgba } from 'polished';
 
-import { bgIsLightOrDark } from '@holium/design-system';
+import { bgIsLightOrDark, luminosity } from '@holium/design-system';
 
 import { defaultTheme } from './defaultTheme';
 
@@ -69,22 +69,64 @@ export const Theme = types
 export type ThemeType = Instance<typeof Theme>;
 export type ThemeSnapshotIn = typeof Theme.SnapshotType;
 
-const generateColors = (baseColor: string, bgLuminosity: 'light' | 'dark') => {
-  const windowColor =
-    bgLuminosity === 'dark' ? darken(0.05, baseColor) : lighten(0.3, baseColor);
+const generateColors = (color: string, bgLuminosity: 'light' | 'dark') => {
+  /* Generate base color using semi-intelligent hue / contrast logic.
+     This is used as the base for  */
+  const genBaseColor = () => {
+    const luma = luminosity(color);
+    if (bgLuminosity === 'dark') {
+      /* 0 - 128 */
+      const shift = 64 - luma;
+      if (shift > 0) {
+        return mix(
+          0.5,
+          '#000',
+          lighten(Math.min(0.0001 * Math.pow(shift, 2), 0.2), color)
+        );
+      } else {
+        return mix(
+          0.5,
+          '#000',
+          darken(Math.min(0.0001 * Math.pow(shift, 2), 0.4), color)
+        );
+      }
+    } else {
+      /* 128 - 255 */
+      const shift = luma - 192;
+      if (shift > 0) {
+        return mix(
+          0.25,
+          '#FFF',
+          darken(Math.min(0.0001 * Math.pow(shift, 2), 0.2), color)
+        );
+      } else {
+        return mix(
+          0.25,
+          '#FFF',
+          lighten(Math.min(0.0001 * Math.pow(shift, 2), 0.4), color)
+        );
+      }
+    }
+  };
+
+  const baseColor = genBaseColor();
+
   return {
     // TODO add window border color
     mode: bgLuminosity,
     backgroundColor: baseColor,
     inputColor:
       bgLuminosity === 'dark'
-        ? darken(0.06, windowColor)
-        : lighten(0.05, windowColor),
+        ? darken(0.11, baseColor)
+        : lighten(0.11, baseColor),
     dockColor:
       bgLuminosity === 'dark'
         ? lighten(0.05, baseColor)
-        : lighten(0.4, baseColor),
-    windowColor,
+        : lighten(0.12, baseColor),
+    windowColor:
+      bgLuminosity === 'dark'
+        ? darken(0.05, baseColor)
+        : lighten(0.1, baseColor),
     textColor:
       bgLuminosity === 'dark'
         ? lighten(0.9, baseColor)
