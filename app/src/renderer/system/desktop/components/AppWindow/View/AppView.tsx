@@ -133,7 +133,7 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
           innerRef={webViewRef}
           id={`${appWindow.appId}-urbit-webview`}
           appId={appWindow.appId}
-          partition="persist:default"
+          partition={`persist:default-${loggedInAccount?.serverId}`}
           webpreferences="sandbox=false, nativeWindowOpen=yes"
           // @ts-ignore
           allowpopups="true"

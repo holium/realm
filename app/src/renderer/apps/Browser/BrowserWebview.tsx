@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 
 import { Text } from '@holium/design-system';
 
+import { useAppState } from 'renderer/stores/app.store';
 import { WebView } from 'renderer/system/desktop/components/AppWindow/View/WebView';
 
 import { useBrowser } from './store';
@@ -15,6 +16,8 @@ type Props = {
 const appId = 'os-browser';
 
 const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
+  const { loggedInAccount } = useAppState();
+
   const { currentTab, setUrl, setLoading, setLoaded, setError } = useBrowser();
   const [readyWebview, setReadyWebview] = useState<Electron.WebviewTag>();
 
@@ -95,7 +98,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
             // @ts-expect-error
             enableblinkfeatures="PreciseMemoryInfo, CSSVariables, AudioOutputDevices, AudioVideoTracks"
             useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0"
-            partition="persist:browser-webview"
+            partition={`persist:browser-webview-${loggedInAccount?.serverId}`}
             isLocked={isDragging || isResizing || loadingState === 'loading'}
             style={{
               background: 'white',
