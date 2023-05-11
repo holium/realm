@@ -47,12 +47,15 @@ export class AppPublishersTable extends AbstractDataAccess<
           max(status) status,
           max(requested_at) requestedAt,
           max(loaded_at) loadedAt,
-          json_group_array(
-              json_object(
-                'source', source,
-                'desk', desk
-              )
-          ) as sources_list
+          CASE 
+              WHEN source = '' THEN json('[]')
+              ELSE json_group_array(
+                  json_object(
+                    'source', source,
+                    'desk', desk
+                  )
+                )
+          END as sources_list
         FROM ${tableName}
         GROUP BY publisher)
         SELECT json_group_object(
@@ -85,13 +88,13 @@ export class AppPublishersTable extends AbstractDataAccess<
         source,
         desk,
         status,
-        requested_at,
+        requested_at
       ) VALUES (
         @publisher,
         @source,
         @desk,
-        @status
-        @requestedAt,
+        @status,
+        @requestedAt
       )`
     );
     insert.run({
