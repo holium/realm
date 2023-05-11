@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { spaces } from 'spaces';
 import styled from 'styled-components';
-import { SpaceKeys, TrayAppType } from 'types';
 
 import { Flex } from '@holium/design-system/general';
 
@@ -10,11 +9,14 @@ import { GlobalStyle } from 'components/GlobalStyle';
 import { Header } from 'components/Header';
 import { Hero } from 'components/Hero';
 import { Page } from 'components/Page';
+import { useSpace } from 'components/SpaceContext';
 import { ChatApp } from 'components/TrayApps/Chat';
 import { NotificationApp } from 'components/TrayApps/Notifications';
 import { RoomApp } from 'components/TrayApps/Rooms';
 import { SpacesApp } from 'components/TrayApps/Spaces';
 import { WalletApp } from 'components/TrayApps/Wallet';
+
+import { SpaceKeys, TrayAppType } from '../types';
 
 const Main = styled.main`
   flex: 1;
@@ -25,15 +27,14 @@ const Main = styled.main`
 `;
 
 export default function HomePage() {
-  const [currentSpace, setCurrentSpace] = useState<SpaceKeys>('spacebros');
-  const [theme, setTheme] = useState(spaces[currentSpace].theme);
+  const { space } = useSpace();
   const [trayApp, setTrayApp] = useState<TrayAppType | null>(null);
 
   const handleSetTrayApp = (app: TrayAppType) => {
     if (app?.id === 'spaces') {
       // Preload all the wallpapers so the space transition is smooth.
-      Object.keys(spaces).map((space) => {
-        const theme = spaces[space as SpaceKeys]?.theme;
+      Object.keys(spaces).map((s) => {
+        const theme = spaces[s as SpaceKeys]?.theme;
         const wallpaper = new Image();
         wallpaper.src = theme.wallpaper;
         return wallpaper;
@@ -45,29 +46,24 @@ export default function HomePage() {
 
   return (
     <>
-      <GlobalStyle theme={theme} />
+      <GlobalStyle theme={spaces[space].theme} />
       <Page title="Holium">
         <Flex
           className="wallpaper"
-          style={{ backgroundColor: theme.backgroundColor }}
-          backgroundImage={`url(${theme.wallpaper})`}
+          style={{ backgroundColor: spaces[space].theme.backgroundColor }}
+          backgroundImage={`url(${spaces[space].theme.wallpaper})`}
         />
         <Header />
         <Main>
           <Hero />
         </Main>
-        <Footer currentSpace={currentSpace} setCurrentApp={handleSetTrayApp} />
+        <Footer currentSpace={space} setCurrentApp={handleSetTrayApp} />
       </Page>
       {trayApp?.id === 'spaces' && (
         <SpacesApp
           coords={trayApp.coords}
           isOpen={trayApp?.id === 'spaces'}
           closeTray={() => setTrayApp(null)}
-          currentSpace={currentSpace}
-          setCurrentSpace={(space) => {
-            setCurrentSpace(space);
-            setTheme(spaces[space].theme);
-          }}
         />
       )}
       {trayApp?.id === 'chat' && (
@@ -75,11 +71,6 @@ export default function HomePage() {
           coords={trayApp.coords}
           isOpen={trayApp?.id === 'chat'}
           closeTray={() => setTrayApp(null)}
-          currentSpace={currentSpace}
-          setCurrentSpace={(space) => {
-            setCurrentSpace(space);
-            setTheme(spaces[space].theme);
-          }}
         />
       )}
       {trayApp?.id === 'rooms-tray' && (
@@ -87,11 +78,6 @@ export default function HomePage() {
           coords={trayApp.coords}
           isOpen={trayApp?.id === 'rooms-tray'}
           closeTray={() => setTrayApp(null)}
-          currentSpace={currentSpace}
-          setCurrentSpace={(space) => {
-            setCurrentSpace(space);
-            setTheme(spaces[space].theme);
-          }}
         />
       )}
       {trayApp?.id === 'wallet' && (
@@ -99,11 +85,6 @@ export default function HomePage() {
           coords={trayApp.coords}
           isOpen={trayApp?.id === 'wallet'}
           closeTray={() => setTrayApp(null)}
-          currentSpace={currentSpace}
-          setCurrentSpace={(space) => {
-            setCurrentSpace(space);
-            setTheme(spaces[space].theme);
-          }}
         />
       )}
       {trayApp?.id === 'notifications' && (
@@ -111,11 +92,6 @@ export default function HomePage() {
           coords={trayApp.coords}
           isOpen={trayApp?.id === 'notifications'}
           closeTray={() => setTrayApp(null)}
-          currentSpace={currentSpace}
-          setCurrentSpace={(space) => {
-            setCurrentSpace(space);
-            setTheme(spaces[space].theme);
-          }}
         />
       )}
     </>

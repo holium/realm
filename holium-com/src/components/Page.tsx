@@ -1,5 +1,8 @@
 import { ReactNode } from 'react';
 import NextHead from 'next/head';
+import { spaces } from 'spaces';
+
+import { useSpace } from './SpaceContext';
 
 const siteUrl = 'https://www.holium.com/';
 const siteTitle = 'Holium';
@@ -14,6 +17,9 @@ type Props = {
 };
 
 export const Page = ({ title = siteTitle, children }: Props) => {
+  const { space } = useSpace();
+  const themeColor = spaces[space].theme.backgroundColor;
+
   return (
     <>
       <NextHead>
@@ -39,6 +45,13 @@ export const Page = ({ title = siteTitle, children }: Props) => {
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={siteDescription} />
         <meta name="twitter:image" content={`${siteUrl}og-twitter-image.png`} />
+
+        <meta name="theme-color" content={themeColor} />
+        <meta name="msapplication-navbutton-color" content={themeColor} />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content={themeColor}
+        />
       </NextHead>
 
       {children}
