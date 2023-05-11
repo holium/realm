@@ -81,13 +81,13 @@ const generateColors = (color: string, bgLuminosity: 'light' | 'dark') => {
         return mix(
           0.25,
           '#000',
-          lighten(Math.max(0.0001 * Math.pow(shift, 2), 0.4), color)
+          lighten(Math.min(0.0001 * Math.pow(shift, 2), 0.2), color)
         );
       } else {
         return mix(
           0.25,
           '#000',
-          darken(Math.max(0.0001 * Math.pow(shift, 2), 0.4), color)
+          darken(Math.min(0.0001 * Math.pow(shift, 2), 0.4), color)
         );
       }
     } else {
@@ -98,13 +98,13 @@ const generateColors = (color: string, bgLuminosity: 'light' | 'dark') => {
         return mix(
           0.25,
           '#FFF',
-          darken(Math.max(0.0001 * Math.pow(shift, 2), 0.4), color)
+          darken(Math.min(0.0001 * Math.pow(shift, 2), 0.2), color)
         );
       } else {
         return mix(
           0.25,
           '#FFF',
-          lighten(Math.max(0.0001 * Math.pow(shift, 2), 0.4), color)
+          lighten(Math.min(0.0001 * Math.pow(shift, 2), 0.4), color)
         );
       }
     }
@@ -119,15 +119,15 @@ const generateColors = (color: string, bgLuminosity: 'light' | 'dark') => {
     inputColor:
       bgLuminosity === 'dark'
         ? darken(0.11, baseColor)
-        : lighten(0.35, baseColor),
+        : lighten(0.11, baseColor),
     dockColor:
       bgLuminosity === 'dark'
         ? lighten(0.05, baseColor)
-        : lighten(0.4, baseColor),
+        : lighten(0.12, baseColor),
     windowColor:
       bgLuminosity === 'dark'
         ? darken(0.05, baseColor)
-        : lighten(0.3, baseColor),
+        : lighten(0.1, baseColor),
     textColor:
       bgLuminosity === 'dark'
         ? lighten(0.9, baseColor)
