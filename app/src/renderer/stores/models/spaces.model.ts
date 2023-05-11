@@ -245,7 +245,7 @@ export const SpacesStore = types
           appState.setTheme(self.selected.theme);
           self.loader.set('loaded');
         }
-        console.log('bookmarks', bookmarks);
+
         (Object.values(bookmarks) as Bookmark[]).forEach(({ path, url }) => {
           const space = self.spaces.get(path);
           if (space) {
