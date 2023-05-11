@@ -82,6 +82,7 @@ export const ContextMenu = () => {
           width: WIDTH,
           maxHeight: MAX_HEIGHT,
           overflowY: 'auto',
+          borderColor: contextualColors.borderColor,
         }}
         customBg={contextualColors.backgroundColor}
       >

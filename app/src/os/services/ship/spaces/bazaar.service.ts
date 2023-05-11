@@ -81,13 +81,6 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
           break;
         case 'app-install-update': //  installed, uninstalled, started, etc.
           const { appId, app, grid } = data['app-install-update'];
-          // log.info(
-          //   'bazaar.service.ts:',
-          //   'app-install-update',
-          //   appId,
-          //   app,
-          //   grid
-          // );
           this.tables?.appCatalog.updateApp(appId, app);
           this.tables?.appCatalog.updateGrid(grid);
           const updatedApp = this.tables?.appCatalog.getApp(appId);
@@ -392,13 +385,7 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
   }
 
   async addAlly(ship: string) {
-    APIConnection.getInstance().conduit.poke({
-      app: 'treaty',
-      mark: 'ally-update-0',
-      json: {
-        add: ship,
-      },
-    });
+    this.tables?.appPublishers.addAlly(ship);
   }
 
   async removeAlly(ship: string) {
