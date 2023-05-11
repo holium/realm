@@ -312,6 +312,12 @@ function registerOnUpdateListener() {
       case 'remove':
         shipStore.spacesStore._onSpaceRemoved(payload);
         break;
+      case 'bookmark-added':
+        shipStore.spacesStore._onBookmarkAdded(payload);
+        break;
+      case 'bookmark-removed':
+        shipStore.spacesStore._onBookmarkRemoved(payload);
+        break;
     }
   });
 

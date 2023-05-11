@@ -35,3 +35,5 @@ export const createUrl = (query: string) => {
 
   return `${searchBase}${encodeURIComponent(query)}`;
 };
+
+export const stripSlash = (url: string) => url.replace(/\/$/, '');

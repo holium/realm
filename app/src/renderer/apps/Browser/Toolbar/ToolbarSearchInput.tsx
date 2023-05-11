@@ -7,14 +7,21 @@ import {
 } from 'react';
 import { observer } from 'mobx-react';
 
-import { Box, Flex, TextInput } from '@holium/design-system';
+import { Box, Flex } from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
 
 import { useAppState } from 'renderer/stores/app.store';
+import { SpacesIPC } from 'renderer/stores/ipc';
+import { useShipStore } from 'renderer/stores/ship.store';
+import {
+  getFaviconFromUrl,
+  getSiteNameFromUrl,
+} from 'renderer/system/desktop/components/SystemBar/components/CommunityBar/AppDock/util';
 
 import { createUrl } from '../helpers/createUrl';
 import { useBrowser } from '../store';
 import { ToolbarLockIcon } from './ToolbarLockIcon';
-import { ToolbarSearchIcon } from './ToolbarSearchIcon';
+import { ToolbarStarIcon } from './ToolbarStarIcon';
 
 type Props = {
   innerRef: RefObject<HTMLDivElement>;
@@ -23,24 +30,50 @@ type Props = {
 
 const ToolbarSearchInputPresenter = ({ innerRef, readyWebview }: Props) => {
   const { theme } = useAppState();
-  const { currentTab, setUrl } = useBrowser();
-  const [input, setInput] = useState(currentTab.url ?? '');
+  const { spacesStore } = useShipStore();
+  const currentSpace = spacesStore.selected;
+
+  const { currentTab, setInPageNav, setUrl } = useBrowser();
+  const [input, setInput] = useState(currentTab.inPageNav ?? '');
+
+  const starred = Boolean(currentSpace?.hasBookmark(currentTab.inPageNav));
+
+  const handleStarClick = () => {
+    const spacePath = currentSpace?.path;
+    if (!spacePath) return;
+
+    if (starred) {
+      SpacesIPC.removeBookmark(spacePath, input);
+    } else {
+      SpacesIPC.addBookmark({
+        path: spacePath,
+        url: input,
+        title: getSiteNameFromUrl(input),
+        favicon: getFaviconFromUrl(input),
+        color: '#92D4F9',
+      });
+    }
+  };
 
   useEffect(() => {
     if (!readyWebview) return;
 
-    readyWebview.addEventListener('did-navigate', (e) => setInput(e.url));
-    readyWebview.addEventListener('did-navigate-in-page', (e) =>
-      setInput(e.url)
-    );
+    const handleNavigation = (e: Electron.DidNavigateEvent) => {
+      setInput(e.url);
+      setInPageNav(e.url);
+    };
+
+    readyWebview.addEventListener('did-navigate', handleNavigation);
+    readyWebview.addEventListener('did-navigate-in-page', handleNavigation);
 
     return () => {
-      readyWebview.removeEventListener('did-navigate', (e) => setInput(e.url));
-      readyWebview.removeEventListener('did-navigate-in-page', (e) =>
-        setInput(e.url)
+      readyWebview.removeEventListener('did-navigate', handleNavigation);
+      readyWebview.removeEventListener(
+        'did-navigate-in-page',
+        handleNavigation
       );
     };
-  }, [readyWebview, readyWebview]);
+  }, [readyWebview]);
 
   const onInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setInput(e.target.value);
@@ -76,7 +109,9 @@ const ToolbarSearchInputPresenter = ({ innerRef, readyWebview }: Props) => {
             />
           </Box>
         }
-        rightAdornment={<ToolbarSearchIcon onClick={search} />}
+        rightAdornment={
+          <ToolbarStarIcon starred={starred} onClick={handleStarClick} />
+        }
         placeholder="Search DuckDuckGo or enter url"
         width="100%"
         style={{

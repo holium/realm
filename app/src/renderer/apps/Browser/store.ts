@@ -4,11 +4,12 @@ import { Instance, onSnapshot, types } from 'mobx-state-tree';
 import { MainIPC } from 'renderer/stores/ipc';
 import { LoaderModel } from 'renderer/stores/models/common.model';
 
-import { isUrlSafe } from './helpers/createUrl';
+import { isUrlSafe, stripSlash } from './helpers/createUrl';
 
 const TabModel = types.model('BrowserTabModel', {
   id: types.identifier,
   url: types.string,
+  inPageNav: types.string,
   isSafe: types.optional(types.boolean, true),
   loader: types.optional(LoaderModel, { state: 'initial' }),
 });
@@ -18,6 +19,7 @@ export const BrowserModel = types
     currentTab: types.optional(TabModel, {
       id: 'tab-0',
       url: 'https://duckduckgo.com',
+      inPageNav: 'https://duckduckgo.com',
       isSafe: true,
       loader: { state: 'initial' },
     }),
@@ -25,8 +27,20 @@ export const BrowserModel = types
   })
   .actions((self) => ({
     setUrl(url: string) {
-      self.currentTab.url = url;
-      self.currentTab.isSafe = isUrlSafe(url);
+      const cleanUrl = stripSlash(url);
+
+      self.currentTab.url = cleanUrl;
+      self.currentTab.inPageNav = cleanUrl;
+      self.currentTab.isSafe = isUrlSafe(cleanUrl);
+      self.currentTab.loader.state = 'initial';
+    },
+    setInPageNav(url: string) {
+      // In page nav is set when the user clicks on a link within the webview.
+      // We save the latest URL here as to not cause a re-render of the webview.
+      const cleanUrl = stripSlash(url);
+
+      self.currentTab.inPageNav = cleanUrl;
+      self.currentTab.isSafe = isUrlSafe(cleanUrl);
       self.currentTab.loader.state = 'initial';
     },
     setLoading() {

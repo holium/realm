@@ -3,30 +3,32 @@ import { Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
 
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 
+import { Bookmark } from 'os/services/ship/spaces/tables/bookmarks.table';
 import { Divider } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 
 import { PinnedDockApp } from './PinnedDockApp';
+import { PinnedWebApp } from './PinnedWebApp';
 import { UnpinnedDockApp } from './UnpinnedDockApp';
 
 type Props = {
-  spacePath: string;
+  currentSpace: SpaceModelType;
   pinnedDockApps: AppMobxType[];
   unpinnedDockApps: AppMobxType[];
+  bookmarks: Bookmark[];
 };
 
 const AppDockViewPresenter = ({
-  spacePath,
+  currentSpace,
   pinnedDockApps,
   unpinnedDockApps,
+  bookmarks,
 }: Props) => {
   const { shellStore, theme } = useAppState();
-  const { spacesStore } = useShipStore();
-  const currentSpace = spacesStore.selected;
 
   const onClickDockedApp = useCallback((dockedApp: AppMobxType) => {
     const appWindow = shellStore.getWindowByAppId(dockedApp.id);
@@ -44,14 +46,14 @@ const AppDockViewPresenter = ({
 
   const pinnedAppTiles = pinnedDockApps.map((app) => {
     const appWindow = shellStore.getWindowByAppId(app.id);
-    const pinnedTileId = `pinned-${app.id}-${spacePath}`;
+    const pinnedTileId = `pinned-${app.id}-${currentSpace.path}`;
 
     return (
       <PinnedDockApp
         key={`tile-${pinnedTileId}`}
         tileId={pinnedTileId}
         app={app}
-        space={spacesStore.selected}
+        space={currentSpace}
         hasWindow={Boolean(appWindow)}
         isActive={Boolean(appWindow?.isActive)}
         isMinimized={Boolean(appWindow?.isMinimized)}
@@ -60,43 +62,52 @@ const AppDockViewPresenter = ({
     );
   });
 
+  const pinnedWebApps = bookmarks.map((bookmark) => (
+    <PinnedWebApp key={`pinned-${bookmark.url}`} {...bookmark} />
+  ));
+
   const unpinnedAppTiles = unpinnedDockApps.map((app, index) => {
     const appWindow = shellStore.getWindowByAppId(app.id);
-    const unpinnedTileId = `unpinned-${app.id}-${spacePath}-${index}`;
+    const unpinnedTileId = `unpinned-${app.id}-${currentSpace.path}-${index}`;
 
     return (
       <UnpinnedDockApp
         key={`tile-${unpinnedTileId}`}
         tileId={unpinnedTileId}
         app={app}
-        space={spacesStore.selected}
+        space={currentSpace}
         isActive={Boolean(appWindow?.isActive)}
         isMinimized={Boolean(appWindow?.isMinimized)}
         onClick={onClickDockedApp}
       />
     );
   });
-  const showDivider = pinnedDockApps.length > 0 && unpinnedDockApps.length > 0;
+
+  const showPinnedAppDivider = Boolean(
+    pinnedDockApps.length && unpinnedDockApps.length
+  );
+  const showPinnedWebAppDivider = Boolean(
+    (pinnedDockApps.length || unpinnedDockApps.length) && pinnedWebApps.length
+  );
 
   return (
     <Flex position="relative" flexDirection="row" alignItems="center">
       <Reorder.Group
-        key={`dock-${spacePath}`}
+        key={`dock-${currentSpace.path}`}
         axis="x"
         style={{
           display: 'flex',
           position: 'relative',
-          flexDirection: 'row',
           gap: 8,
         }}
         values={currentSpace?.dockAppIds || []}
-        onReorder={(apps) => currentSpace?.reorderPinnedApps(apps)}
+        onReorder={(apps: string[]) => currentSpace.reorderPinnedApps(apps)}
       >
         {pinnedAppTiles}
       </Reorder.Group>
-      {showDivider && (
+      {showPinnedAppDivider && (
         <Divider
-          key={`dock-divider-${spacePath}`}
+          key={`pinned-app-divider-${currentSpace.path}`}
           ml={2}
           mr={2}
           customBg={rgba(lighten(0.2, theme.dockColor), 0.4)}
@@ -105,6 +116,27 @@ const AppDockViewPresenter = ({
       <Flex position="relative" flexDirection="row" alignItems="center" gap={8}>
         {unpinnedAppTiles}
       </Flex>
+      {showPinnedWebAppDivider && (
+        <Divider
+          key={`pinned-web-app-divider-${currentSpace.path}`}
+          ml={2}
+          mr={2}
+          customBg={rgba(lighten(0.2, theme.dockColor), 0.4)}
+        />
+      )}
+      <Reorder.Group
+        key={`web-app-dock-${currentSpace.path}`}
+        axis="x"
+        style={{
+          display: 'flex',
+          position: 'relative',
+          gap: 8,
+        }}
+        values={currentSpace?.bookmarks.map((b) => b.url) || []}
+        onReorder={(urls: string[]) => currentSpace.reorderBookmarks(urls)}
+      >
+        {pinnedWebApps}
+      </Reorder.Group>
     </Flex>
   );
 };

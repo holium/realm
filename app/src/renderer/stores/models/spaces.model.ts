@@ -10,6 +10,8 @@ import {
 
 import { defaultTheme, Theme } from '@holium/shared';
 
+import { CreateBookmarkPayload } from 'os/services/ship/spaces/spaces.types';
+import { Bookmark } from 'os/services/ship/spaces/tables/bookmarks.table';
 import { MemberRole } from 'os/types';
 
 import { appState } from '../app.store';
@@ -52,6 +54,14 @@ const StallModel = types.model('StallModel', {
   recommended: types.array(UrbitApp),
 });
 
+const BookmarkModel = types.model('BookmarkModel', {
+  path: types.string,
+  title: types.string,
+  url: types.string,
+  favicon: types.string,
+  color: types.string,
+});
+
 export const SpaceModel = types
   .model('SpaceModel', {
     path: types.identifier,
@@ -70,13 +80,20 @@ export const SpaceModel = types
     members: types.optional(MembersStore, { all: {} }),
     stall: StallModel,
     dock: types.array(UrbitApp),
+    bookmarks: types.array(BookmarkModel),
   })
   .views((self) => ({
     isPinned(appId: string) {
       return self.dock.some((app) => app.id === appId);
     },
+    hasBookmark(url: string) {
+      return self.bookmarks.some((bookmark) => bookmark.url === url);
+    },
     get dockAppIds() {
       return self.dock.slice().map((app) => app.id);
+    },
+    get bookmarkUrls() {
+      return self.bookmarks.slice().map((bookmark) => bookmark.url);
     },
     isHost() {
       // TODO check if admin
@@ -129,6 +146,14 @@ export const SpaceModel = types
         console.error(error);
       }
     }),
+    reorderBookmarks(bookmarkDock: string[]) {
+      const bookmarkDockUrls = self.bookmarks.sort((a, b) => {
+        const aIndex = bookmarkDock.findIndex((url) => url === a.url);
+        const bIndex = bookmarkDock.findIndex((url) => url === b.url);
+        return aIndex - bIndex;
+      });
+      applySnapshot(self.bookmarks, bookmarkDockUrls);
+    },
     addToSuite: flow(function* (appId: string, index: number) {
       try {
         return yield BazaarIPC.addToSuite(self.path, appId, index);
@@ -155,6 +180,15 @@ export const SpaceModel = types
     },
     _setStall(stall: any) {
       self.stall = StallModel.create(stall);
+    },
+    _onBookmarkAdded(payload: CreateBookmarkPayload) {
+      self.bookmarks.push(payload);
+    },
+    _onBookmarkRemoved(url: string) {
+      const index = self.bookmarks.findIndex(
+        (bookmark) => bookmark.url === url
+      );
+      self.bookmarks.splice(index, 1);
     },
   }));
 
@@ -211,7 +245,7 @@ export const SpacesStore = types
   .actions((self) => ({
     init: flow(function* () {
       try {
-        const { current, spaces } = yield SpacesIPC.getInitial();
+        const { current, spaces, bookmarks } = yield SpacesIPC.getInitial();
         spaces.forEach((space: any) => {
           space.theme.id = space.path;
           const spaceModel = SpaceModel.create(spaceRowToModel(space));
@@ -222,6 +256,13 @@ export const SpacesStore = types
           appState.setTheme(self.selected.theme);
           self.loader.set('loaded');
         }
+
+        (Object.values(bookmarks) as Bookmark[]).forEach((bookmark) => {
+          const space = self.spaces.get(bookmark.path);
+          if (space) {
+            space.bookmarks.push(bookmark);
+          }
+        });
       } catch (e) {
         console.error(e);
         self.loader.set('error');
@@ -468,6 +509,16 @@ export const SpacesStore = types
       const refreshedSpace = yield SpacesIPC.getSpace(joinedPayload.path);
       self.spaces.set(space.path, spaceRowToModel(refreshedSpace));
     }),
+    _onBookmarkAdded: (bookmarkPayload: CreateBookmarkPayload) => {
+      const space = self.spaces.get(bookmarkPayload.path);
+      if (!space) return;
+      space._onBookmarkAdded(bookmarkPayload);
+    },
+    _onBookmarkRemoved: (bookmarkPayload: { path: string; url: string }) => {
+      const space = self.spaces.get(bookmarkPayload.path);
+      if (!space) return;
+      space._onBookmarkRemoved(bookmarkPayload.url);
+    },
   }));
 
 export type SpacesStoreType = Instance<typeof SpacesStore>;
