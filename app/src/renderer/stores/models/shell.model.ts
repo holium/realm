@@ -98,6 +98,10 @@ export const ShellModel = types
       };
     },
     setIsBlurred(isBlurred: boolean) {
+      /* don't remove blur if home pane is open */
+      if (self.isBlurred && self.homePaneOpen) {
+        return;
+      }
       self.isBlurred = isBlurred;
     },
     setFullscreen(isFullscreen: boolean) {
