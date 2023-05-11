@@ -9,13 +9,12 @@ import { Footer } from 'components/Footer';
 import { GlobalStyle } from 'components/GlobalStyle';
 import { Header } from 'components/Header';
 import { Hero } from 'components/Hero';
+import { Page } from 'components/Page';
 import { ChatApp } from 'components/TrayApps/Chat';
 import { NotificationApp } from 'components/TrayApps/Notifications';
 import { RoomApp } from 'components/TrayApps/Rooms';
 import { SpacesApp } from 'components/TrayApps/Spaces';
 import { WalletApp } from 'components/TrayApps/Wallet';
-
-import { Page } from '../components/Page';
 
 const Main = styled.main`
   flex: 1;
@@ -32,7 +31,7 @@ export default function HomePage() {
 
   const handleSetTrayApp = (app: TrayAppType) => {
     if (app?.id === 'spaces') {
-      // Preload all the images so the transition is smooth.
+      // Preload all the wallpapers so the space transition is smooth.
       Object.keys(spaces).map((space) => {
         const theme = spaces[space as SpaceKeys]?.theme;
         const wallpaper = new Image();

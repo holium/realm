@@ -32,6 +32,8 @@ export const HeroContainer = styled(Flex)`
   max-width: ${DESKTOP_WIDTH}px;
   justify-content: space-between;
   align-items: center;
+  gap: 32px;
+  padding: 64px 16px;
 
   @media (max-width: ${DESKTOP_WIDTH}px) {
     flex-direction: column;
@@ -42,6 +44,12 @@ export const HeroContainer = styled(Flex)`
   @media (max-width: 814px) {
     max-width: 100%;
   }
+
+  @media (max-width: ${MOBILE_WIDTH}px) {
+    #hovering-cursors {
+      display: none;
+    }
+  }
 `;
 
 export const H1Container = styled(Flex)`
@@ -49,7 +57,6 @@ export const H1Container = styled(Flex)`
   flex-direction: column;
   align-self: flex-start;
   gap: 16px;
-  padding: 64px 16px;
 
   @media (max-width: ${DESKTOP_WIDTH}px) {
     align-items: center;
