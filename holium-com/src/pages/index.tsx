@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { spaces } from 'spaces';
 import styled from 'styled-components';
 import { SpaceKeys, TrayAppType } from 'types';
@@ -30,15 +30,19 @@ export default function HomePage() {
   const [theme, setTheme] = useState(spaces[currentSpace].theme);
   const [trayApp, setTrayApp] = useState<TrayAppType | null>(null);
 
-  useEffect(() => {
-    // Preload all the images so the transition is smooth.
-    Object.keys(spaces).map((space) => {
-      const theme = spaces[space as SpaceKeys]?.theme;
-      const wallpaper = new Image();
-      wallpaper.src = theme.wallpaper;
-      return wallpaper;
-    });
-  }, []);
+  const handleSetTrayApp = (app: TrayAppType) => {
+    if (app?.id === 'spaces') {
+      // Preload all the images so the transition is smooth.
+      Object.keys(spaces).map((space) => {
+        const theme = spaces[space as SpaceKeys]?.theme;
+        const wallpaper = new Image();
+        wallpaper.src = theme.wallpaper;
+        return wallpaper;
+      });
+    }
+
+    setTrayApp(app);
+  };
 
   return (
     <>
@@ -53,7 +57,7 @@ export default function HomePage() {
         <Main>
           <Hero />
         </Main>
-        <Footer currentSpace={currentSpace} setCurrentApp={setTrayApp} />
+        <Footer currentSpace={currentSpace} setCurrentApp={handleSetTrayApp} />
       </Page>
       {trayApp?.id === 'spaces' && (
         <SpacesApp
