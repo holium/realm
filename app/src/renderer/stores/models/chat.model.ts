@@ -138,6 +138,7 @@ export const ChatMessage = types
     reactions: types.optional(types.array(ReactionModel), []),
     // ui state
     pending: types.optional(types.boolean, false),
+    error: types.maybe(types.string),
   })
   .views((self) => ({
     get reactionsList() {
@@ -147,6 +148,9 @@ export const ChatMessage = types
   .actions((self) => ({
     setPending(pending: boolean) {
       self.pending = pending;
+    },
+    setError(error: string) {
+      self.error = error;
     },
     updateContents(contents: any, updatedAt: number) {
       self.contents = contents;
@@ -371,15 +375,20 @@ export const Chat = types
       // self.lastUpdatedAt = new Date().getTime();
     },
     deleteMessage: flow(function* (messageId: string) {
-      const oldMessages = self.messages;
+      let success: boolean = true;
       try {
+        yield ChatIPC.deleteMessage(self.path, messageId);
+      } catch (error) {
+        console.error(error);
+        success = false;
+        self.messages
+          .find((m) => m.id === messageId)
+          ?.setError('Failed to delete');
+      }
+      if (success) {
         const message = self.messages.find((m) => m.id === messageId);
         if (!message) return;
         self.messages.remove(message);
-        yield ChatIPC.deleteMessage(self.path, messageId);
-      } catch (error) {
-        self.messages = oldMessages;
-        console.error(error);
       }
     }),
     muteNotification: flow(function* (mute: boolean) {
