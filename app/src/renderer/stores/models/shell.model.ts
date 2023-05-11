@@ -1,6 +1,8 @@
 import { toJS } from 'mobx';
 import { applySnapshot, getSnapshot, Instance, types } from 'mobx-state-tree';
 
+import { getSiteNameFromUrl } from '@holium/design-system/util';
+
 import { getDefaultAppDimensions } from 'renderer/lib/dimensions';
 
 import {
@@ -191,11 +193,7 @@ export const ShellModel = types
       }
       const position = getCenteredPosition(dimensions);
 
-      // Get sitename from url.
-      const sitename = url
-        .replace(/^(?:https?:\/\/)?(?:www\.)?/i, '')
-        .split('.')[0]
-        .replace(/^\w/, (c) => c.toUpperCase());
+      const sitename = getSiteNameFromUrl(url);
 
       const newWindow = AppWindowModel.create({
         appId: url,

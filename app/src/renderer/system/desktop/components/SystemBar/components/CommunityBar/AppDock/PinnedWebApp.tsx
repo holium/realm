@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 
-import { Flex } from '@holium/design-system/general';
+import { Flex, Text } from '@holium/design-system/general';
 import { TileHighlight } from '@holium/design-system/os';
+import { getSiteNameFromUrl } from '@holium/design-system/util';
 
 import { ContextMenuOption, useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
@@ -23,6 +24,7 @@ type WebAppTileProps = {
   boxShadow?: string;
   favicon: string | null;
   character: string;
+  children?: ReactNode;
   onClick: () => void;
   onFaultyFavicon: () => void;
 };
@@ -34,12 +36,14 @@ const WebAppTile = ({
   boxShadow,
   favicon,
   character,
+  children,
   onClick,
   onFaultyFavicon,
 }: WebAppTileProps) => (
   <Flex
     id={tileId}
     style={{
+      position: 'relative',
       width: size,
       height: size,
       borderRadius,
@@ -67,6 +71,7 @@ const WebAppTile = ({
     ) : (
       character
     )}
+    {children}
   </Flex>
 );
 
@@ -144,7 +149,21 @@ const PinnedWebAppPresenter = ({ url, isGrid }: Props) => {
         character={character}
         onClick={onClick}
         onFaultyFavicon={() => setFavicon(null)}
-      />
+      >
+        <Text.Custom
+          position="absolute"
+          style={{
+            pointerEvents: 'none',
+            color: 'rgba(51, 51, 51, 0.8)',
+          }}
+          left="1.5rem"
+          bottom="1.25rem"
+          fontWeight={500}
+          fontSize={2}
+        >
+          {getSiteNameFromUrl(url)}
+        </Text.Custom>
+      </WebAppTile>
     );
   }
 
