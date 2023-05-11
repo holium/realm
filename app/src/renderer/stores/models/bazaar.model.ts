@@ -173,10 +173,13 @@ export const BazaarStore = types
           const apps = Array.from<AppMobxType>(self.catalog.values())
             .map((app) => getSnapshot(app))
             .filter((app: SnapshotOut<AppMobxType>) => {
-              if (app.type === 'urbit') {
+              if (app.gridIndex === null) {
+                return false;
+              } else if (app.type === 'urbit') {
                 const urb = app as AppMobxType;
                 return (
                   // 'started' installs should show on the desktop no?
+
                   urb.installStatus === 'started' ||
                   urb.installStatus === 'installed' ||
                   urb.installStatus === 'suspended' ||

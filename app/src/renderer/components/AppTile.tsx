@@ -241,7 +241,7 @@ const AppTilePresenter = ({
             textStyle="capitalize"
             fontSize={tileSize === 'xl1' ? '13px' : 2}
           >
-            {app.installStatus}
+            {installStatus}
           </Text.Custom>
         );
       }

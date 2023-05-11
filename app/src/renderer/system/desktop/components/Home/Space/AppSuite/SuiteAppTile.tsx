@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
 import { observer } from 'mobx-react';
-import { rgba } from 'polished';
 
-import { bgIsLightOrDark, Box, Button, Icon } from '@holium/design-system';
+import { Box, Button, Icon } from '@holium/design-system';
 
 import { AppTile, ContextMenuOption } from 'renderer/components';
 import { getAppTileFlags } from 'renderer/lib/app';
@@ -38,18 +37,10 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
     return (app as AppMobxType).host;
   }, [app]);
 
-  const lightOrDark: 'light' | 'dark' = bgIsLightOrDark(app.color);
-  const isLight = useMemo(() => lightOrDark === 'light', [lightOrDark]);
-  const iconColor = useMemo(
-    () => (isLight ? rgba('#333333', 0.7) : rgba('#FFFFFF', 0.7)),
-    [isLight]
-  );
-
   const isPinned = currentSpace?.isPinned(app.id);
   const weRecommended = bazaarStore.isRecommended(app.id);
-  const installStatus =
-    ((app as AppMobxType).installStatus as InstallStatus) ||
-    InstallStatus.installed;
+  const appRef = bazaarStore.catalog.get(app.id);
+  const installStatus = appRef?.installStatus as InstallStatus;
   const { isInstalled, isUninstalled, isDesktop } =
     getAppTileFlags(installStatus);
 
@@ -57,6 +48,7 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
     evt.stopPropagation();
     return handleInstallation(appHost, app.id, installStatus);
   };
+
   const canSuspend =
     (installStatus === InstallStatus.installed ||
       installStatus === InstallStatus.suspended) &&
@@ -151,7 +143,7 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
             // color={iconColor}
             onClick={onInstallation}
           >
-            <Icon name="CloudDownload" size={20} iconColor={iconColor} />
+            <Icon name="CloudDownload" size={20} />
           </Button.IconButton>
         </Box>
       )}

@@ -268,7 +268,8 @@ const DevAppsPresenter = () => {
     const ally = bazaarStore.getAlly(selectedShip);
     let takingTooLong = false;
     if (
-      !ally.desks.loadedAt &&
+      ally &&
+      !ally?.desks.loadedAt &&
       moment(ally.desks.requestedAt).diff(moment(), 'minutes') < -5
     ) {
       takingTooLong = true;

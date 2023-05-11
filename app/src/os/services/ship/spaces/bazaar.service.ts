@@ -428,14 +428,6 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
     });
     return result.treaties;
   }
-
-  // async addRecentApp(appId: string) {
-  //   return this.models.bazaar.addRecentApp(appId);
-  // }
-
-  // async addRecentDev(shipId: string) {
-  //   return this.models.bazaar.addRecentDev(shipId);
-  // }
 }
 
 export default BazaarService;
