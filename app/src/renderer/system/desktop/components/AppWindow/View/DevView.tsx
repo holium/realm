@@ -135,6 +135,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
       isResizing,
       loading.isOn,
       currentTheme.windowColor,
+      loggedInAccount,
     ]
   );
 };

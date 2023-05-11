@@ -150,7 +150,7 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
         />
       </AppViewContainer>
     ),
-    [lockView, appWindow.appId, appUrl]
+    [lockView, appWindow.appId, appUrl, loggedInAccount]
   );
 };
 

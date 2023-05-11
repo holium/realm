@@ -110,7 +110,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
         )}
       </>
     ),
-    [currentTab.url, isDragging, isResizing, loadingState]
+    [currentTab.url, isDragging, isResizing, loadingState, loggedInAccount]
   );
 };
 
