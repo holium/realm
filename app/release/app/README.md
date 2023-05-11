@@ -43,7 +43,7 @@ When PR title starts with `staging`:
 
 When PR title starts with `release`:
 
-- ghproxy URL is set to `ghproxy.holium.xyz`
+- ghproxy URL is set to `download.holium.com`
 - autoUpdater channel (setFeedURL) is set to `latest`
 - release titled `release-<version>`
 - last step in build flips the `draft` release to `latest` making available for download

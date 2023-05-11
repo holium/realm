@@ -59,7 +59,7 @@ const configuration: webpack.Configuration = {
       AUTOUPDATE_FEED_URL:
         process.env.RELEASE_CHANNEL === 'latest' ||
         process.env.RELEASE_CHANNEL === 'hotfix'
-          ? 'https://ghproxy.holium.xyz'
+          ? 'https://download.holium.com'
           : 'https://ghproxy-staging.holium.xyz',
       INSTALL_MOON:
         process.env.RELEASE_CHANNEL === 'latest' ||
