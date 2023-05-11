@@ -119,6 +119,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
           appId={appWindow.appId}
           src={appWindow.href?.site}
           webpreferences="sandbox=false"
+          partition="persist:browser-webview"
           isLocked={isResizing || loading.isOn}
           style={{
             width: 'inherit',

@@ -180,7 +180,7 @@ export const ShellModel = types
 
       return newWindow;
     },
-    openRelicWindow() {
+    openWebApp(url: string) {
       const dimensions = getDefaultAppDimensions(
         'os-browser',
         self.desktopDimensions
@@ -191,12 +191,23 @@ export const ShellModel = types
       }
       const position = getCenteredPosition(dimensions);
 
+      // Get sitename from url and capitalize first letter.
+      const sitename = url
+        .replace('https://', '')
+        .replace('http://', '')
+        .split('/')[0]
+        .split('.')[0]
+        .replace(/^\w/, (c) => c.toUpperCase());
+
       const newWindow = AppWindowModel.create({
-        appId: 'os-browser',
-        title: 'Relic Browser',
+        appId: url,
+        title: sitename,
         glob: false,
         state: 'normal',
-        type: 'native',
+        type: 'web',
+        href: {
+          site: url,
+        },
         zIndex: self.windows.size + 1,
         bounds: {
           ...dimensions,

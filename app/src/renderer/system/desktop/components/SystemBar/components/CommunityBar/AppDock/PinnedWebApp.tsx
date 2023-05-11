@@ -4,7 +4,6 @@ import { observer } from 'mobx-react';
 
 import { Flex } from '@holium/design-system/general';
 
-import { useBrowser } from 'renderer/apps/Browser/store';
 import { ContextMenuOption, useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { SpacesIPC } from 'renderer/stores/ipc';
@@ -21,7 +20,6 @@ type Props = {
 };
 
 const PinnedWebAppPresenter = ({ url }: Props) => {
-  const { setUrl } = useBrowser();
   const { shellStore } = useAppState();
   const { spacesStore } = useShipStore();
 
@@ -56,21 +54,19 @@ const PinnedWebAppPresenter = ({ url }: Props) => {
   );
 
   const onClick = () => {
-    const appId = 'os-browser';
-    const appWindow = shellStore.getWindowByAppId(appId);
+    const appWindow = shellStore.getWindowByAppId(url);
 
     if (appWindow) {
       if (appWindow.isMinimized) {
-        shellStore.toggleMinimized(appId);
+        shellStore.toggleMinimized(url);
       } else {
-        shellStore.setActive(appId);
+        shellStore.setActive(url);
       }
     } else {
-      shellStore.openRelicWindow();
+      shellStore.openWebApp(url);
     }
     shellStore.closeHomePane();
 
-    setUrl(url);
   };
 
   useEffect(() => {
