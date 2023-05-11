@@ -3,6 +3,7 @@ import { Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 
 import { Flex } from '@holium/design-system/general';
+import { TileHighlight } from '@holium/design-system/os';
 
 import { ContextMenuOption, useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
@@ -25,6 +26,9 @@ const PinnedWebAppPresenter = ({ url }: Props) => {
 
   const [favicon, setFavicon] = useState<string | null>(getFavicon(url));
   const { getOptions, setOptions } = useContextMenu();
+
+  const window = shellStore.getWindowByAppId(url);
+  const isActive = window?.isActive;
 
   // First uppercase letter of the website name.
   // Remove any protocol and www. from the url.
@@ -66,7 +70,6 @@ const PinnedWebAppPresenter = ({ url }: Props) => {
       shellStore.openWebApp(url);
     }
     shellStore.closeHomePane();
-
   };
 
   useEffect(() => {
@@ -107,6 +110,12 @@ const PinnedWebAppPresenter = ({ url }: Props) => {
           character
         )}
       </Flex>
+      <TileHighlight
+        layoutId={`tile-highlight-${tileId}`}
+        isOpen={Boolean(window)}
+        isActive={Boolean(isActive)}
+        transition={{ duration: 0.2 }}
+      />
     </Reorder.Item>
   );
 };
