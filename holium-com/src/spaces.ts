@@ -210,7 +210,7 @@ export const spaces: Record<SpaceKeys, Space> = {
       iconColor: 'rgba(185,174,201,0.4)',
       accentColor: '#4E9EFD',
       mouseColor: '#4E9EFD',
-      wallpaper: './space-wallpapers/flat-earth-society.jpg',
+      wallpaper: './space-wallpapers/flat-earth-society.png',
     },
   },
   english: {
