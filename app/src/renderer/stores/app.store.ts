@@ -339,6 +339,22 @@ function registerOnUpdateListener() {
       case 'joined-bazaar':
         shipStore.spacesStore._onJoinedBazaar(payload);
         break;
+      case 'new-ally':
+        if (!payload.desks || payload.desks?.length === 0) {
+          // if there are no published apps, we will never get the
+          //  'treaties-loaded' event (see below); therefore scry just in
+          //  case and set the loading state to loaded
+          shipStore.bazaarStore.alliesLoader.set('loaded');
+          // shipStore.bazaarStore.scryTreaties(payload.ship);
+        }
+        shipStore.bazaarStore._addAlly(payload.ship, payload);
+        break;
+      case 'ally-deleted':
+        shipStore.bazaarStore._removeAlly(payload.ship);
+        break;
+      case 'treaties-loaded':
+        shipStore.bazaarStore.scryTreaties(payload.ship);
+        break;
     }
   });
 

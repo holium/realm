@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
 import { Box, Flex, Icon, Row, Text } from '@holium/design-system';
@@ -45,7 +46,7 @@ interface AppRowProps {
   actionRenderer?: any;
 }
 
-export const AppRow = ({
+export const AppRowPresenter = ({
   descriptionWidth = 340,
   app,
   onClick,
@@ -53,7 +54,7 @@ export const AppRow = ({
 }: AppRowProps) => {
   const rowRef = useRef<any>(null);
   let image = app.image;
-  if (app && !app.image && app.href && app.href.site) {
+  if ((app && !app.image) || (app.href && app.href.site)) {
     // for the case an image is served by the ship
     // we wont have it until install, so set to null
     image = null;
@@ -97,7 +98,9 @@ export const AppRow = ({
           >
             {image && (
               <img
-                style={{ pointerEvents: 'none' }}
+                style={{
+                  pointerEvents: 'none',
+                }}
                 draggable="false"
                 height={sizes.sm}
                 width={sizes.sm}
@@ -131,3 +134,5 @@ export const AppRow = ({
     </Row>
   );
 };
+
+export const AppRow = observer(AppRowPresenter);

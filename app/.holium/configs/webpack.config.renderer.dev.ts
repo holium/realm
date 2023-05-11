@@ -138,7 +138,7 @@ const configuration: webpack.Configuration = {
       NODE_ENV: 'development',
       PLAYGROUND_PORT: playgroundPort,
       USE_LOCAL_WALLET_API: useLocalWalletAPI,
-      API_URL: 'https://backend-server-test.thirdearth.com',
+      API_URL: 'https://backend-server.third.earth',
       API_HEADERS_CLIENT_ID: '5',
       API_HEADERS_VERSION: '2',
       STRIPE_KEY:

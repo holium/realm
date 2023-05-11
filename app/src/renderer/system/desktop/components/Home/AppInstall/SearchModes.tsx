@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
+import moment from 'moment';
 import { isValidPatp } from 'urbit-ob';
 
 import {
@@ -27,42 +28,26 @@ import { useAppInstaller } from './store';
 const SearchModesPresenter = () => {
   const { bazaarStore } = useShipStore();
   const [data, setData] = useState<any>([]);
-  const {
-    searchMode,
-    searchString,
-    selectedShip,
-    selectedDesk,
-    loadingState,
-    setLoadingState,
-  } = useAppInstaller();
-
-  useEffect(() => {
-    if (searchMode === 'dev-app-search' && selectedShip) {
-      bazaarStore
-        .scryTreaties(selectedShip)
-        .catch((e) => console.error(e))
-        .finally(() => setLoadingState(''));
-    }
-  }, [bazaarStore.treatiesLoaded, searchMode, selectedShip, setLoadingState]);
+  const { searchMode, searchString, selectedShip, selectedDesk } =
+    useAppInstaller();
 
   useEffect(() => {
     if (searchMode === 'dev-app-search' && selectedShip) {
       if (!bazaarStore.hasAlly(selectedShip)) {
-        if (loadingState !== 'loading-published-apps') {
-          setLoadingState('loading-published-apps');
+        if (!bazaarStore.alliesLoader.isLoading) {
           bazaarStore
             .addAlly(selectedShip)
             .then(() => {
               bazaarStore.scryTreaties(selectedShip);
             })
             .catch((e) => console.error(e));
-          // .finally(() => appInstaller.setLoadingState(''));
         }
       } else {
         bazaarStore.scryTreaties(selectedShip);
+        // bazaarStore.setLoadingState('published-apps-loaded');
       }
     }
-  }, [bazaarStore, loadingState, searchMode, selectedShip, setLoadingState]);
+  }, [searchMode, selectedShip]);
 
   useEffect(() => {
     if (searchMode === 'app-search') {
@@ -104,7 +89,6 @@ export const SearchModes = observer(SearchModesPresenter);
 const AppInstallStartPresenter = () => {
   const { bazaarStore } = useShipStore();
   const appInstaller = useAppInstaller();
-
   return (
     <NoScrollBar flexDirection="column">
       <Flex flexDirection="column" gap={12}>
@@ -229,13 +213,13 @@ const AppProvidersPresenter = () => {
     }
   };
   return (
-    bazaarStore.allies && (
+    bazaarStore.getAllies() && (
       <>
-        {Array.from(bazaarStore.allies.values())
-          .filter(
-            (item: any) =>
-              item.ship && item.ship.startsWith(appInstaller.searchString)
-          )
+        {bazaarStore
+          .getAllies()
+          .filter((item: any) => {
+            return item.ship && item.ship.startsWith(appInstaller.searchString);
+          })
           .map((item: any, index: number) => (
             <ProviderRow
               key={`provider-${index}`}
@@ -280,24 +264,50 @@ const DevAppsPresenter = () => {
     setApp,
   } = useAppInstaller();
 
-  const apps: DocketAppType[] = bazaarStore.searchTreaties(
-    selectedShip,
-    searchString
-  );
-
-  if (bazaarStore.loadingTreaties) {
+  if (bazaarStore.treatyLoader.isLoading) {
+    const ally = bazaarStore.getAlly(selectedShip);
+    let takingTooLong = false;
+    if (
+      ally &&
+      !ally?.desks.loadedAt &&
+      moment(ally.desks.requestedAt).diff(moment(), 'minutes') < -5
+    ) {
+      takingTooLong = true;
+    }
     return (
-      <Flex flex={1} verticalAlign="middle">
-        <Spinner size={0} />
-        <Text.Custom
-          marginLeft={2}
-          opacity={0.4}
-        >{`Loading published apps...`}</Text.Custom>
+      <Flex col>
+        <Flex flex={1} verticalAlign="middle">
+          <Spinner size={0} />
+          <Text.Custom marginLeft={2} opacity={0.4}>
+            {`Loading published apps...`}{' '}
+          </Text.Custom>
+        </Flex>
+        {takingTooLong && (
+          <>
+            <Text.Custom marginTop={3} opacity={0.4}>
+              {`This is taking longer than expected. The app publisher may be offline.`}
+            </Text.Custom>
+            <Flex row justify="center" width="100%">
+              <Button.TextButton
+                marginTop={2}
+                color="intent-alert"
+                onClick={() => {
+                  setSearchMode('none');
+                  setSearchString('');
+                  bazaarStore.removeAlly(selectedShip);
+                  setSelectedShip('');
+                }}
+              >
+                Cancel
+              </Button.TextButton>
+            </Flex>
+          </>
+        )}
       </Flex>
     );
   }
 
-  const InstallButton = ({ app }: any) => {
+  const InstallButtonPresenter = ({ app }: any) => {
     const { bazaarStore } = useShipStore();
     const parts = app.id.split('/');
     let appEntry;
@@ -320,10 +330,22 @@ const DevAppsPresenter = () => {
           setSearchMode('none');
         }}
       >
-        {installed ? 'Installed' : 'Install'}
+        {appEntry?.installStatus === 'started' ? (
+          <Spinner size={0} color="white" />
+        ) : installed ? (
+          'Installed'
+        ) : (
+          'Install'
+        )}
       </Button.Primary>
     );
   };
+  const InstallButton = observer(InstallButtonPresenter);
+
+  const apps: DocketAppType[] = bazaarStore.searchTreaties(
+    selectedShip,
+    searchString
+  );
 
   if (!apps || apps.length === 0) {
     return <Text.Custom opacity={0.4}>{`No apps found`}</Text.Custom>;

@@ -55,11 +55,12 @@ const FeaturedListPresenter = () => {
         key={`featured-spaces-${listData.length}`}
         width={354}
         data={listData}
-        itemContent={(_, data) => {
+        // todo types
+        itemContent={(_, data: any) => {
           const onJoin = async () => {
             console.log('joining', data.path.substring(1));
             spacesStore
-              .joinSpace(data.path.substring(1))
+              .joinSpace(data.path)
               .then(() => {
                 spacesStore.selectSpace(data.path);
               })

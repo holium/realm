@@ -10,10 +10,12 @@ import {
   Icon,
   IconPathsType,
   InstallStatus,
+  Spinner,
   Text,
 } from '@holium/design-system';
 
 import { LinkPreview } from 'renderer/components';
+import { getAppTileFlags } from 'renderer/lib/app';
 import { normalizeBounds } from 'renderer/lib/window-manager';
 import { appState, useAppState } from 'renderer/stores/app.store';
 import {
@@ -223,6 +225,10 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
     );
   }
 
+  const isInstalling = getAppTileFlags(
+    app.installStatus as InstallStatus
+  ).isInstalling;
+
   return (
     <Flex flex={1} flexDirection="column" justifyContent="flex-start">
       <Flex flexDirection="row" gap={20}>
@@ -266,19 +272,28 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
                 borderRadius={6}
                 paddingTop="6px"
                 paddingBottom="6px"
-                disabled={isInstalled}
+                disabled={isInstalling}
                 fontWeight={500}
                 onClick={(e) => {
                   e.stopPropagation();
                   const a = app as AppMobxType;
                   if (!isInstalled && a && a.host) {
                     bazaarStore.installApp(a.host, a.id);
+                  } else if (isInstalled && a) {
+                    // if the app is installed we want to uninstall it
+                    bazaarStore.uninstallApp(a.id);
                   }
                   // TODO should we close on install?
                   onClose();
                 }}
               >
-                {isInstalled ? 'Installed' : 'Install'}
+                {isInstalling ? (
+                  <Spinner size={0} color="white" />
+                ) : isInstalled ? (
+                  'Uninstall'
+                ) : (
+                  'Install'
+                )}
               </Button.Primary>
 
               <Button.Secondary

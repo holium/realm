@@ -120,6 +120,7 @@
       [%x %treaties ship=@ ~]     ::  ~/scry/bazaar/allies
         =/  =ship      (slav %p i.t.t.path)
         =/  treaties   (treaties:scry:bazaar:core ship %.y)
+        ~&  >  [treaties]
         ``bazaar-view+!>([%treaties treaties])
       ::
       ::
@@ -128,6 +129,12 @@
         =/  dok  (find-docket:helpers:bazaar:core %realm)
         ?~  dok  ``json+!>(~)
         ``bazaar-view+!>([%version version.u.dok])
+      ::
+      [%x %pikes ~]     ::  ~/scry/bazaar/pikes
+        =/  peaks      get-pikes:core
+        ~&  >  [peaks]
+        ~
+        :: ``bazaar-view+!>([%treaties treaties])
     ==
   ::
   ++  on-agent
@@ -1429,6 +1436,7 @@
   ++  on-new
     |=  [=ship =alliance:treaty]
     ^-  (quip card _state)
+    :: ~&  >>  "{<dap.bowl>}: [on-new] => {<[ship alliance]>}"
     :_  state
     :~
       [%give %fact [/updates ~] bazaar-reaction+!>([%new-ally ship alliance])]
@@ -1552,7 +1560,7 @@
 ++  get-pikes
   ^-  pikes:hood
   :: ~&  >>  "{<dap.bowl>}: [get-pikes]"
-  .^(pikes:hood %gx (welp pre /kiln/pikes/noun))
+  .^(pikes:hood %gx (welp pre /kiln/pikes/kiln-pikes))
 ::
 ::  +get-syncs:
 ::

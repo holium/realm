@@ -11,3 +11,5 @@ export const NotifIPC = window.notifService;
 export const FriendsIPC = window.friendDb;
 export const SpacesIPC = window.spacesService;
 export const BazaarIPC = window.bazaarService;
+export const AppInstallIPC = window.appInstallService;
+export const AppRecentsIPC = window.appRecentsService;

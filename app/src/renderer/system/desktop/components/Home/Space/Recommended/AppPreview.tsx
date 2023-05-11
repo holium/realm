@@ -30,7 +30,8 @@ export const AppPreview: FC<AppPreviewProps> = observer(
     let info = '';
     if (app.type === 'urbit') {
       info = app.info;
-      installStatus = app.installStatus as InstallStatus;
+      installStatus = bazaarStore.catalog.get(app.id)
+        ?.installStatus as InstallStatus;
     }
 
     const {
@@ -72,7 +73,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
           fontSize={'13px'}
           // color={isFailed ? '#5e0b18' : theme.currentTheme.textColor}
         >
-          {app.installStatus}
+          {installStatus}
         </Text.Custom>
       );
     }
@@ -120,7 +121,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
                 // hoverFill={theme.currentTheme.accentColor}
                 onClick={onInstallation}
               >
-                <Icon name="CloudDownload" />
+                <Icon name="CloudDownload" size={20} />
               </Button.IconButton>
             )}
             {isInstalling && (
@@ -130,7 +131,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
                 alignItems="center"
                 justifyContent="center"
               >
-                <Spinner size={0} />
+                <Spinner size={0} color={'white'} />
               </Flex>
             )}
             {isFailed && (

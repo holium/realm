@@ -18,7 +18,7 @@ const EmptyPicture = styled.div<EmptyPictureProps>`
 `;
 
 const SpaceButton = styled(BarButton)`
-  padding: 0px 4px;
+  padding: 0px 4px 0px 2px !important;
   padding-right: 16px;
   text-align: left;
   display: inline-flex;

@@ -20,6 +20,7 @@ type ContextMenuOptionsMap = {
 type ColorConfig = {
   textColor: string;
   backgroundColor: string;
+  borderColor?: string;
 };
 
 type ContextMenuColorsMap = {
