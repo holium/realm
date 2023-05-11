@@ -12,8 +12,8 @@ export const constants = {
 };
 
 export const downloadLinks = {
-  macM1: 'https://ghproxy.holium.xyz/latest-Realm-mac-arm64.dmg',
-  macIntel: 'https://ghproxy.holium.xyz/latest-Realm-mac.dmg',
-  windows: 'https://ghproxy.holium.xyz/latest/windows',
-  linux: 'https://ghproxy.holium.xyz/latest/linux',
+  macM1: 'https://download.holium.com/latest-Realm-mac-arm64.dmg',
+  macIntel: 'https://download.holium.com/latest-Realm-mac.dmg',
+  windows: 'https://download.holium.com/latest/windows',
+  linux: 'https://download.holium.com/latest/linux',
 };
