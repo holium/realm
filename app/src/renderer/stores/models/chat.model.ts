@@ -383,7 +383,7 @@ export const Chat = types
         success = false;
         self.messages
           .find((m) => m.id === messageId)
-          ?.setError('failed to delete');
+          ?.setError('Failed to delete');
       }
       if (success) {
         const message = self.messages.find((m) => m.id === messageId);
