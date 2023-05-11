@@ -5,11 +5,15 @@ import { pathToObj } from '../../../lib/path';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
 import { BazaarUpdateType } from './bazaar.types';
+import { AppPublishersTable } from './tables/appPublishers.table';
+import { AppRecentsTable } from './tables/appRecents.table';
 import { AppCatalogDB } from './tables/catalog.table';
 
 export class BazaarService extends AbstractService<BazaarUpdateType> {
   private tables?: {
     appCatalog: AppCatalogDB;
+    appPublishers: AppPublishersTable;
+    appRecents: AppRecentsTable;
   };
   private shipDB?: Database;
   constructor(options?: ServiceOptions, db?: Database) {
@@ -19,6 +23,8 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
     }
     this.tables = {
       appCatalog: new AppCatalogDB({ preload: false, name: 'appCatalog', db }),
+      appPublishers: new AppPublishersTable(false, db),
+      appRecents: new AppRecentsTable(false, db),
     };
 
     this._onEvent = this._onEvent.bind(this);
@@ -75,6 +81,13 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
           break;
         case 'app-install-update': //  installed, uninstalled, started, etc.
           const { appId, app, grid } = data['app-install-update'];
+          // log.info(
+          //   'bazaar.service.ts:',
+          //   'app-install-update',
+          //   appId,
+          //   app,
+          //   grid
+          // );
           this.tables?.appCatalog.updateApp(appId, app);
           this.tables?.appCatalog.updateGrid(grid);
           const updatedApp = this.tables?.appCatalog.getApp(appId);
@@ -205,6 +218,7 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
           // model._allyDeleted(data['ally-deleted'].ship);
           break;
         case 'treaties-loaded':
+          log.info('treaties-loaded => %o', data['treaties-loaded']);
           this.sendUpdate({
             type: 'treaties-loaded',
             payload: data['treaties-loaded'],
@@ -378,39 +392,17 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
   }
 
   async addAlly(ship: string) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        reject('timed out after 10 seconds');
-      }, 10000);
-      APIConnection.getInstance().conduit.poke({
-        app: 'treaty',
-        mark: 'ally-update-0',
-        json: {
-          add: ship,
-        },
-        reaction: 'bazaar-reaction.new-ally',
-        onReaction: (data) => {
-          log.info('new-ally', data);
-          resolve(data['new-ally']);
-        },
-        onError: (err) => {
-          log.info('new-ally error', err);
-          reject(err);
-        },
-      });
+    APIConnection.getInstance().conduit.poke({
+      app: 'treaty',
+      mark: 'ally-update-0',
+      json: {
+        add: ship,
+      },
     });
   }
 
   async removeAlly(ship: string) {
-    const ally = APIConnection.getInstance().conduit.poke({
-      app: 'treaty',
-      mark: 'ally-update-0',
-      json: {
-        del: ship,
-      },
-    });
-
-    log.info('removeAlly', ally);
+    this.tables?.appPublishers.removeAlly(ship);
   }
 
   async scryHash(app: string) {
@@ -426,7 +418,7 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
       app: 'bazaar',
       path: '/allies',
     });
-    return result.allies;
+    return this.tables?.appPublishers.insertAll(result.allies);
   }
 
   async scryTreaties(ship: string) {
@@ -434,7 +426,6 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
       app: 'bazaar',
       path: `/treaties/${ship}`,
     });
-    log.info('scryTreaties', result);
     return result.treaties;
   }
 

@@ -1,7 +1,6 @@
 import { observable, toJS } from 'mobx';
 import {
   applySnapshot,
-  clone,
   flow,
   getSnapshot,
   Instance,
@@ -11,7 +10,7 @@ import {
 
 import { cleanNounColor } from '@holium/design-system';
 
-import { BazaarIPC } from '../ipc';
+import { AppRecentsIPC, BazaarIPC } from '../ipc';
 import { LoaderModel } from './common.model';
 import { Glob } from './docket.model';
 
@@ -157,7 +156,6 @@ export const BazaarStore = types
     addingAlly: types.map(types.string),
     devAppMap: types.map(DevAppModel),
     installations: types.map(types.string),
-    treatiesLoaded: types.optional(types.boolean, false),
     alliesLoader: types.optional(LoaderModel, { state: 'initial' }),
     treatyLoader: types.optional(LoaderModel, { state: 'initial' }),
     recentApps: types.array(types.string),
@@ -214,6 +212,9 @@ export const BazaarStore = types
         getAllies() {
           return Array.from(toJS(allies).values());
         },
+        getAlly(ship: string) {
+          return allies.get(ship);
+        },
         hasAlly(ship: string) {
           return allies.has(ship);
         },
@@ -262,143 +263,33 @@ export const BazaarStore = types
       actions: {
         init: flow(function* () {
           const data = yield BazaarIPC.fetchAppCatalog();
+          AppRecentsIPC.getRecentDesks().then((res) => {
+            applySnapshot(
+              self.recentApps,
+              res.map((row) => row.desk)
+            );
+          });
+          AppRecentsIPC.getRecentPublishers().then((res) => {
+            applySnapshot(
+              self.recentDevs,
+              res.map((row) => row.publisher)
+            );
+          });
           applySnapshot(self.catalog, data);
         }),
         _onInitialLoad(catalog: any) {
           applySnapshot(self.catalog, catalog);
         },
+
         reset() {
           self.catalog.clear();
           self.gridIndex.clear();
           self.recentApps.clear();
           self.recentDevs.clear();
         },
-        // Updates
-        // _setAppStatus(appId: string, app: UrbitAppType, gridIndex: any) {
-        //   self.catalog.set(appId, {
-        //     ...app,
-        //     color: cleanNounColor(app.color),
-        //   });
-        //   applySnapshot(self.gridIndex, gridIndex);
-        // },
-        // _addPinned(data: { path: string; id: string; index: number }) {
-        //   if (!self.docks.has(data.path)) {
-        //     self.docks.set(data.path, []);
-        //   }
-        //   const dock = self.docks.get(data.path);
-        //   dock?.push(data.id);
-        //   self.docks.set(data.path, dock);
-        // },
-        // _removePinned(data: { path: string; id: string }) {
-        //   const dock = self.docks.get(data.path);
-        //   const removeIndex = dock?.findIndex((id: string) => id === data.id);
-        //   if (removeIndex) dock?.splice(removeIndex, 1);
-        //   self.docks.set(data.path, dock);
-        // },
-        // _reorderPins(data: { path: string; dock: string[] }) {
-        //   self.docks.set(data.path, data.dock);
-        // },
-        // _suiteAdded(data: { path: string; id: string; index: number }) {
-        //   const stall = self.stalls.get(data.path);
-        //   if (!stall) return;
-        //   stall?.suite.set(`${data.index}`, data.id);
-        //   self.stalls.set(data.path, stall);
-        // },
-        // _suiteRemoved(data: { path: string; index: number }) {
-        //   const stall = self.stalls.get(data.path);
-        //   if (!stall) return;
-        //   stall.suite.delete(`${data.index}`);
-        //   self.stalls.set(data.path, stall);
-        // },
 
-        // _addJoined(data: { path: string; stall: any; catalog: any }) {
-        //   Object.keys(data.catalog).forEach((key: string) => {
-        //     const docket = data.catalog[key];
-        //     if (docket.type === 'urbit') {
-        //       // Set new apps in catalog
-        //       const app = self.catalog.get(key);
-        //       if (!app) {
-        //         data.catalog[key].color = cleanNounColor(data.catalog[key].color);
-        //         self.catalog.set(key, data.catalog[key]);
-        //       } else {
-        //         if (!(app as UrbitAppType).host && data.catalog[key].host) {
-        //           // add host to existing app
-        //           (app as UrbitAppType).setHost(data.catalog[key].host);
-        //           self.catalog.set(key, app);
-        //         }
-        //       }
-        //     }
-        //   });
-        //   self.stalls.set(data.path, data.stall);
-        // },
-        // _rebuildCatalog(data: any) {
-        //   if (data.catalog) {
-        //     for (let i = 0; i < data.catalog.length; i++) {
-        //       const app: AppType = data.catalog[i];
-        //       if (app.type === 'urbit') {
-        //         app.color = cleanNounColor(app.color);
-        //       }
-        //       self.catalog.set(app.id, app);
-        //     }
-        //   }
-        //   self.gridIndex.clear();
-        //   applySnapshot(self.gridIndex, data.grid);
-        // },
-        // _rebuildStall(data: any) {
-        //   if (data.catalog) {
-        //     for (let i = 0; i < data.catalog.length; i++) {
-        //       const app: AppType = data.catalog[i];
-        //       if (app.type === 'urbit') {
-        //         app.color = cleanNounColor(app.color);
-        //       }
-        //       self.catalog.set(app.id, app);
-        //     }
-        //   }
-        //   self.stalls.set(data.path, data.stall);
-        // },
-        // _clearStall(data: any) {
-        //   self.stalls.set(data.path, StallModel.create());
-        // },
-        // _allyAdded(ship: string, desks: string[]) {
-        //   if (self.addingAlly.get(ship)) {
-        //     self.addingAlly.delete(ship);
-        //   }
-        //   // extra desk name from full desk path (i.e. <ship>/<desk>)
-        //   for (let i = 0; i < desks.length; i++) {
-        //     desks[i] = desks[i].split('/')[1];
-        //   }
-        //   self.allies.set(ship, { ship, desks });
-        //   // this nice little 'new ally' event allows us to see if this ship
-        //   //  has any apps available. if not, end the search (i.e. don't wait for
-        //   //  treaties-loaded event since it will never happen)
-        //   if (desks.length === 0) {
-        //     self.loadingTreaties = false;
-        //     // hmm.wondering if we should use this use-case to send a del to the treaty to remove
-        //     //   this ally, to force a research if/when the user hits the ship again. keep
-        //     //   an eye on this
-        //   }
-        // },
-        // _allyDeleted(ship: string) {
-        //   if (self.addingAlly.get(ship)) {
-        //     self.addingAlly.delete(ship);
-        //   }
-        //   if (self.allies.has(ship)) {
-        //     self.allies.delete(ship);
-        //   }
-        // },
-        // _addRecommended(data: { id: string; stalls: any }) {
-        //   self.recommendations.push(data.id);
-        //   applySnapshot(self.stalls, data.stalls);
-        // },
-        // _removeRecommended(data: { id: string; stalls: any }) {
-        //   const removeIndex = self.recommendations?.findIndex(
-        //     (id: string) => id === data.id
-        //   );
-        //   self.recommendations.splice(removeIndex, 1);
-        //   applySnapshot(self.stalls, data.stalls);
-        // },
-
-        addRecentApp(appId: string) {
+        addRecentApp: flow(function* (appId: string) {
+          yield AppRecentsIPC.addRecentDesk(appId);
           // keep no more than 5 recent app entries
           if (self.recentApps.length >= 5) {
             self.recentApps.pop();
@@ -408,31 +299,34 @@ export const BazaarStore = types
           if (idx !== -1) self.recentApps.splice(idx, 1);
           // add app to front of list
           self.recentApps.splice(0, 0, appId);
-        },
-        addRecentDev(shipId: string) {
-          // keep no more than 5 recent app entries
+        }),
+        addRecentDev: flow(function* (shipId: string) {
+          yield AppRecentsIPC.addRecentPublisher(shipId);
+          // // keep no more than 5 recent app entries
           if (self.recentDevs.length >= 5) {
             self.recentDevs.pop();
           }
           const idx = self.recentDevs.findIndex((item) => item === shipId);
           if (idx !== -1) self.recentDevs.splice(idx, 1);
           self.recentDevs.splice(0, 0, shipId);
-        },
+        }),
         //
         // Pokes
         //
         installApp: flow(function* (ship: string, desk: string) {
           let app: any | undefined = self.catalog.get(desk);
           if (!app) {
-            const treaty: DocketAppType | undefined = clone(
-              treaties.get(`${ship}/${desk}`)
+            const treaty: DocketAppType | undefined = treaties.get(
+              `${ship}/${desk}`
             );
+
             if (treaty) {
               app = UrbitApp.create({
-                ...treaty,
+                ...toJS(treaty),
                 type: AppTypes.Urbit,
+                installStatus: InstallStatus.started,
               });
-              self.catalog.set(desk, clone(app));
+              self.catalog.set(desk, app);
             }
           }
           try {
@@ -457,6 +351,7 @@ export const BazaarStore = types
           if (app) {
             app.setStatus(InstallStatus.uninstalled);
             self.gridIndex.delete(desk);
+            self.installations.delete(app.id);
             try {
               return yield BazaarIPC.uninstallApp(desk);
             } catch (error) {
@@ -527,7 +422,10 @@ export const BazaarStore = types
         addAlly: flow(function* (ship: string) {
           try {
             const alliesResponse = yield BazaarIPC.scryAllies();
-            if (Object.keys(alliesResponse).includes(ship)) {
+            if (
+              alliesResponse[ship] &&
+              alliesResponse[ship].status === 'loaded'
+            ) {
               console.log('already added ally', ship);
               return;
             }
@@ -580,6 +478,9 @@ export const BazaarStore = types
             self.treatyLoader.set('loading');
             treaties.clear();
             const treatiesResponse = yield BazaarIPC.scryTreaties(ship);
+            if (Object.keys(treatiesResponse).length === 0) {
+              return;
+            }
             const formedTreaties = [];
             for (const key in treatiesResponse) {
               const treaty = treatiesResponse[key];
@@ -674,6 +575,9 @@ export const BazaarStore = types
         },
         _removeAlly(ship: string) {
           allies.delete(ship);
+        },
+        _onTreatyUpdate(ship: string, data: any) {
+          treaties.set(ship, data);
         },
       },
     };

@@ -1,11 +1,16 @@
 import { useEffect, useMemo } from 'react';
+import { observer } from 'mobx-react';
 
 import { AppTile, AppTileType, bgIsLightOrDark } from '@holium/design-system';
 
 import { useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
-import { AppMobxType } from 'renderer/stores/models/bazaar.model';
+import {
+  AppMobxType,
+  InstallStatus,
+} from 'renderer/stores/models/bazaar.model';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type Props = {
   tileId: string;
@@ -16,7 +21,7 @@ type Props = {
   onClick: (app: AppMobxType) => void;
 };
 
-export const UnpinnedDockApp = ({
+export const UnpinnedDockAppPresenter = ({
   tileId,
   app,
   space,
@@ -25,6 +30,11 @@ export const UnpinnedDockApp = ({
   onClick,
 }: Props) => {
   const { shellStore } = useAppState();
+  const { bazaarStore } = useShipStore();
+
+  const appRef = bazaarStore.catalog.get(app.id);
+  // TODO need to cleanup and use a ref for the app here
+
   const { getOptions, setOptions, getColors, setColors } = useContextMenu();
 
   const contextMenuOptions = useMemo(
@@ -83,9 +93,11 @@ export const UnpinnedDockApp = ({
       tileId={tileId}
       tileSize="sm"
       app={app}
+      installStatus={appRef?.installStatus as InstallStatus}
       isOpen={true}
       isActive={isActive}
       onAppClick={(app: AppTileType) => onClick(app as AppMobxType)}
     />
   );
 };
+export const UnpinnedDockApp = observer(UnpinnedDockAppPresenter);

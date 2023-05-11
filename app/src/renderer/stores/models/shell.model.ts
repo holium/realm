@@ -2,6 +2,7 @@ import { toJS } from 'mobx';
 import { applySnapshot, getSnapshot, Instance, types } from 'mobx-state-tree';
 
 import { getInitialWindowBounds } from '../../lib/window-manager';
+import { shipStore } from '../ship.store';
 import {
   AppWindowMobxType,
   AppWindowModel,
@@ -157,6 +158,8 @@ export const ShellModel = types
         type: app.type,
         bounds: getInitialWindowBounds(app, self.desktopDimensions),
       });
+
+      shipStore.bazaarStore.addRecentApp(app.id);
 
       self.windows.set(newWindow.appId, newWindow);
       this.setActive(newWindow.appId);

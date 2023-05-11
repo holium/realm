@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
+import moment from 'moment';
 import { isValidPatp } from 'urbit-ob';
 
 import {
@@ -88,7 +89,6 @@ export const SearchModes = observer(SearchModesPresenter);
 const AppInstallStartPresenter = () => {
   const { bazaarStore } = useShipStore();
   const appInstaller = useAppInstaller();
-
   return (
     <NoScrollBar flexDirection="column">
       <Flex flexDirection="column" gap={12}>
@@ -265,18 +265,48 @@ const DevAppsPresenter = () => {
   } = useAppInstaller();
 
   if (bazaarStore.treatyLoader.isLoading) {
+    const ally = bazaarStore.getAlly(selectedShip);
+    let takingTooLong = false;
+    if (
+      !ally.desks.loadedAt &&
+      moment(ally.desks.requestedAt).diff(moment(), 'minutes') < -5
+    ) {
+      takingTooLong = true;
+    }
     return (
-      <Flex flex={1} verticalAlign="middle">
-        <Spinner size={0} />
-        <Text.Custom
-          marginLeft={2}
-          opacity={0.4}
-        >{`Loading published apps...`}</Text.Custom>
+      <Flex col>
+        <Flex flex={1} verticalAlign="middle">
+          <Spinner size={0} />
+          <Text.Custom marginLeft={2} opacity={0.4}>
+            {`Loading published apps...`}{' '}
+          </Text.Custom>
+        </Flex>
+        {takingTooLong && (
+          <>
+            <Text.Custom marginTop={3} opacity={0.4}>
+              {`This is taking longer than expected. The app publisher may be offline.`}
+            </Text.Custom>
+            <Flex row justify="center" width="100%">
+              <Button.TextButton
+                marginTop={2}
+                color="intent-alert"
+                onClick={() => {
+                  setSearchMode('none');
+                  setSearchString('');
+                  bazaarStore.removeAlly(selectedShip);
+                  setSelectedShip('');
+                }}
+              >
+                Cancel
+              </Button.TextButton>
+            </Flex>
+          </>
+        )}
       </Flex>
     );
   }
 
-  const InstallButton = ({ app }: any) => {
+  const InstallButtonPresenter = ({ app }: any) => {
     const { bazaarStore } = useShipStore();
     const parts = app.id.split('/');
     let appEntry;
@@ -299,10 +329,17 @@ const DevAppsPresenter = () => {
           setSearchMode('none');
         }}
       >
-        {installed ? 'Installed' : 'Install'}
+        {appEntry?.installStatus === 'started' ? (
+          <Spinner size={0} color="white" />
+        ) : installed ? (
+          'Installed'
+        ) : (
+          'Install'
+        )}
       </Button.Primary>
     );
   };
+  const InstallButton = observer(InstallButtonPresenter);
 
   const apps: DocketAppType[] = bazaarStore.searchTreaties(
     selectedShip,

@@ -10,10 +10,12 @@ import {
   Icon,
   IconPathsType,
   InstallStatus,
+  Spinner,
   Text,
 } from '@holium/design-system';
 
 import { LinkPreview } from 'renderer/components';
+import { getAppTileFlags } from 'renderer/lib/app';
 import { normalizeBounds } from 'renderer/lib/window-manager';
 import { appState, useAppState } from 'renderer/stores/app.store';
 import {
@@ -278,7 +280,14 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
                   onClose();
                 }}
               >
-                {isInstalled ? 'Installed' : 'Install'}
+                {getAppTileFlags(app.installStatus as InstallStatus)
+                  .isInstalling ? (
+                  <Spinner size={0} color="white" />
+                ) : isInstalled ? (
+                  'Installed'
+                ) : (
+                  'Install'
+                )}
               </Button.Primary>
 
               <Button.Secondary

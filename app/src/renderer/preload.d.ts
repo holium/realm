@@ -10,6 +10,8 @@ import { roomsPreload } from 'os/services/ship/rooms.service';
 import { shipPreload } from 'os/services/ship/ship.service';
 import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
+import { appPublishersDBPreload } from 'os/services/ship/spaces/tables/appPublishers.table';
+import { appRecentsPreload } from 'os/services/ship/spaces/tables/appRecents.table';
 import { walletPreload } from 'os/services/ship/wallet/wallet.service';
 
 declare global {
@@ -31,6 +33,8 @@ declare global {
     realm: typeof realmPreload;
     spacesService: typeof spacesPreload;
     bazaarService: typeof bazaarPreload;
+    appInstallService: typeof appPublishersDBPreload;
+    appRecentsService: typeof appRecentsPreload;
     twttr: any;
   }
 }

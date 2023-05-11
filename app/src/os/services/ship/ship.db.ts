@@ -9,6 +9,8 @@ import { friendsInitSql } from './friends.service';
 import { notifInitSql } from './notifications/notifications.table';
 import { Credentials } from './ship.types.ts';
 import { spacesTablesInitSql } from './spaces/spaces.service';
+import { appPublishersInitSql } from './spaces/tables/appPublishers.table';
+import { appRecentsInitSql } from './spaces/tables/appRecents.table';
 import { bazaarTablesInitSql } from './spaces/tables/catalog.table';
 import { walletInitSql } from './wallet/wallet.db';
 
@@ -126,6 +128,8 @@ ${notifInitSql}
 ${friendsInitSql}
 ${spacesTablesInitSql}
 ${walletInitSql}
+${appPublishersInitSql}
+${appRecentsInitSql}
 create table if not exists credentials (
   url       TEXT PRIMARY KEY NOT NULL,
   code      TEXT NOT NULL,
