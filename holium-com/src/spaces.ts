@@ -5,8 +5,7 @@ export const spaces: Record<SpaceKeys, Space> = {
     id: 'realm-forerunners',
     title: 'Realm Forerunners',
     members: 703,
-    picture:
-      'https://lomder-librun.sfo3.cdn.digitaloceanspaces.com/tiles/realm-docket.png',
+    picture: './space-pictures/realm-forerunners.png',
     theme: {
       id: 'realm-forerunners',
       mode: 'light',
@@ -19,15 +18,14 @@ export const spaces: Record<SpaceKeys, Space> = {
       accentColor: '#4E9EFD',
       offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
-      wallpaper:
-        'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2832&q=100',
+      wallpaper: './space-wallpapers/realm-forerunners.avif',
     },
   },
   cyberpunk: {
     id: 'cyberpunk',
     title: 'Cyberpunk',
     members: 240,
-    picture: '/cyberpunk-group.jpeg',
+    picture: './space-pictures/cyberpunk-group.jpeg',
     theme: {
       id: 'cyberpunk',
       mode: 'dark',
@@ -40,15 +38,14 @@ export const spaces: Record<SpaceKeys, Space> = {
       accentColor: '#4E9EFD',
       offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
-      wallpaper:
-        'https://images.unsplash.com/photo-1668211834355-2cdf073f2351?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2970&q=80',
+      wallpaper: './space-wallpapers/cyberpunk.avif',
     },
   },
   'holy-order': {
     id: 'holy-order',
     title: 'The Holy Order',
     members: 220,
-    picture: '/christian-group.jpeg',
+    picture: './space-pictures/christian-group.jpeg',
     theme: {
       id: 'holy-order',
       mode: 'dark',
@@ -61,15 +58,14 @@ export const spaces: Record<SpaceKeys, Space> = {
       accentColor: '#4E9EFD',
       offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
-      wallpaper:
-        'https://images.unsplash.com/photo-1660235029768-f50fb2e954d6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2969&q=80',
+      wallpaper: './space-wallpapers/holy-order.avif',
     },
   },
   spacebros: {
     id: 'spacebros',
     title: 'Space Bros',
     members: 230,
-    picture: 'https://avatarfiles.alphacoders.com/326/326460.jpg',
+    picture: './space-pictures/spacebros.jpeg',
     theme: {
       id: 'spacebros',
       mode: 'dark',
@@ -82,8 +78,7 @@ export const spaces: Record<SpaceKeys, Space> = {
       accentColor: '#4E9EFD',
       offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
-      wallpaper:
-        'https://lomder-librun.sfo3.digitaloceanspaces.com/Images/fasnut-famden/2023.2.20..19.16.36-black-hole.jpg',
+      wallpaper: './space-wallpapers/spacebros.jpg',
     },
   },
   // 'monke': {
@@ -111,8 +106,7 @@ export const spaces: Record<SpaceKeys, Space> = {
     id: 'amish',
     title: 'Paradise Amish Farm',
     members: 25,
-    picture:
-      'https://lomder-librun.sfo3.digitaloceanspaces.com/Images/fasnut-famden/2023.2.20..21.16.35-521533%20copy.jpeg',
+    picture: './space-pictures/amish.jpeg',
     theme: {
       id: 'amish',
       mode: 'dark',
@@ -125,8 +119,7 @@ export const spaces: Record<SpaceKeys, Space> = {
       accentColor: '#4E9EFD',
       offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
-      wallpaper:
-        'https://lomder-librun.sfo3.digitaloceanspaces.com/Images/fasnut-famden/2023.2.20..21.12.38-521657.jpg',
+      wallpaper: './space-wallpapers/amish.jpg',
     },
   },
   // memedao: {
@@ -154,7 +147,7 @@ export const spaces: Record<SpaceKeys, Space> = {
     id: 'mums',
     title: 'Mums',
     members: 801,
-    picture: '/mums-group.png',
+    picture: './space-pictures/mums-group.png',
     theme: {
       id: 'mums',
       mode: 'dark',
@@ -167,16 +160,14 @@ export const spaces: Record<SpaceKeys, Space> = {
       accentColor: '#4E9EFD',
       offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
-      wallpaper:
-        'https://img5.goodfon.com/original/1920x1080/0/dc/chudak-irena-zhenshchina-mama-mat-rebionok-malysh-materinstv.jpg',
+      wallpaper: './space-wallpapers/mums.jpeg',
     },
   },
   islam: {
     id: 'islam',
     title: 'Mosque Chat',
     members: 154,
-    picture:
-      'https://imgs.search.brave.com/NIg8JD8QnwmDvf_wd1nKCsVA-R-YwZZ8gDKuJ2LFeLQ/rs:fit:500:500:1/g:ce/aHR0cHM6Ly93d3cu/dWx0cmF1cGRhdGVz/LmNvbS93cC1jb250/ZW50L3VwbG9hZHMv/MjAxNy8wMy9iZWF1/dGlmdWwtaXNsYW1p/Yy1kcHMuanBn',
+    picture: './space-pictures/islam.webp',
     theme: {
       id: 'islam',
       mode: 'dark',
@@ -189,16 +180,14 @@ export const spaces: Record<SpaceKeys, Space> = {
       accentColor: '#4E9EFD',
       offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
-      wallpaper:
-        'https://lomder-librun.sfo3.digitaloceanspaces.com/Images/fasnut-famden/2023.2.20..21.30.43-pexels-vishnudeep-dixit-1260801.jpg',
+      wallpaper: './space-wallpapers/islam.jpg',
     },
   },
   athiest: {
     id: 'athiest',
     title: 'Athiesm',
     members: 13,
-    picture:
-      'https://yt3.ggpht.com/a/AATXAJzmn1EiK5cIx5uXYUHalPT7o_jHFgYqK2Mbkgum=s900-c-k-c0xffffffff-no-rj-mo',
+    picture: './space-pictures/athiest.jpeg',
     theme: {
       id: 'athiest',
       mode: 'dark',
@@ -211,15 +200,14 @@ export const spaces: Record<SpaceKeys, Space> = {
       accentColor: '#4E9EFD',
       offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
-      wallpaper:
-        'https://lomder-librun.sfo3.digitaloceanspaces.com/Images/fasnut-famden/2023.2.20..19.28.24-FgUwJaQ-atheism-wallpaper.jpg',
+      wallpaper: './space-wallpapers/athiest.jpg',
     },
   },
   'flat-earth-society': {
     id: 'flat-earth-society',
     title: 'The Flat Earth Society',
     members: 11,
-    picture: '/flat-earth-group.jpeg',
+    picture: './space-pictures/flat-earth-group.jpeg',
     theme: {
       id: 'flat-earth-society',
       mode: 'dark',
@@ -232,16 +220,14 @@ export const spaces: Record<SpaceKeys, Space> = {
       accentColor: '#4E9EFD',
       offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
-      wallpaper:
-        'https://lomder-librun.sfo3.cdn.digitaloceanspaces.com/Images%2Fflat-earth.png',
+      wallpaper: './space-wallpapers/flat-earth-society.png',
     },
   },
   english: {
     id: 'english',
     title: 'Mrs. Milligan’s English Study Group',
     members: 10,
-    picture:
-      'https://images.fineartamerica.com/images/artworkimages/mediumlarge/1/old-books-theresa-tahara.jpg',
+    picture: './space-pictures/english.jpeg',
     theme: {
       id: 'english',
       mode: 'dark',
@@ -254,8 +240,7 @@ export const spaces: Record<SpaceKeys, Space> = {
       accentColor: '#4E9EFD',
       offAccentColor: '#BDBDBD',
       mouseColor: '#4E9EFD',
-      wallpaper:
-        'https://lomder-librun.sfo3.digitaloceanspaces.com/Images/fasnut-famden/2023.2.20..23.04.26-dusty-sunflower-laptop-zig4pj6kzo0en3wn.jpg',
+      wallpaper: './space-wallpapers/english.jpeg',
     },
   },
   // zoomurs: {

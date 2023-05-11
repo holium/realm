@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { spaces } from 'spaces';
 import styled from 'styled-components';
 import { SpaceKeys, TrayAppType } from 'types';
@@ -26,9 +26,19 @@ const Main = styled.main`
 `;
 
 export default function HomePage() {
-  const [currentSpace, setCurrentSpace] = useState<SpaceKeys>('cyberpunk');
+  const [currentSpace, setCurrentSpace] = useState<SpaceKeys>('spacebros');
   const [theme, setTheme] = useState(spaces[currentSpace].theme);
   const [trayApp, setTrayApp] = useState<TrayAppType | null>(null);
+
+  useEffect(() => {
+    // Preload all the images so the transition is smooth.
+    Object.keys(spaces).map((space) => {
+      const theme = spaces[space as SpaceKeys]?.theme;
+      const wallpaper = new Image();
+      wallpaper.src = theme.wallpaper;
+      return wallpaper;
+    });
+  }, []);
 
   return (
     <>
@@ -36,6 +46,7 @@ export default function HomePage() {
       <Page title="Holium">
         <Flex
           className="wallpaper"
+          style={{ backgroundColor: theme.backgroundColor }}
           backgroundImage={`url(${theme.wallpaper})`}
         />
         <Header />
