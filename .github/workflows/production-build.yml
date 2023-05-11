@@ -262,6 +262,7 @@ jobs:
         env:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
+          ARTIFACT_VERSION: ${{ needs.pre-deploy.outputs.artifact_version }}
       #
       - name: Download and install code signing tool
         run: |
@@ -292,6 +293,9 @@ jobs:
       # copy release artifacts from this runner to digitalocean
       - name: Publish artifacts
         run: |
+          # move the signed version of the exe into the main build folder
+          rm -f ./app/release/build/Realm-Setup-$ARTIFACT_VERSION.exe
+          mv ./app/release/build/signed/Realm-Setup-$ARTIFACT_VERSION.exe ./app/release/build/Realm-Setup-$ARTIFACT_VERSION.exe
           mkdir -p ~/.ssh
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
@@ -303,6 +307,7 @@ jobs:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_RSA: ${{ secrets.DEPLOY_RSA }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          ARTIFACT_VERSION: ${{ needs.pre-deploy.outputs.artifact_version }}
   #
   deploy-desks:
     if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'build')
