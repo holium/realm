@@ -12,7 +12,6 @@ import {
 } from '@holium/design-system/general';
 import { TrayApp } from '@holium/design-system/os';
 
-import { SpaceKeys } from '../../types';
 import { WalletCardStyle } from '../WalletCard';
 
 type ChatAppProps = {
@@ -23,9 +22,7 @@ type ChatAppProps = {
     width: number;
     height: number;
   };
-  currentSpace: SpaceKeys;
   closeTray: () => void;
-  setCurrentSpace: (space: SpaceKeys) => void;
 };
 
 const position = 'top-left';
