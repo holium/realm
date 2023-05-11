@@ -93,7 +93,6 @@ const generateColors = (color: string, bgLuminosity: 'light' | 'dark') => {
     } else {
       /* 128 - 255 */
       const shift = luma - 192;
-      console.log(shift);
       if (shift > 0) {
         return mix(
           0.25,
