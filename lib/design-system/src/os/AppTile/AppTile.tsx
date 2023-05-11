@@ -95,20 +95,20 @@ interface TileHighlightProps {
 }
 export const TileHighlight = styled(Box)<TileHighlightProps>`
   left: 11px;
-  bottom: -8px;
+  bottom: -5px;
   width: 10px;
-  height: 5px;
-  border-radius: 4px;
+  height: 2px;
+  border-radius: 1px;
   position: absolute;
   ${(props: TileHighlightProps) =>
     props.isOpen &&
     css`
-      background-color: rgba((var(--rlm-icon-rgb)), 0.5);
+      background-color: rgba(var(--rlm-off-accent-rgba), 1);
     `}
   ${(props: TileHighlightProps) =>
     props.isActive &&
     css`
-      background-color: rgba((var(--rlm-accent-rgb)), 0.5);
+      background-color: rgba(var(--rlm-accent-rgba), 1);
     `}
 `;
 
