@@ -79,13 +79,13 @@ const generateColors = (color: string, bgLuminosity: 'light' | 'dark') => {
       const shift = 64 - luma;
       if (shift > 0) {
         return mix(
-          0.25,
+          0.5,
           '#000',
           lighten(Math.min(0.0001 * Math.pow(shift, 2), 0.2), color)
         );
       } else {
         return mix(
-          0.25,
+          0.5,
           '#000',
           darken(Math.min(0.0001 * Math.pow(shift, 2), 0.4), color)
         );
