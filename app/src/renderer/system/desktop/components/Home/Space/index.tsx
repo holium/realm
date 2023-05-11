@@ -210,7 +210,7 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
                 flexWrap="wrap"
                 flexDirection="row"
               >
-                <AppGrid tileSize="xl2" />
+                <AppGrid />
               </Flex>
             </Flex>
           ) : (

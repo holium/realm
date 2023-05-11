@@ -191,11 +191,9 @@ export const ShellModel = types
       }
       const position = getCenteredPosition(dimensions);
 
-      // Get sitename from url and capitalize first letter.
+      // Get sitename from url.
       const sitename = url
-        .replace('https://', '')
-        .replace('http://', '')
-        .split('/')[0]
+        .replace(/^(?:https?:\/\/)?(?:www\.)?/i, '')
         .split('.')[0]
         .replace(/^\w/, (c) => c.toUpperCase());
 

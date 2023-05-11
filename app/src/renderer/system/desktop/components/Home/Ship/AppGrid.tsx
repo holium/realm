@@ -1,19 +1,15 @@
 import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 
-import { Box } from '@holium/design-system';
+import { Box } from '@holium/design-system/general';
 
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { AppTileSize } from '../AppTile';
+import { PinnedWebApp } from '../../SystemBar/components/CommunityBar/AppDock/PinnedWebApp';
 import { GridAppTile } from './GridAppTile';
 
-interface AppGridProps {
-  tileSize: AppTileSize;
-}
-
-const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
+const AppGridPresenter = () => {
   const { bazaarStore, spacesStore } = useShipStore();
   const currentSpace = spacesStore.selected;
   const apps = useMemo(
@@ -23,6 +19,11 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
         // ...bazaarStore.devApps,
       ] as AppMobxType[],
     [bazaarStore.catalog, bazaarStore.installations.values()]
+  );
+
+  const pinnedWebAppUrls = useMemo(
+    () => currentSpace?.webAppDockUrls ?? [],
+    [currentSpace?.webAppDockUrls]
   );
 
   if (!currentSpace) return null;
@@ -35,13 +36,16 @@ const AppGridPresenter = ({ tileSize = 'xxl' }: AppGridProps) => {
           <Box id={tileId} key={tileId}>
             <GridAppTile
               tileId={tileId}
-              tileSize={tileSize}
+              tileSize="xl2"
               app={app}
               currentSpace={currentSpace}
             />
           </Box>
         );
-      })}{' '}
+      })}
+      {pinnedWebAppUrls.map((url, index) => (
+        <PinnedWebApp key={`appgrid-${index}-pinned-${url}`} url={url} isGrid />
+      ))}
     </>
   );
 };

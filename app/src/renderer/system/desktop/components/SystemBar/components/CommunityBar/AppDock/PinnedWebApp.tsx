@@ -16,11 +16,66 @@ const getFavicon = (url: string) => {
   return `${protocol}//${host}/favicon.ico`;
 };
 
-type Props = {
-  url: string;
+type WebAppTileProps = {
+  tileId: string;
+  size: number;
+  borderRadius: number;
+  boxShadow?: string;
+  favicon: string | null;
+  character: string;
+  onClick: () => void;
+  onFaultyFavicon: () => void;
 };
 
-const PinnedWebAppPresenter = ({ url }: Props) => {
+const WebAppTile = ({
+  tileId,
+  size,
+  borderRadius,
+  boxShadow,
+  favicon,
+  character,
+  onClick,
+  onFaultyFavicon,
+}: WebAppTileProps) => (
+  <Flex
+    id={tileId}
+    style={{
+      width: size,
+      height: size,
+      borderRadius,
+      boxShadow,
+      color: '#fff',
+      backgroundColor: '#92D4F9',
+      alignItems: 'center',
+      justifyContent: 'center',
+      userSelect: 'none',
+    }}
+    onClick={onClick}
+  >
+    {favicon ? (
+      <img
+        alt="favicon"
+        src={favicon}
+        style={{
+          width: '50%',
+          height: '50%',
+          borderRadius: 4,
+          pointerEvents: 'none',
+        }}
+        onError={onFaultyFavicon}
+      />
+    ) : (
+      character
+    )}
+  </Flex>
+);
+
+type Props = {
+  url: string;
+  isGrid?: boolean;
+};
+
+const PinnedWebAppPresenter = ({ url, isGrid }: Props) => {
   const { shellStore } = useAppState();
   const { spacesStore } = useShipStore();
 
@@ -76,40 +131,34 @@ const PinnedWebAppPresenter = ({ url }: Props) => {
     if (contextMenuOptions !== getOptions(tileId)) {
       setOptions(tileId, contextMenuOptions);
     }
-  }, [contextMenuOptions, getOptions, setOptions, tileId]);
+  }, [contextMenuOptions, tileId]);
+
+  if (isGrid) {
+    return (
+      <WebAppTile
+        tileId={tileId}
+        size={196}
+        borderRadius={24}
+        boxShadow="var(--rlm-box-shadow-2)"
+        favicon={favicon}
+        character={character}
+        onClick={onClick}
+        onFaultyFavicon={() => setFavicon(null)}
+      />
+    );
+  }
 
   return (
     <Reorder.Item key={url} value={url}>
-      <Flex
-        id={tileId}
-        style={{
-          width: 32,
-          height: 32,
-          borderRadius: 4,
-          color: '#fff',
-          backgroundColor: '#92D4F9',
-          alignItems: 'center',
-          justifyContent: 'center',
-          userSelect: 'none',
-        }}
+      <WebAppTile
+        tileId={tileId}
+        size={32}
+        borderRadius={4}
+        favicon={favicon}
+        character={character}
         onClick={onClick}
-      >
-        {favicon ? (
-          <img
-            alt="favicon"
-            src={favicon}
-            style={{
-              width: 16,
-              height: 16,
-              borderRadius: 4,
-              pointerEvents: 'none',
-            }}
-            onError={() => setFavicon(null)}
-          />
-        ) : (
-          character
-        )}
-      </Flex>
+        onFaultyFavicon={() => setFavicon(null)}
+      />
       <TileHighlight
         layoutId={`tile-highlight-${tileId}`}
         isOpen={Boolean(window)}

@@ -149,8 +149,8 @@ const AppTilePresenter = ({
   const tileRef = useRef(null);
   const isAppGrid =
     tileSize === 'xxl' || tileSize === 'xl2' || tileSize === 'xl1';
-  const boxShadowStyle = isAppGrid ? '0px 2px 8px rgba(0, 0, 0, 0.15)' : 'none';
-  const boxShadowHover = isAppGrid ? '0px 4px 8px rgba(0, 0, 0, 0.15)' : 'none';
+  const boxShadowStyle = isAppGrid ? 'var(--rlm-box-shadow-2)' : 'none';
+  const boxShadowHover = isAppGrid ? 'var(--rlm-box-shadow-2)' : 'none';
 
   const isLight = useMemo(() => {
     return bgIsLightOrDark(app.color) === 'light';
