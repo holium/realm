@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { TextInput } from '@holium/design-system';
 import { Flex, Icon, Text } from '@holium/design-system/general';
 
 import { GET_REALM_HREF, MOBILE_WIDTH } from '../consts';
@@ -34,16 +35,31 @@ export const Hero = () => {
           A home for communities, a platform for building new social
           experiences, and a crypto user's dream.
         </P>
-        <UnstyledNextLink href={GET_REALM_HREF}>
-          <GetRealmButton>
-            <Text.Body fontWeight={500} style={{ color: '#fff' }}>
-              Get Realm
-            </Text.Body>
-            <RoundArrow>
-              <Icon name="ArrowRightLine" />
-            </RoundArrow>
-          </GetRealmButton>
-        </UnstyledNextLink>
+
+        <TextInput
+          id="email"
+          name="email"
+          placeholder="Enter your email"
+          type="email"
+          style={{
+            borderRadius: 999,
+            padding: '8px 8px 8px 12px',
+            marginTop: '16px',
+            maxWidth: '384px',
+          }}
+          rightAdornment={
+            <UnstyledNextLink href={GET_REALM_HREF}>
+              <GetRealmButton>
+                <Text.Body fontWeight={500} style={{ color: '#fff' }}>
+                  Get Realm
+                </Text.Body>
+                <RoundArrow>
+                  <Icon name="ArrowRightLine" />
+                </RoundArrow>
+              </GetRealmButton>
+            </UnstyledNextLink>
+          }
+        />
       </H1Container>
       <Flex flex={1} width="100%" justify="center" padding="16px">
         {isMobile ? <HoveringCursorsStatic /> : <HoveringCursors />}

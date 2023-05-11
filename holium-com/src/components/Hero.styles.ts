@@ -10,7 +10,6 @@ export const GetRealmButton = styled(Button.Primary)`
   padding: 10px 10px 10px 16px;
   border-radius: 999px;
   gap: 12px;
-  margin-top: 16px;
 `;
 
 export const RoundArrow = styled.div`
