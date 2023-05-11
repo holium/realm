@@ -178,9 +178,9 @@ export const PassportCardAvatar = ({
       if (generatedImages?.[index - 1]?.downloadLink) {
         fetch(generatedImages[index - 1].downloadLink, { headers });
       }
-
-      avatarModal.toggleOff();
     }
+
+    avatarModal.toggleOff();
   };
 
   const onClickSourceText = () => {
