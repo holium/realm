@@ -264,7 +264,7 @@ jobs:
           BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
   #
   # deploy-desks:
-  #   if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
+  #   if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'build')
   #   needs: [pre-deploy, build-mac, build-windows, build-linux]
   #   runs-on: ubuntu-latest
   #   steps:
