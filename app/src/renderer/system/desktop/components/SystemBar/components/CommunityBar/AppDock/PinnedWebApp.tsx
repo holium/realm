@@ -90,6 +90,8 @@ const PinnedWebAppPresenter = ({ url, isGrid }: Props) => {
   const window = shellStore.getWindowByAppId(url);
   const isActive = window?.isActive;
 
+  console.log('window', JSON.stringify(window, null, 2));
+
   // First uppercase letter of the website name.
   // Remove any protocol and www. from the url.
   const character = url
@@ -177,13 +179,14 @@ const PinnedWebAppPresenter = ({ url, isGrid }: Props) => {
         character={character}
         onClick={onClick}
         onFaultyFavicon={() => setFavicon(null)}
-      />
-      <TileHighlight
-        layoutId={`tile-highlight-${tileId}`}
-        isOpen={Boolean(window)}
-        isActive={Boolean(isActive)}
-        transition={{ duration: 0.2 }}
-      />
+      >
+        <TileHighlight
+          layoutId={`tile-highlight-${tileId}`}
+          isOpen={Boolean(window)}
+          isActive={Boolean(isActive)}
+          transition={{ duration: 0.2 }}
+        />
+      </WebAppTile>
     </Reorder.Item>
   );
 };
