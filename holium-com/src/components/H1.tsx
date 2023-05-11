@@ -13,7 +13,7 @@ const futureOfTexts = [
   'DAOs',
 ];
 
-const H1Text = styled(Text.H1)`
+export const H1Text = styled(Text.H1)`
   font-size: 64px;
   line-height: 1.2em;
   width: 100%;
