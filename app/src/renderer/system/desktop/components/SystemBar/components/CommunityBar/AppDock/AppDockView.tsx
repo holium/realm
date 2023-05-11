@@ -3,8 +3,9 @@ import { Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
 
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 
+import { Bookmark } from 'os/services/ship/spaces/tables/bookmarks.table';
 import { Divider } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';
@@ -18,14 +19,14 @@ type Props = {
   currentSpace: SpaceModelType;
   pinnedDockApps: AppMobxType[];
   unpinnedDockApps: AppMobxType[];
-  pinnedWebAppUrls: string[];
+  bookmarks: Bookmark[];
 };
 
 const AppDockViewPresenter = ({
   currentSpace,
   pinnedDockApps,
   unpinnedDockApps,
-  pinnedWebAppUrls,
+  bookmarks,
 }: Props) => {
   const { shellStore, theme } = useAppState();
 
@@ -61,8 +62,8 @@ const AppDockViewPresenter = ({
     );
   });
 
-  const pinnedWebApps = pinnedWebAppUrls.map((url) => (
-    <PinnedWebApp key={`pinned-${url}`} url={url} />
+  const pinnedWebApps = bookmarks.map((bookmark) => (
+    <PinnedWebApp key={`pinned-${bookmark.url}`} {...bookmark} />
   ));
 
   const unpinnedAppTiles = unpinnedDockApps.map((app, index) => {
@@ -131,8 +132,8 @@ const AppDockViewPresenter = ({
           position: 'relative',
           gap: 8,
         }}
-        values={currentSpace?.webAppDockUrls || []}
-        onReorder={(urls: string[]) => currentSpace.reorderWebApps(urls)}
+        values={currentSpace?.bookmarks.map((b) => b.url) || []}
+        onReorder={(urls: string[]) => currentSpace.reorderBookmarks(urls)}
       >
         {pinnedWebApps}
       </Reorder.Group>

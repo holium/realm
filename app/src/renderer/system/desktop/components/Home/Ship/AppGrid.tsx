@@ -21,9 +21,9 @@ const AppGridPresenter = () => {
     [bazaarStore.catalog, bazaarStore.installations.values()]
   );
 
-  const pinnedWebAppUrls = useMemo(
-    () => currentSpace?.webAppDockUrls ?? [],
-    [currentSpace?.webAppDockUrls]
+  const bookmarks = useMemo(
+    () => currentSpace?.bookmarks ?? [],
+    [currentSpace?.bookmarks]
   );
 
   if (!currentSpace) return null;
@@ -43,8 +43,12 @@ const AppGridPresenter = () => {
           </Box>
         );
       })}
-      {pinnedWebAppUrls.map((url, index) => (
-        <PinnedWebApp key={`appgrid-${index}-pinned-${url}`} url={url} isGrid />
+      {bookmarks.map((bookmark, index) => (
+        <PinnedWebApp
+          key={`appgrid-${index}-pinned-${bookmark.url}`}
+          {...bookmark}
+          isGrid
+        />
       ))}
     </>
   );

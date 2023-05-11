@@ -10,6 +10,7 @@ import {
 
 import { defaultTheme, Theme } from '@holium/shared';
 
+import { CreateBookmarkPayload } from 'os/services/ship/spaces/spaces.types';
 import { Bookmark } from 'os/services/ship/spaces/tables/bookmarks.table';
 import { MemberRole } from 'os/types';
 
@@ -53,6 +54,14 @@ const StallModel = types.model('StallModel', {
   recommended: types.array(UrbitApp),
 });
 
+const BookmarkModel = types.model('BookmarkModel', {
+  path: types.string,
+  title: types.string,
+  url: types.string,
+  favicon: types.string,
+  color: types.string,
+});
+
 export const SpaceModel = types
   .model('SpaceModel', {
     path: types.identifier,
@@ -71,20 +80,20 @@ export const SpaceModel = types
     members: types.optional(MembersStore, { all: {} }),
     stall: StallModel,
     dock: types.array(UrbitApp),
-    webAppDock: types.array(types.string),
+    bookmarks: types.array(BookmarkModel),
   })
   .views((self) => ({
     isPinned(appId: string) {
       return self.dock.some((app) => app.id === appId);
     },
-    isWebAppPinned(url: string) {
-      return self.webAppDock.includes(url);
+    hasBookmark(url: string) {
+      return self.bookmarks.some((bookmark) => bookmark.url === url);
     },
     get dockAppIds() {
       return self.dock.slice().map((app) => app.id);
     },
-    get webAppDockUrls() {
-      return self.webAppDock.slice();
+    get bookmarkUrls() {
+      return self.bookmarks.slice().map((bookmark) => bookmark.url);
     },
     isHost() {
       // TODO check if admin
@@ -137,13 +146,13 @@ export const SpaceModel = types
         console.error(error);
       }
     }),
-    reorderWebApps(webAppDock: string[]) {
-      const webAppDockUrls = self.webAppDock.sort((a, b) => {
-        const aIndex = webAppDock.findIndex((url) => url === a);
-        const bIndex = webAppDock.findIndex((url) => url === b);
+    reorderBookmarks(bookmarkDock: string[]) {
+      const bookmarkDockUrls = self.bookmarks.sort((a, b) => {
+        const aIndex = bookmarkDock.findIndex((url) => url === a.url);
+        const bIndex = bookmarkDock.findIndex((url) => url === b.url);
         return aIndex - bIndex;
       });
-      applySnapshot(self.webAppDock, webAppDockUrls);
+      applySnapshot(self.bookmarks, bookmarkDockUrls);
     },
     addToSuite: flow(function* (appId: string, index: number) {
       try {
@@ -172,12 +181,14 @@ export const SpaceModel = types
     _setStall(stall: any) {
       self.stall = StallModel.create(stall);
     },
-    _onBookmarkAdded(url: string) {
-      self.webAppDock.push(url);
+    _onBookmarkAdded(payload: CreateBookmarkPayload) {
+      self.bookmarks.push(payload);
     },
     _onBookmarkRemoved(url: string) {
-      const index = self.webAppDock.findIndex((webAppUrl) => webAppUrl === url);
-      self.webAppDock.splice(index, 1);
+      const index = self.bookmarks.findIndex(
+        (bookmark) => bookmark.url === url
+      );
+      self.bookmarks.splice(index, 1);
     },
   }));
 
@@ -246,10 +257,10 @@ export const SpacesStore = types
           self.loader.set('loaded');
         }
 
-        (Object.values(bookmarks) as Bookmark[]).forEach(({ path, url }) => {
-          const space = self.spaces.get(path);
+        (Object.values(bookmarks) as Bookmark[]).forEach((bookmark) => {
+          const space = self.spaces.get(bookmark.path);
           if (space) {
-            space.webAppDock.push(url);
+            space.bookmarks.push(bookmark);
           }
         });
       } catch (e) {
@@ -498,10 +509,10 @@ export const SpacesStore = types
       const refreshedSpace = yield SpacesIPC.getSpace(joinedPayload.path);
       self.spaces.set(space.path, spaceRowToModel(refreshedSpace));
     }),
-    _onBookmarkAdded: (bookmarkPayload: { path: string; url: string }) => {
+    _onBookmarkAdded: (bookmarkPayload: CreateBookmarkPayload) => {
       const space = self.spaces.get(bookmarkPayload.path);
       if (!space) return;
-      space._onBookmarkAdded(bookmarkPayload.url);
+      space._onBookmarkAdded(bookmarkPayload);
     },
     _onBookmarkRemoved: (bookmarkPayload: { path: string; url: string }) => {
       const space = self.spaces.get(bookmarkPayload.path);

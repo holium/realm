@@ -18,10 +18,3 @@ export const capitalizeFirstLetter = (string: string) => {
 const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 
 export const isValidEmail = (email: string) => emailRegex.test(email);
-
-export const getSiteNameFromUrl = (url: string) =>
-  url
-    .replace(/^(?:https?:\/\/)?(?:www\.)?/i, '')
-    .split('.')[0]
-    .replace(/^\w/, (c) => c.toUpperCase())
-    .replace(/\/$/, '');

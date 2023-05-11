@@ -1,8 +1,7 @@
 import { toJS } from 'mobx';
 import { applySnapshot, getSnapshot, Instance, types } from 'mobx-state-tree';
 
-import { getSiteNameFromUrl } from '@holium/design-system/util';
-
+import { Bookmark } from 'os/services/ship/spaces/tables/bookmarks.table';
 import { getDefaultAppDimensions } from 'renderer/lib/dimensions';
 
 import {
@@ -182,7 +181,7 @@ export const ShellModel = types
 
       return newWindow;
     },
-    openWebApp(url: string) {
+    openBookmark(bookmark: Omit<Bookmark, 'favicon'>) {
       const dimensions = getDefaultAppDimensions(
         'os-browser',
         self.desktopDimensions
@@ -193,16 +192,14 @@ export const ShellModel = types
       }
       const position = getCenteredPosition(dimensions);
 
-      const sitename = getSiteNameFromUrl(url);
-
       const newWindow = AppWindowModel.create({
-        appId: url,
-        title: sitename,
+        appId: bookmark.url,
+        title: bookmark.title,
         glob: false,
         state: 'normal',
         type: 'web',
         href: {
-          site: url,
+          site: bookmark.url,
         },
         zIndex: self.windows.size + 1,
         bounds: {

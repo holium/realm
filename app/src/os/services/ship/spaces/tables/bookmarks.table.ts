@@ -2,10 +2,14 @@
 import Database from 'better-sqlite3-multiple-ciphers';
 
 import AbstractDataAccess from '../../../abstract.db';
+import { CreateBookmarkPayload } from '../spaces.types';
 
 export type Bookmark = {
   path: string;
   url: string;
+  title: string;
+  favicon: string;
+  color: string;
 };
 
 export class BookmarksDB extends AbstractDataAccess<Bookmark, any> {
@@ -25,6 +29,9 @@ export class BookmarksDB extends AbstractDataAccess<Bookmark, any> {
     return {
       path: row.path,
       url: row.url,
+      title: row.title,
+      favicon: row.favicon,
+      color: row.color,
     };
   }
 
@@ -51,12 +58,12 @@ export class BookmarksDB extends AbstractDataAccess<Bookmark, any> {
     insertMany(Object.values(bookmarks));
   }
 
-  addBookmark(path: string, url: string) {
+  addBookmark(payload: CreateBookmarkPayload) {
     if (!this.db?.open) return;
     const insert = this.db.prepare(
-      `REPLACE INTO bookmarks (url, path) VALUES (@url, @path)`
+      `REPLACE INTO bookmarks (url, path, title, favicon, color) VALUES (@url, @path, @title, @favicon, @color)`
     );
-    insert.run({ url, path });
+    insert.run(payload);
   }
 
   removeBookmark(path: string, url: string) {
@@ -71,7 +78,10 @@ export class BookmarksDB extends AbstractDataAccess<Bookmark, any> {
 export const bookmarksInitSql = `
   create table if not exists bookmarks (
     path text not null,
-    url text not null
+    url text not null unique,
+    title text,
+    favicon text,
+    color text
   );
 `;
 

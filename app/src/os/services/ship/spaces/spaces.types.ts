@@ -1,9 +1,14 @@
+export type CreateBookmarkPayload = {
+  path: string;
+  url: string;
+  title: string;
+  favicon: string;
+  color: string;
+};
+
 type BookmarkAddedType = {
   type: 'bookmark-added';
-  payload: {
-    path: string;
-    url: string;
-  };
+  payload: CreateBookmarkPayload;
 };
 
 type BookmarkRemovedType = {

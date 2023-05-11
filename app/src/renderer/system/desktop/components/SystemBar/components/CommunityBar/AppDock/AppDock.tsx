@@ -23,14 +23,14 @@ const AppDockPresenter = () => {
     )
     .map(({ appId }) => bazaarStore.getApp(appId))
     .filter(Boolean) as AppMobxType[];
-  const pinnedWebAppUrls = currentSpace?.webAppDockUrls || [];
+  const bookmarks = currentSpace?.bookmarks || [];
 
   return (
     <AppDockView
       currentSpace={currentSpace}
       pinnedDockApps={pinnedDockApps}
       unpinnedDockApps={unpinnedDockApps}
-      pinnedWebAppUrls={pinnedWebAppUrls}
+      bookmarks={bookmarks}
     />
   );
 };

@@ -7,11 +7,16 @@ import {
 } from 'react';
 import { observer } from 'mobx-react';
 
-import { Box, Flex, TextInput } from '@holium/design-system';
+import { Box, Flex } from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
 
 import { useAppState } from 'renderer/stores/app.store';
 import { SpacesIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
+import {
+  getFaviconFromUrl,
+  getSiteNameFromUrl,
+} from 'renderer/system/desktop/components/SystemBar/components/CommunityBar/AppDock/util';
 
 import { createUrl } from '../helpers/createUrl';
 import { useBrowser } from '../store';
@@ -31,7 +36,7 @@ const ToolbarSearchInputPresenter = ({ innerRef, readyWebview }: Props) => {
   const { currentTab, setInPageNav, setUrl } = useBrowser();
   const [input, setInput] = useState(currentTab.inPageNav ?? '');
 
-  const starred = Boolean(currentSpace?.isWebAppPinned(currentTab.inPageNav));
+  const starred = Boolean(currentSpace?.hasBookmark(currentTab.inPageNav));
 
   const handleStarClick = () => {
     const spacePath = currentSpace?.path;
@@ -40,7 +45,13 @@ const ToolbarSearchInputPresenter = ({ innerRef, readyWebview }: Props) => {
     if (starred) {
       SpacesIPC.removeBookmark(spacePath, input);
     } else {
-      SpacesIPC.addBookmark(spacePath, input);
+      SpacesIPC.addBookmark({
+        path: spacePath,
+        url: input,
+        title: getSiteNameFromUrl(input),
+        favicon: getFaviconFromUrl(input),
+        color: '#92D4F9',
+      });
     }
   };
 
@@ -99,9 +110,7 @@ const ToolbarSearchInputPresenter = ({ innerRef, readyWebview }: Props) => {
           </Box>
         }
         rightAdornment={
-          <Flex mr="8px">
-            <ToolbarStarIcon starred={starred} onClick={handleStarClick} />
-          </Flex>
+          <ToolbarStarIcon starred={starred} onClick={handleStarClick} />
         }
         placeholder="Search DuckDuckGo or enter url"
         width="100%"

@@ -8,7 +8,7 @@ import { MemberRole } from '../../../types';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
 import { spacesModelQuery } from './spaces.query';
-import { SpacesUpdateType } from './spaces.types';
+import { CreateBookmarkPayload, SpacesUpdateType } from './spaces.types';
 import {
   Bookmark,
   BookmarksDB,
@@ -573,13 +573,13 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
     return this.featuredSpacesDB?.getFeaturedSpaces();
   }
 
-  public async addBookmark(path: string, url: string) {
+  public async addBookmark(payload: CreateBookmarkPayload) {
     this.sendUpdate({
       type: 'bookmark-added',
-      payload: { path, url },
+      payload,
     });
 
-    return this.bookmarksDB?.addBookmark(path, url);
+    return this.bookmarksDB?.addBookmark(payload);
   }
 
   public async removeBookmark(path: string, url: string) {
