@@ -1,20 +1,20 @@
 import { Button, Text } from '@holium/design-system/general';
 
 import { Holium } from '../../public/Holium';
-import { onClickGetRealm, onClickLogin } from '../consts';
+import { GET_REALM_HREF, LOGIN_HREF } from '../consts';
 import {
   HeaderContainer,
   HeaderCTAs,
   HeaderMenuLink,
   HeaderNavigation,
-  UnstyledLink,
 } from './Header.styles';
+import { UnstyledNextLink } from './UnstyledNextLink';
 
 export const Header = () => (
   <HeaderContainer>
-    <UnstyledLink href="/" id="holium-logo">
+    <UnstyledNextLink href="/" id="holium-logo">
       <Holium />
-    </UnstyledLink>
+    </UnstyledNextLink>
     <HeaderNavigation>
       <ul>
         <li>
@@ -43,22 +43,25 @@ export const Header = () => (
       </ul>
     </HeaderNavigation>
     <HeaderCTAs>
-      <Button.Secondary onClick={onClickLogin}>
-        <Text.Body color="text" fontWeight={500}>
-          Login
-        </Text.Body>
-      </Button.Secondary>
-      <Button.Primary
-        display="flex"
-        width="90px"
-        justifyContent="center"
-        flexWrap="nowrap"
-        onClick={onClickGetRealm}
-      >
-        <Text.Body fontWeight={500} style={{ color: '#fff' }}>
-          Get Realm
-        </Text.Body>
-      </Button.Primary>
+      <UnstyledNextLink href={LOGIN_HREF}>
+        <Button.Secondary>
+          <Text.Body color="text" fontWeight={500}>
+            Login
+          </Text.Body>
+        </Button.Secondary>
+      </UnstyledNextLink>
+      <UnstyledNextLink href={GET_REALM_HREF}>
+        <Button.Primary
+          display="flex"
+          width="90px"
+          justifyContent="center"
+          flexWrap="nowrap"
+        >
+          <Text.Body fontWeight={500} style={{ color: '#fff' }}>
+            Get Realm
+          </Text.Body>
+        </Button.Primary>
+      </UnstyledNextLink>
     </HeaderCTAs>
   </HeaderContainer>
 );
