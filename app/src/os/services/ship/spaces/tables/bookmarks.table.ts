@@ -78,11 +78,12 @@ export class BookmarksDB extends AbstractDataAccess<Bookmark, any> {
 export const bookmarksInitSql = `
   create table if not exists bookmarks (
     path text not null,
-    url text not null unique,
+    url text not null,
     title text,
     favicon text,
     color text
   );
+  create unique index if not exists bookmarks_path_url on bookmarks (path, url);
 `;
 
 export const bookmarksDBPreload = BookmarksDB.preload(new BookmarksDB(true));
