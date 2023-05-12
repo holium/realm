@@ -25,13 +25,14 @@ SELECT
     ELSE json('[]')
   END AS dock
 FROM (
-    SELECT
-      docks.space,
-      ac.*
-    FROM app_docks docks, json_each(docks.dock)
-    LEFT JOIN app_catalog ac ON ac.id = json_each.value
-    LEFT JOIN app_grid ag ON ac.id = ag.appId
-    WHERE ag.idx IS NOT NULL
+  SELECT
+    docks.space,
+    ac.*
+  FROM app_docks docks, json_each(docks.dock)
+  LEFT JOIN app_catalog ac ON ac.id = json_each.value
+  LEFT JOIN app_grid ag ON ac.id = ag.appId
+  WHERE ag.idx IS NOT NULL
+  GROUP BY space, ac.id
 ) AS docks`;
 
 export const spaceStallQuery = `
