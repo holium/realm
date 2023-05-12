@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
 import { Flex, Icon, Text } from '@holium/design-system/general';
@@ -24,6 +24,14 @@ export const Hero = () => {
     setEmail((e.target as HTMLInputElement).value);
   };
 
+  useEffect(() => {
+    // Autofocus input on page load.
+    const input = document.getElementById('get-realm-email');
+    if (input) {
+      input.focus();
+    }
+  }, []);
+
   return (
     <HeroContainer>
       <H1Container>
@@ -48,8 +56,8 @@ export const Hero = () => {
           }}
         >
           <TextInput
-            id="email"
-            name="email"
+            id="get-realm-email"
+            name="get-realm-email"
             placeholder="Enter email"
             type="email"
             width="100%"
