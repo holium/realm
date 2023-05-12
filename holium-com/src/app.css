@@ -36,14 +36,14 @@ a:visted {
   color: rgba(var(--rlm-accent-rgba));
 }
 
-.hideonmobile {
-  @media (max-width: 560px) {
+@media (max-width: 560px) {
+  .hideonmobile {
     display: none;
   }
 }
 
-.hideondesktop {
-  @media (min-width: 560px) {
+@media (min-width: 561px) {
+  .hideondesktop {
     display: none;
   }
 }
