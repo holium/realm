@@ -38,6 +38,7 @@ export const HeroContainer = styled(Flex)`
     flex-direction: column;
     text-align: center;
     max-width: 814px;
+    width: 100%;
   }
 
   @media (max-width: 814px) {
@@ -66,6 +67,8 @@ export const H1Container = styled(Flex)`
 
 export const P = styled(Text.Body)`
   font-size: 28px;
+  width: 100%;
+  max-width: 745px;
 
   @media (max-width: ${MOBILE_WIDTH}px) {
     font-size: 22px;

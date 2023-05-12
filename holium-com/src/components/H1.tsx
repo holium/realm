@@ -15,7 +15,7 @@ const futureOfTexts = [
 
 export const H1Text = styled(Text.H1)`
   font-size: 64px;
-  line-height: 1.2em;
+  line-height: 1.1em;
   width: 100%;
   text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
 
