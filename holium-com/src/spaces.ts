@@ -185,7 +185,7 @@ export const spaces: Record<SpaceKeys, Space> = {
   },
   athiest: {
     id: 'athiest',
-    title: 'Athiesm',
+    title: 'Atheism',
     members: 13,
     picture: './space-pictures/athiest.jpeg',
     theme: {

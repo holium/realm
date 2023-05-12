@@ -4,6 +4,7 @@ import { Button, Flex, Text } from '@holium/design-system/general';
 
 import { OnboardDialog } from '../components/OnboardDialog';
 import {
+  MOBILE_WIDTH,
   OnboardDialogDescription,
   OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
@@ -12,11 +13,17 @@ import { GetIdIcon } from '../icons/GetIdIcon';
 
 const GrayBox = styled(Flex)`
   padding: 16px;
-  gap: 32px;
-  flex-direction: column;
+  gap: 16px;
   background-color: rgba(var(--rlm-border-rgba), 0.5);
   border: 1px solid rgba(var(--rlm-border-rgba));
   border-radius: 12px;
+
+  @media (max-width: ${MOBILE_WIDTH}px) {
+    padding: 32px;
+    .hideonmobile {
+      display: none;
+    }
+  }
 `;
 
 const InfoText = styled(OnboardDialogDescription)`
@@ -48,28 +55,29 @@ export const GetRealmDialog = ({ onBack, onGetANewId }: Props) => (
         </OnboardDialogDescription>
         <OrDivider maxWidth="90%" />
         <GrayBox>
-          <Flex>
-            <Flex flex={1} alignItems="center" justifyContent="center">
-              <Flex flexDirection="column" gap="16px" alignItems="center">
-                <OnboardDialogDescription>
-                  Want in now?
-                </OnboardDialogDescription>
-                <Button.Primary type="button" onClick={onGetANewId}>
-                  <Text.Body
-                    style={{
-                      fontWeight: 500,
-                      color: '#ffffff',
-                      margin: '2px',
-                    }}
-                  >
-                    Purchase ID
-                  </Text.Body>
-                </Button.Primary>
-              </Flex>
+          <Flex flex={1} alignItems="center" justifyContent="center" gap="16px">
+            <Flex flexDirection="column" gap="16px" alignItems="center">
+              <OnboardDialogDescription>Want in now?</OnboardDialogDescription>
+              <Button.Primary type="button" onClick={onGetANewId}>
+                <Text.Body
+                  style={{
+                    fontWeight: 500,
+                    color: '#ffffff',
+                    margin: '2px',
+                  }}
+                >
+                  Purchase ID
+                </Text.Body>
+              </Button.Primary>
             </Flex>
-            <Flex flex={1} alignItems="center" justifyContent="center">
-              <GetIdIcon size={240} />
-            </Flex>
+          </Flex>
+          <Flex
+            flex={1}
+            alignItems="center"
+            justifyContent="center"
+            className="hideonmobile"
+          >
+            <GetIdIcon size={240} />
           </Flex>
         </GrayBox>
         <InfoText>

@@ -2,9 +2,8 @@ import { GetServerSideProps } from 'next';
 
 import { GetRealmDialog } from '@holium/shared';
 
-import { useNavigation } from 'util/useNavigation';
-
 import { Page } from '../components/Page';
+import { useNavigation } from '../util/useNavigation';
 import { joinWaitlist } from './account/get-realm';
 
 type Props = {
