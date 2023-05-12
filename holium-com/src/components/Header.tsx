@@ -1,7 +1,7 @@
 import { Button, Text } from '@holium/design-system/general';
 
 import { Holium } from '../../public/Holium';
-import { GET_REALM_HREF, LOGIN_HREF } from '../consts';
+import { LOGIN_HREF } from '../consts';
 import {
   HeaderContainer,
   HeaderCTAs,
@@ -49,18 +49,6 @@ export const Header = () => (
             Login
           </Text.Body>
         </Button.Secondary>
-      </UnstyledNextLink>
-      <UnstyledNextLink href={GET_REALM_HREF}>
-        <Button.Primary
-          display="flex"
-          width="90px"
-          justifyContent="center"
-          flexWrap="nowrap"
-        >
-          <Text.Body fontWeight={500} style={{ color: '#fff' }}>
-            Get Realm
-          </Text.Body>
-        </Button.Primary>
       </UnstyledNextLink>
     </HeaderCTAs>
   </HeaderContainer>

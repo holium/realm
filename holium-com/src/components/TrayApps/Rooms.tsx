@@ -48,6 +48,7 @@ export const RoomApp = ({
   return (
     <TrayApp
       id="rooms-tray"
+      className="hideonmobile"
       isOpen={isOpen}
       coords={coords}
       closeTray={closeTray}

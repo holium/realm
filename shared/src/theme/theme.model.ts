@@ -8,7 +8,7 @@ import {
 } from 'mobx-state-tree';
 import { darken, lighten, mix, rgba } from 'polished';
 
-import { bgIsLightOrDark, luminosity } from '@holium/design-system';
+import { bgIsLightOrDark, luminosity } from '@holium/design-system/util';
 
 import { defaultTheme } from './defaultTheme';
 

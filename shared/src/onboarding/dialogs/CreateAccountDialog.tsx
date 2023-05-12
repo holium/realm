@@ -13,11 +13,13 @@ import {
 } from '../components/OnboardDialog.styles';
 
 type Props = {
+  prefilledEmail?: string;
   onAlreadyHaveAccount: () => void;
   onNext: (email: string, password: string) => Promise<boolean>;
 };
 
 export const CreateAccountDialog = ({
+  prefilledEmail,
   onAlreadyHaveAccount,
   onNext,
 }: Props) => {
@@ -64,6 +66,7 @@ export const CreateAccountDialog = ({
 
   return (
     <OnboardDialog
+      autoComplete={false}
       icon={<HoliumButton size={100} pointer={false} />}
       body={
         <>
@@ -77,6 +80,8 @@ export const CreateAccountDialog = ({
               id="create-account-email"
               name="create-account-email"
               ref={emailRef}
+              defaultValue={prefilledEmail}
+              autoComplete="new-password"
               type="email"
               placeholder="name@email.com"
               error={emailError.isOn}
@@ -96,6 +101,7 @@ export const CreateAccountDialog = ({
               name="create-account-password"
               ref={passwordRef}
               type={showPassword.isOn ? 'text' : 'password'}
+              autoComplete="new-password"
               placeholder="• • • • • • • •"
               onChange={onChangePassword}
               rightAdornment={
@@ -122,6 +128,7 @@ export const CreateAccountDialog = ({
               name="create-account-confirm-password"
               ref={confirmPasswordRef}
               type={showConfirmPassword.isOn ? 'text' : 'password'}
+              autoComplete="new-password"
               placeholder="• • • • • • • •"
               error={confirmPasswordError.isOn}
               onChange={onChangeConfirmPassword}

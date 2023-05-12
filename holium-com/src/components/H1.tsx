@@ -15,7 +15,7 @@ const futureOfTexts = [
 
 export const H1Text = styled(Text.H1)`
   font-size: 64px;
-  line-height: 1.2em;
+  line-height: 1.1em;
   width: 100%;
   text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
 
@@ -38,7 +38,7 @@ export const H1Text = styled(Text.H1)`
   }
 `;
 
-export const H1 = () => {
+export const H1 = ({ className = '' }) => {
   const [msgIdx, setMsgIdx] = useState(0);
   const [replay, setReplay] = useState(true);
   const [futureOfText, setFutureOfText] = useState('');
@@ -59,7 +59,7 @@ export const H1 = () => {
   }, [msgIdx]);
 
   return (
-    <H1Text>
+    <H1Text className={className}>
       Realm is the future of{' '}
       <AnimatedText text={futureOfText} replay={replay} />
     </H1Text>

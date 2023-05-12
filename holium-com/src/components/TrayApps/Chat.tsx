@@ -8,8 +8,9 @@ import {
   WindowedList,
 } from '@holium/design-system/general';
 import { TrayApp } from '@holium/design-system/os';
-import { Bubble } from '@holium/design-system/src/blocks/Bubble/Bubble';
-import { ChatInput } from '@holium/design-system/src/blocks/ChatInput/ChatInput';
+import { BubbleSkeleton } from '@holium/design-system/src/blocks/Bubble/BubbleSkeleton';
+import { ChatInputSkeleton } from '@holium/design-system/src/blocks/ChatInput/ChatInputSkeleton';
+import { chatDate } from '@holium/design-system/util';
 
 import { messages, spaces } from '../../spaces';
 import { useSpace } from '../SpaceContext';
@@ -41,14 +42,20 @@ export const ChatApp = ({
   coords,
 }: ChatAppProps) => {
   const { space } = useSpace();
-  const [chats, setChats] = useState<any[]>(messages[space]);
+  const [chats, setChats] = useState(messages[space]);
 
   useEffect(() => {
     setChats(messages[space]);
   }, [space]);
 
   return (
-    <TrayApp id="chat" isOpen={isOpen} coords={coords} closeTray={closeTray}>
+    <TrayApp
+      id="chat"
+      className="hideonmobile"
+      isOpen={isOpen}
+      coords={coords}
+      closeTray={closeTray}
+    >
       <Flex gap={12} flexDirection="column">
         <Flex ml={1} flexDirection="row" alignItems="center">
           <Flex width={26}>
@@ -71,14 +78,20 @@ export const ChatApp = ({
                   width="100%"
                   style={{ pointerEvents: 'none' }}
                 >
-                  <Bubble
+                  <BubbleSkeleton
                     id={`chat-${index}`}
                     isOur={row.author === '~lomder-librun'}
                     author={row.author}
                     authorColor={row.authorColor}
-                    message={row.message}
-                    sentAt={new Date(row.sentAt).toISOString()}
-                    onReaction={() => {}}
+                    fragmentBlock={row.message.map((fragment) => {
+                      if (fragment.image) {
+                        return <img src={fragment.image} alt="" />;
+                      }
+
+                      return <Text.Body>{fragment.plain}</Text.Body>;
+                    })}
+                    dateDisplay={chatDate(new Date(row.sentAt))}
+                    footerHeight="14px"
                   />
                 </Box>
               );
@@ -86,24 +99,7 @@ export const ChatApp = ({
           />
         </Box>
         <Box position="absolute" bottom={12} left={12} right={12}>
-          <ChatInput
-            id="chat-send"
-            selectedChatPath="~lomder-librun"
-            onSend={(message: any[]) => {
-              setChats([
-                ...chats,
-                {
-                  our: true,
-                  author: '~lomder-librun',
-                  sentAt: new Date().toISOString(),
-                  message: message,
-                },
-              ]);
-            }}
-            onAttachment={() => {}}
-            onBlur={() => {}}
-            onEditConfirm={() => {}}
-          />
+          <ChatInputSkeleton />
         </Box>
       </Flex>
     </TrayApp>
