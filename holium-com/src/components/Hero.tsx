@@ -15,7 +15,6 @@ import {
 } from './Hero.styles';
 import { HoveringCursors } from './HoveringCursors';
 import { HoveringCursorsStatic } from './HovertingCursorsStatic';
-import { UnstyledNextLink } from './UnstyledNextLink';
 
 export const Hero = () => {
   const [email, setEmail] = useState('');
@@ -45,7 +44,7 @@ export const Hero = () => {
           flexDirection="column"
           alignItems="center"
           maxWidth="320px"
-          gap="16px"
+          gap="8px"
           marginTop="16px"
           as="form"
           onSubmit={(e) => {
@@ -68,20 +67,14 @@ export const Hero = () => {
               padding: '8px 8px 8px 12px',
             }}
             rightAdornment={
-              <UnstyledNextLink
-                href={
-                  validEmail.isOn ? `${GET_REALM_HREF}?email=${email}` : '#'
-                }
-              >
-                <GetRealmButton type="button">
-                  <Text.Body fontWeight={500} style={{ color: '#fff' }}>
-                    Get Realm
-                  </Text.Body>
-                  <RoundArrow>
-                    <Icon name="ArrowRightLine" />
-                  </RoundArrow>
-                </GetRealmButton>
-              </UnstyledNextLink>
+              <GetRealmButton type="submit">
+                <Text.Body fontWeight={500} style={{ color: '#fff' }}>
+                  Get Realm
+                </Text.Body>
+                <RoundArrow>
+                  <Icon name="ArrowRightLine" />
+                </RoundArrow>
+              </GetRealmButton>
             }
           />
           <Text.Body
