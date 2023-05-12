@@ -328,7 +328,7 @@ export const renderFragment = (
 
     case 'blockquote':
       return (
-        <FragmentBlockquote id={id} key={index}>
+        <FragmentBlockquote id={id} key={index} className="fragment-blockquote">
           {(fragment as FragmentBlockquoteType).blockquote}
         </FragmentBlockquote>
       );
@@ -340,7 +340,7 @@ export const renderFragment = (
       );
     case 'ship':
       return (
-        <FragmentShip id={id} key={index}>
+        <FragmentShip id={id} key={index} className="fragment-ship">
           {(fragment as FragmentShipType).ship}
         </FragmentShip>
       );
@@ -350,6 +350,7 @@ export const renderFragment = (
         <CodeWrapper
           py={1}
           minWidth={containerWidth ? containerWidth / 1.25 : 150}
+          className="code-wrapper"
         >
           <FragmentCodeBlock id={id} key={index}>
             {(fragment as FragmentCodeType).code}
@@ -358,7 +359,7 @@ export const renderFragment = (
       );
     case 'link':
       return (
-        <BlockWrapper id={id} key={author + index}>
+        <BlockWrapper id={id} key={author + index} className="block-wrapper">
           <LinkBlock
             draggable={false}
             mode="embed"
@@ -436,6 +437,7 @@ export const renderFragment = (
           style={{ height: 46 }}
           id={id}
           key={`${author + index}-reply`}
+          className="fragment-blockquote"
           onClick={() => onReplyClick?.(replyId)}
         >
           <Flex

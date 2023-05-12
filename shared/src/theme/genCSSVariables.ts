@@ -1,6 +1,6 @@
 import { darken, lighten, rgba } from 'polished';
 
-import { toRgbaString } from '@holium/design-system';
+import { toRgbaString } from '@holium/design-system/util';
 
 import { ThemeType } from './theme.model';
 

@@ -38,12 +38,12 @@ a:visted {
 
 @media (max-width: 560px) {
   .hideonmobile {
-    display: none;
+    display: none !important;
   }
 }
 
 @media (min-width: 561px) {
   .hideondesktop {
-    display: none;
+    display: none !important;
   }
 }

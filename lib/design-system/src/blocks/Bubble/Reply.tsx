@@ -84,6 +84,7 @@ export const Reply = (props: ReplyProps) => {
       <Box>
         <FragmentImage
           id={'pin-image-preview'}
+          className="fragment-image"
           src={link}
           style={{ display: 'block' }}
           // width={100}
@@ -115,7 +116,7 @@ export const Reply = (props: ReplyProps) => {
       >
         <FragmentBlockquote
           id={id}
-          className="pinned-or-reply-message"
+          className="fragment-blockquote pinned-or-reply-message"
           style={{
             paddingRight: 6,
             borderRadius: 10,

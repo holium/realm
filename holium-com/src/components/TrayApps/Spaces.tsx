@@ -38,7 +38,13 @@ export const SpacesApp = ({
   const { space, setSpace } = useSpace();
 
   return (
-    <TrayApp id="spaces" isOpen={isOpen} coords={coords} closeTray={closeTray}>
+    <TrayApp
+      id="spaces"
+      className="hideonmobile"
+      isOpen={isOpen}
+      coords={coords}
+      closeTray={closeTray}
+    >
       <Flex style={{ flexDirection: 'column' }}>
         <Flex align="center" justify="space-between" mb={2}>
           <Text.Custom

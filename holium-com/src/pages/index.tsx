@@ -59,40 +59,34 @@ export default function HomePage() {
         </Main>
         <Footer currentSpace={space} setCurrentApp={handleSetTrayApp} />
       </Page>
-      {trayApp?.id === 'spaces' && (
-        <SpacesApp
-          coords={trayApp.coords}
-          isOpen={trayApp?.id === 'spaces'}
-          closeTray={() => setTrayApp(null)}
-        />
-      )}
-      {trayApp?.id === 'chat' && (
-        <ChatApp
-          coords={trayApp.coords}
-          isOpen={trayApp?.id === 'chat'}
-          closeTray={() => setTrayApp(null)}
-        />
-      )}
-      {trayApp?.id === 'rooms-tray' && (
-        <RoomApp
-          coords={trayApp.coords}
-          isOpen={trayApp?.id === 'rooms-tray'}
-          closeTray={() => setTrayApp(null)}
-        />
-      )}
-      {trayApp?.id === 'wallet' && (
-        <WalletApp
-          coords={trayApp.coords}
-          isOpen={trayApp?.id === 'wallet'}
-          closeTray={() => setTrayApp(null)}
-        />
-      )}
-      {trayApp?.id === 'notifications' && (
-        <NotificationApp
-          coords={trayApp.coords}
-          isOpen={trayApp?.id === 'notifications'}
-          closeTray={() => setTrayApp(null)}
-        />
+      {trayApp && (
+        <>
+          <SpacesApp
+            coords={trayApp.coords}
+            isOpen={trayApp.id === 'spaces'}
+            closeTray={() => setTrayApp(null)}
+          />
+          <ChatApp
+            coords={trayApp.coords}
+            isOpen={trayApp.id === 'chat'}
+            closeTray={() => setTrayApp(null)}
+          />
+          <RoomApp
+            coords={trayApp.coords}
+            isOpen={trayApp.id === 'rooms-tray'}
+            closeTray={() => setTrayApp(null)}
+          />
+          <WalletApp
+            coords={trayApp.coords}
+            isOpen={trayApp.id === 'wallet'}
+            closeTray={() => setTrayApp(null)}
+          />
+          <NotificationApp
+            coords={trayApp.coords}
+            isOpen={trayApp.id === 'notifications'}
+            closeTray={() => setTrayApp(null)}
+          />
+        </>
       )}
     </>
   );

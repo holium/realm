@@ -53,6 +53,7 @@ export const PinnedMessage = (props: PinnedProps) => {
       <Box>
         <FragmentImage
           id={'pin-image-preview'}
+          className="fragment-image"
           src={link}
           style={{ display: 'block' }}
           draggable={false}
@@ -67,7 +68,7 @@ export const PinnedMessage = (props: PinnedProps) => {
     <Flex id={id} key={id} width="100%" onClick={onClick}>
       <FullWidthFragmentBlock id={id}>
         <FragmentBlockquote
-          className="pinned-or-reply-message"
+          className="fragment-blockquote pinned-or-reply-message"
           id={id}
           style={{
             borderLeft: `2px solid ${

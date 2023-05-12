@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 
 import { Flex, Icon, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
-import { useToggle } from '@holium/design-system/util';
 
 import { GET_REALM_HREF } from '../consts';
 import { H1, H1Text } from './H1';
@@ -21,14 +20,8 @@ export const Hero = () => {
   const router = useRouter();
   const [email, setEmail] = useState('');
 
-  const validEmail = useToggle(false);
-
   const onChangeEmail = (e: ChangeEvent<HTMLInputElement>) => {
-    const newValue = (e.target as HTMLInputElement).value;
-    setEmail(newValue);
-
-    const validEmailRegex = /\S+@\S+\.\S+/;
-    validEmail.setToggle(validEmailRegex.test(newValue));
+    setEmail((e.target as HTMLInputElement).value);
   };
 
   return (
@@ -43,17 +36,15 @@ export const Hero = () => {
           experiences, and a crypto user's dream.
         </P>
         <Flex
-          flexDirection="column"
-          alignItems="center"
-          maxWidth="320px"
-          gap="8px"
-          marginTop="16px"
           as="form"
+          alignItems="center"
+          flexDirection="column"
+          gap="8px"
+          maxWidth="320px"
+          marginTop="16px"
           onSubmit={(e) => {
             e.preventDefault();
-            if (validEmail.isOn) {
-              router.push(`${GET_REALM_HREF}?email=${email}`);
-            }
+            router.push(`${GET_REALM_HREF}?email=${email}`);
           }}
         >
           <TextInput

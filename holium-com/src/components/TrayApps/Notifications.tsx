@@ -36,6 +36,7 @@ export const NotificationApp = ({
   return (
     <TrayApp
       id="notifications"
+      className="hideonmobile"
       isOpen={isOpen}
       coords={coords}
       closeTray={closeTray}
