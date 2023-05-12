@@ -25,7 +25,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   const result = await joinWaitlist(prefilledEmail);
 
   if (!result) {
-    res.writeHead(302, { Location: '/' });
+    res.writeHead(302, { Location: '/join-failed' });
     res.end();
   }
 

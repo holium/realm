@@ -40,6 +40,7 @@ export { LoginDialog } from './dialogs/LoginDialog';
 export { PassportDialog } from './dialogs/PassportDialog';
 export { PasswordDialog } from './dialogs/PasswordDialog';
 export { PaymentDialog } from './dialogs/PaymentDialog';
+export { SomethingWentWrongDialog } from './dialogs/SomethingWentWrongDialog';
 export { VerifyEmailDialog } from './dialogs/VerifyEmailDialog';
 export { OnboardingStorage } from './services/OnboardingStorage';
 export { ThirdEarthApi } from './services/ThirdEarthApi';
