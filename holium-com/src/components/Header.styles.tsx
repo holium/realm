@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 
 import { MOBILE_WIDTH } from '../consts';
+import { UnstyledNextLink } from './UnstyledNextLink';
 
 export const HeaderContainer = styled.header`
   width: 100%;
@@ -35,13 +36,6 @@ export const HeaderNavigation = styled.nav`
   }
 `;
 
-export const UnstyledLink = styled.a`
-  display: flex;
-  color: inherit;
-  text-decoration: none;
-  justify-content: center;
-`;
-
 export const HeaderCTAs = styled.div`
   display: flex;
   align-items: center;
@@ -49,7 +43,7 @@ export const HeaderCTAs = styled.div`
   gap: 8px;
 `;
 
-export const HeaderMenuLink = styled(UnstyledLink)<{
+export const HeaderMenuLink = styled(UnstyledNextLink)<{
   current?: boolean;
 }>`
   font-size: 18px;
