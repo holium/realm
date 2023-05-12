@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 
-import { TextInput } from '@holium/design-system';
 import { Flex, Icon, Text } from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
+import { useToggle } from '@holium/design-system/util';
 
 import { GET_REALM_HREF } from '../consts';
 import { H1, H1Text } from './H1';
@@ -18,6 +19,16 @@ import { UnstyledNextLink } from './UnstyledNextLink';
 
 export const Hero = () => {
   const [email, setEmail] = useState('');
+
+  const validEmail = useToggle(false);
+
+  const onChangeEmail = (e: ChangeEvent<HTMLInputElement>) => {
+    const newValue = (e.target as HTMLInputElement).value;
+    setEmail(newValue);
+
+    const validEmailRegex = /\S+@\S+\.\S+/;
+    validEmail.setToggle(validEmailRegex.test(newValue));
+  };
 
   return (
     <HeroContainer>
@@ -39,7 +50,9 @@ export const Hero = () => {
           as="form"
           onSubmit={(e) => {
             e.preventDefault();
-            window.location.href = `${GET_REALM_HREF}?email=${email}`;
+            if (validEmail.isOn) {
+              window.location.href = `${GET_REALM_HREF}?email=${email}`;
+            }
           }}
         >
           <TextInput
@@ -49,13 +62,17 @@ export const Hero = () => {
             type="email"
             width="100%"
             value={email}
-            onChange={(e) => setEmail((e.target as HTMLInputElement).value)}
+            onChange={onChangeEmail}
             style={{
               borderRadius: 999,
               padding: '8px 8px 8px 12px',
             }}
             rightAdornment={
-              <UnstyledNextLink href={`${GET_REALM_HREF}?email=${email}`}>
+              <UnstyledNextLink
+                href={
+                  validEmail.isOn ? `${GET_REALM_HREF}?email=${email}` : '#'
+                }
+              >
                 <GetRealmButton type="button">
                   <Text.Body fontWeight={500} style={{ color: '#fff' }}>
                     Get Realm
