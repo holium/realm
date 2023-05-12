@@ -1,4 +1,5 @@
 import { ChangeEvent, useState } from 'react';
+import { useRouter } from 'next/router';
 
 import { Flex, Icon, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
@@ -17,6 +18,7 @@ import { HoveringCursors } from './HoveringCursors';
 import { HoveringCursorsStatic } from './HovertingCursorsStatic';
 
 export const Hero = () => {
+  const router = useRouter();
   const [email, setEmail] = useState('');
 
   const validEmail = useToggle(false);
@@ -50,7 +52,7 @@ export const Hero = () => {
           onSubmit={(e) => {
             e.preventDefault();
             if (validEmail.isOn) {
-              window.location.href = `${GET_REALM_HREF}?email=${email}`;
+              router.push(`${GET_REALM_HREF}?email=${email}`);
             }
           }}
         >
