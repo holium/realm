@@ -38,7 +38,7 @@ export const H1Text = styled(Text.H1)`
   }
 `;
 
-export const H1 = () => {
+export const H1 = ({ className = '' }) => {
   const [msgIdx, setMsgIdx] = useState(0);
   const [replay, setReplay] = useState(true);
   const [futureOfText, setFutureOfText] = useState('');
@@ -59,7 +59,7 @@ export const H1 = () => {
   }, [msgIdx]);
 
   return (
-    <H1Text>
+    <H1Text className={className}>
       Realm is the future of{' '}
       <AnimatedText text={futureOfText} replay={replay} />
     </H1Text>
