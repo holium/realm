@@ -7,14 +7,14 @@ import { DESKTOP_WIDTH, MOBILE_WIDTH } from '../consts';
 export const GetRealmButton = styled(Button.Primary)`
   display: flex;
   font-size: 18px;
-  padding: 10px 10px 10px 16px;
+  padding: 4px 6px 4px 10px;
   border-radius: 999px;
   gap: 12px;
 `;
 
 export const RoundArrow = styled.div`
-  width: 24px;
-  height: 24px;
+  width: 19px;
+  height: 19px;
   border-radius: 50%;
   background-color: #fff;
   display: flex;

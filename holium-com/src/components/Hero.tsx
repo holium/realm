@@ -50,14 +50,14 @@ export const Hero = () => {
           <TextInput
             id="email"
             name="email"
-            placeholder="Enter your email"
+            placeholder="Enter email"
             type="email"
             width="100%"
             value={email}
             onChange={onChangeEmail}
             style={{
               borderRadius: 999,
-              padding: '8px 8px 8px 12px',
+              padding: '8px 8px 8px 16px',
             }}
             rightAdornment={
               <GetRealmButton type="submit">
