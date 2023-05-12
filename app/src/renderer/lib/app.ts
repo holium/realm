@@ -35,7 +35,9 @@ export const getAppTileFlags = (
     isFaded,
     isSuspended: installStatus === InstallStatus.suspended,
     isFailed: installStatus === InstallStatus.failed,
-    isUninstalled: installStatus === InstallStatus.uninstalled,
+    isUninstalled:
+      installStatus === InstallStatus.uninstalled ||
+      installStatus === InstallStatus.desktop,
     hasFailed: installStatus === InstallStatus.failed,
     isDesktop: installStatus === InstallStatus.desktop,
   };

@@ -51,6 +51,10 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: Record<string, Dimensions> = {
     width: 900,
     height: 700,
   },
+  'os-browser': {
+    width: 1200,
+    height: 900,
+  },
   sphinx: {
     width: 600,
     height: 700,

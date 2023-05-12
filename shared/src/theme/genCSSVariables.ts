@@ -13,6 +13,11 @@ export const genCSSVariables = (theme: ThemeType) => {
    *
    * The rgba vars allow for opacity to be applied dynamically.
    */
+
+  /*
+    dock color used in random places but not in the dock - ok
+  */
+
   const themeMode = theme.mode;
   const isLight = themeMode === 'light';
   const homeButtonColor = isLight
@@ -126,34 +131,4 @@ export const genCSSVariables = (theme: ThemeType) => {
       --rlm-overlay-active-color: ${overlayActiveColor};
     }
   `;
-};
-
-export const generateColors = (
-  baseColor: string,
-  bgLuminosity: 'light' | 'dark'
-) => {
-  const windowColor =
-    bgLuminosity === 'dark' ? darken(0.05, baseColor) : lighten(0.3, baseColor);
-  return {
-    // TODO add window border color
-    mode: bgLuminosity,
-    backgroundColor: baseColor,
-    inputColor:
-      bgLuminosity === 'dark'
-        ? darken(0.06, windowColor)
-        : lighten(0.05, windowColor),
-    dockColor:
-      bgLuminosity === 'dark'
-        ? lighten(0.05, baseColor)
-        : lighten(0.4, baseColor),
-    windowColor,
-    textColor:
-      bgLuminosity === 'dark'
-        ? lighten(0.9, baseColor)
-        : darken(0.8, baseColor),
-    iconColor:
-      bgLuminosity === 'dark'
-        ? rgba(lighten(0.5, baseColor), 0.4)
-        : rgba(darken(0.4, baseColor), 0.3),
-  };
 };

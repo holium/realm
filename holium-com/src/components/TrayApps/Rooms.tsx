@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 import { Button, Flex, Icon, Text } from '@holium/design-system/general';
 import { TrayApp } from '@holium/design-system/os';
 
+import { useSpace } from 'components/SpaceContext';
+
 import { rooms } from '../../spaces';
-import { SpaceKeys } from '../../types';
 import { CommButton } from '../CommButton';
 import { RoomSpeaker } from '../RoomSpeaker';
 
@@ -16,9 +17,7 @@ type ChatAppProps = {
     width: number;
     height: number;
   };
-  currentSpace: SpaceKeys;
   closeTray: () => void;
-  setCurrentSpace: (space: SpaceKeys) => void;
 };
 
 const position = 'top-left';
@@ -33,17 +32,18 @@ export const roomConfig = {
 
 export const RoomApp = ({
   isOpen = false,
-  closeTray,
   coords,
-  currentSpace,
+  closeTray,
 }: ChatAppProps) => {
   const [muted, setMuted] = useState(false);
   const [room, setRoom] = useState<any>(null);
 
+  const { space } = useSpace();
+
   useEffect(() => {
     setMuted(false);
-    setRoom(rooms[currentSpace]);
-  }, [currentSpace]);
+    setRoom(rooms[space]);
+  }, [space]);
 
   return (
     <TrayApp

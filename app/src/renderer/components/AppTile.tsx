@@ -149,8 +149,8 @@ const AppTilePresenter = ({
   const tileRef = useRef(null);
   const isAppGrid =
     tileSize === 'xxl' || tileSize === 'xl2' || tileSize === 'xl1';
-  const boxShadowStyle = isAppGrid ? '0px 2px 8px rgba(0, 0, 0, 0.15)' : 'none';
-  const boxShadowHover = isAppGrid ? '0px 4px 8px rgba(0, 0, 0, 0.15)' : 'none';
+  const boxShadowStyle = isAppGrid ? 'var(--rlm-box-shadow-2)' : 'none';
+  const boxShadowHover = isAppGrid ? 'var(--rlm-box-shadow-2)' : 'none';
 
   const isLight = useMemo(() => {
     return bgIsLightOrDark(app.color) === 'light';
@@ -161,7 +161,11 @@ const AppTilePresenter = ({
     [isLight]
   );
   const contextMenuColors = useMemo(
-    () => ({ textColor, backgroundColor: app.color }),
+    () => ({
+      textColor,
+      backgroundColor: app.color,
+      borderColor: darken(0.05, app.color),
+    }),
     [app.color, textColor]
   );
 
@@ -241,7 +245,7 @@ const AppTilePresenter = ({
             textStyle="capitalize"
             fontSize={tileSize === 'xl1' ? '13px' : 2}
           >
-            {app.installStatus}
+            {installStatus}
           </Text.Custom>
         );
       }

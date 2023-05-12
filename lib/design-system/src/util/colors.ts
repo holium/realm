@@ -75,7 +75,7 @@ export function bgIsLightOrDark(hexColor: string) {
   }
 }
 
-function luminosity(hexColor: string) {
+export function luminosity(hexColor: string) {
   var c = hexColor.substring(1); // strip #
   var rgb = parseInt(c, 16); // convert rrggbb to decimal
   var r = (rgb >> 16) & 0xff; // extract red

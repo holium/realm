@@ -43,6 +43,7 @@ export type BubbleProps = {
   innerRef?: Ref<HTMLDivElement>;
   onReaction?: (payload: OnReactionPayload) => void;
   onReplyClick?: (msgId: string) => void;
+  error?: string;
 } & BoxProps;
 
 export const Bubble = ({
@@ -67,6 +68,7 @@ export const Bubble = ({
   expiresAt,
   onReaction,
   onReplyClick,
+  error,
 }: BubbleProps) => {
   const [dateDisplay, setDateDisplay] = useState(chatDate(new Date(sentAt)));
   useEffect(() => {
@@ -243,6 +245,20 @@ export const Bubble = ({
               minWidth={minBubbleWidth}
               flexBasis={minBubbleWidth}
             >
+              {error && (
+                <Text.Custom
+                  style={{ whiteSpace: 'nowrap', userSelect: 'none' }}
+                  pointerEvents="none"
+                  textAlign="right"
+                  display="inline-flex"
+                  alignItems="flex-end"
+                  justifyContent="flex-end"
+                  opacity={0.35}
+                  id={id}
+                >
+                  {error}
+                </Text.Custom>
+              )}
               {expiresAt && (
                 // TODO tooltip with time remaining
                 <Icon
@@ -290,5 +306,6 @@ export const Bubble = ({
     dateDisplay,
     minBubbleWidth,
     footerHeight,
+    error,
   ]);
 };

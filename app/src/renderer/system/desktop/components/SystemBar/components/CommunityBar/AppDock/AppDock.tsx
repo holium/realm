@@ -11,23 +11,26 @@ const AppDockPresenter = () => {
   const { spacesStore, bazaarStore } = useShipStore();
 
   const currentSpace = spacesStore.selected;
-  const pinnedDockApps = currentSpace?.dock || [];
+
+  if (!currentSpace) return null;
+
+  const pinnedDockApps = currentSpace.dock || [];
   const unpinnedDockApps = shellStore.openWindows
-    .filter(({ appId }) => !currentSpace?.isPinned(appId))
+    .filter(({ appId }) => !currentSpace.isPinned(appId))
     .filter(
       ({ appId }, index, self) =>
         self.findIndex(({ appId: id }) => id === appId) === index
     )
     .map(({ appId }) => bazaarStore.getApp(appId))
     .filter(Boolean) as AppMobxType[];
-
-  if (!currentSpace) return null;
+  const bookmarks = currentSpace?.bookmarks || [];
 
   return (
     <AppDockView
-      spacePath={currentSpace.path}
+      currentSpace={currentSpace}
       pinnedDockApps={pinnedDockApps}
       unpinnedDockApps={unpinnedDockApps}
+      bookmarks={bookmarks}
     />
   );
 };

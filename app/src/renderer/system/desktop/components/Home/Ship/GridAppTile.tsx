@@ -50,7 +50,9 @@ export const GridAppTilePresenter = ({
       [
         {
           label: isAppPinned ? 'Unpin app' : 'Pin app',
-          disabled: app.type === AppTypes.Web,
+          disabled:
+            app.type === AppTypes.Web ||
+            installStatus !== InstallStatus.installed,
           onClick: (evt: any) => {
             evt.stopPropagation();
             isAppPinned

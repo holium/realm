@@ -54,11 +54,7 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
   }, []);
 
   useEffect(() => {
-    appInstaller.setSearchMode('none');
-    appInstaller.setSearchModeArgs([]);
-    appInstaller.setSearchString('');
-    appInstaller.setSearchPlaceholder('Search...');
-    appInstaller.setSelectedShip('');
+    appInstaller.reset();
   }, [appInstaller]);
 
   const { search } = useMemo(() => searchForm(), []);
@@ -76,7 +72,6 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
     if (searchString === '' && search.state.value !== '') {
       search.actions.onChange('');
       clearInput();
-      console.log('selectedShip', selectedShip);
     }
   }, [
     clearInput,
@@ -147,11 +142,7 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
               searchMode !== 'dev-app-search' &&
               searchString.length === 0
             ) {
-              appInstaller.setSearchMode('none');
-              appInstaller.setSearchModeArgs([]);
-              appInstaller.setSearchString('');
-              appInstaller.setSearchPlaceholder('Search...');
-              appInstaller.setSelectedShip('');
+              appInstaller.reset();
               search.actions.onChange('');
             }
             if (

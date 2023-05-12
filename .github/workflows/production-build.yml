@@ -14,7 +14,7 @@ env:
 #
 jobs:
   pre-deploy:
-    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'build')
     runs-on: ubuntu-latest
     outputs:
       # the full CI object returned by the post-deploy script
@@ -47,7 +47,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
   #
   build-mac:
-    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'build')
     needs: [pre-deploy]
     runs-on: macos-latest
     steps:
@@ -129,7 +129,7 @@ jobs:
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
   #
   build-linux:
-    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'build')
     needs: [pre-deploy]
     runs-on: ubuntu-latest
     steps:
@@ -200,7 +200,7 @@ jobs:
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
   #
   build-windows:
-    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'build')
     needs: [pre-deploy]
     runs-on: ubuntu-latest
     container:
@@ -262,6 +262,7 @@ jobs:
         env:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
+          ARTIFACT_VERSION: ${{ needs.pre-deploy.outputs.artifact_version }}
       #
       - name: Download and install code signing tool
         run: |
@@ -292,6 +293,9 @@ jobs:
       # copy release artifacts from this runner to digitalocean
       - name: Publish artifacts
         run: |
+          # move the signed version of the exe into the main build folder
+          rm -f ./app/release/build/Realm-Setup-$ARTIFACT_VERSION.exe
+          mv ./app/release/build/signed/Realm-Setup-$ARTIFACT_VERSION.exe ./app/release/build/Realm-Setup-$ARTIFACT_VERSION.exe
           mkdir -p ~/.ssh
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
@@ -303,9 +307,10 @@ jobs:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_RSA: ${{ secrets.DEPLOY_RSA }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          ARTIFACT_VERSION: ${{ needs.pre-deploy.outputs.artifact_version }}
   #
   deploy-desks:
-    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'build')
     needs: [pre-deploy, build-mac, build-windows, build-linux]
     runs-on: ubuntu-latest
     steps:
@@ -374,7 +379,7 @@ jobs:
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   post-deploy:
-    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'build')
     needs: [pre-deploy, build-mac, build-windows, build-linux, deploy-desks]
     runs-on: ubuntu-latest
     steps:
@@ -435,7 +440,7 @@ jobs:
   # this will run even if the build is canceled or fails
   #  we need this to re-enable the workflow
   finalize:
-    if: always() && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
+    if: always() && contains(github.event.pull_request.labels.*.name, 'build')
     needs: [pre-deploy, post-deploy]
     runs-on: ubuntu-latest
     steps:

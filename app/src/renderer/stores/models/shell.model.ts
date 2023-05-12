@@ -1,7 +1,15 @@
 import { toJS } from 'mobx';
 import { applySnapshot, getSnapshot, Instance, types } from 'mobx-state-tree';
 
-import { getInitialWindowBounds } from '../../lib/window-manager';
+import { Bookmark } from 'os/services/ship/spaces/tables/bookmarks.table';
+import { getDefaultAppDimensions } from 'renderer/lib/dimensions';
+
+import {
+  getCenteredPosition,
+  getInitialWindowBounds,
+} from '../../lib/window-manager';
+import { shipStore } from '../ship.store';
+import { AppMobxType } from './bazaar.model';
 import {
   AppWindowMobxType,
   AppWindowModel,
@@ -97,6 +105,10 @@ export const ShellModel = types
       };
     },
     setIsBlurred(isBlurred: boolean) {
+      /* don't remove blur if home pane is open */
+      if (self.isBlurred && self.homePaneOpen) {
+        return;
+      }
       self.isBlurred = isBlurred;
     },
     setFullscreen(isFullscreen: boolean) {
@@ -132,15 +144,18 @@ export const ShellModel = types
       const windowBounds = self.getWindowByAppId(appId)?.bounds;
       if (windowBounds) applySnapshot(windowBounds, bounds);
     },
-    openWindow(app: any, nativeConfig?: any) {
+    openWindow(app: AppMobxType, nativeConfig?: any) {
       let glob;
       let href;
       if (app.type === 'urbit') {
-        glob = app.href.glob ? true : false;
+        // @ts-ignore
+        glob = app.href?.glob ? true : false;
         href = app.href;
       }
 
+      // @ts-ignore
       if (app.type === 'dev') {
+        // @ts-ignore
         href = { site: app.web.url };
       }
 
@@ -156,6 +171,41 @@ export const ShellModel = types
         zIndex: self.windows.size + 1,
         type: app.type,
         bounds: getInitialWindowBounds(app, self.desktopDimensions),
+      });
+
+      shipStore.bazaarStore.addRecentApp(app.id);
+
+      self.windows.set(newWindow.appId, newWindow);
+      this.setActive(newWindow.appId);
+      if (self.homePaneOpen) self.homePaneOpen = false;
+
+      return newWindow;
+    },
+    openBookmark(bookmark: Omit<Bookmark, 'favicon'>) {
+      const dimensions = getDefaultAppDimensions(
+        'os-browser',
+        self.desktopDimensions
+      );
+      if (!dimensions) {
+        console.error('Could not get default dimensions');
+        return;
+      }
+      const position = getCenteredPosition(dimensions);
+
+      const newWindow = AppWindowModel.create({
+        appId: bookmark.url,
+        title: bookmark.title,
+        glob: false,
+        state: 'normal',
+        type: 'web',
+        href: {
+          site: bookmark.url,
+        },
+        zIndex: self.windows.size + 1,
+        bounds: {
+          ...dimensions,
+          ...position,
+        },
       });
 
       self.windows.set(newWindow.appId, newWindow);

@@ -77,7 +77,6 @@ export const SystemBar = ({ currentSpace, setCurrentApp }: SystemBarProps) => {
         <SelectedSpaceRow
           gap={8}
           id="spaces-icon"
-          align="center"
           whileTap={{ scale: 0.975 }}
           transition={{ scale: 0.2 }}
           onClick={() => {

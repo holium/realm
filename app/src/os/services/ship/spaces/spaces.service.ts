@@ -8,7 +8,12 @@ import { MemberRole } from '../../../types';
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
 import { spacesModelQuery } from './spaces.query';
-import { SpacesUpdateType } from './spaces.types';
+import { CreateBookmarkPayload, SpacesUpdateType } from './spaces.types';
+import {
+  Bookmark,
+  BookmarksDB,
+  bookmarksInitSql,
+} from './tables/bookmarks.table';
 import {
   FeaturedSpacesDB,
   spacesFeaturedInitSql,
@@ -23,6 +28,7 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
   public membersDB?: MembersDB;
   public invitationsDB?: InvitationDB;
   public featuredSpacesDB?: FeaturedSpacesDB;
+  public bookmarksDB?: BookmarksDB;
   private patp?: string;
 
   constructor(options?: ServiceOptions, db?: Database, patp?: string) {
@@ -34,6 +40,7 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
     this.membersDB = new MembersDB(false, db);
     this.invitationsDB = new InvitationDB(false, db);
     this.featuredSpacesDB = new FeaturedSpacesDB(false, db);
+    this.bookmarksDB = new BookmarksDB(false, db);
 
     this._onEvent = this._onEvent.bind(this);
     if (options?.verbose) {
@@ -250,8 +257,16 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
     log.warn('Spaces subscription error', err);
   };
 
-  public async getInitial() {
-    if (!this.shipDB) return;
+  public async getInitial(): Promise<{
+    current: string | null;
+    spaces: any[];
+    bookmarks:
+      | {
+          [path: string]: Bookmark;
+        }
+      | undefined;
+  } | null> {
+    if (!this.shipDB) return null;
     const query = this.shipDB.prepare(spacesModelQuery);
     const result: any = query.all();
     const currentSpace = result.filter((row: any) => row.current === 1)[0];
@@ -271,6 +286,7 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
             : { suite: {}, recommended: {} },
         };
       }),
+      bookmarks: this.bookmarksDB?.getAll(),
     };
   }
 
@@ -556,6 +572,24 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
   public async getFeaturedSpaces() {
     return this.featuredSpacesDB?.getFeaturedSpaces();
   }
+
+  public async addBookmark(payload: CreateBookmarkPayload) {
+    this.sendUpdate({
+      type: 'bookmark-added',
+      payload,
+    });
+
+    return this.bookmarksDB?.addBookmark(payload);
+  }
+
+  public async removeBookmark(path: string, url: string) {
+    this.sendUpdate({
+      type: 'bookmark-removed',
+      payload: { path, url },
+    });
+
+    return this.bookmarksDB?.removeBookmark(path, url);
+  }
 }
 
 export default SpacesService;
@@ -570,6 +604,7 @@ export const spacesTablesInitSql = `
  ${spacesInvitationsInitSql}
  ${spacesMembersInitSql}
  ${spacesFeaturedInitSql}
+ ${bookmarksInitSql}
 `;
 
 export type NewSpace = {
