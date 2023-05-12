@@ -164,9 +164,6 @@ export const BazaarStore = types
   .extend((self) => {
     const treaties = observable.map(new Map<string, any>());
     const allies = observable.map(new Map<string, any>());
-    BazaarIPC.scryAllies().then((alliesInit: any) => {
-      allies.replace(alliesInit);
-    });
     return {
       views: {
         get installed(): SnapshotOut<AppMobxType>[] {
