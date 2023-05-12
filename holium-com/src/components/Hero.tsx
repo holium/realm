@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 
 import { Flex, Icon, Text } from '@holium/design-system/general';
 
@@ -14,6 +13,7 @@ import {
 } from './Hero.styles';
 import { HoveringCursors } from './HoveringCursors';
 import { HoveringCursorsStatic } from './HovertingCursorsStatic';
+import { UnstyledNextLink } from './UnstyledNextLink';
 
 export const Hero = () => {
   const [isMobile, setIsMobile] = useState(true);
@@ -34,7 +34,7 @@ export const Hero = () => {
           A home for communities, a platform for building new social
           experiences, and a crypto user's dream.
         </P>
-        <Link href={GET_REALM_HREF}>
+        <UnstyledNextLink href={GET_REALM_HREF}>
           <GetRealmButton>
             <Text.Body fontWeight={500} style={{ color: '#fff' }}>
               Get Realm
@@ -43,7 +43,7 @@ export const Hero = () => {
               <Icon name="ArrowRightLine" />
             </RoundArrow>
           </GetRealmButton>
-        </Link>
+        </UnstyledNextLink>
       </H1Container>
       <Flex flex={1} width="100%" justify="center" padding="16px">
         {isMobile ? <HoveringCursorsStatic /> : <HoveringCursors />}

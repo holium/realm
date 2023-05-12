@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 import { Button, Text } from '@holium/design-system/general';
 
 import { Holium } from '../../public/Holium';
@@ -9,14 +7,14 @@ import {
   HeaderCTAs,
   HeaderMenuLink,
   HeaderNavigation,
-  UnstyledLink,
 } from './Header.styles';
+import { UnstyledNextLink } from './UnstyledNextLink';
 
 export const Header = () => (
   <HeaderContainer>
-    <UnstyledLink href="/" id="holium-logo">
+    <UnstyledNextLink href="/" id="holium-logo">
       <Holium />
-    </UnstyledLink>
+    </UnstyledNextLink>
     <HeaderNavigation>
       <ul>
         <li>
@@ -45,14 +43,14 @@ export const Header = () => (
       </ul>
     </HeaderNavigation>
     <HeaderCTAs>
-      <Link href={LOGIN_HREF}>
+      <UnstyledNextLink href={LOGIN_HREF}>
         <Button.Secondary>
           <Text.Body color="text" fontWeight={500}>
             Login
           </Text.Body>
         </Button.Secondary>
-      </Link>
-      <Link href={GET_REALM_HREF}>
+      </UnstyledNextLink>
+      <UnstyledNextLink href={GET_REALM_HREF}>
         <Button.Primary
           display="flex"
           width="90px"
@@ -63,7 +61,7 @@ export const Header = () => (
             Get Realm
           </Text.Body>
         </Button.Primary>
-      </Link>
+      </UnstyledNextLink>
     </HeaderCTAs>
   </HeaderContainer>
 );

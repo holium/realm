@@ -16,7 +16,7 @@ import { useNavigation } from '../util/useNavigation';
 const siteDescription = 'Get on the Holium network.';
 const siteKeywords = 'Holium, Hosting, Holium Hosting, Urbit, Urbit Hosting';
 const siteUrl = 'https://hosting.holium.com/';
-const themeColor = '#000000';
+const siteColor = '#000000';
 
 const Main = styled.main`
   width: 100%;
@@ -88,11 +88,11 @@ export const Page = ({ title, isProtected = false, children }: Props) => {
         <meta name="twitter:description" content={siteDescription} />
         <meta name="twitter:image" content={`${siteUrl}og-twitter-image.png`} />
 
-        <meta name="theme-color" content={themeColor} />
-        <meta name="msapplication-navbutton-color" content={themeColor} />
+        <meta name="theme-color" content={siteColor} />
+        <meta name="msapplication-navbutton-color" content={siteColor} />
         <meta
           name="apple-mobile-web-app-status-bar-style"
-          content={themeColor}
+          content={siteColor}
         />
       </NextHead>
       <Main>
