@@ -1,10 +1,26 @@
+import { GetServerSideProps } from 'next';
+
 import { CreateAccountDialog, OnboardingStorage } from '@holium/shared';
 
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
-export default function CreateAccount() {
+type Props = {
+  prefilledEmail: string;
+};
+
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+  const prefilledEmail = (query.email ?? '') as string;
+
+  return {
+    props: {
+      prefilledEmail,
+    },
+  };
+};
+
+export default function CreateAccount({ prefilledEmail }: Props) {
   const { goToPage } = useNavigation();
 
   const onAlreadyHaveAccount = () => goToPage('/login');
@@ -26,6 +42,7 @@ export default function CreateAccount() {
   return (
     <Page title="Create account">
       <CreateAccountDialog
+        prefilledEmail={prefilledEmail}
         onAlreadyHaveAccount={onAlreadyHaveAccount}
         onNext={onNext}
       />

@@ -30,33 +30,57 @@ export const Hero = () => {
           A home for communities, a platform for building new social
           experiences, and a crypto user's dream.
         </P>
-
-        <TextInput
-          id="email"
-          name="email"
-          placeholder="Enter your email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail((e.target as HTMLInputElement).value)}
-          style={{
-            borderRadius: 999,
-            padding: '8px 8px 8px 12px',
-            marginTop: '16px',
-            maxWidth: '384px',
+        <Flex
+          flexDirection="column"
+          alignItems="center"
+          maxWidth="320px"
+          gap="16px"
+          marginTop="16px"
+          as="form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            window.location.href = `${GET_REALM_HREF}?email=${email}`;
           }}
-          rightAdornment={
-            <UnstyledNextLink href={`${GET_REALM_HREF}?email=${email}`}>
-              <GetRealmButton>
-                <Text.Body fontWeight={500} style={{ color: '#fff' }}>
-                  Get Realm
-                </Text.Body>
-                <RoundArrow>
-                  <Icon name="ArrowRightLine" />
-                </RoundArrow>
-              </GetRealmButton>
-            </UnstyledNextLink>
-          }
-        />
+        >
+          <TextInput
+            id="email"
+            name="email"
+            placeholder="Enter your email"
+            type="email"
+            width="100%"
+            value={email}
+            onChange={(e) => setEmail((e.target as HTMLInputElement).value)}
+            style={{
+              borderRadius: 999,
+              padding: '8px 8px 8px 12px',
+            }}
+            rightAdornment={
+              <UnstyledNextLink href={`${GET_REALM_HREF}?email=${email}`}>
+                <GetRealmButton type="button">
+                  <Text.Body fontWeight={500} style={{ color: '#fff' }}>
+                    Get Realm
+                  </Text.Body>
+                  <RoundArrow>
+                    <Icon name="ArrowRightLine" />
+                  </RoundArrow>
+                </GetRealmButton>
+              </UnstyledNextLink>
+            }
+          />
+          <Text.Body
+            as="label"
+            htmlFor="email"
+            style={{
+              opacity: 0.85,
+              fontSize: '12px',
+              width: '100%',
+              textAlign: 'left',
+            }}
+          >
+            By entering your email, you agree to receive updates via email
+            regarding Realm access.
+          </Text.Body>
+        </Flex>
       </H1Container>
       <Flex flex={1} width="100%" justify="center" padding="16px">
         <HoveringCursors className="hideonmobile" />

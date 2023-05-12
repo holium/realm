@@ -37,6 +37,7 @@ export const TextInput = forwardRef(
       autoFocus,
       style,
       inputStyle,
+      autoComplete,
       onChange,
       onFocus,
       onBlur,
@@ -70,6 +71,7 @@ export const TextInput = forwardRef(
             disabled={disabled}
             readOnly={readOnly}
             autoFocus={autoFocus}
+            autoComplete={autoComplete}
             onChange={onChange}
             onFocus={onFocus}
             onBlur={onBlur}
@@ -87,6 +89,7 @@ export const TextInput = forwardRef(
             placeholder={placeholder}
             defaultValue={defaultValue}
             autoFocus={autoFocus}
+            autoComplete={autoComplete}
             value={value}
             required={required}
             tabIndex={tabIndex}

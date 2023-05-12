@@ -33,6 +33,7 @@ export { ClaimTokenDialog } from './dialogs/ClaimTokenDialog';
 export { CreateAccountDialog } from './dialogs/CreateAccountDialog';
 export { CredentialsDialog } from './dialogs/CredentialsDialog';
 export { DownloadDialog } from './dialogs/DownloadDialog';
+export { GetRealmDialog } from './dialogs/GetRealmDialog';
 export { HostingDialog } from './dialogs/HostingDialog';
 export { InstallationDialog } from './dialogs/InstallationDialog';
 export { LoginDialog } from './dialogs/LoginDialog';

@@ -32,7 +32,7 @@ export const HeroContainer = styled(Flex)`
   justify-content: space-between;
   align-items: center;
   gap: 32px;
-  padding: 64px 16px;
+  padding: 64px 16px 0 64px;
 
   @media (max-width: ${DESKTOP_WIDTH}px) {
     flex-direction: column;
