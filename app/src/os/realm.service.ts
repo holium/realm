@@ -138,11 +138,13 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   }
 
   async setSessionCookie(credentials: Credentials) {
-    await session.fromPartition(`persist:default`).cookies.set({
-      url: `${credentials.url}`,
-      name: `urbauth-${credentials.ship}`,
-      value: credentials.cookie?.split('=')[1].split('; ')[0],
-    });
+    await session
+      .fromPartition(`persist:default-${credentials.ship}`)
+      .cookies.set({
+        url: `${credentials.url}`,
+        name: `urbauth-${credentials.ship}`,
+        value: credentials.cookie?.split('=')[1].split('; ')[0],
+      });
   }
 
   /**
@@ -324,7 +326,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           'Setting cookie',
           cookie?.split('=')[1].split('; ')[0]
         );
-        await session.fromPartition(`persist:default`).cookies.set({
+        await session.fromPartition(`persist:default-${patp}`).cookies.set({
           url: `${url}`,
           name: `urbauth-${patp}`,
           value: cookie?.split('=')[1].split('; ')[0],
