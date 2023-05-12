@@ -1,4 +1,4 @@
-import { app } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import log from 'electron-log';
 
 import { Conduit, ConduitState } from './index';
@@ -14,6 +14,7 @@ export class APIConnection {
   private static instance: APIConnection;
   private conduitInstance: Conduit;
   private isReconnecting = false;
+  private hasFailed = false;
 
   private constructor(session: ConduitSession) {
     this.conduitInstance = new Conduit(session.ship);
@@ -78,6 +79,7 @@ export class APIConnection {
       if (!this.isReconnecting) {
         this.sendConnectionStatus(ConduitState.Initialized);
       }
+      this.hasFailed = false;
     });
     conduit.on(ConduitState.Refreshing, () => {
       this.sendConnectionStatus(ConduitState.Refreshing);
@@ -90,10 +92,11 @@ export class APIConnection {
     });
     conduit.on(ConduitState.Connected, () => {
       this.sendConnectionStatus(ConduitState.Connected);
+      this.hasFailed = false;
     });
-    conduit.on(ConduitState.Disconnected, () =>
-      this.sendConnectionStatus(ConduitState.Disconnected)
-    );
+    conduit.on(ConduitState.Disconnected, () => {
+      if (!this.hasFailed) this.sendConnectionStatus(ConduitState.Disconnected);
+    });
     conduit.on(ConduitState.Connecting, () => {
       this.sendConnectionStatus(ConduitState.Connecting);
     });
@@ -101,6 +104,7 @@ export class APIConnection {
       // this.services.identity.auth.setLoader('error');
       // this.isResuming = false;
       this.isReconnecting = false;
+      this.hasFailed = true;
       this.sendConnectionStatus(ConduitState.Failed);
     });
     conduit.on(ConduitState.Stale, () => {
@@ -110,7 +114,16 @@ export class APIConnection {
   }
 
   sendConnectionStatus(status: ConduitState) {
-    log.info('api-connection.ts:', `sendConnectionStatus => %o`, status);
+    log.info(
+      'api-connection.ts:',
+      `sendConnectionStatus => %o`,
+      status,
+      this.conduit.uid
+    );
+    const windows = BrowserWindow.getAllWindows();
+    windows.forEach((window) => {
+      window.webContents.send(`realm.sendConnectionStatus`, status);
+    });
   }
 }
 

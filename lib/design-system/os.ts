@@ -2,6 +2,7 @@ export * from './src/os/AppTile/AppTile';
 export * from './src/os/AppTile/AppTile';
 export * from './src/os/Bar/Bar';
 export { Bookmark } from './src/os/Bookmark/Bookmark';
+export * from './src/os/ConnectionStatus/ConnectionStatus';
 export * from './src/os/Notifications/AppGroup';
 export * from './src/os/Notifications/Notification';
 export * from './src/os/Notifications/NotificationList';

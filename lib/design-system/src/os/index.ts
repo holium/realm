@@ -1,6 +1,7 @@
 export * from './AppTile/AppTile';
 export * from './Bar/Bar';
 export { Bookmark } from './Bookmark/Bookmark';
+export * from './ConnectionStatus/ConnectionStatus';
 export * from './Notifications/AppGroup';
 export * from './Notifications/Notification';
 export * from './Notifications/NotificationList';

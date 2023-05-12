@@ -349,6 +349,11 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       // TODO wire up libs here
     });
   }
+
+  async reconnectConduit() {
+    APIConnection.getInstance().conduit.reconnectToChannel();
+  }
+
   // private startBackgroundProcess(): void {
   //   if (this.realmProcess) {
   //     return;

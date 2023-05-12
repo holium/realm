@@ -1,8 +1,10 @@
+import { session } from 'electron';
 import log from 'electron-log';
 import { deSig, preSig } from '@urbit/aura';
 import EventEmitter, { setMaxListeners } from 'events';
 import EventSource from 'eventsource';
 
+import { getCookie } from '../../lib/shipHelpers';
 import {
   Action,
   ConduitState,
@@ -39,7 +41,7 @@ export class Conduit extends EventEmitter {
   reconnectTimeout: any = 0;
   status: ConduitState = ConduitState.Disconnected;
   private abort = new AbortController();
-  private uid: string = this.generateUID();
+  uid: string = this.generateUID();
   private code: string | undefined = undefined;
   private sse: EventSource | undefined;
 
@@ -188,6 +190,7 @@ export class Conduit extends EventEmitter {
         }
       };
       this.sse.onerror = async (error) => {
+        log.info(this.watches.keys());
         if (!error) {
           this.handleError({ status: 500, message: 'Unknown error' });
         }
@@ -203,11 +206,14 @@ export class Conduit extends EventEmitter {
         }
         // @ts-expect-error
         if (error.status >= 500) {
+          console.log('error', error);
           this.updateStatus(ConduitState.Failed);
           this.failGracefully();
         }
         if (!error.status) {
           // this happens when the ship is offline
+          console.log('error.status', error);
+
           this.updateStatus(ConduitState.Failed);
           this.disconnectGracefully();
         }
@@ -493,7 +499,7 @@ export class Conduit extends EventEmitter {
   /**
    * TODO add a limit here
    */
-  private async reconnectToChannel() {
+  async reconnectToChannel() {
     // if (this.reconnectTimeout !== 0) clearTimeout(this.reconnectTimeout);
     // this.uid = this.generateUID();
     log.info('Conduit ---> reconnecting to channel');
@@ -652,6 +658,7 @@ export class Conduit extends EventEmitter {
    * @returns
    */
   async handleError(err: any): Promise<any> {
+    log.info('Conduit ---> handleError', err);
     return new Promise(async (resolve, reject) => {
       if (err.status === 403 || err.response?.status === 403) {
         // if (!this.code) {
@@ -684,9 +691,19 @@ export class Conduit extends EventEmitter {
         let cookie: string | undefined = undefined;
         try {
           this.updateStatus(ConduitState.Refreshing);
-          cookie = await Conduit.fetchCookie(this.url, this.code ?? '');
+          cookie = await getCookie({
+            serverUrl: this.url,
+            serverCode: this.code ?? '',
+          });
           if (cookie) {
             this.cookie = cookie;
+            await session
+              .fromPartition(`persist:default-${this.ship}`)
+              .cookies.set({
+                url: `${this.url}`,
+                name: `urbauth-${this.ship}`,
+                value: cookie?.split('=')[1].split('; ')[0],
+              });
             this.updateStatus(ConduitState.Refreshed, {
               url: this.url,
               ship: preSig(this.ship),
