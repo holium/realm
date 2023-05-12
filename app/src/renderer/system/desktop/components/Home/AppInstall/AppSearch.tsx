@@ -69,6 +69,23 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
   }, [selectedShip]);
 
   useEffect(() => {
+    console.log(searchMode, searchString);
+    if (searchMode === 'app-summary') {
+      if (inputRef.current) {
+        inputRef.current.value = searchString;
+      }
+    } else if (searchMode === 'dev-app-search') {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    } else if (searchMode === 'none') {
+      if (inputRef.current) {
+        inputRef.current.value = '';
+      }
+    }
+  }, [searchMode]);
+
+  useEffect(() => {
     if (searchString === '' && search.state.value !== '') {
       search.actions.onChange('');
       clearInput();
@@ -117,7 +134,9 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
           }}
           leftAdornment={
             <Flex height="100%" col justify="center">
-              {searchMode === 'dev-app-search' && selectedShip !== '' ? (
+              {(searchMode === 'dev-app-search' ||
+                searchMode === 'app-summary') &&
+              selectedShip !== '' ? (
                 <Text.Custom color="accent" mr={0} pb={0} fontWeight={500}>
                   Apps by {selectedShip}
                 </Text.Custom>
@@ -155,6 +174,7 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
               appInstaller.setSelectedShip('');
               appInstaller.setSearchString('');
               search.actions.onChange('');
+              search.actions.onFocus();
             }
           }}
           defaultValue={search.state.value}
