@@ -82,7 +82,7 @@ export const Hero = () => {
             as="label"
             htmlFor="email"
             style={{
-              opacity: 0.85,
+              opacity: 0.7,
               fontSize: '12px',
               width: '100%',
               textAlign: 'left',

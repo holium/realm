@@ -5,7 +5,6 @@ import { Button, Flex, Text } from '@holium/design-system/general';
 import { OnboardDialog } from '../components/OnboardDialog';
 import {
   OnboardDialogDescription,
-  OnboardDialogSubTitle,
   OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
 import { OrDivider } from '../components/OrDivider';
@@ -20,15 +19,12 @@ const GrayBox = styled(Flex)`
   border-radius: 12px;
 `;
 
-const Subtitle = styled(OnboardDialogSubTitle)`
-  font-size: 18px;
-`;
-
 const InfoText = styled(OnboardDialogDescription)`
   font-size: 12px;
   text-align: center;
   max-width: 400px;
   margin: 0 auto;
+  opacity: 0.7;
 `;
 
 type Props = {
@@ -40,19 +36,24 @@ export const GetRealmDialog = ({ onBack, onGetANewId }: Props) => (
   <OnboardDialog
     body={
       <>
-        <OnboardDialogTitle>
+        <OnboardDialogTitle
+          style={{
+            marginTop: -29,
+          }}
+        >
           Congratulations, you're on the waitlist!
         </OnboardDialogTitle>
         <OnboardDialogDescription>
           We'll notify you as soon as we open up capacity.{' '}
         </OnboardDialogDescription>
-        <OrDivider />
-        <Subtitle>Get instant access to Realm:</Subtitle>
+        <OrDivider maxWidth="90%" />
         <GrayBox>
           <Flex>
             <Flex flex={1} alignItems="center" justifyContent="center">
               <Flex flexDirection="column" gap="16px" alignItems="center">
-                <OnboardDialogDescription>Start fresh</OnboardDialogDescription>
+                <OnboardDialogDescription>
+                  Want in now?
+                </OnboardDialogDescription>
                 <Button.Primary type="button" onClick={onGetANewId}>
                   <Text.Body
                     style={{
@@ -61,7 +62,7 @@ export const GetRealmDialog = ({ onBack, onGetANewId }: Props) => (
                       margin: '2px',
                     }}
                   >
-                    Get a new ID
+                    Purchase ID
                   </Text.Body>
                 </Button.Primary>
               </Flex>
@@ -70,11 +71,11 @@ export const GetRealmDialog = ({ onBack, onGetANewId }: Props) => (
               <GetIdIcon size={240} />
             </Flex>
           </Flex>
-          <InfoText>
-            We’ll be adding more options for getting on Realm such as migrating
-            your server or booting with an Urbit ID keyfile.
-          </InfoText>
         </GrayBox>
+        <InfoText>
+          We’ll be adding more options for getting on Realm such as migrating
+          your server or booting with an Urbit ID keyfile.
+        </InfoText>
       </>
     }
     hideNextButton

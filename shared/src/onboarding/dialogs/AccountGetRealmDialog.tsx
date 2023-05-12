@@ -39,7 +39,7 @@ export const AccountGetRealmDialog = ({
         >
           <GetIdIcon />
           <Button.Primary onClick={onClickGetHosting}>Get an ID</Button.Primary>
-          <OrDivider maxWidth={180} />
+          <OrDivider maxWidth="180px" />
           <JoinWaitlist onClickJoinWaitlist={onClickJoinWaitlist} />
           <AccountDialogDescription style={{ fontSize: 12 }}>
             Sign up for the waitlist if you aren’t hosted on Holium.
