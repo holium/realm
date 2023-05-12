@@ -162,7 +162,7 @@ export const LinkBlock = ({
             width={width - 24}
             onNavigate={(url: string) => {
               if (!url.match(/^http/i)) {
-                url = "https://" + url;
+                url = 'https://' + url;
               }
               window.open(url, '_blank');
             }}
