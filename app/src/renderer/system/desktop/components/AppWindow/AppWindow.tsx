@@ -30,6 +30,10 @@ type Props = {
   appWindow: AppWindowMobxType;
 };
 
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
 const AppWindowPresenter = ({ appWindow }: Props) => {
   const { shellStore } = useAppState();
   const { bazaarStore } = useShipStore();
@@ -44,6 +48,11 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     () => denormalizeBounds(appWindow.bounds, shellStore.desktopDimensions),
     [appWindow.bounds, shellStore.desktopDimensions]
   );
+
+  const minX = 0;
+  const minY = 0;
+  const maxX = shellStore.desktopDimensions.width;
+  const maxY = shellStore.desktopDimensions.height;
 
   const mouseDragX = useMotionValue(0);
   const mouseDragY = useMotionValue(0);
@@ -102,13 +111,12 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   useEffect(() => {
     window.electron.app.onMouseMove((mousePosition, _, isDragging) => {
       if (isDragging) {
-        mouseDragX.set(mousePosition.x);
-        mouseDragY.set(mousePosition.y);
+        const x = clamp(mousePosition.x, minX, maxX);
+        const y = clamp(mousePosition.y, minY, maxY);
+        mouseDragX.set(x);
+        mouseDragY.set(y);
         // Check if the mouse is in a resize handle.
-        if (
-          !resizing.isOn &&
-          isInResizeCorner(mousePosition.x, mousePosition.y)
-        ) {
+        if (!resizing.isOn && isInResizeCorner(x, y)) {
           resizing.toggleOn();
         }
       } else {
@@ -237,27 +245,35 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   const updateWindowBounds = useCallback(
     debounce(() => {
       if (!shellStore.windows.has(appId)) return;
+
+      const x = clamp(motionX.get(), minX, maxX);
+      const y = clamp(motionY.get(), minY, maxY);
+      const width = clamp(motionWidth.get(), minX, maxX);
+      const height = clamp(motionHeight.get(), minY, maxY);
+
+      console.log(x, y, width, height);
+
       shellStore.setWindowBounds(
         appId,
         normalizeBounds(
           {
-            x: motionX.get(),
-            y: motionY.get(),
-            height: motionHeight.get(),
-            width: motionWidth.get(),
+            x: x,
+            y: y,
+            height: height,
+            width: width,
           },
           shellStore.desktopDimensions
         )
       );
 
-      resizeTopLeftX.set(motionX.get());
-      resizeTopLeftY.set(motionY.get());
-      resizeTopRightX.set(motionX.get() + motionWidth.get());
-      resizeTopRightY.set(motionY.get());
-      resizeBottomLeftX.set(motionX.get());
-      resizeBottomLefty.set(motionY.get() + motionHeight.get());
-      resizeBottomRightX.set(motionX.get() + motionWidth.get());
-      resizeBottomRightY.set(motionY.get() + motionHeight.get());
+      resizeTopLeftX.set(x);
+      resizeTopLeftY.set(y);
+      resizeTopRightX.set(x + width);
+      resizeTopRightY.set(y);
+      resizeBottomLeftX.set(x);
+      resizeBottomLefty.set(y + height);
+      resizeBottomRightX.set(x + width);
+      resizeBottomRightY.set(y + height);
     }, 100),
     [appId, motionX, motionY, motionWidth, motionHeight]
   );
