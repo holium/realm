@@ -1,14 +1,9 @@
-import { calculateAnchorPointById } from './../logic/lib/position';
 import { createContext, useContext } from 'react';
+import { Instance, onSnapshot, types } from 'mobx-state-tree';
 
-import {
-  applyPatch,
-  Instance,
-  types,
-  onSnapshot,
-  applySnapshot,
-} from 'mobx-state-tree';
-import { RoomsAppState } from 'os/services/tray/rooms.model';
+import { Dimensions } from '@holium/design-system';
+
+import { RealmIPC } from 'renderer/stores/ipc';
 import {
   NetworkStoreType,
   ProtocolType,
@@ -16,11 +11,10 @@ import {
   WalletCreationMode,
   WalletStore,
   WalletView,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from 'renderer/stores/models/wallet.model';
 
-import { OSActions } from '../logic/actions/os';
-// import { DmApp } from './Messages/store';
-import { Dimensions } from '@holium/design-system';
+import { calculateAnchorPointById } from '../lib/position';
+import { RoomsAppState } from './Rooms/rooms.model';
 
 const TrayAppCoords = types.model({
   left: types.number,
@@ -54,7 +48,7 @@ const TrayAppStore = types
     dimensions: TrayAppDimensions,
     roomsApp: RoomsAppState,
     walletApp: WalletStore,
-    // dmApp: DmApp,
+    innerNavigation: types.string,
   })
   .actions((self) => ({
     setTrayAppCoords(coords: Instance<typeof TrayAppCoords>) {
@@ -71,6 +65,10 @@ const TrayAppStore = types
     },
     closeActiveApp() {
       self.activeApp = null;
+      self.innerNavigation = '';
+    },
+    clearInnerNavigation() {
+      self.innerNavigation = '';
     },
     setActiveApp(
       appId: TrayAppKeys | null,
@@ -93,6 +91,11 @@ const TrayAppStore = types
         );
         self.dimensions = dimensions;
       }
+      if (params?.innerNavigation) {
+        self.innerNavigation = params.innerNavigation;
+      } else {
+        self.innerNavigation = '';
+      }
     },
   }));
 
@@ -104,7 +107,7 @@ const loadSnapshot = () => {
 
 const persistedState = loadSnapshot();
 
-const walletAppDefault = {
+export const walletAppDefault = {
   navState: {
     view: WalletView.NEW,
     protocol: ProtocolType.ETH_GORLI,
@@ -155,7 +158,6 @@ const walletAppDefault = {
 
 export const trayStore = TrayAppStore.create({
   activeApp: null,
-  // activeApp: 'account-tray',
   coords: (persistedState && persistedState.coords) || {
     left: 0,
     bottom: 0,
@@ -168,9 +170,7 @@ export const trayStore = TrayAppStore.create({
     currentView: 'list',
   },
   walletApp: walletAppDefault,
-  // dmApp: {
-  //   currentView: 'dm-list',
-  // },
+  innerNavigation: '',
 });
 
 onSnapshot(trayStore, (snapshot) => {
@@ -192,27 +192,31 @@ export function useTrayApps() {
   return store;
 }
 
-OSActions.onLogout((_event: any) => {
-  applySnapshot(trayStore.walletApp, walletAppDefault);
+// TODO
+
+RealmIPC.onUpdate((update) => {
+  if (update.type === 'logout') {
+    // applySnapshot(trayStore.walletApp, walletAppDefault);
+  }
 });
 
 // Listen for all patches
-OSActions.onEffect((_event: any, value: any) => {
-  if (value.response === 'initial') {
-    if (value.resource === 'wallet') {
-      applySnapshot(trayStore.walletApp, value.model);
-    }
-  }
-  if (value.response === 'patch') {
-    if (value.resource === 'wallet') {
-      applyPatch(trayStore.walletApp, value.patch);
-    }
-  }
-});
+// OSActions.onEffect((_event: any, value: any) => {
+//   if (value.response === 'initial') {
+//     if (value.resource === 'wallet') {
+//       applySnapshot(trayStore.walletApp, value.model);
+//     }
+//   }
+//   if (value.response === 'patch') {
+//     if (value.resource === 'wallet') {
+//       applyPatch(trayStore.walletApp, value.patch);
+//     }
+//   }
+// });
 
 // After boot, set the initial data
-OSActions.onBoot((_event: any, response: any) => {
-  if (response.wallet) {
-    applySnapshot(trayStore.walletApp, response.wallet);
-  }
-});
+// OSActions.onBoot((_event: any, response: any) => {
+//   if (response.wallet) {
+//     applySnapshot(trayStore.walletApp, response.wallet);
+//   }
+// });

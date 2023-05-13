@@ -1,7 +1,9 @@
-import { useRef, useCallback, useEffect, Fragment, useMemo } from 'react';
-import { MotionStyle, motion, Variant } from 'framer-motion';
+import { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
+import { motion, MotionStyle, Variant } from 'framer-motion';
+
+import { contrastAwareBlackOrWhiteRgb, Position } from '@holium/design-system';
 import { MouseState } from '@holium/realm-presence';
-import { Position } from '@holium/design-system';
+
 import { IsDevice } from './isDevice';
 
 const innerSize = 10;
@@ -110,7 +112,7 @@ const AnimatedCursorView = ({
         width: innerSize,
         height: innerSize,
         pointerEvents: 'none',
-        border: '1px solid white',
+        border: `1px solid ${contrastAwareBlackOrWhiteRgb(color, 'white')}`,
         boxSizing: 'content-box',
         backgroundColor: `rgba(${color}, 1)`,
         transition: 'opacity 0.15s ease-in-out, transform 0.25s ease-in-out',

@@ -1,18 +1,4 @@
 /**
- * Returns a timestamp in the format HH:MM AM/PM.
- * @param timestamp
- */
-export const displayTimestamp = (timestamp: number): string => {
-  const date = new Date(timestamp);
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  const hours12 = hours % 12 || 12;
-  const minutesStr = minutes < 10 ? `0${minutes}` : `${minutes}`;
-  return `${hours12}:${minutesStr} ${ampm}`;
-};
-
-/**
  * Returns a date in the format M/D/YYYY if the date is not today or yesterday.
  * @param timestamp
  */

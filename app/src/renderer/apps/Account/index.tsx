@@ -1,30 +1,29 @@
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
-import { Button, Avatar, Flex, Icon, Text } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { nativeApps } from '../nativeApps';
 import { observer } from 'mobx-react';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
+
+import { Avatar, Button, Flex, Icon, Text } from '@holium/design-system';
+
+import { trackEvent } from 'renderer/lib/track';
+import { useAppState } from 'renderer/stores/app.store';
+import { AppType } from 'renderer/stores/models/bazaar.model';
+
+import { nativeApps } from '../nativeApps';
 import { useTrayApps } from '../store';
-import { AuthActions } from 'renderer/logic/actions/auth';
-import { trackEvent } from 'renderer/logic/lib/track';
-import { AppType } from 'os/services/spaces/models/bazaar';
 
 const AccountTrayAppPresenter = () => {
-  const { ship } = useServices();
+  const { loggedInAccount, shellStore, authStore } = useAppState();
   const { setActiveApp } = useTrayApps();
-  const roomsManager = useRooms(ship?.patp);
 
   const openSettingsApp = () => {
-    DesktopActions.openAppWindow(nativeApps['os-settings'] as AppType);
+    shellStore.openWindow(nativeApps['os-settings'] as AppType);
   };
 
-  if (!ship) return null;
+  if (!loggedInAccount) return null;
 
   let subtitle;
-  if (ship.nickname) {
+  if (loggedInAccount.nickname) {
     subtitle = (
       <Text.Custom opacity={0.7} fontSize={2} fontWeight={400}>
-        {ship.patp}
+        {loggedInAccount.serverId}
       </Text.Custom>
     );
   }
@@ -51,9 +50,9 @@ const AccountTrayAppPresenter = () => {
             simple
             borderRadiusOverride="4px"
             size={32}
-            avatar={ship.avatar}
-            patp={ship.patp}
-            sigilColor={[ship.color || '#000000', 'white']}
+            avatar={loggedInAccount.avatar}
+            patp={loggedInAccount.serverId}
+            sigilColor={[loggedInAccount.color || '#000000', 'white']}
           />
           <Flex ml={2} flexDirection="column">
             <Text.Custom
@@ -66,7 +65,7 @@ const AccountTrayAppPresenter = () => {
               fontWeight={500}
               variant="body"
             >
-              {ship.nickname || ship.patp}
+              {loggedInAccount.nickname || loggedInAccount.serverId}
             </Text.Custom>
             {subtitle}
           </Flex>
@@ -76,8 +75,7 @@ const AccountTrayAppPresenter = () => {
             size={28}
             className="realm-cursor-hover"
             onClick={() => {
-              roomsManager.cleanup();
-              AuthActions.logout(ship.patp);
+              authStore.logout();
               setActiveApp(null);
               trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
             }}
@@ -88,8 +86,7 @@ const AccountTrayAppPresenter = () => {
             size={28}
             className="realm-cursor-hover"
             onClick={() => {
-              roomsManager.cleanup();
-              AuthActions.logout(ship.patp);
+              authStore.logout();
               setActiveApp(null);
               // trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
             }}

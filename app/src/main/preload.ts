@@ -1,17 +1,35 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { MouseState } from '@holium/realm-presence';
-import { osPreload } from '../os/preload';
-import { MediaAccess, MediaAccessStatus } from '../os/types';
+
 import { Position } from '@holium/design-system';
+import { MouseState } from '@holium/realm-presence';
+
+import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
+import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
+
+import { realmPreload } from '../os/realm.service';
+import { authPreload } from '../os/services/auth/auth.service';
+import { onboardingPreload } from '../os/services/auth/onboarding.service';
+import { chatPreload } from '../os/services/ship/chat/chat.service';
+import { friendsPreload } from '../os/services/ship/friends.service';
+import { notifPreload } from '../os/services/ship/notifications/notifications.service';
+import { roomsPreload } from '../os/services/ship/rooms.service';
+import { shipPreload } from '../os/services/ship/ship.service';
+import { appPublishersDBPreload } from '../os/services/ship/spaces/tables/appPublishers.table';
+import { appRecentsPreload } from '../os/services/ship/spaces/tables/appRecents.table';
+import { walletPreload } from '../os/services/ship/wallet/wallet.service';
+import { MediaAccess, MediaAccessStatus } from '../os/types';
 import { multiplayerPreload } from './preload.multiplayer';
+
 import './helpers/mouseListener';
 import './helpers/keyListener';
 
 const appPreload = {
-  /* Senders */
-  setFullscreen(callback: any) {
-    ipcRenderer.on('set-fullscreen', callback);
+  setPartitionCookie: (partition: string, cookie: any) => {
+    ipcRenderer.send('set-partition-cookie', partition, cookie);
   },
+  downloadUrlAsFile: (url: string) =>
+    ipcRenderer.send('download-url-as-file', { url }),
+  /* Senders */
   openApp: (app: any, partition: string) => {
     return ipcRenderer.invoke('open-app', app, partition);
   },
@@ -49,6 +67,11 @@ const appPreload = {
     ipcRenderer.invoke('realm-to-app.ephemeral-chat', patp, message);
   },
   /* Receivers */
+  onSetFullScreen(callback: (isFullscreen: boolean) => void) {
+    ipcRenderer.on('set-fullscreen', (_, isFullscreen) => {
+      callback(isFullscreen);
+    });
+  },
   onBrowserOpen(callback: any) {
     ipcRenderer.on('realm.browser.open', callback);
   },
@@ -134,6 +157,19 @@ export type AppPreloadType = typeof appPreload;
 
 contextBridge.exposeInMainWorld('electron', {
   app: appPreload,
-  os: osPreload,
   multiplayer: multiplayerPreload,
 });
+
+contextBridge.exposeInMainWorld('realm', realmPreload);
+contextBridge.exposeInMainWorld('shipService', shipPreload);
+contextBridge.exposeInMainWorld('spacesService', spacesPreload);
+contextBridge.exposeInMainWorld('authService', authPreload);
+contextBridge.exposeInMainWorld('roomsService', roomsPreload);
+contextBridge.exposeInMainWorld('chatService', chatPreload);
+contextBridge.exposeInMainWorld('walletService', walletPreload);
+contextBridge.exposeInMainWorld('notifService', notifPreload);
+contextBridge.exposeInMainWorld('friendDb', friendsPreload);
+contextBridge.exposeInMainWorld('bazaarService', bazaarPreload);
+contextBridge.exposeInMainWorld('onboardingService', onboardingPreload);
+contextBridge.exposeInMainWorld('appInstallService', appPublishersDBPreload);
+contextBridge.exposeInMainWorld('appRecentsService', appRecentsPreload);

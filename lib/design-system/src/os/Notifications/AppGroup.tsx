@@ -1,17 +1,18 @@
-import {
-  Flex,
-  BoxProps,
-  FlexProps,
-  Text,
-  Button,
-  Icon,
-  Avatar,
-  NoScrollBar,
-} from '../../../general';
-import styled from 'styled-components';
-import { NotificationType } from './Notifications.types';
-import { NotifAppRow, Notification } from './Notification';
 import { useState } from 'react';
+import styled from 'styled-components';
+
+import {
+  Avatar,
+  BoxProps,
+  Button,
+  Flex,
+  FlexProps,
+  Icon,
+  NoScrollBar,
+  Text,
+} from '../../../general';
+import { NotifAppRow, Notification } from './Notification';
+import { NotificationType } from './Notifications.types';
 
 type AppGroupProps = {
   appInfo: {

@@ -1,9 +1,10 @@
-import styled, { css } from 'styled-components';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
+import styled, { css } from 'styled-components';
+
 import { Avatar, Box, BoxProps, Button, Icon } from '@holium/design-system';
 
 import { GroupSigil } from '../components/GroupSigil';
-import { useState } from 'react';
 
 type ChatAvatarProps = {
   sigil?: {

@@ -1,7 +1,9 @@
 import { BrowserWindow, ipcMain, screen } from 'electron';
-import { MouseState, PresenceArg } from '@holium/realm-presence';
+
 import { Position } from '@holium/design-system';
-import { denormalizePosition } from '../../os/services/shell/lib/window-manager';
+import { MouseState, PresenceArg } from '@holium/realm-presence';
+
+import { denormalizePosition } from '../../renderer/lib/window-manager';
 
 const getWebContentsPosition = (mainWindow: BrowserWindow) => {
   const screenPosition = screen.getCursorScreenPoint();

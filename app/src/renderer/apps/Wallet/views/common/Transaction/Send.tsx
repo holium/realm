@@ -1,15 +1,16 @@
 import { FC } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Box } from 'renderer/components';
-import { Text } from '@holium/design-system';
-import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
+
+import { Box, Flex, Text } from '@holium/design-system';
+
 import {
   BitcoinWalletType,
-  EthWalletType,
   ERC20Type,
+  EthWalletType,
   ProtocolType,
-} from 'os/services/tray/wallet-lib/wallet.model';
+} from 'renderer/stores/models/wallet.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+
 import { TransactionPane } from './Pane';
 
 const abbrMap = {
@@ -33,18 +34,17 @@ interface SendTransactionProps {
 export const SendTransaction: FC<SendTransactionProps> = observer(
   (props: SendTransactionProps) => {
     const { coin } = props;
-    const { theme } = useServices();
-    const { walletApp } = useTrayApps();
+    const { walletStore } = useShipStore();
     const pendingTx =
-      walletApp.navState.protocol === ProtocolType.UQBAR
-        ? walletApp.uqTx
+      walletStore.navState.protocol === ProtocolType.UQBAR
+        ? walletStore.uqTx
         : null;
     const uqbarContract: boolean = pendingTx
       ? 'noun' in pendingTx.action
       : false;
 
-    const Seperator = () => (
-      <Flex mt={6} position="relative" width="100%" justifyContent="center">
+    const Separator = () => (
+      <Flex position="relative" width="100%" justifyContent="center" gap={10}>
         <Box position="absolute" width="300px" height="1px" left="-10px" />
         {uqbarContract ? (
           <Flex
@@ -55,9 +55,6 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
             justifyContent="center"
             alignItems="center"
             borderRadius="50px"
-            background={
-              theme.currentTheme.mode === 'light' ? '#EAF3FF' : '#262f3b'
-            }
           >
             <Text.Body color="accent">Contract Interaction</Text.Body>
           </Flex>
@@ -66,23 +63,20 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
             position="absolute"
             px={2}
             bottom="-12px"
-            height="25px"
+            // height="25px"
             min-width="80px"
             justifyContent="center"
             alignItems="center"
             borderRadius="50px"
-            background={
-              theme.currentTheme.mode === 'light' ? '#EAF3FF' : '#262f3b'
-            }
           >
             <Text.Body color="accent">
               {`Send ${
                 coin
                   ? coin.name
-                  : walletApp.navState.protocol === ProtocolType.UQBAR
+                  : walletStore.navState.protocol === ProtocolType.UQBAR
                   ? 'zigs'
                   : abbrMap[
-                      walletApp.navState.network as 'bitcoin' | 'ethereum'
+                      walletStore.navState.network as 'bitcoin' | 'ethereum'
                     ]
               }
               `}
@@ -93,28 +87,30 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
     );
 
     return (
-      <Box width="100%" hidden={props.hidden}>
-        <Seperator />
-        <TransactionPane
-          onConfirm={props.onConfirm}
-          max={
-            props.coin
-              ? Number(props.coin.balance)
-              : Number(
-                  (props.wallet as EthWalletType).data.get(
-                    walletApp.navState.protocol
-                  )?.balance
-                )
-          }
-          onScreenChange={props.onScreenChange}
-          uqbarContract={uqbarContract}
-          close={props.close}
-          coin={props.coin}
-          setTransactionAmount={props.setTransactionAmount}
-          transactionAmount={props.transactionAmount}
-          setTransactionRecipient={props.setTransactionRecipient}
-          transactionRecipient={props.transactionRecipient}
-        />
+      <Box width="100%" hidden={props.hidden} color="card">
+        <Flex flexDirection="column" gap={10}>
+          <Separator />
+          <TransactionPane
+            onConfirm={props.onConfirm}
+            max={
+              props.coin
+                ? Number(props.coin.balance)
+                : Number(
+                    (props.wallet as EthWalletType).data.get(
+                      walletStore.navState.protocol
+                    )?.balance
+                  )
+            }
+            onScreenChange={props.onScreenChange}
+            uqbarContract={uqbarContract}
+            close={props.close}
+            coin={props.coin}
+            setTransactionAmount={props.setTransactionAmount}
+            transactionAmount={props.transactionAmount}
+            setTransactionRecipient={props.setTransactionRecipient}
+            transactionRecipient={props.transactionRecipient}
+          />
+        </Flex>
       </Box>
     );
   }

@@ -1,15 +1,16 @@
 import { Flex } from '@holium/design-system/general';
+
 import { DownloadButton } from '../components/DownloadButton';
+import { OnboardDialog } from '../components/OnboardDialog';
 import {
-  OnboardDialogTitle,
   OnboardDialogDescription,
+  OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
 import { AppleIcon } from '../icons/AppleIcon';
 import { ArrowRightIcon } from '../icons/ArrowRightIcon';
 import { DownloadIcon } from '../icons/DownloadIcon';
 import { LinuxIcon } from '../icons/LinuxIcon';
 import { WindowsIcon } from '../icons/WindowsIcon';
-import { OnboardDialog } from '../components/OnboardDialog';
 
 export type DownloadRealmBodyProps = {
   onDownloadMacM1: () => void;

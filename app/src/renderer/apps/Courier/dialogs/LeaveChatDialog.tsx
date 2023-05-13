@@ -1,8 +1,9 @@
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { useState } from 'react';
+
+import { ConfirmDialog } from 'renderer/apps/System/Dialogs/Confirm';
+import { normalizeBounds } from 'renderer/lib/window-manager';
+import { useShipStore } from 'renderer/stores/ship.store';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { ConfirmDialog } from '../../System/Dialogs/Confirm';
-import { useChatStore } from '../store';
 
 type LeaveChatDialogConfigComponentProps = {
   path: string;
@@ -15,7 +16,8 @@ const LeaveChatDialogConfigComponent = ({
   ...props
 }: LeaveChatDialogConfigComponentProps) => {
   const [loading, setLoading] = useState(false);
-  const { getChatHeader, leaveChat } = useChatStore();
+  const { chatStore } = useShipStore();
+  const { getChatHeader, leaveChat } = chatStore;
   const onConfirm = async () => {
     if (path) {
       setLoading(true);

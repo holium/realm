@@ -1,53 +1,55 @@
-import { useState, Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Button, Flex, Text } from 'renderer/components';
-import { darken, transparentize } from 'polished';
-import { useServices } from 'renderer/logic/store';
-import { WordPicker } from './WordPicker';
-import { NewWalletScreen } from './index';
 
-interface ConfirmProps {
+import { Button, Flex, Text } from '@holium/design-system';
+
+import { NewWalletScreen } from './EthNew';
+import { WordPicker } from './WordPicker';
+
+type Props = {
   seedPhrase: string;
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
-}
+};
 
-const ConfirmPresenter = (props: ConfirmProps) => {
+const ConfirmPresenter = ({ seedPhrase, setScreen }: Props) => {
   const [valid, setValid] = useState(false);
-  const { theme } = useServices();
-
-  const panelBackground = darken(0.02, theme.currentTheme.windowColor);
-  const panelBorder = `2px solid ${transparentize(0.9, '#000000')}`;
 
   return (
     <Flex
       width="100%"
       height="100%"
       flexDirection="column"
-      justifyContent="space-evenly"
+      justifyContent="space-between"
       alignItems="center"
     >
-      <Flex flexDirection="column">
-        <Text variant="h5">Confirm words</Text>
-        <Text mt={3} variant="body">
+      <Flex flexDirection="column" alignItems="center" gap="16px">
+        <Text.H5 variant="h5">Confirm words</Text.H5>
+        <Text.Body variant="body">
           Verify you wrote the secret recovery phrase down correctly by clicking
           the following words in the correct order.
-        </Text>
-      </Flex>
-      <Flex flexDirection="column" alignItems="center">
+        </Text.Body>
         <WordPicker
-          seedPhrase={props.seedPhrase}
-          border={panelBorder}
-          background={panelBackground}
+          seedPhrase={seedPhrase}
+          border="2px solid rgba(var(--rlm-border-rgba))"
           onValidChange={setValid}
         />
       </Flex>
-      <Flex justifyContent="center" alignItems="center">
-        <Button
+      <Flex width="100%" gap="16px">
+        <Button.Transparent
+          flex={1}
+          justifyContent="center"
+          onClick={() => setScreen(NewWalletScreen.CREATE)}
+        >
+          Cancel
+        </Button.Transparent>
+        <Button.TextButton
+          flex={1}
           disabled={!valid}
-          onClick={() => props.setScreen(NewWalletScreen.PASSCODE)}
+          justifyContent="center"
+          onClick={() => setScreen(NewWalletScreen.PASSCODE)}
         >
           Confirm
-        </Button>
+        </Button.TextButton>
       </Flex>
     </Flex>
   );

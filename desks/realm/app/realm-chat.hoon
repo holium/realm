@@ -1,6 +1,6 @@
 ::  app/realm-chat.hoon
-/-  *realm-chat, db-sur=chat-db, notify
-/+  dbug, lib=realm-chat
+/-  *realm-chat, db-sur=chat-db, notify, ndb=notif-db, fr=friends
+/+  dbug, lib=realm-chat, db-lib=chat-db
 =|  state-0
 =*  state  -
 :: ^-  agent:gall
@@ -175,18 +175,24 @@
                   |=  id=msg-id:db-sur
                   ^-  (list card)
                   =/  parts     (skim new-msg-parts |=(p=msg-part:db-sur =(msg-id.p id)))
-                  =/  thepath   path:(snag 0 parts)
+                  =/  first-msg-part  (snag 0 parts)
+                  ?:  =(-.content.first-msg-part %status) :: don't send notifs on %status msgs
+                    ~
+                  =/  thepath   path.first-msg-part
                   ?:  =(sender.id our.bowl) :: if it's our message, don't do anything
                     ~
                   ?:  (~(has in mutes.state) thepath)               :: if it's a muted path, send a pre-dismissed notif to notif-db
-                    =/  notif-db-card  (notif-new-msg:core parts our.bowl %.y)
+                    =/  notif-db-card  (notif-new-msg:core parts our.bowl %.y bowl)
                     [notif-db-card ~]
-                  =/  notif-db-card  (notif-new-msg:core parts our.bowl %.n)
+                  =/  notif-db-card  (notif-new-msg:core parts our.bowl %.n bowl)
                   ?:  :: if we should do a push notification also,
                   ?&  push-enabled.state                  :: push is enabled
                       (gth (lent ~(tap by devices.state)) 0) :: there is at least one device
                   ==
-                    =/  push-card  (push-notification-card:lib bowl state thepath (notif-msg parts) (crip "from {(scow %p sender.id)}"))
+                    =/  push-title      (notif-from-nickname-or-patp sender.id bowl)
+                    =/  push-subtitle   (group-name-or-blank parts bowl)
+                    =/  push-contents   (notif-msg parts bowl)
+                    =/  push-card  (push-notification-card:lib bowl state thepath push-title push-subtitle push-contents)
                     [push-card notif-db-card ~]
                   :: otherwise, just send to notif-db
                   [notif-db-card ~]
@@ -223,6 +229,16 @@
                           !>([%send-message path.path-row.ch ~[[[%status (crip "You set disappearing messages to {(scow %dr max-expires-at-duration.path-row.ch)}")] ~ ~]] *@dr])
                         [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action send-status-message]~
                       ~
+
+                    %del-paths-row
+                      =/  notif-ids=(list @ud)
+                        %+  turn
+                          (scry-notifs-for-path path.ch bowl)
+                        |=(n=notif-row:ndb id.n)
+                      %+  turn  notif-ids
+                      |=  id=@ud
+                      ^-  card
+                      [%pass /dbpoke %agent [our.bowl %notif-db] %poke %notif-db-poke !>([%delete id])]
                   ==
                 [(weld cards new-msg-notif-cards) this]
             ==
@@ -236,7 +252,7 @@
   ++  on-arvo
     |=  [=wire =sign-arvo]
     ^-  (quip card _this)
-    !!
+    `this
   ::
   ++  on-fail
     |=  [=term =tang]
@@ -254,10 +270,23 @@
     %add-row  =(-.+.ch %messages)
   ==
 ::
+++  scry-notifs-for-path
+  |=  [=path =bowl:gall]
+  ^-  (list notif-row:ndb)
+  =/  scry-path  (weld /(scot %p our.bowl)/notif-db/(scot %da now.bowl)/db/path/realm-chat path)
+  .^  (list notif-row:ndb)
+      %gx
+      (weld scry-path /noun)
+  ==
+::
 ++  notif-new-msg
-  |=  [=message:db-sur =ship dismissed=?]
+  |=  [=message:db-sur =ship dismissed=? =bowl:gall]
   ^-  card
   =/  msg-part  (snag 0 message)
+  =/  title     (notif-msg message bowl)
+  =/  content   (notif-from-nickname-or-patp sender.msg-id.msg-part bowl)
+  =/  link      (msg-id-to-cord:encode:db-lib msg-id.msg-part)
+  ~&  >  link
   [
     %pass
     /dbpoke
@@ -265,13 +294,14 @@
     [ship %notif-db]
     %poke
     %notif-db-poke
-    !>([%create %realm-chat path.msg-part %message (notif-msg message) (crip "from {(scow %p sender.msg-id.msg-part)}") '' ~ '' ~ dismissed])
+    !>([%create %realm-chat path.msg-part %message title content '' ~ link ~ dismissed])
   ]
+::  returns either 'New Message' or a preview of the actual message
+::  depending on `msg-preview-notif.state` flag
 ++  notif-msg
-  |=  =message:db-sur
+  |=  [=message:db-sur =bowl:gall]
   ^-  @t
-  ?.  msg-preview-notif.state
-    'New Message'
+  ?.  msg-preview-notif.state  'New Message'
   =/  str=tape
     ^-  tape
     %+  join
@@ -297,4 +327,29 @@
       %status               p.content.part
     ==
   (crip `tape`(swag [0 140] str)) :: only show the first 140 characters of the message in the preview
+++  group-name-or-blank
+  |=  [=message:db-sur =bowl:gall]
+  ^-  @t
+  =/  msg-path    path:(snag 0 message)
+  =/  pathrow     (scry-path-row:lib msg-path bowl)
+  =/  title       (~(get by metadata.pathrow) 'title')
+  ?:  =(type.pathrow %dm)   ''  :: always blank for DMs
+  ?~  title     'Group Chat'    :: if it's a group chat without a title, just say "group chat"
+  (need title)                  :: otherwise, return the title of the group
+++  notif-from-nickname-or-patp
+  |=  [patp=ship =bowl:gall]
+  ^-  @t
+  =/  cv=view:fr
+    .^  view:fr
+        %gx
+        /(scot %p our.bowl)/friends/(scot %da now.bowl)/contact-hoon/(scot %p patp)/noun
+    ==
+  =/  nickname=@t
+    ?+  -.cv  (scot %p patp) :: if the scry came back wonky, just fall back to patp
+      %contact-info
+        nickname.contact-info.cv
+    ==
+  ?:  =('' nickname)
+    (scot %p patp)
+  nickname
 --

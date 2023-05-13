@@ -1,27 +1,34 @@
 import { ChangeEvent, useRef } from 'react';
+
+import { Anchor, Button, Flex, Icon } from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
 import { HoliumButton } from '@holium/design-system/os';
-import { Flex, Anchor } from '@holium/design-system/general';
 import { isValidEmail, useToggle } from '@holium/design-system/util';
+
+import { OnboardDialog } from '../components/OnboardDialog';
 import {
   OnboardDialogDescription,
-  OnboardDialogInput,
   OnboardDialogInputLabel,
   OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
-import { OnboardDialog } from '../components/OnboardDialog';
 
 type Props = {
+  prefilledEmail?: string;
   onAlreadyHaveAccount: () => void;
   onNext: (email: string, password: string) => Promise<boolean>;
 };
 
 export const CreateAccountDialog = ({
+  prefilledEmail,
   onAlreadyHaveAccount,
   onNext,
 }: Props) => {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
+
+  const showPassword = useToggle(false);
+  const showConfirmPassword = useToggle(false);
 
   const emailError = useToggle(false);
   const confirmPasswordError = useToggle(false);
@@ -59,43 +66,84 @@ export const CreateAccountDialog = ({
 
   return (
     <OnboardDialog
+      autoComplete={false}
       icon={<HoliumButton size={100} pointer={false} />}
       body={
         <>
           <OnboardDialogTitle pb={3}>Create account</OnboardDialogTitle>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="email">
+            <OnboardDialogInputLabel as="label" htmlFor="create-account-email">
               Email
             </OnboardDialogInputLabel>
-            <OnboardDialogInput
+            <TextInput
+              height="38px"
+              id="create-account-email"
+              name="create-account-email"
               ref={emailRef}
+              defaultValue={prefilledEmail}
+              autoComplete="new-password"
               type="email"
               placeholder="name@email.com"
-              isError={emailError.isOn}
+              error={emailError.isOn}
               onChange={onEmailChange}
             />
           </Flex>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="password">
+            <OnboardDialogInputLabel
+              as="label"
+              htmlFor="create-account-password"
+            >
               Password
             </OnboardDialogInputLabel>
-            <OnboardDialogInput
+            <TextInput
+              height="38px"
+              id="create-account-password"
+              name="create-account-password"
               ref={passwordRef}
-              type="password"
+              type={showPassword.isOn ? 'text' : 'password'}
+              autoComplete="new-password"
               placeholder="• • • • • • • •"
               onChange={onChangePassword}
+              rightAdornment={
+                <Button.IconButton type="button" onClick={showPassword.toggle}>
+                  <Icon
+                    name={showPassword.isOn ? 'EyeOff' : 'EyeOn'}
+                    opacity={0.5}
+                    size={18}
+                  />
+                </Button.IconButton>
+              }
             />
           </Flex>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="password">
-              Confirm password
+            <OnboardDialogInputLabel
+              as="label"
+              htmlFor="create-account-confirm-password"
+            >
+              Confirm Password
             </OnboardDialogInputLabel>
-            <OnboardDialogInput
+            <TextInput
+              height="38px"
+              id="create-account-confirm-password"
+              name="create-account-confirm-password"
               ref={confirmPasswordRef}
-              type="password"
+              type={showConfirmPassword.isOn ? 'text' : 'password'}
+              autoComplete="new-password"
               placeholder="• • • • • • • •"
-              isError={confirmPasswordError.isOn}
+              error={confirmPasswordError.isOn}
               onChange={onChangeConfirmPassword}
+              rightAdornment={
+                <Button.IconButton
+                  type="button"
+                  onClick={showConfirmPassword.toggle}
+                >
+                  <Icon
+                    name={showPassword.isOn ? 'EyeOff' : 'EyeOn'}
+                    opacity={0.5}
+                    size={18}
+                  />
+                </Button.IconButton>
+              }
             />
           </Flex>
           <OnboardDialogDescription>

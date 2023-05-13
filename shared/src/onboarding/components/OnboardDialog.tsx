@@ -1,58 +1,86 @@
-import { FormEvent, ReactNode } from 'react';
-import { Flex, Icon, Spinner } from '@holium/design-system/general';
+import { FormEvent, ReactNode, useState } from 'react';
+
+import { ErrorBox, Flex, Icon, Spinner } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
+
+import { SubmitButton } from './hosting/SubmitButton';
 import {
   OnboardDialogBackButton,
   OnboardDialogBody,
   OnboardDialogBodyContainer,
   OnboardDialogCard,
   OnboardDialogFooter,
+  OnboardDialogFooterBackButtonFlex,
   OnboardDialogIconContainer,
 } from './OnboardDialog.styles';
-import { SubmitButton } from './hosting/SubmitButton';
 
 type Props = {
-  icon: ReactNode;
   body: ReactNode;
+  icon?: ReactNode;
   nextText?: string;
   nextIcon?: ReactNode;
+  hideNextButton?: boolean;
+  autoComplete?: boolean;
+  footer?: ReactNode;
   onBack?: () => void;
   onNext?: () => Promise<boolean>;
 };
 
 export const OnboardDialog = ({
-  icon,
   body,
+  icon,
   nextText = 'Next',
   nextIcon,
+  hideNextButton,
+  autoComplete = true,
+  footer,
   onBack,
   onNext,
 }: Props) => {
   const submitting = useToggle(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     submitting.toggleOn();
+    setErrorMessage(null);
+
+    // Unfocus all inputs.
+    (document.activeElement as HTMLElement)?.blur();
 
     try {
       const successfull = await onNext?.();
-      if (!successfull) submitting.toggleOff();
-    } catch (error) {
+      if (!successfull) throw new Error('Something went wrong.');
+    } catch (error: any) {
+      if (typeof error === 'string') setErrorMessage(error);
+      else if (error.message) setErrorMessage(error.message);
+      else setErrorMessage('Something went wrong.');
+
       submitting.toggleOff();
     }
   };
 
   return (
-    <OnboardDialogCard onSubmit={onNext ? handleSubmit : undefined}>
+    <OnboardDialogCard
+      autoComplete={autoComplete ? 'on' : 'off'}
+      method="post"
+      action=""
+      onSubmit={onNext ? handleSubmit : undefined}
+    >
       <OnboardDialogBody>
-        <OnboardDialogIconContainer>{icon}</OnboardDialogIconContainer>
-        <OnboardDialogBodyContainer>{body}</OnboardDialogBodyContainer>
+        {icon && (
+          <OnboardDialogIconContainer>{icon}</OnboardDialogIconContainer>
+        )}
+        <OnboardDialogBodyContainer>
+          {body}
+          {errorMessage && <ErrorBox>{errorMessage}</ErrorBox>}
+        </OnboardDialogBodyContainer>
       </OnboardDialogBody>
       <OnboardDialogFooter>
-        <Flex flex={1} justifyContent="space-between">
-          <Flex alignItems="center">
+        <Flex flex={1} alignItems="center">
+          <OnboardDialogFooterBackButtonFlex>
             {onBack && (
-              <OnboardDialogBackButton onClick={onBack} type="button">
+              <OnboardDialogBackButton type="button" onClick={onBack}>
                 <Icon
                   name="ArrowLeftLine"
                   size={20}
@@ -61,14 +89,19 @@ export const OnboardDialog = ({
                 />
               </OnboardDialogBackButton>
             )}
-          </Flex>
-          <Flex alignItems="center" justifyContent="space-between">
-            <SubmitButton
-              text={nextText}
-              icon={nextIcon}
-              submitting={submitting.isOn}
-              disabled={!onNext}
-            />
+          </OnboardDialogFooterBackButtonFlex>
+          <Flex flex={5} gap="16px">
+            <Flex flex={1} alignItems="center">
+              {footer}
+            </Flex>
+            {!hideNextButton && (
+              <SubmitButton
+                text={nextText}
+                icon={nextIcon}
+                submitting={submitting.isOn}
+                disabled={!onNext}
+              />
+            )}
           </Flex>
         </Flex>
       </OnboardDialogFooter>

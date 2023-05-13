@@ -1,23 +1,25 @@
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, CSSProperties, FormEvent, useState } from 'react';
+
 import {
-  Text,
-  Flex,
   ErrorBox,
+  Flex,
   SuccessBox,
+  Text,
 } from '@holium/design-system/general';
+import { RadioList, TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
-import { RadioList } from '@holium/design-system/inputs';
+
 import { Modal } from '../../Modal';
 import { SubmitButton } from '../SubmitButton';
-import { OnboardDialogInput } from '../../OnboardDialog.styles';
 
 type Props = {
   isOpen: boolean;
+  style?: CSSProperties;
   onDismiss: () => void;
   onSubmit: (ejectAddress: string, ethAddress: string) => Promise<boolean>;
 };
 
-export const EjectIdModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
+export const EjectIdModal = ({ isOpen, style, onDismiss, onSubmit }: Props) => {
   const submitting = useToggle(false);
 
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -58,7 +60,12 @@ export const EjectIdModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onDismiss={onDismiss} onSubmit={handleSubmit}>
+    <Modal
+      isOpen={isOpen}
+      style={style}
+      onDismiss={onDismiss}
+      onSubmit={handleSubmit}
+    >
       <Text.H5>Eject ID</Text.H5>
       <Text.Body>
         Ejecting your ID begins the process of taking cryptographic ownership of
@@ -80,7 +87,10 @@ export const EjectIdModal = ({ isOpen, onDismiss, onSubmit }: Props) => {
           onClick={setSelectedEjectOption}
         />
         {selectedEjectOption === 'ethereumAddress' && (
-          <OnboardDialogInput
+          <TextInput
+            height="38px"
+            id="eth-address"
+            name="eth-address"
             type="password"
             placeholder="Ethereum address"
             onChange={onChangeEthAddress}

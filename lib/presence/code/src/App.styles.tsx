@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+
 import { Flex } from '@holium/design-system';
 
 export const Header = styled(Flex)`

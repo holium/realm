@@ -1,26 +1,30 @@
 import { useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
+import styled from 'styled-components';
+
 import {
-  Flex,
-  Text,
-  Icon,
-  Button,
-  TextInput,
   Avatar,
+  Button,
+  Flex,
+  Icon,
   Spinner,
+  Text,
+  TextInput,
   Tooltip,
 } from '@holium/design-system';
+
+import { ChatPathType } from 'os/services/ship/chat/chat.types';
+import { ShipSearch } from 'renderer/components/ShipSearch';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+
 import { useTrayApps } from '../../store';
-import { useChatStore } from '../store';
-import { ShipSearch } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import styled from 'styled-components';
-import { motion } from 'framer-motion';
-import { ChatPathType } from 'os/services/chat/chat.service';
 
 export const NewChat = () => {
-  const { ship, friends } = useServices();
+  const { loggedInAccount } = useAppState();
+  const { friends, chatStore } = useShipStore();
   const { dimensions } = useTrayApps();
-  const { inbox, setSubroute, createChat } = useChatStore();
+  const { inbox, setSubroute, createChat } = chatStore;
   const [creating, setCreating] = useState<boolean>(false);
   const [searchString, setSearchString] = useState<string>('');
   const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
@@ -28,7 +32,7 @@ export const NewChat = () => {
   const onCreateChat = () => {
     let title: string;
     let chatType: ChatPathType;
-    if (!ship) return;
+    if (!loggedInAccount) return;
     if (selectedPatp.size === 1) {
       chatType = 'dm';
       const metadata = friends.getContactAvatarMetadata(
@@ -45,7 +49,12 @@ export const NewChat = () => {
       chatType = 'group';
     }
     setCreating(true);
-    createChat(title, ship.patp, chatType, Array.from(selectedPatp))
+    createChat(
+      title,
+      loggedInAccount.serverId,
+      chatType,
+      Array.from(selectedPatp)
+    )
       .then(() => {
         setSubroute('inbox');
         setCreating(false);
@@ -174,7 +183,7 @@ const RemoveWrapper = styled(motion.div)`
 `;
 
 const SelectedShips = ({ ships, onRemove }: SelectedShipsProps) => {
-  const { friends } = useServices();
+  const { friends } = useShipStore();
 
   return (
     <Flex height="98px" py={1} gap={12} overflowY="scroll">

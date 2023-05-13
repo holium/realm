@@ -1,16 +1,22 @@
 import { useRef, useState } from 'react';
-import { Icons, Input, Text, TextButton } from 'renderer/components';
 import { useField, useForm } from 'mobx-easy-form';
-import { useServices } from 'renderer/logic/store';
 import { observer } from 'mobx-react';
 import { isValidPatp } from 'urbit-ob';
-import { Flex, Spinner } from '@holium/design-system';
+
+import {
+  Button,
+  Flex,
+  Icon,
+  Spinner,
+  Text,
+  TextInput,
+} from '@holium/design-system';
+
+import { useAppState } from 'renderer/stores/app.store';
 
 export const RoomInvite = observer(() => {
   const inviteInputRef = useRef<HTMLInputElement>(null);
-
-  const { theme: themeStore, ship } = useServices();
-  const theme = themeStore.currentTheme;
+  const { loggedInAccount } = useAppState();
 
   const [loading, setLoading] = useState(false);
 
@@ -53,7 +59,7 @@ export const RoomInvite = observer(() => {
       //   return { error: 'Already added', parsed: undefined };
       // }
 
-      if (patp === ship?.patp) {
+      if (patp === loggedInAccount?.serverId) {
         return { error: "You can't invite yourself!", parsed: undefined };
       }
 
@@ -68,16 +74,17 @@ export const RoomInvite = observer(() => {
   return (
     <Flex flexDirection="column" flex={2} gap={4} p={2} alignItems="flex-start">
       <Flex flexDirection="row" gap={4} width="100%">
-        <Input
+        <TextInput
           tabIndex={2}
           type="text"
+          id="invite-patp"
+          name="invite-patp"
           placeholder="~sampel-palnet"
           autoFocus
-          innerRef={inviteInputRef}
+          ref={inviteInputRef}
           spellCheck={false}
-          wrapperStyle={{
+          style={{
             borderRadius: 6,
-            backgroundColor: theme.inputColor,
           }}
           value={invitePatp.state.value}
           // value={''}
@@ -99,12 +106,10 @@ export const RoomInvite = observer(() => {
           onBlur={() => invitePatp.actions.onBlur()}
         />
         <Flex justifyContent="center" alignItems="center">
-          <TextButton
+          <Button.TextButton
             tabIndex={2}
             style={{ padding: '6px 10px', borderRadius: 6, height: 35 }}
-            showBackground
-            textColor="#0FC383"
-            highlightColor="#0FC383"
+            color="intent-success"
             disabled={!inviteForm.computed.isValid}
             onClick={(evt: any) => {
               evt.preventDefault();
@@ -112,8 +117,12 @@ export const RoomInvite = observer(() => {
               inviteForm.actions.submit();
             }}
           >
-            {loading ? <Spinner mx={2} size={0} /> : <Text>Invite</Text>}
-          </TextButton>
+            {loading ? (
+              <Spinner mx={2} size={0} />
+            ) : (
+              <Text.Custom>Invite</Text.Custom>
+            )}
+          </Button.TextButton>
         </Flex>
       </Flex>
 
@@ -132,10 +141,10 @@ export const RoomInvite = observer(() => {
               mt={4}
               flexDirection="row"
             >
-              <Icons mr={4} name="CheckCircle">
+              <Icon size={16} mr={4} name="CheckCircle">
                 {' '}
-              </Icons>
-              <Text>{patp}</Text>
+              </Icon>
+              <Text.Custom>{patp}</Text.Custom>
             </Flex>
           );
         })}

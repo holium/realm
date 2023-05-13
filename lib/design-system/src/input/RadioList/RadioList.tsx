@@ -1,8 +1,8 @@
-import { RadioOption } from '../RadioGroup/RadioGroup';
-import { Row } from '../../general/Row/Row';
 import { Flex } from '../../general/Flex/Flex';
 import { Icon } from '../../general/Icon/Icon';
+import { Row } from '../../general/Row/Row';
 import { Text } from '../../general/Text/Text';
+import { RadioOption } from '../RadioGroup/RadioGroup';
 
 type Props = {
   options: RadioOption[];

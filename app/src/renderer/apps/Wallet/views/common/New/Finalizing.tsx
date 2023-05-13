@@ -1,9 +1,10 @@
-import { FC, useMemo, useEffect } from 'react';
+import { FC, useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Spinner } from '@holium/design-system';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
+
+import { Flex, Spinner, Text } from '@holium/design-system';
+
+import { WalletView } from 'renderer/stores/models/wallet.model';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface FinalizingProps {
   seedPhrase: string;
@@ -12,16 +13,12 @@ interface FinalizingProps {
 
 export const Finalizing: FC<FinalizingProps> = observer(
   (props: FinalizingProps) => {
-    const { theme } = useServices();
-    const themeData = useMemo(
-      () => getBaseTheme(theme.currentTheme),
-      [theme.currentTheme.mode]
-    );
-
+    const { walletStore } = useShipStore();
     const initWallet = async () => {
       if (props.seedPhrase && props.passcode) {
-        await WalletActions.setMnemonic(props.seedPhrase, props.passcode);
-        await WalletActions.watchUpdates();
+        await walletStore.setMnemonic(props.seedPhrase, props.passcode);
+        await walletStore.navigate(WalletView.LIST);
+        // await walletStore.watchUpdates();
       }
     };
     useEffect(() => {
@@ -37,11 +34,7 @@ export const Finalizing: FC<FinalizingProps> = observer(
         alignItems="center"
       >
         <Spinner size={3} />
-        <Text.Custom
-          mt={6}
-          color={themeData.colors.text.secondary}
-          fontSize={3}
-        >
+        <Text.Custom mt={6} fontSize={3}>
           Creating wallet...
         </Text.Custom>
       </Flex>

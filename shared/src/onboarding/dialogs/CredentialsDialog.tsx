@@ -1,19 +1,21 @@
 import styled from 'styled-components';
+
 import { CopyButton, Flex, Text } from '@holium/design-system/general';
-import { CredentialsIcon } from '../icons/CredentialsIcon';
+
+import { OnboardDialog } from '../components/OnboardDialog';
 import {
   OnboardDialogDescription,
   OnboardDialogSubTitle,
   OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
-import { OnboardDialog } from '../components/OnboardDialog';
+import { CredentialsIcon } from '../icons/CredentialsIcon';
 
 const InfoCard = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
   background: rgba(var(--rlm-window-rgba));
-  filter: brightness(0.9);
+  filter: brightness(1.1);
   border-radius: 9px;
   padding: 16px;
 `;
@@ -45,16 +47,20 @@ export const CredentialsDialog = ({ credentials, onNext }: Props) => (
         </OnboardDialogDescription>
         <InfoCard>
           <Flex flexDirection="column" gap={4}>
-            <OnboardDialogSubTitle fontWeight={600}>ID</OnboardDialogSubTitle>
+            <OnboardDialogSubTitle fontWeight={600}>
+              Server ID
+            </OnboardDialogSubTitle>
             <InfoCardText>{credentials.id}</InfoCardText>
           </Flex>
           <Flex flexDirection="column" gap={4}>
-            <OnboardDialogSubTitle fontWeight={600}>URL</OnboardDialogSubTitle>
+            <OnboardDialogSubTitle fontWeight={600}>
+              Server URL
+            </OnboardDialogSubTitle>
             <InfoCardText>{credentials.url}</InfoCardText>
           </Flex>
           <Flex flexDirection="column" gap={4}>
             <OnboardDialogSubTitle fontWeight={600}>
-              Access Code
+              Server Code
             </OnboardDialogSubTitle>
             <InfoCardText>{credentials.accessCode}</InfoCardText>
           </Flex>

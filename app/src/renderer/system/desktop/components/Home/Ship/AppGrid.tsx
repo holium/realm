@@ -1,48 +1,39 @@
-import { useState, useEffect } from 'react';
-import { toJS } from 'mobx';
+import { useEffect, useMemo, useState } from 'react';
+import { GridContextProvider, GridDropZone, swap } from 'react-grid-dnd';
 import { observer } from 'mobx-react';
-import { AppTile, AppTileSize } from 'renderer/components/AppTile/AppTile';
-import {
-  AppType,
-  AppTypes,
-  InstallStatus,
-  UrbitAppType,
-  WebAppType,
-} from 'os/services/spaces/models/bazaar';
-import { useServices } from 'renderer/logic/store';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import {
-  handleInstallation,
-  handleResumeSuspend,
-  installLabel,
-  resumeSuspendLabel,
-} from '../AppInstall/helpers';
-import {
-  GridContextProvider,
-  GridDropZone,
-  GridItem,
-  swap,
-} from 'react-grid-dnd';
-import disableScroll from 'disable-scroll';
+
 import { useToggle } from '@holium/design-system';
+import { Box } from '@holium/design-system/general';
+
+import { AppMobxType } from 'renderer/stores/models/bazaar.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import { PinnedWebApp } from '../../SystemBar/components/CommunityBar/AppDock/PinnedWebApp';
+import { GridAppTile } from './GridAppTile';
 
 interface AppGridProps {
-  tileSize: AppTileSize;
   maxWidth: number;
 }
 
-const AppGridPresenter = ({
-  tileSize = 'xxl',
-  maxWidth = 880,
-}: AppGridProps) => {
-  const { spaces, bazaar } = useServices();
-  const currentSpace = spaces.selected;
-  const apps = [...bazaar.installed, ...bazaar.devApps] as
-    | AppType[]
-    | WebAppType[];
-  const [items, setItems] = useState(apps);
+const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
+  const { bazaarStore, spacesStore } = useShipStore();
+  const currentSpace = spacesStore.selected;
+
+  const apps = useMemo(
+    () =>
+      [
+        ...bazaarStore.installed,
+        // ...bazaarStore.devApps,
+      ] as AppMobxType[],
+    [bazaarStore.catalog, bazaarStore.installations.values()]
+  );
+
+  const bookmarks = useMemo(
+    () => currentSpace?.bookmarks ?? [],
+    [currentSpace?.bookmarks]
+  );
+
+  const [items, setItems] = useState([...apps, ...bookmarks]);
   const canClick = useToggle(true);
 
   // TODO: we should remove this listener when the component unmounts
@@ -57,7 +48,7 @@ const AppGridPresenter = ({
 
   const onChange = (sourceId, sourceIndex, targetIndex) => {
     console.log('onChange', sourceId, sourceIndex, targetIndex);
-    const nextState = swap(items, sourceIndex, targetIndex);
+    const nextState = swap(apps, sourceIndex, targetIndex);
     console.log(nextState);
     setItems(nextState);
   };
@@ -69,118 +60,31 @@ const AppGridPresenter = ({
         boxesPerRow={4}
         rowHeight={maxWidth / 4}
         style={{
-          height: (maxWidth / 4) * Math.ceil(items.length / 4),
+          height: (maxWidth / 4) * Math.ceil(apps.length / 4),
           // overflow: 'hidden',
           width: maxWidth,
         }}
       >
         {items.map((app, index: number) => {
-          const isAppPinned = bazaar.isPinned(currentSpace.path, app.id);
-          const weRecommended = bazaar.isRecommended(app.id);
-          const installStatus = app.installStatus as InstallStatus;
-
-          const canSuspend =
-            (installStatus === InstallStatus.installed ||
-              installStatus === InstallStatus.suspended) &&
-            app.type === 'urbit';
-
-          const suspendRow = canSuspend
-            ? [
-                {
-                  label: resumeSuspendLabel(installStatus),
-                  section: 2,
-                  disabled: false,
-                  onClick: (evt: any) => {
-                    evt.stopPropagation();
-                    return handleResumeSuspend(app.id, installStatus);
-                  },
-                },
-              ]
-            : [];
-
-          const installRow =
-            app.type === 'urbit'
-              ? [
-                  {
-                    label: installLabel(installStatus),
-                    section: 2,
-                    disabled: false,
-                    onClick: (evt: any) => {
-                      evt.stopPropagation();
-                      const appHost = (app as UrbitAppType).host;
-                      return handleInstallation(appHost, app.id, installStatus);
-                    },
-                  },
-                ]
-              : [];
-          const tileId = `${app.title}-${index}-grid`;
-
+          const tileId = `${app.title}-${index}-ship-grid-tile`;
           return (
-            <GridItem
-              key={tileId}
-              onMouseDownCapture={() => {
-                disableScroll.on();
-              }}
-              onMouseUpCapture={() => {
-                disableScroll.off();
-              }}
-            >
-              <AppTile
+            <Box id={tileId} key={tileId}>
+              <GridAppTile
                 tileId={tileId}
-                isAnimated={
-                  installStatus !== InstallStatus.suspended &&
-                  installStatus !== InstallStatus.failed
-                }
-                installStatus={installStatus}
-                tileSize={tileSize}
-                app={app as AppType}
-                contextMenuOptions={[
-                  {
-                    label: isAppPinned ? 'Unpin app' : 'Pin app',
-                    disabled: app.type === AppTypes.Web,
-                    onClick: (evt: any) => {
-                      evt.stopPropagation();
-                      isAppPinned
-                        ? SpacesActions.unpinApp(currentSpace.path, app.id)
-                        : SpacesActions.pinApp(currentSpace.path, app.id);
-                    },
-                  },
-                  {
-                    label: weRecommended ? 'Unrecommend app' : 'Recommend app',
-                    disabled: app.type === AppTypes.Web,
-                    onClick: (evt: any) => {
-                      evt.stopPropagation();
-                      weRecommended
-                        ? SpacesActions.unrecommendApp(app.id)
-                        : SpacesActions.recommendApp(app.id);
-                    },
-                  },
-                  {
-                    label: 'App info',
-                    disabled: app.type === AppTypes.Web,
-                    onClick: (evt: any) => {
-                      evt.stopPropagation();
-                      ShellActions.openDialogWithStringProps(
-                        'app-detail-dialog',
-                        {
-                          appId: app.id,
-                        }
-                      );
-                    },
-                  },
-                  ...suspendRow,
-                  ...installRow,
-                ]}
-                onAppClick={(selectedApp) => {
-                  if (canClick.isOn) {
-                    DesktopActions.openAppWindow(toJS(selectedApp));
-                    DesktopActions.closeHomePane();
-                  }
-                }}
+                tileSize="xl2"
+                app={app}
+                currentSpace={currentSpace}
               />
-            </GridItem>
+            </Box>
           );
         })}
+        {bookmarks.map((bookmark, index) => (
+          <PinnedWebApp
+            key={`appgrid-${index}-pinned-${bookmark.url}`}
+            {...bookmark}
+            isGrid
+          />
+        ))}
       </GridDropZone>
     </GridContextProvider>
   );

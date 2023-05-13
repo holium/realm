@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
-import styled from 'styled-components';
 import ReactPlayer from 'react-player';
+import styled from 'styled-components';
+
 import { Flex, Icon, Text } from '../../../general';
-import { isSpotifyLink } from '../../util/links';
-import { BlockProps, Block } from '../Block/Block';
+import { isSoundcloudLink, isSpotifyLink } from '../../util/links';
+import { Block, BlockProps } from '../Block/Block';
 
 type MediaBlockProps = {
   url: string;
@@ -20,6 +21,7 @@ export const MediaBlock = ({
   const [isReady, setIsReady] = useState(false);
 
   const isSpotify = useMemo(() => isSpotifyLink(url), [url]);
+  const isSoundcloud = useMemo(() => isSoundcloudLink(url), [url]);
   let heightOverride = height;
 
   if (isSpotify) {
@@ -37,6 +39,32 @@ export const MediaBlock = ({
         <webview
           id={rest.id}
           src={`https://open.spotify.com/embed${spotifyLink.pathname}`}
+          style={{
+            borderRadius: '4px',
+            overflow: 'hidden',
+            width: width,
+            height: heightOverride,
+          }}
+        />
+      </MediaWrapper>
+    );
+  }
+  if (isSoundcloud) {
+    heightOverride = 230;
+    const width = 300;
+    return (
+      <MediaWrapper
+        {...rest}
+        height={heightOverride + 12}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ opacity: 0.2 }}
+      >
+        <webview
+          id={rest.id}
+          src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(
+            url
+          )}&visual=true&buying=false&liking=false&download=false&sharing=false&show_comments=false&show_playcount=false&callback=true`}
           style={{
             borderRadius: '4px',
             overflow: 'hidden',

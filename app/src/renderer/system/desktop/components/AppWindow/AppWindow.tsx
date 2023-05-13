@@ -1,23 +1,25 @@
-import { debounce } from 'lodash';
 import { PointerEvent, useCallback, useEffect, useMemo } from 'react';
-import { useMotionValue, useDragControls } from 'framer-motion';
+import { useDragControls, useMotionValue } from 'framer-motion';
+import { debounce } from 'lodash';
 import { observer } from 'mobx-react';
-import { AppWindowType } from '../../../../../os/services/shell/desktop.model';
-import { AppWindowByType } from './AppWindowByType';
-import { AppWindowContainer } from './AppWindow.styles';
-import { AppWindowResizeHandles } from './AppWindowResizeHandles';
-import { Flex } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { useToggle } from '@holium/design-system';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
+
+import { Flex } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
+
 import {
   denormalizeBounds,
   normalizeBounds,
-} from 'os/services/shell/lib/window-manager';
+} from 'renderer/lib/window-manager';
+import { useAppState } from 'renderer/stores/app.store';
+import { AppWindowMobxType } from 'renderer/stores/models/window.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
+
+import { ErrorBoundary } from '../../../ErrorBoundary';
+import { AppWindowContainer } from './AppWindow.styles';
+import { AppWindowByType } from './AppWindowByType';
+import { AppWindowResizeHandles } from './AppWindowResizeHandles';
 import { TitlebarByType } from './Titlebar/TitlebarByType';
-import rgba from 'polished/lib/color/rgba';
-import { ErrorBoundary } from '../../../../logic/ErrorBoundary';
 
 const CURSOR_WIDTH = 10;
 
@@ -25,22 +27,22 @@ const MIN_WIDTH = 500;
 const MIN_HEIGHT = 400;
 
 type Props = {
-  appWindow: AppWindowType;
+  appWindow: AppWindowMobxType;
 };
 
 const AppWindowPresenter = ({ appWindow }: Props) => {
-  const { shell, bazaar, theme } = useServices();
-  const { textColor, windowColor } = theme.currentTheme;
+  const { shellStore } = useAppState();
+  const { bazaarStore } = useShipStore();
 
   const dragControls = useDragControls();
   const resizing = useToggle(false);
   const dragging = useToggle(false);
 
-  const appInfo = bazaar.getApp(appWindow.appId);
+  const appInfo = bazaarStore.getApp(appWindow.appId);
   const borderRadius = appWindow.type === 'dialog' ? 16 : 12;
   const bounds = useMemo(
-    () => denormalizeBounds(appWindow.bounds, shell.desktopDimensions),
-    [appWindow.bounds, shell.desktopDimensions]
+    () => denormalizeBounds(appWindow.bounds, shellStore.desktopDimensions),
+    [appWindow.bounds, shellStore.desktopDimensions]
   );
 
   const mouseDragX = useMotionValue(0);
@@ -230,11 +232,13 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     },
     [mouseDragX, mouseDragY]
   );
+  const appId = useMemo(() => appWindow.appId, [appWindow.appId]);
 
   const updateWindowBounds = useCallback(
     debounce(() => {
-      DesktopActions.setWindowBounds(
-        appWindow.appId,
+      if (!shellStore.windows.has(appId)) return;
+      shellStore.setWindowBounds(
+        appId,
         normalizeBounds(
           {
             x: motionX.get(),
@@ -242,7 +246,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
             height: motionHeight.get(),
             width: motionWidth.get(),
           },
-          shell.desktopDimensions
+          shellStore.desktopDimensions
         )
       );
 
@@ -255,7 +259,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       resizeBottomRightX.set(motionX.get() + motionWidth.get());
       resizeBottomRightY.set(motionY.get() + motionHeight.get());
     }, 100),
-    [motionX, motionY, motionWidth, motionHeight]
+    [appId, motionX, motionY, motionWidth, motionHeight]
   );
 
   const onDragStart = (e: PointerEvent<HTMLDivElement>) => {
@@ -269,18 +273,18 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   };
 
   const onMaximize = async () => {
-    const mb = await DesktopActions.toggleMaximized(appWindow.appId);
-    const dmb = denormalizeBounds(mb, shell.desktopDimensions);
+    const mb = shellStore.toggleMaximized(appWindow.appId);
+    const dmb = denormalizeBounds(mb, shellStore.desktopDimensions);
     motionX.set(dmb.x);
     motionY.set(dmb.y);
     motionWidth.set(dmb.width);
     motionHeight.set(dmb.height);
   };
 
-  const onMinimize = () => DesktopActions.toggleMinimized(appWindow.appId);
+  const onMinimize = () => shellStore.toggleMinimized(appWindow.appId);
 
   const onClose = () =>
-    appWindow.isActive && DesktopActions.closeAppWindow(appWindow.appId);
+    appWindow.isActive && shellStore.closeWindow(appWindow.appId);
 
   const onDevTools = useCallback(() => {
     const webView = document.getElementById(
@@ -294,7 +298,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       : webView.openDevTools();
   }, [webViewId]);
 
-  const onMouseDown = () => DesktopActions.setActive(appWindow.appId);
+  const onMouseDown = () => shellStore.setActive(appWindow.appId);
 
   return (
     <AppWindowContainer
@@ -334,8 +338,6 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
         borderRadius,
         display: appWindow.isMinimized ? 'none' : 'block',
       }}
-      color={textColor}
-      customBg={rgba(windowColor, 0.9)}
       onMouseDown={onMouseDown}
     >
       <Flex
@@ -349,8 +351,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       >
         <TitlebarByType
           appWindow={appWindow}
-          shell={shell}
-          currentTheme={theme.currentTheme}
+          shell={shellStore}
           hideTitlebarBorder={
             appInfo?.type === 'urbit' && !appInfo.config?.titlebarBorder
           }

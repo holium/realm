@@ -9,7 +9,7 @@ const fs = require('fs');
 //   an 'alpha' channel user. the rule is:
 //  once an 'alpha' user, always an 'alpha' user unless you remove/edit the settings.json file
 
-export function getReleaseChannel() {
+export function getReleaseChannelFromSettings() {
   let releaseChannel = process.env.RELEASE_CHANNEL || 'latest';
   const settingsFilename = `${app.getPath('userData')}/settings.json`;
   if (fs.existsSync(settingsFilename)) {
@@ -19,7 +19,7 @@ export function getReleaseChannel() {
   return releaseChannel;
 }
 
-export function setReleaseChannel(channel: string) {
+export function saveReleaseChannelInSettings(channel: string) {
   const settingsFilename = `${app.getPath('userData')}/settings.json`;
   fs.writeFileSync(
     settingsFilename,

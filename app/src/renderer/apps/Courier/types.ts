@@ -1,4 +1,4 @@
-import { ChatPathType } from 'os/services/chat/chat.service';
+import { ChatPathType } from 'os/services/ship/chat/chat.types';
 
 export type ChatRowType = {
   id: string;

@@ -1,14 +1,15 @@
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { Card, Box, BoxProps, Portal } from '../../../general';
 import styled from 'styled-components';
+
+import { Box, BoxProps, Card, Portal } from '../../../general';
 import {
+  Dimensions,
   getAnchorPointByElement,
   getMenuHeight,
-  Position,
   Orientation,
-  Dimensions,
+  Position,
 } from '../../util/position';
-import { useState, useEffect, useCallback, useMemo } from 'react';
 import { MenuItem, MenuItemProps } from './MenuItem';
 import { useMenu } from './useMenu';
 

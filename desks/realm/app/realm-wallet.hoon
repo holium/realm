@@ -77,10 +77,11 @@
       :-  [%pass /addr/(scot %p from) %agent [from dap.bowl] task]~
       this
         [%updates ~]
-      :_  this
-      :~  [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%wallets wallets.state])]
-          [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]
-      ==
+      `this
+      :: :_  this
+      :: :~  [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%wallets wallets.state])]
+      ::     [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]
+      :: ==
     ==
   ++  on-leave  on-leave:def
   ++  on-peek
@@ -100,6 +101,10 @@
       :^  ~  ~  %realm-wallet-update
       !>  ^-  update
       [%settings settings.state]
+        [%x %passcode ~]
+      :^  ~  ~  %realm-wallet-update
+      !>  ^-  update
+      [%passcode passcode-hash.settings.state]
     ==
   ++  on-agent  on-agent:def
   ++  on-arvo   on-arvo:def
@@ -274,6 +279,7 @@
     =/  cards
       ^-  (list card)
       =/  key  [network.act `@ta`idx]
+      ~&  'create wallet update'
       :~  `card`[%give %fact [/updates]~ %realm-wallet-update !>(`update`[%wallet network.act (scot %ud idx) u.wallet])]
       ==
     ::  send wallet to requester if not our

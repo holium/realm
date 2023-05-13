@@ -1,22 +1,28 @@
-import { observer } from 'mobx-react';
-import { useTrayApps } from 'renderer/apps/store';
-import { Flex } from 'renderer/components';
-import { Speaker } from '../components/Speaker';
-import { useRooms } from '../useRooms';
 import { useEffect } from 'react';
+import { observer } from 'mobx-react';
+
+import { Flex } from '@holium/design-system';
+
+import { useTrayApps } from 'renderer/apps/store';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import { Speaker } from '../components/Speaker';
 import { roomTrayConfig } from '../config';
-import { useServices } from 'renderer/logic/store';
 
 const VoiceViewPresenter = () => {
-  const { ship } = useServices();
-  const roomsManager = useRooms(ship?.patp);
+  const { roomsStore } = useShipStore();
+  const { loggedInAccount } = useAppState();
 
   const { setTrayAppHeight } = useTrayApps();
 
-  const our = roomsManager?.local.patp;
-  const speakers = roomsManager
-    ? [...Array.from(roomsManager.protocol.peers.keys())]
-    : []; //.filter((patp) => patp !== our);
+  const speakers = roomsStore.current
+    ? [
+        ...Array.from(roomsStore.getPeers()).filter(
+          (patp) => patp !== window.ship
+        ),
+      ]
+    : [];
 
   useEffect(() => {
     const regularHeight = roomTrayConfig.dimensions.height;
@@ -28,7 +34,7 @@ const VoiceViewPresenter = () => {
     }
   }, [speakers.length, setTrayAppHeight]);
 
-  if (!roomsManager?.live.room) {
+  if (!roomsStore.current) {
     return null;
   }
   return (
@@ -36,12 +42,18 @@ const VoiceViewPresenter = () => {
       flex={2}
       gap={12}
       py={2}
-      display="grid"
-      gridTemplateColumns={speakers.length + 1 ? `repeat(2, 1fr)` : '.5fr'}
-      gridAutoColumns="1fr"
-      gridAutoRows={'.5fr'}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: speakers.length + 1 ? `repeat(2, 1fr)` : '.5fr',
+        gridAutoColumns: '1fr',
+        gridAutoRows: '.5fr',
+      }}
     >
-      <Speaker key={our} type="our" person={our ?? ''} />
+      <Speaker
+        key={loggedInAccount?.serverId}
+        type="our"
+        person={loggedInAccount?.serverId ?? ''}
+      />
       {speakers.map((person: string) => (
         <Speaker key={person} type="speaker" person={person} />
       ))}

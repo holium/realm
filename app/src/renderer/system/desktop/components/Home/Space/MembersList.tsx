@@ -1,42 +1,33 @@
 import { useMemo } from 'react';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
-import { rgba, darken } from 'polished';
-import { Flex, Text, PersonRow } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { ShipActions } from 'renderer/logic/actions/ship';
-import { Member } from 'os/types';
-import { WindowedList } from '@holium/design-system';
-import { MemberType } from 'os/services/spaces/models/members';
-import { FriendType } from 'os/services/ship/models/friends';
+
+import { Flex, Text, WindowedList } from '@holium/design-system';
+
+import { PersonRow } from 'renderer/components/People/PersonRow';
+import { useAppState } from 'renderer/stores/app.store';
+import { FriendType } from 'renderer/stores/models/friends.model';
+import { MemberType } from 'renderer/stores/models/invitations.model';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface IMembersList {
-  path: string;
   our: boolean;
 }
-
 type Roles = 'initiate' | 'member' | 'admin' | 'owner';
 
-const MembersListPresenter = (props: IMembersList) => {
-  const { path, our } = props;
-  const { theme, spaces, membership, ship, friends } = useServices();
-
-  const rowBg = rgba(darken(0.075, theme.currentTheme.windowColor), 0.5);
+const MembersListPresenter = ({ our }: IMembersList) => {
+  const { loggedInAccount } = useAppState();
+  const { spacesStore, friends } = useShipStore();
+  const currentSpace = spacesStore.selected;
 
   const pinned = useMemo(() => friends.pinned || [], [friends.pinned]);
   const unpinned = useMemo(() => friends.unpinned || [], [friends.unpinned]);
-  const members = useMemo(() => membership.getMembersList(path), [path]);
-  const admins = useMemo(
-    () => members.filter((member: Member) => member.roles.includes('admin')),
-    [members]
-  );
-  const membersOnly = useMemo(
-    () =>
-      members.filter(
-        (member: Member) =>
-          member.roles.includes('member') || member.status.includes('invited')
-      ),
-    [members]
+  let members = currentSpace ? Array.from(currentSpace?.members.list) : [];
+  const admins = members.filter((member) => member.roles.includes('admin'));
+  members = members.filter((member) => !member.roles.includes('admin'));
+  const membersOnly = members.filter(
+    (member) =>
+      member.roles.includes('member') || member.status.includes('invited')
   );
 
   type ListData = {
@@ -77,8 +68,7 @@ const MembersListPresenter = (props: IMembersList) => {
   );
 
   const TitleRow = ({ title }: { title: string }) => (
-    <Text
-      key={title}
+    <Text.Custom
       style={{ textTransform: 'uppercase' }}
       fontSize={1}
       fontWeight={600}
@@ -88,7 +78,7 @@ const MembersListPresenter = (props: IMembersList) => {
       mb="4px"
     >
       {title}
-    </Text>
+    </Text.Custom>
   );
 
   const HintRow = ({ hint }: { hint: string }) => (
@@ -98,9 +88,9 @@ const MembersListPresenter = (props: IMembersList) => {
       alignItems="center"
       height={40}
     >
-      <Text fontSize={2} opacity={0.5}>
+      <Text.Custom fontSize={2} opacity={0.5}>
         {hint}
-      </Text>
+      </Text.Custom>
     </Flex>
   );
 
@@ -120,15 +110,17 @@ const MembersListPresenter = (props: IMembersList) => {
         activeRole = 'initiate';
       }
     }
+
+    if (!loggedInAccount) return null;
+    if (!currentSpace) return null;
+
     const setNewRole = (role: Roles) => {
       const newRoles = roles
         ? [...roles.filter((role) => role !== activeRole), role]
         : [role];
-      SpacesActions.setRoles(member.patp, newRoles);
+      currentSpace.path &&
+        spacesStore.setRoles(currentSpace.path, member.patp, newRoles);
     };
-
-    if (!ship) return null;
-    if (!spaces.selected) return null;
 
     return (
       <PersonRow
@@ -140,10 +132,9 @@ const MembersListPresenter = (props: IMembersList) => {
         avatar={contact.avatar}
         description={contact.bio}
         listId="member-list"
-        rowBg={rowBg}
-        theme={theme.currentTheme}
         contextMenuOptions={
-          membership.isAdmin(path, ship.patp) && member.patp !== ship.patp
+          currentSpace.isAdmin(loggedInAccount.serverId) &&
+          member.patp !== loggedInAccount.serverId
             ? [
                 activeRole === 'admin'
                   ? {
@@ -161,10 +152,8 @@ const MembersListPresenter = (props: IMembersList) => {
                 {
                   label: 'Kick',
                   onClick: () => {
-                    SpacesActions.kickMember(
-                      spaces.selected?.path ?? '',
-                      member.patp
-                    );
+                    currentSpace.path &&
+                      spacesStore.kickMember(currentSpace.path, member.patp);
                   },
                 },
               ]
@@ -172,25 +161,25 @@ const MembersListPresenter = (props: IMembersList) => {
         }
       >
         {member.status === 'invited' && (
-          <Text opacity={0.3} fontSize={1}>
+          <Text.Custom opacity={0.3} fontSize={1}>
             Invited
-          </Text>
+          </Text.Custom>
         )}
       </PersonRow>
     );
   };
 
   const onUnpin = (friend: any) => {
-    ShipActions.editFriend(friend.patp, {
+    friends.editFriend(friend.patp, {
       pinned: false,
-      tags: friend.tags,
+      tags: toJS(friend.tags),
     });
   };
 
   const onPin = (friend: any) => {
-    ShipActions.editFriend(friend.patp, {
+    friends.editFriend(friend.patp, {
       pinned: true,
-      tags: friend.tags,
+      tags: toJS(friend.tags),
     });
   };
 
@@ -219,14 +208,12 @@ const MembersListPresenter = (props: IMembersList) => {
         avatar={contact.avatar}
         description={contact.bio}
         listId="friend-list"
-        rowBg={rowBg}
-        theme={theme.currentTheme}
         contextMenuOptions={[
           ...pinOption,
           {
             label: 'Remove',
             onClick: (_evt: any) => {
-              ShipActions.removeFriend(friend.patp);
+              friends.removeFriend(friend.patp);
             },
           },
         ]}

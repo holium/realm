@@ -6,27 +6,35 @@
  * When running `yarn build` or `yarn build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
-import path from 'path';
-import { app, ipcMain, BrowserWindow, shell, session } from 'electron';
-import isDev from 'electron-is-dev';
-import fs from 'fs';
-import fetch from 'cross-fetch';
+import { app, BrowserWindow, ipcMain, session, shell } from 'electron';
 import { download } from 'electron-dl';
+import isDev from 'electron-is-dev';
+import log from 'electron-log';
 import { ElectronBlocker } from '@cliqz/adblocker-electron';
-import { MenuBuilder } from './menu';
-import { resolveHtmlPath } from './util';
-import { Realm } from '../os';
-import { FullScreenHelper } from './helpers/fullscreen';
-import { WebViewHelper } from './helpers/webview';
+import fs from 'fs';
+import path from 'path';
+
+import { RealmService } from '../os/realm.service';
+import { AppUpdater } from './AppUpdater';
+import { BrowserHelper } from './helpers/browser';
 import { DevHelper } from './helpers/dev';
-import { PowerHelper } from './helpers/power';
+import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
+import { FullScreenHelper } from './helpers/fullscreen';
+import { hideCursor } from './helpers/hideCursor';
+import { KeyHelper } from './helpers/key';
 import { MediaHelper } from './helpers/media';
 import { MouseHelper } from './helpers/mouse';
-import { KeyHelper } from './helpers/key';
-import { BrowserHelper } from './helpers/browser';
-import { hideCursor } from './helpers/hideCursor';
-import { AppUpdater } from './AppUpdater';
-import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
+import { PowerHelper } from './helpers/power';
+import { WebViewHelper } from './helpers/webview';
+import { MenuBuilder } from './menu';
+import { resolveHtmlPath } from './util';
+
+// TODO test this
+log.create('main');
+log.catchErrors();
+log.transports.file.level = 'info';
+log.transports.file.resolvePath = () =>
+  path.join(app.getPath('userData'), 'main.log');
 
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
@@ -71,8 +79,9 @@ export const getPreloadPath = () =>
     : path.join(__dirname, '../../.holium/dll/preload.js');
 
 const createWindow = async () => {
-  // TODO fix the warnings and errors with this
-  // if (isDevelopment) await installExtensions();
+  if (isDevelopment) {
+    // TODO can cleanup here
+  }
 
   mainWindow = new BrowserWindow({
     show: false,
@@ -82,6 +91,7 @@ const createWindow = async () => {
     title: 'Realm',
     fullscreen: true,
     acceptFirstMouse: true,
+    titleBarStyle: 'hidden',
     webPreferences: {
       nodeIntegration: false,
       webviewTag: true,
@@ -94,7 +104,8 @@ const createWindow = async () => {
   // ---------------------------------------------------------------------
   // ----------------------- Start Realm services ------------------------
   // ---------------------------------------------------------------------
-  Realm.start(mainWindow);
+  // Realm.start(mainWindow);
+  // ---------------------------------------------------------------------
 
   FullScreenHelper.registerListeners(mainWindow);
   WebViewHelper.registerListeners(mainWindow);
@@ -113,6 +124,11 @@ const createWindow = async () => {
     mainWindow.webContents.send('add-key-listeners');
   });
 
+  // ---------------------------------------------------------------------
+  // ----------------------- Start Realm services ------------------------
+  // ---------------------------------------------------------------------
+  new RealmService();
+
   // TODO why is this rendering multiple times?
   mainWindow.on('ready-to-show', () => {
     // This is how you can set scale
@@ -126,10 +142,6 @@ const createWindow = async () => {
     } else {
       isDev ? mainWindow.showInactive() : mainWindow.show();
     }
-    mainWindow.webContents.send(
-      'realm.shell.set-fullscreen',
-      mainWindow.isFullScreen()
-    );
     const initialDimensions = mainWindow.getBounds();
     mainWindow.webContents.send('set-dimensions', initialDimensions);
   });
@@ -224,21 +236,21 @@ app.on('window-all-closed', () => {
 });
 // quitting is complicated. We have to catch the initial quit signal, preventDefault() it,
 // do our cleanup, and then re-emit and actually quit it
-let lastQuitSignal: number = 0;
-app.on('before-quit', (event) => {
-  if (!updater.checkingForUpdates) {
-    if (lastQuitSignal === 0) {
-      lastQuitSignal = new Date().getTime() - 1;
-      event.preventDefault();
-      mainWindow.webContents.send('realm.before-quit');
-      setTimeout(() => app.quit(), 500); // after half a second, we really do need to shut down
-    }
-  }
-});
+// let lastQuitSignal: number = 0;
+// app.on('before-quit', (event) => {
+//   if (!updater.checkingForUpdates) {
+//     if (lastQuitSignal === 0) {
+//       lastQuitSignal = new Date().getTime() - 1;
+//       event.preventDefault();
+//       mainWindow.webContents.send('realm.before-quit');
+//       setTimeout(() => app.quit(), 500); // after half a second, we really do need to shut down
+//     }
+//   }
+// });
 
-ipcMain.on('realm.app.quit', (_event) => {
-  if (!updater.checkingForUpdates) app.quit();
-});
+// ipcMain.on('realm.app.quit', (_event) => {
+//   if (!updater.checkingForUpdates) app.quit();
+// });
 
 ipcMain.on('download-url-as-file', (_event, { url }) => {
   const win = BrowserWindow.getFocusedWindow();

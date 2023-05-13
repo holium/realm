@@ -4,43 +4,44 @@
   "workspaces": [
     "app",
     "shared",
-    "onboarding",
+    "holium-com",
+    "hosting-holium-com",
     "lib/design-system",
     "lib/presence",
     "lib/presence/code",
-    "lib/conduit",
     "lib/room",
     "lib/room/test-ui"
   ],
   "scripts": {
-    "tsc": "yarn workspace @holium/realm tsc && yarn workspace @holium/design-system tsc && yarn workspace @holium/conduit tsc && yarn workspace @holium/realm-presence tsc && yarn workspace @holium/realm-presence-notes tsc && yarn workspace @holium/realm-room tsc && yarn workspace @holium/realm-room-test-ui tsc",
-    "postinstall": "yarn workspace @holium/realm electron-rebuild better-sqlite3",
+    "tsc": "yarn workspace @holium/realm tsc && yarn workspace @holium/design-system tsc && yarn workspace @holium/realm-presence tsc && yarn workspace @holium/realm-presence-notes tsc && yarn workspace @holium/shared tsc && yarn workspace @holium/holium-com tsc && yarn workspace @holium/hosting-holium-com tsc",
+    "postinstall": "yarn workspace @holium/realm postinstall",
     "build": "yarn build:app",
     "build:app": "yarn workspace @holium/realm build",
     "build:design-system": "yarn workspace @holium/design-system build",
-    "build:conduit": "yarn workspace @holium/conduit build",
     "build:multiplayer": "yarn workspace @holium/realm-presence build",
-    "build:room": "yarn workspace @holium/realm-room build",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
+    "lint-check": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
+    "lint": "eslint . --fix --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
     "start": "yarn workspace @holium/realm start",
     "start:onboard": "yarn workspace @holium/realm start:onboard",
     "add:realm": "yarn workspace @holium/realm add -W",
     "package": "yarn workspace @holium/realm package",
-    "package:prerelease:linux": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:prerelease:linux",
-    "package:prerelease:mac": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:prerelease:mac",
-    "package:prerelease:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:prerelease:win",
-    "package:release:linux": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:linux",
-    "package:release:mac": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:mac",
-    "package:release:win": "yarn build:multiplayer && yarn build:conduit && yarn build:room && yarn build:design-system && yarn workspace @holium/realm package:release:win",
+    "package:prerelease:linux": "yarn build:multiplayer && yarn build:design-system && yarn workspace @holium/realm package:prerelease:linux",
+    "package:prerelease:mac": "yarn build:multiplayer && yarn build:design-system && yarn workspace @holium/realm package:prerelease:mac",
+    "package:prerelease:win": "yarn build:multiplayer && yarn build:design-system && yarn workspace @holium/realm package:prerelease:win",
+    "package:release:linux": "yarn build:multiplayer && yarn build:design-system && yarn workspace @holium/realm package:release:linux",
+    "package:release:mac": "yarn build:multiplayer && yarn build:design-system && yarn workspace @holium/realm package:release:mac",
+    "package:release:win": "yarn build:multiplayer && yarn build:design-system && yarn workspace @holium/realm package:release:win",
     "build-storybook": "build-storybook",
     "storybook": "start-storybook -p 6006"
   },
   "dependencies": {
     "@etchteam/storybook-addon-css-variables-theme": "^1.4.0",
     "alchemy-sdk": "^2.2.1",
+    "better-sqlite3-multiple-ciphers": "^8.3.0",
     "ethers": "^5.7.0",
     "qrcode.react": "^3.1.0",
-    "socket.io-client": "^4.5.4"
+    "socket.io-client": "^4.5.4",
+    "stream-browserify": "^3.0.0"
   },
   "version": "0.1.11-alpha",
   "devDependencies": {
@@ -58,6 +59,7 @@
     "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-unused-imports": "^2.0.0",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
     "prettier": "^2.8.3",
     "storybook-addon-state": "^1.0.3",
     "typescript": "^4.9.4"
@@ -67,7 +69,6 @@
       "shared",
       "lib/design-system",
       "lib/presence",
-      "lib/conduit",
       "lib/room"
     ]
   }

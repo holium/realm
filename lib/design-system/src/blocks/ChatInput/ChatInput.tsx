@@ -1,52 +1,19 @@
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useState, useRef, useEffect } from 'react';
-import styled from 'styled-components';
-import { Icon, Button, BoxProps, Flex, Spinner } from '../../../general';
-import { InputBox, TextArea } from '../../../inputs';
-import { ImageBlock } from '../ImageBlock/ImageBlock';
-import { MediaBlock } from '../MediaBlock/MediaBlock';
+
+import { BoxProps, Button, Flex, Icon, Spinner } from '../../../general';
+import { InputBox } from '../../input/InputBox/InputBox';
 import { isImageLink, parseMediaType } from '../../util/links';
 import { FragmentType } from '../Bubble/Bubble.types';
-import { FragmentImage } from '../Bubble/fragment-lib';
-import { convertFragmentsToText, parseChatInput } from './fragment-parser';
 import { Reply } from '../Bubble/Reply';
-
-const CHAT_INPUT_LINE_HEIGHT = 22;
-const ChatBox = styled(TextArea)`
-  resize: none;
-  line-height: ${CHAT_INPUT_LINE_HEIGHT}px;
-  font-size: 14px;
-  padding-left: 4px;
-  padding-right: 4px;
-`;
-
-const RemoveAttachmentButton = styled(motion.div)`
-  position: relative;
-  z-index: 4;
-  transition: var(--transition);
-  overflow: visible;
-  ${FragmentImage} {
-    padding: 0px;
-  }
-  ${Button.Base} {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .chat-attachment-remove-btn {
-    position: absolute;
-    display: flex;
-    overflow: visible;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    top: -4px;
-    right: -4px;
-    z-index: 4;
-    border-radius: 12px;
-    transition: var(--transition);
-  }
-`;
+import { ImageBlock } from '../ImageBlock/ImageBlock';
+import { MediaBlock } from '../MediaBlock/MediaBlock';
+import {
+  CHAT_INPUT_LINE_HEIGHT,
+  ChatBox,
+  RemoveAttachmentButton,
+} from './ChatInput.styles';
+import { convertFragmentsToText, parseChatInput } from './fragment-parser';
 
 type ChatInputProps = {
   id: string;
@@ -143,6 +110,7 @@ export const ChatInput = ({
     } else {
       setRows(scrollHeight / CHAT_INPUT_LINE_HEIGHT);
     }
+    setValue(newValue);
   };
 
   const onChange = (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -219,7 +187,7 @@ export const ChatInput = ({
   };
 
   return (
-    <Flex flexDirection="column" overflow="visible" width={containerWidth}>
+    <Flex width="100%" flexDirection="column" overflow="visible">
       <InputBox
         inputId={id}
         px={0}
@@ -229,8 +197,8 @@ export const ChatInput = ({
         {...chatInputProps}
       >
         <Flex
+          flex={1}
           flexDirection="column"
-          width={containerWidth ? containerWidth - 2 : undefined}
           py={2}
           px={2}
           justifyContent="flex-end"
@@ -244,6 +212,7 @@ export const ChatInput = ({
               flexDirection="row"
               height={attachmentHeight}
               overflowX="auto"
+              overflowY="hidden"
               alignItems="flex-start"
             >
               {attachments.map((attachment: string, index: number) => {
@@ -303,9 +272,9 @@ export const ChatInput = ({
           ) : null}
           {replyTo ? (
             <Flex
-              mt="6px"
+              mt="4px"
               mx="4px"
-              mb="12px"
+              mb="6px"
               gap={8}
               flexDirection="row"
               height={replyHeight}
@@ -326,7 +295,7 @@ export const ChatInput = ({
               />
             </Flex>
           ) : null}
-          <Flex width="100%" flexDirection="row" alignItems="flex-end" gap={4}>
+          <Flex flex={1} flexDirection="row" alignItems="flex-end" gap={4}>
             <Flex>
               <Button.IconButton
                 size={22}

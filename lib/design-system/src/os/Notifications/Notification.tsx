@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import styled from 'styled-components';
+
+import { Button, Flex, FlexProps, Icon, Text } from '../../../general';
 import { timelineDate } from '../../util/date';
-import { Flex, Text, Button, Icon, FlexProps } from '../../../general';
 import {
   NotificationButtonType,
   NotificationType,
@@ -52,6 +53,7 @@ export const Notification = ({
       background="card"
       onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
+        onDismiss(app, path, id);
         onLinkClick(app, path, notification.link);
       }}
     >

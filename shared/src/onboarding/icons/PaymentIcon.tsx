@@ -6,7 +6,7 @@ export const PaymentIcon = () => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g clip-path="url(#clip0_2332_2048)">
+    <g clipPath="url(#clip0_2332_2048)">
       <path d="M15 75.5H65V80.5H15V75.5Z" fill="#CDD9E4" />
       <path d="M32.5 63H47.5V78H32.5V63Z" fill="#CDD9E4" />
       <path

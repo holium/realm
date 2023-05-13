@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Button, Text } from 'renderer/components';
-import { Flex, Box } from '@holium/design-system';
-import { ShellActions } from 'renderer/logic/actions/shell';
+
+import { Button, Flex, Text } from '@holium/design-system';
+
+import { trackEvent } from 'renderer/lib/track';
+import { normalizeBounds } from 'renderer/lib/window-manager';
+import { useAppState } from 'renderer/stores/app.store';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
-import { trackEvent } from 'renderer/logic/lib/track';
-import { AuthActions } from 'renderer/logic/actions/auth';
 
 export const ShutdownDialogConfig: DialogConfig = {
   component: (props: any) => <ShutdownDialog {...props} />,
@@ -32,12 +32,13 @@ export const ShutdownDialogConfig: DialogConfig = {
 };
 
 const ShutdownDialogPresenter = () => {
+  const { shellStore, authStore } = useAppState();
   const [seconds, setSeconds] = useState(60);
   const [id, setId] = useState<NodeJS.Timer>();
 
   function shutdown() {
     trackEvent('CLICK_SHUTDOWN', 'DESKTOP_SCREEN');
-    AuthActions.shutdown();
+    authStore.shutdown();
   }
 
   useEffect(() => {
@@ -53,37 +54,49 @@ const ShutdownDialogPresenter = () => {
   });
 
   return (
-    <Flex px={12} width="100%" height="100%" flexDirection="column">
-      <Text fontSize={4} fontWeight={500} mb={10}>
-        Power Off
-      </Text>
-      <Text fontSize={2} lineHeight="copy" variant="body">
-        Realm will power off automatically in {seconds} second
-        {seconds > 1 && 's'}.
-      </Text>
-      <Box mt={4} width="100%">
-        <Flex width="100%" justifyContent="space-between">
-          <Button
-            width="45%"
-            disabled={false}
-            onClick={() => {
-              id && clearInterval(id);
-              ShellActions.closeDialog();
-              ShellActions.setBlur(false);
-              // reset seconds/id for next open
-              // 62 === 60 ???
-              setId(undefined);
-              setSeconds(62);
-            }}
-            variant="secondary"
-          >
-            Cancel
-          </Button>
-          <Button width="50%" disabled={false} onClick={shutdown}>
-            Power Off
-          </Button>
-        </Flex>
-      </Box>
+    <Flex
+      px={12}
+      gap={16}
+      width="100%"
+      height="100%"
+      flexDirection="column"
+      justifyContent="space-between"
+    >
+      <Flex gap={10} flexDirection="column">
+        <Text.Custom fontSize={3} fontWeight={500}>
+          Power Off
+        </Text.Custom>
+        <Text.Custom fontSize={2} lineHeight="copy" variant="body">
+          Realm will power off automatically in {seconds} second
+          {seconds > 1 && 's'}.
+        </Text.Custom>
+      </Flex>
+      <Flex gap="16px">
+        <Button.Secondary
+          flex={1}
+          justifyContent="center"
+          onClick={() => {
+            id && clearInterval(id);
+            shellStore.closeDialog();
+            shellStore.setIsBlurred(false);
+            // reset seconds/id for next open
+            // 62 === 60 ???
+            setId(undefined);
+            setSeconds(62);
+          }}
+          variant="secondary"
+        >
+          <Flex py={1}>Cancel</Flex>
+        </Button.Secondary>
+        <Button.Primary
+          flex={1}
+          justifyContent="center"
+          background="intent-alert"
+          onClick={shutdown}
+        >
+          <Flex py={1}>Power Off</Flex>
+        </Button.Primary>
+      </Flex>
     </Flex>
   );
 };

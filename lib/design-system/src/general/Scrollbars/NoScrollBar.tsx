@@ -1,7 +1,8 @@
 import styled from 'styled-components';
-import { Flex } from '../../../general';
 
-export const NoScrollBar: any = styled(Flex)`
+import { Flex } from '../Flex/Flex';
+
+export const NoScrollBar = styled(Flex)`
   ::-webkit-scrollbar {
     display: none;
   }

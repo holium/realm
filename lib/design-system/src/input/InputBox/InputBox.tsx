@@ -1,6 +1,7 @@
-import styled, { css } from 'styled-components';
-import { Text, Box, BoxProps, Flex } from '../../../general';
 import { AnimationProps } from 'framer-motion';
+import styled, { css } from 'styled-components';
+
+import { Box, BoxProps, Flex, Text } from '../../../general';
 
 type StyledBoxProps = {
   label?: string;
@@ -27,14 +28,10 @@ const StyledBox = styled(Flex)<StyledBoxProps>`
     props.shouldHighlightOnFocus &&
     css`
       &:focus,
-      &:focus-within,
-      &:active {
+      &:focus-within {
         transition: var(--transition);
         outline: none;
         border-color: rgba(var(--rlm-accent-rgba));
-        &::placeholder {
-          color: transparent;
-        }
       }
     `}
 
@@ -51,9 +48,6 @@ const StyledBox = styled(Flex)<StyledBoxProps>`
     appearance: none;
     outline: none;
     border: 1px transparent;
-    &::placeholder {
-      opacity: 0.5;
-    }
   }
 
   input[type='password'] {
@@ -95,13 +89,19 @@ const StyledBox = styled(Flex)<StyledBoxProps>`
         }
       }
     `}
+
+  /* Gets rid of Chrome's autofill styling */
+  input:-webkit-autofill,
+  input:-webkit-autofill:focus {
+    transition: background-color 600000s 0s, color 600000s 0s;
+  }
 `;
 
 const Adornment = styled(Box)<BoxProps & { disabled?: boolean }>`
   user-select: none;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   svg {
     display: block;
@@ -138,15 +138,20 @@ export const InputBox = ({
   error,
   children,
   borderRadius = '6px',
+  background = 'rgba(var(--rlm-input-rgba))',
+  style,
   px,
   py,
+  onClick,
   ...boxProps
 }: InputBoxProps) => (
   <StyledBox
+    style={style}
     width={width}
     height={height}
     error={error}
     borderRadius={borderRadius}
+    background={background}
     flexDirection={inlineLabelDirection}
     disabled={disabled}
     onFocus={() => document.getElementById(inputId)?.focus()}
@@ -154,6 +159,8 @@ export const InputBox = ({
     textAlign={boxProps.textAlign || 'left'}
     px={px}
     py={py}
+    className="text-cursor"
+    onClick={onClick}
   >
     {label && label !== 'none' && (
       <Text.Label
@@ -169,15 +176,15 @@ export const InputBox = ({
         {label}
       </Text.Label>
     )}
-    <Box display="flex" flexDirection="row" flex={1} height="100%">
+    <Box display="flex" flexDirection="row" flex={1} alignItems="center">
       {leftAdornment && (
-        <Adornment mr={1} disabled={disabled} pb={2}>
+        <Adornment mr={1} disabled={disabled} alignContent="center">
           {leftAdornment}
         </Adornment>
       )}
       {children}
       {rightAdornment && (
-        <Adornment ml={1} disabled={disabled} pb={2}>
+        <Adornment ml={1} disabled={disabled} alignContent="center">
           {rightAdornment}
         </Adornment>
       )}

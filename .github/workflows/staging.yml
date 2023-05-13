@@ -41,24 +41,6 @@ jobs:
             return result
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-      #
-      - name: Start release draft
-        if: ${{ fromJSON(steps.ci.outputs.result).isNewBuild }}
-        # create annotated tag for this branch. this will become basis for the release
-        run: |
-          mkdir -p ./app/release/build
-          touch ./app/release/build/log.txt
-          echo "pre-deploy workflow for $BUILD_VERSION..." >> ./app/release/build/log.txt
-          git config --global user.email realm-builder-no-reply@holium.com
-          git config --global user.name ${{ github.actor }}
-          git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
-          git push origin $BUILD_VERSION
-          gh release create $BUILD_VERSION ./app/release/build/*.* --target staging --title "$RELEASE_NAME"  --draft --latest=false --verify-tag --notes "$CHANGELOG"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          RELEASE_NAME: ${{ fromJSON(steps.ci.outputs.result).releaseName }}
-          BUILD_VERSION: ${{ fromJSON(steps.ci.outputs.result).buildVersion }}
-          CHANGELOG: ${{ github.event.pull_request.body }}
   #
   build-mac:
     needs: [pre-deploy]
@@ -71,7 +53,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '>=18'
           cache: 'npm'
       - name: Install the Apple certificate
         env:
@@ -116,24 +98,31 @@ jobs:
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       #
       - name: Build and publish
-        run: npx cross-env yarn package:prerelease:mac
+        run: npx cross-env PUBLISH_FOR_PULL_REQUEST=true CSC_FOR_PULL_REQUEST=true yarn package:prerelease:mac
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
           BUILD_CERTIFICATE_BASE64: ${{ secrets.REALM_BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-      #
-      - name: Deploy binaries and other artifacts to draft release
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
+      # copy release artifacts from this runner to digitalocean
+      - name: Publish artifacts
         run: |
+          mkdir -p ~/.ssh
+          # ensure private key
+          echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
+          chmod 600 ~/.ssh/usher_rsa
           # rename the latest-mac.yml file to alpha-mac.yml for staging builds
           mv -f ./app/release/build/latest-mac.yml ./app/release/build/alpha-mac.yml
-          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir -p ~/$BUILD_VERSION"
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
         env:
-          GH_DEBUG: api
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA_STAGING }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
   #
   build-linux:
     needs: [pre-deploy]
@@ -146,7 +135,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '>=18'
           cache: 'npm'
       - name: Install yarn
         run: npm install -g yarn
@@ -174,33 +163,38 @@ jobs:
         env:
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
-      #
-      - name: Deploy binaries and other artifacts to draft release
+      # copy release artifacts from this runner to digitalocean
+      - name: Publish artifacts
         run: |
+          mkdir -p ~/.ssh
+          # ensure private key
+          echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
+          chmod 600 ~/.ssh/usher_rsa
           # rename the latest-mac.yml file to alpha-mac.yml for staging builds
           mv -f ./app/release/build/latest-linux.yml ./app/release/build/$RELEASE_CHANNEL-linux.yml
-          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir -p ~/$BUILD_VERSION"
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
         env:
-          GH_DEBUG: api
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA_STAGING }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
       # all builds should produce the same sourcemaps; therefore only need to create the Sentry
       #   release one time. Use linux build since Sentry action only runs on linux
       - name: Create Sentry release
-        uses: getsentry/action-release@v1
+        run: |
+          sudo npm install -g @sentry/cli --unsafe-perm
+          sentry-cli sourcemaps inject ./app/release/app/dist/renderer
+          sentry-cli sourcemaps upload --org $SENTRY_ORG --auth-token $SENTRY_AUTH_TOKEN --project $SENTRY_PROJECT --use-artifact-bundle --release $BUILD_VERSION --dist $BUILD_VERSION ./app/release/app/dist/renderer
+          # legacy method
+          sentry-cli releases files $BUILD_VERSION upload-sourcemaps ./app/release/app/dist/renderer
+          sentry-cli releases finalize $BUILD_VERSION
         env:
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-          # SENTRY_URL: https://sentry.io/
-          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-          SENTRY_LOG_LEVEL: debug
-        with:
-          environment: staging
-          sourcemaps: './app/release/app/dist'
-          version: ${{ needs.pre-deploy.outputs.build_version }}
-          ignore_empty: true
   #
   build-windows:
     needs: [pre-deploy]
@@ -217,7 +211,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '>=18'
           cache: 'npm'
       #
       - name: Install yarn
@@ -262,25 +256,28 @@ jobs:
           cd ../
           sudo yarn package:prerelease:win
         env:
-          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          RELEASE_CHANNEL: ${{ needs.pre-deploy.outputs.channel }}
           ARTIFACT_VERSION: ${{ needs.pre-deploy.outputs.artifact_version }}
-      #
-      - name: Deploy binaries and other artifacts to draft release
+      # copy release artifacts from this runner to digitalocean
+      - name: Publish artifacts
         run: |
+          mkdir -p ~/.ssh
+          # ensure private key
+          echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
+          chmod 600 ~/.ssh/usher_rsa
           # rename the latest.yml (windows) file to alpha.yml for staging builds
           mv -f ./app/release/build/latest.yml ./app/release/build/alpha.yml
-          gh release upload $BUILD_VERSION ./app/release/build/*.* --clobber
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir -p ~/$BUILD_VERSION"
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          GH_DEBUG: api
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA_STAGING }}
           BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
-          BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
-          BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
-          BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
   #
   deploy-desks:
-    needs: [pre-deploy, build-mac, build-linux, build-windows]
+    needs: [pre-deploy, build-mac, build-windows, build-linux]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -293,7 +290,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '>=18'
           cache: 'npm'
       #
       - name: Bump desks version
@@ -309,7 +306,7 @@ jobs:
       # publish latest agent udpates for realm and usher
       - name: Publish ship updates
         run: |
-          mkdir ~/.ssh
+          mkdir -p ~/.ssh
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
@@ -348,7 +345,7 @@ jobs:
   #  once everything is done, flip the switch on the draft release to make
   #    the release available to auto-update
   post-deploy:
-    needs: [pre-deploy, build-mac, build-linux, build-windows, deploy-desks]
+    needs: [pre-deploy, build-mac, build-windows, build-linux, deploy-desks]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -359,7 +356,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '>=18'
           cache: 'npm'
       #
       - name: Run post-deploy script
@@ -375,7 +372,35 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
-
+      # copy release artifacts from digitalocean (all platforms) back to this runner
+      - name: Retrieve release artifacts
+        run: |
+          mkdir -p ~/.ssh
+          # ensure private key
+          echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
+          chmod 600 ~/.ssh/usher_rsa
+          mkdir -p ~/$BUILD_VERSION
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION ~
+        env:
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA_STAGING }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+      #
+      - run: |
+          git config --global user.email realm-builder-no-reply@holium.com
+          git config --global user.name ${{ github.actor }}
+          git tag -f -a $BUILD_VERSION -m "build tag: $BUILD_VERSION"
+          git push origin $BUILD_VERSION
+          gh release create $BUILD_VERSION ~/$BUILD_VERSION/*.* --target staging --title "$RELEASE_NAME" --prerelease=false --draft=true --latest=false --verify-tag --notes "$CHANGELOG"
+          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf ~/$BUILD_VERSION"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME_STAGING }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST_STAGING }}
+          DEPLOY_RSA: ${{ secrets.DEPLOY_RSA_STAGING }}
+          RELEASE_NAME: ${{ needs.pre-deploy.outputs.release_name }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
   #
   # this will run even if the build is canceled or fails
   #  we need this to re-enable the workflow

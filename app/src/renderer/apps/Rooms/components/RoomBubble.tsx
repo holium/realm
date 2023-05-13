@@ -1,16 +1,14 @@
+import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
 import {
-  compose,
-  color,
   backgroundColor,
   BackgroundColorProps,
+  color,
   ColorProps,
+  compose,
 } from 'styled-system';
-import { motion } from 'framer-motion';
-import { ThemeType } from '../../../theme';
 
 type BubbleProps = {
-  theme: ThemeType;
   customBg?: string;
   primary: boolean;
 } & BackgroundColorProps &
@@ -19,8 +17,7 @@ type BubbleProps = {
 export const Bubble = styled(motion.div)<BubbleProps>`
   max-width: calc(100% - 10px);
   box-sizing: content-box;
-  background: ${(props: BubbleProps) =>
-    props.customBg || props.theme.colors.bg.blendedBg};
+  background: rgba(var(--rlm-accent-rgba));
   border-radius: 19px;
   ${(props: BubbleProps) =>
     props.primary

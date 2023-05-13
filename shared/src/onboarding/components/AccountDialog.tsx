@@ -1,21 +1,26 @@
-import { FormEvent, ReactNode } from 'react';
+import { FormEvent, ReactNode, useEffect } from 'react';
+
 import {
   Button,
   Flex,
   Icon,
   Skeleton,
   Spinner,
+  Text,
 } from '@holium/design-system/general';
-import { HoliumButton } from '@holium/design-system/os';
 import { Select } from '@holium/design-system/inputs';
+import { HoliumButton } from '@holium/design-system/os';
+import { useToggle } from '@holium/design-system/util';
+
+import { OnboardingStorage } from '../onboarding';
 import {
   AccountDialogCard,
+  AccountDialogInnerCard,
   AccountDialogSidebar,
   AccountDialogSidebarMenu,
   AccountDialogSidebarMenuItemText,
-  AccountDialogInnerCard,
-  AccountDialogTitle,
   AccountDialogSubtitle,
+  AccountDialogTitle,
 } from './AccountDialog.styles';
 
 export enum SidebarSection {
@@ -25,6 +30,7 @@ export enum SidebarSection {
   CustomDomain = 'Custom Domain',
   DownloadRealm = 'Download Realm',
   GetHosting = 'Get Hosting',
+  GetRealm = 'Get Realm',
 }
 
 type Props = {
@@ -34,6 +40,7 @@ type Props = {
   children?: ReactNode;
   customBody?: ReactNode;
   isLoading?: boolean;
+  onClickBuyServer: () => void;
   setSelectedPatp: (patp: string) => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onSubmit?: () => void;
@@ -47,23 +54,34 @@ export const AccountDialog = ({
   children,
   customBody,
   isLoading,
+  onClickBuyServer,
   setSelectedPatp,
   onClickSidebarSection,
   onSubmit,
   onExit,
 }: Props) => {
   const hasShips = patps ? patps.length > 0 : false;
+  const hasCSEK = useToggle(false);
 
-  const sidebarItems =
-    hasShips || isLoading
-      ? [
-          SidebarSection.Hosting,
-          SidebarSection.S3Storage,
-          SidebarSection.Statistics,
-          SidebarSection.CustomDomain,
-          SidebarSection.DownloadRealm,
-        ]
-      : [SidebarSection.GetHosting, SidebarSection.DownloadRealm];
+  let sidebarItems: SidebarSection[] = [];
+
+  if (hasShips) {
+    sidebarItems = [
+      SidebarSection.Hosting,
+      SidebarSection.S3Storage,
+      // SidebarSection.Statistics,
+      SidebarSection.CustomDomain,
+      SidebarSection.DownloadRealm,
+    ];
+  } else if (hasCSEK.isOn) {
+    sidebarItems = [SidebarSection.DownloadRealm, SidebarSection.GetHosting];
+  } else {
+    sidebarItems = [SidebarSection.GetRealm, SidebarSection.GetHosting];
+  }
+
+  useEffect(() => {
+    hasCSEK.setToggle(Boolean(OnboardingStorage.get().clientSideEncryptionKey));
+  }, []);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -71,7 +89,7 @@ export const AccountDialog = ({
   };
 
   const onClickHoliumButton = () => {
-    window.open('https://holium.com', '_blank');
+    window.location.href = 'https://holium.com';
   };
 
   return (
@@ -98,6 +116,21 @@ export const AccountDialog = ({
                   value: patp,
                   label: patp,
                 }))}
+                extraSection={
+                  <Flex
+                    flexDirection="column"
+                    mt="8px"
+                    pt="8px"
+                    borderTop="1px solid rgba(var(--rlm-border-rgba))"
+                  >
+                    <Button.Transparent width="100%" onClick={onClickBuyServer}>
+                      <Flex alignItems="center" gap="8px">
+                        <Icon name="AddCircleLine" size={16} />
+                        <Text.Body>Purchase new ID</Text.Body>
+                      </Flex>
+                    </Button.Transparent>
+                  </Flex>
+                }
                 selected={selectedPatp}
                 onClick={(newPatp) => setSelectedPatp(newPatp)}
               />
@@ -147,14 +180,24 @@ type AccountDialogSkeletonProps = {
 
 export const AccountDialogSkeleton = ({
   currentSection,
-}: AccountDialogSkeletonProps) => (
-  <AccountDialog
-    patps={[]}
-    selectedPatp=""
-    currentSection={currentSection}
-    isLoading
-    setSelectedPatp={() => {}}
-    onClickSidebarSection={() => {}}
-    onExit={() => {}}
-  />
-);
+}: AccountDialogSkeletonProps) => {
+  const isBlankBody =
+    currentSection &&
+    [SidebarSection.GetRealm, SidebarSection.DownloadRealm].includes(
+      currentSection
+    );
+
+  return (
+    <AccountDialog
+      patps={[]}
+      selectedPatp=""
+      currentSection={currentSection}
+      isLoading
+      customBody={isBlankBody ? <Flex flex={5} /> : undefined}
+      setSelectedPatp={() => {}}
+      onClickBuyServer={() => {}}
+      onClickSidebarSection={() => {}}
+      onExit={() => {}}
+    />
+  );
+};

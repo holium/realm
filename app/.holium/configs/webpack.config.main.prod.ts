@@ -59,7 +59,7 @@ const configuration: webpack.Configuration = {
       AUTOUPDATE_FEED_URL:
         process.env.RELEASE_CHANNEL === 'latest' ||
         process.env.RELEASE_CHANNEL === 'hotfix'
-          ? 'https://ghproxy.holium.xyz'
+          ? 'https://download.holium.com'
           : 'https://ghproxy-staging.holium.xyz',
       INSTALL_MOON:
         process.env.RELEASE_CHANNEL === 'latest' ||
@@ -67,6 +67,11 @@ const configuration: webpack.Configuration = {
           ? '~hostyv:realm'
           : '~nimwyd-ramwyl-dozzod-hostyv:realm',
       RELEASE_CHANNEL: process.env.RELEASE_CHANNEL || 'latest',
+      ...(process.env.BUILD_VERSION
+        ? {
+            BUILD_VERSION: process.env.BUILD_VERSION,
+          }
+        : {}),
     }),
   ],
   /**

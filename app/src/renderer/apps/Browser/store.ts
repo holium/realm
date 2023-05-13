@@ -1,17 +1,15 @@
-import { LoaderModel } from 'os/services/common.model';
-import { toJS } from 'mobx';
-import { types, onSnapshot, Instance } from 'mobx-state-tree';
 import { createContext, useContext } from 'react';
-import { RealmActions } from 'renderer/logic/actions/main';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { nativeApps } from '../nativeApps';
-import { isUrlSafe } from './helpers/createUrl';
-import { servicesStore } from 'renderer/logic/store';
-import { AppType } from 'os/services/spaces/models/bazaar';
+import { Instance, onSnapshot, types } from 'mobx-state-tree';
+
+import { MainIPC } from 'renderer/stores/ipc';
+import { LoaderModel } from 'renderer/stores/models/common.model';
+
+import { isUrlSafe, stripSlash } from './helpers/createUrl';
 
 const TabModel = types.model('BrowserTabModel', {
   id: types.identifier,
   url: types.string,
+  inPageNav: types.string,
   isSafe: types.optional(types.boolean, true),
   loader: types.optional(LoaderModel, { state: 'initial' }),
 });
@@ -21,6 +19,7 @@ export const BrowserModel = types
     currentTab: types.optional(TabModel, {
       id: 'tab-0',
       url: 'https://duckduckgo.com',
+      inPageNav: 'https://duckduckgo.com',
       isSafe: true,
       loader: { state: 'initial' },
     }),
@@ -28,8 +27,20 @@ export const BrowserModel = types
   })
   .actions((self) => ({
     setUrl(url: string) {
-      self.currentTab.url = url;
-      self.currentTab.isSafe = isUrlSafe(url);
+      const cleanUrl = stripSlash(url);
+
+      self.currentTab.url = cleanUrl;
+      self.currentTab.inPageNav = cleanUrl;
+      self.currentTab.isSafe = isUrlSafe(cleanUrl);
+      self.currentTab.loader.state = 'initial';
+    },
+    setInPageNav(url: string) {
+      // In page nav is set when the user clicks on a link within the webview.
+      // We save the latest URL here as to not cause a re-render of the webview.
+      const cleanUrl = stripSlash(url);
+
+      self.currentTab.inPageNav = cleanUrl;
+      self.currentTab.isSafe = isUrlSafe(cleanUrl);
       self.currentTab.loader.state = 'initial';
     },
     setLoading() {
@@ -68,11 +79,11 @@ export function useBrowser() {
   return store;
 }
 
-RealmActions.onBrowserOpen((_event: any, url: string) => {
-  const relic = servicesStore.bazaar.getApp('os-browser');
-  DesktopActions.openAppWindow(
-    toJS(relic) || (nativeApps['os-browser'] as AppType)
-  ).then(() => {
-    browserState.setUrl(url);
-  });
+MainIPC.onBrowserOpen((_event: any, _url: string) => {
+  // const relic = servicesStore.bazaar.getApp('os-browser');
+  // DesktopActions.openAppWindow(
+  //   toJS(relic) || (nativeApps['os-browser'] as AppType)
+  // ).then(() => {
+  //   browserState.setUrl(url);
+  // });
 });

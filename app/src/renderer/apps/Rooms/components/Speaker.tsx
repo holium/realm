@@ -1,16 +1,18 @@
-import { useRef, useEffect, useMemo } from 'react';
-import { observer } from 'mobx-react';
+import { useEffect, useMemo, useRef } from 'react';
 import BeatLoader from 'react-spinners/BeatLoader';
+import { observer } from 'mobx-react';
 import styled from 'styled-components';
-import { useServices } from 'renderer/logic/store';
-import { PeerConnectionState, RealmProtocol } from '@holium/realm-room';
-import { darken } from 'polished';
-import { useRooms } from '../useRooms';
+
+import { Avatar, Flex, FlexProps, Icon, Text } from '@holium/design-system';
+
 import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
-import { Flex, FlexProps, Text, Avatar, Icon } from '@holium/design-system';
+import { useAppState } from 'renderer/stores/app.store';
+import { PeerConnectionState } from 'renderer/stores/rooms/rooms.types';
+import { useShipStore } from 'renderer/stores/ship.store';
+
 import { AudioWave } from './AudioWave';
 
 interface ISpeaker {
@@ -28,18 +30,20 @@ const speakerType = {
 
 const SpeakerPresenter = (props: ISpeaker) => {
   const { person, type } = props;
-  const { ship, theme, friends } = useServices();
+  const { loggedInAccount } = useAppState();
+  const { friends, roomsStore } = useShipStore();
   const speakerRef = useRef<any>(null);
-  const roomsManager = useRooms(ship?.patp);
   const { getOptions, setOptions } = useContextMenu();
-  const isOur = person === ship?.patp;
+  const isOur = person === loggedInAccount?.serverId;
   const metadata = friends.getContactAvatarMetadata(person);
-  console.log(metadata);
 
   let name = metadata?.nickname || person;
-  const peer = isOur
-    ? roomsManager.protocol.local
-    : roomsManager.protocol.peers.get(person);
+  let peer: any;
+  if (isOur) {
+    peer = roomsStore;
+  } else {
+    peer = roomsStore.peersMetadata.get(person);
+  }
 
   const contextMenuOptions = useMemo(
     () =>
@@ -49,23 +53,23 @@ const SpeakerPresenter = (props: ISpeaker) => {
           label: 'Reconnect',
           disabled: peer?.status === PeerConnectionState.Connected,
           onClick: (evt: any) => {
-            (roomsManager.protocol as RealmProtocol).retry(person);
+            roomsStore.retryPeer(person);
             evt.stopPropagation();
           },
         },
         // only the creator can kick people
-        ship?.patp === roomsManager.live.room?.creator && {
+        loggedInAccount?.serverId === roomsStore.current?.creator && {
           style: { color: '#FD4E4E' },
           id: `room-speaker-${person}-kick`,
           label: 'Kick',
           loading: false,
           onClick: (evt: any) => {
             evt.stopPropagation();
-            roomsManager.protocol.kick(person);
+            roomsStore.kickPeer(person);
           },
         },
       ].filter(Boolean) as ContextMenuOption[],
-    [peer?.status, person, roomsManager.live.room, roomsManager.protocol, ship]
+    [peer?.status, person, roomsStore.current, loggedInAccount]
   );
 
   const peerState = isOur ? PeerConnectionState.Connected : peer?.status;
@@ -90,19 +94,24 @@ const SpeakerPresenter = (props: ISpeaker) => {
 
   useEffect(() => {
     if (
-      person !== ship?.patp &&
+      person !== loggedInAccount?.serverId &&
       contextMenuOptions !== getOptions(`room-speaker-${person}`)
     ) {
       setOptions(`room-speaker-${person}`, contextMenuOptions);
     }
-  }, [contextMenuOptions, getOptions, person, setOptions, ship?.patp]);
+  }, [
+    contextMenuOptions,
+    getOptions,
+    person,
+    setOptions,
+    loggedInAccount?.serverId,
+  ]);
 
   return (
     <SpeakerWrapper
       id={`room-speaker-${person}`}
       // data-close-tray="false"
       ref={speakerRef}
-      hoverBg={darken(0.04, theme.currentTheme.windowColor)}
       key={person}
       gap={4}
       flexDirection="column"
@@ -123,7 +132,6 @@ const SpeakerPresenter = (props: ISpeaker) => {
         >
           <Avatar
             clickable={false}
-            opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
             borderRadiusOverride="6px"
             simple
             size={36}
@@ -186,15 +194,13 @@ const SpeakerPresenter = (props: ISpeaker) => {
 
 export const Speaker = observer(SpeakerPresenter);
 
-type SpeakerStyle = FlexProps & { hoverBg: string };
-
-const SpeakerWrapper = styled(Flex)<SpeakerStyle>`
+const SpeakerWrapper = styled(Flex)<FlexProps>`
   padding: 16px 0;
   border-radius: 9px;
   transition: 0.25s ease;
   &:hover {
     transition: 0.25s ease;
-    background-color: ${(props: SpeakerStyle) => props.hoverBg};
+    background: rgba(var(--rlm-overlay-hover-rgba));
   }
 `;
 

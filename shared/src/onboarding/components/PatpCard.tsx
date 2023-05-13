@@ -1,5 +1,6 @@
 import styled, { css } from 'styled-components';
-import { Flex, Text, Avatar } from '@holium/design-system/general';
+
+import { Avatar, Flex, Text } from '@holium/design-system/general';
 
 const PatpCardView = styled(Flex)<{ isSelected: boolean }>`
   flex: 1;
@@ -39,7 +40,7 @@ type Props = {
 
 export const PatpCard = ({ patp, isSelected, onClick }: Props) => (
   <PatpCardView isSelected={isSelected} onClick={onClick}>
-    <Avatar patp={patp} sigilColor={['black', 'white']} size={24} />
+    <Avatar patp={patp} sigilColor={['black', 'white']} size={24} simple />
     <PatpCardText isSelected={isSelected}>{patp}</PatpCardText>
   </PatpCardView>
 );

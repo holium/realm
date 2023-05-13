@@ -27,8 +27,9 @@ import {
   TypographyProps,
   variant,
 } from 'styled-system';
-import { ColorProps, colorStyle } from '../../util/colors';
+
 import { skeletonStyle } from '../../general/Skeleton/Skeleton';
+import { ColorProps, colorStyle } from '../../util/colors';
 
 type TextDecorationOption = 'overline' | 'line-through' | 'underline';
 type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';
@@ -99,9 +100,8 @@ export const boxStyles = compose(
   })
 );
 
-export const Box = styled(motion.div)<BoxProps>`
-  box-sizing: border-box;
-  ${boxStyles}
-  ${colorStyle}
-  ${({ isSkeleton }) => isSkeleton && skeletonStyle}
-`;
+export const Box = styled(motion.div)<BoxProps>(
+  (props) => (props.isSkeleton ? skeletonStyle : undefined),
+  boxStyles,
+  colorStyle
+);

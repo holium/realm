@@ -1,41 +1,44 @@
-import {
-  FragmentType,
-  FragmentBlockquoteType,
-  FragmentBoldType,
-  FragmentBoldItalicsType,
-  FragmentBoldItalicsStrikeType,
-  FragmentItalicsStrikeType,
-  FragmentBoldStrikeType,
-  FragmentCodeType,
-  FragmentImageType,
-  FragmentInlineCodeType,
-  FragmentItalicsType,
-  FragmentLinkType,
-  FragmentPlainType,
-  FragmentShipType,
-  FragmentStrikeType,
-  FragmentKey,
-  FragmentUrLinkType,
-  FragmentReplyType,
-  FragmentTabType,
-  TEXT_TYPES,
-} from './Bubble.types';
+import { motion } from 'framer-motion';
 import styled from 'styled-components';
-import { capitalizeFirstLetter } from '../../util/strings';
+
 import {
-  Text,
-  TextProps,
   Flex,
   FlexProps,
   skeletonStyle,
+  Text,
+  TextProps,
 } from '../../../general';
-import { BlockStyle } from '../Block/Block';
-import { motion } from 'framer-motion';
 import { ImageBlock } from '../../blocks/ImageBlock/ImageBlock';
 import { LinkBlock } from '../../blocks/LinkBlock/LinkBlock';
-import { BubbleAuthor } from './Bubble.styles';
 import { Bookmark } from '../../os/Bookmark/Bookmark';
+import { capitalizeFirstLetter } from '../../util/strings';
+import { BlockStyle } from '../Block/Block';
+import { convertFragmentsToPreview } from '../ChatInput/fragment-parser';
 import { BUBBLE_HEIGHT } from './Bubble.constants';
+import { BubbleAuthor } from './Bubble.styles';
+import {
+  FragmentBlockquoteType,
+  FragmentBoldItalicsStrikeType,
+  FragmentBoldItalicsType,
+  FragmentBoldStrikeType,
+  FragmentBoldType,
+  FragmentCodeType,
+  FragmentImageType,
+  FragmentInlineCodeType,
+  FragmentItalicsStrikeType,
+  FragmentItalicsType,
+  FragmentKey,
+  FragmentLinkType,
+  FragmentMarkdownType,
+  FragmentPlainType,
+  FragmentReplyType,
+  FragmentShipType,
+  FragmentStrikeType,
+  FragmentTabType,
+  FragmentType,
+  FragmentUrLinkType,
+  TEXT_TYPES,
+} from './Bubble.types';
 
 export const FragmentBase = styled(Text.Custom)<TextProps>`
   display: inline;
@@ -154,6 +157,7 @@ export const FragmentCodeBlock = styled(Text.Custom)`
   border-radius: 4px;
   width: 100%;
   white-space: pre-wrap;
+  word-wrap: break-word;
 `;
 
 type FragmentImageProps = {
@@ -266,6 +270,12 @@ export const renderFragment = (
 ) => {
   const key = Object.keys(fragment)[0] as FragmentKey;
   switch (key) {
+    case 'markdown':
+      return (
+        <FragmentPlain id={id} key={index}>
+          {(fragment as FragmentMarkdownType).markdown}
+        </FragmentPlain>
+      );
     case 'plain':
       return (
         <FragmentPlain id={id} key={index}>
@@ -318,7 +328,7 @@ export const renderFragment = (
 
     case 'blockquote':
       return (
-        <FragmentBlockquote id={id} key={index}>
+        <FragmentBlockquote id={id} key={index} className="fragment-blockquote">
           {(fragment as FragmentBlockquoteType).blockquote}
         </FragmentBlockquote>
       );
@@ -330,7 +340,7 @@ export const renderFragment = (
       );
     case 'ship':
       return (
-        <FragmentShip id={id} key={index}>
+        <FragmentShip id={id} key={index} className="fragment-ship">
           {(fragment as FragmentShipType).ship}
         </FragmentShip>
       );
@@ -340,6 +350,7 @@ export const renderFragment = (
         <CodeWrapper
           py={1}
           minWidth={containerWidth ? containerWidth / 1.25 : 150}
+          className="code-wrapper"
         >
           <FragmentCodeBlock id={id} key={index}>
             {(fragment as FragmentCodeType).code}
@@ -348,7 +359,7 @@ export const renderFragment = (
       );
     case 'link':
       return (
-        <BlockWrapper id={id} key={author + index}>
+        <BlockWrapper id={id} key={author + index} className="block-wrapper">
           <LinkBlock
             draggable={false}
             mode="embed"
@@ -391,10 +402,15 @@ export const renderFragment = (
 
     case 'reply':
       const msg = (fragment as FragmentReplyType).reply.message[0];
+      const fullmessage = (fragment as FragmentReplyType).reply.message;
       const replyAuthor = (fragment as FragmentReplyType).reply.author;
       const replyId = (fragment as FragmentReplyType).reply.msgId;
-      const fragmentType: string = Object.keys(msg)[0];
-      let replyContent = null;
+      const fragmentType = Object.keys(msg)[0];
+      let replyContent: any = (
+        <FragmentPlain id={id}>
+          {convertFragmentsToPreview(id, fullmessage)}
+        </FragmentPlain>
+      );
       if (
         !TEXT_TYPES.includes(fragmentType) &&
         fragmentType !== 'image' &&
@@ -410,12 +426,9 @@ export const renderFragment = (
             {capitalizeFirstLetter(fragmentType)}
           </FragmentPlain>
         );
-      } else {
-        // TODO flesh out the image case with the following text
-        if (fragmentType === 'image') {
-          // take out precalculated height and width
-          (msg as FragmentImageType).metadata = {};
-        }
+      } else if (fragmentType === 'image') {
+        // take out precalculated height and width
+        (msg as FragmentImageType).metadata = {};
         replyContent = renderFragment(id, msg, index, replyAuthor);
       }
 
@@ -424,6 +437,7 @@ export const renderFragment = (
           style={{ height: 46 }}
           id={id}
           key={`${author + index}-reply`}
+          className="fragment-blockquote"
           onClick={() => onReplyClick?.(replyId)}
         >
           <Flex

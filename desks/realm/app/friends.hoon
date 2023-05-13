@@ -106,6 +106,14 @@
       ?~  fren  ``noun+!>((view:enjs:lib [%contact-info *contact-info:store]))
       ?~  contact-info.u.fren  ``noun+!>((view:enjs:lib [%contact-info *contact-info:store]))
       ``noun+!>((view:enjs:lib [%contact-info u.contact-info.u.fren]))
+      ::
+        [%x %contact-hoon @ ~]
+      ?>  =(our.bowl src.bowl)
+      =/  =ship  `@p`(slav %p i.t.t.path)
+      =/  fren  (~(get by friends) ship)
+      ?~  fren  ``noun+!>([%contact-info *contact-info:store])
+      ?~  contact-info.u.fren  ``noun+!>([%contact-info *contact-info:store])
+      ``noun+!>([%contact-info u.contact-info.u.fren])
     ==
   ::
   ++  on-agent
@@ -438,8 +446,8 @@
 ++  sour  (scot %p our.bowl)
 ++  snow  (scot %da now.bowl)
 ::
-++  has-pals           .^(? %gu /[sour]/pals/[snow])
-++  has-contact-store  .^(? %gu /[sour]/contact-store/[snow])
+++  has-pals           .^(? %gu /[sour]/pals/[snow]/$)
+++  has-contact-store  .^(? %gu /[sour]/contact-store/[snow]/$)
 ++  pals-targets  .^((set ship) %gx /[sour]/pals/[snow]/targets/noun)
 ++  pals-leeches  .^((set ship) %gx /[sour]/pals/[snow]/leeches/noun)
 ++  pals-mutuals  .^((set ship) %gx /[sour]/pals/[snow]/mutuals/noun)

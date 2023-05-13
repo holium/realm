@@ -30,3 +30,26 @@ export const AppRegistry: { [key: string]: AppEntry } = {
     },
   },
 };
+
+type SystemEntry = {
+  position: string;
+  anchorOffset: {
+    x: number;
+    y: number;
+  };
+  dimensions: {
+    height: number;
+    width: number;
+  };
+};
+
+export const SystemTrayRegistry: { [key: string]: SystemEntry } = {
+  spaces: {
+    position: 'top-right',
+    anchorOffset: {
+      x: 4,
+      y: 16,
+    },
+    dimensions: { height: 550, width: 380 },
+  },
+};

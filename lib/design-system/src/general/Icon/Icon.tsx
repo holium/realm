@@ -1,23 +1,24 @@
-import { motion, SVGMotionProps } from 'framer-motion';
 import { forwardRef, useState } from 'react';
+import { motion, SVGMotionProps } from 'framer-motion';
 import styled from 'styled-components';
 import {
-  compose,
-  space,
   color,
-  layout,
-  width,
+  compose,
   height,
-  typography,
-  WidthProps,
   HeightProps,
-  SpaceProps,
+  layout,
   LayoutProps,
+  space,
+  SpaceProps,
+  typography,
   TypographyProps,
+  width,
+  WidthProps,
 } from 'styled-system';
-import { IconPathsType, paths } from './icons';
-import { BoxProps } from '../Box/Box';
+
 import { ColorVariants } from '../../util/colors';
+import { BoxProps } from '../Box/Box';
+import { IconPathsType, paths } from './icons';
 
 export type IconProps = BoxProps &
   SpaceProps &

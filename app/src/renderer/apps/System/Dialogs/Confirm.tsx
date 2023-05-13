@@ -1,9 +1,8 @@
-import { FC } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Spinner } from '@holium/design-system';
-import { Text, TextButton } from 'renderer/components';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { useServices } from 'renderer/logic/store';
+
+import { Button, Flex, Spinner, Text } from '@holium/design-system';
+
+import { useAppState } from 'renderer/stores/app.store';
 
 interface ConfirmDialogProps {
   loading: boolean;
@@ -15,67 +14,64 @@ interface ConfirmDialogProps {
   onConfirm: () => any;
 }
 
-export const ConfirmDialog: FC<ConfirmDialogProps> = observer(
-  (props: ConfirmDialogProps) => {
-    const { theme } = useServices();
-    const { loading } = props;
+const ConfirmDialogPresenter = ({
+  title,
+  description,
+  innerContent,
+  loading,
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  onConfirm,
+}: ConfirmDialogProps) => {
+  const { shellStore } = useAppState();
 
-    const onConfirm = () => {
-      props.onConfirm().then(() => {
-        ShellActions.closeDialog();
-        ShellActions.setBlur(false);
-      });
-    };
+  const handleOnConfirm = () => {
+    onConfirm().then(() => {
+      shellStore.closeDialog();
+      shellStore.setIsBlurred(false);
+    });
+  };
 
-    return (
-      <Flex
-        flex={1}
-        width="100%"
-        height="100%"
-        flexDirection="column"
-        justifyContent="space-between"
-      >
-        <Text fontSize={3} fontWeight={600}>
-          {props.title}
-        </Text>
-        <Text fontSize={2} fontWeight={300}>
-          {props.description}
-        </Text>
-        {props.innerContent}
-        <Flex justifyContent="space-between">
-          <TextButton
-            data-close-tray="false"
-            tabIndex={2}
-            showBackground
-            highlightColor={theme.currentTheme.accentColor}
-            textColor={theme.currentTheme.accentColor}
-            style={{ fontWeight: 400 }}
-            onClick={() => {
-              ShellActions.closeDialog();
-              ShellActions.setBlur(false);
-            }}
-          >
-            {props.cancelText}
-          </TextButton>
-          <TextButton
-            data-close-tray="false"
-            tabIndex={1}
-            highlightColor="#EC415A"
-            showBackground
-            textColor="#EC415A"
-            disabled={loading}
-            style={{ fontWeight: 400 }}
-            onClick={() => onConfirm()}
-          >
-            {loading ? <Spinner size={0} /> : props.confirmText}
-          </TextButton>
-        </Flex>
+  return (
+    <Flex
+      flex={1}
+      width="100%"
+      height="100%"
+      flexDirection="column"
+      justifyContent="space-between"
+    >
+      <Text.Custom fontSize={3} fontWeight={600}>
+        {title}
+      </Text.Custom>
+      <Text.Custom fontSize={2} fontWeight={300}>
+        {description}
+      </Text.Custom>
+      {innerContent}
+      <Flex justifyContent="space-between">
+        <Button.TextButton
+          data-close-tray="false"
+          tabIndex={2}
+          style={{ fontWeight: 400 }}
+          onClick={() => {
+            shellStore.closeDialog();
+            shellStore.setIsBlurred(false);
+          }}
+        >
+          {cancelText}
+        </Button.TextButton>
+        <Button.TextButton
+          data-close-tray="false"
+          tabIndex={1}
+          color="intent-alert"
+          disabled={loading}
+          style={{ fontWeight: 400 }}
+          onClick={handleOnConfirm}
+        >
+          {loading ? <Spinner size={0} /> : confirmText}
+        </Button.TextButton>
       </Flex>
-    );
-  }
-);
-
-ConfirmDialog.defaultProps = {
-  confirmText: 'Confirm',
-  cancelText: 'Cancel',
+    </Flex>
+  );
 };
+
+export const ConfirmDialog = observer(ConfirmDialogPresenter);

@@ -1,12 +1,21 @@
-import { useRef, useMemo, useCallback } from 'react';
-import { Flex, Text, Input, IconButton, Icons } from 'renderer/components';
+import { useCallback, useMemo, useRef } from 'react';
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
+
+import {
+  Box,
+  Bubble,
+  Button,
+  Flex,
+  Icon,
+  Text,
+  TextInput,
+  WindowedList,
+} from '@holium/design-system';
+
 import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
-import { WindowedList } from '@holium/design-system';
-import { RoomChatMessage } from '../components/RoomChatMessage';
-import { useRooms } from '../useRooms';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 export const chatForm = (
   defaults: any = {
@@ -33,17 +42,15 @@ export const chatForm = (
 
 const RoomChatPresenter = () => {
   const { text } = useMemo(() => chatForm(), []);
+  const { loggedInAccount } = useAppState();
+  const { roomsStore } = useShipStore();
   const { getTrayAppHeight } = useTrayApps();
   const listHeight = getTrayAppHeight() - 164;
-  const { theme: themeStore, ship } = useServices();
-
-  const roomsManager = useRooms(ship?.patp);
-
-  const theme = themeStore.currentTheme;
 
   const chatInputRef = useRef<HTMLInputElement>(null);
 
-  const chats = roomsManager.live.chat.slice(0);
+  const chats = roomsStore.chat.slice(0);
+  const ourColor = loggedInAccount?.color || '#000';
 
   const handleChat = useCallback(
     (evt: any) => {
@@ -52,10 +59,10 @@ const RoomChatPresenter = () => {
       if (chatInputRef.current === null) return;
       const innerText = chatInputRef.current.value;
       if (innerText === '') return;
-      roomsManager.sendChat(innerText);
+      roomsStore.sendChat(innerText);
       text.actions.onChange('');
     },
-    [roomsManager.presentRoom, text.actions]
+    [roomsStore.current, text.actions]
   );
 
   const ChatList = useMemo(() => {
@@ -67,9 +74,9 @@ const RoomChatPresenter = () => {
           alignItems="center"
           justifyContent="center"
         >
-          <Text fontWeight={500} opacity={0.5}>
+          <Text.Custom fontWeight={500} opacity={0.5}>
             No Chat History
-          </Text>
+          </Text.Custom>
         </Flex>
       );
     }
@@ -79,46 +86,68 @@ const RoomChatPresenter = () => {
         width={354}
         height={listHeight}
         data={chats.sort((a, b) => a.timeReceived - b.timeReceived)}
+        alignToBottom
+        chatMode
+        shiftScrollbar
         itemContent={(index, chat) => (
-          <RoomChatMessage
-            key={chat.index}
-            chat={chat}
-            doesPack={
-              chats[index - 1] &&
-              // pack if last guy is the same as the current guy
-              chats[index - 1].author === chat.author
-              // and the last guy isn't too old (2 minutes)
-              // chats[index - 1].timeReceived + 1000 < chat.timeReceived
-            }
-          />
+          <Box pt="2px">
+            <Bubble
+              id={`chat-${chat.index}`}
+              isOur={chat.author === window.ship}
+              author={chat.author}
+              ourColor={ourColor}
+              authorColor="#000"
+              sentAt={new Date(chat.timeReceived).toISOString()}
+              isPrevGrouped={
+                chats[index - 1] && chats[index - 1].author === chat.author
+              }
+              message={[
+                {
+                  plain: chat.content,
+                },
+              ]}
+              onReaction={() => {}}
+            />
+          </Box>
         )}
       />
     );
   }, [chats]);
 
   return (
-    <Flex flex={1} flexDirection="column">
+    <Flex position="relative" flex={1} flexDirection="column">
       {ChatList}
       <Flex
+        position="absolute"
+        bottom={0}
+        left={0}
+        right={0}
         flexDirection="row"
         alignItems="center"
         pt={2}
         pb={2}
-        px={3}
+        // px={3}
         style={{
           gap: 8,
         }}
       >
-        <Input
+        <TextInput
           tabIndex={2}
+          id="chat-input"
+          name="chat-input"
           type="text"
-          placeholder="whats up dawg"
+          placeholder="New message"
           autoFocus
-          innerRef={chatInputRef}
+          ref={chatInputRef}
           spellCheck={false}
-          wrapperStyle={{
-            borderRadius: 6,
-            backgroundColor: theme.inputColor,
+          inputStyle={{
+            paddingLeft: 8,
+            paddingRight: 6,
+          }}
+          style={{
+            width: '100%',
+            height: 24,
+            borderRadius: 16,
           }}
           value={text.state.value}
           error={
@@ -134,18 +163,16 @@ const RoomChatPresenter = () => {
           }}
           onFocus={() => text.actions.onFocus()}
           onBlur={() => text.actions.onBlur()}
-          rightIcon={
+          rightAdornment={
             <Flex justifyContent="center" alignItems="center">
-              <IconButton
-                luminosity={theme.mode}
+              <Button.IconButton
                 size={24}
-                canFocus
                 onClick={(evt: any) => {
                   handleChat(evt);
                 }}
               >
-                <Icons opacity={0.5} name="ArrowRightLine" />
-              </IconButton>
+                <Icon size={18} opacity={0.5} name="ArrowRightLine" />
+              </Button.IconButton>
             </Flex>
           }
         />

@@ -1,88 +1,18 @@
-import { useEffect, useState } from 'react';
-import { sigil, reactRenderer } from '@tlon/sigil-js';
-import styled, { css } from 'styled-components';
+import { reactRenderer, sigil } from '@tlon/sigil-js';
 import { motion } from 'framer-motion';
-import { BorderRadiusProps } from 'styled-system';
-import { Box, BoxProps } from '../Box/Box';
-import { isImgValid } from '../../util/image';
 
-export type AvatarStyleProps = BoxProps &
-  BorderRadiusProps & {
-    clickable?: boolean;
-    active?: boolean;
-    sigilColor?: string;
-    sigilSize?: number;
-    overlayBorder?: string;
-    borderRadiusOverride?: string;
-    raised?: boolean;
-    theme: any;
-  };
+import { contrastAwareBlackOrWhiteHex } from '../../../util';
+import { AvatarInner, AvatarWrapper } from './Avatar.styles';
 
-export const AvatarWrapper = styled(Box)<AvatarStyleProps>`
-  overflow: hidden;
-  box-sizing: content-box;
-  pointer-events: none;
-  border-radius: var(--rlm-border-radius-4);
-  img {
-    user-select: none;
-    pointer-events: none;
-    background: rgba(var(--rlm-base-rgba));
-    border-radius: var(--rlm-border-radius-4);
-  }
-  transition: var(--transition);
-
-  ${(props: AvatarStyleProps) =>
-    props.clickable &&
-    css`
-      pointer-events: auto;
-      cursor: pointer;
-      -webkit-filter: brightness(100%);
-      transition: var(--transition);
-      &:hover {
-        -webkit-filter: brightness(96%);
-        transition: var(--transition);
-      }
-      &:active {
-        -webkit-filter: brightness(92%);
-        transition: var(--transition);
-      }
-    `}
-
-  ${(props: AvatarStyleProps) =>
-    props.raised &&
-    css`
-      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-    `}
-
-      ${(props: AvatarStyleProps) =>
-    props.borderRadiusOverride &&
-    css`
-      border-radius: ${props.borderRadiusOverride};
-    `}
-`;
-
-const AvatarInner = styled(Box)<{ src: string }>`
-  background-image: url(${(props) => props.src});
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-`;
-
-type AvatarProps = {
+type Props = {
   patp: string;
   avatar?: string | null;
-  nickname?: string;
   size: number;
   simple?: boolean;
   sigilColor: [string, string];
-  isLogin?: boolean;
   clickable?: boolean;
-  opacity?: number;
-  layoutId?: string;
-  layout?: any;
-  transition?: any;
   borderRadiusOverride?: string;
-} & BoxProps;
+};
 
 export const Avatar = ({
   patp,
@@ -91,20 +21,12 @@ export const Avatar = ({
   sigilColor = ['#000000', '#ffffff'],
   simple,
   clickable,
-  layoutId,
-  layout,
-  transition,
-  ...rest
-}: AvatarProps) => {
-  const [_isValid, setIsValid] = useState(false);
-
-  useEffect(() => {
-    if (avatar) {
-      isImgValid(avatar).then((valid) => {
-        setIsValid(valid);
-      });
-    }
-  }, [avatar]);
+  borderRadiusOverride,
+}: Props) => {
+  const responsiveSigilColor: [string, string] = [
+    sigilColor[0],
+    contrastAwareBlackOrWhiteHex(sigilColor[0], 'white'),
+  ];
 
   let innerContent = null;
   if (avatar) {
@@ -112,11 +34,11 @@ export const Avatar = ({
       <AvatarInner
         src={avatar}
         style={{
-          borderRadius: rest.borderRadiusOverride,
+          borderRadius: borderRadiusOverride,
           width: size,
           height: size,
         }}
-      ></AvatarInner>
+      />
     );
   } else {
     if (!patp) return null;
@@ -126,7 +48,7 @@ export const Avatar = ({
       <motion.div
         style={{
           padding: innerPadding,
-          backgroundColor: sigilColor[0],
+          backgroundColor: responsiveSigilColor[0],
           width: size,
           height: size,
         }}
@@ -138,7 +60,7 @@ export const Avatar = ({
             size: sigilSize,
             icon: simple,
             margin: false,
-            colors: sigilColor,
+            colors: responsiveSigilColor,
           })}
       </motion.div>
     );
@@ -146,14 +68,9 @@ export const Avatar = ({
 
   return (
     <AvatarWrapper
-      layoutId={layoutId}
-      layout={layout}
-      transition={transition}
-      borderRadiusOverride={rest.borderRadiusOverride}
+      borderRadiusOverride={borderRadiusOverride}
       clickable={clickable}
       sigilSize={size}
-      width={size}
-      height={size}
     >
       {innerContent}
     </AvatarWrapper>

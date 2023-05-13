@@ -1,20 +1,21 @@
-import { useMemo, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { observer } from 'mobx-react';
+
 import {
-  Row,
+  convertFragmentsToPreview,
   Flex,
+  MenuItemProps,
+  Row,
   Text,
   timelineDate,
-  MenuItemProps,
-  TEXT_TYPES,
 } from '@holium/design-system';
-import { observer } from 'mobx-react';
+
+import { ChatPathType } from 'os/services/ship/chat/chat.types';
 import { useContextMenu } from 'renderer/components';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { useChatStore } from '../store';
-import { ChatPathType } from 'os/services/chat/chat.service';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+
 import { ChatAvatar } from './ChatAvatar';
-import { useServices } from 'renderer/logic/store';
-import { useAccountStore } from 'renderer/apps/Account/store';
 import { UnreadBadge } from './UnreadBadge';
 
 type ChatRowProps = {
@@ -41,7 +42,8 @@ export const ChatRowPresenter = ({
   height,
   onClick,
 }: ChatRowProps) => {
-  const { ship, spaces } = useServices();
+  const { loggedInAccount, shellStore } = useAppState();
+  const { notifStore, chatStore, spacesStore } = useShipStore();
   const {
     inbox,
     getChatHeader,
@@ -51,8 +53,8 @@ export const ChatRowPresenter = ({
     isChatMuted,
     togglePinned,
     toggleMuted,
-  } = useChatStore();
-  const { readPath, getUnreadCountByPath } = useAccountStore();
+  } = chatStore;
+  const { readPath, getUnreadCountByPath } = notifStore;
   const { getOptions, setOptions } = useContextMenu();
 
   const unreadCount = getUnreadCountByPath(path);
@@ -66,40 +68,9 @@ export const ChatRowPresenter = ({
   const lastMessageUpdated: React.ReactNode = useMemo(() => {
     if (!chat) return null;
     if (!chat.lastMessage) return 'No messages yet';
-    return (
-      <span>
-        {chat.lastMessage &&
-          chat.lastMessage.contents.map(
-            (content: { [key: string]: string }, idx: number) => {
-              if (!chat.lastMessage) return null;
-              let type = Object.keys(content)[0];
-              const value = content[type];
-              if (type === 'break') {
-                return ' ';
-              } else if (TEXT_TYPES.includes(type) || type === 'link') {
-                return (
-                  <span key={`${chat.lastMessage.id}-lastMessage-${idx}`}>
-                    {value}
-                  </span>
-                );
-              } else {
-                if (type === 'code') type = 'code block';
-                return (
-                  <span
-                    style={{
-                      marginLeft: 2,
-                      marginRight: 2,
-                      fontStyle: 'italic',
-                    }}
-                    key={`${chat.lastMessage.id}-lastMessage-${idx}`}
-                  >
-                    {type}
-                  </span>
-                );
-              }
-            }
-          )}
-      </span>
+    return convertFragmentsToPreview(
+      chat.lastMessage.id,
+      chat.lastMessage.contents
     );
   }, [chat?.lastMessage?.id]);
 
@@ -130,14 +101,14 @@ export const ChatRowPresenter = ({
   }, [chat?.lastMessage?.id]);
 
   const contextMenuOptions = useMemo(() => {
-    if (!ship) return [];
+    if (!loggedInAccount) return [];
     const menu = [];
     menu.push({
       id: `${chatRowId}-pin-chat`,
       icon: isPinned ? 'Unpin' : 'Pin',
       label: isPinned ? 'Unpin' : 'Pin',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         togglePinned(path, !isPinned);
       },
@@ -147,7 +118,7 @@ export const ChatRowPresenter = ({
       icon: 'MessageRead',
       label: 'Mark as read',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         readPath('realm-chat', path);
       },
@@ -157,7 +128,7 @@ export const ChatRowPresenter = ({
       icon: 'Info',
       label: 'Info',
       disabled: false,
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         setChat(path);
         setSubroute('chat-info');
@@ -167,7 +138,7 @@ export const ChatRowPresenter = ({
       id: `${chatRowId}-mute-chat`,
       icon: isMuted ? 'NotificationOff' : 'Notification',
       label: isMuted ? 'Unmute' : 'Mute',
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         toggleMuted(path, !isMuted);
       },
@@ -179,13 +150,13 @@ export const ChatRowPresenter = ({
         icon: isAdmin ? 'Trash' : 'Logout',
         iconColor: '#ff6240',
         labelColor: '#ff6240',
-        onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
-          ShellActions.setBlur(true);
-          ShellActions.openDialogWithStringProps('leave-chat-dialog', {
+          shellStore.setIsBlurred(true);
+          shellStore.openDialogWithStringProps('leave-chat-dialog', {
             path,
             amHost: isAdmin.toString(),
-            our: ship.patp,
+            our: loggedInAccount.serverId,
           });
         },
       });
@@ -207,7 +178,7 @@ export const ChatRowPresenter = ({
   let spaceHeader = null;
   let avatarColor: string | undefined;
   if (type === 'space') {
-    const space = spaces.getSpaceByChatPath(path);
+    const space = spacesStore.getSpaceByChatPath(path);
 
     if (!space) {
       spaceHeader = null;

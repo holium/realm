@@ -1,17 +1,13 @@
 import styled from 'styled-components';
-import { Text, Box, BoxProps, Icon } from '../../../general';
+
+import { Box, BoxProps, Icon, Text } from '../../../general';
 import { BlockStyle } from '../../blocks/Block/Block';
 import { BUBBLE_HEIGHT, BUBBLE_WIDTH } from './Bubble.constants';
-import {
-  FragmentBlockquote,
-  FragmentShip,
-  BlockWrapper,
-  CodeWrapper,
-} from './fragment-lib';
 
 export type BubbleStyleProps = {
   isPrevGrouped?: boolean;
   isNextGrouped?: boolean;
+  ourTextColor?: string;
 } & BoxProps;
 
 export const BubbleStyle = styled(Box)<BubbleStyleProps>`
@@ -24,7 +20,7 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
   box-sizing: border-box;
   padding: ${BUBBLE_HEIGHT.rem.paddingY} ${BUBBLE_WIDTH.rem.paddingX};
   min-width: 150px;
-  max-width: 100%;
+  max-width: 90%;
   color: rgba(var(--rlm-text-rgba));
   background: rgba(var(--rlm-input-rgba));
   border-radius: ${(props) => {
@@ -53,30 +49,56 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
     }} !important;
 
     ${Text.Custom} {
-      color: #ffffff !important;
+      color: ${(props) => {
+        if (props.ourTextColor) {
+          return props.ourTextColor;
+        }
+        return '#ffffff';
+      }} !important;
     }
     ${Icon} {
       line-height: 1.1;
       fill: #ffffff !important;
     }
-    ${FragmentBlockquote} {
-      color: #ffffff;
-      border-left: 2px solid #ffffff70;
+    .fragment-blockquote {
+      color: ${(props) => {
+        if (props.ourTextColor) {
+          return props.ourTextColor;
+        }
+        return '#ffffff';
+      }};
+      border-left: 2px solid
+        ${(props) => {
+          if (props.ourTextColor) {
+            return props.ourTextColor;
+          }
+          return '#ffffff';
+        }}70;
     }
-    ${CodeWrapper} {
+    .code-wrapper {
       background-color: rgba(0, 0, 0, 0.12);
       &:hover {
         transition: var(--transition);
         background-color: rgba(0, 0, 0, 0.15);
       }
     }
-    ${FragmentShip} {
-      background: #ffffff30;
+    .fragment-ship {
+      background: ${(props) => {
+        if (props.ourTextColor && props.ourTextColor === '#000000') {
+          return '#00000015';
+        }
+        return '#ffffff30';
+      }};
       &:hover {
-        background: #ffffff45;
+        background: ${(props) => {
+          if (props.ourTextColor && props.ourTextColor === '#000000') {
+            return '#00000025';
+          }
+          return '#ffffff45';
+        }};
       }
     }
-    ${BlockWrapper} {
+    .block-wrapper {
       a {
         color: #ffffff !important;
       }

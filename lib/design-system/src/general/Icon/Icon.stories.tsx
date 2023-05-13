@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Icon } from './Icon';
-import { paths, IconPathsType } from './icons';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+
+import { TextInput } from '../../../inputs';
 import { Flex } from '../Flex/Flex';
 import { Text } from '../Text/Text';
-import { TextInput } from '../../../inputs';
+import { Icon } from './Icon';
+import { IconPathsType, paths } from './icons';
 
 export default {
   component: Icon,

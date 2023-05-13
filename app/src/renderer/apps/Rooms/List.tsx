@@ -1,25 +1,29 @@
+import { useEffect } from 'react';
 import { observer } from 'mobx-react';
-import { Flex, Text, Button, Icon, Tooltip } from '@holium/design-system';
-import { RoomRow } from './components/RoomRow';
-import { useServices } from 'renderer/logic/store';
-import { ProviderSelector } from './components/ProviderSelector';
-import { useRooms } from './useRooms';
+
+import { Button, Flex, Icon, Text, Tooltip } from '@holium/design-system';
+
+import { trackEvent } from 'renderer/lib/track';
+import { RoomMobx } from 'renderer/stores/rooms.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+
 import { useTrayApps } from '../store';
-import { RealmProtocol, RoomType } from '@holium/realm-room';
+import { ProviderSelector } from './components/ProviderSelector';
+import { RoomRow } from './components/RoomRow';
 
 const RoomsPresenter = () => {
-  const { ship, spaces, theme } = useServices();
-  const { windowColor } = theme.currentTheme;
+  const { spacesStore, roomsStore } = useShipStore();
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms(ship?.patp);
 
-  const ourSpace = spaces.selected?.type === 'our';
+  const ourSpace = spacesStore.selected?.type === 'our';
+
+  useEffect(() => {
+    trackEvent('OPENED', 'ROOMS_LIST');
+  }, []);
 
   const rooms = ourSpace
-    ? roomsManager?.rooms
-    : (roomsManager?.protocol as RealmProtocol).getSpaceRooms(
-        spaces.selected?.path ?? ''
-      );
+    ? roomsStore?.roomsList
+    : roomsStore.getSpaceRooms(spacesStore.selected?.path ?? '');
 
   return (
     <>
@@ -65,7 +69,7 @@ const RoomsPresenter = () => {
             </Text.Custom>
           </Flex>
         )}
-        {rooms?.map((room: RoomType, index: number) => {
+        {rooms?.map((room: RoomMobx, index: number) => {
           return (
             <RoomRow
               key={`${room.title}-${index}`}
@@ -79,8 +83,8 @@ const RoomsPresenter = () => {
               capacity={room.capacity}
               onClick={async (evt: any) => {
                 evt.stopPropagation();
-                if (roomsManager?.live.room?.rid !== room.rid) {
-                  roomsManager?.joinRoom(room.rid);
+                if (roomsStore.current?.rid !== room.rid) {
+                  roomsStore?.joinRoom(room.rid);
                 }
                 roomsApp.setView('room');
               }}
@@ -95,7 +99,6 @@ const RoomsPresenter = () => {
           content="This is your room provider."
         >
           <ProviderSelector
-            seedColor={windowColor}
             onClick={() => {
               console.log('show provider setup');
             }}

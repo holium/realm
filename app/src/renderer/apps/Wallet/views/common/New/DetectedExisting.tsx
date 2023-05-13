@@ -1,72 +1,47 @@
 import { Dispatch, SetStateAction } from 'react';
 import { observer } from 'mobx-react';
-import {
-  Button,
-  Flex,
-  Text,
-  Box,
-  Icons,
-  TextButton,
-} from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { getBaseTheme } from 'renderer/apps/Wallet/lib/helpers';
-import { NewWalletScreen } from './index';
+
+import { Box, Button, Flex, Icon, Text } from '@holium/design-system';
+
+import { NewWalletScreen } from './EthNew';
 
 interface DetectedExistingProps {
   setScreen: Dispatch<SetStateAction<NewWalletScreen>>;
 }
 
 const DetectedExistingPresenter = (props: DetectedExistingProps) => {
-  const { theme } = useServices();
-  const baseTheme = getBaseTheme(theme.currentTheme);
-
   return (
     <Flex width="100%" height="100%" flexDirection="column">
-      <Flex flex={4} flexDirection="column" alignItems="center">
-        <Text mt={6} variant="h4">
-          Recover Wallet
-        </Text>
-        <Text
-          px="10px"
-          mt={3}
-          mb={5}
-          variant="body"
-          color={baseTheme.colors.text.secondary}
-          textAlign="center"
-        >
+      <Flex flex={4} flexDirection="column" alignItems="center" gap={20}>
+        <Text.H4 variant="h4">Recover Wallet</Text.H4>
+        <Text.Body px="10px" mb={5} variant="body" textAlign="center">
           An existing Realm wallet has been detected. You can either recover it
           using your seed phrase or create a new one.
-        </Text>
-        <Box mt={9}>
-          <Button
+        </Text.Body>
+        <Box>
+          <Button.TextButton
             onClick={() => props.setScreen(NewWalletScreen.RECOVER_EXISTING)}
           >
             Recover Wallet
-          </Button>
+          </Button.TextButton>
         </Box>
-        <Box mt={3}>
-          <TextButton
-            textColor={baseTheme.colors.text.secondary}
+        <Box>
+          <Button.TextButton
             onClick={() => props.setScreen(NewWalletScreen.BACKUP)}
           >
             Or create a new wallet
-          </TextButton>
+          </Button.TextButton>
         </Box>
       </Flex>
-      <Flex mb={6} mx={3} justifyContent="center" alignItems="center">
+      <Flex mb={2} mx={3} justifyContent="center" alignItems="center">
         <Box>
-          <Icons name="InfoCircle" color={baseTheme.colors.brand.secondary} />
+          <Icon name="InfoCircle" />
         </Box>
         <Box>
-          <Text
-            ml={2}
-            variant="hint"
-            justifyContent="flex-end"
-            color={baseTheme.colors.brand.secondary}
-          >
+          <Text.Hint ml={2} variant="hint" justifyContent="flex-end">
             You are using pre-release software. Only use for development
             purposes.
-          </Text>
+          </Text.Hint>
         </Box>
       </Flex>
     </Flex>

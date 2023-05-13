@@ -1,7 +1,8 @@
 import { BrowserWindow, ipcMain, session } from 'electron';
+
 import { getPreloadPath } from '../main';
-import { hideCursor } from './hideCursor';
 import { isMac, isWindows } from './env';
+import { hideCursor } from './hideCursor';
 
 const registerListeners = (mainWindow: BrowserWindow) => {
   ipcMain.handle(

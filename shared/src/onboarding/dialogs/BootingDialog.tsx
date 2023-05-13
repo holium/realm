@@ -1,6 +1,9 @@
 import styled from 'styled-components';
+
 import { Flex, Icon, Spinner, Text } from '@holium/design-system/general';
+
 import { OnboardDialog } from '../components/OnboardDialog';
+import { OnboardDialogTitle } from '../components/OnboardDialog.styles';
 
 type Props = {
   logs: string[];
@@ -34,7 +37,7 @@ export const BootingDialog = ({ logs, isBooting, onNext }: Props) => (
     }
     body={
       <Flex flexDirection="column" gap={16}>
-        <Text.H2>Booting your personal server</Text.H2>
+        <OnboardDialogTitle>Booting your personal server</OnboardDialogTitle>
         <LogCard>
           {logs.map((log, i) => (
             <LogText key={`log-${i}`}>{log}</LogText>

@@ -1,4 +1,5 @@
 import { ipcMain, systemPreferences } from 'electron';
+
 import { MediaAccess, MediaAccessStatus } from '../../os/types';
 import { isMac, isWindows } from './env';
 

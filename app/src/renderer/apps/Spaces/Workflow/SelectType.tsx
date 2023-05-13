@@ -1,13 +1,15 @@
 import { FC, useEffect, useState } from 'react';
-import styled from 'styled-components';
 // import { toJS } from 'mobx';
 import { motion } from 'framer-motion';
-import { Text, Flex, Skeleton } from 'renderer/components';
 import { observer } from 'mobx-react';
-import { useServices } from 'renderer/logic/store';
+import styled from 'styled-components';
+
+import { Button, Flex, Icon, Skeleton, Text } from '@holium/design-system';
+
+import { useShipStore } from 'renderer/stores/ship.store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+
 import { SelectRow } from '../components/SelectionRow';
-import { ShipActions } from 'renderer/logic/actions/ship';
 
 export const Wrapper = styled(motion.div)`
   position: absolute;
@@ -16,16 +18,15 @@ export const Wrapper = styled(motion.div)`
 
 export const CreateSpaceModal: FC<BaseDialogProps> = observer(
   (props: BaseDialogProps) => {
-    const { theme, spaces } = useServices();
-    const { windowColor } = theme.currentTheme;
+    const { getOurGroups, spacesStore } = useShipStore();
     const { setState } = props;
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(true);
     useEffect(() => {
-      const groupSpaces = Array.from(spaces.spaces.values())
+      const groupSpaces = Array.from(spacesStore.spaces.values())
         .filter((space) => space.type === 'group')
         .map((space) => space.path);
-      ShipActions.getOurGroups().then((ourGroups) => {
+      getOurGroups().then((ourGroups) => {
         const nonSpaceGroups = ourGroups.filter(
           (group: any) => !groupSpaces.includes(group.path)
         );
@@ -57,7 +58,6 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
                   key={groupKey}
                   color={data.color}
                   image={data.picture}
-                  customBg={windowColor}
                   title={data.name || groupKey}
                   buttonText="Add Space"
                   subtitle={subtitle}
@@ -87,9 +87,9 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
               justifyContent="center"
               flex={1}
             >
-              <Text textAlign="center" fontWeight={300} opacity={0.6}>
+              <Text.Custom textAlign="center" fontWeight={300} opacity={0.6}>
                 You don't host any groups.
-              </Text>
+              </Text.Custom>
             </Flex>
           )}
         </>
@@ -97,7 +97,7 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
     }
     return (
       <Flex flexDirection="column" width="100%">
-        <Text
+        <Text.Custom
           fontSize={5}
           lineHeight="24px"
           fontWeight={500}
@@ -105,21 +105,47 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
           variant="body"
         >
           Make a space
-        </Text>
-        <Text
+        </Text.Custom>
+        <Text.Custom
           fontSize={3}
           fontWeight={200}
           lineHeight="20px"
           variant="body"
           opacity={0.6}
-          mb={6}
+          mb={4}
         >
           A space is a place where people can compute together.
-        </Text>
-        <Flex flexDirection="column" justifyContent="flex-start">
-          <SelectRow
+        </Text.Custom>
+        <Flex col justify="flex-start">
+          <Flex row justify="space-between" align="center">
+            <Flex row gap={16} align="center">
+              <Icon size={32} name="SpacesColor" />
+              <Text.Custom opacity={0.9} fontSize={3} fontWeight={500}>
+                New Space
+              </Text.Custom>
+            </Flex>
+            <Button.TextButton
+              // fontSize={2}
+              onClick={(evt: any) => {
+                evt.stopPropagation();
+                setState &&
+                  setState({
+                    title: 'New Space',
+                    type: 'space',
+                    color: '#000000',
+                    image: '',
+                    archetype: 'community',
+                    archetypeTitle: 'Community',
+                    crestOption: 'color',
+                  });
+                props.onNext && props.onNext(null, 'New Space');
+              }}
+            >
+              Create
+            </Button.TextButton>
+          </Flex>
+          {/* <SelectRow
             icon="SpacesColor"
-            customBg={windowColor}
             title="New Space"
             buttonText="Create"
             onButtonClick={(data: any) => {
@@ -135,9 +161,9 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
                 });
               props.onNext && props.onNext(null, data);
             }}
-          />
-          <Flex mt={8} flex={1} flexDirection="column">
-            <Text
+          /> */}
+          <Flex mt={4} flex={1} flexDirection="column">
+            <Text.Custom
               fontWeight={500}
               fontSize={2}
               opacity={0.5}
@@ -145,7 +171,7 @@ export const CreateSpaceModal: FC<BaseDialogProps> = observer(
               style={{ textTransform: 'uppercase' }}
             >
               Your groups
-            </Text>
+            </Text.Custom>
             <Flex flex={1} gap={6} flexDirection="column">
               {list}
             </Flex>

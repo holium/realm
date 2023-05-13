@@ -1,14 +1,20 @@
-import { RefObject } from 'react';
+import { RefObject, useState } from 'react';
+import { Gallery } from 'react-photoswipe-gallery';
+
 import {
   Box,
   Text,
   WindowedList,
   WindowedListRef,
 } from '@holium/design-system';
+
 import { displayDate } from 'os/lib/time';
+
+import {
+  ChatMessageType,
+  ChatModelType,
+} from '../../../stores/models/chat.model';
 import { ChatMessage } from '../components/ChatMessage';
-import { ChatMessageType, ChatModelType } from '../models';
-import { Gallery } from 'react-photoswipe-gallery';
 
 type Props = {
   listRef: RefObject<WindowedListRef>;
@@ -31,9 +37,10 @@ export const ChatLogList = ({
   endOfListPadding,
   topOfListPadding,
 }: Props) => {
+  const [prevHeight, setPrevHeight] = useState<number>(0);
+
   const renderChatRow = (index: number, row: ChatMessageType) => {
     const isLast = selectedChat ? index === messages.length - 1 : false;
-
     const isNextGrouped =
       index < messages.length - 1 && row.sender === messages[index + 1].sender;
 
@@ -42,6 +49,7 @@ export const ChatLogList = ({
       row.sender === messages[index - 1].sender &&
       Object.keys(messages[index - 1].contents[0])[0] !== 'status';
 
+    // we need to use 3px here because numbers are increments of 4px -- so 3 is 12px actually
     let topSpacing = isPrevGrouped ? '3px' : 2;
     let bottomSpacing = isNextGrouped ? '3px' : 2;
 
@@ -50,9 +58,6 @@ export const ChatLogList = ({
       messages[index - 1] &&
       new Date(messages[index - 1].createdAt).toDateString();
     const showDate = index === 0 || thisMsgDate !== prevMsgDate;
-    if (index === messages.length - 1 && endOfListPadding) {
-      bottomSpacing = endOfListPadding;
-    }
 
     if (index === 0 && topOfListPadding) {
       topSpacing = topOfListPadding;
@@ -106,10 +111,31 @@ export const ChatLogList = ({
         width={width}
         height={height}
         atBottomThreshold={100}
-        // style={{ marginRight: -scrollbarWidth }}
-        // alignToBottom
-        // initialTopMostItemIndex={messages.length - 1}
+        followOutput={true}
+        increaseViewportBy={{
+          top: 200,
+          bottom: 200,
+        }}
+        alignToBottom
+        totalListHeightChanged={(height: number) => {
+          if (height - prevHeight === 10) {
+            // 10 px is the height change that occurs when there's a reaction added
+            listRef?.current?.scrollBy({
+              top: 10,
+            });
+          } else if (height - prevHeight === endOfListPadding) {
+            listRef?.current?.scrollBy({
+              top: endOfListPadding,
+            });
+          }
+          setPrevHeight(height);
+        }}
         itemContent={renderChatRow}
+        components={{
+          Footer: () => {
+            return <div style={{ height: endOfListPadding + 'px' }}> </div>;
+          },
+        }}
         chatMode
         shiftScrollbar
       />

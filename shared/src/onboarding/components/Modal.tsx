@@ -1,14 +1,16 @@
-import { FormEvent, ReactNode } from 'react';
+import { CSSProperties, FormEvent, ReactNode } from 'react';
 import styled from 'styled-components';
+
 import { Button, Icon } from '@holium/design-system/general';
+
 import { MOBILE_WIDTH } from './OnboardDialog.styles';
 
-const ModalContainer = styled.div`
+const ModalContainer = styled.div<{ maxWidth?: number }>`
   display: flex;
   position: absolute;
   z-index: 100;
   width: 100%;
-  max-width: ${MOBILE_WIDTH}px;
+  max-width: ${({ maxWidth }) => `${maxWidth ?? MOBILE_WIDTH}px`};
   padding: 32px;
   border-radius: 11px;
   background-color: rgba(var(--rlm-window-rgba));
@@ -48,20 +50,29 @@ const CloseFormContainer = styled.div`
 type Props = {
   isOpen: boolean;
   children: ReactNode;
+  maxWidth?: number;
+  style?: CSSProperties;
   onDismiss: () => void;
   onSubmit?: (e: FormEvent<HTMLFormElement>) => void;
 };
 
-export const Modal = ({ isOpen, children, onDismiss, onSubmit }: Props) => {
+export const Modal = ({
+  isOpen,
+  children,
+  maxWidth,
+  style,
+  onDismiss,
+  onSubmit,
+}: Props) => {
   if (!isOpen) return null;
 
   return (
     <>
       <Overlay onClick={onDismiss} />
-      <ModalContainer>
-        <Form onSubmit={onSubmit}>
+      <ModalContainer style={style} maxWidth={maxWidth}>
+        <Form autoComplete="off" onSubmit={onSubmit}>
           <CloseFormContainer>
-            <Button.Transparent onClick={onDismiss}>
+            <Button.Transparent type="button" onClick={onDismiss}>
               <Icon name="Close" size={20} fill="text" opacity={0.5} />
             </Button.Transparent>
           </CloseFormContainer>

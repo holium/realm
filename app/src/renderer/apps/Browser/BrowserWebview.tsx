@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Text } from 'renderer/components';
-import { useBrowser } from './store';
+
+import { Text } from '@holium/design-system';
+
+import { useAppState } from 'renderer/stores/app.store';
 import { WebView } from 'renderer/system/desktop/components/AppWindow/View/WebView';
+
+import { useBrowser } from './store';
 
 type Props = {
   isDragging: boolean;
@@ -12,6 +16,8 @@ type Props = {
 const appId = 'os-browser';
 
 const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
+  const { loggedInAccount } = useAppState();
+
   const { currentTab, setUrl, setLoading, setLoaded, setError } = useBrowser();
   const [readyWebview, setReadyWebview] = useState<Electron.WebviewTag>();
 
@@ -71,7 +77,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
     () => (
       <>
         {loadingState === 'error' ? (
-          <Text
+          <Text.Custom
             style={{
               position: 'absolute',
               top: '50%',
@@ -83,7 +89,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
             }}
           >
             Failed to load.
-          </Text>
+          </Text.Custom>
         ) : (
           <WebView
             id={currentTab.id}
@@ -92,7 +98,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
             // @ts-expect-error
             enableblinkfeatures="PreciseMemoryInfo, CSSVariables, AudioOutputDevices, AudioVideoTracks"
             useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0"
-            partition="browser-webview"
+            partition={`persist:browser-webview-${loggedInAccount?.serverId}`}
             isLocked={isDragging || isResizing || loadingState === 'loading'}
             style={{
               background: 'white',
@@ -104,7 +110,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
         )}
       </>
     ),
-    [currentTab.url, isDragging, isResizing, loadingState]
+    [currentTab.url, isDragging, isResizing, loadingState, loggedInAccount]
   );
 };
 

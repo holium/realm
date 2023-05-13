@@ -1,16 +1,25 @@
-import { useMemo, useState, useEffect, Ref } from 'react';
-import { Flex, Text, BoxProps, Box, convertDarkText, Icon } from '../..';
-import { BubbleStyle, BubbleAuthor, BubbleFooter } from './Bubble.styles';
-import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
-import { Reactions, OnReactionPayload } from './Reaction';
+import { Ref, useEffect, useMemo, useState } from 'react';
+
+import {
+  Box,
+  BoxProps,
+  contrastAwareBlackOrWhiteHex,
+  Flex,
+  flipColorIfLowContrast,
+  Icon,
+  Text,
+} from '../..';
+import { chatDate } from '../../util/date';
+import { BUBBLE_HEIGHT, STATUS_HEIGHT } from './Bubble.constants';
+import { BubbleAuthor, BubbleFooter, BubbleStyle } from './Bubble.styles';
 import {
   FragmentReactionType,
   FragmentStatusType,
   FragmentType,
 } from './Bubble.types';
-import { chatDate } from '../../util/date';
+import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
 import { InlineStatus } from './InlineStatus';
-import { BUBBLE_HEIGHT, STATUS_HEIGHT } from './Bubble.constants';
+import { OnReactionPayload, Reactions } from './Reaction';
 
 export type BubbleProps = {
   id: string;
@@ -34,6 +43,7 @@ export type BubbleProps = {
   innerRef?: Ref<HTMLDivElement>;
   onReaction?: (payload: OnReactionPayload) => void;
   onReplyClick?: (msgId: string) => void;
+  error?: string;
 } & BoxProps;
 
 export const Bubble = ({
@@ -58,6 +68,7 @@ export const Bubble = ({
   expiresAt,
   onReaction,
   onReplyClick,
+  error,
 }: BubbleProps) => {
   const [dateDisplay, setDateDisplay] = useState(chatDate(new Date(sentAt)));
   useEffect(() => {
@@ -77,15 +88,17 @@ export const Bubble = ({
 
   const authorColorDisplay = useMemo(
     () =>
-      (authorColor && convertDarkText(authorColor, themeMode)) ||
+      (authorColor && flipColorIfLowContrast(authorColor, themeMode)) ||
       'rgba(var(--rlm-text-rgba))',
     [authorColor]
   );
 
-  const innerWidth = useMemo(
-    () => (containerWidth ? containerWidth - 16 : undefined),
-    [containerWidth]
-  );
+  const innerWidth = useMemo(() => {
+    if (!containerWidth) return undefined;
+
+    const removePercentageWidth = containerWidth * 0.1;
+    return containerWidth - 16 - removePercentageWidth;
+  }, [containerWidth]);
 
   const footerHeight = useMemo(() => {
     if (reactions.length > 0) {
@@ -191,6 +204,10 @@ export const Bubble = ({
           id={id}
           isPrevGrouped={isPrevGrouped}
           isNextGrouped={isNextGrouped}
+          ourTextColor={contrastAwareBlackOrWhiteHex(
+            ourColor ?? '#ffffff',
+            'white'
+          )}
           style={
             isOur
               ? {
@@ -228,6 +245,20 @@ export const Bubble = ({
               minWidth={minBubbleWidth}
               flexBasis={minBubbleWidth}
             >
+              {error && (
+                <Text.Custom
+                  style={{ whiteSpace: 'nowrap', userSelect: 'none' }}
+                  pointerEvents="none"
+                  textAlign="right"
+                  display="inline-flex"
+                  alignItems="flex-end"
+                  justifyContent="flex-end"
+                  opacity={0.35}
+                  id={id}
+                >
+                  {error}
+                </Text.Custom>
+              )}
               {expiresAt && (
                 // TODO tooltip with time remaining
                 <Icon
@@ -275,5 +306,6 @@ export const Bubble = ({
     dateDisplay,
     minBubbleWidth,
     footerHeight,
+    error,
   ]);
 };

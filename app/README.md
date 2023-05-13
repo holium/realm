@@ -70,3 +70,15 @@ If you include `DEBUG_PROD=true` you can open dev tools and check for errors.
 ```zsh
 npx cross-env DEBUG_PROD=true yarn package
 ```
+
+## SqlCipher connection through Datagrip or DB tool
+
+We use `better-sqlite3-multiple-ciphers` to use encrypted `better-sqlite3`
+
+Set up a custom driver for datagrip here:
+
+```
+https://github.com/Willena/sqlite-jdbc-crypt/releases
+```
+
+Guide: https://intellij-support.jetbrains.com/hc/en-us/community/posts/360007633799-How-to-open-SQLCipher-passwrd-protected-file-in-Datagrip

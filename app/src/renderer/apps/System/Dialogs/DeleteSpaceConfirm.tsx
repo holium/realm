@@ -1,7 +1,9 @@
-import { normalizeBounds } from 'os/services/shell/lib/window-manager';
 import { useState } from 'react';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
+
+import { normalizeBounds } from 'renderer/lib/window-manager';
+import { useShipStore } from 'renderer/stores/ship.store';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
+
 import { ConfirmDialog } from './Confirm';
 
 type DeleteSpaceDialogConfigComponentProps = {
@@ -16,10 +18,11 @@ const DeleteSpaceDialogConfigComponent = ({
   ...props
 }: DeleteSpaceDialogConfigComponentProps) => {
   const [loading, setLoading] = useState(false);
+  const { spacesStore } = useShipStore();
   const onConfirm = async () => {
     if (path) {
       setLoading(true);
-      SpacesActions.deleteSpace(path).then(() => {
+      spacesStore.deleteSpace(path).then(() => {
         setLoading(false);
       });
     }

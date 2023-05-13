@@ -1,38 +1,46 @@
 import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
-import { Badge } from 'renderer/components';
-import { CommButton, Flex, Button, Icon, Text } from '@holium/design-system';
+
+import { Button, CommButton, Flex, Icon, Text } from '@holium/design-system';
+
 import { useTrayApps } from 'renderer/apps/store';
-import { useServices } from 'renderer/logic/store';
-import { VoiceView } from './Voice';
+import { Badge } from 'renderer/components';
+import { trackEvent } from 'renderer/lib/track';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+
 import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
-import { useRooms } from '../useRooms';
+import { VoiceView } from './Voice';
 
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
 const RoomPresenter = () => {
-  const { ship, theme, desktop } = useServices();
+  const { loggedInAccount, theme, shellStore } = useAppState();
+  const { roomsStore } = useShipStore();
   const { roomsApp } = useTrayApps();
-  const roomsManager = useRooms(ship?.patp);
 
-  const { dockColor, mode } = theme.currentTheme;
+  const { dockColor, mode } = theme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
-  const isMuted = roomsManager?.protocol.local?.isMuted;
+  const isMuted = roomsStore.isMuted;
   const commButtonBg =
     mode === 'light' ? darken(0.04, dockColor) : darken(0.01, dockColor);
 
   const presentRoom = useMemo(() => {
-    if (!roomsManager?.live.room) return;
-    return roomsManager?.live.room;
-  }, [roomsManager?.live.room]);
+    if (!roomsStore.current) return;
+    return roomsStore.current;
+  }, [roomsStore.current]);
 
-  const [readChat, setReadChat] = useState(roomsManager?.live.chat.slice());
+  useEffect(() => {
+    trackEvent('OPENED', 'ROOMS_VOICE');
+  }, []);
+
+  const [readChat, setReadChat] = useState(roomsStore.chat.slice());
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    const latestChat = roomsManager?.live.chat.slice();
+    const latestChat = roomsStore.chat.slice();
     if (roomView === 'chat') {
       setReadChat(latestChat);
       setUnreadCount(0);
@@ -40,12 +48,14 @@ const RoomPresenter = () => {
       setUnreadCount(
         latestChat
           ? latestChat.filter(
-              (msg) => !readChat?.includes(msg) && msg.author !== ship?.patp
+              (msg) =>
+                !readChat?.includes(msg) &&
+                msg.author !== loggedInAccount?.serverId
             ).length
           : 0
       );
     }
-  }, [roomView, roomsManager?.live.chat.length]);
+  }, [roomView, roomsStore.chat.length]);
 
   useEffect(() => {
     if (!presentRoom) roomsApp.setView('list');
@@ -150,20 +160,28 @@ const RoomPresenter = () => {
           <Flex alignItems="center">
             <Button.IconButton
               className="realm-cursor-hover"
-              size={26}
-              customColor={
-                presentRoom.creator === ship?.patp ? 'intent-alert' : 'icon'
+              size={30}
+              showOnHover
+              iconColor={
+                presentRoom.creator === loggedInAccount?.serverId
+                  ? 'intent-alert'
+                  : undefined
               }
               onClick={(evt) => {
                 evt.stopPropagation();
-                if (presentRoom.creator === ship?.patp) {
-                  roomsManager?.deleteRoom(rid);
+                if (presentRoom.creator === loggedInAccount?.serverId) {
+                  roomsStore.deleteRoom(rid);
                 } else {
-                  roomsManager?.leaveRoom();
+                  roomsStore.leaveRoom();
                 }
               }}
             >
-              <Icon name="RoomLeave" size={22} opacity={0.7} />
+              <Icon
+                name="RoomLeave"
+                fill="intent-alert"
+                size={22}
+                opacity={0.9}
+              />
             </Button.IconButton>
           </Flex>
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
@@ -173,16 +191,16 @@ const RoomPresenter = () => {
               onClick={(evt) => {
                 evt.stopPropagation();
                 if (isMuted) {
-                  roomsManager?.unmute();
+                  roomsStore?.unmute();
                 } else {
-                  roomsManager?.mute();
+                  roomsStore?.mute();
                 }
               }}
             />
             <CommButton
-              icon={desktop.multiplayerEnabled ? 'MouseOn' : 'MouseOff'}
+              icon={shellStore.multiplayerEnabled ? 'MouseOn' : 'MouseOff'}
               customBg={commButtonBg}
-              onClick={desktop.toggleMultiplayer}
+              onClick={shellStore.toggleMultiplayer}
             />
             {/* <CommButton
               icon="HeadphoneLine"
@@ -203,8 +221,9 @@ const RoomPresenter = () => {
             >
               <Button.IconButton
                 className="realm-cursor-hover"
-                size={26}
-                customColor={roomView === 'chat' ? 'accent' : 'icon'}
+                size={30}
+                showOnHover
+                iconColor={roomView === 'chat' ? 'accent' : 'icon'}
                 onClick={(evt) => {
                   evt.stopPropagation();
                   roomView === 'chat'
@@ -212,7 +231,7 @@ const RoomPresenter = () => {
                     : setRoomView('chat');
                 }}
               >
-                <Icon name="Chat3" size={22} opacity={0.7} />
+                <Icon name="Chat3" size={22} opacity={0.9} />
               </Button.IconButton>
             </Badge>
           </Flex>

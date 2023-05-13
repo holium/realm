@@ -1,9 +1,12 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ProgressInfo, UpdateInfo } from 'electron-updater';
-import { Flex, ProgressBar, Button, Text } from '@holium/design-system';
-import { HoliumLogo } from './holium-logo';
+
+import { Button, Flex, ProgressBar, Text } from '@holium/design-system';
+
 import { StandAloneMouse } from '../mouse/StandAloneMouse';
+import { HoliumLogo } from './holium-logo';
+
 import './installer.css';
 
 declare global {
@@ -78,6 +81,7 @@ root.render(<View id={containerId} />);
 
 const UpdateAvailable = (props: UpdateAvailableProps) => {
   const { info } = props;
+  const [isOperating, setIsOperating] = useState(false);
   return (
     <Flex width="100%" flexDirection="column" alignItems="center">
       <Flex gap={20} flexDirection="column" width={308} alignItems="center">
@@ -94,8 +98,14 @@ const UpdateAvailable = (props: UpdateAvailableProps) => {
             height={26}
             width="inherit"
             justifyContent="center"
+            disabled={isOperating}
             px="8px"
-            onClick={() => window.autoUpdate.downloadUpdates()}
+            onClick={() => {
+              if (!isOperating) {
+                setIsOperating(true);
+                window.autoUpdate.downloadUpdates();
+              }
+            }}
           >
             Download
           </Button.Primary>
@@ -103,8 +113,14 @@ const UpdateAvailable = (props: UpdateAvailableProps) => {
             height={26}
             width="inherit"
             justifyContent="center"
+            disabled={isOperating}
             px="8px"
-            onClick={() => window.autoUpdate.cancelUpdates()}
+            onClick={() => {
+              if (!isOperating) {
+                setIsOperating(true);
+                window.autoUpdate.cancelUpdates();
+              }
+            }}
           >
             Cancel
           </Button.Secondary>
@@ -115,6 +131,7 @@ const UpdateAvailable = (props: UpdateAvailableProps) => {
 };
 
 const UpdateDownloaded = () => {
+  const [isOperating, setIsOperating] = useState(false);
   return (
     <Flex width="100%" flexDirection="column" alignItems="center">
       <Flex gap={20} flexDirection="column" width={308} alignItems="center">
@@ -129,7 +146,13 @@ const UpdateDownloaded = () => {
             width="inherit"
             justifyContent="center"
             px="8px"
-            onClick={() => window.autoUpdate.installUpdates()}
+            disabled={isOperating}
+            onClick={() => {
+              if (!isOperating) {
+                setIsOperating(true);
+                window.autoUpdate.installUpdates();
+              }
+            }}
           >
             Install and Restart
           </Button.Primary>
@@ -138,7 +161,13 @@ const UpdateDownloaded = () => {
             width="inherit"
             justifyContent="center"
             px="8px"
-            onClick={() => window.autoUpdate.cancelUpdates()}
+            disabled={isOperating}
+            onClick={() => {
+              if (!isOperating) {
+                setIsOperating(true);
+                window.autoUpdate.cancelUpdates();
+              }
+            }}
           >
             Cancel
           </Button.Secondary>
@@ -149,6 +178,7 @@ const UpdateDownloaded = () => {
 };
 
 const UpdateNotAvailable = () => {
+  const [isOperating, setIsOperating] = useState(false);
   return (
     <Flex width="100%" flexDirection="column" alignItems="center">
       <Flex gap={20} flexDirection="column" width={308} alignItems="center">
@@ -163,7 +193,13 @@ const UpdateNotAvailable = () => {
             width="inherit"
             justifyContent="center"
             px="8px"
-            onClick={() => window.autoUpdate.cancelUpdates()}
+            disabled={isOperating}
+            onClick={() => {
+              if (!isOperating) {
+                setIsOperating(true);
+                window.autoUpdate.cancelUpdates();
+              }
+            }}
           >
             Ok
           </Button.Secondary>

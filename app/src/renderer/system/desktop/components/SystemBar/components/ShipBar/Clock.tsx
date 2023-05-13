@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import moment from 'moment';
+
 import { Flex, Text } from '@holium/design-system';
 
 export const TrayClock = () => {

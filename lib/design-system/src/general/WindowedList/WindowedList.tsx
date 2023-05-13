@@ -1,6 +1,6 @@
 import { Ref } from 'react';
+import { Virtuoso, VirtuosoHandle, VirtuosoProps } from 'react-virtuoso';
 import styled from 'styled-components';
-import { Virtuoso, VirtuosoProps, VirtuosoHandle } from 'react-virtuoso';
 
 const SCROLLBAR_WIDTH = 12;
 

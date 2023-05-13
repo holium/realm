@@ -1,17 +1,11 @@
-import styled from 'styled-components';
-import { rgba, darken } from 'polished';
-import { Flex, Icons, Text } from 'renderer/components';
-import { ThemeType } from 'renderer/theme';
-import { useServices } from 'renderer/logic/store';
-import { useRooms } from '../useRooms';
 import { observer } from 'mobx-react';
+import styled from 'styled-components';
 
-interface CommCircleProps {
-  customBg: string;
-  theme: ThemeType;
-}
+import { Flex, Icon, Text } from '@holium/design-system';
 
-const ProviderStyle = styled(Flex)<CommCircleProps>`
+import { useShipStore } from 'renderer/stores/ship.store';
+
+const ProviderStyle = styled(Flex)`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,31 +13,27 @@ const ProviderStyle = styled(Flex)<CommCircleProps>`
   height: 24px;
   border-radius: 12px;
   gap: 6px;
-  background: ${(props: CommCircleProps) => darken(0.03, props.customBg)};
-  transition: ${(props: CommCircleProps) => props.theme.transition};
+  background: rgba(var(--rlm-overlay-hover-rgba));
+  transition: var(--transition);
   &:hover {
-    background: ${(props: CommCircleProps) => darken(0.04, props.customBg)};
-    transition: ${(props: CommCircleProps) => props.theme.transition};
+    background: rgba(var(--rlm-overlay-active-rgba));
+    transition: var(--transition);
   }
 `;
 
 interface ProviderSelectorProps {
   connected?: boolean;
-  seedColor: string;
   onClick: (evt: any) => void;
 }
 
 const ProviderSelectorPresenter = ({ onClick }: ProviderSelectorProps) => {
-  const { ship, theme } = useServices();
-  const { windowColor, textColor } = theme.currentTheme;
-  const roomsManager = useRooms(ship?.patp);
-
+  const { roomsStore } = useShipStore();
   return (
-    <ProviderStyle customBg={windowColor} onClick={(evt: any) => onClick(evt)}>
-      <Icons size={18} fill={rgba(textColor, 0.7)} name="BaseStation" />
-      <Text fontSize={1} color={rgba(textColor, 0.7)}>
-        {roomsManager?.protocol.provider}
-      </Text>
+    <ProviderStyle onClick={(evt: any) => onClick(evt)}>
+      <Icon size={18} opacity={0.7} name="BaseStation" />
+      <Text.Custom fontSize={1} opacity={0.7} isSkeleton={!roomsStore.provider}>
+        {roomsStore.provider}
+      </Text.Custom>
     </ProviderStyle>
   );
 };

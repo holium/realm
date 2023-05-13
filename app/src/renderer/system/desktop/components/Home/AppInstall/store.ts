@@ -1,8 +1,8 @@
 import { createContext, useContext } from 'react';
-import { Instance, types, onSnapshot } from 'mobx-state-tree';
-import { Patp } from 'os/types';
-import { calculatePopoverAnchorById } from 'renderer/logic/lib/position';
-import { DocketApp, DocketAppType } from 'os/services/spaces/models/bazaar';
+import { cast, Instance, onSnapshot, types } from 'mobx-state-tree';
+
+import { calculatePopoverAnchorById } from 'renderer/lib/position';
+import { DocketApp, DocketAppType } from 'renderer/stores/models/bazaar.model';
 
 const searchMode = types.enumeration([
   'none',
@@ -16,7 +16,12 @@ const searchMode = types.enumeration([
 
 export type SearchMode = Instance<typeof searchMode>;
 
-const loadingState = types.enumeration(['loading-published-apps', '']);
+const loadingState = types.enumeration([
+  'loading-published-apps',
+  'published-apps-loaded',
+  'adding-app-publisher',
+  '',
+]);
 
 export type LoadingState = Instance<typeof loadingState>;
 
@@ -94,7 +99,7 @@ export const AppInstallStore = types
     setSearchPlaceholder(placeholder: any) {
       self.searchPlaceholder = placeholder;
     },
-    setSelectedShip(ship: Patp) {
+    setSelectedShip(ship: string) {
       self.selectedShip = ship;
     },
     setSelectedDesk(desk: string) {
@@ -115,6 +120,13 @@ export const AppInstallStore = types
         dimensions,
         centered: true,
       });
+    },
+    reset() {
+      self.searchMode = 'none';
+      self.searchModeArgs = cast([]);
+      self.searchString = '';
+      self.searchPlaceholder = 'Search...';
+      self.selectedShip = '';
     },
   }));
 

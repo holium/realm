@@ -1,15 +1,17 @@
-import { useMemo, useEffect } from 'react';
-import styled from 'styled-components';
-import { SpaceModelType } from 'os/services/spaces/models/spaces';
-import { useServices } from 'renderer/logic/store';
-import { ShellActions } from 'renderer/logic/actions/shell';
-import { pluralize } from 'renderer/logic/lib/text';
+import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
+import styled from 'styled-components';
+
+import { Flex, Icon, Row, Text } from '@holium/design-system';
+
 import {
   ContextMenuOption,
   useContextMenu,
 } from 'renderer/components/ContextMenu';
-import { Row, Text, Flex, Icon } from '@holium/design-system';
+import { pluralize } from 'renderer/lib/text';
+import { useAppState } from 'renderer/stores/app.store';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 export const EmptyGroup = styled.div<{ color?: string }>`
   height: 32px;
@@ -26,42 +28,44 @@ interface SpaceRowProps {
 
 const SpaceRowPresenter = (props: SpaceRowProps) => {
   const { selected, space, onSelect } = props;
-  const { membership, ship } = useServices();
+  const { loggedInAccount, shellStore, theme } = useAppState();
+  const { spacesStore } = useShipStore();
   const { getOptions, setOptions } = useContextMenu();
   const spaceRowId = useMemo(() => `space-row-${space.path}`, [space.path]);
 
-  const members = membership.spaces.get(space.path);
-  const member = members?.get(ship?.patp ?? '');
+  const members = spacesStore.spaces.get(space.path)?.members;
+  const member = members?.all.get(loggedInAccount?.serverId ?? '');
   const roles = member?.roles;
   const contextMenuOptions = useMemo(() => {
     const menu = [];
     menu.push({
       id: `space-row-${space.path}-btn-leave`,
       label: 'Copy link',
-      onClick: (evt: React.MouseEvent<HTMLButtonElement>) => {
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
         navigator.clipboard.writeText(space.path.substring(1));
       },
     });
-    if (roles?.includes('owner') || roles?.includes('admin')) {
+    if (loggedInAccount && space.isAdmin(loggedInAccount.serverId)) {
       menu.push({
         id: `space-row-${space.path}-btn-edit`,
         label: 'Edit',
         onClick: () => {
-          ShellActions.setBlur(true);
-          ShellActions.openDialogWithStringProps('edit-space', {
+          shellStore.setIsBlurred(true);
+          shellStore.openDialogWithStringProps('edit-space', {
             space: space.path,
           });
         },
       });
     }
-    if (member?.roles.includes('owner')) {
+
+    if (space.isHost()) {
       menu.push({
         id: `space-row-${space.path}-btn-delete`,
         label: 'Delete',
         onClick: () => {
-          ShellActions.setBlur(true);
-          ShellActions.openDialogWithStringProps('delete-space-dialog', {
+          shellStore.setIsBlurred(true);
+          shellStore.openDialogWithStringProps('delete-space-dialog', {
             path: space.path,
             name: space.name,
           });
@@ -72,8 +76,8 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
         id: `space-row-${space.path}-btn-leave`,
         label: 'Leave',
         onClick: () => {
-          ShellActions.setBlur(true);
-          ShellActions.openDialogWithStringProps('leave-space-dialog', {
+          shellStore.setIsBlurred(true);
+          shellStore.openDialogWithStringProps('leave-space-dialog', {
             path: space.path,
             name: space.name,
           });
@@ -82,7 +86,14 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
     }
 
     return menu.filter(Boolean) as ContextMenuOption[];
-  }, [membership.spaces, roles, ship, space.name, space.path]);
+  }, [
+    spacesStore.spaces,
+    roles,
+    loggedInAccount,
+    space.name,
+    space.path,
+    theme,
+  ]);
 
   useEffect(() => {
     if (contextMenuOptions !== getOptions(spaceRowId)) {
@@ -91,7 +102,10 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
   }, [contextMenuOptions, getOptions, setOptions, spaceRowId]);
 
   const contextMenuButtonIds = contextMenuOptions.map((item) => item?.id);
-  const memberCount = membership.getMemberCount(space.path);
+  let memberCount = 0;
+  members?.all.forEach((m) =>
+    m.status !== 'invited' ? (memberCount += 1) : null
+  );
   return (
     <Row
       id={spaceRowId}
@@ -101,6 +115,7 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
       onClick={(evt: any) => {
         // If a menu item is clicked
         if (!contextMenuButtonIds.includes(evt.target.id)) {
+          console.log('clicking on spacerow', space.path);
           onSelect(space.path);
         }
       }}
@@ -139,8 +154,7 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
                 opacity={0.6}
                 fontSize={2}
               >
-                {membership.getMemberCount(space.path)}{' '}
-                {pluralize('member', memberCount)}
+                {memberCount} {pluralize('member', memberCount || 0)}
               </Text.Custom>
             </Flex>
             {/* {space.path === '~hatryx-lastud/spaces/other-life' && (
@@ -158,9 +172,9 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
                 </Text>
               </Flex>
             )} */}
-            {/* <Text fontWeight={500} mt="1px" opacity={0.6} variant="hint">
+            {/* <Text.Custom fontWeight={500} mt="1px" opacity={0.6} variant="hint">
                 {space.hasAdmin && `(owner)`}
-              </Text> */}
+              </Text.Custom> */}
           </Flex>
         </Flex>
       </Flex>

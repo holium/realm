@@ -29,6 +29,7 @@
           [%rebuild-stall rebuild-stall]
           [%clear-stall clear-stall]
           [%set-host set-host]
+          [%delete-catalog-entry del-cat-entry]
       ==
     ::
     ++  install-app
@@ -107,6 +108,11 @@
       :~  [%app-id so]
           [%host (su ;~(pfix sig fed:ag))]
       ==
+    ::
+    ++  del-cat-entry
+      %-  ot
+      :~  [%app-id so]
+      ==
     --
   --
 ::
@@ -136,20 +142,7 @@
         %app-install-update
       (urbit-app-update:encode app-id.rct urbit-app.rct grid-index.rct)
       ::
-        %pinned
-      %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%id s+app-id.rct]
-          [%index (numb index.rct)]
-      ==
-      ::
-        %unpinned
-      %-  pairs
-      :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
-          [%id s+app-id.rct]
-      ==
-      ::
-        %pins-reodered
+        %dock-update
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%dock a+(turn dock.rct |=(=app-id:store s+app-id))]
@@ -171,6 +164,7 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
           [%id s+app-id.rct]
+          [%app (app-detail:encode app-id.rct app.rct)]
           [%index (numb index.rct)]
       ==
       ::
@@ -266,6 +260,9 @@
       ::
         %app-hash
       s+(scot %uv hash.vi)
+      ::
+        %version
+      (version:encode version.vi)
       ::
     ==
   --
@@ -491,6 +488,7 @@
       %da   s+(scot %da p.c)
       %tas  s+(scot %tas p.c)
       %ud   (numb p.c)
+      %uv   s+(scot %uv p.c)
     ==
   ::
   ++  alliance

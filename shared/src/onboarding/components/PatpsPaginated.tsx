@@ -1,7 +1,9 @@
-import { Icon } from '@holium/design-system/general';
 import { useState } from 'react';
-import { PatpCard } from './PatpCard';
 import styled from 'styled-components';
+
+import { Flex, Icon, Spinner } from '@holium/design-system/general';
+
+import { PatpCard } from './PatpCard';
 
 const Paginator = styled.div`
   grid-column: 1 / 3;
@@ -28,6 +30,14 @@ export const PatpsPaginated = ({
   const paginatedPatps = patps.slice(page * pageSize, (page + 1) * pageSize);
   const pages = Array.from({ length: totalPages }).map((_, i) => i);
 
+  if (!patps.length) {
+    return (
+      <Flex justifyContent="center">
+        <Spinner size={3} />
+      </Flex>
+    );
+  }
+
   return (
     <div
       style={{
@@ -47,6 +57,7 @@ export const PatpsPaginated = ({
       <Paginator>
         <button
           disabled={page === 0}
+          type="button"
           onClick={() => setPage(page - 1)}
           style={{
             border: 'none',
@@ -64,6 +75,7 @@ export const PatpsPaginated = ({
         {pages.map((i) => (
           <button
             key={`circle-button-${i}`}
+            type="button"
             onClick={() => setPage(i)}
             style={{
               border: 'none',
@@ -83,6 +95,7 @@ export const PatpsPaginated = ({
         ))}
         <button
           disabled={page === totalPages - 1}
+          type="button"
           onClick={() => setPage(page + 1)}
           style={{
             border: 'none',

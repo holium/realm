@@ -1,31 +1,30 @@
-import { FC, useMemo } from 'react';
-import { darken, lighten } from 'polished';
-import { Flex, Spinner } from '@holium/design-system';
-import { Icons, Text, IconButton } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import {
-  shortened,
-  getBaseTheme,
-  formatEthAmount,
-  formatBtcAmount,
-} from '../../../lib/helpers';
-import { WalletActions } from 'renderer/logic/actions/wallet';
-import {
-  WalletView,
-  TransactionType,
-  ProtocolType,
-} from 'os/services/tray/wallet-lib/wallet.model';
-import { useTrayApps } from 'renderer/apps/store';
-import { TxType } from './List';
+import { FC } from 'react';
 
-interface PendingTransactionDisplayProps {
+import { Button, Card, Flex, Icon, Spinner, Text } from '@holium/design-system';
+
+import {
+  ProtocolType,
+  TransactionType,
+  WalletView,
+} from 'renderer/stores/models/wallet.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import {
+  formatBtcAmount,
+  formatEthAmount,
+  shortened,
+} from '../../../lib/helpers';
+
+type PendingTransactionDisplayProps = {
   transactions: TransactionType[];
-  hide: any;
-}
-export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
-  props: PendingTransactionDisplayProps
-) => {
-  const pendingTransactions = props.transactions
+  hide: () => void;
+};
+
+export const PendingTransactionDisplay = ({
+  transactions,
+  hide,
+}: PendingTransactionDisplayProps) => {
+  const pendingTransactions = transactions
     .filter((trans) => trans.status === 'pending')
     .sort(
       (a, b) =>
@@ -34,11 +33,8 @@ export const PendingTransactionDisplay: FC<PendingTransactionDisplayProps> = (
     );
 
   return pendingTransactions.length ? (
-    <Flex px={1} mb={1} width="100%">
-      <PendingTransaction
-        transaction={pendingTransactions[0]}
-        hide={props.hide}
-      />
+    <Flex width="100%">
+      <PendingTransaction transaction={pendingTransactions[0]} hide={hide} />
     </Flex>
   ) : null;
 };
@@ -51,17 +47,15 @@ interface PendingTransactionProps {
 export const PendingTransaction: FC<PendingTransactionProps> = (
   props: PendingTransactionProps
 ) => {
-  const { theme } = useServices();
-  const { walletApp } = useTrayApps();
-  const { colors } = getBaseTheme(theme.currentTheme);
+  const { walletStore } = useShipStore();
 
   const goToTransaction = () => {
-    WalletActions.navigate(WalletView.TRANSACTION_DETAIL, {
+    walletStore.navigate(WalletView.TRANSACTION_DETAIL, {
       walletIndex: props.transaction.walletIndex.toString(),
       detail: {
         type: 'transaction',
-        txtype: walletApp.navState.detail?.txtype as TxType,
-        coinKey: walletApp.navState.detail?.coinKey,
+        txtype: props.transaction.ethType ? 'coin' : 'general',
+        coinKey: props.transaction.ethType,
         key: props.transaction.hash,
       },
     });
@@ -78,63 +72,45 @@ export const PendingTransaction: FC<PendingTransactionProps> = (
     console.log(props.transaction.ethType);
     unitsDisplay =
       props.transaction.ethType === 'ETH'
-        ? walletApp.navState.protocol === ProtocolType.UQBAR
+        ? walletStore.navState.protocol === ProtocolType.UQBAR
           ? 'zigs'
           : 'ETH'
-        : walletApp.ethereum.wallets
+        : walletStore.ethereum.wallets
             ?.get(props.transaction.walletIndex.toString())
-            ?.data.get(walletApp.navState.protocol)
+            ?.data.get(walletStore.navState.protocol)
             ?.coins.get(props.transaction.ethType)?.name ?? '';
   }
 
-  const bgColor = useMemo(
-    () =>
-      theme.currentTheme.mode === 'light'
-        ? darken(0.04, theme.currentTheme.windowColor)
-        : lighten(0.02, theme.currentTheme.windowColor),
-    [theme.currentTheme.windowColor]
-  );
-
   return (
-    <Flex
-      mx={2}
-      py={2}
-      px={2}
-      width="100%"
-      justifyContent="space-between"
-      background={bgColor}
-      borderRadius="9px"
-    >
-      <Flex
-        mx={2}
-        justifyContent="center"
-        alignItems="center"
-        onClick={goToTransaction}
-      >
-        <Flex mr={4} height="100%" alignItems="center">
-          <Spinner size={0} color={colors.brand.primary} />
+    <Card width="100%" style={{ borderRadius: '9px' }}>
+      <Flex flexDirection="row" justifyContent="space-between">
+        <Flex
+          justifyContent="center"
+          alignItems="center"
+          onClick={goToTransaction}
+          gap={10}
+          padding={1}
+        >
+          <Flex height="100%" alignItems="center" ml={1}>
+            <Spinner size={0} />
+          </Flex>
+          <Flex flexDirection="column">
+            <Text.Body variant="body">
+              {props.transaction.type === 'sent' ? 'Sending' : 'Receiving'}{' '}
+              {isEth ? ethAmount.eth : btcAmount.btc} {unitsDisplay}
+            </Text.Body>
+            <Text.Body variant="body" fontSize={1}>
+              {props.transaction.type === 'sent' ? 'To:' : 'From:'}{' '}
+              {themDisplay} <Icon ml="7px" name="ShareBox" size="15px" />
+            </Text.Body>
+          </Flex>
         </Flex>
-        <Flex flexDirection="column">
-          <Text variant="body" color={colors.brand.primary}>
-            {props.transaction.type === 'sent' ? 'Sending' : 'Receiving'}{' '}
-            {isEth ? ethAmount.eth : btcAmount.btc} {unitsDisplay}
-          </Text>
-          <Text pt={1} variant="body" color={colors.text.disabled} fontSize={1}>
-            {props.transaction.type === 'sent' ? 'To:' : 'From:'} {themDisplay}{' '}
-            <Icons ml="7px" name="ShareBox" size="15px" />
-          </Text>
+        <Flex justifyContent="center" alignItems="center">
+          <Button.IconButton onClick={props.hide} mr={1}>
+            <Icon opacity={0.7} name="Close" size="15px" />
+          </Button.IconButton>
         </Flex>
       </Flex>
-      <Flex justifyContent="center" alignItems="center">
-        <IconButton onClick={props.hide} mr={1}>
-          <Icons
-            opacity={0.7}
-            name="Close"
-            size="15px"
-            color={colors.text.disabled}
-          />
-        </IconButton>
-      </Flex>
-    </Flex>
+    </Card>
   );
 };

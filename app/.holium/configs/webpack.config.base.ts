@@ -41,16 +41,14 @@ const configuration: webpack.Configuration = {
   resolve: {
     extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
     modules: [webpackPaths.srcPath, 'node_modules'],
-
-    // alias: {
-    //   react: path.resolve('../../node_modules/react'),
-    //   'react-dom': path.resolve('../../node_modules/react-dom'),
-    //   'styled-components': path.resolve('../../node_modules/styled-components'),
-    //   'styled-system': path.resolve('../../node_modules/styled-system'),
-    // },
+    alias: {
+      crypto: require.resolve('crypto-browserify'),
+      stream: require.resolve('stream-browserify')
+    }
   },
 
   plugins: [],
 };
+// export default merge(backgroundConfig, configuration);
 
 export default configuration;

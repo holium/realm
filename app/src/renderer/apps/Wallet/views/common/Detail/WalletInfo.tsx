@@ -1,12 +1,12 @@
 import { FC, useState } from 'react';
 import { observer } from 'mobx-react';
-import { darken } from 'polished';
 import { QRCodeSVG } from 'qrcode.react';
 
-import { Flex, Box, Icons, Text } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
-import { shortened, formatEthAmount, getBaseTheme } from '../../../lib/helpers';
-import { EthWalletType } from 'os/services/tray/wallet-lib/wallet.model';
+import { Box, Flex, Icon, Text } from '@holium/design-system';
+
+import { EthWalletType } from 'renderer/stores/models/wallet.model';
+
+import { formatEthAmount, shortened } from '../../../lib/helpers';
 
 interface WalletInfoProps {
   wallet: EthWalletType;
@@ -18,10 +18,6 @@ interface WalletInfoProps {
 
 export const WalletInfo: FC<WalletInfoProps> = observer(
   (props: WalletInfoProps) => {
-    const { theme } = useServices();
-
-    const themeData = getBaseTheme(theme.currentTheme);
-    const panelBorder = darken(0.08, theme.currentTheme.windowColor);
     // TODO clean up everything
     const amountDisplay = `${
       // @ts-ignore
@@ -43,18 +39,10 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
         <Box>
           {!copied ? (
             <Box onClick={copy}>
-              <Icons
-                name="Copy"
-                height="20px"
-                color={themeData.colors.text.disabled}
-              />
+              <Icon name="Copy" height="20px" />
             </Box>
           ) : (
-            <Icons
-              name="CheckCircle"
-              height="20px"
-              color={themeData.colors.ui.intent.success}
-            />
+            <Icon name="CheckCircle" height="20px" />
           )}
         </Box>
       );
@@ -64,8 +52,6 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
       <Flex
         p={2}
         width="100%"
-        background={darken(0.03, theme.currentTheme.windowColor)}
-        border={`solid 1px ${panelBorder}`}
         borderRadius="8px"
         flexDirection="column"
         justifyContent="center"
@@ -73,36 +59,23 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
       >
         <Flex width="100%" justifyContent="space-between">
           <Flex>
-            <Text>aowsiehtoishrtoiwheotiwhet</Text>
             {/*(typeof props.wallet) === EthWalletType
             ? <Icons name="Ethereum" height="20px" mr={2} />
             : <Icons name="Bitcoin" height="20px" mr={2} />
     */}
-            <Icons name="Bitcoin" height="20px" mr={2} />
-            <Text pt="2px" textAlign="center" fontSize="14px">
+            <Icon name="Bitcoin" height="20px" mr={2} />
+            <Text.Body pt="2px" textAlign="center" fontSize="14px">
               {props.wallet && shortened(props.wallet.address)}
-            </Text>
+            </Text.Body>
           </Flex>
           <Flex>
             {props.sendTrans ? (
-              <Icons
-                name="ChevronDown"
-                color={themeData.colors.text.disabled}
-              />
+              <Icon name="ChevronDown" />
             ) : (
               <>
                 <CopyButton content={props.wallet && props.wallet.address} />
                 <Box onClick={() => props.setQROpen(!props.QROpen)}>
-                  <Icons
-                    ml={2}
-                    name="QRCode"
-                    height="20px"
-                    color={
-                      props.QROpen
-                        ? themeData.colors.brand.primary
-                        : themeData.colors.text.disabled
-                    }
-                  />
+                  <Icon ml={2} name="QRCode" height="20px" />
                 </Box>
               </>
             )}
@@ -118,26 +91,30 @@ export const WalletInfo: FC<WalletInfoProps> = observer(
             alignItems="center"
           >
             <QRCodeSVG
-              width="100%"
-              height="100%"
+              // width="100%"
+              // height="100%"
               value={props.wallet.address}
             />
           </Flex>
         </Box>
         <Box p={2} width="100%" hidden={props.hideWalletHero}>
-          <Text
+          <Text.Body
             mt={3}
             opacity={0.5}
             fontWeight={600}
-            color={themeData.colors.text.tertiary}
             style={{ textTransform: 'uppercase' }}
             animate={false}
           >
             {props.wallet.nickname}
-          </Text>
-          <Text opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
+          </Text.Body>
+          <Text.Body
+            opacity={0.9}
+            fontWeight={600}
+            fontSize={7}
+            animate={false}
+          >
             {amountDisplay}
-          </Text>
+          </Text.Body>
         </Box>
       </Flex>
     );

@@ -1,6 +1,6 @@
+import { BoxProps, Flex, Icon, Text } from '../../../general';
 import { pluralize } from '../../../util';
 import { FragmentShip } from './fragment-lib';
-import { Text, Flex, BoxProps, Icon } from '../../../general';
 
 type InlineStatusProps = {
   id: string;
@@ -12,6 +12,7 @@ type InlineStatusProps = {
 const createdChatRegex = /created the chat/;
 const joinedChatRegex = /joined the chat/;
 const leftChatRegex = /left the chat/;
+const addedPeersRegex = /added \d+ peers/;
 const parseCreatedJoinedLeftChat = (id: string, text: string) => {
   let patp: string = '';
   let status: string = '';
@@ -24,12 +25,21 @@ const parseCreatedJoinedLeftChat = (id: string, text: string) => {
   } else if (leftChatRegex.test(text)) {
     status = 'left the chat';
     patp = text.replace(status, '').trim();
+  } else if (addedPeersRegex.test(text)) {
+    // split the text into the status and the patp
+    status = `added ${text.split('added')[1].trim()}`;
+
+    patp = text.replace(addedPeersRegex, '').trim();
   }
   if (!patp) return null;
   return (
     <Flex id={id} flexDirection="row" alignItems="center" gap={4}>
       {/* TODO popup passport card on click */}
-      <FragmentShip style={{ padding: '0px 4px' }} fontSize={1}>
+      <FragmentShip
+        style={{ padding: '0px 4px' }}
+        fontSize={1}
+        className="fragment-ship"
+      >
         {patp}
       </FragmentShip>
       <Text.Custom id={id} fontSize={1} fontWeight={300} opacity={0.5}>

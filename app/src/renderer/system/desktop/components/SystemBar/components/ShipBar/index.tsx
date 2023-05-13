@@ -1,32 +1,30 @@
-import { useEffect, useState, useCallback } from 'react';
-import { WalletTray } from './WalletTray';
-import { observer } from 'mobx-react';
-import { MessagesTray } from './MessagesTray';
-import { AccountTray } from './AccountTray';
-import {
-  Flex,
-  BarStyle,
-  NotificationType,
-  NotificationList,
-  Button,
-  Icon,
-  Box,
-  NoScrollBar,
-} from '@holium/design-system';
-import { RoomTray } from './Rooms';
+import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { AuthActions } from 'renderer/logic/actions/auth';
-import { useRooms } from 'renderer/apps/Rooms/useRooms';
-import { useServices } from 'renderer/logic/store';
-import { trackEvent } from 'renderer/logic/lib/track';
+import { observer } from 'mobx-react';
+
+import {
+  BarStyle,
+  Box,
+  Button,
+  Flex,
+  Icon,
+  NoScrollBar,
+  NotificationList,
+  NotificationType,
+} from '@holium/design-system';
+
 import { nativeApps } from 'renderer/apps/nativeApps';
-import { AppType } from 'os/services/spaces/models/bazaar';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
 import { useTrayApps } from 'renderer/apps/store';
-import { useAccountStore } from 'renderer/apps/Account/store';
-import { useChatStore } from 'renderer/apps/Courier/store';
-import { openChatToPath } from 'renderer/logic/lib/useTrayControls';
-import { ShellActions } from 'renderer/logic/actions/shell';
+import { trackEvent } from 'renderer/lib/track';
+import { openChatToPath } from 'renderer/lib/useTrayControls';
+import { useAppState } from 'renderer/stores/app.store';
+import { AppType } from 'renderer/stores/models/bazaar.model';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import { AccountTray } from './AccountTray';
+import { MessagesTray } from './MessagesTray';
+import { RoomTray } from './Rooms';
+import { WalletTray } from './WalletTray';
 
 type ExpandBarStyles = {
   height: number | 'fit-content';
@@ -36,7 +34,8 @@ type ExpandBarStyles = {
 };
 
 export const ShipBarPresenter = () => {
-  const { ship } = useServices();
+  const { loggedInAccount, shellStore, authStore } = useAppState();
+  const { chatStore, notifStore } = useShipStore();
   const {
     unreadCount,
     initNotifications,
@@ -44,10 +43,8 @@ export const ShipBarPresenter = () => {
     dismissOne,
     dismissApp,
     dismissPath,
-  } = useAccountStore();
-  const roomsManager = useRooms(ship?.patp);
+  } = notifStore;
   const { setActiveApp, activeApp } = useTrayApps();
-  const chatStore = useChatStore();
 
   const [isAccountExpanded, setIsAccountExpanded] = useState(false);
 
@@ -62,13 +59,12 @@ export const ShipBarPresenter = () => {
 
   const onNotifLinkClick = (app: string, path: string, link?: string) => {
     trackEvent('CLICK_NOTIFICATION', 'DESKTOP_SCREEN', { app });
-    console.log('clicked notification', app, path, link);
     switch (app) {
       case 'os-settings':
-        DesktopActions.openAppWindow(nativeApps['os-settings'] as AppType);
+        shellStore.openWindow(nativeApps['os-settings'] as AppType);
         break;
       case 'os-browser':
-        DesktopActions.openAppWindow(nativeApps['os-browser'] as AppType);
+        shellStore.openWindow(nativeApps['os-browser'] as AppType);
         break;
       case 'realm-chat':
         openChatToPath(chatStore, setActiveApp, path, link);
@@ -84,12 +80,16 @@ export const ShipBarPresenter = () => {
       evt.stopPropagation();
       return;
     }
+    if (chatStore.inbox.length === 0) {
+      chatStore.loadChatList();
+    }
     setAccountTrayOpen(true);
   };
 
   useEffect(() => {
+    if (!loggedInAccount) return;
     initNotifications();
-  }, [ship?.patp]);
+  }, [loggedInAccount?.serverId]);
 
   useEffect(() => {
     if (isAccountTrayOpen) {
@@ -145,7 +145,7 @@ export const ShipBarPresenter = () => {
     };
   }, [handleClickOutside, root]);
 
-  if (!ship) return null;
+  if (!loggedInAccount) return null;
   const apps: any = {
     'realm-chat': {
       image: 'https://cdn-icons-png.flaticon.com/512/724/724715.png',
@@ -194,7 +194,7 @@ export const ShipBarPresenter = () => {
         {isAccountTrayOpen && (
           <Flex
             flexDirection="column"
-            minHeight={minHeight - 40}
+            minHeight={minHeight - 24}
             pt="8px"
             pb="6px"
             pl="3px"
@@ -219,38 +219,55 @@ export const ShipBarPresenter = () => {
               overflowX="hidden"
               width={width - 15}
             >
-              <NotificationList
-                justifyContent="flex-end"
-                onPathLookup={(app: string, path: string) => {
-                  if (app === 'realm-chat') {
-                    let { title, sigil, image } = chatStore.getChatHeader(path);
-                    return {
-                      title,
-                      sigil,
-                      image,
-                    };
-                  }
-                  return null;
-                  // return getNotificationPath(app, path);
-                }}
-                onAppLookup={(app: string) => {
-                  return apps[app];
-                }}
-                onDismiss={(app: string, path: string, id: number) => {
-                  console.log(`dismissed - ${app} ${path} ${id}`);
-                  dismissOne(id);
-                }}
-                onDismissAll={(app: string, path?: string) => {
-                  if (path) {
-                    dismissPath(app, path);
-                  } else {
-                    dismissApp(app);
-                  }
-                }}
-                onLinkClick={onNotifLinkClick}
-                containerWidth={width - 15}
-                notifications={undismissedNotifications as NotificationType[]}
-              />
+              {chatStore.loader.isFirstLoad ? (
+                <Flex
+                  isSkeleton
+                  flexDirection="column"
+                  gap={12}
+                  position="absolute"
+                  justify="center"
+                  align="center"
+                  width="calc(100% - 24px)"
+                  left={12}
+                  right={12}
+                  top={12}
+                  height={50}
+                />
+              ) : (
+                <NotificationList
+                  justifyContent="flex-end"
+                  onPathLookup={(app: string, path: string) => {
+                    if (app === 'realm-chat') {
+                      let { title, sigil, image } =
+                        chatStore.getChatHeader(path);
+                      return {
+                        title,
+                        sigil,
+                        image,
+                      };
+                    }
+                    return null;
+                    // return getNotificationPath(app, path);
+                  }}
+                  onAppLookup={(app: string) => {
+                    return apps[app];
+                  }}
+                  onDismiss={(app: string, path: string, id: number) => {
+                    console.log(`dismissed - ${app} ${path} ${id}`);
+                    dismissOne(id);
+                  }}
+                  onDismissAll={(app: string, path?: string) => {
+                    if (path) {
+                      dismissPath(app, path);
+                    } else {
+                      dismissApp(app);
+                    }
+                  }}
+                  onLinkClick={onNotifLinkClick}
+                  containerWidth={width - 15}
+                  notifications={undismissedNotifications as NotificationType[]}
+                />
+              )}
             </NoScrollBar>
             <Flex
               animate={{
@@ -273,9 +290,8 @@ export const ShipBarPresenter = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
                 onClick={() => {
-                  roomsManager.cleanup();
-                  ShellActions.setBlur(true);
-                  ShellActions.openDialog('shutdown-dialog');
+                  shellStore.setIsBlurred(true);
+                  shellStore.openDialog('shutdown-dialog');
                   setActiveApp(null);
                 }}
               >
@@ -289,10 +305,8 @@ export const ShipBarPresenter = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
                 onClick={() => {
-                  roomsManager.cleanup();
-                  AuthActions.logout(ship.patp);
+                  authStore.logout();
                   setActiveApp(null);
-                  trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
                 }}
               >
                 <Icon name="Logout" size={22} />
@@ -306,9 +320,7 @@ export const ShipBarPresenter = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
                 onClick={() =>
-                  DesktopActions.openAppWindow(
-                    nativeApps['os-settings'] as AppType
-                  )
+                  shellStore.openWindow(nativeApps['os-settings'] as AppType)
                 }
               >
                 <Icon name="Settings" size={22} />
@@ -360,7 +372,6 @@ export const ShipBarPresenter = () => {
             </Box>
           </Flex>
         </Flex>
-
         <AccountTray unreadCount={unreadCount} onClick={onAccountTrayClick} />
       </Flex>
     </BarStyle>
@@ -368,88 +379,3 @@ export const ShipBarPresenter = () => {
 };
 
 export const ShipBar = observer(ShipBarPresenter);
-
-// {
-//   isAccountTrayOpen || isAccountExpanded ? (
-//     <Flex
-//       gap={8}
-//       py={'3px'}
-//       pl="3px"
-//       width="100%"
-//       justifyContent="space-between"
-//       alignItems="center"
-//       onHoverEnd={() => {
-//         if (!isAccountTrayOpen) {
-//           setIsAccountExpanded(false);
-//         }
-//       }}
-//     >
-//       <Flex gap={8} height={34} alignItems="center">
-//         {/* <Button.IconButton
-//               size={28}
-//               className="realm-cursor-hover"
-//               onClick={() => {
-//                 roomsManager.cleanup();
-//                 AuthActions.logout(ship.patp);
-//                 setActiveApp(null);
-//                 // trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
-//               }}
-//             >
-//               <Icon name="Shutdown" size={22} opacity={0.7} />
-//             </Button.IconButton>
-//             <Button.IconButton
-//               size={28}
-//               className="realm-cursor-hover"
-//               onClick={() => {
-//                 roomsManager.cleanup();
-//                 AuthActions.logout(ship.patp);
-//                 setActiveApp(null);
-//                 trackEvent('CLICK_LOG_OUT', 'DESKTOP_SCREEN');
-//               }}
-//             >
-//               <Icon name="Logout" size={22} opacity={0.7} />
-//             </Button.IconButton>
-
-//             <Button.IconButton
-//               className="realm-cursor-hover"
-//               data-close-tray="true"
-//               size={28}
-//               onClick={() =>
-//                 DesktopActions.openAppWindow(
-//                   nativeApps['os-settings'] as AppType
-//                 )
-//               }
-//             >
-//               <Icon name="Settings" size={22} opacity={0.7} />
-//             </Button.IconButton> */}
-//       </Flex>
-//       <AccountTray
-//         isOpen={isAccountTrayOpen}
-//         isExpanded={isAccountExpanded}
-//         onToggleExpanded={(isExpanded) => setIsAccountExpanded(isExpanded)}
-//         onClick={onAccountTrayClick}
-//       />
-//     </Flex>
-//   ) : (
-//     <Flex
-//       gap={8}
-//       py={'3px'}
-//       width="100%"
-//       justifyContent="space-between"
-//       alignItems="center"
-//     >
-//       <RoomTray />
-//       <Flex gap={8} height={34} alignItems="center">
-//         <WalletTray />
-//         <MessagesTray />
-//         <AccountTray
-//           isOpen={isAccountTrayOpen}
-//           isExpanded={isAccountExpanded}
-//           onToggleExpanded={(isExpanded) => setIsAccountExpanded(isExpanded)}
-//           onClick={onAccountTrayClick}
-//         />
-//       </Flex>
-//       {/* <TrayClock /> */}
-//     </Flex>
-//   );
-// }

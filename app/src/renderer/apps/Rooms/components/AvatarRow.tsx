@@ -1,7 +1,8 @@
-import { Avatar } from '@holium/design-system';
 import { observer } from 'mobx-react';
-import { Flex, Box } from 'renderer/components';
-import { useServices } from 'renderer/logic/store';
+
+import { Avatar, Box, Flex } from '@holium/design-system';
+
+import { useShipStore } from 'renderer/stores/ship.store';
 
 interface AvatarRowProps {
   people: string[];
@@ -9,7 +10,7 @@ interface AvatarRowProps {
 }
 
 const AvatarRowPresenter = ({ people }: AvatarRowProps) => {
-  const { friends } = useServices();
+  const { friends } = useShipStore();
 
   return (
     <Flex flexDirection="row" alignItems="center">

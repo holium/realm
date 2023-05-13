@@ -1,14 +1,15 @@
 import styled from 'styled-components';
-import { Text, Flex, Box, BoxProps, capitalizeFirstLetter } from '../../index';
+
+import { Box, BoxProps, capitalizeFirstLetter, Flex, Text } from '../../index';
 import { BubbleAuthor } from './Bubble.styles';
+import { FragmentImageType, FragmentType, TEXT_TYPES } from './Bubble.types';
 import {
   FragmentBlock,
-  FragmentPlain,
   FragmentBlockquote,
-  renderFragment,
   FragmentImage,
+  FragmentPlain,
+  renderFragment,
 } from './fragment-lib';
-import { FragmentImageType, FragmentType, TEXT_TYPES } from './Bubble.types';
 
 const FullWidthFragmentBlock = styled(FragmentBlock)`
   width: 100%;
@@ -52,6 +53,7 @@ export const PinnedMessage = (props: PinnedProps) => {
       <Box>
         <FragmentImage
           id={'pin-image-preview'}
+          className="fragment-image"
           src={link}
           style={{ display: 'block' }}
           draggable={false}
@@ -66,7 +68,7 @@ export const PinnedMessage = (props: PinnedProps) => {
     <Flex id={id} key={id} width="100%" onClick={onClick}>
       <FullWidthFragmentBlock id={id}>
         <FragmentBlockquote
-          className="pinned-or-reply-message"
+          className="fragment-blockquote pinned-or-reply-message"
           id={id}
           style={{
             borderLeft: `2px solid ${

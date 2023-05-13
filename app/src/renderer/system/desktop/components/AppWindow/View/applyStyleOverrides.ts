@@ -1,5 +1,6 @@
-import { rgba, darken, lighten } from 'polished';
-import { ThemeType } from 'renderer/logic/theme';
+import { darken, lighten, rgba } from 'polished';
+
+import { ThemeType } from '@holium/shared';
 
 export const applyStyleOverrides = (appId: string, theme: ThemeType) => {
   const baseBg = theme.windowColor;

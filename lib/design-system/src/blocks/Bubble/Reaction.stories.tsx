@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Flex, Box } from '../../../general';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+
+import { Box, Flex } from '../../../general';
+import { FragmentReactionType } from './Bubble.types';
 import {
   OnReactionPayload,
-  Reactions,
   ReactionPicker,
   ReactionPickerStyle,
+  Reactions,
 } from './Reaction';
-import { FragmentReactionType } from './Bubble.types';
 
 export default {
   component: Reactions,

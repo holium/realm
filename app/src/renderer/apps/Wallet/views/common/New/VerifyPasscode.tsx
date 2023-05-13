@@ -1,5 +1,7 @@
 import { observer } from 'mobx-react';
-import { Flex, Text, Icons } from 'renderer/components';
+
+import { Flex, Icon, Text } from '@holium/design-system';
+
 import { PasscodeInput } from '../../../components/PasscodeInput';
 
 interface LockedProps {
@@ -14,15 +16,15 @@ const VerifyPasscodePresenter = ({ onSuccess }: LockedProps) => (
       justifyContent="center"
       alignItems="center"
     >
-      <Icons name="Locked" size={36} />
-      <Text mt={2} variant="h3">
+      <Icon name="Locked" size={36} />
+      <Text.H3 mt={2} variant="h3">
         Wallet Locked
-      </Text>
+      </Text.H3>
     </Flex>
-    <Flex flex={2} pt={8} flexDirection="column" alignItems="center">
-      <Text mb={8} variant="body">
+    <Flex flex={2} flexDirection="column" alignItems="center" gap={10}>
+      <Text.Body mb={8} variant="body">
         Enter your passcode to continue.
-      </Text>
+      </Text.Body>
       <PasscodeInput checkStored={true} onSuccess={onSuccess} />
     </Flex>
   </Flex>

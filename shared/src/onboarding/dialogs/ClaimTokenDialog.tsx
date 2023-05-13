@@ -1,26 +1,23 @@
 import { ChangeEvent, useRef } from 'react';
-import { Flex, Anchor } from '@holium/design-system/general';
-import { useToggle } from '@holium/design-system/util';
+
+import { Flex } from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
 import { HoliumButton } from '@holium/design-system/os';
+import { useToggle } from '@holium/design-system/util';
+
+import { OnboardDialog } from '../components/OnboardDialog';
 import {
   OnboardDialogDescription,
-  OnboardDialogInput,
   OnboardDialogInputLabel,
   OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
-import { OnboardDialog } from '../components/OnboardDialog';
 
 type Props = {
   email: string;
-  onAlreadyHaveAccount: () => void;
   onClaim: (password: string) => Promise<boolean>;
 };
 
-export const ClaimTokenDialog = ({
-  email,
-  onAlreadyHaveAccount,
-  onClaim,
-}: Props) => {
+export const ClaimTokenDialog = ({ email, onClaim }: Props) => {
   const passwordRef = useRef<HTMLInputElement>(null);
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
 
@@ -57,12 +54,27 @@ export const ClaimTokenDialog = ({
             To get access to Realm, you will need to create an account. After
             you click Claim, you will be brought to a download page.
           </OnboardDialogDescription>
-          <OnboardDialogInput value={email} disabled />
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="password">
+            <OnboardDialogInputLabel as="label" htmlFor="email">
+              Email
+            </OnboardDialogInputLabel>
+            <TextInput
+              height="38px"
+              id="claim-token-email"
+              name="claim-token-email"
+              type="email"
+              value={email}
+              disabled
+            />
+          </Flex>
+          <Flex flexDirection="column" gap={2}>
+            <OnboardDialogInputLabel as="label" htmlFor="claim-token-password">
               Password
             </OnboardDialogInputLabel>
-            <OnboardDialogInput
+            <TextInput
+              height="38px"
+              id="claim-token-password"
+              name="claim-token-password"
               ref={passwordRef}
               type="password"
               placeholder="• • • • • • • •"
@@ -70,21 +82,23 @@ export const ClaimTokenDialog = ({
             />
           </Flex>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="password">
-              Confirm password
+            <OnboardDialogInputLabel
+              as="label"
+              htmlFor="claim-token-confirm-password"
+            >
+              Confirm Password
             </OnboardDialogInputLabel>
-            <OnboardDialogInput
+            <TextInput
+              height="38px"
+              id="claim-token-confirm-password"
+              name="claim-token-confirm-password"
               ref={confirmPasswordRef}
               type="password"
               placeholder="• • • • • • • •"
-              isError={confirmPasswordError.isOn}
+              error={confirmPasswordError.isOn}
               onChange={onChangeConfirmPassword}
             />
           </Flex>
-          <OnboardDialogDescription>
-            Already have an account?{' '}
-            <Anchor onClick={onAlreadyHaveAccount}>Log in</Anchor>.
-          </OnboardDialogDescription>
         </>
       }
       nextText="Claim"

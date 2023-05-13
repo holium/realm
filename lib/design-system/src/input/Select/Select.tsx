@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { Variants } from 'framer-motion';
+
 import { Icon } from '../../general/Icon/Icon';
-import { Text } from '../../general/Text/Text';
 import { MenuItemStyle } from '../../general/MenuItem/MenuItem.styles';
-import { SelectDropdown, SelectWrapper } from './Select.styles';
+import { Text } from '../../general/Text/Text';
 import { RadioOption } from '../RadioGroup/RadioGroup';
+import { SelectDropdown, SelectWrapper } from './Select.styles';
 
 const animationVariants: Variants = {
   enter: {
@@ -37,6 +38,7 @@ type Props = {
   maxWidth?: number;
   width?: number;
   backgroundColor?: string;
+  extraSection?: ReactNode;
   onClick: (value: string) => void;
 };
 
@@ -48,6 +50,7 @@ export const Select = ({
   placeholder = 'Select one',
   disabled,
   backgroundColor,
+  extraSection,
   width,
   onClick,
 }: Props) => {
@@ -124,6 +127,7 @@ export const Select = ({
             {option.label}
           </MenuItemStyle>
         ))}
+        {extraSection}
       </SelectDropdown>
     </SelectWrapper>
   );

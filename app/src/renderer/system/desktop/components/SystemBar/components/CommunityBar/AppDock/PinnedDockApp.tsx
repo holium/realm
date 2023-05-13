@@ -1,47 +1,59 @@
-import { useRef, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Reorder } from 'framer-motion';
+import { observer } from 'mobx-react-lite';
+
 import {
-  AppType,
+  AppTile,
+  AppTileType,
+  bgIsLightOrDark,
+  getAppTileFlags,
+} from '@holium/design-system';
+
+import { ContextMenuOption, useContextMenu } from 'renderer/components';
+import { useAppState } from 'renderer/stores/app.store';
+import {
+  AppMobxType,
   InstallStatus,
-  UrbitAppType,
-} from 'os/services/spaces/models/bazaar';
-import { AppTile, ContextMenuOption } from 'renderer/components';
-import { DesktopActions } from 'renderer/logic/actions/desktop';
-import { SpacesActions } from 'renderer/logic/actions/spaces';
-import { getAppTileFlags } from 'renderer/logic/lib/app';
+} from 'renderer/stores/models/bazaar.model';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
+import { useShipStore } from 'renderer/stores/ship.store';
 import {
-  resumeSuspendLabel,
+  handleInstallation,
   handleResumeSuspend,
   installLabel,
-  handleInstallation,
+  resumeSuspendLabel,
 } from 'renderer/system/desktop/components/Home/AppInstall/helpers';
 
 type Props = {
   tileId: string;
-  app: AppType;
-  spacePath: string;
+  app: AppMobxType;
+  space?: SpaceModelType;
   hasWindow: boolean;
   isActive: boolean;
   isMinimized: boolean;
-  onClick: (app: AppType) => void;
+  onClick: (app: AppMobxType) => void;
 };
 
-export const PinnedDockApp = ({
+export const PinnedDockAppPresenter = ({
   tileId,
   app,
-  spacePath,
+  space,
   hasWindow,
   isActive,
   isMinimized,
   onClick,
 }: Props) => {
+  const { shellStore } = useAppState();
+  const { bazaarStore } = useShipStore();
   const pointerDownRef = useRef<{
     tileId: string;
     rect: DOMRect;
   } | null>(null);
-
+  const { getOptions, setOptions, getColors, setColors } = useContextMenu();
+  const appRef = bazaarStore.catalog.get(app.id);
+  // TODO need to cleanup and use a ref for the app here
   const { isSuspended, isUninstalled } = getAppTileFlags(
-    (app.installStatus as InstallStatus) || InstallStatus.installed
+    (appRef?.installStatus as InstallStatus) || InstallStatus.installed
   );
 
   const unpinOption: ContextMenuOption[] = [
@@ -49,7 +61,7 @@ export const PinnedDockApp = ({
       id: `${app.id}-unpin}`,
       label: 'Unpin',
       onClick: () => {
-        SpacesActions.unpinApp(spacePath, app.id);
+        space?.unpinApp(app.id);
       },
     },
   ];
@@ -59,7 +71,7 @@ export const PinnedDockApp = ({
           id: isMinimized ? `${app.id}-show}` : `${app.id}-hide}`,
           label: isMinimized ? 'Show' : 'Hide',
           section: 2,
-          onClick: () => DesktopActions.toggleMinimized(app.id),
+          onClick: () => shellStore.toggleMinimized(app.id),
         },
       ]
     : [];
@@ -69,21 +81,21 @@ export const PinnedDockApp = ({
           id: `${app.id}-close}`,
           label: 'Close',
           section: 2,
-          onClick: () => DesktopActions.closeAppWindow(app.id),
+          onClick: () => shellStore.closeWindow(app.id),
         },
       ]
     : [];
   const suspendOption: ContextMenuOption[] = isSuspended
     ? [
         {
-          label: resumeSuspendLabel(app.installStatus as InstallStatus),
+          label: resumeSuspendLabel(appRef?.installStatus as InstallStatus),
           section: 2,
           disabled: false,
           onClick: (evt: any) => {
             evt.stopPropagation();
             return handleResumeSuspend(
               app.id,
-              app.installStatus as InstallStatus
+              appRef?.installStatus as InstallStatus
             );
           },
         },
@@ -93,21 +105,58 @@ export const PinnedDockApp = ({
     app.type === 'urbit' && isUninstalled
       ? [
           {
-            label: installLabel(app.installStatus as InstallStatus),
+            label: installLabel(appRef?.installStatus as InstallStatus),
             // section: 2,
             disabled: false,
             onClick: (evt: any) => {
               evt.stopPropagation();
-              const appHost = (app as UrbitAppType).host;
+              const appHost = (app as AppMobxType).host;
               return handleInstallation(
                 appHost,
                 app.id,
-                app.installStatus as InstallStatus
+                appRef?.installStatus as InstallStatus
               );
             },
           },
         ]
       : [];
+
+  const contextMenuOptions = useMemo(
+    () => [
+      ...installOption,
+      ...suspendOption,
+      ...unpinOption,
+      ...hideOrShowOption,
+      ...closeOption,
+    ],
+    [appRef?.installStatus]
+  );
+
+  const contextMenuColors = useMemo(() => {
+    const isLight = bgIsLightOrDark(app.color) === 'light';
+    const textColor = isLight
+      ? 'rgba(51, 51, 51, 0.8)'
+      : 'rgba(255, 255, 255, 0.8)';
+    return { textColor, backgroundColor: app.color };
+  }, [app.color]);
+
+  useEffect(() => {
+    if (contextMenuOptions && contextMenuOptions !== getOptions(tileId)) {
+      setOptions(tileId, contextMenuOptions);
+    }
+
+    if (contextMenuColors && contextMenuColors !== getColors(tileId)) {
+      setColors(tileId, contextMenuColors);
+    }
+  }, [
+    contextMenuColors,
+    contextMenuOptions,
+    getColors,
+    getOptions,
+    setColors,
+    setOptions,
+    tileId,
+  ]);
 
   return useMemo(
     () => (
@@ -130,6 +179,7 @@ export const PinnedDockApp = ({
           },
         }}
         whileDrag={{ zIndex: 20 }}
+        drag="x"
         onPointerDown={() => {
           const rect = document.getElementById(tileId)?.getBoundingClientRect();
           if (rect) pointerDownRef.current = { tileId, rect };
@@ -157,24 +207,27 @@ export const PinnedDockApp = ({
         <AppTile
           tileId={tileId}
           tileSize="sm"
-          installStatus={app.installStatus as InstallStatus}
-          app={app}
+          installStatus={appRef?.installStatus as InstallStatus}
+          app={app as AppTileType}
           isOpen={hasWindow}
           isActive={isActive}
           isAnimated={
-            app.installStatus !== InstallStatus.suspended &&
-            app.installStatus !== InstallStatus.failed
+            appRef?.installStatus !== InstallStatus.suspended &&
+            appRef?.installStatus !== InstallStatus.failed
           }
-          contextMenuOptions={[
-            ...installOption,
-            ...suspendOption,
-            ...unpinOption,
-            ...hideOrShowOption,
-            ...closeOption,
-          ]}
         />
       </Reorder.Item>
     ),
-    [app, tileId, hasWindow, isActive, isMinimized, onClick]
+    [
+      app,
+      tileId,
+      hasWindow,
+      isActive,
+      isMinimized,
+      appRef?.installStatus,
+      onClick,
+    ]
   );
 };
+
+export const PinnedDockApp = observer(PinnedDockAppPresenter);

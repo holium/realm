@@ -1,17 +1,18 @@
+import { useMemo } from 'react';
 import styled from 'styled-components';
-import { Text, Flex, Box, BoxProps, Button, Icon } from '../../../general';
+
+import { Box, BoxProps, Button, Flex, Icon, Text } from '../../../general';
+import { flipColorIfLowContrast } from '../../../util';
 import { capitalizeFirstLetter } from '../../util/strings';
+import { convertFragmentsToPreview } from '../ChatInput/fragment-parser';
 import { BubbleAuthor } from './Bubble.styles';
+import { FragmentImageType, FragmentType, TEXT_TYPES } from './Bubble.types';
 import {
   FragmentBlock,
-  FragmentPlain,
   FragmentBlockquote,
-  renderFragment,
   FragmentImage,
+  FragmentPlain,
 } from './fragment-lib';
-import { FragmentType, FragmentImageType, TEXT_TYPES } from './Bubble.types';
-import { useMemo } from 'react';
-import { convertDarkText } from '../../../util';
 
 const ReplyContainer = styled(Flex)`
   flex-direction: column;
@@ -49,13 +50,17 @@ export const Reply = (props: ReplyProps) => {
 
   const authorColorDisplay = useMemo(
     () =>
-      (authorColor && convertDarkText(authorColor, themeMode)) ||
+      (authorColor && flipColorIfLowContrast(authorColor, themeMode)) ||
       'rgba(var(--rlm-text-rgba))',
     [authorColor]
   );
   if (!message) return null;
   const fragmentType: string = Object.keys(message[0])[0];
-  let replyContent = null;
+  let replyContent = (
+    <FragmentPlain id={id}>
+      {convertFragmentsToPreview(id, message)}
+    </FragmentPlain>
+  );
   let mediaContent = null;
   if (
     (!TEXT_TYPES.includes(fragmentType) &&
@@ -79,6 +84,7 @@ export const Reply = (props: ReplyProps) => {
       <Box>
         <FragmentImage
           id={'pin-image-preview'}
+          className="fragment-image"
           src={link}
           style={{ display: 'block' }}
           // width={100}
@@ -86,14 +92,6 @@ export const Reply = (props: ReplyProps) => {
           draggable={false}
         />
       </Box>
-    );
-  } else {
-    replyContent = renderFragment(
-      id,
-      message[0],
-      0,
-      author,
-      containerWidth ? containerWidth - 16 - 22 : undefined
     );
   }
   let additionalWidth = mediaContent ? 100 : 0;
@@ -118,7 +116,7 @@ export const Reply = (props: ReplyProps) => {
       >
         <FragmentBlockquote
           id={id}
-          className="pinned-or-reply-message"
+          className="fragment-blockquote pinned-or-reply-message"
           style={{
             paddingRight: 6,
             borderRadius: 10,

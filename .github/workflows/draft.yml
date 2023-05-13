@@ -74,7 +74,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '>=18'
           cache: 'npm'
       - name: Install the Apple certificate
         env:
@@ -152,7 +152,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '>=18'
           cache: 'npm'
       - name: Install yarn
         run: npm install -g yarn
@@ -203,7 +203,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '>=18'
           cache: 'npm'
       #
       - name: Pull latest
@@ -264,7 +264,7 @@ jobs:
           BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
   #
   # deploy-desks:
-  #   if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'do-not-build')
+  #   if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'build')
   #   needs: [pre-deploy, build-mac, build-windows, build-linux]
   #   runs-on: ubuntu-latest
   #   steps:
@@ -275,7 +275,7 @@ jobs:
   #     - name: Setup node
   #       uses: actions/setup-node@v3
   #       with:
-  #         node-version: '14'
+  #         node-version: '>=18'
   #         cache: 'npm'
   #     #
   #     - name: Pull latest
@@ -352,7 +352,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '>=18'
           cache: 'npm'
       #
       - name: Run post-deploy script
