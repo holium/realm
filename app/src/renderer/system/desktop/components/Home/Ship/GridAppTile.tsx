@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 
+import { UseToggleHook } from '@holium/design-system';
+
 import { AppTile, ContextMenuOption } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import {
@@ -25,6 +27,7 @@ type AppProps = {
   tileSize: AppTileSize;
   app: AppMobxType;
   currentSpace: SpaceModelType;
+  canClick: UseToggleHook;
 };
 
 export const GridAppTilePresenter = ({
@@ -32,6 +35,7 @@ export const GridAppTilePresenter = ({
   tileSize,
   app,
   currentSpace,
+  canClick,
 }: AppProps) => {
   const { shellStore } = useAppState();
   const { bazaarStore } = useShipStore();
@@ -115,8 +119,10 @@ export const GridAppTilePresenter = ({
       app={app as AppMobxType}
       contextMenuOptions={contextMenuOptions}
       onAppClick={(selectedApp: AppMobxType) => {
-        shellStore.openWindow(toJS(selectedApp));
-        shellStore.closeHomePane();
+        if (canClick.isOn) {
+          shellStore.openWindow(toJS(selectedApp));
+          shellStore.closeHomePane();
+        }
       }}
     />
   );

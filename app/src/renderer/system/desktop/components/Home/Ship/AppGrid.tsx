@@ -1,9 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { GridContextProvider, GridDropZone, swap } from 'react-grid-dnd';
+import {
+  GridContextProvider,
+  GridDropZone,
+  GridItem,
+  swap,
+} from 'react-grid-dnd';
+import disableScroll from 'disable-scroll';
 import { observer } from 'mobx-react';
 
 import { useToggle } from '@holium/design-system';
-import { Box } from '@holium/design-system/general';
 
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -33,7 +38,8 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
     [currentSpace?.bookmarks]
   );
 
-  const [items, setItems] = useState([...apps, ...bookmarks]);
+  // const [items, setItems] = useState([...apps, ...bookmarks]);
+  const [items, setItems] = useState(apps);
   const canClick = useToggle(true);
 
   // TODO: we should remove this listener when the component unmounts
@@ -68,14 +74,24 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
         {items.map((app, index: number) => {
           const tileId = `${app.title}-${index}-ship-grid-tile`;
           return (
-            <Box id={tileId} key={tileId}>
+            <GridItem
+              id={tileId}
+              key={tileId}
+              onMouseDownCapture={() => {
+                disableScroll.on();
+              }}
+              onMouseUpCapture={() => {
+                disableScroll.off();
+              }}
+            >
               <GridAppTile
                 tileId={tileId}
                 tileSize="xl2"
                 app={app}
                 currentSpace={currentSpace}
+                canClick={canClick}
               />
-            </Box>
+            </GridItem>
           );
         })}
         {bookmarks.map((bookmark, index) => (
