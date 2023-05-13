@@ -110,6 +110,8 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
 
   useEffect(() => {
     window.electron.app.onMouseMove((mousePosition, _, isDragging) => {
+      dragging.setToggle(isDragging);
+
       if (isDragging) {
         const x = clamp(mousePosition.x, minX, maxX);
         const y = clamp(mousePosition.y, minY, maxY);
@@ -251,8 +253,6 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       const width = clamp(motionWidth.get(), minX, maxX);
       const height = clamp(motionHeight.get(), minY, maxY);
 
-      console.log(x, y, width, height);
-
       shellStore.setWindowBounds(
         appId,
         normalizeBounds(
@@ -279,12 +279,10 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   );
 
   const onDragStart = (e: PointerEvent<HTMLDivElement>) => {
-    dragging.toggleOn();
     dragControls.start(e);
   };
 
   const onDragEnd = () => {
-    dragging.toggleOff();
     updateWindowBounds();
   };
 
@@ -325,7 +323,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       dragElastic={0}
       dragMomentum={false}
       dragListener={false}
-      drag={dragging.isOn}
+      drag
       dragControls={dragControls}
       initial={{
         opacity: 0,
@@ -345,11 +343,19 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
           duration: 0.1,
         },
       }}
+      dragConstraints={{
+        top: minY,
+        left: minX - CURSOR_WIDTH,
+        right: maxX - motionWidth.get() - CURSOR_WIDTH,
+        bottom: maxY - motionHeight.get(),
+      }}
       style={{
         x: motionX,
         y: motionY,
         width: motionWidth,
         height: motionHeight,
+        maxWidth: maxX,
+        maxHeight: maxY,
         zIndex: appWindow.zIndex,
         borderRadius,
         display: appWindow.isMinimized ? 'none' : 'block',
