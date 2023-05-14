@@ -36,7 +36,11 @@ const AppDockViewPresenter = ({
       if (appWindow.isMinimized) {
         shellStore.toggleMinimized(dockedApp.id);
       } else {
-        shellStore.setActive(dockedApp.id);
+        if (!appWindow.isActive) {
+          shellStore.setActive(dockedApp.id);
+        } else {
+          shellStore.toggleMinimized(dockedApp.id);
+        }
       }
     } else {
       shellStore.openWindow(dockedApp);

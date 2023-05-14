@@ -54,7 +54,11 @@ const PinnedWebAppPresenter = ({
       if (appWindow.isMinimized) {
         shellStore.toggleMinimized(url);
       } else {
-        shellStore.setActive(url);
+        if (!appWindow.isActive) {
+          shellStore.setActive(url);
+        } else {
+          shellStore.toggleMinimized(url);
+        }
       }
     } else {
       shellStore.openBookmark({

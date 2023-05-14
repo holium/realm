@@ -58,6 +58,14 @@ export const AppWindowModel = types
       'normal'
     ),
   })
+  .views((self) => ({
+    get isMinimized() {
+      return self.state === 'minimized';
+    },
+    isMaximized(desktopDimensions: Dimensions) {
+      return isMaximizedBounds(self.bounds, desktopDimensions);
+    },
+  }))
   .actions((self) => ({
     setZIndex(zIndex: number) {
       self.zIndex = zIndex;
@@ -68,8 +76,31 @@ export const AppWindowModel = types
     minimize() {
       self.state = 'minimized';
     },
-    maximize(desktopDimensions: Dimensions) {
-      const isMaximized = isMaximizedBounds(self.bounds, desktopDimensions);
+    restoreOldDimensions() {
+      self.bounds = { ...self.prevBounds };
+    },
+    maximizeLeft(desktopDimensions: Dimensions) {
+      const maximizedBounds = getMaximizedBounds(desktopDimensions);
+      self.prevBounds = { ...self.bounds };
+      self.bounds = {
+        x: maximizedBounds.x,
+        y: maximizedBounds.y,
+        width: maximizedBounds.width / 2,
+        height: maximizedBounds.height,
+      };
+    },
+    maximizeRight(desktopDimensions: Dimensions) {
+      const maximizedBounds = getMaximizedBounds(desktopDimensions);
+      self.prevBounds = { ...self.bounds };
+      self.bounds = {
+        x: maximizedBounds.x + maximizedBounds.width / 2,
+        y: maximizedBounds.y,
+        width: maximizedBounds.width / 2,
+        height: maximizedBounds.height,
+      };
+    },
+    toggleMaximize(desktopDimensions: Dimensions) {
+      const isMaximized = self.isMaximized(desktopDimensions);
       if (isMaximized) {
         self.bounds = { ...self.prevBounds };
       } else {
@@ -79,11 +110,6 @@ export const AppWindowModel = types
     },
     setIsActive(isActive: boolean) {
       self.isActive = isActive;
-    },
-  }))
-  .views((self) => ({
-    get isMinimized() {
-      return self.state === 'minimized';
     },
   }));
 
