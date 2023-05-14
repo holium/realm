@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { useToggle } from '@holium/design-system';
+import { useToggle } from '@holium/design-system/util';
 import { MouseState } from '@holium/realm-presence';
 
 import { AnimatedCursor } from './AnimatedCursor';

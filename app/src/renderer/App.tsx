@@ -3,7 +3,7 @@ import { MotionConfig } from 'framer-motion';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
-import { BgImage, GlobalStyle } from './App.styles';
+import { GlobalStyle, RealmBackground } from './App.styles';
 import { AppContent } from './AppContent';
 import { AppLoading } from './AppLoading';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
@@ -44,7 +44,7 @@ const AppPresenter = () => {
       <AppStateProvider value={appState}>
         <GlobalStyle blur={true} realmTheme={theme} />
         {!shellStore.isFullscreen && <Titlebar />}
-        <BgImage blurred={shellStore.isBlurred} wallpaper={bgImage} />
+        <RealmBackground blurred={shellStore.isBlurred} wallpaper={bgImage} />
         <SelectionProvider>
           <ContextMenuProvider>
             <ErrorBoundary>
