@@ -24,6 +24,7 @@
           [%suite-remove suite-remove]
           [%install-app install-app]
           [%uninstall-app uninstall-app]
+          [%reorder-app reorder-app]
           [%initialize ul]
           [%rebuild-catalog ul]
           [%rebuild-stall rebuild-stall]
@@ -41,6 +42,12 @@
     ++  uninstall-app
       %-  ot
       :~  [%desk so]
+      ==
+    ::
+    ++  reorder-app
+      %-  ot
+      :~  [%desk so]
+          [%index ni]
       ==
     ::
     ++  add-pin

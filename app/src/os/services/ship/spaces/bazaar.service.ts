@@ -272,6 +272,19 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
     });
   }
 
+  async reorderApp(desk: string, index: number) {
+    return APIConnection.getInstance().conduit.poke({
+      app: 'bazaar',
+      mark: 'bazaar-action',
+      json: {
+        'reorder-app': {
+          desk,
+          index,
+        },
+      },
+    });
+  }
+
   async installApp(ship: string, desk: string) {
     return APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
