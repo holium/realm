@@ -52,14 +52,19 @@ export const ShellModel = types
     get openWindows() {
       return Array.from(self.windows.values());
     },
-    getWindowByAppId(appId: string) {
-      return self.windows.get(appId);
-    },
     get isHomePaneOpen() {
       return self.homePaneOpen;
     },
     get isIsolationMode() {
       return self.isolationMode;
+    },
+    getWindowByAppId(appId: string) {
+      return self.windows.get(appId);
+    },
+    isWindowMaximized(appId: string) {
+      const window = self.windows.get(appId);
+      if (!window) throw console.error('Window not found');
+      return window.isMaximized(self.desktopDimensions);
     },
   }))
   .actions((self) => ({
@@ -240,7 +245,24 @@ export const ShellModel = types
     toggleMaximized(appId: string): BoundsModelType {
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');
-      window.maximize(self.desktopDimensions);
+      window.toggleMaximize(self.desktopDimensions);
+      return toJS(window.bounds);
+    },
+    maximize(appId: string): BoundsModelType {
+      const window = self.getWindowByAppId(appId);
+      if (!window) throw console.error('Window not found');
+      if (!self.isWindowMaximized(appId)) {
+        window.toggleMaximize(self.desktopDimensions);
+      }
+      return toJS(window.bounds);
+    },
+    unmaximize(appId: string): BoundsModelType {
+      const window = self.getWindowByAppId(appId);
+      if (!window) throw console.error('Window not found');
+      if (self.isWindowMaximized(appId)) {
+        console.log('unmaximizing', toJS(window.bounds));
+        window.restoreOldDimensions();
+      }
       return toJS(window.bounds);
     },
     toggleDevTools() {

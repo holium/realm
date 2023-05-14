@@ -1,5 +1,9 @@
 import { PointerEvent, useCallback, useEffect, useMemo } from 'react';
-import { useDragControls, useMotionValue } from 'framer-motion';
+import {
+  useAnimationControls,
+  useDragControls,
+  useMotionValue,
+} from 'framer-motion';
 import { debounce } from 'lodash';
 import { observer } from 'mobx-react';
 
@@ -32,7 +36,7 @@ type Props = {
   appWindow: AppWindowMobxType;
 };
 
-function clamp(value, min, max) {
+function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
@@ -43,7 +47,8 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   const dragControls = useDragControls();
   const resizing = useToggle(false);
   const dragging = useToggle(false);
-  const draggingNearEdge = useToggle(false);
+  const nearEdge = useToggle(false);
+  const controls = useAnimationControls();
 
   const appInfo = bazaarStore.getApp(appWindow.appId);
   const borderRadius = appWindow.type === 'dialog' ? 16 : 12;
@@ -51,6 +56,13 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     () => denormalizeBounds(appWindow.bounds, shellStore.desktopDimensions),
     [appWindow.bounds, shellStore.desktopDimensions]
   );
+
+  controls.start({
+    opacity: 1,
+    transition: {
+      duration: 0.15,
+    },
+  });
 
   const minX = 0;
   const minY = 0;
@@ -111,21 +123,16 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     y >= maxY - TRIGGER_AUTO_RESIZE;
 
   useEffect(() => {
-    motionX.set(bounds.x);
-    motionY.set(bounds.y);
-    motionWidth.set(bounds.width);
-    motionHeight.set(bounds.height);
-  }, [appWindow.bounds]);
-
-  useEffect(() => {
     /*
       This function gets registered once.  So it can't access our state values
       (resizing, dragging.) - But it can modify them.
     */
     window.electron.app.onMouseMove((mousePosition, _, isDragging) => {
+      const x = clamp(mousePosition.x, minX, maxX);
+      const y = clamp(mousePosition.y, minY, maxY);
+      nearEdge.setToggle(mouseIsNearEdge(x, y));
+
       if (isDragging) {
-        const x = clamp(mousePosition.x, minX, maxX);
-        const y = clamp(mousePosition.y, minY, maxY);
         mouseDragX.set(x);
         mouseDragY.set(y);
 
@@ -135,10 +142,8 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
         if (isInResizeCorner(x, y)) {
           resizing.toggleOn();
         }
-        draggingNearEdge.setToggle(mouseIsNearEdge(x, y));
       } else {
         dragging.toggleOff();
-        draggingNearEdge.toggleOff();
         resizing.toggleOff();
       }
     });
@@ -147,23 +152,26 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     };
   }, []);
 
-  // useEffect(() => {
-  //   if (!draggingNearEdge.isOn) {
-  //     shellStore.hideSnapView();
-  //   } else {
-  //     if (draggingNearEdge.isOn && !resizing.isOn) {
-  //       const x = mouseDragX.get();
-  //       const y = mouseDragY.get();
-  //       if (x <= minX + TRIGGER_AUTO_RESIZE) {
-  //         shellStore.setSnapView('left');
-  //       } else if (y <= minY + TRIGGER_AUTO_RESIZE) {
-  //         shellStore.setSnapView('fullscreen');
-  //       } else if (x >= maxX - TRIGGER_AUTO_RESIZE) {
-  //         shellStore.setSnapView('right');
-  //       }
-  //     }
-  //   }
-  // }, [draggingNearEdge.isOn, resizing.isOn]);
+  useEffect(() => {
+    if (!nearEdge.isOn) {
+      shellStore.hideSnapView();
+      if (dragging.isOn && !resizing.isOn) {
+        dragUnmaximize();
+      }
+    } else {
+      if (nearEdge.isOn && dragging.isOn && !resizing.isOn) {
+        const x = mouseDragX.get();
+        const y = mouseDragY.get();
+        if (x <= minX + TRIGGER_AUTO_RESIZE) {
+          shellStore.setSnapView('left');
+        } else if (y <= minY + TRIGGER_AUTO_RESIZE) {
+          shellStore.setSnapView('fullscreen');
+        } else if (x >= maxX - TRIGGER_AUTO_RESIZE) {
+          shellStore.setSnapView('right');
+        }
+      }
+    }
+  }, [nearEdge.isOn, resizing.isOn, dragging.isOn]);
 
   const windowId = `app-window-${appWindow.appId}`;
   const webViewId = getWebViewId(appWindow.appId, appWindow.type);
@@ -323,20 +331,37 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
 
   const onDragEnd = () => {
     dragging.toggleOff();
-    if (draggingNearEdge.isOn && !resizing.isOn) {
-      onMaximize();
+    if (nearEdge.isOn && !resizing.isOn) {
+      dragMaximize();
     } else {
       updateWindowBounds();
     }
   };
 
+  const setBoundsAfterMaximize = (mb: BoundsModelType) => {
+    const dmb = denormalizeBounds(mb, shellStore.desktopDimensions);
+    controls.start({
+      x: dmb.x,
+      y: dmb.y,
+      width: dmb.width,
+      height: dmb.height,
+      transition: { duration: 0.2 },
+    });
+  };
+
+  const dragMaximize = () => {
+    const mb = shellStore.maximize(appWindow.appId);
+    setBoundsAfterMaximize(mb);
+  };
+
+  const dragUnmaximize = () => {
+    const mb = shellStore.unmaximize(appWindow.appId);
+    const dmb = denormalizeBounds(mb, shellStore.desktopDimensions);
+  };
+
   const onMaximize = () => {
     const mb = shellStore.toggleMaximized(appWindow.appId);
-    const dmb = denormalizeBounds(mb, shellStore.desktopDimensions);
-    motionX.set(dmb.x);
-    motionY.set(dmb.y);
-    motionWidth.set(dmb.width);
-    motionHeight.set(dmb.height);
+    setBoundsAfterMaximize(mb);
   };
 
   const onMinimize = () => shellStore.toggleMinimized(appWindow.appId);
@@ -367,17 +392,12 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       dragElastic={0}
       dragMomentum={false}
       dragListener={false}
-      drag
+      drag={dragging.isOn}
       dragControls={dragControls}
       initial={{
         opacity: 0,
       }}
-      animate={{
-        opacity: 1,
-        transition: {
-          duration: 0.15,
-        },
-      }}
+      animate={controls}
       transition={{
         background: { duration: 0.25 },
       }}
