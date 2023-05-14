@@ -260,7 +260,6 @@ export const ShellModel = types
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');
       if (self.isWindowMaximized(appId)) {
-        console.log('unmaximizing', toJS(window.bounds));
         window.restoreOldDimensions();
       }
       return toJS(window.bounds);

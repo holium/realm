@@ -152,26 +152,26 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     };
   }, []);
 
-  useEffect(() => {
-    if (!nearEdge.isOn) {
-      shellStore.hideSnapView();
-      if (dragging.isOn && !resizing.isOn) {
-        dragUnmaximize();
-      }
-    } else {
-      if (nearEdge.isOn && dragging.isOn && !resizing.isOn) {
-        const x = mouseDragX.get();
-        const y = mouseDragY.get();
-        if (x <= minX + TRIGGER_AUTO_RESIZE) {
-          shellStore.setSnapView('left');
-        } else if (y <= minY + TRIGGER_AUTO_RESIZE) {
-          shellStore.setSnapView('fullscreen');
-        } else if (x >= maxX - TRIGGER_AUTO_RESIZE) {
-          shellStore.setSnapView('right');
-        }
-      }
-    }
-  }, [nearEdge.isOn, resizing.isOn, dragging.isOn]);
+  // useEffect(() => {
+  //   if (!nearEdge.isOn) {
+  //     shellStore.hideSnapView();
+  //     if (dragging.isOn && !resizing.isOn) {
+  //       dragUnmaximize();
+  //     }
+  //   } else {
+  //     if (nearEdge.isOn && dragging.isOn && !resizing.isOn) {
+  //       const x = mouseDragX.get();
+  //       const y = mouseDragY.get();
+  //       if (x <= minX + TRIGGER_AUTO_RESIZE) {
+  //         shellStore.setSnapView('left');
+  //       } else if (y <= minY + TRIGGER_AUTO_RESIZE) {
+  //         shellStore.setSnapView('fullscreen');
+  //       } else if (x >= maxX - TRIGGER_AUTO_RESIZE) {
+  //         shellStore.setSnapView('right');
+  //       }
+  //     }
+  //   }
+  // }, [nearEdge.isOn, resizing.isOn, dragging.isOn]);
 
   const windowId = `app-window-${appWindow.appId}`;
   const webViewId = getWebViewId(appWindow.appId, appWindow.type);
@@ -354,10 +354,10 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     setBoundsAfterMaximize(mb);
   };
 
-  const dragUnmaximize = () => {
-    const mb = shellStore.unmaximize(appWindow.appId);
-    const dmb = denormalizeBounds(mb, shellStore.desktopDimensions);
-  };
+  // const dragUnmaximize = () => {
+  //   const mb = shellStore.unmaximize(appWindow.appId);
+  //   const dmb = denormalizeBounds(mb, shellStore.desktopDimensions);
+  // };
 
   const onMaximize = () => {
     const mb = shellStore.toggleMaximized(appWindow.appId);
