@@ -248,6 +248,18 @@ export const ShellModel = types
       window.toggleMaximize(self.desktopDimensions);
       return toJS(window.bounds);
     },
+    maximizeLeft(appId: string): BoundsModelType {
+      const window = self.getWindowByAppId(appId);
+      if (!window) throw console.error('Window not found');
+      window.maximizeLeft(self.desktopDimensions);
+      return toJS(window.bounds);
+    },
+    maximizeRight(appId: string): BoundsModelType {
+      const window = self.getWindowByAppId(appId);
+      if (!window) throw console.error('Window not found');
+      window.maximizeRight(self.desktopDimensions);
+      return toJS(window.bounds);
+    },
     maximize(appId: string): BoundsModelType {
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');

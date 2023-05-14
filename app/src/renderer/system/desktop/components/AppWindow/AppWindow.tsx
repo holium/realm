@@ -350,8 +350,20 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   };
 
   const dragMaximize = () => {
-    const mb = shellStore.maximize(appWindow.appId);
-    setBoundsAfterMaximize(mb);
+    const x = mouseDragX.get();
+    const y = mouseDragY.get();
+    if (y <= minY + TRIGGER_AUTO_RESIZE) {
+      const mb = shellStore.maximize(appWindow.appId);
+      setBoundsAfterMaximize(mb);
+    } else {
+      if (x <= minX + TRIGGER_AUTO_RESIZE) {
+        const mb = shellStore.maximizeLeft(appWindow.appId);
+        setBoundsAfterMaximize(mb);
+      } else if (x >= maxX - TRIGGER_AUTO_RESIZE) {
+        const mb = shellStore.maximizeRight(appWindow.appId);
+        setBoundsAfterMaximize(mb);
+      }
+    }
   };
 
   // const dragUnmaximize = () => {

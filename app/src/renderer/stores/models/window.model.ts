@@ -79,6 +79,26 @@ export const AppWindowModel = types
     restoreOldDimensions() {
       self.bounds = { ...self.prevBounds };
     },
+    maximizeLeft(desktopDimensions: Dimensions) {
+      const maximizedBounds = getMaximizedBounds(desktopDimensions);
+      self.prevBounds = { ...self.bounds };
+      self.bounds = {
+        x: maximizedBounds.x,
+        y: maximizedBounds.y,
+        width: maximizedBounds.width / 2,
+        height: maximizedBounds.height,
+      };
+    },
+    maximizeRight(desktopDimensions: Dimensions) {
+      const maximizedBounds = getMaximizedBounds(desktopDimensions);
+      self.prevBounds = { ...self.bounds };
+      self.bounds = {
+        x: maximizedBounds.x + maximizedBounds.width / 2,
+        y: maximizedBounds.y,
+        width: maximizedBounds.width / 2,
+        height: maximizedBounds.height,
+      };
+    },
     toggleMaximize(desktopDimensions: Dimensions) {
       const isMaximized = self.isMaximized(desktopDimensions);
       if (isMaximized) {
