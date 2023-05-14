@@ -23,6 +23,7 @@ import { TitlebarByType } from './Titlebar/TitlebarByType';
 
 const CURSOR_WIDTH = 10;
 const MIN_WINDOW_AMOUNT_ON_SCREEN = 64;
+const TRIGGER_AUTO_RESIZE = 32;
 
 const MIN_WIDTH = 500;
 const MIN_HEIGHT = 400;
@@ -42,6 +43,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   const dragControls = useDragControls();
   const resizing = useToggle(false);
   const dragging = useToggle(false);
+  const draggingNearEdge = useToggle(false);
 
   const appInfo = bazaarStore.getApp(appWindow.appId);
   const borderRadius = appWindow.type === 'dialog' ? 16 : 12;
@@ -55,8 +57,8 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   const maxX = shellStore.desktopDimensions.width;
   const maxY = shellStore.desktopDimensions.height;
 
-  const mouseDragX = useMotionValue(0);
-  const mouseDragY = useMotionValue(0);
+  const mouseDragX = useMotionValue((minX + maxX) / 2);
+  const mouseDragY = useMotionValue((minY + maxY) / 2);
 
   const motionX = useMotionValue(bounds.x);
   const motionY = useMotionValue(bounds.y);
@@ -102,6 +104,12 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     ]
   );
 
+  const mouseIsNearEdge = (x: number, y: number) =>
+    x <= minX + TRIGGER_AUTO_RESIZE ||
+    x >= maxX - TRIGGER_AUTO_RESIZE ||
+    y <= minY + TRIGGER_AUTO_RESIZE ||
+    y >= maxY - TRIGGER_AUTO_RESIZE;
+
   useEffect(() => {
     motionX.set(bounds.x);
     motionY.set(bounds.y);
@@ -110,23 +118,52 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   }, [appWindow.bounds]);
 
   useEffect(() => {
+    /*
+      This function gets registered once.  So it can't access our state values
+      (resizing, dragging.) - But it can modify them.
+    */
     window.electron.app.onMouseMove((mousePosition, _, isDragging) => {
-      dragging.setToggle(isDragging);
-
       if (isDragging) {
         const x = clamp(mousePosition.x, minX, maxX);
         const y = clamp(mousePosition.y, minY, maxY);
         mouseDragX.set(x);
         mouseDragY.set(y);
+
         // Check if the mouse is in a resize handle.
-        if (!resizing.isOn && isInResizeCorner(x, y)) {
+        // Note that this isn't enough to be actually "resizing" -
+        // they must also not be dragging.
+        if (isInResizeCorner(x, y)) {
           resizing.toggleOn();
         }
+        draggingNearEdge.setToggle(mouseIsNearEdge(x, y));
       } else {
+        dragging.toggleOff();
+        draggingNearEdge.toggleOff();
         resizing.toggleOff();
       }
     });
+    return () => {
+      window.electron.app.removeOnMouseMove();
+    };
   }, []);
+
+  // useEffect(() => {
+  //   if (!draggingNearEdge.isOn) {
+  //     shellStore.hideSnapView();
+  //   } else {
+  //     if (draggingNearEdge.isOn && !resizing.isOn) {
+  //       const x = mouseDragX.get();
+  //       const y = mouseDragY.get();
+  //       if (x <= minX + TRIGGER_AUTO_RESIZE) {
+  //         shellStore.setSnapView('left');
+  //       } else if (y <= minY + TRIGGER_AUTO_RESIZE) {
+  //         shellStore.setSnapView('fullscreen');
+  //       } else if (x >= maxX - TRIGGER_AUTO_RESIZE) {
+  //         shellStore.setSnapView('right');
+  //       }
+  //     }
+  //   }
+  // }, [draggingNearEdge.isOn, resizing.isOn]);
 
   const windowId = `app-window-${appWindow.appId}`;
   const webViewId = getWebViewId(appWindow.appId, appWindow.type);
@@ -280,14 +317,20 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   );
 
   const onDragStart = (e: PointerEvent<HTMLDivElement>) => {
+    dragging.toggleOn();
     dragControls.start(e);
   };
 
   const onDragEnd = () => {
-    updateWindowBounds();
+    dragging.toggleOff();
+    if (draggingNearEdge.isOn && !resizing.isOn) {
+      onMaximize();
+    } else {
+      updateWindowBounds();
+    }
   };
 
-  const onMaximize = async () => {
+  const onMaximize = () => {
     const mb = shellStore.toggleMaximized(appWindow.appId);
     const dmb = denormalizeBounds(mb, shellStore.desktopDimensions);
     motionX.set(dmb.x);
@@ -388,7 +431,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
         />
         <ErrorBoundary>
           <AppWindowByType
-            isResizing={resizing.isOn}
+            isResizing={resizing.isOn && !dragging.isOn}
             isDragging={dragging.isOn}
             appWindow={appWindow}
           />

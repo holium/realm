@@ -26,6 +26,7 @@ export type NativeAppConfigMobxType = Instance<typeof NativeAppConfig>;
 export const ShellModel = types
   .model('ShellModel', {
     isBlurred: types.optional(types.boolean, true),
+    snapView: types.optional(types.string, 'none'),
     isFullscreen: types.optional(types.boolean, true),
     desktopDimensions: types.optional(
       types.model({
@@ -110,6 +111,12 @@ export const ShellModel = types
         return;
       }
       self.isBlurred = isBlurred;
+    },
+    setSnapView(view: string) {
+      self.snapView = view;
+    },
+    hideSnapView() {
+      self.snapView = 'none';
     },
     setFullscreen(isFullscreen: boolean) {
       self.isFullscreen = isFullscreen;
