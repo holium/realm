@@ -22,6 +22,7 @@ import { AppWindowResizeHandles } from './AppWindowResizeHandles';
 import { TitlebarByType } from './Titlebar/TitlebarByType';
 
 const CURSOR_WIDTH = 10;
+const MIN_WINDOW_AMOUNT_ON_SCREEN = 64;
 
 const MIN_WIDTH = 500;
 const MIN_HEIGHT = 400;
@@ -344,10 +345,11 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
         },
       }}
       dragConstraints={{
-        top: minY,
-        left: minX - CURSOR_WIDTH,
-        right: maxX - motionWidth.get() - CURSOR_WIDTH,
-        bottom: maxY - motionHeight.get(),
+        top: minY - motionHeight.get() + MIN_WINDOW_AMOUNT_ON_SCREEN,
+        left:
+          minX - motionWidth.get() - CURSOR_WIDTH + MIN_WINDOW_AMOUNT_ON_SCREEN,
+        right: maxX - CURSOR_WIDTH - MIN_WINDOW_AMOUNT_ON_SCREEN,
+        bottom: maxY - MIN_WINDOW_AMOUNT_ON_SCREEN,
       }}
       style={{
         x: motionX,
