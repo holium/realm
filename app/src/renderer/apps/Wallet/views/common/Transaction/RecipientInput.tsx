@@ -13,13 +13,23 @@ import {
   TextInput,
 } from '@holium/design-system';
 
-import { RecipientPayload } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { shortened } from '../../../lib/helpers';
 import { ContainerFlex } from './styled';
 
-const RecipientInputPresenter = (props: {
+type RecipientPayload = {
+  recipientMetadata?: {
+    color: string;
+    avatar?: string;
+    nickname?: string;
+  };
+  patp: string;
+  address?: string | null;
+  gasEstimate?: number;
+};
+
+type Props = {
   setValid: (
     valid: boolean,
     recipient: {
@@ -29,7 +39,9 @@ const RecipientInputPresenter = (props: {
       patpAddress?: string;
     }
   ) => void;
-}) => {
+};
+
+const RecipientInputPresenter = (props: Props) => {
   const { walletStore } = useShipStore();
 
   const [icon, setIcon] = useState('blank');

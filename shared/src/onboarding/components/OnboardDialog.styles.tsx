@@ -32,7 +32,8 @@ export const OnboardDialogCard = styled.form`
 
   @media (max-width: ${MOBILE_WIDTH}px) {
     align-self: flex-start;
-    height: 100vh;
+    height: 100%;
+    min-height: 100vh;
     margin: 0;
     padding: 32px;
     border-radius: 0;

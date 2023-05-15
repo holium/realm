@@ -5,7 +5,7 @@ const registerListeners = (mainWindow: BrowserWindow) => {
   webContents.on('will-navigate', function (e, url) {
     if (url !== webContents.getURL()) {
       e.preventDefault();
-      mainWindow.webContents.send('realm.browser.open', url);
+      webContents.send('realm.browser.open', url);
     }
   });
 

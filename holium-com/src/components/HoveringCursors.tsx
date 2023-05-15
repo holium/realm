@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-export const HoveringCursors = () => (
+export const HoveringCursors = ({ className = '' }) => (
   <motion.svg
     width="275"
     height="330"
@@ -8,6 +8,7 @@ export const HoveringCursors = () => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
+    className={className}
   >
     <motion.g
       animate={['initial']}

@@ -5,8 +5,8 @@ import { Button, Flex, Text } from '@holium/design-system';
 import {
   NetworkStoreType,
   NetworkType,
-  WalletView,
-} from 'renderer/stores/models/wallet.model';
+} from 'os/services/ship/wallet/wallet.types';
+import { WalletView } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { WalletCard } from './common/WalletCard';

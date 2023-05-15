@@ -20,6 +20,7 @@ type Props = {
   nextText?: string;
   nextIcon?: ReactNode;
   hideNextButton?: boolean;
+  autoComplete?: boolean;
   footer?: ReactNode;
   onBack?: () => void;
   onNext?: () => Promise<boolean>;
@@ -31,6 +32,7 @@ export const OnboardDialog = ({
   nextText = 'Next',
   nextIcon,
   hideNextButton,
+  autoComplete = true,
   footer,
   onBack,
   onNext,
@@ -59,7 +61,12 @@ export const OnboardDialog = ({
   };
 
   return (
-    <OnboardDialogCard onSubmit={onNext ? handleSubmit : undefined}>
+    <OnboardDialogCard
+      autoComplete={autoComplete ? 'on' : 'off'}
+      method="post"
+      action=""
+      onSubmit={onNext ? handleSubmit : undefined}
+    >
       <OnboardDialogBody>
         {icon && (
           <OnboardDialogIconContainer>{icon}</OnboardDialogIconContainer>

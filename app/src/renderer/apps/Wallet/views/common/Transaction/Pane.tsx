@@ -3,12 +3,9 @@ import { observer } from 'mobx-react';
 
 import { Avatar, Box, Button, Flex, Icon, Text } from '@holium/design-system';
 
+import { ProtocolType } from 'os/services/ship/wallet/wallet.types';
 import { shortened } from 'renderer/apps/Wallet/lib/helpers';
-import {
-  ERC20Type,
-  ProtocolType,
-  WalletView,
-} from 'renderer/stores/models/wallet.model';
+import { ERC20Type, WalletView } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { AmountInput } from './AmountInput';

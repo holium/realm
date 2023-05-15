@@ -35,7 +35,11 @@ const parseCreatedJoinedLeftChat = (id: string, text: string) => {
   return (
     <Flex id={id} flexDirection="row" alignItems="center" gap={4}>
       {/* TODO popup passport card on click */}
-      <FragmentShip style={{ padding: '0px 4px' }} fontSize={1}>
+      <FragmentShip
+        style={{ padding: '0px 4px' }}
+        fontSize={1}
+        className="fragment-ship"
+      >
         {patp}
       </FragmentShip>
       <Text.Custom id={id} fontSize={1} fontWeight={300} opacity={0.5}>

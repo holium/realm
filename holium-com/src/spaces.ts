@@ -185,7 +185,7 @@ export const spaces: Record<SpaceKeys, Space> = {
   },
   athiest: {
     id: 'athiest',
-    title: 'Athiesm',
+    title: 'Atheism',
     members: 13,
     picture: './space-pictures/athiest.jpeg',
     theme: {
@@ -264,7 +264,24 @@ export const spaces: Record<SpaceKeys, Space> = {
   // },
 };
 
-export const messages: { [key: string]: any } = {
+type MessageContent = {
+  plain?: string;
+  ship?: string;
+  url?: string;
+  link?: string;
+  image?: string;
+};
+
+export type Message = {
+  author: string;
+  authorColor: string;
+  sentAt: string;
+  message: MessageContent[];
+  our?: boolean;
+  onReaction: () => void;
+};
+
+export const messages: { [key: string]: Message[] } = {
   'realm-forerunners': [
     {
       author: 'Thearellica',

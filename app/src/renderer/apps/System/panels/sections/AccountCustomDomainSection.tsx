@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { useToggle } from '@holium/design-system';
+import { useToggle } from '@holium/design-system/util';
 import { AccountCustomDomainDialogBody, useUser } from '@holium/shared';
 
 import { thirdEarthApi } from 'renderer/onboarding/thirdEarthApi';

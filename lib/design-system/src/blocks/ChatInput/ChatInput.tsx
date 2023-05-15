@@ -1,53 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import styled from 'styled-components';
 
 import { BoxProps, Button, Flex, Icon, Spinner } from '../../../general';
-import { InputBox, TextArea } from '../../../inputs';
+import { InputBox } from '../../input/InputBox/InputBox';
 import { isImageLink, parseMediaType } from '../../util/links';
 import { FragmentType } from '../Bubble/Bubble.types';
-import { FragmentImage } from '../Bubble/fragment-lib';
 import { Reply } from '../Bubble/Reply';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
 import { MediaBlock } from '../MediaBlock/MediaBlock';
+import {
+  CHAT_INPUT_LINE_HEIGHT,
+  ChatBox,
+  RemoveAttachmentButton,
+} from './ChatInput.styles';
 import { convertFragmentsToText, parseChatInput } from './fragment-parser';
-
-const CHAT_INPUT_LINE_HEIGHT = 22;
-const ChatBox = styled(TextArea)`
-  resize: none;
-  line-height: ${CHAT_INPUT_LINE_HEIGHT}px;
-  font-size: 14px;
-  padding-left: 4px;
-  padding-right: 4px;
-`;
-
-const RemoveAttachmentButton = styled(motion.div)`
-  position: relative;
-  z-index: 4;
-  transition: var(--transition);
-  overflow: visible;
-  ${FragmentImage} {
-    padding: 0px;
-  }
-  ${Button.Base} {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .chat-attachment-remove-btn {
-    position: absolute;
-    display: flex;
-    overflow: visible;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    top: -4px;
-    right: -4px;
-    z-index: 4;
-    border-radius: 12px;
-    transition: var(--transition);
-  }
-`;
 
 type ChatInputProps = {
   id: string;

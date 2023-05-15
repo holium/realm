@@ -69,7 +69,6 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
   }, [selectedShip]);
 
   useEffect(() => {
-    console.log(searchMode, searchString);
     if (searchMode === 'app-summary') {
       if (inputRef.current) {
         inputRef.current.value = searchString;

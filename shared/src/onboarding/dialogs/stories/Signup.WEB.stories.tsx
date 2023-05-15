@@ -1,5 +1,7 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
+import { GetRealmDialog, SomethingWentWrongDialog } from '@holium/shared';
+
 import { BootingDialog } from '../BootingDialog';
 import { ChooseIdDialog } from '../ChooseIdDialog';
 import { CreateAccountDialog } from '../CreateAccountDialog';
@@ -17,6 +19,26 @@ export default {
   component: CreateAccountDialog,
   title: 'Onboarding/Signup flow WEB',
 } as ComponentMeta<typeof CreateAccountDialog>;
+
+export const GetRealmDialogStory: ComponentStory<
+  typeof GetRealmDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <GetRealmDialog onGetANewId={() => {}} onBack={() => {}} />
+  </OnboardingDialogWrapper>
+);
+
+GetRealmDialogStory.storyName = '0. Join waitlist';
+
+export const SomethingWentWrongDialogStory: ComponentStory<
+  typeof SomethingWentWrongDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <SomethingWentWrongDialog onBack={() => {}} />
+  </OnboardingDialogWrapper>
+);
+
+SomethingWentWrongDialogStory.storyName = '0.1 Something went wrong';
 
 export const CreateAccountDialogStory: ComponentStory<
   typeof CreateAccountDialog
