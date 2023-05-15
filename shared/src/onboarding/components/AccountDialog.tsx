@@ -148,7 +148,7 @@ export const AccountDialog = ({
             </AccountDialogSidebarMenuItemText>
           ))}
         </AccountDialogSidebarMenu>
-        <Button.Transparent onClick={onExit}>
+        <Button.Transparent style={{ padding: 0 }} onClick={onExit}>
           <Icon fill="text" opacity={0.5} name="RoomLeave" size={20} />
         </Button.Transparent>
       </AccountDialogSidebar>
