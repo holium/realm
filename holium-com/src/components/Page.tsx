@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import NextHead from 'next/head';
-import { spaces } from 'spaces';
 
+import { spaces } from '../spaces';
 import { useSpace } from './SpaceContext';
 
 const siteUrl = 'https://www.holium.com';
