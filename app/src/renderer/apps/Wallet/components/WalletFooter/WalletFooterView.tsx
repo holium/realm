@@ -1,21 +1,15 @@
 import styled from 'styled-components';
 
-import { Box, Button, Flex, Icon } from '@holium/design-system/general';
+import { Button, Flex, Icon } from '@holium/design-system/general';
 
 import { ProtocolType } from 'os/services/ship/wallet/wallet.types';
 
 import { WalletProtocol } from '../WalletProtocol';
 
-const Wrapper = styled(Box)`
-  position: absolute;
-  z-index: 3;
-  bottom: -12px;
-  left: -12px;
-  right: -12px;
-  padding: 12px;
-  height: 50px;
-  width: calc(100% + 24px);
-  display: ${({ hidden }) => (hidden ? 'none' : 'block')};
+const Wrapper = styled(Flex)`
+  height: 24px;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 type Props = {
@@ -28,9 +22,11 @@ export const WalletFooterView = ({
   protocol,
   hidden = false,
   onClickSettings,
-}: Props) => (
-  <Wrapper hidden={hidden}>
-    <Flex justifyContent="space-between">
+}: Props) => {
+  if (hidden) return null;
+
+  return (
+    <Wrapper>
       <WalletProtocol protocol={protocol} />
       <Flex>
         <Flex mr="10px">
@@ -64,6 +60,6 @@ export const WalletFooterView = ({
           <Icon name="Settings" size={20} opacity={0.5} />
         </Button.IconButton>
       </Flex>
-    </Flex>
-  </Wrapper>
-);
+    </Wrapper>
+  );
+};

@@ -13,7 +13,7 @@ export const WalletHeaderView = ({
   onClickBack,
   onAddWallet,
 }: Props) => (
-  <Flex width="100%" justifyContent="space-between" alignItems="center" pb={2}>
+  <Flex width="100%" justifyContent="space-between" alignItems="center">
     {showBack && !isOnboarding ? (
       <Button.IconButton
         size={26}

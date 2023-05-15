@@ -11,7 +11,6 @@ import {
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { useTrayApps } from '../store';
 import { PendingTransactionDisplay } from './components/Transaction/Pending';
 import { WalletFooter } from './components/WalletFooter/WalletFooter';
 import { WalletHeader } from './components/WalletHeader/WalletHeader';
@@ -24,7 +23,7 @@ import { TransactionDetailScreen } from './screens/TransactionDetailScreen';
 import { WalletListScreen } from './screens/WalletListScreen';
 import { WalletSettingsScreen } from './screens/WalletSettingsScreen';
 import { WalletScreen } from './types';
-import { WalletAppNew } from './WalletNew';
+import { WalletNew } from './WalletNew';
 
 const WalletScreens: Record<
   WalletScreen,
@@ -34,7 +33,7 @@ const WalletScreens: Record<
   [WalletScreen.WALLET_DETAIL]: () => <DetailScreen />,
   [WalletScreen.TRANSACTION_SEND]: () => <DetailScreen />,
   [WalletScreen.TRANSACTION_DETAIL]: () => <TransactionDetailScreen />,
-  [WalletScreen.NEW]: () => <WalletAppNew />,
+  [WalletScreen.NEW]: () => <WalletNew />,
   [WalletScreen.TRANSACTION_CONFIRM]: () => <div />,
   [WalletScreen.CREATE_WALLET]: ({ network }) => (
     <CreateWalletScreen network={network} />
@@ -44,10 +43,9 @@ const WalletScreens: Record<
   [WalletScreen.NFT_DETAIL]: () => <NFTDetailScreen />,
 };
 
-const WalletAppPresenter = () => {
+const WalletPresenter = () => {
   const [hidePending, setHidePending] = useState(true);
 
-  const { dimensions } = useTrayApps();
   const { walletStore } = useShipStore();
 
   let transactions: TransactionType[] = [];
@@ -117,21 +115,19 @@ const WalletAppPresenter = () => {
     WalletScreen.NFT_DETAIL,
   ].includes(walletStore.navState.view);
 
-  const viewComponent: WalletScreen =
+  const screenComponent: WalletScreen =
     walletStore.navState.view === WalletScreen.TRANSACTION_CONFIRM
       ? WalletScreen.TRANSACTION_SEND
       : walletStore.navState.view;
 
-  const View = WalletScreens[viewComponent];
+  const Screen = WalletScreens[screenComponent];
 
   return (
     <Flex
-      onClick={(evt) => evt.stopPropagation()}
-      position="relative"
-      height={dimensions.height - 24}
-      width="100%"
+      flex={1}
       flexDirection="column"
-      gap={10}
+      gap="12px"
+      onClick={(e) => e.stopPropagation()}
     >
       <WalletHeader
         isOnboarding={WalletScreen.NEW === walletStore.navState.view}
@@ -148,11 +144,10 @@ const WalletAppPresenter = () => {
         walletStore.navState.view !== WalletScreen.TRANSACTION_DETAIL && (
           <PendingTransactionDisplay transactions={transactions} hide={hide} />
         )}
-      <View network={walletStore.navState.network} />
-
+      <Screen network={walletStore.navState.network} />
       <WalletFooter hidden={hideFooter} />
     </Flex>
   );
 };
 
-export const WalletApp = observer(WalletAppPresenter);
+export const Wallet = observer(WalletPresenter);

@@ -18,7 +18,7 @@ export const CreateWalletScreenBody = ({
   onChangeNickname,
   onClickCreate,
 }: Props) => (
-  <Flex p={1} height="100%" width="100%" flexDirection="column" gap={20}>
+  <Flex flex={1} flexDirection="column" gap={20}>
     <Text.H4 mt={2} variant="h4">
       Create Address
     </Text.H4>

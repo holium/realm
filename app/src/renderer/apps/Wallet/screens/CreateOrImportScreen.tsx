@@ -6,8 +6,8 @@ type Props = {
   setScreen: (screen: NewWalletScreen) => void;
 };
 
-export const CreateScreen = ({ setScreen }: Props) => (
-  <Flex width="100%" height="100%" flexDirection="column">
+export const CreateOrImportScreen = ({ setScreen }: Props) => (
+  <Flex flex={1} flexDirection="column">
     <Flex flex={1} flexDirection="column" gap="32px" justifyContent="center">
       <Flex flexDirection="column" gap={16} alignItems="center">
         <Text.H4 mt="100px" variant="h4">

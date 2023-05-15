@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { Box, Button, Flex, Icon } from '@holium/design-system/general';
+import { Button, Flex, Icon } from '@holium/design-system/general';
 
 import { NewWalletScreen } from 'renderer/apps/Wallet/types';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -9,14 +9,14 @@ import { useShipStore } from 'renderer/stores/ship.store';
 import { BackupScreen } from './screens/BackupScreen';
 import { ConfirmPasscodeScreen } from './screens/ConfirmPasscodeScreen';
 import { ConfirmScreen } from './screens/ConfirmScreen';
+import { CreateOrImportScreen } from './screens/CreateOrImportScreen';
 import { CreatePasscodeScreen } from './screens/CreatePasscodeScreen';
-import { CreateScreen } from './screens/CreateScreen';
 import { DetectedExistingScreen } from './screens/DetectedExistingScreen';
 import { FinalizingScreen } from './screens/FinalizingScreen';
 import { ImportScreen } from './screens/ImportScreen';
 import { RecoverExistingScreen } from './screens/RecoverExistingScreen';
 
-const WalletAppNewPresenter = () => {
+const WalletNewPresenter = () => {
   const { walletStore } = useShipStore();
   const initialScreen = walletStore.initialized
     ? NewWalletScreen.DETECTED_EXISTING
@@ -34,7 +34,7 @@ const WalletAppNewPresenter = () => {
   };
 
   const components = {
-    [NewWalletScreen.CREATE]: <CreateScreen setScreen={setScreen} />,
+    [NewWalletScreen.CREATE]: <CreateOrImportScreen setScreen={setScreen} />,
     [NewWalletScreen.IMPORT]: (
       <ImportScreen setSeedPhrase={setSeedPhrase} setScreen={setScreen} />
     ),
@@ -77,7 +77,7 @@ const WalletAppNewPresenter = () => {
   const currentComponent = components[screen];
 
   return (
-    <Box width="100%" height="100%" px={1} py={2}>
+    <>
       {currentComponent}
       {![NewWalletScreen.CREATE, NewWalletScreen.DETECTED_EXISTING].includes(
         screen
@@ -106,8 +106,8 @@ const WalletAppNewPresenter = () => {
           </Button.IconButton>
         </Flex>
       )}
-    </Box>
+    </>
   );
 };
 
-export const WalletAppNew = observer(WalletAppNewPresenter);
+export const WalletNew = observer(WalletNewPresenter);

@@ -11,6 +11,7 @@ import {
 } from 'os/services/ship/wallet/wallet.types';
 import { RealmIPC } from 'renderer/stores/ipc';
 import { WalletStore } from 'renderer/stores/models/wallet.model';
+import { TrayAppKey } from 'renderer/system/desktop/components/SystemBar/apps';
 
 import { calculateAnchorPointById } from '../lib/position';
 import { RoomsAppState } from './Rooms/rooms.model';
@@ -25,13 +26,6 @@ const TrayAppDimensions = types.model({
   width: types.number,
   height: types.number,
 });
-
-export type TrayAppKeys =
-  | 'rooms-tray'
-  | 'account-tray'
-  | 'messages-tray'
-  | 'wallet-tray'
-  | 'spaces-tray';
 
 const TrayAppStore = types
   .model('TrayAppStore', {
@@ -71,7 +65,7 @@ const TrayAppStore = types
       self.innerNavigation = '';
     },
     setActiveApp(
-      appId: TrayAppKeys | null,
+      appId: TrayAppKey | null,
       params?: {
         willOpen: boolean;
         position: string;
