@@ -290,6 +290,25 @@ jobs:
           BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
           BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
           BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
+      # generate a new checksum based on signed .exe
+      - name: Generate checksum
+        uses: actions/github-script@v6
+        id: generate-checksum
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/generate-checksum.js')
+            const result = script({github, context}, 'production-build.yml', 'windows', JSON.parse(process.env.CI_ENV))
+            console.log(result)
+            return result
+        env:
+          USERNAME: ${{ secrets.CODE_SIGNING_USERNAME }}
+          PASSWORD: ${{ secrets.CODE_SIGNING_PASSWORD }}
+          SSLCOM_SIGNING_SECRET: ${{ secrets.SSLCOM_SIGNING_SECRET }}
+          BUILD_VERSION: ${{ needs.pre-deploy.outputs.build_version }}
+          ARTIFACT_VERSION: ${{ needs.pre-deploy.outputs.artifact_version }}
+          BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
+          BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
+          BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
       # copy release artifacts from this runner to digitalocean
       - name: Publish artifacts
         run: |
