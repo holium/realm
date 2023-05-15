@@ -15,7 +15,10 @@ import {
   normalizeBounds,
 } from 'renderer/lib/window-manager';
 import { useAppState } from 'renderer/stores/app.store';
-import { AppWindowMobxType } from 'renderer/stores/models/window.model';
+import {
+  AppWindowMobxType,
+  BoundsModelType,
+} from 'renderer/stores/models/window.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
 
