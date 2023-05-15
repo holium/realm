@@ -44,7 +44,7 @@ async function hashFile() {
           }
           lines[j] = `${raw[0]}: ${raw[1].trim()}`;
         }
-        fs.writeFileSync(`./app/release/build/latest.yml`, lines.join('\n'));, lines.join('\n');
+        fs.writeFileSync(`./app/release/build/latest.yml`, lines.join('\n'));
         resolve(hashval);
       })
       .pipe(hash, {
