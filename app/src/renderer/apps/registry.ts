@@ -1,4 +1,3 @@
-// import type { IconPathsType } from '@holium/design-system';
 type AppEntry = {
   name: string;
   icon: any;
@@ -14,7 +13,7 @@ type AppEntry = {
   };
 };
 
-export const AppRegistry: { [key: string]: AppEntry } = {
+export const AppRegistry: Record<string, AppEntry> = {
   chat: {
     name: 'Chat',
     icon: 'Messages',
@@ -43,7 +42,7 @@ type SystemEntry = {
   };
 };
 
-export const SystemTrayRegistry: { [key: string]: SystemEntry } = {
+export const SystemTrayRegistry: Record<string, SystemEntry> = {
   spaces: {
     position: 'top-right',
     anchorOffset: {

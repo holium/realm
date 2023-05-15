@@ -18,6 +18,8 @@ import {
   SharingMode,
   WalletCreationMode,
 } from 'os/services/ship/wallet/wallet.types';
+import { gweiToEther } from 'renderer/apps/Wallet/helpers';
+import { WalletScreen } from 'renderer/apps/Wallet/types';
 
 import { appState } from '../app.store';
 import { WalletIPC } from '../ipc';
@@ -25,23 +27,6 @@ import { shipStore } from '../ship.store';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
-
-export enum WalletView {
-  LIST = 'list',
-  NEW = 'new',
-  WALLET_DETAIL = 'detail',
-  TRANSACTION_SEND = 'send',
-  TRANSACTION_CONFIRM = 'confirm',
-  TRANSACTION_DETAIL = 'transaction',
-  NFT_DETAIL = 'ethereum:nft',
-  LOCKED = 'locked',
-  SETTINGS = 'settings',
-  CREATE_WALLET = 'create-wallet',
-}
-
-const gweiToEther = (gwei: number) => {
-  return gwei / 1000000000000000000;
-};
 
 const Settings = types
   .model('Settings', {
@@ -708,7 +693,7 @@ const NetworkStores = types.enumeration(Object.values(NetworkStoreType));
 
 export const WalletNavState = types
   .model('WalletNavState', {
-    view: types.enumeration(Object.values(WalletView)),
+    view: types.enumeration(Object.values(WalletScreen)),
     protocol: Protocols,
     lastEthProtocol: Protocols,
     btcNetwork: NetworkStores,
@@ -805,7 +790,7 @@ export interface WalletNavOptions {
 
 export const WalletStore = types
   .model('WalletStore', {
-    returnView: types.maybe(types.enumeration(Object.values(WalletView))),
+    returnView: types.maybe(types.enumeration(Object.values(WalletScreen))),
     ethereum: EthStore,
     bitcoin: BitcoinStore,
     btctest: BitcoinStore,
@@ -889,7 +874,7 @@ export const WalletStore = types
         }
       },
       setNetwork(network: NetworkType) {
-        this.navigate(WalletView.LIST);
+        this.navigate(WalletScreen.LIST);
         if (self.navState.network !== network) {
           this.setNetworkSetter(network);
           this.watchUpdates(self.navState.protocol);
@@ -906,7 +891,7 @@ export const WalletStore = types
         self.navState.protocol = protocol;
         self.ethereum.setProtocol(protocol);
       },
-      navigate(view: WalletView, options?: WalletNavOptions) {
+      navigate(view: WalletScreen, options?: WalletNavOptions) {
         const canReturn = options?.canReturn || true;
         const walletIndex = options?.walletIndex || self.navState.walletIndex;
         const detail = options?.detail;
@@ -920,10 +905,10 @@ export const WalletStore = types
         if (
           canReturn &&
           ![
-            WalletView.LOCKED,
-            WalletView.NEW,
-            WalletView.TRANSACTION_SEND,
-            WalletView.TRANSACTION_CONFIRM,
+            WalletScreen.LOCKED,
+            WalletScreen.NEW,
+            WalletScreen.TRANSACTION_SEND,
+            WalletScreen.TRANSACTION_CONFIRM,
           ].includes(self.navState.view)
         ) {
           const returnSnapshot = getSnapshot(self.navState);
@@ -943,7 +928,7 @@ export const WalletStore = types
         self.navState = newState;
       },
       navigateBack() {
-        const DEFAULT_RETURN_VIEW = WalletView.LIST;
+        const DEFAULT_RETURN_VIEW = WalletScreen.LIST;
         let returnSnapshot = getSnapshot(
           WalletNavState.create({
             view: DEFAULT_RETURN_VIEW,
@@ -962,7 +947,7 @@ export const WalletStore = types
       },
       resetNavigation() {
         self.navState = WalletNavState.create({
-          view: WalletView.LIST,
+          view: WalletScreen.LIST,
           protocol: self.navState.protocol,
           lastEthProtocol: self.navState.lastEthProtocol,
           btcNetwork: self.navState.btcNetwork,
@@ -1082,7 +1067,7 @@ export const WalletStore = types
       }),
       createWallet(nickname: string) {
         this.createWalletFlow(nickname);
-        this.navigate(WalletView.LIST, { canReturn: false });
+        this.navigate(WalletScreen.LIST, { canReturn: false });
       },
       sendEthereumTransaction: flow(function* (
         walletIndex: string,
@@ -1199,7 +1184,7 @@ export const WalletStore = types
         yield WalletIPC.updateWalletState(watchProtocol) as PromiseLike<any>;
       }),
       setProtocol(protocol: ProtocolType) {
-        this.navigate(WalletView.LIST);
+        this.navigate(WalletScreen.LIST);
         if (self.navState.protocol !== protocol) {
           this.setProtocolSetter(protocol);
         }
@@ -1275,7 +1260,7 @@ export const WalletStore = types
         self.pauseUpdates();
         if (hasPasscode) {
           // @ts-expect-error
-          self.navigate(WalletView.LOCKED);
+          self.navigate(WalletScreen.LOCKED);
         }
       }),
       pauseUpdates: flow(function* (): Generator<PromiseLike<any>, void, any> {
