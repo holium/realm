@@ -3,7 +3,8 @@ import { observer } from 'mobx-react';
 
 import { Box, Flex, Icon, Text, TextInput } from '@holium/design-system';
 
-import { ERC20Type, ProtocolType } from 'renderer/stores/models/wallet.model';
+import { ProtocolType } from 'os/services/ship/wallet/wallet.types';
+import { ERC20Type } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ContainerFlex, FlexHider } from './styled';

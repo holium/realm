@@ -1,5 +1,4 @@
-import { Asset } from 'renderer/stores/models/wallet.model';
-
+import { Asset } from '../wallet.types';
 import { BaseProtocol } from './BaseProtocol';
 
 /**

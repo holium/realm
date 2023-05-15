@@ -4,7 +4,7 @@ import { observer } from 'mobx-react';
 
 import { Button, Flex, Text, TextInput } from '@holium/design-system';
 
-import { NetworkType } from 'renderer/stores/models/wallet.model';
+import { NetworkType } from 'os/services/ship/wallet/wallet.types';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 type Props = {

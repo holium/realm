@@ -15,9 +15,9 @@ import {
 
 import {
   SharingMode,
-  UISettingsType,
   WalletCreationMode,
-} from 'renderer/stores/models/wallet.model';
+} from 'os/services/ship/wallet/wallet.types';
+import { UISettingsType } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { DeletePasscode } from './DeletePasscode';

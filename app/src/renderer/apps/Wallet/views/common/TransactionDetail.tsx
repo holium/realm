@@ -13,10 +13,12 @@ import {
 } from '@holium/design-system';
 
 import {
-  BitcoinWalletType,
-  EthWalletType,
   NetworkType,
   ProtocolType,
+} from 'os/services/ship/wallet/wallet.types';
+import {
+  BitcoinWalletType,
+  EthWalletType,
   TransactionType,
   WalletStoreType,
 } from 'renderer/stores/models/wallet.model';

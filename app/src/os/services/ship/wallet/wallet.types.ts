@@ -1,3 +1,14 @@
+export enum NetworkType {
+  ETHEREUM = 'ethereum',
+  BITCOIN = 'bitcoin',
+}
+
+export enum NetworkStoreType {
+  ETHEREUM = 'Ethereum',
+  BTC_MAIN = 'Bitcoin Mainnet',
+  BTC_TEST = 'Bitcoin Testnet',
+}
+
 export type Asset = {
   addr: string; // smart contract address for eth
   id?: string; // chainId for eth, id for uqbar
