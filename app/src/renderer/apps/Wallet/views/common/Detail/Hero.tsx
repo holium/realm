@@ -4,14 +4,22 @@ import { observer } from 'mobx-react';
 import { QRCodeSVG } from 'qrcode.react';
 import styled from 'styled-components';
 
-import { Box, CopyButton, Flex, Icon, Text } from '@holium/design-system';
+import {
+  Box,
+  CopyButton,
+  Flex,
+  Icon,
+  Text,
+} from '@holium/design-system/general';
 
+import {
+  NetworkType,
+  ProtocolType,
+} from 'os/services/ship/wallet/wallet.types';
 import {
   BitcoinWalletType,
   ERC20Type,
   EthWalletType,
-  NetworkType,
-  ProtocolType,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 

@@ -8,23 +8,23 @@ import {
   types,
 } from 'mobx-state-tree';
 
+import {
+  Asset,
+  CoinAsset,
+  NetworkStoreType,
+  NetworkType,
+  NFTAsset,
+  ProtocolType,
+  SharingMode,
+  WalletCreationMode,
+} from 'os/services/ship/wallet/wallet.types';
+
 import { appState } from '../app.store';
 import { WalletIPC } from '../ipc';
 import { shipStore } from '../ship.store';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
-
-export interface RecipientPayload {
-  recipientMetadata?: {
-    color: string;
-    avatar?: string;
-    nickname?: string;
-  };
-  patp: string;
-  address?: string | null;
-  gasEstimate?: number;
-}
 
 export enum WalletView {
   LIST = 'list',
@@ -42,17 +42,6 @@ export enum WalletView {
 const gweiToEther = (gwei: number) => {
   return gwei / 1000000000000000000;
 };
-
-export enum WalletCreationMode {
-  DEFAULT = 'default',
-  ON_DEMAND = 'on-demand',
-}
-
-export enum SharingMode {
-  NOBODY = 'nobody',
-  FRIENDS = 'friends',
-  ANYBODY = 'anybody',
-}
 
 const Settings = types
   .model('Settings', {
@@ -89,56 +78,7 @@ export const WalletSettings = types.model('WalletSettings', {
   passcodeHash: types.string,
 });
 
-export enum NetworkType {
-  ETHEREUM = 'ethereum',
-  BITCOIN = 'bitcoin',
-}
-
-export enum ProtocolType {
-  ETH_MAIN = 'Ethereum Mainnet',
-  ETH_GORLI = 'Görli Testnet',
-  BTC_MAIN = 'Bitcoin Mainnet',
-  BTC_TEST = 'Bitcoin Testnet',
-  UQBAR = 'Uqbar Network',
-}
 const Protocols = types.enumeration(Object.values(ProtocolType));
-
-export type Asset = {
-  addr: string; // smart contract address for eth
-  id?: string; // chainId for eth, id for uqbar
-  type: 'coin' | 'token' | 'multisig' | string;
-  data: NFTAsset | CoinAsset | MultiAsset;
-};
-
-// ERC-20
-export type CoinAsset = {
-  logo: string | null; // url of token logo image
-  symbol: string; // USDC, DAI, BNB, etc
-  decimals: number; // 8 - used to convert to human readable number
-  balance: number; // current account balance
-  totalSupply: number; // total supply of the coin
-  allowances: { [addr: string]: number };
-};
-
-// ERC-721
-export type NFTAsset = {
-  name: string;
-  tokenId: string;
-  description: string;
-  image: string;
-  transferable?: boolean;
-  properties: { [key: string]: string | object };
-};
-
-// ERC-1155
-export type MultiAsset = {
-  name: string;
-  decimals: number; // 8 - used to convert to human readable number
-  description: string;
-  image: string;
-  balance: number; // current account balance
-  properties: { [key: string]: string | object };
-};
 
 export const Transaction = types.model('Transaction', {
   hash: types.identifier,
@@ -764,11 +704,6 @@ export const EthStore = types
   }));
 export type EthStoreType = Instance<typeof EthStore>;
 
-export enum NetworkStoreType {
-  ETHEREUM = 'Ethereum',
-  BTC_MAIN = 'Bitcoin Mainnet',
-  BTC_TEST = 'Bitcoin Testnet',
-}
 const NetworkStores = types.enumeration(Object.values(NetworkStoreType));
 
 export const WalletNavState = types

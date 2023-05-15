@@ -2,8 +2,8 @@ import { FC } from 'react';
 
 import { Button, Card, Flex, Icon, Spinner, Text } from '@holium/design-system';
 
+import { ProtocolType } from 'os/services/ship/wallet/wallet.types';
 import {
-  ProtocolType,
   TransactionType,
   WalletView,
 } from 'renderer/stores/models/wallet.model';

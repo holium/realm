@@ -3,11 +3,11 @@ import { observer } from 'mobx-react';
 
 import { Box, Flex, Text } from '@holium/design-system';
 
+import { ProtocolType } from 'os/services/ship/wallet/wallet.types';
 import {
   BitcoinWalletType,
   ERC20Type,
   EthWalletType,
-  ProtocolType,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -63,7 +63,6 @@ export const SendTransaction: FC<SendTransactionProps> = observer(
             position="absolute"
             px={2}
             bottom="-12px"
-            // height="25px"
             min-width="80px"
             justifyContent="center"
             alignItems="center"

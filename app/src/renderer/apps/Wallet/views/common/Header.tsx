@@ -2,15 +2,14 @@ import { rgba } from 'polished';
 
 import { Button, Flex, Icon, Text } from '@holium/design-system';
 
+import { NetworkType } from 'os/services/ship/wallet/wallet.types';
 import { useShipStore } from 'renderer/stores/ship.store';
-
-type Network = 'ethereum' | 'bitcoin';
 
 type Props = {
   showBack: boolean;
   isOnboarding: boolean;
-  network: Network | string;
-  onSetNetwork: (network: Network) => void;
+  network: NetworkType | string;
+  onSetNetwork: (network: NetworkType) => void;
   onAddWallet: () => void;
   hide: boolean;
 };

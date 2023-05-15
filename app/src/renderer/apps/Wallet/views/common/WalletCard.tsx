@@ -3,11 +3,13 @@ import { useMemo } from 'react';
 import { Flex, Text } from '@holium/design-system';
 
 import {
+  NetworkType,
+  ProtocolType,
+} from 'os/services/ship/wallet/wallet.types';
+import {
   BitcoinWalletType,
   ERC20Type,
   EthWalletType,
-  NetworkType,
-  ProtocolType,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 

@@ -3,15 +3,14 @@ import { Instance, onSnapshot, types } from 'mobx-state-tree';
 
 import { Dimensions } from '@holium/design-system';
 
-import { RealmIPC } from 'renderer/stores/ipc';
 import {
   NetworkStoreType,
   ProtocolType,
   SharingMode,
   WalletCreationMode,
-  WalletStore,
-  WalletView,
-} from 'renderer/stores/models/wallet.model';
+} from 'os/services/ship/wallet/wallet.types';
+import { RealmIPC } from 'renderer/stores/ipc';
+import { WalletStore, WalletView } from 'renderer/stores/models/wallet.model';
 
 import { calculateAnchorPointById } from '../lib/position';
 import { RoomsAppState } from './Rooms/rooms.model';

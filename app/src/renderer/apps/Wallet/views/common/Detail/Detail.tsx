@@ -3,11 +3,11 @@ import { observer } from 'mobx-react';
 
 import { Box, Button, Flex, Text } from '@holium/design-system';
 
+import { NetworkType } from 'os/services/ship/wallet/wallet.types';
 import {
   BitcoinWalletType,
   ERC20Type,
   EthWalletType,
-  NetworkType,
   WalletView,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
