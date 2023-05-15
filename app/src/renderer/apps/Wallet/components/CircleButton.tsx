@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
 
-import { Flex, Icon, IconPathsType, Text } from '@holium/design-system';
+import { Flex, Icon, IconPathsType, Text } from '@holium/design-system/general';
 
 interface CircleButtonProps {
   icon: IconPathsType;

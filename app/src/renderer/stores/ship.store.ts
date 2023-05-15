@@ -8,6 +8,7 @@ import {
   SharingMode,
   WalletCreationMode,
 } from 'os/services/ship/wallet/wallet.types';
+import { WalletScreen } from 'renderer/apps/Wallet/types';
 
 import { ChatStore } from './chat.store';
 import { ShipIPC } from './ipc';
@@ -18,7 +19,7 @@ import { FeaturedStore } from './models/featured.model';
 import { FriendsStore } from './models/friends.model';
 import { NotifStore } from './models/notification.model';
 import { SpacesStore } from './models/spaces.model';
-import { WalletStore, WalletView } from './models/wallet.model';
+import { WalletStore } from './models/wallet.model';
 import { RoomsStore } from './rooms.store';
 
 export const ShipStore = types
@@ -120,7 +121,7 @@ export const shipStore = ShipStore.create({
   bazaarStore: loadBazaarSnapshot(),
   walletStore: {
     navState: {
-      view: WalletView.NEW,
+      view: WalletScreen.NEW,
       protocol: ProtocolType.ETH_GORLI,
       lastEthProtocol: ProtocolType.ETH_GORLI,
       btcNetwork: NetworkStoreType.BTC_MAIN,
