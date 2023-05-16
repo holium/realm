@@ -68,10 +68,14 @@ export const WalletListScreenBody = ({
         gap={20}
       >
         <Text.H3 variant="h3" textAlign="center">
-          No wallets
+          No addresses
         </Text.H3>
-        <Flex width="80%" justifyContent="center">
-          <Text.Body variant="body" textAlign="center">
+        <Flex justifyContent="center">
+          <Text.Body
+            textAlign="center"
+            maxWidth="80%"
+            style={{ fontWeight: 300 }}
+          >
             You haven't created any{' '}
             {network === 'ethereum'
               ? 'Ethereum'
@@ -107,7 +111,7 @@ export const WalletListScreenBody = ({
           </Text.H3>{' '}
         </Flex>
       ) : (
-        <Empty network={network} />
+        <Empty />
       )}
     </Flex>
   );
