@@ -8,6 +8,7 @@ import { ProtocolType } from 'os/services/ship/wallet/wallet.types';
 
 import { WalletFooterView } from './components/WalletFooter/WalletFooterView';
 import { WalletHeaderView } from './components/WalletHeader/WalletHeaderView';
+import { BackupScreen } from './screens/BackupScreen';
 import { CreateOrImportScreen } from './screens/CreateOrImportScreen';
 
 type WalletWrapperProps = {
@@ -52,4 +53,16 @@ export const CreateOrImportStory: ComponentStory<
   </WalletWrapper>
 );
 
-CreateOrImportStory.storyName = '1. Create or import wallet';
+CreateOrImportStory.storyName = '1. No wallet found';
+
+export const BackUpWalletStory: ComponentStory<typeof BackupScreen> = () => (
+  <WalletWrapper isOnboarding>
+    <BackupScreen
+      seedPhrase="route way orange glass jar wing social album tag raven august miracle"
+      setSeedPhrase={() => {}}
+      setScreen={() => {}}
+    />
+  </WalletWrapper>
+);
+
+BackUpWalletStory.storyName = '2. Back up your wallet';

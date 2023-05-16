@@ -1,7 +1,14 @@
 import { useEffect } from 'react';
 import { ethers } from 'ethers';
 
-import { Button, CopyButton, Flex, Text } from '@holium/design-system/general';
+import {
+  Button,
+  CopyButton,
+  Flex,
+  HideButton,
+  Text,
+} from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 
 import { NewWalletScreen } from 'renderer/apps/Wallet/types';
 
@@ -16,6 +23,8 @@ export const BackupScreen = ({
   setScreen,
   setSeedPhrase,
 }: Props) => {
+  const hideSeedPhrase = useToggle(false);
+
   useEffect(() => {
     setSeedPhrase(ethers.Wallet.createRandom().mnemonic.phrase);
   }, []);
@@ -29,33 +38,41 @@ export const BackupScreen = ({
       alignItems="center"
     >
       <Flex flexDirection="column" gap="12px">
-        <Text.H5 variant="h5">Back up your Wallet</Text.H5>
-        <Text.Body mt={3} variant="body">
+        <Text.H5 variant="h5">Back up your wallet</Text.H5>
+        <Text.Body>
           Your secret recovery phrase is used to restore your wallet.
         </Text.Body>
-        <Text.Body mt={2} variant="body">
-          Save these 12 words and store them in a safe place. Don’t share them
+        <Text.Body>
+          Save these 12 words and store them in a safe place. Don't share them
           with anyone.
         </Text.Body>
         <Flex
-          p="16px"
           mt="32px"
-          gap="16px"
           width="100%"
           flexDirection="column"
-          border="1px solid rgba(var(--rlm-icon-rgba))"
+          alignItems="center"
+          border="1px solid rgba(var(--rlm-border-rgba))"
+          background="rgba(var(--rlm-border-rgba), 0.1)"
           borderRadius="9px"
         >
           <Text.Body
+            fontSize="14px"
+            p="16px"
+            maxWidth="230px"
             style={{
+              lineHeight: '26px',
               wordSpacing: '7px',
               textAlign: 'center',
-              fontSize: '18px',
+              filter: hideSeedPhrase.isOn ? 'blur(10px)' : 'none',
             }}
           >
             {seedPhrase}
           </Text.Body>
-          <Flex width="100%" justifyContent="flex-end">
+          <Flex width="100%" justifyContent="space-between" padding="8px">
+            <HideButton
+              isOn={hideSeedPhrase.isOn}
+              onClick={hideSeedPhrase.toggle}
+            />
             <CopyButton content={seedPhrase} label="Copy" />
           </Flex>
         </Flex>

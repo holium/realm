@@ -8,6 +8,7 @@ export { CommButton } from './src/general/CommButton/CommButton';
 export * from './src/general/CopyButton/CopyButton';
 export { Favicon } from './src/general/Favicon/Favicon';
 export * from './src/general/Flex/Flex';
+export { HideButton } from './src/general/HideButton/HideButton';
 export * from './src/general/Icon/Icon';
 export type { IconPathsType } from './src/general/Icon/icons';
 export * from './src/general/IntentBox/IntentBox';
