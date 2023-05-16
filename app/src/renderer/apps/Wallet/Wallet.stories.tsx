@@ -15,16 +15,24 @@ import { BackupScreen } from './screens/BackupScreen';
 import { ConfirmPasscodeScreen } from './screens/ConfirmPasscodeScreen';
 import { ConfirmScreen } from './screens/ConfirmScreen';
 import { CreatePasscodeScreen } from './screens/CreatePasscodeScreen';
+import { CreateWalletScreenBody } from './screens/CreateWalletScreen/CreateWalletScreenBody';
 import { FinalizingScreenBody } from './screens/FinalizingScreen/FinalizingScreenBody';
 import { NoWalletFoundScreen } from './screens/NoWalletFoundScreen';
 import { WalletListScreenBody } from './screens/WalletListScreen/WalletListScreenBody';
 
 type WalletWrapperProps = {
+  protocol?: ProtocolType;
   isOnboarding: boolean;
+  hideBack?: boolean;
   children: ReactNode;
 };
 
-const WalletWrapper = ({ isOnboarding, children }: WalletWrapperProps) => (
+const WalletWrapper = ({
+  protocol,
+  isOnboarding,
+  hideBack = false,
+  children,
+}: WalletWrapperProps) => (
   <Flex width="100%" height="100vh" justifyContent="center" alignItems="center">
     <TrayAppWrapper
       style={{
@@ -33,17 +41,19 @@ const WalletWrapper = ({ isOnboarding, children }: WalletWrapperProps) => (
       }}
     >
       <WalletHeaderView
-        showBack={false}
+        showBack={!isOnboarding && !hideBack}
         isOnboarding={isOnboarding}
         onClickBack={() => {}}
         onAddWallet={() => {}}
       />
       {children}
-      <WalletFooterView
-        hidden={isOnboarding}
-        protocol={ProtocolType.BTC_MAIN}
-        onClickSettings={() => {}}
-      />
+      {protocol && !isOnboarding && (
+        <WalletFooterView
+          hidden={isOnboarding}
+          protocol={protocol}
+          onClickSettings={() => {}}
+        />
+      )}
     </TrayAppWrapper>
   </Flex>
 );
@@ -127,7 +137,11 @@ CreatingWalletStory.storyName = '6. Creating wallet...';
 export const NoAddressesStory: ComponentStory<
   typeof WalletListScreenBody
 > = () => (
-  <WalletWrapper isOnboarding={false}>
+  <WalletWrapper
+    protocol={ProtocolType.ETH_GORLI}
+    isOnboarding={false}
+    hideBack
+  >
     <WalletListScreenBody
       wallets={[]}
       network={NetworkType.ETHEREUM}
@@ -139,3 +153,58 @@ export const NoAddressesStory: ComponentStory<
 );
 
 NoAddressesStory.storyName = '7. No addresses';
+
+export const CreateWalletStory: ComponentStory<
+  typeof CreateWalletScreenBody
+> = () => (
+  <WalletWrapper protocol={ProtocolType.ETH_GORLI} isOnboarding={false}>
+    <CreateWalletScreenBody
+      network={NetworkType.ETHEREUM}
+      loading={false}
+      nickname="My wallet"
+      onChangeNickname={() => {}}
+      onClickCreate={() => {}}
+    />
+  </WalletWrapper>
+);
+
+CreateWalletStory.storyName = '8. Create address';
+
+export const WalletList: ComponentStory<typeof WalletListScreenBody> = () => (
+  <WalletWrapper
+    protocol={ProtocolType.ETH_GORLI}
+    isOnboarding={false}
+    hideBack
+  >
+    <WalletListScreenBody
+      wallets={[
+        {
+          index: 0,
+          key: '1',
+          network: NetworkType.ETHEREUM,
+          path: "m/44'/60'/0'/0/0",
+          address: '0x123456789',
+          balance: '0.000000000000000000',
+          nickname: 'My wallet',
+          transactionList: {} as any,
+          data: {
+            get: () => ({
+              balance: '0.000000000000000000',
+              transactionList: {
+                transactions: [],
+              },
+            }),
+          } as any,
+          setBalance: () => {},
+          applyTransactions: () => {},
+        },
+      ]}
+      network={NetworkType.ETHEREUM}
+      protocol={ProtocolType.ETH_GORLI}
+      onSelectAddress={() => {}}
+      onClickCreateAddress={() => {}}
+    />
+  </WalletWrapper>
+);
+
+WalletList.storyName = '9. My addresses';

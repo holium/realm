@@ -1,6 +1,7 @@
-import { useState } from 'react';
 import { useField, useForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
+
+import { useToggle } from '@holium/design-system/util';
 
 import { NetworkType } from 'os/services/ship/wallet/wallet.types';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -13,18 +14,19 @@ type Props = {
 
 const CreateWalletScreenPresenter = ({ network }: Props) => {
   const { walletStore } = useShipStore();
-  const [_, setLoading] = useState(false);
+  const loading = useToggle(false);
+
   const form = useForm({
     async onSubmit({ values }) {
       if (form.computed.isDirty) {
-        setLoading(true);
+        loading.toggleOn();
         try {
           console.log(`creating wallet ${values.nickname}`);
           await walletStore.createWallet(values.nickname);
-          setLoading(false);
         } catch (reason) {
           console.error(reason);
-          setLoading(false);
+        } finally {
+          loading.toggleOff();
         }
       }
     },
@@ -44,6 +46,7 @@ const CreateWalletScreenPresenter = ({ network }: Props) => {
   return (
     <CreateWalletScreenBody
       network={network}
+      loading={loading.isOn}
       nickname={nickname.state.value}
       onChangeNickname={(e) => nickname.actions.onChange(e.target.value)}
       onClickCreate={form.actions.submit}

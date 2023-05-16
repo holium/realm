@@ -64,7 +64,9 @@ export const WalletCard = ({
               (wallet as EthWalletType).data.get(protocol)?.balance ?? ''
             ).eth
           } ETH`
-      : `${formatEthAmount((wallet as BitcoinWalletType).balance).eth} BTC`;
+      : `${
+          formatEthAmount((wallet as BitcoinWalletType).balance)?.eth ?? ''
+        } BTC`;
 
   return (
     <WalletCardStyle
@@ -117,7 +119,9 @@ export const WalletCard = ({
             </Text.Body>
           )}
         </Flex>
-        <Text.Body variant="body">{transactions.length} Transactions</Text.Body>
+        <Text.Body variant="body">
+          {transactions?.length} Transactions
+        </Text.Body>
       </Flex>
     </WalletCardStyle>
   );

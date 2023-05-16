@@ -1063,8 +1063,8 @@ export const WalletStore = types
           nickname
         ) as PromiseLike<any>;
       }),
-      createWallet(nickname: string) {
-        this.createWalletFlow(nickname);
+      async createWallet(nickname: string) {
+        await this.createWalletFlow(nickname);
         this.navigate(WalletScreen.LIST, { canReturn: false });
       },
       sendEthereumTransaction: flow(function* (
