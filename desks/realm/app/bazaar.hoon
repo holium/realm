@@ -427,6 +427,7 @@
       %set-host          (set-host +.action)
       :: testing helper. remove an app from the ship catalog w/o producing any effects
       %delete-catalog-entry  (delete-catalog-entry +.action)
+      %gift  (give-gift +.action)
     ==    ::  +pre: prefix for scries to hood
     ::
     ++  pre  /(scot %p our.bowl)/hood/(scot %da now.bowl)
@@ -435,6 +436,14 @@
     ++  get-sources
       ^-  (map desk [=ship =desk])
       .^((map @tas [@p @tas]) %gx (welp pre /kiln/sources/noun))
+    ::
+    ++  give-gift
+      |=  [g=@tas]
+      ^-  (quip card _state)
+      ~&  "{<dap.bowl>}: [give-gift]. {<g>}"
+      :_  state
+      :~  [%give %fact [/updates ~] bazaar-reaction+!>([%gift g])]
+      ==
     ::
     ::  $set-host:
     ::    set the host of an app in the catalog

@@ -479,6 +479,8 @@ export const BazaarStore = types
             treaties.clear();
             const treatiesResponse = yield BazaarIPC.scryTreaties(ship);
             if (Object.keys(treatiesResponse).length === 0) {
+              // must set or spinner won't stop spinning
+              self.treatyLoader.set('loaded');
               return;
             }
             const formedTreaties = [];

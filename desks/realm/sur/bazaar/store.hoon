@@ -73,6 +73,7 @@
       [%clear-stall path=space-path:spaces args=(map cord cord)]
       [%set-host app-id=desk host=ship]
       [%delete-catalog-entry =app-id]
+      [%gift g=@tas]
   ==
 ::
 +$  interaction
@@ -98,6 +99,7 @@
       [%rebuild-catalog =catalog =grid-index]
       [%rebuild-stall path=space-path:spaces =catalog =stall]
       [%clear-stall path=space-path:spaces]
+      [%gift g=@tas]
   ==
 +$  view
   $%  [%catalog =catalog]
