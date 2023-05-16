@@ -72,7 +72,7 @@ IPassport) => {
                   },
                 });
                 // TODO: placeholder, we need to implement the actual send coins functionality
-                // WalletActions.navigate(WalletView.TRANSACTION_SEND, {
+                // WalletActions.navigate(WalletScreen.TRANSACTION_SEND, {
                 //   walletIndex: '0',
                 //   to: patp,
                 // });

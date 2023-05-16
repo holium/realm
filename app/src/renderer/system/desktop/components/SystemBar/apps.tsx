@@ -2,7 +2,7 @@ import { AccountTrayApp } from 'renderer/apps/Account';
 import { CourierApp } from 'renderer/apps/Courier/app';
 import { RoomApp } from 'renderer/apps/Rooms';
 import { SpacesTrayApp } from 'renderer/apps/Spaces';
-import { WalletApp } from 'renderer/apps/Wallet/WalletApp';
+import { WalletApp } from 'renderer/apps/Wallet/Wallet';
 import { calculateAnchorPoint } from 'renderer/lib/position';
 
 // import { WalletApp } from 'renderer/apps/Wallet';
