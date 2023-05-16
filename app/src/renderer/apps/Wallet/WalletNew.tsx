@@ -9,18 +9,18 @@ import { useShipStore } from 'renderer/stores/ship.store';
 import { BackupScreen } from './screens/BackupScreen';
 import { ConfirmPasscodeScreen } from './screens/ConfirmPasscodeScreen';
 import { ConfirmScreen } from './screens/ConfirmScreen';
-import { CreateOrImportScreen } from './screens/CreateOrImportScreen';
-import { CreatePasscodeScreen } from './screens/CreatePasscodeScreen';
+import { CreatePasscodeScreen } from './screens/CreatePasscodeScreen/CreatePasscodeScreen';
 import { DetectedExistingScreen } from './screens/DetectedExistingScreen';
 import { FinalizingScreen } from './screens/FinalizingScreen';
 import { ImportScreen } from './screens/ImportScreen';
+import { NoWalletFoundScreen } from './screens/NoWalletFoundScreen';
 import { RecoverExistingScreen } from './screens/RecoverExistingScreen';
 
 const WalletNewPresenter = () => {
   const { walletStore } = useShipStore();
   const initialScreen = walletStore.initialized
     ? NewWalletScreen.DETECTED_EXISTING
-    : NewWalletScreen.CREATE;
+    : NewWalletScreen.NO_WALLET;
 
   const [screen, setScreen] = useState<NewWalletScreen>(initialScreen);
   const [passcode, setPasscode] = useState<number[]>([]);
@@ -34,7 +34,7 @@ const WalletNewPresenter = () => {
   };
 
   const components = {
-    [NewWalletScreen.CREATE]: <CreateOrImportScreen setScreen={setScreen} />,
+    [NewWalletScreen.NO_WALLET]: <NoWalletFoundScreen setScreen={setScreen} />,
     [NewWalletScreen.IMPORT]: (
       <ImportScreen setSeedPhrase={setSeedPhrase} setScreen={setScreen} />
     ),
@@ -49,13 +49,17 @@ const WalletNewPresenter = () => {
       <ConfirmScreen setScreen={setScreen} seedPhrase={seedPhrase} />
     ),
     [NewWalletScreen.PASSCODE]: (
-      <CreatePasscodeScreen setPasscode={setPasscodeWrapper} />
+      <CreatePasscodeScreen
+        checkPasscode={walletStore.checkPasscode}
+        setPasscode={setPasscodeWrapper}
+      />
     ),
     [NewWalletScreen.CONFIRM_PASSCODE]: (
       <ConfirmPasscodeScreen
-        setScreen={setScreen}
         correctPasscode={passcode}
+        checkPasscode={walletStore.checkPasscode}
         onSuccess={setPasscode}
+        setScreen={setScreen}
       />
     ),
     [NewWalletScreen.FINALIZING]: (
@@ -79,7 +83,7 @@ const WalletNewPresenter = () => {
   return (
     <>
       {currentComponent}
-      {![NewWalletScreen.CREATE, NewWalletScreen.DETECTED_EXISTING].includes(
+      {![NewWalletScreen.NO_WALLET, NewWalletScreen.DETECTED_EXISTING].includes(
         screen
       ) && (
         <Flex
@@ -89,7 +93,7 @@ const WalletNewPresenter = () => {
             setScreen(
               walletStore.initialized
                 ? NewWalletScreen.DETECTED_EXISTING
-                : NewWalletScreen.CREATE
+                : NewWalletScreen.NO_WALLET
             )
           }
         >
@@ -98,7 +102,7 @@ const WalletNewPresenter = () => {
               setScreen(
                 walletStore.initialized
                   ? NewWalletScreen.DETECTED_EXISTING
-                  : NewWalletScreen.CREATE
+                  : NewWalletScreen.NO_WALLET
               )
             }
           >

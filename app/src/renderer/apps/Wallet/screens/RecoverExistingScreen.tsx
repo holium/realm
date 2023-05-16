@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from 'react';
+import { useState } from 'react';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
@@ -57,9 +57,8 @@ const RecoverExistingScreenPresenter = ({
 
   return showPasscode ? (
     <VerifyPasscode
-      onSuccess={(code: number[]) => {
-        recoverSeedPhrase(code);
-      }}
+      checkPasscode={walletStore.checkPasscode}
+      onSuccess={recoverSeedPhrase}
     />
   ) : (
     <NoResize width="100%" height="100%" flexDirection="column" gap={10}>
@@ -77,8 +76,8 @@ const RecoverExistingScreenPresenter = ({
           type="textarea"
           value={phrase}
           cols={50}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            updatePhrase(e.target.value)
+          onChange={(e) =>
+            updatePhrase((e.target as HTMLTextAreaElement).value)
           }
         />
 

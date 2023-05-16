@@ -3,10 +3,11 @@ import { Flex, Icon, Text } from '@holium/design-system/general';
 import { PasscodeInput } from './PasscodeInput';
 
 type Props = {
+  checkPasscode: (passcode: number[]) => Promise<boolean>;
   onSuccess: (passcode: number[]) => void;
 };
 
-export const DeletePasscode = ({ onSuccess }: Props) => (
+export const DeletePasscode = ({ checkPasscode, onSuccess }: Props) => (
   <Flex width="100%" height="100%" flexDirection="column" alignItems="center">
     <Flex
       flex={1}
@@ -24,9 +25,10 @@ export const DeletePasscode = ({ onSuccess }: Props) => (
         Enter your passcode to continue.
       </Text.Body>
       <PasscodeInput
-        checkStored={true}
+        checkStored
+        keepLoading
+        checkPasscode={checkPasscode}
         onSuccess={onSuccess}
-        keepLoading={true}
       />
     </Flex>
   </Flex>

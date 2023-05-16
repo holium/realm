@@ -10,7 +10,8 @@ import { WalletFooterView } from './components/WalletFooter/WalletFooterView';
 import { WalletHeaderView } from './components/WalletHeader/WalletHeaderView';
 import { BackupScreen } from './screens/BackupScreen';
 import { ConfirmScreen } from './screens/ConfirmScreen';
-import { CreateOrImportScreen } from './screens/CreateOrImportScreen';
+import { CreatePasscodeScreen } from './screens/CreatePasscodeScreen/CreatePasscodeScreen';
+import { NoWalletFoundScreen } from './screens/NoWalletFoundScreen';
 
 type WalletWrapperProps = {
   isOnboarding: boolean;
@@ -42,15 +43,15 @@ const WalletWrapper = ({ isOnboarding, children }: WalletWrapperProps) => (
 );
 
 export default {
-  component: CreateOrImportScreen,
+  component: NoWalletFoundScreen,
   title: 'Wallet/Create wallet flow',
-} as ComponentMeta<typeof CreateOrImportScreen>;
+} as ComponentMeta<typeof NoWalletFoundScreen>;
 
 export const CreateOrImportStory: ComponentStory<
-  typeof CreateOrImportScreen
+  typeof NoWalletFoundScreen
 > = () => (
   <WalletWrapper isOnboarding>
-    <CreateOrImportScreen setScreen={() => {}} />
+    <NoWalletFoundScreen setScreen={() => {}} />
   </WalletWrapper>
 );
 
@@ -68,15 +69,26 @@ export const BackUpWalletStory: ComponentStory<typeof BackupScreen> = () => (
 
 BackUpWalletStory.storyName = '2. Back up your wallet';
 
-export const ConfirmStory: ComponentStory<typeof ConfirmScreen> = () => {
-  return (
-    <WalletWrapper isOnboarding>
-      <ConfirmScreen
-        seedPhrase="route way orange glass jar wing social album tag raven august miracle"
-        setScreen={() => {}}
-      />
-    </WalletWrapper>
-  );
-};
+export const ConfirmStory: ComponentStory<typeof ConfirmScreen> = () => (
+  <WalletWrapper isOnboarding>
+    <ConfirmScreen
+      seedPhrase="route way orange glass jar wing social album tag raven august miracle"
+      setScreen={() => {}}
+    />
+  </WalletWrapper>
+);
 
 ConfirmStory.storyName = '3. Confirm words';
+
+export const CreatePasscodeStory: ComponentStory<
+  typeof CreatePasscodeScreen
+> = () => (
+  <WalletWrapper isOnboarding>
+    <CreatePasscodeScreen
+      checkPasscode={() => Promise.resolve(false)}
+      setPasscode={() => {}}
+    />
+  </WalletWrapper>
+);
+
+CreatePasscodeStory.storyName = '4. Set a passcode';

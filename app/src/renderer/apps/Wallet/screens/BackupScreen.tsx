@@ -58,7 +58,7 @@ export const BackupScreen = ({
           <Text.Body
             fontSize="14px"
             p="16px"
-            maxWidth="242px"
+            maxWidth="250px"
             style={{
               lineHeight: '26px',
               wordSpacing: '7px',
@@ -81,7 +81,7 @@ export const BackupScreen = ({
         <Button.Secondary
           flex={1}
           justifyContent="center"
-          onClick={() => setScreen(NewWalletScreen.CREATE)}
+          onClick={() => setScreen(NewWalletScreen.NO_WALLET)}
         >
           Cancel
         </Button.Secondary>

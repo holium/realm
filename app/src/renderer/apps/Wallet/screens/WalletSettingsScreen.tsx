@@ -111,16 +111,16 @@ const WalletSettingsScreenPresenter = () => {
           </Button.IconButton>
         </Flex>
       </Flex>
-      <DeletePasscode onSuccess={deleteWallet} />
+      <DeletePasscode
+        checkPasscode={walletStore.checkPasscode}
+        onSuccess={deleteWallet}
+      />
     </Flex>
   ) : (
     <Flex width="100%" height="100%" flexDirection="column" gap="12px">
       <Flex justifyContent="space-between" alignItems="center">
         <Flex alignItems="center">
-          <Button.IconButton
-            size={26}
-            onClick={async () => await walletStore.navigateBack()}
-          >
+          <Button.IconButton size={26} onClick={walletStore.navigateBack}>
             <Icon name="ArrowLeftLine" size={24} opacity={0.7} />
           </Button.IconButton>
           <Text.Custom

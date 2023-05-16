@@ -227,6 +227,7 @@ const DetailHeroPresenter = ({
 
   return showPasscode ? (
     <TransactionPasscode
+      checkPasscode={walletStore.checkPasscode}
       onSuccess={(code: number[]) => {
         sendTransaction(code);
       }}

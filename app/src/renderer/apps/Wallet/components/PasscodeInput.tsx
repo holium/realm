@@ -1,29 +1,33 @@
 import { useEffect, useState } from 'react';
-import { observer } from 'mobx-react';
 
 import { Box, Flex, Spinner, Text } from '@holium/design-system/general';
-
-import { useShipStore } from 'renderer/stores/ship.store';
 
 import { PasscodeDisplay } from './PasscodeDisplay';
 
 const PASSCODE_LENGTH = 6;
 
-interface PasscodeInputProps {
-  onSuccess: any;
+type Props = {
   checkStored?: boolean;
   checkAgainst?: number[];
-  onError?: any;
   keepLoading?: boolean;
-}
+  checkPasscode: (code: number[]) => Promise<boolean>;
+  onError?: () => void;
+  onSuccess: (code: number[]) => void;
+};
 
-export const PasscodeInputPresenter = (props: PasscodeInputProps) => {
-  const { walletStore } = useShipStore();
+export const PasscodeInput = ({
+  checkStored,
+  checkAgainst,
+  keepLoading,
+  checkPasscode,
+  onError,
+  onSuccess,
+}: Props) => {
   const [inputCode, setInputCode] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
-  const listener = async (event: KeyboardEvent) => {
+  const onKeyDown = async (event: KeyboardEvent) => {
     if (event.key === 'Backspace' || event.key === 'Delete') {
       if (inputCode.length) {
         setInputCode(inputCode.slice(0, inputCode.length - 1));
@@ -40,30 +44,32 @@ export const PasscodeInputPresenter = (props: PasscodeInputProps) => {
 
     if (newInputCode.length === PASSCODE_LENGTH) {
       let codeIsCorrect = true;
-      if (props.checkStored) {
+      if (checkStored) {
         setLoading(true);
-        codeIsCorrect = await walletStore.checkPasscode(newInputCode);
-        if (!props.keepLoading) {
+        codeIsCorrect = await checkPasscode(newInputCode);
+        if (!keepLoading) {
           setLoading(false);
         }
-      } else if (props.checkAgainst) {
-        codeIsCorrect =
-          props.checkAgainst.toString() === newInputCode.toString();
+      } else if (checkAgainst) {
+        codeIsCorrect = checkAgainst.toString() === newInputCode.toString();
       }
 
       if (codeIsCorrect) {
-        props.onSuccess(newInputCode);
+        onSuccess(newInputCode);
       } else {
         setError(true);
         setInputCode([]);
-        props.onError && props.onError();
+        onError && onError();
       }
     }
   };
 
   useEffect(() => {
-    document.addEventListener('keydown', listener);
-    return () => document.removeEventListener('keydown', listener);
+    document.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+    };
   }, [inputCode]);
 
   return (
@@ -82,5 +88,3 @@ export const PasscodeInputPresenter = (props: PasscodeInputProps) => {
     </Flex>
   );
 };
-
-export const PasscodeInput = observer(PasscodeInputPresenter);

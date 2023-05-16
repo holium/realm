@@ -6,12 +6,14 @@ import { PasscodeInput } from '../components/PasscodeInput';
 
 type Props = {
   correctPasscode: number[];
+  checkPasscode: (passcode: number[]) => Promise<boolean>;
   onSuccess: (passcode: number[]) => void;
   setScreen: (screen: NewWalletScreen) => void;
 };
 
 export const ConfirmPasscodeScreen = ({
   correctPasscode,
+  checkPasscode,
   onSuccess,
   setScreen,
 }: Props) => (
@@ -27,7 +29,8 @@ export const ConfirmPasscodeScreen = ({
     <Flex flex={4} justifyContent="center" alignItems="center">
       <PasscodeInput
         checkAgainst={correctPasscode}
-        onSuccess={(passcode: number[]) => {
+        checkPasscode={checkPasscode}
+        onSuccess={(passcode) => {
           onSuccess(passcode);
           setScreen(NewWalletScreen.FINALIZING);
         }}

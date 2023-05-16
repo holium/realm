@@ -29,7 +29,11 @@ const LockedScreenPresenter = () => {
       </Flex>
       <Flex flex={2} flexDirection="column" alignItems="center" gap={20}>
         <Text.Body variant="body">Enter your passcode to continue.</Text.Body>
-        <PasscodeInput checkStored={true} onSuccess={unlock} />
+        <PasscodeInput
+          checkStored
+          checkPasscode={walletStore.checkPasscode}
+          onSuccess={unlock}
+        />
       </Flex>
     </Flex>
   );

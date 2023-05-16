@@ -12,7 +12,7 @@ export enum WalletScreen {
 }
 
 export enum NewWalletScreen {
-  CREATE = 'create',
+  NO_WALLET = 'no_wallet',
   IMPORT = 'import',
   BACKUP = 'backup',
   CONFIRM = 'confirm',

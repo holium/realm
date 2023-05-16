@@ -59,7 +59,7 @@ export const ImportScreen = ({ setScreen, setSeedPhrase }: Props) => {
         <Button.Transparent
           flex={1}
           justifyContent="center"
-          onClick={() => setScreen(NewWalletScreen.CREATE)}
+          onClick={() => setScreen(NewWalletScreen.NO_WALLET)}
         >
           Cancel
         </Button.Transparent>
