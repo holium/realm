@@ -9,6 +9,7 @@ import { ProtocolType } from 'os/services/ship/wallet/wallet.types';
 import { WalletFooterView } from './components/WalletFooter/WalletFooterView';
 import { WalletHeaderView } from './components/WalletHeader/WalletHeaderView';
 import { BackupScreen } from './screens/BackupScreen';
+import { ConfirmScreen } from './screens/ConfirmScreen';
 import { CreateOrImportScreen } from './screens/CreateOrImportScreen';
 
 type WalletWrapperProps = {
@@ -66,3 +67,16 @@ export const BackUpWalletStory: ComponentStory<typeof BackupScreen> = () => (
 );
 
 BackUpWalletStory.storyName = '2. Back up your wallet';
+
+export const ConfirmStory: ComponentStory<typeof ConfirmScreen> = () => {
+  return (
+    <WalletWrapper isOnboarding>
+      <ConfirmScreen
+        seedPhrase="route way orange glass jar wing social album tag raven august miracle"
+        setScreen={() => {}}
+      />
+    </WalletWrapper>
+  );
+};
+
+ConfirmStory.storyName = '3. Confirm words';

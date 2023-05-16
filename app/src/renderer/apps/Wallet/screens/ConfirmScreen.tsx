@@ -22,17 +22,13 @@ export const ConfirmScreen = ({ seedPhrase, setScreen }: Props) => {
       justifyContent="space-between"
       alignItems="center"
     >
-      <Flex flexDirection="column" alignItems="center" gap="16px">
+      <Flex flexDirection="column" gap="16px">
         <Text.H5 variant="h5">Confirm words</Text.H5>
-        <Text.Body variant="body">
+        <Text.Body style={{ fontWeight: 300 }}>
           Verify you wrote the secret recovery phrase down correctly by clicking
           the following words in the correct order.
         </Text.Body>
-        <WordPicker
-          seedPhrase={seedPhrase}
-          border="2px solid rgba(var(--rlm-border-rgba))"
-          onValidChange={setValid}
-        />
+        <WordPicker seedPhrase={seedPhrase} onValidChange={setValid} />
       </Flex>
       <Flex width="100%" gap="16px">
         <Button.Transparent

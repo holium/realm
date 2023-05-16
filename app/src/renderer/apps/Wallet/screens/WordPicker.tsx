@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { Box, Flex, Text } from '@holium/design-system/general';
+import { Box, Flex, Icon, Text } from '@holium/design-system/general';
 
 type WordPickerState = {
   wordsToSelect: Array<{ word: string; available: boolean }>;
@@ -10,17 +10,10 @@ type WordPickerState = {
 
 type Props = {
   seedPhrase: string;
-  background?: string;
-  border: string;
-  onValidChange: any;
+  onValidChange: (valid: boolean) => void;
 };
 
-const WordPickerPresenter = ({
-  seedPhrase,
-  background,
-  border,
-  onValidChange,
-}: Props) => {
+const WordPickerPresenter = ({ seedPhrase, onValidChange }: Props) => {
   const [state, setState] = useState<WordPickerState>({
     wordsToSelect: [],
     selectedWords: [],
@@ -85,65 +78,59 @@ const WordPickerPresenter = ({
   }
 
   const Select = ({ words }: any) => {
-    const Available = ({ word, onClick }: any) => (
-      <Box
-        m="4px"
-        px="8px"
-        py="6px"
-        border={border}
-        borderRadius={6}
-        onClick={onClick}
-      >
-        <Text.Body variant="body">{word}</Text.Body>
-      </Box>
-    );
-    const Unavailable = ({ word }: any) => (
-      <Box m="6px" px="8px" py="6px" borderRadius={6}>
-        <Text.Body variant="body" style={{ textDecoration: 'line-through' }}>
-          {word}
-        </Text.Body>
-      </Box>
-    );
-
     return (
-      <Flex justifyContent="space-evenly" alignItems="center" flexWrap="wrap">
+      <Flex justifyContent="space-between" flexWrap="wrap">
         {words.map(
-          (element: { word: string; available: boolean }, index: number) =>
-            element.available ? (
-              <Available
-                key={index}
-                word={element.word}
-                onClick={() => selectWord(index)}
-                background={background}
-                border={border}
-              />
-            ) : (
-              <Unavailable key={index} word={element.word} />
-            )
+          (element: { word: string; available: boolean }, index: number) => (
+            <Box
+              m="4px"
+              px="8px"
+              py="6px"
+              border="1px solid rgba(var(--rlm-border-rgba))"
+              background="rgba(var(--rlm-border-rgba), 0.1)"
+              borderRadius={6}
+              opacity={element.available ? 1 : 0.3}
+              style={{ cursor: 'pointer' }}
+              onClick={() => selectWord(index)}
+            >
+              <Text.Body variant="body">{element.word}</Text.Body>
+            </Box>
+          )
         )}
       </Flex>
     );
   };
 
-  const Display = ({ words, border }: any) => {
-    const Spacer = ({ border }: any) => (
-      <Box m={1} height={24} width={64} borderBottom={border} />
-    );
-    const Next = () => <Box m={1} height={24} width={64} />;
-    const Word = ({ border, removeable, children }: any) => (
-      <Flex
-        m={1}
+  const Display = ({ selectedWords }: { selectedWords: string[] }) => {
+    const Spacer = () => (
+      <Box
         height={24}
         width={64}
-        borderBottom={border}
+        borderBottom="1px solid rgba(var(--rlm-border-rgba))"
+      />
+    );
+    const Current = () => (
+      <Box
+        height={24}
+        width={64}
+        borderBottom="1px solid rgba(var(--rlm-accent-rgba))"
+        background="rgba(var(--rlm-accent-rgba), 0.1)"
+      />
+    );
+    const Word = ({ removeable, children }: any) => (
+      <Flex
+        gap="2px"
+        height={24}
+        width={64}
+        borderBottom="1px solid rgba(var(--rlm-border-rgba))"
         justifyContent="center"
         alignItems="center"
+        style={{ cursor: removeable ? 'pointer' : 'default' }}
+        onClick={removeable ? deselectWord : undefined}
       >
         <Text.Body variant="body">{children}</Text.Body>
         {removeable ? (
-          <Text.Body ml="6px" variant="body" onClick={deselectWord}>
-            x
-          </Text.Body>
+          <Icon name="Close" size={12} fill="text" opacity={0.3} />
         ) : (
           <></>
         )}
@@ -153,40 +140,41 @@ const WordPickerPresenter = ({
     return (
       <Flex
         justifyContent="space-evenly"
+        gap="8px"
         alignItems="center"
         flexWrap="wrap"
-        border={border}
+        p="16px 16px 24px 16px"
+        border="1px solid rgba(var(--rlm-border-rgba))"
+        background="rgba(var(--rlm-border-rgba), 0.1)"
         borderRadius={6}
       >
-        {[...Array(12).keys()].map((index) => {
-          if (index < words.length - 1)
+        {seedPhrase.split(' ').map((_, index) => {
+          if (index < selectedWords.length - 1)
+            return <Word key={index}>{selectedWords[index]}</Word>;
+
+          if (index === selectedWords.length - 1)
             return (
-              <Word key={index} border={border}>
-                {words[index]}
+              <Word key={index} removeable={true}>
+                {selectedWords[index]}
               </Word>
             );
 
-          if (index === words.length - 1)
-            return (
-              <Word key={index} removeable={true} border={border}>
-                {words[index]}
-              </Word>
-            );
+          if (index === selectedWords.length) return <Current key={index} />;
 
-          if (index === words.length) return <Next key={index} />;
-
-          return <Spacer key={index} border={border} />;
+          return <Spacer key={index} />;
         })}
       </Flex>
     );
   };
 
   return (
-    <>
-      <Select words={state.wordsToSelect} border={border} />
-      <Display words={state.selectedWords} border={border} />
-      <Text.Body variant="body">{error}</Text.Body>
-    </>
+    <Flex flexDirection="column" gap="16px" mt="14px">
+      <Select words={state.wordsToSelect} />
+      <Display selectedWords={state.selectedWords} />
+      <Text.Body textAlign="center" color="intent-alert">
+        {error}
+      </Text.Body>
+    </Flex>
   );
 };
 

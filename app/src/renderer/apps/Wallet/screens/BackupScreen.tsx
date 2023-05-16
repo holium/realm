@@ -39,10 +39,10 @@ export const BackupScreen = ({
     >
       <Flex flexDirection="column" gap="12px">
         <Text.H5 variant="h5">Back up your wallet</Text.H5>
-        <Text.Body>
+        <Text.Body style={{ fontWeight: 300 }}>
           Your secret recovery phrase is used to restore your wallet.
         </Text.Body>
-        <Text.Body>
+        <Text.Body style={{ fontWeight: 300 }}>
           Save these 12 words and store them in a safe place. Don't share them
           with anyone.
         </Text.Body>
@@ -58,7 +58,7 @@ export const BackupScreen = ({
           <Text.Body
             fontSize="14px"
             p="16px"
-            maxWidth="230px"
+            maxWidth="242px"
             style={{
               lineHeight: '26px',
               wordSpacing: '7px',
@@ -78,13 +78,13 @@ export const BackupScreen = ({
         </Flex>
       </Flex>
       <Flex width="100%" gap={16}>
-        <Button.Transparent
+        <Button.Secondary
           flex={1}
           justifyContent="center"
           onClick={() => setScreen(NewWalletScreen.CREATE)}
         >
           Cancel
-        </Button.Transparent>
+        </Button.Secondary>
         <Button.TextButton
           flex={1}
           justifyContent="center"

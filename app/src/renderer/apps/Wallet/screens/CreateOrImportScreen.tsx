@@ -20,6 +20,7 @@ export const CreateOrImportScreen = ({ setScreen }: Props) => (
           fontSize="14px"
           fontWeight="500"
           lineHeight="16px"
+          style={{ padding: '5px 10px' }}
           onClick={() => setScreen(NewWalletScreen.BACKUP)}
         >
           Create wallet
@@ -28,6 +29,7 @@ export const CreateOrImportScreen = ({ setScreen }: Props) => (
           fontSize="14px"
           fontWeight="500"
           lineHeight="16px"
+          style={{ padding: '5px 10px' }}
           onClick={() => setScreen(NewWalletScreen.IMPORT)}
         >
           Import wallet
