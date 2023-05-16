@@ -18,13 +18,19 @@ const WalletProtocolPresenter = ({ protocol }: Props) => (
     //onClick={WalletActions.toggleNetwork}
   >
     <Box
-      height="8px"
       width="8px"
+      height="8px"
       mr={2}
       borderRadius="50%"
       background="#4CDD86"
     />
-    <Text.Custom fontSize="12px">{protocol}</Text.Custom>
+    <Text.Body
+      style={{
+        fontSize: '12px',
+      }}
+    >
+      {protocol}
+    </Text.Body>
   </Flex>
 );
 
