@@ -60,7 +60,7 @@ const WalletWrapper = ({
 
 export default {
   component: NoWalletFoundScreen,
-  title: 'Wallet/Create wallet flow',
+  title: 'Wallet/Onboarding',
 } as ComponentMeta<typeof NoWalletFoundScreen>;
 
 export const CreateOrImportStory: ComponentStory<
