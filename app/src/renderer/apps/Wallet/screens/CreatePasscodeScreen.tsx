@@ -1,6 +1,6 @@
 import { Flex, Text } from '@holium/design-system/general';
 
-import { PasscodeInput } from '../../components/PasscodeInput';
+import { PasscodeInput } from '../components/PasscodeInput';
 
 type Props = {
   checkPasscode: (passcode: number[]) => Promise<boolean>;

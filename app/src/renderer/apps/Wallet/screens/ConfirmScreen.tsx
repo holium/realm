@@ -2,13 +2,13 @@ import { useState } from 'react';
 
 import { Button, Flex, Text } from '@holium/design-system/general';
 
-import { NewWalletScreen } from 'renderer/apps/Wallet/types';
+import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 
 import { WordPicker } from './WordPicker';
 
 type Props = {
   seedPhrase: string;
-  setScreen: (screen: NewWalletScreen) => void;
+  setScreen: (screen: WalletOnboardingScreen) => void;
 };
 
 export const ConfirmScreen = ({ seedPhrase, setScreen }: Props) => {
@@ -34,7 +34,7 @@ export const ConfirmScreen = ({ seedPhrase, setScreen }: Props) => {
         <Button.Transparent
           flex={1}
           justifyContent="center"
-          onClick={() => setScreen(NewWalletScreen.NO_WALLET)}
+          onClick={() => setScreen(WalletOnboardingScreen.NO_WALLET)}
         >
           Cancel
         </Button.Transparent>
@@ -42,7 +42,7 @@ export const ConfirmScreen = ({ seedPhrase, setScreen }: Props) => {
           flex={1}
           disabled={!valid}
           justifyContent="center"
-          onClick={() => setScreen(NewWalletScreen.PASSCODE)}
+          onClick={() => setScreen(WalletOnboardingScreen.PASSCODE)}
         >
           Confirm
         </Button.TextButton>

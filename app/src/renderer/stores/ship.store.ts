@@ -121,7 +121,7 @@ export const shipStore = ShipStore.create({
   bazaarStore: loadBazaarSnapshot(),
   walletStore: {
     navState: {
-      view: WalletScreen.NEW,
+      view: WalletScreen.ONBOARDING,
       protocol: ProtocolType.ETH_GORLI,
       lastEthProtocol: ProtocolType.ETH_GORLI,
       btcNetwork: NetworkStoreType.BTC_MAIN,

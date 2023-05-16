@@ -4,15 +4,20 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { Flex } from '@holium/design-system/general';
 import { TrayAppWrapper } from '@holium/design-system/os';
 
-import { ProtocolType } from 'os/services/ship/wallet/wallet.types';
+import {
+  NetworkType,
+  ProtocolType,
+} from 'os/services/ship/wallet/wallet.types';
 
 import { WalletFooterView } from './components/WalletFooter/WalletFooterView';
 import { WalletHeaderView } from './components/WalletHeader/WalletHeaderView';
 import { BackupScreen } from './screens/BackupScreen';
 import { ConfirmPasscodeScreen } from './screens/ConfirmPasscodeScreen';
 import { ConfirmScreen } from './screens/ConfirmScreen';
-import { CreatePasscodeScreen } from './screens/CreatePasscodeScreen/CreatePasscodeScreen';
+import { CreatePasscodeScreen } from './screens/CreatePasscodeScreen';
+import { FinalizingScreenBody } from './screens/FinalizingScreen/FinalizingScreenBody';
 import { NoWalletFoundScreen } from './screens/NoWalletFoundScreen';
+import { WalletListScreenBody } from './screens/WalletListScreen/WalletListScreenBody';
 
 type WalletWrapperProps = {
   isOnboarding: boolean;
@@ -108,3 +113,29 @@ export const ConfirmPasscodeStory: ComponentStory<
 );
 
 ConfirmPasscodeStory.storyName = '5. Confirm passcode';
+
+export const CreatingWalletStory: ComponentStory<
+  typeof FinalizingScreenBody
+> = () => (
+  <WalletWrapper isOnboarding>
+    <FinalizingScreenBody />
+  </WalletWrapper>
+);
+
+CreatingWalletStory.storyName = '6. Creating wallet...';
+
+export const NoAddressesStory: ComponentStory<
+  typeof WalletListScreenBody
+> = () => (
+  <WalletWrapper isOnboarding={false}>
+    <WalletListScreenBody
+      wallets={[]}
+      network={NetworkType.ETHEREUM}
+      protocol={ProtocolType.ETH_GORLI}
+      onSelectAddress={() => {}}
+      onClickCreateAddress={() => {}}
+    />
+  </WalletWrapper>
+);
+
+NoAddressesStory.storyName = '7. No addresses';

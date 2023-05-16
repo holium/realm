@@ -1,6 +1,6 @@
 import { Flex, Text } from '@holium/design-system/general';
 
-import { NewWalletScreen } from 'renderer/apps/Wallet/types';
+import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 
 import { PasscodeInput } from '../components/PasscodeInput';
 
@@ -8,7 +8,7 @@ type Props = {
   correctPasscode: number[];
   checkPasscode: (passcode: number[]) => Promise<boolean>;
   onSuccess: (passcode: number[]) => void;
-  setScreen: (screen: NewWalletScreen) => void;
+  setScreen: (screen: WalletOnboardingScreen) => void;
 };
 
 export const ConfirmPasscodeScreen = ({
@@ -32,7 +32,7 @@ export const ConfirmPasscodeScreen = ({
         checkPasscode={checkPasscode}
         onSuccess={(passcode) => {
           onSuccess(passcode);
-          setScreen(NewWalletScreen.FINALIZING);
+          setScreen(WalletOnboardingScreen.FINALIZING);
         }}
       />
     </Flex>

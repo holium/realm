@@ -10,11 +10,11 @@ import {
 } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
 
-import { NewWalletScreen } from 'renderer/apps/Wallet/types';
+import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 
 type Props = {
   seedPhrase: string;
-  setScreen: (screen: NewWalletScreen) => void;
+  setScreen: (screen: WalletOnboardingScreen) => void;
   setSeedPhrase: (phrase: string) => void;
 };
 
@@ -81,14 +81,14 @@ export const BackupScreen = ({
         <Button.Secondary
           flex={1}
           justifyContent="center"
-          onClick={() => setScreen(NewWalletScreen.NO_WALLET)}
+          onClick={() => setScreen(WalletOnboardingScreen.NO_WALLET)}
         >
           Cancel
         </Button.Secondary>
         <Button.TextButton
           flex={1}
           justifyContent="center"
-          onClick={() => setScreen(NewWalletScreen.CONFIRM)}
+          onClick={() => setScreen(WalletOnboardingScreen.CONFIRM)}
         >
           I wrote it down
         </Button.TextButton>

@@ -103,7 +103,7 @@ const persistedState = loadSnapshot();
 
 export const walletAppDefault = {
   navState: {
-    view: WalletScreen.NEW,
+    view: WalletScreen.ONBOARDING,
     protocol: ProtocolType.ETH_GORLI,
     lastEthProtocol: ProtocolType.ETH_GORLI,
     btcNetwork: NetworkStoreType.BTC_MAIN,

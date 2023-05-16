@@ -3,26 +3,26 @@ import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon } from '@holium/design-system/general';
 
-import { NewWalletScreen } from 'renderer/apps/Wallet/types';
+import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { BackupScreen } from './screens/BackupScreen';
-import { ConfirmPasscodeScreen } from './screens/ConfirmPasscodeScreen';
-import { ConfirmScreen } from './screens/ConfirmScreen';
-import { CreatePasscodeScreen } from './screens/CreatePasscodeScreen/CreatePasscodeScreen';
-import { DetectedExistingScreen } from './screens/DetectedExistingScreen';
-import { FinalizingScreen } from './screens/FinalizingScreen';
-import { ImportScreen } from './screens/ImportScreen';
-import { NoWalletFoundScreen } from './screens/NoWalletFoundScreen';
-import { RecoverExistingScreen } from './screens/RecoverExistingScreen';
+import { BackupScreen } from './BackupScreen';
+import { ConfirmPasscodeScreen } from './ConfirmPasscodeScreen';
+import { ConfirmScreen } from './ConfirmScreen';
+import { CreatePasscodeScreen } from './CreatePasscodeScreen';
+import { DetectedExistingScreen } from './DetectedExistingScreen';
+import { FinalizingScreen } from './FinalizingScreen/FinalizingScreen';
+import { ImportScreen } from './ImportScreen';
+import { NoWalletFoundScreen } from './NoWalletFoundScreen';
+import { RecoverExistingScreen } from './RecoverExistingScreen';
 
-const WalletNewPresenter = () => {
+const WalletOnboardingPresenter = () => {
   const { walletStore } = useShipStore();
   const initialScreen = walletStore.initialized
-    ? NewWalletScreen.DETECTED_EXISTING
-    : NewWalletScreen.NO_WALLET;
+    ? WalletOnboardingScreen.DETECTED_EXISTING
+    : WalletOnboardingScreen.NO_WALLET;
 
-  const [screen, setScreen] = useState<NewWalletScreen>(initialScreen);
+  const [screen, setScreen] = useState<WalletOnboardingScreen>(initialScreen);
   const [passcode, setPasscode] = useState<number[]>([]);
 
   // TODO move this to background thread
@@ -30,31 +30,33 @@ const WalletNewPresenter = () => {
 
   const setPasscodeWrapper = (passcode: number[]) => {
     setPasscode(passcode);
-    setScreen(NewWalletScreen.CONFIRM_PASSCODE);
+    setScreen(WalletOnboardingScreen.CONFIRM_PASSCODE);
   };
 
   const components = {
-    [NewWalletScreen.NO_WALLET]: <NoWalletFoundScreen setScreen={setScreen} />,
-    [NewWalletScreen.IMPORT]: (
+    [WalletOnboardingScreen.NO_WALLET]: (
+      <NoWalletFoundScreen setScreen={setScreen} />
+    ),
+    [WalletOnboardingScreen.IMPORT]: (
       <ImportScreen setSeedPhrase={setSeedPhrase} setScreen={setScreen} />
     ),
-    [NewWalletScreen.BACKUP]: (
+    [WalletOnboardingScreen.BACKUP]: (
       <BackupScreen
         setScreen={setScreen}
         setSeedPhrase={setSeedPhrase}
         seedPhrase={seedPhrase}
       />
     ),
-    [NewWalletScreen.CONFIRM]: (
+    [WalletOnboardingScreen.CONFIRM]: (
       <ConfirmScreen setScreen={setScreen} seedPhrase={seedPhrase} />
     ),
-    [NewWalletScreen.PASSCODE]: (
+    [WalletOnboardingScreen.PASSCODE]: (
       <CreatePasscodeScreen
         checkPasscode={walletStore.checkPasscode}
         setPasscode={setPasscodeWrapper}
       />
     ),
-    [NewWalletScreen.CONFIRM_PASSCODE]: (
+    [WalletOnboardingScreen.CONFIRM_PASSCODE]: (
       <ConfirmPasscodeScreen
         correctPasscode={passcode}
         checkPasscode={walletStore.checkPasscode}
@@ -62,13 +64,13 @@ const WalletNewPresenter = () => {
         setScreen={setScreen}
       />
     ),
-    [NewWalletScreen.FINALIZING]: (
+    [WalletOnboardingScreen.FINALIZING]: (
       <FinalizingScreen seedPhrase={seedPhrase} passcode={passcode} />
     ),
-    [NewWalletScreen.DETECTED_EXISTING]: (
+    [WalletOnboardingScreen.DETECTED_EXISTING]: (
       <DetectedExistingScreen setScreen={setScreen} />
     ),
-    [NewWalletScreen.RECOVER_EXISTING]: (
+    [WalletOnboardingScreen.RECOVER_EXISTING]: (
       <RecoverExistingScreen
         setSeedPhrase={(phrase: string, passcode: number[]) => {
           setSeedPhrase(phrase);
@@ -83,17 +85,18 @@ const WalletNewPresenter = () => {
   return (
     <>
       {currentComponent}
-      {![NewWalletScreen.NO_WALLET, NewWalletScreen.DETECTED_EXISTING].includes(
-        screen
-      ) && (
+      {![
+        WalletOnboardingScreen.NO_WALLET,
+        WalletOnboardingScreen.DETECTED_EXISTING,
+      ].includes(screen) && (
         <Flex
           position="absolute"
           zIndex={999}
           onClick={() =>
             setScreen(
               walletStore.initialized
-                ? NewWalletScreen.DETECTED_EXISTING
-                : NewWalletScreen.NO_WALLET
+                ? WalletOnboardingScreen.DETECTED_EXISTING
+                : WalletOnboardingScreen.NO_WALLET
             )
           }
         >
@@ -101,8 +104,8 @@ const WalletNewPresenter = () => {
             onClick={() =>
               setScreen(
                 walletStore.initialized
-                  ? NewWalletScreen.DETECTED_EXISTING
-                  : NewWalletScreen.NO_WALLET
+                  ? WalletOnboardingScreen.DETECTED_EXISTING
+                  : WalletOnboardingScreen.NO_WALLET
               )
             }
           >
@@ -114,4 +117,4 @@ const WalletNewPresenter = () => {
   );
 };
 
-export const WalletNew = observer(WalletNewPresenter);
+export const WalletOnboarding = observer(WalletOnboardingPresenter);

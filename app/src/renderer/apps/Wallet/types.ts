@@ -1,6 +1,6 @@
 export enum WalletScreen {
   LIST = 'list',
-  NEW = 'new',
+  ONBOARDING = 'onboarding',
   WALLET_DETAIL = 'detail',
   TRANSACTION_SEND = 'send',
   TRANSACTION_CONFIRM = 'confirm',
@@ -11,7 +11,7 @@ export enum WalletScreen {
   CREATE_WALLET = 'create-wallet',
 }
 
-export enum NewWalletScreen {
+export enum WalletOnboardingScreen {
   NO_WALLET = 'no_wallet',
   IMPORT = 'import',
   BACKUP = 'backup',

@@ -226,9 +226,7 @@ const BitcoinStore = types
     get list() {
       return Array.from(self.wallets).map(([key, wallet]) => ({
         key,
-        nickname: wallet.nickname,
-        address: wallet.address,
-        balance: wallet.balance,
+        ...wallet,
       }));
     },
   }))
@@ -906,7 +904,7 @@ export const WalletStore = types
           canReturn &&
           ![
             WalletScreen.LOCKED,
-            WalletScreen.NEW,
+            WalletScreen.ONBOARDING,
             WalletScreen.TRANSACTION_SEND,
             WalletScreen.TRANSACTION_CONFIRM,
           ].includes(self.navState.view)

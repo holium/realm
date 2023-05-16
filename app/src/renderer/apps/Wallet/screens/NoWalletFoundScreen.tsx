@@ -1,9 +1,9 @@
 import { Button, Flex, Icon, Text } from '@holium/design-system/general';
 
-import { NewWalletScreen } from 'renderer/apps/Wallet/types';
+import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 
 type Props = {
-  setScreen: (screen: NewWalletScreen) => void;
+  setScreen: (screen: WalletOnboardingScreen) => void;
 };
 
 export const NoWalletFoundScreen = ({ setScreen }: Props) => (
@@ -21,7 +21,7 @@ export const NoWalletFoundScreen = ({ setScreen }: Props) => (
           fontWeight="500"
           lineHeight="16px"
           style={{ padding: '5px 10px' }}
-          onClick={() => setScreen(NewWalletScreen.BACKUP)}
+          onClick={() => setScreen(WalletOnboardingScreen.BACKUP)}
         >
           Create wallet
         </Button.Primary>
@@ -30,7 +30,7 @@ export const NoWalletFoundScreen = ({ setScreen }: Props) => (
           fontWeight="500"
           lineHeight="16px"
           style={{ padding: '5px 10px' }}
-          onClick={() => setScreen(NewWalletScreen.IMPORT)}
+          onClick={() => setScreen(WalletOnboardingScreen.IMPORT)}
         >
           Import wallet
         </Button.Secondary>

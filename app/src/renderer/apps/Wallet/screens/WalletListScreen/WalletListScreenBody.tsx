@@ -1,20 +1,36 @@
-import { observer } from 'mobx-react';
-
 import { Button, Flex, Text } from '@holium/design-system/general';
 
 import {
   NetworkStoreType,
   NetworkType,
+  ProtocolType,
 } from 'os/services/ship/wallet/wallet.types';
-import { useShipStore } from 'renderer/stores/ship.store';
+import {
+  BitcoinWalletType,
+  EthWalletType,
+} from 'renderer/stores/models/wallet.model';
 
-import { WalletCard } from '../components/WalletCard';
-import { WalletScreen } from '../types';
+import { WalletCard } from '../../components/WalletCard';
 
-const WalletListScreenPresenter = () => {
-  const { walletStore } = useShipStore();
-  const list = walletStore.currentStore.list;
+type Props = {
+  wallets: ((BitcoinWalletType | EthWalletType) & {
+    key: string;
+  })[];
+  network: NetworkType;
+  protocol: ProtocolType;
+  btcNetwork?: NetworkStoreType;
+  onSelectAddress: (key: string) => void;
+  onClickCreateAddress: () => void;
+};
 
+export const WalletListScreenBody = ({
+  wallets,
+  network,
+  protocol,
+  btcNetwork,
+  onSelectAddress,
+  onClickCreateAddress,
+}: Props) => {
   const List = () => {
     return (
       <Flex
@@ -26,16 +42,14 @@ const WalletListScreenPresenter = () => {
         overflowX="visible"
         overflowY="auto"
       >
-        {list.map((walletEntry) => {
+        {wallets.map((walletEntry) => {
           return (
             <WalletCard
               key={walletEntry.address}
-              walletKey={walletEntry.key}
-              onSelect={() => {
-                walletStore.navigate(WalletScreen.WALLET_DETAIL, {
-                  walletIndex: walletEntry.key,
-                });
-              }}
+              wallet={walletEntry}
+              network={network}
+              protocol={protocol}
+              onSelect={() => onSelectAddress(walletEntry.key)}
             />
           );
         })}
@@ -44,10 +58,6 @@ const WalletListScreenPresenter = () => {
   };
 
   const Empty = () => {
-    const onClick = () => {
-      walletStore.navigate(WalletScreen.CREATE_WALLET);
-    };
-
     return (
       <Flex
         width="100%"
@@ -58,21 +68,21 @@ const WalletListScreenPresenter = () => {
         gap={20}
       >
         <Text.H3 variant="h3" textAlign="center">
-          No addresses
+          No wallets
         </Text.H3>
         <Flex width="80%" justifyContent="center">
           <Text.Body variant="body" textAlign="center">
             You haven't created any{' '}
-            {walletStore.navState.network === 'ethereum'
+            {network === 'ethereum'
               ? 'Ethereum'
-              : walletStore.navState.btcNetwork === NetworkStoreType.BTC_MAIN
+              : btcNetwork === NetworkStoreType.BTC_MAIN
               ? 'Bitcoin'
               : 'Bitcoin Testnet'}{' '}
-            addresses yet.
+            wallets yet.
           </Text.Body>
         </Flex>
         <Flex justifyContent="center">
-          <Button.TextButton onClick={onClick}>
+          <Button.TextButton onClick={onClickCreateAddress}>
             Create address
           </Button.TextButton>
         </Flex>
@@ -80,11 +90,11 @@ const WalletListScreenPresenter = () => {
     );
   };
 
-  return list.length ? (
+  return wallets && wallets.length ? (
     <List />
   ) : (
     <Flex height="100%" width="100%" flexDirection="column" alignItems="center">
-      {walletStore.navState.network === NetworkType.BITCOIN ? (
+      {network === NetworkType.BITCOIN ? (
         <Flex
           width="100%"
           height="100%"
@@ -97,11 +107,8 @@ const WalletListScreenPresenter = () => {
           </Text.H3>{' '}
         </Flex>
       ) : (
-        // @ts-ignore
-        <Empty network={walletStore.navState.network} />
+        <Empty network={network} />
       )}
     </Flex>
   );
 };
-
-export const WalletListScreen = observer(WalletListScreenPresenter);

@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Button, Flex, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 
-import { NewWalletScreen } from 'renderer/apps/Wallet/types';
+import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 
 const NoResize = styled(Flex)`
   textarea {
@@ -15,7 +15,7 @@ const NoResize = styled(Flex)`
 
 type Props = {
   setSeedPhrase: (phrase: string) => void;
-  setScreen: (screen: NewWalletScreen) => void;
+  setScreen: (screen: WalletOnboardingScreen) => void;
 };
 
 export const ImportScreen = ({ setScreen, setSeedPhrase }: Props) => {
@@ -23,7 +23,7 @@ export const ImportScreen = ({ setScreen, setSeedPhrase }: Props) => {
 
   const saveSeedPhrase = () => {
     setSeedPhrase(phrase);
-    setScreen(NewWalletScreen.PASSCODE);
+    setScreen(WalletOnboardingScreen.PASSCODE);
   };
 
   return (
@@ -59,7 +59,7 @@ export const ImportScreen = ({ setScreen, setSeedPhrase }: Props) => {
         <Button.Transparent
           flex={1}
           justifyContent="center"
-          onClick={() => setScreen(NewWalletScreen.NO_WALLET)}
+          onClick={() => setScreen(WalletOnboardingScreen.NO_WALLET)}
         >
           Cancel
         </Button.Transparent>

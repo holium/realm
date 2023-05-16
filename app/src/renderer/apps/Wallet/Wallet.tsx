@@ -20,10 +20,10 @@ import { DetailScreen } from './screens/DetailScreen';
 import { LockedScreen } from './screens/LockedScreen';
 import { NFTDetailScreen } from './screens/NFTDetailScreen';
 import { TransactionDetailScreen } from './screens/TransactionDetailScreen';
-import { WalletListScreen } from './screens/WalletListScreen';
+import { WalletListScreen } from './screens/WalletListScreen/WalletListScreen';
+import { WalletOnboarding } from './screens/WalletOnboarding';
 import { WalletSettingsScreen } from './screens/WalletSettingsScreen';
 import { WalletScreen } from './types';
-import { WalletNew } from './WalletNew';
 
 const WalletScreens: Record<
   WalletScreen,
@@ -33,7 +33,7 @@ const WalletScreens: Record<
   [WalletScreen.WALLET_DETAIL]: () => <DetailScreen />,
   [WalletScreen.TRANSACTION_SEND]: () => <DetailScreen />,
   [WalletScreen.TRANSACTION_DETAIL]: () => <TransactionDetailScreen />,
-  [WalletScreen.NEW]: () => <WalletNew />,
+  [WalletScreen.ONBOARDING]: () => <WalletOnboarding />,
   [WalletScreen.TRANSACTION_CONFIRM]: () => <div />,
   [WalletScreen.CREATE_WALLET]: ({ network }) => (
     <CreateWalletScreen network={network} />
@@ -99,7 +99,7 @@ const WalletPresenter = () => {
   };
 
   const hideFooter = [
-    WalletScreen.NEW,
+    WalletScreen.ONBOARDING,
     WalletScreen.LOCKED,
     WalletScreen.SETTINGS,
   ].includes(walletStore.navState.view);
@@ -130,7 +130,7 @@ const WalletPresenter = () => {
       onClick={(e) => e.stopPropagation()}
     >
       <WalletHeader
-        isOnboarding={WalletScreen.NEW === walletStore.navState.view}
+        isOnboarding={WalletScreen.ONBOARDING === walletStore.navState.view}
         showBack={walletStore.navState.view !== WalletScreen.LIST}
         network={
           walletStore.navState.network === 'ethereum' ? 'ethereum' : 'bitcoin'

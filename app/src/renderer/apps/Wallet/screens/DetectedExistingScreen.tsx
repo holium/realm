@@ -1,9 +1,9 @@
 import { Box, Button, Flex, Icon, Text } from '@holium/design-system/general';
 
-import { NewWalletScreen } from 'renderer/apps/Wallet/types';
+import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 
 type Props = {
-  setScreen: (screen: NewWalletScreen) => void;
+  setScreen: (screen: WalletOnboardingScreen) => void;
 };
 
 export const DetectedExistingScreen = ({ setScreen }: Props) => (
@@ -16,13 +16,15 @@ export const DetectedExistingScreen = ({ setScreen }: Props) => (
       </Text.Body>
       <Box>
         <Button.TextButton
-          onClick={() => setScreen(NewWalletScreen.RECOVER_EXISTING)}
+          onClick={() => setScreen(WalletOnboardingScreen.RECOVER_EXISTING)}
         >
           Recover Wallet
         </Button.TextButton>
       </Box>
       <Box>
-        <Button.TextButton onClick={() => setScreen(NewWalletScreen.BACKUP)}>
+        <Button.TextButton
+          onClick={() => setScreen(WalletOnboardingScreen.BACKUP)}
+        >
           Or create a new wallet
         </Button.TextButton>
       </Box>
