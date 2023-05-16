@@ -219,7 +219,6 @@ export class Conduit extends EventEmitter {
         }
       };
       this.sse.addEventListener('close', () => {
-        console.log('e');
         throw new Error('Ship unexpectedly closed the connection');
       });
     });
@@ -233,6 +232,7 @@ export class Conduit extends EventEmitter {
    */
   async refresh(url: string, code: string): Promise<string | undefined> {
     this.url = url;
+    this.code = code;
     this.updateStatus(ConduitState.Refreshing);
     const cookie: string | undefined = await Conduit.fetchCookie(url, code);
     if (cookie === undefined) {
@@ -711,7 +711,7 @@ export class Conduit extends EventEmitter {
               code: this.code,
             });
             if (err.originator === 'sse') {
-              await this.init(this.url, this.cookie, this.code ?? '');
+              await this.init(this.url, this.code ?? '', this.cookie);
               resolve(undefined);
               return;
             }

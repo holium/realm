@@ -49,6 +49,7 @@ const AppStateModel = types
       'stale',
       'refreshing',
       'refreshed',
+      'offline',
     ]),
     error: types.maybeNull(types.string),
   })
