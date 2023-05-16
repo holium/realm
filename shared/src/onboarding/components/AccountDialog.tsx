@@ -126,7 +126,7 @@ export const AccountDialog = ({
                     <Button.Transparent width="100%" onClick={onClickBuyServer}>
                       <Flex alignItems="center" gap="8px">
                         <Icon name="AddCircleLine" size={16} />
-                        <Text.Body>Purchase new ID</Text.Body>
+                        <Text.Body>Get another ID</Text.Body>
                       </Flex>
                     </Button.Transparent>
                   </Flex>
