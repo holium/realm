@@ -30,7 +30,6 @@
           [%clear-stall clear-stall]
           [%set-host set-host]
           [%delete-catalog-entry del-cat-entry]
-          [%gift gf]
       ==
     ::
     ++  install-app
@@ -114,11 +113,6 @@
       %-  ot
       :~  [%app-id so]
       ==
-    ::
-    ++  gf
-      %-  ot
-      :~  [%g so]
-      ==
     --
   --
 ::
@@ -144,11 +138,6 @@
           [%recommendations a+(turn ~(tap in recommendations.rct) |=(=app-id:store s+app-id))]
           [%grid (grid-index-js:encode grid-index.rct)]
       ==
-      ::
-        %gift
-        %-  pairs
-        :~  [%g s+g.rct]
-        ==
       ::
         %app-install-update
       (urbit-app-update:encode app-id.rct urbit-app.rct grid-index.rct)
