@@ -15,22 +15,11 @@ export const WalletHeaderView = ({
 }: Props) => (
   <Flex width="100%" justifyContent="space-between" alignItems="center">
     {showBack && !isOnboarding ? (
-      <Button.IconButton
-        size={26}
-        mt={isOnboarding ? 1 : 0}
-        onClick={onClickBack}
-      >
+      <Button.IconButton onClick={onClickBack}>
         <Icon name="ArrowLeftLine" size={24} opacity={0.7} />
       </Button.IconButton>
     ) : (
-      <Flex
-        mt={isOnboarding ? 1 : 0}
-        justifyContent="center"
-        alignItems="center"
-        width="26px"
-      >
-        <Icon name="WalletTray" size={24} opacity={0.6} />
-      </Flex>
+      <Icon name="WalletTray" size={24} opacity={0.6} />
     )}
 
     {!isOnboarding && (
