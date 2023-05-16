@@ -1,15 +1,16 @@
 import { ReactNode } from 'react';
 import NextHead from 'next/head';
-import { spaces } from 'spaces';
 
+import { spaces } from '../spaces';
 import { useSpace } from './SpaceContext';
 
-const siteUrl = 'https://www.holium.com/';
+const siteUrl = 'https://www.holium.com';
 const siteTitle = 'Holium';
 const siteDescription =
   'Holium Realm is a crypto OS that has a wallet, collaborative primitives, voice and cursor sharing, Urbit apps, and more. Compute together.';
 const siteKeywords =
   'Holium, urbit, p2p, decentralized, crypto, community, realm, collaboration';
+const siteImage = `${siteUrl}/og-image.png`;
 
 type Props = {
   title: string;
@@ -33,18 +34,18 @@ export const Page = ({ title = siteTitle, children }: Props) => {
         <meta name="robots" content="index, follow" />
         <meta name="googlebot" content="index, follow" />
 
-        <meta property="og:url" content="https://www.holium.com/" />
+        <meta property="og:url" content={siteUrl} />
         <meta property="og:type" content="website" />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={siteDescription} />
-        <meta property="og:image" content={`${siteUrl}og-twitter-image.png`} />
+        <meta property="og:image" content={siteImage} />
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@HoliumCorp" />
         <meta name="twitter:creator" content="@HoliumCorp" />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={siteDescription} />
-        <meta name="twitter:image" content={`${siteUrl}og-twitter-image.png`} />
+        <meta name="twitter:image" content={siteImage} />
 
         <meta name="theme-color" content={themeColor} />
         <meta name="msapplication-navbutton-color" content={themeColor} />
