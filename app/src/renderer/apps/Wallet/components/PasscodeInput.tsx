@@ -56,6 +56,7 @@ export const PasscodeInput = ({
 
       if (codeIsCorrect) {
         onSuccess(newInputCode);
+        setError(false);
       } else {
         setError(true);
         setInputCode([]);
@@ -79,11 +80,11 @@ export const PasscodeInput = ({
         <Box hidden={!loading}>
           <Spinner size={1} />
         </Box>
-        <Box hidden={!error}>
-          <Text.Body variant="body" fontSize={1}>
+        {error && (
+          <Text.Body color="intent-alert" fontSize={1}>
             That passcode was incorrect.
           </Text.Body>
-        </Box>
+        )}
       </Flex>
     </Flex>
   );

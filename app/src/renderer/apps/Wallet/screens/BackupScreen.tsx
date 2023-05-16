@@ -56,11 +56,11 @@ export const BackupScreen = ({
           borderRadius="9px"
         >
           <Text.Body
-            fontSize="14px"
             p="16px"
             maxWidth="250px"
             style={{
               lineHeight: '26px',
+              fontSize: '14px',
               wordSpacing: '7px',
               textAlign: 'center',
               filter: hideSeedPhrase.isOn ? 'blur(10px)' : 'none',

@@ -9,6 +9,7 @@ import { ProtocolType } from 'os/services/ship/wallet/wallet.types';
 import { WalletFooterView } from './components/WalletFooter/WalletFooterView';
 import { WalletHeaderView } from './components/WalletHeader/WalletHeaderView';
 import { BackupScreen } from './screens/BackupScreen';
+import { ConfirmPasscodeScreen } from './screens/ConfirmPasscodeScreen';
 import { ConfirmScreen } from './screens/ConfirmScreen';
 import { CreatePasscodeScreen } from './screens/CreatePasscodeScreen/CreatePasscodeScreen';
 import { NoWalletFoundScreen } from './screens/NoWalletFoundScreen';
@@ -92,3 +93,18 @@ export const CreatePasscodeStory: ComponentStory<
 );
 
 CreatePasscodeStory.storyName = '4. Set a passcode';
+
+export const ConfirmPasscodeStory: ComponentStory<
+  typeof ConfirmPasscodeScreen
+> = () => (
+  <WalletWrapper isOnboarding>
+    <ConfirmPasscodeScreen
+      correctPasscode={[1, 2, 3, 4, 5, 6]}
+      checkPasscode={() => Promise.resolve(false)}
+      onSuccess={() => {}}
+      setScreen={() => {}}
+    />
+  </WalletWrapper>
+);
+
+ConfirmPasscodeStory.storyName = '5. Confirm passcode';
