@@ -15,33 +15,8 @@ import { PendingTransactionDisplay } from './components/Transaction/Pending';
 import { WalletFooter } from './components/WalletFooter/WalletFooter';
 import { WalletHeader } from './components/WalletHeader/WalletHeader';
 import { getTransactions } from './helpers';
-import { CreateWalletScreen } from './screens/CreateWalletScreen/CreateWalletScreen';
-import { DetailScreen } from './screens/DetailScreen';
-import { LockedScreen } from './screens/LockedScreen';
-import { NFTDetailScreen } from './screens/NFTDetailScreen';
-import { TransactionDetailScreen } from './screens/TransactionDetailScreen';
-import { WalletListScreen } from './screens/WalletListScreen/WalletListScreen';
-import { WalletOnboarding } from './screens/WalletOnboarding';
-import { WalletSettingsScreen } from './screens/WalletSettingsScreen/WalletSettingsScreen';
+import { walletScreens } from './screens/walletScreens';
 import { WalletScreen } from './types';
-
-const WalletScreens: Record<
-  WalletScreen,
-  (props: { network: NetworkType }) => JSX.Element
-> = {
-  [WalletScreen.LIST]: () => <WalletListScreen />,
-  [WalletScreen.WALLET_DETAIL]: () => <DetailScreen />,
-  [WalletScreen.TRANSACTION_SEND]: () => <DetailScreen />,
-  [WalletScreen.TRANSACTION_DETAIL]: () => <TransactionDetailScreen />,
-  [WalletScreen.ONBOARDING]: () => <WalletOnboarding />,
-  [WalletScreen.TRANSACTION_CONFIRM]: () => <div />,
-  [WalletScreen.CREATE_WALLET]: ({ network }) => (
-    <CreateWalletScreen network={network} />
-  ),
-  [WalletScreen.LOCKED]: () => <LockedScreen />,
-  [WalletScreen.SETTINGS]: () => <WalletSettingsScreen />,
-  [WalletScreen.NFT_DETAIL]: () => <NFTDetailScreen />,
-};
 
 const WalletPresenter = () => {
   const [hidePending, setHidePending] = useState(true);
@@ -120,7 +95,7 @@ const WalletPresenter = () => {
       ? WalletScreen.TRANSACTION_SEND
       : walletStore.navState.view;
 
-  const Screen = WalletScreens[screenComponent];
+  const Screen = walletScreens[screenComponent];
 
   return (
     <Flex
