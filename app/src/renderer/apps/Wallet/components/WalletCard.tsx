@@ -8,6 +8,7 @@ import {
   BitcoinWalletType,
   ERC20Type,
   EthWalletType,
+  TransactionType,
 } from 'renderer/stores/models/wallet.model';
 
 import {
@@ -38,20 +39,28 @@ export const WalletCard = ({
   onSelect,
 }: Props) => {
   let coins: ERC20Type[] | null = null;
+  let transactions: TransactionType[] | null = null;
 
   if (network === NetworkType.ETHEREUM) {
     const ethWallet = wallet as EthWalletType;
+    if (!ethWallet.data) return null;
+
     const coinMap = ethWallet.data.get(protocol)?.coins;
     if (coinMap) coins = getCoins(coinMap as any);
   }
 
-  const walletTransactions =
-    network === NetworkType.ETHEREUM
-      ? (wallet as EthWalletType).data.get(protocol)?.transactionList
-          .transactions
-      : (wallet as BitcoinWalletType).transactionList.transactions;
+  if (network === NetworkType.ETHEREUM) {
+    const ethWallet = wallet as EthWalletType;
+    if (!ethWallet.data) return null;
 
-  const transactions = getTransactions(walletTransactions || new Map());
+    transactions = getTransactions(
+      ethWallet.data.get(protocol)?.transactionList.transactions ?? new Map()
+    );
+  } else {
+    const btcWallet = wallet as BitcoinWalletType;
+
+    transactions = getTransactions(btcWallet.transactionList.transactions);
+  }
 
   const amountDisplay =
     network === NetworkType.ETHEREUM

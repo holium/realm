@@ -12,10 +12,12 @@ import {
 
 import { WalletCard } from '../../components/WalletCard';
 
+export type WalletWithKey = (BitcoinWalletType | EthWalletType) & {
+  key: string;
+};
+
 type Props = {
-  wallets: ((BitcoinWalletType | EthWalletType) & {
-    key: string;
-  })[];
+  wallets: WalletWithKey[];
   network: NetworkType;
   protocol: ProtocolType;
   btcNetwork?: NetworkStoreType;
