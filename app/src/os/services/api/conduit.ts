@@ -30,7 +30,7 @@ export class Conduit extends EventEmitter {
   private url: string = '';
   private prevMsgId: number = 0;
   private lastAckId: number = 0;
-  cookie: string | null | undefined = undefined;
+  cookie: string | null = null;
   ship: string;
   pokes: Map<number, PokeParams & PokeCallbacks>;
   watches: Map<number, SubscribeParams & SubscribeCallbacks>;
@@ -260,17 +260,17 @@ export class Conduit extends EventEmitter {
    * @param url ship root url (e.g. http://localhost:80)
    * @returns
    */
-  async refresh(url: string, code: string): Promise<string | undefined> {
+  async refresh(url: string, code: string): Promise<string | null> {
     this.url = url;
     this.updateStatus(ConduitState.Refreshing);
-    const cookie: string | undefined = await Conduit.fetchCookie(url, code);
-    if (cookie === undefined) {
+    const cookie: string | null = await Conduit.fetchCookie(url, code);
+    if (cookie === null) {
       // console.log('Conduit.fetchCookie call failed with args => %o', {
       //   url,
       //   code,
       // });
       this.updateStatus(ConduitState.Failed);
-      return undefined;
+      return null;
     }
     this.cookie = cookie;
     this.updateStatus(ConduitState.Refreshed, {
@@ -646,11 +646,8 @@ export class Conduit extends EventEmitter {
    * @param code
    * @returns
    */
-  static async fetchCookie(
-    url: string,
-    code: Patp
-  ): Promise<string | null | undefined> {
-    let cookie = undefined;
+  static async fetchCookie(url: string, code: Patp): Promise<string | null> {
+    let cookie = null;
 
     const controller = new AbortController();
     const timeout = setTimeout(() => {
