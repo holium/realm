@@ -34,17 +34,28 @@ const PinnedWebAppPresenter = ({
 
   const tileId = useMemo(() => `pinned-web-app-${url}`, [url]);
 
-  const contextMenuOptions: ContextMenuOption[] = useMemo(
-    () => [
-      {
-        id: 'unpin-web-app',
-        label: 'Unpin',
-        onClick: () => {
-          SpacesIPC.removeBookmark(path, url);
+  const contextMenuOptions = useMemo(
+    () =>
+      [
+        {
+          id: 'unpin-web-app',
+          label: 'Unpin',
+          onClick: () => SpacesIPC.removeBookmark(path, url),
         },
-      },
-    ],
-    [path, url]
+        window && {
+          id: window.isMinimized ? 'show-web-app' : 'hide-web-app',
+          label: window.isMinimized ? 'Show' : 'Hide',
+          section: 1,
+          onClick: () => shellStore.toggleMinimized(url),
+        },
+        window && {
+          id: 'close-web-app',
+          label: 'Close',
+          section: 1,
+          onClick: () => shellStore.closeWindow(url),
+        },
+      ].filter(Boolean) as ContextMenuOption[],
+    [path, url, window?.isMinimized, shellStore]
   );
 
   const onClick = () => {
