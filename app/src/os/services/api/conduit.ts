@@ -30,7 +30,7 @@ export class Conduit extends EventEmitter {
   private url: string = '';
   private prevMsgId: number = 0;
   private lastAckId: number = 0;
-  cookie: string | undefined = undefined;
+  cookie: string | null | undefined = undefined;
   ship: string;
   pokes: Map<number, PokeParams & PokeCallbacks>;
   watches: Map<number, SubscribeParams & SubscribeCallbacks>;
@@ -649,7 +649,7 @@ export class Conduit extends EventEmitter {
   static async fetchCookie(
     url: string,
     code: Patp
-  ): Promise<string | undefined> {
+  ): Promise<string | null | undefined> {
     let cookie = undefined;
 
     const controller = new AbortController();

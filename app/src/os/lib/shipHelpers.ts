@@ -13,7 +13,7 @@ export async function getCookie({
   serverCode,
 }: ServerConnectionData) {
   log.info(`Getting cookie for ${serverUrl}`);
-  let cookie: string | undefined;
+  let cookie: string | null;
   const controller = new AbortController();
   const timeout = setTimeout(() => {
     controller.abort();
