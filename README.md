@@ -1,6 +1,6 @@
 # Holium Realm
 
-A desktop environment for Urbit.
+A collaborative userspace for Urbit.
 
 ## Directory structure
 
