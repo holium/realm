@@ -199,7 +199,7 @@ export class ShipService extends AbstractService<any> {
     this.shipDB.encrypt(password);
   }
 
-  public cleanup() {
+  public async cleanup() {
     // remove all ipcMain listeners
     this.removeHandlers();
     this.services?.chat.reset();
@@ -208,7 +208,7 @@ export class ShipService extends AbstractService<any> {
     this.services?.friends.reset();
     this.services?.spaces.reset();
     this.services?.bazaar.reset();
-    APIConnection.getInstance().closeChannel();
+    await APIConnection.getInstance().closeChannel();
 
     this.shipDB?.disconnect();
   }

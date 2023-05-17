@@ -52,7 +52,6 @@ export class Conduit extends EventEmitter {
     this.reactions = new Map();
     this.handleError = this.handleError.bind(this);
     this.updateStatus = this.updateStatus.bind(this);
-    this.reconnectToChannel = this.reconnectToChannel.bind(this);
     this.startSSE = this.startSSE.bind(this);
   }
 
@@ -383,11 +382,13 @@ export class Conduit extends EventEmitter {
    * @returns boolean indicating if the re-subscription was successful
    */
   async resubscribe(watchId: number, retryCount = 0, retryDelay = 2000) {
+    log.info('resubscribing to watch', watchId);
     const idleWatch = this.idleWatches.get(watchId);
     if (!idleWatch) {
       console.log("Watch doesn't exist, can't re-subscribe.");
       return false;
     }
+    log.info('idle watch', idleWatch);
     console.log('Attempting to re-subscribe to ', idleWatch?.app, '...');
 
     try {
@@ -524,28 +525,6 @@ export class Conduit extends EventEmitter {
       this.idleWatches.delete(watchId);
       this.watches.set(watchId, watch);
     }
-  }
-
-  /**
-   * TODO add a limit here
-   */
-  private async reconnectToChannel() {
-    // if (this.reconnectTimeout !== 0) clearTimeout(this.reconnectTimeout);
-    // this.uid = this.generateUID();
-    log.info('Conduit ---> reconnecting to channel');
-    const channelId = this.channelUrl(this.uid);
-    await this.startSSE(channelId)
-      .then(() => {
-        console.log(`reconnected to channel ${channelId}`);
-      })
-      .catch((err) => {
-        console.log('reconnectToChannel err', err);
-        // (function (conduit: Conduit) {
-        //   conduit.reconnectTimeout = setTimeout(() => {
-        //     conduit.startSSE();
-        //   }, 2000);
-        // })(this);
-      });
   }
 
   /**

@@ -125,7 +125,8 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
 
       this.setSessionCookie(credentials);
       return new Promise((resolve) => {
-        APIConnection.getInstance().conduit.on('connected', () => {
+        APIConnection.getInstance().conduit.once('connected', () => {
+          log.info('login: conduit connected');
           if (!this.services) return;
           this.services.auth._setLockfile({ ...credentials, ship: patp });
           this.services.ship?.init();
@@ -177,9 +178,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     if (!this.services) {
       return false;
     }
-
-    this.services.ship?.cleanup();
-    APIConnection.getInstance().closeChannel();
+    await this.services.ship?.cleanup();
     delete this.services.ship;
     this.services.auth._clearLockfile();
     this.sendUpdate({
