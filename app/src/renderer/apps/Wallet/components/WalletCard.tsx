@@ -87,21 +87,13 @@ export const WalletCard = ({
       onClick={onSelect}
     >
       <Text.Body
-        layoutId={`wallet-name-${wallet?.address}`}
-        layout="position"
-        transition={{ duration: 0.1 }}
+        opacity={0.5}
         fontWeight={600}
         style={{ textTransform: 'uppercase' }}
       >
         {wallet?.nickname}
       </Text.Body>
-      <Text.Body
-        mt={1}
-        layoutId={`wallet-balance-${wallet?.address}`}
-        transition={{ duration: 0.1 }}
-        fontWeight={600}
-        fontSize={7}
-      >
+      <Text.Body mt={1} fontWeight={600} fontSize={7}>
         {amountDisplay}
       </Text.Body>
       <Flex
@@ -128,9 +120,7 @@ export const WalletCard = ({
             </Text.Body>
           )}
         </Flex>
-        <Text.Body variant="body">
-          {transactions?.length} Transactions
-        </Text.Body>
+        <Text.Body opacity={0.3}>{transactions?.length} Transactions</Text.Body>
       </Flex>
     </WalletCardStyle>
   );

@@ -10,7 +10,8 @@ import {
 import { CreateWalletScreenBody } from '../screens/CreateWalletScreen/CreateWalletScreenBody';
 import { WalletListScreenBody } from '../screens/WalletListScreen/WalletListScreenBody';
 import { WalletSettingsScreenBody } from '../screens/WalletSettingsScreen/WalletSettingsScreenBody';
-import { mockWallets, WalletStoryWrapper } from './helper';
+import { WalletStoryWrapper } from './helper';
+import { mockWallets } from './mockData';
 
 export default {
   component: WalletSettingsScreenBody,
@@ -33,7 +34,9 @@ export const CreateWalletStory: ComponentStory<
 
 CreateWalletStory.storyName = 'Create address';
 
-export const WalletList: ComponentStory<typeof WalletListScreenBody> = () => (
+export const WalletListStory: ComponentStory<
+  typeof WalletListScreenBody
+> = () => (
   <WalletStoryWrapper
     protocol={ProtocolType.ETH_GORLI}
     isOnboarding={false}
@@ -49,9 +52,9 @@ export const WalletList: ComponentStory<typeof WalletListScreenBody> = () => (
   </WalletStoryWrapper>
 );
 
-WalletList.storyName = 'My addresses';
+WalletListStory.storyName = 'My addresses';
 
-export const SettingsStory: ComponentStory<
+export const WalletSettingsStory: ComponentStory<
   typeof WalletSettingsScreenBody
 > = () => (
   <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI} hideHeader hideFooter>
@@ -74,4 +77,4 @@ export const SettingsStory: ComponentStory<
   </WalletStoryWrapper>
 );
 
-SettingsStory.storyName = 'Settings';
+WalletSettingsStory.storyName = 'Settings';

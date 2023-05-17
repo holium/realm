@@ -33,88 +33,82 @@ export const WalletListScreenBody = ({
   onSelectAddress,
   onClickCreateAddress,
 }: Props) => {
-  const List = () => {
+  if (!wallets || !wallets.length) {
     return (
       <Flex
         height="100%"
         width="100%"
         flexDirection="column"
-        layoutScroll
-        gap={6}
-        overflowX="visible"
-        overflowY="auto"
-      >
-        {wallets.map((walletEntry) => {
-          return (
-            <WalletCard
-              key={walletEntry.address}
-              wallet={walletEntry}
-              network={network}
-              protocol={protocol}
-              onSelect={() => onSelectAddress(walletEntry.key)}
-            />
-          );
-        })}
-      </Flex>
-    );
-  };
-
-  const Empty = () => {
-    return (
-      <Flex
-        width="100%"
-        height="100%"
-        flexDirection="column"
-        justifyContent="center"
         alignItems="center"
-        gap={20}
       >
-        <Text.H3 variant="h3" textAlign="center">
-          No addresses
-        </Text.H3>
-        <Flex justifyContent="center">
-          <Text.Body
-            textAlign="center"
-            maxWidth="80%"
-            style={{ fontWeight: 300 }}
+        {network === NetworkType.BITCOIN ? (
+          <Flex
+            width="100%"
+            height="100%"
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
           >
-            You haven't created any{' '}
-            {network === 'ethereum'
-              ? 'Ethereum'
-              : btcNetwork === NetworkStoreType.BTC_MAIN
-              ? 'Bitcoin'
-              : 'Bitcoin Testnet'}{' '}
-            wallets yet.
-          </Text.Body>
-        </Flex>
-        <Flex justifyContent="center">
-          <Button.TextButton onClick={onClickCreateAddress}>
-            Create address
-          </Button.TextButton>
-        </Flex>
+            <Text.H3 variant="h3" textAlign="center">
+              Coming soon...
+            </Text.H3>{' '}
+          </Flex>
+        ) : (
+          <Flex
+            width="100%"
+            height="100%"
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+            gap={20}
+          >
+            <Text.H3 variant="h3" textAlign="center">
+              No addresses
+            </Text.H3>
+            <Flex justifyContent="center">
+              <Text.Body
+                textAlign="center"
+                maxWidth="80%"
+                style={{ fontWeight: 300 }}
+              >
+                You haven't created any{' '}
+                {network === 'ethereum'
+                  ? 'Ethereum'
+                  : btcNetwork === NetworkStoreType.BTC_MAIN
+                  ? 'Bitcoin'
+                  : 'Bitcoin Testnet'}{' '}
+                wallets yet.
+              </Text.Body>
+            </Flex>
+            <Flex justifyContent="center">
+              <Button.TextButton onClick={onClickCreateAddress}>
+                Create address
+              </Button.TextButton>
+            </Flex>
+          </Flex>
+        )}
       </Flex>
     );
-  };
+  }
 
-  return wallets && wallets.length ? (
-    <List />
-  ) : (
-    <Flex height="100%" width="100%" flexDirection="column" alignItems="center">
-      {network === NetworkType.BITCOIN ? (
-        <Flex
-          width="100%"
-          height="100%"
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="center"
-        >
-          <Text.H3 variant="h3" textAlign="center">
-            Coming soon...
-          </Text.H3>{' '}
-        </Flex>
-      ) : (
-        <Empty />
-      )}
+  return (
+    <Flex
+      height="100%"
+      width="100%"
+      flexDirection="column"
+      layoutScroll
+      gap={6}
+      overflowY="auto"
+    >
+      {wallets.map((walletEntry) => (
+        <WalletCard
+          key={walletEntry.address}
+          wallet={walletEntry}
+          network={network}
+          protocol={protocol}
+          onSelect={() => onSelectAddress(walletEntry.key)}
+        />
+      ))}
     </Flex>
   );
 };
