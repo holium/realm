@@ -30,7 +30,7 @@ export class Conduit extends EventEmitter {
   private url: string = '';
   private prevMsgId: number = 0;
   private lastAckId: number = 0;
-  cookie: string | null = null;
+  cookie: string | undefined = undefined;
   ship: string;
   pokes: Map<number, PokeParams & PokeCallbacks>;
   watches: Map<number, SubscribeParams & SubscribeCallbacks>;
@@ -650,7 +650,7 @@ export class Conduit extends EventEmitter {
     url: string,
     code: Patp
   ): Promise<string | undefined> {
-    let cookie;
+    let cookie = undefined;
 
     const controller = new AbortController();
     const timeout = setTimeout(() => {
