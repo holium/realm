@@ -7,6 +7,8 @@ import { TrayAppWrapper } from '@holium/design-system/os';
 import {
   NetworkType,
   ProtocolType,
+  SharingMode,
+  WalletCreationMode,
 } from 'os/services/ship/wallet/wallet.types';
 
 import { WalletFooterView } from './components/WalletFooter/WalletFooterView';
@@ -19,17 +21,46 @@ import { CreateWalletScreenBody } from './screens/CreateWalletScreen/CreateWalle
 import { FinalizingScreenBody } from './screens/FinalizingScreen/FinalizingScreenBody';
 import { NoWalletFoundScreen } from './screens/NoWalletFoundScreen';
 import { WalletListScreenBody } from './screens/WalletListScreen/WalletListScreenBody';
+import { WalletSettingsScreen } from './screens/WalletSettingsScreen/WalletSettingsScreen';
+import { WalletSettingsScreenBody } from './screens/WalletSettingsScreen/WalletSettingsScreenBody';
+
+const walletsMock = [
+  {
+    index: 0,
+    key: '1',
+    network: NetworkType.ETHEREUM,
+    path: "m/44'/60'/0'/0/0",
+    address: '0x123456789',
+    balance: '0.000000000000000000',
+    nickname: 'My wallet',
+    transactionList: {} as any,
+    data: {
+      get: () => ({
+        balance: '0.000000000000000000',
+        transactionList: {
+          transactions: [],
+        },
+      }),
+    } as any,
+    setBalance: () => {},
+    applyTransactions: () => {},
+  },
+];
 
 type WalletWrapperProps = {
   protocol?: ProtocolType;
-  isOnboarding: boolean;
+  isOnboarding?: boolean;
+  hideHeader?: boolean;
+  hideFooter?: boolean;
   hideBack?: boolean;
   children: ReactNode;
 };
 
 const WalletWrapper = ({
   protocol,
-  isOnboarding,
+  isOnboarding = false,
+  hideHeader = false,
+  hideFooter = false,
   hideBack = false,
   children,
 }: WalletWrapperProps) => (
@@ -40,14 +71,16 @@ const WalletWrapper = ({
         height: 600,
       }}
     >
-      <WalletHeaderView
-        showBack={!isOnboarding && !hideBack}
-        isOnboarding={isOnboarding}
-        onClickBack={() => {}}
-        onAddWallet={() => {}}
-      />
+      {!hideHeader && (
+        <WalletHeaderView
+          showBack={!isOnboarding && !hideBack}
+          isOnboarding={isOnboarding}
+          onClickBack={() => {}}
+          onAddWallet={() => {}}
+        />
+      )}
       {children}
-      {protocol && !isOnboarding && (
+      {protocol && !isOnboarding && !hideFooter && (
         <WalletFooterView
           hidden={isOnboarding}
           protocol={protocol}
@@ -177,28 +210,7 @@ export const WalletList: ComponentStory<typeof WalletListScreenBody> = () => (
     hideBack
   >
     <WalletListScreenBody
-      wallets={[
-        {
-          index: 0,
-          key: '1',
-          network: NetworkType.ETHEREUM,
-          path: "m/44'/60'/0'/0/0",
-          address: '0x123456789',
-          balance: '0.000000000000000000',
-          nickname: 'My wallet',
-          transactionList: {} as any,
-          data: {
-            get: () => ({
-              balance: '0.000000000000000000',
-              transactionList: {
-                transactions: [],
-              },
-            }),
-          } as any,
-          setBalance: () => {},
-          applyTransactions: () => {},
-        },
-      ]}
+      wallets={walletsMock}
       network={NetworkType.ETHEREUM}
       protocol={ProtocolType.ETH_GORLI}
       onSelectAddress={() => {}}
@@ -208,3 +220,28 @@ export const WalletList: ComponentStory<typeof WalletListScreenBody> = () => (
 );
 
 WalletList.storyName = '9. My addresses';
+
+export const SettingsStory: ComponentStory<
+  typeof WalletSettingsScreen
+> = () => (
+  <WalletWrapper protocol={ProtocolType.ETH_GORLI} hideHeader hideFooter>
+    <WalletSettingsScreenBody
+      wallets={walletsMock}
+      saving={false}
+      creationMode="default"
+      onClickCreationMode={() => {}}
+      blocked={['~zod', '~bus']}
+      onChangeBlockList={() => {}}
+      sharingMode={SharingMode.NOBODY}
+      defaultIndex={0}
+      walletCreationMode={WalletCreationMode.DEFAULT}
+      setWalletVisibility={() => {}}
+      onClickDeleteLocally={() => {}}
+      onClickDeleteCompletely={() => {}}
+      onClickBack={() => {}}
+      onClickSaveSettings={() => {}}
+    />
+  </WalletWrapper>
+);
+
+SettingsStory.storyName = '10. Settings';

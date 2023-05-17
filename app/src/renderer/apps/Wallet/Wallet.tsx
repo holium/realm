@@ -22,7 +22,7 @@ import { NFTDetailScreen } from './screens/NFTDetailScreen';
 import { TransactionDetailScreen } from './screens/TransactionDetailScreen';
 import { WalletListScreen } from './screens/WalletListScreen/WalletListScreen';
 import { WalletOnboarding } from './screens/WalletOnboarding';
-import { WalletSettingsScreen } from './screens/WalletSettingsScreen';
+import { WalletSettingsScreen } from './screens/WalletSettingsScreen/WalletSettingsScreen';
 import { WalletScreen } from './types';
 
 const WalletScreens: Record<

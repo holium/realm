@@ -51,9 +51,9 @@ export const VisibilitySelect = ({
           onClick={visibilityChange}
         />
       </Flex>
-      <Flex mt={1} width="220px">
-        {['anyone', 'friends'].includes(sharingMode) &&
-          walletCreationMode !== WalletCreationMode.ON_DEMAND && (
+      {['anyone', 'friends'].includes(sharingMode) &&
+        walletCreationMode !== WalletCreationMode.ON_DEMAND && (
+          <Flex width="220px">
             <Select
               id="wallet-default"
               options={sharedWalletOptions}
@@ -62,8 +62,8 @@ export const VisibilitySelect = ({
                 onChange(sharingMode, Number(newAddress))
               }
             />
-          )}
-      </Flex>
+          </Flex>
+        )}
     </>
   );
 };
