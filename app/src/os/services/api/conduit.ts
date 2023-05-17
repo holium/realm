@@ -107,7 +107,7 @@ export class Conduit extends EventEmitter {
     try {
       await this.scry({ app: 'spaces', path: `/current` });
     } catch (e) {
-      console.log(e);
+      log.error(e);
     }
     await this.poke({
       app: 'hood',
@@ -168,7 +168,7 @@ export class Conduit extends EventEmitter {
                 // @ts-expect-error
                 handler.onError(parsedData.err);
               } else {
-                console.error(new Error('poke sse error'));
+                log.error('poke sse error', parsedData.err);
               }
             }
             this.pokes.delete(eventId);
@@ -180,7 +180,7 @@ export class Conduit extends EventEmitter {
               if (watchHandler) {
                 watchHandler.onError?.(eventId, parsedData.err);
               } else {
-                console.error(new Error('watch sse error'));
+                log.error('watch sse error', parsedData.err);
               }
               this.setAsIdleWatch(eventId);
             } else {
@@ -216,8 +216,7 @@ export class Conduit extends EventEmitter {
             break;
           //
           default:
-            console.log('unrecognized', parsedData);
-            // other
+            log.info('unrecognized', parsedData);
             break;
         }
       };
@@ -225,7 +224,7 @@ export class Conduit extends EventEmitter {
         if (!error) {
           this.handleError({ status: 500, message: 'Unknown error' });
         }
-        console.log('sse error', error);
+        log.error('sse error', error);
         if (error.status === 403) {
           // @ts-ignore
           error.originator = 'sse';
@@ -247,8 +246,7 @@ export class Conduit extends EventEmitter {
         }
       };
       this.sse.addEventListener('close', () => {
-        console.log('e');
-        throw new Error('Ship unexpectedly closed the connection');
+        log.warn('Ship unexpectedly closed the connection');
       });
     });
   }
@@ -264,10 +262,6 @@ export class Conduit extends EventEmitter {
     this.updateStatus(ConduitState.Refreshing);
     const cookie: string | null = await Conduit.fetchCookie(url, code);
     if (cookie === null) {
-      // console.log('Conduit.fetchCookie call failed with args => %o', {
-      //   url,
-      //   code,
-      // });
       this.updateStatus(ConduitState.Failed);
       return null;
     }
@@ -385,28 +379,26 @@ export class Conduit extends EventEmitter {
     log.info('resubscribing to watch', watchId);
     const idleWatch = this.idleWatches.get(watchId);
     if (!idleWatch) {
-      console.log("Watch doesn't exist, can't re-subscribe.");
+      log.info("Watch doesn't exist, can't re-subscribe.");
       return false;
     }
-    log.info('idle watch', idleWatch);
-    console.log('Attempting to re-subscribe to ', idleWatch?.app, '...');
+    log.info('Attempting to re-subscribe to ', idleWatch?.app, '...');
 
     try {
       const res = await this.watch(idleWatch);
       if (res) {
         this.setAsActiveWatch(watchId);
-        console.log('Re-subscribed to', idleWatch?.app);
+        log.info('Re-subscribed to', idleWatch?.app);
         return true;
       }
     } catch {
       // throttle retries based on retryCount using exponential backoff
       retryDelay = Math.min(retryDelay * 2, 60000);
-      console.log('resubcribing in', retryDelay / 1000, 'seconds...');
+      log.info('resubcribing in', retryDelay / 1000, 'seconds...');
       setTimeout(() => {
         this.resubscribe(watchId, retryCount + 1, retryDelay);
       }, retryDelay);
-
-      console.log('Failed to re-subscribe to', idleWatch?.app);
+      log.warn('Failed to re-subscribe to', idleWatch?.app);
     }
 
     return false;
@@ -455,7 +447,7 @@ export class Conduit extends EventEmitter {
       );
       return response.json();
     } catch (err) {
-      console.log(err);
+      log.error(err);
     }
   }
 
@@ -647,9 +639,8 @@ export class Conduit extends EventEmitter {
         return Promise.reject(response);
       }
       cookie = response.headers.get('set-cookie');
-      // log.info('cookie', cookie);
     } catch (err: any) {
-      console.log(err);
+      log.error(err);
     } finally {
       clearTimeout(timeout);
     }
@@ -689,10 +680,7 @@ export class Conduit extends EventEmitter {
         //   console.log('Error', err.message);
         // }
         // console.log(err.config);
-        console.log(
-          '403 [stale connection] refreshing cookie => %o',
-          this.code
-        );
+        log.info('403 [stale connection] refreshing cookie => %o', this.code);
         let cookie: string | null = null;
         try {
           this.updateStatus(ConduitState.Refreshing);
@@ -711,23 +699,17 @@ export class Conduit extends EventEmitter {
               return;
             }
             err.config.headers['Cookie'] = cookie;
-            // const result = await axios(err.config);
-            resolve(err);
-            return;
+            return resolve(err);
           }
-          console.log('error: could not refresh token');
+          log.error('error: could not refresh token');
           this.updateStatus(ConduitState.Failed);
-          reject(null);
-          return;
+          return reject(null);
         } catch (e) {
-          console.log(e);
-          reject(e);
-          return;
+          log.error(e);
+          return reject(e);
         }
       }
-      reject(err);
-      return;
-      // Promise.reject(err);
+      return reject(err);
     });
   }
 }
