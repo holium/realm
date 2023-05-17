@@ -30,7 +30,7 @@ import { TitlebarByType } from './Titlebar/TitlebarByType';
 
 const CURSOR_WIDTH = 10;
 const MIN_WINDOW_AMOUNT_ON_SCREEN = 64;
-const TRIGGER_AUTO_RESIZE = 32;
+const TRIGGER_AUTO_RESIZE = 8;
 
 const MIN_WIDTH = 500;
 const MIN_HEIGHT = 400;
