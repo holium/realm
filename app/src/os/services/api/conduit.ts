@@ -714,7 +714,7 @@ export class Conduit extends EventEmitter {
           '403 [stale connection] refreshing cookie => %o',
           this.code
         );
-        let cookie: string | undefined = undefined;
+        let cookie: string | null = null;
         try {
           this.updateStatus(ConduitState.Refreshing);
           cookie = await Conduit.fetchCookie(this.url, this.code ?? '');
@@ -728,7 +728,7 @@ export class Conduit extends EventEmitter {
             });
             if (err.originator === 'sse') {
               await this.init(this.url, this.code ?? '', this.cookie);
-              resolve(undefined);
+              resolve(null);
               return;
             }
             err.config.headers['Cookie'] = cookie;
@@ -738,7 +738,7 @@ export class Conduit extends EventEmitter {
           }
           console.log('error: could not refresh token');
           this.updateStatus(ConduitState.Failed);
-          reject(undefined);
+          reject(null);
           return;
         } catch (e) {
           console.log(e);
