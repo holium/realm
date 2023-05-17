@@ -1,3 +1,4 @@
+import { toJS } from 'mobx';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { TwitterPicker } from 'react-color';
 import { createField, createForm } from 'mobx-easy-form';
@@ -151,6 +152,7 @@ const SpacesCreateFormPresenter = ({
         color: space.color,
         image: space.picture,
         crestOption: space.picture ? 'image' : 'color',
+        theme: toJS(space.theme),
       });
       if (space.picture) {
         setCrestOption('image');
