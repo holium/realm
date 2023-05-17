@@ -18,22 +18,6 @@ export default {
   title: 'Wallet/Base Screens',
 } as ComponentMeta<typeof WalletSettingsScreenBody>;
 
-export const CreateWalletStory: ComponentStory<
-  typeof CreateWalletScreenBody
-> = () => (
-  <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI} isOnboarding={false}>
-    <CreateWalletScreenBody
-      network={NetworkType.ETHEREUM}
-      loading={false}
-      nickname="My wallet"
-      onChangeNickname={() => {}}
-      onClickCreate={() => {}}
-    />
-  </WalletStoryWrapper>
-);
-
-CreateWalletStory.storyName = 'Create address';
-
 export const WalletListStory: ComponentStory<
   typeof WalletListScreenBody
 > = () => (
@@ -53,6 +37,22 @@ export const WalletListStory: ComponentStory<
 );
 
 WalletListStory.storyName = 'My addresses';
+
+export const CreateWalletStory: ComponentStory<
+  typeof CreateWalletScreenBody
+> = () => (
+  <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI} isOnboarding={false}>
+    <CreateWalletScreenBody
+      network={NetworkType.ETHEREUM}
+      loading={false}
+      nickname="My wallet"
+      onChangeNickname={() => {}}
+      onClickCreate={() => {}}
+    />
+  </WalletStoryWrapper>
+);
+
+CreateWalletStory.storyName = 'Create address';
 
 export const WalletSettingsStory: ComponentStory<
   typeof WalletSettingsScreenBody

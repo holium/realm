@@ -1,5 +1,3 @@
-import { observer } from 'mobx-react';
-
 import { Box, Flex, Text } from '@holium/design-system/general';
 
 import { ProtocolType } from 'os/services/ship/wallet/wallet.types';
@@ -8,13 +6,14 @@ type Props = {
   protocol: ProtocolType;
 };
 
-const WalletProtocolPresenter = ({ protocol }: Props) => (
+export const WalletProtocol = ({ protocol }: Props) => (
   <Flex
     width="fit-content"
-    px={2}
+    p="4px 7px"
     alignItems="center"
     justifyContent="center"
     borderRadius="33px"
+    background="rgba(var(--rlm-border-rgba), 0.1)"
     //onClick={WalletActions.toggleNetwork}
   >
     <Box
@@ -26,6 +25,7 @@ const WalletProtocolPresenter = ({ protocol }: Props) => (
     />
     <Text.Body
       style={{
+        color: 'rgba(0,0,0, 0.5)',
         fontSize: '12px',
       }}
     >
@@ -33,5 +33,3 @@ const WalletProtocolPresenter = ({ protocol }: Props) => (
     </Text.Body>
   </Flex>
 );
-
-export const WalletProtocol = observer(WalletProtocolPresenter);

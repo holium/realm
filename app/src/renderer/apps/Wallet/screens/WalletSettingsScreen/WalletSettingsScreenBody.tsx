@@ -120,7 +120,7 @@ export const WalletSettingsScreenBody = ({
       <Flex flexDirection="column" gap="4px">
         <Text.Label>Delete locally</Text.Label>
         <Text.Custom fontSize={2} opacity={0.8}>
-          Delete your HD wallet from local storage.
+          Delete your wallet from local storage.
         </Text.Custom>
         <Button.TextButton
           height={32}
@@ -134,8 +134,8 @@ export const WalletSettingsScreenBody = ({
       <Flex flexDirection="column" gap="4px">
         <Text.Label>Delete completely</Text.Label>
         <Text.Custom fontSize={2} opacity={0.8}>
-          Completely delete your HD wallet locally and remove all metadata from
-          your Urbit.
+          Completely delete your wallet locally and remove all metadata from
+          Urbit.
         </Text.Custom>
         <Button.TextButton
           height={32}

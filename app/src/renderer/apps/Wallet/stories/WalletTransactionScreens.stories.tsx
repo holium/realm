@@ -24,7 +24,7 @@ export const TransactionDetailStory: ComponentStory<
       transactionStatus="test"
       protocol={ProtocolType.ETH_GORLI}
       saveTransactionNotes={() => Promise.resolve()}
-      amountDisplay="1"
+      amountDisplay="1 ETH"
       usdAmount="1"
     />
   </WalletStoryWrapper>

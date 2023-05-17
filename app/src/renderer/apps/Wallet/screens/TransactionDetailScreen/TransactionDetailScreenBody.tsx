@@ -87,7 +87,7 @@ export const TransactionDetailScreenBody = ({
           )}
         </Flex>
       </Flex>
-      <Flex width="100%" justifyContent="space-between">
+      <Flex width="100%" justifyContent="space-between" alignItems="center">
         <Text.Custom fontSize={1} opacity={0.7}>
           {wasSent ? 'SENT TO' : 'RECEIVED FROM'}
         </Text.Custom>
@@ -107,21 +107,24 @@ export const TransactionDetailScreenBody = ({
           </Text.Custom>
         </Flex>
       </Flex>
-      <Flex position="relative" width="100%" justifyContent="space-between">
+      <Flex width="100%" justifyContent="space-between" alignItems="center">
         <Text.Custom fontSize={1} opacity={0.7}>
           DATE
         </Text.Custom>
         <Text.Custom fontSize={1}>{completedAtString}</Text.Custom>
       </Flex>
-      <Flex position="relative" width="100%" justifyContent="space-between">
+      <Flex width="100%" justifyContent="space-between" alignItems="center">
         <Text.Custom fontSize={1} opacity={0.7}>
           HASH
         </Text.Custom>
-        <Flex position="relative" left="10px">
+        <Flex>
           <Anchor
             href={`https://goerli.etherscan.io/tx/${transactionHash}`}
             rel="noreferrer"
             target="_blank"
+            style={{
+              fontSize: '12px',
+            }}
           >
             {transactionHash.slice(0, 12)}...{' '}
             <Icon mb={1} name="Link" size={16} opacity={0.5} />
