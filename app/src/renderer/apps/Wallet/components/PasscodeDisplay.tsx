@@ -23,8 +23,8 @@ const EmptyNumber = () => (
     width={32}
     height={35}
     borderRadius={4}
-    border="2px solid rgba(var(--rlm-border-rgba))"
-    background="rgba(var(--rlm-border-rgba), 0.1)"
+    border="2px solid rgba(var(--rlm-text-rgba), 0.1)"
+    background="rgba(var(--rlm-text-rgba), 0.02)"
   />
 );
 

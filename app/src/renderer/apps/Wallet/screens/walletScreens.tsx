@@ -3,7 +3,7 @@ import { NetworkType } from 'os/services/ship/wallet/wallet.types';
 import { WalletScreen } from '../types';
 import { CreateWalletScreen } from './CreateWalletScreen/CreateWalletScreen';
 import { DetailScreen } from './DetailScreen';
-import { LockedScreen } from './LockedScreen';
+import { LockedScreen } from './LockedScreen/LockedScreen';
 import { NFTDetailScreen } from './NFTDetailScreen';
 import { TransactionDetailScreen } from './TransactionDetailScreen/TransactionDetailScreen';
 import { WalletListScreen } from './WalletListScreen/WalletListScreen';

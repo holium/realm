@@ -8,6 +8,7 @@ import {
 } from 'os/services/ship/wallet/wallet.types';
 
 import { CreateWalletScreenBody } from '../screens/CreateWalletScreen/CreateWalletScreenBody';
+import { LockedScreenBody } from '../screens/LockedScreen/LockedScreenBody';
 import { WalletListScreenBody } from '../screens/WalletListScreen/WalletListScreenBody';
 import { WalletSettingsScreenBody } from '../screens/WalletSettingsScreen/WalletSettingsScreenBody';
 import { WalletStoryWrapper } from './helper';
@@ -78,3 +79,14 @@ export const WalletSettingsStory: ComponentStory<
 );
 
 WalletSettingsStory.storyName = 'Settings';
+
+export const LockedStory: ComponentStory<typeof LockedScreenBody> = () => (
+  <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI} hideHeader hideFooter>
+    <LockedScreenBody
+      checkPasscode={() => Promise.resolve(true)}
+      onSuccess={() => {}}
+    />
+  </WalletStoryWrapper>
+);
+
+LockedStory.storyName = 'Locked';
