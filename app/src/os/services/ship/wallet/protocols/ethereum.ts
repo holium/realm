@@ -6,17 +6,15 @@ import {
 } from 'alchemy-sdk';
 import axios from 'axios';
 import { ethers } from 'ethers';
-// @ts-expect-error
 import abi from 'human-standard-token-abi';
-// NOTE: this was needed for JsonRpcProvider to work
 import fetch from 'node-fetch';
 import io from 'socket.io-client';
 
 import { WalletDB } from '../wallet.db';
-// import nftabi from 'non-fungible-token-abi';
 import { Asset, CoinAsset, NFTAsset, ProtocolType } from '../wallet.types';
 import { BaseBlockProtocol } from './BaseBlockProtocol';
 
+// NOTE: this was needed for JsonRpcProvider to work
 declare var global: any;
 global.fetch = fetch;
 
@@ -24,7 +22,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
   private protocol: ProtocolType;
   private ethProvider: ethers.providers.JsonRpcProvider;
   private alchemy: Alchemy;
-  private interval: any;
   private baseURL: string;
   private nodeURL: string;
   private updating: boolean = false;
@@ -72,8 +69,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
 
   removeListener() {
     this.ethProvider.removeAllListeners();
-    clearInterval(this.interval);
-    this.interval = null;
   }
 
   watchUpdates(conduit: any, walletDB: WalletDB) {
