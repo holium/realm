@@ -309,6 +309,7 @@ jobs:
           BUILD_VERSION_MAJOR: ${{ needs.pre-deploy.outputs.build_version_major }}
           BUILD_VERSION_MINOR: ${{ needs.pre-deploy.outputs.build_version_minor }}
           BUILD_VERSION_BUILD: ${{ needs.pre-deploy.outputs.build_version_build }}
+          CI_ENV: ${{ needs.pre-deploy.outputs.ci }}
       # copy release artifacts from this runner to digitalocean
       - name: Publish artifacts
         run: |
