@@ -66,6 +66,28 @@ export class Conduit extends EventEmitter {
   }
 
   /**
+   * safeFetch - wrap the base fetch with an auto-retry attempt on 403 error
+   *
+   * @param url
+   * @param options
+   */
+  async safeFetch(url: string, options: any): Promise<any> {
+    try {
+      let response = await fetch(url, { ...options, headers: this.headers });
+      if (response.status === 403) {
+        this.cookie = await Conduit.fetchCookie(this.url, this.code ?? '');
+        if (!this.cookie) {
+          throw new Error('fetchCookie failed');
+        }
+        response = await fetch(url, { ...options, headers: this.headers });
+      }
+      return response;
+    } catch (err: any) {
+      Promise.reject(err);
+    }
+  }
+
+  /**
    *
    * @param ship i.e. lomder-librun without the ~
    * @returns
@@ -75,6 +97,19 @@ export class Conduit extends EventEmitter {
     this.cookie = cookie;
     this.code = code;
     this.uid = this.generateUID();
+    // before doing anything, determine if the cookie is stale .. this can happen if a cookie from a
+    //  prior session (logging out) has become stale and this call is made when the app restarts. chose
+    //  to put this here to prevent potential fetchCookie eyre thrashing by checking 403 errors in the scry
+    //  and other eyre methods. potentially lots of these methods can be called at startup; therefore a refresh
+    //  here will eliminate multiple fetchCookie calls
+    //   use the current space scry to test cookie
+    // http://localhost/~/scry/spaces/current.json
+    //  the scry below will set the this.cookie internally and becomes the new value for all future calls
+    try {
+      await this.scry({ app: 'spaces', path: `/current` });
+    } catch (e) {
+      console.log(e);
+    }
     await this.poke({
       app: 'hood',
       mark: 'helm-hi',
@@ -225,17 +260,17 @@ export class Conduit extends EventEmitter {
    * @param url ship root url (e.g. http://localhost:80)
    * @returns
    */
-  async refresh(url: string, code: string): Promise<string | undefined> {
+  async refresh(url: string, code: string): Promise<string | null> {
     this.url = url;
     this.updateStatus(ConduitState.Refreshing);
-    const cookie: string | undefined = await Conduit.fetchCookie(url, code);
-    if (cookie === undefined) {
+    const cookie: string | null = await Conduit.fetchCookie(url, code);
+    if (cookie === null) {
       // console.log('Conduit.fetchCookie call failed with args => %o', {
       //   url,
       //   code,
       // });
       this.updateStatus(ConduitState.Failed);
-      return undefined;
+      return null;
     }
     this.cookie = cookie;
     this.updateStatus(ConduitState.Refreshed, {
@@ -385,7 +420,8 @@ export class Conduit extends EventEmitter {
   async scry(params: Scry): Promise<any> {
     const { app, path } = params;
     try {
-      const response = await fetch(`${this.url}/~/scry/${app}${path}.json`, {
+      const url = `${this.url}/~/scry/${app}${path}.json`;
+      const response = await this.safeFetch(url, {
         method: 'GET',
         headers: this.headers,
         signal: this.abort.signal,
@@ -407,7 +443,7 @@ export class Conduit extends EventEmitter {
     const { inputMark, outputMark, threadName, body, desk } = params;
 
     try {
-      const response = await fetch(
+      const response = await this.safeFetch(
         `${this.url}/spider/${desk}/${inputMark}/${threadName}/${outputMark}.json`,
         {
           method: 'POST',
@@ -522,7 +558,7 @@ export class Conduit extends EventEmitter {
     try {
       if (!this.headers.Cookie) throw new Error('headers.Cookie not set');
 
-      const response = await fetch(this.channelUrl(this.uid), {
+      const response = await this.safeFetch(this.channelUrl(this.uid), {
         headers: {
           ...this.headers,
           Cookie: this.headers.Cookie,
@@ -610,11 +646,8 @@ export class Conduit extends EventEmitter {
    * @param code
    * @returns
    */
-  static async fetchCookie(
-    url: string,
-    code: Patp
-  ): Promise<string | undefined> {
-    let cookie;
+  static async fetchCookie(url: string, code: Patp): Promise<string | null> {
+    let cookie = null;
 
     const controller = new AbortController();
     const timeout = setTimeout(() => {
@@ -634,8 +667,8 @@ export class Conduit extends EventEmitter {
       if (!response.ok) {
         return Promise.reject(response);
       }
-      cookie = response.headers.get('set-cookie')?.[0];
-      log.info('cookie', cookie);
+      cookie = response.headers.get('set-cookie');
+      // log.info('cookie', cookie);
     } catch (err: any) {
       console.log(err);
     } finally {
@@ -681,7 +714,7 @@ export class Conduit extends EventEmitter {
           '403 [stale connection] refreshing cookie => %o',
           this.code
         );
-        let cookie: string | undefined = undefined;
+        let cookie: string | null = null;
         try {
           this.updateStatus(ConduitState.Refreshing);
           cookie = await Conduit.fetchCookie(this.url, this.code ?? '');
@@ -694,8 +727,8 @@ export class Conduit extends EventEmitter {
               code: this.code,
             });
             if (err.originator === 'sse') {
-              await this.init(this.url, this.cookie, this.code ?? '');
-              resolve(undefined);
+              await this.init(this.url, this.code ?? '', this.cookie);
+              resolve(null);
               return;
             }
             err.config.headers['Cookie'] = cookie;
@@ -705,7 +738,7 @@ export class Conduit extends EventEmitter {
           }
           console.log('error: could not refresh token');
           this.updateStatus(ConduitState.Failed);
-          reject(undefined);
+          reject(null);
           return;
         } catch (e) {
           console.log(e);
