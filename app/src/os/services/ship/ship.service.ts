@@ -208,7 +208,16 @@ export class ShipService extends AbstractService<any> {
     this.services?.friends.reset();
     this.services?.spaces.reset();
     this.services?.bazaar.reset();
+    // if the ship is too slow, just skip closing the channel
+    // so we dont hang the app for too long
+    const timeout = setTimeout(() => {
+      Promise.resolve();
+      log.warn(
+        'ship.service.ts, cleanup(): took too long to close channel, skipping'
+      );
+    }, 1000);
     await APIConnection.getInstance().closeChannel();
+    clearTimeout(timeout);
 
     this.shipDB?.disconnect();
   }

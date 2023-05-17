@@ -126,7 +126,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       this.setSessionCookie(credentials);
       return new Promise((resolve) => {
         APIConnection.getInstance().conduit.once('connected', () => {
-          log.info('login: conduit connected');
+          log.info('realm.service.ts, login: conduit connected');
           if (!this.services) return;
           this.services.auth._setLockfile({ ...credentials, ship: patp });
           this.services.ship?.init();
