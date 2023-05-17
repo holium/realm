@@ -293,7 +293,7 @@ jobs:
         with:
           ref: master
           # Urbit symlink fetching
-          submodules: 'true'
+          submodules: 'recursive'
       #
       - name: Setup node
         uses: actions/setup-node@v3
