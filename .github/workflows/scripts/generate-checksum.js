@@ -24,7 +24,7 @@ async function hashFile() {
         const hashval = hash.read();
         console.log(hashval);
         // now rewrite the latest.yml file with these new values
-        const yml = `./app/release/build/latest.yml`;
+        const yml = './app/release/build/latest.yml';
         const yaml = fs.readFileSync(yml).toString();
         let lines = yaml.split('\n');
         for (let j = 0; j < lines.length; j++) {
