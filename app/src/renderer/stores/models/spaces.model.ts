@@ -326,7 +326,7 @@ export const SpacesStore = types
       updatedSpace.access = space.access;
       updatedSpace.description = space.description;
       updatedSpace.name = space.name;
-      updatedSpace.theme = clone(space.theme);
+      updatedSpace.theme = space.theme;
       try {
         self.spaces.set(spacePath, updatedSpace);
         yield SpacesIPC.updateSpace(spacePath, space);

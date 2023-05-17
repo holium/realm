@@ -66,7 +66,7 @@ export const GlobalStyle = createGlobalStyle<Props>`
       height: 100vh;
       width: 100vw;
       margin: 0;
-      overflow: hidden; 
+      overflow: hidden;
       position: relative;
     }
 
@@ -87,7 +87,7 @@ export const GlobalStyle = createGlobalStyle<Props>`
     }
 `;
 
-export const BgImage = ({
+export const RealmBackground = ({
   blurred,
   wallpaper,
 }: {
@@ -110,6 +110,7 @@ export const BgImage = ({
             opacity: { duration: 0.5 },
           }}
         />
+        <div id="ghostpane" />
       </AnimatePresence>
     ),
     [blurred, wallpaper]

@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { transparentize } from 'polished';
 import styled from 'styled-components';
 
-import { Box, BoxProps, Flex, FlexProps } from '@holium/design-system';
+import { Box, BoxProps, Flex, FlexProps } from '@holium/design-system/general';
 
 interface PasscodeDisplayProps {
   digits: number;

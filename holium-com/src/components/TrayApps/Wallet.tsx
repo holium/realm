@@ -82,7 +82,13 @@ export const WalletApp = ({
   const [listType, setListType] = useState<ListTypes>('transactions');
 
   return (
-    <TrayApp id="wallet" isOpen={isOpen} coords={coords} closeTray={closeTray}>
+    <TrayApp
+      id="wallet"
+      className="hideonmobile"
+      isOpen={isOpen}
+      coords={coords}
+      closeTray={closeTray}
+    >
       <Flex
         width="100%"
         height="100%"

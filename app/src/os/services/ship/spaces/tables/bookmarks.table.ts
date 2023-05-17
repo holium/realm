@@ -41,21 +41,9 @@ export class BookmarksDB extends AbstractDataAccess<Bookmark, any> {
     const result = query.all();
     const bookmarks: { [key: string]: Bookmark } = {};
     for (const row of result) {
-      bookmarks[row.path] = this.mapRow(row);
+      bookmarks[row.path + row.url] = this.mapRow(row);
     }
     return bookmarks;
-  }
-
-  public insertAll(bookmarks: { [key: string]: Bookmark }) {
-    if (!this.db?.open) return;
-    const insert = this.db.prepare(
-      `REPLACE INTO bookmarks (url, path) VALUES (@url, @path)`
-    );
-
-    const insertMany = this.db.transaction((bookmarks: Bookmark[]) => {
-      for (const bookmark of bookmarks) insert.run(bookmark);
-    });
-    insertMany(Object.values(bookmarks));
   }
 
   addBookmark(payload: CreateBookmarkPayload) {

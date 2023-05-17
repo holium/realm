@@ -35,3 +35,15 @@ a {
 a:visted {
   color: rgba(var(--rlm-accent-rgba));
 }
+
+@media (max-width: 560px) {
+  .hideonmobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 561px) {
+  .hideondesktop {
+    display: none !important;
+  }
+}

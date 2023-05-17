@@ -3,12 +3,6 @@ import styled from 'styled-components';
 import { Box, BoxProps, Icon, Text } from '../../../general';
 import { BlockStyle } from '../../blocks/Block/Block';
 import { BUBBLE_HEIGHT, BUBBLE_WIDTH } from './Bubble.constants';
-import {
-  BlockWrapper,
-  CodeWrapper,
-  FragmentBlockquote,
-  FragmentShip,
-} from './fragment-lib';
 
 export type BubbleStyleProps = {
   isPrevGrouped?: boolean;
@@ -66,7 +60,7 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
       line-height: 1.1;
       fill: #ffffff !important;
     }
-    ${FragmentBlockquote} {
+    .fragment-blockquote {
       color: ${(props) => {
         if (props.ourTextColor) {
           return props.ourTextColor;
@@ -81,14 +75,14 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
           return '#ffffff';
         }}70;
     }
-    ${CodeWrapper} {
+    .code-wrapper {
       background-color: rgba(0, 0, 0, 0.12);
       &:hover {
         transition: var(--transition);
         background-color: rgba(0, 0, 0, 0.15);
       }
     }
-    ${FragmentShip} {
+    .fragment-ship {
       background: ${(props) => {
         if (props.ourTextColor && props.ourTextColor === '#000000') {
           return '#00000015';
@@ -104,7 +98,7 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
         }};
       }
     }
-    ${BlockWrapper} {
+    .block-wrapper {
       a {
         color: #ffffff !important;
       }

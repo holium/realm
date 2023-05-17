@@ -8,51 +8,25 @@ import {
   types,
 } from 'mobx-state-tree';
 
+import {
+  Asset,
+  CoinAsset,
+  NetworkStoreType,
+  NetworkType,
+  NFTAsset,
+  ProtocolType,
+  SharingMode,
+  WalletCreationMode,
+} from 'os/services/ship/wallet/wallet.types';
+import { gweiToEther } from 'renderer/apps/Wallet/helpers';
+import { WalletScreen } from 'renderer/apps/Wallet/types';
+
 import { appState } from '../app.store';
 import { WalletIPC } from '../ipc';
 import { shipStore } from '../ship.store';
 
 // 10 minutes
 const AUTO_LOCK_INTERVAL = 1000 * 60 * 10;
-
-export interface RecipientPayload {
-  recipientMetadata?: {
-    color: string;
-    avatar?: string;
-    nickname?: string;
-  };
-  patp: string;
-  address?: string | null;
-  gasEstimate?: number;
-}
-
-export enum WalletView {
-  LIST = 'list',
-  NEW = 'new',
-  WALLET_DETAIL = 'detail',
-  TRANSACTION_SEND = 'send',
-  TRANSACTION_CONFIRM = 'confirm',
-  TRANSACTION_DETAIL = 'transaction',
-  NFT_DETAIL = 'ethereum:nft',
-  LOCKED = 'locked',
-  SETTINGS = 'settings',
-  CREATE_WALLET = 'create-wallet',
-}
-
-const gweiToEther = (gwei: number) => {
-  return gwei / 1000000000000000000;
-};
-
-export enum WalletCreationMode {
-  DEFAULT = 'default',
-  ON_DEMAND = 'on-demand',
-}
-
-export enum SharingMode {
-  NOBODY = 'nobody',
-  FRIENDS = 'friends',
-  ANYBODY = 'anybody',
-}
 
 const Settings = types
   .model('Settings', {
@@ -89,56 +63,7 @@ export const WalletSettings = types.model('WalletSettings', {
   passcodeHash: types.string,
 });
 
-export enum NetworkType {
-  ETHEREUM = 'ethereum',
-  BITCOIN = 'bitcoin',
-}
-
-export enum ProtocolType {
-  ETH_MAIN = 'Ethereum Mainnet',
-  ETH_GORLI = 'Görli Testnet',
-  BTC_MAIN = 'Bitcoin Mainnet',
-  BTC_TEST = 'Bitcoin Testnet',
-  UQBAR = 'Uqbar Network',
-}
 const Protocols = types.enumeration(Object.values(ProtocolType));
-
-export type Asset = {
-  addr: string; // smart contract address for eth
-  id?: string; // chainId for eth, id for uqbar
-  type: 'coin' | 'token' | 'multisig' | string;
-  data: NFTAsset | CoinAsset | MultiAsset;
-};
-
-// ERC-20
-export type CoinAsset = {
-  logo: string | null; // url of token logo image
-  symbol: string; // USDC, DAI, BNB, etc
-  decimals: number; // 8 - used to convert to human readable number
-  balance: number; // current account balance
-  totalSupply: number; // total supply of the coin
-  allowances: { [addr: string]: number };
-};
-
-// ERC-721
-export type NFTAsset = {
-  name: string;
-  tokenId: string;
-  description: string;
-  image: string;
-  transferable?: boolean;
-  properties: { [key: string]: string | object };
-};
-
-// ERC-1155
-export type MultiAsset = {
-  name: string;
-  decimals: number; // 8 - used to convert to human readable number
-  description: string;
-  image: string;
-  balance: number; // current account balance
-  properties: { [key: string]: string | object };
-};
 
 export const Transaction = types.model('Transaction', {
   hash: types.identifier,
@@ -764,16 +689,11 @@ export const EthStore = types
   }));
 export type EthStoreType = Instance<typeof EthStore>;
 
-export enum NetworkStoreType {
-  ETHEREUM = 'Ethereum',
-  BTC_MAIN = 'Bitcoin Mainnet',
-  BTC_TEST = 'Bitcoin Testnet',
-}
 const NetworkStores = types.enumeration(Object.values(NetworkStoreType));
 
 export const WalletNavState = types
   .model('WalletNavState', {
-    view: types.enumeration(Object.values(WalletView)),
+    view: types.enumeration(Object.values(WalletScreen)),
     protocol: Protocols,
     lastEthProtocol: Protocols,
     btcNetwork: NetworkStores,
@@ -870,7 +790,7 @@ export interface WalletNavOptions {
 
 export const WalletStore = types
   .model('WalletStore', {
-    returnView: types.maybe(types.enumeration(Object.values(WalletView))),
+    returnView: types.maybe(types.enumeration(Object.values(WalletScreen))),
     ethereum: EthStore,
     bitcoin: BitcoinStore,
     btctest: BitcoinStore,
@@ -954,7 +874,7 @@ export const WalletStore = types
         }
       },
       setNetwork(network: NetworkType) {
-        this.navigate(WalletView.LIST);
+        this.navigate(WalletScreen.LIST);
         if (self.navState.network !== network) {
           this.setNetworkSetter(network);
           this.watchUpdates(self.navState.protocol);
@@ -971,7 +891,7 @@ export const WalletStore = types
         self.navState.protocol = protocol;
         self.ethereum.setProtocol(protocol);
       },
-      navigate(view: WalletView, options?: WalletNavOptions) {
+      navigate(view: WalletScreen, options?: WalletNavOptions) {
         const canReturn = options?.canReturn || true;
         const walletIndex = options?.walletIndex || self.navState.walletIndex;
         const detail = options?.detail;
@@ -985,10 +905,10 @@ export const WalletStore = types
         if (
           canReturn &&
           ![
-            WalletView.LOCKED,
-            WalletView.NEW,
-            WalletView.TRANSACTION_SEND,
-            WalletView.TRANSACTION_CONFIRM,
+            WalletScreen.LOCKED,
+            WalletScreen.NEW,
+            WalletScreen.TRANSACTION_SEND,
+            WalletScreen.TRANSACTION_CONFIRM,
           ].includes(self.navState.view)
         ) {
           const returnSnapshot = getSnapshot(self.navState);
@@ -1008,7 +928,7 @@ export const WalletStore = types
         self.navState = newState;
       },
       navigateBack() {
-        const DEFAULT_RETURN_VIEW = WalletView.LIST;
+        const DEFAULT_RETURN_VIEW = WalletScreen.LIST;
         let returnSnapshot = getSnapshot(
           WalletNavState.create({
             view: DEFAULT_RETURN_VIEW,
@@ -1027,7 +947,7 @@ export const WalletStore = types
       },
       resetNavigation() {
         self.navState = WalletNavState.create({
-          view: WalletView.LIST,
+          view: WalletScreen.LIST,
           protocol: self.navState.protocol,
           lastEthProtocol: self.navState.lastEthProtocol,
           btcNetwork: self.navState.btcNetwork,
@@ -1147,7 +1067,7 @@ export const WalletStore = types
       }),
       createWallet(nickname: string) {
         this.createWalletFlow(nickname);
-        this.navigate(WalletView.LIST, { canReturn: false });
+        this.navigate(WalletScreen.LIST, { canReturn: false });
       },
       sendEthereumTransaction: flow(function* (
         walletIndex: string,
@@ -1264,7 +1184,7 @@ export const WalletStore = types
         yield WalletIPC.updateWalletState(watchProtocol) as PromiseLike<any>;
       }),
       setProtocol(protocol: ProtocolType) {
-        this.navigate(WalletView.LIST);
+        this.navigate(WalletScreen.LIST);
         if (self.navState.protocol !== protocol) {
           this.setProtocolSetter(protocol);
         }
@@ -1340,7 +1260,7 @@ export const WalletStore = types
         self.pauseUpdates();
         if (hasPasscode) {
           // @ts-expect-error
-          self.navigate(WalletView.LOCKED);
+          self.navigate(WalletScreen.LOCKED);
         }
       }),
       pauseUpdates: flow(function* (): Generator<PromiseLike<any>, void, any> {
