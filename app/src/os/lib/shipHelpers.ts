@@ -28,7 +28,7 @@ export async function getCookie({
       // credentials: 'include', // TODO test this
       signal: controller.signal,
     });
-    cookie = response.headers.get('set-cookie')?.split(';')[0];
+    cookie = cookie = response.headers.get('set-cookie');
     log.info(`Got cookie for ${serverUrl}`);
   } catch (e) {
     log.error(`Error getting cookie for ${serverUrl}`, e);
