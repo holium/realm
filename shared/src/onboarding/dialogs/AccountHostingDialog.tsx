@@ -43,7 +43,12 @@ export const AccountHostingDialog = ({
     selectedPatp={selectedPatp}
     setSelectedPatp={setSelectedPatp}
     currentSection={SidebarSection.Hosting}
-    isLoading={!email || !serverUrl || !serverCode || !serverMaintenanceWindow}
+    isLoading={
+      !email ||
+      !serverUrl ||
+      !serverCode ||
+      (!serverMaintenanceWindow && serverMaintenanceWindow !== 0)
+    }
     onClickBuyServer={onClickBuyServer}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
