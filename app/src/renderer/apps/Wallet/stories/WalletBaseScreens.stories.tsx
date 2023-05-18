@@ -98,7 +98,7 @@ export const LockedStory: ComponentStory<typeof LockedScreenBody> = () => (
 
 LockedStory.storyName = 'Locked';
 
-export const WalletDetailStory: ComponentStory<
+export const WalletDetailsStory: ComponentStory<
   typeof DetailScreenBody
 > = () => (
   <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI}>
@@ -128,4 +128,4 @@ export const WalletDetailStory: ComponentStory<
   </WalletStoryWrapper>
 );
 
-WalletDetailStory.storyName = 'Wallet detail';
+WalletDetailsStory.storyName = 'Wallet details';

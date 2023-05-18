@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import { Card } from '@holium/design-system/general';
 
@@ -10,21 +10,18 @@ export const WalletCardStyle = styled(Card)<CardStyleProps>`
   display: flex;
   flex-direction: column;
   width: 100%;
+  min-height: 0;
   padding: 12px 16px;
   transition: box-shadow 0.1s ease;
   border-radius: 16px !important;
+  transition: box-shadow 0.25s ease;
+  box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
 
-  ${(props: CardStyleProps) =>
-    props.isSelected
-      ? css`
-          gap: 10px;
-          box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
-        `
-      : css`
-          &:hover {
-            transition: box-shadow 0.25s ease;
-            box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
-          }
+  ${({ isSelected }) =>
+    isSelected &&
+    `
+      flex: 1;
+      gap: 10px;
         `}
 `;
 
