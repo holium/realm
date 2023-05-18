@@ -15,9 +15,12 @@ import {
   RecipientPayload,
 } from 'os/services/ship/wallet/wallet.types';
 import { shortened } from 'renderer/apps/Wallet/helpers';
-import { WalletScreen } from 'renderer/apps/Wallet/types';
+import { TransactionRecipient, WalletScreen } from 'renderer/apps/Wallet/types';
 import {
+  BitcoinWalletType,
   ERC20Type,
+  EthStoreType,
+  EthWalletType,
   WalletNavOptions,
 } from 'renderer/stores/models/wallet.model';
 
@@ -33,35 +36,33 @@ const ethToUsd = (eth: number, currentPrice: number) =>
   isNaN(eth) ? 0 : (eth * currentPrice).toFixed(2);
 
 type Props = {
+  wallet: EthWalletType | BitcoinWalletType;
   protocol: ProtocolType;
   network: NetworkType;
-  ethereum: any;
-  currentWallet?: any;
-  navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
+  ethereum: EthStoreType;
   screen: 'initial' | 'confirm';
   max: number;
-  onScreenChange: (screen: 'initial' | 'confirm') => void;
-  close: () => void;
-  coin?: ERC20Type | null;
-  onConfirm: () => void;
-  transactionAmount: any;
-  setTransactionAmount: any;
-  transactionRecipient: any;
-  setTransactionRecipient: any;
+  coin: ERC20Type | null;
+  transactionAmount: number;
+  setTransactionAmount: (amount: number) => void;
+  transactionRecipient: TransactionRecipient;
+  setTransactionRecipient: (recipient: TransactionRecipient) => void;
   uqbarContract: boolean;
   to: string | undefined;
   getRecipient: (ship: string) => Promise<RecipientPayload>;
+  navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
+  close: () => void;
+  onConfirm: () => void;
 };
 
 export const TransactionPane = ({
+  wallet,
   protocol,
   network,
   ethereum,
-  currentWallet,
   navigate,
   screen,
   max,
-  onScreenChange,
   close,
   coin,
   onConfirm,
@@ -84,7 +85,6 @@ export const TransactionPane = ({
       //   transactionAmount
       // );
     } else {
-      const wallet = currentWallet;
       navigate(WalletScreen.TRANSACTION_CONFIRM, {
         walletIndex: `${wallet?.index}`,
         protocol: protocol,
@@ -97,18 +97,16 @@ export const TransactionPane = ({
           },
         }),
       });
-      onScreenChange('confirm');
     }
   };
 
   const prev = () => {
     navigate(WalletScreen.TRANSACTION_SEND);
-    onScreenChange('initial');
   };
 
   const amountValidator = (valid: boolean, amount?: number) => {
     setAmountValid(valid);
-    if (valid) {
+    if (valid && amount) {
       setTransactionAmount(amount);
     }
   };

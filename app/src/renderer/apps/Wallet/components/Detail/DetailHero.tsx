@@ -16,8 +16,10 @@ import {
   RecipientPayload,
 } from 'os/services/ship/wallet/wallet.types';
 import {
+  BitcoinStoreType,
   BitcoinWalletType,
   ERC20Type,
+  EthStoreType,
   EthWalletType,
   UqTxType,
   WalletNavOptions,
@@ -33,7 +35,7 @@ import {
   formatZigAmount,
   shortened,
 } from '../../helpers';
-import { WalletScreen } from '../../types';
+import { TransactionRecipient, WalletScreen } from '../../types';
 import { SendTransaction } from '../Transaction/SendTransaction';
 import { TransactionPasscode } from '../Transaction/TransactionPasscode';
 import {
@@ -64,26 +66,24 @@ const AddressStyle = styled(Flex)`
 `;
 
 type Props = {
-  coinView?: any | null;
+  coinView: JSX.Element | null;
   wallet: EthWalletType | BitcoinWalletType;
   coin: ERC20Type | null;
   QROpen: boolean;
   setQROpen: (open: boolean) => void;
   hideWalletHero: boolean;
   sendTrans: boolean;
-  onScreenChange: any;
-  setSendTrans: any;
   currentWallet?: EthWalletType | BitcoinWalletType;
   network: NetworkType;
   protocol: ProtocolType;
-  bitcoin: any;
-  ethereum: any;
-  screen: any;
+  bitcoin: BitcoinStoreType;
+  ethereum: EthStoreType;
+  screen: WalletScreen;
   uqTx?: UqTxType;
   navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
   checkPasscode: (passcode: number[]) => Promise<boolean>;
-  sendERC20Transaction: any;
-  sendEthereumTransaction: any;
+  sendERC20Transaction: (...args: any) => Promise<any>;
+  sendEthereumTransaction: (...args: any) => Promise<any>;
   close: () => void;
   onClickNavigateBack: () => void;
   to: string | undefined;
@@ -106,8 +106,6 @@ export const DetailHero = ({
   setQROpen,
   hideWalletHero,
   sendTrans,
-  onScreenChange,
-  setSendTrans,
   checkPasscode,
   sendERC20Transaction,
   sendEthereumTransaction,
@@ -149,10 +147,10 @@ export const DetailHero = ({
           : ''
         : coin.conversions.usd
         ? '$' +
-          `${convertERC20AmountToUsd(
+          convertERC20AmountToUsd(
             formatCoinAmount(coin.balance, coin.decimals),
             coin.conversions.usd
-          )}`
+          )
         : ''
       : bitcoin.conversions.usd
       ? '$' +
@@ -204,12 +202,8 @@ export const DetailHero = ({
   );
 
   const [transactionAmount, setTransactionAmount] = useState(0);
-  const [transactionRecipient, setTransactionRecipient] = useState<{
-    address?: string;
-    patp?: string;
-    patpAddress?: string;
-    color?: string;
-  }>({});
+  const [transactionRecipient, setTransactionRecipient] =
+    useState<TransactionRecipient>({});
 
   const sendTransaction = async (passcode: number[]) => {
     try {
@@ -327,13 +321,25 @@ export const DetailHero = ({
       >
         <SendReceiveButtons
           hidden={sendTrans}
-          send={() => setSendTrans(true)}
+          send={() =>
+            navigate(WalletScreen.TRANSACTION_SEND, {
+              walletIndex: `${wallet.index}`,
+              protocol: protocol,
+              ...(coin && {
+                detail: {
+                  type: 'coin',
+                  txtype: 'coin',
+                  coinKey: coin.address,
+                  key: coin.address,
+                },
+              }),
+            })
+          }
           receive={() => setQROpen(true)}
         />
         <SendTransaction
           wallet={wallet}
           hidden={!sendTrans}
-          onScreenChange={onScreenChange}
           close={close}
           coin={coin}
           network={network}

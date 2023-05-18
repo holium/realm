@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEventHandler, useEffect, useRef, useState } from 'react';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import { isValidPatp } from 'urbit-ob';
@@ -42,7 +42,7 @@ const RecipientInputPresenter = ({
   useEffect(() => {
     if (to) {
       setRecipient(to);
-      onChange({ target: { value: to } });
+      onChange({ target: { value: to } } as any);
     }
   }, []);
 
@@ -125,7 +125,7 @@ const RecipientInputPresenter = ({
     }
   }, [recipientDetails]);
 
-  const onChange = (e: any) => {
+  const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const value: string = e.target.value;
     const validAddress =
       network === 'ethereum' ? ethers.utils.isAddress(value) : false; // TODO add bitcoin validation

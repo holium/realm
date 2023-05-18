@@ -9,9 +9,11 @@ import {
   RecipientPayload,
 } from 'os/services/ship/wallet/wallet.types';
 import {
+  BitcoinStoreType,
   BitcoinWalletType,
   ERC20Type,
   ERC721Type,
+  EthStoreType,
   EthWalletType,
   TransactionType,
   UqTxType,
@@ -34,31 +36,29 @@ type Props = {
   coin: ERC20Type | null;
   sendTrans: boolean;
   hideWalletHero: boolean;
-  onScreenChange: (screen: string) => void;
-  setSendTrans: (sendTrans: boolean) => void;
   transactions: TransactionType[];
   coins: ERC20Type[] | null;
   nfts: ERC721Type[] | null;
   network: NetworkType;
   protocol: ProtocolType;
   currentWallet?: EthWalletType | BitcoinWalletType;
-  bitcoin: any;
-  ethereum: any;
-  checkPasscode: (passcode: number[]) => Promise<boolean>;
-  sendERC20Transaction: any;
+  ethereum: EthStoreType;
+  bitcoin: BitcoinStoreType;
   sendEthereumTransaction: any;
-  onClickNavigateBack: () => void;
-  close: () => void;
-  ethToUsd: number;
+  ethToUsd: number | undefined;
   ethAmount?: EthAmount;
   ethType?: string;
   txType?: string;
   coinKey?: string;
-  navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
   uqTx?: UqTxType;
   screen: WalletScreen;
   to: string | undefined;
+  close: () => void;
   getRecipient: (ship: string) => Promise<RecipientPayload>;
+  checkPasscode: (passcode: number[]) => Promise<boolean>;
+  onClickNavigateBack: () => void;
+  navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
+  sendERC20Transaction: (...args: any) => Promise<any>;
 };
 
 export const DetailScreenBody = ({
@@ -66,9 +66,6 @@ export const DetailScreenBody = ({
   coin,
   sendTrans,
   hideWalletHero,
-  onScreenChange,
-  close,
-  setSendTrans,
   transactions,
   coins,
   nfts,
@@ -77,20 +74,21 @@ export const DetailScreenBody = ({
   currentWallet,
   bitcoin,
   ethereum,
-  checkPasscode,
   sendERC20Transaction,
   sendEthereumTransaction,
-  onClickNavigateBack,
   ethToUsd,
   ethAmount,
   ethType,
   txType,
   coinKey,
-  navigate,
   uqTx,
   screen,
   to,
+  checkPasscode,
+  navigate,
   getRecipient,
+  onClickNavigateBack,
+  close,
 }: Props) => {
   const qrCode = useToggle(false);
 
@@ -111,23 +109,18 @@ export const DetailScreenBody = ({
         protocol={protocol}
         bitcoin={bitcoin}
         ethereum={ethereum}
-        checkPasscode={checkPasscode}
         sendERC20Transaction={sendERC20Transaction}
         sendEthereumTransaction={sendEthereumTransaction}
-        onClickNavigateBack={onClickNavigateBack}
         coin={coin}
         QROpen={qrCode.isOn}
         setQROpen={qrCode.toggle}
         sendTrans={sendTrans}
         hideWalletHero={hideWalletHero}
-        navigate={navigate}
         screen={screen}
-        onScreenChange={onScreenChange}
-        setSendTrans={setSendTrans}
+        navigate={navigate}
         close={close}
         coinView={
-          coin &&
-          !sendTrans && (
+          coin && !sendTrans ? (
             <Flex
               layout="position"
               transition={{
@@ -150,11 +143,13 @@ export const DetailScreenBody = ({
                 navigate={navigate}
               />
             </Flex>
-          )
+          ) : null
         }
         uqTx={uqTx}
         to={to}
         getRecipient={getRecipient}
+        onClickNavigateBack={onClickNavigateBack}
+        checkPasscode={checkPasscode}
       />
       <Box width="100%" hidden={qrCode.isOn || sendTrans}>
         <Flex

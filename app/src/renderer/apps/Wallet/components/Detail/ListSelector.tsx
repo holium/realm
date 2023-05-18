@@ -6,7 +6,7 @@ export type DisplayType = 'coins' | 'nfts' | 'transactions';
 
 type Props = {
   selected: DisplayType;
-  onChange: any;
+  onChange: (t: DisplayType) => void;
   network: string;
 };
 

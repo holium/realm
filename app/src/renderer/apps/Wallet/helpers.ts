@@ -5,6 +5,7 @@ import {
   ERC721Type,
   TransactionType,
 } from '../../stores/models/wallet.model';
+import { ERC20Amount } from './types';
 
 // TODO: replace with actual exchange rate
 export const ethToUsd = (eth: number, currentPrice: number) =>
@@ -105,7 +106,10 @@ export function formatEthAmount(amount: string): EthAmount {
   };
 }
 
-export function formatCoinAmount(balance: string | BigInt, decimals: number) {
+export function formatCoinAmount(
+  balance: string | BigInt,
+  decimals: number
+): ERC20Amount {
   let amount = typeof balance === 'string' ? balance : balance.toString();
   if (amount.length < decimals) {
     const additionalDigits = '0'.repeat(decimals - amount.length + 1);
@@ -168,13 +172,10 @@ export function convertBtcAmountToUsd(
 }
 
 export function convertERC20AmountToUsd(
-  amount: any,
+  amount: ERC20Amount,
   exchangeRate: number = 1647.37
 ) {
-  if (amount.btc === '0') {
-    return 0;
-  }
-  const usd = Number(amount.btc) * exchangeRate;
+  const usd = Number(amount.big) * exchangeRate;
   return usd.toFixed(2);
 }
 

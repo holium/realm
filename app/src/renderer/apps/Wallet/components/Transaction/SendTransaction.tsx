@@ -8,12 +8,13 @@ import {
 import {
   BitcoinWalletType,
   ERC20Type,
+  EthStoreType,
   EthWalletType,
   UqTxType,
   WalletNavOptions,
 } from 'renderer/stores/models/wallet.model';
 
-import { WalletScreen } from '../../types';
+import { TransactionRecipient, WalletScreen } from '../../types';
 import { TransactionPane } from './TransactionPane';
 
 const abbrMap = {
@@ -22,47 +23,43 @@ const abbrMap = {
 };
 
 type Props = {
+  wallet: EthWalletType | BitcoinWalletType;
   hidden: boolean;
-  onScreenChange: any;
   protocol: ProtocolType;
   network: NetworkType;
   uqTx?: UqTxType;
-  close: () => void;
-  wallet: EthWalletType | BitcoinWalletType;
-  coin: ERC20Type | null;
-  onConfirm: () => void;
-  transactionAmount: any;
-  setTransactionAmount: any;
-  transactionRecipient: any;
-  setTransactionRecipient: any;
-  screen: WalletScreen;
-  ethereum: any;
-  currentWallet?: EthWalletType | BitcoinWalletType;
-  navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
   to: string | undefined;
+  coin: ERC20Type | null;
+  transactionAmount: number;
+  setTransactionAmount: (amount: number) => void;
+  transactionRecipient: TransactionRecipient;
+  setTransactionRecipient: (recipient: TransactionRecipient) => void;
+  screen: WalletScreen;
+  ethereum: EthStoreType;
+  onConfirm: () => void;
+  close: () => void;
+  navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
   getRecipient: (ship: string) => Promise<RecipientPayload>;
 };
 
 export const SendTransaction = ({
+  wallet,
   coin,
   hidden,
-  onScreenChange,
   protocol,
   network,
   uqTx,
-  close,
-  wallet,
-  onConfirm,
+  to,
   transactionAmount,
   setTransactionAmount,
   transactionRecipient,
   setTransactionRecipient,
   screen,
   ethereum,
-  currentWallet,
   navigate,
-  to,
   getRecipient,
+  close,
+  onConfirm,
 }: Props) => {
   const pendingTx = protocol === ProtocolType.UQBAR ? uqTx : null;
   const uqbarContract: boolean = pendingTx ? 'noun' in pendingTx.action : false;
@@ -115,7 +112,7 @@ export const SendTransaction = ({
           protocol={protocol}
           network={network}
           ethereum={ethereum}
-          currentWallet={currentWallet}
+          wallet={wallet}
           screen={
             screen === WalletScreen.TRANSACTION_SEND ? 'initial' : 'confirm'
           }
@@ -126,7 +123,6 @@ export const SendTransaction = ({
               ? Number(coin.balance)
               : Number((wallet as EthWalletType).data.get(protocol)?.balance)
           }
-          onScreenChange={onScreenChange}
           uqbarContract={uqbarContract}
           close={close}
           coin={coin}

@@ -11,7 +11,7 @@ import {
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { PendingTransactionDisplay } from './components/Transaction/Pending';
+import { PendingTransactionDisplay } from './components/Transaction/PendingTransactionDisplay';
 import { WalletFooter } from './components/WalletFooter/WalletFooter';
 import { WalletHeader } from './components/WalletHeader/WalletHeader';
 import { getTransactions } from './helpers';

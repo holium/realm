@@ -24,3 +24,16 @@ export enum WalletOnboardingScreen {
 }
 
 export type TxType = 'coin' | 'nft' | 'general' | undefined;
+
+export type ERC20Amount = {
+  big: BigInt;
+  full: string;
+  display: string;
+};
+
+export type TransactionRecipient = {
+  address?: string;
+  patp?: string;
+  patpAddress?: string;
+  color?: string;
+};

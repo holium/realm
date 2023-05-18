@@ -1,8 +1,130 @@
-import { NetworkType } from 'os/services/ship/wallet/wallet.types';
 import {
+  NetworkType,
+  ProtocolType,
+  SharingMode,
+  WalletCreationMode,
+} from 'os/services/ship/wallet/wallet.types';
+import {
+  BitcoinStoreType,
+  BitcoinWalletType,
   ERC20Type,
+  EthStoreType,
+  EthWalletType,
   TransactionType,
 } from 'renderer/stores/models/wallet.model';
+
+import { WalletWithKey } from '../screens/WalletListScreen/WalletListScreenBody';
+
+const conversions = {
+  usd: 0,
+  cad: 0,
+  euro: 0,
+  setUsd: () => {},
+};
+
+const bitcoinWallet: BitcoinWalletType = {
+  index: 3,
+  network: NetworkType.BITCOIN,
+  path: "m/44'/0'/0'/0/0",
+  address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+  balance: '0.000000000000000000',
+  nickname: 'Bitcoin Account',
+  transactionList: {} as any,
+  setBalance: () => {},
+  applyTransactions: () => {},
+};
+
+const ethereumWallet1: EthWalletType = {
+  index: 0,
+  network: NetworkType.ETHEREUM,
+  path: "m/44'/60'/0'/0/0",
+  address: '0x123456789',
+  nickname: 'Main Account',
+  data: {
+    get: () => ({
+      balance: '0.003200000000000000',
+      transactionList: {
+        transactions: mockTransactions,
+      },
+      coins: mockCoins_account1,
+    }),
+  } as any,
+  setBalance: () => {},
+  setNFTs: () => {},
+  setCoin: () => {},
+  updateNft: () => {},
+  updateNftTransfers: () => {},
+  setUqbarTokenId: () => {},
+  getTransaction: () => ({} as any),
+  enqueueTransaction: () => {},
+  applyTransactionUpdate: () => {},
+};
+
+const ethereumWallet2: EthWalletType = {
+  ...ethereumWallet1,
+  index: 1,
+  path: "m/44'/60'/0'/0/1",
+  address: '0x987654321',
+  nickname: 'Test Account',
+  data: {
+    get: () => ({
+      balance: '0.000000000000000000',
+      transactionList: {
+        transactions: [],
+      },
+      coins: mockCoins_account2,
+    }),
+  } as any,
+};
+
+const bitcoinWallets = new Map<string, BitcoinWalletType>();
+bitcoinWallets.set('0', bitcoinWallet);
+
+const ethereumWallets = new Map<string, EthWalletType>();
+ethereumWallets.set('0', ethereumWallet1);
+ethereumWallets.set('1', ethereumWallet2);
+
+const settings = {
+  walletCreationMode: WalletCreationMode.DEFAULT,
+  sharingMode: SharingMode.NOBODY,
+  defaultIndex: 0,
+  provider: undefined,
+  setWalletCreationMode: () => {},
+  setSharingMode: () => {},
+  setDefaultIndex: () => {},
+  setProvider: () => {},
+};
+
+export const mockBitcoin: BitcoinStoreType = {
+  block: 0,
+  wallets: bitcoinWallets as any,
+  settings,
+  conversions,
+  list: {} as any,
+  initial: () => {},
+  setProvider: () => {},
+  applyWalletUpdate: () => {},
+  setExchangeRate: () => {},
+  setBlock: () => {},
+};
+
+export const mockEthereum: EthStoreType = {
+  gorliBlock: 0,
+  protocol: ProtocolType.ETH_MAIN,
+  wallets: ethereumWallets as any,
+  settings,
+  initialized: false,
+  conversions,
+  list: {} as any,
+  initial: () => {},
+  setProvider: () => {},
+  applyWalletUpdate: () => {},
+  setExchangeRate: () => {},
+  setDefaultWallet: () => {},
+  setProtocol: () => {},
+  deleteWallets: () => {},
+  setSettings: () => {},
+};
 
 export const mockShibaCoin: ERC20Type = {
   name: 'Shiba',
@@ -10,12 +132,7 @@ export const mockShibaCoin: ERC20Type = {
   address: '0x123456789',
   balance: '0',
   decimals: 18,
-  conversions: {
-    usd: 0,
-    cad: 0,
-    euro: 0,
-    setUsd: () => {},
-  },
+  conversions,
   transactionList: {} as any,
   block: 0,
   uqbarMetadataId: undefined,
@@ -68,47 +185,8 @@ export const mockTransactions: TransactionType[] = Array.from({
   notes: '',
 }));
 
-export const mockWallets = [
-  {
-    index: 0,
-    key: '1',
-    network: NetworkType.ETHEREUM,
-    path: "m/44'/60'/0'/0/0",
-    address: '0x123456789',
-    balance: '0.003200000000000000',
-    nickname: 'Account 1',
-    transactionList: {} as any,
-    data: {
-      get: () => ({
-        balance: '0.003200000000000000',
-        transactionList: {
-          transactions: mockTransactions,
-        },
-        coins: mockCoins_account1,
-      }),
-    } as any,
-    setBalance: () => {},
-    applyTransactions: () => {},
-  },
-  {
-    index: 1,
-    key: '2',
-    network: NetworkType.ETHEREUM,
-    path: "m/44'/60'/0'/0/1",
-    address: '0x987654321',
-    balance: '0.000000000000000000',
-    nickname: 'Test Account',
-    transactionList: {} as any,
-    data: {
-      get: () => ({
-        balance: '0.000000000000000000',
-        transactionList: {
-          transactions: [],
-        },
-        coins: mockCoins_account2,
-      }),
-    } as any,
-    setBalance: () => {},
-    applyTransactions: () => {},
-  },
+export const mockWallets: WalletWithKey[] = [
+  { ...ethereumWallet1, key: '0' },
+  { ...ethereumWallet2, key: '1' },
+  { ...bitcoinWallet, key: '2' },
 ];

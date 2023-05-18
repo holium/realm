@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { observer } from 'mobx-react';
 
 import { Box, Flex, Icon, Text } from '@holium/design-system/general';
 
+type Word = { word: string; available: boolean };
+
 type WordPickerState = {
-  wordsToSelect: Array<{ word: string; available: boolean }>;
+  wordsToSelect: Word[];
   selectedWords: string[];
 };
 
@@ -13,7 +14,7 @@ type Props = {
   onValidChange: (valid: boolean) => void;
 };
 
-const WordPickerPresenter = ({ seedPhrase, onValidChange }: Props) => {
+export const WordPicker = ({ seedPhrase, onValidChange }: Props) => {
   const [state, setState] = useState<WordPickerState>({
     wordsToSelect: [],
     selectedWords: [],
@@ -77,26 +78,24 @@ const WordPickerPresenter = ({ seedPhrase, onValidChange }: Props) => {
     });
   }
 
-  const Select = ({ words }: any) => {
+  const Select = ({ words }: { words: Word[] }) => {
     return (
       <Flex justifyContent="space-between" flexWrap="wrap">
-        {words.map(
-          (element: { word: string; available: boolean }, index: number) => (
-            <Box
-              m="4px"
-              px="8px"
-              py="6px"
-              border="1px solid rgba(var(--rlm-border-rgba))"
-              background="rgba(var(--rlm-border-rgba), 0.1)"
-              borderRadius={6}
-              opacity={element.available ? 1 : 0.3}
-              style={{ cursor: 'pointer' }}
-              onClick={() => selectWord(index)}
-            >
-              <Text.Body variant="body">{element.word}</Text.Body>
-            </Box>
-          )
-        )}
+        {words.map((word, index: number) => (
+          <Box
+            m="4px"
+            px="8px"
+            py="6px"
+            border="1px solid rgba(var(--rlm-border-rgba))"
+            background="rgba(var(--rlm-border-rgba), 0.1)"
+            borderRadius={6}
+            opacity={word.available ? 1 : 0.3}
+            style={{ cursor: 'pointer' }}
+            onClick={() => selectWord(index)}
+          >
+            <Text.Body variant="body">{word.word}</Text.Body>
+          </Box>
+        ))}
       </Flex>
     );
   };
@@ -117,7 +116,13 @@ const WordPickerPresenter = ({ seedPhrase, onValidChange }: Props) => {
         background="rgba(var(--rlm-accent-rgba), 0.1)"
       />
     );
-    const Word = ({ removeable, children }: any) => (
+    const Word = ({
+      removeable,
+      children,
+    }: {
+      removeable?: boolean;
+      children: string;
+    }) => (
       <Flex
         gap="2px"
         height={24}
@@ -177,5 +182,3 @@ const WordPickerPresenter = ({ seedPhrase, onValidChange }: Props) => {
     </Flex>
   );
 };
-
-export const WordPicker = observer(WordPickerPresenter);

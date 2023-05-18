@@ -21,8 +21,6 @@ const DetailScreenPresenter = () => {
   const hideWalletHero =
     walletStore.navState.view === WalletScreen.TRANSACTION_CONFIRM;
 
-  const onScreenChange = () => {};
-
   const wallet = walletStore.currentWallet;
   let coins = null;
   let nfts = null;
@@ -83,43 +81,24 @@ const DetailScreenPresenter = () => {
       coin={coin}
       sendTrans={sendTrans}
       hideWalletHero={hideWalletHero}
-      onScreenChange={onScreenChange}
-      close={walletStore.navigateBack}
       transactions={transactions}
       coins={coins}
       nfts={nfts}
+      ethToUsd={walletStore.ethereum.conversions.usd}
+      uqTx={walletStore.uqTx}
+      screen={walletStore.navState.view}
+      to={walletStore.navState.to}
       network={walletStore.navState.network}
-      setSendTrans={(send: boolean) => {
-        if (send) {
-          walletStore.navigate(WalletScreen.TRANSACTION_SEND, {
-            walletIndex: `${wallet.index}`,
-            protocol: walletStore.navState.protocol,
-            ...(coin && {
-              detail: {
-                type: 'coin',
-                txtype: 'coin',
-                coinKey: coin.address,
-                key: coin.address,
-              },
-            }),
-          });
-        } else {
-          walletStore.navigateBack();
-        }
-      }}
       protocol={walletStore.navState.protocol}
       bitcoin={walletStore.bitcoin}
       ethereum={walletStore.ethereum}
       checkPasscode={walletStore.checkPasscode}
       navigate={walletStore.navigate}
-      ethToUsd={0}
       sendERC20Transaction={walletStore.sendERC20Transaction}
       sendEthereumTransaction={walletStore.sendEthereumTransaction}
       onClickNavigateBack={walletStore.navigateBack}
-      uqTx={walletStore.uqTx}
-      screen={walletStore.navState.view}
-      to={walletStore.navState.to}
       getRecipient={walletStore.getRecipient}
+      close={walletStore.navigateBack}
     />
   );
 };

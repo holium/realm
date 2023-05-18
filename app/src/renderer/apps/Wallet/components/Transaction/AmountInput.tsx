@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { ChangeEventHandler, useRef, useState } from 'react';
 
 import { Box, Flex, Icon, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
@@ -7,7 +7,7 @@ import {
   NetworkType,
   ProtocolType,
 } from 'os/services/ship/wallet/wallet.types';
-import { ERC20Type } from 'renderer/stores/models/wallet.model';
+import { ERC20Type, EthStoreType } from 'renderer/stores/models/wallet.model';
 
 import { ethToUsd, usdToEth } from '../../helpers';
 import { ContainerFlex, FlexHider } from './AmountInput.styles';
@@ -22,7 +22,7 @@ type Props = {
   coin?: ERC20Type | null;
   protocol: ProtocolType;
   network: NetworkType;
-  ethereum: any;
+  ethereum: EthStoreType;
   setValid: (valid: boolean, amount?: number) => void;
 };
 
@@ -64,7 +64,7 @@ export const AmountInput = ({
     }
   };
 
-  const onChange = (e: any) => {
+  const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const value: string = e.target.value;
     const isDecimal = value.includes('.');
     const decimalPlaces = isDecimal ? value.split('.')[1].length : 0;
