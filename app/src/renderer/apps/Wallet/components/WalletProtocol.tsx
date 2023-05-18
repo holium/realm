@@ -25,7 +25,7 @@ export const WalletProtocol = ({ protocol }: Props) => (
     />
     <Text.Body
       style={{
-        color: 'rgba(0,0,0, 0.5)',
+        color: 'rgba(var(--rlm-bordertext-rgba), 0.7)',
         fontSize: '12px',
       }}
     >

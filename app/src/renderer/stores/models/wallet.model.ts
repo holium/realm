@@ -15,6 +15,7 @@ import {
   NetworkType,
   NFTAsset,
   ProtocolType,
+  RecipientPayload,
   SharingMode,
   WalletCreationMode,
 } from 'os/services/ship/wallet/wallet.types';
@@ -1201,17 +1202,15 @@ export const WalletStore = types
       }),
       getRecipient: flow(function* (
         ship: string
-      ): Generator<PromiseLike<any>, any, any> {
+      ): Generator<PromiseLike<any>, RecipientPayload, any> {
         const patp = ship.includes('~') ? ship : `~${ship}`;
         const recipientMetadata: {
           color: string;
           avatar?: string;
           nickname?: string;
         } = shipStore.friends.getContactAvatarMetadata(patp);
-        const address = yield WalletIPC.getAddress(
-          self.navState.network,
-          patp
-        ) as PromiseLike<any>;
+        const address = yield WalletIPC.getAddress(self.navState.network, patp);
+
         return {
           patp,
           gasEstimate: 7,

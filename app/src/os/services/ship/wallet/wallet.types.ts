@@ -156,3 +156,14 @@ export type WalletDbReactions =
       };
     }
   | WalletDbChangeReactions;
+
+export type RecipientPayload = {
+  recipientMetadata?: {
+    color: string;
+    avatar?: string;
+    nickname?: string;
+  };
+  patp: string;
+  address?: string | null;
+  gasEstimate?: number;
+};

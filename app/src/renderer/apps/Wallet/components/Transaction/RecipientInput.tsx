@@ -6,24 +6,18 @@ import { isValidPatp } from 'urbit-ob';
 import { Flex, Spinner, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 
-import { useShipStore } from 'renderer/stores/ship.store';
+import {
+  NetworkType,
+  RecipientPayload,
+} from 'os/services/ship/wallet/wallet.types';
 
 import { shortened } from '../../helpers';
 import { ContainerFlex } from './AmountInput.styles';
 import { RecipientIcon } from './RecipientIcon';
 
-type RecipientPayload = {
-  recipientMetadata?: {
-    color: string;
-    avatar?: string;
-    nickname?: string;
-  };
-  patp: string;
-  address?: string | null;
-  gasEstimate?: number;
-};
-
 type Props = {
+  to: string | undefined;
+  network: NetworkType;
   setValid: (
     valid: boolean,
     recipient: {
@@ -33,18 +27,22 @@ type Props = {
       patpAddress?: string;
     }
   ) => void;
+  getRecipient: (ship: string) => Promise<RecipientPayload>;
 };
 
-const RecipientInputPresenter = ({ setValid }: Props) => {
-  const { walletStore } = useShipStore();
-
+const RecipientInputPresenter = ({
+  to,
+  network,
+  setValid,
+  getRecipient: getRecipientFn,
+}: Props) => {
   const [icon, setIcon] = useState('blank');
   const [valueCache, setValueCache] = useState('');
   const [recipient, setRecipient] = useState('');
   useEffect(() => {
-    if (walletStore.navState.to) {
-      setRecipient(walletStore.navState.to);
-      onChange({ target: { value: walletStore.navState.to } });
+    if (to) {
+      setRecipient(to);
+      onChange({ target: { value: to } });
     }
   }, []);
 
@@ -73,7 +71,7 @@ const RecipientInputPresenter = ({ setValid }: Props) => {
         }, 5000);
 
         try {
-          walletStore.getRecipient(patp).then((details) => {
+          getRecipientFn(patp).then((details) => {
             timer && clearTimeout(timer);
             resolve(details);
           });
@@ -130,9 +128,7 @@ const RecipientInputPresenter = ({ setValid }: Props) => {
   const onChange = (e: any) => {
     const value: string = e.target.value;
     const validAddress =
-      walletStore.navState.network === 'ethereum'
-        ? ethers.utils.isAddress(value)
-        : false; // TODO add bitcoin validation
+      network === 'ethereum' ? ethers.utils.isAddress(value) : false; // TODO add bitcoin validation
     const validPatp = isValidPatp(value);
 
     if (validAddress) {

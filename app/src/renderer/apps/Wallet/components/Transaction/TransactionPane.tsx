@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { observer } from 'mobx-react';
 
 import {
   Avatar,
@@ -10,37 +9,57 @@ import {
   Text,
 } from '@holium/design-system/general';
 
-import { ProtocolType } from 'os/services/ship/wallet/wallet.types';
+import {
+  NetworkType,
+  ProtocolType,
+  RecipientPayload,
+} from 'os/services/ship/wallet/wallet.types';
 import { shortened } from 'renderer/apps/Wallet/helpers';
 import { WalletScreen } from 'renderer/apps/Wallet/types';
-import { ERC20Type } from 'renderer/stores/models/wallet.model';
-import { useShipStore } from 'renderer/stores/ship.store';
+import {
+  ERC20Type,
+  WalletNavOptions,
+} from 'renderer/stores/models/wallet.model';
 
 import { AmountInput } from './AmountInput';
 import { RecipientInput } from './RecipientInput';
 
 const abbrMap = {
-  ethereum: 'ETH',
-  bitcoin: 'BTC',
+  [NetworkType.ETHEREUM]: 'ETH',
+  [NetworkType.BITCOIN]: 'BTC',
 };
 
 const ethToUsd = (eth: number, currentPrice: number) =>
   isNaN(eth) ? 0 : (eth * currentPrice).toFixed(2);
 
 type Props = {
+  protocol: ProtocolType;
+  network: NetworkType;
+  ethereum: any;
+  currentWallet?: any;
+  navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
+  screen: 'initial' | 'confirm';
   max: number;
-  onScreenChange: any;
-  close: any;
+  onScreenChange: (screen: 'initial' | 'confirm') => void;
+  close: () => void;
   coin?: ERC20Type | null;
-  onConfirm: any;
+  onConfirm: () => void;
   transactionAmount: any;
   setTransactionAmount: any;
   transactionRecipient: any;
   setTransactionRecipient: any;
   uqbarContract: boolean;
+  to: string | undefined;
+  getRecipient: (ship: string) => Promise<RecipientPayload>;
 };
 
-const TransactionPanePresenter = ({
+export const TransactionPane = ({
+  protocol,
+  network,
+  ethereum,
+  currentWallet,
+  navigate,
+  screen,
   max,
   onScreenChange,
   close,
@@ -51,29 +70,24 @@ const TransactionPanePresenter = ({
   transactionRecipient,
   setTransactionRecipient,
   uqbarContract,
+  to,
+  getRecipient,
 }: Props) => {
-  const { walletStore } = useShipStore();
-
-  const screen =
-    walletStore.navState.view === WalletScreen.TRANSACTION_SEND
-      ? 'initial'
-      : 'confirm';
-
   const [amountValid, setAmountValid] = useState(false);
 
   const [recipientValid, setRecipientValid] = useState(false);
 
   const next = () => {
-    if (walletStore.navState.protocol === ProtocolType.UQBAR) {
-      // walletStore.enqueueUqbarTransaction(
-      //   walletStore.navState.walletIndex ?? '',
+    if (protocol === ProtocolType.UQBAR) {
+      // enqueueUqbarTransaction(
+      //   walletIndex ?? '',
       //   transactionAmount
       // );
     } else {
-      const wallet = walletStore.currentWallet;
-      walletStore.navigate(WalletScreen.TRANSACTION_CONFIRM, {
+      const wallet = currentWallet;
+      navigate(WalletScreen.TRANSACTION_CONFIRM, {
         walletIndex: `${wallet?.index}`,
-        protocol: walletStore.navState.protocol,
+        protocol: protocol,
         ...(coin && {
           detail: {
             type: 'coin',
@@ -88,7 +102,7 @@ const TransactionPanePresenter = ({
   };
 
   const prev = () => {
-    walletStore.navigate(WalletScreen.TRANSACTION_SEND);
+    navigate(WalletScreen.TRANSACTION_SEND);
     onScreenChange('initial');
   };
 
@@ -113,9 +127,21 @@ const TransactionPanePresenter = ({
     <>
       {screen === 'initial' ? (
         <Flex flexDirection="column">
-          <AmountInput max={max} coin={coin} setValid={amountValidator} />
+          <AmountInput
+            max={max}
+            coin={coin}
+            setValid={amountValidator}
+            protocol={protocol}
+            network={network}
+            ethereum={ethereum}
+          />
           <Box width="100%">
-            <RecipientInput setValid={recipientValidator} />
+            <RecipientInput
+              to={to}
+              network={network}
+              getRecipient={getRecipient}
+              setValid={recipientValidator}
+            />
           </Box>
           <Flex justifyContent="space-between">
             <Button.TextButton variant="transparent" onClick={() => close()}>
@@ -142,17 +168,13 @@ const TransactionPanePresenter = ({
                 {transactionAmount}{' '}
                 {coin
                   ? coin.name
-                  : walletStore.navState.protocol === ProtocolType.UQBAR
+                  : protocol === ProtocolType.UQBAR
                   ? 'zigs'
-                  : abbrMap[walletStore.navState.network]}
+                  : abbrMap[network]}
               </Text.Body>
-              {walletStore.navState.protocol === ProtocolType.ETH_MAIN && (
+              {protocol === ProtocolType.ETH_MAIN && (
                 <Text.Body>
-                  $
-                  {ethToUsd(
-                    transactionAmount,
-                    walletStore.ethereum.conversions.usd ?? 0
-                  )}{' '}
+                  ${ethToUsd(transactionAmount, ethereum.conversions.usd ?? 0)}{' '}
                   USD
                 </Text.Body>
               )}
@@ -201,40 +223,15 @@ const TransactionPanePresenter = ({
                           </Flex>
                         )}
                     </Flex>
-                    {/* <Flex flexDirection="column" justifyContent="center">
-      {transactionRecipient.address ? (
-        <Text variant="body">
-          {shortened(transactionRecipient.address)}
-        </Text>
-      ) : (
-        <>
-          <Text variant="body">{transactionRecipient.patp}</Text>
-          <Text
-            variant="body"
-            color={themeData.colors.text.tertiary}
-          >
-            {shortened(
-              `0xE96E2181F6166A37EA4C04F6E6E2bD672D72Acc1`
-            )}
-          </Text>
-        </>
-      )}
-    </Flex> */}
                   </Flex>
                 </Flex>
                 <Flex width="100%" justifyContent="space-between">
                   <Text.Body variant="body">NETWORK FEE</Text.Body>
                   <Flex flexDirection="column">
                     <Text.Body variant="body">0.001 ETH</Text.Body>
-                    {walletStore.navState.protocol ===
-                      ProtocolType.ETH_MAIN && (
+                    {protocol === ProtocolType.ETH_MAIN && (
                       <Text.Body fontSize={1}>
-                        ≈{' '}
-                        {ethToUsd(
-                          0.0005,
-                          walletStore.ethereum.conversions.usd ?? 0
-                        )}{' '}
-                        USD
+                        ≈ {ethToUsd(0.0005, ethereum.conversions.usd ?? 0)} USD
                       </Text.Body>
                     )}
                   </Flex>
@@ -245,13 +242,12 @@ const TransactionPanePresenter = ({
                     <Text.Body variant="body">
                       {transactionAmount + 0.0005} {coin ? coin.name : 'ETH'}
                     </Text.Body>
-                    {walletStore.navState.protocol ===
-                      ProtocolType.ETH_MAIN && (
+                    {protocol === ProtocolType.ETH_MAIN && (
                       <Text.Body fontSize={1}>
                         ≈{' '}
                         {ethToUsd(
                           transactionAmount + 0.0005,
-                          walletStore.ethereum.conversions.usd ?? 0
+                          ethereum.conversions.usd ?? 0
                         )}{' '}
                         USD
                       </Text.Body>
@@ -277,5 +273,3 @@ const TransactionPanePresenter = ({
     </>
   );
 };
-
-export const TransactionPane = observer(TransactionPanePresenter);

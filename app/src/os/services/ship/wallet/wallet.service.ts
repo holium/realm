@@ -257,16 +257,17 @@ export class WalletService extends AbstractService {
 
   async getAddress(patp: string, network: string) {
     try {
-      const address: any = await APIConnection.getInstance().conduit.poke({
-        app: 'realm-wallet',
-        mark: 'realm-wallet-action',
-        json: {
-          'get-address': {
-            network: network,
-            patp,
+      const address: string | null =
+        await APIConnection.getInstance().conduit.poke({
+          app: 'realm-wallet',
+          mark: 'realm-wallet-action',
+          json: {
+            'get-address': {
+              network: network,
+              patp,
+            },
           },
-        },
-      });
+        });
       return address;
     } catch (e) {
       console.error(e);

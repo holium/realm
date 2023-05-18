@@ -8,11 +8,13 @@ import {
 } from 'os/services/ship/wallet/wallet.types';
 
 import { CreateWalletScreenBody } from '../screens/CreateWalletScreen/CreateWalletScreenBody';
+import { DetailScreenBody } from '../screens/DetailScreen/DetailScreenBody';
 import { LockedScreenBody } from '../screens/LockedScreen/LockedScreenBody';
 import { WalletListScreenBody } from '../screens/WalletListScreen/WalletListScreenBody';
 import { WalletSettingsScreenBody } from '../screens/WalletSettingsScreen/WalletSettingsScreenBody';
+import { WalletScreen } from '../types';
 import { WalletStoryWrapper } from './helper';
-import { mockWallets } from './mockData';
+import { mockShibaCoin, mockTransactions, mockWallets } from './mockData';
 
 export default {
   component: WalletSettingsScreenBody,
@@ -90,3 +92,37 @@ export const LockedStory: ComponentStory<typeof LockedScreenBody> = () => (
 );
 
 LockedStory.storyName = 'Locked';
+
+export const WalletDetailStory: ComponentStory<
+  typeof DetailScreenBody
+> = () => (
+  <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI} hideHeader hideFooter>
+    <DetailScreenBody
+      wallet={mockWallets[0]}
+      coin={mockShibaCoin}
+      hideWalletHero={false}
+      onScreenChange={() => {}}
+      close={() => {}}
+      transactions={mockTransactions}
+      coins={[]}
+      nfts={[]}
+      network={NetworkType.ETHEREUM}
+      sendTrans={false}
+      setSendTrans={() => {}}
+      protocol={ProtocolType.ETH_GORLI}
+      bitcoin={{}}
+      ethereum={{}}
+      checkPasscode={() => Promise.resolve(true)}
+      sendEthereumTransaction={() => {}}
+      onClickNavigateBack={() => {}}
+      navigate={() => {}}
+      ethToUsd={0}
+      sendERC20Transaction={() => {}}
+      screen={WalletScreen.WALLET_DETAIL}
+      to="~zod"
+      getRecipient={() => Promise.resolve({} as any)}
+    />
+  </WalletStoryWrapper>
+);
+
+WalletDetailStory.storyName = 'Wallet detail';

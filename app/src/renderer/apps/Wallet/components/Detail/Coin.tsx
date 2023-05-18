@@ -1,33 +1,20 @@
-import { observer } from 'mobx-react';
-
 import { Flex, Icon, Row, Text } from '@holium/design-system/general';
 
-import { WalletScreen } from 'renderer/apps/Wallet/types';
 import { ERC20Type } from 'renderer/stores/models/wallet.model';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 import { formatCoinAmount, getMockCoinIcon } from '../../helpers';
 
-type Props = { details: ERC20Type };
+type Props = {
+  coin: ERC20Type;
+  onClickCoin: (address: string) => void;
+};
 
-const CoinPresenter = ({ details }: Props) => {
-  const { walletStore } = useShipStore();
-  const coinIcon = details.logo || getMockCoinIcon(details.name);
-  const amount = formatCoinAmount(details.balance, details.decimals);
+export const Coin = ({ coin, onClickCoin }: Props) => {
+  const coinIcon = coin.logo || getMockCoinIcon(coin.name);
+  const amount = formatCoinAmount(coin.balance, coin.decimals);
 
   return (
-    <Row
-      onClick={() => {
-        walletStore.navigate(WalletScreen.WALLET_DETAIL, {
-          detail: {
-            type: 'coin',
-            txtype: 'coin',
-            coinKey: details.address,
-            key: details.address,
-          },
-        });
-      }}
-    >
+    <Row onClick={() => onClickCoin(coin.address)}>
       <Flex width="100%" alignItems="center" justifyContent="space-between">
         <Flex alignItems="center">
           <img
@@ -40,7 +27,7 @@ const CoinPresenter = ({ details }: Props) => {
           <Flex flexDirection="column" justifyContent="center">
             <Text.Body variant="body">
               {' '}
-              {amount.display} {details.name}{' '}
+              {amount.display} {coin.name}{' '}
             </Text.Body>
           </Flex>
         </Flex>
@@ -49,5 +36,3 @@ const CoinPresenter = ({ details }: Props) => {
     </Row>
   );
 };
-
-export const Coin = observer(CoinPresenter);

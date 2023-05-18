@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { observer } from 'mobx-react';
 import { QRCodeSVG } from 'qrcode.react';
 import styled from 'styled-components';
 
@@ -14,13 +13,15 @@ import {
 import {
   NetworkType,
   ProtocolType,
+  RecipientPayload,
 } from 'os/services/ship/wallet/wallet.types';
 import {
   BitcoinWalletType,
   ERC20Type,
   EthWalletType,
+  UqTxType,
+  WalletNavOptions,
 } from 'renderer/stores/models/wallet.model';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 import {
   convertBtcAmountToUsd,
@@ -32,6 +33,7 @@ import {
   formatZigAmount,
   shortened,
 } from '../../helpers';
+import { WalletScreen } from '../../types';
 import { SendTransaction } from '../Transaction/SendTransaction';
 import { TransactionPasscode } from '../Transaction/TransactionPasscode';
 import {
@@ -71,37 +73,61 @@ type Props = {
   sendTrans: boolean;
   onScreenChange: any;
   setSendTrans: any;
-  close: any;
+  currentWallet?: EthWalletType | BitcoinWalletType;
+  network: NetworkType;
+  protocol: ProtocolType;
+  bitcoin: any;
+  ethereum: any;
+  screen: any;
+  uqTx?: UqTxType;
+  navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
+  checkPasscode: (passcode: number[]) => Promise<boolean>;
+  sendERC20Transaction: any;
+  sendEthereumTransaction: any;
+  close: () => void;
+  onClickNavigateBack: () => void;
+  to: string | undefined;
+  getRecipient: (ship: string) => Promise<RecipientPayload>;
 };
 
-const DetailHeroPresenter = ({
+export const DetailHero = ({
   wallet,
+  currentWallet,
   coin,
   coinView,
+  network,
+  protocol,
+  bitcoin,
+  ethereum,
+  screen,
   QROpen,
+  uqTx,
+  navigate,
   setQROpen,
   hideWalletHero,
   sendTrans,
   onScreenChange,
   setSendTrans,
+  checkPasscode,
+  sendERC20Transaction,
+  sendEthereumTransaction,
   close,
+  onClickNavigateBack,
+  getRecipient,
+  to,
 }: Props) => {
-  const { walletStore } = useShipStore();
   const [showPasscode, setShowPasscode] = useState(false);
 
   const amountDisplay =
-    walletStore.navState.network === NetworkType.ETHEREUM
+    network === NetworkType.ETHEREUM
       ? !coin
-        ? walletStore.navState.protocol === ProtocolType.UQBAR
+        ? protocol === ProtocolType.UQBAR
           ? `${formatZigAmount(
-              (wallet as EthWalletType).data.get(walletStore.navState.protocol)
-                ?.balance ?? ''
+              (wallet as EthWalletType).data.get(protocol)?.balance ?? ''
             )} zigs`
           : `${
               formatEthAmount(
-                (wallet as EthWalletType).data.get(
-                  walletStore.navState.protocol
-                )?.balance ?? ''
+                (wallet as EthWalletType).data.get(protocol)?.balance ?? ''
               ).eth
             } ETH`
         : `${formatCoinAmount(coin.balance, coin.decimals).display} ${
@@ -110,17 +136,15 @@ const DetailHeroPresenter = ({
       : `${formatBtcAmount((wallet as BitcoinWalletType).balance).btc} BTC`;
 
   const amountUsdDisplay =
-    walletStore.navState.network === 'ethereum'
+    network === 'ethereum'
       ? !coin
-        ? walletStore.ethereum.conversions.usd
+        ? ethereum.conversions.usd
           ? '$' +
             `${convertEthAmountToUsd(
               formatEthAmount(
-                (wallet as EthWalletType).data.get(
-                  walletStore.navState.protocol
-                )?.balance ?? ''
+                (wallet as EthWalletType).data.get(protocol)?.balance ?? ''
               ),
-              walletStore.ethereum.conversions.usd
+              ethereum.conversions.usd
             )}`
           : ''
         : coin.conversions.usd
@@ -130,11 +154,11 @@ const DetailHeroPresenter = ({
             coin.conversions.usd
           )}`
         : ''
-      : walletStore.bitcoin.conversions.usd
+      : bitcoin.conversions.usd
       ? '$' +
         `${convertBtcAmountToUsd(
           formatBtcAmount((wallet as BitcoinWalletType).balance),
-          walletStore.bitcoin.conversions.usd
+          bitcoin.conversions.usd
         )}`
       : '';
 
@@ -162,7 +186,7 @@ const DetailHeroPresenter = ({
           fontWeight={500}
           fontSize={2}
           style={{ textTransform: 'uppercase' }}
-          onClick={walletStore.navigateBack}
+          onClick={onClickNavigateBack}
         >
           {`${wallet.nickname}`}
         </BreadCrumb>
@@ -189,16 +213,16 @@ const DetailHeroPresenter = ({
 
   const sendTransaction = async (passcode: number[]) => {
     try {
-      if (walletStore.navState.network === NetworkType.ETHEREUM) {
-        if (walletStore.navState.protocol === ProtocolType.UQBAR) {
-          // await walletStore.submitUqbarTransaction(
-          //   walletStore.currentWallet?.index.toString() ?? '',
+      if (network === NetworkType.ETHEREUM) {
+        if (protocol === ProtocolType.UQBAR) {
+          // await submitUqbarTransaction(
+          //   currentWallet?.index.toString() ?? '',
           //   passcode
           // );
         } else {
           coin
-            ? await walletStore.sendERC20Transaction(
-                walletStore.currentWallet?.index.toString() ?? '',
+            ? await sendERC20Transaction(
+                currentWallet?.index.toString() ?? '',
                 transactionRecipient.address ??
                   transactionRecipient.patpAddress ??
                   '',
@@ -207,8 +231,8 @@ const DetailHeroPresenter = ({
                 passcode,
                 transactionRecipient.patp
               )
-            : await walletStore.sendEthereumTransaction(
-                walletStore.currentWallet?.index.toString() ?? '',
+            : await sendEthereumTransaction(
+                currentWallet?.index.toString() ?? '',
                 transactionRecipient.address ||
                   transactionRecipient.patpAddress ||
                   '',
@@ -227,7 +251,7 @@ const DetailHeroPresenter = ({
 
   return showPasscode ? (
     <TransactionPasscode
-      checkPasscode={walletStore.checkPasscode}
+      checkPasscode={checkPasscode}
       onSuccess={(code: number[]) => {
         sendTransaction(code);
       }}
@@ -247,7 +271,7 @@ const DetailHeroPresenter = ({
       >
         <AddressStyle>
           <Flex>
-            {walletStore.navState.network === NetworkType.ETHEREUM ? (
+            {network === NetworkType.ETHEREUM ? (
               <Icon name="Ethereum" mr={2} />
             ) : (
               <Icon name="Bitcoin" mr={2} />
@@ -312,16 +336,22 @@ const DetailHeroPresenter = ({
           onScreenChange={onScreenChange}
           close={close}
           coin={coin}
+          network={network}
+          protocol={protocol}
+          uqTx={uqTx}
+          screen={screen}
+          ethereum={ethereum}
+          navigate={navigate}
           onConfirm={() => setShowPasscode(true)}
           setTransactionAmount={setTransactionAmount}
           transactionAmount={transactionAmount}
           setTransactionRecipient={setTransactionRecipient}
           transactionRecipient={transactionRecipient}
+          to={to}
+          getRecipient={getRecipient}
         />
       </Flex>
       {coinView}
     </WalletCardStyle>
   );
 };
-
-export const DetailHero = observer(DetailHeroPresenter);

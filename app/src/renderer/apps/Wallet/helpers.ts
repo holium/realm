@@ -52,7 +52,7 @@ export function getNfts(nftMap: Map<string, ERC721Type>): ERC721Type[] {
   return Array.from(nftMap.values());
 }
 
-interface EthAmount {
+export type EthAmount = {
   eth: string;
   gwei: string;
   wei: string;
@@ -64,7 +64,7 @@ interface EthAmount {
   display: string;
   full: string;
   big: BigNumber;
-}
+};
 
 interface BtcAmount {
   btc: string;

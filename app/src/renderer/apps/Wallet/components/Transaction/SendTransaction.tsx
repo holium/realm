@@ -1,16 +1,20 @@
-import { observer } from 'mobx-react';
-
 import { Box, Flex, Text } from '@holium/design-system/general';
 
-import { ProtocolType } from 'os/services/ship/wallet/wallet.types';
+import {
+  NetworkType,
+  ProtocolType,
+  RecipientPayload,
+} from 'os/services/ship/wallet/wallet.types';
 import {
   BitcoinWalletType,
   ERC20Type,
   EthWalletType,
+  UqTxType,
+  WalletNavOptions,
 } from 'renderer/stores/models/wallet.model';
-import { useShipStore } from 'renderer/stores/ship.store';
 
-import { TransactionPane } from './Pane';
+import { WalletScreen } from '../../types';
+import { TransactionPane } from './TransactionPane';
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -20,6 +24,9 @@ const abbrMap = {
 type Props = {
   hidden: boolean;
   onScreenChange: any;
+  protocol: ProtocolType;
+  network: NetworkType;
+  uqTx?: UqTxType;
   close: () => void;
   wallet: EthWalletType | BitcoinWalletType;
   coin: ERC20Type | null;
@@ -28,12 +35,21 @@ type Props = {
   setTransactionAmount: any;
   transactionRecipient: any;
   setTransactionRecipient: any;
+  screen: WalletScreen;
+  ethereum: any;
+  currentWallet?: EthWalletType | BitcoinWalletType;
+  navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
+  to: string | undefined;
+  getRecipient: (ship: string) => Promise<RecipientPayload>;
 };
 
-export const SendTransactionPresenter = ({
+export const SendTransaction = ({
   coin,
   hidden,
   onScreenChange,
+  protocol,
+  network,
+  uqTx,
   close,
   wallet,
   onConfirm,
@@ -41,12 +57,14 @@ export const SendTransactionPresenter = ({
   setTransactionAmount,
   transactionRecipient,
   setTransactionRecipient,
+  screen,
+  ethereum,
+  currentWallet,
+  navigate,
+  to,
+  getRecipient,
 }: Props) => {
-  const { walletStore } = useShipStore();
-  const pendingTx =
-    walletStore.navState.protocol === ProtocolType.UQBAR
-      ? walletStore.uqTx
-      : null;
+  const pendingTx = protocol === ProtocolType.UQBAR ? uqTx : null;
   const uqbarContract: boolean = pendingTx ? 'noun' in pendingTx.action : false;
 
   const Separator = () => (
@@ -78,11 +96,9 @@ export const SendTransactionPresenter = ({
             {`Send ${
               coin
                 ? coin.name
-                : walletStore.navState.protocol === ProtocolType.UQBAR
+                : protocol === ProtocolType.UQBAR
                 ? 'zigs'
-                : abbrMap[
-                    walletStore.navState.network as 'bitcoin' | 'ethereum'
-                  ]
+                : abbrMap[network as 'bitcoin' | 'ethereum']
             }
               `}
           </Text.Body>
@@ -96,15 +112,19 @@ export const SendTransactionPresenter = ({
       <Flex flexDirection="column" gap={10}>
         <Separator />
         <TransactionPane
+          protocol={protocol}
+          network={network}
+          ethereum={ethereum}
+          currentWallet={currentWallet}
+          screen={
+            screen === WalletScreen.TRANSACTION_SEND ? 'initial' : 'confirm'
+          }
+          navigate={navigate}
           onConfirm={onConfirm}
           max={
             coin
               ? Number(coin.balance)
-              : Number(
-                  (wallet as EthWalletType).data.get(
-                    walletStore.navState.protocol
-                  )?.balance
-                )
+              : Number((wallet as EthWalletType).data.get(protocol)?.balance)
           }
           onScreenChange={onScreenChange}
           uqbarContract={uqbarContract}
@@ -114,10 +134,10 @@ export const SendTransactionPresenter = ({
           transactionAmount={transactionAmount}
           setTransactionRecipient={setTransactionRecipient}
           transactionRecipient={transactionRecipient}
+          to={to}
+          getRecipient={getRecipient}
         />
       </Flex>
     </Box>
   );
 };
-
-export const SendTransaction = observer(SendTransactionPresenter);

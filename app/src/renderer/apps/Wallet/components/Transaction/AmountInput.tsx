@@ -1,12 +1,13 @@
 import { useRef, useState } from 'react';
-import { observer } from 'mobx-react';
 
 import { Box, Flex, Icon, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 
-import { ProtocolType } from 'os/services/ship/wallet/wallet.types';
+import {
+  NetworkType,
+  ProtocolType,
+} from 'os/services/ship/wallet/wallet.types';
 import { ERC20Type } from 'renderer/stores/models/wallet.model';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ethToUsd, usdToEth } from '../../helpers';
 import { ContainerFlex, FlexHider } from './AmountInput.styles';
@@ -19,17 +20,26 @@ const abbrMap = {
 type Props = {
   max: number;
   coin?: ERC20Type | null;
+  protocol: ProtocolType;
+  network: NetworkType;
+  ethereum: any;
   setValid: (valid: boolean, amount?: number) => void;
 };
 
-export const AmountInputPresenter = ({ max, coin, setValid }: Props) => {
+export const AmountInput = ({
+  max,
+  coin,
+  protocol,
+  network,
+  ethereum,
+  setValid,
+}: Props) => {
   const amountRef = useRef<HTMLInputElement>(null);
-  const { walletStore } = useShipStore();
 
   const [inCryptoToggle, setInCryptoToggle] = useState(true);
   const showUsd =
-    walletStore.navState.protocol === ProtocolType.ETH_MAIN ||
-    (walletStore.navState.protocol === ProtocolType.ETH_GORLI && !coin);
+    protocol === ProtocolType.ETH_MAIN ||
+    (protocol === ProtocolType.ETH_GORLI && !coin);
 
   const inCrypto = showUsd ? inCryptoToggle : true;
 
@@ -39,8 +49,8 @@ export const AmountInputPresenter = ({ max, coin, setValid }: Props) => {
   const check = (inCrypto: boolean, value: string | number) => {
     const numVal = Number(value);
     let amountInCrypto = numVal;
-    if (walletStore.ethereum.conversions.usd && !inCrypto) {
-      amountInCrypto = usdToEth(numVal, walletStore.ethereum.conversions.usd);
+    if (ethereum.conversions.usd && !inCrypto) {
+      amountInCrypto = usdToEth(numVal, ethereum.conversions.usd);
       // inCrypto ? numVal : usdToEth(numVal, currentPrice);
     }
     if (amountInCrypto > max) {
@@ -115,7 +125,7 @@ export const AmountInputPresenter = ({ max, coin, setValid }: Props) => {
                 style={{ width: '80%' }}
                 autoFocus
                 type="number"
-                placeholder="0.00000000"
+                placeholder="0.0000000000000000000000"
                 value={(amount ?? '').toString()}
                 onChange={onChange}
               />
@@ -140,26 +150,19 @@ export const AmountInputPresenter = ({ max, coin, setValid }: Props) => {
             {showUsd && (
               <Box hidden={!amount}>
                 <Text.Custom fontSize="11px">
-                  {walletStore.ethereum.conversions.usd &&
+                  {ethereum.conversions.usd &&
                     (inCrypto
                       ? `$${ethToUsd(
                           Number(amount),
-                          walletStore.ethereum.conversions.usd
+                          ethereum.conversions.usd
                         )} USD`
                       : `${usdToEth(
                           Number(amount),
-                          walletStore.ethereum.conversions.usd
+                          ethereum.conversions.usd
                         )} ${
                           coin
                             ? coin.name
-                            : walletStore.navState.protocol ===
-                              ProtocolType.UQBAR
-                            ? 'zigs'
-                            : abbrMap[
-                                walletStore.navState.network as
-                                  | 'bitcoin'
-                                  | 'ethereum'
-                              ]
+                            : abbrMap[network as 'bitcoin' | 'ethereum']
                         }`)}
                 </Text.Custom>
               </Box>
@@ -175,11 +178,9 @@ export const AmountInputPresenter = ({ max, coin, setValid }: Props) => {
               {inCrypto
                 ? coin
                   ? coin.name
-                  : walletStore.navState.protocol === ProtocolType.UQBAR
+                  : protocol === ProtocolType.UQBAR
                   ? 'zigs'
-                  : abbrMap[
-                      walletStore.navState.network as 'bitcoin' | 'ethereum'
-                    ]
+                  : abbrMap[network as 'bitcoin' | 'ethereum']
                 : 'USD'}
             </Text.Custom>
             {showUsd && <Icon ml={1} name="UpDown" size="12px" />}
@@ -194,5 +195,3 @@ export const AmountInputPresenter = ({ max, coin, setValid }: Props) => {
     </Flex>
   );
 };
-
-export const AmountInput = observer(AmountInputPresenter);

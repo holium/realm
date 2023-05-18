@@ -1,10 +1,31 @@
 import { NetworkType } from 'os/services/ship/wallet/wallet.types';
+import {
+  ERC20Type,
+  TransactionType,
+} from 'renderer/stores/models/wallet.model';
 
-const mockCoins_account1 = new Map();
-mockCoins_account1.set('0x123456789', {
+export const mockShibaCoin: ERC20Type = {
   name: 'Shiba',
   logo: 'https://dynamic-assets.coinbase.com/c14c8dc36c003113c898b56dfff649eb0ff71249fd7c8a9de724edb2dedfedde5562ba4a194db8433f2ef31a1e879af0727e6632751539707b17e66d63a9013b/asset_icons/a7309384448163db7e3e9fded23cd6ecf3ea6e1fb3800cab216acb7fc85f9563.png',
-});
+  address: '0x123456789',
+  balance: '0',
+  decimals: 18,
+  conversions: {
+    usd: 0,
+    cad: 0,
+    euro: 0,
+    setUsd: () => {},
+  },
+  transactionList: {} as any,
+  block: 0,
+  uqbarMetadataId: undefined,
+  setBalance: () => {},
+  setExchangeRate: () => {},
+  setBlock: () => {},
+};
+
+const mockCoins_account1 = new Map();
+mockCoins_account1.set('0x123456789', mockShibaCoin);
 mockCoins_account1.set('0x987654321', {
   name: 'Chainlink',
   logo: 'https://dynamic-assets.coinbase.com/37ef8491789cea02a81cf80394ed3a4b5d9c408a969fd6bea76b403e04e7fd9cef623384d16a60f3c39e052006bc79522d902108764ce584466674a4da6cb316/asset_icons/c551d7b5ffe48f1d72e726ab8932ad98758ab414062e5e07479096089c547220.png',
@@ -24,6 +45,29 @@ mockCoins_account2.set('0x987654321', {
   logo: 'https://dynamic-assets.coinbase.com/3803f30367bb3972e192cd3fdd2230cd37e6d468eab12575a859229b20f12ff9c994d2c86ccd7bf9bc258e9bd5e46c5254283182f70caf4bd02cc4f8e3890d82/asset_icons/1597d628dd19b7885433a2ac2d7de6ad196c519aeab4bfe679706aacbf1df78a.png',
 });
 
+export const mockTransactions: TransactionType[] = Array.from({
+  length: 112,
+}).map((_, i) => ({
+  hash: '0x123456789' + i,
+  walletIndex: 0,
+  amount: '0.100000000000000000',
+  ethType: 'transfer',
+  network: NetworkType.ETHEREUM,
+  type: 'sent',
+
+  initiatedAt: new Date().getTime().toLocaleString(),
+  completedAt: new Date().getTime().toLocaleString(),
+
+  ourAddress: '',
+  theirPatp: '',
+  theirAddress: '',
+
+  status: 'succeeded',
+  failureReason: '',
+
+  notes: '',
+}));
+
 export const mockWallets = [
   {
     index: 0,
@@ -38,15 +82,7 @@ export const mockWallets = [
       get: () => ({
         balance: '0.003200000000000000',
         transactionList: {
-          transactions: Array.from({ length: 112 }).map((_, i) => ({
-            id: i,
-            hash: '0x123456789',
-            from: '0x123456789',
-            to: '0x987654321',
-            value: '0.000000000000000000',
-            timestamp: new Date().getTime(),
-            status: 'confirmed',
-          })),
+          transactions: mockTransactions,
         },
         coins: mockCoins_account1,
       }),
