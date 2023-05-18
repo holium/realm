@@ -9,6 +9,7 @@ import { useAppState } from 'renderer/stores/app.store';
 import {
   AppMobxType,
   InstallStatus,
+  AppTypes,
 } from 'renderer/stores/models/bazaar.model';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -68,6 +69,7 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
         },
         {
           label: weRecommended ? 'Unrecommend app' : 'Recommend app',
+          disabled: app.type !== AppTypes.Urbit,
           onClick: (evt: any) => {
             evt.stopPropagation();
             weRecommended

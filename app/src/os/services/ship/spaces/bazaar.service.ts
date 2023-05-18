@@ -223,10 +223,6 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
             type: 'new-ally',
             payload: data['new-ally'],
           });
-          this.sendUpdate({
-            type: 'treaties-loaded',
-            payload: data['new-ally'],
-          });
           break;
         case 'ally-deleted':
           this.sendUpdate({

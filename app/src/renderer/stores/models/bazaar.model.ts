@@ -282,6 +282,10 @@ export const BazaarStore = types
         },
 
         reset() {
+          self.alliesLoader.set('initial');
+          allies.clear();
+          self.treatyLoader.set('initial');
+          treaties.clear();
           self.catalog.clear();
           self.gridIndex.clear();
           self.recentApps.clear();
@@ -331,6 +335,11 @@ export const BazaarStore = types
           }
           try {
             if (app) {
+              // if this is not set, the app will not render the tile
+              //  in the grid. default this value to the size of the app catalog (0-based)
+              if (!app.gridIndex) {
+                app.gridIndex = self.catalog.size;
+              }
               app.setStatus(InstallStatus.started);
               self.installations.set(app.id, InstallStatus.started);
             }
@@ -429,10 +438,12 @@ export const BazaarStore = types
               console.log('already added ally', ship);
               return;
             }
+            self.treatyLoader.set('loading');
             self.addingAlly.set(ship, 'adding new ally');
             const result: any = yield BazaarIPC.addAlly(ship);
             return result;
           } catch (error) {
+            self.treatyLoader.set('error');
             console.error(error);
           }
         }),
@@ -479,6 +490,8 @@ export const BazaarStore = types
             treaties.clear();
             const treatiesResponse = yield BazaarIPC.scryTreaties(ship);
             if (Object.keys(treatiesResponse).length === 0) {
+              // must set or spinner won't stop spinning
+              self.treatyLoader.set('loaded');
               return;
             }
             const formedTreaties = [];
@@ -499,6 +512,7 @@ export const BazaarStore = types
             self.treatyLoader.set('loaded');
             return formedTreaties;
           } catch (error) {
+            self.treatyLoader.set('error');
             console.error(error);
             throw error;
           }
