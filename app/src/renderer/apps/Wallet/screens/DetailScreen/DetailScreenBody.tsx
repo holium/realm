@@ -105,7 +105,7 @@ export const DetailScreenBody = ({
   const qrCode = useToggle(false);
 
   // TODO default to coins or nfts if they have those
-  const [tab, setTab] = useState<WalletTab>('transactions');
+  const [tab, setTab] = useState<WalletTab>('coins');
   const [showPasscode, setShowPasscode] = useState(false);
   const [transactionAmount, setTransactionAmount] = useState(0);
   const [transactionRecipient, setTransactionRecipient] =

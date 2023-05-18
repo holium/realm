@@ -15,11 +15,7 @@ type Props = {
 
 export const NFTList = ({ nfts, navigate }: Props) => {
   if (!nfts.length) {
-    return (
-      <Text.H5 mt={6} variant="h5" textAlign="center">
-        No NFTs
-      </Text.H5>
-    );
+    return <Text.H5>No NFTs</Text.H5>;
   }
 
   return (

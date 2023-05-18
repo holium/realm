@@ -15,11 +15,7 @@ type Props = {
 
 export const CoinList = ({ coins, navigate }: Props) => {
   if (!coins.length) {
-    return (
-      <Text.H5 mt={6} variant="h5" textAlign="center">
-        No Coins
-      </Text.H5>
-    );
+    return <Text.H5>No coins</Text.H5>;
   }
 
   return (

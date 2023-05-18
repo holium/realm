@@ -37,11 +37,7 @@ export const TransactionList = ({
   }
 
   if (!transactions.length) {
-    return (
-      <Text.H5 variant="h5" textAlign="center">
-        No transactions
-      </Text.H5>
-    );
+    return <Text.H5>No transactions</Text.H5>;
   }
 
   return (
