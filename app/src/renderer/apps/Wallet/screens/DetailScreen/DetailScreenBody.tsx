@@ -34,10 +34,7 @@ import {
 import { SendTransaction } from '../../components/Transaction/SendTransaction';
 import { TransactionList } from '../../components/Transaction/TransactionList';
 import { TransactionPasscode } from '../../components/Transaction/TransactionPasscode';
-import {
-  WalletCardStyle,
-  walletCardStyleTransition,
-} from '../../components/WalletCardWrapper';
+import { WalletCardStyle } from '../../components/WalletCardWrapper';
 import {
   convertBtcAmountToUsd,
   convertERC20AmountToUsd,
@@ -211,11 +208,7 @@ export const DetailScreenBody = ({
   }
 
   return (
-    <WalletCardStyle
-      width="100%"
-      transition={walletCardStyleTransition}
-      isSelected
-    >
+    <WalletCardStyle width="100%" isSelected>
       <WalletAddressHeader
         address={wallet.address}
         isSendingTransaction={isSendingTransaction}

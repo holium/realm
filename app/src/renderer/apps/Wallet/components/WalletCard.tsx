@@ -18,10 +18,7 @@ import {
   getMockCoinIcon,
   getTransactions,
 } from '../helpers';
-import {
-  WalletCardStyle,
-  walletCardStyleTransition,
-} from './WalletCardWrapper';
+import { WalletCardStyle } from './WalletCardWrapper';
 
 type Props = {
   wallet: BitcoinWalletType | EthWalletType;
@@ -82,7 +79,6 @@ export const WalletCard = ({
       layout="size"
       layoutId={`wallet-card-${wallet?.address}`}
       justifyContent="flex-start"
-      transition={walletCardStyleTransition}
       isSelected={!!isSelected}
       onClick={onSelect}
     >

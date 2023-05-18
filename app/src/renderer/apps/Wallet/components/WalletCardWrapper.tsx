@@ -15,7 +15,7 @@ export const WalletCardStyle = styled(Card)<CardStyleProps>`
   transition: box-shadow 0.1s ease;
   border-radius: 16px !important;
   transition: box-shadow 0.25s ease;
-  box-shadow: var(--rlm-box-shadow-1);
+  box-shadow: var(--rlm-box-shadow-1) !important;
   background-color: rgba(var(--rlm-window-rgba));
   overflow-y: auto;
 
@@ -26,8 +26,3 @@ export const WalletCardStyle = styled(Card)<CardStyleProps>`
       gap: 10px;
     `}
 `;
-
-export const walletCardStyleTransition = {
-  duration: 0.1,
-  layout: { duration: 0.1, ease: 'easeInOut' },
-};

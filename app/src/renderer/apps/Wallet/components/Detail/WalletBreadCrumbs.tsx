@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { Button, Flex, Icon, Text } from '@holium/design-system/general';
+import { Flex, Text } from '@holium/design-system/general';
 
 const BreadCrumbs = styled(Text.Body)`
   display: flex;
@@ -13,9 +13,7 @@ const BreadCrumbs = styled(Text.Body)`
 
 const FirstBreadCrumb = styled.span`
   cursor: pointer;
-  &:hover {
-    text-decoration: underline;
-  }
+  text-decoration: underline;
 `;
 
 type Props = {
@@ -33,9 +31,6 @@ export const WalletBreadCrumbs = ({
 
   return (
     <Flex alignItems="center" gap={8}>
-      <Button.IconButton onClick={onClickBack}>
-        <Icon name="ArrowLeftLine" size="20px" color="text" opacity={0.5} />
-      </Button.IconButton>
       <BreadCrumbs>
         <FirstBreadCrumb onClick={onClickBack}>
           {walletNickname}

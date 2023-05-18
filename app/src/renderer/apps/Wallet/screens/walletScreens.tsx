@@ -4,7 +4,7 @@ import { WalletScreen } from '../types';
 import { CreateWalletScreen } from './CreateWalletScreen/CreateWalletScreen';
 import { DetailScreen } from './DetailScreen/DetailScreen';
 import { LockedScreen } from './LockedScreen/LockedScreen';
-import { NFTDetailScreen } from './NFTDetailScreen';
+import { NFTDetailScreen } from './NFTDetailScreen/NFTDetailScreen';
 import { TransactionDetailScreen } from './TransactionDetailScreen/TransactionDetailScreen';
 import { WalletListScreen } from './WalletListScreen/WalletListScreen';
 import { WalletOnboarding } from './WalletOnboarding';

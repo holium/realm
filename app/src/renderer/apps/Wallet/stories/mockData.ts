@@ -8,6 +8,7 @@ import {
   BitcoinStoreType,
   BitcoinWalletType,
   ERC20Type,
+  ERC721Type,
   EthStoreType,
   EthWalletType,
   TransactionType,
@@ -141,16 +142,21 @@ export const mockShibaCoin: ERC20Type = {
   setBlock: () => {},
 };
 
+export const mockBitcoinCoin: ERC20Type = {
+  ...mockShibaCoin,
+  name: 'Bitcoin',
+  logo: 'https://dynamic-assets.coinbase.com/e785e0181f1a23a30d9476038d9be91e9f6c63959b538eabbc51a1abc8898940383291eede695c3b8dfaa1829a9b57f5a2d0a16b0523580346c6b8fab67af14b/asset_icons/b57ac673f06a4b0338a596817eb0a50ce16e2059f327dc117744449a47915cb2.png',
+  address: '0x135792468',
+  decimals: 8,
+};
+
 const mockCoins_account1 = new Map();
 mockCoins_account1.set('0x123456789', mockShibaCoin);
 mockCoins_account1.set('0x987654321', {
   name: 'Chainlink',
   logo: 'https://dynamic-assets.coinbase.com/37ef8491789cea02a81cf80394ed3a4b5d9c408a969fd6bea76b403e04e7fd9cef623384d16a60f3c39e052006bc79522d902108764ce584466674a4da6cb316/asset_icons/c551d7b5ffe48f1d72e726ab8932ad98758ab414062e5e07479096089c547220.png',
 });
-mockCoins_account1.set('0x135792468', {
-  name: 'Bitcoin',
-  logo: 'https://dynamic-assets.coinbase.com/e785e0181f1a23a30d9476038d9be91e9f6c63959b538eabbc51a1abc8898940383291eede695c3b8dfaa1829a9b57f5a2d0a16b0523580346c6b8fab67af14b/asset_icons/b57ac673f06a4b0338a596817eb0a50ce16e2059f327dc117744449a47915cb2.png',
-});
+mockCoins_account1.set('0x135792468', mockBitcoinCoin);
 
 const mockCoins_account2 = new Map();
 mockCoins_account2.set('0x123456789', {
@@ -190,3 +196,26 @@ export const mockWallets: WalletWithKey[] = [
   { ...ethereumWallet2, key: '1' },
   { ...bitcoinWallet, key: '2' },
 ];
+
+export const mockCryptoPunkNft: ERC721Type = {
+  name: 'CryptoPunk #70',
+  collectionName: 'CryptoPunks',
+  address: '0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb',
+  tokenId: '70',
+  imageUrl:
+    'https://i.seadn.io/gae/og0ga0_wlsfyF0osZ9HKpu_OzlYOpzTbN_ESHjmNulIS31OAhAWpfoMtRaumfNJ0mZFRmZPnzC-AMCS8m5qjK3bPsKCjdqoaeUeV?auto=format&dpr=1&w=1000',
+  lastPrice: '67.00',
+  floorPrice: '67.00',
+  transactionList: {} as any,
+  block: 0,
+};
+
+export const mockStarNft: ERC721Type = {
+  ...mockCryptoPunkNft,
+  name: '~risreg',
+  collectionName: 'Azimuth points',
+  floorPrice: '4.19',
+  tokenId: '0',
+  imageUrl:
+    'https://openseauserdata.com/files/aaa736022a4d24424f4067f859446f5a.svg',
+};

@@ -13,10 +13,18 @@ type Props = {
   navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
 };
 
-export const CoinList = ({ coins, navigate }: Props) => (
-  <Flex gap={4} flexDirection="column" alignItems="center">
-    {coins.length ? (
-      coins.map((coin, index) => (
+export const CoinList = ({ coins, navigate }: Props) => {
+  if (!coins.length) {
+    return (
+      <Text.H5 mt={6} variant="h5" textAlign="center">
+        No Coins
+      </Text.H5>
+    );
+  }
+
+  return (
+    <Flex gap={4} flexDirection="column" alignItems="center">
+      {coins.map((coin, index) => (
         <Coin
           key={index}
           coin={coin}
@@ -31,11 +39,7 @@ export const CoinList = ({ coins, navigate }: Props) => (
             });
           }}
         />
-      ))
-    ) : (
-      <Text.H5 mt={6} variant="h5" textAlign="center">
-        No Coins
-      </Text.H5>
-    )}
-  </Flex>
-);
+      ))}
+    </Flex>
+  );
+};

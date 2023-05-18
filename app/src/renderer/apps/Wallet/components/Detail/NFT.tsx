@@ -1,47 +1,50 @@
-import { Flex, Icon, Row, Text } from '@holium/design-system/general';
+import { Flex, Row, Text } from '@holium/design-system/general';
 
 type Props = {
   imageUrl: string;
   collectionName: string;
   name: string;
+  floorPrice: string | undefined;
   onClickNft: () => void;
 };
 
-export const NFT = ({ imageUrl, collectionName, name, onClickNft }: Props) => (
+export const NFT = ({
+  imageUrl,
+  collectionName,
+  name,
+  floorPrice,
+  onClickNft,
+}: Props) => (
   <Row onClick={onClickNft}>
-    <Flex width="100%" alignItems="center" justifyContent="space-between">
-      <Flex alignItems="center">
-        <Flex
-          width="76px"
+    <Flex width="100%" alignItems="center" gap="10px">
+      <Flex
+        width="76px"
+        height="76px"
+        borderRadius="4px"
+        justifyContent="center"
+      >
+        <img
+          alt="NFT"
+          style={{ borderRadius: 4 }}
           height="76px"
-          borderRadius="4px"
-          justifyContent="center"
-        >
-          <img
-            alt="NFT"
-            style={{ borderRadius: 4 }}
-            height="76px"
-            width="76px"
-            src={imageUrl}
-          />
+          width="76px"
+          src={imageUrl}
+        />
+      </Flex>
+      <Flex flex={1} height="100%" flexDirection="column" gap="6px">
+        <Flex flexDirection="column" justifyContent="center">
+          <Text.Body fontWeight={300} style={{ fontSize: '11px' }}>
+            {collectionName}
+          </Text.Body>
+          <Text.H5 fontSize={1}>{name}</Text.H5>
         </Flex>
-        <Flex
-          ml={4}
-          flexDirection="column"
-          justifyContent="space-evenly"
-          alignItems="flex-start"
-        >
-          <Flex flexDirection="column" justifyContent="center">
-            <Text.Body variant="body" fontSize={1}>
-              {collectionName}
-            </Text.Body>
-            <Text.H5 variant="h5" fontSize={1}>
-              {name}
-            </Text.H5>
-          </Flex>
+        <Flex flexDirection="column" justifyContent="center">
+          <Text.Body fontWeight={300} style={{ fontSize: '11px' }}>
+            Floor price
+          </Text.Body>
+          <Text.H5 fontSize={1}>{floorPrice ?? '0'}</Text.H5>
         </Flex>
       </Flex>
-      <Icon name="ChevronRight" height={20} />
     </Flex>
   </Row>
 );

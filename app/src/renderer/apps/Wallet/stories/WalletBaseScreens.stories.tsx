@@ -10,14 +10,18 @@ import {
 import { CreateWalletScreenBody } from '../screens/CreateWalletScreen/CreateWalletScreenBody';
 import { DetailScreenBody } from '../screens/DetailScreen/DetailScreenBody';
 import { LockedScreenBody } from '../screens/LockedScreen/LockedScreenBody';
+import { NFTDetailScreenBody } from '../screens/NFTDetailScreen/NFTDetailScreenBody';
 import { WalletListScreenBody } from '../screens/WalletListScreen/WalletListScreenBody';
 import { WalletSettingsScreenBody } from '../screens/WalletSettingsScreen/WalletSettingsScreenBody';
 import { WalletScreen } from '../types';
 import { WalletStoryWrapper } from './helper';
 import {
   mockBitcoin,
+  mockBitcoinCoin,
+  mockCryptoPunkNft,
   mockEthereum,
   mockShibaCoin,
+  mockStarNft,
   mockTransactions,
   mockWallets,
 } from './mockData';
@@ -27,7 +31,7 @@ export default {
   title: 'Wallet/Base Screens',
 } as ComponentMeta<typeof WalletSettingsScreenBody>;
 
-export const WalletTransactionssStory: ComponentStory<
+export const WalletDetailssStory: ComponentStory<
   typeof DetailScreenBody
 > = () => (
   <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI}>
@@ -35,8 +39,8 @@ export const WalletTransactionssStory: ComponentStory<
       wallet={mockWallets[0]}
       coin={mockShibaCoin}
       transactions={mockTransactions}
-      coins={[]}
-      nfts={[]}
+      coins={[mockShibaCoin, mockBitcoinCoin]}
+      nfts={[mockStarNft, mockCryptoPunkNft]}
       network={NetworkType.ETHEREUM}
       protocol={ProtocolType.ETH_GORLI}
       bitcoin={mockBitcoin}
@@ -55,7 +59,23 @@ export const WalletTransactionssStory: ComponentStory<
   </WalletStoryWrapper>
 );
 
-WalletTransactionssStory.storyName = 'Wallet transactions';
+WalletDetailssStory.storyName = 'Wallet details';
+
+export const NftDetailStory: ComponentStory<
+  typeof NFTDetailScreenBody
+> = () => (
+  <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI}>
+    <NFTDetailScreenBody
+      nftName={mockStarNft.name}
+      nftImageUrl={mockStarNft.imageUrl}
+      nftAddress={mockStarNft.address}
+      nftTokenId={mockStarNft.tokenId}
+      nftCollectionName={mockStarNft.collectionName}
+    />
+  </WalletStoryWrapper>
+);
+
+NftDetailStory.storyName = 'NFT detail';
 
 export const WalletListStory: ComponentStory<
   typeof WalletListScreenBody
