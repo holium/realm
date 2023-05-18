@@ -8,8 +8,8 @@ import { getAppTileFlags } from 'renderer/lib/app';
 import { useAppState } from 'renderer/stores/app.store';
 import {
   AppMobxType,
-  InstallStatus,
   AppTypes,
+  InstallStatus,
 } from 'renderer/stores/models/bazaar.model';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 import { useShipStore } from 'renderer/stores/ship.store';
