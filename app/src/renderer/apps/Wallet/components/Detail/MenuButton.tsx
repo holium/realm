@@ -8,12 +8,10 @@ type Props = {
   onClick: () => void;
 };
 
-export const MenuButton = ({ selected, children, onClick }: Props) => (
-  <Button.TextButton
-    flex={1}
-    color={selected ? 'accent' : 'text'}
-    onClick={onClick}
-  >
-    {children}
-  </Button.TextButton>
-);
+export const MenuButton = ({ selected, children, onClick }: Props) => {
+  if (selected) {
+    return <Button.TextButton onClick={onClick}>{children}</Button.TextButton>;
+  }
+
+  return <Button.Transparent onClick={onClick}>{children}</Button.Transparent>;
+};

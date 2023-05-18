@@ -11,18 +11,20 @@ export const WalletCardStyle = styled(Card)<CardStyleProps>`
   flex-direction: column;
   width: 100%;
   min-height: 0;
-  padding: 12px 16px;
+  padding: 12px;
   transition: box-shadow 0.1s ease;
   border-radius: 16px !important;
   transition: box-shadow 0.25s ease;
   box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
+  background-color: rgba(var(--rlm-window-rgba));
+  overflow-y: auto;
 
   ${({ isSelected }) =>
     isSelected &&
     `
       flex: 1;
       gap: 10px;
-        `}
+    `}
 `;
 
 export const walletCardStyleTransition = {

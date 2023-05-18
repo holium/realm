@@ -24,7 +24,6 @@ const abbrMap = {
 
 type Props = {
   wallet: EthWalletType | BitcoinWalletType;
-  hidden: boolean;
   protocol: ProtocolType;
   network: NetworkType;
   uqTx?: UqTxType;
@@ -32,7 +31,7 @@ type Props = {
   coin: ERC20Type | null;
   transactionAmount: number;
   setTransactionAmount: (amount: number) => void;
-  transactionRecipient: TransactionRecipient;
+  transactionRecipient: TransactionRecipient | null;
   setTransactionRecipient: (recipient: TransactionRecipient) => void;
   screen: WalletScreen;
   ethereum: EthStoreType;
@@ -45,7 +44,6 @@ type Props = {
 export const SendTransaction = ({
   wallet,
   coin,
-  hidden,
   protocol,
   network,
   uqTx,
@@ -105,7 +103,7 @@ export const SendTransaction = ({
   );
 
   return (
-    <Box width="100%" hidden={hidden} color="card">
+    <Box width="100%" color="card">
       <Flex flexDirection="column" gap={10}>
         <Separator />
         <TransactionPane
@@ -116,22 +114,17 @@ export const SendTransaction = ({
           screen={
             screen === WalletScreen.TRANSACTION_SEND ? 'initial' : 'confirm'
           }
-          navigate={navigate}
-          onConfirm={onConfirm}
-          max={
-            coin
-              ? Number(coin.balance)
-              : Number((wallet as EthWalletType).data.get(protocol)?.balance)
-          }
+          to={to}
+          transactionAmount={transactionAmount}
+          transactionRecipient={transactionRecipient}
+          coin={coin}
           uqbarContract={uqbarContract}
           close={close}
-          coin={coin}
           setTransactionAmount={setTransactionAmount}
-          transactionAmount={transactionAmount}
           setTransactionRecipient={setTransactionRecipient}
-          transactionRecipient={transactionRecipient}
-          to={to}
           getRecipient={getRecipient}
+          navigate={navigate}
+          onConfirm={onConfirm}
         />
       </Flex>
     </Box>

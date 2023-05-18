@@ -13,7 +13,7 @@ export const WalletProtocol = ({ protocol }: Props) => (
     alignItems="center"
     justifyContent="center"
     borderRadius="33px"
-    background="rgba(var(--rlm-border-rgba), 0.1)"
+    background="rgba(var(--rlm-overlay-hover-rgba))"
     //onClick={WalletActions.toggleNetwork}
   >
     <Box
@@ -25,8 +25,9 @@ export const WalletProtocol = ({ protocol }: Props) => (
     />
     <Text.Body
       style={{
-        color: 'rgba(var(--rlm-bordertext-rgba), 0.7)',
+        color: 'rgba(var(--rlm-text-rgba), 0.6)',
         fontSize: '12px',
+        fontWeight: 300,
       }}
     >
       {protocol}

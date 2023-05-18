@@ -2,20 +2,20 @@ import { Flex } from '@holium/design-system/general';
 
 import { MenuButton } from './MenuButton';
 
-export type DisplayType = 'coins' | 'nfts' | 'transactions';
+export type WalletTab = 'coins' | 'nfts' | 'transactions';
 
 type Props = {
-  selected: DisplayType;
-  onChange: (t: DisplayType) => void;
+  selected: WalletTab;
   network: string;
+  onSelect: (t: WalletTab) => void;
 };
 
-export const ListSelector = ({ selected, onChange, network }: Props) => (
-  <Flex alignItems="center">
+export const WalletTabMenu = ({ selected, network, onSelect }: Props) => (
+  <Flex alignItems="center" gap="4px">
     {network === 'ethereum' && (
       <MenuButton
         selected={selected === 'coins'}
-        onClick={() => onChange('coins')}
+        onClick={() => onSelect('coins')}
       >
         Coins
       </MenuButton>
@@ -23,14 +23,14 @@ export const ListSelector = ({ selected, onChange, network }: Props) => (
     {network === 'ethereum' && (
       <MenuButton
         selected={selected === 'nfts'}
-        onClick={() => onChange('nfts')}
+        onClick={() => onSelect('nfts')}
       >
         NFTs
       </MenuButton>
     )}
     <MenuButton
       selected={selected === 'transactions'}
-      onClick={() => onChange('transactions')}
+      onClick={() => onSelect('transactions')}
     >
       Transactions
     </MenuButton>

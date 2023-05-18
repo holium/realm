@@ -2,10 +2,10 @@ import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 
 import { NetworkType } from 'os/services/ship/wallet/wallet.types';
-import { WalletScreen } from 'renderer/apps/Wallet/types';
 import {
   BitcoinWalletType,
   ERC20Type,
+  ERC721Type,
   EthWalletType,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -15,29 +15,28 @@ import { DetailScreenBody } from './DetailScreenBody';
 
 const DetailScreenPresenter = () => {
   const { walletStore } = useShipStore();
-  const sendTrans =
-    walletStore.navState.view === WalletScreen.TRANSACTION_SEND ||
-    walletStore.navState.view === WalletScreen.TRANSACTION_CONFIRM;
-  const hideWalletHero =
-    walletStore.navState.view === WalletScreen.TRANSACTION_CONFIRM;
+
+  let coin: ERC20Type | null = null;
+  let coins: ERC20Type[] | null = null;
+  let nfts: ERC721Type[] | null = null;
 
   const wallet = walletStore.currentWallet;
-  let coins = null;
-  let nfts = null;
-  const hasCoin =
-    walletStore.navState.detail && walletStore.navState.detail.type === 'coin';
-  let coin: ERC20Type | null = null;
+
   if (walletStore.navState.network === 'ethereum') {
     const ethWalletData = (wallet as EthWalletType).data.get(
       walletStore.navState.protocol
     );
+
     if (ethWalletData) {
+      const hasCoin = walletStore.navState.detail?.type === 'coin';
+
       if (hasCoin && walletStore.navState.detail?.key) {
         const newCoin = ethWalletData.coins.get(
           walletStore.navState.detail?.key
         );
         if (newCoin) coin = newCoin;
       }
+
       coins = getCoins(ethWalletData.coins as any);
       nfts = getNfts(ethWalletData.nfts as any);
     }
@@ -79,8 +78,6 @@ const DetailScreenPresenter = () => {
     <DetailScreenBody
       wallet={wallet}
       coin={coin}
-      sendTrans={sendTrans}
-      hideWalletHero={hideWalletHero}
       transactions={transactions}
       coins={coins}
       nfts={nfts}

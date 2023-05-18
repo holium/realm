@@ -12,7 +12,7 @@ export const TrayAppWrapper = styled(motion.div)`
   height: inherit;
   position: absolute;
   overflow: hidden;
-  gap: 20px;
+  gap: 12px;
   border-radius: 16px;
   backdrop-filter: blur(24px);
   backface-visibility: hidden;

@@ -105,12 +105,10 @@ export const WalletDetailsStory: ComponentStory<
     <DetailScreenBody
       wallet={mockWallets[0]}
       coin={mockShibaCoin}
-      hideWalletHero={false}
       transactions={mockTransactions}
       coins={[]}
       nfts={[]}
       network={NetworkType.ETHEREUM}
-      sendTrans={false}
       protocol={ProtocolType.ETH_GORLI}
       bitcoin={mockBitcoin}
       ethereum={{} as any}
@@ -119,7 +117,7 @@ export const WalletDetailsStory: ComponentStory<
       to="~zod"
       getRecipient={() => Promise.resolve({} as any)}
       checkPasscode={() => Promise.resolve(true)}
-      sendEthereumTransaction={() => {}}
+      sendEthereumTransaction={() => Promise.resolve(false)}
       onClickNavigateBack={() => {}}
       sendERC20Transaction={() => Promise.resolve(false)}
       navigate={() => {}}

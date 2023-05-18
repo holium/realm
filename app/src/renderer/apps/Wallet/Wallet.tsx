@@ -90,12 +90,12 @@ const WalletPresenter = () => {
     WalletScreen.NFT_DETAIL,
   ].includes(walletStore.navState.view);
 
-  const screenComponent: WalletScreen =
+  const walletScreenComponent =
     walletStore.navState.view === WalletScreen.TRANSACTION_CONFIRM
       ? WalletScreen.TRANSACTION_SEND
       : walletStore.navState.view;
 
-  const Screen = walletScreens[screenComponent];
+  const WalletScreenCurrent = walletScreens[walletScreenComponent];
 
   return (
     <Flex
@@ -119,7 +119,7 @@ const WalletPresenter = () => {
         walletStore.navState.view !== WalletScreen.TRANSACTION_DETAIL && (
           <PendingTransactionDisplay transactions={transactions} hide={hide} />
         )}
-      <Screen network={walletStore.navState.network} />
+      <WalletScreenCurrent network={walletStore.navState.network} />
       <WalletFooter hidden={hideFooter} />
     </Flex>
   );

@@ -1,20 +1,12 @@
 import { useState } from 'react';
 
-import {
-  Avatar,
-  Box,
-  Button,
-  Flex,
-  Icon,
-  Text,
-} from '@holium/design-system/general';
+import { Box, Button, Flex, Text } from '@holium/design-system/general';
 
 import {
   NetworkType,
   ProtocolType,
   RecipientPayload,
 } from 'os/services/ship/wallet/wallet.types';
-import { shortened } from 'renderer/apps/Wallet/helpers';
 import { TransactionRecipient, WalletScreen } from 'renderer/apps/Wallet/types';
 import {
   BitcoinWalletType,
@@ -26,6 +18,7 @@ import {
 
 import { AmountInput } from './AmountInput';
 import { RecipientInput } from './RecipientInput';
+import { TransactionRecipientInfo } from './TransactionRecipientInfo';
 
 const abbrMap = {
   [NetworkType.ETHEREUM]: 'ETH',
@@ -41,11 +34,10 @@ type Props = {
   network: NetworkType;
   ethereum: EthStoreType;
   screen: 'initial' | 'confirm';
-  max: number;
   coin: ERC20Type | null;
   transactionAmount: number;
   setTransactionAmount: (amount: number) => void;
-  transactionRecipient: TransactionRecipient;
+  transactionRecipient: TransactionRecipient | null;
   setTransactionRecipient: (recipient: TransactionRecipient) => void;
   uqbarContract: boolean;
   to: string | undefined;
@@ -62,7 +54,6 @@ export const TransactionPane = ({
   ethereum,
   navigate,
   screen,
-  max,
   close,
   coin,
   onConfirm,
@@ -77,6 +68,10 @@ export const TransactionPane = ({
   const [amountValid, setAmountValid] = useState(false);
 
   const [recipientValid, setRecipientValid] = useState(false);
+
+  const max = coin
+    ? Number(coin.balance)
+    : Number((wallet as EthWalletType).data.get(protocol)?.balance);
 
   const next = () => {
     if (protocol === ProtocolType.UQBAR) {
@@ -184,44 +179,9 @@ export const TransactionPane = ({
               >
                 <Flex width="100%" justifyContent="space-between">
                   <Text.Body variant="body">TO</Text.Body>
-                  <Flex justifyContent="center">
-                    <Flex>
-                      {!transactionRecipient.patp &&
-                        transactionRecipient.address && (
-                          <Flex flexDirection="column" justifyContent="center">
-                            <Icon name="Spy" size="24px" />
-                            <Text.Body variant="body">
-                              {shortened(transactionRecipient.address)}
-                            </Text.Body>
-                          </Flex>
-                        )}
-                      {transactionRecipient.patp &&
-                        transactionRecipient.address && (
-                          <Flex gap={8} alignItems="center">
-                            <Avatar
-                              sigilColor={[
-                                transactionRecipient.color || 'black',
-                                'white',
-                              ]}
-                              simple={true}
-                              size={24}
-                              patp={transactionRecipient.patp}
-                            />{' '}
-                            <Flex
-                              flexDirection="column"
-                              justifyContent="center"
-                            >
-                              <Text.Body variant="body">
-                                {transactionRecipient.patp}
-                              </Text.Body>
-                              <Text.Body variant="body">
-                                {shortened(transactionRecipient.address)}
-                              </Text.Body>
-                            </Flex>
-                          </Flex>
-                        )}
-                    </Flex>
-                  </Flex>
+                  <TransactionRecipientInfo
+                    transactionRecipient={transactionRecipient}
+                  />
                 </Flex>
                 <Flex width="100%" justifyContent="space-between">
                   <Text.Body variant="body">NETWORK FEE</Text.Body>
