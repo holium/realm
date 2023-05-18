@@ -74,8 +74,8 @@ export const Transaction = types.model('Transaction', {
   ethType: types.string,
   type: types.enumeration(['sent', 'received']),
 
-  initiatedAt: types.maybeNull(types.string),
-  completedAt: types.maybeNull(types.string),
+  initiatedAt: types.maybeNull(types.number),
+  completedAt: types.maybeNull(types.number),
 
   ourAddress: types.string,
   theirPatp: types.maybeNull(types.string),
@@ -127,7 +127,7 @@ const TransactionList = types
           network: 'ethereum',
           ethType: transaction.contractAddress || 'ETH',
           type: sent ? 'sent' : 'received',
-          initiatedAt: previousTransaction?.initiatedAt || '',
+          initiatedAt: previousTransaction?.initiatedAt || 0,
           completedAt: transaction.metadata.blockTimestamp,
           ourAddress: sent ? transaction.from : transaction.to,
           theirPatp: previousTransaction?.theirPatp,

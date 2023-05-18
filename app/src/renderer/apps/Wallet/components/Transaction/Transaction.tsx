@@ -12,7 +12,7 @@ import {
 type Props = {
   transaction: TransactionType;
   isCoin?: boolean;
-  usdAmountDisplay?: string;
+  usdAmountDisplay: string;
   onClick: () => void;
 };
 
@@ -33,53 +33,69 @@ export const Transaction = ({
   const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
   const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
 
+  const currency = isEth ? 'ETH' : 'BTC';
+  const statusMessage =
+    transaction.status !== 'pending'
+      ? wasSent
+        ? `Sent ${currency}`
+        : `Received ${currency}`
+      : wasSent
+      ? `Sending ${currency}`
+      : `Receiving ${currency}`;
+
+  const dateString = `${
+    monthNames[completedDate.getMonth()]
+  } ${completedDate.getDate()}`;
+
   return (
     <Row onClick={onClick}>
-      <Flex width="100%" justifyContent="space-between" alignItems="center">
-        <Flex flexDirection="column" justifyContent="center">
+      <Flex width="100%" alignItems="center" gap="8px">
+        <Flex flex={1} flexDirection="column" justifyContent="center">
           <Text.Custom fontWeight={500} fontSize={3}>
-            {transaction.status !== 'pending'
-              ? wasSent
-                ? 'Sent'
-                : 'Received'
-              : wasSent
-              ? 'Sending'
-              : 'Receiving'}
+            {statusMessage}
           </Text.Custom>
-          <Flex>
-            <Text.Body variant="body" fontSize={1}>
-              {`${
-                monthNames[completedDate.getMonth()]
-              } ${completedDate.getDate()}`}
+          <Flex gap="4px">
+            <Text.Body
+              fontSize={1}
+              fontWeight={300}
+              opacity={wasSent ? 1 : 0.5}
+              style={{
+                whiteSpace: 'nowrap',
+                color: wasSent
+                  ? 'var(--rlm-intent-success-color)'
+                  : 'var(--rlm-text-color)',
+              }}
+            >
+              {dateString}
             </Text.Body>
-            <Text.Body mx={1} variant="body" fontSize={1}>
+            <Text.Body
+              fontSize={1}
+              fontWeight={300}
+              opacity={0.5}
+              style={{ whiteSpace: 'nowrap' }}
+            >
               ·
             </Text.Body>
             <Text.Custom
               truncate
-              width={130}
-              variant="body"
               fontSize={1}
+              fontWeight={300}
               opacity={0.5}
+              style={{ whiteSpace: 'nowrap' }}
             >
-              {wasSent ? 'To:' : 'From:'} {themDisplay}
+              {`${wasSent ? 'To:' : 'From:'} ${themDisplay}`}
             </Text.Custom>
           </Flex>
         </Flex>
         <Flex
           flexDirection="column"
-          justifyContent="center"
           alignItems="flex-end"
+          justifyContent="center"
         >
           <Text.Body fontSize={2}>
-            {transaction.type === 'sent' ? '-' : ''}{' '}
-            {isEth ? `${ethAmount.eth}` /* ETH` */ : `${btcAmount.btc} BTC`}
+            {isEth ? `-${ethAmount.eth} ETH` : `-${btcAmount.btc} BTC`}
           </Text.Body>
-          {!isCoin && (
-            <Text.Hint opacity={0.5}>
-              {transaction.type === 'sent' ? '-' : ''}${usdAmountDisplay}
-            </Text.Hint>
-          )}
+          {!isCoin && <Text.Hint opacity={0.5}>-${usdAmountDisplay}</Text.Hint>}
         </Flex>
       </Flex>
     </Row>

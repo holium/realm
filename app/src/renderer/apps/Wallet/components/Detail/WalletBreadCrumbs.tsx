@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 
-import { Button, Flex, Icon } from '@holium/design-system/general';
+import { Button, Flex, Icon, Text } from '@holium/design-system/general';
 
-const BreadCrumbs = styled(Flex)`
+const BreadCrumbs = styled(Text.Body)`
   display: flex;
   font-size: 13px;
   font-weight: 500;

@@ -8,19 +8,6 @@ import {
   Text,
 } from '@holium/design-system/general';
 
-const CircleBtn = styled(Flex)`
-  flex-direction: column;
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background-color: var(--rlm-accent-color);
-`;
-
 const FullButton = styled(Button.Transparent)`
   flex-direction: column;
   align-items: center;
@@ -28,18 +15,19 @@ const FullButton = styled(Button.Transparent)`
   cursor: pointer;
   transition: var(--transition);
 
-  &:hover {
-    ${CircleBtn} {
-      background-color: var(--rlm-accent-color);
-    }
-    ${Text} {
-      color: var(--rlm-accent-color);
-    }
-  }
-
   svg {
-    fill: var(--rlm-window-color);
+    fill: #ffffff !important;
   }
+`;
+
+const CircleBtn = styled(Flex)`
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--rlm-accent-color);
 `;
 
 type Props = {
@@ -53,7 +41,7 @@ export const CircleButton = ({ icon, title, onClick }: Props) => (
     <CircleBtn>
       <Icon name={icon} size={24} fill="window" />
     </CircleBtn>
-    <Text.Body color="accent" style={{ fontWeight: 300 }}>
+    <Text.Body style={{ fontWeight: 300, color: 'var(--rlm-accent-color)' }}>
       {title}
     </Text.Body>
   </FullButton>

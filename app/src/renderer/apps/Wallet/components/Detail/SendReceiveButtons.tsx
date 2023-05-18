@@ -8,7 +8,7 @@ type Props = {
 };
 
 export const SendReceiveButtons = ({ send, receive }: Props) => (
-  <Flex width="100%" justifyContent="center" gap="4px">
+  <Flex width="100%" justifyContent="center" gap="4px" mb="8px">
     <CircleButton icon="Receive" title="Receive" onClick={receive} />
     <CircleButton icon="Send" title="Send" onClick={send} />
   </Flex>

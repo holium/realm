@@ -28,6 +28,6 @@ export const WalletBalance = ({
     <Text.Body opacity={0.8} fontWeight={600} fontSize={5}>
       {amountDisplay}
     </Text.Body>
-    <Text.Body>{amountUsdDisplay}</Text.Body>
+    <Text.Body opacity={0.5}>{amountUsdDisplay}</Text.Body>
   </Flex>
 );

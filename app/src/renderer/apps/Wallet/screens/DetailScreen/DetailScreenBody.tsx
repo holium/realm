@@ -179,32 +179,27 @@ export const DetailScreenBody = ({
           }`
       : `${formatBtcAmount((wallet as BitcoinWalletType).balance).btc} BTC`;
 
-  const amountUsdDisplay =
-    network === 'ethereum'
-      ? !coin
-        ? ethereum.conversions.usd
-          ? '$' +
-            convertEthAmountToUsd(
-              formatEthAmount(
-                (wallet as EthWalletType).data.get(protocol)?.balance ?? ''
-              ),
-              ethereum.conversions.usd
-            )
-          : ''
-        : coin.conversions.usd
-        ? '$' +
-          convertERC20AmountToUsd(
-            formatCoinAmount(coin.balance, coin.decimals),
-            coin.conversions.usd
-          )
-        : ''
-      : bitcoin.conversions.usd
-      ? '$' +
-        convertBtcAmountToUsd(
-          formatBtcAmount((wallet as BitcoinWalletType).balance),
-          bitcoin.conversions.usd
-        )
-      : '';
+  let amountUsdDisplay = '$0.00 USD';
+  if (network === NetworkType.ETHEREUM) {
+    if (coin && coin.conversions.usd) {
+      amountUsdDisplay = `$${convertERC20AmountToUsd(
+        formatCoinAmount(coin.balance, coin.decimals),
+        coin.conversions.usd
+      )} USD`;
+    } else if (ethereum.conversions.usd) {
+      amountUsdDisplay = `$${convertEthAmountToUsd(
+        formatEthAmount(
+          (wallet as EthWalletType).data.get(protocol)?.balance ?? ''
+        ),
+        ethereum.conversions.usd
+      )} USD`;
+    }
+  } else if (bitcoin.conversions.usd) {
+    amountUsdDisplay = `$${convertBtcAmountToUsd(
+      formatBtcAmount((wallet as BitcoinWalletType).balance),
+      bitcoin.conversions.usd
+    )} USD`;
+  }
 
   if (showPasscode) {
     return (
@@ -271,35 +266,26 @@ export const DetailScreenBody = ({
         selected={tab}
         onSelect={(newTab) => setTab(newTab)}
       />
-
-      <Flex
-        width="100%"
-        flexDirection="column"
-        justifyContent="center"
-        gap={10}
-      >
-        {tab === 'transactions' && (
-          <TransactionList
-            transactions={transactions}
-            txType={txType}
-            coinKey={coinKey}
-            ethType={ethType}
-            ethToUsd={ethToUsd}
-            ethAmount={ethAmount}
-            navigate={navigate}
-          />
-        )}
-        {tab === 'coins' && coins && (
-          <CoinList coins={coins as any} navigate={navigate} />
-        )}
-        {tab === 'nfts' && nfts && (
-          <NFTList nfts={nfts as any} navigate={navigate} />
-        )}
-      </Flex>
+      {tab === 'transactions' && (
+        <TransactionList
+          transactions={transactions}
+          txType={txType}
+          coinKey={coinKey}
+          ethType={ethType}
+          ethToUsd={ethToUsd}
+          ethAmount={ethAmount}
+          navigate={navigate}
+        />
+      )}
+      {tab === 'coins' && coins && (
+        <CoinList coins={coins as any} navigate={navigate} />
+      )}
+      {tab === 'nfts' && nfts && (
+        <NFTList nfts={nfts as any} navigate={navigate} />
+      )}
       {isSendingTransaction && (
         <SendTransaction
           wallet={wallet}
-          close={close}
           coin={coin}
           network={network}
           protocol={protocol}
@@ -307,13 +293,14 @@ export const DetailScreenBody = ({
           screen={screen}
           ethereum={ethereum}
           to={to}
-          navigate={navigate}
           transactionRecipient={transactionRecipient}
+          navigate={navigate}
           onConfirm={() => setShowPasscode(true)}
           setTransactionAmount={setTransactionAmount}
           transactionAmount={transactionAmount}
           setTransactionRecipient={setTransactionRecipient}
           getRecipient={getRecipient}
+          close={close}
         />
       )}
     </WalletCardStyle>

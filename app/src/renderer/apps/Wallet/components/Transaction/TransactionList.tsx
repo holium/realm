@@ -47,22 +47,22 @@ export const TransactionList = ({
   return (
     <Flex
       flex={1}
-      minHeight={200}
+      minHeight="160px"
       width="100%"
       flexDirection="column"
       overflowY="auto"
     >
       {transactions.map((transaction, index) => (
         <Transaction
+          key={`transaction-${index}`}
           isCoin={ethType !== undefined}
-          key={index}
           transaction={transaction}
           usdAmountDisplay={
             ethAmount
               ? `${convertEthAmountToUsd(ethAmount, ethToUsd)} USD`
-              : undefined
+              : '0.00 USD'
           }
-          onClick={() =>
+          onClick={() => {
             navigate(WalletScreen.TRANSACTION_DETAIL, {
               detail: {
                 type: 'transaction',
@@ -70,8 +70,8 @@ export const TransactionList = ({
                 coinKey,
                 key: transaction.hash,
               },
-            })
-          }
+            });
+          }}
         />
       ))}
     </Flex>

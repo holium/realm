@@ -139,7 +139,7 @@ export function convertEthAmountToUsd(
   exchangeRate: number = 1647.37
 ) {
   if (amount.eth === '0') {
-    return 0;
+    return '0.00';
   }
   const usd = Number(amount.eth) * exchangeRate;
   return usd.toFixed(2);
@@ -165,7 +165,7 @@ export function convertBtcAmountToUsd(
   exchangeRate: number = 1647.37
 ) {
   if (amount.btc === '0') {
-    return 0;
+    return '0.00';
   }
   const usd = Number(amount.btc) * exchangeRate;
   return usd.toFixed(2);

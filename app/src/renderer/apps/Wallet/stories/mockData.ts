@@ -16,9 +16,9 @@ import {
 import { WalletWithKey } from '../screens/WalletListScreen/WalletListScreenBody';
 
 const conversions = {
-  usd: 0,
-  cad: 0,
-  euro: 0,
+  usd: 1794,
+  cad: 1794,
+  euro: 1794,
   setUsd: () => {},
 };
 
@@ -172,17 +172,17 @@ export const mockTransactions: TransactionType[] = Array.from({
   network: NetworkType.ETHEREUM,
   type: 'sent',
 
-  initiatedAt: new Date().getTime().toLocaleString(),
-  completedAt: new Date().getTime().toLocaleString(),
+  initiatedAt: new Date().getTime(),
+  completedAt: new Date().getTime(),
 
-  ourAddress: '',
-  theirPatp: '',
-  theirAddress: '',
+  ourAddress: '~zod',
+  theirPatp: '~bus',
+  theirAddress: '0x987654321' + i,
 
   status: 'succeeded',
   failureReason: '',
 
-  notes: '',
+  notes: "I'm a note",
 }));
 
 export const mockWallets: WalletWithKey[] = [

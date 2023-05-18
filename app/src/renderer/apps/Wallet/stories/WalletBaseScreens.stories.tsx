@@ -16,6 +16,7 @@ import { WalletScreen } from '../types';
 import { WalletStoryWrapper } from './helper';
 import {
   mockBitcoin,
+  mockEthereum,
   mockShibaCoin,
   mockTransactions,
   mockWallets,
@@ -25,6 +26,36 @@ export default {
   component: WalletSettingsScreenBody,
   title: 'Wallet/Base Screens',
 } as ComponentMeta<typeof WalletSettingsScreenBody>;
+
+export const WalletTransactionssStory: ComponentStory<
+  typeof DetailScreenBody
+> = () => (
+  <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI}>
+    <DetailScreenBody
+      wallet={mockWallets[0]}
+      coin={mockShibaCoin}
+      transactions={mockTransactions}
+      coins={[]}
+      nfts={[]}
+      network={NetworkType.ETHEREUM}
+      protocol={ProtocolType.ETH_GORLI}
+      bitcoin={mockBitcoin}
+      ethereum={mockEthereum}
+      ethToUsd={mockEthereum.conversions.usd}
+      screen={WalletScreen.WALLET_DETAIL}
+      to="~zod"
+      getRecipient={() => Promise.resolve({} as any)}
+      checkPasscode={() => Promise.resolve(true)}
+      sendEthereumTransaction={() => Promise.resolve(false)}
+      onClickNavigateBack={() => {}}
+      sendERC20Transaction={() => Promise.resolve(false)}
+      navigate={() => {}}
+      close={() => {}}
+    />
+  </WalletStoryWrapper>
+);
+
+WalletTransactionssStory.storyName = 'Wallet transactions';
 
 export const WalletListStory: ComponentStory<
   typeof WalletListScreenBody
@@ -97,33 +128,3 @@ export const LockedStory: ComponentStory<typeof LockedScreenBody> = () => (
 );
 
 LockedStory.storyName = 'Locked';
-
-export const WalletDetailsStory: ComponentStory<
-  typeof DetailScreenBody
-> = () => (
-  <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI}>
-    <DetailScreenBody
-      wallet={mockWallets[0]}
-      coin={mockShibaCoin}
-      transactions={mockTransactions}
-      coins={[]}
-      nfts={[]}
-      network={NetworkType.ETHEREUM}
-      protocol={ProtocolType.ETH_GORLI}
-      bitcoin={mockBitcoin}
-      ethereum={{} as any}
-      ethToUsd={0}
-      screen={WalletScreen.WALLET_DETAIL}
-      to="~zod"
-      getRecipient={() => Promise.resolve({} as any)}
-      checkPasscode={() => Promise.resolve(true)}
-      sendEthereumTransaction={() => Promise.resolve(false)}
-      onClickNavigateBack={() => {}}
-      sendERC20Transaction={() => Promise.resolve(false)}
-      navigate={() => {}}
-      close={() => {}}
-    />
-  </WalletStoryWrapper>
-);
-
-WalletDetailsStory.storyName = 'Wallet details';

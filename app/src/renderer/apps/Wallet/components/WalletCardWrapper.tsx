@@ -15,7 +15,7 @@ export const WalletCardStyle = styled(Card)<CardStyleProps>`
   transition: box-shadow 0.1s ease;
   border-radius: 16px !important;
   transition: box-shadow 0.25s ease;
-  box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--rlm-box-shadow-1);
   background-color: rgba(var(--rlm-window-rgba));
   overflow-y: auto;
 
