@@ -19,6 +19,7 @@ export const WalletCardStyle = styled(Card)<CardStyleProps>`
   box-shadow: var(--rlm-box-shadow-1) !important;
   background-color: rgba(var(--rlm-window-rgba));
   overflow-y: auto;
+  overflow-x: hidden;
 
   ${({ isSelected }) =>
     isSelected &&

@@ -13,6 +13,8 @@ import { TextInput } from '@holium/design-system/inputs';
 
 import { ProtocolType } from 'os/services/ship/wallet/wallet.types';
 
+import { WalletCardStyle } from '../../components/WalletCardWrapper';
+
 type Props = {
   wasSent: boolean;
   transactionStatus: string;
@@ -49,8 +51,10 @@ export const TransactionDetailScreenBody = ({
   };
 
   return (
-    <Flex width="100%" height="100%" flexDirection="column" gap={10}>
-      <Text.Body fontSize={2}>Transaction</Text.Body>
+    <WalletCardStyle isSelected>
+      <Text.Body fontSize={2} opacity={0.5}>
+        Transaction
+      </Text.Body>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
         {transactionStatus === 'pending' ? (
           <Flex alignItems="center">
@@ -78,7 +82,7 @@ export const TransactionDetailScreenBody = ({
             {wasSent && '-'} {amountDisplay}
           </Text.Body>
           {protocol === ProtocolType.ETH_MAIN && (
-            <Text.Body fontSize={2}>${usdAmount}</Text.Body>
+            <Text.Body fontSize={2}>${usdAmount} USD</Text.Body>
           )}
         </Flex>
       </Flex>
@@ -130,35 +134,29 @@ export const TransactionDetailScreenBody = ({
         <Text.Label opacity={0.7} fontSize={1}>
           Notes
         </Text.Label>
-        <Flex
-          width="100%"
-          flexDirection="column"
-          justifyContent="center"
-          gap={10}
-        >
-          <TextInput
-            id="transaction-notes"
-            name="transaction-notes"
-            type="textarea"
-            rows={4}
-            cols={50}
-            value={notes}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setNotes(e.target.value)
-            }
-            placeholder="Transaction notes..."
-          />
+        <TextInput
+          id="transaction-notes"
+          name="transaction-notes"
+          type="textarea"
+          rows={4}
+          cols={50}
+          value={notes}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setNotes(e.target.value)
+          }
+          placeholder="Transaction notes..."
+        />
+        <Flex width="100%" justifyContent="flex-end">
           <Button.Primary
-            width="100%"
             height={32}
             justifyContent="center"
             disabled={notes === transactionNotes && !loading}
             onClick={onClickSaveNotes}
           >
-            {loading ? <Spinner size={0} color="white" /> : 'Save notes'}
+            {loading ? <Spinner size={0} color="white" /> : 'Save'}
           </Button.Primary>
         </Flex>
       </Flex>
-    </Flex>
+    </WalletCardStyle>
   );
 };

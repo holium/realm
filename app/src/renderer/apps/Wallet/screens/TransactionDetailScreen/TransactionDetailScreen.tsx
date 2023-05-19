@@ -92,7 +92,7 @@ const TransactionDetailScreenPresenter = () => {
       transactionStatus={transaction.status}
       protocol={walletStore.navState.protocol}
       saveTransactionNotes={walletStore.saveTransactionNotes}
-      amountDisplay={isEth ? `${ethAmount.eth}` : `${btcAmount.btc} BTC`}
+      amountDisplay={isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC`}
       usdAmount={
         isEth
           ? convertEthAmountToUsd(

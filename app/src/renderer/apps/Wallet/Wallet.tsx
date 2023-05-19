@@ -104,6 +104,7 @@ const WalletPresenter = () => {
     <Flex
       flex={1}
       gap="inherit"
+      minHeight={0}
       flexDirection="column"
       onClick={(e) => e.stopPropagation()}
     >

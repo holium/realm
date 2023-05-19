@@ -75,7 +75,7 @@ export const Transaction = types.model('Transaction', {
   type: types.enumeration(['sent', 'received']),
 
   initiatedAt: types.maybeNull(types.number),
-  completedAt: types.maybeNull(types.number),
+  completedAt: types.maybeNull(types.string),
 
   ourAddress: types.string,
   theirPatp: types.maybeNull(types.string),
