@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Flex, Spinner, Text } from '@holium/design-system/general';
+import { Button, Flex, Spinner, Text } from '@holium/design-system/general';
 
 import { PasscodeDisplay } from './PasscodeDisplay';
 
@@ -10,6 +10,7 @@ type Props = {
   checkStored?: boolean;
   checkAgainst?: number[];
   keepLoading?: boolean;
+  onClickForgotPasscode?: () => void;
   checkPasscode: (code: number[]) => Promise<boolean>;
   onError?: () => void;
   onSuccess: (code: number[]) => void;
@@ -19,6 +20,7 @@ export const PasscodeInput = ({
   checkStored,
   checkAgainst,
   keepLoading,
+  onClickForgotPasscode,
   checkPasscode,
   onError,
   onSuccess,
@@ -78,6 +80,11 @@ export const PasscodeInput = ({
       <PasscodeDisplay digits={6} filled={inputCode.length} />
       <Flex mt={4} width="80%" justifyContent="center">
         {loading && <Spinner size={3} />}
+        {!loading && onClickForgotPasscode && (
+          <Button.Transparent onClick={onClickForgotPasscode}>
+            <Text.Label opacity={0.5}>Forgot passcode?</Text.Label>
+          </Button.Transparent>
+        )}
         {error && (
           <Text.Body color="intent-alert" fontSize={1}>
             That passcode was incorrect.

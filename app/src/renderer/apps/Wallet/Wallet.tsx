@@ -77,11 +77,14 @@ const WalletPresenter = () => {
     WalletScreen.ONBOARDING,
     WalletScreen.LOCKED,
     WalletScreen.SETTINGS,
+    WalletScreen.FORGOT_PASSCODE,
   ].includes(walletStore.navState.view);
 
-  const hideHeader = [WalletScreen.LOCKED, WalletScreen.SETTINGS].includes(
-    walletStore.navState.view
-  );
+  const hideHeader = [
+    WalletScreen.LOCKED,
+    WalletScreen.SETTINGS,
+    WalletScreen.FORGOT_PASSCODE,
+  ].includes(walletStore.navState.view);
 
   const pendingIsVisible = [
     WalletScreen.LIST,

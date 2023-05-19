@@ -990,8 +990,8 @@ export const WalletStore = types
       reset() {
         // applySnapshot(self, walletAppDefault);
       },
-      deleteShipWallet(passcode: number[]) {
-        this.deleteShipMnemonic(passcode);
+      async deleteShipWallet(passcode?: number[]) {
+        await this.deleteShipMnemonic(passcode);
         this.reset();
       },
       deleteLocalWallet(passcode: number[]) {
@@ -1008,9 +1008,9 @@ export const WalletStore = types
         ) as PromiseLike<any>;
       }),
       deleteShipMnemonic: flow(function* (
-        passcode: number[]
+        passcode?: number[]
       ): Generator<PromiseLike<any>, void, any> {
-        const passcodeString = passcode.map(String).join('');
+        const passcodeString = passcode?.map(String).join('');
         yield WalletIPC.deleteShipMnemonic(
           self.ourPatp ?? '',
           passcodeString ?? ''

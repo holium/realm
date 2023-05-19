@@ -9,6 +9,7 @@ export enum WalletScreen {
   LOCKED = 'locked',
   SETTINGS = 'settings',
   CREATE_WALLET = 'create-wallet',
+  FORGOT_PASSCODE = 'forgot-passcode',
 }
 
 export enum WalletOnboardingScreen {

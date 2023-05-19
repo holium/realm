@@ -9,6 +9,7 @@ import {
 
 import { CreateWalletScreenBody } from '../screens/CreateWalletScreen/CreateWalletScreenBody';
 import { DetailScreenBody } from '../screens/DetailScreen/DetailScreenBody';
+import { ForgotPasscodeScreenBody } from '../screens/ForgotPasscodeScreen/ForgotPasscodeScreenBody';
 import { LockedScreenBody } from '../screens/LockedScreen/LockedScreenBody';
 import { NFTDetailScreenBody } from '../screens/NFTDetailScreen/NFTDetailScreenBody';
 import { WalletListScreenBody } from '../screens/WalletListScreen/WalletListScreenBody';
@@ -141,6 +142,7 @@ WalletSettingsStory.storyName = 'Settings';
 export const LockedStory: ComponentStory<typeof LockedScreenBody> = () => (
   <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI} hideHeader hideFooter>
     <LockedScreenBody
+      onClickForgotPasscode={() => {}}
       checkPasscode={() => Promise.resolve(true)}
       onSuccess={() => {}}
     />
@@ -148,3 +150,22 @@ export const LockedStory: ComponentStory<typeof LockedScreenBody> = () => (
 );
 
 LockedStory.storyName = 'Locked';
+
+export const ForgotPasscodeStory: ComponentStory<
+  typeof ForgotPasscodeScreenBody
+> = () => (
+  <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI} hideHeader hideFooter>
+    <ForgotPasscodeScreenBody
+      onClickCancel={() => {}}
+      onClickDelete={() => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve();
+          }, 1000);
+        });
+      }}
+    />
+  </WalletStoryWrapper>
+);
+
+ForgotPasscodeStory.storyName = 'Forgot passcode';

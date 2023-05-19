@@ -3,6 +3,7 @@ import { NetworkType } from 'os/services/ship/wallet/wallet.types';
 import { WalletScreen } from '../types';
 import { CreateWalletScreen } from './CreateWalletScreen/CreateWalletScreen';
 import { DetailScreen } from './DetailScreen/DetailScreen';
+import { ForgotPasscodeScreen } from './ForgotPasscodeScreen/ForgotPasscodeScreen';
 import { LockedScreen } from './LockedScreen/LockedScreen';
 import { NFTDetailScreen } from './NFTDetailScreen/NFTDetailScreen';
 import { TransactionDetailScreen } from './TransactionDetailScreen/TransactionDetailScreen';
@@ -26,4 +27,5 @@ export const walletScreens: Record<
   [WalletScreen.LOCKED]: () => <LockedScreen />,
   [WalletScreen.SETTINGS]: () => <WalletSettingsScreen />,
   [WalletScreen.NFT_DETAIL]: () => <NFTDetailScreen />,
+  [WalletScreen.FORGOT_PASSCODE]: () => <ForgotPasscodeScreen />,
 };
