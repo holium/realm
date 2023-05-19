@@ -1,6 +1,6 @@
 import { ChangeEvent } from 'react';
 
-import { Button, Flex, Text } from '@holium/design-system/general';
+import { Button, Flex, Spinner, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 
 import { NetworkType } from 'os/services/ship/wallet/wallet.types';
@@ -10,7 +10,7 @@ type Props = {
   nickname: string;
   loading: boolean;
   onChangeNickname: (e: ChangeEvent<HTMLInputElement>) => void;
-  onClickCreate: () => void;
+  onClickCreate: () => Promise<void>;
 };
 
 export const CreateWalletScreenBody = ({
@@ -42,7 +42,7 @@ export const CreateWalletScreenBody = ({
         disabled={loading}
         onClick={onClickCreate}
       >
-        {loading ? 'Creating...' : 'Create'}
+        {loading ? <Spinner size={0} /> : 'Create'}
       </Button.Primary>
     </Flex>
   </Flex>

@@ -6,6 +6,7 @@ import { useToggle } from '@holium/design-system/util';
 import { NetworkType } from 'os/services/ship/wallet/wallet.types';
 import { useShipStore } from 'renderer/stores/ship.store';
 
+import { WalletScreen } from '../../types';
 import { CreateWalletScreenBody } from './CreateWalletScreenBody';
 
 type Props = {
@@ -22,7 +23,8 @@ const CreateWalletScreenPresenter = ({ network }: Props) => {
         loading.toggleOn();
         try {
           console.log(`creating wallet ${values.nickname}`);
-          await walletStore.createWallet(values.nickname);
+          await walletStore.createWalletFlow(values.nickname);
+          walletStore.navigate(WalletScreen.LIST, { canReturn: false });
         } catch (reason) {
           console.error(reason);
         } finally {

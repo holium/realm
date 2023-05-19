@@ -28,9 +28,14 @@ const WalletOnboardingPresenter = () => {
   // TODO move this to background thread
   const [seedPhrase, setSeedPhrase] = useState('');
 
-  const setPasscodeWrapper = (passcode: number[]) => {
+  const setPasscodeWrapper = async (passcode: number[]) => {
     setPasscode(passcode);
     setScreen(WalletOnboardingScreen.CONFIRM_PASSCODE);
+  };
+
+  const onCorrectPasscode = async (passcode: number[]) => {
+    setPasscode(passcode);
+    setScreen(WalletOnboardingScreen.FINALIZING);
   };
 
   const components = {
@@ -60,8 +65,7 @@ const WalletOnboardingPresenter = () => {
       <ConfirmPasscodeScreen
         correctPasscode={passcode}
         checkPasscode={walletStore.checkPasscode}
-        onSuccess={setPasscode}
-        setScreen={setScreen}
+        onSuccess={onCorrectPasscode}
       />
     ),
     [WalletOnboardingScreen.FINALIZING]: (

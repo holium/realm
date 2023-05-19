@@ -4,7 +4,7 @@ import { PasscodeInput } from '../PasscodeInput';
 
 type Props = {
   checkPasscode: (passcode: number[]) => Promise<boolean>;
-  onSuccess: (passcode: number[]) => void;
+  onSuccess: (passcode: number[]) => Promise<void>;
 };
 
 export const TransactionPasscode = ({ checkPasscode, onSuccess }: Props) => (
@@ -28,7 +28,6 @@ export const TransactionPasscode = ({ checkPasscode, onSuccess }: Props) => (
       <Text.Body variant="body">Enter your passcode to continue.</Text.Body>
       <PasscodeInput
         checkStored
-        keepLoading
         checkPasscode={checkPasscode}
         onSuccess={onSuccess}
       />

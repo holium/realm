@@ -5,7 +5,7 @@ import { PasscodeInput } from '../../components/PasscodeInput';
 type Props = {
   onClickBack: () => void;
   checkPasscode: (passcode: number[]) => Promise<boolean>;
-  onSuccess: (passcode: number[]) => void;
+  onSuccess: (passcode: number[]) => Promise<void>;
 };
 
 export const DeleteWalletScreen = ({
@@ -37,7 +37,6 @@ export const DeleteWalletScreen = ({
         <Flex flexDirection="column" alignItems="center">
           <PasscodeInput
             checkStored
-            keepLoading
             checkPasscode={checkPasscode}
             onSuccess={onSuccess}
           />

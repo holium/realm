@@ -58,7 +58,7 @@ export const CreatePasscodeStory: ComponentStory<
   <WalletStoryWrapper isOnboarding>
     <CreatePasscodeScreen
       checkPasscode={() => Promise.resolve(false)}
-      setPasscode={() => {}}
+      setPasscode={() => Promise.resolve()}
     />
   </WalletStoryWrapper>
 );
@@ -72,8 +72,7 @@ export const ConfirmPasscodeStory: ComponentStory<
     <ConfirmPasscodeScreen
       correctPasscode={[1, 2, 3, 4, 5, 6]}
       checkPasscode={() => Promise.resolve(false)}
-      onSuccess={() => {}}
-      setScreen={() => {}}
+      onSuccess={() => Promise.resolve()}
     />
   </WalletStoryWrapper>
 );

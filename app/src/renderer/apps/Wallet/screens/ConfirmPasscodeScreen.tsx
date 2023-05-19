@@ -1,21 +1,17 @@
 import { Flex, Text } from '@holium/design-system/general';
 
-import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
-
 import { PasscodeInput } from '../components/PasscodeInput';
 
 type Props = {
   correctPasscode: number[];
   checkPasscode: (passcode: number[]) => Promise<boolean>;
-  onSuccess: (passcode: number[]) => void;
-  setScreen: (screen: WalletOnboardingScreen) => void;
+  onSuccess: (passcode: number[]) => Promise<void>;
 };
 
 export const ConfirmPasscodeScreen = ({
   correctPasscode,
   checkPasscode,
   onSuccess,
-  setScreen,
 }: Props) => (
   <Flex width="100%" height="100%" flexDirection="column">
     <Flex flex={1} flexDirection="column">
@@ -30,10 +26,7 @@ export const ConfirmPasscodeScreen = ({
       <PasscodeInput
         checkAgainst={correctPasscode}
         checkPasscode={checkPasscode}
-        onSuccess={(passcode) => {
-          onSuccess(passcode);
-          setScreen(WalletOnboardingScreen.FINALIZING);
-        }}
+        onSuccess={onSuccess}
       />
     </Flex>
   </Flex>

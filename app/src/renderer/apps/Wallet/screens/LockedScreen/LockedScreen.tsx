@@ -8,10 +8,11 @@ import { LockedScreenBody } from './LockedScreenBody';
 const LockedScreenPresenter = () => {
   const { walletStore } = useShipStore();
 
-  const unlock = () => {
+  const unlock = async () => {
+    await walletStore.getWalletsUpdate();
+    await walletStore.watchUpdates();
+
     walletStore.navigate(WalletScreen.LIST);
-    walletStore.getWalletsUpdate();
-    walletStore.watchUpdates();
   };
 
   return (

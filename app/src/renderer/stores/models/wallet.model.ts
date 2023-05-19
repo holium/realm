@@ -1064,10 +1064,6 @@ export const WalletStore = types
           nickname
         ) as PromiseLike<any>;
       }),
-      async createWallet(nickname: string) {
-        await this.createWalletFlow(nickname);
-        this.navigate(WalletScreen.LIST, { canReturn: false });
-      },
       sendEthereumTransaction: flow(function* (
         walletIndex: string,
         to: string,
@@ -1244,6 +1240,7 @@ export const WalletStore = types
         return yield WalletIPC.checkMnemonic(mnemonic) as PromiseLike<any>;
       }),
       autoLock() {
+        console.log('AUTOLOCK', 'shouldLock');
         const shouldLock =
           Date.now() - AUTO_LOCK_INTERVAL > self.lastInteraction.getTime();
         if (shouldLock) {

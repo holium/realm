@@ -108,7 +108,7 @@ export const CreateWalletStory: ComponentStory<
       loading={false}
       nickname="My wallet"
       onChangeNickname={() => {}}
-      onClickCreate={() => {}}
+      onClickCreate={() => Promise.resolve()}
     />
   </WalletStoryWrapper>
 );
@@ -147,7 +147,7 @@ export const DeleteWalletStory: ComponentStory<
     <DeleteWalletScreen
       onClickBack={() => {}}
       checkPasscode={() => Promise.resolve(true)}
-      onSuccess={() => {}}
+      onSuccess={() => Promise.resolve()}
     />
   </WalletStoryWrapper>
 );
@@ -159,7 +159,7 @@ export const LockedStory: ComponentStory<typeof LockedScreenBody> = () => (
     <LockedScreenBody
       onClickForgotPasscode={() => {}}
       checkPasscode={() => Promise.resolve(true)}
-      onSuccess={() => {}}
+      onSuccess={() => Promise.resolve()}
     />
   </WalletStoryWrapper>
 );

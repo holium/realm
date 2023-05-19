@@ -34,6 +34,16 @@ export const WalletListScreenBody = ({
   onClickCreateAddress,
 }: Props) => {
   if (!wallets || !wallets.length) {
+    if (network === NetworkType.BITCOIN) {
+      return (
+        <Flex flex={1} flexDirection="column" justifyContent="center">
+          <Text.H3 variant="h3" textAlign="center">
+            Coming soon...
+          </Text.H3>{' '}
+        </Flex>
+      );
+    }
+
     return (
       <Flex
         height="100%"
@@ -41,52 +51,38 @@ export const WalletListScreenBody = ({
         flexDirection="column"
         alignItems="center"
       >
-        {network === NetworkType.BITCOIN ? (
-          <Flex
-            width="100%"
-            height="100%"
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <Text.H3 variant="h3" textAlign="center">
-              Coming soon...
-            </Text.H3>{' '}
+        <Flex
+          width="100%"
+          height="100%"
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+          gap={20}
+        >
+          <Text.H3 variant="h3" textAlign="center">
+            No addresses
+          </Text.H3>
+          <Flex justifyContent="center">
+            <Text.Body
+              textAlign="center"
+              maxWidth="80%"
+              style={{ fontWeight: 300 }}
+            >
+              You haven't created any{' '}
+              {network === 'ethereum'
+                ? 'Ethereum'
+                : btcNetwork === NetworkStoreType.BTC_MAIN
+                ? 'Bitcoin'
+                : 'Bitcoin Testnet'}{' '}
+              wallets yet.
+            </Text.Body>
           </Flex>
-        ) : (
-          <Flex
-            width="100%"
-            height="100%"
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            gap={20}
-          >
-            <Text.H3 variant="h3" textAlign="center">
-              No addresses
-            </Text.H3>
-            <Flex justifyContent="center">
-              <Text.Body
-                textAlign="center"
-                maxWidth="80%"
-                style={{ fontWeight: 300 }}
-              >
-                You haven't created any{' '}
-                {network === 'ethereum'
-                  ? 'Ethereum'
-                  : btcNetwork === NetworkStoreType.BTC_MAIN
-                  ? 'Bitcoin'
-                  : 'Bitcoin Testnet'}{' '}
-                wallets yet.
-              </Text.Body>
-            </Flex>
-            <Flex justifyContent="center">
-              <Button.TextButton onClick={onClickCreateAddress}>
-                Create address
-              </Button.TextButton>
-            </Flex>
+          <Flex justifyContent="center">
+            <Button.TextButton onClick={onClickCreateAddress}>
+              Create address
+            </Button.TextButton>
           </Flex>
-        )}
+        </Flex>
       </Flex>
     );
   }

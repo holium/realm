@@ -42,11 +42,7 @@ export const WalletStoryWrapper = ({
       )}
       {children}
       {protocol && !isOnboarding && !hideFooter && (
-        <WalletFooterView
-          hidden={isOnboarding}
-          protocol={protocol}
-          onClickSettings={() => {}}
-        />
+        <WalletFooterView protocol={protocol} onClickSettings={() => {}} />
       )}
     </TrayAppWrapper>
   </Flex>

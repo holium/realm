@@ -4,7 +4,7 @@ import { PasscodeInput } from '../components/PasscodeInput';
 
 type Props = {
   checkPasscode: (passcode: number[]) => Promise<boolean>;
-  setPasscode: (passcode: number[]) => void;
+  setPasscode: (passcode: number[]) => Promise<void>;
 };
 
 export const CreatePasscodeScreen = ({ checkPasscode, setPasscode }: Props) => (

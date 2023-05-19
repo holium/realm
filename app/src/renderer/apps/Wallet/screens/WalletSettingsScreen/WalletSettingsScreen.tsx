@@ -84,11 +84,11 @@ const WalletSettingsScreenPresenter = () => {
     walletStore.navigateBack();
   }
 
-  const deleteWallet = (passcode: number[]) => {
+  const deleteWallet = async (passcode: number[]) => {
     if (settingScreen === SettingScreen.LOCAL) {
       walletStore.deleteLocalWallet(passcode);
     } else if (settingScreen === SettingScreen.AGENT) {
-      walletStore.deleteShipWallet(passcode);
+      await walletStore.deleteShipWallet(passcode);
     }
   };
 
