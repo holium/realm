@@ -107,23 +107,24 @@ const WalletPresenter = () => {
       flexDirection="column"
       onClick={(e) => e.stopPropagation()}
     >
-      <WalletHeader
-        isOnboarding={WalletScreen.ONBOARDING === walletStore.navState.view}
-        showBack={walletStore.navState.view !== WalletScreen.LIST}
-        network={
-          walletStore.navState.network === 'ethereum' ? 'ethereum' : 'bitcoin'
-        }
-        onAddWallet={() => walletStore.navigate(WalletScreen.CREATE_WALLET)}
-        onSetNetwork={(network) => walletStore.setNetwork(network)}
-        hide={hideHeader}
-      />
+      {!hideHeader && (
+        <WalletHeader
+          isOnboarding={WalletScreen.ONBOARDING === walletStore.navState.view}
+          showBack={walletStore.navState.view !== WalletScreen.LIST}
+          network={
+            walletStore.navState.network === 'ethereum' ? 'ethereum' : 'bitcoin'
+          }
+          onAddWallet={() => walletStore.navigate(WalletScreen.CREATE_WALLET)}
+          onSetNetwork={(network) => walletStore.setNetwork(network)}
+        />
+      )}
       {pendingIsVisible &&
         !hidePending &&
         walletStore.navState.view !== WalletScreen.TRANSACTION_DETAIL && (
           <PendingTransactionDisplay transactions={transactions} hide={hide} />
         )}
       <WalletScreenCurrent network={walletStore.navState.network} />
-      <WalletFooter hidden={hideFooter} />
+      {!hideFooter && <WalletFooter />}
     </Flex>
   );
 };

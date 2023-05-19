@@ -9,7 +9,7 @@ const LockedScreenPresenter = () => {
   const { walletStore } = useShipStore();
 
   const unlock = () => {
-    walletStore.navigateBack();
+    walletStore.navigate(WalletScreen.LIST);
     walletStore.getWalletsUpdate();
     walletStore.watchUpdates();
   };

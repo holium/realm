@@ -14,23 +14,15 @@ const Wrapper = styled(Flex)`
 
 type Props = {
   protocol: ProtocolType;
-  hidden?: boolean;
   onClickSettings: () => void;
 };
 
-export const WalletFooterView = ({
-  protocol,
-  hidden = false,
-  onClickSettings,
-}: Props) => {
-  if (hidden) return null;
-
-  return (
-    <Wrapper>
-      <WalletProtocol protocol={protocol} />
-      <Flex>
-        <Flex mr="10px">
-          {/*walletApp.navState.network === NetworkType.ETHEREUM &&
+export const WalletFooterView = ({ protocol, onClickSettings }: Props) => (
+  <Wrapper>
+    <WalletProtocol protocol={protocol} />
+    <Flex>
+      <Flex mr="10px">
+        {/*walletApp.navState.network === NetworkType.ETHEREUM &&
                 (uqbarDeskExists ? (
                   <ImageToggle
                     src={UqbarLogo}
@@ -55,11 +47,10 @@ export const WalletFooterView = ({
                     />
                   </Tooltip>
                 ))*/}
-        </Flex>
-        <Button.IconButton size={24} onClick={onClickSettings}>
-          <Icon name="Settings" size={20} opacity={0.5} />
-        </Button.IconButton>
       </Flex>
-    </Wrapper>
-  );
-};
+      <Button.IconButton size={24} onClick={onClickSettings}>
+        <Icon name="Settings" size={20} opacity={0.5} />
+      </Button.IconButton>
+    </Flex>
+  </Wrapper>
+);

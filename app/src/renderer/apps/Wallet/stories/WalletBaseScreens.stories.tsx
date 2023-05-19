@@ -13,6 +13,7 @@ import { ForgotPasscodeScreenBody } from '../screens/ForgotPasscodeScreen/Forgot
 import { LockedScreenBody } from '../screens/LockedScreen/LockedScreenBody';
 import { NFTDetailScreenBody } from '../screens/NFTDetailScreen/NFTDetailScreenBody';
 import { WalletListScreenBody } from '../screens/WalletListScreen/WalletListScreenBody';
+import { DeleteWalletScreen } from '../screens/WalletSettingsScreen/DeleteWalletScreen';
 import { WalletSettingsScreenBody } from '../screens/WalletSettingsScreen/WalletSettingsScreenBody';
 import { WalletScreen } from '../types';
 import { WalletStoryWrapper } from './helper';
@@ -138,6 +139,20 @@ export const WalletSettingsStory: ComponentStory<
 );
 
 WalletSettingsStory.storyName = 'Settings';
+
+export const DeleteWalletStory: ComponentStory<
+  typeof DeleteWalletScreen
+> = () => (
+  <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI} hideHeader hideFooter>
+    <DeleteWalletScreen
+      onClickBack={() => {}}
+      checkPasscode={() => Promise.resolve(true)}
+      onSuccess={() => {}}
+    />
+  </WalletStoryWrapper>
+);
+
+DeleteWalletStory.storyName = 'Settings / Delete wallet';
 
 export const LockedStory: ComponentStory<typeof LockedScreenBody> = () => (
   <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI} hideHeader hideFooter>

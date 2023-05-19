@@ -11,18 +11,14 @@ type Props = {
   network: NetworkType | string;
   onSetNetwork: (network: NetworkType) => void;
   onAddWallet: () => void;
-  hide: boolean;
 };
 
 const WalletHeaderPresenter = ({
-  hide,
   showBack,
   isOnboarding,
   onAddWallet,
 }: Props) => {
   const { walletStore } = useShipStore();
-
-  if (hide) return null;
 
   return (
     <WalletHeaderView
