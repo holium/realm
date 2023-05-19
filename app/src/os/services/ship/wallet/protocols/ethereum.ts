@@ -372,8 +372,10 @@ export class EthereumProtocol implements BaseBlockProtocol {
       return [];
     }
   }
-  async sendTransaction(signedTx: string): Promise<any> {
-    return (await this.ethProvider.sendTransaction(signedTx)).hash;
+  async sendTransaction(signedTx: string) {
+    const tx = await this.ethProvider.sendTransaction(signedTx);
+
+    return tx.hash;
   }
   async populateERC20(
     contractAddress: string,

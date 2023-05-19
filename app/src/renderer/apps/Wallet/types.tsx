@@ -1,3 +1,4 @@
+import { ProtocolType } from 'os/services/ship/wallet/wallet.types';
 export enum WalletScreen {
   LIST = 'list',
   ONBOARDING = 'onboarding',
@@ -38,3 +39,32 @@ export type TransactionRecipient = {
   patpAddress?: string;
   color?: string;
 };
+
+export type SendEthereumTransactionParams = {
+  walletIndex: string;
+  to: string;
+  amount: string;
+  passcode: number[];
+  toPatp?: string;
+};
+
+export type SendEthereumTransaction = (
+  props: SendEthereumTransactionParams
+) => Promise<void>;
+
+export type SendERC20TransactionParams = {
+  walletIndex: string;
+  currentProtocol: ProtocolType;
+  path: string;
+  toPatp: string;
+  passcode: number[];
+  from: string;
+  to: string;
+  amount: string;
+  contractAddress: string;
+  decimals: number;
+};
+
+export type SendERC20Transaction = (
+  props: SendERC20TransactionParams
+) => Promise<void>;

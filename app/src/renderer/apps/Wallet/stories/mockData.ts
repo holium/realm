@@ -178,8 +178,8 @@ export const mockTransactions: TransactionType[] = Array.from({
   network: NetworkType.ETHEREUM,
   type: 'sent',
 
-  initiatedAt: new Date().getTime(),
-  completedAt: new Date().getTime(),
+  initiatedAt: 0,
+  completedAt: new Date().toLocaleDateString(),
 
   ourAddress: '~zod',
   theirPatp: '~bus',

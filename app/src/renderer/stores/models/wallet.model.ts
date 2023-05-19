@@ -20,7 +20,11 @@ import {
   WalletCreationMode,
 } from 'os/services/ship/wallet/wallet.types';
 import { gweiToEther } from 'renderer/apps/Wallet/helpers';
-import { WalletScreen } from 'renderer/apps/Wallet/types';
+import {
+  SendERC20TransactionParams,
+  SendEthereumTransactionParams,
+  WalletScreen,
+} from 'renderer/apps/Wallet/types';
 
 import { appState } from '../app.store';
 import { WalletIPC } from '../ipc';
@@ -1085,24 +1089,34 @@ export const WalletStore = types
           nickname
         ) as PromiseLike<any>;
       }),
-      sendEthereumTransaction: flow(function* (
-        walletIndex: string,
-        to: string,
-        amount: string,
-        passcode: number[],
-        toPatp?: string
-      ): Generator<PromiseLike<any>, void, any> {
+      sendEthereumTransaction: flow(function* ({
+        walletIndex,
+        to,
+        amount,
+        passcode,
+        toPatp,
+      }: SendEthereumTransactionParams): Generator<
+        PromiseLike<any>,
+        void,
+        any
+      > {
         const path = "m/44'/60'/0'/0/0" + walletIndex;
-        const from = self.ethereum.wallets.get(walletIndex)?.address ?? '';
-        const { hash, tx } = yield WalletIPC.sendTransaction(
-          self.navState.protocol,
+        const from = self.ethereum.wallets.get(walletIndex)?.address;
+
+        if (!from) {
+          console.error('No address found for wallet index', walletIndex);
+          return;
+        }
+
+        const { hash, tx } = yield WalletIPC.sendTransaction({
+          currentProtocol: self.navState.protocol,
           path,
-          self.ourPatp ?? '',
-          passcode.map(String).join(''),
+          ourPatp: self.ourPatp ?? '',
+          passcode: passcode.map(String).join(''),
           from,
           to,
-          amount
-        ) as PromiseLike<any>;
+          amount,
+        }) as PromiseLike<any>;
         const currentWallet = self.currentWallet as EthWalletType;
         const fromAddress = currentWallet.address;
         currentWallet.enqueueTransaction(
@@ -1127,14 +1141,14 @@ export const WalletStore = types
           stateTx
         ) as PromiseLike<any>;
       }),
-      sendERC20Transaction: flow(function* (
-        walletIndex: string,
-        to: string,
-        amount: string,
-        contractAddress: string,
-        passcode: number[],
-        toPatp?: string
-      ): Generator<PromiseLike<any>, void, any> {
+      sendERC20Transaction: flow(function* ({
+        walletIndex,
+        to,
+        amount,
+        passcode,
+        toPatp,
+        contractAddress,
+      }: SendERC20TransactionParams): Generator<PromiseLike<any>, void, any> {
         const path = "m/44'/60'/0'/0/0" + walletIndex;
         const from = self.ethereum.wallets.get(walletIndex)?.address ?? '';
         const { hash } = yield WalletIPC.sendERC20Transaction(

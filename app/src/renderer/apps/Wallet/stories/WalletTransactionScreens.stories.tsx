@@ -43,9 +43,9 @@ export const SendStory: ComponentStory<typeof DetailScreenBody> = () => (
       to="~zod"
       getRecipient={() => Promise.resolve({} as any)}
       checkPasscode={() => Promise.resolve(true)}
-      sendEthereumTransaction={() => Promise.resolve(false)}
+      sendEthereumTransaction={() => Promise.resolve()}
       onClickNavigateBack={() => {}}
-      sendERC20Transaction={() => Promise.resolve(false)}
+      sendERC20Transaction={() => Promise.resolve()}
       navigate={() => {}}
       close={() => {}}
     />
@@ -71,9 +71,9 @@ export const ConfirmStory: ComponentStory<typeof DetailScreenBody> = () => (
       to="~zod"
       getRecipient={() => Promise.resolve({} as any)}
       checkPasscode={() => Promise.resolve(true)}
-      sendEthereumTransaction={() => Promise.resolve(false)}
+      sendEthereumTransaction={() => Promise.resolve()}
       onClickNavigateBack={() => {}}
-      sendERC20Transaction={() => Promise.resolve(false)}
+      sendERC20Transaction={() => Promise.resolve()}
       navigate={() => {}}
       close={() => {}}
     />

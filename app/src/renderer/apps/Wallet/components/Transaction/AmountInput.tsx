@@ -160,8 +160,12 @@ export const AmountInput = ({
             <Text.Custom fontSize="11px" opacity={0.7}>
               {ethereum.conversions.usd &&
                 (inCrypto
-                  ? `$${ethToUsd(Number(amount), ethereum.conversions.usd)} USD`
-                  : `${usdToEth(Number(amount), ethereum.conversions.usd)} ${
+                  ? `~ $${ethToUsd(
+                      Number(amount),
+                      ethereum.conversions.usd,
+                      4
+                    )} USD`
+                  : `~ ${usdToEth(Number(amount), ethereum.conversions.usd)} ${
                       coin
                         ? coin.name
                         : abbrMap[network as 'bitcoin' | 'ethereum']

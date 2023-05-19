@@ -44,7 +44,12 @@ import {
   formatEthAmount,
   formatZigAmount,
 } from '../../helpers';
-import { TransactionRecipient, WalletScreen } from '../../types';
+import {
+  SendERC20Transaction,
+  SendEthereumTransaction,
+  TransactionRecipient,
+  WalletScreen,
+} from '../../types';
 import { SubmitTransactionPasscodeScreen } from './SubmitTransactionPasscodeScreen';
 
 type Props = {
@@ -55,7 +60,6 @@ type Props = {
   nfts: ERC721Type[] | null;
   network: NetworkType;
   protocol: ProtocolType;
-  currentWallet?: EthWalletType | BitcoinWalletType;
   ethereum: EthStoreType;
   bitcoin: BitcoinStoreType;
   ethToUsd: number | undefined;
@@ -71,8 +75,8 @@ type Props = {
   checkPasscode: (passcode: number[]) => Promise<boolean>;
   onClickNavigateBack: () => void;
   navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
-  sendERC20Transaction: (...args: any) => Promise<any>;
-  sendEthereumTransaction: (...args: any) => Promise<any>;
+  sendERC20Transaction: SendERC20Transaction;
+  sendEthereumTransaction: SendEthereumTransaction;
 };
 
 export const DetailScreenBody = ({
@@ -83,7 +87,6 @@ export const DetailScreenBody = ({
   nfts,
   network,
   protocol,
-  currentWallet,
   bitcoin,
   ethereum,
   ethToUsd,
@@ -121,40 +124,46 @@ export const DetailScreenBody = ({
       if (network === NetworkType.ETHEREUM) {
         if (protocol === ProtocolType.UQBAR) {
           // await submitUqbarTransaction(
-          //   currentWallet?.index.toString() ?? '',
+          //   wallet?.index.toString() ?? '',
           //   passcode
           // );
         } else {
           if (!transactionRecipient) return;
 
           if (coin) {
-            await sendERC20Transaction(
-              currentWallet?.index.toString() ?? '',
-              transactionRecipient.address ??
+            await sendERC20Transaction({
+              walletIndex: wallet.index.toString(),
+              currentProtocol: protocol,
+              path: wallet.index.toString() ?? '',
+              toPatp: transactionRecipient.patp ?? '',
+              passcode,
+              from: wallet.address,
+              to:
+                transactionRecipient.address ??
                 transactionRecipient.patpAddress ??
                 '',
-              transactionAmount.toString(),
-              coin.address,
-              passcode,
-              transactionRecipient.patp
-            );
+              amount: transactionAmount.toString(),
+              contractAddress: coin.address,
+              decimals: coin.decimals,
+            });
           } else {
-            await sendEthereumTransaction(
-              currentWallet?.index.toString() ?? '',
-              transactionRecipient.address ||
-                transactionRecipient.patpAddress ||
+            await sendEthereumTransaction({
+              walletIndex: wallet.index.toString(),
+              to:
+                transactionRecipient.address ??
+                transactionRecipient.patpAddress ??
                 '',
-              transactionAmount.toString(),
+              amount: transactionAmount.toString(),
               passcode,
-              transactionRecipient.patp
-            );
+              toPatp: transactionRecipient.patp,
+            });
           }
         }
       }
 
       close();
     } catch (e) {
-      console.error(e);
+      console.error('sendTransaction error', e);
     }
   };
 
@@ -201,7 +210,7 @@ export const DetailScreenBody = ({
     return (
       <SubmitTransactionPasscodeScreen
         checkPasscode={checkPasscode}
-        onSuccess={(code: number[]) => sendTransaction(code)}
+        onSuccess={sendTransaction}
       />
     );
   }

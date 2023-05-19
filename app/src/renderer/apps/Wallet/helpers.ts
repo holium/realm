@@ -8,10 +8,10 @@ import {
 import { ERC20Amount } from './types';
 
 // TODO: replace with actual exchange rate
-export const ethToUsd = (eth: number, currentPrice: number) =>
-  isNaN(eth) ? 0 : (eth * currentPrice).toFixed(2);
-export const usdToEth = (usd: number, currentPrice: number) =>
-  isNaN(usd) ? 0 : Number((usd / currentPrice).toFixed(8));
+export const ethToUsd = (eth: number, currentPrice: number, decimals = 2) =>
+  isNaN(eth) ? 0 : (eth * currentPrice).toFixed(decimals);
+export const usdToEth = (usd: number, currentPrice: number, decimals = 8) =>
+  isNaN(usd) ? 0 : Number((usd / currentPrice).toFixed(decimals));
 
 export function gweiToEther(gwei: number) {
   return gwei / 1000000000000000000;

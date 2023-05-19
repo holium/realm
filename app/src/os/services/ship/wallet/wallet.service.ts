@@ -152,41 +152,67 @@ export class WalletService extends AbstractService {
     await APIConnection.getInstance().conduit.poke(payload);
   }
 
-  async sendTransaction(
-    currentProtocol: ProtocolType,
-    path: string,
-    ourPatp: string,
-    passcode: string,
-    from: string,
-    to: string,
-    amount: string
-  ) {
+  async sendTransaction({
+    currentProtocol,
+    path,
+    ourPatp,
+    passcode,
+    from,
+    to,
+    amount,
+  }: {
+    currentProtocol: ProtocolType;
+    path: string;
+    ourPatp: string;
+    passcode: string;
+    from: string;
+    to: string;
+    amount: string;
+  }) {
     const protocol = this.protocolManager?.protocols.get(
       currentProtocol
     ) as EthereumProtocol;
-    const tx = {
+
+    const gasLimit = await protocol.getFeeEstimate({
+      to,
+      from,
+      value: ethers.utils.parseEther(amount),
+    });
+    console.log('sendTransaction', 'gasLimit', gasLimit);
+
+    const gasPrice = await protocol.getFeePrice();
+    console.log('sendTransaction', 'gasPrice', gasPrice);
+
+    const nonce = await protocol.getNonce(from);
+    console.log('sendTransaction', 'nonce', nonce);
+
+    const chainId = await protocol.getChainId();
+    console.log('sendTransaction', 'chainId', chainId);
+
+    const transaction = {
       from,
       to,
       value: ethers.utils.parseEther(amount),
-      gasLimit: await protocol.getFeeEstimate({
-        to,
-        from,
-        value: ethers.utils.parseEther(amount),
-      }),
-      gasPrice: await protocol.getFeePrice(),
-      nonce: await protocol.getNonce(from),
-      chainId: await protocol.getChainId(),
+      gasLimit,
+      gasPrice,
+      nonce,
+      chainId,
     };
-    const signedTx = await RealmSigner.signTransaction(
+    console.log('tx', JSON.stringify(transaction, null, 2));
+    const signedTx = await RealmSigner.signTransaction({
       path,
-      tx,
-      ourPatp,
-      passcode
-    );
+      transaction,
+      patp: ourPatp,
+      passcode,
+    });
+    console.log('sendTransaction', 'signedTx', signedTx);
+
     const hash = await (
       this.protocolManager?.protocols.get(currentProtocol) as BaseBlockProtocol
     ).sendTransaction(signedTx);
-    return { hash, tx };
+    console.log('sendTransaction', 'hash', hash);
+
+    return { hash, tx: transaction };
   }
 
   async sendERC20Transaction(
@@ -212,12 +238,12 @@ export class WalletService extends AbstractService {
     tx.gasPrice = await protocol.getFeePrice();
     tx.nonce = await protocol.getNonce(from);
     tx.chainId = await protocol.getChainId();
-    const signedTx = await RealmSigner.signTransaction(
+    const signedTx = await RealmSigner.signTransaction({
       path,
-      tx,
-      ourPatp,
-      passcode
-    );
+      transaction: tx,
+      patp: ourPatp,
+      passcode,
+    });
     const hash = await (
       this.protocolManager?.protocols.get(currentProtocol) as BaseBlockProtocol
     ).sendTransaction(signedTx);
