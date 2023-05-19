@@ -194,7 +194,6 @@ export const monthNames = [
   'Dec',
 ];
 
-// https://coincodex.com/cryptocurrencies/sector/ethereum-erc20/
 export function getMockCoinIcon(ticker: string) {
   switch (ticker) {
     case 'BUSD':

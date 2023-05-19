@@ -6,6 +6,7 @@ import {
 } from 'os/services/ship/wallet/wallet.types';
 
 import { DetailScreenBody } from '../screens/DetailScreen/DetailScreenBody';
+import { SubmitTransactionPasscodeScreen } from '../screens/DetailScreen/SubmitTransactionPasscodeScreen';
 import { TransactionDetailScreenBody } from '../screens/TransactionDetailScreen/TransactionDetailScreenBody';
 import { WalletScreen } from '../types';
 import { WalletStoryWrapper } from './helper';
@@ -80,6 +81,19 @@ export const ConfirmStory: ComponentStory<typeof DetailScreenBody> = () => (
 );
 
 ConfirmStory.storyName = 'Confirm';
+
+export const SubmitTransactionPasscodeStory: ComponentStory<
+  typeof SubmitTransactionPasscodeScreen
+> = () => (
+  <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI}>
+    <SubmitTransactionPasscodeScreen
+      checkPasscode={() => Promise.resolve(false)}
+      onSuccess={() => Promise.resolve()}
+    />
+  </WalletStoryWrapper>
+);
+
+SubmitTransactionPasscodeStory.storyName = 'Submit transaction with passcode';
 
 export const TransactionDetailStory: ComponentStory<
   typeof TransactionDetailScreenBody

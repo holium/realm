@@ -45,9 +45,7 @@ export const WalletAddressHeader = ({
     <Text.Body flex={1} fontSize="14px">
       {shortened(address)}
     </Text.Body>
-    {isSendingTransaction ? (
-      <Icon name="ChevronDown" size="20px" fill="text" opacity={0.5} />
-    ) : (
+    {!isSendingTransaction && (
       <Flex gap={10}>
         <CopyButton content={address} />
         <Button.IconButton onClick={onClickQrCode}>

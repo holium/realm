@@ -81,7 +81,7 @@ export const PasscodeInput = ({
   return (
     <Flex flexDirection="column" alignItems="center">
       <PasscodeDisplay digits={6} filled={inputCode.length} />
-      <Flex mt={4} width="80%" justifyContent="center">
+      <Flex mt={4} flexDirection="column" justifyContent="center">
         {loading.isOn && <Spinner size={3} />}
         {!loading.isOn && onClickForgotPasscode && (
           <Button.Transparent onClick={onClickForgotPasscode}>

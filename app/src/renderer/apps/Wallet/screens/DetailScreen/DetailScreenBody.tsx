@@ -33,7 +33,6 @@ import {
 } from '../../components/Detail/WalletTabMenu';
 import { SendTransaction } from '../../components/Transaction/SendTransaction';
 import { TransactionList } from '../../components/Transaction/TransactionList';
-import { TransactionPasscode } from '../../components/Transaction/TransactionPasscode';
 import { WalletCardStyle } from '../../components/WalletCardWrapper';
 import {
   convertBtcAmountToUsd,
@@ -46,6 +45,7 @@ import {
   formatZigAmount,
 } from '../../helpers';
 import { TransactionRecipient, WalletScreen } from '../../types';
+import { SubmitTransactionPasscodeScreen } from './SubmitTransactionPasscodeScreen';
 
 type Props = {
   wallet: BitcoinWalletType | EthWalletType;
@@ -199,7 +199,7 @@ export const DetailScreenBody = ({
 
   if (showPasscode) {
     return (
-      <TransactionPasscode
+      <SubmitTransactionPasscodeScreen
         checkPasscode={checkPasscode}
         onSuccess={(code: number[]) => sendTransaction(code)}
       />
