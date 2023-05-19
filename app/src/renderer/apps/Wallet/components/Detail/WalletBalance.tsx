@@ -1,4 +1,5 @@
 import { Flex, Text } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 
 import { ERC20Type } from 'renderer/stores/models/wallet.model';
 
@@ -17,6 +18,8 @@ export const WalletBalance = ({
   amountUsdDisplay,
   simple,
 }: Props) => {
+  const hideImg = useToggle(false);
+
   if (simple) {
     return (
       <Text.Body
@@ -31,13 +34,14 @@ export const WalletBalance = ({
 
   return (
     <Flex flexDirection="column" alignItems="center" gap="7px">
-      {coin && (
+      {coin && !hideImg.isOn && (
         <img
           alt="coin icon"
           width="26px"
           height="26px"
           src={coin.logo ?? getMockCoinIcon(coin.name)}
           style={{ objectFit: 'cover' }}
+          onError={() => hideImg.toggleOn()}
         />
       )}
       <Text.Body opacity={0.8} fontWeight={600} fontSize={5}>

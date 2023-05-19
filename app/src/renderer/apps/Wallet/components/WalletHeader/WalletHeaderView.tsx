@@ -31,7 +31,7 @@ export const WalletHeaderView = ({
           py={1}
           pl={1}
           pr={2}
-          background={'rgba(98, 126, 234, 0.14)'}
+          background="rgba(98, 126, 234, 0.14)"
           borderRadius={6}
           gap="6px"
         >

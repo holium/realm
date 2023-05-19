@@ -9,6 +9,9 @@ const BreadCrumbs = styled(Text.Body)`
   text-transform: uppercase;
   gap: 4px;
   opacity: 0.5;
+  * {
+    user-select: none;
+  }
 `;
 
 const FirstBreadCrumb = styled.span`
