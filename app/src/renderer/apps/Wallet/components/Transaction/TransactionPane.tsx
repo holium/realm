@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { Box, Button, Flex, Text } from '@holium/design-system/general';
+import { Button, Flex, Text } from '@holium/design-system/general';
 
 import {
   NetworkType,
@@ -36,11 +36,11 @@ type Props = {
   screen: 'initial' | 'confirm';
   coin: ERC20Type | null;
   transactionAmount: number;
+  to: string | undefined;
+  uqbarContract: boolean;
   setTransactionAmount: (amount: number) => void;
   transactionRecipient: TransactionRecipient | null;
   setTransactionRecipient: (recipient: TransactionRecipient) => void;
-  uqbarContract: boolean;
-  to: string | undefined;
   getRecipient: (ship: string) => Promise<RecipientPayload>;
   navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
   close: () => void;
@@ -52,18 +52,18 @@ export const TransactionPane = ({
   protocol,
   network,
   ethereum,
-  navigate,
   screen,
-  close,
   coin,
-  onConfirm,
+  to,
+  uqbarContract,
   transactionAmount,
   setTransactionAmount,
   transactionRecipient,
   setTransactionRecipient,
-  uqbarContract,
-  to,
   getRecipient,
+  navigate,
+  close,
+  onConfirm,
 }: Props) => {
   const [amountValid, setAmountValid] = useState(false);
 
@@ -116,10 +116,10 @@ export const TransactionPane = ({
     }
   };
 
-  return (
-    <>
-      {screen === 'initial' ? (
-        <Flex flexDirection="column">
+  if (screen === 'initial') {
+    return (
+      <Flex flex={1} flexDirection="column" justifyContent="space-between">
+        <Flex flexDirection="column" gap="10px">
           <AmountInput
             max={max}
             coin={coin}
@@ -128,106 +128,111 @@ export const TransactionPane = ({
             network={network}
             ethereum={ethereum}
           />
-          <Box width="100%">
-            <RecipientInput
-              to={to}
-              network={network}
-              getRecipient={getRecipient}
-              setValid={recipientValidator}
-            />
-          </Box>
-          <Flex justifyContent="space-between">
-            <Button.TextButton variant="transparent" onClick={() => close()}>
-              Cancel
-            </Button.TextButton>
-            <Button.TextButton
-              disabled={!recipientValid || !amountValid}
-              onClick={next}
-            >
-              Next
-            </Button.TextButton>
-          </Flex>
+          <RecipientInput
+            to={to}
+            network={network}
+            getRecipient={getRecipient}
+            setValid={recipientValidator}
+          />
         </Flex>
-      ) : (
-        <Flex flexDirection="column">
-          {!uqbarContract && (
-            <>
-              <Text.Body
-                opacity={0.9}
-                fontWeight={600}
-                fontSize={7}
-                animate={false}
-              >
-                {transactionAmount}{' '}
-                {coin
-                  ? coin.name
-                  : protocol === ProtocolType.UQBAR
-                  ? 'zigs'
-                  : abbrMap[network]}
-              </Text.Body>
-              {protocol === ProtocolType.ETH_MAIN && (
-                <Text.Body>
-                  ${ethToUsd(transactionAmount, ethereum.conversions.usd ?? 0)}{' '}
-                  USD
-                </Text.Body>
-              )}
-              <Flex
-                width="100%"
-                flexDirection="column"
-                justifyContent="space-evenly"
-                alignItems="center"
-              >
-                <Flex width="100%" justifyContent="space-between">
-                  <Text.Body variant="body">TO</Text.Body>
-                  <TransactionRecipientInfo
-                    transactionRecipient={transactionRecipient}
-                  />
-                </Flex>
-                <Flex width="100%" justifyContent="space-between">
-                  <Text.Body variant="body">NETWORK FEE</Text.Body>
-                  <Flex flexDirection="column">
-                    <Text.Body variant="body">0.001 ETH</Text.Body>
-                    {protocol === ProtocolType.ETH_MAIN && (
-                      <Text.Body fontSize={1}>
-                        ≈ {ethToUsd(0.0005, ethereum.conversions.usd ?? 0)} USD
-                      </Text.Body>
-                    )}
-                  </Flex>
-                </Flex>
-                <Flex width="100%" justifyContent="space-between">
-                  <Text.Body variant="body">TOTAL</Text.Body>
-                  <Flex flexDirection="column">
-                    <Text.Body variant="body">
-                      {transactionAmount + 0.0005} {coin ? coin.name : 'ETH'}
-                    </Text.Body>
-                    {protocol === ProtocolType.ETH_MAIN && (
-                      <Text.Body fontSize={1}>
-                        ≈{' '}
-                        {ethToUsd(
-                          transactionAmount + 0.0005,
-                          ethereum.conversions.usd ?? 0
-                        )}{' '}
-                        USD
-                      </Text.Body>
-                    )}
-                  </Flex>
-                </Flex>
-              </Flex>
-            </>
+        <Flex gap="10px">
+          <Button.Secondary
+            flex={1}
+            justifyContent="center"
+            onClick={() => close()}
+          >
+            Cancel
+          </Button.Secondary>
+          <Button.TextButton
+            flex={1}
+            justifyContent="center"
+            disabled={!recipientValid || !amountValid}
+            onClick={next}
+          >
+            Next
+          </Button.TextButton>
+        </Flex>
+      </Flex>
+    );
+  }
+
+  return (
+    <Flex flexDirection="column">
+      {!uqbarContract && (
+        <>
+          <Text.Body
+            opacity={0.9}
+            fontWeight={600}
+            fontSize={7}
+            animate={false}
+          >
+            {transactionAmount}{' '}
+            {coin
+              ? coin.name
+              : protocol === ProtocolType.UQBAR
+              ? 'zigs'
+              : abbrMap[network]}
+          </Text.Body>
+          {protocol === ProtocolType.ETH_MAIN && (
+            <Text.Body>
+              ${ethToUsd(transactionAmount, ethereum.conversions.usd ?? 0)} USD
+            </Text.Body>
           )}
-          <Flex justifyContent="space-between">
-            <Button.TextButton variant="transparent" onClick={() => prev()}>
-              Reject
-            </Button.TextButton>
-            <Button.TextButton
-              px={2}
-              onClick={onConfirm} // sendTransaction}
-            >
-              Confirm
-            </Button.TextButton>
+          <Flex
+            width="100%"
+            flexDirection="column"
+            justifyContent="space-evenly"
+            alignItems="center"
+          >
+            <Flex width="100%" justifyContent="space-between">
+              <Text.Body variant="body">TO</Text.Body>
+              <TransactionRecipientInfo
+                transactionRecipient={transactionRecipient}
+              />
+            </Flex>
+            <Flex width="100%" justifyContent="space-between">
+              <Text.Body variant="body">NETWORK FEE</Text.Body>
+              <Flex flexDirection="column">
+                <Text.Body variant="body">0.001 ETH</Text.Body>
+                {protocol === ProtocolType.ETH_MAIN && (
+                  <Text.Body fontSize={1}>
+                    ≈ {ethToUsd(0.0005, ethereum.conversions.usd ?? 0)} USD
+                  </Text.Body>
+                )}
+              </Flex>
+            </Flex>
+            <Flex width="100%" justifyContent="space-between">
+              <Text.Body variant="body">TOTAL</Text.Body>
+              <Flex flexDirection="column">
+                <Text.Body variant="body">
+                  {transactionAmount + 0.0005} {coin ? coin.name : 'ETH'}
+                </Text.Body>
+                {protocol === ProtocolType.ETH_MAIN && (
+                  <Text.Body fontSize={1}>
+                    ≈{' '}
+                    {ethToUsd(
+                      transactionAmount + 0.0005,
+                      ethereum.conversions.usd ?? 0
+                    )}{' '}
+                    USD
+                  </Text.Body>
+                )}
+              </Flex>
+            </Flex>
           </Flex>
-        </Flex>
+        </>
       )}
-    </>
+      <Flex justifyContent="space-between">
+        <Button.TextButton variant="transparent" onClick={() => prev()}>
+          Reject
+        </Button.TextButton>
+        <Button.TextButton
+          px={2}
+          onClick={onConfirm} // sendTransaction}
+        >
+          Confirm
+        </Button.TextButton>
+      </Flex>
+    </Flex>
   );
 };

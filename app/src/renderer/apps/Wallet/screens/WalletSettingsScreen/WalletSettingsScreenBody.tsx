@@ -58,14 +58,14 @@ export const WalletSettingsScreenBody = ({
         <Button.IconButton size={26} onClick={onClickBack}>
           <Icon name="ArrowLeftLine" size={24} opacity={0.7} />
         </Button.IconButton>
-        <Text.Custom
+        <Text.Body
           ml={2}
           opacity={0.8}
           textTransform="uppercase"
           fontWeight={600}
         >
           Settings
-        </Text.Custom>
+        </Text.Body>
       </Flex>
       <Button.Primary
         variant="minimal"
@@ -80,10 +80,10 @@ export const WalletSettingsScreenBody = ({
     <Flex flex={1} flexDirection="column" gap="16px" overflowY="auto">
       <Flex flexDirection="column" gap="4px">
         <Text.Label>Address Creation Mode</Text.Label>
-        <Text.Custom fontSize={1} opacity={0.8}>
+        <Text.Body fontSize={1} opacity={0.8}>
           If set to on-demand, anytime you're sent funds a new address will be
           created to receive them.
-        </Text.Custom>
+        </Text.Body>
         <Flex width="140px">
           <Select
             id="wallet-creation-mode"
@@ -99,10 +99,10 @@ export const WalletSettingsScreenBody = ({
 
       <Flex flexDirection="column" gap="4px">
         <Text.Label>Wallet Visibility</Text.Label>
-        <Text.Custom fontSize={1} opacity={0.8}>
+        <Text.Body fontSize={1} opacity={0.8}>
           Determine how you want to share addresses with other people on the
           network.
-        </Text.Custom>
+        </Text.Body>
         <VisibilitySelect
           wallets={wallets as any}
           sharingMode={sharingMode}
@@ -119,9 +119,9 @@ export const WalletSettingsScreenBody = ({
 
       <Flex flexDirection="column" gap="4px">
         <Text.Label>Delete locally</Text.Label>
-        <Text.Custom fontSize={2} opacity={0.8}>
+        <Text.Body fontSize={2} opacity={0.8}>
           Delete your wallet from local storage.
-        </Text.Custom>
+        </Text.Body>
         <Button.TextButton
           height={32}
           fontWeight={500}
@@ -133,10 +133,10 @@ export const WalletSettingsScreenBody = ({
       </Flex>
       <Flex flexDirection="column" gap="4px">
         <Text.Label>Delete completely</Text.Label>
-        <Text.Custom fontSize={2} opacity={0.8}>
+        <Text.Body fontSize={2} opacity={0.8}>
           Completely delete your wallet locally and remove all metadata from
           Urbit.
-        </Text.Custom>
+        </Text.Body>
         <Button.TextButton
           height={32}
           fontWeight={500}

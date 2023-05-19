@@ -12,7 +12,6 @@ import {
 } from 'os/services/ship/wallet/wallet.types';
 
 import { shortened } from '../../helpers';
-import { ContainerFlex } from './AmountInput.styles';
 import { RecipientIcon } from './RecipientIcon';
 
 type Props = {
@@ -161,53 +160,48 @@ const RecipientInputPresenter = ({
   };
 
   return (
-    <Flex flexDirection="column" gap={10}>
-      <Flex width="100%" justifyContent="space-evenly" alignItems="center">
+    <Flex flexDirection="column">
+      <Flex width="100%" alignItems="center" gap="16px">
         <Text.Body fontSize={1} variant="body">
           TO
         </Text.Body>
-        <ContainerFlex
-          className="realm-cursor-hover"
-          width="240px"
-          height="45px"
-          borderRadius="7px"
-          alignItems="center"
-        >
-          <RecipientIcon
-            recipientMetadata={recipientDetails.details?.recipientMetadata}
-            valueCache={valueCache}
-            icon={icon}
-          />
-          <Flex flexDirection="column">
-            <TextInput
-              id="recipient-input"
-              name="recipient-input"
-              width="100%"
-              placeholder="@p or recipient’s address"
-              spellCheck="false"
-              value={recipient}
-              onChange={onChange}
+        <TextInput
+          id="recipient-input"
+          name="recipient-input"
+          width="100%"
+          placeholder="@p or recipient’s address"
+          spellCheck="false"
+          value={recipient}
+          onChange={onChange}
+          leftAdornment={
+            <RecipientIcon
+              recipientMetadata={recipientDetails.details?.recipientMetadata}
+              valueCache={valueCache}
+              icon={icon}
             />
-            {recipientDetails.details?.address && (
-              <Text.Body fontSize={1} variant="body" opacity={0.7}>
-                {shortened(recipientDetails.details?.address)}
-              </Text.Body>
-            )}
-          </Flex>
-          {loading && (
-            <Flex mr={2}>
-              <Spinner ml={2} size="14px" />
-            </Flex>
-          )}
-        </ContainerFlex>
+          }
+          rightAdornment={
+            loading ? (
+              <Flex mr={2}>
+                <Spinner ml={2} size="14px" />
+              </Flex>
+            ) : undefined
+          }
+        />
       </Flex>
-      <Flex width="100%" justifyContent="flex-end">
-        <Text.Body variant="body" fontSize="11px">
-          {recipientDetails.failed &&
-            recipientDetails.details?.patp === recipient &&
-            `${recipient} doesn't have a Realm wallet.`}
-          &nbsp;&nbsp;&nbsp;
-        </Text.Body>
+      <Flex mt="4px" ml="36px" gap="2px" flexDirection="column">
+        {recipientDetails.details?.address && (
+          <Text.Body mt="4px" fontSize={1} variant="body" opacity={0.7}>
+            {shortened(recipientDetails.details?.address)}
+          </Text.Body>
+        )}
+        {recipientDetails.failed && (
+          <Text.Custom fontSize="11px" color="intent-caution">
+            {recipientDetails.details?.patp === recipient
+              ? `${recipient} doesn't have a Realm wallet.`
+              : 'Invalid address or ship.'}
+          </Text.Custom>
+        )}
       </Flex>
     </Flex>
   );

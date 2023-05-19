@@ -254,27 +254,31 @@ export const DetailScreenBody = ({
           receive={qrCode.toggle}
         />
       )}
-      <WalletTabMenu
-        network={network}
-        selected={tab}
-        onSelect={(newTab) => setTab(newTab)}
-      />
-      {tab === 'transactions' && (
-        <TransactionList
-          transactions={transactions}
-          txType={txType}
-          coinKey={coinKey}
-          ethType={ethType}
-          ethToUsd={ethToUsd}
-          ethAmount={ethAmount}
-          navigate={navigate}
-        />
-      )}
-      {tab === 'coins' && coins && (
-        <CoinList coins={coins as any} navigate={navigate} />
-      )}
-      {tab === 'nfts' && nfts && (
-        <NFTList nfts={nfts as any} navigate={navigate} />
+      {!isSendingTransaction && (
+        <>
+          <WalletTabMenu
+            network={network}
+            selected={tab}
+            onSelect={(newTab) => setTab(newTab)}
+          />
+          {tab === 'transactions' && (
+            <TransactionList
+              transactions={transactions}
+              txType={txType}
+              coinKey={coinKey}
+              ethType={ethType}
+              ethToUsd={ethToUsd}
+              ethAmount={ethAmount}
+              navigate={navigate}
+            />
+          )}
+          {tab === 'coins' && coins && (
+            <CoinList coins={coins as any} navigate={navigate} />
+          )}
+          {tab === 'nfts' && nfts && (
+            <NFTList nfts={nfts as any} navigate={navigate} />
+          )}
+        </>
       )}
       {isSendingTransaction && (
         <SendTransaction

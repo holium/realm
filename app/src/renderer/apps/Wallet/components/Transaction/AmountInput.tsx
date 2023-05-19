@@ -1,6 +1,6 @@
 import { ChangeEventHandler, useRef, useState } from 'react';
 
-import { Box, Flex, Icon, Text } from '@holium/design-system/general';
+import { Box, Button, Flex, Icon, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 
 import {
@@ -97,32 +97,25 @@ export const AmountInput = ({
 
   return (
     <Flex flexDirection="column">
-      <FlexHider width="100%" justifyContent="space-between">
-        <Text.Body fontSize={1} variant="body">
-          AMOUNT
-        </Text.Body>
+      <FlexHider
+        width="100%"
+        justifyContent="space-between"
+        alignItems="center"
+        gap="16px"
+      >
+        <Text.Body fontSize={1}>AMOUNT</Text.Body>
         <ContainerFlex
-          className="realm-cursor-hover"
-          px={1}
-          py={1}
+          flex={1}
+          gap="4px"
+          minWidth={0}
           onClick={inputContainerClicked}
-          width="200px"
-          height="40px"
-          justifyContent="space-between"
-          borderRadius="7px"
         >
-          <Flex
-            px={1}
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="flex-start"
-          >
+          <Flex flex={1} minWidth={0} alignItems="center" gap="4px">
             {inCrypto ? (
               <TextInput
                 id="amount-input"
                 name="amount-input"
                 ref={amountRef}
-                style={{ width: '80%' }}
                 autoFocus
                 type="number"
                 placeholder="0.0000000000000000000000"
@@ -130,68 +123,58 @@ export const AmountInput = ({
                 onChange={onChange}
               />
             ) : (
-              <Flex>
-                <Text.Custom pt="2px" fontSize="12px">
-                  $
-                </Text.Custom>
+              <>
+                <Text.Body fontSize="12px">$</Text.Body>
                 <TextInput
                   id="amount-input"
                   name="amount-input"
                   autoFocus
                   ref={amountRef}
-                  style={{ width: '80%' }}
                   type="number"
                   placeholder="0.00"
                   value={(amount ?? '').toString()}
                   onChange={onChange}
                 />
-              </Flex>
-            )}
-            {showUsd && (
-              <Box hidden={!amount}>
-                <Text.Custom fontSize="11px">
-                  {ethereum.conversions.usd &&
-                    (inCrypto
-                      ? `$${ethToUsd(
-                          Number(amount),
-                          ethereum.conversions.usd
-                        )} USD`
-                      : `${usdToEth(
-                          Number(amount),
-                          ethereum.conversions.usd
-                        )} ${
-                          coin
-                            ? coin.name
-                            : abbrMap[network as 'bitcoin' | 'ethereum']
-                        }`)}
-                </Text.Custom>
-              </Box>
+              </>
             )}
           </Flex>
-          <Flex
-            justifyContent="center"
-            alignItems="center"
-            borderRadius="5px"
-            onClick={toggleInCrypto}
-          >
-            <Text.Custom fontSize="12px">
-              {inCrypto
-                ? coin
-                  ? coin.name
-                  : protocol === ProtocolType.UQBAR
-                  ? 'zigs'
-                  : abbrMap[network as 'bitcoin' | 'ethereum']
-                : 'USD'}
-            </Text.Custom>
-            {showUsd && <Icon ml={1} name="UpDown" size="12px" />}
-          </Flex>
+          <Button.Transparent onClick={toggleInCrypto}>
+            <Flex justifyContent="center" alignItems="center">
+              <Text.Custom fontSize="12px">
+                {inCrypto
+                  ? coin
+                    ? coin.name
+                    : protocol === ProtocolType.UQBAR
+                    ? 'zigs'
+                    : abbrMap[network as 'bitcoin' | 'ethereum']
+                  : 'USD'}
+              </Text.Custom>
+              {showUsd && <Icon ml={1} name="UpDown" size="12px" />}
+            </Flex>
+          </Button.Transparent>
         </ContainerFlex>
       </FlexHider>
-      <Box ml="72px" width="100%">
-        <Text.Custom fontSize="11px" color="intent-caution">
-          {amountError && 'Amount greater than wallet balance.'}
-        </Text.Custom>
-      </Box>
+      <Flex mt="4px" gap="2px" ml="72px" width="100%" flexDirection="column">
+        {showUsd && (
+          <Box hidden={!amount}>
+            <Text.Custom fontSize="11px" opacity={0.7}>
+              {ethereum.conversions.usd &&
+                (inCrypto
+                  ? `$${ethToUsd(Number(amount), ethereum.conversions.usd)} USD`
+                  : `${usdToEth(Number(amount), ethereum.conversions.usd)} ${
+                      coin
+                        ? coin.name
+                        : abbrMap[network as 'bitcoin' | 'ethereum']
+                    }`)}
+            </Text.Custom>
+          </Box>
+        )}
+        {amountError && (
+          <Text.Custom fontSize="11px" color="intent-caution">
+            Amount greater than wallet balance.
+          </Text.Custom>
+        )}
+      </Flex>
     </Flex>
   );
 };

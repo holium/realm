@@ -1,4 +1,6 @@
-import { Box, Flex, Text } from '@holium/design-system/general';
+import styled from 'styled-components';
+
+import { Flex } from '@holium/design-system/general';
 
 import {
   NetworkType,
@@ -16,6 +18,30 @@ import {
 
 import { TransactionRecipient, WalletScreen } from '../../types';
 import { TransactionPane } from './TransactionPane';
+
+const SeparatorContainer = styled(Flex)`
+  width: 200%;
+  left: 50%;
+  transform: translateX(-50%);
+  position: relative;
+  margin: 20px 0 32px 0;
+  align-items: center;
+`;
+
+const SeparatorLine = styled(Flex)`
+  flex: 1;
+  height: 1px;
+  background: rgba(var(--rlm-border-rgba));
+`;
+
+const SeparatorBox = styled.div`
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--rlm-accent-color);
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(var(--rlm-accent-rgba), 0.1);
+`;
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -63,70 +89,46 @@ export const SendTransaction = ({
   const uqbarContract: boolean = pendingTx ? 'noun' in pendingTx.action : false;
 
   const Separator = () => (
-    <Flex position="relative" width="100%" justifyContent="center" gap={10}>
-      <Box position="absolute" width="300px" height="1px" left="-10px" />
-      {uqbarContract ? (
-        <Flex
-          position="absolute"
-          bottom="-12px"
-          height="25px"
-          width="170px"
-          justifyContent="center"
-          alignItems="center"
-          borderRadius="50px"
-        >
-          <Text.Body color="accent">Contract Interaction</Text.Body>
-        </Flex>
-      ) : (
-        <Flex
-          position="absolute"
-          px={2}
-          bottom="-12px"
-          min-width="80px"
-          justifyContent="center"
-          alignItems="center"
-          borderRadius="50px"
-        >
-          <Text.Body color="accent">
-            {`Send ${
+    <SeparatorContainer>
+      <SeparatorLine />
+      <SeparatorBox>
+        {uqbarContract
+          ? 'Contract Interaction'
+          : `Send ${
               coin
                 ? coin.name
                 : protocol === ProtocolType.UQBAR
                 ? 'zigs'
                 : abbrMap[network as 'bitcoin' | 'ethereum']
-            }
-              `}
-          </Text.Body>
-        </Flex>
-      )}
-    </Flex>
+            }`}
+      </SeparatorBox>
+      <SeparatorLine />
+    </SeparatorContainer>
   );
 
   return (
-    <Box width="100%" color="card">
-      <Flex flexDirection="column" gap={10}>
-        <Separator />
-        <TransactionPane
-          protocol={protocol}
-          network={network}
-          ethereum={ethereum}
-          wallet={wallet}
-          screen={
-            screen === WalletScreen.TRANSACTION_SEND ? 'initial' : 'confirm'
-          }
-          to={to}
-          transactionAmount={transactionAmount}
-          transactionRecipient={transactionRecipient}
-          coin={coin}
-          uqbarContract={uqbarContract}
-          close={close}
-          setTransactionAmount={setTransactionAmount}
-          setTransactionRecipient={setTransactionRecipient}
-          getRecipient={getRecipient}
-          navigate={navigate}
-          onConfirm={onConfirm}
-        />
-      </Flex>
-    </Box>
+    <>
+      <Separator />
+      <TransactionPane
+        protocol={protocol}
+        network={network}
+        ethereum={ethereum}
+        wallet={wallet}
+        screen={
+          screen === WalletScreen.TRANSACTION_SEND ? 'initial' : 'confirm'
+        }
+        to={to}
+        transactionAmount={transactionAmount}
+        transactionRecipient={transactionRecipient}
+        coin={coin}
+        uqbarContract={uqbarContract}
+        close={close}
+        setTransactionAmount={setTransactionAmount}
+        setTransactionRecipient={setTransactionRecipient}
+        getRecipient={getRecipient}
+        navigate={navigate}
+        onConfirm={onConfirm}
+      />
+    </>
   );
 };

@@ -50,47 +50,42 @@ export const TransactionDetailScreenBody = ({
 
   return (
     <Flex width="100%" height="100%" flexDirection="column" gap={10}>
-      <Text.Custom fontSize={2}>Transaction</Text.Custom>
+      <Text.Body fontSize={2}>Transaction</Text.Body>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
         {transactionStatus === 'pending' ? (
           <Flex alignItems="center">
-            <Text.Custom
+            <Text.Body
               opacity={0.9}
               fontWeight={600}
               fontSize={7}
               animate={false}
             >
               Pending
-            </Text.Custom>
+            </Text.Body>
             <Spinner size={0} />
           </Flex>
         ) : (
-          <Text.Custom
-            opacity={0.9}
-            fontWeight={600}
-            fontSize={7}
-            animate={false}
-          >
+          <Text.H1 opacity={0.9} fontWeight={600} fontSize={7} animate={false}>
             {wasSent ? `Sent` : `Received`}
-          </Text.Custom>
+          </Text.H1>
         )}
         <Flex
           flexDirection="column"
           justifyContent="center"
           alignItems="flex-end"
         >
-          <Text.Custom fontSize={4}>
+          <Text.Body fontSize={4}>
             {wasSent && '-'} {amountDisplay}
-          </Text.Custom>
+          </Text.Body>
           {protocol === ProtocolType.ETH_MAIN && (
-            <Text.Custom fontSize={2}>${usdAmount}</Text.Custom>
+            <Text.Body fontSize={2}>${usdAmount}</Text.Body>
           )}
         </Flex>
       </Flex>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
-        <Text.Custom fontSize={1} opacity={0.7}>
+        <Text.Body fontSize={1} opacity={0.7}>
           {wasSent ? 'SENT TO' : 'RECEIVED FROM'}
-        </Text.Custom>
+        </Text.Body>
         <Flex alignItems="center">
           {!patp ? (
             <Icon name="Spy" size={18} opacity={0.5} />
@@ -102,21 +97,21 @@ export const TransactionDetailScreenBody = ({
               sigilColor={['#000000', 'white']}
             />
           )}
-          <Text.Custom fontSize={1} ml={2}>
+          <Text.Body fontSize={1} ml={2}>
             {themDisplay}
-          </Text.Custom>
+          </Text.Body>
         </Flex>
       </Flex>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
-        <Text.Custom fontSize={1} opacity={0.7}>
+        <Text.Body fontSize={1} opacity={0.7}>
           DATE
-        </Text.Custom>
-        <Text.Custom fontSize={1}>{completedAtString}</Text.Custom>
+        </Text.Body>
+        <Text.Body fontSize={1}>{completedAtString}</Text.Body>
       </Flex>
       <Flex width="100%" justifyContent="space-between" alignItems="center">
-        <Text.Custom fontSize={1} opacity={0.7}>
+        <Text.Body fontSize={1} opacity={0.7}>
           HASH
-        </Text.Custom>
+        </Text.Body>
         <Flex>
           <Anchor
             href={`https://goerli.etherscan.io/tx/${transactionHash}`}
@@ -131,8 +126,8 @@ export const TransactionDetailScreenBody = ({
           </Anchor>
         </Flex>
       </Flex>
-      <Flex flexDirection="column" gap={10}>
-        <Text.Label style={{ marginBottom: 4 }} opacity={0.7} fontSize={1}>
+      <Flex flexDirection="column" gap="4px">
+        <Text.Label opacity={0.7} fontSize={1}>
           Notes
         </Text.Label>
         <Flex

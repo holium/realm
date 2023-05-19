@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Box, Flex, Spinner, Text } from '@holium/design-system/general';
+import { Flex, Spinner, Text } from '@holium/design-system/general';
 
 import { PasscodeDisplay } from './PasscodeDisplay';
 
@@ -24,7 +24,7 @@ export const PasscodeInput = ({
   onSuccess,
 }: Props) => {
   const [inputCode, setInputCode] = useState<number[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   const onKeyDown = async (event: KeyboardEvent) => {
@@ -77,9 +77,7 @@ export const PasscodeInput = ({
     <Flex flexDirection="column" alignItems="center">
       <PasscodeDisplay digits={6} filled={inputCode.length} />
       <Flex mt={4} width="80%" justifyContent="center">
-        <Box hidden={!loading}>
-          <Spinner size={1} />
-        </Box>
+        {loading && <Spinner size={3} />}
         {error && (
           <Text.Body color="intent-alert" fontSize={1}>
             That passcode was incorrect.
