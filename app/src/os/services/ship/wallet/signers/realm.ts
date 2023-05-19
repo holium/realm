@@ -102,6 +102,10 @@ export abstract class RealmSigner implements BaseSigner {
     db.delete();
   }
 
+  static forceDeleteMnemonic(patp: string) {
+    EncryptedStore.forceDelete('mnemonic', `realm.${patp}`);
+  }
+
   static hasMnemonic(patp: string) {
     return EncryptedStore.storeExists('mnemonic', `realm.${patp}`);
   }

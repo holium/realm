@@ -244,8 +244,13 @@ export class WalletService extends AbstractService {
     RealmSigner.deleteMnemonic(ourPatp, passcode);
   }
 
-  async deleteShipMnemonic(ourPatp: string, passcode: string) {
-    RealmSigner.deleteMnemonic(ourPatp, passcode);
+  async deleteShipMnemonic(ourPatp: string, passcode?: string) {
+    if (passcode) {
+      RealmSigner.deleteMnemonic(ourPatp, passcode);
+    } else {
+      RealmSigner.forceDeleteMnemonic(ourPatp);
+    }
+
     await APIConnection.getInstance().conduit.poke({
       app: 'realm-wallet',
       mark: 'realm-wallet-action',

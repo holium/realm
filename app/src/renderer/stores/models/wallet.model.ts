@@ -999,7 +999,11 @@ export const WalletStore = types
         this.navigate(WalletScreen.ONBOARDING);
       },
       async deleteShipWallet(passcode?: number[]) {
-        await this.deleteShipMnemonic(passcode);
+        if (passcode) {
+          await this.deleteShipMnemonic(passcode);
+        } else {
+          await this.forceDeleteShipMnemonic();
+        }
         this.reset();
       },
       deleteLocalWallet(passcode: number[]) {
@@ -1016,12 +1020,21 @@ export const WalletStore = types
         ) as PromiseLike<any>;
       }),
       deleteShipMnemonic: flow(function* (
-        passcode?: number[]
+        passcode: number[]
       ): Generator<PromiseLike<any>, void, any> {
         const passcodeString = passcode?.map(String).join('');
         yield WalletIPC.deleteShipMnemonic(
           self.ourPatp ?? '',
           passcodeString ?? ''
+        ) as PromiseLike<any>;
+      }),
+      forceDeleteShipMnemonic: flow(function* (): Generator<
+        PromiseLike<any>,
+        void,
+        any
+      > {
+        yield WalletIPC.deleteShipMnemonic(
+          self.ourPatp ?? ''
         ) as PromiseLike<any>;
       }),
       setMnemonic: flow(function* (
