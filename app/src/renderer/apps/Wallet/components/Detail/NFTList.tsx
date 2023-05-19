@@ -15,7 +15,7 @@ type Props = {
 
 export const NFTList = ({ nfts, navigate }: Props) => {
   if (!nfts.length) {
-    return <Text.H5>No NFTs</Text.H5>;
+    return <Text.H5 mt="4px">No NFTs</Text.H5>;
   }
 
   return (

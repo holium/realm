@@ -77,6 +77,9 @@ export class EncryptedStore<T> {
 
   delete() {
     this.db.clear();
+    console.log('deleting', this.db.path);
+    // Delete the file itself.
+    fs.unlinkSync(this.db.path);
   }
 
   static storeExists(name: string, cwd: string): boolean {

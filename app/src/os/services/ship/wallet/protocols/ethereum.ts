@@ -77,7 +77,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
       const socket = io(this.baseURL);
       socket.on('connect', () => {
         const room = this.protocol === ProtocolType.ETH_MAIN ? 'main' : 'gorli';
-        console.log('connected to ' + room + ' socket');
+        console.log('wallet connected to ' + room + ' socket');
         socket.emit('join', room);
       });
       socket.on('block', (data: any) => {
@@ -85,14 +85,16 @@ export class EthereumProtocol implements BaseBlockProtocol {
         this.updateWalletState(conduit, walletDB, currentBlock);
       });
       socket.on('error', (error: any) => {
-        console.log(error);
+        console.error('wallet error:', error);
       });
       // either by directly modifying the `auth` attribute
       socket.on('connect_error', () => {
-        console.log('connect error');
+        console.error('wallet connect_error');
       });
 
-      socket.on('disconnect', () => {});
+      socket.on('disconnect', () => {
+        console.log('wallet disconnected');
+      });
     } catch (error) {
       console.log(error);
     }

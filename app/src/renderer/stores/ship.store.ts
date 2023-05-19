@@ -2,13 +2,7 @@ import { createContext, useContext } from 'react';
 import { flow, Instance, onSnapshot, SnapshotIn, types } from 'mobx-state-tree';
 
 import { RealmSessionCredentials } from 'os/realm.types';
-import {
-  NetworkStoreType,
-  ProtocolType,
-  SharingMode,
-  WalletCreationMode,
-} from 'os/services/ship/wallet/wallet.types';
-import { WalletScreen } from 'renderer/apps/Wallet/types';
+import { walletAppDefault } from 'renderer/apps/store';
 
 import { ChatStore } from './chat.store';
 import { ShipIPC } from './ipc';
@@ -119,54 +113,7 @@ export const shipStore = ShipStore.create({
     },
   },
   bazaarStore: loadBazaarSnapshot(),
-  walletStore: {
-    navState: {
-      view: WalletScreen.ONBOARDING,
-      protocol: ProtocolType.ETH_GORLI,
-      lastEthProtocol: ProtocolType.ETH_GORLI,
-      btcNetwork: NetworkStoreType.BTC_MAIN,
-      // transSend: false,
-    },
-    ethereum: {
-      // block: 0,
-      gorliBlock: 0,
-      protocol: ProtocolType.ETH_GORLI,
-      settings: {
-        walletCreationMode: WalletCreationMode.DEFAULT,
-        sharingMode: SharingMode.ANYBODY,
-        defaultIndex: 0,
-      },
-      initialized: false,
-      conversions: {},
-    },
-    bitcoin: {
-      block: 0,
-      settings: {
-        walletCreationMode: WalletCreationMode.DEFAULT,
-        sharingMode: SharingMode.ANYBODY,
-        defaultIndex: 0,
-      },
-      conversions: {},
-    },
-    btctest: {
-      block: 0,
-      settings: {
-        walletCreationMode: WalletCreationMode.DEFAULT,
-        sharingMode: SharingMode.ANYBODY,
-        defaultIndex: 0,
-      },
-      conversions: {},
-    },
-    navHistory: [],
-    creationMode: 'default',
-    sharingMode: 'anybody',
-    lastInteraction: Date.now(),
-    initialized: false,
-    settings: {
-      passcodeHash: '',
-    },
-    forceActive: false,
-  },
+  walletStore: walletAppDefault,
   featuredStore: {
     spaces: {},
   },

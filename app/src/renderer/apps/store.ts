@@ -101,53 +101,54 @@ const loadSnapshot = () => {
 
 const persistedState = loadSnapshot();
 
+const defaultSettings = {
+  walletCreationMode: WalletCreationMode.DEFAULT,
+  sharingMode: SharingMode.ANYBODY,
+  defaultIndex: 0,
+};
+
+const defaultConversions = {
+  usd: 0,
+  euro: 0,
+  cad: 0,
+};
+
 export const walletAppDefault = {
   navState: {
     view: WalletScreen.ONBOARDING,
     protocol: ProtocolType.ETH_GORLI,
     lastEthProtocol: ProtocolType.ETH_GORLI,
     btcNetwork: NetworkStoreType.BTC_MAIN,
-    transSend: false,
   },
   ethereum: {
-    block: 0,
     gorliBlock: 0,
     protocol: ProtocolType.ETH_GORLI,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
+    settings: defaultSettings,
     initialized: false,
-    conversions: {},
+    conversions: defaultConversions,
   },
   bitcoin: {
     block: 0,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    conversions: {},
+    settings: defaultSettings,
+    conversions: defaultConversions,
   },
   btctest: {
     block: 0,
-    settings: {
-      walletCreationMode: WalletCreationMode.DEFAULT,
-      sharingMode: SharingMode.ANYBODY,
-      defaultIndex: 0,
-    },
-    conversions: {},
+    settings: defaultSettings,
+    conversions: defaultConversions,
   },
-  navHistory: [],
   creationMode: 'default',
   sharingMode: 'anybody',
-  lastInteraction: Date.now(),
+  lastInteraction: new Date(),
   initialized: false,
   settings: {
     passcodeHash: '',
   },
   forceActive: false,
+  returnView: WalletScreen.ONBOARDING,
+  ourPatp: '',
+  passcodeHash: '',
+  navHistory: [],
 };
 
 export const trayStore = TrayAppStore.create({
@@ -163,7 +164,7 @@ export const trayStore = TrayAppStore.create({
   roomsApp: {
     currentView: 'list',
   },
-  walletApp: walletAppDefault,
+  walletApp: walletAppDefault as any,
   innerNavigation: '',
 });
 

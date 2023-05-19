@@ -988,7 +988,15 @@ export const WalletStore = types
         self.forceActive = forceActive;
       },
       reset() {
-        // applySnapshot(self, walletAppDefault);
+        self.ethereum.deleteWallets();
+        self.ourPatp = '';
+        self.passcodeHash = '';
+        self.lastInteraction = new Date();
+        self.initialized = false;
+        self.forceActive = false;
+        self.uqTx = undefined;
+        self.navHistory = cast([]);
+        this.navigate(WalletScreen.ONBOARDING);
       },
       async deleteShipWallet(passcode?: number[]) {
         await this.deleteShipMnemonic(passcode);
