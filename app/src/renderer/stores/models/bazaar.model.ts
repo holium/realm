@@ -218,9 +218,14 @@ export const BazaarStore = types
         hasAlly(ship: string) {
           return allies.has(ship);
         },
-        getTreaties(ship: string) {
+        // exact - treaty ship must match exact. if false, match
+        //  on "child" ships. for example, if searching '~dister-dozzod-dozzod',
+        //    '~lander-dister-dozzod-dozzod/landscape' should match since '~dister-dozzod-dozzod'
+        //    is parent ship
+        getTreaties(ship: string, exact: boolean = true) {
+          ship = exact ? ship : (ship = ship.substring(1));
           const filteredTreaties = Array.from(toJS(treaties).values()).filter(
-            (val) => val.id.split('/')[0] === ship
+            (val) => val.id.split('/')[0].endsWith(ship)
           );
           return filteredTreaties;
         },
@@ -228,12 +233,13 @@ export const BazaarStore = types
           const treaty = treaties.get(`${ship}/${desk}`);
           return treaty && getSnapshot(treaty);
         },
-        searchTreaties(ship: string, term: string) {
+        searchTreaties(ship: string, term: string, exact: boolean = false) {
           const str = term.toLowerCase();
-          const resultTreaties = this.getTreaties(ship).filter((val) => {
+          ship = exact ? ship : ship.substring(1);
+          const resultTreaties = this.getTreaties(ship, false).filter((val) => {
             const tokens = val.id.split('/');
             return (
-              tokens[0] === ship &&
+              tokens[0].endsWith(ship) &&
               (val.title.toLowerCase().startsWith(str) ||
                 tokens[1].startsWith(term))
             );
