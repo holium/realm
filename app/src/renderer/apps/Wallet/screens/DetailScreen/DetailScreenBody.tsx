@@ -115,7 +115,6 @@ export const DetailScreenBody = ({
     WalletScreen.TRANSACTION_SEND,
     WalletScreen.TRANSACTION_CONFIRM,
   ].includes(screen);
-  const hideWalletHero = screen === WalletScreen.TRANSACTION_CONFIRM;
 
   const sendTransaction = async (passcode: number[]) => {
     try {
@@ -216,25 +215,24 @@ export const DetailScreenBody = ({
         onClickQrCode={qrCode.toggle}
       />
 
-      {!hideWalletHero && (
-        <Flex width="100%" flexDirection="column" gap="12px">
-          <WalletBreadCrumbs
-            walletNickname={wallet.nickname}
-            coinName={coin?.name}
-            onClickBack={onClickNavigateBack}
-          />
-          {qrCode.isOn && (
-            <Flex width="100%" height="190px" minHeight={0} alignItems="center">
-              <QRCodeSVG width="100%" height="100%" value={wallet.address} />
-            </Flex>
-          )}
-          <WalletBalance
-            coin={coin}
-            amountDisplay={amountDisplay}
-            amountUsdDisplay={amountUsdDisplay}
-          />
-        </Flex>
-      )}
+      <Flex width="100%" flexDirection="column" gap="12px">
+        <WalletBreadCrumbs
+          walletNickname={wallet.nickname}
+          coinName={coin?.name}
+          onClickBack={onClickNavigateBack}
+        />
+        {qrCode.isOn && (
+          <Flex width="100%" height="190px" minHeight={0} alignItems="center">
+            <QRCodeSVG width="100%" height="100%" value={wallet.address} />
+          </Flex>
+        )}
+        <WalletBalance
+          coin={coin}
+          amountDisplay={amountDisplay}
+          amountUsdDisplay={amountUsdDisplay}
+          simple={isSendingTransaction}
+        />
+      </Flex>
       {!isSendingTransaction && (
         <SendReceiveButtons
           send={() => {

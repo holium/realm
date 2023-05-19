@@ -53,6 +53,34 @@ export const SendStory: ComponentStory<typeof DetailScreenBody> = () => (
 
 SendStory.storyName = 'Send';
 
+export const ConfirmStory: ComponentStory<typeof DetailScreenBody> = () => (
+  <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI}>
+    <DetailScreenBody
+      wallet={mockWallets[0]}
+      coin={null}
+      transactions={mockTransactions}
+      coins={[mockShibaCoin, mockBitcoinCoin]}
+      nfts={[mockStarNft, mockCryptoPunkNft]}
+      network={NetworkType.ETHEREUM}
+      protocol={ProtocolType.ETH_GORLI}
+      bitcoin={mockBitcoin}
+      ethereum={mockEthereum}
+      ethToUsd={mockEthereum.conversions.usd}
+      screen={WalletScreen.TRANSACTION_CONFIRM}
+      to="~zod"
+      getRecipient={() => Promise.resolve({} as any)}
+      checkPasscode={() => Promise.resolve(true)}
+      sendEthereumTransaction={() => Promise.resolve(false)}
+      onClickNavigateBack={() => {}}
+      sendERC20Transaction={() => Promise.resolve(false)}
+      navigate={() => {}}
+      close={() => {}}
+    />
+  </WalletStoryWrapper>
+);
+
+ConfirmStory.storyName = 'Confirm';
+
 export const TransactionDetailStory: ComponentStory<
   typeof TransactionDetailScreenBody
 > = () => (

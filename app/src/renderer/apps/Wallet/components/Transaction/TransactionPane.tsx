@@ -155,42 +155,34 @@ export const TransactionPane = ({
       </Flex>
     );
   }
+  console.log('transactionRecipient', transactionRecipient);
 
   return (
-    <Flex flexDirection="column">
+    <Flex flexDirection="column" flex={1}>
       {!uqbarContract && (
-        <>
-          <Text.Body
-            opacity={0.9}
-            fontWeight={600}
-            fontSize={7}
-            animate={false}
-          >
-            {transactionAmount}{' '}
-            {coin
-              ? coin.name
-              : protocol === ProtocolType.UQBAR
-              ? 'zigs'
-              : abbrMap[network]}
-          </Text.Body>
-          {protocol === ProtocolType.ETH_MAIN && (
-            <Text.Body>
-              ${ethToUsd(transactionAmount, ethereum.conversions.usd ?? 0)} USD
-            </Text.Body>
-          )}
+        <Flex flexDirection="column" flex={1}>
           <Flex
             width="100%"
             flexDirection="column"
             justifyContent="space-evenly"
             alignItems="center"
+            gap="16px"
           >
-            <Flex width="100%" justifyContent="space-between">
+            <Flex
+              width="100%"
+              justifyContent="space-between"
+              alignItems="center"
+            >
               <Text.Body variant="body">TO</Text.Body>
               <TransactionRecipientInfo
                 transactionRecipient={transactionRecipient}
               />
             </Flex>
-            <Flex width="100%" justifyContent="space-between">
+            <Flex
+              width="100%"
+              justifyContent="space-between"
+              alignItems="center"
+            >
               <Text.Body variant="body">NETWORK FEE</Text.Body>
               <Flex flexDirection="column">
                 <Text.Body variant="body">0.001 ETH</Text.Body>
@@ -201,7 +193,11 @@ export const TransactionPane = ({
                 )}
               </Flex>
             </Flex>
-            <Flex width="100%" justifyContent="space-between">
+            <Flex
+              width="100%"
+              justifyContent="space-between"
+              alignItems="center"
+            >
               <Text.Body variant="body">TOTAL</Text.Body>
               <Flex flexDirection="column">
                 <Text.Body variant="body">
@@ -220,17 +216,19 @@ export const TransactionPane = ({
               </Flex>
             </Flex>
           </Flex>
-        </>
+        </Flex>
       )}
-      <Flex justifyContent="space-between">
-        <Button.TextButton variant="transparent" onClick={() => prev()}>
-          Reject
-        </Button.TextButton>
+      <Flex gap="10px">
+        <Button.Secondary flex={1} justifyContent="center" onClick={prev}>
+          Cancel
+        </Button.Secondary>
         <Button.TextButton
-          px={2}
-          onClick={onConfirm} // sendTransaction}
+          flex={1}
+          justifyContent="center"
+          color="intent-success"
+          onClick={onConfirm}
         >
-          Confirm
+          Send {abbrMap[network]}
         </Button.TextButton>
       </Flex>
     </Flex>

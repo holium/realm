@@ -24,7 +24,7 @@ export const PasscodeInput = ({
   onSuccess,
 }: Props) => {
   const [inputCode, setInputCode] = useState<number[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
   const onKeyDown = async (event: KeyboardEvent) => {
