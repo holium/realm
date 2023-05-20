@@ -129,7 +129,7 @@ export const PinnedDockAppPresenter = ({
       ...hideOrShowOption,
       ...closeOption,
     ],
-    [appRef?.installStatus]
+    [appRef?.installStatus, isActive, isMinimized]
   );
 
   const contextMenuColors = useMemo(() => {

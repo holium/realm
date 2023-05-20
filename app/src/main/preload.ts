@@ -75,7 +75,7 @@ const appPreload = {
   onBrowserOpen(callback: any) {
     ipcRenderer.on('realm.browser.open', callback);
   },
-  onInitialDimensions(callback: any) {
+  onDimensionsChange(callback: any) {
     ipcRenderer.on('set-dimensions', callback);
   },
   onMouseOut(callback: () => void) {

@@ -44,7 +44,11 @@ const AppPresenter = () => {
       <AppStateProvider value={appState}>
         <GlobalStyle blur={true} realmTheme={theme} />
         {!shellStore.isFullscreen && <Titlebar />}
-        <RealmBackground blurred={shellStore.isBlurred} wallpaper={bgImage} />
+        <RealmBackground
+          blurred={shellStore.isBlurred}
+          snapView={shellStore.snapView}
+          wallpaper={bgImage}
+        />
         <SelectionProvider>
           <ContextMenuProvider>
             <ErrorBoundary>

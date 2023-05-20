@@ -144,6 +144,7 @@ const createWindow = async () => {
     }
     const initialDimensions = mainWindow.getBounds();
     mainWindow.webContents.send('set-dimensions', initialDimensions);
+    mainWindow.webContents.send('set-fullscreen', mainWindow.isFullScreen());
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);
