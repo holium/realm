@@ -154,9 +154,6 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
         resizing.toggleOff();
       }
     });
-    return () => {
-      window.electron.app.removeOnMouseMove();
-    };
   }, []);
 
   useEffect(() => {
@@ -334,6 +331,16 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     [appId, motionX, motionY, motionWidth, motionHeight]
   );
 
+  useEffect(() => {
+    if (!dragging.isOn) {
+      if (nearEdge.isOn && !resizing.isOn) {
+        dragMaximize();
+      } else {
+        updateWindowBounds();
+      }
+    }
+  }, [dragging.isOn]);
+
   const onDragStart = (e: PointerEvent<HTMLDivElement>) => {
     dragging.toggleOn();
     dragControls.start(e);
@@ -341,12 +348,6 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
 
   const onDragEnd = () => {
     dragging.toggleOff();
-    console.log('drag end');
-    if (nearEdge.isOn && !resizing.isOn) {
-      dragMaximize();
-    } else {
-      updateWindowBounds();
-    }
   };
 
   const setBoundsAfterMaximize = (mb: BoundsModelType) => {
