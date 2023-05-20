@@ -136,7 +136,7 @@ export const RealmBackground = ({
 
     switch (snapView) {
       case 'none':
-        controls.start({ opacity: 0 });
+        controls.start({ opacity: 0, zIndex: 0 });
         break;
       case 'left':
         // 1. get the ghost pane into the correct position
@@ -146,6 +146,7 @@ export const RealmBackground = ({
           y: shellStore.isFullscreen ? dmb.y : dmb.y + 30,
           width: dmb.width / 2,
           height: shellStore.isFullscreen ? dmb.height : dmb.height - 30,
+          zIndex: shellStore.windows.size,
           transition: {
             duration: 0,
           },
@@ -158,6 +159,7 @@ export const RealmBackground = ({
           y: shellStore.isFullscreen ? dmb.y : dmb.y + 30,
           width: dmb.width / 2,
           height: shellStore.isFullscreen ? dmb.height : dmb.height - 30,
+          zIndex: shellStore.windows.size,
           transition: {
             duration: 0,
           },
@@ -170,6 +172,7 @@ export const RealmBackground = ({
           y: shellStore.isFullscreen ? dmb.y : dmb.y + 30,
           width: dmb.width,
           height: shellStore.isFullscreen ? dmb.height : dmb.height - 30,
+          zIndex: shellStore.windows.size,
           transition: {
             duration: 0,
           },
