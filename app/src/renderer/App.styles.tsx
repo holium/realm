@@ -1,10 +1,18 @@
-import { useMemo } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { useEffect, useMemo } from 'react';
+import {
+  AnimatePresence,
+  AnimationControls,
+  motion,
+  useAnimationControls,
+} from 'framer-motion';
 import { darken } from 'polished';
 import { createGlobalStyle, css } from 'styled-components';
 
 import { genCSSVariables, ThemeType } from '@holium/shared';
 
+import { useAppState } from 'renderer/stores/app.store';
+
+import { denormalizeBounds, getMaximizedBounds } from './lib/window-manager';
 import { BackgroundImage } from './system/system.styles';
 
 type Props = {
@@ -87,13 +95,70 @@ export const GlobalStyle = createGlobalStyle<Props>`
     }
 `;
 
+type GhostPaneProps = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  controls: AnimationControls;
+};
+
+const GhostPane = ({ x, y, width, height, controls }: GhostPaneProps) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    exit={{ opacity: 0 }}
+    animate={controls}
+    style={{
+      x,
+      y,
+      width,
+      height,
+      borderRadius: 8,
+      zIndex: 0,
+      backgroundColor: 'rgba(var(--rlm-dock-rgba))',
+      position: 'absolute',
+    }}
+    transition={{
+      opacity: { duration: 0.2 },
+    }}
+  />
+);
+
 export const RealmBackground = ({
   blurred,
   wallpaper,
+  snapView,
 }: {
   blurred: boolean;
   wallpaper: string;
+  snapView: string;
 }) => {
+  const { shellStore } = useAppState();
+  const mb = getMaximizedBounds(shellStore.desktopDimensions);
+  const dmb = denormalizeBounds(mb, shellStore.desktopDimensions);
+  const leftControls = useAnimationControls();
+  const rightControls = useAnimationControls();
+  const fullscreenControls = useAnimationControls();
+
+  useEffect(() => {
+    switch (snapView) {
+      case 'none':
+        leftControls.start({ opacity: 0 });
+        rightControls.start({ opacity: 0 });
+        fullscreenControls.start({ opacity: 0 });
+        break;
+      case 'left':
+        leftControls.start({ opacity: 1 });
+        break;
+      case 'right':
+        rightControls.start({ opacity: 1 });
+        break;
+      case 'fullscreen':
+        fullscreenControls.start({ opacity: 1 });
+        break;
+    }
+  }, [snapView]);
+
   return useMemo(
     () => (
       <AnimatePresence>
@@ -110,7 +175,27 @@ export const RealmBackground = ({
             opacity: { duration: 0.5 },
           }}
         />
-        <div id="ghostpane" />
+        <GhostPane
+          x={dmb.x}
+          y={dmb.y}
+          width={dmb.width}
+          height={dmb.height}
+          controls={fullscreenControls}
+        />
+        <GhostPane
+          x={dmb.x}
+          y={dmb.y}
+          width={dmb.width / 2}
+          height={dmb.height}
+          controls={leftControls}
+        />
+        <GhostPane
+          x={dmb.x + dmb.width / 2}
+          y={dmb.y}
+          width={dmb.width / 2}
+          height={dmb.height}
+          controls={rightControls}
+        />
       </AnimatePresence>
     ),
     [blurred, wallpaper]

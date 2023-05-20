@@ -40,7 +40,7 @@ export const getMaximizedBounds = (desktopDimensions: Dimensions): Bounds => {
   const windowHeight = 10 - offsetY;
 
   return {
-    x: 0,
+    x: normalizedPaddingX,
     y: normalizedPaddingY,
     width: windowWidth,
     height: windowHeight,
