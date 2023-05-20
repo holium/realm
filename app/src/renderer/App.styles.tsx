@@ -103,26 +103,30 @@ type GhostPaneProps = {
   controls: AnimationControls;
 };
 
-const GhostPane = ({ x, y, width, height, controls }: GhostPaneProps) => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    exit={{ opacity: 0 }}
-    animate={controls}
-    style={{
-      x,
-      y,
-      width,
-      height,
-      borderRadius: 8,
-      zIndex: 0,
-      backgroundColor: 'rgba(var(--rlm-dock-rgba))',
-      position: 'absolute',
-    }}
-    transition={{
-      opacity: { duration: 0.2 },
-    }}
-  />
-);
+const GhostPane = ({ x, y, width, height, controls }: GhostPaneProps) => {
+  const { shellStore } = useAppState();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      exit={{ opacity: 0 }}
+      animate={controls}
+      style={{
+        x,
+        y: shellStore.isFullscreen ? y : y + 30,
+        width,
+        height: shellStore.isFullscreen ? height : height - 30,
+        borderRadius: 8,
+        zIndex: 0,
+        backgroundColor: 'rgba(var(--rlm-dock-rgba))',
+        position: 'absolute',
+      }}
+      transition={{
+        opacity: { duration: 0.2 },
+      }}
+    />
+  );
+};
 
 export const RealmBackground = ({
   blurred,
@@ -176,21 +180,21 @@ export const RealmBackground = ({
           }}
         />
         <GhostPane
-          x={dmb.x}
+          x={dmb.x + 8}
           y={dmb.y}
           width={dmb.width}
           height={dmb.height}
           controls={fullscreenControls}
         />
         <GhostPane
-          x={dmb.x}
+          x={dmb.x + 8}
           y={dmb.y}
           width={dmb.width / 2}
           height={dmb.height}
           controls={leftControls}
         />
         <GhostPane
-          x={dmb.x + dmb.width / 2}
+          x={dmb.x + 8 + dmb.width / 2}
           y={dmb.y}
           width={dmb.width / 2}
           height={dmb.height}

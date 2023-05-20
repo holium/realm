@@ -6,6 +6,7 @@ import { Dimensions } from '@holium/design-system';
 import {
   getMaximizedBounds,
   isMaximizedBounds,
+  normalizeValue,
 } from '../../lib/window-manager';
 import { Glob } from './docket.model';
 
@@ -79,33 +80,48 @@ export const AppWindowModel = types
     restoreOldDimensions() {
       self.bounds = { ...self.prevBounds };
     },
-    maximizeLeft(desktopDimensions: Dimensions) {
+    maximizeLeft(desktopDimensions: Dimensions, isFullscreen: boolean) {
       const maximizedBounds = getMaximizedBounds(desktopDimensions);
       self.prevBounds = { ...self.bounds };
       self.bounds = {
         x: maximizedBounds.x,
         y: maximizedBounds.y,
         width: maximizedBounds.width / 2,
-        height: maximizedBounds.height,
+        height: isFullscreen
+          ? maximizedBounds.height
+          : maximizedBounds.height -
+            normalizeValue(30, desktopDimensions.height),
       };
     },
-    maximizeRight(desktopDimensions: Dimensions) {
+    maximizeRight(desktopDimensions: Dimensions, isFullscreen: boolean) {
       const maximizedBounds = getMaximizedBounds(desktopDimensions);
       self.prevBounds = { ...self.bounds };
       self.bounds = {
         x: maximizedBounds.x + maximizedBounds.width / 2,
         y: maximizedBounds.y,
         width: maximizedBounds.width / 2,
-        height: maximizedBounds.height,
+        height: isFullscreen
+          ? maximizedBounds.height
+          : maximizedBounds.height -
+            normalizeValue(30, desktopDimensions.height),
       };
     },
-    toggleMaximize(desktopDimensions: Dimensions) {
+    toggleMaximize(desktopDimensions: Dimensions, isFullscreen: boolean) {
       const isMaximized = self.isMaximized(desktopDimensions);
       if (isMaximized) {
         self.bounds = { ...self.prevBounds };
       } else {
         self.prevBounds = { ...self.bounds };
-        self.bounds = getMaximizedBounds(desktopDimensions);
+        const maximizedBounds = getMaximizedBounds(desktopDimensions);
+        self.bounds = {
+          x: maximizedBounds.x,
+          y: maximizedBounds.y,
+          width: maximizedBounds.width,
+          height: isFullscreen
+            ? maximizedBounds.height
+            : maximizedBounds.height -
+              normalizeValue(30, desktopDimensions.height),
+        };
       }
     },
     setIsActive(isActive: boolean) {
