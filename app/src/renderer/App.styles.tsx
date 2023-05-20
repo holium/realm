@@ -96,26 +96,16 @@ export const GlobalStyle = createGlobalStyle<Props>`
 `;
 
 type GhostPaneProps = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
   controls: AnimationControls;
 };
 
-const GhostPane = ({ x, y, width, height, controls }: GhostPaneProps) => {
-  const { shellStore } = useAppState();
-
+const GhostPane = ({ controls }: GhostPaneProps) => {
   return (
     <motion.div
       initial={{ opacity: 0 }}
       exit={{ opacity: 0 }}
       animate={controls}
       style={{
-        x,
-        y: shellStore.isFullscreen ? y : y + 30,
-        width,
-        height: shellStore.isFullscreen ? height : height - 30,
         borderRadius: 8,
         zIndex: 0,
         backgroundColor: 'rgba(var(--rlm-dock-rgba))',
@@ -138,27 +128,53 @@ export const RealmBackground = ({
   snapView: string;
 }) => {
   const { shellStore } = useAppState();
-  const mb = getMaximizedBounds(shellStore.desktopDimensions);
-  const dmb = denormalizeBounds(mb, shellStore.desktopDimensions);
-  const leftControls = useAnimationControls();
-  const rightControls = useAnimationControls();
-  const fullscreenControls = useAnimationControls();
+  const controls = useAnimationControls();
 
   useEffect(() => {
+    const mb = getMaximizedBounds(shellStore.desktopDimensions);
+    const dmb = denormalizeBounds(mb, shellStore.desktopDimensions);
+
     switch (snapView) {
       case 'none':
-        leftControls.start({ opacity: 0 });
-        rightControls.start({ opacity: 0 });
-        fullscreenControls.start({ opacity: 0 });
+        controls.start({ opacity: 0 });
         break;
       case 'left':
-        leftControls.start({ opacity: 1 });
+        // 1. get the ghost pane into the correct position
+        // 2. show it.
+        controls.start({
+          x: dmb.x + 8,
+          y: shellStore.isFullscreen ? dmb.y : dmb.y + 30,
+          width: dmb.width / 2,
+          height: shellStore.isFullscreen ? dmb.height : dmb.height - 30,
+          transition: {
+            duration: 0,
+          },
+        });
+        controls.start({ opacity: 1 });
         break;
       case 'right':
-        rightControls.start({ opacity: 1 });
+        controls.start({
+          x: dmb.x + 8 + dmb.width / 2,
+          y: shellStore.isFullscreen ? dmb.y : dmb.y + 30,
+          width: dmb.width / 2,
+          height: shellStore.isFullscreen ? dmb.height : dmb.height - 30,
+          transition: {
+            duration: 0,
+          },
+        });
+        controls.start({ opacity: 1 });
         break;
       case 'fullscreen':
-        fullscreenControls.start({ opacity: 1 });
+        controls.start({
+          x: dmb.x + 8,
+          y: shellStore.isFullscreen ? dmb.y : dmb.y + 30,
+          width: dmb.width,
+          height: shellStore.isFullscreen ? dmb.height : dmb.height - 30,
+          transition: {
+            duration: 0,
+          },
+        });
+        controls.start({ opacity: 1 });
         break;
     }
   }, [snapView]);
@@ -179,27 +195,7 @@ export const RealmBackground = ({
             opacity: { duration: 0.5 },
           }}
         />
-        <GhostPane
-          x={dmb.x + 8}
-          y={dmb.y}
-          width={dmb.width}
-          height={dmb.height}
-          controls={fullscreenControls}
-        />
-        <GhostPane
-          x={dmb.x + 8}
-          y={dmb.y}
-          width={dmb.width / 2}
-          height={dmb.height}
-          controls={leftControls}
-        />
-        <GhostPane
-          x={dmb.x + 8 + dmb.width / 2}
-          y={dmb.y}
-          width={dmb.width / 2}
-          height={dmb.height}
-          controls={rightControls}
-        />
+        <GhostPane controls={controls} />
       </AnimatePresence>
     ),
     [blurred, wallpaper]
