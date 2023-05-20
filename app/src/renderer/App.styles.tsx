@@ -9,7 +9,6 @@ import { BackgroundImage } from './system/system.styles';
 
 type Props = {
   realmTheme: ThemeType;
-  blur: boolean;
 };
 
 export const GlobalStyle = createGlobalStyle<Props>`

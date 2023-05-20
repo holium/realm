@@ -38,7 +38,6 @@ export const ResumingOverlay = styled.div`
 export const BackgroundWrap = styled(motion.div)`
   user-select: none;
   position: fixed;
-  z-index: 0;
   right: -22px;
   left: -22px;
   z-index: 0;
@@ -49,7 +48,7 @@ export const BackgroundWrap = styled(motion.div)`
 `;
 
 export const BackgroundImage = styled(motion.img)`
-  ${(props: { blur?: boolean; src?: string }) =>
+  ${(props: { src?: string }) =>
     props.src &&
     css`
       user-select: none;

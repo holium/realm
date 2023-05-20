@@ -407,7 +407,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       dragElastic={0}
       dragMomentum={false}
       dragListener={false}
-      drag={dragging.isOn}
+      drag
       dragControls={dragControls}
       initial={{
         opacity: 0,

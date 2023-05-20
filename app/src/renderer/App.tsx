@@ -42,7 +42,7 @@ const AppPresenter = () => {
   return (
     <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
       <AppStateProvider value={appState}>
-        <GlobalStyle blur={true} realmTheme={theme} />
+        <GlobalStyle realmTheme={theme} />
         {!shellStore.isFullscreen && <Titlebar />}
         <RealmBackground blurred={shellStore.isBlurred} wallpaper={bgImage} />
         <SelectionProvider>
@@ -51,8 +51,6 @@ const AppPresenter = () => {
               {booted ? <AppContent /> : <AppLoading />}
               {contextMenuMemo}
               <div id="portal-root" />
-              <div id="menu-root" />
-              <div id="audio-root" />
             </ErrorBoundary>
           </ContextMenuProvider>
         </SelectionProvider>
