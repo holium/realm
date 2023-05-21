@@ -104,13 +104,8 @@ export const AmountInput = ({
         gap="16px"
       >
         <Text.Body fontSize={1}>AMOUNT</Text.Body>
-        <ContainerFlex
-          flex={1}
-          gap="4px"
-          minWidth={0}
-          onClick={inputContainerClicked}
-        >
-          <Flex flex={1} minWidth={0} alignItems="center" gap="4px">
+        <ContainerFlex onClick={inputContainerClicked}>
+          <Flex flex={1} minWidth={0}>
             {inCrypto ? (
               <TextInput
                 id="amount-input"
@@ -123,7 +118,13 @@ export const AmountInput = ({
                 onChange={onChange}
               />
             ) : (
-              <>
+              <Flex
+                flex={1}
+                minWidth={0}
+                alignItems="center"
+                gap="4px"
+                pl="4px"
+              >
                 <Text.Body fontSize="12px">$</Text.Body>
                 <TextInput
                   id="amount-input"
@@ -135,7 +136,7 @@ export const AmountInput = ({
                   value={(amount ?? '').toString()}
                   onChange={onChange}
                 />
-              </>
+              </Flex>
             )}
           </Flex>
           <Button.Transparent onClick={toggleInCrypto}>
