@@ -182,16 +182,9 @@ export class WalletService extends AbstractService {
       from,
       value: ethers.utils.parseEther(amount),
     });
-    console.log('sendTransaction', 'gasLimit', gasLimit);
-
     const gasPrice = await protocol.getFeePrice();
-    console.log('sendTransaction', 'gasPrice', gasPrice);
-
     const nonce = await protocol.getNonce(from);
-    console.log('sendTransaction', 'nonce', nonce);
-
     const chainId = await protocol.getChainId();
-    console.log('sendTransaction', 'chainId', chainId);
 
     const transaction = {
       from,
@@ -202,19 +195,16 @@ export class WalletService extends AbstractService {
       nonce,
       chainId,
     };
-    console.log('tx', JSON.stringify(transaction, null, 2));
     const signedTx = await RealmSigner.signTransaction({
       path,
       transaction,
       patp: ourPatp,
       passcode,
     });
-    console.log('sendTransaction', 'signedTx', signedTx);
 
     const hash = await (
       this.protocolManager?.protocols.get(currentProtocol) as BaseBlockProtocol
     ).sendTransaction(signedTx);
-    console.log('sendTransaction', 'hash', hash);
 
     return { hash, tx: transaction };
   }

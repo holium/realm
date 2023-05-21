@@ -43,8 +43,6 @@ const PendingTransactionPresenter = ({ transaction, hide }: Props) => {
     transaction.theirPatp || shortened(transaction.theirAddress);
   let unitsDisplay = 'BTC';
   if (isEth) {
-    console.log(transaction);
-    console.log(transaction.ethType);
     unitsDisplay =
       transaction.ethType === 'ETH'
         ? walletStore.navState.protocol === ProtocolType.UQBAR
