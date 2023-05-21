@@ -68,9 +68,10 @@ export const Transaction = ({
               opacity={transaction.status !== 'pending' ? 1 : 0.5}
               style={{
                 whiteSpace: 'nowrap',
-                color: transaction.status !== 'pending'
-                  ? 'var(--rlm-intent-success-color)'
-                  : 'var(--rlm-text-color)',
+                color:
+                  transaction.status !== 'pending'
+                    ? 'var(--rlm-intent-success-color)'
+                    : 'var(--rlm-text-color)',
               }}
             >
               {dateString}

@@ -183,7 +183,7 @@ export const DetailScreenBody = ({
           }`
       : `${formatBtcAmount((wallet as BitcoinWalletType).balance).btc} BTC`;
 
-  let amountUsdDisplay = '$0.00 USD';
+  let amountUsdDisplay = '$ ... USD';
   if (network === NetworkType.ETHEREUM) {
     if (coin && coinPrice) {
       amountUsdDisplay = `$${convertERC20AmountToUsd(

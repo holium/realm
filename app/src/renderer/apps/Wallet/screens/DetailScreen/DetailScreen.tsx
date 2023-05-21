@@ -26,7 +26,10 @@ const DetailScreenPresenter = () => {
   useEffect(() => {
     walletStore.ethereum.conversions.usd.then(setEthPrice);
     walletStore.bitcoin.conversions.usd.then(setBitcoinPrice);
-  }, [walletStore.ethereum.conversions.usd, walletStore.bitcoin.conversions.usd]);
+  }, [
+    walletStore.ethereum.conversions.usd,
+    walletStore.bitcoin.conversions.usd,
+  ]);
 
   const wallet = walletStore.currentWallet;
 

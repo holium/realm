@@ -64,7 +64,7 @@ export const ConfirmStory: ComponentStory<typeof DetailScreenBody> = () => (
       ethPrice={1725.0}
       bitcoinPrice={1725.0}
       screen={WalletScreen.TRANSACTION_CONFIRM}
-      to="~zod"
+      to="0x1234567890"
       getRecipient={() => Promise.resolve({} as any)}
       checkPasscode={() => Promise.resolve(true)}
       sendEthereumTransaction={() => Promise.resolve()}

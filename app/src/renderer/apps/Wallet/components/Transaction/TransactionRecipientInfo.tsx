@@ -13,21 +13,21 @@ export const TransactionRecipientInfo = ({ transactionRecipient }: Props) => {
   return (
     <Flex justifyContent="center">
       {!transactionRecipient.patp && transactionRecipient.address && (
-        <Flex flexDirection="column" justifyContent="center">
-          <Icon name="Spy" size="24px" />
-          <Text.Body variant="body">
+        <Flex gap="8px" justifyContent="center">
+          <Icon name="Spy" size="20px" />
+          <Text.Body style={{ lineHeight: '20px' }}>
             {shortened(transactionRecipient.address)}
           </Text.Body>
         </Flex>
       )}
       {transactionRecipient.patp && transactionRecipient.address && (
-        <Flex gap={8} alignItems="center">
+        <Flex gap="8px" alignItems="center">
           <Avatar
             sigilColor={[transactionRecipient.color || 'black', 'white']}
             simple={true}
             size={24}
             patp={transactionRecipient.patp}
-          />{' '}
+          />
           <Flex flexDirection="column" justifyContent="center">
             <Text.Body variant="body">{transactionRecipient.patp}</Text.Body>
             <Text.Body variant="body">

@@ -154,7 +154,6 @@ export const TransactionPane = ({
       </Flex>
     );
   }
-  console.log('transactionRecipient', transactionRecipient);
 
   return (
     <Flex flexDirection="column" flex={1}>
