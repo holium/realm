@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 import { Flex, Icon, Row, Text } from '@holium/design-system/general';
 
 import { ERC20Type } from 'renderer/stores/models/wallet.model';
@@ -14,12 +16,18 @@ type Props = {
 };
 
 export const Coin = ({ coin, onClickCoin }: Props) => {
+  const [coinPrice, setCoinPrice] = useState<number>();
+
+  useEffect(() => {
+    coin.conversions.getUsdPrice(coin.name).then(setCoinPrice);
+  }, [coin]);
+
   const coinIcon = coin.logo || getMockCoinIcon(coin.name);
   const amount = formatCoinAmount(coin.balance, coin.decimals);
 
   const amountUsdDisplay = `$${convertERC20AmountToUsd(
     formatCoinAmount(coin.balance, coin.decimals),
-    coin.conversions.usd
+    coinPrice
   )} USD`;
 
   return (

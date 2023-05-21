@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import Database from 'better-sqlite3-multiple-ciphers';
+import CoinGecko from 'coingecko-api';
 import { ethers } from 'ethers';
 
 import AbstractService, { ServiceOptions } from '../../abstract.service';
@@ -15,6 +16,8 @@ import { ProtocolType, UISettingsType } from './wallet.types';
 export class WalletService extends AbstractService {
   public walletDB?: WalletDB;
   private protocolManager?: ProtocolManager;
+  private coingecko?: CoinGecko;
+
   constructor(options?: ServiceOptions, db?: Database) {
     super('walletService', options);
     if (options?.preload) {
@@ -30,6 +33,7 @@ export class WalletService extends AbstractService {
       protocolMap,
       ProtocolType.ETH_GORLI
     );
+    this.coingecko = new CoinGecko();
   }
 
   public reset(): void {
@@ -333,20 +337,12 @@ export class WalletService extends AbstractService {
 
   watchUpdates(protocol: ProtocolType) {
     if (!this.walletDB) throw new Error('Wallet DB not initialized');
-    this.protocolManager?.watchUpdates(
-      APIConnection.getInstance().conduit,
-      this.walletDB,
-      protocol
-    );
+    this.protocolManager?.watchUpdates(this.walletDB, protocol);
   }
 
   updateWalletState(protocol: ProtocolType) {
     if (!this.walletDB) throw new Error('Wallet DB not initialized');
-    this.protocolManager?.updateWalletState(
-      APIConnection.getInstance().conduit,
-      this.walletDB,
-      protocol
-    );
+    this.protocolManager?.updateWalletState(this.walletDB, protocol);
   }
 
   pauseUpdates() {
@@ -371,7 +367,25 @@ export class WalletService extends AbstractService {
   }
 
   async getWalletsUpdate() {
-    this.walletDB?.sendChainUpdate(await this.walletDB._fetchWallets());
+    if (!this.walletDB) throw new Error('Wallet DB not initialized');
+
+    const data = await this.walletDB.fetchWallets();
+    this.walletDB.sendChainUpdate(data);
+  }
+
+  async getBitcoinPrice() {
+    const response = await this.coingecko?.coins.fetch('bitcoin', {});
+    return response?.data?.market_data?.current_price?.usd;
+  }
+
+  async getEthereumPrice() {
+    const response = await this.coingecko?.coins.fetch('ethereum', {});
+    return response?.data?.market_data?.current_price?.usd;
+  }
+
+  async getCoinPrice(coinName: string) {
+    const response = await this.coingecko?.coins.fetch(coinName, {});
+    return response?.data?.market_data?.current_price?.usd;
   }
 }
 

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import { NetworkType } from 'os/services/ship/wallet/wallet.types';
@@ -66,6 +67,17 @@ const getTransaction = (
 const TransactionDetailScreenPresenter = () => {
   const { walletStore } = useShipStore();
 
+  const [ethPrice, setEthPrice] = useState<number>();
+  const [bitcoinPrice, setBitcoinPrice] = useState<number>();
+
+  useEffect(() => {
+    walletStore.ethereum.conversions.usd.then(setEthPrice);
+    walletStore.bitcoin.conversions.usd.then(setBitcoinPrice);
+  }, [
+    walletStore.ethereum.conversions.usd,
+    walletStore.bitcoin.conversions.usd,
+  ]);
+
   let transaction = getTransaction(walletStore);
 
   if (!transaction) return null;
@@ -95,14 +107,8 @@ const TransactionDetailScreenPresenter = () => {
       amountDisplay={isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC`}
       usdAmount={
         isEth
-          ? convertEthAmountToUsd(
-              ethAmount,
-              walletStore.ethereum.conversions.usd
-            )
-          : convertBtcAmountToUsd(
-              btcAmount,
-              walletStore.bitcoin.conversions.usd
-            )
+          ? convertEthAmountToUsd(ethAmount, ethPrice)
+          : convertBtcAmountToUsd(btcAmount, bitcoinPrice)
       }
     />
   );

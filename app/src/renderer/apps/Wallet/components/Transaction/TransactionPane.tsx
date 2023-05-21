@@ -11,7 +11,6 @@ import { TransactionRecipient, WalletScreen } from 'renderer/apps/Wallet/types';
 import {
   BitcoinWalletType,
   ERC20Type,
-  EthStoreType,
   EthWalletType,
   WalletNavOptions,
 } from 'renderer/stores/models/wallet.model';
@@ -32,7 +31,7 @@ type Props = {
   wallet: EthWalletType | BitcoinWalletType;
   protocol: ProtocolType;
   network: NetworkType;
-  ethereum: EthStoreType;
+  ethPrice: number | undefined;
   screen: 'initial' | 'confirm';
   coin: ERC20Type | null;
   transactionAmount: number;
@@ -51,7 +50,7 @@ export const TransactionPane = ({
   wallet,
   protocol,
   network,
-  ethereum,
+  ethPrice,
   screen,
   coin,
   to,
@@ -126,7 +125,7 @@ export const TransactionPane = ({
             setValid={amountValidator}
             protocol={protocol}
             network={network}
-            ethereum={ethereum}
+            ethPrice={ethPrice}
           />
           <RecipientInput
             to={to}
@@ -188,7 +187,7 @@ export const TransactionPane = ({
                 <Text.Body variant="body">0.001 ETH</Text.Body>
                 {protocol === ProtocolType.ETH_MAIN && (
                   <Text.Body fontSize={1}>
-                    ≈ {ethToUsd(0.0005, ethereum.conversions.usd ?? 0)} USD
+                    ≈ {ethPrice ? ethToUsd(0.0005, ethPrice) : '...'} USD
                   </Text.Body>
                 )}
               </Flex>
@@ -206,10 +205,9 @@ export const TransactionPane = ({
                 {protocol === ProtocolType.ETH_MAIN && (
                   <Text.Body fontSize={1}>
                     ≈{' '}
-                    {ethToUsd(
-                      transactionAmount + 0.0005,
-                      ethereum.conversions.usd ?? 0
-                    )}{' '}
+                    {ethPrice
+                      ? ethToUsd(transactionAmount + 0.0005, ethPrice)
+                      : '...'}{' '}
                     USD
                   </Text.Body>
                 )}

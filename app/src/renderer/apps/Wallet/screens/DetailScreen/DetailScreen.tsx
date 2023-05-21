@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import { NetworkType } from 'os/services/ship/wallet/wallet.types';
@@ -19,6 +19,14 @@ const DetailScreenPresenter = () => {
   let coin: ERC20Type | null = null;
   let coins: ERC20Type[] | null = null;
   let nfts: ERC721Type[] | null = null;
+
+  const [ethPrice, setEthPrice] = useState<number>();
+  const [bitcoinPrice, setBitcoinPrice] = useState<number>();
+
+  useEffect(() => {
+    walletStore.ethereum.conversions.usd.then(setEthPrice);
+    walletStore.bitcoin.conversions.usd.then(setBitcoinPrice);
+  }, [walletStore.ethereum.conversions.usd, walletStore.bitcoin.conversions.usd]);
 
   const wallet = walletStore.currentWallet;
 
@@ -81,14 +89,13 @@ const DetailScreenPresenter = () => {
       transactions={transactions}
       coins={coins}
       nfts={nfts}
-      ethToUsd={walletStore.ethereum.conversions.usd}
       uqTx={walletStore.uqTx}
       screen={walletStore.navState.view}
       to={walletStore.navState.to}
       network={walletStore.navState.network}
       protocol={walletStore.navState.protocol}
-      bitcoin={walletStore.bitcoin}
-      ethereum={walletStore.ethereum}
+      ethPrice={ethPrice}
+      bitcoinPrice={bitcoinPrice}
       checkPasscode={walletStore.checkPasscode}
       navigate={walletStore.navigate}
       sendERC20Transaction={walletStore.sendERC20Transaction}

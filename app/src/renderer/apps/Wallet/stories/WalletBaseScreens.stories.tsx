@@ -18,10 +18,8 @@ import { WalletSettingsScreenBody } from '../screens/WalletSettingsScreen/Wallet
 import { WalletScreen } from '../types';
 import { WalletStoryWrapper } from './helper';
 import {
-  mockBitcoin,
   mockBitcoinCoin,
   mockCryptoPunkNft,
-  mockEthereum,
   mockShibaCoin,
   mockStarNft,
   mockTransactions,
@@ -45,9 +43,8 @@ export const WalletDetailssStory: ComponentStory<
       nfts={[mockStarNft, mockCryptoPunkNft]}
       network={NetworkType.ETHEREUM}
       protocol={ProtocolType.ETH_GORLI}
-      bitcoin={mockBitcoin}
-      ethereum={mockEthereum}
-      ethToUsd={mockEthereum.conversions.usd}
+      ethPrice={1725.0}
+      bitcoinPrice={1725.0}
       screen={WalletScreen.WALLET_DETAIL}
       to="~zod"
       getRecipient={() => Promise.resolve({} as any)}

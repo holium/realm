@@ -5,27 +5,28 @@ import {
   WalletNavOptions,
 } from 'renderer/stores/models/wallet.model';
 
-import { convertEthAmountToUsd, EthAmount } from '../../helpers';
+import { EthAmount } from '../../helpers';
 import { TxType, WalletScreen } from '../../types';
 import { Transaction } from './Transaction';
 
 type Props = {
   transactions: TransactionType[];
+  ethPrice: number | undefined;
+  bitcoinPrice: number | undefined;
   txType?: string;
   coinKey?: string;
   ethAmount?: EthAmount;
   ethType?: string;
-  ethToUsd?: number;
   navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
 };
 
 export const TransactionList = ({
-  ethType,
-  ethToUsd,
   transactions: unfilteredTransactions,
+  ethPrice,
+  bitcoinPrice,
+  ethType,
   txType,
   coinKey,
-  ethAmount,
   navigate,
 }: Props) => {
   let transactions = unfilteredTransactions;
@@ -53,11 +54,8 @@ export const TransactionList = ({
           key={`transaction-${index}`}
           isCoin={ethType !== undefined}
           transaction={transaction}
-          usdAmountDisplay={
-            ethAmount
-              ? `${convertEthAmountToUsd(ethAmount, ethToUsd)} USD`
-              : '0.00 USD'
-          }
+          ethPrice={ethPrice}
+          bitcoinPrice={bitcoinPrice}
           onClick={() => {
             navigate(WalletScreen.TRANSACTION_DETAIL, {
               detail: {

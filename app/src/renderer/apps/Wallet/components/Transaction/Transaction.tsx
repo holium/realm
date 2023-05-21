@@ -3,6 +3,8 @@ import { Flex, Row, Text } from '@holium/design-system/general';
 import { TransactionType } from 'renderer/stores/models/wallet.model';
 
 import {
+  convertBtcAmountToUsd,
+  convertEthAmountToUsd,
   formatBtcAmount,
   formatEthAmount,
   monthNames,
@@ -11,15 +13,17 @@ import {
 
 type Props = {
   transaction: TransactionType;
+  ethPrice: number | undefined;
+  bitcoinPrice: number | undefined;
   isCoin?: boolean;
-  usdAmountDisplay: string;
   onClick: () => void;
 };
 
 export const Transaction = ({
   transaction,
+  ethPrice,
+  bitcoinPrice,
   isCoin,
-  usdAmountDisplay,
   onClick,
 }: Props) => {
   const wasSent = transaction.type === 'sent';
@@ -32,6 +36,9 @@ export const Transaction = ({
 
   const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
   const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
+  const usdAmountDisplay = isEth
+    ? convertEthAmountToUsd(ethAmount, ethPrice)
+    : convertBtcAmountToUsd(btcAmount, bitcoinPrice);
 
   const currency = isEth ? 'ETH' : 'BTC';
   const statusMessage =
@@ -58,10 +65,10 @@ export const Transaction = ({
             <Text.Body
               fontSize={1}
               fontWeight={300}
-              opacity={wasSent ? 1 : 0.5}
+              opacity={transaction.status !== 'pending' ? 1 : 0.5}
               style={{
                 whiteSpace: 'nowrap',
-                color: wasSent
+                color: transaction.status !== 'pending'
                   ? 'var(--rlm-intent-success-color)'
                   : 'var(--rlm-text-color)',
               }}
@@ -93,9 +100,10 @@ export const Transaction = ({
           justifyContent="center"
         >
           <Text.Body fontSize={2}>
-            {isEth ? `-${ethAmount.eth} ETH` : `-${btcAmount.btc} BTC`}
+            {wasSent ? '-' : ''}
+            {isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC`}
           </Text.Body>
-          {!isCoin && <Text.Hint opacity={0.5}>-${usdAmountDisplay}</Text.Hint>}
+          {!isCoin && <Text.Hint opacity={0.5}>${usdAmountDisplay}</Text.Hint>}
         </Flex>
       </Flex>
     </Row>

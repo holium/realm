@@ -108,9 +108,7 @@ const defaultSettings = {
 };
 
 const defaultConversions = {
-  usd: 0,
-  euro: 0,
-  cad: 0,
+  usd: Promise.resolve(0),
 };
 
 export const walletAppDefault = {

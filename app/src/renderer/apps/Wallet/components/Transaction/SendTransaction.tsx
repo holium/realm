@@ -10,7 +10,6 @@ import {
 import {
   BitcoinWalletType,
   ERC20Type,
-  EthStoreType,
   EthWalletType,
   UqTxType,
   WalletNavOptions,
@@ -60,7 +59,7 @@ type Props = {
   transactionRecipient: TransactionRecipient | null;
   setTransactionRecipient: (recipient: TransactionRecipient) => void;
   screen: WalletScreen;
-  ethereum: EthStoreType;
+  ethPrice: number | undefined;
   onConfirm: () => void;
   close: () => void;
   navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
@@ -79,7 +78,7 @@ export const SendTransaction = ({
   transactionRecipient,
   setTransactionRecipient,
   screen,
-  ethereum,
+  ethPrice,
   navigate,
   getRecipient,
   close,
@@ -112,7 +111,7 @@ export const SendTransaction = ({
       <TransactionPane
         protocol={protocol}
         network={network}
-        ethereum={ethereum}
+        ethPrice={ethPrice}
         wallet={wallet}
         screen={
           screen === WalletScreen.TRANSACTION_SEND ? 'initial' : 'confirm'

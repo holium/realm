@@ -7,7 +7,7 @@ import {
   NetworkType,
   ProtocolType,
 } from 'os/services/ship/wallet/wallet.types';
-import { ERC20Type, EthStoreType } from 'renderer/stores/models/wallet.model';
+import { ERC20Type } from 'renderer/stores/models/wallet.model';
 
 import { ethToUsd, usdToEth } from '../../helpers';
 import { ContainerFlex, FlexHider } from './AmountInput.styles';
@@ -22,7 +22,7 @@ type Props = {
   coin?: ERC20Type | null;
   protocol: ProtocolType;
   network: NetworkType;
-  ethereum: EthStoreType;
+  ethPrice: number | undefined;
   setValid: (valid: boolean, amount?: number) => void;
 };
 
@@ -31,7 +31,7 @@ export const AmountInput = ({
   coin,
   protocol,
   network,
-  ethereum,
+  ethPrice,
   setValid,
 }: Props) => {
   const amountRef = useRef<HTMLInputElement>(null);
@@ -49,8 +49,8 @@ export const AmountInput = ({
   const check = (inCrypto: boolean, value: string | number) => {
     const numVal = Number(value);
     let amountInCrypto = numVal;
-    if (ethereum.conversions.usd && !inCrypto) {
-      amountInCrypto = usdToEth(numVal, ethereum.conversions.usd);
+    if (ethPrice && !inCrypto) {
+      amountInCrypto = usdToEth(numVal, ethPrice);
       // inCrypto ? numVal : usdToEth(numVal, currentPrice);
     }
     if (amountInCrypto > max) {
@@ -158,14 +158,10 @@ export const AmountInput = ({
         {showUsd && (
           <Box hidden={!amount}>
             <Text.Custom fontSize="11px" opacity={0.7}>
-              {ethereum.conversions.usd &&
+              {ethPrice &&
                 (inCrypto
-                  ? `~ $${ethToUsd(
-                      Number(amount),
-                      ethereum.conversions.usd,
-                      4
-                    )} USD`
-                  : `~ ${usdToEth(Number(amount), ethereum.conversions.usd)} ${
+                  ? `$${ethToUsd(Number(amount), ethPrice, 4)} USD`
+                  : `${usdToEth(Number(amount), ethPrice)} ${
                       coin
                         ? coin.name
                         : abbrMap[network as 'bitcoin' | 'ethereum']

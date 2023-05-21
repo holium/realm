@@ -71,8 +71,8 @@ export class EthereumProtocol implements BaseBlockProtocol {
     this.ethProvider.removeAllListeners();
   }
 
-  watchUpdates(conduit: any, walletDB: WalletDB) {
-    this.updateWalletState(conduit, walletDB);
+  watchUpdates(walletDB: WalletDB) {
+    this.updateWalletState(walletDB);
     try {
       const socket = io(this.baseURL);
       socket.on('connect', () => {
@@ -82,7 +82,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
       });
       socket.on('block', (data: any) => {
         const currentBlock = Number(data.toString());
-        this.updateWalletState(conduit, walletDB, currentBlock);
+        this.updateWalletState(walletDB, currentBlock);
       });
       socket.on('error', (error: any) => {
         console.error('wallet error:', error);
@@ -100,11 +100,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
     }
   }
 
-  async updateWalletState(
-    _conduit: any,
-    walletDB: WalletDB,
-    currentBlock?: number
-  ) {
+  async updateWalletState(walletDB: WalletDB, currentBlock?: number) {
     if (this.updating) {
       return;
     }
@@ -560,5 +556,9 @@ export class EthereumProtocol implements BaseBlockProtocol {
 
   async getBlockNumber(): Promise<number> {
     return await this.ethProvider.getBlockNumber();
+  }
+
+  async getEtherPrice(): Promise<number> {
+    return this.ethProvider.getEtherPrice();
   }
 }

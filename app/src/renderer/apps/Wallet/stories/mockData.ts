@@ -5,10 +5,13 @@ import {
   WalletCreationMode,
 } from 'os/services/ship/wallet/wallet.types';
 import {
+  BitcoinConversionsType,
   BitcoinStoreType,
   BitcoinWalletType,
+  ERC20ConversionsType,
   ERC20Type,
   ERC721Type,
+  EthConversionsType,
   EthStoreType,
   EthWalletType,
   TransactionType,
@@ -16,11 +19,14 @@ import {
 
 import { WalletWithKey } from '../screens/WalletListScreen/WalletListScreenBody';
 
-const conversions = {
-  usd: 1794,
-  cad: 1794,
-  euro: 1794,
-  setUsd: () => {},
+const bitcoinConversions: BitcoinConversionsType = {
+  usd: Promise.resolve(10000),
+};
+const ethConversions: EthConversionsType = {
+  usd: Promise.resolve(1000),
+};
+const coinConversions: ERC20ConversionsType = {
+  getUsdPrice: () => Promise.resolve(100),
 };
 
 const bitcoinWallet: BitcoinWalletType = {
@@ -100,12 +106,11 @@ export const mockBitcoin: BitcoinStoreType = {
   block: 0,
   wallets: bitcoinWallets as any,
   settings,
-  conversions,
+  conversions: bitcoinConversions,
   list: {} as any,
   initial: () => {},
   setProvider: () => {},
   applyWalletUpdate: () => {},
-  setExchangeRate: () => {},
   setBlock: () => {},
 };
 
@@ -115,12 +120,11 @@ export const mockEthereum: EthStoreType = {
   wallets: ethereumWallets as any,
   settings,
   initialized: false,
-  conversions,
+  conversions: ethConversions,
   list: {} as any,
   initial: () => {},
   setProvider: () => {},
   applyWalletUpdate: () => {},
-  setExchangeRate: () => {},
   setDefaultWallet: () => {},
   setProtocol: () => {},
   deleteWallets: () => {},
@@ -133,12 +137,11 @@ export const mockShibaCoin: ERC20Type = {
   address: '0x123456789',
   balance: '0',
   decimals: 18,
-  conversions,
+  conversions: coinConversions,
   transactionList: {} as any,
   block: 0,
   uqbarMetadataId: undefined,
   setBalance: () => {},
-  setExchangeRate: () => {},
   setBlock: () => {},
 };
 

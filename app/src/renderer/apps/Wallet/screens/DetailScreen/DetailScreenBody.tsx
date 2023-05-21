@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 
 import { Flex } from '@holium/design-system/general';
@@ -10,11 +10,9 @@ import {
   RecipientPayload,
 } from 'os/services/ship/wallet/wallet.types';
 import {
-  BitcoinStoreType,
   BitcoinWalletType,
   ERC20Type,
   ERC721Type,
-  EthStoreType,
   EthWalletType,
   TransactionType,
   UqTxType,
@@ -38,7 +36,6 @@ import {
   convertBtcAmountToUsd,
   convertERC20AmountToUsd,
   convertEthAmountToUsd,
-  EthAmount,
   formatBtcAmount,
   formatCoinAmount,
   formatEthAmount,
@@ -60,10 +57,8 @@ type Props = {
   nfts: ERC721Type[] | null;
   network: NetworkType;
   protocol: ProtocolType;
-  ethereum: EthStoreType;
-  bitcoin: BitcoinStoreType;
-  ethToUsd: number | undefined;
-  ethAmount?: EthAmount;
+  ethPrice: number | undefined;
+  bitcoinPrice: number | undefined;
   ethType?: string;
   txType?: string;
   coinKey?: string;
@@ -87,10 +82,8 @@ export const DetailScreenBody = ({
   nfts,
   network,
   protocol,
-  bitcoin,
-  ethereum,
-  ethToUsd,
-  ethAmount,
+  ethPrice,
+  bitcoinPrice,
   ethType,
   txType,
   coinKey,
@@ -106,6 +99,12 @@ export const DetailScreenBody = ({
   sendEthereumTransaction,
 }: Props) => {
   const qrCode = useToggle(false);
+
+  const [coinPrice, setCoinPrice] = useState<number>();
+
+  useEffect(() => {
+    coin?.conversions.getUsdPrice(coin.name).then(setCoinPrice);
+  }, [coin]);
 
   // TODO default to coins or nfts if they have those
   const [tab, setTab] = useState<WalletTab>('coins');
@@ -186,23 +185,23 @@ export const DetailScreenBody = ({
 
   let amountUsdDisplay = '$0.00 USD';
   if (network === NetworkType.ETHEREUM) {
-    if (coin && coin.conversions.usd) {
+    if (coin && coinPrice) {
       amountUsdDisplay = `$${convertERC20AmountToUsd(
         formatCoinAmount(coin.balance, coin.decimals),
-        coin.conversions.usd
+        coinPrice
       )} USD`;
-    } else if (ethereum.conversions.usd) {
+    } else if (ethPrice) {
       amountUsdDisplay = `$${convertEthAmountToUsd(
         formatEthAmount(
           (wallet as EthWalletType).data.get(protocol)?.balance ?? ''
         ),
-        ethereum.conversions.usd
+        ethPrice
       )} USD`;
     }
-  } else if (bitcoin.conversions.usd) {
+  } else if (bitcoinPrice) {
     amountUsdDisplay = `$${convertBtcAmountToUsd(
       formatBtcAmount((wallet as BitcoinWalletType).balance),
-      bitcoin.conversions.usd
+      bitcoinPrice
     )} USD`;
   }
 
@@ -274,8 +273,8 @@ export const DetailScreenBody = ({
               txType={txType}
               coinKey={coinKey}
               ethType={ethType}
-              ethToUsd={ethToUsd}
-              ethAmount={ethAmount}
+              ethPrice={ethPrice}
+              bitcoinPrice={bitcoinPrice}
               navigate={navigate}
             />
           )}
@@ -295,7 +294,7 @@ export const DetailScreenBody = ({
           protocol={protocol}
           uqTx={uqTx}
           screen={screen}
-          ethereum={ethereum}
+          ethPrice={ethPrice}
           to={to}
           transactionRecipient={transactionRecipient}
           navigate={navigate}
