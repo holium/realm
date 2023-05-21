@@ -83,6 +83,7 @@ export const SubmitTransactionPasscodeStory: ComponentStory<
 > = () => (
   <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI}>
     <SubmitTransactionPasscodeScreen
+      sendError={false}
       checkPasscode={() => Promise.resolve(false)}
       onSuccess={() => Promise.resolve()}
     />

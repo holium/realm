@@ -1,5 +1,4 @@
-import log from 'electron-log';
-import { ethers } from 'ethers';
+import { ethers, Wallet } from 'ethers';
 
 import { EncryptedStore } from '../../../../lib/encryptedStore';
 import { BaseSigner } from './BaseSigner';
@@ -39,9 +38,8 @@ export abstract class RealmSigner implements BaseSigner {
     patp,
     passcode,
   }: SignTransactionProps): Promise<string> {
-    log.info('signing transaction', transaction);
     const privateKey = this.getPrivateKey(patp, passcode);
-    const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
+    const wallet = new Wallet(privateKey.derivePath(path).privateKey);
     const signedTransaction = await wallet.signTransaction(transaction);
 
     return signedTransaction;

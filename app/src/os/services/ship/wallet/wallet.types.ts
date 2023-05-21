@@ -77,8 +77,8 @@ export type TransactionsRow = {
   hash: string;
   network: string;
   type: number;
-  initiatedAt: number;
-  completedAt: number | undefined;
+  initiatedAt: string;
+  completedAt: string | undefined;
   ourAddress: string;
   theirPatp: string | undefined;
   theirAddres: string;

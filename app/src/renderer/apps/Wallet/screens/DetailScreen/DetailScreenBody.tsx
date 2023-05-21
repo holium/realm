@@ -113,12 +113,15 @@ export const DetailScreenBody = ({
   const [transactionRecipient, setTransactionRecipient] =
     useState<TransactionRecipient | null>(null);
 
+  const sendError = useToggle(false);
+
   const isSendingTransaction = [
     WalletScreen.TRANSACTION_SEND,
     WalletScreen.TRANSACTION_CONFIRM,
   ].includes(screen);
 
   const sendTransaction = async (passcode: number[]) => {
+    sendError.toggleOff();
     try {
       if (network === NetworkType.ETHEREUM) {
         if (protocol === ProtocolType.UQBAR) {
@@ -163,6 +166,7 @@ export const DetailScreenBody = ({
       close();
     } catch (e) {
       console.error('sendTransaction error', e);
+      sendError.toggleOn();
     }
   };
 
@@ -208,6 +212,7 @@ export const DetailScreenBody = ({
   if (showPasscode) {
     return (
       <SubmitTransactionPasscodeScreen
+        sendError={sendError.isOn}
         checkPasscode={checkPasscode}
         onSuccess={sendTransaction}
       />

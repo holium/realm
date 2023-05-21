@@ -1,13 +1,15 @@
-import { Flex, Icon, Text } from '@holium/design-system/general';
+import { ErrorBox, Flex, Icon, Text } from '@holium/design-system/general';
 
 import { PasscodeInput } from '../../components/PasscodeInput';
 
 type Props = {
+  sendError: boolean;
   checkPasscode: (passcode: number[]) => Promise<boolean>;
   onSuccess: (passcode: number[]) => Promise<void>;
 };
 
 export const SubmitTransactionPasscodeScreen = ({
+  sendError,
   checkPasscode,
   onSuccess,
 }: Props) => (
@@ -28,6 +30,7 @@ export const SubmitTransactionPasscodeScreen = ({
         checkPasscode={checkPasscode}
         onSuccess={onSuccess}
       />
+      {sendError && <ErrorBox>The transaction failed to send.</ErrorBox>}
     </Flex>
   </Flex>
 );

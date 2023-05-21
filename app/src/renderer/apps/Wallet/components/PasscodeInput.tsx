@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 
-import { Button, Flex, Spinner, Text } from '@holium/design-system/general';
+import {
+  Button,
+  ErrorBox,
+  Flex,
+  Spinner,
+  Text,
+} from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
 
 import { PasscodeDisplay } from './PasscodeDisplay';
@@ -88,11 +94,7 @@ export const PasscodeInput = ({
             <Text.Label opacity={0.5}>Forgot passcode?</Text.Label>
           </Button.Transparent>
         )}
-        {error.isOn && (
-          <Text.Body color="intent-alert" fontSize={1}>
-            That passcode was incorrect.
-          </Text.Body>
-        )}
+        {error.isOn && <ErrorBox>That passcode was incorrect.</ErrorBox>}
       </Flex>
     </Flex>
   );

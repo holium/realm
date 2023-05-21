@@ -78,7 +78,7 @@ export const Transaction = types.model('Transaction', {
   ethType: types.string,
   type: types.enumeration(['sent', 'received']),
 
-  initiatedAt: types.maybeNull(types.number),
+  initiatedAt: types.maybeNull(types.string),
   completedAt: types.maybeNull(types.string),
 
   ourAddress: types.string,
@@ -131,7 +131,7 @@ const TransactionList = types
           network: 'ethereum',
           ethType: transaction.contractAddress || 'ETH',
           type: sent ? 'sent' : 'received',
-          initiatedAt: previousTransaction?.initiatedAt || 0,
+          initiatedAt: previousTransaction?.initiatedAt || '0',
           completedAt: transaction.metadata.blockTimestamp,
           ourAddress: sent ? transaction.from : transaction.to,
           theirPatp: previousTransaction?.theirPatp,
@@ -1077,8 +1077,13 @@ export const WalletStore = types
       passcode,
       toPatp,
     }: SendEthereumTransactionParams): Generator<PromiseLike<any>, void, any> {
-      const path = "m/44'/60'/0'/0/0" + walletIndex;
-      const from = self.ethereum.wallets.get(walletIndex)?.address;
+      const path = "m/44'/60'/0'/0/" + walletIndex;
+      const wallet = self.ethereum.wallets.get(walletIndex);
+      const from = wallet?.address;
+
+      console.log('wallet', JSON.stringify(wallet, null, 2));
+      console.log('wallet.path', wallet?.path);
+      console.log('path', path);
 
       if (!from) {
         console.error('No address found for wallet index', walletIndex);
@@ -1126,7 +1131,7 @@ export const WalletStore = types
       toPatp,
       contractAddress,
     }: SendERC20TransactionParams): Generator<PromiseLike<any>, void, any> {
-      const path = "m/44'/60'/0'/0/0" + walletIndex;
+      const path = "m/44'/60'/0'/0/" + walletIndex;
       const from = self.ethereum.wallets.get(walletIndex)?.address ?? '';
       const { hash } = yield WalletIPC.sendERC20Transaction(
         self.navState.protocol,

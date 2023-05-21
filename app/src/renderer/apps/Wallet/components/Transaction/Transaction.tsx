@@ -30,8 +30,8 @@ export const Transaction = ({
   const isEth = transaction.network === 'ethereum';
   const themDisplay =
     transaction.theirPatp || shortened(transaction.theirAddress);
-  const completedDate = new Date(
-    transaction.completedAt || transaction.initiatedAt || 0
+  const date = new Date(
+    transaction.completedAt ?? transaction.initiatedAt ?? '0'
   );
 
   const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
@@ -50,9 +50,9 @@ export const Transaction = ({
       ? `Sending ${currency}`
       : `Receiving ${currency}`;
 
-  const dateString = `${
-    monthNames[completedDate.getMonth()]
-  } ${completedDate.getDate()}`;
+  const dateString = monthNames[date.getMonth()]
+    ? `${monthNames[date.getMonth()]} ${date.getDate()}`
+    : 'Sending...';
 
   return (
     <Row onClick={onClick}>
