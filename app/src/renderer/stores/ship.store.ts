@@ -48,6 +48,7 @@ export const ShipStore = types
       self.chatStore.reset();
       self.bazaarStore.reset();
       self.spacesStore.reset();
+      self.walletStore.reset();
       self.friends.reset();
       self.featuredStore.reset();
       self.roomsStore.reset();
