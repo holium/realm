@@ -156,7 +156,7 @@ export const TransactionPane = ({
   }
 
   return (
-    <Flex flexDirection="column" flex={1}>
+    <Flex flexDirection="column" flex={1} gap="16px">
       {!uqbarContract && (
         <Flex flexDirection="column" flex={1}>
           <Flex
