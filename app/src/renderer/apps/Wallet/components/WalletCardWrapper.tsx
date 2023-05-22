@@ -1,6 +1,11 @@
 import styled from 'styled-components';
 
-import { Card } from '@holium/design-system/general';
+import {
+  Card,
+  Flex,
+  scrollbarCss,
+  scrollbarHoverCss,
+} from '@holium/design-system/general';
 
 interface CardStyleProps {
   isSelected: boolean;
@@ -13,13 +18,9 @@ export const WalletCardStyle = styled(Card)<CardStyleProps>`
   width: 100%;
   min-height: 0;
   padding: 12px;
-  transition: box-shadow 0.1s ease;
   border-radius: 16px !important;
-  transition: box-shadow 0.25s ease;
   box-shadow: var(--rlm-box-shadow-1) !important;
   background-color: rgba(var(--rlm-window-rgba));
-  overflow-y: auto;
-  overflow-x: hidden;
 
   ${({ isSelected }) =>
     isSelected &&
@@ -27,4 +28,17 @@ export const WalletCardStyle = styled(Card)<CardStyleProps>`
       flex: 1;
       gap: 10px;
     `}
+`;
+
+export const WalletCardBody = styled(Flex)`
+  flex-direction: column;
+  gap: inherit;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  ${scrollbarCss}
+
+  &:hover {
+    ${scrollbarHoverCss}
+  }
 `;

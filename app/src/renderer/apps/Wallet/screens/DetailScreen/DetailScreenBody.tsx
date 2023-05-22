@@ -31,7 +31,10 @@ import {
 } from '../../components/Detail/WalletTabMenu';
 import { SendTransaction } from '../../components/Transaction/SendTransaction';
 import { TransactionList } from '../../components/Transaction/TransactionList';
-import { WalletCardStyle } from '../../components/WalletCardWrapper';
+import {
+  WalletCardBody,
+  WalletCardStyle,
+} from '../../components/WalletCardWrapper';
 import {
   convertBtcAmountToUsd,
   convertERC20AmountToUsd,
@@ -228,89 +231,91 @@ export const DetailScreenBody = ({
         onClickQrCode={qrCode.toggle}
       />
 
-      <Flex width="100%" flexDirection="column" gap="12px">
-        <WalletBreadCrumbs
-          walletNickname={wallet.nickname}
-          coinName={coin?.name}
-          onClickBack={onClickNavigateBack}
-        />
-        {qrCode.isOn && (
-          <Flex width="100%" height="190px" minHeight={0} alignItems="center">
-            <QRCodeSVG width="100%" height="100%" value={wallet.address} />
-          </Flex>
-        )}
-        <WalletBalance
-          coin={coin}
-          amountDisplay={amountDisplay}
-          amountUsdDisplay={amountUsdDisplay}
-          simple={isSendingTransaction}
-        />
-      </Flex>
-      {!isSendingTransaction && (
-        <SendReceiveButtons
-          send={() => {
-            navigate(WalletScreen.TRANSACTION_SEND, {
-              walletIndex: `${wallet.index}`,
-              protocol: protocol,
-              ...(coin && {
-                detail: {
-                  type: 'coin',
-                  txtype: 'coin',
-                  coinKey: coin.address,
-                  key: coin.address,
-                },
-              }),
-            });
-          }}
-          receive={qrCode.toggle}
-        />
-      )}
-      {!isSendingTransaction && (
-        <>
-          <WalletTabMenu
-            network={network}
-            selected={tab}
-            onSelect={(newTab) => setTab(newTab)}
+      <WalletCardBody>
+        <Flex width="100%" flexDirection="column" gap="12px">
+          <WalletBreadCrumbs
+            walletNickname={wallet.nickname}
+            coinName={coin?.name}
+            onClickBack={onClickNavigateBack}
           />
-          {tab === 'transactions' && (
-            <TransactionList
-              transactions={transactions}
-              txType={txType}
-              coinKey={coinKey}
-              ethType={ethType}
-              ethPrice={ethPrice}
-              bitcoinPrice={bitcoinPrice}
-              navigate={navigate}
+          {qrCode.isOn && (
+            <Flex width="100%" height="190px" minHeight={0} alignItems="center">
+              <QRCodeSVG width="100%" height="100%" value={wallet.address} />
+            </Flex>
+          )}
+          <WalletBalance
+            coin={coin}
+            amountDisplay={amountDisplay}
+            amountUsdDisplay={amountUsdDisplay}
+            simple={isSendingTransaction}
+          />
+        </Flex>
+        {!isSendingTransaction && (
+          <SendReceiveButtons
+            send={() => {
+              navigate(WalletScreen.TRANSACTION_SEND, {
+                walletIndex: `${wallet.index}`,
+                protocol: protocol,
+                ...(coin && {
+                  detail: {
+                    type: 'coin',
+                    txtype: 'coin',
+                    coinKey: coin.address,
+                    key: coin.address,
+                  },
+                }),
+              });
+            }}
+            receive={qrCode.toggle}
+          />
+        )}
+        {!isSendingTransaction && (
+          <>
+            <WalletTabMenu
+              network={network}
+              selected={tab}
+              onSelect={(newTab) => setTab(newTab)}
             />
-          )}
-          {tab === 'coins' && coins && (
-            <CoinList coins={coins as any} navigate={navigate} />
-          )}
-          {tab === 'nfts' && nfts && (
-            <NFTList nfts={nfts as any} navigate={navigate} />
-          )}
-        </>
-      )}
-      {isSendingTransaction && (
-        <SendTransaction
-          wallet={wallet}
-          coin={coin}
-          network={network}
-          protocol={protocol}
-          uqTx={uqTx}
-          screen={screen}
-          ethPrice={ethPrice}
-          to={to}
-          transactionRecipient={transactionRecipient}
-          navigate={navigate}
-          onConfirm={() => setShowPasscode(true)}
-          setTransactionAmount={setTransactionAmount}
-          transactionAmount={transactionAmount}
-          setTransactionRecipient={setTransactionRecipient}
-          getRecipient={getRecipient}
-          close={close}
-        />
-      )}
+            {tab === 'transactions' && (
+              <TransactionList
+                transactions={transactions}
+                txType={txType}
+                coinKey={coinKey}
+                ethType={ethType}
+                ethPrice={ethPrice}
+                bitcoinPrice={bitcoinPrice}
+                navigate={navigate}
+              />
+            )}
+            {tab === 'coins' && coins && (
+              <CoinList coins={coins as any} navigate={navigate} />
+            )}
+            {tab === 'nfts' && nfts && (
+              <NFTList nfts={nfts as any} navigate={navigate} />
+            )}
+          </>
+        )}
+        {isSendingTransaction && (
+          <SendTransaction
+            wallet={wallet}
+            coin={coin}
+            network={network}
+            protocol={protocol}
+            uqTx={uqTx}
+            screen={screen}
+            ethPrice={ethPrice}
+            to={to}
+            transactionRecipient={transactionRecipient}
+            navigate={navigate}
+            onConfirm={() => setShowPasscode(true)}
+            setTransactionAmount={setTransactionAmount}
+            transactionAmount={transactionAmount}
+            setTransactionRecipient={setTransactionRecipient}
+            getRecipient={getRecipient}
+            close={close}
+          />
+        )}
+      </WalletCardBody>
     </WalletCardStyle>
   );
 };

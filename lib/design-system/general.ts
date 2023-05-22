@@ -22,3 +22,4 @@ export { Spinner } from './src/general/Spinner/Spinner';
 export * from './src/general/Text/Text';
 export { Tooltip } from './src/general/Tooltip/Tooltip';
 export * from './src/general/WindowedList/WindowedList';
+export * from './src/general/WindowedList/WindowedList.styles';

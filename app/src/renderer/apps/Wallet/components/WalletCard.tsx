@@ -76,8 +76,6 @@ export const WalletCard = ({
 
   return (
     <WalletCardStyle
-      layout="size"
-      layoutId={`wallet-card-${wallet?.address}`}
       justifyContent="flex-start"
       isSelected={!!isSelected}
       onClick={onSelect}
@@ -92,15 +90,7 @@ export const WalletCard = ({
       <Text.Body mt={1} fontWeight={600} fontSize={7}>
         {amountDisplay}
       </Text.Body>
-      <Flex
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.1 }}
-        pt={2}
-        justifyContent="space-between"
-        alignItems="center"
-      >
+      <Flex pt={2} justifyContent="space-between" alignItems="center">
         <Flex>
           {coins?.slice(0, 6).map((coin: ERC20Type, index: number) => (
             <img
