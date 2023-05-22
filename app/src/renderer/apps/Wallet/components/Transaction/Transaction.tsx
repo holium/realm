@@ -34,12 +34,14 @@ export const Transaction = ({
     transaction.completedAt ?? transaction.initiatedAt ?? '0'
   );
 
-  const ethAmount = transaction.amount
-    ? formatEthAmount(isEth ? transaction.amount : '0')
-    : ({ eth: '0' } as any);
-  const btcAmount = transaction.amount
-    ? formatBtcAmount(!isEth ? transaction.amount : '0')
-    : ({ btc: '0' } as any);
+  const ethAmount =
+    transaction.amount && transaction.amount !== 'NaN'
+      ? formatEthAmount(isEth ? transaction.amount : '0')
+      : ({ eth: '0' } as any);
+  const btcAmount =
+    transaction.amount && transaction.amount !== 'NaN'
+      ? formatBtcAmount(!isEth ? transaction.amount : '0')
+      : ({ btc: '0' } as any);
   const usdAmountDisplay = isEth
     ? convertEthAmountToUsd(ethAmount, ethPrice)
     : convertBtcAmountToUsd(btcAmount, bitcoinPrice);
