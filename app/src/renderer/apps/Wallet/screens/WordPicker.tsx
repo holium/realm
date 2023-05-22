@@ -83,6 +83,7 @@ export const WordPicker = ({ seedPhrase, onValidChange }: Props) => {
       <Flex justifyContent="space-between" flexWrap="wrap">
         {words.map((word, index: number) => (
           <Box
+            key={`${index}-${word.word}-select`}
             m="4px"
             px="8px"
             py="6px"
@@ -153,20 +154,21 @@ export const WordPicker = ({ seedPhrase, onValidChange }: Props) => {
         background="rgba(var(--rlm-border-rgba), 0.1)"
         borderRadius={6}
       >
-        {seedPhrase.split(' ').map((_, index) => {
+        {seedPhrase.split(' ').map((word, index) => {
           if (index < selectedWords.length - 1)
-            return <Word key={index}>{selectedWords[index]}</Word>;
+            return <Word key={`${index}-${word}-selected`}>{word}</Word>;
 
           if (index === selectedWords.length - 1)
             return (
-              <Word key={index} removeable={true}>
-                {selectedWords[index]}
+              <Word key={`${index}-${word}-selected`} removeable={true}>
+                {word}
               </Word>
             );
 
-          if (index === selectedWords.length) return <Current key={index} />;
+          if (index === selectedWords.length)
+            return <Current key={`${index}-${word}-current`} />;
 
-          return <Spacer key={index} />;
+          return <Spacer key={`${index}-${word}-spacer`} />;
         })}
       </Flex>
     );
