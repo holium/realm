@@ -71,15 +71,15 @@ const DetailScreenPresenter = () => {
     .filter((trans) => trans.status === 'pending')
     .sort(
       (a, b) =>
-        new Date(b.completedAt ?? 0).getTime() -
-        new Date(a.completedAt ?? 0).getTime()
+        new Date(b.completedAt ?? b.initiatedAt ?? 0).getTime() -
+        new Date(a.completedAt ?? a.initiatedAt ?? 0).getTime()
     );
   const transactionHistory = transactions
     .filter((trans) => trans.status !== 'pending')
     .sort(
       (a, b) =>
-        new Date(b.completedAt ?? 0).getTime() -
-        new Date(a.completedAt ?? 0).getTime()
+        new Date(b.completedAt ?? b.initiatedAt ?? 0).getTime() -
+        new Date(a.completedAt ?? a.initiatedAt ?? 0).getTime()
     );
   transactions = [...pendingTransactions, ...transactionHistory];
 

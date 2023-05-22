@@ -29,13 +29,7 @@ export const TransactionList = ({
   coinKey,
   navigate,
 }: Props) => {
-  let transactions = unfilteredTransactions.sort((a, b) => {
-    const aDate = new Date(a.initiatedAt ?? '');
-    const bDate = new Date(b.initiatedAt ?? '');
-
-    return bDate.getTime() - aDate.getTime();
-  });
-
+  let transactions = unfilteredTransactions;
   if (ethType === 'ETH') {
     transactions = unfilteredTransactions.filter(
       (tx) => tx.ethType === ethType
