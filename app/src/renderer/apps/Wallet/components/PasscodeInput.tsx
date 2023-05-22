@@ -90,7 +90,7 @@ export const PasscodeInput = ({
       <Flex mt={4} flexDirection="column" justifyContent="center">
         {loading.isOn && <Spinner size={3} />}
         {!loading.isOn && onClickForgotPasscode && (
-          <Button.Transparent onClick={onClickForgotPasscode}>
+          <Button.Transparent mt="12px" onClick={onClickForgotPasscode}>
             <Text.Label opacity={0.5}>Forgot passcode?</Text.Label>
           </Button.Transparent>
         )}
