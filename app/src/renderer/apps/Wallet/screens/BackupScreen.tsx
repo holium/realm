@@ -1,13 +1,20 @@
 import { useEffect } from 'react';
 import { ethers } from 'ethers';
 
-import { Button, CopyButton, Flex, Text } from '@holium/design-system/general';
+import {
+  Button,
+  CopyButton,
+  Flex,
+  HideButton,
+  Text,
+} from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 
-import { NewWalletScreen } from 'renderer/apps/Wallet/types';
+import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 
 type Props = {
   seedPhrase: string;
-  setScreen: (screen: NewWalletScreen) => void;
+  setScreen: (screen: WalletOnboardingScreen) => void;
   setSeedPhrase: (phrase: string) => void;
 };
 
@@ -16,6 +23,8 @@ export const BackupScreen = ({
   setScreen,
   setSeedPhrase,
 }: Props) => {
+  const hideSeedPhrase = useToggle(false);
+
   useEffect(() => {
     setSeedPhrase(ethers.Wallet.createRandom().mnemonic.phrase);
   }, []);
@@ -29,49 +38,57 @@ export const BackupScreen = ({
       alignItems="center"
     >
       <Flex flexDirection="column" gap="12px">
-        <Text.H5 variant="h5">Back up your Wallet</Text.H5>
-        <Text.Body mt={3} variant="body">
+        <Text.H5 variant="h5">Back up your wallet</Text.H5>
+        <Text.Body style={{ fontWeight: 300 }}>
           Your secret recovery phrase is used to restore your wallet.
         </Text.Body>
-        <Text.Body mt={2} variant="body">
-          Save these 12 words and store them in a safe place. Don’t share them
+        <Text.Body style={{ fontWeight: 300 }}>
+          Save these 12 words and store them in a safe place. Don't share them
           with anyone.
         </Text.Body>
         <Flex
-          p="16px"
           mt="32px"
-          gap="16px"
           width="100%"
           flexDirection="column"
-          border="1px solid rgba(var(--rlm-icon-rgba))"
+          alignItems="center"
+          border="1px solid rgba(var(--rlm-border-rgba))"
+          background="rgba(var(--rlm-border-rgba), 0.1)"
           borderRadius="9px"
         >
           <Text.Body
+            p="16px"
+            maxWidth="250px"
             style={{
+              lineHeight: '26px',
+              fontSize: '14px',
               wordSpacing: '7px',
               textAlign: 'center',
-              fontSize: '18px',
+              filter: hideSeedPhrase.isOn ? 'blur(10px)' : 'none',
             }}
           >
             {seedPhrase}
           </Text.Body>
-          <Flex width="100%" justifyContent="flex-end">
+          <Flex width="100%" justifyContent="space-between" padding="8px">
+            <HideButton
+              isOn={hideSeedPhrase.isOn}
+              onClick={hideSeedPhrase.toggle}
+            />
             <CopyButton content={seedPhrase} label="Copy" />
           </Flex>
         </Flex>
       </Flex>
       <Flex width="100%" gap={16}>
-        <Button.Transparent
+        <Button.Secondary
           flex={1}
           justifyContent="center"
-          onClick={() => setScreen(NewWalletScreen.CREATE)}
+          onClick={() => setScreen(WalletOnboardingScreen.NO_WALLET)}
         >
           Cancel
-        </Button.Transparent>
+        </Button.Secondary>
         <Button.TextButton
           flex={1}
           justifyContent="center"
-          onClick={() => setScreen(NewWalletScreen.CONFIRM)}
+          onClick={() => setScreen(WalletOnboardingScreen.CONFIRM)}
         >
           I wrote it down
         </Button.TextButton>

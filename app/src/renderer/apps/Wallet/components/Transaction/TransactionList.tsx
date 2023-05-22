@@ -1,166 +1,72 @@
-import { observer } from 'mobx-react';
+import { Flex, Text } from '@holium/design-system/general';
 
 import {
-  Flex,
-  Icon,
-  NoScrollBar,
-  Row,
-  Text,
-} from '@holium/design-system/general';
+  TransactionType,
+  WalletNavOptions,
+} from 'renderer/stores/models/wallet.model';
 
-import { TxType, WalletScreen } from 'renderer/apps/Wallet/types';
-import { TransactionType } from 'renderer/stores/models/wallet.model';
-import { useShipStore } from 'renderer/stores/ship.store';
-
-import {
-  convertEthAmountToUsd,
-  formatBtcAmount,
-  formatEthAmount,
-  monthNames,
-  shortened,
-} from '../../helpers';
+import { EthAmount } from '../../helpers';
+import { TxType, WalletScreen } from '../../types';
+import { Transaction } from './Transaction';
 
 type Props = {
-  transaction: TransactionType;
-  isCoin?: boolean;
-};
-
-const TransactionPresenter = ({ transaction, isCoin }: Props) => {
-  const { walletStore } = useShipStore();
-  const wasSent = transaction.type === 'sent';
-  const isEth = transaction.network === 'ethereum';
-  const themDisplay =
-    transaction.theirPatp || shortened(transaction.theirAddress);
-  const completedDate = new Date(
-    transaction.completedAt || transaction.initiatedAt || 0
-  );
-
-  const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
-  const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
-
-  const onClick = () => {
-    walletStore.navigate(WalletScreen.TRANSACTION_DETAIL, {
-      detail: {
-        type: 'transaction',
-        txtype: (walletStore.navState.detail?.txtype as TxType) || 'general',
-        coinKey: walletStore.navState.detail?.coinKey,
-        key: transaction.hash,
-      },
-    });
-  };
-
-  return (
-    <Row onClick={onClick}>
-      <Flex width="100%" justifyContent="space-between" alignItems="center">
-        <Flex flexDirection="column" justifyContent="center">
-          <Text.Custom fontWeight={500} fontSize={3}>
-            {transaction.status !== 'pending'
-              ? wasSent
-                ? 'Sent'
-                : 'Received'
-              : wasSent
-              ? 'Sending'
-              : 'Receiving'}
-          </Text.Custom>
-          <Flex>
-            <Text.Body variant="body" fontSize={1}>
-              {`${
-                monthNames[completedDate.getMonth()]
-              } ${completedDate.getDate()}`}
-            </Text.Body>
-            <Text.Body mx={1} variant="body" fontSize={1}>
-              ·
-            </Text.Body>
-            <Text.Custom
-              truncate
-              width={130}
-              variant="body"
-              fontSize={1}
-              opacity={0.5}
-            >
-              {wasSent ? 'To:' : 'From:'} {themDisplay}
-            </Text.Custom>
-          </Flex>
-        </Flex>
-        <Flex
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="flex-end"
-        >
-          <Text.Body fontSize={2}>
-            {transaction.type === 'sent' ? '-' : ''}{' '}
-            {isEth ? `${ethAmount.eth}` /* ETH` */ : `${btcAmount.btc} BTC`}
-          </Text.Body>
-          {!isCoin && (
-            <Text.Hint opacity={0.5}>
-              {transaction.type === 'sent' ? '-' : ''}$
-              {isEth &&
-                `${convertEthAmountToUsd(
-                  ethAmount,
-                  walletStore.ethereum.conversions.usd
-                )} USD`}
-            </Text.Hint>
-          )}
-        </Flex>
-      </Flex>
-    </Row>
-  );
-};
-
-export const Transaction = observer(TransactionPresenter);
-
-type TransactionListProps = {
-  height: number;
   transactions: TransactionType[];
+  ethPrice: number | undefined;
+  bitcoinPrice: number | undefined;
+  txType?: string;
+  coinKey?: string;
+  ethAmount?: EthAmount;
   ethType?: string;
+  navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
 };
 
-const TransactionListPresenter = ({
-  height,
-  ethType,
+export const TransactionList = ({
   transactions: unfilteredTransactions,
-}: TransactionListProps) => {
-  const pending = unfilteredTransactions.filter(
-    (tx) => tx.status === 'pending'
-  ).length;
-
+  ethPrice,
+  bitcoinPrice,
+  ethType,
+  txType,
+  coinKey,
+  navigate,
+}: Props) => {
   let transactions = unfilteredTransactions;
   if (ethType === 'ETH') {
-    transactions = unfilteredTransactions.filter((tx) =>
-      ethType ? tx.ethType === ethType : true
+    transactions = unfilteredTransactions.filter(
+      (tx) => tx.ethType === ethType
     );
   }
 
+  if (!transactions.length) {
+    return <Text.H5 mt="4px">No transactions</Text.H5>;
+  }
+
   return (
-    <>
-      <NoScrollBar
-        width="100%"
-        height={pending ? height - 54 : height}
-        flexDirection="column"
-        margin="auto"
-        overflow="auto"
-      >
-        {transactions.length ? (
-          transactions.map((transaction, index) => (
-            <Transaction
-              isCoin={ethType !== undefined}
-              key={index}
-              transaction={transaction}
-            />
-          ))
-        ) : (
-          <Text.H5 variant="h5" textAlign="center">
-            No transactions
-          </Text.H5>
-        )}
-      </NoScrollBar>
-      {transactions.length > 4 && (
-        <Flex pt="2px" width="100%" justifyContent="center">
-          <Icon name="ChevronDown" size={1} />
-        </Flex>
-      )}
-    </>
+    <Flex
+      flex={1}
+      minHeight="160px"
+      width="100%"
+      flexDirection="column"
+      overflowY="auto"
+    >
+      {transactions.map((transaction, index) => (
+        <Transaction
+          key={`transaction-${index}`}
+          isCoin={ethType !== undefined}
+          transaction={transaction}
+          ethPrice={ethPrice}
+          bitcoinPrice={bitcoinPrice}
+          onClick={() => {
+            navigate(WalletScreen.TRANSACTION_DETAIL, {
+              detail: {
+                type: 'transaction',
+                txtype: (txType as TxType) || 'general',
+                coinKey,
+                key: transaction.hash,
+              },
+            });
+          }}
+        />
+      ))}
+    </Flex>
   );
 };
-
-export const TransactionList = observer(TransactionListPresenter);

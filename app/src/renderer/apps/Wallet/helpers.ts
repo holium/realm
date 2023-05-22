@@ -5,12 +5,13 @@ import {
   ERC721Type,
   TransactionType,
 } from '../../stores/models/wallet.model';
+import { ERC20Amount } from './types';
 
 // TODO: replace with actual exchange rate
-export const ethToUsd = (eth: number, currentPrice: number) =>
-  isNaN(eth) ? 0 : (eth * currentPrice).toFixed(2);
-export const usdToEth = (usd: number, currentPrice: number) =>
-  isNaN(usd) ? 0 : Number((usd / currentPrice).toFixed(8));
+export const ethToUsd = (eth: number, currentPrice: number, decimals = 2) =>
+  isNaN(eth) ? 0 : (eth * currentPrice).toFixed(decimals);
+export const usdToEth = (usd: number, currentPrice: number, decimals = 8) =>
+  isNaN(usd) ? 0 : Number((usd / currentPrice).toFixed(decimals));
 
 export function gweiToEther(gwei: number) {
   return gwei / 1000000000000000000;
@@ -52,7 +53,7 @@ export function getNfts(nftMap: Map<string, ERC721Type>): ERC721Type[] {
   return Array.from(nftMap.values());
 }
 
-interface EthAmount {
+export type EthAmount = {
   eth: string;
   gwei: string;
   wei: string;
@@ -64,7 +65,7 @@ interface EthAmount {
   display: string;
   full: string;
   big: BigNumber;
-}
+};
 
 interface BtcAmount {
   btc: string;
@@ -105,7 +106,10 @@ export function formatEthAmount(amount: string): EthAmount {
   };
 }
 
-export function formatCoinAmount(balance: string | BigInt, decimals: number) {
+export function formatCoinAmount(
+  balance: string | BigInt,
+  decimals: number
+): ERC20Amount {
   let amount = typeof balance === 'string' ? balance : balance.toString();
   if (amount.length < decimals) {
     const additionalDigits = '0'.repeat(decimals - amount.length + 1);
@@ -135,7 +139,7 @@ export function convertEthAmountToUsd(
   exchangeRate: number = 1647.37
 ) {
   if (amount.eth === '0') {
-    return 0;
+    return '0.00';
   }
   const usd = Number(amount.eth) * exchangeRate;
   return usd.toFixed(2);
@@ -161,20 +165,17 @@ export function convertBtcAmountToUsd(
   exchangeRate: number = 1647.37
 ) {
   if (amount.btc === '0') {
-    return 0;
+    return '0.00';
   }
   const usd = Number(amount.btc) * exchangeRate;
   return usd.toFixed(2);
 }
 
 export function convertERC20AmountToUsd(
-  amount: any,
+  amount: ERC20Amount,
   exchangeRate: number = 1647.37
 ) {
-  if (amount.btc === '0') {
-    return 0;
-  }
-  const usd = Number(amount.btc) * exchangeRate;
+  const usd = Number(amount.big) * exchangeRate;
   return usd.toFixed(2);
 }
 
@@ -193,7 +194,6 @@ export const monthNames = [
   'Dec',
 ];
 
-// https://coincodex.com/cryptocurrencies/sector/ethereum-erc20/
 export function getMockCoinIcon(ticker: string) {
   switch (ticker) {
     case 'BUSD':
