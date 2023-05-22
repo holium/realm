@@ -154,21 +154,22 @@ export const WordPicker = ({ seedPhrase, onValidChange }: Props) => {
         background="rgba(var(--rlm-border-rgba), 0.1)"
         borderRadius={6}
       >
-        {seedPhrase.split(' ').map((word, index) => {
+        {seedPhrase.split(' ').map((_, index) => {
+          const w = selectedWords[index];
           if (index < selectedWords.length - 1)
-            return <Word key={`${index}-${word}-selected-one`}>{word}</Word>;
+            return <Word key={`${index}-${w}-selected-one`}>{w}</Word>;
 
           if (index === selectedWords.length - 1)
             return (
-              <Word key={`${index}-${word}-selected`} removeable={true}>
-                {word}
+              <Word key={`${index}-${w}-selected`} removeable={true}>
+                {w}
               </Word>
             );
 
           if (index === selectedWords.length)
-            return <Current key={`${index}-${word}-current`} />;
+            return <Current key={`${index}-${w}-current`} />;
 
-          return <Spacer key={`${index}-${word}-spacer`} />;
+          return <Spacer key={`${index}-${w}-spacer`} />;
         })}
       </Flex>
     );

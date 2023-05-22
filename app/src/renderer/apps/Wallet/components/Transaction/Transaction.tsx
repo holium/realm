@@ -34,8 +34,12 @@ export const Transaction = ({
     transaction.completedAt ?? transaction.initiatedAt ?? '0'
   );
 
-  const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
-  const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
+  const ethAmount = transaction.amount
+    ? formatEthAmount(isEth ? transaction.amount : '0')
+    : ({ eth: '0' } as any);
+  const btcAmount = transaction.amount
+    ? formatBtcAmount(!isEth ? transaction.amount : '0')
+    : ({ btc: '0' } as any);
   const usdAmountDisplay = isEth
     ? convertEthAmountToUsd(ethAmount, ethPrice)
     : convertBtcAmountToUsd(btcAmount, bitcoinPrice);

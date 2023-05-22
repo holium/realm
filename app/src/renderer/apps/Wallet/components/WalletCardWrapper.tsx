@@ -31,6 +31,7 @@ export const WalletCardStyle = styled(Card)<CardStyleProps>`
 `;
 
 export const WalletCardBody = styled(Flex)`
+  flex: 1;
   flex-direction: column;
   gap: inherit;
   overflow-y: auto;
