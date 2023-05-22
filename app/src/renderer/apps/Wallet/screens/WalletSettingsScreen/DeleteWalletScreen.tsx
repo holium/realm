@@ -31,7 +31,7 @@ export const DeleteWalletScreen = ({
           justifyContent="center"
           gap="12px"
         >
-          <Text.H3 color="intent-caution">Confirm Delete</Text.H3>
+          <Text.H3 color="intent-alert">Confirm Delete</Text.H3>
           <Text.Body variant="body">Enter your passcode to continue.</Text.Body>
         </Flex>
         <Flex flexDirection="column" alignItems="center">
