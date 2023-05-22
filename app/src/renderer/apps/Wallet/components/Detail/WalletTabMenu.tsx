@@ -12,8 +12,22 @@ type Props = {
 
 export const WalletTabMenu = ({ selected, network, onSelect }: Props) => (
   <Flex alignItems="center" gap="4px">
+    <MenuButton
+      style={{
+        width: '107px',
+        justifyContent: 'center',
+      }}
+      selected={selected === 'transactions'}
+      onClick={() => onSelect('transactions')}
+    >
+      Transactions
+    </MenuButton>
     {network === 'ethereum' && (
       <MenuButton
+        style={{
+          width: '57px',
+          justifyContent: 'center',
+        }}
         selected={selected === 'coins'}
         onClick={() => onSelect('coins')}
       >
@@ -22,17 +36,15 @@ export const WalletTabMenu = ({ selected, network, onSelect }: Props) => (
     )}
     {network === 'ethereum' && (
       <MenuButton
+        style={{
+          width: '52px',
+          justifyContent: 'center',
+        }}
         selected={selected === 'nfts'}
         onClick={() => onSelect('nfts')}
       >
         NFTs
       </MenuButton>
     )}
-    <MenuButton
-      selected={selected === 'transactions'}
-      onClick={() => onSelect('transactions')}
-    >
-      Transactions
-    </MenuButton>
   </Flex>
 );
