@@ -80,7 +80,7 @@ export const WordPicker = ({ seedPhrase, onValidChange }: Props) => {
 
   const Select = ({ words }: { words: Word[] }) => {
     return (
-      <Flex justifyContent="space-between" flexWrap="wrap">
+      <Flex justifyContent="center" flexWrap="wrap">
         {words.map((word, index: number) => (
           <Box
             key={`${index}-${word.word}-select`}
@@ -156,7 +156,7 @@ export const WordPicker = ({ seedPhrase, onValidChange }: Props) => {
       >
         {seedPhrase.split(' ').map((word, index) => {
           if (index < selectedWords.length - 1)
-            return <Word key={`${index}-${word}-selected`}>{word}</Word>;
+            return <Word key={`${index}-${word}-selected-one`}>{word}</Word>;
 
           if (index === selectedWords.length - 1)
             return (
