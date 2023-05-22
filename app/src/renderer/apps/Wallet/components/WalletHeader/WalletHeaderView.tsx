@@ -21,7 +21,9 @@ export const WalletHeaderView = ({
         <Icon name="ArrowLeftLine" size={24} opacity={0.7} />
       </Button.IconButton>
     ) : (
-      <Icon name="WalletTray" size={24} opacity={0.6} />
+      <Flex width="26px">
+        <Icon name="WalletTray" size={24} opacity={0.6} />
+      </Flex>
     )}
 
     {!isOnboarding && (
