@@ -2,13 +2,13 @@ import { useState } from 'react';
 
 import { Button, Flex, Text } from '@holium/design-system/general';
 
-import { NewWalletScreen } from 'renderer/apps/Wallet/types';
+import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 
 import { WordPicker } from './WordPicker';
 
 type Props = {
   seedPhrase: string;
-  setScreen: (screen: NewWalletScreen) => void;
+  setScreen: (screen: WalletOnboardingScreen) => void;
 };
 
 export const ConfirmScreen = ({ seedPhrase, setScreen }: Props) => {
@@ -22,23 +22,19 @@ export const ConfirmScreen = ({ seedPhrase, setScreen }: Props) => {
       justifyContent="space-between"
       alignItems="center"
     >
-      <Flex flexDirection="column" alignItems="center" gap="16px">
+      <Flex flexDirection="column" gap="16px">
         <Text.H5 variant="h5">Confirm words</Text.H5>
-        <Text.Body variant="body">
+        <Text.Body style={{ fontWeight: 300 }}>
           Verify you wrote the secret recovery phrase down correctly by clicking
           the following words in the correct order.
         </Text.Body>
-        <WordPicker
-          seedPhrase={seedPhrase}
-          border="2px solid rgba(var(--rlm-border-rgba))"
-          onValidChange={setValid}
-        />
+        <WordPicker seedPhrase={seedPhrase} onValidChange={setValid} />
       </Flex>
       <Flex width="100%" gap="16px">
         <Button.Transparent
           flex={1}
           justifyContent="center"
-          onClick={() => setScreen(NewWalletScreen.CREATE)}
+          onClick={() => setScreen(WalletOnboardingScreen.NO_WALLET)}
         >
           Cancel
         </Button.Transparent>
@@ -46,7 +42,7 @@ export const ConfirmScreen = ({ seedPhrase, setScreen }: Props) => {
           flex={1}
           disabled={!valid}
           justifyContent="center"
-          onClick={() => setScreen(NewWalletScreen.PASSCODE)}
+          onClick={() => setScreen(WalletOnboardingScreen.PASSCODE)}
         >
           Confirm
         </Button.TextButton>

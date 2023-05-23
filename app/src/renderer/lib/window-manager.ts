@@ -225,6 +225,9 @@ export const normalizePosition = (
   y: position.y / (desktopDimensions.height / 10),
 });
 
+export const normalizeValue = (value: number, dimension: number): number =>
+  value / (dimension / 10);
+
 /* Converts position from the 1-10 scale to pixels. */
 export const denormalizePosition = (
   position: Position,

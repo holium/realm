@@ -245,26 +245,26 @@ export const ShellModel = types
     toggleMaximized(appId: string): BoundsModelType {
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');
-      window.toggleMaximize(self.desktopDimensions);
+      window.toggleMaximize(self.desktopDimensions, self.isFullscreen);
       return toJS(window.bounds);
     },
     maximizeLeft(appId: string): BoundsModelType {
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');
-      window.maximizeLeft(self.desktopDimensions);
+      window.maximizeLeft(self.desktopDimensions, self.isFullscreen);
       return toJS(window.bounds);
     },
     maximizeRight(appId: string): BoundsModelType {
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');
-      window.maximizeRight(self.desktopDimensions);
+      window.maximizeRight(self.desktopDimensions, self.isFullscreen);
       return toJS(window.bounds);
     },
     maximize(appId: string): BoundsModelType {
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');
       if (!self.isWindowMaximized(appId)) {
-        window.toggleMaximize(self.desktopDimensions);
+        window.toggleMaximize(self.desktopDimensions, self.isFullscreen);
       }
       return toJS(window.bounds);
     },

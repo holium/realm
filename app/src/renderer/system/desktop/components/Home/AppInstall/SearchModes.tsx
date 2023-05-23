@@ -35,19 +35,21 @@ const SearchModesPresenter = () => {
     if (searchMode === 'dev-app-search' && selectedShip) {
       if (!bazaarStore.hasAlly(selectedShip)) {
         if (!bazaarStore.alliesLoader.isLoading) {
-          bazaarStore
-            .addAlly(selectedShip)
-            .then(() => {
-              bazaarStore.scryTreaties(selectedShip);
-            })
-            .catch((e) => console.error(e));
+          // prevents UI crash
+          bazaarStore.addAlly(selectedShip).catch((e) => console.error(e));
         }
       } else {
-        bazaarStore.scryTreaties(selectedShip);
+        bazaarStore.scryTreaties(selectedShip).catch((e) => console.error(e));
         // bazaarStore.setLoadingState('published-apps-loaded');
       }
     }
   }, [searchMode, selectedShip]);
+
+  useEffect(() => {
+    if (selectedShip && bazaarStore.alliesLoader.isLoaded) {
+      bazaarStore.scryTreaties(selectedShip).catch((e) => console.error(e));
+    }
+  }, [bazaarStore.alliesLoader]);
 
   useEffect(() => {
     if (searchMode === 'app-search') {

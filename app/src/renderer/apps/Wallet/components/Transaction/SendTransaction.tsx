@@ -1,16 +1,46 @@
-import { observer } from 'mobx-react';
+import styled from 'styled-components';
 
-import { Box, Flex, Text } from '@holium/design-system/general';
+import { Flex } from '@holium/design-system/general';
 
-import { ProtocolType } from 'os/services/ship/wallet/wallet.types';
+import {
+  NetworkType,
+  ProtocolType,
+  RecipientPayload,
+} from 'os/services/ship/wallet/wallet.types';
 import {
   BitcoinWalletType,
   ERC20Type,
   EthWalletType,
+  UqTxType,
+  WalletNavOptions,
 } from 'renderer/stores/models/wallet.model';
-import { useShipStore } from 'renderer/stores/ship.store';
 
-import { TransactionPane } from './Pane';
+import { TransactionRecipient, WalletScreen } from '../../types';
+import { TransactionPane } from './TransactionPane';
+
+const SeparatorContainer = styled(Flex)`
+  width: 200%;
+  left: 50%;
+  transform: translateX(-50%);
+  position: relative;
+  margin: 20px 0 32px 0;
+  align-items: center;
+`;
+
+const SeparatorLine = styled(Flex)`
+  flex: 1;
+  height: 1px;
+  background: rgba(var(--rlm-border-rgba));
+`;
+
+const SeparatorBox = styled.div`
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--rlm-accent-color);
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(var(--rlm-accent-rgba), 0.1);
+`;
 
 const abbrMap = {
   ethereum: 'ETH',
@@ -18,106 +48,86 @@ const abbrMap = {
 };
 
 type Props = {
-  hidden: boolean;
-  onScreenChange: any;
-  close: () => void;
   wallet: EthWalletType | BitcoinWalletType;
+  protocol: ProtocolType;
+  network: NetworkType;
+  uqTx?: UqTxType;
+  to: string | undefined;
   coin: ERC20Type | null;
+  transactionAmount: number;
+  setTransactionAmount: (amount: number) => void;
+  transactionRecipient: TransactionRecipient | null;
+  setTransactionRecipient: (recipient: TransactionRecipient) => void;
+  screen: WalletScreen;
+  ethPrice: number | undefined;
   onConfirm: () => void;
-  transactionAmount: any;
-  setTransactionAmount: any;
-  transactionRecipient: any;
-  setTransactionRecipient: any;
+  close: () => void;
+  navigate: (view: WalletScreen, options?: WalletNavOptions) => void;
+  getRecipient: (ship: string) => Promise<RecipientPayload>;
 };
 
-export const SendTransactionPresenter = ({
-  coin,
-  hidden,
-  onScreenChange,
-  close,
+export const SendTransaction = ({
   wallet,
-  onConfirm,
+  coin,
+  protocol,
+  network,
+  uqTx,
+  to,
   transactionAmount,
   setTransactionAmount,
   transactionRecipient,
   setTransactionRecipient,
+  screen,
+  ethPrice,
+  navigate,
+  getRecipient,
+  close,
+  onConfirm,
 }: Props) => {
-  const { walletStore } = useShipStore();
-  const pendingTx =
-    walletStore.navState.protocol === ProtocolType.UQBAR
-      ? walletStore.uqTx
-      : null;
+  const pendingTx = protocol === ProtocolType.UQBAR ? uqTx : null;
   const uqbarContract: boolean = pendingTx ? 'noun' in pendingTx.action : false;
 
   const Separator = () => (
-    <Flex position="relative" width="100%" justifyContent="center" gap={10}>
-      <Box position="absolute" width="300px" height="1px" left="-10px" />
-      {uqbarContract ? (
-        <Flex
-          position="absolute"
-          bottom="-12px"
-          height="25px"
-          width="170px"
-          justifyContent="center"
-          alignItems="center"
-          borderRadius="50px"
-        >
-          <Text.Body color="accent">Contract Interaction</Text.Body>
-        </Flex>
-      ) : (
-        <Flex
-          position="absolute"
-          px={2}
-          bottom="-12px"
-          min-width="80px"
-          justifyContent="center"
-          alignItems="center"
-          borderRadius="50px"
-        >
-          <Text.Body color="accent">
-            {`Send ${
+    <SeparatorContainer>
+      <SeparatorLine />
+      <SeparatorBox>
+        {uqbarContract
+          ? 'Contract Interaction'
+          : `Send ${
               coin
                 ? coin.name
-                : walletStore.navState.protocol === ProtocolType.UQBAR
+                : protocol === ProtocolType.UQBAR
                 ? 'zigs'
-                : abbrMap[
-                    walletStore.navState.network as 'bitcoin' | 'ethereum'
-                  ]
-            }
-              `}
-          </Text.Body>
-        </Flex>
-      )}
-    </Flex>
+                : abbrMap[network as 'bitcoin' | 'ethereum']
+            }`}
+      </SeparatorBox>
+      <SeparatorLine />
+    </SeparatorContainer>
   );
 
   return (
-    <Box width="100%" hidden={hidden} color="card">
-      <Flex flexDirection="column" gap={10}>
-        <Separator />
-        <TransactionPane
-          onConfirm={onConfirm}
-          max={
-            coin
-              ? Number(coin.balance)
-              : Number(
-                  (wallet as EthWalletType).data.get(
-                    walletStore.navState.protocol
-                  )?.balance
-                )
-          }
-          onScreenChange={onScreenChange}
-          uqbarContract={uqbarContract}
-          close={close}
-          coin={coin}
-          setTransactionAmount={setTransactionAmount}
-          transactionAmount={transactionAmount}
-          setTransactionRecipient={setTransactionRecipient}
-          transactionRecipient={transactionRecipient}
-        />
-      </Flex>
-    </Box>
+    <>
+      <Separator />
+      <TransactionPane
+        protocol={protocol}
+        network={network}
+        ethPrice={ethPrice}
+        wallet={wallet}
+        screen={
+          screen === WalletScreen.TRANSACTION_SEND ? 'initial' : 'confirm'
+        }
+        to={to}
+        transactionAmount={transactionAmount}
+        transactionRecipient={transactionRecipient}
+        coin={coin}
+        uqbarContract={uqbarContract}
+        close={close}
+        setTransactionAmount={setTransactionAmount}
+        setTransactionRecipient={setTransactionRecipient}
+        getRecipient={getRecipient}
+        navigate={navigate}
+        onConfirm={onConfirm}
+      />
+    </>
   );
 };
-
-export const SendTransaction = observer(SendTransactionPresenter);

@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from 'react';
+import { useState } from 'react';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { Box, Button, Flex, Icon, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 
-import { NewWalletScreen } from 'renderer/apps/Wallet/types';
+import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { VerifyPasscode } from '../components/VerifyPasscode';
@@ -19,7 +19,7 @@ const NoResize = styled(Flex)`
 
 type Props = {
   setSeedPhrase: (phrase: string, passcode: number[]) => void;
-  setScreen: (screen: NewWalletScreen) => void;
+  setScreen: (screen: WalletOnboardingScreen) => void;
 };
 
 const RecoverExistingScreenPresenter = ({
@@ -46,7 +46,7 @@ const RecoverExistingScreenPresenter = ({
     if (correct) {
       setSeedPhrase(phrase, passcode);
       walletStore.watchUpdates();
-      setScreen(NewWalletScreen.FINALIZING);
+      setScreen(WalletOnboardingScreen.FINALIZING);
       setError('');
     } else {
       setError(
@@ -57,9 +57,8 @@ const RecoverExistingScreenPresenter = ({
 
   return showPasscode ? (
     <VerifyPasscode
-      onSuccess={(code: number[]) => {
-        recoverSeedPhrase(code);
-      }}
+      checkPasscode={walletStore.checkPasscode}
+      onSuccess={recoverSeedPhrase}
     />
   ) : (
     <NoResize width="100%" height="100%" flexDirection="column" gap={10}>
@@ -77,8 +76,8 @@ const RecoverExistingScreenPresenter = ({
           type="textarea"
           value={phrase}
           cols={50}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            updatePhrase(e.target.value)
+          onChange={(e) =>
+            updatePhrase((e.target as HTMLTextAreaElement).value)
           }
         />
 
@@ -101,7 +100,7 @@ const RecoverExistingScreenPresenter = ({
         position="absolute"
         top="582px"
         zIndex={999}
-        onClick={() => setScreen(NewWalletScreen.DETECTED_EXISTING)}
+        onClick={() => setScreen(WalletOnboardingScreen.DETECTED_EXISTING)}
       >
         <Icon name="ArrowLeftLine" size={2} />
       </Flex>

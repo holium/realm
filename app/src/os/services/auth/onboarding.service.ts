@@ -309,6 +309,10 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       minor: -1,
       build: -1,
     };
+    console.log('environment variables:');
+    console.log(`BUILD_VERSION=${process.env.BUILD_VERSION}`);
+    console.log(`ARTIFACT_VERSION=${process.env.ARTIFACT_VERSION}`);
+    console.log(`RELEASE_CHANNEL=${process.env.RELEASE_CHANNEL}`);
     console.log(
       `preparing build version env var '${process.env.BUILD_VERSION}'`
     );

@@ -14,6 +14,7 @@ export const getAppTileFlags = (
   installStatus: InstallStatus
 ): AppStatusFlags => {
   const isInstalling =
+    installStatus === InstallStatus.started ||
     installStatus === InstallStatus.reviving ||
     installStatus === InstallStatus.suspending ||
     (installStatus !== InstallStatus.installed &&

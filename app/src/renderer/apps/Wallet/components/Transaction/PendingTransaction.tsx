@@ -1,3 +1,5 @@
+import { observer } from 'mobx-react';
+
 import {
   Button,
   Card,
@@ -14,68 +16,42 @@ import { useShipStore } from 'renderer/stores/ship.store';
 
 import { formatBtcAmount, formatEthAmount, shortened } from '../../helpers';
 
-type PendingTransactionDisplayProps = {
-  transactions: TransactionType[];
+type Props = {
+  transaction: TransactionType;
   hide: () => void;
 };
 
-export const PendingTransactionDisplay = ({
-  transactions,
-  hide,
-}: PendingTransactionDisplayProps) => {
-  const pendingTransactions = transactions
-    .filter((trans) => trans.status === 'pending')
-    .sort(
-      (a, b) =>
-        new Date(a.initiatedAt ?? 0).getTime() -
-        new Date(b.initiatedAt ?? 0).getTime()
-    );
-
-  return pendingTransactions.length ? (
-    <Flex width="100%">
-      <PendingTransaction transaction={pendingTransactions[0]} hide={hide} />
-    </Flex>
-  ) : null;
-};
-
-type PendingTransactionProps = {
-  transaction: TransactionType;
-  hide: any;
-};
-
-export const PendingTransaction = (props: PendingTransactionProps) => {
+const PendingTransactionPresenter = ({ transaction, hide }: Props) => {
   const { walletStore } = useShipStore();
 
   const goToTransaction = () => {
     walletStore.navigate(WalletScreen.TRANSACTION_DETAIL, {
-      walletIndex: props.transaction.walletIndex.toString(),
+      walletIndex: transaction.walletIndex.toString(),
       detail: {
         type: 'transaction',
-        txtype: props.transaction.ethType ? 'coin' : 'general',
-        coinKey: props.transaction.ethType,
-        key: props.transaction.hash,
+        txtype: transaction.ethType ? 'coin' : 'general',
+        coinKey: transaction.ethType,
+        key: transaction.hash,
       },
     });
   };
 
-  const isEth = props.transaction.network === 'ethereum';
-  const ethAmount = formatEthAmount(isEth ? props.transaction.amount : '1');
-  const btcAmount = formatBtcAmount(!isEth ? props.transaction.amount : '1');
+  const isEth = transaction.network === 'ethereum';
+  const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
+  const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
   const themDisplay =
-    props.transaction.theirPatp || shortened(props.transaction.theirAddress);
+    transaction.theirPatp || shortened(transaction.theirAddress);
   let unitsDisplay = 'BTC';
   if (isEth) {
-    console.log(props.transaction);
-    console.log(props.transaction.ethType);
     unitsDisplay =
-      props.transaction.ethType === 'ETH'
+      transaction.ethType === 'ETH'
         ? walletStore.navState.protocol === ProtocolType.UQBAR
           ? 'zigs'
           : 'ETH'
         : walletStore.ethereum.wallets
-            ?.get(props.transaction.walletIndex.toString())
+            ?.get(transaction.walletIndex.toString())
             ?.data.get(walletStore.navState.protocol)
-            ?.coins.get(props.transaction.ethType)?.name ?? '';
+            ?.coins.get(transaction.ethType)?.name ?? '';
   }
 
   return (
@@ -93,17 +69,17 @@ export const PendingTransaction = (props: PendingTransactionProps) => {
           </Flex>
           <Flex flexDirection="column">
             <Text.Body variant="body">
-              {props.transaction.type === 'sent' ? 'Sending' : 'Receiving'}{' '}
+              {transaction.type === 'sent' ? 'Sending' : 'Receiving'}{' '}
               {isEth ? ethAmount.eth : btcAmount.btc} {unitsDisplay}
             </Text.Body>
             <Text.Body variant="body" fontSize={1}>
-              {props.transaction.type === 'sent' ? 'To:' : 'From:'}{' '}
-              {themDisplay} <Icon ml="7px" name="ShareBox" size="15px" />
+              {transaction.type === 'sent' ? 'To:' : 'From:'} {themDisplay}{' '}
+              <Icon ml="7px" name="ShareBox" size="15px" />
             </Text.Body>
           </Flex>
         </Flex>
         <Flex justifyContent="center" alignItems="center">
-          <Button.IconButton onClick={props.hide} mr={1}>
+          <Button.IconButton onClick={hide} mr={1}>
             <Icon opacity={0.7} name="Close" size="15px" />
           </Button.IconButton>
         </Flex>
@@ -111,3 +87,5 @@ export const PendingTransaction = (props: PendingTransactionProps) => {
     </Card>
   );
 };
+
+export const PendingTransaction = observer(PendingTransactionPresenter);

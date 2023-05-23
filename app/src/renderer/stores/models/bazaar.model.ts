@@ -218,9 +218,14 @@ export const BazaarStore = types
         hasAlly(ship: string) {
           return allies.has(ship);
         },
-        getTreaties(ship: string) {
+        // exact - treaty ship must match exact. if false, match
+        //  on "child" ships. for example, if searching '~dister-dozzod-dozzod',
+        //    '~lander-dister-dozzod-dozzod/landscape' should match since '~dister-dozzod-dozzod'
+        //    is parent ship
+        getTreaties(ship: string, exact: boolean = true) {
+          ship = exact ? ship : (ship = ship.substring(1));
           const filteredTreaties = Array.from(toJS(treaties).values()).filter(
-            (val) => val.id.split('/')[0] === ship
+            (val) => val.id.split('/')[0].endsWith(ship)
           );
           return filteredTreaties;
         },
@@ -228,12 +233,13 @@ export const BazaarStore = types
           const treaty = treaties.get(`${ship}/${desk}`);
           return treaty && getSnapshot(treaty);
         },
-        searchTreaties(ship: string, term: string) {
+        searchTreaties(ship: string, term: string, exact: boolean = false) {
           const str = term.toLowerCase();
-          const resultTreaties = this.getTreaties(ship).filter((val) => {
+          ship = exact ? ship : ship.substring(1);
+          const resultTreaties = this.getTreaties(ship, false).filter((val) => {
             const tokens = val.id.split('/');
             return (
-              tokens[0] === ship &&
+              tokens[0].endsWith(ship) &&
               (val.title.toLowerCase().startsWith(str) ||
                 tokens[1].startsWith(term))
             );
@@ -282,6 +288,10 @@ export const BazaarStore = types
         },
 
         reset() {
+          self.alliesLoader.set('initial');
+          allies.clear();
+          self.treatyLoader.set('initial');
+          treaties.clear();
           self.catalog.clear();
           self.gridIndex.clear();
           self.recentApps.clear();
@@ -331,6 +341,11 @@ export const BazaarStore = types
           }
           try {
             if (app) {
+              // if this is not set, the app will not render the tile
+              //  in the grid. default this value to the size of the app catalog (0-based)
+              if (!app.gridIndex) {
+                app.gridIndex = self.catalog.size;
+              }
               app.setStatus(InstallStatus.started);
               self.installations.set(app.id, InstallStatus.started);
             }
@@ -429,10 +444,12 @@ export const BazaarStore = types
               console.log('already added ally', ship);
               return;
             }
+            self.treatyLoader.set('loading');
             self.addingAlly.set(ship, 'adding new ally');
             const result: any = yield BazaarIPC.addAlly(ship);
             return result;
           } catch (error) {
+            self.treatyLoader.set('error');
             console.error(error);
           }
         }),
@@ -479,6 +496,8 @@ export const BazaarStore = types
             treaties.clear();
             const treatiesResponse = yield BazaarIPC.scryTreaties(ship);
             if (Object.keys(treatiesResponse).length === 0) {
+              // must set or spinner won't stop spinning
+              self.treatyLoader.set('loaded');
               return;
             }
             const formedTreaties = [];
@@ -499,6 +518,7 @@ export const BazaarStore = types
             self.treatyLoader.set('loaded');
             return formedTreaties;
           } catch (error) {
+            self.treatyLoader.set('error');
             console.error(error);
             throw error;
           }

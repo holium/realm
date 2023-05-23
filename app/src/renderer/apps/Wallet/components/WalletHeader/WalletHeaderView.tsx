@@ -1,5 +1,7 @@
 import { Button, Flex, Icon, Text } from '@holium/design-system/general';
 
+const ethereumColor = '#627EEA';
+
 type Props = {
   showBack: boolean;
   isOnboarding: boolean;
@@ -13,22 +15,13 @@ export const WalletHeaderView = ({
   onClickBack,
   onAddWallet,
 }: Props) => (
-  <Flex width="100%" justifyContent="space-between" alignItems="center" pb={2}>
+  <Flex width="100%" justifyContent="space-between" alignItems="center">
     {showBack && !isOnboarding ? (
-      <Button.IconButton
-        size={26}
-        mt={isOnboarding ? 1 : 0}
-        onClick={onClickBack}
-      >
+      <Button.IconButton onClick={onClickBack}>
         <Icon name="ArrowLeftLine" size={24} opacity={0.7} />
       </Button.IconButton>
     ) : (
-      <Flex
-        mt={isOnboarding ? 1 : 0}
-        justifyContent="center"
-        alignItems="center"
-        width="26px"
-      >
+      <Flex width="26px">
         <Icon name="WalletTray" size={24} opacity={0.6} />
       </Flex>
     )}
@@ -40,11 +33,16 @@ export const WalletHeaderView = ({
           py={1}
           pl={1}
           pr={2}
-          background={'rgba(98, 126, 234, 0.14)'}
+          background="rgba(98, 126, 234, 0.14)"
           borderRadius={6}
+          gap="6px"
         >
-          <Icon mr="6px" size={20} name="Ethereum" pointerEvents="none" />
-          <Text.Custom fontSize={2} fontWeight={500}>
+          <Icon size={20} name="Ethereum" pointerEvents="none" />
+          <Text.Custom
+            style={{ color: ethereumColor }}
+            fontSize={2}
+            fontWeight={500}
+          >
             Ethereum
           </Text.Custom>
         </Flex>

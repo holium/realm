@@ -1,8 +1,8 @@
-import { Conduit } from 'os/services/api';
+import { WalletDB } from '../wallet.db';
 
 /**
  * BaseProtocol is an abstract class that defines the interface for chain communication.
  */
 export abstract class BaseProtocol {
-  abstract updateWalletState(conduit: Conduit, walletState: any): void;
+  abstract updateWalletState(walletState: WalletDB): void;
 }

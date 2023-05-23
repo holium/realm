@@ -16,19 +16,16 @@ import { formatEthAmount, shortened } from '../../helpers';
 type Props = {
   wallet: EthWalletType;
   QROpen: boolean;
-  setQROpen: (open: boolean) => void;
-  hideWalletHero: boolean;
   sendTrans: boolean;
+  setQROpen: (open: boolean) => void;
 };
 
 const WalletInfoPresenter = ({
   wallet,
   QROpen,
-  setQROpen,
-  hideWalletHero,
   sendTrans,
+  setQROpen,
 }: Props) => {
-  // TODO clean up everything
   const amountDisplay = `${
     // @ts-ignore
     formatEthAmount(wallet ? wallet.balance : '0.0').eth
@@ -83,7 +80,7 @@ const WalletInfoPresenter = ({
           />
         </Flex>
       </Box>
-      <Box p={2} width="100%" hidden={hideWalletHero}>
+      <Box p={2} width="100%">
         <Text.Body
           mt={3}
           opacity={0.5}
