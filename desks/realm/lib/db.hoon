@@ -92,7 +92,9 @@
   |-
     ?:  =(index (lent keys))
       tables.state
-    $(index +(index), tables.state (~(del by tables.state) path))
+    =/  typekey    (snag index keys)
+    =/  pt         (~(del by (~(got by tables.state) typekey)) path)
+    $(index +(index), tables.state (~(put by tables.state) typekey pt))
 ::
 ++  process-db-change
 :: takes a db-change object (that we presumably got as a %fact on a
@@ -118,9 +120,17 @@
       =.  updated-at.path-row   updated-at.row.ch
       =.  paths.state           (~(put by paths.state) path path-row)
       =.  received-at.row.ch    now.bowl
-      (add-row-to-db row.ch schema.ch state)
+      =/  sch=schema            (~(got by schemas.state) [type.row.ch v.row.ch]) :: currently just ensuring that we have the schema already
+      (add-row-to-db row.ch sch state)
     %del-row
-      ~&  >>>  "TODO %del-row db-change on sub wire not handled properly yet"
+      =.  updated-at.path-row   t.ch
+      =.  paths.state           (~(put by paths.state) path.ch path-row)
+      =/  pt              (~(got by tables.state) type.ch)
+      =/  tbl             (~(got by pt) path.ch)
+      =.  tbl             (~(del by tbl) id.ch)                :: delete by id
+      =.  pt              (~(put by pt) path.ch tbl)           :: update the pathed-table
+      =.  tables.state    (~(put by tables.state) type.ch pt)  :: update the tables.state
+      =.  del-log.state   (~(put by del-log.state) now.bowl ch)  :: record the fact that we deleted
       state
     %add-path   !!  :: don't bother handling this because it should never come on the sub-wire... it goes through %get-path
     %upd-path
@@ -205,7 +215,16 @@
       $(index +(index))
     $(index +(index), result (~(put by result) current-type (need tbl)))
 ::
+::
 :: pokes
+::   tests:
+::db &db-action [%create-path [/example ~zod %host ~ ~ ~ *@da *@da *@da] ~[[~zod %host] [~bus %member]]]
+::db &db-action [%add-peer /example ~fed %member]
+::db &db-action [%create [/example [our now] %foo 0 [%general ~[1 'a']] *@da *@da *@da] [~ ~[['num' 'ud'] ['str' 't']]]]
+::db &db-action [%create [/example [our now] %foo 0 [%general ~[1 'b']] *@da *@da *@da] ~]
+::db &db-action [%edit /example [our ~2023.5.22..20.15.47..86fe] %foo 0 [%general ~[2 'b']] *@da *@da *@da]
+::db &db-action [%remove %foo /example [our ~2023.5.22..20.15.47..86fe]]
+::db &db-action [%create [/example [our now] %foo 0 [%general ~[1 'c']] *@da *@da *@da] ~]
 ::
 ++  create-path
 ::db &db-action [%create-path [/example ~zod %host ~ ~ ~ *@da *@da *@da] ~[[~zod %host] [~bus %member]]]
@@ -376,49 +395,6 @@
 
   [cards state]
 ::
-:: ++  get-peer
-::   |=  [[=path =ship =role t=@da] state=state-0 =bowl:gall]
-::   ^-  (quip card state-0)
-::   :: ensure the path exists
-::   =/  path-row    (~(got by paths.state) path)
-::   :: ensure this came from the host
-::   ?>  =(src.bowl host.path-row)
-::   :: and not from us
-::   ?<  =(src.bowl our.bowl)
-:: 
-::   :: local state updates
-::   :: update the peers list
-::   =/  p=peer      [path ship role t t now.bowl]
-::   =/  peerslist   [p (~(got by peers.state) path)]
-::   =.  peers.state     (~(put by peers.state) path peerslist)
-:: 
-::   :: emit the change to subscribers
-::   =/  cards=(list card)
-::     [%give %fact [/db (weld /path path) ~] db-changes+!>([%add-peer p]~)]~
-::   [cards state]
-::
-:: ++  delete-peer
-::   |=  [[=path =ship] state=state-0 =bowl:gall]
-::   ^-  (quip card state-0)
-::   :: ensure the path actually exists
-::   =/  path-row=path-row    (~(got by paths.state) path)
-::   :: ensure this came from host ship
-::   ?>  =(host.path-row src.bowl)
-:: 
-::   :: remove from paths table, and peers table
-::   =.  paths.state  (~(del by paths.state) path)
-::   =.  peers.state  (~(del by peers.state) path)
-::   :: remove from data tables
-::   =.  tables.state  (del-path-in-tables state path)
-:: 
-::   :: add to del-log (implies that the other stuff is also deleted)
-::   =.  del-log.state   (~(put by del-log.state) now.bowl [%del-path path])
-:: 
-::   :: emit the change to subscribers
-::   =/  cards=(list card)
-::     [%give %fact [/db (weld /path path) ~] db-changes+!>([%del-path path]~)]~
-::   [cards state]
-::
 ++  get-path
   |=  [[=path-row peers=ship-roles] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
@@ -497,9 +473,11 @@
   [cards state]
 ::
 ++  create
-::db &db-action [%create [/example [our now] %foo 0 [%general ~[5 'a']] *@da *@da *@da] [~ ~[['num' 'ud'] ['str' 't']]]]
-::db &db-action [%create [/example [our now] %foo 1 [%general ~[5 'a' now]] *@da *@da *@da] [~ ~[['num' 'ud'] ['str' 't'] ['custom-time' 'da']]]]
-::db &db-action [%create [/example [our now] %foo 1 [%general ~[6 'b' now]] *@da *@da *@da] ~]
+::db &db-action [%create [/example [our now] %foo 0 [%general ~[1 'a']] *@da *@da *@da] [~ ~[['num' 'ud'] ['str' 't']]]]
+::db &db-action [%create [/example [our now] %foo 0 [%general ~[1 'b']] *@da *@da *@da] ~]
+::db &db-action [%create [/example [our now] %foo 1 [%general ~[1 'a' now]] *@da *@da *@da] [~ ~[['num' 'ud'] ['str' 't'] ['custom-time' 'da']]]]
+::db &db-action [%create [/example [our now] %foo 1 [%general ~[2 'b' now]] *@da *@da *@da] ~]
+::db &db-action [%create [/example [our now] %foo 2 [%general ~[1 'd' (jam /hello/goodbye)]] *@da *@da *@da] [~ ~[['num' 'ud'] ['str' 't'] ['mypath' 'path']]]]
 ::~zod:db &db-action [%create [/example [our now] %vote 0 [%vote [%.y our %foo [~zod now] /example]] *@da *@da *@da] [~ ~]]
   |=  [[=row uschema=(unit schema)] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
@@ -540,12 +518,13 @@
   [cards state]
 ::
 ++  edit
+::db &db-action [%edit /example [our ~2023.5.22..17.21.47..9d73] %foo 0 [%general ~[2 'b']] *@da *@da *@da]
   |=  [=row state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: permissions
   =/  old-row              (~(got by (~(got by (~(got by tables.state) type.row)) path.row)) id.row) :: old row must first exist
   =/  path-row=path-row    (~(got by paths.state) path.row)
-  ?.  (has-edit-permissions path-row row state bowl)
+  ?.  (has-edit-permissions path-row old-row state bowl)
     ~&  >>>  "{(scow %p src.bowl)} tried to edit a %{(scow %tas type.row)} row where they didn't have permissions"
     `state
 
@@ -572,27 +551,128 @@
     :: kick subs to force them to re-sub for next update
     [%give %kick [path-sub-wire ~] ~]
   ==
-  ~&  >  "publishing new row to {(spud path-sub-wire)} (and also kicking)"
+  ~&  >  "publishing edited row to {(spud path-sub-wire)} and kicking everyone there"
 
-  :: logic
-  =/  cards  ~
   [cards state]
 ::
 ++  remove
-  |=  [=row state=state-0 =bowl:gall]
+::db &db-action [%remove %foo /example [our ~2023.5.22..19.22.29..d0f7]]
+  |=  [[=type:common =path =id:common] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: permissions
-  =/  path-row=path-row    (~(got by paths.state) path.row)
-  ?.  (has-delete-permissions path-row row state bowl)
-    ~&  >>>  "{(scow %p src.bowl)} tried to delete a %{(scow %tas type.row)} row where they didn't have permissions"
+  =/  pt                  (~(got by tables.state) type)
+  =/  tbl                 (~(got by pt) path)
+  =/  old-row             (~(got by tbl) id) :: old row must first exist
+  =/  path-row=path-row   (~(got by paths.state) path)
+  ?.  (has-delete-permissions path-row old-row state bowl)
+    ~&  >>>  "{(scow %p src.bowl)} tried to delete a %{(scow %tas type)} row where they didn't have permissions"
     `state
 
-  :: logic
-  =/  cards  ~
+  :: update path
+  =/  foreign-ship-sub-wire   (weld /next/(scot %da updated-at.path-row) path)
+  =.  updated-at.path-row     now.bowl
+  =.  received-at.path-row    now.bowl
+  =.  paths.state             (~(put by paths.state) path path-row)
+
+  :: do the delete
+  =.  tbl             (~(del by tbl) id)                :: delete by id
+  =.  pt              (~(put by pt) path tbl)           :: update the pathed-table
+  =.  tables.state    (~(put by tables.state) type pt)  :: update the tables.state
+  =/  log=db-row-del-change    [%del-row path type id now.bowl]
+  =.  del-log.state   (~(put by del-log.state) now.bowl log)  :: record the fact that we deleted
+
+  :: emit the change to subscribers
+  =/  cards=(list card)  :~
+    :: tell subs about the new row
+    [%give %fact [/db (weld /path path) foreign-ship-sub-wire ~] db-changes+!>(~[log])]
+    :: kick foreign ship subs to force them to re-sub for next update
+    [%give %kick [foreign-ship-sub-wire ~] ~]
+  ==
+  ~&  >  "publishing %del-row type: {<type>} id: {<id>} to {(spud foreign-ship-sub-wire)} + kicking those subs"
+
   [cards state]
 ::
 ::
 ::  JSON
+::
+++  dejs
+  =,  dejs:format
+  |%
+  ++  action
+    |=  jon=json
+    ^-  ^action
+    =<  (decode jon)
+    |%
+    ++  decode
+      %-  of
+      :~  [%add-peer add-peer]
+          [%kick-peer kick-peer]
+          [%create create]
+      ==
+    ::
+    ++  add-peer
+      %-  ot
+      :~  [%path pa]
+          [%ship de-ship]
+          [%role (se %tas)]
+      ==
+    ::
+    ++  kick-peer
+      %-  ot
+      :~  [%path pa]
+          [%ship de-ship]
+      ==
+    ::
+    ++  create
+      %-  ot
+      :~  [%row de-row]
+          [%schema ul]  :: TODO actually get the schema
+      ==
+    ::
+    ++  de-row
+      |=  jon=json
+      ^-  row
+      ?>  ?=([%o *] jon)
+      [
+        (pa (~(got by p.jon) 'path'))
+        (de-id (~(got by p.jon) 'id'))
+        ((se %tas) (~(got by p.jon) 'type'))
+        (ni (~(got by p.jon) 'v'))
+        [%general ((ar de-col) (~(got by p.jon) 'data'))]
+        *@da
+        *@da
+        *@da
+      ]
+    ::
+    ++  de-col
+      |=  jon=json
+      ^-  @
+      ?>  ?=([%a *] jon)
+      ?~  p.jon  !!
+      =/  type-key            (so (snag 0 `(list json)`p.jon))
+      =/  datatom             (snag 1 p.jon)
+      ?:  =(type-key 'rd')    (ne datatom)
+      ?:  =(type-key 'ud')    (ni datatom)
+      ?:  =(type-key 't')     (so datatom)
+      ?:  =(type-key 'path')  (jam (pa datatom))
+      !!
+    ::
+    ++  de-id
+      %+  cu
+        path-to-id
+      pa
+    ::
+    ++  path-to-id
+      |=  p=path
+      ^-  id:common
+      [`@p`(slav %p +2:p) `@da`(slav %da +6:p)]
+    ::
+    ++  de-ship  (su ;~(pfix sig fed:ag))
+    ::
+    ++  dri   :: specify in integer milliseconds, returns a @dr
+      (cu |=(t=@ud ^-(@dr (div (mul ~s1 t) 1.000))) ni)
+    --
+  --
 ::
 ++  enjs
   =,  enjs:format
@@ -627,6 +707,7 @@
           ['peers' ~]
           ['tables' ~]
           ['schemas' ~]
+          ['dels' ~]
       ==
     ::
     ++  en-table
@@ -673,12 +754,13 @@
               =/  sch  (snag index schema)
               =/  d    (snag index cols.data.row)
               =/  t
-                ?@  d
 :: apply the t.sch as aura to atom
-                  ?:  =(t.sch 'ud')  (numb `@ud`d)
-                  ?:  =(t.sch 't')   [%s `@t`d]
-                  ?:  =(t.sch 'da')  (time `@da`d)
-                  !!
+                ?:  =(t.sch 'ud')  (numb `@ud`d)
+                ?:  =(t.sch 'rd')  (numbrd `@rd`d)
+                ?:  =(t.sch 't')   [%s `@t`d]
+                ?:  =(t.sch 'da')  (time `@da`d)
+                ?:  =(t.sch 'dr')  (time-dr `@dr`d)
+                ?:  =(t.sch 'path')  (path ;;(^path (cue d)))
                 !!
               $(index +(index), result [[name.sch t] result])
 ::          %vote
@@ -694,5 +776,16 @@
       |=  =id:common
       ^-  cord
       (spat ~[(scot %p ship.id) (scot %da t.id)])
+    ::
+    ++  numbrd
+      |=  a=@rd
+      ^-  json
+      :-  %n
+      (crip (flop (snip (snip (flop (trip (scot %rd a)))))))
+    ::
+    ++  time-dr
+      |=  a=@dr
+      ^-  json
+      (numb (mul (div a ~s1) 1.000))
   --
 --

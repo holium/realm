@@ -138,9 +138,20 @@
           =/  thepathrow    (~(got by paths.state) t.t.path)
           :: if the @da they passed was behind, %give them the current version, and %kick them
           ?:  (gth updated-at.thepathrow t)
+            ~&  >>>  "{<src.bowl>} tried to sub on old @da {<t>}, %kicking them"
             =/  thepeers    (~(got by peers.state) t.t.path)
             =/  tbls        (tables-by-path:db tables.state t.t.path)
-            :~  [%give %fact ~ db-path+!>([thepathrow thepeers tbls schemas.state])]
+            =/  dels=(list [@da db-del-change])
+              %+  skim
+                ~(tap by del-log.state)
+              |=  [k=@da v=db-del-change]
+              ^-  ?
+              ?-  -.v
+                %del-row   =(path.v t.t.path)
+                %del-peer  =(path.v t.t.path)
+                %del-path  =(path.v t.t.path)
+              ==
+            :~  [%give %fact ~ db-path+!>([thepathrow thepeers tbls schemas.state dels])]
                 [%give %kick [path ~] `src.bowl]
             ==
           :: else, don't give them anything. we will give+kick when a new version happens
@@ -230,23 +241,26 @@
             ?:  =(~ pathrow)
               ~&  >>>  "got a %kick on {(spud +.wire)} that we are ignoring because that path is not in our state"
               `this
-            ~&  >  "{<dap.bowl>}: /next/[path] kicked us, resubbing with most recent updated-at"
+            =/  newpath  (weld /next/(scot %da updated-at:(need pathrow)) path:(need pathrow))
+            ~&  >  "{<dap.bowl>}: /next/[path] kicked us, resubbing {(spud newpath)}"
             :_  this
             :~
-              [%pass wire %agent [src.bowl %db] %watch (weld /next/(scot %da updated-at:(need pathrow)) path:(need pathrow))]
+              [%pass wire %agent [src.bowl %db] %watch newpath]
             ==
           %fact
             :: handle the update by updating our local state and
             :: pushing db-changes out to our subscribers
             =^  cards  state
             ^-  (quip card state-0)
-            ?+  -.+.sign  
+            =/  dbpath=path         +.wire
+            =/  factmark  -.+.sign
+            ~&  >>  "%fact on {(spud wire)}: {<factmark>}"
+            ?+  factmark
               :: default case:
-                ~&  >>>  "UNHANDLED FACT in /next/[path]"
+                ~&  >>>  "UNHANDLED FACT type"
                 ~&  >>>  +.sign
                 `state
               %db-changes
-                =/  dbpath=path         +.wire
                 =/  changes=db-changes  !<(db-changes +.+.sign)
                 =/  index=@ud           0
                 |-
@@ -255,6 +269,39 @@
                     :: echo the changes out to our client subs
                     [%give %fact [/db (weld /path dbpath) ~] db-changes+!>(changes)]~
                   $(index +(index), state (process-db-change:db dbpath (snag index changes) state bowl))
+              %db-path
+                =/  full=fullpath  !<(fullpath +.+.sign)
+                :: insert pathrow
+                =.  received-at.path-row.full  now.bowl
+                =.  paths.state     (~(put by paths.state) dbpath path-row.full)
+                :: insert peers
+                =.  peers.full
+                  %+  turn
+                    peers.full
+                  |=  p=peer
+                  =.  received-at.p  now.bowl
+                  p
+                =.  peers.state     (~(put by peers.state) dbpath peers.full)
+                :: update schemas
+                =.  schemas.state   (~(gas by schemas.state) ~(tap by schemas.full))
+                :: update del-log
+                =.  del-log.state   (~(gas by del-log.state) dels.full)
+                :: update tables
+                =/  keys=(list type:common)   ~(tap in ~(key by tables.full))
+                =/  index=@ud       0
+                |-
+                  ?:  =(index (lent keys))
+                    :_  state
+                    :: echo the changes out to our client subs
+                    [%give %fact [/db (weld /path dbpath) ~] db-path+!>(full)]~
+                  =/  key         (snag index keys)
+                  =/  maybe-pt    (~(get by tables.state) key)
+                  =.  tables.state
+                    ?~  maybe-pt
+                      (~(put by tables.state) key (malt [dbpath (~(got by tables.full) key)]~))
+                    =/  pt  (~(put by (need maybe-pt)) dbpath (~(got by tables.full) key))
+                    (~(put by tables.state) key pt)
+                  $(index +(index))
             ==
             [cards this]
         ==

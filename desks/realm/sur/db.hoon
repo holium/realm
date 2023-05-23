@@ -14,6 +14,8 @@
   ==
 
 +$  tables    (map type:common pathed-table)
+:: this inner layer of indirection allows us some efficiencies in
+:: accessing all data on a path as opposed to doing full table scans
 +$  pathed-table   (map path table)
 +$  table     (map id:common row)
 
@@ -23,10 +25,9 @@
 :: allowable @t codes are:
 ::  @t @ud etc (any atom code)
 ::  path
-::  list
-::  set
-::  map
-
+::  list  (for a list of @t)
+::  set   (for a set of @t)
+::  map   (for a map of @t to @t)
 
 :: goal: accept string version of type definition (like [@ud @t] or (list @)) and dynamically apply that to an arbitrary noun (which has had type info thrown away)
 :: example: data=[5 'a'] as a * (noun) and type='[n=@ud s=@t]'
@@ -59,7 +60,7 @@
       received-at=@da   :: when this ship actually got the latest version of the row, regardless of when the row was originally created
   ==
 +$  columns
-  $%  [%general cols=(list col-types)]
+  $%  [%general cols=(list @)]
       [%vote vote:common]
       [%rating rating:common]
       [%comment comment:common]
@@ -67,17 +68,15 @@
       [%link link:common]
       [%follow follow:common]
   ==
-+$  col-types :: allowable column types
-  $@  @
-  $%
-    [%path path]
-    [%set (set @)]
-    [%list (list @)]
-    [%map (map @t @t)]
-  ==
 
 :: used for dumping the current state of every row on a given path
-+$  fullpath  [=path-row peers=(list peer) tables=(map type:common table) =schemas]
++$  fullpath
+  $:  =path-row
+      peers=(list peer)
+      tables=(map type:common table)
+      =schemas
+      dels=(list [@da db-del-change])
+  ==
 +$  path-row
   $:  =path
       host=ship
@@ -118,7 +117,7 @@
       received-at=@da
   ==
 
-+$  db-row-del-change    [%del-row =type:common =path =id:common]
++$  db-row-del-change    [%del-row =path =type:common =id:common t=@da]
 +$  db-peer-del-change   [%del-peer =path =ship t=@da]
 +$  db-path-del-change   [%del-path =path]
 +$  db-del-change
@@ -128,7 +127,7 @@
   ==
 +$  db-change
   $%  [%add-row =row =schema]
-      [%upd-row =row =schema]
+      [%upd-row =row]
       db-row-del-change
       [%add-path =path-row]
       [%upd-path =path-row]
@@ -158,13 +157,11 @@
       :: only from host foreign ship
       [%get-path =path-row peers=ship-roles]  :: when we are being informed that we were added to a peers list. we don't know the list, only the host (which is who sent it to us)
       [%delete-path =path]                    :: when we are being informed that we got kicked (or host deleted the path entirely). also deletes all attached objects
-::       [%get-peer =path =ship =role t=@da]     :: when we are being informed that a peer was added to the list
-::       [%delete-peer =path =ship]              :: when we are being informed that a peer got kicked
 
       :: only from our.bowl
       [%create =row schema=(unit schema)]      :: %host creating the row, sends %get to all peers
       [%edit =row]        :: %host editing the row, sends %get to all peers
-      [%remove =row]      :: %host deleting the row, sends %delete to all peers
+      [%remove =type:common =path =id:common]      :: %host deleting the row, sends %delete to all peers
       :: only from host foreign ship
     :: these arent needed on subs model of data-replication
 ::      [%get =row]         :: when we receive a new version of the row from %host

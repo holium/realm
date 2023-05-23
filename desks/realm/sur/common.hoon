@@ -73,5 +73,17 @@
       follower=ship     
       domain=path   :: maybe I only want to follow ~zod's %recipes, not their %rumors posts
   ==
+
+:: the relay table is necessary for making retweets work on urbit
+:: the goal includes the ability to count retweets within a space
+::  (should come with ability to relay to all paths or just to a
+::  particular path)
++$  relay
+  $:  who=ship
+      =id
+      =type
+      target-path=path
+      original-path=path
+  ==
 --
 
