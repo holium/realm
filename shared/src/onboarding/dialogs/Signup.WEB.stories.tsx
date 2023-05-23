@@ -73,11 +73,7 @@ export const ChooseIdDialogStory: ComponentStory<
   typeof ChooseIdDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <ChooseIdDialog
-      patps={mockPatps}
-      onSelectPatp={() => {}}
-      onNext={() => Promise.resolve(false)}
-    />
+    <ChooseIdDialog ids={mockPatps} onNext={() => Promise.resolve(false)} />
   </OnboardingDialogWrapper>
 );
 

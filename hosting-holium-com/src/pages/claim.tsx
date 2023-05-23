@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { FormikValues } from 'formik';
 import { GetServerSideProps } from 'next';
 
 import { ClaimTokenDialog, OnboardingStorage } from '@holium/shared';
@@ -56,7 +57,7 @@ export default function ClaimInvite({
 }: Props) {
   const { goToPage } = useNavigation();
 
-  const onClaim = async (password: string) => {
+  const onNext = async ({ password }: FormikValues) => {
     try {
       const { token } = await thirdEarthApi.resetPassword(
         inviteToken,
@@ -71,6 +72,7 @@ export default function ClaimInvite({
       return true;
     } catch (error) {
       console.error(error);
+
       return false;
     }
   };
@@ -86,7 +88,7 @@ export default function ClaimInvite({
 
   return (
     <Page title="Claim your Realm invite">
-      {!full_account && <ClaimTokenDialog email={email} onClaim={onClaim} />}
+      {!full_account && <ClaimTokenDialog email={email} onNext={onNext} />}
     </Page>
   );
 }

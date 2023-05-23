@@ -53,7 +53,7 @@ type Props = {
   onUploadFile: (file: File) => Promise<string | undefined>;
 };
 
-export const PassportCard = ({
+export const PassportForm = ({
   patp,
   color = '#000000',
   nickname,

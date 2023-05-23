@@ -13,7 +13,7 @@ export { GetNewAccessCodeModal } from './components/modals/GetNewAccessCodeModal
 export { VerifyEmailModal } from './components/modals/VerifyEmailModal';
 export { OnboardDialogSkeleton } from './components/OnboardDialog';
 export { OnboardDialogDescription } from './components/OnboardDialog.styles';
-export { PassportCard } from './components/PassportCard';
+export { PassportForm } from './components/PassportForm';
 export { SubmitButton } from './components/SubmitButton';
 export { TermsDisclaimer } from './components/TermsDisclaimer';
 export { AccountCustomDomainDialog } from './dialogs/AccountCustomDomain/AccountCustomDomainDialog';
@@ -38,7 +38,6 @@ export { HostingDialog } from './dialogs/Hosting/HostingDialog';
 export { InstallationDialog } from './dialogs/Installation/InstallationDialog';
 export { LoginDialog } from './dialogs/Login/LoginDialog';
 export { PassportDialog } from './dialogs/Passport/PassportDialog';
-export { PasswordDialog } from './dialogs/Password/PasswordDialog';
 export { PaymentDialog } from './dialogs/Payment/PaymentDialog';
 export { ServerSelfHostingDialogBody } from './dialogs/ServerSelfHosting/ServerSelfHostingDialogBody';
 export { SomethingWentWrongDialog } from './dialogs/SomethingWentWrong/SomethingWentWrongDialog';

@@ -6,7 +6,6 @@ import { HoliumButton } from '@holium/design-system/os';
 import { OnboardDialog } from '../../components/OnboardDialog';
 import { CreateAccountDialogBody } from './CreateAccountDialogBody';
 
-// Don't validate fields until the user has interacted with them.
 const CreateAccountSchema = Yup.object().shape({
   email: Yup.string().required('Email is required.').email('Invalid email.'),
   password: Yup.string()
@@ -36,9 +35,9 @@ export const CreateAccountDialog = ({
     }}
     validationSchema={CreateAccountSchema}
     icon={<HoliumButton size={100} pointer={false} />}
-    body={() => (
+    body={
       <CreateAccountDialogBody onAlreadyHaveAccount={onAlreadyHaveAccount} />
-    )}
+    }
     onNext={onNext}
   />
 );

@@ -46,7 +46,7 @@ export const CreateAccountDialogBody = ({ onAlreadyHaveAccount }: Props) => {
         <FormField
           name="password"
           type={showPassword.isOn ? 'text' : 'password'}
-          placeholder="••••••••"
+          placeholder="• • • • • • • •"
           isError={Boolean(errors?.password)}
           rightIcon={
             <Button.IconButton type="button" onClick={showPassword.toggle}>
@@ -68,7 +68,7 @@ export const CreateAccountDialogBody = ({ onAlreadyHaveAccount }: Props) => {
           name="confirmPassword"
           type={showConfirmPassword.isOn ? 'text' : 'password'}
           isError={Boolean(errors?.confirmPassword)}
-          placeholder="••••••••"
+          placeholder="• • • • • • • •"
           rightIcon={
             <Button.IconButton
               type="button"

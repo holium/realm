@@ -57,11 +57,7 @@ export const ChooseIdDialogStory: ComponentStory<
   typeof ChooseIdDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <ChooseIdDialog
-      patps={mockPatps}
-      onSelectPatp={() => {}}
-      onNext={() => Promise.resolve(false)}
-    />
+    <ChooseIdDialog ids={mockPatps} onNext={() => Promise.resolve(false)} />
   </OnboardingDialogWrapper>
 );
 
@@ -134,9 +130,10 @@ export const PassportDialogStory: ComponentStory<
   <OnboardingDialogWrapper>
     <PassportDialog
       patp="~pasren-satmex"
-      prefilledNickname=""
+      prefilledNickname="The Nickname of the Century"
       prefilledDescription=""
       prefilledAvatarSrc=""
+      prefilledColor="#333333"
       onUploadFile={() => Promise.reject()}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}

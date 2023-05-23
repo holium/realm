@@ -1,16 +1,8 @@
-import { Flex } from '@holium/design-system/general';
-
-import {
-  DownloadRealmButtons,
-  DownloadRealmButtonsProps,
-} from '../../components/DownloadRealmButtons';
+import { DownloadRealmButtonsProps } from '../../components/DownloadRealmButtons';
 import { OnboardDialog } from '../../components/OnboardDialog';
-import {
-  OnboardDialogDescription,
-  OnboardDialogTitle,
-} from '../../components/OnboardDialog.styles';
 import { ArrowRightIcon } from '../../icons/ArrowRightIcon';
 import { DownloadIcon } from '../../icons/DownloadIcon';
+import { DownloadDialogBody } from './DownloadDialogBody';
 
 type Props = DownloadRealmButtonsProps & {
   onBack?: () => void;
@@ -24,27 +16,22 @@ export const DownloadDialog = ({
   onDownloadLinux,
   onBack,
   onNext,
-}: Props) => (
-  <OnboardDialog
-    icon={<DownloadIcon />}
-    body={() => (
-      <Flex flexDirection="column" gap={16} marginBottom={30}>
-        <OnboardDialogTitle>Download Realm for desktop</OnboardDialogTitle>
-        <OnboardDialogDescription>
-          Realm is a community OS for crypto, groups, and friends. It’s a new OS
-          build on a decentralized network.
-        </OnboardDialogDescription>
-        <DownloadRealmButtons
+}: Props) => {
+  return (
+    <OnboardDialog
+      icon={<DownloadIcon />}
+      body={
+        <DownloadDialogBody
           onDownloadMacM1={onDownloadMacM1}
           onDownloadMacIntel={onDownloadMacIntel}
           onDownloadWindows={onDownloadWindows}
           onDownloadLinux={onDownloadLinux}
         />
-      </Flex>
-    )}
-    nextText="Go to account"
-    nextIcon={<ArrowRightIcon fill="accent" />}
-    onBack={onBack}
-    onNext={onNext}
-  />
-);
+      }
+      nextText="Go to account"
+      nextIcon={<ArrowRightIcon fill="accent" />}
+      onBack={onBack}
+      onNext={onNext}
+    />
+  );
+};

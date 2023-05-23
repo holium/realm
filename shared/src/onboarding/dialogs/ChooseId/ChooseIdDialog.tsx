@@ -1,60 +1,27 @@
-import { useEffect, useState } from 'react';
-
-import { Flex } from '@holium/design-system/general';
+import { FormikValues } from 'formik';
+import * as Yup from 'yup';
 
 import { OnboardDialog } from '../../components/OnboardDialog';
-import {
-  OnboardDialogDescription,
-  OnboardDialogTitle,
-} from '../../components/OnboardDialog.styles';
-import { PatpsPaginated } from '../../components/PatpsPaginated';
 import { IdentityIcon } from '../../icons/IdentityIcon';
+import { ChooseIdDialogBody } from './ChooseIdDialogBody';
+
+const ChooseIdSchema = Yup.object().shape({
+  id: Yup.string().required('Required'),
+});
 
 type Props = {
-  patps: string[];
-  onSelectPatp: (patp: string) => void;
+  ids: string[];
   onBack?: () => void;
-  onNext: () => Promise<boolean>;
+  onNext: (values: FormikValues) => Promise<boolean>;
 };
 
-export const ChooseIdDialog = ({
-  patps,
-  onSelectPatp,
-  onBack,
-  onNext,
-}: Props) => {
-  const [selectedPatp, setSelectedPatp] = useState<string>();
-
-  const handleOnSelectPatp = (patp: string) => {
-    onSelectPatp(patp);
-    setSelectedPatp(patp);
-  };
-
-  useEffect(() => {
-    handleOnSelectPatp(patps[0]);
-  }, [patps]);
-
-  return (
-    <OnboardDialog
-      icon={<IdentityIcon />}
-      body={() => (
-        <>
-          <Flex flexDirection="column" gap={16} marginBottom={30}>
-            <OnboardDialogTitle>Choose ID</OnboardDialogTitle>
-            <OnboardDialogDescription>
-              An ID is like a phone number. It’s how your friends connect with
-              you on Realm.
-            </OnboardDialogDescription>
-          </Flex>
-          <PatpsPaginated
-            patps={patps}
-            selectedPatp={selectedPatp}
-            onSelectPatp={handleOnSelectPatp}
-          />
-        </>
-      )}
-      onBack={onBack}
-      onNext={onNext}
-    />
-  );
-};
+export const ChooseIdDialog = ({ ids, onBack, onNext }: Props) => (
+  <OnboardDialog
+    initialValues={{ id: undefined }}
+    validationSchema={ChooseIdSchema}
+    icon={<IdentityIcon />}
+    body={<ChooseIdDialogBody ids={ids} />}
+    onBack={onBack}
+    onNext={onNext}
+  />
+);

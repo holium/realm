@@ -12,14 +12,14 @@ type Props = {
 export const SomethingWentWrongDialog = ({ onBack }: Props) => (
   <OnboardDialog
     icon={<GetIdIcon />}
-    body={() => (
+    body={
       <>
         <OnboardDialogTitle>Something went wrong.</OnboardDialogTitle>
         <OnboardDialogDescription>
           We could not add you to the waitlist. Please try again later.
         </OnboardDialogDescription>
       </>
-    )}
+    }
     hideNextButton
     onBack={onBack}
   />

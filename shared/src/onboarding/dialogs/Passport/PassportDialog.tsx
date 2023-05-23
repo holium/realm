@@ -9,8 +9,8 @@ import {
   OnboardDialogDescription,
   OnboardDialogTitle,
 } from '../../components/OnboardDialog.styles';
-import { PassportCard } from '../../components/PassportCard';
 import { AddImageIcon } from '../../icons/AddImageIcon';
+import { PassportForm } from '../../onboarding';
 
 const List = styled.ul`
   margin-left: 20px;
@@ -72,7 +72,7 @@ export const PassportDialog = ({
 
   return (
     <OnboardDialog
-      body={() => (
+      body={
         <Flex
           flexDirection="column"
           width="100%"
@@ -95,7 +95,7 @@ export const PassportDialog = ({
                 It allows P2P payments, DMs, etc. Make it yours.
               </OnboardDialogDescription>
               {patp ? (
-                <PassportCard
+                <PassportForm
                   patp={patp}
                   color={prefilledColor}
                   nickname={nickname}
@@ -127,7 +127,7 @@ export const PassportDialog = ({
             </>
           )}
         </Flex>
-      )}
+      }
       onBack={onBack}
       onNext={handleOnNext}
     />

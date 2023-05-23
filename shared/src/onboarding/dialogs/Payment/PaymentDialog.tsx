@@ -78,7 +78,7 @@ const PaymentDialogPresenter = ({
   return (
     <OnboardDialog
       icon={<PaymentIcon />}
-      body={() => (
+      body={
         <>
           <OnboardDialogTitle>Payment</OnboardDialogTitle>
           <ProductCards
@@ -89,7 +89,7 @@ const PaymentDialogPresenter = ({
           <AccountInformation patp={patp} email={email} />
           <PaymentForm />
         </>
-      )}
+      }
       nextText="Submit"
       onBack={onBack}
       onNext={handleOnNext}
@@ -102,7 +102,7 @@ export const PaymentDialog = ({ stripe, stripeOptions, ...props }: Props) => {
     return (
       <OnboardDialog
         icon={<PaymentIcon />}
-        body={() => (
+        body={
           <>
             <OnboardDialogTitle>Payment</OnboardDialogTitle>
             <ProductCards
@@ -115,10 +115,10 @@ export const PaymentDialog = ({ stripe, stripeOptions, ...props }: Props) => {
               <Spinner size={3} />
             </Flex>
           </>
-        )}
+        }
         nextText="Submit"
         onBack={props.onBack}
-        onNext={() => Promise.resolve(false)}
+        onNext={undefined}
       />
     );
   }

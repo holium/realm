@@ -1,13 +1,18 @@
-import { ReactNode, useRef } from 'react';
+import { ReactNode } from 'react';
+import { FormikValues } from 'formik';
+import * as yup from 'yup';
 
-import { Button, Flex, Icon } from '@holium/design-system/general';
-import { TextInput } from '@holium/design-system/inputs';
 import { HoliumButton } from '@holium/design-system/os';
 import { useToggle } from '@holium/design-system/util';
 
 import { OnboardDialog } from '../../components/OnboardDialog';
-import { OnboardDialogInputLabel } from '../../components/OnboardDialog.styles';
 import { TermsModal } from '../../components/TermsModal';
+import { LoginDialogBody } from './LoginDialogBody';
+
+const LoginSchema = yup.object().shape({
+  email: yup.string().required('Email is required.').email('Invalid email.'),
+  password: yup.string().required('Password is required.'),
+});
 
 type Props = {
   prefilledEmail?: string;
@@ -26,67 +31,21 @@ export const LoginDialog = ({
   onLogin,
 }: Props) => {
   const terms = useToggle(false);
-  const showPassword = useToggle(false);
 
-  const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
-
-  const handleOnLogin = () => {
-    const email = emailRef.current?.value;
-    const password = passwordRef.current?.value;
-
-    if (email && password) return onLogin(email, password);
-    return Promise.resolve(false);
+  const handleOnLogin = ({ email, password }: FormikValues) => {
+    return onLogin(email, password);
   };
 
   return (
     <>
       <OnboardDialog
+        initialValues={{
+          email: prefilledEmail,
+          password: undefined,
+        }}
+        validationSchema={LoginSchema}
         icon={<HoliumButton size={100} pointer={false} />}
-        body={() => (
-          <>
-            <Flex flexDirection="column" gap={2}>
-              <OnboardDialogInputLabel as="label" htmlFor="login-email">
-                Email
-              </OnboardDialogInputLabel>
-              <TextInput
-                height="38px"
-                id="login-email"
-                name="login-email"
-                ref={emailRef}
-                defaultValue={prefilledEmail}
-                type="email"
-                placeholder="name@email.com"
-              />
-            </Flex>
-            <Flex flexDirection="column" gap={2}>
-              <OnboardDialogInputLabel as="label" htmlFor="login-password">
-                Password
-              </OnboardDialogInputLabel>
-              <TextInput
-                height="38px"
-                id="login-password"
-                name="login-password"
-                ref={passwordRef}
-                type={showPassword.isOn ? 'text' : 'password'}
-                placeholder="• • • • • • • •"
-                rightAdornment={
-                  <Button.IconButton
-                    type="button"
-                    onClick={showPassword.toggle}
-                  >
-                    <Icon
-                      name={showPassword.isOn ? 'EyeOff' : 'EyeOn'}
-                      opacity={0.5}
-                      size={18}
-                    />
-                  </Button.IconButton>
-                }
-              />
-            </Flex>
-            {label}
-          </>
-        )}
+        body={<LoginDialogBody label={label} />}
         footer={footer}
         nextText="Login"
         onBack={onBack}

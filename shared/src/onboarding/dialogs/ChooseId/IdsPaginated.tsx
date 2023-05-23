@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { Flex, Icon, Spinner } from '@holium/design-system/general';
 
-import { PatpCard } from './PatpCard';
+import { PatpCard } from '../../components/PatpCard';
 
 const Paginator = styled.div`
   grid-column: 1 / 3;
@@ -13,24 +13,24 @@ const Paginator = styled.div`
 `;
 
 type Props = {
-  patps: string[];
+  ids: string[];
   pageSize?: number;
-  selectedPatp: string | undefined;
-  onSelectPatp: (patp: string) => void;
+  selectedId: string | undefined;
+  onSelectId: (patp: string) => void;
 };
 
-export const PatpsPaginated = ({
-  patps,
+export const IdsPaginated = ({
+  ids,
   pageSize = 6,
-  selectedPatp,
-  onSelectPatp,
+  selectedId,
+  onSelectId,
 }: Props) => {
   const [page, setPage] = useState(0);
-  const totalPages = Math.ceil(patps.length / pageSize);
-  const paginatedPatps = patps.slice(page * pageSize, (page + 1) * pageSize);
+  const totalPages = Math.ceil(ids.length / pageSize);
+  const paginatedPatps = ids.slice(page * pageSize, (page + 1) * pageSize);
   const pages = Array.from({ length: totalPages }).map((_, i) => i);
 
-  if (!patps.length) {
+  if (!ids.length) {
     return (
       <Flex justifyContent="center">
         <Spinner size={3} />
@@ -50,8 +50,8 @@ export const PatpsPaginated = ({
         <PatpCard
           key={patp}
           patp={patp}
-          isSelected={patp === selectedPatp}
-          onClick={() => onSelectPatp(patp)}
+          isSelected={patp === selectedId}
+          onClick={() => onSelectId(patp)}
         />
       ))}
       <Paginator>

@@ -18,7 +18,7 @@ export const CreateAccountDialogStory: ComponentStory<
   <OnboardingDialogWrapper>
     <ClaimTokenDialog
       email="man@email.com"
-      onClaim={() => Promise.resolve(false)}
+      onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );

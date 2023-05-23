@@ -2,7 +2,7 @@ import { ComponentProps, ReactNode } from 'react';
 import { Field } from 'formik';
 import styled, { css } from 'styled-components';
 
-const FormFieldInput = styled(Field)`
+export const FormFieldInput = styled(Field)`
   flex: 1;
   gap: 6px;
   height: 40px;
@@ -15,15 +15,17 @@ const FormFieldInput = styled(Field)`
   font-family: var(--rlm-font);
 
   &[type='password'] {
-    letter-spacing: 0.25em;
+    &:not(:placeholder-shown) {
+      letter-spacing: 0.25em;
+    }
   }
   &::placeholder {
     color: rgba(var(--rlm-text-rgba), 0.5);
   }
 
   /* Gets rid of Chrome's autofill styling */
-  input:-webkit-autofill,
-  input:-webkit-autofill:focus {
+  &:-webkit-autofill,
+  &:-webkit-autofill:focus {
     transition: background-color 600000s 0s, color 600000s 0s;
   }
 `;
@@ -33,7 +35,7 @@ type ContainerProps = {
   rightIcon?: ReactNode;
 };
 
-const FormFieldContainer = styled.div<ContainerProps>`
+export const FormFieldContainer = styled.div<ContainerProps>`
   display: flex;
   align-items: center;
   background-color: rgba(var(--rlm-input-rgba));
@@ -62,6 +64,8 @@ const FormFieldContainer = styled.div<ContainerProps>`
 `;
 
 const FormFieldIconContainer = styled.div`
+  display: flex;
+  align-items: center;
   margin-right: 6px;
 `;
 

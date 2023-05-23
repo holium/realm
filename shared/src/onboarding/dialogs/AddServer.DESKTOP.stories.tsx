@@ -81,6 +81,7 @@ export const PassportDialogStory: ComponentStory<
       prefilledNickname=""
       prefilledDescription=""
       prefilledAvatarSrc=""
+      prefilledColor="#333333"
       onUploadFile={() => Promise.reject()}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { track } from '@amplitude/analytics-browser';
+import { FormikValues } from 'formik';
 
 import { ChooseIdDialog, OnboardingStorage } from '@holium/shared';
 
@@ -29,26 +30,17 @@ export const ChooseIdStep = ({ setStep }: StepProps) => {
     getAndSetPatps();
   }, []);
 
-  const onSelectPatp = (serverId: string) => {
-    OnboardingStorage.set({ serverId });
-  };
-
   const onBack = () => {
     setStep('/hosting');
   };
 
-  const onNext = () => {
+  const onNext = ({ id }: FormikValues) => {
+    OnboardingStorage.set({ serverId: id });
+
     setStep('/payment');
 
-    return Promise.resolve(false);
+    return Promise.resolve(true);
   };
 
-  return (
-    <ChooseIdDialog
-      patps={patps}
-      onSelectPatp={onSelectPatp}
-      onBack={onBack}
-      onNext={onNext}
-    />
-  );
+  return <ChooseIdDialog ids={patps} onBack={onBack} onNext={onNext} />;
 };
