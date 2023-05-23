@@ -22,6 +22,7 @@ const devtoolsConfig = {
 // the goal here is to load any environment variables from .env (if it exists). Note
 //  that dotenv will not overwrite vars that already exist. if you need to do that,
 //  try this: require('dotenv').config({ override: true })
+// as of this writing, only the Windows build generates a .env file
 require('dotenv').config();
 
 const configuration: webpack.Configuration = {
