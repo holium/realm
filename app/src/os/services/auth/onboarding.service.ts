@@ -387,7 +387,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     const self = this;
     return new Promise((resolve) => {
       let totalWaitTime = 0,
-        maxWaitTime = 300000; // 5 minutes
+        maxWaitTime = 600000; // 5 minutes
       (async function versionCheck(totalWaitTime, maxWaitTime) {
         const result = await self._testVersion(buildVersion);
         if (result) {
