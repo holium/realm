@@ -1,3 +1,4 @@
+import { FormikValues } from 'formik';
 import { GetServerSideProps } from 'next';
 
 import { CreateAccountDialog, OnboardingStorage } from '@holium/shared';
@@ -25,12 +26,18 @@ export default function CreateAccount({ prefilledEmail }: Props) {
 
   const onAlreadyHaveAccount = () => goToPage('/login');
 
-  const onNext = async (email: string, password: string) => {
+  const onNext = async (values: FormikValues) => {
     // TODO: hash password
-    OnboardingStorage.set({ email, passwordHash: password });
+    OnboardingStorage.set({
+      email: values.email,
+      passwordHash: values.password,
+    });
 
     try {
-      const result = await thirdEarthApi.register(email, password);
+      const result = await thirdEarthApi.register(
+        values.email,
+        values.password
+      );
       if (Boolean(result)) goToPage('/verify-email');
       return Boolean(result);
     } catch (error) {

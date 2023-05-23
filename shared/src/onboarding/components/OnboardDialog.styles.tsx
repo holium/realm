@@ -1,3 +1,4 @@
+import { Form } from 'formik';
 import styled from 'styled-components';
 
 import { Text } from '@holium/design-system/general';
@@ -5,7 +6,7 @@ import { Text } from '@holium/design-system/general';
 export const TABLET_WIDTH = 800;
 export const MOBILE_WIDTH = 400;
 
-export const OnboardDialogCard = styled.form`
+export const OnboardDialogCard = styled(Form)`
   display: flex;
   flex: 1;
   flex-direction: column;

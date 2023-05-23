@@ -1,9 +1,9 @@
-import { ChangeEvent, useRef } from 'react';
+import { FormikValues } from 'formik';
+import * as Yup from 'yup';
 
 import { Anchor, Button, Flex, Icon } from '@holium/design-system/general';
-import { TextInput } from '@holium/design-system/inputs';
 import { HoliumButton } from '@holium/design-system/os';
-import { isValidEmail, useToggle } from '@holium/design-system/util';
+import { useToggle } from '@holium/design-system/util';
 
 import { OnboardDialog } from '../components/OnboardDialog';
 import {
@@ -11,11 +11,23 @@ import {
   OnboardDialogInputLabel,
   OnboardDialogTitle,
 } from '../components/OnboardDialog.styles';
+import { FormField } from '../onboarding';
+
+// Don't validate fields until the user has interacted with them.
+const CreateAccountSchema = Yup.object().shape({
+  email: Yup.string().required('Email is required.').email('Invalid email.'),
+  password: Yup.string()
+    .required('Password is required.')
+    .min(4, 'Password too short.'),
+  confirmPassword: Yup.string()
+    .required('Please confirm your password.')
+    .oneOf([Yup.ref('password'), null], 'Passwords must match.'),
+});
 
 type Props = {
   prefilledEmail?: string;
   onAlreadyHaveAccount: () => void;
-  onNext: (email: string, password: string) => Promise<boolean>;
+  onNext: (values: FormikValues) => Promise<boolean>;
 };
 
 export const CreateAccountDialog = ({
@@ -23,88 +35,42 @@ export const CreateAccountDialog = ({
   onAlreadyHaveAccount,
   onNext,
 }: Props) => {
-  const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
-  const confirmPasswordRef = useRef<HTMLInputElement>(null);
-
   const showPassword = useToggle(false);
   const showConfirmPassword = useToggle(false);
 
-  const emailError = useToggle(false);
-  const confirmPasswordError = useToggle(false);
-
-  const onEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const email = e.target.value;
-    emailError.setToggle(!isValidEmail(email));
-  };
-
-  const onChangePassword = () => {
-    confirmPasswordError.toggleOff();
-  };
-
-  const onChangeConfirmPassword = (e: ChangeEvent<HTMLInputElement>) => {
-    const password = passwordRef.current?.value;
-    const confirmPassword = e.target.value;
-    confirmPasswordError.setToggle(password !== confirmPassword);
-  };
-
-  const handleOnNext = () => {
-    const email = emailRef.current?.value;
-    const password = passwordRef.current?.value;
-    const confirmPassword = confirmPasswordRef.current?.value;
-
-    if (!email || !password || !confirmPassword) {
-      return Promise.resolve(false);
-    }
-
-    if (emailError.isOn || confirmPasswordError.isOn) {
-      return Promise.resolve(false);
-    }
-
-    return onNext(email, password);
-  };
-
   return (
     <OnboardDialog
-      autoComplete={false}
+      initialValues={{
+        email: prefilledEmail,
+        password: undefined,
+        confirmPassword: undefined,
+      }}
+      validationSchema={CreateAccountSchema}
       icon={<HoliumButton size={100} pointer={false} />}
-      body={
+      body={(errors) => (
         <>
           <OnboardDialogTitle pb={3}>Create account</OnboardDialogTitle>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel as="label" htmlFor="create-account-email">
+            <OnboardDialogInputLabel as="label" htmlFor="email">
               Email
             </OnboardDialogInputLabel>
-            <TextInput
-              height="38px"
-              id="create-account-email"
-              name="create-account-email"
-              ref={emailRef}
-              defaultValue={prefilledEmail}
-              autoComplete="new-password"
+            <FormField
+              name="email"
               type="email"
               placeholder="name@email.com"
-              error={emailError.isOn}
-              onChange={onEmailChange}
+              isError={Boolean(errors?.email)}
             />
           </Flex>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel
-              as="label"
-              htmlFor="create-account-password"
-            >
+            <OnboardDialogInputLabel as="label" htmlFor="password">
               Password
             </OnboardDialogInputLabel>
-            <TextInput
-              height="38px"
-              id="create-account-password"
-              name="create-account-password"
-              ref={passwordRef}
+            <FormField
+              name="password"
               type={showPassword.isOn ? 'text' : 'password'}
-              autoComplete="new-password"
-              placeholder="• • • • • • • •"
-              onChange={onChangePassword}
-              rightAdornment={
+              placeholder="••••••••"
+              isError={Boolean(errors?.password)}
+              rightIcon={
                 <Button.IconButton type="button" onClick={showPassword.toggle}>
                   <Icon
                     name={showPassword.isOn ? 'EyeOff' : 'EyeOn'}
@@ -116,29 +82,22 @@ export const CreateAccountDialog = ({
             />
           </Flex>
           <Flex flexDirection="column" gap={2}>
-            <OnboardDialogInputLabel
-              as="label"
-              htmlFor="create-account-confirm-password"
-            >
+            <OnboardDialogInputLabel as="label" htmlFor="confirm-password">
               Confirm Password
             </OnboardDialogInputLabel>
-            <TextInput
+            <FormField
               height="38px"
-              id="create-account-confirm-password"
-              name="create-account-confirm-password"
-              ref={confirmPasswordRef}
+              name="confirmPassword"
               type={showConfirmPassword.isOn ? 'text' : 'password'}
-              autoComplete="new-password"
-              placeholder="• • • • • • • •"
-              error={confirmPasswordError.isOn}
-              onChange={onChangeConfirmPassword}
-              rightAdornment={
+              isError={Boolean(errors?.confirmPassword)}
+              placeholder="••••••••"
+              rightIcon={
                 <Button.IconButton
                   type="button"
                   onClick={showConfirmPassword.toggle}
                 >
                   <Icon
-                    name={showPassword.isOn ? 'EyeOff' : 'EyeOn'}
+                    name={showConfirmPassword.isOn ? 'EyeOff' : 'EyeOn'}
                     opacity={0.5}
                     size={18}
                   />
@@ -151,8 +110,8 @@ export const CreateAccountDialog = ({
             <Anchor onClick={onAlreadyHaveAccount}>Log in</Anchor>.
           </OnboardDialogDescription>
         </>
-      }
-      onNext={handleOnNext}
+      )}
+      onNext={onNext}
     />
   );
 };
