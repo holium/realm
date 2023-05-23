@@ -26,18 +26,12 @@ export default function CreateAccount({ prefilledEmail }: Props) {
 
   const onAlreadyHaveAccount = () => goToPage('/login');
 
-  const onNext = async (values: FormikValues) => {
+  const onNext = async ({ email, password }: FormikValues) => {
     // TODO: hash password
-    OnboardingStorage.set({
-      email: values.email,
-      passwordHash: values.password,
-    });
+    OnboardingStorage.set({ email, passwordHash: password });
 
     try {
-      const result = await thirdEarthApi.register(
-        values.email,
-        values.password
-      );
+      const result = await thirdEarthApi.register(email, password);
       if (Boolean(result)) goToPage('/verify-email');
       return Boolean(result);
     } catch (error) {

@@ -5,7 +5,6 @@ import * as Yup from 'yup';
 import { ErrorBox, Flex, Icon, Spinner } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
 
-import { SubmitButton } from './hosting/SubmitButton';
 import {
   OnboardDialogBackButton,
   OnboardDialogBody,
@@ -15,12 +14,13 @@ import {
   OnboardDialogFooterBackButtonFlex,
   OnboardDialogIconContainer,
 } from './OnboardDialog.styles';
+import { SubmitButton } from './SubmitButton';
 
 type Props = {
   body: (errors?: FormikErrors<FormikValues>) => ReactNode;
   icon?: ReactNode;
-  initialValues: FormikValues;
-  validationSchema: Yup.ObjectSchema<any>;
+  initialValues?: FormikValues;
+  validationSchema?: Yup.ObjectSchema<any>;
   nextText?: string;
   nextIcon?: ReactNode;
   hideNextButton?: boolean;
@@ -32,7 +32,7 @@ type Props = {
 export const OnboardDialog = ({
   body,
   icon,
-  initialValues,
+  initialValues = {},
   validationSchema,
   nextText = 'Next',
   nextIcon,
@@ -45,6 +45,8 @@ export const OnboardDialog = ({
   const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>();
 
   const formValidationFunction = async (values: FormikValues) => {
+    if (!validationSchema) return {};
+
     const untouchedFieds = Object.keys(values).filter(
       (key) => values[key] === undefined
     );
