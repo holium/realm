@@ -67,9 +67,8 @@ export default function ClaimInvite({
       if (!token) return false;
 
       OnboardingStorage.set({ token });
-      goToPage('/account/download-realm');
 
-      return true;
+      return goToPage('/account/download-realm');
     } catch (error) {
       console.error(error);
 

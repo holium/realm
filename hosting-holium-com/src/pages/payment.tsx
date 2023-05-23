@@ -85,9 +85,7 @@ export default function Payment({ products }: ServerSideProps) {
     await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
     await thirdEarthApi.ship(token, serverId, productId.toString(), invoiceId);
 
-    goToPage('/booting');
-
-    return true;
+    return goToPage('/booting');
   };
 
   return (

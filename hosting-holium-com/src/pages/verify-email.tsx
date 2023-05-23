@@ -33,14 +33,13 @@ export default function VerifyEmail() {
       OnboardingStorage.set({ token: result.token });
 
       if (Boolean(result)) {
-        await goToPage('/choose-id');
-        return true;
+        return goToPage('/choose-id');
+      } else {
+        return false;
       }
     } catch (error) {
       console.error(error);
 
-      return false;
-    } finally {
       return false;
     }
   };
