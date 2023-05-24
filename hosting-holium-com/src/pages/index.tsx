@@ -32,8 +32,11 @@ export default function CreateAccount({ prefilledEmail }: Props) {
 
     try {
       const result = await thirdEarthApi.register(email, password);
-      if (Boolean(result)) goToPage('/verify-email');
-      return Boolean(result);
+      if (Boolean(result)) {
+        return goToPage('/verify-email');
+      } else {
+        return false;
+      }
     } catch (error) {
       console.error(error);
       return false;
