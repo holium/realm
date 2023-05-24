@@ -72,6 +72,7 @@
     "react-spinners": "^0.13.4",
     "simple-peer": "^9.11.1",
     "socket.io-client": "^4.6.1",
+    "stream-browserify": "^3.0.0",
     "styled-components": "^5.3.3",
     "styled-system": "^5.1.5",
     "ts-node-dev": "^2.0.0",
