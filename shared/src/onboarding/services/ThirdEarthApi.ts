@@ -323,7 +323,7 @@ export class ThirdEarthApi {
     );
   }
 
-  getUserS3Info(token: string, shipId: string) {
+  getUserStorageInfo(token: string, shipId: string) {
     return http<GetUserS3InfoResponse>(`${this.apiBaseUrl}/user/s3/${shipId}`, {
       method: 'GET',
       headers: this.getHeaders(token),

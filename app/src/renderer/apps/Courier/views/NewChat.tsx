@@ -27,20 +27,20 @@ export const NewChat = () => {
   const { inbox, setSubroute, createChat } = chatStore;
   const [creating, setCreating] = useState<boolean>(false);
   const [searchString, setSearchString] = useState<string>('');
-  const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
+  const [selectedIdentity, setSelected] = useState<Set<string>>(new Set());
 
   const onCreateChat = () => {
     let title: string;
     let chatType: ChatPathType;
     if (!loggedInAccount) return;
-    if (selectedPatp.size === 1) {
+    if (selectedIdentity.size === 1) {
       chatType = 'dm';
       const metadata = friends.getContactAvatarMetadata(
-        Array.from(selectedPatp)[0]
+        Array.from(selectedIdentity)[0]
       );
       title = metadata.nickname || metadata.patp;
     } else {
-      title = Array.from(selectedPatp)
+      title = Array.from(selectedIdentity)
         .map((patp: string) => {
           const metadata = friends.getContactAvatarMetadata(patp);
           return metadata.nickname || metadata.patp;
@@ -53,7 +53,7 @@ export const NewChat = () => {
       title,
       loggedInAccount.serverId,
       chatType,
-      Array.from(selectedPatp)
+      Array.from(selectedIdentity)
     )
       .then(() => {
         setSubroute('inbox');
@@ -67,25 +67,25 @@ export const NewChat = () => {
 
   const onShipSelected = (contact: [string, string?]) => {
     const patp = contact[0];
-    selectedPatp.add(patp);
-    setSelected(new Set(selectedPatp));
+    selectedIdentity.add(patp);
+    setSelected(new Set(selectedIdentity));
     setSearchString('');
   };
 
   const onShipRemove = (contact: [string, string?]) => {
-    selectedPatp.delete(contact[0]);
-    setSelected(new Set(selectedPatp));
+    selectedIdentity.delete(contact[0]);
+    setSelected(new Set(selectedIdentity));
   };
 
   const dmAlreadyExists = useMemo(() => {
-    if (selectedPatp.size !== 1) return false;
+    if (selectedIdentity.size !== 1) return false;
     return inbox.some((chat) => {
       return (
         chat.type === 'dm' &&
-        chat.peers.find((p: any) => p.ship === Array.from(selectedPatp)[0])
+        chat.peers.find((p: any) => p.ship === Array.from(selectedIdentity)[0])
       );
     });
-  }, [selectedPatp.size === 1]);
+  }, [selectedIdentity.size === 1]);
 
   return (
     <Flex gap={4} height={dimensions.height - 14} flexDirection="column">
@@ -110,7 +110,7 @@ export const NewChat = () => {
           New Chat
         </Text.Custom>
         <Flex width={120} alignItems="flex-start" justifyContent="flex-end">
-          {selectedPatp.size > 0 && (
+          {selectedIdentity.size > 0 && (
             <Tooltip
               id="create-chat-tooltip"
               show={dmAlreadyExists}
@@ -137,19 +137,19 @@ export const NewChat = () => {
         width={dimensions.width - 34}
         borderRadius={16}
         height={32}
-        placeholder="Search by Urbit ID or nickname"
+        placeholder="Search by identity or nickname"
         leftAdornment={<Icon name="Search" ml={1} size={18} opacity={0.3} />}
         onChange={(evt: any) => {
           evt.stopPropagation();
           setSearchString(evt.target.value);
         }}
       />
-      {selectedPatp.size > 0 && (
-        <SelectedShips ships={selectedPatp} onRemove={onShipRemove} />
+      {selectedIdentity.size > 0 && (
+        <SelectedShips ships={selectedIdentity} onRemove={onShipRemove} />
       )}
       <ShipSearch
         search={searchString}
-        selected={selectedPatp}
+        selected={selectedIdentity}
         onSelected={(contact: any) => onShipSelected(contact)}
       />
     </Flex>

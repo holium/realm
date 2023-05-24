@@ -13,7 +13,7 @@ type Props = {
   onNext: (id: string, url: string, code: string) => Promise<boolean>;
 };
 
-export const AddServerDialog = ({ onBack, onNext }: Props) => {
+export const AddIdentityDialog = ({ onBack, onNext }: Props) => {
   const [id, setId] = useState('');
   const [url, setUrl] = useState('');
   const [code, setCode] = useState('');
@@ -79,7 +79,7 @@ export const AddServerDialog = ({ onBack, onNext }: Props) => {
         <>
           <Flex flexDirection="column" gap={2}>
             <OnboardDialogInputLabel as="label" htmlFor="id-onboarding">
-              Server ID
+              ID
             </OnboardDialogInputLabel>
             <TextInput
               height="38px"
@@ -95,7 +95,7 @@ export const AddServerDialog = ({ onBack, onNext }: Props) => {
           </Flex>
           <Flex flexDirection="column" gap={2}>
             <OnboardDialogInputLabel as="label" htmlFor="url-onboarding">
-              Server URL
+              URL
             </OnboardDialogInputLabel>
             <TextInput
               height="38px"
@@ -111,7 +111,7 @@ export const AddServerDialog = ({ onBack, onNext }: Props) => {
           </Flex>
           <Flex flexDirection="column" gap={2}>
             <OnboardDialogInputLabel as="label" htmlFor="access-key-onboarding">
-              Server Code
+              Code
             </OnboardDialogInputLabel>
             <TextInput
               height="38px"
@@ -137,7 +137,7 @@ export const AddServerDialog = ({ onBack, onNext }: Props) => {
           {formError && <ErrorBox>{formError}</ErrorBox>}
         </>
       }
-      nextText="Add Ship"
+      nextText="Add Identity"
       onBack={onBack}
       onNext={handleOnNext}
     />

@@ -82,7 +82,7 @@ export const GetRealmDialog = ({ onBack, onGetANewId }: Props) => (
         </GrayBox>
         <InfoText>
           We’ll be adding more options for getting on Realm such as migrating
-          your server or booting with an Urbit ID keyfile.
+          your server or booting with an identity keyfile.
         </InfoText>
       </>
     }

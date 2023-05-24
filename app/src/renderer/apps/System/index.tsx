@@ -71,7 +71,7 @@ const SystemAppPresenter = () => {
       icon: 'CloudDownload',
       label: 'Storage',
       value: 'storage',
-      sublabel: 'S3 Storage',
+      sublabel: 'Storage',
     },
   ];
 

@@ -8,7 +8,7 @@ import { GetIdIcon } from '../icons/GetIdIcon';
 
 type Props = {
   onClickGetHosting: () => void;
-  onClickBuyServer: () => void;
+  onClickBuyIdentity: () => void;
   onClickJoinWaitlist: (email: string) => Promise<boolean>;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
@@ -16,15 +16,15 @@ type Props = {
 
 export const AccountGetRealmDialog = ({
   onClickGetHosting,
-  onClickBuyServer,
+  onClickBuyIdentity,
   onClickJoinWaitlist,
   onClickSidebarSection,
   onExit,
 }: Props) => (
   <AccountDialog
-    patps={[]}
-    selectedPatp={''}
-    setSelectedPatp={() => {}}
+    identities={[]}
+    selectedIdentity={''}
+    setSelectedIdentity={() => {}}
     currentSection={SidebarSection.GetRealm}
     customBody={
       <Flex flex={5}>
@@ -47,7 +47,7 @@ export const AccountGetRealmDialog = ({
         </Flex>
       </Flex>
     }
-    onClickBuyServer={onClickBuyServer}
+    onClickBuyIdentity={onClickBuyIdentity}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   />

@@ -11,28 +11,28 @@ import { PatpsPaginated } from '../components/PatpsPaginated';
 import { IdentityIcon } from '../icons/IdentityIcon';
 
 type Props = {
-  patps: string[];
+  identities: string[];
   onSelectPatp: (patp: string) => void;
   onBack?: () => void;
   onNext: () => Promise<boolean>;
 };
 
 export const ChooseIdDialog = ({
-  patps,
+  identities,
   onSelectPatp,
   onBack,
   onNext,
 }: Props) => {
-  const [selectedPatp, setSelectedPatp] = useState<string>();
+  const [selectedIdentity, setSelectedIdentity] = useState<string>();
 
   const handleOnSelectPatp = (patp: string) => {
     onSelectPatp(patp);
-    setSelectedPatp(patp);
+    setSelectedIdentity(patp);
   };
 
   useEffect(() => {
-    handleOnSelectPatp(patps[0]);
-  }, [patps]);
+    handleOnSelectPatp(identities[0]);
+  }, [identities]);
 
   return (
     <OnboardDialog
@@ -47,8 +47,8 @@ export const ChooseIdDialog = ({
             </OnboardDialogDescription>
           </Flex>
           <PatpsPaginated
-            patps={patps}
-            selectedPatp={selectedPatp}
+            identities={identities}
+            selectedIdentity={selectedIdentity}
             onSelectPatp={handleOnSelectPatp}
           />
         </>

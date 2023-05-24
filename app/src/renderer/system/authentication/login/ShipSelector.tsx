@@ -53,9 +53,9 @@ const ShipSelectorPresenter = () => {
             if (!dragging) {
               onSelect(account.serverId);
               setTheme(account.theme);
-              // const selectedPatp = await AuthActions.getSelected();
-              // if (selectedPatp) {
-              //   if (selectedPatp !== account.serverId) {
+              // const selectedIdentity = await AuthActions.getSelected();
+              // if (selectedIdentity) {
+              //   if (selectedIdentity !== account.serverId) {
               //     !dragging && AuthActions.setSelected(account.serverId);
               //     setLoginError('');
               //     const currTheme = await AuthActions.getShipTheme(account.serverId);

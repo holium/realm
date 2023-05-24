@@ -15,12 +15,12 @@ export const ServerSelfHostingDialogBody = ({
   serverCode,
 }: Props) => (
   <AccountDialogTable>
-    <AccountDialogTableRow title="Server ID">
+    <AccountDialogTableRow title="ID">
       <AccountDialogDescription flex={1}>{serverId}</AccountDialogDescription>
     </AccountDialogTableRow>
-    <AccountDialogTableRow title="Server URL">
+    <AccountDialogTableRow title="URL">
       <AccountDialogDescription flex={1}>{serverUrl}</AccountDialogDescription>
     </AccountDialogTableRow>
-    <ChangeAccessCode label="Server Code" serverCode={serverCode} />
+    <ChangeAccessCode label="Code" serverCode={serverCode} />
   </AccountDialogTable>
 );
