@@ -1,8 +1,8 @@
 import { Space, SpaceInvite } from '@prisma/client';
 import { GetStaticProps } from 'next';
 
-import { Invite } from '../../components/Invite';
-import prisma from '../../lib/prisma';
+import { Invite } from '../components/Invite';
+import prisma from '../lib/prisma';
 
 export const getServerSideProps: GetStaticProps = async ({ params }) => {
   const inviteId = params?.id as string;
