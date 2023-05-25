@@ -1,4 +1,3 @@
-import React from 'react';
 import { GetStaticProps } from 'next';
 
 import { Invite, InviteProps } from '../components/Invite';
@@ -13,6 +12,7 @@ export const getStaticProps: GetStaticProps = async () => {
       },
     },
   ];
+
   return {
     props: { invites },
     revalidate: 10,
