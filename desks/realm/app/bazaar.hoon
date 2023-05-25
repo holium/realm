@@ -412,6 +412,8 @@
       %pin               (add-pin +.action)
       %unpin             (rem-pin +.action)
       %reorder-pins      (reorder-pins +.action)
+      %add-bookmark      (add-bookmark +.action)
+      %remove-bookmark   (rem-bookmark +.action)
       %recommend         (recommend +.action)
       %unrecommend       (unrecommend +.action)
       %suite-add         (add-suite +.action)
@@ -541,6 +543,18 @@
       :_  state
       [%give %fact [/updates ~] bazaar-reaction+!>([%dock-update path dock])]~
     ::
+    ++  add-bookmark
+      |=  =app-id:store
+      ?>  =(our.bowl src.bowl)
+      =.  grid-index.state  (add-grid-index:helpers:bazaar:core app-id grid-index.state)
+      `state
+    ::
+    ++  rem-bookmark
+      |=  =app-id:store
+      ?>  =(our.bowl src.bowl)
+      =.  grid-index.state  (rem-grid-index:helpers:bazaar:core app-id grid-index.state)
+      `state
+    ::
     ++  rem-pin
       |=  [path=space-path:spaces-store =app-id:store]
       ?>  =(our.bowl src.bowl)
@@ -622,13 +636,13 @@
       (docket-install ship desk [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.u.app grid-index.state])]~)
     ::
     ++  reorder-app
-      |=  [=desk index=@ud]
+      |=  [=app-id:store index=@ud]
       ^-  (quip card _state)
       ?>  =(our.bowl src.bowl)
-      ::  Don't assert in catalog, so we can jam b
-      ::  ?>  (~(has by catalog.state) desk)
-      =.  grid-index  (reorder-grid-index:helpers:bazaar:core desk index grid-index.state)
-      `state
+      =/  new-grid-index  (mov-grid-index:helpers:bazaar:core app-id index grid-index.state)
+      =.  grid-index  new-grid-index
+      :_  state
+      [%give %fact [/updates ~] bazaar-reaction+!>([%reorder-grid-index new-grid-index])]~
     ::
     ++  docket-install
       |=  [=ship =desk cards=(list card)]
@@ -1137,6 +1151,7 @@
     ::
     ++  add-grid-index
       |=  [=app-id:store =grid-index:store]
+      ^-  grid-index:store
       =/  grid-list         (sort-grid:helpers:bazaar:core grid-index)
       =/  current-index     (find [app-id]~ grid-list)
       ?~  current-index
@@ -1147,10 +1162,28 @@
     ::
     ++  rem-grid-index
       |=  [=app-id:store =grid-index:store]
+      ^-  grid-index:store
       =/  grid-list         (sort-grid:helpers:bazaar:core grid-index)
       =/  current-index     (find [app-id]~ grid-list)
       ?~  current-index     grid-index
       =.  grid-list         (oust [u.current-index 1] grid-list)
+      =/  new-grid-index
+        %+  turn  (gulf 0 (sub (lent grid-list) 1))
+          |=  idx=@ud
+          =/  app  (snag idx grid-list)
+          [idx app]
+      `=grid-index:store`(malt new-grid-index)
+    ::
+    ++  mov-grid-index
+      |=  [=app-id:store index=@ud =grid-index:store]
+      ^-  grid-index:store
+      =/  grid-list         (sort-grid:helpers:bazaar:core grid-index)
+      =/  current-index     (find [app-id]~ grid-list)
+      ?~  current-index     !!
+      :: it's already in the grid. remove it from its current position
+      :: then add it to the specified position (not optimal)
+      =.  grid-list         (oust [u.current-index 1] grid-list)
+      =.  grid-list         (into grid-list index app-id)
       =/  new-grid-index
         %+  turn  (gulf 0 (sub (lent grid-list) 1))
           |=  idx=@ud

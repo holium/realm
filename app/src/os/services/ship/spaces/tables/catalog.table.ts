@@ -330,6 +330,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
 
   private _insertGrid(grid: { [idx: string]: string }) {
     if (!this.db?.open) return;
+    this.db.prepare('DELETE FROM app_grid;').run();
     const insert = this.db.prepare(
       `REPLACE INTO app_grid (
         idx,

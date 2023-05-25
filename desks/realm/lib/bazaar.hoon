@@ -18,6 +18,8 @@
           [%pin add-pin]
           [%unpin rem-pin]
           [%reorder-pins reorder-pins]
+          [%add-bookmark add-bookmark]
+          [%remove-bookmark remove-bookmark]
           [%recommend add-rec]
           [%unrecommend rem-rec]
           [%suite-add suite-add]
@@ -61,6 +63,16 @@
       %-  ot
       :~  [%path pth]
           [%app-id so]
+      ==
+    ::
+    ++  add-bookmark
+      %-  ot
+      :~  [%app-id so]
+      ==
+    ::
+    ++  remove-bookmark
+      %-  ot
+      :~  [%app-id so]
       ==
     ::
     ++  reorder-pins
@@ -242,6 +254,12 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
       ==
+      ::
+        %reorder-grid-index
+      %-  pairs
+      :~  [%grid (grid-index-js:encode grid-index.rct)]
+      ==
+      ::
     ==
   ::
   ++  view  :: encodes for on-peek

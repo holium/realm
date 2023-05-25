@@ -13,7 +13,6 @@ import { useToggle } from '@holium/design-system';
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { PinnedWebApp } from '../../SystemBar/components/CommunityBar/AppDock/PinnedWebApp';
 import { GridAppTile } from './GridAppTile';
 
 interface AppGridProps {
@@ -28,17 +27,16 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
     () =>
       [
         ...bazaarStore.installed,
+        // ...(currentSpace?.bookmarks ?? []),
         // ...bazaarStore.devApps,
       ] as AppMobxType[],
-    [bazaarStore.catalog, bazaarStore.installations.values()]
+    [
+      bazaarStore.catalog,
+      bazaarStore.installations.values(),
+      currentSpace?.bookmarks,
+    ]
   );
 
-  const bookmarks = useMemo(
-    () => currentSpace?.bookmarks ?? [],
-    [currentSpace?.bookmarks]
-  );
-
-  // const [items, setItems] = useState([...apps, ...bookmarks]);
   const [items, setItems] = useState(apps);
   const canClick = useToggle(true);
 
@@ -52,10 +50,10 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
 
   if (!currentSpace) return null;
 
-  const onChange = (sourceId, sourceIndex, targetIndex) => {
-    console.log('onChange', sourceId, sourceIndex, targetIndex);
-    const nextState = swap(apps, sourceIndex, targetIndex);
-    console.log(nextState);
+  const onChange = (_, sourceIndex, targetIndex) => {
+    if (sourceIndex === targetIndex) return;
+    bazaarStore.reorderApp(sourceIndex, targetIndex);
+    const nextState = swap(items, sourceIndex, targetIndex);
     setItems(nextState);
   };
 
@@ -72,6 +70,30 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
         }}
       >
         {items.map((app, index: number) => {
+          // console.log(app);
+          // this is messy.  TODO consolidate devapps, pins, and installed apps into one component.
+          // if (app.hasOwnProperty('url')) {
+          //   const tileId = `appgrid-${index}-pinned-${app.url}`;
+          //   return (
+          //     <GridItem
+          //       id={tileId}
+          //       key={tileId}
+          //       onMouseDownCapture={() => {
+          //         disableScroll.on();
+          //       }}
+          //       onMouseUpCapture={() => {
+          //         disableScroll.off();
+          //       }}
+          //     >
+          //       <PinnedWebApp
+          //         key={`appgrid-${index}-pinned-${app.url}`}
+          //         canClick={canClick}
+          //         {...app}
+          //         isGrid
+          //       />
+          //     </GridItem>
+          //   );
+          // } else {
           const tileId = `${app.title}-${index}-ship-grid-tile`;
           return (
             <GridItem
@@ -94,13 +116,6 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
             </GridItem>
           );
         })}
-        {bookmarks.map((bookmark, index) => (
-          <PinnedWebApp
-            key={`appgrid-${index}-pinned-${bookmark.url}`}
-            {...bookmark}
-            isGrid
-          />
-        ))}
       </GridDropZone>
     </GridContextProvider>
   );

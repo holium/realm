@@ -361,6 +361,10 @@ function registerOnUpdateListener() {
       case 'treaties-loaded':
         shipStore.bazaarStore.scryTreaties(payload.ship);
         break;
+      case 'reorder-grid-index':
+        console.warn('reordeg grid index', payload);
+        shipStore.bazaarStore._onReorderGridIndex(payload);
+        break;
     }
   });
 

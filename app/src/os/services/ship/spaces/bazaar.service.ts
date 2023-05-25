@@ -230,6 +230,13 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
             payload: data['ally-deleted'],
           });
           break;
+        case 'reorder-grid-index':
+          this.tables?.appCatalog.updateGrid(data['reorder-grid-index'].grid);
+          this.sendUpdate({
+            type: 'reorder-grid-index',
+            payload: data['reorder-grid-index'].grid,
+          });
+          break;
         default:
           break;
       }

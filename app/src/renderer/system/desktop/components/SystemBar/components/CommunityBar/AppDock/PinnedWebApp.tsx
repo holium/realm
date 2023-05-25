@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
+import { rgba } from 'polished';
 
+import { UseToggleHook } from '@holium/design-system';
 import { Text } from '@holium/design-system/general';
 import { TileHighlight } from '@holium/design-system/os';
 
@@ -14,6 +16,7 @@ import { WebAppTile } from './WebAppTile';
 
 type Props = Bookmark & {
   isGrid?: boolean;
+  canClick: UseToggleHook;
 };
 
 const PinnedWebAppPresenter = ({
@@ -23,6 +26,7 @@ const PinnedWebAppPresenter = ({
   color,
   favicon: initialFavicon,
   isGrid,
+  canClick,
 }: Props) => {
   const { shellStore } = useAppState();
   const { getOptions, setOptions } = useContextMenu();
@@ -40,7 +44,7 @@ const PinnedWebAppPresenter = ({
         {
           id: 'unpin-web-app',
           label: 'Unpin',
-          onClick: () => SpacesIPC.removeBookmark(path, url),
+          onClick: () => SpacesIPC.removeBookmark(path, url, title),
         },
         window && {
           id: window.isMinimized ? 'show-web-app' : 'hide-web-app',
@@ -72,14 +76,16 @@ const PinnedWebAppPresenter = ({
         }
       }
     } else {
-      shellStore.openBookmark({
-        path,
-        url,
-        title,
-        color,
-      });
+      if (canClick.isOn) {
+        shellStore.openBookmark({
+          path,
+          url,
+          title,
+          color,
+        });
+        shellStore.closeHomePane();
+      }
     }
-    shellStore.closeHomePane();
   };
 
   useEffect(() => {
@@ -109,7 +115,7 @@ const PinnedWebAppPresenter = ({
           fontSize={2}
           style={{
             pointerEvents: 'none',
-            color: 'rgba(51, 51, 51, 0.8)',
+            color: rgba('#000000', 0.8),
           }}
         >
           {title}
