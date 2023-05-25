@@ -174,6 +174,10 @@ export const BazaarStore = types
                 return false;
               } else if (app.type === 'urbit') {
                 const urb = app as AppMobxType;
+                if (urb.id === 'landscape') {
+                  urb.gridIndex = 9999;
+                  return false;
+                }
                 return (
                   // 'started' installs should show on the desktop no?
 
