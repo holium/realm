@@ -6,17 +6,15 @@ import {
 } from 'alchemy-sdk';
 import axios from 'axios';
 import { ethers } from 'ethers';
-// @ts-expect-error
 import abi from 'human-standard-token-abi';
-// NOTE: this was needed for JsonRpcProvider to work
 import fetch from 'node-fetch';
 import io from 'socket.io-client';
 
 import { WalletDB } from '../wallet.db';
-// import nftabi from 'non-fungible-token-abi';
 import { Asset, CoinAsset, NFTAsset, ProtocolType } from '../wallet.types';
 import { BaseBlockProtocol } from './BaseBlockProtocol';
 
+// NOTE: this was needed for JsonRpcProvider to work
 declare var global: any;
 global.fetch = fetch;
 
@@ -24,7 +22,6 @@ export class EthereumProtocol implements BaseBlockProtocol {
   private protocol: ProtocolType;
   private ethProvider: ethers.providers.JsonRpcProvider;
   private alchemy: Alchemy;
-  private interval: any;
   private baseURL: string;
   private nodeURL: string;
   private updating: boolean = false;
@@ -72,42 +69,38 @@ export class EthereumProtocol implements BaseBlockProtocol {
 
   removeListener() {
     this.ethProvider.removeAllListeners();
-    clearInterval(this.interval);
-    this.interval = null;
   }
 
-  watchUpdates(conduit: any, walletDB: WalletDB) {
-    this.updateWalletState(conduit, walletDB);
+  watchUpdates(walletDB: WalletDB) {
+    this.updateWalletState(walletDB);
     try {
       const socket = io(this.baseURL);
       socket.on('connect', () => {
         const room = this.protocol === ProtocolType.ETH_MAIN ? 'main' : 'gorli';
-        console.log('connected to ' + room + ' socket');
+        console.log('wallet connected to ' + room + ' socket');
         socket.emit('join', room);
       });
       socket.on('block', (data: any) => {
         const currentBlock = Number(data.toString());
-        this.updateWalletState(conduit, walletDB, currentBlock);
+        this.updateWalletState(walletDB, currentBlock);
       });
       socket.on('error', (error: any) => {
-        console.log(error);
+        console.error('wallet error:', error);
       });
       // either by directly modifying the `auth` attribute
       socket.on('connect_error', () => {
-        console.log('connect error');
+        console.error('wallet connect_error');
       });
 
-      socket.on('disconnect', () => {});
+      socket.on('disconnect', () => {
+        console.log('wallet disconnected');
+      });
     } catch (error) {
       console.log(error);
     }
   }
 
-  async updateWalletState(
-    _conduit: any,
-    walletDB: WalletDB,
-    currentBlock?: number
-  ) {
+  async updateWalletState(walletDB: WalletDB, currentBlock?: number) {
     if (this.updating) {
       return;
     }
@@ -375,8 +368,10 @@ export class EthereumProtocol implements BaseBlockProtocol {
       return [];
     }
   }
-  async sendTransaction(signedTx: string): Promise<any> {
-    return (await this.ethProvider.sendTransaction(signedTx)).hash;
+  async sendTransaction(signedTx: string) {
+    const tx = await this.ethProvider.sendTransaction(signedTx);
+
+    return tx.hash;
   }
   async populateERC20(
     contractAddress: string,
@@ -561,5 +556,9 @@ export class EthereumProtocol implements BaseBlockProtocol {
 
   async getBlockNumber(): Promise<number> {
     return await this.ethProvider.getBlockNumber();
+  }
+
+  async getEtherPrice(): Promise<number> {
+    return this.ethProvider.getEtherPrice();
   }
 }

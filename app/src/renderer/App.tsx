@@ -3,7 +3,7 @@ import { MotionConfig } from 'framer-motion';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
-import { BgImage, GlobalStyle } from './App.styles';
+import { GlobalStyle, RealmBackground } from './App.styles';
 import { AppContent } from './AppContent';
 import { AppLoading } from './AppLoading';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
@@ -21,7 +21,7 @@ const Titlebar = styled.div`
   left: 0;
   width: 100%;
   height: 28px;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--rlm-dock-color);
   z-index: 100;
   -webkit-user-select: none;
   -webkit-app-region: drag;
@@ -44,7 +44,11 @@ const AppPresenter = () => {
       <AppStateProvider value={appState}>
         <GlobalStyle blur={true} realmTheme={theme} />
         {!shellStore.isFullscreen && <Titlebar />}
-        <BgImage blurred={shellStore.isBlurred} wallpaper={bgImage} />
+        <RealmBackground
+          blurred={shellStore.isBlurred}
+          snapView={shellStore.snapView}
+          wallpaper={bgImage}
+        />
         <SelectionProvider>
           <ContextMenuProvider>
             <ErrorBoundary>

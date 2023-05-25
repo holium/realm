@@ -1,3 +1,14 @@
+export enum NetworkType {
+  ETHEREUM = 'ethereum',
+  BITCOIN = 'bitcoin',
+}
+
+export enum NetworkStoreType {
+  ETHEREUM = 'Ethereum',
+  BTC_MAIN = 'Bitcoin Mainnet',
+  BTC_TEST = 'Bitcoin Testnet',
+}
+
 export type Asset = {
   addr: string; // smart contract address for eth
   id?: string; // chainId for eth, id for uqbar
@@ -66,8 +77,8 @@ export type TransactionsRow = {
   hash: string;
   network: string;
   type: number;
-  initiatedAt: number;
-  completedAt: number | undefined;
+  initiatedAt: string;
+  completedAt: string | undefined;
   ourAddress: string;
   theirPatp: string | undefined;
   theirAddres: string;
@@ -145,3 +156,14 @@ export type WalletDbReactions =
       };
     }
   | WalletDbChangeReactions;
+
+export type RecipientPayload = {
+  recipientMetadata?: {
+    color: string;
+    avatar?: string;
+    nickname?: string;
+  };
+  patp: string;
+  address?: string | null;
+  gasEstimate?: number;
+};

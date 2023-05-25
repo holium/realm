@@ -309,6 +309,10 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       minor: -1,
       build: -1,
     };
+    console.log('environment variables:');
+    console.log(`BUILD_VERSION=${process.env.BUILD_VERSION}`);
+    console.log(`ARTIFACT_VERSION=${process.env.ARTIFACT_VERSION}`);
+    console.log(`RELEASE_CHANNEL=${process.env.RELEASE_CHANNEL}`);
     console.log(
       `preparing build version env var '${process.env.BUILD_VERSION}'`
     );
@@ -383,7 +387,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     const self = this;
     return new Promise((resolve) => {
       let totalWaitTime = 0,
-        maxWaitTime = 300000; // 5 minutes
+        maxWaitTime = 600000; // 5 minutes
       (async function versionCheck(totalWaitTime, maxWaitTime) {
         const result = await self._testVersion(buildVersion);
         if (result) {

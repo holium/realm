@@ -1,36 +1,24 @@
 import { observer } from 'mobx-react';
 
-import { TrayApp } from '@holium/design-system';
+import { TrayApp } from '@holium/design-system/os';
 
-import { TrayAppKeys, useTrayApps } from 'renderer/apps/store';
+import { useTrayApps } from 'renderer/apps/store';
 
 import { ErrorBoundary } from '../ErrorBoundary';
-import { trayAppRenderers } from './components/SystemBar/apps';
+import { TrayAppKey, trayAppRenderers } from './components/SystemBar/apps';
 
 const TrayManagerPresenter = () => {
-  // const { activeApp, coords, walletApp, dimensions, setActiveApp } =
-  //   useTrayApps();
   const { activeApp, coords, dimensions, setActiveApp } = useTrayApps();
-  // const [walletForceActive, setWalletForceActive] = useState(false);
-
-  // if (walletForceActive && activeApp !== 'wallet-tray') {
-  //   // WalletActions.setForceActive(false);
-  //   setWalletForceActive(false);
-  // }
-  // if (walletApp.forceActive && !walletForceActive) {
-  //   setWalletForceActive(true);
-  //   setActiveApp('wallet-tray');
-  // }
 
   if (!activeApp) return null;
 
-  const TrayAppView = trayAppRenderers[activeApp].component;
+  const TrayAppComponent = trayAppRenderers[activeApp as TrayAppKey].component;
   const height = document.body.clientHeight;
 
   return (
     <TrayApp
       zIndex={100}
-      id={activeApp as TrayAppKeys}
+      id={activeApp as TrayAppKey}
       coords={{
         x: coords.left,
         y: height - dimensions.height - coords.bottom,
@@ -39,7 +27,7 @@ const TrayManagerPresenter = () => {
       }}
       closeTray={() => setActiveApp(null)}
     >
-      <ErrorBoundary>{TrayAppView && <TrayAppView />}</ErrorBoundary>
+      <ErrorBoundary>{TrayAppComponent && <TrayAppComponent />}</ErrorBoundary>
     </TrayApp>
   );
 };

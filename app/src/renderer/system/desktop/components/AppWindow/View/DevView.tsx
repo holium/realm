@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 import { onAction } from 'mobx-state-tree';
 
-import { useToggle } from '@holium/design-system';
+import { useToggle } from '@holium/design-system/util';
 import { genCSSVariables } from '@holium/shared';
 
 import { useAppState } from 'renderer/stores/app.store';

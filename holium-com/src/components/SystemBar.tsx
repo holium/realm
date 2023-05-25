@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 import { Avatar, Flex, Icon, Text } from '@holium/design-system/general';
@@ -62,6 +63,14 @@ export const calculateAnchorPointById = (
 
 export const SystemBar = ({ currentSpace, setCurrentApp }: SystemBarProps) => {
   const currentRoom = rooms[currentSpace];
+
+  useEffect(() => {
+    // Preload all space pictures.
+    Object.values(spaces).forEach((space) => {
+      const img = new Image();
+      img.src = space.picture;
+    });
+  }, []);
 
   return (
     <Flex flex={1} position="relative" width="auto" gap={8}>

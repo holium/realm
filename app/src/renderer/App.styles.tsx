@@ -1,10 +1,18 @@
-import { useMemo } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { useEffect, useMemo } from 'react';
+import {
+  AnimatePresence,
+  AnimationControls,
+  motion,
+  useAnimationControls,
+} from 'framer-motion';
 import { darken } from 'polished';
 import { createGlobalStyle, css } from 'styled-components';
 
 import { genCSSVariables, ThemeType } from '@holium/shared';
 
+import { useAppState } from 'renderer/stores/app.store';
+
+import { denormalizeBounds, getMaximizedBounds } from './lib/window-manager';
 import { BackgroundImage } from './system/system.styles';
 
 type Props = {
@@ -34,7 +42,6 @@ export const GlobalStyle = createGlobalStyle<Props>`
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
-      
     }
 
     /* Track */
@@ -66,7 +73,7 @@ export const GlobalStyle = createGlobalStyle<Props>`
       height: 100vh;
       width: 100vw;
       margin: 0;
-      overflow: hidden; 
+      overflow: hidden;
       position: relative;
     }
 
@@ -87,13 +94,93 @@ export const GlobalStyle = createGlobalStyle<Props>`
     }
 `;
 
-export const BgImage = ({
+type GhostPaneProps = {
+  controls: AnimationControls;
+};
+
+const GhostPane = ({ controls }: GhostPaneProps) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      exit={{ opacity: 0 }}
+      animate={controls}
+      style={{
+        borderRadius: 8,
+        zIndex: 0,
+        backgroundColor: 'rgba(var(--rlm-dock-rgba))',
+        position: 'absolute',
+      }}
+      transition={{
+        opacity: { duration: 0.2 },
+      }}
+    />
+  );
+};
+
+export const RealmBackground = ({
   blurred,
   wallpaper,
+  snapView,
 }: {
   blurred: boolean;
   wallpaper: string;
+  snapView: string;
 }) => {
+  const { shellStore } = useAppState();
+  const controls = useAnimationControls();
+
+  useEffect(() => {
+    const mb = getMaximizedBounds(shellStore.desktopDimensions);
+    const dmb = denormalizeBounds(mb, shellStore.desktopDimensions);
+
+    switch (snapView) {
+      case 'none':
+        controls.start({ opacity: 0, zIndex: 0 });
+        break;
+      case 'left':
+        // 1. get the ghost pane into the correct position
+        // 2. show it.
+        controls.start({
+          x: dmb.x + 8,
+          y: shellStore.isFullscreen ? dmb.y : dmb.y + 30,
+          width: dmb.width / 2,
+          height: shellStore.isFullscreen ? dmb.height : dmb.height - 30,
+          zIndex: shellStore.windows.size,
+          transition: {
+            duration: 0,
+          },
+        });
+        controls.start({ opacity: 1 });
+        break;
+      case 'right':
+        controls.start({
+          x: dmb.x + 8 + dmb.width / 2,
+          y: shellStore.isFullscreen ? dmb.y : dmb.y + 30,
+          width: dmb.width / 2,
+          height: shellStore.isFullscreen ? dmb.height : dmb.height - 30,
+          zIndex: shellStore.windows.size,
+          transition: {
+            duration: 0,
+          },
+        });
+        controls.start({ opacity: 1 });
+        break;
+      case 'fullscreen':
+        controls.start({
+          x: dmb.x + 8,
+          y: shellStore.isFullscreen ? dmb.y : dmb.y + 30,
+          width: dmb.width,
+          height: shellStore.isFullscreen ? dmb.height : dmb.height - 30,
+          zIndex: shellStore.windows.size,
+          transition: {
+            duration: 0,
+          },
+        });
+        controls.start({ opacity: 1 });
+        break;
+    }
+  }, [snapView]);
+
   return useMemo(
     () => (
       <AnimatePresence>
@@ -110,6 +197,7 @@ export const BgImage = ({
             opacity: { duration: 0.5 },
           }}
         />
+        <GhostPane controls={controls} />
       </AnimatePresence>
     ),
     [blurred, wallpaper]

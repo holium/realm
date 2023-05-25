@@ -90,3 +90,8 @@ declare module 'better-sqlite3-multiple-ciphers' {
     SqliteError: typeof SqliteError;
   }
 }
+
+declare module 'human-standard-token-abi' {
+  const abi: any;
+  export default abi;
+}

@@ -1,5 +1,3 @@
-import { toJS } from 'mobx';
-
 import { NewSpace } from 'os/services/ship/spaces/spaces.service';
 import { normalizeBounds } from 'renderer/lib/window-manager';
 import { appState } from 'renderer/stores/app.store';
@@ -107,10 +105,10 @@ export const spacesDialogs: DialogRenderers = {
         access: createForm.access,
         picture: createForm.image,
         color: createForm.color,
-        theme: toJS(createForm.theme),
+        theme: createForm.theme,
       };
       shipStore.spacesStore.updateSpace(state.path, createForm).then(() => {
-        setState({ loading: false });
+        setState({ ...state, loading: false });
         appState.shellStore.setIsBlurred(false);
         appState.shellStore.closeDialog();
       });

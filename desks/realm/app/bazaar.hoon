@@ -771,6 +771,7 @@
       =/  stall               (~(got by stalls.state) path)
       =.  suite.stall         (~(put by suite.stall) [index app-id])
       =.  stalls.state        (~(put by stalls.state) [path stall])
+      :: ~&  >>  "{<app.updates>}"
       :_  state
       [%give %fact [/updates ~] bazaar-reaction+!>([%suite-added path app-id app.updates index])]~
     ::
@@ -792,6 +793,7 @@
         %-  ~(rep by catalog)
           |=  [entry=[=app-id:store =app:store] result=(list [=app-id:store =app:store])]
           ?:  (~(has by catalog.state) app-id.entry)  ::  if we already have the app
+            =.  app.entry  (~(got by catalog.state) app-id.entry)
             (snoc result entry)
           =/  entry
             ?+  -.app.entry  entry
@@ -823,34 +825,19 @@
           %none     [det catalog.state]
           ::
           %delete   [det catalog.state]
-            :: [det ?~(det ~ (~(del by catalog.state) app-id.u.det))]
           ::
           %add
             =/  det  (need det)
             =/  app  (need app.det)
             =/  app
-              ?.  (is-app-installed:helpers:bazaar:core app-id.det)
-                ::  if the app is not in our catalog, update it's installed
-                ::   status relative to our ship . %desktop
-                ?>  ?=(%urbit -.app)
-                =.  install-status.app  %desktop
-                app
-              ::  if it exists in docket, it must exist in catalog
-              =/  app  (~(get by catalog.state) app-id.det)
-              ?~  app  ~&  >>>  "{<dap.bowl>}: unexpected error. {<app-id.det>} exists in docket, but not in catalog"  !!
-              ?>  ?=(%urbit -.u.app)
-              =.  install-status.u.app  %installed
-              u.app
-            =/  syncs=(map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])  get-syncs:core
-            =/  desks=(map desk ship)
-              %-  ~(rep by syncs)
-                |=  [[det=[syd=desk her=ship sud=desk] other=[nun=@ta kid=(unit desk) let=@ud]] acc=(map desk ship)]
-                (~(put by acc) sud.det her.det)
-            =.  app
-              ?:  =(-.app %urbit)
-                ?>  ?=(%urbit -.app)
-                :: =.  host.app  (~(get by desks) desk)
-                app
+              ?:  (~(has by catalog.state) app-id.det)
+                :: if the app *is* in the catalog, leave it's status as is
+                (~(got by catalog.state) app-id.det)
+              ::  if the app is not in our catalog, update it's installed
+              ::   status relative to our ship . %desktop
+              ?>  ?=(%urbit -.app)
+              ::  place it on the desktop where it can then be installed by an end-user in UI
+              =.  install-status.app  %desktop
               app
             [(some [app-id.det (some app)]) (~(put by catalog.state) app-id.det app)]
         ==
@@ -923,7 +910,7 @@
       =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
       :_  state
       :~
-        [%give %fact paths bazaar-reaction+!>([%stall-update path stall (some [app-id (some app)])])]
+        [%give %fact paths bazaar-reaction+!>([%stall-update path stall (some [app-id (some our-app)])])]
       ==
     ::
     ++  member-unrecommend

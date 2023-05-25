@@ -50,7 +50,8 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
   const selectedShip = appInstaller.selectedShip;
 
   useEffect(() => {
-    bazaarStore.scryAllies();
+    // prevents UI crash
+    bazaarStore.scryAllies().catch((e) => console.error(e));
   }, []);
 
   useEffect(() => {
@@ -69,7 +70,6 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
   }, [selectedShip]);
 
   useEffect(() => {
-    console.log(searchMode, searchString);
     if (searchMode === 'app-summary') {
       if (inputRef.current) {
         inputRef.current.value = searchString;

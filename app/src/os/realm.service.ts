@@ -6,6 +6,7 @@ import {
   getReleaseChannelFromSettings,
   saveReleaseChannelInSettings,
 } from './lib/settings';
+import { getCookie } from './lib/shipHelpers';
 import { RealmUpdateTypes } from './realm.types';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { APIConnection } from './services/api';
@@ -122,13 +123,23 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         log.error('realm.service.ts:', 'No credentials found');
         return false;
       }
+      const cookie = await getCookie({
+        serverUrl: credentials.url,
+        serverCode: credentials.code,
+      });
+      if (!cookie) {
+        log.error('realm.service.ts:', 'Fetching cookie failed');
+        return false;
+      }
 
-      this.setSessionCookie(credentials);
+      this.setSessionCookie({ ...credentials, cookie });
       return new Promise((resolve) => {
-        APIConnection.getInstance().conduit.on('connected', () => {
+        APIConnection.getInstance().conduit.once('connected', () => {
+          log.info('realm.service.ts, login: conduit connected');
           if (!this.services) return;
           this.services.auth._setLockfile({ ...credentials, ship: patp });
           this.services.ship?.init();
+          this.services.ship?.updateCookie(cookie);
           this._sendAuthenticated(patp, credentials.url, credentials.cookie);
           resolve(true);
         });
@@ -177,9 +188,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     if (!this.services) {
       return false;
     }
-
-    this.services.ship?.cleanup();
-    APIConnection.getInstance().closeChannel();
+    await this.services.ship?.cleanup();
     delete this.services.ship;
     this.services.auth._clearLockfile();
     this.sendUpdate({
@@ -314,22 +323,26 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           log.error('realm.service.ts:', 'No credentials found');
           return;
         }
-        const { cookie } = credentials;
+        const cookie = await getCookie({
+          serverUrl: credentials.url,
+          serverCode: credentials.code,
+        });
+        if (!cookie) {
+          log.error('realm.service.ts:', 'Could not fetch a new cookie!');
+          // TODO show feedback to user
+          return;
+        }
         const patp = this.services?.ship?.patp;
         if (!patp) {
           log.error('realm.service.ts:', 'No patp found');
           return;
         }
 
-        log.info(
-          'realm.service.ts:',
-          'Setting cookie',
-          cookie?.split('=')[1].split('; ')[0]
-        );
+        log.info('realm.service.ts:', 'Setting cookie', cookie);
         await session.fromPartition(`persist:default-${patp}`).cookies.set({
           url: `${url}`,
           name: `urbauth-${patp}`,
-          value: cookie?.split('=')[1].split('; ')[0],
+          value: cookie,
         });
 
         this.services?.ship?.updateCookie(cookie);
