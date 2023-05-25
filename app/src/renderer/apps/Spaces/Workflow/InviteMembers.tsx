@@ -283,7 +283,7 @@ const InviteMembersPresenter = ({
   if (!workflowState) return null;
 
   return (
-    <Flex col width="100%" overflowY="hidden">
+    <Flex col width="100%">
       <Text.Custom
         fontSize={5}
         lineHeight="24px"

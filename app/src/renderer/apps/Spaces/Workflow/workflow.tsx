@@ -4,7 +4,8 @@ import { appState } from 'renderer/stores/app.store';
 import { shipStore } from 'renderer/stores/ship.store';
 import { DialogRenderers } from 'renderer/system/dialog/dialogs';
 
-import { SpacesCreateForm } from './Details';
+import { EditSpace } from './EditSpace/EditSpace';
+import { SpaceWorkFlowState } from './EditSpace/types';
 import { InviteMembers } from './InviteMembers';
 import { CreateSpaceModal } from './SelectType';
 
@@ -44,7 +45,7 @@ export const spacesDialogs: DialogRenderers = {
   'create-space-3': {
     workflow: true,
     hasCloseButton: true,
-    component: (props: any) => <SpacesCreateForm {...props} />,
+    component: (props: any) => <EditSpace {...props} />,
     hasPrevious: () => true,
     onNext: (_evt: any, _state: any, _setState: any) => {
       appState.shellStore.openDialog('create-space-4');
@@ -86,28 +87,33 @@ export const spacesDialogs: DialogRenderers = {
   'edit-space': (dialogProps: any) => ({
     workflow: true,
     hasCloseButton: true,
-    component: (props: any) => (
-      <SpacesCreateForm edit={dialogProps} {...props} />
-    ),
+    component: (props: any) => <EditSpace edit={dialogProps} {...props} />,
     hasPrevious: () => false,
     nextButtonText: 'Update Space',
-    onNext: (_evt: any, state: any, setState: any) => {
-      if (state.crestOption === 'color') {
-        state.image = '';
-      }
+    onNext: (
+      _evt: any,
+      state: SpaceWorkFlowState,
+      setState: (state: Partial<SpaceWorkFlowState>) => void
+    ) => {
       let createForm = state;
+      setState({ ...state, loading: true });
+
+      if (createForm.crestOption === 'color') {
+        createForm.picture = '';
+      }
       if (!createForm.archetype) createForm.archetype = 'community';
       delete createForm['archetypeTitle'];
-      setState({ ...state, loading: true });
-      createForm = {
+
+      const payload = {
         name: createForm.name,
-        description: createForm.description || '',
+        description: createForm.description,
         access: createForm.access,
-        picture: createForm.image,
+        picture: createForm.picture,
         color: createForm.color,
         theme: createForm.theme,
       };
-      shipStore.spacesStore.updateSpace(state.path, createForm).then(() => {
+
+      shipStore.spacesStore.updateSpace(state.path, payload as any).then(() => {
         setState({ ...state, loading: false });
         appState.shellStore.setIsBlurred(false);
         appState.shellStore.closeDialog();
@@ -118,17 +124,15 @@ export const spacesDialogs: DialogRenderers = {
       appState.shellStore.setIsBlurred(false);
       appState.shellStore.closeDialog();
     },
-    isValidated: (state: any) => {
-      if (
+    isValidated: (state: SpaceWorkFlowState) => {
+      const isStateValid = Boolean(
         state &&
-        state.access &&
-        state.name &&
-        (state.picture !== undefined || state.color !== undefined)
-      ) {
-        return true;
-      } else {
-        return false;
-      }
+          state.access &&
+          state.name &&
+          (state.picture !== undefined || state.color !== undefined)
+      );
+
+      return isStateValid;
     },
     getWindowProps: (desktopDimensions) => ({
       appId: 'edit-space',

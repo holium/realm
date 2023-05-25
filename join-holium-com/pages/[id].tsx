@@ -8,9 +8,7 @@ export const getServerSideProps: GetStaticProps = async ({ params }) => {
   const inviteId = params?.id as string;
 
   if (!inviteId) {
-    return {
-      notFound: true,
-    };
+    return { notFound: true };
   }
 
   const invite = await prisma.spaceInvite.findUnique({
@@ -23,14 +21,10 @@ export const getServerSideProps: GetStaticProps = async ({ params }) => {
   });
 
   if (!invite) {
-    return {
-      notFound: true,
-    };
+    return { notFound: true };
   }
 
-  return {
-    props: { invite: JSON.parse(JSON.stringify(invite)) },
-  };
+  return { props: { invite: JSON.parse(JSON.stringify(invite)) } };
 };
 
 type Props = {

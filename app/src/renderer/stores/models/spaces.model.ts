@@ -321,7 +321,10 @@ export const SpacesStore = types
     updateSpace: flow(function* (spacePath: string, space: SpaceModelType) {
       const oldSpace = self.spaces.get(spacePath);
       const updatedSpace = self.spaces.get(spacePath);
-      if (!oldSpace || !updatedSpace) return;
+      if (!oldSpace || !updatedSpace) {
+        console.error('space not found');
+        return;
+      }
       space.path = spacePath;
       updatedSpace.access = space.access;
       updatedSpace.description = space.description;
