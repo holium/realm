@@ -1,4 +1,5 @@
 import React from 'react';
+import { Space, SpaceInvite } from '@prisma/client';
 
 export type InviteProps = {
   id: string;
@@ -9,7 +10,9 @@ export type InviteProps = {
 };
 
 type Props = {
-  invite: InviteProps;
+  invite: SpaceInvite & {
+    space: Space;
+  };
 };
 
 export const Invite = ({ invite }: Props) => (

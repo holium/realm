@@ -7,6 +7,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@prisma/client": "^4.14.1",
     "next": "^13.4.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -17,6 +18,7 @@
     "@types/node": "^18.15.3",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
-    "babel-plugin-styled-components": "^2.1.1"
+    "babel-plugin-styled-components": "^2.1.1",
+    "prisma": "^4.14.1"
   }
 }
