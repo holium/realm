@@ -13,6 +13,7 @@ import { defaultTheme, Theme } from '@holium/shared';
 import { CreateBookmarkPayload } from 'os/services/ship/spaces/spaces.types';
 import { Bookmark } from 'os/services/ship/spaces/tables/bookmarks.table';
 import { MemberRole } from 'os/types';
+import { SpaceWorkFlowState } from 'renderer/apps/Spaces/Workflow/EditSpace/types';
 
 import { appState } from '../app.store';
 import { BazaarIPC, SpacesIPC } from '../ipc';
@@ -319,30 +320,31 @@ export const SpacesStore = types
         return null;
       }
     }),
-    updateSpace: flow(function* (spacePath: string, space: SpaceModelType) {
+    updateSpace: flow(function* (
+      spacePayload: Omit<SpaceWorkFlowState, 'type' | 'crestOption'> & {
+        archetype: string;
+      }
+    ) {
+      const spacePath = spacePayload.path;
       const oldSpace = self.spaces.get(spacePath);
       const updatedSpace = self.spaces.get(spacePath);
+
       if (!oldSpace || !updatedSpace) {
         console.error('space not found');
         return;
       }
-      space.path = spacePath;
-      updatedSpace.access = space.access;
-      updatedSpace.description = space.description;
-      updatedSpace.name = space.name;
-      updatedSpace.theme = space.theme;
-      updatedSpace.joinLink = space.joinLink;
+
+      updatedSpace.access = spacePayload.access;
+      updatedSpace.description = spacePayload.description;
+      updatedSpace.name = spacePayload.name;
+      updatedSpace.theme = spacePayload.theme;
+      updatedSpace.joinLink = spacePayload.joinLink;
+
       try {
-        console.log(
-          'updating space',
-          spacePath,
-          JSON.stringify(space, null, 2)
-        );
         self.spaces.set(spacePath, updatedSpace);
-        // TODO add agent support for joinLink.
-        // eslint-disable-next-line unused-imports/no-unused-vars
-        const { joinLink, ...pokePayload } = space;
-        yield SpacesIPC.updateSpace(spacePath, pokePayload);
+        // TODO: store joinLink in agent too.
+        const { joinLink: _, ...spacePayloadWithoutJoinLink } = spacePayload;
+        yield SpacesIPC.updateSpace(spacePath, spacePayloadWithoutJoinLink);
       } catch (e) {
         self.spaces.set(spacePath, oldSpace);
         console.error(e);

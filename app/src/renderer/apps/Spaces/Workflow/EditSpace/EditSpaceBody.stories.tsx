@@ -21,6 +21,7 @@ export const Demo: ComponentStory<typeof EditSpaceBody> = () => {
         initialImage=""
         initialLink=""
         initialAccessOption="public"
+        joinLinkPayload={{} as any}
         updateState={action('updateState')}
       />
     </DialogViewContainer>

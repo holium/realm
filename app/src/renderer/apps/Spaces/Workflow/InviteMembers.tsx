@@ -11,12 +11,13 @@ import {
   Flex,
   Icon,
   Row,
-  Select,
   Skeleton,
   Text,
-  TextInput,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
+import { Select, TextInput } from '@holium/design-system/inputs';
+import { defaultTheme } from '@holium/shared';
 
+import { getSpacePath } from 'os/lib/text';
 import { MemberRole, MemberStatus } from 'os/types';
 import { Crest } from 'renderer/components';
 import { ShipSearch } from 'renderer/components/ShipSearch';
@@ -24,6 +25,8 @@ import { pluralize } from 'renderer/lib/text';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+
+import { JoinLink } from './EditSpace/JoinLink';
 
 interface IMemberList {
   height?: any;
@@ -44,7 +47,7 @@ const MemberList = styled(Flex)<IMemberList>`
 `;
 
 export const createPeopleForm = (
-  defaults: any = {
+  defaults = {
     person: '',
   }
 ) => {
@@ -376,7 +379,7 @@ const InviteMembersPresenter = ({
             }}
           />
         </Flex>
-        <Flex position="relative" flexDirection="column" gap={6} height={294}>
+        <Flex position="relative" flexDirection="column" gap={6} height="190px">
           <Text.Label fontWeight={500}>Members</Text.Label>
           <MemberList>
             {!loading ? (
@@ -389,6 +392,26 @@ const InviteMembersPresenter = ({
               </Flex>
             )}
           </MemberList>
+        </Flex>
+        <Flex flexDirection="column" gap="2px">
+          <Text.Label fontWeight={500}>Join Lnk</Text.Label>
+          <JoinLink
+            payload={{
+              from: loggedInAccount?.serverId ?? '',
+              space: {
+                path: getSpacePath(
+                  loggedInAccount?.serverId ?? '',
+                  workflowState.name
+                ),
+                name: workflowState.name,
+                picture: workflowState.image,
+                description: workflowState.description,
+                membersCount: memberCount,
+                theme: JSON.stringify(defaultTheme),
+              },
+            }}
+            onGenerateLink={() => {}}
+          />
         </Flex>
       </Flex>
     </Flex>

@@ -3,25 +3,33 @@ import { useState } from 'react';
 import { CopyButton, Flex, Spinner, Text } from '@holium/design-system/general';
 import { TextInput, Toggle } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
+import { CreateSpaceInvitePayload } from '@holium/shared';
 
 import { joinApi } from './JoinApi';
 
 type Props = {
+  payload: CreateSpaceInvitePayload;
   initialLink?: string;
   onGenerateLink: (link: string) => void;
 };
 
-export const JoinLink = ({ initialLink, onGenerateLink }: Props) => {
+export const JoinLink = ({ payload, initialLink, onGenerateLink }: Props) => {
   const loading = useToggle(false);
+  const error = useToggle(false);
   const [link, setLink] = useState<string | null>(initialLink ?? null);
 
   const onChangeToggle = async (checked: boolean) => {
+    error.toggleOff();
     if (!checked) {
       setLink(null);
 
       loading.toggleOn();
 
-      await joinApi.deleteAllSpaceInvites({ path: 'test' });
+      try {
+        await joinApi.deleteAllSpaceInvites({ path: payload.space.path });
+      } catch (msg) {
+        console.error(msg);
+      }
 
       loading.toggleOff();
 
@@ -31,22 +39,15 @@ export const JoinLink = ({ initialLink, onGenerateLink }: Props) => {
     loading.toggleOn();
 
     try {
-      const createSpaceInviteResponse = await joinApi.createSpaceInvite({
-        from: '~lopsyp-doztun',
-        space: {
-          path: '~test',
-          name: 'test',
-          description: 'test',
-          membersCount: 777,
-          picture: '',
-          theme: '',
-        },
-      });
+      const createSpaceInviteResponse = await joinApi.createSpaceInvite(
+        payload
+      );
 
       setLink(createSpaceInviteResponse.inviteUrl);
       onGenerateLink(createSpaceInviteResponse.inviteUrl);
-    } catch (error) {
-      console.error(error);
+    } catch (msg) {
+      console.error(msg);
+      error.toggleOn();
     } finally {
       loading.toggleOff();
     }
@@ -69,6 +70,11 @@ export const JoinLink = ({ initialLink, onGenerateLink }: Props) => {
             width="100%"
             rightAdornment={<CopyButton content={link} />}
           />
+        )}
+        {error.isOn && (
+          <Text.Body color="intent-alert">
+            Couldn't generate join link. Please try again.
+          </Text.Body>
         )}
       </Flex>
     </Flex>

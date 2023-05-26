@@ -111,10 +111,12 @@ export const spacesDialogs: DialogRenderers = {
         picture: createForm.picture,
         color: createForm.color,
         theme: createForm.theme,
+        path: createForm.path,
         joinLink: createForm.joinLink,
+        archetype: createForm.archetype,
       };
 
-      shipStore.spacesStore.updateSpace(state.path, payload as any).then(() => {
+      shipStore.spacesStore.updateSpace(payload).then(() => {
         setState({ ...state, loading: false });
         appState.shellStore.setIsBlurred(false);
         appState.shellStore.closeDialog();

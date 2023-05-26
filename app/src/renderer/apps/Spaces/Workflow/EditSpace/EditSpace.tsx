@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 
+import { getSpacePath } from 'os/lib/text';
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
 
@@ -14,6 +16,7 @@ type Props = BaseDialogProps & {
 };
 
 const EditSpacePresenter = ({ edit, workflowState, setState }: Props) => {
+  const { loggedInAccount } = useAppState();
   const { spacesStore } = useShipStore();
 
   const existingSpace = spacesStore.spaces.get(edit?.space);
@@ -48,6 +51,24 @@ const EditSpacePresenter = ({ edit, workflowState, setState }: Props) => {
       initialImage={initialValues.picture}
       initialAccessOption={initialValues.access}
       initialLink={initialValues.joinLink}
+      joinLinkPayload={
+        existingSpace
+          ? {
+              from: loggedInAccount?.serverId ?? '',
+              space: {
+                path: getSpacePath(
+                  loggedInAccount?.serverId ?? '',
+                  workflowState.name
+                ),
+                name: workflowState.name,
+                picture: workflowState.image,
+                description: workflowState.description,
+                theme: JSON.stringify(workflowState.theme),
+                membersCount: existingSpace?.members.list.length ?? 0,
+              },
+            }
+          : undefined
+      }
       updateState={updateState}
     />
   );

@@ -3,6 +3,7 @@ import { ChangeEvent, useState } from 'react';
 import { Button, Flex, Icon, Text } from '@holium/design-system/general';
 import { RadioGroup, RadioList, TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
+import { CreateSpaceInvitePayload } from '@holium/shared';
 
 import { Crest, isImgUrl } from 'renderer/components/Crest';
 
@@ -24,6 +25,7 @@ type Props = {
   initialAccessOption: AccessOptionType;
   initialLink: string;
   isGroupSpace: boolean;
+  joinLinkPayload?: CreateSpaceInvitePayload;
   updateState: (state: Partial<SpaceWorkFlowState>) => void;
 };
 
@@ -35,6 +37,7 @@ export const EditSpaceBody = ({
   initialAccessOption,
   isGroupSpace,
   initialLink,
+  joinLinkPayload,
   updateState,
 }: Props) => {
   const invalidImg = useToggle(false);
@@ -227,12 +230,13 @@ export const EditSpaceBody = ({
               onClick={onClickAccessOption}
             />
           </Flex>
-          {initialName && initialName.length > 0 && (
+          {joinLinkPayload && (
             <Flex col>
               <Text.Label mb={1} fontWeight={500}>
                 Join link
               </Text.Label>
               <JoinLink
+                payload={joinLinkPayload}
                 initialLink={initialLink}
                 onGenerateLink={(joinLink) => updateState({ joinLink })}
               />

@@ -12,7 +12,7 @@ datasource db {
 
 model Space {
   id           String        @id @default(cuid())
-  path         String        @unique
+  path         String
   name         String
   picture      String?
   theme        String
