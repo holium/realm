@@ -1,8 +1,16 @@
 import React from 'react';
 import { Space, SpaceInvite } from '@prisma/client';
+import Link from 'next/link';
 import styled from 'styled-components';
 
-import { Button, Flex, Icon, Text } from '@holium/design-system/general';
+import {
+  Button,
+  Flex,
+  Icon,
+  Spinner,
+  Text,
+} from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 
 export const InviteCardContainer = styled(Flex)`
   width: 100%;
@@ -36,35 +44,77 @@ type Props = {
   };
 };
 
-export const InviteCard = ({ invite }: Props) => (
-  <InviteCardContainer>
-    <Flex flexDirection="column" gap="20px" alignItems="center">
-      <SpacePictureContainer color={invite.space.color}>
-        {invite.space.picture && (
-          <SpacePicture src={invite.space.picture} alt={invite.space.name} />
-        )}
-      </SpacePictureContainer>
-      <Flex flexDirection="column" gap="8px" alignItems="center">
-        <Text.H1 style={{ fontSize: '20px' }}>{invite.space.name}</Text.H1>
-        <Flex gap="6px" alignItems="center">
-          <Icon name="Members" size={14} />
-          <Text.Body opacity={0.5} style={{ fontSize: '14px' }}>
-            {invite.space.membersCount} members
-          </Text.Body>
+export const InviteCard = ({ invite }: Props) => {
+  const joining = useToggle(false);
+  const dontHaveRealm = useToggle(false);
+
+  const onClickJoin = () => {
+    joining.toggleOn();
+    // Open alert that tries to open deeplink to realm.
+    window.location.href = `realm://join-${invite.space.path}}`;
+
+    setTimeout(() => {
+      joining.toggleOff();
+      dontHaveRealm.toggleOn();
+    }, 1000);
+  };
+
+  return (
+    <InviteCardContainer>
+      <Flex flexDirection="column" gap="20px" alignItems="center">
+        <SpacePictureContainer color={invite.space.color}>
+          {invite.space.picture && (
+            <SpacePicture src={invite.space.picture} alt={invite.space.name} />
+          )}
+        </SpacePictureContainer>
+        <Flex flexDirection="column" gap="8px" alignItems="center">
+          <Text.H1 style={{ fontSize: '20px' }}>{invite.space.name}</Text.H1>
+          <Flex gap="6px" alignItems="center">
+            <Icon name="Members" size={14} />
+            <Text.Body opacity={0.5} style={{ fontSize: '14px' }}>
+              {invite.space.membersCount} members
+            </Text.Body>
+          </Flex>
         </Flex>
+        <Text.Body
+          opacity={0.5}
+          textAlign="center"
+          style={{ fontSize: '15px' }}
+        >
+          {invite.space.description}
+        </Text.Body>
       </Flex>
-      <Text.Body opacity={0.5} textAlign="center" style={{ fontSize: '15px' }}>
-        {invite.space.description}
-      </Text.Body>
-    </Flex>
-    <Button.Primary
-      width="100%"
-      maxWidth="216px"
-      justifyContent="center"
-      borderRadius="10px"
-      style={{ padding: '8px', fontWeight: 500 }}
-    >
-      Join
-    </Button.Primary>
-  </InviteCardContainer>
-);
+      <Flex width="100%" flexDirection="column" gap="16px" alignItems="center">
+        <Button.Primary
+          width="100%"
+          maxWidth="216px"
+          height="40px"
+          alignItems="center"
+          justifyContent="center"
+          borderRadius="10px"
+          style={{ fontWeight: 500 }}
+          onClick={onClickJoin}
+        >
+          {joining.isOn ? <Spinner size={0} /> : 'Join'}
+        </Button.Primary>
+        {dontHaveRealm.isOn && (
+          <Text.Body
+            opacity={0.5}
+            textAlign="center"
+            style={{ fontSize: '12px' }}
+          >
+            Trouble joining?{' '}
+            <Link
+              style={{
+                color: 'inherit',
+              }}
+              href="https://holium.com"
+            >
+              Download Realm
+            </Link>
+          </Text.Body>
+        )}
+      </Flex>
+    </InviteCardContainer>
+  );
+};
