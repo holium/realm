@@ -47,6 +47,9 @@
       "path": "./hosting-holium-com"
     },
     {
+      "path": "./join-holium-com"
+    },
+    {
       "path": "./lib/design-system"
     },
     {
