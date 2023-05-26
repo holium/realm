@@ -16,12 +16,18 @@ const InviteCardContainer = styled(Flex)`
   box-shadow: var(--rlm-box-shadow-1);
 `;
 
-const SpacePicture = styled.img`
+const SpacePictureContainer = styled.div<{ color: string }>`
   width: 100px;
   height: 100px;
   border-radius: 8px;
+  background-color: ${({ color }) => color};
+  overflow: hidden;
+`;
+
+const SpacePicture = styled.img`
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  background-color: rgba(var(--rlm-text-rgba), 0.1);
 `;
 
 type Props = {
@@ -33,17 +39,21 @@ type Props = {
 export const InviteCard = ({ invite }: Props) => (
   <InviteCardContainer>
     <Flex flexDirection="column" gap="20px" alignItems="center">
-      <SpacePicture src={invite.space.picture} alt={invite.space.name} />
-      <Flex flexDirection="column" gap="8px">
+      <SpacePictureContainer color={invite.space.color}>
+        {invite.space.picture && (
+          <SpacePicture src={invite.space.picture} alt={invite.space.name} />
+        )}
+      </SpacePictureContainer>
+      <Flex flexDirection="column" gap="8px" alignItems="center">
         <Text.H1 style={{ fontSize: '20px' }}>{invite.space.name}</Text.H1>
-        <Flex gap="4px">
-          <Icon name="Members" size={1} />
+        <Flex gap="6px" alignItems="center">
+          <Icon name="Members" size={14} />
           <Text.Body opacity={0.5} style={{ fontSize: '14px' }}>
             {invite.space.membersCount} members
           </Text.Body>
         </Flex>
       </Flex>
-      <Text.Body opacity={0.5} style={{ fontSize: '15px' }}>
+      <Text.Body opacity={0.5} textAlign="center" style={{ fontSize: '15px' }}>
         {invite.space.description}
       </Text.Body>
     </Flex>

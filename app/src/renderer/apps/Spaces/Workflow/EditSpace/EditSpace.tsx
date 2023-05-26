@@ -61,7 +61,8 @@ const EditSpacePresenter = ({ edit, workflowState, setState }: Props) => {
                   workflowState.name
                 ),
                 name: workflowState.name,
-                picture: workflowState.image,
+                picture: workflowState.picture,
+                color: workflowState.color,
                 description: workflowState.description,
                 theme: JSON.stringify(workflowState.theme),
                 membersCount: existingSpace?.members.list.length ?? 0,

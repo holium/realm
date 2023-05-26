@@ -15,6 +15,7 @@ model Space {
   path         String
   name         String
   picture      String?
+  color        String
   theme        String
   description  String?
   membersCount Int?          @map(name: "members_count")

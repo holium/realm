@@ -405,6 +405,7 @@ const InviteMembersPresenter = ({
                 ),
                 name: workflowState.name,
                 picture: workflowState.image,
+                color: workflowState.color,
                 description: workflowState.description,
                 membersCount: memberCount,
                 theme: JSON.stringify(defaultTheme),

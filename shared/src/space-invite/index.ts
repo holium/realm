@@ -5,7 +5,8 @@ export type CreateSpaceInvitePayload = {
     path: string;
     description: string;
     membersCount: number;
-    picture: string;
+    picture: string | null;
+    color: string;
     theme: string;
   };
 };
