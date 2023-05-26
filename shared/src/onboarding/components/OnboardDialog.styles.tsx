@@ -57,6 +57,7 @@ export const OnboardDialogBody = styled.div`
 export const OnboardDialogBodyContainer = styled.div`
   display: flex;
   flex: 5;
+  min-width: 0;
   gap: 16px;
   flex-direction: column;
   justify-content: center;
