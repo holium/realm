@@ -475,6 +475,7 @@ export const SpacesStore = types
       const space = self.spaces.get(updatePayload.path);
       if (!space) return;
       self.spaces.set(updatePayload.path, spaceRowToModel(updatePayload));
+      if (space.path !== updatePayload.path) return;
       if (updatePayload.theme !== space.theme) {
         const updatedTheme = self.spaces.get(updatePayload.path)?.theme;
         if (updatedTheme) {
