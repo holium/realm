@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 
 import { useAppState } from 'renderer/stores/app.store';
@@ -11,15 +10,12 @@ const AppSearchPopoverPresenter = () => {
   const appInstaller = useAppInstaller();
   const { shellStore } = useAppState();
 
-  const coords = useMemo(
-    () => ({
-      left: appInstaller.coords.left,
-      top: shellStore.isFullscreen
-        ? appInstaller.coords.top
-        : appInstaller.coords.top + 30,
-    }),
-    [shellStore.isFullscreen, appInstaller.coords]
-  );
+  const coords = {
+    left: appInstaller.coords.left,
+    top: shellStore.isFullscreen
+      ? appInstaller.coords.top
+      : appInstaller.coords.top + 30,
+  };
 
   if (appInstaller.searchMode === 'none') return null;
 
