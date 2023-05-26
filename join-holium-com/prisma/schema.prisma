@@ -1,0 +1,34 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["jsonProtocol"]
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl         = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+  shadowDatabaseUrl = env("POSTGRES_URL_NON_POOLING") // used for migrations
+}
+
+model Space {
+  id           String        @id @default(cuid())
+  path         String
+  name         String
+  picture      String?
+  color        String
+  theme        String
+  description  String?
+  membersCount Int?          @map(name: "members_count")
+  createdAt    DateTime      @default(now()) @map(name: "created_at")
+  updatedAt    DateTime      @updatedAt @map(name: "updated_at")
+  SpaceInvite  SpaceInvite[]
+}
+
+model SpaceInvite {
+  id        String   @id @default(cuid())
+  from      String
+  spaceId   String   @map(name: "space_id")
+  space     Space    @relation(fields: [spaceId], references: [id])
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+}

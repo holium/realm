@@ -2880,6 +2880,23 @@
   resolved "https://registry.yarnpkg.com/@preconstruct/next/-/next-4.0.0.tgz#4d9c64ed68bb7cdc72d35d79d1dbe26ba2cae61e"
   integrity sha512-vSrc8wFQgBErU7dKTKSQtr/DLWPHcN9jMoiWOAQodB1+B4Kpqqry6QhGYoRm0DQU5gNL+Rcp+Xb350O1E/gjsg==
 
+"@prisma/client@^4.14.1":
+  version "4.14.1"
+  resolved "https://registry.yarnpkg.com/@prisma/client/-/client-4.14.1.tgz#61720f385f687f7e88de41fccade1ed62be57a54"
+  integrity sha512-TZIswkeX1ccsHG/eN2kICzg/csXll0osK3EHu1QKd8VJ3XLcXozbNELKkCNfsCUvKJAwPdDtFCzF+O+raIVldw==
+  dependencies:
+    "@prisma/engines-version" "4.14.0-67.d9a4c5988f480fa576d43970d5a23641aa77bc9c"
+
+"@prisma/engines-version@4.14.0-67.d9a4c5988f480fa576d43970d5a23641aa77bc9c":
+  version "4.14.0-67.d9a4c5988f480fa576d43970d5a23641aa77bc9c"
+  resolved "https://registry.yarnpkg.com/@prisma/engines-version/-/engines-version-4.14.0-67.d9a4c5988f480fa576d43970d5a23641aa77bc9c.tgz#0aeca447c4a5f23c83f68b8033e627b60bc01850"
+  integrity sha512-3jum8/YSudeSN0zGW5qkpz+wAN2V/NYCQ+BPjvHYDfWatLWlQkqy99toX0GysDeaUoBIJg1vaz2yKqiA3CFcQw==
+
+"@prisma/engines@4.14.1":
+  version "4.14.1"
+  resolved "https://registry.yarnpkg.com/@prisma/engines/-/engines-4.14.1.tgz#dac49f8d1f2d4f14a8ed7e6f96b24cd49bd6cd91"
+  integrity sha512-APqFddPVHYmWNKqc+5J5SqrLFfOghKOLZxobmguDUacxOwdEutLsbXPVhNnpFDmuQWQFbXmrTTPoRrrF6B1MWA==
+
 "@radix-ui/primitive@1.0.0":
   version "1.0.0"
   resolved "https://registry.npmjs.org/@radix-ui/primitive/-/primitive-1.0.0.tgz"
@@ -7887,6 +7904,14 @@ core-util-is@~1.0.0:
   version "1.0.3"
   resolved "https://registry.npmjs.org/core-util-is/-/core-util-is-1.0.3.tgz"
   integrity sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==
+
+cors@^2.8.5:
+  version "2.8.5"
+  resolved "https://registry.yarnpkg.com/cors/-/cors-2.8.5.tgz#eac11da51592dd86b9f06f6e7ac293b3df875d29"
+  integrity sha512-KIHbLJqu73RGr/hnbrO9uBeixNGuvSQjul/jdFvS/KFSIH1hWVd1ng7zOHx+YrEfInLG7q4n6GHQ9cDtxv/P6g==
+  dependencies:
+    object-assign "^4"
+    vary "^1"
 
 cosmiconfig@^6.0.0:
   version "6.0.0"
@@ -13416,6 +13441,13 @@ next@^13.4.1:
     "@next/swc-win32-ia32-msvc" "13.4.1"
     "@next/swc-win32-x64-msvc" "13.4.1"
 
+nextjs-cors@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/nextjs-cors/-/nextjs-cors-2.1.2.tgz#f2298e490617ee99dbcbe5901db8307a36c6fe50"
+  integrity sha512-2yOVivaaf2ILe4f/qY32hnj3oC77VCOsUQJQfhVMGsXE/YMEWUY2zy78sH9FKUCM7eG42/l3pDofIzMD781XGA==
+  dependencies:
+    cors "^2.8.5"
+
 nice-try@^1.0.4:
   version "1.0.5"
   resolved "https://registry.npmjs.org/nice-try/-/nice-try-1.0.5.tgz"
@@ -13670,7 +13702,7 @@ num2fraction@^1.2.2:
   resolved "https://registry.npmjs.org/num2fraction/-/num2fraction-1.2.2.tgz"
   integrity sha512-Y1wZESM7VUThYY+4W+X4ySH2maqcA+p7UR+w8VWNWVAd6lwuXXWz/w/Cz43J/dI2I+PS6wD5N+bJUF+gjWvIqg==
 
-object-assign@^4.0.1, object-assign@^4.1.1:
+object-assign@^4, object-assign@^4.0.1, object-assign@^4.1.1:
   version "4.1.1"
   resolved "https://registry.npmjs.org/object-assign/-/object-assign-4.1.1.tgz"
   integrity sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==
@@ -14717,6 +14749,13 @@ pretty-hrtime@^1.0.3:
   version "1.0.3"
   resolved "https://registry.npmjs.org/pretty-hrtime/-/pretty-hrtime-1.0.3.tgz"
   integrity sha512-66hKPCr+72mlfiSjlEB1+45IjXSqvVAIy6mocupoww4tBFE9R9IhwwUGoI4G++Tc9Aq+2rxOt0RFU6gPcrte0A==
+
+prisma@^4.14.1:
+  version "4.14.1"
+  resolved "https://registry.yarnpkg.com/prisma/-/prisma-4.14.1.tgz#7a6bb4ce847a9d08deabb6acdf3116fff15e1316"
+  integrity sha512-z6hxzTMYqT9SIKlzD08dhzsLUpxjFKKsLpp5/kBDnSqiOjtUyyl/dC5tzxLcOa3jkEHQ8+RpB/fE3w8bgNP51g==
+  dependencies:
+    "@prisma/engines" "4.14.1"
 
 process-nextick-args@~2.0.0:
   version "2.0.1"
@@ -17851,7 +17890,7 @@ validate-npm-package-license@^3.0.1:
     spdx-correct "^3.0.0"
     spdx-expression-parse "^3.0.0"
 
-vary@~1.1.2:
+vary@^1, vary@~1.1.2:
   version "1.1.2"
   resolved "https://registry.npmjs.org/vary/-/vary-1.1.2.tgz"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==

@@ -18,6 +18,7 @@ export const genCSSVariables = (theme: ThemeType) => {
     dock color used in random places but not in the dock - ok
   */
 
+  const backgroundImage = theme.wallpaper;
   const themeMode = theme.mode;
   const isLight = themeMode === 'light';
   const homeButtonColor = isLight
@@ -72,6 +73,7 @@ export const genCSSVariables = (theme: ThemeType) => {
 
   return `
     :root {
+      --background-image: url(${backgroundImage});
       --theme-mode: ${themeMode};
       --rlm-font: 'Rubik', sans-serif;
       --blur: blur(24px);

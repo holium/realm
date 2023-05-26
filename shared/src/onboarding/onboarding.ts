@@ -41,6 +41,7 @@ export { PaymentDialog } from './dialogs/Payment/PaymentDialog';
 export { ServerSelfHostingDialogBody } from './dialogs/ServerSelfHosting/ServerSelfHostingDialogBody';
 export { SomethingWentWrongDialog } from './dialogs/SomethingWentWrong/SomethingWentWrongDialog';
 export { VerifyEmailDialog } from './dialogs/VerifyEmail/VerifyEmailDialog';
+export { http } from './services/http';
 export { OnboardingStorage } from './services/OnboardingStorage';
 export { ThirdEarthApi } from './services/ThirdEarthApi';
 export { UserContextProvider, useUser } from './services/UserContext';

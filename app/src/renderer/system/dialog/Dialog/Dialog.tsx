@@ -1,13 +1,4 @@
-import {
-  FC,
-  ReactNode,
-  RefObject,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import styled from 'styled-components';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button, Flex, Icon, Spinner } from '@holium/design-system';
 
@@ -15,32 +6,13 @@ import { useAppState } from 'renderer/stores/app.store';
 import { AppWindowMobxType } from 'renderer/stores/models/window.model';
 import { DialogConfig, dialogRenderers } from 'renderer/system/dialog/dialogs';
 
-export interface DialogViewProps {
-  appWindow: AppWindowMobxType;
-}
+import { DialogViewContainer } from './Dialog.styles';
 
-type ViewProps = {
-  ref: RefObject<HTMLDivElement>;
-  hasTitleBar?: boolean;
-  children?: ReactNode;
+type Props = {
+  appWindow: AppWindowMobxType;
 };
 
-const View = styled.div<ViewProps>`
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  width: inherit;
-  height: inherit;
-  padding: 24px 24px;
-  background: rgba(var(--rlm-window-rgba), 0.9);
-  backdrop-filter: blur(24px);
-`;
-
-export const DialogView = ({ appWindow }: DialogViewProps) => {
+export const DialogView = ({ appWindow }: Props) => {
   const { shellStore } = useAppState();
   const elementRef = useRef(null);
 
@@ -82,7 +54,7 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
   }, [isValidated, workflowState]);
 
   return (
-    <View ref={elementRef}>
+    <DialogViewContainer innerRef={elementRef}>
       <Flex
         flex={1}
         flexDirection="column"
@@ -151,6 +123,6 @@ export const DialogView = ({ appWindow }: DialogViewProps) => {
           </Flex>
         )}
       </Flex>
-    </View>
+    </DialogViewContainer>
   );
 };

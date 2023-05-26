@@ -17,6 +17,7 @@ import path from 'path';
 import { RealmService } from '../os/realm.service';
 import { AppUpdater } from './AppUpdater';
 import { BrowserHelper } from './helpers/browser';
+import { DeepLinkHelper } from './helpers/deepLink';
 import { DevHelper } from './helpers/dev';
 import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
 import { FullScreenHelper } from './helpers/fullscreen';
@@ -107,6 +108,9 @@ const createWindow = async () => {
   // Realm.start(mainWindow);
   // ---------------------------------------------------------------------
 
+  // console.log('second-instance');
+  // log.info('second-instance', spacePath);
+
   FullScreenHelper.registerListeners(mainWindow);
   WebViewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
@@ -114,6 +118,7 @@ const createWindow = async () => {
   BrowserHelper.registerListeners(mainWindow);
   PowerHelper.registerListeners(mainWindow);
   KeyHelper.registerListeners(mainWindow);
+  DeepLinkHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
