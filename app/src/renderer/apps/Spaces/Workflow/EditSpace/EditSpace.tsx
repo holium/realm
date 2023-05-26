@@ -28,6 +28,7 @@ const EditSpacePresenter = ({ edit, workflowState, setState }: Props) => {
     access: (existingSpace?.access as AccessOptionType) || 'public',
     crestOption: existingSpace?.picture ? 'image' : 'color',
     theme: toJS(existingSpace?.theme),
+    joinLink: existingSpace?.joinLink || '',
   };
 
   const updateState = (state: Partial<SpaceWorkFlowState>) => {
@@ -46,6 +47,7 @@ const EditSpacePresenter = ({ edit, workflowState, setState }: Props) => {
       initialColor={initialValues.color}
       initialImage={initialValues.picture}
       initialAccessOption={initialValues.access}
+      initialLink={initialValues.joinLink}
       updateState={updateState}
     />
   );

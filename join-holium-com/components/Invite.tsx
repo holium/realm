@@ -18,7 +18,8 @@ type Props = {
 export const Invite = ({ invite }: Props) => (
   <div>
     <h2>Invite to{invite.space.name}</h2>
-    <small>ID: {invite.id}</small>
-    <small>From: {invite.from}</small>
+    <p>ID: {invite.id}</p>
+    <p>Members: {invite.space.membersCount}</p>
+    <p>From: {invite.from}</p>
   </div>
 );

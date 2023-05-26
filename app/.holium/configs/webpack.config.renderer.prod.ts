@@ -110,6 +110,7 @@ const configuration: webpack.Configuration = {
       AMPLITUDE_API_KEY: 'd6d123a2a660806abcc6b1845c475f2f',
       AMPLITUDE_API_KEY_DEV: '68e00eca14dda372e15a8aadaa0b37ac',
       API_URL: 'https://backend-server.third.earth',
+      JOIN_API_URL: 'https://join.holium.com',
       API_HEADERS_CLIENT_ID: '5',
       API_HEADERS_VERSION: '2',
       STRIPE_KEY:

@@ -139,6 +139,7 @@ const configuration: webpack.Configuration = {
       PLAYGROUND_PORT: playgroundPort,
       USE_LOCAL_WALLET_API: useLocalWalletAPI,
       API_URL: 'https://backend-server-test.thirdearth.com',
+      JOIN_API_URL: 'http://localhost:3000',
       API_HEADERS_CLIENT_ID: '5',
       API_HEADERS_VERSION: '2',
       STRIPE_KEY:

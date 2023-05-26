@@ -14,6 +14,7 @@ export type SpaceWorkFlowState = {
   picture: string;
   crestOption: CrestOptionType;
   access: AccessOptionType;
+  joinLink: string;
   theme: ThemeType;
   archetype?: string;
   archetypeTitle?: string;

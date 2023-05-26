@@ -19,6 +19,7 @@ export const Demo: ComponentStory<typeof EditSpaceBody> = () => {
         initialDescription="This is my space"
         initialColor="#000000"
         initialImage=""
+        initialLink=""
         initialAccessOption="public"
         updateState={action('updateState')}
       />

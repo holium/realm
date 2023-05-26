@@ -13,6 +13,7 @@ datasource db {
 model Space {
   id           String        @id @default(cuid())
   name         String
+  picture      String?
   theme        String
   description  String?
   membersCount Int?          @map(name: "members_count")

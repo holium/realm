@@ -111,6 +111,7 @@ export const spacesDialogs: DialogRenderers = {
         picture: createForm.picture,
         color: createForm.color,
         theme: createForm.theme,
+        joinLink: createForm.joinLink,
       };
 
       shipStore.spacesStore.updateSpace(state.path, payload as any).then(() => {
@@ -143,7 +144,7 @@ export const spacesDialogs: DialogRenderers = {
           x: 0,
           y: 0,
           width: 550,
-          height: 570,
+          height: 685,
         },
         desktopDimensions
       ),

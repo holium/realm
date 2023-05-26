@@ -7,6 +7,7 @@ import { useToggle } from '@holium/design-system/util';
 import { Crest, isImgUrl } from 'renderer/components/Crest';
 
 import { EditSpaceColor } from './EditSpaceColor';
+import { JoinLink } from './JoinLink';
 import { spaceForm } from './spaceForm';
 import {
   accessOptions,
@@ -21,6 +22,7 @@ type Props = {
   initialColor: string;
   initialImage: string;
   initialAccessOption: AccessOptionType;
+  initialLink: string;
   isGroupSpace: boolean;
   updateState: (state: Partial<SpaceWorkFlowState>) => void;
 };
@@ -32,6 +34,7 @@ export const EditSpaceBody = ({
   initialImage,
   initialAccessOption,
   isGroupSpace,
+  initialLink,
   updateState,
 }: Props) => {
   const invalidImg = useToggle(false);
@@ -90,8 +93,8 @@ export const EditSpaceBody = ({
   });
 
   return (
-    <Flex col width="100%">
-      <Text.Custom fontSize={5} lineHeight="24px" fontWeight={500} mb={16}>
+    <Flex col width="100%" minHeight="100%" gap={16} overflow="auto">
+      <Text.Custom fontSize={5} lineHeight="24px" fontWeight={500}>
         Edit details
       </Text.Custom>
       <Flex col width="100%" gap={16} justify="flex-start">
@@ -224,6 +227,17 @@ export const EditSpaceBody = ({
               onClick={onClickAccessOption}
             />
           </Flex>
+          {initialName && initialName.length > 0 && (
+            <Flex col>
+              <Text.Label mb={1} fontWeight={500}>
+                Join link
+              </Text.Label>
+              <JoinLink
+                initialLink={initialLink}
+                onGenerateLink={(joinLink) => updateState({ joinLink })}
+              />
+            </Flex>
+          )}
         </Flex>
       </Flex>
     </Flex>

@@ -81,6 +81,7 @@ export const SpaceModel = types
     stall: StallModel,
     dock: types.array(UrbitApp),
     bookmarks: types.array(BookmarkModel),
+    joinLink: types.optional(types.string, ''),
   })
   .views((self) => ({
     isPinned(appId: string) {
@@ -330,9 +331,18 @@ export const SpacesStore = types
       updatedSpace.description = space.description;
       updatedSpace.name = space.name;
       updatedSpace.theme = space.theme;
+      updatedSpace.joinLink = space.joinLink;
       try {
+        console.log(
+          'updating space',
+          spacePath,
+          JSON.stringify(space, null, 2)
+        );
         self.spaces.set(spacePath, updatedSpace);
-        yield SpacesIPC.updateSpace(spacePath, space);
+        // TODO add agent support for joinLink.
+        // eslint-disable-next-line unused-imports/no-unused-vars
+        const { joinLink, ...pokePayload } = space;
+        yield SpacesIPC.updateSpace(spacePath, pokePayload);
       } catch (e) {
         self.spaces.set(spacePath, oldSpace);
         console.error(e);
