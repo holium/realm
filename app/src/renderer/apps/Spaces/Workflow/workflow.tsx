@@ -112,7 +112,6 @@ export const spacesDialogs: DialogRenderers = {
         color: createForm.color,
         theme: createForm.theme,
         path: createForm.path,
-        joinLink: createForm.joinLink,
         archetype: createForm.archetype,
       };
 

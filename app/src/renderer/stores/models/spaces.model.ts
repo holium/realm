@@ -82,7 +82,6 @@ export const SpaceModel = types
     stall: StallModel,
     dock: types.array(UrbitApp),
     bookmarks: types.array(BookmarkModel),
-    joinLink: types.optional(types.string, ''),
   })
   .views((self) => ({
     isPinned(appId: string) {
@@ -322,7 +321,10 @@ export const SpacesStore = types
       }
     }),
     updateSpace: flow(function* (
-      spacePayload: Omit<SpaceWorkFlowState, 'type' | 'crestOption'> & {
+      spacePayload: Omit<
+        SpaceWorkFlowState,
+        'type' | 'crestOption' | 'joinLink'
+      > & {
         archetype: string;
       }
     ) {
@@ -339,13 +341,10 @@ export const SpacesStore = types
       updatedSpace.description = spacePayload.description;
       updatedSpace.name = spacePayload.name;
       updatedSpace.theme = spacePayload.theme;
-      updatedSpace.joinLink = spacePayload.joinLink;
 
       try {
         self.spaces.set(spacePath, updatedSpace);
-        // TODO: store joinLink in agent too.
-        const { joinLink: _, ...spacePayloadWithoutJoinLink } = spacePayload;
-        yield SpacesIPC.updateSpace(spacePath, spacePayloadWithoutJoinLink);
+        yield SpacesIPC.updateSpace(spacePath, spacePayload);
       } catch (e) {
         self.spaces.set(spacePath, oldSpace);
         console.error(e);

@@ -29,6 +29,16 @@ class JoinApi {
     });
   }
 
+  getJoinLinkForSpace(spacePath: string) {
+    return http<CreateSpaceInviteResponse>(
+      `${this.apiBaseUrl}/api/invite?spacePath=${spacePath}`,
+      {
+        method: 'GET',
+        headers: this.getHeaders(),
+      }
+    );
+  }
+
   deleteAllSpaceInvites(payload: DeleteAllSpaceInvitesPayload) {
     return http<void>(`${this.apiBaseUrl}/api/invite`, {
       method: 'DELETE',

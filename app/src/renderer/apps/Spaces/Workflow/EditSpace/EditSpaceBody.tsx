@@ -1,6 +1,12 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 
-import { Button, Flex, Icon, Text } from '@holium/design-system/general';
+import {
+  Button,
+  Flex,
+  Icon,
+  Spinner,
+  Text,
+} from '@holium/design-system/general';
 import { RadioGroup, RadioList, TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
 import { CreateSpaceInvitePayload } from '@holium/shared';
@@ -8,6 +14,7 @@ import { CreateSpaceInvitePayload } from '@holium/shared';
 import { Crest, isImgUrl } from 'renderer/components/Crest';
 
 import { EditSpaceColor } from './EditSpaceColor';
+import { joinApi } from './JoinApi';
 import { JoinLink } from './JoinLink';
 import { spaceForm } from './spaceForm';
 import {
@@ -23,7 +30,6 @@ type Props = {
   initialColor: string;
   initialImage: string;
   initialAccessOption: AccessOptionType;
-  initialLink: string;
   isGroupSpace: boolean;
   joinLinkPayload?: CreateSpaceInvitePayload;
   updateState: (state: Partial<SpaceWorkFlowState>) => void;
@@ -36,11 +42,13 @@ export const EditSpaceBody = ({
   initialImage,
   initialAccessOption,
   isGroupSpace,
-  initialLink,
   joinLinkPayload,
   updateState,
 }: Props) => {
   const invalidImg = useToggle(false);
+
+  const fetching = useToggle(false);
+  const [initialLink, setInitialLink] = useState<string>();
 
   const [color, setColor] = useState(initialColor.replace('#', ''));
   const [image, setImage] = useState(initialImage);
@@ -48,6 +56,20 @@ export const EditSpaceBody = ({
   const [crestOption, setCrestOption] = useState<CrestOptionType>(
     initialImage ? 'image' : 'color'
   );
+
+  useEffect(() => {
+    if (joinLinkPayload?.space.path && initialLink === undefined) {
+      fetching.toggleOn();
+      joinApi
+        .getJoinLinkForSpace(joinLinkPayload.space.path)
+        .then(({ inviteUrl }) => setInitialLink(inviteUrl))
+        .catch((e) => {
+          setInitialLink('');
+          console.error(e);
+        })
+        .finally(fetching.toggleOff);
+    }
+  }, [joinLinkPayload]);
 
   const onClickColorOrImage = (newCrestOption: CrestOptionType) => {
     setCrestOption(newCrestOption);
@@ -230,16 +252,18 @@ export const EditSpaceBody = ({
               onClick={onClickAccessOption}
             />
           </Flex>
-          {joinLinkPayload && (
-            <Flex col>
-              <Text.Label mb={1} fontWeight={500}>
-                Join link
-              </Text.Label>
-              <JoinLink
-                payload={joinLinkPayload}
-                initialLink={initialLink}
-                onGenerateLink={(joinLink) => updateState({ joinLink })}
-              />
+          {joinLinkPayload?.space.path && (
+            <Flex col gap="4px">
+              <Text.Label fontWeight={500}>Join link</Text.Label>
+              {fetching.isOn ? (
+                <Spinner size={1} />
+              ) : (
+                <JoinLink
+                  payload={joinLinkPayload}
+                  initialLink={initialLink}
+                  onGenerateLink={(joinLink) => updateState({ joinLink })}
+                />
+              )}
             </Flex>
           )}
         </Flex>

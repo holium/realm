@@ -59,7 +59,11 @@ export const JoinLink = ({ payload, initialLink, onGenerateLink }: Props) => {
         External link to onboard members into your space.
       </Text.Body>
       <Flex width="100%" align="center" gap="10px" height="34px">
-        <Toggle disabled={loading.isOn} onChange={onChangeToggle} />
+        <Toggle
+          initialChecked={Boolean(initialLink)}
+          disabled={loading.isOn}
+          onChange={onChangeToggle}
+        />
         {loading.isOn && <Spinner size={0} />}
         {link && link?.length > 0 && (
           <TextInput

@@ -19,20 +19,28 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   });
 
-  // GET /api/invite/:id
+  // GET /api/invite?spacePath=spacePath
   if (req.method === 'GET') {
-    const inviteId = req.query.id as string;
+    const spacePath = req.query.spacePath as string;
 
-    const invite = await prisma.spaceInvite.findUnique({
+    const invite = await prisma.spaceInvite.findFirst({
       where: {
-        id: inviteId,
+        space: {
+          path: spacePath,
+        },
       },
     });
 
     if (!invite) {
       return res.status(404).json({ message: 'Invite not found' });
     } else {
-      return res.status(200).json(invite);
+      const inviteUrl = `https://join.holium.com/${invite.id}`;
+
+      const response: CreateSpaceInviteResponse = {
+        inviteUrl,
+      };
+
+      return res.status(200).json(response);
     }
   } else if (req.method === 'POST') {
     // Create the invite and corresponding space.

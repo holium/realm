@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 
-import { getSpacePath } from 'os/lib/text';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
@@ -31,7 +30,6 @@ const EditSpacePresenter = ({ edit, workflowState, setState }: Props) => {
     access: (existingSpace?.access as AccessOptionType) || 'public',
     crestOption: existingSpace?.picture ? 'image' : 'color',
     theme: toJS(existingSpace?.theme),
-    joinLink: existingSpace?.joinLink || '',
   };
 
   const updateState = (state: Partial<SpaceWorkFlowState>) => {
@@ -50,22 +48,18 @@ const EditSpacePresenter = ({ edit, workflowState, setState }: Props) => {
       initialColor={initialValues.color}
       initialImage={initialValues.picture}
       initialAccessOption={initialValues.access}
-      initialLink={initialValues.joinLink}
       joinLinkPayload={
-        existingSpace
+        existingSpace?.path
           ? {
               from: loggedInAccount?.serverId ?? '',
               space: {
-                path: getSpacePath(
-                  loggedInAccount?.serverId ?? '',
-                  workflowState.name
-                ),
+                path: existingSpace?.path,
                 name: workflowState.name,
                 picture: workflowState.picture,
                 color: workflowState.color,
                 description: workflowState.description,
                 theme: JSON.stringify(workflowState.theme),
-                membersCount: existingSpace?.members.list.length ?? 0,
+                membersCount: existingSpace.members.list.length ?? 0,
               },
             }
           : undefined
