@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 import { Button, Flex, Icon, Text } from '@holium/design-system/general';
 
-const InviteCardContainer = styled(Flex)`
+export const InviteCardContainer = styled(Flex)`
   width: 100%;
   max-width: 377px;
   flex-direction: column;
