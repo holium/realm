@@ -12,21 +12,29 @@ type Props = {
 };
 
 export const JoinLink = ({ initialLink, onGenerateLink }: Props) => {
-  const generating = useToggle(false);
+  const loading = useToggle(false);
   const [link, setLink] = useState<string | null>(initialLink ?? null);
 
   const onChangeToggle = async (checked: boolean) => {
     if (!checked) {
       setLink(null);
+
+      loading.toggleOn();
+
+      await joinApi.deleteAllSpaceInvites({ path: 'test' });
+
+      loading.toggleOff();
+
       return;
     }
 
-    generating.toggleOn();
+    loading.toggleOn();
 
     try {
       const createSpaceInviteResponse = await joinApi.createSpaceInvite({
         from: '~lopsyp-doztun',
         space: {
+          path: '~test',
           name: 'test',
           description: 'test',
           membersCount: 777,
@@ -40,7 +48,7 @@ export const JoinLink = ({ initialLink, onGenerateLink }: Props) => {
     } catch (error) {
       console.error(error);
     } finally {
-      generating.toggleOff();
+      loading.toggleOff();
     }
   };
 
@@ -50,8 +58,8 @@ export const JoinLink = ({ initialLink, onGenerateLink }: Props) => {
         External link to onboard members into your space.
       </Text.Body>
       <Flex width="100%" align="center" gap="10px" height="34px">
-        <Toggle disabled={generating.isOn} onChange={onChangeToggle} />
-        {generating.isOn && <Spinner size={0} />}
+        <Toggle disabled={loading.isOn} onChange={onChangeToggle} />
+        {loading.isOn && <Spinner size={0} />}
         {link && link?.length > 0 && (
           <TextInput
             id="invite-link"

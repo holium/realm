@@ -158,4 +158,4 @@ export const DownloadDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-DownloadDialogStory.storyName = '7. Download Realm for Desktop';
+DownloadDialogStory.storyName = '7. Download Realm for desktop';

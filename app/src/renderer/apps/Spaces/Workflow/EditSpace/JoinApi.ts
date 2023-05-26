@@ -1,6 +1,7 @@
 import {
   CreateSpaceInvitePayload,
   CreateSpaceInviteResponse,
+  DeleteAllSpaceInvitesPayload,
   http,
 } from '@holium/shared';
 
@@ -14,7 +15,6 @@ class JoinApi {
   private getHeaders() {
     const defaultHeaders = {
       'Content-Type': 'application/json',
-      // Access-Control-Allow-Origin
       'Access-Control-Allow-Origin': '*',
     };
 
@@ -24,6 +24,14 @@ class JoinApi {
   createSpaceInvite(payload: CreateSpaceInvitePayload) {
     return http<CreateSpaceInviteResponse>(`${this.apiBaseUrl}/api/invite`, {
       method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(payload),
+    });
+  }
+
+  deleteAllSpaceInvites(payload: DeleteAllSpaceInvitesPayload) {
+    return http<void>(`${this.apiBaseUrl}/api/invite`, {
+      method: 'DELETE',
       headers: this.getHeaders(),
       body: JSON.stringify(payload),
     });

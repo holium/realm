@@ -56,14 +56,20 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       inviteUrl,
     };
 
-    // Set 'Access-Control-Allow-Origin': '*' header.
-
-    return res
-      .status(200)
-      .setHeader('Access-Control-Allow-Origin', '*')
-      .json(response);
+    return res.status(200).json(response);
   } else if (req.method === 'DELETE') {
     // Delete the invite.
+    const path = req.body.path as string;
+
+    await prisma.spaceInvite.deleteMany({
+      where: {
+        space: {
+          path,
+        },
+      },
+    });
+
+    return res.status(200).json({ message: 'Invites deleted' });
   } else {
     res.status(405).json({ message: 'Method not allowed' });
   }
