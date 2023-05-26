@@ -135,6 +135,12 @@ const appPreload = {
       }
     );
   },
+  /* Deeplink listeners */
+  onJoinSpace(callback: (spacePath: string) => void) {
+    ipcRenderer.on('join-space', (_, spacePath: string) => {
+      callback(spacePath);
+    });
+  },
   /* Removers */
   removeOnKeyDown() {
     ipcRenderer.removeAllListeners('key-down');
@@ -150,6 +156,9 @@ const appPreload = {
   },
   removeOnMouseMove() {
     ipcRenderer.removeAllListeners('mouse-move');
+  },
+  removeOnJoinSpace() {
+    ipcRenderer.removeAllListeners('join-space');
   },
 };
 

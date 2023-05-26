@@ -20,7 +20,8 @@ import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
 const HostingPresenter = () => {
   const { goToPage, logout } = useNavigation();
-  const { token, email, ships, selectedPatp, setSelectedPatp } = useUser();
+  const { token, email, ships, selectedIdentity, setSelectedIdentity } =
+    useUser();
 
   const changeEmailModal = useToggle(false);
   const verifyEmailModal = useToggle(false);
@@ -30,8 +31,8 @@ const HostingPresenter = () => {
   const ejectIdModal = useToggle(false);
 
   const selectedShip = useMemo(
-    () => ships.find((ship) => ship.patp === selectedPatp),
-    [ships, selectedPatp]
+    () => ships.find((ship) => ship.patp === selectedIdentity),
+    [ships, selectedIdentity]
   );
 
   const onClickSidebarSection = (section: string) => {
@@ -158,7 +159,7 @@ const HostingPresenter = () => {
     return false;
   };
 
-  const onClickBuyServer = () => {
+  const onClickBuyIdentity = () => {
     goToPage(accountPageUrl['Get Hosting'], {
       back_url: accountPageUrl['Hosting'],
     });
@@ -198,14 +199,14 @@ const HostingPresenter = () => {
         onSubmit={onSubmitEjectId}
       />
       <AccountHostingDialog
-        patps={ships.map((ship) => ship.patp)}
-        selectedPatp={selectedPatp}
+        identities={ships.map((ship) => ship.patp)}
+        selectedIdentity={selectedIdentity}
         email={email}
         serverUrl={selectedShip?.link}
         serverCode={selectedShip?.code}
         serverMaintenanceWindow={selectedShip?.maintenance_window}
-        onClickBuyServer={onClickBuyServer}
-        setSelectedPatp={setSelectedPatp}
+        onClickBuyIdentity={onClickBuyIdentity}
+        setSelectedIdentity={setSelectedIdentity}
         onClickChangeEmail={changeEmailModal.toggleOn}
         onClickChangePassword={changePasswordModal.toggleOn}
         onClickManageBilling={onClickManageBilling}

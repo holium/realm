@@ -157,7 +157,7 @@ const AppTilePresenter = ({
   }, [app.color]);
 
   const textColor = useMemo(
-    () => (isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8)),
+    () => (isLight ? rgba('#000000', 0.8) : rgba('#FFFFFF', 0.8)),
     [isLight]
   );
   const contextMenuColors = useMemo(
