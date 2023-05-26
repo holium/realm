@@ -108,6 +108,9 @@ const createWindow = async () => {
   // Realm.start(mainWindow);
   // ---------------------------------------------------------------------
 
+  // console.log('second-instance');
+  // log.info('second-instance', spacePath);
+
   FullScreenHelper.registerListeners(mainWindow);
   WebViewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
@@ -115,7 +118,7 @@ const createWindow = async () => {
   BrowserHelper.registerListeners(mainWindow);
   PowerHelper.registerListeners(mainWindow);
   KeyHelper.registerListeners(mainWindow);
-  DeepLinkHelper.registerListeners(app, mainWindow);
+  DeepLinkHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 

@@ -284,6 +284,7 @@ export const SpacesStore = types
       self.join.set('loading');
       try {
         const space = yield SpacesIPC.joinSpace(spacePath);
+        console.log('joined space', space);
         const host = spacePath.split('/')[1];
         shipStore.roomsStore.setProvider(host);
         self.join.set('loaded');

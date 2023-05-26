@@ -51,7 +51,9 @@ export const InviteCard = ({ invite }: Props) => {
   const onClickJoin = () => {
     joining.toggleOn();
     // Open alert that tries to open deeplink to realm.
-    window.location.href = `realm://join-${invite.space.path}}`;
+    const base = 'realm://';
+    const param = `join-${invite.space.path}`;
+    window.location.href = `${base}${param}`;
 
     setTimeout(() => {
       joining.toggleOff();

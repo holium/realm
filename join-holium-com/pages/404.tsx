@@ -17,7 +17,9 @@ const FourOhFourPage = () => {
     >
       <GlobalStyle theme={defaultTheme} />
       <InviteCardContainer>
-        <Text.H1 style={{ fontSize: '24px' }}>Invite not found</Text.H1>
+        <Text.H1 style={{ fontSize: '24px', fontWeight: 500 }}>
+          Invite not found
+        </Text.H1>
         <Link href="https://holium.com">
           <Button.Primary
             height="40px"
