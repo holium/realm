@@ -1,7 +1,11 @@
 import { Space, SpaceInvite } from '@prisma/client';
 import { GetStaticProps } from 'next';
 
-import { Invite } from '../components/Invite';
+import { Flex } from '@holium/design-system/general';
+import { ThemeType } from '@holium/shared';
+
+import { InviteCard } from '../components/InviteCard';
+import { GlobalStyle } from '../lib/globalStyle';
 import prisma from '../lib/prisma';
 
 export const getServerSideProps: GetStaticProps = async ({ params }) => {
@@ -34,15 +38,19 @@ type Props = {
 };
 
 const InvitePage = ({ invite }: Props) => {
+  const theme: ThemeType = JSON.parse(invite.space.theme);
+
   return (
-    <div>
-      <h1>Invite</h1>
-      <main>
-        <div key={invite.id}>
-          <Invite invite={invite} />
-        </div>
-      </main>
-    </div>
+    <Flex
+      width="100%"
+      height="100vh"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <GlobalStyle theme={theme} />
+      <InviteCard invite={invite} />
+    </Flex>
   );
 };
 
