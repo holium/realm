@@ -5,7 +5,7 @@ import { Flex } from '@holium/design-system/general';
 import { ThemeType } from '@holium/shared';
 
 import { InviteCard } from '../components/InviteCard';
-import { GlobalStyle } from '../lib/globalStyle';
+import { GlobalStyle } from '../lib/GlobalStyle';
 import prisma from '../lib/prisma';
 
 export const getServerSideProps: GetStaticProps = async ({ params }) => {
