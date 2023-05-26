@@ -2,30 +2,33 @@ import { Button, Flex, Icon } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
 
-import { AccountDialogTableRow } from '../../components/AccountDialogTableRow';
+import { AccountDialogTableRow } from '../AccountDialogTableRow';
 
 type Props = {
-  s3Password: string;
+  storagePassword: string;
 };
 
-export const S3Password = ({ s3Password }: Props) => {
-  const showS3Password = useToggle(false);
+export const StoragePassword = ({ storagePassword }: Props) => {
+  const showStoragePassword = useToggle(false);
 
   return (
-    <AccountDialogTableRow title="S3 Password">
+    <AccountDialogTableRow title="Storage Password">
       <Flex flex={1}>
         <TextInput
           height="38px"
           id="hosting-access-code"
           name="hosting-access-code"
-          value={s3Password}
+          value={storagePassword}
           width="100%"
           readOnly={true}
-          type={showS3Password.isOn ? 'text' : 'password'}
+          type={showStoragePassword.isOn ? 'text' : 'password'}
           rightAdornment={
-            <Button.IconButton type="button" onClick={showS3Password.toggle}>
+            <Button.IconButton
+              type="button"
+              onClick={showStoragePassword.toggle}
+            >
               <Icon
-                name={showS3Password.isOn ? 'EyeOff' : 'EyeOn'}
+                name={showStoragePassword.isOn ? 'EyeOff' : 'EyeOn'}
                 opacity={0.5}
                 size={18}
               />

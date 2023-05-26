@@ -70,7 +70,7 @@ export default function Booting() {
   }, [booting, pollShipStatus]);
 
   return (
-    <Page title="Booting your personal server" isProtected>
+    <Page title="Booting your identity" isProtected>
       <BootingDialog logs={logs} isBooting={booting.isOn} onNext={onNext} />
     </Page>
   );

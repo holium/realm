@@ -6,8 +6,7 @@ import {
   AccountCustomDomainDialog,
   AccountDownloadRealmDialog,
   AccountHostingDialog,
-  AccountS3StorageDialog,
-  AccountStatisticsDialog,
+  AccountStorageDialog,
   ForgotPassword,
   LoginDialog,
   OnboardDialogDescription,
@@ -40,10 +39,10 @@ export const AccountHostingDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <AccountHostingDialog
-      patps={['~pasren-satmex']}
-      selectedPatp="~pasren-satmex"
-      setSelectedPatp={() => {}}
-      onClickBuyServer={() => {}}
+      identities={['~pasren-satmex']}
+      selectedIdentity="~pasren-satmex"
+      setSelectedIdentity={() => {}}
+      onClickBuyIdentity={() => {}}
       email="rubberducky12@protonmail.com"
       serverUrl="https://pasren-satmex.holium.network/"
       serverCode="tolnym-rilmug-ricnep-marlyx"
@@ -62,18 +61,18 @@ export const AccountHostingDialogStory: ComponentStory<
 
 AccountHostingDialogStory.storyName = '2. Hosting';
 
-export const AccountS3StorageDialogStory: ComponentStory<
-  typeof AccountS3StorageDialog
+export const AccountStorageDialogStory: ComponentStory<
+  typeof AccountStorageDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <AccountS3StorageDialog
-      patps={['~pasren-satmex']}
-      selectedPatp="~pasren-satmex"
-      setSelectedPatp={() => {}}
-      onClickBuyServer={() => {}}
-      url="https://console.s31.holium.network"
-      s3Bucket="pasren-satmex"
-      s3Password="1234567890"
+    <AccountStorageDialog
+      identities={['~pasren-satmex']}
+      selectedIdentity="~pasren-satmex"
+      setSelectedIdentity={() => {}}
+      onClickBuyIdentity={() => {}}
+      storageUrl="https://console.s31.holium.network"
+      storageBucket="pasren-satmex"
+      storagePassword="1234567890"
       dataStorage={{ used: 800, total: 2000 }}
       dataSent={{
         networkUsage: 20,
@@ -85,56 +84,39 @@ export const AccountS3StorageDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-AccountS3StorageDialogStory.storyName = '3. S3 Storage';
-
-export const AccountStatisticsDialogStory: ComponentStory<
-  typeof AccountStatisticsDialog
-> = () => (
-  <OnboardingDialogWrapper>
-    <AccountStatisticsDialog
-      patps={['~pasren-satmex']}
-      selectedPatp="~pasren-satmex"
-      setSelectedPatp={() => {}}
-      onClickBuyServer={() => {}}
-      onClickSidebarSection={() => {}}
-      onExit={() => {}}
-    />
-  </OnboardingDialogWrapper>
-);
-
-AccountStatisticsDialogStory.storyName = '4. Statistics';
+AccountStorageDialogStory.storyName = '3. Storage';
 
 export const AccountCustomDomainDialogStory: ComponentStory<
   typeof AccountCustomDomainDialog
 > = () => (
   <OnboardingDialogWrapper>
     <AccountCustomDomainDialog
-      patps={['~pasren-satmex']}
-      selectedPatp="~pasren-satmex"
+      identities={['~pasren-satmex']}
+      selectedIdentity="~pasren-satmex"
       dropletIp="123.123.123.123"
       domain="holium.network"
       submitting={false}
       onChangeDomain={() => {}}
       onSubmit={() => Promise.resolve()}
-      setSelectedPatp={() => {}}
-      onClickBuyServer={() => {}}
+      setSelectedIdentity={() => {}}
+      onClickBuyIdentity={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />
   </OnboardingDialogWrapper>
 );
 
-AccountCustomDomainDialogStory.storyName = '5. Custom Domain';
+AccountCustomDomainDialogStory.storyName = '4. Custom Domain';
 
 export const AccountDownloadRealmDialogStory: ComponentStory<
   typeof AccountDownloadRealmDialog
 > = () => (
   <OnboardingDialogWrapper>
     <AccountDownloadRealmDialog
-      patps={['~pasren-satmex']}
-      selectedPatp="~pasren-satmex"
-      setSelectedPatp={() => {}}
-      onClickBuyServer={() => {}}
+      identities={['~pasren-satmex']}
+      selectedIdentity="~pasren-satmex"
+      setSelectedIdentity={() => {}}
+      onClickBuyIdentity={() => {}}
       onClickSidebarSection={() => {}}
       onDownloadMacM1={() => {}}
       onDownloadMacIntel={() => {}}
@@ -145,4 +127,4 @@ export const AccountDownloadRealmDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-AccountDownloadRealmDialogStory.storyName = '6. Download Realm';
+AccountDownloadRealmDialogStory.storyName = '5. Download Realm';

@@ -36,26 +36,20 @@ export const CredentialsDialogBody = ({ credentials }: Props) => (
   <Flex flexDirection="column" gap={16}>
     <OnboardDialogTitle>Credentials</OnboardDialogTitle>
     <OnboardDialogDescription>
-      Save this information in case you want to connect to your personal server
-      from any other browser or device.
+      Save this information in case you want to use your identity in any other
+      browser or device.
     </OnboardDialogDescription>
     <InfoCard>
       <Flex flexDirection="column" gap={4}>
-        <OnboardDialogSubTitle fontWeight={600}>
-          Server ID
-        </OnboardDialogSubTitle>
+        <OnboardDialogSubTitle fontWeight={600}>ID</OnboardDialogSubTitle>
         <InfoCardText>{credentials.id}</InfoCardText>
       </Flex>
       <Flex flexDirection="column" gap={4}>
-        <OnboardDialogSubTitle fontWeight={600}>
-          Server URL
-        </OnboardDialogSubTitle>
+        <OnboardDialogSubTitle fontWeight={600}>URL</OnboardDialogSubTitle>
         <InfoCardText>{credentials.url}</InfoCardText>
       </Flex>
       <Flex flexDirection="column" gap={4}>
-        <OnboardDialogSubTitle fontWeight={600}>
-          Server Code
-        </OnboardDialogSubTitle>
+        <OnboardDialogSubTitle fontWeight={600}>Code</OnboardDialogSubTitle>
         <InfoCardText>{credentials.accessCode}</InfoCardText>
       </Flex>
       <Flex mt={1}>

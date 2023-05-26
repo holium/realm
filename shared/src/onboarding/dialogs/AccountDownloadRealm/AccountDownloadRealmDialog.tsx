@@ -11,30 +11,30 @@ import {
 } from '../../components/DownloadRealmButtons';
 
 type Props = DownloadRealmButtonsProps & {
-  patps: string[] | undefined;
-  selectedPatp: string | undefined;
-  setSelectedPatp: (patp: string) => void;
-  onClickBuyServer: () => void;
+  identities: string[] | undefined;
+  selectedIdentity: string | undefined;
+  setSelectedIdentity: (patp: string) => void;
+  onClickBuyIdentity: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
 
 export const AccountDownloadRealmDialog = ({
-  patps,
-  selectedPatp,
-  setSelectedPatp,
+  identities,
+  selectedIdentity,
+  setSelectedIdentity,
   onDownloadMacM1,
   onDownloadMacIntel,
   onDownloadWindows,
   onDownloadLinux,
-  onClickBuyServer,
+  onClickBuyIdentity,
   onClickSidebarSection,
   onExit,
 }: Props) => (
   <AccountDialog
-    patps={patps ?? []}
-    selectedPatp={selectedPatp ?? ''}
-    setSelectedPatp={setSelectedPatp}
+    identities={identities ?? []}
+    selectedIdentity={selectedIdentity ?? ''}
+    setSelectedIdentity={setSelectedIdentity}
     currentSection={SidebarSection.DownloadRealm}
     customBody={
       <Flex
@@ -60,7 +60,7 @@ export const AccountDownloadRealmDialog = ({
         />
       </Flex>
     }
-    onClickBuyServer={onClickBuyServer}
+    onClickBuyIdentity={onClickBuyIdentity}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   />

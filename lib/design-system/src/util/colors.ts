@@ -66,8 +66,8 @@ export function bgIsLightOrDark(hexColor: string) {
   const hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b));
 
   // Using the HSP value, determine whether the color is light or dark
-  // console.log(hsp);
-  if (hsp > 127.5) {
+  // console.log(hexColor, hsp);
+  if (hsp > 140) {
     // the background image is too light
     return 'light';
   } else {

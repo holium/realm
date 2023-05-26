@@ -357,7 +357,7 @@ const LoginPresenter = () => {
                   transition={{ duration: 0.5 }}
                 />
                 <Text.Custom fontWeight={500} noSelection>
-                  Add Server
+                  Add Identity
                 </Text.Custom>
               </Flex>
             </Button.TextButton>

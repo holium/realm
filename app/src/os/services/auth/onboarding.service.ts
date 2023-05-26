@@ -525,7 +525,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
 
   public addServer() {
     this.sendUpdate({
-      type: 'add-server',
+      type: 'add-identity',
     });
   }
 

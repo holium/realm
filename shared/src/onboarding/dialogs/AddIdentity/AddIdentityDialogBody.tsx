@@ -6,14 +6,14 @@ import { useToggle } from '@holium/design-system/util';
 import { OnboardDialogInputLabel } from '../../components/OnboardDialog.styles';
 import { FormField } from '../../onboarding';
 
-type AddServerFields = {
+type AddIdentityFields = {
   id: string;
   url: string;
   code: string;
 };
 
-export const AddServerDialogBody = () => {
-  const { errors } = useFormikContext<AddServerFields>();
+export const AddIdentityDialogBody = () => {
+  const { errors } = useFormikContext<AddIdentityFields>();
 
   const showAccessKey = useToggle(false);
 
@@ -21,7 +21,7 @@ export const AddServerDialogBody = () => {
     <>
       <Flex flexDirection="column" gap={2}>
         <OnboardDialogInputLabel as="label" htmlFor="id-onboarding">
-          Server ID
+          ID
         </OnboardDialogInputLabel>
         <FormField
           name="id"
@@ -32,7 +32,7 @@ export const AddServerDialogBody = () => {
       </Flex>
       <Flex flexDirection="column" gap={2}>
         <OnboardDialogInputLabel as="label" htmlFor="url-onboarding">
-          Server URL
+          URL
         </OnboardDialogInputLabel>
         <FormField
           name="url"
@@ -43,7 +43,7 @@ export const AddServerDialogBody = () => {
       </Flex>
       <Flex flexDirection="column" gap={2}>
         <OnboardDialogInputLabel as="label" htmlFor="access-key-onboarding">
-          Server Code
+          Code
         </OnboardDialogInputLabel>
         <FormField
           name="code"

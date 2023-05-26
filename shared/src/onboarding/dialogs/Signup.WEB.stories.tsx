@@ -2,7 +2,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import {
   BootingDialog,
-  ChooseIdDialog,
+  ChooseIdentityDialog,
   CreateAccountDialog,
   CredentialsDialog,
   DownloadDialog,
@@ -70,10 +70,13 @@ export const VerifyEmailDialogStory: ComponentStory<
 VerifyEmailDialogStory.storyName = '2. Verify email';
 
 export const ChooseIdDialogStory: ComponentStory<
-  typeof ChooseIdDialog
+  typeof ChooseIdentityDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <ChooseIdDialog ids={mockPatps} onNext={() => Promise.resolve(false)} />
+    <ChooseIdentityDialog
+      identities={mockPatps}
+      onNext={() => Promise.resolve(false)}
+    />
   </OnboardingDialogWrapper>
 );
 

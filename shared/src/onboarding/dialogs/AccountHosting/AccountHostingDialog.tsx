@@ -2,46 +2,46 @@ import { AccountDialog, SidebarSection } from '../../components/AccountDialog';
 import { AccountHostingDialogBody } from './AccountHostingDialogBody';
 
 type Props = {
-  patps: string[];
-  selectedPatp: string;
+  identities: string[];
+  selectedIdentity: string;
   email: string | null;
   serverUrl: string | undefined;
   serverCode: string | undefined;
   serverMaintenanceWindow: number | undefined;
-  setSelectedPatp: (patp: string) => void;
+  setSelectedIdentity: (patp: string) => void;
   onClickChangeEmail: () => void;
   onClickChangePassword: () => void;
   onClickManageBilling: () => void;
   onClickGetNewAccessCode: () => void;
   onClickChangeMaintenanceWindow: () => void;
   onClickEjectId: () => void;
-  onClickBuyServer: () => void;
+  onClickBuyIdentity: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
 
 export const AccountHostingDialog = ({
-  patps,
-  selectedPatp,
+  identities,
+  selectedIdentity,
   email,
   serverUrl,
   serverCode,
   serverMaintenanceWindow,
-  setSelectedPatp,
+  setSelectedIdentity,
   onClickChangeEmail,
   onClickChangePassword,
   onClickManageBilling,
   onClickGetNewAccessCode,
   onClickChangeMaintenanceWindow,
   onClickEjectId,
-  onClickBuyServer,
+  onClickBuyIdentity,
   onClickSidebarSection,
   onExit,
 }: Props) => (
   <AccountDialog
-    patps={patps}
-    selectedPatp={selectedPatp}
-    setSelectedPatp={setSelectedPatp}
+    identities={identities}
+    selectedIdentity={selectedIdentity}
+    setSelectedIdentity={setSelectedIdentity}
     currentSection={SidebarSection.Hosting}
     isLoading={
       !email ||
@@ -49,12 +49,12 @@ export const AccountHostingDialog = ({
       !serverCode ||
       (!serverMaintenanceWindow && serverMaintenanceWindow !== 0)
     }
-    onClickBuyServer={onClickBuyServer}
+    onClickBuyIdentity={onClickBuyIdentity}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >
     <AccountHostingDialogBody
-      selectedPatp={selectedPatp}
+      selectedIdentity={selectedIdentity}
       email={email as string}
       serverUrl={serverUrl as string}
       serverCode={serverCode as string}

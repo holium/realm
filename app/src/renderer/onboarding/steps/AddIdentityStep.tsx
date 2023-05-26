@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
 
 import {
-  AddServerDialog,
+  AddIdentityDialog,
   defaultTheme,
   OnboardingStorage,
 } from '@holium/shared';
@@ -11,9 +11,9 @@ import { OnboardingIPC } from 'renderer/stores/ipc';
 
 import { StepProps } from './types';
 
-export const AddServerStep = ({ setStep }: StepProps) => {
+export const AddIdentityStep = ({ setStep }: StepProps) => {
   useEffect(() => {
-    track('Onboarding / Add Server');
+    track('Onboarding / Add Identity');
   });
 
   const onBack = () => {
@@ -41,9 +41,9 @@ export const AddServerStep = ({ setStep }: StepProps) => {
     });
 
     OnboardingIPC.setCredentials({
-      serverId: serverId,
-      serverCode: serverCode,
-      serverUrl: serverUrl,
+      serverId,
+      serverCode,
+      serverUrl,
     });
 
     const { passwordHash, masterAccountId } = OnboardingStorage.get();
@@ -73,5 +73,5 @@ export const AddServerStep = ({ setStep }: StepProps) => {
     return true;
   };
 
-  return <AddServerDialog onBack={onBack} onNext={onNext} />;
+  return <AddIdentityDialog onBack={onBack} onNext={onNext} />;
 };

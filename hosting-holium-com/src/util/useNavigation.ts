@@ -12,8 +12,7 @@ export const accountPageUrl: Record<string, OnboardingPage> = {
   'Get Realm': '/account/get-realm',
   'Download Realm': '/account/download-realm',
   'Custom Domain': '/account/custom-domain',
-  'S3 Storage': '/account/s3-storage',
-  Statistics: '/account/statistics',
+  Storage: '/account/storage',
   Hosting: '/account',
   'Get Hosting': '/choose-id',
 };

@@ -45,7 +45,7 @@ const GetNewAccessCodeContainer = styled(Flex)`
 `;
 
 type Props = {
-  selectedPatp: string;
+  selectedIdentity: string;
   email: string;
   serverUrl: string;
   serverCode: string;
@@ -59,7 +59,7 @@ type Props = {
 };
 
 export const AccountHostingDialogBody = ({
-  selectedPatp,
+  selectedIdentity,
   email,
   serverUrl,
   serverCode,
@@ -73,9 +73,9 @@ export const AccountHostingDialogBody = ({
 }: Props) => (
   <>
     <AccountDialogTable>
-      <AccountDialogTableRow title="Server ID">
+      <AccountDialogTableRow title="ID">
         <AccountDialogDescription flex={1}>
-          {selectedPatp}
+          {selectedIdentity}
         </AccountDialogDescription>
       </AccountDialogTableRow>
       <AccountDialogTableRow title="Email">

@@ -14,7 +14,7 @@ export const AccountInformation = ({ patp, email }: Props) => (
   <>
     <Flex gap={32} mb="4px">
       <Flex flexDirection="column" gap={6}>
-        <OnboardDialogSubTitle>Urbit ID</OnboardDialogSubTitle>
+        <OnboardDialogSubTitle>ID</OnboardDialogSubTitle>
         <OnboardDialogDescription>{patp}</OnboardDialogDescription>
       </Flex>
       <Flex flexDirection="column" gap={6}>

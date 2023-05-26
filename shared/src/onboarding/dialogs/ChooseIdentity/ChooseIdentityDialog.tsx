@@ -3,24 +3,24 @@ import * as Yup from 'yup';
 
 import { OnboardDialog } from '../../components/OnboardDialog';
 import { IdentityIcon } from '../../icons/IdentityIcon';
-import { ChooseIdDialogBody } from './ChooseIdDialogBody';
+import { ChooseIdentityDialogBody } from './ChooseIdentityDialogBody';
 
 const ChooseIdSchema = Yup.object().shape({
   id: Yup.string().required('Required'),
 });
 
 type Props = {
-  ids: string[];
+  identities: string[];
   onBack?: () => void;
   onNext: (values: FormikValues) => Promise<boolean>;
 };
 
-export const ChooseIdDialog = ({ ids, onBack, onNext }: Props) => (
+export const ChooseIdentityDialog = ({ identities, onBack, onNext }: Props) => (
   <OnboardDialog
     initialValues={{ id: undefined }}
     validationSchema={ChooseIdSchema}
     icon={<IdentityIcon />}
-    body={<ChooseIdDialogBody ids={ids} />}
+    body={<ChooseIdentityDialogBody identities={identities} />}
     onBack={onBack}
     onNext={onNext}
   />

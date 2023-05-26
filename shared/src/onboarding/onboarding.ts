@@ -22,13 +22,12 @@ export { AccountDownloadRealmDialog } from './dialogs/AccountDownloadRealm/Accou
 export { AccountGetRealmDialog } from './dialogs/AccountGetRealm/AccountGetRealmDialog';
 export { AccountHostingDialog } from './dialogs/AccountHosting/AccountHostingDialog';
 export { AccountHostingDialogBody } from './dialogs/AccountHosting/AccountHostingDialogBody';
-export { AccountS3StorageDialog } from './dialogs/AccountS3Storage/AccountS3StorageDialog';
-export { AccountS3StorageDialogBody } from './dialogs/AccountS3Storage/AccountS3StorageDialogBody';
 export { AccountSelfHostingDialogBody } from './dialogs/AccountSelfHosting/AccountSelfHostingDialogBody';
-export { AccountStatisticsDialog } from './dialogs/AccountStatisticsDialog/AccountStatisticsDialog';
-export { AddServerDialog } from './dialogs/AddServer/AddServerDialog';
+export { AccountStorageDialog } from './dialogs/AccountStorage/AccountStorageDialog';
+export { AccountStorageDialogBody } from './dialogs/AccountStorage/AccountStorageDialogBody';
+export { AddIdentityDialog } from './dialogs/AddIdentity/AddIdentityDialog';
 export { BootingDialog } from './dialogs/Booting/BootingDialog';
-export { ChooseIdDialog } from './dialogs/ChooseId/ChooseIdDialog';
+export { ChooseIdentityDialog } from './dialogs/ChooseIdentity/ChooseIdentityDialog';
 export { ClaimTokenDialog } from './dialogs/ClaimToken/ClaimTokenDialog';
 export { CreateAccountDialog } from './dialogs/CreateAccount/CreateAccountDialog';
 export { CredentialsDialog } from './dialogs/Credentials/CredentialsDialog';

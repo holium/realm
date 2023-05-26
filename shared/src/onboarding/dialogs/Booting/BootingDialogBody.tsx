@@ -25,7 +25,7 @@ type Props = {
 
 export const BootingDialogBody = ({ logs }: Props) => (
   <Flex flexDirection="column" gap={16}>
-    <OnboardDialogTitle>Booting your personal server</OnboardDialogTitle>
+    <OnboardDialogTitle>Booting your identity</OnboardDialogTitle>
     <LogCard>
       {logs.map((log, i) => (
         <LogText key={`log-${i}`}>{log}</LogText>

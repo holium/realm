@@ -7,27 +7,27 @@ import {
   OnboardDialogDescription,
   OnboardDialogTitle,
 } from '../../components/OnboardDialog.styles';
-import { IdsPaginated } from './IdsPaginated';
+import { IdentitiesPaginated } from './IdentitiesPaginated';
 
 type ChooseIdFields = {
   id: string;
 };
 
 type Props = {
-  ids: string[];
+  identities: string[];
 };
 
-export const ChooseIdDialogBody = ({ ids }: Props) => {
+export const ChooseIdentityDialogBody = ({ identities }: Props) => {
   const {
     values: { id },
     setFieldValue,
   } = useFormikContext<ChooseIdFields>();
 
   useEffect(() => {
-    if (!id && ids.length > 0) {
-      setFieldValue('id', ids[0]);
+    if (!id && identities.length > 0) {
+      setFieldValue('id', identities[0]);
     }
-  }, [ids]);
+  }, [identities]);
 
   return (
     <>
@@ -38,8 +38,8 @@ export const ChooseIdDialogBody = ({ ids }: Props) => {
           on Realm.
         </OnboardDialogDescription>
       </Flex>
-      <IdsPaginated
-        ids={ids}
+      <IdentitiesPaginated
+        identities={identities}
         selectedId={id}
         onSelectId={(id) => setFieldValue('id', id)}
       />

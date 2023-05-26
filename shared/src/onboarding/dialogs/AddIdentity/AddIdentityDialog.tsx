@@ -3,7 +3,7 @@ import * as Yup from 'yup';
 
 import { OnboardDialog } from '../../components/OnboardDialog';
 import { CredentialsIcon } from '../../icons/CredentialsIcon';
-import { AddServerDialogBody } from './AddServerDialogBody';
+import { AddIdentityDialogBody } from './AddIdentityDialogBody';
 
 const AddServerSchema = Yup.object().shape({
   id: Yup.string().required('Required'),
@@ -16,7 +16,7 @@ type Props = {
   onNext: (id: string, url: string, code: string) => Promise<boolean>;
 };
 
-export const AddServerDialog = ({ onBack, onNext }: Props) => {
+export const AddIdentityDialog = ({ onBack, onNext }: Props) => {
   const handleOnNext = async ({ id, url, code }: FormikValues) => {
     try {
       const urlWithNoTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
@@ -32,8 +32,8 @@ export const AddServerDialog = ({ onBack, onNext }: Props) => {
       initialValues={{ id: undefined, url: undefined, code: undefined }}
       validationSchema={AddServerSchema}
       icon={<CredentialsIcon />}
-      body={<AddServerDialogBody />}
-      nextText="Add Ship"
+      body={<AddIdentityDialogBody />}
+      nextText="Add identity"
       onBack={onBack}
       onNext={handleOnNext}
     />

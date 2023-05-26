@@ -4,7 +4,7 @@ import { Anchor } from '@holium/design-system/general';
 
 import {
   BootingDialog,
-  ChooseIdDialog,
+  ChooseIdentityDialog,
   CreateAccountDialog,
   CredentialsDialog,
   HostingDialog,
@@ -22,7 +22,7 @@ import {
 
 export default {
   component: CreateAccountDialog,
-  title: 'Onboarding/Buy Server DESKTOP',
+  title: 'Onboarding/Buy Identity DESKTOP',
 } as ComponentMeta<typeof CreateAccountDialog>;
 
 export const LoginDialogStory: ComponentStory<typeof LoginDialog> = () => (
@@ -53,15 +53,18 @@ export const HostingDialogStory: ComponentStory<typeof HostingDialog> = () => (
 
 HostingDialogStory.storyName = '2. Hosting';
 
-export const ChooseIdDialogStory: ComponentStory<
-  typeof ChooseIdDialog
+export const ChooseIdentityDialogStory: ComponentStory<
+  typeof ChooseIdentityDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <ChooseIdDialog ids={mockPatps} onNext={() => Promise.resolve(false)} />
+    <ChooseIdentityDialog
+      identities={mockPatps}
+      onNext={() => Promise.resolve(false)}
+    />
   </OnboardingDialogWrapper>
 );
 
-ChooseIdDialogStory.storyName = '3. Choose ID';
+ChooseIdentityDialogStory.storyName = '3. Choose Identity';
 
 export const PaymentDialogStory: ComponentStory<typeof PaymentDialog> = () => (
   <OnboardingDialogWrapper>

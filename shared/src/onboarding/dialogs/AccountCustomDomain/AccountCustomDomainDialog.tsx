@@ -2,43 +2,43 @@ import { AccountDialog, SidebarSection } from '../../components/AccountDialog';
 import { AccountCustomDomainDialogBody } from './AccountCustomDomainDialogBody';
 
 type Props = {
-  patps: string[];
-  selectedPatp: string;
+  identities: string[];
+  selectedIdentity: string;
   domain: string;
   dropletIp: string | undefined;
   submitting: boolean;
   errorMessage?: string;
   successMessage?: string;
-  setSelectedPatp: (patp: string) => void;
+  setSelectedIdentity: (patp: string) => void;
   onChangeDomain: (domain: string) => void;
   onSubmit: () => Promise<void>;
-  onClickBuyServer: () => void;
+  onClickBuyIdentity: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
 
 export const AccountCustomDomainDialog = ({
-  patps,
-  selectedPatp,
+  identities,
+  selectedIdentity,
   dropletIp,
   domain,
   submitting,
   errorMessage,
   successMessage,
-  setSelectedPatp,
+  setSelectedIdentity,
   onChangeDomain,
   onSubmit,
-  onClickBuyServer,
+  onClickBuyIdentity,
   onClickSidebarSection,
   onExit,
 }: Props) => (
   <AccountDialog
-    patps={patps}
-    selectedPatp={selectedPatp}
-    setSelectedPatp={setSelectedPatp}
+    identities={identities}
+    selectedIdentity={selectedIdentity}
+    setSelectedIdentity={setSelectedIdentity}
     currentSection={SidebarSection.CustomDomain}
     isLoading={!dropletIp}
-    onClickBuyServer={onClickBuyServer}
+    onClickBuyIdentity={onClickBuyIdentity}
     onClickSidebarSection={onClickSidebarSection}
     onSubmit={onSubmit}
     onExit={onExit}

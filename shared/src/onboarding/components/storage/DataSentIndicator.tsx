@@ -1,7 +1,7 @@
 import { Flex, ProgressBar, Text } from '@holium/design-system/general';
 
 import { OnboardDialogSubTitle } from '../../components/OnboardDialog.styles';
-import { bytesToString } from '../util';
+import { bytesToString } from '../../dialogs/util';
 
 type Props = {
   dataSent: {
@@ -32,7 +32,7 @@ export const DataSentIndicator = ({ dataSent }: Props) => {
         </Text.Body>
         and
         <Text.Body color="intent-alert">
-          {bytesToString(Number(minioBytes))} (S3 data)
+          {bytesToString(Number(minioBytes))} (storage data)
         </Text.Body>
         of {bytesToString(totalBytes)}
       </Text.Body>

@@ -13,24 +13,27 @@ const Paginator = styled.div`
 `;
 
 type Props = {
-  ids: string[];
+  identities: string[];
   pageSize?: number;
   selectedId: string | undefined;
   onSelectId: (patp: string) => void;
 };
 
-export const IdsPaginated = ({
-  ids,
+export const IdentitiesPaginated = ({
+  identities,
   pageSize = 6,
   selectedId,
   onSelectId,
 }: Props) => {
   const [page, setPage] = useState(0);
-  const totalPages = Math.ceil(ids.length / pageSize);
-  const paginatedPatps = ids.slice(page * pageSize, (page + 1) * pageSize);
+  const totalPages = Math.ceil(identities.length / pageSize);
+  const paginatedPatps = identities.slice(
+    page * pageSize,
+    (page + 1) * pageSize
+  );
   const pages = Array.from({ length: totalPages }).map((_, i) => i);
 
-  if (!ids.length) {
+  if (!identities.length) {
     return (
       <Flex justifyContent="center">
         <Spinner size={3} />
