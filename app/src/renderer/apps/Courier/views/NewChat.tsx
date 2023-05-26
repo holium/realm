@@ -27,7 +27,9 @@ export const NewChat = () => {
   const { inbox, setSubroute, createChat } = chatStore;
   const [creating, setCreating] = useState<boolean>(false);
   const [searchString, setSearchString] = useState<string>('');
-  const [selectedIdentity, setSelected] = useState<Set<string>>(new Set());
+  const [selectedIdentity, setSelectedIdentity] = useState<Set<string>>(
+    new Set()
+  );
 
   const onCreateChat = () => {
     let title: string;
@@ -68,13 +70,13 @@ export const NewChat = () => {
   const onShipSelected = (contact: [string, string?]) => {
     const patp = contact[0];
     selectedIdentity.add(patp);
-    setSelected(new Set(selectedIdentity));
+    setSelectedIdentity(new Set(selectedIdentity));
     setSearchString('');
   };
 
   const onShipRemove = (contact: [string, string?]) => {
     selectedIdentity.delete(contact[0]);
-    setSelected(new Set(selectedIdentity));
+    setSelectedIdentity(new Set(selectedIdentity));
   };
 
   const dmAlreadyExists = useMemo(() => {

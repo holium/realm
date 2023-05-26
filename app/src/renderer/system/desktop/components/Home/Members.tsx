@@ -65,7 +65,9 @@ const MembersPresenter = ({ our }: IMembers) => {
 
   const { person } = useMemo(() => createPeopleForm(), []);
   // Ship search
-  const [selectedIdentity, setSelected] = useState<Set<string>>(new Set());
+  const [selectedIdentity, setSelectedIdentity] = useState<Set<string>>(
+    new Set()
+  );
   const [selectedNickname, setSelectedNickname] = useState<Set<string>>(
     new Set()
   );
@@ -83,7 +85,7 @@ const MembersPresenter = ({ our }: IMembers) => {
     }
     // const pendingAdd = selectedIdentity;
     selectedIdentity.add(patp);
-    setSelected(new Set(selectedIdentity));
+    setSelectedIdentity(new Set(selectedIdentity));
     selectedNickname.add(nickname || '');
     setSelectedNickname(new Set(selectedNickname));
     // const updatedAll = all;

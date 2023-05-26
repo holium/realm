@@ -81,7 +81,9 @@ const InviteMembersPresenter = ({
   const searchRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const { person } = useMemo(() => createPeopleForm(), []);
-  const [selectedIdentity, setSelected] = useState<Set<string>>(new Set());
+  const [selectedIdentity, setSelectedIdentity] = useState<Set<string>>(
+    new Set()
+  );
   const [nicknameMap, setNicknameMap] = useState<{ [patp: string]: string }>(
     {}
   );
@@ -172,7 +174,7 @@ const InviteMembersPresenter = ({
     const patp = contact[0];
     const nickname = contact[1];
     selectedIdentity.add(patp);
-    setSelected(new Set(selectedIdentity));
+    setSelectedIdentity(new Set(selectedIdentity));
     setNicknameMap({ ...nicknameMap, [patp]: nickname || '' });
     const newMembers: any = {
       ...permissionMap,
@@ -255,7 +257,7 @@ const InviteMembersPresenter = ({
                 evt.stopPropagation();
                 const copyPatp = selectedIdentity;
                 copyPatp.delete(patp);
-                setSelected(new Set(copyPatp));
+                setSelectedIdentity(new Set(copyPatp));
                 const nickMap = nicknameMap;
                 delete nickMap[patp];
                 setNicknameMap(nickMap);

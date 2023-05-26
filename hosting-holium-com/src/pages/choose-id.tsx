@@ -1,7 +1,8 @@
+import { FormikValues } from 'formik';
 import { GetServerSideProps } from 'next';
 
 import {
-  ChooseIdDialog,
+  ChooseIdentityDialog,
   OnboardingPage,
   OnboardingStorage,
 } from '@holium/shared';
@@ -36,21 +37,20 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
 export default function ChooseId({ identities, back_url }: ServerSideProps) {
   const { goToPage } = useNavigation();
 
-  const onSelectPatp = (serverId: string) => {
-    OnboardingStorage.set({ serverId });
-  };
-
   const onBack = back_url.length
     ? () => goToPage(back_url as OnboardingPage)
     : undefined;
 
-  const onNext = () => goToPage('/payment');
+  const onNext = ({ id }: FormikValues) => {
+    OnboardingStorage.set({ serverId: id });
+
+    return goToPage('/payment');
+  };
 
   return (
     <Page title="Choose ID" isProtected>
-      <ChooseIdDialog
+      <ChooseIdentityDialog
         identities={identities}
-        onSelectPatp={onSelectPatp}
         onBack={onBack}
         onNext={onNext}
       />

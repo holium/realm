@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { Flex, Text } from '@holium/design-system';
-import { PassportCard } from '@holium/shared';
+import { PassportForm } from '@holium/shared';
 
 import { AuthIPC, ShipIPC } from 'renderer/stores/ipc';
 import { MobXAccount } from 'renderer/stores/models/account.model';
@@ -62,7 +62,7 @@ export const AccountPassportSection = ({ account }: Props) => {
       onSubmit={onSubmit}
       body={
         <>
-          <PassportCard
+          <PassportForm
             patp={account.serverId}
             color={accentColor}
             nickname={nickname}

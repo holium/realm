@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { track } from '@amplitude/analytics-browser';
+import { FormikValues } from 'formik';
 
-import { ChooseIdDialog, OnboardingStorage } from '@holium/shared';
+import { ChooseIdentityDialog, OnboardingStorage } from '@holium/shared';
 
 import { thirdEarthApi } from '../thirdEarthApi';
 import { StepProps } from './types';
@@ -29,24 +30,21 @@ export const ChooseIdStep = ({ setStep }: StepProps) => {
     getAndSetPatps();
   }, []);
 
-  const onSelectPatp = (serverId: string) => {
-    OnboardingStorage.set({ serverId });
-  };
-
   const onBack = () => {
     setStep('/hosting');
   };
 
-  const onNext = () => {
+  const onNext = ({ id }: FormikValues) => {
+    OnboardingStorage.set({ serverId: id });
+
     setStep('/payment');
 
-    return Promise.resolve(false);
+    return Promise.resolve(true);
   };
 
   return (
-    <ChooseIdDialog
+    <ChooseIdentityDialog
       identities={identities}
-      onSelectPatp={onSelectPatp}
       onBack={onBack}
       onNext={onNext}
     />
