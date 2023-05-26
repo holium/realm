@@ -11,7 +11,7 @@ import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
 type ServerSideProps = {
-  patps: string[];
+  identities: string[];
   back_url: string;
 };
 
@@ -21,19 +21,19 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const productId = products[0].id;
 
   const planets = await thirdEarthApi.getPlanets(productId);
-  const patps = Object.values(planets.planets)
+  const identities = Object.values(planets.planets)
     .filter((planet) => planet.planet_status === 'available')
     .map((planet) => planet.patp);
 
   return {
     props: {
-      patps,
+      identities,
       back_url,
     } as ServerSideProps,
   };
 };
 
-export default function ChooseId({ patps, back_url }: ServerSideProps) {
+export default function ChooseId({ identities, back_url }: ServerSideProps) {
   const { goToPage } = useNavigation();
 
   const onSelectPatp = (serverId: string) => {
@@ -49,7 +49,7 @@ export default function ChooseId({ patps, back_url }: ServerSideProps) {
   return (
     <Page title="Choose ID" isProtected>
       <ChooseIdDialog
-        patps={patps}
+        identities={identities}
         onSelectPatp={onSelectPatp}
         onBack={onBack}
         onNext={onNext}

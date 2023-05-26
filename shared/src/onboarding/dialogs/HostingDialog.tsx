@@ -49,15 +49,14 @@ export const HostingDialog = ({
       <Flex flexDirection="column" gap={16}>
         <OnboardDialogTitle>Hosting</OnboardDialogTitle>
         <OnboardDialogDescription maxWidth={417}>
-          Signup for Realm hosting or enter your existing server connection
-          info.
+          Signup for Realm hosting, or enter your existing identity info.
         </OnboardDialogDescription>
         <Flex mt={12} gap={10}>
           <GetHostingButton type="button" onClick={onGetHosting}>
             Get hosting
           </GetHostingButton>
           <AddExistingServerButton type="button" onClick={onAddExistingServer}>
-            Add existing server
+            Add existing identity
           </AddExistingServerButton>
         </Flex>
       </Flex>

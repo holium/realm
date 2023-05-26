@@ -65,7 +65,7 @@ const MembersPresenter = ({ our }: IMembers) => {
 
   const { person } = useMemo(() => createPeopleForm(), []);
   // Ship search
-  const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
+  const [selectedIdentity, setSelected] = useState<Set<string>>(new Set());
   const [selectedNickname, setSelectedNickname] = useState<Set<string>>(
     new Set()
   );
@@ -81,9 +81,9 @@ const MembersPresenter = ({ our }: IMembers) => {
       currentSpace.path &&
         shipStore.spacesStore.inviteMember(currentSpace.path, patp);
     }
-    // const pendingAdd = selectedPatp;
-    selectedPatp.add(patp);
-    setSelected(new Set(selectedPatp));
+    // const pendingAdd = selectedIdentity;
+    selectedIdentity.add(patp);
+    setSelected(new Set(selectedIdentity));
     selectedNickname.add(nickname || '');
     setSelectedNickname(new Set(selectedNickname));
     // const updatedAll = all;
@@ -155,7 +155,7 @@ const MembersPresenter = ({ our }: IMembers) => {
         <ShipSearch
           isDropdown
           search={person.state.value}
-          selected={selectedPatp}
+          selected={selectedIdentity}
           onSelected={(ship: [string, string?]) => {
             onShipSelected(ship);
             person.actions.onChange('');

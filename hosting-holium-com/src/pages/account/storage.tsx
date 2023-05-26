@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import {
-  AccountS3StorageDialog,
+  AccountStorageDialog,
   UserContextProvider,
   useUser,
 } from '@holium/shared';
@@ -11,12 +11,12 @@ import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
 type GetUserS3InfoResponse = Awaited<
-  ReturnType<typeof thirdEarthApi.getUserS3Info>
+  ReturnType<typeof thirdEarthApi.getUserStorageInfo>
 >;
 
 const S3StoragePresenter = () => {
   const { goToPage, logout } = useNavigation();
-  const { token, ships, selectedPatp, setSelectedPatp } = useUser();
+  const { token, ships, selectedIdentity, setSelectedIdentity } = useUser();
 
   const [s3Info, setS3Info] = useState<GetUserS3InfoResponse>();
   const [networkUsage, setNetworkUsage] = useState<number>(0);
@@ -26,20 +26,20 @@ const S3StoragePresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  const onClickBuyServer = () => {
+  const onClickBuyIdentity = () => {
     goToPage(accountPageUrl['Get Hosting'], {
-      back_url: accountPageUrl['S3 Storage'],
+      back_url: accountPageUrl['Storage'],
     });
   };
 
   useEffect(() => {
-    const selectedShip = ships.find((ship) => ship.patp === selectedPatp);
+    const selectedShip = ships.find((ship) => ship.patp === selectedIdentity);
 
     if (!token) return;
     if (!selectedShip) return;
 
     thirdEarthApi
-      .getUserS3Info(token, selectedShip.id.toString())
+      .getUserStorageInfo(token, selectedShip.id.toString())
       .then(setS3Info);
 
     thirdEarthApi
@@ -48,22 +48,22 @@ const S3StoragePresenter = () => {
         setNetworkUsage(response.networkUsage?.network_sent_total ?? 0);
         setMinioUsage(response.networkUsage?.minio_sent_total ?? 0);
       });
-  }, [token, ships, selectedPatp]);
+  }, [token, ships, selectedIdentity]);
 
   return (
-    <AccountS3StorageDialog
-      patps={ships.map((ship) => ship.patp)}
-      selectedPatp={selectedPatp}
-      setSelectedPatp={setSelectedPatp}
-      url={s3Info?.consoleUrl}
-      s3Bucket={s3Info?.userName}
-      s3Password={s3Info?.code}
+    <AccountStorageDialog
+      identities={ships.map((ship) => ship.patp)}
+      selectedIdentity={selectedIdentity}
+      setSelectedIdentity={setSelectedIdentity}
+      storageUrl={s3Info?.consoleUrl}
+      storageBucket={s3Info?.userName}
+      storagePassword={s3Info?.code}
       dataStorage={{
         used: Number(s3Info?.storageUsed),
         total: Number(s3Info?.storageCapacity),
       }}
       dataSent={{ networkUsage, minioUsage }}
-      onClickBuyServer={onClickBuyServer}
+      onClickBuyIdentity={onClickBuyIdentity}
       onClickSidebarSection={onClickSidebarSection}
       onExit={logout}
     />
@@ -72,7 +72,7 @@ const S3StoragePresenter = () => {
 
 export default function S3Storage() {
   return (
-    <Page title="Account / S3 Storage" isProtected>
+    <Page title="Account / Storage" isProtected>
       <UserContextProvider api={thirdEarthApi}>
         <S3StoragePresenter />
       </UserContextProvider>

@@ -76,7 +76,7 @@ type OnboardingAccountPage =
   | '/account/custom-domain'
   | '/account/download-realm'
   | '/account/get-realm'
-  | '/account/s3-storage'
+  | '/account/storage'
   | '/account/statistics';
 
 type OnboardingSignupPage =
@@ -93,7 +93,7 @@ export type OnboardingPage = OnboardingAccountPage | OnboardingSignupPage;
 
 export type RealmOnboardingStep =
   | '/login'
-  | '/add-server'
+  | '/add-identity'
   | '/passport'
   | '/hosting'
   | '/intermediary-login'

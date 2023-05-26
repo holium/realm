@@ -22,7 +22,7 @@ import {
 
 export default {
   component: CreateAccountDialog,
-  title: 'Onboarding/Buy Server DESKTOP',
+  title: 'Onboarding/Buy Identity DESKTOP',
 } as ComponentMeta<typeof CreateAccountDialog>;
 
 export const LoginDialogStory: ComponentStory<typeof LoginDialog> = () => (
@@ -58,7 +58,7 @@ export const ChooseIdDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <ChooseIdDialog
-      patps={mockPatps}
+      identities={mockPatps}
       onSelectPatp={() => {}}
       onNext={() => Promise.resolve(false)}
     />

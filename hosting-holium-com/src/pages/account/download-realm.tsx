@@ -4,15 +4,14 @@ import {
   useUser,
 } from '@holium/shared';
 
-import { thirdEarthApi } from 'util/thirdEarthApi';
-
 import { Page } from '../../components/Page';
 import { downloadLinks } from '../../util/constants';
+import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
 const DownloadRealmPresenter = () => {
   const { goToPage, logout } = useNavigation();
-  const { ships, selectedPatp, setSelectedPatp } = useUser();
+  const { ships, selectedIdentity, setSelectedIdentity } = useUser();
 
   const onClickSidebarSection = (section: string) => {
     if (section === 'Get Hosting') {
@@ -23,7 +22,7 @@ const DownloadRealmPresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  const onClickBuyServer = () => {
+  const onClickBuyIdentity = () => {
     goToPage(accountPageUrl['Get Hosting'], {
       back_url: accountPageUrl['Download Realm'],
     });
@@ -41,14 +40,14 @@ const DownloadRealmPresenter = () => {
   return (
     <Page title="Account / Download Realm" isProtected>
       <AccountDownloadRealmDialog
-        patps={ships.map((ship) => ship.patp)}
-        selectedPatp={selectedPatp}
-        setSelectedPatp={setSelectedPatp}
+        identities={ships.map((ship) => ship.patp)}
+        selectedIdentity={selectedIdentity}
+        setSelectedIdentity={setSelectedIdentity}
         onDownloadMacM1={onDownloadMacM1}
         onDownloadMacIntel={onDownloadMacIntel}
         onDownloadWindows={onDownloadWindows}
         onDownloadLinux={onDownloadLinux}
-        onClickBuyServer={onClickBuyServer}
+        onClickBuyIdentity={onClickBuyIdentity}
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />

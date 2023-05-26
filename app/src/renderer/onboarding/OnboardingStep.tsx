@@ -2,7 +2,7 @@ import { observer } from 'mobx-react';
 
 import { useAppState } from 'renderer/stores/app.store';
 
-import { AddServerStep } from './steps/AddServerStep';
+import { AddIdentityStep } from './steps/AddIdentityStep';
 import { BootingStep } from './steps/BootingStep';
 import { ChooseIdStep } from './steps/ChooseIdStep';
 import { CredentialsStep } from './steps/CredentialsStep';
@@ -24,8 +24,8 @@ export const OnboardingStepPresenter = () => {
       );
     case '/hosting':
       return <HostingStep setStep={setOnboardingStep} />;
-    case '/add-server':
-      return <AddServerStep setStep={setOnboardingStep} />;
+    case '/add-identity':
+      return <AddIdentityStep setStep={setOnboardingStep} />;
     case '/passport':
       return <PassportStep setStep={setOnboardingStep} />;
     case '/installation':

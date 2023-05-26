@@ -13,24 +13,27 @@ const Paginator = styled.div`
 `;
 
 type Props = {
-  patps: string[];
+  identities: string[];
   pageSize?: number;
-  selectedPatp: string | undefined;
+  selectedIdentity: string | undefined;
   onSelectPatp: (patp: string) => void;
 };
 
 export const PatpsPaginated = ({
-  patps,
+  identities,
   pageSize = 6,
-  selectedPatp,
+  selectedIdentity,
   onSelectPatp,
 }: Props) => {
   const [page, setPage] = useState(0);
-  const totalPages = Math.ceil(patps.length / pageSize);
-  const paginatedPatps = patps.slice(page * pageSize, (page + 1) * pageSize);
+  const totalPages = Math.ceil(identities.length / pageSize);
+  const paginatedPatps = identities.slice(
+    page * pageSize,
+    (page + 1) * pageSize
+  );
   const pages = Array.from({ length: totalPages }).map((_, i) => i);
 
-  if (!patps.length) {
+  if (!identities.length) {
     return (
       <Flex justifyContent="center">
         <Spinner size={3} />
@@ -50,7 +53,7 @@ export const PatpsPaginated = ({
         <PatpCard
           key={patp}
           patp={patp}
-          isSelected={patp === selectedPatp}
+          isSelected={patp === selectedIdentity}
           onClick={() => onSelectPatp(patp)}
         />
       ))}

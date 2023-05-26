@@ -4,7 +4,7 @@ import { Anchor } from '@holium/design-system/general';
 import { OnboardDialogDescription } from '@holium/shared';
 
 import { TermsDisclaimer } from '../../components/TermsDisclaimer';
-import { AddServerDialog } from '../AddServerDialog';
+import { AddIdentityDialog } from '../AddIdentityDialog';
 import { CreateAccountDialog } from '../CreateAccountDialog';
 import { HostingDialog } from '../HostingDialog';
 import { InstallationDialog } from '../InstallationDialog';
@@ -14,7 +14,7 @@ import { OnboardingDialogWrapper } from './helpers';
 
 export default {
   component: CreateAccountDialog,
-  title: 'Onboarding/Add Server DESKTOP',
+  title: 'Onboarding/Add Identity DESKTOP',
 } as ComponentMeta<typeof CreateAccountDialog>;
 
 export const LoginDialogStory: ComponentStory<typeof LoginDialog> = () => (
@@ -45,15 +45,18 @@ export const HostingDialogStory: ComponentStory<typeof HostingDialog> = () => (
 
 HostingDialogStory.storyName = '2. Hosting';
 
-export const AddServerDialogStory: ComponentStory<
-  typeof AddServerDialog
+export const AddIdentityDialogStory: ComponentStory<
+  typeof AddIdentityDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <AddServerDialog onBack={() => {}} onNext={() => Promise.resolve(false)} />
+    <AddIdentityDialog
+      onBack={() => {}}
+      onNext={() => Promise.resolve(false)}
+    />
   </OnboardingDialogWrapper>
 );
 
-AddServerDialogStory.storyName = '3. Add server';
+AddIdentityDialogStory.storyName = '3. Add identity';
 
 export const InstallationDialogStory: ComponentStory<
   typeof InstallationDialog
