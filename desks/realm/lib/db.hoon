@@ -220,8 +220,8 @@
 ::   tests:
 ::db &db-action [%create-path [/example ~zod %host ~ ~ ~ *@da *@da *@da] ~[[~zod %host] [~bus %member]]]
 ::db &db-action [%add-peer /example ~fed %member]
-::db &db-action [%create [/example [our now] %foo 0 [%general ~[1 'a']] *@da *@da *@da] [~ ~[['num' 'ud'] ['str' 't']]]]
-::db &db-action [%create [/example [our now] %foo 0 [%general ~[1 'b']] *@da *@da *@da] ~]
+::db &db-action [%create /example %foo 0 [%general ~[1 'a']] ~[['num' 'ud'] ['str' 't']]]
+::db &db-action [%create /example %vote 0 [%vote [%.y our %foo [~zod now] /example]] ~]
 ::db &db-action [%edit /example [our ~2023.5.22..20.15.47..86fe] %foo 0 [%general ~[2 'b']] *@da *@da *@da]
 ::db &db-action [%remove %foo /example [our ~2023.5.22..20.15.47..86fe]]
 ::db &db-action [%create [/example [our now] %foo 0 [%general ~[1 'c']] *@da *@da *@da] ~]
@@ -473,24 +473,30 @@
   [cards state]
 ::
 ++  create
-::db &db-action [%create [/example [our now] %foo 0 [%general ~[1 'a']] *@da *@da *@da] [~ ~[['num' 'ud'] ['str' 't']]]]
-::db &db-action [%create [/example [our now] %foo 0 [%general ~[1 'b']] *@da *@da *@da] ~]
-::db &db-action [%create [/example [our now] %foo 1 [%general ~[1 'a' now]] *@da *@da *@da] [~ ~[['num' 'ud'] ['str' 't'] ['custom-time' 'da']]]]
-::db &db-action [%create [/example [our now] %foo 1 [%general ~[2 'b' now]] *@da *@da *@da] ~]
-::db &db-action [%create [/example [our now] %foo 2 [%general ~[1 'd' (jam /hello/goodbye)]] *@da *@da *@da] [~ ~[['num' 'ud'] ['str' 't'] ['mypath' 'path']]]]
-::~zod:db &db-action [%create [/example [our now] %vote 0 [%vote [%.y our %foo [~zod now] /example]] *@da *@da *@da] [~ ~]]
-  |=  [[=row uschema=(unit schema)] state=state-0 =bowl:gall]
+::db &db-action [%create /example %foo 0 [%general ~[1 'a']] ~[['num' 'ud'] ['str' 't']]]
+::db &db-action [%create /example %vote 0 [%vote [%.y our %foo [~zod now] /example]] ~]
+::db &db-action [%create /example %foo 1 [%general ~[1 'd' (jam /hello/goodbye)]] ~[['num' 'ud'] ['str' 't'] ['mypath' 'path']]]
+::~zod/db &db-action [%create /example %vote 0 [%vote %.y our %foo [~zod now] /example] ~]
+  |=  [=input-row state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  :: form row from input
+  =/  row=row  [
+    path.input-row
+    [src.bowl now.bowl]
+    type.input-row
+    v.input-row
+    data.input-row
+    now.bowl
+    now.bowl
+    now.bowl
+  ]
+
+  ~&  >>>  "%create called"
   :: ensure the path actually exists
   =/  path-row=path-row    (~(got by paths.state) path.row)
   ?.  (has-create-permissions path-row row state bowl)
     ~&  >>>  "{(scow %p src.bowl)} tried to create a %{(scow %tas type.row)} row where they didn't have permissions"
     `state
-  :: schema checking
-  =/  sch=schema
-    ?~  uschema
-      (~(got by schemas.state) [type.row v.row])
-    (need uschema)
 
   :: update path
   =/  path-sub-wire           (weld /next/(scot %da updated-at.path-row) path.row)
@@ -498,18 +504,12 @@
   =.  received-at.path-row    now.bowl
   =.  paths.state             (~(put by paths.state) path.row path-row)
 
-  :: cleanup input
-  =.  id.row            [src.bowl now.bowl] :: overwrite whatever id the client asked for, we create that ourselves
-  =.  created-at.row    now.bowl
-  =.  updated-at.row    now.bowl
-  =.  received-at.row   now.bowl
-
-  =.  state             (add-row-to-db row sch state)
+  =.  state             (add-row-to-db row schema.input-row state)
 
   :: emit the change to subscribers
   =/  cards=(list card)  :~
     :: tell subs about the new row
-    [%give %fact [/db (weld /path path.row) path-sub-wire ~] db-changes+!>([%add-row row sch]~)]
+    [%give %fact [/db (weld /path path.row) path-sub-wire ~] db-changes+!>([%add-row row schema.input-row]~)]
     :: kick subs to force them to re-sub for next update
     [%give %kick [path-sub-wire ~] ~]
   ==
@@ -607,7 +607,7 @@
       %-  of
       :~  [%add-peer add-peer]
           [%kick-peer kick-peer]
-          [%create create]
+          [%create de-input-row]
       ==
     ::
     ++  add-peer
@@ -623,39 +623,55 @@
           [%ship de-ship]
       ==
     ::
-    ++  create
-      %-  ot
-      :~  [%row de-row]
-          [%schema ul]  :: TODO actually get the schema
-      ==
-    ::
-    ++  de-row
+    ++  de-input-row
       |=  jon=json
-      ^-  row
+      ^-  input-row
+      ~&  >>>  "de-input-row called"
       ?>  ?=([%o *] jon)
+      =/  data-type   ((se %tas) (~(got by p.jon) 'type'))
+      =/  schema=schema     ((ar (at ~[so so])) (~(got by p.jon) 'schema'))
+      =/  actual-data
+        ?+  data-type
+            [%general ((de-cols schema) (~(got by p.jon) 'data'))]
+          %vote
+            [%vote (de-vote (~(got by p.jon) 'data'))]
+        ==
       [
         (pa (~(got by p.jon) 'path'))
-        (de-id (~(got by p.jon) 'id'))
-        ((se %tas) (~(got by p.jon) 'type'))
+        data-type
         (ni (~(got by p.jon) 'v'))
-        [%general ((ar de-col) (~(got by p.jon) 'data'))]
-        *@da
-        *@da
-        *@da
+        actual-data
+        schema
       ]
     ::
-    ++  de-col
+    ++  de-cols
+      |=  sch=schema
       |=  jon=json
-      ^-  @
+      ^-  (list @)
       ?>  ?=([%a *] jon)
-      ?~  p.jon  !!
-      =/  type-key            (so (snag 0 `(list json)`p.jon))
-      =/  datatom             (snag 1 p.jon)
-      ?:  =(type-key 'rd')    (ne datatom)
-      ?:  =(type-key 'ud')    (ni datatom)
-      ?:  =(type-key 't')     (so datatom)
-      ?:  =(type-key 'path')  (jam (pa datatom))
-      !!
+      =/  index=@ud   0
+      =/  result      *(list @)
+      |-
+        ?:  =(index (lent p.jon))
+          result
+        =/  type-key            t:(snag index sch)
+        =/  datatom             (snag index `(list json)`p.jon)
+        =/  next=@
+          ?:  =(type-key 'rd')    (ne datatom)
+          ?:  =(type-key 'ud')    (ni datatom)
+          ?:  =(type-key 't')     (so datatom)
+          ?:  =(type-key 'path')  (jam (pa datatom))
+          !!
+        $(index +(index), result (snoc result next))
+    ::
+    ++  de-vote
+      %-  ot
+      :~  [%up bo]
+          [%ship de-ship]
+          [%parent-type (se %tas)]
+          [%parent-id de-id]
+          [%parent-path pa]
+      ==
     ::
     ++  de-id
       %+  cu
@@ -763,7 +779,13 @@
                 ?:  =(t.sch 'path')  (path ;;(^path (cue d)))
                 !!
               $(index +(index), result [[name.sch t] result])
-::          %vote
+          %vote
+            :~  ['up' b+up.data.row]
+                ['ship' s+(scot %p ship.data.row)]
+                ['parent-type' s+(scot %tas parent-type.data.row)]
+                ['parent-id' (row-id-to-json parent-id.data.row)]
+                ['parent-path' s+(spat parent-path.data.row)]
+            ==
         ==
       =/  keyvals  (weld basekvs dynamickvs)
       (pairs keyvals)

@@ -159,12 +159,19 @@
       [%delete-path =path]                    :: when we are being informed that we got kicked (or host deleted the path entirely). also deletes all attached objects
 
       :: only from our.bowl
-      [%create =row schema=(unit schema)]      :: %host creating the row, sends %get to all peers
+      [%create =input-row]      :: %host creating the row, sends %get to all peers
       [%edit =row]        :: %host editing the row, sends %get to all peers
       [%remove =type:common =path =id:common]      :: %host deleting the row, sends %delete to all peers
       :: only from host foreign ship
     :: these arent needed on subs model of data-replication
 ::      [%get =row]         :: when we receive a new version of the row from %host
 ::      [%delete =row]      :: when %host tells us that the row was deleted
+  ==
++$  input-row
+  $:  =path
+      =type:common
+      v=@ud
+      data=columns
+      =schema
   ==
 --
