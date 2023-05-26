@@ -6,7 +6,7 @@ export const FormFieldInput = styled(Field)`
   flex: 1;
   gap: 6px;
   height: 40px;
-  padding: 0 6px;
+  padding: 0 8px;
   appearance: none;
   outline: none;
   border: none;
