@@ -6,7 +6,6 @@ import { Box } from '@holium/design-system/general';
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { PinnedWebApp } from '../../SystemBar/components/CommunityBar/AppDock/PinnedWebApp';
 import { GridAppTile } from './GridAppTile';
 
 const AppGridPresenter = () => {
@@ -19,11 +18,6 @@ const AppGridPresenter = () => {
         // ...bazaarStore.devApps,
       ] as AppMobxType[],
     [bazaarStore.catalog, bazaarStore.installations.values()]
-  );
-
-  const bookmarks = useMemo(
-    () => currentSpace?.bookmarks ?? [],
-    [currentSpace?.bookmarks]
   );
 
   if (!currentSpace) return null;
@@ -43,13 +37,6 @@ const AppGridPresenter = () => {
           </Box>
         );
       })}
-      {bookmarks.map((bookmark, index) => (
-        <PinnedWebApp
-          key={`appgrid-${index}-pinned-${bookmark.url}`}
-          {...bookmark}
-          isGrid
-        />
-      ))}
     </>
   );
 };

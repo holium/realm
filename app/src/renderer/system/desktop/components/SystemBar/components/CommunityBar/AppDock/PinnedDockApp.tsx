@@ -7,6 +7,7 @@ import {
   AppTileType,
   bgIsLightOrDark,
   getAppTileFlags,
+  useToggle,
 } from '@holium/design-system';
 
 import { ContextMenuOption, useContextMenu } from 'renderer/components';
@@ -51,6 +52,7 @@ export const PinnedDockAppPresenter = ({
   } | null>(null);
   const { getOptions, setOptions, getColors, setColors } = useContextMenu();
   const appRef = bazaarStore.catalog.get(app.id);
+  const tapping = useToggle(false);
   // TODO need to cleanup and use a ref for the app here
   const { isSuspended, isUninstalled } = getAppTileFlags(
     (appRef?.installStatus as InstallStatus) || InstallStatus.installed
@@ -178,17 +180,21 @@ export const PinnedDockAppPresenter = ({
             opacity: { duration: 1, delay: 0 },
           },
         }}
+        onDragStart={() => tapping.toggleOff()}
         whileDrag={{ zIndex: 20 }}
         drag="x"
         onPointerDown={() => {
           const rect = document.getElementById(tileId)?.getBoundingClientRect();
           if (rect) pointerDownRef.current = { tileId, rect };
+          tapping.toggleOn();
         }}
         onPointerUp={(e) => {
           // Make sure it's a left click.
           if (e.button !== 0) return;
 
           if (tileId !== pointerDownRef.current?.tileId) return;
+
+          tapping.toggleOff();
 
           const pointerDownRect = pointerDownRef.current?.rect;
           const pointerUpRect = document
@@ -197,13 +203,27 @@ export const PinnedDockAppPresenter = ({
 
           if (!pointerDownRect || !pointerUpRect) return;
 
-          // < 5px movement is a click
           const diffX = Math.abs(pointerDownRect.x - pointerUpRect.x);
           const diffY = Math.abs(pointerDownRect.y - pointerUpRect.y);
 
-          if (diffX < 5 && diffY < 5) onClick(app);
+          if (diffX === 0 && diffY === 0) onClick(app);
         }}
       >
+        {tapping.isOn && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 10,
+              borderRadius: 4,
+              backgroundColor: 'rgba(0, 0, 0, 0.2)',
+              pointerEvents: 'none',
+            }}
+          />
+        )}
         <AppTile
           tileId={tileId}
           tileSize="sm"
@@ -211,10 +231,7 @@ export const PinnedDockAppPresenter = ({
           app={app as AppTileType}
           isOpen={hasWindow}
           isActive={isActive}
-          isAnimated={
-            appRef?.installStatus !== InstallStatus.suspended &&
-            appRef?.installStatus !== InstallStatus.failed
-          }
+          isAnimated={false}
         />
       </Reorder.Item>
     ),
@@ -226,6 +243,7 @@ export const PinnedDockAppPresenter = ({
       isMinimized,
       appRef?.installStatus,
       onClick,
+      tapping.isOn,
     ]
   );
 };
