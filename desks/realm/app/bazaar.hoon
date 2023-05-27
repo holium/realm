@@ -1212,7 +1212,7 @@
     ::
     ++  init-catalog
       |=  [charges=(map desk charge:docket)]
-      =/  hidden     `(set desk)`(silt ~['realm' 'realm-wallet' 'courier' 'garden'])
+      =/  hidden     `(set desk)`(silt ~['realm' 'realm-wallet' 'courier' 'garden' 'landscape'])
       =/  syncs=(map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])  get-syncs:core
       =+  peaks=get-pikes:core
       =/  desks=(map desk ship)
