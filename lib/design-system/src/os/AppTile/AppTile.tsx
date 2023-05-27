@@ -10,7 +10,7 @@ import {
   Spinner,
   Text,
 } from '../../../general';
-import { bgIsLightOrDark } from '../../../util';
+import { bgIsLightOrDark, UseToggleHook } from '../../../util';
 
 const sizes = {
   sm: 32,
@@ -155,6 +155,7 @@ interface AppTileProps {
   isAnimated?: boolean;
   highlightOnHover?: boolean;
   onAppClick?: (app: AppTileType) => void;
+  tapping?: UseToggleHook;
 }
 
 export const AppTile = ({
@@ -168,6 +169,7 @@ export const AppTile = ({
   hasTitle,
   installStatus = InstallStatus.installed,
   onAppClick,
+  tapping,
 }: AppTileProps) => {
   const tileRef = useRef(null);
   const isAppGrid =
@@ -415,6 +417,21 @@ export const AppTile = ({
         }}
         className="app-dock-icon"
       >
+        {typeof tapping !== 'undefined' && tapping.isOn && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 10,
+              borderRadius: 4,
+              backgroundColor: 'rgba(0, 0, 0, 0.2)',
+              pointerEvents: 'none',
+            }}
+          />
+        )}
         {status}
         {isInstalling && !isUninstalled && (
           <Flex

@@ -209,21 +209,6 @@ export const PinnedDockAppPresenter = ({
           if (diffX === 0 && diffY === 0) onClick(app);
         }}
       >
-        {tapping.isOn && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              zIndex: 10,
-              borderRadius: 4,
-              backgroundColor: 'rgba(0, 0, 0, 0.2)',
-              pointerEvents: 'none',
-            }}
-          />
-        )}
         <AppTile
           tileId={tileId}
           tileSize="sm"
@@ -232,6 +217,7 @@ export const PinnedDockAppPresenter = ({
           isOpen={hasWindow}
           isActive={isActive}
           isAnimated={false}
+          tapping={tapping}
         />
       </Reorder.Item>
     ),

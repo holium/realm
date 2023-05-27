@@ -157,7 +157,7 @@ const Label = styled(Default)<TextProps>`
 `;
 
 const Custom = styled(Box)<TextProps>`
-  user-select: text;
+  user-select: none;
   ${customStyling}
 `;
 

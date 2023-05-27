@@ -42,7 +42,6 @@ const MessagesTrayPresenter = () => {
     <Flex
       className="realm-cursor-hover"
       position="relative"
-      whileTap={{ scale: 0.95 }}
       transition={{ scale: 0.2 }}
       onClick={onButtonClick}
     >
