@@ -41,7 +41,7 @@ const PinnedWebAppPresenter = ({
         {
           id: 'unpin-web-app',
           label: 'Unpin',
-          onClick: () => SpacesIPC.removeBookmark(path, url, title),
+          onClick: () => SpacesIPC.removeBookmark(path, url),
         },
         window && {
           id: window.isMinimized ? 'show-web-app' : 'hide-web-app',

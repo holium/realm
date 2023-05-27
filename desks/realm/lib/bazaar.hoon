@@ -18,8 +18,6 @@
           [%pin add-pin]
           [%unpin rem-pin]
           [%reorder-pins reorder-pins]
-          [%add-bookmark add-bookmark]
-          [%remove-bookmark remove-bookmark]
           [%recommend add-rec]
           [%unrecommend rem-rec]
           [%suite-add suite-add]
@@ -63,16 +61,6 @@
       %-  ot
       :~  [%path pth]
           [%app-id so]
-      ==
-    ::
-    ++  add-bookmark
-      %-  ot
-      :~  [%app-id so]
-      ==
-    ::
-    ++  remove-bookmark
-      %-  ot
-      :~  [%app-id so]
       ==
     ::
     ++  reorder-pins

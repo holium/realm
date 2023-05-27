@@ -366,7 +366,7 @@
           :: get rid of the pending-install that may have been added
           =/  pending-install         (~(get by pending-installs.state) desk.wave)
           =.  pending-installs.state  ?~(pending-install pending-installs.state (~(del by pending-installs) desk.wave))
-          =.  grid-index              (add-grid-index:helpers:bazaar:core desk.wave grid-index.state)
+          =.  grid-index              (set-grid-index:helpers:bazaar:core desk.wave grid-index.state)
           =.  catalog.state           (~(put by catalog.state) desk.wave u.app)
           :: ~&  >>  "{<dap.bowl>}: %live [app-install-update] {<[host.u.app install-status.u.app]>}"
           :_  state
@@ -382,7 +382,7 @@
           =.  install-status.u.app  ?:(=(install-status.u.app %uninstalled) %suspended install-status.u.app)
           :: ~&  >>  ["{<dap.bowl>}: %wave %held post-status: " install-status.u.app]
           =.  host.u.app            ?~(sync.u.pyk ~ `ship.u.sync.u.pyk)
-          =.  grid-index            (add-grid-index:helpers:bazaar:core desk.wave grid-index.state)
+          =.  grid-index            (set-grid-index:helpers:bazaar:core desk.wave grid-index.state)
           :: ~&  >>  "{<dap.bowl>}: %held [app-install-update] {<[host.u.app install-status.u.app]>}"
           :_  state(catalog (~(put by catalog.state) desk.wave u.app))
           :~  [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk.wave +.u.app grid-index])]
@@ -412,8 +412,6 @@
       %pin               (add-pin +.action)
       %unpin             (rem-pin +.action)
       %reorder-pins      (reorder-pins +.action)
-      %add-bookmark      (add-bookmark +.action)
-      %remove-bookmark   (rem-bookmark +.action)
       %recommend         (recommend +.action)
       %unrecommend       (unrecommend +.action)
       %suite-add         (add-suite +.action)
@@ -452,7 +450,7 @@
       %-  (slog leaf+"{<dap.bowl>} setting host for catalog app {<app-id>} to {<host>}" ~)
       =.  host.u.app          (some host)
       =.  catalog.state       (~(put by catalog.state) app-id u.app)
-      =.  grid-index.state    (add-grid-index:helpers:bazaar:core app-id grid-index.state)
+      =.  grid-index.state    (set-grid-index:helpers:bazaar:core app-id grid-index.state)
       :_  state
       :~  [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update app-id +.u.app grid-index.state])]
       ==
@@ -543,18 +541,6 @@
       :_  state
       [%give %fact [/updates ~] bazaar-reaction+!>([%dock-update path dock])]~
     ::
-    ++  add-bookmark
-      |=  =app-id:store
-      ?>  =(our.bowl src.bowl)
-      =.  grid-index.state  (add-grid-index:helpers:bazaar:core app-id grid-index.state)
-      `state
-    ::
-    ++  rem-bookmark
-      |=  =app-id:store
-      ?>  =(our.bowl src.bowl)
-      =.  grid-index.state  (rem-grid-index:helpers:bazaar:core app-id grid-index.state)
-      `state
-    ::
     ++  rem-pin
       |=  [path=space-path:spaces-store =app-id:store]
       ?>  =(our.bowl src.bowl)
@@ -621,7 +607,7 @@
       =/  app                     (~(get by catalog.state) desk)
       ?~  app                     (docket-install ship desk ~)
       ?>  ?=(%urbit -.u.app)
-      =.  grid-index              (add-grid-index:helpers:bazaar:core desk grid-index.state)
+      =.  grid-index              (set-grid-index:helpers:bazaar:core desk grid-index.state)
       :: ~&  >>  [%install-app app]
       =.  install-status.u.app
         ?:  =(%uninstalled install-status.u.app)  %suspended
@@ -1055,14 +1041,14 @@
         =.  icon.native-app             'AppIconCompass'
         =.  config.native-app           [size=[7 10] titlebar-border=%.y show-titlebar=%.n]
       =.  catalog.init                  (~(put by catalog.init) %os-browser [%native native-app])
-      =.  grid-index.init               (add-grid-index:helpers:bazaar:core %os-browser grid-index.init)
+      =.  grid-index.init               (set-grid-index:helpers:bazaar:core %os-browser grid-index.init)
       =|  =native-app:store
         =.  title.native-app            'Settings'
         =.  color.native-app            '#ACBCCB'
         =.  icon.native-app             'AppIconSettings'
         =.  config.native-app           [size=[5 6] titlebar-border=%.y show-titlebar=%.n]
       =.  catalog.init                  (~(put by catalog.init) %os-settings [%native native-app])
-      =.  grid-index.init               (add-grid-index:helpers:bazaar:core %os-settings grid-index.init)
+      =.  grid-index.init               (set-grid-index:helpers:bazaar:core %os-settings grid-index.init)
       init
     ::
     ++  get-stall-apps
@@ -1149,7 +1135,7 @@
           ==
       ==
     ::
-    ++  add-grid-index
+    ++  set-grid-index
       |=  [=app-id:store =grid-index:store]
       ^-  grid-index:store
       =/  grid-list         (sort-grid:helpers:bazaar:core grid-index)
@@ -1248,7 +1234,7 @@
         =/  sync                (~(get by desks) desk)
         =/  host=(unit ship)    sync
         :: ~&  >>  [desk -.chad.charge install-status]
-        [(~(put by catalog.acc) desk [%urbit docket.charge host install-status (config:scry:bazaar:core desk)]) (add-grid-index desk grid-index.acc)]
+        [(~(put by catalog.acc) desk [%urbit docket.charge host install-status (config:scry:bazaar:core desk)]) (set-grid-index desk grid-index.acc)]
     ::
     ++  skim-installed
       |=  [=app-id:store =app:store]
@@ -1532,7 +1518,7 @@
       =.  config.u.app          (config:scry:bazaar:core app-id)
       u.app
       =.  catalog.state           (~(put by catalog.state) app-id app)
-      =.  grid-index              (add-grid-index:helpers:bazaar:core app-id grid-index.state)
+      =.  grid-index              (set-grid-index:helpers:bazaar:core app-id grid-index.state)
       :: %-  (slog leaf+"{<dap.bowl>}: [update-app-catalog]" ~)
       :: %-  (slog leaf+"  app-install-update => {<[%app-install-update app-id +.app grid-index.state]>}" ~)
       :_  state

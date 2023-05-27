@@ -61,8 +61,6 @@
       [%pin path=space-path:spaces =app-id index=(unit @ud)]
       [%unpin path=space-path:spaces =app-id]
       [%reorder-pins path=space-path:spaces =dock]
-      [%add-bookmark =app-id]
-      [%remove-bookmark =app-id]
       [%recommend =app-id]
       [%unrecommend =app-id]
       [%suite-add path=space-path:spaces =app-id index=@ud]

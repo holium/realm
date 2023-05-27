@@ -574,19 +574,6 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
   }
 
   public async addBookmark(payload: CreateBookmarkPayload) {
-    // try {
-    //   await APIConnection.getInstance().conduit.poke({
-    //     app: 'bazaar',
-    //     mark: 'bazaar-action',
-    //     json: {
-    //       'add-bookmark': {
-    //         'app-id': payload.title.toLowerCase(),
-    //       },
-    //     },
-    //   });
-    // } catch (e) {
-    //   log.error(e);
-    // }
     this.sendUpdate({
       type: 'bookmark-added',
       payload,
@@ -595,21 +582,7 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
     return this.bookmarksDB?.addBookmark(payload);
   }
 
-  public async removeBookmark(path: string, url: string, title: string) {
-    // this might hit collisions between titles of similar pins.
-    // try {
-    //   await APIConnection.getInstance().conduit.poke({
-    //     app: 'bazaar',
-    //     mark: 'bazaar-action',
-    //     json: {
-    //       'remove-bookmark': {
-    //         'app-id': title.toLowerCase(),
-    //       },
-    //     },
-    //   });
-    // } catch (e) {
-    //   log.error(e);
-    // }
+  public async removeBookmark(path: string, url: string) {
     this.sendUpdate({
       type: 'bookmark-removed',
       payload: { path, url },
