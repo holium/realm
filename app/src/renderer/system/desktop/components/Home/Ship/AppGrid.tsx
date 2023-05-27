@@ -62,7 +62,7 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
         }}
       >
         {items.map((app, index: number) => {
-          const tileId = `${app.title}-${index}-ship-grid-tile`;
+          const tileId = `${app.id}-${index}-ship-grid-tile`;
           return (
             <GridItem
               id={tileId}
