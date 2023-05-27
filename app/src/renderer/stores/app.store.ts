@@ -232,7 +232,7 @@ function registerOnUpdateListener() {
     if (update.type === 'account-updated') {
       appState.authStore._onUpdateAccount(update.payload);
     }
-    if (update.type === 'add-server') {
+    if (update.type === 'add-identity') {
       appState.setOnboardingStep('/hosting');
       appState.setCurrentScreen('onboarding');
     }

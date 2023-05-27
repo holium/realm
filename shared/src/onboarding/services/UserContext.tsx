@@ -16,8 +16,8 @@ interface IUserContext {
   token: string | null;
   email: string | null;
   ships: ThirdEarthShip[];
-  selectedPatp: string;
-  setSelectedPatp: (patp: string) => void;
+  selectedIdentity: string;
+  setSelectedIdentity: (patp: string) => void;
 }
 
 const UserContext = createContext<IUserContext>(null as any);
@@ -31,7 +31,7 @@ export const UserContextProvider = ({ api, children }: Props) => {
   const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [ships, setShips] = useState<ThirdEarthShip[]>([]);
-  const [selectedPatp, setSelectedPatp] = useState<string>('');
+  const [selectedIdentity, setSelectedIdentity] = useState<string>('');
 
   useEffect(() => {
     const { token, email } = OnboardingStorage.get();
@@ -44,7 +44,7 @@ export const UserContextProvider = ({ api, children }: Props) => {
       setToken(token);
       setEmail(email);
       setShips(newShips ?? []);
-      setSelectedPatp(newShips[0]?.patp ?? '');
+      setSelectedIdentity(newShips[0]?.patp ?? '');
     };
 
     getAndSetUserData();
@@ -56,8 +56,8 @@ export const UserContextProvider = ({ api, children }: Props) => {
         token,
         email,
         ships,
-        selectedPatp,
-        setSelectedPatp,
+        selectedIdentity,
+        setSelectedIdentity,
       }}
     >
       {children}

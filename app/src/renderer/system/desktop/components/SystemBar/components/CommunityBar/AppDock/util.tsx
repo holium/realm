@@ -8,9 +8,7 @@ export const getCharacterFromUrl = (url: string) =>
     .toUpperCase();
 
 export const getFaviconFromUrl = (url: string) => {
-  const { protocol, host } = new URL(url);
-
-  return `${protocol}//${host}/favicon.ico`;
+  return `https://www.google.com/s2/favicons?domain=${url}&sz=256`;
 };
 
 export const getSiteNameFromUrl = (url: string) =>

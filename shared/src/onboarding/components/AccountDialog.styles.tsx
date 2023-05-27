@@ -5,12 +5,15 @@ import { Flex } from '@holium/design-system/general';
 import {
   MOBILE_WIDTH,
   OnboardDialogCard,
+  onboardDialogCardCss,
   OnboardDialogDescription,
   OnboardDialogTitle,
   TABLET_WIDTH,
 } from './OnboardDialog.styles';
 
-export const AccountDialogCard = styled(OnboardDialogCard)`
+export const AccountDialogCard = styled.form`
+  ${onboardDialogCardCss}
+
   height: 500px;
   flex-direction: row;
   padding: 16px;

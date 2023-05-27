@@ -1,11 +1,12 @@
-import styled from 'styled-components';
+import { Form } from 'formik';
+import styled, { css } from 'styled-components';
 
 import { Text } from '@holium/design-system/general';
 
 export const TABLET_WIDTH = 800;
 export const MOBILE_WIDTH = 400;
 
-export const OnboardDialogCard = styled.form`
+export const onboardDialogCardCss = css`
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -40,6 +41,10 @@ export const OnboardDialogCard = styled.form`
   }
 `;
 
+export const OnboardDialogCard = styled(Form)`
+  ${onboardDialogCardCss}
+`;
+
 export const OnboardDialogBody = styled.div`
   flex: 1;
   width: 100%;
@@ -57,6 +62,7 @@ export const OnboardDialogBody = styled.div`
 export const OnboardDialogBodyContainer = styled.div`
   display: flex;
   flex: 5;
+  min-width: 0;
   gap: 16px;
   flex-direction: column;
   justify-content: center;

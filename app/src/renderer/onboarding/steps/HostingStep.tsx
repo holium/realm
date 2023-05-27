@@ -48,7 +48,7 @@ export const HostingStepPresenter = ({ setStep }: StepProps) => {
 
   const onAddExistingServer = () => {
     OnboardingStorage.set({ serverType: 'local' });
-    setStep('/add-server');
+    setStep('/add-identity');
   };
 
   return (

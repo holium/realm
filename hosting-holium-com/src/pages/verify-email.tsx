@@ -1,3 +1,5 @@
+import { FormikValues } from 'formik';
+
 import { OnboardingStorage, VerifyEmailDialog } from '@holium/shared';
 
 import { Page } from '../components/Page';
@@ -25,14 +27,16 @@ export default function VerifyEmail() {
 
   const onBack = () => goToPage('/');
 
-  const onNext = async (verificationcode: string) => {
+  const onNext = async ({ verificationcode }: FormikValues) => {
     try {
       const result = await thirdEarthApi.verifyEmail(verificationcode);
       OnboardingStorage.set({ token: result.token });
 
-      if (Boolean(result)) goToPage('/choose-id');
-
-      return Boolean(result);
+      if (Boolean(result)) {
+        return goToPage('/choose-id');
+      } else {
+        return false;
+      }
     } catch (error) {
       console.error(error);
 
