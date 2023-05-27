@@ -613,8 +613,6 @@ export const BazaarStore = types
             const index = apps.findIndex((app) => app.id === indexes[i]);
             apps[index].setGridIndex(i);
           }
-          // console.log('reorder grid index!', indexes);
-          // console.warn(self.catalog.values());
         },
         _addAlly(ship: string, data: any) {
           allies.set(ship, data);

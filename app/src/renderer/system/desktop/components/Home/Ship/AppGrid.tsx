@@ -27,21 +27,14 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
     () =>
       [
         ...bazaarStore.installed,
-        // ...(currentSpace?.bookmarks ?? []),
         // ...bazaarStore.devApps,
       ] as AppMobxType[],
-    [
-      bazaarStore.catalog,
-      bazaarStore.installations.values(),
-      currentSpace?.bookmarks,
-    ]
+    [bazaarStore.catalog, bazaarStore.installations.values()]
   );
 
   const [items, setItems] = useState(apps);
   const canClick = useToggle(true);
 
-  // TODO: we should remove this listener when the component unmounts
-  // or find a more efficient way to get if the user is dragging
   useEffect(() => {
     window.electron.app.onMouseMove((position, state, isDragging) => {
       canClick.setToggle(!isDragging);
@@ -70,30 +63,6 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
         }}
       >
         {items.map((app, index: number) => {
-          // console.log(app);
-          // this is messy.  TODO consolidate devapps, pins, and installed apps into one component.
-          // if (app.hasOwnProperty('url')) {
-          //   const tileId = `appgrid-${index}-pinned-${app.url}`;
-          //   return (
-          //     <GridItem
-          //       id={tileId}
-          //       key={tileId}
-          //       onMouseDownCapture={() => {
-          //         disableScroll.on();
-          //       }}
-          //       onMouseUpCapture={() => {
-          //         disableScroll.off();
-          //       }}
-          //     >
-          //       <PinnedWebApp
-          //         key={`appgrid-${index}-pinned-${app.url}`}
-          //         canClick={canClick}
-          //         {...app}
-          //         isGrid
-          //       />
-          //     </GridItem>
-          //   );
-          // } else {
           const tileId = `${app.title}-${index}-ship-grid-tile`;
           return (
             <GridItem

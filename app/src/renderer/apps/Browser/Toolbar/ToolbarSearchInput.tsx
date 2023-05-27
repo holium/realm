@@ -42,15 +42,13 @@ const ToolbarSearchInputPresenter = ({ innerRef, readyWebview }: Props) => {
     const spacePath = currentSpace?.path;
     if (!spacePath) return;
 
-    const title = getSiteNameFromUrl(input);
-
     if (starred) {
       SpacesIPC.removeBookmark(spacePath, input);
     } else {
       SpacesIPC.addBookmark({
         path: spacePath,
         url: input,
-        title: title,
+        title: getSiteNameFromUrl(input),
         favicon: getFaviconFromUrl(input),
         color: '#FFFFFF',
       });
