@@ -34,7 +34,6 @@ export const WebAppTile = ({
       onTapStart={() => tapping.toggleOn()}
       onTapCancel={() => tapping.toggleOff()}
       onTap={() => tapping.toggleOff()}
-      // onTap={}
       style={{
         position: 'relative',
         width: size,
