@@ -1,5 +1,4 @@
 export * from './src/os/AppTile/AppTile';
-export * from './src/os/AppTile/AppTile';
 export * from './src/os/Bar/Bar';
 export { Bookmark } from './src/os/Bookmark/Bookmark';
 export * from './src/os/Notifications/AppGroup';
