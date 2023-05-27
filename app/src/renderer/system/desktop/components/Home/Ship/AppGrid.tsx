@@ -58,7 +58,6 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
         rowHeight={maxWidth / 4}
         style={{
           height: (maxWidth / 4) * Math.ceil(apps.length / 4),
-          // overflow: 'hidden',
           width: maxWidth,
         }}
       >

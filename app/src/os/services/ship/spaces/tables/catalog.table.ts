@@ -88,7 +88,8 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
           ) app
         FROM app_catalog ac
         LEFT JOIN app_grid ag ON ac.id = ag.appId
-        LEFT JOIN app_recommendations ar ON ac.id = ar.id;`
+        LEFT JOIN app_recommendations ar ON ac.id = ar.id
+        WHERE ac.id != 'landscape';`
     );
     const apps: any[] = select.all();
     if (!apps.length) return {};

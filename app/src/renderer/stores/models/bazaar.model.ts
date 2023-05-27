@@ -174,10 +174,6 @@ export const BazaarStore = types
                 return false;
               } else if (app.type === 'urbit') {
                 const urb = app as AppMobxType;
-                if (urb.id === 'landscape') {
-                  urb.gridIndex = 9999;
-                  return false;
-                }
                 return (
                   // 'started' installs should show on the desktop no?
 
@@ -611,7 +607,9 @@ export const BazaarStore = types
           const apps = Array.from<AppMobxType>(self.catalog.values());
           for (let i = 0; i < Object.keys(indexes).length; i++) {
             const index = apps.findIndex((app) => app.id === indexes[i]);
-            apps[index].setGridIndex(i);
+            if (index !== -1) {
+              apps[index].setGridIndex(i);
+            }
           }
         },
         _addAlly(ship: string, data: any) {
