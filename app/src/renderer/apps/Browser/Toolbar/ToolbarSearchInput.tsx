@@ -50,7 +50,7 @@ const ToolbarSearchInputPresenter = ({ innerRef, readyWebview }: Props) => {
         url: input,
         title: getSiteNameFromUrl(input),
         favicon: getFaviconFromUrl(input),
-        color: '#92D4F9',
+        color: '#FFFFFF',
       });
     }
   };
