@@ -414,6 +414,19 @@ export const BazaarStore = types
             }
           }
         }),
+        reorderApp: flow(function* (oldIndex: number, newIndex: number) {
+          try {
+            const apps = Array.from<AppMobxType>(self.catalog.values());
+            const indexOfApp = apps.findIndex(
+              (app) => app.gridIndex === oldIndex
+            );
+            const desk = apps[indexOfApp].id;
+            if (!desk) return;
+            return yield BazaarIPC.reorderApp(desk, newIndex);
+          } catch (error) {
+            console.error(error);
+          }
+        }),
         recommendApp: flow(function* (appId: string) {
           try {
             self.recommendations.push(appId);
@@ -589,6 +602,15 @@ export const BazaarStore = types
         _onUnrecommendedUpdate(appId: string) {
           const app = self.catalog.get(appId);
           if (app) app.setIsRecommended(false);
+        },
+        _onReorderGridIndex(indexes: any) {
+          const apps = Array.from<AppMobxType>(self.catalog.values());
+          for (let i = 0; i < Object.keys(indexes).length; i++) {
+            const index = apps.findIndex((app) => app.id === indexes[i]);
+            if (index !== -1) {
+              apps[index].setGridIndex(i);
+            }
+          }
         },
         _addAlly(ship: string, data: any) {
           allies.set(ship, data);

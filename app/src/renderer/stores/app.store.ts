@@ -361,6 +361,9 @@ function registerOnUpdateListener() {
       case 'treaties-loaded':
         shipStore.bazaarStore.scryTreaties(payload.ship);
         break;
+      case 'reorder-grid-index':
+        shipStore.bazaarStore._onReorderGridIndex(payload);
+        break;
     }
   });
 

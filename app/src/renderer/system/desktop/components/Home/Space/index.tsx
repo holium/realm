@@ -216,7 +216,7 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
                 flexWrap="wrap"
                 flexDirection="row"
               >
-                <AppGrid />
+                <AppGrid maxWidth={maxWidth} />
               </Flex>
             </Flex>
           ) : (

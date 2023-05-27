@@ -67,6 +67,7 @@
       [%suite-remove path=space-path:spaces index=@ud]
       [%install-app =ship =desk]
       [%uninstall-app =desk]
+      [%reorder-app =app-id index=@ud]
       [%initialize args=(map cord cord)]
       [%rebuild-catalog args=(map cord cord)]
       [%rebuild-stall path=space-path:spaces args=(map cord cord)]
@@ -98,6 +99,7 @@
       [%rebuild-catalog =catalog =grid-index]
       [%rebuild-stall path=space-path:spaces =catalog =stall]
       [%clear-stall path=space-path:spaces]
+      [%reorder-grid-index =grid-index]
   ==
 +$  view
   $%  [%catalog =catalog]
