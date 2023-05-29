@@ -36,7 +36,7 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
   const canClick = useToggle(true);
 
   useEffect(() => {
-    window.electron.app.onMouseMove((_, __, isDragging) => {
+    window.electron.app.onMouseMove((_position, _state, isDragging) => {
       canClick.setToggle(!isDragging);
     });
   }, []);
