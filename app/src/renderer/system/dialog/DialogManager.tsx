@@ -22,8 +22,6 @@ const DialogManagerPresenter = ({
   const [dialogConfig, setDialogConfig] = useState<DialogConfig | null>(null);
   const [dialogWindow, setDialogWindow] = useState<ReactNode>(null);
 
-  console.log(dialogConfig);
-
   const isOpen = useMemo(() => Boolean(dialogId), [dialogId]);
 
   const onEsc = useCallback(() => {
@@ -67,7 +65,12 @@ const DialogManagerPresenter = ({
   );
 
   useEffect(() => {
-    if (dialogId) openAndSetDialogWindow(dialogId);
+    if (dialogId) {
+      openAndSetDialogWindow(dialogId);
+    } else {
+      setDialogConfig(null);
+      setDialogWindow(null);
+    }
   }, [dialogId, openAndSetDialogWindow]);
 
   return (
