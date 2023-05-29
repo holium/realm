@@ -44,7 +44,7 @@ export const ResetCodeDialogConfig: (dialogProps: any) => DialogConfig = (
   }),
   hasCloseButton: true,
   noTitlebar: false,
-  draggable: false,
+  static: true,
 });
 
 type ResetCodeProps = {
