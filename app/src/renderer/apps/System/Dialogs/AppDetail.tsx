@@ -357,5 +357,5 @@ export const AppDetailDialog: (dialogProps: AppDetailProps) => DialogConfig = (
     }),
     hasCloseButton: true,
     unblurOnClose: false,
-    draggable: false,
+    static: true,
   } as DialogConfig);

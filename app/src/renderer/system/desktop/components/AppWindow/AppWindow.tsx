@@ -56,6 +56,12 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
 
   const appInfo = bazaarStore.getApp(appWindow.appId);
   const borderRadius = appWindow.type === 'dialog' ? 16 : 12;
+
+  const allowDragOrResize = useMemo(
+    () => appWindow.type !== 'dialog' || appWindow.static,
+    [appWindow.type, appWindow.static]
+  );
+
   const bounds = useMemo(
     () => denormalizeBounds(appWindow.bounds, shellStore.desktopDimensions),
     [appWindow.bounds, shellStore.desktopDimensions]
@@ -342,6 +348,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   }, [dragging.isOn]);
 
   const onDragStart = (e: PointerEvent<HTMLDivElement>) => {
+    if (!allowDragOrResize) return;
     dragging.toggleOn();
     dragControls.start(e);
   };
@@ -481,29 +488,31 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
             appWindow={appWindow}
           />
         </ErrorBoundary>
-        <AppWindowResizeHandles
-          zIndex={appWindow.zIndex + 1}
-          topRight={{
-            x: resizeTopRightX,
-            y: resizeTopRightY,
-          }}
-          topLeft={{
-            x: resizeTopLeftX,
-            y: resizeTopLeftY,
-          }}
-          bottomLeft={{
-            x: resizeBottomLeftX,
-            y: resizeBottomLefty,
-          }}
-          bottomRight={{
-            x: resizeBottomRightX,
-            y: resizeBottomRightY,
-          }}
-          onDragTopLeft={handleTopLeftCornerResize}
-          onDragTopRight={handleTopRightCornerResize}
-          onDragBottomLeft={handleBottomLeftCornerResize}
-          onDragBottomRight={handleBottomRightCornerResize}
-        />
+        {allowDragOrResize && (
+          <AppWindowResizeHandles
+            zIndex={appWindow.zIndex + 1}
+            topRight={{
+              x: resizeTopRightX,
+              y: resizeTopRightY,
+            }}
+            topLeft={{
+              x: resizeTopLeftX,
+              y: resizeTopLeftY,
+            }}
+            bottomLeft={{
+              x: resizeBottomLeftX,
+              y: resizeBottomLefty,
+            }}
+            bottomRight={{
+              x: resizeBottomRightX,
+              y: resizeBottomRightY,
+            }}
+            onDragTopLeft={handleTopLeftCornerResize}
+            onDragTopRight={handleTopRightCornerResize}
+            onDragBottomLeft={handleBottomLeftCornerResize}
+            onDragBottomRight={handleBottomRightCornerResize}
+          />
+        )}
       </Flex>
     </AppWindowContainer>
   );

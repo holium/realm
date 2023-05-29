@@ -48,7 +48,7 @@ export const AppWindowModel = types
       height: 5,
     }),
     /**
-     * The ative window has a titlebar with full contrast.
+     * The active window has a titlebar with full contrast.
      */
     isActive: types.optional(types.boolean, false),
     /**
@@ -58,6 +58,10 @@ export const AppWindowModel = types
       types.enumeration(['normal', 'minimized', 'fullscreen']),
       'normal'
     ),
+    /**
+     *  The window is static and cannot be moved or resized.
+     */
+    static: types.optional(types.boolean, false),
   })
   .views((self) => ({
     get isMinimized() {
