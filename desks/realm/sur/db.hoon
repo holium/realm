@@ -80,7 +80,7 @@
 +$  path-row
   $:  =path
       host=ship
-      replication=?(%host %gossip %shared-host)  :: for now only %host is supported
+      =replication
       default-access=access-rules   :: for everything not found in the table-access
       =table-access                 :: allows a path to specify role-based access rules on a per-table basis
       =constraints
@@ -88,6 +88,7 @@
       updated-at=@da
       received-at=@da
   ==
++$  replication   ?(%host %gossip %shared-host)  :: for now only %host is supported
 +$  table-access  (map type:common access-rules)
 +$  access-rules  (map role access-rule)
 +$  access-rule   [create=? edit=permission-scope delete=permission-scope]
@@ -149,7 +150,7 @@
 +$  action
   $%
       :: only from our.bowl
-      [%create-path =path-row peers=ship-roles]       :: create a new peers list, sends %get-path to all peers
+      [%create-path =input-path-row]       :: create a new peers list, sends %get-path to all peers
       [%create-from-space =path space-path=path =role]  :: create a new peers list based on space members, automatically keeps peers list in sync, sends %get-path to all peers
       [%remove-path =path]                    :: remove a peers list and all attached objects in tables, sends %delete-path to all peers
       [%add-peer =path =ship =role]           :: add a peer to an existing peers list, sends %get-path to that peer
@@ -158,15 +159,22 @@
       [%get-path =path-row peers=ship-roles]  :: when we are being informed that we were added to a peers list. we don't know the list, only the host (which is who sent it to us)
       [%delete-path =path]                    :: when we are being informed that we got kicked (or host deleted the path entirely). also deletes all attached objects
 
-      :: only from our.bowl
-      [%create =input-row]      :: %host creating the row, sends %get to all peers
-      [%edit =row]        :: %host editing the row, sends %get to all peers
+      :: any peer in the path can send these pokes to the %host
+      :: if they have right permissions, host will propagate the data
+      [%create =input-row]          :: sends %add-row to all subs
+      [%edit =id:common =input-row] :: sends %upd-row to all subs
       [%remove =type:common =path =id:common]      :: %host deleting the row, sends %delete to all peers
-      :: only from host foreign ship
-    :: these arent needed on subs model of data-replication
-::      [%get =row]         :: when we receive a new version of the row from %host
-::      [%delete =row]      :: when %host tells us that the row was deleted
   ==
+::
++$  input-path-row
+  $:  =path
+      =replication
+      default-access=access-rules
+      =table-access
+      =constraints
+      peers=ship-roles
+  ==
+::
 +$  input-row
   $:  =path
       =type:common

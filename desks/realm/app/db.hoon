@@ -92,10 +92,6 @@
         (get-path:db +.act state bowl)
       %delete-path
         (delete-path:db +.act state bowl)
-::       %get-peer
-::         (get-peer:db +.act state bowl)
-::       %delete-peer
-::         (delete-peer:db +.act state bowl)
 
       %create
         (create:db +.act state bowl)
@@ -178,27 +174,29 @@
       [%x %db ~]
         ``db-state+!>(state)
     ::
-::     :: objects from all tables on a specific path
-::       [%x %db %path *]
-::         =/  thepath  t.t.t.path
-::         =/  thepathrow  (~(got by paths-table.state) thepath)
-::         ``db-dump+!>([%tables [[%paths (malt (limo ~[[thepath thepathrow]]))] ~]])
-::     ::
-::     :: the current peers list for a given path
-::     :: .^(* %gx /(scot %p our)/chat-db/(scot %da now)/db/peers/a/path/to/a/chat/noun)
-::       [%x %db %peers *]
-::         =/  thepath  t.t.t.path
-::         =/  thepeers  (~(got by peers-table.state) thepath)
-::         ``chat-db-dump+!>([%tables [[%peers (malt (limo ~[[thepath thepeers]]))] ~]])
-::     ::
-::     :: /x/db/start-ms/[unix ms].json
-::     :: all tables, but only with received-at after <time>
-::       [%x %db %start-ms @ ~]
-::         =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
-::         =/  msgs            messages+(start:from:db-lib timestamp messages-table.state)
-::         =/  paths           paths+(path-start:from:db-lib timestamp paths-table.state)
-::         =/  peers           peers+(peer-start:from:db-lib timestamp peers-table.state)
-::         ``chat-db-dump+!>(tables+[msgs paths peers ~])
+    :: full information about a given path
+      [%x %db %path *]
+        =/  thepath  t.t.t.path
+        =/  thepathrow  (~(got by paths.state) thepath)
+        =/  thepeers    (~(got by peers.state) thepath)
+        =/  tbls        (tables-by-path:db tables.state thepath)
+        =/  dels=(list [@da db-del-change])
+          %+  skim
+            ~(tap by del-log.state)
+          |=  [k=@da v=db-del-change]
+          ^-  ?
+          ?-  -.v
+            %del-row   =(path.v thepath)
+            %del-peer  =(path.v thepath)
+            %del-path  =(path.v thepath)
+          ==
+        ``db-path+!>([thepathrow thepeers tbls schemas.state dels])
+    ::
+    :: /x/db/start-ms/[unix ms].json
+    :: all tables, but only with received-at after <time>
+      [%x %db %start-ms @ ~]
+        =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
+        ``db-state+!>((after-time:db state timestamp))
 ::     :: /x/db/[table]/start-ms/[unix ms].json
 ::     :: specific table, but only with received-at after <time>
 ::       [%x %db %start-ms @ ~]

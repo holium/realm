@@ -215,43 +215,67 @@
       $(index +(index))
     $(index +(index), result (~(put by result) current-type (need tbl)))
 ::
+++  after-time
+  |=  [st=state-0 t=@da]
+  ^-  state-0
+  ?:  =(0 t)  st
+  =.  paths.st
+    (~(gas by *paths) (skim ~(tap by paths.st) |=(kv=[=path =path-row] (gth received-at.path-row.kv t))))
+  =/  allpeers
+    %+  skim
+      ^-  (list peer)
+      %-  zing
+      ~(val by peers.st)
+    |=  =peer
+    (gth received-at.peer t)
+  =.  peers.st
+    (~(put by *peers) /fake allpeers)
+  st
 ::
 :: pokes
 ::   tests:
-::db &db-action [%create-path [/example ~zod %host ~ ~ ~ *@da *@da *@da] ~[[~zod %host] [~bus %member]]]
+::db &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
 ::db &db-action [%add-peer /example ~fed %member]
 ::db &db-action [%create /example %foo 0 [%general ~[1 'a']] ~[['num' 'ud'] ['str' 't']]]
-::db &db-action [%create /example %vote 0 [%vote [%.y our %foo [~zod now] /example]] ~]
+::db &db-action [%create /example %vote 0 [%vote [%.y our %foo [our now] /example]] ~]
+::~zod/db &db-action [%create /example %vote 0 [%vote %.y our %foo [~zod now] /example] ~]
 ::db &db-action [%edit /example [our ~2023.5.22..20.15.47..86fe] %foo 0 [%general ~[2 'b']] *@da *@da *@da]
 ::db &db-action [%remove %foo /example [our ~2023.5.22..20.15.47..86fe]]
-::db &db-action [%create [/example [our now] %foo 0 [%general ~[1 'c']] *@da *@da *@da] ~]
 ::
 ++  create-path
-::db &db-action [%create-path [/example ~zod %host ~ ~ ~ *@da *@da *@da] ~[[~zod %host] [~bus %member]]]
-  |=  [[=path-row peers=ship-roles] state=state-0 =bowl:gall]
+::db &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
+  |=  [=input-path-row state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: ensure the path doesn't already exist
-  =/  pre-existing    (~(get by paths.state) path.path-row)
+  =/  pre-existing    (~(get by paths.state) path.input-path-row)
   ?>  =(~ pre-existing)
   :: ensure this came from our ship
   ?>  =(our.bowl src.bowl)
 
   :: local state updates
   :: create the path-row
-  =.  host.path-row         our.bowl
-  =.  created-at.path-row   now.bowl
-  =.  updated-at.path-row   now.bowl
-  =.  received-at.path-row  now.bowl
+  =/  path-row=path-row  [
+    path.input-path-row
+    our.bowl
+    replication.input-path-row
+    default-access.input-path-row
+    table-access.input-path-row
+    constraints.input-path-row
+    now.bowl
+    now.bowl
+    now.bowl
+  ]
+  :: overwrite with global default if path-default is not specified
   =.  default-access.path-row
     ?~  default-access.path-row
       default-access-rules
     default-access.path-row
   =.  paths.state     (~(put by paths.state) path.path-row path-row)
   :: create the peers list
-  =.  peers :: ensure [our.bowl %host] is in the peers list
-    ?~  (find [[our.bowl %host]]~ peers)
-      [[our.bowl %host] peers]
-    peers
+  =/  peers :: ensure [our.bowl %host] is in the peers list
+    ?~  (find [[our.bowl %host]]~ peers.input-path-row)
+      [[our.bowl %host] peers.input-path-row]
+    peers.input-path-row
   =/  peerslist
     %+  turn
       peers
@@ -274,7 +298,7 @@
     |=  =peer
     ^-  card
     (get-path-card ship.peer path-row peers)
-  :: emit the change to subscribers
+  :: emit the change to self-subscriptions (our clients)
   =/  thechange  db-changes+!>([[%add-path path-row] (turn peerslist |=(p=peer [%add-peer p]))])
   =/  subscription-facts=(list card)  :~
     [%give %fact [/db (weld /path path.path-row) ~] thechange]
@@ -491,7 +515,6 @@
     now.bowl
   ]
 
-  ~&  >>>  "%create called"
   :: ensure the path actually exists
   =/  path-row=path-row    (~(got by paths.state) path.row)
   ?.  (has-create-permissions path-row row state bowl)
@@ -517,30 +540,43 @@
 
   [cards state]
 ::
-++  edit
-::db &db-action [%edit /example [our ~2023.5.22..17.21.47..9d73] %foo 0 [%general ~[2 'b']] *@da *@da *@da]
-  |=  [=row state=state-0 =bowl:gall]
+++  edit  :: falls back to existing db schema if schema from poke input is null
+:: generally, you'd only bother passing the schema if you are changing the version of the row
+::db &db-action [%edit [our ~2023.5.22..17.21.47..9d73] /example %foo 0 [%general ~[2 'b']] ~]
+  |=  [[=id:common =input-row] state=state-0 =bowl:gall]
+  ~&  >>>  "edit called"
   ^-  (quip card state-0)
   :: permissions
-  =/  old-row              (~(got by (~(got by (~(got by tables.state) type.row)) path.row)) id.row) :: old row must first exist
-  =/  path-row=path-row    (~(got by paths.state) path.row)
+  =/  old-row              (~(got by (~(got by (~(got by tables.state) type.input-row)) path.input-row)) id) :: old row must first exist
+  =/  path-row=path-row    (~(got by paths.state) path.input-row)
   ?.  (has-edit-permissions path-row old-row state bowl)
-    ~&  >>>  "{(scow %p src.bowl)} tried to edit a %{(scow %tas type.row)} row where they didn't have permissions"
+    ~&  >>>  "{(scow %p src.bowl)} tried to edit a %{(scow %tas type.input-row)} row where they didn't have permissions"
     `state
 
   :: schema checking
-  =/  sch=schema            (~(got by schemas.state) [type.row v.row]) :: currently just ensuring that we have the schema already
+  =/  sch=schema
+    ?~  schema.input-row
+      (~(got by schemas.state) [type.input-row v.input-row]) :: crash if they didn't pass a schema AND we don't already have one
+    schema.input-row
   :: TODO check that new version doesn't violate constraints
 
   :: update path
-  =/  path-sub-wire           (weld /next/(scot %da updated-at.path-row) path.row)
+  =/  path-sub-wire           (weld /next/(scot %da updated-at.path-row) path.path-row)
   =.  updated-at.path-row     now.bowl
   =.  received-at.path-row    now.bowl
-  =.  paths.state             (~(put by paths.state) path.row path-row)
+  =.  paths.state             (~(put by paths.state) path.path-row path-row)
 
   :: cleanup input
-  =.  updated-at.row    now.bowl
-  =.  received-at.row   now.bowl
+  =/  row=row  [
+    path.input-row
+    id
+    type.input-row
+    v.input-row
+    data.input-row
+    created-at.old-row
+    now.bowl
+    now.bowl
+  ]
 
   =.  state             (add-row-to-db row sch state)
 
@@ -607,7 +643,11 @@
       %-  of
       :~  [%add-peer add-peer]
           [%kick-peer kick-peer]
+          [%create-path create-path]
+          [%remove-path pa]
           [%create de-input-row]
+          [%edit (ot ~[[%id de-id] [%input-row de-input-row]])]
+          [%remove remove]
       ==
     ::
     ++  add-peer
@@ -623,10 +663,105 @@
           [%ship de-ship]
       ==
     ::
+    ++  remove
+      %-  ot
+      :~  [%type (se %tas)]
+          [%path pa]
+          [%id de-id]
+      ==
+    ::
+    ++  create-path
+      |=  jon=json
+      ^-  input-path-row
+      ?>  ?=([%o *] jon)
+      =/  urep    (~(get by p.jon) 'replication')
+      =/  replication=replication
+        ?~  urep
+          %host
+        (de-replication (need urep))
+      =/  udef    (~(get by p.jon) 'default-access')
+      =/  default-access 
+        ?~  udef
+          ~
+        (de-access-rules (need udef))
+      =/  utbl    (~(get by p.jon) 'table-access')
+      =/  table-access 
+        ?~  utbl
+          ~
+        (de-table-access (need utbl))
+      [
+        (pa (~(got by p.jon) 'path'))
+        replication
+        default-access
+        table-access
+        ~ :: TODO parse json constraints
+        ((ar (ot ~[[%ship de-ship] [%role (se %tas)]])) (~(got by p.jon) 'peers'))
+      ]
+    ::
+    ++  de-table-access
+      |=  jon=json
+      ^-  table-access
+      ?>  ?=([%o *] jon)
+      =/  type-keys  ~(tap in ~(key by p.jon))
+      =/  kvs
+        %+  turn
+          type-keys
+        |=  k=@t
+        ^-  [k=type:common v=access-rules]
+        [`@tas`k (de-access-rules (~(got by p.jon) k))]
+      (~(gas by *table-access) kvs)
+    ::
+    ++  de-access-rules
+      |=  jon=json
+      ^-  access-rules
+      ?>  ?=([%o *] jon)
+      =/  role-keys  ~(tap in ~(key by p.jon))
+      =/  kvs
+        %+  turn
+          role-keys
+        |=  k=@t
+        ^-  [k=role v=access-rule]
+        [`@tas`k (de-access-rule (~(got by p.jon) k))]
+      (~(gas by *access-rules) kvs)
+    ::
+    ++  de-access-rule
+      %-  ot
+      :~  [%create bo]
+          [%edit de-permission-scope]
+          [%delete de-permission-scope]
+      ==
+    ::
+    ++  de-replication
+      %+  cu
+        tas-to-replication
+      (se %tas)
+    ::
+    ++  tas-to-replication
+      |=  t=@tas
+      ^-  replication
+      ?+  t  !!
+        %shared-host  %shared-host
+        %host         %host
+        %gossip       %gossip
+      ==
+    ::
+    ++  de-permission-scope
+      %+  cu
+        tas-to-permission-scope
+      (se %tas)
+    ::
+    ++  tas-to-permission-scope
+      |=  t=@tas
+      ^-  permission-scope
+      ?+  t  !!
+        %table  %table
+        %own    %own
+        %none   %none
+      ==
+    ::
     ++  de-input-row
       |=  jon=json
       ^-  input-row
-      ~&  >>>  "de-input-row called"
       ?>  ?=([%o *] jon)
       =/  data-type   ((se %tas) (~(got by p.jon) 'type'))
       =/  schema=schema     ((ar (at ~[so so])) (~(got by p.jon) 'schema'))
@@ -659,8 +794,13 @@
         =/  next=@
           ?:  =(type-key 'rd')    (ne datatom)
           ?:  =(type-key 'ud')    (ni datatom)
+          ?:  =(type-key 'da')    (di datatom)
+          ?:  =(type-key 'dr')    (dri datatom)
           ?:  =(type-key 't')     (so datatom)
           ?:  =(type-key 'path')  (jam (pa datatom))
+          ?:  =(type-key 'list')  (jam ((ar so) datatom))
+          ?:  =(type-key 'set')   (jam ((as so) datatom))
+          ?:  =(type-key 'map')   (jam ((om so) datatom))
           !!
         $(index +(index), result (snoc result next))
     ::
@@ -699,9 +839,9 @@
       %-  pairs
       :~  ['state-version' (numb `@`-.st)]
           ['data-tables' (en-tables tables.st schemas.st)]
-        :: ['schemas' (en-schemas X)]
-        :: ['paths' (en-paths X)]
-        :: ['peers' (en-peers X)]
+          ['schemas' (en-schemas schemas.st)]
+          ['paths' (en-paths paths.st)]
+          ['peers' (en-peers peers.st)]
         :: ['del-log' (en-del-log X)]
       ==
     ::
@@ -719,10 +859,10 @@
       ^-  json
       :: TODO actually return the data
       %-  pairs
-      :~  ['path-row' ~]
-          ['peers' ~]
+      :~  ['path-row' (en-path-row path-row.fp)]
+          ['peers' a+(turn peers.fp en-peer)]
           ['tables' ~]
-          ['schemas' ~]
+          ['schemas' (en-schemas schemas.fp)]
           ['dels' ~]
       ==
     ::
@@ -777,6 +917,9 @@
                 ?:  =(t.sch 'da')  (time `@da`d)
                 ?:  =(t.sch 'dr')  (time-dr `@dr`d)
                 ?:  =(t.sch 'path')  (path ;;(^path (cue d)))
+                ?:  =(t.sch 'list')  [%a (turn ;;((list @t) (cue d)) |=(i=@t s+i))]
+                ?:  =(t.sch 'set')   [%a (turn ~(tap in ;;((set @t) (cue d))) |=(i=@t s+i))]
+                ?:  =(t.sch 'map')   [%o (~(run by ;;((map @t @t) (cue d))) |=(i=@t s+i))]
                 !!
               $(index +(index), result [[name.sch t] result])
           %vote
@@ -789,6 +932,82 @@
         ==
       =/  keyvals  (weld basekvs dynamickvs)
       (pairs keyvals)
+    ::
+    ++  en-path-row
+      |=  =path-row
+      ^-  json
+      %-  pairs
+      :~  ['path' (path path.path-row)]
+          ['host' s+(scot %p host.path-row)]
+          ['replication' s+(scot %tas replication.path-row)]
+          ['default-access' (en-access-rules default-access.path-row)]
+          ['table-access' (en-table-access table-access.path-row)]
+          ['constraints' ~]  :: TODO actually do json conversion for constraints
+          ['created-at' (time created-at.path-row)]
+          ['updated-at' (time updated-at.path-row)]
+          ['received-at' (time received-at.path-row)]
+      ==
+    ::
+    ++  en-table-access
+      |=  =table-access
+      ^-  json
+      :-  %o
+      `(map @t json)`(~(run by table-access) en-access-rules)
+    ::
+    ++  en-access-rules
+      |=  =access-rules
+      ^-  json
+      :-  %o
+      `(map @t json)`(~(run by access-rules) en-access-rule)
+    ::
+    ++  en-access-rule
+      |=  =access-rule
+      ^-  json
+      %-  pairs
+      :~  ['create' b+create.access-rule]
+          ['edit' s+edit.access-rule]
+          ['delete' s+delete.access-rule]
+      ==
+    ::
+    ++  en-peer
+      |=  =peer
+      ^-  json
+      %-  pairs
+      :~  ['path' (path path.peer)]
+          ['ship' s+(scot %p ship.peer)]
+          ['role' s+(scot %tas role.peer)]
+          ['created-at' (time created-at.peer)]
+          ['updated-at' (time updated-at.peer)]
+          ['received-at' (time received-at.peer)]
+      ==
+    ::
+    ++  en-paths
+      |=  =paths
+      ^-  json
+      :-  %a
+      (turn ~(val by paths) en-path-row)
+    ::
+    ++  en-peers
+      |=  =peers
+      ^-  json
+      :-  %a
+      (turn `(list peer)`(zing ~(val by peers)) en-peer)
+    ::
+    ++  en-schemas
+      |=  =schemas
+      ^-  json
+      :-  %a
+      (turn ~(tap by schemas) en-schema-kv)
+    ::
+    ++  en-schema-kv
+      |=  [k=[=type:common v=@ud] v=schema]
+      ^-  json
+      %-  pairs
+      :~  ['type' s+type.k]
+          ['version' (numb v.k)]
+          ['schema' a+(turn v |=(col=[name=@t t=@t] (pairs ~[['name' s+name.col] ['type' s+t.col]])))]
+      ==
+    ::
     ++  row-id-to-json
       |=  =id:common
       ^-  json
