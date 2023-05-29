@@ -36,14 +36,18 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
   const canClick = useToggle(true);
 
   useEffect(() => {
-    window.electron.app.onMouseMove((position, state, isDragging) => {
+    window.electron.app.onMouseMove((_, __, isDragging) => {
       canClick.setToggle(!isDragging);
     });
   }, []);
 
   if (!currentSpace) return null;
 
-  const onChange = (_, sourceIndex, targetIndex) => {
+  const onChange = (
+    _sourceId: any,
+    sourceIndex: number,
+    targetIndex: number
+  ) => {
     if (sourceIndex === targetIndex) return;
     bazaarStore.reorderApp(sourceIndex, targetIndex);
     const nextState = swap(items, sourceIndex, targetIndex);
