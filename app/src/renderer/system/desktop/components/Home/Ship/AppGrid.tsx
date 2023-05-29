@@ -43,7 +43,6 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
 
   if (!currentSpace) return null;
 
-
   const onChange = (
     _sourceId: any,
     sourceIndex: number,

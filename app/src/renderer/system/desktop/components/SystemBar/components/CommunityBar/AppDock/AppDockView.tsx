@@ -3,7 +3,6 @@ import { Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 import { lighten, rgba } from 'polished';
 
-import { useToggle } from '@holium/design-system';
 import { Flex } from '@holium/design-system/general';
 
 import { Bookmark } from 'os/services/ship/spaces/tables/bookmarks.table';
@@ -66,14 +65,9 @@ const AppDockViewPresenter = ({
       />
     );
   });
-  const canClick = useToggle(true);
 
   const pinnedWebApps = bookmarks.map((bookmark) => (
-    <PinnedWebApp
-      key={`pinned-${bookmark.url}`}
-      {...bookmark}
-      canClick={canClick}
-    />
+    <PinnedWebApp key={`pinned-${bookmark.url}`} {...bookmark} />
   ));
 
   const unpinnedAppTiles = unpinnedDockApps.map((app, index) => {
