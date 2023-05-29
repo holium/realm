@@ -45,15 +45,7 @@ export const colorStyle = css<ColorProps>`
     `}
 `;
 
-/**
- *  bgIsLightOrDark
- *
- *  Given a hex color will determine light or dark
- *
- * @param {string} color - a hex value
- * @returns
- */
-export function bgIsLightOrDark(hexColor: string) {
+const hexColorToHSP = (hexColor: string) => {
   const color = +(
     '0x' + hexColor.slice(1).replace(hexColor.length < 5 ? /./g : '', '$&$&')
   );
@@ -64,10 +56,32 @@ export function bgIsLightOrDark(hexColor: string) {
 
   // HSP (Highly Sensitive Poo) equation from http://alienryderflex.com/hsp.html
   const hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b));
+  return hsp;
+};
 
+// altered contrast for making text more readable.
+export const textIsLightOrDark = (hexColor: string) => {
+  const hsp = hexColorToHSP(hexColor);
+  if (hsp > 140) {
+    return 'light';
+  } else {
+    return 'dark';
+  }
+};
+
+/**
+ *  bgIsLightOrDark
+ *
+ *  Given a hex color will determine light or dark
+ *
+ * @param {string} color - a hex value
+ * @returns
+ */
+export function bgIsLightOrDark(hexColor: string) {
   // Using the HSP value, determine whether the color is light or dark
   // console.log(hexColor, hsp);
-  if (hsp > 140) {
+  const hsp = hexColorToHSP(hexColor);
+  if (hsp > 127.5) {
     // the background image is too light
     return 'light';
   } else {
