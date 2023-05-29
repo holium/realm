@@ -1,16 +1,35 @@
 import { BrowserWindow, ipcMain, screen } from 'electron';
 
-import { Position } from '@holium/design-system';
+import { Position } from '@holium/design-system/util';
 import { MouseState, PresenceArg } from '@holium/realm-presence';
 
 import { denormalizePosition } from '../../renderer/lib/window-manager';
+
+const MOUSE_WINDOW_PADDING = 200;
+
+const getMouseWindowBounds = (mainWindow: BrowserWindow) => {
+  let mouseWindowBounds = mainWindow.getBounds();
+
+  if (mainWindow.isFullScreen()) {
+    // We need to add padding to the window bounds to make sure the
+    // default cursor doesn't show up when the user moves towards the edges.
+    mouseWindowBounds = {
+      width: mouseWindowBounds.width + MOUSE_WINDOW_PADDING,
+      height: mouseWindowBounds.height + MOUSE_WINDOW_PADDING,
+      x: mouseWindowBounds.x - MOUSE_WINDOW_PADDING / 2,
+      y: mouseWindowBounds.y - MOUSE_WINDOW_PADDING / 2,
+    };
+  }
+
+  return mouseWindowBounds;
+};
 
 const getWebContentsPosition = (mainWindow: BrowserWindow) => {
   const screenPosition = screen.getCursorScreenPoint();
   const mainWindowPosition = mainWindow.getPosition();
   return {
-    x: screenPosition.x - mainWindowPosition[0],
-    y: screenPosition.y - mainWindowPosition[1],
+    x: screenPosition.x - mainWindowPosition[0] + MOUSE_WINDOW_PADDING / 2,
+    y: screenPosition.y - mainWindowPosition[1] + MOUSE_WINDOW_PADDING / 2,
   };
 };
 
@@ -190,4 +209,4 @@ const registerListeners = (
   );
 };
 
-export const MouseHelper = { registerListeners };
+export const MouseHelper = { registerListeners, getMouseWindowBounds };

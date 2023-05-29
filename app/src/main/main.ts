@@ -80,16 +80,11 @@ export const getPreloadPath = () =>
     : path.join(__dirname, '../../.holium/dll/preload.js');
 
 const createWindow = async () => {
-  if (isDevelopment) {
-    // TODO can cleanup here
-  }
-
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1920,
-    height: 1080,
     icon: getAssetPath('icon.png'),
     title: 'Realm',
+    frame: false,
     fullscreen: true,
     acceptFirstMouse: true,
     titleBarStyle: 'hidden',
@@ -163,11 +158,13 @@ const createWindow = async () => {
 };
 
 const createMouseOverlayWindow = () => {
+  const mouseWindowBounds = MouseHelper.getMouseWindowBounds(mainWindow);
+
   // Create a window covering the whole window.
   const newMouseWindow = new BrowserWindow({
     title: 'Mouse overlay',
     parent: mainWindow,
-    ...mainWindow.getBounds(),
+    ...mouseWindowBounds,
     frame: false,
     movable: false,
     minimizable: false,
@@ -214,6 +211,14 @@ const createMouseOverlayWindow = () => {
 
   newMouseWindow.on('close', () => {
     if (mainWindow.isClosable()) mainWindow.close();
+  });
+
+  newMouseWindow.on('focus', () => {
+    log.info('mainWindow focus');
+  });
+
+  mainWindow.on('focus', () => {
+    log.info('mainWindow focus');
   });
 
   mainWindow.on('close', () => {

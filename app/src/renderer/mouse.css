@@ -5,4 +5,5 @@ body {
   padding: 0;
   box-sizing: border-box;
   overflow: hidden;
+  border: 150px solid red;
 }
