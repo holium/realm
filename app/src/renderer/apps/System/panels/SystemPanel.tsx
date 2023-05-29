@@ -4,8 +4,8 @@ import { observer } from 'mobx-react';
 import { Button, CheckBox, Flex, Text } from '@holium/design-system';
 
 import { MediaAccess, MediaAccessStatus } from 'os/types';
-import { useAppState } from 'renderer/stores/app.store';
 import { MainIPC } from 'renderer/stores/ipc';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { SettingControl } from '../components/SettingControl';
 import { SettingPane } from '../components/SettingPane';
@@ -30,7 +30,7 @@ const colorMap: Record<MediaAccessStatus, string> = {
 // `;
 
 const SystemPanelPresenter = () => {
-  const { shellStore } = useAppState();
+  const { settingsStore } = useShipStore();
   // const { bazaarStore, friends, spacesStore, bulletinStore } = useShipStore();
 
   const [mediaStatus, setMediaStatus] = useState<MediaAccess>({
@@ -88,8 +88,20 @@ const SystemPanelPresenter = () => {
           <SettingControl label="Isolation Mode">
             <CheckBox
               label="Prevents the native OS from causing edge events and notifications."
-              isChecked={shellStore.isIsolationMode}
-              onChange={shellStore.toggleIsolationMode}
+              isChecked={settingsStore.isolationModeEnabled}
+              onChange={settingsStore.toggleIsolationMode}
+            />
+          </SettingControl>
+        }
+      />
+      <SettingSection
+        title="Mouse"
+        body={
+          <SettingControl label="Realm cursor">
+            <CheckBox
+              label="Use the Realm cursor type instead of the system cursor."
+              isChecked={settingsStore.realmCursorEnabled}
+              onChange={settingsStore.toggleRealmCursor}
             />
           </SettingControl>
         }

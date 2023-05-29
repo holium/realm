@@ -39,7 +39,6 @@ export const ShellModel = types
     dialogProps: types.map(types.string),
     mouseColor: types.optional(types.string, '#4E9EFD'),
     homePaneOpen: types.optional(types.boolean, false),
-    isolationMode: types.optional(types.boolean, false),
     micAllowed: types.optional(types.boolean, false),
     multiplayerEnabled: types.optional(types.boolean, false),
     windows: types.map(AppWindowModel),
@@ -54,9 +53,6 @@ export const ShellModel = types
     },
     get isHomePaneOpen() {
       return self.homePaneOpen;
-    },
-    get isIsolationMode() {
-      return self.isolationMode;
     },
     getWindowByAppId(appId: string) {
       return self.windows.get(appId);
@@ -89,20 +85,6 @@ export const ShellModel = types
       // TODO set color in ship profile
       window.electron.app.setMouseColor(mouseColor);
       self.mouseColor = mouseColor;
-    },
-    toggleIsolationMode: () => {
-      if (self.isolationMode) {
-        window.electron.app.disableIsolationMode();
-      } else {
-        window.electron.app.enableIsolationMode();
-      }
-      self.isolationMode = !self.isolationMode;
-    },
-    enableIsolationMode: () => {
-      return window.electron.app.enableIsolationMode();
-    },
-    disableIsolationMode: () => {
-      return window.electron.app.disableIsolationMode();
     },
     setDesktopDimensions(width: number, height: number) {
       self.desktopDimensions = {

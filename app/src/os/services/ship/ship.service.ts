@@ -13,6 +13,7 @@ import ChatService from './chat/chat.service';
 import { FriendsService } from './friends.service';
 import NotificationsService from './notifications/notifications.service';
 import RoomsService from './rooms.service';
+import { SettingsService } from './settings.service';
 import { ShipDB } from './ship.db';
 import { Credentials } from './ship.types.ts';
 import BazaarService from './spaces/bazaar.service';
@@ -31,6 +32,7 @@ export class ShipService extends AbstractService<any> {
     spaces: SpacesService;
     bazaar: BazaarService;
     wallet: WalletService;
+    settings: SettingsService;
   };
 
   constructor(
@@ -133,6 +135,7 @@ export class ShipService extends AbstractService<any> {
       friends: new FriendsService(this.serviceOptions, this.shipDB.db),
       rooms: new RoomsService(this.serviceOptions),
       wallet: new WalletService(undefined, this.shipDB.db),
+      settings: new SettingsService(this.serviceOptions, this.shipDB.db),
     };
   }
 

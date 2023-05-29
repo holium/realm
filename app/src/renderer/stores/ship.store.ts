@@ -12,6 +12,7 @@ import { CredentialsModel } from './models/credentials.model';
 import { FeaturedStore } from './models/featured.model';
 import { FriendsStore } from './models/friends.model';
 import { NotifStore } from './models/notification.model';
+import { SettingsModel } from './models/settings.model';
 import { SpacesStore } from './models/spaces.model';
 import { WalletStore } from './models/wallet.model';
 import { RoomsStore } from './rooms.store';
@@ -27,6 +28,7 @@ export const ShipStore = types
     walletStore: WalletStore,
     featuredStore: FeaturedStore,
     roomsStore: RoomsStore,
+    settingsStore: SettingsModel,
     loader: LoaderModel,
   })
   .actions((self) => ({
@@ -42,6 +44,7 @@ export const ShipStore = types
       self.spacesStore.init();
       self.walletStore.init();
       self.roomsStore.init();
+      self.settingsStore.init(session.serverId);
     },
     reset() {
       self.notifStore.reset();
@@ -52,6 +55,7 @@ export const ShipStore = types
       self.friends.reset();
       self.featuredStore.reset();
       self.roomsStore.reset();
+      self.settingsStore.reset();
     },
     getOurGroups: flow(function* () {
       try {
@@ -117,6 +121,11 @@ export const shipStore = ShipStore.create({
   walletStore: walletAppDefault,
   featuredStore: {
     spaces: {},
+  },
+  settingsStore: {
+    identity: '',
+    isolationModeEnabled: false,
+    realmCursorEnabled: false,
   },
   loader: {
     state: 'initial',

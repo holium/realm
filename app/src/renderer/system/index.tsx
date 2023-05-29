@@ -23,16 +23,10 @@ const ShellPresenter = () => {
   );
 
   useEffect(() => {
-    // Sync Electron with MobX state.
-    if (shellStore.isIsolationMode) {
-      shellStore.enableIsolationMode();
-    } else {
-      shellStore.disableIsolationMode();
-    }
     if (session?.color) {
       shellStore.setMouseColor(session?.color);
     }
-  }, [shellStore.isIsolationMode, session?.color]);
+  }, [session?.color]);
 
   return (
     <ViewPort>
