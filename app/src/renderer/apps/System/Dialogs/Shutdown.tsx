@@ -25,7 +25,7 @@ export const ShutdownDialogConfig: DialogConfig = {
       desktopDimensions
     ),
   }),
-  draggable: false,
+  static: true,
   hasCloseButton: false,
   unblurOnClose: true,
   noTitlebar: false,
