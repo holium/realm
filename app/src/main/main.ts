@@ -36,8 +36,6 @@ log.catchErrors();
 log.transports.file.level = 'info';
 log.transports.file.resolvePath = () =>
   path.join(app.getPath('userData'), 'main.log');
-// make log work in production
-log.transports.console.level = 'info';
 
 ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
   blocker.enableBlockingInSession(session.fromPartition('browser-webview'));
