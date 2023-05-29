@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 
-import { useToggle, UseToggleHook } from '@holium/design-system';
+import { useToggle } from '@holium/design-system';
 import { TileHighlight } from '@holium/design-system/os';
 
 import { Bookmark } from 'os/services/ship/spaces/tables/bookmarks.table';
@@ -12,9 +12,7 @@ import { SpacesIPC } from 'renderer/stores/ipc';
 
 import { WebAppTile } from './WebAppTile';
 
-type Props = Bookmark & {
-  canClick: UseToggleHook;
-};
+type Props = Bookmark;
 
 const PinnedWebAppPresenter = ({
   path,
@@ -22,7 +20,6 @@ const PinnedWebAppPresenter = ({
   title,
   color,
   favicon: initialFavicon,
-  canClick,
 }: Props) => {
   const { shellStore } = useAppState();
   const { getOptions, setOptions } = useContextMenu();
@@ -73,15 +70,13 @@ const PinnedWebAppPresenter = ({
         }
       }
     } else {
-      if (canClick.isOn) {
-        shellStore.openBookmark({
-          path,
-          url,
-          title,
-          color,
-        });
-        shellStore.closeHomePane();
-      }
+      shellStore.openBookmark({
+        path,
+        url,
+        title,
+        color,
+      });
+      shellStore.closeHomePane();
     }
   };
 

@@ -43,7 +43,12 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
 
   if (!currentSpace) return null;
 
-  const onChange = (_: any, sourceIndex: number, targetIndex: number) => {
+
+  const onChange = (
+    _sourceId: any,
+    sourceIndex: number,
+    targetIndex: number
+  ) => {
     if (sourceIndex === targetIndex) return;
     bazaarStore.reorderApp(sourceIndex, targetIndex);
     const nextState = swap(items, sourceIndex, targetIndex);
