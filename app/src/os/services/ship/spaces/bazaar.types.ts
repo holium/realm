@@ -12,6 +12,7 @@ export type BazaarUpdateType = {
     | 'joined-bazaar'
     | 'new-ally'
     | 'ally-deleted'
-    | 'treaties-loaded';
+    | 'treaties-loaded'
+    | 'reorder-grid-index';
   payload: any;
 };

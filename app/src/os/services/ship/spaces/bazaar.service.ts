@@ -230,6 +230,13 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
             payload: data['ally-deleted'],
           });
           break;
+        case 'reorder-grid-index':
+          this.tables?.appCatalog.updateGrid(data['reorder-grid-index'].grid);
+          this.sendUpdate({
+            type: 'reorder-grid-index',
+            payload: data['reorder-grid-index'].grid,
+          });
+          break;
         default:
           break;
       }
@@ -265,6 +272,19 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
       app: 'hood',
       mark: 'kiln-revive',
       json: desk,
+    });
+  }
+
+  async reorderApp(desk: string, index: number) {
+    return APIConnection.getInstance().conduit.poke({
+      app: 'bazaar',
+      mark: 'bazaar-action',
+      json: {
+        'reorder-app': {
+          desk,
+          index,
+        },
+      },
     });
   }
 

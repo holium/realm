@@ -24,6 +24,7 @@
           [%suite-remove suite-remove]
           [%install-app install-app]
           [%uninstall-app uninstall-app]
+          [%reorder-app reorder-app]
           [%initialize ul]
           [%rebuild-catalog ul]
           [%rebuild-stall rebuild-stall]
@@ -41,6 +42,12 @@
     ++  uninstall-app
       %-  ot
       :~  [%desk so]
+      ==
+    ::
+    ++  reorder-app
+      %-  ot
+      :~  [%desk so]
+          [%index ni]
       ==
     ::
     ++  add-pin
@@ -235,6 +242,12 @@
       %-  pairs
       :~  [%path s+(spat /(scot %p ship.path.rct)/(scot %tas space.path.rct))]
       ==
+      ::
+        %reorder-grid-index
+      %-  pairs
+      :~  [%grid (grid-index-js:encode grid-index.rct)]
+      ==
+      ::
     ==
   ::
   ++  view  :: encodes for on-peek

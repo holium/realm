@@ -88,8 +88,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
           ) app
         FROM app_catalog ac
         LEFT JOIN app_grid ag ON ac.id = ag.appId
-        LEFT JOIN app_recommendations ar ON ac.id = ar.id
-        WHERE ac.id != 'landscape';`
+        LEFT JOIN app_recommendations ar ON ac.id = ar.id;`
     );
     const apps: any[] = select.all();
     if (!apps.length) return {};
@@ -330,6 +329,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
 
   private _insertGrid(grid: { [idx: string]: string }) {
     if (!this.db?.open) return;
+    const wipe = this.db.prepare('DELETE FROM app_grid;');
     const insert = this.db.prepare(
       `REPLACE INTO app_grid (
         idx,
@@ -340,7 +340,9 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
 
       )`
     );
-    const insertMany = this.db.transaction((grid: any) => {
+
+    const wipeAndReinsert = this.db.transaction((grid: any) => {
+      wipe.run();
       Object.entries<any>(grid).forEach(([idx, appId]) => {
         insert.run({
           idx: parseInt(idx),
@@ -348,7 +350,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
         });
       });
     });
-    insertMany(grid);
+    wipeAndReinsert(grid);
   }
 
   private _insertDocks(docks: { [key: string]: string[] }) {

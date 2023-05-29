@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 
-import { Text } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system';
 import { TileHighlight } from '@holium/design-system/os';
 
 import { Bookmark } from 'os/services/ship/spaces/tables/bookmarks.table';
@@ -12,9 +12,7 @@ import { SpacesIPC } from 'renderer/stores/ipc';
 
 import { WebAppTile } from './WebAppTile';
 
-type Props = Bookmark & {
-  isGrid?: boolean;
-};
+type Props = Bookmark;
 
 const PinnedWebAppPresenter = ({
   path,
@@ -22,7 +20,6 @@ const PinnedWebAppPresenter = ({
   title,
   color,
   favicon: initialFavicon,
-  isGrid,
 }: Props) => {
   const { shellStore } = useAppState();
   const { getOptions, setOptions } = useContextMenu();
@@ -32,6 +29,7 @@ const PinnedWebAppPresenter = ({
   const window = shellStore.getWindowByAppId(url);
   const isActive = window?.isActive;
 
+  const tapping = useToggle(false);
   const tileId = useMemo(() => `pinned-web-app-${url}`, [url]);
 
   const contextMenuOptions = useMemo(
@@ -78,8 +76,8 @@ const PinnedWebAppPresenter = ({
         title,
         color,
       });
+      shellStore.closeHomePane();
     }
-    shellStore.closeHomePane();
   };
 
   useEffect(() => {
@@ -88,38 +86,8 @@ const PinnedWebAppPresenter = ({
     }
   }, [contextMenuOptions, tileId]);
 
-  if (isGrid) {
-    return (
-      <WebAppTile
-        tileId={tileId}
-        size={196}
-        borderRadius={24}
-        backgroundColor={color}
-        boxShadow="var(--rlm-box-shadow-2)"
-        favicon={favicon}
-        letter={title.slice(0, 1).toUpperCase()}
-        onClick={onClick}
-        onFaultyFavicon={() => setFavicon(null)}
-      >
-        <Text.Custom
-          position="absolute"
-          left="1.5rem"
-          bottom="1.25rem"
-          fontWeight={500}
-          fontSize={2}
-          style={{
-            pointerEvents: 'none',
-            color: 'rgba(51, 51, 51, 0.8)',
-          }}
-        >
-          {title}
-        </Text.Custom>
-      </WebAppTile>
-    );
-  }
-
   return (
-    <Reorder.Item key={url} value={url}>
+    <Reorder.Item key={url} value={url} onDragStart={() => tapping.toggleOff()}>
       <WebAppTile
         tileId={tileId}
         size={32}
@@ -129,6 +97,7 @@ const PinnedWebAppPresenter = ({
         letter={title.slice(0, 1).toUpperCase()}
         onClick={onClick}
         onFaultyFavicon={() => setFavicon(null)}
+        tapping={tapping}
       >
         <TileHighlight
           layoutId={`tile-highlight-${tileId}`}

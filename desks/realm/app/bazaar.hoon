@@ -418,6 +418,7 @@
       %suite-remove      (rem-suite +.action)
       %install-app       (install-app +.action)
       %uninstall-app     (uninstall-app +.action)
+      %reorder-app       (reorder-app +.action)
       :: sent during onboarding after realm desk is fully installed and ready
       ::  use this opportunity to refresh app-catalog
       %initialize        (initialize +.action)
@@ -619,8 +620,15 @@
       =.  host.u.app              (some ship)
       =.  catalog.state           (~(put by catalog.state) desk u.app)
       (docket-install ship desk [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.u.app grid-index.state])]~)
-
-      :: =^  cards  state
+    ::
+    ++  reorder-app
+      |=  [=app-id:store index=@ud]
+      ^-  (quip card _state)
+      ?>  =(our.bowl src.bowl)
+      =/  new-grid-index  (mov-grid-index:helpers:bazaar:core app-id index grid-index.state)
+      =.  grid-index  new-grid-index
+      :_  state
+      [%give %fact [/updates ~] bazaar-reaction+!>([%reorder-grid-index new-grid-index])]~
     ::
     ++  docket-install
       |=  [=ship =desk cards=(list card)]
@@ -1129,6 +1137,7 @@
     ::
     ++  set-grid-index
       |=  [=app-id:store =grid-index:store]
+      ^-  grid-index:store
       =/  grid-list         (sort-grid:helpers:bazaar:core grid-index)
       =/  current-index     (find [app-id]~ grid-list)
       ?~  current-index
@@ -1139,10 +1148,28 @@
     ::
     ++  rem-grid-index
       |=  [=app-id:store =grid-index:store]
+      ^-  grid-index:store
       =/  grid-list         (sort-grid:helpers:bazaar:core grid-index)
       =/  current-index     (find [app-id]~ grid-list)
       ?~  current-index     grid-index
       =.  grid-list         (oust [u.current-index 1] grid-list)
+      =/  new-grid-index
+        %+  turn  (gulf 0 (sub (lent grid-list) 1))
+          |=  idx=@ud
+          =/  app  (snag idx grid-list)
+          [idx app]
+      `=grid-index:store`(malt new-grid-index)
+    ::
+    ++  mov-grid-index
+      |=  [=app-id:store index=@ud =grid-index:store]
+      ^-  grid-index:store
+      =/  grid-list         (sort-grid:helpers:bazaar:core grid-index)
+      =/  current-index     (find [app-id]~ grid-list)
+      ?~  current-index     !!
+      :: it's already in the grid. remove it from its current position
+      :: then add it to the specified position (not optimal)
+      =.  grid-list         (oust [u.current-index 1] grid-list)
+      =.  grid-list         (into grid-list index app-id)
       =/  new-grid-index
         %+  turn  (gulf 0 (sub (lent grid-list) 1))
           |=  idx=@ud
@@ -1185,7 +1212,7 @@
     ::
     ++  init-catalog
       |=  [charges=(map desk charge:docket)]
-      =/  hidden     `(set desk)`(silt ~['realm' 'realm-wallet' 'courier' 'garden'])
+      =/  hidden     `(set desk)`(silt ~['realm' 'realm-wallet' 'courier' 'garden' 'landscape'])
       =/  syncs=(map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])  get-syncs:core
       =+  peaks=get-pikes:core
       =/  desks=(map desk ship)

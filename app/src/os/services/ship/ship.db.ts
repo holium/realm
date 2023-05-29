@@ -1,7 +1,5 @@
 import { app } from 'electron';
-import log from 'electron-log';
 import Database from 'better-sqlite3-multiple-ciphers';
-import crypto from 'crypto';
 import path from 'path';
 
 import { CHAT_TABLES, chatInitSql } from './chat/chat.schema';
@@ -19,32 +17,35 @@ export class ShipDB {
   private patp: string;
 
   private readonly dbPath: string;
-  private readonly dontEncryptDb: boolean =
-    process.env.DONT_ENCRYPT_DB === 'true';
+  // private readonly dontEncryptDb: boolean =
+  //   process.env.DONT_ENCRYPT_DB === 'true';
 
-  constructor(patp: string, password: string, clientSideEncryptionKey: string) {
+  constructor(
+    patp: string,
+    _password: string,
+    _clientSideEncryptionKey: string
+  ) {
     this.patp = patp;
     this.dbPath = path.join(app.getPath('userData'), `${patp}.sqlite`);
 
     // Create the database if it doesn't exist
-    log.info('ship.db.ts:', 'ship db file doesnt exist');
-    if (this.dontEncryptDb) {
-      this.shipDB = new Database(this.dbPath);
-      this.shipDB.exec(initSql);
-      return;
-    } else {
-      log.info('ship.db.ts:', 'Encrypting ship db');
-      const hashGenerator = crypto.createHmac(
-        'sha256',
-        clientSideEncryptionKey
-      );
-      const passwordHash = hashGenerator.update(password).digest('hex');
 
-      this.shipDB = new Database(this.dbPath, {
-        key: passwordHash,
-      });
-      this.shipDB.exec(initSql);
-    }
+    this.shipDB = new Database(this.dbPath);
+    this.shipDB.exec(initSql);
+
+    // } else {
+    //   log.info('ship.db.ts:', 'Encrypting ship db');
+    //   const hashGenerator = crypto.createHmac(
+    //     'sha256',
+    //     clientSideEncryptionKey
+    //   );
+    //   const passwordHash = hashGenerator.update(password).digest('hex');
+
+    //   this.shipDB = new Database(this.dbPath, {
+    //     key: passwordHash,
+    //   });
+    //   this.shipDB.exec(initSql);
+    // }
 
     // update db schemas if we need to
     this.addColumnIfNotExists(

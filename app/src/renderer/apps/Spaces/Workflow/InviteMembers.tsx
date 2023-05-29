@@ -394,7 +394,7 @@ const InviteMembersPresenter = ({
           </MemberList>
         </Flex>
         <Flex flexDirection="column" gap="2px">
-          <Text.Label fontWeight={500}>Join Lnk</Text.Label>
+          <Text.Label fontWeight={500}>Join Link</Text.Label>
           <JoinLink
             payload={{
               from: loggedInAccount?.serverId ?? '',
