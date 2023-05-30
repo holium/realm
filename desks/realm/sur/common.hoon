@@ -6,6 +6,7 @@
       %tag
       %link
       %follow
+      %relay
       @tas
   ==
 +$  id        [=ship t=@da] :: ship is who created the row, t is when it was created since that's inherently unique in one-at-a-time only creation fashion

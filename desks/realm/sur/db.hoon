@@ -67,6 +67,7 @@
       [%tag tag:common]
       [%link link:common]
       [%follow follow:common]
+      [%relay relay:common]
   ==
 
 :: used for dumping the current state of every row on a given path

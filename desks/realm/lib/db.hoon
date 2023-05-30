@@ -824,6 +824,8 @@
             [%general ((de-cols schema) (~(got by p.jon) 'data'))]
           %vote
             [%vote (de-vote (~(got by p.jon) 'data'))]
+          %comment
+            [%comment (de-comment (~(got by p.jon) 'data'))]
         ==
       [
         (pa (~(got by p.jon) 'path'))
@@ -862,6 +864,15 @@
     ++  de-vote
       %-  ot
       :~  [%up bo]
+          [%ship de-ship]
+          [%parent-type (se %tas)]
+          [%parent-id de-id]
+          [%parent-path pa]
+      ==
+    ::
+    ++  de-comment
+      %-  ot
+      :~  [%txt so]
           [%ship de-ship]
           [%parent-type (se %tas)]
           [%parent-id de-id]
@@ -1044,6 +1055,13 @@
               $(index +(index), result [[name.sch t] result])
           %vote
             :~  ['up' b+up.data.row]
+                ['ship' s+(scot %p ship.data.row)]
+                ['parent-type' s+(scot %tas parent-type.data.row)]
+                ['parent-id' (row-id-to-json parent-id.data.row)]
+                ['parent-path' s+(spat parent-path.data.row)]
+            ==
+          %comment
+            :~  ['txt' s+txt.data.row]
                 ['ship' s+(scot %p ship.data.row)]
                 ['parent-type' s+(scot %tas parent-type.data.row)]
                 ['parent-id' (row-id-to-json parent-id.data.row)]
