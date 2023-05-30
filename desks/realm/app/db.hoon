@@ -162,10 +162,7 @@
   :: endpoints for clients syncing with their own ship
   :: /x/db.json
   :: /x/db/path/[path].json
-  :: /x/db/peers/[path].json
   :: /x/db/start-ms/[unix ms].json
-  :: /x/db/[table]/start-ms/[unix ms].json
-  :: /x/delete-log/start-ms/[unix ms].json
   ++  on-peek
     |=  =path
     ^-  (unit (unit cage))
@@ -197,18 +194,6 @@
       [%x %db %start-ms @ ~]
         =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
         ``db-state+!>((after-time:db state timestamp))
-::     :: /x/db/[table]/start-ms/[unix ms].json
-::     :: specific table, but only with received-at after <time>
-::       [%x %db %start-ms @ ~]
-::         =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
-::         =/  msgs            messages+(start:from:db-lib timestamp messages-table.state)
-::         =/  paths           paths+(path-start:from:db-lib timestamp paths-table.state)
-::         =/  peers           peers+(peer-start:from:db-lib timestamp peers-table.state)
-::         ``chat-db-dump+!>(tables+[msgs paths peers ~])
-::     ::
-::       [%x %delete-log %start-ms @ ~]
-::         =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
-::         ``chat-del-log+!>((lot:delon:sur del-log.state ~ `timestamp))
     ==
   ::
   ++  on-agent

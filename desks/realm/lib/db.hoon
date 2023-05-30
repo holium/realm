@@ -215,21 +215,75 @@
       $(index +(index))
     $(index +(index), result (~(put by result) current-type (need tbl)))
 ::
+++  flatten-tables
+  |=  =tables
+  ^-  (map type:common table)
+  =/  types=(list type:common)  ~(tap in ~(key by tables))
+  =/  result                    *(map type:common table)
+  =/  index=@ud                 0
+  |-
+    ?:  =(index (lent types))
+      result
+    =/  t       (snag index types)
+    =/  tbl=table  (ptbl-to-tbl (~(got by tables) t))
+    $(index +(index), result (~(put by result) t tbl))
+::
+++  ptbl-to-tbl
+  |=  ptbl=pathed-table
+  ^-  table
+  =/  paths   ~(tap in ~(key by ptbl))
+  =/  result=table  *table
+  =/  index=@ud     0
+  |-
+    ?:  =(index (lent paths))
+      result
+    =/  tbl=table  (~(got by ptbl) (snag index paths))
+    $(index +(index), result (~(uni by result) tbl))
+::
+++  tbl-after
+  |=  [tbl=table t=@da]
+  ^-  table
+  %-  ~(gas by *table)
+  %+  skim
+    ~(tap by tbl) 
+  |=  [k=id:common v=row]
+  ^-  ?
+  (gth received-at.v t)
+::
 ++  after-time
   |=  [st=state-0 t=@da]
   ^-  state-0
   ?:  =(0 t)  st
+
   =.  paths.st
     (~(gas by *paths) (skim ~(tap by paths.st) |=(kv=[=path =path-row] (gth received-at.path-row.kv t))))
-  =/  allpeers
+
+  =.  del-log.st
+    %-  ~(gas by *del-log)
+    %+  skim
+      ~(tap by del-log.st)
+    |=  [dt=@da ch=db-del-change]
+    (gth dt t)
+
+  =.  peers.st
+    %+  ~(put by *peers)
+      /output
     %+  skim
       ^-  (list peer)
       %-  zing
       ~(val by peers.st)
-    |=  =peer
-    (gth received-at.peer t)
-  =.  peers.st
-    (~(put by *peers) /fake allpeers)
+    |=(=peer (gth received-at.peer t))
+
+  =/  types=(list type:common)  ~(tap in ~(key by tables.st))
+  =/  newtbls=tables            *tables
+  =/  index=@ud                 0
+  =.  tables.st
+    |-
+      ?:  =(index (lent types))
+        newtbls
+      =/  typ     (snag index types)
+      =/  tbl     (tbl-after (ptbl-to-tbl (~(got by tables.st) typ)) t)
+      $(index +(index), newtbls (~(put by newtbls) typ (~(put by *pathed-table) /output tbl)))
   st
 ::
 :: pokes
@@ -833,6 +887,42 @@
 ++  enjs
   =,  enjs:format
   |%
+    ++  en-db-changes
+      |=  chs=db-changes
+      ^-  json
+      :-  %a
+      %+  turn
+        chs
+      |=  ch=db-change
+      ^-  json
+      %-  pairs
+      ^-  (list [@t json])
+      %+  weld
+        ^-  (list [@t json])
+        ~[['change' [%s -.ch]]]
+      ^-  (list [@t json])
+      ?-  -.ch
+        %add-row
+          ~[['row' (en-row row.ch (~(put by *schemas) [type.row.ch v.row.ch] schema.ch))]]
+        %upd-row  !!
+        %del-row
+          :~  ['path' s+(spat path.ch)]
+              ['type' s+type.ch]
+              ['id' (row-id-to-json id.ch)]
+              ['timestamp' (time t.ch)]
+           ==
+        %add-peer
+          ~[['peer' (en-peer peer.ch)]]
+        %upd-peer
+          ~[['peer' (en-peer peer.ch)]]
+        %del-peer  !!
+        %add-path
+          ~[['path' (en-path-row path-row.ch)]]
+        %upd-path
+          ~[['path' (en-path-row path-row.ch)]]
+        %del-path  !!
+      ==
+    ::
     ++  state
       |=  st=versioned-state
       ^-  json
@@ -842,7 +932,36 @@
           ['schemas' (en-schemas schemas.st)]
           ['paths' (en-paths paths.st)]
           ['peers' (en-peers peers.st)]
-        :: ['del-log' (en-del-log X)]
+          ['del-log' (en-del-log del-log.st)]
+      ==
+    ::
+    ++  en-del-log
+      |=  =del-log
+      ^-  json
+      :-  %a
+      (turn ~(tap by del-log) en-del-change)
+    ::
+    ++  en-del-change
+      |=  [t=@da ch=db-del-change]
+      ^-  json
+      =/  default=(list [@t json])
+        :~  ['timestamp' (time t)]
+            ['change' [%s -.ch]]
+        ==
+      %-  pairs
+      %+  weld
+        default
+      ^-  (list [@t json])
+      ?-  -.ch
+        %del-path
+          ~[['path' s+(spat path.ch)]]
+        %del-peer
+          ~[['path' s+(spat path.ch)] ['ship' s+(scot %p ship.ch)]]
+        %del-row
+          :~  ['path' s+(spat path.ch)]
+              ['type' s+type.ch]
+              ['id' (row-id-to-json id.ch)]
+          == 
       ==
     ::
     ++  en-tables
@@ -857,13 +976,12 @@
     ++  en-fullpath
       |=  fp=fullpath
       ^-  json
-      :: TODO actually return the data
       %-  pairs
       :~  ['path-row' (en-path-row path-row.fp)]
           ['peers' a+(turn peers.fp en-peer)]
-          ['tables' ~]
+          ['tables' ~]  :: TODO fullpath tables JSON output
           ['schemas' (en-schemas schemas.fp)]
-          ['dels' ~]
+          ['dels' a+(turn dels.fp en-del-change)]
       ==
     ::
     ++  en-table
