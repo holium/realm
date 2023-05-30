@@ -1,4 +1,4 @@
-/-  common
+/-  common, membership
 |%
 +$  card  card:agent:gall
 +$  versioned-state
@@ -126,7 +126,7 @@
   $%
       :: only from our.bowl
       [%create-path =input-path-row]       :: create a new peers list, sends %get-path to all peers
-      [%create-from-space =path space-path=path =role]  :: create a new peers list based on space members, automatically keeps peers list in sync, sends %get-path to all peers
+      [%create-from-space =path space-path=[=ship space=cord] sr=role:membership]  :: create a new peers list based on space members, automatically keeps peers list in sync, sends %get-path to all peers
       [%remove-path =path]                    :: remove a peers list and all attached objects in tables, sends %delete-path to all peers
       [%add-peer =path =ship =role]           :: add a peer to an existing peers list, sends %get-path to that peer
       [%kick-peer =path =ship]                :: remove a peer from an existing peers list, sends %delete-path to that peer

@@ -49,8 +49,8 @@
 ::        :db &db-action [%create /example %foo 1 [%general ~[1 'd' (jam /hello/goodbye)]] ~[['num' 'ud'] ['str' 't'] ['mypath' 'path']]]
 ::        :~zod/db &db-action [%create /example %vote 0 [%vote %.y our %foo [~zod now] /example] ~]
 
-/-  *db
-/+  dbug, db
+/-  *db, sstore=spaces-store, vstore=visas
+/+  dbug, db, spaces-chat
 =|  state-0
 =*  state  -
 :: ^-  agent:gall
@@ -58,18 +58,47 @@
   %-  agent:dbug
   |_  =bowl:gall
   +*  this  .
-      core   ~(. +> [bowl ~])
   ::
   ++  on-init
     ^-  (quip card _this)
     =/  default-state=state-0   *state-0
-    [~ this(state default-state)]
+    =/  default-cards
+      :~  [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+      ==
+    =/  cs=(quip card state-0)  [default-cards default-state]
+
+    =/  spaces-scry   .^(view:sstore %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
+    ?>  ?=(%spaces -.spaces-scry)
+    =/  index=@ud     0
+    =/  keys=(list space-path:sstore)  :: list of space-path we own
+      %+  skim
+        ~(tap in ~(key by spaces.spaces-scry))
+      |=(=space-path:sstore &(=(ship.space-path our.bowl) ?!(=(space.space-path 'our'))))
+
+    |-
+      ?:  =(index (lent keys))
+        [-.cs this(state +.cs)]
+      =/  key       (snag index keys)
+      =/  pathed    (pathify-space-path:spaces-chat key)
+      =/  ini       (create-from-space:db [(weld pathed /initiate) key %initiate] +.cs bowl)
+      =.  cs        [(weld -.cs -.ini) +.ini]
+      =/  mem       (create-from-space:db [pathed key %member] +.cs bowl)
+      =.  cs        [(weld -.cs -.mem) +.mem]
+      =/  adm       (create-from-space:db [(weld pathed /admin) key %admin] +.cs bowl)
+      =.  cs        [(weld -.cs -.adm) +.adm]
+      =/  owr       (create-from-space:db [(weld pathed /owner) key %owner] +.cs bowl)
+      $(index +(index), cs [(weld -.cs -.owr) +.owr])
   ++  on-save   !>(state)
   ++  on-load
     |=  old-state=vase
     ^-  (quip card _this)
     =/  old  !<(versioned-state old-state)
-    [~ this(state old)]
+    :: do a quick check to make sure we are subbed to /updates in %spaces
+    =/  cards
+      ?:  (~(has by wex.bowl) [/spaces our.bowl %spaces])
+        ~
+      [%pass /spaces %agent [our.bowl %spaces] %watch /updates]~
+    [cards this(state old)]
   ::
   ++  on-poke
     |=  [=mark =vase]
@@ -209,6 +238,30 @@
             ~&  >>>  p.sign
             `this
         ==
+      [%spaces ~]
+        ?+    -.sign  !!
+          %watch-ack
+            ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to spaces" ~)  `this
+            ~&  >>>  "{<dap.bowl>}: spaces subscription failed"
+            `this
+          %kick
+            ~&  >  "{<dap.bowl>}: spaces kicked us, resubscribing..."
+            :_  this
+            :~  [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+            ==
+          %fact
+            ?+    p.cage.sign   !!
+              %spaces-reaction
+                =^  cards  state
+                  (spaces-reaction:db !<(=reaction:sstore q.cage.sign) state bowl)
+                [cards this]
+              ::
+              %visa-reaction
+                =^  cards  state
+                  (visas-reaction:db !<(=reaction:vstore q.cage.sign) state bowl)
+                [cards this]
+            ==
+        ==
       [%next *]
         ?-    -.sign
           %poke-ack
@@ -334,5 +387,4 @@
 |_  [=bowl:gall cards=(list card)]
 ::
 ++  this  .
-++  core  .
 --

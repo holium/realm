@@ -1,7 +1,9 @@
 ::  db [realm]:
 ::  TODO:
 ::  - constraints via paths-table settings
-/-  *db, common
+/-  *db, common, mstore=membership, sstore=spaces-store
+/-  vstore=visas
+/+  spaces-chat
 |%
 ::
 :: helpers
@@ -285,6 +287,93 @@
       $(index +(index), newtbls (~(put by newtbls) typ (~(put by *pathed-table) /output tbl)))
   st
 ::
+++  spaces-reaction
+  |=  [rct=reaction:sstore state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  |^
+  ?+  -.rct         `state
+    %add            (on-add +.rct)
+    %remove         (on-remove +.rct)
+  ==
+  ::
+  ++  on-add
+    |=  [new-space=space:sstore =members:mstore]
+    ::  only host can create space path-rows
+    ?.  =(our.bowl ship.path.new-space)
+      `state
+    %-  (slog leaf+"{<dap.bowl>}: creating paths for {<path.new-space>}" ~)
+    =/  pathed    (pathify-space-path:spaces-chat path.new-space)
+    =/  ini       (create-from-space [(weld pathed /initiate) path.new-space %initiate] state bowl)
+    =/  mem       (create-from-space [pathed path.new-space %member] +.ini bowl)
+    =/  cs        [(weld -.ini -.mem) +.mem]
+    =/  adm       (create-from-space [(weld pathed /admin) path.new-space %admin] +.cs bowl)
+    =.  cs        [(weld -.cs -.adm) +.adm]
+    =/  owr       (create-from-space [(weld pathed /owner) path.new-space %owner] +.cs bowl)
+    [(weld -.cs -.owr) +.owr]
+  ::
+  ++  on-remove
+    |=  [path=space-path:sstore]
+    ::  only host can delete space path-rows
+    ?.  =(our.bowl ship.path)
+      `state
+    %-  (slog leaf+"{<dap.bowl>}: deleting paths for {<path>}" ~)
+    =/  pathed    (pathify-space-path:spaces-chat path)
+    =/  cs        (remove-path (weld pathed /initiate) state bowl)
+    =/  mem       (remove-path pathed +.cs bowl)
+    =.  cs        [(weld -.cs -.mem) +.mem]
+    =/  adm       (remove-path (weld pathed /admin) +.cs bowl)
+    =.  cs        [(weld -.cs -.adm) +.adm]
+    =/  owr       (remove-path (weld pathed /owner) +.cs bowl)
+    [(weld -.cs -.owr) +.owr]
+    ::
+  --
+::
+++  visas-reaction
+  |=  [rct=reaction:vstore state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  |^
+  ?+  -.rct             `state
+    %invite-accepted    (on-accepted +.rct)
+    %kicked             (on-kicked +.rct)
+  ==
+  ::
+  ++  on-accepted
+    |=  [path=space-path:sstore =ship =member:mstore]
+    ^-  (quip card state-0)
+    ::  only host can modify peers lists
+    ?.  =(our.bowl ship.path)    `state
+    ::  if we are here, we are the host
+    =/  pathed    (pathify-space-path:spaces-chat path)
+    =/  max-role
+      ?:  (~(has in roles.member) %owner)   %host
+      ?:  (~(has in roles.member) %admin)   %admin
+      ?:  (~(has in roles.member) %member)  %member
+      %initiate
+    =/  mem  (add-peer [pathed ship max-role] state bowl)
+    =/  adm  (add-peer [(weld pathed /admin) ship max-role] +.mem bowl)
+    =/  owr  (add-peer [(weld pathed /owner) ship max-role] +.adm bowl)
+    ?-  max-role
+      %initiate  `state  :: don't ADD them to the initiate list, because they already were when they were invited
+      %member    mem
+      %admin     [(weld -.adm -.mem) +.adm]
+      %host      [(weld -.owr (weld -.adm -.mem)) +.owr]
+    ==
+  ::
+  ++  on-kicked
+    |=  [path=space-path:sstore =ship]
+    ^-  (quip card state-0)
+    ::  only host can modify peers lists
+    ?.  =(our.bowl ship.path)    `state
+    =/  pathed    (pathify-space-path:spaces-chat path)
+    :: attempt to kick from all since it doesn't hurt anything if they
+    :: aren't actually in the path
+    =/  ini  (kick-peer [(weld pathed /initiate) ship] state bowl)
+    =/  mem  (kick-peer [pathed ship] +.ini bowl)
+    =/  adm  (kick-peer [(weld pathed /admin) ship] +.mem bowl)
+    =/  owr  (kick-peer [(weld pathed /owner) ship] +.adm bowl)
+    [(weld -.owr (weld -.adm (weld -.ini -.mem))) +.owr]
+  --
+::
 :: pokes
 ::   tests:
 ::db &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
@@ -361,9 +450,87 @@
   [cards state]
 ::
 ++  create-from-space
-  |=  [[=path space-path=path =role] state=state-0 =bowl:gall]
+:: note sr is the space-role that the path is being generated for, not
+:: the %db role (%host vs %owner)
+:: if you pass _____ as sr:
+::   %owner,    only members with %owner in their roles will be part of the path, %joined or %host must be status
+::   %admin,    %owner or %admin must be in roles, %joined must be status
+::   %member,   %owner %admin or %member must be in roles, %joined must be status
+::   %initiate, every ship in the members list, regardless of role or joined status
+  |=  [[=path sp=[=ship space=cord] sr=role:mstore] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =/  cards  ~
+  =/  members     .^(view:mstore %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.sp)/(scot %tas space.sp)/members/noun)
+  ?>  ?=(%members -.members)
+  =/  filtered-members
+    %+  skim
+      ~(tap by members.members)
+    |=  [=ship =member:mstore]
+    ^-  ?
+    ?:  =(sr %initiate)  %.y
+    ?&  |(=(status.member %joined) =(status.member %host))
+      ?|
+        (~(has in roles.member) sr)
+        ?-  sr
+          %initiate   %.y
+          %member 
+            ?|  (~(has in roles.member) %admin)
+                (~(has in roles.member) %owner)
+            ==
+          %admin
+                (~(has in roles.member) %owner)
+          %owner      %.n
+        ==
+      ==
+    ==
+
+  =/  peers=(list peer)
+    %+  turn
+      filtered-members
+    |=  [=ship =member:mstore]
+    ^-  peer
+    =/  max-role
+      ?:  (~(has in roles.member) %owner)   %host
+      ?:  (~(has in roles.member) %admin)   %admin
+      ?:  (~(has in roles.member) %member)  %member
+      %initiate
+    [
+      path
+      ship
+      ?:(=(ship our.bowl) %host max-role)  :: our is always the %host
+      now.bowl
+      now.bowl
+      now.bowl
+    ]
+  =.  peers.state     (~(put by peers.state) path peers)
+
+  :: create the path-row
+  =/  path-row=path-row  [
+    path
+    our.bowl
+    %host
+    default-access-rules
+    ~
+    ~
+    now.bowl
+    now.bowl
+    now.bowl
+  ]
+  =.  paths.state     (~(put by paths.state) path path-row)
+
+  ::  alert the peers that they have been added
+  =/  peer-pokes=(list card)
+    %+  turn
+      (skip peers |=(p=peer =(ship.p our.bowl))) :: skip ourselves though, since that poke will just fail
+    |=  =peer
+    ^-  card
+    (get-path-card ship.peer path-row (turn peers |=(p=^peer [ship.p role.p])))
+  :: emit the change to self-subscriptions (our clients)
+  =/  thechange  db-changes+!>([[%add-path path-row] (turn peers |=(p=peer [%add-peer p]))])
+  =/  subscription-facts=(list card)  :~
+    [%give %fact [/db (weld /path path.path-row) ~] thechange]
+  ==
+
+  =/  cards  (weld peer-pokes subscription-facts)
   [cards state]
 ::
 ++  remove-path
