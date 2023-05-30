@@ -193,6 +193,7 @@ const createMouseOverlayWindow = () => {
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
 
   FullScreenHelper.registerListeners(mainWindow, newMouseWindow);
+  MouseHelper.registerListeners(mainWindow, newMouseWindow);
 
   const mouseSetup = () => {
     if (isMac) {
@@ -229,8 +230,6 @@ const createMouseOverlayWindow = () => {
     newMouseWindow.setBounds(newDimension);
     mainWindow.webContents.send('set-dimensions', newDimension);
   });
-
-  MouseHelper.registerListeners(mainWindow, newMouseWindow);
 };
 
 app.on('window-all-closed', () => {

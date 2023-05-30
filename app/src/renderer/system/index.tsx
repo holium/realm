@@ -38,9 +38,6 @@ const ShellPresenter = () => {
     <ViewPort>
       <Layer zIndex={2}>{DialogLayer}</Layer>
       <Desktop />
-      <Layer zIndex={20}>{/* <ConnectionStatus /> */}</Layer>
-      {/* TODO make DragBar work */}
-      {/* <Layer zIndex={21}>{!isFullscreen && <DragBar />}</Layer> */}
     </ViewPort>
   );
 };
