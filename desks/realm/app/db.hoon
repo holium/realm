@@ -3,11 +3,11 @@
 ::  - ship-to-ship replication of data uses one-at-a-time subscriptions
 ::    described here: https://developers.urbit.org/reference/arvo/concepts/subscriptions#one-at-a-time
 ::  - ship-to-frontend syncing of data uses chat-db model of /db
-::    subscribe wire and /x/db/start-ms/[unix ms].json +
-::    /x/delete-log/start-ms/[unix ms].json scries
+::    subscribe wire and /x/db/start-ms/[unix ms].json
 ::  - %db provides a data layer only. business logic and permissioning
-::    must be checked by the %app that uses it
-::  - custom data types work by %apps specifying the location of the mar files?
+::    must be checked by the %app that uses it (unless it can be fit
+::    within the database permissions and constraints system)
+::  - custom data types work by %apps specifying the schema for the type
 ::
 ::  Example: (where %app is some forum-posting groups-like thing)
 ::  ~zod%app -> ~zod%db
@@ -38,15 +38,16 @@
 
 ::  TO USE:
 ::  - create a path with a list of peers with %create-path
-::    ex: :db &db-action [%create-path [/example ~zod %host ~ ~ ~ *@da *@da *@da] ~[[~zod %host] [~bus %member]]]
+::    ex: :db &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
 ::  - create a data-row of a custom or pre-defined type
 ::    you are required to provide a schema when you first create a row of a new custom-type
 ::    but if the schema is already there for that type/version combo,
 ::    you can just pass ~ in that spot
 ::    schemas are versionable
-::    ex: :db &db-action [%create [/example [our now] %foo 0 [%general ~[5 'a']] *@da *@da *@da] [~ ~[['num' 'ud'] ['str' 't']]]]
-::        :db &db-action [%create [/example [our now] %foo 1 [%general ~[5 'a' now]] *@da *@da *@da] [~ ~[['num' 'ud'] ['str' 't'] ['custom-time' 'da']]]]
-::        :db &db-action [%create [/example [our now] %foo 1 [%general ~[6 'b' now]] *@da *@da *@da] ~]
+::    ex: :db &db-action [%create /example %foo 0 [%general ~[1 'a']] ~[['num' 'ud'] ['str' 't']]]
+::        :db &db-action [%create /example %vote 0 [%vote [%.y our %foo [~zod now] /example]] ~]
+::        :db &db-action [%create /example %foo 1 [%general ~[1 'd' (jam /hello/goodbye)]] ~[['num' 'ud'] ['str' 't'] ['mypath' 'path']]]
+::        :~zod/db &db-action [%create /example %vote 0 [%vote %.y our %foo [~zod now] /example] ~]
 
 /-  *db
 /+  dbug, db

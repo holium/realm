@@ -1,11 +1,6 @@
 ::  db [realm]:
 ::  TODO:
-::  - permissioning via paths-table settings
 ::  - constraints via paths-table settings
-::  - pub/sub for data table changes
-::  - laggard pub/sub logic for dumping the "whole" path when someone
-::    requests an "old" version on their sub to /next/[path]
-::  - %general type inference to json out for scries ?HOW HOON BLACK MAGIC?
 /-  *db, common
 |%
 ::
@@ -1166,5 +1161,6 @@
       |=  a=@dr
       ^-  json
       (numb (mul (div a ~s1) 1.000))
+    ::
   --
 --

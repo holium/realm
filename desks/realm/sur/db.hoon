@@ -13,13 +13,6 @@
       =del-log
   ==
 
-+$  tables    (map type:common pathed-table)
-:: this inner layer of indirection allows us some efficiencies in
-:: accessing all data on a path as opposed to doing full table scans
-+$  pathed-table   (map path table)
-+$  table     (map id:common row)
-
-+$  paths     (map path path-row)
 +$  schemas   (map [=type:common v=@ud] schema)
 +$  schema    (list [name=@t t=@t])  :: list of [column-name type-code]
 :: allowable @t codes are:
@@ -29,24 +22,11 @@
 ::  set   (for a set of @t)
 ::  map   (for a map of @t to @t)
 
-:: goal: accept string version of type definition (like [@ud @t] or (list @)) and dynamically apply that to an arbitrary noun (which has had type info thrown away)
-:: example: data=[5 'a'] as a * (noun) and type='[n=@ud s=@t]'
-::          (some-magic data type) -> [n=5 s='a'] the typed data
-::         why does this fail?   `@ta`-:+:`*`-:!>(atom) gets the aura
-::                               from an arbitrary atom
-::  if we throw away type info, we can dynamically apply it like this:
-::  > !<(tape [-:!>("foobar") `*`"foobar"])
-::  "foobar"
-::  or:
-::  !<(tape [-:!>(*tape) `*`"foobar"])
-::  > !<([@ud @t] [-:!>(*[@ud @t]) `*`[1 'a']])
-::  [1 'a']
-:: !<(tape [-:!>(*tape) `*`"foobar"])> `type`-:(slap !>(.) (ream '*[@ud @t (list @)]'))
-:: #t/[@ud @t it(@)]
-:: > `type`-:(slap !>(.) (ream '*(list @)'))
-:: #t/it(@)
-::  .*(. +:(ride -:!>(.) 'tape'))  seems to produce the subject but isnt
-::  usable as a mold
++$  tables    (map type:common pathed-table)
+:: this inner layer of indirection allows us some efficiencies in
+:: accessing all data on a path as opposed to doing full table scans
++$  pathed-table   (map path table)
++$  table     (map id:common row)
 +$  role      ?(%host %$ @tas)  :: %$ is "everyone else" wild-card role
 +$  row
   $:  =path             :: application-specific logic about what this row is attached to (ie /space/space-path/app/app-name/thing)
@@ -78,6 +58,7 @@
       =schemas
       dels=(list [@da db-del-change])
   ==
++$  paths     (map path path-row)
 +$  path-row
   $:  =path
       host=ship
@@ -103,12 +84,7 @@
 +$  check         ~  :: I want check to be the mold for a gate that takes in a row and produces %.y or %.n, which will allow applications to specify arbitrary check functions to constrain their data
 
 
-:: when we create an object, we must specify who our peers are for the
-:: /path
-::
-:: when a foreign ship creates an object, it automatically makes a
-:: path->peers mapping here containing just that one ship as %host,
-:: since all communication is only accepted through the /path host
+:: when we create an object, we must specify who our peers are for the /path
 +$  peers  (map path (list peer))
 +$  peer
   $:  =path           :: same as path.row
@@ -141,7 +117,6 @@
 +$  db-changes    (list db-change)
 +$  del-log  (map @da db-del-change)
 
-+$  ship-roles  (list [s=@p =role])
 :: the model is, each row belongs to a %host ship, and to a
 :: /path. The %host serves as the "source of truth" for all data on that
 :: path. So when a peer wants to edit some row, it just sends the edit
@@ -167,6 +142,7 @@
       [%remove =type:common =path =id:common]      :: %host deleting the row, sends %delete to all peers
   ==
 ::
++$  ship-roles  (list [s=@p =role])
 +$  input-path-row
   $:  =path
       =replication
@@ -175,7 +151,6 @@
       =constraints
       peers=ship-roles
   ==
-::
 +$  input-row
   $:  =path
       =type:common
