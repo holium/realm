@@ -111,7 +111,6 @@ const createWindow = async () => {
   // console.log('second-instance');
   // log.info('second-instance', spacePath);
 
-  FullScreenHelper.registerListeners(mainWindow);
   WebViewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners();
@@ -178,7 +177,6 @@ const createMouseOverlayWindow = () => {
     hasShadow: false,
     skipTaskbar: true,
     transparent: true,
-    alwaysOnTop: true,
     fullscreen: true,
     titleBarStyle: 'hidden',
     acceptFirstMouse: true,
@@ -193,6 +191,8 @@ const createMouseOverlayWindow = () => {
   });
   newMouseWindow.setIgnoreMouseEvents(true);
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
+
+  FullScreenHelper.registerListeners(mainWindow, newMouseWindow);
 
   const mouseSetup = () => {
     if (isMac) {
