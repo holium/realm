@@ -55,6 +55,12 @@ const appPreload = {
   disableIsolationMode: () => {
     return ipcRenderer.invoke('disable-isolation-mode');
   },
+  enableRealmCursor: () => {
+    return ipcRenderer.invoke('enable-realm-cursor');
+  },
+  disableRealmCursor: () => {
+    return ipcRenderer.invoke('disable-realm-cursor');
+  },
   setMouseColor(hex: string) {
     ipcRenderer.invoke('mouse-color', hex);
   },
@@ -85,8 +91,11 @@ const appPreload = {
   onEnableMouseLayerTracking(callback: () => void) {
     ipcRenderer.on('enable-mouse-layer-tracking', callback);
   },
-  onDisableCustomMouse(callback: () => void) {
-    ipcRenderer.on('disable-custom-mouse', callback);
+  onEnableRealmCursor(callback: () => void) {
+    ipcRenderer.on('enable-realm-cursor', callback);
+  },
+  onDisableRealmCursor(callback: () => void) {
+    ipcRenderer.on('disable-realm-cursor', callback);
   },
   onToggleOnEphemeralChat(callback: () => void) {
     ipcRenderer.on('realm.toggle-on-ephemeral-chat', () => {

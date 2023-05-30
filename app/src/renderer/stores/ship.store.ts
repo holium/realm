@@ -125,7 +125,8 @@ export const shipStore = ShipStore.create({
   settingsStore: {
     identity: '',
     isolationModeEnabled: false,
-    realmCursorEnabled: false,
+    realmCursorEnabled: true,
+    profileColorForCursorEnabled: true,
   },
   loader: {
     state: 'initial',

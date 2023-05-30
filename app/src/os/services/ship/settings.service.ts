@@ -7,6 +7,7 @@ export type Setting = {
   identity: string;
   isolationModeEnabled: number;
   realmCursorEnabled: number;
+  profileColorForCursorEnabled: number;
 };
 
 export class SettingsService extends AbstractDataAccess<Setting, any> {
@@ -24,6 +25,7 @@ export class SettingsService extends AbstractDataAccess<Setting, any> {
       identity: row.identity,
       isolationModeEnabled: row.isolationModeEnabled,
       realmCursorEnabled: row.realmCursorEnabled,
+      profileColorForCursorEnabled: row.profileColorForCursorEnabled,
     };
   }
 
@@ -43,7 +45,7 @@ export class SettingsService extends AbstractDataAccess<Setting, any> {
   set(setting: Setting) {
     if (!this.db?.open) return;
     const replace = this.db.prepare(
-      `REPLACE INTO settings (identity, isolationModeEnabled, realmCursorEnabled) VALUES (@identity, @isolationModeEnabled, @realmCursorEnabled)`
+      `REPLACE INTO settings (identity, isolationModeEnabled, realmCursorEnabled, profileColorForCursorEnabled) VALUES (@identity, @isolationModeEnabled, @realmCursorEnabled, @profileColorForCursorEnabled)`
     );
     replace.run(setting);
   }
@@ -61,7 +63,8 @@ export const settingsInitSql = `
   create table if not exists settings (
     identity text primary key,
     isolationModeEnabled number,
-    realmCursorEnabled number
+    realmCursorEnabled number,
+    profileColorForCursorEnabled number
   );
 `;
 

@@ -1,8 +1,6 @@
 import { BrowserWindow, ipcMain, session } from 'electron';
 
 import { getPreloadPath } from '../main';
-import { isMac, isWindows } from './env';
-import { hideCursor } from './hideCursor';
 
 const registerListeners = (mainWindow: BrowserWindow) => {
   ipcMain.handle(
@@ -28,7 +26,6 @@ const registerListeners = (mainWindow: BrowserWindow) => {
 
   mainWindow.webContents.on('did-attach-webview', (_, webContents) => {
     webContents.on('dom-ready', () => {
-      if (isMac || isWindows) hideCursor(webContents);
       webContents.send('add-mouse-listeners');
       webContents.send('add-key-listeners');
     });

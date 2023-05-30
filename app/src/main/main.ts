@@ -17,11 +17,11 @@ import path from 'path';
 import { RealmService } from '../os/realm.service';
 import { AppUpdater } from './AppUpdater';
 import { BrowserHelper } from './helpers/browser';
+import { CursorHelper } from './helpers/cursor';
 import { DeepLinkHelper } from './helpers/deepLink';
 import { DevHelper } from './helpers/dev';
-import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
+import { isDevelopment, isMac, isProduction } from './helpers/env';
 import { FullScreenHelper } from './helpers/fullscreen';
-import { hideCursor } from './helpers/hideCursor';
 import { KeyHelper } from './helpers/key';
 import { MediaHelper } from './helpers/media';
 import { MouseHelper } from './helpers/mouse';
@@ -122,8 +122,6 @@ const createWindow = async () => {
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.webContents.on('dom-ready', () => {
-    // We use the default cursor for Linux.
-    if (isMac || isWindows) hideCursor(mainWindow.webContents);
     mainWindow.webContents.send('add-mouse-listeners', true);
     mainWindow.webContents.send('add-key-listeners');
   });
@@ -193,25 +191,8 @@ const createMouseOverlayWindow = () => {
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
 
   FullScreenHelper.registerListeners(mainWindow, newMouseWindow);
+  CursorHelper.registerListeners(mainWindow, newMouseWindow);
   MouseHelper.registerListeners(mainWindow, newMouseWindow);
-
-  const mouseSetup = () => {
-    if (isMac) {
-      hideCursor(newMouseWindow.webContents);
-      newMouseWindow.setWindowButtonVisibility(false);
-      /**
-       * For macOS we enable mouse layer tracking for a smoother experience.
-       * It is not supported for Windows or Linux.
-       */
-      newMouseWindow.webContents.send('enable-mouse-layer-tracking');
-    } else if (isWindows) {
-      hideCursor(newMouseWindow.webContents);
-    } else {
-      newMouseWindow.webContents.send('disable-custom-mouse');
-    }
-  };
-
-  newMouseWindow.webContents.on('dom-ready', mouseSetup);
 
   newMouseWindow.on('close', () => {
     if (mainWindow.isClosable()) mainWindow.close();

@@ -37,7 +37,6 @@ export const ShellModel = types
     ),
     dialogId: types.maybe(types.string),
     dialogProps: types.map(types.string),
-    mouseColor: types.optional(types.string, '#4E9EFD'),
     homePaneOpen: types.optional(types.boolean, false),
     micAllowed: types.optional(types.boolean, false),
     multiplayerEnabled: types.optional(types.boolean, false),
@@ -80,11 +79,6 @@ export const ShellModel = types
     },
     closeDialog() {
       self.dialogId = undefined;
-    },
-    setMouseColor: async (mouseColor: string) => {
-      // TODO set color in ship profile
-      window.electron.app.setMouseColor(mouseColor);
-      self.mouseColor = mouseColor;
     },
     setDesktopDimensions(width: number, height: number) {
       self.desktopDimensions = {

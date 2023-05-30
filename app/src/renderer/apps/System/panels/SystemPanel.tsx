@@ -11,6 +11,7 @@ import { SettingControl } from '../components/SettingControl';
 import { SettingPane } from '../components/SettingPane';
 import { SettingSection } from '../components/SettingSection';
 import { SettingTitle } from '../components/SettingTitle';
+import { SystemMouseSection } from './sections/SystemMouseSection/SystemMouseSection';
 // import { useShipStore } from 'renderer/stores/ship.store';
 
 const colorMap: Record<MediaAccessStatus, string> = {
@@ -94,17 +95,13 @@ const SystemPanelPresenter = () => {
           </SettingControl>
         }
       />
-      <SettingSection
-        title="Mouse"
-        body={
-          <SettingControl label="Realm cursor">
-            <CheckBox
-              label="Use the Realm cursor type instead of the system cursor."
-              isChecked={settingsStore.realmCursorEnabled}
-              onChange={settingsStore.toggleRealmCursor}
-            />
-          </SettingControl>
+      <SystemMouseSection
+        realmCursorEnabled={settingsStore.realmCursorEnabled}
+        setRealmCursor={settingsStore.setRealmCursor}
+        profileColorForCursorEnabled={
+          settingsStore.profileColorForCursorEnabled
         }
+        setProfileColorForCursor={settingsStore.setProfileColorForCursor}
       />
       <SettingSection
         title="Permissions"

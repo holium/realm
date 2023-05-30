@@ -13,7 +13,7 @@ export const Mouse = () => {
   const mouseLayerTracking = useToggle(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [state, setState] = useState<MouseState>('pointer');
-  const [mouseColor, setMouseColor] = useState('0, 0, 0');
+  const [mouseColor, setMouseColor] = useState('78, 158, 253');
   const ephemeralChat = useToggle(false);
   const [chat, setChat] = useState('');
 
@@ -50,7 +50,8 @@ export const Mouse = () => {
       if (rgbString) setMouseColor(rgbString);
     });
 
-    window.electron.app.onDisableCustomMouse(disabled.toggleOn);
+    window.electron.app.onEnableRealmCursor(disabled.toggleOff);
+    window.electron.app.onDisableRealmCursor(disabled.toggleOn);
 
     window.electron.app.onToggleOnEphemeralChat(ephemeralChat.toggleOn);
 
