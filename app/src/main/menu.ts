@@ -98,6 +98,22 @@ export class MenuBuilder {
         },
       ],
     };
+    const subMenuFile: DarwinMenuItemConstructorOptions = {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Close Current Window',
+          accelerator: 'CommandOrControl+W',
+          enabled: false,
+          click: () => {
+            this.mainWindow.webContents.send(
+              'shortcut-event',
+              'close-current-window'
+            );
+          },
+        },
+      ],
+    };
     const subMenuEdit: DarwinMenuItemConstructorOptions = {
       label: 'Edit',
       submenu: [
@@ -165,37 +181,37 @@ export class MenuBuilder {
         { label: 'Bring All to Front', selector: 'arrangeInFront:' },
       ],
     };
-    const subMenuHelp: MenuItemConstructorOptions = {
-      label: 'Help',
-      submenu: [
-        {
-          label: 'Learn More',
-          click() {
-            shell.openExternal('https://electronjs.org');
-          },
-        },
-        {
-          label: 'Documentation',
-          click() {
-            shell.openExternal(
-              'https://github.com/electron/electron/tree/main/docs#readme'
-            );
-          },
-        },
-        {
-          label: 'Community Discussions',
-          click() {
-            shell.openExternal('https://www.electronjs.org/community');
-          },
-        },
-        {
-          label: 'Search Issues',
-          click() {
-            shell.openExternal('https://github.com/electron/electron/issues');
-          },
-        },
-      ],
-    };
+    // const subMenuHelp: MenuItemConstructorOptions = {
+    //   label: 'Help',
+    //   submenu: [
+    //     {
+    //       label: 'Learn More',
+    //       click() {
+    //         shell.openExternal('https://electronjs.org');
+    //       },
+    //     },
+    //     {
+    //       label: 'Documentation',
+    //       click() {
+    //         shell.openExternal(
+    //           'https://github.com/electron/electron/tree/main/docs#readme'
+    //         );
+    //       },
+    //     },
+    //     {
+    //       label: 'Community Discussions',
+    //       click() {
+    //         shell.openExternal('https://www.electronjs.org/community');
+    //       },
+    //     },
+    //     {
+    //       label: 'Search Issues',
+    //       click() {
+    //         shell.openExternal('https://github.com/electron/electron/issues');
+    //       },
+    //     },
+    //   ],
+    // };
 
     // const subMenuView =
     //   process.env.NODE_ENV === 'development' ||
@@ -205,7 +221,14 @@ export class MenuBuilder {
 
     const subMenuView = subMenuViewDev;
 
-    return [subMenuAbout, subMenuEdit, subMenuView, subMenuWindow, subMenuHelp];
+    return [
+      subMenuAbout,
+      subMenuFile,
+      subMenuEdit,
+      subMenuView,
+      subMenuWindow,
+      // subMenuHelp,
+    ];
   }
 
   buildDefaultTemplate() {

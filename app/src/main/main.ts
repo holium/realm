@@ -26,6 +26,7 @@ import { KeyHelper } from './helpers/key';
 import { MediaHelper } from './helpers/media';
 import { MouseHelper } from './helpers/mouse';
 import { PowerHelper } from './helpers/power';
+import { ShortcutHelper } from './helpers/shortcut';
 import { WebViewHelper } from './helpers/webview';
 import { MenuBuilder } from './menu';
 import { resolveHtmlPath } from './util';
@@ -119,6 +120,7 @@ const createWindow = async () => {
   PowerHelper.registerListeners(mainWindow);
   KeyHelper.registerListeners(mainWindow);
   DeepLinkHelper.registerListeners(mainWindow);
+  ShortcutHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 

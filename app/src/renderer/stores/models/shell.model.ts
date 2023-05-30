@@ -191,6 +191,7 @@ export const ShellModel = types
       this.setActive(newWindow.appId);
       if (self.homePaneOpen) self.homePaneOpen = false;
 
+      // ipcRenderer.invoke('shortcut-enabled', 'close-current-window', true);
       return newWindow;
     },
     openBookmark(bookmark: Omit<Bookmark, 'favicon'>) {
@@ -279,6 +280,16 @@ export const ShellModel = types
     toggleDevTools() {
       return window.electron.app.toggleDevTools();
     },
+    closeCurrentWindow() {
+      const windows = Array.from(self.windows.values());
+      const activeWindow = windows.find(
+        (app: AppWindowMobxType) => app.isActive
+      );
+      // not optimal
+      if (activeWindow) {
+        this.closeWindow(activeWindow.appId);
+      }
+    },
     closeWindow(appId: string) {
       const windows = Array.from(self.windows.values());
       self.nativeConfig.delete(appId);
@@ -291,6 +302,8 @@ export const ShellModel = types
         )[0];
         if (nextWindow) {
           this.setActive(nextWindow.appId);
+        } else {
+          // ipcRenderer.invoke('shortcut-enabled', 'close-current-window', false);
         }
       }
       self.windows.delete(appId);
@@ -300,6 +313,13 @@ export const ShellModel = types
     },
     toggleMultiplayer() {
       self.multiplayerEnabled = !self.multiplayerEnabled;
+    },
+    handleShortcutEvent(shortcut: string) {
+      switch (shortcut) {
+        case 'close-current-window':
+          this.closeCurrentWindow();
+          break;
+      }
     },
   }));
 
