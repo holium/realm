@@ -50,14 +50,6 @@
       [%relay relay:common]
   ==
 
-:: used for dumping the current state of every row on a given path
-+$  fullpath
-  $:  =path-row
-      peers=(list peer)
-      tables=(map type:common table)
-      =schemas
-      dels=(list [@da db-del-change])
-  ==
 +$  paths     (map path path-row)
 +$  path-row
   $:  =path
@@ -82,10 +74,17 @@
 +$  uniques       (set unique-columns)  :: the various uniqueness rules that must all be true
 +$  unique-columns  (set @t)  :: names of columns that taken together must be unique in the table+path
 +$  check         ~  :: I want check to be the mold for a gate that takes in a row and produces %.y or %.n, which will allow applications to specify arbitrary check functions to constrain their data
+:: used for dumping the current state of every row on a given path
++$  fullpath
+  $:  =path-row
+      peers=(list peer)
+      tables=(map type:common table)
+      =schemas
+      dels=(list [@da db-del-change])
+  ==
 
-
-:: when we create an object, we must specify who our peers are for the /path
 +$  peers  (map path (list peer))
+:: when we create an object, we must specify who our peers are for the /path
 +$  peer
   $:  =path           :: same as path.row
       =ship
@@ -97,7 +96,7 @@
 
 +$  db-row-del-change    [%del-row =path =type:common =id:common t=@da]
 +$  db-peer-del-change   [%del-peer =path =ship t=@da]
-+$  db-path-del-change   [%del-path =path]
++$  db-path-del-change   [%del-path =path t=@da]
 +$  db-del-change
   $%  db-row-del-change
       db-peer-del-change
@@ -105,7 +104,7 @@
   ==
 +$  db-change
   $%  [%add-row =row =schema]
-      [%upd-row =row]
+      [%upd-row =row =schema]
       db-row-del-change
       [%add-path =path-row]
       [%upd-path =path-row]

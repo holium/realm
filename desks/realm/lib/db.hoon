@@ -116,7 +116,11 @@
       =.  paths.state           (~(put by paths.state) path path-row)
       =.  received-at.row.ch    now.bowl
       =/  sch=schema            (~(got by schemas.state) [type.row.ch v.row.ch]) :: currently just ensuring that we have the schema already
-      (add-row-to-db row.ch sch state)
+      ?:  =(sch schema.ch)
+        :: the schema has not changed, so this is fine
+        (add-row-to-db row.ch schema.ch state)
+      ::TODO handle the schema has changed situation
+      !!
     %del-row
       =.  updated-at.path-row   t.ch
       =.  paths.state           (~(put by paths.state) path.ch path-row)
@@ -383,7 +387,7 @@
 
   :: emit the change to subscribers
   =/  sub-facts=(list card)
-    [%give %fact [/db (weld /path path) ~] db-changes+!>([%del-path path]~)]~
+    [%give %fact [/db (weld /path path) ~] db-changes+!>([%del-path path now.bowl]~)]~
   =/  cards=(list card)  (weld del-pokes sub-facts)
 
   :: remove from paths table, and peers table
@@ -393,7 +397,7 @@
   =.  tables.state  (del-path-in-tables state path)
 
   :: add to del-log
-  =.  del-log.state   (~(put by del-log.state) now.bowl [%del-path path])
+  =.  del-log.state   (~(put by del-log.state) now.bowl [%del-path path now.bowl])
 
   [cards state]
 ::
@@ -538,11 +542,11 @@
   =.  tables.state  (del-path-in-tables state path)
 
   :: add to del-log (implies that the other stuff is also deleted)
-  =.  del-log.state   (~(put by del-log.state) now.bowl [%del-path path])
+  =.  del-log.state   (~(put by del-log.state) now.bowl [%del-path path now.bowl])
 
   :: emit the change to subscribers
   =/  cards=(list card)
-    [%give %fact [/db (weld /path path) ~] db-changes+!>([%del-path path]~)]~
+    [%give %fact [/db (weld /path path) ~] db-changes+!>([%del-path path now.bowl]~)]~
   [cards state]
 ::
 ++  create
@@ -632,7 +636,7 @@
   :: emit the change to subscribers
   =/  cards=(list card)  :~
     :: tell subs about the new row
-    [%give %fact [/db (weld /path path.row) path-sub-wire ~] db-changes+!>([%upd-row row]~)]
+    [%give %fact [/db (weld /path path.row) path-sub-wire ~] db-changes+!>([%upd-row row sch]~)]
     :: kick subs to force them to re-sub for next update
     [%give %kick [path-sub-wire ~] ~]
   ==
@@ -911,7 +915,8 @@
       ?-  -.ch
         %add-row
           ~[['row' (en-row row.ch (~(put by *schemas) [type.row.ch v.row.ch] schema.ch))]]
-        %upd-row  !!
+        %upd-row
+          ~[['row' (en-row row.ch (~(put by *schemas) [type.row.ch v.row.ch] schema.ch))]]
         %del-row
           :~  ['path' s+(spat path.ch)]
               ['type' s+type.ch]
@@ -922,12 +927,19 @@
           ~[['peer' (en-peer peer.ch)]]
         %upd-peer
           ~[['peer' (en-peer peer.ch)]]
-        %del-peer  !!
+        %del-peer
+          :~  ['path' s+(spat path.ch)]
+              ['ship' s+(scot %p ship.ch)]
+              ['timestamp' (time t.ch)]
+           ==
         %add-path
           ~[['path' (en-path-row path-row.ch)]]
         %upd-path
           ~[['path' (en-path-row path-row.ch)]]
-        %del-path  !!
+        %del-path
+          :~  ['path' s+(spat path.ch)]
+              ['timestamp' (time t.ch)]
+           ==
       ==
     ::
     ++  state
