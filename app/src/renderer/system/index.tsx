@@ -14,7 +14,7 @@ const getCssVar = (name: string) =>
 
 const ShellPresenter = () => {
   const { settingsStore } = useShipStore();
-  const { shellStore, authStore } = useAppState();
+  const { shellStore, authStore, loggedInAccount } = useAppState();
   const { session } = authStore;
 
   const DialogLayer = useMemo(
@@ -42,6 +42,7 @@ const ShellPresenter = () => {
     session?.color,
     settingsStore.realmCursorEnabled,
     settingsStore.profileColorForCursorEnabled,
+    loggedInAccount?.serverId, // For switching ships with different settings.
   ]);
 
   return (
