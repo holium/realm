@@ -851,6 +851,7 @@
           ?:  =(type-key 'da')    (di datatom)
           ?:  =(type-key 'dr')    (dri datatom)
           ?:  =(type-key 't')     (so datatom)
+          ?:  =(type-key 'p')     ((se %p) datatom)
           ?:  =(type-key 'path')  (jam (pa datatom))
           ?:  =(type-key 'list')  (jam ((ar so) datatom))
           ?:  =(type-key 'set')   (jam ((as so) datatom))
@@ -1032,6 +1033,7 @@
                 ?:  =(t.sch 'ud')  (numb `@ud`d)
                 ?:  =(t.sch 'rd')  (numbrd `@rd`d)
                 ?:  =(t.sch 't')   [%s `@t`d]
+                ?:  =(t.sch 'p')   s+(scot %p `@p`d)
                 ?:  =(t.sch 'da')  (time `@da`d)
                 ?:  =(t.sch 'dr')  (time-dr `@dr`d)
                 ?:  =(t.sch 'path')  (path ;;(^path (cue d)))
