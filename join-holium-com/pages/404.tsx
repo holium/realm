@@ -4,10 +4,11 @@ import { Button, Flex, Text } from '@holium/design-system/general';
 import { defaultTheme } from '@holium/shared';
 
 import { InviteCardContainer } from '../components/InviteCard';
+import { Page } from '../components/Page';
 import { GlobalStyle } from '../lib/GlobalStyle';
 
-const FourOhFourPage = () => {
-  return (
+const FourOhFourPage = () => (
+  <Page>
     <Flex
       width="100%"
       height="100vh"
@@ -34,7 +35,7 @@ const FourOhFourPage = () => {
         </Link>
       </InviteCardContainer>
     </Flex>
-  );
-};
+  </Page>
+);
 
 export default FourOhFourPage;
