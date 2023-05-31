@@ -2,16 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { observer } from 'mobx-react';
 
+import { Box, Button, Flex, Icon } from '@holium/design-system/general';
 import {
   BarStyle,
-  Box,
-  Button,
-  Flex,
-  Icon,
-  NoScrollBar,
   NotificationList,
   NotificationType,
-} from '@holium/design-system';
+} from '@holium/design-system/os';
 
 import { nativeApps } from 'renderer/apps/nativeApps';
 import { useTrayApps } from 'renderer/apps/store';
@@ -213,13 +209,12 @@ export const ShipBarPresenter = () => {
               transition: { duration: 0.1, ease: 'easeInOut' },
             }}
           >
-            <NoScrollBar
+            <Flex
               justifyContent="flex-start"
               overflowY="auto"
               overflowX="hidden"
               width={width - 15}
               minHeight={0}
-              borderRadius={6}
             >
               {chatStore.loader.isFirstLoad ? (
                 <Flex
@@ -270,7 +265,7 @@ export const ShipBarPresenter = () => {
                   notifications={undismissedNotifications as NotificationType[]}
                 />
               )}
-            </NoScrollBar>
+            </Flex>
             <Flex
               animate={{
                 opacity: 1,
