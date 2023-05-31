@@ -157,11 +157,11 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     const value = credentials.cookie?.split('=')[1].split('; ')[0];
     // remove current cookie
     await session
-      .fromPartition(`persist:default-${credentials.ship}`)
+      .fromPartition(`persist:webview-${credentials.ship}`)
       .cookies.remove(`${credentials.url}`, `urbauth-${credentials.ship}`);
     // set new cookie
     await session
-      .fromPartition(`persist:default-${credentials.ship}`)
+      .fromPartition(`persist:webview-${credentials.ship}`)
       .cookies.set({
         url: `${credentials.url}`,
         name: `urbauth-${credentials.ship}`,
