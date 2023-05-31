@@ -218,6 +218,8 @@ export const ShipBarPresenter = () => {
               overflowY="auto"
               overflowX="hidden"
               width={width - 15}
+              minHeight={0}
+              borderRadius={6}
             >
               {chatStore.loader.isFirstLoad ? (
                 <Flex

@@ -62,7 +62,7 @@ export const NotificationList = ({
   }
   return (
     <Flex
-      height="inherit"
+      height="100%"
       flexDirection="column"
       gap={8}
       justifyContent={justifyContent}
