@@ -120,13 +120,19 @@
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
     ?+    wire  !!
-      [%dbpoke ~]
+      [%dbpoke *]
         ?+    -.sign  `this
           %poke-ack
             ?~  p.sign  `this
-            ~&  >>>  "%realm-chat: {<(spat wire)>} dbpoke failed"
-            ~&  >>>  p.sign
-            `this
+            ?~  +.wire
+              ~&  >>>  "%realm-chat: {<(spat wire)>} dbpoke failed in an unhandled way"
+              ~&  >>>  p.sign
+              `this
+            ~&  >>>  "kicking {<src.bowl>} from {(spud +.wire)} because /dbpoke got a poke-nack"
+            =/  fakebowl   bowl
+            =.  src.fakebowl  our.bowl
+            =/  cs  (remove-ship-from-chat:lib [+.wire src.bowl] state fakebowl)
+            [-.cs this(state +.cs)]
         ==
       [%selfpoke ~]
         ?+    -.sign  `this
