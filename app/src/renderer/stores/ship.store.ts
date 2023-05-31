@@ -14,7 +14,7 @@ import { FriendsStore } from './models/friends.model';
 import { NotifStore } from './models/notification.model';
 import { SpacesStore } from './models/spaces.model';
 import { WalletStore } from './models/wallet.model';
-import { RoomsStore } from './rooms.store';
+// import { RoomsStore } from './rooms.store';
 
 export const ShipStore = types
   .model('ShipStore', {
@@ -26,7 +26,7 @@ export const ShipStore = types
     bazaarStore: BazaarStore,
     walletStore: WalletStore,
     featuredStore: FeaturedStore,
-    roomsStore: RoomsStore,
+    // roomsStore: RoomsStore,
     loader: LoaderModel,
   })
   .actions((self) => ({
@@ -41,7 +41,7 @@ export const ShipStore = types
       self.bazaarStore.init();
       self.spacesStore.init();
       self.walletStore.init();
-      self.roomsStore.init();
+      // self.roomsStore.init();
     },
     reset() {
       self.notifStore.reset();
@@ -51,7 +51,7 @@ export const ShipStore = types
       self.walletStore.reset();
       self.friends.reset();
       self.featuredStore.reset();
-      self.roomsStore.reset();
+      // self.roomsStore.reset();
     },
     getOurGroups: flow(function* () {
       try {
@@ -121,10 +121,10 @@ export const shipStore = ShipStore.create({
   loader: {
     state: 'initial',
   },
-  roomsStore: {
-    provider: window.ship,
-    rooms: {},
-  },
+  // roomsStore: {
+  //   provider: window.ship,
+  //   rooms: {},
+  // },
 });
 
 onSnapshot(shipStore, (snapshot) => {

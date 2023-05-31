@@ -13,6 +13,7 @@ import { useAppState } from 'renderer/stores/app.store';
 import { PeerConnectionState } from 'renderer/stores/rooms/rooms.types';
 import { useShipStore } from 'renderer/stores/ship.store';
 
+import { useRoomsStore } from '../store/RoomsStoreContext';
 import { AudioWave } from './AudioWave';
 
 interface ISpeaker {
@@ -31,7 +32,8 @@ const speakerType = {
 const SpeakerPresenter = (props: ISpeaker) => {
   const { person, type } = props;
   const { loggedInAccount } = useAppState();
-  const { friends, roomsStore } = useShipStore();
+  const { friends } = useShipStore();
+  const roomsStore = useRoomsStore();
   const speakerRef = useRef<any>(null);
   const { getOptions, setOptions } = useContextMenu();
   const isOur = person === loggedInAccount?.serverId;
@@ -40,9 +42,9 @@ const SpeakerPresenter = (props: ISpeaker) => {
   let name = metadata?.nickname || person;
   let peer: any;
   if (isOur) {
-    peer = roomsStore;
+    peer = roomsStore.ourPeer;
   } else {
-    peer = roomsStore.peersMetadata.get(person);
+    peer = roomsStore.peers.get(person);
   }
 
   const contextMenuOptions = useMemo(
@@ -58,7 +60,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
           },
         },
         // only the creator can kick people
-        loggedInAccount?.serverId === roomsStore.current?.creator && {
+        loggedInAccount?.serverId === roomsStore.currentRoom?.creator && {
           style: { color: '#FD4E4E' },
           id: `room-speaker-${person}-kick`,
           label: 'Kick',
@@ -69,10 +71,11 @@ const SpeakerPresenter = (props: ISpeaker) => {
           },
         },
       ].filter(Boolean) as ContextMenuOption[],
-    [peer?.status, person, roomsStore.current, loggedInAccount]
+    [peer?.status, person, roomsStore.currentRid, loggedInAccount]
   );
 
   const peerState = isOur ? PeerConnectionState.Connected : peer?.status;
+  console.log('peerState', person, peer?.status);
 
   if (name.length > 17) name = `${name.substring(0, 17)}...`;
 

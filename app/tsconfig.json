@@ -1,15 +1,10 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
+    "experimentalDecorators": true,
     "baseUrl": "src",
     "outDir": "release/app/dist"
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules",
-    "release",
-    ".holium/dll"
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules", "release", ".holium/dll"]
 }

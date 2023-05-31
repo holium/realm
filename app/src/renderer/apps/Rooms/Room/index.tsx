@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { darken } from 'polished';
 
@@ -8,8 +8,8 @@ import { useTrayApps } from 'renderer/apps/store';
 import { Badge } from 'renderer/components';
 import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
 
+import { useRoomsStore } from '../store/RoomsStoreContext';
 import { RoomChat } from './Chat';
 import { RoomInvite } from './Invite';
 import { VoiceView } from './Voice';
@@ -18,7 +18,7 @@ type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
 const RoomPresenter = () => {
   const { loggedInAccount, theme, shellStore } = useAppState();
-  const { roomsStore } = useShipStore();
+  const roomsStore = useRoomsStore();
   const { roomsApp } = useTrayApps();
 
   const { dockColor, mode } = theme;
@@ -26,11 +26,6 @@ const RoomPresenter = () => {
   const isMuted = roomsStore.isMuted;
   const commButtonBg =
     mode === 'light' ? darken(0.04, dockColor) : darken(0.01, dockColor);
-
-  const presentRoom = useMemo(() => {
-    if (!roomsStore.current) return;
-    return roomsStore.current;
-  }, [roomsStore.current]);
 
   useEffect(() => {
     trackEvent('OPENED', 'ROOMS_VOICE');
@@ -58,12 +53,15 @@ const RoomPresenter = () => {
   }, [roomView, roomsStore.chat.length]);
 
   useEffect(() => {
-    if (!presentRoom) roomsApp.setView('list');
-  }, [presentRoom, roomsApp]);
+    if (!roomsStore.currentRid) roomsApp.setView('list');
+  }, [roomsStore.currentRid, roomsApp]);
 
+  if (!roomsStore.currentRid) return <div />;
+
+  const presentRoom = roomsStore.rooms.get(roomsStore.currentRid);
   if (!presentRoom) return <div />;
-  const { rid, creator } = presentRoom;
-  const presentCount = presentRoom?.present?.length ?? 0;
+  const { rid, creator, present, title } = presentRoom;
+  const presentCount = present?.length ?? 0;
   const creatorStr =
     creator.length > 14 ? `${creator.substring(0, 14)}...` : creator;
 
@@ -102,7 +100,7 @@ const RoomPresenter = () => {
                 textTransform: 'uppercase',
               }}
             >
-              {presentRoom.title}
+              {title}
             </Text.Custom>
             <Flex mt="2px">
               <Text.Custom fontSize={2} fontWeight={400} opacity={0.5}>
@@ -163,16 +161,18 @@ const RoomPresenter = () => {
               size={30}
               showOnHover
               iconColor={
-                presentRoom.creator === loggedInAccount?.serverId
+                creator === loggedInAccount?.serverId
                   ? 'intent-alert'
                   : undefined
               }
               onClick={(evt) => {
                 evt.stopPropagation();
-                if (presentRoom.creator === loggedInAccount?.serverId) {
+                if (creator === loggedInAccount?.serverId) {
                   roomsStore.deleteRoom(rid);
+                  roomsApp.setView('list');
                 } else {
-                  roomsStore.leaveRoom();
+                  roomsStore.leaveRoom(rid);
+                  roomsApp.setView('list');
                 }
               }}
             >
@@ -191,9 +191,9 @@ const RoomPresenter = () => {
               onClick={(evt) => {
                 evt.stopPropagation();
                 if (isMuted) {
-                  roomsStore?.unmute();
+                  roomsStore.ourPeer.unmute();
                 } else {
-                  roomsStore?.mute();
+                  roomsStore.ourPeer.mute();
                 }
               }}
             />
