@@ -58,6 +58,7 @@
       default-access=access-rules   :: for everything not found in the table-access
       =table-access                 :: allows a path to specify role-based access rules on a per-table basis
       =constraints
+      space=(unit [=path =role:membership])  :: if the path-row is created from a space, record the info
       created-at=@da
       updated-at=@da
       received-at=@da

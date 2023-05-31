@@ -302,6 +302,7 @@
     ?.  =(our.bowl ship.path.new-space)
       `state
     %-  (slog leaf+"{<dap.bowl>}: creating paths for {<path.new-space>}" ~)
+    :: create the default 4 paths
     =/  pathed    (pathify-space-path:spaces-chat path.new-space)
     =/  ini       (create-from-space [(weld pathed /initiate) path.new-space %initiate] state bowl)
     =/  mem       (create-from-space [pathed path.new-space %member] +.ini bowl)
@@ -318,13 +319,21 @@
       `state
     %-  (slog leaf+"{<dap.bowl>}: deleting paths for {<path>}" ~)
     =/  pathed    (pathify-space-path:spaces-chat path)
-    =/  cs        (remove-path (weld pathed /initiate) state bowl)
-    =/  mem       (remove-path pathed +.cs bowl)
-    =.  cs        [(weld -.cs -.mem) +.mem]
-    =/  adm       (remove-path (weld pathed /admin) +.cs bowl)
-    =.  cs        [(weld -.cs -.adm) +.adm]
-    =/  owr       (remove-path (weld pathed /owner) +.cs bowl)
-    [(weld -.cs -.owr) +.owr]
+    =/  prs=(list path-row)  
+      %+  skim
+        ~(val by paths.state)
+      |=(pr=path-row ?~(space.pr %.n =(path:(need space.pr) pathed)))
+
+    =/  index=@ud  0
+    =/  cs      [*(list card) state]
+    |-
+      ?:  =(index (lent prs))
+        cs
+      =/  pr   (snag index prs)
+      =/  fakebowl  bowl
+      =.  now.fakebowl   `@da`(add index now.bowl)
+      =/  new  (remove-path path.pr +.cs fakebowl)
+      $(index +(index), cs [(weld -.cs -.new) +.new])
     ::
   --
 ::
@@ -343,21 +352,38 @@
     ::  only host can modify peers lists
     ?.  =(our.bowl ship.path)    `state
     ::  if we are here, we are the host
-    =/  pathed    (pathify-space-path:spaces-chat path)
     =/  max-role
       ?:  (~(has in roles.member) %owner)   %host
       ?:  (~(has in roles.member) %admin)   %admin
       ?:  (~(has in roles.member) %member)  %member
       %initiate
-    =/  mem  (add-peer [pathed ship max-role] state bowl)
-    =/  adm  (add-peer [(weld pathed /admin) ship max-role] +.mem bowl)
-    =/  owr  (add-peer [(weld pathed /owner) ship max-role] +.adm bowl)
-    ?-  max-role
-      %initiate  `state  :: don't ADD them to the initiate list, because they already were when they were invited
-      %member    mem
-      %admin     [(weld -.adm -.mem) +.adm]
-      %host      [(weld -.owr (weld -.adm -.mem)) +.owr]
-    ==
+    ?:  =(max-role %initiate)  `state :: initiates don't get access to anything new from accepting
+    =/  pathed    (pathify-space-path:spaces-chat path)
+    =/  prs=(list path-row)
+      %+  skim
+        ~(val by paths.state)
+      |=(pr=path-row ?~(space.pr %.n =(path:(need space.pr) pathed)))
+
+    =/  index=@ud  0
+    =/  cs   [*(list card) state]
+    |-
+      ?:  =(index (lent prs))
+        cs
+      =/  pr   (snag index prs)
+      =/  prole  role:(need space.pr)
+      ?:  ?|  =(prole %member)
+              ?&  =(prole %admin)
+                  |(=(max-role %host) =(max-role %admin))
+              ==
+              ?&  =(prole %host)
+                  =(max-role %host)
+              ==
+          ==
+        :: if they SHOULD be added, add them
+        =/  new  (add-peer [path.pr ship max-role] +.cs bowl)
+        $(index +(index), cs [(weld -.cs -.new) +.new])
+      :: else, move on
+      $(index +(index))
   ::
   ++  on-kicked
     |=  [path=space-path:sstore =ship]
@@ -367,11 +393,20 @@
     =/  pathed    (pathify-space-path:spaces-chat path)
     :: attempt to kick from all since it doesn't hurt anything if they
     :: aren't actually in the path
-    =/  ini  (kick-peer [(weld pathed /initiate) ship] state bowl)
-    =/  mem  (kick-peer [pathed ship] +.ini bowl)
-    =/  adm  (kick-peer [(weld pathed /admin) ship] +.mem bowl)
-    =/  owr  (kick-peer [(weld pathed /owner) ship] +.adm bowl)
-    [(weld -.owr (weld -.adm (weld -.ini -.mem))) +.owr]
+    =/  pathed    (pathify-space-path:spaces-chat path)
+    =/  prs=(list path-row)  
+      %+  skim
+        ~(val by paths.state)
+      |=(pr=path-row ?~(space.pr %.n =(path:(need space.pr) pathed)))
+
+    =/  index=@ud  0
+    =/  cs      [*(list card) state]
+    |-
+      ?:  =(index (lent prs))
+        cs
+      =/  pr   (snag index prs)
+      =/  new  (kick-peer [path.pr ship] +.cs bowl)
+      $(index +(index), cs [(weld -.cs -.new) +.new])
   --
 ::
 :: pokes
@@ -403,6 +438,7 @@
     default-access.input-path-row
     table-access.input-path-row
     constraints.input-path-row
+    ~
     now.bowl
     now.bowl
     now.bowl
@@ -459,6 +495,7 @@
 ::   %initiate, every ship in the members list, regardless of role or joined status
   |=  [[=path sp=[=ship space=cord] sr=role:mstore] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  ~&  %create-from-space
   =/  members     .^(view:mstore %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.sp)/(scot %tas space.sp)/members/noun)
   ?>  ?=(%members -.members)
   =/  filtered-members
@@ -511,6 +548,7 @@
     default-access-rules
     ~
     ~
+    [~ [(pathify-space-path:spaces-chat sp) sr]]
     now.bowl
     now.bowl
     now.bowl
@@ -696,6 +734,7 @@
   |=  [=path state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: ensure the path actually exists
+  ~&  >>>  "attempting to delete {<path>}"
   =/  path-row=path-row    (~(got by paths.state) path)
   :: ensure this came from host ship
   ?>  =(host.path-row src.bowl)
@@ -864,6 +903,7 @@
       :~  [%add-peer add-peer]
           [%kick-peer kick-peer]
           [%create-path create-path]
+          [%create-from-space de-create-from-space]
           [%remove-path pa]
           [%create de-input-row]
           [%edit (ot ~[[%id de-id] [%input-row de-input-row]])]
@@ -888,6 +928,13 @@
       :~  [%type (se %tas)]
           [%path pa]
           [%id de-id]
+      ==
+    ::
+    ++  de-create-from-space
+      %-  ot
+      :~  [%path pa]
+          [%space-path de-space-path]
+          [%space-role de-space-role]
       ==
     ::
     ++  create-path
@@ -1054,6 +1101,31 @@
       |=  p=path
       ^-  id:common
       [`@p`(slav %p +2:p) `@da`(slav %da +6:p)]
+    ::
+    ++  de-space-path
+      %+  cu
+        path-to-space-path
+      pa
+    ::
+    ++  path-to-space-path
+      |=  p=path
+      ^-  [=ship space=cord]
+      [`@p`(slav %p +2:p) `@t`(slav %tas +6:p)]
+    ::
+    ++  de-space-role
+      %+  cu
+        tas-to-space-role
+      (se %tas)
+    ::
+    ++  tas-to-space-role
+      |=  t=@tas
+      ^-  role:mstore
+      ?+  t  !!
+        %initiate   %initiate
+        %member     %member
+        %admin      %admin
+        %owner      %owner
+      ==
     ::
     ++  de-ship  (su ;~(pfix sig fed:ag))
     ::
