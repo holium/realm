@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { observer } from 'mobx-react';
+import styled from 'styled-components';
 
 import { Box, Button, Flex, Icon } from '@holium/design-system/general';
 import {
@@ -21,6 +22,21 @@ import { AccountTray } from './AccountTray';
 import { MessagesTray } from './MessagesTray';
 import { RoomTray } from './Rooms';
 import { WalletTray } from './WalletTray';
+
+const Scroller = styled(Flex)`
+  justify-content: flex-start;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  min-height: 0;
+  border-radius: 6px;
+
+  ::-webkit-scrollbar,
+  ::-webkit-scrollbar-track {
+    border-radius: 0 6px 6px 0;
+    background-color: rgba(var(--rlm-card-rgba), 0.7);
+  }
+`;
 
 type ExpandBarStyles = {
   height: number | 'fit-content';
@@ -209,13 +225,7 @@ export const ShipBarPresenter = () => {
               transition: { duration: 0.1, ease: 'easeInOut' },
             }}
           >
-            <Flex
-              justifyContent="flex-start"
-              overflowY="auto"
-              overflowX="hidden"
-              width={width - 15}
-              minHeight={0}
-            >
+            <Scroller>
               {chatStore.loader.isFirstLoad ? (
                 <Flex
                   isSkeleton
@@ -265,7 +275,7 @@ export const ShipBarPresenter = () => {
                   notifications={undismissedNotifications as NotificationType[]}
                 />
               )}
-            </Flex>
+            </Scroller>
             <Flex
               animate={{
                 opacity: 1,
