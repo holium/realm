@@ -460,7 +460,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     try {
       await this._openConduit({ serverId, serverUrl, serverCode });
     } catch (e) {
-      log.error('ship.service.ts:', 'Failed to open the conduit', e);
+      log.error('onboarding.service.ts:', 'Failed to open the conduit', e);
       throw e;
     }
     return coo;
@@ -486,9 +486,9 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       if (!cookie) throw new Error('Failed to get cookie');
       const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
       const sanitizedCookie = cookie.split('; ')[0];
-      log.info('ship.service.ts:', 'cookie', sanitizedCookie);
+      log.info('onboarding.service.ts:', 'cookie', sanitizedCookie);
       log.info(
-        'ship.service.ts:',
+        'onboarding.service.ts:',
         'ids',
         serverId.toLowerCase(),
         cookiePatp.toLowerCase()
@@ -503,7 +503,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
 
       return sanitizedCookie;
     } catch (e) {
-      log.error('ship.service.ts:', 'Failed to get cookie', e);
+      log.error('onboarding.service.ts:', 'Failed to get cookie', e);
       throw e;
     }
   }
@@ -554,7 +554,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
           resolve(null);
         })
         .on('error', (err: any) => {
-          log.error('ship.service.ts:', 'Conduit error', err);
+          log.error('onboarding.service.ts:', 'Conduit error', err);
           reject(err);
         });
     });

@@ -195,7 +195,7 @@ export const ChatMessage = types
   }));
 export type ChatMessageType = Instance<typeof ChatMessage>;
 
-const ChatTypes = types.enumeration(['dm', 'group', 'space']);
+const ChatTypes = types.enumeration(['dm', 'group', 'space', 'self']);
 export type ChatRowType = Instance<typeof ChatTypes>;
 
 export const Chat = types
@@ -601,16 +601,12 @@ export const Chat = types
       }
     }),
     addPeer: flow(function* (ship: string) {
-      const oldPeers = self.peers;
       try {
         yield ChatIPC.addPeerToChat(self.path, ship) as Promise<void>;
-        self.peers.push(PeerModel.create({ ship, role: 'member' }));
-        return self.peers;
       } catch (error) {
         console.error(error);
-        self.peers = oldPeers;
-        return self.peers;
       }
+      return self.peers;
     }),
     removePeer: flow(function* (ship: string) {
       const oldPeers = self.peers;

@@ -22,18 +22,30 @@
           ~              :: set of pinned chats
           %.n            :: msg-preview-notif
       ==
-    :_  this(state default-state)
-    :~
-      [%pass /db %agent [our.bowl %chat-db] %watch /db]
-    ==
+
+    =/  subs   [%pass /db %agent [our.bowl %chat-db] %watch /db]~
+    ::  now check if we need to create a notes-to-self chat
+    =/  selfpaths=(list path-row:db-sur)  (skim (scry-paths:lib bowl) |=(p=path-row:db-sur =(type.p %self)))
+    =/  createcards
+      ?.  =(0 (lent selfpaths))  ~
+      -:(create-chat:lib [(notes-to-self bowl) %self ~ %host *@dr] state bowl)
+
+    [(weld subs createcards) this(state default-state)]
   ++  on-save   !>(state)
   ++  on-load
     |=  old-state=vase
     ^-  (quip card _this)
     :: do a quick check to make sure we are subbed to /db in %chat-db
-    =/  cards  ?:  =(wex.bowl ~)  
-      [%pass /db %agent [our.bowl %chat-db] %watch /db]~
-    ~
+    =/  cards=(list card)
+      ?:  =(wex.bowl ~)  
+        [%pass /db %agent [our.bowl %chat-db] %watch /db]~
+      ~
+    ::  now check if we need to create a notes-to-self chat
+    =/  selfpaths=(list path-row:db-sur)  (skim (scry-paths:lib bowl) |=(p=path-row:db-sur =(type.p %self)))
+    =.  cards
+      ?.  =(0 (lent selfpaths))  cards
+      (weld cards -:(create-chat:lib [(notes-to-self bowl) %self ~ %host *@dr] state bowl))
+      
     =/  old  !<(versioned-state old-state)
     ?-  -.old
       %0  [cards this(state old)]
@@ -120,13 +132,19 @@
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
     ?+    wire  !!
-      [%dbpoke ~]
+      [%dbpoke *]
         ?+    -.sign  `this
           %poke-ack
             ?~  p.sign  `this
-            ~&  >>>  "%realm-chat: {<(spat wire)>} dbpoke failed"
-            ~&  >>>  p.sign
-            `this
+            ?~  +.wire
+              ~&  >>>  "%realm-chat: {<(spat wire)>} dbpoke failed in an unhandled way"
+              ~&  >>>  p.sign
+              `this
+            ~&  >>>  "kicking {<src.bowl>} from {(spud +.wire)} because /dbpoke got a poke-nack"
+            =/  fakebowl   bowl
+            =.  src.fakebowl  our.bowl
+            =/  cs  (remove-ship-from-chat:lib [+.wire src.bowl] state fakebowl)
+            [-.cs this(state +.cs)]
         ==
       [%selfpoke ~]
         ?+    -.sign  `this
@@ -352,4 +370,5 @@
   ?:  =('' nickname)
     (scot %p patp)
   nickname
+++  notes-to-self  |=(=bowl:gall (malt ~[['title' 'Notes to Self'] ['reactions' 'true'] ['creator' (scot %p our.bowl)] ['description' '']]))
 --

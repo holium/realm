@@ -60,7 +60,10 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
   if (!loggedInAccount) return null;
   if (!currentSpace) return null;
 
-  const membersCount = currentSpace.members.count;
+  let membersCount: number = 0;
+  currentSpace.members?.all.forEach((m) =>
+    m.status !== 'invited' ? (membersCount += 1) : null
+  );
   const maxWidth = 880;
 
   const isAdmin = currentSpace.isAdmin(loggedInAccount.serverId);

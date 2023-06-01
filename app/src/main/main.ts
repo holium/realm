@@ -86,8 +86,8 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1920,
-    height: 1080,
+    width: 1512,
+    height: 982,
     icon: getAssetPath('icon.png'),
     title: 'Realm',
     fullscreen: true,
