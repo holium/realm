@@ -173,8 +173,9 @@ export const LinkBlock = ({
   }
 
   const ogHasURL = openGraph && openGraph.ogUrl;
+  const ogHasImage = openGraph && openGraph.ogImage;
   // 254px in rem is 15rem
-  if (!ogHasURL) {
+  if (!ogHasURL && !ogHasImage) {
     const width = containerWidth ? containerWidth - 12 : 320;
     return (
       <Box height={RAW_LINK_HEIGHT} id={id}>
@@ -184,6 +185,7 @@ export const LinkBlock = ({
       </Box>
     );
   }
+  const ogOrLink = ogHasURL ? (openGraph?.ogUrl) : link;
   return (
     <Block id={id} {...rest} height={LINK_PREVIEW_HEIGHT}>
       <LinkImage
@@ -198,13 +200,13 @@ export const LinkBlock = ({
         <LinkTitle
           id={id}
           truncate
-          isSkeleton={!ogHasURL}
+          isSkeleton={!(openGraph?.ogTitle)}
           fontSize={2}
           fontWeight={500}
           width={containerWidth ? containerWidth - 20 : 'inherit'}
           onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {
             evt.stopPropagation();
-            window.open(openGraph?.ogUrl, '_blank');
+            window.open(ogOrLink, '_blank');
           }}
         >
           {openGraph?.ogTitle}
@@ -212,7 +214,7 @@ export const LinkBlock = ({
         <LinkDescription
           id={id}
           truncate
-          isSkeleton={!ogHasURL}
+          isSkeleton={!(openGraph?.ogDescription)}
           fontSize={1}
           opacity={0.7}
           width={containerWidth ? containerWidth - 20 : 'calc(100% - 16px)'}
@@ -237,22 +239,19 @@ export const LinkBlock = ({
         >
           <Text.Anchor
             id={id}
-            isSkeleton={!ogHasURL}
+            isSkeleton={false}
             fontSize={0}
             opacity={0.5}
             onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {
               evt.stopPropagation();
-              if (ogHasURL) {
-                const origin = new URL(openGraph.ogUrl).origin;
-                window.open(origin, '_blank');
-              }
+              const origin = new URL(ogOrLink).origin;
+              window.open(origin, '_blank');
             }}
           >
             {openGraph?.ogSiteName ||
-              (ogHasURL && new URL(openGraph.ogUrl).hostname)}
+              (new URL(ogOrLink).hostname)}
           </Text.Anchor>
         </Flex>
-
         <Text.Custom
           id={id}
           truncate
