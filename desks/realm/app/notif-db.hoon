@@ -109,6 +109,10 @@
         =/  theid    (slav %ud i.t.t.t.path)
         ``notif-rows+!>([(got:notifon notifs-table.state theid) ~])
     ::
+      [%x %db %unread-count @ ~]
+        =/  theapp    `@tas`i.t.t.t.path
+        ``atom+!>((lent (unreads-by-app:core theapp)))
+    ::
       [%x %db %path @ *]
         =/  theapp    `@tas`i.t.t.t.path
         =/  thepath   t.t.t.t.path
@@ -189,6 +193,11 @@
   %+  turn
     (skim (tap:notifon:sur notifs-table.state) |=([k=@ud v=notif-row:sur] read.v))
   val-r
+++  unreads-by-app
+  |=  app=@tas
+  %+  skim
+    all-unread-rows
+  |=(v=notif-row:sur =(app.v app))
 ++  rows-by-path
   |=  [app=@tas =path]
   %+  turn

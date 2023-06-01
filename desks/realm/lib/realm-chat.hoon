@@ -3,11 +3,24 @@
 ::  Chat message lib within Realm. Mostly handles [de]serialization
 ::    to/from json from types stored in realm-chat sur.
 ::
-/-  *realm-chat, db=chat-db, notify
+/-  *realm-chat, db=chat-db, notify, fr=friends
 /+  notif-lib=notify
 |%
 ::
 :: helpers
+::
+++  scry-avatar-for-patp
+  |=  [patp=ship =bowl:gall]
+  ^-  (unit @t)
+  =/  cv=view:fr
+    .^  view:fr
+        %gx
+        /(scot %p our.bowl)/friends/(scot %da now.bowl)/contact-hoon/(scot %p patp)/noun
+    ==
+  ?+  -.cv  !! :: if the scry came back wonky, crash
+    %contact-info
+      avatar.contact-info.cv
+  ==
 ::
 ++  scry-messages-for-path
   |=  [=path =bowl:gall]
@@ -119,13 +132,13 @@
   |=(peer=ship [%pass (weld /dbpoke path) %agent [s %chat-db] %poke %chat-db-action !>([%add-peer path peer])])
 ::
 ++  push-notification-card
-  |=  [=bowl:gall state=state-0 chat-path=path title=@t subtitle=@t content=@t]
+  |=  [=bowl:gall state=state-0 chat-path=path title=@t subtitle=@t content=@t unread=@ud avatar=(unit @t)]
   ^-  card
   =/  note=notification:notify
   ^-  notification:notify
     [
       app-id=app-id.state
-      data=[path=(spat chat-path) member-meta=*mem-meta:notify]
+      data=[path=(spat chat-path) member-meta=*mem-meta:notify unread avatar]
       title=(malt ~[['en' title]])
       subtitle=?:(=(subtitle '') ~ (malt ~[['en' subtitle]]))
       contents=(malt ~[['en' content]])
@@ -148,6 +161,7 @@
   ==
 
   [%pass /push-notification/(scot %da now.bowl) %arvo %i %request request *outbound-config:iris]
+::
 ++  dm-already-exists
   |=  [typ=@tas peers=(list ship) =bowl:gall]
   ^-  ?
@@ -165,6 +179,7 @@
     =/  firstmatches=?   (~(has in setpeers) (snag 0 dmships))
     =/  secondmatches=?  (~(has in setpeers) (snag 1 dmships))
     $(index +(index), conflict &(firstmatches secondmatches))
+::
 ::
 ::  poke actions
 ::
@@ -408,6 +423,7 @@
   `state
 ::
 ++  set-device
+::realm-chat &chat-action [%set-device 'device' 'player']
   |=  [[=device-id:notify =player-id:notify] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ?>  =(src.bowl our.bowl)

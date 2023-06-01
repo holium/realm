@@ -78,13 +78,15 @@
       :~
         ['path' s+path.mtd]
         ['usrinfo' o+(~(run by member-meta.mtd) mtd-helper)]
+        ['unread_count' (numb unread.mtd)]
+        ['avatar' ?~(avatar.mtd ~ s+u.avatar.mtd)]
       ==
     ++  mtd-helper
       |=  mtd=contact-mtd:sur
       ^-  json
       %-  pairs
       :~
-          ['avatar' ?~(avatar.mtd s+'' s+u.avatar.mtd)]
+          ['avatar' ?~(avatar.mtd ~ s+u.avatar.mtd)]
           ['nickname' s+nickname.mtd]
           ['color' s+(scot %ux color.mtd)]  ::  todo convert this to hex string here
       ==

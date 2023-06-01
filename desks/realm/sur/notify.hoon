@@ -26,6 +26,8 @@
 +$  mtd
   $:  path=cord 
       member-meta=mem-meta
+      unread=@ud
+      avatar=(unit @t)
   ==
 ::
 +$  view
