@@ -25,10 +25,11 @@ import { WalletTray } from './WalletTray';
 
 const Scroller = styled(Flex)`
   justify-content: flex-start;
+  align-items: center;
   overflow-y: auto;
   overflow-x: hidden;
   width: 100%;
-  min-height: 0;
+  min-height: 60px;
   border-radius: 6px;
 
   ::-webkit-scrollbar,
@@ -230,14 +231,9 @@ export const ShipBarPresenter = () => {
                 <Flex
                   isSkeleton
                   flexDirection="column"
-                  gap={12}
-                  position="absolute"
                   justify="center"
                   align="center"
-                  width="calc(100% - 24px)"
-                  left={12}
-                  right={12}
-                  top={12}
+                  width="100%"
                   height={50}
                 />
               ) : (

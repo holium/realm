@@ -48,7 +48,6 @@ export const NotificationList = ({
     return (
       // show empty state
       <Flex
-        height={60}
         flexDirection="column"
         alignItems="center"
         justifyContent="center"
