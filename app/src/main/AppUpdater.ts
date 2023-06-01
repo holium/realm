@@ -63,14 +63,14 @@ interface IpcHandler {
 }
 
 export class AppUpdater implements IAppUpdater {
-  private manualCheck: boolean = false;
+  private manualCheck = false;
   private doneCallback: undefined | ((value: unknown) => void) = undefined;
   private progressWindow: BrowserWindow | null = null;
   private splashWindow: BrowserWindow | null = null;
   private handlers: IpcHandler[] = [];
   private updateInfo: UpdateInfo | undefined = undefined;
   private autoUpdater: typeof autoUpdater;
-  public checkingForUpdates: boolean = false;
+  public checkingForUpdates = false;
 
   constructor() {
     autoUpdater.removeAllListeners();
@@ -191,10 +191,7 @@ export class AppUpdater implements IAppUpdater {
     this.doneCallback && this.doneCallback('continue');
   };
 
-  startUpdateUI = (
-    mainWindow: BrowserWindow | null,
-    manualCheck: boolean = false
-  ) => {
+  startUpdateUI = (mainWindow: BrowserWindow | null, manualCheck = false) => {
     this.manualCheck = manualCheck;
     // this is not needed if the app is already open (mainWindow !== null)
     if (!mainWindow) {
@@ -296,9 +293,9 @@ export class AppUpdater implements IAppUpdater {
   //   auto update checks, gracefully ignore.
   checkForUpdates = (
     mainWindow: BrowserWindow | null = null,
-    manualCheck: boolean = false
+    manualCheck = false
   ) => {
-    return new Promise(async (resolve) => {
+    return new Promise((resolve) => {
       if (!process.env.AUTOUPDATE_FEED_URL) {
         resolve('continue');
         return;

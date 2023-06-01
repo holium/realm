@@ -25,6 +25,7 @@ const ShipSelectorPresenter = () => {
   const { setTheme, authStore } = useAppState();
   const { accounts, selected: selectedShip, setSelected: onSelect } = authStore;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [orderedList, _setOrder] = useState(
     accounts.map((a) => a.serverId) || []
   );

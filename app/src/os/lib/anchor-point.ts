@@ -74,9 +74,6 @@ export const calculateAnchorPoint = (
           x = x - menuWidth + event.offsetX;
         }
         y = event.target.offsetTop + event.target.clientHeight;
-        if (menuHeight) {
-          y = y;
-        }
         return {
           x,
           y,
@@ -87,13 +84,14 @@ export const calculateAnchorPoint = (
           y: event.target.offsetTop + event.clientY + padding,
         };
 
-      default:
+      default: {
         let pointerY = event.clientY;
         if (position === 'above') {
           pointerY = pointerY - (menuHeight ?? 0);
         }
         // pointer or default
         return { x: event.clientX + padding, y: pointerY + padding };
+      }
     }
   } else {
     return { x: 0, y: 0 };

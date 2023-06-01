@@ -375,7 +375,7 @@ export const Chat = types
       // self.lastUpdatedAt = new Date().getTime();
     },
     deleteMessage: flow(function* (messageId: string) {
-      let success: boolean = true;
+      let success = true;
       try {
         yield ChatIPC.deleteMessage(self.path, messageId);
       } catch (error) {

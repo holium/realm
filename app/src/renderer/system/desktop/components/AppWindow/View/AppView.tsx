@@ -94,7 +94,7 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
       setAppUrl(appUrl);
     }
 
-    () => {
+    return () => {
       setReady(false);
     };
   }, [

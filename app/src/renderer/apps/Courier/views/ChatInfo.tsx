@@ -76,6 +76,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const { selectedChat, setSubroute, getChatHeader } = chatStore;
   const { dimensions } = useTrayApps();
   const containerRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string>();
   const [image, setImage] = useState(selectedChat?.metadata?.image || '');
@@ -89,7 +90,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
     if (!selectedChat || !loggedInAccount)
       return { resolvedTitle: 'Error loading title', subtitle: '' };
 
-    let { title, sigil, image: chatImage } = getChatHeader(selectedChat.path);
+    const { title, sigil, image: chatImage } = getChatHeader(selectedChat.path);
     let subtitle = '';
     if (selectedChat.type === 'dm') {
       if (chatImage) setImage(chatImage);

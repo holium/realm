@@ -29,6 +29,7 @@ const RecoverExistingScreenPresenter = ({
   const { walletStore } = useShipStore();
   const [phrase, setPhrase] = useState('');
   const [error, setError] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_loading, setLoading] = useState(false);
 
   const [showPasscode, setShowPasscode] = useState(false);

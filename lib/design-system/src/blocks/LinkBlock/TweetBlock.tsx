@@ -64,6 +64,7 @@ export const TweetBlock: FC<TweetBlockProps> = (props: TweetBlockProps) => {
       tweetEmbed = (
         <webview
           id={`${id}-webview`}
+          // eslint-disable-next-line react/no-unknown-property
           webpreferences="sandbox=false"
           src={`https://platform.twitter.com/embed/Tweet.html?dnt=true&embedId=twitter-widget-0a&frame=false&hideCard=false&hideThread=false&id=${tweetId}&lang=en&theme=light&widgetsVersion=aaf4084522e3a%3A1674595607486&width=${tWidth}px`}
           style={{

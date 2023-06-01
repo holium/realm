@@ -107,7 +107,7 @@ export function formatEthAmount(amount: string): EthAmount {
 }
 
 export function formatCoinAmount(
-  balance: string | BigInt,
+  balance: string | bigint,
   decimals: number
 ): ERC20Amount {
   let amount = typeof balance === 'string' ? balance : balance.toString();
@@ -136,7 +136,7 @@ export function formatCoinAmount(
 
 export function convertEthAmountToUsd(
   amount: EthAmount,
-  exchangeRate: number = 1647.37
+  exchangeRate = 1647.37
 ) {
   if (amount.eth === '0') {
     return '0.00';
@@ -162,7 +162,7 @@ export function formatBtcAmount(amount: string): BtcAmount {
 
 export function convertBtcAmountToUsd(
   amount: BtcAmount,
-  exchangeRate: number = 1647.37
+  exchangeRate = 1647.37
 ) {
   if (amount.btc === '0') {
     return '0.00';
@@ -173,7 +173,7 @@ export function convertBtcAmountToUsd(
 
 export function convertERC20AmountToUsd(
   amount: ERC20Amount,
-  exchangeRate: number = 1647.37
+  exchangeRate = 1647.37
 ) {
   const usd = Number(amount.big) * exchangeRate;
   return usd.toFixed(2);

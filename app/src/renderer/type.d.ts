@@ -55,7 +55,7 @@ declare module 'better-sqlite3-multiple-ciphers' {
     inTransaction: boolean;
     constructor(filename: string, options?: Database.Options): Database;
 
-    prepare<BindParameters extends any[] | {} = any[]>(
+    prepare<BindParameters extends any[] | object = any[]>(
       source: string
     ): BindParameters extends any[]
       ? Statement<BindParameters>

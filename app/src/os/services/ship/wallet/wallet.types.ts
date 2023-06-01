@@ -87,7 +87,7 @@ export type TransactionsRow = {
   notes: string;
 };
 
-export type WalletsRow = {};
+export type WalletsRow = object;
 
 export type WalletTables = 'messages' | 'paths' | 'peers';
 export type DbChangeType =

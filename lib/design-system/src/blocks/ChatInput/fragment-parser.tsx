@@ -170,7 +170,7 @@ const eatSpecialType = (
       startIndex = raw.indexOf(startToken);
     } else if (typeof startToken === 'object') {
       // handle regex (for italics since * is a subset of bold's **)
-      let possibleMatch = raw.match(startToken);
+      const possibleMatch = raw.match(startToken);
       startIndex =
         possibleMatch && possibleMatch.index !== undefined
           ? possibleMatch.index
@@ -191,14 +191,14 @@ const eatSpecialType = (
         // see if we find an exit match
         const offset = startIndex + startTokenLength;
         const endToken = parserRules[type].ender || startToken;
-        let endTokenLength = (parserRules[type].enderLength ||
+        const endTokenLength = (parserRules[type].enderLength ||
           parserRules[type].tokenLength) as unknown as number;
         let stopIndex: number;
         if (typeof endToken === 'string') {
           stopIndex = raw.substr(offset).indexOf(endToken);
         } else {
           // handle regex (for italics since * is a subset of bold's **)
-          let interimMatch = raw.substr(offset).match(endToken);
+          const interimMatch = raw.substr(offset).match(endToken);
           stopIndex =
             interimMatch && interimMatch.index !== undefined
               ? interimMatch.index
@@ -206,7 +206,7 @@ const eatSpecialType = (
         }
         if (stopIndex >= 0) {
           // there is an exit match
-          let parsedIndex = offset + stopIndex + endTokenLength;
+          const parsedIndex = offset + stopIndex + endTokenLength;
           pre = raw.substr(0, startIndex);
           post = raw.substr(parsedIndex);
           frag = { [type]: raw.substr(offset, stopIndex) } as FragmentType;
@@ -224,8 +224,8 @@ const updateResults = (
   snippetIndex: number,
   eaten: { frag: FragmentType | null; pre: string; post: string }
 ): any[] => {
-  let arrPre = results.slice(0, snippetIndex);
-  let arrPost = results.slice(snippetIndex + 1);
+  const arrPre = results.slice(0, snippetIndex);
+  const arrPost = results.slice(snippetIndex + 1);
   results = arrPre;
   results.push(eaten.pre);
   results.push(eaten.frag);
@@ -257,9 +257,9 @@ export const parseChatInput = (input: string): FragmentType[] => {
     let matched = false;
     // handle the non-recursive types
     for (let ki = 0; ki < nonRecursiveKeys.length; ki++) {
-      let key: ParserKey = nonRecursiveKeys[ki];
+      const key: ParserKey = nonRecursiveKeys[ki];
       if (!matched) {
-        let eaten = eatSpecialType(snippet, key);
+        const eaten = eatSpecialType(snippet, key);
         if (eaten.frag) {
           results = updateResults(results, snippetIndex, eaten);
           matched = true;
@@ -269,16 +269,16 @@ export const parseChatInput = (input: string): FragmentType[] => {
     // handle the recursive types
     // important that this happens AFTER the non-recursive types
     if (!matched) {
-      let eats: any = {};
+      const eats: any = {};
       for (let ki = 0; ki < recursiveKeys.length; ki++) {
-        let key: ParserKey = recursiveKeys[ki];
+        const key: ParserKey = recursiveKeys[ki];
         eats[key] = eatSpecialType(snippet, key);
       }
       // find the one that starts earliest in the snippet
       let smallest = 10000000;
       let smallestKey = null;
       for (let ki = 0; ki < recursiveKeys.length; ki++) {
-        let key = recursiveKeys[ki];
+        const key = recursiveKeys[ki];
         if (eats[key].frag && eats[key].pre.length < smallest) {
           smallest = eats[key].pre.length;
           smallestKey = key;
@@ -287,7 +287,7 @@ export const parseChatInput = (input: string): FragmentType[] => {
       if (smallestKey) {
         matched = true;
         // RECURSION HAPPENS HERE
-        let innerFrags: any[] = parseChatInput(
+        const innerFrags: any[] = parseChatInput(
           eats[smallestKey].frag[smallestKey]
         );
         for (let i = 0; i < innerFrags.length; i++) {
@@ -328,8 +328,8 @@ export const parseChatInput = (input: string): FragmentType[] => {
             };
           }
         }
-        let arrPre = results.slice(0, snippetIndex);
-        let arrPost = results.slice(snippetIndex + 1);
+        const arrPre = results.slice(0, snippetIndex);
+        const arrPost = results.slice(snippetIndex + 1);
         results = arrPre;
         results.push(eats[smallestKey].pre);
         for (let inneri = 0; inneri < innerFrags.length; inneri++) {
@@ -359,7 +359,7 @@ export const convertFragmentsToPreview = (
   return (
     <span>
       {contents.map((content: FragmentType, idx: number) => {
-        let type = Object.keys(content)[0] as FragmentKey;
+        const type = Object.keys(content)[0] as FragmentKey;
         const value = content[type];
         if (type === 'break') {
           return <span key={`${chatid}-lastMessage-${idx}`}> </span>;

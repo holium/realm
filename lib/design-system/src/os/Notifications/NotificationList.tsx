@@ -40,8 +40,8 @@ export const NotificationList = ({
   let apps = notifications.map((n) => n.app);
   // reduce notifications to unique paths
   apps = apps.filter((app, index) => apps.indexOf(app) === index);
-  let appGroupedNotifications = apps.map((app) => {
-    let grouped = notifications.filter((n) => n.app === app);
+  const appGroupedNotifications = apps.map((app) => {
+    const grouped = notifications.filter((n) => n.app === app);
     return grouped;
   });
   if (notifications.length === 0) {
