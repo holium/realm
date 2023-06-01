@@ -15,6 +15,6 @@ jobs:
       - name: Install modules
         run: yarn
       - name: Run ESLint
-        run: yarn lint-check
+        run: yarn lint:ci
       - name: Compile TypeScript
         run: yarn tsc
