@@ -1067,6 +1067,8 @@
           ?:  =(type-key 'dr')    (dri datatom)
           ?:  =(type-key 't')     (so datatom)
           ?:  =(type-key 'p')     ((se %p) datatom)
+          ?:  =(type-key 'id')    (jam (de-id datatom))
+          ?:  =(type-key 'unit')  (jam (so:dejs-soft:format datatom))
           ?:  =(type-key 'path')  (jam (pa datatom))
           ?:  =(type-key 'list')  (jam ((ar so) datatom))
           ?:  =(type-key 'set')   (jam ((as so) datatom))
@@ -1293,6 +1295,8 @@
                 ?:  =(t.sch 'p')   s+(scot %p `@p`d)
                 ?:  =(t.sch 'da')  (time `@da`d)
                 ?:  =(t.sch 'dr')  (time-dr `@dr`d)
+                ?:  =(t.sch 'id')    (row-id-to-json ;;(id:common (cue d)))
+                ?:  =(t.sch 'unit')  ?~(;;((unit @t) (cue d)) ~ s+(need ;;((unit @t) (cue d))))
                 ?:  =(t.sch 'path')  (path ;;(^path (cue d)))
                 ?:  =(t.sch 'list')  [%a (turn ;;((list @t) (cue d)) |=(i=@t s+i))]
                 ?:  =(t.sch 'set')   [%a (turn ~(tap in ;;((set @t) (cue d))) |=(i=@t s+i))]

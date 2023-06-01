@@ -17,6 +17,8 @@
 +$  schema    (list [name=@t t=@t])  :: list of [column-name type-code]
 :: allowable @t codes are:
 ::  @t @ud etc (any atom code)
+::  id    (for a id:common type of [=ship t=@da], useful for referencing other rows from within your custom-type
+::  unit  (for a (unit @t) only)
 ::  path
 ::  list  (for a list of @t)
 ::  set   (for a set of @t)
