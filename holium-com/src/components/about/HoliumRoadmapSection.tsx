@@ -87,7 +87,7 @@ export const HoliumRoadmapSection = () => (
       <Milestone
         index={5}
         title="Realm Android"
-        description="An identity system that makes onboarding and NFT gating simple and robust."
+        description="The Android version of Realm will be released."
       />
       <Date date="09/2023" />
       <Milestone
