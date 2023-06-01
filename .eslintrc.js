@@ -1,6 +1,18 @@
 module.exports = {
-  extends: ['react-app', 'plugin:prettier/recommended'],
-  plugins: ['unused-imports', 'simple-import-sort'],
+  extends: [
+    'react-app',
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended',
+    'plugin:react-hooks/recommended',
+  ],
+  plugins: [
+    'prettier',
+    'unused-imports',
+    '@typescript-eslint',
+    'simple-import-sort',
+  ],
   parser: '@typescript-eslint/parser',
   root: true,
   parserOptions: { project: './tsconfig.json' },
@@ -21,10 +33,6 @@ module.exports = {
         argsIgnorePattern: '^_',
       },
     ],
-    '@typescript-eslint/consistent-type-exports': 'error',
-    '@typescript-eslint/no-non-null-assertion': 'error',
-    '@typescript-eslint/no-unused-expressions': 'off',
-    '@typescript-eslint/no-unused-vars': 'off',
     'simple-import-sort/imports': [
       'error',
       {
