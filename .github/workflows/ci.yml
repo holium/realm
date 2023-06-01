@@ -16,6 +16,8 @@ jobs:
         with:
           node-version: 18
           cache: 'yarn'
+      - name: Install project dependencies
+        run: yarn
       - name: Run ESLint
         run: yarn lint:ci
       # - name: Compile TypeScript
