@@ -6,7 +6,7 @@ import { HoliumRoadmapSection } from 'components/about/HoliumRoadmapSection';
 import { HoliumValuesSection } from 'components/about/HoliumValuesSection';
 import { Page } from 'components/Page';
 
-import { Section, SectionTitle } from './about.styles';
+import { Section, SectionTitle } from '../styles/about.styles';
 
 export default function AboutPage() {
   return (

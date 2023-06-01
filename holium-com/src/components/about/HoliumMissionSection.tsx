@@ -1,5 +1,5 @@
-import { SectionTitle } from 'pages/about.styles';
 import styled from 'styled-components';
+import { SectionTitle } from 'styles/about.styles';
 
 import { Flex, Text } from '@holium/design-system/general';
 
