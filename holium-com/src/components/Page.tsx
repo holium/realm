@@ -1,7 +1,13 @@
 import { ReactNode } from 'react';
 import NextHead from 'next/head';
+import styled from 'styled-components';
+
+import { Flex } from '@holium/design-system/general';
 
 import { spaces } from '../spaces';
+import { SpaceKeys } from '../types';
+import { GlobalStyle } from './GlobalStyle';
+import { Header } from './Header';
 import { useSpace } from './SpaceContext';
 
 const siteUrl = 'https://www.holium.com';
@@ -12,14 +18,31 @@ const siteKeywords =
   'Holium, urbit, p2p, decentralized, crypto, community, realm, collaboration';
 const siteImage = `${siteUrl}/og-image.png`;
 
+const Main = styled.main`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
 type Props = {
   title: string;
-  children: ReactNode;
+  wallpaper?: boolean;
+  forcedSpace?: SpaceKeys;
+  body: ReactNode;
+  footer?: ReactNode;
 };
 
-export const Page = ({ title = siteTitle, children }: Props) => {
+export const Page = ({
+  title = siteTitle,
+  wallpaper = true,
+  forcedSpace,
+  body,
+  footer,
+}: Props) => {
   const { space } = useSpace();
-  const themeColor = spaces[space].theme.backgroundColor;
+  const theme = spaces[forcedSpace ?? space].theme;
 
   return (
     <>
@@ -47,15 +70,26 @@ export const Page = ({ title = siteTitle, children }: Props) => {
         <meta name="twitter:description" content={siteDescription} />
         <meta name="twitter:image" content={siteImage} />
 
-        <meta name="theme-color" content={themeColor} />
-        <meta name="msapplication-navbutton-color" content={themeColor} />
+        <meta name="theme-color" content={theme.backgroundColor} />
+        <meta
+          name="msapplication-navbutton-color"
+          content={theme.backgroundColor}
+        />
         <meta
           name="apple-mobile-web-app-status-bar-style"
-          content={themeColor}
+          content={theme.backgroundColor}
         />
       </NextHead>
 
-      {children}
+      <GlobalStyle theme={theme} />
+      <Flex
+        className="wallpaper"
+        style={{ backgroundColor: theme.backgroundColor }}
+        backgroundImage={wallpaper ? `url(${theme.wallpaper})` : undefined}
+      />
+      <Header />
+      <Main>{body}</Main>
+      {footer}
     </>
   );
 };
