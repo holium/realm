@@ -2,6 +2,7 @@ import { Flex, Text } from '@holium/design-system/general';
 
 import { HoliumLogoSection } from 'components/about/HoliumLogoSection';
 import { HoliumMissionSection } from 'components/about/HoliumMissionSection';
+import { HoliumRoadmapSection } from 'components/about/HoliumRoadmapSection';
 import { HoliumValuesSection } from 'components/about/HoliumValuesSection';
 import { Page } from 'components/Page';
 
@@ -39,6 +40,14 @@ export default function AboutPage() {
 
           <Section>
             <SectionTitle>Roadmap</SectionTitle>
+            <Flex
+              flex={1}
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <HoliumRoadmapSection />
+            </Flex>
           </Section>
         </Flex>
       }
