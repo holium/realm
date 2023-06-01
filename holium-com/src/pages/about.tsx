@@ -4,14 +4,16 @@ import { HoliumLogoSection } from 'components/about/HoliumLogoSection';
 import { HoliumMissionSection } from 'components/about/HoliumMissionSection';
 import { HoliumRoadmapSection } from 'components/about/HoliumRoadmapSection';
 import { HoliumValuesSection } from 'components/about/HoliumValuesSection';
-import { Page } from 'components/Page';
+import { Page, siteUrl } from 'components/Page';
 
 import { Section, SectionTitle } from '../styles/about.styles';
 
 export default function AboutPage() {
   return (
     <Page
-      title="Holium"
+      title="Our mission"
+      description="Build a sovereign future for humanity."
+      image={`${siteUrl}/og-image-mission.png`}
       forcedSpace="realm-forerunners"
       body={
         <Flex
