@@ -50,12 +50,14 @@ const getBoxVariant = (rightSide: boolean) => {
 };
 
 type MilestoneProps = {
+  index: number;
   title: string;
   description: string;
   rightSide?: boolean;
 };
 
 export const Milestone = ({
+  index,
   title,
   description,
   rightSide = false,
@@ -65,10 +67,12 @@ export const Milestone = ({
   const inView = useInView(ref);
 
   useEffect(() => {
+    control.start('hidden');
+  }, [control]);
+
+  useEffect(() => {
     if (inView) {
       control.start('visible');
-    } else {
-      control.start('hidden');
     }
   }, [control, inView]);
 
@@ -77,7 +81,11 @@ export const Milestone = ({
       ref={ref}
       initial="hidden"
       animate={control}
-      transition={{ duration: 0.5, delay: 0.5, ease: 'easeInOut' }}
+      transition={{
+        ease: 'easeInOut',
+        duration: 0.5,
+        delay: 0.25 + index * 0.1,
+      }}
       variants={getBoxVariant(rightSide)}
     >
       <MilestoneCard rightSide={rightSide}>
