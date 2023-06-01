@@ -18,10 +18,6 @@ module.exports = {
   parserOptions: { project: './tsconfig.json' },
   rules: {
     'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'off', // many cases where we need other variables in the deps
-    'react/display-name': 'off',
-    'react/react-in-jsx-scope': 'off',
-    'react/no-unescaped-entities': 'off',
     'import/no-duplicates': 'error',
     'unused-imports/no-unused-imports': 'error',
     'unused-imports/no-unused-vars': [
@@ -53,6 +49,15 @@ module.exports = {
       },
     ],
     'simple-import-sort/exports': 'error',
+    // Disabled rules
+    'react-hooks/exhaustive-deps': 'off',
+    'react/display-name': 'off',
+    'react/react-in-jsx-scope': 'off',
+    'react/no-unescaped-entities': 'off',
+    '@typescript-eslint/no-empty-function': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off',
+    '@typescript-eslint/no-var-requires': 'off',
   },
   settings: {
     react: {

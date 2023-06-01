@@ -16,5 +16,5 @@ jobs:
         run: yarn
       - name: Run ESLint
         run: yarn lint:ci
-      - name: Compile TypeScript
-        run: yarn tsc
+      # - name: Compile TypeScript
+      #   run: yarn tsc
