@@ -17,7 +17,7 @@ const RenaissanceHeadContainer = styled(Flex)`
 `;
 
 const HeroContainer = styled(Flex)`
-  flex: 2;
+  flex: 3;
   flex-direction: column;
   gap: 16px;
 `;
