@@ -185,7 +185,7 @@ export const LinkBlock = ({
       </Box>
     );
   }
-  const ogOrLink = ogHasURL ? (openGraph?.ogUrl) : link;
+  const ogOrLink = ogHasURL ? openGraph?.ogUrl : link;
   return (
     <Block id={id} {...rest} height={LINK_PREVIEW_HEIGHT}>
       <LinkImage
@@ -200,7 +200,7 @@ export const LinkBlock = ({
         <LinkTitle
           id={id}
           truncate
-          isSkeleton={!(openGraph?.ogTitle)}
+          isSkeleton={!openGraph?.ogTitle}
           fontSize={2}
           fontWeight={500}
           width={containerWidth ? containerWidth - 20 : 'inherit'}
@@ -214,7 +214,7 @@ export const LinkBlock = ({
         <LinkDescription
           id={id}
           truncate
-          isSkeleton={!(openGraph?.ogDescription)}
+          isSkeleton={!openGraph?.ogDescription}
           fontSize={1}
           opacity={0.7}
           width={containerWidth ? containerWidth - 20 : 'calc(100% - 16px)'}
@@ -248,8 +248,7 @@ export const LinkBlock = ({
               window.open(origin, '_blank');
             }}
           >
-            {openGraph?.ogSiteName ||
-              (new URL(ogOrLink).hostname)}
+            {openGraph?.ogSiteName || new URL(ogOrLink).hostname}
           </Text.Anchor>
         </Flex>
         <Text.Custom

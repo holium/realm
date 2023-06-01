@@ -119,6 +119,9 @@ export const FragmentReplyTo = styled(motion.blockquote)`
 export const FragmentInlineCode = styled(FragmentBase)`
   font-family: 'Fira Code', monospace;
   border-radius: 4px;
+  display: flex;
+  max-width: 100%;
+  overflow-x: auto;
   /* padding: 0px 3px; */
 `;
 
