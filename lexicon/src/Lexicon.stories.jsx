@@ -1,6 +1,6 @@
 import App from './App';
 export default {
-  title: 'LexiconWordPage',
+  title: 'Lexicon/LexiconWordPage',
 };
 
 export const Default = () => <App />;
