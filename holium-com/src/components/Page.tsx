@@ -88,7 +88,6 @@ export const Page = ({
       <GlobalStyle theme={theme} />
       <Flex
         className="wallpaper"
-        style={{ backgroundColor: theme.backgroundColor }}
         backgroundImage={wallpaper ? `url(${theme.wallpaper})` : undefined}
       />
       <Header />
