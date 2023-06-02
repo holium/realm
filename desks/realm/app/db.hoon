@@ -51,6 +51,8 @@
 
 /-  *db, sstore=spaces-store, vstore=visas
 /+  dbug, db, spaces-chat
+/=  t-  /ted/venter
+/=  v-  /mar/db/vent
 =|  state-0
 =*  state  -
 :: ^-  agent:gall
@@ -143,6 +145,10 @@
     =/  cards=(list card)
     ::  each path should map to a list of cards
     ?+  path      !!
+        [%vent @ @ ~] :: poke response comes on this path
+          =/  src=ship  (slav %p i.t.path)
+          ?>  =(src src.bowl)
+          ~
       ::
         [%db ~]  :: the "everything" path
           ?>  =(our.bowl src.bowl)

@@ -760,7 +760,7 @@
 ::db &db-action [%create /example %vote 0 [%vote [%.y our %foo [~zod now] /example]] ~]
 ::db &db-action [%create /example %foo 1 [%general ~[1 'd' (jam /hello/goodbye)]] ~[['num' 'ud'] ['str' 't'] ['mypath' 'path']]]
 ::~zod/db &db-action [%create /example %vote 0 [%vote %.y our %foo [~zod now] /example] ~]
-  |=  [=input-row state=state-0 =bowl:gall]
+  |=  [[=pid =input-row] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: form row from input
   =/  row=row  [
@@ -788,12 +788,16 @@
 
   =.  state             (add-row-to-db row schema.input-row state)
 
+  =/  vent-path=path  /vent/(scot %p src.pid)/(scot %da now.pid)
   :: emit the change to subscribers
   =/  cards=(list card)  :~
     :: tell subs about the new row
     [%give %fact [/db (weld /path path.row) path-sub-wire ~] db-changes+!>([%add-row row schema.input-row]~)]
     :: kick subs to force them to re-sub for next update
     [%give %kick [path-sub-wire ~] ~]
+    :: give vent response
+    [%give %fact ~[vent-path] db-vent+!>([%row-id id.row])]
+    [%give %kick ~[vent-path] ~]
   ==
   ~&  >  "publishing new row to {(spud path-sub-wire)} (and also kicking)"
 
@@ -905,10 +909,16 @@
           [%create-path create-path]
           [%create-from-space de-create-from-space]
           [%remove-path pa]
-          [%create de-input-row]
+          [%create de-create-input-row]
           [%edit (ot ~[[%id de-id] [%input-row de-input-row]])]
           [%remove remove]
       ==
+    ::
+    ++  de-create-input-row
+      |=  jon=json
+      ^-  [pid input-row]
+      ?>  ?=([%o *] jon)
+      [[~zod ~2000.1.1] (de-input-row jon)]
     ::
     ++  add-peer
       %-  ot
@@ -1139,6 +1149,13 @@
 ++  enjs
   =,  enjs:format
   |%
+    ++  en-vent
+      |=  =vent
+      ^-  json
+      %+  frond
+        %row-id
+      (row-id-to-json id.vent)
+    ::
     ++  en-db-changes
       |=  chs=db-changes
       ^-  json

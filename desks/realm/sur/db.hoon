@@ -118,6 +118,8 @@
   ==
 +$  db-changes    (list db-change)
 +$  del-log  (map @da db-del-change)
+::
++$  pid  [src=ship now=@da]
 
 :: the model is, each row belongs to a %host ship, and to a
 :: /path. The %host serves as the "source of truth" for all data on that
@@ -139,7 +141,7 @@
 
       :: any peer in the path can send these pokes to the %host
       :: if they have right permissions, host will propagate the data
-      [%create =input-row]          :: sends %add-row to all subs
+      [%create =pid =input-row]          :: sends %add-row to all subs
       [%edit =id:common =input-row] :: sends %upd-row to all subs
       [%remove =type:common =path =id:common]      :: %host deleting the row, sends %delete to all peers
   ==
@@ -159,5 +161,9 @@
       v=@ud
       data=columns
       =schema
+  ==
+::
++$  vent
+  $%  [%row-id =id:common]
   ==
 --
