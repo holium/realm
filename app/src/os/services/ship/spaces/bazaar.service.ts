@@ -283,7 +283,11 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
     });
   }
 
-  async reorderApp(desk: string, index: number) {
+  async reorderApp(
+    desk: string,
+    index: number,
+    grid: { [idx: string]: string }
+  ) {
     return APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
@@ -292,6 +296,13 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
           desk,
           index,
         },
+      },
+      onSuccess: () => {
+        this.tables?.appCatalog.updateGrid(grid);
+        this.sendUpdate({
+          type: 'reorder-grid-index',
+          payload: grid,
+        });
       },
     });
   }
