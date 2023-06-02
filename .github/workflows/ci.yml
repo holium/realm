@@ -8,7 +8,7 @@ on:
       - '**.tsx'
 jobs:
   build:
-    name: Lint and tsc
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
