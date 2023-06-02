@@ -414,7 +414,11 @@ export const BazaarStore = types
             }
           }
         }),
-        reorderApp: flow(function* (oldIndex: number, newIndex: number) {
+        reorderApp: flow(function* (
+          oldIndex: number,
+          newIndex: number,
+          grid: { [idx: string]: string }
+        ) {
           try {
             const apps = Array.from<AppMobxType>(self.catalog.values());
             const indexOfApp = apps.findIndex(
@@ -422,7 +426,7 @@ export const BazaarStore = types
             );
             const desk = apps[indexOfApp].id;
             if (!desk) return;
-            return yield BazaarIPC.reorderApp(desk, newIndex);
+            return yield BazaarIPC.reorderApp(desk, newIndex, grid);
           } catch (error) {
             console.error(error);
           }
