@@ -779,6 +779,11 @@
   ?.  (has-create-permissions path-row row state bowl)
     ~&  >>>  "{(scow %p src.bowl)} tried to create a %{(scow %tas type.row)} row where they didn't have permissions"
     `state
+  :: forward the request if we aren't the host
+  ?.  =(host.path-row our.bowl)
+    ~&  >>  "{<src.bowl>} tried to have us ({<our.bowl>}) create a row in {<path.path-row>} where we are not the host. forwarding the poke to the host: {<host.path-row>}"
+    :_  state
+    [%pass /dbpoke %agent [host.path-row %db] %poke %db-action !>([%create input-row])]~
 
   :: update path
   =/  path-sub-wire           (weld /next/(scot %da updated-at.path-row) path.row)
@@ -803,7 +808,7 @@
 :: generally, you'd only bother passing the schema if you are changing the version of the row
 ::db &db-action [%edit [our ~2023.5.22..17.21.47..9d73] /example %foo 0 [%general ~[2 'b']] ~]
   |=  [[=id:common =input-row] state=state-0 =bowl:gall]
-  ~&  >>>  "edit called"
+  ~&  "%db agent - %edit poke"
   ^-  (quip card state-0)
   :: permissions
   =/  old-row              (~(got by (~(got by (~(got by tables.state) type.input-row)) path.input-row)) id) :: old row must first exist
@@ -811,6 +816,11 @@
   ?.  (has-edit-permissions path-row old-row state bowl)
     ~&  >>>  "{(scow %p src.bowl)} tried to edit a %{(scow %tas type.input-row)} row where they didn't have permissions"
     `state
+  :: forward the request if we aren't the host
+  ?.  =(host.path-row our.bowl)
+    ~&  >>  "{<src.bowl>} tried to have us ({<our.bowl>}) edit a row in {<path.path-row>} where we are not the host. forwarding the poke to the host: {<host.path-row>}"
+    :_  state
+    [%pass /dbpoke %agent [host.path-row %db] %poke %db-action !>([%edit id input-row])]~
 
   :: schema checking
   =/  sch=schema
@@ -862,6 +872,11 @@
   ?.  (has-delete-permissions path-row old-row state bowl)
     ~&  >>>  "{(scow %p src.bowl)} tried to delete a %{(scow %tas type)} row where they didn't have permissions"
     `state
+  :: forward the request if we aren't the host
+  ?.  =(host.path-row our.bowl)
+    ~&  >>  "{<src.bowl>} tried to have us ({<our.bowl>}) remove a row in {<path.path-row>} where we are not the host. forwarding the poke to the host: {<host.path-row>}"
+    :_  state
+    [%pass /dbpoke %agent [host.path-row %db] %poke %db-action !>([%remove type path id])]~
 
   :: update path
   =/  foreign-ship-sub-wire   (weld /next/(scot %da updated-at.path-row) path)
@@ -1066,6 +1081,7 @@
           ?:  =(type-key 'da')    (di datatom)
           ?:  =(type-key 'dr')    (dri datatom)
           ?:  =(type-key 't')     (so datatom)
+          ?:  =(type-key 'f')     (bo datatom)
           ?:  =(type-key 'p')     ((se %p) datatom)
           ?:  =(type-key 'id')    (jam (de-id datatom))
           ?:  =(type-key 'unit')  (jam (so:dejs-soft:format datatom))
@@ -1293,6 +1309,7 @@
                 ?:  =(t.sch 'rd')  (numbrd `@rd`d)
                 ?:  =(t.sch 't')   [%s `@t`d]
                 ?:  =(t.sch 'p')   s+(scot %p `@p`d)
+                ?:  =(t.sch 'f')   [%b ?:(=(d 0) %.y %.n)] :: @f is ? is flag is loobean is %.y/%.n 0 is true
                 ?:  =(t.sch 'da')  (time `@da`d)
                 ?:  =(t.sch 'dr')  (time-dr `@dr`d)
                 ?:  =(t.sch 'id')    (row-id-to-json ;;(id:common (cue d)))
