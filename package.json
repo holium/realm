@@ -24,6 +24,7 @@
     "lint": "eslint --fix -c .eslintrc.js $(git diff --name-only --diff-filter=ACMRTUXB master | grep  -E \"(.js$|.jsx$|.ts$|.tsx$)\") --ignore-path .gitignore",
     "lint:ci": "eslint -c .eslintrc.js $(git diff --name-only --diff-filter=ACMRTUXB origin/master | grep  -E \"(.js$|.jsx$|.ts$|.tsx$)\") --ignore-path .gitignore",
     "lint:all": "eslint --fix . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
+    "lint:ci:master": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
     "start": "yarn workspace @holium/realm start",
     "start:onboard": "yarn workspace @holium/realm start:onboard",
     "add:realm": "yarn workspace @holium/realm add -W",

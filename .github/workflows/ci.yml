@@ -27,5 +27,3 @@ jobs:
         run: yarn --frozen-lockfile
       - name: Run ESLint
         run: yarn lint:ci
-      # - name: Compile TypeScript
-      #   run: yarn tsc
