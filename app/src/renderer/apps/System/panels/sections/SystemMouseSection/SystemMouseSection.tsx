@@ -40,11 +40,13 @@ export const SystemMouseSection = ({
                 }}
               />
             </Flex>
-            <CheckBox
-              label="Use profile color for cursor"
-              isChecked={profileColorForCursorEnabled}
-              onChange={setProfileColorForCursor}
-            />
+            {realmCursorEnabled && (
+              <CheckBox
+                label="Use profile color for cursor"
+                isChecked={profileColorForCursorEnabled}
+                onChange={setProfileColorForCursor}
+              />
+            )}
           </Flex>
         </SettingControl>
       }
