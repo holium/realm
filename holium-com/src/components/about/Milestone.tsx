@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { MOBILE_WIDTH } from 'consts';
 import { motion, useAnimation, useInView } from 'framer-motion';
 import styled from 'styled-components';
 
 import { Flex, Text } from '@holium/design-system/general';
+
+import { TIMELINE_WIDTH } from './HoliumRoadmapSection.styles';
 
 const MilestoneCard = styled(Flex)<{ rightSide: boolean }>`
   flex-direction: column;
@@ -18,7 +19,7 @@ const MilestoneCard = styled(Flex)<{ rightSide: boolean }>`
   ${({ rightSide }) =>
     rightSide &&
     `
-    @media (min-width: ${MOBILE_WIDTH}px) {
+    @media (min-width: ${TIMELINE_WIDTH}px) {
       transform: translateX(calc(100% + 48px));
     }
   `}
