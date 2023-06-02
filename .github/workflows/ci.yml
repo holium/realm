@@ -16,6 +16,13 @@ jobs:
         with:
           node-version: 18
           cache: 'yarn'
+      - name: Checkout
+        run: |
+          commits=${{ github.event.pull_request.commits }}
+          if [[ -n "$commits" ]]; then
+            # Prepare enough depth for diffs with master
+            git fetch --depth="$(( commits + 1 ))"
+          fi
       - name: Install project dependencies
         run: yarn --frozen-lockfile
       - name: Run ESLint
