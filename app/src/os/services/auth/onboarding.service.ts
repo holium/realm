@@ -303,7 +303,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   }
 
   _prepareBuildVersionEnv() {
-    let result: RealmInstallVersionTest = {
+    const result: RealmInstallVersionTest = {
       success: false, // assume failure
       major: -1,
       minor: -1,
@@ -322,7 +322,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       );
       return result;
     }
-    let buildVersion = process.env.BUILD_VERSION.split('.');
+    const buildVersion = process.env.BUILD_VERSION.split('.');
     if (buildVersion.length < 3) {
       console.warn(
         `BUILD_VERSION '${buildVersion}' not valid. skipping installation validation...`
@@ -384,9 +384,10 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   private async waitForInstallRealmAgent(
     buildVersion: RealmInstallVersionTest
   ): Promise<RealmInstallStatus> {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     return new Promise((resolve) => {
-      let totalWaitTime = 0,
+      const totalWaitTime = 0,
         maxWaitTime = 600000; // 5 minutes
       (async function versionCheck(totalWaitTime, maxWaitTime) {
         const result = await self._testVersion(buildVersion);
@@ -405,6 +406,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   }
 
   async installRealmAgent(): Promise<RealmInstallStatus> {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       // if bypass, don't perform install and continue with onboarding. useful in development
       if (process.env.INSTALL_MOON === 'bypass') {

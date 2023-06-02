@@ -95,7 +95,7 @@ export const useMultiplayer = ({
           window.electron.app.realmToAppEphemeralChat(patp, newChat);
           broadcastChat(patp, newChat);
         } else {
-          let newKey = key;
+          const newKey = key;
           // If the key is not a regular character, ignore it.
           if (newKey.length > 1) return;
 

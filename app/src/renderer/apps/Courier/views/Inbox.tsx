@@ -39,9 +39,8 @@ export const InboxPresenter = () => {
   const searchFilter = useCallback(
     (preview: ChatModelType) => {
       if (!searchString || searchString.trim() === '') return true;
-      let title: string;
       const dm = preview as ChatModelType;
-      title = dm.metadata.title;
+      const title = dm.metadata.title;
       return title.toLowerCase().indexOf(searchString.toLowerCase()) === 0;
     },
     [searchString]

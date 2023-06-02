@@ -78,7 +78,7 @@ const TransactionDetailScreenPresenter = () => {
     walletStore.bitcoin.conversions.usd,
   ]);
 
-  let transaction = getTransaction(walletStore);
+  const transaction = getTransaction(walletStore);
 
   if (!transaction) return null;
 

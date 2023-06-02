@@ -150,7 +150,7 @@ const InviteMembersPresenter = ({
             members: newMembers,
           });
           delete groupMembers[loggedInAccount.serverId];
-          for (var member of Object.keys(groupMembers)) {
+          for (const member of Object.keys(groupMembers)) {
             selectedIdentity.add(member);
             setNicknameMap({ ...nicknameMap, [member]: '' });
           }
@@ -264,6 +264,7 @@ const InviteMembersPresenter = ({
                 const nickMap = nicknameMap;
                 delete nickMap[patp];
                 setNicknameMap(nickMap);
+                // eslint-disable-next-line react/prop-types
                 const delMembers = workflowState.members;
                 delete delMembers[patp];
                 setWorkspaceState({

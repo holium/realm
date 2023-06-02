@@ -34,9 +34,9 @@ type ConnectionSetupOptions = {
 export class RemotePeer {
   patp: string;
   patpId: number;
-  audioLevel: number = 0;
-  isMuted: boolean = false;
-  isSpeaking: boolean = false;
+  audioLevel = 0;
+  isMuted = false;
+  isSpeaking = false;
   audioTracks: Map<string, any>;
   audioStream: MediaStream | null = null;
   status: PeerConnectionState = PeerConnectionState.New;
@@ -45,8 +45,8 @@ export class RemotePeer {
   spInstance: SimplePeer.Instance | null = null;
   rid: string;
   rtcConfig: any;
-  isAudioAttached: boolean = false;
-  isVideoAttached: boolean = false;
+  isAudioAttached = false;
+  isVideoAttached = false;
   analysers: IAudioAnalyser[] = [];
   sendDataToPeer: (data: Partial<DataPacket>) => void = () => {};
   sendSignalToPeer: (to: string, rid: string, signal: any) => void = () => {};
@@ -172,7 +172,7 @@ export class RemotePeer {
           this.audioStream = stream;
           this.audioTracks.set(track.id, track);
           this.analysers[0] = PeerSpeakingDetectionAnalyser.initialize(this);
-          let audioElement: HTMLMediaElement = this.getMediaElement(
+          const audioElement: HTMLMediaElement = this.getMediaElement(
             TrackKind.Audio
           );
           document.body.appendChild(audioElement);

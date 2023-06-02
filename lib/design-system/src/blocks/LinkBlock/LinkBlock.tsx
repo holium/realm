@@ -84,7 +84,7 @@ export const LinkBlock = ({
     onLinkLoaded();
   }, [openGraph]);
 
-  let description = openGraph?.ogDescription || '';
+  const description = openGraph?.ogDescription || '';
 
   // TODO make twitter height dynamic
   if (metadata.linkType === 'twitter' || linkBlockType === 'twitter') {

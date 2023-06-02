@@ -10,12 +10,12 @@ export class SpeakingDetectionAnalyser {
   audioContext: AudioContext | null = null;
   mediaStreamSource: MediaStreamAudioSourceNode | null = null;
   analyser: AnalyserNode | null = null;
-  bufferLength: number = 0;
+  bufferLength = 0;
   dataArray: Uint8Array | null = null;
-  currentFrameId: number = 0;
-  averageFrequency: number = 0;
-  lo: number = 0;
-  hi: number = 0;
+  currentFrameId = 0;
+  averageFrequency = 0;
+  lo = 0;
+  hi = 0;
   static initialize(peer: LocalPeer): IAudioAnalyser {
     const analyser = new SpeakingDetectionAnalyser();
     analyser.attach(peer);

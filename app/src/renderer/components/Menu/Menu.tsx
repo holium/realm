@@ -48,6 +48,7 @@ export class Menu extends React.PureComponent<IProps, IState> {
   handleClickOutside = (event: any) => {
     const { isOpen, onClose, preventDefault } = this.props;
 
+    // eslint-disable-next-line react/no-find-dom-node
     const domNode = ReactDOM.findDOMNode(this.menuRef.current);
     if (!domNode || !domNode.contains(event.target)) {
       // You are clicking outside
@@ -57,6 +58,7 @@ export class Menu extends React.PureComponent<IProps, IState> {
       }
     } else {
       // You are clicking inside
+      // eslint-disable-next-line react/no-find-dom-node
       const clickedNode = ReactDOM.findDOMNode(event.target);
       const preventMenuClose = event.target.getAttribute(
         'data-prevent-menu-close'

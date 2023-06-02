@@ -1,5 +1,5 @@
 {
-  "private": "true",
+  "private": true,
   "name": "realm-monorepo",
   "workspaces": [
     "app",
@@ -20,8 +20,11 @@
     "build:app": "yarn workspace @holium/realm build",
     "build:design-system": "yarn workspace @holium/design-system build",
     "build:multiplayer": "yarn workspace @holium/realm-presence build",
-    "lint-check": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
-    "lint": "eslint . --fix --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
+    "precommit": "yarn lint-staged",
+    "lint": "eslint --fix -c .eslintrc.js $(git diff --name-only --diff-filter=ACMRTUXB master | grep  -E \"(.js$|.jsx$|.ts$|.tsx$)\") --ignore-path .gitignore",
+    "lint:ci": "eslint -c .eslintrc.js $(git diff --name-only --diff-filter=ACMRTUXB origin/master | grep  -E \"(.js$|.jsx$|.ts$|.tsx$)\") --ignore-path .gitignore",
+    "lint:all": "eslint --fix . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
+    "lint:ci:master": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
     "start": "yarn workspace @holium/realm start",
     "start:onboard": "yarn workspace @holium/realm start:onboard",
     "add:realm": "yarn workspace @holium/realm add -W",
@@ -33,7 +36,8 @@
     "package:release:mac": "yarn build:multiplayer && yarn build:design-system && yarn workspace @holium/realm package:release:mac",
     "package:release:win": "yarn build:multiplayer && yarn build:design-system && yarn workspace @holium/realm package:release:win",
     "build-storybook": "build-storybook",
-    "storybook": "start-storybook -p 6006"
+    "storybook": "start-storybook -p 6006",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@etchteam/storybook-addon-css-variables-theme": "^1.4.0"
@@ -55,6 +59,8 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-unused-imports": "^2.0.0",
     "eslint-plugin-simple-import-sort": "^10.0.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.2",
     "prettier": "^2.8.3",
     "storybook-addon-state": "^1.0.3",
     "typescript": "^4.9.4"
@@ -66,5 +72,8 @@
       "lib/presence",
       "lib/room"
     ]
+  },
+  "lint-staged": {
+    "*.{js,mjs,cjs,jsx,ts,tsx}": "yarn eslint --fix"
   }
 }

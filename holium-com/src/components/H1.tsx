@@ -38,7 +38,7 @@ export const H1Text = styled(Text.H1)`
   }
 `;
 
-export const H1 = ({ className = '' }) => {
+export const H1 = ({ className = '' }: { className?: string }) => {
   const [msgIdx, setMsgIdx] = useState(0);
   const [replay, setReplay] = useState(true);
   const [futureOfText, setFutureOfText] = useState('');
