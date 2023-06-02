@@ -8,17 +8,23 @@ import { SystemCursorIcon } from './SystemCursorIcon';
 type CursorOptionProps = {
   type: 'Realm' | 'System';
   isSelected: boolean;
+  customFill?: string;
   onClick: () => void;
 };
 
 export const CursorOption = ({
   type,
   isSelected,
+  customFill,
   onClick,
 }: CursorOptionProps) => (
   <Flex flexDirection="column" gap="6px">
     <CursorOptionBox isSelected={isSelected} onClick={onClick}>
-      {type === 'Realm' ? <RealmCursorIcon /> : <SystemCursorIcon />}
+      {type === 'Realm' ? (
+        <RealmCursorIcon fill={customFill} />
+      ) : (
+        <SystemCursorIcon />
+      )}
     </CursorOptionBox>
     <Text.Label textAlign="center" style={{ fontSize: 12, fontWeight: 400 }}>
       {type}

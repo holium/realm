@@ -1,5 +1,9 @@
+import { observer } from 'mobx-react';
+
 import { Flex } from '@holium/design-system/general';
 import { CheckBox } from '@holium/design-system/inputs';
+
+import { useAppState } from 'renderer/stores/app.store';
 
 import { SettingControl } from '../../../components/SettingControl';
 import { SettingSection } from '../../../components/SettingSection';
@@ -12,12 +16,14 @@ type Props = {
   setProfileColorForCursor: (enabled: boolean) => void;
 };
 
-export const SystemMouseSection = ({
+const SystemMouseSectionPresenter = ({
   realmCursorEnabled,
   setRealmCursor,
   profileColorForCursorEnabled,
   setProfileColorForCursor,
 }: Props) => {
+  const { authStore } = useAppState();
+
   return (
     <SettingSection
       title="Mouse"
@@ -35,6 +41,11 @@ export const SystemMouseSection = ({
               <CursorOption
                 type="Realm"
                 isSelected={realmCursorEnabled}
+                customFill={
+                  profileColorForCursorEnabled
+                    ? authStore.session?.color ?? undefined
+                    : undefined
+                }
                 onClick={() => {
                   if (!realmCursorEnabled) setRealmCursor(true);
                 }}
@@ -53,3 +64,5 @@ export const SystemMouseSection = ({
     />
   );
 };
+
+export const SystemMouseSection = observer(SystemMouseSectionPresenter);

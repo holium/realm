@@ -1,4 +1,10 @@
-export const RealmCursorIcon = () => (
+type Props = {
+  fill?: string;
+};
+
+export const RealmCursorIcon = ({
+  fill = 'var(--rlm-accent-color)',
+}: Props) => (
   <svg
     width="16"
     height="16"
@@ -7,7 +13,7 @@ export const RealmCursorIcon = () => (
     xmlns="http://www.w3.org/2000/svg"
   >
     <g filter="url(#filter0_d_6255_17167)">
-      <circle cx="8" cy="8" r="5" fill="var(--rlm-accent-color)" />
+      <circle cx="8" cy="8" r="5" fill={fill} />
       <circle cx="8" cy="8" r="5.5" stroke="white" />
     </g>
     <defs>
