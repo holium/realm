@@ -4,6 +4,7 @@ import { Box, BoxProps } from '../../general/Box/Box';
 
 export type CardProps = {
   fill?: boolean;
+  blur?: boolean;
   customBg?: string;
   elevation?: 0 | 1 | 2 | 3 | 4;
 } & BoxProps;
@@ -18,7 +19,7 @@ const boxShadows = [
 
 export const Card = styled(Box)<CardProps>`
   flex-direction: column;
-  backdrop-filter: var(--blur);
+  backdrop-filter: ${({ blur = true }) => (blur ? 'var(--blur)' : 'none')};
   background: ${({ customBg = 'rgba(var(--rlm-card-rgba))' }) => customBg};
   border-width: 1px;
   border-style: solid;
