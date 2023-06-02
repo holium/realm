@@ -23,7 +23,7 @@ const RoomPresenter = () => {
 
   const { dockColor, mode } = theme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
-  const isMuted = roomsStore.isMuted;
+  const isMuted = roomsStore.ourPeer.isMuted;
   const commButtonBg =
     mode === 'light' ? darken(0.04, dockColor) : darken(0.01, dockColor);
 
