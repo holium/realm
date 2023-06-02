@@ -16,7 +16,7 @@
       :*  %0
           '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id
           (sham our.bowl)                         :: uuid
-          *devices
+          *(map @t @t)
           %.y            :: push-enabled
           ~              :: set of muted chats
           ~              :: set of pinned chats
@@ -47,6 +47,7 @@
       (weld cards -:(create-chat:lib [(notes-to-self bowl) %self ~ %host *@dr] state bowl))
       
     =/  old  !<(versioned-state old-state)
+    =.  app-id.old  '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id
     ?-  -.old
       %0  [cards this(state old)]
     ==
@@ -218,9 +219,14 @@
                       ?:  =(%space type.prow)
                         =/  uspace  (~(get by metadata.prow) 'space')
                         ?~  uspace  ~
-                        =/  spv=view:spc    .^(view:spc %gx (weld (weld /(scot %p our.bowl)/spaces/(scot %da now.bowl)/ (stab u.uspace)) /noun))
-                        ?>  =(%space -.spv)
-                        (some picture.space.spv)
+                        =/  path-first=path   /(scot %p our.bowl)/spaces/(scot %da now.bowl)
+                        =/  path-second=path  (stab u.uspace)
+                        =/  path-final=path   (weld (weld path-first path-second) /noun)
+                        =/  space-scry    .^(view:spc %gx path-final)
+                        ?>  ?=(%space -.space-scry)
+                        ?:  =('' picture.space.space-scry)
+                          (some wallpaper.theme.space.space-scry)
+                        (some picture.space.space-scry)
                       ~  :: default to null if we don't know what type of chat this is
                     =/  push-card
                       %:  push-notification-card:lib

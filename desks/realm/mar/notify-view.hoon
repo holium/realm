@@ -6,7 +6,7 @@
 ++  grow
   |%
   ++  noun  ds
-  ++  json  (devices:encode:lib ds)
+  ++  json  (en-devices:encode:lib ds)
   --
 ::
 ++  grab

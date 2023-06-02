@@ -142,7 +142,6 @@
       subtitle=?:(=(subtitle '') ~ (malt ~[['en' subtitle]]))
       contents=(malt ~[['en' content]])
     ]
-  ~&  >  note
   ::  send http request
   ::
   =/  =header-list:http    ['Content-Type' 'application/json']~
@@ -508,7 +507,7 @@
         extended-list
     ::
     ++  mtd 
-      |=  =mtd:sur
+      |=  mtd=push-mtd
       ^-  json
       %-  pairs
       :~
@@ -524,8 +523,8 @@
       %-  pairs
       ['en' s+message]~
     ::
-    ++  devices
-      |=  =devices:sur
+    ++  en-devices
+      |=  =devices
       ^-  json
       %-  pairs
       :~  

@@ -102,8 +102,15 @@
   ++  on-load
     |=  ole=vase
     ^-  (quip card _this)
+    ~&  bowl
+    ~&  wex.bowl
+    :: do a quick check to make sure we are subbed to /db in %chat-db
+    =/  cards=(list card)
+      ?:  =(wex.bowl ~)  
+        [%pass /spaces %agent [our.bowl %spaces] %watch /updates]~
+      ~
     =/  old=state-0  !<(state-0 ole)
-    `this(state old)
+    [cards this(state old)]
   ::
   ++  on-peek   |=(path ~)
   ++  on-watch  |=(path !!)
@@ -134,6 +141,7 @@
 ::
 ++  spaces-reaction
   |=  [rct=reaction:sstore]
+  ~&  %spaces-reaction
   ^-  (quip card _state)
   |^
   ?+  -.rct         `state
@@ -143,6 +151,7 @@
   ::
   ++  on-add
     |=  [new-space=space:sstore =members:mstore]
+    ~&  %on-add
     ?.  (is-host:hol path.new-space) :: only host can create chats
       `state
     %-  (slog leaf+"{<dap.bowl>}: creating chat for {<path.new-space>}" ~)
