@@ -17,5 +17,5 @@ export const DialogViewContainer = styled.div<Props>`
   height: inherit;
   padding: 24px;
   background: rgba(var(--rlm-window-rgba), 0.9);
-  backdrop-filter: blur(24px);
+  backdrop-filter: var(--blur);
 `;

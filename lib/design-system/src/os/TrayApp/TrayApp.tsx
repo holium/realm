@@ -14,7 +14,7 @@ export const TrayAppWrapper = styled(motion.div)`
   overflow: hidden;
   gap: 12px;
   border-radius: 16px;
-  backdrop-filter: blur(24px);
+  backdrop-filter: var(--blur);
   backface-visibility: hidden;
   background: rgba(var(--rlm-window-bg-rgba));
   border: 1px solid rgba(var(--rlm-border-rgba));
