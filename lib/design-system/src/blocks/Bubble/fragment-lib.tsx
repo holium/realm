@@ -121,7 +121,7 @@ export const FragmentInlineCode = styled(FragmentBase)`
   border-radius: 4px;
   display: flex;
   max-width: 100%;
-  overflow-x: auto;
+  word-wrap: break-word;
   /* padding: 0px 3px; */
 `;
 
@@ -193,7 +193,7 @@ export const FragmentBlockquote = styled(motion.blockquote)`
   display: flex;
   flex-direction: row;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(var(--rlm-overlay-hover-rgba));
 
   .fragment-reply {
     border-radius: 4px;

@@ -22,7 +22,7 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
   min-width: 150px;
   max-width: 90%;
   color: rgba(var(--rlm-text-rgba));
-  background: rgba(var(--rlm-input-rgba));
+  background: rgba(var(--rlm-card-rgba));
   border-radius: ${(props) => {
     if (props.isPrevGrouped && props.isNextGrouped) {
       return '0px 12px 12px 0px';
@@ -67,6 +67,10 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
         }
         return '#ffffff';
       }};
+      background: rgba(0, 0, 0, 0.08) !important;
+      &:hover {
+        background: rgba(0, 0, 0, 0.12) !important;
+      }
       border-left: 2px solid
         ${(props) => {
           if (props.ourTextColor) {
