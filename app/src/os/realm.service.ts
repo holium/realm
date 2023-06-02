@@ -155,21 +155,26 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     const path = credentials.cookie?.split('; ')[1].split('=')[1];
     const maxAge = credentials.cookie?.split('; ')[2].split('=')[1];
     const value = credentials.cookie?.split('=')[1].split('; ')[0];
-    // remove current cookie
-    await session
-      .fromPartition(`persist:default-${credentials.ship}`)
-      .cookies.remove(`${credentials.url}`, `urbauth-${credentials.ship}`);
-    // set new cookie
-    await session
-      .fromPartition(`persist:default-${credentials.ship}`)
-      .cookies.set({
-        url: `${credentials.url}`,
-        name: `urbauth-${credentials.ship}`,
-        value,
-        expirationDate:
-          new Date(Date.now() + parseInt(maxAge) * 1000).getTime() / 1000,
-        path: path,
-      });
+    try {
+      // remove current cookie
+      await session
+        .fromPartition(`persist:webview-${credentials.ship}`)
+        .cookies.remove(`${credentials.url}`, `urbauth-${credentials.ship}`);
+      // set new cookie
+      return await session
+        .fromPartition(`persist:webview-${credentials.ship}`)
+        .cookies.set({
+          url: `${credentials.url}`,
+          name: `urbauth-${credentials.ship}`,
+          value,
+          expirationDate: new Date(
+            Date.now() + parseInt(maxAge) * 1000
+          ).getTime(),
+          path: path,
+        });
+    } catch (e) {
+      log.error('setSessionCookie error:', e);
+    }
   }
 
   /**
@@ -353,7 +358,6 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           return;
         }
 
-        log.info('realm.service.ts:', 'Setting cookie', cookie);
         await this.setSessionCookie({ ...credentials, cookie });
 
         this.services?.ship?.updateCookie(cookie);

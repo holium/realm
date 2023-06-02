@@ -222,7 +222,7 @@ export const BazaarStore = types
         //  on "child" ships. for example, if searching '~dister-dozzod-dozzod',
         //    '~lander-dister-dozzod-dozzod/landscape' should match since '~dister-dozzod-dozzod'
         //    is parent ship
-        getTreaties(ship: string, exact: boolean = true) {
+        getTreaties(ship: string, exact = true) {
           ship = exact ? ship : (ship = ship.substring(1));
           const filteredTreaties = Array.from(toJS(treaties).values()).filter(
             (val) => val.id.split('/')[0].endsWith(ship)
@@ -233,7 +233,7 @@ export const BazaarStore = types
           const treaty = treaties.get(`${ship}/${desk}`);
           return treaty && getSnapshot(treaty);
         },
-        searchTreaties(ship: string, term: string, exact: boolean = false) {
+        searchTreaties(ship: string, term: string, exact = false) {
           const str = term.toLowerCase();
           ship = exact ? ship : ship.substring(1);
           const resultTreaties = this.getTreaties(ship, false).filter((val) => {
@@ -414,7 +414,11 @@ export const BazaarStore = types
             }
           }
         }),
-        reorderApp: flow(function* (oldIndex: number, newIndex: number) {
+        reorderApp: flow(function* (
+          oldIndex: number,
+          newIndex: number,
+          grid: { [idx: string]: string }
+        ) {
           try {
             const apps = Array.from<AppMobxType>(self.catalog.values());
             const indexOfApp = apps.findIndex(
@@ -422,7 +426,7 @@ export const BazaarStore = types
             );
             const desk = apps[indexOfApp].id;
             if (!desk) return;
-            return yield BazaarIPC.reorderApp(desk, newIndex);
+            return yield BazaarIPC.reorderApp(desk, newIndex, grid);
           } catch (error) {
             console.error(error);
           }

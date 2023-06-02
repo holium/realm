@@ -4,6 +4,7 @@ import AbstractDataAccess, {
 import { APIConnection } from '../../api';
 import { ProtocolType, TransactionsRow } from './wallet.types';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface WalletRow {}
 
 export class WalletDB extends AbstractDataAccess<WalletRow> {

@@ -32,7 +32,7 @@ export default function VerifyEmail() {
       const result = await thirdEarthApi.verifyEmail(verificationcode);
       OnboardingStorage.set({ token: result.token });
 
-      if (Boolean(result)) {
+      if (result) {
         return goToPage('/choose-id');
       } else {
         return false;

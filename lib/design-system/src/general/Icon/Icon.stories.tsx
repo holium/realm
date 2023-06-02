@@ -28,6 +28,7 @@ export const Default: ComponentStory<typeof Icon> = () => {
           .filter((value) => value.toLowerCase().includes(search.toLowerCase()))
           .map((name) => (
             <Flex
+              key={name}
               width={120}
               gap={12}
               mb={3}

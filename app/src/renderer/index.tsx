@@ -11,7 +11,7 @@ const isProd = environment === 'production';
 
 const sentryDsn = process.env.SENTRY_DSN;
 if (sentryDsn) {
-  let cfg: Sentry.BrowserOptions = {
+  const cfg: Sentry.BrowserOptions = {
     environment,
     dsn: 'https://56fbf5e600db48cf8a785931be1ca5e4@o1327359.ingest.sentry.io/4504310987358208',
     integrations: [

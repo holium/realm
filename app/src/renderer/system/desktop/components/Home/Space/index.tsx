@@ -60,7 +60,7 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
   if (!loggedInAccount) return null;
   if (!currentSpace) return null;
 
-  let membersCount: number = 0;
+  let membersCount = 0;
   currentSpace.members?.all.forEach((m) =>
     m.status !== 'invited' ? (membersCount += 1) : null
   );

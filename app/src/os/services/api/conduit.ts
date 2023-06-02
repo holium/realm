@@ -27,9 +27,9 @@ setMaxListeners(20);
  * SSE library for interfacing with Urbit.
  */
 export class Conduit extends EventEmitter {
-  private url: string = '';
-  private prevMsgId: number = 0;
-  private lastAckId: number = 0;
+  private url = '';
+  private prevMsgId = 0;
+  private lastAckId = 0;
   cookie: string | null = null;
   ship: string;
   pokes: Map<number, PokeParams & PokeCallbacks>;
@@ -191,7 +191,7 @@ export class Conduit extends EventEmitter {
             }
             break;
           //
-          case 'diff':
+          case 'diff': {
             const json = parsedData.json;
             const mark = parsedData.mark;
             if (this.watches.has(eventId)) {
@@ -204,6 +204,7 @@ export class Conduit extends EventEmitter {
               this.reactions.delete(maybeReactionPath);
             }
             break;
+          }
           // quit
           case 'quit':
             log.info('on quit', eventId, this.watches.has(eventId));
@@ -300,6 +301,7 @@ export class Conduit extends EventEmitter {
       this.reactions.set(params.reaction, params.onReaction);
     }
     // Properly waiting
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_req, res] = await Promise.all([
       this.postToChannel(message),
       new Promise((resolve, reject) => {
@@ -655,6 +657,7 @@ export class Conduit extends EventEmitter {
    * @returns
    */
   async handleError(err: any): Promise<any> {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       if (err.status === 403 || err.response?.status === 403) {
         // if (!this.code) {

@@ -38,6 +38,7 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
   useEffect(() => {
     window.electron.app.onMouseMove((_position, _state, isDragging) => {
       canClick.setToggle(!isDragging);
+      if (!isDragging) disableScroll.off();
     });
   }, []);
 
@@ -49,9 +50,15 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
     targetIndex: number
   ) => {
     if (sourceIndex === targetIndex) return;
-    bazaarStore.reorderApp(sourceIndex, targetIndex);
     const nextState = swap(items, sourceIndex, targetIndex);
     setItems(nextState);
+    const newGrid = Object();
+
+    // eslint-disable-next-line array-callback-return
+    nextState.map((app, index: number) => {
+      newGrid[index] = app.id;
+    });
+    bazaarStore.reorderApp(sourceIndex, targetIndex, newGrid);
   };
 
   return (
@@ -73,9 +80,6 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
               key={tileId}
               onMouseDownCapture={() => {
                 disableScroll.on();
-              }}
-              onMouseUpCapture={() => {
-                disableScroll.off();
               }}
             >
               <GridAppTile

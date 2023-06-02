@@ -6,7 +6,7 @@ export const PasswordIcon = () => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g clip-path="url(#clip0_1562_8459)">
+    <g clipPath="url(#clip0_1562_8459)">
       <path
         d="M40 5.5C48.27 5.5 55 12.23 55 20.5V37.95H25V20.5C25 12.23 31.73 5.5 40 5.5ZM40 0.5C28.955 0.5 20 9.455 20 20.5C20 21.315 20 42.95 20 42.95H60C60 42.95 60 21.32 60 20.5C60 9.455 51.045 0.5 40 0.5Z"
         fill="#66798F"

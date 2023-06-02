@@ -12,7 +12,7 @@ class StreamCaret {
   }
 
   update(view: EditorView, lastState: EditorView['state'] | null) {
-    let state = view.state;
+    const state = view.state;
     if (
       lastState &&
       lastState.doc.eq(state.doc) &&

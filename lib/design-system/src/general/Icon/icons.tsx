@@ -213,8 +213,8 @@ export const paths = {
           y2="19.071"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#75DAFF" />
-          <stop offset="1" stop-color="#1EA2E4" />
+          <stop stopColor="#75DAFF" />
+          <stop offset="1" stopColor="#1EA2E4" />
         </linearGradient>
         <radialGradient
           id="paint1_radial_265_6460"
@@ -225,7 +225,7 @@ export const paths = {
           gradientTransform="translate(12 12) scale(10)"
         >
           <stop />
-          <stop offset="1" stop-opacity="0" />
+          <stop offset="1" stopOpacity="0" />
         </radialGradient>
         <radialGradient
           id="paint2_radial_265_6460"
@@ -235,8 +235,8 @@ export const paths = {
           gradientUnits="userSpaceOnUse"
           gradientTransform="translate(11.9353 2.23176) scale(22.2841)"
         >
-          <stop stop-color="#FAFAFB" />
-          <stop offset="1" stop-color="#C8CDD1" />
+          <stop stopColor="#FAFAFB" />
+          <stop offset="1" stopColor="#C8CDD1" />
         </radialGradient>
       </defs>
     </>

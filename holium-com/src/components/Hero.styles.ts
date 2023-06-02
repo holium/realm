@@ -39,6 +39,11 @@ export const HeroContainer = styled(Flex)`
     text-align: center;
     max-width: 814px;
     width: 100%;
+    max-height: 725px;
+
+    svg {
+      transform: scale(0.8) translateY(-64px);
+    }
   }
 
   @media (max-width: 814px) {

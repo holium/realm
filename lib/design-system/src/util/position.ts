@@ -16,7 +16,7 @@ export const getMenuHeight = (
   menuItems: any[],
   itemHeight: number,
   dividerHeight: number,
-  padding: number = 8
+  padding = 8
 ) => {
   const numberOfMenuItems = menuItems.length;
   const numberOfDividers = new Set(menuItems.map((o) => o.section)).size - 1;
@@ -61,8 +61,8 @@ export const getAnchorPointByElement = (
 ) => {
   let x: number;
   let y: number;
-  let menuWidth = dimensions.width;
-  let menuHeight = dimensions.height;
+  const menuWidth = dimensions.width;
+  const menuHeight = dimensions.height;
   const {
     left: clickX,
     top: clickY,
@@ -134,13 +134,14 @@ export const getAnchorPointByElement = (
         y: y + offset.y,
       };
 
-    default:
+    default: {
       let pointerY = el.clientTop;
       if (position === 'above') {
         pointerY = pointerY - menuHeight;
       }
       // pointer or default
       return { x: offsetX + offset.x, y: pointerY + offset.y };
+    }
   }
 };
 
@@ -157,8 +158,8 @@ export const getAnchorPointByTarget = (
   if (event.target instanceof HTMLElement) {
     let x: number;
     let y: number;
-    let menuWidth = dimensions.width;
-    let menuHeight = dimensions.height;
+    const menuWidth = dimensions.width;
+    const menuHeight = dimensions.height;
     const clickX = event.x;
     const clickY = event.y;
     const offsetX = event.offsetX;
@@ -228,13 +229,14 @@ export const getAnchorPointByTarget = (
           y: y + offset.y,
         };
 
-      default:
+      default: {
         let pointerY = event.clientY;
         if (position === 'above') {
           pointerY = pointerY - menuHeight;
         }
         // pointer or default
         return { x: event.clientX + offset.x, y: pointerY + offset.y };
+      }
     }
   } else {
     throw new Error('event.target is not an HTMLElement');

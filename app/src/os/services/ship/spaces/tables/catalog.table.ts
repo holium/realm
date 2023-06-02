@@ -221,6 +221,7 @@ export class AppCatalogDB extends AbstractDataAccess<App, any> {
     this._insertAppCatalog({ [appId]: app });
   }
 
+  // Handles both the caching of grid indexes and the eventual Urbit response.
   public updateGrid(grid: { [idx: string]: string }) {
     if (!this.db?.open) return;
     this._insertGrid(grid);

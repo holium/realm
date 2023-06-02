@@ -241,7 +241,7 @@ export const ShipBarPresenter = () => {
                   justifyContent="flex-end"
                   onPathLookup={(app: string, path: string) => {
                     if (app === 'realm-chat') {
-                      let { title, sigil, image } =
+                      const { title, sigil, image } =
                         chatStore.getChatHeader(path);
                       return {
                         title,

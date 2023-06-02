@@ -133,5 +133,5 @@ export const AppWindowModel = types
     },
   }));
 
-export interface AppWindowMobxType extends Instance<typeof AppWindowModel> {}
-export interface AppWindowProps extends SnapshotIn<typeof AppWindowModel> {}
+export type AppWindowMobxType = Instance<typeof AppWindowModel>;
+export type AppWindowProps = SnapshotIn<typeof AppWindowModel>;

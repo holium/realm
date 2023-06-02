@@ -30,6 +30,7 @@ export const AnimatedText = (props: { text: string; replay: boolean }) => {
   // Add a space ("\u00A0") to the end of each word
   words.map((word, index) => {
     if (index === words.length - 1) {
+      // eslint-disable-next-line array-callback-return
       return;
     }
     return word.push('\u00A0');

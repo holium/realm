@@ -15,7 +15,7 @@ import { Asset, CoinAsset, NFTAsset, ProtocolType } from '../wallet.types';
 import { BaseBlockProtocol } from './BaseBlockProtocol';
 
 // NOTE: this was needed for JsonRpcProvider to work
-declare var global: any;
+declare let global: any;
 global.fetch = fetch;
 
 export class EthereumProtocol implements BaseBlockProtocol {
@@ -24,7 +24,7 @@ export class EthereumProtocol implements BaseBlockProtocol {
   private alchemy: Alchemy;
   private baseURL: string;
   private nodeURL: string;
-  private updating: boolean = false;
+  private updating = false;
 
   constructor(protocol: ProtocolType) {
     this.protocol = protocol;
@@ -151,89 +151,87 @@ export class EthereumProtocol implements BaseBlockProtocol {
             }
           }
         });
-        if (true) {
-          const ethWalletAddress = wallet?.address;
-          if (!ethWalletAddress) {
-            continue;
-          }
-          this.getAccountAssets(ethWalletAddress).then((assets: Asset[]) => {
-            for (const asset of assets) {
-              if (asset.type === 'coin') {
-                this.getAsset(asset.addr, ethWalletAddress, 'coin').then(
-                  (coin: Asset | null) => {
-                    if (coin) {
-                      walletDB.sendChainUpdate({
-                        'set-coin': {
-                          index: wallet.wallet_index,
-                          protocol: this.protocol,
-                          coin,
-                        },
-                      });
-                    }
+        const ethWalletAddress = wallet?.address;
+        if (!ethWalletAddress) {
+          continue;
+        }
+        this.getAccountAssets(ethWalletAddress).then((assets: Asset[]) => {
+          for (const asset of assets) {
+            if (asset.type === 'coin') {
+              this.getAsset(asset.addr, ethWalletAddress, 'coin').then(
+                (coin: Asset | null) => {
+                  if (coin) {
+                    walletDB.sendChainUpdate({
+                      'set-coin': {
+                        index: wallet.wallet_index,
+                        protocol: this.protocol,
+                        coin,
+                      },
+                    });
                   }
-                );
-
-                if (currentBlock) {
-                  this.getAssetTransfers(
-                    asset.addr,
-                    ethWalletAddress,
-                    walletDB.getLatestBlock() ?? 0,
-                    currentBlock
-                  ).then((transfers: any) => {
-                    walletDB.sendChainUpdate({
-                      'apply-coin-transactions': {
-                        index: wallet.wallet_index,
-                        protocol: this.protocol,
-                        coinAddr: asset.addr,
-                        transactions: transfers,
-                      },
-                    });
-                    walletDB.sendChainUpdate({
-                      'set-coin-block': {
-                        index: wallet.wallet_index,
-                        protocol: this.protocol,
-                        coinAddr: asset.addr,
-                        block: currentBlock,
-                      },
-                    });
-                  });
                 }
-              }
-              if (asset.type === 'nft') {
-                this.getAsset(
-                  asset.addr,
-                  ethWalletAddress,
-                  'nft',
-                  (asset.data as NFTAsset).tokenId
-                ).then((nft: Asset | null) => {
-                  if (nft) {
-                    walletDB.sendChainUpdate({
-                      'update-nft': {
-                        index: wallet.wallet_index,
-                        protocol: this.protocol,
-                        nft,
-                      },
-                    });
-                  }
-                });
+              );
+
+              if (currentBlock) {
                 this.getAssetTransfers(
                   asset.addr,
-                  wallet.address,
-                  0,
-                  currentBlock ?? 0
+                  ethWalletAddress,
+                  walletDB.getLatestBlock() ?? 0,
+                  currentBlock
                 ).then((transfers: any) => {
                   walletDB.sendChainUpdate({
-                    'update-nft-transfers': {
+                    'apply-coin-transactions': {
                       index: wallet.wallet_index,
                       protocol: this.protocol,
-                      transfers,
+                      coinAddr: asset.addr,
+                      transactions: transfers,
+                    },
+                  });
+                  walletDB.sendChainUpdate({
+                    'set-coin-block': {
+                      index: wallet.wallet_index,
+                      protocol: this.protocol,
+                      coinAddr: asset.addr,
+                      block: currentBlock,
                     },
                   });
                 });
               }
             }
-          });
-        }
+            if (asset.type === 'nft') {
+              this.getAsset(
+                asset.addr,
+                ethWalletAddress,
+                'nft',
+                (asset.data as NFTAsset).tokenId
+              ).then((nft: Asset | null) => {
+                if (nft) {
+                  walletDB.sendChainUpdate({
+                    'update-nft': {
+                      index: wallet.wallet_index,
+                      protocol: this.protocol,
+                      nft,
+                    },
+                  });
+                }
+              });
+              this.getAssetTransfers(
+                asset.addr,
+                wallet.address,
+                0,
+                currentBlock ?? 0
+              ).then((transfers: any) => {
+                walletDB.sendChainUpdate({
+                  'update-nft-transfers': {
+                    index: wallet.wallet_index,
+                    protocol: this.protocol,
+                    transfers,
+                  },
+                });
+              });
+            }
+          }
+        });
       }
     } catch (error) {
       console.log(error);

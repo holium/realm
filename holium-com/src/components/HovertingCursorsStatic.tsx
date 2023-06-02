@@ -1,4 +1,8 @@
-export const HoveringCursorsStatic = ({ className = '' }) => (
+export const HoveringCursorsStatic = ({
+  className = '',
+}: {
+  className?: string;
+}) => (
   <svg
     width="265"
     height="320"
