@@ -295,6 +295,7 @@ export const ShipBarPresenter = () => {
                 onClick={() => {
                   shellStore.setIsBlurred(true);
                   shellStore.openDialog('shutdown-dialog');
+                  setAccountTrayOpen(false);
                   setActiveApp(null);
                 }}
               >
@@ -322,9 +323,10 @@ export const ShipBarPresenter = () => {
                 animate={{ opacity: 0.7 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
-                onClick={() =>
-                  shellStore.openWindow(nativeApps['os-settings'] as AppType)
-                }
+                onClick={() => {
+                  shellStore.openWindow(nativeApps['os-settings'] as AppType);
+                  setAccountTrayOpen(false);
+                }}
               >
                 <Icon name="Settings" size={22} />
               </Button.IconButton>

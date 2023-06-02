@@ -73,6 +73,7 @@ export const ShellModel = types
       return newWindow;
     },
     openDialog(dialogId: string) {
+      self.homePaneOpen = false;
       self.dialogId = dialogId;
     },
     openDialogWithStringProps(dialogId: string, props: any) {
