@@ -1,0 +1,15 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "lint": {},
+    "build": {
+      "dependsOn": ["^build"]
+    }
+  },
+  "globalDependencies": [
+    "tsconfig.json",
+    "tsconfig.base.json",
+    ".eslintrc.js",
+    ".prettierrc.js"
+  ]
+}

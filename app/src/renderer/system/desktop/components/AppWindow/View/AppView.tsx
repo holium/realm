@@ -84,7 +84,7 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
 
       let appUrl = `${loggedInAccount.serverUrl}/apps/${appWindow.appId}/?spaceId=${spacesStore.selected?.path}`;
 
-      if (appWindow.href?.glob.base) {
+      if (appWindow.href?.glob && appWindow.href?.glob.base) {
         appUrl = `${loggedInAccount.serverUrl}/apps/${appWindow.href?.glob.base}/?spaceId=${spacesStore.selected?.path}`;
       }
       if (appWindow.href?.site) {
@@ -94,7 +94,7 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
       setAppUrl(appUrl);
     }
 
-    () => {
+    return () => {
       setReady(false);
     };
   }, [

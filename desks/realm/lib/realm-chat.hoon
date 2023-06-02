@@ -55,6 +55,20 @@
     %peers  (snag 0 ~(val by peers-table.tbl))
   ==
 ::
+++  scry-paths
+  |=  =bowl:gall
+  ^-  (list path-row:db)
+  =/  tbls
+    .^
+      db-dump:db
+      %gx
+      /(scot %p our.bowl)/chat-db/(scot %da now.bowl)/db/paths/noun
+    ==
+  =/  tbl  `table:db`(snag 0 tables.tbls)
+  ?+  -.tbl  !!
+    %paths  ~(val by paths-table.tbl)
+  ==
+::
 ++  into-backlog-msg-poke
   |=  [m=message:db =ship]
   [%pass /dbpoke %agent [ship %chat-db] %poke %chat-db-action !>([%insert-backlog m])]
@@ -64,19 +78,19 @@
   =/  exp-at=@da  ?:  =(expires-in.act *@dr)
     *@da
   (add ts expires-in.act)
-  [%pass /dbpoke %agent [patp.p %chat-db] %poke %chat-db-action !>([%insert ts path.act fragments.act exp-at])]
+  [%pass (weld /dbpoke path.p) %agent [patp.p %chat-db] %poke %chat-db-action !>([%insert ts path.act fragments.act exp-at])]
 ::
 ++  into-edit-message-poke
   |=  [p=peer-row:db act=edit-message-action:db]
-  [%pass /dbpoke %agent [patp.p %chat-db] %poke %chat-db-action !>([%edit act])]
+  [%pass (weld /dbpoke path.p) %agent [patp.p %chat-db] %poke %chat-db-action !>([%edit act])]
 ::
 ++  into-delete-backlog-poke
   |=  [p=peer-row:db =path now=time]
-  [%pass /dbpoke %agent [patp.p %chat-db] %poke %chat-db-action !>([%delete-backlog path now])]
+  [%pass (weld /dbpoke path.p) %agent [patp.p %chat-db] %poke %chat-db-action !>([%delete-backlog path now])]
 ::
 ++  into-delete-message-poke
   |=  [p=peer-row:db =msg-id:db]
-  [%pass /dbpoke %agent [patp.p %chat-db] %poke %chat-db-action !>([%delete msg-id])]
+  [%pass (weld /dbpoke path.p) %agent [patp.p %chat-db] %poke %chat-db-action !>([%delete msg-id])]
 ::
 ++  into-all-peers-kick-pokes
   |=  [kickee=ship peers=(list peer-row:db)]
@@ -88,12 +102,12 @@
 ++  into-kick-peer-poke
   |=  [target=ship kickee=ship =path]
   ^-  card
-  [%pass /dbpoke %agent [target %chat-db] %poke %chat-db-action !>([%kick-peer path kickee])]
+  [%pass (weld /dbpoke path) %agent [target %chat-db] %poke %chat-db-action !>([%kick-peer path kickee])]
 ::
 ++  create-path-db-poke
   |=  [=ship row=path-row:db peers=ship-roles:db]
   ^-  card
-  [%pass /dbpoke %agent [ship %chat-db] %poke %chat-db-action !>([%create-path row peers])]
+  [%pass (weld /dbpoke path.row) %agent [ship %chat-db] %poke %chat-db-action !>([%create-path row peers])]
 ::
 ++  into-add-peer-pokes
   |=  [s=ship peers=(list ship) =path]
@@ -102,7 +116,7 @@
     %+  skip
       peers
     |=(p=ship =(p s)) :: skip the peer who matches the root-ship that we are poking
-  |=(peer=ship [%pass /dbpoke %agent [s %chat-db] %poke %chat-db-action !>([%add-peer path peer])])
+  |=(peer=ship [%pass (weld /dbpoke path) %agent [s %chat-db] %poke %chat-db-action !>([%add-peer path peer])])
 ::
 ++  push-notification-card
   |=  [=bowl:gall state=state-0 chat-path=path title=@t subtitle=@t content=@t]
@@ -134,11 +148,29 @@
   ==
 
   [%pass /push-notification/(scot %da now.bowl) %arvo %i %request request *outbound-config:iris]
+++  dm-already-exists
+  |=  [typ=@tas peers=(list ship) =bowl:gall]
+  ^-  ?
+  ?.  =(typ %dm)  %.n  :: if the goal `typ` is not %dm, there is no way for a conflicting dm to already exist
+  =/  dmpaths  (turn (skim (scry-paths bowl) |=(pr=path-row:db =(type.pr %dm))) |=(pr=path-row:db path.pr))
+  =/  index=@ud  0
+  =/  conflict=?   %.n
+  =/  setpeers     (silt peers)
+  |-
+    ?:  |(conflict =(index (lent dmpaths)))
+      conflict
+    =/  dmpeers  (scry-peers (snag index dmpaths) bowl)
+    =/  dmships  (turn dmpeers |=(p=peer-row:db patp.p))
+    ?.  =((lent dmships) 2)  $(index +(index))
+    =/  firstmatches=?   (~(has in setpeers) (snag 0 dmships))
+    =/  secondmatches=?  (~(has in setpeers) (snag 1 dmships))
+    $(index +(index), conflict &(firstmatches secondmatches))
 ::
 ::  poke actions
 ::
 ++  create-chat
-::realm-chat &action [%create-chat ~ %chat ~[~bus ~dev] %host *@dr]
+::realm-chat &chat-action [%create-chat ~ %dm ~[~bus] %host *@dr]
+::realm-chat &chat-action [%create-chat ~ %chat ~[~bus ~dev] %host *@dr]
   |=  [act=create-chat-data state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ?>  =(src.bowl our.bowl)
@@ -148,7 +180,18 @@
   =/  all-ships
     ?:  (~(has in (silt peers.act)) our.bowl)  peers.act
     [our.bowl peers.act]
-  =/  all-peers=ship-roles:db  (turn all-ships |=(s=ship [s ?:(=(s our.bowl) %host %member)]))
+  ?:  (dm-already-exists type.act all-ships bowl)
+    ~&  >>>  "dm between {<all-ships>} already exists"
+    `state
+  =/  all-peers=ship-roles:db  
+    %+  turn
+      all-ships
+    |=  s=ship
+    =/  rl
+      ?:  =(s our.bowl)    %host
+      ?:  =(type.act %dm)  %host
+      %member
+    [s rl]
 
   =/  cards=(list card)
     %+  turn

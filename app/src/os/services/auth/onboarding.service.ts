@@ -303,7 +303,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   }
 
   _prepareBuildVersionEnv() {
-    let result: RealmInstallVersionTest = {
+    const result: RealmInstallVersionTest = {
       success: false, // assume failure
       major: -1,
       minor: -1,
@@ -322,7 +322,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       );
       return result;
     }
-    let buildVersion = process.env.BUILD_VERSION.split('.');
+    const buildVersion = process.env.BUILD_VERSION.split('.');
     if (buildVersion.length < 3) {
       console.warn(
         `BUILD_VERSION '${buildVersion}' not valid. skipping installation validation...`
@@ -384,9 +384,10 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   private async waitForInstallRealmAgent(
     buildVersion: RealmInstallVersionTest
   ): Promise<RealmInstallStatus> {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     return new Promise((resolve) => {
-      let totalWaitTime = 0,
+      const totalWaitTime = 0,
         maxWaitTime = 600000; // 5 minutes
       (async function versionCheck(totalWaitTime, maxWaitTime) {
         const result = await self._testVersion(buildVersion);
@@ -405,6 +406,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
   }
 
   async installRealmAgent(): Promise<RealmInstallStatus> {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       // if bypass, don't perform install and continue with onboarding. useful in development
       if (process.env.INSTALL_MOON === 'bypass') {
@@ -460,7 +462,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     try {
       await this._openConduit({ serverId, serverUrl, serverCode });
     } catch (e) {
-      log.error('ship.service.ts:', 'Failed to open the conduit', e);
+      log.error('onboarding.service.ts:', 'Failed to open the conduit', e);
       throw e;
     }
     return coo;
@@ -486,9 +488,9 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       if (!cookie) throw new Error('Failed to get cookie');
       const cookiePatp = cookie.split('=')[0].replace('urbauth-', '');
       const sanitizedCookie = cookie.split('; ')[0];
-      log.info('ship.service.ts:', 'cookie', sanitizedCookie);
+      log.info('onboarding.service.ts:', 'cookie', sanitizedCookie);
       log.info(
-        'ship.service.ts:',
+        'onboarding.service.ts:',
         'ids',
         serverId.toLowerCase(),
         cookiePatp.toLowerCase()
@@ -503,7 +505,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
 
       return sanitizedCookie;
     } catch (e) {
-      log.error('ship.service.ts:', 'Failed to get cookie', e);
+      log.error('onboarding.service.ts:', 'Failed to get cookie', e);
       throw e;
     }
   }
@@ -554,7 +556,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
           resolve(null);
         })
         .on('error', (err: any) => {
-          log.error('ship.service.ts:', 'Conduit error', err);
+          log.error('onboarding.service.ts:', 'Conduit error', err);
           reject(err);
         });
     });

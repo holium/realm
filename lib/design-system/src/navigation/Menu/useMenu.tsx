@@ -121,6 +121,7 @@ export function useMenu(
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
+      // eslint-disable-next-line react/no-find-dom-node
       const domNode = ReactDOM.findDOMNode(menuRef.current);
 
       if (domNode && domNode.contains(event.target as HTMLElement)) {
@@ -167,7 +168,7 @@ export function useMenu(
     menuDimensions: { width: number; height: number },
     offset?: Position
   ): Position => {
-    let position: Position = getAnchorPointByTarget(
+    const position: Position = getAnchorPointByTarget(
       anchorEvent.nativeEvent,
       menuDimensions,
       orientation,

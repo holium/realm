@@ -14,8 +14,8 @@ const joinedChatRegex = /joined the chat/;
 const leftChatRegex = /left the chat/;
 const addedPeersRegex = /added \d+ peers/;
 const parseCreatedJoinedLeftChat = (id: string, text: string) => {
-  let patp: string = '';
-  let status: string = '';
+  let patp = '';
+  let status = '';
   if (createdChatRegex.test(text)) {
     status = 'created the chat';
     patp = text.replace(status, '').trim();

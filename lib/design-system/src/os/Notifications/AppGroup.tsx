@@ -50,8 +50,8 @@ export const AppGroup = ({
   let paths = notifications.map((n) => n.path);
   // reduce notifications to unique paths
   paths = paths.filter((path, index) => paths.indexOf(path) === index);
-  let groupedNotifications = paths.map((path) => {
-    let grouped = notifications.filter((n) => n.path === path);
+  const groupedNotifications = paths.map((path) => {
+    const grouped = notifications.filter((n) => n.path === path);
     return grouped;
   });
 
@@ -89,7 +89,7 @@ export const AppGroup = ({
         : groupedNotifications.map((notifs) => {
             const metadata = onPathLookup(notifs[0].app, notifs[0].path);
             if (!metadata) return renderedNotifications(notifs, outerOffset);
-            let title = metadata.title;
+            const title = metadata.title;
 
             let avatar;
             if (metadata?.image) {

@@ -95,7 +95,7 @@ export const spacesDialogs: DialogRenderers = {
       state: SpaceWorkFlowState,
       setState: (state: Partial<SpaceWorkFlowState>) => void
     ) => {
-      let createForm = state;
+      const createForm = state;
       setState({ ...state, loading: true });
 
       if (createForm.crestOption === 'color') {
