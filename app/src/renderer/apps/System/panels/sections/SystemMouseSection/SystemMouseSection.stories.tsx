@@ -5,13 +5,13 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { useToggle } from '@holium/design-system';
 import { Flex } from '@holium/design-system/general';
 
-import { SystemMouseSection } from './SystemMouseSection';
+import { SystemMouseSectionView } from './SystemMouseSectionView';
 
 export default {
   title: 'OS/System Mouse Section',
-} as ComponentMeta<typeof SystemMouseSection>;
+} as ComponentMeta<typeof SystemMouseSectionView>;
 
-export const Demo: ComponentStory<typeof SystemMouseSection> = () => {
+export const Demo: ComponentStory<typeof SystemMouseSectionView> = () => {
   const realmCursor = useToggle(false);
   const profileColorForCursor = useToggle(false);
 
@@ -23,7 +23,7 @@ export const Demo: ComponentStory<typeof SystemMouseSection> = () => {
         margin: '24px auto',
       }}
     >
-      <SystemMouseSection
+      <SystemMouseSectionView
         realmCursorEnabled={realmCursor.isOn}
         setRealmCursor={realmCursor.setToggle}
         profileColorForCursorEnabled={profileColorForCursor.isOn}
