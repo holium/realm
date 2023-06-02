@@ -34,7 +34,6 @@ export const AccountDialogInnerCard = styled(OnboardDialogCard)`
   height: 100%;
   width: 100%;
   min-height: 0;
-  background-color: rgba(var(--rlm-window-rgba));
   border-radius: 11px;
   padding: 16px;
   margin: 0;
