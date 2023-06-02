@@ -23,6 +23,16 @@ const ShellPresenter = () => {
   );
 
   useEffect(() => {
+    window.electron.app.onShortcutEvent((shortcut: string) => {
+      shellStore.handleShortcutEvent(shortcut);
+    });
+
+    return () => {
+      window.electron.app.removeOnShortcutEvent();
+    };
+  }, []);
+
+  useEffect(() => {
     // Sync Electron with MobX state.
     if (shellStore.isIsolationMode) {
       shellStore.enableIsolationMode();

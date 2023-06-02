@@ -13,3 +13,4 @@ export const SpacesIPC = window.spacesService;
 export const BazaarIPC = window.bazaarService;
 export const AppInstallIPC = window.appInstallService;
 export const AppRecentsIPC = window.appRecentsService;
+// export const ShellIPC = window.shellService;

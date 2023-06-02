@@ -122,6 +122,11 @@ const appPreload = {
       callback(hex);
     });
   },
+  onShortcutEvent(callback: (shortcut: string) => void) {
+    ipcRenderer.on('shortcut-event', (_, shortcut: string) => {
+      callback(shortcut);
+    });
+  },
   onKeyDown(callback: (key: string, isFocused: boolean) => void) {
     ipcRenderer.on('key-down', (_, key: string, isFocused: boolean) => {
       callback(key, isFocused);
@@ -159,6 +164,9 @@ const appPreload = {
   },
   removeOnJoinSpace() {
     ipcRenderer.removeAllListeners('join-space');
+  },
+  removeOnShortcutEvent() {
+    ipcRenderer.removeAllListeners('shortcut-event');
   },
 };
 
