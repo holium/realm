@@ -98,7 +98,7 @@ const BrowserWebviewPresenter = ({ isDragging, isResizing }: Props) => {
             // @ts-expect-error
             enableblinkfeatures="PreciseMemoryInfo, CSSVariables, AudioOutputDevices, AudioVideoTracks"
             useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0"
-            partition={`persist:browser-webview-${loggedInAccount?.serverId}`}
+            partition={`persist:webview-${loggedInAccount?.serverId}`}
             isLocked={isDragging || isResizing || loadingState === 'loading'}
             style={{
               background: 'white',
