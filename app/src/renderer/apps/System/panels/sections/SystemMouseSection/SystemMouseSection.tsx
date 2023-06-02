@@ -28,12 +28,16 @@ export const SystemMouseSection = ({
               <CursorOption
                 type="System"
                 isSelected={!realmCursorEnabled}
-                onClick={() => setRealmCursor(false)}
+                onClick={() => {
+                  if (realmCursorEnabled) setRealmCursor(false);
+                }}
               />
               <CursorOption
                 type="Realm"
                 isSelected={realmCursorEnabled}
-                onClick={() => setRealmCursor(true)}
+                onClick={() => {
+                  if (!realmCursorEnabled) setRealmCursor(true);
+                }}
               />
             </Flex>
             <CheckBox
