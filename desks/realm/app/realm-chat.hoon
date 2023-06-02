@@ -1,5 +1,5 @@
 ::  app/realm-chat.hoon
-/-  *realm-chat, db-sur=chat-db, notify, ndb=notif-db, fr=friends
+/-  *realm-chat, db-sur=chat-db, ndb=notif-db, fr=friends, spc=spaces-store
 /+  dbug, lib=realm-chat, db-lib=chat-db
 =|  state-0
 =*  state  -
@@ -14,9 +14,9 @@
     ^-  (quip card _this)
     =/  default-state=state-0
       :*  %0
-          '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id:notify
-          (sham our.bowl)                         :: uuid:notify
-          *devices:notify
+          '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id
+          (sham our.bowl)                         :: uuid
+          *devices
           %.y            :: push-enabled
           ~              :: set of muted chats
           ~              :: set of pinned chats
@@ -113,7 +113,7 @@
     ::
       [%x %devices ~]
         ?>  =(our.bowl src.bowl)
-        ``notify-view+!>([%devices devices.state])
+        ``notify-view+!>(devices.state)
     ::
       [%x %pins ~]
         ?>  =(our.bowl src.bowl)
@@ -215,13 +215,18 @@
                     =/  avatar=(unit @t)
                       ?:  =(%dm type.prow)      (scry-avatar-for-patp:lib sender.id bowl)
                       ?:  =(%group type.prow)   (~(get by metadata.prow) 'image')
-                      ?:  =(%space type.prow)   (~(get by metadata.prow) 'space')
+                      ?:  =(%space type.prow)
+                        =/  uspace  (~(get by metadata.prow) 'space')
+                        ?~  uspace  ~
+                        =/  spv=view:spc    .^(view:spc %gx (weld (weld /(scot %p our.bowl)/spaces/(scot %da now.bowl)/ (stab u.uspace)) /noun))
+                        ?>  =(%space -.spv)
+                        (some picture.space.spv)
                       ~  :: default to null if we don't know what type of chat this is
                     =/  push-card
                       %:  push-notification-card:lib
                           bowl
                           state
-                          thepath
+                          prow
                           push-title
                           push-subtitle
                           push-contents

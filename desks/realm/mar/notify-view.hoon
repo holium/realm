@@ -1,16 +1,16 @@
-/-  store=notify
-/+  *notify
+/-  sur=realm-chat
+/+  lib=realm-chat
 ::
-|_  view=view:store
+|_  ds=devices:sur
 ++  grad  %noun
 ++  grow
   |%
-  ++  noun  view
-  ++  json  (view:enjs view)
+  ++  noun  ds
+  ++  json  (devices:encode:lib ds)
   --
 ::
 ++  grab
   |%
-  ++  noun  view:store
+  ++  noun  devices:sur
   --
 --
