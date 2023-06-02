@@ -5,6 +5,7 @@ import path from 'path';
 import { CHAT_TABLES, chatInitSql } from './chat/chat.schema';
 import { friendsInitSql } from './friends.service';
 import { notifInitSql } from './notifications/notifications.table';
+import { settingsInitSql } from './settings.service';
 import { Credentials } from './ship.types.ts';
 import { spacesTablesInitSql } from './spaces/spaces.service';
 import { appPublishersInitSql } from './spaces/tables/appPublishers.table';
@@ -131,6 +132,7 @@ ${spacesTablesInitSql}
 ${walletInitSql}
 ${appPublishersInitSql}
 ${appRecentsInitSql}
+${settingsInitSql}
 create table if not exists credentials (
   url       TEXT PRIMARY KEY NOT NULL,
   code      TEXT NOT NULL,

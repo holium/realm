@@ -47,9 +47,6 @@ export const Theme = types
     },
   }))
   .actions((self) => ({
-    setMouseColor(color: string) {
-      self.mouseColor = color;
-    },
     setAccentColor(color: string) {
       self.accentColor = color;
     },

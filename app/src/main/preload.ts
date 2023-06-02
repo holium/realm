@@ -3,6 +3,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 import { Position } from '@holium/design-system';
 import { MouseState } from '@holium/realm-presence';
 
+import { settingsPreload } from 'os/services/ship/settings.service';
 import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
 
@@ -54,6 +55,12 @@ const appPreload = {
   disableIsolationMode: () => {
     return ipcRenderer.invoke('disable-isolation-mode');
   },
+  enableRealmCursor: () => {
+    return ipcRenderer.invoke('enable-realm-cursor');
+  },
+  disableRealmCursor: () => {
+    return ipcRenderer.invoke('disable-realm-cursor');
+  },
   setMouseColor(hex: string) {
     ipcRenderer.invoke('mouse-color', hex);
   },
@@ -84,8 +91,11 @@ const appPreload = {
   onEnableMouseLayerTracking(callback: () => void) {
     ipcRenderer.on('enable-mouse-layer-tracking', callback);
   },
-  onDisableCustomMouse(callback: () => void) {
-    ipcRenderer.on('disable-custom-mouse', callback);
+  onEnableRealmCursor(callback: () => void) {
+    ipcRenderer.on('enable-realm-cursor', callback);
+  },
+  onDisableRealmCursor(callback: () => void) {
+    ipcRenderer.on('disable-realm-cursor', callback);
   },
   onToggleOnEphemeralChat(callback: () => void) {
     ipcRenderer.on('realm.toggle-on-ephemeral-chat', () => {
@@ -182,3 +192,4 @@ contextBridge.exposeInMainWorld('bazaarService', bazaarPreload);
 contextBridge.exposeInMainWorld('onboardingService', onboardingPreload);
 contextBridge.exposeInMainWorld('appInstallService', appPublishersDBPreload);
 contextBridge.exposeInMainWorld('appRecentsService', appRecentsPreload);
+contextBridge.exposeInMainWorld('settingsService', settingsPreload);

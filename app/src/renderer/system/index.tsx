@@ -4,12 +4,17 @@ import { observer } from 'mobx-react';
 
 // import { ConnectionStatus } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { Desktop } from './desktop/Desktop';
 import { DialogManager } from './dialog/DialogManager';
 
+const getCssVar = (name: string) =>
+  getComputedStyle(document.documentElement).getPropertyValue(name);
+
 const ShellPresenter = () => {
-  const { shellStore, authStore } = useAppState();
+  const { settingsStore } = useShipStore();
+  const { shellStore, authStore, loggedInAccount } = useAppState();
   const { session } = authStore;
 
   const DialogLayer = useMemo(
@@ -23,16 +28,22 @@ const ShellPresenter = () => {
   );
 
   useEffect(() => {
-    // Sync Electron with MobX state.
-    if (shellStore.isIsolationMode) {
-      shellStore.enableIsolationMode();
-    } else {
-      shellStore.disableIsolationMode();
-    }
-    if (session?.color) {
-      shellStore.setMouseColor(session?.color);
-    }
-  }, [shellStore.isIsolationMode, session?.color]);
+    const mouseRgba = getCssVar('--rlm-mouse-color');
+
+    // Sync mouse layer. Wait for a bit to make sure it is mounted.
+    setTimeout(() => {
+      if (settingsStore.profileColorForCursorEnabled) {
+        window.electron.app.setMouseColor(session?.color ?? '#4E9EFD');
+      } else {
+        window.electron.app.setMouseColor(mouseRgba ?? '#4E9EFD');
+      }
+    }, 500);
+  }, [
+    session?.color,
+    settingsStore.realmCursorEnabled,
+    settingsStore.profileColorForCursorEnabled,
+    loggedInAccount?.serverId, // For switching ships with different settings.
+  ]);
 
   return (
     <ViewPort>
