@@ -38,6 +38,7 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
   useEffect(() => {
     window.electron.app.onMouseMove((_position, _state, isDragging) => {
       canClick.setToggle(!isDragging);
+      if (!isDragging) disableScroll.off();
     });
   }, []);
 
@@ -73,9 +74,6 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
               key={tileId}
               onMouseDownCapture={() => {
                 disableScroll.on();
-              }}
-              onMouseUpCapture={() => {
-                disableScroll.off();
               }}
             >
               <GridAppTile

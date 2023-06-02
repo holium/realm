@@ -1,12 +1,7 @@
 import { useState } from 'react';
 import { spaces } from 'spaces';
-import styled from 'styled-components';
-
-import { Flex } from '@holium/design-system/general';
 
 import { Footer } from 'components/Footer';
-import { GlobalStyle } from 'components/GlobalStyle';
-import { Header } from 'components/Header';
 import { Hero } from 'components/Hero';
 import { Page } from 'components/Page';
 import { useSpace } from 'components/SpaceContext';
@@ -17,14 +12,6 @@ import { SpacesApp } from 'components/TrayApps/Spaces';
 import { WalletApp } from 'components/TrayApps/Wallet';
 
 import { SpaceKeys, TrayAppType } from '../types';
-
-const Main = styled.main`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-`;
 
 export default function HomePage() {
   const { space } = useSpace();
@@ -46,19 +33,13 @@ export default function HomePage() {
 
   return (
     <>
-      <GlobalStyle theme={spaces[space].theme} />
-      <Page title="Holium">
-        <Flex
-          className="wallpaper"
-          style={{ backgroundColor: spaces[space].theme.backgroundColor }}
-          backgroundImage={`url(${spaces[space].theme.wallpaper})`}
-        />
-        <Header />
-        <Main>
-          <Hero />
-        </Main>
-        <Footer currentSpace={space} setCurrentApp={handleSetTrayApp} />
-      </Page>
+      <Page
+        title="Holium"
+        body={<Hero />}
+        footer={
+          <Footer currentSpace={space} setCurrentApp={handleSetTrayApp} />
+        }
+      />
       {trayApp && (
         <>
           <SpacesApp

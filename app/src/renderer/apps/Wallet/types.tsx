@@ -28,7 +28,7 @@ export enum WalletOnboardingScreen {
 export type TxType = 'coin' | 'nft' | 'general' | undefined;
 
 export type ERC20Amount = {
-  big: BigInt;
+  big: bigint;
   full: string;
   display: string;
 };

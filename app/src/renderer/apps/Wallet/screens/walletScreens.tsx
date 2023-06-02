@@ -21,7 +21,7 @@ export const walletScreens: Record<
   [WalletScreen.TRANSACTION_DETAIL]: () => <TransactionDetailScreen />,
   [WalletScreen.ONBOARDING]: () => <WalletOnboarding />,
   [WalletScreen.TRANSACTION_CONFIRM]: () => <div />,
-  [WalletScreen.CREATE_WALLET]: ({ network }) => (
+  [WalletScreen.CREATE_WALLET]: ({ network }: { network: NetworkType }) => (
     <CreateWalletScreen network={network} />
   ),
   [WalletScreen.LOCKED]: () => <LockedScreen />,

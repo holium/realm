@@ -84,7 +84,7 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
 
       let appUrl = `${loggedInAccount.serverUrl}/apps/${appWindow.appId}/?spaceId=${spacesStore.selected?.path}`;
 
-      if (appWindow.href?.glob.base) {
+      if (appWindow.href?.glob && appWindow.href?.glob.base) {
         appUrl = `${loggedInAccount.serverUrl}/apps/${appWindow.href?.glob.base}/?spaceId=${spacesStore.selected?.path}`;
       }
       if (appWindow.href?.site) {
@@ -94,7 +94,7 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
       setAppUrl(appUrl);
     }
 
-    () => {
+    return () => {
       setReady(false);
     };
   }, [
@@ -136,7 +136,8 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
           innerRef={webViewRef}
           id={`${appWindow.appId}-urbit-webview`}
           appId={appWindow.appId}
-          partition={`persist:default-${loggedInAccount?.serverId}`}
+          useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0"
+          partition={`persist:webview-${loggedInAccount?.serverId}`}
           webpreferences="sandbox=false, nativeWindowOpen=yes"
           // @ts-ignore
           allowpopups="true"

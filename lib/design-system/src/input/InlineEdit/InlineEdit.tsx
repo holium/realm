@@ -11,6 +11,7 @@ const InlineEditStyled = styled(Flex)<InlineEditStyledProps>`
   width: 100%;
   appearance: none;
   transition: var(--transition);
+  color: rgba(var(--rlm-text-rgba));
   background: transparent;
 
   border-radius: 6px;

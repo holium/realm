@@ -86,8 +86,8 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1920,
-    height: 1080,
+    width: 1512,
+    height: 982,
     icon: getAssetPath('icon.png'),
     title: 'Realm',
     fullscreen: true,
@@ -111,7 +111,6 @@ const createWindow = async () => {
   // console.log('second-instance');
   // log.info('second-instance', spacePath);
 
-  FullScreenHelper.registerListeners(mainWindow);
   WebViewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners();
@@ -178,7 +177,6 @@ const createMouseOverlayWindow = () => {
     hasShadow: false,
     skipTaskbar: true,
     transparent: true,
-    alwaysOnTop: true,
     fullscreen: true,
     titleBarStyle: 'hidden',
     acceptFirstMouse: true,
@@ -193,6 +191,9 @@ const createMouseOverlayWindow = () => {
   });
   newMouseWindow.setIgnoreMouseEvents(true);
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
+
+  FullScreenHelper.registerListeners(mainWindow, newMouseWindow);
+  MouseHelper.registerListeners(mainWindow, newMouseWindow);
 
   const mouseSetup = () => {
     if (isMac) {
@@ -229,8 +230,6 @@ const createMouseOverlayWindow = () => {
     newMouseWindow.setBounds(newDimension);
     mainWindow.webContents.send('set-dimensions', newDimension);
   });
-
-  MouseHelper.registerListeners(mainWindow, newMouseWindow);
 };
 
 app.on('window-all-closed', () => {

@@ -40,8 +40,10 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     });
 
     const windows = BrowserWindow.getAllWindows();
-    windows.forEach((window) => {
-      window.webContents.on('did-attach-webview', this.onWebViewAttached);
+    windows.forEach(({ webContents }) => {
+      webContents.on('did-attach-webview', (event, webviewWebContents) => {
+        this.onWebViewAttached(event, webviewWebContents);
+      });
     });
   }
 
@@ -153,21 +155,26 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     const path = credentials.cookie?.split('; ')[1].split('=')[1];
     const maxAge = credentials.cookie?.split('; ')[2].split('=')[1];
     const value = credentials.cookie?.split('=')[1].split('; ')[0];
-    // remove current cookie
-    await session
-      .fromPartition(`persist:default-${credentials.ship}`)
-      .cookies.remove(`${credentials.url}`, `urbauth-${credentials.ship}`);
-    // set new cookie
-    await session
-      .fromPartition(`persist:default-${credentials.ship}`)
-      .cookies.set({
-        url: `${credentials.url}`,
-        name: `urbauth-${credentials.ship}`,
-        value,
-        expirationDate:
-          new Date(Date.now() + parseInt(maxAge) * 1000).getTime() / 1000,
-        path: path,
-      });
+    try {
+      // remove current cookie
+      await session
+        .fromPartition(`persist:webview-${credentials.ship}`)
+        .cookies.remove(`${credentials.url}`, `urbauth-${credentials.ship}`);
+      // set new cookie
+      return await session
+        .fromPartition(`persist:webview-${credentials.ship}`)
+        .cookies.set({
+          url: `${credentials.url}`,
+          name: `urbauth-${credentials.ship}`,
+          value,
+          expirationDate: new Date(
+            Date.now() + parseInt(maxAge) * 1000
+          ).getTime(),
+          path: path,
+        });
+    } catch (e) {
+      log.error('setSessionCookie error:', e);
+    }
   }
 
   /**
@@ -351,7 +358,6 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           return;
         }
 
-        log.info('realm.service.ts:', 'Setting cookie', cookie);
         await this.setSessionCookie({ ...credentials, cookie });
 
         this.services?.ship?.updateCookie(cookie);
@@ -362,10 +368,10 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     }
   }
 
-  async onWebViewAttached(_: Event, webContents: WebContents) {
-    webContents.on('will-redirect', (_e: Event, url: string) =>
-      this.onWillRedirect(url, webContents)
-    );
+  async onWebViewAttached(_: any, webContents: WebContents) {
+    webContents.on('will-redirect', (_, url) => {
+      this.onWillRedirect(url, webContents);
+    });
 
     webContents.on('dom-ready', () => {
       // TODO wire up libs here

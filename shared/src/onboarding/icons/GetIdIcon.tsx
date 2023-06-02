@@ -1,7 +1,6 @@
-export const GetIdIcon = ({ size = 136 }) => (
+export const GetIdIcon = ({ size = 136 }: { size?: number }) => (
   <svg
     width="100%"
-    max-width={size}
     height={size}
     viewBox="0 0 136 136"
     fill="none"

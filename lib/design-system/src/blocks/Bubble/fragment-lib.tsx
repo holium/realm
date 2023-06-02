@@ -119,6 +119,9 @@ export const FragmentReplyTo = styled(motion.blockquote)`
 export const FragmentInlineCode = styled(FragmentBase)`
   font-family: 'Fira Code', monospace;
   border-radius: 4px;
+  display: flex;
+  max-width: 100%;
+  word-wrap: break-word;
   /* padding: 0px 3px; */
 `;
 
@@ -190,7 +193,7 @@ export const FragmentBlockquote = styled(motion.blockquote)`
   display: flex;
   flex-direction: row;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(var(--rlm-overlay-hover-rgba));
 
   .fragment-reply {
     border-radius: 4px;
@@ -382,8 +385,7 @@ export const renderFragment = (
           />
         </BlockWrapper>
       );
-
-    case 'image':
+    case 'image': {
       const imageFrag = fragment as FragmentImageType;
       return (
         <BlockWrapper id={id} key={author + index}>
@@ -399,8 +401,8 @@ export const renderFragment = (
           />
         </BlockWrapper>
       );
-
-    case 'reply':
+    }
+    case 'reply': {
       const msg = (fragment as FragmentReplyType).reply.message[0];
       const fullmessage = (fragment as FragmentReplyType).reply.message;
       const replyAuthor = (fragment as FragmentReplyType).reply.author;
@@ -471,7 +473,8 @@ export const renderFragment = (
           </Flex>
         </FragmentBlockquote>
       );
-    case 'tab':
+    }
+    case 'tab': {
       const { url, favicon, title } = (fragment as FragmentTabType).tab;
       return (
         <TabWrapper
@@ -490,7 +493,7 @@ export const renderFragment = (
           />
         </TabWrapper>
       );
-
+    }
     case 'ur-link':
       return `<${(fragment as FragmentUrLinkType)['ur-link']}>`;
     case 'break':

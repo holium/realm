@@ -219,8 +219,7 @@ export const CodeBlock: ComponentStory<typeof Bubble> = () => {
         message={[
           { plain: 'Run the following command to download' },
           {
-            code: 'wget -qO - https://raw.githubusercontent.com/linux-surface/linux-surface/master/pkg/keys/surface.asc \
-    | gpg --dearmor | sudo dd of=/etc/apt/trusted.gpg.d/linux-surface.gpg',
+            code: 'wget -qO - https://raw.githubusercontent.com/linux-surface/linux-surface/master/pkg/keys/surface.asc | gpg --dearmor | sudo dd of=/etc/apt/trusted.gpg.d/linux-surface.gpg',
           },
         ]}
         onReaction={() => {}}
@@ -232,8 +231,7 @@ export const CodeBlock: ComponentStory<typeof Bubble> = () => {
         sentAt="2023-01-26T11:04:38.000Z"
         message={[
           {
-            code: 'wget -qO - https://raw.githubusercontent.com/linux-surface/linux-surface/master/pkg/keys/surface.asc \
-    | gpg --dearmor | sudo dd of=/etc/apt/trusted.gpg.d/linux-surface.gpg',
+            code: 'wget -qO - https://raw.githubusercontent.com/linux-surface/linux-surface/master/pkg/keys/surface.asc | gpg --dearmor | sudo dd of=/etc/apt/trusted.gpg.d/linux-surface.gpg',
           },
         ]}
         onReaction={() => {}}
