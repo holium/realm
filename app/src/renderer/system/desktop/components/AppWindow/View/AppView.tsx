@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
@@ -83,8 +84,8 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
       });
 
       let appUrl = `${loggedInAccount.serverUrl}/apps/${appWindow.appId}/?spaceId=${spacesStore.selected?.path}`;
-
-      if (appWindow.href?.glob.base) {
+      console.log(toJS(appWindow.href));
+      if (appWindow.href?.glob && appWindow.href?.glob.base) {
         appUrl = `${loggedInAccount.serverUrl}/apps/${appWindow.href?.glob.base}/?spaceId=${spacesStore.selected?.path}`;
       }
       if (appWindow.href?.site) {
