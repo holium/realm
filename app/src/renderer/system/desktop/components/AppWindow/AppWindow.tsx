@@ -12,6 +12,7 @@ import { useToggle } from '@holium/design-system/util';
 
 import {
   denormalizeBounds,
+  isFullWidth,
   normalizeBounds,
 } from 'renderer/lib/window-manager';
 import { useAppState } from 'renderer/stores/app.store';
@@ -82,6 +83,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   const mouseDragX = useMotionValue((minX + maxX) / 2);
   const mouseDragY = useMotionValue((minY + maxY) / 2);
 
+  const cursorX = useMotionValue((minX + maxX) / 2);
   const motionX = useMotionValue(bounds.x);
   const motionY = useMotionValue(bounds.y);
   const motionWidth = useMotionValue(bounds.width);
@@ -156,6 +158,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
           resizing.toggleOn();
         }
       } else {
+        cursorX.set(x);
         dragging.toggleOff();
         resizing.toggleOff();
       }
@@ -166,7 +169,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     if (!nearEdge.isOn) {
       shellStore.hideSnapView();
       if (dragging.isOn && !resizing.isOn) {
-        // dragUnmaximize();
+        dragUnmaximize();
       }
     } else {
       if (nearEdge.isOn && dragging.isOn && !resizing.isOn) {
@@ -386,10 +389,39 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     }
   };
 
-  // const dragUnmaximize = () => {
-  //   const mb = shellStore.unmaximize(appWindow.appId);
-  //   const dmb = denormalizeBounds(mb, shellStore.desktopDimensions);
-  // };
+  const dragUnmaximize = () => {
+    if (shellStore.isWindowMaximized(appWindow.appId)) {
+      const mbAll = shellStore.unmaximize(appWindow.appId);
+      console.log(mbAll);
+      const dmbPrev = denormalizeBounds(
+        mbAll['prevBounds'],
+        shellStore.desktopDimensions
+      );
+      const dmb = denormalizeBounds(
+        mbAll['bounds'],
+        shellStore.desktopDimensions
+      );
+      const xPos = cursorX.get();
+      const win = shellStore.getWindowByAppId(appWindow.appId);
+      if (win) {
+        if (isFullWidth(win.prevBounds.width, shellStore.desktopDimensions)) {
+          const relativeX = xPos / dmbPrev.width;
+          controls.start({
+            x: relativeX * dmb.width,
+            width: dmb.width,
+            height: dmb.height,
+            transition: { duration: 0.2 },
+          });
+        } else {
+          controls.start({
+            width: dmb.width,
+            height: dmb.height,
+            transition: { duration: 0.2 },
+          });
+        }
+      }
+    }
+  };
 
   const onMaximize = () => {
     const mb = shellStore.toggleMaximized(appWindow.appId);
