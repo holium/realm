@@ -55,11 +55,19 @@ export const isMaximizedBounds = (
   const margin = 0.01;
 
   return (
-    Math.abs(bounds.x - maximizedBounds.x) < margin &&
-    Math.abs(bounds.y - maximizedBounds.y) < margin &&
-    (Math.abs(bounds.width - maximizedBounds.width) < margin ||
-      Math.abs(bounds.width - maximizedBounds.width / 2) < margin) &&
-    Math.abs(bounds.height - maximizedBounds.height) < margin
+    (Math.abs(bounds.x - maximizedBounds.x) < margin &&
+      Math.abs(bounds.y - maximizedBounds.y) < margin &&
+      Math.abs(bounds.width - maximizedBounds.width) < margin &&
+      Math.abs(bounds.height - maximizedBounds.height) < margin) ||
+    (Math.abs(bounds.x - (maximizedBounds.x + maximizedBounds.width / 2)) <
+      margin &&
+      Math.abs(bounds.y - maximizedBounds.y) < margin &&
+      Math.abs(bounds.width - maximizedBounds.width / 2) < margin &&
+      Math.abs(bounds.height - maximizedBounds.height) < margin) ||
+    (Math.abs(bounds.x - maximizedBounds.x) < margin &&
+      Math.abs(bounds.y - maximizedBounds.y) < margin &&
+      Math.abs(bounds.width - maximizedBounds.width / 2) < margin &&
+      Math.abs(bounds.height - maximizedBounds.height) < margin)
   );
 };
 
