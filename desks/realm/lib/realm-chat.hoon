@@ -78,19 +78,23 @@
   =/  exp-at=@da  ?:  =(expires-in.act *@dr)
     *@da
   (add ts expires-in.act)
-  [%pass (weld /dbpoke path.p) %agent [patp.p %chat-db] %poke %chat-db-action !>([%insert ts path.act fragments.act exp-at])]
+  [%pass /dbpoke %agent [patp.p %chat-db] %poke %chat-db-action !>([%insert ts path.act fragments.act exp-at])]
+  :: [%pass (weld /dbpoke path.p) %agent [patp.p %chat-db] %poke %chat-db-action !>([%insert ts path.act fragments.act exp-at])]
 ::
 ++  into-edit-message-poke
   |=  [p=peer-row:db act=edit-message-action:db]
-  [%pass (weld /dbpoke path.p) %agent [patp.p %chat-db] %poke %chat-db-action !>([%edit act])]
+  [%pass /dbpoke %agent [patp.p %chat-db] %poke %chat-db-action !>([%edit act])]
+  :: [%pass (weld /dbpoke path.p) %agent [patp.p %chat-db] %poke %chat-db-action !>([%edit act])]
 ::
 ++  into-delete-backlog-poke
   |=  [p=peer-row:db =path now=time]
-  [%pass (weld /dbpoke path.p) %agent [patp.p %chat-db] %poke %chat-db-action !>([%delete-backlog path now])]
+  [%pass /dbpoke %agent [patp.p %chat-db] %poke %chat-db-action !>([%delete-backlog path now])]
+  :: [%pass (weld /dbpoke path.p) %agent [patp.p %chat-db] %poke %chat-db-action !>([%delete-backlog path now])]
 ::
 ++  into-delete-message-poke
   |=  [p=peer-row:db =msg-id:db]
-  [%pass (weld /dbpoke path.p) %agent [patp.p %chat-db] %poke %chat-db-action !>([%delete msg-id])]
+  [%pass /dbpoke %agent [patp.p %chat-db] %poke %chat-db-action !>([%delete msg-id])]
+  :: [%pass (weld /dbpoke path.p) %agent [patp.p %chat-db] %poke %chat-db-action !>([%delete msg-id])]
 ::
 ++  into-all-peers-kick-pokes
   |=  [kickee=ship peers=(list peer-row:db)]
@@ -102,12 +106,14 @@
 ++  into-kick-peer-poke
   |=  [target=ship kickee=ship =path]
   ^-  card
-  [%pass (weld /dbpoke path) %agent [target %chat-db] %poke %chat-db-action !>([%kick-peer path kickee])]
+  [%pass /dbpoke %agent [target %chat-db] %poke %chat-db-action !>([%kick-peer path kickee])]
+  :: [%pass (weld /dbpoke path) %agent [target %chat-db] %poke %chat-db-action !>([%kick-peer path kickee])]
 ::
 ++  create-path-db-poke
   |=  [=ship row=path-row:db peers=ship-roles:db]
   ^-  card
-  [%pass (weld /dbpoke path.row) %agent [ship %chat-db] %poke %chat-db-action !>([%create-path row peers])]
+  [%pass /dbpoke %agent [ship %chat-db] %poke %chat-db-action !>([%create-path row peers])]
+  :: [%pass (weld /dbpoke path.row) %agent [ship %chat-db] %poke %chat-db-action !>([%create-path row peers])]
 ::
 ++  into-add-peer-pokes
   |=  [s=ship peers=(list ship) =path]
@@ -116,7 +122,8 @@
     %+  skip
       peers
     |=(p=ship =(p s)) :: skip the peer who matches the root-ship that we are poking
-  |=(peer=ship [%pass (weld /dbpoke path) %agent [s %chat-db] %poke %chat-db-action !>([%add-peer path peer])])
+  |=(peer=ship [%pass /dbpoke %agent [s %chat-db] %poke %chat-db-action !>([%add-peer path peer])])
+  :: |=(peer=ship [%pass (weld /dbpoke path) %agent [s %chat-db] %poke %chat-db-action !>([%add-peer path peer])])
 ::
 ++  push-notification-card
   |=  [=bowl:gall state=state-0 chat-path=path title=@t subtitle=@t content=@t]
