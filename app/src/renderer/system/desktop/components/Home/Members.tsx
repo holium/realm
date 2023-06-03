@@ -32,7 +32,7 @@ const HomeSidebar = styled(motion.div)<HomeSidebarProps>`
   height: 100%;
   gap: 16px;
   background: rgba(var(--rlm-window-rgba), 0.9);
-  backdrop-filter: blur(24px);
+  backdrop-filter: var(--blur);
 `;
 
 interface IMembers {

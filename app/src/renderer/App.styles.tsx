@@ -191,7 +191,7 @@ export const RealmBackground = ({
           exit={{ opacity: 0 }}
           animate={{
             opacity: 1,
-            filter: blurred ? `blur(24px)` : 'blur(0px)',
+            filter: blurred ? `var(--blur)` : 'blur(0px)',
           }}
           transition={{
             opacity: { duration: 0.5 },
