@@ -245,13 +245,19 @@ export const ShellModel = types
       }
       return toJS(window.bounds);
     },
-    unmaximize(appId: string): BoundsModelType {
+    unmaximize(appId: string): {
+      bounds: BoundsModelType;
+      prevBounds: BoundsModelType;
+    } {
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');
       if (self.isWindowMaximized(appId)) {
-        window.restoreOldDimensions();
+        window.toggleMaximize(self.desktopDimensions, self.isFullscreen);
       }
-      return toJS(window.bounds);
+      return {
+        bounds: toJS(window.bounds),
+        prevBounds: toJS(window.prevBounds),
+      };
     },
     toggleDevTools() {
       return window.electron.app.toggleDevTools();
