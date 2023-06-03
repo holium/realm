@@ -86,7 +86,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     return getChatHeader(selectedChat.path);
   }, [selectedChat?.path, window.ship]);
 
-  let replyToFormatted = useMemo(() => {
+  const replyToFormatted = useMemo(() => {
     if (selectedChat?.replyingMsg) {
       const {
         color: authorColor,
@@ -139,7 +139,7 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     if (!selectedChat) return;
     const measuredFrags = await Promise.all(
       fragments.map(async (frag) => {
-        let metadata: {} | string = {};
+        let metadata: object | string = {};
         if (Object.keys(frag)[0] === 'image') {
           const { width, height } = await measureImage(
             frag.image,

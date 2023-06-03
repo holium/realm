@@ -37,9 +37,7 @@ export const ShellModel = types
     ),
     dialogId: types.maybe(types.string),
     dialogProps: types.map(types.string),
-    mouseColor: types.optional(types.string, '#4E9EFD'),
     homePaneOpen: types.optional(types.boolean, false),
-    isolationMode: types.optional(types.boolean, false),
     micAllowed: types.optional(types.boolean, false),
     multiplayerEnabled: types.optional(types.boolean, false),
     windows: types.map(AppWindowModel),
@@ -54,9 +52,6 @@ export const ShellModel = types
     },
     get isHomePaneOpen() {
       return self.homePaneOpen;
-    },
-    get isIsolationMode() {
-      return self.isolationMode;
     },
     getWindowByAppId(appId: string) {
       return self.windows.get(appId);
@@ -84,25 +79,6 @@ export const ShellModel = types
     },
     closeDialog() {
       self.dialogId = undefined;
-    },
-    setMouseColor: async (mouseColor: string) => {
-      // TODO set color in ship profile
-      window.electron.app.setMouseColor(mouseColor);
-      self.mouseColor = mouseColor;
-    },
-    toggleIsolationMode: () => {
-      if (self.isolationMode) {
-        window.electron.app.disableIsolationMode();
-      } else {
-        window.electron.app.enableIsolationMode();
-      }
-      self.isolationMode = !self.isolationMode;
-    },
-    enableIsolationMode: () => {
-      return window.electron.app.enableIsolationMode();
-    },
-    disableIsolationMode: () => {
-      return window.electron.app.disableIsolationMode();
     },
     setDesktopDimensions(width: number, height: number) {
       self.desktopDimensions = {
@@ -245,26 +221,26 @@ export const ShellModel = types
     toggleMaximized(appId: string): BoundsModelType {
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');
-      window.toggleMaximize(self.desktopDimensions);
+      window.toggleMaximize(self.desktopDimensions, self.isFullscreen);
       return toJS(window.bounds);
     },
     maximizeLeft(appId: string): BoundsModelType {
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');
-      window.maximizeLeft(self.desktopDimensions);
+      window.maximizeLeft(self.desktopDimensions, self.isFullscreen);
       return toJS(window.bounds);
     },
     maximizeRight(appId: string): BoundsModelType {
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');
-      window.maximizeRight(self.desktopDimensions);
+      window.maximizeRight(self.desktopDimensions, self.isFullscreen);
       return toJS(window.bounds);
     },
     maximize(appId: string): BoundsModelType {
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');
       if (!self.isWindowMaximized(appId)) {
-        window.toggleMaximize(self.desktopDimensions);
+        window.toggleMaximize(self.desktopDimensions, self.isFullscreen);
       }
       return toJS(window.bounds);
     },

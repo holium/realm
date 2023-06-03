@@ -94,7 +94,7 @@ export const Reply = (props: ReplyProps) => {
       </Box>
     );
   }
-  let additionalWidth = mediaContent ? 100 : 0;
+  const additionalWidth = mediaContent ? 100 : 0;
   return (
     <ReplyContainer
       id={id}

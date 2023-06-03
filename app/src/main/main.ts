@@ -17,10 +17,11 @@ import path from 'path';
 import { RealmService } from '../os/realm.service';
 import { AppUpdater } from './AppUpdater';
 import { BrowserHelper } from './helpers/browser';
+import { CursorHelper } from './helpers/cursor';
+import { DeepLinkHelper } from './helpers/deepLink';
 import { DevHelper } from './helpers/dev';
-import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
+import { isDevelopment, isMac, isProduction } from './helpers/env';
 import { FullScreenHelper } from './helpers/fullscreen';
-import { hideCursor } from './helpers/hideCursor';
 import { KeyHelper } from './helpers/key';
 import { MediaHelper } from './helpers/media';
 import { MouseHelper } from './helpers/mouse';
@@ -85,8 +86,8 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1920,
-    height: 1080,
+    width: 1512,
+    height: 982,
     icon: getAssetPath('icon.png'),
     title: 'Realm',
     fullscreen: true,
@@ -107,19 +108,20 @@ const createWindow = async () => {
   // Realm.start(mainWindow);
   // ---------------------------------------------------------------------
 
-  FullScreenHelper.registerListeners(mainWindow);
+  // console.log('second-instance');
+  // log.info('second-instance', spacePath);
+
   WebViewHelper.registerListeners(mainWindow);
   DevHelper.registerListeners(mainWindow);
   MediaHelper.registerListeners();
   BrowserHelper.registerListeners(mainWindow);
   PowerHelper.registerListeners(mainWindow);
   KeyHelper.registerListeners(mainWindow);
+  DeepLinkHelper.registerListeners(mainWindow);
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.webContents.on('dom-ready', () => {
-    // We use the default cursor for Linux.
-    if (isMac || isWindows) hideCursor(mainWindow.webContents);
     mainWindow.webContents.send('add-mouse-listeners', true);
     mainWindow.webContents.send('add-key-listeners');
   });
@@ -144,6 +146,7 @@ const createWindow = async () => {
     }
     const initialDimensions = mainWindow.getBounds();
     mainWindow.webContents.send('set-dimensions', initialDimensions);
+    mainWindow.webContents.send('set-fullscreen', mainWindow.isFullScreen());
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);
@@ -172,7 +175,6 @@ const createMouseOverlayWindow = () => {
     hasShadow: false,
     skipTaskbar: true,
     transparent: true,
-    alwaysOnTop: true,
     fullscreen: true,
     titleBarStyle: 'hidden',
     acceptFirstMouse: true,
@@ -188,23 +190,9 @@ const createMouseOverlayWindow = () => {
   newMouseWindow.setIgnoreMouseEvents(true);
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
 
-  const mouseSetup = () => {
-    if (isMac) {
-      hideCursor(newMouseWindow.webContents);
-      newMouseWindow.setWindowButtonVisibility(false);
-      /**
-       * For macOS we enable mouse layer tracking for a smoother experience.
-       * It is not supported for Windows or Linux.
-       */
-      newMouseWindow.webContents.send('enable-mouse-layer-tracking');
-    } else if (isWindows) {
-      hideCursor(newMouseWindow.webContents);
-    } else {
-      newMouseWindow.webContents.send('disable-custom-mouse');
-    }
-  };
-
-  newMouseWindow.webContents.on('dom-ready', mouseSetup);
+  FullScreenHelper.registerListeners(mainWindow, newMouseWindow);
+  CursorHelper.registerListeners(mainWindow, newMouseWindow);
+  MouseHelper.registerListeners(mainWindow, newMouseWindow);
 
   newMouseWindow.on('close', () => {
     if (mainWindow.isClosable()) mainWindow.close();
@@ -223,8 +211,6 @@ const createMouseOverlayWindow = () => {
     newMouseWindow.setBounds(newDimension);
     mainWindow.webContents.send('set-dimensions', newDimension);
   });
-
-  MouseHelper.registerListeners(mainWindow, newMouseWindow);
 };
 
 app.on('window-all-closed', () => {

@@ -150,6 +150,7 @@
   ::
   +$  diff
     $%  [%add meta=data:meta]
+        [%edit meta=data:meta]
         [%del ~]
     ==
   --

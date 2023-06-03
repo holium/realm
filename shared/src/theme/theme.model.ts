@@ -47,9 +47,6 @@ export const Theme = types
     },
   }))
   .actions((self) => ({
-    setMouseColor(color: string) {
-      self.mouseColor = color;
-    },
     setAccentColor(color: string) {
       self.accentColor = color;
     },
@@ -117,15 +114,15 @@ const generateColors = (color: string, bgLuminosity: 'light' | 'dark') => {
     backgroundColor: baseColor,
     inputColor:
       bgLuminosity === 'dark'
-        ? darken(0.11, baseColor)
-        : lighten(0.11, baseColor),
+        ? darken(0.08, baseColor)
+        : lighten(0.13, baseColor),
     dockColor:
       bgLuminosity === 'dark'
         ? lighten(0.05, baseColor)
         : lighten(0.12, baseColor),
     windowColor:
       bgLuminosity === 'dark'
-        ? darken(0.05, baseColor)
+        ? darken(0.03, baseColor)
         : lighten(0.1, baseColor),
     textColor:
       bgLuminosity === 'dark'

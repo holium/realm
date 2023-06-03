@@ -1,27 +1,42 @@
+import { FC } from 'react';
+
 import { AccountTrayApp } from 'renderer/apps/Account';
 import { CourierApp } from 'renderer/apps/Courier/app';
 import { RoomApp } from 'renderer/apps/Rooms';
 import { SpacesTrayApp } from 'renderer/apps/Spaces';
-import { WalletApp } from 'renderer/apps/Wallet/Wallet';
+import { trayStore } from 'renderer/apps/store';
+import { Wallet } from 'renderer/apps/Wallet/Wallet';
 import { calculateAnchorPoint } from 'renderer/lib/position';
 
-// import { WalletApp } from 'renderer/apps/Wallet';
-import { trayStore } from '../../../../apps/store';
+export type TrayAppKey =
+  | 'rooms-tray'
+  | 'spaces-tray'
+  | 'account-tray'
+  | 'messages-tray'
+  | 'wallet-tray';
 
-export interface ViewRenderers {
-  [key: string]: {
+type TrayAppRenderers = Record<
+  TrayAppKey,
+  {
     dimensions: {
       height: number;
       width: number;
       maxHeight?: number;
     };
     growHeight?: boolean;
-    component: React.FC<any>;
+    component: FC<any>;
     onOpen?: (evt: any) => void;
-  };
-}
+  }
+>;
 
-export const defaultTrayDimensions = {
+export const defaultTrayDimensions: Record<
+  TrayAppKey,
+  {
+    width: number;
+    height: number;
+    maxHeight?: number;
+  }
+> = {
   'rooms-tray': {
     width: 380,
     height: 500,
@@ -45,7 +60,7 @@ export const defaultTrayDimensions = {
   },
 };
 
-export const trayAppRenderers: ViewRenderers = {
+export const trayAppRenderers: TrayAppRenderers = {
   'rooms-tray': {
     dimensions: defaultTrayDimensions['rooms-tray'],
     component: () => <RoomApp />,
@@ -102,7 +117,7 @@ export const trayAppRenderers: ViewRenderers = {
     },
   },
   'wallet-tray': {
-    component: () => <WalletApp />,
+    component: () => <Wallet />,
     dimensions: defaultTrayDimensions['wallet-tray'],
   },
 };

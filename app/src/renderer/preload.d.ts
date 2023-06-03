@@ -7,6 +7,7 @@ import { chatPreload } from 'os/services/ship/chat/chat.service';
 import { friendsPreload } from 'os/services/ship/friends.service';
 import { notifPreload } from 'os/services/ship/notifications/notifications.service';
 import { roomsPreload } from 'os/services/ship/rooms.service';
+import { settingsPreload } from 'os/services/ship/settings.service';
 import { shipPreload } from 'os/services/ship/ship.service';
 import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
@@ -35,6 +36,7 @@ declare global {
     bazaarService: typeof bazaarPreload;
     appInstallService: typeof appPublishersDBPreload;
     appRecentsService: typeof appRecentsPreload;
+    settingsService: typeof settingsPreload;
     twttr: any;
   }
 }

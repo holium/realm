@@ -13,6 +13,7 @@ import { defaultTheme, Theme } from '@holium/shared';
 import { CreateBookmarkPayload } from 'os/services/ship/spaces/spaces.types';
 import { Bookmark } from 'os/services/ship/spaces/tables/bookmarks.table';
 import { MemberRole } from 'os/types';
+import { SpaceWorkFlowState } from 'renderer/apps/Spaces/Workflow/EditSpace/types';
 
 import { appState } from '../app.store';
 import { BazaarIPC, SpacesIPC } from '../ipc';
@@ -282,6 +283,7 @@ export const SpacesStore = types
       self.join.set('loading');
       try {
         const space = yield SpacesIPC.joinSpace(spacePath);
+        console.log('joined space', space);
         const host = spacePath.split('/')[1];
         shipStore.roomsStore.setProvider(host);
         self.join.set('loaded');
@@ -318,18 +320,31 @@ export const SpacesStore = types
         return null;
       }
     }),
-    updateSpace: flow(function* (spacePath: string, space: SpaceModelType) {
+    updateSpace: flow(function* (
+      spacePayload: Omit<
+        SpaceWorkFlowState,
+        'type' | 'crestOption' | 'joinLink'
+      > & {
+        archetype: string;
+      }
+    ) {
+      const spacePath = spacePayload.path;
       const oldSpace = self.spaces.get(spacePath);
       const updatedSpace = self.spaces.get(spacePath);
-      if (!oldSpace || !updatedSpace) return;
-      space.path = spacePath;
-      updatedSpace.access = space.access;
-      updatedSpace.description = space.description;
-      updatedSpace.name = space.name;
-      updatedSpace.theme = clone(space.theme);
+
+      if (!oldSpace || !updatedSpace) {
+        console.error('space not found');
+        return;
+      }
+
+      updatedSpace.access = spacePayload.access;
+      updatedSpace.description = spacePayload.description;
+      updatedSpace.name = spacePayload.name;
+      updatedSpace.theme = spacePayload.theme;
+
       try {
         self.spaces.set(spacePath, updatedSpace);
-        yield SpacesIPC.updateSpace(spacePath, space);
+        yield SpacesIPC.updateSpace(spacePath, spacePayload);
       } catch (e) {
         self.spaces.set(spacePath, oldSpace);
         console.error(e);
@@ -460,6 +475,7 @@ export const SpacesStore = types
       const space = self.spaces.get(updatePayload.path);
       if (!space) return;
       self.spaces.set(updatePayload.path, spaceRowToModel(updatePayload));
+      if (space.path !== updatePayload.path) return;
       if (updatePayload.theme !== space.theme) {
         const updatedTheme = self.spaces.get(updatePayload.path)?.theme;
         if (updatedTheme) {

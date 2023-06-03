@@ -1,15 +1,23 @@
 module.exports = {
-  extends: ['react-app', 'plugin:prettier/recommended'],
-  plugins: ['unused-imports', 'simple-import-sort'],
+  extends: [
+    'react-app',
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended',
+    'plugin:react-hooks/recommended',
+  ],
+  plugins: [
+    'prettier',
+    'unused-imports',
+    '@typescript-eslint',
+    'simple-import-sort',
+  ],
   parser: '@typescript-eslint/parser',
   root: true,
   parserOptions: { project: './tsconfig.json' },
   rules: {
     'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'off', // many cases where we need other variables in the deps
-    'react/display-name': 'off',
-    'react/react-in-jsx-scope': 'off',
-    'react/no-unescaped-entities': 'off',
     'import/no-duplicates': 'error',
     'unused-imports/no-unused-imports': 'error',
     'unused-imports/no-unused-vars': [
@@ -21,10 +29,6 @@ module.exports = {
         argsIgnorePattern: '^_',
       },
     ],
-    '@typescript-eslint/consistent-type-exports': 'error',
-    '@typescript-eslint/no-non-null-assertion': 'error',
-    '@typescript-eslint/no-unused-expressions': 'off',
-    '@typescript-eslint/no-unused-vars': 'off',
     'simple-import-sort/imports': [
       'error',
       {
@@ -45,6 +49,15 @@ module.exports = {
       },
     ],
     'simple-import-sort/exports': 'error',
+    // Disabled rules
+    'react-hooks/exhaustive-deps': 'off',
+    'react/display-name': 'off',
+    'react/react-in-jsx-scope': 'off',
+    'react/no-unescaped-entities': 'off',
+    '@typescript-eslint/no-empty-function': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off',
+    '@typescript-eslint/no-var-requires': 'off',
   },
   settings: {
     react: {

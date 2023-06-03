@@ -105,8 +105,8 @@ export const WalletApp = ({
           }}
         />
         {listType === 'transactions' &&
-          wallet.transactions.map((transaction: any) => {
-            return <Transaction {...transaction} />;
+          wallet.transactions.map((transaction: any, index: number) => {
+            return <Transaction key={index} {...transaction} />;
           })}
       </Flex>
     </TrayApp>

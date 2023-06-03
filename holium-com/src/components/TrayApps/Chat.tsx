@@ -85,10 +85,12 @@ export const ChatApp = ({
                     authorColor={row.authorColor}
                     fragmentBlock={row.message.map((fragment) => {
                       if (fragment.image) {
-                        return <img src={fragment.image} alt="" />;
+                        return <img key={index} src={fragment.image} alt="" />;
                       }
 
-                      return <Text.Body>{fragment.plain}</Text.Body>;
+                      return (
+                        <Text.Body key={index}>{fragment.plain}</Text.Body>
+                      );
                     })}
                     dateDisplay={chatDate(new Date(row.sentAt))}
                     footerHeight="14px"

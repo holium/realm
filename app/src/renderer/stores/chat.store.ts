@@ -201,7 +201,7 @@ export const ChatStore = types
     createChat: flow(function* (
       title: string,
       creator: string,
-      type: 'dm' | 'group' | 'space',
+      type: 'dm' | 'group' | 'space' | 'self',
       peers: string[]
     ) {
       try {

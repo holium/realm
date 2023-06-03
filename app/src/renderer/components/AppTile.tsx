@@ -4,12 +4,12 @@ import { darken, desaturate, lighten, rgba } from 'polished';
 import styled, { css } from 'styled-components';
 
 import {
-  bgIsLightOrDark,
   Box,
   Flex,
   Icon,
   Spinner,
   Text,
+  textIsLightOrDark,
 } from '@holium/design-system';
 
 import {
@@ -153,11 +153,11 @@ const AppTilePresenter = ({
   const boxShadowHover = isAppGrid ? 'var(--rlm-box-shadow-2)' : 'none';
 
   const isLight = useMemo(() => {
-    return bgIsLightOrDark(app.color) === 'light';
+    return textIsLightOrDark(app.color) === 'light';
   }, [app.color]);
 
   const textColor = useMemo(
-    () => (isLight ? rgba('#333333', 0.8) : rgba('#FFFFFF', 0.8)),
+    () => (isLight ? rgba('#000000', 0.8) : rgba('#FFFFFF', 0.8)),
     [isLight]
   );
   const contextMenuColors = useMemo(

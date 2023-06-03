@@ -69,6 +69,7 @@ const FeaturedListPresenter = () => {
               });
           };
           const hasJoined = spacesStore.getSpaceByPath(data.path) !== undefined;
+
           return (
             <Row
               selected

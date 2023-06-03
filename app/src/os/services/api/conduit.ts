@@ -29,9 +29,9 @@ setMaxListeners(20);
  * SSE library for interfacing with Urbit.
  */
 export class Conduit extends EventEmitter {
-  private url: string = '';
-  private prevMsgId: number = 0;
-  private lastAckId: number = 0;
+  private url = '';
+  private prevMsgId = 0;
+  private lastAckId = 0;
   cookie: string | null = null;
   ship: string;
   pokes: Map<number, PokeParams & PokeCallbacks>;
@@ -54,7 +54,6 @@ export class Conduit extends EventEmitter {
     this.reactions = new Map();
     this.handleError = this.handleError.bind(this);
     this.updateStatus = this.updateStatus.bind(this);
-    this.reconnectToChannel = this.reconnectToChannel.bind(this);
     this.startSSE = this.startSSE.bind(this);
   }
 
@@ -68,6 +67,28 @@ export class Conduit extends EventEmitter {
   }
 
   /**
+   * safeFetch - wrap the base fetch with an auto-retry attempt on 403 error
+   *
+   * @param url
+   * @param options
+   */
+  async safeFetch(url: string, options: any): Promise<any> {
+    try {
+      let response = await fetch(url, { ...options, headers: this.headers });
+      if (response.status === 403) {
+        this.cookie = await Conduit.fetchCookie(this.url, this.code ?? '');
+        if (!this.cookie) {
+          throw new Error('fetchCookie failed');
+        }
+        response = await fetch(url, { ...options, headers: this.headers });
+      }
+      return response;
+    } catch (err: any) {
+      Promise.reject(err);
+    }
+  }
+
+  /**
    *
    * @param ship i.e. lomder-librun without the ~
    * @returns
@@ -77,6 +98,19 @@ export class Conduit extends EventEmitter {
     this.cookie = cookie;
     this.code = code;
     this.uid = this.generateUID();
+    // before doing anything, determine if the cookie is stale .. this can happen if a cookie from a
+    //  prior session (logging out) has become stale and this call is made when the app restarts. chose
+    //  to put this here to prevent potential fetchCookie eyre thrashing by checking 403 errors in the scry
+    //  and other eyre methods. potentially lots of these methods can be called at startup; therefore a refresh
+    //  here will eliminate multiple fetchCookie calls
+    //   use the current space scry to test cookie
+    // http://localhost/~/scry/spaces/current.json
+    //  the scry below will set the this.cookie internally and becomes the new value for all future calls
+    try {
+      await this.scry({ app: 'spaces', path: `/current` });
+    } catch (e) {
+      log.error(e);
+    }
     await this.poke({
       app: 'hood',
       mark: 'helm-hi',
@@ -136,7 +170,7 @@ export class Conduit extends EventEmitter {
                 // @ts-expect-error
                 handler.onError(parsedData.err);
               } else {
-                console.error(new Error('poke sse error'));
+                log.error('poke sse error', parsedData.err);
               }
             }
             this.pokes.delete(eventId);
@@ -148,7 +182,7 @@ export class Conduit extends EventEmitter {
               if (watchHandler) {
                 watchHandler.onError?.(eventId, parsedData.err);
               } else {
-                console.error(new Error('watch sse error'));
+                log.error('watch sse error', parsedData.err);
               }
               this.setAsIdleWatch(eventId);
             } else {
@@ -159,7 +193,7 @@ export class Conduit extends EventEmitter {
             }
             break;
           //
-          case 'diff':
+          case 'diff': {
             const json = parsedData.json;
             const mark = parsedData.mark;
             if (this.watches.has(eventId)) {
@@ -172,6 +206,7 @@ export class Conduit extends EventEmitter {
               this.reactions.delete(maybeReactionPath);
             }
             break;
+          }
           // quit
           case 'quit':
             log.info('on quit', eventId, this.watches.has(eventId));
@@ -184,8 +219,7 @@ export class Conduit extends EventEmitter {
             break;
           //
           default:
-            console.log('unrecognized', parsedData);
-            // other
+            log.info('unrecognized', parsedData);
             break;
         }
       };
@@ -194,7 +228,7 @@ export class Conduit extends EventEmitter {
         if (!error) {
           this.handleError({ status: 500, message: 'Unknown error' });
         }
-        console.log('sse error', error);
+        log.error('sse error', error);
         if (error.status === 403) {
           // @ts-ignore
           error.originator = 'sse';
@@ -219,7 +253,7 @@ export class Conduit extends EventEmitter {
         }
       };
       this.sse.addEventListener('close', () => {
-        throw new Error('Ship unexpectedly closed the connection');
+        log.warn('Ship unexpectedly closed the connection');
       });
     });
   }
@@ -230,18 +264,14 @@ export class Conduit extends EventEmitter {
    * @param url ship root url (e.g. http://localhost:80)
    * @returns
    */
-  async refresh(url: string, code: string): Promise<string | undefined> {
+  async refresh(url: string, code: string): Promise<string | null> {
     this.url = url;
     this.code = code;
     this.updateStatus(ConduitState.Refreshing);
-    const cookie: string | undefined = await Conduit.fetchCookie(url, code);
-    if (cookie === undefined) {
-      // console.log('Conduit.fetchCookie call failed with args => %o', {
-      //   url,
-      //   code,
-      // });
+    const cookie: string | null = await Conduit.fetchCookie(url, code);
+    if (cookie === null) {
       this.updateStatus(ConduitState.Failed);
-      return undefined;
+      return null;
     }
     this.cookie = cookie;
     this.updateStatus(ConduitState.Refreshed, {
@@ -278,6 +308,7 @@ export class Conduit extends EventEmitter {
       this.reactions.set(params.reaction, params.onReaction);
     }
     // Properly waiting
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_req, res] = await Promise.all([
       this.postToChannel(message),
       new Promise((resolve, reject) => {
@@ -354,29 +385,29 @@ export class Conduit extends EventEmitter {
    * @returns boolean indicating if the re-subscription was successful
    */
   async resubscribe(watchId: number, retryCount = 0, retryDelay = 2000) {
+    log.info('resubscribing to watch', watchId);
     const idleWatch = this.idleWatches.get(watchId);
     if (!idleWatch) {
-      console.log("Watch doesn't exist, can't re-subscribe.");
+      log.info("Watch doesn't exist, can't re-subscribe.");
       return false;
     }
-    console.log('Attempting to re-subscribe to ', idleWatch?.app, '...');
+    log.info('Attempting to re-subscribe to ', idleWatch?.app, '...');
 
     try {
       const res = await this.watch(idleWatch);
       if (res) {
         this.setAsActiveWatch(watchId);
-        console.log('Re-subscribed to', idleWatch?.app);
+        log.info('Re-subscribed to', idleWatch?.app);
         return true;
       }
     } catch {
       // throttle retries based on retryCount using exponential backoff
       retryDelay = Math.min(retryDelay * 2, 60000);
-      console.log('resubcribing in', retryDelay / 1000, 'seconds...');
+      log.info('resubcribing in', retryDelay / 1000, 'seconds...');
       setTimeout(() => {
         this.resubscribe(watchId, retryCount + 1, retryDelay);
       }, retryDelay);
-
-      console.log('Failed to re-subscribe to', idleWatch?.app);
+      log.warn('Failed to re-subscribe to', idleWatch?.app);
     }
 
     return false;
@@ -391,7 +422,8 @@ export class Conduit extends EventEmitter {
   async scry(params: Scry): Promise<any> {
     const { app, path } = params;
     try {
-      const response = await fetch(`${this.url}/~/scry/${app}${path}.json`, {
+      const url = `${this.url}/~/scry/${app}${path}.json`;
+      const response = await this.safeFetch(url, {
         method: 'GET',
         headers: this.headers,
         signal: this.abort.signal,
@@ -413,7 +445,7 @@ export class Conduit extends EventEmitter {
     const { inputMark, outputMark, threadName, body, desk } = params;
 
     try {
-      const response = await fetch(
+      const response = await this.safeFetch(
         `${this.url}/spider/${desk}/${inputMark}/${threadName}/${outputMark}.json`,
         {
           method: 'POST',
@@ -424,7 +456,7 @@ export class Conduit extends EventEmitter {
       );
       return response.json();
     } catch (err) {
-      console.log(err);
+      log.error(err);
     }
   }
 
@@ -497,28 +529,6 @@ export class Conduit extends EventEmitter {
   }
 
   /**
-   * TODO add a limit here
-   */
-  async reconnectToChannel() {
-    // if (this.reconnectTimeout !== 0) clearTimeout(this.reconnectTimeout);
-    // this.uid = this.generateUID();
-    log.info('Conduit ---> reconnecting to channel');
-    const channelId = this.channelUrl(this.uid);
-    await this.startSSE(channelId)
-      .then(() => {
-        console.log(`reconnected to channel ${channelId}`);
-      })
-      .catch((err) => {
-        console.log('reconnectToChannel err', err);
-        // (function (conduit: Conduit) {
-        //   conduit.reconnectTimeout = setTimeout(() => {
-        //     conduit.startSSE();
-        //   }, 2000);
-        // })(this);
-      });
-  }
-
-  /**
    * postToChannel
    *
    * @param body
@@ -528,7 +538,7 @@ export class Conduit extends EventEmitter {
     try {
       if (!this.headers.Cookie) throw new Error('headers.Cookie not set');
 
-      const response = await fetch(this.channelUrl(this.uid), {
+      const response = await this.safeFetch(this.channelUrl(this.uid), {
         headers: {
           ...this.headers,
           Cookie: this.headers.Cookie,
@@ -616,11 +626,8 @@ export class Conduit extends EventEmitter {
    * @param code
    * @returns
    */
-  static async fetchCookie(
-    url: string,
-    code: Patp
-  ): Promise<string | undefined> {
-    let cookie;
+  static async fetchCookie(url: string, code: Patp): Promise<string | null> {
+    let cookie = null;
 
     const controller = new AbortController();
     const timeout = setTimeout(() => {
@@ -640,10 +647,9 @@ export class Conduit extends EventEmitter {
       if (!response.ok) {
         return Promise.reject(response);
       }
-      cookie = response.headers.get('set-cookie')?.[0];
-      log.info('cookie', cookie);
+      cookie = response.headers.get('set-cookie');
     } catch (err: any) {
-      console.log(err);
+      log.error(err);
     } finally {
       clearTimeout(timeout);
     }
@@ -658,7 +664,7 @@ export class Conduit extends EventEmitter {
    * @returns
    */
   async handleError(err: any): Promise<any> {
-    log.info('Conduit ---> handleError', err);
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       if (err.status === 403 || err.response?.status === 403) {
         // if (!this.code) {
@@ -684,11 +690,8 @@ export class Conduit extends EventEmitter {
         //   console.log('Error', err.message);
         // }
         // console.log(err.config);
-        console.log(
-          '403 [stale connection] refreshing cookie => %o',
-          this.code
-        );
-        let cookie: string | undefined = undefined;
+        log.info('403 [stale connection] refreshing cookie => %o', this.code);
+        let cookie: string | null = null;
         try {
           this.updateStatus(ConduitState.Refreshing);
           cookie = await getCookie({
@@ -712,27 +715,21 @@ export class Conduit extends EventEmitter {
             });
             if (err.originator === 'sse') {
               await this.init(this.url, this.code ?? '', this.cookie);
-              resolve(undefined);
+              resolve(null);
               return;
             }
             err.config.headers['Cookie'] = cookie;
-            // const result = await axios(err.config);
-            resolve(err);
-            return;
+            return resolve(err);
           }
-          console.log('error: could not refresh token');
+          log.error('error: could not refresh token');
           this.updateStatus(ConduitState.Failed);
-          reject(undefined);
-          return;
+          return reject(null);
         } catch (e) {
-          console.log(e);
-          reject(e);
-          return;
+          log.error(e);
+          return reject(e);
         }
       }
-      reject(err);
-      return;
-      // Promise.reject(err);
+      return reject(err);
     });
   }
 }

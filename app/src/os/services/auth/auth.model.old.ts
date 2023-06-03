@@ -190,6 +190,7 @@ export const AuthStore = types
         self.loader.error(err);
       }
     },
+    // eslint-disable-next-line require-yield
     removeShip: flow(function* (ship: string) {
       // const [response, error] = yield AuthIPC.removeShip(ship);
       // if (error) throw error;

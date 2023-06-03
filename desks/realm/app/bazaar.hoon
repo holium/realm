@@ -418,6 +418,7 @@
       %suite-remove      (rem-suite +.action)
       %install-app       (install-app +.action)
       %uninstall-app     (uninstall-app +.action)
+      %reorder-app       (reorder-app +.action)
       :: sent during onboarding after realm desk is fully installed and ready
       ::  use this opportunity to refresh app-catalog
       %initialize        (initialize +.action)
@@ -619,8 +620,15 @@
       =.  host.u.app              (some ship)
       =.  catalog.state           (~(put by catalog.state) desk u.app)
       (docket-install ship desk [%give %fact [/updates ~] bazaar-reaction+!>([%app-install-update desk +.u.app grid-index.state])]~)
-
-      :: =^  cards  state
+    ::
+    ++  reorder-app
+      |=  [=app-id:store index=@ud]
+      ^-  (quip card _state)
+      ?>  =(our.bowl src.bowl)
+      =/  new-grid-index  (mov-grid-index:helpers:bazaar:core app-id index grid-index.state)
+      =.  grid-index  new-grid-index
+      :_  state
+      [%give %fact [/updates ~] bazaar-reaction+!>([%reorder-grid-index new-grid-index])]~
     ::
     ++  docket-install
       |=  [=ship =desk cards=(list card)]
@@ -763,6 +771,7 @@
       =/  stall               (~(got by stalls.state) path)
       =.  suite.stall         (~(put by suite.stall) [index app-id])
       =.  stalls.state        (~(put by stalls.state) [path stall])
+      :: ~&  >>  "{<app.updates>}"
       :_  state
       [%give %fact [/updates ~] bazaar-reaction+!>([%suite-added path app-id app.updates index])]~
     ::
@@ -784,6 +793,7 @@
         %-  ~(rep by catalog)
           |=  [entry=[=app-id:store =app:store] result=(list [=app-id:store =app:store])]
           ?:  (~(has by catalog.state) app-id.entry)  ::  if we already have the app
+            =.  app.entry  (~(got by catalog.state) app-id.entry)
             (snoc result entry)
           =/  entry
             ?+  -.app.entry  entry
@@ -815,34 +825,19 @@
           %none     [det catalog.state]
           ::
           %delete   [det catalog.state]
-            :: [det ?~(det ~ (~(del by catalog.state) app-id.u.det))]
           ::
           %add
             =/  det  (need det)
             =/  app  (need app.det)
             =/  app
-              ?.  (is-app-installed:helpers:bazaar:core app-id.det)
-                ::  if the app is not in our catalog, update it's installed
-                ::   status relative to our ship . %desktop
-                ?>  ?=(%urbit -.app)
-                =.  install-status.app  %desktop
-                app
-              ::  if it exists in docket, it must exist in catalog
-              =/  app  (~(get by catalog.state) app-id.det)
-              ?~  app  ~&  >>>  "{<dap.bowl>}: unexpected error. {<app-id.det>} exists in docket, but not in catalog"  !!
-              ?>  ?=(%urbit -.u.app)
-              =.  install-status.u.app  %installed
-              u.app
-            =/  syncs=(map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])  get-syncs:core
-            =/  desks=(map desk ship)
-              %-  ~(rep by syncs)
-                |=  [[det=[syd=desk her=ship sud=desk] other=[nun=@ta kid=(unit desk) let=@ud]] acc=(map desk ship)]
-                (~(put by acc) sud.det her.det)
-            =.  app
-              ?:  =(-.app %urbit)
-                ?>  ?=(%urbit -.app)
-                :: =.  host.app  (~(get by desks) desk)
-                app
+              ?:  (~(has by catalog.state) app-id.det)
+                :: if the app *is* in the catalog, leave it's status as is
+                (~(got by catalog.state) app-id.det)
+              ::  if the app is not in our catalog, update it's installed
+              ::   status relative to our ship . %desktop
+              ?>  ?=(%urbit -.app)
+              ::  place it on the desktop where it can then be installed by an end-user in UI
+              =.  install-status.app  %desktop
               app
             [(some [app-id.det (some app)]) (~(put by catalog.state) app-id.det app)]
         ==
@@ -915,7 +910,7 @@
       =/  paths                   [/updates /bazaar/(scot %p ship.path)/(scot %tas space.path) ~]
       :_  state
       :~
-        [%give %fact paths bazaar-reaction+!>([%stall-update path stall (some [app-id (some app)])])]
+        [%give %fact paths bazaar-reaction+!>([%stall-update path stall (some [app-id (some our-app)])])]
       ==
     ::
     ++  member-unrecommend
@@ -1142,6 +1137,7 @@
     ::
     ++  set-grid-index
       |=  [=app-id:store =grid-index:store]
+      ^-  grid-index:store
       =/  grid-list         (sort-grid:helpers:bazaar:core grid-index)
       =/  current-index     (find [app-id]~ grid-list)
       ?~  current-index
@@ -1152,10 +1148,28 @@
     ::
     ++  rem-grid-index
       |=  [=app-id:store =grid-index:store]
+      ^-  grid-index:store
       =/  grid-list         (sort-grid:helpers:bazaar:core grid-index)
       =/  current-index     (find [app-id]~ grid-list)
       ?~  current-index     grid-index
       =.  grid-list         (oust [u.current-index 1] grid-list)
+      =/  new-grid-index
+        %+  turn  (gulf 0 (sub (lent grid-list) 1))
+          |=  idx=@ud
+          =/  app  (snag idx grid-list)
+          [idx app]
+      `=grid-index:store`(malt new-grid-index)
+    ::
+    ++  mov-grid-index
+      |=  [=app-id:store index=@ud =grid-index:store]
+      ^-  grid-index:store
+      =/  grid-list         (sort-grid:helpers:bazaar:core grid-index)
+      =/  current-index     (find [app-id]~ grid-list)
+      ?~  current-index     !!
+      :: it's already in the grid. remove it from its current position
+      :: then add it to the specified position (not optimal)
+      =.  grid-list         (oust [u.current-index 1] grid-list)
+      =.  grid-list         (into grid-list index app-id)
       =/  new-grid-index
         %+  turn  (gulf 0 (sub (lent grid-list) 1))
           |=  idx=@ud
@@ -1198,7 +1212,7 @@
     ::
     ++  init-catalog
       |=  [charges=(map desk charge:docket)]
-      =/  hidden     `(set desk)`(silt ~['realm' 'realm-wallet' 'courier' 'garden'])
+      =/  hidden     `(set desk)`(silt ~['realm' 'realm-wallet' 'courier' 'garden' 'landscape'])
       =/  syncs=(map [syd=desk her=ship sud=desk] [nun=@ta kid=(unit desk) let=@ud])  get-syncs:core
       =+  peaks=get-pikes:core
       =/  desks=(map desk ship)

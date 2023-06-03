@@ -6,6 +6,7 @@ import { Dimensions } from '@holium/design-system';
 import {
   getMaximizedBounds,
   isMaximizedBounds,
+  normalizeValue,
 } from '../../lib/window-manager';
 import { Glob } from './docket.model';
 
@@ -47,7 +48,7 @@ export const AppWindowModel = types
       height: 5,
     }),
     /**
-     * The ative window has a titlebar with full contrast.
+     * The active window has a titlebar with full contrast.
      */
     isActive: types.optional(types.boolean, false),
     /**
@@ -57,6 +58,10 @@ export const AppWindowModel = types
       types.enumeration(['normal', 'minimized', 'fullscreen']),
       'normal'
     ),
+    /**
+     *  The window is static and cannot be moved or resized.
+     */
+    static: types.optional(types.boolean, false),
   })
   .views((self) => ({
     get isMinimized() {
@@ -79,33 +84,48 @@ export const AppWindowModel = types
     restoreOldDimensions() {
       self.bounds = { ...self.prevBounds };
     },
-    maximizeLeft(desktopDimensions: Dimensions) {
+    maximizeLeft(desktopDimensions: Dimensions, isFullscreen: boolean) {
       const maximizedBounds = getMaximizedBounds(desktopDimensions);
       self.prevBounds = { ...self.bounds };
       self.bounds = {
         x: maximizedBounds.x,
         y: maximizedBounds.y,
         width: maximizedBounds.width / 2,
-        height: maximizedBounds.height,
+        height: isFullscreen
+          ? maximizedBounds.height
+          : maximizedBounds.height -
+            normalizeValue(30, desktopDimensions.height),
       };
     },
-    maximizeRight(desktopDimensions: Dimensions) {
+    maximizeRight(desktopDimensions: Dimensions, isFullscreen: boolean) {
       const maximizedBounds = getMaximizedBounds(desktopDimensions);
       self.prevBounds = { ...self.bounds };
       self.bounds = {
         x: maximizedBounds.x + maximizedBounds.width / 2,
         y: maximizedBounds.y,
         width: maximizedBounds.width / 2,
-        height: maximizedBounds.height,
+        height: isFullscreen
+          ? maximizedBounds.height
+          : maximizedBounds.height -
+            normalizeValue(30, desktopDimensions.height),
       };
     },
-    toggleMaximize(desktopDimensions: Dimensions) {
+    toggleMaximize(desktopDimensions: Dimensions, isFullscreen: boolean) {
       const isMaximized = self.isMaximized(desktopDimensions);
       if (isMaximized) {
         self.bounds = { ...self.prevBounds };
       } else {
         self.prevBounds = { ...self.bounds };
-        self.bounds = getMaximizedBounds(desktopDimensions);
+        const maximizedBounds = getMaximizedBounds(desktopDimensions);
+        self.bounds = {
+          x: maximizedBounds.x,
+          y: maximizedBounds.y,
+          width: maximizedBounds.width,
+          height: isFullscreen
+            ? maximizedBounds.height
+            : maximizedBounds.height -
+              normalizeValue(30, desktopDimensions.height),
+        };
       }
     },
     setIsActive(isActive: boolean) {
@@ -113,5 +133,5 @@ export const AppWindowModel = types
     },
   }));
 
-export interface AppWindowMobxType extends Instance<typeof AppWindowModel> {}
-export interface AppWindowProps extends SnapshotIn<typeof AppWindowModel> {}
+export type AppWindowMobxType = Instance<typeof AppWindowModel>;
+export type AppWindowProps = SnapshotIn<typeof AppWindowModel>;

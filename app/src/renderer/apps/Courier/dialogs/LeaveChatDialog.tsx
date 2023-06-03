@@ -7,6 +7,7 @@ import { DialogConfig } from 'renderer/system/dialog/dialogs';
 
 type LeaveChatDialogConfigComponentProps = {
   path: string;
+  amHost: string;
   [key: string]: any;
 };
 

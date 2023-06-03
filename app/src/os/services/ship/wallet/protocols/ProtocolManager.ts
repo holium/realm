@@ -27,7 +27,7 @@ export class ProtocolManager {
     }
   }
 
-  watchUpdates(conduit: any, walletState: WalletDB, protocol: ProtocolType) {
+  watchUpdates(walletState: WalletDB, protocol: ProtocolType) {
     if (
       this.currentProtocol === ProtocolType.ETH_MAIN ||
       this.currentProtocol === ProtocolType.ETH_GORLI
@@ -44,21 +44,14 @@ export class ProtocolManager {
     ) {
       (
         this.protocols.get(this.currentProtocol) as EthereumProtocol
-      ).watchUpdates(conduit, walletState);
+      ).watchUpdates(walletState);
     } else if (this.currentProtocol === ProtocolType.UQBAR) {
-      this.protocols
-        .get(this.currentProtocol)
-        ?.updateWalletState(conduit, walletState);
+      this.protocols.get(this.currentProtocol)?.updateWalletState(walletState);
     }
   }
 
-  updateWalletState(
-    conduit: any,
-    walletState: WalletDB,
-    protocol: ProtocolType
-  ) {
+  updateWalletState(walletState: WalletDB, protocol: ProtocolType) {
     (this.protocols.get(protocol) as EthereumProtocol).updateWalletState(
-      conduit,
       walletState
     );
   }

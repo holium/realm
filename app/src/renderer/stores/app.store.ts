@@ -169,7 +169,7 @@ function registerOnUpdateListener() {
     return;
   }
 
-  MainIPC.onInitialDimensions((_e: any, dims: any) => {
+  MainIPC.onDimensionsChange((_e: any, dims: any) => {
     appState.shellStore.setDesktopDimensions(dims.width, dims.height);
   });
 
@@ -236,7 +236,7 @@ function registerOnUpdateListener() {
     if (update.type === 'account-updated') {
       appState.authStore._onUpdateAccount(update.payload);
     }
-    if (update.type === 'add-server') {
+    if (update.type === 'add-identity') {
       appState.setOnboardingStep('/hosting');
       appState.setCurrentScreen('onboarding');
     }
@@ -350,13 +350,13 @@ function registerOnUpdateListener() {
         shipStore.spacesStore._onJoinedBazaar(payload);
         break;
       case 'new-ally':
-        if (!payload.desks || payload.desks?.length === 0) {
+        if (payload.desks?.length === 0) {
           // if there are no published apps, we will never get the
           //  'treaties-loaded' event (see below); therefore scry just in
           //  case and set the loading state to loaded
-          shipStore.bazaarStore.alliesLoader.set('loaded');
-          // shipStore.bazaarStore.scryTreaties(payload.ship);
+          shipStore.bazaarStore.treatyLoader.set('loaded');
         }
+        shipStore.bazaarStore.alliesLoader.set('loaded');
         shipStore.bazaarStore._addAlly(payload.ship, payload);
         break;
       case 'ally-deleted':
@@ -364,6 +364,9 @@ function registerOnUpdateListener() {
         break;
       case 'treaties-loaded':
         shipStore.bazaarStore.scryTreaties(payload.ship);
+        break;
+      case 'reorder-grid-index':
+        shipStore.bazaarStore._onReorderGridIndex(payload);
         break;
     }
   });

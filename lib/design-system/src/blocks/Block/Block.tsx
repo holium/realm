@@ -52,7 +52,8 @@ export const BlockStyle = styled(motion.span)<StyleProps>`
   box-sizing: content-box;
   align-items: flex-start;
   padding: 6px;
-  backdrop-filter: brightness(95%) blur(6px);
+  backdrop-filter: blur(6px);
+  background: rgba(var(--rlm-overlay-hover-rgba));
   gap: 6px;
   color: rgba(var(--rlm-text-rgba)) !important;
   ${Text.Custom} {

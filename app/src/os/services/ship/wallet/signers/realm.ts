@@ -1,9 +1,14 @@
-import { ethers } from 'ethers';
+import { ethers, Wallet } from 'ethers';
 
-// import { safeStorage } from 'electron';
-// import { removeDots } from '../../../../api/uqbar';
 import { EncryptedStore } from '../../../../lib/encryptedStore';
 import { BaseSigner } from './BaseSigner';
+
+type SignTransactionProps = {
+  path: string;
+  transaction: ethers.providers.TransactionRequest;
+  patp: string;
+  passcode: string;
+};
 
 export abstract class RealmSigner implements BaseSigner {
   // TODO use ethers wallet encryption
@@ -27,15 +32,17 @@ export abstract class RealmSigner implements BaseSigner {
     db.store = mnemonic;
   }
 
-  static signTransaction(
-    path: string,
-    message: any,
-    patp: string,
-    passcode: string
-  ): any {
+  static async signTransaction({
+    path,
+    transaction,
+    patp,
+    passcode,
+  }: SignTransactionProps): Promise<string> {
     const privateKey = this.getPrivateKey(patp, passcode);
-    const wallet = new ethers.Wallet(privateKey.derivePath(path).privateKey);
-    return wallet.signTransaction(message);
+    const wallet = new Wallet(privateKey.derivePath(path).privateKey);
+    const signedTransaction = await wallet.signTransaction(transaction);
+
+    return signedTransaction;
   }
   // static async signUqbarTransaction(
   //   path: string,
@@ -100,6 +107,10 @@ export abstract class RealmSigner implements BaseSigner {
     };
     const db = new EncryptedStore<string>(storeParams);
     db.delete();
+  }
+
+  static forceDeleteMnemonic(patp: string) {
+    EncryptedStore.forceDelete('mnemonic', `realm.${patp}`);
   }
 
   static hasMnemonic(patp: string) {

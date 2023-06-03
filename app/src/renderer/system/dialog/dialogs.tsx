@@ -29,7 +29,7 @@ export interface BaseWorkflowProps {
 export type BaseDialogProps = {
   hasCloseButton: boolean; // should the dialog have a close button in the top right
   noTitlebar?: boolean; // should there be the base window titlebar in the dialog
-  draggable?: boolean;
+  static?: boolean;
   unblurOnClose?: boolean;
   edit?: any;
   onOpen?: () => void; // is the function that executes when the dialog is opened

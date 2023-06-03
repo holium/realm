@@ -213,8 +213,8 @@ export const paths = {
           y2="19.071"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#75DAFF" />
-          <stop offset="1" stop-color="#1EA2E4" />
+          <stop stopColor="#75DAFF" />
+          <stop offset="1" stopColor="#1EA2E4" />
         </linearGradient>
         <radialGradient
           id="paint1_radial_265_6460"
@@ -225,7 +225,7 @@ export const paths = {
           gradientTransform="translate(12 12) scale(10)"
         >
           <stop />
-          <stop offset="1" stop-opacity="0" />
+          <stop offset="1" stopOpacity="0" />
         </radialGradient>
         <radialGradient
           id="paint2_radial_265_6460"
@@ -235,8 +235,8 @@ export const paths = {
           gradientUnits="userSpaceOnUse"
           gradientTransform="translate(11.9353 2.23176) scale(22.2841)"
         >
-          <stop stop-color="#FAFAFB" />
-          <stop offset="1" stop-color="#C8CDD1" />
+          <stop stopColor="#FAFAFB" />
+          <stop offset="1" stopColor="#C8CDD1" />
         </radialGradient>
       </defs>
     </>
@@ -375,6 +375,9 @@ export const paths = {
   ),
   InfoCircle: (
     <path d="M12 22.5C6.477 22.5 2 18.023 2 12.5C2 6.977 6.477 2.5 12 2.5C17.523 2.5 22 6.977 22 12.5C22 18.023 17.523 22.5 12 22.5ZM12 20.5C14.1217 20.5 16.1566 19.6571 17.6569 18.1569C19.1571 16.6566 20 14.6217 20 12.5C20 10.3783 19.1571 8.34344 17.6569 6.84315C16.1566 5.34286 14.1217 4.5 12 4.5C9.87827 4.5 7.84344 5.34286 6.34315 6.84315C4.84286 8.34344 4 10.3783 4 12.5C4 14.6217 4.84286 16.6566 6.34315 18.1569C7.84344 19.6571 9.87827 20.5 12 20.5V20.5ZM11 7.5H13V9.5H11V7.5ZM11 11.5H13V17.5H11V11.5Z" />
+  ),
+  InfoCircleFilled: (
+    <path d="M9 16.5C4.85775 16.5 1.5 13.1422 1.5 9C1.5 4.85775 4.85775 1.5 9 1.5C13.1422 1.5 16.5 4.85775 16.5 9C16.5 13.1422 13.1422 16.5 9 16.5ZM8.25 11.25V12.75H9.75V11.25H8.25ZM8.25 5.25V9.75H9.75V5.25H8.25Z" />
   ),
   CursorOn: (
     <path d="M7.1999 2.3999C6.98773 2.3999 6.78425 2.48419 6.63422 2.63422C6.48419 2.78425 6.3999 2.98773 6.3999 3.1999V16.7999C6.3999 17.0121 6.48419 17.2156 6.63422 17.3656C6.78425 17.5156 6.98773 17.5999 7.1999 17.5999C7.32357 17.5997 7.4455 17.5708 7.55611 17.5154C7.66672 17.4601 7.76301 17.3799 7.8374 17.2812L10.3358 14.4952L13.1062 20.8937C13.3614 21.4841 14.0534 21.7507 14.639 21.4843C15.2166 21.2219 15.4724 20.5424 15.2108 19.964L12.3515 13.6312L16.7999 13.5999C17.0121 13.5999 17.2156 13.5156 17.3656 13.3656C17.5156 13.2156 17.5999 13.0121 17.5999 12.7999C17.5999 12.6807 17.5732 12.563 17.5219 12.4554C17.4705 12.3478 17.3957 12.253 17.303 12.178L7.82646 2.70303C7.75161 2.60857 7.65637 2.53224 7.54788 2.47975C7.43938 2.42726 7.32043 2.39997 7.1999 2.3999Z" />
@@ -735,6 +738,51 @@ export const paths = {
   ),
   StarFilled: (
     <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z" />
+  ),
+  RealmCursor: (
+    <>
+      <g filter="url(#filter0_d_6255_17167)">
+        <circle cx="8" cy="8" r="5" fill="var(--rlm-accent-color)" />
+        <circle cx="8" cy="8" r="5.5" stroke="white" />
+      </g>
+      <defs>
+        <filter
+          id="filter0_d_6255_17167"
+          x="0"
+          y="0"
+          width="16"
+          height="16"
+          filterUnits="userSpaceOnUse"
+          colorInterpolationFilters="sRGB"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
+          <feOffset />
+          <feGaussianBlur stdDeviation="1" />
+          <feComposite in2="hardAlpha" operator="out" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_6255_17167"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_6255_17167"
+            result="shape"
+          />
+        </filter>
+      </defs>
+    </>
   ),
 };
 

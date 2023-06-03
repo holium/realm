@@ -6,6 +6,7 @@ import {
   getReleaseChannelFromSettings,
   saveReleaseChannelInSettings,
 } from './lib/settings';
+import { getCookie } from './lib/shipHelpers';
 import { RealmUpdateTypes } from './realm.types';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { APIConnection } from './services/api';
@@ -32,14 +33,17 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     };
 
     this.onWebViewAttached = this.onWebViewAttached.bind(this);
+    this.onWillRedirect = this.onWillRedirect.bind(this);
 
     app.on('quit', () => {
       // do other cleanup here
     });
 
     const windows = BrowserWindow.getAllWindows();
-    windows.forEach((window) => {
-      window.webContents.on('did-attach-webview', this.onWebViewAttached);
+    windows.forEach(({ webContents }) => {
+      webContents.on('did-attach-webview', (event, webviewWebContents) => {
+        this.onWebViewAttached(event, webviewWebContents);
+      });
     });
   }
 
@@ -122,13 +126,23 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         log.error('realm.service.ts:', 'No credentials found');
         return false;
       }
+      const cookie = await getCookie({
+        serverUrl: credentials.url,
+        serverCode: credentials.code,
+      });
+      if (!cookie) {
+        log.error('realm.service.ts:', 'Fetching cookie failed');
+        return false;
+      }
 
-      this.setSessionCookie(credentials);
+      await this.setSessionCookie({ ...credentials, cookie });
       return new Promise((resolve) => {
-        APIConnection.getInstance().conduit.on('connected', () => {
+        APIConnection.getInstance().conduit.once('connected', () => {
+          log.info('realm.service.ts, login: conduit connected');
           if (!this.services) return;
           this.services.auth._setLockfile({ ...credentials, ship: patp });
           this.services.ship?.init();
+          this.services.ship?.updateCookie(cookie);
           this._sendAuthenticated(patp, credentials.url, credentials.cookie);
           resolve(true);
         });
@@ -138,13 +152,29 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   }
 
   async setSessionCookie(credentials: Credentials) {
-    await session
-      .fromPartition(`persist:default-${credentials.ship}`)
-      .cookies.set({
-        url: `${credentials.url}`,
-        name: `urbauth-${credentials.ship}`,
-        value: credentials.cookie?.split('=')[1].split('; ')[0],
-      });
+    const path = credentials.cookie?.split('; ')[1].split('=')[1];
+    const maxAge = credentials.cookie?.split('; ')[2].split('=')[1];
+    const value = credentials.cookie?.split('=')[1].split('; ')[0];
+    try {
+      // remove current cookie
+      await session
+        .fromPartition(`persist:webview-${credentials.ship}`)
+        .cookies.remove(`${credentials.url}`, `urbauth-${credentials.ship}`);
+      // set new cookie
+      return await session
+        .fromPartition(`persist:webview-${credentials.ship}`)
+        .cookies.set({
+          url: `${credentials.url}`,
+          name: `urbauth-${credentials.ship}`,
+          value,
+          expirationDate: new Date(
+            Date.now() + parseInt(maxAge) * 1000
+          ).getTime(),
+          path: path,
+        });
+    } catch (e) {
+      log.error('setSessionCookie error:', e);
+    }
   }
 
   /**
@@ -177,9 +207,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     if (!this.services) {
       return false;
     }
-
-    this.services.ship?.cleanup();
-    APIConnection.getInstance().closeChannel();
+    await this.services.ship?.cleanup();
     delete this.services.ship;
     this.services.auth._clearLockfile();
     this.sendUpdate({
@@ -297,7 +325,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     saveReleaseChannelInSettings(channel);
   }
 
-  async onWillRedirect(url: string) {
+  async onWillRedirect(url: string, webContents: WebContents) {
     try {
       const delim = '/~/login?redirect=';
       const parts = url.split(delim);
@@ -314,36 +342,36 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           log.error('realm.service.ts:', 'No credentials found');
           return;
         }
-        const { cookie } = credentials;
+        const cookie = await getCookie({
+          serverUrl: credentials.url,
+          serverCode: credentials.code,
+        });
+        log.info('realm.service.ts:', 'onWillRedirect getCookie', cookie);
+        if (!cookie) {
+          log.error('realm.service.ts:', 'Could not fetch a new cookie!');
+          // TODO show feedback to user
+          return;
+        }
         const patp = this.services?.ship?.patp;
         if (!patp) {
           log.error('realm.service.ts:', 'No patp found');
           return;
         }
 
-        log.info(
-          'realm.service.ts:',
-          'Setting cookie',
-          cookie?.split('=')[1].split('; ')[0]
-        );
-        await session.fromPartition(`persist:default-${patp}`).cookies.set({
-          url: `${url}`,
-          name: `urbauth-${patp}`,
-          value: cookie?.split('=')[1].split('; ')[0],
-        });
+        await this.setSessionCookie({ ...credentials, cookie });
 
         this.services?.ship?.updateCookie(cookie);
-        // webContents.reload();
+        webContents.reload();
       }
     } catch (e) {
       console.error(e);
     }
   }
 
-  async onWebViewAttached(_: Event, webContents: WebContents) {
-    webContents.on('will-redirect', (_e: Event, url: string) =>
-      this.onWillRedirect(url)
-    );
+  async onWebViewAttached(_: any, webContents: WebContents) {
+    webContents.on('will-redirect', (_, url) => {
+      this.onWillRedirect(url, webContents);
+    });
 
     webContents.on('dom-ready', () => {
       // TODO wire up libs here

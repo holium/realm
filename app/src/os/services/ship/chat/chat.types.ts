@@ -141,4 +141,4 @@ export type ChatPathMetadata = {
   peer?: string; // if type is dm, this is the peer
 };
 
-export type ChatPathType = 'dm' | 'group' | 'space';
+export type ChatPathType = 'dm' | 'group' | 'space' | 'self';

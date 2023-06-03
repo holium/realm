@@ -1,6 +1,6 @@
 import { ChangeEvent } from 'react';
 
-import { Button, Flex, Text } from '@holium/design-system/general';
+import { Button, Flex, Spinner, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 
 import { NetworkType } from 'os/services/ship/wallet/wallet.types';
@@ -8,26 +8,26 @@ import { NetworkType } from 'os/services/ship/wallet/wallet.types';
 type Props = {
   network: NetworkType;
   nickname: string;
+  loading: boolean;
   onChangeNickname: (e: ChangeEvent<HTMLInputElement>) => void;
-  onClickCreate: () => void;
+  onClickCreate: () => Promise<void>;
 };
 
 export const CreateWalletScreenBody = ({
   network,
   nickname,
+  loading,
   onChangeNickname,
   onClickCreate,
 }: Props) => (
-  <Flex p={1} height="100%" width="100%" flexDirection="column" gap={20}>
-    <Text.H4 mt={2} variant="h4">
-      Create Address
-    </Text.H4>
-    <Text.Body mt={3} variant="body">
+  <Flex flex={1} flexDirection="column" gap="16px">
+    <Text.H4>Create Address</Text.H4>
+    <Text.Body style={{ fontWeight: 300 }}>
       A new {network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} address will be
       created. Give it a memorable nickname.
     </Text.Body>
-    <Flex flexDirection="column" gap={10}>
-      <Text.Label mb={1}>Nickname</Text.Label>
+    <Flex flexDirection="column" gap="4px">
+      <Text.Label>Nickname</Text.Label>
       <TextInput
         id="wallet-nickname"
         name="wallet-nickname"
@@ -35,11 +35,15 @@ export const CreateWalletScreenBody = ({
         onChange={onChangeNickname}
         placeholder="Fort Knox"
       />
-    </Flex>
-    <Flex width="100%">
-      <Button.TextButton id="submit" width="100%" onClick={onClickCreate}>
-        Create
-      </Button.TextButton>
+      <Button.Primary
+        width="100%"
+        mt="4px"
+        justifyContent="center"
+        disabled={loading}
+        onClick={onClickCreate}
+      >
+        {loading ? <Spinner size={0} /> : 'Create'}
+      </Button.Primary>
     </Flex>
   </Flex>
 );

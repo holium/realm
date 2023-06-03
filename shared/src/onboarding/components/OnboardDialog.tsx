@@ -1,9 +1,9 @@
-import { FormEvent, ReactNode, useState } from 'react';
+import { ReactNode, useState } from 'react';
+import { Formik, FormikValues } from 'formik';
+import * as Yup from 'yup';
 
 import { ErrorBox, Flex, Icon, Spinner } from '@holium/design-system/general';
-import { useToggle } from '@holium/design-system/util';
 
-import { SubmitButton } from './hosting/SubmitButton';
 import {
   OnboardDialogBackButton,
   OnboardDialogBody,
@@ -13,6 +13,7 @@ import {
   OnboardDialogFooterBackButtonFlex,
   OnboardDialogIconContainer,
 } from './OnboardDialog.styles';
+import { SubmitButton } from './SubmitButton';
 
 type Props = {
   body: ReactNode;
@@ -20,10 +21,11 @@ type Props = {
   nextText?: string;
   nextIcon?: ReactNode;
   hideNextButton?: boolean;
-  autoComplete?: boolean;
   footer?: ReactNode;
+  initialValues?: FormikValues;
+  validationSchema?: Yup.ObjectSchema<any>;
   onBack?: () => void;
-  onNext?: () => Promise<boolean>;
+  onNext?: (values: FormikValues) => Promise<boolean>;
 };
 
 export const OnboardDialog = ({
@@ -32,80 +34,108 @@ export const OnboardDialog = ({
   nextText = 'Next',
   nextIcon,
   hideNextButton,
-  autoComplete = true,
   footer,
+  initialValues = {},
+  validationSchema = Yup.object(),
   onBack,
   onNext,
 }: Props) => {
-  const submitting = useToggle(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>();
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    submitting.toggleOn();
-    setErrorMessage(null);
+  const formValidationFunction = async (values: FormikValues) => {
+    if (!validationSchema) return {};
+
+    const untouchedFieds = Object.keys(values).filter(
+      (key) => values[key] === undefined
+    );
+
+    try {
+      await validationSchema.validate(values, { abortEarly: false });
+    } catch (error: any) {
+      const errors: Record<string, string> = {};
+      error.inner.forEach((err: Yup.ValidationError) => {
+        // Don't validate untouched fields.
+        if (err.path && !untouchedFieds.includes(err.path)) {
+          errors[err.path] = err.message;
+        }
+      });
+      return errors;
+    }
+
+    return {};
+  };
+
+  const onSubmit = async (values: FormikValues) => {
+    setSubmitErrorMessage(null);
 
     // Unfocus all inputs.
     (document.activeElement as HTMLElement)?.blur();
 
     try {
-      const successfull = await onNext?.();
+      const successfull = await onNext?.(values);
       if (!successfull) throw new Error('Something went wrong.');
     } catch (error: any) {
-      if (typeof error === 'string') setErrorMessage(error);
-      else if (error.message) setErrorMessage(error.message);
-      else setErrorMessage('Something went wrong.');
-
-      submitting.toggleOff();
+      if (typeof error === 'string') setSubmitErrorMessage(error);
+      else if (error.message) setSubmitErrorMessage(error.message);
+      else setSubmitErrorMessage('Something went wrong.');
     }
   };
 
   return (
-    <OnboardDialogCard
-      autoComplete={autoComplete ? 'on' : 'off'}
-      method="post"
-      action=""
-      onSubmit={onNext ? handleSubmit : undefined}
+    <Formik
+      initialValues={initialValues}
+      validate={formValidationFunction}
+      onSubmit={onSubmit}
     >
-      <OnboardDialogBody>
-        {icon && (
-          <OnboardDialogIconContainer>{icon}</OnboardDialogIconContainer>
-        )}
-        <OnboardDialogBodyContainer>
-          {body}
-          {errorMessage && <ErrorBox>{errorMessage}</ErrorBox>}
-        </OnboardDialogBodyContainer>
-      </OnboardDialogBody>
-      <OnboardDialogFooter>
-        <Flex flex={1} alignItems="center">
-          <OnboardDialogFooterBackButtonFlex>
-            {onBack && (
-              <OnboardDialogBackButton type="button" onClick={onBack}>
-                <Icon
-                  name="ArrowLeftLine"
-                  size={20}
-                  fill="text"
-                  opacity={0.3}
-                />
-              </OnboardDialogBackButton>
+      {({ values, isSubmitting, isValid }) => (
+        <OnboardDialogCard>
+          <OnboardDialogBody>
+            {icon && (
+              <OnboardDialogIconContainer>{icon}</OnboardDialogIconContainer>
             )}
-          </OnboardDialogFooterBackButtonFlex>
-          <Flex flex={5} gap="16px">
+            <OnboardDialogBodyContainer>
+              {body}
+              {submitErrorMessage && <ErrorBox>{submitErrorMessage}</ErrorBox>}
+            </OnboardDialogBodyContainer>
+          </OnboardDialogBody>
+          <OnboardDialogFooter>
             <Flex flex={1} alignItems="center">
-              {footer}
+              <OnboardDialogFooterBackButtonFlex>
+                {onBack && (
+                  <OnboardDialogBackButton type="button" onClick={onBack}>
+                    <Icon
+                      name="ArrowLeftLine"
+                      size={20}
+                      fill="text"
+                      opacity={0.3}
+                    />
+                  </OnboardDialogBackButton>
+                )}
+              </OnboardDialogFooterBackButtonFlex>
+              <Flex flex={5} gap="16px">
+                <Flex flex={1} alignItems="center">
+                  {footer}
+                </Flex>
+                {!hideNextButton && (
+                  <SubmitButton
+                    text={nextText}
+                    icon={nextIcon}
+                    submitting={isSubmitting}
+                    disabled={
+                      !onNext ||
+                      !isValid ||
+                      Object.keys(values).filter(
+                        (key) => values[key] === undefined
+                      ).length > 0
+                    }
+                  />
+                )}
+              </Flex>
             </Flex>
-            {!hideNextButton && (
-              <SubmitButton
-                text={nextText}
-                icon={nextIcon}
-                submitting={submitting.isOn}
-                disabled={!onNext}
-              />
-            )}
-          </Flex>
-        </Flex>
-      </OnboardDialogFooter>
-    </OnboardDialogCard>
+          </OnboardDialogFooter>
+        </OnboardDialogCard>
+      )}
+    </Formik>
   );
 };
 

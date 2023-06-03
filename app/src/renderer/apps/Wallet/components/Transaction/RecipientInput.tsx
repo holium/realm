@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEventHandler, useEffect, useRef, useState } from 'react';
 import { ethers } from 'ethers';
 import { observer } from 'mobx-react';
 import { isValidPatp } from 'urbit-ob';
@@ -6,24 +6,17 @@ import { isValidPatp } from 'urbit-ob';
 import { Flex, Spinner, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 
-import { useShipStore } from 'renderer/stores/ship.store';
+import {
+  NetworkType,
+  RecipientPayload,
+} from 'os/services/ship/wallet/wallet.types';
 
 import { shortened } from '../../helpers';
-import { ContainerFlex } from './AmountInput.styles';
 import { RecipientIcon } from './RecipientIcon';
 
-type RecipientPayload = {
-  recipientMetadata?: {
-    color: string;
-    avatar?: string;
-    nickname?: string;
-  };
-  patp: string;
-  address?: string | null;
-  gasEstimate?: number;
-};
-
 type Props = {
+  to: string | undefined;
+  network: NetworkType;
   setValid: (
     valid: boolean,
     recipient: {
@@ -33,18 +26,22 @@ type Props = {
       patpAddress?: string;
     }
   ) => void;
+  getRecipient: (ship: string) => Promise<RecipientPayload>;
 };
 
-const RecipientInputPresenter = ({ setValid }: Props) => {
-  const { walletStore } = useShipStore();
-
+const RecipientInputPresenter = ({
+  to,
+  network,
+  setValid,
+  getRecipient: getRecipientFn,
+}: Props) => {
   const [icon, setIcon] = useState('blank');
   const [valueCache, setValueCache] = useState('');
   const [recipient, setRecipient] = useState('');
   useEffect(() => {
-    if (walletStore.navState.to) {
-      setRecipient(walletStore.navState.to);
-      onChange({ target: { value: walletStore.navState.to } });
+    if (to) {
+      setRecipient(to);
+      onChange({ target: { value: to } } as any);
     }
   }, []);
 
@@ -73,7 +70,7 @@ const RecipientInputPresenter = ({ setValid }: Props) => {
         }, 5000);
 
         try {
-          walletStore.getRecipient(patp).then((details) => {
+          getRecipientFn(patp).then((details) => {
             timer && clearTimeout(timer);
             resolve(details);
           });
@@ -127,12 +124,10 @@ const RecipientInputPresenter = ({ setValid }: Props) => {
     }
   }, [recipientDetails]);
 
-  const onChange = (e: any) => {
+  const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const value: string = e.target.value;
     const validAddress =
-      walletStore.navState.network === 'ethereum'
-        ? ethers.utils.isAddress(value)
-        : false; // TODO add bitcoin validation
+      network === 'ethereum' ? ethers.utils.isAddress(value) : false; // TODO add bitcoin validation
     const validPatp = isValidPatp(value);
 
     if (validAddress) {
@@ -165,53 +160,48 @@ const RecipientInputPresenter = ({ setValid }: Props) => {
   };
 
   return (
-    <Flex flexDirection="column" gap={10}>
-      <Flex width="100%" justifyContent="space-evenly" alignItems="center">
+    <Flex flexDirection="column">
+      <Flex width="100%" alignItems="center" gap="16px">
         <Text.Body fontSize={1} variant="body">
           TO
         </Text.Body>
-        <ContainerFlex
-          className="realm-cursor-hover"
-          width="240px"
-          height="45px"
-          borderRadius="7px"
-          alignItems="center"
-        >
-          <RecipientIcon
-            recipientMetadata={recipientDetails.details?.recipientMetadata}
-            valueCache={valueCache}
-            icon={icon}
-          />
-          <Flex flexDirection="column">
-            <TextInput
-              id="recipient-input"
-              name="recipient-input"
-              width="100%"
-              placeholder="@p or recipient’s address"
-              spellCheck="false"
-              value={recipient}
-              onChange={onChange}
+        <TextInput
+          id="recipient-input"
+          name="recipient-input"
+          width="100%"
+          placeholder="@p or recipient’s address"
+          spellCheck="false"
+          value={recipient}
+          onChange={onChange}
+          leftAdornment={
+            <RecipientIcon
+              recipientMetadata={recipientDetails.details?.recipientMetadata}
+              valueCache={valueCache}
+              icon={icon}
             />
-            {recipientDetails.details?.address && (
-              <Text.Body fontSize={1} variant="body" opacity={0.7}>
-                {shortened(recipientDetails.details?.address)}
-              </Text.Body>
-            )}
-          </Flex>
-          {loading && (
-            <Flex mr={2}>
-              <Spinner ml={2} size="14px" />
-            </Flex>
-          )}
-        </ContainerFlex>
+          }
+          rightAdornment={
+            loading ? (
+              <Flex mr={2}>
+                <Spinner ml={2} size="14px" />
+              </Flex>
+            ) : undefined
+          }
+        />
       </Flex>
-      <Flex width="100%" justifyContent="flex-end">
-        <Text.Body variant="body" fontSize="11px">
-          {recipientDetails.failed &&
-            recipientDetails.details?.patp === recipient &&
-            `${recipient} doesn't have a Realm wallet.`}
-          &nbsp;&nbsp;&nbsp;
-        </Text.Body>
+      <Flex mt="4px" ml="36px" gap="2px" flexDirection="column">
+        {recipientDetails.details?.address && (
+          <Text.Body mt="4px" fontSize={1} variant="body" opacity={0.7}>
+            {shortened(recipientDetails.details?.address)}
+          </Text.Body>
+        )}
+        {recipientDetails.failed && (
+          <Text.Custom fontSize="11px" color="intent-caution">
+            {recipientDetails.details?.patp === recipient
+              ? `${recipient} doesn't have a Realm wallet.`
+              : 'Invalid address or ship.'}
+          </Text.Custom>
+        )}
       </Flex>
     </Flex>
   );

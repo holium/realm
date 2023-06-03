@@ -4,6 +4,7 @@ import AbstractDataAccess, {
 import { APIConnection } from '../../api';
 import { ProtocolType, TransactionsRow } from './wallet.types';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface WalletRow {}
 
 export class WalletDB extends AbstractDataAccess<WalletRow> {
@@ -28,7 +29,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   }
 
   async init() {
-    const wallets = await this._fetchWallets();
+    const wallets = await this.fetchWallets();
     this._insertWallets(wallets.wallets.ethereum);
     this._insertWallets(wallets.wallets.bitcoin);
     this._insertWallets(wallets.wallets.btctestnet);
@@ -64,7 +65,7 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     return response;
   }
 
-  async _fetchWallets() {
+  async fetchWallets() {
     // const lastTimestamp = this.getLastTimestamp('wallets');
     const response = await APIConnection.getInstance().conduit.scry({
       app: 'realm-wallet',

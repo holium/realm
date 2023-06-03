@@ -4,6 +4,7 @@ import { Position } from '@holium/design-system';
 import { MouseState } from '@holium/realm-presence';
 
 import { ConduitState } from 'os/services/api';
+import { settingsPreload } from 'os/services/ship/settings.service';
 import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
 
@@ -55,6 +56,12 @@ const appPreload = {
   disableIsolationMode: () => {
     return ipcRenderer.invoke('disable-isolation-mode');
   },
+  enableRealmCursor: () => {
+    return ipcRenderer.invoke('enable-realm-cursor');
+  },
+  disableRealmCursor: () => {
+    return ipcRenderer.invoke('disable-realm-cursor');
+  },
   setMouseColor(hex: string) {
     ipcRenderer.invoke('mouse-color', hex);
   },
@@ -81,7 +88,7 @@ const appPreload = {
   onBrowserOpen(callback: any) {
     ipcRenderer.on('realm.browser.open', callback);
   },
-  onInitialDimensions(callback: any) {
+  onDimensionsChange(callback: any) {
     ipcRenderer.on('set-dimensions', callback);
   },
   onMouseOut(callback: () => void) {
@@ -90,8 +97,11 @@ const appPreload = {
   onEnableMouseLayerTracking(callback: () => void) {
     ipcRenderer.on('enable-mouse-layer-tracking', callback);
   },
-  onDisableCustomMouse(callback: () => void) {
-    ipcRenderer.on('disable-custom-mouse', callback);
+  onEnableRealmCursor(callback: () => void) {
+    ipcRenderer.on('enable-realm-cursor', callback);
+  },
+  onDisableRealmCursor(callback: () => void) {
+    ipcRenderer.on('disable-realm-cursor', callback);
   },
   onToggleOnEphemeralChat(callback: () => void) {
     ipcRenderer.on('realm.toggle-on-ephemeral-chat', () => {
@@ -141,6 +151,12 @@ const appPreload = {
       }
     );
   },
+  /* Deeplink listeners */
+  onJoinSpace(callback: (spacePath: string) => void) {
+    ipcRenderer.on('join-space', (_, spacePath: string) => {
+      callback(spacePath);
+    });
+  },
   /* Removers */
   removeOnKeyDown() {
     ipcRenderer.removeAllListeners('key-down');
@@ -156,6 +172,9 @@ const appPreload = {
   },
   removeOnMouseMove() {
     ipcRenderer.removeAllListeners('mouse-move');
+  },
+  removeOnJoinSpace() {
+    ipcRenderer.removeAllListeners('join-space');
   },
 };
 
@@ -179,3 +198,4 @@ contextBridge.exposeInMainWorld('bazaarService', bazaarPreload);
 contextBridge.exposeInMainWorld('onboardingService', onboardingPreload);
 contextBridge.exposeInMainWorld('appInstallService', appPublishersDBPreload);
 contextBridge.exposeInMainWorld('appRecentsService', appRecentsPreload);
+contextBridge.exposeInMainWorld('settingsService', settingsPreload);
