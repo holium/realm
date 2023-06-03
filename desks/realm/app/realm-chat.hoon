@@ -203,6 +203,12 @@
                   =/  thepath   path.first-msg-part
                   ?:  =(sender.id our.bowl) :: if it's our message, don't do anything
                     ~
+                  ::  if it's a %react AND it's not reacting to our
+                  ::  message, don't do anything
+                  =/  not-replying-to-us=?
+                    ?~  reply-to.first-msg-part  %.y
+                      ?!(=(our.bowl +:+:(need reply-to.first-msg-part)))
+                  ?:  &(=(-.content.first-msg-part %react) not-replying-to-us)  ~
                   ?:  (~(has in mutes.state) thepath)               :: if it's a muted path, send a pre-dismissed notif to notif-db
                     =/  notif-db-card  (notif-new-msg:core parts our.bowl %.y bowl)
                     [notif-db-card ~]
