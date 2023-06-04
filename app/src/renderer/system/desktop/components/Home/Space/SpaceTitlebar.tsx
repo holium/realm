@@ -22,6 +22,8 @@ const SpaceTitlebarPresenter = ({
   membersCount,
   onMemberClick,
   onToggleApps,
+  showAppGrid,
+  showMembers,
 }: SpaceTitlebarProps) => {
   return (
     <Flex width="100%">
@@ -31,10 +33,18 @@ const SpaceTitlebarPresenter = ({
       <Flex alignItems="center" gap={12}>
         <AppSearchApp mode="space" />
         <Flex flex={1} gap={8} justifyContent="flex-end">
-          <Button.IconButton size={32} onClick={onToggleApps}>
+          <Button.IconButton
+            size={32}
+            onClick={onToggleApps}
+            isSelected={showAppGrid}
+          >
             <Icon name="AppGrid" size={22} />
           </Button.IconButton>
-          <Button.IconButton size={32} onClick={onMemberClick}>
+          <Button.IconButton
+            size={32}
+            onClick={onMemberClick}
+            isSelected={showMembers}
+          >
             <Icon name="Members" size={22} opacity={0.7} />
           </Button.IconButton>
         </Flex>

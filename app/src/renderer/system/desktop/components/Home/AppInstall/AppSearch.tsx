@@ -178,25 +178,23 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
             }
           }}
           defaultValue={search.state.value}
-          onChange={(evt) => {
+          onChange={(evt: any) => {
             evt.stopPropagation();
-            // @ts-ignore
-            // @ts-ignore
             search.actions.onChange(evt.target.value);
-            // @ts-ignore
             appInstaller.setSearchString(evt.target.value);
-            // @ts-ignore
             if (evt.target.value) {
-              // @ts-ignore
               if (evt.target.value[0] === '~') {
                 appInstaller.setSearchMode('ship-search');
-                // setData([]);
               } else {
                 if (['app-search', 'dev-app-search'].includes(searchMode)) {
                   appInstaller.setSearchMode(searchMode);
                 } else {
                   appInstaller.setSearchMode('app-search');
                 }
+              }
+            } else {
+              if (evt.key === 'Backspace') {
+                appInstaller.setSearchMode('start');
               }
             }
           }}

@@ -34,6 +34,10 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
     [shellStore.isFullscreen]
   );
 
+  const onMemberClick = () => {
+    setSidebar(!sidebar ? 'members' : null);
+  };
+
   const sidebarComponent = useMemo(() => {
     return (
       <AnimatePresence>
@@ -50,7 +54,7 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
             flexDirection="column"
             flex={2}
           >
-            <Members our={isOur} />
+            <Members our={isOur} onMemberClick={onMemberClick} />
           </Flex>
         )}
       </AnimatePresence>
@@ -130,6 +134,7 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
                 onClick={() => {
                   setSidebar(!sidebar ? 'friends' : null);
                 }}
+                isSelected={sidebar === 'friends'}
               >
                 <Icon name="Members" size={22} opacity={0.7} />
               </Button.IconButton>
@@ -174,9 +179,7 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
               onToggleApps={() => {
                 showAppGrid(!appGrid);
               }}
-              onMemberClick={() => {
-                setSidebar(!sidebar ? 'members' : null);
-              }}
+              onMemberClick={onMemberClick}
             />
           </Flex>
         )}

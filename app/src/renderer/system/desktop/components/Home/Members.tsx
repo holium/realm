@@ -37,6 +37,7 @@ const HomeSidebar = styled(motion.div)<HomeSidebarProps>`
 
 interface IMembers {
   our: boolean;
+  onMemberClick: () => void;
   friends?: any[];
 }
 
@@ -69,7 +70,7 @@ export const createPeopleForm = (
   };
 };
 
-const MembersPresenter = ({ our }: IMembers) => {
+const MembersPresenter = ({ our, onMemberClick }: IMembers) => {
   const { spacesStore } = useShipStore();
   const { shellStore } = useAppState();
   const searchRef = useRef(null);
@@ -121,6 +122,14 @@ const MembersPresenter = ({ our }: IMembers) => {
         <Text.Custom fontWeight={500} fontSize={4} opacity={1}>
           {our ? 'Friends' : 'Members'}
         </Text.Custom>
+        <Button.IconButton
+          onClick={onMemberClick}
+          style={{
+            marginLeft: 'auto',
+          }}
+        >
+          <Icon name="ChevronRight" size={18} opacity={0.7} />
+        </Button.IconButton>
       </Flex>
       <Flex position="relative">
         {/* Search and dropdown */}

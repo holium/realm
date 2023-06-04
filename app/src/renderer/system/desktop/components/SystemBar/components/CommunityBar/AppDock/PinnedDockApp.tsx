@@ -115,6 +115,7 @@ export const PinnedDockAppPresenter = ({
               const appHost = (app as AppMobxType).host;
               return handleInstallation(
                 appHost,
+                app.title,
                 app.id,
                 appRef?.installStatus as InstallStatus
               );
