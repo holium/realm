@@ -18,7 +18,7 @@ const tabData: TabItem[] = [
 function Word() {
   const [tabValue, setTabValue] = useState<number>(0);
   return (
-    <Card p={3} elevation={4} maxWidth={400}>
+    <Card p={3} elevation={4} maxWidth={400} marginBottom={12}>
       <Text.Label opacity={0.7} fontWeight={400} style={{ marginBottom: 4 }}>
         Word of the day
       </Text.Label>
