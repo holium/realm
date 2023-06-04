@@ -1,18 +1,17 @@
-import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import { Button, Flex, Text } from '@holium/design-system';
 
-import { trackEvent } from 'renderer/lib/track';
 import { normalizeBounds } from 'renderer/lib/window-manager';
 import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 
-export const ShutdownDialogConfig: DialogConfig = {
-  component: (props: any) => <ShutdownDialog {...props} />,
+export const InstallAppDialogConfig: DialogConfig = {
+  component: (props: any) => <InstallAppDialog {...props} />,
   getWindowProps: (desktopDimensions) => ({
-    appId: 'shutdown-dialog',
-    title: 'Shutdown Dialog',
+    appId: 'install-confirm-dialog',
+    title: 'Install Confirm Dialog',
     zIndex: 13,
     type: 'dialog',
     bounds: normalizeBounds(
@@ -31,27 +30,15 @@ export const ShutdownDialogConfig: DialogConfig = {
   noTitlebar: false,
 };
 
-const ShutdownDialogPresenter = () => {
-  const { shellStore, authStore } = useAppState();
-  const [seconds, setSeconds] = useState(60);
-  const [id, setId] = useState<NodeJS.Timer>();
-
-  function shutdown() {
-    trackEvent('CLICK_SHUTDOWN', 'DESKTOP_SCREEN');
-    authStore.shutdown();
-  }
-
-  useEffect(() => {
-    if (seconds <= 0) {
-      shutdown();
-    }
-    if (!id) {
-      const interval = setInterval(() => {
-        setSeconds((seconds) => seconds - 1);
-      }, 1000);
-      setId(interval);
-    }
-  });
+const InstallAppDialogPresenter = ({
+  name,
+  desk,
+}: {
+  name: string;
+  desk: string;
+}) => {
+  const { shellStore } = useAppState();
+  const { bazaarStore } = useShipStore();
 
   return (
     <Flex
@@ -64,11 +51,15 @@ const ShutdownDialogPresenter = () => {
     >
       <Flex gap={10} flexDirection="column">
         <Text.Custom fontSize={3} fontWeight={500}>
-          Power Off
+          Uninstall "{name}"?
         </Text.Custom>
         <Text.Custom fontSize={2} lineHeight="copy" variant="body">
-          Realm will power off automatically in {seconds} second
-          {seconds > 1 && 's'}.
+          All processes will be stopped and their data archived, and the app
+          will no longer receive updates.
+        </Text.Custom>
+        <Text.Custom fontSize={2} lineHeight="copy" variant="body">
+          If the app is reinstalled, the archived data will be restored and
+          you'll be able to pick up where you left off.
         </Text.Custom>
       </Flex>
       <Flex gap="16px">
@@ -76,19 +67,21 @@ const ShutdownDialogPresenter = () => {
           flex={1}
           justifyContent="center"
           onClick={() => {
-            id && clearInterval(id);
             shellStore.closeDialog();
-            shellStore.setIsBlurred(false);
-            // reset seconds/id for next open
-            // 62 === 60 ???
-            setId(undefined);
-            setSeconds(62);
           }}
           variant="secondary"
         >
           <Flex py={1}>Cancel</Flex>
         </Button.Secondary>
-        <Button.Primary flex={1} justifyContent="center" onClick={shutdown}>
+        <Button.Primary
+          flex={1}
+          justifyContent="center"
+          background="intent-alert"
+          onClick={() => {
+            shellStore.closeDialog();
+            bazaarStore.uninstallApp(desk);
+          }}
+        >
           <Flex py={1}>Power Off</Flex>
         </Button.Primary>
       </Flex>
@@ -96,4 +89,4 @@ const ShutdownDialogPresenter = () => {
   );
 };
 
-const ShutdownDialog = observer(ShutdownDialogPresenter);
+const InstallAppDialog = observer(InstallAppDialogPresenter);

@@ -106,7 +106,12 @@ export const GridAppTilePresenter = ({
           onClick: (evt: any) => {
             evt.stopPropagation();
             const appHost = (app as AppMobxType).host;
-            return handleInstallation(appHost, app.id, installStatus);
+            return handleInstallation(
+              appHost,
+              app.title,
+              app.id,
+              installStatus
+            );
           },
         },
       ].filter(Boolean) as ContextMenuOption[],

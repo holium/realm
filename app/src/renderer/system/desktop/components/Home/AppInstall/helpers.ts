@@ -1,3 +1,4 @@
+import { appState } from 'renderer/stores/app.store';
 import { InstallStatus } from 'renderer/stores/models/bazaar.model';
 
 import { shipStore } from '../../../../../stores/ship.store';
@@ -20,6 +21,7 @@ export const installLabel = (status: InstallStatus) => {
 
 export const handleInstallation = (
   host: string | null,
+  title: string,
   desk: string,
   status: InstallStatus
 ) => {
@@ -34,11 +36,15 @@ export const handleInstallation = (
     console.error('No host found for app', desk);
     return;
   }
+  const { shellStore } = appState;
   const { bazaarStore } = shipStore;
   switch (status) {
     case InstallStatus.installed:
     case InstallStatus.suspended:
-      bazaarStore.uninstallApp(desk);
+      shellStore.openDialogWithStringProps('uninstall-confirm-dialog', {
+        title,
+        desk,
+      });
       return;
     case InstallStatus.uninstalled:
     case InstallStatus.desktop:

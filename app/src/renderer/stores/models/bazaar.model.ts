@@ -416,7 +416,6 @@ export const BazaarStore = types
             const indexOfApp = apps.findIndex(
               (app) => app.gridIndex === oldIndex
             );
-            console.log(apps[indexOfApp]);
             const desk = apps[indexOfApp].id;
             if (!desk) return;
             return yield BazaarIPC.reorderApp(desk, newIndex, grid);

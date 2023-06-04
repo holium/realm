@@ -9,6 +9,7 @@ import { ChangeEmailDialogConfig } from 'renderer/apps/System/Dialogs/ChangeEmai
 import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
 import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceConfirm';
 import { ShutdownDialogConfig } from 'renderer/apps/System/Dialogs/Shutdown';
+import { UninstallAppDialogConfig } from 'renderer/apps/System/Dialogs/UninstallApp';
 import { AppWindowProps } from 'renderer/stores/models/window.model';
 
 import { ResetCodeDialogConfig } from '../authentication/login/ResetCodeDialog';
@@ -50,6 +51,7 @@ export interface DialogRenderers {
 export const dialogRenderers: DialogRenderers = {
   'shutdown-dialog': ShutdownDialogConfig,
   'app-detail-dialog': AppDetailDialog,
+  'uninstall-confirm-dialog': UninstallAppDialogConfig,
   'leave-space-dialog': LeaveSpaceDialogConfig,
   'leave-chat-dialog': LeaveChatDialogConfig,
   'delete-space-dialog': DeleteSpaceDialogConfig,

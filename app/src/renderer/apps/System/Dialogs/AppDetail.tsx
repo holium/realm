@@ -229,6 +229,9 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
     );
   }
 
+  const delay = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
   const isInstalling = getAppTileFlags(
     app.installStatus as InstallStatus
   ).isInstalling;
@@ -278,7 +281,7 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
                 paddingBottom="6px"
                 disabled={isInstalling}
                 fontWeight={500}
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation();
                   const a = app as AppMobxType;
                   if (isSuspended) {
@@ -287,8 +290,16 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
                     bazaarStore.installApp(a.host, a.id);
                   } else if (isInstalled && a) {
                     // if the app is installed we want to uninstall it
-                    bazaarStore.uninstallApp(a.id);
                     onClose();
+                    // I am sorry for this - Dialogs need to be refactored.
+                    await delay(100);
+                    shellStore.openDialogWithStringProps(
+                      'uninstall-confirm-dialog',
+                      {
+                        title: a.title,
+                        desk: a.id,
+                      }
+                    );
                   }
                   // TODO should we close on install?
                 }}
