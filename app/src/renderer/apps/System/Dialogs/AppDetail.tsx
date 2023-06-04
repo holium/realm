@@ -287,7 +287,16 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
                   if (isSuspended) {
                     bazaarStore.reviveApp(a.id);
                   } else if (!isInstalled && a && a.host) {
-                    bazaarStore.installApp(a.host, a.id);
+                    onClose();
+                    await delay(100);
+                    shellStore.openDialogWithStringProps(
+                      'install-confirm-dialog',
+                      {
+                        ship: a.host,
+                        title: a.title,
+                        desk: a.id,
+                      }
+                    );
                   } else if (isInstalled && a) {
                     // if the app is installed we want to uninstall it
                     onClose();

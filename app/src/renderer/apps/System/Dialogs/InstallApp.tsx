@@ -7,8 +7,17 @@ import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { DialogConfig } from 'renderer/system/dialog/dialogs';
 
-export const InstallAppDialogConfig: DialogConfig = {
-  component: (props: any) => <InstallAppDialog {...props} />,
+export const InstallAppDialogConfig: (dialogProps: any) => DialogConfig = (
+  dialogProps: any
+) => ({
+  component: (props) => (
+    <InstallAppDialog
+      ship={dialogProps.ship}
+      title={dialogProps.title}
+      desk={dialogProps.desk}
+      {...props}
+    />
+  ),
   getWindowProps: (desktopDimensions) => ({
     appId: 'install-confirm-dialog',
     title: 'Install Confirm Dialog',
@@ -19,7 +28,7 @@ export const InstallAppDialogConfig: DialogConfig = {
         x: 0,
         y: 0,
         width: 400,
-        height: 160,
+        height: 200,
       },
       desktopDimensions
     ),
@@ -28,13 +37,15 @@ export const InstallAppDialogConfig: DialogConfig = {
   hasCloseButton: false,
   unblurOnClose: true,
   noTitlebar: false,
-};
+});
 
 const InstallAppDialogPresenter = ({
-  name,
+  ship,
+  title,
   desk,
 }: {
-  name: string;
+  ship: string;
+  title: string;
   desk: string;
 }) => {
   const { shellStore } = useAppState();
@@ -49,17 +60,13 @@ const InstallAppDialogPresenter = ({
       flexDirection="column"
       justifyContent="space-between"
     >
-      <Flex gap={10} flexDirection="column">
+      <Flex gap={20} flexDirection="column">
         <Text.Custom fontSize={3} fontWeight={500}>
-          Uninstall "{name}"?
+          Install "{title}"?
         </Text.Custom>
         <Text.Custom fontSize={2} lineHeight="copy" variant="body">
-          All processes will be stopped and their data archived, and the app
-          will no longer receive updates.
-        </Text.Custom>
-        <Text.Custom fontSize={2} lineHeight="copy" variant="body">
-          If the app is reinstalled, the archived data will be restored and
-          you'll be able to pick up where you left off.
+          This application will be able to view and interact with your server's
+          contents. Only install if you trust the developer.
         </Text.Custom>
       </Flex>
       <Flex gap="16px">
@@ -76,13 +83,12 @@ const InstallAppDialogPresenter = ({
         <Button.Primary
           flex={1}
           justifyContent="center"
-          background="intent-alert"
           onClick={() => {
             shellStore.closeDialog();
-            bazaarStore.uninstallApp(desk);
+            bazaarStore.installApp(ship, desk);
           }}
         >
-          <Flex py={1}>Power Off</Flex>
+          <Flex py={1}>Install</Flex>
         </Button.Primary>
       </Flex>
     </Flex>
