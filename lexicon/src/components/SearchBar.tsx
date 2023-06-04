@@ -4,6 +4,9 @@ import { Button, Icon, Flex, TextInput } from '@holium/design-system';
 function SearchBar() {
   return (
     <Flex flex={1} gap={10} justifyContent={'center'} marginBottom={12}>
+      <Button.IconButton>
+        <Icon name="ArrowLeftLine" size={22} />
+      </Button.IconButton>
       <TextInput
         id="search-input"
         name="search"

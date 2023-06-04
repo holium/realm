@@ -1,6 +1,6 @@
 import React from 'react';
 import { Flex } from '@holium/design-system';
-import { Word } from './pages';
+import { Word, Home } from './pages';
 import { SearchBar, AddWord } from './components';
 
 function App() {
@@ -11,6 +11,7 @@ function App() {
         <SearchBar />
         <AddWord />
         <Word />
+        <Home />
       </Flex>
     </>
   );
