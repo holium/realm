@@ -10,8 +10,18 @@ import {
 } from '@holium/design-system';
 export default function AddWord() {
   const [word, setWord] = useState<string>('');
+  const [definition, setDefinition] = useState<string>('');
+  const [sentence, setSentence] = useState<string>('');
+  const [related, setRelated] = useState<string>('');
   return (
-    <Card p={3} elevation={4} minWidth={400} maxWidth={400} minHeight={400} marginBottom={12}>
+    <Card
+      p={3}
+      elevation={4}
+      minWidth={400}
+      maxWidth={400}
+      minHeight={400}
+      marginBottom={12}
+    >
       <Input
         style={{
           flex: 0,
@@ -38,10 +48,12 @@ export default function AddWord() {
           <TextInput
             id="definition-input"
             name="definition"
-            value={''}
+            value={definition}
             placeholder="Type your definition..."
             error={false}
-            onChange={() => null}
+            onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
+              setDefinition(evt.target.value);
+            }}
           />
         </Flex>
         <Flex flexDirection={'column'} gap={6}>
@@ -49,10 +61,12 @@ export default function AddWord() {
           <TextInput
             id="add-word-sentence-input"
             name="sentence"
-            value={''}
+            value={sentence}
             placeholder="An example of how it’s used..."
             error={false}
-            onChange={() => null}
+            onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
+              setSentence(evt.target.value);
+            }}
           />
         </Flex>
         <Flex flexDirection={'column'} gap={6}>
@@ -60,10 +74,12 @@ export default function AddWord() {
           <TextInput
             id="add-word-related-input"
             name="related"
-            value={''}
+            value={related}
             placeholder="words related to this one..."
             error={false}
-            onChange={() => null}
+            onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
+              setRelated(evt.target.value);
+            }}
           />
         </Flex>
       </Flex>

@@ -54,3 +54,7 @@
   --rlm-overlay-hover-color: rgba(0, 0, 0, 0.04);
   --rlm-overlay-active-color: rgba(0, 0, 0, 0.06);
 }
+.highlight-hover:hover {
+  background-color: rgba(var(--rlm-overlay-hover-rgba));
+  cursor: pointer;
+}
