@@ -3,11 +3,11 @@ import { deSig, preSig } from '@urbit/aura';
 import EventEmitter, { setMaxListeners } from 'events';
 import EventSource from 'eventsource';
 
+import { getCookie } from '../../lib/shipHelpers';
 import {
   Action,
   ConduitState,
   Message,
-  Patp,
   PokeCallbacks,
   PokeParams,
   ReactionPath,
@@ -74,7 +74,11 @@ export class Conduit extends EventEmitter {
     try {
       let response = await fetch(url, { ...options, headers: this.headers });
       if (response.status === 403) {
-        this.cookie = await Conduit.fetchCookie(this.url, this.code ?? '');
+        if (!this.code) throw new Error('fetchCookie failed, no code');
+        this.cookie = await getCookie({
+          serverUrl: this.url,
+          serverCode: this.code,
+        });
         if (!this.cookie) {
           throw new Error('fetchCookie failed');
         }
@@ -133,7 +137,7 @@ export class Conduit extends EventEmitter {
 
     return new Promise((resolve, reject) => {
       this.sse = new EventSource(channelUrl, {
-        headers: { Cookie: this.cookie?.split('; ')[0] },
+        headers: { Cookie: this.cookie },
       });
 
       this.sse.onopen = async (response) => {
@@ -261,7 +265,10 @@ export class Conduit extends EventEmitter {
   async refresh(url: string, code: string): Promise<string | null> {
     this.url = url;
     this.updateStatus(ConduitState.Refreshing);
-    const cookie: string | null = await Conduit.fetchCookie(url, code);
+    const cookie: string | null = await getCookie({
+      serverUrl: url,
+      serverCode: code,
+    });
     if (cookie === null) {
       this.updateStatus(ConduitState.Failed);
       return null;
@@ -477,7 +484,7 @@ export class Conduit extends EventEmitter {
     if (!this.cookie) throw new Error('cookie not set');
     return {
       'Content-Type': 'application/json',
-      Cookie: this.cookie.split('; ')[0],
+      Cookie: this.cookie,
     };
   }
 
@@ -611,45 +618,6 @@ export class Conduit extends EventEmitter {
   }
 
   /**
-   * fetchCookie
-   *
-   * Should be used when not connected to a channel to retrieve a cookie
-   *
-   * @param url
-   * @param code
-   * @returns
-   */
-  static async fetchCookie(url: string, code: Patp): Promise<string | null> {
-    let cookie = null;
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => {
-      controller.abort();
-      log.error('fetchCookie timed out');
-    }, 10000);
-
-    try {
-      const response = await fetch(`${url}/~/login`, {
-        method: 'POST',
-        body: `password=${code}`,
-        headers: {
-          'Content-Type': 'text/plain',
-        },
-        signal: controller.signal,
-      });
-      if (!response.ok) {
-        return Promise.reject(response);
-      }
-      cookie = response.headers.get('set-cookie');
-    } catch (err: any) {
-      log.error(err);
-    } finally {
-      clearTimeout(timeout);
-    }
-    return cookie;
-  }
-
-  /**
    * Global error handler for axios errors. For now , hook 403 responses and use
    *  to indicate that cookie has expired (stale connection).
    *
@@ -687,7 +655,11 @@ export class Conduit extends EventEmitter {
         let cookie: string | null = null;
         try {
           this.updateStatus(ConduitState.Refreshing);
-          cookie = await Conduit.fetchCookie(this.url, this.code ?? '');
+          if (!this.code) throw new Error('fetchCookie failed, no code');
+          cookie = await getCookie({
+            serverUrl: this.url,
+            serverCode: this.code,
+          });
           if (cookie) {
             this.cookie = cookie;
             this.updateStatus(ConduitState.Refreshed, {

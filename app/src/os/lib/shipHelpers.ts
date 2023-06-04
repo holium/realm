@@ -25,16 +25,18 @@ export async function getCookie({
       headers: {
         'Content-Type': 'text/plain',
       },
-      // credentials: 'include', // TODO test this
+      credentials: 'include', // TODO test this
       signal: controller.signal,
     });
+    if (!response.ok) {
+      throw new Error(`Bad response from server: ${response.status}`);
+    }
     cookie = response.headers.get('set-cookie');
-    log.info(`Got cookie for ${serverUrl}`);
+    return cookie;
   } catch (e) {
     log.error(`Error getting cookie for ${serverUrl}`, e);
     return Promise.reject(e);
   } finally {
     clearTimeout(timeout);
   }
-  return cookie;
 }
