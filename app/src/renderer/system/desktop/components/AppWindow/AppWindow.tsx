@@ -390,6 +390,8 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   };
 
   const dragUnmaximize = () => {
+    // this function is firing for dialogs also - throwing an error.
+    if (appWindow.type === 'dialog') return;
     if (shellStore.isWindowMaximized(appWindow.appId)) {
       const mbAll = shellStore.unmaximize(appWindow.appId);
       console.log(mbAll);

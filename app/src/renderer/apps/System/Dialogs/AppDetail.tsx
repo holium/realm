@@ -194,6 +194,9 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
                 link={app.website}
                 onClick={() => {
                   shellStore.closeDialog();
+                  if (app && app.website) {
+                    window.open(app.website, '_blank');
+                  }
                 }}
               />
             }
