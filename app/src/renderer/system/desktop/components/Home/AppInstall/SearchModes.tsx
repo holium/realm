@@ -329,7 +329,7 @@ const DevAppsPresenter = () => {
           e.stopPropagation();
           !installed && bazaarStore.installApp(parts[0], parts[1]);
           // TODO should we close app search on install?
-          setSearchMode('none');
+          // setSearchMode('none');
         }}
       >
         {appEntry?.installStatus === 'started' ? (
