@@ -132,7 +132,8 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
   } else {
     return null;
   }
-  const isInstalled = app && app.installStatus === 'installed';
+  const isInstalled = app && app.installStatus === InstallStatus.installed;
+  const isSuspended = app && app.installStatus === InstallStatus.suspended;
 
   let graphic;
   let title = app.title;
@@ -280,20 +281,24 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
                 onClick={(e) => {
                   e.stopPropagation();
                   const a = app as AppMobxType;
-                  if (!isInstalled && a && a.host) {
+                  if (isSuspended) {
+                    bazaarStore.reviveApp(a.id);
+                  } else if (!isInstalled && a && a.host) {
                     bazaarStore.installApp(a.host, a.id);
                   } else if (isInstalled && a) {
                     // if the app is installed we want to uninstall it
                     bazaarStore.uninstallApp(a.id);
+                    onClose();
                   }
                   // TODO should we close on install?
-                  onClose();
                 }}
               >
                 {isInstalling ? (
                   <Spinner size={0} color="white" />
                 ) : isInstalled ? (
                   'Uninstall'
+                ) : isSuspended ? (
+                  'Revive'
                 ) : (
                   'Install'
                 )}

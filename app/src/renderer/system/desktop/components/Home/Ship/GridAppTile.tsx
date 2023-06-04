@@ -76,7 +76,13 @@ export const GridAppTilePresenter = ({
         },
         {
           label: 'App info',
-          disabled: app.type === AppTypes.Web,
+          disabled:
+            app.type === AppTypes.Web ||
+            [
+              InstallStatus.installed,
+              InstallStatus.suspended,
+              InstallStatus.reviving,
+            ].includes(installStatus) === false,
           onClick: (evt: any) => {
             evt.stopPropagation();
             shellStore.openDialogWithStringProps('app-detail-dialog', {

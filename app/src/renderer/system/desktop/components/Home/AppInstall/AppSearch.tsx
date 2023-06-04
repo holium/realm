@@ -198,6 +198,8 @@ const AppSearchAppPresenter = (props: AppSearchProps) => {
                   appInstaller.setSearchMode('app-search');
                 }
               }
+            } else {
+              appInstaller.setSearchMode('start');
             }
           }}
           onFocus={(evt) => {

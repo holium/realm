@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   GridContextProvider,
   GridDropZone,
@@ -23,7 +23,7 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
   const { bazaarStore, spacesStore } = useShipStore();
   const currentSpace = spacesStore.selected;
 
-  const apps = useMemo(
+  let apps = useMemo(
     () =>
       [
         ...bazaarStore.installed,
@@ -32,7 +32,6 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
     [bazaarStore.catalog, bazaarStore.installations.values()]
   );
 
-  const [items, setItems] = useState(apps);
   const canClick = useToggle(true);
 
   useEffect(() => {
@@ -50,8 +49,8 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
     targetIndex: number
   ) => {
     if (sourceIndex === targetIndex) return;
-    const nextState = swap(items, sourceIndex, targetIndex);
-    setItems(nextState);
+    const nextState = swap(apps, sourceIndex, targetIndex);
+    apps = nextState;
     const newGrid = Object();
 
     // eslint-disable-next-line array-callback-return
@@ -72,7 +71,7 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
           width: maxWidth,
         }}
       >
-        {items.map((app, index: number) => {
+        {apps.map((app, index: number) => {
           const tileId = `${app.id}-${index}-ship-grid-tile`;
           return (
             <GridItem
