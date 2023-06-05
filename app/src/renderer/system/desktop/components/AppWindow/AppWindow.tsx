@@ -128,12 +128,11 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     ]
   );
 
-  const mouseIsNearEdge = (x: number, y: number, isFullscreen: boolean) => {
-    const _minY = isFullscreen ? minY : minY + 30;
+  const mouseIsNearEdge = (x: number, y: number) => {
     return (
       x <= minX + TRIGGER_AUTO_RESIZE ||
       x >= maxX - TRIGGER_AUTO_RESIZE ||
-      y <= _minY + TRIGGER_AUTO_RESIZE
+      y <= minY + TRIGGER_AUTO_RESIZE
     );
   };
 
@@ -145,7 +144,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     window.electron.app.onMouseMove((mousePosition, _, isDragging) => {
       const x = clamp(mousePosition.x, minX, maxX);
       const y = clamp(mousePosition.y, minY, maxY);
-      nearEdge.setToggle(mouseIsNearEdge(x, y, shellStore.isFullscreen));
+      nearEdge.setToggle(mouseIsNearEdge(x, y));
 
       if (isDragging) {
         mouseDragX.set(x);
@@ -175,10 +174,9 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       if (nearEdge.isOn && dragging.isOn && !resizing.isOn) {
         const x = mouseDragX.get();
         const y = mouseDragY.get();
-        const _minY = shellStore.isFullscreen ? minY : minY + 30;
         if (x <= minX + TRIGGER_AUTO_RESIZE) {
           shellStore.setSnapView('left');
-        } else if (y <= _minY + TRIGGER_AUTO_RESIZE) {
+        } else if (y <= minY + TRIGGER_AUTO_RESIZE) {
           shellStore.setSnapView('fullscreen');
         } else if (x >= maxX - TRIGGER_AUTO_RESIZE) {
           shellStore.setSnapView('right');
@@ -374,8 +372,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   const dragMaximize = () => {
     const x = mouseDragX.get();
     const y = mouseDragY.get();
-    const _minY = shellStore.isFullscreen ? minY : minY + 30;
-    if (y <= _minY + TRIGGER_AUTO_RESIZE) {
+    if (y <= minY + TRIGGER_AUTO_RESIZE) {
       const mb = shellStore.maximize(appWindow.appId);
       setBoundsAfterMaximize(mb);
     } else {
