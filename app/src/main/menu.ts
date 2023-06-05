@@ -129,8 +129,8 @@ export class MenuBuilder {
           accelerator: 'Ctrl+Command+F',
           click: () => {
             const wasFullscreen = this.mainWindow.isFullScreen();
-            this.mainWindow.setFullScreen(!wasFullscreen);
             this.mainWindow.setMenuBarVisibility(wasFullscreen);
+            this.mainWindow.setFullScreen(!wasFullscreen);
           },
         },
         {
@@ -246,8 +246,8 @@ export class MenuBuilder {
                   accelerator: 'F11',
                   click: () => {
                     const wasFullscreen = this.mainWindow.isFullScreen();
-                    this.mainWindow.setFullScreen(!wasFullscreen);
                     this.mainWindow.setMenuBarVisibility(wasFullscreen);
+                    this.mainWindow.setFullScreen(!wasFullscreen);
                   },
                 },
                 {
@@ -264,8 +264,8 @@ export class MenuBuilder {
                   accelerator: 'F11',
                   click: () => {
                     const wasFullscreen = this.mainWindow.isFullScreen();
-                    this.mainWindow.setFullScreen(!wasFullscreen);
                     this.mainWindow.setMenuBarVisibility(wasFullscreen);
+                    this.mainWindow.setFullScreen(!wasFullscreen);
                   },
                 },
               ],

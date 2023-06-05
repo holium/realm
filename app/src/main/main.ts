@@ -101,7 +101,6 @@ const createWindow = async () => {
     },
   });
   mainWindow.setMenuBarVisibility(false);
-  mainWindow.setAutoHideMenuBar(true);
 
   // ---------------------------------------------------------------------
   // ----------------------- Start Realm services ------------------------

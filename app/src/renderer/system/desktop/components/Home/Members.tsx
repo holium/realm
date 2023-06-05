@@ -2,32 +2,22 @@ import { useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { isValidPatp } from 'urbit-ob';
 
 import { Button, Flex, Icon, Text, TextInput } from '@holium/design-system';
 
 import { ShipSearch } from 'renderer/components/ShipSearch';
-import { useAppState } from 'renderer/stores/app.store';
 import { shipStore, useShipStore } from 'renderer/stores/ship.store';
 
 import { MembersList } from './Space/MembersList';
 
-type HomeSidebarProps = {
-  isFullscreen: boolean;
-};
-
-const HomeSidebar = styled(motion.div)<HomeSidebarProps>`
+const HomeSidebar = styled(motion.div)`
   position: relative;
   display: flex;
   flex-direction: column;
   border-radius: 12px;
   padding: 16px 16px 0 16px;
-  ${(props) =>
-    !props.isFullscreen &&
-    css`
-      margin-top: 30px;
-    `}
   width: 100%;
   height: 100%;
   gap: 16px;
@@ -72,7 +62,6 @@ export const createPeopleForm = (
 
 const MembersPresenter = ({ our, onMemberClick }: IMembers) => {
   const { spacesStore } = useShipStore();
-  const { shellStore } = useAppState();
   const searchRef = useRef(null);
 
   const { person } = useMemo(() => createPeopleForm(), []);
@@ -115,7 +104,6 @@ const MembersPresenter = ({ our, onMemberClick }: IMembers) => {
       onContextMenu={(evt: any) => {
         evt.stopPropagation();
       }}
-      isFullscreen={shellStore.isFullscreen}
     >
       <Flex flexDirection="row" alignItems="center" gap={10} mb={12}>
         <Icon name="Members" size={18} opacity={0.5} />

@@ -142,9 +142,9 @@ export const RealmBackground = ({
         // 2. show it.
         controls.start({
           x: dmb.x + 8,
-          y: shellStore.isFullscreen ? dmb.y : dmb.y + 30,
+          y: dmb.y,
           width: dmb.width / 2,
-          height: shellStore.isFullscreen ? dmb.height : dmb.height - 30,
+          height: dmb.height,
           zIndex: shellStore.windows.size,
           transition: {
             duration: 0,
@@ -155,9 +155,9 @@ export const RealmBackground = ({
       case 'right':
         controls.start({
           x: dmb.x + 8 + dmb.width / 2,
-          y: shellStore.isFullscreen ? dmb.y : dmb.y + 30,
+          y: dmb.y,
           width: dmb.width / 2,
-          height: shellStore.isFullscreen ? dmb.height : dmb.height - 30,
+          height: dmb.height,
           zIndex: shellStore.windows.size,
           transition: {
             duration: 0,
@@ -168,9 +168,9 @@ export const RealmBackground = ({
       case 'fullscreen':
         controls.start({
           x: dmb.x + 8,
-          y: shellStore.isFullscreen ? dmb.y : dmb.y + 30,
+          y: dmb.y,
           width: dmb.width,
-          height: shellStore.isFullscreen ? dmb.height : dmb.height - 30,
+          height: dmb.height,
           zIndex: shellStore.windows.size,
           transition: {
             duration: 0,
