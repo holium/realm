@@ -40,7 +40,7 @@ export const ChatStore = types
   })
   .views((self) => ({
     isChatPinned(path: string) {
-      return self.inbox.find((c) => path === c.path)?.pinned || false;
+      return !!self.pinnedChats.find((p) => path === p);
     },
     isChatMuted(path: string) {
       return !!self.mutedChats.find((p) => path === p);
@@ -69,8 +69,8 @@ export const ChatStore = types
         }
 
         // Check if the chats are pinned
-        const isAPinned = a.pinned;
-        const isBPinned = b.pinned;
+        const isAPinned = self.pinnedChats.includes(a.path);
+        const isBPinned = self.pinnedChats.includes(b.path);
 
         // Compare the pinned status
         if (isAPinned !== isBPinned) {
@@ -199,7 +199,7 @@ export const ChatStore = types
         if (muted) {
           self.mutedChats.push(path);
         } else {
-          self.mutedChats.replace(self.mutedChats.filter((c) => c !== path));
+          self.mutedChats.remove(path);
         }
       } else {
         console.info(`chat ${path} not found`);

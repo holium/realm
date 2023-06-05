@@ -756,6 +756,17 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   // Inserts
   //
 
+  setPinned(path: string, pinned: boolean) {
+    if (!this.db?.open) return;
+
+    const sql1 = this.db.prepare(
+      `UPDATE ${CHAT_TABLES.PATHS_FLAGS} SET pinned = ${
+        pinned ? 1 : 0
+      } WHERE path = ?;`
+    );
+    return sql1.run(path);
+  }
+
   setMuted(path: string, muted: boolean) {
     if (!this.db?.open) return;
 
