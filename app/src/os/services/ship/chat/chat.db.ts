@@ -128,6 +128,9 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         path: '/pins',
       });
 
+      const truncate = `DELETE FROM ${CHAT_TABLES.PATHS_FLAGS};`;
+      this.db.prepare(truncate).run();
+
       const insert = this.db.prepare(
         `REPLACE INTO ${CHAT_TABLES.PATHS_FLAGS} (
           path,
@@ -752,6 +755,17 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   //
   // Inserts
   //
+
+  setMuted(path: string, muted: boolean) {
+    if (!this.db?.open) return;
+
+    const sql1 = this.db.prepare(
+      `UPDATE ${CHAT_TABLES.PATHS_FLAGS} SET muted = ${
+        muted ? 1 : 0
+      } WHERE path = ?;`
+    );
+    return sql1.run(path);
+  }
 
   private _insertMessages(messages: MessagesRow[]) {
     if (!this.db?.open) return;

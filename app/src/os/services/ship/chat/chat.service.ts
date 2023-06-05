@@ -65,6 +65,7 @@ export class ChatService extends AbstractService<ChatUpdateTypes> {
     };
     try {
       await APIConnection.getInstance().conduit.poke(payload);
+      this.chatDB?.setMuted(path, mute);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to toggle muted chat');
