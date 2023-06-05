@@ -58,28 +58,40 @@ const ConnIndicator = styled(motion.div)`
   border-radius: 50%;
 `;
 
-export const ConnectionStatus = observer(() => {
-  const { loggedInAccount, theme } = useAppState();
+export const ConnectionStatusPresenter = () => {
+  const { loggedInAccount, theme, connectionStatus } = useAppState();
   const [isReconnecting, setIsReconnecting] = useState(false);
+  const status = connectionStatus;
+  const online = connectionStatus === 'connected';
+  // const [status, _setStatus] = useState<
+  //   | 'online'
+  //   | 'offline'
+  //   | 'failed'
+  //   | 'refreshing'
+  //   | 'refreshed'
+  //   | 'connected'
+  //   | 'connecting'
+  //   | 'initialized'
+  // >(connectionStatus as any);
   // const status = connectionStatus;
-  const online = true;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [status, _setStatus] = useState<
-    | 'online'
-    | 'offline'
-    | 'failed'
-    | 'refreshing'
-    | 'refreshed'
-    | 'connected'
-    | 'connecting'
-    | 'initialized'
-  >('online');
+  // const online = true;
+  // // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // const [status, _setStatus] = useState<
+  //   | 'online'
+  //   | 'offline'
+  //   | 'failed'
+  //   | 'refreshing'
+  //   | 'refreshed'
+  //   | 'connected'
+  //   | 'connecting'
+  //   | 'initialized'
+  // >('online');
 
   const mode = theme.mode;
   const onReconnect = () => {
     // OSActions.reconnect();
   };
-  // console.log('render status => %o', status);
+  console.log('render status => %o', status);
   let color = '#34C676';
   let statusText = 'Connected';
   let leftIcon = <div />;
@@ -171,4 +183,6 @@ export const ConnectionStatus = observer(() => {
     ),
     [status, isReconnecting, loggedInAccount?.serverId]
   );
-});
+};
+
+export const ConnectionStatus = observer(ConnectionStatusPresenter);

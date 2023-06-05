@@ -3,6 +3,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 import { Position } from '@holium/design-system';
 import { MouseState } from '@holium/realm-presence';
 
+import { ConduitState } from 'os/services/api';
 import { settingsPreload } from 'os/services/ship/settings.service';
 import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
@@ -77,6 +78,11 @@ const appPreload = {
   onSetFullScreen(callback: (isFullscreen: boolean) => void) {
     ipcRenderer.on('set-fullscreen', (_, isFullscreen) => {
       callback(isFullscreen);
+    });
+  },
+  onConnectionStatus(callback: (status: ConduitState) => void) {
+    ipcRenderer.on('realm.sendConnectionStatus', (_, status) => {
+      callback(status);
     });
   },
   onBrowserOpen(callback: any) {

@@ -2,8 +2,11 @@ import { useEffect, useMemo } from 'react';
 import { Layer, ViewPort } from 'react-spaces';
 import { observer } from 'mobx-react';
 
-// import { ConnectionStatus } from 'renderer/components';
+import { ConnectionStatus } from '@holium/design-system';
+
+import { ConduitState } from 'os/services/api';
 import { useAppState } from 'renderer/stores/app.store';
+import { RealmIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { Desktop } from './desktop/Desktop';
@@ -13,8 +16,9 @@ const getCssVar = (name: string) =>
   getComputedStyle(document.documentElement).getPropertyValue(name);
 
 const ShellPresenter = () => {
+  const { loggedInAccount, shellStore, authStore, theme, connectionStatus } =
+    useAppState();
   const { settingsStore } = useShipStore();
-  const { shellStore, authStore, loggedInAccount } = useAppState();
   const { session } = authStore;
 
   const DialogLayer = useMemo(
@@ -49,6 +53,22 @@ const ShellPresenter = () => {
     <ViewPort>
       <Layer zIndex={2}>{DialogLayer}</Layer>
       <Desktop />
+      <Layer zIndex={20}>
+        <ConnectionStatus
+          serverId={loggedInAccount?.serverId || ''}
+          themeMode={theme.mode as 'light' | 'dark'}
+          status={connectionStatus as ConduitState}
+          onReconnect={() => {
+            console.log('reconnect');
+            RealmIPC.reconnectConduit();
+          }}
+          onSendBugReport={() => {
+            console.log('send bug report');
+          }}
+        />
+      </Layer>
+      {/* TODO make DragBar work */}
+      {/* <Layer zIndex={21}>{!isFullscreen && <DragBar />}</Layer> */}
     </ViewPort>
   );
 };
