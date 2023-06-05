@@ -26,7 +26,7 @@ function WordItem() {
     >
       <Flex justifyContent={'space-between'} alignItems={'flex-end'}>
         <Text.H6 fontWeight={600}>word</Text.H6>
-        <Text.Hint opacity={0.7}> ~lodlev-migdev</Text.Hint>
+        <Text.Body opacity={0.5}> ~lodlev-migdev</Text.Body>
       </Flex>
       <Flex justifyContent={'space-between'} alignItems={'flex-end'}>
         <Flex gap={10}>
@@ -51,9 +51,9 @@ function WordItem() {
             <Text.Body opacity={0.7}>2</Text.Body>
           </Button.IconButton>
         </Flex>
-        <Text.Hint opacity={0.7} style={{ marginBottom: 3 }}>
+        <Text.Body opacity={0.5} style={{ marginBottom: 3 }}>
           07/21/2022 10:30 AM
-        </Text.Hint>
+        </Text.Body>
       </Flex>
     </Flex>
   );
