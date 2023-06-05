@@ -112,7 +112,6 @@ function Word() {
     </Card>
   );
 }
-
 function Definition({ text }: { text: string }) {
   return (
     <Flex flexDirection={'column'} gap={8}>
@@ -159,5 +158,4 @@ function Definitions() {
     </Flex>
   );
 }
-
 export default Word;
