@@ -5,6 +5,7 @@ import { Flex } from '@holium/design-system/general';
 import { ThemeType } from '@holium/shared';
 
 import { InviteCard } from '../components/InviteCard';
+import { Page } from '../components/Page';
 import { GlobalStyle } from '../lib/GlobalStyle';
 import prisma from '../lib/prisma';
 
@@ -41,16 +42,24 @@ const InvitePage = ({ invite }: Props) => {
   const theme: ThemeType = JSON.parse(invite.space.theme);
 
   return (
-    <Flex
-      width="100%"
-      height="100vh"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
+    <Page
+      title={invite.space.name}
+      description={invite.space.description}
+      favicon={invite.space.picture}
+      image={theme.wallpaper}
+      themeColor={theme.backgroundColor}
     >
-      <GlobalStyle theme={theme} />
-      <InviteCard invite={invite} />
-    </Flex>
+      <Flex
+        width="100%"
+        height="100vh"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <GlobalStyle theme={theme} />
+        <InviteCard invite={invite} />
+      </Flex>
+    </Page>
   );
 };
 

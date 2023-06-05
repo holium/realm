@@ -213,8 +213,8 @@ export const paths = {
           y2="19.071"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#75DAFF" />
-          <stop offset="1" stop-color="#1EA2E4" />
+          <stop stopColor="#75DAFF" />
+          <stop offset="1" stopColor="#1EA2E4" />
         </linearGradient>
         <radialGradient
           id="paint1_radial_265_6460"
@@ -225,7 +225,7 @@ export const paths = {
           gradientTransform="translate(12 12) scale(10)"
         >
           <stop />
-          <stop offset="1" stop-opacity="0" />
+          <stop offset="1" stopOpacity="0" />
         </radialGradient>
         <radialGradient
           id="paint2_radial_265_6460"
@@ -235,8 +235,8 @@ export const paths = {
           gradientUnits="userSpaceOnUse"
           gradientTransform="translate(11.9353 2.23176) scale(22.2841)"
         >
-          <stop stop-color="#FAFAFB" />
-          <stop offset="1" stop-color="#C8CDD1" />
+          <stop stopColor="#FAFAFB" />
+          <stop offset="1" stopColor="#C8CDD1" />
         </radialGradient>
       </defs>
     </>
@@ -738,6 +738,51 @@ export const paths = {
   ),
   StarFilled: (
     <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z" />
+  ),
+  RealmCursor: (
+    <>
+      <g filter="url(#filter0_d_6255_17167)">
+        <circle cx="8" cy="8" r="5" fill="var(--rlm-accent-color)" />
+        <circle cx="8" cy="8" r="5.5" stroke="white" />
+      </g>
+      <defs>
+        <filter
+          id="filter0_d_6255_17167"
+          x="0"
+          y="0"
+          width="16"
+          height="16"
+          filterUnits="userSpaceOnUse"
+          colorInterpolationFilters="sRGB"
+        >
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
+          <feColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
+          />
+          <feOffset />
+          <feGaussianBlur stdDeviation="1" />
+          <feComposite in2="hardAlpha" operator="out" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_6255_17167"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_6255_17167"
+            result="shape"
+          />
+        </filter>
+      </defs>
+    </>
   ),
 };
 

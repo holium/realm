@@ -31,12 +31,11 @@ export const calculateAnchorPointById = (
 ) => {
   const el = document.getElementById(`${appId}-icon`);
   if (!el) return null;
-
   const {
     left: buttonLeft,
     width: buttonWidth,
     height,
-  } = el?.getBoundingClientRect();
+  } = el.getBoundingClientRect();
   const buttonTop = el.offsetHeight + height;
   let style: any = {};
 

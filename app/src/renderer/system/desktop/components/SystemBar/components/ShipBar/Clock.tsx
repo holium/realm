@@ -8,7 +8,7 @@ export const TrayClock = () => {
   const [date, setDate] = useState(() => moment().format('ddd MMM YY'));
   useEffect(() => {
     function initClock() {
-      let interval = (60 - new Date().getSeconds()) * 1000 + 5;
+      const interval = (60 - new Date().getSeconds()) * 1000 + 5;
       setTime(moment().format('ddd MMM DD'));
       setDate(moment().format('hh:mm A'));
       setTimeout(initClock, interval);

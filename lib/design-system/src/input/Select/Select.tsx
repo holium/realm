@@ -74,7 +74,7 @@ export const Select = ({
   useEffect(() => {
     document.addEventListener('click', handleClickOutside, true);
 
-    () => {
+    return () => {
       document.removeEventListener('click', handleClickOutside, true);
     };
   }, []);

@@ -16,7 +16,7 @@ export const MiniAppWindow = styled(motion.div)<MiniAppStyleProps>`
   ::-webkit-scrollbar {
     display: none;
   }
-  /* backdrop-filter: blur(24px); */
+  /* backdrop-filter: var(--blur); */
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   background: rgba(var(--rlm-window-rgba));

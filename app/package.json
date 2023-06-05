@@ -2,7 +2,7 @@
   "name": "@holium/realm",
   "version": "0.9.0",
   "description": "A desktop environment for Urbit",
-  "private": "true",
+  "private": true,
   "scripts": {
     "postbuild": "./node_modules/.bin/electron-rebuild -f -w better-sqlite3 better-sqlite3-multiple-ciphers",
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",

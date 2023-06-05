@@ -16,7 +16,11 @@ export default {
   title: 'OS/Mouse',
 } as ComponentMeta<typeof AnimatedCursor>;
 
-export const Demo: ComponentStory<typeof AnimatedCursor> = ({ color }) => {
+export const Demo: ComponentStory<typeof AnimatedCursor> = ({
+  color,
+}: {
+  color?: string;
+}) => {
   const containerId = 'mouse-area';
 
   return (

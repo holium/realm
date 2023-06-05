@@ -30,11 +30,11 @@ type LocalPeerSetters = {
 };
 
 export class LocalPeer {
-  patp: string = '';
-  patpId: number = 0;
-  audioLevel: number = 0;
-  isMuted: boolean = false;
-  isSpeaking: boolean = false;
+  patp = '';
+  patpId = 0;
+  audioLevel = 0;
+  isMuted = false;
+  isSpeaking = false;
   status: PeerConnectionState = PeerConnectionState.New;
   audioTracks: Map<string, any> = new Map();
   stream: MediaStream | undefined = undefined;

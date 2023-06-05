@@ -11,6 +11,7 @@ RealmAPI.init().then(() => {
   RealmAPI.watch({
     app: 'friends',
     path: '/all',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onEvent: (_data) => {
       // console.log('in sample.js', data);
     },
@@ -25,6 +26,7 @@ RealmAPI.init().then(() => {
       },
     },
     reaction: 'friends-reaction.new-friend',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onReaction: (_data) => {
       // console.log('is it poke reaction?', data);
     },
@@ -33,6 +35,7 @@ RealmAPI.init().then(() => {
   RealmAPI.scry({
     app: 'passports',
     path: '/visas',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   }).then((_res) => {
     // console.log('scry, ', res);
   });
@@ -46,6 +49,7 @@ RealmAPI.init().then(() => {
       RealmAPI.scry({
         app: 'passports',
         path: '/visas',
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       }).then((_res) => {
         // console.log('scry again', res);
       });

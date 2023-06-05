@@ -101,7 +101,7 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
             payload: data['initial'],
           });
           break;
-        case 'add':
+        case 'add': {
           const addedSpace = data['add'];
           addedSpace.current = 1;
           const addedPath = addedSpace.space.path;
@@ -115,7 +115,8 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
             payload: this.getSpace(addedPath),
           });
           break;
-        case 'remove':
+        }
+        case 'remove': {
           const removedPath = data['remove']['space-path'];
           let resetToHomeSpace = false;
           if (this.spacesDB?.findOne(removedPath)?.current) {
@@ -128,7 +129,8 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
             payload: { path: removedPath, resetToHomeSpace },
           });
           break;
-        case 'replace':
+        }
+        case 'replace': {
           const replacePayload = data['replace'];
           // log.info('replace', replacePayload);
           const replacePath = replacePayload.space.path;
@@ -138,7 +140,8 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
             payload: this.getSpace(replacePath),
           });
           break;
-        case 'remote-space':
+        }
+        case 'remote-space': {
           // when a remote space is added, we need to add it to our local db
           const remoteSpace = data['remote-space'];
           this.spacesDB?.insertAll({ [remoteSpace.path]: remoteSpace.space });
@@ -151,6 +154,7 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
             payload: this.getSpace(remoteSpace.path),
           });
           break;
+        }
         default:
           break;
       }
@@ -160,7 +164,7 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
       const visaType = Object.keys(visaData)[0];
 
       switch (visaType) {
-        case 'invite-sent':
+        case 'invite-sent': {
           const sentPayload = visaData['invite-sent'];
           this.membersDB?.createMember({
             space: sentPayload.path,
@@ -172,7 +176,8 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
             payload: sentPayload,
           });
           break;
-        case 'invite-accepted':
+        }
+        case 'invite-accepted': {
           const acceptedPayload = visaData['invite-accepted'];
           const updated = this.membersDB?.updateMember(
             acceptedPayload.path,
@@ -192,7 +197,8 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
             },
           });
           break;
-        case 'invite-received':
+        }
+        case 'invite-received': {
           const receivedPayload = visaData[visaType];
           const invites = this.invitationsDB?.insertAll({
             [receivedPayload.path]: receivedPayload.invite,
@@ -202,11 +208,14 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
             payload: invites,
           });
           break;
-        case 'invite-removed': // this is when an invite is declined by our or after we have accepted it
+        }
+        case 'invite-removed': {
+          // this is when an invite is declined by our or after we have accepted it
           const path = visaData[visaType].path;
           this.invitationsDB?.removeInvite(path);
           break;
-        case 'kicked':
+        }
+        case 'kicked': {
           const kickedPayload = visaData.kicked;
           this.membersDB?.deleteMember(kickedPayload.path, kickedPayload.ship);
           this.sendUpdate({
@@ -214,7 +223,8 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
             payload: kickedPayload,
           });
           break;
-        case 'edited':
+        }
+        case 'edited': {
           const editedPayload = visaData.edited;
           const editedUpdated = this.membersDB?.updateMember(
             editedPayload.path,
@@ -236,6 +246,7 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
             },
           });
           break;
+        }
         case 'invite-declined':
           log.info('invite-declined', visaData[visaType]);
           // this.invitationsDB?.removeInvite(path);

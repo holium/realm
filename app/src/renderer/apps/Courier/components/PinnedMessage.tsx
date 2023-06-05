@@ -26,11 +26,11 @@ const BlurredBG = styled.div`
   z-index: 10;
   .pinned-or-reply-message {
     border-radius: 2px;
-    backdrop-filter: blur(24px);
+    backdrop-filter: var(--blur);
     background: rgba(var(--rlm-window-rgba));
     width: calc(100% + 2px);
     &:hover {
-      backdrop-filter: blur(24px);
+      backdrop-filter: var(--blur);
       background: rgba(var(--rlm-window-rgba));
     }
   }

@@ -79,7 +79,8 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
             payload: this.tables?.appCatalog.getCatalog(),
           });
           break;
-        case 'app-install-update': //  installed, uninstalled, started, etc.
+        case 'app-install-update': {
+          //  installed, uninstalled, started, etc.
           const { appId, app, grid } = data['app-install-update'];
           this.tables?.appCatalog.updateApp(appId, app);
           this.tables?.appCatalog.updateGrid(grid);
@@ -89,7 +90,8 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
             payload: updatedApp,
           });
           break;
-        case 'dock-update':
+        }
+        case 'dock-update': {
           const payload = data['dock-update'];
           const pinnedDock = this.tables?.appCatalog.updateDock(payload);
           this.sendUpdate({
@@ -100,7 +102,8 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
             },
           });
           break;
-        case 'suite-added':
+        }
+        case 'suite-added': {
           const addedStall = this.tables?.appCatalog.updateSuite(
             data['suite-added'],
             'add'
@@ -113,7 +116,8 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
             },
           });
           break;
-        case 'suite-removed':
+        }
+        case 'suite-removed': {
           const removedStall = this.tables?.appCatalog.updateSuite(
             data['suite-removed'],
             'remove'
@@ -126,6 +130,7 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
             },
           });
           break;
+        }
         case 'recommended':
           this.tables?.appCatalog.updateRecommendations(
             data.recommended,
@@ -150,7 +155,7 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
             },
           });
           break;
-        case 'stall-update':
+        case 'stall-update': {
           const stallUpdate = data['stall-update'];
           // TODO come up with better solution for p2p app discovery
           if ('add-app' in stallUpdate) {
@@ -179,7 +184,9 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
           });
 
           break;
-        case 'joined-bazaar': // stall, path, catalog
+        }
+        case 'joined-bazaar': {
+          // stall, path, catalog
           const joinedBazaar = data['joined-bazaar'];
           this.tables?.appCatalog.updateCatalog(joinedBazaar.catalog);
           const joinedStallUpdate = this.tables?.appCatalog.updateStall(
@@ -194,6 +201,7 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
             },
           });
           break;
+        }
         case 'rebuild-catalog':
           log.info('rebuild-catalog => %o', data['rebuild-catalog']);
           // console.log('rebuild-catalog => %o', data['rebuild-catalog']);
@@ -275,7 +283,11 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
     });
   }
 
-  async reorderApp(desk: string, index: number) {
+  async reorderApp(
+    desk: string,
+    index: number,
+    grid: { [idx: string]: string }
+  ) {
     return APIConnection.getInstance().conduit.poke({
       app: 'bazaar',
       mark: 'bazaar-action',
@@ -284,6 +296,13 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
           desk,
           index,
         },
+      },
+      onSuccess: () => {
+        this.tables?.appCatalog.updateGrid(grid);
+        this.sendUpdate({
+          type: 'reorder-grid-index',
+          payload: grid,
+        });
       },
     });
   }

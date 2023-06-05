@@ -114,7 +114,7 @@ export const ChatMessagePresenter = ({
               Object.keys(c)[0].includes('image')
             );
           if (elem) {
-            let asImage = elem as HTMLImageElement;
+            const asImage = elem as HTMLImageElement;
             if (
               images &&
               images.length > 0 &&
@@ -146,7 +146,7 @@ export const ChatMessagePresenter = ({
               Object.keys(c)[0].includes('image')
             );
           if (elem) {
-            let asImage = elem as HTMLImageElement;
+            const asImage = elem as HTMLImageElement;
             if (
               images &&
               images.length > 0 &&
@@ -178,7 +178,7 @@ export const ChatMessagePresenter = ({
             msgModel &&
             msgModel.contents.filter((c) => Object.keys(c)[0].includes('link'));
           if (elem) {
-            let asImage = elem as HTMLAnchorElement;
+            const asImage = elem as HTMLAnchorElement;
             if (
               links &&
               links.length > 0 &&
@@ -271,7 +271,7 @@ export const ChatMessagePresenter = ({
 
   const messages = selectedChat?.messages || [];
 
-  let mergedContents: any | undefined = useMemo(() => {
+  const mergedContents: any | undefined = useMemo(() => {
     const replyTo = message.replyToMsgId;
     let replyToObj = {
       reply: { msgId: replyTo, author: 'unknown', message: [{ plain: '' }] },
@@ -279,7 +279,7 @@ export const ChatMessagePresenter = ({
     if (replyTo) {
       const originalMsg = toJS(messages.find((m) => m.id === replyTo));
       if (originalMsg) {
-        let { nickname } = friends.getContactAvatarMetadata(
+        const { nickname } = friends.getContactAvatarMetadata(
           originalMsg?.sender
         );
         replyToObj = originalMsg && {

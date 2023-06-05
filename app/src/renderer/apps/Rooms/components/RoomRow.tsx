@@ -37,7 +37,7 @@ const RoomRowPresenter = ({
 
   const { dockColor, windowColor } = theme;
 
-  let presentCount = present?.length ?? 0;
+  const presentCount = present?.length ?? 0;
   let peopleText = 'people';
   if (presentCount === 1) {
     peopleText = 'person';

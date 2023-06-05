@@ -81,9 +81,6 @@ export const AppWindowModel = types
     minimize() {
       self.state = 'minimized';
     },
-    restoreOldDimensions() {
-      self.bounds = { ...self.prevBounds };
-    },
     maximizeLeft(desktopDimensions: Dimensions, isFullscreen: boolean) {
       const maximizedBounds = getMaximizedBounds(desktopDimensions);
       self.prevBounds = { ...self.bounds };
@@ -113,7 +110,9 @@ export const AppWindowModel = types
     toggleMaximize(desktopDimensions: Dimensions, isFullscreen: boolean) {
       const isMaximized = self.isMaximized(desktopDimensions);
       if (isMaximized) {
+        const bounds = { ...self.bounds };
         self.bounds = { ...self.prevBounds };
+        self.prevBounds = bounds;
       } else {
         self.prevBounds = { ...self.bounds };
         const maximizedBounds = getMaximizedBounds(desktopDimensions);
@@ -133,5 +132,5 @@ export const AppWindowModel = types
     },
   }));
 
-export interface AppWindowMobxType extends Instance<typeof AppWindowModel> {}
-export interface AppWindowProps extends SnapshotIn<typeof AppWindowModel> {}
+export type AppWindowMobxType = Instance<typeof AppWindowModel>;
+export type AppWindowProps = SnapshotIn<typeof AppWindowModel>;

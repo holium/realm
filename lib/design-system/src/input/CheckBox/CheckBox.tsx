@@ -9,7 +9,7 @@ type Props = {
   isChecked?: boolean;
   disabled?: boolean;
   defaultChecked?: boolean;
-  onChange?: () => void;
+  onChange?: (v: boolean) => void;
 };
 
 export const CheckBox = ({
@@ -24,8 +24,14 @@ export const CheckBox = ({
 
   const onToggle = () => {
     if (disabled) return;
-    toggled.toggle();
-    onChange?.();
+
+    if (toggled.isOn) {
+      toggled.toggleOff();
+      onChange?.(false);
+    } else {
+      toggled.toggleOn();
+      onChange?.(true);
+    }
   };
 
   return (

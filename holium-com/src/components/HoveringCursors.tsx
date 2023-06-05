@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-export const HoveringCursors = ({ className = '' }) => (
+export const HoveringCursors = ({ className = '' }: { className?: string }) => (
   <motion.svg
     width="275"
     height="330"
