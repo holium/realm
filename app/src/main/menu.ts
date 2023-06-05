@@ -128,7 +128,9 @@ export class MenuBuilder {
           label: 'Toggle Full Screen',
           accelerator: 'Ctrl+Command+F',
           click: () => {
-            this.mainWindow.setFullScreen(!this.mainWindow.isFullScreen());
+            const wasFullscreen = this.mainWindow.isFullScreen();
+            this.mainWindow.setFullScreen(!wasFullscreen);
+            this.mainWindow.setMenuBarVisibility(wasFullscreen);
           },
         },
         {
@@ -243,9 +245,9 @@ export class MenuBuilder {
                   label: 'Toggle &Full Screen',
                   accelerator: 'F11',
                   click: () => {
-                    this.mainWindow.setFullScreen(
-                      !this.mainWindow.isFullScreen()
-                    );
+                    const wasFullscreen = this.mainWindow.isFullScreen();
+                    this.mainWindow.setFullScreen(!wasFullscreen);
+                    this.mainWindow.setMenuBarVisibility(wasFullscreen);
                   },
                 },
                 {
@@ -261,9 +263,9 @@ export class MenuBuilder {
                   label: 'Toggle &Full Screen',
                   accelerator: 'F11',
                   click: () => {
-                    this.mainWindow.setFullScreen(
-                      !this.mainWindow.isFullScreen()
-                    );
+                    const wasFullscreen = this.mainWindow.isFullScreen();
+                    this.mainWindow.setFullScreen(!wasFullscreen);
+                    this.mainWindow.setMenuBarVisibility(wasFullscreen);
                   },
                 },
               ],

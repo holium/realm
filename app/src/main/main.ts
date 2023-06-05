@@ -92,7 +92,6 @@ const createWindow = async () => {
     title: 'Realm',
     fullscreen: true,
     acceptFirstMouse: true,
-    titleBarStyle: 'hidden',
     webPreferences: {
       nodeIntegration: false,
       webviewTag: true,
@@ -101,6 +100,8 @@ const createWindow = async () => {
       preload: getPreloadPath(),
     },
   });
+  mainWindow.setMenuBarVisibility(false);
+  mainWindow.setAutoHideMenuBar(true);
 
   // ---------------------------------------------------------------------
   // ----------------------- Start Realm services ------------------------

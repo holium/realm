@@ -6,10 +6,12 @@ const registerListeners = (
 ) => {
   mainWindow.on('enter-full-screen', () => {
     mainWindow.webContents.send('set-fullscreen', true);
+    mainWindow.setMenuBarVisibility(false);
   });
 
   mainWindow.on('leave-full-screen', () => {
     mainWindow.webContents.send('set-fullscreen', false);
+    mainWindow.setMenuBarVisibility(true);
   });
 
   mainWindow.on('focus', mouseWindow.moveTop);
