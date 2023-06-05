@@ -2,7 +2,7 @@ import { BrowserWindow, ipcMain, session } from 'electron';
 
 import { getPreloadPath } from '../util';
 
-const registerListeners = (mainWindow: BrowserWindow) => {
+const registerListeners = (win: BrowserWindow) => {
   ipcMain.handle(
     'open-app',
     (_event, location: { url: string; cookies: any }, partition: string) => {
@@ -17,14 +17,14 @@ const registerListeners = (mainWindow: BrowserWindow) => {
     }
   );
 
-  mainWindow.webContents.on('will-attach-webview', (_, webPreferences) => {
+  win.webContents.on('will-attach-webview', (_, webPreferences) => {
     webPreferences.preload = getPreloadPath();
     webPreferences.nodeIntegration = false;
     webPreferences.contextIsolation = true;
     webPreferences.sandbox = false;
   });
 
-  mainWindow.webContents.on('did-attach-webview', (_, webContents) => {
+  win.webContents.on('did-attach-webview', (_, webContents) => {
     webContents.on('dom-ready', () => {
       webContents.send('add-mouse-listeners');
       webContents.send('add-key-listeners');

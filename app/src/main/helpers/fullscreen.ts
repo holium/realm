@@ -1,7 +1,5 @@
 import { BrowserWindow, ipcMain } from 'electron';
 
-import { bootStandalone } from '../main';
-
 const registerListeners = (
   mainWindow: BrowserWindow,
   mouseWindow: BrowserWindow
@@ -18,12 +16,6 @@ const registerListeners = (
 
   ipcMain.handle('set-fullscreen', (_, isFullscreen) => {
     mainWindow.setFullScreen(isFullscreen);
-  });
-
-  ipcMain.handle('set-standalone-chat', (_, isStandaloneChat) => {
-    if (isStandaloneChat) {
-      bootStandalone();
-    }
   });
 
   mainWindow.on('focus', mouseWindow.moveTop);

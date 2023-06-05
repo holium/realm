@@ -1,15 +1,16 @@
-import { app, BrowserWindow, screen, shell } from 'electron';
+import { BrowserWindow, screen, shell } from 'electron';
 import isDev from 'electron-is-dev';
 
 import { BrowserHelper } from './helpers/browser';
-import { CursorHelper } from './helpers/cursor';
+import { CursorSettingsHelper } from './helpers/cursorSettings';
 import { DeepLinkHelper } from './helpers/deepLink';
 import { DevHelper } from './helpers/dev';
 import { FullScreenHelper } from './helpers/fullscreen';
 import { KeyHelper } from './helpers/key';
 import { MediaHelper } from './helpers/media';
-import { MouseHelper } from './helpers/mouse';
+import { MouseEventsHelper } from './helpers/mouseEvents';
 import { PowerHelper } from './helpers/power';
+import { StandaloneHelper } from './helpers/standalone';
 import { TitlebarHelper } from './helpers/titlebar';
 import { WebViewHelper } from './helpers/webview';
 import { MenuBuilder } from './menu';
@@ -47,6 +48,7 @@ export const createRealmWindow = () => {
   KeyHelper.registerListeners(newRealmWindow);
   DeepLinkHelper.registerListeners(newRealmWindow);
   TitlebarHelper.registerListeners(newRealmWindow);
+  StandaloneHelper.registerListeners();
 
   newRealmWindow.loadURL(resolveHtmlPath('index.html'));
 
@@ -116,8 +118,8 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
 
   FullScreenHelper.registerListeners(parentWindow, newMouseWindow);
-  CursorHelper.registerListeners(parentWindow, newMouseWindow);
-  MouseHelper.registerListeners(parentWindow, newMouseWindow);
+  CursorSettingsHelper.registerListeners(parentWindow, newMouseWindow);
+  MouseEventsHelper.registerListeners(parentWindow, newMouseWindow);
 
   newMouseWindow.on('close', () => {
     if (parentWindow.isClosable()) parentWindow.close();
@@ -126,8 +128,6 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
   parentWindow.on('close', () => {
     if (newMouseWindow.isClosable()) newMouseWindow.close();
   });
-
-  parentWindow.on('closed', app.quit);
 
   parentWindow.on('resize', () => {
     const newDimension = parentWindow.getBounds();
@@ -158,10 +158,16 @@ export const createStandaloneChatWindow = () => {
   KeyHelper.registerListeners(newStandaloneChatWindow);
   DeepLinkHelper.registerListeners(newStandaloneChatWindow);
   TitlebarHelper.registerListeners(newStandaloneChatWindow);
+  StandaloneHelper.registerListeners();
 
-  newStandaloneChatWindow.on('ready-to-show', newStandaloneChatWindow.show);
+  newStandaloneChatWindow.webContents.on('dom-ready', () => {
+    newStandaloneChatWindow.webContents.send('add-mouse-listeners', true);
+    newStandaloneChatWindow.webContents.send('add-key-listeners');
+  });
 
-  newStandaloneChatWindow.on('close', app.quit);
+  newStandaloneChatWindow.on('ready-to-show', () => {
+    newStandaloneChatWindow.show();
+  });
 
   return newStandaloneChatWindow;
 };

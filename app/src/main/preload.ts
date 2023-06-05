@@ -54,6 +54,9 @@ const appPreload = {
   setStandaloneChat: (isStandaloneChat: boolean) => {
     return ipcRenderer.invoke('set-standalone-chat', isStandaloneChat);
   },
+  isStandaloneChat: () => {
+    return ipcRenderer.invoke('is-standalone-chat');
+  },
   enableIsolationMode: () => {
     return ipcRenderer.invoke('enable-isolation-mode');
   },

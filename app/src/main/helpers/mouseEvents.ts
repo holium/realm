@@ -190,4 +190,4 @@ const registerListeners = (
   );
 };
 
-export const MouseHelper = { registerListeners };
+export const MouseEventsHelper = { registerListeners };

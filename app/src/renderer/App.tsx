@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MotionConfig } from 'framer-motion';
 import { observer } from 'mobx-react';
 
@@ -23,20 +23,24 @@ import 'photoswipe/dist/photoswipe.css';
 const AppPresenter = () => {
   const { theme, shellStore, booted } = useAppState();
 
+  const [isStandaloneChat, setStandaloneChat] = useState(
+    shellStore.isStandaloneChat
+  );
+
+  useEffect(() => {
+    window.electron.app.isStandaloneChat().then(setStandaloneChat);
+  }, []);
+
   const contextMenu = useMemo(() => <ContextMenu />, []);
   const titlebar = useMemo(() => {
     if (shellStore.isFullscreen) {
       return null;
     }
 
-    return shellStore.isStandaloneChat ? (
-      <StandAloneChatTitlebar />
-    ) : (
-      <RealmTitlebar />
-    );
-  }, [shellStore.isFullscreen, shellStore.isStandaloneChat]);
+    return isStandaloneChat ? <StandAloneChatTitlebar /> : <RealmTitlebar />;
+  }, [shellStore.isFullscreen, isStandaloneChat]);
   const background = useMemo(() => {
-    if (shellStore.isStandaloneChat) {
+    if (isStandaloneChat) {
       return null;
     }
 
@@ -51,19 +55,19 @@ const AppPresenter = () => {
     theme.wallpaper,
     shellStore.isBlurred,
     shellStore.snapView,
-    shellStore.isStandaloneChat,
+    isStandaloneChat,
   ]);
   const content = useMemo(() => {
     if (!booted) {
       return <AppLoading />;
     }
 
-    if (shellStore.isStandaloneChat) {
+    if (isStandaloneChat) {
       return <StandaloneChat />;
     }
 
     return <AppContent />;
-  }, [shellStore.isStandaloneChat, booted]);
+  }, [isStandaloneChat, booted]);
 
   useEffect(() => {
     RealmIPC.boot();

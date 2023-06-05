@@ -138,6 +138,6 @@ const registerListeners = (
   });
 };
 
-export const CursorHelper = {
+export const CursorSettingsHelper = {
   registerListeners,
 };
