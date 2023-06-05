@@ -28,6 +28,7 @@ export const ShellModel = types
     isBlurred: types.optional(types.boolean, true),
     snapView: types.optional(types.string, 'none'),
     isFullscreen: types.optional(types.boolean, true),
+    isStandaloneChat: types.optional(types.boolean, false),
     desktopDimensions: types.optional(
       types.model({
         width: types.number,
@@ -80,6 +81,23 @@ export const ShellModel = types
     },
     closeDialog() {
       self.dialogId = undefined;
+    },
+    setMouseColor: async (mouseColor: string) => {
+      window.electron.app.setMouseColor(mouseColor);
+    },
+    setStandaloneChat: (isStandaloneChat: boolean) => {
+      window.electron.app.setStandaloneChat(isStandaloneChat);
+      self.isStandaloneChat = isStandaloneChat;
+    },
+    setFullScreen: (isFullscreen: boolean) => {
+      window.electron.app.setFullscreen(isFullscreen);
+      self.isFullscreen = isFullscreen;
+    },
+    enableIsolationMode: () => {
+      return window.electron.app.enableIsolationMode();
+    },
+    disableIsolationMode: () => {
+      return window.electron.app.disableIsolationMode();
     },
     setDesktopDimensions(width: number, height: number) {
       self.desktopDimensions = {

@@ -1,3 +1,4 @@
+import { app } from 'electron/main';
 import path from 'path';
 import { URL } from 'url';
 
@@ -31,3 +32,13 @@ if (process.env.NODE_ENV === 'development') {
     return `file://${path.resolve(__dirname, '../../media/', htmlFileName)}`;
   };
 }
+
+export const getAssetPath = (...paths: string[]) =>
+  app.isPackaged
+    ? path.join(process.resourcesPath, 'assets', ...paths)
+    : path.join(__dirname, '../../assets', ...paths);
+
+export const getPreloadPath = () =>
+  app.isPackaged
+    ? path.join(__dirname, 'preload.js')
+    : path.join(__dirname, '../../.holium/dll/preload.js');

@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain, session } from 'electron';
 
-import { getPreloadPath } from '../main';
+import { getPreloadPath } from '../util';
 
 const registerListeners = (mainWindow: BrowserWindow) => {
   ipcMain.handle(

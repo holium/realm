@@ -24,7 +24,7 @@ const heightPadding = 12;
 const searchHeight = 40;
 
 export const InboxPresenter = () => {
-  const { loggedInAccount, theme } = useAppState();
+  const { loggedInAccount, theme, shellStore } = useAppState();
   const { chatStore, spacesStore } = useShipStore();
   const { dimensions } = useTrayApps();
   const [showList, setShowList] = useState<boolean>(false);
@@ -83,16 +83,29 @@ export const InboxPresenter = () => {
             }}
           />
         </Flex>
-        <Button.IconButton
-          className="realm-cursor-hover"
-          size={26}
-          onClick={(evt) => {
-            evt.stopPropagation();
-            setSubroute('new');
-          }}
-        >
-          <Icon name="Plus" size={24} opacity={0.5} />
-        </Button.IconButton>
+        <Flex gap="4px">
+          <Button.IconButton
+            className="realm-cursor-hover"
+            size={26}
+            onClick={(evt) => {
+              evt.stopPropagation();
+              shellStore.setFullScreen(false);
+              shellStore.setStandaloneChat(true);
+            }}
+          >
+            <Icon name="Link" size={24} opacity={0.5} />
+          </Button.IconButton>
+          <Button.IconButton
+            className="realm-cursor-hover"
+            size={26}
+            onClick={(evt) => {
+              evt.stopPropagation();
+              setSubroute('new');
+            }}
+          >
+            <Icon name="Plus" size={24} opacity={0.5} />
+          </Button.IconButton>
+        </Flex>
       </Flex>
       {sortedChatList.length === 0 ? (
         <Flex

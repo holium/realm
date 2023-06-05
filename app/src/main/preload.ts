@@ -48,6 +48,12 @@ const appPreload = {
   toggleDevTools: () => {
     return ipcRenderer.invoke('toggle-devtools');
   },
+  setFullscreen: (isFullscreen: boolean) => {
+    return ipcRenderer.invoke('set-fullscreen', isFullscreen);
+  },
+  setStandaloneChat: (isStandaloneChat: boolean) => {
+    return ipcRenderer.invoke('set-standalone-chat', isStandaloneChat);
+  },
   enableIsolationMode: () => {
     return ipcRenderer.invoke('enable-isolation-mode');
   },

@@ -1,4 +1,6 @@
 import { ipcMain, systemPreferences } from 'electron';
+import { BrowserWindow } from 'electron/main';
+import { download } from 'electron-dl';
 
 import { MediaAccess, MediaAccessStatus } from '../../os/types';
 import { isMac, isWindows } from './env';
@@ -30,18 +32,12 @@ const registerListeners = () => {
     };
   });
 
-  // ipcMain.handle(
-  //   'set-media-status',
-  //   async (_event, mediaType: 'camera' | 'mic', enabled: boolean) => {
-  //     const camera = systemPreferences.getMediaAccessStatus('camera');
-  //     systemPreferences.medi('microphone');
-
-  //     return {
-  //       camera,
-  //       mic: systemPreferences.getMediaAccessStatus('microphone'),
-  //     };
-  //   }
-  // );
+  ipcMain.on('download-url-as-file', (_event, { url }) => {
+    const win = BrowserWindow.getFocusedWindow();
+    if (win) {
+      download(win, url, { saveAs: true });
+    }
+  });
 };
 
 export const MediaHelper = { registerListeners };

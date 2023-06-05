@@ -6,7 +6,7 @@ import {
   useAnimationControls,
 } from 'framer-motion';
 import { darken } from 'polished';
-import { createGlobalStyle, css } from 'styled-components';
+import styled, { createGlobalStyle, css } from 'styled-components';
 
 import { genCSSVariables, ThemeType } from '@holium/shared';
 
@@ -217,3 +217,28 @@ export const RealmBackground = ({
     [blurred, wallpaper]
   );
 };
+
+export const RealmTitlebar = styled.div<{
+  forcedColor?: string;
+}>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 28px;
+  color: #333333;
+  opacity: 0.9;
+  font-size: 13px;
+  font-weight: 500;
+  background: ${({ forcedColor }) => forcedColor ?? 'var(--rlm-dock-color)'};
+  z-index: 100;
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+`;
+
+export const StandAloneChatTitlebar = () => (
+  <RealmTitlebar forcedColor="#FFFFFF">Realm Chat</RealmTitlebar>
+);
