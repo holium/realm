@@ -1,5 +1,5 @@
 ::  app/realm-chat.hoon
-/-  *realm-chat, db-sur=chat-db, notify, ndb=notif-db, fr=friends
+/-  *realm-chat, db-sur=chat-db, ndb=notif-db, fr=friends, spc=spaces-store
 /+  dbug, lib=realm-chat, db-lib=chat-db
 =|  state-0
 =*  state  -
@@ -14,13 +14,13 @@
     ^-  (quip card _this)
     =/  default-state=state-0
       :*  %0
-          '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id:notify
-          (sham our.bowl)                         :: uuid:notify
-          *devices:notify
+          '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id
+          (sham our.bowl)                         :: uuid
+          *(map @t @t)
           %.y            :: push-enabled
           ~              :: set of muted chats
           ~              :: set of pinned chats
-          %.n            :: msg-preview-notif
+          %.y            :: msg-preview-notif
       ==
 
     =/  subs   [%pass /db %agent [our.bowl %chat-db] %watch /db]~
@@ -47,6 +47,7 @@
       (weld cards -:(create-chat:lib [(notes-to-self bowl) %self ~ %host *@dr] state bowl))
       
     =/  old  !<(versioned-state old-state)
+    =.  app-id.old  '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id
     ?-  -.old
       %0  [cards this(state old)]
     ==
@@ -113,7 +114,7 @@
     ::
       [%x %devices ~]
         ?>  =(our.bowl src.bowl)
-        ``notify-view+!>([%devices devices.state])
+        ``notify-view+!>(devices.state)
     ::
       [%x %pins ~]
         ?>  =(our.bowl src.bowl)
@@ -217,10 +218,37 @@
                   ?&  push-enabled.state                  :: push is enabled
                       (gth (lent ~(tap by devices.state)) 0) :: there is at least one device
                   ==
+                    =/  prow            (scry-path-row:lib thepath bowl)
                     =/  push-title      (notif-from-nickname-or-patp sender.id bowl)
-                    =/  push-subtitle   (group-name-or-blank parts bowl)
+                    =/  push-subtitle   (group-name-or-blank prow)
                     =/  push-contents   (notif-msg parts bowl)
-                    =/  push-card  (push-notification-card:lib bowl state thepath push-title push-subtitle push-contents)
+                    =/  unread-count    +(.^(@ud %gx /(scot %p our.bowl)/notif-db/(scot %da now.bowl)/db/unread-count/(scot %tas %realm-chat)/noun))
+                    =/  avatar=(unit @t)
+                      ?:  =(%dm type.prow)      (scry-avatar-for-patp:lib sender.id bowl)
+                      ?:  =(%group type.prow)   (~(get by metadata.prow) 'image')
+                      ?:  =(%space type.prow)
+                        =/  uspace  (~(get by metadata.prow) 'space')
+                        ?~  uspace  ~
+                        =/  path-first=path   /(scot %p our.bowl)/spaces/(scot %da now.bowl)
+                        =/  path-second=path  (stab u.uspace)
+                        =/  path-final=path   (weld (weld path-first path-second) /noun)
+                        =/  space-scry    .^(view:spc %gx path-final)
+                        ?>  ?=(%space -.space-scry)
+                        ?:  =('' picture.space.space-scry)
+                          (some wallpaper.theme.space.space-scry)
+                        (some picture.space.space-scry)
+                      ~  :: default to null if we don't know what type of chat this is
+                    =/  push-card
+                      %:  push-notification-card:lib
+                          bowl
+                          state
+                          prow
+                          push-title
+                          push-subtitle
+                          push-contents
+                          unread-count
+                          avatar
+                      ==
                     [push-card notif-db-card ~]
                   :: otherwise, just send to notif-db
                   [notif-db-card ~]
@@ -356,14 +384,13 @@
     ==
   (crip `tape`(swag [0 140] str)) :: only show the first 140 characters of the message in the preview
 ++  group-name-or-blank
-  |=  [=message:db-sur =bowl:gall]
+  |=  [=path-row:db-sur]
   ^-  @t
-  =/  msg-path    path:(snag 0 message)
-  =/  pathrow     (scry-path-row:lib msg-path bowl)
-  =/  title       (~(get by metadata.pathrow) 'title')
-  ?:  =(type.pathrow %dm)   ''  :: always blank for DMs
+  =/  title       (~(get by metadata.path-row) 'title')
+  ?:  =(type.path-row %dm)   '' :: always blank for DMs
   ?~  title     'Group Chat'    :: if it's a group chat without a title, just say "group chat"
   (need title)                  :: otherwise, return the title of the group
+::
 ++  notif-from-nickname-or-patp
   |=  [patp=ship =bowl:gall]
   ^-  @t
