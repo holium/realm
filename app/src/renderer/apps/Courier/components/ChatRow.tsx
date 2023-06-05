@@ -4,6 +4,7 @@ import { observer } from 'mobx-react';
 import {
   convertFragmentsToPreview,
   Flex,
+  Icon,
   MenuItemProps,
   Row,
   Text,
@@ -290,6 +291,7 @@ export const ChatRowPresenter = ({
             </Text.Custom>
           </Flex>
         </Flex>
+        {isMuted && <Icon name="NotificationOff" size={14} opacity={0.7} />}
         <Flex alignItems="flex-end" gap={2} flexDirection="column">
           <Text.Custom
             style={{ wordBreak: 'keep-all' }}

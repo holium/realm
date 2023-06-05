@@ -1,4 +1,3 @@
-import { toJS } from 'mobx';
 // import { toJS } from 'mobx';
 import {
   destroy,
@@ -33,6 +32,7 @@ export const ChatStore = types
       'inbox'
     ),
     pinnedChats: types.array(types.string),
+    mutedChats: types.array(types.string),
     inbox: types.array(Chat),
     selectedChat: types.maybe(types.reference(Chat)),
     isOpen: types.boolean,
@@ -40,10 +40,10 @@ export const ChatStore = types
   })
   .views((self) => ({
     isChatPinned(path: string) {
-      return self.inbox.find((c) => path === c.path)?.pinned || false;
+      return !!self.pinnedChats.find((p) => path === p);
     },
     isChatMuted(path: string) {
-      return self.inbox.find((c) => path === c.path)?.muted || false;
+      return !!self.mutedChats.find((p) => path === p);
     },
     isChatSelected(path: string) {
       return self.selectedChat?.path === path;
@@ -69,8 +69,8 @@ export const ChatStore = types
         }
 
         // Check if the chats are pinned
-        const isAPinned = a.pinned;
-        const isBPinned = b.pinned;
+        const isAPinned = self.pinnedChats.includes(a.path);
+        const isBPinned = self.pinnedChats.includes(b.path);
 
         // Compare the pinned status
         if (isAPinned !== isBPinned) {
@@ -141,7 +141,9 @@ export const ChatStore = types
       }
     }),
     fetchInboxMetadata: flow(function* () {
-      yield ChatIPC.fetchPathMetadata();
+      const { muted, pinned } = yield ChatIPC.fetchPathMetadata();
+      self.pinnedChats = pinned;
+      self.mutedChats = muted;
     }),
     loadChatList: flow(function* () {
       try {
@@ -194,6 +196,11 @@ export const ChatStore = types
       const chat = self.inbox.find((chat) => chat.path === path);
       if (chat) {
         yield chat.muteNotification(muted);
+        if (muted) {
+          self.mutedChats.push(path);
+        } else {
+          self.mutedChats.remove(path);
+        }
       } else {
         console.info(`chat ${path} not found`);
       }
@@ -236,7 +243,6 @@ export const ChatStore = types
       }
     }),
     onPathsAdded(path: any) {
-      console.log('onPathsAdded', toJS(path));
       self.inbox.push(path);
     },
     // This is a handler for onDbChange
