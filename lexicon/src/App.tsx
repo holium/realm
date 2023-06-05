@@ -1,6 +1,6 @@
 import React from 'react';
 import { Flex } from '@holium/design-system';
-import { Word, Home } from './pages';
+import { Word, Home, Dictionary } from './pages';
 import { SearchBar, AddWord } from './components';
 
 function App() {
@@ -9,6 +9,7 @@ function App() {
       <div id="portal-root" />
       <Flex alignItems={'center'} flexDirection={'column'}>
         <SearchBar />
+        <Dictionary />
         <AddWord />
         <Word />
         <Home />
