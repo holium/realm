@@ -10,9 +10,10 @@ import {
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 import { useAppState } from 'renderer/stores/app.store';
-import { PeerConnectionState } from 'renderer/stores/rooms/rooms.types';
 import { useShipStore } from 'renderer/stores/ship.store';
 
+import { PeerConnectionState } from '../store/room.types';
+import { PeerClass } from '../store/RoomsStore';
 import { useRoomsStore } from '../store/RoomsStoreContext';
 import { AudioWave } from './AudioWave';
 
@@ -75,7 +76,6 @@ const SpeakerPresenter = (props: ISpeaker) => {
   );
 
   const peerState = isOur ? PeerConnectionState.Connected : peer?.status;
-  console.log('peerState', person, peer?.status);
 
   if (name.length > 17) name = `${name.substring(0, 17)}...`;
 
@@ -120,77 +120,106 @@ const SpeakerPresenter = (props: ISpeaker) => {
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
+      className={(peer as PeerClass)?.hasVideo ? 'speaker-video-on' : ''}
     >
-      <Flex
-        style={{ pointerEvents: 'none' }}
-        flexDirection="column"
-        alignItems="center"
-        gap={10}
-      >
+      <>
+        <video
+          style={{
+            zIndex: 0,
+            display: 'none',
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            borderRadius: '6px',
+          }}
+          id={`peer-video-${person}`}
+          autoPlay
+        />
         <Flex
+          zIndex={2}
+          className="speaker-avatar-wrapper"
           style={{ pointerEvents: 'none' }}
           flexDirection="column"
           alignItems="center"
-          gap={0}
+          gap={10}
         >
-          <Avatar
-            clickable={false}
-            borderRadiusOverride="6px"
-            simple
-            size={36}
-            avatar={metadata && metadata.avatar}
-            patp={person}
-            sigilColor={[(metadata && metadata.color) || '#000000', 'white']}
-          />
-        </Flex>
-        <Text.Custom
-          style={{ pointerEvents: 'none' }}
-          opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
-          alignItems="center"
-          // height={20}
-          fontSize={2}
-          fontWeight={500}
-        >
-          {name}
-        </Text.Custom>
-      </Flex>
-      <Flex
-        position="relative"
-        opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
-        flexDirection="row"
-        justifyContent="center"
-        alignItems="center"
-        style={{ pointerEvents: 'none' }}
-      >
-        <Flex height={26} mt="1px">
-          {!peer?.isMuted && <AudioWave speaking={peer?.isSpeaking} />}
-        </Flex>
-
-        <Flex position="absolute" style={{ height: 18, pointerEvents: 'none' }}>
-          {peer?.isMuted && (
-            <Icon
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              name="MicOff"
-              size={18}
-              opacity={0.5}
+          <Flex
+            className="speaker-avatar"
+            style={{ pointerEvents: 'none' }}
+            flexDirection="column"
+            alignItems="center"
+            gap={0}
+          >
+            <Avatar
+              clickable={false}
+              borderRadiusOverride="6px"
+              simple
+              size={(peer as PeerClass)?.hasVideo ? 22 : 32}
+              avatar={metadata && metadata.avatar}
+              patp={person}
+              sigilColor={[(metadata && metadata.color) || '#000000', 'white']}
             />
+          </Flex>
+          <Text.Custom
+            className="speaker-name"
+            style={{ pointerEvents: 'none' }}
+            opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
+            alignItems="center"
+            // height={20}
+            fontSize={2}
+            fontWeight={500}
+          >
+            {name}
+          </Text.Custom>
+        </Flex>
+        <Flex
+          className="speaker-audio-indicator"
+          position="relative"
+          opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
+          flexDirection="row"
+          justifyContent="center"
+          alignItems="center"
+          style={{ pointerEvents: 'none' }}
+        >
+          <Flex height={26} mt="1px">
+            {!peer?.isMuted && <AudioWave speaking={peer?.isSpeaking} />}
+          </Flex>
+
+          <Flex
+            position="absolute"
+            style={{ height: 18, pointerEvents: 'none' }}
+          >
+            {peer?.isMuted && (
+              <Icon
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.5 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                name="MicOff"
+                size={18}
+                opacity={0.5}
+              />
+            )}
+          </Flex>
+          {!peer?.isMuted && !peer?.isSpeaking && (
+            <Flex
+              className="speaker-sublabel"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              position="absolute"
+            >
+              {sublabel}
+            </Flex>
           )}
         </Flex>
-        {!peer?.isMuted && !peer?.isSpeaking && (
-          <Flex
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            position="absolute"
-          >
-            {sublabel}
-          </Flex>
-        )}
-      </Flex>
+      </>
     </SpeakerWrapper>
   );
 };
@@ -201,9 +230,31 @@ const SpeakerWrapper = styled(Flex)<FlexProps>`
   padding: 16px 0;
   border-radius: 9px;
   transition: 0.25s ease;
+  position: relative;
   &:hover {
     transition: 0.25s ease;
     background: rgba(var(--rlm-overlay-hover-rgba));
+  }
+  &.speaker-video-on {
+    .speaker-avatar-wrapper {
+      position: absolute;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: flex-start;
+      left: 8px;
+      bottom: 8px;
+    }
+    .speaker-audio-indicator {
+      position: absolute;
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: flex-end;
+      right: 8px;
+      bottom: 8px;
+    }
+    .speaker-sublabel {
+      display: none;
+    }
   }
 `;
 

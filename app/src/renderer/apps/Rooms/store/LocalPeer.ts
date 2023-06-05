@@ -21,10 +21,10 @@ export const DEFAULT_AUDIO_OPTIONS = {
 };
 
 export class LocalPeer {
-  @observable patp: string = '';
-  @observable audioLevel: number = 0;
-  @observable isMuted: boolean = false;
-  @observable isSpeaking: boolean = false;
+  @observable patp = '';
+  @observable audioLevel = 0;
+  @observable isMuted = false;
+  @observable isSpeaking = false;
   @observable status: PeerConnectionState = PeerConnectionState.New;
   @observable videoTrack: Map<string, any> = new Map();
   @observable audioTracks: Map<string, any> = new Map();

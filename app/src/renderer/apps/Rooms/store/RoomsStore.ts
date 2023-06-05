@@ -3,9 +3,10 @@ import { action, makeObservable, observable } from 'mobx';
 import Peer, { Instance as PeerInstance } from 'simple-peer';
 
 import { SoundActions } from 'renderer/lib/sound';
-import { DataPacket } from 'renderer/stores/rooms/rooms.types';
 
 import { LocalPeer } from './LocalPeer';
+import { DataPacket } from './room.types';
+import { IAudioAnalyser, SpeakingDetectionAnalyser } from './SpeakingDetector';
 
 type RoomAccess = 'public' | 'private';
 type RoomCreateType = {
@@ -57,13 +58,13 @@ type RoomChat = {
 
 export class RoomModel {
   @observable rid: string;
-  @observable provider: string = '';
-  @observable creator: string = '';
+  @observable provider = '';
+  @observable creator = '';
   @observable access: RoomAccess = 'public';
-  @observable title: string = '';
+  @observable title = '';
   @observable present: string[] = [];
   @observable whitelist: string[] = [];
-  @observable capacity: number = 10;
+  @observable capacity = 10;
   @observable path: string | null = null;
 
   constructor(initialData: RoomCreateType) {
@@ -281,6 +282,7 @@ export class RoomsStore {
         break;
       case 'room-created':
         console.log('room created', event);
+        // eslint-disable-next-line no-case-declarations
         const newRoom = new RoomModel(event.room);
         newRoom.update(event.room);
         this.rooms.set(event.room.rid, newRoom);
@@ -347,9 +349,8 @@ export class RoomsStore {
         }
         break;
       case 'room-deleted':
-        const removeRid = event.rid;
-        this._removeRoom(removeRid);
-        if (this.currentRid && this.currentRid === removeRid) {
+        this._removeRoom(event.rid);
+        if (this.currentRid && this.currentRid === event.rid) {
           this.rooms.get(this.currentRid)?.present.forEach((peerId: string) => {
             if (peerId !== this.ourId) this.destroyPeer(peerId);
           });
@@ -357,18 +358,17 @@ export class RoomsStore {
         }
         break;
       case 'signal':
-        const { signal, from, rid } = event;
-        if (this.currentRid === rid) {
+        if (this.currentRid === event.rid) {
           if (!this.ourPeer.stream) {
             console.error('no local stream');
             return;
           }
-          const peer = this.peers.get(from) || this.createPeer(rid);
+          const peer = this.peers.get(event.from) || this.createPeer(event.rid);
           if (!peer) {
             console.log('on signal - no peer found');
             return;
           }
-          peer.onReceivedSignal(signal);
+          peer.onReceivedSignal(event.signal);
         }
         break;
     }
@@ -399,6 +399,7 @@ export class RoomsStore {
 
   @action
   editRoom(title: string, path: string) {
+    console.log('edit room', title, path);
     // const newRoom = {
     //   rid: ridFromTitle(this.provider, this.ourId, title),
     //   provider: this.provider,
@@ -558,10 +559,17 @@ export class PeerClass {
   @observable peerId: string;
   @observable peer: PeerInstance;
   @observable websocket: WebSocket;
+  @observable hasVideo = false;
   @observable isMuted = false;
   @observable isSpeaking = false;
   @observable isAudioAttached = false;
   @observable status = 'disconnected';
+  @observable analysers: IAudioAnalyser[] = [];
+  @observable audioTracks: Map<string, any> = new Map();
+  @observable audioStream: MediaStream | null = null;
+  @observable videoStream: MediaStream | null = null;
+  @observable videoTracks: Map<string, any> = new Map();
+  @observable stream: MediaStream | null = null;
 
   constructor(
     rid: string,
@@ -580,11 +588,27 @@ export class PeerClass {
   }
 
   @action
+  isSpeakingChanged(isSpeaking: boolean) {
+    this.isSpeaking = isSpeaking;
+  }
+
+  @action
+  isMutedChanged(isMuted: boolean) {
+    this.isMuted = isMuted;
+  }
+
+  @action
+  isAudioAttachedChanged(isAudioAttached: boolean) {
+    this.isAudioAttached = isAudioAttached;
+  }
+
+  @action
   createPeer(peerId: string, initiator: boolean, stream: MediaStream) {
     this.status = 'connecting';
     const peer = new Peer({
       initiator: initiator,
       trickle: true,
+      channelName: peerId,
       stream,
       config: {
         iceServers: [
@@ -600,7 +624,6 @@ export class PeerClass {
       },
     });
 
-    console.log('Created peer', peerId, peer);
     peer.removeAllListeners();
 
     peer.on('signal', (this.onSignal = this.onSignal.bind(this)));
@@ -608,40 +631,94 @@ export class PeerClass {
     peer.on('connect', (this.onConnect = this.onConnect.bind(this)));
     peer.on('data', (this.onData = this.onData.bind(this)));
     peer.on('track', (this.onTrack = this.onTrack.bind(this)));
-
-    peer.on('error', (e) => {
-      console.log('Peer error %s:', peerId, e);
-    });
-
-    peer.on('close', () => {
-      this.status = 'disconnected';
-      console.log('Peer closed connection', peerId);
-      // setPeerState(peerId, peer);
-    });
+    peer.on('error', (this.onError = this.onError.bind(this)));
+    peer.on('close', (this.onClose = this.onClose.bind(this)));
 
     return peer;
   }
 
   @action
   onTrack(track: MediaStreamTrack, stream: MediaStream) {
-    console.log('got track', track, stream);
+    if (track.kind === 'video') {
+      console.log('got video track', track.id);
+      // attach video track to video element
+      if (this.videoTracks.has(track.id)) {
+        console.log('already have this track');
+        return;
+      }
+      this.videoTracks.set(track.id, track);
+      this.videoStream = stream;
+      this.hasVideo = true;
+      const video = document.getElementById(
+        `peer-video-${this.peerId}`
+      ) as HTMLVideoElement;
+      if (video) {
+        video.style.display = 'inline-block';
+        video.srcObject = stream;
+        video.playsInline = true;
+      } else {
+        // const video = document.createElement('video');
+        // video.id = `peer-video-${this.peerId}`;
+        // video.srcObject = stream;
+        // video.autoplay = true;
+        // video.playsInline = true;
+        console.log('no video element found');
+      }
+    }
     if (track.kind === 'audio') {
-      this.isAudioAttached = true;
+      console.log('got audio track', track.id);
+      if (this.audioTracks.size > 0) {
+        console.log('already have this track');
+        return;
+      }
+      this.audioTracks.set(track.id, track);
+      console.log(this.audioTracks);
+      this.audioStream = stream;
+      this.isAudioAttachedChanged(true);
+      this.stream = stream;
+
       track.onmute = () => {
         console.log('track muted');
-        this.isMuted = true;
+        this.isMutedChanged(true);
       };
 
       track.onunmute = () => {
         console.log('track unmuted');
-        this.isMuted = false;
+        this.isMutedChanged(false);
       };
 
       track.onended = () => {
         console.log('track ended');
-        this.isAudioAttached = false;
+        this.isAudioAttachedChanged(false);
       };
+
+      this.analysers[0] = SpeakingDetectionAnalyser.initialize(this);
+      // create an audio element for the stream
+      const audio = document.createElement('audio');
+      audio.id = `peer-audio-${this.peerId}`;
+      audio.srcObject = stream;
+      audio.autoplay = true;
+      document.body.appendChild(audio);
     }
+  }
+
+  @action
+  onError(err: any) {
+    console.error('peer error', err);
+  }
+
+  @action
+  onClose() {
+    this.status = 'disconnected';
+    this.peer.removeAllListeners();
+    this.peer.destroy();
+    this.audioTracks.forEach((track) => {
+      track.stop();
+    });
+    this.audioTracks.clear();
+    this.analysers.forEach((analyser) => {
+      analyser.detach();
+    });
   }
 
   @action
@@ -657,18 +734,17 @@ export class PeerClass {
   }
 
   @action
-  onStream(stream: MediaStream) {
-    if (this.status !== 'connected') return;
-    this.peer.addStream(stream);
-    // create an audio element for the stream
-    const audio = document.createElement('audio');
-    audio.id = `peer-audio-${this.peerId}`;
-    audio.srcObject = stream;
-    audio.autoplay = true;
-    document.body.appendChild(audio);
+  onStream(_stream: MediaStream) {
+    // if (this.status !== 'connected') return;
+    // this.peer.addStream(stream);
+    // // create an audio element for the stream
+    // const audio = document.createElement('audio');
+    // audio.id = `peer-audio-${this.peerId}`;
+    // audio.srcObject = stream;
+    // audio.autoplay = true;
+    // document.body.appendChild(audio);
     // audio.playsInline = true;
     // document.getElementById(`peer-video-${peerId}`).srcObject = stream
-
     // document.getElementById(`peer-video-${peerId}`).srcObject = stream;
     // setPeerState(peerId, peer);
   }

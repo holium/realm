@@ -1,4 +1,5 @@
 import { LocalPeer } from './LocalPeer';
+import { PeerClass } from './RoomsStore';
 
 export interface IAudioAnalyser {
   attach: (peer: LocalPeer) => void;
@@ -6,17 +7,17 @@ export interface IAudioAnalyser {
 }
 
 export class SpeakingDetectionAnalyser {
-  peer: LocalPeer | null = null;
+  peer: LocalPeer | PeerClass | null = null;
   audioContext: AudioContext | null = null;
   mediaStreamSource: MediaStreamAudioSourceNode | null = null;
   analyser: AnalyserNode | null = null;
-  bufferLength: number = 0;
+  bufferLength = 0;
   dataArray: Uint8Array | null = null;
-  currentFrameId: number = 0;
-  averageFrequency: number = 0;
-  lo: number = 0;
-  hi: number = 0;
-  static initialize(peer: LocalPeer): IAudioAnalyser {
+  currentFrameId = 0;
+  averageFrequency = 0;
+  lo = 0;
+  hi = 0;
+  static initialize(peer: LocalPeer | PeerClass): IAudioAnalyser {
     const analyser = new SpeakingDetectionAnalyser();
     analyser.attach(peer);
     return analyser;
@@ -43,7 +44,7 @@ export class SpeakingDetectionAnalyser {
       }
     }
   }
-  attach(peer: LocalPeer) {
+  attach(peer: LocalPeer | PeerClass) {
     this.peer = peer;
     this.audioContext = new (window.AudioContext ||
       window.webkitAudioContext)();

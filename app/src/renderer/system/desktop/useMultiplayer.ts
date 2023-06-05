@@ -12,9 +12,12 @@ import {
   PresenceBroadcast,
 } from '@holium/realm-presence';
 
+import {
+  DataPacket,
+  DataPacketKind,
+} from 'renderer/apps/Rooms/store/room.types';
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { normalizePosition } from 'renderer/lib/window-manager';
-import { DataPacket, DataPacketKind } from 'renderer/stores/rooms/rooms.types';
 import { ShipStoreInstance } from 'renderer/stores/ship.store';
 
 type Props = {
