@@ -174,6 +174,7 @@ export class RoomsStore {
     RealmIPC.onUpdate((update) => {
       if (update.type === 'logout') {
         this.hangupAllPeers();
+        this.cleanUpCurrentRoom();
         this.status = 'disconnected';
         this.websocket.close();
       }
@@ -504,7 +505,7 @@ export class RoomsStore {
   }
 
   @action
-  joinRoom(rid: string) {
+  cleanUpCurrentRoom() {
     if (this.currentRoom) {
       if (this.currentRoom.creator === this.ourId) {
         this.deleteRoom(this.currentRoom.rid);
@@ -512,6 +513,11 @@ export class RoomsStore {
         this.leaveRoom(this.currentRoom.rid);
       }
     }
+  }
+
+  @action
+  joinRoom(rid: string) {
+    this.cleanUpCurrentRoom();
     this.ourPeer.enableMedia(this.ourPeer.constraints).then(
       action(() => {
         this.setCurrentRoom(rid);
