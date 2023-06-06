@@ -38,14 +38,14 @@ const SpaceTitlebarPresenter = ({
             onClick={onToggleApps}
             isSelected={showAppGrid}
           >
-            <Icon name="AppGrid" size={22} />
+            <Icon name="AppGrid" size={22} opacity={0.9} />
           </Button.IconButton>
           <Button.IconButton
             size={32}
             onClick={onMemberClick}
             isSelected={showMembers}
           >
-            <Icon name="Members" size={22} opacity={0.7} />
+            <Icon name="Members" size={22} opacity={0.9} />
           </Button.IconButton>
         </Flex>
       </Flex>

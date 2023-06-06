@@ -106,17 +106,18 @@ const MembersPresenter = ({ our, onMemberClick }: IMembers) => {
       }}
     >
       <Flex flexDirection="row" alignItems="center" gap={10} mb={12}>
-        <Icon name="Members" size={18} opacity={0.5} />
+        <Icon name="Members" size={18} opacity={0.7} />
         <Text.Custom fontWeight={500} fontSize={4} opacity={1}>
           {our ? 'Friends' : 'Members'}
         </Text.Custom>
         <Button.IconButton
+          className="realm-cursor-hover"
           onClick={onMemberClick}
           style={{
             marginLeft: 'auto',
           }}
         >
-          <Icon name="ChevronRight" size={18} opacity={0.7} />
+          <Icon name="Close" size={22} opacity={0.7} />
         </Button.IconButton>
       </Flex>
       <Flex position="relative">

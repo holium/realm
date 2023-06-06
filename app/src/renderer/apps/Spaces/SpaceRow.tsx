@@ -146,7 +146,7 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
           </Text.Custom>
           <Flex flexDirection="row" gap={12}>
             <Flex gap={4} flexDirection="row" alignItems="center">
-              <Icon name="Members" size={16} opacity={0.6} />
+              <Icon name="Members" size={16} opacity={0.7} />
               <Text.Custom
                 fontWeight={400}
                 mt="1px"
