@@ -54,8 +54,13 @@ const SpeakerPresenter = (props: ISpeaker) => {
   useEffect(() => {
     if (!videoRef.current) return;
     if (!peer || !peer?.hasVideo) return;
-    videoRef.current.srcObject = peer?.stream;
-    videoRef.current.style.display = 'inline-block';
+    console.log('reattaching video', peer);
+    if (!videoRef.current.srcObject) {
+      videoRef.current.srcObject = peer.stream;
+      videoRef.current.style.display = 'inline-block';
+      videoRef.current.playsInline = true;
+      videoRef.current.muted = true;
+    }
   }, [peer?.hasVideo, videoRef.current]);
 
   const contextMenuOptions = useMemo(

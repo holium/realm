@@ -3,6 +3,7 @@ import { action, makeObservable, observable } from 'mobx';
 import Peer, { Instance as PeerInstance } from 'simple-peer';
 
 import { SoundActions } from 'renderer/lib/sound';
+import { RealmIPC } from 'renderer/stores/ipc';
 
 import { LocalPeer } from './LocalPeer';
 import { DataPacket } from './room.types';
@@ -133,6 +134,7 @@ export class RoomsStore {
   @observable status = 'disconnected';
   @observable peers: Map<string, PeerClass> = observable.map();
   @observable websocket: WebSocket;
+  @observable reconnectTimer: NodeJS.Timeout | null = null;
   @observable rtcConfig = {
     iceServers: [
       {
@@ -156,6 +158,26 @@ export class RoomsStore {
     this.websocket = this.connect();
     this.onRoomEvent = this.onRoomEvent.bind(this);
     this.createPeer = this.createPeer.bind(this);
+
+    // handles various connectivity events
+    window.addEventListener('offline', () => {
+      this.status = 'offline';
+      this.hangupAllPeers();
+      this.websocket.close();
+    });
+
+    window.addEventListener('online', () => {
+      this.status = 'disconnected';
+      this.websocket = this.connect();
+    });
+
+    RealmIPC.onUpdate((update) => {
+      if (update.type === 'logout') {
+        this.hangupAllPeers();
+        this.status = 'disconnected';
+        this.websocket.close();
+      }
+    });
   }
 
   get currentRoom() {
@@ -236,40 +258,62 @@ export class RoomsStore {
   }
 
   @action
+  reconnect(delay: number, backoff: number) {
+    // add backoff factor to delay
+    delay = delay * backoff;
+    // if delay is greater than 30 seconds, cap it at 30 seconds
+    if (delay > 30000) {
+      delay = 30000;
+    }
+    // try to reconnect after delay
+    // only let one timer run at a time
+    if (!this.reconnectTimer) {
+      this.reconnectTimer = setTimeout(() => {
+        this.websocket = this.connect();
+        this.reconnectTimer = null;
+      }, delay);
+    }
+  }
+
+  @action
   connect() {
     const websocket = new WebSocket(
       `wss://${this.provider}/signaling?serverId=${this.ourId}`
     );
 
-    websocket.onopen = function open() {
-      console.log('connected');
+    websocket.onopen = () => {
+      console.log('websocket connected');
+      this.status = 'connected';
       websocket.send(serialize({ type: 'connect' }));
     };
 
     websocket.onmessage = this.onMessage.bind(this);
 
-    websocket.onclose = function close() {
-      console.log('disconnected');
-      // setStatus('disconnected');
-      // setTimeout(connect, 5000); // Try to reconnect after 5 seconds
+    websocket.onclose = () => {
+      console.log('websocket closed', this.status);
+      if (this.status !== 'disconnected') {
+        this.reconnect(5000, 1.5);
+      }
     };
 
-    websocket.onerror = function error(err) {
+    websocket.onerror = (err) => {
       console.error('Error occurred:', err);
-      // setStatus('error');
+      this.status = 'error';
       websocket.close();
     };
 
     const disconnect = () => {
+      this.status = 'disconnected';
       console.log('disconnecting websocket');
       websocket.send(serialize({ type: 'disconnect' }));
       websocket.close();
     };
-    window.onclose = function () {
+
+    window.onclose = () => {
       disconnect();
     };
     // on sigkill close the connection
-    window.onbeforeunload = function () {
+    window.onbeforeunload = () => {
       disconnect();
     };
     return websocket;
@@ -409,7 +453,7 @@ export class RoomsStore {
   @action
   createRoom(title: string, access: RoomAccess, path: string | null) {
     SoundActions.playRoomEnter();
-    this.ourPeer.enableMedia();
+    this.ourPeer.enableMedia(this.ourPeer.constraints);
     const newRoom = {
       rid: ridFromTitle(this.provider, this.ourId, title),
       provider: this.provider,
@@ -454,18 +498,21 @@ export class RoomsStore {
   deleteRoom(rid: string) {
     SoundActions.playRoomLeave();
     this.rooms.delete(rid);
+    this.ourPeer.disableMedia();
+    this.currentRid = null;
     this.websocket.send(
       serialize({
         type: 'delete-room',
         rid,
       })
     );
+    this.hangupAllPeers();
   }
 
   @action
   joinRoom(rid: string) {
     SoundActions.playRoomEnter();
-    this.ourPeer.enableMedia().then(
+    this.ourPeer.enableMedia(this.ourPeer.constraints).then(
       action(() => {
         this.setCurrentRoom(rid);
         this.websocket.send(
@@ -486,18 +533,14 @@ export class RoomsStore {
     SoundActions.playRoomLeave();
     this.rooms.get(rid)?.removePeer(this.ourId);
     this.currentRid = null;
+    this.ourPeer.disableMedia();
     this.websocket.send(
       serialize({
         type: 'leave-room',
         rid,
       })
     );
-    // remove us from the room
-    // leave room will trigger room-left event
-    // clean up peers
-    this.rooms.get(rid)?.present.forEach((peerId: string) => {
-      if (peerId !== this.ourId) this.destroyPeer(peerId);
-    });
+    this.hangupAllPeers();
   }
 
   @action
