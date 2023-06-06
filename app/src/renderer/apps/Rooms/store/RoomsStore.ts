@@ -297,6 +297,7 @@ export class RoomsStore {
               'peer was destroyed, connection closed, reconnecting',
               peerId
             );
+            this.destroyPeer(peerId);
             this.createPeer(peerId);
             return;
           }
@@ -453,6 +454,7 @@ export class RoomsStore {
               'peer was destroyed, but is attempting to reconnect',
               event.from
             );
+            this.destroyPeer(event.from);
             peer = this.createPeer(event.from);
             return;
           }
