@@ -70,7 +70,9 @@ export const bootStandaloneChat = () => {
   registerMouseLayerHandlers(throwawayWindow, standaloneChatWindow);
 
   // Change dock icon to standalone chat icon.
-  const standaloneImage = nativeImage.createFromPath(getAssetPath('uqbar.png'));
+  const standaloneImage = nativeImage.createFromPath(
+    getAssetPath('standalone-chat-icon.png')
+  );
   app.dock.setIcon(standaloneImage);
 
   standaloneChatWindow.on('close', () => {

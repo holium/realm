@@ -39,6 +39,7 @@ const defaultRealmWindowOptions: Electron.BrowserWindowConstructorOptions = {
 export const createRealmWindow = () => {
   const newRealmWindow = new BrowserWindow(defaultRealmWindowOptions);
   newRealmWindow.setMenuBarVisibility(false);
+  newRealmWindow.loadURL(resolveHtmlPath('index.html'));
 
   WebViewHelper.registerListeners(newRealmWindow);
   DevHelper.registerListeners(newRealmWindow);
@@ -49,8 +50,6 @@ export const createRealmWindow = () => {
   DeepLinkHelper.registerListeners(newRealmWindow);
   TitlebarHelper.registerListeners(newRealmWindow);
   StandaloneHelper.registerListeners();
-
-  newRealmWindow.loadURL(resolveHtmlPath('index.html'));
 
   newRealmWindow.webContents.on('dom-ready', () => {
     newRealmWindow.webContents.send('add-mouse-listeners', true);
@@ -143,7 +142,7 @@ export const createStandaloneChatWindow = () => {
     title: 'Realm Chat',
     fullscreen: false,
     titleBarStyle: 'default',
-    icon: getAssetPath('uqbar.png'),
+    icon: getAssetPath('standalone-chat-icon.png'),
   });
   newStandaloneChatWindow.setMenuBarVisibility(true);
   newStandaloneChatWindow.loadURL(resolveHtmlPath('index.html'));
