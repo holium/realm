@@ -977,12 +977,12 @@ export class PeerClass {
   onConnect() {
     this.status = 'connected';
     console.log('Peer connected', this.peerId);
-    this.peer.send(
-      serialize({
-        type: 'peer-message',
-        msg: 'hey man!',
-      })
-    );
+    // this.peer.send(
+    //   serialize({
+    //     type: 'peer-message',
+    //     msg: 'hey man!',
+    //   })
+    // );
   }
 
   // --------------------
