@@ -57,11 +57,15 @@ export const StandaloneChatPresenter = () => {
   }
 
   return (
-    <Flex style={{ paddingTop: 28 }}>
-      <Inbox />
-      {chatStore.subroute === 'chat' && <ChatLog storage={storage} />}
-      {chatStore.subroute === 'chat-info' && <ChatInfo storage={storage} />}
-      {chatStore.subroute === 'new' && <NewChat />}
+    <Flex style={{ width: '100%', height: '100%', paddingTop: 28 }}>
+      <Flex minWidth={384}>
+        <Inbox isStandaloneChat />
+      </Flex>
+      <Flex flex={1} height="100%" position="relative">
+        {chatStore.subroute === 'chat' && <ChatLog storage={storage} />}
+        {chatStore.subroute === 'chat-info' && <ChatInfo storage={storage} />}
+        {chatStore.subroute === 'new' && <NewChat />}
+      </Flex>
     </Flex>
   );
 };

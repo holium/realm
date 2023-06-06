@@ -1,25 +1,22 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import {
-  Box,
   Button,
   Flex,
   Icon,
   Text,
-  TextInput,
   WindowedList,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
 
-import { ChatModelType } from '../../../../stores/models/chat.model';
-import { ChatRow } from '../../components/ChatRow';
+import { ChatModelType } from 'renderer/stores/models/chat.model';
 
-const heightPadding = 12;
-const searchHeight = 40;
+import { InboxRow } from './InboxRow';
 
 type Props = {
   inboxes: ChatModelType[];
-  width: number;
-  height: number;
+  width: number | undefined;
+  height: number | undefined;
   accountIdentity: string | undefined;
   spacePath: string | undefined;
   isChatPinned: (path: string) => boolean;
@@ -42,12 +39,6 @@ export const InboxView = ({
   const [searchString, setSearchString] = useState<string>('');
   const [showList, setShowList] = useState<boolean>(false);
 
-  const listWidth = useMemo(() => width - 2, [width]);
-  const listHeight = useMemo(
-    () => height + 24 - heightPadding - searchHeight,
-    [height]
-  );
-
   const searchFilter = useCallback(
     (inbox: ChatModelType) => {
       if (!searchString || searchString.trim() === '') return true;
@@ -66,8 +57,8 @@ export const InboxView = ({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.01 }}
-      width={width}
-      height={height}
+      width={width ?? '100%'}
+      height={height ?? '100%'}
       flexDirection="column"
       onAnimationComplete={() => setShowList(true)}
     >
@@ -133,117 +124,30 @@ export const InboxView = ({
         </Flex>
       ) : (
         showList && (
-          <Box height={height + 24 - heightPadding} width={listWidth}>
-            <WindowedList
-              data={filteredInboxes}
-              width={listWidth}
-              shiftScrollbar
-              height={listHeight}
-              overscan={25}
-              increaseViewportBy={{
-                top: 400,
-                bottom: 400,
-              }}
-              itemContent={(index, inbox) => (
-                <Inbox
-                  key={`${window.ship}-${inbox.path}-${index}-unpinned`}
-                  inbox={inbox}
-                  isAdmin={
-                    accountIdentity ? inbox.isHost(accountIdentity) : false
-                  }
-                  isLast={index === filteredInboxes.length - 1}
-                  isSelectedSpaceChat={inbox.metadata.space === spacePath}
-                  isPinned={isChatPinned(inbox.path)}
-                  onClickInbox={onClickInbox}
-                />
-              )}
-            />
-          </Box>
+          <WindowedList
+            data={filteredInboxes}
+            shiftScrollbar
+            overscan={25}
+            increaseViewportBy={{
+              top: 400,
+              bottom: 400,
+            }}
+            itemContent={(index, inbox) => (
+              <InboxRow
+                key={`${window.ship}-${inbox.path}-${index}-unpinned`}
+                inbox={inbox}
+                isAdmin={
+                  accountIdentity ? inbox.isHost(accountIdentity) : false
+                }
+                isLast={index === filteredInboxes.length - 1}
+                isSelectedSpaceChat={inbox.metadata.space === spacePath}
+                isPinned={isChatPinned(inbox.path)}
+                onClickInbox={onClickInbox}
+              />
+            )}
+          />
         )
       )}
     </Flex>
-  );
-};
-
-type InboxProps = {
-  inbox: ChatModelType;
-  isAdmin: boolean;
-  isLast: boolean;
-  isSelectedSpaceChat: boolean;
-  isPinned: boolean;
-  onClickInbox: (path: string) => void;
-};
-
-const Inbox = ({
-  inbox,
-  isAdmin,
-  isLast,
-  isSelectedSpaceChat,
-  isPinned,
-  onClickInbox,
-}: InboxProps) => {
-  const height = inbox.type === 'space' ? 70 : 52;
-
-  let customStyle = {};
-  let outerStyle = {};
-
-  if (isSelectedSpaceChat) {
-    outerStyle = {
-      paddingBottom: 8,
-      height: height + 8,
-      marginBottom: 8,
-      borderBottom: '1px solid rgba(var(--rlm-border-rgba), 0.8)',
-    };
-    customStyle = {
-      borderRadius: 6,
-    };
-  } else if (isPinned) {
-    outerStyle = {
-      height,
-    };
-    customStyle = {
-      borderRadius: 6,
-      height,
-      background: 'var(--rlm-overlay-hover-color)',
-    };
-  } else if (isLast) {
-    outerStyle = {
-      height: height + 16,
-      paddingBottom: 16,
-    };
-  } else {
-    outerStyle = {
-      height,
-    };
-  }
-
-  return (
-    <Box style={outerStyle}>
-      <Box
-        width="100%"
-        zIndex={2}
-        layout="preserve-aspect"
-        alignItems="center"
-        layoutId={`chat-${inbox.path}-container`}
-        style={customStyle}
-      >
-        <ChatRow
-          height={height}
-          path={inbox.path}
-          title={inbox.metadata.title}
-          peers={inbox.peers.map((peer) => peer.ship)}
-          isAdmin={isAdmin}
-          type={inbox.type}
-          timestamp={inbox.createdAt || inbox.metadata.timestamp}
-          metadata={inbox.metadata}
-          peersGetBacklog={inbox.peersGetBacklog}
-          muted={inbox.muted}
-          onClick={(evt) => {
-            evt.stopPropagation();
-            onClickInbox(inbox.path);
-          }}
-        />
-      </Box>
-    </Box>
   );
 };

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 
 import { trackEvent } from 'renderer/lib/track';
@@ -8,20 +8,16 @@ import { useShipStore } from 'renderer/stores/ship.store';
 import { useTrayApps } from '../../../store';
 import { InboxView } from './InboxView';
 
-export const InboxPresenter = () => {
+type Props = {
+  isStandaloneChat?: boolean;
+};
+
+export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
   const { loggedInAccount, shellStore } = useAppState();
   const { chatStore, spacesStore } = useShipStore();
   const { dimensions } = useTrayApps();
   const { sortedChatList, setChat, setSubroute, isChatPinned } = chatStore;
   const currentSpace = spacesStore.selected;
-
-  const [isStandaloneChat, setStandaloneChat] = useState(
-    shellStore.isStandaloneChat
-  );
-
-  useEffect(() => {
-    window.electron.app.isStandaloneChat().then(setStandaloneChat);
-  }, []);
 
   useEffect(() => {
     trackEvent('OPENED', 'CHAT_INBOX');
@@ -30,16 +26,16 @@ export const InboxPresenter = () => {
   return (
     <InboxView
       inboxes={sortedChatList}
-      width={dimensions.width - 24}
-      height={dimensions.height - 24}
+      width={isStandaloneChat ? undefined : dimensions.width - 24}
+      height={isStandaloneChat ? undefined : dimensions.height - 24}
       accountIdentity={loggedInAccount?.serverId}
       spacePath={currentSpace?.path}
       isChatPinned={isChatPinned}
       onClickInbox={setChat}
       onClickNewInbox={() => setSubroute('new')}
-      onClickStandaloneChat={() =>
-        shellStore.setStandaloneChat(!isStandaloneChat)
-      }
+      onClickStandaloneChat={() => {
+        shellStore.setStandaloneChat(!isStandaloneChat);
+      }}
     />
   );
 };
