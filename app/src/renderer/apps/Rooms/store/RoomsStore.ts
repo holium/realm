@@ -278,6 +278,7 @@ export class RoomsStore {
     websocket.onopen = () => {
       console.log('websocket connected');
       if (this.currentRoom && this.status === 'connected') {
+        this.ourPeer.enableMedia(this.ourPeer.constraints);
         console.log(
           'websocket onopen reconnecting to room',
           this.currentRoom.rid
