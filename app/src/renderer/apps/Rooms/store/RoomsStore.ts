@@ -446,7 +446,16 @@ export class RoomsStore {
             console.error('no local stream');
             return;
           }
-          const peer = this.peers.get(event.from) || this.createPeer(event.rid);
+
+          let peer = this.peers.get(event.from) || this.createPeer(event.rid);
+          if (peer?.peer.destroyed) {
+            console.log(
+              'peer was destroyed, but is attempting to reconnect',
+              event.from
+            );
+            peer = this.createPeer(event.from);
+            return;
+          }
           if (!peer) {
             console.log('on signal - no peer found');
             return;
