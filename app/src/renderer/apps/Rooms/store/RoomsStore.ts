@@ -101,7 +101,7 @@ export class RoomModel {
 
   @action
   removePeer(patp: string) {
-    this.present.splice(this.present.indexOf(patp), 1);
+    this.present = this.present.filter((p) => p !== patp);
   }
 
   @action
@@ -111,7 +111,7 @@ export class RoomModel {
 
   @action
   removeWhitelist(patp: string) {
-    this.whitelist.splice(this.whitelist.indexOf(patp), 1);
+    this.whitelist = this.whitelist.filter((p) => p !== patp);
   }
 }
 
@@ -205,6 +205,26 @@ export class RoomsStore {
   }
 
   @action
+  async toggleVideo(enableVideo: boolean) {
+    if (!enableVideo) {
+      const stream = await this.ourPeer.disableVideo();
+      if (stream) {
+        stream.getVideoTracks().forEach((track) => {
+          track.enabled = false;
+          track.stop();
+        });
+      }
+    } else {
+      const stream = await this.ourPeer.enableVideo();
+      this.peers.forEach((peer) => {
+        if (stream) {
+          peer.peer.addStream(stream);
+        }
+      });
+    }
+  }
+
+  @action
   setProvider(provider: string) {
     this.provider = provider;
     this.websocket = this.connect();
@@ -244,6 +264,9 @@ export class RoomsStore {
       console.log('disconnecting websocket');
       websocket.send(serialize({ type: 'disconnect' }));
       websocket.close();
+    };
+    window.onclose = function () {
+      disconnect();
     };
     // on sigkill close the connection
     window.onbeforeunload = function () {
@@ -335,10 +358,7 @@ export class RoomsStore {
             SoundActions.playRoomPeerLeave();
             console.log('someone left the room', event);
             this.destroyPeer(event.peer_id);
-            const presentList = this.rooms.get(event.rid)?.present;
-            if (presentList) {
-              presentList.splice(presentList.indexOf(event.peer_id), 1);
-            }
+            this.rooms.get(event.rid)?.removePeer(event.peer_id);
 
             // this.rooms.get(event.rid)?.present.splice(
             // self.rooms = self.rooms.map((room: any) =>
@@ -369,6 +389,18 @@ export class RoomsStore {
             return;
           }
           peer.onReceivedSignal(event.signal);
+        }
+        break;
+      case 'chat':
+        if (this.currentRid === event.rid && event.peer_id !== this.ourId) {
+          console.log('chat', event);
+          this.chat.push({
+            author: event.peer_id,
+            contents: event.message,
+            timeReceived: new Date().getTime(),
+            isRightAligned: event.from === this.ourId,
+            index: this.chat.length,
+          });
         }
         break;
     }
@@ -466,6 +498,24 @@ export class RoomsStore {
     this.rooms.get(rid)?.present.forEach((peerId: string) => {
       if (peerId !== this.ourId) this.destroyPeer(peerId);
     });
+  }
+
+  @action
+  sendChat(rid: string, message: string) {
+    this.chat.push({
+      index: this.chat.length,
+      author: this.ourId,
+      contents: message,
+      timeReceived: Date.now(),
+      isRightAligned: true,
+    });
+    this.websocket.send(
+      serialize({
+        type: 'send-chat',
+        rid,
+        message,
+      })
+    );
   }
 
   @action
@@ -583,6 +633,7 @@ export class PeerClass {
     this.rid = rid;
     this.websocket = websocket;
     this.peerId = peerId;
+
     this.ourId = ourId;
     this.peer = this.createPeer(peerId, initiator, stream);
   }
@@ -600,6 +651,11 @@ export class PeerClass {
   @action
   isAudioAttachedChanged(isAudioAttached: boolean) {
     this.isAudioAttached = isAudioAttached;
+  }
+
+  @action
+  hasVideoChanged(hasVideo: boolean) {
+    this.hasVideo = hasVideo;
   }
 
   @action
@@ -648,31 +704,25 @@ export class PeerClass {
       }
       this.videoTracks.set(track.id, track);
       this.videoStream = stream;
-      this.hasVideo = true;
+      this.hasVideoChanged(true);
       const video = document.getElementById(
         `peer-video-${this.peerId}`
       ) as HTMLVideoElement;
+
       if (video) {
         video.style.display = 'inline-block';
         video.srcObject = stream;
         video.playsInline = true;
       } else {
-        // const video = document.createElement('video');
-        // video.id = `peer-video-${this.peerId}`;
-        // video.srcObject = stream;
-        // video.autoplay = true;
-        // video.playsInline = true;
         console.log('no video element found');
       }
     }
     if (track.kind === 'audio') {
-      console.log('got audio track', track.id);
       if (this.audioTracks.size > 0) {
         console.log('already have this track');
         return;
       }
       this.audioTracks.set(track.id, track);
-      console.log(this.audioTracks);
       this.audioStream = stream;
       this.isAudioAttachedChanged(true);
       this.stream = stream;
@@ -709,13 +759,32 @@ export class PeerClass {
 
   @action
   onClose() {
-    this.status = 'disconnected';
+    this.status = 'closed';
     this.peer.removeAllListeners();
     this.peer.destroy();
     this.audioTracks.forEach((track) => {
       track.stop();
     });
     this.audioTracks.clear();
+    this.isAudioAttachedChanged(false);
+    this.isSpeakingChanged(false);
+    document.getElementById(`peer-audio-${this.peerId}`)?.remove();
+
+    this.videoTracks.forEach((track) => {
+      track.stop();
+    });
+    this.videoTracks.clear();
+    this.hasVideoChanged(false);
+    const video = document.getElementById(
+      `peer-video-${this.peerId}`
+    ) as HTMLVideoElement;
+
+    if (video) {
+      video.style.display = 'none';
+      video.srcObject = null;
+      video.playsInline = false;
+    }
+
     this.analysers.forEach((analyser) => {
       analyser.detach();
     });

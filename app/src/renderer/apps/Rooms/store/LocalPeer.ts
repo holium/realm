@@ -25,8 +25,9 @@ export class LocalPeer {
   @observable audioLevel = 0;
   @observable isMuted = false;
   @observable isSpeaking = false;
+  @observable isVideoOn = false;
   @observable status: PeerConnectionState = PeerConnectionState.New;
-  @observable videoTrack: Map<string, any> = new Map();
+  @observable videoTracks: Map<string, any> = new Map();
   @observable audioTracks: Map<string, any> = new Map();
   @observable stream: MediaStream | undefined = undefined;
   @observable constraints: MediaStreamConstraints = {
@@ -62,6 +63,28 @@ export class LocalPeer {
     this.audioTracks.forEach((track: MediaStreamTrack) => {
       track.enabled = true;
     });
+  }
+
+  get hasVideo() {
+    return this.isVideoOn;
+  }
+
+  @action
+  async enableVideo() {
+    this.isVideoOn = true;
+    this.constraints.video = true;
+    return await this.enableMedia(this.constraints);
+  }
+
+  @action
+  async disableVideo() {
+    this.isVideoOn = false;
+    this.constraints.video = false;
+    this.stream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
+      track.stop();
+    });
+
+    return await this.enableMedia(this.constraints);
   }
 
   @action
@@ -117,9 +140,6 @@ export class LocalPeer {
       video: false,
     }
   ) {
-    if (this.stream) {
-      return;
-    }
     const storedDeviceId = localStorage.getItem('rooms-audio-input');
     if (storedDeviceId) {
       options.audio = {
@@ -127,7 +147,7 @@ export class LocalPeer {
         deviceId: { exact: storedDeviceId },
       };
     }
-    await navigator.mediaDevices
+    return await navigator.mediaDevices
       .getUserMedia(options)
       .then(this.setMedia)
       .catch((err: any) => {
@@ -137,13 +157,49 @@ export class LocalPeer {
 
   @action
   setMedia(stream: MediaStream) {
-    this.stream = stream;
-    this.stream.getAudioTracks().forEach((audio: MediaStreamTrack) => {
-      this.audioTracks.set(audio.id, audio);
-    });
+    if (this.stream && this.stream.active) {
+      this.stream = stream;
+      // if video constraints changed, we need to reattach the video track
+      if (this.isVideoOn) {
+        const video = document.getElementById(
+          `peer-video-${this.patp}`
+        ) as HTMLVideoElement;
+        stream.getVideoTracks().forEach((track: MediaStreamTrack) => {
+          this.videoTracks.set(track.id, track);
+        });
+        if (video) {
+          video.style.display = 'inline-block';
+          video.srcObject = stream;
+        }
+      } else {
+        const videoEl = document.getElementById(
+          `peer-video-${this.patp}`
+        ) as HTMLVideoElement;
+        if (videoEl) {
+          videoEl.style.display = 'none';
+          videoEl.srcObject = null;
+        }
+        this.stream.getVideoTracks().forEach((track: MediaStreamTrack) => {
+          this.stream?.removeTrack(track);
+          track.stop();
+          this.videoTracks.delete(track.id);
+        });
+      }
+    } else {
+      this.stream = stream;
+      this.stream.getAudioTracks().forEach((audio: MediaStreamTrack) => {
+        this.audioTracks.set(audio.id, audio);
+      });
+      if (this.isVideoOn) {
+        this.stream.getVideoTracks().forEach((video: MediaStreamTrack) => {
+          this.videoTracks.set(video.id, video);
+        });
+      }
+    }
     // initialize the speaking detection analyser
     this.analysers[0] = SpeakingDetectionAnalyser.initialize(this);
     this.status = PeerConnectionState.Broadcasting;
+    return this.stream;
   }
 
   @action
@@ -152,6 +208,11 @@ export class LocalPeer {
       track.stop();
     });
     this.audioTracks.clear();
+    this.videoTracks.forEach((track: MediaStreamTrack) => {
+      track.stop();
+    });
+    this.videoTracks.clear();
+
     this.analysers.forEach((analyser: IAudioAnalyser) => {
       analyser.detach();
     });

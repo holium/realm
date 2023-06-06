@@ -15,7 +15,8 @@ import {
 
 import { useTrayApps } from 'renderer/apps/store';
 import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
+
+import { useRoomsStore } from '../store/RoomsStoreContext';
 
 export const chatForm = (
   defaults: any = {
@@ -43,7 +44,7 @@ export const chatForm = (
 const RoomChatPresenter = () => {
   const { text } = useMemo(() => chatForm(), []);
   const { loggedInAccount } = useAppState();
-  const { roomsStore } = useShipStore();
+  const roomsStore = useRoomsStore();
   const { getTrayAppHeight } = useTrayApps();
   const listHeight = getTrayAppHeight() - 164;
 
@@ -57,12 +58,13 @@ const RoomChatPresenter = () => {
       evt.preventDefault();
       evt.stopPropagation();
       if (chatInputRef.current === null) return;
+      if (!roomsStore.currentRid) return;
       const innerText = chatInputRef.current.value;
       if (innerText === '') return;
-      roomsStore.sendChat(innerText);
+      roomsStore.sendChat(roomsStore.currentRid, innerText);
       text.actions.onChange('');
     },
-    [roomsStore.current, text.actions]
+    [roomsStore.currentRid, text.actions]
   );
 
   const ChatList = useMemo(() => {
@@ -103,7 +105,7 @@ const RoomChatPresenter = () => {
               }
               message={[
                 {
-                  plain: chat.content,
+                  plain: chat.contents,
                 },
               ]}
               onReaction={() => {}}

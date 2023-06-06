@@ -36,6 +36,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
   const { friends } = useShipStore();
   const roomsStore = useRoomsStore();
   const speakerRef = useRef<any>(null);
+  const videoRef = useRef<any>(null);
   const { getOptions, setOptions } = useContextMenu();
   const isOur = person === loggedInAccount?.serverId;
   const metadata = friends.getContactAvatarMetadata(person);
@@ -47,6 +48,14 @@ const SpeakerPresenter = (props: ISpeaker) => {
   } else {
     peer = roomsStore.peers.get(person);
   }
+
+  // if navigating away and back, we need to reattach the video
+  useEffect(() => {
+    if (!videoRef.current) return;
+    if (!peer?.hasVideo) return;
+    videoRef.current.srcObject = peer?.stream;
+    videoRef.current.style.display = 'inline-block';
+  }, [peer?.hasVideo, videoRef.current]);
 
   const contextMenuOptions = useMemo(
     () =>
@@ -92,7 +101,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
     sublabel = <Sublabel>Disconnected</Sublabel>;
 
   if (peerState === PeerConnectionState.Closed) {
-    sublabel = <Sublabel>Away</Sublabel>;
+    sublabel = <Sublabel>Disconnected</Sublabel>;
   }
 
   useEffect(() => {
@@ -111,6 +120,9 @@ const SpeakerPresenter = (props: ISpeaker) => {
   ]);
 
   const hasVideo = (peer as PeerClass)?.hasVideo;
+  const isSpeaking =
+    (peer as PeerClass)?.isSpeaking && !(peer as PeerClass)?.isMuted;
+
   return (
     <SpeakerWrapper
       id={`room-speaker-${person}`}
@@ -121,10 +133,15 @@ const SpeakerPresenter = (props: ISpeaker) => {
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      className={hasVideo ? 'speaker-video-on' : ''}
+      className={`${
+        hasVideo && peerState !== PeerConnectionState.Closed
+          ? 'speaker-video-on'
+          : ''
+      } ${isSpeaking ? 'speaker-speaking' : ''}`}
     >
       <>
         <video
+          ref={videoRef}
           style={{
             zIndex: 0,
             display: 'none',
@@ -136,10 +153,12 @@ const SpeakerPresenter = (props: ISpeaker) => {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            borderRadius: '6px',
+            borderRadius: '9px',
           }}
           id={`peer-video-${person}`}
           autoPlay
+          playsInline
+          muted={isOur}
         />
         <Flex
           zIndex={2}
@@ -187,7 +206,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
           style={{ pointerEvents: 'none' }}
         >
           <Flex height={26} mt="1px">
-            {!peer?.isMuted && <AudioWave speaking={peer?.isSpeaking} />}
+            {!peer?.isMuted && <AudioWave speaking={isSpeaking} />}
           </Flex>
 
           <Flex
@@ -206,7 +225,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
               />
             )}
           </Flex>
-          {!peer?.isMuted && !peer?.isSpeaking && (
+          {!peer?.isMuted && !isSpeaking && (
             <Flex
               className="speaker-sublabel"
               initial={{ opacity: 0 }}
@@ -231,15 +250,26 @@ const SpeakerWrapper = styled(Flex)<FlexProps>`
   border-radius: 9px;
   transition: 0.25s ease;
   position: relative;
+  height: 186px;
+  outline: 2px solid transparent;
+
   &:hover {
     transition: 0.25s ease;
     background: rgba(var(--rlm-overlay-hover-rgba));
   }
+  &.speaker-speaking {
+    transition: 0.25s ease;
+    z-index: 2;
+    outline: 2px solid rgba(var(--rlm-accent-rgba));
+  }
+  background: transparent;
   &.speaker-video-on {
+    background: black;
+    transition: 0.25s ease;
     .speaker-avatar-wrapper {
       position: absolute;
       flex-direction: row;
-      align-items: flex-start;
+      align-items: center;
       justify-content: flex-start;
       left: 8px;
       bottom: 8px;

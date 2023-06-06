@@ -24,6 +24,7 @@ const RoomPresenter = () => {
   const { dockColor, mode } = theme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
   const isMuted = roomsStore.ourPeer.isMuted;
+  const hasVideo = roomsStore.ourPeer.isVideoOn;
   const commButtonBg =
     mode === 'light' ? darken(0.04, dockColor) : darken(0.01, dockColor);
 
@@ -201,6 +202,13 @@ const RoomPresenter = () => {
               icon={shellStore.multiplayerEnabled ? 'MouseOn' : 'MouseOff'}
               customBg={commButtonBg}
               onClick={shellStore.toggleMultiplayer}
+            />
+            <CommButton
+              icon={hasVideo ? 'VideoOn' : 'VideoOff'}
+              customBg={commButtonBg}
+              onClick={() => {
+                roomsStore.toggleVideo(!hasVideo);
+              }}
             />
             {/* <CommButton
               icon="HeadphoneLine"
