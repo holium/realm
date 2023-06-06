@@ -32,6 +32,14 @@ export const InboxPresenter = () => {
   const [searchString, setSearchString] = useState<string>('');
   const currentSpace = spacesStore.selected;
 
+  const [isStandaloneChat, setStandaloneChat] = useState(
+    shellStore.isStandaloneChat
+  );
+
+  useEffect(() => {
+    window.electron.app.isStandaloneChat().then(setStandaloneChat);
+  }, []);
+
   useEffect(() => {
     trackEvent('OPENED', 'CHAT_INBOX');
   }, []);
@@ -90,7 +98,7 @@ export const InboxPresenter = () => {
             onClick={(evt) => {
               evt.stopPropagation();
               shellStore.setFullScreen(false);
-              shellStore.setStandaloneChat(true);
+              shellStore.setStandaloneChat(!isStandaloneChat);
             }}
           >
             <Icon name="Link" size={24} opacity={0.5} />
