@@ -6,7 +6,8 @@ import {
   useState,
 } from 'react';
 
-import { Box, ChatInput } from '@holium/design-system';
+import { ChatInput } from '@holium/design-system/blocks';
+import { Box } from '@holium/design-system/general';
 
 import { FileUploadParams } from 'os/services/ship/ship.service';
 import { useFileUpload } from 'renderer/lib/useFileUpload';
@@ -23,7 +24,6 @@ type CourierInputProps = {
   storage: IuseStorage;
   selectedChat: ChatModelType;
   editMessage?: ChatMessageType | null;
-  containerWidth: number;
   themeMode: 'light' | 'dark';
   onSend: (fragments: any[]) => void;
   onAttachmentChange: (attachmentCount: number) => void;
@@ -36,7 +36,6 @@ export const ChatInputBox = ({
   storage,
   selectedChat,
   editMessage,
-  containerWidth,
   themeMode,
   onSend,
   onEditConfirm,
@@ -141,7 +140,6 @@ export const ChatInputBox = ({
         delay: 0.2,
         duration: 0.1,
       }}
-      width={containerWidth}
       onAnimationComplete={() => {
         setIsFocused(true);
       }}
@@ -153,10 +151,8 @@ export const ChatInputBox = ({
         replyTo={replyTo}
         isFocused={isFocused}
         loading={isUploading}
-        containerWidth={containerWidth}
         onSend={(fragments) => {
           onSend(fragments);
-          // clear attachments
           setAttachment([]);
         }}
         themeMode={themeMode}

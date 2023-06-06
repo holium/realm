@@ -22,7 +22,6 @@ type ChatInputProps = {
   isFocused?: boolean;
   loading?: boolean;
   attachments?: string[];
-  containerWidth?: number;
   replyTo?: {
     id: string;
     author: string;
@@ -64,7 +63,6 @@ export const ChatInput = ({
   editingMessage,
   attachments,
   error,
-  containerWidth,
   themeMode,
   onSend,
   onEditConfirm,
@@ -286,9 +284,6 @@ export const ChatInput = ({
                 author={replyTo.author}
                 authorColor={replyTo.authorColor}
                 themeMode={themeMode}
-                containerWidth={
-                  containerWidth ? containerWidth - 10 : undefined
-                }
                 message={replyTo.message}
                 sentAt={replyTo.sentAt}
                 onCancel={onCancelReply}

@@ -1,12 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { useEffect, useMemo, useRef } from 'react';
 import { observer } from 'mobx-react';
-import styled from 'styled-components';
 
 import {
   extractOGData,
   fetchOGData,
-  Flex,
   measureImage,
   measureTweet,
   parseMediaType,
@@ -16,36 +13,24 @@ import {
 
 import { useTrayApps } from 'renderer/apps/store';
 import { trackEvent } from 'renderer/lib/track';
-import { IuseStorage } from 'renderer/lib/useStorage';
+import { useStorage } from 'renderer/lib/useStorage';
 import { useAppState } from 'renderer/stores/app.store';
+import { ChatMessageType } from 'renderer/stores/models/chat.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { ChatMessageType } from '../../../stores/models/chat.model';
-import { ChatAvatar } from '../components/ChatAvatar';
-import { ChatInputBox } from '../components/ChatInputBox';
-import { ChatLogHeader } from '../components/ChatLogHeader';
-import { PinnedContainer } from '../components/PinnedMessage';
-import { ChatLogList } from './ChatLogList';
+import { ChatAvatar } from '../../components/ChatAvatar';
+import { ChatLogView } from './ChatLogView';
 
-const FullWidthAnimatePresence = styled(AnimatePresence)`
-  position: absolute;
-  z-index: 16;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-`;
-
-type ChatLogProps = {
-  storage: IuseStorage;
+type Props = {
+  isStandaloneChat?: boolean;
 };
 
-export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
+export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
+  const storage = useStorage();
   const { loggedInAccount, theme } = useAppState();
   const { dimensions, innerNavigation } = useTrayApps();
   const { notifStore, friends, chatStore, spacesStore } = useShipStore();
   const { selectedChat, getChatHeader, setSubroute } = chatStore;
-  const [showAttachments, setShowAttachments] = useState(false);
 
   const listRef = useRef<WindowedListRef>(null);
 
@@ -120,19 +105,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
     }
   }
 
-  const chatAvatarEl = (
-    <ChatAvatar
-      sigil={sigil}
-      type={type}
-      path={path}
-      peers={peers.map((p) => p.ship)}
-      image={image}
-      metadata={metadata}
-      color={avatarColor}
-      canEdit={false}
-    />
-  );
-
   const containerWidth = dimensions.width - 24;
 
   const onMessageSend = async (fragments: any[]) => {
@@ -200,18 +172,6 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
 
   const height: number = dimensions.height - 104;
 
-  let topPadding;
-  let endPadding;
-  if (showPin) {
-    topPadding = 50;
-  }
-  if (showAttachments) {
-    endPadding = 136;
-  }
-  if (selectedChat.replyingMsg) {
-    endPadding = 56;
-  }
-
   let pretitle;
   let subtitle;
   if (selectedChat.peers.length > 1 && selectedChat.type === 'group') {
@@ -253,111 +213,39 @@ export const ChatLogPresenter = ({ storage }: ChatLogProps) => {
   }
 
   return (
-    <Flex flexDirection="column">
-      <Flex
-        layout="preserve-aspect"
-        layoutId={`chat-${path}-container`}
-        flexDirection="column"
-      >
-        <ChatLogHeader
-          title={title}
+    <ChatLogView
+      path={path}
+      title={title}
+      pretitle={pretitle}
+      subtitle={subtitle}
+      messages={messages}
+      selectedChat={selectedChat}
+      storage={storage}
+      isMuted={selectedChat.muted}
+      showPin={showPin}
+      pinnedChatMessage={selectedChat.pinnedChatMessage as ChatMessageType}
+      width={isStandaloneChat ? '100%' : containerWidth}
+      height={isStandaloneChat ? '100%' : height}
+      ourColor={ourColor}
+      themeMode={theme.mode as 'light' | 'dark'}
+      listRef={listRef}
+      replyTo={replyToFormatted}
+      chatAvatar={
+        <ChatAvatar
+          sigil={sigil}
+          type={type}
           path={path}
-          isMuted={selectedChat.muted}
-          onBack={() => setSubroute('inbox')}
-          hasMenu
-          avatar={chatAvatarEl}
-          pretitle={pretitle}
-          subtitle={subtitle}
+          peers={peers.map((p) => p.ship)}
+          image={image}
+          metadata={metadata}
+          color={avatarColor}
+          canEdit={false}
         />
-        <Flex
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1, duration: 0.1 }}
-        >
-          {messages.length === 0 ? (
-            <Flex
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              width={containerWidth}
-              height={height}
-            >
-              <Text.Custom
-                textAlign="center"
-                width={300}
-                fontSize={3}
-                opacity={0.5}
-              >
-                You haven't sent or received any messages in this chat yet.
-              </Text.Custom>
-            </Flex>
-          ) : (
-            <Flex position="relative" flexDirection="column" width="100%">
-              <ChatLogList
-                listRef={listRef}
-                messages={messages}
-                topOfListPadding={topPadding}
-                endOfListPadding={endPadding}
-                selectedChat={selectedChat}
-                width={containerWidth}
-                height={height}
-                ourColor={ourColor}
-              />
-              {showPin && (
-                <FullWidthAnimatePresence>
-                  <PinnedContainer
-                    message={selectedChat.pinnedChatMessage as ChatMessageType}
-                  />
-                </FullWidthAnimatePresence>
-              )}
-            </Flex>
-          )}
-        </Flex>
-      </Flex>
-      <Flex
-        position="absolute"
-        flexDirection="column"
-        mt={6}
-        bottom={12}
-        left={12}
-        right={12}
-        initial={{
-          opacity: 0,
-        }}
-        animate={{ opacity: 1 }}
-        transition={{
-          delay: 0.2,
-          duration: 0.1,
-        }}
-      >
-        <ChatInputBox
-          storage={storage}
-          selectedChat={selectedChat}
-          themeMode={theme.mode as 'light' | 'dark'}
-          onSend={onMessageSend}
-          onEditConfirm={onEditConfirm}
-          editMessage={selectedChat.editingMsg}
-          replyTo={replyToFormatted}
-          containerWidth={containerWidth}
-          onCancelEdit={(evt) => {
-            evt.stopPropagation();
-            if (!selectedChat) return;
-            selectedChat.cancelEditing();
-          }}
-          onAttachmentChange={(attachmentCount) => {
-            if (attachmentCount > 0) {
-              setShowAttachments(true);
-            } else {
-              setShowAttachments(false);
-            }
-            // Wait for transition to finish, then scroll to bottom.
-            setTimeout(() => {
-              listRef.current?.scrollToIndex(messages.length - 1);
-            }, 250);
-          }}
-        />
-      </Flex>
-    </Flex>
+      }
+      onBack={() => setSubroute('inbox')}
+      onEditConfirm={onEditConfirm}
+      onSend={onMessageSend}
+    />
   );
 };
 

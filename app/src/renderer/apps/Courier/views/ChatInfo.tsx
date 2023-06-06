@@ -24,7 +24,7 @@ import { useTrayApps } from 'renderer/apps/store';
 import { useContextMenu } from 'renderer/components';
 import { ShipSearch } from 'renderer/components/ShipSearch';
 import { useFileUpload } from 'renderer/lib/useFileUpload';
-import { IuseStorage } from 'renderer/lib/useStorage';
+import { useStorage } from 'renderer/lib/useStorage';
 import { useAppState } from 'renderer/stores/app.store';
 import { ShipIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -66,17 +66,13 @@ export const createPeopleForm = (
   };
 };
 
-type ChatInfoProps = {
-  storage: IuseStorage;
-};
-
-export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
+export const ChatInfoPresenter = () => {
+  const storage = useStorage();
   const { loggedInAccount, theme } = useAppState();
   const { chatStore, spacesStore, friends } = useShipStore();
   const { selectedChat, setSubroute, getChatHeader } = chatStore;
   const { dimensions } = useTrayApps();
   const containerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string>();
   const [image, setImage] = useState(selectedChat?.metadata?.image || '');

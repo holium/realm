@@ -268,7 +268,6 @@ export const renderFragment = (
   fragment: FragmentType,
   index: number,
   author: string,
-  containerWidth?: number,
   onReplyClick?: (id: string) => void
 ) => {
   const key = Object.keys(fragment)[0] as FragmentKey;
@@ -350,11 +349,7 @@ export const renderFragment = (
 
     case 'code':
       return (
-        <CodeWrapper
-          py={1}
-          minWidth={containerWidth ? containerWidth / 1.25 : 150}
-          className="code-wrapper"
-        >
+        <CodeWrapper py={1} minWidth={150} className="code-wrapper">
           <FragmentCodeBlock id={id} key={index}>
             {(fragment as FragmentCodeType).code}
           </FragmentCodeBlock>
@@ -366,7 +361,6 @@ export const renderFragment = (
           <LinkBlock
             draggable={false}
             mode="embed"
-            containerWidth={containerWidth}
             metadata={(fragment as FragmentLinkType).metadata}
             link={(fragment as FragmentLinkType).link}
             id={id}
@@ -420,7 +414,7 @@ export const renderFragment = (
       ) {
         replyContent = (
           <FragmentPlain
-            maxWidth={containerWidth && containerWidth - 16}
+            maxWidth="100%"
             truncate
             id={id}
             key={`${author + index}-reply`}
@@ -466,7 +460,7 @@ export const renderFragment = (
               truncate
               overflow="hidden"
               width="fit-content"
-              maxWidth={containerWidth && containerWidth - 16}
+              maxWidth="100%"
             >
               {replyContent}
             </Text.Custom>
@@ -477,19 +471,12 @@ export const renderFragment = (
     case 'tab': {
       const { url, favicon, title } = (fragment as FragmentTabType).tab;
       return (
-        <TabWrapper
-          width={containerWidth && containerWidth - 16}
-          id={url}
-          p={0}
-        >
+        <TabWrapper width="100%" id={url} p={0}>
           <Bookmark
             url={url}
             favicon={favicon}
             title={title}
-            width={containerWidth && containerWidth - 36}
-            onNavigate={(url: string) => {
-              window.open(url, '_blank');
-            }}
+            onNavigate={(url) => window.open(url, '_blank')}
           />
         </TabWrapper>
       );

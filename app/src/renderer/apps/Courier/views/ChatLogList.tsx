@@ -18,8 +18,6 @@ import { ChatMessage } from '../components/ChatMessage';
 
 type Props = {
   listRef: RefObject<WindowedListRef>;
-  width: number;
-  height: number;
   messages: ChatMessageType[];
   selectedChat: ChatModelType;
   ourColor: string;
@@ -29,8 +27,6 @@ type Props = {
 
 export const ChatLogList = ({
   listRef,
-  width,
-  height,
   messages,
   selectedChat,
   ourColor,
@@ -66,7 +62,6 @@ export const ChatLogList = ({
     return (
       <Box
         key={row.id}
-        mx="1px"
         animate={false}
         pt={topSpacing}
         pb={isLast ? bottomSpacing : 0}
@@ -86,7 +81,6 @@ export const ChatLogList = ({
         <ChatMessage
           isPrevGrouped={isPrevGrouped}
           isNextGrouped={isNextGrouped}
-          containerWidth={width}
           message={row as ChatMessageType}
           ourColor={ourColor}
           onReplyClick={(replyId) => {
@@ -108,8 +102,6 @@ export const ChatLogList = ({
       <WindowedList
         innerRef={listRef}
         data={messages}
-        width={width}
-        height={height}
         atBottomThreshold={100}
         followOutput={true}
         increaseViewportBy={{

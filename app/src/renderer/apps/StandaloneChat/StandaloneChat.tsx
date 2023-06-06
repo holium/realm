@@ -4,17 +4,15 @@ import { observer } from 'mobx-react';
 import { Flex, Spinner, Text } from '@holium/design-system/general';
 
 import { useTrayApps } from 'renderer/apps/store';
-import { useStorage } from 'renderer/lib/useStorage';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ChatInfo } from '../Courier/views/ChatInfo';
-import { ChatLog } from '../Courier/views/ChatLog';
+import { ChatLog } from '../Courier/views/ChatLog/ChatLog';
 import { Inbox } from '../Courier/views/Inbox/Inbox';
 import { NewChat } from '../Courier/views/NewChat';
 
 export const StandaloneChatPresenter = () => {
   const { clearInnerNavigation } = useTrayApps();
-  const storage = useStorage();
   const { chatStore } = useShipStore();
 
   useEffect(() => {
@@ -62,8 +60,8 @@ export const StandaloneChatPresenter = () => {
         <Inbox isStandaloneChat />
       </Flex>
       <Flex flex={1} height="100%" position="relative">
-        {chatStore.subroute === 'chat' && <ChatLog storage={storage} />}
-        {chatStore.subroute === 'chat-info' && <ChatInfo storage={storage} />}
+        {chatStore.subroute === 'chat' && <ChatLog isStandaloneChat />}
+        {chatStore.subroute === 'chat-info' && <ChatInfo />}
         {chatStore.subroute === 'new' && <NewChat />}
       </Flex>
     </Flex>

@@ -37,7 +37,6 @@ export type BubbleProps = {
   ourColor?: string;
   message?: FragmentType[];
   reactions?: FragmentReactionType[];
-  containerWidth?: number;
   isPrevGrouped?: boolean; // should we show the author if multiple messages by same author?
   isNextGrouped?: boolean; // should we show the author if multiple messages by same author?
   innerRef?: Ref<HTMLDivElement>;
@@ -60,7 +59,6 @@ export const Bubble = ({
   message,
   isEdited,
   isEditing,
-  containerWidth,
   reactions = [],
   isPrevGrouped,
   isNextGrouped,
@@ -92,13 +90,6 @@ export const Bubble = ({
       'rgba(var(--rlm-text-rgba))',
     [authorColor]
   );
-
-  const innerWidth = useMemo(() => {
-    if (!containerWidth) return undefined;
-
-    const removePercentageWidth = containerWidth * 0.1;
-    return containerWidth - 16 - removePercentageWidth;
-  }, [containerWidth]);
 
   const footerHeight = useMemo(() => {
     if (reactions.length > 0) {
@@ -143,14 +134,7 @@ export const Bubble = ({
       return (
         <span id={id} key={`${id}-index-${index}`}>
           {prevLineBreak}
-          {renderFragment(
-            id,
-            fragment,
-            index,
-            author,
-            innerWidth,
-            onReplyClick
-          )}
+          {renderFragment(id, fragment, index, author, onReplyClick)}
           {nextLineBreak}
         </span>
       );
