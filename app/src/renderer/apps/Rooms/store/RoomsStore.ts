@@ -173,7 +173,6 @@ export class RoomsStore {
 
     RealmIPC.onUpdate((update) => {
       if (update.type === 'logout') {
-        this.hangupAllPeers();
         this.cleanUpCurrentRoom();
         this.status = 'disconnected';
         this.websocket.close();
@@ -278,6 +277,31 @@ export class RoomsStore {
 
     websocket.onopen = () => {
       console.log('websocket connected');
+      if (this.currentRoom && this.status === 'connected') {
+        console.log(
+          'websocket onopen reconnecting to room',
+          this.currentRoom.rid
+        );
+        // reconnect to current room if you were in one and
+        // the websocket disconnected
+        const peers = this.currentRoom.present.filter(
+          (peer: string) => peer !== this.ourId
+        );
+        peers.forEach((peerId: string) => {
+          if (!this.ourPeer.stream) {
+            console.error('no local stream');
+            return;
+          }
+          if (this.peers.get(peerId)?.peer.destroyed) {
+            console.log(
+              'peer was destroyed, connection closed, reconnecting',
+              peerId
+            );
+            this.createPeer(peerId);
+            return;
+          }
+        });
+      }
       this.status = 'connected';
       websocket.send(serialize({ type: 'connect' }));
     };
