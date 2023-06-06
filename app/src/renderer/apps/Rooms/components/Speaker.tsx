@@ -12,6 +12,7 @@ import {
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
+import { LocalPeer } from '../store/LocalPeer';
 import { PeerConnectionState } from '../store/room.types';
 import { PeerClass } from '../store/RoomsStore';
 import { useRoomsStore } from '../store/RoomsStoreContext';
@@ -42,7 +43,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
   const metadata = friends.getContactAvatarMetadata(person);
 
   let name = metadata?.nickname || person;
-  let peer: any;
+  let peer: PeerClass | LocalPeer | undefined;
   if (isOur) {
     peer = roomsStore.ourPeer;
   } else {
@@ -52,7 +53,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
   // if navigating away and back, we need to reattach the video
   useEffect(() => {
     if (!videoRef.current) return;
-    if (!peer?.hasVideo) return;
+    if (!peer || !peer?.hasVideo) return;
     videoRef.current.srcObject = peer?.stream;
     videoRef.current.style.display = 'inline-block';
   }, [peer?.hasVideo, videoRef.current]);

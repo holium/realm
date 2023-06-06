@@ -689,7 +689,7 @@ export class PeerClass {
     peer.on('track', (this.onTrack = this.onTrack.bind(this)));
     peer.on('error', (this.onError = this.onError.bind(this)));
     peer.on('close', (this.onClose = this.onClose.bind(this)));
-
+    // peer
     return peer;
   }
 
@@ -703,21 +703,31 @@ export class PeerClass {
         return;
       }
       this.videoTracks.set(track.id, track);
-      this.videoStream = stream;
+      this.stream = stream;
       this.hasVideoChanged(true);
       const video = document.getElementById(
         `peer-video-${this.peerId}`
       ) as HTMLVideoElement;
 
+      track.onmute = () => {
+        // triggered when video is stopped by peer
+        track.stop();
+        if (!video) return;
+        video.style.display = 'none';
+        this.hasVideoChanged(false);
+      };
+
       if (video) {
         video.style.display = 'inline-block';
         video.srcObject = stream;
         video.playsInline = true;
+        video.muted = true;
       } else {
         console.log('no video element found');
       }
     }
     if (track.kind === 'audio') {
+      console.log('got audio track', track.id);
       if (this.audioTracks.size > 0) {
         console.log('already have this track');
         return;
@@ -730,11 +740,17 @@ export class PeerClass {
       track.onmute = () => {
         console.log('track muted');
         this.isMutedChanged(true);
+        document
+          .getElementById(`peer-audio-${this.peerId}`)
+          ?.setAttribute('muted', 'true');
       };
 
       track.onunmute = () => {
         console.log('track unmuted');
         this.isMutedChanged(false);
+        document
+          .getElementById(`peer-audio-${this.peerId}`)
+          ?.setAttribute('muted', 'false');
       };
 
       track.onended = () => {
