@@ -186,6 +186,11 @@
           ::==
           ~&  >  "{(scow %p src.bowl)} subbed to {(spud path)}"
           ~
+      :: /vent/~zod/~2000.1.1
+        [%vent @ @ ~] :: poke response comes on this path
+          =/  src=ship  (slav %p i.t.path)
+          ?>  =(src src.bowl)
+          ~
     ==
     [cards this]
   ::
@@ -218,6 +223,12 @@
             %del-path  =(path.v thepath)
           ==
         ``db-path+!>([thepathrow thepeers tbls schemas.state dels])
+    ::
+    :: host of a given path
+      [%x %host %path *]
+        =/  thepath  t.t.t.path
+        =/  thepathrow  (~(got by paths.state) thepath)
+        ``ship+!>(host.thepathrow)
     ::
     :: /x/db/start-ms/[unix ms].json
     :: all tables, but only with received-at after <time>

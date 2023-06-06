@@ -80,9 +80,9 @@
 ::  (should come with ability to relay to all paths or just to a
 ::  particular path)
 +$  relay
-  $:  who=ship
-      =id
+  $:  what=id
       =type
+      revision=@ud
       target-path=path
       original-path=path
   ==

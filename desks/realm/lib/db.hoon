@@ -760,7 +760,7 @@
 ::db &db-action [%create /example %vote 0 [%vote [%.y our %foo [~zod now] /example]] ~]
 ::db &db-action [%create /example %foo 1 [%general ~[1 'd' (jam /hello/goodbye)]] ~[['num' 'ud'] ['str' 't'] ['mypath' 'path']]]
 ::~zod/db &db-action [%create /example %vote 0 [%vote %.y our %foo [~zod now] /example] ~]
-  |=  [=input-row state=state-0 =bowl:gall]
+  |=  [[=req-id =input-row] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: form row from input
   =/  row=row  [
@@ -768,6 +768,7 @@
     [src.bowl now.bowl]
     type.input-row
     v.input-row
+    ~
     data.input-row
     now.bowl
     now.bowl
@@ -783,7 +784,7 @@
   ?.  =(host.path-row our.bowl)
     ~&  >>  "{<src.bowl>} tried to have us ({<our.bowl>}) create a row in {<path.path-row>} where we are not the host. forwarding the poke to the host: {<host.path-row>}"
     :_  state
-    [%pass /dbpoke %agent [host.path-row %db] %poke %db-action !>([%create input-row])]~
+    [%pass /dbpoke %agent [host.path-row %db] %poke %db-action !>([%create req-id input-row])]~
 
   :: update path
   =/  path-sub-wire           (weld /next/(scot %da updated-at.path-row) path.row)
@@ -794,11 +795,15 @@
   =.  state             (add-row-to-db row schema.input-row state)
 
   :: emit the change to subscribers
+  =/  vent-path=path  /vent/(scot %p src.req-id)/(scot %da now.req-id)
   =/  cards=(list card)  :~
     :: tell subs about the new row
     [%give %fact [/db (weld /path path.row) path-sub-wire ~] db-changes+!>([%add-row row schema.input-row]~)]
     :: kick subs to force them to re-sub for next update
     [%give %kick [path-sub-wire ~] ~]
+    :: give vent response
+    [%give %fact ~[vent-path] db-vent+!>([%row-id id.row])]
+    [%give %kick ~[vent-path] ~]
   ==
   ~&  >  "publishing new row to {(spud path-sub-wire)} (and also kicking)"
 
@@ -841,6 +846,7 @@
     id
     type.input-row
     v.input-row
+    ?~(revision.old-row ~ [~ +(u.revision.old-row)])
     data.input-row
     created-at.old-row
     now.bowl
@@ -890,6 +896,7 @@
   =.  tables.state    (~(put by tables.state) type pt)  :: update the tables.state
   =/  log=db-row-del-change    [%del-row path type id now.bowl]
   =.  del-log.state   (~(put by del-log.state) now.bowl log)  :: record the fact that we deleted
+  :: TODO remove remote-scry paths for the row
 
   :: emit the change to subscribers
   =/  cards=(list card)  :~
@@ -920,10 +927,19 @@
           [%create-path create-path]
           [%create-from-space de-create-from-space]
           [%remove-path pa]
-          [%create de-input-row]
+          [%create de-create-input-row]
           [%edit (ot ~[[%id de-id] [%input-row de-input-row]])]
           [%remove remove]
       ==
+    ::
+    ++  de-create-input-row
+      |=  jon=json
+      ^-  [req-id input-row]
+      ?>  ?=([%o *] jon)
+      =/  request-id=(unit json)  (~(get by p.jon) 'request-id')
+      ?~  request-id
+        [[~zod ~2000.1.1] (de-input-row jon)]  :: if the poke-sender didn't care enough to pass a request id, just use a fake one
+      [(de-id u.request-id) (de-input-row jon)]
     ::
     ++  add-peer
       %-  ot
@@ -1155,6 +1171,13 @@
 ++  enjs
   =,  enjs:format
   |%
+    ++  en-vent
+      |=  =vent
+      ^-  json
+      %+  frond
+        %row-id
+      (row-id-to-json id.vent)
+    ::
     ++  en-db-changes
       |=  chs=db-changes
       ^-  json
@@ -1289,6 +1312,7 @@
             id+(row-id-to-json id.row)
             type+s+type.row
             v+(numb v.row)
+            [%revision ?~(revision.row ~ (numb u.revision.row))]
             created-at+(time created-at.row)
             updated-at+(time updated-at.row)
             received-at+(time received-at.row)

@@ -36,6 +36,7 @@
       =id:common
       =type:common      :: MUST always be same as table type
       v=@ud             :: data-type version
+      revision=(unit @ud)  :: necessary for relaying via remote-scry. when non-null, indicates the latest version number to use in scry
       data=columns      :: the actual content
       created-at=@da    :: when the source-ship originally created the row
       updated-at=@da    :: when the source-ship originally last updated the row
@@ -139,7 +140,7 @@
 
       :: any peer in the path can send these pokes to the %host
       :: if they have right permissions, host will propagate the data
-      [%create =input-row]          :: sends %add-row to all subs
+      [%create =req-id =input-row]          :: sends %add-row to all subs
       [%edit =id:common =input-row] :: sends %upd-row to all subs
       [%remove =type:common =path =id:common]      :: %host deleting the row, sends %delete to all peers
   ==
@@ -159,5 +160,11 @@
       v=@ud
       data=columns
       =schema
+  ==
+::
++$  req-id  [src=ship now=@da] :: the request-id, used for threads and venting
+::
++$  vent
+  $%  [%row-id =id:common]
   ==
 --
