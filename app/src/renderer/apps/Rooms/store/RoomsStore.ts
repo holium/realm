@@ -505,6 +505,13 @@ export class RoomsStore {
 
   @action
   joinRoom(rid: string) {
+    if (this.currentRoom) {
+      if (this.currentRoom.creator === this.ourId) {
+        this.deleteRoom(this.currentRoom.rid);
+      } else {
+        this.leaveRoom(this.currentRoom.rid);
+      }
+    }
     this.ourPeer.enableMedia(this.ourPeer.constraints).then(
       action(() => {
         this.setCurrentRoom(rid);
