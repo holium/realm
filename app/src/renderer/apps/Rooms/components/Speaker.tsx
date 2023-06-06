@@ -54,7 +54,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
   useEffect(() => {
     if (!videoRef.current) return;
     if (!peer || !peer?.hasVideo) return;
-    console.log('reattaching video', peer);
+
     if (!videoRef.current.srcObject) {
       videoRef.current.srcObject = peer.stream;
       videoRef.current.style.display = 'inline-block';

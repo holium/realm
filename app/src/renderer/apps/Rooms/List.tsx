@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, Text, Tooltip } from '@holium/design-system';
 
+import { SoundActions } from 'renderer/lib/sound';
 import { trackEvent } from 'renderer/lib/track';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -85,6 +86,7 @@ const RoomsPresenter = () => {
               capacity={room.capacity}
               onClick={async (evt: any) => {
                 evt.stopPropagation();
+                await SoundActions.playRoomEnter();
                 if (roomsStore.currentRid !== room.rid) {
                   roomsStore.joinRoom(room.rid);
                 }

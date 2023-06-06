@@ -4,6 +4,7 @@ import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, Text, TextInput } from '@holium/design-system';
 
+import { SoundActions } from 'renderer/lib/sound';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
@@ -67,8 +68,9 @@ const NewRoomPresenter = () => {
     []
   );
 
-  const createRoom = (evt: any) => {
+  const createRoom = async (evt: any) => {
     // setLoading(true);
+    await SoundActions.playRoomEnter();
     const { name, isPrivate } = form.actions.submit();
     evt.stopPropagation();
     const spacePath =

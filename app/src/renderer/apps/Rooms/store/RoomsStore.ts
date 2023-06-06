@@ -229,13 +229,7 @@ export class RoomsStore {
   @action
   async toggleVideo(enableVideo: boolean) {
     if (!enableVideo) {
-      const stream = await this.ourPeer.disableVideo();
-      if (stream) {
-        stream.getVideoTracks().forEach((track) => {
-          track.enabled = false;
-          track.stop();
-        });
-      }
+      await this.ourPeer.disableVideo();
     } else {
       const stream = await this.ourPeer.enableVideo();
       this.peers.forEach((peer) => {
@@ -452,7 +446,7 @@ export class RoomsStore {
 
   @action
   createRoom(title: string, access: RoomAccess, path: string | null) {
-    SoundActions.playRoomEnter();
+    // await SoundActions.playRoomEnter();
     this.ourPeer.enableMedia(this.ourPeer.constraints);
     const newRoom = {
       rid: ridFromTitle(this.provider, this.ourId, title),
@@ -511,7 +505,6 @@ export class RoomsStore {
 
   @action
   joinRoom(rid: string) {
-    SoundActions.playRoomEnter();
     this.ourPeer.enableMedia(this.ourPeer.constraints).then(
       action(() => {
         this.setCurrentRoom(rid);

@@ -77,10 +77,11 @@ export class LocalPeer {
   }
 
   @action
-  async disableVideo() {
+  async disableVideo(): Promise<MediaStream | void> {
     this.isVideoOn = false;
     this.constraints.video = false;
     this.stream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
+      track.enabled = false;
       track.stop();
     });
 
