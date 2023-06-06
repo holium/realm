@@ -22,7 +22,8 @@ const PinnedWebAppPresenter = ({
   favicon: initialFavicon,
 }: Props) => {
   const { shellStore } = useAppState();
-  const { getOptions, setOptions } = useContextMenu();
+  const { getOptions, setOptions, getColors, setColors, mouseRef } =
+    useContextMenu();
 
   const [favicon, setFavicon] = useState<string | null>(initialFavicon);
 
@@ -56,6 +57,10 @@ const PinnedWebAppPresenter = ({
     [path, url, window?.isMinimized, shellStore]
   );
 
+  const contextMenuColors = useMemo(() => {
+    return { textColor: 'rgba(51, 51, 51, 0.8)', backgroundColor: '#fff' };
+  }, []);
+
   const onClick = () => {
     const appWindow = shellStore.getWindowByAppId(url);
 
@@ -81,13 +86,33 @@ const PinnedWebAppPresenter = ({
   };
 
   useEffect(() => {
+    if (!mouseRef) tapping.toggleOff();
+  }, [mouseRef]);
+
+  useEffect(() => {
     if (contextMenuOptions !== getOptions(tileId)) {
       setOptions(tileId, contextMenuOptions);
+    }
+
+    if (contextMenuColors !== getColors(tileId)) {
+      setColors(tileId, contextMenuColors);
     }
   }, [contextMenuOptions, tileId]);
 
   return (
-    <Reorder.Item key={url} value={url} onDragStart={() => tapping.toggleOff()}>
+    <Reorder.Item
+      key={url}
+      value={url}
+      onDragStart={() => tapping.toggleOff()}
+      onPointerDown={() => {
+        tapping.toggleOn();
+      }}
+      onPointerUp={(e) => {
+        // Make sure it's a left click.
+        if (e.button !== 0) return;
+        tapping.toggleOff();
+      }}
+    >
       <WebAppTile
         tileId={tileId}
         size={32}

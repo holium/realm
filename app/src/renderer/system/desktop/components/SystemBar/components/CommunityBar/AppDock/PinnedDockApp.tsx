@@ -50,7 +50,8 @@ export const PinnedDockAppPresenter = ({
     tileId: string;
     rect: DOMRect;
   } | null>(null);
-  const { getOptions, setOptions, getColors, setColors } = useContextMenu();
+  const { getOptions, setOptions, getColors, setColors, mouseRef } =
+    useContextMenu();
   const appRef = bazaarStore.catalog.get(app.id);
   const tapping = useToggle(false);
   // TODO need to cleanup and use a ref for the app here
@@ -144,11 +145,15 @@ export const PinnedDockAppPresenter = ({
   }, [app.color]);
 
   useEffect(() => {
-    if (contextMenuOptions && contextMenuOptions !== getOptions(tileId)) {
+    if (!mouseRef) tapping.toggleOff();
+  }, [mouseRef]);
+
+  useEffect(() => {
+    if (contextMenuOptions !== getOptions(tileId)) {
       setOptions(tileId, contextMenuOptions);
     }
 
-    if (contextMenuColors && contextMenuColors !== getColors(tileId)) {
+    if (contextMenuColors !== getColors(tileId)) {
       setColors(tileId, contextMenuColors);
     }
   }, [
@@ -182,7 +187,6 @@ export const PinnedDockAppPresenter = ({
           },
         }}
         onDragStart={() => tapping.toggleOff()}
-        whileDrag={{ zIndex: 20 }}
         drag="x"
         onPointerDown={() => {
           const rect = document.getElementById(tileId)?.getBoundingClientRect();
