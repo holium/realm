@@ -8,10 +8,7 @@
     "esModuleInterop": true,
     "inlineSources": true,
     "jsx": "react-jsx",
-    "lib": [
-      "dom",
-      "es2021"
-    ],
+    "lib": ["dom", "es2021"],
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
@@ -28,11 +25,10 @@
     "strict": true,
     "strictFunctionTypes": true,
     "strictNullChecks": true,
-    "target": "es2021"
+    "target": "es2021",
+    "extraFileExtensions": [".ejs"]
   },
-  "exclude": [
-    "node_modules"
-  ],
+  "exclude": ["node_modules"],
   "references": [
     {
       "path": "./app"
