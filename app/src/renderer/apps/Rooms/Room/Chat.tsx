@@ -98,7 +98,7 @@ const RoomChatPresenter = () => {
               isOur={chat.author === window.ship}
               author={chat.author}
               ourColor={ourColor}
-              authorColor="#000"
+              authorColor="rgba(var(--rlm-text-rgba), 0.7)"
               sentAt={new Date(chat.timeReceived).toISOString()}
               isPrevGrouped={
                 chats[index - 1] && chats[index - 1].author === chat.author

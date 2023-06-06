@@ -5,12 +5,12 @@ import { darken, lighten } from 'polished';
 import { Flex, Text, Tooltip } from '@holium/design-system';
 
 import { useAppState } from 'renderer/stores/app.store';
-import { RoomChatMobx } from 'renderer/stores/rooms.store';
 
+import { RoomChat } from '../store/RoomsStore';
 import { Bubble } from './RoomBubble';
 
 interface RoomChatMessageProps {
-  chat: RoomChatMobx;
+  chat: RoomChat;
   doesPack: boolean;
 }
 
@@ -27,6 +27,12 @@ const RoomChatMessagePresenter = ({ chat, doesPack }: RoomChatMessageProps) => {
 
     setTimeString(`${hor}:${min}:${sec}`);
   }, [chat]);
+
+  const bubbleColor = chat.isRightAligned
+    ? theme.accentColor
+    : theme.mode === 'light'
+    ? darken(0.1, theme.windowColor)
+    : lighten(0.1, theme.windowColor);
 
   return (
     <Flex
@@ -46,14 +52,8 @@ const RoomChatMessagePresenter = ({ chat, doesPack }: RoomChatMessageProps) => {
         <Tooltip placement="top" content={timeString} id={`${chat.index}`}>
           <Bubble
             primary={chat.isRightAligned}
-            color={chat.isRightAligned ? '#FFF' : theme.textColor}
-            customBg={
-              chat.isRightAligned
-                ? theme.accentColor
-                : theme.mode === 'light'
-                ? darken(0.1, theme.windowColor)
-                : lighten(0.1, theme.windowColor)
-            }
+            // color={chat.isRightAligned ? '#FFF' : authorColorDisplay}
+            customBg={bubbleColor}
           >
             <Text.Custom
               fontSize={2}
@@ -61,7 +61,7 @@ const RoomChatMessagePresenter = ({ chat, doesPack }: RoomChatMessageProps) => {
                 maxWidth: '200px',
               }}
             >
-              {`${chat.content}`}
+              {`${chat.contents}`}
             </Text.Custom>
           </Bubble>
         </Tooltip>

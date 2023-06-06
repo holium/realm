@@ -28,6 +28,10 @@ export const Bubble = styled(motion.div)<BubbleProps>`
           border-bottom-right-radius: 0px;
         `
       : css`
+          * {
+            /* color: #fff; */
+            color: rgba(var(--rlm-text-rgba), 0.7);
+          }
           border-top-left-radius: 0px;
         `}
 

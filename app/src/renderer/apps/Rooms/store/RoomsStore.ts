@@ -49,7 +49,7 @@ const isInitiator = (from: string, to: string) => {
   return patp2dec(from) > patp2dec(to);
 };
 
-type RoomChat = {
+export type RoomChat = {
   index: number;
   author: string;
   contents: string;
@@ -407,13 +407,13 @@ export class RoomsStore {
         }
         break;
       case 'room-deleted':
-        this._removeRoom(event.rid);
         if (this.currentRid && this.currentRid === event.rid) {
           this.rooms.get(this.currentRid)?.present.forEach((peerId: string) => {
             if (peerId !== this.ourId) this.destroyPeer(peerId);
           });
           this.currentRid = null;
         }
+        this._removeRoom(event.rid);
         break;
       case 'signal':
         if (this.currentRid === event.rid) {

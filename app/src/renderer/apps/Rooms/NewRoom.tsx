@@ -5,6 +5,7 @@ import { observer } from 'mobx-react';
 import { Button, Flex, Icon, Text, TextInput } from '@holium/design-system';
 
 import { SoundActions } from 'renderer/lib/sound';
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
@@ -60,6 +61,7 @@ export const createRoomForm = (
 
 const NewRoomPresenter = () => {
   const roomsStore = useRoomsStore();
+  const { loggedInAccount } = useAppState();
   const { spacesStore } = useShipStore();
   const { roomsApp } = useTrayApps();
 
@@ -69,8 +71,15 @@ const NewRoomPresenter = () => {
   );
 
   const createRoom = async (evt: any) => {
-    // setLoading(true);
-    await SoundActions.playRoomEnter();
+    // setLoading(true)
+    if (roomsStore.currentRoom) {
+      if (roomsStore.currentRoom.creator === loggedInAccount?.serverId) {
+        roomsStore.deleteRoom(roomsStore.currentRoom.rid);
+      } else {
+        roomsStore.leaveRoom(roomsStore.currentRoom.rid);
+      }
+    }
+    SoundActions.playRoomEnter();
     const { name, isPrivate } = form.actions.submit();
     evt.stopPropagation();
     const spacePath =

@@ -86,8 +86,8 @@ const RoomsPresenter = () => {
               capacity={room.capacity}
               onClick={async (evt: any) => {
                 evt.stopPropagation();
-                await SoundActions.playRoomEnter();
                 if (roomsStore.currentRid !== room.rid) {
+                  SoundActions.playRoomEnter();
                   roomsStore.joinRoom(room.rid);
                 }
                 roomsApp.setView('room');
