@@ -1,4 +1,5 @@
 import { app, BrowserWindow, Menu, MenuItem, nativeImage } from 'electron';
+import Store from 'electron-store';
 
 import { RealmService } from '../os/realm.service';
 import { AppUpdater } from './AppUpdater';
@@ -11,6 +12,8 @@ import {
 } from './windows';
 
 import './logging';
+
+const store = new Store();
 
 let updater: AppUpdater;
 let realmService: RealmService | null;
@@ -65,6 +68,8 @@ export const bootRealm = () => {
   mouseOverlayWindow.on('close', () => {
     mouseOverlayWindow = null;
   });
+
+  store.reset('isStandaloneChat');
 };
 
 export const bootStandaloneChat = () => {
@@ -106,6 +111,8 @@ export const bootStandaloneChat = () => {
   standaloneChatWindow.on('close', () => {
     standaloneChatWindow = null;
   });
+
+  store.set('isStandaloneChat', true);
 };
 
 app
@@ -116,8 +123,12 @@ app
     updater.checkForUpdates().then(() => {
       updater.checkingForUpdates = false;
 
-      // bootRealm();
-      bootStandaloneChat();
+      // Boot whatever the user last used.
+      if (store.get('isStandaloneChat')) {
+        bootStandaloneChat();
+      } else {
+        bootRealm();
+      }
     });
   })
   .catch(console.error);
