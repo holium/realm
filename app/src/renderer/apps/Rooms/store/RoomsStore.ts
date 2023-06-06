@@ -50,6 +50,14 @@ const isInitiator = (from: string, to: string) => {
   return patp2dec(from) > patp2dec(to);
 };
 
+type OnDataChannel = (
+  rid: string,
+  peer: string,
+  data: DataPacket
+) => Promise<void>;
+
+type OnLeftRoom = (rid: string, peer: string) => void;
+
 export type RoomChat = {
   index: number;
   author: string;
@@ -148,6 +156,8 @@ export class RoomsStore {
       },
     ],
   };
+  @observable onDataChannel: OnDataChannel = async () => {};
+  @observable onLeftRoom: OnLeftRoom = async () => {};
 
   constructor(ourId: string, provider?: string) {
     makeObservable(this);
@@ -179,6 +189,18 @@ export class RoomsStore {
         this.websocket.close();
       }
     });
+  }
+
+  @action
+  registerListeners({
+    onDataChannel,
+    onLeftRoom,
+  }: {
+    onDataChannel: OnDataChannel;
+    onLeftRoom: OnLeftRoom;
+  }) {
+    this.onDataChannel = onDataChannel.bind(this);
+    this.onLeftRoom = onLeftRoom.bind(this);
   }
 
   get currentRoom() {
@@ -547,6 +569,7 @@ export class RoomsStore {
         rid,
       })
     );
+    this.onLeftRoom(rid, this.ourId);
     this.hangupAllPeers();
   }
 
@@ -592,6 +615,7 @@ export class RoomsStore {
         rid,
       })
     );
+    this.onLeftRoom(rid, this.ourId);
     this.hangupAllPeers();
   }
 
@@ -631,7 +655,11 @@ export class RoomsStore {
       peerId,
       isInitiator(this.ourId, peerId),
       this.ourPeer.stream,
-      this.websocket
+      this.websocket,
+      {
+        onDataChannel: this.onDataChannel.bind(this),
+        onLeftRoom: this.onLeftRoom.bind(this),
+      }
     );
     this.peers.set(peerId, peer);
     return peer;
@@ -716,6 +744,8 @@ export class PeerClass {
   @observable videoTracks: Map<string, any> = new Map();
   @observable stream: MediaStream | null = null;
   @observable ourStream: MediaStream;
+  @observable onDataChannel: OnDataChannel = async () => {};
+  @observable onLeftRoom: OnLeftRoom = async () => {};
 
   constructor(
     rid: string,
@@ -723,7 +753,11 @@ export class PeerClass {
     peerId: string,
     initiator: boolean,
     stream: MediaStream,
-    websocket: WebSocket
+    websocket: WebSocket,
+    listeners: {
+      onDataChannel: OnDataChannel;
+      onLeftRoom: OnLeftRoom;
+    }
   ) {
     makeObservable(this);
     this.rid = rid;
@@ -732,6 +766,8 @@ export class PeerClass {
     this.ourStream = stream;
     this.ourId = ourId;
     this.peer = this.createPeer(peerId, initiator, stream);
+    this.onDataChannel = listeners.onDataChannel;
+    this.onLeftRoom = listeners.onLeftRoom;
   }
 
   @action
@@ -934,6 +970,7 @@ export class PeerClass {
   @action
   onData(data: any) {
     console.log('Data from peer', this.peerId, unserialize(data));
+    this.onDataChannel(this.rid, this.peerId, unserialize(data));
   }
 
   @action
@@ -985,6 +1022,7 @@ export class PeerClass {
 
   @action
   destroy() {
+    this.onLeftRoom(this.rid, this.peerId);
     this.peer.destroy();
   }
 

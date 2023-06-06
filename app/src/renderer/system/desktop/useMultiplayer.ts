@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { onAction } from 'mobx-state-tree';
 
 import { Dimensions, useToggle } from '@holium/design-system';
 import {
@@ -25,7 +24,7 @@ type Props = {
   shipColor: string;
   desktopDimensions: Dimensions;
   isMultiplayerEnabled: boolean;
-  shipStore: ShipStoreInstance;
+  _shipStore?: ShipStoreInstance;
 };
 
 export const useMultiplayer = ({
@@ -33,7 +32,7 @@ export const useMultiplayer = ({
   shipColor,
   desktopDimensions,
   isMultiplayerEnabled,
-  shipStore,
+  _shipStore,
 }: Props) => {
   const chat = useRef('');
   const ephemeralChat = useToggle(false);
@@ -272,31 +271,42 @@ export const useMultiplayer = ({
       }
     };
 
-    onAction(shipStore, (call) => {
-      if (call.path === '/roomsStore') {
-        if (call.name === 'deleteRoom') {
-          // we deleted our created room, so we should remove all cursors
-          onLeftRoom('', window.ship);
-        }
-        if (call.name === 'leaveRoom') {
-          // we left the room, so we should remove all cursors
-          onLeftRoom('', window.ship);
-        }
-        if (call.name === '_onRoomLeft') {
-          // called when we or someone else leaves the room
-          if (call.args) {
-            const rid = call.args[0];
-            const patp = call.args[1];
-            onLeftRoom(rid, patp);
-          }
-        }
-        if (call.name === '_onDataChannel') {
-          if (call.args) {
-            onDataChannel('', '', call.args[0]);
-          }
-        }
-      }
+    // roomsStore.onDataChannel(onDataChannel);
+
+    // intercept(roomsStore, 'backgroundColor', (change) => {
+
+    // });
+
+    roomsStore.registerListeners({
+      onLeftRoom: onLeftRoom,
+      onDataChannel: onDataChannel,
     });
+
+    // onAction(shipStore, (call) => {
+    //   if (call.path === '/roomsStore') {
+    //     if (call.name === 'deleteRoom') {
+    //       // we deleted our created room, so we should remove all cursors
+    //       onLeftRoom('', window.ship);
+    //     }
+    //     if (call.name === 'leaveRoom') {
+    //       // we left the room, so we should remove all cursors
+    //       onLeftRoom('', window.ship);
+    //     }
+    //     if (call.name === '_onRoomLeft') {
+    //       // called when we or someone else leaves the room
+    //       if (call.args) {
+    //         const rid = call.args[0];
+    //         const patp = call.args[1];
+    //         onLeftRoom(rid, patp);
+    //       }
+    //     }
+    //     if (call.name === '_onDataChannel') {
+    //       if (call.args) {
+    //         onDataChannel('', '', call.args[0]);
+    //       }
+    //     }
+    //   }
+    // });
 
     return () => {
       window.electron.app.removeOnMouseOut();
