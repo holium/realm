@@ -81,8 +81,6 @@ const AppPresenter = () => {
     return <AppContent />;
   }, [isStandaloneChat, booted]);
 
-  console.log('titlebar', titlebar);
-
   return (
     <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
       <AppStateProvider value={appState}>

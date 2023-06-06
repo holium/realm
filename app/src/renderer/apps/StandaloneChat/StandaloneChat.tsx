@@ -13,7 +13,13 @@ import { NewChat } from '../Courier/views/NewChat';
 
 export const StandaloneChatPresenter = () => {
   const { clearInnerNavigation } = useTrayApps();
-  const { chatStore } = useShipStore();
+  const { chatStore, spacesStore } = useShipStore();
+
+  useEffect(() => {
+    // Standalone chat defaults to personal space.
+    const ourSpace = `/${window.ship}/our`;
+    spacesStore.selectSpace(ourSpace);
+  });
 
   useEffect(() => {
     window.electron.app.disableRealmCursor();

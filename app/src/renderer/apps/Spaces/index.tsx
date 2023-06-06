@@ -53,6 +53,8 @@ const SpacesTrayAppPresenter = () => {
     spacesStore.setJoin('loaded');
   }
 
+  console.log('current space: ', spacesStore.selected?.path);
+
   return (
     <Flex
       height={dimensions.height - 24}
