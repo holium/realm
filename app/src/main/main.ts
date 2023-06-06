@@ -1,11 +1,13 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, nativeImage } from 'electron';
 
 import { RealmService } from '../os/realm.service';
 import { AppUpdater } from './AppUpdater';
+import { getAssetPath } from './util';
 import {
   createMouseOverlayWindow,
   createRealmWindow,
   createStandaloneChatWindow,
+  registerMouseLayerHandlers,
 } from './windows';
 
 import './logging';
@@ -38,6 +40,10 @@ export const bootRealm = () => {
   realmWindow = createRealmWindow();
   mouseOverlayWindow = createMouseOverlayWindow(realmWindow);
 
+  // Change dock icon to realm icon.
+  const realmImage = nativeImage.createFromPath(getAssetPath('icon.png'));
+  app.dock.setIcon(realmImage);
+
   realmWindow.on('close', () => {
     realmWindow = null;
   });
@@ -57,16 +63,18 @@ export const bootStandaloneChat = () => {
     realmWindow = null;
   }
 
-  // Create a mouse overlay window just to init listeners.
   standaloneChatWindow = createStandaloneChatWindow();
-  mouseOverlayWindow = createMouseOverlayWindow(standaloneChatWindow);
+  const throwawayWindow = new BrowserWindow({
+    show: false,
+  });
+  registerMouseLayerHandlers(throwawayWindow, standaloneChatWindow);
+
+  // Change dock icon to standalone chat icon.
+  const standaloneImage = nativeImage.createFromPath(getAssetPath('uqbar.png'));
+  app.dock.setIcon(standaloneImage);
 
   standaloneChatWindow.on('close', () => {
     standaloneChatWindow = null;
-  });
-
-  mouseOverlayWindow.on('close', () => {
-    mouseOverlayWindow = null;
   });
 };
 
@@ -78,7 +86,8 @@ app
     updater.checkForUpdates().then(() => {
       updater.checkingForUpdates = false;
 
-      bootRealm();
+      // bootRealm();
+      bootStandaloneChat();
     });
   })
   .catch(console.error);

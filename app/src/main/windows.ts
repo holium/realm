@@ -82,15 +82,13 @@ export const createRealmWindow = () => {
     return { action: 'deny' };
   });
 
-  console.log('Realm Window Created');
-
   return newRealmWindow;
 };
 
 export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
   // Create a window covering the whole main window.
   const defaultMouseWindowOptions: Electron.BrowserWindowConstructorOptions = {
-    title: 'Mouse overlay',
+    title: 'Mouse Overlay',
     parent: parentWindow,
     ...parentWindow.getBounds(),
     frame: false,
@@ -119,9 +117,7 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
   newMouseWindow.setIgnoreMouseEvents(true);
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
 
-  FullScreenHelper.registerListeners(parentWindow, newMouseWindow);
-  CursorSettingsHelper.registerListeners(parentWindow, newMouseWindow);
-  MouseEventsHelper.registerListeners(parentWindow, newMouseWindow);
+  registerMouseLayerHandlers(parentWindow, newMouseWindow);
 
   newMouseWindow.on('close', () => {
     if (parentWindow.isClosable()) parentWindow.close();
@@ -138,8 +134,6 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
     parentWindow.webContents.send('set-dimensions', newDimension);
   });
 
-  console.log('Mouse Overlay Window Created');
-
   return newMouseWindow;
 };
 
@@ -151,7 +145,7 @@ export const createStandaloneChatWindow = () => {
     titleBarStyle: 'default',
     icon: getAssetPath('uqbar.png'),
   });
-
+  newStandaloneChatWindow.setMenuBarVisibility(true);
   newStandaloneChatWindow.loadURL(resolveHtmlPath('index.html'));
 
   WebViewHelper.registerListeners(newStandaloneChatWindow);
@@ -173,7 +167,14 @@ export const createStandaloneChatWindow = () => {
     newStandaloneChatWindow.show();
   });
 
-  console.log('Standalone Chat Window Created');
-
   return newStandaloneChatWindow;
+};
+
+export const registerMouseLayerHandlers = (
+  parentWindow: BrowserWindow,
+  mouseOverlayWindow: BrowserWindow
+) => {
+  FullScreenHelper.registerListeners(parentWindow, mouseOverlayWindow);
+  CursorSettingsHelper.registerListeners(parentWindow, mouseOverlayWindow);
+  MouseEventsHelper.registerListeners(parentWindow, mouseOverlayWindow);
 };

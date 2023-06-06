@@ -6,14 +6,12 @@ const registerListeners = (win: BrowserWindow) => {
   ipcMain.removeHandler('open-app');
   ipcMain.removeHandler('set-partition-cookies');
 
-  console.log('registering open-app listener');
   ipcMain.handle(
     'open-app',
     (_, location: { url: string; cookies: any }, partition: string) => {
       session.fromPartition(partition).cookies.set(location.cookies);
     }
   );
-  console.log('registering set-partition-cookies listener');
   ipcMain.handle(
     'set-partition-cookies',
     async (_, partition: string, cookies: any) => {

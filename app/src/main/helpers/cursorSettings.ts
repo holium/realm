@@ -68,6 +68,40 @@ const showCursor = (webContents: Electron.WebContents) => {
   webContents.insertCSS(showCursorCss);
 };
 
+const enableRealmCursor = (
+  mainWindow: BrowserWindow,
+  mouseOverlayWindow: BrowserWindow
+) => {
+  realmCursorEnabled = true;
+  mouseOverlayWindow.webContents.send('enable-realm-cursor');
+
+  if (isMac) {
+    hideCursor(mouseOverlayWindow.webContents);
+    hideCursor(mainWindow.webContents);
+    mouseOverlayWindow.setWindowButtonVisibility(false);
+    /**
+     * For macOS we enable mouse layer tracking for a smoother experience.
+     * It is not supported for Windows or Linux.
+     */
+    mouseOverlayWindow.webContents.send('enable-mouse-layer-tracking');
+  } else if (isWindows) {
+    hideCursor(mouseOverlayWindow.webContents);
+    hideCursor(mainWindow.webContents);
+  } else {
+    mouseOverlayWindow.webContents.send('disable-realm-cursor');
+  }
+};
+
+export const disableRealmCursor = (
+  mainWindow: BrowserWindow,
+  mouseOverlayWindow: BrowserWindow
+) => {
+  realmCursorEnabled = false;
+  showCursor(mouseOverlayWindow.webContents);
+  showCursor(mainWindow.webContents);
+  mouseOverlayWindow.webContents.send('disable-realm-cursor');
+};
+
 const registerListeners = (
   mainWindow: BrowserWindow,
   newMouseWindow: BrowserWindow
@@ -87,39 +121,11 @@ const registerListeners = (
     });
   });
 
-  const enableRealmCursor = () => {
-    realmCursorEnabled = true;
-    newMouseWindow.webContents.send('enable-realm-cursor');
-
-    if (isMac) {
-      hideCursor(newMouseWindow.webContents);
-      hideCursor(mainWindow.webContents);
-      newMouseWindow.setWindowButtonVisibility(false);
-      /**
-       * For macOS we enable mouse layer tracking for a smoother experience.
-       * It is not supported for Windows or Linux.
-       */
-      newMouseWindow.webContents.send('enable-mouse-layer-tracking');
-    } else if (isWindows) {
-      hideCursor(newMouseWindow.webContents);
-      hideCursor(mainWindow.webContents);
-    } else {
-      newMouseWindow.webContents.send('disable-realm-cursor');
-    }
-  };
-
-  const disableRealmCursor = () => {
-    realmCursorEnabled = false;
-    showCursor(newMouseWindow.webContents);
-    showCursor(mainWindow.webContents);
-    newMouseWindow.webContents.send('disable-realm-cursor');
-  };
-
   newMouseWindow.webContents.on('dom-ready', () => {
     if (realmCursorEnabled) {
-      enableRealmCursor();
+      enableRealmCursor(mainWindow, newMouseWindow);
     } else {
-      disableRealmCursor();
+      disableRealmCursor(mainWindow, newMouseWindow);
     }
   });
 
@@ -127,16 +133,16 @@ const registerListeners = (
   ipcMain.removeHandler('disable-realm-cursor');
 
   ipcMain.handle('enable-realm-cursor', () => {
-    enableRealmCursor();
-
     const mainWindow = BrowserWindow.getAllWindows()[0];
+    enableRealmCursor(mainWindow, newMouseWindow);
     mainWindow.reload();
   });
 
   ipcMain.handle('disable-realm-cursor', () => {
-    disableRealmCursor();
-
     const mainWindow = BrowserWindow.getAllWindows()[0];
+
+    disableRealmCursor(mainWindow, newMouseWindow);
+
     mainWindow.reload();
   });
 };

@@ -19,6 +19,10 @@ export const StandaloneChatPresenter = () => {
   const { chatStore } = useShipStore();
 
   useEffect(() => {
+    window.electron.app.disableRealmCursor();
+  }, []);
+
+  useEffect(() => {
     if (chatStore.subroute === 'inbox') {
       // ChatIPC.fetchPathMetadata();
 
