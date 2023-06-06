@@ -8,7 +8,6 @@ import {
   createMouseOverlayWindow,
   createRealmWindow,
   createStandaloneChatWindow,
-  registerMouseLayerHandlers,
 } from './windows';
 
 import './logging';
@@ -83,10 +82,7 @@ export const bootStandaloneChat = () => {
   }
 
   standaloneChatWindow = createStandaloneChatWindow();
-  const throwawayWindow = new BrowserWindow({
-    show: false,
-  });
-  registerMouseLayerHandlers(throwawayWindow, standaloneChatWindow);
+  mouseOverlayWindow = createMouseOverlayWindow(standaloneChatWindow);
 
   // Change dock icon to standalone chat icon.
   const standaloneImage = nativeImage.createFromPath(

@@ -26,19 +26,30 @@ const AppPresenter = () => {
   const [isStandaloneChat, setStandaloneChat] = useState(
     shellStore.isStandaloneChat
   );
+  const [isFullscreen, setIsFullscreen] = useState(shellStore.isFullscreen);
 
   useEffect(() => {
     window.electron.app.isStandaloneChat().then(setStandaloneChat);
+    window.electron.app.isFullscreen().then(setIsFullscreen);
+  }, []);
+
+  useEffect(() => {
+    RealmIPC.boot();
+    return () => {
+      shellStore.closeDialog();
+    };
   }, []);
 
   const contextMenu = useMemo(() => <ContextMenu />, []);
+
   const titlebar = useMemo(() => {
-    if (shellStore.isFullscreen) {
+    if (isFullscreen) {
       return null;
     }
 
     return isStandaloneChat ? <StandAloneChatTitlebar /> : <RealmTitlebar />;
-  }, [shellStore.isFullscreen, isStandaloneChat]);
+  }, [isFullscreen, isStandaloneChat]);
+
   const background = useMemo(() => {
     if (isStandaloneChat) {
       return null;
@@ -57,6 +68,7 @@ const AppPresenter = () => {
     shellStore.snapView,
     isStandaloneChat,
   ]);
+
   const content = useMemo(() => {
     if (!booted) {
       return <AppLoading />;
@@ -69,12 +81,7 @@ const AppPresenter = () => {
     return <AppContent />;
   }, [isStandaloneChat, booted]);
 
-  useEffect(() => {
-    RealmIPC.boot();
-    return () => {
-      shellStore.closeDialog();
-    };
-  }, []);
+  console.log('titlebar', titlebar);
 
   return (
     <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>

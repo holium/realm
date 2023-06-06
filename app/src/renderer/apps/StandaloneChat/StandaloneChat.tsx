@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { LayoutGroup } from 'framer-motion';
 import { observer } from 'mobx-react';
 
 import { Flex, Spinner, Text } from '@holium/design-system/general';
@@ -10,7 +9,7 @@ import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ChatInfo } from '../Courier/views/ChatInfo';
 import { ChatLog } from '../Courier/views/ChatLog';
-import { Inbox } from '../Courier/views/Inbox';
+import { Inbox } from '../Courier/views/Inbox/Inbox';
 import { NewChat } from '../Courier/views/NewChat';
 
 export const StandaloneChatPresenter = () => {
@@ -59,12 +58,10 @@ export const StandaloneChatPresenter = () => {
 
   return (
     <Flex style={{ paddingTop: 28 }}>
-      <LayoutGroup>
-        {chatStore.subroute === 'inbox' && <Inbox />}
-        {chatStore.subroute === 'chat' && <ChatLog storage={storage} />}
-        {chatStore.subroute === 'chat-info' && <ChatInfo storage={storage} />}
-        {chatStore.subroute === 'new' && <NewChat />}
-      </LayoutGroup>
+      <Inbox />
+      {chatStore.subroute === 'chat' && <ChatLog storage={storage} />}
+      {chatStore.subroute === 'chat-info' && <ChatInfo storage={storage} />}
+      {chatStore.subroute === 'new' && <NewChat />}
     </Flex>
   );
 };

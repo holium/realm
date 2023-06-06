@@ -116,7 +116,9 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
   newMouseWindow.setIgnoreMouseEvents(true);
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
 
-  registerMouseLayerHandlers(parentWindow, newMouseWindow);
+  FullScreenHelper.registerListeners(parentWindow, newMouseWindow);
+  CursorSettingsHelper.registerListeners(parentWindow, newMouseWindow);
+  MouseEventsHelper.registerListeners(parentWindow, newMouseWindow);
 
   newMouseWindow.on('close', () => {
     if (parentWindow.isClosable()) parentWindow.close();
@@ -141,7 +143,6 @@ export const createStandaloneChatWindow = () => {
     ...defaultRealmWindowOptions,
     title: 'Realm Chat',
     fullscreen: false,
-    titleBarStyle: 'default',
     icon: getAssetPath('standalone-chat-icon.png'),
   });
   newStandaloneChatWindow.setMenuBarVisibility(true);
@@ -167,13 +168,4 @@ export const createStandaloneChatWindow = () => {
   });
 
   return newStandaloneChatWindow;
-};
-
-export const registerMouseLayerHandlers = (
-  parentWindow: BrowserWindow,
-  mouseOverlayWindow: BrowserWindow
-) => {
-  FullScreenHelper.registerListeners(parentWindow, mouseOverlayWindow);
-  CursorSettingsHelper.registerListeners(parentWindow, mouseOverlayWindow);
-  MouseEventsHelper.registerListeners(parentWindow, mouseOverlayWindow);
 };

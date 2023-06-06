@@ -51,6 +51,9 @@ const appPreload = {
   setFullscreen: (isFullscreen: boolean) => {
     return ipcRenderer.invoke('set-fullscreen', isFullscreen);
   },
+  isFullscreen: () => {
+    return ipcRenderer.invoke('is-fullscreen');
+  },
   setStandaloneChat: (isStandaloneChat: boolean) => {
     return ipcRenderer.invoke('set-standalone-chat', isStandaloneChat);
   },

@@ -8,6 +8,7 @@ import {
 import { darken } from 'polished';
 import styled, { createGlobalStyle, css } from 'styled-components';
 
+import { Text } from '@holium/design-system/general';
 import { genCSSVariables, ThemeType } from '@holium/shared';
 
 import { useAppState } from 'renderer/stores/app.store';
@@ -229,10 +230,6 @@ export const RealmTitlebar = styled.div<{
   left: 0;
   width: 100%;
   height: 28px;
-  color: #333333;
-  opacity: 0.9;
-  font-size: 13px;
-  font-weight: 500;
   background: ${({ forcedColor }) => forcedColor ?? 'var(--rlm-dock-color)'};
   z-index: 100;
   -webkit-user-select: none;
@@ -240,5 +237,15 @@ export const RealmTitlebar = styled.div<{
 `;
 
 export const StandAloneChatTitlebar = () => (
-  <RealmTitlebar forcedColor="#FFFFFF">Realm Chat</RealmTitlebar>
+  <RealmTitlebar>
+    <Text.Body
+      style={{
+        opacity: 0.9,
+        fontSize: 13,
+        fontWeight: 500,
+      }}
+    >
+      Realm Chat
+    </Text.Body>
+  </RealmTitlebar>
 );

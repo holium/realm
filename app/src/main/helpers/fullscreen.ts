@@ -17,9 +17,14 @@ const registerListeners = (
   mainWindow.on('focus', mouseWindow.moveTop);
 
   ipcMain.removeHandler('set-fullscreen');
+  ipcMain.removeHandler('is-fullscreen');
 
   ipcMain.handle('set-fullscreen', (_, isFullscreen) => {
     mainWindow.setFullScreen(isFullscreen);
+  });
+
+  ipcMain.handle('is-fullscreen', () => {
+    return mainWindow.isFullScreen();
   });
 };
 

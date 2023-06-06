@@ -10,7 +10,7 @@ import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ChatInfo } from './views/ChatInfo';
 import { ChatLog } from './views/ChatLog';
-import { Inbox } from './views/Inbox';
+import { Inbox } from './views/Inbox/Inbox';
 import { NewChat } from './views/NewChat';
 
 export const CourierAppPresenter = () => {
