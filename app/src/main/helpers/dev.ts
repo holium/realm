@@ -1,6 +1,10 @@
 import { BrowserWindow, ipcMain } from 'electron';
 
 const registerListeners = (mainWindow: BrowserWindow) => {
+  ipcMain.removeHandler('toggle-devtools');
+  ipcMain.removeHandler('enable-isolation-mode');
+  ipcMain.removeHandler('disable-isolation-mode');
+
   ipcMain.handle('toggle-devtools', () => {
     if (mainWindow.webContents.isDevToolsOpened()) {
       mainWindow.webContents.closeDevTools();

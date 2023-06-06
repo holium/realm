@@ -20,7 +20,7 @@ let realmWindow: BrowserWindow | null;
 let mouseOverlayWindow: BrowserWindow | null;
 let standaloneChatWindow: BrowserWindow | null;
 
-const bootRealm = () => {
+export const bootRealm = () => {
   if (!realmService) {
     realmService = new RealmService();
   }
@@ -47,7 +47,7 @@ const bootRealm = () => {
   });
 };
 
-const bootStandaloneChat = () => {
+export const bootStandaloneChat = () => {
   if (!realmService) {
     realmService = new RealmService();
   }
@@ -78,12 +78,7 @@ app
     updater.checkForUpdates().then(() => {
       updater.checkingForUpdates = false;
 
-      const isStandaloneChat = app.commandLine.hasSwitch('standalone-chat');
-      if (isStandaloneChat) {
-        bootStandaloneChat();
-      } else {
-        bootRealm();
-      }
+      bootRealm();
     });
   })
   .catch(console.error);

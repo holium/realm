@@ -82,6 +82,8 @@ export const createRealmWindow = () => {
     return { action: 'deny' };
   });
 
+  console.log('Realm Window Created');
+
   return newRealmWindow;
 };
 
@@ -136,6 +138,8 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
     parentWindow.webContents.send('set-dimensions', newDimension);
   });
 
+  console.log('Mouse Overlay Window Created');
+
   return newMouseWindow;
 };
 
@@ -168,6 +172,8 @@ export const createStandaloneChatWindow = () => {
   newStandaloneChatWindow.on('ready-to-show', () => {
     newStandaloneChatWindow.show();
   });
+
+  console.log('Standalone Chat Window Created');
 
   return newStandaloneChatWindow;
 };

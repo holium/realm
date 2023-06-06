@@ -123,6 +123,9 @@ const registerListeners = (
     }
   });
 
+  ipcMain.removeHandler('enable-realm-cursor');
+  ipcMain.removeHandler('disable-realm-cursor');
+
   ipcMain.handle('enable-realm-cursor', () => {
     enableRealmCursor();
 

@@ -14,11 +14,13 @@ const registerListeners = (
     mainWindow.setMenuBarVisibility(true);
   });
 
+  mainWindow.on('focus', mouseWindow.moveTop);
+
+  ipcMain.removeHandler('set-fullscreen');
+
   ipcMain.handle('set-fullscreen', (_, isFullscreen) => {
     mainWindow.setFullScreen(isFullscreen);
   });
-
-  mainWindow.on('focus', mouseWindow.moveTop);
 };
 
 export const FullScreenHelper = { registerListeners };

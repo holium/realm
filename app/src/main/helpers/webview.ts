@@ -3,16 +3,20 @@ import { BrowserWindow, ipcMain, session } from 'electron';
 import { getPreloadPath } from '../util';
 
 const registerListeners = (win: BrowserWindow) => {
+  ipcMain.removeHandler('open-app');
+  ipcMain.removeHandler('set-partition-cookies');
+
+  console.log('registering open-app listener');
   ipcMain.handle(
     'open-app',
-    (_event, location: { url: string; cookies: any }, partition: string) => {
+    (_, location: { url: string; cookies: any }, partition: string) => {
       session.fromPartition(partition).cookies.set(location.cookies);
     }
   );
-
+  console.log('registering set-partition-cookies listener');
   ipcMain.handle(
     'set-partition-cookies',
-    async (_event, partition: string, cookies: any) => {
+    async (_, partition: string, cookies: any) => {
       session.fromPartition(partition).cookies.set(cookies);
     }
   );

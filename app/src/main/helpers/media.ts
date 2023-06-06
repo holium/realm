@@ -1,11 +1,15 @@
-import { ipcMain, systemPreferences } from 'electron';
-import { BrowserWindow } from 'electron/main';
+import { BrowserWindow, ipcMain, systemPreferences } from 'electron';
 import { download } from 'electron-dl';
 
 import { MediaAccess, MediaAccessStatus } from '../../os/types';
 import { isMac, isWindows } from './env';
 
 const registerListeners = () => {
+  ipcMain.removeHandler('ask-for-mic');
+  ipcMain.removeHandler('ask-for-camera');
+  ipcMain.removeHandler('get-media-status');
+  ipcMain.removeHandler('download-url-as-file');
+
   ipcMain.handle('ask-for-mic', async (): Promise<MediaAccessStatus> => {
     await systemPreferences.askForMediaAccess('microphone');
     return systemPreferences.getMediaAccessStatus('microphone');

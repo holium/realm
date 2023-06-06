@@ -18,6 +18,26 @@ const registerListeners = (
   mainWindow: BrowserWindow,
   mouseWindow: BrowserWindow
 ) => {
+  ipcMain.removeHandler('mouse-out');
+  ipcMain.removeHandler('mouse-move');
+  ipcMain.removeHandler('mouse-down');
+  ipcMain.removeHandler('mouse-up');
+  ipcMain.removeHandler('mouse-color');
+  ipcMain.removeHandler('realm.toggle-on-ephemeral-chat');
+  ipcMain.removeHandler('realm.toggle-off-ephemeral-chat');
+  ipcMain.removeHandler('realm-to-app.ephemeral-chat');
+  ipcMain.removeHandler('multiplayer.mouse-out');
+  ipcMain.removeHandler('multiplayer.mouse-move');
+  ipcMain.removeHandler('multiplayer.mouse-down');
+  ipcMain.removeHandler('multiplayer.mouse-up');
+  ipcMain.removeHandler('multiplayer.app-to-realm.mouse-click');
+  ipcMain.removeHandler('multiplayer.realm-to-app.mouse-click');
+  ipcMain.removeHandler('multiplayer.app-to-realm.send-transaction');
+  ipcMain.removeHandler('multiplayer.realm-to-app.send-transaction');
+  ipcMain.removeHandler('presence.app-to-realm.broadcast');
+  ipcMain.removeHandler('presence.realm-to-app.broadcast');
+  ipcMain.removeHandler('multiplayer.realm-to-app.send-chat');
+
   // We send mouse events to the mouse window to move the cursor,
   // as well as the main window to update multiplayer cursors via %rooms-v2.
   ipcMain.handle('mouse-out', () => {

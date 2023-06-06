@@ -1,4 +1,4 @@
-import { app } from 'electron/main';
+import { app } from 'electron';
 import path from 'path';
 import { URL } from 'url';
 
