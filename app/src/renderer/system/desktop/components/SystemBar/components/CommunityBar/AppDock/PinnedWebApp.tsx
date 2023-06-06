@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 
@@ -22,6 +22,10 @@ const PinnedWebAppPresenter = ({
   favicon: initialFavicon,
 }: Props) => {
   const { shellStore } = useAppState();
+  const pointerDownRef = useRef<{
+    tileId: string;
+    rect: DOMRect;
+  } | null>(null);
   const { getOptions, setOptions, getColors, setColors, mouseRef } =
     useContextMenu();
 
@@ -105,12 +109,29 @@ const PinnedWebAppPresenter = ({
       value={url}
       onDragStart={() => tapping.toggleOff()}
       onPointerDown={() => {
+        const rect = document.getElementById(tileId)?.getBoundingClientRect();
+        if (rect) pointerDownRef.current = { tileId, rect };
         tapping.toggleOn();
       }}
       onPointerUp={(e) => {
         // Make sure it's a left click.
         if (e.button !== 0) return;
+
+        if (tileId !== pointerDownRef.current?.tileId) return;
+
         tapping.toggleOff();
+
+        const pointerDownRect = pointerDownRef.current?.rect;
+        const pointerUpRect = document
+          .getElementById(tileId)
+          ?.getBoundingClientRect();
+
+        if (!pointerDownRect || !pointerUpRect) return;
+
+        const diffX = Math.abs(pointerDownRect.x - pointerUpRect.x);
+        const diffY = Math.abs(pointerDownRect.y - pointerUpRect.y);
+
+        if (diffX === 0 && diffY === 0) onClick();
       }}
     >
       <WebAppTile
@@ -120,7 +141,6 @@ const PinnedWebAppPresenter = ({
         backgroundColor={color}
         favicon={favicon}
         letter={title.slice(0, 1).toUpperCase()}
-        onClick={onClick}
         onFaultyFavicon={() => setFavicon(null)}
         tapping={tapping}
       >

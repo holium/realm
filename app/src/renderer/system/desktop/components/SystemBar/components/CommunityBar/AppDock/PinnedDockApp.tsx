@@ -171,23 +171,7 @@ export const PinnedDockAppPresenter = ({
       <Reorder.Item
         key={app.id}
         value={app.id}
-        initial={{
-          opacity: 0.0,
-        }}
-        animate={{
-          opacity: 1,
-          transition: {
-            opacity: { duration: 0.25, delay: 0.5 },
-          },
-        }}
-        exit={{
-          opacity: 0.5,
-          transition: {
-            opacity: { duration: 1, delay: 0 },
-          },
-        }}
         onDragStart={() => tapping.toggleOff()}
-        drag="x"
         onPointerDown={() => {
           const rect = document.getElementById(tileId)?.getBoundingClientRect();
           if (rect) pointerDownRef.current = { tileId, rect };
