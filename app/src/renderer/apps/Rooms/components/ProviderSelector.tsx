@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
@@ -28,11 +29,18 @@ interface ProviderSelectorProps {
 
 const ProviderSelectorPresenter = ({ onClick }: ProviderSelectorProps) => {
   const roomsStore = useRoomsStore();
+  const [provider, setProvider] = useState<string>(
+    roomsStore.provider.split('.')[0]
+  );
+
+  useEffect(() => {
+    setProvider(roomsStore.provider.split('.')[0]);
+  }, [roomsStore.provider]);
   return (
     <ProviderStyle onClick={(evt: any) => onClick(evt)}>
       <Icon size={18} opacity={0.7} name="BaseStation" />
       <Text.Custom fontSize={1} opacity={0.7} isSkeleton={!roomsStore.provider}>
-        {roomsStore.provider}
+        {provider}
       </Text.Custom>
     </ProviderStyle>
   );

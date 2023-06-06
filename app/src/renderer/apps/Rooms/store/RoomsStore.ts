@@ -129,7 +129,7 @@ export class RoomsStore {
   @observable ourId: string;
   @observable ourPeer: LocalPeer;
   @observable path = '';
-  @observable provider = 'node-0.holium.live';
+  @observable provider = 'litzod-dozzod-hostyv.holium.live';
   @observable rooms: Map<string, RoomModel> = observable.map<
     string,
     RoomModel
@@ -836,6 +836,7 @@ export class PeerClass {
       }
       this.videoTracks.set(track.id, track);
       this.stream = stream;
+      // this.stream.o
       this.hasVideoChanged(true);
       const video = document.getElementById(
         `peer-video-${this.peerId}`
@@ -952,24 +953,10 @@ export class PeerClass {
   }
 
   @action
-  onStream(_stream: MediaStream) {
-    // if (this.status !== 'connected') return;
-    // this.peer.addStream(stream);
-    // // create an audio element for the stream
-    // const audio = document.createElement('audio');
-    // audio.id = `peer-audio-${this.peerId}`;
-    // audio.srcObject = stream;
-    // audio.autoplay = true;
-    // document.body.appendChild(audio);
-    // audio.playsInline = true;
-    // document.getElementById(`peer-video-${peerId}`).srcObject = stream
-    // document.getElementById(`peer-video-${peerId}`).srcObject = stream;
-    // setPeerState(peerId, peer);
-  }
+  onStream(_stream: MediaStream) {}
 
   @action
   onData(data: any) {
-    console.log('Data from peer', this.peerId, unserialize(data));
     this.onDataChannel(this.rid, this.peerId, unserialize(data));
   }
 
@@ -977,12 +964,6 @@ export class PeerClass {
   onConnect() {
     this.status = 'connected';
     console.log('Peer connected', this.peerId);
-    // this.peer.send(
-    //   serialize({
-    //     type: 'peer-message',
-    //     msg: 'hey man!',
-    //   })
-    // );
   }
 
   // --------------------
@@ -1000,7 +981,6 @@ export class PeerClass {
 
   @action
   onReceivedSignal(data: any) {
-    console.log('received signal', data);
     try {
       if (this.peer) {
         this.peer.signal(data);
