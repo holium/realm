@@ -17,14 +17,12 @@ import {
 } from 'renderer/apps/Rooms/store/room.types';
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { normalizePosition } from 'renderer/lib/window-manager';
-import { ShipStoreInstance } from 'renderer/stores/ship.store';
 
 type Props = {
   patp: string | undefined;
   shipColor: string;
   desktopDimensions: Dimensions;
   isMultiplayerEnabled: boolean;
-  _shipStore?: ShipStoreInstance;
 };
 
 export const useMultiplayer = ({
@@ -32,7 +30,6 @@ export const useMultiplayer = ({
   shipColor,
   desktopDimensions,
   isMultiplayerEnabled,
-  _shipStore,
 }: Props) => {
   const chat = useRef('');
   const ephemeralChat = useToggle(false);
