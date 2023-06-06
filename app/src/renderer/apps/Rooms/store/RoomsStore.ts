@@ -2,6 +2,7 @@ import { patp2dec } from '@urbit/aura';
 import { action, makeObservable, observable } from 'mobx';
 import Peer, { Instance as PeerInstance } from 'simple-peer';
 
+import { trayStore } from 'renderer/apps/store';
 import { SoundActions } from 'renderer/lib/sound';
 import { RealmIPC } from 'renderer/stores/ipc';
 
@@ -276,34 +277,41 @@ export class RoomsStore {
     );
 
     websocket.onopen = () => {
-      console.log('websocket connected');
+      console.log('websocket connected', `status: ${this.status}`);
       if (this.currentRoom && this.status === 'connected') {
-        this.ourPeer.enableMedia(this.ourPeer.constraints);
         console.log(
-          'websocket onopen reconnecting to room',
-          this.currentRoom.rid
+          'cleaning up -- you were in a room and in a disconnected state'
         );
-        // reconnect to current room if you were in one and
-        // the websocket disconnected
-        const peers = this.currentRoom.present.filter(
-          (peer: string) => peer !== this.ourId
-        );
-        peers.forEach((peerId: string) => {
-          if (!this.ourPeer.stream) {
-            console.error('no local stream');
-            return;
-          }
-          if (this.peers.get(peerId)?.peer.destroyed) {
-            console.log(
-              'peer was destroyed, connection closed, reconnecting',
-              peerId
-            );
-            this.destroyPeer(peerId);
-            this.createPeer(peerId);
-            return;
-          }
-        });
+        // todo improve this... this catches when you close the laptop lid
+        // and reopen it, and the websocket reconnects
+        this.ourPeer.enableMedia(this.ourPeer.constraints);
+        websocket.send(serialize({ type: 'disconnect' }));
+        trayStore.roomsApp.setView('list');
       }
+      //   console.log(
+      //     'websocket onopen reconnecting to room',
+      //     this.currentRoom.rid
+      //   );
+      //   // reconnect to current room if you were in one and
+      //   // the websocket disconnected
+      //   const peers = this.currentRoom.present.filter(
+      //     (peer: string) => peer !== this.ourId
+      //   );
+      //   peers.forEach((peerId: string) => {
+      //     if (!this.ourPeer.stream) {
+      //       console.error('no local stream');
+      //       return;
+      //     }
+      //     const peer = this.peers.get(peerId);
+      //     if (peer?.peer.destroyed) {
+      //       console.log(
+      //         'peer was destroyed, connection closed, reconnecting',
+      //         peerId
+      //       );
+      //       peer.retry(this.ourPeer.stream);
+      //     }
+      //   });
+      // }
       this.status = 'connected';
       websocket.send(serialize({ type: 'connect' }));
     };
@@ -329,6 +337,8 @@ export class RoomsStore {
       websocket.send(serialize({ type: 'disconnect' }));
       websocket.close();
     };
+
+    // on computer sleep close the connection
 
     window.onclose = () => {
       disconnect();
@@ -705,6 +715,7 @@ export class PeerClass {
   @observable videoStream: MediaStream | null = null;
   @observable videoTracks: Map<string, any> = new Map();
   @observable stream: MediaStream | null = null;
+  @observable ourStream: MediaStream;
 
   constructor(
     rid: string,
@@ -718,7 +729,7 @@ export class PeerClass {
     this.rid = rid;
     this.websocket = websocket;
     this.peerId = peerId;
-
+    this.ourStream = stream;
     this.ourId = ourId;
     this.peer = this.createPeer(peerId, initiator, stream);
   }
@@ -841,6 +852,7 @@ export class PeerClass {
       track.onended = () => {
         console.log('track ended');
         this.isAudioAttachedChanged(false);
+        this.peer.destroy();
       };
 
       this.analysers[0] = SpeakingDetectionAnalyser.initialize(this);
@@ -951,6 +963,7 @@ export class PeerClass {
 
   @action
   onReceivedSignal(data: any) {
+    console.log('received signal', data);
     try {
       if (this.peer) {
         this.peer.signal(data);
@@ -961,9 +974,13 @@ export class PeerClass {
   }
 
   @action
-  retry() {
+  retry(ourStream?: MediaStream) {
     this.peer.destroy();
-    this.peer = this.createPeer(this.peerId, false, this.peer.streams[0]);
+    this.peer = this.createPeer(
+      this.peerId,
+      false,
+      ourStream || this.ourStream
+    );
   }
 
   @action
