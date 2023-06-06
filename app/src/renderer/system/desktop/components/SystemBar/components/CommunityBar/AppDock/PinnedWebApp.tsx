@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 
@@ -22,7 +22,12 @@ const PinnedWebAppPresenter = ({
   favicon: initialFavicon,
 }: Props) => {
   const { shellStore } = useAppState();
-  const { getOptions, setOptions } = useContextMenu();
+  const pointerDownRef = useRef<{
+    tileId: string;
+    rect: DOMRect;
+  } | null>(null);
+  const { getOptions, setOptions, getColors, setColors, mouseRef } =
+    useContextMenu();
 
   const [favicon, setFavicon] = useState<string | null>(initialFavicon);
 
@@ -56,6 +61,10 @@ const PinnedWebAppPresenter = ({
     [path, url, window?.isMinimized, shellStore]
   );
 
+  const contextMenuColors = useMemo(() => {
+    return { textColor: 'rgba(51, 51, 51, 0.8)', backgroundColor: '#fff' };
+  }, []);
+
   const onClick = () => {
     const appWindow = shellStore.getWindowByAppId(url);
 
@@ -81,13 +90,50 @@ const PinnedWebAppPresenter = ({
   };
 
   useEffect(() => {
+    if (!mouseRef) tapping.toggleOff();
+  }, [mouseRef]);
+
+  useEffect(() => {
     if (contextMenuOptions !== getOptions(tileId)) {
       setOptions(tileId, contextMenuOptions);
+    }
+
+    if (contextMenuColors !== getColors(tileId)) {
+      setColors(tileId, contextMenuColors);
     }
   }, [contextMenuOptions, tileId]);
 
   return (
-    <Reorder.Item key={url} value={url} onDragStart={() => tapping.toggleOff()}>
+    <Reorder.Item
+      key={url}
+      value={url}
+      onDragStart={() => tapping.toggleOff()}
+      onPointerDown={() => {
+        const rect = document.getElementById(tileId)?.getBoundingClientRect();
+        if (rect) pointerDownRef.current = { tileId, rect };
+        tapping.toggleOn();
+      }}
+      onPointerUp={(e) => {
+        // Make sure it's a left click.
+        if (e.button !== 0) return;
+
+        if (tileId !== pointerDownRef.current?.tileId) return;
+
+        tapping.toggleOff();
+
+        const pointerDownRect = pointerDownRef.current?.rect;
+        const pointerUpRect = document
+          .getElementById(tileId)
+          ?.getBoundingClientRect();
+
+        if (!pointerDownRect || !pointerUpRect) return;
+
+        const diffX = Math.abs(pointerDownRect.x - pointerUpRect.x);
+        const diffY = Math.abs(pointerDownRect.y - pointerUpRect.y);
+
+        if (diffX === 0 && diffY === 0) onClick();
+      }}
+    >
       <WebAppTile
         tileId={tileId}
         size={32}
@@ -95,7 +141,6 @@ const PinnedWebAppPresenter = ({
         backgroundColor={color}
         favicon={favicon}
         letter={title.slice(0, 1).toUpperCase()}
-        onClick={onClick}
         onFaultyFavicon={() => setFavicon(null)}
         tapping={tapping}
       >
