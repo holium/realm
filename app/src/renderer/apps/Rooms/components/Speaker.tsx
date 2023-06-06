@@ -110,6 +110,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
     loggedInAccount?.serverId,
   ]);
 
+  const hasVideo = (peer as PeerClass)?.hasVideo;
   return (
     <SpeakerWrapper
       id={`room-speaker-${person}`}
@@ -120,7 +121,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      className={(peer as PeerClass)?.hasVideo ? 'speaker-video-on' : ''}
+      className={hasVideo ? 'speaker-video-on' : ''}
     >
       <>
         <video
@@ -157,9 +158,9 @@ const SpeakerPresenter = (props: ISpeaker) => {
           >
             <Avatar
               clickable={false}
-              borderRadiusOverride="6px"
+              borderRadiusOverride={hasVideo ? '3px' : '6px'}
               simple
-              size={(peer as PeerClass)?.hasVideo ? 22 : 32}
+              size={hasVideo ? 22 : 32}
               avatar={metadata && metadata.avatar}
               patp={person}
               sigilColor={[(metadata && metadata.color) || '#000000', 'white']}
@@ -170,7 +171,6 @@ const SpeakerPresenter = (props: ISpeaker) => {
             style={{ pointerEvents: 'none' }}
             opacity={peerState === PeerConnectionState.Connected ? 1 : 0.4}
             alignItems="center"
-            // height={20}
             fontSize={2}
             fontWeight={500}
           >
