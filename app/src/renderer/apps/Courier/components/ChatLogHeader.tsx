@@ -1,10 +1,26 @@
 import { useMemo } from 'react';
+import styled from 'styled-components';
 
 import { Button, Flex, Icon, Text } from '@holium/design-system/general';
 import { Menu, MenuItemProps } from '@holium/design-system/navigation';
 
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+const ChatLogHeaderContainer = styled(Flex)<{ isStandaloneChat: boolean }>`
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+
+  ${({ isStandaloneChat }) =>
+    isStandaloneChat &&
+    `
+    height: 58px;
+    padding: 12px;
+    background: var(--rlm-base-color);
+    border-bottom: 1px solid var(--rlm-dock-color);
+  `}
+`;
 
 type ChatLogHeaderProps = {
   path: string;
@@ -111,17 +127,7 @@ export const ChatLogHeader = ({
   }, [selectedChat?.hidePinned, isMuted]);
 
   return (
-    <Flex
-      height={isStandaloneChat ? 58 : undefined}
-      gap={12}
-      padding="12px"
-      background="var(--rlm-base-color)"
-      borderBottom={
-        isStandaloneChat ? '1px solid var(--rlm-dock-color)' : undefined
-      }
-      alignItems="center"
-      justifyContent="space-between"
-    >
+    <ChatLogHeaderContainer isStandaloneChat={isStandaloneChat}>
       <Flex
         flexDirection="row"
         justifyContent="space-between"
@@ -185,6 +191,6 @@ export const ChatLogHeader = ({
           />
         )}
       </Flex>
-    </Flex>
+    </ChatLogHeaderContainer>
   );
 };

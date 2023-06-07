@@ -1,13 +1,6 @@
 import { ReactNode, RefObject, useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
-import styled from 'styled-components';
 
-import {
-  Box,
-  Flex,
-  Text,
-  WindowedListRef,
-} from '@holium/design-system/general';
+import { Flex, Text, WindowedListRef } from '@holium/design-system/general';
 
 import {
   ChatFragmentMobxType,
@@ -19,15 +12,11 @@ import { ChatInputBox } from '../../components/ChatInputBox';
 import { ChatLogHeader } from '../../components/ChatLogHeader';
 import { PinnedContainer } from '../../components/PinnedMessage';
 import { ChatLogList } from '../ChatLogList';
-
-const FullWidthAnimatePresence = styled(AnimatePresence)`
-  position: absolute;
-  z-index: 16;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-`;
+import {
+  ChatInputContainer,
+  ChatLogListContainer,
+  FullWidthAnimatePresence,
+} from './ChatLogView.styles';
 
 type Props = {
   path: string;
@@ -53,7 +42,7 @@ type Props = {
     sentAt: string;
     message: ChatFragmentMobxType;
   } | null;
-  isStandaloneChat?: boolean;
+  isStandaloneChat: boolean;
   onBack: () => void;
   onEditConfirm: (fragments: any[]) => void;
   onSend: (fragments: any[]) => Promise<void>;
@@ -146,7 +135,7 @@ export const ChatLogView = ({
             You haven't sent or received any messages in this chat yet.
           </Text.Custom>
         ) : (
-          <Flex flex={1} flexDirection="column" width="100%" paddingLeft="12px">
+          <ChatLogListContainer isStandaloneChat={isStandaloneChat}>
             {showPin && (
               <FullWidthAnimatePresence>
                 <PinnedContainer message={pinnedChatMessage} />
@@ -159,15 +148,10 @@ export const ChatLogView = ({
               endOfListPadding={endPadding}
               ourColor={ourColor}
             />
-          </Flex>
+          </ChatLogListContainer>
         )}
       </Flex>
-      <Box
-        width="100%"
-        padding="11px 12px 12px 12px"
-        background="var(--rlm-base-color)"
-        borderTop="1px solid var(--rlm-dock-color)"
-      >
+      <ChatInputContainer isStandaloneChat={isStandaloneChat}>
         <ChatInputBox
           storage={storage}
           selectedChat={selectedChat}
@@ -183,7 +167,7 @@ export const ChatLogView = ({
           }}
           onAttachmentChange={onAttachmentChange}
         />
-      </Box>
+      </ChatInputContainer>
     </Flex>
   );
 };

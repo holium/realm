@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import styled from 'styled-components';
 
 import {
   Button,
@@ -13,13 +14,26 @@ import { ChatModelType } from 'renderer/stores/models/chat.model';
 
 import { InboxRow } from './InboxRow';
 
+const InboxViewHeaderContainer = styled(Flex)<{ isStandaloneChat?: boolean }>`
+  align-items: center;
+  z-index: 1;
+  padding: 0 0 8px 4px;
+
+  ${({ isStandaloneChat }) =>
+    isStandaloneChat &&
+    `
+    height: 58px;
+    padding: 12px
+  `}
+`;
+
 type Props = {
   inboxes: ChatModelType[];
   width: number | undefined;
   height: number | undefined;
   accountIdentity: string | undefined;
   spacePath: string | undefined;
-  disableAnimation?: boolean;
+  isStandaloneChat?: boolean;
   isChatPinned: (path: string) => boolean;
   onClickInbox: (path: string) => void;
   onClickNewInbox: () => void;
@@ -32,7 +46,7 @@ export const InboxView = ({
   height,
   accountIdentity,
   spacePath,
-  disableAnimation,
+  isStandaloneChat,
   isChatPinned,
   onClickInbox,
   onClickNewInbox,
@@ -61,7 +75,7 @@ export const InboxView = ({
       height={height ?? '100%'}
       flexDirection="column"
     >
-      <Flex zIndex={1} height={58} padding="12px" alignItems="center">
+      <InboxViewHeaderContainer isStandaloneChat={isStandaloneChat}>
         <Flex width={26}>
           <Icon name="Messages" size={24} opacity={0.8} />
         </Flex>
@@ -94,7 +108,7 @@ export const InboxView = ({
             <Icon name="Plus" size={24} opacity={0.5} />
           </Button.IconButton>
         </Flex>
-      </Flex>
+      </InboxViewHeaderContainer>
       {filteredInboxes.length === 0 ? (
         <Flex
           flex={1}
@@ -137,7 +151,7 @@ export const InboxView = ({
               isAdmin={accountIdentity ? inbox.isHost(accountIdentity) : false}
               isSelectedSpaceChat={inbox.metadata.space === spacePath}
               isPinned={isChatPinned(inbox.path)}
-              disableAnimation={disableAnimation}
+              disableAnimation={isStandaloneChat}
               onClickInbox={onClickInbox}
             />
           )}

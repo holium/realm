@@ -25,10 +25,15 @@ const toggleFullscreen = (mainWindow: BrowserWindow) => {
 };
 
 const registerListeners = (mainWindow: BrowserWindow) => {
+  ipcMain.removeHandler('close-realm');
+  ipcMain.removeHandler('toggle-minimized');
+  ipcMain.removeHandler('toggle-fullscreen');
+
   ipcMain.handle('close-realm', (_) => {
     mainWindow.close();
     app.quit();
   });
+
   ipcMain.handle('toggle-minimized', (_) => {
     mainWindow.isMinimized() ? mainWindow.restore() : mainWindow.minimize();
   });
