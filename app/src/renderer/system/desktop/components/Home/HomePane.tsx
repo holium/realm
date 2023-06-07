@@ -20,7 +20,7 @@ const HomeWindow = styled(motion.div)`
 `;
 
 const HomePanePresenter = () => {
-  const { shellStore, theme } = useAppState();
+  const { shellStore, theme, showTitleBar } = useAppState();
   const { spacesStore } = useShipStore();
   const isOpen = shellStore.isHomePaneOpen;
   const isOur = spacesStore.selected?.type === 'our';
@@ -35,10 +35,11 @@ const HomePanePresenter = () => {
       <AnimatePresence>
         <HomeWindow
           key="home-window"
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 0, paddingTop: showTitleBar ? 20 : 0 }}
           animate={{
             opacity: isOpen ? 1 : 0,
             display: isOpen ? 'block' : 'none',
+            paddingTop: showTitleBar ? 20 : 0,
             background: rgba(
               theme.mode === 'light' ? '#FFFFFF' : '#000000',
               theme.mode === 'light' ? 0.25 : 0.25

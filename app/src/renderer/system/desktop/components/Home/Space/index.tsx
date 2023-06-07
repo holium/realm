@@ -6,6 +6,7 @@ import { Button, Flex, Icon, NoScrollBar } from '@holium/design-system';
 
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { TITLEBAR_HEIGHT } from 'renderer/system/Titlebar';
 
 import { AppSearchApp } from '../AppInstall/AppSearch';
 import { Members } from '../Members';
@@ -22,7 +23,7 @@ interface HomePaneProps {
 type SidebarType = 'members' | 'friends' | null;
 
 const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
-  const { loggedInAccount } = useAppState();
+  const { loggedInAccount, showTitleBar } = useAppState();
   const { spacesStore } = useShipStore();
   const currentSpace = spacesStore.selected;
   const [sidebar, setSidebar] = useState<SidebarType>(null);
@@ -39,7 +40,7 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
           <Flex
             position="absolute"
             right="8px"
-            top="8px"
+            top={showTitleBar ? 8 + TITLEBAR_HEIGHT : '8px'}
             bottom={58}
             initial={{ opacity: 0, width: 40 }}
             animate={{ opacity: 1, width: 330 }}
