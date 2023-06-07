@@ -219,9 +219,7 @@ export const RealmBackground = ({
   );
 };
 
-export const RealmTitlebar = styled.div<{
-  forcedColor?: string;
-}>`
+export const RealmTitlebar = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -230,7 +228,7 @@ export const RealmTitlebar = styled.div<{
   left: 0;
   width: 100%;
   height: 28px;
-  background: ${({ forcedColor }) => forcedColor ?? 'var(--rlm-dock-color)'};
+  background: var(--rlm-dock-color);
   z-index: 100;
   -webkit-user-select: none;
   -webkit-app-region: drag;

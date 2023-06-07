@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { ViewPort } from 'react-spaces';
 import { observer } from 'mobx-react';
 
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -19,7 +20,11 @@ export const StandaloneChatPresenter = () => {
     window.electron.app.disableRealmCursor();
   });
 
-  return <StandaloneChatBody />;
+  return (
+    <ViewPort>
+      <StandaloneChatBody />
+    </ViewPort>
+  );
 };
 
 export const StandaloneChat = observer(StandaloneChatPresenter);
