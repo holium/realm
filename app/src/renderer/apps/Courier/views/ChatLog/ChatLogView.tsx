@@ -102,7 +102,7 @@ export const ChatLogView = ({
       flex={1}
       height="100%"
       layout="preserve-aspect"
-      layoutId={`chat-${path}-container`}
+      layoutId={isStandaloneChat ? undefined : `chat-${path}-container`}
       flexDirection="column"
     >
       <ChatLogHeader

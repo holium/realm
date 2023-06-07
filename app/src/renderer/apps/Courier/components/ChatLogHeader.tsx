@@ -112,7 +112,6 @@ export const ChatLogHeader = ({
         label: isAdmin ? 'Delete chat' : 'Leave chat',
         disabled: false,
         onClick: () => {
-          // evt.stopPropagation();
           shellStore.setIsBlurred(true);
           shellStore.openDialogWithStringProps('leave-chat-dialog', {
             path,
@@ -150,7 +149,7 @@ export const ChatLogHeader = ({
             layoutId={isStandaloneChat ? undefined : `chat-${path}-avatar`}
             layout={'preserve-aspect'}
             transition={{
-              duration: 0.15,
+              duration: isStandaloneChat ? 0 : 0.15,
             }}
           >
             {avatar}
@@ -164,7 +163,7 @@ export const ChatLogHeader = ({
               layout="preserve-aspect"
               textAlign="left"
               transition={{
-                duration: 0.15,
+                duration: isStandaloneChat ? 0 : 0.15,
               }}
               fontWeight={500}
               fontSize={3}

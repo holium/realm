@@ -24,7 +24,7 @@ type ChatRowProps = {
   timestamp: number;
   type: ChatPathType;
   peersGetBacklog: boolean;
-  disableAnimation?: boolean;
+  isStandaloneChat?: boolean;
   onClick: (evt: MouseEvent<HTMLDivElement>) => void;
 };
 
@@ -35,7 +35,7 @@ export const ChatRowPresenter = ({
   isAdmin,
   type,
   metadata,
-  disableAnimation,
+  isStandaloneChat,
   onClick,
 }: ChatRowProps) => {
   const { loggedInAccount, shellStore } = useAppState();
@@ -182,10 +182,10 @@ export const ChatRowPresenter = ({
       spaceHeader = (
         <Text.Custom
           textAlign="left"
-          layoutId={`chat-${path}-pretitle`}
+          layoutId={isStandaloneChat ? undefined : `chat-${path}-pretitle`}
           layout="preserve-aspect"
           transition={{
-            duration: disableAnimation ? 0 : 0.15,
+            duration: isStandaloneChat ? 0 : 0.15,
           }}
           width={210}
           initial={{ opacity: 0.5 }}
@@ -237,10 +237,10 @@ export const ChatRowPresenter = ({
       >
         <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
           <Flex
-            layoutId={`chat-${path}-avatar`}
+            layoutId={isStandaloneChat ? undefined : `chat-${path}-avatar`}
             layout="preserve-aspect"
             transition={{
-              duration: disableAnimation ? 0 : 0.15,
+              duration: isStandaloneChat ? 0 : 0.15,
             }}
           >
             {chatAvatarEl}
@@ -252,13 +252,13 @@ export const ChatRowPresenter = ({
               </Flex>
             )}
             <Text.Custom
-              layoutId={`chat-${path}-name`}
+              layoutId={isStandaloneChat ? undefined : `chat-${path}-name`}
               layout="preserve-aspect"
               truncate
               textAlign="left"
               width={210}
               transition={{
-                duration: disableAnimation ? 0 : 0.15,
+                duration: isStandaloneChat ? 0 : 0.15,
               }}
               fontWeight={500}
               fontSize={3}
@@ -267,13 +267,13 @@ export const ChatRowPresenter = ({
             </Text.Custom>
             <Text.Custom
               textAlign="left"
-              layoutId={`chat-${path}-subtitle`}
+              layoutId={isStandaloneChat ? undefined : `chat-${path}-subtitle`}
               layout="preserve-aspect"
               truncate
               width={210}
               fontWeight={400}
               transition={{
-                duration: disableAnimation ? 0 : 0.1,
+                duration: isStandaloneChat ? 0 : 0.1,
               }}
               initial={{ opacity: 0.5 }}
               animate={{ opacity: 0.5, lineHeight: '1.2' }}

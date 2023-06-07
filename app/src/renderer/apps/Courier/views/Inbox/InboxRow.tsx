@@ -36,7 +36,7 @@ type InboxProps = {
   isAdmin: boolean;
   isSelectedSpaceChat: boolean;
   isPinned: boolean;
-  disableAnimation?: boolean;
+  isStandaloneChat?: boolean;
   onClickInbox: (path: string) => void;
 };
 
@@ -45,7 +45,7 @@ export const InboxRow = ({
   isAdmin,
   isSelectedSpaceChat,
   isPinned,
-  disableAnimation,
+  isStandaloneChat,
   onClickInbox,
 }: InboxProps) => {
   return useMemo(
@@ -55,7 +55,9 @@ export const InboxRow = ({
           isSpace={inbox.type === 'space'}
           isPinned={isPinned}
           layout="preserve-aspect"
-          layoutId={`chat-${inbox.path}-container`}
+          layoutId={
+            isStandaloneChat ? undefined : `chat-${inbox.path}-container`
+          }
         >
           <ChatRow
             path={inbox.path}
@@ -67,7 +69,7 @@ export const InboxRow = ({
             metadata={inbox.metadata}
             peersGetBacklog={inbox.peersGetBacklog}
             muted={inbox.muted}
-            disableAnimation={disableAnimation}
+            isStandaloneChat={isStandaloneChat}
             onClick={(evt) => {
               evt.stopPropagation();
               onClickInbox(inbox.path);

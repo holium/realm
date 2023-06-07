@@ -178,10 +178,10 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
     subtitle = (
       <Text.Custom
         textAlign="left"
-        layoutId={`chat-${path}-subtitle`}
+        layoutId={isStandaloneChat ? undefined : `chat-${path}-subtitle`}
         layout="preserve-aspect"
         transition={{
-          duration: 0.15,
+          duration: isStandaloneChat ? 0 : 0.15,
         }}
         width={210}
         initial={{ opacity: 0 }}
@@ -196,7 +196,7 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
     pretitle = (
       <Text.Custom
         textAlign="left"
-        layoutId={`chat-${path}-pretitle`}
+        layoutId={isStandaloneChat ? undefined : `chat-${path}-pretitle`}
         layout="preserve-aspect"
         transition={{
           duration: 0.15,

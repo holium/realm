@@ -151,7 +151,7 @@ export const InboxView = ({
               isAdmin={accountIdentity ? inbox.isHost(accountIdentity) : false}
               isSelectedSpaceChat={inbox.metadata.space === spacePath}
               isPinned={isChatPinned(inbox.path)}
-              disableAnimation={isStandaloneChat}
+              isStandaloneChat={isStandaloneChat}
               onClickInbox={onClickInbox}
             />
           )}
