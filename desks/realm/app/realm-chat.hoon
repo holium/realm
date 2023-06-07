@@ -23,14 +23,11 @@
           %.y            :: msg-preview-notif
       ==
 
-    =/  subs   [%pass /db %agent [our.bowl %chat-db] %watch /db]~
-    ::  now check if we need to create a notes-to-self chat
-    =/  selfpaths=(list path-row:db-sur)  (skim (scry-paths:lib bowl) |=(p=path-row:db-sur =(type.p %self)))
-    =/  createcards
-      ?.  =(0 (lent selfpaths))  ~
-      -:(create-chat:lib [(notes-to-self bowl) %self ~ %host *@dr] state bowl)
-
-    [(weld subs createcards) this(state default-state)]
+    =/  cards=(list card)
+    :~  [%pass /db %agent [our.bowl %chat-db] %watch /db]
+        [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action !>([%create-notes-to-self-if-not-exists ~])]
+    ==
+    [cards this(state default-state)]
   ++  on-save   !>(state)
   ++  on-load
     |=  old-state=vase
@@ -38,14 +35,11 @@
     :: do a quick check to make sure we are subbed to /db in %chat-db
     =/  cards=(list card)
       ?:  =(wex.bowl ~)  
-        [%pass /db %agent [our.bowl %chat-db] %watch /db]~
-      ~
-    ::  now check if we need to create a notes-to-self chat
-    =/  selfpaths=(list path-row:db-sur)  (skim (scry-paths:lib bowl) |=(p=path-row:db-sur =(type.p %self)))
-    =.  cards
-      ?.  =(0 (lent selfpaths))  cards
-      (weld cards -:(create-chat:lib [(notes-to-self bowl) %self ~ %host *@dr] state bowl))
-      
+        :~  [%pass /db %agent [our.bowl %chat-db] %watch /db]
+            [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action !>([%create-notes-to-self-if-not-exists ~])]
+        ==
+      [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action !>([%create-notes-to-self-if-not-exists ~])]~
+
     =/  old  !<(versioned-state old-state)
     =.  app-id.old  '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id
     ?-  -.old
@@ -96,6 +90,9 @@
         (pin-chat:lib +.act state bowl)
       %toggle-msg-preview-notif
         (toggle-msg-preview-notif:lib +.act state bowl)
+
+      %create-notes-to-self-if-not-exists
+        (create-notes-to-self-if-not-exists:lib state bowl)
     ==
     [cards this]
   ::  realm-chat supports no subscriptions
@@ -407,5 +404,4 @@
   ?:  =('' nickname)
     (scot %p patp)
   nickname
-++  notes-to-self  |=(=bowl:gall (malt ~[['title' 'Notes to Self'] ['reactions' 'true'] ['creator' (scot %p our.bowl)] ['description' '']]))
 --

@@ -466,6 +466,16 @@
   =.  msg-preview-notif.state  toggle
   `state
 ::
+++  create-notes-to-self-if-not-exists
+  |=  [state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  =/  selfpaths=(list path-row:db)  (skim (scry-paths bowl) |=(p=path-row:db =(type.p %self)))
+  ?.  =(0 (lent selfpaths))
+    `state
+  (create-chat [(notes-to-self bowl) %self ~ %host *@dr] state bowl)
+::
+++  notes-to-self  |=(=bowl:gall (malt ~[['title' 'Notes to Self'] ['reactions' 'true'] ['creator' (scot %p our.bowl)] ['description' '']]))
+::
 ::
 ::  JSON
 ::
