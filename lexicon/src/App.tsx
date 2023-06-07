@@ -4,12 +4,20 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import api from './api';
 import { Navigation } from './Navigation';
 import { Dictionary, Home, Word } from './pages';
+import { useStore } from './store';
 import { log } from './utils';
 
+declare global {
+  interface Window {
+    ship: string;
+  }
+}
+
 function App() {
-  const space: string = '/~lux/our';
+  const { space } = useStore();
 
   const doStateScry = async () => {
+    if (!space) return;
     try {
       const s = await api.getState();
       const subscribeToSpace = await api.subscribePath(space);
@@ -24,7 +32,7 @@ function App() {
   };
   useEffect(() => {
     doStateScry();
-  }, []);
+  }, [space]);
 
   return (
     <>

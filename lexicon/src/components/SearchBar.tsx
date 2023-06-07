@@ -2,7 +2,11 @@ import React from 'react';
 
 import { Button, Flex, Icon, TextInput } from '@holium/design-system';
 
-export const SearchBar = () => {
+interface Props {
+  addModalOpen: boolean;
+  onAddWord: Function;
+}
+export const SearchBar = ({ onAddWord, addModalOpen }: Props) => {
   return (
     <Flex flex={1} gap={10} justifyContent={'center'} marginBottom={12}>
       <Button.IconButton>
@@ -21,7 +25,12 @@ export const SearchBar = () => {
         error={false}
         onChange={() => null}
       />
-      <Button.TextButton fontSize={1} fontWeight={600}>
+      <Button.TextButton
+        fontSize={1}
+        fontWeight={600}
+        onClick={() => onAddWord()}
+        disabled={addModalOpen}
+      >
         Add Word
       </Button.TextButton>
     </Flex>
