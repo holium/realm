@@ -24,9 +24,13 @@ export type PinnedProps = {
   onClick?: (msgId: string) => void;
 } & BoxProps;
 
-export const PinnedMessage = (props: PinnedProps) => {
-  const { id, author, authorColor, message, onClick = () => {} } = props;
-
+export const PinnedMessage = ({
+  id,
+  author,
+  authorColor,
+  message,
+  onClick,
+}: PinnedProps) => {
   if (!message) return null;
   const fragmentType: string = Object.keys(message[0])[0];
   let pinnedContent = null;
@@ -65,7 +69,7 @@ export const PinnedMessage = (props: PinnedProps) => {
   }
 
   return (
-    <Flex id={id} key={id} width="100%" onClick={onClick}>
+    <Flex id={id} width="100%" style={{ cursor: 'pointer' }} onClick={onClick}>
       <FullWidthFragmentBlock id={id}>
         <FragmentBlockquote
           className="fragment-blockquote pinned-or-reply-message"

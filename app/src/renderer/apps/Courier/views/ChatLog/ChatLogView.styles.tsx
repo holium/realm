@@ -25,6 +25,7 @@ export const ChatInputContainer = styled(Box)<{ isStandaloneChat: boolean }>`
 `;
 
 export const ChatLogListContainer = styled(Flex)<{ isStandaloneChat: boolean }>`
+  position: relative;
   flex: 1;
   flex-direction: column;
   width: 100%;

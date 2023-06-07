@@ -1,20 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import {
-  Flex,
-  flipColorIfLowContrast,
-  MenuItemProps,
-  PinnedMessage,
-} from '@holium/design-system';
+import { PinnedMessage } from '@holium/design-system/blocks';
+import { Flex } from '@holium/design-system/general';
+import { MenuItemProps } from '@holium/design-system/navigation';
+import { flipColorIfLowContrast } from '@holium/design-system/util';
 
 import { useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ChatMessageType } from '../../../stores/models/chat.model';
+
 type PinnedContainerProps = {
   message: ChatMessageType;
+  onClick: () => void;
 };
 
 const BlurredBG = styled.div`
@@ -36,7 +36,7 @@ const BlurredBG = styled.div`
   }
 `;
 
-export const PinnedContainer = ({ message }: PinnedContainerProps) => {
+export const PinnedContainer = ({ message, onClick }: PinnedContainerProps) => {
   const { chatStore } = useShipStore();
   const selectedChat = chatStore.selectedChat;
   const { friends } = useShipStore();
@@ -95,7 +95,7 @@ export const PinnedContainer = ({ message }: PinnedContainerProps) => {
 
   return (
     <Flex
-      width="calc(100% + 2px)"
+      width="100%"
       position="absolute"
       top={0}
       left={0}
@@ -114,9 +114,7 @@ export const PinnedContainer = ({ message }: PinnedContainerProps) => {
           authorColor={authorColor}
           message={message.contents}
           sentAt={new Date(message.createdAt).toISOString()}
-          onClick={() => {
-            console.log('clicked pinned message');
-          }}
+          onClick={onClick}
         />
       </BlurredBG>
     </Flex>

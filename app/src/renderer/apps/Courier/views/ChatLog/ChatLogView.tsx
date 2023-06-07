@@ -138,7 +138,19 @@ export const ChatLogView = ({
           <ChatLogListContainer isStandaloneChat={isStandaloneChat}>
             {showPin && (
               <FullWidthAnimatePresence>
-                <PinnedContainer message={pinnedChatMessage} />
+                <PinnedContainer
+                  message={pinnedChatMessage}
+                  onClick={() => {
+                    const index = messages.findIndex(
+                      (msg) => msg.id === pinnedChatMessage.id
+                    );
+                    listRef?.current?.scrollToIndex({
+                      index,
+                      align: 'start',
+                      behavior: 'smooth',
+                    });
+                  }}
+                />
               </FullWidthAnimatePresence>
             )}
             <ChatLogList
