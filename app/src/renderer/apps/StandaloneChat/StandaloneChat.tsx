@@ -3,7 +3,6 @@ import { observer } from 'mobx-react';
 
 import { Flex, Spinner, Text } from '@holium/design-system/general';
 
-import { useTrayApps } from 'renderer/apps/store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ChatInfo } from '../Courier/views/ChatInfo';
@@ -12,7 +11,6 @@ import { Inbox } from '../Courier/views/Inbox/Inbox';
 import { NewChat } from '../Courier/views/NewChat';
 
 export const StandaloneChatPresenter = () => {
-  const { clearInnerNavigation } = useTrayApps();
   const { chatStore, spacesStore } = useShipStore();
 
   useEffect(() => {
@@ -37,8 +35,6 @@ export const StandaloneChatPresenter = () => {
     }
   }, []);
 
-  useEffect(clearInnerNavigation, [chatStore.subroute]);
-
   if (chatStore.loader.isFirstLoad) {
     return (
       <Flex
@@ -59,10 +55,22 @@ export const StandaloneChatPresenter = () => {
       </Flex>
     );
   }
+  console.log('chatStore.subroute', chatStore.subroute);
 
   return (
-    <Flex style={{ width: '100%', height: '100%', paddingTop: 28 }}>
-      <Flex minWidth={384}>
+    <Flex
+      style={{
+        width: '100%',
+        height: '100%',
+        paddingTop: 28,
+        background: 'var(--rlm-dock-color)',
+      }}
+    >
+      <Flex
+        minWidth={400}
+        borderRight="1px solid var(--rlm-dock-color)"
+        background="var(--rlm-base-color)"
+      >
         <Inbox isStandaloneChat />
       </Flex>
       <Flex flex={1} height="100%" position="relative">

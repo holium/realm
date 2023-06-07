@@ -2,7 +2,12 @@ import { ReactNode, RefObject, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import styled from 'styled-components';
 
-import { Flex, Text, WindowedListRef } from '@holium/design-system/general';
+import {
+  Box,
+  Flex,
+  Text,
+  WindowedListRef,
+} from '@holium/design-system/general';
 
 import {
   ChatFragmentMobxType,
@@ -48,6 +53,7 @@ type Props = {
     sentAt: string;
     message: ChatFragmentMobxType;
   } | null;
+  isStandaloneChat?: boolean;
   onBack: () => void;
   onEditConfirm: (fragments: any[]) => void;
   onSend: (fragments: any[]) => Promise<void>;
@@ -65,13 +71,12 @@ export const ChatLogView = ({
   pinnedChatMessage,
   storage,
   isMuted,
-  width,
-  height,
   ourColor,
   themeMode,
   listRef,
-  onBack,
   replyTo,
+  isStandaloneChat,
+  onBack,
   onEditConfirm,
   onSend,
 }: Props) => {
@@ -89,6 +94,8 @@ export const ChatLogView = ({
     endPadding = 56;
   }
 
+  console.log('messages.length', messages.length);
+
   const onAttachmentChange = (attachmentCount: number) => {
     if (attachmentCount > 0) {
       setShowAttachments(true);
@@ -102,81 +109,64 @@ export const ChatLogView = ({
   };
 
   return (
-    <Flex flex={1} height="100%" flexDirection="column">
+    <Flex
+      flex={1}
+      height="100%"
+      layout="preserve-aspect"
+      layoutId={`chat-${path}-container`}
+      flexDirection="column"
+    >
+      <ChatLogHeader
+        title={title}
+        path={path}
+        isMuted={isMuted}
+        avatar={chatAvatar}
+        pretitle={pretitle}
+        subtitle={subtitle}
+        hasMenu
+        isStandaloneChat={isStandaloneChat}
+        onBack={onBack}
+      />
       <Flex
         flex={1}
-        height="100%"
-        layout="preserve-aspect"
-        layoutId={`chat-${path}-container`}
-        flexDirection="column"
-      >
-        <ChatLogHeader
-          title={title}
-          path={path}
-          isMuted={isMuted}
-          onBack={onBack}
-          hasMenu
-          avatar={chatAvatar}
-          pretitle={pretitle}
-          subtitle={subtitle}
-        />
-        <Flex
-          flex={1}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1, duration: 0.1 }}
-        >
-          {messages.length === 0 ? (
-            <Flex
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              width={width}
-              height={height}
-            >
-              <Text.Custom
-                textAlign="center"
-                width={300}
-                fontSize={3}
-                opacity={0.5}
-              >
-                You haven't sent or received any messages in this chat yet.
-              </Text.Custom>
-            </Flex>
-          ) : (
-            <Flex position="relative" flexDirection="column" width="100%">
-              <ChatLogList
-                listRef={listRef}
-                messages={messages}
-                topOfListPadding={topPadding}
-                endOfListPadding={endPadding}
-                selectedChat={selectedChat}
-                ourColor={ourColor}
-              />
-              {showPin && (
-                <FullWidthAnimatePresence>
-                  <PinnedContainer message={pinnedChatMessage} />
-                </FullWidthAnimatePresence>
-              )}
-            </Flex>
-          )}
-        </Flex>
-      </Flex>
-      <Flex
-        position="absolute"
-        flexDirection="column"
-        mt={6}
-        bottom={12}
-        left={12}
-        right={12}
-        initial={{
-          opacity: 0,
-        }}
+        initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{
-          delay: 0.2,
-          duration: 0.1,
-        }}
+        transition={{ delay: 0.1, duration: 0.1 }}
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+      >
+        {messages.length === 0 ? (
+          <Text.Custom
+            textAlign="center"
+            width={300}
+            fontSize={3}
+            opacity={0.5}
+          >
+            You haven't sent or received any messages in this chat yet.
+          </Text.Custom>
+        ) : (
+          <Flex flex={1} flexDirection="column" width="100%" paddingLeft="12px">
+            {showPin && (
+              <FullWidthAnimatePresence>
+                <PinnedContainer message={pinnedChatMessage} />
+              </FullWidthAnimatePresence>
+            )}
+            <ChatLogList
+              listRef={listRef}
+              messages={messages}
+              topOfListPadding={topPadding}
+              endOfListPadding={endPadding}
+              ourColor={ourColor}
+            />
+          </Flex>
+        )}
+      </Flex>
+      <Box
+        width="100%"
+        padding="11px 12px 12px 12px"
+        background="var(--rlm-base-color)"
+        borderTop="1px solid var(--rlm-dock-color)"
       >
         <ChatInputBox
           storage={storage}
@@ -193,7 +183,7 @@ export const ChatLogView = ({
           }}
           onAttachmentChange={onAttachmentChange}
         />
-      </Flex>
+      </Box>
     </Flex>
   );
 };

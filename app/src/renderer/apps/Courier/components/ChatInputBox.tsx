@@ -140,9 +140,7 @@ export const ChatInputBox = ({
         delay: 0.2,
         duration: 0.1,
       }}
-      onAnimationComplete={() => {
-        setIsFocused(true);
-      }}
+      onAnimationComplete={() => setIsFocused(true)}
     >
       <div ref={mediaRef} style={{ display: 'none' }}></div>
       <ChatInput

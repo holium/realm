@@ -10,16 +10,12 @@ import {
 
 import { displayDate } from 'os/lib/time';
 
-import {
-  ChatMessageType,
-  ChatModelType,
-} from '../../../stores/models/chat.model';
+import { ChatMessageType } from '../../../stores/models/chat.model';
 import { ChatMessage } from '../components/ChatMessage';
 
 type Props = {
   listRef: RefObject<WindowedListRef>;
   messages: ChatMessageType[];
-  selectedChat: ChatModelType;
   ourColor: string;
   endOfListPadding?: number;
   topOfListPadding?: number;
@@ -28,7 +24,6 @@ type Props = {
 export const ChatLogList = ({
   listRef,
   messages,
-  selectedChat,
   ourColor,
   endOfListPadding,
   topOfListPadding,
@@ -36,7 +31,7 @@ export const ChatLogList = ({
   const [prevHeight, setPrevHeight] = useState<number>(0);
 
   const renderChatRow = (index: number, row: ChatMessageType) => {
-    const isLast = selectedChat ? index === messages.length - 1 : false;
+    const isLast = index === messages.length - 1;
     const isNextGrouped =
       index < messages.length - 1 && row.sender === messages[index + 1].sender;
 
@@ -47,7 +42,7 @@ export const ChatLogList = ({
 
     // we need to use 3px here because numbers are increments of 4px -- so 3 is 12px actually
     let topSpacing = isPrevGrouped ? '3px' : 2;
-    const bottomSpacing = isNextGrouped ? '3px' : 2;
+    const bottomSpacing = isLast ? (isNextGrouped ? '3px' : 2) : 0;
 
     const thisMsgDate = new Date(row.createdAt).toDateString();
     const prevMsgDate =
@@ -60,12 +55,7 @@ export const ChatLogList = ({
     }
 
     return (
-      <Box
-        key={row.id}
-        animate={false}
-        pt={topSpacing}
-        pb={isLast ? bottomSpacing : 0}
-      >
+      <Box key={row.id} animate={false} pt={topSpacing} pb={bottomSpacing}>
         {showDate && (
           <Text.Custom
             opacity={0.5}

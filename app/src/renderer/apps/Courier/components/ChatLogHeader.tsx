@@ -1,13 +1,7 @@
 import { useMemo } from 'react';
 
-import {
-  Button,
-  Flex,
-  Icon,
-  Menu,
-  MenuItemProps,
-  Text,
-} from '@holium/design-system';
+import { Button, Flex, Icon, Text } from '@holium/design-system/general';
+import { Menu, MenuItemProps } from '@holium/design-system/navigation';
 
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -19,9 +13,10 @@ type ChatLogHeaderProps = {
   subtitle?: React.ReactNode;
   avatar: React.ReactNode;
   isMuted: boolean;
-  onBack: () => void;
   hasMenu: boolean;
   rightAction?: React.ReactNode;
+  isStandaloneChat?: boolean;
+  onBack: () => void;
 };
 
 export const ChatLogHeader = ({
@@ -30,10 +25,11 @@ export const ChatLogHeader = ({
   pretitle,
   subtitle,
   avatar,
-  onBack,
   rightAction,
   isMuted,
   hasMenu = true,
+  isStandaloneChat = false,
+  onBack,
 }: ChatLogHeaderProps) => {
   const { loggedInAccount, shellStore } = useAppState();
   const { chatStore } = useShipStore();
@@ -116,14 +112,15 @@ export const ChatLogHeader = ({
 
   return (
     <Flex
-      pt="2px"
-      pr="2px"
-      pb={12}
+      height={isStandaloneChat ? 58 : undefined}
       gap={12}
-      height={40}
-      flexDirection="row"
-      justifyContent="space-between"
+      padding="12px"
+      background="var(--rlm-base-color)"
+      borderBottom={
+        isStandaloneChat ? '1px solid var(--rlm-dock-color)' : undefined
+      }
       alignItems="center"
+      justifyContent="space-between"
     >
       <Flex
         flexDirection="row"
@@ -131,19 +128,21 @@ export const ChatLogHeader = ({
         alignItems="center"
         gap={8}
       >
-        <Button.IconButton
-          size={26}
-          onClick={(evt) => {
-            evt.stopPropagation();
-            onBack();
-          }}
-        >
-          <Icon name="ArrowLeftLine" size={22} opacity={0.5} />
-        </Button.IconButton>
+        {!isStandaloneChat && (
+          <Button.IconButton
+            size={26}
+            onClick={(evt) => {
+              evt.stopPropagation();
+              onBack();
+            }}
+          >
+            <Icon name="ArrowLeftLine" size={22} opacity={0.5} />
+          </Button.IconButton>
+        )}
         <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
           <Flex
-            layoutId={`chat-${path}-avatar`}
-            layout="preserve-aspect"
+            layoutId={isStandaloneChat ? undefined : `chat-${path}-avatar`}
+            layout={'preserve-aspect'}
             transition={{
               duration: 0.15,
             }}
@@ -155,7 +154,7 @@ export const ChatLogHeader = ({
             <Text.Custom
               truncate
               width={255}
-              layoutId={`chat-${path}-name`}
+              layoutId={isStandaloneChat ? `chat-${path}-name` : undefined}
               layout="preserve-aspect"
               textAlign="left"
               transition={{

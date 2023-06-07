@@ -19,6 +19,7 @@ type Props = {
   height: number | undefined;
   accountIdentity: string | undefined;
   spacePath: string | undefined;
+  disableAnimation?: boolean;
   isChatPinned: (path: string) => boolean;
   onClickInbox: (path: string) => void;
   onClickNewInbox: () => void;
@@ -31,13 +32,13 @@ export const InboxView = ({
   height,
   accountIdentity,
   spacePath,
+  disableAnimation,
   isChatPinned,
   onClickInbox,
   onClickNewInbox,
   onClickStandaloneChat,
 }: Props) => {
   const [searchString, setSearchString] = useState<string>('');
-  const [showList, setShowList] = useState<boolean>(false);
 
   const searchFilter = useCallback(
     (inbox: ChatModelType) => {
@@ -56,13 +57,11 @@ export const InboxView = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.01 }}
       width={width ?? '100%'}
       height={height ?? '100%'}
       flexDirection="column"
-      onAnimationComplete={() => setShowList(true)}
     >
-      <Flex zIndex={1} mb={2} ml={1} flexDirection="row" alignItems="center">
+      <Flex zIndex={1} height={58} padding="12px" alignItems="center">
         <Flex width={26}>
           <Icon name="Messages" size={24} opacity={0.8} />
         </Flex>
@@ -123,30 +122,26 @@ export const InboxView = ({
           </Text.Custom>
         </Flex>
       ) : (
-        showList && (
-          <WindowedList
-            data={filteredInboxes}
-            shiftScrollbar
-            overscan={25}
-            increaseViewportBy={{
-              top: 400,
-              bottom: 400,
-            }}
-            itemContent={(index, inbox) => (
-              <InboxRow
-                key={`${window.ship}-${inbox.path}-${index}-unpinned`}
-                inbox={inbox}
-                isAdmin={
-                  accountIdentity ? inbox.isHost(accountIdentity) : false
-                }
-                isLast={index === filteredInboxes.length - 1}
-                isSelectedSpaceChat={inbox.metadata.space === spacePath}
-                isPinned={isChatPinned(inbox.path)}
-                onClickInbox={onClickInbox}
-              />
-            )}
-          />
-        )
+        <WindowedList
+          data={filteredInboxes}
+          shiftScrollbar
+          overscan={25}
+          increaseViewportBy={{
+            top: 400,
+            bottom: 400,
+          }}
+          itemContent={(index, inbox) => (
+            <InboxRow
+              key={`inbox-${inbox.path}-${index}`}
+              inbox={inbox}
+              isAdmin={accountIdentity ? inbox.isHost(accountIdentity) : false}
+              isSelectedSpaceChat={inbox.metadata.space === spacePath}
+              isPinned={isChatPinned(inbox.path)}
+              disableAnimation={disableAnimation}
+              onClickInbox={onClickInbox}
+            />
+          )}
+        />
       )}
     </Flex>
   );

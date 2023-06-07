@@ -1,15 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { MouseEvent, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 
-import {
-  convertFragmentsToPreview,
-  Flex,
-  Icon,
-  MenuItemProps,
-  Row,
-  Text,
-  timelineDate,
-} from '@holium/design-system';
+import { convertFragmentsToPreview } from '@holium/design-system/blocks';
+import { Flex, Icon, Row, Text } from '@holium/design-system/general';
+import { MenuItemProps } from '@holium/design-system/navigation';
+import { timelineDate } from '@holium/design-system/util';
 
 import { ChatPathType } from 'os/services/ship/chat/chat.types';
 import { useContextMenu } from 'renderer/components';
@@ -29,8 +24,8 @@ type ChatRowProps = {
   timestamp: number;
   type: ChatPathType;
   peersGetBacklog: boolean;
-  height: number;
-  onClick: (evt: React.MouseEvent<HTMLDivElement>) => void;
+  disableAnimation?: boolean;
+  onClick: (evt: MouseEvent<HTMLDivElement>) => void;
 };
 
 export const ChatRowPresenter = ({
@@ -40,7 +35,7 @@ export const ChatRowPresenter = ({
   isAdmin,
   type,
   metadata,
-  height,
+  disableAnimation,
   onClick,
 }: ChatRowProps) => {
   const { loggedInAccount, shellStore } = useAppState();
@@ -190,7 +185,7 @@ export const ChatRowPresenter = ({
           layoutId={`chat-${path}-pretitle`}
           layout="preserve-aspect"
           transition={{
-            duration: 0.15,
+            duration: disableAnimation ? 0 : 0.15,
           }}
           width={210}
           initial={{ opacity: 0.5 }}
@@ -225,16 +220,14 @@ export const ChatRowPresenter = ({
     [title, path, type, peers, sigil, image]
   );
 
+  const onClickRow = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (contextMenuButtonIds.includes((e.target as HTMLDivElement).id)) return;
+
+    onClick(e);
+  };
+
   return (
-    <Row
-      id={chatRowId}
-      height={height}
-      onClick={(evt: any) => {
-        if (!contextMenuButtonIds.includes(evt.target.id)) {
-          onClick(evt);
-        }
-      }}
-    >
+    <Row id={chatRowId} onClick={onClickRow}>
       <Flex
         pointerEvents="none"
         flexDirection="row"
@@ -247,7 +240,7 @@ export const ChatRowPresenter = ({
             layoutId={`chat-${path}-avatar`}
             layout="preserve-aspect"
             transition={{
-              duration: 0.15,
+              duration: disableAnimation ? 0 : 0.15,
             }}
           >
             {chatAvatarEl}
@@ -265,7 +258,7 @@ export const ChatRowPresenter = ({
               textAlign="left"
               width={210}
               transition={{
-                duration: 0.15,
+                duration: disableAnimation ? 0 : 0.15,
               }}
               fontWeight={500}
               fontSize={3}
@@ -280,7 +273,7 @@ export const ChatRowPresenter = ({
               width={210}
               fontWeight={400}
               transition={{
-                duration: 0.1,
+                duration: disableAnimation ? 0 : 0.1,
               }}
               initial={{ opacity: 0.5 }}
               animate={{ opacity: 0.5, lineHeight: '1.2' }}

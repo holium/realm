@@ -242,6 +242,7 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
           canEdit={false}
         />
       }
+      isStandaloneChat={isStandaloneChat}
       onBack={() => setSubroute('inbox')}
       onEditConfirm={onEditConfirm}
       onSend={onMessageSend}

@@ -30,6 +30,7 @@ export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
       height={isStandaloneChat ? undefined : dimensions.height - 24}
       accountIdentity={loggedInAccount?.serverId}
       spacePath={currentSpace?.path}
+      disableAnimation={isStandaloneChat}
       isChatPinned={isChatPinned}
       onClickInbox={setChat}
       onClickNewInbox={() => setSubroute('new')}
