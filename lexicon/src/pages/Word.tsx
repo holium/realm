@@ -87,11 +87,11 @@ export const Word = () => {
         onChange={(newValue: number) => setTabValue(newValue)}
         tabData={tabData}
       />
-      <TabPanel value={tabValue} index={0}>
+      <TabPanel value={tabValue} index={0} other={null}>
         <Definitions />
       </TabPanel>
-      <TabPanel value={tabValue} index={1}>
-        <Definitions />
+      <TabPanel value={tabValue} index={1} other={null}>
+        <Definitions /> 
       </TabPanel>
       <Flex flexDirection={'column'} gap={10}>
         <TextInput

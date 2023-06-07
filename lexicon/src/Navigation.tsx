@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   Outlet,
   useNavigate,
@@ -8,15 +8,17 @@ import {
 
 import { Flex } from '@holium/design-system';
 
-import { SearchBar } from './components';
+import { AddWord, SearchBar } from './components';
+import { useStore } from './store';
+import { log } from './utils';
 
 export const Navigation = () => {
   const [searchParams] = useSearchParams();
   const { ship, group, word } = useParams();
   //presisted space data for filtering search correctly
-  const [space, setSpace] = useState<string>('');
   const navigate = useNavigate();
-  //  const { setModalOpen, modalOpen, isAdminScry, isAdmin } = useLexiconStore();
+  const { setAddModalOpen, addModalOpen, space, setSpace } = useStore();
+  log('space', space);
   useEffect(() => {
     const spaceId = searchParams.get('spaceId');
     if (spaceId) {
@@ -26,16 +28,21 @@ export const Navigation = () => {
   useEffect(() => {
     //We care about knowing the space id, either through params {ship}/{group} or space id which is the same thing
     if (ship && group) {
-      const space = `${ship}/${group}`;
+      const space = `/${ship}/${group}`;
       setSpace(space);
       //isAdminScry(space);
     }
     //everytime we get a new space (ship/group) we check if we are admins on that space, via a scry
   }, [ship, group]);
+
   //render the relevant route
   return (
     <Flex flexDirection={'column'} alignItems={'center'}>
-      <SearchBar />
+      <SearchBar
+        addModalOpen={addModalOpen}
+        onAddWord={() => setAddModalOpen(true)}
+      />
+      <AddWord open={addModalOpen} onClose={() => setAddModalOpen(false)} />
       <Outlet />
     </Flex>
   );

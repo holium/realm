@@ -164,14 +164,20 @@ const api = {
       },
     });
   },
-  runThread: async () => {
+  runThread: async (
+    path: string,
+    type: string,
+    version: number,
+    data: any,
+    schema: Schema
+  ) => {
     const json = {
       create: {
-        path: '/~rildyl-mapsel-niblyx-malnus/db-test-space',
-        type: 'thread-tester',
-        v: 0,
-        data: ['thread-test'],
-        schema: [['zippo', 't']],
+        path: path,
+        type: type,
+        v: version,
+        data: data,
+        schema: schema,
       },
     };
     return api.createApi().thread({
@@ -209,7 +215,7 @@ const api = {
   createWord: async (path: string, word: string) => {
     const data = [word, {}];
 
-    return api.create(path, 'lexicon-word', 0, data, WordSchema);
+    return api.runThread(path, 'lexicon-word', 0, data, WordSchema);
   },
   editWord: async (path: string, wordID: string, word: string) => {
     const data = [word, {}];
@@ -240,19 +246,25 @@ const api = {
     const data = [related, wordID, {}];
     return await api.create(path, 'lexicon-related', 0, data, RelatedSchema);
   },
-  voteOnWord: async (path: string, wordID: string, vote: boolean | null) => {
+  voteOnWord: async (
+    path: string,
+    wordID: string,
+    voteId: string,
+    vote: boolean | null,
+    ship: string
+  ) => {
     if (vote === null) {
-      const voteID = '';
-      return await api.remove(voteID, path, 'votes');
+      return await api.remove(voteId, path, 'vote');
     } else {
       // Example vote
       const data = {
-        up: true,
-        ship: '~zod',
+        up: vote,
+        ship,
         'parent-type': 'lexicon-word',
         'parent-id': wordID,
         'parent-path': path,
       };
+
       // add conditionals for editing instead of creating
       return await api.create(path, 'vote', 0, data, []);
     }
