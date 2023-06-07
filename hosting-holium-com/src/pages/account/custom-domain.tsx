@@ -13,7 +13,7 @@ import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
 const CustomDomainPresenter = () => {
   const { goToPage, logout } = useNavigation();
-  const { token, ships, selectedPatp, setSelectedPatp } = useUser();
+  const { token, ships, selectedIdentity, setSelectedIdentity } = useUser();
 
   const submitting = useToggle(false);
   const [domain, setDomain] = useState('');
@@ -21,8 +21,8 @@ const CustomDomainPresenter = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
 
   const ship = useMemo(
-    () => ships.find((ship) => ship.patp === selectedPatp),
-    [ships, selectedPatp]
+    () => ships.find((ship) => ship.patp === selectedIdentity),
+    [ships, selectedIdentity]
   );
 
   const onSubmit = async () => {
@@ -63,7 +63,7 @@ const CustomDomainPresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  const onClickBuyServer = () => {
+  const onClickBuyIdentity = () => {
     goToPage(accountPageUrl['Get Hosting'], {
       back_url: accountPageUrl['Custom Domain'],
     });
@@ -72,17 +72,17 @@ const CustomDomainPresenter = () => {
   return (
     <Page title="Account / Download Realm" isProtected>
       <AccountCustomDomainDialog
-        patps={ships.map((ship) => ship.patp)}
-        selectedPatp={selectedPatp}
+        identities={ships.map((ship) => ship.patp)}
+        selectedIdentity={selectedIdentity}
         domain={domain}
         dropletIp={ship?.droplet_ip}
         errorMessage={errorMessage}
         successMessage={successMessage}
         submitting={submitting.isOn}
-        setSelectedPatp={setSelectedPatp}
+        setSelectedIdentity={setSelectedIdentity}
         onChangeDomain={setDomain}
         onSubmit={onSubmit}
-        onClickBuyServer={onClickBuyServer}
+        onClickBuyIdentity={onClickBuyIdentity}
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />

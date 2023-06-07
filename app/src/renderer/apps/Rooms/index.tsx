@@ -6,12 +6,12 @@ import { Flex } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useAppState } from 'renderer/stores/app.store';
 import { MainIPC } from 'renderer/stores/ipc';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 import { Rooms } from './List';
 import { NewRoom } from './NewRoom';
 import { Room } from './Room';
 import { Settings } from './Settings';
+import { useRoomsStore } from './store/RoomsStoreContext';
 
 const RoomViews: { [key: string]: any } = {
   list: () => <Rooms />,
@@ -22,7 +22,7 @@ const RoomViews: { [key: string]: any } = {
 
 export const RoomAppPresenter = () => {
   const { shellStore } = useAppState();
-  const { roomsStore } = useShipStore();
+  const roomsStore = useRoomsStore();
   const { roomsApp, dimensions } = useTrayApps();
 
   useEffect(() => {
@@ -35,10 +35,10 @@ export const RoomAppPresenter = () => {
   }, []);
 
   useEffect(() => {
-    if (roomsStore.current) {
+    if (roomsStore.currentRid) {
       roomsApp.setView('room');
     }
-  }, [roomsApp, roomsStore.current]);
+  }, [roomsApp, roomsStore.currentRid]);
   const View = RoomViews[roomsApp.currentView];
   return (
     <Flex

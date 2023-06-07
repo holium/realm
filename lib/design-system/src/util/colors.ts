@@ -45,15 +45,7 @@ export const colorStyle = css<ColorProps>`
     `}
 `;
 
-/**
- *  bgIsLightOrDark
- *
- *  Given a hex color will determine light or dark
- *
- * @param {string} color - a hex value
- * @returns
- */
-export function bgIsLightOrDark(hexColor: string) {
+const hexColorToHSP = (hexColor: string) => {
   const color = +(
     '0x' + hexColor.slice(1).replace(hexColor.length < 5 ? /./g : '', '$&$&')
   );
@@ -64,9 +56,31 @@ export function bgIsLightOrDark(hexColor: string) {
 
   // HSP (Highly Sensitive Poo) equation from http://alienryderflex.com/hsp.html
   const hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b));
+  return hsp;
+};
 
+// altered contrast for making text more readable.
+export const textIsLightOrDark = (hexColor: string) => {
+  const hsp = hexColorToHSP(hexColor);
+  if (hsp > 140) {
+    return 'light';
+  } else {
+    return 'dark';
+  }
+};
+
+/**
+ *  bgIsLightOrDark
+ *
+ *  Given a hex color will determine light or dark
+ *
+ * @param {string} color - a hex value
+ * @returns
+ */
+export function bgIsLightOrDark(hexColor: string) {
   // Using the HSP value, determine whether the color is light or dark
-  // console.log(hsp);
+  // console.log(hexColor, hsp);
+  const hsp = hexColorToHSP(hexColor);
   if (hsp > 127.5) {
     // the background image is too light
     return 'light';
@@ -76,13 +90,13 @@ export function bgIsLightOrDark(hexColor: string) {
 }
 
 export function luminosity(hexColor: string) {
-  var c = hexColor.substring(1); // strip #
-  var rgb = parseInt(c, 16); // convert rrggbb to decimal
-  var r = (rgb >> 16) & 0xff; // extract red
-  var g = (rgb >> 8) & 0xff; // extract green
-  var b = (rgb >> 0) & 0xff; // extract blue
+  const c = hexColor.substring(1); // strip #
+  const rgb = parseInt(c, 16); // convert rrggbb to decimal
+  const r = (rgb >> 16) & 0xff; // extract red
+  const g = (rgb >> 8) & 0xff; // extract green
+  const b = (rgb >> 0) & 0xff; // extract blue
 
-  var luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
+  const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
   return luma;
 }
 /*
@@ -93,8 +107,8 @@ export function contrastAwareBlackOrWhiteRgb(
   targetColor: 'black' | 'white'
 ) {
   let color = targetColor === 'black' ? '#000000' : '#ffffff';
-  let rgb = rgbColor.split(', ');
-  var luma = 0.2126 * +rgb[0] + 0.7152 * +rgb[1] + 0.0722 * +rgb[2]; // per ITU-R BT.709
+  const rgb = rgbColor.split(', ');
+  const luma = 0.2126 * +rgb[0] + 0.7152 * +rgb[1] + 0.0722 * +rgb[2]; // per ITU-R BT.709
   if (luma < 40 && targetColor === 'black') {
     color = '#ffffff';
   }
@@ -127,7 +141,7 @@ export function flipColorIfLowContrast(
   themeMode: string | undefined
 ) {
   let color = hexColor;
-  let luma = luminosity(hexColor);
+  const luma = luminosity(hexColor);
   if (luma < 40 && themeMode === 'dark') {
     color = '#ffffff';
   }
@@ -182,7 +196,7 @@ export function hexToRgb(hex: string) {
 
 export const rgbToHex = (r: number, g: number, b: number) => {
   const componentToHex = (c: number) => {
-    var hex = c.toString(16);
+    const hex = c.toString(16);
     return hex.length === 1 ? '0' + hex : hex;
   };
 

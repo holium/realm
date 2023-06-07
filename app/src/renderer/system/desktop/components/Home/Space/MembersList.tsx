@@ -228,18 +228,22 @@ const MembersListPresenter = ({ our }: IMembersList) => {
         data={our ? friendListData : memberListData}
         itemContent={(_, rowData) => {
           switch (rowData.type) {
-            case 'title':
+            case 'title': {
               const title = rowData.data as string;
               return <TitleRow title={title} />;
-            case 'hint':
+            }
+            case 'hint': {
               const hint = rowData.data as string;
               return <HintRow hint={hint} />;
-            case 'member':
+            }
+            case 'member': {
               const member = rowData.data;
               return <MemberRow member={member} />;
-            case 'friend':
+            }
+            case 'friend': {
               const friend = rowData.data;
               return <FriendRow friend={friend} />;
+            }
             default:
               console.error('Invalid rowData', rowData);
               return null;

@@ -40,7 +40,7 @@ export const App = () => {
     clientID
   ) => {
     if (!editorView || !authority) return;
-    const parsedSteps = serializedSteps.map((s: Object) =>
+    const parsedSteps = serializedSteps.map((s: object) =>
       Step.fromJSON(schema, s)
     );
     authority.receiveSteps(version, parsedSteps, clientID);

@@ -22,6 +22,7 @@ const radius = {
   xxl: 20,
 };
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface TileStyleProps {}
 const TileStyle = styled(Box)<TileStyleProps>`
   position: relative;

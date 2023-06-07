@@ -8,6 +8,7 @@ import { getAppTileFlags } from 'renderer/lib/app';
 import { useAppState } from 'renderer/stores/app.store';
 import {
   AppMobxType,
+  AppTypes,
   InstallStatus,
 } from 'renderer/stores/models/bazaar.model';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
@@ -46,7 +47,7 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
 
   const onInstallation = (evt: React.MouseEvent<HTMLButtonElement>) => {
     evt.stopPropagation();
-    return handleInstallation(appHost, app.id, installStatus);
+    return handleInstallation(appHost, app.title, app.id, installStatus);
   };
 
   const canSuspend =
@@ -68,6 +69,7 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
         },
         {
           label: weRecommended ? 'Unrecommend app' : 'Recommend app',
+          disabled: app.type !== AppTypes.Urbit,
           onClick: (evt: any) => {
             evt.stopPropagation();
             weRecommended
@@ -111,6 +113,7 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
             if (!appHost) throw new Error('App host is undefined');
             return handleInstallation(
               appHost,
+              app.title,
               app.id,
               app.installStatus as InstallStatus
             );

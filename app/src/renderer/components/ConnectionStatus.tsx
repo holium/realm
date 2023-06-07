@@ -63,6 +63,7 @@ export const ConnectionStatus = observer(() => {
   const [isReconnecting, setIsReconnecting] = useState(false);
   // const status = connectionStatus;
   const online = true;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [status, _setStatus] = useState<
     | 'online'
     | 'offline'

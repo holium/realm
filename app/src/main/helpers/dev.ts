@@ -18,6 +18,7 @@ const registerListeners = (mainWindow: BrowserWindow) => {
     const isFullScreen = mainWindow.isFullScreen();
     mainWindow.setKiosk(false);
     mainWindow.setFullScreen(isFullScreen);
+    mainWindow.setMenuBarVisibility(!isFullScreen);
   });
 };
 

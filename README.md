@@ -1,6 +1,6 @@
 # Holium Realm
 
-A desktop environment for Urbit.
+The GUI for a new network OS.
 
 ## Directory structure
 

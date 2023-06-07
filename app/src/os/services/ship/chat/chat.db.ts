@@ -128,6 +128,9 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         path: '/pins',
       });
 
+      const truncate = `DELETE FROM ${CHAT_TABLES.PATHS_FLAGS};`;
+      this.db.prepare(truncate).run();
+
       const insert = this.db.prepare(
         `REPLACE INTO ${CHAT_TABLES.PATHS_FLAGS} (
           path,
@@ -252,14 +255,15 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     if (dbChange.type === 'add-row') {
       const addRow = dbChange as AddRow;
       switch (addRow.table) {
-        case 'messages':
+        case 'messages': {
           // console.log('add-row to messages', addRow.row);
           const message = addRow.row as MessagesRow;
           this._insertMessages([message]);
           const msg = this.getChatMessage(message['msg-id']);
           this.sendUpdate({ type: 'message-received', payload: msg });
           break;
-        case 'paths':
+        }
+        case 'paths': {
           // console.log('add-row to paths', addRow.row);
           const path = addRow.row as PathsRow;
           this._insertPaths([path]);
@@ -267,18 +271,20 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
           this.sendUpdate({ type: 'path-added', payload: chat });
 
           break;
-        case 'peers':
+        }
+        case 'peers': {
           // console.log('add-row to peers', addRow.row);
           const peers = addRow.row as PeersRow;
           this._insertPeers([peers]);
           this.sendUpdate({ type: 'peer-added', payload: peers });
           break;
+        }
       }
     }
     if (dbChange.type === 'update') {
       const update = dbChange as UpdateRow;
       switch (update.table) {
-        case 'messages':
+        case 'messages': {
           const message = update as UpdateMessage;
           // console.log('update messages', message.message);
           const msgId = message.message[0]['msg-id'];
@@ -286,18 +292,21 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
           const msg = this.getChatMessage(msgId);
           this.sendUpdate({ type: 'message-edited', payload: msg });
           break;
-        case 'paths':
+        }
+        case 'paths': {
           // console.log('update paths', update.row);
           const path = update.row as PathsRow;
           this._insertPaths([path]);
           const chat = this.getChat(path.path);
           this.sendUpdate({ type: 'path-updated', payload: chat });
           break;
-        case 'peers':
+        }
+        case 'peers': {
           // console.log('update peers', update.row);
           const peers = update.row as PeersRow;
           this._insertPeers([peers]);
           break;
+        }
       }
     }
     if (
@@ -746,6 +755,28 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   //
   // Inserts
   //
+
+  setPinned(path: string, pinned: boolean) {
+    if (!this.db?.open) return;
+
+    const sql1 = this.db.prepare(
+      `UPDATE ${CHAT_TABLES.PATHS_FLAGS} SET pinned = ${
+        pinned ? 1 : 0
+      } WHERE path = ?;`
+    );
+    return sql1.run(path);
+  }
+
+  setMuted(path: string, muted: boolean) {
+    if (!this.db?.open) return;
+
+    const sql1 = this.db.prepare(
+      `UPDATE ${CHAT_TABLES.PATHS_FLAGS} SET muted = ${
+        muted ? 1 : 0
+      } WHERE path = ?;`
+    );
+    return sql1.run(path);
+  }
 
   private _insertMessages(messages: MessagesRow[]) {
     if (!this.db?.open) return;

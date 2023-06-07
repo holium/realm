@@ -32,6 +32,7 @@ const Screen = types.enumeration(['login', 'onboarding', 'os']);
 const AppStateModel = types
   .model('AppStateModel', {
     booted: types.boolean,
+    showTitleBar: types.boolean,
     seenSplash: types.boolean,
     currentScreen: Screen,
     onboardingStep: types.string,
@@ -69,6 +70,9 @@ const AppStateModel = types
     setLoggedIn(serverId: string) {
       self.authStore._setSession(serverId);
       self.shellStore.setIsBlurred(false);
+    },
+    setShowTitleBar(show: boolean) {
+      self.showTitleBar = show;
     },
     setLoggedOut(serverId?: string) {
       self.authStore._clearSession(serverId);
@@ -117,6 +121,7 @@ const lastTheme = localStorage.getItem('lastTheme');
 export const appState = AppStateModel.create({
   booted: false,
   seenSplash: false,
+  showTitleBar: false,
   currentScreen: 'login',
   onboardingStep: '/login',
   theme: lastTheme
@@ -137,6 +142,15 @@ export const appState = AppStateModel.create({
 });
 
 watchOnlineStatus(appState);
+
+window.electron.app.onSetTitlebarVisible((show: boolean) => {
+  appState.setShowTitleBar(show);
+});
+
+window.electron.app.onSetFullScreen((isFullScreen: boolean) => {
+  appState.shellStore.setFullscreen(isFullScreen);
+});
+
 // OSActions.onConnectionStatus((_event: any, status: any) => {
 //   coreStore.setConnectionStatus(status);
 // });
@@ -165,7 +179,7 @@ function registerOnUpdateListener() {
     return;
   }
 
-  MainIPC.onInitialDimensions((_e: any, dims: any) => {
+  MainIPC.onDimensionsChange((_e: any, dims: any) => {
     appState.shellStore.setDesktopDimensions(dims.width, dims.height);
   });
 
@@ -232,7 +246,7 @@ function registerOnUpdateListener() {
     if (update.type === 'account-updated') {
       appState.authStore._onUpdateAccount(update.payload);
     }
-    if (update.type === 'add-server') {
+    if (update.type === 'add-identity') {
       appState.setOnboardingStep('/hosting');
       appState.setCurrentScreen('onboarding');
     }
@@ -346,13 +360,13 @@ function registerOnUpdateListener() {
         shipStore.spacesStore._onJoinedBazaar(payload);
         break;
       case 'new-ally':
-        if (!payload.desks || payload.desks?.length === 0) {
+        if (payload.desks?.length === 0) {
           // if there are no published apps, we will never get the
           //  'treaties-loaded' event (see below); therefore scry just in
           //  case and set the loading state to loaded
-          shipStore.bazaarStore.alliesLoader.set('loaded');
-          // shipStore.bazaarStore.scryTreaties(payload.ship);
+          shipStore.bazaarStore.treatyLoader.set('loaded');
         }
+        shipStore.bazaarStore.alliesLoader.set('loaded');
         shipStore.bazaarStore._addAlly(payload.ship, payload);
         break;
       case 'ally-deleted':
@@ -360,6 +374,9 @@ function registerOnUpdateListener() {
         break;
       case 'treaties-loaded':
         shipStore.bazaarStore.scryTreaties(payload.ship);
+        break;
+      case 'reorder-grid-index':
+        shipStore.bazaarStore._onReorderGridIndex(payload);
         break;
     }
   });

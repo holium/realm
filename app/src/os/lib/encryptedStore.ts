@@ -77,6 +77,11 @@ export class EncryptedStore<T> {
 
   delete() {
     this.db.clear();
+    fs.unlinkSync(this.db.path);
+  }
+
+  static forceDelete(name: string, cwd: string) {
+    fs.unlinkSync(`${app.getPath('userData')}/${cwd}/${name}.json`);
   }
 
   static storeExists(name: string, cwd: string): boolean {

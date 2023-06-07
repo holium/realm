@@ -59,7 +59,7 @@ export const UnpinnedDockAppPresenter = ({
         onClick: () => app && shellStore.closeWindow(app.id),
       },
     ],
-    []
+    [isActive, isMinimized]
   );
 
   const contextMenuColors = useMemo(() => {

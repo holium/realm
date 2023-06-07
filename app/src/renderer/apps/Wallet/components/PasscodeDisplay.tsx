@@ -1,61 +1,46 @@
-import { FC } from 'react';
-import { transparentize } from 'polished';
-import styled from 'styled-components';
+import { Box, Flex } from '@holium/design-system/general';
 
-import { Box, BoxProps, Flex, FlexProps } from '@holium/design-system';
+const FilledNumber = () => (
+  <Flex
+    width={32}
+    height={35}
+    borderRadius={4}
+    alignItems="center"
+    justifyContent="center"
+    border="2px solid rgba(var(--rlm-accent-rgba))"
+  >
+    <Box
+      height="8px"
+      width="8px"
+      borderRadius="50%"
+      background="rgba(var(--rlm-accent-rgba))"
+    />
+  </Flex>
+);
 
-interface PasscodeDisplayProps {
+const EmptyNumber = () => (
+  <Flex
+    width={32}
+    height={35}
+    borderRadius={4}
+    border="2px solid rgba(var(--rlm-text-rgba), 0.1)"
+    background="rgba(var(--rlm-text-rgba), 0.02)"
+  />
+);
+
+type Props = {
   digits: number;
   filled: number;
-}
-
-const FilledFlex = styled(Flex)<FlexProps>`
-  border: 2px solid rgba(var(--rlm-accent-rgba));
-`;
-
-const FilledBox = styled(Box)<BoxProps>`
-  background-color: rgba(var(--rlm-accent-rgba));
-`;
-
-export const PasscodeDisplay: FC<PasscodeDisplayProps> = (
-  props: PasscodeDisplayProps
-) => {
-  const Filled = () => (
-    <FilledFlex
-      mx="6px"
-      height={35}
-      width={32}
-      borderRadius={4}
-      alignItems="center"
-      justifyContent="center"
-    >
-      <FilledBox height="8px" width="8px" borderRadius="50%"></FilledBox>
-    </FilledFlex>
-  );
-
-  const Empty = (props: any) => (
-    <Flex
-      mx="6px"
-      height={35}
-      width={32}
-      border={props.border}
-      borderRadius={4}
-      background={props.background}
-    ></Flex>
-  );
-
-  return (
-    <Flex width="100%" alignItems="center" justifyContent="center">
-      {[...Array(props.digits).keys()].map((index) => {
-        return index < props.filled ? (
-          <Filled key={index} />
-        ) : (
-          <Empty
-            key={index}
-            border={`2px solid ${transparentize(0.9, '#000000')}`}
-          />
-        );
-      })}
-    </Flex>
-  );
 };
+
+export const PasscodeDisplay = ({ digits, filled }: Props) => (
+  <Flex width="100%" alignItems="center" justifyContent="center" gap="11px">
+    {[...Array(digits).keys()].map((index) => {
+      if (index < filled) {
+        return <FilledNumber key={index} />;
+      }
+
+      return <EmptyNumber key={index} />;
+    })}
+  </Flex>
+);

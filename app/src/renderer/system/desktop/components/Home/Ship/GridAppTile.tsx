@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 
+import { UseToggleHook } from '@holium/design-system';
+
 import { AppTile, ContextMenuOption } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import {
@@ -25,6 +27,7 @@ type AppProps = {
   tileSize: AppTileSize;
   app: AppMobxType;
   currentSpace: SpaceModelType;
+  canClick: UseToggleHook;
 };
 
 export const GridAppTilePresenter = ({
@@ -32,6 +35,7 @@ export const GridAppTilePresenter = ({
   tileSize,
   app,
   currentSpace,
+  canClick,
 }: AppProps) => {
   const { shellStore } = useAppState();
   const { bazaarStore } = useShipStore();
@@ -72,7 +76,13 @@ export const GridAppTilePresenter = ({
         },
         {
           label: 'App info',
-          disabled: app.type === AppTypes.Web,
+          disabled:
+            app.type === AppTypes.Web ||
+            [
+              InstallStatus.installed,
+              InstallStatus.suspended,
+              InstallStatus.reviving,
+            ].includes(installStatus) === false,
           onClick: (evt: any) => {
             evt.stopPropagation();
             shellStore.openDialogWithStringProps('app-detail-dialog', {
@@ -96,7 +106,12 @@ export const GridAppTilePresenter = ({
           onClick: (evt: any) => {
             evt.stopPropagation();
             const appHost = (app as AppMobxType).host;
-            return handleInstallation(appHost, app.id, installStatus);
+            return handleInstallation(
+              appHost,
+              app.title,
+              app.id,
+              installStatus
+            );
           },
         },
       ].filter(Boolean) as ContextMenuOption[],
@@ -115,8 +130,10 @@ export const GridAppTilePresenter = ({
       app={app as AppMobxType}
       contextMenuOptions={contextMenuOptions}
       onAppClick={(selectedApp: AppMobxType) => {
-        shellStore.openWindow(toJS(selectedApp));
-        shellStore.closeHomePane();
+        if (canClick.isOn) {
+          shellStore.openWindow(toJS(selectedApp));
+          shellStore.closeHomePane();
+        }
       }}
     />
   );

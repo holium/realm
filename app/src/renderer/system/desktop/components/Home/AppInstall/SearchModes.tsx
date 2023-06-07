@@ -14,7 +14,7 @@ import {
 } from '@holium/design-system';
 
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
-import { appState } from 'renderer/stores/app.store';
+import { appState, useAppState } from 'renderer/stores/app.store';
 import {
   AppMobxType,
   DocketAppType,
@@ -35,19 +35,21 @@ const SearchModesPresenter = () => {
     if (searchMode === 'dev-app-search' && selectedShip) {
       if (!bazaarStore.hasAlly(selectedShip)) {
         if (!bazaarStore.alliesLoader.isLoading) {
-          bazaarStore
-            .addAlly(selectedShip)
-            .then(() => {
-              bazaarStore.scryTreaties(selectedShip);
-            })
-            .catch((e) => console.error(e));
+          // prevents UI crash
+          bazaarStore.addAlly(selectedShip).catch((e) => console.error(e));
         }
       } else {
-        bazaarStore.scryTreaties(selectedShip);
+        bazaarStore.scryTreaties(selectedShip).catch((e) => console.error(e));
         // bazaarStore.setLoadingState('published-apps-loaded');
       }
     }
   }, [searchMode, selectedShip]);
+
+  useEffect(() => {
+    if (selectedShip && bazaarStore.alliesLoader.isLoaded) {
+      bazaarStore.scryTreaties(selectedShip).catch((e) => console.error(e));
+    }
+  }, [bazaarStore.alliesLoader]);
 
   useEffect(() => {
     if (searchMode === 'app-search') {
@@ -309,31 +311,51 @@ const DevAppsPresenter = () => {
 
   const InstallButtonPresenter = ({ app }: any) => {
     const { bazaarStore } = useShipStore();
+    const { shellStore } = useAppState();
     const parts = app.id.split('/');
     let appEntry;
     let installed = false;
+    let suspended = false;
     if (bazaarStore.catalog.has(parts[1])) {
       appEntry = bazaarStore.catalog.get(parts[1]) as AppMobxType;
-      installed = appEntry.installStatus === 'installed';
+      installed = appEntry.installStatus === InstallStatus.installed;
+      suspended = appEntry.installStatus === InstallStatus.suspended;
     }
     return (
       <Button.Primary
         borderRadius={6}
         paddingTop="6px"
         paddingBottom="6px"
-        disabled={installed}
         fontWeight={500}
         onClick={(e) => {
           e.stopPropagation();
-          !installed && bazaarStore.installApp(parts[0], parts[1]);
-          // TODO should we close app search on install?
-          setSearchMode('none');
+          if (suspended) {
+            bazaarStore.reviveApp(parts[1]);
+          } else if (!installed) {
+            setSearchMode('none');
+            shellStore.openDialogWithStringProps('install-confirm-dialog', {
+              ship: parts[0],
+              title: app.title,
+              desk: parts[1],
+            });
+          } else {
+            setSearchMode('none');
+            shellStore.openDialogWithStringProps('uninstall-confirm-dialog', {
+              title: app.title,
+              desk: parts[1],
+            });
+          }
         }}
       >
-        {appEntry?.installStatus === 'started' ? (
+        {appEntry &&
+        [InstallStatus.started, InstallStatus.reviving].includes(
+          appEntry.installStatus as InstallStatus
+        ) ? (
           <Spinner size={0} color="white" />
         ) : installed ? (
-          'Installed'
+          'Uninstall'
+        ) : suspended ? (
+          'Revive'
         ) : (
           'Install'
         )}

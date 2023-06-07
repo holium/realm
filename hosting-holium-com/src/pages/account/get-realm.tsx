@@ -47,7 +47,7 @@ const GetRealmPresenter = () => {
         onClickGetHosting={goToGetHosting}
         onClickJoinWaitlist={joinWaitlist}
         onClickSidebarSection={onClickSidebarSection}
-        onClickBuyServer={() => {}}
+        onClickBuyIdentity={() => {}}
         onExit={logout}
       />
     </Page>

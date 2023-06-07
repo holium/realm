@@ -47,7 +47,7 @@ export const AppWindowModel = types
       height: 5,
     }),
     /**
-     * The ative window has a titlebar with full contrast.
+     * The active window has a titlebar with full contrast.
      */
     isActive: types.optional(types.boolean, false),
     /**
@@ -57,6 +57,10 @@ export const AppWindowModel = types
       types.enumeration(['normal', 'minimized', 'fullscreen']),
       'normal'
     ),
+    /**
+     *  The window is static and cannot be moved or resized.
+     */
+    static: types.optional(types.boolean, false),
   })
   .views((self) => ({
     get isMinimized() {
@@ -75,9 +79,6 @@ export const AppWindowModel = types
     },
     minimize() {
       self.state = 'minimized';
-    },
-    restoreOldDimensions() {
-      self.bounds = { ...self.prevBounds };
     },
     maximizeLeft(desktopDimensions: Dimensions) {
       const maximizedBounds = getMaximizedBounds(desktopDimensions);
@@ -102,10 +103,18 @@ export const AppWindowModel = types
     toggleMaximize(desktopDimensions: Dimensions) {
       const isMaximized = self.isMaximized(desktopDimensions);
       if (isMaximized) {
+        const bounds = { ...self.bounds };
         self.bounds = { ...self.prevBounds };
+        self.prevBounds = bounds;
       } else {
         self.prevBounds = { ...self.bounds };
-        self.bounds = getMaximizedBounds(desktopDimensions);
+        const maximizedBounds = getMaximizedBounds(desktopDimensions);
+        self.bounds = {
+          x: maximizedBounds.x,
+          y: maximizedBounds.y,
+          width: maximizedBounds.width,
+          height: maximizedBounds.height,
+        };
       }
     },
     setIsActive(isActive: boolean) {
@@ -113,5 +122,5 @@ export const AppWindowModel = types
     },
   }));
 
-export interface AppWindowMobxType extends Instance<typeof AppWindowModel> {}
-export interface AppWindowProps extends SnapshotIn<typeof AppWindowModel> {}
+export type AppWindowMobxType = Instance<typeof AppWindowModel>;
+export type AppWindowProps = SnapshotIn<typeof AppWindowModel>;

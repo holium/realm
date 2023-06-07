@@ -1,11 +1,20 @@
-import { useMemo } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { useEffect, useMemo } from 'react';
+import {
+  AnimatePresence,
+  AnimationControls,
+  motion,
+  useAnimationControls,
+} from 'framer-motion';
 import { darken } from 'polished';
 import { createGlobalStyle, css } from 'styled-components';
 
 import { genCSSVariables, ThemeType } from '@holium/shared';
 
+import { useAppState } from 'renderer/stores/app.store';
+
+import { denormalizeBounds, getMaximizedBounds } from './lib/window-manager';
 import { BackgroundImage } from './system/system.styles';
+import { TITLEBAR_HEIGHT } from './system/Titlebar';
 
 type Props = {
   realmTheme: ThemeType;
@@ -34,7 +43,6 @@ export const GlobalStyle = createGlobalStyle<Props>`
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
-      
     }
 
     /* Track */
@@ -87,13 +95,106 @@ export const GlobalStyle = createGlobalStyle<Props>`
     }
 `;
 
+type GhostPaneProps = {
+  controls: AnimationControls;
+};
+
+const GhostPane = ({ controls }: GhostPaneProps) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      exit={{ opacity: 0 }}
+      animate={controls}
+      style={{
+        borderRadius: 8,
+        zIndex: 0,
+        backgroundColor: 'rgba(var(--rlm-dock-rgba))',
+        position: 'absolute',
+      }}
+      transition={{
+        opacity: { duration: 0.2 },
+      }}
+    />
+  );
+};
+
 export const RealmBackground = ({
   blurred,
   wallpaper,
+  snapView,
 }: {
   blurred: boolean;
   wallpaper: string;
+  snapView: string;
 }) => {
+  const { shellStore, showTitleBar } = useAppState();
+  const controls = useAnimationControls();
+
+  useEffect(() => {
+    const desktopDimensions = shellStore.desktopDimensions;
+
+    let mb = getMaximizedBounds(desktopDimensions);
+    let dmb = denormalizeBounds(mb, desktopDimensions);
+
+    if (showTitleBar) {
+      dmb = {
+        ...dmb,
+        y: dmb.y + TITLEBAR_HEIGHT,
+      };
+      mb = {
+        ...mb,
+        y: mb.y + TITLEBAR_HEIGHT,
+      };
+    }
+
+    switch (snapView) {
+      case 'none':
+        controls.start({ opacity: 0, zIndex: 0 });
+        break;
+      case 'left':
+        // 1. get the ghost pane into the correct position
+        // 2. show it.
+        controls.start({
+          x: dmb.x + 8,
+          y: dmb.y,
+          width: dmb.width / 2,
+          height: dmb.height,
+          zIndex: shellStore.windows.size,
+          transition: {
+            duration: 0,
+          },
+        });
+        controls.start({ opacity: 1 });
+        break;
+      case 'right':
+        controls.start({
+          x: dmb.x + 8 + dmb.width / 2,
+          y: dmb.y,
+          width: dmb.width / 2,
+          height: dmb.height,
+          zIndex: shellStore.windows.size,
+          transition: {
+            duration: 0,
+          },
+        });
+        controls.start({ opacity: 1 });
+        break;
+      case 'fullscreen':
+        controls.start({
+          x: dmb.x + 8,
+          y: dmb.y,
+          width: dmb.width,
+          height: dmb.height,
+          zIndex: shellStore.windows.size,
+          transition: {
+            duration: 0,
+          },
+        });
+        controls.start({ opacity: 1 });
+        break;
+    }
+  }, [snapView]);
+
   return useMemo(
     () => (
       <AnimatePresence>
@@ -104,13 +205,13 @@ export const RealmBackground = ({
           exit={{ opacity: 0 }}
           animate={{
             opacity: 1,
-            filter: blurred ? `blur(24px)` : 'blur(0px)',
+            filter: blurred ? `var(--blur)` : 'blur(0px)',
           }}
           transition={{
             opacity: { duration: 0.5 },
           }}
         />
-        <div id="ghostpane" />
+        <GhostPane controls={controls} />
       </AnimatePresence>
     ),
     [blurred, wallpaper]

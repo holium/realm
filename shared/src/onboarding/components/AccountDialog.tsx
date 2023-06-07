@@ -25,8 +25,7 @@ import {
 
 export enum SidebarSection {
   Hosting = 'Hosting',
-  S3Storage = 'S3 Storage',
-  Statistics = 'Statistics',
+  Storage = 'Storage',
   CustomDomain = 'Custom Domain',
   DownloadRealm = 'Download Realm',
   GetHosting = 'Get Hosting',
@@ -34,33 +33,33 @@ export enum SidebarSection {
 }
 
 type Props = {
-  patps: string[];
-  selectedPatp: string;
+  identities: string[];
+  selectedIdentity: string;
   currentSection?: SidebarSection;
   children?: ReactNode;
   customBody?: ReactNode;
   isLoading?: boolean;
-  onClickBuyServer: () => void;
-  setSelectedPatp: (patp: string) => void;
+  onClickBuyIdentity: () => void;
+  setSelectedIdentity: (patp: string) => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onSubmit?: () => void;
   onExit: () => void;
 };
 
 export const AccountDialog = ({
-  patps,
-  selectedPatp,
+  identities,
+  selectedIdentity,
   currentSection,
   children,
   customBody,
   isLoading,
-  onClickBuyServer,
-  setSelectedPatp,
+  onClickBuyIdentity,
+  setSelectedIdentity,
   onClickSidebarSection,
   onSubmit,
   onExit,
 }: Props) => {
-  const hasShips = patps ? patps.length > 0 : false;
+  const hasShips = identities ? identities.length > 0 : false;
   const hasCSEK = useToggle(false);
 
   let sidebarItems: SidebarSection[] = [];
@@ -68,8 +67,7 @@ export const AccountDialog = ({
   if (hasShips) {
     sidebarItems = [
       SidebarSection.Hosting,
-      SidebarSection.S3Storage,
-      // SidebarSection.Statistics,
+      SidebarSection.Storage,
       SidebarSection.CustomDomain,
       SidebarSection.DownloadRealm,
     ];
@@ -100,7 +98,7 @@ export const AccountDialog = ({
           {isLoading && (
             <Flex flexDirection="column" gap="2px">
               <AccountDialogSidebarMenuItemText isOpen={false}>
-                Server ID
+                ID
               </AccountDialogSidebarMenuItemText>
               <Skeleton height={32} />
             </Flex>
@@ -108,11 +106,11 @@ export const AccountDialog = ({
           {hasShips && !isLoading && (
             <Flex flexDirection="column" gap="2px">
               <AccountDialogSidebarMenuItemText isOpen={false}>
-                Server ID
+                ID
               </AccountDialogSidebarMenuItemText>
               <Select
                 id="ship-selector"
-                options={patps.map((patp) => ({
+                options={identities.map((patp) => ({
                   value: patp,
                   label: patp,
                 }))}
@@ -123,16 +121,19 @@ export const AccountDialog = ({
                     pt="8px"
                     borderTop="1px solid rgba(var(--rlm-border-rgba))"
                   >
-                    <Button.Transparent width="100%" onClick={onClickBuyServer}>
+                    <Button.Transparent
+                      width="100%"
+                      onClick={onClickBuyIdentity}
+                    >
                       <Flex alignItems="center" gap="8px">
                         <Icon name="AddCircleLine" size={16} />
-                        <Text.Body>Purchase new ID</Text.Body>
+                        <Text.Body>Get another ID</Text.Body>
                       </Flex>
                     </Button.Transparent>
                   </Flex>
                 }
-                selected={selectedPatp}
-                onClick={(newPatp) => setSelectedPatp(newPatp)}
+                selected={selectedIdentity}
+                onClick={(newPatp) => setSelectedIdentity(newPatp)}
               />
             </Flex>
           )}
@@ -148,7 +149,7 @@ export const AccountDialog = ({
             </AccountDialogSidebarMenuItemText>
           ))}
         </AccountDialogSidebarMenu>
-        <Button.Transparent onClick={onExit}>
+        <Button.Transparent style={{ padding: 0 }} onClick={onExit}>
           <Icon fill="text" opacity={0.5} name="RoomLeave" size={20} />
         </Button.Transparent>
       </AccountDialogSidebar>
@@ -189,13 +190,13 @@ export const AccountDialogSkeleton = ({
 
   return (
     <AccountDialog
-      patps={[]}
-      selectedPatp=""
+      identities={[]}
+      selectedIdentity=""
       currentSection={currentSection}
       isLoading
       customBody={isBlankBody ? <Flex flex={5} /> : undefined}
-      setSelectedPatp={() => {}}
-      onClickBuyServer={() => {}}
+      setSelectedIdentity={() => {}}
+      onClickBuyIdentity={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />

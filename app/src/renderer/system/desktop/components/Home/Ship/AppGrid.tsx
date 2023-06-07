@@ -1,17 +1,28 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  GridContextProvider,
+  GridDropZone,
+  GridItem,
+  swap,
+} from 'react-grid-dnd';
+import disableScroll from 'disable-scroll';
 import { observer } from 'mobx-react';
 
-import { Box } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system';
 
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { PinnedWebApp } from '../../SystemBar/components/CommunityBar/AppDock/PinnedWebApp';
 import { GridAppTile } from './GridAppTile';
 
-const AppGridPresenter = () => {
+interface AppGridProps {
+  maxWidth: number;
+}
+
+const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
   const { bazaarStore, spacesStore } = useShipStore();
   const currentSpace = spacesStore.selected;
+
   const apps = useMemo(
     () =>
       [
@@ -20,37 +31,73 @@ const AppGridPresenter = () => {
       ] as AppMobxType[],
     [bazaarStore.catalog, bazaarStore.installations.values()]
   );
+  const [items, setItems] = useState(apps);
 
-  const bookmarks = useMemo(
-    () => currentSpace?.bookmarks ?? [],
-    [currentSpace?.bookmarks]
-  );
+  useEffect(() => {
+    setItems(apps);
+  }, [bazaarStore.installed]);
+
+  const canClick = useToggle(true);
+
+  useEffect(() => {
+    window.electron.app.onMouseMove((_position, _state, isDragging) => {
+      canClick.setToggle(!isDragging);
+      if (!isDragging) disableScroll.off();
+    });
+  }, []);
 
   if (!currentSpace) return null;
 
+  const onChange = (
+    _sourceId: any,
+    sourceIndex: number,
+    targetIndex: number
+  ) => {
+    if (sourceIndex === targetIndex) return;
+    const nextState = swap(apps, sourceIndex, targetIndex);
+    setItems(nextState);
+    const newGrid = Object();
+
+    // eslint-disable-next-line array-callback-return
+    nextState.map((app, index: number) => {
+      newGrid[index] = app.id;
+    });
+    bazaarStore.reorderApp(sourceIndex, targetIndex, newGrid);
+  };
+
   return (
-    <>
-      {apps.map((app, index: number) => {
-        const tileId = `${app.title}-${index}-ship-grid-tile`;
-        return (
-          <Box id={tileId} key={tileId}>
-            <GridAppTile
-              tileId={tileId}
-              tileSize="xl2"
-              app={app}
-              currentSpace={currentSpace}
-            />
-          </Box>
-        );
-      })}
-      {bookmarks.map((bookmark, index) => (
-        <PinnedWebApp
-          key={`appgrid-${index}-pinned-${bookmark.url}`}
-          {...bookmark}
-          isGrid
-        />
-      ))}
-    </>
+    <GridContextProvider onChange={onChange}>
+      <GridDropZone
+        id="items"
+        boxesPerRow={4}
+        rowHeight={maxWidth / 4}
+        style={{
+          height: (maxWidth / 4) * Math.ceil(apps.length / 4),
+          width: maxWidth,
+        }}
+      >
+        {items.map((app, index: number) => {
+          const tileId = `${app.id}-${index}-ship-grid-tile`;
+          return (
+            <GridItem
+              id={tileId}
+              key={tileId}
+              onMouseDownCapture={() => {
+                disableScroll.on();
+              }}
+            >
+              <GridAppTile
+                tileId={tileId}
+                tileSize="xl2"
+                app={app}
+                currentSpace={currentSpace}
+                canClick={canClick}
+              />
+            </GridItem>
+          );
+        })}
+      </GridDropZone>
+    </GridContextProvider>
   );
 };
 

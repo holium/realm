@@ -32,11 +32,13 @@ export const searchPatpOrNickname = (
     (el: [string, ContactMetadata]) => {
       const patp = el[0].toLocaleLowerCase();
       if (patp === our) {
+        // eslint-disable-next-line array-callback-return
         return;
       }
       const nickname = el[1].nickname?.toLocaleLowerCase();
       const searchTerm = search.toLocaleLowerCase();
       if (Array.from(selected.values()).includes(patp)) {
+        // eslint-disable-next-line array-callback-return
         return;
       }
 

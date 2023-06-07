@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { onAction } from 'mobx-state-tree';
 
 import { Dimensions, useToggle } from '@holium/design-system';
 import {
@@ -12,18 +11,18 @@ import {
   PresenceBroadcast,
 } from '@holium/realm-presence';
 
+import {
+  DataPacket,
+  DataPacketKind,
+} from 'renderer/apps/Rooms/store/room.types';
+import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { normalizePosition } from 'renderer/lib/window-manager';
-import { DataPacket, DataPacketKind } from 'renderer/stores/rooms/rooms.types';
-import { ShipStoreInstance } from 'renderer/stores/ship.store';
-
-import { RoomsMobxType } from './../../stores/rooms.store';
 
 type Props = {
   patp: string | undefined;
   shipColor: string;
   desktopDimensions: Dimensions;
   isMultiplayerEnabled: boolean;
-  shipStore: ShipStoreInstance;
 };
 
 export const useMultiplayer = ({
@@ -31,17 +30,16 @@ export const useMultiplayer = ({
   shipColor,
   desktopDimensions,
   isMultiplayerEnabled,
-  shipStore,
 }: Props) => {
   const chat = useRef('');
   const ephemeralChat = useToggle(false);
-  const roomsStore = shipStore.roomsStore as RoomsMobxType;
+  const roomsStore = useRoomsStore();
 
   const timeout = useRef<NodeJS.Timeout | null>(null);
 
   const isInRoom = useMemo(
-    () => Boolean(roomsStore.current),
-    [roomsStore.current]
+    () => Boolean(roomsStore.currentRoom),
+    [roomsStore.currentRoom]
   );
 
   const broadcastChat = useCallback((patp: string, message: string) => {
@@ -50,7 +48,7 @@ export const useMultiplayer = ({
       message,
       event: 'chat',
     };
-    roomsStore.sendData({
+    roomsStore.sendDataToRoom({
       kind: DataPacketKind.DATA,
       value: { multiplayer: multiplayerChat },
     });
@@ -95,7 +93,7 @@ export const useMultiplayer = ({
           window.electron.app.realmToAppEphemeralChat(patp, newChat);
           broadcastChat(patp, newChat);
         } else {
-          let newKey = key;
+          const newKey = key;
           // If the key is not a regular character, ignore it.
           if (newKey.length > 1) return;
 
@@ -140,7 +138,7 @@ export const useMultiplayer = ({
         patp,
         event: 'mouse-out',
       };
-      roomsStore.sendData({
+      roomsStore.sendDataToRoom({
         kind: DataPacketKind.DATA,
         value: { multiplayer: multiplayerOut },
       });
@@ -156,7 +154,7 @@ export const useMultiplayer = ({
         patp,
         event: 'mouse-out',
       };
-      roomsStore.sendData({
+      roomsStore.sendDataToRoom({
         kind: DataPacketKind.DATA,
         value: { multiplayer: multiplayerOut },
       });
@@ -168,7 +166,7 @@ export const useMultiplayer = ({
         patp,
         event: 'mouse-down',
       };
-      roomsStore.sendData({
+      roomsStore.sendDataToRoom({
         kind: DataPacketKind.DATA,
         value: {
           multiplayer: multiplayerDown,
@@ -182,7 +180,7 @@ export const useMultiplayer = ({
         patp,
         event: 'mouse-up',
       };
-      roomsStore.sendData({
+      roomsStore.sendDataToRoom({
         kind: DataPacketKind.DATA,
         value: { multiplayer: multiplayerUp },
       });
@@ -197,7 +195,7 @@ export const useMultiplayer = ({
         state,
         hexColor: shipColor,
       };
-      roomsStore.sendData({
+      roomsStore.sendDataToRoom({
         kind: DataPacketKind.DATA,
         value: { multiplayer: multiplayerMove },
       });
@@ -210,7 +208,7 @@ export const useMultiplayer = ({
         elementId,
         event: 'mouse-click',
       };
-      roomsStore.sendData({
+      roomsStore.sendDataToRoom({
         kind: DataPacketKind.DATA,
         value: { multiplayer: multiplayerClick },
       });
@@ -222,7 +220,7 @@ export const useMultiplayer = ({
         event: 'broadcast',
         data: [...data],
       };
-      roomsStore.sendData({
+      roomsStore.sendDataToRoom({
         kind: DataPacketKind.DATA,
         value: { broadcast },
       });
@@ -233,7 +231,7 @@ export const useMultiplayer = ({
         patp,
         event: 'mouse-out',
       };
-      roomsStore.sendData({
+      roomsStore.sendDataToRoom({
         kind: DataPacketKind.DATA,
         value: { multiplayer: multiplayerOut },
       });
@@ -270,30 +268,9 @@ export const useMultiplayer = ({
       }
     };
 
-    onAction(shipStore, (call) => {
-      if (call.path === '/roomsStore') {
-        if (call.name === 'deleteRoom') {
-          // we deleted our created room, so we should remove all cursors
-          onLeftRoom('', window.ship);
-        }
-        if (call.name === 'leaveRoom') {
-          // we left the room, so we should remove all cursors
-          onLeftRoom('', window.ship);
-        }
-        if (call.name === '_onRoomLeft') {
-          // called when we or someone else leaves the room
-          if (call.args) {
-            const rid = call.args[0];
-            const patp = call.args[1];
-            onLeftRoom(rid, patp);
-          }
-        }
-        if (call.name === '_onDataChannel') {
-          if (call.args) {
-            onDataChannel('', '', call.args[0]);
-          }
-        }
-      }
+    roomsStore.registerListeners({
+      onLeftRoom: onLeftRoom,
+      onDataChannel: onDataChannel,
     });
 
     return () => {

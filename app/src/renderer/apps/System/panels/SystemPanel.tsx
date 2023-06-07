@@ -4,13 +4,14 @@ import { observer } from 'mobx-react';
 import { Button, CheckBox, Flex, Text } from '@holium/design-system';
 
 import { MediaAccess, MediaAccessStatus } from 'os/types';
-import { useAppState } from 'renderer/stores/app.store';
 import { MainIPC } from 'renderer/stores/ipc';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { SettingControl } from '../components/SettingControl';
 import { SettingPane } from '../components/SettingPane';
 import { SettingSection } from '../components/SettingSection';
 import { SettingTitle } from '../components/SettingTitle';
+import { SystemMouseSection } from './sections/SystemMouseSection/SystemMouseSection';
 // import { useShipStore } from 'renderer/stores/ship.store';
 
 const colorMap: Record<MediaAccessStatus, string> = {
@@ -30,7 +31,7 @@ const colorMap: Record<MediaAccessStatus, string> = {
 // `;
 
 const SystemPanelPresenter = () => {
-  const { shellStore } = useAppState();
+  const { settingsStore } = useShipStore();
   // const { bazaarStore, friends, spacesStore, bulletinStore } = useShipStore();
 
   const [mediaStatus, setMediaStatus] = useState<MediaAccess>({
@@ -88,11 +89,19 @@ const SystemPanelPresenter = () => {
           <SettingControl label="Isolation Mode">
             <CheckBox
               label="Prevents the native OS from causing edge events and notifications."
-              isChecked={shellStore.isIsolationMode}
-              onChange={shellStore.toggleIsolationMode}
+              isChecked={settingsStore.isolationModeEnabled}
+              onChange={settingsStore.toggleIsolationMode}
             />
           </SettingControl>
         }
+      />
+      <SystemMouseSection
+        realmCursorEnabled={settingsStore.realmCursorEnabled}
+        setRealmCursor={settingsStore.setRealmCursor}
+        profileColorForCursorEnabled={
+          settingsStore.profileColorForCursorEnabled
+        }
+        setProfileColorForCursor={settingsStore.setProfileColorForCursor}
       />
       <SettingSection
         title="Permissions"

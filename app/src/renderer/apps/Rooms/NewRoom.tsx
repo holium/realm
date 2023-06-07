@@ -4,9 +4,12 @@ import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, Text, TextInput } from '@holium/design-system';
 
+import { SoundActions } from 'renderer/lib/sound';
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
+import { useRoomsStore } from './store/RoomsStoreContext';
 
 export const createRoomForm = (
   currentRooms: string[],
@@ -57,7 +60,9 @@ export const createRoomForm = (
 };
 
 const NewRoomPresenter = () => {
-  const { spacesStore, roomsStore } = useShipStore();
+  const roomsStore = useRoomsStore();
+  const { loggedInAccount } = useAppState();
+  const { spacesStore } = useShipStore();
   const { roomsApp } = useTrayApps();
 
   const { form, name } = useMemo(
@@ -65,8 +70,16 @@ const NewRoomPresenter = () => {
     []
   );
 
-  const createRoom = (evt: any) => {
-    // setLoading(true);
+  const createRoom = async (evt: any) => {
+    // setLoading(true)
+    if (roomsStore.currentRoom) {
+      if (roomsStore.currentRoom.creator === loggedInAccount?.serverId) {
+        roomsStore.deleteRoom(roomsStore.currentRoom.rid);
+      } else {
+        roomsStore.leaveRoom(roomsStore.currentRoom.rid);
+      }
+    }
+    SoundActions.playRoomEnter();
     const { name, isPrivate } = form.actions.submit();
     evt.stopPropagation();
     const spacePath =

@@ -19,6 +19,12 @@ const devtoolsConfig = {
   devtool: 'source-map',
 };
 
+// the goal here is to load any environment variables from .env (if it exists). Note
+//  that dotenv will not overwrite vars that already exist. if you need to do that,
+//  try this: require('dotenv').config({ override: true })
+// .env for Windows only for now
+require('dotenv').config();
+
 const configuration: webpack.Configuration = {
   ...devtoolsConfig,
   mode: 'production',

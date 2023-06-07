@@ -1,5 +1,5 @@
 import { app } from 'electron';
-const fs = require('fs');
+import fs from 'fs';
 
 // determine the releaseChannel. if a user downloads an alpha version of the app, we
 //  need to record this for later use. the reason is that 'alpha' channel updates
@@ -13,7 +13,7 @@ export function getReleaseChannelFromSettings() {
   let releaseChannel = process.env.RELEASE_CHANNEL || 'latest';
   const settingsFilename = `${app.getPath('userData')}/settings.json`;
   if (fs.existsSync(settingsFilename)) {
-    var settings = JSON.parse(fs.readFileSync(settingsFilename, 'utf8'));
+    const settings = JSON.parse(fs.readFileSync(settingsFilename, 'utf8'));
     releaseChannel = settings.releaseChannel || releaseChannel;
   }
   return releaseChannel;

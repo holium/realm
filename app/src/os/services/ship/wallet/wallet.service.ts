@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import Database from 'better-sqlite3-multiple-ciphers';
+import CoinGecko from 'coingecko-api';
 import { ethers } from 'ethers';
 
 import AbstractService, { ServiceOptions } from '../../abstract.service';
@@ -15,6 +16,8 @@ import { ProtocolType, UISettingsType } from './wallet.types';
 export class WalletService extends AbstractService {
   public walletDB?: WalletDB;
   private protocolManager?: ProtocolManager;
+  private coingecko?: CoinGecko;
+
   constructor(options?: ServiceOptions, db?: Database) {
     super('walletService', options);
     if (options?.preload) {
@@ -30,6 +33,7 @@ export class WalletService extends AbstractService {
       protocolMap,
       ProtocolType.ETH_GORLI
     );
+    this.coingecko = new CoinGecko();
   }
 
   public reset(): void {
@@ -152,41 +156,57 @@ export class WalletService extends AbstractService {
     await APIConnection.getInstance().conduit.poke(payload);
   }
 
-  async sendTransaction(
-    currentProtocol: ProtocolType,
-    path: string,
-    ourPatp: string,
-    passcode: string,
-    from: string,
-    to: string,
-    amount: string
-  ) {
+  async sendTransaction({
+    currentProtocol,
+    path,
+    ourPatp,
+    passcode,
+    from,
+    to,
+    amount,
+  }: {
+    currentProtocol: ProtocolType;
+    path: string;
+    ourPatp: string;
+    passcode: string;
+    from: string;
+    to: string;
+    amount: string;
+  }) {
     const protocol = this.protocolManager?.protocols.get(
       currentProtocol
     ) as EthereumProtocol;
-    const tx = {
+
+    const gasLimit = await protocol.getFeeEstimate({
+      to,
+      from,
+      value: ethers.utils.parseEther(amount),
+    });
+    const gasPrice = await protocol.getFeePrice();
+    const nonce = await protocol.getNonce(from);
+    const chainId = await protocol.getChainId();
+
+    const transaction = {
       from,
       to,
       value: ethers.utils.parseEther(amount),
-      gasLimit: await protocol.getFeeEstimate({
-        to,
-        from,
-        value: ethers.utils.parseEther(amount),
-      }),
-      gasPrice: await protocol.getFeePrice(),
-      nonce: await protocol.getNonce(from),
-      chainId: await protocol.getChainId(),
+      gasLimit,
+      gasPrice,
+      nonce,
+      chainId,
     };
-    const signedTx = await RealmSigner.signTransaction(
+    const signedTx = await RealmSigner.signTransaction({
       path,
-      tx,
-      ourPatp,
-      passcode
-    );
+      transaction,
+      patp: ourPatp,
+      passcode,
+    });
+
     const hash = await (
       this.protocolManager?.protocols.get(currentProtocol) as BaseBlockProtocol
     ).sendTransaction(signedTx);
-    return { hash, tx };
+
+    return { hash, tx: transaction };
   }
 
   async sendERC20Transaction(
@@ -212,12 +232,12 @@ export class WalletService extends AbstractService {
     tx.gasPrice = await protocol.getFeePrice();
     tx.nonce = await protocol.getNonce(from);
     tx.chainId = await protocol.getChainId();
-    const signedTx = await RealmSigner.signTransaction(
+    const signedTx = await RealmSigner.signTransaction({
       path,
-      tx,
-      ourPatp,
-      passcode
-    );
+      transaction: tx,
+      patp: ourPatp,
+      passcode,
+    });
     const hash = await (
       this.protocolManager?.protocols.get(currentProtocol) as BaseBlockProtocol
     ).sendTransaction(signedTx);
@@ -244,8 +264,13 @@ export class WalletService extends AbstractService {
     RealmSigner.deleteMnemonic(ourPatp, passcode);
   }
 
-  async deleteShipMnemonic(ourPatp: string, passcode: string) {
-    RealmSigner.deleteMnemonic(ourPatp, passcode);
+  async deleteShipMnemonic(ourPatp: string, passcode?: string) {
+    if (passcode) {
+      RealmSigner.deleteMnemonic(ourPatp, passcode);
+    } else {
+      RealmSigner.forceDeleteMnemonic(ourPatp);
+    }
+
     await APIConnection.getInstance().conduit.poke({
       app: 'realm-wallet',
       mark: 'realm-wallet-action',
@@ -257,16 +282,17 @@ export class WalletService extends AbstractService {
 
   async getAddress(patp: string, network: string) {
     try {
-      const address: any = await APIConnection.getInstance().conduit.poke({
-        app: 'realm-wallet',
-        mark: 'realm-wallet-action',
-        json: {
-          'get-address': {
-            network: network,
-            patp,
+      const address: string | null =
+        await APIConnection.getInstance().conduit.poke({
+          app: 'realm-wallet',
+          mark: 'realm-wallet-action',
+          json: {
+            'get-address': {
+              network: network,
+              patp,
+            },
           },
-        },
-      });
+        });
       return address;
     } catch (e) {
       console.error(e);
@@ -301,20 +327,12 @@ export class WalletService extends AbstractService {
 
   watchUpdates(protocol: ProtocolType) {
     if (!this.walletDB) throw new Error('Wallet DB not initialized');
-    this.protocolManager?.watchUpdates(
-      APIConnection.getInstance().conduit,
-      this.walletDB,
-      protocol
-    );
+    this.protocolManager?.watchUpdates(this.walletDB, protocol);
   }
 
   updateWalletState(protocol: ProtocolType) {
     if (!this.walletDB) throw new Error('Wallet DB not initialized');
-    this.protocolManager?.updateWalletState(
-      APIConnection.getInstance().conduit,
-      this.walletDB,
-      protocol
-    );
+    this.protocolManager?.updateWalletState(this.walletDB, protocol);
   }
 
   pauseUpdates() {
@@ -339,7 +357,25 @@ export class WalletService extends AbstractService {
   }
 
   async getWalletsUpdate() {
-    this.walletDB?.sendChainUpdate(await this.walletDB._fetchWallets());
+    if (!this.walletDB) throw new Error('Wallet DB not initialized');
+
+    const data = await this.walletDB.fetchWallets();
+    this.walletDB.sendChainUpdate(data);
+  }
+
+  async getBitcoinPrice() {
+    const response = await this.coingecko?.coins.fetch('bitcoin', {});
+    return response?.data?.market_data?.current_price?.usd;
+  }
+
+  async getEthereumPrice() {
+    const response = await this.coingecko?.coins.fetch('ethereum', {});
+    return response?.data?.market_data?.current_price?.usd;
+  }
+
+  async getCoinPrice(coinName: string) {
+    const response = await this.coingecko?.coins.fetch(coinName, {});
+    return response?.data?.market_data?.current_price?.usd;
   }
 }
 

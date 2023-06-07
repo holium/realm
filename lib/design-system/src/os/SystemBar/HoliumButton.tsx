@@ -29,11 +29,17 @@ const HoliSvg = styled(motion.svg)`
   }
 `;
 
+interface HoliumButtonTypes {
+  size?: number;
+  pointer?: boolean;
+  onClick?: () => void;
+}
+
 export const HoliumButton = ({
   size = 28,
   pointer = true,
   onClick = () => {},
-}) => (
+}: HoliumButtonTypes) => (
   <HoliSvg
     width={size}
     height={size}

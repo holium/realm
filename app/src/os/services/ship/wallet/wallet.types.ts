@@ -77,8 +77,8 @@ export type TransactionsRow = {
   hash: string;
   network: string;
   type: number;
-  initiatedAt: number;
-  completedAt: number | undefined;
+  initiatedAt: string;
+  completedAt: string | undefined;
   ourAddress: string;
   theirPatp: string | undefined;
   theirAddres: string;
@@ -87,7 +87,7 @@ export type TransactionsRow = {
   notes: string;
 };
 
-export type WalletsRow = {};
+export type WalletsRow = object;
 
 export type WalletTables = 'messages' | 'paths' | 'peers';
 export type DbChangeType =
@@ -156,3 +156,14 @@ export type WalletDbReactions =
       };
     }
   | WalletDbChangeReactions;
+
+export type RecipientPayload = {
+  recipientMetadata?: {
+    color: string;
+    avatar?: string;
+    nickname?: string;
+  };
+  patp: string;
+  address?: string | null;
+  gasEstimate?: number;
+};

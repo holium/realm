@@ -5,4 +5,7 @@ export const isDevelopment =
 
 export const isMac = process.platform === 'darwin';
 
+// is arm64
+export const isArm64 = process.arch === 'arm64';
+
 export const isWindows = process.platform === 'win32';

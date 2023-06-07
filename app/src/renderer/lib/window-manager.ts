@@ -32,7 +32,7 @@ export const getMaximizedBounds = (desktopDimensions: Dimensions): Bounds => {
   const normalizedPaddingX = (8 / desktopDimensions.width) * 10;
   const normalizedPaddingY = (8 / desktopDimensions.height) * 10;
   const normalizedDockHeight = (40 / desktopDimensions.height) * 10;
-
+  // const showTitlebar = appState.showTitleBar;
   const offsetX = 2 * normalizedPaddingX;
   const offsetY = 3 * normalizedPaddingY + normalizedDockHeight;
 
@@ -55,11 +55,27 @@ export const isMaximizedBounds = (
   const margin = 0.01;
 
   return (
-    Math.abs(bounds.x - maximizedBounds.x) < margin &&
-    Math.abs(bounds.y - maximizedBounds.y) < margin &&
-    Math.abs(bounds.width - maximizedBounds.width) < margin &&
-    Math.abs(bounds.height - maximizedBounds.height) < margin
+    (Math.abs(bounds.x - maximizedBounds.x) < margin &&
+      Math.abs(bounds.y - maximizedBounds.y) < margin &&
+      Math.abs(bounds.width - maximizedBounds.width) < margin &&
+      Math.abs(bounds.height - maximizedBounds.height) < margin) ||
+    (Math.abs(bounds.x - (maximizedBounds.x + maximizedBounds.width / 2)) <
+      margin &&
+      Math.abs(bounds.y - maximizedBounds.y) < margin &&
+      Math.abs(bounds.width - maximizedBounds.width / 2) < margin &&
+      Math.abs(bounds.height - maximizedBounds.height) < margin) ||
+    (Math.abs(bounds.x - maximizedBounds.x) < margin &&
+      Math.abs(bounds.y - maximizedBounds.y) < margin &&
+      Math.abs(bounds.width - maximizedBounds.width / 2) < margin &&
+      Math.abs(bounds.height - maximizedBounds.height) < margin)
   );
+};
+
+export const isFullWidth = (width: number, desktopDimensions: Dimensions) => {
+  const maximizedBounds = getMaximizedBounds(desktopDimensions);
+  const margin = 0.01;
+
+  return Math.abs(width - maximizedBounds.width) < margin;
 };
 
 /**
@@ -224,6 +240,9 @@ export const normalizePosition = (
   x: position.x / (desktopDimensions.width / 10),
   y: position.y / (desktopDimensions.height / 10),
 });
+
+export const normalizeValue = (value: number, dimension: number): number =>
+  value / (dimension / 10);
 
 /* Converts position from the 1-10 scale to pixels. */
 export const denormalizePosition = (

@@ -18,6 +18,7 @@ export const genCSSVariables = (theme: ThemeType) => {
     dock color used in random places but not in the dock - ok
   */
 
+  const backgroundImage = theme.wallpaper;
   const themeMode = theme.mode;
   const isLight = themeMode === 'light';
   const homeButtonColor = isLight
@@ -35,7 +36,7 @@ export const genCSSVariables = (theme: ThemeType) => {
   const dockColor = rgba(theme.windowColor, 0.65);
   const cardColor = isLight
     ? lighten(0.05, theme.windowColor)
-    : darken(0.025, theme.windowColor);
+    : darken(0.03, theme.windowColor);
   const textColor = theme.textColor;
   const iconColor = rgba(theme.textColor, 0.7);
   const mouseColor = theme.mouseColor;
@@ -72,6 +73,7 @@ export const genCSSVariables = (theme: ThemeType) => {
 
   return `
     :root {
+      --background-image: url(${backgroundImage});
       --theme-mode: ${themeMode};
       --rlm-font: 'Rubik', sans-serif;
       --blur: blur(24px);

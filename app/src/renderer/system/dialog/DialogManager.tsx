@@ -65,7 +65,12 @@ const DialogManagerPresenter = ({
   );
 
   useEffect(() => {
-    if (dialogId) openAndSetDialogWindow(dialogId);
+    if (dialogId) {
+      openAndSetDialogWindow(dialogId);
+    } else {
+      setDialogConfig(null);
+      setDialogWindow(null);
+    }
   }, [dialogId, openAndSetDialogWindow]);
 
   return (
@@ -80,7 +85,7 @@ const DialogManagerPresenter = ({
         top: 0,
         right: 0,
         height: '100vh',
-        paddingTop: shellStore.isFullscreen ? 0 : 30,
+        paddingTop: 0,
       }}
     >
       {dialogWindow}

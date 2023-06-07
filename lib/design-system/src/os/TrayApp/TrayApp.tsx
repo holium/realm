@@ -4,14 +4,17 @@ import styled from 'styled-components';
 
 import { BoxProps } from '../../general/Box/Box';
 
-const Wrapper = styled(motion.div)`
+export const TrayAppWrapper = styled(motion.div)`
+  display: flex !important;
+  flex-direction: column;
+  padding: 12px;
   z-index: 16;
   height: inherit;
   position: absolute;
   overflow: hidden;
+  gap: 12px;
   border-radius: 16px;
-  transform: translate3d(0, 0, 0);
-  backdrop-filter: blur(24px);
+  backdrop-filter: var(--blur);
   backface-visibility: hidden;
   background: rgba(var(--rlm-window-bg-rgba));
   border: 1px solid rgba(var(--rlm-border-rgba));
@@ -19,10 +22,6 @@ const Wrapper = styled(motion.div)`
   ::-webkit-scrollbar {
     display: none;
   }
-`;
-
-const AppSection = styled(motion.div)`
-  padding: 12px;
 `;
 
 type AppCoords = {
@@ -92,7 +91,7 @@ export const TrayApp = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <Wrapper
+        <TrayAppWrapper
           key={appId}
           id={appId}
           initial={{
@@ -123,8 +122,8 @@ export const TrayApp = ({
             duration: 0.2,
           }}
         >
-          <AppSection>{children}</AppSection>
-        </Wrapper>
+          {children}
+        </TrayAppWrapper>
       )}
     </AnimatePresence>
   );

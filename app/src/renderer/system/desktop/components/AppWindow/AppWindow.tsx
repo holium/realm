@@ -12,6 +12,7 @@ import { useToggle } from '@holium/design-system/util';
 
 import {
   denormalizeBounds,
+  isFullWidth,
   normalizeBounds,
 } from 'renderer/lib/window-manager';
 import { useAppState } from 'renderer/stores/app.store';
@@ -21,6 +22,7 @@ import {
 } from 'renderer/stores/models/window.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
+import { TITLEBAR_HEIGHT } from 'renderer/system/Titlebar';
 
 import { ErrorBoundary } from '../../../ErrorBoundary';
 import { AppWindowContainer } from './AppWindow.styles';
@@ -30,7 +32,7 @@ import { TitlebarByType } from './Titlebar/TitlebarByType';
 
 const CURSOR_WIDTH = 10;
 const MIN_WINDOW_AMOUNT_ON_SCREEN = 64;
-const TRIGGER_AUTO_RESIZE = 32;
+const TRIGGER_AUTO_RESIZE = 8;
 
 const MIN_WIDTH = 500;
 const MIN_HEIGHT = 400;
@@ -44,17 +46,24 @@ function clamp(value: number, min: number, max: number) {
 }
 
 const AppWindowPresenter = ({ appWindow }: Props) => {
-  const { shellStore } = useAppState();
+  const { shellStore, showTitleBar } = useAppState();
   const { bazaarStore } = useShipStore();
 
   const dragControls = useDragControls();
+  /* true by default to make drag constraints work. */
+  const dragging = useToggle(true);
   const resizing = useToggle(false);
-  const dragging = useToggle(false);
   const nearEdge = useToggle(false);
   const controls = useAnimationControls();
 
   const appInfo = bazaarStore.getApp(appWindow.appId);
   const borderRadius = appWindow.type === 'dialog' ? 16 : 12;
+
+  const allowDragOrResize = useMemo(
+    () => appWindow.type !== 'dialog' || appWindow.static,
+    [appWindow.type, appWindow.static]
+  );
+
   const bounds = useMemo(
     () => denormalizeBounds(appWindow.bounds, shellStore.desktopDimensions),
     [appWindow.bounds, shellStore.desktopDimensions]
@@ -68,13 +77,14 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   });
 
   const minX = 0;
-  const minY = 0;
+  const minY = showTitleBar ? TITLEBAR_HEIGHT + 8 : 0;
   const maxX = shellStore.desktopDimensions.width;
   const maxY = shellStore.desktopDimensions.height;
 
   const mouseDragX = useMotionValue((minX + maxX) / 2);
   const mouseDragY = useMotionValue((minY + maxY) / 2);
 
+  const cursorX = useMotionValue((minX + maxX) / 2);
   const motionX = useMotionValue(bounds.x);
   const motionY = useMotionValue(bounds.y);
   const motionWidth = useMotionValue(bounds.width);
@@ -119,11 +129,13 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     ]
   );
 
-  const mouseIsNearEdge = (x: number, y: number) =>
-    x <= minX + TRIGGER_AUTO_RESIZE ||
-    x >= maxX - TRIGGER_AUTO_RESIZE ||
-    y <= minY + TRIGGER_AUTO_RESIZE ||
-    y >= maxY - TRIGGER_AUTO_RESIZE;
+  const mouseIsNearEdge = (x: number, y: number) => {
+    return (
+      x <= minX + TRIGGER_AUTO_RESIZE ||
+      x >= maxX - TRIGGER_AUTO_RESIZE ||
+      y <= minY + TRIGGER_AUTO_RESIZE
+    );
+  };
 
   useEffect(() => {
     /*
@@ -146,35 +158,35 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
           resizing.toggleOn();
         }
       } else {
+        cursorX.set(x);
         dragging.toggleOff();
         resizing.toggleOff();
       }
     });
-    return () => {
-      window.electron.app.removeOnMouseMove();
-    };
   }, []);
 
-  // useEffect(() => {
-  //   if (!nearEdge.isOn) {
-  //     shellStore.hideSnapView();
-  //     if (dragging.isOn && !resizing.isOn) {
-  //       dragUnmaximize();
-  //     }
-  //   } else {
-  //     if (nearEdge.isOn && dragging.isOn && !resizing.isOn) {
-  //       const x = mouseDragX.get();
-  //       const y = mouseDragY.get();
-  //       if (x <= minX + TRIGGER_AUTO_RESIZE) {
-  //         shellStore.setSnapView('left');
-  //       } else if (y <= minY + TRIGGER_AUTO_RESIZE) {
-  //         shellStore.setSnapView('fullscreen');
-  //       } else if (x >= maxX - TRIGGER_AUTO_RESIZE) {
-  //         shellStore.setSnapView('right');
-  //       }
-  //     }
-  //   }
-  // }, [nearEdge.isOn, resizing.isOn, dragging.isOn]);
+  useEffect(() => {
+    if (!nearEdge.isOn) {
+      shellStore.hideSnapView();
+      if (dragging.isOn && !resizing.isOn) {
+        dragUnmaximize();
+      }
+    } else {
+      if (nearEdge.isOn && dragging.isOn && !resizing.isOn) {
+        const x = mouseDragX.get();
+        const y = mouseDragY.get();
+        if (x <= minX + TRIGGER_AUTO_RESIZE) {
+          shellStore.setSnapView('left');
+        } else if (y <= minY + TRIGGER_AUTO_RESIZE) {
+          shellStore.setSnapView('fullscreen');
+        } else if (x >= maxX - TRIGGER_AUTO_RESIZE) {
+          shellStore.setSnapView('right');
+        }
+      } else {
+        shellStore.hideSnapView();
+      }
+    }
+  }, [nearEdge.isOn, resizing.isOn, dragging.isOn]);
 
   const windowId = `app-window-${appWindow.appId}`;
   const webViewId = getWebViewId(appWindow.appId, appWindow.type);
@@ -327,18 +339,24 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     [appId, motionX, motionY, motionWidth, motionHeight]
   );
 
+  useEffect(() => {
+    if (!dragging.isOn) {
+      if (nearEdge.isOn && !resizing.isOn) {
+        dragMaximize();
+      } else {
+        updateWindowBounds();
+      }
+    }
+  }, [dragging.isOn]);
+
   const onDragStart = (e: PointerEvent<HTMLDivElement>) => {
+    if (!allowDragOrResize) return;
     dragging.toggleOn();
     dragControls.start(e);
   };
 
   const onDragEnd = () => {
     dragging.toggleOff();
-    if (nearEdge.isOn && !resizing.isOn) {
-      dragMaximize();
-    } else {
-      updateWindowBounds();
-    }
   };
 
   const setBoundsAfterMaximize = (mb: BoundsModelType) => {
@@ -369,10 +387,41 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     }
   };
 
-  // const dragUnmaximize = () => {
-  //   const mb = shellStore.unmaximize(appWindow.appId);
-  //   const dmb = denormalizeBounds(mb, shellStore.desktopDimensions);
-  // };
+  const dragUnmaximize = () => {
+    // this function is firing for dialogs also - throwing an error.
+    if (appWindow.type === 'dialog') return;
+    if (shellStore.isWindowMaximized(appWindow.appId)) {
+      const mbAll = shellStore.unmaximize(appWindow.appId);
+      console.log(mbAll);
+      const dmbPrev = denormalizeBounds(
+        mbAll['prevBounds'],
+        shellStore.desktopDimensions
+      );
+      const dmb = denormalizeBounds(
+        mbAll['bounds'],
+        shellStore.desktopDimensions
+      );
+      const xPos = cursorX.get();
+      const win = shellStore.getWindowByAppId(appWindow.appId);
+      if (win) {
+        if (isFullWidth(win.prevBounds.width, shellStore.desktopDimensions)) {
+          const relativeX = xPos / dmbPrev.width;
+          controls.start({
+            x: relativeX * dmb.width,
+            width: dmb.width,
+            height: dmb.height,
+            transition: { duration: 0.2 },
+          });
+        } else {
+          controls.start({
+            width: dmb.width,
+            height: dmb.height,
+            transition: { duration: 0.2 },
+          });
+        }
+      }
+    }
+  };
 
   const onMaximize = () => {
     const mb = shellStore.toggleMaximized(appWindow.appId);
@@ -471,29 +520,31 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
             appWindow={appWindow}
           />
         </ErrorBoundary>
-        <AppWindowResizeHandles
-          zIndex={appWindow.zIndex + 1}
-          topRight={{
-            x: resizeTopRightX,
-            y: resizeTopRightY,
-          }}
-          topLeft={{
-            x: resizeTopLeftX,
-            y: resizeTopLeftY,
-          }}
-          bottomLeft={{
-            x: resizeBottomLeftX,
-            y: resizeBottomLefty,
-          }}
-          bottomRight={{
-            x: resizeBottomRightX,
-            y: resizeBottomRightY,
-          }}
-          onDragTopLeft={handleTopLeftCornerResize}
-          onDragTopRight={handleTopRightCornerResize}
-          onDragBottomLeft={handleBottomLeftCornerResize}
-          onDragBottomRight={handleBottomRightCornerResize}
-        />
+        {allowDragOrResize && (
+          <AppWindowResizeHandles
+            zIndex={appWindow.zIndex + 1}
+            topRight={{
+              x: resizeTopRightX,
+              y: resizeTopRightY,
+            }}
+            topLeft={{
+              x: resizeTopLeftX,
+              y: resizeTopLeftY,
+            }}
+            bottomLeft={{
+              x: resizeBottomLeftX,
+              y: resizeBottomLefty,
+            }}
+            bottomRight={{
+              x: resizeBottomRightX,
+              y: resizeBottomRightY,
+            }}
+            onDragTopLeft={handleTopLeftCornerResize}
+            onDragTopRight={handleTopRightCornerResize}
+            onDragBottomLeft={handleBottomLeftCornerResize}
+            onDragBottomRight={handleBottomRightCornerResize}
+          />
+        )}
       </Flex>
     </AppWindowContainer>
   );

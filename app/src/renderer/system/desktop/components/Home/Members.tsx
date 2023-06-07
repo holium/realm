@@ -22,11 +22,12 @@ const HomeSidebar = styled(motion.div)`
   height: 100%;
   gap: 16px;
   background: rgba(var(--rlm-window-rgba), 0.9);
-  backdrop-filter: blur(24px);
+  backdrop-filter: var(--blur);
 `;
 
 interface IMembers {
   our: boolean;
+  onMemberClick: () => void;
   friends?: any[];
 }
 
@@ -59,13 +60,15 @@ export const createPeopleForm = (
   };
 };
 
-const MembersPresenter = ({ our }: IMembers) => {
+const MembersPresenter = ({ our, onMemberClick }: IMembers) => {
   const { spacesStore } = useShipStore();
   const searchRef = useRef(null);
 
   const { person } = useMemo(() => createPeopleForm(), []);
   // Ship search
-  const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
+  const [selectedIdentity, setSelectedIdentity] = useState<Set<string>>(
+    new Set()
+  );
   const [selectedNickname, setSelectedNickname] = useState<Set<string>>(
     new Set()
   );
@@ -81,9 +84,9 @@ const MembersPresenter = ({ our }: IMembers) => {
       currentSpace.path &&
         shipStore.spacesStore.inviteMember(currentSpace.path, patp);
     }
-    // const pendingAdd = selectedPatp;
-    selectedPatp.add(patp);
-    setSelected(new Set(selectedPatp));
+    // const pendingAdd = selectedIdentity;
+    selectedIdentity.add(patp);
+    setSelectedIdentity(new Set(selectedIdentity));
     selectedNickname.add(nickname || '');
     setSelectedNickname(new Set(selectedNickname));
     // const updatedAll = all;
@@ -103,10 +106,19 @@ const MembersPresenter = ({ our }: IMembers) => {
       }}
     >
       <Flex flexDirection="row" alignItems="center" gap={10} mb={12}>
-        <Icon name="Members" size={18} opacity={0.5} />
+        <Icon name="Members" size={18} opacity={0.7} />
         <Text.Custom fontWeight={500} fontSize={4} opacity={1}>
           {our ? 'Friends' : 'Members'}
         </Text.Custom>
+        <Button.IconButton
+          className="realm-cursor-hover"
+          onClick={onMemberClick}
+          style={{
+            marginLeft: 'auto',
+          }}
+        >
+          <Icon name="Close" size={22} opacity={0.7} />
+        </Button.IconButton>
       </Flex>
       <Flex position="relative">
         {/* Search and dropdown */}
@@ -155,7 +167,7 @@ const MembersPresenter = ({ our }: IMembers) => {
         <ShipSearch
           isDropdown
           search={person.state.value}
-          selected={selectedPatp}
+          selected={selectedIdentity}
           onSelected={(ship: [string, string?]) => {
             onShipSelected(ship);
             person.actions.onChange('');

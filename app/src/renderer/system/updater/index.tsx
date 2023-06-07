@@ -10,7 +10,9 @@ import { HoliumLogo } from './holium-logo';
 import './installer.css';
 
 declare global {
-  var autoUpdate: any;
+  interface Window {
+    autoUpdate: any;
+  }
 }
 
 type UpdateStatsProps = {

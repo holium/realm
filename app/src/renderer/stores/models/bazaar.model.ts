@@ -175,8 +175,6 @@ export const BazaarStore = types
               } else if (app.type === 'urbit') {
                 const urb = app as AppMobxType;
                 return (
-                  // 'started' installs should show on the desktop no?
-
                   urb.installStatus === 'started' ||
                   urb.installStatus === 'installed' ||
                   urb.installStatus === 'suspended' ||
@@ -218,9 +216,14 @@ export const BazaarStore = types
         hasAlly(ship: string) {
           return allies.has(ship);
         },
-        getTreaties(ship: string) {
+        // exact - treaty ship must match exact. if false, match
+        //  on "child" ships. for example, if searching '~dister-dozzod-dozzod',
+        //    '~lander-dister-dozzod-dozzod/landscape' should match since '~dister-dozzod-dozzod'
+        //    is parent ship
+        getTreaties(ship: string, exact = true) {
+          ship = exact ? ship : (ship = ship.substring(1));
           const filteredTreaties = Array.from(toJS(treaties).values()).filter(
-            (val) => val.id.split('/')[0] === ship
+            (val) => val.id.split('/')[0].endsWith(ship)
           );
           return filteredTreaties;
         },
@@ -228,12 +231,13 @@ export const BazaarStore = types
           const treaty = treaties.get(`${ship}/${desk}`);
           return treaty && getSnapshot(treaty);
         },
-        searchTreaties(ship: string, term: string) {
+        searchTreaties(ship: string, term: string, exact = false) {
           const str = term.toLowerCase();
-          const resultTreaties = this.getTreaties(ship).filter((val) => {
+          ship = exact ? ship : ship.substring(1);
+          const resultTreaties = this.getTreaties(ship, false).filter((val) => {
             const tokens = val.id.split('/');
             return (
-              tokens[0] === ship &&
+              tokens[0].endsWith(ship) &&
               (val.title.toLowerCase().startsWith(str) ||
                 tokens[1].startsWith(term))
             );
@@ -282,8 +286,11 @@ export const BazaarStore = types
         },
 
         reset() {
+          self.alliesLoader.set('initial');
+          allies.clear();
+          self.treatyLoader.set('initial');
+          treaties.clear();
           self.catalog.clear();
-          self.gridIndex.clear();
           self.recentApps.clear();
           self.recentDevs.clear();
         },
@@ -331,6 +338,11 @@ export const BazaarStore = types
           }
           try {
             if (app) {
+              // if this is not set, the app will not render the tile
+              //  in the grid. default this value to the size of the app catalog (0-based)
+              if (!app.gridIndex) {
+                app.gridIndex = self.catalog.size;
+              }
               app.setStatus(InstallStatus.started);
               self.installations.set(app.id, InstallStatus.started);
             }
@@ -344,19 +356,14 @@ export const BazaarStore = types
           }
         }),
         uninstallApp: flow(function* (desk: string) {
-          Array.from(self.gridIndex.entries()).forEach(([key, value]) => {
-            if (desk === value) self.gridIndex.delete(key);
-          });
           const app = self.catalog.get(desk);
           if (app) {
             app.setStatus(InstallStatus.uninstalled);
-            self.gridIndex.delete(desk);
             self.installations.delete(app.id);
             try {
               return yield BazaarIPC.uninstallApp(desk);
             } catch (error) {
               console.error(error);
-              self.gridIndex.set(`${self.gridIndex.size + 1}`, desk);
               app.setStatus(InstallStatus.installed);
             }
           }
@@ -399,6 +406,23 @@ export const BazaarStore = types
             }
           }
         }),
+        reorderApp: flow(function* (
+          oldIndex: number,
+          newIndex: number,
+          grid: { [idx: string]: string }
+        ) {
+          try {
+            const apps = Array.from<AppMobxType>(self.catalog.values());
+            const indexOfApp = apps.findIndex(
+              (app) => app.gridIndex === oldIndex
+            );
+            const desk = apps[indexOfApp].id;
+            if (!desk) return;
+            return yield BazaarIPC.reorderApp(desk, newIndex, grid);
+          } catch (error) {
+            console.error(error);
+          }
+        }),
         recommendApp: flow(function* (appId: string) {
           try {
             self.recommendations.push(appId);
@@ -429,10 +453,12 @@ export const BazaarStore = types
               console.log('already added ally', ship);
               return;
             }
+            self.treatyLoader.set('loading');
             self.addingAlly.set(ship, 'adding new ally');
             const result: any = yield BazaarIPC.addAlly(ship);
             return result;
           } catch (error) {
+            self.treatyLoader.set('error');
             console.error(error);
           }
         }),
@@ -479,6 +505,8 @@ export const BazaarStore = types
             treaties.clear();
             const treatiesResponse = yield BazaarIPC.scryTreaties(ship);
             if (Object.keys(treatiesResponse).length === 0) {
+              // must set or spinner won't stop spinning
+              self.treatyLoader.set('loaded');
               return;
             }
             const formedTreaties = [];
@@ -499,6 +527,7 @@ export const BazaarStore = types
             self.treatyLoader.set('loaded');
             return formedTreaties;
           } catch (error) {
+            self.treatyLoader.set('error');
             console.error(error);
             throw error;
           }
@@ -569,6 +598,15 @@ export const BazaarStore = types
         _onUnrecommendedUpdate(appId: string) {
           const app = self.catalog.get(appId);
           if (app) app.setIsRecommended(false);
+        },
+        _onReorderGridIndex(indexes: any) {
+          const apps = Array.from<AppMobxType>(self.catalog.values());
+          for (let i = 0; i < Object.keys(indexes).length; i++) {
+            const index = apps.findIndex((app) => app.id === indexes[i]);
+            if (index !== -1) {
+              apps[index].setGridIndex(i);
+            }
+          }
         },
         _addAlly(ship: string, data: any) {
           allies.set(ship, data);

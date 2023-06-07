@@ -12,7 +12,7 @@ import { APIConnection, ConduitSession } from '../api';
 import ChatService from './chat/chat.service';
 import { FriendsService } from './friends.service';
 import NotificationsService from './notifications/notifications.service';
-import RoomsService from './rooms.service';
+import { SettingsService } from './settings.service';
 import { ShipDB } from './ship.db';
 import { Credentials } from './ship.types.ts';
 import BazaarService from './spaces/bazaar.service';
@@ -24,13 +24,13 @@ export class ShipService extends AbstractService<any> {
   private shipDB?: ShipDB;
   private serviceOptions: ServiceOptions = { preload: false, verbose: false };
   services?: {
-    rooms: RoomsService;
     notifications: NotificationsService;
     chat: ChatService;
     friends: FriendsService;
     spaces: SpacesService;
     bazaar: BazaarService;
     wallet: WalletService;
+    settings: SettingsService;
   };
 
   constructor(
@@ -131,8 +131,8 @@ export class ShipService extends AbstractService<any> {
       bazaar: new BazaarService(this.serviceOptions, this.shipDB.db),
       spaces: new SpacesService(this.serviceOptions, this.shipDB.db, this.patp),
       friends: new FriendsService(this.serviceOptions, this.shipDB.db),
-      rooms: new RoomsService(this.serviceOptions),
       wallet: new WalletService(undefined, this.shipDB.db),
+      settings: new SettingsService(this.serviceOptions, this.shipDB.db),
     };
   }
 
@@ -199,16 +199,24 @@ export class ShipService extends AbstractService<any> {
     this.shipDB.encrypt(password);
   }
 
-  public cleanup() {
+  public async cleanup() {
     // remove all ipcMain listeners
     this.removeHandlers();
     this.services?.chat.reset();
-    this.services?.rooms.removeHandlers();
     this.services?.notifications.reset();
     this.services?.friends.reset();
     this.services?.spaces.reset();
     this.services?.bazaar.reset();
-    APIConnection.getInstance().closeChannel();
+    // if the ship is too slow, just skip closing the channel
+    // so we dont hang the app for too long
+    const timeout = setTimeout(() => {
+      Promise.resolve();
+      log.warn(
+        'ship.service.ts, cleanup(): took too long to close channel, skipping'
+      );
+    }, 1000);
+    await APIConnection.getInstance().closeChannel();
+    clearTimeout(timeout);
 
     this.shipDB?.disconnect();
   }

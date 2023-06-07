@@ -11,12 +11,13 @@ import {
   Flex,
   Icon,
   Row,
-  Select,
   Skeleton,
   Text,
-  TextInput,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
+import { Select, TextInput } from '@holium/design-system/inputs';
+import { defaultTheme } from '@holium/shared';
 
+import { getSpacePath } from 'os/lib/text';
 import { MemberRole, MemberStatus } from 'os/types';
 import { Crest } from 'renderer/components';
 import { ShipSearch } from 'renderer/components/ShipSearch';
@@ -24,6 +25,8 @@ import { pluralize } from 'renderer/lib/text';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';
+
+import { JoinLink } from './EditSpace/JoinLink';
 
 interface IMemberList {
   height?: any;
@@ -44,7 +47,7 @@ const MemberList = styled(Flex)<IMemberList>`
 `;
 
 export const createPeopleForm = (
-  defaults: any = {
+  defaults = {
     person: '',
   }
 ) => {
@@ -81,7 +84,9 @@ const InviteMembersPresenter = ({
   const searchRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const { person } = useMemo(() => createPeopleForm(), []);
-  const [selectedPatp, setSelected] = useState<Set<string>>(new Set());
+  const [selectedIdentity, setSelectedIdentity] = useState<Set<string>>(
+    new Set()
+  );
   const [nicknameMap, setNicknameMap] = useState<{ [patp: string]: string }>(
     {}
   );
@@ -119,7 +124,7 @@ const InviteMembersPresenter = ({
             ? 'member'
             : 'initiate';
           members[member] = { primaryRole, roles: memberVal.roles, alias: memberVal.alias, status: memberVal.status};
-          selectedPatp.add(member);
+          selectedIdentity.add(member);
           setNicknameMap({ ...nicknameMap, [member]: '' });
         }
         setPermissionMap(members);
@@ -134,7 +139,7 @@ const InviteMembersPresenter = ({
           groupMembers[loggedInAccount.serverId].roles = ['owner'];
           groupMembers[loggedInAccount.serverId].status = 'host';
           groupMembers[loggedInAccount.serverId].primaryRole = 'owner';
-          selectedPatp.add(loggedInAccount.serverId);
+          selectedIdentity.add(loggedInAccount.serverId);
           setNicknameMap({ ...nicknameMap, [loggedInAccount.serverId]: '' });
           const newMembers: any = {
             ...groupMembers,
@@ -145,8 +150,8 @@ const InviteMembersPresenter = ({
             members: newMembers,
           });
           delete groupMembers[loggedInAccount.serverId];
-          for (var member of Object.keys(groupMembers)) {
-            selectedPatp.add(member);
+          for (const member of Object.keys(groupMembers)) {
+            selectedIdentity.add(member);
             setNicknameMap({ ...nicknameMap, [member]: '' });
           }
           setLoading(false);
@@ -164,15 +169,15 @@ const InviteMembersPresenter = ({
           },
         },
       });
-      selectedPatp.add(loggedInAccount.serverId);
+      selectedIdentity.add(loggedInAccount.serverId);
     }
   }, []);
 
   const onShipSelected = (contact: [string, string?]) => {
     const patp = contact[0];
     const nickname = contact[1];
-    selectedPatp.add(patp);
-    setSelected(new Set(selectedPatp));
+    selectedIdentity.add(patp);
+    setSelectedIdentity(new Set(selectedIdentity));
     setNicknameMap({ ...nicknameMap, [patp]: nickname || '' });
     const newMembers: any = {
       ...permissionMap,
@@ -253,12 +258,13 @@ const InviteMembersPresenter = ({
               disabled={isOur}
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                const copyPatp = selectedPatp;
+                const copyPatp = selectedIdentity;
                 copyPatp.delete(patp);
-                setSelected(new Set(copyPatp));
+                setSelectedIdentity(new Set(copyPatp));
                 const nickMap = nicknameMap;
                 delete nickMap[patp];
                 setNicknameMap(nickMap);
+                // eslint-disable-next-line react/prop-types
                 const delMembers = workflowState.members;
                 delete delMembers[patp];
                 setWorkspaceState({
@@ -275,13 +281,13 @@ const InviteMembersPresenter = ({
     );
   };
 
-  const memberPatps = Array.from(selectedPatp.values());
+  const memberPatps = Array.from(selectedIdentity.values());
   const memberCount = memberPatps.length;
 
   if (!workflowState) return null;
 
   return (
-    <Flex col width="100%" overflowY="hidden">
+    <Flex col width="100%">
       <Text.Custom
         fontSize={5}
         lineHeight="24px"
@@ -338,7 +344,7 @@ const InviteMembersPresenter = ({
             ref={searchRef}
             height={34}
             leftAdornment={<Icon opacity={0.6} name="UserAdd" size={18} />}
-            placeholder="Enter Urbit ID"
+            placeholder="Enter identity"
             style={{
               borderRadius: 6,
               paddingRight: 4,
@@ -367,14 +373,14 @@ const InviteMembersPresenter = ({
           <ShipSearch
             isDropdown
             search={person.state.value}
-            selected={selectedPatp}
+            selected={selectedIdentity}
             onSelected={(contact: any) => {
               onShipSelected(contact);
               person.actions.onChange('');
             }}
           />
         </Flex>
-        <Flex position="relative" flexDirection="column" gap={6} height={294}>
+        <Flex position="relative" flexDirection="column" gap={6} height="190px">
           <Text.Label fontWeight={500}>Members</Text.Label>
           <MemberList>
             {!loading ? (
@@ -387,6 +393,27 @@ const InviteMembersPresenter = ({
               </Flex>
             )}
           </MemberList>
+        </Flex>
+        <Flex flexDirection="column" gap="2px">
+          <Text.Label fontWeight={500}>Join Link</Text.Label>
+          <JoinLink
+            payload={{
+              from: loggedInAccount?.serverId ?? '',
+              space: {
+                path: getSpacePath(
+                  loggedInAccount?.serverId ?? '',
+                  workflowState.name
+                ),
+                name: workflowState.name,
+                picture: workflowState.image,
+                color: workflowState.color,
+                description: workflowState.description,
+                membersCount: memberCount,
+                theme: JSON.stringify(defaultTheme),
+              },
+            }}
+            onGenerateLink={() => {}}
+          />
         </Flex>
       </Flex>
     </Flex>

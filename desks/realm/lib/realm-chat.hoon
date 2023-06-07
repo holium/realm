@@ -3,11 +3,24 @@
 ::  Chat message lib within Realm. Mostly handles [de]serialization
 ::    to/from json from types stored in realm-chat sur.
 ::
-/-  *realm-chat, db=chat-db, notify
-/+  notif-lib=notify
+/-  *realm-chat, db=chat-db, fr=friends
+/+  chat-db
 |%
 ::
 :: helpers
+::
+++  scry-avatar-for-patp
+  |=  [patp=ship =bowl:gall]
+  ^-  (unit @t)
+  =/  cv=view:fr
+    .^  view:fr
+        %gx
+        /(scot %p our.bowl)/friends/(scot %da now.bowl)/contact-hoon/(scot %p patp)/noun
+    ==
+  ?+  -.cv  !! :: if the scry came back wonky, crash
+    %contact-info
+      avatar.contact-info.cv
+  ==
 ::
 ++  scry-messages-for-path
   |=  [=path =bowl:gall]
@@ -55,6 +68,20 @@
     %peers  (snag 0 ~(val by peers-table.tbl))
   ==
 ::
+++  scry-paths
+  |=  =bowl:gall
+  ^-  (list path-row:db)
+  =/  tbls
+    .^
+      db-dump:db
+      %gx
+      /(scot %p our.bowl)/chat-db/(scot %da now.bowl)/db/paths/noun
+    ==
+  =/  tbl  `table:db`(snag 0 tables.tbls)
+  ?+  -.tbl  !!
+    %paths  ~(val by paths-table.tbl)
+  ==
+::
 ++  into-backlog-msg-poke
   |=  [m=message:db =ship]
   [%pass /dbpoke %agent [ship %chat-db] %poke %chat-db-action !>([%insert-backlog m])]
@@ -65,18 +92,22 @@
     *@da
   (add ts expires-in.act)
   [%pass /dbpoke %agent [patp.p %chat-db] %poke %chat-db-action !>([%insert ts path.act fragments.act exp-at])]
+  :: [%pass (weld /dbpoke path.p) %agent [patp.p %chat-db] %poke %chat-db-action !>([%insert ts path.act fragments.act exp-at])]
 ::
 ++  into-edit-message-poke
   |=  [p=peer-row:db act=edit-message-action:db]
   [%pass /dbpoke %agent [patp.p %chat-db] %poke %chat-db-action !>([%edit act])]
+  :: [%pass (weld /dbpoke path.p) %agent [patp.p %chat-db] %poke %chat-db-action !>([%edit act])]
 ::
 ++  into-delete-backlog-poke
   |=  [p=peer-row:db =path now=time]
   [%pass /dbpoke %agent [patp.p %chat-db] %poke %chat-db-action !>([%delete-backlog path now])]
+  :: [%pass (weld /dbpoke path.p) %agent [patp.p %chat-db] %poke %chat-db-action !>([%delete-backlog path now])]
 ::
 ++  into-delete-message-poke
   |=  [p=peer-row:db =msg-id:db]
   [%pass /dbpoke %agent [patp.p %chat-db] %poke %chat-db-action !>([%delete msg-id])]
+  :: [%pass (weld /dbpoke path.p) %agent [patp.p %chat-db] %poke %chat-db-action !>([%delete msg-id])]
 ::
 ++  into-all-peers-kick-pokes
   |=  [kickee=ship peers=(list peer-row:db)]
@@ -89,11 +120,13 @@
   |=  [target=ship kickee=ship =path]
   ^-  card
   [%pass /dbpoke %agent [target %chat-db] %poke %chat-db-action !>([%kick-peer path kickee])]
+  :: [%pass (weld /dbpoke path) %agent [target %chat-db] %poke %chat-db-action !>([%kick-peer path kickee])]
 ::
 ++  create-path-db-poke
   |=  [=ship row=path-row:db peers=ship-roles:db]
   ^-  card
   [%pass /dbpoke %agent [ship %chat-db] %poke %chat-db-action !>([%create-path row peers])]
+  :: [%pass (weld /dbpoke path.row) %agent [ship %chat-db] %poke %chat-db-action !>([%create-path row peers])]
 ::
 ++  into-add-peer-pokes
   |=  [s=ship peers=(list ship) =path]
@@ -103,15 +136,15 @@
       peers
     |=(p=ship =(p s)) :: skip the peer who matches the root-ship that we are poking
   |=(peer=ship [%pass /dbpoke %agent [s %chat-db] %poke %chat-db-action !>([%add-peer path peer])])
+  :: |=(peer=ship [%pass (weld /dbpoke path) %agent [s %chat-db] %poke %chat-db-action !>([%add-peer path peer])])
 ::
 ++  push-notification-card
-  |=  [=bowl:gall state=state-0 chat-path=path title=@t subtitle=@t content=@t]
+  |=  [=bowl:gall state=state-0 =path-row:db title=@t subtitle=@t content=@t unread=@ud avatar=(unit @t)]
   ^-  card
-  =/  note=notification:notify
-  ^-  notification:notify
+  =/  note=push-notif
     [
       app-id=app-id.state
-      data=[path=(spat chat-path) member-meta=*mem-meta:notify]
+      data=[path-row unread avatar]
       title=(malt ~[['en' title]])
       subtitle=?:(=(subtitle '') ~ (malt ~[['en' subtitle]]))
       contents=(malt ~[['en' content]])
@@ -128,17 +161,37 @@
         :-  ~
         %-  as-octt:mimes:html
         %-  en-json:html
-        %+  request:enjs:notif-lib
+        %+  notify-request:encode
           note
         devices.state
   ==
 
   [%pass /push-notification/(scot %da now.bowl) %arvo %i %request request *outbound-config:iris]
 ::
+++  dm-already-exists
+  |=  [typ=@tas peers=(list ship) =bowl:gall]
+  ^-  ?
+  ?.  =(typ %dm)  %.n  :: if the goal `typ` is not %dm, there is no way for a conflicting dm to already exist
+  =/  dmpaths  (turn (skim (scry-paths bowl) |=(pr=path-row:db =(type.pr %dm))) |=(pr=path-row:db path.pr))
+  =/  index=@ud  0
+  =/  conflict=?   %.n
+  =/  setpeers     (silt peers)
+  |-
+    ?:  |(conflict =(index (lent dmpaths)))
+      conflict
+    =/  dmpeers  (scry-peers (snag index dmpaths) bowl)
+    =/  dmships  (turn dmpeers |=(p=peer-row:db patp.p))
+    ?.  =((lent dmships) 2)  $(index +(index))
+    =/  firstmatches=?   (~(has in setpeers) (snag 0 dmships))
+    =/  secondmatches=?  (~(has in setpeers) (snag 1 dmships))
+    $(index +(index), conflict &(firstmatches secondmatches))
+::
+::
 ::  poke actions
 ::
 ++  create-chat
-::realm-chat &action [%create-chat ~ %chat ~[~bus ~dev] %host *@dr]
+::realm-chat &chat-action [%create-chat ~ %dm ~[~bus] %host *@dr]
+::realm-chat &chat-action [%create-chat ~ %chat ~[~bus ~dev] %host *@dr]
   |=  [act=create-chat-data state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ?>  =(src.bowl our.bowl)
@@ -148,7 +201,18 @@
   =/  all-ships
     ?:  (~(has in (silt peers.act)) our.bowl)  peers.act
     [our.bowl peers.act]
-  =/  all-peers=ship-roles:db  (turn all-ships |=(s=ship [s ?:(=(s our.bowl) %host %member)]))
+  ?:  (dm-already-exists type.act all-ships bowl)
+    ~&  >>>  "dm between {<all-ships>} already exists"
+    `state
+  =/  all-peers=ship-roles:db  
+    %+  turn
+      all-ships
+    |=  s=ship
+    =/  rl
+      ?:  =(s our.bowl)    %host
+      ?:  =(type.act %dm)  %host
+      %member
+    [s rl]
 
   =/  cards=(list card)
     %+  turn
@@ -358,14 +422,15 @@
   `state
 ::
 ++  remove-device
-  |=  [=device-id:notify state=state-0 =bowl:gall]
+  |=  [device-id=cord state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ?>  =(src.bowl our.bowl)
   =.  devices.state         (~(del by devices.state) device-id)
   `state
 ::
 ++  set-device
-  |=  [[=device-id:notify =player-id:notify] state=state-0 =bowl:gall]
+::realm-chat &chat-action [%set-device 'device' 'player']
+  |=  [[device-id=cord player-id=cord] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ?>  =(src.bowl our.bowl)
   =.  devices.state         (~(put by devices.state) device-id player-id)
@@ -401,6 +466,16 @@
   =.  msg-preview-notif.state  toggle
   `state
 ::
+++  create-notes-to-self-if-not-exists
+  |=  [state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  =/  selfpaths=(list path-row:db)  (skim (scry-paths bowl) |=(p=path-row:db =(type.p %self)))
+  ?.  =(0 (lent selfpaths))
+    `state
+  (create-chat [(notes-to-self bowl) %self ~ %host *@dr] state bowl)
+::
+++  notes-to-self  |=(=bowl:gall (malt ~[['title' 'Notes to Self'] ['reactions' 'true'] ['creator' (scot %p our.bowl)] ['description' '']]))
+::
 ::
 ::  JSON
 ::
@@ -424,7 +499,61 @@
       :~  push-enabled+b+push-enabled.s
           msg-preview-notif+b+msg-preview-notif.s
       ==
+    ::
+    ++  notify-request :: encodes for iris outbound
+      |=  [notif=push-notif =devices]
+      ^-  json
+      =/  player-ids  ~(val by devices)
+      =/  base-list
+      :~  
+          ['app_id' s+app-id.notif]
+          ['data' (mtd data.notif)]
+          ['include_player_ids' a+(turn player-ids |=([id=@t] s+id))]
+          ['headings' (contents title.notif)]
+      ==
+      =/  extended-list
+        ?~  subtitle.notif  base-list
+        :-  ['subtitle' (contents subtitle.notif)]
+        base-list
+
+      ?~  contents.notif
+        (pairs extended-list)
+      %-  pairs
+      :-
+        ['contents' (contents contents.notif)]
+        extended-list
+    ::
+    ++  mtd 
+      |=  mtd=push-mtd
+      ^-  json
+      %-  pairs
+      :~
+        ['path-row' (path-row:encode:chat-db path-row.mtd)]
+        ['unread_count' (numb unread.mtd)]
+        ['avatar' ?~(avatar.mtd ~ s+u.avatar.mtd)]
+      ==
+    ::
+    ++  contents 
+      |=  contents=(map cord cord)
+      ^-  json
+      =/  message   (~(got by contents) 'en')
+      %-  pairs
+      ['en' s+message]~
+    ::
+    ++  en-devices
+      |=  =devices
+      ^-  json
+      %-  pairs
+      :~  
+        :-  %devices
+        %-  pairs
+        %+  turn  ~(tap by devices)
+        |=  [device-id=@t player-id=@t]
+        ^-  [cord json]
+        [device-id s+player-id]
+      ==
   --
+::
 ++  dejs
   =,  dejs:format
   |%

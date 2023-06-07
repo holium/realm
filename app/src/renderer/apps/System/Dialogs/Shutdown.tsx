@@ -25,7 +25,7 @@ export const ShutdownDialogConfig: DialogConfig = {
       desktopDimensions
     ),
   }),
-  draggable: false,
+  static: true,
   hasCloseButton: false,
   unblurOnClose: true,
   noTitlebar: false,
@@ -88,12 +88,7 @@ const ShutdownDialogPresenter = () => {
         >
           <Flex py={1}>Cancel</Flex>
         </Button.Secondary>
-        <Button.Primary
-          flex={1}
-          justifyContent="center"
-          background="intent-alert"
-          onClick={shutdown}
-        >
+        <Button.Primary flex={1} justifyContent="center" onClick={shutdown}>
           <Flex py={1}>Power Off</Flex>
         </Button.Primary>
       </Flex>

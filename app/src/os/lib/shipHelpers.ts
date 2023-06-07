@@ -13,7 +13,7 @@ export async function getCookie({
   serverCode,
 }: ServerConnectionData) {
   log.info(`Getting cookie for ${serverUrl}`);
-  let cookie: string | undefined;
+  let cookie: string | null;
   const controller = new AbortController();
   const timeout = setTimeout(() => {
     controller.abort();
@@ -28,7 +28,7 @@ export async function getCookie({
       // credentials: 'include', // TODO test this
       signal: controller.signal,
     });
-    cookie = response.headers.get('set-cookie')?.split(';')[0];
+    cookie = response.headers.get('set-cookie');
     log.info(`Got cookie for ${serverUrl}`);
   } catch (e) {
     log.error(`Error getting cookie for ${serverUrl}`, e);

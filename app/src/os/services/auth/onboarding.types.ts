@@ -28,8 +28,8 @@ export type RealmInstallVersionTest = {
   build: number;
 };
 
-type OnboardingAddServer = {
-  type: 'add-server';
+type OnboardingAddIdentity = {
+  type: 'add-identity';
 };
 
 type OnboardingFinished = {
@@ -40,5 +40,5 @@ export type OnboardingUpdateTypes =
   | OnboardingAccountAdded
   | OnboardingAccountRemoved
   | OnboardingAccountUpdated
-  | OnboardingAddServer
+  | OnboardingAddIdentity
   | OnboardingFinished;

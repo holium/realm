@@ -1,4 +1,4 @@
-/-  db=chat-db, notify
+/-  db=chat-db
 ::  realm-chat [realm]
 ::
 |%
@@ -10,13 +10,29 @@
   ==
 +$  state-0
   $:  %0
-      =app-id:notify         :: constant
-      =uuid:notify           :: (sham @p)
-      =devices:notify        :: (map device-id player-id)
+      app-id=@t           :: constant
+      uuid=@uvH           :: (sham @p)
+      =devices            :: (map device-id player-id)
       push-enabled=?
-      =mutes                 :: the list of muted chat `path`s
-      =pins                  :: the set of pinned chat `path`s
+      =mutes              :: the list of muted chat `path`s
+      =pins               :: the set of pinned chat `path`s
       msg-preview-notif=?
+  ==
+::
++$  devices  (map @t @t)
+::
++$  push-notif
+  $:  app-id=cord                   ::  the onesignal app-id for realm
+      data=push-mtd                 ::  { "path-row": {}, "unread": 0, "avatar": null }
+      title=(map cord cord)         ::  {"en": "Sender Name"}
+      subtitle=(map cord cord)      ::  (optional) {"en": "Group title"}
+      contents=(map cord cord)      ::  {"en": "New Message"} or the actual message
+  ==
+::
++$  push-mtd
+  $:  =path-row:db
+      unread=@ud
+      avatar=(unit @t)
   ==
 ::
 +$  action
@@ -36,11 +52,13 @@
       :: internal %realm-chat state updaters
       [%enable-push ~]
       [%disable-push ~]
-      [%set-device =device-id:notify =player-id:notify]
-      [%remove-device =device-id:notify]
+      [%set-device device-id=@t player-id=@t]
+      [%remove-device device-id=@t]
       [%mute-chat =path mute=?]  :: toggles the muted-state of the path
       [%pin-chat =path pin=?]    :: toggles the pinned-state of the path
       [%toggle-msg-preview-notif msg-preview-notif=?]
+
+      [%create-notes-to-self-if-not-exists ~]
   ==
 +$  create-chat-data  [metadata=(map cord cord) type=@tas peers=(list ship) invites=@tas max-expires-at-duration=@dr]
 --

@@ -2,25 +2,25 @@ import { Bottom, Fill, Layer } from 'react-spaces';
 import { observer } from 'mobx-react';
 
 import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 import { AppWindowManager } from './AppWindowManager';
 import { HomePane } from './components/Home/HomePane';
 import { SystemBar } from './components/SystemBar/SystemBar';
 import { TrayManager } from './TrayManager';
+import { useDeeplink } from './useDeeplink';
 import { useMultiplayer } from './useMultiplayer';
 
 const DesktopPresenter = () => {
   const { shellStore, authStore } = useAppState();
-  const shipStore = useShipStore();
   const { session } = authStore;
+
+  useDeeplink();
 
   useMultiplayer({
     patp: session?.serverId,
     shipColor: session?.color ?? '#000000',
     desktopDimensions: shellStore.desktopDimensions,
     isMultiplayerEnabled: shellStore.multiplayerEnabled,
-    shipStore,
   });
 
   return (

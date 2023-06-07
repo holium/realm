@@ -15,7 +15,8 @@ import { useNavigation } from '../util/useNavigation';
 
 const siteDescription = 'Get on the Holium network.';
 const siteKeywords = 'Holium, Hosting, Holium Hosting, Urbit, Urbit Hosting';
-const siteUrl = 'https://hosting.holium.com/';
+const siteUrl = 'https://hosting.holium.com';
+const siteImage = `${siteUrl}/og-image.png`;
 const siteColor = '#000000';
 
 const Main = styled.main`
@@ -79,14 +80,14 @@ export const Page = ({ title, isProtected = false, children }: Props) => {
         <meta property="og:type" content="website" />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={siteDescription} />
-        <meta property="og:image" content={`${siteUrl}og-twitter-image.png`} />
+        <meta property="og:image" content={siteImage} />
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@HoliumCorp" />
         <meta name="twitter:creator" content="@HoliumCorp" />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={siteDescription} />
-        <meta name="twitter:image" content={`${siteUrl}og-twitter-image.png`} />
+        <meta name="twitter:image" content={siteImage} />
 
         <meta name="theme-color" content={siteColor} />
         <meta name="msapplication-navbutton-color" content={siteColor} />
