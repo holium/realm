@@ -4,6 +4,44 @@
 =<  [store .]
 =,  store
 |%
+++  init-spaces
+  |=  [state=state-0:store =bowl:gall]
+  ^-  (quip card:agent:gall state-0)
+  ?.  =(0 (lent ~(key by chats.state)))  `state
+  ~&  "{<dap.bowl>}: initializing..."
+  =/  spaces-scry       .^(view:sstore %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
+  ?>  ?=(%spaces -.spaces-scry)
+  =/  spaces            spaces.spaces-scry
+  =/  to-add-chat=(list [k=space-path:sstore v=space:sstore])
+      %+  skim  ~(tap by spaces)
+        |=  kv=[k=space-path:sstore v=space:sstore]
+        &(=(ship.path.v.kv our.bowl) ?!(=(space.k.kv 'our')))
+  =/  new-chats
+    %+  turn  to-add-chat
+      |=  [sk=space-path:sstore sv=space:sstore]
+      =/  members-scry         .^(view:mstore %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.sk)/(scot %tas space.sk)/members/noun)
+      ?>  ?=(%members -.members-scry)
+      =/  members           members.members-scry
+      =/  chat-and-cards    (create-space-chat sv [%role %member] members now.bowl)
+      =/  chat              +.chat-and-cards
+      =/  cards
+        %+  weld
+          -.chat-and-cards
+        (create-channel-pokes sk chat members)
+      [k=sk c=chat cd=cards]
+  =/  cards
+    %+  roll  new-chats
+      |=  [[k=space-path:sstore c=chat:store cd=(list card:agent:gall)] acc=(list card:agent:gall)]
+      (weld acc cd)
+  =/  chats
+    %+  turn  new-chats
+    |=  [k=space-path:sstore c=chat:store cd=(list card:agent:gall)]
+    =/  chats-map       `chats:store`~
+    =/  chats-map       (~(put by chats-map) path.c c)
+    [k chats-map]
+  =.  chats.state   `space-chats:store`(malt chats)
+  [cards state]
+::
 ++  pathify-space-path
   |=  =space-path:sstore
   ^-  path
