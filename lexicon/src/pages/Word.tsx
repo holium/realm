@@ -1,21 +1,23 @@
 import React, { useState } from 'react';
+
 import {
   Button,
-  Icon,
   Card,
   Flex,
+  Icon,
+  Menu,
   Text,
   TextInput,
-  Menu,
 } from '@holium/design-system';
-import { Tabs, TabPanel } from '../components';
+
+import { TabPanel, Tabs } from '../components';
 import { TabItem } from '../types';
 
 const tabData: TabItem[] = [
   { label: 'Definitions', value: 0 },
   { label: 'Sentences', value: 1 },
 ];
-function Word() {
+export const Word = () => {
   const [tabValue, setTabValue] = useState<number>(0);
   return (
     <Card p={3} elevation={4} maxWidth={400} marginBottom={12}>
@@ -111,7 +113,7 @@ function Word() {
       </Flex>
     </Card>
   );
-}
+};
 function Definition({ text }: { text: string }) {
   return (
     <Flex flexDirection={'column'} gap={8}>
@@ -144,7 +146,7 @@ function Definition({ text }: { text: string }) {
     </Flex>
   );
 }
-function Definitions() {
+const Definitions = () => {
   return (
     <Flex flexDirection="column" gap={20}>
       <Definition
@@ -157,5 +159,4 @@ function Definitions() {
       <Definition text={'popular word among internet users'} />
     </Flex>
   );
-}
-export default Word;
+};

@@ -1,7 +1,8 @@
 import React from 'react';
-import { Button, Icon, Flex, TextInput } from '@holium/design-system';
 
-function SearchBar() {
+import { Button, Flex, Icon, TextInput } from '@holium/design-system';
+
+export const SearchBar = () => {
   return (
     <Flex flex={1} gap={10} justifyContent={'center'} marginBottom={12}>
       <Button.IconButton>
@@ -25,6 +26,4 @@ function SearchBar() {
       </Button.TextButton>
     </Flex>
   );
-}
-
-export default SearchBar;
+};

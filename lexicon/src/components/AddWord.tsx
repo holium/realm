@@ -1,18 +1,43 @@
 import React, { useState } from 'react';
+
 import {
   Button,
-  Icon,
   Card,
   Flex,
+  Input,
   Text,
   TextInput,
-  Input,
 } from '@holium/design-system';
-export default function AddWord() {
+
+import api from '../api';
+import { log } from '../utils';
+
+export const AddWord = () => {
+  const space: string = '/~lux/our';
+
   const [word, setWord] = useState<string>('');
   const [definition, setDefinition] = useState<string>('');
   const [sentence, setSentence] = useState<string>('');
   const [related, setRelated] = useState<string>('');
+
+  const addWord = async () => {
+    try {
+      const result = await api.createWord(space, word);
+      resetForm();
+      log('addWord result =>', result);
+    } catch (e) {
+      log('addword error => ', e);
+    }
+  };
+  const resetForm = () => {
+    setWord('');
+    setDefinition('');
+    setSentence('');
+    setRelated('');
+  };
+  const handleSubmit = () => {
+    addWord();
+  };
   return (
     <Card
       p={3}
@@ -87,14 +112,19 @@ export default function AddWord() {
         <Button.Transparent fontSize={1} fontWeight={600} opacity={0.5}>
           Cancel
         </Button.Transparent>
-        <Button.TextButton fontSize={1} fontWeight={600} alignSelf={'flex-end'}>
+        <Button.TextButton
+          fontSize={1}
+          fontWeight={600}
+          alignSelf={'flex-end'}
+          onClick={handleSubmit}
+        >
           Submit
         </Button.TextButton>
       </Flex>
     </Card>
   );
-}
-function RequiredLabel({ text }: { text: string }) {
+};
+const RequiredLabel = ({ text }: { text: string }) => {
   return (
     <Flex gap={2}>
       <Text.Label fontWeight={600}>{text}</Text.Label>
@@ -106,4 +136,4 @@ function RequiredLabel({ text }: { text: string }) {
       </Text.Label>
     </Flex>
   );
-}
+};

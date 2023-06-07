@@ -1,5 +1,5 @@
-import Word from './Word';
-import Home from './Home';
-import Dictionary from './Dictionary';
+import { Dictionary } from './Dictionary';
+import { Home } from './Home';
+import { Word } from './Word';
 
-export { Word, Home , Dictionary};
+export { Dictionary, Home, Word };
