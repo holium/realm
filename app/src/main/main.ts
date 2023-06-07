@@ -80,8 +80,6 @@ export const getPreloadPath = () =>
     : path.join(__dirname, '../../.holium/dll/preload.js');
 
 export const toggleFullscreen = (mainWindow: BrowserWindow) => {
-  const wasFullscreen = mainWindow.isFullScreen();
-  mainWindow.setFullScreen(!wasFullscreen);
   if (isArm64 && isMac) {
     const wasSimpleFullscreen = mainWindow.isSimpleFullScreen();
     mainWindow.setSimpleFullScreen(!wasSimpleFullscreen);
@@ -96,6 +94,8 @@ export const toggleFullscreen = (mainWindow: BrowserWindow) => {
     }
     // mainWindow.webContents.send('set-titlebar-visible', !wasSimpleFullscreen);
   } else {
+    const wasFullscreen = mainWindow.isFullScreen();
+    mainWindow.setFullScreen(!wasFullscreen);
     mainWindow.setMenuBarVisibility(wasFullscreen);
     mainWindow.webContents.send('set-fullscreen', !wasFullscreen);
   }
@@ -114,7 +114,6 @@ const createWindow = async () => {
     icon: getAssetPath('icon.png'),
     title: 'Realm',
     fullscreen: true,
-    titleBarStyle: isArm64 && isMac ? undefined : 'hidden',
     acceptFirstMouse: true,
     // turn on simple fullscreen for arm64 mac to fill notch area
     simpleFullscreen: isArm64 && isMac,
