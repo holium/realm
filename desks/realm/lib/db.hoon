@@ -770,6 +770,7 @@
     v.input-row
     ~
     data.input-row
+    src.bowl
     now.bowl
     now.bowl
     now.bowl
@@ -848,6 +849,7 @@
     v.input-row
     ?~(revision.old-row ~ [~ +(u.revision.old-row)])
     data.input-row
+    creator.old-row
     created-at.old-row
     now.bowl
     now.bowl
@@ -1327,6 +1329,7 @@
             type+s+type.row
             v+(numb v.row)
             [%revision ?~(revision.row ~ (numb u.revision.row))]
+            creator+(ship creator.row)
             created-at+(time created-at.row)
             updated-at+(time updated-at.row)
             received-at+(time received-at.row)

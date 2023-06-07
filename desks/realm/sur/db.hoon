@@ -38,6 +38,7 @@
       v=@ud             :: data-type version
       revision=(unit @ud)  :: necessary for relaying via remote-scry. when non-null, indicates the latest version number to use in scry
       data=columns      :: the actual content
+      creator=@p        :: the source-ship who originally created the row
       created-at=@da    :: when the source-ship originally created the row
       updated-at=@da    :: when the source-ship originally last updated the row
       received-at=@da   :: when this ship actually got the latest version of the row, regardless of when the row was originally created
