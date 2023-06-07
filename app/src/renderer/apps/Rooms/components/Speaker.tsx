@@ -272,6 +272,9 @@ const SpeakerWrapper = styled(Flex)<FlexProps>`
   &.speaker-video-on {
     background: black;
     transition: 0.25s ease;
+    .speaker-name {
+      color: #fff;
+    }
     .speaker-avatar-wrapper {
       position: absolute;
       flex-direction: row;
