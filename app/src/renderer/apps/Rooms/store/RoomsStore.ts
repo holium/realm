@@ -270,6 +270,25 @@ export class RoomsStore {
   }
 
   @action
+  setAudioInput(deviceId: string) {
+    this.ourPeer.setAudioInputDevice(deviceId);
+  }
+
+  @action
+  setAudioOutput(deviceId: string) {
+    this.ourPeer.setAudioOutputDevice(deviceId);
+    // loop peers and set their audio output on their audio elements
+    this.peers.forEach((peer) => {
+      peer.setAudioOutputDevice(deviceId);
+    });
+  }
+
+  @action
+  setVideoInput(deviceId: string) {
+    this.ourPeer.setVideoInputDevice(deviceId);
+  }
+
+  @action
   setCurrentRoom(rid: string) {
     this.currentRid = rid;
   }
@@ -587,9 +606,9 @@ export class RoomsStore {
   @action
   joinRoom(rid: string) {
     this.cleanUpCurrentRoom();
+    this.setCurrentRoom(rid);
     this.ourPeer.enableMedia(this.ourPeer.constraints).then(
       action(() => {
-        this.setCurrentRoom(rid);
         this.websocket.send(
           serialize({
             type: 'enter-room',
@@ -744,6 +763,8 @@ export class PeerClass {
   @observable videoTracks: Map<string, any> = new Map();
   @observable stream: MediaStream | null = null;
   @observable ourStream: MediaStream;
+  @observable reconnectAttempts = 0;
+
   @observable onDataChannel: OnDataChannel = async () => {};
   @observable onLeftRoom: OnLeftRoom = async () => {};
 
@@ -759,6 +780,9 @@ export class PeerClass {
       onLeftRoom: OnLeftRoom;
     }
   ) {
+    if (!rid || !ourId || !peerId || !stream || !websocket || !listeners) {
+      throw new Error('Invalid parameters provided for PeerClass');
+    }
     makeObservable(this);
     this.rid = rid;
     this.websocket = websocket;
@@ -788,6 +812,19 @@ export class PeerClass {
   @action
   hasVideoChanged(hasVideo: boolean) {
     this.hasVideo = hasVideo;
+  }
+
+  @action
+  setAudioOutputDevice(deviceId: string) {
+    // const video = document.getElementById(
+    //     `peer-video-${this.peerId}`
+    // ) as HTMLVideoElement;
+    // video.setSinkId(deviceId);
+    const audio = document.getElementById(
+      `peer-audio-${this.peerId}`
+    ) as HTMLAudioElement;
+    // @ts-expect-error
+    audio.setSinkId(deviceId);
   }
 
   @action
@@ -827,6 +864,10 @@ export class PeerClass {
 
   @action
   onTrack(track: MediaStreamTrack, stream: MediaStream) {
+    if (!track || !(track instanceof MediaStreamTrack)) {
+      console.error('Invalid track received in onTrack');
+      return;
+    }
     if (track.kind === 'video') {
       console.log('got video track', track.id);
       // attach video track to video element
@@ -905,10 +946,24 @@ export class PeerClass {
   @action
   onError(err: any) {
     console.error('peer error', err);
+    if (this.reconnectAttempts < 5) {
+      // limit reconnect attempts to 5
+      console.log(
+        `Attempting to reconnect (attempt ${this.reconnectAttempts + 1})`
+      );
+      this.reconnectAttempts++;
+      this.retry(this.ourStream);
+    } else {
+      console.log('Maximum reconnect attempts reached');
+    }
   }
 
   @action
   onClose() {
+    if (!this.peer) {
+      console.error('Peer does not exist in onClose');
+      return;
+    }
     this.status = 'closed';
     this.peer.removeAllListeners();
     this.peer.destroy();
@@ -942,14 +997,18 @@ export class PeerClass {
 
   @action
   onSignal(signal: any) {
-    const msg = {
-      type: 'signal',
-      rid: this.rid,
-      signal,
-      to: this.peerId,
-      from: this.ourId,
-    };
-    this.websocket.send(serialize(msg));
+    try {
+      const msg = {
+        type: 'signal',
+        rid: this.rid,
+        signal,
+        to: this.peerId,
+        from: this.ourId,
+      };
+      this.websocket.send(serialize(msg));
+    } catch (e) {
+      console.error('Error in onSignal', e);
+    }
   }
 
   @action

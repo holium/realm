@@ -25,10 +25,9 @@
     "strict": true,
     "strictFunctionTypes": true,
     "strictNullChecks": true,
-    "target": "es2021",
-    "extraFileExtensions": [".ejs"]
+    "target": "es2021"
   },
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules", "**/app/src/renderer/index.ejs"],
   "references": [
     {
       "path": "./app"

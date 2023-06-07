@@ -35,11 +35,19 @@ export class LocalPeer {
     video: false,
   };
   @observable analysers: IAudioAnalyser[] = [];
+  @observable devices:
+    | {
+        audioInput: string;
+        audioOutput: string;
+        videoInput: string;
+      }
+    | undefined;
 
   constructor(ourId: string) {
     makeObservable(this);
     this.patp = ourId;
     this.setMedia = this.setMedia.bind(this);
+    // get current audio input device
   }
 
   @action
@@ -102,13 +110,32 @@ export class LocalPeer {
     localStorage.setItem('rooms-audio-input', deviceId);
     if (this.stream?.active) {
       this.disableMedia();
-      this.enableMedia({
-        audio: {
-          ...(this.constraints.audio as MediaTrackConstraints),
-          deviceId: {
-            exact: deviceId,
-          },
+      this.constraints.audio = {
+        ...(this.constraints.audio as MediaTrackConstraints),
+        deviceId: {
+          exact: deviceId,
         },
+      };
+      this.enableMedia({
+        audio: this.constraints.audio,
+        video: this.constraints.video,
+      });
+    }
+  }
+
+  @action
+  setVideoInputDevice(deviceId: string) {
+    localStorage.setItem('rooms-video-input', deviceId);
+    if (this.stream?.active) {
+      this.disableMedia();
+      this.constraints.video = {
+        ...(this.constraints.video as MediaTrackConstraints),
+        deviceId: {
+          exact: deviceId,
+        },
+      };
+      this.enableMedia({
+        audio: this.constraints.audio,
         video: this.constraints.video,
       });
     }
@@ -118,6 +145,7 @@ export class LocalPeer {
   @action
   setAudioOutputDevice(deviceId: string) {
     localStorage.setItem('rooms-audio-output', deviceId);
+    // setup new audio output device
   }
 
   @action
