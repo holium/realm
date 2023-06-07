@@ -1,7 +1,24 @@
-import React from 'react';
-import { Button, Icon, Card, Flex, Text } from '@holium/design-system';
+import React, { useEffect } from 'react';
 
-function Home() {
+import { Button, Card, Flex, Icon, Text } from '@holium/design-system';
+
+import api from '../api';
+import { log } from '../utils';
+
+export const Home = () => {
+  const space: string = '/~lux/our';
+  const getPathData = async () => {
+    //fetch data stored in db under the current space(path)
+    try {
+      const result = await api.getPath(space);
+      log('getPathData result =>', result);
+    } catch (e) {
+      log('getPathData error =>', e);
+    }
+  };
+  useEffect(() => {
+    getPathData();
+  }, []);
   return (
     <Card p={'10px'} elevation={4} maxWidth={400} minWidth={400}>
       <Flex flexDirection={'column'}>
@@ -14,8 +31,8 @@ function Home() {
       </Flex>
     </Card>
   );
-}
-function WordItem() {
+};
+const WordItem = () => {
   return (
     <Flex
       flexDirection={'column'}
@@ -57,5 +74,4 @@ function WordItem() {
       </Flex>
     </Flex>
   );
-}
-export default Home;
+};

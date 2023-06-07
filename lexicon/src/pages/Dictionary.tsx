@@ -1,16 +1,8 @@
-import React, { useState } from 'react';
-import {
-  Button,
-  Icon,
-  Card,
-  Flex,
-  Text,
-  TextInput,
-  Menu,
-  Box,
-} from '@holium/design-system';
+import React from 'react';
 
-function Dictionary() {
+import { Box, Card, Flex, Text } from '@holium/design-system';
+
+export const Dictionary = () => {
   return (
     <Card p={3} elevation={4} maxWidth={400} minWidth={400} marginBottom={12}>
       <Flex flexDirection={'column'} justifyContent={'space-between'}>
@@ -24,8 +16,8 @@ function Dictionary() {
       </Flex>
     </Card>
   );
-}
-function Definition() {
+};
+const Definition = () => {
   return (
     <Box>
       <Text.H6
@@ -98,7 +90,7 @@ function Definition() {
       </Flex>
     </Box>
   );
-}
+};
 function DefinitionElement({
   count,
   text,
@@ -118,35 +110,6 @@ function DefinitionElement({
         {example}
       </Text.Body>
     </Flex>
-    /* <Stack marginTop={'10px'}>
-      <Stack direction={'row'} spacing={'5px'}>
-        <Typography
-          variant="subtitle2"
-          sx={{ textDecoration: 'underline' }}
-          color="var(--rlm-text-color, #000)"
-        >
-          {count}.
-        </Typography>
-
-        <Typography variant="subtitle2" color="var(--rlm-text-color, #000)">
-          {def}
-        </Typography>
-      </Stack>
-
-      {example && (
-        <Box>
-          <Typography
-            variant="subtitle2"
-            marginLeft={'18px'}
-            marginTop={'2px'}
-            color="var(--rlm-text-color, #000)"
-            style={{ opacity: 0.5 }}
-          >
-            "{example}"
-          </Typography>
-        </Box>
-      )}
-    </Stack>*/
   );
 }
 export default Dictionary;

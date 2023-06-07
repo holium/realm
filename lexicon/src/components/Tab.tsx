@@ -1,25 +1,15 @@
 import React from 'react';
-import {
-  Button,
-  Icon,
-  Card,
-  Flex,
-  Text,
-  TextInput,
-  Menu,
-} from '@holium/design-system';
+
+import { Button, Flex } from '@holium/design-system';
+
 import { TabItem } from '../types';
 
-
-function Tabs({
-  value,
-  tabData,
-  onChange,
-}: {
+interface TabsProps {
   value: number;
   tabData: TabItem[];
   onChange: Function;
-}) {
+}
+export const Tabs = ({ value, tabData, onChange }: TabsProps) => {
   return (
     <Flex
       gap={10}
@@ -56,15 +46,19 @@ function Tabs({
       })}
     </Flex>
   );
-}
+};
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
   value: number;
+  other: any;
 }
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
+export const TabPanel = ({
+  children,
+  value,
+  index,
+  ...other
+}: TabPanelProps) => {
   return (
     <div
       role="tabpanel"
@@ -76,6 +70,4 @@ function TabPanel(props: TabPanelProps) {
       {children}
     </div>
   );
-}
-
-export { Tabs, TabPanel };
+};
