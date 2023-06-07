@@ -318,7 +318,7 @@ export class RoomsStore {
     );
 
     websocket.onopen = () => {
-      console.log('websocket connected', `status: ${this.status}`);
+      console.log('websocket connected');
       if (this.currentRoom && this.status === 'connected') {
         console.log(
           'cleaning up -- you were in a room and in a disconnected state'
