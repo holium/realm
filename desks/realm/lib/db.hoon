@@ -909,6 +909,15 @@
 
   [cards state]
 ::
+++  create-relay
+  :: supposed to be used by the sharer, poking their own ship,
+  :: regardless of if they are the host of either original or target
+  :: path
+  |=  [[=req-id =input-row] state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  ::  ensure that original
+  `state
+::
 ::
 ::  JSON
 ::
@@ -1070,6 +1079,8 @@
             [%vote (de-vote (~(got by p.jon) 'data'))]
           %comment
             [%comment (de-comment (~(got by p.jon) 'data'))]
+          %relay
+            [%relay (de-relay (~(got by p.jon) 'data'))]
         ==
       [
         (pa (~(got by p.jon) 'path'))
@@ -1124,6 +1135,15 @@
           [%parent-type (se %tas)]
           [%parent-id de-id]
           [%parent-path pa]
+      ==
+    ::
+    ++  de-relay
+      %-  ot
+      :~  [%id de-id]
+          [%type (se %tas)]
+          [%revision ni]
+          [%target-path pa]
+          [%original-path pa]
       ==
     ::
     ++  de-id
@@ -1371,6 +1391,13 @@
                 ['parent-type' s+(scot %tas parent-type.data.row)]
                 ['parent-id' (row-id-to-json parent-id.data.row)]
                 ['parent-path' s+(spat parent-path.data.row)]
+            ==
+          %relay
+            :~  ['id' (row-id-to-json id.data.row)]
+                ['type' s+(scot %tas type.data.row)]
+                ['revision' (numb revision.data.row)]
+                ['target-path' s+(spat target-path.data.row)]
+                ['original-path' s+(spat original-path.data.row)]
             ==
         ==
       =/  keyvals  (weld basekvs dynamickvs)

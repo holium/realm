@@ -80,11 +80,11 @@
 ::  (should come with ability to relay to all paths or just to a
 ::  particular path)
 +$  relay
-  $:  what=id
-      =type
+  $:  =id   :: the id of what is being relayed
+      =type :: type of what is being relayed
       revision=@ud
-      target-path=path
-      original-path=path
+      target-path=path   :: where we are relay-ing TO
+      original-path=path :: where the original thing lives
   ==
 --
 
