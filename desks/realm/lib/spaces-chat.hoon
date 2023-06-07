@@ -19,7 +19,7 @@
   =/  new-chats
     %+  turn  to-add-chat
       |=  [sk=space-path:sstore sv=space:sstore]
-      =/  members-scry         .^(view:mstore %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.sk)/(scot %tas space.sk)/members/noun)
+      =/  members-scry      .^(view:mstore %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.sk)/(scot %tas space.sk)/members/noun)
       ?>  ?=(%members -.members-scry)
       =/  members           members.members-scry
       =/  chat-and-cards    (create-space-chat sv [%role %member] members now.bowl)
