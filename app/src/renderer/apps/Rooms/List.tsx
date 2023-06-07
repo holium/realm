@@ -3,17 +3,20 @@ import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, Text, Tooltip } from '@holium/design-system';
 
+import { SoundActions } from 'renderer/lib/sound';
 import { trackEvent } from 'renderer/lib/track';
-import { RoomMobx } from 'renderer/stores/rooms.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
 import { ProviderSelector } from './components/ProviderSelector';
 import { RoomRow } from './components/RoomRow';
+import { RoomModel } from './store/RoomsStore';
+import { useRoomsStore } from './store/RoomsStoreContext';
 
 const RoomsPresenter = () => {
-  const { spacesStore, roomsStore } = useShipStore();
+  const { spacesStore } = useShipStore();
   const { roomsApp } = useTrayApps();
+  const roomsStore = useRoomsStore();
 
   const ourSpace = spacesStore.selected?.type === 'our';
 
@@ -22,7 +25,7 @@ const RoomsPresenter = () => {
   }, []);
 
   const rooms = ourSpace
-    ? roomsStore?.roomsList
+    ? roomsStore.roomsList
     : roomsStore.getSpaceRooms(spacesStore.selected?.path ?? '');
 
   return (
@@ -69,7 +72,7 @@ const RoomsPresenter = () => {
             </Text.Custom>
           </Flex>
         )}
-        {rooms?.map((room: RoomMobx, index: number) => {
+        {rooms?.map((room: RoomModel, index: number) => {
           return (
             <RoomRow
               key={`${room.title}-${index}`}
@@ -83,8 +86,9 @@ const RoomsPresenter = () => {
               capacity={room.capacity}
               onClick={async (evt: any) => {
                 evt.stopPropagation();
-                if (roomsStore.current?.rid !== room.rid) {
-                  roomsStore?.joinRoom(room.rid);
+                if (roomsStore.currentRid !== room.rid) {
+                  SoundActions.playRoomEnter();
+                  roomsStore.joinRoom(room.rid);
                 }
                 roomsApp.setView('room');
               }}

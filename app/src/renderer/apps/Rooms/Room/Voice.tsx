@@ -5,24 +5,19 @@ import { Flex } from '@holium/design-system';
 
 import { useTrayApps } from 'renderer/apps/store';
 import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
 
 import { Speaker } from '../components/Speaker';
 import { roomTrayConfig } from '../config';
+import { useRoomsStore } from '../store/RoomsStoreContext';
 
 const VoiceViewPresenter = () => {
-  const { roomsStore } = useShipStore();
+  // const { roomsStore } = useShipStore();
+  const roomsStore = useRoomsStore();
+
   const { loggedInAccount } = useAppState();
 
   const { setTrayAppHeight } = useTrayApps();
-
-  const speakers = roomsStore.current
-    ? [
-        ...Array.from(roomsStore.getPeers()).filter(
-          (patp) => patp !== window.ship
-        ),
-      ]
-    : [];
+  const speakers = roomsStore.currentRoomPeers ?? [];
 
   useEffect(() => {
     const regularHeight = roomTrayConfig.dimensions.height;
@@ -34,7 +29,7 @@ const VoiceViewPresenter = () => {
     }
   }, [speakers.length, setTrayAppHeight]);
 
-  if (!roomsStore.current) {
+  if (!roomsStore.currentRid) {
     return null;
   }
   return (
@@ -54,8 +49,8 @@ const VoiceViewPresenter = () => {
         type="our"
         person={loggedInAccount?.serverId ?? ''}
       />
-      {speakers.map((person: string) => (
-        <Speaker key={person} type="speaker" person={person} />
+      {speakers.map((peer: string) => (
+        <Speaker key={peer} type="speaker" person={peer} />
       ))}
     </Flex>
   );

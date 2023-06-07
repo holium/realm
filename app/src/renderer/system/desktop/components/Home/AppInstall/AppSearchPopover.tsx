@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react';
 
-import { useAppState } from 'renderer/stores/app.store';
 import { useAppInstaller } from 'renderer/system/desktop/components/Home/AppInstall/store';
 
 import { RealmPopover } from '../Popover';
@@ -8,13 +7,10 @@ import { SearchModes } from './SearchModes';
 
 const AppSearchPopoverPresenter = () => {
   const appInstaller = useAppInstaller();
-  const { shellStore } = useAppState();
 
   const coords = {
     left: appInstaller.coords.left,
-    top: shellStore.isFullscreen
-      ? appInstaller.coords.top
-      : appInstaller.coords.top + 30,
+    top: appInstaller.coords.top,
   };
 
   if (appInstaller.searchMode === 'none') return null;

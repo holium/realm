@@ -1,12 +1,13 @@
-import { RemotePeer } from './RemotePeer';
+import { LocalPeer } from './LocalPeer';
+import { PeerClass } from './RoomsStore';
 
 export interface IAudioAnalyser {
-  attach: (peer: RemotePeer) => void;
+  attach: (peer: LocalPeer) => void;
   detach: () => void;
 }
 
-export class PeerSpeakingDetectionAnalyser {
-  peer: RemotePeer | null = null;
+export class SpeakingDetectionAnalyser {
+  peer: LocalPeer | PeerClass | null = null;
   audioContext: AudioContext | null = null;
   mediaStreamSource: MediaStreamAudioSourceNode | null = null;
   analyser: AnalyserNode | null = null;
@@ -16,8 +17,8 @@ export class PeerSpeakingDetectionAnalyser {
   averageFrequency = 0;
   lo = 0;
   hi = 0;
-  static initialize(peer: RemotePeer): IAudioAnalyser {
-    const analyser = new PeerSpeakingDetectionAnalyser();
+  static initialize(peer: LocalPeer | PeerClass): IAudioAnalyser {
+    const analyser = new SpeakingDetectionAnalyser();
     analyser.attach(peer);
     return analyser;
   }
@@ -43,14 +44,14 @@ export class PeerSpeakingDetectionAnalyser {
       }
     }
   }
-  attach(peer: RemotePeer) {
+  attach(peer: LocalPeer | PeerClass) {
     this.peer = peer;
     this.audioContext = new (window.AudioContext ||
       window.webkitAudioContext)();
     this.analyser = this.audioContext.createAnalyser();
-    if (!peer.audioStream) throw new Error('No stream');
+    if (!peer.stream) throw new Error('No stream');
     this.mediaStreamSource = this.audioContext.createMediaStreamSource(
-      peer.audioStream
+      peer.stream
     );
     this.mediaStreamSource?.connect(this.analyser);
     this.analyser.minDecibels = -90;

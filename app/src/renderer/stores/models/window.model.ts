@@ -6,7 +6,6 @@ import { Dimensions } from '@holium/design-system';
 import {
   getMaximizedBounds,
   isMaximizedBounds,
-  normalizeValue,
 } from '../../lib/window-manager';
 import { Glob } from './docket.model';
 
@@ -81,33 +80,27 @@ export const AppWindowModel = types
     minimize() {
       self.state = 'minimized';
     },
-    maximizeLeft(desktopDimensions: Dimensions, isFullscreen: boolean) {
+    maximizeLeft(desktopDimensions: Dimensions) {
       const maximizedBounds = getMaximizedBounds(desktopDimensions);
       self.prevBounds = { ...self.bounds };
       self.bounds = {
         x: maximizedBounds.x,
         y: maximizedBounds.y,
         width: maximizedBounds.width / 2,
-        height: isFullscreen
-          ? maximizedBounds.height
-          : maximizedBounds.height -
-            normalizeValue(30, desktopDimensions.height),
+        height: maximizedBounds.height,
       };
     },
-    maximizeRight(desktopDimensions: Dimensions, isFullscreen: boolean) {
+    maximizeRight(desktopDimensions: Dimensions) {
       const maximizedBounds = getMaximizedBounds(desktopDimensions);
       self.prevBounds = { ...self.bounds };
       self.bounds = {
         x: maximizedBounds.x + maximizedBounds.width / 2,
         y: maximizedBounds.y,
         width: maximizedBounds.width / 2,
-        height: isFullscreen
-          ? maximizedBounds.height
-          : maximizedBounds.height -
-            normalizeValue(30, desktopDimensions.height),
+        height: maximizedBounds.height,
       };
     },
-    toggleMaximize(desktopDimensions: Dimensions, isFullscreen: boolean) {
+    toggleMaximize(desktopDimensions: Dimensions) {
       const isMaximized = self.isMaximized(desktopDimensions);
       if (isMaximized) {
         const bounds = { ...self.bounds };
@@ -120,10 +113,7 @@ export const AppWindowModel = types
           x: maximizedBounds.x,
           y: maximizedBounds.y,
           width: maximizedBounds.width,
-          height: isFullscreen
-            ? maximizedBounds.height
-            : maximizedBounds.height -
-              normalizeValue(30, desktopDimensions.height),
+          height: maximizedBounds.height,
         };
       }
     },

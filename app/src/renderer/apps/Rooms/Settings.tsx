@@ -10,24 +10,28 @@ import {
   Text,
 } from '@holium/design-system';
 
-import { useShipStore } from 'renderer/stores/ship.store';
-
 import { useTrayApps } from '../store';
+import { useRoomsStore } from './store/RoomsStoreContext';
 
 const formSourceOptions = (sources: MediaDeviceInfo[]) => {
   return sources.map((source) => {
     return {
       label: source.label,
+      kind: source.kind,
       value: source.deviceId,
     };
   });
 };
-const getAudioInputSources = async () => {
+const getMediaSources = async () => {
   const devices: MediaDeviceInfo[] =
     await navigator.mediaDevices.enumerateDevices();
   return formSourceOptions(
     devices.filter((device: MediaDeviceInfo) => {
-      return device.kind === 'audioinput';
+      return (
+        device.kind === 'audioinput' ||
+        device.kind === 'audiooutput' ||
+        device.kind === 'videoinput'
+      );
     })
   );
 };
@@ -54,20 +58,58 @@ const getAudioInputSources = async () => {
 
 const SettingsPresenter = () => {
   const { roomsApp } = useTrayApps();
-  const { roomsStore } = useShipStore();
+  const roomsStore = useRoomsStore();
 
   const [audioSourceOptions, setAudioSources] = useState<RadioOption[] | any[]>(
     []
   );
+  const [audioOutputOptions, setAudioOutput] = useState<RadioOption[] | any[]>(
+    []
+  );
+  const [videoSourceOptions, setVideoSources] = useState<RadioOption[] | any[]>(
+    []
+  );
   const [selectedSource, setSelectedSource] = useState('');
+  const [selectedOutputSource, setSelectedOutputSource] = useState('');
+  const [selectedVideoSource, setSelectedVideoSource] = useState('');
 
   useEffect(() => {
-    getAudioInputSources().then((sources: any[]) => {
-      setAudioSources(sources as RadioOption[]);
-      const deviceId =
+    getMediaSources().then((sources: any[]) => {
+      const audioSources = sources.filter(
+        (source) => source.kind === 'audioinput'
+      ) as RadioOption[];
+      const audioOutputSources = sources.filter(
+        (source) => source.kind === 'audiooutput'
+      ) as RadioOption[];
+      const videoSources = sources.filter(
+        (source) => source.kind === 'videoinput'
+      ) as RadioOption[];
+      setAudioSources(audioSources);
+      setAudioOutput(audioOutputSources);
+      setVideoSources(videoSources);
+      const audioDeviceId =
         localStorage.getItem('rooms-audio-input') ||
-        sources.find((source) => source.value === 'default')?.value;
-      setSelectedSource(deviceId);
+        audioSources.find((source) =>
+          source.value.toLowerCase().includes('default')
+        )?.value ||
+        audioSources[0]?.value;
+      setSelectedSource(audioDeviceId);
+
+      const audioOutputId =
+        localStorage.getItem('rooms-audio-output') ||
+        audioOutputSources.find((source) =>
+          source.value.toLowerCase().includes('default')
+        )?.value ||
+        audioOutputSources[0]?.value;
+      setSelectedOutputSource(audioOutputId);
+
+      const videoDeviceId =
+        localStorage.getItem('rooms-video-input') ||
+        videoSources.find((source) =>
+          source.value.toLowerCase().includes('default')
+        )?.value ||
+        videoSources[0]?.value;
+      setSelectedVideoSource(videoDeviceId);
     });
   }, []);
 
@@ -101,8 +143,8 @@ const SettingsPresenter = () => {
         </Flex>
         <Flex ml={1} pl={2} pr={2}></Flex>
       </Flex>
-      <Flex flex={1} flexDirection="column">
-        <Text.Label>Audio input</Text.Label>
+      <Flex flexDirection="column" mb={2}>
+        <Text.Label mb={1}>Audio input</Text.Label>
         <Select
           id="rooms-settings-audio-input"
           options={audioSourceOptions}
@@ -110,6 +152,30 @@ const SettingsPresenter = () => {
           onClick={(source) => {
             setSelectedSource(source);
             roomsStore.setAudioInput(source);
+          }}
+        />
+      </Flex>
+      <Flex flexDirection="column" mb={2}>
+        <Text.Label mb={1}>Audio output</Text.Label>
+        <Select
+          id="rooms-settings-audio-output"
+          options={audioOutputOptions}
+          selected={selectedOutputSource}
+          onClick={(source) => {
+            setSelectedOutputSource(source);
+            roomsStore.setAudioOutput(source);
+          }}
+        />
+      </Flex>
+      <Flex flexDirection="column">
+        <Text.Label mb={1}>Video input</Text.Label>
+        <Select
+          id="rooms-settings-video-input"
+          options={videoSourceOptions}
+          selected={selectedVideoSource}
+          onClick={(source) => {
+            setSelectedVideoSource(source);
+            roomsStore.setVideoInput(source);
           }}
         />
       </Flex>

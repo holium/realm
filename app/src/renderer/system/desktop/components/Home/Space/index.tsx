@@ -24,15 +24,9 @@ type SidebarType = 'members' | 'friends' | null;
 const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
   const { loggedInAccount } = useAppState();
   const { spacesStore } = useShipStore();
-  const { shellStore } = useAppState();
   const currentSpace = spacesStore.selected;
   const [sidebar, setSidebar] = useState<SidebarType>(null);
   const [appGrid, showAppGrid] = useState(isOur ? true : false);
-
-  const topMargin = useMemo(
-    () => (shellStore.isFullscreen ? 40 : 70),
-    [shellStore.isFullscreen]
-  );
 
   const onMemberClick = () => {
     setSidebar(!sidebar ? 'members' : null);
@@ -95,7 +89,7 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
             height={44}
             gap={12}
             mb={40}
-            mt={topMargin}
+            mt={40}
             flexDirection="row"
             alignItems="center"
             justifyContent="center"
@@ -149,7 +143,7 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
             maxHeight={44}
             height={44}
             gap={12}
-            mt={topMargin}
+            mt={40}
             mb={40}
             width={maxWidth}
             variants={{

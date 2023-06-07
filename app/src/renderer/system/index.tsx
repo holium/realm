@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { Layer, ViewPort } from 'react-spaces';
 import { observer } from 'mobx-react';
 
+import { RoomsStoreProvider } from 'renderer/apps/Rooms/store/RoomsStoreProvider';
 // import { ConnectionStatus } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -45,11 +46,18 @@ const ShellPresenter = () => {
     loggedInAccount?.serverId, // For switching ships with different settings.
   ]);
 
+  if (!loggedInAccount) {
+    return null;
+  }
+
   return (
-    <ViewPort>
-      <Layer zIndex={2}>{DialogLayer}</Layer>
-      <Desktop />
-    </ViewPort>
+    <RoomsStoreProvider ourId={loggedInAccount.serverId}>
+      <ViewPort>
+        <Layer zIndex={2}>{DialogLayer}</Layer>
+        <Desktop />
+        <Layer zIndex={20}>{/* <ConnectionStatus /> */}</Layer>
+      </ViewPort>
+    </RoomsStoreProvider>
   );
 };
 
