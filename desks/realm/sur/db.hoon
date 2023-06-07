@@ -166,5 +166,6 @@
 ::
 +$  vent
   $%  [%row-id =id:common]
+      [%ack ~]
   ==
 --
