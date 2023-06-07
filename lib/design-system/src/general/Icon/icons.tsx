@@ -784,6 +784,60 @@ export const paths = {
       </defs>
     </>
   ),
+  NotesToSelf: (
+    <g>
+      <path
+        d="M14.5 21H4C3.4475 21 3 20.5525 3 20V4C3 3.4475 3.4475 3 4 3H20C20.5525 3 21 3.4475 21 4V14.5L14.5 21Z"
+        fill="url(#paint0_linear_4961_30453)"
+      />
+      <path
+        d="M15.5 14.5H21L14.5 21V15.5C14.5 14.9475 14.9475 14.5 15.5 14.5Z"
+        fill="url(#paint1_linear_4961_30453)"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M6 9C6 8.72386 6.22386 8.5 6.5 8.5H17.5C17.7761 8.5 18 8.72386 18 9C18 9.27614 17.7761 9.5 17.5 9.5H6.5C6.22386 9.5 6 9.27614 6 9Z"
+        fill="#E8BA13"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M6 12C6 11.7239 6.22386 11.5 6.5 11.5H17.5C17.7761 11.5 18 11.7239 18 12C18 12.2761 17.7761 12.5 17.5 12.5H6.5C6.22386 12.5 6 12.2761 6 12Z"
+        fill="#E8BA13"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M6 15C6 14.7239 6.22386 14.5 6.5 14.5H11.5C11.7761 14.5 12 14.7239 12 15C12 15.2761 11.7761 15.5 11.5 15.5H6.5C6.22386 15.5 6 15.2761 6 15Z"
+        fill="#E8BA13"
+      />
+      <defs>
+        <linearGradient
+          id="paint0_linear_4961_30453"
+          x1="3.4745"
+          y1="3.4745"
+          x2="17.7225"
+          y2="17.7225"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#FEDE00" />
+          <stop offset="1" stopColor="#FFD000" />
+        </linearGradient>
+        <linearGradient
+          id="paint1_linear_4961_30453"
+          x1="14.796"
+          y1="14.796"
+          x2="17.8355"
+          y2="17.8355"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#4B4B4B" />
+          <stop offset="1" stopColor="#3B3B3B" />
+        </linearGradient>
+      </defs>
+    </g>
+  ),
 };
 
 export type IconPathsType = keyof typeof paths;
