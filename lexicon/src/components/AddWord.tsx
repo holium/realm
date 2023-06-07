@@ -12,7 +12,11 @@ import {
 import api from '../api';
 import { log } from '../utils';
 
-export const AddWord = () => {
+interface Props {
+  open: boolean;
+  onClose: Function;
+}
+export const AddWord = ({ open, onClose }: Props) => {
   const space: string = '/~lux/our';
 
   const [word, setWord] = useState<string>('');
@@ -22,7 +26,26 @@ export const AddWord = () => {
 
   const addWord = async () => {
     try {
-      const result = await api.createWord(space, word);
+      const result: any = await api.createWord(space, word);
+      if (result) {
+        //word created succesfully, create a definition and sentence if any
+        const wordId = result['row-id'];
+
+        const definitionResult = await api.createDefinition(
+          space,
+          wordId,
+          definition
+        );
+        log('definitionResult', definitionResult);
+        if (sentence) {
+          const sentenceResult = await api.createSentence(
+            space,
+            wordId,
+            sentence
+          );
+          log('sentenceResult', sentenceResult);
+        }
+      }
       resetForm();
       log('addWord result =>', result);
     } catch (e) {
@@ -38,6 +61,7 @@ export const AddWord = () => {
   const handleSubmit = () => {
     addWord();
   };
+  if (!open) return null;
   return (
     <Card
       p={3}
@@ -109,7 +133,12 @@ export const AddWord = () => {
         </Flex>
       </Flex>
       <Flex gap={10} justifyContent={'flex-end'} marginTop={'auto'}>
-        <Button.Transparent fontSize={1} fontWeight={600} opacity={0.5}>
+        <Button.Transparent
+          fontSize={1}
+          fontWeight={600}
+          opacity={0.5}
+          onClick={() => onClose()}
+        >
           Cancel
         </Button.Transparent>
         <Button.TextButton
@@ -117,6 +146,7 @@ export const AddWord = () => {
           fontWeight={600}
           alignSelf={'flex-end'}
           onClick={handleSubmit}
+          disabled={!definition || !word}
         >
           Submit
         </Button.TextButton>
