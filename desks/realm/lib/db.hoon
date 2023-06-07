@@ -1174,9 +1174,10 @@
     ++  en-vent
       |=  =vent
       ^-  json
-      %+  frond
-        %row-id
-      (row-id-to-json id.vent)
+      ?-  -.vent
+        %ack     s/%ack
+        %row-id  (frond row-id+(row-id-to-json id.vent))
+      ==
     ::
     ++  en-db-changes
       |=  chs=db-changes
