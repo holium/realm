@@ -1,5 +1,5 @@
-import SearchBar from './SearchBar';
-import { Tabs, TabPanel } from './Tab';
-import AddWord from './AddWord';
+import { AddWord } from './AddWord';
+import { SearchBar } from './SearchBar';
+import { TabPanel, Tabs } from './Tab';
 
-export { SearchBar, Tabs, TabPanel, AddWord };
+export { AddWord, SearchBar, TabPanel, Tabs };

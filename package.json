@@ -11,7 +11,8 @@
     "lib/presence",
     "lib/presence/code",
     "lib/room",
-    "lib/room/test-ui"
+    "lib/room/test-ui",
+    "lexicon"
   ],
   "scripts": {
     "tsc": "yarn workspace @holium/realm tsc --noemit && yarn workspace @holium/design-system tsc --noemit && yarn workspace @holium/realm-presence tsc --noemit && yarn workspace @holium/realm-presence-notes tsc --noemit && yarn workspace @holium/shared tsc --noemit && yarn workspace @holium/holium-com tsc --noemit && yarn workspace @holium/hosting-holium-com tsc --noemit",
