@@ -210,11 +210,9 @@ export const ChatInfoPresenter = () => {
     >
       <ChatLogHeader
         path={path}
-        title={'Chat Info'}
         isMuted={selectedChat.muted}
-        avatar={<div />}
-        onBack={() => setSubroute('chat')}
         hasMenu={false}
+        onBack={() => setSubroute('chat')}
       />
       <NoScrollBar
         flexDirection="column"

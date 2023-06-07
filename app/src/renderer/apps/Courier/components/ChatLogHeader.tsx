@@ -1,11 +1,14 @@
 import { useMemo } from 'react';
+import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
-import { Button, Flex, Icon, Text } from '@holium/design-system/general';
+import { Button, Flex, Icon } from '@holium/design-system/general';
 import { Menu, MenuItemProps } from '@holium/design-system/navigation';
 
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+import { ChatLogHeaderContent } from './ChatLogHeaderContent';
 
 const ChatLogHeaderContainer = styled(Flex)<{ isStandaloneChat: boolean }>`
   gap: 12px;
@@ -22,12 +25,8 @@ const ChatLogHeaderContainer = styled(Flex)<{ isStandaloneChat: boolean }>`
   `}
 `;
 
-type ChatLogHeaderProps = {
+type Props = {
   path: string;
-  title: string;
-  pretitle?: React.ReactNode;
-  subtitle?: React.ReactNode;
-  avatar: React.ReactNode;
   isMuted: boolean;
   hasMenu: boolean;
   rightAction?: React.ReactNode;
@@ -35,18 +34,14 @@ type ChatLogHeaderProps = {
   onBack: () => void;
 };
 
-export const ChatLogHeader = ({
+const ChatLogHeaderPresenter = ({
   path,
-  title,
-  pretitle,
-  subtitle,
-  avatar,
   rightAction,
   isMuted,
   hasMenu = true,
   isStandaloneChat = false,
   onBack,
-}: ChatLogHeaderProps) => {
+}: Props) => {
   const { loggedInAccount, shellStore } = useAppState();
   const { chatStore } = useShipStore();
   const { selectedChat, setSubroute, toggleMuted } = chatStore;
@@ -144,35 +139,7 @@ export const ChatLogHeader = ({
             <Icon name="ArrowLeftLine" size={22} opacity={0.5} />
           </Button.IconButton>
         )}
-        <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
-          <Flex
-            layoutId={isStandaloneChat ? undefined : `chat-${path}-avatar`}
-            layout={'preserve-aspect'}
-            transition={{
-              duration: isStandaloneChat ? 0 : 0.15,
-            }}
-          >
-            {avatar}
-          </Flex>
-          <Flex alignItems="flex-start" flexDirection="column">
-            {pretitle}
-            <Text.Custom
-              truncate
-              width={255}
-              layoutId={isStandaloneChat ? `chat-${path}-name` : undefined}
-              layout="preserve-aspect"
-              textAlign="left"
-              transition={{
-                duration: isStandaloneChat ? 0 : 0.15,
-              }}
-              fontWeight={500}
-              fontSize={3}
-            >
-              {title}
-            </Text.Custom>
-            {subtitle}
-          </Flex>
-        </Flex>
+        <ChatLogHeaderContent isStandaloneChat={isStandaloneChat} />
       </Flex>
       <Flex>
         {rightAction}
@@ -193,3 +160,5 @@ export const ChatLogHeader = ({
     </ChatLogHeaderContainer>
   );
 };
+
+export const ChatLogHeader = observer(ChatLogHeaderPresenter);

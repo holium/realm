@@ -13,33 +13,31 @@ import { FileUploadParams } from 'os/services/ship/ship.service';
 import { useFileUpload } from 'renderer/lib/useFileUpload';
 import { IuseStorage } from 'renderer/lib/useStorage';
 import { ShipIPC } from 'renderer/stores/ipc';
-
-import {
-  ChatMessageType,
-  ChatModelType,
-} from '../../../stores/models/chat.model';
+import { ChatMessageType } from 'renderer/stores/models/chat.model';
 
 type CourierInputProps = {
   replyTo?: any;
   storage: IuseStorage;
-  selectedChat: ChatModelType;
+  selectedChatPath: string;
   editMessage?: ChatMessageType | null;
   themeMode: 'light' | 'dark';
   onSend: (fragments: any[]) => void;
   onAttachmentChange: (attachmentCount: number) => void;
   onCancelEdit?: (evt: React.MouseEvent<HTMLButtonElement>) => void;
+  onCancelReply?: () => void;
   onEditConfirm: (fragments: any[]) => void;
 };
 
 export const ChatInputBox = ({
   replyTo,
   storage,
-  selectedChat,
+  selectedChatPath,
   editMessage,
   themeMode,
   onSend,
   onEditConfirm,
   onCancelEdit,
+  onCancelReply,
   onAttachmentChange,
 }: CourierInputProps) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -145,7 +143,7 @@ export const ChatInputBox = ({
       <div ref={mediaRef} style={{ display: 'none' }}></div>
       <ChatInput
         id="chat-log-input"
-        selectedChatPath={selectedChat.path}
+        selectedChatPath={selectedChatPath}
         replyTo={replyTo}
         isFocused={isFocused}
         loading={isUploading}
@@ -166,7 +164,7 @@ export const ChatInputBox = ({
         editingMessage={editMessage?.contents}
         onEditConfirm={onEditConfirm}
         onCancelEdit={onCancelEdit}
-        onCancelReply={() => selectedChat.clearReplying()}
+        onCancelReply={onCancelReply}
         onBlur={() => setIsFocused(false)}
       />
     </Box>

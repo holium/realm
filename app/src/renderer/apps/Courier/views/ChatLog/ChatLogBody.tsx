@@ -1,12 +1,13 @@
-import { ReactNode, RefObject, useState } from 'react';
+import { RefObject, useState } from 'react';
+import { observer } from 'mobx-react';
 
 import { Flex, Text, WindowedListRef } from '@holium/design-system/general';
 
 import {
   ChatFragmentMobxType,
   ChatMessageType,
-  ChatModelType,
 } from 'renderer/stores/models/chat.model';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ChatInputBox } from '../../components/ChatInputBox';
 import { ChatLogHeader } from '../../components/ChatLogHeader';
@@ -16,22 +17,14 @@ import {
   ChatInputContainer,
   ChatLogListContainer,
   FullWidthAnimatePresence,
-} from './ChatLogView.styles';
+} from './ChatLogBody.styles';
 
 type Props = {
   path: string;
-  title: string;
-  pretitle?: ReactNode;
-  subtitle?: ReactNode;
-  chatAvatar: ReactNode;
-  messages: ChatMessageType[];
-  selectedChat: ChatModelType;
   showPin: boolean;
   pinnedChatMessage: ChatMessageType;
   storage: any;
   isMuted: boolean;
-  width: number | string;
-  height: number | string;
   ourColor: string;
   themeMode: 'light' | 'dark';
   listRef: RefObject<WindowedListRef>;
@@ -43,19 +36,12 @@ type Props = {
     message: ChatFragmentMobxType;
   } | null;
   isStandaloneChat: boolean;
-  onBack: () => void;
   onEditConfirm: (fragments: any[]) => void;
   onSend: (fragments: any[]) => Promise<void>;
 };
 
-export const ChatLogView = ({
+const ChatLogBodyPresenter = ({
   path,
-  title,
-  pretitle,
-  subtitle,
-  chatAvatar,
-  messages,
-  selectedChat,
   showPin,
   pinnedChatMessage,
   storage,
@@ -65,11 +51,17 @@ export const ChatLogView = ({
   listRef,
   replyTo,
   isStandaloneChat,
-  onBack,
   onEditConfirm,
   onSend,
 }: Props) => {
+  const { chatStore } = useShipStore();
+  const { selectedChat, setSubroute } = chatStore;
+
   const [showAttachments, setShowAttachments] = useState(false);
+
+  if (!selectedChat) return null;
+
+  const { messages } = selectedChat;
 
   let topPadding;
   let endPadding;
@@ -82,8 +74,6 @@ export const ChatLogView = ({
   if (selectedChat.replyingMsg) {
     endPadding = 56;
   }
-
-  console.log('messages.length', messages.length);
 
   const onAttachmentChange = (attachmentCount: number) => {
     if (attachmentCount > 0) {
@@ -106,15 +96,11 @@ export const ChatLogView = ({
       flexDirection="column"
     >
       <ChatLogHeader
-        title={title}
         path={path}
         isMuted={isMuted}
-        avatar={chatAvatar}
-        pretitle={pretitle}
-        subtitle={subtitle}
-        hasMenu
         isStandaloneChat={isStandaloneChat}
-        onBack={onBack}
+        hasMenu
+        onBack={() => setSubroute('inbox')}
       />
       <Flex
         flex={1}
@@ -166,7 +152,7 @@ export const ChatLogView = ({
       <ChatInputContainer isStandaloneChat={isStandaloneChat}>
         <ChatInputBox
           storage={storage}
-          selectedChat={selectedChat}
+          selectedChatPath={selectedChat.path}
           themeMode={themeMode}
           onSend={onSend}
           onEditConfirm={onEditConfirm}
@@ -177,9 +163,12 @@ export const ChatLogView = ({
             if (!selectedChat) return;
             selectedChat.cancelEditing();
           }}
+          onCancelReply={selectedChat.clearReplying}
           onAttachmentChange={onAttachmentChange}
         />
       </ChatInputContainer>
     </Flex>
   );
 };
+
+export const ChatLogBody = observer(ChatLogBodyPresenter);

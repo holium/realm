@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 
 import { isArm64, isMac } from './env';
 
-const toggleFullscreen = (mainWindow: BrowserWindow) => {
+export const toggleFullscreen = (mainWindow: BrowserWindow) => {
   if (isArm64 && isMac) {
     const wasSimpleFullscreen = mainWindow.isSimpleFullScreen();
     mainWindow.setSimpleFullScreen(!wasSimpleFullscreen);

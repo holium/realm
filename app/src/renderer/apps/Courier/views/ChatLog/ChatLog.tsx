@@ -7,7 +7,6 @@ import {
   measureImage,
   measureTweet,
   parseMediaType,
-  Text,
   WindowedListRef,
 } from '@holium/design-system';
 
@@ -18,8 +17,7 @@ import { useAppState } from 'renderer/stores/app.store';
 import { ChatMessageType } from 'renderer/stores/models/chat.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { ChatAvatar } from '../../components/ChatAvatar';
-import { ChatLogView } from './ChatLogView';
+import { ChatLogBody } from './ChatLogBody';
 
 type Props = {
   isStandaloneChat?: boolean;
@@ -29,8 +27,8 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
   const storage = useStorage();
   const { loggedInAccount, theme } = useAppState();
   const { dimensions, innerNavigation } = useTrayApps();
-  const { notifStore, friends, chatStore, spacesStore } = useShipStore();
-  const { selectedChat, getChatHeader, setSubroute } = chatStore;
+  const { notifStore, friends, chatStore } = useShipStore();
+  const { selectedChat } = chatStore;
 
   const listRef = useRef<WindowedListRef>(null);
 
@@ -65,12 +63,6 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
     }, 350);
   }, [selectedChat?.path, innerNavigation]);
 
-  const { title, sigil, image } = useMemo(() => {
-    if (!selectedChat || !loggedInAccount?.serverId)
-      return { title: 'Error loading title' };
-    return getChatHeader(selectedChat.path);
-  }, [selectedChat?.path, window.ship]);
-
   const replyToFormatted = useMemo(() => {
     if (selectedChat?.replyingMsg) {
       const {
@@ -90,20 +82,10 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
   }, [selectedChat?.replyingMsg, listRef.current]);
 
   if (!selectedChat || !loggedInAccount) return null;
-  const { path, type, peers, metadata, messages } = selectedChat;
+  const { path, messages } = selectedChat;
 
   const showPin =
     selectedChat.pinnedMessageId !== null && !selectedChat.hidePinned;
-
-  let spaceTitle = undefined;
-  let avatarColor: string | undefined;
-  if (type === 'space') {
-    const space = spacesStore.getSpaceByChatPath(path);
-    if (space) {
-      spaceTitle = space.name;
-      avatarColor = space.color;
-    }
-  }
 
   const containerWidth = dimensions.width - 24;
 
@@ -170,80 +152,18 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
     );
   };
 
-  const height: number = dimensions.height - 104;
-
-  let pretitle;
-  let subtitle;
-  if (selectedChat.peers.length > 1 && selectedChat.type === 'group') {
-    subtitle = (
-      <Text.Custom
-        textAlign="left"
-        layoutId={isStandaloneChat ? undefined : `chat-${path}-subtitle`}
-        layout="preserve-aspect"
-        transition={{
-          duration: isStandaloneChat ? 0 : 0.15,
-        }}
-        width={210}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.5, lineHeight: '1' }}
-        fontSize={2}
-      >
-        {selectedChat.peers.length} members
-      </Text.Custom>
-    );
-  }
-  if (selectedChat.type === 'space') {
-    pretitle = (
-      <Text.Custom
-        textAlign="left"
-        layoutId={isStandaloneChat ? undefined : `chat-${path}-pretitle`}
-        layout="preserve-aspect"
-        transition={{
-          duration: 0.15,
-        }}
-        width={210}
-        initial={{ opacity: 0.5 }}
-        animate={{ opacity: 0.5, lineHeight: '1' }}
-        fontSize={1}
-        fontWeight={500}
-      >
-        {spaceTitle}
-      </Text.Custom>
-    );
-  }
-
   return (
-    <ChatLogView
+    <ChatLogBody
       path={path}
-      title={title}
-      pretitle={pretitle}
-      subtitle={subtitle}
-      messages={messages}
-      selectedChat={selectedChat}
       storage={storage}
       isMuted={selectedChat.muted}
       showPin={showPin}
       pinnedChatMessage={selectedChat.pinnedChatMessage as ChatMessageType}
-      width={isStandaloneChat ? '100%' : containerWidth}
-      height={isStandaloneChat ? '100%' : height}
       ourColor={ourColor}
       themeMode={theme.mode as 'light' | 'dark'}
       listRef={listRef}
       replyTo={replyToFormatted}
-      chatAvatar={
-        <ChatAvatar
-          sigil={sigil}
-          type={type}
-          path={path}
-          peers={peers.map((p) => p.ship)}
-          image={image}
-          metadata={metadata}
-          color={avatarColor}
-          canEdit={false}
-        />
-      }
       isStandaloneChat={isStandaloneChat}
-      onBack={() => setSubroute('inbox')}
       onEditConfirm={onEditConfirm}
       onSend={onMessageSend}
     />

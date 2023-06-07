@@ -20,20 +20,20 @@ export const StandaloneChatPresenter = () => {
   });
 
   useEffect(() => {
+    // Standalone chat uses the default OS cursor.
     window.electron.app.disableRealmCursor();
-  }, []);
+  });
 
   useEffect(() => {
+    // Fetch messages for the selected chat.
     if (chatStore.subroute === 'inbox') {
-      // ChatIPC.fetchPathMetadata();
-
       if (chatStore.inbox.length === 0) {
         chatStore.loadChatList();
       }
     } else {
       chatStore.selectedChat?.fetchMessages();
     }
-  }, []);
+  }, [chatStore.subroute, chatStore.selectedChat, chatStore.inbox]);
 
   if (chatStore.loader.isFirstLoad) {
     return (
@@ -55,7 +55,6 @@ export const StandaloneChatPresenter = () => {
       </Flex>
     );
   }
-  console.log('chatStore.subroute', chatStore.subroute);
 
   return (
     <Flex
