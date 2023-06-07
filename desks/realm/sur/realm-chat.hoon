@@ -57,6 +57,8 @@
       [%mute-chat =path mute=?]  :: toggles the muted-state of the path
       [%pin-chat =path pin=?]    :: toggles the pinned-state of the path
       [%toggle-msg-preview-notif msg-preview-notif=?]
+
+      [%create-notes-to-self-if-not-exists ~]
   ==
 +$  create-chat-data  [metadata=(map cord cord) type=@tas peers=(list ship) invites=@tas max-expires-at-duration=@dr]
 --
