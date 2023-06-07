@@ -101,7 +101,7 @@ const AppViewPresenter = ({ isResizing, isDragging, appWindow }: Props) => {
     loggedInAccount,
     appWindow,
     spacesStore.selected?.path,
-    shellStore.mouseColor,
+    shellStore,
     theme.backgroundColor,
     theme.mode,
   ]);

@@ -50,7 +50,8 @@ export const PinnedDockAppPresenter = ({
     tileId: string;
     rect: DOMRect;
   } | null>(null);
-  const { getOptions, setOptions, getColors, setColors } = useContextMenu();
+  const { getOptions, setOptions, getColors, setColors, mouseRef } =
+    useContextMenu();
   const appRef = bazaarStore.catalog.get(app.id);
   const tapping = useToggle(false);
   // TODO need to cleanup and use a ref for the app here
@@ -115,6 +116,7 @@ export const PinnedDockAppPresenter = ({
               const appHost = (app as AppMobxType).host;
               return handleInstallation(
                 appHost,
+                app.title,
                 app.id,
                 appRef?.installStatus as InstallStatus
               );
@@ -143,11 +145,15 @@ export const PinnedDockAppPresenter = ({
   }, [app.color]);
 
   useEffect(() => {
-    if (contextMenuOptions && contextMenuOptions !== getOptions(tileId)) {
+    if (!mouseRef) tapping.toggleOff();
+  }, [mouseRef]);
+
+  useEffect(() => {
+    if (contextMenuOptions !== getOptions(tileId)) {
       setOptions(tileId, contextMenuOptions);
     }
 
-    if (contextMenuColors && contextMenuColors !== getColors(tileId)) {
+    if (contextMenuColors !== getColors(tileId)) {
       setColors(tileId, contextMenuColors);
     }
   }, [
@@ -165,24 +171,7 @@ export const PinnedDockAppPresenter = ({
       <Reorder.Item
         key={app.id}
         value={app.id}
-        initial={{
-          opacity: 0.0,
-        }}
-        animate={{
-          opacity: 1,
-          transition: {
-            opacity: { duration: 0.25, delay: 0.5 },
-          },
-        }}
-        exit={{
-          opacity: 0.5,
-          transition: {
-            opacity: { duration: 1, delay: 0 },
-          },
-        }}
         onDragStart={() => tapping.toggleOff()}
-        whileDrag={{ zIndex: 20 }}
-        drag="x"
         onPointerDown={() => {
           const rect = document.getElementById(tileId)?.getBoundingClientRect();
           if (rect) pointerDownRef.current = { tileId, rect };

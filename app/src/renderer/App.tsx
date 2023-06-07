@@ -1,7 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { MotionConfig } from 'framer-motion';
 import { observer } from 'mobx-react';
-import styled from 'styled-components';
 
 import { GlobalStyle, RealmBackground } from './App.styles';
 import { AppContent } from './AppContent';
@@ -14,18 +13,6 @@ import { ErrorBoundary } from './system/ErrorBoundary';
 
 import './app.css';
 import 'photoswipe/dist/photoswipe.css';
-
-const RealmTitlebar = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 28px;
-  background: var(--rlm-dock-color);
-  z-index: 100;
-  -webkit-user-select: none;
-  -webkit-app-region: drag;
-`;
 
 const AppPresenter = () => {
   const { theme, shellStore, booted } = useAppState();
@@ -43,7 +30,6 @@ const AppPresenter = () => {
     <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
       <AppStateProvider value={appState}>
         <GlobalStyle blur={true} realmTheme={theme} />
-        {!shellStore.isFullscreen && <RealmTitlebar />}
         <RealmBackground
           blurred={shellStore.isBlurred}
           snapView={shellStore.snapView}

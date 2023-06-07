@@ -17,11 +17,11 @@ import path from 'path';
 import { RealmService } from '../os/realm.service';
 import { AppUpdater } from './AppUpdater';
 import { BrowserHelper } from './helpers/browser';
+import { CursorHelper } from './helpers/cursor';
 import { DeepLinkHelper } from './helpers/deepLink';
 import { DevHelper } from './helpers/dev';
-import { isDevelopment, isMac, isProduction, isWindows } from './helpers/env';
+import { isArm64, isDevelopment, isMac, isProduction } from './helpers/env';
 import { FullScreenHelper } from './helpers/fullscreen';
-import { hideCursor } from './helpers/hideCursor';
 import { KeyHelper } from './helpers/key';
 import { MediaHelper } from './helpers/media';
 import { MouseHelper } from './helpers/mouse';
@@ -79,6 +79,28 @@ export const getPreloadPath = () =>
     ? path.join(__dirname, 'preload.js')
     : path.join(__dirname, '../../.holium/dll/preload.js');
 
+export const toggleFullscreen = (mainWindow: BrowserWindow) => {
+  if (isArm64 && isMac) {
+    const wasSimpleFullscreen = mainWindow.isSimpleFullScreen();
+    mainWindow.setSimpleFullScreen(!wasSimpleFullscreen);
+    const initialDimensions = mainWindow.getBounds();
+    if (wasSimpleFullscreen) {
+      mainWindow.webContents.send('set-dimensions', initialDimensions);
+      mainWindow.webContents.send('set-fullscreen', false);
+    } else {
+      initialDimensions.height = initialDimensions.height - 42;
+      mainWindow.webContents.send('set-dimensions', initialDimensions);
+      mainWindow.webContents.send('set-fullscreen', true);
+    }
+    // mainWindow.webContents.send('set-titlebar-visible', !wasSimpleFullscreen);
+  } else {
+    const wasFullscreen = mainWindow.isFullScreen();
+    mainWindow.setFullScreen(!wasFullscreen);
+    mainWindow.setMenuBarVisibility(wasFullscreen);
+    mainWindow.webContents.send('set-fullscreen', !wasFullscreen);
+  }
+};
+
 const createWindow = async () => {
   if (isDevelopment) {
     // TODO can cleanup here
@@ -86,13 +108,15 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
+    frame: isArm64 && isMac ? false : true,
     width: 1512,
     height: 982,
     icon: getAssetPath('icon.png'),
     title: 'Realm',
     fullscreen: true,
     acceptFirstMouse: true,
-    titleBarStyle: 'hidden',
+    // turn on simple fullscreen for arm64 mac to fill notch area
+    simpleFullscreen: isArm64 && isMac,
     webPreferences: {
       nodeIntegration: false,
       webviewTag: true,
@@ -101,6 +125,7 @@ const createWindow = async () => {
       preload: getPreloadPath(),
     },
   });
+  mainWindow.setMenuBarVisibility(false);
 
   // ---------------------------------------------------------------------
   // ----------------------- Start Realm services ------------------------
@@ -122,10 +147,20 @@ const createWindow = async () => {
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.webContents.on('dom-ready', () => {
-    // We use the default cursor for Linux.
-    if (isMac || isWindows) hideCursor(mainWindow.webContents);
     mainWindow.webContents.send('add-mouse-listeners', true);
     mainWindow.webContents.send('add-key-listeners');
+  });
+
+  ipcMain.handle('close-realm', (_) => {
+    mainWindow.close();
+    app.quit();
+  });
+  ipcMain.handle('toggle-minimized', (_) => {
+    mainWindow.isMinimized() ? mainWindow.restore() : mainWindow.minimize();
+  });
+
+  ipcMain.handle('toggle-fullscreen', (_) => {
+    toggleFullscreen(mainWindow);
   });
 
   // ---------------------------------------------------------------------
@@ -147,8 +182,17 @@ const createWindow = async () => {
       isDev ? mainWindow.showInactive() : mainWindow.show();
     }
     const initialDimensions = mainWindow.getBounds();
+    let hasTitlebar = false;
+    let isFullscreen = mainWindow.isFullScreen();
+    if (isArm64 && isMac) {
+      initialDimensions.height = initialDimensions.height - 42;
+      hasTitlebar = true;
+      isFullscreen = mainWindow.isSimpleFullScreen();
+    }
+    mainWindow.webContents.send('set-titlebar-visible', hasTitlebar);
     mainWindow.webContents.send('set-dimensions', initialDimensions);
-    mainWindow.webContents.send('set-fullscreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send('set-fullscreen', isFullscreen);
+    // mainWindow.on('app-command')
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);
@@ -163,10 +207,11 @@ const createWindow = async () => {
 
 const createMouseOverlayWindow = () => {
   // Create a window covering the whole window.
+  const bounds = mainWindow.getBounds();
   const newMouseWindow = new BrowserWindow({
     title: 'Mouse overlay',
     parent: mainWindow,
-    ...mainWindow.getBounds(),
+    ...bounds,
     frame: false,
     movable: false,
     minimizable: false,
@@ -191,27 +236,11 @@ const createMouseOverlayWindow = () => {
   });
   newMouseWindow.setIgnoreMouseEvents(true);
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
+  // newMouseWindow.setMenuBarVisibility(false);
 
   FullScreenHelper.registerListeners(mainWindow, newMouseWindow);
+  CursorHelper.registerListeners(mainWindow, newMouseWindow);
   MouseHelper.registerListeners(mainWindow, newMouseWindow);
-
-  const mouseSetup = () => {
-    if (isMac) {
-      hideCursor(newMouseWindow.webContents);
-      newMouseWindow.setWindowButtonVisibility(false);
-      /**
-       * For macOS we enable mouse layer tracking for a smoother experience.
-       * It is not supported for Windows or Linux.
-       */
-      newMouseWindow.webContents.send('enable-mouse-layer-tracking');
-    } else if (isWindows) {
-      hideCursor(newMouseWindow.webContents);
-    } else {
-      newMouseWindow.webContents.send('disable-custom-mouse');
-    }
-  };
-
-  newMouseWindow.webContents.on('dom-ready', mouseSetup);
 
   newMouseWindow.on('close', () => {
     if (mainWindow.isClosable()) mainWindow.close();
@@ -237,6 +266,7 @@ app.on('window-all-closed', () => {
     // Respect the OSX convention of having the application in memory even
     // after all windows have been closed
     if (!isMac) app.quit();
+    if (isArm64) app.quit();
   }
 });
 // quitting is complicated. We have to catch the initial quit signal, preventDefault() it,
@@ -282,5 +312,21 @@ app
         createMouseOverlayWindow();
       }
     });
+
+    app.on('before-quit', () => {
+      if (isMac) {
+        mainWindow?.close();
+        app.exit();
+      }
+    });
   })
   .catch(console.log);
+
+// // detect sigkill or sigterm and quit
+// process.on('SIGTERM', () => {
+//   app.exit();
+// });
+
+// process.on('SIGINT', () => {
+//   app.exit();
+// });

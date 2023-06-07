@@ -8,6 +8,10 @@
   font-family: var(--rlm-font);
 }
 
+body {
+  background-color: var(--rlm-base-color);
+}
+
 #__next {
   position: relative;
   display: flex;

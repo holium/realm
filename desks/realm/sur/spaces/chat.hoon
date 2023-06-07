@@ -21,6 +21,7 @@
 ::
 +$  action
   $%  [%create-channel path=space-path =chat]
+      [%init ~]
       :: [%delete-channel path=space-path]
       :: [%set-access path=space-path chat-path=path access=chat-access]
   ==

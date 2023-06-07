@@ -47,7 +47,7 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
 
   const onInstallation = (evt: React.MouseEvent<HTMLButtonElement>) => {
     evt.stopPropagation();
-    return handleInstallation(appHost, app.id, installStatus);
+    return handleInstallation(appHost, app.title, app.id, installStatus);
   };
 
   const canSuspend =
@@ -113,6 +113,7 @@ const SuiteAppTilePresenter = ({ index, app, space, isAdmin }: Props) => {
             if (!appHost) throw new Error('App host is undefined');
             return handleInstallation(
               appHost,
+              app.title,
               app.id,
               app.installStatus as InstallStatus
             );

@@ -85,7 +85,7 @@ const DialogManagerPresenter = ({
         top: 0,
         right: 0,
         height: '100vh',
-        paddingTop: shellStore.isFullscreen ? 0 : 30,
+        paddingTop: 0,
       }}
     >
       {dialogWindow}

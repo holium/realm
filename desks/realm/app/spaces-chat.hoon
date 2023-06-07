@@ -21,40 +21,11 @@
   ::
   ++  on-init
     ^-  (quip card _this)
-    %-  (slog leaf+"{<dap.bowl>}: initializing..." ~)
-    =/  spaces-scry       .^(view:sstore %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
-    ?>  ?=(%spaces -.spaces-scry)
-    =/  spaces            spaces.spaces-scry
-    =/  to-add-chat=(list [k=space-path:sstore v=space:sstore])
-        %+  skim  ~(tap by spaces)
-          |=  kv=[k=space-path:sstore v=space:sstore]
-          &(=(ship.path.v.kv our.bowl) ?!(=(space.k.kv 'our')))
-    =/  new-chats  
-      %+  turn  to-add-chat
-        |=  [sk=space-path:sstore sv=space:sstore]
-        =/  members-scry         .^(view:mstore %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.sk)/(scot %tas space.sk)/members/noun)
-        ?>  ?=(%members -.members-scry)
-        =/  members           members.members-scry
-        =/  chat-and-cards    (create-space-chat:lib sv [%role %member] members now.bowl)
-        =/  chat              +.chat-and-cards
-        =/  cards             -.chat-and-cards
-        =.  cards             (weld cards (create-channel-pokes:lib sk chat members))   
-        [k=sk c=chat cd=cards]
-    =/  cards  
-      %+  roll  new-chats
-        |=  [[k=space-path:sstore c=chat:store cd=(list card)] acc=(list card)]
-        (weld acc cd)
-    =/  chats
-      %+  turn  new-chats
-      |=  [k=space-path:sstore c=chat:store cd=(list card)]
-      =/  chats-map       `chats:store`~
-      =/  chats-map       (~(put by chats-map) path.c c)
-      [k chats-map]
-    =.  chats.state   `space-chats:store`(malt chats)
+    %-  (slog leaf+"{<dap.bowl>}: watching %spaces /updates..." ~)
     :_  this
-    %+  weld  cards
     ^-  (list card)
     :~
+      [%pass /self %agent [our.bowl %spaces-chat] %poke %spaces-chat-action !>([%init ~])]
       [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
     ==
   ::
@@ -72,6 +43,9 @@
     ^-  (quip card _this)
     =/  wirepath  `path`wire
     ?+    wire  (on-agent:def wire sign)
+      [%self ~]
+        ~&  "on-agent %self {<-.sign>}"
+        `this
       [%spaces ~]
         ?+    -.sign  (on-agent:def wire sign)
           %watch-ack
@@ -102,8 +76,13 @@
   ++  on-load
     |=  ole=vase
     ^-  (quip card _this)
+    :: do a quick check to make sure we are subbed to /updates in %spaces
+    =/  cards=(list card)
+      ?:  =(wex.bowl ~)  
+        [%pass /spaces %agent [our.bowl %spaces] %watch /updates]~
+      ~
     =/  old=state-0  !<(state-0 ole)
-    `this(state old)
+    [cards this(state old)]
   ::
   ++  on-peek   |=(path ~)
   ++  on-watch  |=(path !!)
@@ -120,6 +99,7 @@
   ^-  (quip card _state)
   ?-  -.action
     %create-channel   (handle-create-channel +.action)
+    %init             (init-spaces:lib state bowl)
   ==
   ::
   ++  handle-create-channel
@@ -134,6 +114,7 @@
 ::
 ++  spaces-reaction
   |=  [rct=reaction:sstore]
+  ~&  %spaces-reaction
   ^-  (quip card _state)
   |^
   ?+  -.rct         `state
@@ -143,6 +124,7 @@
   ::
   ++  on-add
     |=  [new-space=space:sstore =members:mstore]
+    ~&  %on-add
     ?.  (is-host:hol path.new-space) :: only host can create chats
       `state
     %-  (slog leaf+"{<dap.bowl>}: creating chat for {<path.new-space>}" ~)

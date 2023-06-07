@@ -116,6 +116,7 @@ const AnimatedCursorView = ({
         boxSizing: 'content-box',
         backgroundColor: `rgba(${color}, 1)`,
         transition: 'opacity 0.15s ease-in-out, transform 0.25s ease-in-out',
+        borderRadius: '50%',
       },
       cursorOuter: {
         boxSizing: 'content-box',

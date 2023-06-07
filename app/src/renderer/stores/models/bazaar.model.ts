@@ -175,8 +175,6 @@ export const BazaarStore = types
               } else if (app.type === 'urbit') {
                 const urb = app as AppMobxType;
                 return (
-                  // 'started' installs should show on the desktop no?
-
                   urb.installStatus === 'started' ||
                   urb.installStatus === 'installed' ||
                   urb.installStatus === 'suspended' ||
@@ -293,7 +291,6 @@ export const BazaarStore = types
           self.treatyLoader.set('initial');
           treaties.clear();
           self.catalog.clear();
-          self.gridIndex.clear();
           self.recentApps.clear();
           self.recentDevs.clear();
         },
@@ -359,19 +356,14 @@ export const BazaarStore = types
           }
         }),
         uninstallApp: flow(function* (desk: string) {
-          Array.from(self.gridIndex.entries()).forEach(([key, value]) => {
-            if (desk === value) self.gridIndex.delete(key);
-          });
           const app = self.catalog.get(desk);
           if (app) {
             app.setStatus(InstallStatus.uninstalled);
-            self.gridIndex.delete(desk);
             self.installations.delete(app.id);
             try {
               return yield BazaarIPC.uninstallApp(desk);
             } catch (error) {
               console.error(error);
-              self.gridIndex.set(`${self.gridIndex.size + 1}`, desk);
               app.setStatus(InstallStatus.installed);
             }
           }
@@ -414,7 +406,11 @@ export const BazaarStore = types
             }
           }
         }),
-        reorderApp: flow(function* (oldIndex: number, newIndex: number) {
+        reorderApp: flow(function* (
+          oldIndex: number,
+          newIndex: number,
+          grid: { [idx: string]: string }
+        ) {
           try {
             const apps = Array.from<AppMobxType>(self.catalog.values());
             const indexOfApp = apps.findIndex(
@@ -422,7 +418,7 @@ export const BazaarStore = types
             );
             const desk = apps[indexOfApp].id;
             if (!desk) return;
-            return yield BazaarIPC.reorderApp(desk, newIndex);
+            return yield BazaarIPC.reorderApp(desk, newIndex, grid);
           } catch (error) {
             console.error(error);
           }

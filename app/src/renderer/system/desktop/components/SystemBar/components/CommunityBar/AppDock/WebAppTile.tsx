@@ -10,7 +10,6 @@ type WebAppTileProps = {
   favicon: string | null;
   letter: string;
   children?: React.ReactNode;
-  onClick: () => void;
   onFaultyFavicon: () => void;
   tapping: UseToggleHook;
 };
@@ -24,7 +23,6 @@ export const WebAppTile = ({
   favicon,
   letter,
   children,
-  onClick,
   onFaultyFavicon,
   tapping,
 }: WebAppTileProps) => {
@@ -46,7 +44,6 @@ export const WebAppTile = ({
         justifyContent: 'center',
         userSelect: 'none',
       }}
-      onClick={onClick}
     >
       {tapping.isOn && (
         <div

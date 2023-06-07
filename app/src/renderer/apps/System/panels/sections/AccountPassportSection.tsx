@@ -58,7 +58,6 @@ export const AccountPassportSection = ({ account }: Props) => {
   return (
     <SettingSection
       title="Passport"
-      elevation={2}
       onSubmit={onSubmit}
       body={
         <>

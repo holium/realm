@@ -79,12 +79,6 @@ const parserRules: ParserRules = {
     recurse: false,
     priority: 2,
   },
-  ship: {
-    regex: /~([a-z-])+/i,
-    filter: isValidPatp,
-    recurse: false,
-    priority: 2.5,
-  },
   image: {
     regex:
       // /(https?:\/\/)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#&//=]*)?\.(jpg|jpeg|png|gif|svg|webp|bmp|tif|tiff)(\?[-a-zA-Z0-9()@:%_+.~#&//=]*)?/i,
@@ -99,6 +93,12 @@ const parserRules: ParserRules = {
     //   /(https?:\/\/)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{2,6}(\b|(\/([-a-zA-Z0-9()@:%_+.~#?&//=]*)+))/i,
     recurse: false,
     priority: 3.5,
+  },
+  ship: {
+    regex: /~([a-z-])+/i,
+    filter: isValidPatp,
+    recurse: false,
+    priority: 3.7,
   },
   'bold-italics-strike': {
     token: '***~~',

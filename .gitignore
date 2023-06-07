@@ -138,6 +138,3 @@ urbit/*
 
 # Vercel
 .vercel
-
-# Turborepo
-.turbo
