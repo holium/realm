@@ -10,6 +10,7 @@ import {
 import { useAppState } from 'renderer/stores/app.store';
 import { AppType } from 'renderer/stores/models/bazaar.model';
 
+import { TITLEBAR_HEIGHT } from '../Titlebar';
 import { AppWindow } from './components/AppWindow/AppWindow';
 
 const AppWindowManagerPresenter = () => {
@@ -66,9 +67,9 @@ const AppWindowManagerPresenter = () => {
         padding: '8px',
         position: 'fixed',
         left: 0,
-        top: showTitleBar ? 42 : 0,
+        top: showTitleBar ? TITLEBAR_HEIGHT : 0,
         right: 0,
-        height: 'calc(100vh - 42px)',
+        height: `calc(100vh - ${TITLEBAR_HEIGHT}px)`,
         paddingTop: 0,
       }}
     >

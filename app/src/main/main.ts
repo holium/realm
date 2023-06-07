@@ -236,7 +236,7 @@ const createMouseOverlayWindow = () => {
   });
   newMouseWindow.setIgnoreMouseEvents(true);
   newMouseWindow.loadURL(resolveHtmlPath('mouse.html'));
-  newMouseWindow.setMenuBarVisibility(false);
+  // newMouseWindow.setMenuBarVisibility(false);
 
   FullScreenHelper.registerListeners(mainWindow, newMouseWindow);
   CursorHelper.registerListeners(mainWindow, newMouseWindow);
