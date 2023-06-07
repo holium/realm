@@ -32,7 +32,7 @@ export const getMaximizedBounds = (desktopDimensions: Dimensions): Bounds => {
   const normalizedPaddingX = (8 / desktopDimensions.width) * 10;
   const normalizedPaddingY = (8 / desktopDimensions.height) * 10;
   const normalizedDockHeight = (40 / desktopDimensions.height) * 10;
-
+  // const showTitlebar = appState.showTitleBar;
   const offsetX = 2 * normalizedPaddingX;
   const offsetY = 3 * normalizedPaddingY + normalizedDockHeight;
 

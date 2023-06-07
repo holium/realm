@@ -45,7 +45,7 @@ function clamp(value: number, min: number, max: number) {
 }
 
 const AppWindowPresenter = ({ appWindow }: Props) => {
-  const { shellStore } = useAppState();
+  const { shellStore, showTitleBar } = useAppState();
   const { bazaarStore } = useShipStore();
 
   const dragControls = useDragControls();
@@ -76,7 +76,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   });
 
   const minX = 0;
-  const minY = 0;
+  const minY = showTitleBar ? 50 : 0;
   const maxX = shellStore.desktopDimensions.width;
   const maxY = shellStore.desktopDimensions.height;
 

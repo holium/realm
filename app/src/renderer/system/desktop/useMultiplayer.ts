@@ -268,42 +268,10 @@ export const useMultiplayer = ({
       }
     };
 
-    // roomsStore.onDataChannel(onDataChannel);
-
-    // intercept(roomsStore, 'backgroundColor', (change) => {
-
-    // });
-
     roomsStore.registerListeners({
       onLeftRoom: onLeftRoom,
       onDataChannel: onDataChannel,
     });
-
-    // onAction(shipStore, (call) => {
-    //   if (call.path === '/roomsStore') {
-    //     if (call.name === 'deleteRoom') {
-    //       // we deleted our created room, so we should remove all cursors
-    //       onLeftRoom('', window.ship);
-    //     }
-    //     if (call.name === 'leaveRoom') {
-    //       // we left the room, so we should remove all cursors
-    //       onLeftRoom('', window.ship);
-    //     }
-    //     if (call.name === '_onRoomLeft') {
-    //       // called when we or someone else leaves the room
-    //       if (call.args) {
-    //         const rid = call.args[0];
-    //         const patp = call.args[1];
-    //         onLeftRoom(rid, patp);
-    //       }
-    //     }
-    //     if (call.name === '_onDataChannel') {
-    //       if (call.args) {
-    //         onDataChannel('', '', call.args[0]);
-    //       }
-    //     }
-    //   }
-    // });
 
     return () => {
       window.electron.app.removeOnMouseOut();

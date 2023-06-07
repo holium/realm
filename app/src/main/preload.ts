@@ -150,6 +150,21 @@ const appPreload = {
       callback(spacePath);
     });
   },
+
+  onSetTitlebarVisible(callback: (isVisible: boolean) => void) {
+    ipcRenderer.on('set-titlebar-visible', (_, isVisible: boolean) => {
+      callback(isVisible);
+    });
+  },
+  toggleMinimized: () => {
+    return ipcRenderer.invoke('toggle-minimized');
+  },
+  closeRealm: () => {
+    return ipcRenderer.invoke('close-realm');
+  },
+  toggleFullscreen: () => {
+    return ipcRenderer.invoke('toggle-fullscreen');
+  },
   /* Removers */
   removeOnKeyDown() {
     ipcRenderer.removeAllListeners('key-down');

@@ -25,7 +25,8 @@
     "strict": true,
     "strictFunctionTypes": true,
     "strictNullChecks": true,
-    "target": "es2021"
+    "target": "es2021",
+    "experimentalDecorators": true
   },
   "exclude": ["node_modules", "**/app/src/renderer/index.ejs"],
   "references": [

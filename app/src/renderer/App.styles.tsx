@@ -14,6 +14,7 @@ import { useAppState } from 'renderer/stores/app.store';
 
 import { denormalizeBounds, getMaximizedBounds } from './lib/window-manager';
 import { BackgroundImage } from './system/system.styles';
+import { TITLEBAR_HEIGHT } from './system/Titlebar';
 
 type Props = {
   realmTheme: ThemeType;
@@ -126,12 +127,25 @@ export const RealmBackground = ({
   wallpaper: string;
   snapView: string;
 }) => {
-  const { shellStore } = useAppState();
+  const { shellStore, showTitleBar } = useAppState();
   const controls = useAnimationControls();
 
   useEffect(() => {
-    const mb = getMaximizedBounds(shellStore.desktopDimensions);
-    const dmb = denormalizeBounds(mb, shellStore.desktopDimensions);
+    const desktopDimensions = shellStore.desktopDimensions;
+
+    let mb = getMaximizedBounds(desktopDimensions);
+    let dmb = denormalizeBounds(mb, desktopDimensions);
+
+    if (showTitleBar) {
+      dmb = {
+        ...dmb,
+        y: dmb.y + TITLEBAR_HEIGHT,
+      };
+      mb = {
+        ...mb,
+        y: mb.y + TITLEBAR_HEIGHT,
+      };
+    }
 
     switch (snapView) {
       case 'none':

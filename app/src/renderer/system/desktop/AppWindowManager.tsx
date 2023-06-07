@@ -13,7 +13,7 @@ import { AppType } from 'renderer/stores/models/bazaar.model';
 import { AppWindow } from './components/AppWindow/AppWindow';
 
 const AppWindowManagerPresenter = () => {
-  const { shellStore } = useAppState();
+  const { shellStore, showTitleBar } = useAppState();
   const { getOptions, setOptions } = useContextMenu();
   const id = 'desktop-fill';
 
@@ -66,9 +66,9 @@ const AppWindowManagerPresenter = () => {
         padding: '8px',
         position: 'fixed',
         left: 0,
-        top: 0,
+        top: showTitleBar ? 42 : 0,
         right: 0,
-        height: '100vh',
+        height: 'calc(100vh - 42px)',
         paddingTop: 0,
       }}
     >

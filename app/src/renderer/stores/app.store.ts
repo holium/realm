@@ -32,6 +32,7 @@ const Screen = types.enumeration(['login', 'onboarding', 'os']);
 const AppStateModel = types
   .model('AppStateModel', {
     booted: types.boolean,
+    showTitleBar: types.boolean,
     seenSplash: types.boolean,
     currentScreen: Screen,
     onboardingStep: types.string,
@@ -69,6 +70,9 @@ const AppStateModel = types
     setLoggedIn(serverId: string) {
       self.authStore._setSession(serverId);
       self.shellStore.setIsBlurred(false);
+    },
+    setShowTitleBar(show: boolean) {
+      self.showTitleBar = show;
     },
     setLoggedOut(serverId?: string) {
       self.authStore._clearSession(serverId);
@@ -117,6 +121,7 @@ const lastTheme = localStorage.getItem('lastTheme');
 export const appState = AppStateModel.create({
   booted: false,
   seenSplash: false,
+  showTitleBar: false,
   currentScreen: 'login',
   onboardingStep: '/login',
   theme: lastTheme
@@ -137,6 +142,15 @@ export const appState = AppStateModel.create({
 });
 
 watchOnlineStatus(appState);
+
+window.electron.app.onSetTitlebarVisible((show: boolean) => {
+  appState.setShowTitleBar(show);
+});
+
+window.electron.app.onSetFullScreen((isFullScreen: boolean) => {
+  appState.shellStore.setFullscreen(isFullScreen);
+});
+
 // OSActions.onConnectionStatus((_event: any, status: any) => {
 //   coreStore.setConnectionStatus(status);
 // });

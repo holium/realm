@@ -1,4 +1,5 @@
 import { patp2dec } from '@urbit/aura';
+import EventsEmitter from 'events';
 import { action, makeObservable, observable } from 'mobx';
 import Peer, { Instance as PeerInstance } from 'simple-peer';
 
@@ -125,7 +126,7 @@ export class RoomModel {
   }
 }
 
-export class RoomsStore {
+export class RoomsStore extends EventsEmitter {
   @observable ourId: string;
   @observable ourPeer: LocalPeer;
   @observable path = '';
@@ -160,6 +161,7 @@ export class RoomsStore {
   @observable onLeftRoom: OnLeftRoom = async () => {};
 
   constructor(ourId: string, provider?: string) {
+    super();
     makeObservable(this);
     this.ourId = ourId;
     if (provider) {
@@ -680,6 +682,12 @@ export class RoomsStore {
         onLeftRoom: this.onLeftRoom.bind(this),
       }
     );
+
+    // TODO wire up peer data events
+    // peer.on('on-peer-data', (data) => {
+    //   this.emit('on-peer-data', data);
+    // });
+
     this.peers.set(peerId, peer);
     return peer;
   }
@@ -705,8 +713,12 @@ export class RoomsStore {
 
   @action
   destroyPeer(peerId: string) {
-    this.peers.get(peerId)?.destroy();
-    this.peers.delete(peerId);
+    const peer = this.peers.get(peerId);
+    if (peer) {
+      peer.removeAllListeners();
+      peer.destroy();
+      this.peers.delete(peerId);
+    }
   }
 
   @action
@@ -745,7 +757,7 @@ export class RoomsStore {
   }
 }
 
-export class PeerClass {
+export class PeerClass extends EventsEmitter {
   @observable rid: string;
   @observable ourId: string;
   @observable peerId: string;
@@ -780,6 +792,7 @@ export class PeerClass {
       onLeftRoom: OnLeftRoom;
     }
   ) {
+    super();
     if (!rid || !ourId || !peerId || !stream || !websocket || !listeners) {
       throw new Error('Invalid parameters provided for PeerClass');
     }
@@ -1016,6 +1029,8 @@ export class PeerClass {
 
   @action
   onData(data: any) {
+    // TODO wire up event
+    // this.emit('on-peer-data', data);
     this.onDataChannel(this.rid, this.peerId, unserialize(data));
   }
 
