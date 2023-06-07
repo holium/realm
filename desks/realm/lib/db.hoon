@@ -909,14 +909,31 @@
 
   [cards state]
 ::
-++  create-relay
+++  relay
   :: supposed to be used by the sharer, poking their own ship,
-  :: regardless of if they are the host of either original or target
-  :: path
+  :: regardless of if they are the host of either original or target path
   |=  [[=req-id =input-row] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  ::  ensure that original
-  `state
+  :: first check that the input is actually a %relay
+  ?>  ?=(-.data.input-row %relay)
+  :: then check that we actually have the thing being relayed
+  =/  obj-id=id:common  id.data.input-row
+  =/  obj=row  (~(got by (~(got by (~(got by tables.state) type.data.input-row)) path.data.input-row) obj-id)
+  :: and its schema
+  =/  sch=schema  (~(got by schemas.state) [type.obj v.obj])
+  :: then check if we have already relayed this thing before
+  =/  relays=table  (ptbl-to-tbl (~(got by tables.state) %relay))
+  =/  prev=(list row)  (skim ~(val by relays) |=(r=row ?>(?=(-.data.r %relay) =(id.data.r obj-id))))
+  ?~  prev
+    :: if we have not previously relayed this thing, publish to remote-scry
+    =/  cards  [%pass /remote-scry/callback %grow /(scot %p ship.obj-id)/(scot %da t.obj-id) row-and-schema+[row sch]]~
+    =.  revision.input-row  0 :: force to 0 because we are publishing for first time
+    =/  qcs=(quip card state-0)  (create [req-id input-row] state bowl)
+    [(weld cards -.qcs) +.qcs]
+  :: else, the thing is already published, so use the pre-existing revision number
+  =/  first-prev=row        (snag 0 prev)
+  =.  revision.input-row    revision.data.first-prev
+  (create [req-id input-row] state bowl)
 ::
 ::
 ::  JSON
@@ -1141,9 +1158,8 @@
       %-  ot
       :~  [%id de-id]
           [%type (se %tas)]
+          [%path pa]
           [%revision ni]
-          [%target-path pa]
-          [%original-path pa]
       ==
     ::
     ++  de-id
@@ -1395,9 +1411,8 @@
           %relay
             :~  ['id' (row-id-to-json id.data.row)]
                 ['type' s+(scot %tas type.data.row)]
+                ['path' s+(spat path.data.row)]
                 ['revision' (numb revision.data.row)]
-                ['target-path' s+(spat target-path.data.row)]
-                ['original-path' s+(spat original-path.data.row)]
             ==
         ==
       =/  keyvals  (weld basekvs dynamickvs)

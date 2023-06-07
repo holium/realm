@@ -52,6 +52,7 @@
       [%follow follow:common]
       [%relay relay:common]
   ==
++$  row-and-schema  [=row =schema] :: the row and the schema for the row
 
 +$  paths     (map path path-row)
 +$  path-row

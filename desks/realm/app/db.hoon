@@ -240,7 +240,11 @@
   ++  on-agent
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
-    ?+    wire  !!
+    ?+    wire  ~&(wire ~&(sign !!))
+      [%remote-scry %callback ~]
+        ~&  "remote-scry/callback on-agent"
+        ~&  sign
+        `this
       [%dbpoke ~]
         ?+    -.sign  `this
           %poke-ack
@@ -310,13 +314,33 @@
                 `state
               %db-changes
                 =/  changes=db-changes  !<(db-changes +.+.sign)
+                =/  remote-scries   *(list card)
                 =/  index=@ud           0
                 |-
                   ?:  =(index (lent changes))
                     :_  state
                     :: echo the changes out to our client subs
+                    %+  weld
+                      remote-scries
                     [%give %fact [/db (weld /path dbpath) ~] db-changes+!>(changes)]~
-                  $(index +(index), state (process-db-change:db dbpath (snag index changes) state bowl))
+                  =/  change   (snag index changes)
+                  =/  new-scry=(list card)
+                    ?+  -.change  ~
+                      %add-row
+                        ?.  ?=(%relay type.row.ch)  ~
+                        ?>  ?=(%relay -.data.row.ch)
+                        :~  [
+                          %pass
+                          /remote-scry/callback
+                          %arvo
+                          %a
+                          %keen
+                          ship.id.row.ch
+                          /g/x/(scot %ud revision.data.row.ch)/(scot %tas dap.bowl)//(scot %p ship.id.data.row.ch)/(scot %da t.id.data.row.ch)
+                        ]
+                        ==
+                    ==
+                  $(index +(index), state (process-db-change:db dbpath change state bowl), remote-scries (weld remote-scries new-scry))
               %db-path
                 =/  full=fullpath  !<(fullpath +.+.sign)
                 :: insert pathrow
