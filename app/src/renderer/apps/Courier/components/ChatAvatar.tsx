@@ -70,6 +70,11 @@ export const ChatAvatar = ({
       />
     );
   }
+
+  if (type === 'self') {
+    avatarElement = <Icon name="NotesToSelf" size={size} />;
+  }
+
   if (image) {
     avatarElement = (
       <ImageCrest height={size} width={size} borderRadius={4} src={image} />
