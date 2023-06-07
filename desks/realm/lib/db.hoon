@@ -1272,13 +1272,26 @@
       |=  [=type:common pt=pathed-table]
       (en-table type pt schemas)
     ::
+    ++  en-fullpath-tables
+      |=  [tables=(map type:common table) =schemas]
+      ^-  json
+      :-  %a
+      %+  turn
+        ~(tap by tables)
+      |=  [=type:common =table]
+      =/  rows=(list row)  ~(val by table)
+      %-  pairs
+      :~  ['type' s+type]
+          ['rows' a+(turn rows |=(=row (en-row row schemas)))]
+      ==
+    ::
     ++  en-fullpath
       |=  fp=fullpath
       ^-  json
       %-  pairs
       :~  ['path-row' (en-path-row path-row.fp)]
           ['peers' a+(turn peers.fp en-peer)]
-          ['tables' ~]  :: TODO fullpath tables JSON output
+          ['tables' (en-fullpath-tables [tables schemas]:fp)]
           ['schemas' (en-schemas schemas.fp)]
           ['dels' a+(turn dels.fp en-del-change)]
       ==
