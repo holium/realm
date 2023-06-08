@@ -125,7 +125,7 @@ function App() {
   const makeWordList = () => {
     const wordMap: any = new Map();
     if (wordRows.length > 0) {
-      let newWordList = wordRows.map((item: any) => {
+      const newWordList = wordRows.map((item: any) => {
         wordMap.set(item.id, item);
         return {
           id: item.id,
@@ -151,7 +151,7 @@ function App() {
         let upVotes = lastVoteData?.upVotes ?? 0;
         let downVotes = lastVoteData?.downVotes ?? 0;
         let currentShipVoted = lastVoteData?.currentShipVoted ?? null;
-        let newVotes = lastVoteData?.votes ?? [];
+        const newVotes = lastVoteData?.votes ?? [];
         //incremenet/decrement vote count accrodingly
 
         if (item.up) {

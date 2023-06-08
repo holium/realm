@@ -1,6 +1,4 @@
-import React from 'react';
-
-import { Box, Card, Flex, Text } from '@holium/design-system';
+import { Box, Card, Flex, Text } from '@holium/design-system/general';
 
 export const Dictionary = () => {
   return (
@@ -91,6 +89,7 @@ const Definition = () => {
     </Box>
   );
 };
+
 function DefinitionElement({
   count,
   text,
@@ -112,4 +111,5 @@ function DefinitionElement({
     </Flex>
   );
 }
+
 export default Dictionary;

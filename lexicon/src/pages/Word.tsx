@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import {
   Button,
@@ -9,13 +10,12 @@ import {
   Text,
   TextInput,
 } from '@holium/design-system';
-import { useLocation, useNavigate } from 'react-router-dom';
 
-import { TabPanel, Tabs, Vote } from '../components';
-import { TabItem } from '../types';
-import { Store, useStore } from '../store';
-import { log, shipName } from '../utils';
 import api from '../api';
+import { TabPanel, Tabs, Vote } from '../components';
+import { Store, useStore } from '../store';
+import { TabItem } from '../types';
+import { log, shipName } from '../utils';
 
 const tabData: TabItem[] = [
   { label: 'Definitions', value: 0 },
@@ -179,7 +179,7 @@ const Sentences = ({ sentenceList, space, state }: any) => {
         let upVotes = lastVoteData?.upVotes ?? 0;
         let downVotes = lastVoteData?.downVotes ?? 0;
         let currentShipVoted = lastVoteData?.currentShipVoted ?? null;
-        let newVotes = lastVoteData?.votes ?? [];
+        const newVotes = lastVoteData?.votes ?? [];
         //incremenet/decrement vote count accrodingly
 
         if (item.up) {
@@ -287,7 +287,7 @@ const Definitions = ({ definitionList, state, space }: any) => {
         let upVotes = lastVoteData?.upVotes ?? 0;
         let downVotes = lastVoteData?.downVotes ?? 0;
         let currentShipVoted = lastVoteData?.currentShipVoted ?? null;
-        let newVotes = lastVoteData?.votes ?? [];
+        const newVotes = lastVoteData?.votes ?? [];
         //incremenet/decrement vote count accrodingly
 
         if (item.up) {

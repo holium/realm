@@ -1,13 +1,13 @@
 import React from 'react';
 
-import { Button, Flex } from '@holium/design-system';
+import { Button, Flex } from '@holium/design-system/general';
 
 import { TabItem } from '../types';
 
 interface TabsProps {
   value: number;
   tabData: TabItem[];
-  onChange: Function;
+  onChange: (value: number) => void;
 }
 export const Tabs = ({ value, tabData, onChange }: TabsProps) => {
   return (

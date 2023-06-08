@@ -1,28 +1,26 @@
 import React, { useState } from 'react';
 
-import {
-  Button,
-  Card,
-  Flex,
-  Input,
-  Text,
-  TextInput,
-} from '@holium/design-system';
+import { Button, Card, Flex, Text } from '@holium/design-system/general';
+import { Input, TextInput } from '@holium/design-system/inputs';
 
 import api from '../api';
-import { log } from '../utils';
 import { Store, useStore } from '../store';
+import { log } from '../utils';
 
-interface Props {
+type Props = {
   open: boolean;
-  onClose: Function;
-}
+  onClose: () => void;
+};
+
 export const AddWord = ({ open, onClose }: Props) => {
   const space = useStore((store: Store) => store.space);
   const [word, setWord] = useState<string>('');
   const [definition, setDefinition] = useState<string>('');
   const [sentence, setSentence] = useState<string>('');
   const [related, setRelated] = useState<string>('');
+
+  if (!space) return null;
+  if (!open) return null;
 
   const addWord = async () => {
     try {
@@ -62,7 +60,7 @@ export const AddWord = ({ open, onClose }: Props) => {
   const handleSubmit = () => {
     addWord();
   };
-  if (!open) return null;
+
   return (
     <Card
       p={3}
