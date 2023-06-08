@@ -9,7 +9,7 @@ import {
   WordSchema,
 } from './types';
 import { PeerParm, PeerParms, Schema } from './types/bedrock';
-import { changesHandler } from './updates';
+import { updateHandler } from './updates';
 
 const api = {
   createApi: memoize(() => {
@@ -192,7 +192,7 @@ const api = {
     return api.createApi().subscribe({
       app: 'db',
       path: '/db',
-      event: changesHandler,
+      event: updateHandler,
       err: () => console.log('Subscription rejected.'),
       quit: () => console.log('Kicked from subscription.'),
     });
@@ -201,7 +201,7 @@ const api = {
     return api.createApi().subscribe({
       app: 'db',
       path: `/path${path}`,
-      event: changesHandler,
+      event: updateHandler,
       err: () => console.log('Subscription rejected.'),
       quit: () => console.log('Kicked from subscription.'),
     });

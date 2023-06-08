@@ -9,6 +9,9 @@ import { displayDate, log, shipName } from '../utils';
 export const Home = () => {
   const { space } = useStore();
   const [wordList, setWordList] = useState<any>([]);
+
+  const { wordRows, setWordRows, voteRows, setVoteRows } = useStore();
+
   const [voteMap, setVoteMap] = useState<any>(new Map());
   const getPathData = async () => {
     if (!space) return;
@@ -17,83 +20,90 @@ export const Home = () => {
       const result = await api.getPath(space);
       //select the table with type => "lexicon-word"
       if (result) {
-        let lexiconWordRow: any = [];
-        let voteRow: any = [];
+        let newWordRows: any = [];
+        let newVoteRows: any = [];
         result.tables.forEach((item: any) => {
           if (item.type === 'lexicon-word') {
-            lexiconWordRow = item.rows;
+            newWordRows = item.rows;
           } else if (item.type === 'vote') {
-            voteRow = item.rows;
+            newVoteRows = item.rows;
           }
         });
-        const wordMap: any = new Map();
-        if (lexiconWordRow.length > 0) {
-          let newWordList = lexiconWordRow.map((item: any) => {
-            wordMap.set(item.id, item);
-            return {
-              id: item.id,
-              word: item.word,
-              createdAt: item['created-at'],
-              votes: item.votes,
-            };
-          });
-          setWordList(newWordList);
-        }
-        const voteMap: any = new Map();
-
-        voteRow.map((item: any) => {
-          //if this vote is linked to a word (we check wordMap) add it to our voteMap under that word's idea
-          if (wordMap.has(item['parent-id'])) {
-            const lastVoteData = voteMap.get(item['parent-id']);
-
-            let upVotes = lastVoteData?.upVotes ?? 0;
-            let downVotes = lastVoteData?.downVotes ?? 0;
-            let currentShipVoted = lastVoteData?.currentShipVoted ?? null;
-            let newVotes = lastVoteData?.votes ?? [];
-            //incremenet/decrement vote count accrodingly
-
-            if (item.up) {
-              if (item.ship === '~' + shipName())
-                currentShipVoted = { vote: true, voteId: item.id };
-              upVotes++;
-            } else {
-              if (item.ship === '~' + shipName())
-                currentShipVoted = { vote: false, voteId: item.id };
-
-              downVotes++;
-            }
-
-            //we count the up/down vote
-            newVotes.push(item);
-            voteMap.set(item['parent-id'], {
-              votes: newVotes,
-              upVotes,
-              downVotes,
-              currentShipVoted,
-            });
-          }
-        });
-        setVoteMap(voteMap);
+        setVoteRows(newVoteRows);
+        setWordRows(newWordRows);
       }
-
       log('getPathData result =>', result);
     } catch (e) {
       log('getPathData error =>', e);
     }
   };
-  log('wordList', wordList);
+
+  const makeWordList = () => {
+    const wordMap: any = new Map();
+    if (wordRows.length > 0) {
+      let newWordList = wordRows.map((item: any) => {
+        wordMap.set(item.id, item);
+        return {
+          id: item.id,
+          word: item.word,
+          createdAt: item['created-at'],
+          votes: item.votes,
+        };
+      });
+      setWordList(newWordList);
+    }
+    const voteMap: any = new Map();
+
+    voteRows.map((item: any) => {
+      //if this vote is linked to a word (we check wordMap) add it to our voteMap under that word's idea
+      if (wordMap.has(item['parent-id'])) {
+        const lastVoteData = voteMap.get(item['parent-id']);
+
+        let upVotes = lastVoteData?.upVotes ?? 0;
+        let downVotes = lastVoteData?.downVotes ?? 0;
+        let currentShipVoted = lastVoteData?.currentShipVoted ?? null;
+        let newVotes = lastVoteData?.votes ?? [];
+        //incremenet/decrement vote count accrodingly
+
+        if (item.up) {
+          if (item.ship === '~' + shipName())
+            currentShipVoted = { vote: true, voteId: item.id };
+          upVotes++;
+        } else {
+          if (item.ship === '~' + shipName())
+            currentShipVoted = { vote: false, voteId: item.id };
+
+          downVotes++;
+        }
+
+        //we count the up/down vote
+        newVotes.push(item);
+        voteMap.set(item['parent-id'], {
+          votes: newVotes,
+          upVotes,
+          downVotes,
+          currentShipVoted,
+        });
+      }
+    });
+    setVoteMap(voteMap);
+  };
+
+  useEffect(() => {
+    makeWordList();
+  }, [wordRows, voteRows]);
+
   useEffect(() => {
     getPathData();
   }, [space]);
+
   const voteOnWord = async (
     worId: string,
     voteType: null | boolean,
     voteId: string = ''
   ) => {
     if (!space) return;
-    log('voteId', voteId);
     try {
-      log({ space, worId, voteId, voteType });
       const result = await api.voteOnWord(
         space,
         worId,
@@ -112,7 +122,6 @@ export const Home = () => {
         {wordList.map((item: any, index: number) => {
           const { id, word, createdAt } = item;
           const votes = voteMap.get(id);
-          log('votes ===>', votes);
           return (
             <WordItem
               key={'word-item-' + index}
@@ -143,6 +152,7 @@ const WordItem = ({ id, word, createdAt, votes, onVote }: WordItemProps) => {
       padding={'10px'}
       style={{ borderRadius: 6 }}
       className="highlight-hover"
+      tabIndex={0}
     >
       <Flex justifyContent={'space-between'} alignItems={'flex-end'}>
         <Text.H6 fontWeight={600}>{word}</Text.H6>
