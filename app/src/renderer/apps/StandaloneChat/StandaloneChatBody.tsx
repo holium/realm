@@ -5,10 +5,10 @@ import { Flex, Spinner, Text } from '@holium/design-system/general';
 
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { ChatInfo } from '../Courier/views/ChatInfo';
+import { ChatInfo } from '../Courier/views/ChatInfo/ChatInfo';
 import { ChatLog } from '../Courier/views/ChatLog/ChatLog';
+import { CreateNewChat } from '../Courier/views/CreateNewChat/CreateNewChat';
 import { Inbox } from '../Courier/views/Inbox/Inbox';
-import { NewChat } from '../Courier/views/NewChat';
 import {
   ResizeHandle,
   StandaloneChatContainer,
@@ -84,8 +84,8 @@ export const StandaloneChatBodyPresenter = () => {
       </Flex>
       <Flex flex={1} height="100%" position="relative" minWidth={360}>
         {chatStore.subroute === 'chat' && <ChatLog isStandaloneChat />}
-        {chatStore.subroute === 'chat-info' && <ChatInfo />}
-        {chatStore.subroute === 'new' && <NewChat />}
+        {chatStore.subroute === 'chat-info' && <ChatInfo isStandaloneChat />}
+        {chatStore.subroute === 'new' && <CreateNewChat isStandaloneChat />}
       </Flex>
     </StandaloneChatContainer>
   );

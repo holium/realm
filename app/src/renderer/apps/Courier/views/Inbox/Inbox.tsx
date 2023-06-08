@@ -28,8 +28,14 @@ export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
       spacePath={currentSpace?.path}
       isStandaloneChat={isStandaloneChat}
       isChatPinned={isChatPinned}
-      onClickInbox={setChat}
-      onClickNewInbox={() => setSubroute('new')}
+      onClickInbox={(path) => {
+        setChat(path);
+        setSubroute('chat');
+      }}
+      onClickNewInbox={() => {
+        setChat('');
+        setSubroute('new');
+      }}
       onClickStandaloneChat={() => {
         shellStore.setStandaloneChat(!isStandaloneChat);
       }}

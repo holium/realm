@@ -12,12 +12,12 @@ import { useShipStore } from 'renderer/stores/ship.store';
 import { ChatInputBox } from '../../components/ChatInputBox';
 import { ChatLogHeader } from '../../components/ChatLogHeader';
 import { PinnedContainer } from '../../components/PinnedMessage';
-import { ChatLogList } from '../ChatLogList';
 import {
   ChatInputContainer,
   ChatLogListContainer,
   FullWidthAnimatePresence,
 } from './ChatLogBody.styles';
+import { ChatLogList } from './ChatLogList';
 
 type Props = {
   path: string;

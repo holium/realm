@@ -140,10 +140,9 @@ export const ChatRowPresenter = ({
       id={chatRowId}
       style={{
         minWidth: 0,
-        marginBottom: isStandaloneChat ? 6 : 0,
         background:
           isStandaloneChat && isSelected
-            ? 'var(--rlm-accent-color)'
+            ? 'rgba(var(--rlm-accent-rgba), 0.12)'
             : undefined,
       }}
       onClick={onClickRow}

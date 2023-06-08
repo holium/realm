@@ -10,8 +10,8 @@ import {
 
 import { displayDate } from 'os/lib/time';
 
-import { ChatMessageType } from '../../../stores/models/chat.model';
-import { ChatMessage } from '../components/ChatMessage';
+import { ChatMessageType } from '../../../../stores/models/chat.model';
+import { ChatMessage } from '../../components/ChatMessage';
 
 type Props = {
   listRef: RefObject<WindowedListRef>;

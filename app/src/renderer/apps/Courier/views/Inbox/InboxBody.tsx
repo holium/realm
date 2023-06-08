@@ -108,7 +108,10 @@ const InboxBodyPresenter = ({
           <Button.IconButton
             className="realm-cursor-hover"
             size={26}
-            onClick={onClickNewInbox}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClickNewInbox();
+            }}
           >
             <Icon name="Plus" size={24} opacity={0.5} />
           </Button.IconButton>

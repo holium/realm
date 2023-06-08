@@ -7,10 +7,10 @@ import { Flex, Spinner, Text } from '@holium/design-system';
 import { useTrayApps } from 'renderer/apps/store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { ChatInfo } from './views/ChatInfo';
+import { ChatInfo } from './views/ChatInfo/ChatInfo';
 import { ChatLog } from './views/ChatLog/ChatLog';
+import { CreateNewChat } from './views/CreateNewChat/CreateNewChat';
 import { Inbox } from './views/Inbox/Inbox';
-import { NewChat } from './views/NewChat';
 
 export const CourierAppPresenter = () => {
   const { clearInnerNavigation } = useTrayApps();
@@ -57,7 +57,7 @@ export const CourierAppPresenter = () => {
       {chatStore.subroute === 'inbox' && <Inbox />}
       {chatStore.subroute === 'chat' && <ChatLog />}
       {chatStore.subroute === 'chat-info' && <ChatInfo />}
-      {chatStore.subroute === 'new' && <NewChat />}
+      {chatStore.subroute === 'new' && <CreateNewChat />}
     </LayoutGroup>
   );
 };
