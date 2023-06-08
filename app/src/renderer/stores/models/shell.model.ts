@@ -56,10 +56,10 @@ export const ShellModel = types
     getWindowByAppId(appId: string) {
       return self.windows.get(appId);
     },
-    isWindowMaximized(appId: string) {
+    isWindowFullyMaximized(appId: string) {
       const window = self.windows.get(appId);
       if (!window) throw console.error('Window not found');
-      return window.isMaximized(self.desktopDimensions);
+      return window.isFullyMaximized(self.desktopDimensions);
     },
   }))
   .actions((self) => ({
@@ -222,26 +222,30 @@ export const ShellModel = types
     toggleMaximized(appId: string): BoundsModelType {
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');
-      window.toggleMaximize(self.desktopDimensions);
+      window.toggleFullyMaximize(self.desktopDimensions);
+      window.isMaximized = !window.isMaximized;
       return toJS(window.bounds);
     },
     maximizeLeft(appId: string): BoundsModelType {
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');
       window.maximizeLeft(self.desktopDimensions);
+      window.isMaximized = true;
       return toJS(window.bounds);
     },
     maximizeRight(appId: string): BoundsModelType {
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');
       window.maximizeRight(self.desktopDimensions);
+      window.isMaximized = true;
       return toJS(window.bounds);
     },
     maximize(appId: string): BoundsModelType {
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');
-      if (!self.isWindowMaximized(appId)) {
-        window.toggleMaximize(self.desktopDimensions);
+      if (!self.isWindowFullyMaximized(appId)) {
+        window.toggleFullyMaximize(self.desktopDimensions);
+        window.isMaximized = true;
       }
       return toJS(window.bounds);
     },
@@ -251,8 +255,9 @@ export const ShellModel = types
     } {
       const window = self.getWindowByAppId(appId);
       if (!window) throw console.error('Window not found');
-      if (self.isWindowMaximized(appId)) {
+      if (self.windows.get(appId)?.isMaximized) {
         window.toggleMaximize(self.desktopDimensions);
+        window.isMaximized = false;
       }
       return {
         bounds: toJS(window.bounds),
