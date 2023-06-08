@@ -1,5 +1,7 @@
 import { BrowserWindow, ipcMain } from 'electron';
 
+import { setFullScreen } from './titlebar';
+
 const registerListeners = (
   mainWindow: BrowserWindow,
   mouseWindow: BrowserWindow
@@ -20,7 +22,7 @@ const registerListeners = (
   ipcMain.removeHandler('is-fullscreen');
 
   ipcMain.handle('set-fullscreen', (_, isFullscreen) => {
-    mainWindow.setFullScreen(isFullscreen);
+    setFullScreen(mainWindow, isFullscreen);
   });
 
   ipcMain.handle('is-fullscreen', () => {

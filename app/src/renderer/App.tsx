@@ -2,11 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { MotionConfig } from 'framer-motion';
 import { observer } from 'mobx-react';
 
-import {
-  GlobalStyle,
-  RealmBackground,
-  StandAloneChatTitlebar,
-} from './App.styles';
+import { GlobalStyle, RealmBackground } from './App.styles';
 import { AppContent } from './AppContent';
 import { AppLoading } from './AppLoading';
 import { StandaloneChat } from './apps/StandaloneChat/StandaloneChat';
@@ -15,7 +11,7 @@ import { SelectionProvider } from './lib/selection';
 import { appState, AppStateProvider, useAppState } from './stores/app.store';
 import { RealmIPC } from './stores/ipc';
 import { ErrorBoundary } from './system/ErrorBoundary';
-import { RealmTitlebar } from './system/Titlebar';
+import { RealmTitlebar, StandAloneChatTitlebar } from './system/Titlebar';
 
 import './app.css';
 import 'photoswipe/dist/photoswipe.css';

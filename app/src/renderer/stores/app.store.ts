@@ -151,14 +151,6 @@ window.electron.app.onSetFullScreen((isFullScreen: boolean) => {
   appState.shellStore.setFullscreen(isFullScreen);
 });
 
-// OSActions.onConnectionStatus((_event: any, status: any) => {
-//   coreStore.setConnectionStatus(status);
-// });
-
-// onSnapshot(appState, (snapshot) => {
-//   localStorage.setItem('appState', JSON.stringify(snapshot));
-// });
-
 export type AppStateType = Instance<typeof AppStateModel>;
 export const AppStateContext = createContext<null | AppStateType>(appState);
 

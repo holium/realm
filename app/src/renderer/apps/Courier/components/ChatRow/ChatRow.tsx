@@ -158,7 +158,7 @@ export const ChatRowPresenter = ({
         <Flex flex={1} gap={12} alignItems="center" minWidth={0}>
           <Flex
             layoutId={isStandaloneChat ? undefined : `chat-${path}-avatar`}
-            layout="preserve-aspect"
+            layout={isStandaloneChat ? undefined : 'preserve-aspect'}
             transition={{
               duration: isStandaloneChat ? 0 : 0.15,
             }}
@@ -186,7 +186,7 @@ export const ChatRowPresenter = ({
                 layoutId={
                   isStandaloneChat ? undefined : `chat-${path}-pretitle`
                 }
-                layout="preserve-aspect"
+                layout={isStandaloneChat ? undefined : 'preserve-aspect'}
                 transition={{
                   duration: isStandaloneChat ? 0 : 0.15,
                 }}
@@ -210,7 +210,7 @@ export const ChatRowPresenter = ({
               <Flex flex={1} minWidth={0} maxWidth="100%">
                 <Text.Custom
                   layoutId={isStandaloneChat ? undefined : `chat-${path}-name`}
-                  layout="preserve-aspect"
+                  layout={isStandaloneChat ? undefined : 'preserve-aspect'}
                   truncate
                   textAlign="left"
                   transition={{
@@ -252,7 +252,7 @@ export const ChatRowPresenter = ({
                 layoutId={
                   isStandaloneChat ? undefined : `chat-${path}-subtitle`
                 }
-                layout="preserve-aspect"
+                layout={isStandaloneChat ? undefined : 'preserve-aspect'}
                 truncate
                 width={210}
                 fontWeight={400}

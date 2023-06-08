@@ -6,7 +6,6 @@ import path from 'path';
 
 import { isDevelopment, isProduction } from './helpers/env';
 
-// TODO test this
 log.create('main');
 log.catchErrors();
 log.transports.file.level = 'info';

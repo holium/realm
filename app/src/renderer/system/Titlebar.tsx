@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import styled, { css } from 'styled-components';
 
-import { Flex } from '@holium/design-system';
+import { Flex, Text } from '@holium/design-system';
 
 import { useAppState } from 'renderer/stores/app.store';
 
@@ -22,6 +22,7 @@ const TrafficButton = styled(motion.button)<TrafficButtonProps>`
   background: ${(props) => props.color};
   border: 0.5px solid rgba(0, 0, 0, 0.12);
   -webkit-app-region: no-drag;
+
   &:hover {
     filter: brightness(0.9);
   }
@@ -40,6 +41,8 @@ const TitlebarContainer = styled.div<TitlebarContainerProps>`
   width: 100%;
   background: rgba(0, 0, 0, 0.05);
   backdrop-filter: var(--blur);
+  transition: var(--transition);
+
   ${(props) =>
     !props.isFullscreen &&
     css`
@@ -50,13 +53,11 @@ const TitlebarContainer = styled.div<TitlebarContainerProps>`
     css`
       &:not(:hover) {
         ${TrafficButton} {
-          transition: var(--transition);
           opacity: 0;
         }
       }
       &:hover {
         ${TrafficButton} {
-          transition: var(--transition);
           opacity: 1;
         }
       }
@@ -91,3 +92,32 @@ export const RealmTitlebarPresenter = () => {
 };
 
 export const RealmTitlebar = observer(RealmTitlebarPresenter);
+
+const StandAloneChatTitlebarContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 28px;
+  background: var(--rlm-dock-color);
+  z-index: 100;
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+`;
+
+export const StandAloneChatTitlebar = () => (
+  <StandAloneChatTitlebarContainer>
+    <Text.Body
+      style={{
+        opacity: 0.9,
+        fontSize: 13,
+        fontWeight: 500,
+      }}
+    >
+      Realm Chat
+    </Text.Body>
+  </StandAloneChatTitlebarContainer>
+);

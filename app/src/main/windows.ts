@@ -5,6 +5,7 @@ import { BrowserHelper } from './helpers/browser';
 import { CursorSettingsHelper } from './helpers/cursorSettings';
 import { DeepLinkHelper } from './helpers/deepLink';
 import { DevHelper } from './helpers/dev';
+import { isArm64, isMac } from './helpers/env';
 import { FullScreenHelper } from './helpers/fullscreen';
 import { KeyHelper } from './helpers/key';
 import { MediaHelper } from './helpers/media';
@@ -20,13 +21,15 @@ const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
 const defaultRealmWindowOptions: Electron.BrowserWindowConstructorOptions = {
   show: false,
+  frame: isArm64 && isMac ? false : true,
   width,
   height,
   icon: getAssetPath('icon.png'),
   title: 'Realm',
   fullscreen: true,
   acceptFirstMouse: true,
-  titleBarStyle: 'hidden',
+  // turn on simple fullscreen for arm64 mac to fill notch area
+  simpleFullscreen: isArm64 && isMac,
   webPreferences: {
     nodeIntegration: false,
     webviewTag: true,
@@ -64,12 +67,17 @@ export const createRealmWindow = () => {
     }
 
     const initialDimensions = newRealmWindow.getBounds();
+    let hasTitlebar = false;
+    let isFullscreen = newRealmWindow.isFullScreen();
+    if (isArm64 && isMac) {
+      initialDimensions.height = initialDimensions.height - 42;
+      hasTitlebar = true;
+      isFullscreen = newRealmWindow.isSimpleFullScreen();
+    }
 
+    newRealmWindow.webContents.send('set-titlebar-visible', hasTitlebar);
     newRealmWindow.webContents.send('set-dimensions', initialDimensions);
-    newRealmWindow.webContents.send(
-      'set-fullscreen',
-      newRealmWindow.isFullScreen()
-    );
+    newRealmWindow.webContents.send('set-fullscreen', isFullscreen);
   });
 
   const menuBuilder = new MenuBuilder(newRealmWindow);
@@ -143,6 +151,8 @@ export const createStandaloneChatWindow = () => {
     ...defaultRealmWindowOptions,
     title: 'Realm Chat',
     fullscreen: false,
+    simpleFullscreen: false,
+    frame: false,
     icon: getAssetPath('standalone-chat-icon.png'),
   });
   newStandaloneChatWindow.setMenuBarVisibility(true);
