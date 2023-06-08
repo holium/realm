@@ -1,5 +1,4 @@
-import { AddWord } from './AddWord';
-import { SearchBar } from './SearchBar';
-import { TabPanel, Tabs } from './Tab';
-
-export { AddWord, SearchBar, TabPanel, Tabs };
+export * from './AddWord';
+export * from './SearchBar';
+export * from './Tab';
+export * from './Vote';
