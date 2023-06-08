@@ -6,7 +6,7 @@
  * When running `yarn build` or `yarn build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
-import { app, BrowserWindow, ipcMain, session, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, screen, session, shell } from 'electron';
 import { download } from 'electron-dl';
 import isDev from 'electron-is-dev';
 import log from 'electron-log';
@@ -106,11 +106,13 @@ const createWindow = async () => {
     // TODO can cleanup here
   }
 
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
   mainWindow = new BrowserWindow({
     show: false,
     frame: isArm64 && isMac ? false : true,
-    width: 1512,
-    height: 982,
+    width: width,
+    height: height,
     icon: getAssetPath('icon.png'),
     title: 'Realm',
     fullscreen: true,
