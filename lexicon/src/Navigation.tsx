@@ -6,7 +6,7 @@ import {
   useSearchParams,
 } from 'react-router-dom';
 
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 
 import { AddWord, SearchBar } from './components';
 import { useStore } from './store';
@@ -17,7 +17,7 @@ export const Navigation = () => {
   const { ship, group, word } = useParams();
   //presisted space data for filtering search correctly
   const navigate = useNavigate();
-  const { setAddModalOpen, addModalOpen, space, setSpace } = useStore();
+  const { setAddModalOpen, addModalOpen, setSpace } = useStore();
   log('space', searchParams.get('spaceId'));
   useEffect(() => {
     const spaceId = searchParams.get('spaceId');
