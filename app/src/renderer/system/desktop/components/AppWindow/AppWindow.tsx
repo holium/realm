@@ -171,7 +171,6 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     if (!nearEdge.isOn) {
       shellStore.hideSnapView();
       if (dragging.isOn && !resizing.isOn) {
-        console.log('drag unmaximizing!');
         dragUnmaximize();
       }
     } else {
@@ -401,7 +400,6 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     if (appWindow.type === 'dialog') return;
     if (appWindow.isMaximized) {
       const mbAll = shellStore.unmaximize(appWindow.appId);
-      console.log(mbAll);
       const dmbPrev = denormalizeBounds(
         mbAll['prevBounds'],
         shellStore.desktopDimensions
@@ -416,7 +414,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
         if (isFullWidth(win.prevBounds.width, shellStore.desktopDimensions)) {
           const relativeX = xPos / dmbPrev.width;
           controls.start({
-            x: relativeX * dmb.width,
+            x: xPos - relativeX * dmb.width,
             width: dmb.width,
             height: dmb.height,
             transition: { duration: 0.2 },
@@ -433,7 +431,6 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   };
 
   const onMaximize = () => {
-    console.log(onMaximize);
     const mb = shellStore.toggleMaximized(appWindow.appId);
     setBoundsAfterMaximize(mb);
   };
