@@ -321,12 +321,3 @@ app
     });
   })
   .catch(console.log);
-
-// // detect sigkill or sigterm and quit
-// process.on('SIGTERM', () => {
-//   app.exit();
-// });
-
-// process.on('SIGINT', () => {
-//   app.exit();
-// });
