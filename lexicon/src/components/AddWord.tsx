@@ -47,6 +47,7 @@ export const AddWord = ({ open, onClose }: Props) => {
         }
       }
       resetForm();
+      onClose();
       log('addWord result =>', result);
     } catch (e) {
       log('addword error => ', e);
@@ -90,6 +91,7 @@ export const AddWord = ({ open, onClose }: Props) => {
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
           setWord(evt.target.value);
         }}
+        autoFocus
       />
       <Flex flexDirection={'column'} gap={12}>
         <Flex flexDirection={'column'} gap={6}>
