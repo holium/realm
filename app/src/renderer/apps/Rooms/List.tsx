@@ -10,18 +10,22 @@ import { useShipStore } from 'renderer/stores/ship.store';
 import { useTrayApps } from '../store';
 import { ProviderSelector } from './components/ProviderSelector';
 import { RoomRow } from './components/RoomRow';
+import { roomTrayConfig } from './config';
 import { RoomModel } from './store/RoomsStore';
 import { useRoomsStore } from './store/RoomsStoreContext';
 
 const RoomsPresenter = () => {
   const { spacesStore } = useShipStore();
-  const { roomsApp } = useTrayApps();
+  const { roomsApp, dimensions, setTrayAppHeight } = useTrayApps();
   const roomsStore = useRoomsStore();
 
   const ourSpace = spacesStore.selected?.type === 'our';
 
   useEffect(() => {
     trackEvent('OPENED', 'ROOMS_LIST');
+    if (dimensions.height !== roomTrayConfig.dimensions.height) {
+      setTrayAppHeight(roomTrayConfig.dimensions.height);
+    }
   }, []);
 
   const rooms = ourSpace
