@@ -5,7 +5,6 @@ import { observer } from 'mobx-react';
 import { GlobalStyle, RealmBackground } from './App.styles';
 import { AppContent } from './AppContent';
 import { AppLoading } from './AppLoading';
-import { StandaloneChat } from './apps/StandaloneChat/StandaloneChat';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
 import { SelectionProvider } from './lib/selection';
 import { appState, AppStateProvider, useAppState } from './stores/app.store';
@@ -70,11 +69,7 @@ const AppPresenter = () => {
       return <AppLoading />;
     }
 
-    if (isStandaloneChat) {
-      return <StandaloneChat />;
-    }
-
-    return <AppContent />;
+    return <AppContent isStandaloneChat={isStandaloneChat} />;
   }, [isStandaloneChat, booted]);
 
   return (
