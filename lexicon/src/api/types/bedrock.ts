@@ -39,7 +39,7 @@ export type Replication = 'host' | 'gossip' | 'shared-host';
 export type PermissionScope = 'table' | 'own' | 'none';
 
 export type AccessRule = {
-  create: Boolean;
+  create: boolean;
   edit: PermissionScope;
   delete: PermissionScope;
 };

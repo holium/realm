@@ -1,12 +1,10 @@
-import React from 'react';
-
 import { Button, Flex, Icon, TextInput } from '@holium/design-system';
 
 interface Props {
   addModalOpen: boolean;
-  onAddWord: Function;
+  onAddWord: () => void;
   backButton: boolean;
-  onBack: Function;
+  onBack: () => void;
 }
 export const SearchBar = ({
   onAddWord,

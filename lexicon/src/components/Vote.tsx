@@ -13,7 +13,7 @@ export const Vote = ({ id, votes }: WordItemProps) => {
   const voteOnWord = async (
     id: string,
     voteType: null | boolean,
-    voteId: string = ''
+    voteId = ''
   ) => {
     if (!space) return;
     try {

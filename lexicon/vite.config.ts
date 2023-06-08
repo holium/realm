@@ -1,6 +1,6 @@
+import { urbitPlugin } from '@urbit/vite-plugin-urbit';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
-import { urbitPlugin } from '@urbit/vite-plugin-urbit';
 
 // https://vitejs.dev/config/
 export default defineConfig({
