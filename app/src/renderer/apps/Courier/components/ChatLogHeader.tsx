@@ -14,6 +14,7 @@ const ChatLogHeaderContainer = styled(Flex)<{ isStandaloneChat: boolean }>`
   gap: 12px;
   align-items: center;
   justify-content: space-between;
+  padding: 0 0 12px 0;
 
   ${({ isStandaloneChat }) =>
     isStandaloneChat &&
@@ -30,6 +31,7 @@ type Props = {
   isMuted: boolean;
   hasMenu: boolean;
   rightAction?: React.ReactNode;
+  forceBackButton?: boolean;
   isStandaloneChat?: boolean;
   onBack: () => void;
 };
@@ -39,6 +41,7 @@ const ChatLogHeaderPresenter = ({
   rightAction,
   isMuted,
   hasMenu = true,
+  forceBackButton = false,
   isStandaloneChat = false,
   onBack,
 }: Props) => {
@@ -128,17 +131,18 @@ const ChatLogHeaderPresenter = ({
         alignItems="center"
         gap={8}
       >
-        {!isStandaloneChat && (
-          <Button.IconButton
-            size={26}
-            onClick={(evt) => {
-              evt.stopPropagation();
-              onBack();
-            }}
-          >
-            <Icon name="ArrowLeftLine" size={22} opacity={0.5} />
-          </Button.IconButton>
-        )}
+        {!isStandaloneChat ||
+          (forceBackButton && (
+            <Button.IconButton
+              size={26}
+              onClick={(evt) => {
+                evt.stopPropagation();
+                onBack();
+              }}
+            >
+              <Icon name="ArrowLeftLine" size={22} opacity={0.5} />
+            </Button.IconButton>
+          ))}
         <ChatLogHeaderContent isStandaloneChat={isStandaloneChat} />
       </Flex>
       <Flex>

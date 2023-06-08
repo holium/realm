@@ -8,7 +8,6 @@ import {
   Flex,
   Icon,
   InlineEdit,
-  NoScrollBar,
   SectionDivider,
   Select,
   Text,
@@ -17,7 +16,6 @@ import {
 } from '@holium/design-system';
 
 import { FileUploadParams } from 'os/services/ship/ship.service';
-import { useTrayApps } from 'renderer/apps/store';
 import { ShipSearch } from 'renderer/components/ShipSearch';
 import { useFileUpload } from 'renderer/lib/useFileUpload';
 import { useStorage } from 'renderer/lib/useStorage';
@@ -67,12 +65,11 @@ type Props = {
   isStandaloneChat?: boolean;
 };
 
-export const ChatInfoPresenter = ({ isStandaloneChat: _ }: Props) => {
+export const ChatInfoPresenter = ({ isStandaloneChat }: Props) => {
   const storage = useStorage();
   const { loggedInAccount, theme } = useAppState();
   const { chatStore, spacesStore, friends } = useShipStore();
   const { selectedChat, setSubroute, getChatHeader } = chatStore;
-  const { dimensions } = useTrayApps();
   const containerRef = useRef<HTMLDivElement>(null);
   const [_isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string>();
@@ -119,6 +116,7 @@ export const ChatInfoPresenter = ({ isStandaloneChat: _ }: Props) => {
   const { canUpload, promptUpload } = useFileUpload({ storage });
 
   if (!selectedChat) return null;
+
   const {
     sortedPeers,
     type,
@@ -131,14 +129,11 @@ export const ChatInfoPresenter = ({ isStandaloneChat: _ }: Props) => {
     updateInvitePermissions,
     updateExpiresDuration,
   } = selectedChat;
-  // const title = metadata?.title;
 
   const editMetadata = (editedMetadata: any) => {
     if (!selectedChat) return;
     selectedChat.updateMetadata(editedMetadata);
   };
-
-  // const setInvote
 
   const uploadFile = (params: FileUploadParams) => {
     setIsUploading(true);
@@ -203,26 +198,21 @@ export const ChatInfoPresenter = ({ isStandaloneChat: _ }: Props) => {
   };
 
   return (
-    <Flex
-      flexDirection="column"
-      height={dimensions.height}
-      overflowX="hidden"
-      overflowY="auto"
-    >
+    <Flex flexDirection="column" width="100%" height="100%" overflowY="auto">
       <ChatLogHeader
         path={path}
         isMuted={selectedChat.muted}
         hasMenu={false}
+        forceBackButton
+        isStandaloneChat={isStandaloneChat}
         onBack={() => setSubroute('chat')}
       />
-      <NoScrollBar
+      <Flex
+        flex={1}
         flexDirection="column"
-        height={dimensions.height - 48}
-        overflowX="hidden"
         overflowY="auto"
-        pb={2}
+        padding={isStandaloneChat ? '12px' : '0 0 12px 0'}
       >
-        {/* Chat Info */}
         <Flex flexDirection="column" gap={4} pt={3} pb={3}>
           <Flex
             flexDirection="column"
@@ -524,7 +514,7 @@ export const ChatInfoPresenter = ({ isStandaloneChat: _ }: Props) => {
             );
           })}
         </Flex>
-      </NoScrollBar>
+      </Flex>
     </Flex>
   );
 };

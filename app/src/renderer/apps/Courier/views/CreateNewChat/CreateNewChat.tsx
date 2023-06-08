@@ -143,8 +143,8 @@ const CreateNewChatPresenter = ({ isStandaloneChat = false }: Props) => {
       </Flex>
       <Flex width="100%" padding={isStandaloneChat ? '0 12px 12px 12px' : 0}>
         <TextInput
-          id="dm-search"
-          name="dm-search"
+          id="new-dm-search"
+          name="new-dm-search"
           width="100%"
           borderRadius={16}
           height={32}
