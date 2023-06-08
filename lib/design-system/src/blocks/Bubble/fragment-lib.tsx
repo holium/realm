@@ -55,10 +55,18 @@ export const BlockWrapper = styled(motion.span)`
 `;
 
 export const FragmentBlock = styled(motion.span)`
-  height: 100%;
   width: 100%;
+  height: 100%;
+  min-width: 0px;
+  max-width: 100%;
+  position: relative;
+
   blockquote {
     margin-bottom: 4px;
+  }
+  * {
+    min-width: 0px;
+    max-width: 100%;
   }
 `;
 
