@@ -86,7 +86,10 @@ export const StandaloneChatBodyPresenter = () => {
           <ResizeHandle onMouseDown={onMouseDownResizeHandle} />
         </Flex>
         <StandaloneChatPassportPreview
-          onClickCog={() => chatStore.setSubroute('passport')}
+          onClickCog={() => {
+            chatStore.setChat('');
+            chatStore.setSubroute('passport');
+          }}
         />
       </Flex>
       <Flex flex={1} height="100%" position="relative" minWidth={360}>

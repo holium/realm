@@ -8,6 +8,7 @@ import {
   Flex,
   Icon,
   InlineEdit,
+  NoScrollBar,
   SectionDivider,
   Select,
   Text,
@@ -198,7 +199,7 @@ export const ChatInfoPresenter = ({ isStandaloneChat }: Props) => {
   };
 
   return (
-    <Flex flexDirection="column" width="100%" height="100%" overflowY="auto">
+    <Flex flexDirection="column" width="100%" height="100%">
       <ChatLogHeader
         path={path}
         isMuted={selectedChat.muted}
@@ -207,7 +208,7 @@ export const ChatInfoPresenter = ({ isStandaloneChat }: Props) => {
         isStandaloneChat={isStandaloneChat}
         onBack={() => setSubroute('chat')}
       />
-      <Flex
+      <NoScrollBar
         flex={1}
         flexDirection="column"
         overflowY="auto"
@@ -259,7 +260,6 @@ export const ChatInfoPresenter = ({ isStandaloneChat }: Props) => {
             </Flex>
           </Flex>
         </Flex>
-        {/* Settings */}
         <Flex my={2} flexDirection="column">
           <Box mb={2}>
             <SectionDivider label="Settings" alignment="left" />
@@ -514,7 +514,7 @@ export const ChatInfoPresenter = ({ isStandaloneChat }: Props) => {
             );
           })}
         </Flex>
-      </Flex>
+      </NoScrollBar>
     </Flex>
   );
 };

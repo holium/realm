@@ -131,18 +131,17 @@ const ChatLogHeaderPresenter = ({
         alignItems="center"
         gap={8}
       >
-        {!isStandaloneChat ||
-          (forceBackButton && (
-            <Button.IconButton
-              size={26}
-              onClick={(evt) => {
-                evt.stopPropagation();
-                onBack();
-              }}
-            >
-              <Icon name="ArrowLeftLine" size={22} opacity={0.5} />
-            </Button.IconButton>
-          ))}
+        {(!isStandaloneChat || forceBackButton) && (
+          <Button.IconButton
+            size={26}
+            onClick={(evt) => {
+              evt.stopPropagation();
+              onBack();
+            }}
+          >
+            <Icon name="ArrowLeftLine" size={22} opacity={0.5} />
+          </Button.IconButton>
+        )}
         <ChatLogHeaderContent isStandaloneChat={isStandaloneChat} />
       </Flex>
       <Flex>
