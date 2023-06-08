@@ -314,7 +314,7 @@ app
     });
 
     app.on('before-quit', () => {
-      if (isMac) {
+      if (isMac && isArm64) {
         mainWindow?.close();
         app.exit();
       }

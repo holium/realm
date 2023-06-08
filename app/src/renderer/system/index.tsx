@@ -9,15 +9,14 @@ import { useShipStore } from 'renderer/stores/ship.store';
 
 import { Desktop } from './desktop/Desktop';
 import { DialogManager } from './dialog/DialogManager';
-import { RealmTitlebar } from './Titlebar';
+// import { RealmTitlebar } from './Titlebar';
 
 const getCssVar = (name: string) =>
   getComputedStyle(document.documentElement).getPropertyValue(name);
 
 const ShellPresenter = () => {
   const { settingsStore } = useShipStore();
-  const { shellStore, authStore, loggedInAccount, showTitleBar } =
-    useAppState();
+  const { shellStore, authStore, loggedInAccount } = useAppState();
   const { session } = authStore;
 
   const DialogLayer = useMemo(
@@ -55,7 +54,7 @@ const ShellPresenter = () => {
   return (
     <RoomsStoreProvider ourId={loggedInAccount.serverId}>
       <ViewPort>
-        {showTitleBar && <RealmTitlebar />}
+        {/* {showTitleBar && <RealmTitlebar />} */}
         <Layer zIndex={2}>{DialogLayer}</Layer>
         <Desktop />
         <Layer zIndex={20}>{/* <ConnectionStatus /> */}</Layer>

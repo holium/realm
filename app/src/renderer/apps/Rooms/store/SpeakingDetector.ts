@@ -1,5 +1,5 @@
 import { LocalPeer } from './LocalPeer';
-import { PeerClass } from './RoomsStore';
+import { PeerClass } from './Peer';
 
 export interface IAudioAnalyser {
   attach: (peer: LocalPeer) => void;

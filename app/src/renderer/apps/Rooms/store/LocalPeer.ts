@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events';
 import { action, makeObservable, observable } from 'mobx';
 
 import { PeerConnectionState } from './room.types';
@@ -20,7 +21,7 @@ export const DEFAULT_AUDIO_OPTIONS = {
   autoGainControl: false,
 };
 
-export class LocalPeer {
+export class LocalPeer extends EventEmitter {
   @observable patp = '';
   @observable audioLevel = 0;
   @observable isMuted = false;
@@ -44,6 +45,7 @@ export class LocalPeer {
     | undefined;
 
   constructor(ourId: string) {
+    super();
     makeObservable(this);
     this.patp = ourId;
     this.setMedia = this.setMedia.bind(this);
@@ -102,9 +104,11 @@ export class LocalPeer {
   }
 
   @action
-  isSpeakingChanged(speaking: boolean) {
-    this.isSpeaking = speaking;
+  isSpeakingChanged(isSpeaking: boolean) {
+    this.isSpeaking = isSpeaking;
+    this.emit('isSpeakingChanged', isSpeaking);
   }
+
   @action
   setAudioInputDevice(deviceId: string) {
     localStorage.setItem('rooms-audio-input', deviceId);

@@ -19,6 +19,11 @@ export const TrayAppWrapper = styled(motion.div)`
   background: rgba(var(--rlm-window-bg-rgba));
   border: 1px solid rgba(var(--rlm-border-rgba));
   box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.12);
+  // this forces gpu rendering on the tray app which is needed to prevent
+  // a flicker bug due to the backdrop-filter
+  --webkit-transform: translate3d(0, 0, 0);
+  --webkit-backdrop-filter: var(--blur);
+  --webkit-backface-visibility: hidden;
   ::-webkit-scrollbar {
     display: none;
   }
