@@ -1,6 +1,6 @@
 import create from 'zustand';
-
-interface Store {
+import { log } from './utils';
+export interface Store {
   addModalOpen: boolean;
   setAddModalOpen: (addModalOpen: boolean) => void;
 
@@ -12,11 +12,38 @@ interface Store {
 
   addWordRow: (newWordRow: any) => void;
 
+  removeWordRow: (rowId: any) => void;
+
   voteRows: any;
   setVoteRows: (voteRows: any) => void;
 
   addVoteRow: (newVoteRow: any) => void;
   removeVoteRow: (rowId: string) => void;
+
+  voteMap: any;
+  setVoteMap: (voteMap: any) => void;
+
+  definitionRows: any;
+  setDefinitionRows: (definitionRows: any) => void;
+
+  definitionMap: any;
+  setDefinitionMap: (definitionMap: any) => void;
+
+  addDefinitionRow: (newDefinitionRow: any) => void;
+
+  sentenceRows: any;
+  setSentenceRows: (sentenceRows: any) => void;
+
+  addSentenceRow: (newSentenceRow: any) => void;
+
+  sentenceMap: any;
+  setSentenceMap: (sentenceMap: any) => void;
+
+  wordMap: any;
+  setWordMap: (wordMap: any) => void;
+
+  wordList: any;
+  setWordList: (wordList: any) => void;
 }
 
 export const useStore = create<Store>((set, get) => ({
@@ -32,6 +59,15 @@ export const useStore = create<Store>((set, get) => ({
   addWordRow: (newWordRow: any) => {
     const newWordRows = [...get().wordRows];
     newWordRows.push(newWordRow);
+    set({
+      wordRows: newWordRows,
+    });
+  },
+
+  removeWordRow: (rowId: string) => {
+    const newWordRows = [...get().wordRows].filter(
+      (item: any) => item.id !== rowId
+    );
     set({
       wordRows: newWordRows,
     });
@@ -56,4 +92,43 @@ export const useStore = create<Store>((set, get) => ({
       voteRows: newVoteRows,
     });
   },
+
+  voteMap: new Map(),
+  setVoteMap: (voteMap: any) => set({ voteMap }),
+
+  definitionRows: [],
+  setDefinitionRows: (definitionRows: any) => set({ definitionRows }),
+
+  addDefinitionRow: (newDefinitionRow: any) => {
+    const newDefinitionRows = [...get().definitionRows];
+    newDefinitionRows.push(newDefinitionRow);
+
+    set({
+      definitionRows: newDefinitionRows,
+    });
+  },
+  definitionMap: new Map(),
+  setDefinitionMap: (definitionMap: any) => set({ definitionMap }),
+
+  sentenceRows: [],
+  setSentenceRows: (sentenceRows: any) => set({ sentenceRows }),
+
+  addSentenceRow: (newSentenceRow: any) => {
+    const newSentenceRows = [...get().sentenceRows];
+    newSentenceRows.push(newSentenceRow);
+
+    log('newSentenceRows', newSentenceRows);
+    set({
+      sentenceRows: newSentenceRows,
+    });
+  },
+
+  sentenceMap: new Map(),
+  setSentenceMap: (sentenceMap: any) => set({ sentenceMap }),
+
+  wordMap: new Map(),
+  setWordMap: (wordMap: any) => set({ wordMap }),
+
+  wordList: [],
+  setWordList: (wordList: any) => set({ wordList }),
 }));

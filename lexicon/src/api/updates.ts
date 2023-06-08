@@ -17,12 +17,24 @@ export const updateHandler = (update: any) => {
         store.addWordRow(update[0].row);
         break;
       }
+      case 'del-row-lexicon-word': {
+        store.removeWordRow(update[0].id);
+        break;
+      }
       case 'add-row-vote': {
         store.addVoteRow(update[0].row);
         break;
       }
       case 'del-row-vote': {
         store.removeVoteRow(update[0].id);
+        break;
+      }
+      case 'add-row-lexicon-definition': {
+        store.addDefinitionRow(update[0].row);
+        break;
+      }
+      case 'add-row-lexicon-sentence': {
+        store.addSentenceRow(update[0].row);
         break;
       }
     }

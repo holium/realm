@@ -10,7 +10,12 @@ export default {
 
 export const Default = () => (
   <Flex flexDirection="column" alignItems={'center'}>
-    <SearchBar />
+    <SearchBar
+      onAddWord={() => null}
+      addModalOpen={true}
+      backButton={false}
+      onBack={() => null}
+    />
     <Home />
   </Flex>
 );
