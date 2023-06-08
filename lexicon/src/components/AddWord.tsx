@@ -11,14 +11,14 @@ import {
 
 import api from '../api';
 import { log } from '../utils';
+import { Store, useStore } from '../store';
 
 interface Props {
   open: boolean;
   onClose: Function;
 }
 export const AddWord = ({ open, onClose }: Props) => {
-  const space: string = '/~lux/our';
-
+  const space = useStore((store: Store) => store.space);
   const [word, setWord] = useState<string>('');
   const [definition, setDefinition] = useState<string>('');
   const [sentence, setSentence] = useState<string>('');

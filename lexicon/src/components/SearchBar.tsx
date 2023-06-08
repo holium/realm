@@ -5,13 +5,22 @@ import { Button, Flex, Icon, TextInput } from '@holium/design-system';
 interface Props {
   addModalOpen: boolean;
   onAddWord: Function;
+  backButton: boolean;
+  onBack: Function;
 }
-export const SearchBar = ({ onAddWord, addModalOpen }: Props) => {
+export const SearchBar = ({
+  onAddWord,
+  addModalOpen,
+  backButton,
+  onBack,
+}: Props) => {
   return (
     <Flex flex={1} gap={10} justifyContent={'center'} marginBottom={12}>
-      <Button.IconButton>
-        <Icon name="ArrowLeftLine" size={22} />
-      </Button.IconButton>
+      {backButton && (
+        <Button.IconButton onClick={() => onBack()}>
+          <Icon name="ArrowLeftLine" size={22} />
+        </Button.IconButton>
+      )}
       <TextInput
         id="search-input"
         name="search"
@@ -25,14 +34,16 @@ export const SearchBar = ({ onAddWord, addModalOpen }: Props) => {
         error={false}
         onChange={() => null}
       />
-      <Button.TextButton
-        fontSize={1}
-        fontWeight={600}
-        onClick={() => onAddWord()}
-        disabled={addModalOpen}
-      >
-        Add Word
-      </Button.TextButton>
+      {!backButton && (
+        <Button.TextButton
+          fontSize={1}
+          fontWeight={600}
+          onClick={() => onAddWord()}
+          disabled={addModalOpen}
+        >
+          Add Word
+        </Button.TextButton>
+      )}
     </Flex>
   );
 };

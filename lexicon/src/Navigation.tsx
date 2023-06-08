@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   Outlet,
   useNavigate,
@@ -18,7 +18,7 @@ export const Navigation = () => {
   //presisted space data for filtering search correctly
   const navigate = useNavigate();
   const { setAddModalOpen, addModalOpen, space, setSpace } = useStore();
-  log('space', space);
+  log('space', searchParams.get('spaceId'));
   useEffect(() => {
     const spaceId = searchParams.get('spaceId');
     if (spaceId) {
@@ -41,6 +41,8 @@ export const Navigation = () => {
       <SearchBar
         addModalOpen={addModalOpen}
         onAddWord={() => setAddModalOpen(true)}
+        backButton={!!word}
+        onBack={() => navigate(-1)}
       />
       <AddWord open={addModalOpen} onClose={() => setAddModalOpen(false)} />
       <Outlet />
