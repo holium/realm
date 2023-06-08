@@ -5,7 +5,7 @@ import { Dimensions } from '@holium/design-system';
 
 import {
   getMaximizedBounds,
-  isMaximizedBounds,
+  isFullyMaximizedBounds,
 } from '../../lib/window-manager';
 import { Glob } from './docket.model';
 
@@ -61,13 +61,14 @@ export const AppWindowModel = types
      *  The window is static and cannot be moved or resized.
      */
     static: types.optional(types.boolean, false),
+    isMaximized: types.optional(types.boolean, false),
   })
   .views((self) => ({
     get isMinimized() {
       return self.state === 'minimized';
     },
-    isMaximized(desktopDimensions: Dimensions) {
-      return isMaximizedBounds(self.bounds, desktopDimensions);
+    isFullyMaximized(desktopDimensions: Dimensions) {
+      return isFullyMaximizedBounds(self.bounds, desktopDimensions);
     },
   }))
   .actions((self) => ({
@@ -101,7 +102,24 @@ export const AppWindowModel = types
       };
     },
     toggleMaximize(desktopDimensions: Dimensions) {
-      const isMaximized = self.isMaximized(desktopDimensions);
+      const isMaximized = self.isMaximized;
+      if (isMaximized) {
+        const bounds = { ...self.bounds };
+        self.bounds = { ...self.prevBounds };
+        self.prevBounds = bounds;
+      } else {
+        self.prevBounds = { ...self.bounds };
+        const maximizedBounds = getMaximizedBounds(desktopDimensions);
+        self.bounds = {
+          x: maximizedBounds.x,
+          y: maximizedBounds.y,
+          width: maximizedBounds.width,
+          height: maximizedBounds.height,
+        };
+      }
+    },
+    toggleFullyMaximize(desktopDimensions: Dimensions) {
+      const isMaximized = self.isFullyMaximized(desktopDimensions);
       if (isMaximized) {
         const bounds = { ...self.bounds };
         self.bounds = { ...self.prevBounds };
