@@ -8,6 +8,7 @@ import { SubmitButton } from '@holium/shared';
 const SettingSectionForm = styled.form<{ zIndex: number }>`
   display: flex;
   flex-direction: column;
+  width: 100%;
   z-index: ${({ zIndex }) => zIndex};
 `;
 

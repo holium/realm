@@ -13,6 +13,8 @@ import {
   ResizeHandle,
   StandaloneChatContainer,
 } from './StandaloneChatBody.styles';
+import { StandaloneChatPassport } from './StandaloneChatPassport';
+import { StandaloneChatPassportPreview } from './StandaloneChatPassportPreview';
 
 export const StandaloneChatBodyPresenter = () => {
   const { chatStore } = useShipStore();
@@ -73,19 +75,29 @@ export const StandaloneChatBodyPresenter = () => {
   return (
     <StandaloneChatContainer>
       <Flex
-        position="relative"
+        flexDirection="column"
         minWidth={320}
         width={sidebarWidth}
         background="var(--rlm-base-color)"
         borderRight="1px solid var(--rlm-dock-color)"
       >
-        <Inbox isStandaloneChat />
-        <ResizeHandle onMouseDown={onMouseDownResizeHandle} />
+        <Flex flex={1} position="relative">
+          <Inbox isStandaloneChat />
+          <ResizeHandle onMouseDown={onMouseDownResizeHandle} />
+        </Flex>
+        <StandaloneChatPassportPreview
+          onClickCog={() => chatStore.setSubroute('passport')}
+        />
       </Flex>
       <Flex flex={1} height="100%" position="relative" minWidth={360}>
         {chatStore.subroute === 'chat' && <ChatLog isStandaloneChat />}
         {chatStore.subroute === 'chat-info' && <ChatInfo isStandaloneChat />}
         {chatStore.subroute === 'new' && <CreateNewChat isStandaloneChat />}
+        {chatStore.subroute === 'passport' && (
+          <StandaloneChatPassport
+            onBack={() => chatStore.setSubroute('inbox')}
+          />
+        )}
       </Flex>
     </StandaloneChatContainer>
   );
