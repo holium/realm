@@ -17,7 +17,9 @@ export const StandaloneChatPresenter = () => {
 
   useEffect(() => {
     // Standalone chat uses the default OS cursor.
-    window.electron.app.disableRealmCursor();
+    window.electron.app.isRealmCursorEnabled().then((enabled) => {
+      if (enabled) window.electron.app.disableRealmCursor();
+    });
   });
 
   return (

@@ -16,7 +16,7 @@ import { Chat, ChatModelType } from './models/chat.model';
 import { LoaderModel } from './models/common.model';
 import { ShipStore, shipStore } from './ship.store';
 
-type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
+export type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
 
 export const sortByUpdatedAt = (a: any, b: any) => {
   return (

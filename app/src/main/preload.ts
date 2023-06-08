@@ -72,6 +72,9 @@ const appPreload = {
   disableRealmCursor: () => {
     return ipcRenderer.invoke('disable-realm-cursor');
   },
+  isRealmCursorEnabled: () => {
+    return ipcRenderer.invoke('is-realm-cursor-enabled');
+  },
   setMouseColor(hex: string) {
     ipcRenderer.invoke('mouse-color', hex);
   },

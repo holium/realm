@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import styled from 'styled-components';
 
 import { Flex, Spinner, Text } from '@holium/design-system/general';
 
@@ -10,17 +9,34 @@ import { ChatInfo } from '../Courier/views/ChatInfo';
 import { ChatLog } from '../Courier/views/ChatLog/ChatLog';
 import { Inbox } from '../Courier/views/Inbox/Inbox';
 import { NewChat } from '../Courier/views/NewChat';
-
-const ResizeHandle = styled.div`
-  width: 5px;
-  height: 100%;
-  cursor: col-resize;
-`;
+import {
+  ResizeHandle,
+  StandaloneChatContainer,
+} from './StandaloneChatBody.styles';
 
 export const StandaloneChatBodyPresenter = () => {
   const { chatStore } = useShipStore();
 
   const [sidebarWidth, setSidebarWidth] = useState(400);
+
+  const onMouseDownResizeHandle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.pageX;
+    const startWidth = sidebarWidth;
+
+    const onMouseMove = (e: MouseEvent) => {
+      const delta = e.pageX - startX;
+      setSidebarWidth(startWidth + delta);
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
 
   useEffect(() => {
     // Fetch messages for the selected chat.
@@ -55,48 +71,23 @@ export const StandaloneChatBodyPresenter = () => {
   }
 
   return (
-    <Flex
-      style={{
-        width: '100%',
-        height: '100%',
-        paddingTop: 28,
-        background: 'var(--rlm-dock-color)',
-      }}
-    >
+    <StandaloneChatContainer>
       <Flex
+        position="relative"
         minWidth={300}
         width={sidebarWidth}
-        borderRight="1px solid var(--rlm-dock-color)"
         background="var(--rlm-base-color)"
+        borderRight="1px solid var(--rlm-dock-color)"
       >
         <Inbox isStandaloneChat />
-        <ResizeHandle
-          onMouseDown={(e) => {
-            e.preventDefault();
-            const startX = e.pageX;
-            const startWidth = sidebarWidth;
-
-            const onMouseMove = (e: MouseEvent) => {
-              const delta = e.pageX - startX;
-              setSidebarWidth(startWidth + delta);
-            };
-
-            const onMouseUp = () => {
-              window.removeEventListener('mousemove', onMouseMove);
-              window.removeEventListener('mouseup', onMouseUp);
-            };
-
-            window.addEventListener('mousemove', onMouseMove);
-            window.addEventListener('mouseup', onMouseUp);
-          }}
-        />
+        <ResizeHandle onMouseDown={onMouseDownResizeHandle} />
       </Flex>
       <Flex flex={1} height="100%" position="relative" minWidth={360}>
         {chatStore.subroute === 'chat' && <ChatLog isStandaloneChat />}
         {chatStore.subroute === 'chat-info' && <ChatInfo />}
         {chatStore.subroute === 'new' && <NewChat />}
       </Flex>
-    </Flex>
+    </StandaloneChatContainer>
   );
 };
 

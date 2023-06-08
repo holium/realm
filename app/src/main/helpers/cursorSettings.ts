@@ -1,4 +1,5 @@
 import { BrowserWindow, ipcMain } from 'electron';
+import log from 'electron-log';
 
 import { isMac, isWindows } from './env';
 
@@ -34,33 +35,33 @@ const hideCursorCss = `
 
 const showCursorCss = `
   * {
-    cursor: auto !important;
+    cursor: inherit !important;
   }
   *::before,
   *::after {
-    cursor: auto !important;
+    cursor: inherit !important;
   }
   *:hover {
-    cursor: auto !important;
+    cursor: inherit !important;
   }
   *:active {
-    cursor: auto !important;
+    cursor: inherit !important;
   }
   *:focus {
-    cursor: auto !important;
+    cursor: inherit !important;
   }
   *:focus-within {
-    cursor: auto !important;
+    cursor: inherit !important;
   }
   *:focus-visible {
-    cursor: auto !important;
+    cursor: inherit !important;
   }
   *:focus:not(:focus-visible) {
-    cursor: auto !important;
+    cursor: inherit !important;
   }
 `;
 
-export const hideCursor = (webContents: Electron.WebContents) => {
+const hideCursor = (webContents: Electron.WebContents) => {
   webContents.insertCSS(hideCursorCss);
 };
 
@@ -131,6 +132,7 @@ const registerListeners = (
 
   ipcMain.removeHandler('enable-realm-cursor');
   ipcMain.removeHandler('disable-realm-cursor');
+  ipcMain.removeHandler('is-realm-cursor-enabled');
 
   ipcMain.handle('enable-realm-cursor', () => {
     const mainWindow = BrowserWindow.getAllWindows()[0];
@@ -139,12 +141,21 @@ const registerListeners = (
   });
 
   ipcMain.handle('disable-realm-cursor', () => {
-    const mainWindow = BrowserWindow.getAllWindows()[0];
+    const mainWindow = BrowserWindow.getAllWindows().find((window) =>
+      ['Realm Chat', 'Realm'].includes(window.title)
+    );
+
+    if (!mainWindow) {
+      log.error('Could not find main window');
+      return;
+    }
 
     disableRealmCursor(mainWindow, newMouseWindow);
 
     mainWindow.reload();
   });
+
+  ipcMain.handle('is-realm-cursor-enabled', () => realmCursorEnabled);
 };
 
 export const CursorSettingsHelper = {

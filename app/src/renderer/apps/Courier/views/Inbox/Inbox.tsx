@@ -5,8 +5,7 @@ import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { useTrayApps } from '../../../store';
-import { InboxView } from './InboxView';
+import { InboxBody } from './InboxBody';
 
 type Props = {
   isStandaloneChat?: boolean;
@@ -15,7 +14,6 @@ type Props = {
 export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
   const { loggedInAccount, shellStore } = useAppState();
   const { chatStore, spacesStore } = useShipStore();
-  const { dimensions } = useTrayApps();
   const { sortedChatList, setChat, setSubroute, isChatPinned } = chatStore;
   const currentSpace = spacesStore.selected;
 
@@ -24,10 +22,8 @@ export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
   }, []);
 
   return (
-    <InboxView
+    <InboxBody
       inboxes={sortedChatList}
-      width={isStandaloneChat ? undefined : dimensions.width - 24}
-      height={isStandaloneChat ? undefined : dimensions.height - 24}
       accountIdentity={loggedInAccount?.serverId}
       spacePath={currentSpace?.path}
       isStandaloneChat={isStandaloneChat}

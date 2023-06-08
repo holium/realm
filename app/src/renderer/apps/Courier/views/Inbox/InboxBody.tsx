@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
 import {
@@ -10,11 +11,12 @@ import {
 } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 
+import { useTrayApps } from 'renderer/apps/store';
 import { ChatModelType } from 'renderer/stores/models/chat.model';
 
 import { InboxRow } from './InboxRow';
 
-const InboxViewHeaderContainer = styled(Flex)<{ isStandaloneChat?: boolean }>`
+const InboxBodyHeaderContainer = styled(Flex)<{ isStandaloneChat?: boolean }>`
   align-items: center;
   z-index: 1;
   padding: 0 0 8px 4px;
@@ -29,8 +31,6 @@ const InboxViewHeaderContainer = styled(Flex)<{ isStandaloneChat?: boolean }>`
 
 type Props = {
   inboxes: ChatModelType[];
-  width: number | undefined;
-  height: number | undefined;
   accountIdentity: string | undefined;
   spacePath: string | undefined;
   isStandaloneChat?: boolean;
@@ -40,10 +40,8 @@ type Props = {
   onClickStandaloneChat: () => void;
 };
 
-export const InboxView = ({
+const InboxBodyPresenter = ({
   inboxes,
-  width,
-  height,
   accountIdentity,
   spacePath,
   isStandaloneChat,
@@ -52,6 +50,11 @@ export const InboxView = ({
   onClickNewInbox,
   onClickStandaloneChat,
 }: Props) => {
+  const { dimensions } = useTrayApps();
+
+  const width = isStandaloneChat ? '100%' : dimensions.width - 24;
+  const height = isStandaloneChat ? '100%' : dimensions.height - 24;
+
   const [searchString, setSearchString] = useState<string>('');
 
   const searchFilter = useCallback(
@@ -71,11 +74,13 @@ export const InboxView = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      width={width ?? '100%'}
-      height={height ?? '100%'}
+      width={width}
+      height={height}
+      minWidth={0}
       flexDirection="column"
+      paddingLeft={isStandaloneChat ? 12 : 0}
     >
-      <InboxViewHeaderContainer isStandaloneChat={isStandaloneChat}>
+      <InboxBodyHeaderContainer isStandaloneChat={isStandaloneChat}>
         <Flex width={26}>
           <Icon name="Messages" size={24} opacity={0.8} />
         </Flex>
@@ -108,7 +113,7 @@ export const InboxView = ({
             <Icon name="Plus" size={24} opacity={0.5} />
           </Button.IconButton>
         </Flex>
-      </InboxViewHeaderContainer>
+      </InboxBodyHeaderContainer>
       {filteredInboxes.length === 0 ? (
         <Flex
           flex={1}
@@ -160,3 +165,5 @@ export const InboxView = ({
     </Flex>
   );
 };
+
+export const InboxBody = observer(InboxBodyPresenter);
