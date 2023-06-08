@@ -13,8 +13,8 @@ import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { LocalPeer } from '../store/LocalPeer';
+import { PeerClass } from '../store/Peer';
 import { PeerConnectionState } from '../store/room.types';
-import { PeerClass } from '../store/RoomsStore';
 import { useRoomsStore } from '../store/RoomsStoreContext';
 import { AudioWave } from './AudioWave';
 
@@ -61,8 +61,27 @@ const SpeakerPresenter = (props: ISpeaker) => {
       videoRef.current.playsInline = true;
       videoRef.current.muted = true;
     }
+    const speakerDiv = document.getElementById(`room-speaker-${person}`);
+    if (speakerDiv) {
+      if (peer?.hasVideo && peerState !== PeerConnectionState.Closed) {
+        speakerDiv.classList.add('speaker-video-on');
+      } else {
+        speakerDiv.classList.remove('speaker-video-on');
+      }
+    }
   }, [peer?.hasVideo, videoRef.current]);
 
+  useEffect(() => {
+    if (!speakerRef.current) return;
+    const speakerDiv = document.getElementById(`room-speaker-${person}`);
+    if (speakerDiv) {
+      if (peer?.isSpeaking) {
+        speakerDiv.classList.add('speaker-speaking');
+      } else {
+        speakerDiv.classList.remove('speaker-speaking');
+      }
+    }
+  }, [peer?.isSpeaking, speakerRef.current]);
   const contextMenuOptions = useMemo(
     () =>
       [
@@ -139,11 +158,11 @@ const SpeakerPresenter = (props: ISpeaker) => {
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      className={`${
-        hasVideo && peerState !== PeerConnectionState.Closed
-          ? 'speaker-video-on'
-          : ''
-      } ${isSpeaking ? 'speaker-speaking' : ''}`}
+      // className={`${
+      //   hasVideo && peerState !== PeerConnectionState.Closed
+      //     ? 'speaker-video-on'
+      //     : ''
+      // } ${isSpeaking ? 'speaker-speaking' : ''}`}
     >
       <>
         <video

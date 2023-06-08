@@ -10,12 +10,13 @@ import { SelectionProvider } from './lib/selection';
 import { appState, AppStateProvider, useAppState } from './stores/app.store';
 import { RealmIPC } from './stores/ipc';
 import { ErrorBoundary } from './system/ErrorBoundary';
+import { RealmTitlebar } from './system/Titlebar';
 
 import './app.css';
 import 'photoswipe/dist/photoswipe.css';
 
 const AppPresenter = () => {
-  const { theme, shellStore, booted } = useAppState();
+  const { theme, shellStore, booted, showTitleBar } = useAppState();
   const contextMenuMemo = useMemo(() => <ContextMenu />, []);
   const bgImage = useMemo(() => theme.wallpaper, [theme.wallpaper]);
 
@@ -30,6 +31,7 @@ const AppPresenter = () => {
     <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
       <AppStateProvider value={appState}>
         <GlobalStyle blur={true} realmTheme={theme} />
+
         <RealmBackground
           blurred={shellStore.isBlurred}
           snapView={shellStore.snapView}
@@ -38,6 +40,7 @@ const AppPresenter = () => {
         <SelectionProvider>
           <ContextMenuProvider>
             <ErrorBoundary>
+              {showTitleBar && <RealmTitlebar />}
               {booted ? <AppContent /> : <AppLoading />}
               {contextMenuMemo}
               <div id="portal-root" />
