@@ -3,6 +3,8 @@ import Store from 'electron-store';
 
 import { RealmService } from '../os/realm.service';
 import { AppUpdater } from './AppUpdater';
+import { setRealmCursor } from './helpers/cursorSettings';
+import { isArm64, isMac } from './helpers/env';
 import { getAssetPath } from './util';
 import {
   createMouseOverlayWindow,
@@ -39,6 +41,7 @@ export const bootRealm = () => {
     mouseOverlayWindow = null;
   }
 
+  setRealmCursor(true);
   realmWindow = createRealmWindow();
   mouseOverlayWindow = createMouseOverlayWindow(realmWindow);
 
@@ -68,7 +71,7 @@ export const bootRealm = () => {
     mouseOverlayWindow = null;
   });
 
-  store.reset('isStandaloneChat');
+  store.set('isStandaloneChat', false);
 };
 
 export const bootStandaloneChat = () => {
@@ -76,11 +79,16 @@ export const bootStandaloneChat = () => {
     realmService = new RealmService();
   }
 
-  if (realmWindow && realmWindow.isClosable()) {
-    realmWindow.close();
+  if (realmWindow) {
+    if (realmWindow.isClosable()) {
+      realmWindow.close();
+    }
+    realmWindow.destroy();
+
     realmWindow = null;
   }
 
+  setRealmCursor(false);
   standaloneChatWindow = createStandaloneChatWindow();
   mouseOverlayWindow = createMouseOverlayWindow(standaloneChatWindow);
 
@@ -124,6 +132,14 @@ app
         bootStandaloneChat();
       } else {
         bootRealm();
+      }
+    });
+
+    app.on('before-quit', () => {
+      if (isMac && isArm64) {
+        realmWindow?.isClosable() && realmWindow?.close();
+        standaloneChatWindow?.isClosable() && standaloneChatWindow?.close();
+        app.exit();
       }
     });
   })

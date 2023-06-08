@@ -7,9 +7,9 @@ import { AnimatedCursor } from './AnimatedCursor';
 import { EphemeralChat } from './Mouse.styles';
 
 export const Mouse = () => {
+  const enabled = useToggle(true);
   const active = useToggle(false);
   const visible = useToggle(false);
-  const disabled = useToggle(false);
   const mouseLayerTracking = useToggle(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [state, setState] = useState<MouseState>('pointer');
@@ -50,8 +50,9 @@ export const Mouse = () => {
       if (rgbString) setMouseColor(rgbString);
     });
 
-    window.electron.app.onEnableRealmCursor(disabled.toggleOff);
-    window.electron.app.onDisableRealmCursor(disabled.toggleOn);
+    window.electron.app.onEnableRealmCursor(enabled.toggleOn);
+    window.electron.app.onDisableRealmCursor(enabled.toggleOff);
+    window.electron.app.isRealmCursorEnabled().then(enabled.setToggle);
 
     window.electron.app.onToggleOnEphemeralChat(ephemeralChat.toggleOn);
 
@@ -69,7 +70,7 @@ export const Mouse = () => {
     };
   }, []);
 
-  if (disabled.isOn) return null;
+  if (!enabled.isOn) return null;
 
   return (
     <>

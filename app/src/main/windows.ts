@@ -1,4 +1,4 @@
-import { BrowserWindow, screen, shell } from 'electron';
+import { BrowserWindow, Rectangle, screen, shell } from 'electron';
 import isDev from 'electron-is-dev';
 
 import { BrowserHelper } from './helpers/browser';
@@ -17,9 +17,13 @@ import { WebViewHelper } from './helpers/webview';
 import { MenuBuilder } from './menu';
 import { getAssetPath, getPreloadPath, resolveHtmlPath } from './util';
 
-const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-
-const defaultRealmWindowOptions: Electron.BrowserWindowConstructorOptions = {
+const getDefaultRealmWindowOptions = ({
+  width,
+  height,
+}: Pick<
+  Rectangle,
+  'width' | 'height'
+>): Electron.BrowserWindowConstructorOptions => ({
   show: false,
   frame: isArm64 && isMac ? false : true,
   width,
@@ -37,9 +41,14 @@ const defaultRealmWindowOptions: Electron.BrowserWindowConstructorOptions = {
     contextIsolation: true,
     preload: getPreloadPath(),
   },
-};
+});
 
 export const createRealmWindow = () => {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const defaultRealmWindowOptions = getDefaultRealmWindowOptions({
+    width,
+    height,
+  });
   const newRealmWindow = new BrowserWindow(defaultRealmWindowOptions);
   newRealmWindow.setMenuBarVisibility(false);
   newRealmWindow.loadURL(resolveHtmlPath('index.html'));
@@ -147,6 +156,12 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
 };
 
 export const createStandaloneChatWindow = () => {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const defaultRealmWindowOptions = getDefaultRealmWindowOptions({
+    width,
+    height,
+  });
+
   const newStandaloneChatWindow = new BrowserWindow({
     ...defaultRealmWindowOptions,
     title: 'Realm Chat',

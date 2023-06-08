@@ -57,7 +57,7 @@ const appPreload = {
   setStandaloneChat: (isStandaloneChat: boolean) => {
     return ipcRenderer.invoke('set-standalone-chat', isStandaloneChat);
   },
-  isStandaloneChat: () => {
+  isStandaloneChat: (): Promise<boolean> => {
     return ipcRenderer.invoke('is-standalone-chat');
   },
   enableIsolationMode: () => {
@@ -66,13 +66,13 @@ const appPreload = {
   disableIsolationMode: () => {
     return ipcRenderer.invoke('disable-isolation-mode');
   },
-  enableRealmCursor: () => {
-    return ipcRenderer.invoke('enable-realm-cursor');
+  enableRealmCursor: (refresh?: boolean) => {
+    return ipcRenderer.invoke('enable-realm-cursor', refresh);
   },
-  disableRealmCursor: () => {
-    return ipcRenderer.invoke('disable-realm-cursor');
+  disableRealmCursor: (refresh?: boolean) => {
+    return ipcRenderer.invoke('disable-realm-cursor', refresh);
   },
-  isRealmCursorEnabled: () => {
+  isRealmCursorEnabled: (): Promise<boolean> => {
     return ipcRenderer.invoke('is-realm-cursor-enabled');
   },
   setMouseColor(hex: string) {

@@ -74,7 +74,7 @@ export const StandaloneChatBodyPresenter = () => {
     <StandaloneChatContainer>
       <Flex
         position="relative"
-        minWidth={300}
+        minWidth={320}
         width={sidebarWidth}
         background="var(--rlm-base-color)"
         borderRight="1px solid var(--rlm-dock-color)"
