@@ -36,7 +36,7 @@ export const Mouse = () => {
       // If this code is reached, great, it means the device (probably macOS)
       // can detect mouse movement directly in the mouse layer, so we'll use that instead of IPC.
       // At least for moving, dragging is still IPC'd.
-      // if (!mouseLayerTracking.isOn) mouseLayerTracking.toggleOn();
+      if (!mouseLayerTracking.isOn) mouseLayerTracking.toggleOn();
 
       if (!active.isOn) setPosition({ x: e.clientX, y: e.clientY });
     };

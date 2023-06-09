@@ -27,6 +27,8 @@ let mouseOverlayWindow: BrowserWindow | null;
 let standaloneChatWindow: BrowserWindow | null;
 
 export const bootRealm = () => {
+  store.set('isStandaloneChat', false);
+
   if (!realmService) {
     realmService = new RealmService();
   }
@@ -86,11 +88,11 @@ export const bootRealm = () => {
   mouseOverlayWindow.on('close', () => {
     mouseOverlayWindow = null;
   });
-
-  store.set('isStandaloneChat', false);
 };
 
 export const bootStandaloneChat = () => {
+  store.set('isStandaloneChat', true);
+
   if (!realmService) {
     realmService = new RealmService();
   }
@@ -133,8 +135,6 @@ export const bootStandaloneChat = () => {
   standaloneChatWindow.on('close', () => {
     standaloneChatWindow = null;
   });
-
-  store.set('isStandaloneChat', true);
 };
 
 app
