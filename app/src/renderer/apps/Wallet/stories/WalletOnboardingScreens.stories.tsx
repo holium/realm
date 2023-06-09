@@ -109,11 +109,3 @@ export const NoAddressesStory: ComponentStory<
 );
 
 NoAddressesStory.storyName = '7. No addresses';
-
-// export const CancelStory: ComponentStory<typeof CancelScreen> = () => (
-//   <WalletStoryWrapper isOnboarding>
-//     <CancelScreen />
-//   </WalletStoryWrapper>
-// );
-
-// CancelStory.storyName = '8. Cancel Wallet Creation';
