@@ -1,4 +1,4 @@
-import { BrowserWindow, Rectangle, screen, shell } from 'electron';
+import { BrowserWindow, screen, shell } from 'electron';
 import isDev from 'electron-is-dev';
 
 import { BrowserHelper } from './helpers/browser';
@@ -17,17 +17,13 @@ import { WebViewHelper } from './helpers/webview';
 import { MenuBuilder } from './menu';
 import { getAssetPath, getPreloadPath, resolveHtmlPath } from './util';
 
-const getDefaultRealmWindowOptions = ({
-  width,
-  height,
-}: Pick<
-  Rectangle,
-  'width' | 'height'
->): Electron.BrowserWindowConstructorOptions => ({
+const defaultRealmWindowOptions: Electron.BrowserWindowConstructorOptions = {
   show: false,
   frame: isArm64 && isMac ? false : true,
-  width,
-  height,
+  // We start with a zero size window and enlarge it,
+  // to trigger the mouse-in event when the window is shown.
+  width: 0,
+  height: 0,
   icon: getAssetPath('icon.png'),
   title: 'Realm',
   fullscreen: true,
@@ -41,14 +37,27 @@ const getDefaultRealmWindowOptions = ({
     contextIsolation: true,
     preload: getPreloadPath(),
   },
-});
+};
+
+const expandWindowToFullscreen = (window: BrowserWindow) => {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
+  if (isArm64 && isMac) {
+    // Account for notch on arm64 mac with simple fullscreen.
+    const NOTCH_HEIGHT = 32;
+    window.setBounds({
+      x: 0,
+      y: 0 - NOTCH_HEIGHT,
+      width,
+      height: height + NOTCH_HEIGHT,
+    });
+  } else {
+    window.setBounds({ width, height });
+    window.center();
+  }
+};
 
 export const createRealmWindow = () => {
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  const defaultRealmWindowOptions = getDefaultRealmWindowOptions({
-    width,
-    height,
-  });
   const newRealmWindow = new BrowserWindow(defaultRealmWindowOptions);
   newRealmWindow.setMenuBarVisibility(false);
   newRealmWindow.loadURL(resolveHtmlPath('index.html'));
@@ -74,6 +83,8 @@ export const createRealmWindow = () => {
     } else {
       isDev ? newRealmWindow.showInactive() : newRealmWindow.show();
     }
+
+    expandWindowToFullscreen(newRealmWindow);
 
     const initialDimensions = newRealmWindow.getBounds();
     let hasTitlebar = false;
@@ -156,12 +167,6 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
 };
 
 export const createStandaloneChatWindow = () => {
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  const defaultRealmWindowOptions = getDefaultRealmWindowOptions({
-    width,
-    height,
-  });
-
   const newStandaloneChatWindow = new BrowserWindow({
     ...defaultRealmWindowOptions,
     title: 'Realm Chat',
@@ -189,6 +194,8 @@ export const createStandaloneChatWindow = () => {
   });
 
   newStandaloneChatWindow.on('ready-to-show', () => {
+    expandWindowToFullscreen(newStandaloneChatWindow);
+
     newStandaloneChatWindow.show();
   });
 

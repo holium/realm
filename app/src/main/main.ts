@@ -32,12 +32,12 @@ export const bootRealm = () => {
   }
 
   if (standaloneChatWindow) {
-    standaloneChatWindow.destroy();
+    standaloneChatWindow.close();
     standaloneChatWindow = null;
   }
 
   if (mouseOverlayWindow) {
-    mouseOverlayWindow.destroy();
+    mouseOverlayWindow.close();
     mouseOverlayWindow = null;
   }
 
@@ -47,7 +47,11 @@ export const bootRealm = () => {
 
   // Change dock icon to realm icon.
   const realmImage = nativeImage.createFromPath(getAssetPath('icon.png'));
-  app.dock.setIcon(realmImage);
+  if (isMac) {
+    app.dock.setIcon(realmImage);
+  } else {
+    realmWindow.setIcon(realmImage);
+  }
 
   // Update dock menu to include 'Switch to Chat' menu item.
   const defaultMenuItems =

@@ -102,9 +102,6 @@ const appPreload = {
   onMouseOut(callback: () => void) {
     ipcRenderer.on('mouse-out', callback);
   },
-  onEnableMouseLayerTracking(callback: () => void) {
-    ipcRenderer.on('enable-mouse-layer-tracking', callback);
-  },
   onEnableRealmCursor(callback: () => void) {
     ipcRenderer.on('enable-realm-cursor', callback);
   },

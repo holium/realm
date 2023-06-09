@@ -86,17 +86,10 @@ const enableRealmCursor = (
   if (isMac) {
     hideSystemCursor(mouseOverlayWindow.webContents);
     hideSystemCursor(mainWindow.webContents);
-    mouseOverlayWindow.setWindowButtonVisibility(false);
-    /**
-     * For macOS we enable mouse layer tracking for a smoother experience.
-     * It is not supported for Windows or Linux.
-     */
-    mouseOverlayWindow.webContents.send('enable-mouse-layer-tracking');
-    mouseOverlayWindow.webContents.send('enable-realm-cursor');
+    // mouseOverlayWindow.setWindowButtonVisibility(false);
   } else if (isWindows) {
     hideSystemCursor(mouseOverlayWindow.webContents);
     hideSystemCursor(mainWindow.webContents);
-    mouseOverlayWindow.webContents.send('enable-realm-cursor');
   }
 };
 
