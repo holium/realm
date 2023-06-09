@@ -12,6 +12,8 @@ import { useToggle } from '@holium/design-system/util';
 
 import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 
+import { resetOnboarding } from './WalletOnboarding';
+
 type Props = {
   seedPhrase: string;
   setScreen: (screen: WalletOnboardingScreen) => void;
@@ -26,7 +28,9 @@ export const BackupScreen = ({
   const hideSeedPhrase = useToggle(false);
 
   useEffect(() => {
-    setSeedPhrase(ethers.Wallet.createRandom().mnemonic.phrase);
+    if (!seedPhrase) {
+      setSeedPhrase(ethers.Wallet.createRandom().mnemonic.phrase);
+    }
   }, []);
 
   return (
@@ -81,7 +85,7 @@ export const BackupScreen = ({
         <Button.Secondary
           flex={1}
           justifyContent="center"
-          onClick={() => setScreen(WalletOnboardingScreen.NO_WALLET)}
+          onClick={() => resetOnboarding(setScreen, setSeedPhrase)}
         >
           Cancel
         </Button.Secondary>

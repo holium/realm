@@ -4,14 +4,20 @@ import { Button, Flex, Text } from '@holium/design-system/general';
 
 import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 
+import { resetOnboarding } from './WalletOnboarding';
 import { WordPicker } from './WordPicker';
 
 type Props = {
   seedPhrase: string;
+  setSeedPhrase: (phrase: string) => void;
   setScreen: (screen: WalletOnboardingScreen) => void;
 };
 
-export const ConfirmScreen = ({ seedPhrase, setScreen }: Props) => {
+export const ConfirmScreen = ({
+  seedPhrase,
+  setSeedPhrase,
+  setScreen,
+}: Props) => {
   const [valid, setValid] = useState(false);
 
   return (
@@ -34,7 +40,7 @@ export const ConfirmScreen = ({ seedPhrase, setScreen }: Props) => {
         <Button.Transparent
           flex={1}
           justifyContent="center"
-          onClick={() => setScreen(WalletOnboardingScreen.NO_WALLET)}
+          onClick={() => resetOnboarding(setScreen, setSeedPhrase)}
         >
           Cancel
         </Button.Transparent>

@@ -675,6 +675,7 @@ export type EthStoreType = Instance<typeof EthStore>;
 
 const NetworkStores = types.enumeration(Object.values(NetworkStoreType));
 
+// nav state for after onboarding.
 export const WalletNavState = types
   .model('WalletNavState', {
     view: types.enumeration(Object.values(WalletScreen)),
