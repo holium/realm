@@ -22,5 +22,6 @@
     "test/**/__snapshots__": true,
     "package-lock.json": true,
     "*.{css,sass,scss}.d.ts": true
-  }
+  },
+  "files.eol": "auto"
 }

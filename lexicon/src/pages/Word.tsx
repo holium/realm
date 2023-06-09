@@ -171,7 +171,7 @@ const Sentences = ({ sentenceList, space, state }: any) => {
     sentenceList.forEach((item: any) => {
       sentenceDefinitionId.add(item.id);
     });
-    voteRows.map((item: any) => {
+    voteRows.forEach((item: any) => {
       if (sentenceDefinitionId.has(item['parent-id'])) {
         //accumulate rows into their respective parents (words)
         const lastVoteData = voteMap.get(item['parent-id']);
@@ -279,7 +279,7 @@ const Definitions = ({ definitionList, state, space }: any) => {
     definitionList.forEach((item: any) => {
       definitionIdSet.add(item.id);
     });
-    voteRows.map((item: any) => {
+    voteRows.forEach((item: any) => {
       if (definitionIdSet.has(item['parent-id'])) {
         //accumulate rows into their respective parents (words)
         const lastVoteData = voteMap.get(item['parent-id']);
