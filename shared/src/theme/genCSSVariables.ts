@@ -42,7 +42,7 @@ export const genCSSVariables = (theme: ThemeType) => {
   const mouseColor = theme.mouseColor;
   const realmBrandColor = '#F08735';
   const intentAlertColor = '#ff6240';
-  const intentCautionColor = isLight ? intentAlertColor : '#ffbc32';
+  const intentCautionColor = isLight ? realmBrandColor : '#ffbc32';
   const intentSuccessColor = '#0fc383';
   const overlayHoverColor = isLight
     ? rgba({ red: 0, green: 0, blue: 0, alpha: 0.04 })
