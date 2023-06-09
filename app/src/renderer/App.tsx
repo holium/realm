@@ -10,7 +10,10 @@ import { SelectionProvider } from './lib/selection';
 import { appState, AppStateProvider, useAppState } from './stores/app.store';
 import { RealmIPC } from './stores/ipc';
 import { ErrorBoundary } from './system/ErrorBoundary';
-import { RealmTitlebar, StandAloneChatTitlebar } from './system/Titlebar';
+import {
+  RealmTitlebar,
+  StandAloneChatTitlebar,
+} from './system/titlebar/Titlebar';
 
 import './app.css';
 import 'photoswipe/dist/photoswipe.css';

@@ -22,7 +22,7 @@ import {
 } from 'renderer/stores/models/window.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
-import { TITLEBAR_HEIGHT } from 'renderer/system/Titlebar';
+import { TITLEBAR_HEIGHT } from 'renderer/system/titlebar/Titlebar';
 
 import { ErrorBoundary } from '../../../ErrorBoundary';
 import { AppWindowContainer } from './AppWindow.styles';

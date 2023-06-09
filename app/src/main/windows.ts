@@ -170,7 +170,7 @@ export const createStandaloneChatWindow = () => {
     frame: false,
     icon: getAssetPath('standalone-chat-icon.png'),
   });
-  newStandaloneChatWindow.setMenuBarVisibility(true);
+  newStandaloneChatWindow.setMenuBarVisibility(false);
   newStandaloneChatWindow.loadURL(resolveHtmlPath('index.html'));
 
   WebViewHelper.registerListeners(newStandaloneChatWindow);
