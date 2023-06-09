@@ -1,6 +1,6 @@
 ::  notif-db [realm]:
 ::
-/-  *notif-versioned-state, sur=notif-db
+/-  *notif-versioned-state, sur=notif-db, chat-db
 |%
 ::
 :: helpers
@@ -68,6 +68,12 @@
   ?:  =(stop index)
     [tbl ids]
   $(index +(index), tbl (put:notifon:sur tbl (snag index ids) (toggle-dismissed +:(snag index kvs) now %.y)))
+++  ids-by-path
+  |=  [tbl=notifs-table:sur app=@tas =path]
+  ^-  (list id:sur)
+  %+  turn
+    (skim (tap:notifon:sur tbl) |=([k=@ud v=notif-row:sur] &(=(app app.v) =(path path.v))))
+  |=([k=@ud v=notif-row:sur] k)
 ::
 ::
 ::  poke actions
@@ -223,6 +229,54 @@
     [%give %fact [/db ~] thechange]
   ==
   [gives state]
+::
+++  delete-old-realm-chat-notifs
+  |=  [state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  =/  del-log-kvs
+    %-  tap:delon:chat-db
+    .^(del-log:chat-db %gx /(scot %p our.bowl)/chat-db/(scot %da now.bowl)/delete-log/start-ms/0/noun)
+
+  =/  deleted-paths
+  %+  turn 
+    %+  skim
+      del-log-kvs
+    |=  [k=time v=db-change-type:chat-db]
+    ?+  -.v  %.n
+      %del-paths-row  %.y
+    ==
+  |=  [k=time v=db-change-type:chat-db]
+  ^-  path
+  ?+  -.v  !!
+    %del-paths-row  path.v
+  ==
+
+  =/  notif-ids-to-del=(list id:sur)
+  %-  zing
+  %+  turn
+    deleted-paths
+  |=  =path
+  ^-  (list id:sur)
+  (ids-by-path notifs-table.state %realm-chat path)
+
+  =/  index=@ud  0
+  =/  changes=db-change:sur  ~
+  =/  cs=[db-change:sur state-0]
+    |-
+      ?:  =(index (lent notif-ids-to-del))
+        [changes state]
+      =/  id=id:sur  (snag index notif-ids-to-del)
+      =/  ch=db-change-type:sur  [%del-row id]
+      =.  notifs-table.state  +:(del:notifon:sur notifs-table.state id)
+      =.  del-log.state       (put:delon:sur del-log.state (add now.bowl index) ch)
+      $(index +(index), changes (snoc changes ch))
+
+  =/  thechange  notif-db-change+!>(-.cs)
+  =/  gives  :~
+    [%give %fact [/db ~] thechange]
+  ==
+  [gives +.cs]
+::
 ::
 ::  JSON
 ::

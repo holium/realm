@@ -1,5 +1,5 @@
 ::  app/notif-db.hoon
-/-  *notif-versioned-state, sur=notif-db
+/-  *notif-versioned-state, sur=notif-db, db-sur=chat-db
 /+  dbug, db-lib=notif-db
 =|  state-0
 =*  state  -
@@ -14,14 +14,25 @@
     ^-  (quip card _this)
     =/  default-state=state-0
       [%0 0 *notifs-table:sur *del-log:sur]
-    `this(state default-state)
+    =/  cards=(list card)
+    :~  [%pass /db %agent [our.bowl %chat-db] %watch /db]
+    ==
+    [cards this(state default-state)]
   ++  on-save   !>(state)
   ++  on-load
     |=  old-state=vase
     ^-  (quip card _this)
+    =/  cards=(list card)
+      %+  weld
+        ^-  (list card)
+        [%pass /selfpoke %agent [our.bowl %notif-db] %poke %notif-db-poke !>([%delete-old-realm-chat-notifs ~])]~
+      ^-  (list card)
+      ?:  =(wex.bowl ~)
+        [%pass /db %agent [our.bowl %chat-db] %watch /db]~
+      ~
     =/  old  !<(versioned-state old-state)
     ?-  -.old
-      %0  `this(state old)
+      %0  [cards this(state old)]
     ==
   ::
   ++  on-poke
@@ -65,6 +76,8 @@
       %delete
         ?>  =(src.bowl our.bowl)
         (delete:db-lib +.act state bowl)
+      %delete-old-realm-chat-notifs
+        (delete-old-realm-chat-notifs:db-lib state bowl)
     ==
     [cards this]
   ::
@@ -145,12 +158,29 @@
         =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
         ``notif-del-log+!>((lot:delon:sur del-log.state ~ `timestamp))
     ==
-  :: notif-db does not subscribe to anything.
-  :: notif-db does not care
+  ::
   ++  on-agent
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
-    !!
+    ?+  wire  !!
+      [%selfpoke ~]
+        ?+    -.sign  `this
+          %poke-ack
+            ?~  p.sign  `this
+            ~&  >>>  "%realm-chat: {<(spat wire)>} selfpoke failed"
+            `this
+        ==
+      [%db ~]
+        ?+  -.sign  `this
+          %fact
+            ?+  p.cage.sign  `this
+              %chat-db-change
+                =/  thechange=db-change:db-sur  !<(db-change:db-sur q.cage.sign)
+                :: TODO, respond to changes from chat-db
+                `this
+            ==
+        ==
+    ==
   ::
   ++  on-leave
     |=  path
