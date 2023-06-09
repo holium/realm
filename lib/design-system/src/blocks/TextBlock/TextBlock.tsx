@@ -19,10 +19,10 @@ export const TextBlock = ({ text, by, reference, ...rest }: TextBlockProps) => (
       {text}
     </Text.Custom>
     <Flex
-      className="block-footer"
       flex={1}
-      justifyContent="space-between"
       width="inherit"
+      justifyContent="space-between"
+      className="block-footer"
     >
       <Flex flexDirection="row" gap={4} alignItems="center">
         {reference.image && (

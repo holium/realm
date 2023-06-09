@@ -85,24 +85,16 @@ export const BlockStyle = styled(motion.span)<StyleProps>`
       background: transparent;
       position: relative;
       .block-footer {
-        transition: var(--transition);
-        position: absolute;
         display: flex;
         justify-content: space-between;
-        background: transparent;
         border-radius: 0px 0px 2px 2px;
         padding: 4px 4px;
-        bottom: 0px;
-        left: 0px;
-        right: 0px;
       }
 
       ${props.variant !== 'content' &&
       css`
         &:hover {
           .block-footer {
-            transition: var(--transition);
-            opacity: 1;
             background: rgba(var(--rlm-window-rgba));
           }
           .block-author {

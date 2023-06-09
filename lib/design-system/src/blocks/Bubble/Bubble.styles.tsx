@@ -136,6 +136,10 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
   }
 
   box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
+
+  * {
+    box-sizing: border-box;
+  }
 `;
 
 export const BubbleAuthor = styled(Text.Custom)<{ authorColor?: string }>`

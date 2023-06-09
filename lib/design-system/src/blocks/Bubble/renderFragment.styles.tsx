@@ -36,8 +36,10 @@ export const FragmentBlock = styled(motion.span)`
     margin-bottom: 4px;
   }
   * {
-    min-width: 0px;
+    min-width: 0;
     max-width: 100%;
+    min-height: 0;
+    max-height: 100%;
   }
 `;
 

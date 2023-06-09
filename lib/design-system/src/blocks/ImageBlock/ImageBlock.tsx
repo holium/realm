@@ -1,7 +1,6 @@
 import { MutableRefObject, useMemo, useState } from 'react';
 import { Item } from 'react-photoswipe-gallery';
 
-import { Flex, Text } from '../../../general';
 import { Block, BlockProps } from '../Block/Block';
 import { FragmentImage } from '../Bubble/renderFragment.styles';
 
@@ -15,7 +14,6 @@ export const ImageBlock = ({
   id,
   showLoader,
   image,
-  by,
   variant,
   width = 'inherit',
   height,
@@ -76,14 +74,6 @@ export const ImageBlock = ({
           />
         )}
       </Item>
-      {by && (
-        <Flex className="block-footer">
-          <Flex></Flex>
-          <Text.Hint className="block-author" noSelection fontSize={0}>
-            {by}
-          </Text.Hint>
-        </Flex>
-      )}
     </Block>
   );
 };
