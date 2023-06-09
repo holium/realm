@@ -42,7 +42,10 @@ export const ConfirmScreen = ({ seedPhrase, setScreen }: Props) => {
           flex={1}
           disabled={!valid}
           justifyContent="center"
-          onClick={() => setScreen(WalletOnboardingScreen.PASSCODE)}
+          onClick={() => {
+            localStorage.removeItem('WalletOnboardingWordPickerState');
+            setScreen(WalletOnboardingScreen.PASSCODE);
+          }}
         >
           Confirm
         </Button.TextButton>

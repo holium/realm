@@ -30,6 +30,7 @@ export const resetOnboarding = (
   localStorage.removeItem('WalletOnboardingScreen');
   localStorage.removeItem('WalletOnboardingSeedPhrase');
   localStorage.removeItem('WalletOnboardingPasscode');
+  localStorage.removeItem('WalletOnboardingWordPickerState');
 };
 
 const WalletOnboardingPresenter = () => {

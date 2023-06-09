@@ -19,31 +19,55 @@ export const WordPicker = ({ seedPhrase, onValidChange }: Props) => {
     wordsToSelect: [],
     selectedWords: [],
   });
+
+  useEffect(() => {
+    if (state.wordsToSelect.length !== 0) {
+      localStorage.setItem(
+        'WalletOnboardingWordPickerState',
+        JSON.stringify(state)
+      );
+    }
+  }, [state]);
+
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const words = seedPhrase
-      .trim()
-      .split(' ')
-      .sort((a, b) => a.localeCompare(b));
-    const wordsToSelect = words.map((word) => ({ word, available: true }));
-    const selectedWords: string[] = [];
-    setState({ wordsToSelect, selectedWords });
+    const initialStateString = localStorage.getItem(
+      'WalletOnboardingWordPickerState'
+    );
+    if (initialStateString) {
+      const initialState = JSON.parse(initialStateString) as WordPickerState;
+      setState(initialState);
+    } else {
+      const words = seedPhrase
+        .trim()
+        .split(' ')
+        .sort((a, b) => a.localeCompare(b));
+      const wordsToSelect = words.map((word) => ({ word, available: true }));
+      const selectedWords: string[] = [];
+      setState({ wordsToSelect, selectedWords });
+    }
   }, [seedPhrase]);
 
   function selectWord(index: number) {
     let word = '';
+    let canSelect = false;
     const updatedWordsToSelect = state.wordsToSelect.map((element, i) => {
       if (i === index) {
         word = element.word;
-        element.available = false;
+        if (element.available) {
+          canSelect = true;
+          element.available = false;
+        }
       }
 
       return element;
     });
 
     const updatedSelectedWords = state.selectedWords;
-    updatedSelectedWords.push(word);
+    if (canSelect) {
+      updatedSelectedWords.push(word);
+    }
 
     setState({
       wordsToSelect: updatedWordsToSelect,
