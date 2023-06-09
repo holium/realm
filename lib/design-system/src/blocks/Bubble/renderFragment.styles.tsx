@@ -31,6 +31,9 @@ export const FragmentBlock = styled(motion.span)`
   min-width: 0px;
   max-width: 100%;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 
   blockquote {
     margin-bottom: 4px;

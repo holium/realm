@@ -22,7 +22,6 @@ export const InboxRow = ({
 }: InboxProps) => (
   <StyledInboxRowContainer isSelectedSpaceChat={isSelectedSpaceChat}>
     <StyledInboxRow
-      isSpace={inbox.type === 'space'}
       isPinned={isPinned}
       layout="preserve-aspect"
       layoutId={isStandaloneChat ? undefined : `chat-${inbox.path}-container`}
