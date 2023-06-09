@@ -3,6 +3,7 @@ import { Flex } from '@holium/design-system';
 import { SearchBar } from '../components';
 import { Home } from '../pages';
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   title: 'Lexicon/Word List',
   component: Home,

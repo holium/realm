@@ -71,7 +71,7 @@ function App() {
   const makeSentenceMap = () => {
     if (wordMap.size === 0) return;
     const sentenceMap: any = new Map();
-    sentenceRows.map((item: any) => {
+    sentenceRows.forEach((item: any) => {
       log('item', item);
       //if this vote is linked to a word (we check wordMap) add it to our voteMap under that word's idea
       if (wordMap.has(item['word-id'])) {
@@ -86,7 +86,7 @@ function App() {
   const makeDefinitionMap = () => {
     if (wordMap.size === 0) return;
     const definitionMap: any = new Map();
-    definitionRows.map((item: any) => {
+    definitionRows.forEach((item: any) => {
       log('item', item);
       //if this vote is linked to a word (we check wordMap) add it to our voteMap under that word's idea
       if (wordMap.has(item['word-id'])) {
@@ -142,7 +142,7 @@ function App() {
     if (wordMap.size === 0) return;
     const voteMap: any = new Map();
 
-    voteRows.map((item: any) => {
+    voteRows.forEach((item: any) => {
       //if this vote is linked to a word (we check wordMap) add it to our voteMap under that word's idea
       if (wordMap.has(item['parent-id'])) {
         //accumulate rows into their respective parents (words)
