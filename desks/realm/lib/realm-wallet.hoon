@@ -191,8 +191,9 @@
           ?:  ?|  =(network.update %bitcoin)
                   =(network.update %btctestnet)
               ==
-            ['address' [%s (crip q:(trim 2 (scow %uc address.wallet.update)))]]
-          ['address' [%s (crip (z-co:co address.wallet.update))]]
+              ['address' [%s address.wallet.update]]
+            ::['address' [%s (crip q:(trim 2 (scow %uc address.wallet.update)))]]
+          ['address' [%s address.wallet.update]]
           ['path' [%s path.wallet.update]]
           ['nickname' [%s nickname.wallet.update]]
       ==
@@ -225,8 +226,9 @@
               :~  ?:  ?|  =(network %bitcoin)
                           =(network %btctestnet)
                       ==
-                    ['address' [%s (crip q:(trim 2 (scow %uc address.wallet)))]]
-                  ['address' [%s (crip (z-co:co address.wallet))]]
+                    ['address' [%s address.wallet]]
+                    ::['address' [%s (crip q:(trim 2 (scow %uc address.wallet)))]]
+                  ['address' [%s address.wallet]]
                   ['path' [%s path.wallet]]
                   ['nickname' [%s nickname.wallet]]
                   ['transactions' (transactions-to-json transactions.wallet)]
@@ -266,6 +268,6 @@
     %-  pairs
     ?~  address.update
       ['address' ~]~
-    ['address' [%s (crip (z-co:co u.address.update))]]~
+    ['address' [%s u.address.update]]~
   ==
 --
