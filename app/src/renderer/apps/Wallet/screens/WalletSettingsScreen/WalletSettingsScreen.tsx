@@ -85,7 +85,9 @@ const WalletSettingsScreenPresenter = () => {
   }
 
   const deleteWallet = async (passcode: number[]) => {
+    console.log('delete wallet!');
     if (settingScreen === SettingScreen.LOCAL) {
+      console.log('deleting local wallet', passcode);
       walletStore.deleteLocalWallet(passcode);
     } else if (settingScreen === SettingScreen.AGENT) {
       await walletStore.deleteShipWallet(passcode);
