@@ -17,9 +17,10 @@ import {
   FragmentStatusType,
   FragmentType,
 } from './Bubble.types';
-import { FragmentBlock, LineBreak, renderFragment } from './fragment-lib';
 import { InlineStatus } from './InlineStatus';
 import { OnReactionPayload, Reactions } from './Reaction';
+import { renderFragment } from './renderFragment';
+import { FragmentBlock, LineBreak } from './renderFragment.styles';
 
 export type BubbleProps = {
   id: string;

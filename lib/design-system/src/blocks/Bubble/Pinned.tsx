@@ -3,13 +3,13 @@ import styled from 'styled-components';
 import { Box, BoxProps, capitalizeFirstLetter, Flex, Text } from '../../index';
 import { BubbleAuthor } from './Bubble.styles';
 import { FragmentImageType, FragmentType, TEXT_TYPES } from './Bubble.types';
+import { renderFragment } from './renderFragment';
 import {
   FragmentBlock,
   FragmentBlockquote,
   FragmentImage,
   FragmentPlain,
-  renderFragment,
-} from './fragment-lib';
+} from './renderFragment.styles';
 
 const FullWidthFragmentBlock = styled(FragmentBlock)`
   width: 100%;

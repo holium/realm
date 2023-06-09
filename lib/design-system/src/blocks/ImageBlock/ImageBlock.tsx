@@ -3,7 +3,7 @@ import { Item } from 'react-photoswipe-gallery';
 
 import { Flex, Text } from '../../../general';
 import { Block, BlockProps } from '../Block/Block';
-import { FragmentImage } from '../Bubble/fragment-lib';
+import { FragmentImage } from '../Bubble/renderFragment.styles';
 
 type ImageBlockProps = {
   showLoader?: boolean;
