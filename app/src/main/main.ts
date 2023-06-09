@@ -32,12 +32,24 @@ export const bootRealm = () => {
   }
 
   if (standaloneChatWindow) {
-    standaloneChatWindow.close();
+    if (standaloneChatWindow.isClosable()) {
+      standaloneChatWindow.close();
+    }
+    if (standaloneChatWindow && !standaloneChatWindow.isDestroyed()) {
+      standaloneChatWindow.destroy();
+    }
+
     standaloneChatWindow = null;
   }
 
   if (mouseOverlayWindow) {
-    mouseOverlayWindow.close();
+    if (mouseOverlayWindow.isClosable()) {
+      mouseOverlayWindow.close();
+    }
+    if (mouseOverlayWindow && !mouseOverlayWindow.isDestroyed()) {
+      mouseOverlayWindow.destroy();
+    }
+
     mouseOverlayWindow = null;
   }
 
@@ -87,7 +99,9 @@ export const bootStandaloneChat = () => {
     if (realmWindow.isClosable()) {
       realmWindow.close();
     }
-    realmWindow.destroy();
+    if (realmWindow && !realmWindow.isDestroyed()) {
+      realmWindow.destroy();
+    }
 
     realmWindow = null;
   }

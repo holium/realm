@@ -9,11 +9,13 @@ const registerListeners = (
   mainWindow.on('enter-full-screen', () => {
     mainWindow.webContents.send('set-fullscreen', true);
     mainWindow.setMenuBarVisibility(false);
+    mouseWindow.setAlwaysOnTop(true, 'screen-saver');
   });
 
   mainWindow.on('leave-full-screen', () => {
     mainWindow.webContents.send('set-fullscreen', false);
     mainWindow.setMenuBarVisibility(true);
+    mouseWindow.setAlwaysOnTop(false);
   });
 
   mainWindow.on('focus', mouseWindow.moveTop);

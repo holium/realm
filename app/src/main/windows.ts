@@ -129,6 +129,7 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
     skipTaskbar: true,
     transparent: true,
     fullscreen: true,
+    simpleFullscreen: isArm64 && isMac,
     titleBarStyle: 'hidden',
     acceptFirstMouse: true,
     roundedCorners: false,
@@ -171,7 +172,7 @@ export const createStandaloneChatWindow = () => {
     ...defaultRealmWindowOptions,
     title: 'Realm Chat',
     fullscreen: false,
-    simpleFullscreen: false,
+    simpleFullscreen: isArm64 && isMac,
     frame: false,
     icon: getAssetPath('standalone-chat-icon.png'),
   });
