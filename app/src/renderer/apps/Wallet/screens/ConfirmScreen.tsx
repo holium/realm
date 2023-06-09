@@ -34,7 +34,7 @@ export const ConfirmScreen = ({ seedPhrase, setScreen }: Props) => {
         <Button.Transparent
           flex={1}
           justifyContent="center"
-          onClick={() => setScreen(WalletOnboardingScreen.NO_WALLET)}
+          onClick={() => setScreen(WalletOnboardingScreen.CANCEL)}
         >
           Cancel
         </Button.Transparent>
@@ -42,7 +42,10 @@ export const ConfirmScreen = ({ seedPhrase, setScreen }: Props) => {
           flex={1}
           disabled={!valid}
           justifyContent="center"
-          onClick={() => setScreen(WalletOnboardingScreen.PASSCODE)}
+          onClick={() => {
+            localStorage.removeItem('WalletOnboardingWordPickerState');
+            setScreen(WalletOnboardingScreen.PASSCODE);
+          }}
         >
           Confirm
         </Button.TextButton>

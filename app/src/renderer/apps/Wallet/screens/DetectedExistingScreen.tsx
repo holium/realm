@@ -34,7 +34,7 @@ export const DetectedExistingScreen = ({ setScreen }: Props) => (
         <Icon name="InfoCircle" />
       </Box>
       <Box>
-        <Text.Hint ml={2} variant="hint" justifyContent="flex-end">
+        <Text.Hint ml={2} color="intent-caution" justifyContent="flex-end">
           You are using pre-release software. Only use for development purposes.
         </Text.Hint>
       </Box>

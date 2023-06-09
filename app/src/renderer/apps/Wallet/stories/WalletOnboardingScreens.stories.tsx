@@ -73,6 +73,7 @@ export const ConfirmPasscodeStory: ComponentStory<
       correctPasscode={[1, 2, 3, 4, 5, 6]}
       checkPasscode={() => Promise.resolve(false)}
       onSuccess={() => Promise.resolve()}
+      setScreen={() => {}}
     />
   </WalletStoryWrapper>
 );

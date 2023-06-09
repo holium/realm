@@ -26,7 +26,9 @@ export const BackupScreen = ({
   const hideSeedPhrase = useToggle(false);
 
   useEffect(() => {
-    setSeedPhrase(ethers.Wallet.createRandom().mnemonic.phrase);
+    if (!seedPhrase) {
+      setSeedPhrase(ethers.Wallet.createRandom().mnemonic.phrase);
+    }
   }, []);
 
   return (
@@ -81,7 +83,7 @@ export const BackupScreen = ({
         <Button.Secondary
           flex={1}
           justifyContent="center"
-          onClick={() => setScreen(WalletOnboardingScreen.NO_WALLET)}
+          onClick={() => setScreen(WalletOnboardingScreen.CANCEL)}
         >
           Cancel
         </Button.Secondary>

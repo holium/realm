@@ -16,7 +16,7 @@ export const TrayAppWrapper = styled(motion.div)`
   border-radius: 16px;
   backdrop-filter: var(--blur);
   backface-visibility: hidden;
-  background: rgba(var(--rlm-window-bg-rgba));
+  background: rgba(var(--rlm-window-bg-rgba)) !important;
   border: 1px solid rgba(var(--rlm-border-rgba));
   box-shadow: 0px 0px 9px rgba(0, 0, 0, 0.12);
   // this forces gpu rendering on the tray app which is needed to prevent

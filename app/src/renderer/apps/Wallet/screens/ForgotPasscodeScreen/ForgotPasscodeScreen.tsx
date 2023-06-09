@@ -19,7 +19,9 @@ const ForgotPasscodeScreenPresenter = () => {
   return (
     <ForgotPasscodeScreenBody
       onClickCancel={onClickCancel}
-      onClickDelete={onClickDelete}
+      onClickDeleteAsync={onClickDelete}
+      bodyText="If you've forgotten your passcode, you can delete your wallet and then
+      import it again using your recovery phrase."
     />
   );
 };
