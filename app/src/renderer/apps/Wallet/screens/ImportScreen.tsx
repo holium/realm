@@ -7,8 +7,6 @@ import { TextInput } from '@holium/design-system/inputs';
 
 import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 
-import { resetOnboarding } from './WalletOnboarding';
-
 const NoResize = styled(Flex)`
   textarea {
     resize: none;
@@ -61,7 +59,7 @@ export const ImportScreen = ({ setScreen, setSeedPhrase }: Props) => {
         <Button.Transparent
           flex={1}
           justifyContent="center"
-          onClick={() => resetOnboarding(setScreen, setSeedPhrase)}
+          onClick={() => setScreen(WalletOnboardingScreen.CANCEL)}
         >
           Cancel
         </Button.Transparent>

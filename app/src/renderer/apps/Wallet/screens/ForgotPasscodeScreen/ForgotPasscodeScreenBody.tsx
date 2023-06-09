@@ -9,18 +9,23 @@ import { useToggle } from '@holium/design-system/util';
 
 type Props = {
   onClickCancel: () => void;
-  onClickDelete: () => Promise<void>;
+  onClickDelete?: () => void;
+  onClickDeleteAsync?: () => Promise<void>;
+  bodyText: string;
 };
 
 export const ForgotPasscodeScreenBody = ({
   onClickCancel,
   onClickDelete,
+  onClickDeleteAsync,
+  bodyText,
 }: Props) => {
   const deleting = useToggle(false);
 
   const handleOnClickDelete = async () => {
     deleting.toggleOn();
-    await onClickDelete();
+    onClickDelete && onClickDelete();
+    onClickDeleteAsync && (await onClickDeleteAsync());
     deleting.toggleOff();
   };
 
@@ -36,10 +41,7 @@ export const ForgotPasscodeScreenBody = ({
       <Icon name="Info" size={36} />
       <Flex flexDirection="column" gap="12px" alignItems="center">
         <Text.H3>Delete wallet</Text.H3>
-        <Text.Body textAlign="center">
-          If you've forgotten your passcode, you can delete your wallet and then
-          import it again using your recovery phrase.
-        </Text.Body>
+        <Text.Body textAlign="center">{bodyText}</Text.Body>
       </Flex>
       <Flex gap="10px">
         <Button.Transparent

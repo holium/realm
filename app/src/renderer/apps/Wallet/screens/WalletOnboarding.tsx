@@ -13,6 +13,7 @@ import { ConfirmScreen } from './ConfirmScreen';
 import { CreatePasscodeScreen } from './CreatePasscodeScreen';
 import { DetectedExistingScreen } from './DetectedExistingScreen';
 import { FinalizingScreen } from './FinalizingScreen/FinalizingScreen';
+import { ForgotPasscodeScreenBody } from './ForgotPasscodeScreen/ForgotPasscodeScreenBody';
 import { ImportScreen } from './ImportScreen';
 import { NoWalletFoundScreen } from './NoWalletFoundScreen';
 import { RecoverExistingScreen } from './RecoverExistingScreen';
@@ -61,7 +62,9 @@ const WalletOnboardingPresenter = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('WalletOnboardingScreen', screen);
+    if (screen !== WalletOnboardingScreen.CANCEL) {
+      localStorage.setItem('WalletOnboardingScreen', screen);
+    }
   }, [screen]);
 
   useEffect(() => {
@@ -96,12 +99,24 @@ const WalletOnboardingPresenter = () => {
         seedPhrase={seedPhrase}
       />
     ),
-    [WalletOnboardingScreen.CONFIRM]: (
-      <ConfirmScreen
-        setScreen={setScreen}
-        setSeedPhrase={setSeedPhrase}
-        seedPhrase={seedPhrase}
+    [WalletOnboardingScreen.CANCEL]: (
+      <ForgotPasscodeScreenBody
+        onClickCancel={() => {
+          const screen = localStorage.getItem('WalletOnboardingScreen');
+          if (screen) {
+            setScreen(screen as WalletOnboardingScreen);
+          } else {
+            setScreen(initialScreen);
+          }
+        }}
+        onClickDelete={() =>
+          resetOnboarding(setScreen, setSeedPhrase, setPasscode)
+        }
+        bodyText="Are you sure? To create a new wallet, a different seed phrase will be used."
       />
+    ),
+    [WalletOnboardingScreen.CONFIRM]: (
+      <ConfirmScreen setScreen={setScreen} seedPhrase={seedPhrase} />
     ),
     [WalletOnboardingScreen.PASSCODE]: (
       <CreatePasscodeScreen

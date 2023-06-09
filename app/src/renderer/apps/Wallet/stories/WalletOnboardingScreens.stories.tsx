@@ -46,7 +46,6 @@ export const ConfirmStory: ComponentStory<typeof ConfirmScreen> = () => (
     <ConfirmScreen
       seedPhrase="route way orange glass jar wing social album tag raven august miracle"
       setScreen={() => {}}
-      setSeedPhrase={() => {}}
     />
   </WalletStoryWrapper>
 );
@@ -110,3 +109,11 @@ export const NoAddressesStory: ComponentStory<
 );
 
 NoAddressesStory.storyName = '7. No addresses';
+
+// export const CancelStory: ComponentStory<typeof CancelScreen> = () => (
+//   <WalletStoryWrapper isOnboarding>
+//     <CancelScreen />
+//   </WalletStoryWrapper>
+// );
+
+// CancelStory.storyName = '8. Cancel Wallet Creation';

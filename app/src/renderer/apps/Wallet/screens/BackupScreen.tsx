@@ -12,8 +12,6 @@ import { useToggle } from '@holium/design-system/util';
 
 import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 
-import { resetOnboarding } from './WalletOnboarding';
-
 type Props = {
   seedPhrase: string;
   setScreen: (screen: WalletOnboardingScreen) => void;
@@ -85,7 +83,7 @@ export const BackupScreen = ({
         <Button.Secondary
           flex={1}
           justifyContent="center"
-          onClick={() => resetOnboarding(setScreen, setSeedPhrase)}
+          onClick={() => setScreen(WalletOnboardingScreen.CANCEL)}
         >
           Cancel
         </Button.Secondary>

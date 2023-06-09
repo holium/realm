@@ -31,7 +31,7 @@ export default {
   title: 'Wallet/Base Screens',
 } as ComponentMeta<typeof WalletSettingsScreenBody>;
 
-export const WalletDetailssStory: ComponentStory<
+export const WalletDetailsStory: ComponentStory<
   typeof DetailScreenBody
 > = () => (
   <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI}>
@@ -58,7 +58,7 @@ export const WalletDetailssStory: ComponentStory<
   </WalletStoryWrapper>
 );
 
-WalletDetailssStory.storyName = 'Wallet details';
+WalletDetailsStory.storyName = 'Wallet details';
 
 export const NftDetailStory: ComponentStory<
   typeof NFTDetailScreenBody
@@ -169,13 +169,15 @@ export const ForgotPasscodeStory: ComponentStory<
   <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI} hideHeader hideFooter>
     <ForgotPasscodeScreenBody
       onClickCancel={() => {}}
-      onClickDelete={() => {
+      onClickDeleteAsync={() => {
         return new Promise((resolve) => {
           setTimeout(() => {
             resolve();
           }, 1000);
         });
       }}
+      bodyText="If you've forgotten your passcode, you can delete your wallet and then
+      import it again using your recovery phrase."
     />
   </WalletStoryWrapper>
 );
