@@ -40,6 +40,7 @@ export const HeroContainer = styled(Flex)`
     max-width: 814px;
     width: 100%;
     max-height: 725px;
+    overflow: hidden;
 
     svg {
       transform: scale(0.8) translateY(-64px);
