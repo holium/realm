@@ -43,6 +43,7 @@ export const FragmentBlock = styled(motion.span)`
     max-width: 100%;
     min-height: 0;
     max-height: 100%;
+    overflow-wrap: break-word;
   }
 `;
 
