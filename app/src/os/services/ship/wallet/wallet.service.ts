@@ -1,3 +1,4 @@
+import log from 'electron-log';
 import bcrypt from 'bcryptjs';
 import Database from 'better-sqlite3-multiple-ciphers';
 import CoinGecko from 'coingecko-api';
@@ -63,8 +64,8 @@ export class WalletService extends AbstractService {
       app: 'realm-wallet',
       path: '/passcode',
     });
-    console.log('response', response);
-    console.log(
+    log.warn('response', response);
+    log.warn(
       'trying',
       (
         await APIConnection.getInstance().conduit.scry({
@@ -173,34 +174,39 @@ export class WalletService extends AbstractService {
     to: string;
     amount: string;
   }) {
+    log.warn('getting protocol');
     const protocol = this.protocolManager?.protocols.get(
       currentProtocol
     ) as EthereumProtocol;
+    log.warn('protocol', protocol);
 
-    const gasLimit = await protocol.getFeeEstimate({
-      to,
-      from,
-      value: ethers.utils.parseEther(amount),
-    });
+    // const gasLimit = await protocol.getFeeEstimate({
+    //   to,
+    //   from,
+    //   value: ethers.utils.parseEther(amount),
+    // });
     const gasPrice = await protocol.getFeePrice();
     const nonce = await protocol.getNonce(from);
     const chainId = await protocol.getChainId();
+    log.warn('chainId', chainId);
 
     const transaction = {
       from,
       to,
       value: ethers.utils.parseEther(amount),
-      gasLimit,
+      gasLimit: ethers.utils.hexlify(21000),
       gasPrice,
       nonce,
       chainId,
     };
+    log.warn('transaction', transaction);
     const signedTx = await RealmSigner.signTransaction({
       path,
       transaction,
       patp: ourPatp,
       passcode,
     });
+    log.warn('signedTx', signedTx);
 
     const hash = await (
       this.protocolManager?.protocols.get(currentProtocol) as BaseBlockProtocol
@@ -280,24 +286,22 @@ export class WalletService extends AbstractService {
     });
   }
 
-  async getAddress(patp: string, network: string) {
-    try {
-      const address: string | null =
-        await APIConnection.getInstance().conduit.poke({
-          app: 'realm-wallet',
-          mark: 'realm-wallet-action',
-          json: {
-            'get-address': {
-              network: network,
-              patp,
-            },
-          },
-        });
-      return address;
-    } catch (e) {
-      console.error(e);
-      return null;
-    }
+  async getAddress(network: string, from: string) {
+    return new Promise((resolve, reject) => {
+      APIConnection.getInstance().conduit.watch({
+        app: 'realm-wallet',
+        path: '/address/' + network + '/' + from,
+        onEvent(data, _id, _mark) {
+          log.info('success', data);
+          resolve(data);
+        },
+        onError(_id, e) {
+          log.info('error', e);
+          resolve(null);
+        },
+        onQuit() {},
+      });
+    });
   }
 
   async saveTransactionNotes(

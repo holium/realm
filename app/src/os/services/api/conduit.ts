@@ -212,7 +212,7 @@ export class Conduit extends EventEmitter {
               const reconnectSub = this.watches.get(eventId);
               reconnectSub?.onQuit?.(parsedData);
               this.setAsIdleWatch(eventId);
-              this.resubscribe(eventId);
+              // this.resubscribe(eventId);
             }
             break;
           //

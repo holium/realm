@@ -135,6 +135,8 @@ export const DetailScreenBody = ({
         } else {
           if (!transactionRecipient) return;
 
+          console.error('transactionRecipient', transactionRecipient);
+
           if (coin) {
             await sendERC20Transaction({
               walletIndex: wallet.index.toString(),
@@ -156,7 +158,7 @@ export const DetailScreenBody = ({
               walletIndex: wallet.index.toString(),
               to:
                 transactionRecipient.address ??
-                transactionRecipient.patpAddress ??
+                transactionRecipient.patpAddress.address ??
                 '',
               amount: transactionAmount.toString(),
               passcode,

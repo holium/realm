@@ -1,6 +1,5 @@
 import { Avatar, Flex, Icon, Text } from '@holium/design-system/general';
 
-import { shortened } from '../../helpers';
 import { TransactionRecipient } from '../../types';
 
 type Props = {
@@ -15,9 +14,9 @@ export const TransactionRecipientInfo = ({ transactionRecipient }: Props) => {
       {!transactionRecipient.patp && transactionRecipient.address && (
         <Flex gap="8px" justifyContent="center">
           <Icon name="Spy" size="20px" />
-          <Text.Body style={{ lineHeight: '20px' }}>
+          {/* <Text.Body style={{ lineHeight: '20px' }}>
             {shortened(transactionRecipient.address)}
-          </Text.Body>
+          </Text.Body> */}
         </Flex>
       )}
       {transactionRecipient.patp && transactionRecipient.address && (
@@ -30,9 +29,9 @@ export const TransactionRecipientInfo = ({ transactionRecipient }: Props) => {
           />
           <Flex flexDirection="column" justifyContent="center">
             <Text.Body variant="body">{transactionRecipient.patp}</Text.Body>
-            <Text.Body variant="body">
+            {/* <Text.Body variant="body">
               {shortened(transactionRecipient.address)}
-            </Text.Body>
+            </Text.Body> */}
           </Flex>
         </Flex>
       )}

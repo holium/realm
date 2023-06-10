@@ -190,11 +190,11 @@ const RecipientInputPresenter = ({
         />
       </Flex>
       <Flex mt="4px" ml="36px" gap="2px" flexDirection="column">
-        {recipientDetails.details?.address && (
+        {/* {recipientDetails.details?.address && (
           <Text.Body mt="4px" fontSize={1} variant="body" opacity={0.7}>
             {shortened(recipientDetails.details?.address)}
           </Text.Body>
-        )}
+        )} */}
         {recipientDetails.failed && (
           <Text.Custom fontSize="11px" color="intent-caution">
             {recipientDetails.details?.patp === recipient
