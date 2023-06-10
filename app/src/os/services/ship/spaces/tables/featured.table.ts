@@ -50,10 +50,6 @@ export class FeaturedSpacesDB extends AbstractDataAccess<FeaturedSpace, any> {
       //   console.error('Subscription to %bulletin rejected');
       //   store.setSubscriptionStatus('unsubscribed');
       // },
-      // onQuit: () => {
-      //   console.error('Kicked from %bulletin subscription');
-      //   store.setSubscriptionStatus('unsubscribed');
-      // },
     });
   }
 

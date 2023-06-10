@@ -58,6 +58,7 @@ export interface SubscribeParams {
   ship?: string; // lomder-librun
   app: string; // friends
   path: string; // /all
+  letConnectionDie?: boolean; // true
 }
 
 export interface SubscribeCallbacks {

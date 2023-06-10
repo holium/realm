@@ -14,7 +14,6 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     params.tableName = 'transactions';
     super(params);
     if (params.preload) return;
-    this._onQuit = this._onQuit.bind(this);
     this._onError = this._onError.bind(this);
     this._onDbUpdate = this._onDbUpdate.bind(this);
     this.init = this.init.bind(this);
@@ -22,7 +21,6 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
       app: 'realm-wallet',
       path: '/updates',
       onEvent: this._onDbUpdate,
-      onQuit: this._onQuit,
       onError: this._onError,
     });
     this.init();
@@ -87,9 +85,6 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     this.sendUpdate(data);
   }
 
-  private _onQuit() {
-    console.log('fail!');
-  }
   private _onError(err: any) {
     console.log('err!', err);
   }
