@@ -53,6 +53,15 @@ export const TransactionDetailScreenBody = ({
     saveTransactionNotes(notes).then(() => setLoading(false));
   };
 
+  const statusMessage =
+    transactionStatus !== 'pending'
+      ? wasSent
+        ? 'SENT TO'
+        : 'RECEIVED FROM'
+      : wasSent
+      ? 'SENDING TO'
+      : 'RECEIVING FROM';
+
   return (
     <WalletCardStyle isSelected>
       <WalletCardBody>
@@ -61,14 +70,14 @@ export const TransactionDetailScreenBody = ({
         </Text.Body>
         <Flex width="100%" justifyContent="space-between" alignItems="center">
           {transactionStatus === 'pending' ? (
-            <Flex alignItems="center">
+            <Flex alignItems="center" gap={8}>
               <Text.Body
-                opacity={0.9}
+                opacity={0.5}
                 fontWeight={600}
                 fontSize={7}
                 animate={false}
               >
-                Pending
+                {wasSent ? 'Sending' : 'Receiving'}
               </Text.Body>
               <Spinner size={0} />
             </Flex>
@@ -87,7 +96,17 @@ export const TransactionDetailScreenBody = ({
             justifyContent="center"
             alignItems="flex-end"
           >
-            <Text.Body fontSize={4}>
+            <Text.Body
+              fontSize={4}
+              opacity={transactionStatus !== 'pending' ? 1 : 0.5}
+              color={
+                transactionStatus === 'pending'
+                  ? 'text'
+                  : wasSent
+                  ? 'intent-alert'
+                  : 'intent-success'
+              }
+            >
               {wasSent && '-'} {amountDisplay}
             </Text.Body>
             {protocol === ProtocolType.ETH_MAIN && (
@@ -97,7 +116,7 @@ export const TransactionDetailScreenBody = ({
         </Flex>
         <Flex width="100%" justifyContent="space-between" alignItems="center">
           <Text.Body fontSize={1} opacity={0.7}>
-            {wasSent ? 'SENT TO' : 'RECEIVED FROM'}
+            {statusMessage}
           </Text.Body>
           <Flex alignItems="center">
             {!patp ? (

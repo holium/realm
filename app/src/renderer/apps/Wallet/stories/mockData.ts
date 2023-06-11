@@ -17,7 +17,7 @@ import {
   TransactionType,
 } from 'renderer/stores/models/wallet.model';
 
-import { WalletWithKey } from '../screens/WalletListScreen/WalletListScreenBody';
+import { WalletWithKey } from '../screens/Base/WalletListScreen/WalletListScreenBody';
 
 const bitcoinConversions: BitcoinConversionsType = {
   usd: Promise.resolve(10000),
@@ -171,7 +171,28 @@ mockCoins_account2.set('0x987654321', {
   logo: 'https://dynamic-assets.coinbase.com/3803f30367bb3972e192cd3fdd2230cd37e6d468eab12575a859229b20f12ff9c994d2c86ccd7bf9bc258e9bd5e46c5254283182f70caf4bd02cc4f8e3890d82/asset_icons/1597d628dd19b7885433a2ac2d7de6ad196c519aeab4bfe679706aacbf1df78a.png',
 });
 
-export const mockTransactions: TransactionType[] = Array.from({
+const mockPendingTransaction: TransactionType = {
+  hash: '0x123456789',
+  walletIndex: 0,
+  amount: '0.100000000000000000',
+  ethType: 'transfer',
+  network: NetworkType.ETHEREUM,
+  type: 'sent',
+
+  initiatedAt: '0',
+  completedAt: new Date().toLocaleDateString(),
+
+  ourAddress: '~zod',
+  theirPatp: '~bus',
+  theirAddress: '0x987654321',
+
+  status: 'pending',
+  failureReason: '',
+
+  notes: "I'm a note",
+};
+
+const mockSentTransactions: TransactionType[] = Array.from({
   length: 112,
 }).map((_, i) => ({
   hash: '0x123456789' + i,
@@ -193,6 +214,11 @@ export const mockTransactions: TransactionType[] = Array.from({
 
   notes: "I'm a note",
 }));
+
+export const mockTransactions: TransactionType[] = [
+  mockPendingTransaction,
+  ...mockSentTransactions,
+];
 
 export const mockWallets: WalletWithKey[] = [
   { ...ethereumWallet1, key: '0' },

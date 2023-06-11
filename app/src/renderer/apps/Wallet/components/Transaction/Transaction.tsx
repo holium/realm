@@ -1,4 +1,4 @@
-import { Flex, Row, Text } from '@holium/design-system/general';
+import { Flex, Row, Spinner, Text } from '@holium/design-system/general';
 
 import { TransactionType } from 'renderer/stores/models/wallet.model';
 
@@ -64,20 +64,22 @@ export const Transaction = ({
     <Row onClick={onClick}>
       <Flex width="100%" alignItems="center" gap="8px">
         <Flex flex={1} flexDirection="column" justifyContent="center">
-          <Text.Custom fontWeight={500} fontSize={3}>
-            {statusMessage}
-          </Text.Custom>
+          <Flex alignItems="center" gap={8}>
+            <Text.Custom
+              fontWeight={500}
+              fontSize={3}
+              opacity={transaction.status !== 'pending' ? 1 : 0.5}
+            >
+              {statusMessage}
+            </Text.Custom>
+            {transaction.status === 'pending' && <Spinner size={0} />}
+          </Flex>
           <Flex gap="4px">
             <Text.Body
               fontSize={1}
               fontWeight={300}
-              opacity={transaction.status !== 'pending' ? 1 : 0.5}
               style={{
                 whiteSpace: 'nowrap',
-                color:
-                  transaction.status !== 'pending'
-                    ? 'var(--rlm-intent-success-color)'
-                    : 'var(--rlm-text-color)',
               }}
             >
               {dateString}
@@ -106,7 +108,17 @@ export const Transaction = ({
           alignItems="flex-end"
           justifyContent="center"
         >
-          <Text.Body fontSize={2}>
+          <Text.Body
+            fontSize={2}
+            opacity={transaction.status !== 'pending' ? 1 : 0.5}
+            color={
+              transaction.status === 'pending'
+                ? 'text'
+                : wasSent
+                ? 'intent-alert'
+                : 'intent-success'
+            }
+          >
             {wasSent ? '-' : ''}
             {isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC`}
           </Text.Body>

@@ -103,7 +103,7 @@ export const TransactionDetailStory: ComponentStory<
       transactionHash="0x1234567890"
       patp="~zod"
       transactionNotes="test"
-      transactionStatus="test"
+      transactionStatus="succeeded"
       protocol={ProtocolType.ETH_GORLI}
       saveTransactionNotes={() => Promise.resolve()}
       amountDisplay="1 ETH"
@@ -113,3 +113,25 @@ export const TransactionDetailStory: ComponentStory<
 );
 
 TransactionDetailStory.storyName = 'Transaction detail';
+
+export const PendingTransactionDetailStory: ComponentStory<
+  typeof TransactionDetailScreenBody
+> = () => (
+  <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI}>
+    <TransactionDetailScreenBody
+      wasSent={true}
+      themDisplay="0x1234567890"
+      completedAtString="2021-09-01"
+      transactionHash="0x1234567890"
+      patp="~zod"
+      transactionNotes="test"
+      transactionStatus="pending"
+      protocol={ProtocolType.ETH_GORLI}
+      saveTransactionNotes={() => Promise.resolve()}
+      amountDisplay="1 ETH"
+      usdAmount="2000"
+    />
+  </WalletStoryWrapper>
+);
+
+PendingTransactionDetailStory.storyName = 'Pending transaction detail';
