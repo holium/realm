@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
+
+import { Button, Flex, Text } from '@holium/design-system';
 
 import { PeerConnectionState } from '../store/room.types';
 import { SpeakerGrid } from './SpeakerGrid';
@@ -22,16 +25,35 @@ export type RoomType = {
 
 const contacts: any = {
   '~lomder-librun': {
-    color: '#eedfc9',
+    color: '#f29810',
     nickname: 'lomder-librun',
     avatar: null,
   },
+  '~fasnut-famden': {
+    color: '#129131',
+    nickname: 'Thearellica',
+    avatar:
+      'https://lomder-librun.sfo3.digitaloceanspaces.com/Images/~fasnut-famden/1683832836-fasnut-famden%20light%20blue%20green.jpg',
+  },
+  '~lopsyp-doztun': {
+    color: '#129131',
+    nickname: 'Gus',
+    avatar:
+      'https://rindux-mocrux.s31.third.earth/~lopsyp-doztun/1683061010-boom.jpeg',
+  },
   '~hostyv': {
-    color: '#eedfc9',
+    color: '#785218',
     nickname: 'hostyv',
     avatar: null,
   },
+  '~bus': {
+    color: '#3b1878',
+    nickname: 'bus',
+    avatar: null,
+  },
 };
+
+const peers1 = Array.from<any>(Object.keys(contacts)).map((id: string) => id);
 
 const getContactMetadata = (ship: string) => contacts[ship];
 
@@ -61,15 +83,163 @@ const room: RoomType = {
   path: '/~lomder-librun/realm-forerunners',
 };
 
-export const NoActiveSpeaker: ComponentStory<typeof SpeakerGrid> = () => (
-  <SpeakerGrid
-    activeSpeaker={null}
-    peers={['~lomder-librun', '~hostyv']}
-    getContactMetadata={getContactMetadata}
-    getPeer={getPeer}
-    ourId="~lomder-librun"
-    room={room}
-    kickPeer={() => {}}
-    retryPeer={() => {}}
-  />
+export const Togglable: ComponentStory<typeof SpeakerGrid> = () => {
+  const [activeSpeaker, setActiveSpeaker] = useState<string | null>(null);
+
+  return (
+    <Flex row align="flex-start" p={3} gap={16}>
+      <Flex col>
+        <Text.Label>Tray size</Text.Label>
+        <Flex
+          p={1}
+          background="rgba(0, 0, 0, 0.04)"
+          borderRadius={6}
+          height={400}
+          width={380}
+        >
+          <SpeakerGrid
+            activeSpeaker={activeSpeaker}
+            peers={peers1}
+            getContactMetadata={getContactMetadata}
+            getPeer={getPeer}
+            ourId="~lomder-librun"
+            room={room}
+            kickPeer={() => {}}
+            retryPeer={() => {}}
+          />
+        </Flex>
+      </Flex>
+      <Flex col>
+        <Text.Label>Full size</Text.Label>
+        <Flex
+          p={1}
+          background="rgba(0, 0, 0, 0.04)"
+          borderRadius={6}
+          height={600}
+          width={900}
+        >
+          <SpeakerGrid
+            columns={3}
+            size="full"
+            activeSpeaker={activeSpeaker}
+            peers={peers1}
+            getContactMetadata={getContactMetadata}
+            getPeer={getPeer}
+            ourId="~lomder-librun"
+            room={room}
+            kickPeer={() => {}}
+            retryPeer={() => {}}
+          />
+        </Flex>
+        <Button.Primary
+          mt={3}
+          onClick={() => {
+            setActiveSpeaker(activeSpeaker ? null : '~lomder-librun');
+          }}
+        >
+          Toggle active
+        </Button.Primary>
+      </Flex>
+    </Flex>
+  );
+};
+
+export const NoActiveSpeaker: ComponentStory<typeof SpeakerGrid> = () => {
+  return (
+    <Flex row align="flex-start" p={3} gap={16}>
+      <Flex col>
+        <Text.Label>Tray size</Text.Label>
+        <Flex
+          p={1}
+          background="rgba(0, 0, 0, 0.04)"
+          borderRadius={6}
+          height={400}
+          width={380}
+        >
+          <SpeakerGrid
+            activeSpeaker={null}
+            peers={peers1}
+            getContactMetadata={getContactMetadata}
+            getPeer={getPeer}
+            ourId="~lomder-librun"
+            room={room}
+            kickPeer={() => {}}
+            retryPeer={() => {}}
+          />
+        </Flex>
+      </Flex>
+      <Flex col>
+        <Text.Label>Full size</Text.Label>
+        <Flex
+          p={1}
+          background="rgba(0, 0, 0, 0.04)"
+          borderRadius={6}
+          height={600}
+          width={900}
+        >
+          <SpeakerGrid
+            columns={4}
+            size="full"
+            activeSpeaker={null}
+            peers={peers1}
+            getContactMetadata={getContactMetadata}
+            getPeer={getPeer}
+            ourId="~lomder-librun"
+            room={room}
+            kickPeer={() => {}}
+            retryPeer={() => {}}
+          />
+        </Flex>
+      </Flex>
+    </Flex>
+  );
+};
+
+export const ActiveSpeaker: ComponentStory<typeof SpeakerGrid> = () => (
+  <Flex row align="flex-start" p={3} gap={16}>
+    <Flex col>
+      <Text.Label>Tray size</Text.Label>
+      <Flex
+        p={1}
+        background="rgba(0, 0, 0, 0.04)"
+        borderRadius={6}
+        height={400}
+        width={380}
+      >
+        <SpeakerGrid
+          activeSpeaker={'~lomder-librun'}
+          peers={peers1}
+          getContactMetadata={getContactMetadata}
+          getPeer={getPeer}
+          ourId="~lomder-librun"
+          room={room}
+          kickPeer={() => {}}
+          retryPeer={() => {}}
+        />
+      </Flex>
+    </Flex>
+    <Flex col>
+      <Text.Label>Full size</Text.Label>
+      <Flex
+        p={1}
+        background="rgba(0, 0, 0, 0.04)"
+        borderRadius={6}
+        height={600}
+        width={900}
+      >
+        <SpeakerGrid
+          columns={4}
+          size="full"
+          activeSpeaker={'~lomder-librun'}
+          peers={peers1}
+          getContactMetadata={getContactMetadata}
+          getPeer={getPeer}
+          ourId="~lomder-librun"
+          room={room}
+          kickPeer={() => {}}
+          retryPeer={() => {}}
+        />
+      </Flex>
+    </Flex>
+  </Flex>
 );

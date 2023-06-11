@@ -3,10 +3,13 @@ import { action, makeObservable, observable } from 'mobx';
 import Peer, { Instance as PeerInstance } from 'simple-peer';
 
 import { serialize, unserialize } from './helpers';
-import { DataPacket } from './room.types';
+import { DataPacket, DataPayload } from './room.types';
 import { OnDataChannel, OnLeftRoom } from './RoomsStore';
 import { IAudioAnalyser, SpeakingDetectionAnalyser } from './SpeakingDetector';
 
+const DataPacketMuteStatus = 3;
+// const DataPacketSpeakingChanged = 4;
+//
 export class PeerClass extends EventsEmitter {
   @observable rid: string;
   @observable ourId: string;
@@ -76,6 +79,12 @@ export class PeerClass extends EventsEmitter {
   @action
   hasVideoChanged(hasVideo: boolean) {
     this.hasVideo = hasVideo;
+  }
+
+  setNewStream(stream: MediaStream) {
+    this.peer.removeStream(this.ourStream);
+    this.peer.addStream(stream);
+    this.ourStream = stream;
   }
 
   @action
@@ -307,9 +316,16 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onData(data: any) {
-    // TODO wire up event
-    // this.emit('on-peer-data', data);
-    this.onDataChannel(this.rid, this.peerId, unserialize(data));
+    const dataPacket = unserialize(data);
+    if (dataPacket.kind === DataPacketMuteStatus) {
+      const payload = dataPacket.value as DataPayload;
+      if (payload.data) {
+        this.isMutedChanged(true);
+      } else {
+        this.isMutedChanged(false);
+      }
+    }
+    this.onDataChannel(this.rid, this.peerId, dataPacket);
   }
 
   @action

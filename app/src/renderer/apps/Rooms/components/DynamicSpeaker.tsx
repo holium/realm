@@ -5,8 +5,7 @@ import styled from 'styled-components';
 
 import { Avatar, Flex, FlexProps, Icon, Text } from '@holium/design-system';
 
-import { ContextMenuOption } from 'renderer/components';
-import { useContextMenu } from 'renderer/components/ContextMenu/useContextMenu';
+import { ContextMenuOption, useContextMenu } from 'renderer/components';
 
 import { LocalPeer } from '../store/LocalPeer';
 import { PeerClass } from '../store/Peer';
@@ -15,10 +14,13 @@ import { AudioWave } from './AudioWave';
 import { RoomType } from './rooms.stories';
 
 interface ISpeaker {
+  isActive?: boolean;
   person: string;
   cursors?: boolean;
+  size?: 'tray' | 'full';
   type: 'speaker' | 'listener' | 'creator';
   isOur: boolean;
+  ourId: string;
   metadata: any;
   peer: PeerClass | LocalPeer | any;
   kickPeer: (person: string) => void;
@@ -34,8 +36,19 @@ const speakerType = {
 };
 
 const SpeakerPresenter = (props: ISpeaker) => {
-  const { person, type, isOur, metadata, peer, kickPeer, retryPeer, room } =
-    props;
+  const {
+    size = 'tray',
+    person,
+    type,
+    isOur,
+    ourId,
+    metadata,
+    isActive = false,
+    peer,
+    kickPeer,
+    retryPeer,
+    room,
+  } = props;
 
   const speakerRef = useRef<any>(null);
   const videoRef = useRef<any>(null);
@@ -88,7 +101,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
           },
         },
         // only the creator can kick people
-        type === 'creator' && {
+        room.creator === ourId && {
           style: { color: '#FD4E4E' },
           id: `room-speaker-${person}-kick`,
           label: 'Kick',
@@ -115,14 +128,15 @@ const SpeakerPresenter = (props: ISpeaker) => {
   return (
     <SpeakerWrapper
       id={`room-speaker-${person}`}
-      // data-close-tray="false"
+      size={size}
       ref={speakerRef}
       key={person}
       gap={4}
+      transition={{ width: { duration: 0.5 } }}
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      className={`${
+      className={`speaker ${isActive ? 'active-speaker' : ''} ${
         hasVideo && peerState !== PeerConnectionState.Closed
           ? 'speaker-video-on'
           : ''
@@ -147,7 +161,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
           id={`peer-video-${person}`}
           autoPlay
           playsInline
-          muted={isOur}
+          muted
         />
         <Flex
           zIndex={2}
@@ -217,10 +231,10 @@ const SpeakerPresenter = (props: ISpeaker) => {
           {!peer?.isMuted && !isSpeaking && (
             <Flex
               className="speaker-sublabel"
-              initial={{ opacity: 0 }}
+              initial={{ opacity: 1 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: 0.15 }}
               position="absolute"
             >
               {sublabel}
@@ -234,12 +248,15 @@ const SpeakerPresenter = (props: ISpeaker) => {
 
 export const Speaker = observer(SpeakerPresenter);
 
-const SpeakerWrapper = styled(Flex)<FlexProps>`
+type SpeakerWrapperProps = {
+  size: 'tray' | 'full';
+};
+
+const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
   padding: 16px 0;
   border-radius: 9px;
   transition: 0.25s ease;
   position: relative;
-  height: 186px;
   outline: 2px solid transparent;
 
   &:hover {

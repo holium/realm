@@ -2,7 +2,6 @@ import { patp2dec } from '@urbit/aura';
 import EventsEmitter from 'events';
 import { action, makeObservable, observable } from 'mobx';
 
-import { trayStore } from 'renderer/apps/store';
 import { SoundActions } from 'renderer/lib/sound';
 import { RealmIPC } from 'renderer/stores/ipc';
 
@@ -206,6 +205,8 @@ export class RoomsStore extends EventsEmitter {
   }) {
     this.onDataChannel = onDataChannel.bind(this);
     this.onLeftRoom = onLeftRoom.bind(this);
+    this.kickPeer = this.kickPeer.bind(this);
+    this.retryPeer = this.retryPeer.bind(this);
   }
 
   get currentRoom() {
@@ -257,12 +258,17 @@ export class RoomsStore extends EventsEmitter {
   @action
   async toggleVideo(enableVideo: boolean) {
     if (!enableVideo) {
-      await this.ourPeer.disableVideo();
+      this.peers.forEach((peer) => {
+        if (this.ourPeer.videoStream) {
+          peer.peer.removeStream(this.ourPeer.videoStream);
+        }
+      });
+      this.ourPeer.disableVideo();
     } else {
       const stream = await this.ourPeer.enableVideo();
       this.peers.forEach((peer) => {
         if (stream) {
-          peer.peer.addStream(stream);
+          peer.setNewStream(stream);
         }
       });
     }
@@ -324,40 +330,6 @@ export class RoomsStore extends EventsEmitter {
 
     websocket.onopen = () => {
       console.log('websocket connected');
-      if (this.currentRoom && this.status === 'connected') {
-        console.log(
-          'cleaning up -- you were in a room and in a disconnected state'
-        );
-        // todo improve this... this catches when you close the laptop lid
-        // and reopen it, and the websocket reconnects
-        this.ourPeer.enableMedia(this.ourPeer.constraints);
-        websocket.send(serialize({ type: 'disconnect' }));
-        trayStore.roomsApp.setView('list');
-      }
-      //   console.log(
-      //     'websocket onopen reconnecting to room',
-      //     this.currentRoom.rid
-      //   );
-      //   // reconnect to current room if you were in one and
-      //   // the websocket disconnected
-      //   const peers = this.currentRoom.present.filter(
-      //     (peer: string) => peer !== this.ourId
-      //   );
-      //   peers.forEach((peerId: string) => {
-      //     if (!this.ourPeer.stream) {
-      //       console.error('no local stream');
-      //       return;
-      //     }
-      //     const peer = this.peers.get(peerId);
-      //     if (peer?.peer.destroyed) {
-      //       console.log(
-      //         'peer was destroyed, connection closed, reconnecting',
-      //         peerId
-      //       );
-      //       peer.retry(this.ourPeer.stream);
-      //     }
-      //   });
-      // }
       this.status = 'connected';
       websocket.send(serialize({ type: 'connect' }));
     };
@@ -385,7 +357,6 @@ export class RoomsStore extends EventsEmitter {
     };
 
     // on computer sleep close the connection
-
     window.onclose = () => {
       disconnect();
     };
@@ -445,7 +416,7 @@ export class RoomsStore extends EventsEmitter {
               (peer: string) => peer !== this.ourId
             );
             peers.forEach((peerId: string) => {
-              if (!this.ourPeer.stream) {
+              if (!this.ourPeer.audioStream) {
                 console.error('no local stream');
                 return;
               }
@@ -500,7 +471,7 @@ export class RoomsStore extends EventsEmitter {
         break;
       case 'signal':
         if (this.currentRid === event.rid) {
-          if (!this.ourPeer.stream) {
+          if (!this.ourPeer.audioStream) {
             console.error('no local stream');
             return;
           }
@@ -539,10 +510,8 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   createRoom(title: string, access: RoomAccess, path: string | null) {
-    // await SoundActions.playRoomEnter();
-    if (!this.ourPeer.stream) {
-      this.ourPeer.enableMedia(this.ourPeer.constraints);
-    }
+    this.ourPeer.enableAudio();
+
     const newRoom = {
       rid: ridFromTitle(this.provider, this.ourId, title),
       provider: this.provider,
@@ -587,7 +556,7 @@ export class RoomsStore extends EventsEmitter {
   deleteRoom(rid: string) {
     SoundActions.playRoomLeave();
     this.rooms.delete(rid);
-    this.ourPeer.disableMedia();
+    this.ourPeer.disableAll();
     this.currentRid = null;
     this.websocket.send(
       serialize({
@@ -614,8 +583,8 @@ export class RoomsStore extends EventsEmitter {
   joinRoom(rid: string) {
     this.cleanUpCurrentRoom();
     this.setCurrentRoom(rid);
-    if (!this.ourPeer.stream) {
-      this.ourPeer.enableMedia(this.ourPeer.constraints).then(
+    if (!this.ourPeer.audioStream) {
+      this.ourPeer.enableAudio().then(
         action(() => {
           this.websocket.send(
             serialize({
@@ -637,7 +606,6 @@ export class RoomsStore extends EventsEmitter {
       // add us to the room
       this.rooms.get(rid)?.addPeer(this.ourId);
     }
-    // enter room will trigger room-entered event
   }
 
   @action
@@ -645,7 +613,7 @@ export class RoomsStore extends EventsEmitter {
     SoundActions.playRoomLeave();
     this.rooms.get(rid)?.removePeer(this.ourId);
     this.currentRid = null;
-    this.ourPeer.disableMedia();
+    this.ourPeer.disableAll();
     this.websocket.send(
       serialize({
         type: 'leave-room',
@@ -680,7 +648,7 @@ export class RoomsStore extends EventsEmitter {
       console.warn('No current room');
       return;
     }
-    if (!this.ourPeer.stream) {
+    if (!this.ourPeer.audioStream) {
       console.error('no local stream');
       // TODO handle this better
       return;
@@ -691,7 +659,7 @@ export class RoomsStore extends EventsEmitter {
       this.ourId,
       peerId,
       isInitiator(this.ourId, peerId),
-      this.ourPeer.stream,
+      this.ourPeer.audioStream,
       this.websocket,
       {
         onDataChannel: this.onDataChannel.bind(this),
