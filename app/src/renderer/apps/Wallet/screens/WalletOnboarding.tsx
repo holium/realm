@@ -7,16 +7,16 @@ import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
 import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { BackupScreen } from './BackupScreen';
-import { ConfirmPasscodeScreen } from './ConfirmPasscodeScreen';
-import { ConfirmScreen } from './ConfirmScreen';
-import { CreatePasscodeScreen } from './CreatePasscodeScreen';
-import { DetectedExistingScreen } from './DetectedExistingScreen';
-import { FinalizingScreen } from './FinalizingScreen/FinalizingScreen';
-import { ForgotPasscodeScreenBody } from './ForgotPasscodeScreen/ForgotPasscodeScreenBody';
-import { ImportScreen } from './ImportScreen';
-import { NoWalletFoundScreen } from './NoWalletFoundScreen';
-import { RecoverExistingScreen } from './RecoverExistingScreen';
+import { BackupScreen } from './Onboarding/BackupScreen';
+import { CancelWalletCreationScreen } from './Onboarding/CancelWalletCreationScreen';
+import { ConfirmPasscodeScreen } from './Onboarding/ConfirmPasscodeScreen';
+import { ConfirmScreen } from './Onboarding/ConfirmScreen';
+import { CreatePasscodeScreen } from './Onboarding/CreatePasscodeScreen';
+import { DetectedExistingScreen } from './Onboarding/DetectedExistingScreen';
+import { FinalizingScreen } from './Onboarding/FinalizingScreen/FinalizingScreen';
+import { ImportExistingScreen } from './Onboarding/ImportExistingScreen/ImportExistingScreen';
+import { NoWalletFoundScreen } from './Onboarding/NoWalletFoundScreen';
+import { RecoverExistingScreen } from './Onboarding/RecoverExistingScreen/RecoverExistingScreen';
 
 export const resetOnboarding = (
   setScreen: any,
@@ -42,6 +42,7 @@ const WalletOnboardingPresenter = () => {
   const loading = useToggle(true);
   const [screen, setScreen] = useState<WalletOnboardingScreen>(initialScreen);
   const [passcode, setPasscode] = useState<number[]>([]);
+  const [canContinue, setCanContinue] = useState(false);
 
   // TODO move this to background thread
   const [seedPhrase, setSeedPhrase] = useState('');
@@ -76,22 +77,15 @@ const WalletOnboardingPresenter = () => {
     localStorage.setItem('WalletOnboardingSeedPhrase', seedPhrase);
   }, [seedPhrase]);
 
-  const setPasscodeWrapper = async (passcode: number[]) => {
-    setPasscode(passcode);
-    setScreen(WalletOnboardingScreen.CONFIRM_PASSCODE);
-  };
-
-  const onCorrectPasscode = async (passcode: number[]) => {
-    setPasscode(passcode);
-    setScreen(WalletOnboardingScreen.FINALIZING);
-  };
-
   const components = {
     [WalletOnboardingScreen.NO_WALLET]: (
       <NoWalletFoundScreen setScreen={setScreen} />
     ),
     [WalletOnboardingScreen.IMPORT]: (
-      <ImportScreen setSeedPhrase={setSeedPhrase} setScreen={setScreen} />
+      <ImportExistingScreen
+        setSeedPhrase={setSeedPhrase}
+        setScreen={setScreen}
+      />
     ),
     [WalletOnboardingScreen.BACKUP]: (
       <BackupScreen
@@ -101,7 +95,7 @@ const WalletOnboardingPresenter = () => {
       />
     ),
     [WalletOnboardingScreen.CANCEL]: (
-      <ForgotPasscodeScreenBody
+      <CancelWalletCreationScreen
         onClickCancel={() => {
           const screen = localStorage.getItem('WalletOnboardingScreen');
           if (screen) {
@@ -113,7 +107,6 @@ const WalletOnboardingPresenter = () => {
         onClickDelete={() =>
           resetOnboarding(setScreen, setSeedPhrase, setPasscode)
         }
-        bodyText="Are you sure? To create a new wallet, a different seed phrase will be used."
       />
     ),
     [WalletOnboardingScreen.CONFIRM]: (
@@ -122,15 +115,18 @@ const WalletOnboardingPresenter = () => {
     [WalletOnboardingScreen.PASSCODE]: (
       <CreatePasscodeScreen
         checkPasscode={walletStore.checkPasscode}
-        setPasscode={setPasscodeWrapper}
+        passcode={passcode}
+        setPasscode={setPasscode}
+        setScreen={setScreen}
       />
     ),
     [WalletOnboardingScreen.CONFIRM_PASSCODE]: (
       <ConfirmPasscodeScreen
         correctPasscode={passcode}
         checkPasscode={walletStore.checkPasscode}
-        onSuccess={onCorrectPasscode}
         setScreen={setScreen}
+        canContinue={canContinue}
+        setCanContinue={setCanContinue}
       />
     ),
     [WalletOnboardingScreen.FINALIZING]: (

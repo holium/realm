@@ -597,7 +597,7 @@ export const EthStore = types
           index: Number(wallet.key),
           network: 'ethereum',
           path: wallet.path,
-          address: '0x' + wallet.address.substring(2).padStart(40, '0'),
+          address: wallet.address,
           nickname: wallet.nickname,
           data: {
             [ProtocolType.ETH_MAIN]: {
@@ -1309,7 +1309,7 @@ WalletIPC.onUpdate((payload: any) => {
       ) {
         shipStore.walletStore.setInitialized(true);
       }
-      shipStore.walletStore.ethereum.initial(wallets);
+      shipStore.walletStore.ethereum.initial(wallets.ethereum);
       shipStore.walletStore.bitcoin.initial(wallets.bitcoin);
       shipStore.walletStore.btctest.initial(wallets.btctestnet);
       break;
