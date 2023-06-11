@@ -28,13 +28,10 @@ const FinalizingScreenPresenter = ({
   const { walletStore } = useShipStore();
   const initWallet = async () => {
     if (seedPhrase && passcode) {
-      // For testing
-      return;
       await walletStore.setMnemonic(seedPhrase, passcode);
+      resetOnboarding(setScreen, setSeedPhrase, setPasscode);
       walletStore.navigate(WalletScreen.LIST);
       // wipe local storage
-      resetOnboarding(setScreen, setSeedPhrase, setPasscode);
-      // await walletStore.watchUpdates();
     }
   };
 

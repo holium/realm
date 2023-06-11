@@ -77,9 +77,13 @@ const WalletOnboardingPresenter = () => {
 
   useEffect(() => {
     if (
-      ![WalletOnboardingScreen.CANCEL, WalletOnboardingScreen.IMPORT].includes(
-        screen
-      )
+      ![
+        WalletOnboardingScreen.CANCEL,
+        WalletOnboardingScreen.IMPORT,
+        WalletOnboardingScreen.RECOVER_EXISTING,
+        WalletOnboardingScreen.DETECTED_EXISTING,
+        WalletOnboardingScreen.NO_WALLET,
+      ].includes(screen)
     ) {
       localStorage.setItem('WalletOnboardingScreen', screen);
     }
