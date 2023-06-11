@@ -12,7 +12,7 @@ import { TextInput } from '@holium/design-system/inputs';
 
 import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 
-import { VerifyPasscode } from '../../../components/VerifyPasscode';
+import { LockedScreenBody } from '../../Base/LockedScreen/LockedScreenBody';
 
 const NoResize = styled(Flex)`
   textarea {
@@ -44,7 +44,8 @@ export const RecoverExistingScreenBody = ({
   setScreen,
 }: Props) => {
   return showPasscode ? (
-    <VerifyPasscode
+    <LockedScreenBody
+      onClickForgotPasscode={() => setScreen(WalletOnboardingScreen.CANCEL)}
       checkPasscode={checkPasscode}
       onSuccess={recoverSeedPhrase}
     />

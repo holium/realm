@@ -36,7 +36,7 @@ export const ForgotPasscodeScreenBody = ({
       <Icon name="Info" size={32} opacity={0.5} />
       <Flex flexDirection="column" gap="12px" alignItems="center">
         <Text.H4>Delete wallet</Text.H4>
-        <Text.Body px="30px" opacity={0.7}>
+        <Text.Body px="30px" opacity={0.7} textAlign="center">
           If you've forgotten your passcode, you can delete your wallet and then
           import it again using your recovery phrase.
         </Text.Body>

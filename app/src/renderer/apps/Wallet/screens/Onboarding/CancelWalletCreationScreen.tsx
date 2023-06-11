@@ -24,7 +24,7 @@ const CancelWalletCreationScreenPresenter = ({
         <Icon name="Info" size={32} opacity={0.5} />
         <Flex flexDirection="column" gap="12px" alignItems="center">
           <Text.H4>Cancel setup</Text.H4>
-          <Text.Body px="30px" opacity={0.7}>
+          <Text.Body textAlign="center" px="30px" opacity={0.7}>
             Are you sure? Starting over requires a new seed phrase.
           </Text.Body>
         </Flex>

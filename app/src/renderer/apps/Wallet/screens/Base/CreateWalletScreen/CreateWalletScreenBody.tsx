@@ -22,7 +22,7 @@ export const CreateWalletScreenBody = ({
 }: Props) => (
   <Flex flex={1} flexDirection="column" gap="16px">
     <Text.H4>Create Address</Text.H4>
-    <Text.Body style={{ fontWeight: 300 }}>
+    <Text.Body opacity={0.7}>
       A new {network === 'ethereum' ? 'Ethereum' : 'Bitcoin'} address will be
       created. Give it a memorable nickname.
     </Text.Body>

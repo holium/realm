@@ -11,7 +11,7 @@ export const NoWalletFoundScreen = ({ setScreen }: Props) => (
     <Flex flex={1} flexDirection="column" gap="24px" justifyContent="center">
       <Flex flexDirection="column" gap={8} alignItems="center">
         <Text.H4 style={{ lineHeight: '1.5rem' }}>No Wallet Found</Text.H4>
-        <Text.Body px="30px" opacity={0.7}>
+        <Text.Body textAlign="center" px="30px" opacity={0.7}>
           You haven't configured your Realm wallet yet.
         </Text.Body>
       </Flex>

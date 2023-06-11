@@ -63,7 +63,7 @@ export const WalletListScreenBody = ({
             No addresses
           </Text.H3>
           <Flex justifyContent="center">
-            <Text.Body px={30} opacity={0.7}>
+            <Text.Body textAlign="center" px={30} opacity={0.7}>
               You haven't created any{' '}
               {network === 'ethereum'
                 ? 'Ethereum'

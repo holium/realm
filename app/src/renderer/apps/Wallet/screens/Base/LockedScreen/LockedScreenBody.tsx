@@ -5,7 +5,7 @@ import { PasscodeInput } from '../../../components/PasscodeInput';
 type Props = {
   onClickForgotPasscode: () => void;
   checkPasscode: (passcode: number[]) => Promise<boolean>;
-  onSuccess: () => Promise<void>;
+  onSuccess: (passcode: number[]) => Promise<void>;
 };
 
 export const LockedScreenBody = ({

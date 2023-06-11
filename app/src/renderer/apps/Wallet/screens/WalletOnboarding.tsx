@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import { useToggle } from '@holium/design-system';
-import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
+import { Flex, Spinner } from '@holium/design-system/general';
 
 import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -35,9 +35,21 @@ export const resetOnboarding = (
 
 const WalletOnboardingPresenter = () => {
   const { walletStore } = useShipStore();
+
   const initialScreen = walletStore.initialized
     ? WalletOnboardingScreen.DETECTED_EXISTING
     : WalletOnboardingScreen.NO_WALLET;
+
+  console.log('initialScreen', initialScreen);
+
+  useEffect(() => {
+    console.log('initialized uef', walletStore.initialized);
+    if (walletStore.initialized) {
+      setScreen(WalletOnboardingScreen.DETECTED_EXISTING);
+    } else {
+      setScreen(WalletOnboardingScreen.NO_WALLET);
+    }
+  }, [walletStore.initialized]);
 
   const loading = useToggle(true);
   const [screen, setScreen] = useState<WalletOnboardingScreen>(initialScreen);
@@ -64,7 +76,11 @@ const WalletOnboardingPresenter = () => {
   }, []);
 
   useEffect(() => {
-    if (screen !== WalletOnboardingScreen.CANCEL) {
+    if (
+      ![WalletOnboardingScreen.CANCEL, WalletOnboardingScreen.IMPORT].includes(
+        screen
+      )
+    ) {
       localStorage.setItem('WalletOnboardingScreen', screen);
     }
   }, [screen]);
@@ -151,7 +167,6 @@ const WalletOnboardingPresenter = () => {
       />
     ),
   };
-  const currentComponent = components[screen];
 
   if (loading.isOn) {
     return (
@@ -163,39 +178,8 @@ const WalletOnboardingPresenter = () => {
     );
   }
 
-  return (
-    <>
-      {currentComponent}
-      {![
-        WalletOnboardingScreen.NO_WALLET,
-        WalletOnboardingScreen.DETECTED_EXISTING,
-      ].includes(screen) && (
-        <Flex
-          position="absolute"
-          zIndex={999}
-          onClick={() =>
-            setScreen(
-              walletStore.initialized
-                ? WalletOnboardingScreen.DETECTED_EXISTING
-                : WalletOnboardingScreen.NO_WALLET
-            )
-          }
-        >
-          <Button.IconButton
-            onClick={() =>
-              setScreen(
-                walletStore.initialized
-                  ? WalletOnboardingScreen.DETECTED_EXISTING
-                  : WalletOnboardingScreen.NO_WALLET
-              )
-            }
-          >
-            <Icon name="ArrowLeftLine" size={1} />
-          </Button.IconButton>
-        </Flex>
-      )}
-    </>
-  );
+  const currentComponent = components[screen];
+  return currentComponent;
 };
 
 export const WalletOnboarding = observer(WalletOnboardingPresenter);
