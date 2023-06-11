@@ -67,6 +67,8 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     const type = Object.keys(data)[0];
     if (type === 'wallet') {
       this._insertWallets({ [data.wallet.key]: data.wallet });
+    } else if (type === 'transaction') {
+      this._insertTransactions([data.transaction]);
     }
     this.sendUpdate(data);
   }
