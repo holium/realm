@@ -3,12 +3,22 @@ import { observer } from 'mobx-react';
 
 import { NetworkType } from 'os/services/ship/wallet/wallet.types';
 import {
+  convertBtcAmountToUsd,
+  convertEthAmountToUsd,
+  formatBtcAmount,
+  formatEthAmount,
+  getDisplayDate,
+  shortened,
+} from 'renderer/apps/Wallet/helpers';
+import {
   BitcoinWalletType,
   EthWalletType,
   TransactionType,
   WalletStoreType,
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
+
+import { TransactionDetailScreenBody } from './TransactionDetailScreenBody';
 
 const getTransaction = (
   walletStore: WalletStoreType
@@ -57,8 +67,8 @@ const getTransaction = (
 const TransactionDetailScreenPresenter = () => {
   const { walletStore } = useShipStore();
 
-  const [_ethPrice, setEthPrice] = useState<number>();
-  const [_bitcoinPrice, setBitcoinPrice] = useState<number>();
+  const [ethPrice, setEthPrice] = useState<number>();
+  const [bitcoinPrice, setBitcoinPrice] = useState<number>();
 
   useEffect(() => {
     walletStore.ethereum.conversions.usd.then(setEthPrice);
@@ -72,38 +82,39 @@ const TransactionDetailScreenPresenter = () => {
 
   if (!transaction) return null;
 
-  // const wasSent = transaction.type === 'sent';
-  // const isEth = transaction.network === 'ethereum';
-  // const themDisplay =
-  //   transaction.theirPatp || shortened(transaction.theirAddress);
-  // const completed = new Date(
-  //   transaction.completedAt || transaction.initiatedAt || ''
-  // );
-
-  // const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
-  // const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
-
   console.log('transaction', transaction);
+  console.log('transaction.status', transaction.status);
+  console.log('transaction.amount', transaction.amount);
+
+  const wasSent = transaction.type === 'sent';
+  const isEth = transaction.network === 'ethereum';
+  const themDisplay =
+    transaction.theirPatp || shortened(transaction.theirAddress);
+  const completed = new Date(
+    transaction.completedAt || transaction.initiatedAt || ''
+  );
+
+  const ethAmount = formatEthAmount(isEth ? transaction.amount : '1');
+  const btcAmount = formatBtcAmount(!isEth ? transaction.amount : '1');
 
   return (
-    <></>
-    // <TransactionDetailScreenBody
-    //   wasSent={wasSent}
-    //   themDisplay={themDisplay}
-    //   completedAtString={getDisplayDate(completed)}
-    //   transactionHash={transaction.hash}
-    //   patp={transaction.theirPatp}
-    //   transactionNotes={transaction.notes}
-    //   transactionStatus={transaction.status}
-    //   protocol={walletStore.navState.protocol}
-    //   saveTransactionNotes={walletStore.saveTransactionNotes}
-    //   amountDisplay={isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC`}
-    //   usdAmount={
-    //     isEth
-    //       ? convertEthAmountToUsd(ethAmount, ethPrice)
-    //       : convertBtcAmountToUsd(btcAmount, bitcoinPrice)
-    //   }
-    // />
+    <TransactionDetailScreenBody
+      wasSent={wasSent}
+      themDisplay={themDisplay}
+      completedAtString={getDisplayDate(completed)}
+      transactionHash={transaction.hash}
+      patp={transaction.theirPatp}
+      transactionNotes={transaction.notes}
+      transactionStatus={transaction.status}
+      protocol={walletStore.navState.protocol}
+      saveTransactionNotes={walletStore.saveTransactionNotes}
+      amountDisplay={isEth ? `${ethAmount.eth} ETH` : `${btcAmount.btc} BTC`}
+      usdAmount={
+        isEth
+          ? convertEthAmountToUsd(ethAmount, ethPrice)
+          : convertBtcAmountToUsd(btcAmount, bitcoinPrice)
+      }
+    />
   );
 };
 

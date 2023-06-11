@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import { formatEther } from 'ethers/lib/utils';
 import {
   applySnapshot,
   cast,
@@ -19,7 +20,6 @@ import {
   SharingMode,
   WalletCreationMode,
 } from 'os/services/ship/wallet/wallet.types';
-import { gweiToEther } from 'renderer/apps/Wallet/helpers';
 import {
   SendERC20TransactionParams,
   SendEthereumTransactionParams,
@@ -490,7 +490,7 @@ const EthWallet = types
       const tx = {
         hash,
         walletIndex: self.index,
-        amount: contractType ? amount : gweiToEther(amount).toString(),
+        amount: contractType ? amount : formatEther(amount),
         network: 'ethereum',
         ethType: contractType || 'ETH',
         type: 'sent',
