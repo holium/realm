@@ -973,6 +973,17 @@ export const WalletStore = types
       self.forceActive = forceActive;
     },
     reset() {
+      self.ethereum.deleteWallets();
+      self.ourPatp = '';
+      self.passcodeHash = '';
+      self.lastInteraction = new Date();
+      self.initialized = false;
+      self.forceActive = false;
+      self.uqTx = undefined;
+      self.navHistory = cast([]);
+      this.navigate(WalletScreen.ONBOARDING);
+    },
+    resetLocal() {
       self.ourPatp = '';
       self.passcodeHash = '';
       self.lastInteraction = new Date();
@@ -988,13 +999,10 @@ export const WalletStore = types
         await this.forceDeleteShipMnemonic();
       }
       this.reset();
-      // save these on local deletion for proper recovery
-      self.ethereum.deleteWallets();
-      self.initialized = false;
     },
     deleteLocalWallet(passcode: number[]) {
       this.deleteLocalMnemonic(passcode);
-      this.reset();
+      this.resetLocal();
     },
     deleteLocalMnemonic: flow(function* (
       passcode: number[]

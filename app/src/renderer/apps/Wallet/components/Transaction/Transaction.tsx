@@ -1,3 +1,5 @@
+import { cite } from '@urbit/aura';
+
 import { Flex, Row, Spinner, Text } from '@holium/design-system/general';
 
 import { TransactionType } from 'renderer/stores/models/wallet.model';
@@ -28,8 +30,9 @@ export const Transaction = ({
 }: Props) => {
   const wasSent = transaction.type === 'sent';
   const isEth = transaction.network === 'ethereum';
-  const themDisplay =
-    transaction.theirPatp || shortened(transaction.theirAddress);
+  const themDisplay = transaction.theirPatp
+    ? cite(transaction.theirPatp)
+    : shortened(transaction.theirAddress);
   const date = new Date(
     transaction.completedAt ?? transaction.initiatedAt ?? '0'
   );
