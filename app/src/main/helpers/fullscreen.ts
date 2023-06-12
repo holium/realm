@@ -1,6 +1,77 @@
-import { BrowserWindow, ipcMain } from 'electron';
+import { BrowserWindow, ipcMain, screen } from 'electron';
 
-import { setFullScreen } from './titlebar';
+import { isArm64, isMac } from './env';
+
+export const NOTCH_HEIGHT = 32;
+
+export const useSimpleFullscreen = isArm64 && isMac;
+
+// ready-to-show is caused to be fired more than once by webviews,
+// so we need to check if it's already been expanded from 0,0.
+export const hasBeenExpanded = (window: BrowserWindow) => {
+  const { width, height } = window.getBounds();
+  return width > 0 && height > 0;
+};
+
+export const expandWindowToFullscreen = (window: BrowserWindow) => {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
+  const fullScreenBounds = {
+    x: 0,
+    y: 0 - NOTCH_HEIGHT,
+    width,
+    height: height + NOTCH_HEIGHT,
+  };
+
+  // Account for notch on arm64 mac with simple fullscreen.
+  window.setBounds(fullScreenBounds);
+
+  return fullScreenBounds;
+};
+
+export const toggleFullScreen = (
+  window: BrowserWindow,
+  forceFullscreen?: boolean,
+  forceWindowed?: boolean
+) => {
+  if (useSimpleFullscreen) {
+    const wasSimpleFullscreen = window.isSimpleFullScreen();
+    if ((wasSimpleFullscreen || forceWindowed) && !forceFullscreen) {
+      const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+      const nonFullScreenBounds = {
+        x: 0,
+        y: 0,
+        width,
+        height,
+      };
+      window.setFullScreen(false);
+      window.setSimpleFullScreen(false);
+      window.setBounds(nonFullScreenBounds);
+      window.webContents.send('set-dimensions', nonFullScreenBounds);
+      window.webContents.send('set-fullscreen', false);
+    } else {
+      window.setFullScreen(true);
+      window.setSimpleFullScreen(true);
+      const fullScreenBounds = expandWindowToFullscreen(window);
+      window.webContents.send('set-dimensions', fullScreenBounds);
+      window.webContents.send('set-fullscreen', true);
+    }
+  } else {
+    const wasFullscreen = window.isFullScreen();
+
+    if ((wasFullscreen || forceWindowed) && !forceFullscreen) {
+      window.setFullScreen(false);
+      window.setSimpleFullScreen(false);
+      window.setMenuBarVisibility(true);
+      window.webContents.send('set-fullscreen', false);
+    } else {
+      window.setFullScreen(true);
+      window.setSimpleFullScreen(false);
+      window.setMenuBarVisibility(false);
+      window.webContents.send('set-fullscreen', true);
+    }
+  }
+};
 
 const registerListeners = (
   mainWindow: BrowserWindow,
@@ -23,8 +94,8 @@ const registerListeners = (
   ipcMain.removeHandler('set-fullscreen');
   ipcMain.removeHandler('is-fullscreen');
 
-  ipcMain.handle('set-fullscreen', (_, isFullscreen) => {
-    setFullScreen(mainWindow, isFullscreen);
+  ipcMain.handle('set-fullscreen', (_, forceFullScreen) => {
+    toggleFullScreen(mainWindow, forceFullScreen, !forceFullScreen);
   });
 
   ipcMain.handle('is-fullscreen', () => {

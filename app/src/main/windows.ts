@@ -5,8 +5,12 @@ import { BrowserHelper } from './helpers/browser';
 import { CursorSettingsHelper } from './helpers/cursorSettings';
 import { DeepLinkHelper } from './helpers/deepLink';
 import { DevHelper } from './helpers/dev';
-import { isArm64, isMac } from './helpers/env';
-import { FullScreenHelper } from './helpers/fullscreen';
+import {
+  expandWindowToFullscreen,
+  FullScreenHelper,
+  hasBeenExpanded,
+  useSimpleFullscreen,
+} from './helpers/fullscreen';
 import { KeyHelper } from './helpers/key';
 import { MediaHelper } from './helpers/media';
 import { MouseEventsHelper } from './helpers/mouseEvents';
@@ -16,9 +20,6 @@ import { TitlebarHelper } from './helpers/titlebar';
 import { WebViewHelper } from './helpers/webview';
 import { MenuBuilder } from './menu';
 import { getAssetPath, getPreloadPath, resolveHtmlPath } from './util';
-
-const NOTCH_HEIGHT = 32;
-const useSimpleFullscreen = isArm64 && isMac;
 
 const getDefaultRealmWindowOptions = (
   width: number,
@@ -44,25 +45,6 @@ const getDefaultRealmWindowOptions = (
     preload: getPreloadPath(),
   },
 });
-
-// ready-to-show is caused to be fired more than once by webviews,
-// so we need to check if it's already been expanded from 0,0.
-const hasBeenExpanded = (window: BrowserWindow) => {
-  const { width, height } = window.getBounds();
-  return width > 0 && height > 0;
-};
-
-const expandWindowToFullscreen = (window: BrowserWindow) => {
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-
-  // Account for notch on arm64 mac with simple fullscreen.
-  window.setBounds({
-    x: 0,
-    y: 0 - NOTCH_HEIGHT,
-    width,
-    height: height + NOTCH_HEIGHT,
-  });
-};
 
 export const createRealmWindow = () => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -144,7 +126,6 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
     skipTaskbar: true,
     transparent: true,
     fullscreen: true,
-    simpleFullscreen: useSimpleFullscreen,
     titleBarStyle: 'hidden',
     acceptFirstMouse: true,
     roundedCorners: false,
@@ -188,8 +169,9 @@ export const createStandaloneChatWindow = () => {
   const newStandaloneChatWindow = new BrowserWindow({
     ...defaultRealmWindowOptions,
     title: 'Realm Chat',
+    // Windowed by default.
     fullscreen: false,
-    frame: false,
+    simpleFullscreen: false,
     icon: getAssetPath('standalone-chat-icon.png'),
   });
   newStandaloneChatWindow.setMenuBarVisibility(false);

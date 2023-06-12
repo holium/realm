@@ -7,7 +7,7 @@ import {
 } from 'electron';
 
 import { AppUpdater } from './AppUpdater';
-import { toggleFullScreen } from './helpers/titlebar';
+import { toggleFullScreen } from './helpers/fullscreen';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
