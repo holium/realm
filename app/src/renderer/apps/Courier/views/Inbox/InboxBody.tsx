@@ -139,7 +139,7 @@ export const InboxBody = ({
       ) : (
         <WindowedList
           data={filteredInboxes}
-          shiftScrollbar
+          shiftScrollbar={!isStandaloneChat}
           overscan={25}
           increaseViewportBy={{
             top: 400,
