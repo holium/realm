@@ -7,7 +7,7 @@ import { DESKTOP_WIDTH, MOBILE_WIDTH } from '../consts';
 export const GetRealmButton = styled(Button.Primary)`
   display: flex;
   font-size: 18px;
-  padding: 4px 6px 4px 10px;
+  padding: 6px 6px 6px 10px;
   border-radius: 999px;
   gap: 12px;
 `;

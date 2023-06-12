@@ -25,11 +25,11 @@ export const Hero = () => {
   };
 
   useEffect(() => {
-    // Autofocus input on page load.
+    // Don't autofocus input on mobile because it zooms in on the input.
     const input = document.getElementById('get-realm-email');
-    if (input) {
-      input.focus();
-    }
+    const isDesktop = window.innerWidth > 768;
+
+    if (input && isDesktop) input.focus();
   }, []);
 
   return (
@@ -65,7 +65,7 @@ export const Hero = () => {
             onChange={onChangeEmail}
             style={{
               borderRadius: 999,
-              padding: '8px 8px 8px 16px',
+              padding: '6px 6px 6px 16px',
             }}
             rightAdornment={
               <GetRealmButton type="submit">
