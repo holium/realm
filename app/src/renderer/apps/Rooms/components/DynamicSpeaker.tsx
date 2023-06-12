@@ -239,10 +239,10 @@ const SpeakerPresenter = (props: ISpeaker) => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
                 iconColor={
-                  hasVideo
+                  peer?.isForceMuted
+                    ? '#ff6240'
+                    : hasVideo
                     ? 'white'
-                    : undefined || peer?.isForceMuted
-                    ? 'red'
                     : undefined
                 }
                 name="MicOff"

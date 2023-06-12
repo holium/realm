@@ -21,6 +21,14 @@ export const DEFAULT_AUDIO_OPTIONS = {
   autoGainControl: false,
 };
 
+const DEFAULT_VIDEO_OPTIONS = {
+  width: { ideal: 1280 },
+  height: { ideal: 720 },
+  frameRate: { ideal: 30 },
+  facingMode: 'user',
+  aspectRatio: 1.333333, // 4:3
+};
+
 export class LocalPeer extends EventEmitter {
   @observable patp = '';
   @observable audioLevel = 0;
@@ -140,9 +148,10 @@ export class LocalPeer extends EventEmitter {
           audio: false,
           video: storedDeviceId
             ? {
+                ...DEFAULT_VIDEO_OPTIONS,
                 deviceId: storedDeviceId,
               }
-            : true,
+            : DEFAULT_VIDEO_OPTIONS,
         })
         .then(this.setVideoStream.bind(this))
         .catch((err: any) => {
