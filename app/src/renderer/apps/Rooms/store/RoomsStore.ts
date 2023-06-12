@@ -478,6 +478,7 @@ export class RoomsStore extends EventsEmitter {
           this.rooms.get(this.currentRid)?.present.forEach((peerId: string) => {
             if (peerId !== this.ourId) this.destroyPeer(peerId);
           });
+          this.ourPeer.disableAll();
           this.currentRid = null;
         }
         this._removeRoom(event.rid);

@@ -191,8 +191,13 @@ export class LocalPeer extends EventEmitter {
 
   @action
   isSpeakingChanged(isSpeaking: boolean) {
-    this.isSpeaking = isSpeaking;
-    this.emit('isSpeakingChanged', isSpeaking);
+    if (!this.isMuted) {
+      this.isSpeaking = isSpeaking;
+      this.emit('isSpeakingChanged', isSpeaking);
+    } else if (this.isSpeaking) {
+      this.isSpeaking = false;
+      this.emit('isSpeakingChanged', false);
+    }
   }
 
   @action
