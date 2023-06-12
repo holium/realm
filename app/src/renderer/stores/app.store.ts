@@ -171,7 +171,7 @@ function registerOnUpdateListener() {
     return;
   }
 
-  MainIPC.onDimensionsChange((_e: any, dims: any) => {
+  MainIPC.onDimensionsChange((_: any, dims: any) => {
     appState.shellStore.setDesktopDimensions(dims.width, dims.height);
   });
 

@@ -62,6 +62,10 @@ export const toggleFullScreen = (
       window.webContents.send('set-dimensions', fullScreenBounds);
       window.webContents.send('set-fullscreen', true);
     }
+
+    // Use our custom titlebar.
+    window.setMenuBarVisibility(false);
+    window.webContents.send('set-titlebar-visible', true);
   } else {
     const wasFullscreen = window.isFullScreen();
 
@@ -76,6 +80,10 @@ export const toggleFullScreen = (
       window.setMenuBarVisibility(false);
       window.webContents.send('set-fullscreen', true);
     }
+
+    // Use the native titlebar.
+    window.setMenuBarVisibility(true);
+    window.webContents.send('set-titlebar-visible', false);
   }
 };
 

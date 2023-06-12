@@ -344,7 +344,14 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       resizeBottomRightX.set(x + width);
       resizeBottomRightY.set(y + height);
     }, 100),
-    [appId, motionX, motionY, motionWidth, motionHeight]
+    [
+      appId,
+      motionX,
+      motionY,
+      motionWidth,
+      motionHeight,
+      shellStore.desktopDimensions,
+    ]
   );
 
   useEffect(() => {

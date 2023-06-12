@@ -1,5 +1,4 @@
 import { BrowserWindow, screen, shell } from 'electron';
-import isDev from 'electron-is-dev';
 
 import { BrowserHelper } from './helpers/browser';
 import { CursorSettingsHelper } from './helpers/cursorSettings';
@@ -9,6 +8,7 @@ import {
   expandWindowToFullscreen,
   FullScreenHelper,
   hasBeenExpanded,
+  toggleFullScreen,
   useSimpleFullscreen,
 } from './helpers/fullscreen';
 import { KeyHelper } from './helpers/key';
@@ -75,26 +75,14 @@ export const createRealmWindow = () => {
     if (process.env.START_MINIMIZED) {
       newRealmWindow.minimize();
     } else {
-      isDev ? newRealmWindow.showInactive() : newRealmWindow.show();
+      newRealmWindow.show();
     }
 
-    const initialDimensions = newRealmWindow.getBounds();
-    let hasTitlebar = false;
-    let isFullscreen = newRealmWindow.isFullScreen();
-
-    if (useSimpleFullscreen) {
-      if (!hasBeenExpanded(newRealmWindow)) {
-        expandWindowToFullscreen(newRealmWindow);
-      }
-
-      initialDimensions.height = initialDimensions.height - 42;
-      hasTitlebar = true;
-      isFullscreen = newRealmWindow.isSimpleFullScreen();
+    if (!hasBeenExpanded(newRealmWindow)) {
+      expandWindowToFullscreen(newRealmWindow);
     }
 
-    newRealmWindow.webContents.send('set-titlebar-visible', hasTitlebar);
-    newRealmWindow.webContents.send('set-dimensions', initialDimensions);
-    newRealmWindow.webContents.send('set-fullscreen', isFullscreen);
+    toggleFullScreen(newRealmWindow, true);
   });
 
   const menuBuilder = new MenuBuilder(newRealmWindow);

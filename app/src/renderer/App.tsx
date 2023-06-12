@@ -21,13 +21,13 @@ import 'photoswipe/dist/photoswipe.css';
 const AppPresenter = () => {
   const { theme, shellStore, booted } = useAppState();
 
-  const [isStandaloneChat, setStandaloneChat] = useState(
+  const [isStandaloneChat, setIsStandaloneChat] = useState(
     shellStore.isStandaloneChat
   );
   const [isFullscreen, setIsFullscreen] = useState(shellStore.isFullscreen);
 
   useEffect(() => {
-    window.electron.app.isStandaloneChat().then(setStandaloneChat);
+    window.electron.app.isStandaloneChat().then(setIsStandaloneChat);
     window.electron.app.isFullscreen().then(setIsFullscreen);
   }, []);
 
