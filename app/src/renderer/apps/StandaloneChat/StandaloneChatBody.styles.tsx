@@ -18,5 +18,5 @@ export const StandaloneChatContainer = styled(Flex)`
   width: 100%;
   height: calc(100% - ${TITLEBAR_HEIGHT}px);
   margin-top: ${TITLEBAR_HEIGHT}px;
-  background: var(--rlm-dock-color);
+  border-top: 1px solid var(--rlm-base-color);
 `;

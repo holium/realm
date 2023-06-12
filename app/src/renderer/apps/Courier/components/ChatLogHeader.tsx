@@ -21,8 +21,8 @@ const ChatLogHeaderContainer = styled(Flex)<{ isStandaloneChat: boolean }>`
     `
     height: 58px;
     padding: 12px;
-    background: rgba(var(--rlm-base-rgba), 0.5);
-    border-bottom: 1px solid var(--rlm-dock-color);
+    background: var(--rlm-window-color);
+    border-bottom: 1px solid var(--rlm-base-color);
   `}
 `;
 

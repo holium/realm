@@ -78,8 +78,8 @@ export const StandaloneChatBodyPresenter = () => {
         flexDirection="column"
         minWidth={320}
         width={sidebarWidth}
-        background="rgba(var(--rlm-base-rgba), 0.5)"
-        borderRight="1px solid var(--rlm-dock-color)"
+        background="var(--rlm-window-color)"
+        borderRight="1px solid var(--rlm-base-color)"
       >
         <Flex flex={1} position="relative">
           <Inbox isStandaloneChat />
@@ -92,7 +92,13 @@ export const StandaloneChatBodyPresenter = () => {
           }}
         />
       </Flex>
-      <Flex flex={1} height="100%" position="relative" minWidth={360}>
+      <Flex
+        flex={1}
+        height="100%"
+        position="relative"
+        minWidth={360}
+        background="var(--rlm-dock-color)"
+      >
         {chatStore.subroute === 'chat' && <ChatLog isStandaloneChat />}
         {chatStore.subroute === 'chat-info' && <ChatInfo isStandaloneChat />}
         {chatStore.subroute === 'new' && <CreateNewChat isStandaloneChat />}

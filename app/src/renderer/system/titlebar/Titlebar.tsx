@@ -72,7 +72,7 @@ const StandAloneChatTitlebarContainer = styled.div`
   width: 100%;
   height: ${TITLEBAR_HEIGHT}px;
   padding: 1px 12px 0 12px;
-  background: var(--rlm-dock-color);
+  background: var(--rlm-window-color);
   z-index: 100;
   -webkit-user-select: none;
   -webkit-app-region: drag;

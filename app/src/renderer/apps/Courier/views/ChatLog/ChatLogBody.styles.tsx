@@ -19,8 +19,8 @@ export const ChatInputContainer = styled(Box)<{ isStandaloneChat: boolean }>`
     isStandaloneChat &&
     `
       padding: 11px 12px 12px 12px;
-      background: rgba(var(--rlm-base-rgba), 0.5);
-      border-top: 1px solid var(--rlm-dock-color);
+      background: var(--rlm-window-color);
+      border-top: 1px solid var(--rlm-base-color);
   `}
 `;
 
