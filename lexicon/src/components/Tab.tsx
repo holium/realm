@@ -22,7 +22,7 @@ export const Tabs = ({ value, tabData, onChange }: TabsProps) => {
             className="tab-element"
             key={index}
             fontSize={1}
-            fontWeight={item.value === value ? 600 : 400}
+            fontWeight={item.value === value ? 500 : 400}
             style={{
               padding: '2px 0px',
               borderRadius: 0,

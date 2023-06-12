@@ -1,4 +1,17 @@
-import { Button, Flex, Icon, TextInput } from '@holium/design-system';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import {
+  Box,
+  Button,
+  Card,
+  Flex,
+  Icon,
+  Text,
+  TextInput,
+} from '@holium/design-system';
+
+import { Store, useStore } from '../store';
 
 interface Props {
   addModalOpen: boolean;
@@ -12,8 +25,52 @@ export const SearchBar = ({
   backButton,
   onBack,
 }: Props) => {
+  const space = useStore((store: Store) => store.space);
+  const wordList = useStore((store: Store) => store.wordList);
+  const navigate = useNavigate();
+
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [matchedWords, setMatchedWords] = useState<any>([]);
+  const [displaySuggestions, setDisplaySuggestions] = useState<boolean>(false);
+
+  const handleSearchQueryChnage = (
+    evt: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newMatchedWords: any = wordList.filter((item: any) => {
+      return item.word.toLowerCase().includes(evt.target.value.toLowerCase());
+    });
+    if (!evt.target.value) {
+      setDisplaySuggestions(false);
+    } else {
+      setDisplaySuggestions(true);
+    }
+    setMatchedWords(newMatchedWords);
+    setSearchQuery(evt.target.value);
+  };
+
+  const onWordClick = (selectedWord: any) => {
+    const { word, id, createdAt, votes, webSearch } = selectedWord;
+    if (webSearch) {
+      navigate('/apps/lexicon/dict/' + word);
+    } else {
+      navigate('/apps/lexicon' + space + '/' + word, {
+        state: { id, word, createdAt, votes, webSearch },
+      });
+    }
+    resetSearch();
+  };
+  const resetSearch = () => {
+    setSearchQuery('');
+    setDisplaySuggestions(false);
+    setMatchedWords([]);
+  };
   return (
-    <Flex flex={1} gap={10} justifyContent={'center'} marginBottom={12}>
+    <Flex
+      flex={1}
+      gap={10}
+      justifyContent={'center'}
+      style={{ position: 'relative' }}
+    >
       {backButton && (
         <Button.IconButton onClick={() => onBack()}>
           <Icon name="ArrowLeftLine" size={22} />
@@ -27,15 +84,59 @@ export const SearchBar = ({
         style={{
           paddingLeft: 9,
         }}
-        value={''}
+        value={searchQuery}
         placeholder="Search words"
         error={false}
-        onChange={() => null}
+        onChange={handleSearchQueryChnage}
       />
+      {displaySuggestions && (
+        <Card
+          padding={'5px'}
+          elevation={4}
+          width={'100%'}
+          style={{ position: 'absolute', left: 0, top: 40, zIndex: 1 }}
+        >
+          <Flex flexDirection={'column'}>
+            {matchedWords.map((item: any, index: number) => {
+              return (
+                <Box
+                  key={'search-suggestion-' + index}
+                  className="highlight-hover"
+                  style={{
+                    padding: '6px 8px',
+                    borderRadius: '6px',
+                  }}
+                  tabIndex={0}
+                  onClick={() => onWordClick(item)}
+                >
+                  <Text.Body fontWeight={500}> {item.word}</Text.Body>
+                </Box>
+              );
+            })}
+
+            <Box
+              key={'search-suggestion-search-web'}
+              className="highlight-hover"
+              style={{
+                padding: '6px 8px',
+                borderRadius: '6px',
+              }}
+              tabIndex={0}
+              onClick={() =>
+                onWordClick({ word: searchQuery, webSearch: true })
+              }
+            >
+              <Text.Body fontWeight={500} opacity={0.7}>
+                search web for: {searchQuery}?
+              </Text.Body>
+            </Box>
+          </Flex>
+        </Card>
+      )}
       {!backButton && (
         <Button.TextButton
           fontSize={1}
-          fontWeight={600}
+          fontWeight={500}
           onClick={() => onAddWord()}
           disabled={addModalOpen}
         >

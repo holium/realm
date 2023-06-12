@@ -65,9 +65,9 @@ export const AddWord = ({ open, onClose }: Props) => {
     <Card
       p={3}
       elevation={4}
-      minWidth={400}
-      maxWidth={400}
+      width={'100%'}
       minHeight={400}
+      margin="20px"
       marginBottom={12}
     >
       <Input
@@ -77,9 +77,9 @@ export const AddWord = ({ open, onClose }: Props) => {
           fontWeight: 600,
           marginBottom: 16,
           padding: 0,
+          backgroundColor: 'transparent',
         }}
         id={'add-word-input'}
-        tabIndex={1}
         spellCheck={false}
         autoComplete="off"
         autoCorrect="off"
@@ -135,15 +135,15 @@ export const AddWord = ({ open, onClose }: Props) => {
       <Flex gap={10} justifyContent={'flex-end'} marginTop={'auto'}>
         <Button.Transparent
           fontSize={1}
-          fontWeight={600}
-          opacity={0.5}
+          fontWeight={500}
+          opacity={0.7}
           onClick={() => onClose()}
         >
           Cancel
         </Button.Transparent>
         <Button.TextButton
           fontSize={1}
-          fontWeight={600}
+          fontWeight={500}
           alignSelf={'flex-end'}
           onClick={handleSubmit}
           disabled={!definition || !word}

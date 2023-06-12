@@ -1,6 +1,7 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Card, Flex, Text } from '@holium/design-system';
+import { Card, Flex, Spinner, Text } from '@holium/design-system';
 
 import { Vote } from '../components';
 import { Store, useStore } from '../store';
@@ -9,13 +10,19 @@ import { displayDate } from '../utils';
 export const Home = () => {
   const navigate = useNavigate();
 
-  //  const currentPage = store((state) => state.currentPage); move to this to only rerender on specifc element chnage
   const voteMap = useStore((state: Store) => state.voteMap);
   const wordList = useStore((state: Store) => state.wordList);
+  const loadingMain = useStore((state: Store) => state.loadingMain);
 
   return (
-    <Card p={'10px'} elevation={4} maxWidth={400} minWidth={400}>
+    <Card p={'10px'} elevation={4} width="100%" margin="12px 20px">
       <Flex flexDirection={'column'}>
+        {loadingMain && <Spinner size={1} />}
+        {!loadingMain && wordList.length === 0 && (
+          <Text.H6 opacity=".7" fontWeight={500}>
+            no words in this space, add one to start
+          </Text.H6>
+        )}
         {wordList.map((item: any, index: number) => {
           const { id, word, createdAt } = item;
           const votes = voteMap.get(id);
@@ -42,8 +49,28 @@ interface WordItemProps {
   navigate: any;
 }
 const WordItem = ({ id, word, createdAt, votes, navigate }: WordItemProps) => {
-  const { space } = useStore();
+  const space = useStore((store: Store) => store.space);
+  const definitionMap = useStore((store: Store) => store.definitionMap);
+  const definitionVoteMap = useStore((store: Store) => store.definitionVoteMap);
 
+  const [mostVotedDefinition, setMostVotedDefinition] = useState<string>('');
+  useEffect(() => {
+    //get the most upvoted definition
+    const relatedDefinitions = definitionMap.get(id);
+    if (relatedDefinitions?.length > 0) {
+      let newMostVotedDefinition = relatedDefinitions[0].definition; //initilise as the first definition
+      let mostVotedCount = 0; //intilise as the initial most voted count, this gets reset for the first element any
+      relatedDefinitions?.forEach((item: any) => {
+        const upVoteCount = definitionVoteMap.get(item.id)?.upVotes ?? 0;
+        if (upVoteCount > mostVotedCount) {
+          //we have a new top voted definition
+          mostVotedCount = upVoteCount;
+          newMostVotedDefinition = item.definition;
+        }
+      });
+      setMostVotedDefinition(newMostVotedDefinition);
+    }
+  }, [definitionMap, definitionVoteMap]);
   return (
     <Flex
       flexDirection={'column'}
@@ -60,11 +87,16 @@ const WordItem = ({ id, word, createdAt, votes, navigate }: WordItemProps) => {
     >
       <Flex justifyContent={'space-between'} alignItems={'flex-end'}>
         <Text.H6 fontWeight={600}>{word}</Text.H6>
-        <Text.Body opacity={0.5}> ~lodlev-migdev</Text.Body>
+        <Text.Body opacity={0.5} fontWeight={500}>
+          ~lodlev-migdev
+        </Text.Body>
       </Flex>
+      <Text.Body opacity={0.7} fontWeight={500}>
+        {mostVotedDefinition}
+      </Text.Body>
       <Flex justifyContent={'space-between'} alignItems={'flex-end'}>
         <Vote id={id} votes={votes} />
-        <Text.Body opacity={0.5} style={{ marginBottom: 3 }}>
+        <Text.Body opacity={0.5} fontWeight={500} style={{ marginBottom: 3 }}>
           {displayDate(createdAt)}
         </Text.Body>
       </Flex>
