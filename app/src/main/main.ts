@@ -63,23 +63,24 @@ export const bootRealm = () => {
   const realmImage = nativeImage.createFromPath(getAssetPath('icon.png'));
   if (isMac) {
     app.dock.setIcon(realmImage);
+    // Update dock menu to include 'Switch to Chat' menu item.
+    const defaultMenuItems =
+      app.dock
+        .getMenu()
+        ?.items.filter(
+          (item) =>
+            item.label !== 'Switch to Realm' && item.label !== 'Switch to Chat'
+        ) ?? [];
+    const newMenuItem = new MenuItem({
+      label: 'Switch to Chat',
+      click: bootStandaloneChat,
+    });
+    app.dock.setMenu(
+      Menu.buildFromTemplate([...defaultMenuItems, newMenuItem])
+    );
   } else {
     realmWindow.setIcon(realmImage);
   }
-
-  // Update dock menu to include 'Switch to Chat' menu item.
-  const defaultMenuItems =
-    app.dock
-      .getMenu()
-      ?.items.filter(
-        (item) =>
-          item.label !== 'Switch to Realm' && item.label !== 'Switch to Chat'
-      ) ?? [];
-  const newMenuItem = new MenuItem({
-    label: 'Switch to Chat',
-    click: bootStandaloneChat,
-  });
-  app.dock.setMenu(Menu.buildFromTemplate([...defaultMenuItems, newMenuItem]));
 
   realmWindow.on('close', () => {
     realmWindow = null;
@@ -119,21 +120,26 @@ export const bootStandaloneChat = () => {
   const standaloneImage = nativeImage.createFromPath(
     getAssetPath('standalone-chat-icon.png')
   );
-  app.dock.setIcon(standaloneImage);
-
-  // Update dock menu to include 'Switch to Realm' menu item.
-  const defaultMenuItems =
-    app.dock
-      .getMenu()
-      ?.items.filter(
-        (item) =>
-          item.label !== 'Switch to Realm' && item.label !== 'Switch to Chat'
-      ) ?? [];
-  const newMenuItem = new MenuItem({
-    label: 'Switch to Realm',
-    click: bootRealm,
-  });
-  app.dock.setMenu(Menu.buildFromTemplate([...defaultMenuItems, newMenuItem]));
+  if (isMac) {
+    app.dock.setIcon(standaloneImage);
+    // Update dock menu to include 'Switch to Realm' menu item.
+    const defaultMenuItems =
+      app.dock
+        .getMenu()
+        ?.items.filter(
+          (item) =>
+            item.label !== 'Switch to Realm' && item.label !== 'Switch to Chat'
+        ) ?? [];
+    const newMenuItem = new MenuItem({
+      label: 'Switch to Realm',
+      click: bootRealm,
+    });
+    app.dock.setMenu(
+      Menu.buildFromTemplate([...defaultMenuItems, newMenuItem])
+    );
+  } else {
+    standaloneChatWindow.setIcon(standaloneImage);
+  }
 
   standaloneChatWindow.on('close', () => {
     standaloneChatWindow = null;
