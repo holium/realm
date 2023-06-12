@@ -2,7 +2,13 @@ import { BrowserWindow, ipcMain, screen } from 'electron';
 
 import { isArm64, isMac } from './env';
 
-export const NOTCH_HEIGHT = 32;
+// Get the menu bar of new macs with notch.
+const getMenubarHeight = () => {
+  return (
+    screen.getPrimaryDisplay().bounds.height -
+    screen.getPrimaryDisplay().workAreaSize.height
+  );
+};
 
 export const useSimpleFullscreen = isArm64 && isMac;
 
@@ -18,9 +24,9 @@ export const expandWindowToFullscreen = (window: BrowserWindow) => {
 
   const fullScreenBounds = {
     x: 0,
-    y: 0 - NOTCH_HEIGHT,
+    y: 0 - getMenubarHeight(),
     width,
-    height: height + NOTCH_HEIGHT,
+    height: height + getMenubarHeight(),
   };
 
   // Account for notch on arm64 mac with simple fullscreen.

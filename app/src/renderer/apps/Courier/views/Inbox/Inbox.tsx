@@ -37,7 +37,6 @@ export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
         setSubroute('new');
       }}
       onClickStandaloneChat={() => {
-        shellStore.setFullScreen(!isStandaloneChat);
         shellStore.setStandaloneChat(!isStandaloneChat);
       }}
     />

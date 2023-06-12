@@ -79,11 +79,11 @@ const AppPresenter = () => {
     <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
       <AppStateProvider value={appState}>
         <GlobalStyle blur={true} realmTheme={theme} />
+        {background}
         <SelectionProvider>
           <ContextMenuProvider>
             <ErrorBoundary>
               {titlebar}
-              {background}
               {content}
               {contextMenu}
               <div id="portal-root" />
