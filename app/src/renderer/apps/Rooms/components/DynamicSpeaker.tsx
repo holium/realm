@@ -62,10 +62,10 @@ const SpeakerPresenter = (props: ISpeaker) => {
     if (!peer || !peer?.hasVideo) return;
 
     if (!videoRef.current.srcObject) {
-      videoRef.current.srcObject = peer.stream;
+      videoRef.current.srcObject = peer.videoStream;
       videoRef.current.style.display = 'inline-block';
       videoRef.current.playsInline = true;
-      videoRef.current.muted = true;
+      // videoRef.current.muted = true;
     }
   }, [peer?.hasVideo, videoRef.current]);
 
@@ -100,6 +100,19 @@ const SpeakerPresenter = (props: ISpeaker) => {
             evt.stopPropagation();
           },
         },
+        {
+          id: `room-speaker-${person}-mute`,
+          label: peer?.isForceMuted ? 'Unmute' : 'Mute',
+          // disabled: peer?.status === PeerConnectionState.,
+          onClick: (evt: any) => {
+            if (peer?.isForceMuted) {
+              peer.forceUnmute();
+            } else {
+              peer.forceMute();
+            }
+            evt.stopPropagation();
+          },
+        },
         // only the creator can kick people
         room.creator === ourId && {
           style: { color: '#FD4E4E' },
@@ -112,7 +125,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
           },
         },
       ].filter(Boolean) as ContextMenuOption[],
-    [peer?.status, person, room.rid, type]
+    [peer?.status, peer?.isForceMuted, person, room.rid, type]
   );
 
   useEffect(() => {
@@ -124,6 +137,8 @@ const SpeakerPresenter = (props: ISpeaker) => {
   const hasVideo = (peer as PeerClass)?.hasVideo;
   const isSpeaking =
     (peer as PeerClass)?.isSpeaking && !(peer as PeerClass)?.isMuted;
+
+  const showMuteIcon = peer?.isMuted || peer?.isForceMuted;
 
   return (
     <SpeakerWrapper
@@ -210,27 +225,33 @@ const SpeakerPresenter = (props: ISpeaker) => {
           style={{ pointerEvents: 'none' }}
         >
           <Flex height={26} mt="1px">
-            {!peer?.isMuted && <AudioWave speaking={isSpeaking} />}
+            {!showMuteIcon && <AudioWave speaking={isSpeaking} />}
           </Flex>
 
           <Flex
             position="absolute"
             style={{ height: 18, pointerEvents: 'none' }}
           >
-            {peer?.isMuted && (
+            {showMuteIcon && (
               <Icon
                 initial={{ opacity: 0 }}
                 animate={{ opacity: hasVideo ? 1.0 : 0.7 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                iconColor={hasVideo ? 'white' : undefined}
+                iconColor={
+                  hasVideo
+                    ? 'white'
+                    : undefined || peer?.isForceMuted
+                    ? 'red'
+                    : undefined
+                }
                 name="MicOff"
                 size={18}
                 opacity={0.5}
               />
             )}
           </Flex>
-          {!peer?.isMuted && !isSpeaking && (
+          {!showMuteIcon && !isSpeaking && (
             <Flex
               className="speaker-sublabel"
               initial={{ opacity: 1 }}

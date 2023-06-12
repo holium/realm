@@ -115,9 +115,6 @@ const SpeakerGridStyle = styled.div<SpeakerGridStyleProps>`
     background-color: rgba(var(--rlm-input-rgba), 0.1);
   }
 
-  /* grid-auto-rows: 200px;
-  grid-auto-columns: 1fr;
-  grid-template-columns: 1fr 1fr; */
   .active-speaker {
     grid-area: 1 / 1 / 2 / 3;
     width: 100%;
@@ -125,6 +122,7 @@ const SpeakerGridStyle = styled.div<SpeakerGridStyleProps>`
     transition: width 0.5s ease-in-out;
     overflow: visible;
   }
+
   ${({ peers, size }: SpeakerGridStyleProps) => css`
     grid-template-columns: ${size === 'tray' ? '1fr 1fr' : '4fr 1fr'};
     grid-template-rows: ${size === 'tray' ? '240px' : '186px'};
@@ -138,27 +136,7 @@ const SpeakerGridStyle = styled.div<SpeakerGridStyleProps>`
       margin-right: -${SCROLLBAR_WIDTH - 1}px;
       grid-auto-rows: 182px;
       grid-template-rows: 240px;
-    `}/* ${peers.length === 4 &&
-    css`
-      overflow-y: scroll;
-      width: calc(100% + ${SCROLLBAR_WIDTH}px);
-      max-height: 410px;
-      margin-right: -${SCROLLBAR_WIDTH - 1}px;
-    `} */
-
-   /* ${peers.length > 6
-      ? css`
-          overflow-y: scroll;
-          max-height: 628px;
-          width: calc(100% + ${SCROLLBAR_WIDTH}px);
-          margin-right: -${SCROLLBAR_WIDTH - 1}px;
-        `
-      : css`
-          width: 100%;
-          overflow: visible;
-          max-height: 100%;
-          margin-right: 0px;
-        `} */
+    `}
   `};
 
   & {
@@ -171,48 +149,4 @@ const SpeakerGridStyle = styled.div<SpeakerGridStyleProps>`
         margin-right: -${SCROLLBAR_WIDTH - 1}px;
       `}
   }
-  /* & {
-  } */
-  /* & {
-    ${({ size, activeSpeaker, peers }: SpeakerGridStyleProps) => {
-    return activeSpeaker
-      ? css`
-          grid-template-columns: ${size === 'tray' ? '1fr 1fr' : '4fr 1fr'};
-          grid-template-rows: ${size === 'tray' ? '240px' : '186px'};
-          grid-auto-rows: 156px;
-
-          .active-speaker {
-            grid-area: 1 / 1 / 2 / 3;
-            width: 100%;
-            height: 100%;
-            transition: width 0.5s ease-in-out;
-            overflow: visible;
-          }
-          ${peers.length > 4 &&
-          css`
-            overflow-y: scroll;
-            width: calc(100% + ${SCROLLBAR_WIDTH}px);
-            max-height: 628px;
-            margin-right: -${SCROLLBAR_WIDTH - 1}px;
-            grid-auto-rows: 182px;
-            grid-template-rows: 240px;
-          `}
-
-          ${peers.length === 4 &&
-          css`
-            overflow-y: scroll;
-            width: calc(100% + ${SCROLLBAR_WIDTH}px);
-            max-height: 410px;
-            margin-right: -${SCROLLBAR_WIDTH - 1}px;
-          `}
-        `
-      : css`
-          .speaker {
-            overflow: visible;
-            height: 100%;
-            transition: width 0.5s ease-in-out;
-          }
-        `;
-  }}
-  } */
 `;

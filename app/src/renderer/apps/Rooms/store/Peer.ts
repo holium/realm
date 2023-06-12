@@ -18,6 +18,7 @@ export class PeerClass extends EventsEmitter {
   @observable websocket: WebSocket;
   @observable hasVideo = false;
   @observable isMuted = false;
+  @observable isForceMuted = false;
   @observable isSpeaking = false;
   @observable isAudioAttached = false;
   @observable status = 'disconnected';
@@ -58,6 +59,22 @@ export class PeerClass extends EventsEmitter {
     this.peer = this.createPeer(peerId, initiator, stream);
     this.onDataChannel = listeners.onDataChannel;
     this.onLeftRoom = listeners.onLeftRoom;
+  }
+
+  @action
+  forceMute() {
+    this.isForceMuted = true;
+    this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
+      track.enabled = false;
+    });
+  }
+
+  @action
+  forceUnmute() {
+    this.isForceMuted = false;
+    this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
+      track.enabled = true;
+    });
   }
 
   @action
@@ -167,13 +184,13 @@ export class PeerClass extends EventsEmitter {
         `peer-video-${this.peerId}`
       ) as HTMLVideoElement;
 
-      track.onmute = () => {
-        // triggered when video is stopped by peer
-        track.stop();
-        if (!video) return;
-        video.style.display = 'none';
-        this.hasVideoChanged(false);
-      };
+      // track.onmute = () => {
+      //   // triggered when video is stopped by peer
+      //   track.stop();
+      //   if (!video) return;
+      //   video.style.display = 'none';
+      //   this.hasVideoChanged(false);
+      // };
 
       if (video) {
         console.log('video stream id', stream.id);
