@@ -103,7 +103,7 @@ const InboxBodyPresenter = ({
             size={26}
             onClick={onClickStandaloneChat}
           >
-            <Icon name="Link" size={24} opacity={0.5} />
+            <Icon name="Window" size={24} opacity={0.5} />
           </Button.IconButton>
           <Button.IconButton
             className="realm-cursor-hover"
