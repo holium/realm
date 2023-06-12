@@ -27,7 +27,7 @@ export class PeerClass extends EventsEmitter {
   @observable videoStream: MediaStream | null = null;
   @observable videoTracks: Map<string, any> = new Map();
   @observable stream: MediaStream | null = null;
-  @observable ourStream: MediaStream;
+  @observable ourStreams: MediaStream[];
   @observable reconnectAttempts = 0;
 
   @observable onDataChannel: OnDataChannel = async () => {};
@@ -38,7 +38,7 @@ export class PeerClass extends EventsEmitter {
     ourId: string,
     peerId: string,
     initiator: boolean,
-    stream: MediaStream,
+    stream: MediaStream[],
     websocket: WebSocket,
     listeners: {
       onDataChannel: OnDataChannel;
@@ -53,7 +53,7 @@ export class PeerClass extends EventsEmitter {
     this.rid = rid;
     this.websocket = websocket;
     this.peerId = peerId;
-    this.ourStream = stream;
+    this.ourStreams = stream;
     this.ourId = ourId;
     this.peer = this.createPeer(peerId, initiator, stream);
     this.onDataChannel = listeners.onDataChannel;
@@ -82,9 +82,10 @@ export class PeerClass extends EventsEmitter {
   }
 
   setNewStream(stream: MediaStream) {
-    this.peer.removeStream(this.ourStream);
+    // this.peer.removeStream(this.ourStreams);
     this.peer.addStream(stream);
-    this.ourStream = stream;
+    this.ourStreams.push(stream);
+    // this.ourStreams = stream;
   }
 
   @action
@@ -101,13 +102,13 @@ export class PeerClass extends EventsEmitter {
   }
 
   @action
-  createPeer(peerId: string, initiator: boolean, stream: MediaStream) {
+  createPeer(peerId: string, initiator: boolean, streams: MediaStream[]) {
     this.status = 'connecting';
     const peer = new Peer({
       initiator: initiator,
       trickle: true,
       channelName: peerId,
-      stream,
+      streams,
       config: {
         iceServers: [
           {
@@ -242,7 +243,7 @@ export class PeerClass extends EventsEmitter {
         `Attempting to reconnect (attempt ${this.reconnectAttempts + 1})`
       );
       this.reconnectAttempts++;
-      this.retry(this.ourStream);
+      this.retry(this.ourStreams);
     } else {
       console.log('Maximum reconnect attempts reached');
     }
@@ -359,12 +360,12 @@ export class PeerClass extends EventsEmitter {
   }
 
   @action
-  retry(ourStream?: MediaStream) {
+  retry(ourStreams?: MediaStream[]) {
     this.peer.destroy();
     this.peer = this.createPeer(
       this.peerId,
       false,
-      ourStream || this.ourStream
+      ourStreams || this.ourStreams
     );
   }
 

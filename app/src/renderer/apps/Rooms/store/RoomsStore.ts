@@ -269,7 +269,10 @@ export class RoomsStore extends EventsEmitter {
   async toggleVideo(enableVideo: boolean) {
     if (!enableVideo) {
       this.peers.forEach((peer) => {
-        if (this.ourPeer.videoStream) {
+        if (
+          this.ourPeer.videoStream &&
+          peer.peer.streams.includes(this.ourPeer.videoStream)
+        ) {
           peer.peer.removeStream(this.ourPeer.videoStream);
         }
       });
@@ -664,12 +667,16 @@ export class RoomsStore extends EventsEmitter {
       return;
     }
     console.log('creating peer', peerId);
+    const streams = [this.ourPeer.audioStream];
+    if (this.ourPeer.videoStream) {
+      streams.push(this.ourPeer.videoStream);
+    }
     const peer = new PeerClass(
       this.currentRid,
       this.ourId,
       peerId,
       isInitiator(this.ourId, peerId),
-      this.ourPeer.audioStream,
+      streams,
       this.websocket,
       {
         onDataChannel: this.onDataChannel.bind(this),
