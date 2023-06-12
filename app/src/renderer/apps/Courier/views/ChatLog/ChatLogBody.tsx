@@ -145,6 +145,7 @@ const ChatLogBodyPresenter = ({
               topOfListPadding={topPadding}
               endOfListPadding={endPadding}
               ourColor={ourColor}
+              isStandaloneChat={isStandaloneChat}
             />
           </ChatLogListContainer>
         )}

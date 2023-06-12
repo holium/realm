@@ -17,6 +17,7 @@ type Props = {
   listRef: RefObject<WindowedListRef>;
   messages: ChatMessageType[];
   ourColor: string;
+  isStandaloneChat: boolean;
   endOfListPadding?: number;
   topOfListPadding?: number;
 };
@@ -27,6 +28,7 @@ export const ChatLogList = ({
   ourColor,
   endOfListPadding,
   topOfListPadding,
+  isStandaloneChat,
 }: Props) => {
   const [prevHeight, setPrevHeight] = useState<number>(0);
 
@@ -125,7 +127,7 @@ export const ChatLogList = ({
           },
         }}
         chatMode
-        shiftScrollbar
+        shiftScrollbar={!isStandaloneChat}
       />
     </Gallery>
   );
