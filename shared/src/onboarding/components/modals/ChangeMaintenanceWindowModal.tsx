@@ -13,7 +13,7 @@ import { SubmitButton } from '../SubmitButton';
 
 type Props = {
   isOpen: boolean;
-  initialSelected?: string;
+  initialSelected: string;
   style?: CSSProperties;
   onDismiss: () => void;
   onSubmit: (maintenanceWindow: string) => Promise<boolean>;
@@ -21,7 +21,7 @@ type Props = {
 
 export const ChangeMaintenanceWindowModal = ({
   isOpen,
-  initialSelected = '0',
+  initialSelected,
   style,
   onDismiss,
   onSubmit,

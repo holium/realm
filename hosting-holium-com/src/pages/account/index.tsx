@@ -202,7 +202,7 @@ const HostingPresenter = () => {
       />
       <ChangeMaintenanceWindowModal
         isOpen={changeMaintenanceWindowModal.isOn}
-        initialSelected={selectedShip?.maintenance_window.toString()}
+        initialSelected={(selectedShip?.maintenance_window ?? 0).toString()}
         onDismiss={changeMaintenanceWindowModal.toggleOff}
         onSubmit={onSubmitNewMaintenanceWindow}
       />
