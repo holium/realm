@@ -24,6 +24,12 @@ export interface Store {
   voteMap: any;
   setVoteMap: (voteMap: any) => void;
 
+  definitionVoteMap: any;
+  setDefinitionVoteMap: (definitionVoteMap: any) => void;
+
+  sentenceVoteMap: any;
+  setSentenceVoteMap: (sentenceVoteMap: any) => void;
+
   definitionRows: any;
   setDefinitionRows: (definitionRows: any) => void;
 
@@ -43,8 +49,14 @@ export interface Store {
   wordMap: any;
   setWordMap: (wordMap: any) => void;
 
+  mostVotedDefinitionMap: any;
+  setMostVotedDefinitionMap: (mostVotedDefinitionMap: any) => void;
+
   wordList: any;
   setWordList: (wordList: any) => void;
+
+  loadingMain: boolean;
+  setLoadingMain: (loadingMain: boolean) => void;
 }
 
 export const useStore = create<Store>((set, get) => ({
@@ -97,6 +109,12 @@ export const useStore = create<Store>((set, get) => ({
   voteMap: new Map(),
   setVoteMap: (voteMap: any) => set({ voteMap }),
 
+  definitionVoteMap: new Map(),
+  setDefinitionVoteMap: (definitionVoteMap: any) => set({ definitionVoteMap }),
+
+  sentenceVoteMap: new Map(),
+  setSentenceVoteMap: (sentenceVoteMap: any) => set({ sentenceVoteMap }),
+
   definitionRows: [],
   setDefinitionRows: (definitionRows: any) => set({ definitionRows }),
 
@@ -118,7 +136,6 @@ export const useStore = create<Store>((set, get) => ({
     const newSentenceRows = [...get().sentenceRows];
     newSentenceRows.push(newSentenceRow);
 
-    log('newSentenceRows', newSentenceRows);
     set({
       sentenceRows: newSentenceRows,
     });
@@ -132,4 +149,11 @@ export const useStore = create<Store>((set, get) => ({
 
   wordList: [],
   setWordList: (wordList: any) => set({ wordList }),
+
+  mostVotedDefinitionMap: new Map(),
+  setMostVotedDefinitionMap: (mostVotedDefinitionMap: any) =>
+    set({ mostVotedDefinitionMap }),
+
+  loadingMain: true,
+  setLoadingMain: (loadingMain: boolean) => set({ loadingMain }),
 }));

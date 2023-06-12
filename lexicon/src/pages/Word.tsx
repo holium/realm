@@ -15,7 +15,7 @@ import api from '../api';
 import { TabPanel, Tabs, Vote } from '../components';
 import { Store, useStore } from '../store';
 import { TabItem } from '../types';
-import { log, shipName } from '../utils';
+import { log } from '../utils';
 
 const tabData: TabItem[] = [
   { label: 'Definitions', value: 0 },
@@ -58,11 +58,11 @@ export const Word = () => {
       log('removeWord error => ', removeWord);
     }
   };
+  const goToDict = () => {
+    navigate('/apps/lexicon/dict/' + state.word);
+  };
   return (
-    <Card p={3} elevation={4} width={400} marginBottom={12}>
-      <Text.Label opacity={0.7} fontWeight={400} style={{ marginBottom: 4 }}>
-        Word of the day
-      </Text.Label>
+    <Card p={3} elevation={4} width={'100%'} margin={'12px 20px'}>
       <Flex justifyContent={'space-between'} mb={'8px'}>
         <Text.H3 fontWeight={600}>{state.word}</Text.H3>
 
@@ -103,6 +103,7 @@ export const Word = () => {
                 disabled: false,
                 onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
                   evt.stopPropagation();
+                  goToDict();
                 },
               },
               {
@@ -119,8 +120,12 @@ export const Word = () => {
         </Flex>
       </Flex>
       <Flex justifyContent={'space-between'} mb={'16px'}>
-        <Text.Body opacity={0.5}>~lodlev-migdev</Text.Body>
-        <Text.Body opacity={0.5}>07/21/2022 10:30 AM</Text.Body>
+        <Text.Body opacity={0.5} fontWeight={500}>
+          ~lodlev-migdev
+        </Text.Body>
+        <Text.Body opacity={0.5} fontWeight={500}>
+          07/21/2022 10:30 AM
+        </Text.Body>
       </Flex>
       <Tabs
         value={tabValue}
@@ -161,53 +166,8 @@ function Definition({
 }
 const Sentences = ({ sentenceList, space, state }: any) => {
   const [newSentence, setNewSentence] = useState<string>('');
-  const voteRows = useStore((state: Store) => state.voteRows);
-  const [sentenceVotesMap, setSentenceVoteMap] = useState<any>(new Map());
+  const sentenceVoteMap = useStore((state: Store) => state.sentenceVoteMap);
 
-  const makeVoteMap = () => {
-    //construct a vote map for the definitions of this word
-    const voteMap: any = new Map();
-    const sentenceDefinitionId = new Set(); //set of our definition ids
-    sentenceList.forEach((item: any) => {
-      sentenceDefinitionId.add(item.id);
-    });
-    voteRows.forEach((item: any) => {
-      if (sentenceDefinitionId.has(item['parent-id'])) {
-        //accumulate rows into their respective parents (words)
-        const lastVoteData = voteMap.get(item['parent-id']);
-
-        let upVotes = lastVoteData?.upVotes ?? 0;
-        let downVotes = lastVoteData?.downVotes ?? 0;
-        let currentShipVoted = lastVoteData?.currentShipVoted ?? null;
-        const newVotes = lastVoteData?.votes ?? [];
-        //incremenet/decrement vote count accrodingly
-
-        if (item.up) {
-          if (item.ship === '~' + shipName())
-            currentShipVoted = { vote: true, voteId: item.id };
-          upVotes++;
-        } else {
-          if (item.ship === '~' + shipName())
-            currentShipVoted = { vote: false, voteId: item.id };
-
-          downVotes++;
-        }
-
-        //we count the up/down vote
-        newVotes.push(item);
-        voteMap.set(item['parent-id'], {
-          votes: newVotes,
-          upVotes,
-          downVotes,
-          currentShipVoted,
-        });
-      }
-    });
-    setSentenceVoteMap(voteMap);
-  };
-  useEffect(() => {
-    makeVoteMap();
-  }, [sentenceList, voteRows]);
   const handleSubmitNewSentence = async () => {
     if (!space) return;
     try {
@@ -228,7 +188,7 @@ const Sentences = ({ sentenceList, space, state }: any) => {
   return (
     <Flex flexDirection="column" gap={20}>
       {sentenceList.map((item: any, index: number) => {
-        const votes = sentenceVotesMap.get(item.id);
+        const votes = sentenceVoteMap.get(item.id);
 
         return (
           <Definition
@@ -257,7 +217,7 @@ const Sentences = ({ sentenceList, space, state }: any) => {
         />
         <Button.TextButton
           fontSize={1}
-          fontWeight={600}
+          fontWeight={500}
           alignSelf={'flex-end'}
           onClick={handleSubmitNewSentence}
         >
@@ -269,53 +229,8 @@ const Sentences = ({ sentenceList, space, state }: any) => {
 };
 const Definitions = ({ definitionList, state, space }: any) => {
   const [newDefinition, setNewDefinition] = useState<string>('');
-  const voteRows = useStore((state: Store) => state.voteRows);
-  const [definitionVotesMap, setDefinitionVotesMap] = useState<any>(new Map());
+  const definitionVoteMap = useStore((state: Store) => state.definitionVoteMap);
 
-  const makeVoteMap = () => {
-    //construct a vote map for the definitions of this word
-    const voteMap: any = new Map();
-    const definitionIdSet = new Set(); //set of our definition ids
-    definitionList.forEach((item: any) => {
-      definitionIdSet.add(item.id);
-    });
-    voteRows.forEach((item: any) => {
-      if (definitionIdSet.has(item['parent-id'])) {
-        //accumulate rows into their respective parents (words)
-        const lastVoteData = voteMap.get(item['parent-id']);
-
-        let upVotes = lastVoteData?.upVotes ?? 0;
-        let downVotes = lastVoteData?.downVotes ?? 0;
-        let currentShipVoted = lastVoteData?.currentShipVoted ?? null;
-        const newVotes = lastVoteData?.votes ?? [];
-        //incremenet/decrement vote count accrodingly
-
-        if (item.up) {
-          if (item.ship === '~' + shipName())
-            currentShipVoted = { vote: true, voteId: item.id };
-          upVotes++;
-        } else {
-          if (item.ship === '~' + shipName())
-            currentShipVoted = { vote: false, voteId: item.id };
-
-          downVotes++;
-        }
-
-        //we count the up/down vote
-        newVotes.push(item);
-        voteMap.set(item['parent-id'], {
-          votes: newVotes,
-          upVotes,
-          downVotes,
-          currentShipVoted,
-        });
-      }
-    });
-    setDefinitionVotesMap(voteMap);
-  };
-  useEffect(() => {
-    makeVoteMap();
-  }, [definitionList, voteRows]);
   const handleSubmitNewDefinition = async () => {
     if (!space) return;
     try {
@@ -336,7 +251,7 @@ const Definitions = ({ definitionList, state, space }: any) => {
   return (
     <Flex flexDirection="column" gap={20}>
       {definitionList.map((item: any, index: number) => {
-        const votes = definitionVotesMap.get(item.id);
+        const votes = definitionVoteMap.get(item.id);
         return (
           <Definition
             id={item.id}
@@ -364,7 +279,7 @@ const Definitions = ({ definitionList, state, space }: any) => {
         />
         <Button.TextButton
           fontSize={1}
-          fontWeight={600}
+          fontWeight={500}
           alignSelf={'flex-end'}
           onClick={handleSubmitNewDefinition}
         >

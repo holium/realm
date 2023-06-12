@@ -1,7 +1,7 @@
 import { Button, Flex, Icon, Text } from '@holium/design-system';
 
 import api from '../api';
-import { useStore } from '../store';
+import { Store, useStore } from '../store';
 import { log, shipName } from '../utils';
 
 interface WordItemProps {
@@ -9,7 +9,7 @@ interface WordItemProps {
   votes: any;
 }
 export const Vote = ({ id, votes }: WordItemProps) => {
-  const { space } = useStore();
+  const space = useStore((store: Store) => store.space);
   const voteOnWord = async (
     id: string,
     voteType: null | boolean,
@@ -56,7 +56,11 @@ export const Vote = ({ id, votes }: WordItemProps) => {
           paddingLeft: 4,
           paddingRight: 4,
         }}
-        iconColor={votes?.currentShipVoted.vote === true ? 'accent' : 'icon'}
+        iconColor={
+          votes?.currentShipVoted.vote === true
+            ? 'rgba(var(--rlm-accent-rgba))'
+            : 'icon'
+        }
       >
         <Icon
           opacity={0.7}
@@ -74,7 +78,7 @@ export const Vote = ({ id, votes }: WordItemProps) => {
             color:
               votes?.currentShipVoted.vote === true
                 ? 'rgba(var(--rlm-accent-rgba))'
-                : 'rgba(var(--rlm-text-color), .7)',
+                : 'rgba(var(--rlm-text-rgba), .7)',
           }}
         >
           {votes?.upVotes ?? 0}
@@ -105,7 +109,9 @@ export const Vote = ({ id, votes }: WordItemProps) => {
           paddingRight: 4,
         }}
         iconColor={
-          votes?.currentShipVoted.vote === false ? 'intent-alert' : 'icon'
+          votes?.currentShipVoted.vote === false
+            ? 'rgba(var(--rlm-intent-alert-rgba))'
+            : 'icon'
         }
       >
         <Icon
@@ -121,7 +127,7 @@ export const Vote = ({ id, votes }: WordItemProps) => {
             color:
               votes?.currentShipVoted.vote === false
                 ? 'rgba(var(--rlm-intent-alert-rgba))'
-                : 'rgba(var(--rlm-text-color))',
+                : 'rgba(var(--rlm-text-rgba))',
           }}
         >
           {votes?.downVotes ?? 0}
