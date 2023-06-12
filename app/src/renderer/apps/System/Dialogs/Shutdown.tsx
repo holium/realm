@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { Button, Flex, Text } from '@holium/design-system';
+import { Button, Flex, Spinner, Text } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 
 import { trackEvent } from 'renderer/lib/track';
 import { normalizeBounds } from 'renderer/lib/window-manager';
@@ -36,10 +37,16 @@ const ShutdownDialogPresenter = () => {
   const [seconds, setSeconds] = useState(60);
   const [id, setId] = useState<NodeJS.Timer>();
 
-  function shutdown() {
+  const shuttingDown = useToggle(false);
+
+  const shutdown = async () => {
+    shuttingDown.toggleOn();
+
     trackEvent('CLICK_SHUTDOWN', 'DESKTOP_SCREEN');
-    authStore.shutdown();
-  }
+    await authStore.shutdown();
+
+    shuttingDown.toggleOff();
+  };
 
   useEffect(() => {
     if (seconds <= 0) {
@@ -88,8 +95,17 @@ const ShutdownDialogPresenter = () => {
         >
           <Flex py={1}>Cancel</Flex>
         </Button.Secondary>
-        <Button.Primary flex={1} justifyContent="center" onClick={shutdown}>
-          <Flex py={1}>Power Off</Flex>
+        <Button.Primary
+          flex={1}
+          justifyContent="center"
+          disabled={shuttingDown.isOn}
+          onClick={shutdown}
+        >
+          {shuttingDown.isOn ? (
+            <Spinner size={16} />
+          ) : (
+            <Flex py={1}>Power Off</Flex>
+          )}
         </Button.Primary>
       </Flex>
     </Flex>
