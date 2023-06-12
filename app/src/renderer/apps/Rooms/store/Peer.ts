@@ -200,28 +200,6 @@ export class PeerClass extends EventsEmitter {
       this.audioStream = stream;
       this.isAudioAttachedChanged(true);
 
-      track.onmute = () => {
-        console.log('track muted');
-        this.isMutedChanged(true);
-        document
-          .getElementById(`peer-audio-${this.peerId}`)
-          ?.setAttribute('muted', 'true');
-      };
-
-      track.onunmute = () => {
-        console.log('track unmuted');
-        this.isMutedChanged(false);
-        document
-          .getElementById(`peer-audio-${this.peerId}`)
-          ?.setAttribute('muted', 'false');
-      };
-
-      track.onended = () => {
-        console.log('track ended');
-        this.isAudioAttachedChanged(false);
-        this.peer.destroy();
-      };
-
       this.analysers[0] = SpeakingDetectionAnalyser.initialize(this);
       // create an audio element for the stream
       const audio = document.createElement('audio');

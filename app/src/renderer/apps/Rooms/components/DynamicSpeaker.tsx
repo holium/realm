@@ -223,6 +223,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
                 animate={{ opacity: 0.5 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
+                iconColor={hasVideo ? 'white' : undefined}
                 name="MicOff"
                 size={18}
                 opacity={0.5}
