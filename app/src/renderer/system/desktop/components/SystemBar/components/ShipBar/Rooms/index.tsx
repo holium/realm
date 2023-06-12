@@ -33,7 +33,7 @@ const RoomTrayPresenter = () => {
     setTrayAppDimensions,
   } = useTrayApps();
 
-  const muted = roomsStore.isMuted;
+  const muted = roomsStore.ourPeer.isMuted;
 
   const onButtonClick = useCallback(
     (evt: any) => {
