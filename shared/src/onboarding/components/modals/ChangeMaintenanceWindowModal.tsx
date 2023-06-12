@@ -37,11 +37,9 @@ export const ChangeMaintenanceWindowModal = ({
 
     const response = await onSubmit(selectedMaintenanceWindow);
 
-    if (!response) submitting.toggleOff();
-    else {
-      // Refresh the page to show the new maintenance window.
-      window.location.reload();
-    }
+    submitting.toggleOff();
+
+    return response;
   };
 
   return (

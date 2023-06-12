@@ -20,8 +20,14 @@ import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
 const HostingPresenter = () => {
   const { goToPage, logout } = useNavigation();
-  const { token, email, ships, selectedIdentity, setSelectedIdentity } =
-    useUser();
+  const {
+    token,
+    email,
+    ships,
+    selectedIdentity,
+    setSelectedIdentity,
+    refetchShips,
+  } = useUser();
 
   const changeEmailModal = useToggle(false);
   const verifyEmailModal = useToggle(false);
@@ -116,7 +122,14 @@ const HostingPresenter = () => {
       maintenanceWindow
     );
 
-    if (response?.maintenance_window) return true;
+    if (response?.maintenance_window) {
+      await refetchShips();
+
+      changeMaintenanceWindowModal.toggleOff();
+
+      return true;
+    }
+
     return false;
   };
 
