@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MotionConfig } from 'framer-motion';
 import { observer } from 'mobx-react';
 
@@ -10,15 +10,26 @@ import { SelectionProvider } from './lib/selection';
 import { appState, AppStateProvider, useAppState } from './stores/app.store';
 import { RealmIPC } from './stores/ipc';
 import { ErrorBoundary } from './system/ErrorBoundary';
-import { RealmTitlebar } from './system/Titlebar';
+import {
+  RealmTitlebar,
+  StandAloneChatTitlebar,
+} from './system/titlebar/Titlebar';
 
 import './app.css';
 import 'photoswipe/dist/photoswipe.css';
 
 const AppPresenter = () => {
-  const { theme, shellStore, booted, showTitleBar } = useAppState();
-  const contextMenuMemo = useMemo(() => <ContextMenu />, []);
-  const bgImage = useMemo(() => theme.wallpaper, [theme.wallpaper]);
+  const { theme, shellStore, booted } = useAppState();
+
+  const [isStandaloneChat, setIsStandaloneChat] = useState(
+    shellStore.isStandaloneChat
+  );
+  const [isFullscreen, setIsFullscreen] = useState(shellStore.isFullscreen);
+
+  useEffect(() => {
+    window.electron.app.isStandaloneChat().then(setIsStandaloneChat);
+    window.electron.app.isFullscreen().then(setIsFullscreen);
+  }, []);
 
   useEffect(() => {
     RealmIPC.boot();
@@ -27,25 +38,53 @@ const AppPresenter = () => {
     };
   }, []);
 
+  const contextMenu = useMemo(() => <ContextMenu />, []);
+
+  const titlebar = useMemo(() => {
+    if (isFullscreen) {
+      return null;
+    }
+
+    return isStandaloneChat ? <StandAloneChatTitlebar /> : <RealmTitlebar />;
+  }, [isFullscreen, isStandaloneChat]);
+
+  const background = useMemo(() => {
+    if (isStandaloneChat) {
+      return null;
+    }
+
+    return (
+      <RealmBackground
+        blurred={shellStore.isBlurred}
+        snapView={shellStore.snapView}
+        wallpaper={theme.wallpaper}
+      />
+    );
+  }, [
+    theme.wallpaper,
+    shellStore.isBlurred,
+    shellStore.snapView,
+    isStandaloneChat,
+  ]);
+
+  const content = booted ? (
+    <AppContent isStandaloneChat={isStandaloneChat} />
+  ) : (
+    <AppLoading />
+  );
+
   return (
     <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
       <AppStateProvider value={appState}>
         <GlobalStyle blur={true} realmTheme={theme} />
-
-        <RealmBackground
-          blurred={shellStore.isBlurred}
-          snapView={shellStore.snapView}
-          wallpaper={bgImage}
-        />
+        {background}
         <SelectionProvider>
           <ContextMenuProvider>
             <ErrorBoundary>
-              {showTitleBar && <RealmTitlebar />}
-              {booted ? <AppContent /> : <AppLoading />}
-              {contextMenuMemo}
+              {titlebar}
+              {content}
+              {contextMenu}
               <div id="portal-root" />
-              <div id="menu-root" />
-              <div id="audio-root" />
             </ErrorBoundary>
           </ContextMenuProvider>
         </SelectionProvider>

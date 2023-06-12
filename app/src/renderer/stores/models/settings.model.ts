@@ -38,6 +38,7 @@ export const SettingsModel = types
           }
 
           if (self.realmCursorEnabled) {
+            // Don't refresh since CSS has already been injected.
             window.electron.app.enableRealmCursor();
           } else {
             window.electron.app.disableRealmCursor();
@@ -79,9 +80,10 @@ export const SettingsModel = types
       });
 
       if (enabled) {
-        window.electron.app.enableRealmCursor();
+        // Refresh since CSS has not been injected yet.
+        window.electron.app.enableRealmCursor(true);
       } else {
-        window.electron.app.disableRealmCursor();
+        window.electron.app.disableRealmCursor(true);
       }
     },
     setProfileColorForCursor(enabled: boolean) {

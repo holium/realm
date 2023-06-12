@@ -1,9 +1,15 @@
-import { ipcMain, systemPreferences } from 'electron';
+import { BrowserWindow, ipcMain, systemPreferences } from 'electron';
+import { download } from 'electron-dl';
 
 import { MediaAccess, MediaAccessStatus } from '../../os/types';
 import { isMac, isWindows } from './env';
 
 const registerListeners = () => {
+  ipcMain.removeHandler('ask-for-mic');
+  ipcMain.removeHandler('ask-for-camera');
+  ipcMain.removeHandler('get-media-status');
+  ipcMain.removeHandler('download-url-as-file');
+
   ipcMain.handle('ask-for-mic', async (): Promise<MediaAccessStatus> => {
     await systemPreferences.askForMediaAccess('microphone');
     return systemPreferences.getMediaAccessStatus('microphone');
@@ -30,18 +36,12 @@ const registerListeners = () => {
     };
   });
 
-  // ipcMain.handle(
-  //   'set-media-status',
-  //   async (_event, mediaType: 'camera' | 'mic', enabled: boolean) => {
-  //     const camera = systemPreferences.getMediaAccessStatus('camera');
-  //     systemPreferences.medi('microphone');
-
-  //     return {
-  //       camera,
-  //       mic: systemPreferences.getMediaAccessStatus('microphone'),
-  //     };
-  //   }
-  // );
+  ipcMain.on('download-url-as-file', (_event, { url }) => {
+    const win = BrowserWindow.getFocusedWindow();
+    if (win) {
+      download(win, url, { saveAs: true });
+    }
+  });
 };
 
 export const MediaHelper = { registerListeners };

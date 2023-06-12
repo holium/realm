@@ -17,7 +17,7 @@ import { openChatToPath } from 'renderer/lib/useTrayControls';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppType } from 'renderer/stores/models/bazaar.model';
 import { useShipStore } from 'renderer/stores/ship.store';
-import { TITLEBAR_HEIGHT } from 'renderer/system/Titlebar';
+import { TITLEBAR_HEIGHT } from 'renderer/system/titlebar/Titlebar';
 
 import { AccountTray } from './AccountTray';
 import { MessagesTray } from './MessagesTray';

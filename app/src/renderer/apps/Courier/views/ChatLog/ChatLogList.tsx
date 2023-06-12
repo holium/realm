@@ -6,54 +6,48 @@ import {
   Text,
   WindowedList,
   WindowedListRef,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
 
 import { displayDate } from 'os/lib/time';
 
-import {
-  ChatMessageType,
-  ChatModelType,
-} from '../../../stores/models/chat.model';
-import { ChatMessage } from '../components/ChatMessage';
+import { ChatMessageType } from '../../../../stores/models/chat.model';
+import { ChatMessage } from '../../components/ChatMessage';
 
 type Props = {
   listRef: RefObject<WindowedListRef>;
-  width: number;
-  height: number;
   messages: ChatMessageType[];
-  selectedChat: ChatModelType;
   ourColor: string;
+  isStandaloneChat: boolean;
   endOfListPadding?: number;
   topOfListPadding?: number;
 };
 
 export const ChatLogList = ({
   listRef,
-  width,
-  height,
   messages,
-  selectedChat,
   ourColor,
   endOfListPadding,
   topOfListPadding,
+  isStandaloneChat,
 }: Props) => {
   const [prevHeight, setPrevHeight] = useState<number>(0);
 
-  const renderChatRow = (index: number, row: ChatMessageType) => {
-    const isLast = selectedChat ? index === messages.length - 1 : false;
+  const renderChatRow = (index: number, message: ChatMessageType) => {
+    const isLast = index === messages.length - 1;
     const isNextGrouped =
-      index < messages.length - 1 && row.sender === messages[index + 1].sender;
+      index < messages.length - 1 &&
+      message.sender === messages[index + 1].sender;
 
     const isPrevGrouped =
       index > 0 &&
-      row.sender === messages[index - 1].sender &&
+      message.sender === messages[index - 1].sender &&
       Object.keys(messages[index - 1].contents[0])[0] !== 'status';
 
     // we need to use 3px here because numbers are increments of 4px -- so 3 is 12px actually
     let topSpacing = isPrevGrouped ? '3px' : 2;
-    const bottomSpacing = isNextGrouped ? '3px' : 2;
+    const bottomSpacing = isLast ? (isNextGrouped ? '3px' : 2) : 0;
 
-    const thisMsgDate = new Date(row.createdAt).toDateString();
+    const thisMsgDate = new Date(message.createdAt).toDateString();
     const prevMsgDate =
       messages[index - 1] &&
       new Date(messages[index - 1].createdAt).toDateString();
@@ -65,11 +59,10 @@ export const ChatLogList = ({
 
     return (
       <Box
-        key={row.id}
-        mx="1px"
+        key={`row-${message.id}-${index}`}
         animate={false}
         pt={topSpacing}
-        pb={isLast ? bottomSpacing : 0}
+        pb={bottomSpacing}
       >
         {showDate && (
           <Text.Custom
@@ -80,14 +73,13 @@ export const ChatLogList = ({
             mt={2}
             mb={2}
           >
-            {displayDate(row.createdAt)}
+            {displayDate(message.createdAt)}
           </Text.Custom>
         )}
         <ChatMessage
           isPrevGrouped={isPrevGrouped}
           isNextGrouped={isNextGrouped}
-          containerWidth={width}
-          message={row as ChatMessageType}
+          message={message as ChatMessageType}
           ourColor={ourColor}
           onReplyClick={(replyId) => {
             const replyIndex = messages.findIndex((msg) => msg.id === replyId);
@@ -108,8 +100,6 @@ export const ChatLogList = ({
       <WindowedList
         innerRef={listRef}
         data={messages}
-        width={width}
-        height={height}
         atBottomThreshold={100}
         followOutput={true}
         increaseViewportBy={{
@@ -137,7 +127,7 @@ export const ChatLogList = ({
           },
         }}
         chatMode
-        shiftScrollbar
+        shiftScrollbar={!isStandaloneChat}
       />
     </Gallery>
   );

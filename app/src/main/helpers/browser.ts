@@ -26,25 +26,3 @@ const registerListeners = (mainWindow: BrowserWindow) => {
 };
 
 export const BrowserHelper = { registerListeners };
-
-//  webContents.on(
-//    'context-menu',
-//    (event: Electron.Event, props: Electron.ContextMenuParams) => {
-//      const menu = new Menu();
-//      const menuItem = new MenuItem({
-//        label: 'Inspect Element',
-//        click: () => {
-//          webContents.inspectElement(props.x, props.y);
-//        },
-//      });
-//      menu.append(menuItem);
-//      // const { x, y } = props;
-//      // mainWindow.webContents.send('realm.browser.contextmenu', {
-//      //   x,
-//      //   y,
-//      // });
-//      event.preventDefault();
-//      console.log(webContents.getType());
-//      menu.popup(webContents);
-//    }
-//  );

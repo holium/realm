@@ -1,20 +1,9 @@
-import { motion } from 'framer-motion';
-import styled from 'styled-components';
-
-import {
-  Flex,
-  FlexProps,
-  skeletonStyle,
-  Text,
-  TextProps,
-} from '../../../general';
-import { ImageBlock } from '../../blocks/ImageBlock/ImageBlock';
-import { LinkBlock } from '../../blocks/LinkBlock/LinkBlock';
+import { Flex, Text } from '../../../general';
 import { Bookmark } from '../../os/Bookmark/Bookmark';
 import { capitalizeFirstLetter } from '../../util/strings';
-import { BlockStyle } from '../Block/Block';
 import { convertFragmentsToPreview } from '../ChatInput/fragment-parser';
-import { BUBBLE_HEIGHT } from './Bubble.constants';
+import { ImageBlock } from '../ImageBlock/ImageBlock';
+import { LinkBlock } from '../LinkBlock/LinkBlock';
 import { BubbleAuthor } from './Bubble.styles';
 import {
   FragmentBlockquoteType,
@@ -39,236 +28,30 @@ import {
   FragmentUrLinkType,
   TEXT_TYPES,
 } from './Bubble.types';
-
-export const FragmentBase = styled(Text.Custom)<TextProps>`
-  display: inline;
-  user-select: text;
-  margin: 0px 0px;
-  line-height: ${BUBBLE_HEIGHT.rem.fragment};
-`;
-
-export const BlockWrapper = styled(motion.span)`
-  padding: 0px;
-  display: inline-block;
-  margin-top: 2px;
-  height: 100%;
-`;
-
-export const FragmentBlock = styled(motion.span)`
-  height: 100%;
-  width: 100%;
-  blockquote {
-    margin-bottom: 4px;
-  }
-`;
-
-export const FragmentPlain = styled(FragmentBase)`
-  font-weight: 400;
-  margin: 0 0;
-  line-height: ${BUBBLE_HEIGHT.rem.fragment};
-`;
-
-export const FragmentBold = styled(FragmentBase)`
-  font-weight: 800;
-`;
-export const FragmentItalic = styled(FragmentBase)`
-  font-style: italic;
-`;
-export const FragmentStrike = styled(FragmentBase)`
-  text-decoration: line-through;
-`;
-
-export const FragmentBoldItalic = styled(FragmentBase)`
-  font-weight: 800;
-  font-style: italic;
-`;
-
-export const FragmentBoldStrike = styled(FragmentBase)`
-  font-weight: 800;
-  text-decoration: line-through;
-`;
-
-export const FragmentItalicsStrike = styled(FragmentBase)`
-  font-style: italic;
-  text-decoration: line-through;
-`;
-
-export const FragmentBoldItalicsStrike = styled(FragmentBase)`
-  font-weight: 800;
-  font-style: italic;
-  text-decoration: line-through;
-`;
-
-export const FragmentReplyTo = styled(motion.blockquote)`
-  font-style: italic;
-  border-radius: 4px;
-  display: flex;
-  margin: 0px;
-  flex-direction: column;
-  padding: 4px;
-  background: rgba(var(--rlm-card-rgba));
-  ${FragmentBase} {
-    font-size: 0.86em;
-    color: rgba(var(--rlm-text-rgba));
-  }
-  ${Text.Custom} {
-    color: rgba(var(--rlm-text-rgba));
-  }
-`;
-
-export const FragmentInlineCode = styled(FragmentBase)`
-  font-family: 'Fira Code', monospace;
-  border-radius: 4px;
-  display: flex;
-  max-width: 100%;
-  word-wrap: break-word;
-  /* padding: 0px 3px; */
-`;
-
-export const FragmentShip = styled(FragmentBase)`
-  color: rgba(var(--rlm-accent-rgba));
-  background: rgba(var(--rlm-accent-rgba), 0.12);
-  border-radius: 4px;
-  padding: 2px 4px;
-  transition: var(--transition);
-  &:hover {
-    transition: var(--transition);
-    background: rgba(var(--rlm-accent-rgba), 0.18);
-    cursor: pointer;
-  }
-`;
-
-export const CodeWrapper = styled(Flex)`
-  border-radius: 4px;
-  background-color: rgba(0, 0, 0, 0.08);
-  transition: var(--transition);
-  &:hover {
-    transition: var(--transition);
-    background-color: rgba(0, 0, 0, 0.12);
-  }
-  margin-top: 4px;
-  margin-bottom: 4px;
-  padding: 6px 8px;
-  width: 100%;
-  ${Text.Custom} {
-    color: rgba(var(--rlm-text-rgba)) !important;
-  }
-`;
-
-export const FragmentCodeBlock = styled(Text.Custom)`
-  font-family: 'Fira Code', monospace;
-  border-radius: 4px;
-  width: 100%;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-`;
-
-type FragmentImageProps = {
-  isSkeleton?: boolean;
-};
-
-export const FragmentImage = styled(motion.img)<FragmentImageProps>`
-  width: 100%;
-  max-width: 20rem;
-  border-radius: 4px;
-  ${({ isSkeleton }) => isSkeleton && skeletonStyle}
-`;
-
-const TabWrapper = styled(Flex)<FlexProps>`
-  border-radius: 6px;
-  background: rgba(var(--rlm-card-rgba));
-  ${Text.Custom} {
-    color: rgba(var(--rlm-text-rgba));
-  }
-`;
-
-export const FragmentBlockquote = styled(motion.blockquote)`
-  font-style: italic;
-  border-left: 2px solid rgba(var(--rlm-accent-rgba));
-  padding-left: 6px;
-  padding-right: 8px;
-  border-radius: 6px;
-  padding-top: 6px;
-  padding-bottom: 6px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  background-color: rgba(var(--rlm-overlay-hover-rgba));
-
-  .fragment-reply {
-    border-radius: 4px;
-
-    ${FragmentBase} {
-      font-size: 0.82rem;
-    }
-    ${Text.Custom} {
-      line-height: 1rem;
-    }
-    .block-author {
-      display: none !important;
-    }
-    ${BlockWrapper} {
-      height: 32px !important;
-      width: fit-content !important;
-    }
-    ${BlockStyle} {
-      padding: 0px;
-      margin: 0px;
-      height: 32px !important;
-      width: fit-content !important;
-    }
-    ${FragmentImage} {
-      width: fit-content !important;
-      height: 32px !important;
-    }
-    &.pinned {
-      gap: 0px;
-      ${Text.Custom} {
-        /* line-height: inherit; */
-        /* font-size: 0.8em; */
-      }
-    }
-  }
-  &.pinned-or-reply-message {
-    padding-top: 4px;
-    padding-bottom: 4px;
-    padding-left: 6px;
-    padding-right: 4px;
-    border-radius: 3px;
-    height: 46px;
-    width: 100%;
-    gap: 12px;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    margin: 0;
-    background: rgba(var(--rlm-overlay-hover-rgba));
-    ${FragmentImage} {
-      border-radius: 2px;
-      height: 36px !important;
-    }
-  }
-  &:hover:not([disabled]) {
-    transition: var(--transition);
-    background-color: rgba(var(--rlm-overlay-active-rgba));
-    cursor: pointer;
-  }
-`;
-
-export const LineBreak = styled.div`
-  width: 100%;
-  height: 4px;
-  margin: 0;
-  padding: 0;
-`;
+import {
+  BlockWrapper,
+  CodeWrapper,
+  FragmentBlockquote,
+  FragmentBold,
+  FragmentBoldItalic,
+  FragmentBoldItalicsStrike,
+  FragmentBoldStrike,
+  FragmentCodeBlock,
+  FragmentInlineCode,
+  FragmentItalic,
+  FragmentItalicsStrike,
+  FragmentPlain,
+  FragmentShip,
+  FragmentStrike,
+  LineBreak,
+  TabWrapper,
+} from './renderFragment.styles';
 
 export const renderFragment = (
   id: string,
   fragment: FragmentType,
   index: number,
   author: string,
-  containerWidth?: number,
   onReplyClick?: (id: string) => void
 ) => {
   const key = Object.keys(fragment)[0] as FragmentKey;
@@ -350,11 +133,7 @@ export const renderFragment = (
 
     case 'code':
       return (
-        <CodeWrapper
-          py={1}
-          minWidth={containerWidth ? containerWidth / 1.25 : 150}
-          className="code-wrapper"
-        >
+        <CodeWrapper py={1} minWidth={150} className="code-wrapper">
           <FragmentCodeBlock id={id} key={index}>
             {(fragment as FragmentCodeType).code}
           </FragmentCodeBlock>
@@ -366,21 +145,11 @@ export const renderFragment = (
           <LinkBlock
             draggable={false}
             mode="embed"
-            containerWidth={containerWidth}
             metadata={(fragment as FragmentLinkType).metadata}
             link={(fragment as FragmentLinkType).link}
             id={id}
             by={author}
-            onLinkLoaded={
-              // onMeasure
-              //   ? onMeasure
-              //   : () => {
-              //       // do nothing
-              //     }
-              () => {
-                // do nothing
-              }
-            }
+            onLinkLoaded={() => {}}
             minWidth={320}
           />
         </BlockWrapper>
@@ -420,7 +189,7 @@ export const renderFragment = (
       ) {
         replyContent = (
           <FragmentPlain
-            maxWidth={containerWidth && containerWidth - 16}
+            maxWidth="100%"
             truncate
             id={id}
             key={`${author + index}-reply`}
@@ -466,7 +235,7 @@ export const renderFragment = (
               truncate
               overflow="hidden"
               width="fit-content"
-              maxWidth={containerWidth && containerWidth - 16}
+              maxWidth="100%"
             >
               {replyContent}
             </Text.Custom>
@@ -477,19 +246,12 @@ export const renderFragment = (
     case 'tab': {
       const { url, favicon, title } = (fragment as FragmentTabType).tab;
       return (
-        <TabWrapper
-          width={containerWidth && containerWidth - 16}
-          id={url}
-          p={0}
-        >
+        <TabWrapper width="100%" id={url} p={0}>
           <Bookmark
             url={url}
             favicon={favicon}
             title={title}
-            width={containerWidth && containerWidth - 36}
-            onNavigate={(url: string) => {
-              window.open(url, '_blank');
-            }}
+            onNavigate={(url) => window.open(url, '_blank')}
           />
         </TabWrapper>
       );

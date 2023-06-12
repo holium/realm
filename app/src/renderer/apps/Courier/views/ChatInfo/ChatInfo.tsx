@@ -4,14 +4,11 @@ import { observer } from 'mobx-react-lite';
 import { isValidPatp } from 'urbit-ob';
 
 import {
-  Avatar,
   Box,
   Flex,
   Icon,
   InlineEdit,
-  MenuItemProps,
   NoScrollBar,
-  Row,
   SectionDivider,
   Select,
   Text,
@@ -20,11 +17,9 @@ import {
 } from '@holium/design-system';
 
 import { FileUploadParams } from 'os/services/ship/ship.service';
-import { useTrayApps } from 'renderer/apps/store';
-import { useContextMenu } from 'renderer/components';
 import { ShipSearch } from 'renderer/components/ShipSearch';
 import { useFileUpload } from 'renderer/lib/useFileUpload';
-import { IuseStorage } from 'renderer/lib/useStorage';
+import { useStorage } from 'renderer/lib/useStorage';
 import { useAppState } from 'renderer/stores/app.store';
 import { ShipIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -32,10 +27,11 @@ import { useShipStore } from 'renderer/stores/ship.store';
 import {
   InvitePermissionType,
   PeerModelType,
-} from '../../../stores/models/chat.model';
-import { ChatAvatar } from '../components/ChatAvatar';
-import { ChatLogHeader } from '../components/ChatLogHeader';
-import { ExpiresValue, millisecondsToExpires } from '../types';
+} from '../../../../stores/models/chat.model';
+import { ChatAvatar } from '../../components/ChatAvatar';
+import { ChatLogHeader } from '../../components/ChatLogHeader';
+import { ExpiresValue, millisecondsToExpires } from '../../types';
+import { PeerRow } from './PeerRow';
 
 export const createPeopleForm = (
   defaults: any = {
@@ -66,17 +62,16 @@ export const createPeopleForm = (
   };
 };
 
-type ChatInfoProps = {
-  storage: IuseStorage;
+type Props = {
+  isStandaloneChat?: boolean;
 };
 
-export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
+export const ChatInfoPresenter = ({ isStandaloneChat }: Props) => {
+  const storage = useStorage();
   const { loggedInAccount, theme } = useAppState();
   const { chatStore, spacesStore, friends } = useShipStore();
   const { selectedChat, setSubroute, getChatHeader } = chatStore;
-  const { dimensions } = useTrayApps();
   const containerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string>();
   const [image, setImage] = useState(selectedChat?.metadata?.image || '');
@@ -122,6 +117,7 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   const { canUpload, promptUpload } = useFileUpload({ storage });
 
   if (!selectedChat) return null;
+
   const {
     sortedPeers,
     type,
@@ -134,14 +130,11 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
     updateInvitePermissions,
     updateExpiresDuration,
   } = selectedChat;
-  // const title = metadata?.title;
 
   const editMetadata = (editedMetadata: any) => {
     if (!selectedChat) return;
     selectedChat.updateMetadata(editedMetadata);
   };
-
-  // const setInvote
 
   const uploadFile = (params: FileUploadParams) => {
     setIsUploading(true);
@@ -206,28 +199,21 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
   };
 
   return (
-    <Flex
-      flexDirection="column"
-      height={dimensions.height}
-      overflowX="hidden"
-      overflowY="auto"
-    >
+    <Flex flexDirection="column" width="100%" height="100%">
       <ChatLogHeader
         path={path}
-        title={'Chat Info'}
         isMuted={selectedChat.muted}
-        avatar={<div />}
-        onBack={() => setSubroute('chat')}
         hasMenu={false}
+        forceBackButton
+        isStandaloneChat={isStandaloneChat}
+        onBack={() => setSubroute('chat')}
       />
       <NoScrollBar
+        flex={1}
         flexDirection="column"
-        height={dimensions.height - 48}
-        overflowX="hidden"
         overflowY="auto"
-        pb={2}
+        padding={isStandaloneChat ? '12px' : '0 0 12px 0'}
       >
-        {/* Chat Info */}
         <Flex flexDirection="column" gap={4} pt={3} pb={3}>
           <Flex
             flexDirection="column"
@@ -274,7 +260,6 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
             </Flex>
           </Flex>
         </Flex>
-        {/* Settings */}
         <Flex my={2} flexDirection="column">
           <Box mb={2}>
             <SectionDivider label="Settings" alignment="left" />
@@ -518,13 +503,6 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
                 },
               });
             }
-            // options.push({
-            //   id: `${id}-profile`,
-            //   label: 'View Profile',
-            //   onClick: (_evt: any) => {
-            //     console.log('view profile');
-            //   },
-            // });
             return (
               <PeerRow
                 key={id}
@@ -538,70 +516,6 @@ export const ChatInfoPresenter = ({ storage }: ChatInfoProps) => {
         </Flex>
       </NoScrollBar>
     </Flex>
-  );
-};
-
-type PeerRowProps = {
-  id: string;
-  peer: string;
-  role: string;
-  options?: MenuItemProps[];
-};
-
-const LabelMap = {
-  host: 'host',
-  admin: 'admin',
-};
-const PeerRow = ({ id, peer, options, role }: PeerRowProps) => {
-  const { getOptions, setOptions } = useContextMenu();
-
-  const { friends } = useShipStore();
-
-  useEffect(() => {
-    if (options && options.length && options !== getOptions(id)) {
-      setOptions(id, options);
-    }
-  }, [options, getOptions, id, setOptions]);
-
-  const metadata = friends.getContactAvatarMetadata(peer);
-  return (
-    <Row id={id}>
-      <Flex
-        gap={10}
-        flexDirection="row"
-        alignItems="center"
-        flex={1}
-        maxWidth="100%"
-        style={{ pointerEvents: 'none' }}
-      >
-        <Box>
-          <Avatar
-            simple
-            size={22}
-            avatar={metadata.avatar}
-            patp={metadata.patp}
-            sigilColor={[metadata.color || '#000000', 'white']}
-          />
-        </Box>
-        <Flex flex={1} height="22px" overflow="hidden" alignItems="center">
-          <Text.Custom
-            fontSize={2}
-            style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {metadata.nickname ? metadata.nickname : metadata.patp}
-          </Text.Custom>
-        </Flex>
-        {(role === 'host' || role === 'admin') && (
-          <Text.Custom fontSize={2} opacity={0.5}>
-            {LabelMap[role]}
-          </Text.Custom>
-        )}
-      </Flex>
-    </Row>
   );
 };
 

@@ -22,7 +22,7 @@ import {
 } from 'renderer/stores/models/window.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
-import { TITLEBAR_HEIGHT } from 'renderer/system/Titlebar';
+import { TITLEBAR_HEIGHT } from 'renderer/system/titlebar/Titlebar';
 
 import { ErrorBoundary } from '../../../ErrorBoundary';
 import { AppWindowContainer } from './AppWindow.styles';
@@ -344,7 +344,14 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       resizeBottomRightX.set(x + width);
       resizeBottomRightY.set(y + height);
     }, 100),
-    [appId, motionX, motionY, motionWidth, motionHeight]
+    [
+      appId,
+      motionX,
+      motionY,
+      motionWidth,
+      motionHeight,
+      shellStore.desktopDimensions,
+    ]
   );
 
   useEffect(() => {

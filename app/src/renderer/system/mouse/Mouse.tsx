@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 
-import { hexToRgb, rgbToString, useToggle } from '@holium/design-system';
+import { hexToRgb, rgbToString, useToggle } from '@holium/design-system/util';
 import { MouseState } from '@holium/realm-presence';
 
 import { AnimatedCursor } from './AnimatedCursor';
 import { EphemeralChat } from './Mouse.styles';
 
 export const Mouse = () => {
+  const enabled = useToggle(true);
   const active = useToggle(false);
   const visible = useToggle(false);
-  const disabled = useToggle(false);
   const mouseLayerTracking = useToggle(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [state, setState] = useState<MouseState>('pointer');
@@ -33,13 +33,15 @@ export const Mouse = () => {
     });
 
     const handleMouseMove = (e: MouseEvent) => {
+      // If this code is reached, great, it means the device (probably macOS)
+      // can detect mouse movement directly in the mouse layer, so we'll use that instead of IPC.
+      // At least for moving, dragging is still IPC'd.
+      if (!mouseLayerTracking.isOn) mouseLayerTracking.toggleOn();
+
       if (!active.isOn) setPosition({ x: e.clientX, y: e.clientY });
     };
 
-    window.electron.app.onEnableMouseLayerTracking(() => {
-      mouseLayerTracking.toggleOn();
-      window.addEventListener('mousemove', handleMouseMove);
-    });
+    window.addEventListener('mousemove', handleMouseMove);
 
     window.electron.app.onMouseDown(active.toggleOn);
 
@@ -50,8 +52,9 @@ export const Mouse = () => {
       if (rgbString) setMouseColor(rgbString);
     });
 
-    window.electron.app.onEnableRealmCursor(disabled.toggleOff);
-    window.electron.app.onDisableRealmCursor(disabled.toggleOn);
+    window.electron.app.onEnableRealmCursor(enabled.toggleOn);
+    window.electron.app.onDisableRealmCursor(enabled.toggleOff);
+    window.electron.app.isRealmCursorEnabled().then(enabled.setToggle);
 
     window.electron.app.onToggleOnEphemeralChat(ephemeralChat.toggleOn);
 
@@ -63,13 +66,11 @@ export const Mouse = () => {
     window.electron.app.onRealmToAppEphemeralChat((_, c) => setChat(c));
 
     return () => {
-      if (mouseLayerTracking.isOn) {
-        window.removeEventListener('mousemove', handleMouseMove);
-      }
+      window.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
 
-  if (disabled.isOn) return null;
+  if (!enabled.isOn) return null;
 
   return (
     <>
