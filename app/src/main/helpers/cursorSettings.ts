@@ -86,7 +86,6 @@ const enableRealmCursor = (
   if (isMac) {
     hideSystemCursor(mouseOverlayWindow.webContents);
     hideSystemCursor(mainWindow.webContents);
-    // mouseOverlayWindow.setWindowButtonVisibility(false);
   } else if (isWindows) {
     hideSystemCursor(mouseOverlayWindow.webContents);
     hideSystemCursor(mainWindow.webContents);

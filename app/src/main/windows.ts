@@ -17,6 +17,7 @@ import { WebViewHelper } from './helpers/webview';
 import { MenuBuilder } from './menu';
 import { getAssetPath, getPreloadPath, resolveHtmlPath } from './util';
 
+const NOTCH_HEIGHT = 32;
 const useSimpleFullscreen = isArm64 && isMac;
 
 const getDefaultRealmWindowOptions = (
@@ -44,11 +45,17 @@ const getDefaultRealmWindowOptions = (
   },
 });
 
+// ready-to-show is caused to be fired more than once by webviews,
+// so we need to check if it's already been expanded from 0,0.
+const hasBeenExpanded = (window: BrowserWindow) => {
+  const { width, height } = window.getBounds();
+  return width > 0 && height > 0;
+};
+
 const expandWindowToFullscreen = (window: BrowserWindow) => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
   // Account for notch on arm64 mac with simple fullscreen.
-  const NOTCH_HEIGHT = 32;
   window.setBounds({
     x: 0,
     y: 0 - NOTCH_HEIGHT,
@@ -94,7 +101,9 @@ export const createRealmWindow = () => {
     let isFullscreen = newRealmWindow.isFullScreen();
 
     if (useSimpleFullscreen) {
-      expandWindowToFullscreen(newRealmWindow);
+      if (!hasBeenExpanded(newRealmWindow)) {
+        expandWindowToFullscreen(newRealmWindow);
+      }
 
       initialDimensions.height = initialDimensions.height - 42;
       hasTitlebar = true;
@@ -202,7 +211,9 @@ export const createStandaloneChatWindow = () => {
   });
 
   newStandaloneChatWindow.on('ready-to-show', () => {
-    expandWindowToFullscreen(newStandaloneChatWindow);
+    if (!hasBeenExpanded(newStandaloneChatWindow)) {
+      expandWindowToFullscreen(newStandaloneChatWindow);
+    }
 
     newStandaloneChatWindow.show();
   });
