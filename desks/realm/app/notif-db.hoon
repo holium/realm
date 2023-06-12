@@ -1,6 +1,6 @@
 ::  app/notif-db.hoon
 /-  *notif-versioned-state, sur=notif-db, db-sur=chat-db
-/+  dbug, db-lib=notif-db
+/+  dbug, db-lib=notif-db, cdb-lib=chat-db
 =|  state-0
 =*  state  -
 :: ^-  agent:gall
@@ -176,8 +176,43 @@
             ?+  p.cage.sign  `this
               %chat-db-change
                 =/  thechange=db-change:db-sur  !<(db-change:db-sur q.cage.sign)
-                :: TODO, respond to changes from chat-db
-                `this
+                =/  del-paths=(list path)
+                  %+  turn
+                    %+  skim
+                      thechange
+                    |=(ch=db-change-type:db-sur =(-.ch %del-paths-row))
+                  |=  ch=db-change-type:db-sur
+                  ?+  -.ch    !!
+                    %del-paths-row    path.ch
+                  ==
+                =/  del-msgs=(list cord)
+                  %+  turn
+                    %+  skim
+                      thechange
+                    |=(ch=db-change-type:db-sur =(-.ch %del-messages-row))
+                  |=  ch=db-change-type:db-sur
+                  ?+  -.ch    !!
+                    %del-messages-row    (msg-id-to-cord:encode:cdb-lib msg-id.uniq-id.ch)
+                  ==
+                =/  notif-ids=(list id:sur)
+                (generate-uniq-notif-ids-to-del:db-lib state del-msgs del-paths)
+                =/  index=@ud  0
+                =/  changes=db-change:sur  ~
+                =/  cs=[db-change:sur state-0]
+                  |-
+                    ?:  =(index (lent notif-ids))
+                      [changes state]
+                    =/  id=id:sur  (snag index notif-ids)
+                    =/  ch=db-change-type:sur  [%del-row id]
+                    =.  notifs-table.state  +:(del:notifon:sur notifs-table.state id)
+                    =.  del-log.state       (put:delon:sur del-log.state (add now.bowl index) ch)
+                    $(index +(index), changes (snoc changes ch))
+
+                =/  ourchange  notif-db-change+!>(-.cs)
+                =/  gives  :~
+                  [%give %fact [/db ~] ourchange]
+                ==
+                [gives this(state +.cs)]
             ==
         ==
     ==

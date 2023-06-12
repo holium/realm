@@ -1,6 +1,7 @@
 ::  notif-db [realm]:
 ::
 /-  *notif-versioned-state, sur=notif-db, chat-db
+/+  cdb-lib=chat-db
 |%
 ::
 :: helpers
@@ -74,6 +75,37 @@
   %+  turn
     (skim (tap:notifon:sur tbl) |=([k=@ud v=notif-row:sur] &(=(app app.v) =(path path.v))))
   |=([k=@ud v=notif-row:sur] k)
+::
+++  ids-by-link
+  |=  [tbl=notifs-table:sur app=@tas link=cord]
+  ^-  (list id:sur)
+  %+  turn
+    (skim (tap:notifon:sur tbl) |=([k=@ud v=notif-row:sur] &(=(app app.v) =(link link.v))))
+  |=([k=@ud v=notif-row:sur] k)
+::
+++  generate-uniq-notif-ids-to-del
+  |=  [state=state-0 deleted-msg-id-cords=(list cord) deleted-paths=(list path)]
+  ^-  (list id:sur)
+  =/  notif-ids-to-del-set=(set id:sur)
+  %-  silt
+  ^-  (list id:sur)
+  %+  weld
+    ^-  (list id:sur)
+    %-  zing
+    %+  turn
+      deleted-msg-id-cords
+    |=  =cord
+    ^-  (list id:sur)
+    (ids-by-link notifs-table.state %realm-chat cord)
+  ^-  (list id:sur)
+  %-  zing
+  %+  turn
+    deleted-paths
+  |=  =path
+  ^-  (list id:sur)
+  (ids-by-path notifs-table.state %realm-chat path)
+
+  ~(tap in notif-ids-to-del-set)
 ::
 ::
 ::  poke actions
@@ -237,6 +269,20 @@
     %-  tap:delon:chat-db
     .^(del-log:chat-db %gx /(scot %p our.bowl)/chat-db/(scot %da now.bowl)/delete-log/start-ms/0/noun)
 
+  =/  deleted-msg-id-cords=(list cord)
+  %+  turn 
+    %+  skim
+      del-log-kvs
+    |=  [k=time v=db-change-type:chat-db]
+    ?+  -.v  %.n
+      %del-messages-row  %.y
+    ==
+  |=  [k=time v=db-change-type:chat-db]
+  ^-  cord
+  ?+  -.v  !!
+    %del-messages-row  (msg-id-to-cord:encode:cdb-lib msg-id.uniq-id.v)
+  ==
+
   =/  deleted-paths
   %+  turn 
     %+  skim
@@ -252,12 +298,7 @@
   ==
 
   =/  notif-ids-to-del=(list id:sur)
-  %-  zing
-  %+  turn
-    deleted-paths
-  |=  =path
-  ^-  (list id:sur)
-  (ids-by-path notifs-table.state %realm-chat path)
+  (generate-uniq-notif-ids-to-del state deleted-msg-id-cords deleted-paths)
 
   =/  index=@ud  0
   =/  changes=db-change:sur  ~
