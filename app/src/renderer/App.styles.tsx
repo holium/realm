@@ -92,6 +92,11 @@ export const GlobalStyle = createGlobalStyle<Props>`
 
     fieldset {
       border: 0;
+      &:disabled {
+        /* turn off disabled */
+        pointer-events: auto;
+
+      }
     }
 `;
 

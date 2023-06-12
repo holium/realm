@@ -5,23 +5,27 @@ import styled from 'styled-components';
 
 import { Avatar, Flex, FlexProps, Icon, Text } from '@holium/design-system';
 
-import {
-  ContextMenuOption,
-  useContextMenu,
-} from 'renderer/components/ContextMenu';
-import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
+import { ContextMenuOption, useContextMenu } from 'renderer/components';
 
 import { LocalPeer } from '../store/LocalPeer';
 import { PeerClass } from '../store/Peer';
 import { PeerConnectionState } from '../store/room.types';
-import { useRoomsStore } from '../store/RoomsStoreContext';
 import { AudioWave } from './AudioWave';
+import { RoomType } from './rooms.stories';
 
 interface ISpeaker {
+  isActive?: boolean;
   person: string;
   cursors?: boolean;
-  type: 'our' | 'speaker' | 'listener' | 'creator';
+  size?: 'tray' | 'full';
+  type: 'speaker' | 'listener' | 'creator';
+  isOur: boolean;
+  ourId: string;
+  metadata: any;
+  peer: PeerClass | LocalPeer | any;
+  kickPeer: (person: string) => void;
+  retryPeer: (person: string) => void;
+  room: RoomType;
 }
 
 const speakerType = {
@@ -32,23 +36,25 @@ const speakerType = {
 };
 
 const SpeakerPresenter = (props: ISpeaker) => {
-  const { person, type } = props;
-  const { loggedInAccount } = useAppState();
-  const { friends } = useShipStore();
-  const roomsStore = useRoomsStore();
+  const {
+    size = 'tray',
+    person,
+    type,
+    isOur,
+    ourId,
+    metadata,
+    isActive = false,
+    peer,
+    kickPeer,
+    retryPeer,
+    room,
+  } = props;
+
   const speakerRef = useRef<any>(null);
   const videoRef = useRef<any>(null);
   const { getOptions, setOptions } = useContextMenu();
-  const isOur = person === loggedInAccount?.serverId;
-  const metadata = friends.getContactAvatarMetadata(person);
 
   let name = metadata?.nickname || person;
-  let peer: PeerClass | LocalPeer | undefined;
-  if (isOur) {
-    peer = roomsStore.ourPeer;
-  } else {
-    peer = roomsStore.peers.get(person);
-  }
 
   // if navigating away and back, we need to reattach the video
   useEffect(() => {
@@ -56,45 +62,17 @@ const SpeakerPresenter = (props: ISpeaker) => {
     if (!peer || !peer?.hasVideo) return;
 
     if (!videoRef.current.srcObject) {
-      videoRef.current.srcObject = peer.stream;
+      videoRef.current.srcObject = peer.videoStream;
       videoRef.current.style.display = 'inline-block';
       videoRef.current.playsInline = true;
-      videoRef.current.muted = true;
+      // videoRef.current.muted = true;
     }
   }, [peer?.hasVideo, videoRef.current]);
-
-  const contextMenuOptions = useMemo(
-    () =>
-      [
-        {
-          id: `room-speaker-${person}-reconnect`,
-          label: 'Reconnect',
-          disabled: peer?.status === PeerConnectionState.Connected,
-          onClick: (evt: any) => {
-            roomsStore.retryPeer(person);
-            evt.stopPropagation();
-          },
-        },
-        // only the creator can kick people
-        loggedInAccount?.serverId === roomsStore.currentRoom?.creator && {
-          style: { color: '#FD4E4E' },
-          id: `room-speaker-${person}-kick`,
-          label: 'Kick',
-          loading: false,
-          onClick: (evt: any) => {
-            evt.stopPropagation();
-            roomsStore.kickPeer(person);
-          },
-        },
-      ].filter(Boolean) as ContextMenuOption[],
-    [peer?.status, person, roomsStore.currentRid, loggedInAccount]
-  );
-
-  const peerState = isOur ? PeerConnectionState.Connected : peer?.status;
 
   if (name.length > 17) name = `${name.substring(0, 17)}...`;
 
   let sublabel = <Sublabel>{speakerType[type]}</Sublabel>;
+  const peerState = isOur ? PeerConnectionState.Connected : peer?.status;
   if (peerState === PeerConnectionState.Failed)
     sublabel = <Sublabel color="intent-alert">Failed</Sublabel>;
   if (
@@ -110,36 +88,70 @@ const SpeakerPresenter = (props: ISpeaker) => {
     sublabel = <Sublabel>Disconnected</Sublabel>;
   }
 
+  const contextMenuOptions = useMemo(
+    () =>
+      [
+        {
+          id: `room-speaker-${person}-reconnect`,
+          label: 'Reconnect',
+          disabled: peer?.status === PeerConnectionState.Connected,
+          onClick: (evt: any) => {
+            retryPeer(person);
+            evt.stopPropagation();
+          },
+        },
+        {
+          id: `room-speaker-${person}-mute`,
+          label: peer?.isForceMuted ? 'Unmute' : 'Mute',
+          // disabled: peer?.status === PeerConnectionState.,
+          onClick: (evt: any) => {
+            if (peer?.isForceMuted) {
+              peer.forceUnmute();
+            } else {
+              peer.forceMute();
+            }
+            evt.stopPropagation();
+          },
+        },
+        // only the creator can kick people
+        room.creator === ourId && {
+          style: { color: '#FD4E4E' },
+          id: `room-speaker-${person}-kick`,
+          label: 'Kick',
+          loading: false,
+          onClick: (evt: any) => {
+            evt.stopPropagation();
+            kickPeer(person);
+          },
+        },
+      ].filter(Boolean) as ContextMenuOption[],
+    [peer?.status, peer?.isForceMuted, person, room.rid, type]
+  );
+
   useEffect(() => {
-    if (
-      person !== loggedInAccount?.serverId &&
-      contextMenuOptions !== getOptions(`room-speaker-${person}`)
-    ) {
+    if (!isOur && contextMenuOptions !== getOptions(`room-speaker-${person}`)) {
       setOptions(`room-speaker-${person}`, contextMenuOptions);
     }
-  }, [
-    contextMenuOptions,
-    getOptions,
-    person,
-    setOptions,
-    loggedInAccount?.serverId,
-  ]);
+  }, [contextMenuOptions, getOptions, person, setOptions, isOur]);
 
   const hasVideo = (peer as PeerClass)?.hasVideo;
   const isSpeaking =
     (peer as PeerClass)?.isSpeaking && !(peer as PeerClass)?.isMuted;
 
+  const showMuteIcon = peer?.isMuted || peer?.isForceMuted;
+
   return (
     <SpeakerWrapper
       id={`room-speaker-${person}`}
-      // data-close-tray="false"
+      size={size}
       ref={speakerRef}
       key={person}
       gap={4}
+      transition={{ width: { duration: 0.5 } }}
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      className={`${
+      className={`speaker ${isActive ? 'active-speaker' : ''} ${
         hasVideo && peerState !== PeerConnectionState.Closed
           ? 'speaker-video-on'
           : ''
@@ -152,6 +164,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
             zIndex: 0,
             display: 'none',
             position: 'absolute',
+            pointerEvents: 'none',
             left: 0,
             right: 0,
             top: 0,
@@ -164,7 +177,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
           id={`peer-video-${person}`}
           autoPlay
           playsInline
-          muted={isOur}
+          muted
         />
         <Flex
           zIndex={2}
@@ -212,32 +225,39 @@ const SpeakerPresenter = (props: ISpeaker) => {
           style={{ pointerEvents: 'none' }}
         >
           <Flex height={26} mt="1px">
-            {!peer?.isMuted && <AudioWave speaking={isSpeaking} />}
+            {!showMuteIcon && <AudioWave speaking={isSpeaking} />}
           </Flex>
 
           <Flex
             position="absolute"
             style={{ height: 18, pointerEvents: 'none' }}
           >
-            {peer?.isMuted && (
+            {showMuteIcon && (
               <Icon
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
+                animate={{ opacity: hasVideo ? 1.0 : 0.7 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
+                iconColor={
+                  peer?.isForceMuted
+                    ? '#ff6240'
+                    : hasVideo
+                    ? 'white'
+                    : undefined
+                }
                 name="MicOff"
                 size={18}
                 opacity={0.5}
               />
             )}
           </Flex>
-          {!peer?.isMuted && !isSpeaking && (
+          {!showMuteIcon && !isSpeaking && (
             <Flex
               className="speaker-sublabel"
-              initial={{ opacity: 0 }}
+              initial={{ opacity: 1 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: 0.15 }}
               position="absolute"
             >
               {sublabel}
@@ -251,12 +271,15 @@ const SpeakerPresenter = (props: ISpeaker) => {
 
 export const Speaker = observer(SpeakerPresenter);
 
-const SpeakerWrapper = styled(Flex)<FlexProps>`
+type SpeakerWrapperProps = {
+  size: 'tray' | 'full';
+};
+
+const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
   padding: 16px 0;
   border-radius: 9px;
   transition: 0.25s ease;
   position: relative;
-  height: 186px;
   outline: 2px solid transparent;
 
   &:hover {
