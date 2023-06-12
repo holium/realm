@@ -2,7 +2,7 @@ import { app, BrowserWindow } from 'electron';
 
 const registerListeners = (mainWindow: BrowserWindow) => {
   const webContents = mainWindow.webContents;
-  webContents.on('will-navigate', function (e, url) {
+  webContents.on('will-navigate', (e, url) => {
     if (url !== webContents.getURL()) {
       e.preventDefault();
       webContents.send('realm.browser.open', url);
