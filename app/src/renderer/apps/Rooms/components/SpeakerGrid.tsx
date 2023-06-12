@@ -1,12 +1,9 @@
 import { observer } from 'mobx-react';
 import styled, { css } from 'styled-components';
 
-import { Flex } from '@holium/design-system';
-
 import { Speaker } from './DynamicSpeaker';
 import { RoomType } from './rooms.stories';
 
-// props with children
 type SpeakerGridProps = {
   ourId: string;
   size?: 'tray' | 'full';
@@ -38,7 +35,6 @@ export const SpeakerGridPresenter = ({
     const isOur = peerId === ourId;
     return (
       <Speaker
-        // isActive={ourId === peerId}
         isActive={activeSpeaker ? activeSpeaker === peerId : false}
         key={peerId}
         size={size}
@@ -57,12 +53,8 @@ export const SpeakerGridPresenter = ({
 
   return (
     <SpeakerGridStyle
-      flexDirection={
-        activeSpeaker ? (size === 'tray' ? 'column' : 'row') : 'initial'
-      }
       size={size}
       activeSpeaker={activeSpeaker}
-      // activeSpeaker={ourId}
       peers={peers}
       columns={columns}
     >
@@ -82,25 +74,23 @@ type SpeakerGridStyleProps = {
 
 export const SCROLLBAR_WIDTH = 12;
 
-const SpeakerGridStyle = styled(Flex)<SpeakerGridStyleProps>`
+const SpeakerGridStyle = styled.div<SpeakerGridStyleProps>`
   display: grid;
-  flex: 2;
   scrollbar-width: thin;
-  grid-auto-flow: dense;
   padding: 2px;
+  padding-bottom: 4px;
   gap: 8px;
   ::-webkit-scrollbar {
     width: ${SCROLLBAR_WIDTH}px;
-    transition: 0.25s ease-in-out;
+    transition: 0.25s background-color ease-in-out;
   }
-  transition: 0.25s ease-in-out;
 
   ::-webkit-scrollbar-thumb {
     border-radius: 20px;
     border: 3px solid transparent;
     background-clip: content-box;
     background-color: transparent;
-    transition: 0.25s ease-in-out;
+    transition: 0.25s background-color ease-in-out;
   }
 
   ::-webkit-scrollbar-track {
@@ -108,99 +98,82 @@ const SpeakerGridStyle = styled(Flex)<SpeakerGridStyleProps>`
     border: 3px solid transparent;
     background-clip: content-box;
     background-color: transparent;
-    transition: 0.25s ease-in-out;
+    transition: 0.25s background-color ease-in-out;
   }
   ::-webkit-scrollbar-thumb {
-    transition: 0.25s ease-in-out;
-    background-color: rgba(var(--rlm-text-rgba), 0.3);
+    transition: 0.25s background-color ease-in-out;
+    background-color: rgba(var(--rlm-text-rgba), 0.1);
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    transition: 0.25s ease-in-out;
-    background-color: rgba(var(--rlm-text-rgba), 0.4);
+    transition: 0.25s background-color ease-in-out;
+    background-color: rgba(var(--rlm-text-rgba), 0.2);
   }
 
   ::-webkit-scrollbar-track:hover {
-    transition: 0.25s ease-in-out;
-    background-color: rgba(var(--rlm-input-rgba), 0.3);
+    transition: 0.25s background-color ease-in-out;
+    background-color: rgba(var(--rlm-input-rgba), 0.1);
   }
-  ${({ columns, peers }: SpeakerGridStyleProps) => css`
-    ${peers.length + 1
-      ? css`
-          grid-template-columns: repeat(${columns}, 1fr);
-        `
-      : css`
-          grid-template-columns: ${1 / columns}fr;
-        `}
-    ${peers.length > 4
-      ? css`
-          grid-template-rows: repeat(3, 186px);
-        `
-      : css`
-          grid-template-rows: repeat(2, 186px);
-        `}
-      ${peers.length > 5
+
+  grid-auto-rows: 200px;
+  grid-auto-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
+
+  ${({ peers }: SpeakerGridStyleProps) => css`
+    ${peers.length > 6
       ? css`
           overflow-y: scroll;
-          max-height: 593px;
-          margin-right: -8px;
+          max-height: 628px;
+          width: calc(100% + ${SCROLLBAR_WIDTH}px);
+          margin-right: -${SCROLLBAR_WIDTH - 1}px;
         `
       : css`
-          overflow-y: visible;
+          width: 100%;
+          overflow: visible;
           max-height: 100%;
           margin-right: 0px;
         `}
   `};
 
-  // apply to self and a child class called other-grid
   & {
-    ${({ size, columns, activeSpeaker, peers }: SpeakerGridStyleProps) => {
+    ${({ size, activeSpeaker, peers }: SpeakerGridStyleProps) => {
       return activeSpeaker
         ? css`
-            grid-template-columns: ${size === 'tray' ? '1fr 1fr ' : '4fr 1fr'};
-            grid-template-rows: ${size === 'tray' ? '312px auto' : '1fr'};
-            // active and other grid areas
+            grid-template-columns: ${size === 'tray' ? '1fr 1fr' : '4fr 1fr'};
+            grid-template-rows: ${size === 'tray' ? '240px' : '186px'};
+            grid-auto-rows: 156px;
 
             .active-speaker {
-              grid-area: 1 / 1 / 4 / 4;
+              grid-area: 1 / 1 / 2 / 3;
               width: 100%;
               height: 100%;
               transition: width 0.5s ease-in-out;
               overflow: visible;
             }
+            ${peers.length > 4 &&
+            css`
+              overflow-y: scroll;
+              width: calc(100% + ${SCROLLBAR_WIDTH}px);
+              max-height: 628px;
+              margin-right: -${SCROLLBAR_WIDTH - 1}px;
+              grid-auto-rows: 182px;
+              grid-template-rows: 240px;
+            `}
+
+            ${peers.length === 4 &&
+            css`
+              overflow-y: scroll;
+              width: calc(100% + ${SCROLLBAR_WIDTH}px);
+              max-height: 410px;
+              margin-right: -${SCROLLBAR_WIDTH - 1}px;
+            `}
           `
         : css`
             .speaker {
               overflow: visible;
-
               height: 100%;
               transition: width 0.5s ease-in-out;
             }
-            /* ${peers.length + 1
-              ? css`
-                  grid-template-columns: repeat(${columns}, 1fr);
-                `
-              : css`
-                  grid-template-columns: ${1 / columns}fr;
-                `}
-            ${peers.length > 4
-              ? css`
-                  grid-template-rows: repeat(3, 1fr);
-                `
-              : css`
-                  grid-template-rows: repeat(2, 1fr);
-                `}
-            ${peers.length > 5
-              ? css`
-                  overflow-y: scroll;
-                  max-height: 593px;
-                  margin-right: -8px;
-                `
-              : css`
-                  overflow-y: visible;
-                  max-height: 100%;
-                  margin-right: 0px;
-                `} */
           `;
     }}
   }

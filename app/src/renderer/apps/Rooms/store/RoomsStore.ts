@@ -235,7 +235,17 @@ export class RoomsStore extends EventsEmitter {
       return [];
     }
     const room = this.rooms.get(this.currentRid);
-    return room?.present || [];
+    return (
+      room?.present.slice().sort((a, b) => {
+        if (a === this.ourId) {
+          return -1;
+        }
+        if (b === this.ourId) {
+          return 1;
+        }
+        return 0;
+      }) || []
+    );
   }
 
   get roomsList() {

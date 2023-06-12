@@ -150,6 +150,12 @@ const RoomPresenter = () => {
         {roomView === 'chat' && <RoomChat />}
         {roomView === 'invite' && <RoomInvite />}
         <Flex
+          position="absolute"
+          width="100%"
+          left={0}
+          bottom={0}
+          right={0}
+          zIndex={5}
           px={1}
           pb={1}
           flexDirection="row"

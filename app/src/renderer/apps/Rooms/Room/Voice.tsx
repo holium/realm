@@ -21,8 +21,8 @@ const VoiceViewPresenter = () => {
 
   useEffect(() => {
     const regularHeight = roomTrayConfig.dimensions.height;
-    if (peers.length + 1 > 4) {
-      const tallHeight = roomTrayConfig.dimensions.height + 181 + 12;
+    if (peers.length > 4) {
+      const tallHeight = roomTrayConfig.dimensions.height + 212;
       setTrayAppHeight(tallHeight);
     } else {
       setTrayAppHeight(regularHeight);
@@ -102,7 +102,16 @@ const VoiceViewPresenter = () => {
   return (
     <SpeakerGrid
       activeSpeaker={activeSpeaker}
-      peers={peers}
+      // sort the list to have our peer first
+      peers={peers.slice().sort((a, b) => {
+        if (a === loggedInAccount?.serverId) {
+          return -1;
+        }
+        if (b === loggedInAccount?.serverId) {
+          return 1;
+        }
+        return 0;
+      })}
       getContactMetadata={getContactMetadata}
       getPeer={getPeer}
       ourId={loggedInAccount?.serverId ?? ''}
