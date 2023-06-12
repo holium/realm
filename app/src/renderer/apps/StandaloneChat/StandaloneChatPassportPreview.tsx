@@ -22,7 +22,7 @@ const StandaloneChatPassportPreviewPresenter = ({ onClickCog }: Props) => {
   return (
     <Flex
       width="100%"
-      height="64px"
+      height="65px"
       borderTop="1px solid var(--rlm-base-color)"
       padding="12px"
       gap="12px"
