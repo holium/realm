@@ -67,23 +67,21 @@ const AppPresenter = () => {
     isStandaloneChat,
   ]);
 
-  const content = useMemo(() => {
-    if (!booted) {
-      return <AppLoading />;
-    }
-
-    return <AppContent isStandaloneChat={isStandaloneChat} />;
-  }, [isStandaloneChat, booted]);
+  const content = booted ? (
+    <AppContent isStandaloneChat={isStandaloneChat} />
+  ) : (
+    <AppLoading />
+  );
 
   return (
     <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
       <AppStateProvider value={appState}>
         <GlobalStyle blur={true} realmTheme={theme} />
-        {background}
         <SelectionProvider>
           <ContextMenuProvider>
             <ErrorBoundary>
               {titlebar}
+              {background}
               {content}
               {contextMenu}
               <div id="portal-root" />
