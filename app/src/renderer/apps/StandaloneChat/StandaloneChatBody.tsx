@@ -78,7 +78,7 @@ export const StandaloneChatBodyPresenter = () => {
         flexDirection="column"
         minWidth={320}
         width={sidebarWidth}
-        background="var(--rlm-base-color)"
+        background="rgba(var(--rlm-base-rgba), 0.5)"
         borderRight="1px solid var(--rlm-dock-color)"
       >
         <Flex flex={1} position="relative">
