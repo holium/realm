@@ -82,6 +82,7 @@ const ShutdownDialogPresenter = () => {
         <Button.Secondary
           flex={1}
           justifyContent="center"
+          disabled={shuttingDown.isOn}
           onClick={() => {
             id && clearInterval(id);
             shellStore.closeDialog();
