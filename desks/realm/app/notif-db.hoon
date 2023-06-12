@@ -194,6 +194,7 @@
                   ?+  -.ch    !!
                     %del-messages-row    (msg-id-to-cord:encode:cdb-lib msg-id.uniq-id.ch)
                   ==
+                ?:  &(=(0 (lent del-msgs)) =(0 (lent del-paths)))  `this  :: return nothing if no del changes
                 =/  notif-ids=(list id:sur)
                 (generate-uniq-notif-ids-to-del:db-lib state del-msgs del-paths)
                 =/  index=@ud  0
