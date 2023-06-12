@@ -58,6 +58,7 @@ export class LocalPeer extends EventEmitter {
     this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
       track.enabled = false;
     });
+    this.emit('isMutedChanged', false);
   }
 
   @action
@@ -66,6 +67,7 @@ export class LocalPeer extends EventEmitter {
     this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
       track.enabled = true;
     });
+    this.emit('isMutedChanged', true);
   }
 
   get hasVideo() {

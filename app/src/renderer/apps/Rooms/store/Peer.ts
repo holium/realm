@@ -69,6 +69,7 @@ export class PeerClass extends EventsEmitter {
   @action
   isMutedChanged(isMuted: boolean) {
     this.isMuted = isMuted;
+    this.emit('isMutedChanged', isMuted);
   }
 
   @action
@@ -159,8 +160,8 @@ export class PeerClass extends EventsEmitter {
         console.log('got screen track');
       }
       this.videoTracks.set(track.id, track);
-      this.stream = stream;
-      // this.stream.o
+      this.videoStream = stream;
+
       this.hasVideoChanged(true);
       const video = document.getElementById(
         `peer-video-${this.peerId}`
@@ -198,7 +199,6 @@ export class PeerClass extends EventsEmitter {
       this.audioTracks.set(track.id, track);
       this.audioStream = stream;
       this.isAudioAttachedChanged(true);
-      this.stream = stream;
 
       track.onmute = () => {
         console.log('track muted');

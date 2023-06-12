@@ -167,9 +167,20 @@ export class RoomsStore extends EventsEmitter {
       this.provider = provider;
     }
     this.ourPeer = new LocalPeer(this.ourId);
+
     this.ourPeer.on('isSpeakingChanged', (isSpeaking) => {
       this.updateActiveSpeaker(this.ourId, isSpeaking);
     });
+
+    this.ourPeer.on('isMutedChanged', (isMuted) => {
+      this.sendDataToRoom({
+        kind: 3,
+        value: {
+          data: isMuted,
+        },
+      });
+    });
+
     this.websocket = this.connect();
     this.onRoomEvent = this.onRoomEvent.bind(this);
     this.createPeer = this.createPeer.bind(this);

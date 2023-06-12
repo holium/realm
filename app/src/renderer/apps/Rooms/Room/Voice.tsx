@@ -93,28 +93,23 @@ const VoiceViewPresenter = () => {
     return friends.getContactAvatarMetadata(peerId);
   };
 
-  console.log(
-    'streams',
-    roomsStore.ourPeer?.audioStream?.getAudioTracks(),
-    roomsStore.ourPeer?.videoStream?.getVideoTracks()
-  );
+  const ourId = loggedInAccount?.serverId;
 
   return (
     <SpeakerGrid
-      activeSpeaker={activeSpeaker}
-      // sort the list to have our peer first
+      activeSpeaker={activeSpeaker || ourId || null}
       peers={peers.slice().sort((a, b) => {
-        if (a === loggedInAccount?.serverId) {
+        if (a === ourId) {
           return -1;
         }
-        if (b === loggedInAccount?.serverId) {
+        if (b === ourId) {
           return 1;
         }
         return 0;
       })}
       getContactMetadata={getContactMetadata}
       getPeer={getPeer}
-      ourId={loggedInAccount?.serverId ?? ''}
+      ourId={ourId ?? ''}
       room={roomsStore.currentRoom}
       kickPeer={roomsStore.kickPeer}
       retryPeer={roomsStore.retryPeer}

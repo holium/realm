@@ -149,6 +149,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
             zIndex: 0,
             display: 'none',
             position: 'absolute',
+            pointerEvents: 'none',
             left: 0,
             right: 0,
             top: 0,

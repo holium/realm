@@ -8,6 +8,7 @@ type RowProps = {
   gap?: string;
   small?: boolean;
   selected?: boolean;
+  isDisabled?: boolean;
   disabled?: boolean;
   pending?: boolean;
   noHover?: boolean;
@@ -67,6 +68,8 @@ export const Row = styled(Box)<RowProps>`
   &:disabled {
     opacity: 0.2;
   }
+
+  ${({ isDisabled }) => isDisabled && `opacity: 0.2;`}
 
   ${(props) =>
     css`

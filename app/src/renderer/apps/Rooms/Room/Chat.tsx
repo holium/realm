@@ -46,7 +46,7 @@ const RoomChatPresenter = () => {
   const { loggedInAccount } = useAppState();
   const roomsStore = useRoomsStore();
   const { getTrayAppHeight } = useTrayApps();
-  const listHeight = getTrayAppHeight() - 164;
+  const listHeight = getTrayAppHeight() - 168;
 
   const chatInputRef = useRef<HTMLInputElement>(null);
 
@@ -72,6 +72,7 @@ const RoomChatPresenter = () => {
       return (
         <Flex
           height="100%"
+          width="100%"
           flexDirection="column"
           alignItems="center"
           justifyContent="center"
@@ -91,6 +92,7 @@ const RoomChatPresenter = () => {
         alignToBottom
         chatMode
         shiftScrollbar
+        followOutput={true}
         itemContent={(index, chat) => (
           <Box pt="2px">
             <Bubble
@@ -117,8 +119,10 @@ const RoomChatPresenter = () => {
   }, [chats]);
 
   return (
-    <Flex position="relative" flex={1} flexDirection="column">
-      {ChatList}
+    <Flex position="relative" bottom={50} flex={1} flexDirection="column">
+      <Flex position="absolute" top={50} bottom={10} left={0} right={0}>
+        {ChatList}
+      </Flex>
       <Flex
         position="absolute"
         bottom={0}
