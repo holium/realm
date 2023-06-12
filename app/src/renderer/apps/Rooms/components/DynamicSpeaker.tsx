@@ -220,7 +220,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
             {peer?.isMuted && (
               <Icon
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
+                animate={{ opacity: hasVideo ? 1.0 : 0.7 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
                 iconColor={hasVideo ? 'white' : undefined}

@@ -21,7 +21,7 @@ const VoiceViewPresenter = () => {
 
   useEffect(() => {
     const regularHeight = roomTrayConfig.dimensions.height;
-    if (peers.length > 4) {
+    if (peers.length >= 4) {
       const tallHeight = roomTrayConfig.dimensions.height + 212;
       setTrayAppHeight(tallHeight);
     } else {

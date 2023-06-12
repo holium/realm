@@ -696,15 +696,9 @@ export class RoomsStore extends EventsEmitter {
       }
     );
 
-    // TODO wire up peer data events
     peer.on('isSpeakingChanged', (isSpeaking: boolean) => {
       this.updateActiveSpeaker(peerId, isSpeaking);
     });
-
-    // peer.on('isMutedChanged', (isMuted: boolean) => {
-    //   console.log(peer.peerId, 'isMutedChanged', isMuted);
-    //   // this.updateMuted(peerId, isMuted);
-    // });
 
     this.peers.set(peerId, peer);
     return peer;
