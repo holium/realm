@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
 import {
@@ -11,7 +10,6 @@ import {
 } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 
-import { useTrayApps } from 'renderer/apps/store';
 import { ChatModelType } from 'renderer/stores/models/chat.model';
 
 import { InboxRow } from './InboxRow';
@@ -40,7 +38,7 @@ type Props = {
   onClickStandaloneChat: () => void;
 };
 
-const InboxBodyPresenter = ({
+export const InboxBody = ({
   inboxes,
   accountIdentity,
   spacePath,
@@ -50,11 +48,6 @@ const InboxBodyPresenter = ({
   onClickNewInbox,
   onClickStandaloneChat,
 }: Props) => {
-  const { dimensions } = useTrayApps();
-
-  const width = isStandaloneChat ? '100%' : dimensions.width - 24;
-  const height = isStandaloneChat ? '100%' : dimensions.height - 24;
-
   const [searchString, setSearchString] = useState<string>('');
 
   const searchFilter = useCallback(
@@ -74,8 +67,8 @@ const InboxBodyPresenter = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      width={width}
-      height={height}
+      width="100%"
+      height="100%"
       minWidth={0}
       flexDirection="column"
       paddingLeft={isStandaloneChat ? 12 : 0}
@@ -168,5 +161,3 @@ const InboxBodyPresenter = ({
     </Flex>
   );
 };
-
-export const InboxBody = observer(InboxBodyPresenter);
