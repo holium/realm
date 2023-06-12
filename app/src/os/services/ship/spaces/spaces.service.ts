@@ -53,7 +53,6 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
       app: 'spaces',
       path: `/updates`,
       onEvent: this._onEvent,
-      onQuit: this._onQuit,
       onError: this._onError,
     });
     this.fetchInviteData();
@@ -258,10 +257,6 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
           break;
       }
     }
-  };
-
-  private _onQuit = () => {
-    log.warn('Spaces subscription quit');
   };
 
   private _onError = (err: any) => {

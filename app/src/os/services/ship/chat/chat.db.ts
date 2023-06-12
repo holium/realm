@@ -47,7 +47,6 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     params.name = 'chatDB';
     super(params);
     if (params.preload) return;
-    this._onQuit = this._onQuit.bind(this);
     this._onError = this._onError.bind(this);
     this._onDbUpdate = this._onDbUpdate.bind(this);
     this._handleDBChange = this._handleDBChange.bind(this);
@@ -71,7 +70,6 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
       app: 'chat-db',
       path: '/db',
       onEvent: this._onDbUpdate,
-      onQuit: this._onQuit,
       onError: this._onError,
     });
     await this.fetchPathMetadata();
@@ -357,9 +355,6 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     }
   }
 
-  private _onQuit() {
-    console.log('fail!');
-  }
   private _onError(err: any) {
     console.log('err!', err);
   }

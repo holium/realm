@@ -106,7 +106,9 @@ export const WalletCard = ({
             </Text.Body>
           )}
         </Flex>
-        <Text.Body opacity={0.3}>{transactions?.length} Transactions</Text.Body>
+        <Text.Body opacity={0.3}>
+          {transactions?.length} Transaction{transactions?.length !== 1 && 's'}
+        </Text.Body>
       </Flex>
     </WalletCardStyle>
   );
