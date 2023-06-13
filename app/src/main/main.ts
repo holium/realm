@@ -5,6 +5,7 @@ import { RealmService } from '../os/realm.service';
 import { AppUpdater } from './AppUpdater';
 import { setRealmCursor } from './helpers/cursorSettings';
 import { isArm64, isMac } from './helpers/env';
+import { MenuBuilder } from './menu';
 import { getAssetPath } from './util';
 import {
   createMouseOverlayWindow,
@@ -17,6 +18,7 @@ import './logging';
 const store = new Store();
 
 let updater: AppUpdater;
+let menuBuilder: MenuBuilder | null;
 let realmService: RealmService | null;
 
 // The realm window has a mouse overlay window associated with it.
@@ -58,6 +60,13 @@ export const bootRealm = () => {
   setRealmCursor(true);
   realmWindow = createRealmWindow();
   mouseOverlayWindow = createMouseOverlayWindow(realmWindow);
+
+  if (menuBuilder) {
+    menuBuilder = null;
+  }
+
+  menuBuilder = new MenuBuilder(realmWindow);
+  menuBuilder.buildMenu();
 
   // Change dock icon to realm icon.
   const realmImage = nativeImage.createFromPath(getAssetPath('icon.png'));
@@ -112,6 +121,13 @@ export const bootStandaloneChat = () => {
   setRealmCursor(false);
   standaloneChatWindow = createStandaloneChatWindow();
   mouseOverlayWindow = createMouseOverlayWindow(standaloneChatWindow);
+
+  if (menuBuilder) {
+    menuBuilder = null;
+  }
+
+  menuBuilder = new MenuBuilder(standaloneChatWindow);
+  menuBuilder.buildMenu();
 
   // Change dock icon to standalone chat icon.
   const standaloneImage = nativeImage.createFromPath(

@@ -18,7 +18,6 @@ import { PowerHelper } from './helpers/power';
 import { StandaloneHelper } from './helpers/standalone';
 import { TitlebarHelper } from './helpers/titlebar';
 import { WebViewHelper } from './helpers/webview';
-import { MenuBuilder } from './menu';
 import { getAssetPath, getPreloadPath, resolveHtmlPath } from './util';
 
 const defaultRealmWindowOptions = {
@@ -75,9 +74,6 @@ export const createRealmWindow = () => {
       fullScreenWindow(newRealmWindow);
     }
   });
-
-  const menuBuilder = new MenuBuilder(newRealmWindow);
-  menuBuilder.buildMenu();
 
   // Open urls in the user's browser
   newRealmWindow.webContents.setWindowOpenHandler((edata) => {
