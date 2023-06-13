@@ -99,9 +99,6 @@ export const bootStandaloneChat = () => {
   }
 
   if (realmWindow) {
-    realmWindow.setFullScreen(false);
-    realmWindow.setSimpleFullScreen(false);
-
     if (realmWindow.isClosable()) {
       realmWindow.close();
     }

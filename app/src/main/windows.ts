@@ -153,9 +153,6 @@ export const createStandaloneChatWindow = () => {
   const newStandaloneChatWindow = new BrowserWindow({
     ...defaultRealmWindowOptions,
     title: 'Realm Chat',
-    // Windowed by default.
-    fullscreen: false,
-    simpleFullscreen: false,
     icon: getAssetPath('standalone-chat-icon.png'),
   });
   newStandaloneChatWindow.setMenuBarVisibility(false);
