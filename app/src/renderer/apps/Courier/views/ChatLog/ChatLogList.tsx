@@ -59,7 +59,7 @@ export const ChatLogList = ({
 
     return (
       <Box
-        key={`row-${message.id}-${index}`}
+        key={`row-${message.id}-${index}-${message.createdAt}`}
         animate={false}
         pt={topSpacing}
         pb={bottomSpacing}
