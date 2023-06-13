@@ -55,7 +55,7 @@ const ChatLogBodyPresenter = ({
   onSend,
 }: Props) => {
   const { chatStore } = useShipStore();
-  const { selectedChat, setSubroute } = chatStore;
+  const { selectedChat, setSubroute, inboxLoader } = chatStore;
 
   const [showAttachments, setShowAttachments] = useState(false);
 
@@ -91,8 +91,9 @@ const ChatLogBodyPresenter = ({
     <Flex
       flex={1}
       height="100%"
-      layout="preserve-aspect"
-      layoutId={isStandaloneChat ? undefined : `chat-${path}-container`}
+      width="100%"
+      // layout="preserve-aspect"
+      // layoutId={isStandaloneChat ? undefined : `chat-${path}-container`}
       flexDirection="column"
     >
       <ChatLogHeader
@@ -106,12 +107,12 @@ const ChatLogBodyPresenter = ({
         flex={1}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.1, duration: 0.1 }}
+        transition={{ duration: 0.05 }}
         flexDirection="column"
         alignItems="center"
         justifyContent="center"
       >
-        {messages.length === 0 ? (
+        {messages.length === 0 && inboxLoader.isLoaded ? (
           <Text.Custom
             textAlign="center"
             width={300}

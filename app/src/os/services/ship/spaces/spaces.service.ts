@@ -332,13 +332,14 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
         },
       },
     });
-    APIConnection.getInstance().conduit.poke({
-      app: 'rooms-v2',
-      mark: 'rooms-v2-session-action',
-      json: {
-        'set-provider': pathObj.ship,
-      },
-    });
+    // TODO add service-provider to %spaces and remove this
+    // APIConnection.getInstance().conduit.poke({
+    //   app: 'rooms-v2',
+    //   mark: 'rooms-v2-session-action',
+    //   json: {
+    //     'set-provider': pathObj.ship,
+    //   },
+    // });
   }
 
   public async createSpace(newSpace: NewSpace) {

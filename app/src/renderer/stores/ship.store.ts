@@ -110,6 +110,7 @@ export const shipStore = ShipStore.create({
     isOpen: false,
     pinnedChats: [],
     loader: { state: 'loading' },
+    inboxLoader: { state: 'initial' },
   },
   spacesStore: {
     spaces: {},

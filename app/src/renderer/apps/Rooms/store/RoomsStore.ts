@@ -534,8 +534,10 @@ export class RoomsStore extends EventsEmitter {
   }
 
   @action
-  createRoom(title: string, access: RoomAccess, path: string | null) {
-    this.ourPeer.enableAudio();
+  async createRoom(title: string, access: RoomAccess, path: string | null) {
+    if (!this.ourPeer.audioStream) {
+      await this.ourPeer.enableAudio();
+    }
 
     const newRoom = {
       rid: ridFromTitle(this.provider, this.ourId, title),
@@ -605,32 +607,21 @@ export class RoomsStore extends EventsEmitter {
   }
 
   @action
-  joinRoom(rid: string) {
+  async joinRoom(rid: string) {
     this.cleanUpCurrentRoom();
     this.setCurrentRoom(rid);
     if (!this.ourPeer.audioStream) {
-      this.ourPeer.enableAudio().then(
-        action(() => {
-          this.websocket.send(
-            serialize({
-              type: 'enter-room',
-              rid,
-            })
-          );
-          // add us to the room
-          this.rooms.get(rid)?.addPeer(this.ourId);
-        })
-      );
-    } else {
-      this.websocket.send(
-        serialize({
-          type: 'enter-room',
-          rid,
-        })
-      );
-      // add us to the room
-      this.rooms.get(rid)?.addPeer(this.ourId);
+      await this.ourPeer.enableAudio();
     }
+
+    this.websocket.send(
+      serialize({
+        type: 'enter-room',
+        rid,
+      })
+    );
+    // add us to the room
+    this.rooms.get(rid)?.addPeer(this.ourId);
   }
 
   @action

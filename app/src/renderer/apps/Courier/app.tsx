@@ -23,9 +23,10 @@ export const CourierAppPresenter = () => {
       if (chatStore.inbox.length === 0) {
         chatStore.loadChatList();
       }
-    } else {
-      chatStore.selectedChat?.fetchMessages();
     }
+    // else {
+    //   chatStore.selectedChat?.fetchMessages();
+    // }
   }, []);
 
   useEffect(() => {

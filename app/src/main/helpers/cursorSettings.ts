@@ -84,11 +84,13 @@ const enableRealmCursor = (
   mouseOverlayWindow: BrowserWindow
 ) => {
   if (isMac) {
-    hideSystemCursor(mouseOverlayWindow.webContents);
-    hideSystemCursor(mainWindow.webContents);
+    !mouseOverlayWindow.isDestroyed &&
+      hideSystemCursor(mouseOverlayWindow.webContents);
+    !mainWindow.isDestroyed && hideSystemCursor(mainWindow.webContents);
   } else if (isWindows) {
-    hideSystemCursor(mouseOverlayWindow.webContents);
-    hideSystemCursor(mainWindow.webContents);
+    !mouseOverlayWindow.isDestroyed &&
+      hideSystemCursor(mouseOverlayWindow.webContents);
+    !mainWindow.isDestroyed && hideSystemCursor(mainWindow.webContents);
   }
 };
 

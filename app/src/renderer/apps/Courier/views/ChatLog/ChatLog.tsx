@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import {
@@ -29,6 +29,7 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
   const { dimensions, innerNavigation } = useTrayApps();
   const { notifStore, friends, chatStore } = useShipStore();
   const { selectedChat } = chatStore;
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   const listRef = useRef<WindowedListRef>(null);
 
@@ -43,25 +44,29 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
 
   useEffect(() => {
     if (!selectedChat || !loggedInAccount?.serverId) return;
-    selectedChat.fetchMessages();
+    if (!hasLoaded) {
+      selectedChat.fetchMessages();
+    }
     const unreadCount = notifStore.getUnreadCountByPath(selectedChat.path);
     if (unreadCount > 0) {
       notifStore.readPath('realm-chat', selectedChat.path);
     }
 
-    setTimeout(() => {
+    if (listRef.current && !hasLoaded) {
       let goalIndex = messages.length - 1;
       const matchingIndex = messages.findIndex((m) => m.id === innerNavigation);
       if (matchingIndex !== -1) {
         goalIndex = matchingIndex;
       }
-      listRef.current?.scrollToIndex({
+
+      listRef.current.scrollToIndex({
         index: goalIndex,
         align: 'start',
         behavior: innerNavigation === '' ? 'auto' : 'smooth',
       });
-    }, 350);
-  }, [selectedChat?.path, innerNavigation]);
+      setHasLoaded(true);
+    }
+  }, [selectedChat?.path, listRef.current, innerNavigation]);
 
   const replyToFormatted = useMemo(() => {
     if (selectedChat?.replyingMsg) {

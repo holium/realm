@@ -84,7 +84,6 @@ const RoomsPresenter = () => {
               title={room.title}
               provider={room.provider}
               present={room.present}
-              // cursors={room.cursors}
               creator={room.creator}
               access={room.access}
               capacity={room.capacity}
@@ -92,9 +91,14 @@ const RoomsPresenter = () => {
                 evt.stopPropagation();
                 if (roomsStore.currentRid !== room.rid) {
                   SoundActions.playRoomEnter();
-                  roomsStore.joinRoom(room.rid);
+                  try {
+                    await roomsStore.joinRoom(room.rid);
+                    roomsApp.setView('room');
+                  } catch (e) {
+                    // TODO put error in UI
+                    console.error(e);
+                  }
                 }
-                roomsApp.setView('room');
               }}
             />
           );

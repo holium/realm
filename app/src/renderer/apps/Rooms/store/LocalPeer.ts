@@ -52,6 +52,7 @@ export class LocalPeer extends EventEmitter {
     super();
     makeObservable(this);
     this.patp = ourId;
+    this.setAudioStream = this.setAudioStream.bind(this);
   }
 
   @action
@@ -102,7 +103,7 @@ export class LocalPeer extends EventEmitter {
             : DEFAULT_AUDIO_OPTIONS,
           video: false,
         })
-        .then(this.setAudioStream.bind(this))
+        .then(this.setAudioStream)
         .catch((err: any) => {
           console.log('enableAudio failed on navigator.mediaDevices', err);
         });
@@ -110,6 +111,7 @@ export class LocalPeer extends EventEmitter {
         this.audioStream = audio;
         this.analysers[0] = SpeakingDetectionAnalyser.initialize(this);
         this.status = PeerConnectionState.Broadcasting;
+
         return this.audioStream;
       } else {
         throw new Error('Could not enable audio');
@@ -117,7 +119,8 @@ export class LocalPeer extends EventEmitter {
     }
   }
 
-  @action setAudioStream(stream: MediaStream) {
+  @action
+  setAudioStream(stream: MediaStream) {
     this.audioStream = stream;
     this.isMuted = false;
     return this.audioStream;

@@ -40,8 +40,8 @@ export const NoWalletFoundScreen = ({ setScreen }: Props) => (
       <Icon
         name="InfoCircleFilled"
         fill="intent-caution"
-        width="18px"
-        height="18px"
+        width={18}
+        height={18}
       />
       <Text.Hint color="intent-caution">
         You are using pre-release software. Only use for development purposes.

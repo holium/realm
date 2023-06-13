@@ -61,6 +61,8 @@ export const RealmTitlebarPresenter = () => {
 
 export const RealmTitlebar = observer(RealmTitlebarPresenter);
 
+export const STANDALONE_CHAT_TITLEBAR_HEIGHT = 30;
+
 const StandAloneChatTitlebarContainer = styled.div`
   position: relative;
   display: flex;
@@ -70,7 +72,7 @@ const StandAloneChatTitlebarContainer = styled.div`
   top: 0;
   left: 0;
   width: 100%;
-  height: ${TITLEBAR_HEIGHT}px;
+  height: ${STANDALONE_CHAT_TITLEBAR_HEIGHT}px;
   padding: 1px 12px 0 12px;
   background: var(--rlm-window-color);
   z-index: 100;
@@ -79,7 +81,7 @@ const StandAloneChatTitlebarContainer = styled.div`
 `;
 
 export const StandAloneChatTitlebar = () => (
-  <Top zIndex={20} size={TITLEBAR_HEIGHT}>
+  <Top zIndex={20} size={STANDALONE_CHAT_TITLEBAR_HEIGHT}>
     <StandAloneChatTitlebarContainer>
       <Flex
         position="relative"
@@ -97,7 +99,7 @@ export const StandAloneChatTitlebar = () => (
             fontWeight: 500,
           }}
         >
-          Realm Chat
+          Courier
         </Text.Body>
       </Flex>
     </StandAloneChatTitlebarContainer>

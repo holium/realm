@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 import { Flex } from '@holium/design-system/general';
 
-import { TITLEBAR_HEIGHT } from 'renderer/system/titlebar/Titlebar';
+import { STANDALONE_CHAT_TITLEBAR_HEIGHT } from 'renderer/system/titlebar/Titlebar';
 
 export const ResizeHandle = styled.div`
   z-index: 1;
@@ -16,7 +16,7 @@ export const ResizeHandle = styled.div`
 
 export const StandaloneChatContainer = styled(Flex)`
   width: 100%;
-  height: calc(100% - ${TITLEBAR_HEIGHT}px);
-  margin-top: ${TITLEBAR_HEIGHT}px;
+  height: calc(100% - ${STANDALONE_CHAT_TITLEBAR_HEIGHT}px);
+  margin-top: ${STANDALONE_CHAT_TITLEBAR_HEIGHT}px;
   border-top: 1px solid var(--rlm-base-color);
 `;
