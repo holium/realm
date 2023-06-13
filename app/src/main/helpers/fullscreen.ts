@@ -38,7 +38,7 @@ export const fullScreenWindow = (window: BrowserWindow) => {
   const fullScreenBounds = getFullScreenBounds();
   window.setBounds(fullScreenBounds);
   window.setFullScreen(true);
-  window.setSimpleFullScreen(useSimpleFullscreen);
+  if (useSimpleFullscreen) window.setSimpleFullScreen(true);
   window.webContents.send('set-fullscreen', true);
   window.webContents.send('use-custom-titlebar', useSimpleFullscreen);
 };
@@ -52,14 +52,14 @@ export const windowWindow = (window: BrowserWindow) => {
     height: 500 * scaleFactor,
   };
   window.setFullScreen(false);
-  window.setSimpleFullScreen(false);
+  if (useSimpleFullscreen) window.setSimpleFullScreen(false);
   window.setBounds(windowedBounds);
   window.webContents.send('set-fullscreen', false);
   window.webContents.send('use-custom-titlebar', useSimpleFullscreen);
 };
 
 export const toggleFullScreen = (window: BrowserWindow) => {
-  if (window.isFullScreen() || window.isSimpleFullScreen()) {
+  if (window.isFullScreen()) {
     windowWindow(window);
   } else {
     fullScreenWindow(window);
