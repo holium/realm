@@ -28,6 +28,6 @@ export const StyledInboxRow = styled(Box)<{
   ${({ isPinned }) =>
     isPinned &&
     `
-    background: rgba(0, 0, 0, 0.12);
+    background: var(--rlm-overlay-hover-color);
   `}
 `;
