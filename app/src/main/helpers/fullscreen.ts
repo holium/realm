@@ -46,14 +46,13 @@ export const fullScreenWindow = (window: BrowserWindow) => {
 export const windowWindow = (window: BrowserWindow) => {
   const scaleFactor = screen.getPrimaryDisplay().scaleFactor;
   const windowedBounds = {
-    x: 0,
-    y: 0,
     width: 700 * scaleFactor,
     height: 500 * scaleFactor,
   };
   window.setFullScreen(false);
   if (useSimpleFullscreen) window.setSimpleFullScreen(false);
   window.setBounds(windowedBounds);
+  window.center();
   window.webContents.send('set-fullscreen', false);
   window.webContents.send('use-custom-titlebar', useSimpleFullscreen);
 };
