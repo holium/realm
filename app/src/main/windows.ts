@@ -4,11 +4,11 @@ import { BrowserHelper } from './helpers/browser';
 import { CursorSettingsHelper } from './helpers/cursorSettings';
 import { DeepLinkHelper } from './helpers/deepLink';
 import { DevHelper } from './helpers/dev';
+import { isArm64Mac } from './helpers/env';
 import {
   FullScreenHelper,
   fullScreenWindow,
   hasBeenExpanded,
-  useSimpleFullscreen,
   windowWindow,
 } from './helpers/fullscreen';
 import { KeyHelper } from './helpers/key';
@@ -20,13 +20,14 @@ import { TitlebarHelper } from './helpers/titlebar';
 import { WebViewHelper } from './helpers/webview';
 import { getAssetPath, getPreloadPath, resolveHtmlPath } from './util';
 
-const defaultRealmWindowOptions = {
+const defaultRealmWindowOptions: Electron.BrowserWindowConstructorOptions = {
   show: false,
-  frame: useSimpleFullscreen ? false : true,
+  frame: isArm64Mac ? false : true,
   // We start with a zero size window and enlarge it,
   // to trigger the mouse-in event when the window is shown.
   width: 0,
   height: 0,
+  fullscreenable: true,
   icon: getAssetPath('icon.png'),
   title: 'Realm',
   fullscreen: false,
@@ -85,6 +86,7 @@ export const createRealmWindow = () => {
 export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
   // Create a window covering the whole main window.
   const defaultMouseWindowOptions: Electron.BrowserWindowConstructorOptions = {
+    show: false,
     title: 'Mouse Overlay',
     parent: parentWindow,
     ...parentWindow.getBounds(),
@@ -117,6 +119,10 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
   FullScreenHelper.registerListeners(parentWindow, newMouseWindow);
   CursorSettingsHelper.registerListeners(parentWindow, newMouseWindow);
   MouseEventsHelper.registerListeners(parentWindow, newMouseWindow);
+
+  newMouseWindow.on('ready-to-show', () => {
+    newMouseWindow.show();
+  });
 
   newMouseWindow.on('close', () => {
     if (parentWindow.isClosable()) parentWindow.close();
