@@ -64,6 +64,15 @@ export const SearchBar = ({
     setDisplaySuggestions(false);
     setMatchedWords([]);
   };
+  const handleKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>,
+    data: any
+  ) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      onWordClick(data);
+    }
+  };
   return (
     <Flex
       flex={1}
@@ -108,6 +117,9 @@ export const SearchBar = ({
                   }}
                   tabIndex={0}
                   onClick={() => onWordClick(item)}
+                  onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) =>
+                    handleKeyDown(event, item)
+                  }
                 >
                   <Text.Body fontWeight={500}> {item.word}</Text.Body>
                 </Box>
@@ -124,6 +136,9 @@ export const SearchBar = ({
               tabIndex={0}
               onClick={() =>
                 onWordClick({ word: searchQuery, webSearch: true })
+              }
+              onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) =>
+                handleKeyDown(event, { word: searchQuery, webSearch: true })
               }
             >
               <Text.Body fontWeight={500} opacity={0.7}>
