@@ -1,4 +1,4 @@
-import { app, BrowserWindow, session, WebContents } from 'electron';
+import { app, BrowserWindow, WebContents } from 'electron';
 import log from 'electron-log';
 import { track } from '@amplitude/analytics-browser';
 
@@ -6,14 +6,13 @@ import {
   getReleaseChannelFromSettings,
   saveReleaseChannelInSettings,
 } from './lib/settings';
-import { getCookie } from './lib/shipHelpers';
+import { getCookie, setSessionCookie } from './lib/shipHelpers';
 import { RealmUpdateTypes } from './realm.types';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { APIConnection } from './services/api';
 import { AuthService } from './services/auth/auth.service';
 import OnboardingService from './services/auth/onboarding.service';
 import { FileUploadParams, ShipService } from './services/ship/ship.service';
-import { Credentials } from './services/ship/ship.types.ts';
 
 export class RealmService extends AbstractService<RealmUpdateTypes> {
   public services?: {
@@ -35,6 +34,12 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
 
     app.on('quit', () => {
       // do other cleanup here
+    });
+
+    app.on('web-contents-created', (_: Event, webContents: WebContents) => {
+      webContents.on('will-redirect', (_: Event, url: string) => {
+        this.onWillRedirect(url, webContents);
+      });
     });
 
     const windows = BrowserWindow.getAllWindows();
@@ -130,7 +135,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         return false;
       }
 
-      await this.setSessionCookie({ ...credentials, cookie });
+      await setSessionCookie({ ...credentials, cookie });
       return new Promise((resolve) => {
         APIConnection.getInstance().conduit.once('connected', () => {
           log.info('realm.service.ts, login: conduit connected');
@@ -144,32 +149,6 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       });
     }
     return isAuthenticated;
-  }
-
-  async setSessionCookie(credentials: Credentials) {
-    const path = credentials.cookie?.split('; ')[1].split('=')[1];
-    const maxAge = credentials.cookie?.split('; ')[2].split('=')[1];
-    const value = credentials.cookie?.split('=')[1].split('; ')[0];
-    try {
-      // remove current cookie
-      await session
-        .fromPartition(`persist:webview-${credentials.ship}`)
-        .cookies.remove(`${credentials.url}`, `urbauth-${credentials.ship}`);
-      // set new cookie
-      return await session
-        .fromPartition(`persist:webview-${credentials.ship}`)
-        .cookies.set({
-          url: `${credentials.url}`,
-          name: `urbauth-${credentials.ship}`,
-          value,
-          expirationDate: new Date(
-            Date.now() + parseInt(maxAge) * 1000
-          ).getTime(),
-          path: path,
-        });
-    } catch (e) {
-      log.error('setSessionCookie error:', e);
-    }
   }
 
   /**
@@ -337,11 +316,15 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           log.error('realm.service.ts:', 'No credentials found');
           return;
         }
+        log.info(
+          'realm.service.ts:',
+          `redirect. fetching new cookie`,
+          credentials
+        );
         const cookie = await getCookie({
           serverUrl: credentials.url,
           serverCode: credentials.code,
         });
-        log.info('realm.service.ts:', 'onWillRedirect getCookie', cookie);
         if (!cookie) {
           log.error('realm.service.ts:', 'Could not fetch a new cookie!');
           // TODO show feedback to user
@@ -353,7 +336,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           return;
         }
 
-        await this.setSessionCookie({ ...credentials, cookie });
+        await setSessionCookie({ ...credentials, cookie });
 
         this.services?.ship?.updateCookie(cookie);
         webContents.reload();
@@ -364,10 +347,6 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   }
 
   async onWebViewAttached(_: any, webContents: WebContents) {
-    webContents.on('will-redirect', (_, url) => {
-      this.onWillRedirect(url, webContents);
-    });
-
     webContents.on('dom-ready', () => {
       // TODO wire up libs here
     });
