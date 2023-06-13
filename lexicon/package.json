@@ -4,7 +4,6 @@
   "version": "0.1.0",
   "main": "dist/holium-lexicon.cjs.js",
   "module": "dist/holium-lexicon.esm.js",
-  "type": "module",
   "scripts": {
     "build": "preconstruct build",
     "postinstall": "preconstruct dev"
