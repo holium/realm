@@ -1,15 +1,15 @@
-import { BrowserWindow, screen, shell } from 'electron';
+import { BrowserWindow, shell } from 'electron';
 
 import { BrowserHelper } from './helpers/browser';
 import { CursorSettingsHelper } from './helpers/cursorSettings';
 import { DeepLinkHelper } from './helpers/deepLink';
 import { DevHelper } from './helpers/dev';
 import {
-  expandWindowToFullscreen,
   FullScreenHelper,
+  fullScreenWindow,
   hasBeenExpanded,
-  toggleFullScreen,
   useSimpleFullscreen,
+  windowWindow,
 } from './helpers/fullscreen';
 import { KeyHelper } from './helpers/key';
 import { MediaHelper } from './helpers/media';
@@ -18,25 +18,22 @@ import { PowerHelper } from './helpers/power';
 import { StandaloneHelper } from './helpers/standalone';
 import { TitlebarHelper } from './helpers/titlebar';
 import { WebViewHelper } from './helpers/webview';
-import { MenuBuilder } from './menu';
 import { getAssetPath, getPreloadPath, resolveHtmlPath } from './util';
 
-const getDefaultRealmWindowOptions = (
-  width: number,
-  height: number
-): Electron.BrowserWindowConstructorOptions => ({
+const defaultRealmWindowOptions = {
   show: false,
   frame: useSimpleFullscreen ? false : true,
+  x: 0,
+  y: 0,
   // We start with a zero size window and enlarge it,
   // to trigger the mouse-in event when the window is shown.
-  width,
-  height,
+  width: 0,
+  height: 0,
   icon: getAssetPath('icon.png'),
   title: 'Realm',
-  fullscreen: true,
+  fullscreen: false,
+  simpleFullscreen: false,
   acceptFirstMouse: true,
-  // turn on simple fullscreen for arm64 mac to fill notch area
-  simpleFullscreen: useSimpleFullscreen,
   webPreferences: {
     nodeIntegration: false,
     webviewTag: true,
@@ -44,14 +41,9 @@ const getDefaultRealmWindowOptions = (
     contextIsolation: true,
     preload: getPreloadPath(),
   },
-});
+};
 
 export const createRealmWindow = () => {
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  const defaultRealmWindowOptions = getDefaultRealmWindowOptions(
-    useSimpleFullscreen ? 0 : width,
-    useSimpleFullscreen ? 0 : height
-  );
   const newRealmWindow = new BrowserWindow(defaultRealmWindowOptions);
   newRealmWindow.setMenuBarVisibility(false);
   newRealmWindow.loadURL(resolveHtmlPath('index.html'));
@@ -79,14 +71,9 @@ export const createRealmWindow = () => {
     }
 
     if (!hasBeenExpanded(newRealmWindow)) {
-      expandWindowToFullscreen(newRealmWindow);
+      fullScreenWindow(newRealmWindow);
     }
-
-    toggleFullScreen(newRealmWindow, true);
   });
-
-  const menuBuilder = new MenuBuilder(newRealmWindow);
-  menuBuilder.buildMenu();
 
   // Open urls in the user's browser
   newRealmWindow.webContents.setWindowOpenHandler((edata) => {
@@ -142,6 +129,13 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
   });
 
   parentWindow.on('resize', () => {
+    const newBounds = parentWindow.getBounds();
+
+    newMouseWindow.setBounds(newBounds);
+    parentWindow.webContents.send('set-dimensions', newBounds);
+  });
+
+  parentWindow.on('move', () => {
     const newDimension = parentWindow.getBounds();
 
     newMouseWindow.setBounds(newDimension);
@@ -152,19 +146,9 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
 };
 
 export const createStandaloneChatWindow = () => {
-  const defaultWidth = 700 * screen.getPrimaryDisplay().scaleFactor;
-  const defaultHeight = 500 * screen.getPrimaryDisplay().scaleFactor;
-  const defaultRealmWindowOptions = getDefaultRealmWindowOptions(
-    defaultWidth,
-    defaultHeight
-  );
-
   const newStandaloneChatWindow = new BrowserWindow({
     ...defaultRealmWindowOptions,
     title: 'Realm Chat',
-    // Windowed by default.
-    fullscreen: false,
-    simpleFullscreen: false,
     icon: getAssetPath('standalone-chat-icon.png'),
   });
   newStandaloneChatWindow.setMenuBarVisibility(false);
@@ -186,9 +170,9 @@ export const createStandaloneChatWindow = () => {
   });
 
   newStandaloneChatWindow.on('ready-to-show', () => {
-    // if (!hasBeenExpanded(newStandaloneChatWindow)) {
-    //   expandWindowToFullscreen(newStandaloneChatWindow);
-    // }
+    if (!hasBeenExpanded(newStandaloneChatWindow)) {
+      windowWindow(newStandaloneChatWindow);
+    }
 
     newStandaloneChatWindow.show();
   });

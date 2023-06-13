@@ -51,8 +51,8 @@ const appPreload = {
   setFullscreen: (isFullscreen: boolean) => {
     return ipcRenderer.invoke('set-fullscreen', isFullscreen);
   },
-  isFullscreen: () => {
-    return ipcRenderer.invoke('is-fullscreen');
+  shouldUseCustomTitlebar: (): Promise<boolean> => {
+    return ipcRenderer.invoke('should-use-custom-titlebar');
   },
   setStandaloneChat: (isStandaloneChat: boolean) => {
     return ipcRenderer.invoke('set-standalone-chat', isStandaloneChat);
@@ -164,7 +164,7 @@ const appPreload = {
   },
 
   onSetTitlebarVisible(callback: (isVisible: boolean) => void) {
-    ipcRenderer.on('set-titlebar-visible', (_, isVisible: boolean) => {
+    ipcRenderer.on('use-custom-titlebar', (_, isVisible: boolean) => {
       callback(isVisible);
     });
   },

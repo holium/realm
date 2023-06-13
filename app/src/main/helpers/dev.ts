@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain } from 'electron';
 
-import { toggleFullScreen } from './fullscreen';
+import { fullScreenWindow } from './fullscreen';
 
 const registerListeners = (mainWindow: BrowserWindow) => {
   ipcMain.removeHandler('toggle-devtools');
@@ -20,10 +20,13 @@ const registerListeners = (mainWindow: BrowserWindow) => {
   });
   ipcMain.handle('disable-isolation-mode', () => {
     if (!mainWindow.isKiosk()) return;
+    mainWindow.setKiosk(false);
+
     // Preserve fullscreen state.
     const isFullScreen = mainWindow.isFullScreen();
-    mainWindow.setKiosk(false);
-    toggleFullScreen(mainWindow, isFullScreen);
+    if (isFullScreen) {
+      fullScreenWindow(mainWindow);
+    }
   });
 };
 
