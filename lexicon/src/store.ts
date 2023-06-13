@@ -1,6 +1,5 @@
 import create from 'zustand';
 
-import { log } from './utils';
 export interface Store {
   addModalOpen: boolean;
   setAddModalOpen: (addModalOpen: boolean) => void;

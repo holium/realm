@@ -1,8 +1,9 @@
 import { observer } from 'mobx-react';
 
-import { App } from '../../../../../lexicon/src/App';
+import { App } from '@holium/lexicon';
 
-export const Lexicon = () => {
+const LexiconAppPresenter = () => {
   return <App />;
 };
-export const LexiconApp = observer(Lexicon);
+
+export const LexiconApp = observer(LexiconAppPresenter);
