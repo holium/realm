@@ -8,6 +8,8 @@ const registerListeners = (mainWindow: BrowserWindow) => {
   ipcMain.removeHandler('disable-isolation-mode');
 
   ipcMain.handle('toggle-devtools', () => {
+    if (mainWindow.isDestroyed()) return;
+
     if (mainWindow.webContents.isDevToolsOpened()) {
       mainWindow.webContents.closeDevTools();
     } else {
@@ -15,11 +17,15 @@ const registerListeners = (mainWindow: BrowserWindow) => {
     }
   });
   ipcMain.handle('enable-isolation-mode', () => {
+    if (mainWindow.isDestroyed()) return;
     if (mainWindow.isKiosk()) return;
+
     mainWindow.setKiosk(true);
   });
   ipcMain.handle('disable-isolation-mode', () => {
+    if (mainWindow.isDestroyed()) return;
     if (!mainWindow.isKiosk()) return;
+
     mainWindow.setKiosk(false);
 
     // Preserve fullscreen state.

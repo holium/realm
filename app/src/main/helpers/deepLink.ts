@@ -12,6 +12,8 @@ const registerListeners = (mainWindow: BrowserWindow) => {
 
   // Protocol handler for osx
   app.on('open-url', function (event: any, url: string) {
+    if (mainWindow.isDestroyed()) return;
+
     event.preventDefault();
     deeplinkingUrl = url;
 
