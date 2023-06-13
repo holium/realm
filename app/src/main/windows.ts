@@ -23,8 +23,6 @@ import { getAssetPath, getPreloadPath, resolveHtmlPath } from './util';
 const defaultRealmWindowOptions = {
   show: false,
   frame: useSimpleFullscreen ? false : true,
-  x: 0,
-  y: 0,
   // We start with a zero size window and enlarge it,
   // to trigger the mouse-in event when the window is shown.
   width: 0,
