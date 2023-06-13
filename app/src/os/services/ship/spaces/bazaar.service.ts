@@ -29,7 +29,6 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
 
     this._onEvent = this._onEvent.bind(this);
     this._onError = this._onError.bind(this);
-    this._onQuit = this._onQuit.bind(this);
     if (options?.verbose) {
       log.info('bazaar.service.ts:', 'Constructed.');
     }
@@ -52,7 +51,6 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
           reject(e);
           this._onError(e);
         },
-        onQuit: this._onQuit,
       });
     });
   }
@@ -249,9 +247,6 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
           break;
       }
     }
-  };
-  private _onQuit = () => {
-    log.warn('Spaces subscription quit');
   };
   private _onError = (err: any) => {
     log.warn('Spaces subscription error', err);

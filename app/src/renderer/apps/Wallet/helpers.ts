@@ -13,10 +13,6 @@ export const ethToUsd = (eth: number, currentPrice: number, decimals = 2) =>
 export const usdToEth = (usd: number, currentPrice: number, decimals = 8) =>
   isNaN(usd) ? 0 : Number((usd / currentPrice).toFixed(decimals));
 
-export function gweiToEther(gwei: number) {
-  return gwei / 1000000000000000000;
-}
-
 export function getDisplayDate(date: Date) {
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',

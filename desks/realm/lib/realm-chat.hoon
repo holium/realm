@@ -345,6 +345,7 @@
   |=  [act=[=path fragments=(list minimal-fragment:db) expires-in=@dr] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ?>  =(src.bowl our.bowl)
+  ?>  (gth (lent fragments.act) 0)  :: no sending empty messages
 
   :: read the peers for the path
   =/  pathpeers  (scry-peers path.act bowl)

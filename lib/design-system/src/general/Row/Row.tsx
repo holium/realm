@@ -8,6 +8,7 @@ type RowProps = {
   gap?: string;
   small?: boolean;
   selected?: boolean;
+  isDisabled?: boolean;
   disabled?: boolean;
   pending?: boolean;
   noHover?: boolean;
@@ -30,7 +31,7 @@ export const Row = styled(Box)<RowProps>`
   flex-basis: initial;
   gap: ${(props: RowProps) => props.gap || '6px'};
   color: rgba(var(--rlm-text-rgba));
-  transition: var(--transition);
+  transition: var(--transition-fast);
 
   &:active:not([disabled]) {
     background-color: rgba(var(--rlm-overlay-active-rgba));
@@ -67,6 +68,8 @@ export const Row = styled(Box)<RowProps>`
   &:disabled {
     opacity: 0.2;
   }
+
+  ${({ isDisabled }) => isDisabled && `opacity: 0.2;`}
 
   ${(props) =>
     css`

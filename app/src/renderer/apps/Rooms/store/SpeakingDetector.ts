@@ -49,9 +49,9 @@ export class SpeakingDetectionAnalyser {
     this.audioContext = new (window.AudioContext ||
       window.webkitAudioContext)();
     this.analyser = this.audioContext.createAnalyser();
-    if (!peer.stream) throw new Error('No stream');
+    if (!peer.audioStream) throw new Error('No stream');
     this.mediaStreamSource = this.audioContext.createMediaStreamSource(
-      peer.stream
+      peer.audioStream
     );
     this.mediaStreamSource?.connect(this.analyser);
     this.analyser.minDecibels = -90;

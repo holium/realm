@@ -16,7 +16,7 @@ import { Chat, ChatModelType } from './models/chat.model';
 import { LoaderModel } from './models/common.model';
 import { ShipStore, shipStore } from './ship.store';
 
-type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
+export type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info' | 'passport';
 
 export const sortByUpdatedAt = (a: any, b: any) => {
   return (
@@ -28,7 +28,13 @@ export const sortByUpdatedAt = (a: any, b: any) => {
 export const ChatStore = types
   .model('ChatStore', {
     subroute: types.optional(
-      types.enumeration<Subroutes>(['inbox', 'new', 'chat', 'chat-info']),
+      types.enumeration<Subroutes>([
+        'inbox',
+        'new',
+        'chat',
+        'chat-info',
+        'passport',
+      ]),
       'inbox'
     ),
     pinnedChats: types.array(types.string),
@@ -37,6 +43,7 @@ export const ChatStore = types
     selectedChat: types.maybe(types.reference(Chat)),
     isOpen: types.boolean,
     loader: LoaderModel,
+    inboxLoader: LoaderModel,
   })
   .views((self) => ({
     isChatPinned(path: string) {
@@ -165,15 +172,15 @@ export const ChatStore = types
       }
       self.subroute = subroute;
     }),
-    setChat: flow(function* (path: string) {
+    setChat(path: string) {
       self.selectedChat = tryReference(() =>
         self.inbox.find((chat) => chat.path === path)
       );
+      ChatIPC.refreshMessagesOnPath(path, window.ship);
       if (self.subroute === 'inbox') {
         self.subroute = 'chat';
       }
-      yield ChatIPC.refreshMessagesOnPath(path, window.ship);
-    }),
+    },
     togglePinned: flow(function* (path: string, pinned: boolean) {
       try {
         if (pinned) {

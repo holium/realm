@@ -3,10 +3,13 @@ import { action, makeObservable, observable } from 'mobx';
 import Peer, { Instance as PeerInstance } from 'simple-peer';
 
 import { serialize, unserialize } from './helpers';
-import { DataPacket } from './room.types';
+import { DataPacket, DataPayload } from './room.types';
 import { OnDataChannel, OnLeftRoom } from './RoomsStore';
 import { IAudioAnalyser, SpeakingDetectionAnalyser } from './SpeakingDetector';
 
+const DataPacketMuteStatus = 3;
+// const DataPacketSpeakingChanged = 4;
+//
 export class PeerClass extends EventsEmitter {
   @observable rid: string;
   @observable ourId: string;
@@ -15,6 +18,7 @@ export class PeerClass extends EventsEmitter {
   @observable websocket: WebSocket;
   @observable hasVideo = false;
   @observable isMuted = false;
+  @observable isForceMuted = false;
   @observable isSpeaking = false;
   @observable isAudioAttached = false;
   @observable status = 'disconnected';
@@ -24,7 +28,7 @@ export class PeerClass extends EventsEmitter {
   @observable videoStream: MediaStream | null = null;
   @observable videoTracks: Map<string, any> = new Map();
   @observable stream: MediaStream | null = null;
-  @observable ourStream: MediaStream;
+  @observable ourStreams: MediaStream[];
   @observable reconnectAttempts = 0;
 
   @observable onDataChannel: OnDataChannel = async () => {};
@@ -35,7 +39,7 @@ export class PeerClass extends EventsEmitter {
     ourId: string,
     peerId: string,
     initiator: boolean,
-    stream: MediaStream,
+    stream: MediaStream[],
     websocket: WebSocket,
     listeners: {
       onDataChannel: OnDataChannel;
@@ -50,11 +54,27 @@ export class PeerClass extends EventsEmitter {
     this.rid = rid;
     this.websocket = websocket;
     this.peerId = peerId;
-    this.ourStream = stream;
+    this.ourStreams = stream;
     this.ourId = ourId;
     this.peer = this.createPeer(peerId, initiator, stream);
     this.onDataChannel = listeners.onDataChannel;
     this.onLeftRoom = listeners.onLeftRoom;
+  }
+
+  @action
+  forceMute() {
+    this.isForceMuted = true;
+    this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
+      track.enabled = false;
+    });
+  }
+
+  @action
+  forceUnmute() {
+    this.isForceMuted = false;
+    this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
+      track.enabled = true;
+    });
   }
 
   @action
@@ -66,6 +86,7 @@ export class PeerClass extends EventsEmitter {
   @action
   isMutedChanged(isMuted: boolean) {
     this.isMuted = isMuted;
+    this.emit('isMutedChanged', isMuted);
   }
 
   @action
@@ -76,6 +97,13 @@ export class PeerClass extends EventsEmitter {
   @action
   hasVideoChanged(hasVideo: boolean) {
     this.hasVideo = hasVideo;
+  }
+
+  setNewStream(stream: MediaStream) {
+    // this.peer.removeStream(this.ourStreams);
+    this.peer.addStream(stream);
+    this.ourStreams.push(stream);
+    // this.ourStreams = stream;
   }
 
   @action
@@ -92,13 +120,13 @@ export class PeerClass extends EventsEmitter {
   }
 
   @action
-  createPeer(peerId: string, initiator: boolean, stream: MediaStream) {
+  createPeer(peerId: string, initiator: boolean, streams: MediaStream[]) {
     this.status = 'connecting';
     const peer = new Peer({
       initiator: initiator,
       trickle: true,
       channelName: peerId,
-      stream,
+      streams,
       config: {
         iceServers: [
           {
@@ -149,20 +177,20 @@ export class PeerClass extends EventsEmitter {
         console.log('got screen track');
       }
       this.videoTracks.set(track.id, track);
-      this.stream = stream;
-      // this.stream.o
+      this.videoStream = stream;
+
       this.hasVideoChanged(true);
       const video = document.getElementById(
         `peer-video-${this.peerId}`
       ) as HTMLVideoElement;
 
-      track.onmute = () => {
-        // triggered when video is stopped by peer
-        track.stop();
-        if (!video) return;
-        video.style.display = 'none';
-        this.hasVideoChanged(false);
-      };
+      // track.onmute = () => {
+      //   // triggered when video is stopped by peer
+      //   track.stop();
+      //   if (!video) return;
+      //   video.style.display = 'none';
+      //   this.hasVideoChanged(false);
+      // };
 
       if (video) {
         console.log('video stream id', stream.id);
@@ -188,29 +216,6 @@ export class PeerClass extends EventsEmitter {
       this.audioTracks.set(track.id, track);
       this.audioStream = stream;
       this.isAudioAttachedChanged(true);
-      this.stream = stream;
-
-      track.onmute = () => {
-        console.log('track muted');
-        this.isMutedChanged(true);
-        document
-          .getElementById(`peer-audio-${this.peerId}`)
-          ?.setAttribute('muted', 'true');
-      };
-
-      track.onunmute = () => {
-        console.log('track unmuted');
-        this.isMutedChanged(false);
-        document
-          .getElementById(`peer-audio-${this.peerId}`)
-          ?.setAttribute('muted', 'false');
-      };
-
-      track.onended = () => {
-        console.log('track ended');
-        this.isAudioAttachedChanged(false);
-        this.peer.destroy();
-      };
 
       this.analysers[0] = SpeakingDetectionAnalyser.initialize(this);
       // create an audio element for the stream
@@ -233,7 +238,7 @@ export class PeerClass extends EventsEmitter {
         `Attempting to reconnect (attempt ${this.reconnectAttempts + 1})`
       );
       this.reconnectAttempts++;
-      this.retry(this.ourStream);
+      this.retry(this.ourStreams);
     } else {
       console.log('Maximum reconnect attempts reached');
     }
@@ -307,9 +312,16 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onData(data: any) {
-    // TODO wire up event
-    // this.emit('on-peer-data', data);
-    this.onDataChannel(this.rid, this.peerId, unserialize(data));
+    const dataPacket = unserialize(data);
+    if (dataPacket.kind === DataPacketMuteStatus) {
+      const payload = dataPacket.value as DataPayload;
+      if (payload.data) {
+        this.isMutedChanged(true);
+      } else {
+        this.isMutedChanged(false);
+      }
+    }
+    this.onDataChannel(this.rid, this.peerId, dataPacket);
   }
 
   @action
@@ -343,12 +355,12 @@ export class PeerClass extends EventsEmitter {
   }
 
   @action
-  retry(ourStream?: MediaStream) {
+  retry(ourStreams?: MediaStream[]) {
     this.peer.destroy();
     this.peer = this.createPeer(
       this.peerId,
       false,
-      ourStream || this.ourStream
+      ourStreams || this.ourStreams
     );
   }
 

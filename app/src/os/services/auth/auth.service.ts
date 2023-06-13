@@ -15,8 +15,6 @@ import { DBAccount } from './accounts.table';
 import { AuthDB } from './auth.db';
 import { AuthUpdateTypes } from './auth.types';
 
-const isDev = process.env.NODE_ENV === 'development';
-
 type LockFileType = {
   session?: ConduitSession;
 };
@@ -243,26 +241,20 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
   }
 
   public _setLockfile(session: ConduitSession): void {
-    if (isDev) {
-      log.info('auth.service.ts:', 'Setting session.lock');
-      const lockFile = new Store<LockFileType>(LockFileOptions);
-      lockFile.set('session', session);
-    }
+    log.info('auth.service.ts:', 'Setting session.lock');
+    const lockFile = new Store<LockFileType>(LockFileOptions);
+    lockFile.set('session', session);
   }
 
   public _getLockfile(): ConduitSession | null {
-    if (isDev) {
-      const lockFile = new Store<LockFileType>(LockFileOptions);
-      return lockFile.get('session') || null;
-    }
+    const lockFile = new Store<LockFileType>(LockFileOptions);
+    return lockFile.get('session') || null;
     return null;
   }
 
   public _clearLockfile(): void {
-    if (isDev) {
-      log.info('Clearing session.lock');
-      fs.unlinkSync(path.join(app.getPath('userData'), 'session.lock'));
-    }
+    log.info('Clearing session.lock');
+    fs.unlinkSync(path.join(app.getPath('userData'), 'session.lock'));
   }
 
   public hasSeenSplash(): boolean {

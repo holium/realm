@@ -7,7 +7,7 @@ import {
 } from 'electron';
 
 import { AppUpdater } from './AppUpdater';
-import { toggleFullscreen } from './main';
+import { toggleFullScreen } from './helpers/fullscreen';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
@@ -128,9 +128,7 @@ export class MenuBuilder {
         {
           label: 'Toggle Full Screen',
           accelerator: 'Ctrl+Command+F',
-          click: () => {
-            toggleFullscreen(this.mainWindow);
-          },
+          click: () => toggleFullScreen(this.mainWindow),
         },
         {
           label: 'Toggle Developer Tools',

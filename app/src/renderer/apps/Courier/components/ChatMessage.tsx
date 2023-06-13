@@ -17,7 +17,6 @@ import { useShipStore } from 'renderer/stores/ship.store';
 import { ChatMessageType } from '../../../stores/models/chat.model';
 
 type ChatMessageProps = {
-  containerWidth: number;
   message: ChatMessageType;
   ourColor: string;
   isPrevGrouped: boolean;
@@ -26,7 +25,6 @@ type ChatMessageProps = {
 };
 
 export const ChatMessagePresenter = ({
-  containerWidth,
   message,
   ourColor,
   isPrevGrouped,
@@ -309,7 +307,6 @@ export const ChatMessagePresenter = ({
       isPrevGrouped={isPrevGrouped}
       isNextGrouped={isNextGrouped}
       expiresAt={message.expiresAt}
-      containerWidth={containerWidth}
       themeMode={theme.mode as 'light' | 'dark'}
       isOur={isOur}
       ourShip={ourShip}

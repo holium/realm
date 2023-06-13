@@ -9,7 +9,7 @@ ipcRenderer.on('add-mouse-listeners', (_, isMainWindow?: boolean) => {
 
     ipcRenderer.invoke('mouse-move', mouseState, isDragging);
   };
-  const handleMouseScroll = (_e: Event) => {
+  const handleMouseScroll = () => {
     ipcRenderer.invoke('mouse-move', null, true);
   };
 

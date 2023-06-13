@@ -2,7 +2,7 @@ import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
 import { APIConnection } from '../../api';
-import { ProtocolType, TransactionsRow } from './wallet.types';
+import { TransactionsRow } from './wallet.types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface WalletRow {}
@@ -14,40 +14,38 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     params.tableName = 'transactions';
     super(params);
     if (params.preload) return;
-    this._onQuit = this._onQuit.bind(this);
     this._onError = this._onError.bind(this);
     this._onDbUpdate = this._onDbUpdate.bind(this);
-    this.init = this.init.bind(this);
+    // this.init = this.init.bind(this);
     APIConnection.getInstance().conduit.watch({
       app: 'realm-wallet',
       path: '/updates',
       onEvent: this._onDbUpdate,
-      onQuit: this._onQuit,
       onError: this._onError,
     });
-    this.init();
+    // this.init();
   }
 
-  async init() {
-    const wallets = await this.fetchWallets();
-    this._insertWallets(wallets.wallets.ethereum);
-    this._insertWallets(wallets.wallets.bitcoin);
-    this._insertWallets(wallets.wallets.btctestnet);
-    const ethWallets = wallets.wallets.ethereum;
-    let wallet: any;
-    for (wallet of Object.values(ethWallets)) {
-      this._insertTransactions(
-        wallet.transactions[ProtocolType.ETH_GORLI] ?? {}
-      );
-      let contract: string;
-      let txns: any;
-      for ([contract, txns] of Object.entries(
-        wallet['token-txns'][ProtocolType.ETH_GORLI] ?? {}
-      )) {
-        this._insertTransactions(txns, contract);
-      }
-    }
-  }
+  // async init() {
+  //   const wallets = await this.fetchWallets();
+  //   this._insertWallets(wallets.wallets.ethereum);
+  //   this._insertWallets(wallets.wallets.bitcoin);
+  //   this._insertWallets(wallets.wallets.btctestnet);
+  //   const ethWallets = wallets.wallets.ethereum;
+  //   let wallet: any;
+  //   for (wallet of Object.values(ethWallets)) {
+  //     this._insertTransactions(
+  //       wallet.transactions[ProtocolType.ETH_GORLI] ?? {}
+  //     );
+  //     let contract: string;
+  //     let txns: any;
+  //     for ([contract, txns] of Object.entries(
+  //       wallet['token-txns'][ProtocolType.ETH_GORLI] ?? {}
+  //     )) {
+  //       this._insertTransactions(txns, contract);
+  //     }
+  //   }
+  // }
 
   protected mapRow(row: any): WalletRow {
     return {
@@ -57,28 +55,20 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
   //
   // Fetches
   //
-  async fetchMuted() {
-    const response = await APIConnection.getInstance().conduit.scry({
-      app: 'realm-chat',
-      path: '/mutes',
-    });
-    return response;
-  }
-
   async fetchWallets() {
-    // const lastTimestamp = this.getLastTimestamp('wallets');
     const response = await APIConnection.getInstance().conduit.scry({
       app: 'realm-wallet',
-      path: '/wallets', // `/${lastTimestamp}`,
+      path: '/wallets',
     });
     return response;
   }
 
   private _onDbUpdate(data: any /*WalletDbReactions*/, _id?: number) {
-    console.log('sending update', data);
     const type = Object.keys(data)[0];
     if (type === 'wallet') {
       this._insertWallets({ [data.wallet.key]: data.wallet });
+    } else if (type === 'transaction') {
+      this._insertTransactions([data.transaction]);
     }
     this.sendUpdate(data);
   }
@@ -87,24 +77,13 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
     this.sendUpdate(data);
   }
 
-  private _onQuit() {
-    console.log('fail!');
-  }
   private _onError(err: any) {
     console.log('err!', err);
   }
-  // private _parseMetadata = (metadata: string) => {
-  //   const mtd = JSON.parse(metadata);
-  //   return {
-  //     ...mtd,
-  //     timestamp: parseInt(mtd.timestamp) || 0,
-  //     reactions: mtd.reactions === 'true',
-  //   };
-  // };
+
   // ----------------------------------------------
   // ----------------- DB queries -----------------
   // ----------------------------------------------
-
   getWallets() {
     if (!this.db) throw new Error('No db connection');
     const query = this.db.prepare(`
@@ -119,20 +98,6 @@ export class WalletDB extends AbstractDataAccess<WalletRow> {
       SELECT * FROM transactions
     `);
     return query.all();
-  }
-
-  getLastTimestamp(
-    table: 'paths' | 'messages' | 'peers' | 'delete_logs' | 'notifications'
-  ): number {
-    if (!this.db) throw new Error('No db connection');
-    const column = table === 'delete_logs' ? 'timestamp' : 'updated_at';
-    const query = this.db.prepare(`
-        SELECT max(${column}) as lastTimestamp
-        FROM ${table};
-      `);
-    const result: any = query.all();
-    // add 1 to avoid getting same timestamp again
-    return result[0]?.lastTimestamp + 1 || 0;
   }
 
   //

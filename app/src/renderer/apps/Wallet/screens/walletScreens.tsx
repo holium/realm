@@ -1,15 +1,15 @@
 import { NetworkType } from 'os/services/ship/wallet/wallet.types';
 
 import { WalletScreen } from '../types';
-import { CreateWalletScreen } from './CreateWalletScreen/CreateWalletScreen';
-import { DetailScreen } from './DetailScreen/DetailScreen';
-import { ForgotPasscodeScreen } from './ForgotPasscodeScreen/ForgotPasscodeScreen';
-import { LockedScreen } from './LockedScreen/LockedScreen';
-import { NFTDetailScreen } from './NFTDetailScreen/NFTDetailScreen';
-import { TransactionDetailScreen } from './TransactionDetailScreen/TransactionDetailScreen';
-import { WalletListScreen } from './WalletListScreen/WalletListScreen';
+import { CreateWalletScreen } from './Base/CreateWalletScreen/CreateWalletScreen';
+import { DetailScreen } from './Base/DetailScreen/DetailScreen';
+import { ForgotPasscodeScreen } from './Base/ForgotPasscodeScreen/ForgotPasscodeScreen';
+import { LockedScreen } from './Base/LockedScreen/LockedScreen';
+import { NFTDetailScreen } from './Base/NFTDetailScreen/NFTDetailScreen';
+import { TransactionDetailScreen } from './Base/TransactionDetailScreen/TransactionDetailScreen';
+import { WalletListScreen } from './Base/WalletListScreen/WalletListScreen';
+import { WalletSettingsScreen } from './Base/WalletSettingsScreen/WalletSettingsScreen';
 import { WalletOnboarding } from './WalletOnboarding';
-import { WalletSettingsScreen } from './WalletSettingsScreen/WalletSettingsScreen';
 
 export const walletScreens: Record<
   WalletScreen,

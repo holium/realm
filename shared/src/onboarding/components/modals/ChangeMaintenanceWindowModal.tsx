@@ -13,7 +13,7 @@ import { SubmitButton } from '../SubmitButton';
 
 type Props = {
   isOpen: boolean;
-  initialSelected?: string;
+  initialSelected: string;
   style?: CSSProperties;
   onDismiss: () => void;
   onSubmit: (maintenanceWindow: string) => Promise<boolean>;
@@ -21,7 +21,7 @@ type Props = {
 
 export const ChangeMaintenanceWindowModal = ({
   isOpen,
-  initialSelected = '0',
+  initialSelected,
   style,
   onDismiss,
   onSubmit,
@@ -37,11 +37,9 @@ export const ChangeMaintenanceWindowModal = ({
 
     const response = await onSubmit(selectedMaintenanceWindow);
 
-    if (!response) submitting.toggleOff();
-    else {
-      // Refresh the page to show the new maintenance window.
-      window.location.reload();
-    }
+    submitting.toggleOff();
+
+    return response;
   };
 
   return (

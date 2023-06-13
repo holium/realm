@@ -1,40 +1,50 @@
 import { useMemo } from 'react';
+import { observer } from 'mobx-react';
+import styled from 'styled-components';
 
-import {
-  Button,
-  Flex,
-  Icon,
-  Menu,
-  MenuItemProps,
-  Text,
-} from '@holium/design-system';
+import { Button, Flex, Icon } from '@holium/design-system/general';
+import { Menu, MenuItemProps } from '@holium/design-system/navigation';
 
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-type ChatLogHeaderProps = {
+import { ChatLogHeaderContent } from './ChatLogHeaderContent';
+
+const ChatLogHeaderContainer = styled(Flex)<{ isStandaloneChat: boolean }>`
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0 12px 0;
+
+  ${({ isStandaloneChat }) =>
+    isStandaloneChat &&
+    `
+    height: 58px;
+    padding: 12px;
+    background: var(--rlm-window-color);
+    border-bottom: 1px solid var(--rlm-base-color);
+  `}
+`;
+
+type Props = {
   path: string;
-  title: string;
-  pretitle?: React.ReactNode;
-  subtitle?: React.ReactNode;
-  avatar: React.ReactNode;
   isMuted: boolean;
-  onBack: () => void;
   hasMenu: boolean;
   rightAction?: React.ReactNode;
+  forceBackButton?: boolean;
+  isStandaloneChat?: boolean;
+  onBack: () => void;
 };
 
-export const ChatLogHeader = ({
+const ChatLogHeaderPresenter = ({
   path,
-  title,
-  pretitle,
-  subtitle,
-  avatar,
-  onBack,
   rightAction,
   isMuted,
   hasMenu = true,
-}: ChatLogHeaderProps) => {
+  forceBackButton = false,
+  isStandaloneChat = false,
+  onBack,
+}: Props) => {
   const { loggedInAccount, shellStore } = useAppState();
   const { chatStore } = useShipStore();
   const { selectedChat, setSubroute, toggleMuted } = chatStore;
@@ -100,7 +110,6 @@ export const ChatLogHeader = ({
         label: isAdmin ? 'Delete chat' : 'Leave chat',
         disabled: false,
         onClick: () => {
-          // evt.stopPropagation();
           shellStore.setIsBlurred(true);
           shellStore.openDialogWithStringProps('leave-chat-dialog', {
             path,
@@ -115,60 +124,25 @@ export const ChatLogHeader = ({
   }, [selectedChat?.hidePinned, isMuted]);
 
   return (
-    <Flex
-      pt="2px"
-      pr="2px"
-      pb={12}
-      gap={12}
-      height={40}
-      flexDirection="row"
-      justifyContent="space-between"
-      alignItems="center"
-    >
+    <ChatLogHeaderContainer isStandaloneChat={isStandaloneChat}>
       <Flex
         flexDirection="row"
         justifyContent="space-between"
         alignItems="center"
         gap={8}
       >
-        <Button.IconButton
-          size={26}
-          onClick={(evt) => {
-            evt.stopPropagation();
-            onBack();
-          }}
-        >
-          <Icon name="ArrowLeftLine" size={22} opacity={0.5} />
-        </Button.IconButton>
-        <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
-          <Flex
-            layoutId={`chat-${path}-avatar`}
-            layout="preserve-aspect"
-            transition={{
-              duration: 0.15,
+        {(!isStandaloneChat || forceBackButton) && (
+          <Button.IconButton
+            size={26}
+            onClick={(evt) => {
+              evt.stopPropagation();
+              onBack();
             }}
           >
-            {avatar}
-          </Flex>
-          <Flex alignItems="flex-start" flexDirection="column">
-            {pretitle}
-            <Text.Custom
-              truncate
-              width={255}
-              layoutId={`chat-${path}-name`}
-              layout="preserve-aspect"
-              textAlign="left"
-              transition={{
-                duration: 0.15,
-              }}
-              fontWeight={500}
-              fontSize={3}
-            >
-              {title}
-            </Text.Custom>
-            {subtitle}
-          </Flex>
-        </Flex>
+            <Icon name="ArrowLeftLine" size={22} opacity={0.5} />
+          </Button.IconButton>
+        )}
+        <ChatLogHeaderContent isStandaloneChat={isStandaloneChat} />
       </Flex>
       <Flex>
         {rightAction}
@@ -186,6 +160,8 @@ export const ChatLogHeader = ({
           />
         )}
       </Flex>
-    </Flex>
+    </ChatLogHeaderContainer>
   );
 };
+
+export const ChatLogHeader = observer(ChatLogHeaderPresenter);

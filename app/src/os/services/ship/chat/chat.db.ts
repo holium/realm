@@ -47,7 +47,6 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     params.name = 'chatDB';
     super(params);
     if (params.preload) return;
-    this._onQuit = this._onQuit.bind(this);
     this._onError = this._onError.bind(this);
     this._onDbUpdate = this._onDbUpdate.bind(this);
     this._handleDBChange = this._handleDBChange.bind(this);
@@ -71,7 +70,6 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
       app: 'chat-db',
       path: '/db',
       onEvent: this._onDbUpdate,
-      onQuit: this._onQuit,
       onError: this._onError,
     });
     await this.fetchPathMetadata();
@@ -163,18 +161,18 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   async refreshMessagesOnPath(path: string, patp: string) {
-    const lastTimestamp = this.getLastTimestamp(
-      CHAT_TABLES.MESSAGES,
-      path,
-      patp
-    );
+    const lastTimestamp =
+      this.getLastTimestamp(CHAT_TABLES.MESSAGES, path, patp) + 1; // add 1 because we keep getting messages we already have
     let messages;
     try {
       const response = await APIConnection.getInstance().conduit.scry({
         app: 'chat-db',
         path: `/db/messages/start-ms/${lastTimestamp}`,
       });
-      messages = response.tables.messages;
+
+      messages = response.tables.messages.filter((msg: any) => {
+        return msg.path === path && msg.sender !== patp;
+      });
     } catch (e) {
       messages = [];
     }
@@ -357,9 +355,6 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     }
   }
 
-  private _onQuit() {
-    console.log('fail!');
-  }
   private _onError(err: any) {
     console.log('err!', err);
   }
@@ -732,6 +727,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
       path && patp ? ` WHERE path = '${path}' and sender != '${patp}'` : '';
     const column =
       table === CHAT_TABLES.DELETE_LOGS ? 'timestamp' : 'received_at';
+
     const query = this.db.prepare(`
       SELECT max(${column}) as lastTimestamp
       FROM ${table}${where};

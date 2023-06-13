@@ -154,7 +154,7 @@ export const LinkBlock = ({
     const width = containerWidth ? containerWidth - 12 : 320;
     return (
       <Box id={id} height={RAW_LINK_HEIGHT}>
-        <Block id={id} {...rest} height={24} width={width - 4}>
+        <Block id={id} {...rest} width={width - 4}>
           <Bookmark
             id={id}
             url={link}
@@ -179,7 +179,7 @@ export const LinkBlock = ({
     const width = containerWidth ? containerWidth - 12 : 320;
     return (
       <Box height={RAW_LINK_HEIGHT} id={id}>
-        <Block id="loader" height={24} width={width - 4}>
+        <Block id="loader" width={width - 4}>
           <Box isSkeleton height={'1.875rem'} width={width - 4}></Box>
         </Block>
       </Box>
@@ -196,7 +196,7 @@ export const LinkBlock = ({
           // todo: if the image fails to load, set the image to error image
         }}
       />
-      <Flex id={id} mb="0.25rem" width="100%" flexDirection="column">
+      <Flex id={id} width="100%" flexDirection="column">
         <LinkTitle
           id={id}
           truncate
@@ -225,17 +225,18 @@ export const LinkBlock = ({
       <Flex
         id={id}
         className="block-footer"
+        minHeight="16px !important"
         flex={1}
         justifyContent="space-between"
         width="100%"
       >
         <Flex
           id={id}
+          flex={1}
           flexDirection="row"
           gap={4}
           justifyContent="space-between"
           alignItems="center"
-          width="50%"
         >
           <Text.Anchor
             id={id}
@@ -251,17 +252,18 @@ export const LinkBlock = ({
             {openGraph?.ogSiteName || new URL(ogOrLink).hostname}
           </Text.Anchor>
         </Flex>
-        <Text.Custom
-          id={id}
-          truncate
-          width="50%"
-          textAlign="right"
-          className="block-author"
-          noSelection
-          fontSize={0}
-        >
-          {by}
-        </Text.Custom>
+        <Flex flex={1} justifyContent="flex-end" alignItems="center">
+          <Text.Custom
+            id={id}
+            truncate
+            textAlign="right"
+            className="block-author"
+            noSelection
+            fontSize={0}
+          >
+            {by}
+          </Text.Custom>
+        </Flex>
       </Flex>
     </Block>
   );

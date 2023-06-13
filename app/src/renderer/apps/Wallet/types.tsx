@@ -15,6 +15,7 @@ export enum WalletScreen {
 
 export enum WalletOnboardingScreen {
   NO_WALLET = 'no_wallet',
+  CANCEL = 'cancel',
   IMPORT = 'import',
   BACKUP = 'backup',
   CONFIRM = 'confirm',
