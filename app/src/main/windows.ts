@@ -152,8 +152,13 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
 };
 
 export const createStandaloneChatWindow = () => {
-  // Always start at 0,0 so the mouse crosses the non-fullscreen window.
-  const defaultRealmWindowOptions = getDefaultRealmWindowOptions(0, 0);
+  const defaultWidth = 700 * screen.getPrimaryDisplay().scaleFactor;
+  const defaultHeight = 500 * screen.getPrimaryDisplay().scaleFactor;
+  const defaultRealmWindowOptions = getDefaultRealmWindowOptions(
+    defaultWidth,
+    defaultHeight
+  );
+
   const newStandaloneChatWindow = new BrowserWindow({
     ...defaultRealmWindowOptions,
     title: 'Realm Chat',
@@ -181,9 +186,9 @@ export const createStandaloneChatWindow = () => {
   });
 
   newStandaloneChatWindow.on('ready-to-show', () => {
-    if (!hasBeenExpanded(newStandaloneChatWindow)) {
-      expandWindowToFullscreen(newStandaloneChatWindow);
-    }
+    // if (!hasBeenExpanded(newStandaloneChatWindow)) {
+    //   expandWindowToFullscreen(newStandaloneChatWindow);
+    // }
 
     newStandaloneChatWindow.show();
   });

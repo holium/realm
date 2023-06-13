@@ -161,18 +161,18 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   }
 
   async refreshMessagesOnPath(path: string, patp: string) {
-    const lastTimestamp = this.getLastTimestamp(
-      CHAT_TABLES.MESSAGES,
-      path,
-      patp
-    );
+    const lastTimestamp =
+      this.getLastTimestamp(CHAT_TABLES.MESSAGES, path, patp) + 1; // add 1 because we keep getting messages we already have
     let messages;
     try {
       const response = await APIConnection.getInstance().conduit.scry({
         app: 'chat-db',
         path: `/db/messages/start-ms/${lastTimestamp}`,
       });
-      messages = response.tables.messages;
+
+      messages = response.tables.messages.filter((msg: any) => {
+        return msg.path === path && msg.sender !== patp;
+      });
     } catch (e) {
       messages = [];
     }
@@ -727,6 +727,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
       path && patp ? ` WHERE path = '${path}' and sender != '${patp}'` : '';
     const column =
       table === CHAT_TABLES.DELETE_LOGS ? 'timestamp' : 'received_at';
+
     const query = this.db.prepare(`
       SELECT max(${column}) as lastTimestamp
       FROM ${table}${where};

@@ -30,6 +30,7 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
   const { notifStore, friends, chatStore } = useShipStore();
   const { selectedChat } = chatStore;
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   const listRef = useRef<WindowedListRef>(null);
 
@@ -44,27 +45,36 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
 
   useEffect(() => {
     if (!selectedChat || !loggedInAccount?.serverId) return;
-    if (!hasLoaded) {
-      selectedChat.fetchMessages();
+    if (!hasLoaded && !isFetching) {
+      setIsFetching(true);
+      selectedChat.fetchMessages().then(() => {
+        setIsFetching(false);
+        setHasLoaded(true);
+      });
     }
+  }, [hasLoaded, isFetching]);
+
+  useEffect(() => {
+    if (!selectedChat || !loggedInAccount?.serverId) return;
+
     const unreadCount = notifStore.getUnreadCountByPath(selectedChat.path);
     if (unreadCount > 0) {
       notifStore.readPath('realm-chat', selectedChat.path);
     }
 
-    if (listRef.current && !hasLoaded) {
+    if (listRef.current && messages.length > 0) {
       let goalIndex = messages.length - 1;
       const matchingIndex = messages.findIndex((m) => m.id === innerNavigation);
       if (matchingIndex !== -1) {
         goalIndex = matchingIndex;
       }
+      // console.log('scrolling to index', goalIndex);
 
       listRef.current.scrollToIndex({
         index: goalIndex,
         align: 'start',
         behavior: innerNavigation === '' ? 'auto' : 'smooth',
       });
-      setHasLoaded(true);
     }
   }, [selectedChat?.path, listRef.current, innerNavigation]);
 
