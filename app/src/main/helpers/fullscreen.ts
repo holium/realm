@@ -17,7 +17,17 @@ export const useSimpleFullscreen = isArm64 && isMac;
 export const hasBeenExpanded = (window: BrowserWindow) => {
   const { width, height } = window.getBounds();
   // On Windows, windows can't be 0,0.
-  return width > 200 && height > 35;
+  return width > 200 && height > 50;
+};
+
+export const getWindowedBounds = () => {
+  const scaleFactor = screen.getPrimaryDisplay().scaleFactor;
+  const windowedBounds = {
+    width: 700 * (scaleFactor > 0 ? scaleFactor : 1),
+    height: 500 * (scaleFactor > 0 ? scaleFactor : 1),
+  };
+
+  return windowedBounds;
 };
 
 const getFullScreenBounds = () => {
@@ -44,11 +54,8 @@ export const fullScreenWindow = (window: BrowserWindow) => {
 };
 
 export const windowWindow = (window: BrowserWindow) => {
-  const scaleFactor = screen.getPrimaryDisplay().scaleFactor;
-  const windowedBounds = {
-    width: 700 * scaleFactor,
-    height: 500 * scaleFactor,
-  };
+  const windowedBounds = getWindowedBounds();
+
   window.setFullScreen(false);
   if (useSimpleFullscreen) window.setSimpleFullScreen(false);
   window.setBounds(windowedBounds);

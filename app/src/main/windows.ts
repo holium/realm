@@ -20,13 +20,14 @@ import { TitlebarHelper } from './helpers/titlebar';
 import { WebViewHelper } from './helpers/webview';
 import { getAssetPath, getPreloadPath, resolveHtmlPath } from './util';
 
-const defaultRealmWindowOptions = {
+const defaultRealmWindowOptions: Electron.BrowserWindowConstructorOptions = {
   show: false,
   frame: useSimpleFullscreen ? false : true,
   // We start with a zero size window and enlarge it,
   // to trigger the mouse-in event when the window is shown.
   width: 0,
   height: 0,
+  fullscreenable: true,
   icon: getAssetPath('icon.png'),
   title: 'Realm',
   fullscreen: false,
