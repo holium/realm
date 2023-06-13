@@ -59,7 +59,10 @@ export const windowWindow = (window: BrowserWindow) => {
 };
 
 export const toggleFullScreen = (window: BrowserWindow) => {
-  if (window.isFullScreen()) {
+  if (
+    window.isFullScreen() ||
+    (useSimpleFullscreen && window.isSimpleFullScreen())
+  ) {
     windowWindow(window);
   } else {
     fullScreenWindow(window);
@@ -71,6 +74,8 @@ const registerListeners = (
   mouseWindow: BrowserWindow
 ) => {
   mainWindow.on('enter-full-screen', () => {
+    if (!mainWindow) return;
+
     mainWindow.webContents.send('set-fullscreen', true);
     mainWindow.setMenuBarVisibility(false);
 
@@ -78,6 +83,8 @@ const registerListeners = (
   });
 
   mainWindow.on('leave-full-screen', () => {
+    if (!mainWindow) return;
+
     mainWindow.webContents.send('set-fullscreen', false);
     mainWindow.setMenuBarVisibility(true);
 

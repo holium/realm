@@ -127,7 +127,6 @@ const ChatLogBodyPresenter = ({
     );
   }, [
     lastMessageTimeStamp,
-    messages.length,
     inboxLoader.isLoaded,
     pinnedChatMessage,
     showPin,
