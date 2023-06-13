@@ -84,13 +84,11 @@ const enableRealmCursor = (
   mouseOverlayWindow: BrowserWindow
 ) => {
   if (isMac) {
-    !mouseOverlayWindow.isDestroyed &&
-      hideSystemCursor(mouseOverlayWindow.webContents);
-    !mainWindow.isDestroyed && hideSystemCursor(mainWindow.webContents);
+    hideSystemCursor(mouseOverlayWindow.webContents);
+    hideSystemCursor(mainWindow.webContents);
   } else if (isWindows) {
-    !mouseOverlayWindow.isDestroyed &&
-      hideSystemCursor(mouseOverlayWindow.webContents);
-    !mainWindow.isDestroyed && hideSystemCursor(mainWindow.webContents);
+    hideSystemCursor(mouseOverlayWindow.webContents);
+    hideSystemCursor(mainWindow.webContents);
   }
 };
 
@@ -98,6 +96,8 @@ export const disableRealmCursor = (
   mainWindow: BrowserWindow,
   mouseOverlayWindow: BrowserWindow
 ) => {
+  if (mainWindow.isDestroyed()) return;
+
   const isStandaloneChat = store.get('isStandaloneChat');
 
   // In Realm you can toggle the cursor in settings,
@@ -115,6 +115,8 @@ const registerListeners = (
   mouseOverlayWindow: BrowserWindow
 ) => {
   mainWindow.webContents.on('dom-ready', () => {
+    if (mainWindow.isDestroyed()) return;
+
     // We use the default cursor for Linux.
     if (realmCursorEnabled) {
       hideSystemCursor(mainWindow.webContents);
@@ -122,6 +124,8 @@ const registerListeners = (
   });
 
   mainWindow.webContents.on('did-attach-webview', (_, webContents) => {
+    if (mainWindow.isDestroyed()) return;
+
     webContents.on('dom-ready', () => {
       if (realmCursorEnabled) {
         hideSystemCursor(webContents);
@@ -130,6 +134,8 @@ const registerListeners = (
   });
 
   mouseOverlayWindow.webContents.on('dom-ready', () => {
+    if (mainWindow.isDestroyed()) return;
+
     if (realmCursorEnabled) {
       enableRealmCursor(mainWindow, mouseOverlayWindow);
     } else {

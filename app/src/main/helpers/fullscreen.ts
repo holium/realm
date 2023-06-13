@@ -74,6 +74,7 @@ const registerListeners = (
 ) => {
   mainWindow.on('enter-full-screen', () => {
     if (!mainWindow) return;
+    if (mainWindow.isDestroyed()) return;
 
     mainWindow.webContents.send('set-fullscreen', true);
     mainWindow.setMenuBarVisibility(false);
@@ -83,6 +84,7 @@ const registerListeners = (
 
   mainWindow.on('leave-full-screen', () => {
     if (!mainWindow) return;
+    if (mainWindow.isDestroyed()) return;
 
     mainWindow.webContents.send('set-fullscreen', false);
     mainWindow.setMenuBarVisibility(true);
@@ -90,7 +92,12 @@ const registerListeners = (
     mouseWindow.setAlwaysOnTop(false);
   });
 
-  mainWindow.on('focus', mouseWindow.moveTop);
+  mainWindow.on('focus', () => {
+    if (!mainWindow) return;
+    if (mainWindow.isDestroyed()) return;
+
+    mouseWindow.moveTop();
+  });
 
   ipcMain.removeHandler('set-fullscreen');
   ipcMain.removeHandler('should-use-custom-titlebar');

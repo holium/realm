@@ -41,11 +41,15 @@ const registerListeners = (
   // We send mouse events to the mouse window to move the cursor,
   // as well as the main window to update multiplayer cursors via %rooms-v2.
   ipcMain.handle('mouse-out', () => {
+    if (mainWindow.isDestroyed()) return;
+
     mouseWindow.webContents.send('mouse-out');
     mainWindow.webContents.send('mouse-out');
   });
 
   ipcMain.handle('mouse-move', (_, state: MouseState, isDragging: boolean) => {
+    if (mainWindow.isDestroyed()) return;
+
     const webContentsPosition = getWebContentsPosition(mainWindow);
     mouseWindow.webContents.send(
       'mouse-move',
@@ -62,33 +66,47 @@ const registerListeners = (
   });
 
   ipcMain.handle('mouse-down', () => {
+    if (mainWindow.isDestroyed()) return;
+
     mouseWindow.webContents.send('mouse-down');
     mainWindow.webContents.send('mouse-down');
   });
 
   ipcMain.handle('mouse-up', () => {
+    if (mainWindow.isDestroyed()) return;
+
     mouseWindow.webContents.send('mouse-up');
     mainWindow.webContents.send('mouse-up');
   });
 
   ipcMain.handle('mouse-color', (_, color: string) => {
+    if (mainWindow.isDestroyed()) return;
+
     mouseWindow.webContents.send('mouse-color', color);
   });
 
   ipcMain.handle('realm.toggle-on-ephemeral-chat', () => {
+    if (mainWindow.isDestroyed()) return;
+
     mouseWindow.webContents.send('realm.toggle-on-ephemeral-chat');
   });
 
   ipcMain.handle('realm.toggle-off-ephemeral-chat', () => {
+    if (mainWindow.isDestroyed()) return;
+
     mouseWindow.webContents.send('realm.toggle-off-ephemeral-chat');
   });
 
   ipcMain.handle('realm-to-app.ephemeral-chat', (_, patp, message) => {
+    if (mainWindow.isDestroyed()) return;
+
     mouseWindow.webContents.send('realm-to-app.ephemeral-chat', patp, message);
   });
 
   /* Multiplayer mouse events */
   ipcMain.handle('multiplayer.mouse-out', (_, patp: string) => {
+    if (mainWindow.isDestroyed()) return;
+
     mouseWindow.webContents.send('multiplayer.mouse-out', patp);
   });
 
@@ -101,6 +119,8 @@ const registerListeners = (
       state: MouseState,
       hexColor: string
     ) => {
+      if (mainWindow.isDestroyed()) return;
+
       const denormalizedPosition = denormalizePosition(
         normalizedPosition,
         mainWindow.getBounds()
@@ -116,16 +136,22 @@ const registerListeners = (
   );
 
   ipcMain.handle('multiplayer.mouse-down', (_, patp: string) => {
+    if (mainWindow.isDestroyed()) return;
+
     mouseWindow.webContents.send('multiplayer.mouse-down', patp);
   });
 
   ipcMain.handle('multiplayer.mouse-up', (_, patp: string) => {
+    if (mainWindow.isDestroyed()) return;
+
     mouseWindow.webContents.send('multiplayer.mouse-up', patp);
   });
 
   ipcMain.handle(
     'multiplayer.app-to-realm.mouse-click',
     (_, patp: string, elementId: string) => {
+      if (mainWindow.isDestroyed()) return;
+
       mainWindow.webContents.send(
         'multiplayer.app-to-realm.mouse-click',
         patp,
@@ -137,6 +163,8 @@ const registerListeners = (
   ipcMain.handle(
     'multiplayer.realm-to-app.mouse-click',
     (_, patp: string, elementId: string) => {
+      if (mainWindow.isDestroyed()) return;
+
       mainWindow.webContents.send(
         'multiplayer.realm-to-app.mouse-click',
         patp,
@@ -154,6 +182,8 @@ const registerListeners = (
       steps: any,
       clientID: string | number
     ) => {
+      if (mainWindow.isDestroyed()) return;
+
       mainWindow.webContents.send(
         'multiplayer.app-to-realm.send-transaction',
         patp,
@@ -173,6 +203,8 @@ const registerListeners = (
       steps: any,
       clientID: string | number
     ) => {
+      if (mainWindow.isDestroyed()) return;
+
       mainWindow.webContents.send(
         'multiplayer.realm-to-app.send-transaction',
         patp,
@@ -186,6 +218,8 @@ const registerListeners = (
   ipcMain.handle(
     'presence.app-to-realm.broadcast',
     <T extends PresenceArg[]>(_: any, ...arg: T) => {
+      if (mainWindow.isDestroyed()) return;
+
       mainWindow.webContents.send('presence.app-to-realm.broadcast', ...arg);
     }
   );
@@ -193,6 +227,8 @@ const registerListeners = (
   ipcMain.handle(
     'presence.realm-to-app.broadcast',
     <T extends PresenceArg[]>(_: any, ...arg: T) => {
+      if (mainWindow.isDestroyed()) return;
+
       mainWindow.webContents.send('presence.realm-to-app.broadcast', ...arg);
     }
   );
@@ -200,6 +236,8 @@ const registerListeners = (
   ipcMain.handle(
     'multiplayer.realm-to-app.send-chat',
     (_, patp: string, message: string) => {
+      if (mainWindow.isDestroyed()) return;
+
       mainWindow.webContents.send('multiplayer.realm-to-app.send-chat', patp);
       mouseWindow.webContents.send(
         'multiplayer.realm-to-app.send-chat',
