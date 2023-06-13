@@ -98,6 +98,8 @@ const RoomsPresenter = () => {
                     // TODO put error in UI
                     console.error(e);
                   }
+                } else {
+                  roomsApp.setView('room');
                 }
               }}
             />
