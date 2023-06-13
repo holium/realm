@@ -19,16 +19,16 @@ import './app.css';
 import 'photoswipe/dist/photoswipe.css';
 
 const AppPresenter = () => {
-  const { theme, shellStore, booted } = useAppState();
+  const { theme, shellStore, booted, showTitleBar, setShowTitleBar } =
+    useAppState();
 
   const [isStandaloneChat, setIsStandaloneChat] = useState(
     shellStore.isStandaloneChat
   );
-  const [isFullscreen, setIsFullscreen] = useState(shellStore.isFullscreen);
 
   useEffect(() => {
     window.electron.app.isStandaloneChat().then(setIsStandaloneChat);
-    window.electron.app.isFullscreen().then(setIsFullscreen);
+    window.electron.app.shouldUseCustomTitlebar().then(setShowTitleBar);
   }, []);
 
   useEffect(() => {
@@ -41,12 +41,10 @@ const AppPresenter = () => {
   const contextMenu = useMemo(() => <ContextMenu />, []);
 
   const titlebar = useMemo(() => {
-    if (isFullscreen) {
-      return null;
-    }
+    if (!showTitleBar) return null;
 
     return isStandaloneChat ? <StandAloneChatTitlebar /> : <RealmTitlebar />;
-  }, [isFullscreen, isStandaloneChat]);
+  }, [showTitleBar, isStandaloneChat]);
 
   const background = useMemo(() => {
     if (isStandaloneChat) {
