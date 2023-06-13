@@ -60,5 +60,15 @@ export const nativeApps: AppManifestMap = {
       hideTitlebarBorder: true,
     },
   },
+  lexicon: {
+    id: 'lexicon',
+    title: 'Lexicon - Dev',
+    type: 'native',
+    color: '#fff',
+    icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/ballot-app-tile.svg',
+    native: {
+      hideTitlebarBorder: true,
+    },
+  },
   ...devApps,
 };

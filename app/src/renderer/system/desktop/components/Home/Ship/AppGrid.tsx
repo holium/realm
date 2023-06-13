@@ -22,15 +22,25 @@ interface AppGridProps {
 const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
   const { bazaarStore, spacesStore } = useShipStore();
   const currentSpace = spacesStore.selected;
-
   const apps = useMemo(
     () =>
       [
         ...bazaarStore.installed,
-        // ...bazaarStore.devApps,
+        ...bazaarStore.devApps,
+        {
+          id: 'lexicon',
+          title: 'Lexicon - Dev',
+          type: 'native',
+          color: '#fff',
+          icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/ballot-app-tile.svg',
+          native: {
+            hideTitlebarBorder: true,
+          },
+        },
       ] as AppMobxType[],
     [bazaarStore.catalog, bazaarStore.installations.values()]
   );
+  console.log('apps', apps);
   const [items, setItems] = useState(apps);
 
   useEffect(() => {
