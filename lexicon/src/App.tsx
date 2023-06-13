@@ -15,7 +15,7 @@ declare global {
   }
 }
 
-function App() {
+export const App = () => {
   const space = useStore((store: Store) => store.space);
   const wordRows = useStore((store: Store) => store.wordRows);
   const setWordRows = useStore((store: Store) => store.setWordRows);
@@ -287,6 +287,4 @@ function App() {
       </Box>
     </main>
   );
-}
-
-export default App;
+};
