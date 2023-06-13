@@ -6,8 +6,8 @@
 ++  grow
   |%
   ++  noun  r
-  ++  json
-    (en-row:enjs:lib r (~(put by *schemas:sur) [type.row.r v.row.r] schema.r))
+::  ++  json
+::    (en-row:enjs:lib r (~(put by *schemas:sur) [type.row.r v.row.r] schema.r))
   --
 ::
 ++  grab

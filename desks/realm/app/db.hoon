@@ -50,7 +50,7 @@
 ::        :~zod/db &db-action [%create /example %vote 0 [%vote %.y our %foo [~zod now] /example] ~]
 
 /-  *db, sstore=spaces-store, vstore=visas
-/+  dbug, db, spaces-chat
+/+  dbug, db
 =|  state-0
 =*  state  -
 :: ^-  agent:gall
@@ -62,32 +62,14 @@
   ++  on-init
     ^-  (quip card _this)
     =/  default-state=state-0   *state-0
+    :: make sure the relay table exists on-init
+    =.  tables.default-state
+    (~(gas by *^tables) ~[[%relay *pathed-table] [%vote *pathed-table] [%react *pathed-table]])
     =/  default-cards
       :~  [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
+          [%pass /selfpoke %agent [our.bowl dap.bowl] %poke %db-action !>([%create-initial-spaces-paths ~])]
       ==
-    =/  cs=(quip card state-0)  [default-cards default-state]
-
-    =/  spaces-scry   .^(view:sstore %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
-    ?>  ?=(%spaces -.spaces-scry)
-    =/  index=@ud     0
-    =/  keys=(list space-path:sstore)  :: list of space-path we own
-      %+  skim
-        ~(tap in ~(key by spaces.spaces-scry))
-      |=(=space-path:sstore &(=(ship.space-path our.bowl) ?!(=(space.space-path 'our'))))
-
-    |-
-      ?:  =(index (lent keys))
-        [-.cs this(state +.cs)]
-      =/  key       (snag index keys)
-      =/  pathed    (pathify-space-path:spaces-chat key)
-      =/  ini       (create-from-space:db [(weld pathed /initiate) key %initiate] +.cs bowl)
-      =.  cs        [(weld -.cs -.ini) +.ini]
-      =/  mem       (create-from-space:db [pathed key %member] +.cs bowl)
-      =.  cs        [(weld -.cs -.mem) +.mem]
-      =/  adm       (create-from-space:db [(weld pathed /admin) key %admin] +.cs bowl)
-      =.  cs        [(weld -.cs -.adm) +.adm]
-      =/  owr       (create-from-space:db [(weld pathed /owner) key %owner] +.cs bowl)
-      $(index +(index), cs [(weld -.cs -.owr) +.owr])
+    [default-cards this(state default-state)]
   ++  on-save   !>(state)
   ++  on-load
     |=  old-state=vase
@@ -129,6 +111,12 @@
         (edit:db +.act state bowl)
       %remove
         (remove:db +.act state bowl)
+
+      %relay
+        (relay:db +.act state bowl)
+
+      %create-initial-spaces-paths
+        (create-initial-spaces-paths:db state bowl)
     ==
     [cards this]
   ::
@@ -242,8 +230,8 @@
     ^-  (quip card _this)
     ?+    wire  ~&(wire ~&(sign !!))
       [%remote-scry %callback ~]
-        ~&  "remote-scry/callback on-agent"
-        ~&  sign
+        ~&  >  "remote-scry/callback on-agent {<-.sign>}"
+        ~&  +.sign
         `this
       [%dbpoke ~]
         ?+    -.sign  `this
@@ -251,6 +239,13 @@
             ?~  p.sign  `this
             ~&  >>>  "%db: {<(spat wire)>} dbpoke failed"
             ~&  >>>  p.sign
+            `this
+        ==
+      [%selfpoke ~]
+        ?+    -.sign  `this
+          %poke-ack
+            ?~  p.sign  `this
+            ~&  >>>  "%db: {<(spat wire)>} selfpoke failed"
             `this
         ==
       [%spaces ~]
@@ -320,23 +315,28 @@
                   ?:  =(index (lent changes))
                     :_  state
                     :: echo the changes out to our client subs
+                    ^-  (list card)
                     %+  weld
                       remote-scries
+                    ^-  (list card)
                     [%give %fact [/db (weld /path dbpath) ~] db-changes+!>(changes)]~
                   =/  change   (snag index changes)
+                  :: TODO, if the object+revsion is already in our
+                  :: tables.state, don't bother remote-scrying
                   =/  new-scry=(list card)
                     ?+  -.change  ~
                       %add-row
-                        ?.  ?=(%relay type.row.ch)  ~
-                        ?>  ?=(%relay -.data.row.ch)
+                        ?.  ?=(%relay type.row.change)  ~
+                        ?>  ?=(%relay -.data.row.change)
+                        ~&  >>>  "asking for remote-scry"
                         :~  [
                           %pass
                           /remote-scry/callback
                           %arvo
                           %a
                           %keen
-                          ship.id.row.ch
-                          /g/x/(scot %ud revision.data.row.ch)/(scot %tas dap.bowl)//(scot %p ship.id.data.row.ch)/(scot %da t.id.data.row.ch)
+                          ship.id.row.change
+                          /g/x/(scot %ud revision.data.row.change)/(scot %tas dap.bowl)//(scot %p ship.id.data.row.change)/(scot %da t.id.data.row.change)
                         ]
                         ==
                     ==
@@ -409,6 +409,22 @@
     |=  [=wire =sign-arvo]
     ^-  (quip card _this)
     ?+  wire  !!
+      [%remote-scry %callback ~]
+        ~&  >  "remote-scry/callback on-arvo"
+        ?+  -.sign-arvo  `this
+          %ames
+            ?+  -.+.sign-arvo  `this
+              %tune
+                =/  r=(unit roar:ames)   roar.+.sign-arvo
+                ?~  r  `this
+                =/  ro=roar:ames    (need r)
+                ?~  data=q.dat.ro  `this
+                =/  rs=row-and-schema  ;;(row-and-schema q.u.data)
+                :-
+                  [%give %fact [/db (weld /path path.row.rs) ~] db-changes+!>([%add-row row.rs schema.rs]~)]~
+                this(state (add-row-to-db:db row.rs schema.rs state))
+            ==
+        ==
       [%timer ~]
         ~&  >>>  "unhandled on-arvo %timer"
         `this

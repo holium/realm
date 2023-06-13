@@ -36,7 +36,6 @@
       =id:common
       =type:common      :: MUST always be same as table type
       v=@ud             :: data-type version
-      revision=(unit @ud)  :: necessary for relaying via remote-scry. when non-null, indicates the latest version number to use in scry
       data=columns      :: the actual content
       created-at=@da    :: when the source-ship originally created the row
       updated-at=@da    :: when the source-ship originally last updated the row
@@ -51,6 +50,7 @@
       [%link link:common]
       [%follow follow:common]
       [%relay relay:common]
+      [%react react:common]
   ==
 +$  row-and-schema  [=row =schema] :: the row and the schema for the row
 
@@ -144,6 +144,8 @@
       [%create =req-id =input-row]          :: sends %add-row to all subs
       [%edit =id:common =input-row] :: sends %upd-row to all subs
       [%remove =type:common =path =id:common]      :: %host deleting the row, sends %delete to all peers
+      [%relay =req-id =input-row]          :: like %create, but for creating a %relay (relay:common)
+      [%create-initial-spaces-paths ~]
   ==
 ::
 +$  ship-roles  (list [s=@p =role])

@@ -175,7 +175,7 @@
     %.y
   :: validate the row against schema
   ?>  
-    ?:  =(%general -.data.row)
+    ?:  ?=(%general -.data.row)
       =((lent schema) (lent +.data.row))  :: TODO make a stronger schema-check by comparing path/map/set/list etc for each item in the data-list
     %.y :: other types are auto-validated
   =.  schemas.state   (~(put by schemas.state) schv schema)
@@ -419,8 +419,15 @@
 ::db &db-action [%edit /example [our ~2023.5.22..20.15.47..86fe] %foo 0 [%general ~[2 'b']] *@da *@da *@da]
 ::db &db-action [%remove %foo /example [our ~2023.5.22..20.15.47..86fe]]
 ::
+::  in zod
+::db &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
+::db &db-action [%create [~zod now] /example %foo 0 [%general ~[1 'a']] ~[['num' 'ud'] ['str' 't']]]
+::  in bus
+::db &db-action [%create-path /target %host ~ ~ ~ ~[[~bus %host] [~fed %member]]]
+::db &db-action [%relay [~bus now] /target %relay 0 [%relay [~zod ~2023.6.13..15.57.34..aa97] %foo /example 0 %all] ~]
 ++  create-path
 ::db &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
+::db &db-action [%create-path /target %host ~ ~ ~ ~[[~bus %host] [~fed %member]]]
   |=  [=input-path-row state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: ensure the path doesn't already exist
@@ -756,7 +763,7 @@
   [cards state]
 ::
 ++  create
-::db &db-action [%create /example %foo 0 [%general ~[1 'a']] ~[['num' 'ud'] ['str' 't']]]
+::db &db-action [%create [~zod now] /example %foo 0 [%general ~[1 'a']] ~[['num' 'ud'] ['str' 't']]]
 ::db &db-action [%create /example %vote 0 [%vote [%.y our %foo [~zod now] /example]] ~]
 ::db &db-action [%create /example %foo 1 [%general ~[1 'd' (jam /hello/goodbye)]] ~[['num' 'ud'] ['str' 't'] ['mypath' 'path']]]
 ::~zod/db &db-action [%create /example %vote 0 [%vote %.y our %foo [~zod now] /example] ~]
@@ -768,7 +775,6 @@
     [src.bowl now.bowl]
     type.input-row
     v.input-row
-    ~
     data.input-row
     now.bowl
     now.bowl
@@ -846,7 +852,6 @@
     id
     type.input-row
     v.input-row
-    ?~(revision.old-row ~ [~ +(u.revision.old-row)])
     data.input-row
     created-at.old-row
     now.bowl
@@ -912,28 +917,76 @@
 ++  relay
   :: supposed to be used by the sharer, poking their own ship,
   :: regardless of if they are the host of either original or target path
+::db &db-action [%relay [~bus now] /target %relay 0 [%relay [~zod ~2023.6.13..15.57.34..aa97] %foo /example 0 %all] ~]
   |=  [[=req-id =input-row] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: first check that the input is actually a %relay
-  ?>  ?=(-.data.input-row %relay)
+  ?+  -.data.input-row   !!
+    %relay 
+  :: then force to %all for protocol for now
+  =.  protocol.data.input-row    %all
   :: then check that we actually have the thing being relayed
   =/  obj-id=id:common  id.data.input-row
-  =/  obj=row  (~(got by (~(got by (~(got by tables.state) type.data.input-row)) path.data.input-row) obj-id)
+  =/  ptbl  (~(got by tables.state) type.data.input-row)
+  =/  obj=row  (~(got by (~(got by ptbl) path.data.input-row)) obj-id)
   :: and its schema
   =/  sch=schema  (~(got by schemas.state) [type.obj v.obj])
   :: then check if we have already relayed this thing before
   =/  relays=table  (ptbl-to-tbl (~(got by tables.state) %relay))
-  =/  prev=(list row)  (skim ~(val by relays) |=(r=row ?>(?=(-.data.r %relay) =(id.data.r obj-id))))
+  =/  prev=(list row)
+    %+  skim
+      ~(val by relays)
+    |=  r=row
+    ?+  -.data.r   !!
+      %relay       =(id.data.r obj-id)
+    ==
+
   ?~  prev
     :: if we have not previously relayed this thing, publish to remote-scry
-    =/  cards  [%pass /remote-scry/callback %grow /(scot %p ship.obj-id)/(scot %da t.obj-id) row-and-schema+[row sch]]~
-    =.  revision.input-row  0 :: force to 0 because we are publishing for first time
+    =/  cards  [%pass /remote-scry/callback %grow /(scot %p ship.obj-id)/(scot %da t.obj-id) row-and-schema+[obj sch]]~
+    =.  revision.data.input-row  0 :: force to 0 because we are publishing for first time
     =/  qcs=(quip card state-0)  (create [req-id input-row] state bowl)
     [(weld cards -.qcs) +.qcs]
   :: else, the thing is already published, so use the pre-existing revision number
-  =/  first-prev=row        (snag 0 prev)
-  =.  revision.input-row    revision.data.first-prev
-  (create [req-id input-row] state bowl)
+  =/  first-prev=row             (snag 0 `(list row)`prev)
+  ?+  -.data.first-prev  !!
+      %relay
+    =.  revision.data.input-row  revision.data.first-prev
+    (create [req-id input-row] state bowl)
+  ==
+  ==
+::
+::  on-init selfpoke
+++  create-initial-spaces-paths
+  |=  [state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  =/  spaces-scry   .^(view:sstore %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/all/noun)
+  ?>  ?=(%spaces -.spaces-scry)
+
+  =/  index=@ud     0
+  =/  keys=(list space-path:sstore)  :: list of space-path we own
+    %+  skim
+      ~(tap in ~(key by spaces.spaces-scry))
+    |=(=space-path:sstore &(=(ship.space-path our.bowl) ?!(=(space.space-path 'our'))))
+
+  =/  cs=(quip card state-0)  [~ state]
+  |-
+    ?:  =(index (lent keys))
+      [-.cs +.cs]
+    =/  key       (snag index keys)
+    =/  pathed    (pathify-space-path:spaces-chat key)
+    =/  preexisting=(unit path-row)    (~(get by paths.state) pathed)
+    :: if the "main" space path-row already is there, then skip them all
+    ?~  preexisting
+      =/  ini       (create-from-space [(weld pathed /initiate) key %initiate] +.cs bowl)
+      =.  cs        [(weld -.cs -.ini) +.ini]
+      =/  mem       (create-from-space [pathed key %member] +.cs bowl)
+      =.  cs        [(weld -.cs -.mem) +.mem]
+      =/  adm       (create-from-space [(weld pathed /admin) key %admin] +.cs bowl)
+      =.  cs        [(weld -.cs -.adm) +.adm]
+      =/  owr       (create-from-space [(weld pathed /owner) key %owner] +.cs bowl)
+      $(index +(index), cs [(weld -.cs -.owr) +.owr])
+    $(index +(index))
 ::
 ::
 ::  JSON
@@ -1139,7 +1192,6 @@
     ++  de-vote
       %-  ot
       :~  [%up bo]
-          [%ship de-ship]
           [%parent-type (se %tas)]
           [%parent-id de-id]
           [%parent-path pa]
@@ -1148,7 +1200,6 @@
     ++  de-comment
       %-  ot
       :~  [%txt so]
-          [%ship de-ship]
           [%parent-type (se %tas)]
           [%parent-id de-id]
           [%parent-path pa]
@@ -1160,6 +1211,7 @@
           [%type (se %tas)]
           [%path pa]
           [%revision ni]
+          [%protocol de-relay-protocol]
       ==
     ::
     ++  de-id
@@ -1181,6 +1233,20 @@
       |=  p=path
       ^-  [=ship space=cord]
       [`@p`(slav %p +2:p) `@t`(slav %tas +6:p)]
+    ::
+    ++  de-relay-protocol
+      %+  cu
+        tas-to-relay-protocol
+      (se %tas)
+    ::
+    ++  tas-to-relay-protocol
+      |=  t=@tas
+      ^-  relay-protocol:common
+      ?+  t  !!
+        %static   %static
+        %edit     %edit
+        %all      %all
+      ==
     ::
     ++  de-space-role
       %+  cu
@@ -1362,7 +1428,7 @@
             id+(row-id-to-json id.row)
             type+s+type.row
             v+(numb v.row)
-            [%revision ?~(revision.row ~ (numb u.revision.row))]
+            creator+s+(scot %p ship.id.row)
             created-at+(time created-at.row)
             updated-at+(time updated-at.row)
             received-at+(time received-at.row)
@@ -1396,14 +1462,12 @@
               $(index +(index), result [[name.sch t] result])
           %vote
             :~  ['up' b+up.data.row]
-                ['ship' s+(scot %p ship.data.row)]
                 ['parent-type' s+(scot %tas parent-type.data.row)]
                 ['parent-id' (row-id-to-json parent-id.data.row)]
                 ['parent-path' s+(spat parent-path.data.row)]
             ==
           %comment
             :~  ['txt' s+txt.data.row]
-                ['ship' s+(scot %p ship.data.row)]
                 ['parent-type' s+(scot %tas parent-type.data.row)]
                 ['parent-id' (row-id-to-json parent-id.data.row)]
                 ['parent-path' s+(spat parent-path.data.row)]
