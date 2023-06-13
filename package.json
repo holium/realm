@@ -71,7 +71,8 @@
       "shared",
       "lib/design-system",
       "lib/presence",
-      "lib/room"
+      "lib/room",
+      "lexicon"
     ]
   },
   "lint-staged": {

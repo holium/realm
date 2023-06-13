@@ -3,9 +3,14 @@ import memoize from 'lodash/memoize';
 export const isDev = () =>
   !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
 
+//returns the current ship's name
 export const shipName = memoize(() => {
-  //returns the current ship's name
-  return isDev() ? import.meta.env.VITE_SHIP_NAME : window.ship;
+  return isDev() ? '~zod' : window.ship;
+});
+
+export const shipCode = memoize(() => {
+  // Todo
+  return '';
 });
 
 export const log = (...args: any) => {

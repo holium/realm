@@ -1,7 +1,7 @@
 import Urbit from '@urbit/http-api';
 import memoize from 'lodash/memoize';
 
-import { isDev, log } from '../utils';
+import { isDev, log, shipCode, shipName } from '../utils';
 import {
   DefinitionSchema,
   RelatedSchema,
@@ -13,10 +13,8 @@ import { updateHandler } from './updates';
 
 const api = {
   createApi: memoize(() => {
-    const urb = isDev()
-      ? new Urbit(import.meta.env.VITE_SHIP_URL, import.meta.env.VITE_SHIP_CODE)
-      : new Urbit('');
-    urb.ship = isDev() ? import.meta.env.VITE_SHIP_NAME : window.ship;
+    const urb = isDev() ? new Urbit(shipName(), shipCode()) : new Urbit('');
+    urb.ship = shipName();
     // Just log errors if we get any
     urb.onError = (message: string) => log('onError: ', message);
     urb.onOpen = () => log('urbit onOpen');

@@ -1,10 +1,14 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-
-    "module": "ES2020",
-  
+    "module": "ESNext",
+    "target": "ESNext"
   },
-  "include": ["src"],
-  "exclude": ["../node_modules/**", "node_modules", "../lib/design-system/**"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

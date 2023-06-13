@@ -6,10 +6,10 @@ import {
   useSearchParams,
 } from 'react-router-dom';
 
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 
-import { AddWord, SearchBar } from './components';
-import { useStore } from './store';
+import { useStore } from '../store';
+import { AddWord, SearchBar } from '.';
 
 export const Navigation = () => {
   const [searchParams] = useSearchParams();
@@ -17,12 +17,14 @@ export const Navigation = () => {
   //presisted space data for filtering search correctly
   const navigate = useNavigate();
   const { setAddModalOpen, addModalOpen, setSpace } = useStore();
+
   useEffect(() => {
     const spaceId = searchParams.get('spaceId');
     if (spaceId) {
       navigate('/apps/lexicon' + spaceId);
     }
   }, [searchParams.get('spaceId')]);
+
   useEffect(() => {
     //We care about knowing the space id, either through params {ship}/{group} or space id which is the same thing
     if (ship && group) {

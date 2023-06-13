@@ -1,13 +1,15 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
-import { Box } from '@holium/design-system';
+import { Box } from '@holium/design-system/general';
 
 import api from './api';
-import { Navigation } from './Navigation';
+import { Navigation } from './components/Navigation';
 import { Dictionary, Home, Word } from './pages';
 import { Store, useStore } from './store';
 import { log, shipName } from './utils';
+
+import './index.css';
 
 declare global {
   interface Window {
