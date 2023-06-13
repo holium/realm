@@ -14,9 +14,17 @@ export const ResizeHandle = styled.div`
   cursor: col-resize;
 `;
 
-export const StandaloneChatContainer = styled(Flex)`
+export const StandaloneChatContainer = styled(Flex)<{
+  showTitleBar: boolean;
+}>`
   width: 100%;
-  height: calc(100% - ${STANDALONE_CHAT_TITLEBAR_HEIGHT}px);
-  margin-top: ${STANDALONE_CHAT_TITLEBAR_HEIGHT}px;
+  height: 100%;
   border-top: 1px solid var(--rlm-base-color);
+
+  ${({ showTitleBar }) =>
+    showTitleBar &&
+    `
+    height: calc(100% - ${STANDALONE_CHAT_TITLEBAR_HEIGHT}px);
+    margin-top: ${STANDALONE_CHAT_TITLEBAR_HEIGHT}px;
+  `}
 `;
