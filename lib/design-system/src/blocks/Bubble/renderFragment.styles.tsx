@@ -106,7 +106,7 @@ export const FragmentInlineCode = styled(FragmentBase)`
   border-radius: 4px;
   display: flex;
   max-width: 100%;
-  word-wrap: break-word;
+  word-break: break-all;
   /* padding: 0px 3px; */
 `;
 
@@ -146,6 +146,7 @@ export const FragmentCodeBlock = styled(Text.Custom)`
   width: 100%;
   white-space: pre-wrap;
   word-wrap: break-word;
+  user-select: text;
 `;
 
 type FragmentImageProps = {

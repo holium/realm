@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 
 import { Flex, Spinner, Text } from '@holium/design-system/general';
 
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ChatInfo } from '../Courier/views/ChatInfo/ChatInfo';
@@ -17,6 +18,7 @@ import { StandaloneChatPassport } from './StandaloneChatPassport';
 import { StandaloneChatPassportPreview } from './StandaloneChatPassportPreview';
 
 export const StandaloneChatBodyPresenter = () => {
+  const { showTitleBar } = useAppState();
   const { chatStore } = useShipStore();
 
   const [sidebarWidth, setSidebarWidth] = useState(400);
@@ -73,7 +75,7 @@ export const StandaloneChatBodyPresenter = () => {
   }
 
   return (
-    <StandaloneChatContainer>
+    <StandaloneChatContainer showTitleBar={showTitleBar}>
       <Flex
         flexDirection="column"
         minWidth={320}

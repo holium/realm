@@ -16,74 +16,55 @@ export const useSimpleFullscreen = isArm64 && isMac;
 // so we need to check if it's already been expanded from 0,0.
 export const hasBeenExpanded = (window: BrowserWindow) => {
   const { width, height } = window.getBounds();
-  return width > 0 && height > 0;
+  // On Windows, windows can't be 0,0.
+  return width > 200 && height > 35;
 };
 
-export const expandWindowToFullscreen = (window: BrowserWindow) => {
+const getFullScreenBounds = () => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
   const fullScreenBounds = {
     x: 0,
-    y: 0 - getMenubarHeight(),
+    // Account for notch on arm64 mac with simple fullscreen.
+    y: useSimpleFullscreen ? 0 - getMenubarHeight() : 0,
     width,
-    height: height + getMenubarHeight(),
+    height: useSimpleFullscreen ? height + getMenubarHeight() : height,
   };
-
-  // Account for notch on arm64 mac with simple fullscreen.
-  window.setBounds(fullScreenBounds);
 
   return fullScreenBounds;
 };
 
-export const toggleFullScreen = (
-  window: BrowserWindow,
-  forceFullscreen?: boolean,
-  forceWindowed?: boolean
-) => {
-  if (useSimpleFullscreen) {
-    const wasSimpleFullscreen = window.isSimpleFullScreen();
-    if ((wasSimpleFullscreen || forceWindowed) && !forceFullscreen) {
-      const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-      const nonFullScreenBounds = {
-        x: 0,
-        y: 0,
-        width,
-        height,
-      };
-      window.setFullScreen(false);
-      window.setSimpleFullScreen(false);
-      window.setBounds(nonFullScreenBounds);
-      window.webContents.send('set-dimensions', nonFullScreenBounds);
-      window.webContents.send('set-fullscreen', false);
-    } else {
-      window.setFullScreen(true);
-      window.setSimpleFullScreen(true);
-      const fullScreenBounds = expandWindowToFullscreen(window);
-      window.webContents.send('set-dimensions', fullScreenBounds);
-      window.webContents.send('set-fullscreen', true);
-    }
+export const fullScreenWindow = (window: BrowserWindow) => {
+  const fullScreenBounds = getFullScreenBounds();
+  window.setBounds(fullScreenBounds);
+  window.setFullScreen(true);
+  if (useSimpleFullscreen) window.setSimpleFullScreen(true);
+  window.webContents.send('set-fullscreen', true);
+  window.webContents.send('use-custom-titlebar', useSimpleFullscreen);
+};
 
-    // Use our custom titlebar.
-    window.setMenuBarVisibility(false);
-    window.webContents.send('set-titlebar-visible', true);
+export const windowWindow = (window: BrowserWindow) => {
+  const scaleFactor = screen.getPrimaryDisplay().scaleFactor;
+  const windowedBounds = {
+    width: 700 * scaleFactor,
+    height: 500 * scaleFactor,
+  };
+  window.setFullScreen(false);
+  if (useSimpleFullscreen) window.setSimpleFullScreen(false);
+  window.setBounds(windowedBounds);
+  window.center();
+  window.webContents.send('set-fullscreen', false);
+  window.webContents.send('use-custom-titlebar', useSimpleFullscreen);
+};
+
+export const toggleFullScreen = (window: BrowserWindow) => {
+  if (
+    window.isFullScreen() ||
+    (useSimpleFullscreen && window.isSimpleFullScreen())
+  ) {
+    windowWindow(window);
   } else {
-    const wasFullscreen = window.isFullScreen();
-
-    if ((wasFullscreen || forceWindowed) && !forceFullscreen) {
-      window.setFullScreen(false);
-      window.setSimpleFullScreen(false);
-      window.setMenuBarVisibility(true);
-      window.webContents.send('set-fullscreen', false);
-    } else {
-      window.setFullScreen(true);
-      window.setSimpleFullScreen(false);
-      window.setMenuBarVisibility(false);
-      window.webContents.send('set-fullscreen', true);
-    }
-
-    // Use the native titlebar.
-    window.setMenuBarVisibility(true);
-    window.webContents.send('set-titlebar-visible', false);
+    fullScreenWindow(window);
   }
 };
 
@@ -92,28 +73,38 @@ const registerListeners = (
   mouseWindow: BrowserWindow
 ) => {
   mainWindow.on('enter-full-screen', () => {
+    if (!mainWindow) return;
+
     mainWindow.webContents.send('set-fullscreen', true);
     mainWindow.setMenuBarVisibility(false);
+
     mouseWindow.setAlwaysOnTop(true, 'screen-saver');
   });
 
   mainWindow.on('leave-full-screen', () => {
+    if (!mainWindow) return;
+
     mainWindow.webContents.send('set-fullscreen', false);
     mainWindow.setMenuBarVisibility(true);
+
     mouseWindow.setAlwaysOnTop(false);
   });
 
   mainWindow.on('focus', mouseWindow.moveTop);
 
   ipcMain.removeHandler('set-fullscreen');
-  ipcMain.removeHandler('is-fullscreen');
+  ipcMain.removeHandler('should-use-custom-titlebar');
 
-  ipcMain.handle('set-fullscreen', (_, forceFullScreen) => {
-    toggleFullScreen(mainWindow, forceFullScreen, !forceFullScreen);
+  ipcMain.handle('set-fullscreen', (_, shouldFullScreen) => {
+    if (shouldFullScreen) {
+      fullScreenWindow(mainWindow);
+    } else {
+      windowWindow(mainWindow);
+    }
   });
 
-  ipcMain.handle('is-fullscreen', () => {
-    return mainWindow.isFullScreen();
+  ipcMain.handle('should-use-custom-titlebar', () => {
+    return useSimpleFullscreen;
   });
 };
 

@@ -20,7 +20,7 @@ export const BubbleStyle = styled(Box)<BubbleStyleProps>`
   box-sizing: border-box;
   padding: ${BUBBLE_HEIGHT.rem.paddingY} ${BUBBLE_WIDTH.rem.paddingX};
   min-width: 150px;
-  max-width: 90%;
+  max-width: min(90%, 450px);
   color: rgba(var(--rlm-text-rgba));
   background: rgba(var(--rlm-card-rgba));
   border-radius: ${(props) => {
