@@ -4,7 +4,7 @@ import Store from 'electron-store';
 import { RealmService } from '../os/realm.service';
 import { AppUpdater } from './AppUpdater';
 import { setRealmCursor } from './helpers/cursorSettings';
-import { isArm64, isMac } from './helpers/env';
+import { isArm64Mac, isMac } from './helpers/env';
 import { MenuBuilder } from './menu';
 import { getAssetPath } from './util';
 import {
@@ -176,7 +176,7 @@ app
     });
 
     app.on('before-quit', () => {
-      if (isMac && isArm64) {
+      if (isArm64Mac) {
         realmWindow?.isClosable() && realmWindow?.close();
         standaloneChatWindow?.isClosable() && standaloneChatWindow?.close();
         app.exit();

@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain, screen } from 'electron';
 
-import { isArm64, isMac } from './env';
+import { isArm64Mac } from './env';
 
 // Get the menu bar of new macs with notch.
 const getMenubarHeight = () => {
@@ -9,8 +9,6 @@ const getMenubarHeight = () => {
     screen.getPrimaryDisplay().workAreaSize.height
   );
 };
-
-export const useSimpleFullscreen = isArm64 && isMac;
 
 // ready-to-show is caused to be fired more than once by webviews,
 // so we need to check if it's already been expanded from 0,0.
@@ -22,10 +20,17 @@ export const hasBeenExpanded = (window: BrowserWindow) => {
 
 export const getWindowedBounds = () => {
   const scaleFactor = screen.getPrimaryDisplay().scaleFactor;
-  const windowedBounds = {
-    width: 700 * (scaleFactor > 0 ? scaleFactor : 1),
-    height: 500 * (scaleFactor > 0 ? scaleFactor : 1),
-  };
+  const width = 700 * (scaleFactor > 0 ? scaleFactor : 1);
+  const height = 500 * (scaleFactor > 0 ? scaleFactor : 1);
+  // Center the window.
+  const x = Math.round(
+    (screen.getPrimaryDisplay().workAreaSize.width - width) / 2
+  );
+  const y = Math.round(
+    (screen.getPrimaryDisplay().workAreaSize.height - height) / 2
+  );
+
+  const windowedBounds = { x, y, width, height };
 
   return windowedBounds;
 };
@@ -36,9 +41,9 @@ const getFullScreenBounds = () => {
   const fullScreenBounds = {
     x: 0,
     // Account for notch on arm64 mac with simple fullscreen.
-    y: useSimpleFullscreen ? 0 - getMenubarHeight() : 0,
+    y: isArm64Mac ? 0 - getMenubarHeight() : 0,
     width,
-    height: useSimpleFullscreen ? height + getMenubarHeight() : height,
+    height: isArm64Mac ? height + getMenubarHeight() : height,
   };
 
   return fullScreenBounds;
@@ -48,27 +53,23 @@ export const fullScreenWindow = (window: BrowserWindow) => {
   const fullScreenBounds = getFullScreenBounds();
   window.setBounds(fullScreenBounds);
   window.setFullScreen(true);
-  if (useSimpleFullscreen) window.setSimpleFullScreen(true);
+  if (isArm64Mac) window.setSimpleFullScreen(true);
   window.webContents.send('set-fullscreen', true);
-  window.webContents.send('use-custom-titlebar', useSimpleFullscreen);
+  window.webContents.send('use-custom-titlebar', isArm64Mac);
 };
 
 export const windowWindow = (window: BrowserWindow) => {
   const windowedBounds = getWindowedBounds();
 
   window.setFullScreen(false);
-  if (useSimpleFullscreen) window.setSimpleFullScreen(false);
+  if (isArm64Mac) window.setSimpleFullScreen(false);
   window.setBounds(windowedBounds);
-  window.center();
   window.webContents.send('set-fullscreen', false);
-  window.webContents.send('use-custom-titlebar', useSimpleFullscreen);
+  window.webContents.send('use-custom-titlebar', isArm64Mac);
 };
 
 export const toggleFullScreen = (window: BrowserWindow) => {
-  if (
-    window.isFullScreen() ||
-    (useSimpleFullscreen && window.isSimpleFullScreen())
-  ) {
+  if (window.isFullScreen() || (isArm64Mac && window.isSimpleFullScreen())) {
     windowWindow(window);
   } else {
     fullScreenWindow(window);
@@ -118,7 +119,7 @@ const registerListeners = (
   });
 
   ipcMain.handle('should-use-custom-titlebar', () => {
-    return useSimpleFullscreen;
+    return isArm64Mac;
   });
 };
 
