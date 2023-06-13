@@ -1,4 +1,4 @@
-import { Button, Flex, Icon, Text } from '@holium/design-system';
+import { Flex, Icon, Text } from '@holium/design-system';
 
 import api from '../api';
 import { Store, useStore } from '../store';
@@ -31,7 +31,12 @@ export const Vote = ({ id, votes }: WordItemProps) => {
   };
   return (
     <Flex gap={10}>
-      <Button.IconButton
+      <Flex
+        alignItems={'center'}
+        justifyContent={'center'}
+        gap={5}
+        className="highlight-hover"
+        role="button"
         onClick={(evt: any) => {
           //TODO: change to correct event
           evt.stopPropagation();
@@ -55,17 +60,17 @@ export const Vote = ({ id, votes }: WordItemProps) => {
               : 'transparent',
           paddingLeft: 4,
           paddingRight: 4,
+          borderRadius: '6px',
         }}
-        iconColor={
-          votes?.currentShipVoted.vote === true
-            ? 'rgba(var(--rlm-accent-rgba))'
-            : 'icon'
-        }
       >
         <Icon
           opacity={0.7}
           name="ThumbsUp"
-          iconColor="accent"
+          iconColor={
+            votes?.currentShipVoted.vote === true
+              ? 'rgba(var(--rlm-accent-rgba))'
+              : 'icon'
+          }
           size={20}
           style={{
             marginTop: 3,
@@ -83,8 +88,13 @@ export const Vote = ({ id, votes }: WordItemProps) => {
         >
           {votes?.upVotes ?? 0}
         </Text.Body>
-      </Button.IconButton>
-      <Button.IconButton
+      </Flex>
+      <Flex
+        alignItems={'center'}
+        justifyContent={'center'}
+        gap={5}
+        className="highlight-hover"
+        role="button"
         onClick={(evt: any) => {
           evt.stopPropagation();
 
@@ -105,19 +115,21 @@ export const Vote = ({ id, votes }: WordItemProps) => {
             votes?.currentShipVoted.vote === false
               ? 'rgba(var(--rlm-intent-alert-rgba),.1)'
               : 'transparent',
+
           paddingLeft: 4,
           paddingRight: 4,
+          borderRadius: '6px',
         }}
-        iconColor={
-          votes?.currentShipVoted.vote === false
-            ? 'rgba(var(--rlm-intent-alert-rgba))'
-            : 'icon'
-        }
       >
         <Icon
           opacity={0.7}
           name="ThumbsDown"
           size={20}
+          iconColor={
+            votes?.currentShipVoted.vote === false
+              ? 'rgba(var(--rlm-intent-alert-rgba))'
+              : 'icon'
+          }
           style={{ marginBottom: -7, marginRight: -5 }}
         />
 
@@ -132,7 +144,7 @@ export const Vote = ({ id, votes }: WordItemProps) => {
         >
           {votes?.downVotes ?? 0}
         </Text.Body>
-      </Button.IconButton>
+      </Flex>
     </Flex>
   );
 };

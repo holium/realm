@@ -71,6 +71,17 @@ const WordItem = ({ id, word, createdAt, votes, navigate }: WordItemProps) => {
       setMostVotedDefinition(newMostVotedDefinition);
     }
   }, [definitionMap, definitionVoteMap]);
+  const navigateToWord = () => {
+    navigate('/apps/lexicon' + space + '/' + word, {
+      state: { id, word, createdAt, votes },
+    });
+  };
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      navigateToWord();
+    }
+  };
   return (
     <Flex
       flexDirection={'column'}
@@ -79,11 +90,8 @@ const WordItem = ({ id, word, createdAt, votes, navigate }: WordItemProps) => {
       style={{ borderRadius: 6 }}
       className="highlight-hover"
       tabIndex={0}
-      onClick={() =>
-        navigate('/apps/lexicon' + space + '/' + word, {
-          state: { id, word, createdAt, votes },
-        })
-      }
+      onClick={navigateToWord}
+      onKeyDown={handleKeyDown}
     >
       <Flex justifyContent={'space-between'} alignItems={'flex-end'}>
         <Text.H6 fontWeight={600}>{word}</Text.H6>
