@@ -3,12 +3,22 @@ import { GetRealmDialogBody } from './GetRealmDialogBody';
 
 type Props = {
   onBack: () => void;
-  onGetANewId: () => void;
+  onPurchaseId: () => void;
+  onMigrateId: () => void;
 };
 
-export const GetRealmDialog = ({ onBack, onGetANewId }: Props) => (
+export const GetRealmDialog = ({
+  onBack,
+  onPurchaseId,
+  onMigrateId,
+}: Props) => (
   <OnboardDialog
-    body={<GetRealmDialogBody onGetANewId={onGetANewId} />}
+    body={
+      <GetRealmDialogBody
+        onPurchaseId={onPurchaseId}
+        onMigrateId={onMigrateId}
+      />
+    }
     hideNextButton
     onBack={onBack}
   />

@@ -16,11 +16,7 @@ type Props = {
 
 export const GetRealmDialogBody = ({ onPurchaseId, onMigrateId }: Props) => (
   <>
-    <OnboardDialogTitle
-      style={{
-        marginTop: -29,
-      }}
-    >
+    <OnboardDialogTitle style={{ marginTop: -29 }}>
       Congratulations, you're on the waitlist!
     </OnboardDialogTitle>
     <OnboardDialogDescription>

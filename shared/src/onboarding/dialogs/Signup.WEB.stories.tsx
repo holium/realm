@@ -12,6 +12,7 @@ import {
   VerifyEmailDialog,
 } from '../onboarding';
 import { GetOnRealmDialog } from './GetOnRealm/GetOnRealmDialog';
+import { MigrateIdDialog } from './MigrateId/MigrateIdDialog';
 import {
   mockPatps,
   OnboardingDialogWrapper,
@@ -27,7 +28,11 @@ export const GetRealmDialogStory: ComponentStory<
   typeof GetRealmDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <GetRealmDialog onGetANewId={() => {}} onBack={() => {}} />
+    <GetRealmDialog
+      onBack={() => {}}
+      onPurchaseId={() => {}}
+      onMigrateId={() => {}}
+    />
   </OnboardingDialogWrapper>
 );
 
@@ -41,7 +46,7 @@ export const SomethingWentWrongDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-SomethingWentWrongDialogStory.storyName = '0.1 Something went wrong';
+SomethingWentWrongDialogStory.storyName = '0.1. Something went wrong';
 
 export const GetOnRealmDialogStory: ComponentStory<
   typeof GetOnRealmDialog
@@ -55,7 +60,7 @@ export const GetOnRealmDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-GetOnRealmDialogStory.storyName = '1. Get on Realm';
+GetOnRealmDialogStory.storyName = '1. Get on Realm (Purchase or Migrate)';
 
 export const CreateAccountDialogStory: ComponentStory<
   typeof CreateAccountDialog
@@ -68,7 +73,7 @@ export const CreateAccountDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-CreateAccountDialogStory.storyName = '1. Create account';
+CreateAccountDialogStory.storyName = '2. Create account';
 
 export const VerifyEmailDialogStory: ComponentStory<
   typeof VerifyEmailDialog
@@ -82,7 +87,7 @@ export const VerifyEmailDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-VerifyEmailDialogStory.storyName = '2. Verify email';
+VerifyEmailDialogStory.storyName = '3. Verify email';
 
 export const ChooseIdDialogStory: ComponentStory<
   typeof ChooseIdentityDialog
@@ -95,7 +100,7 @@ export const ChooseIdDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-ChooseIdDialogStory.storyName = '3. Choose ID';
+ChooseIdDialogStory.storyName = '(Purchase) 4. Choose ID';
 
 export const PaymentDialogStory: ComponentStory<typeof PaymentDialog> = () => (
   <OnboardingDialogWrapper>
@@ -113,7 +118,7 @@ export const PaymentDialogStory: ComponentStory<typeof PaymentDialog> = () => (
   </OnboardingDialogWrapper>
 );
 
-PaymentDialogStory.storyName = '4. Payment';
+PaymentDialogStory.storyName = '(Purchase) 5. Payment';
 
 export const BootingDialogStory: ComponentStory<typeof BootingDialog> = () => (
   <OnboardingDialogWrapper>
@@ -125,7 +130,7 @@ export const BootingDialogStory: ComponentStory<typeof BootingDialog> = () => (
   </OnboardingDialogWrapper>
 );
 
-BootingDialogStory.storyName = '5.1 Booting';
+BootingDialogStory.storyName = '(Purchase) 6.1. Booting';
 
 export const BootingDialogCompleteStory: ComponentStory<
   typeof BootingDialog
@@ -139,7 +144,7 @@ export const BootingDialogCompleteStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-BootingDialogCompleteStory.storyName = '5.2 Booting complete';
+BootingDialogCompleteStory.storyName = '(Purchase) 6.2. Booting complete';
 
 export const CredentialsDialogStory: ComponentStory<
   typeof CredentialsDialog
@@ -156,7 +161,7 @@ export const CredentialsDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-CredentialsDialogStory.storyName = '6. Credentials';
+CredentialsDialogStory.storyName = '(Purchase) 7. Credentials';
 
 export const DownloadDialogStory: ComponentStory<
   typeof DownloadDialog
@@ -173,4 +178,45 @@ export const DownloadDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-DownloadDialogStory.storyName = '7. Download Realm for desktop';
+DownloadDialogStory.storyName = '(Purchase) 8. Download Realm for desktop';
+
+export const MigrateIdDialogStory: ComponentStory<
+  typeof MigrateIdDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <MigrateIdDialog onBack={() => {}} onNext={() => Promise.resolve(false)} />
+  </OnboardingDialogWrapper>
+);
+
+MigrateIdDialogStory.storyName = '(Migrate) 4.1. Migrate an ID';
+
+export const MigrateIdUploadingDialogStory: ComponentStory<
+  typeof MigrateIdDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <MigrateIdDialog
+      fileName="sampel-palnet.tar.gz"
+      progress={30}
+      onBack={() => {}}
+      onNext={() => Promise.resolve(false)}
+    />
+  </OnboardingDialogWrapper>
+);
+
+MigrateIdUploadingDialogStory.storyName =
+  '(Migrate) 4.2. Migrate an ID – Uploading';
+
+export const MigrateIdDoneDialogStory: ComponentStory<
+  typeof MigrateIdDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <MigrateIdDialog
+      fileName="sampel-palnet.tar.gz"
+      progress={100}
+      onBack={() => {}}
+      onNext={() => Promise.resolve(false)}
+    />
+  </OnboardingDialogWrapper>
+);
+
+MigrateIdDoneDialogStory.storyName = '(Migrate) 4.3. Migrate an ID – Uploaded';
