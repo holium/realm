@@ -3,13 +3,13 @@ import styled from 'styled-components';
 import { Box, BoxProps, capitalizeFirstLetter, Flex, Text } from '../../index';
 import { BubbleAuthor } from './Bubble.styles';
 import { FragmentImageType, FragmentType, TEXT_TYPES } from './Bubble.types';
+import { renderFragment } from './renderFragment';
 import {
   FragmentBlock,
   FragmentBlockquote,
   FragmentImage,
   FragmentPlain,
-  renderFragment,
-} from './fragment-lib';
+} from './renderFragment.styles';
 
 const FullWidthFragmentBlock = styled(FragmentBlock)`
   width: 100%;
@@ -24,9 +24,13 @@ export type PinnedProps = {
   onClick?: (msgId: string) => void;
 } & BoxProps;
 
-export const PinnedMessage = (props: PinnedProps) => {
-  const { id, author, authorColor, message, onClick = () => {} } = props;
-
+export const PinnedMessage = ({
+  id,
+  author,
+  authorColor,
+  message,
+  onClick,
+}: PinnedProps) => {
   if (!message) return null;
   const fragmentType: string = Object.keys(message[0])[0];
   let pinnedContent = null;
@@ -65,7 +69,7 @@ export const PinnedMessage = (props: PinnedProps) => {
   }
 
   return (
-    <Flex id={id} key={id} width="100%" onClick={onClick}>
+    <Flex id={id} width="100%" style={{ cursor: 'pointer' }} onClick={onClick}>
       <FullWidthFragmentBlock id={id}>
         <FragmentBlockquote
           className="fragment-blockquote pinned-or-reply-message"

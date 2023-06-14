@@ -212,9 +212,12 @@ export class Conduit extends EventEmitter {
             log.info('on quit', eventId, this.watches.has(eventId));
             if (this.watches.has(eventId)) {
               const reconnectSub = this.watches.get(eventId);
-              reconnectSub?.onQuit?.(parsedData);
               this.setAsIdleWatch(eventId);
-              this.resubscribe(eventId);
+              if (reconnectSub?.onQuit) {
+                reconnectSub?.onQuit?.(parsedData);
+              } else {
+                this.resubscribe(eventId);
+              }
             }
             break;
           //
@@ -338,7 +341,6 @@ export class Conduit extends EventEmitter {
   async watch(params: SubscribeParams & SubscribeCallbacks): Promise<boolean> {
     const handlers: SubscribeParams & SubscribeCallbacks = {
       onEvent: (_data) => {},
-      onQuit: (_id) => {},
       onError: (_id, _err) => {},
       onSubscribed: (_id) => {},
       ...params,
@@ -380,6 +382,8 @@ export class Conduit extends EventEmitter {
 
   /**
    * Tries to re-subscribe to a watch that has gone idle.
+   * This is called automatically when onQuit is not defined for a watch.
+   * To skip auto-resubscribing, define an onQuit handler that does nothing.
    *
    * @param watchId the id of the watch to re-subscribe to
    * @returns boolean indicating if the re-subscription was successful

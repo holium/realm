@@ -32,7 +32,7 @@ export const getMaximizedBounds = (desktopDimensions: Dimensions): Bounds => {
   const normalizedPaddingX = (8 / desktopDimensions.width) * 10;
   const normalizedPaddingY = (8 / desktopDimensions.height) * 10;
   const normalizedDockHeight = (40 / desktopDimensions.height) * 10;
-
+  // const showTitlebar = appState.showTitleBar;
   const offsetX = 2 * normalizedPaddingX;
   const offsetY = 3 * normalizedPaddingY + normalizedDockHeight;
 
@@ -47,7 +47,8 @@ export const getMaximizedBounds = (desktopDimensions: Dimensions): Bounds => {
   };
 };
 
-export const isMaximizedBounds = (
+// Similar to isMaximizedBounds, but only for fullscreen, not left or right.
+export const isFullyMaximizedBounds = (
   bounds: Bounds,
   desktopDimensions: Dimensions
 ) => {
@@ -60,6 +61,37 @@ export const isMaximizedBounds = (
     Math.abs(bounds.width - maximizedBounds.width) < margin &&
     Math.abs(bounds.height - maximizedBounds.height) < margin
   );
+};
+
+export const isMaximizedBounds = (
+  bounds: Bounds,
+  desktopDimensions: Dimensions
+) => {
+  const maximizedBounds = getMaximizedBounds(desktopDimensions);
+  const margin = 0.01;
+
+  return (
+    (Math.abs(bounds.x - maximizedBounds.x) < margin &&
+      Math.abs(bounds.y - maximizedBounds.y) < margin &&
+      Math.abs(bounds.width - maximizedBounds.width) < margin &&
+      Math.abs(bounds.height - maximizedBounds.height) < margin) ||
+    (Math.abs(bounds.x - (maximizedBounds.x + maximizedBounds.width / 2)) <
+      margin &&
+      Math.abs(bounds.y - maximizedBounds.y) < margin &&
+      Math.abs(bounds.width - maximizedBounds.width / 2) < margin &&
+      Math.abs(bounds.height - maximizedBounds.height) < margin) ||
+    (Math.abs(bounds.x - maximizedBounds.x) < margin &&
+      Math.abs(bounds.y - maximizedBounds.y) < margin &&
+      Math.abs(bounds.width - maximizedBounds.width / 2) < margin &&
+      Math.abs(bounds.height - maximizedBounds.height) < margin)
+  );
+};
+
+export const isFullWidth = (width: number, desktopDimensions: Dimensions) => {
+  const maximizedBounds = getMaximizedBounds(desktopDimensions);
+  const margin = 0.01;
+
+  return Math.abs(width - maximizedBounds.width) < margin;
 };
 
 /**

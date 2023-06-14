@@ -1,4 +1,3 @@
-import { toJS } from 'mobx';
 // import { toJS } from 'mobx';
 import {
   destroy,
@@ -17,7 +16,7 @@ import { Chat, ChatModelType } from './models/chat.model';
 import { LoaderModel } from './models/common.model';
 import { ShipStore, shipStore } from './ship.store';
 
-type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info';
+export type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info' | 'passport';
 
 export const sortByUpdatedAt = (a: any, b: any) => {
   return (
@@ -29,21 +28,29 @@ export const sortByUpdatedAt = (a: any, b: any) => {
 export const ChatStore = types
   .model('ChatStore', {
     subroute: types.optional(
-      types.enumeration<Subroutes>(['inbox', 'new', 'chat', 'chat-info']),
+      types.enumeration<Subroutes>([
+        'inbox',
+        'new',
+        'chat',
+        'chat-info',
+        'passport',
+      ]),
       'inbox'
     ),
     pinnedChats: types.array(types.string),
+    mutedChats: types.array(types.string),
     inbox: types.array(Chat),
     selectedChat: types.maybe(types.reference(Chat)),
     isOpen: types.boolean,
     loader: LoaderModel,
+    inboxLoader: LoaderModel,
   })
   .views((self) => ({
     isChatPinned(path: string) {
-      return self.inbox.find((c) => path === c.path)?.pinned || false;
+      return !!self.pinnedChats.find((p) => path === p);
     },
     isChatMuted(path: string) {
-      return self.inbox.find((c) => path === c.path)?.muted || false;
+      return !!self.mutedChats.find((p) => path === p);
     },
     isChatSelected(path: string) {
       return self.selectedChat?.path === path;
@@ -69,8 +76,8 @@ export const ChatStore = types
         }
 
         // Check if the chats are pinned
-        const isAPinned = a.pinned;
-        const isBPinned = b.pinned;
+        const isAPinned = self.pinnedChats.includes(a.path);
+        const isBPinned = self.pinnedChats.includes(b.path);
 
         // Compare the pinned status
         if (isAPinned !== isBPinned) {
@@ -141,7 +148,9 @@ export const ChatStore = types
       }
     }),
     fetchInboxMetadata: flow(function* () {
-      yield ChatIPC.fetchPathMetadata();
+      const { muted, pinned } = yield ChatIPC.fetchPathMetadata();
+      self.pinnedChats = pinned;
+      self.mutedChats = muted;
     }),
     loadChatList: flow(function* () {
       try {
@@ -163,15 +172,15 @@ export const ChatStore = types
       }
       self.subroute = subroute;
     }),
-    setChat: flow(function* (path: string) {
+    setChat(path: string) {
       self.selectedChat = tryReference(() =>
         self.inbox.find((chat) => chat.path === path)
       );
+      ChatIPC.refreshMessagesOnPath(path, window.ship);
       if (self.subroute === 'inbox') {
         self.subroute = 'chat';
       }
-      yield ChatIPC.refreshMessagesOnPath(path, window.ship);
-    }),
+    },
     togglePinned: flow(function* (path: string, pinned: boolean) {
       try {
         if (pinned) {
@@ -194,6 +203,11 @@ export const ChatStore = types
       const chat = self.inbox.find((chat) => chat.path === path);
       if (chat) {
         yield chat.muteNotification(muted);
+        if (muted) {
+          self.mutedChats.push(path);
+        } else {
+          self.mutedChats.remove(path);
+        }
       } else {
         console.info(`chat ${path} not found`);
       }
@@ -236,7 +250,6 @@ export const ChatStore = types
       }
     }),
     onPathsAdded(path: any) {
-      console.log('onPathsAdded', toJS(path));
       self.inbox.push(path);
     },
     // This is a handler for onDbChange

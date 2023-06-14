@@ -8,6 +8,7 @@ import { SubmitButton } from '@holium/shared';
 const SettingSectionForm = styled.form<{ zIndex: number }>`
   display: flex;
   flex-direction: column;
+  width: 100%;
   z-index: ${({ zIndex }) => zIndex};
 `;
 
@@ -66,7 +67,7 @@ export const SettingSection = ({
           {title}
         </Text.Custom>
       )}
-      <Card p={3} elevation={elevation}>
+      <Card p={3} elevation={elevation} blur={false}>
         <Flex flexDirection="column" gap={16}>
           {body}
           {errorMessage && <ErrorBox>{errorMessage}</ErrorBox>}

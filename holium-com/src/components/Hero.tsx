@@ -95,7 +95,7 @@ export const Hero = () => {
       </H1Container>
       <Flex flex={1} width="100%" justify="center" padding="16px">
         <HoveringCursors className="hideonmobile" />
-        <HoveringCursorsStatic className="hideondesktop" />
+        <HoveringCursorsStatic className="cursors-static hideondesktop" />
       </Flex>
     </HeroContainer>
   );

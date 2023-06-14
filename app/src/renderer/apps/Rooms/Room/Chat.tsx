@@ -15,7 +15,8 @@ import {
 
 import { useTrayApps } from 'renderer/apps/store';
 import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
+
+import { useRoomsStore } from '../store/RoomsStoreContext';
 
 export const chatForm = (
   defaults: any = {
@@ -43,9 +44,9 @@ export const chatForm = (
 const RoomChatPresenter = () => {
   const { text } = useMemo(() => chatForm(), []);
   const { loggedInAccount } = useAppState();
-  const { roomsStore } = useShipStore();
+  const roomsStore = useRoomsStore();
   const { getTrayAppHeight } = useTrayApps();
-  const listHeight = getTrayAppHeight() - 164;
+  const listHeight = getTrayAppHeight() - 168;
 
   const chatInputRef = useRef<HTMLInputElement>(null);
 
@@ -57,12 +58,13 @@ const RoomChatPresenter = () => {
       evt.preventDefault();
       evt.stopPropagation();
       if (chatInputRef.current === null) return;
+      if (!roomsStore.currentRid) return;
       const innerText = chatInputRef.current.value;
       if (innerText === '') return;
-      roomsStore.sendChat(innerText);
+      roomsStore.sendChat(roomsStore.currentRid, innerText);
       text.actions.onChange('');
     },
-    [roomsStore.current, text.actions]
+    [roomsStore.currentRid, text.actions]
   );
 
   const ChatList = useMemo(() => {
@@ -70,6 +72,7 @@ const RoomChatPresenter = () => {
       return (
         <Flex
           height="100%"
+          width="100%"
           flexDirection="column"
           alignItems="center"
           justifyContent="center"
@@ -89,6 +92,7 @@ const RoomChatPresenter = () => {
         alignToBottom
         chatMode
         shiftScrollbar
+        followOutput={true}
         itemContent={(index, chat) => (
           <Box pt="2px">
             <Bubble
@@ -96,14 +100,14 @@ const RoomChatPresenter = () => {
               isOur={chat.author === window.ship}
               author={chat.author}
               ourColor={ourColor}
-              authorColor="#000"
+              authorColor="rgba(var(--rlm-text-rgba), 0.7)"
               sentAt={new Date(chat.timeReceived).toISOString()}
               isPrevGrouped={
                 chats[index - 1] && chats[index - 1].author === chat.author
               }
               message={[
                 {
-                  plain: chat.content,
+                  plain: chat.contents,
                 },
               ]}
               onReaction={() => {}}
@@ -115,8 +119,10 @@ const RoomChatPresenter = () => {
   }, [chats]);
 
   return (
-    <Flex position="relative" flex={1} flexDirection="column">
-      {ChatList}
+    <Flex position="relative" bottom={50} flex={1} flexDirection="column">
+      <Flex position="absolute" top={50} bottom={10} left={0} right={0}>
+        {ChatList}
+      </Flex>
       <Flex
         position="absolute"
         bottom={0}

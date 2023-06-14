@@ -4,7 +4,6 @@ export const RealmIPC = window.realm;
 export const AuthIPC = window.authService;
 export const OnboardingIPC = window.onboardingService;
 export const ShipIPC = window.shipService;
-export const RoomsIPC = window.roomsService;
 export const ChatIPC = window.chatService;
 export const WalletIPC = window.walletService;
 export const NotifIPC = window.notifService;

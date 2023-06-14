@@ -7,14 +7,14 @@ import {
   WalletCreationMode,
 } from 'os/services/ship/wallet/wallet.types';
 
-import { CreateWalletScreenBody } from '../screens/CreateWalletScreen/CreateWalletScreenBody';
-import { DetailScreenBody } from '../screens/DetailScreen/DetailScreenBody';
-import { ForgotPasscodeScreenBody } from '../screens/ForgotPasscodeScreen/ForgotPasscodeScreenBody';
-import { LockedScreenBody } from '../screens/LockedScreen/LockedScreenBody';
-import { NFTDetailScreenBody } from '../screens/NFTDetailScreen/NFTDetailScreenBody';
-import { WalletListScreenBody } from '../screens/WalletListScreen/WalletListScreenBody';
-import { DeleteWalletScreen } from '../screens/WalletSettingsScreen/DeleteWalletScreen';
-import { WalletSettingsScreenBody } from '../screens/WalletSettingsScreen/WalletSettingsScreenBody';
+import { CreateWalletScreenBody } from '../screens/Base/CreateWalletScreen/CreateWalletScreenBody';
+import { DetailScreenBody } from '../screens/Base/DetailScreen/DetailScreenBody';
+import { ForgotPasscodeScreenBody } from '../screens/Base/ForgotPasscodeScreen/ForgotPasscodeScreenBody';
+import { LockedScreenBody } from '../screens/Base/LockedScreen/LockedScreenBody';
+import { NFTDetailScreenBody } from '../screens/Base/NFTDetailScreen/NFTDetailScreenBody';
+import { WalletListScreenBody } from '../screens/Base/WalletListScreen/WalletListScreenBody';
+import { DeleteWalletScreen } from '../screens/Base/WalletSettingsScreen/DeleteWalletScreen';
+import { WalletSettingsScreenBody } from '../screens/Base/WalletSettingsScreen/WalletSettingsScreenBody';
 import { WalletScreen } from '../types';
 import { WalletStoryWrapper } from './helper';
 import {
@@ -31,7 +31,7 @@ export default {
   title: 'Wallet/Base Screens',
 } as ComponentMeta<typeof WalletSettingsScreenBody>;
 
-export const WalletDetailssStory: ComponentStory<
+export const WalletDetailsStory: ComponentStory<
   typeof DetailScreenBody
 > = () => (
   <WalletStoryWrapper protocol={ProtocolType.ETH_GORLI}>
@@ -58,7 +58,7 @@ export const WalletDetailssStory: ComponentStory<
   </WalletStoryWrapper>
 );
 
-WalletDetailssStory.storyName = 'Wallet details';
+WalletDetailsStory.storyName = 'Wallet details';
 
 export const NftDetailStory: ComponentStory<
   typeof NFTDetailScreenBody

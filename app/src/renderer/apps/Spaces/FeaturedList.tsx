@@ -36,7 +36,7 @@ const FeaturedListPresenter = () => {
 
   if (listData.length === 0) {
     return (
-      <Flex flex={1} py={1} px={4} width="100%">
+      <Flex flex={1} py={1} px={4} width="100%" overflowX="hidden">
         <Text.Custom
           fontWeight={200}
           opacity={0.5}
@@ -50,7 +50,7 @@ const FeaturedListPresenter = () => {
     );
   }
   return (
-    <Flex flex={1} width="100%">
+    <Flex flex={1} width="100%" overflowX="hidden">
       <WindowedList
         key={`featured-spaces-${listData.length}`}
         width={354}
@@ -64,7 +64,7 @@ const FeaturedListPresenter = () => {
               .then(() => {
                 spacesStore.selectSpace(data.path);
               })
-              .catch((err) => {
+              .catch((err: any) => {
                 console.error(err);
               });
           };
@@ -126,7 +126,7 @@ const FeaturedListPresenter = () => {
                 <Button.TextButton
                   fontSize={2}
                   // showBackground
-                  disabled={hasJoined}
+                  isDisabled={hasJoined}
                   style={{ borderRadius: 6 }}
                   // color="#4E9EFD"
                   onClick={(evt: any) => {

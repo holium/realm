@@ -367,12 +367,7 @@ export const Transaction = ({
             {type}
           </Text.Custom>
           <Flex justifyContent="flex-start">
-            <Text.Custom
-              variant="body"
-              fontSize={1}
-              color={type === 'Sent' ? 'intent-alert' : 'intent-success'}
-              textAlign="left"
-            >
+            <Text.Custom variant="body" fontSize={1} textAlign="left">
               {date}
             </Text.Custom>
             <Text.Custom mx={1} fontSize={1} opacity={0.5}>
@@ -395,7 +390,10 @@ export const Transaction = ({
           justifyContent="center"
           alignItems="flex-end"
         >
-          <Text.Body fontSize={2}>
+          <Text.Body
+            fontSize={2}
+            color={type === 'Sent' ? 'intent-alert' : 'intent-success'}
+          >
             {type === 'Sent' ? '-' : ''} {amount}
           </Text.Body>
           <Text.Hint opacity={0.5}>

@@ -1,6 +1,6 @@
 ::  app/notif-db.hoon
-/-  *notif-versioned-state, sur=notif-db
-/+  dbug, db-lib=notif-db
+/-  *notif-versioned-state, sur=notif-db, db-sur=chat-db
+/+  dbug, db-lib=notif-db, cdb-lib=chat-db
 =|  state-0
 =*  state  -
 :: ^-  agent:gall
@@ -14,14 +14,25 @@
     ^-  (quip card _this)
     =/  default-state=state-0
       [%0 0 *notifs-table:sur *del-log:sur]
-    `this(state default-state)
+    =/  cards=(list card)
+    :~  [%pass /db %agent [our.bowl %chat-db] %watch /db]
+    ==
+    [cards this(state default-state)]
   ++  on-save   !>(state)
   ++  on-load
     |=  old-state=vase
     ^-  (quip card _this)
+    =/  cards=(list card)
+      %+  weld
+        ^-  (list card)
+        [%pass /selfpoke %agent [our.bowl %notif-db] %poke %notif-db-poke !>([%delete-old-realm-chat-notifs ~])]~
+      ^-  (list card)
+      ?:  =(wex.bowl ~)
+        [%pass /db %agent [our.bowl %chat-db] %watch /db]~
+      ~
     =/  old  !<(versioned-state old-state)
     ?-  -.old
-      %0  `this(state old)
+      %0  [cards this(state old)]
     ==
   ::
   ++  on-poke
@@ -65,6 +76,8 @@
       %delete
         ?>  =(src.bowl our.bowl)
         (delete:db-lib +.act state bowl)
+      %delete-old-realm-chat-notifs
+        (delete-old-realm-chat-notifs:db-lib state bowl)
     ==
     [cards this]
   ::
@@ -109,6 +122,10 @@
         =/  theid    (slav %ud i.t.t.t.path)
         ``notif-rows+!>([(got:notifon notifs-table.state theid) ~])
     ::
+      [%x %db %unread-count @ ~]
+        =/  theapp    `@tas`i.t.t.t.path
+        ``atom+!>((lent (unreads-by-app:core theapp)))
+    ::
       [%x %db %path @ *]
         =/  theapp    `@tas`i.t.t.t.path
         =/  thepath   t.t.t.t.path
@@ -141,12 +158,65 @@
         =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)
         ``notif-del-log+!>((lot:delon:sur del-log.state ~ `timestamp))
     ==
-  :: notif-db does not subscribe to anything.
-  :: notif-db does not care
+  ::
   ++  on-agent
     |=  [=wire =sign:agent:gall]
     ^-  (quip card _this)
-    !!
+    ?+  wire  !!
+      [%selfpoke ~]
+        ?+    -.sign  `this
+          %poke-ack
+            ?~  p.sign  `this
+            ~&  >>>  "%realm-chat: {<(spat wire)>} selfpoke failed"
+            `this
+        ==
+      [%db ~]
+        ?+  -.sign  `this
+          %fact
+            ?+  p.cage.sign  `this
+              %chat-db-change
+                =/  thechange=db-change:db-sur  !<(db-change:db-sur q.cage.sign)
+                =/  del-paths=(list path)
+                  %+  turn
+                    %+  skim
+                      thechange
+                    |=(ch=db-change-type:db-sur =(-.ch %del-paths-row))
+                  |=  ch=db-change-type:db-sur
+                  ?+  -.ch    !!
+                    %del-paths-row    path.ch
+                  ==
+                =/  del-msgs=(list cord)
+                  %+  turn
+                    %+  skim
+                      thechange
+                    |=(ch=db-change-type:db-sur =(-.ch %del-messages-row))
+                  |=  ch=db-change-type:db-sur
+                  ?+  -.ch    !!
+                    %del-messages-row    (msg-id-to-cord:encode:cdb-lib msg-id.uniq-id.ch)
+                  ==
+                ?:  &(=(0 (lent del-msgs)) =(0 (lent del-paths)))  `this  :: return nothing if no del changes
+                =/  notif-ids=(list id:sur)
+                (generate-uniq-notif-ids-to-del:db-lib state del-msgs del-paths)
+                =/  index=@ud  0
+                =/  changes=db-change:sur  ~
+                =/  cs=[db-change:sur state-0]
+                  |-
+                    ?:  =(index (lent notif-ids))
+                      [changes state]
+                    =/  id=id:sur  (snag index notif-ids)
+                    =/  ch=db-change-type:sur  [%del-row id]
+                    =.  notifs-table.state  +:(del:notifon:sur notifs-table.state id)
+                    =.  del-log.state       (put:delon:sur del-log.state (add now.bowl index) ch)
+                    $(index +(index), changes (snoc changes ch))
+
+                =/  ourchange  notif-db-change+!>(-.cs)
+                =/  gives  :~
+                  [%give %fact [/db ~] ourchange]
+                ==
+                [gives this(state +.cs)]
+            ==
+        ==
+    ==
   ::
   ++  on-leave
     |=  path
@@ -189,6 +259,11 @@
   %+  turn
     (skim (tap:notifon:sur notifs-table.state) |=([k=@ud v=notif-row:sur] read.v))
   val-r
+++  unreads-by-app
+  |=  app=@tas
+  %+  skim
+    all-unread-rows
+  |=(v=notif-row:sur =(app.v app))
 ++  rows-by-path
   |=  [app=@tas =path]
   %+  turn

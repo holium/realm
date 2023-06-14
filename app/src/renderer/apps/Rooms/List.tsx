@@ -3,26 +3,33 @@ import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, Text, Tooltip } from '@holium/design-system';
 
+import { SoundActions } from 'renderer/lib/sound';
 import { trackEvent } from 'renderer/lib/track';
-import { RoomMobx } from 'renderer/stores/rooms.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
 import { ProviderSelector } from './components/ProviderSelector';
 import { RoomRow } from './components/RoomRow';
+import { roomTrayConfig } from './config';
+import { RoomModel } from './store/RoomsStore';
+import { useRoomsStore } from './store/RoomsStoreContext';
 
 const RoomsPresenter = () => {
-  const { spacesStore, roomsStore } = useShipStore();
-  const { roomsApp } = useTrayApps();
+  const { spacesStore } = useShipStore();
+  const { roomsApp, dimensions, setTrayAppHeight } = useTrayApps();
+  const roomsStore = useRoomsStore();
 
   const ourSpace = spacesStore.selected?.type === 'our';
 
   useEffect(() => {
     trackEvent('OPENED', 'ROOMS_LIST');
+    if (dimensions.height !== roomTrayConfig.dimensions.height) {
+      setTrayAppHeight(roomTrayConfig.dimensions.height);
+    }
   }, []);
 
   const rooms = ourSpace
-    ? roomsStore?.roomsList
+    ? roomsStore.roomsList
     : roomsStore.getSpaceRooms(spacesStore.selected?.path ?? '');
 
   return (
@@ -69,7 +76,7 @@ const RoomsPresenter = () => {
             </Text.Custom>
           </Flex>
         )}
-        {rooms?.map((room: RoomMobx, index: number) => {
+        {rooms?.map((room: RoomModel, index: number) => {
           return (
             <RoomRow
               key={`${room.title}-${index}`}
@@ -77,16 +84,23 @@ const RoomsPresenter = () => {
               title={room.title}
               provider={room.provider}
               present={room.present}
-              // cursors={room.cursors}
               creator={room.creator}
               access={room.access}
               capacity={room.capacity}
               onClick={async (evt: any) => {
                 evt.stopPropagation();
-                if (roomsStore.current?.rid !== room.rid) {
-                  roomsStore?.joinRoom(room.rid);
+                if (roomsStore.currentRid !== room.rid) {
+                  SoundActions.playRoomEnter();
+                  try {
+                    await roomsStore.joinRoom(room.rid);
+                    roomsApp.setView('room');
+                  } catch (e) {
+                    // TODO put error in UI
+                    console.error(e);
+                  }
+                } else {
+                  roomsApp.setView('room');
                 }
-                roomsApp.setView('room');
               }}
             />
           );

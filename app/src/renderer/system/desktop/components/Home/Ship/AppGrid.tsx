@@ -31,8 +31,12 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
       ] as AppMobxType[],
     [bazaarStore.catalog, bazaarStore.installations.values()]
   );
-
   const [items, setItems] = useState(apps);
+
+  useEffect(() => {
+    setItems(apps);
+  }, [bazaarStore.installed]);
+
   const canClick = useToggle(true);
 
   useEffect(() => {
@@ -50,7 +54,7 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
     targetIndex: number
   ) => {
     if (sourceIndex === targetIndex) return;
-    const nextState = swap(items, sourceIndex, targetIndex);
+    const nextState = swap(apps, sourceIndex, targetIndex);
     setItems(nextState);
     const newGrid = Object();
 

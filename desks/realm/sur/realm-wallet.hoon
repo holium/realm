@@ -1,7 +1,7 @@
 |%
 ::  basic types
 ::
-+$  address  @u
++$  address  @t
 +$  network  ?(%bitcoin %btctestnet %ethereum)
 +$  transaction
   $:  hash=@t
@@ -31,7 +31,7 @@
   ==
 +$  status  ?(%pending %failed %succeeded)
 +$  eth-type  ?(%erc20 %erc721 %eth)
-+$  wallet  
++$  wallet
   $:  =address
       path=@t
       nickname=@t
@@ -47,6 +47,19 @@
   $:  who=?(%nobody %friends %anybody)
       wallet-creation=mode
   ==
+
+::  State 0 - wallet as @u instead of @t
+::
++$  address-0  @u
++$  wallet-0
+  $:  address=address-0
+      path=@t
+      nickname=@t
+      transactions=(map net=@t (map hash=@t transaction))
+      token-txns=(map net=@t (map @t (map hash=@t transaction)))
+  ==
++$  wallets-0  (map =network (map @ud wallet-0))
+::
 ::  poke actions
 ::
 +$  action

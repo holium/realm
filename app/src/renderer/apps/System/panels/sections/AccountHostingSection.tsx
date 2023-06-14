@@ -32,7 +32,7 @@ type Props = {
 };
 
 export const AccountHostingSection = ({ account }: Props) => {
-  const { ships } = useUser();
+  const { ships, refetchShips } = useUser();
 
   const changeEmailModal = useToggle(false);
   const verifyEmailModal = useToggle(false);
@@ -107,11 +107,11 @@ export const AccountHostingSection = ({ account }: Props) => {
 
   const onSubmitNewAccessCode = async () => {
     if (!token) return Promise.resolve(false);
-    if (!account) return Promise.resolve(false);
+    if (!ship) return Promise.resolve(false);
 
     const response = await thirdEarthApi.resetShipCode(
       token,
-      account.serverId.toString()
+      ship.id.toString()
     );
 
     if (response) return true;
@@ -120,25 +120,32 @@ export const AccountHostingSection = ({ account }: Props) => {
 
   const onSubmitNewMaintenanceWindow = async (maintenanceWindow: string) => {
     if (!token) return Promise.resolve(false);
-    if (!account) return Promise.resolve(false);
+    if (!ship) return Promise.resolve(false);
 
     const response = await thirdEarthApi.updateMaintenanceWindow(
       token,
-      account.serverId.toString(),
+      ship.id.toString(),
       maintenanceWindow
     );
 
-    if (response?.maintenance_window) return true;
+    if (response?.maintenance_window) {
+      await refetchShips();
+
+      changeMaintenanceWindowModal.toggleOff();
+
+      return true;
+    }
+
     return false;
   };
 
   const onSubmitEjectId = async (ejectAddress: string, ethAddress: string) => {
     if (!token) return Promise.resolve(false);
-    if (!account) return Promise.resolve(false);
+    if (!ship) return Promise.resolve(false);
 
     const response = await thirdEarthApi.ejectShip(
       token,
-      account.serverId.toString(),
+      ship.id.toString(),
       ejectAddress,
       ethAddress
     );

@@ -8,12 +8,13 @@ import {
   useContextMenu,
 } from 'renderer/components/ContextMenu';
 import { useAppState } from 'renderer/stores/app.store';
-import { useShipStore } from 'renderer/stores/ship.store';
 
+import { useRoomsStore } from '../store/RoomsStoreContext';
 import { AvatarRow } from './AvatarRow';
 
 type RoomRowProps = Partial<any> & {
   tray?: boolean;
+  loading?: boolean;
   onClick?: (evt: any) => any;
   rightChildren?: any;
 };
@@ -29,7 +30,7 @@ const RoomRowPresenter = ({
   rightChildren,
 }: RoomRowProps) => {
   const { loggedInAccount, theme } = useAppState();
-  const { roomsStore } = useShipStore();
+  const roomsStore = useRoomsStore();
   const { getOptions, setOptions } = useContextMenu();
   const defaultOptions = getOptions('').filter(
     (o) => o.id === 'toggle-devtools'
@@ -46,7 +47,7 @@ const RoomRowPresenter = ({
   if (titleText && titleText.length > 16 && tray) {
     titleText = titleText.substring(0, 16) + '...';
   }
-  const isLive = roomsStore.current?.rid === rid;
+  const isLive = roomsStore.currentRid === rid;
 
   const contextMenuOptions = useMemo(
     () =>

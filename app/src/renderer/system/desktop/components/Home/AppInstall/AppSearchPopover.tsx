@@ -7,14 +7,12 @@ import { RealmPopover } from '../Popover';
 import { SearchModes } from './SearchModes';
 
 const AppSearchPopoverPresenter = () => {
+  const { showTitleBar } = useAppState();
   const appInstaller = useAppInstaller();
-  const { shellStore } = useAppState();
 
   const coords = {
     left: appInstaller.coords.left,
-    top: shellStore.isFullscreen
-      ? appInstaller.coords.top
-      : appInstaller.coords.top + 30,
+    top: showTitleBar ? appInstaller.coords.top + 16 : appInstaller.coords.top,
   };
 
   if (appInstaller.searchMode === 'none') return null;

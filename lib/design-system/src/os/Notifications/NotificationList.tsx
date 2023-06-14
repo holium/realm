@@ -30,7 +30,6 @@ export const NotificationList = ({
   containerWidth,
   notifications,
   groupByPath = true,
-  justifyContent = 'flex-start',
   onAppLookup,
   onPathLookup,
   onDismiss,
@@ -44,6 +43,7 @@ export const NotificationList = ({
     const grouped = notifications.filter((n) => n.app === app);
     return grouped;
   });
+
   if (notifications.length === 0) {
     return (
       // show empty state
@@ -59,13 +59,9 @@ export const NotificationList = ({
       </Flex>
     );
   }
+
   return (
-    <Flex
-      height="100%"
-      flexDirection="column"
-      gap={8}
-      justifyContent={justifyContent}
-    >
+    <Flex height="100%" minHeight={0} flexDirection="column" gap={8}>
       {appGroupedNotifications.map((appNotifs) => {
         const appInfo = onAppLookup(appNotifs[0].app);
         if (appNotifs.length === 1) {

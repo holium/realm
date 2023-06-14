@@ -2,7 +2,7 @@ import { ReactNode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ProgressInfo, UpdateInfo } from 'electron-updater';
 
-import { Button, Flex, ProgressBar, Text } from '@holium/design-system';
+import { Button, Flex, ProgressBar, Text } from '@holium/design-system/general';
 
 import { StandAloneMouse } from '../mouse/StandAloneMouse';
 import { HoliumLogo } from './holium-logo';
@@ -10,7 +10,9 @@ import { HoliumLogo } from './holium-logo';
 import './installer.css';
 
 declare global {
-  let autoUpdate: any;
+  interface Window {
+    autoUpdate: any;
+  }
 }
 
 type UpdateStatsProps = {

@@ -12,7 +12,7 @@ import {
   FragmentBlockquote,
   FragmentImage,
   FragmentPlain,
-} from './fragment-lib';
+} from './renderFragment.styles';
 
 const ReplyContainer = styled(Flex)`
   flex-direction: column;

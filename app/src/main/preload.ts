@@ -14,7 +14,6 @@ import { onboardingPreload } from '../os/services/auth/onboarding.service';
 import { chatPreload } from '../os/services/ship/chat/chat.service';
 import { friendsPreload } from '../os/services/ship/friends.service';
 import { notifPreload } from '../os/services/ship/notifications/notifications.service';
-import { roomsPreload } from '../os/services/ship/rooms.service';
 import { shipPreload } from '../os/services/ship/ship.service';
 import { appPublishersDBPreload } from '../os/services/ship/spaces/tables/appPublishers.table';
 import { appRecentsPreload } from '../os/services/ship/spaces/tables/appRecents.table';
@@ -50,17 +49,32 @@ const appPreload = {
   toggleDevTools: () => {
     return ipcRenderer.invoke('toggle-devtools');
   },
+  setFullscreen: (isFullscreen: boolean) => {
+    return ipcRenderer.invoke('set-fullscreen', isFullscreen);
+  },
+  shouldUseCustomTitlebar: (): Promise<boolean> => {
+    return ipcRenderer.invoke('should-use-custom-titlebar');
+  },
+  setStandaloneChat: (isStandaloneChat: boolean) => {
+    return ipcRenderer.invoke('set-standalone-chat', isStandaloneChat);
+  },
+  isStandaloneChat: (): Promise<boolean> => {
+    return ipcRenderer.invoke('is-standalone-chat');
+  },
   enableIsolationMode: () => {
     return ipcRenderer.invoke('enable-isolation-mode');
   },
   disableIsolationMode: () => {
     return ipcRenderer.invoke('disable-isolation-mode');
   },
-  enableRealmCursor: () => {
-    return ipcRenderer.invoke('enable-realm-cursor');
+  enableRealmCursor: (refresh?: boolean) => {
+    return ipcRenderer.invoke('enable-realm-cursor', refresh);
   },
-  disableRealmCursor: () => {
-    return ipcRenderer.invoke('disable-realm-cursor');
+  disableRealmCursor: (refresh?: boolean) => {
+    return ipcRenderer.invoke('disable-realm-cursor', refresh);
+  },
+  isRealmCursorEnabled: (): Promise<boolean> => {
+    return ipcRenderer.invoke('is-realm-cursor-enabled');
   },
   setMouseColor(hex: string) {
     ipcRenderer.invoke('mouse-color', hex);
@@ -93,9 +107,6 @@ const appPreload = {
   },
   onMouseOut(callback: () => void) {
     ipcRenderer.on('mouse-out', callback);
-  },
-  onEnableMouseLayerTracking(callback: () => void) {
-    ipcRenderer.on('enable-mouse-layer-tracking', callback);
   },
   onEnableRealmCursor(callback: () => void) {
     ipcRenderer.on('enable-realm-cursor', callback);
@@ -157,6 +168,21 @@ const appPreload = {
       callback(spacePath);
     });
   },
+
+  onSetTitlebarVisible(callback: (isVisible: boolean) => void) {
+    ipcRenderer.on('use-custom-titlebar', (_, isVisible: boolean) => {
+      callback(isVisible);
+    });
+  },
+  toggleMinimized: () => {
+    return ipcRenderer.invoke('toggle-minimized');
+  },
+  closeRealm: () => {
+    return ipcRenderer.invoke('close-realm');
+  },
+  toggleFullscreen: () => {
+    return ipcRenderer.invoke('toggle-fullscreen');
+  },
   /* Removers */
   removeOnKeyDown() {
     ipcRenderer.removeAllListeners('key-down');
@@ -189,7 +215,6 @@ contextBridge.exposeInMainWorld('realm', realmPreload);
 contextBridge.exposeInMainWorld('shipService', shipPreload);
 contextBridge.exposeInMainWorld('spacesService', spacesPreload);
 contextBridge.exposeInMainWorld('authService', authPreload);
-contextBridge.exposeInMainWorld('roomsService', roomsPreload);
 contextBridge.exposeInMainWorld('chatService', chatPreload);
 contextBridge.exposeInMainWorld('walletService', walletPreload);
 contextBridge.exposeInMainWorld('notifService', notifPreload);
