@@ -36,18 +36,12 @@ export const bootRealm = () => {
     realmService = new RealmService();
   }
 
-  if (standaloneChatWindow && standaloneChatWindow.isClosable()) {
-    standaloneChatWindow.close();
-  }
   if (standaloneChatWindow && !standaloneChatWindow.isDestroyed()) {
     standaloneChatWindow.destroy();
   }
 
   standaloneChatWindow = null;
 
-  if (mouseOverlayWindow && mouseOverlayWindow.isClosable()) {
-    mouseOverlayWindow.close();
-  }
   if (mouseOverlayWindow && !mouseOverlayWindow.isDestroyed()) {
     mouseOverlayWindow.destroy();
   }
@@ -58,9 +52,7 @@ export const bootRealm = () => {
   realmWindow = createRealmWindow();
   mouseOverlayWindow = createMouseOverlayWindow(realmWindow);
 
-  if (menuBuilder) {
-    menuBuilder = null;
-  }
+  menuBuilder = null;
 
   menuBuilder = new MenuBuilder(realmWindow);
   menuBuilder.buildMenu();
@@ -106,13 +98,10 @@ export const bootStandaloneChat = () => {
     realmService = new RealmService();
   }
 
-  if (realmWindow && realmWindow.isClosable()) {
+  if (realmWindow && !realmWindow.isDestroyed()) {
     // We need to window the window before closing it, otherwise
     // the Mac menubar isn't reliably restored from simple fullscreen.
     windowWindow(realmWindow);
-    realmWindow.close();
-  }
-  if (realmWindow && !realmWindow.isDestroyed()) {
     realmWindow.destroy();
   }
 
@@ -122,9 +111,7 @@ export const bootStandaloneChat = () => {
   standaloneChatWindow = createStandaloneChatWindow();
   mouseOverlayWindow = createMouseOverlayWindow(standaloneChatWindow);
 
-  if (menuBuilder) {
-    menuBuilder = null;
-  }
+  menuBuilder = null;
 
   menuBuilder = new MenuBuilder(standaloneChatWindow);
   menuBuilder.buildMenu();
