@@ -5,6 +5,7 @@ import { RealmService } from '../os/realm.service';
 import { AppUpdater } from './AppUpdater';
 import { setRealmCursor } from './helpers/cursorSettings';
 import { isArm64Mac, isMac } from './helpers/env';
+import { windowWindow } from './helpers/fullscreen';
 import { MenuBuilder } from './menu';
 import { getAssetPath } from './util';
 import {
@@ -106,6 +107,9 @@ export const bootStandaloneChat = () => {
   }
 
   if (realmWindow && realmWindow.isClosable()) {
+    // We need to window the window before closing it, otherwise
+    // the Mac menubar isn't reliably restored from simple fullscreen.
+    windowWindow(realmWindow);
     realmWindow.close();
   }
   if (realmWindow && !realmWindow.isDestroyed()) {
