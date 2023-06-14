@@ -24,13 +24,21 @@ type Props = {
 
 export const ChatLogList = ({
   listRef,
-  messages,
+  messages: unfilteredMessages,
   ourColor,
   endOfListPadding,
   topOfListPadding,
   isStandaloneChat,
 }: Props) => {
   const [prevHeight, setPrevHeight] = useState<number>(0);
+
+  // Filter out duplicate messages
+  const messages = unfilteredMessages.filter((msg, index) => {
+    if (index === 0) return true;
+    const prevMsg = unfilteredMessages[index - 1];
+    if (msg.id === prevMsg.id) return false;
+    return true;
+  });
 
   const renderChatRow = (index: number, message: ChatMessageType) => {
     const isLast = index === messages.length - 1;
@@ -59,7 +67,7 @@ export const ChatLogList = ({
 
     return (
       <Box
-        key={`row-${message.id}-${index}-${message.createdAt}`}
+        key={`${index}-${message.id}-${message.createdAt}-${message.updatedAt}`}
         animate={false}
         pt={topSpacing}
         pb={bottomSpacing}
@@ -98,13 +106,12 @@ export const ChatLogList = ({
   return (
     <Gallery>
       <WindowedList
+        // Fixes a bug where the list is blank until scrolled.
+        key={messages.length === 0 ? 'empty' : 'not-empty'}
         innerRef={listRef}
         data={messages}
         atBottomThreshold={100}
-        // overscan={isStandaloneChat ? 500 : 250}
         increaseViewportBy={isStandaloneChat ? 600 : 250}
-        followOutput={true}
-        alignToBottom
         totalListHeightChanged={(height: number) => {
           if (height - prevHeight === 10) {
             // 10 px is the height change that occurs when there's a reaction added

@@ -66,11 +66,11 @@ const appPreload = {
   disableIsolationMode: () => {
     return ipcRenderer.invoke('disable-isolation-mode');
   },
-  enableRealmCursor: (refresh?: boolean) => {
-    return ipcRenderer.invoke('enable-realm-cursor', refresh);
+  enableRealmCursor: (reloadMouseWindow?: boolean) => {
+    return ipcRenderer.invoke('enable-realm-cursor', reloadMouseWindow);
   },
-  disableRealmCursor: (refresh?: boolean) => {
-    return ipcRenderer.invoke('disable-realm-cursor', refresh);
+  disableRealmCursor: (reloadMouseWindow?: boolean) => {
+    return ipcRenderer.invoke('disable-realm-cursor', reloadMouseWindow);
   },
   isRealmCursorEnabled: (): Promise<boolean> => {
     return ipcRenderer.invoke('is-realm-cursor-enabled');
