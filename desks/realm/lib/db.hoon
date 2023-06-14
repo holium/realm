@@ -8,6 +8,19 @@
 ::
 :: helpers
 ::
+++  get
+  |=  [=type:common =path =id:common state=state-0]
+  ^-  row
+  (~(got by (~(got by (~(got by tables.state) type)) path)) id)
+::
+++  got
+  |=  [=type:common =path =id:common state=state-0]
+  ^-  (unit row)
+  =/  ptbl  (~(get by tables.state) type)
+  ?~  ptbl  ~
+  =/  tbl   (~(get by u.ptbl) path)
+  ?~  tbl   ~
+  (~(get by u.tbl) id)
 ++  has-create-permissions
   |=  [=path-row =row state=state-0 =bowl:gall]
   ^-  ?
@@ -927,8 +940,7 @@
   =.  protocol.data.input-row    %all
   :: then check that we actually have the thing being relayed
   =/  obj-id=id:common  id.data.input-row
-  =/  ptbl  (~(got by tables.state) type.data.input-row)
-  =/  obj=row  (~(got by (~(got by ptbl) path.data.input-row)) obj-id)
+  =/  obj=row  (got type.data.input-row path.data.input-row obj-id state)
   :: and its schema
   =/  sch=schema  (~(got by schemas.state) [type.obj v.obj])
   :: then check if we have already relayed this thing before

@@ -321,24 +321,25 @@
                     ^-  (list card)
                     [%give %fact [/db (weld /path dbpath) ~] db-changes+!>(changes)]~
                   =/  change   (snag index changes)
-                  :: TODO, if the object+revsion is already in our
-                  :: tables.state, don't bother remote-scrying
                   =/  new-scry=(list card)
                     ?+  -.change  ~
                       %add-row
                         ?.  ?=(%relay type.row.change)  ~
                         ?>  ?=(%relay -.data.row.change)
-                        ~&  >>>  "asking for remote-scry"
-                        :~  [
-                          %pass
-                          /remote-scry/callback
-                          %arvo
-                          %a
-                          %keen
-                          ship.id.row.change
-                          /g/x/(scot %ud revision.data.row.change)/(scot %tas dap.bowl)//(scot %p ship.id.data.row.change)/(scot %da t.id.data.row.change)
-                        ]
-                        ==
+                        =/  uobj=row  (get:db type.data.row.change path.data.row.change id.data.row.change state)
+                        ?~  uobj :: if we DONT have the obj already, remote-scry it
+                          ~&  >>>  "asking for remote-scry"
+                          :~  [
+                            %pass
+                            /remote-scry/callback
+                            %arvo
+                            %a
+                            %keen
+                            ship.id.row.change
+                            /g/x/(scot %ud revision.data.row.change)/(scot %tas dap.bowl)//(scot %p ship.id.data.row.change)/(scot %da t.id.data.row.change)
+                          ]
+                          ==
+                        ~ :: otherwise, don't emit any cards
                     ==
                   $(index +(index), state (process-db-change:db dbpath change state bowl), remote-scries (weld remote-scries new-scry))
               %db-path
