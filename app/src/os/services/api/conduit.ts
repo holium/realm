@@ -334,7 +334,6 @@ export class Conduit extends EventEmitter {
   async watch(params: SubscribeParams & SubscribeCallbacks): Promise<boolean> {
     const handlers: SubscribeParams & SubscribeCallbacks = {
       onEvent: (_data) => {},
-      onQuit: (_id) => {},
       onError: (_id, _err) => {},
       onSubscribed: (_id) => {},
       ...params,
