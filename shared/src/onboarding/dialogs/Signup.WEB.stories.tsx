@@ -11,6 +11,7 @@ import {
   SomethingWentWrongDialog,
   VerifyEmailDialog,
 } from '../onboarding';
+import { GetOnRealmDialog } from './GetOnRealm/GetOnRealmDialog';
 import {
   mockPatps,
   OnboardingDialogWrapper,
@@ -41,6 +42,20 @@ export const SomethingWentWrongDialogStory: ComponentStory<
 );
 
 SomethingWentWrongDialogStory.storyName = '0.1 Something went wrong';
+
+export const GetOnRealmDialogStory: ComponentStory<
+  typeof GetOnRealmDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <GetOnRealmDialog
+      onBuyAnId={() => {}}
+      onMigrateAnId={() => {}}
+      onBack={() => {}}
+    />
+  </OnboardingDialogWrapper>
+);
+
+GetOnRealmDialogStory.storyName = '1. Get on Realm';
 
 export const CreateAccountDialogStory: ComponentStory<
   typeof CreateAccountDialog

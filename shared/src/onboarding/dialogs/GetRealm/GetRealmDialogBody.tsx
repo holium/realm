@@ -1,43 +1,20 @@
-import styled from 'styled-components';
-
 import { Button, Flex, Text } from '@holium/design-system/general';
 
+import { GrayButton } from '../../components/ChangeButton';
 import {
-  MOBILE_WIDTH,
   OnboardDialogDescription,
   OnboardDialogTitle,
 } from '../../components/OnboardDialog.styles';
 import { OrDivider } from '../../components/OrDivider';
 import { GetIdIcon } from '../../icons/GetIdIcon';
-
-const GrayBox = styled(Flex)`
-  padding: 16px;
-  gap: 16px;
-  background-color: rgba(var(--rlm-border-rgba), 0.5);
-  border: 1px solid rgba(var(--rlm-border-rgba));
-  border-radius: 12px;
-
-  @media (max-width: ${MOBILE_WIDTH}px) {
-    padding: 32px;
-    .hideonmobile {
-      display: none;
-    }
-  }
-`;
-
-const InfoText = styled(OnboardDialogDescription)`
-  font-size: 12px;
-  text-align: center;
-  max-width: 400px;
-  margin: 0 auto;
-  opacity: 0.7;
-`;
+import { GrayBox, InfoText } from './GetRealmDialogBody.styles';
 
 type Props = {
-  onGetANewId: () => void;
+  onPurchaseId: () => void;
+  onMigrateId: () => void;
 };
 
-export const GetRealmDialogBody = ({ onGetANewId }: Props) => (
+export const GetRealmDialogBody = ({ onPurchaseId, onMigrateId }: Props) => (
   <>
     <OnboardDialogTitle
       style={{
@@ -54,17 +31,30 @@ export const GetRealmDialogBody = ({ onGetANewId }: Props) => (
       <Flex flex={1} alignItems="center" justifyContent="center" gap="16px">
         <Flex flexDirection="column" gap="16px" alignItems="center">
           <OnboardDialogDescription>Want in now?</OnboardDialogDescription>
-          <Button.Primary type="button" onClick={onGetANewId}>
-            <Text.Body
-              style={{
-                fontWeight: 500,
-                color: '#ffffff',
-                margin: '2px',
-              }}
-            >
-              Purchase ID
-            </Text.Body>
-          </Button.Primary>
+          <Flex gap="12px">
+            <Button.Primary type="button" onClick={onPurchaseId}>
+              <Text.Body
+                style={{
+                  fontWeight: 500,
+                  color: 'inherit',
+                  margin: '2px',
+                }}
+              >
+                Purchase ID
+              </Text.Body>
+            </Button.Primary>
+            <GrayButton onClick={onMigrateId}>
+              <Text.Body
+                style={{
+                  fontWeight: 500,
+                  color: 'inherit',
+                  margin: '2px',
+                }}
+              >
+                Migrate ID
+              </Text.Body>
+            </GrayButton>
+          </Flex>
         </Flex>
       </Flex>
       <Flex
