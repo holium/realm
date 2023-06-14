@@ -40,10 +40,7 @@ const WalletOnboardingPresenter = () => {
     ? WalletOnboardingScreen.DETECTED_EXISTING
     : WalletOnboardingScreen.NO_WALLET;
 
-  console.log('initialScreen', initialScreen);
-
   useEffect(() => {
-    console.log('initialized uef', walletStore.initialized);
     if (walletStore.initialized) {
       setScreen(WalletOnboardingScreen.DETECTED_EXISTING);
     } else {
