@@ -106,12 +106,11 @@ export const ChatLogList = ({
   return (
     <Gallery>
       <WindowedList
+        key={messages.length}
         innerRef={listRef}
         data={messages}
         atBottomThreshold={100}
-        // overscan={isStandaloneChat ? 500 : 250}
         increaseViewportBy={isStandaloneChat ? 600 : 250}
-        followOutput={true}
         alignToBottom
         totalListHeightChanged={(height: number) => {
           if (height - prevHeight === 10) {
