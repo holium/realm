@@ -27,7 +27,7 @@ const defaultRealmWindowOptions: Electron.BrowserWindowConstructorOptions = {
   // to trigger the mouse-in event when the window is shown.
   width: 0,
   height: 0,
-  fullscreenable: true,
+  fullscreenable: true, // Explicitly needed for non-Arm64 Macs.
   icon: getAssetPath('icon.png'),
   title: 'Realm',
   fullscreen: false,
