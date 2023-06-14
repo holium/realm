@@ -1,6 +1,9 @@
 import { BrowserWindow, ipcMain } from 'electron';
+import Store from 'electron-store';
 
 import { fullScreenWindow } from './fullscreen';
+
+const store = new Store();
 
 const registerListeners = (mainWindow: BrowserWindow) => {
   ipcMain.removeHandler('toggle-devtools');
@@ -17,12 +20,16 @@ const registerListeners = (mainWindow: BrowserWindow) => {
     }
   });
   ipcMain.handle('enable-isolation-mode', () => {
+    const isStandaloneChat = store.get('isStandaloneChat');
+    if (isStandaloneChat) return;
     if (mainWindow.isDestroyed()) return;
     if (mainWindow.isKiosk()) return;
 
     mainWindow.setKiosk(true);
   });
   ipcMain.handle('disable-isolation-mode', () => {
+    const isStandaloneChat = store.get('isStandaloneChat');
+    if (isStandaloneChat) return;
     if (mainWindow.isDestroyed()) return;
     if (!mainWindow.isKiosk()) return;
 

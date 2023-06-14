@@ -30,12 +30,12 @@ export const WindowedList = <ItemData, Context = any>({
       ref={innerRef}
       data={data}
       followOutput={chatMode}
+      alignToBottom={chatMode}
       initialTopMostItemIndex={chatMode ? data.length - 1 : 0}
       style={{
         width:
-          width ?? shiftScrollbar
-            ? `calc(100% + ${SCROLLBAR_WIDTH}px)`
-            : '100%',
+          width ??
+          (shiftScrollbar ? `calc(100% + ${SCROLLBAR_WIDTH}px)` : '100%'),
         height: height ?? '100%',
         marginRight: -(shiftScrollbar ? SCROLLBAR_WIDTH : 0),
         ...style,
