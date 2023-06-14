@@ -48,17 +48,32 @@ const appPreload = {
   toggleDevTools: () => {
     return ipcRenderer.invoke('toggle-devtools');
   },
+  setFullscreen: (isFullscreen: boolean) => {
+    return ipcRenderer.invoke('set-fullscreen', isFullscreen);
+  },
+  shouldUseCustomTitlebar: (): Promise<boolean> => {
+    return ipcRenderer.invoke('should-use-custom-titlebar');
+  },
+  setStandaloneChat: (isStandaloneChat: boolean) => {
+    return ipcRenderer.invoke('set-standalone-chat', isStandaloneChat);
+  },
+  isStandaloneChat: (): Promise<boolean> => {
+    return ipcRenderer.invoke('is-standalone-chat');
+  },
   enableIsolationMode: () => {
     return ipcRenderer.invoke('enable-isolation-mode');
   },
   disableIsolationMode: () => {
     return ipcRenderer.invoke('disable-isolation-mode');
   },
-  enableRealmCursor: () => {
-    return ipcRenderer.invoke('enable-realm-cursor');
+  enableRealmCursor: (refresh?: boolean) => {
+    return ipcRenderer.invoke('enable-realm-cursor', refresh);
   },
-  disableRealmCursor: () => {
-    return ipcRenderer.invoke('disable-realm-cursor');
+  disableRealmCursor: (refresh?: boolean) => {
+    return ipcRenderer.invoke('disable-realm-cursor', refresh);
+  },
+  isRealmCursorEnabled: (): Promise<boolean> => {
+    return ipcRenderer.invoke('is-realm-cursor-enabled');
   },
   setMouseColor(hex: string) {
     ipcRenderer.invoke('mouse-color', hex);
@@ -86,9 +101,6 @@ const appPreload = {
   },
   onMouseOut(callback: () => void) {
     ipcRenderer.on('mouse-out', callback);
-  },
-  onEnableMouseLayerTracking(callback: () => void) {
-    ipcRenderer.on('enable-mouse-layer-tracking', callback);
   },
   onEnableRealmCursor(callback: () => void) {
     ipcRenderer.on('enable-realm-cursor', callback);
@@ -152,7 +164,7 @@ const appPreload = {
   },
 
   onSetTitlebarVisible(callback: (isVisible: boolean) => void) {
-    ipcRenderer.on('set-titlebar-visible', (_, isVisible: boolean) => {
+    ipcRenderer.on('use-custom-titlebar', (_, isVisible: boolean) => {
       callback(isVisible);
     });
   },

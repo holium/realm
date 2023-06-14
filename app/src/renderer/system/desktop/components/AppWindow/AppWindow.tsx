@@ -22,7 +22,7 @@ import {
 } from 'renderer/stores/models/window.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
-import { TITLEBAR_HEIGHT } from 'renderer/system/Titlebar';
+import { TITLEBAR_HEIGHT } from 'renderer/system/titlebar/Titlebar';
 
 import { ErrorBoundary } from '../../../ErrorBoundary';
 import { AppWindowContainer } from './AppWindow.styles';
@@ -85,6 +85,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   const mouseDragY = useMotionValue((minY + maxY) / 2);
 
   const cursorX = useMotionValue((minX + maxX) / 2);
+  const cursorY = useMotionValue((minY + maxY) / 2);
   const motionX = useMotionValue(bounds.x);
   const motionY = useMotionValue(bounds.y);
   const motionWidth = useMotionValue(bounds.width);
@@ -159,6 +160,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
         }
       } else {
         cursorX.set(x);
+        cursorY.set(y);
         dragging.toggleOff();
         resizing.toggleOff();
       }
@@ -175,12 +177,18 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       if (nearEdge.isOn && dragging.isOn && !resizing.isOn) {
         const x = mouseDragX.get();
         const y = mouseDragY.get();
+        const mouseY = cursorY.get();
         if (x <= minX + TRIGGER_AUTO_RESIZE) {
           shellStore.setSnapView('left');
         } else if (y <= minY + TRIGGER_AUTO_RESIZE) {
           shellStore.setSnapView('fullscreen');
         } else if (x >= maxX - TRIGGER_AUTO_RESIZE) {
           shellStore.setSnapView('right');
+        } else if (mouseY <= minY + TRIGGER_AUTO_RESIZE) {
+          // maybe need to trigger the snap view.  Toggle off near edge -
+          // it will be toggled on again by onMouseMove and eventually trigger
+          // fullscreen snap pane
+          nearEdge.toggleOff();
         }
       } else {
         shellStore.hideSnapView();
@@ -336,7 +344,14 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       resizeBottomRightX.set(x + width);
       resizeBottomRightY.set(y + height);
     }, 100),
-    [appId, motionX, motionY, motionWidth, motionHeight]
+    [
+      appId,
+      motionX,
+      motionY,
+      motionWidth,
+      motionHeight,
+      shellStore.desktopDimensions,
+    ]
   );
 
   useEffect(() => {
@@ -390,9 +405,8 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   const dragUnmaximize = () => {
     // this function is firing for dialogs also - throwing an error.
     if (appWindow.type === 'dialog') return;
-    if (shellStore.isWindowMaximized(appWindow.appId)) {
+    if (appWindow.isMaximized) {
       const mbAll = shellStore.unmaximize(appWindow.appId);
-      console.log(mbAll);
       const dmbPrev = denormalizeBounds(
         mbAll['prevBounds'],
         shellStore.desktopDimensions
@@ -407,7 +421,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
         if (isFullWidth(win.prevBounds.width, shellStore.desktopDimensions)) {
           const relativeX = xPos / dmbPrev.width;
           controls.start({
-            x: relativeX * dmb.width,
+            x: xPos - relativeX * dmb.width,
             width: dmb.width,
             height: dmb.height,
             transition: { duration: 0.2 },

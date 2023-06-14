@@ -122,7 +122,7 @@ const SpacesTrayAppPresenter = () => {
               }}
               rightAdornment={
                 <Button.TextButton
-                  disabled={!isValidSpace(searchString)}
+                  isDisabled={!isValidSpace(searchString)}
                   onClick={() => {
                     spacesStore.setJoin('loading');
                     console.log('joining space: ', searchString);

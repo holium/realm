@@ -10,7 +10,7 @@ import {
 import { useAppState } from 'renderer/stores/app.store';
 import { AppType } from 'renderer/stores/models/bazaar.model';
 
-import { TITLEBAR_HEIGHT } from '../Titlebar';
+import { TITLEBAR_HEIGHT } from '../titlebar/Titlebar';
 import { AppWindow } from './components/AppWindow/AppWindow';
 
 const AppWindowManagerPresenter = () => {

@@ -17,6 +17,7 @@ import { openChatToPath } from 'renderer/lib/useTrayControls';
 import { useAppState } from 'renderer/stores/app.store';
 import { AppType } from 'renderer/stores/models/bazaar.model';
 import { useShipStore } from 'renderer/stores/ship.store';
+import { TITLEBAR_HEIGHT } from 'renderer/system/titlebar/Titlebar';
 
 import { AccountTray } from './AccountTray';
 import { MessagesTray } from './MessagesTray';
@@ -25,7 +26,6 @@ import { WalletTray } from './WalletTray';
 
 const Scroller = styled(Flex)`
   justify-content: flex-start;
-  align-items: center;
   overflow-y: auto;
   overflow-x: hidden;
   width: 100%;
@@ -183,7 +183,7 @@ export const ShipBarPresenter = () => {
       flexDirection="column"
       justifyContent="flex-end"
       width={width}
-      maxHeight={document.body.clientHeight - 16}
+      maxHeight={document.body.clientHeight - TITLEBAR_HEIGHT - 16}
       style={
         isAccountTrayOpen
           ? {
@@ -238,7 +238,6 @@ export const ShipBarPresenter = () => {
                 />
               ) : (
                 <NotificationList
-                  justifyContent="flex-end"
                   onPathLookup={(app: string, path: string) => {
                     if (app === 'realm-chat') {
                       const { title, sigil, image } =

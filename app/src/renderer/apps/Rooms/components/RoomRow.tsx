@@ -14,6 +14,7 @@ import { AvatarRow } from './AvatarRow';
 
 type RoomRowProps = Partial<any> & {
   tray?: boolean;
+  loading?: boolean;
   onClick?: (evt: any) => any;
   rightChildren?: any;
 };

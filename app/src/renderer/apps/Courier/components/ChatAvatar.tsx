@@ -2,11 +2,18 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
 
-import { Avatar, Box, BoxProps, Button, Icon } from '@holium/design-system';
+import {
+  Avatar,
+  Box,
+  BoxProps,
+  Button,
+  Icon,
+} from '@holium/design-system/general';
 
-import { GroupSigil } from '../components/GroupSigil';
+import { GroupSigil } from './GroupSigil';
+import { ImageCrest } from './ImageCrest';
 
-type ChatAvatarProps = {
+type Props = {
   sigil?: {
     patp: string;
     color: [string, string];
@@ -30,10 +37,10 @@ export const ChatAvatar = ({
   peers,
   color,
   image,
-  onUpload,
-  canEdit = false,
   size = 28,
-}: ChatAvatarProps) => {
+  canEdit = false,
+  onUpload,
+}: Props) => {
   const [showEdit, setShowEdit] = useState(false);
   let avatarElement = null;
 
@@ -149,21 +156,4 @@ const EditWrapper = styled(motion.div)`
       filter: brightness(0.95);
     }
   }
-`;
-
-interface CrestStyleProps {
-  height: number;
-  width: number;
-  src: string;
-  borderRadius: number;
-}
-
-export const ImageCrest = styled(motion.div)<CrestStyleProps>`
-  border-radius: ${(p) => p.borderRadius}px;
-  background-image: url(${(props) => props.src});
-  height: ${(props) => props.height}px;
-  width: ${(props) => props.width}px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
 `;

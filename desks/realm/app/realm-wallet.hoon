@@ -7,14 +7,20 @@
   +$  card  card:agent:gall
   +$  versioned-state
     $%  state-0
+        state-1
     ==
   +$  state-0
     $:  %0
+        wallets=wallets-0
+        =settings
+    ==
+  +$  state-1
+    $:  %1
         =wallets
         =settings
     ==
   --
-=|  state-0
+=|  state-1
 =*  state  -
 =<
   %-  agent:dbug
@@ -33,26 +39,16 @@
     !>(state)
   ::
   ++  on-load
-    |=  =vase
-    ^-  (quip card:agent:gall agent:gall)
-    =/  old=(unit state-0)
-      (mole |.(!<(state-0 vase)))  
-    ?^  old
-      `this(state u.old)
-    ~&  >>  'nuking old %realm-wallet state' ::  temporarily doing this for making development easierr
-    =^  cards  this  on-init
-    :_  this
-    =-  (welp - cards)
-    %+  turn  ~(tap in ~(key by wex.bowl))
-    |=  [=wire =ship =term] 
-    ^-  card
-    [%pass wire %agent [ship term] %leave ~]
-    :: |=  old-state=vase
-    :: ^-  (quip card _this)
-    :: =/  old  !<(versioned-state old-state)
-    :: ?-  -.old
-    ::   %0  `this(state old)
-    :: ==
+    |=  old-state=vase
+    ^-  (quip card _this)
+    =/  old  !<(versioned-state old-state)
+    ?-    -.old
+        %0
+      :-  [%pass /init-wallet %agent [our.bowl %realm-wallet] %poke %realm-wallet-action !>([%initialize ~])]~
+      this
+    ::
+      %1  `this(state old)
+    ==
   ::
   ++  on-poke
     |=  [=mark =vase]
@@ -77,11 +73,10 @@
       :-  [%pass /addr/(scot %p from) %agent [from dap.bowl] task]~
       this
         [%updates ~]
-      `this
-      :: :_  this
-      :: :~  [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%wallets wallets.state])]
-      ::     [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]
-      :: ==
+      :_  this
+      :~  [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%wallets wallets.state])]
+          [%give %fact [/updates]~ %realm-wallet-update !>(`update`[%settings settings.state])]
+      ==
     ==
   ++  on-leave  on-leave:def
   ++  on-peek
@@ -254,9 +249,9 @@
       =/  xpub  xpub:(~(got by networks.settings.state) network.act)
       ?~  xpub  [~ wallets.state]
       =/  wallet-info  (new-address u.xpub network.act idx)
-      =/  address  -:wallet-info
+      =/  address  (crip (weld "0x" `tape`((x-co:co 40) `@ux`-:wallet-info)))
       =/  path     +:wallet-info
-      ~&  >  (crip (weld "generated wallet address " (z-co:co address)))
+      ~&  >  (crip (weld "generated wallet address " (trip address)))
       =/  wallet
         ^-  wallet
         [address path nickname.act ~ ~]

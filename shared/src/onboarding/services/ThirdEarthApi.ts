@@ -398,7 +398,7 @@ export class ThirdEarthApi {
     maintenanceWindow: string
   ) {
     return http<UpdateMaintenanceWindowResponse>(
-      `${this.apiBaseUrl}/user/ship/${shipId}`,
+      `${this.apiBaseUrl}/user/update-maintenance-window/${shipId}`,
       {
         method: 'PUT',
         headers: this.getHeaders(token),

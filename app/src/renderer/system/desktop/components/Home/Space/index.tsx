@@ -6,7 +6,7 @@ import { Button, Flex, Icon, NoScrollBar } from '@holium/design-system';
 
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
-import { TITLEBAR_HEIGHT } from 'renderer/system/Titlebar';
+import { TITLEBAR_HEIGHT } from 'renderer/system/titlebar/Titlebar';
 
 import { AppSearchApp } from '../AppInstall/AppSearch';
 import { Members } from '../Members';

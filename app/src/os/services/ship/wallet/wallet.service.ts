@@ -280,24 +280,21 @@ export class WalletService extends AbstractService {
     });
   }
 
-  async getAddress(patp: string, network: string) {
-    try {
-      const address: string | null =
-        await APIConnection.getInstance().conduit.poke({
-          app: 'realm-wallet',
-          mark: 'realm-wallet-action',
-          json: {
-            'get-address': {
-              network: network,
-              patp,
-            },
-          },
-        });
-      return address;
-    } catch (e) {
-      console.error(e);
-      return null;
-    }
+  async getAddress(network: string, from: string) {
+    return new Promise((resolve, _reject) => {
+      APIConnection.getInstance().conduit.watch({
+        app: 'realm-wallet',
+        path: '/address/' + network + '/' + from,
+        onEvent(data: { address: string }, _id, _mark) {
+          const address = data.address;
+          resolve(address);
+        },
+        onError(_id, _e) {
+          resolve(null);
+        },
+        onQuit() {},
+      });
+    });
   }
 
   async saveTransactionNotes(

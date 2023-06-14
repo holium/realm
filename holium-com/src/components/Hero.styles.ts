@@ -40,20 +40,15 @@ export const HeroContainer = styled(Flex)`
     max-width: 814px;
     width: 100%;
     max-height: 725px;
+    overflow: hidden;
 
-    svg {
+    .cursors-static {
       transform: scale(0.8) translateY(-64px);
     }
   }
 
   @media (max-width: 814px) {
     max-width: 100%;
-  }
-
-  @media (max-width: ${MOBILE_WIDTH}px) {
-    #hovering-cursors {
-      display: none;
-    }
   }
 `;
 

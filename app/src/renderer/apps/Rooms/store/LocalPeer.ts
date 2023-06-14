@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events';
 import { action, makeObservable, observable } from 'mobx';
 
 import { PeerConnectionState } from './room.types';
@@ -20,20 +21,24 @@ export const DEFAULT_AUDIO_OPTIONS = {
   autoGainControl: false,
 };
 
-export class LocalPeer {
+const DEFAULT_VIDEO_OPTIONS = {
+  width: { ideal: 1280 },
+  height: { ideal: 720 },
+  frameRate: { ideal: 30 },
+  facingMode: 'user',
+  aspectRatio: 1.333333, // 4:3
+};
+
+export class LocalPeer extends EventEmitter {
   @observable patp = '';
   @observable audioLevel = 0;
   @observable isMuted = false;
   @observable isSpeaking = false;
   @observable isVideoOn = false;
   @observable status: PeerConnectionState = PeerConnectionState.New;
-  @observable videoTracks: Map<string, any> = new Map();
-  @observable audioTracks: Map<string, any> = new Map();
-  @observable stream: MediaStream | undefined = undefined;
-  @observable constraints: MediaStreamConstraints = {
-    audio: DEFAULT_AUDIO_OPTIONS,
-    video: false,
-  };
+  @observable audioStream: MediaStream | undefined = undefined;
+  @observable videoStream: MediaStream | undefined = undefined;
+  @observable screenStream: MediaStream | undefined = undefined;
   @observable analysers: IAudioAnalyser[] = [];
   @observable devices:
     | {
@@ -44,33 +49,34 @@ export class LocalPeer {
     | undefined;
 
   constructor(ourId: string) {
+    super();
     makeObservable(this);
     this.patp = ourId;
-    this.setMedia = this.setMedia.bind(this);
-    // get current audio input device
+    this.setAudioStream = this.setAudioStream.bind(this);
   }
 
   @action
   init(our: string) {
     this.patp = our;
-    this.audioTracks = new Map();
     return this;
   }
 
   @action
   mute() {
     this.isMuted = true;
-    this.audioTracks.forEach((track: MediaStreamTrack) => {
+    this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
       track.enabled = false;
     });
+    this.emit('isMutedChanged', true);
   }
 
   @action
   unmute() {
     this.isMuted = false;
-    this.audioTracks.forEach((track: MediaStreamTrack) => {
+    this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
       track.enabled = true;
     });
+    this.emit('isMutedChanged', false);
   }
 
   get hasVideo() {
@@ -78,22 +84,118 @@ export class LocalPeer {
   }
 
   @action
-  async enableVideo() {
-    this.isVideoOn = true;
-    this.constraints.video = true;
-    return await this.enableMedia(this.constraints);
+  async enableAudio() {
+    if (this.audioStream && this.audioStream.getAudioTracks().length > 0) {
+      this.audioStream.getAudioTracks().forEach((track: MediaStreamTrack) => {
+        track.enabled = true;
+      });
+      this.isMuted = false;
+      return this.audioStream;
+    } else {
+      const storedDeviceId = localStorage.getItem('rooms-audio-input');
+      const audio = await navigator.mediaDevices
+        .getUserMedia({
+          audio: storedDeviceId
+            ? {
+                ...DEFAULT_AUDIO_OPTIONS,
+                deviceId: { exact: storedDeviceId },
+              }
+            : DEFAULT_AUDIO_OPTIONS,
+          video: false,
+        })
+        .then(this.setAudioStream)
+        .catch((err: any) => {
+          console.log('enableAudio failed on navigator.mediaDevices', err);
+        });
+      if (audio) {
+        this.audioStream = audio;
+        this.analysers[0] = SpeakingDetectionAnalyser.initialize(this);
+        this.status = PeerConnectionState.Broadcasting;
+
+        return this.audioStream;
+      } else {
+        throw new Error('Could not enable audio');
+      }
+    }
   }
 
   @action
-  async disableVideo(): Promise<MediaStream | void> {
-    this.isVideoOn = false;
-    this.constraints.video = false;
-    this.stream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
+  setAudioStream(stream: MediaStream) {
+    this.audioStream = stream;
+    this.isMuted = false;
+    return this.audioStream;
+  }
+
+  @action
+  async disableAudio(): Promise<MediaStream | void> {
+    this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
       track.enabled = false;
       track.stop();
     });
+    this.isMuted = true;
+    this.audioStream = undefined;
+  }
 
-    return await this.enableMedia(this.constraints);
+  @action
+  async enableVideo() {
+    this.isVideoOn = true;
+    if (this.videoStream && this.videoStream.getVideoTracks().length > 0) {
+      this.videoStream.getVideoTracks().forEach((track: MediaStreamTrack) => {
+        track.enabled = true;
+      });
+      return this.videoStream;
+    } else {
+      const storedDeviceId = localStorage.getItem('rooms-video-input');
+      return await navigator.mediaDevices
+        .getUserMedia({
+          audio: false,
+          video: storedDeviceId
+            ? {
+                ...DEFAULT_VIDEO_OPTIONS,
+                deviceId: storedDeviceId,
+              }
+            : DEFAULT_VIDEO_OPTIONS,
+        })
+        .then(this.setVideoStream.bind(this))
+        .catch((err: any) => {
+          console.log('enableVideo failed on navigator.mediaDevices', err);
+          this.isVideoOn = false;
+        });
+    }
+  }
+
+  @action
+  setVideoStream(stream: MediaStream) {
+    this.videoStream = stream;
+    const video = document.getElementById(
+      `peer-video-${this.patp}`
+    ) as HTMLVideoElement;
+
+    if (video) {
+      video.style.display = 'inline-block';
+      video.srcObject = stream;
+    }
+    return this.videoStream;
+  }
+
+  @action
+  disableVideo(): void {
+    this.isVideoOn = false;
+    this.videoStream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
+      track.enabled = false;
+      track.stop();
+    });
+    const videoEl = document.getElementById(
+      `peer-video-${this.patp}`
+    ) as HTMLVideoElement;
+    if (videoEl) {
+      videoEl.style.display = 'none';
+      videoEl.srcObject = null;
+    }
+    this.videoStream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
+      track.stop();
+    });
+    this.videoStream = undefined;
   }
 
   @action
@@ -102,43 +204,37 @@ export class LocalPeer {
   }
 
   @action
-  isSpeakingChanged(speaking: boolean) {
-    this.isSpeaking = speaking;
+  isSpeakingChanged(isSpeaking: boolean) {
+    if (!this.isMuted) {
+      this.isSpeaking = isSpeaking;
+      this.emit('isSpeakingChanged', isSpeaking);
+    } else if (this.isSpeaking) {
+      this.isSpeaking = false;
+      this.emit('isSpeakingChanged', false);
+    }
   }
+
   @action
   setAudioInputDevice(deviceId: string) {
     localStorage.setItem('rooms-audio-input', deviceId);
-    if (this.stream?.active) {
-      this.disableMedia();
-      this.constraints.audio = {
-        ...(this.constraints.audio as MediaTrackConstraints),
-        deviceId: {
-          exact: deviceId,
-        },
-      };
-      this.enableMedia({
-        audio: this.constraints.audio,
-        video: this.constraints.video,
-      });
-    }
+    // if (this.stream?.active) {
+    //   this.disableMedia();
+    //   this.constraints.audio = {
+    //     ...(this.constraints.audio as MediaTrackConstraints),
+    //     deviceId: {
+    //       exact: deviceId,
+    //     },
+    //   };
+    //   this.enableMedia({
+    //     audio: this.constraints.audio,
+    //     video: this.constraints.video,
+    //   });
+    // }
   }
 
   @action
   setVideoInputDevice(deviceId: string) {
     localStorage.setItem('rooms-video-input', deviceId);
-    if (this.stream?.active) {
-      this.disableMedia();
-      this.constraints.video = {
-        ...(this.constraints.video as MediaTrackConstraints),
-        deviceId: {
-          exact: deviceId,
-        },
-      };
-      this.enableMedia({
-        audio: this.constraints.audio,
-        video: this.constraints.video,
-      });
-    }
   }
 
   // TODO
@@ -150,101 +246,22 @@ export class LocalPeer {
 
   @action
   clearTracks() {
-    this.audioTracks.forEach((track: MediaStreamTrack) => {
+    this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
       track.stop();
     });
-    this.audioTracks.clear();
+    this.audioStream = undefined;
   }
 
   @action
-  pauseStream() {
-    this.stream?.getTracks().forEach((track: MediaStreamTrack) => {
-      track.enabled = false;
-    });
-  }
-
-  async enableMedia(
-    options: MediaStreamConstraints = {
-      audio: DEFAULT_AUDIO_OPTIONS,
-      video: false,
-    }
-  ) {
-    const storedDeviceId = localStorage.getItem('rooms-audio-input');
-    if (storedDeviceId) {
-      options.audio = {
-        ...DEFAULT_AUDIO_OPTIONS,
-        deviceId: { exact: storedDeviceId },
-      };
-    }
-    return await navigator.mediaDevices
-      .getUserMedia(options)
-      .then(this.setMedia)
-      .catch((err: any) => {
-        console.log('navigator.mediaDevices.getUserMedia error', err);
-      });
-  }
-
-  @action
-  setMedia(stream: MediaStream) {
-    if (this.stream && this.stream.active) {
-      this.stream = stream;
-      // if video constraints changed, we need to reattach the video track
-      if (this.isVideoOn) {
-        const video = document.getElementById(
-          `peer-video-${this.patp}`
-        ) as HTMLVideoElement;
-        stream.getVideoTracks().forEach((track: MediaStreamTrack) => {
-          this.videoTracks.set(track.id, track);
-        });
-        if (video) {
-          video.style.display = 'inline-block';
-          video.srcObject = stream;
-        }
-      } else {
-        const videoEl = document.getElementById(
-          `peer-video-${this.patp}`
-        ) as HTMLVideoElement;
-        if (videoEl) {
-          videoEl.style.display = 'none';
-          videoEl.srcObject = null;
-        }
-        this.stream.getVideoTracks().forEach((track: MediaStreamTrack) => {
-          this.stream?.removeTrack(track);
-          track.stop();
-          this.videoTracks.delete(track.id);
-        });
-      }
-    } else {
-      this.stream = stream;
-      this.stream.getAudioTracks().forEach((audio: MediaStreamTrack) => {
-        this.audioTracks.set(audio.id, audio);
-      });
-      if (this.isVideoOn) {
-        this.stream.getVideoTracks().forEach((video: MediaStreamTrack) => {
-          this.videoTracks.set(video.id, video);
-        });
-      }
-    }
-    // initialize the speaking detection analyser
-    this.analysers[0] = SpeakingDetectionAnalyser.initialize(this);
-    this.status = PeerConnectionState.Broadcasting;
-    return this.stream;
-  }
-
-  @action
-  disableMedia() {
-    this.audioTracks.forEach((track: MediaStreamTrack) => {
+  disableAll() {
+    this.videoStream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
       track.stop();
     });
-    this.audioTracks.clear();
-    this.videoTracks.forEach((track: MediaStreamTrack) => {
+    this.isVideoOn = false;
+    this.videoStream = undefined;
+    this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
       track.stop();
     });
-    this.videoTracks.clear();
-
-    this.analysers.forEach((analyser: IAudioAnalyser) => {
-      analyser.detach();
-    });
-    this.stream = undefined;
+    this.audioStream = undefined;
   }
 }

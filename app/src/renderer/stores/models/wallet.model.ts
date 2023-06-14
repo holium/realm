@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import { formatEther } from 'ethers/lib/utils';
 import {
   applySnapshot,
   cast,
@@ -19,7 +20,6 @@ import {
   SharingMode,
   WalletCreationMode,
 } from 'os/services/ship/wallet/wallet.types';
-import { gweiToEther } from 'renderer/apps/Wallet/helpers';
 import {
   SendERC20TransactionParams,
   SendEthereumTransactionParams,
@@ -490,7 +490,7 @@ const EthWallet = types
       const tx = {
         hash,
         walletIndex: self.index,
-        amount: contractType ? amount : gweiToEther(amount).toString(),
+        amount: contractType ? amount : formatEther(amount),
         network: 'ethereum',
         ethType: contractType || 'ETH',
         type: 'sent',
@@ -569,8 +569,7 @@ export const EthStore = types
   }))
   .actions((self) => ({
     initial(wallets: any) {
-      const ethWallets = wallets.ethereum;
-      Object.entries(ethWallets).forEach(([key, wallet]) => {
+      Object.entries(wallets).forEach(([key, wallet]) => {
         const walletUpdate = {
           ...(wallet as any),
           key,
@@ -597,7 +596,7 @@ export const EthStore = types
           index: Number(wallet.key),
           network: 'ethereum',
           path: wallet.path,
-          address: '0x' + wallet.address.substring(2).padStart(40, '0'),
+          address: wallet.address,
           nickname: wallet.nickname,
           data: {
             [ProtocolType.ETH_MAIN]: {
@@ -675,6 +674,7 @@ export type EthStoreType = Instance<typeof EthStore>;
 
 const NetworkStores = types.enumeration(Object.values(NetworkStoreType));
 
+// nav state for after onboarding.
 export const WalletNavState = types
   .model('WalletNavState', {
     view: types.enumeration(Object.values(WalletScreen)),
@@ -983,6 +983,15 @@ export const WalletStore = types
       self.navHistory = cast([]);
       this.navigate(WalletScreen.ONBOARDING);
     },
+    resetLocal() {
+      self.ourPatp = '';
+      self.passcodeHash = '';
+      self.lastInteraction = new Date();
+      self.forceActive = false;
+      self.uqTx = undefined;
+      self.navHistory = cast([]);
+      this.navigate(WalletScreen.ONBOARDING);
+    },
     async deleteShipWallet(passcode?: number[]) {
       if (passcode) {
         await this.deleteShipMnemonic(passcode);
@@ -993,7 +1002,7 @@ export const WalletStore = types
     },
     deleteLocalWallet(passcode: number[]) {
       this.deleteLocalMnemonic(passcode);
-      this.reset();
+      this.resetLocal();
     },
     deleteLocalMnemonic: flow(function* (
       passcode: number[]
@@ -1308,7 +1317,7 @@ WalletIPC.onUpdate((payload: any) => {
       ) {
         shipStore.walletStore.setInitialized(true);
       }
-      shipStore.walletStore.ethereum.initial(wallets);
+      shipStore.walletStore.ethereum.initial(wallets.ethereum);
       shipStore.walletStore.bitcoin.initial(wallets.bitcoin);
       shipStore.walletStore.btctest.initial(wallets.btctestnet);
       break;

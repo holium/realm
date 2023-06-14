@@ -1,6 +1,6 @@
 import { HTMLAttributes } from 'react';
 import { motion } from 'framer-motion';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import {
   background,
   BackgroundProps,
@@ -35,6 +35,7 @@ type TextTransformOption = 'uppercase' | 'lowercase' | 'capitalize';
 export type ButtonProps = {
   gap?: string | number | undefined;
   pointerEvents?: boolean;
+  isDisabled?: boolean;
 } & BackgroundProps &
   ButtonStyleProps &
   ColorProps &
@@ -119,6 +120,16 @@ const Base = styled(motion.button)<ButtonProps>`
     opacity: 0.5;
     transition: var(--transition);
   }
+
+  // this is used in Realm to not prevent mouse events from hovering over the button
+  ${(props) =>
+    props.isDisabled &&
+    css`
+      opacity: 0.5;
+      transition: var(--transition);
+      pointer-events: none;
+    `}
+
   svg {
     pointer-events: none;
   }

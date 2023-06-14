@@ -1,8 +1,15 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
 
-import { Button, Flex, Icon, Text, TextInput } from '@holium/design-system';
+import {
+  Button,
+  Flex,
+  Icon,
+  Spinner,
+  Text,
+  TextInput,
+} from '@holium/design-system';
 
 import { SoundActions } from 'renderer/lib/sound';
 import { useAppState } from 'renderer/stores/app.store';
@@ -64,6 +71,7 @@ const NewRoomPresenter = () => {
   const { loggedInAccount } = useAppState();
   const { spacesStore } = useShipStore();
   const { roomsApp } = useTrayApps();
+  const [loading, setLoading] = useState(false);
 
   const { form, name } = useMemo(
     () => createRoomForm(roomsStore.roomsList.map((room) => room.title)),
@@ -86,7 +94,14 @@ const NewRoomPresenter = () => {
       spacesStore.selected?.type !== 'our'
         ? spacesStore.selected?.path ?? ''
         : null;
-    roomsStore?.createRoom(name, isPrivate ? 'private' : 'public', spacePath);
+
+    setLoading(true);
+    await roomsStore?.createRoom(
+      name,
+      isPrivate ? 'private' : 'public',
+      spacePath
+    );
+    setLoading(false);
     roomsApp.setView('room');
   };
 
@@ -152,7 +167,8 @@ const NewRoomPresenter = () => {
             fontWeight={500}
             color="intent-success"
             disabled={!form.computed.isValid}
-            style={{ borderRadius: 6, height: 32 }}
+            justifyContent="center"
+            style={{ borderRadius: 6, height: 32, minWidth: 60 }}
             onKeyDown={(evt: any) => {
               if (evt.key === 'Enter' && form.computed.isValid) {
                 createRoom(evt);
@@ -162,7 +178,7 @@ const NewRoomPresenter = () => {
               createRoom(evt);
             }}
           >
-            Start
+            {loading ? <Spinner size={0} color="white" /> : 'Start'}
           </Button.TextButton>
         </Flex>
         <Flex mt={3} justifyContent="flex-start">
