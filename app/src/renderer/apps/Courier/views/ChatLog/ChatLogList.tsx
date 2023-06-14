@@ -67,7 +67,7 @@ export const ChatLogList = ({
 
     return (
       <Box
-        key={`row-${message.id}-${index}-${message.createdAt}-${message.updatedAt}`}
+        key={`${index}-${message.id}-${message.createdAt}-${message.updatedAt}`}
         animate={false}
         pt={topSpacing}
         pb={bottomSpacing}
@@ -106,12 +106,12 @@ export const ChatLogList = ({
   return (
     <Gallery>
       <WindowedList
-        key={messages.length}
+        // Fixes a bug where the list is blank until scrolled.
+        key={messages.length === 0 ? 'empty' : 'not-empty'}
         innerRef={listRef}
         data={messages}
         atBottomThreshold={100}
         increaseViewportBy={isStandaloneChat ? 600 : 250}
-        alignToBottom
         totalListHeightChanged={(height: number) => {
           if (height - prevHeight === 10) {
             // 10 px is the height change that occurs when there's a reaction added
