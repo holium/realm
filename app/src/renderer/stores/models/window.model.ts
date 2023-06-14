@@ -5,8 +5,7 @@ import { Dimensions } from '@holium/design-system';
 
 import {
   getMaximizedBounds,
-  isMaximizedBounds,
-  normalizeValue,
+  isFullyMaximizedBounds,
 } from '../../lib/window-manager';
 import { Glob } from './docket.model';
 
@@ -62,13 +61,14 @@ export const AppWindowModel = types
      *  The window is static and cannot be moved or resized.
      */
     static: types.optional(types.boolean, false),
+    isMaximized: types.optional(types.boolean, false),
   })
   .views((self) => ({
     get isMinimized() {
       return self.state === 'minimized';
     },
-    isMaximized(desktopDimensions: Dimensions) {
-      return isMaximizedBounds(self.bounds, desktopDimensions);
+    isFullyMaximized(desktopDimensions: Dimensions) {
+      return isFullyMaximizedBounds(self.bounds, desktopDimensions);
     },
   }))
   .actions((self) => ({
@@ -81,34 +81,28 @@ export const AppWindowModel = types
     minimize() {
       self.state = 'minimized';
     },
-    maximizeLeft(desktopDimensions: Dimensions, isFullscreen: boolean) {
+    maximizeLeft(desktopDimensions: Dimensions) {
       const maximizedBounds = getMaximizedBounds(desktopDimensions);
       self.prevBounds = { ...self.bounds };
       self.bounds = {
         x: maximizedBounds.x,
         y: maximizedBounds.y,
         width: maximizedBounds.width / 2,
-        height: isFullscreen
-          ? maximizedBounds.height
-          : maximizedBounds.height -
-            normalizeValue(30, desktopDimensions.height),
+        height: maximizedBounds.height,
       };
     },
-    maximizeRight(desktopDimensions: Dimensions, isFullscreen: boolean) {
+    maximizeRight(desktopDimensions: Dimensions) {
       const maximizedBounds = getMaximizedBounds(desktopDimensions);
       self.prevBounds = { ...self.bounds };
       self.bounds = {
         x: maximizedBounds.x + maximizedBounds.width / 2,
         y: maximizedBounds.y,
         width: maximizedBounds.width / 2,
-        height: isFullscreen
-          ? maximizedBounds.height
-          : maximizedBounds.height -
-            normalizeValue(30, desktopDimensions.height),
+        height: maximizedBounds.height,
       };
     },
-    toggleMaximize(desktopDimensions: Dimensions, isFullscreen: boolean) {
-      const isMaximized = self.isMaximized(desktopDimensions);
+    toggleMaximize(desktopDimensions: Dimensions) {
+      const isMaximized = self.isMaximized;
       if (isMaximized) {
         const bounds = { ...self.bounds };
         self.bounds = { ...self.prevBounds };
@@ -120,10 +114,24 @@ export const AppWindowModel = types
           x: maximizedBounds.x,
           y: maximizedBounds.y,
           width: maximizedBounds.width,
-          height: isFullscreen
-            ? maximizedBounds.height
-            : maximizedBounds.height -
-              normalizeValue(30, desktopDimensions.height),
+          height: maximizedBounds.height,
+        };
+      }
+    },
+    toggleFullyMaximize(desktopDimensions: Dimensions) {
+      const isMaximized = self.isFullyMaximized(desktopDimensions);
+      if (isMaximized) {
+        const bounds = { ...self.bounds };
+        self.bounds = { ...self.prevBounds };
+        self.prevBounds = bounds;
+      } else {
+        self.prevBounds = { ...self.bounds };
+        const maximizedBounds = getMaximizedBounds(desktopDimensions);
+        self.bounds = {
+          x: maximizedBounds.x,
+          y: maximizedBounds.y,
+          width: maximizedBounds.width,
+          height: maximizedBounds.height,
         };
       }
     },

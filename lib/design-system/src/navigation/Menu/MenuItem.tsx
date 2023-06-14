@@ -49,12 +49,13 @@ export const MenuItem = ({
       id={id}
       key={`${id}-${label}`}
       height={34}
-      disabled={disabled}
+      isDisabled={disabled}
       className="nav-menu-item"
       backgroundColor={rgbaBg}
-      onClick={(evt: React.MouseEvent<HTMLDivElement>) =>
-        !disabled && onClick(evt)
-      }
+      onClick={(evt: React.MouseEvent<HTMLDivElement>) => {
+        evt.stopPropagation();
+        !disabled && onClick(evt);
+      }}
     >
       <Flex
         pointerEvents={disabled ? 'none' : 'all'}

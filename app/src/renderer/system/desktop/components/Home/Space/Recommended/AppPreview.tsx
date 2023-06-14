@@ -48,7 +48,7 @@ export const AppPreview: FC<AppPreviewProps> = observer(
     const onInstallation = (evt: React.MouseEvent<HTMLButtonElement>) => {
       evt.stopPropagation();
       const appHost = (app as AppMobxType).host;
-      return handleInstallation(appHost, app.id, installStatus);
+      return handleInstallation(appHost, app.title, app.id, installStatus);
     };
     let status;
     if (isSuspended || isFailed) {

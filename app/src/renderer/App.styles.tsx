@@ -14,6 +14,7 @@ import { useAppState } from 'renderer/stores/app.store';
 
 import { denormalizeBounds, getMaximizedBounds } from './lib/window-manager';
 import { BackgroundImage } from './system/system.styles';
+import { TITLEBAR_HEIGHT } from './system/titlebar/Titlebar';
 
 type Props = {
   realmTheme: ThemeType;
@@ -91,6 +92,11 @@ export const GlobalStyle = createGlobalStyle<Props>`
 
     fieldset {
       border: 0;
+      &:disabled {
+        /* turn off disabled */
+        pointer-events: auto;
+
+      }
     }
 `;
 
@@ -126,12 +132,25 @@ export const RealmBackground = ({
   wallpaper: string;
   snapView: string;
 }) => {
-  const { shellStore } = useAppState();
+  const { shellStore, showTitleBar } = useAppState();
   const controls = useAnimationControls();
 
   useEffect(() => {
-    const mb = getMaximizedBounds(shellStore.desktopDimensions);
-    const dmb = denormalizeBounds(mb, shellStore.desktopDimensions);
+    const desktopDimensions = shellStore.desktopDimensions;
+
+    let mb = getMaximizedBounds(desktopDimensions);
+    let dmb = denormalizeBounds(mb, desktopDimensions);
+
+    if (showTitleBar) {
+      dmb = {
+        ...dmb,
+        y: dmb.y + TITLEBAR_HEIGHT,
+      };
+      mb = {
+        ...mb,
+        y: mb.y + TITLEBAR_HEIGHT,
+      };
+    }
 
     switch (snapView) {
       case 'none':
@@ -142,9 +161,9 @@ export const RealmBackground = ({
         // 2. show it.
         controls.start({
           x: dmb.x + 8,
-          y: shellStore.isFullscreen ? dmb.y : dmb.y + 30,
+          y: dmb.y,
           width: dmb.width / 2,
-          height: shellStore.isFullscreen ? dmb.height : dmb.height - 30,
+          height: dmb.height,
           zIndex: shellStore.windows.size,
           transition: {
             duration: 0,
@@ -155,9 +174,9 @@ export const RealmBackground = ({
       case 'right':
         controls.start({
           x: dmb.x + 8 + dmb.width / 2,
-          y: shellStore.isFullscreen ? dmb.y : dmb.y + 30,
+          y: dmb.y,
           width: dmb.width / 2,
-          height: shellStore.isFullscreen ? dmb.height : dmb.height - 30,
+          height: dmb.height,
           zIndex: shellStore.windows.size,
           transition: {
             duration: 0,
@@ -168,9 +187,9 @@ export const RealmBackground = ({
       case 'fullscreen':
         controls.start({
           x: dmb.x + 8,
-          y: shellStore.isFullscreen ? dmb.y : dmb.y + 30,
+          y: dmb.y,
           width: dmb.width,
-          height: shellStore.isFullscreen ? dmb.height : dmb.height - 30,
+          height: dmb.height,
           zIndex: shellStore.windows.size,
           transition: {
             duration: 0,

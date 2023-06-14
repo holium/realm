@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Lint
+    name: Lint & Compile
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -18,3 +18,5 @@ jobs:
         run: yarn --frozen-lockfile
       - name: Run ESLint
         run: yarn lint:ci:master
+      - name: Run TSC
+        run: yarn tsc

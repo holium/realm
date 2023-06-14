@@ -37,7 +37,6 @@ export const ChatSimulator: ComponentStory<typeof ChatInput> = () => {
       </Box>
       <Box position="absolute" bottom={12} left={0} right={0}>
         <ChatInput
-          containerWidth={400}
           id="chat-send"
           selectedChatPath="foo"
           attachments={
@@ -79,7 +78,6 @@ export const Attachment: ComponentStory<typeof ChatInput> = () => {
       >
         <ChatInput
           id="chat-send"
-          containerWidth={400}
           selectedChatPath="foo"
           attachments={[
             'https://sicnum-rocwen.s34.holium.network/~sicnum-rocwen/1679310718-pixelady-559.png',
@@ -120,7 +118,6 @@ export const ReplyTo: ComponentStory<typeof ChatInput> = () => {
       <ChatInput
         id="chat-send-1"
         selectedChatPath="foo"
-        containerWidth={400}
         replyTo={{
           id: '1',
           author: '~lomder-librun',
@@ -153,7 +150,6 @@ export const ReplyTo: ComponentStory<typeof ChatInput> = () => {
       <ChatInput
         id="chat-send-2"
         selectedChatPath="foo"
-        containerWidth={400}
         replyTo={{
           id: '2',
           author: '~lomder-librun',
@@ -190,7 +186,6 @@ export const ReplyTo: ComponentStory<typeof ChatInput> = () => {
       <ChatInput
         id="chat-send-2"
         selectedChatPath="foo"
-        containerWidth={400}
         replyTo={{
           id: '2',
           author: '~lomder-librun',
@@ -233,7 +228,6 @@ export const ReplyTo: ComponentStory<typeof ChatInput> = () => {
         <ChatInput
           id="chat-send"
           selectedChatPath="foo"
-          containerWidth={400}
           replyTo={{
             id: '1',
             author: '~lomder-librun',

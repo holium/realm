@@ -276,8 +276,8 @@ export const Chat = types
       self.lastFetch = new Date().getTime();
       try {
         const messages = yield ChatIPC.getChatLog(self.path);
-        applySnapshot(self.messages, messages);
         self.hidePinned = self.isPinLocallyHidden();
+        applySnapshot(self.messages, messages);
         return self.messages;
       } catch (error) {
         console.error(error);

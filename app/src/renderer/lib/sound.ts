@@ -9,6 +9,7 @@ available sound bites:
 'dm-send'
 */
 const playAudio = (src: string) => {
+  // play sound on worker thread
   if (window.audio) {
     window.audio.src = src;
   } else {

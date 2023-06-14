@@ -4,6 +4,7 @@ import { observer } from 'mobx-react';
 import { Box, RoomsDock } from '@holium/design-system';
 
 import { roomTrayConfig } from 'renderer/apps/Rooms/config';
+import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/lib/position';
 import { useAppState } from 'renderer/stores/app.store';
@@ -12,7 +13,9 @@ import { useShipStore } from 'renderer/stores/ship.store';
 
 const RoomTrayPresenter = () => {
   const { shellStore } = useAppState();
-  const { friends, spacesStore, roomsStore } = useShipStore();
+  const { friends, spacesStore } = useShipStore();
+  const roomsStore = useRoomsStore();
+
   const { position, anchorOffset, dimensions } = roomTrayConfig;
 
   useEffect(() => {
@@ -30,7 +33,7 @@ const RoomTrayPresenter = () => {
     setTrayAppDimensions,
   } = useTrayApps();
 
-  const muted = roomsStore.isMuted;
+  const muted = roomsStore.ourPeer.isMuted;
 
   const onButtonClick = useCallback(
     (evt: any) => {
@@ -65,7 +68,7 @@ const RoomTrayPresenter = () => {
   );
 
   const participants =
-    roomsStore.getPeers().map((patp: string) => {
+    roomsStore.currentRoomPresent.map((patp: string) => {
       const metadata = friends.getContactAvatarMetadata(patp);
       return metadata;
     }) || [];
@@ -82,7 +85,7 @@ const RoomTrayPresenter = () => {
       transition={{ duration: 0.15, ease: 'easeInOut' }}
     >
       <RoomsDock
-        live={roomsStore.current}
+        live={roomsStore.currentRoom}
         rooms={rooms}
         participants={participants}
         onCreate={() => {
@@ -93,9 +96,9 @@ const RoomTrayPresenter = () => {
         onOpen={onButtonClick}
         onMute={() => {
           if (muted) {
-            roomsStore.unmute();
+            roomsStore.ourPeer.unmute();
           } else {
-            roomsStore.mute();
+            roomsStore.ourPeer.mute();
           }
         }}
         onCursor={() => {}}

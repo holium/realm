@@ -327,6 +327,7 @@
 :: :chat-db &db-action [%insert-backlog list-of-msg-parts]
   |=  [=message:sur state=state-2 =bowl:gall]
   ^-  (quip card state-2)
+  ?:  =(0 (lent message))  `state  :: if the list is empty, don't do anything
   =/  index=@ud   0
   =/  changes=db-change:sur  *db-change:sur
   =/  changes-and-state=[db-change:sur state-2]

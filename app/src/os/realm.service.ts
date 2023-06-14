@@ -15,8 +15,6 @@ import OnboardingService from './services/auth/onboarding.service';
 import { FileUploadParams, ShipService } from './services/ship/ship.service';
 import { Credentials } from './services/ship/ship.types.ts';
 
-const isDev = process.env.NODE_ENV === 'development';
-
 export class RealmService extends AbstractService<RealmUpdateTypes> {
   public services?: {
     auth: AuthService;
@@ -57,11 +55,8 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
    * @returns void
    */
   public async boot() {
-    let session;
-    if (isDev) {
-      session = this._hydrateSessionIfExists();
-      this.services?.ship?.init();
-    }
+    const session = this._hydrateSessionIfExists();
+    this.services?.ship?.init();
 
     this.sendUpdate({
       type: 'booted',

@@ -53,7 +53,6 @@ export class NotificationsDB extends AbstractDataAccess<
     params.tableName = 'notifications';
     super(params);
     if (params.preload) return;
-    this.onQuit = this.onQuit.bind(this);
     this.onError = this.onError.bind(this);
 
     this.onDbUpdate = this.onDbUpdate.bind(this);
@@ -74,7 +73,6 @@ export class NotificationsDB extends AbstractDataAccess<
       app: 'notif-db',
       path: '/db',
       onEvent: this.onDbUpdate,
-      onQuit: this.onQuit,
       onError: this.onError,
     });
     this.sendUpdate({ type: 'init', payload: this.getNotifications() });
@@ -183,10 +181,6 @@ export class NotificationsDB extends AbstractDataAccess<
       this.deleteNotificationsRow(del.id);
       this.sendUpdate({ type: 'notification-deleted', payload: del.id });
     }
-  }
-
-  onQuit() {
-    console.log('fail!');
   }
 
   onError(err: any) {

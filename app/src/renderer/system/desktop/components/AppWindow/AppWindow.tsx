@@ -22,6 +22,7 @@ import {
 } from 'renderer/stores/models/window.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 import { getWebViewId } from 'renderer/system/desktop/components/AppWindow/View/getWebViewId';
+import { TITLEBAR_HEIGHT } from 'renderer/system/titlebar/Titlebar';
 
 import { ErrorBoundary } from '../../../ErrorBoundary';
 import { AppWindowContainer } from './AppWindow.styles';
@@ -45,7 +46,7 @@ function clamp(value: number, min: number, max: number) {
 }
 
 const AppWindowPresenter = ({ appWindow }: Props) => {
-  const { shellStore } = useAppState();
+  const { shellStore, showTitleBar } = useAppState();
   const { bazaarStore } = useShipStore();
 
   const dragControls = useDragControls();
@@ -76,7 +77,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   });
 
   const minX = 0;
-  const minY = 0;
+  const minY = showTitleBar ? TITLEBAR_HEIGHT + 8 : 0;
   const maxX = shellStore.desktopDimensions.width;
   const maxY = shellStore.desktopDimensions.height;
 
@@ -84,6 +85,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   const mouseDragY = useMotionValue((minY + maxY) / 2);
 
   const cursorX = useMotionValue((minX + maxX) / 2);
+  const cursorY = useMotionValue((minY + maxY) / 2);
   const motionX = useMotionValue(bounds.x);
   const motionY = useMotionValue(bounds.y);
   const motionWidth = useMotionValue(bounds.width);
@@ -128,12 +130,11 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     ]
   );
 
-  const mouseIsNearEdge = (x: number, y: number, isFullscreen: boolean) => {
-    const _minY = isFullscreen ? minY : minY + 30;
+  const mouseIsNearEdge = (x: number, y: number) => {
     return (
       x <= minX + TRIGGER_AUTO_RESIZE ||
       x >= maxX - TRIGGER_AUTO_RESIZE ||
-      y <= _minY + TRIGGER_AUTO_RESIZE
+      y <= minY + TRIGGER_AUTO_RESIZE
     );
   };
 
@@ -145,7 +146,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     window.electron.app.onMouseMove((mousePosition, _, isDragging) => {
       const x = clamp(mousePosition.x, minX, maxX);
       const y = clamp(mousePosition.y, minY, maxY);
-      nearEdge.setToggle(mouseIsNearEdge(x, y, shellStore.isFullscreen));
+      nearEdge.setToggle(mouseIsNearEdge(x, y));
 
       if (isDragging) {
         mouseDragX.set(x);
@@ -159,6 +160,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
         }
       } else {
         cursorX.set(x);
+        cursorY.set(y);
         dragging.toggleOff();
         resizing.toggleOff();
       }
@@ -175,13 +177,18 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       if (nearEdge.isOn && dragging.isOn && !resizing.isOn) {
         const x = mouseDragX.get();
         const y = mouseDragY.get();
-        const _minY = shellStore.isFullscreen ? minY : minY + 30;
+        const mouseY = cursorY.get();
         if (x <= minX + TRIGGER_AUTO_RESIZE) {
           shellStore.setSnapView('left');
-        } else if (y <= _minY + TRIGGER_AUTO_RESIZE) {
+        } else if (y <= minY + TRIGGER_AUTO_RESIZE) {
           shellStore.setSnapView('fullscreen');
         } else if (x >= maxX - TRIGGER_AUTO_RESIZE) {
           shellStore.setSnapView('right');
+        } else if (mouseY <= minY + TRIGGER_AUTO_RESIZE) {
+          // maybe need to trigger the snap view.  Toggle off near edge -
+          // it will be toggled on again by onMouseMove and eventually trigger
+          // fullscreen snap pane
+          nearEdge.toggleOff();
         }
       } else {
         shellStore.hideSnapView();
@@ -337,7 +344,14 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       resizeBottomRightX.set(x + width);
       resizeBottomRightY.set(y + height);
     }, 100),
-    [appId, motionX, motionY, motionWidth, motionHeight]
+    [
+      appId,
+      motionX,
+      motionY,
+      motionWidth,
+      motionHeight,
+      shellStore.desktopDimensions,
+    ]
   );
 
   useEffect(() => {
@@ -374,8 +388,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   const dragMaximize = () => {
     const x = mouseDragX.get();
     const y = mouseDragY.get();
-    const _minY = shellStore.isFullscreen ? minY : minY + 30;
-    if (y <= _minY + TRIGGER_AUTO_RESIZE) {
+    if (y <= minY + TRIGGER_AUTO_RESIZE) {
       const mb = shellStore.maximize(appWindow.appId);
       setBoundsAfterMaximize(mb);
     } else {
@@ -392,9 +405,8 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   const dragUnmaximize = () => {
     // this function is firing for dialogs also - throwing an error.
     if (appWindow.type === 'dialog') return;
-    if (shellStore.isWindowMaximized(appWindow.appId)) {
+    if (appWindow.isMaximized) {
       const mbAll = shellStore.unmaximize(appWindow.appId);
-      console.log(mbAll);
       const dmbPrev = denormalizeBounds(
         mbAll['prevBounds'],
         shellStore.desktopDimensions
@@ -409,7 +421,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
         if (isFullWidth(win.prevBounds.width, shellStore.desktopDimensions)) {
           const relativeX = xPos / dmbPrev.width;
           controls.start({
-            x: relativeX * dmb.width,
+            x: xPos - relativeX * dmb.width,
             width: dmb.width,
             height: dmb.height,
             transition: { duration: 0.2 },

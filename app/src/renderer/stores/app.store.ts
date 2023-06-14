@@ -33,6 +33,7 @@ const Screen = types.enumeration(['login', 'onboarding', 'os']);
 const AppStateModel = types
   .model('AppStateModel', {
     booted: types.boolean,
+    showTitleBar: types.boolean,
     seenSplash: types.boolean,
     currentScreen: Screen,
     onboardingStep: types.string,
@@ -71,6 +72,9 @@ const AppStateModel = types
     setLoggedIn(serverId: string) {
       self.authStore._setSession(serverId);
       self.shellStore.setIsBlurred(false);
+    },
+    setShowTitleBar(show: boolean) {
+      self.showTitleBar = show;
     },
     setLoggedOut(serverId?: string) {
       self.authStore._clearSession(serverId);
@@ -119,6 +123,7 @@ const lastTheme = localStorage.getItem('lastTheme');
 export const appState = AppStateModel.create({
   booted: false,
   seenSplash: false,
+  showTitleBar: false,
   currentScreen: 'login',
   onboardingStep: '/login',
   theme: lastTheme
@@ -141,13 +146,13 @@ export const appState = AppStateModel.create({
 watchOnlineStatus(appState);
 MainIPC.onConnectionStatus(appState.setConnectionStatus);
 
-// OSActions.onConnectionStatus((_event: any, status: any) => {
-//   coreStore.setConnectionStatus(status);
-// });
+window.electron.app.onSetTitlebarVisible((show: boolean) => {
+  appState.setShowTitleBar(show);
+});
 
-// onSnapshot(appState, (snapshot) => {
-//   localStorage.setItem('appState', JSON.stringify(snapshot));
-// });
+window.electron.app.onSetFullScreen((isFullScreen: boolean) => {
+  appState.shellStore.setFullscreen(isFullScreen);
+});
 
 export type AppStateType = Instance<typeof AppStateModel>;
 export const AppStateContext = createContext<null | AppStateType>(appState);
@@ -169,7 +174,7 @@ function registerOnUpdateListener() {
     return;
   }
 
-  MainIPC.onDimensionsChange((_e: any, dims: any) => {
+  MainIPC.onDimensionsChange((_: any, dims: any) => {
     appState.shellStore.setDesktopDimensions(dims.width, dims.height);
   });
 

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import { Flex } from '@holium/design-system/general';
-import { useToggle } from '@holium/design-system/util';
 
 import { NetworkType } from 'os/services/ship/wallet/wallet.types';
 import {
@@ -12,7 +11,6 @@ import {
 } from 'renderer/stores/models/wallet.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { PendingTransactionDisplay } from './components/Transaction/PendingTransactionDisplay';
 import { WalletFooter } from './components/WalletFooter/WalletFooter';
 import { WalletHeader } from './components/WalletHeader/WalletHeader';
 import { getTransactions } from './helpers';
@@ -21,8 +19,6 @@ import { WalletScreen } from './types';
 
 const WalletPresenter = () => {
   const { walletStore } = useShipStore();
-
-  const showPending = useToggle(false);
 
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
 
@@ -62,24 +58,6 @@ const WalletPresenter = () => {
     }
   }, [walletStore.currentStore.wallets]);
 
-  useEffect(() => {
-    const pendingTransactions = transactions.filter(
-      (tx) => tx.status === 'pending'
-    ).length;
-
-    const isTransactionScreen = [
-      WalletScreen.LIST,
-      WalletScreen.WALLET_DETAIL,
-      WalletScreen.NFT_DETAIL,
-    ].includes(walletStore.navState.view);
-
-    if (pendingTransactions > 0 && isTransactionScreen) {
-      showPending.toggleOn();
-    } else {
-      showPending.toggleOff();
-    }
-  }, [transactions, walletStore.navState.view]);
-
   const hideFooter = [
     WalletScreen.ONBOARDING,
     WalletScreen.LOCKED,
@@ -117,12 +95,6 @@ const WalletPresenter = () => {
           }
           onAddWallet={() => walletStore.navigate(WalletScreen.CREATE_WALLET)}
           onSetNetwork={(network) => walletStore.setNetwork(network)}
-        />
-      )}
-      {showPending.isOn && (
-        <PendingTransactionDisplay
-          transactions={transactions}
-          hide={showPending.toggleOff}
         />
       )}
       <CurrentWalletScreen network={walletStore.navState.network} />

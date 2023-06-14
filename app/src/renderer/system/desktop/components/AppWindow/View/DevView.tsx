@@ -78,7 +78,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
     return () => {
       webview.removeEventListener('dom-ready', onDomReady);
     };
-  }, [appWindow.appId, loggedInAccount, shipStore.roomsStore]);
+  }, [appWindow.appId, loggedInAccount, shipStore]);
 
   useEffect(() => {
     if (!readyWebview) return;

@@ -2,7 +2,10 @@ import { app, BrowserWindow } from 'electron';
 
 const registerListeners = (mainWindow: BrowserWindow) => {
   const webContents = mainWindow.webContents;
-  webContents.on('will-navigate', function (e, url) {
+
+  webContents.on('will-navigate', (e, url) => {
+    if (mainWindow.isDestroyed()) return;
+
     if (url !== webContents.getURL()) {
       e.preventDefault();
       webContents.send('realm.browser.open', url);
@@ -13,6 +16,8 @@ const registerListeners = (mainWindow: BrowserWindow) => {
   app.on(
     'web-contents-created',
     (_event: Electron.Event, webContents: Electron.WebContents) => {
+      if (mainWindow.isDestroyed()) return;
+
       // Check for a webview
       if (webContents.getType() === 'webview') {
         // Listen for any new window events
@@ -26,25 +31,3 @@ const registerListeners = (mainWindow: BrowserWindow) => {
 };
 
 export const BrowserHelper = { registerListeners };
-
-//  webContents.on(
-//    'context-menu',
-//    (event: Electron.Event, props: Electron.ContextMenuParams) => {
-//      const menu = new Menu();
-//      const menuItem = new MenuItem({
-//        label: 'Inspect Element',
-//        click: () => {
-//          webContents.inspectElement(props.x, props.y);
-//        },
-//      });
-//      menu.append(menuItem);
-//      // const { x, y } = props;
-//      // mainWindow.webContents.send('realm.browser.contextmenu', {
-//      //   x,
-//      //   y,
-//      // });
-//      event.preventDefault();
-//      console.log(webContents.getType());
-//      menu.popup(webContents);
-//    }
-//  );

@@ -52,6 +52,7 @@
       [%dismiss-path app=@tas =path]
       [%update =id =create-action]
       [%delete =id]
+      [%delete-old-realm-chat-notifs ~]
   ==
 +$  create-action      
   $:  app=@tas 

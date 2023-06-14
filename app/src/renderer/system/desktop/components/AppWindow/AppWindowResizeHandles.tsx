@@ -40,7 +40,7 @@ export const AppWindowResizeHandles = ({
   <>
     <TopLeftDragHandle
       drag
-      key={`${topLeft.x.get()}-${topLeft.y.get()}`}
+      key={`top-left-${topLeft.x.get()}-${topLeft.y.get()}`}
       zIndex={zIndex}
       className="app-window-resize"
       onDrag={onDragTopLeft}
@@ -48,7 +48,7 @@ export const AppWindowResizeHandles = ({
     />
     <TopRightDragHandle
       drag
-      key={`${topRight.x.get()}-${topRight.y.get()}`}
+      key={`top-right-${topRight.x.get()}-${topRight.y.get()}`}
       zIndex={zIndex}
       className="app-window-resize"
       onDrag={onDragTopRight}
@@ -56,7 +56,7 @@ export const AppWindowResizeHandles = ({
     />
     <BottomLeftDragHandle
       drag
-      key={`${bottomLeft.x.get()}-${bottomLeft.y.get()}`}
+      key={`bottom-left-${bottomLeft.x.get()}-${bottomLeft.y.get()}`}
       zIndex={zIndex}
       className="app-window-resize"
       onDrag={onDragBottomLeft}
@@ -64,7 +64,7 @@ export const AppWindowResizeHandles = ({
     />
     <BottomRightDragHandle
       drag
-      key={`${bottomRight.x.get()}-${bottomRight.y.get()}`}
+      key={`bottom-right-${bottomRight.x.get()}-${bottomRight.y.get()}`}
       zIndex={zIndex}
       className="app-window-resize"
       onDrag={onDragBottomRight}
