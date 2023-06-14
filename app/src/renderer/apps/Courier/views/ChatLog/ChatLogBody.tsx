@@ -85,7 +85,15 @@ const ChatLogBodyPresenter = ({
     }, 250);
   };
 
-  const lastMessageTimeStamp = messages[messages.length - 1]?.createdAt;
+  const lastMessageIndex = useMemo(
+    () =>
+      messages[messages.length - 1]?.createdAt +
+      messages[messages.length - 1]?.updatedAt,
+    [
+      messages[messages.length - 1]?.createdAt,
+      messages[messages.length - 1]?.updatedAt,
+    ]
+  );
 
   const messageList = useMemo(() => {
     if (messages.length === 0 && inboxLoader.isLoaded) {
@@ -126,7 +134,7 @@ const ChatLogBodyPresenter = ({
       </ChatLogListContainer>
     );
   }, [
-    lastMessageTimeStamp,
+    lastMessageIndex,
     inboxLoader.isLoaded,
     pinnedChatMessage,
     showPin,
