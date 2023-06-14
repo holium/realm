@@ -147,17 +147,25 @@ const registerListeners = (
   ipcMain.removeHandler('disable-realm-cursor');
   ipcMain.removeHandler('is-realm-cursor-enabled');
 
-  ipcMain.handle('enable-realm-cursor', () => {
+  ipcMain.handle('enable-realm-cursor', (_, reloadMouseWindow?: boolean) => {
     const enabled = setRealmCursor(true);
     if (!enabled) return;
 
     enableRealmCursor(mainWindow, mouseOverlayWindow);
+
+    if (reloadMouseWindow) {
+      mouseOverlayWindow.reload();
+    }
   });
 
-  ipcMain.handle('disable-realm-cursor', () => {
+  ipcMain.handle('disable-realm-cursor', (_, reloadMouseWindow?: boolean) => {
     setRealmCursor(false);
 
     disableRealmCursor(mainWindow, mouseOverlayWindow);
+
+    if (reloadMouseWindow) {
+      mouseOverlayWindow.reload();
+    }
   });
 
   ipcMain.handle('is-realm-cursor-enabled', () => realmCursorEnabled);
