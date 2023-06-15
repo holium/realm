@@ -184,7 +184,11 @@ export const MigrateIdDialogStory: ComponentStory<
   typeof MigrateIdDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <MigrateIdDialog onBack={() => {}} onNext={() => Promise.resolve(false)} />
+    <MigrateIdDialog
+      onClickClearUpload={() => {}}
+      onBack={() => {}}
+      onNext={() => Promise.resolve(false)}
+    />
   </OnboardingDialogWrapper>
 );
 
@@ -197,6 +201,7 @@ export const MigrateIdUploadingDialogStory: ComponentStory<
     <MigrateIdDialog
       fileName="sampel-palnet.tar.gz"
       progress={30}
+      onClickClearUpload={() => {}}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
@@ -213,6 +218,7 @@ export const MigrateIdDoneDialogStory: ComponentStory<
     <MigrateIdDialog
       fileName="sampel-palnet.tar.gz"
       progress={100}
+      onClickClearUpload={() => {}}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />

@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { Anchor, Flex, Icon } from '@holium/design-system/general';
+import { Anchor, Button, Flex, Icon } from '@holium/design-system/general';
 
 import {
   OnboardDialogDescription,
@@ -9,6 +9,7 @@ import {
 import { GrayBox } from '../GetRealm/GetRealmDialogBody.styles';
 
 const UploadBox = styled(GrayBox)`
+  position: relative;
   gap: 0;
   height: 80px;
   align-items: center;
@@ -40,9 +41,14 @@ const ProgressBar = styled.div<{ progress: number }>`
 type Props = {
   fileName?: string;
   progress?: number;
+  onClickClearUpload: () => void;
 };
 
-export const MigrateIdDialogBody = ({ fileName, progress }: Props) => (
+export const MigrateIdDialogBody = ({
+  fileName,
+  progress,
+  onClickClearUpload,
+}: Props) => (
   <Flex
     flexDirection="column"
     gap={16}
@@ -70,13 +76,20 @@ export const MigrateIdDialogBody = ({ fileName, progress }: Props) => (
     <UploadBox>
       {fileName && progress !== undefined ? (
         <Flex flex={1} flexDirection="column" gap="2px">
-          <Flex gap="4px">
-            {progress === 100 && <Icon name="CheckCircle" />}
-            <OnboardDialogDescription
-              style={{ fontSize: 12, fontWeight: 500, opacity: 0.7 }}
-            >
-              {fileName}
-            </OnboardDialogDescription>
+          <Flex flex={1} justifyContent="space-between">
+            <Flex gap="4px">
+              {progress === 100 && <Icon name="CheckCircle" />}
+              <OnboardDialogDescription
+                style={{ fontSize: 12, fontWeight: 500, opacity: 0.7 }}
+              >
+                {fileName}
+              </OnboardDialogDescription>
+            </Flex>
+            {progress === 100 && (
+              <Button.IconButton type="button" onClick={onClickClearUpload}>
+                <Icon name="Close" size={20} />
+              </Button.IconButton>
+            )}
           </Flex>
           <Flex width="100%" height="100%" alignItems="center" gap="8px">
             <ProgressBar progress={progress} />
