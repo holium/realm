@@ -1,4 +1,8 @@
-import { AccountGetRealmDialog, UserContextProvider } from '@holium/shared';
+import {
+  AccountGetRealmDialog,
+  OnboardingStorage,
+  UserContextProvider,
+} from '@holium/shared';
 
 import { thirdEarthApi } from 'util/thirdEarthApi';
 
@@ -27,14 +31,18 @@ export const joinWaitlist = async (email: string) => {
 const GetRealmPresenter = () => {
   const { goToPage, logout } = useNavigation();
 
-  const onClickPurchaseId = () => {
-    goToPage('/choose-id', {
+  const onClickMigrateId = () => {
+    OnboardingStorage.set({
+      productType: 'byop-p',
+    });
+    goToPage('/payment', {
       back_url: '/account/get-realm',
     });
   };
 
-  const onClickMigrateId = () => {
-    goToPage('/migrate-id', {
+  const onClickPurchaseId = () => {
+    OnboardingStorage.remove('productType');
+    goToPage('/choose-id', {
       back_url: '/account/get-realm',
     });
   };

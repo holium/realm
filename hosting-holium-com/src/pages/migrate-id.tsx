@@ -14,16 +14,14 @@ export default function MigrateId() {
   const [progress, setProgress] = useState<number>();
 
   const onUpload = async (file: File) => {
-    const { token, email, serverId } = OnboardingStorage.get();
+    const { token, email, serverId, provisionalShipId } =
+      OnboardingStorage.get();
 
-    if (!token || !serverId || !email) return;
+    if (!token || !serverId || !email || !provisionalShipId) return;
 
     setFile(file);
 
     setProgress(0);
-
-    // TODO: store in payment.
-    const provisionalShipId = '';
 
     // Increment progress by 1% every 2s until 99%.
     const interval = setInterval(() => {

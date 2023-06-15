@@ -173,12 +173,16 @@ const HostingPresenter = () => {
   };
 
   const onClickMigrateId = () => {
-    goToPage('/migrate-id', {
+    OnboardingStorage.set({
+      productType: 'byop-p',
+    });
+    goToPage('/payment', {
       back_url: '/account',
     });
   };
 
   const onClickPurchaseId = () => {
+    OnboardingStorage.remove('productType');
     goToPage('/choose-id', {
       back_url: '/account',
     });

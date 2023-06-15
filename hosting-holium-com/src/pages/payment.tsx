@@ -114,12 +114,15 @@ export default function Payment({
       await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
       const provisionalResponse = await thirdEarthApi.provisionalShipEntry({
         token,
-        email,
-        invoiceId,
         product: productId.toString(),
+        invoiceId,
       });
 
       if (!provisionalResponse) return false;
+
+      OnboardingStorage.set({
+        provisionalShipId: provisionalResponse[0].id.toString(),
+      });
 
       return goToPage('/migrate-id');
     }

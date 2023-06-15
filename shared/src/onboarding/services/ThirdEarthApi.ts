@@ -125,15 +125,15 @@ type ShipResponse = {
 
 type ProvisionalShipEntryPayload = {
   token: string;
-  email: string;
-  invoiceId: string;
   product: string;
+  invoiceId: string;
 };
 
 type ProvisionalShipEntryResponse = {
-  ship_id: string;
-  message: string;
-};
+  id: number;
+  user_id: number;
+  invoice_id: string;
+}[];
 
 type UploadPierFileResponse = {
   message?: string;
@@ -451,7 +451,6 @@ export class ThirdEarthApi {
 
   provisionalShipEntry({
     token,
-    email,
     invoiceId,
     product,
   }: ProvisionalShipEntryPayload) {
@@ -461,9 +460,7 @@ export class ThirdEarthApi {
         method: 'POST',
         headers: this.getHeaders(token),
         body: JSON.stringify({
-          // userId: '',
-          email,
-          shipType: 'planet',
+          shipType: 'provisional',
           invoiceId,
           product,
         }),

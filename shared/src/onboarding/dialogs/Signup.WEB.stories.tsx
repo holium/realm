@@ -102,6 +102,7 @@ ChooseIdDialogStory.storyName = '(Purchase) 4. Choose ID';
 export const PaymentDialogStory: ComponentStory<typeof PaymentDialog> = () => (
   <OnboardingDialogWrapper>
     <PaymentDialog
+      productType="planet"
       products={thirdEarthMockProducts}
       productId={1}
       setProductId={() => {}}
@@ -177,6 +178,27 @@ export const DownloadDialogStory: ComponentStory<
 
 DownloadDialogStory.storyName = '(Purchase) 8. Download Realm for desktop';
 
+export const MigrateIdPaymentDialogStory: ComponentStory<
+  typeof PaymentDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <PaymentDialog
+      productType="byop-p"
+      products={thirdEarthMockProducts}
+      productId={1}
+      setProductId={() => {}}
+      patp="~zod"
+      email="admin@admin.com"
+      stripe={undefined}
+      stripeOptions={undefined}
+      onBack={() => {}}
+      onNext={() => Promise.resolve(false)}
+    />
+  </OnboardingDialogWrapper>
+);
+
+MigrateIdPaymentDialogStory.storyName = '(Migrate) 4. Payment';
+
 export const MigrateIdDialogStory: ComponentStory<
   typeof MigrateIdDialog
 > = () => (
@@ -190,7 +212,7 @@ export const MigrateIdDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-MigrateIdDialogStory.storyName = '(Migrate) 4.1. Migrate an ID';
+MigrateIdDialogStory.storyName = '(Migrate) 5.1. Migrate an ID';
 
 export const MigrateIdUploadingDialogStory: ComponentStory<
   typeof MigrateIdDialog
@@ -208,7 +230,7 @@ export const MigrateIdUploadingDialogStory: ComponentStory<
 );
 
 MigrateIdUploadingDialogStory.storyName =
-  '(Migrate) 4.2. Migrate an ID – Uploading';
+  '(Migrate) 5.2. Migrate an ID – Uploading';
 
 export const MigrateIdDoneDialogStory: ComponentStory<
   typeof MigrateIdDialog
@@ -225,4 +247,4 @@ export const MigrateIdDoneDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-MigrateIdDoneDialogStory.storyName = '(Migrate) 4.3. Migrate an ID – Uploaded';
+MigrateIdDoneDialogStory.storyName = '(Migrate) 5.3. Migrate an ID – Uploaded';

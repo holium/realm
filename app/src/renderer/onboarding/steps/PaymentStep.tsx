@@ -85,6 +85,7 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
 
   return (
     <PaymentDialog
+      productType="planet"
       products={products}
       productId={productId}
       patp={serverId}

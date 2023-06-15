@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { useToggle } from '@holium/design-system/util';
 import {
   AccountCustomDomainDialog,
+  OnboardingStorage,
   UserContextProvider,
   useUser,
 } from '@holium/shared';
@@ -64,12 +65,16 @@ const CustomDomainPresenter = () => {
   };
 
   const onClickMigrateId = () => {
-    goToPage('/migrate-id', {
+    OnboardingStorage.set({
+      productType: 'byop-p',
+    });
+    goToPage('/payment', {
       back_url: '/account/custom-domain',
     });
   };
 
   const onClickPurchaseId = () => {
+    OnboardingStorage.remove('productType');
     goToPage('/choose-id', {
       back_url: '/account/custom-domain',
     });
