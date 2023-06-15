@@ -91,7 +91,7 @@ export const ConnectionStatusPresenter = () => {
   const onReconnect = () => {
     // OSActions.reconnect();
   };
-  console.log('render status => %o', status);
+  // console.log('render status => %o', status);
   let color = '#34C676';
   let statusText = 'Connected';
   let leftIcon = <div />;
