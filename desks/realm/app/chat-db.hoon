@@ -169,6 +169,9 @@
           =/  thepathrow   (~(get by paths-table.state) t.t.path)
           :~  [%give %fact ~ chat-path-row+!>(thepathrow)]
           ==
+      :: /chat-vent/~2000.1.1
+        [%chat-vent @ ~] :: poke response comes on this path
+          ~
     ==
     [cards this]
   ::

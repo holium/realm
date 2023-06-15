@@ -194,14 +194,18 @@
 ::realm-chat &chat-action [%create-chat ~ %chat ~[~bus ~dev] %host *@dr]
   |=  [act=create-chat-data state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  (vented-create-chat [now.bowl act] state bowl)
+::
+++  vented-create-chat
+  |=  [act=[t=@da c=create-chat-data] state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
   ?>  =(src.bowl our.bowl)
-  =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl now.bowl]))
-  =/  t=@da  now.bowl
-  =/  pathrow=path-row:db  [chat-path metadata.act type.act t t ~ invites.act %.n max-expires-at-duration.act now.bowl]
+  =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl t.act]))
+  =/  pathrow=path-row:db  [chat-path metadata.c.act type.c.act t.act t.act ~ invites.c.act %.n max-expires-at-duration.c.act now.bowl]
   =/  all-ships
-    ?:  (~(has in (silt peers.act)) our.bowl)  peers.act
-    [our.bowl peers.act]
-  ?:  (dm-already-exists type.act all-ships bowl)
+    ?:  (~(has in (silt peers.c.act)) our.bowl)  peers.c.act
+    [our.bowl peers.c.act]
+  ?:  (dm-already-exists type.c.act all-ships bowl)
     ~&  >>>  "dm between {<all-ships>} already exists"
     `state
   =/  all-peers=ship-roles:db  
@@ -210,7 +214,7 @@
     |=  s=ship
     =/  rl
       ?:  =(s our.bowl)    %host
-      ?:  =(type.act %dm)  %host
+      ?:  =(type.c.act %dm)  %host
       %member
     [s rl]
 
@@ -344,16 +348,21 @@
 ::realm-chat &chat-action [%send-message /realm-chat/path-id ~[[[%plain '0'] ~ ~] [[%plain '1'] ~ ~]] *@dr]
   |=  [act=[=path fragments=(list minimal-fragment:db) expires-in=@dr] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  (vented-send-message [now.bowl act] state bowl)
+::
+++  vented-send-message
+  |=  [act=[t=@da =path fragments=(list minimal-fragment:db) expires-in=@dr] state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
   ?>  =(src.bowl our.bowl)
   ?>  (gth (lent fragments.act) 0)  :: no sending empty messages
 
   :: read the peers for the path
   =/  pathpeers  (scry-peers path.act bowl)
-  =/  official-time  now.bowl
+  =/  official-time  t.act
   =/  cards  
     %:  turn
       pathpeers
-      |=(a=peer-row:db (into-insert-message-poke a act official-time))
+      |=(a=peer-row:db (into-insert-message-poke a +.act official-time))
     ==
   :: then send pokes to all the peers about inserting a message
   [cards state]
