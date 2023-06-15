@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
+import { useEffect, useRef } from 'react';
 
 import { Avatar, Box, Flex, Row, Text } from '@holium/design-system/general';
 import { MenuItemProps } from '@holium/design-system/navigation';
+import { useToggle } from '@holium/design-system/util';
 
 import { useContextMenu } from 'renderer/components';
+import { usePassportMenu } from 'renderer/components/People/usePassportMenu';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 type Props = {
@@ -19,10 +20,23 @@ const LabelMap = {
   admin: 'admin',
 };
 
-const PeerRowPresenter = ({ id, peer, options, role }: Props) => {
+export const PeerRow = ({ id, peer, options, role }: Props) => {
+  const rowRef = useRef<HTMLDivElement>(null);
   const { getOptions, setOptions } = useContextMenu();
+  const { getMenuConfig, setMenuConfig } = usePassportMenu();
+  const selected = useToggle(false);
 
   const { friends } = useShipStore();
+
+  const contact = friends.getContactAvatarMetadata(peer);
+
+  useEffect(() => {
+    if (getMenuConfig()?.id === id) {
+      selected.toggleOn();
+    } else {
+      selected.toggleOff();
+    }
+  }, [getMenuConfig, setMenuConfig]);
 
   useEffect(() => {
     if (options && options.length && options !== getOptions(id)) {
@@ -30,9 +44,27 @@ const PeerRowPresenter = ({ id, peer, options, role }: Props) => {
     }
   }, [options, getOptions, id, setOptions]);
 
-  const metadata = friends.getContactAvatarMetadata(peer);
   return (
-    <Row id={id}>
+    <Row
+      id={id}
+      ref={rowRef}
+      selected={selected.isOn}
+      onClick={(evt) => {
+        evt.stopPropagation();
+        if (selected.isOn) {
+          setMenuConfig(null);
+        } else {
+          setMenuConfig({
+            id,
+            contact,
+            anchorPoint: {
+              x: rowRef.current?.getBoundingClientRect().left || 0,
+              y: rowRef.current?.getBoundingClientRect().top || 0,
+            },
+          });
+        }
+      }}
+    >
       <Flex
         gap={10}
         flexDirection="row"
@@ -45,9 +77,9 @@ const PeerRowPresenter = ({ id, peer, options, role }: Props) => {
           <Avatar
             simple
             size={22}
-            avatar={metadata.avatar}
-            patp={metadata.patp}
-            sigilColor={[metadata.color || '#000000', 'white']}
+            avatar={contact.avatar}
+            patp={contact.patp}
+            sigilColor={[contact.color || '#000000', 'white']}
           />
         </Box>
         <Flex flex={1} height="22px" overflow="hidden" alignItems="center">
@@ -59,7 +91,7 @@ const PeerRowPresenter = ({ id, peer, options, role }: Props) => {
               whiteSpace: 'nowrap',
             }}
           >
-            {metadata.nickname ? metadata.nickname : metadata.patp}
+            {contact.nickname ? contact.nickname : contact.patp}
           </Text.Custom>
         </Flex>
         {(role === 'host' || role === 'admin') && (
@@ -71,4 +103,4 @@ const PeerRowPresenter = ({ id, peer, options, role }: Props) => {
     </Row>
   );
 };
-export const PeerRow = observer(PeerRowPresenter);
+// export const PeerRow = observer(PeerRowPresenter);

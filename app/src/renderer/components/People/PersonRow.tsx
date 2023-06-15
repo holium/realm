@@ -7,9 +7,11 @@ import {
   MenuItemProps,
   Row,
   Text,
+  useToggle,
 } from '@holium/design-system';
 
 import { useContextMenu } from 'renderer/components/ContextMenu';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { usePassportMenu } from './usePassportMenu';
 
@@ -17,10 +19,6 @@ interface IPersonRow {
   listId: string;
   patp: string;
   shortPatp: string;
-  sigilColor?: string | null;
-  avatar?: string | null;
-  nickname?: string | null;
-  description?: string | null;
   contextMenuOptions?: MenuItemProps[];
   children?: any;
 }
@@ -29,18 +27,26 @@ export const PersonRow = ({
   listId,
   patp,
   shortPatp,
-  sigilColor,
-  avatar,
-  nickname,
-  description,
   contextMenuOptions,
   children,
 }: IPersonRow) => {
   const rowRef = useRef<HTMLDivElement>(null);
   const { getOptions, setOptions } = useContextMenu();
-  const { menuConfig, setMenuConfig } = usePassportMenu();
+  const { getMenuConfig, setMenuConfig } = usePassportMenu();
+  const selected = useToggle(false);
+
+  const { friends } = useShipStore();
 
   const id = `${listId}-${patp}`;
+  const contact = friends.getContactAvatarMetadata(patp);
+
+  useEffect(() => {
+    if (getMenuConfig()?.id === id) {
+      selected.toggleOn();
+    } else {
+      selected.toggleOff();
+    }
+  }, [getMenuConfig, setMenuConfig]);
 
   useEffect(() => {
     if (
@@ -61,23 +67,21 @@ export const PersonRow = ({
           evt.stopPropagation();
         }}
         style={{ justifyContent: 'space-between' }}
-        selected={menuConfig?.id === id}
+        selected={selected.isOn}
         onClick={(evt) => {
-          setMenuConfig({
-            id,
-            options: {
-              patp,
-              sigilColor,
-              avatar,
-              nickname,
-              description,
-            },
-            anchorPoint: {
-              x: rowRef.current?.getBoundingClientRect().left || 0,
-              y: rowRef.current?.getBoundingClientRect().top || 0,
-            },
-          });
           evt.stopPropagation();
+          if (selected.isOn) {
+            setMenuConfig(null);
+          } else {
+            setMenuConfig({
+              id,
+              contact,
+              anchorPoint: {
+                x: rowRef.current?.getBoundingClientRect().left || 0,
+                y: rowRef.current?.getBoundingClientRect().top || 0,
+              },
+            });
+          }
         }}
       >
         <Flex
@@ -92,9 +96,9 @@ export const PersonRow = ({
             <Avatar
               simple
               size={22}
-              avatar={avatar}
+              avatar={contact.avatar}
               patp={patp}
-              sigilColor={[sigilColor || '#000000', 'white']}
+              sigilColor={[contact.color || '#000000', 'white']}
             />
           </Box>
           <Flex flex={1} height="22px" overflow="hidden" alignItems="center">
@@ -106,7 +110,7 @@ export const PersonRow = ({
                 whiteSpace: 'nowrap',
               }}
             >
-              {nickname ? nickname : shortPatp}
+              {contact.nickname ? contact.nickname : shortPatp}
             </Text.Custom>
           </Flex>
         </Flex>

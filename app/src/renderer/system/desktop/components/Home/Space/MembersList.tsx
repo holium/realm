@@ -99,8 +99,6 @@ const MembersListPresenter = ({ our }: IMembersList) => {
   }: {
     member: MemberType & { patp: string; shortPatp: string };
   }) => {
-    const contact = friends.getContactAvatarMetadata(member.patp);
-
     const roles = Array.from(member.roles);
     let activeRole = 'initiate';
     if (roles) {
@@ -127,10 +125,6 @@ const MembersListPresenter = ({ our }: IMembersList) => {
         key={`${member.patp}-member`}
         patp={member.patp}
         shortPatp={member.shortPatp}
-        nickname={contact.nickname}
-        sigilColor={contact.color}
-        avatar={contact.avatar}
-        description={contact.bio}
         listId="member-list"
         contextMenuOptions={
           currentSpace.isAdmin(loggedInAccount.serverId) &&
@@ -188,7 +182,6 @@ const MembersListPresenter = ({ our }: IMembersList) => {
   }: {
     friend: FriendType & { patp: string; shortPatp: string };
   }) => {
-    const contact = friends.getContactAvatarMetadata(friend.patp);
     const pinOption = [
       {
         label: friend.pinned ? 'Unpin' : 'Pin',
@@ -203,10 +196,6 @@ const MembersListPresenter = ({ our }: IMembersList) => {
         key={friend.patp}
         patp={friend.patp}
         shortPatp={friend.shortPatp}
-        nickname={contact.nickname}
-        sigilColor={contact.color}
-        avatar={contact.avatar}
-        description={contact.bio}
         listId="friend-list"
         contextMenuOptions={[
           ...pinOption,

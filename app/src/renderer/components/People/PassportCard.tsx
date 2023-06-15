@@ -6,19 +6,19 @@ import { Avatar, Box, Flex, Text } from '@holium/design-system';
 
 interface IPassport {
   patp: string;
-  sigilColor?: string | null;
+  color?: string | null;
   avatar?: string | null;
   nickname?: string | null;
-  description?: string | null;
+  bio?: string | null;
   onClose: any;
 }
 
 const PassportCardPresenter = ({
   patp,
-  sigilColor,
+  color,
   avatar,
   nickname,
-  description,
+  bio,
 }: // onClose,
 IPassport) => {
   // const { setActiveApp, walletApp } = useTrayApps();
@@ -34,7 +34,7 @@ IPassport) => {
             size={52}
             avatar={avatar}
             patp={patp}
-            sigilColor={[sigilColor || '#000000', 'white']}
+            sigilColor={[color || '#000000', 'white']}
             borderRadiusOverride="6px"
           />
         </Box>
@@ -108,9 +108,9 @@ IPassport) => {
             <Icons name="StartDM" color={iconColor} size="16px" />
           </PassportButton> */}
         </Flex>
-        {description && (
+        {bio && (
           <Flex flexDirection="column" gap={4}>
-            <Text.Custom fontSize={2}>{description}</Text.Custom>
+            <Text.Custom fontSize={2}>{bio}</Text.Custom>
           </Flex>
         )}
       </Flex>
