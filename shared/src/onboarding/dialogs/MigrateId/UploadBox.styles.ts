@@ -2,13 +2,21 @@ import styled from 'styled-components';
 
 import { GrayBox } from '../GetRealm/GetRealmDialogBody.styles';
 
-export const UploadBoxContainer = styled(GrayBox)`
+export const UploadBoxContainer = styled(GrayBox)<{
+  isEmpty: boolean;
+}>`
   position: relative;
   gap: 0;
   height: 80px;
   align-items: center;
   justify-content: center;
   border-style: dashed;
+
+  ${({ isEmpty }) =>
+    isEmpty &&
+    `
+    cursor: pointer;
+  `}
 `;
 
 export const ProgressBar = styled.div<{ progress: number }>`
