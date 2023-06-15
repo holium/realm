@@ -172,9 +172,15 @@ const HostingPresenter = () => {
     return false;
   };
 
-  const onClickBuyIdentity = () => {
-    goToPage(accountPageUrl['Get Hosting'], {
-      back_url: accountPageUrl['Hosting'],
+  const onClickMigrateId = () => {
+    goToPage('/migrate-id', {
+      back_url: '/account',
+    });
+  };
+
+  const onClickPurchaseId = () => {
+    goToPage('/choose-id', {
+      back_url: '/account',
     });
   };
 
@@ -218,7 +224,8 @@ const HostingPresenter = () => {
         serverUrl={selectedShip?.link}
         serverCode={selectedShip?.code}
         serverMaintenanceWindow={selectedShip?.maintenance_window}
-        onClickBuyIdentity={onClickBuyIdentity}
+        onClickPurchaseId={onClickPurchaseId}
+        onClickMigrateId={onClickMigrateId}
         setSelectedIdentity={setSelectedIdentity}
         onClickChangeEmail={changeEmailModal.toggleOn}
         onClickChangePassword={changePasswordModal.toggleOn}

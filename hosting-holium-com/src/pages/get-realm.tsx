@@ -43,7 +43,7 @@ export default function GetRealm({ prefilledEmail }: Props) {
   };
 
   const onPurchaseId = () => {
-    goToPage('/', { email: prefilledEmail });
+    goToPage('/create-account', { email: prefilledEmail });
   };
 
   const onMigrateId = () => {};

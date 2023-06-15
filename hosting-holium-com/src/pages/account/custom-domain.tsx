@@ -63,9 +63,15 @@ const CustomDomainPresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  const onClickBuyIdentity = () => {
-    goToPage(accountPageUrl['Get Hosting'], {
-      back_url: accountPageUrl['Custom Domain'],
+  const onClickMigrateId = () => {
+    goToPage('/migrate-id', {
+      back_url: '/account/custom-domain',
+    });
+  };
+
+  const onClickPurchaseId = () => {
+    goToPage('/choose-id', {
+      back_url: '/account/custom-domain',
     });
   };
 
@@ -82,7 +88,8 @@ const CustomDomainPresenter = () => {
         setSelectedIdentity={setSelectedIdentity}
         onChangeDomain={setDomain}
         onSubmit={onSubmit}
-        onClickBuyIdentity={onClickBuyIdentity}
+        onClickPurchaseId={onClickPurchaseId}
+        onClickMigrateId={onClickMigrateId}
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />

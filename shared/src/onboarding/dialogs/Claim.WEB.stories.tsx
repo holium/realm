@@ -31,8 +31,8 @@ export const AccountGetRealmDialogStory: ComponentStory<
   <OnboardingDialogWrapper>
     <AccountGetRealmDialog
       onClickJoinWaitlist={() => Promise.resolve(false)}
-      onClickBuyIdentity={() => {}}
-      onClickGetHosting={() => {}}
+      onClickPurchaseId={() => {}}
+      onClickMigrateId={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />

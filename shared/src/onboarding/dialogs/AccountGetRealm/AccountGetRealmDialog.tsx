@@ -2,21 +2,22 @@ import { Button, Flex } from '@holium/design-system/general';
 
 import { AccountDialog, SidebarSection } from '../../components/AccountDialog';
 import { AccountDialogDescription } from '../../components/AccountDialog.styles';
+import { GrayButton } from '../../components/ChangeButton';
 import { JoinWaitlist } from '../../components/JoinWaitlist';
 import { OrDivider } from '../../components/OrDivider';
 import { GetIdIcon } from '../../icons/GetIdIcon';
 
 type Props = {
-  onClickGetHosting: () => void;
-  onClickBuyIdentity: () => void;
+  onClickPurchaseId: () => void;
+  onClickMigrateId: () => void;
   onClickJoinWaitlist: (email: string) => Promise<boolean>;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
 
 export const AccountGetRealmDialog = ({
-  onClickGetHosting,
-  onClickBuyIdentity,
+  onClickPurchaseId,
+  onClickMigrateId,
   onClickJoinWaitlist,
   onClickSidebarSection,
   onExit,
@@ -38,16 +39,22 @@ export const AccountGetRealmDialog = ({
           margin="32px auto"
         >
           <GetIdIcon />
-          <Button.Primary onClick={onClickGetHosting}>Get an ID</Button.Primary>
+          <Flex gap="12px">
+            <Button.Primary onClick={onClickPurchaseId}>
+              Purchase ID
+            </Button.Primary>
+            <GrayButton onClick={onClickMigrateId}>Migrate ID</GrayButton>
+          </Flex>
           <OrDivider maxWidth="180px" />
           <JoinWaitlist onClickJoinWaitlist={onClickJoinWaitlist} />
           <AccountDialogDescription style={{ fontSize: 12 }}>
-            Sign up for the waitlist if you aren’t hosted on Holium.
+            Join waitlist if you don't want to host with Holium.
           </AccountDialogDescription>
         </Flex>
       </Flex>
     }
-    onClickBuyIdentity={onClickBuyIdentity}
+    onClickPurchaseId={onClickPurchaseId}
+    onClickMigrateId={onClickMigrateId}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   />

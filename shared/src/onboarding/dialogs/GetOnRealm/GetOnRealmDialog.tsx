@@ -3,22 +3,25 @@ import { GetIdIcon } from '../../icons/GetIdIcon';
 import { GetRealmDialogBody } from './GetOnRealmDialogBody';
 
 type Props = {
-  onBack: () => void;
-  onBuyAnId: () => void;
-  onMigrateAnId: () => void;
+  onBack?: () => void;
+  onMigrateId: () => void;
+  onPurchaseId: () => void;
 };
 
 export const GetOnRealmDialog = ({
   onBack,
-  onBuyAnId,
-  onMigrateAnId,
+  onMigrateId,
+  onPurchaseId,
 }: Props) => (
   <OnboardDialog
     icon={<GetIdIcon size={200} />}
     body={
-      <GetRealmDialogBody onBuyAnId={onBuyAnId} onMigrateAnId={onMigrateAnId} />
+      <GetRealmDialogBody
+        onMigrateId={onMigrateId}
+        onPurchaseId={onPurchaseId}
+      />
     }
-    hideNextButton
     onBack={onBack}
+    hideNextButton
   />
 );

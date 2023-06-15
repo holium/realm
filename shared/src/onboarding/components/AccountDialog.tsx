@@ -39,7 +39,8 @@ type Props = {
   children?: ReactNode;
   customBody?: ReactNode;
   isLoading?: boolean;
-  onClickBuyIdentity: () => void;
+  onClickMigrateId: () => void;
+  onClickPurchaseId: () => void;
   setSelectedIdentity: (patp: string) => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onSubmit?: () => void;
@@ -53,7 +54,8 @@ export const AccountDialog = ({
   children,
   customBody,
   isLoading,
-  onClickBuyIdentity,
+  onClickMigrateId,
+  onClickPurchaseId,
   setSelectedIdentity,
   onClickSidebarSection,
   onSubmit,
@@ -119,15 +121,22 @@ export const AccountDialog = ({
                     flexDirection="column"
                     mt="8px"
                     pt="8px"
+                    gap="8px"
                     borderTop="1px solid rgba(var(--rlm-border-rgba))"
                   >
+                    <Button.Transparent width="100%" onClick={onClickMigrateId}>
+                      <Flex alignItems="center" gap="8px">
+                        <Icon name="ArrowRightLine" size={16} />
+                        <Text.Body>Migrate ID</Text.Body>
+                      </Flex>
+                    </Button.Transparent>
                     <Button.Transparent
                       width="100%"
-                      onClick={onClickBuyIdentity}
+                      onClick={onClickPurchaseId}
                     >
                       <Flex alignItems="center" gap="8px">
                         <Icon name="AddCircleLine" size={16} />
-                        <Text.Body>Get another ID</Text.Body>
+                        <Text.Body>Purchase ID</Text.Body>
                       </Flex>
                     </Button.Transparent>
                   </Flex>
@@ -196,7 +205,8 @@ export const AccountDialogSkeleton = ({
       isLoading
       customBody={isBlankBody ? <Flex flex={5} /> : undefined}
       setSelectedIdentity={() => {}}
-      onClickBuyIdentity={() => {}}
+      onClickPurchaseId={() => {}}
+      onClickMigrateId={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />

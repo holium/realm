@@ -1,17 +1,22 @@
-import { Button, Flex, Text } from '@holium/design-system/general';
+import { Flex } from '@holium/design-system/general';
 
-import { GrayButton } from '../../components/ChangeButton';
 import {
   OnboardDialogDescription,
   OnboardDialogTitle,
 } from '../../components/OnboardDialog.styles';
+import {
+  ButtonsContainer,
+  ButtonText,
+  MigrateIdButton,
+  PurchaseIdButton,
+} from './GetOnRealmDialogBody.styles';
 
 type Props = {
-  onBuyAnId: () => void;
-  onMigrateAnId: () => void;
+  onMigrateId: () => void;
+  onPurchaseId: () => void;
 };
 
-export const GetRealmDialogBody = ({ onBuyAnId, onMigrateAnId }: Props) => (
+export const GetRealmDialogBody = ({ onMigrateId, onPurchaseId }: Props) => (
   <Flex flexDirection="column" gap="32px">
     <Flex flexDirection="column" gap="16px">
       <OnboardDialogTitle>Get on Realm</OnboardDialogTitle>
@@ -20,37 +25,13 @@ export const GetRealmDialogBody = ({ onBuyAnId, onMigrateAnId }: Props) => (
         hosting.
       </OnboardDialogDescription>
     </Flex>
-    <Flex flex={1} gap="12px">
-      <Button.Primary
-        type="button"
-        style={{ width: '200px', height: '36px', justifyContent: 'center' }}
-        onClick={onBuyAnId}
-      >
-        <Text.Body
-          style={{
-            fontWeight: 500,
-            color: 'inherit',
-            margin: '2px',
-          }}
-        >
-          Purchase ID
-        </Text.Body>
-      </Button.Primary>
-      <GrayButton
-        type="button"
-        style={{ width: '200px', height: '36px', justifyContent: 'center' }}
-        onClick={onMigrateAnId}
-      >
-        <Text.Body
-          style={{
-            fontWeight: 500,
-            color: 'inherit',
-            margin: '2px',
-          }}
-        >
-          Migrate ID
-        </Text.Body>
-      </GrayButton>
-    </Flex>
+    <ButtonsContainer>
+      <PurchaseIdButton type="button" onClick={onPurchaseId}>
+        <ButtonText>Purchase ID</ButtonText>
+      </PurchaseIdButton>
+      <MigrateIdButton type="button" onClick={onMigrateId}>
+        <ButtonText>Migrate ID</ButtonText>
+      </MigrateIdButton>
+    </ButtonsContainer>
   </Flex>
 );

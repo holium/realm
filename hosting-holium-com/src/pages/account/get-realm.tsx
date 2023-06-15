@@ -27,15 +27,21 @@ export const joinWaitlist = async (email: string) => {
 const GetRealmPresenter = () => {
   const { goToPage, logout } = useNavigation();
 
-  const goToGetHosting = () => {
-    goToPage(accountPageUrl['Get Hosting'], {
+  const onClickPurchaseId = () => {
+    goToPage('/choose-id', {
+      back_url: '/account/get-realm',
+    });
+  };
+
+  const onClickMigrateId = () => {
+    goToPage('/migrate-id', {
       back_url: '/account/get-realm',
     });
   };
 
   const onClickSidebarSection = (section: string) => {
     if (section === 'Get Hosting') {
-      goToGetHosting();
+      onClickPurchaseId();
     } else {
       goToPage(accountPageUrl[section]);
     }
@@ -44,10 +50,10 @@ const GetRealmPresenter = () => {
   return (
     <Page title="Account / Get Realm" isProtected>
       <AccountGetRealmDialog
-        onClickGetHosting={goToGetHosting}
         onClickJoinWaitlist={joinWaitlist}
         onClickSidebarSection={onClickSidebarSection}
-        onClickBuyIdentity={() => {}}
+        onClickPurchaseId={onClickPurchaseId}
+        onClickMigrateId={onClickMigrateId}
         onExit={logout}
       />
     </Page>

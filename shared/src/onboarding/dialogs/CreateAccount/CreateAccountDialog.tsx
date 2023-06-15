@@ -19,12 +19,14 @@ const CreateAccountSchema = Yup.object().shape({
 type Props = {
   prefilledEmail?: string;
   onAlreadyHaveAccount: () => void;
+  onBack: () => void;
   onNext: (values: FormikValues) => Promise<boolean>;
 };
 
 export const CreateAccountDialog = ({
   prefilledEmail,
   onAlreadyHaveAccount,
+  onBack,
   onNext,
 }: Props) => (
   <OnboardDialog
@@ -38,6 +40,7 @@ export const CreateAccountDialog = ({
     body={
       <CreateAccountDialogBody onAlreadyHaveAccount={onAlreadyHaveAccount} />
     }
+    onBack={onBack}
     onNext={onNext}
   />
 );

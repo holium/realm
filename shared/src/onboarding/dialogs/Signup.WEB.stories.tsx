@@ -52,11 +52,7 @@ export const GetOnRealmDialogStory: ComponentStory<
   typeof GetOnRealmDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <GetOnRealmDialog
-      onBuyAnId={() => {}}
-      onMigrateAnId={() => {}}
-      onBack={() => {}}
-    />
+    <GetOnRealmDialog onPurchaseId={() => {}} onMigrateId={() => {}} />
   </OnboardingDialogWrapper>
 );
 
@@ -68,6 +64,7 @@ export const CreateAccountDialogStory: ComponentStory<
   <OnboardingDialogWrapper>
     <CreateAccountDialog
       onAlreadyHaveAccount={() => {}}
+      onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
@@ -185,6 +182,7 @@ export const MigrateIdDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <MigrateIdDialog
+      setFile={() => {}}
       onClickClearUpload={() => {}}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
@@ -201,6 +199,7 @@ export const MigrateIdUploadingDialogStory: ComponentStory<
     <MigrateIdDialog
       fileName="sampel-palnet.tar.gz"
       progress={30}
+      setFile={() => {}}
       onClickClearUpload={() => {}}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
@@ -218,6 +217,7 @@ export const MigrateIdDoneDialogStory: ComponentStory<
     <MigrateIdDialog
       fileName="sampel-palnet.tar.gz"
       progress={100}
+      setFile={() => {}}
       onClickClearUpload={() => {}}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}

@@ -26,8 +26,14 @@ export async function getServerSideProps() {
   };
 }
 
-export default function Payment({ products }: ServerSideProps) {
+export default function Payment({
+  products: unfilteredProducts,
+}: ServerSideProps) {
   const { goToPage } = useNavigation();
+
+  const products = unfilteredProducts.filter(
+    (product) => product.product_type === 'planet'
+  );
 
   const [serverId, setServerId] = useState('');
   const [email, setEmail] = useState('');

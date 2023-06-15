@@ -22,9 +22,15 @@ const DownloadRealmPresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  const onClickBuyIdentity = () => {
-    goToPage(accountPageUrl['Get Hosting'], {
-      back_url: accountPageUrl['Download Realm'],
+  const onClickMigrateId = () => {
+    goToPage('/migrate-id', {
+      back_url: '/account/get-realm',
+    });
+  };
+
+  const onClickPurchaseId = () => {
+    goToPage('/choose-id', {
+      back_url: '/account/download-realm',
     });
   };
 
@@ -47,7 +53,8 @@ const DownloadRealmPresenter = () => {
         onDownloadMacIntel={onDownloadMacIntel}
         onDownloadWindows={onDownloadWindows}
         onDownloadLinux={onDownloadLinux}
-        onClickBuyIdentity={onClickBuyIdentity}
+        onClickPurchaseId={onClickPurchaseId}
+        onClickMigrateId={onClickMigrateId}
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />

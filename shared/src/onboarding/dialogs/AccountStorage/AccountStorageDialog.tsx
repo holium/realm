@@ -16,7 +16,8 @@ type Props = {
     minioUsage: number; // MB
   };
   setSelectedIdentity: (patp: string) => void;
-  onClickBuyIdentity: () => void;
+  onClickPurchaseId: () => void;
+  onClickMigrateId: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -30,7 +31,8 @@ export const AccountStorageDialog = ({
   dataStorage,
   dataSent,
   setSelectedIdentity,
-  onClickBuyIdentity,
+  onClickPurchaseId,
+  onClickMigrateId,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -40,7 +42,8 @@ export const AccountStorageDialog = ({
     currentSection={SidebarSection.Storage}
     isLoading={!storageUrl || !storageBucket || !storagePassword}
     setSelectedIdentity={setSelectedIdentity}
-    onClickBuyIdentity={onClickBuyIdentity}
+    onClickPurchaseId={onClickPurchaseId}
+    onClickMigrateId={onClickMigrateId}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >

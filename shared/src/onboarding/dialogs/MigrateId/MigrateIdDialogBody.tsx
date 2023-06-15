@@ -9,12 +9,14 @@ import { UploadBox } from './UploadBox';
 type Props = {
   fileName?: string;
   progress?: number;
+  setFile: (file: File) => void;
   onClickClearUpload: () => void;
 };
 
 export const MigrateIdDialogBody = ({
   fileName,
   progress,
+  setFile,
   onClickClearUpload,
 }: Props) => (
   <Flex
@@ -36,7 +38,7 @@ export const MigrateIdDialogBody = ({
     </OnboardDialogDescription>
     <OnboardDialogDescription>
       Check out{' '}
-      <Anchor>
+      <Anchor href="https://docs.holium.com/realm/hosting/byop-pier">
         <u>our guide</u>
       </Anchor>{' '}
       for more info!
@@ -44,7 +46,7 @@ export const MigrateIdDialogBody = ({
     <UploadBox
       fileName={fileName}
       progress={progress}
-      setFile={() => {}}
+      setFile={setFile}
       onClickClearUpload={onClickClearUpload}
     />
     <Flex flexDirection="column" gap="4px">

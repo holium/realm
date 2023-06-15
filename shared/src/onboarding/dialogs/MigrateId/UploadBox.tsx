@@ -9,12 +9,7 @@ import { ProgressBar, UploadBoxContainer } from './UploadBox.styles';
 type Props = {
   fileName?: string;
   progress?: number;
-  setFile: (file: {
-    data: File;
-    fileName: string;
-    type: string;
-    size: number;
-  }) => void;
+  setFile: (file: File) => void;
   onClickClearUpload: () => void;
 };
 
@@ -30,12 +25,7 @@ export const UploadBox = ({
     acceptedFiles.forEach((file) => {
       console.log('file ==> ', file.name);
 
-      setFile({
-        data: file,
-        fileName: file.name,
-        type: file.type,
-        size: file.size,
-      });
+      setFile(file);
     });
   };
 

@@ -12,7 +12,8 @@ type Props = {
   setSelectedIdentity: (patp: string) => void;
   onChangeDomain: (domain: string) => void;
   onSubmit: () => Promise<void>;
-  onClickBuyIdentity: () => void;
+  onClickPurchaseId: () => void;
+  onClickMigrateId: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -28,7 +29,8 @@ export const AccountCustomDomainDialog = ({
   setSelectedIdentity,
   onChangeDomain,
   onSubmit,
-  onClickBuyIdentity,
+  onClickPurchaseId,
+  onClickMigrateId,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -38,7 +40,8 @@ export const AccountCustomDomainDialog = ({
     setSelectedIdentity={setSelectedIdentity}
     currentSection={SidebarSection.CustomDomain}
     isLoading={!dropletIp}
-    onClickBuyIdentity={onClickBuyIdentity}
+    onClickPurchaseId={onClickPurchaseId}
+    onClickMigrateId={onClickMigrateId}
     onClickSidebarSection={onClickSidebarSection}
     onSubmit={onSubmit}
     onExit={onExit}

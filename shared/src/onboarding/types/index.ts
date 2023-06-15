@@ -81,9 +81,11 @@ type OnboardingAccountPage =
 
 type OnboardingSignupPage =
   | '/'
+  | '/create-account'
   | '/login'
   | '/verify-email'
   | '/choose-id'
+  | '/migrate-id'
   | '/payment'
   | '/booting'
   | '/credentials'
