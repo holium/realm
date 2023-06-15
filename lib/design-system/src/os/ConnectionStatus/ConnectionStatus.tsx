@@ -144,7 +144,7 @@ export const ConnectionStatus = ({
             status === 'connected' ||
             status === 'initialized'
               ? -50
-              : 20,
+              : 50, // adjusted this since changing full screen feature
         }}
         transition={{
           top: { duration: 0.25 },

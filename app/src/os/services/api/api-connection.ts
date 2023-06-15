@@ -7,7 +7,7 @@ export type ConduitSession = {
   url: string;
   ship: string;
   code: string;
-  cookie: string;
+  cookie: string | null;
 };
 
 export class APIConnection {
@@ -20,7 +20,7 @@ export class APIConnection {
     this.conduitInstance = new Conduit(session.ship);
     this.handleConnectionStatus(this.conduitInstance);
     this.conduitInstance
-      .init(session.url, session.code, session.cookie)
+      .init(session.url, session.code, session.cookie ?? '')
       // .then(() => {
       //   log.info('Conduit initialized');
       // })
@@ -39,7 +39,7 @@ export class APIConnection {
   ): Promise<APIConnection> {
     if (!APIConnection.instance) {
       const conduit = new Conduit(session.ship);
-      await conduit.init(session.url, session.code, session.cookie);
+      await conduit.init(session.url, session.code, session.cookie ?? '');
       APIConnection.instance = new APIConnection(session);
     }
     return APIConnection.instance;

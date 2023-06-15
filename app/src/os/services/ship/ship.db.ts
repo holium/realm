@@ -101,12 +101,12 @@ export class ShipDB {
       .prepare('SELECT * FROM credentials LIMIT 1;')
       .get();
 
-    // log.info('ship.db.ts:', 'getCredentials', result);
+    // console.info('ship.db.ts:', 'getCredentials', result);
 
     return { ...result, ship: this.patp };
   }
 
-  setCredentials(url: string, code: string, cookie: string) {
+  setCredentials(url: string, code: string, cookie: string | null) {
     this.shipDB
       .prepare(
         'INSERT OR REPLACE INTO credentials (url, code, cookie) VALUES (?, ?, ?);'
@@ -136,7 +136,7 @@ ${settingsInitSql}
 create table if not exists credentials (
   url       TEXT PRIMARY KEY NOT NULL,
   code      TEXT NOT NULL,
-  cookie    TEXT NOT NULL,
+  cookie    TEXT,
   wallet    TEXT
 );
 `;

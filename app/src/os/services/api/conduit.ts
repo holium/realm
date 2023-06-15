@@ -66,6 +66,27 @@ export class Conduit extends EventEmitter {
   }
 
   /**
+   * refreshCookie - centralized location for refreshing the conduit cookie. ensures
+   *   errors are handled and events are emitted.
+   *
+   */
+  async refreshCookie() {
+    if (!this.code) throw new Error('fetchCookie failed, no code');
+    this.cookie = await getCookie({
+      serverUrl: this.url,
+      serverCode: this.code,
+    });
+    if (!this.cookie) {
+      throw new Error('fetchCookie failed');
+    }
+    this.updateStatus(ConduitState.Refreshed, {
+      url: this.url,
+      code: this.code,
+      cookie: this.cookie,
+    });
+  }
+
+  /**
    * safeFetch - wrap the base fetch with an auto-retry attempt on 403 error
    *
    * @param url
@@ -75,14 +96,7 @@ export class Conduit extends EventEmitter {
     try {
       let response = await fetch(url, { ...options, headers: this.headers });
       if (response.status === 403) {
-        if (!this.code) throw new Error('fetchCookie failed, no code');
-        this.cookie = await getCookie({
-          serverUrl: this.url,
-          serverCode: this.code,
-        });
-        if (!this.cookie) {
-          throw new Error('fetchCookie failed');
-        }
+        await this.refreshCookie();
         response = await fetch(url, { ...options, headers: this.headers });
       }
       return response;
@@ -629,9 +643,9 @@ export class Conduit extends EventEmitter {
 
   static async reconnect(conduit: Conduit) {
     await conduit.closeChannel();
-    if (!conduit.ship || !conduit.code || !conduit.cookie)
-      throw new Error('ship, code, or cookie not set');
-    conduit.init(conduit.ship, conduit.code, conduit.cookie);
+    if (!conduit.url || !conduit.code || !conduit.cookie)
+      throw new Error('url, code, or cookie not set');
+    conduit.init(conduit.url, conduit.code, conduit.cookie);
     return conduit;
   }
 

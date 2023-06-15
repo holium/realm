@@ -9,6 +9,7 @@ import { S3Client, StorageAcl } from '../../../renderer/lib/S3Client';
 import { getCookie } from '../../lib/shipHelpers';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection, ConduitSession } from '../api';
+import AuthService from '../auth/auth.service';
 import ChatService from './chat/chat.service';
 import { FriendsService } from './friends.service';
 import NotificationsService from './notifications/notifications.service';
@@ -23,6 +24,7 @@ export class ShipService extends AbstractService<any> {
   public patp: string;
   private shipDB?: ShipDB;
   private serviceOptions: ServiceOptions = { preload: false, verbose: false };
+  private authService: AuthService | null = null;
   services?: {
     notifications: NotificationsService;
     chat: ChatService;
@@ -101,7 +103,18 @@ export class ShipService extends AbstractService<any> {
         .conduit.on('connected', () => {
           resolve(null);
         })
+        .on('failed', () => {
+          // log.info('ship.service.ts:', 'Conduit failed');
+          this.shipDB?.setCredentials(credentials.url, credentials.code, null);
+          this.authService?._setLockfile({ ...credentials, cookie: null });
+          APIConnection.getInstance().closeChannel();
+          // this will actually automatically reconnect
+          //  (and it works as of last testing)
+          // APIConnection.getInstance().reconnect();
+          resolve(null);
+        })
         .on('refreshed', (session: ConduitSession) => {
+          // log.info('ship.service.ts:', 'Conduit refreshed', session);
           this.shipDB?.setCredentials(
             session.url,
             session.code,
@@ -136,7 +149,8 @@ export class ShipService extends AbstractService<any> {
     };
   }
 
-  public async init() {
+  public async init(authService: AuthService) {
+    this.authService = authService;
     this.initSpaces();
     this.initChat();
   }
