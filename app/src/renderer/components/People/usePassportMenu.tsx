@@ -14,23 +14,23 @@ import { useAppState } from 'renderer/stores/app.store';
 
 import { PassportCard } from './PassportCard';
 
-type PassportMenuOptions = {
+type PassportMenuContact = {
   patp: string;
-  sigilColor?: string | null;
+  color?: string | null;
   avatar?: string | null;
   nickname?: string | null;
-  description?: string | null;
+  bio?: string | null;
 };
 
 type PassportMenuConfig = {
   id: string;
   anchorPoint: Position;
-  options: PassportMenuOptions;
+  contact: PassportMenuContact;
 };
 
 type PassportMenuContextValue = {
-  menuConfig: PassportMenuConfig | null;
-  setMenuConfig: (config: PassportMenuConfig) => void;
+  getMenuConfig: () => PassportMenuConfig | null;
+  setMenuConfig: (config: PassportMenuConfig | null) => void;
 };
 
 const PassportMenuContext = createContext<PassportMenuContextValue>({} as any);
@@ -44,7 +44,7 @@ const MIN_HEIGHT = 130;
 
 const calculateCoordinates = (config: PassportMenuConfig) => {
   const charactersPerLine = 42;
-  const description = config.options.description ?? '';
+  const description = config.contact.bio ?? '';
   const numberOfLines = Math.ceil(description.length / charactersPerLine);
   const descriptionLineHeight = 17;
   const totalHeight = MIN_HEIGHT + descriptionLineHeight * numberOfLines;
@@ -65,14 +65,16 @@ export const PassportMenuProvider = ({
   const { theme } = useAppState();
   const [menu, setMenu] = useState<PassportMenuConfig | null>(null);
 
-  const setMenuConfig = useCallback((config: PassportMenuConfig) => {
+  const setMenuConfig = useCallback((config: PassportMenuConfig | null) => {
     setMenu(config);
   }, []);
+
+  const getMenuConfig = useCallback(() => menu, [menu]);
 
   return (
     <PassportMenuContext.Provider
       value={{
-        menuConfig: menu,
+        getMenuConfig,
         setMenuConfig,
       }}
     >
@@ -98,7 +100,7 @@ export const PassportMenuProvider = ({
               isOpen
               onClose={() => setMenu(null)}
             >
-              <PassportCard {...menu.options} onClose={() => setMenu(null)} />
+              <PassportCard {...menu.contact} onClose={() => setMenu(null)} />
             </Menu>
           )}
         </AnimatePresence>

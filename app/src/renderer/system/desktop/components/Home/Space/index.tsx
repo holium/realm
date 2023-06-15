@@ -26,11 +26,32 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
   const { loggedInAccount, showTitleBar } = useAppState();
   const { spacesStore } = useShipStore();
   const currentSpace = spacesStore.selected;
-  const [sidebar, setSidebar] = useState<SidebarType>(null);
+
+  const initialSidebar = localStorage.getItem('HomePaneSidebarOpen');
+
+  const [sidebar, setSidebar] = useState<SidebarType>(
+    initialSidebar ? (isOur ? 'friends' : 'members') : null
+  );
   const [appGrid, showAppGrid] = useState(isOur ? true : false);
 
   const onMemberClick = () => {
-    setSidebar(!sidebar ? 'members' : null);
+    if (!sidebar) {
+      localStorage.setItem('HomePaneSidebarOpen', 'yes');
+      setSidebar('members');
+    } else {
+      localStorage.removeItem('HomePaneSidebarOpen');
+      setSidebar(null);
+    }
+  };
+
+  const onFriendClick = () => {
+    if (!sidebar) {
+      localStorage.setItem('HomePaneSidebarOpen', 'yes');
+      setSidebar('friends');
+    } else {
+      localStorage.removeItem('HomePaneSidebarOpen');
+      setSidebar(null);
+    }
   };
 
   const sidebarComponent = useMemo(() => {
@@ -126,9 +147,7 @@ const HomePresenter = ({ isOpen, isOur }: HomePaneProps) => {
             <Flex justifyContent="flex-end">
               <Button.IconButton
                 size={32}
-                onClick={() => {
-                  setSidebar(!sidebar ? 'friends' : null);
-                }}
+                onClick={onFriendClick}
                 isSelected={sidebar === 'friends'}
               >
                 <Icon name="Members" size={22} opacity={0.7} />
