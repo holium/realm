@@ -123,6 +123,22 @@ type ShipResponse = {
   shipType?: string;
 }[];
 
+type ProvisionalShipEntryPayload = {
+  token: string;
+  email: string;
+  invoiceId: string;
+  product: string;
+};
+
+type ProvisionalShipEntryResponse = {
+  ship_id: string;
+  message: string;
+};
+
+type UploadPierFileResponse = {
+  message?: string;
+};
+
 export class ThirdEarthApi {
   private apiBaseUrl: string;
   private headersClientId: string;
@@ -431,5 +447,40 @@ export class ThirdEarthApi {
       method: 'GET',
       headers: this.getHeaders(token),
     });
+  }
+
+  provisionalShipEntry({
+    token,
+    email,
+    invoiceId,
+    product,
+  }: ProvisionalShipEntryPayload) {
+    return http<ProvisionalShipEntryResponse>(
+      `${this.apiBaseUrl}/provisional-ship-entry`,
+      {
+        method: 'POST',
+        headers: this.getHeaders(token),
+        body: JSON.stringify({
+          // userId: '',
+          email,
+          shipType: 'planet',
+          invoiceId,
+          product,
+        }),
+      }
+    );
+  }
+
+  uploadPierFile(token: string, shipId: string, formData: FormData) {
+    return http<UploadPierFileResponse>(
+      `${this.apiBaseUrl}/user/host-ship/${shipId}`,
+      {
+        method: 'POST',
+        headers: this.getHeaders(token),
+        body: formData,
+      },
+      // 60 minutes timeout
+      3600000
+    );
   }
 }

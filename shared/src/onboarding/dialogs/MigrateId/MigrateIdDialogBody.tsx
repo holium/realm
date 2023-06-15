@@ -9,14 +9,14 @@ import { UploadBox } from './UploadBox';
 type Props = {
   fileName?: string;
   progress?: number;
-  setFile: (file: File) => void;
+  onUpload: (file: File) => void;
   onClickClearUpload: () => void;
 };
 
 export const MigrateIdDialogBody = ({
   fileName,
   progress,
-  setFile,
+  onUpload,
   onClickClearUpload,
 }: Props) => (
   <Flex
@@ -46,7 +46,7 @@ export const MigrateIdDialogBody = ({
     <UploadBox
       fileName={fileName}
       progress={progress}
-      setFile={setFile}
+      onUpload={onUpload}
       onClickClearUpload={onClickClearUpload}
     />
     <Flex flexDirection="column" gap="4px">

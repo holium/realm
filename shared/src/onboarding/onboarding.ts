@@ -52,5 +52,6 @@ export type {
   RealmOnboardingStep,
   ThirdEarthPortalSession,
   ThirdEarthProduct,
+  ThirdEarthProductType,
   ThirdEarthShip,
 } from './types';

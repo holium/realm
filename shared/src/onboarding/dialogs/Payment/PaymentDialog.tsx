@@ -11,14 +11,18 @@ import { Stripe, StripeElementsOptions } from '@stripe/stripe-js';
 import { Flex, Spinner } from '@holium/design-system/general';
 
 import { OnboardDialog } from '../../components/OnboardDialog';
-import { OnboardDialogTitle } from '../../components/OnboardDialog.styles';
+import {
+  OnboardDialogDescription,
+  OnboardDialogTitle,
+} from '../../components/OnboardDialog.styles';
 import { PaymentIcon } from '../../icons/PaymentIcon';
-import { ThirdEarthProduct } from '../../types';
+import { ThirdEarthProduct, ThirdEarthProductType } from '../../types';
 import { AccountInformation } from './AccountInformation';
 import { PaymentForm } from './PaymentForm';
 import { ProductCards } from './ProductCards';
 
 type Props = {
+  productType: ThirdEarthProductType;
   products: ThirdEarthProduct[];
   productId: number;
   patp: string;
@@ -31,6 +35,7 @@ type Props = {
 };
 
 const PaymentDialogPresenter = ({
+  productType,
   products,
   productId,
   patp,
@@ -80,13 +85,31 @@ const PaymentDialogPresenter = ({
       icon={<PaymentIcon />}
       body={
         <>
-          <OnboardDialogTitle>Payment</OnboardDialogTitle>
+          <OnboardDialogTitle>
+            {productType === 'byop-p' ? 'BYOP (Pier)' : 'Payment'}
+          </OnboardDialogTitle>
+          {productType === 'byop-p' && (
+            <Flex flexDirection="column" gap="8px">
+              <OnboardDialogDescription>
+                <b>Required:</b> A compressed archive of your existing pier in
+                .zip or .tar.gz format.
+              </OnboardDialogDescription>
+              <OnboardDialogDescription>
+                <b>Included:</b> 5GB of ID data storage, 2GB of S3 data storage,
+                and 200GB/month sent data allowance.
+              </OnboardDialogDescription>
+            </Flex>
+          )}
           <ProductCards
             products={products}
             productId={productId}
             setProductId={setProductId}
           />
-          <AccountInformation patp={patp} email={email} />
+
+          <AccountInformation
+            patp={productType === 'planet' ? patp : undefined}
+            email={email}
+          />
           <PaymentForm />
         </>
       }

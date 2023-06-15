@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { loadStripe, Stripe, StripeElementsOptions } from '@stripe/stripe-js';
+import type { GetServerSideProps } from 'next/types';
 
 import {
   OnboardingStorage,
   PaymentDialog,
   ThirdEarthProduct,
+  ThirdEarthProductType,
 } from '@holium/shared';
 
 import { Page } from '../components/Page';
@@ -16,7 +18,7 @@ type ServerSideProps = {
   products: ThirdEarthProduct[];
 };
 
-export async function getServerSideProps() {
+export const getServerSideProps: GetServerSideProps = async () => {
   const products = await thirdEarthApi.getProducts();
 
   return {
@@ -24,16 +26,12 @@ export async function getServerSideProps() {
       products,
     } as ServerSideProps,
   };
-}
+};
 
 export default function Payment({
   products: unfilteredProducts,
 }: ServerSideProps) {
   const { goToPage } = useNavigation();
-
-  const products = unfilteredProducts.filter(
-    (product) => product.product_type === 'planet'
-  );
 
   const [serverId, setServerId] = useState('');
   const [email, setEmail] = useState('');
@@ -42,17 +40,27 @@ export default function Payment({
   const [stripe, setStripe] = useState<Stripe>();
   const [clientSecret, setClientSecret] = useState<string>();
 
+  const [productType, setProductType] =
+    useState<ThirdEarthProductType>('planet');
+
+  const products = unfilteredProducts.filter(
+    (product) => product.product_type === productType
+  );
+
   const [productId, setProductId] = useState(products[0].id);
   const [invoiceId, setInvoiceId] = useState<string>();
 
   useEffect(() => {
-    const { serverId, email, token } = OnboardingStorage.get();
+    const { serverId, email, token, productType } = OnboardingStorage.get();
 
     if (!serverId || !email || !token) return;
 
     setServerId(serverId);
     setEmail(email);
     setToken(token);
+    if (productType) {
+      setProductType(productType as ThirdEarthProductType);
+    }
 
     const getSecretAndSetupStripe = async () => {
       const response = await thirdEarthApi.stripeMakePayment(
@@ -81,22 +89,48 @@ export default function Payment({
     },
   };
 
-  const onBack = () => goToPage('/choose-id');
+  const onBack = () => {
+    if (productType === 'byop-p') {
+      return goToPage('/');
+    } else {
+      return goToPage('/choose-id');
+    }
+  };
 
   const onNext = async () => {
-    if (!token || !serverId || !invoiceId || !productId)
-      return Promise.resolve(false);
+    if (!token || !serverId || !invoiceId || !productId) return false;
 
-    await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
-    await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
-    await thirdEarthApi.ship(token, serverId, productId.toString(), invoiceId);
+    if (productType === 'planet') {
+      await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
+      await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
+      await thirdEarthApi.ship(
+        token,
+        serverId,
+        productId.toString(),
+        invoiceId
+      );
+      return goToPage('/booting');
+    } else if (productType === 'byop-p') {
+      await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
+      const provisionalResponse = await thirdEarthApi.provisionalShipEntry({
+        token,
+        email,
+        invoiceId,
+        product: productId.toString(),
+      });
 
-    return goToPage('/booting');
+      if (!provisionalResponse) return false;
+
+      return goToPage('/migrate-id');
+    }
+
+    return false;
   };
 
   return (
     <Page title="Payment" isProtected>
       <PaymentDialog
+        productType={productType}
         products={products}
         productId={productId}
         patp={serverId}

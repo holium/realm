@@ -4,7 +4,7 @@ import { MigrateIdDialogBody } from './MigrateIdDialogBody';
 type Props = {
   fileName?: string;
   progress?: number;
-  setFile: (file: File) => void;
+  onUpload: (file: File) => void;
   onClickClearUpload: () => void;
   onBack: () => void;
   onNext: () => Promise<boolean>;
@@ -13,24 +13,22 @@ type Props = {
 export const MigrateIdDialog = ({
   fileName,
   progress,
-  setFile,
+  onUpload,
   onClickClearUpload,
   onBack,
   onNext,
-}: Props) => {
-  return (
-    <OnboardDialog
-      body={
-        <MigrateIdDialogBody
-          fileName={fileName}
-          progress={progress}
-          setFile={setFile}
-          onClickClearUpload={onClickClearUpload}
-        />
-      }
-      nextText="Confirm"
-      onBack={onBack}
-      onNext={onNext}
-    />
-  );
-};
+}: Props) => (
+  <OnboardDialog
+    body={
+      <MigrateIdDialogBody
+        fileName={fileName}
+        progress={progress}
+        onUpload={onUpload}
+        onClickClearUpload={onClickClearUpload}
+      />
+    }
+    nextText="Confirm"
+    onBack={onBack}
+    onNext={onNext}
+  />
+);

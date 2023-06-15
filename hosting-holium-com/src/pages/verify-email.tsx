@@ -33,12 +33,12 @@ export default function VerifyEmail() {
       OnboardingStorage.set({ token: result.token });
 
       if (result) {
-        const { product } = OnboardingStorage.get();
-        if (product === 'migrate-id') {
-          return goToPage('/migrate-id');
+        const { productType } = OnboardingStorage.get();
+        if (productType === 'byop-p') {
+          return goToPage('/payment');
+        } else {
+          return goToPage('/choose-id');
         }
-
-        return goToPage('/choose-id');
       } else {
         return false;
       }
