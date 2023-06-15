@@ -326,7 +326,7 @@
   =/  gives  :~
     [%give %fact (weld message-paths (limo [/db (weld /db/path path.msg-act) ~])) thechange]
     :: give vent response
-    [%give %fact ~[vent-path] chat-vent+!>([%id timestamp.msg-act src.bowl])]
+    [%give %fact ~[vent-path] chat-vent+!>([%msg +.add-result])]
     [%give %kick ~[vent-path] ~]
   ==
   [gives state]
@@ -734,7 +734,7 @@
       ^-  json
       ?-  -.chat-vent
         %ack     s/%ack
-        %id  (frond msg-id+(msg-id-to-json msg-id.chat-vent))
+        %msg     a+(turn message.chat-vent |=(m=msg-part:sur (messages-row [msg-id.m msg-part-id.m] m)))
         %path    (path-row path-row.chat-vent)
       ==
     ::

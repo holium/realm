@@ -144,7 +144,7 @@
 ++  delon  ((on time db-change-type) gth)
 ::
 +$  chat-vent
-  $%  [%id =msg-id]
+  $%  [%msg =message]
       [%path =path-row]
       [%ack ~]
   ==
