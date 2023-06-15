@@ -29,8 +29,8 @@ type PassportMenuConfig = {
 };
 
 type PassportMenuContextValue = {
-  menuConfig: PassportMenuConfig | null;
-  setMenuConfig: (config: PassportMenuConfig) => void;
+  getMenuConfig: () => PassportMenuConfig | null;
+  setMenuConfig: (config: PassportMenuConfig | null) => void;
 };
 
 const PassportMenuContext = createContext<PassportMenuContextValue>({} as any);
@@ -65,14 +65,16 @@ export const PassportMenuProvider = ({
   const { theme } = useAppState();
   const [menu, setMenu] = useState<PassportMenuConfig | null>(null);
 
-  const setMenuConfig = useCallback((config: PassportMenuConfig) => {
+  const setMenuConfig = useCallback((config: PassportMenuConfig | null) => {
     setMenu(config);
   }, []);
+
+  const getMenuConfig = useCallback(() => menu, [menu]);
 
   return (
     <PassportMenuContext.Provider
       value={{
-        menuConfig: menu,
+        getMenuConfig,
         setMenuConfig,
       }}
     >

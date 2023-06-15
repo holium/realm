@@ -7,6 +7,7 @@ import {
   MenuItemProps,
   Row,
   Text,
+  useToggle,
 } from '@holium/design-system';
 
 import { useContextMenu } from 'renderer/components/ContextMenu';
@@ -38,9 +39,18 @@ export const PersonRow = ({
 }: IPersonRow) => {
   const rowRef = useRef<HTMLDivElement>(null);
   const { getOptions, setOptions } = useContextMenu();
-  const { menuConfig, setMenuConfig } = usePassportMenu();
+  const { getMenuConfig, setMenuConfig } = usePassportMenu();
+  const selected = useToggle(false);
 
   const id = `${listId}-${patp}`;
+
+  useEffect(() => {
+    if (getMenuConfig()?.id === id) {
+      selected.toggleOn();
+    } else {
+      selected.toggleOff();
+    }
+  }, [getMenuConfig, setMenuConfig]);
 
   useEffect(() => {
     if (
@@ -61,23 +71,28 @@ export const PersonRow = ({
           evt.stopPropagation();
         }}
         style={{ justifyContent: 'space-between' }}
-        selected={menuConfig?.id === id}
+        selected={selected.isOn}
         onClick={(evt) => {
-          setMenuConfig({
-            id,
-            options: {
-              patp,
-              sigilColor,
-              avatar,
-              nickname,
-              description,
-            },
-            anchorPoint: {
-              x: rowRef.current?.getBoundingClientRect().left || 0,
-              y: rowRef.current?.getBoundingClientRect().top || 0,
-            },
-          });
           evt.stopPropagation();
+          console.log(selected.isOn);
+          if (selected.isOn) {
+            setMenuConfig(null);
+          } else {
+            setMenuConfig({
+              id,
+              options: {
+                patp,
+                sigilColor,
+                avatar,
+                nickname,
+                description,
+              },
+              anchorPoint: {
+                x: rowRef.current?.getBoundingClientRect().left || 0,
+                y: rowRef.current?.getBoundingClientRect().top || 0,
+              },
+            });
+          }
         }}
       >
         <Flex
