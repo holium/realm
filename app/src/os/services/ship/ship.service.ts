@@ -105,12 +105,20 @@ export class ShipService extends AbstractService<any> {
         })
         .on('failed', () => {
           // log.info('ship.service.ts:', 'Conduit failed');
-          this.shipDB?.setCredentials(credentials.url, credentials.code, null);
-          this.authService?._setLockfile({ ...credentials, cookie: null });
-          APIConnection.getInstance().closeChannel();
-          // this will actually automatically reconnect
-          //  (and it works as of last testing)
-          // APIConnection.getInstance().reconnect();
+          try {
+            this.shipDB?.setCredentials(
+              credentials.url,
+              credentials.code,
+              null
+            );
+            this.authService?._setLockfile({ ...credentials, cookie: null });
+            APIConnection.getInstance().closeChannel();
+            // this will actually automatically reconnect
+            //  (and it works as of last testing)
+            // APIConnection.getInstance().reconnect();
+          } catch (e) {
+            log.error(e);
+          }
           resolve(null);
         })
         .on('refreshed', (session: ConduitSession) => {
