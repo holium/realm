@@ -8,12 +8,12 @@
 ::
 :: helpers
 ::
-++  get
+++  got-db
   |=  [=type:common =path =id:common state=state-0]
   ^-  row
   (~(got by (~(got by (~(got by tables.state) type)) path)) id)
 ::
-++  got
+++  get-db
   |=  [=type:common =path =id:common state=state-0]
   ^-  (unit row)
   =/  ptbl  (~(get by tables.state) type)
@@ -21,6 +21,20 @@
   =/  tbl   (~(get by u.ptbl) path)
   ?~  tbl   ~
   (~(get by u.tbl) id)
+::
+++  our-matching-relays
+  |=  [r=row state=state-0 =bowl:gall]
+  ^-  (list row)
+  =/  relays=(list row)  ~(val by (ptbl-to-tbl (~(got by tables.state) %relay)))
+  %+  skim
+    relays
+  |=  rel=row
+  ^-  ?
+  ?+  -.data.rel  %.n
+    %relay
+      &(=(id.data.rel id.r) =(ship.id.rel our.bowl))
+  ==
+
 ++  has-create-permissions
   |=  [=path-row =row state=state-0 =bowl:gall]
   ^-  ?
@@ -438,6 +452,8 @@
 ::  in bus
 ::db &db-action [%create-path /target %host ~ ~ ~ ~[[~bus %host] [~fed %member]]]
 ::db &db-action [%relay [~bus now] /target %relay 0 [%relay [~zod ~2023.6.13..15.57.34..aa97] %foo /example 0 %all] ~]
+::  then, in zod again
+::db &db-action [%edit [our ~2023.5.22..17.21.47..9d73] /example %foo 0 [%general ~[2 'b']] ~]
 ++  create-path
 ::db &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
 ::db &db-action [%create-path /target %host ~ ~ ~ ~[[~bus %host] [~fed %member]]]
@@ -940,18 +956,11 @@
   =.  protocol.data.input-row    %all
   :: then check that we actually have the thing being relayed
   =/  obj-id=id:common  id.data.input-row
-  =/  obj=row  (got type.data.input-row path.data.input-row obj-id state)
+  =/  obj=row  (got-db type.data.input-row path.data.input-row obj-id state)
   :: and its schema
   =/  sch=schema  (~(got by schemas.state) [type.obj v.obj])
   :: then check if we have already relayed this thing before
-  =/  relays=table  (ptbl-to-tbl (~(got by tables.state) %relay))
-  =/  prev=(list row)
-    %+  skim
-      ~(val by relays)
-    |=  r=row
-    ?+  -.data.r   !!
-      %relay       =(id.data.r obj-id)
-    ==
+  =/  prev=(list row)  (our-matching-relays obj state bowl)
 
   ?~  prev
     :: if we have not previously relayed this thing, publish to remote-scry
@@ -979,7 +988,7 @@
   =/  keys=(list space-path:sstore)  :: list of space-path we own
     %+  skim
       ~(tap in ~(key by spaces.spaces-scry))
-    |=(=space-path:sstore &(=(ship.space-path our.bowl) ?!(=(space.space-path 'our'))))
+    |=(=space-path:sstore =(ship.space-path our.bowl))
 
   =/  cs=(quip card state-0)  [~ state]
   |-
@@ -990,6 +999,9 @@
     =/  preexisting=(unit path-row)    (~(get by paths.state) pathed)
     :: if the "main" space path-row already is there, then skip them all
     ?~  preexisting
+      ?:  =(space.key 'our')
+        =/  mem       (create-from-space [pathed key %member] +.cs bowl)
+        $(index +(index), cs [(weld -.cs -.mem) +.mem])
       =/  ini       (create-from-space [(weld pathed /initiate) key %initiate] +.cs bowl)
       =.  cs        [(weld -.cs -.ini) +.ini]
       =/  mem       (create-from-space [pathed key %member] +.cs bowl)

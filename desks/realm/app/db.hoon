@@ -309,7 +309,7 @@
                 `state
               %db-changes
                 =/  changes=db-changes  !<(db-changes +.+.sign)
-                =/  remote-scries   *(list card)
+                =/  result-cards   *(list card)
                 =/  index=@ud           0
                 |-
                   ?:  =(index (lent changes))
@@ -317,7 +317,7 @@
                     :: echo the changes out to our client subs
                     ^-  (list card)
                     %+  weld
-                      remote-scries
+                      result-cards
                     ^-  (list card)
                     [%give %fact [/db (weld /path dbpath) ~] db-changes+!>(changes)]~
                   =/  change   (snag index changes)
@@ -326,7 +326,7 @@
                       %add-row
                         ?.  ?=(%relay type.row.change)  ~
                         ?>  ?=(%relay -.data.row.change)
-                        =/  uobj=row  (get:db type.data.row.change path.data.row.change id.data.row.change state)
+                        =/  uobj=(unit row)  (get-db:db type.data.row.change path.data.row.change id.data.row.change state)
                         ?~  uobj :: if we DONT have the obj already, remote-scry it
                           ~&  >>>  "asking for remote-scry"
                           :~  [
@@ -340,8 +340,47 @@
                           ]
                           ==
                         ~ :: otherwise, don't emit any cards
+                      %upd-row
+                        ?.  ?=(%relay type.row.change)  ~
+                        ?>  ?=(%relay -.data.row.change)
+                        ~&  >>>  "asking for remote-scry"
+                        :~  [
+                          %pass
+                          /remote-scry/callback
+                          %arvo
+                          %a
+                          %keen
+                          ship.id.row.change
+                          /g/x/(scot %ud revision.data.row.change)/(scot %tas dap.bowl)//(scot %p ship.id.data.row.change)/(scot %da t.id.data.row.change)
+                        ]
+                        ==
                     ==
-                  $(index +(index), state (process-db-change:db dbpath change state bowl), remote-scries (weld remote-scries new-scry))
+                  =/  pokes=(list card)
+                    ?+  -.change  ~
+                      %upd-row
+                        ?:  ?=(%relay type.row.change)  ~
+                        :: if it's NOT a relay, we might have to poke ourselves to update the relay
+                        =/  our-relays=(list row)  (our-matching-relays:db row.change state bowl)
+                        ?~  our-relays  ~
+                        :-
+                          :: remote-scry-publish the new row version
+                          [%pass /remote-scry/callback %grow /(scot %p ship.id.row.change)/(scot %da t.id.row.change) row-and-schema+[row.change schema.change]]
+                        ^-  (list card)
+                        %-  zing
+                        %+  turn
+                          our-relays
+                        |=  rela=row
+                        ^-  (list card)
+                        ?+  -.data.rela  ~
+                          %relay
+                            :: increment the revision of all the relays
+                            :: that we host for this changed row
+                            =/  dat  data.rela
+                            =.  revision.dat  +(revision.dat)
+                            [%pass /selfpoke %agent [our.bowl dap.bowl] %poke %db-action !>([%edit id.rela path.rela type.rela v.rela dat ~])]~
+                        ==
+                    ==
+                  $(index +(index), state (process-db-change:db dbpath change state bowl), result-cards (weld (weld result-cards new-scry) pokes))
               %db-path
                 =/  full=fullpath  !<(fullpath +.+.sign)
                 :: insert pathrow
@@ -421,8 +460,13 @@
                 =/  ro=roar:ames    (need r)
                 ?~  data=q.dat.ro  `this
                 =/  rs=row-and-schema  ;;(row-and-schema q.u.data)
-                :-
-                  [%give %fact [/db (weld /path path.row.rs) ~] db-changes+!>([%add-row row.rs schema.rs]~)]~
+                =/  uobj=(unit row)    (get-db:db type.row.rs path.row.rs id.row.rs state)
+                =/  cards=(list card)
+                  ?~  uobj :: if we DONT have the obj already, we're `add-row`ing it
+                    [%give %fact [/db (weld /path path.row.rs) ~] db-changes+!>([%add-row row.rs schema.rs]~)]~
+                  :: otherwise we are just `upd-row`ing it
+                  [%give %fact [/db (weld /path path.row.rs) ~] db-changes+!>([%upd-row row.rs schema.rs]~)]~
+                :-  cards
                 this(state (add-row-to-db:db row.rs schema.rs state))
             ==
         ==
