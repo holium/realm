@@ -16,6 +16,7 @@ import { MigrateIdDialog } from './MigrateId/MigrateIdDialog';
 import {
   mockPatps,
   OnboardingDialogWrapper,
+  thirdEarthMockProduct,
   thirdEarthMockProducts,
 } from './util';
 
@@ -184,7 +185,12 @@ export const MigrateIdPaymentDialogStory: ComponentStory<
   <OnboardingDialogWrapper>
     <PaymentDialog
       productType="byop-p"
-      products={thirdEarthMockProducts}
+      products={[
+        {
+          ...thirdEarthMockProduct,
+          product_type: 'byop-p',
+        },
+      ]}
       productId={1}
       setProductId={() => {}}
       patp="~zod"
@@ -204,8 +210,7 @@ export const MigrateIdDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <MigrateIdDialog
-      onUpload={() => {}}
-      onClickClearUpload={() => {}}
+      onUpload={() => Promise.resolve(false)}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
@@ -221,8 +226,7 @@ export const MigrateIdUploadingDialogStory: ComponentStory<
     <MigrateIdDialog
       fileName="sampel-palnet.tar.gz"
       progress={30}
-      onUpload={() => {}}
-      onClickClearUpload={() => {}}
+      onUpload={() => Promise.resolve(false)}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
@@ -239,8 +243,7 @@ export const MigrateIdDoneDialogStory: ComponentStory<
     <MigrateIdDialog
       fileName="sampel-palnet.tar.gz"
       progress={100}
-      onUpload={() => {}}
-      onClickClearUpload={() => {}}
+      onUpload={() => Promise.resolve(false)}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />

@@ -136,7 +136,16 @@ type ProvisionalShipEntryResponse = {
 }[];
 
 type UploadPierFileResponse = {
-  message?: string;
+  patp?: string;
+  sigil?: string;
+  arvo_key_file?: {
+    iv: string;
+    content: string;
+  };
+  sponsor?: string;
+  planet_status?: string;
+  product_ids?: number[];
+  ship_type?: string;
 };
 
 export class ThirdEarthApi {
@@ -473,7 +482,12 @@ export class ThirdEarthApi {
       `${this.apiBaseUrl}/user/host-ship/${shipId}`,
       {
         method: 'POST',
-        headers: this.getHeaders(token),
+        headers: {
+          // Don't specify content-type for FormData.
+          authorization: `Bearer ${token}`,
+          client_id: this.headersClientId,
+          version: this.headersVersion,
+        },
         body: formData,
       },
       // 60 minutes timeout

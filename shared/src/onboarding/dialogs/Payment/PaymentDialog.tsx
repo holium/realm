@@ -11,13 +11,11 @@ import { Stripe, StripeElementsOptions } from '@stripe/stripe-js';
 import { Flex, Spinner } from '@holium/design-system/general';
 
 import { OnboardDialog } from '../../components/OnboardDialog';
-import {
-  OnboardDialogDescription,
-  OnboardDialogTitle,
-} from '../../components/OnboardDialog.styles';
+import { OnboardDialogTitle } from '../../components/OnboardDialog.styles';
 import { PaymentIcon } from '../../icons/PaymentIcon';
 import { ThirdEarthProduct, ThirdEarthProductType } from '../../types';
 import { AccountInformation } from './AccountInformation';
+import { BYOPInformation } from './BYOPInformation';
 import { PaymentForm } from './PaymentForm';
 import { ProductCards } from './ProductCards';
 
@@ -85,27 +83,13 @@ const PaymentDialogPresenter = ({
       icon={<PaymentIcon />}
       body={
         <>
-          <OnboardDialogTitle>
-            {productType === 'byop-p' ? 'BYOP (Pier)' : 'Payment'}
-          </OnboardDialogTitle>
-          {productType === 'byop-p' && (
-            <Flex flexDirection="column" gap="8px">
-              <OnboardDialogDescription>
-                <b>Required:</b> A compressed archive of your existing pier in
-                .zip or .tar.gz format.
-              </OnboardDialogDescription>
-              <OnboardDialogDescription>
-                <b>Included:</b> 5GB of ID data storage, 2GB of S3 data storage,
-                and 200GB/month sent data allowance.
-              </OnboardDialogDescription>
-            </Flex>
-          )}
+          <OnboardDialogTitle>Payment</OnboardDialogTitle>
+          {productType === 'byop-p' && <BYOPInformation />}
           <ProductCards
             products={products}
             productId={productId}
             setProductId={setProductId}
           />
-
           <AccountInformation
             patp={productType === 'planet' ? patp : undefined}
             email={email}
@@ -128,6 +112,7 @@ export const PaymentDialog = ({ stripe, stripeOptions, ...props }: Props) => {
         body={
           <>
             <OnboardDialogTitle>Payment</OnboardDialogTitle>
+            {props.productType === 'byop-p' && <BYOPInformation />}
             <ProductCards
               products={props.products}
               productId={props.productId}
