@@ -14,10 +14,11 @@
     "zustand": "^4.3.8"
   },
   "peerDependencies": {
+    "@holium/design-system": "0.2.1",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "@holium/design-system": "0.2.1"
+    "styled-components": "^5.3.6"
   },
   "devDependencies": {
     "@babel/core": "^7.18.9",

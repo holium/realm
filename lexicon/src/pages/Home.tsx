@@ -96,7 +96,7 @@ const WordItem = ({ id, word, createdAt, votes, navigate }: WordItemProps) => {
       <Flex justifyContent={'space-between'} alignItems={'flex-end'}>
         <Text.H6 fontWeight={600}>{word}</Text.H6>
         <Text.Body opacity={0.5} fontWeight={500}>
-          ~lodlev-migdev
+          {id?.split('/')[1]}
         </Text.Body>
       </Flex>
       <Text.Body opacity={0.7} fontWeight={500}>

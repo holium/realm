@@ -1,11 +1,18 @@
 import create from 'zustand';
 
+import {
+  DefinitionRow,
+  SentenceRow,
+  VoteRow,
+  WordRow,
+} from './api/types/bedrock';
+
 export interface Store {
   api: any;
   setApi: (api: any) => void;
 
-  shipName: any;
-  setShipName: (shipName: any) => void;
+  shipName: string;
+  setShipName: (shipName: string) => void;
 
   addModalOpen: boolean;
   setAddModalOpen: (addModalOpen: boolean) => void;
@@ -13,17 +20,17 @@ export interface Store {
   space: null | string;
   setSpace: (space: string) => void;
 
-  wordRows: any;
-  setWordRows: (wordRows: any) => void;
+  wordRows: WordRow[];
+  setWordRows: (wordRows: WordRow[]) => void;
 
-  addWordRow: (newWordRow: any) => void;
+  addWordRow: (newWordRow: WordRow) => void;
 
   removeWordRow: (rowId: any) => void;
 
-  voteRows: any;
-  setVoteRows: (voteRows: any) => void;
+  voteRows: VoteRow[];
+  setVoteRows: (voteRows: VoteRow[]) => void;
 
-  addVoteRow: (newVoteRow: any) => void;
+  addVoteRow: (newVoteRow: VoteRow) => void;
   removeVoteRow: (rowId: string) => void;
 
   voteMap: any;
@@ -35,18 +42,18 @@ export interface Store {
   sentenceVoteMap: any;
   setSentenceVoteMap: (sentenceVoteMap: any) => void;
 
-  definitionRows: any;
-  setDefinitionRows: (definitionRows: any) => void;
+  definitionRows: DefinitionRow[];
+  setDefinitionRows: (definitionRows: DefinitionRow[]) => void;
 
   definitionMap: any;
   setDefinitionMap: (definitionMap: any) => void;
 
-  addDefinitionRow: (newDefinitionRow: any) => void;
+  addDefinitionRow: (newDefinitionRow: DefinitionRow) => void;
 
-  sentenceRows: any;
-  setSentenceRows: (sentenceRows: any) => void;
+  sentenceRows: SentenceRow[];
+  setSentenceRows: (sentenceRows: SentenceRow[]) => void;
 
-  addSentenceRow: (newSentenceRow: any) => void;
+  addSentenceRow: (newSentenceRow: SentenceRow) => void;
 
   sentenceMap: any;
   setSentenceMap: (sentenceMap: any) => void;
@@ -65,11 +72,11 @@ export interface Store {
 }
 
 export const useStore = create<Store>((set, get) => ({
-  api: null,
+  api: null, //set to the LexiconIPC passed down from Realm
   setApi: (api: any) => set({ api }),
 
   shipName: '',
-  setShipName: (shipName: any) => set({ shipName }),
+  setShipName: (shipName: string) => set({ shipName }),
 
   addModalOpen: false,
   setAddModalOpen: (addModalOpen: boolean) => set({ addModalOpen }),
@@ -98,9 +105,9 @@ export const useStore = create<Store>((set, get) => ({
   },
 
   voteRows: [],
-  setVoteRows: (voteRows: any) => set({ voteRows }),
+  setVoteRows: (voteRows: VoteRow[]) => set({ voteRows }),
 
-  addVoteRow: (newVoteRow: any) => {
+  addVoteRow: (newVoteRow: VoteRow) => {
     const newVoteRows = [...get().voteRows];
     newVoteRows.push(newVoteRow);
     set({
@@ -127,9 +134,10 @@ export const useStore = create<Store>((set, get) => ({
   setSentenceVoteMap: (sentenceVoteMap: any) => set({ sentenceVoteMap }),
 
   definitionRows: [],
-  setDefinitionRows: (definitionRows: any) => set({ definitionRows }),
+  setDefinitionRows: (definitionRows: DefinitionRow[]) =>
+    set({ definitionRows }),
 
-  addDefinitionRow: (newDefinitionRow: any) => {
+  addDefinitionRow: (newDefinitionRow: DefinitionRow) => {
     const newDefinitionRows = [...get().definitionRows];
     newDefinitionRows.push(newDefinitionRow);
 
@@ -141,9 +149,9 @@ export const useStore = create<Store>((set, get) => ({
   setDefinitionMap: (definitionMap: any) => set({ definitionMap }),
 
   sentenceRows: [],
-  setSentenceRows: (sentenceRows: any) => set({ sentenceRows }),
+  setSentenceRows: (sentenceRows: SentenceRow[]) => set({ sentenceRows }),
 
-  addSentenceRow: (newSentenceRow: any) => {
+  addSentenceRow: (newSentenceRow: SentenceRow) => {
     const newSentenceRows = [...get().sentenceRows];
     newSentenceRows.push(newSentenceRow);
 
