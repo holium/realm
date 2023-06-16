@@ -116,17 +116,12 @@ type UpdatePlanetResponse = {
   msg?: string;
 };
 
-type ShipResponse = {
-  invoiceId?: string;
-  patp?: string;
-  product?: string;
-  shipType?: string;
-}[];
-
 type ProvisionalShipEntryPayload = {
   token: string;
   product: string;
   invoiceId: string;
+  shipType: string;
+  patp?: string;
 };
 
 type ProvisionalShipEntryResponse = {
@@ -300,17 +295,26 @@ export class ThirdEarthApi {
     );
   }
 
-  ship(token: string, patp: string, product: string, invoiceId: string) {
-    return http<ShipResponse>(`${this.apiBaseUrl}/ship`, {
-      method: 'POST',
-      headers: this.getHeaders(token),
-      body: JSON.stringify({
-        patp,
-        shipType: 'planet',
-        product,
-        invoiceId,
-      }),
-    });
+  provisionalShipEntry({
+    token,
+    patp,
+    shipType,
+    product,
+    invoiceId,
+  }: ProvisionalShipEntryPayload) {
+    return http<ProvisionalShipEntryResponse>(
+      `${this.apiBaseUrl}/provisional-ship-entry`,
+      {
+        method: 'POST',
+        headers: this.getHeaders(token),
+        body: JSON.stringify({
+          patp,
+          shipType,
+          invoiceId,
+          product,
+        }),
+      }
+    );
   }
 
   updatePlanetStatus(
@@ -456,25 +460,6 @@ export class ThirdEarthApi {
       method: 'GET',
       headers: this.getHeaders(token),
     });
-  }
-
-  provisionalShipEntry({
-    token,
-    invoiceId,
-    product,
-  }: ProvisionalShipEntryPayload) {
-    return http<ProvisionalShipEntryResponse>(
-      `${this.apiBaseUrl}/provisional-ship-entry`,
-      {
-        method: 'POST',
-        headers: this.getHeaders(token),
-        body: JSON.stringify({
-          shipType: 'provisional',
-          invoiceId,
-          product,
-        }),
-      }
-    );
   }
 
   uploadPierFile(token: string, shipId: string, formData: FormData) {

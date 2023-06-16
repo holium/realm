@@ -32,7 +32,7 @@ const DownloadRealmPresenter = () => {
       productType: 'byop-p',
     });
     goToPage('/payment', {
-      back_url: '/account/get-realm',
+      back_url: '/account/download-realm',
     });
   };
 

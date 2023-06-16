@@ -3,6 +3,7 @@ import { loadStripe, Stripe, StripeElementsOptions } from '@stripe/stripe-js';
 import type { GetServerSideProps } from 'next/types';
 
 import {
+  OnboardingPage,
   OnboardingStorage,
   PaymentDialog,
   ThirdEarthProduct,
@@ -16,20 +17,24 @@ import { useNavigation } from '../util/useNavigation';
 
 type ServerSideProps = {
   products: ThirdEarthProduct[];
+  back_url?: string;
 };
 
-export const getServerSideProps: GetServerSideProps = async () => {
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const products = await thirdEarthApi.getProducts();
+  const back_url = (query.back_url ?? '') as string;
 
   return {
     props: {
       products,
+      back_url,
     } as ServerSideProps,
   };
 };
 
 export default function Payment({
   products: unfilteredProducts,
+  back_url,
 }: ServerSideProps) {
   const { goToPage } = useNavigation();
 
@@ -90,6 +95,10 @@ export default function Payment({
   };
 
   const onBack = () => {
+    if (back_url) {
+      return goToPage(back_url as OnboardingPage);
+    }
+
     if (productType === 'byop-p') {
       return goToPage('/');
     } else {
@@ -103,12 +112,14 @@ export default function Payment({
     if (productType === 'planet') {
       await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
       await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
-      await thirdEarthApi.ship(
+      await thirdEarthApi.provisionalShipEntry({
         token,
-        serverId,
-        productId.toString(),
-        invoiceId
-      );
+        patp: serverId,
+        product: productId.toString(),
+        invoiceId,
+        shipType: 'planet',
+      });
+
       return goToPage('/booting');
     } else if (productType === 'byop-p') {
       await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
@@ -116,6 +127,7 @@ export default function Payment({
         token,
         product: productId.toString(),
         invoiceId,
+        shipType: 'provisional',
       });
 
       if (!provisionalResponse) return false;

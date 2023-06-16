@@ -21,7 +21,7 @@ export const GetRealmDialogBody = ({ onUploadId, onPurchaseId }: Props) => (
     <Flex flexDirection="column" gap="16px">
       <OnboardDialogTitle>Get on Realm</OnboardDialogTitle>
       <OnboardDialogDescription>
-        Get instant access to Realm by purchasing or importing an ID to Holium
+        Get instant access to Realm by purchasing or uploading an ID to Holium
         hosting.
       </OnboardDialogDescription>
     </Flex>

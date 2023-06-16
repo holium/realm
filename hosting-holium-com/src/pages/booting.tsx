@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useToggle } from '@holium/design-system/util';
 import { BootingDialog, OnboardingStorage } from '@holium/shared';
@@ -13,16 +13,22 @@ export default function Booting() {
   const intervalRef = useRef<NodeJS.Timer>();
   const [logs, setLogs] = useState<string[]>(['Booting started.']);
   const booting = useToggle(true);
+  const error = useToggle(false);
 
   const isBYOP = useToggle(false);
 
-  const pollShipStatus = async () => {
+  const pollShipStatus = useCallback(async () => {
     const { serverId, token, productType } = OnboardingStorage.get();
 
     if (!token) return;
 
     const ships = await thirdEarthApi.getUserShips(token);
     let ship = Object.values(ships).find((s) => s.patp === serverId);
+
+    if (ship?.ship_type === 'hardError') {
+      booting.toggleOff();
+      error.toggleOn();
+    }
 
     if (productType === 'byop-p') {
       isBYOP.toggleOn();
@@ -76,11 +82,11 @@ export default function Booting() {
         serverCode,
       });
     }
-  };
+  }, [logs, booting, isBYOP]);
 
   const onNext = () => {
     if (isBYOP.isOn) {
-      return goToPage('/account');
+      return goToPage('/download');
     }
 
     return goToPage('/credentials');
@@ -93,11 +99,16 @@ export default function Booting() {
     intervalRef.current = i;
 
     return () => clearInterval(i);
-  }, [booting]);
+  }, [booting, pollShipStatus]);
 
   return (
     <Page title="Booting your identity" isProtected>
-      <BootingDialog logs={logs} isBooting={booting.isOn} onNext={onNext} />
+      <BootingDialog
+        logs={logs}
+        isBooting={booting.isOn}
+        isError={error.isOn}
+        onNext={onNext}
+      />
     </Page>
   );
 }
