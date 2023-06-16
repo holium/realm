@@ -1,15 +1,17 @@
 import { Flex, Icon, Text } from '@holium/design-system';
 
-import api from '../api';
 import { Store, useStore } from '../store';
-import { log, shipName } from '../utils';
+import { log } from '../utils';
 
 interface WordItemProps {
   id: string;
   votes: any;
 }
 export const Vote = ({ id, votes }: WordItemProps) => {
+  const api = useStore((store: Store) => store.api);
   const space = useStore((store: Store) => store.space);
+  const shipName = useStore((store: Store) => store.shipName);
+
   const voteOnWord = async (
     id: string,
     voteType: null | boolean,
@@ -22,7 +24,7 @@ export const Vote = ({ id, votes }: WordItemProps) => {
         id,
         voteId,
         voteType,
-        '~' + shipName()
+        shipName
       );
       log('voteOnWord result =>', result);
     } catch (e) {

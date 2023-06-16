@@ -11,6 +11,7 @@ import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection, ConduitSession } from '../api';
 import ChatService from './chat/chat.service';
 import { FriendsService } from './friends.service';
+import LexiconService from './lexicon.service';
 import NotificationsService from './notifications/notifications.service';
 import { SettingsService } from './settings.service';
 import { ShipDB } from './ship.db';
@@ -30,6 +31,7 @@ export class ShipService extends AbstractService<any> {
     spaces: SpacesService;
     bazaar: BazaarService;
     wallet: WalletService;
+    lexicon: LexiconService;
     settings: SettingsService;
   };
 
@@ -132,6 +134,7 @@ export class ShipService extends AbstractService<any> {
       spaces: new SpacesService(this.serviceOptions, this.shipDB.db, this.patp),
       friends: new FriendsService(this.serviceOptions, this.shipDB.db),
       wallet: new WalletService(undefined, this.shipDB.db),
+      lexicon: new LexiconService(undefined, this.shipDB.db),
       settings: new SettingsService(this.serviceOptions, this.shipDB.db),
     };
   }

@@ -18,6 +18,7 @@ import { AuthenticationModel } from './auth.store';
 import {
   AuthIPC,
   BazaarIPC,
+  LexiconIPC,
   MainIPC,
   NotifIPC,
   OnboardingIPC,
@@ -179,6 +180,10 @@ function registerOnUpdateListener() {
     appState.shellStore.setFullscreen(isFullScreen);
   });
 
+  LexiconIPC.onUpdate(async (update) => {
+    //update lexicon store with the latest update
+    shipStore.lexiconStore.setUpdate(update?.payload);
+  });
   RealmIPC.onUpdate(async (update) => {
     if (update.type === 'booted') {
       appState.reset();

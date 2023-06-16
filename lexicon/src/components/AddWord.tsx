@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Button, Card, Flex, Text } from '@holium/design-system/general';
 import { Input, TextInput } from '@holium/design-system/inputs';
 
-import api from '../api';
 import { Store, useStore } from '../store';
 import { log } from '../utils';
 
@@ -13,6 +12,7 @@ type Props = {
 };
 
 export const AddWord = ({ open, onClose }: Props) => {
+  const api = useStore((store: Store) => store.api);
   const space = useStore((store: Store) => store.space);
   const [word, setWord] = useState<string>('');
   const [definition, setDefinition] = useState<string>('');

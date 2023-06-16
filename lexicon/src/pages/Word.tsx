@@ -11,7 +11,6 @@ import {
   TextInput,
 } from '@holium/design-system';
 
-import api from '../api';
 import { TabPanel, Tabs, Vote } from '../components';
 import { Store, useStore } from '../store';
 import { TabItem } from '../types';
@@ -21,11 +20,14 @@ const tabData: TabItem[] = [
   { label: 'Definitions', value: 0 },
   { label: 'Sentences', value: 1 },
 ];
+
 export const Word = () => {
+  const api = useStore((store: Store) => store.api);
+  const space = useStore((state: Store) => state.space);
+
   const [tabValue, setTabValue] = useState<number>(0);
   const { state } = useLocation();
   const navigate = useNavigate();
-  const space = useStore((state: Store) => state.space);
 
   const [definitionList, setDefinitionList] = useState<any>([]);
   const [sentenceList, setSentenceList] = useState<any>([]);
@@ -59,7 +61,7 @@ export const Word = () => {
     }
   };
   const goToDict = () => {
-    navigate('/apps/lexicon/dict/' + state.word);
+    navigate('/index.html/dict/' + state.word);
   };
   return (
     <Card p={3} elevation={4} width={'100%'} margin={'12px 20px'}>
@@ -166,6 +168,8 @@ function Definition({
   );
 }
 const Sentences = ({ sentenceList, space, state }: any) => {
+  const api = useStore((store: Store) => store.api);
+
   const [newSentence, setNewSentence] = useState<string>('');
   const sentenceVoteMap = useStore((state: Store) => state.sentenceVoteMap);
 
@@ -229,6 +233,8 @@ const Sentences = ({ sentenceList, space, state }: any) => {
   );
 };
 const Definitions = ({ definitionList, state, space }: any) => {
+  const api = useStore((store: Store) => store.api);
+
   const [newDefinition, setNewDefinition] = useState<string>('');
   const definitionVoteMap = useStore((state: Store) => state.definitionVoteMap);
 

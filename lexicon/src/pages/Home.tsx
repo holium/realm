@@ -72,7 +72,7 @@ const WordItem = ({ id, word, createdAt, votes, navigate }: WordItemProps) => {
     }
   }, [definitionMap, definitionVoteMap]);
   const navigateToWord = () => {
-    navigate('/apps/lexicon' + space + '/' + word, {
+    navigate('/index.html' + space + '/' + word, {
       state: { id, word, createdAt, votes },
     });
   };

@@ -1,6 +1,12 @@
 import create from 'zustand';
 
 export interface Store {
+  api: any;
+  setApi: (api: any) => void;
+
+  shipName: any;
+  setShipName: (shipName: any) => void;
+
   addModalOpen: boolean;
   setAddModalOpen: (addModalOpen: boolean) => void;
 
@@ -59,6 +65,12 @@ export interface Store {
 }
 
 export const useStore = create<Store>((set, get) => ({
+  api: null,
+  setApi: (api: any) => set({ api }),
+
+  shipName: '',
+  setShipName: (shipName: any) => set({ shipName }),
+
   addModalOpen: false,
   setAddModalOpen: (addModalOpen: boolean) => set({ addModalOpen }),
 

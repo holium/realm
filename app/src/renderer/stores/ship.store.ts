@@ -6,6 +6,7 @@ import { walletAppDefault } from 'renderer/apps/store';
 
 import { ChatStore } from './chat.store';
 import { ShipIPC } from './ipc';
+import { LexiconStore } from './lexicon.store';
 import { BazaarStore, BazaarStoreType } from './models/bazaar.model';
 import { LoaderModel } from './models/common.model';
 import { CredentialsModel } from './models/credentials.model';
@@ -27,6 +28,7 @@ export const ShipStore = types
     bazaarStore: BazaarStore,
     walletStore: WalletStore,
     featuredStore: FeaturedStore,
+    lexiconStore: LexiconStore,
     // roomsStore: RoomsStore,
     settingsStore: SettingsModel,
     loader: LoaderModel,
@@ -51,6 +53,7 @@ export const ShipStore = types
       self.chatStore.reset();
       self.bazaarStore.reset();
       self.spacesStore.reset();
+      self.walletStore.reset();
       self.walletStore.reset();
       self.friends.reset();
       self.featuredStore.reset();
@@ -120,6 +123,7 @@ export const shipStore = ShipStore.create({
   },
   bazaarStore: loadBazaarSnapshot(),
   walletStore: walletAppDefault,
+  lexiconStore: { update: null },
   featuredStore: {
     spaces: {},
   },

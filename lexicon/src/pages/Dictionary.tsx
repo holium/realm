@@ -110,7 +110,7 @@ const Definition = ({
                 color="accent"
                 style={{ cursor: 'pointer' }}
                 onClick={() => {
-                  navigate('../apps/lexicon/dict/' + word);
+                  navigate('../index.html/dict/' + word);
                 }}
               >
                 {word}
@@ -131,7 +131,7 @@ const Definition = ({
                 color="accent"
                 style={{ cursor: 'pointer' }}
                 onClick={() => {
-                  navigate('../apps/lexicon/dict/' + word);
+                  navigate('../index.html/dict/' + word);
                 }}
               >
                 {word}

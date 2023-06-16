@@ -3,13 +3,11 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 import { Box } from '@holium/design-system/general';
 
-import api from './api';
+import { updateHandler } from './api/updates';
 import { Navigation } from './components/Navigation';
 import { Dictionary, Home, Word } from './pages';
 import { Store, useStore } from './store';
-import { log, shipName } from './utils';
-
-import './index.css';
+import { log } from './utils';
 
 declare global {
   interface Window {
@@ -17,7 +15,19 @@ declare global {
   }
 }
 
-export const App = () => {
+interface Props {
+  selectedSpace: string;
+  lexiconApi: any;
+  shipName: string;
+  update: any;
+}
+
+export const App = ({ selectedSpace, lexiconApi, update, shipName }: Props) => {
+  const api = useStore((store: Store) => store.api);
+  const setApi = useStore((store: Store) => store.setApi);
+
+  const setShipName = useStore((store: Store) => store.setShipName);
+
   const space = useStore((store: Store) => store.space);
   const wordRows = useStore((store: Store) => store.wordRows);
   const setWordRows = useStore((store: Store) => store.setWordRows);
@@ -47,9 +57,8 @@ export const App = () => {
     //fetch data stored in db under the current space(path)
     try {
       const result = await api.getPath(space);
-      const subscribeToSpace = await api.subscribePath(space); //TOOD: maybe make a button to re-sub in case it dies
+      const subscribeToSpace = await api.subscribePath(space); //TODO: rename api to IPC service
       log('subscribeToSpace', subscribeToSpace);
-      //select the table with type => "lexicon-word"
       if (result) {
         let newWordRows: any = [];
         let newVoteRows: any = [];
@@ -141,16 +150,15 @@ export const App = () => {
 
         let upVotes = lastVoteData?.upVotes ?? 0;
         let downVotes = lastVoteData?.downVotes ?? 0;
-        let currentShipVoted = lastVoteData?.currentShipVoted ?? null;
+        let currentShipVoted = lastVoteData?.currentShipVoted ?? {};
         const newVotes = lastVoteData?.votes ?? [];
         //incremenet/decrement vote count accrodingly
-
         if (item.up) {
-          if (item.ship === '~' + shipName())
+          if (item.ship === shipName)
             currentShipVoted = { vote: true, voteId: item.id };
           upVotes++;
         } else {
-          if (item.ship === '~' + shipName())
+          if (item.ship === shipName)
             currentShipVoted = { vote: false, voteId: item.id };
 
           downVotes++;
@@ -181,16 +189,16 @@ export const App = () => {
 
         let upVotes = lastVoteData?.upVotes ?? 0;
         let downVotes = lastVoteData?.downVotes ?? 0;
-        let currentShipVoted = lastVoteData?.currentShipVoted ?? null;
+        let currentShipVoted = lastVoteData?.currentShipVoted ?? {};
         const newVotes = lastVoteData?.votes ?? [];
         //incremenet/decrement vote count accrodingly
 
         if (item.up) {
-          if (item.ship === '~' + shipName())
+          if (item.ship === shipName)
             currentShipVoted = { vote: true, voteId: item.id };
           upVotes++;
         } else {
-          if (item.ship === '~' + shipName())
+          if (item.ship === shipName)
             currentShipVoted = { vote: false, voteId: item.id };
 
           downVotes++;
@@ -221,16 +229,16 @@ export const App = () => {
 
         let upVotes = lastVoteData?.upVotes ?? 0;
         let downVotes = lastVoteData?.downVotes ?? 0;
-        let currentShipVoted = lastVoteData?.currentShipVoted ?? null;
+        let currentShipVoted = lastVoteData?.currentShipVoted ?? {};
         const newVotes = lastVoteData?.votes ?? [];
         //incremenet/decrement vote count accrodingly
 
         if (item.up) {
-          if (item.ship === '~' + shipName())
+          if (item.ship === shipName)
             currentShipVoted = { vote: true, voteId: item.id };
           upVotes++;
         } else {
-          if (item.ship === '~' + shipName())
+          if (item.ship === shipName)
             currentShipVoted = { vote: false, voteId: item.id };
 
           downVotes++;
@@ -260,6 +268,22 @@ export const App = () => {
   useEffect(() => {
     makeWordList();
   }, [wordRows, voteRows]);
+
+  useEffect(() => {
+    //add our api instance to the store
+    setApi(lexiconApi);
+  }, [lexiconApi]);
+
+  useEffect(() => {
+    //listen to updates from LexiconIPC
+    if (update) {
+      updateHandler(update);
+    }
+  }, [update]);
+  useEffect(() => {
+    setShipName(shipName);
+  }, [shipName]);
+  if (!api) return null;
   return (
     <main
       style={{
@@ -272,15 +296,12 @@ export const App = () => {
       <Box maxWidth={600} margin="auto">
         <Router>
           <Routes>
-            <Route element={<Navigation />}>
+            <Route element={<Navigation selectedSpace={selectedSpace} />}>
+              <Route path="/index.html/:ship/:group/:word" element={<Word />} />
+              <Route path="/index.html/:ship/:group" element={<Home />} />
+              <Route path="/index.html/dict/:word" element={<Dictionary />} />
               <Route
-                path="/apps/lexicon/:ship/:group/:word"
-                element={<Word />}
-              />
-              <Route path="/apps/lexicon/:ship/:group" element={<Home />} />
-              <Route path="/apps/lexicon/dict/:word" element={<Dictionary />} />
-              <Route
-                path="/apps/lexicon/"
+                path="/index.html"
                 element={<p>don't mind me just redirecting over here</p>}
               />
             </Route>
