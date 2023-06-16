@@ -737,6 +737,22 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     return Math.max(result[0]?.lastTimestamp - 1, 0) || 0;
   }
 
+  findChatDM(peer: string, our: string) {
+    if (!this.db?.open) return;
+    const query = this.db.prepare(`
+      SELECT DISTINCT path
+      FROM ${CHAT_TABLES.PEERS}
+      WHERE ship = '${peer}'
+      AND path NOT IN (
+        SELECT path
+        FROM ${CHAT_TABLES.PEERS}
+        WHERE ship NOT IN ('${peer}', '${our}')
+      )
+      `);
+    const result = query.all();
+    return result;
+  }
+
   getChatPeers(path: string) {
     if (!this.db?.open) return;
     const query = this.db.prepare(`
