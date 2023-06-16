@@ -51,9 +51,9 @@ export const SearchBar = ({
   const onWordClick = (selectedWord: any) => {
     const { word, id, createdAt, votes, webSearch } = selectedWord;
     if (webSearch) {
-      navigate('/apps/lexicon/dict/' + word);
+      navigate('/index.html/dict/' + word);
     } else {
-      navigate('/apps/lexicon' + space + '/' + word, {
+      navigate('/index.html' + space + '/' + word, {
         state: { id, word, createdAt, votes, webSearch },
       });
     }

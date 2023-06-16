@@ -25,6 +25,6 @@ export const getNativeAppWindow = {
   },
   lexicon: {
     titlebar: null,
-    view: () => <LexiconApp />,
+    view: (props: any) => <LexiconApp {...props} />,
   },
 };

@@ -3,14 +3,13 @@ import memoize from 'lodash/memoize';
 export const isDev = () =>
   !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
 
-//returns the current ship's name
-export const shipName = memoize(() => {
-  return isDev() ? '~zod' : window.ship;
-});
-
 export const shipCode = memoize(() => {
-  // Todo
-  return '';
+  //TODO: use realm data here
+  return 'hidmeg-donfep-pagtyd-witfur';
+});
+export const shipURI = memoize(() => {
+  //TODO: use realm data here
+  return 'http://localhost:8545';
 });
 
 export const log = (...args: any) => {
