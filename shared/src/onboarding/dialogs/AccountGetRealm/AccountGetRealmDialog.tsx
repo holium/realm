@@ -9,7 +9,7 @@ import { GetIdIcon } from '../../icons/GetIdIcon';
 
 type Props = {
   onClickPurchaseId: () => void;
-  onClickMigrateId: () => void;
+  onClickUploadId: () => void;
   onClickJoinWaitlist: (email: string) => Promise<boolean>;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
@@ -17,7 +17,7 @@ type Props = {
 
 export const AccountGetRealmDialog = ({
   onClickPurchaseId,
-  onClickMigrateId,
+  onClickUploadId,
   onClickJoinWaitlist,
   onClickSidebarSection,
   onExit,
@@ -43,7 +43,7 @@ export const AccountGetRealmDialog = ({
             <Button.Primary onClick={onClickPurchaseId}>
               Purchase ID
             </Button.Primary>
-            <GrayButton onClick={onClickMigrateId}>Migrate ID</GrayButton>
+            <GrayButton onClick={onClickUploadId}>Upload ID</GrayButton>
           </Flex>
           <OrDivider maxWidth="180px" />
           <JoinWaitlist onClickJoinWaitlist={onClickJoinWaitlist} />
@@ -54,7 +54,7 @@ export const AccountGetRealmDialog = ({
       </Flex>
     }
     onClickPurchaseId={onClickPurchaseId}
-    onClickMigrateId={onClickMigrateId}
+    onClickUploadId={onClickUploadId}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   />

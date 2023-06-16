@@ -23,7 +23,7 @@ const DownloadRealmPresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  const onClickMigrateId = () => {
+  const onClickUploadId = () => {
     OnboardingStorage.set({
       productType: 'byop-p',
     });
@@ -59,7 +59,7 @@ const DownloadRealmPresenter = () => {
         onDownloadWindows={onDownloadWindows}
         onDownloadLinux={onDownloadLinux}
         onClickPurchaseId={onClickPurchaseId}
-        onClickMigrateId={onClickMigrateId}
+        onClickUploadId={onClickUploadId}
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />

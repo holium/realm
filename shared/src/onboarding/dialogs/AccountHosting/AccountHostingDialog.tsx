@@ -16,7 +16,7 @@ type Props = {
   onClickChangeMaintenanceWindow: () => void;
   onClickEjectId: () => void;
   onClickPurchaseId: () => void;
-  onClickMigrateId: () => void;
+  onClickUploadId: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -36,7 +36,7 @@ export const AccountHostingDialog = ({
   onClickChangeMaintenanceWindow,
   onClickEjectId,
   onClickPurchaseId,
-  onClickMigrateId,
+  onClickUploadId,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -52,7 +52,7 @@ export const AccountHostingDialog = ({
       (!serverMaintenanceWindow && serverMaintenanceWindow !== 0)
     }
     onClickPurchaseId={onClickPurchaseId}
-    onClickMigrateId={onClickMigrateId}
+    onClickUploadId={onClickUploadId}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >

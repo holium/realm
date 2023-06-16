@@ -1,8 +1,7 @@
 import { useState } from 'react';
 
-import { OnboardingStorage } from '@holium/shared';
+import { OnboardingStorage, UploadIdDialog } from '@holium/shared';
 
-import { MigrateIdDialog } from '../../../shared/src/onboarding/dialogs/MigrateId/MigrateIdDialog';
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
@@ -24,7 +23,7 @@ const uploadErrors: Record<string, string> = {
     "Failed to create an associated row in the 'planets' table.",
 };
 
-export default function MigrateId() {
+export default function UploadId() {
   const { goToPage } = useNavigation();
 
   const [file, setFile] = useState<File>();
@@ -95,8 +94,8 @@ export default function MigrateId() {
   };
 
   return (
-    <Page title="Migrate ID" isProtected>
-      <MigrateIdDialog
+    <Page title="Upload ID" isProtected>
+      <UploadIdDialog
         fileName={file?.name}
         progress={progress}
         error={error}

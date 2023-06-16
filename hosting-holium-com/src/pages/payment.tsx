@@ -124,7 +124,7 @@ export default function Payment({
         provisionalShipId: provisionalResponse[0].id.toString(),
       });
 
-      return goToPage('/migrate-id');
+      return goToPage('/upload-id');
     }
 
     return false;

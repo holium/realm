@@ -11,10 +11,10 @@ import { GrayBox } from './GetRealmDialogBody.styles';
 
 type Props = {
   onPurchaseId: () => void;
-  onMigrateId: () => void;
+  onUploadId: () => void;
 };
 
-export const GetRealmDialogBody = ({ onPurchaseId, onMigrateId }: Props) => (
+export const GetRealmDialogBody = ({ onPurchaseId, onUploadId }: Props) => (
   <>
     <OnboardDialogTitle style={{ marginTop: -29 }}>
       Congratulations, you're on the waitlist!
@@ -39,7 +39,7 @@ export const GetRealmDialogBody = ({ onPurchaseId, onMigrateId }: Props) => (
                 Purchase ID
               </Text.Body>
             </Button.Primary>
-            <GrayButton onClick={onMigrateId}>
+            <GrayButton onClick={onUploadId}>
               <Text.Body
                 style={{
                   fontWeight: 500,
@@ -47,7 +47,7 @@ export const GetRealmDialogBody = ({ onPurchaseId, onMigrateId }: Props) => (
                   margin: '2px',
                 }}
               >
-                Migrate ID
+                Upload ID
               </Text.Body>
             </GrayButton>
           </Flex>

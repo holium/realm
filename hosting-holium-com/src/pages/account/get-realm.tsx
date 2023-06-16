@@ -31,7 +31,7 @@ export const joinWaitlist = async (email: string) => {
 const GetRealmPresenter = () => {
   const { goToPage, logout } = useNavigation();
 
-  const onClickMigrateId = () => {
+  const onClickUploadId = () => {
     OnboardingStorage.set({
       productType: 'byop-p',
     });
@@ -61,7 +61,7 @@ const GetRealmPresenter = () => {
         onClickJoinWaitlist={joinWaitlist}
         onClickSidebarSection={onClickSidebarSection}
         onClickPurchaseId={onClickPurchaseId}
-        onClickMigrateId={onClickMigrateId}
+        onClickUploadId={onClickUploadId}
         onExit={logout}
       />
     </Page>

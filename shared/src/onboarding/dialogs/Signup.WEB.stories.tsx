@@ -12,7 +12,7 @@ import {
   VerifyEmailDialog,
 } from '../onboarding';
 import { GetOnRealmDialog } from './GetOnRealm/GetOnRealmDialog';
-import { MigrateIdDialog } from './MigrateId/MigrateIdDialog';
+import { UploadIdDialog } from './UploadId/UploadIdDialog';
 import {
   mockPatps,
   OnboardingDialogWrapper,
@@ -32,7 +32,7 @@ export const GetRealmDialogStory: ComponentStory<
     <GetRealmDialog
       onBack={() => {}}
       onPurchaseId={() => {}}
-      onMigrateId={() => {}}
+      onUploadId={() => {}}
     />
   </OnboardingDialogWrapper>
 );
@@ -53,11 +53,11 @@ export const GetOnRealmDialogStory: ComponentStory<
   typeof GetOnRealmDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <GetOnRealmDialog onPurchaseId={() => {}} onMigrateId={() => {}} />
+    <GetOnRealmDialog onPurchaseId={() => {}} onUploadId={() => {}} />
   </OnboardingDialogWrapper>
 );
 
-GetOnRealmDialogStory.storyName = '1. Get on Realm (Purchase or Migrate)';
+GetOnRealmDialogStory.storyName = '1. Get on Realm (Purchase or Upload)';
 
 export const CreateAccountDialogStory: ComponentStory<
   typeof CreateAccountDialog
@@ -179,7 +179,7 @@ export const DownloadDialogStory: ComponentStory<
 
 DownloadDialogStory.storyName = '(Purchase) 8. Download Realm for desktop';
 
-export const MigrateIdPaymentDialogStory: ComponentStory<
+export const UploadIdPaymentDialogStory: ComponentStory<
   typeof PaymentDialog
 > = () => (
   <OnboardingDialogWrapper>
@@ -203,13 +203,13 @@ export const MigrateIdPaymentDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-MigrateIdPaymentDialogStory.storyName = '(Migrate) 4. Payment';
+UploadIdPaymentDialogStory.storyName = '(Upload) 4. Payment';
 
-export const MigrateIdDialogStory: ComponentStory<
-  typeof MigrateIdDialog
+export const UploadIdDialogStory: ComponentStory<
+  typeof UploadIdDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <MigrateIdDialog
+    <UploadIdDialog
       onUpload={() => Promise.resolve(false)}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
@@ -217,13 +217,13 @@ export const MigrateIdDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-MigrateIdDialogStory.storyName = '(Migrate) 5.1. Migrate an ID';
+UploadIdDialogStory.storyName = '(Upload) 5.1. Upload ID';
 
-export const MigrateIdUploadingDialogStory: ComponentStory<
-  typeof MigrateIdDialog
+export const UploadIdUploadingDialogStory: ComponentStory<
+  typeof UploadIdDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <MigrateIdDialog
+    <UploadIdDialog
       fileName="sampel-palnet.tar.gz"
       progress={30}
       onUpload={() => Promise.resolve(false)}
@@ -233,14 +233,13 @@ export const MigrateIdUploadingDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-MigrateIdUploadingDialogStory.storyName =
-  '(Migrate) 5.2. Migrate an ID – Uploading';
+UploadIdUploadingDialogStory.storyName = '(Upload) 5.2. Upload ID – Uploading';
 
-export const MigrateIdDoneDialogStory: ComponentStory<
-  typeof MigrateIdDialog
+export const UploadIdDoneDialogStory: ComponentStory<
+  typeof UploadIdDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <MigrateIdDialog
+    <UploadIdDialog
       fileName="sampel-palnet.tar.gz"
       progress={100}
       onUpload={() => Promise.resolve(false)}
@@ -250,7 +249,7 @@ export const MigrateIdDoneDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-MigrateIdDoneDialogStory.storyName = '(Migrate) 5.3. Migrate an ID – Uploaded';
+UploadIdDoneDialogStory.storyName = '(Upload) 5.3. Upload an ID – Uploaded';
 
 export const BYOPBootingDialogStory: ComponentStory<
   typeof BootingDialog
@@ -264,7 +263,7 @@ export const BYOPBootingDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-BYOPBootingDialogStory.storyName = '(Migrate) 6.1. Booting';
+BYOPBootingDialogStory.storyName = '(Upload) 6.1. Booting';
 
 export const BYOPBootingDialogCompleteStory: ComponentStory<
   typeof BootingDialog
@@ -278,4 +277,4 @@ export const BYOPBootingDialogCompleteStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-BYOPBootingDialogCompleteStory.storyName = '(Migrate) 6.2. Booting complete';
+BYOPBootingDialogCompleteStory.storyName = '(Upload) 6.2. Booting complete';

@@ -15,7 +15,7 @@ type Props = DownloadRealmButtonsProps & {
   selectedIdentity: string | undefined;
   setSelectedIdentity: (patp: string) => void;
   onClickPurchaseId: () => void;
-  onClickMigrateId: () => void;
+  onClickUploadId: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -29,7 +29,7 @@ export const AccountDownloadRealmDialog = ({
   onDownloadWindows,
   onDownloadLinux,
   onClickPurchaseId,
-  onClickMigrateId,
+  onClickUploadId,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -63,7 +63,7 @@ export const AccountDownloadRealmDialog = ({
       </Flex>
     }
     onClickPurchaseId={onClickPurchaseId}
-    onClickMigrateId={onClickMigrateId}
+    onClickUploadId={onClickUploadId}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   />

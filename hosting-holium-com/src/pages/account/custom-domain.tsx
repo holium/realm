@@ -64,7 +64,7 @@ const CustomDomainPresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  const onClickMigrateId = () => {
+  const onClickUploadId = () => {
     OnboardingStorage.set({
       productType: 'byop-p',
     });
@@ -94,7 +94,7 @@ const CustomDomainPresenter = () => {
         onChangeDomain={setDomain}
         onSubmit={onSubmit}
         onClickPurchaseId={onClickPurchaseId}
-        onClickMigrateId={onClickMigrateId}
+        onClickUploadId={onClickUploadId}
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />

@@ -27,7 +27,7 @@ const S3StoragePresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  const onClickMigrateId = () => {
+  const onClickUploadId = () => {
     OnboardingStorage.set({
       productType: 'byop-p',
     });
@@ -75,7 +75,7 @@ const S3StoragePresenter = () => {
       }}
       dataSent={{ networkUsage, minioUsage }}
       onClickPurchaseId={onClickPurchaseId}
-      onClickMigrateId={onClickMigrateId}
+      onClickUploadId={onClickUploadId}
       onClickSidebarSection={onClickSidebarSection}
       onExit={logout}
     />

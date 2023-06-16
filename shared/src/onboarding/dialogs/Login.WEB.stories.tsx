@@ -43,7 +43,7 @@ export const AccountHostingDialogStory: ComponentStory<
       selectedIdentity="~pasren-satmex"
       setSelectedIdentity={() => {}}
       onClickPurchaseId={() => {}}
-      onClickMigrateId={() => {}}
+      onClickUploadId={() => {}}
       email="rubberducky12@protonmail.com"
       serverUrl="https://pasren-satmex.holium.network/"
       serverCode="tolnym-rilmug-ricnep-marlyx"
@@ -71,7 +71,7 @@ export const AccountStorageDialogStory: ComponentStory<
       selectedIdentity="~pasren-satmex"
       setSelectedIdentity={() => {}}
       onClickPurchaseId={() => {}}
-      onClickMigrateId={() => {}}
+      onClickUploadId={() => {}}
       storageUrl="https://console.s31.holium.network"
       storageBucket="pasren-satmex"
       storagePassword="1234567890"
@@ -102,7 +102,7 @@ export const AccountCustomDomainDialogStory: ComponentStory<
       onSubmit={() => Promise.resolve()}
       setSelectedIdentity={() => {}}
       onClickPurchaseId={() => {}}
-      onClickMigrateId={() => {}}
+      onClickUploadId={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />
@@ -120,7 +120,7 @@ export const AccountDownloadRealmDialogStory: ComponentStory<
       selectedIdentity="~pasren-satmex"
       setSelectedIdentity={() => {}}
       onClickPurchaseId={() => {}}
-      onClickMigrateId={() => {}}
+      onClickUploadId={() => {}}
       onClickSidebarSection={() => {}}
       onDownloadMacM1={() => {}}
       onDownloadMacIntel={() => {}}

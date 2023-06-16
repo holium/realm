@@ -8,7 +8,7 @@ import {
 } from '../../components/OnboardDialog.styles';
 import { UploadBox } from './UploadBox';
 
-type MigrateIdFields = {
+type UploadIdFields = {
   uploaded: boolean;
   uploading: boolean;
 };
@@ -19,15 +19,11 @@ type Props = {
   onUpload: (file: File) => Promise<boolean>;
 };
 
-export const MigrateIdDialogBody = ({
-  fileName,
-  progress,
-  onUpload,
-}: Props) => {
+export const UploadIdDialogBody = ({ fileName, progress, onUpload }: Props) => {
   const {
     values: { uploaded, uploading },
     setFieldValue,
-  } = useFormikContext<MigrateIdFields>();
+  } = useFormikContext<UploadIdFields>();
 
   const handleUpload = async (file: File) => {
     if (uploading || uploaded) return;
@@ -49,7 +45,7 @@ export const MigrateIdDialogBody = ({
       maxWidth={550}
       alignSelf="center"
     >
-      <OnboardDialogTitle>Migrate an ID</OnboardDialogTitle>
+      <OnboardDialogTitle>Upload ID</OnboardDialogTitle>
       <OnboardDialogDescription>
         Upload a compressed archive of your existing pier in a <code>.zip</code>{' '}
         or <code>.tar.gz</code> format which was created after the ship was shut

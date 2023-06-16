@@ -39,7 +39,7 @@ type Props = {
   children?: ReactNode;
   customBody?: ReactNode;
   isLoading?: boolean;
-  onClickMigrateId: () => void;
+  onClickUploadId: () => void;
   onClickPurchaseId: () => void;
   setSelectedIdentity: (patp: string) => void;
   onClickSidebarSection: (section: SidebarSection) => void;
@@ -54,7 +54,7 @@ export const AccountDialog = ({
   children,
   customBody,
   isLoading,
-  onClickMigrateId,
+  onClickUploadId,
   onClickPurchaseId,
   setSelectedIdentity,
   onClickSidebarSection,
@@ -124,10 +124,10 @@ export const AccountDialog = ({
                     gap="8px"
                     borderTop="1px solid rgba(var(--rlm-border-rgba))"
                   >
-                    <Button.Transparent width="100%" onClick={onClickMigrateId}>
+                    <Button.Transparent width="100%" onClick={onClickUploadId}>
                       <Flex alignItems="center" gap="8px">
                         <Icon name="ArrowRightLine" size={16} />
-                        <Text.Body>Migrate ID</Text.Body>
+                        <Text.Body>Upload ID</Text.Body>
                       </Flex>
                     </Button.Transparent>
                     <Button.Transparent
@@ -206,7 +206,7 @@ export const AccountDialogSkeleton = ({
       customBody={isBlankBody ? <Flex flex={5} /> : undefined}
       setSelectedIdentity={() => {}}
       onClickPurchaseId={() => {}}
-      onClickMigrateId={() => {}}
+      onClickUploadId={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />

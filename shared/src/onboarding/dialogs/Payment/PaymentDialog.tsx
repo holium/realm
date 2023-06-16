@@ -118,7 +118,10 @@ export const PaymentDialog = ({ stripe, stripeOptions, ...props }: Props) => {
               productId={props.productId}
               setProductId={props.setProductId}
             />
-            <AccountInformation patp={props.patp} email={props.email} />
+            <AccountInformation
+              patp={props.productType === 'planet' ? props.patp : undefined}
+              email={props.email}
+            />
             <Flex justifyContent="center" alignItems="center" my={30}>
               <Spinner size={3} />
             </Flex>

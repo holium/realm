@@ -7,16 +7,16 @@ import {
 import {
   ButtonsContainer,
   ButtonText,
-  MigrateIdButton,
   PurchaseIdButton,
+  UploadIdButton,
 } from './GetOnRealmDialogBody.styles';
 
 type Props = {
-  onMigrateId: () => void;
+  onUploadId: () => void;
   onPurchaseId: () => void;
 };
 
-export const GetRealmDialogBody = ({ onMigrateId, onPurchaseId }: Props) => (
+export const GetRealmDialogBody = ({ onUploadId, onPurchaseId }: Props) => (
   <Flex flexDirection="column" gap="32px">
     <Flex flexDirection="column" gap="16px">
       <OnboardDialogTitle>Get on Realm</OnboardDialogTitle>
@@ -29,9 +29,9 @@ export const GetRealmDialogBody = ({ onMigrateId, onPurchaseId }: Props) => (
       <PurchaseIdButton type="button" onClick={onPurchaseId}>
         <ButtonText>Purchase ID</ButtonText>
       </PurchaseIdButton>
-      <MigrateIdButton type="button" onClick={onMigrateId}>
-        <ButtonText>Migrate ID</ButtonText>
-      </MigrateIdButton>
+      <UploadIdButton type="button" onClick={onUploadId}>
+        <ButtonText>Upload ID</ButtonText>
+      </UploadIdButton>
     </ButtonsContainer>
   </Flex>
 );

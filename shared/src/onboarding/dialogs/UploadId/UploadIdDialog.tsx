@@ -3,9 +3,9 @@ import * as Yup from 'yup';
 import { ErrorBox } from '@holium/design-system/general';
 
 import { OnboardDialog } from '../../components/OnboardDialog';
-import { MigrateIdDialogBody } from './MigrateIdDialogBody';
+import { UploadIdDialogBody } from './UploadIdDialogBody';
 
-const MigrateIdSchema = Yup.object().shape({
+const UploadIdSchema = Yup.object().shape({
   uploaded: Yup.boolean().oneOf([true]),
   uploading: Yup.boolean().oneOf([false]),
 });
@@ -19,7 +19,7 @@ type Props = {
   onNext: () => Promise<boolean>;
 };
 
-export const MigrateIdDialog = ({
+export const UploadIdDialog = ({
   fileName,
   progress,
   error,
@@ -29,10 +29,10 @@ export const MigrateIdDialog = ({
 }: Props) => (
   <OnboardDialog
     initialValues={{ uploaded: undefined, uploading: false }}
-    validationSchema={MigrateIdSchema}
+    validationSchema={UploadIdSchema}
     body={
       <>
-        <MigrateIdDialogBody
+        <UploadIdDialogBody
           fileName={fileName}
           progress={progress}
           onUpload={onUpload}

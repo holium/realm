@@ -17,7 +17,7 @@ type Props = {
   };
   setSelectedIdentity: (patp: string) => void;
   onClickPurchaseId: () => void;
-  onClickMigrateId: () => void;
+  onClickUploadId: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -32,7 +32,7 @@ export const AccountStorageDialog = ({
   dataSent,
   setSelectedIdentity,
   onClickPurchaseId,
-  onClickMigrateId,
+  onClickUploadId,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -43,7 +43,7 @@ export const AccountStorageDialog = ({
     isLoading={!storageUrl || !storageBucket || !storagePassword}
     setSelectedIdentity={setSelectedIdentity}
     onClickPurchaseId={onClickPurchaseId}
-    onClickMigrateId={onClickMigrateId}
+    onClickUploadId={onClickUploadId}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >

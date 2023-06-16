@@ -172,7 +172,7 @@ const HostingPresenter = () => {
     return false;
   };
 
-  const onClickMigrateId = () => {
+  const onClickUploadId = () => {
     OnboardingStorage.set({
       productType: 'byop-p',
     });
@@ -229,7 +229,7 @@ const HostingPresenter = () => {
         serverCode={selectedShip?.code}
         serverMaintenanceWindow={selectedShip?.maintenance_window}
         onClickPurchaseId={onClickPurchaseId}
-        onClickMigrateId={onClickMigrateId}
+        onClickUploadId={onClickUploadId}
         setSelectedIdentity={setSelectedIdentity}
         onClickChangeEmail={changeEmailModal.toggleOn}
         onClickChangePassword={changePasswordModal.toggleOn}
