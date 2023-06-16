@@ -36,9 +36,14 @@ const HostingPresenter = () => {
   const changeMaintenanceWindowModal = useToggle(false);
   const ejectIdModal = useToggle(false);
 
+  const identities = useMemo(() => ships.map((ship) => ship.patp), [ships]);
   const selectedShip = useMemo(
     () => ships.find((ship) => ship.patp === selectedIdentity),
     [ships, selectedIdentity]
+  );
+  const isUploadedIdentity = useMemo(
+    () => selectedShip?.product_type === 'byop-p',
+    [selectedShip]
   );
 
   const onClickSidebarSection = (section: string) => {
@@ -222,8 +227,9 @@ const HostingPresenter = () => {
         onSubmit={onSubmitEjectId}
       />
       <AccountHostingDialog
-        identities={ships.map((ship) => ship.patp)}
+        identities={identities}
         selectedIdentity={selectedIdentity}
+        isUploadedIdentity={isUploadedIdentity}
         email={email}
         serverUrl={selectedShip?.link}
         serverCode={selectedShip?.code}

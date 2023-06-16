@@ -90,6 +90,7 @@ const CustomDomainPresenter = () => {
         errorMessage={errorMessage}
         successMessage={successMessage}
         submitting={submitting.isOn}
+        isUploadedIdentity={ship?.product_type === 'byop-p'}
         setSelectedIdentity={setSelectedIdentity}
         onChangeDomain={setDomain}
         onSubmit={onSubmit}

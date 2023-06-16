@@ -8,6 +8,7 @@ type Props = {
   serverUrl: string | undefined;
   serverCode: string | undefined;
   serverMaintenanceWindow: number | undefined;
+  isUploadedIdentity: boolean;
   setSelectedIdentity: (patp: string) => void;
   onClickChangeEmail: () => void;
   onClickChangePassword: () => void;
@@ -28,6 +29,7 @@ export const AccountHostingDialog = ({
   serverUrl,
   serverCode,
   serverMaintenanceWindow,
+  isUploadedIdentity,
   setSelectedIdentity,
   onClickChangeEmail,
   onClickChangePassword,
@@ -51,6 +53,7 @@ export const AccountHostingDialog = ({
       !serverCode ||
       (!serverMaintenanceWindow && serverMaintenanceWindow !== 0)
     }
+    isUploadedIdentity={isUploadedIdentity}
     onClickPurchaseId={onClickPurchaseId}
     onClickUploadId={onClickUploadId}
     onClickSidebarSection={onClickSidebarSection}

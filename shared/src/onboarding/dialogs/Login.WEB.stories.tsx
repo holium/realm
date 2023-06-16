@@ -42,6 +42,7 @@ export const AccountHostingDialogStory: ComponentStory<
       identities={['~pasren-satmex']}
       selectedIdentity="~pasren-satmex"
       setSelectedIdentity={() => {}}
+      isUploadedIdentity={false}
       onClickPurchaseId={() => {}}
       onClickUploadId={() => {}}
       email="rubberducky12@protonmail.com"
@@ -98,6 +99,7 @@ export const AccountCustomDomainDialogStory: ComponentStory<
       dropletIp="123.123.123.123"
       domain="holium.network"
       submitting={false}
+      isUploadedIdentity={false}
       onChangeDomain={() => {}}
       onSubmit={() => Promise.resolve()}
       setSelectedIdentity={() => {}}
@@ -119,6 +121,7 @@ export const AccountDownloadRealmDialogStory: ComponentStory<
       identities={['~pasren-satmex']}
       selectedIdentity="~pasren-satmex"
       setSelectedIdentity={() => {}}
+      isUploadedIdentity={false}
       onClickPurchaseId={() => {}}
       onClickUploadId={() => {}}
       onClickSidebarSection={() => {}}

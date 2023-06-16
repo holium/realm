@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useToggle } from '@holium/design-system/util';
 import { BootingDialog, OnboardingStorage } from '@holium/shared';
@@ -16,28 +16,39 @@ export default function Booting() {
 
   const isBYOP = useToggle(false);
 
-  const pollShipStatus = useCallback(async () => {
+  const pollShipStatus = async () => {
     const { serverId, token, productType } = OnboardingStorage.get();
 
-    if (!serverId || !token) return;
+    if (!token) return;
 
     const ships = await thirdEarthApi.getUserShips(token);
     let ship = Object.values(ships).find((s) => s.patp === serverId);
 
     if (productType === 'byop-p') {
       isBYOP.toggleOn();
-      ship = Object.values(ships).find(
-        (s) => s.ship_type === 'planet' && s.product_type === 'byop-p'
-      );
+      ship = Object.values(ships)
+        .filter((s) => s.product_type === 'byop-p' && s.is_migration)
+        .sort((a, b) => {
+          if (a.created_at > b.created_at) return -1;
+          if (a.created_at < b.created_at) return 1;
+          return 0;
+        })[0];
     }
 
     if (!ship) return;
 
     if (logs.length === 1) {
-      setLogs((logs) => [
-        ...logs,
-        `${serverId ?? 'Your identity'} will be ready in a few minutes.`,
-      ]);
+      if (productType === 'byop-p') {
+        setLogs((logs) => [
+          ...logs,
+          `Your uploaded identity will be ready in 5-10 minutes.`,
+        ]);
+      } else {
+        setLogs((logs) => [
+          ...logs,
+          `${serverId} will be ready in a few minutes.`,
+        ]);
+      }
     } else if (logs.length === 2) {
       setLogs((logs) => [...logs, 'Go touch some grass.']);
     }
@@ -65,11 +76,11 @@ export default function Booting() {
         serverCode,
       });
     }
-  }, [booting, logs]);
+  };
 
   const onNext = () => {
     if (isBYOP.isOn) {
-      goToPage('/account');
+      return goToPage('/account');
     }
 
     return goToPage('/credentials');
@@ -82,7 +93,7 @@ export default function Booting() {
     intervalRef.current = i;
 
     return () => clearInterval(i);
-  }, [booting, pollShipStatus]);
+  }, [booting]);
 
   return (
     <Page title="Booting your identity" isProtected>

@@ -41,6 +41,7 @@ export const AccountStorageDialog = ({
     selectedIdentity={selectedIdentity}
     currentSection={SidebarSection.Storage}
     isLoading={!storageUrl || !storageBucket || !storagePassword}
+    isUploadedIdentity={false}
     setSelectedIdentity={setSelectedIdentity}
     onClickPurchaseId={onClickPurchaseId}
     onClickUploadId={onClickUploadId}

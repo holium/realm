@@ -26,6 +26,7 @@ export const AccountGetRealmDialog = ({
     identities={[]}
     selectedIdentity={''}
     setSelectedIdentity={() => {}}
+    isUploadedIdentity={false}
     currentSection={SidebarSection.GetRealm}
     customBody={
       <Flex flex={5}>

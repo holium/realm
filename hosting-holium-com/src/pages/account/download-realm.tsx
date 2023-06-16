@@ -14,6 +14,10 @@ const DownloadRealmPresenter = () => {
   const { goToPage, logout } = useNavigation();
   const { ships, selectedIdentity, setSelectedIdentity } = useUser();
 
+  const identities = ships.map((ship) => ship.patp);
+  const ship = ships.find((ship) => ship.patp === selectedIdentity);
+  const isUploadedIdentity = ship?.product_type === 'byop-p';
+
   const onClickSidebarSection = (section: string) => {
     if (section === 'Get Hosting') {
       goToPage(accountPageUrl[section], {
@@ -51,8 +55,9 @@ const DownloadRealmPresenter = () => {
   return (
     <Page title="Account / Download Realm" isProtected>
       <AccountDownloadRealmDialog
-        identities={ships.map((ship) => ship.patp)}
+        identities={identities}
         selectedIdentity={selectedIdentity}
+        isUploadedIdentity={isUploadedIdentity}
         setSelectedIdentity={setSelectedIdentity}
         onDownloadMacM1={onDownloadMacM1}
         onDownloadMacIntel={onDownloadMacIntel}

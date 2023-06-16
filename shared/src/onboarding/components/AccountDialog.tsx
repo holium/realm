@@ -39,6 +39,7 @@ type Props = {
   children?: ReactNode;
   customBody?: ReactNode;
   isLoading?: boolean;
+  isUploadedIdentity: boolean;
   onClickUploadId: () => void;
   onClickPurchaseId: () => void;
   setSelectedIdentity: (patp: string) => void;
@@ -54,6 +55,7 @@ export const AccountDialog = ({
   children,
   customBody,
   isLoading,
+  isUploadedIdentity,
   onClickUploadId,
   onClickPurchaseId,
   setSelectedIdentity,
@@ -67,12 +69,20 @@ export const AccountDialog = ({
   let sidebarItems: SidebarSection[] = [];
 
   if (hasShips) {
-    sidebarItems = [
-      SidebarSection.Hosting,
-      SidebarSection.Storage,
-      SidebarSection.CustomDomain,
-      SidebarSection.DownloadRealm,
-    ];
+    if (isUploadedIdentity) {
+      sidebarItems = [
+        SidebarSection.Hosting,
+        SidebarSection.CustomDomain,
+        SidebarSection.DownloadRealm,
+      ];
+    } else {
+      sidebarItems = [
+        SidebarSection.Hosting,
+        SidebarSection.Storage,
+        SidebarSection.CustomDomain,
+        SidebarSection.DownloadRealm,
+      ];
+    }
   } else if (hasCSEK.isOn) {
     sidebarItems = [SidebarSection.DownloadRealm, SidebarSection.GetHosting];
   } else {
@@ -203,6 +213,7 @@ export const AccountDialogSkeleton = ({
       selectedIdentity=""
       currentSection={currentSection}
       isLoading
+      isUploadedIdentity={false}
       customBody={isBlankBody ? <Flex flex={5} /> : undefined}
       setSelectedIdentity={() => {}}
       onClickPurchaseId={() => {}}
