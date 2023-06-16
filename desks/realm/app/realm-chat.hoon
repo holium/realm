@@ -401,7 +401,7 @@
         ?~  reply-to.part   'Reacted to a message'
         =/  prev-msg  (scry-message:lib +.u.reply-to.part bowl)
         =/  prev-summary  (notif-msg prev-msg bowl)
-        (crip "Reacted to: {<prev-summary>}")
+        (crip "Reacted to: \"{(trip prev-summary)}\"")
     ==
   (crip `tape`(swag [0 140] str)) :: only show the first 140 characters of the message in the preview
 ++  group-name-or-blank
