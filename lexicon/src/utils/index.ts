@@ -3,6 +3,10 @@ import memoize from 'lodash/memoize';
 export const isDev = () =>
   !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
 
+export const shipName = memoize(() => {
+  //TODO: use realm data here
+  return '';
+});
 export const shipCode = memoize(() => {
   //TODO: use realm data here
   return 'hidmeg-donfep-pagtyd-witfur';
