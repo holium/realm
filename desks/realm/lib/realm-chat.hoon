@@ -22,6 +22,15 @@
       avatar.contact-info.cv
   ==
 ::
+++  scry-message
+  |=  [=msg-id:db =bowl:gall]
+  ^-  message:db
+  .^
+    message:db
+    %gx
+    /(scot %p our.bowl)/chat-db/(scot %da now.bowl)/db/message/(scot %da timestamp.msg-id)/(scot %p sender.msg-id)/noun
+  ==
+::
 ++  scry-messages-for-path
   |=  [=path =bowl:gall]
   ^-  (list [k=uniq-id:db v=msg-part:db])
@@ -139,12 +148,12 @@
   :: |=(peer=ship [%pass (weld /dbpoke path) %agent [s %chat-db] %poke %chat-db-action !>([%add-peer path peer])])
 ::
 ++  push-notification-card
-  |=  [=bowl:gall state=state-0 =path-row:db title=@t subtitle=@t content=@t unread=@ud avatar=(unit @t)]
+  |=  [=bowl:gall state=state-0 =path-row:db title=@t subtitle=@t content=@t unread=@ud avatar=(unit @t) =message:db]
   ^-  card
   =/  note=push-notif
     [
       app-id=app-id.state
-      data=[path-row unread avatar]
+      data=[path-row unread avatar message]
       title=(malt ~[['en' title]])
       subtitle=?:(=(subtitle '') ~ (malt ~[['en' subtitle]]))
       contents=(malt ~[['en' content]])
@@ -541,6 +550,7 @@
         ['path-row' (path-row:encode:chat-db path-row.mtd)]
         ['unread_count' (numb unread.mtd)]
         ['avatar' ?~(avatar.mtd ~ s+u.avatar.mtd)]
+        ['msg' a+(turn message.mtd |=(m=msg-part:db (messages-row:encode:chat-db [msg-id.m msg-part-id.m] m)))]
       ==
     ::
     ++  contents 

@@ -31,7 +31,7 @@
   =/  index  0
   =/  result=message:sur  *message:sur
   |-
-  ?~  (has:msgon:sur tbl [msg-id index])
+  ?.  (has:msgon:sur tbl [msg-id index])
     result
   $(index +(index), result (snoc result (got:msgon:sur tbl [msg-id index])))
 ::

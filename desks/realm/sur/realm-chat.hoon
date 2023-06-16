@@ -33,6 +33,7 @@
   $:  =path-row:db
       unread=@ud
       avatar=(unit @t)
+      =message:db
   ==
 ::
 +$  action
