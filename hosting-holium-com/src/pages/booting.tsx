@@ -14,20 +14,29 @@ export default function Booting() {
   const [logs, setLogs] = useState<string[]>(['Booting started.']);
   const booting = useToggle(true);
 
+  const isBYOP = useToggle(false);
+
   const pollShipStatus = useCallback(async () => {
-    const { serverId, token } = OnboardingStorage.get();
+    const { serverId, token, productType } = OnboardingStorage.get();
 
     if (!serverId || !token) return;
 
     const ships = await thirdEarthApi.getUserShips(token);
-    const ship = Object.values(ships).find((s) => s.patp === serverId);
+    let ship = Object.values(ships).find((s) => s.patp === serverId);
+
+    if (productType === 'byop-p') {
+      isBYOP.toggleOn();
+      ship = Object.values(ships).find(
+        (s) => s.ship_type === 'planet' && s.product_type === 'byop-p'
+      );
+    }
 
     if (!ship) return;
 
     if (logs.length === 1) {
       setLogs((logs) => [
         ...logs,
-        `${serverId} will be ready in a few minutes.`,
+        `${serverId ?? 'Your identity'} will be ready in a few minutes.`,
       ]);
     } else if (logs.length === 2) {
       setLogs((logs) => [...logs, 'Go touch some grass.']);
@@ -58,7 +67,13 @@ export default function Booting() {
     }
   }, [booting, logs]);
 
-  const onNext = useCallback(() => goToPage('/credentials'), [goToPage]);
+  const onNext = () => {
+    if (isBYOP.isOn) {
+      goToPage('/account');
+    }
+
+    return goToPage('/credentials');
+  };
 
   useEffect(() => {
     if (!booting.isOn) return;

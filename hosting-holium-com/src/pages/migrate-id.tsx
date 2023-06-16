@@ -91,7 +91,7 @@ export default function MigrateId() {
   const onBack = () => goToPage('/account/get-realm');
 
   const onNext = () => {
-    return goToPage('/account');
+    return goToPage('/booting');
   };
 
   return (

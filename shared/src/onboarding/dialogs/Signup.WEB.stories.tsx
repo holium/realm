@@ -251,3 +251,31 @@ export const MigrateIdDoneDialogStory: ComponentStory<
 );
 
 MigrateIdDoneDialogStory.storyName = '(Migrate) 5.3. Migrate an ID – Uploaded';
+
+export const BYOPBootingDialogStory: ComponentStory<
+  typeof BootingDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <BootingDialog
+      isBooting
+      logs={['Booting ~zod.', 'Grab some steak.']}
+      onNext={() => Promise.resolve(false)}
+    />
+  </OnboardingDialogWrapper>
+);
+
+BYOPBootingDialogStory.storyName = '(Migrate) 6.1. Booting';
+
+export const BYOPBootingDialogCompleteStory: ComponentStory<
+  typeof BootingDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <BootingDialog
+      isBooting={false}
+      logs={['Booting ~zod.', 'Grab some steak.', 'Booting complete.']}
+      onNext={() => Promise.resolve(false)}
+    />
+  </OnboardingDialogWrapper>
+);
+
+BYOPBootingDialogCompleteStory.storyName = '(Migrate) 6.2. Booting complete';
