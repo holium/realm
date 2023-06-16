@@ -67,6 +67,10 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: Record<string, Dimensions> = {
     width: 700,
     height: 700,
   },
+  lexicon: {
+    width: 600,
+    height: 700,
+  },
 };
 
 export const getDefaultAppDimensions = (

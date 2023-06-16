@@ -29,10 +29,10 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
         ...bazaarStore.devApps,
         {
           id: 'lexicon',
-          title: 'Lexicon - Dev',
+          title: 'Lexicon',
           type: 'native',
-          color: '#fff',
-          icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/ballot-app-tile.svg',
+          color: '#c5a77c',
+          icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/lexicon.svg',
           native: {
             hideTitlebarBorder: true,
           },

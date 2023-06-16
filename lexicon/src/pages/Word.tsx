@@ -11,6 +11,7 @@ import {
   TextInput,
 } from '@holium/design-system';
 
+import { DefinitionRow, SentenceRow } from '../api/types/bedrock';
 import { TabPanel, Tabs, Vote } from '../components';
 import { Store, useStore } from '../store';
 import { TabItem } from '../types';
@@ -162,7 +163,7 @@ function Definition({
       <Text.Body>{text}</Text.Body>
       <Flex justifyContent={'space-between'}>
         <Vote id={id} votes={votes} />
-        <Text.Body opacity={0.5}> ~lodlev-migdev</Text.Body>
+        <Text.Body opacity={0.5}> {id?.split('/')[1]}</Text.Body>
       </Flex>
     </Flex>
   );
@@ -192,7 +193,7 @@ const Sentences = ({ sentenceList, space, state }: any) => {
   };
   return (
     <Flex flexDirection="column" gap={20}>
-      {sentenceList.map((item: any, index: number) => {
+      {sentenceList.map((item: SentenceRow, index: number) => {
         const votes = sentenceVoteMap.get(item.id);
 
         return (
@@ -257,7 +258,7 @@ const Definitions = ({ definitionList, state, space }: any) => {
   };
   return (
     <Flex flexDirection="column" gap={20}>
-      {definitionList.map((item: any, index: number) => {
+      {definitionList.map((item: DefinitionRow, index: number) => {
         const votes = definitionVoteMap.get(item.id);
         return (
           <Definition

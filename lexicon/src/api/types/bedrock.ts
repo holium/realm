@@ -21,9 +21,6 @@ export interface Peer {
   receivedAt: number;
 }
 
-export type KeyPair = [name: string, t: string];
-export type Schema = KeyPair[];
-
 export interface BedrockRow {
   [key: string]: any;
   path: Path;
@@ -66,24 +63,90 @@ export interface PathRow {
   updatedAt: number;
   receivedAt: number;
 }
+export interface WordRow {
+  id: string;
+  path: string; //path to a space in realm for Lexicon's use case
+  'created-at': number; //date
+  'received-at': number; //date
+  word: string;
+  'updated-at': number; //date
+  revision: any; //?
+  v: number; //version number?
 
-// Bedrock updates
+  type: 'lexicon-word';
+}
+
+export interface DefinitionRow {
+  id: string;
+  path: string; //path to a space in realm for Lexicon's use case
+  'created-at': number; //date
+  'received-at': number; //date
+  definition: string;
+  'updated-at': number; //date
+  revision: any; //?
+  v: number; //version number?
+
+  type: 'lexicon-sentence';
+  'word-id': string; //id of parent word row
+}
+export interface SentenceRow {
+  id: string;
+  path: string; //path to a space in realm for Lexicon's use case
+  'created-at': number; //date
+  'received-at': number; //date
+  definition: string;
+  'updated-at': number; //date
+  revision: any; //?
+  v: number; //version number?
+
+  type: 'lexicon-definition';
+  'word-id': string; //id of parent word row
+}
+export interface SentenceRow {
+  id: string;
+  path: string; //path to a space in realm for Lexicon's use case
+  'created-at': number; //date
+  'received-at': number; //date
+  sentence: string;
+  'updated-at': number; //date
+  revision: any; //?
+  v: number; //version number?
+
+  type: 'lexicon-definition';
+  'word-id': string; //id of parent word row
+}
+export interface VoteRow {
+  id: string;
+  'parent-id': string;
+  'parent-type': string;
+  path: string; //path to a space in realm for Lexicon's use case
+  'parent-path': string;
+  'created-at': number; //date
+  'received-at': number; //date
+  definition: string;
+  'updated-at': number; //date
+  revision: any; //?
+  v: number; //version number?
+  ship: string;
+  type: 'vote';
+  up: boolean;
+}
+export type LeixconRow = VoteRow | WordRow | DefinitionRow | SentenceRow;
+
 export interface addRowUpdate {
   change: 'add-row';
-  row: BedrockRow;
+  row: LeixconRow;
 }
-
-export interface updRowUpdate {
+export interface updateRowUpdate {
   change: 'upd-row';
-  row: BedrockRow;
+  row: LeixconRow;
 }
-
-export interface delRowUpdate {
+export interface deleteRowUpdate {
   change: 'del-row';
-  path: Path;
+  path: string;
   type: Type;
   id: RowID;
-  t: number;
+  timestamp: number; //date
 }
 
 export interface addPathUpdate {
@@ -120,8 +183,8 @@ export interface delPeerUpdate {
 
 export type dbChange =
   | addRowUpdate
-  | updRowUpdate
-  | delRowUpdate
+  | updateRowUpdate
+  | deleteRowUpdate
   | addPathUpdate
   | updPathUpdate
   | delPathUpdate

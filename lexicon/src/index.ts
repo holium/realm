@@ -1,1 +1,1 @@
-export { App } from './App';
+export { Lexicon } from './Lexicon';

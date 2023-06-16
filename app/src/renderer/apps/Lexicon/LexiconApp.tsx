@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react';
 
-import { App } from '@holium/lexicon';
+import { Lexicon } from '@holium/lexicon';
 
 import { useAppState } from 'renderer/stores/app.store';
 import { LexiconIPC } from 'renderer/stores/ipc';
@@ -12,10 +12,10 @@ const LexiconAppPresenter = () => {
   const selectedSpace = spacesStore.selected;
 
   return (
-    <App
+    <Lexicon
       shipName={loggedInAccount?.serverId ?? ''}
       update={lexiconStore.update}
-      lexiconApi={LexiconIPC}
+      lexiconIPC={LexiconIPC}
       selectedSpace={selectedSpace?.path ?? ''}
     />
   );

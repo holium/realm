@@ -3,7 +3,7 @@ import {
   BrowserToolbar,
   BrowserToolbarProps,
 } from 'renderer/apps/Browser/Toolbar/BrowserToolbar';
-import { LexiconApp } from 'renderer/apps/Lexicon';
+import { LexiconApp } from 'renderer/apps/Lexicon/LexiconApp';
 import { SystemApp } from 'renderer/apps/System';
 
 export enum NativeAppId {

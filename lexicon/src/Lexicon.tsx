@@ -1,14 +1,36 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { createGlobalStyle } from 'styled-components';
 
 import { Box } from '@holium/design-system/general';
 
+import {
+  DefinitionRow,
+  SentenceRow,
+  VoteRow,
+  WordRow,
+} from './api/types/bedrock';
 import { updateHandler } from './api/updates';
 import { Navigation } from './components/Navigation';
 import { Dictionary, Home, Word } from './pages';
 import { Store, useStore } from './store';
 import { log } from './utils';
 
+const GlobalStyle = createGlobalStyle`
+  html {
+    overflow: hidden;
+  }
+  .highlight-hover:hover {
+    background-color: rgba(var(--rlm-overlay-hover-rgba));
+    cursor: pointer;
+  }
+  .highlight-hover:focus {
+    background-color: rgba(var(--rlm-overlay-hover-rgba));
+    transition: '.25s ease';
+    outline: none;
+  }
+
+`;
 declare global {
   interface Window {
     ship: string;
@@ -17,12 +39,17 @@ declare global {
 
 interface Props {
   selectedSpace: string;
-  lexiconApi: any;
+  lexiconIPC: any;
   shipName: string;
   update: any;
 }
 
-export const App = ({ selectedSpace, lexiconApi, update, shipName }: Props) => {
+export const Lexicon = ({
+  selectedSpace,
+  lexiconIPC,
+  update,
+  shipName,
+}: Props) => {
   const api = useStore((store: Store) => store.api);
   const setApi = useStore((store: Store) => store.setApi);
 
@@ -56,8 +83,8 @@ export const App = ({ selectedSpace, lexiconApi, update, shipName }: Props) => {
     setLoadingMain(true);
     //fetch data stored in db under the current space(path)
     try {
-      const result = await api.getPath(space);
-      const subscribeToSpace = await api.subscribePath(space); //TODO: rename api to IPC service
+      const result = await lexiconIPC.getPath(space);
+      const subscribeToSpace = await lexiconIPC.subscribePath(space);
       log('subscribeToSpace', subscribeToSpace);
       if (result) {
         let newWordRows: any = [];
@@ -87,10 +114,9 @@ export const App = ({ selectedSpace, lexiconApi, update, shipName }: Props) => {
     }
     setLoadingMain(false);
   };
-
   const makeSentenceMap = () => {
     const sentenceMap: any = new Map();
-    sentenceRows.forEach((item: any) => {
+    sentenceRows.forEach((item: SentenceRow) => {
       //if this vote is linked to a word (we check wordMap) add it to our voteMap under that word's idea
       if (wordMap.has(item['word-id'])) {
         const newSentenceList = sentenceMap.get(item['word-id']) ?? [];
@@ -103,7 +129,7 @@ export const App = ({ selectedSpace, lexiconApi, update, shipName }: Props) => {
   };
   const makeDefinitionMap = () => {
     const definitionMap: any = new Map();
-    definitionRows.forEach((item: any) => {
+    definitionRows.forEach((item: DefinitionRow) => {
       //if this vote is linked to a word (we check wordMap) add it to our voteMap under that word's idea
       if (wordMap.has(item['word-id'])) {
         const newDefinitionList = definitionMap.get(item['word-id']) ?? [];
@@ -126,13 +152,12 @@ export const App = ({ selectedSpace, lexiconApi, update, shipName }: Props) => {
 
   const makeWordList = () => {
     const wordMap: any = new Map();
-    const newWordList = wordRows.map((item: any) => {
+    const newWordList = wordRows.map((item: WordRow) => {
       wordMap.set(item.id, item);
       return {
         id: item.id,
         word: item.word,
         createdAt: item['created-at'],
-        votes: item.votes,
       };
     });
     setWordList(newWordList);
@@ -142,7 +167,7 @@ export const App = ({ selectedSpace, lexiconApi, update, shipName }: Props) => {
   const makeWordMap = () => {
     const voteMap: any = new Map();
 
-    voteRows.forEach((item: any) => {
+    voteRows.forEach((item: VoteRow) => {
       //if this vote is linked to a word (we check wordMap) add it to our voteMap under that word's idea
       if (wordMap.has(item['parent-id'])) {
         //accumulate rows into their respective parents (words)
@@ -179,10 +204,10 @@ export const App = ({ selectedSpace, lexiconApi, update, shipName }: Props) => {
   const definitionVoteMap = () => {
     const newVoteMap: any = new Map();
     const definitionIdSet = new Set(); //set of our definition ids
-    definitionRows.forEach((item: any) => {
+    definitionRows.forEach((item: DefinitionRow) => {
       definitionIdSet.add(item.id);
     });
-    voteRows.forEach((item: any) => {
+    voteRows.forEach((item: VoteRow) => {
       if (definitionIdSet.has(item['parent-id'])) {
         //accumulate rows into their respective parents (words)
         const lastVoteData = newVoteMap.get(item['parent-id']);
@@ -214,15 +239,17 @@ export const App = ({ selectedSpace, lexiconApi, update, shipName }: Props) => {
         });
       }
     });
+    log('newVoteMap', newVoteMap);
+
     setDefinitionVoteMap(newVoteMap);
   };
   const sentenceVoteMap = () => {
     const newVoteMap: any = new Map();
     const sentenceIdSet = new Set(); //set of our definition ids
-    sentenceRows.forEach((item: any) => {
+    sentenceRows.forEach((item: SentenceRow) => {
       sentenceIdSet.add(item.id);
     });
-    voteRows.forEach((item: any) => {
+    voteRows.forEach((item: VoteRow) => {
       if (sentenceIdSet.has(item['parent-id'])) {
         //accumulate rows into their respective parents (words)
         const lastVoteData = newVoteMap.get(item['parent-id']);
@@ -271,8 +298,8 @@ export const App = ({ selectedSpace, lexiconApi, update, shipName }: Props) => {
 
   useEffect(() => {
     //add our api instance to the store
-    setApi(lexiconApi);
-  }, [lexiconApi]);
+    setApi(lexiconIPC);
+  }, [lexiconIPC]);
 
   useEffect(() => {
     //listen to updates from LexiconIPC
@@ -292,8 +319,9 @@ export const App = ({ selectedSpace, lexiconApi, update, shipName }: Props) => {
         backgroundColor: 'transparent',
       }}
     >
+      <GlobalStyle />
       <div id="portal-root" />
-      <Box maxWidth={600} margin="auto">
+      <Box maxWidth={550} margin="auto">
         <Router>
           <Routes>
             <Route element={<Navigation selectedSpace={selectedSpace} />}>
