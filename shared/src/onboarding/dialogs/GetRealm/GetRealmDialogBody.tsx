@@ -7,7 +7,7 @@ import {
 } from '../../components/OnboardDialog.styles';
 import { OrDivider } from '../../components/OrDivider';
 import { GetIdIcon } from '../../icons/GetIdIcon';
-import { GrayBox, InfoText } from './GetRealmDialogBody.styles';
+import { GrayBox } from './GetRealmDialogBody.styles';
 
 type Props = {
   onPurchaseId: () => void;
@@ -62,9 +62,5 @@ export const GetRealmDialogBody = ({ onPurchaseId, onMigrateId }: Props) => (
         <GetIdIcon size={240} />
       </Flex>
     </GrayBox>
-    <InfoText>
-      We’ll be adding more options for getting on Realm such as migrating your
-      server or booting with an identity keyfile.
-    </InfoText>
   </>
 );

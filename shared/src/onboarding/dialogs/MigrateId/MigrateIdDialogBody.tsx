@@ -51,30 +51,26 @@ export const MigrateIdDialogBody = ({
     >
       <OnboardDialogTitle>Migrate an ID</OnboardDialogTitle>
       <OnboardDialogDescription>
-        This option is for people who want to move their existing ship with all
-        of its apps, subscriptions, and configurations to Holium hosting.
+        Upload a compressed archive of your existing pier in a <code>.zip</code>{' '}
+        or <code>.tar.gz</code> format which was created after the ship was shut
+        down at its current location.
       </OnboardDialogDescription>
       <OnboardDialogDescription>
-        <b>Requires:</b> A compressed archive of your existing pier in a .zip or
-        .tar.gz format which was created after the ship was shut down at its
-        current location.
-      </OnboardDialogDescription>
-      <OnboardDialogDescription>
-        Check out{' '}
+        Read{' '}
         <Anchor
           href="https://docs.holium.com/realm/hosting/byop-pier"
           target="_blank"
         >
           <u>our guide</u>
         </Anchor>{' '}
-        for more info!
+        to learn more.
       </OnboardDialogDescription>
       <UploadBox
         fileName={fileName}
         progress={progress}
         onUpload={handleUpload}
       />
-      <Flex flexDirection="column" gap="4px">
+      <Flex flexDirection="column" gap="2px">
         <OnboardDialogDescription>Planets only</OnboardDialogDescription>
         <OnboardDialogDescription>Max file size: 3 GB</OnboardDialogDescription>
       </Flex>

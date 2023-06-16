@@ -48,7 +48,7 @@ export const AccountGetRealmDialog = ({
           <OrDivider maxWidth="180px" />
           <JoinWaitlist onClickJoinWaitlist={onClickJoinWaitlist} />
           <AccountDialogDescription style={{ fontSize: 12 }}>
-            Join waitlist if you don't want to host with Holium.
+            Join the waitlist if you don't want to host with Holium.
           </AccountDialogDescription>
         </Flex>
       </Flex>
