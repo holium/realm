@@ -56,6 +56,8 @@
       :: meta-chat management pokes
       %create-chat
         (create-chat:lib +.act state bowl)
+      %vented-create-chat
+        (vented-create-chat:lib +.act state bowl)
       %edit-chat
         (edit-chat:lib +.act state bowl)
       %pin-message
@@ -69,6 +71,8 @@
       :: message management pokes
       %send-message
         (send-message:lib +.act state bowl)
+      %vented-send-message
+        (vented-send-message:lib +.act state bowl)
       %edit-message
         (edit-message:lib +.act state bowl)
       %delete-message

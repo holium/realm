@@ -143,6 +143,12 @@
 +$  del-log  ((mop time db-change-type) gth)
 ++  delon  ((on time db-change-type) gth)
 ::
++$  chat-vent
+  $%  [%msg =message]
+      [%path =path-row]
+      [%ack ~]
+  ==
+::
 :: old versions
 ::
 +$  del-log-0  ((mop time db-change-type-0) gth)
