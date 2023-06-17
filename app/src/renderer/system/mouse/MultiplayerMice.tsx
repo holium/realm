@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { block, For } from 'million/react';
 
 import { hexToRgb, Position, rgbToString } from '@holium/design-system';
 import { MouseState } from '@holium/realm-presence';
@@ -123,29 +124,51 @@ export const MultiplayerMice = () => {
   if (visibleCursors.length < 1) return null;
 
   return (
-    <>
-      {visibleCursors.map(
-        ([patp, { state, position, isActive, isVisible, color, chat }]) => (
-          <div key={`${patp}-cursor`}>
-            <AnimatedCursor
-              color={color}
-              state={state}
-              position={position}
-              isActive={isActive}
-              isVisible={isVisible}
-            />
-            {chat ? (
-              <EphemeralChat position={position} color={color}>
-                {chat}
-              </EphemeralChat>
-            ) : (
-              <CursorLabel color={color} position={position}>
-                {patp}
-              </CursorLabel>
-            )}
-          </div>
-        )
+    <For each={visibleCursors}>
+      {([patp, { state, position, isActive, isVisible, color, chat }]) => (
+        <CursorBlock
+          patp={patp}
+          state={state}
+          position={position}
+          isActive={isActive}
+          isVisible={isVisible}
+          color={color}
+          chat={chat}
+        />
       )}
-    </>
+    </For>
   );
 };
+
+type CursorBlockProps = {
+  patp: string;
+  state: MouseState;
+  position: Position;
+  isActive: boolean;
+  isVisible: boolean;
+  color: string;
+  chat?: string;
+};
+
+const CursorBlock = block<CursorBlockProps>(
+  ({ patp, state, position, isActive, isVisible, color, chat }) => (
+    <div key={`${patp}-cursor`}>
+      <AnimatedCursor
+        color={color}
+        state={state}
+        position={position}
+        isActive={isActive}
+        isVisible={isVisible}
+      />
+      {chat ? (
+        <EphemeralChat position={position} color={color}>
+          {chat}
+        </EphemeralChat>
+      ) : (
+        <CursorLabel color={color} position={position}>
+          {patp}
+        </CursorLabel>
+      )}
+    </div>
+  )
+);

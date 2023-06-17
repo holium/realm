@@ -11,10 +11,12 @@ import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import { merge } from 'webpack-merge';
 import TerserPlugin from 'terser-webpack-plugin';
+import million from 'million/compiler';
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
 import deleteSourceMaps from '../scripts/delete-source-maps';
+
 const Dotenv = require('dotenv-webpack');
 
 checkNodeEnv('production');
@@ -185,6 +187,7 @@ const configuration: webpack.Configuration = {
         },
       ],
     }),
+    million.webpack,
   ],
 };
 

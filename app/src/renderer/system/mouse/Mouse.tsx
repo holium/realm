@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { block } from 'million/react';
 
 import { hexToRgb, rgbToString, useToggle } from '@holium/design-system/util';
 import { MouseState } from '@holium/realm-presence';
@@ -73,19 +74,51 @@ export const Mouse = () => {
   if (!enabled.isOn) return null;
 
   return (
+    <CursorBlock
+      state={state}
+      mouseColor={mouseColor}
+      position={position}
+      isActive={active.isOn}
+      isVisible={visible.isOn}
+      isEphemeralChatOn={ephemeralChat.isOn}
+      chat={chat}
+    />
+  );
+};
+
+type CursorBlockProps = {
+  state: MouseState;
+  mouseColor: string;
+  position: { x: number; y: number };
+  isActive: boolean;
+  isVisible: boolean;
+  isEphemeralChatOn: boolean;
+  chat: string;
+};
+
+const CursorBlock = block<CursorBlockProps>(
+  ({
+    state,
+    mouseColor,
+    position,
+    isActive,
+    isVisible,
+    isEphemeralChatOn,
+    chat,
+  }) => (
     <>
       <AnimatedCursor
         state={state}
         color={mouseColor}
         position={position}
-        isActive={active.isOn}
-        isVisible={visible.isOn}
+        isActive={isActive}
+        isVisible={isVisible}
       />
-      {ephemeralChat.isOn && (
+      {isEphemeralChatOn && (
         <EphemeralChat position={position} color={mouseColor}>
           {chat}
         </EphemeralChat>
       )}
     </>
-  );
-};
+  )
+);
