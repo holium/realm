@@ -1,7 +1,7 @@
-import { RefObject, useMemo, useState } from 'react';
+import { RefObject, useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { Flex, Text, WindowedListRef } from '@holium/design-system/general';
+import { Flex, WindowedListRef } from '@holium/design-system/general';
 
 import {
   ChatFragmentMobxType,
@@ -11,13 +11,8 @@ import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ChatInputBox } from '../../components/ChatInputBox';
 import { ChatLogHeader } from '../../components/ChatLogHeader';
-import { PinnedContainer } from '../../components/PinnedMessage';
-import {
-  ChatInputContainer,
-  ChatLogListContainer,
-  FullWidthAnimatePresence,
-} from './ChatLogBody.styles';
-import { ChatLogList } from './ChatLogList';
+import { ChatInputContainer } from './ChatLogBody.styles';
+import { ChatLogBodyList } from './ChatLogBodyList';
 
 type Props = {
   path: string;
@@ -85,62 +80,6 @@ const ChatLogBodyPresenter = ({
     }, 250);
   };
 
-  const lastMessageIndex = useMemo(
-    () =>
-      messages[messages.length - 1]?.createdAt +
-      messages[messages.length - 1]?.updatedAt,
-    [
-      messages[messages.length - 1]?.createdAt,
-      messages[messages.length - 1]?.updatedAt,
-    ]
-  );
-
-  const messageList = useMemo(() => {
-    if (messages.length === 0 && inboxLoader.isLoaded) {
-      return (
-        <Text.Custom textAlign="center" width={300} fontSize={3} opacity={0.5}>
-          You haven't sent or received any messages in this chat yet.
-        </Text.Custom>
-      );
-    }
-
-    return (
-      <ChatLogListContainer isStandaloneChat={isStandaloneChat}>
-        {showPin && pinnedChatMessage && (
-          <FullWidthAnimatePresence>
-            <PinnedContainer
-              message={pinnedChatMessage}
-              onClick={() => {
-                const index = messages.findIndex(
-                  (msg) => msg.id === pinnedChatMessage.id
-                );
-                listRef?.current?.scrollToIndex({
-                  index,
-                  align: 'start',
-                  behavior: 'smooth',
-                });
-              }}
-            />
-          </FullWidthAnimatePresence>
-        )}
-        <ChatLogList
-          listRef={listRef}
-          messages={messages}
-          topOfListPadding={topPadding}
-          endOfListPadding={endPadding}
-          ourColor={ourColor}
-          isStandaloneChat={isStandaloneChat}
-        />
-      </ChatLogListContainer>
-    );
-  }, [
-    lastMessageIndex,
-    inboxLoader.isLoaded,
-    pinnedChatMessage,
-    showPin,
-    ourColor,
-  ]);
-
   return (
     <Flex flex={1} height="100%" width="100%" flexDirection="column">
       <ChatLogHeader
@@ -159,7 +98,18 @@ const ChatLogBodyPresenter = ({
         alignItems="center"
         justifyContent="center"
       >
-        {messageList}
+        <ChatLogBodyList
+          messages={messages}
+          listRef={listRef}
+          topPadding={topPadding}
+          endPadding={endPadding}
+          ourColor={ourColor}
+          showPin={showPin}
+          pinnedChatMessage={pinnedChatMessage}
+          isStandaloneChat={isStandaloneChat}
+          isEmpty={messages.length === 0}
+          isLoaded={inboxLoader.isLoaded}
+        />
       </Flex>
       <ChatInputContainer isStandaloneChat={isStandaloneChat}>
         {selectedChat && (
