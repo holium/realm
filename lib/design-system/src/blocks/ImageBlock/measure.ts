@@ -3,8 +3,8 @@ export const measureImage = (
   containerWidth: number
 ): Promise<{ width: string; height: string }> => {
   const div = document.createElement('div');
-  const tray = document.getElementById('messages-tray-app');
-  if (!tray) {
+  const body = document.getElementsByTagName('body')[0];
+  if (!body) {
     return new Promise((resolve) => resolve({ width: '0px', height: '0px' }));
   }
   div.style.visibility = 'hidden';
@@ -22,7 +22,7 @@ export const measureImage = (
   img.style.width = '100%';
   img.style.height = '100%';
   img.style.maxWidth = '20rem';
-  tray.appendChild(div);
+  body.appendChild(div);
 
   return new Promise((resolve, reject) => {
     img.onload = () => {
