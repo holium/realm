@@ -220,24 +220,35 @@
                       (gth (lent ~(tap by devices.state)) 0) :: there is at least one device
                   ==
                     =/  prow            (scry-path-row:lib thepath bowl)
+                    =/  mess            (scry-message:lib id bowl)
+                    =/  space-scry=(unit view:spc)
+                      ?.  =(%space type.prow)  ~
+                      =/  uspace  (~(get by metadata.prow) 'space')
+                      ?~  uspace  ~
+                      =/  path-first=path   /(scot %p our.bowl)/spaces/(scot %da now.bowl)
+                      =/  path-second=path  (stab u.uspace)
+                      =/  path-final=path   (weld (weld path-first path-second) /noun)
+                      (some .^(view:spc %gx path-final))
+
                     =/  push-title      (notif-from-nickname-or-patp sender.id bowl)
-                    =/  push-subtitle   (group-name-or-blank prow)
+                    =/  push-subtitle   
+                      ?~  space-scry
+                        (group-name-or-blank prow)
+                      ?.  =(%space type.prow)
+                        (group-name-or-blank prow)
+                      ?>  ?=(%space -.u.space-scry)
+                      (crip [name.space:(need space-scry) ' - ' (group-name-or-blank prow) ~])
                     =/  push-contents   (notif-msg parts bowl)
                     =/  unread-count    +(.^(@ud %gx /(scot %p our.bowl)/notif-db/(scot %da now.bowl)/db/unread-count/(scot %tas %realm-chat)/noun))
                     =/  avatar=(unit @t)
                       ?:  =(%dm type.prow)      (scry-avatar-for-patp:lib sender.id bowl)
                       ?:  =(%group type.prow)   (~(get by metadata.prow) 'image')
                       ?:  =(%space type.prow)
-                        =/  uspace  (~(get by metadata.prow) 'space')
-                        ?~  uspace  ~
-                        =/  path-first=path   /(scot %p our.bowl)/spaces/(scot %da now.bowl)
-                        =/  path-second=path  (stab u.uspace)
-                        =/  path-final=path   (weld (weld path-first path-second) /noun)
-                        =/  space-scry    .^(view:spc %gx path-final)
-                        ?>  ?=(%space -.space-scry)
-                        ?:  =('' picture.space.space-scry)
-                          (some wallpaper.theme.space.space-scry)
-                        (some picture.space.space-scry)
+                        ?~  space-scry  ~
+                        ?>  ?=(%space -.u.space-scry)
+                        ?:  =('' picture.space.u.space-scry)
+                          (some wallpaper.theme.space.u.space-scry)
+                        (some picture.space.u.space-scry)
                       ~  :: default to null if we don't know what type of chat this is
                     =/  push-card
                       %:  push-notification-card:lib
@@ -249,6 +260,7 @@
                           push-contents
                           unread-count
                           avatar
+                          mess
                       ==
                     [push-card notif-db-card ~]
                   :: otherwise, just send to notif-db
@@ -384,6 +396,12 @@
       %inline-code          p.content.part
       %code                 p.content.part
       %status               p.content.part
+      %link                 p.content.part
+      %react
+        ?~  reply-to.part   'Reacted to a message'
+        =/  prev-msg  (scry-message:lib +.u.reply-to.part bowl)
+        =/  prev-summary  (notif-msg prev-msg bowl)
+        (crip "Reacted to: \"{(trip prev-summary)}\"")
     ==
   (crip `tape`(swag [0 140] str)) :: only show the first 140 characters of the message in the preview
 ++  group-name-or-blank
