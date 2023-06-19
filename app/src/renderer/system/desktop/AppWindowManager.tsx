@@ -69,7 +69,7 @@ const AppWindowManagerPresenter = () => {
         left: 0,
         top: showTitleBar ? TITLEBAR_HEIGHT : 0,
         right: 0,
-        height: `calc(100vh - ${TITLEBAR_HEIGHT}px)`,
+        height: showTitleBar ? `calc(100vh - ${TITLEBAR_HEIGHT}px)` : '100vh',
         paddingTop: 0,
       }}
     >

@@ -1,4 +1,4 @@
-import { Bounds, Dimensions, Position } from '@holium/design-system';
+import { Bounds, Dimensions, Position } from '@holium/design-system/util';
 
 import { AppType, RealmConfigType } from 'renderer/stores/models/bazaar.model';
 

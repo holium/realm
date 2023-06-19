@@ -14,7 +14,6 @@ import { useAppState } from 'renderer/stores/app.store';
 
 import { denormalizeBounds, getMaximizedBounds } from './lib/window-manager';
 import { BackgroundImage } from './system/system.styles';
-import { TITLEBAR_HEIGHT } from './system/titlebar/Titlebar';
 
 type Props = {
   realmTheme: ThemeType;
@@ -144,11 +143,11 @@ export const RealmBackground = ({
     if (showTitleBar) {
       dmb = {
         ...dmb,
-        y: dmb.y + TITLEBAR_HEIGHT,
+        y: dmb.y,
       };
       mb = {
         ...mb,
-        y: mb.y + TITLEBAR_HEIGHT,
+        y: mb.y,
       };
     }
 
