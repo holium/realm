@@ -452,26 +452,27 @@
 ::
 :: pokes
 ::   tests:
-::db &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
-::db &db-action [%add-peer /example ~fed %member]
-::db &db-action [%create /example %foo 0 [%general ~[1 'a']] ~[['num' 'ud'] ['str' 't']]]
-::db &db-action [%create /example %vote 0 [%vote [%.y our %foo [our now] /example]] ~]
-::~zod/db &db-action [%create /example %vote 0 [%vote %.y our %foo [~zod now] /example] ~]
-::db &db-action [%edit /example [our ~2023.5.22..20.15.47..86fe] %foo 0 [%general ~[2 'b']] *@da *@da *@da]
-::db &db-action [%remove %foo /example [our ~2023.5.22..20.15.47..86fe]]
+::bedrock &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
+::bedrock &db-action [%add-peer /example ~fed %member]
+::bedrock &db-action [%create /example %foo 0 [%general ~[1 'a']] ~[['num' 'ud'] ['str' 't']]]
+::bedrock &db-action [%create /example %vote 0 [%vote [%.y our %foo [our now] /example]] ~]
+:: from ~bus:
+::~zod/bedrock &db-action [%create /example %vote 0 [%vote %.y our %foo [~zod now] /example] ~]
+::bedrock &db-action [%edit /example [our ~2023.5.22..20.15.47..86fe] %foo 0 [%general ~[2 'b']] *@da *@da *@da]
+::bedrock &db-action [%remove %foo /example [our ~2023.5.22..20.15.47..86fe]]
 ::
 ::  in zod
-::db &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
-::db &db-action [%create [~zod now] /example %foo 0 [%general ~[1 'a']] ~[['num' 'ud'] ['str' 't']]]
+::bedrock &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
+::bedrock &db-action [%create [~zod now] /example %foo 0 [%general ~[1 'a']] ~[['num' 'ud'] ['str' 't']]]
 ::  in bus
-::db &db-action [%create-path /target %host ~ ~ ~ ~[[~bus %host] [~fed %member]]]
-::db &db-action [%relay [~bus now] /target %relay 0 [%relay [~zod ~2023.6.13..15.57.34..aa97] %foo /example 0 %all %.n] ~]
+::bedrock &db-action [%create-path /target %host ~ ~ ~ ~[[~bus %host] [~fed %member]]]
+::bedrock &db-action [%relay [~bus now] /target %relay 0 [%relay [~zod ~2023.6.13..15.57.34..aa97] %foo /example 0 %all %.n] ~]
 ::  then, in zod again
-::db &db-action [%edit [our ~2023.5.22..17.21.47..9d73] /example %foo 0 [%general ~[2 'b']] ~]
-::db &db-action [%remove %foo /example [our ~2023.5.22..19.22.29..d0f7]]
+::bedrock &db-action [%edit [our ~2023.5.22..17.21.47..9d73] /example %foo 0 [%general ~[2 'b']] ~]
+::bedrock &db-action [%remove %foo /example [our ~2023.5.22..19.22.29..d0f7]]
 ++  create-path
-::db &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
-::db &db-action [%create-path /target %host ~ ~ ~ ~[[~bus %host] [~fed %member]]]
+::bedrock &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
+::bedrock &db-action [%create-path /target %host ~ ~ ~ ~[[~bus %host] [~fed %member]]]
   |=  [=input-path-row state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: ensure the path doesn't already exist
@@ -623,7 +624,7 @@
   [cards state]
 ::
 ++  remove-path
-::db &db-action [%remove-path /example]
+::bedrock &db-action [%remove-path /example]
   |=  [=path state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: ensure the path actually exists
@@ -658,7 +659,7 @@
   [cards state]
 ::
 ++  add-peer
-::db &db-action [%add-peer /example ~fed %member]
+::bedrock &db-action [%add-peer /example ~fed %member]
   |=  [[=path =ship =role] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: ensure the path actually exists
@@ -694,7 +695,7 @@
   [cards state]
 ::
 ++  kick-peer
-::db &db-action [%kick-peer /example ~fed]
+::bedrock &db-action [%kick-peer /example ~fed]
   |=  [[=path =ship] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: ensure the path actually exists
@@ -807,10 +808,10 @@
   [cards state]
 ::
 ++  create
-::db &db-action [%create [~zod now] /example %foo 0 [%general ~[1 'a']] ~[['num' 'ud'] ['str' 't']]]
-::db &db-action [%create /example %vote 0 [%vote [%.y our %foo [~zod now] /example]] ~]
-::db &db-action [%create /example %foo 1 [%general ~[1 'd' (jam /hello/goodbye)]] ~[['num' 'ud'] ['str' 't'] ['mypath' 'path']]]
-::~zod/db &db-action [%create /example %vote 0 [%vote %.y our %foo [~zod now] /example] ~]
+::bedrock &db-action [%create [~zod now] /example %foo 0 [%general ~[1 'a']] ~[['num' 'ud'] ['str' 't']]]
+::bedrock &db-action [%create /example %vote 0 [%vote [%.y our %foo [~zod now] /example]] ~]
+::bedrock &db-action [%create /example %foo 1 [%general ~[1 'd' (jam /hello/goodbye)]] ~[['num' 'ud'] ['str' 't'] ['mypath' 'path']]]
+::~zod/bedrock &db-action [%create /example %vote 0 [%vote %.y our %foo [~zod now] /example] ~]
   |=  [[=req-id =input-row] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: form row from input
@@ -916,7 +917,7 @@
   [cards state]
 ::
 ++  remove
-::db &db-action [%remove %foo /example [our ~2023.5.22..19.22.29..d0f7]]
+::bedrock &db-action [%remove %foo /example [our ~2023.5.22..19.22.29..d0f7]]
   |=  [[=type:common =path =id:common] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: permissions
@@ -961,7 +962,7 @@
 ++  relay
   :: supposed to be used by the sharer, poking their own ship,
   :: regardless of if they are the host of either original or target path
-::db &db-action [%relay [~bus now] /target %relay 0 [%relay [~zod ~2023.6.13..15.57.34..aa97] %foo /example 0 %all] ~]
+::bedrock &db-action [%relay [~bus now] /target %relay 0 [%relay [~zod ~2023.6.13..15.57.34..aa97] %foo /example 0 %all %.n] ~]
   |=  [[=req-id =input-row] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: first check that the input is actually a %relay
