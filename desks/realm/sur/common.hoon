@@ -93,6 +93,7 @@
       =path :: where the thing originally came from
       revision=@ud
       protocol=relay-protocol
+      deleted=?
   ==
 --
 

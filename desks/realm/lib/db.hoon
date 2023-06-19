@@ -22,6 +22,20 @@
   ?~  tbl   ~
   (~(get by u.tbl) id)
 ::
+++  del-db
+  |=  [=type:common =path =id:common state=state-0 t=@da]
+  ^-  state-0
+  =/  pt                  (~(got by tables.state) type)
+  =/  tbl                 (~(got by pt) path)
+  =/  old-row             (~(got by tbl) id) :: old row must first exist
+  :: do the delete
+  =.  tbl             (~(del by tbl) id)                :: delete by id
+  =.  pt              (~(put by pt) path tbl)           :: update the pathed-table
+  =.  tables.state    (~(put by tables.state) type pt)  :: update the tables.state
+  =/  log=db-row-del-change    [%del-row path type id t]
+  =.  del-log.state   (~(put by del-log.state) t log)  :: record the fact that we deleted
+  state
+::
 ++  our-matching-relays
   |=  [r=row state=state-0 =bowl:gall]
   ^-  (list row)
@@ -1236,6 +1250,7 @@
           [%path pa]
           [%revision ni]
           [%protocol de-relay-protocol]
+          [%deleted bo]
       ==
     ::
     ++  de-id

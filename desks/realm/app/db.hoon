@@ -343,6 +343,7 @@
                       %upd-row
                         ?.  ?=(%relay type.row.change)  ~
                         ?>  ?=(%relay -.data.row.change)
+                        ?:  deleted.data.row.change  ~  :: if the root-obj is deleted, don't remote-scry it
                         ~&  >>>  "asking for remote-scry"
                         :~  [
                           %pass
@@ -379,7 +380,42 @@
                             =.  revision.dat  +(revision.dat)
                             [%pass /selfpoke %agent [our.bowl dap.bowl] %poke %db-action !>([%edit id.rela path.rela type.rela v.rela dat ~])]~
                         ==
+                      %del-row
+                        ?:  ?=(%relay type.change)  ~
+                        :: if it's NOT a relay, we might have to poke ourselves to update the relay
+                        =/  fakerow=row  *row
+                        =.  id.fakerow   id.change
+                        =/  our-relays=(list row)  (our-matching-relays:db fakerow state bowl)
+                        ?~  our-relays  ~
+                        =/  snagged-first=row  (snag 0 `(list row)`our-relays)
+                        ?>  ?=(%relay -.data.snagged-first)
+                        :-
+                          :: remote-scry-cull all the revisions of this
+                          :: deleted object
+                          [%pass /remote-scry/cullback %cull [%ud revision.data.snagged-first] /(scot %p ship.id.change)/(scot %da t.id.change)]
+                        ^-  (list card)
+                        %-  zing
+                        %+  turn
+                          our-relays
+                        |=  rela=row
+                        ^-  (list card)
+                        ?+  -.data.rela  ~
+                          %relay
+                            :: signal that the relayed object was deleted
+                            =/  dat  data.rela
+                            =.  deleted.dat  %.y
+                            [%pass /selfpoke %agent [our.bowl dap.bowl] %poke %db-action !>([%edit id.rela path.rela type.rela v.rela dat ~])]~
+                        ==
                     ==
+                  =.  state
+                    ?:  ?&  ?=(%upd-row -.change)
+                            ?=(%relay type.row.change)
+                            ?=(%relay -.data.row.change)
+                            =(%.y deleted.data.row.change)
+                        ==
+                      ~&  >>>  "{<our.bowl>} is del-db ing {<type.data.row.change>} {<ship.id.data.row.change>} {<t.id.data.row.change>}"
+                      (del-db:db type.data.row.change path.data.row.change id.data.row.change state (add now.bowl index))
+                    state
                   $(index +(index), state (process-db-change:db dbpath change state bowl), result-cards (weld (weld result-cards new-scry) pokes))
               %db-path
                 =/  full=fullpath  !<(fullpath +.+.sign)
@@ -470,6 +506,10 @@
                 this(state (add-row-to-db:db row.rs schema.rs state))
             ==
         ==
+      [%remote-scry %cullback ~]
+        ~&  >  "remote-scry cullback we culled something"
+        ~&  >  -.sign-arvo
+        `this
       [%timer ~]
         ~&  >>>  "unhandled on-arvo %timer"
         `this
