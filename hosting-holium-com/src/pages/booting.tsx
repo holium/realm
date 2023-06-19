@@ -13,22 +13,48 @@ export default function Booting() {
   const intervalRef = useRef<NodeJS.Timer>();
   const [logs, setLogs] = useState<string[]>(['Booting started.']);
   const booting = useToggle(true);
+  const error = useToggle(false);
+
+  const isBYOP = useToggle(false);
 
   const pollShipStatus = useCallback(async () => {
-    const { serverId, token } = OnboardingStorage.get();
+    const { serverId, token, productType } = OnboardingStorage.get();
 
-    if (!serverId || !token) return;
+    if (!token) return;
 
     const ships = await thirdEarthApi.getUserShips(token);
-    const ship = Object.values(ships).find((s) => s.patp === serverId);
+    let ship = Object.values(ships).find((s) => s.patp === serverId);
+
+    if (ship?.ship_type === 'hardError') {
+      booting.toggleOff();
+      error.toggleOn();
+    }
+
+    if (productType === 'byop-p') {
+      isBYOP.toggleOn();
+      ship = Object.values(ships)
+        .filter((s) => s.product_type === 'byop-p' && s.is_migration)
+        .sort((a, b) => {
+          if (a.created_at > b.created_at) return -1;
+          if (a.created_at < b.created_at) return 1;
+          return 0;
+        })[0];
+    }
 
     if (!ship) return;
 
     if (logs.length === 1) {
-      setLogs((logs) => [
-        ...logs,
-        `${serverId} will be ready in a few minutes.`,
-      ]);
+      if (productType === 'byop-p') {
+        setLogs((logs) => [
+          ...logs,
+          `Your uploaded identity will be ready in 5-10 minutes.`,
+        ]);
+      } else {
+        setLogs((logs) => [
+          ...logs,
+          `${serverId} will be ready in a few minutes.`,
+        ]);
+      }
     } else if (logs.length === 2) {
       setLogs((logs) => [...logs, 'Go touch some grass.']);
     }
@@ -56,9 +82,15 @@ export default function Booting() {
         serverCode,
       });
     }
-  }, [booting, logs]);
+  }, [logs, booting, isBYOP]);
 
-  const onNext = useCallback(() => goToPage('/credentials'), [goToPage]);
+  const onNext = () => {
+    if (isBYOP.isOn) {
+      return goToPage('/download');
+    }
+
+    return goToPage('/credentials');
+  };
 
   useEffect(() => {
     if (!booting.isOn) return;
@@ -71,7 +103,12 @@ export default function Booting() {
 
   return (
     <Page title="Booting your identity" isProtected>
-      <BootingDialog logs={logs} isBooting={booting.isOn} onNext={onNext} />
+      <BootingDialog
+        logs={logs}
+        isBooting={booting.isOn}
+        isError={error.isOn}
+        onNext={onNext}
+      />
     </Page>
   );
 }

@@ -23,7 +23,7 @@ type Props = {
 
 export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const prefilledEmail = (query.email ?? '') as string;
-  const redirectAfterLogin = (query.redirect ?? '') as string;
+  const redirectAfterLogin = (query.redirect_url ?? '') as string;
 
   return {
     props: {
@@ -39,11 +39,9 @@ export default function Login({ prefilledEmail, redirectAfterLogin }: Props) {
   const forgotPassword = useToggle(false);
   const resetPassword = useToggle(false);
 
-  const onNoAccount = () => goToPage('/');
+  const onNoAccount = () => goToPage('/create-account');
 
-  const onBack = () => {
-    window.location.href = 'https://holium.com';
-  };
+  const onBack = () => goToPage('/');
 
   const onForgotPassword = async (email: string) => {
     const response = await thirdEarthApi.forgotPassword(email);

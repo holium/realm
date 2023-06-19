@@ -76,7 +76,13 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
 
     await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
     await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
-    await thirdEarthApi.ship(token, serverId, productId.toString(), invoiceId);
+    await thirdEarthApi.provisionalShipEntry({
+      token,
+      patp: serverId,
+      shipType: 'planet',
+      product: productId.toString(),
+      invoiceId,
+    });
 
     setStep('/booting');
 
@@ -85,6 +91,7 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
 
   return (
     <PaymentDialog
+      productType="planet"
       products={products}
       productId={productId}
       patp={serverId}
