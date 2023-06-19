@@ -2,10 +2,7 @@ import { Bounds, Dimensions, Position } from '@holium/design-system';
 
 import { AppType, RealmConfigType } from 'renderer/stores/models/bazaar.model';
 
-import {
-  DEFAULT_APP_WINDOW_DIMENSIONS,
-  getDefaultAppDimensions,
-} from './dimensions';
+import { getDefaultAppDimensions } from './dimensions';
 /**
  * getCenteredPosition
  *
@@ -153,7 +150,7 @@ export const getInitialWindowBounds = (
   desktopDimensions: Dimensions
 ): Bounds => {
   // If we have pre-defined dimensions for this app, use them.
-  if (DEFAULT_APP_WINDOW_DIMENSIONS[app.id]) {
+  if (getDefaultAppDimensions(app.id, desktopDimensions)) {
     return getCenteredBounds(app, desktopDimensions);
   }
 
