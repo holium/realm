@@ -1,4 +1,4 @@
-import { Flex } from '@holium/design-system/general';
+import { Anchor, Flex } from '@holium/design-system/general';
 
 import {
   OnboardDialogDescription,
@@ -14,9 +14,14 @@ import {
 type Props = {
   onUploadId: () => void;
   onPurchaseId: () => void;
+  onAlreadyHaveAccount?: () => void;
 };
 
-export const GetRealmDialogBody = ({ onUploadId, onPurchaseId }: Props) => (
+export const GetRealmDialogBody = ({
+  onUploadId,
+  onPurchaseId,
+  onAlreadyHaveAccount,
+}: Props) => (
   <Flex flexDirection="column" gap="32px">
     <Flex flexDirection="column" gap="16px">
       <OnboardDialogTitle>Get on Realm</OnboardDialogTitle>
@@ -33,5 +38,11 @@ export const GetRealmDialogBody = ({ onUploadId, onPurchaseId }: Props) => (
         <ButtonText>Upload ID</ButtonText>
       </UploadIdButton>
     </ButtonsContainer>
+    {onAlreadyHaveAccount && (
+      <OnboardDialogDescription>
+        Already have an account?{' '}
+        <Anchor onClick={onAlreadyHaveAccount}>Log in</Anchor>.
+      </OnboardDialogDescription>
+    )}
   </Flex>
 );

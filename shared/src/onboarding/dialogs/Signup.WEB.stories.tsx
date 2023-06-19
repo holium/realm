@@ -53,7 +53,11 @@ export const GetOnRealmDialogStory: ComponentStory<
   typeof GetOnRealmDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <GetOnRealmDialog onPurchaseId={() => {}} onUploadId={() => {}} />
+    <GetOnRealmDialog
+      onPurchaseId={() => {}}
+      onUploadId={() => {}}
+      onAlreadyHaveAccount={() => {}}
+    />
   </OnboardingDialogWrapper>
 );
 
@@ -64,7 +68,6 @@ export const CreateAccountDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <CreateAccountDialog
-      onAlreadyHaveAccount={() => {}}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />

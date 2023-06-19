@@ -30,13 +30,21 @@ export default function GetOnRealm({ email }: Props) {
   const onUploadId = () => {
     OnboardingStorage.set({ productType: 'byop-p' });
 
-    return goToPage('/create-account');
+    return goToPage('/create-account', {
+      haha: 'true',
+    });
   };
 
   const onPurchaseId = async () => {
     OnboardingStorage.remove('productType');
 
-    return goToPage('/create-account');
+    return goToPage('/create-account', {
+      haha: 'true',
+    });
+  };
+
+  const onAlreadyHaveAccount = () => {
+    return goToPage('/login');
   };
 
   useEffect(() => {
@@ -50,6 +58,7 @@ export default function GetOnRealm({ email }: Props) {
         onPurchaseId={onPurchaseId}
         // Email query parameter means they're coming from the landing page.
         onBack={email ? onBack : undefined}
+        onAlreadyHaveAccount={onAlreadyHaveAccount}
       />
     </Page>
   );

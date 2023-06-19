@@ -38,6 +38,7 @@ export const useNavigation = () => {
         email?: string;
         back_url?: OnboardingPage;
         redirect_url?: OnboardingPage;
+        haha?: string; // Hide "Already have an account"
       }
     ) => {
       const path =

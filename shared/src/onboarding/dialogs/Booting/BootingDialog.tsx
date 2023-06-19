@@ -6,7 +6,7 @@ import { BootingDialogBody } from './BootingDialogBody';
 type Props = {
   logs: string[];
   isBooting: boolean;
-  isError: boolean;
+  isError?: boolean;
   onNext: () => Promise<boolean>;
 };
 
