@@ -1,4 +1,4 @@
-::  app/db.hoon
+::  app/bedrock.hoon
 ::  - all data is scoped by /path, with a corresponding peers list
 ::  - ship-to-ship replication of data uses one-at-a-time subscriptions
 ::    described here: https://developers.urbit.org/reference/arvo/concepts/subscriptions#one-at-a-time
@@ -9,33 +9,6 @@
 ::    within the database permissions and constraints system)
 ::  - custom data types work by %apps specifying the schema for the type
 ::
-::  Example: (where %app is some forum-posting groups-like thing)
-::  ~zod%app -> ~zod%db
-::  ~bus%app -> ~bus%db
-::    on-init both ~zod and ~bus %app should subscribe to /db on their own %db so they can be informed about data-changes
-::  ~zod%app creates a new "thread", which means poking ~zod%db with the peers-list and path for that thread
-::  ~zod%db then pokes ~bus%db with [%get-path path]
-::  ~bus%db then subscribes to ~zod%db /path/[version]/[path] so that it will get the next update
-::    AND, ~bus%db publishes the current version of data to its /db subscription-path
-::  at this point, all the subs are set up to stay in sync, but no actual application data is in the "thread" ~zod%app originally created
-:: THEN
-:: ~zod%app creates a new "post" in that thread, which means poking ~zod%db [%create row], which causes:
-::  1. ~zod%db updates its internal state
-::  2. ~zod%db publishes the new version on /path/[version]/[path] to all [version] subs less than the new current revision
-::  3. ~zod%db kicks all foreign subs from the paths it published to
-::  4. ~zod%db publishes state to /db wire
-:: which causes ~bus%db to:
-:: 1. update its state
-:: 2. publish its state to /db (so that ~bus%app and any frontend clients get it)
-:: 3. subscribe to ~zod%db on /path/[version + 1]/[path] (so that we will be informed of next update)
-:: THEN
-:: ~bus%app wants to create a "reply" in the "thread" so it pokes ~zod%app with some format defined by %app, which causes:
-:: 1. ~zod%app scries ~zod%db for peers to do permissions checking
-:: 2. assuming allowed, ~zod%app pokes ~zod%db with [%create row]
-:: 3. this cascades through publishing on the /path/[version]/[path] to all subs less than new version, just like with the original post
-:: similar process for ~bus%app wanting to %edit their "reply"
-::
-
 ::  TO USE:
 ::  - create a path with a list of peers with %create-path
 ::    ex: :db &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
@@ -53,7 +26,6 @@
 /+  dbug, db
 =|  state-0
 =*  state  -
-:: ^-  agent:gall
 =<
   %-  agent:dbug
   |_  =bowl:gall

@@ -465,9 +465,10 @@
 ::db &db-action [%create [~zod now] /example %foo 0 [%general ~[1 'a']] ~[['num' 'ud'] ['str' 't']]]
 ::  in bus
 ::db &db-action [%create-path /target %host ~ ~ ~ ~[[~bus %host] [~fed %member]]]
-::db &db-action [%relay [~bus now] /target %relay 0 [%relay [~zod ~2023.6.13..15.57.34..aa97] %foo /example 0 %all] ~]
+::db &db-action [%relay [~bus now] /target %relay 0 [%relay [~zod ~2023.6.13..15.57.34..aa97] %foo /example 0 %all %.n] ~]
 ::  then, in zod again
 ::db &db-action [%edit [our ~2023.5.22..17.21.47..9d73] /example %foo 0 [%general ~[2 'b']] ~]
+::db &db-action [%remove %foo /example [our ~2023.5.22..19.22.29..d0f7]]
 ++  create-path
 ::db &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
 ::db &db-action [%create-path /target %host ~ ~ ~ ~[[~bus %host] [~fed %member]]]
