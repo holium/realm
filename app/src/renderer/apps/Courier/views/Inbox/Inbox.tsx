@@ -23,6 +23,7 @@ export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
 
   return (
     <InboxBody
+      key={sortedChatList.length}
       inboxes={sortedChatList}
       accountIdentity={loggedInAccount?.serverId}
       spacePath={currentSpace?.path}

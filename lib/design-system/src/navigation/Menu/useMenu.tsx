@@ -97,13 +97,7 @@ type Orientation =
   | 'bottom-right'
   | 'bottom';
 
-export function useMenu(
-  orientation: Orientation = 'bottom-left',
-  menuDimensions: Dimensions,
-  offset?: Position,
-  closableIds?: string[],
-  closableClasses?: string[]
-): {
+type UseMenuProps = {
   isOpen: boolean;
   anchorEl: null | HTMLElement;
   position: { y: number; x: number };
@@ -111,7 +105,15 @@ export function useMenu(
   closeMenu: () => void;
   toggleMenu: (event: React.MouseEvent<HTMLElement>) => void;
   menuRef: React.RefObject<HTMLDivElement>;
-} {
+};
+
+export function useMenu(
+  orientation: Orientation = 'bottom-left',
+  menuDimensions: Dimensions,
+  offset?: Position,
+  closableIds?: string[],
+  closableClasses?: string[]
+): UseMenuProps {
   const [menuState, setMenuState] = useState<MenuState>({
     isOpen: false,
     anchorEl: null,
