@@ -1,54 +1,64 @@
-import { FormikValues } from 'formik';
-import { GetServerSideProps } from 'next';
+import { useEffect } from 'react';
+import type { GetServerSideProps } from 'next/types';
 
-import { CreateAccountDialog, OnboardingStorage } from '@holium/shared';
+import { GetOnRealmDialog, OnboardingStorage } from '@holium/shared';
 
 import { Page } from '../components/Page';
-import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
 type Props = {
-  prefilledEmail: string;
+  email: string;
 };
 
 export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-  const prefilledEmail = (query.email ?? '') as string;
+  const email = (query.email ?? '') as string;
 
   return {
     props: {
-      prefilledEmail,
+      email,
     },
   };
 };
 
-export default function CreateAccount({ prefilledEmail }: Props) {
+export default function GetOnRealm({ email }: Props) {
   const { goToPage } = useNavigation();
 
-  const onAlreadyHaveAccount = () => goToPage('/login');
-
-  const onNext = async ({ email, password }: FormikValues) => {
-    // TODO: hash password
-    OnboardingStorage.set({ email, passwordHash: password });
-
-    try {
-      const result = await thirdEarthApi.register(email, password);
-      if (result) {
-        return goToPage('/verify-email');
-      } else {
-        return false;
-      }
-    } catch (error) {
-      console.error(error);
-      return false;
-    }
+  const onBack = () => {
+    window.location.href = 'https://holium.com';
   };
 
+  const onUploadId = () => {
+    OnboardingStorage.set({ productType: 'byop-p' });
+
+    return goToPage('/create-account', {
+      haha: 'true',
+    });
+  };
+
+  const onPurchaseId = async () => {
+    OnboardingStorage.remove('productType');
+
+    return goToPage('/create-account', {
+      haha: 'true',
+    });
+  };
+
+  const onAlreadyHaveAccount = () => {
+    return goToPage('/login');
+  };
+
+  useEffect(() => {
+    OnboardingStorage.set({ email });
+  }, [email]);
+
   return (
-    <Page title="Create account">
-      <CreateAccountDialog
-        prefilledEmail={prefilledEmail}
+    <Page title="Get on Realm">
+      <GetOnRealmDialog
+        onUploadId={onUploadId}
+        onPurchaseId={onPurchaseId}
+        // Email query parameter means they're coming from the landing page.
+        onBack={email ? onBack : undefined}
         onAlreadyHaveAccount={onAlreadyHaveAccount}
-        onNext={onNext}
       />
     </Page>
   );

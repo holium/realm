@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { MotionConfig } from 'framer-motion';
 import { observer } from 'mobx-react';
 
+import { PassportMenuProvider } from 'renderer/components/People/usePassportMenu';
+
 import { GlobalStyle, RealmBackground } from './App.styles';
 import { AppContent } from './AppContent';
 import { AppLoading } from './AppLoading';
@@ -78,12 +80,14 @@ const AppPresenter = () => {
         {background}
         <SelectionProvider>
           <ContextMenuProvider>
-            <ErrorBoundary>
-              {titlebar}
-              {content}
-              {contextMenu}
-              <div id="portal-root" />
-            </ErrorBoundary>
+            <PassportMenuProvider>
+              <ErrorBoundary>
+                {titlebar}
+                {content}
+                {contextMenu}
+                <div id="portal-root" />
+              </ErrorBoundary>
+            </PassportMenuProvider>
           </ContextMenuProvider>
         </SelectionProvider>
       </AppStateProvider>

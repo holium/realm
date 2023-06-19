@@ -14,7 +14,6 @@ export const accountPageUrl: Record<string, OnboardingPage> = {
   'Custom Domain': '/account/custom-domain',
   Storage: '/account/storage',
   Hosting: '/account',
-  'Get Hosting': '/choose-id',
 };
 
 export const useNavigation = () => {
@@ -33,7 +32,15 @@ export const useNavigation = () => {
   }, [router.pathname]);
 
   const goToPage = useCallback(
-    (page: OnboardingPage, params?: Record<string, string>) => {
+    (
+      page: OnboardingPage,
+      params?: {
+        email?: string;
+        back_url?: OnboardingPage;
+        redirect_url?: OnboardingPage;
+        haha?: string; // Hide "Already have an account"
+      }
+    ) => {
       const path =
         page + (params ? `?${new URLSearchParams(params).toString()}` : '');
       return router.push(path);

@@ -69,6 +69,7 @@ ChooseIdentityDialogStory.storyName = '3. Choose Identity';
 export const PaymentDialogStory: ComponentStory<typeof PaymentDialog> = () => (
   <OnboardingDialogWrapper>
     <PaymentDialog
+      productType="planet"
       products={thirdEarthMockProducts}
       productId={1}
       setProductId={() => {}}

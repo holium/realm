@@ -1,8 +1,8 @@
-function timeoutPromise<T>(promise: Promise<T>): Promise<T> {
+function timeoutPromise<T>(promise: Promise<T>, timeout = 15000): Promise<T> {
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(() => {
       reject(new Error('timeout'));
-    }, 15000);
+    }, timeout);
     promise.then(
       (res) => {
         clearTimeout(timeoutId);
@@ -18,7 +18,8 @@ function timeoutPromise<T>(promise: Promise<T>): Promise<T> {
 
 export function http<T>(
   input: RequestInfo | URL,
-  init?: RequestInit
+  init?: RequestInit,
+  timeout?: number
 ): Promise<T> {
   return timeoutPromise(
     fetch(input, init).then((response) => {
@@ -26,6 +27,7 @@ export function http<T>(
         throw new Error(response.statusText);
       }
       return response.json();
-    })
+    }),
+    timeout
   );
 }

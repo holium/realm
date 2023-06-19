@@ -4,7 +4,6 @@ import { observer } from 'mobx-react';
 import { rgba } from 'polished';
 import styled from 'styled-components';
 
-import { PassportMenuProvider } from 'renderer/components/People/usePassportMenu';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -48,10 +47,8 @@ const HomePanePresenter = () => {
           transition={{ background: { duration: 0.25 } }}
           exit={{ opacity: 0 }}
         >
-          <PassportMenuProvider>
-            <Home isOpen={isOpen} isOur={isOur} />
-            <AppSearchPopover />
-          </PassportMenuProvider>
+          <Home isOpen={isOpen} isOur={isOur} />
+          <AppSearchPopover />
         </HomeWindow>
       </AnimatePresence>
     ),

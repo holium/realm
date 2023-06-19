@@ -36,9 +36,14 @@ const HostingPresenter = () => {
   const changeMaintenanceWindowModal = useToggle(false);
   const ejectIdModal = useToggle(false);
 
+  const identities = useMemo(() => ships.map((ship) => ship.patp), [ships]);
   const selectedShip = useMemo(
     () => ships.find((ship) => ship.patp === selectedIdentity),
     [ships, selectedIdentity]
+  );
+  const isUploadedIdentity = useMemo(
+    () => selectedShip?.product_type === 'byop-p',
+    [selectedShip]
   );
 
   const onClickSidebarSection = (section: string) => {
@@ -172,9 +177,19 @@ const HostingPresenter = () => {
     return false;
   };
 
-  const onClickBuyIdentity = () => {
-    goToPage(accountPageUrl['Get Hosting'], {
-      back_url: accountPageUrl['Hosting'],
+  const onClickUploadId = () => {
+    OnboardingStorage.set({
+      productType: 'byop-p',
+    });
+    goToPage('/payment', {
+      back_url: '/account',
+    });
+  };
+
+  const onClickPurchaseId = () => {
+    OnboardingStorage.remove('productType');
+    goToPage('/choose-id', {
+      back_url: '/account',
     });
   };
 
@@ -212,13 +227,15 @@ const HostingPresenter = () => {
         onSubmit={onSubmitEjectId}
       />
       <AccountHostingDialog
-        identities={ships.map((ship) => ship.patp)}
+        identities={identities}
         selectedIdentity={selectedIdentity}
+        isUploadedIdentity={isUploadedIdentity}
         email={email}
         serverUrl={selectedShip?.link}
         serverCode={selectedShip?.code}
         serverMaintenanceWindow={selectedShip?.maintenance_window}
-        onClickBuyIdentity={onClickBuyIdentity}
+        onClickPurchaseId={onClickPurchaseId}
+        onClickUploadId={onClickUploadId}
         setSelectedIdentity={setSelectedIdentity}
         onClickChangeEmail={changeEmailModal.toggleOn}
         onClickChangePassword={changePasswordModal.toggleOn}

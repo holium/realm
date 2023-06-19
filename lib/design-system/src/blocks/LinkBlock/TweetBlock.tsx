@@ -92,8 +92,8 @@ export const measureTweet = (
   _containerWidth?: number
 ): Promise<{ width: string; height: string }> => {
   const div = document.createElement('div');
-  const tray = document.getElementById('messages-tray-app');
-  if (!tray) {
+  const body = document.getElementsByTagName('body')[0];
+  if (!body) {
     return new Promise((resolve) => resolve({ width: '0px', height: '0px' }));
   }
   div.style.visibility = 'hidden';
@@ -105,7 +105,7 @@ export const measureTweet = (
   div.style.boxSizing = 'border-box';
   div.style.minWidth = '150px';
   div.style.height = '700px';
-  tray.appendChild(div);
+  body.appendChild(div);
   const root = createRoot(div);
 
   return new Promise((resolve) => {
@@ -123,7 +123,7 @@ export const measureTweet = (
           if (webview) {
             const height = Math.ceil(webview.offsetHeight);
             const width = Math.ceil(webview.offsetWidth);
-            tray.removeChild(div);
+            body.removeChild(div);
             resolve({ width: `${width}`, height: `${height}` });
           } else {
             resolve({ width: '0px', height: '0px' });

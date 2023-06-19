@@ -19,7 +19,7 @@ export const OnboardingDialogWrapper = ({
   </Flex>
 );
 
-const thirdEarthMockProduct: ThirdEarthProduct = {
+export const thirdEarthMockProduct: ThirdEarthProduct = {
   id: 1,
   client_id: 1,
   droplet_class_id: 1,

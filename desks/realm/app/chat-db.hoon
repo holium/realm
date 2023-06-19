@@ -169,6 +169,9 @@
           =/  thepathrow   (~(get by paths-table.state) t.t.path)
           :~  [%give %fact ~ chat-path-row+!>(thepathrow)]
           ==
+      :: /chat-vent/~2000.1.1
+        [%chat-vent @ ~] :: poke response comes on this path
+          ~
     ==
     [cards this]
   ::
@@ -271,6 +274,11 @@
         =/  timestamp=@da   `@da`(slav %da i.t.t.t.t.path)
         =/  sender=@p       `@p`(slav %p i.t.t.t.t.t.path)
         ``chat-db-dump+!>(tables+[messages+(start-lot:from:db-lib `msg-id:sur`[timestamp sender] messages-table.state) ~])
+    ::
+      [%x %db %message @ @ ~]
+        =/  timestamp=@da   `@da`(slav %da i.t.t.t.path)
+        =/  sender=@p       `@p`(slav %p i.t.t.t.t.path)
+        ``chat-db-message+!>((get-full-message:db-lib messages-table.state [timestamp sender]))
     ::
       [%x %delete-log %start-ms @ ~]
         =/  timestamp=@da   (di:dejs:format n+i.t.t.t.path)

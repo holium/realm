@@ -90,7 +90,6 @@ export const ChatStore = types
         return bTimestamp - aTimestamp;
       });
     },
-
     getChatHeader(path: string): {
       title: string;
       sigil?: any;
@@ -155,6 +154,15 @@ export const ChatStore = types
     loadChatList: flow(function* () {
       try {
         self.inbox = yield ChatIPC.getChatList();
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+    findChatDM: flow(function* (peer: string, our: string) {
+      // find the DM, if exists, where it's only ourselves and the peer
+      try {
+        const path = yield ChatIPC.findChatDM(peer, our);
+        return path;
       } catch (error) {
         console.error(error);
       }

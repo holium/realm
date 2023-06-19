@@ -39,7 +39,9 @@ type Props = {
   children?: ReactNode;
   customBody?: ReactNode;
   isLoading?: boolean;
-  onClickBuyIdentity: () => void;
+  isUploadedIdentity: boolean;
+  onClickUploadId: () => void;
+  onClickPurchaseId: () => void;
   setSelectedIdentity: (patp: string) => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onSubmit?: () => void;
@@ -53,7 +55,9 @@ export const AccountDialog = ({
   children,
   customBody,
   isLoading,
-  onClickBuyIdentity,
+  isUploadedIdentity,
+  onClickUploadId,
+  onClickPurchaseId,
   setSelectedIdentity,
   onClickSidebarSection,
   onSubmit,
@@ -65,12 +69,20 @@ export const AccountDialog = ({
   let sidebarItems: SidebarSection[] = [];
 
   if (hasShips) {
-    sidebarItems = [
-      SidebarSection.Hosting,
-      SidebarSection.Storage,
-      SidebarSection.CustomDomain,
-      SidebarSection.DownloadRealm,
-    ];
+    if (isUploadedIdentity) {
+      sidebarItems = [
+        SidebarSection.Hosting,
+        SidebarSection.CustomDomain,
+        SidebarSection.DownloadRealm,
+      ];
+    } else {
+      sidebarItems = [
+        SidebarSection.Hosting,
+        SidebarSection.Storage,
+        SidebarSection.CustomDomain,
+        SidebarSection.DownloadRealm,
+      ];
+    }
   } else if (hasCSEK.isOn) {
     sidebarItems = [SidebarSection.DownloadRealm, SidebarSection.GetHosting];
   } else {
@@ -119,15 +131,22 @@ export const AccountDialog = ({
                     flexDirection="column"
                     mt="8px"
                     pt="8px"
+                    gap="8px"
                     borderTop="1px solid rgba(var(--rlm-border-rgba))"
                   >
+                    <Button.Transparent width="100%" onClick={onClickUploadId}>
+                      <Flex alignItems="center" gap="8px">
+                        <Icon name="ArrowRightLine" size={16} />
+                        <Text.Body>Upload ID</Text.Body>
+                      </Flex>
+                    </Button.Transparent>
                     <Button.Transparent
                       width="100%"
-                      onClick={onClickBuyIdentity}
+                      onClick={onClickPurchaseId}
                     >
                       <Flex alignItems="center" gap="8px">
                         <Icon name="AddCircleLine" size={16} />
-                        <Text.Body>Get another ID</Text.Body>
+                        <Text.Body>Purchase ID</Text.Body>
                       </Flex>
                     </Button.Transparent>
                   </Flex>
@@ -194,9 +213,11 @@ export const AccountDialogSkeleton = ({
       selectedIdentity=""
       currentSection={currentSection}
       isLoading
+      isUploadedIdentity={false}
       customBody={isBlankBody ? <Flex flex={5} /> : undefined}
       setSelectedIdentity={() => {}}
-      onClickBuyIdentity={() => {}}
+      onClickPurchaseId={() => {}}
+      onClickUploadId={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />
