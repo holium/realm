@@ -45,7 +45,7 @@ export const PinnedContainer = ({ message, onClick }: PinnedContainerProps) => {
   const { getOptions, setOptions } = useContextMenu();
   const [authorColor, setAuthorColor] = useState<string | undefined>();
 
-  const pinnedRowId = useMemo(() => `pinned-${message.id}`, [message.id]);
+  const pinnedRowId = useMemo(() => `pinned-${message?.id}`, [message?.id]);
   const contextMenuOptions = useMemo(() => {
     const menu: MenuItemProps[] = [];
     if (!selectedChat || !loggedInAccount) return menu;
@@ -69,7 +69,7 @@ export const PinnedContainer = ({ message, onClick }: PinnedContainerProps) => {
         disabled: false,
         onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
-          selectedChat.clearPinnedMessage(message.id);
+          selectedChat.clearPinnedMessage(message?.id);
         },
       });
     }
@@ -83,7 +83,7 @@ export const PinnedContainer = ({ message, onClick }: PinnedContainerProps) => {
   }, [contextMenuOptions, getOptions, setOptions, pinnedRowId]);
 
   useEffect(() => {
-    const contact = friends.getContactAvatarMetadata(message.sender);
+    const contact = friends.getContactAvatarMetadata(message?.sender);
     // NOTE: #000 is the default color, so we want to default to undefined
     // and use the accent color instead
     const authorColorDisplay =
@@ -91,8 +91,9 @@ export const PinnedContainer = ({ message, onClick }: PinnedContainerProps) => {
       'rgba(var(--rlm-text-rgba))';
 
     setAuthorColor(authorColorDisplay);
-  }, [message.sender]);
+  }, [message?.sender]);
 
+  if (!message) return null;
   return (
     <Flex
       width="100%"
