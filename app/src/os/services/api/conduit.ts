@@ -645,7 +645,7 @@ export class Conduit extends EventEmitter {
     await conduit.closeChannel();
     if (!conduit.url || !conduit.code || !conduit.cookie)
       throw new Error('url, code, or cookie not set');
-    conduit.init(conduit.url, conduit.code, conduit.cookie);
+    await conduit.init(conduit.url, conduit.code, conduit.cookie);
     return conduit;
   }
 

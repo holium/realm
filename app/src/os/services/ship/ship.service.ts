@@ -113,9 +113,6 @@ export class ShipService extends AbstractService<any> {
             );
             this.authService?._setLockfile({ ...credentials, cookie: null });
             APIConnection.getInstance().closeChannel();
-            // this will actually automatically reconnect
-            //  (and it works as of last testing)
-            // APIConnection.getInstance().reconnect();
           } catch (e) {
             log.error(e);
           }
@@ -221,14 +218,18 @@ export class ShipService extends AbstractService<any> {
     this.shipDB.encrypt(password);
   }
 
-  public async cleanup() {
-    // remove all ipcMain listeners
-    this.removeHandlers();
+  public async cleanupServices() {
     this.services?.chat.reset();
     this.services?.notifications.reset();
     this.services?.friends.reset();
     this.services?.spaces.reset();
     this.services?.bazaar.reset();
+  }
+
+  public async cleanup() {
+    // remove all ipcMain listeners
+    this.removeHandlers();
+    this.cleanupServices();
     // if the ship is too slow, just skip closing the channel
     // so we dont hang the app for too long
     const timeout = setTimeout(() => {
@@ -239,7 +240,6 @@ export class ShipService extends AbstractService<any> {
     }, 1000);
     await APIConnection.getInstance().closeChannel();
     clearTimeout(timeout);
-
     this.shipDB?.disconnect();
   }
 

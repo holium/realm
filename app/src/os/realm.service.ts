@@ -2,6 +2,8 @@ import { app, BrowserWindow, WebContents } from 'electron';
 import log from 'electron-log';
 import { track } from '@amplitude/analytics-browser';
 
+import { ConduitState } from 'os/services/api';
+
 import {
   getReleaseChannelFromSettings,
   saveReleaseChannelInSettings,
@@ -364,7 +366,14 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   }
 
   async reconnectConduit() {
-    APIConnection.getInstance().reconnect();
+    APIConnection.getInstance()
+      .reconnect()
+      .then(() => this.services?.ship?.init(this.services?.auth))
+      .catch((e) => log.error(e));
+  }
+
+  async setConduitStatus(status: ConduitState) {
+    APIConnection.getInstance().conduit.updateStatus(status);
   }
 
   // private startBackgroundProcess(): void {

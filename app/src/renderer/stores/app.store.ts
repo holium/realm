@@ -51,6 +51,7 @@ const AppStateModel = types
       'refreshing',
       'refreshed',
       'offline',
+      'no-internet',
     ]),
     error: types.maybeNull(types.string),
   })

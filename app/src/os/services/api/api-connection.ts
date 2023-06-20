@@ -117,6 +117,10 @@ export class APIConnection {
       // this.sendLog('stale connection');
       this.sendConnectionStatus(ConduitState.Stale);
     });
+    conduit.on(ConduitState.NoInternet, () => {
+      // this.sendLog('stale connection');
+      this.sendConnectionStatus(ConduitState.NoInternet);
+    });
   }
 
   sendConnectionStatus(status: ConduitState) {
