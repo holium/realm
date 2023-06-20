@@ -42,7 +42,6 @@ export class ShipService extends AbstractService<any> {
     options?: ServiceOptions
   ) {
     super('shipService', options);
-    console.trace('ship.service.ts:', 'Constructed.');
     this.patp = patp;
     if (options?.preload) return;
     if (options) {

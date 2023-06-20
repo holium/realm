@@ -600,13 +600,7 @@ export class Conduit extends EventEmitter {
     this.pokes = new Map();
     this.watches = new Map();
     this.reactions = new Map();
-    try {
-      console.trace('cleanup: abort');
-      this.abort.abort();
-    } catch (e) {
-      log.info(e);
-    }
-
+    this.abort.abort();
     this.abort = new AbortController();
     this.sse?.close();
     this.sse = undefined;
@@ -638,12 +632,7 @@ export class Conduit extends EventEmitter {
     this.pokes = new Map();
     this.watches = new Map();
     this.reactions = new Map();
-    try {
-      console.trace('closeChannel: abort');
-      this.abort.abort();
-    } catch (e) {
-      log.error(e);
-    }
+    this.abort.abort();
     this.abort = new AbortController();
     this.sse?.close();
     this.sse = undefined;
