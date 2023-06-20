@@ -30,6 +30,7 @@ export type BubbleProps = {
   authorNickname?: string;
   isEdited?: boolean;
   isEditing?: boolean;
+  isDeleting?: boolean;
   expiresAt?: number | null;
   updatedAt?: number | null;
   sentAt: string;
@@ -60,6 +61,7 @@ export const Bubble = ({
   message,
   isEdited,
   isEditing,
+  isDeleting,
   reactions = [],
   isPrevGrouped,
   isNextGrouped,
@@ -171,6 +173,7 @@ export const Bubble = ({
       key={id}
       display="inline-flex"
       justifyContent={isOur ? 'flex-end' : 'flex-start'}
+      position="relative"
     >
       <BubbleStyle
         id={id}
@@ -180,16 +183,15 @@ export const Bubble = ({
           ourColor ?? '#ffffff',
           'white'
         )}
-        style={
-          isOur
-            ? {
-                background: ourColor,
-                boxShadow: isEditing
-                  ? 'inset 0px 0px 0px 2px rgba(var(--rlm-intent-caution-rgba))'
-                  : 'none',
-              }
-            : {}
-        }
+        style={{
+          opacity: isDeleting ? 0.5 : 1,
+          ...(isOur && {
+            background: ourColor,
+            boxShadow: isEditing
+              ? 'inset 0px 0px 0px 2px rgba(var(--rlm-intent-caution-rgba))'
+              : 'none',
+          }),
+        }}
         className={isOur ? 'bubble-our' : ''}
       >
         {!isOur && !isPrevGrouped && (
