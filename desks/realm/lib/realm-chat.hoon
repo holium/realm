@@ -703,7 +703,7 @@
           [%break ul]
           [%ship de-ship]
           [%link so]
-          [%custom (at ~[so so])]
+          [%custom (ot ~[[%name so] [%value so]])]
           [%status so]
       ==
     ::

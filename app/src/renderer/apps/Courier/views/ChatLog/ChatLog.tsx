@@ -27,7 +27,7 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
   const storage = useStorage();
   const { loggedInAccount, theme } = useAppState();
   const { dimensions, innerNavigation } = useTrayApps();
-  const { notifStore, friends, chatStore } = useShipStore();
+  const { notifStore, friends, chatStore, spacesStore } = useShipStore();
   const { selectedChat } = chatStore;
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
@@ -137,6 +137,17 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
                 linkType: 'url',
               };
             }
+          }
+        }
+        if (Object.keys(frag)[0] === 'custom') {
+          const cust = frag.custom;
+          if (cust.name === 'space') {
+            const match = spacesStore.getSpaceByPath(
+              cust.value.replace(/^\/spaces/, '')
+            );
+            metadata = {
+              space: match && JSON.stringify(match),
+            };
           }
         }
         return {

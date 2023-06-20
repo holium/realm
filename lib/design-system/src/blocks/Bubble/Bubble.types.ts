@@ -1,3 +1,11 @@
+export type FragmentCustomType = {
+  custom: {
+    name: string;
+    value: string;
+  };
+  metadata?: any;
+};
+
 export type FragmentMarkdownType = {
   markdown: string;
   metadata?: any;
@@ -84,6 +92,7 @@ export type FragmentTabType = {
 };
 
 export type FragmentType =
+  | FragmentCustomType
   | FragmentMarkdownType
   | FragmentPlainType
   | FragmentBoldType

@@ -9,6 +9,8 @@ import {
   OnReactionPayload,
 } from '@holium/design-system';
 
+import { SystemTrayRegistry } from 'renderer/apps/registry';
+import { useTrayApps } from 'renderer/apps/store';
 import { useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { MainIPC } from 'renderer/stores/ipc';
@@ -24,6 +26,8 @@ type ChatMessageProps = {
   onReplyClick?: (msgId: string) => void;
 };
 
+const { dimensions } = SystemTrayRegistry.spaces;
+
 export const ChatMessagePresenter = ({
   message,
   ourColor,
@@ -32,7 +36,14 @@ export const ChatMessagePresenter = ({
   onReplyClick,
 }: ChatMessageProps) => {
   const { loggedInAccount, theme } = useAppState();
-  const { chatStore, friends } = useShipStore();
+  const { chatStore, friends, spacesStore } = useShipStore();
+  const {
+    activeApp,
+    setActiveApp,
+    setTrayAppCoords,
+    setTrayAppDimensions,
+    coords,
+  } = useTrayApps();
   const { selectedChat } = chatStore;
   const messageRef = useRef<HTMLDivElement>(null);
   const ourShip = useMemo(() => loggedInAccount?.serverId, [loggedInAccount]);
@@ -300,6 +311,33 @@ export const ChatMessagePresenter = ({
     friends,
   ]);
 
+  const joiner = useCallback(
+    (path: string) => {
+      console.log(spacesStore.allSpacePaths, path);
+      if (spacesStore.allSpacePaths.includes(path)) {
+        throw new Error('you are already in this space');
+      }
+      setTrayAppCoords({
+        left: 55,
+        bottom: coords.bottom,
+      });
+      setTrayAppDimensions(dimensions);
+      spacesStore.setJoin('initial');
+      spacesStore.setSearchVisible(true);
+      spacesStore.setSearchPath(path);
+      setActiveApp('spaces-tray');
+      spacesStore.setJoin('loading');
+      spacesStore.joinSpace(path.replace(/^\/spaces/, ''));
+    },
+    [
+      activeApp,
+      setTrayAppCoords,
+      setTrayAppDimensions,
+      setActiveApp,
+      spacesStore,
+    ]
+  );
+
   return (
     <Bubble
       innerRef={messageRef}
@@ -322,6 +360,7 @@ export const ChatMessagePresenter = ({
       reactions={reactionList}
       onReaction={canReact ? onReaction : undefined}
       onReplyClick={onReplyClick}
+      onJoinSpaceClick={joiner}
       error={message.error}
     />
   );
