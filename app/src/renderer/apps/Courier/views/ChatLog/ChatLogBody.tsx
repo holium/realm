@@ -22,7 +22,7 @@ import { ChatLogList } from './ChatLogList';
 type Props = {
   path: string;
   showPin: boolean;
-  pinnedChatMessage: ChatMessageType;
+  pinnedChatMessage: ChatMessageType | null | undefined;
   storage: any;
   isMuted: boolean;
   ourColor: string;
@@ -106,7 +106,7 @@ const ChatLogBodyPresenter = ({
 
     return (
       <ChatLogListContainer isStandaloneChat={isStandaloneChat}>
-        {showPin && (
+        {showPin && pinnedChatMessage && (
           <FullWidthAnimatePresence>
             <PinnedContainer
               message={pinnedChatMessage}
