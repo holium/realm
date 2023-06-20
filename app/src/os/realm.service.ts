@@ -125,6 +125,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       const encryptionkey = await this.services.auth.deriveDbKey(password);
       if (this.services.ship) this.services.ship.cleanup();
       this.services.ship = new ShipService(patp, password, encryptionkey);
+      await this.services.ship.construct();
 
       const credentials = this.services.ship?.credentials;
       if (!credentials) {
@@ -141,25 +142,21 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       }
 
       await setSessionCookie({ ...credentials, cookie });
-      return new Promise((resolve) => {
-        APIConnection.getInstance().conduit.once('connected', () => {
-          log.info('realm.service.ts, login: conduit connected');
-          if (!this.services) return;
-          this.services.auth._setLockfile({
-            ...credentials,
-            cookie,
-            ship: patp,
-          });
-          this.services.ship?.init(this.services.auth);
-          this.services.ship?.updateCookie(cookie);
-          this._sendAuthenticated(
-            patp,
-            credentials.url,
-            credentials.cookie ?? ''
-          );
-          resolve(true);
-        });
+      // return new Promise(async (resolve) => {
+      // APIConnection.getInstance().conduit.once('connected', () => {
+      log.info('realm.service.ts, login: conduit connected');
+      if (!this.services) return isAuthenticated;
+      this.services.auth._setLockfile({
+        ...credentials,
+        cookie,
+        ship: patp,
       });
+      await this.services.ship?.init(this.services.auth);
+      this.services.ship?.updateCookie(cookie);
+      this._sendAuthenticated(patp, credentials.url, credentials.cookie ?? '');
+      //   resolve(true);
+      // });
+      // });
     }
     return isAuthenticated;
   }
