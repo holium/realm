@@ -42,12 +42,13 @@ export class ShipService extends AbstractService<any> {
     options?: ServiceOptions
   ) {
     super('shipService', options);
+    console.trace('ship.service.ts:', 'Constructed.');
     this.patp = patp;
     if (options?.preload) return;
     if (options) {
       this.serviceOptions = options;
     }
-    this.shipDB = new ShipDB(patp, password, clientSideEncryptionKey);
+    this.shipDB = new ShipDB(this.patp, password, clientSideEncryptionKey);
     // this.encryptDb(password);
     if (options?.verbose) {
       log.info(
@@ -56,42 +57,40 @@ export class ShipService extends AbstractService<any> {
         clientSideEncryptionKey
       );
     }
-
-    const credentials = this.shipDB.getCredentials();
-    if (!credentials.cookie) {
-      if (options?.verbose) {
-        log.info('ship.service.ts:', 'No cookie found, getting cookie...');
-      }
-      getCookie({
-        serverUrl: credentials.url,
-        serverCode: credentials.code,
-      })
-        .then((cookie) => {
-          if (cookie) {
-            if (options?.verbose) {
-              log.info(
-                'ship.service.ts:',
-                'Got cookie, setting credentials...'
-              );
-            }
-            this.setCredentials(credentials.url, credentials.code, cookie);
-            this._openConduit({ ...credentials, patp, cookie });
-            this._registerServices();
-          } else {
-            log.error('ship.service.ts:', 'Failed to get cookie');
-          }
-        })
-        .catch((err) => {
-          log.error('ship.service.ts:', 'Failed to get cookie', err);
-        });
-    } else {
-      this._openConduit(credentials);
-      this._registerServices();
-    }
-
     app.on('quit', () => {
       this.shipDB?.disconnect();
     });
+  }
+
+  public async construct() {
+    if (!this.shipDB) return;
+    const credentials = this.shipDB.getCredentials();
+    if (!credentials.cookie) {
+      if (this.serviceOptions?.verbose) {
+        log.info('ship.service.ts:', 'No cookie found, getting cookie...');
+      }
+      try {
+        const cookie = await getCookie({
+          serverUrl: credentials.url,
+          serverCode: credentials.code,
+        });
+        if (cookie) {
+          if (this.serviceOptions?.verbose) {
+            log.info('ship.service.ts:', 'Got cookie, setting credentials...');
+          }
+          this.setCredentials(credentials.url, credentials.code, cookie);
+          await this._openConduit({ ...credentials, patp: this.patp, cookie });
+          this._registerServices();
+        } else {
+          log.error('ship.service.ts:', 'Failed to get cookie');
+        }
+      } catch (e) {
+        log.error(e);
+      }
+    } else {
+      await this._openConduit(credentials);
+      this._registerServices();
+    }
   }
 
   _openConduit(credentials: any) {

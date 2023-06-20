@@ -65,7 +65,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
    * @returns void
    */
   public async boot() {
-    const session = this._hydrateSessionIfExists();
+    const session = await this._hydrateSessionIfExists();
     this.services?.ship?.init(this.services?.auth);
 
     this.sendUpdate({
@@ -248,7 +248,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     });
   }
 
-  private _hydrateSessionIfExists() {
+  private async _hydrateSessionIfExists() {
     if (!this.services) return null;
 
     const session = this.services?.auth._getLockfile();
@@ -265,6 +265,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
 
       // todo figure out how to get the password and encryptionKey from the lockfile
       this.services.ship = new ShipService(session.ship, '', '');
+      await this.services.ship.construct();
 
       return {
         url: session.url,
@@ -366,10 +367,17 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   }
 
   async reconnectConduit() {
-    APIConnection.getInstance()
-      .reconnect()
-      .then(() => this.services?.ship?.init(this.services?.auth))
-      .catch((e) => log.error(e));
+    log.info('realm.service.ts:', 'Reconnecting conduit');
+    try {
+      await APIConnection.getInstance().reconnect();
+      this.services?.ship?.init(this.services?.auth);
+    } catch (e) {
+      log.error(e);
+    }
+    // APIConnection.getInstance()
+    //   .reconnect()
+    //   .then(() => this.services?.ship?.init(this.services?.auth))
+    //   .catch((e) => log.error(e));
   }
 
   async setConduitStatus(status: ConduitState) {
