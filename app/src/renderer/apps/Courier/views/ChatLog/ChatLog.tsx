@@ -14,7 +14,6 @@ import { useTrayApps } from 'renderer/apps/store';
 import { trackEvent } from 'renderer/lib/track';
 import { useStorage } from 'renderer/lib/useStorage';
 import { useAppState } from 'renderer/stores/app.store';
-import { ChatMessageType } from 'renderer/stores/models/chat.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ChatLogBody } from './ChatLogBody';
@@ -173,7 +172,7 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
       storage={storage}
       isMuted={selectedChat.muted}
       showPin={showPin}
-      pinnedChatMessage={selectedChat.pinnedChatMessage as ChatMessageType}
+      pinnedChatMessage={selectedChat.pinnedChatMessage}
       ourColor={ourColor}
       themeMode={theme.mode as 'light' | 'dark'}
       listRef={listRef}
