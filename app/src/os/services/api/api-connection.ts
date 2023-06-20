@@ -90,9 +90,9 @@ export class APIConnection {
     conduit.on(ConduitState.Refreshing, () => {
       this.sendConnectionStatus(ConduitState.Refreshing);
     });
-    conduit.on(ConduitState.Refreshed, (session) => {
+    conduit.on(ConduitState.Refreshed, () => {
       // console.info(`ConduitState.Refreshed => %o`, session);
-      log.info('api-connection.ts:', `ConduitState.Refreshed => %o`, session);
+      log.info('api-connection.ts:', `ConduitState.Refreshed`);
       // this.saveSession(session);
       this.sendConnectionStatus(ConduitState.Refreshed);
     });

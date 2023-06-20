@@ -76,7 +76,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           ? {
               serverId: session.patp,
               serverUrl: session.url,
-              cookie: session.cookie,
+              cookie: session.cookie || '',
             }
           : undefined,
         seenSplash: this.services?.auth.hasSeenSplash() || false,

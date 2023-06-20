@@ -196,9 +196,11 @@ export const ConnectionStatus = ({
                 ml={2}
                 baseColor={color}
                 mode={themeMode}
-                disabled={reportedBug}
+                isDisabled={reportedBug}
                 width={100}
                 style={{
+                  // TODO implement the send bug report logic
+                  display: 'none',
                   pointerEvents: 'all',
                 }}
                 onClick={(evt) => {
@@ -225,7 +227,7 @@ export const ConnectionStatus = ({
                 ml={2}
                 baseColor={color}
                 mode={themeMode}
-                disabled={isReconnecting}
+                isDisabled={isReconnecting}
                 width={130}
                 style={{
                   pointerEvents: 'all',
