@@ -26,17 +26,17 @@ export const Word = () => {
   const api = useStore((store: Store) => store.api);
   const space = useStore((state: Store) => state.space);
 
-  const [tabValue, setTabValue] = useState<number>(0);
   const { state } = useLocation();
   const navigate = useNavigate();
+  const definitionMap = useStore((state: Store) => state.definitionMap);
+  const sentenceMap = useStore((state: Store) => state.sentenceMap);
+  const voteMap = useStore((state: Store) => state.voteMap);
 
+  const [tabValue, setTabValue] = useState<number>(0);
   const [definitionList, setDefinitionList] = useState<any>([]);
   const [sentenceList, setSentenceList] = useState<any>([]);
   const [votes, setVotes] = useState<any>([]);
 
-  const definitionMap = useStore((state: Store) => state.definitionMap);
-  const sentenceMap = useStore((state: Store) => state.sentenceMap);
-  const voteMap = useStore((state: Store) => state.voteMap);
   useEffect(() => {
     if (state) {
       const wordId = state.id;
@@ -75,7 +75,7 @@ export const Word = () => {
             justifyContent={'center'}
             gap={4}
             style={{
-              padding: '4px 3px',
+              padding: '4px 6px',
               backgroundColor: '#FDC14E1F',
               borderRadius: '6px',
             }}

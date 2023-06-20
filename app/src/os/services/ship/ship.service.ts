@@ -142,6 +142,7 @@ export class ShipService extends AbstractService<any> {
   public async init() {
     this.initSpaces();
     this.initChat();
+    this.initLexicon();
   }
 
   private async initSpaces() {
@@ -152,6 +153,10 @@ export class ShipService extends AbstractService<any> {
   private async initChat() {
     await this.services?.chat.init();
     this.services?.notifications.init();
+  }
+
+  private async initLexicon() {
+    await this.services?.lexicon.init();
   }
 
   public updateCookie(cookie: string) {
