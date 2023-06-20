@@ -181,5 +181,11 @@ export const createStandaloneChatWindow = () => {
     newStandaloneChatWindow.show();
   });
 
+  // Open standalone URLs in the user's default browser.
+  newStandaloneChatWindow.webContents.setWindowOpenHandler((edata) => {
+    shell.openExternal(edata.url);
+    return { action: 'deny' };
+  });
+
   return newStandaloneChatWindow;
 };
