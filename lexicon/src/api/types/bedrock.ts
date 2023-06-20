@@ -27,9 +27,9 @@ export interface BedrockRow {
   id: RowID;
   type: Type;
   v: number;
-  'created-at': number;
-  'updated-at': number;
-  'received-at': number;
+  created_at: number;
+  updated_at: number;
+  received_at: number;
 }
 
 export type Replication = 'host' | 'gossip' | 'shared-host';
@@ -66,10 +66,10 @@ export interface PathRow {
 export interface WordRow {
   id: string;
   path: string; //path to a space in realm for Lexicon's use case
-  'created-at': number; //date
-  'received-at': number; //date
+  created_at: number; //date
+  received_at: number; //date
   word: string;
-  'updated-at': number; //date
+  updated_at: number; //date
   revision: any; //?
   v: number; //version number?
 
@@ -79,52 +79,52 @@ export interface WordRow {
 export interface DefinitionRow {
   id: string;
   path: string; //path to a space in realm for Lexicon's use case
-  'created-at': number; //date
-  'received-at': number; //date
+  created_at: number; //date
+  received_at: number; //date
   definition: string;
-  'updated-at': number; //date
+  updated_at: number; //date
   revision: any; //?
   v: number; //version number?
 
   type: 'lexicon-sentence';
-  'word-id': string; //id of parent word row
+  word_id: string; //id of parent word row
 }
 export interface SentenceRow {
   id: string;
   path: string; //path to a space in realm for Lexicon's use case
-  'created-at': number; //date
-  'received-at': number; //date
+  created_at: number; //date
+  received_at: number; //date
   definition: string;
-  'updated-at': number; //date
+  updated_at: number; //date
   revision: any; //?
   v: number; //version number?
 
   type: 'lexicon-definition';
-  'word-id': string; //id of parent word row
+  word_id: string; //id of parent word row
 }
 export interface SentenceRow {
   id: string;
   path: string; //path to a space in realm for Lexicon's use case
-  'created-at': number; //date
-  'received-at': number; //date
+  created_at: number; //date
+  received_at: number; //date
   sentence: string;
-  'updated-at': number; //date
+  updated_at: number; //date
   revision: any; //?
   v: number; //version number?
 
   type: 'lexicon-definition';
-  'word-id': string; //id of parent word row
+  word_id: string; //id of parent word row
 }
 export interface VoteRow {
   id: string;
-  'parent-id': string;
-  'parent-type': string;
+  parent_id: string;
+  parent_type: string;
   path: string; //path to a space in realm for Lexicon's use case
-  'parent-path': string;
-  'created-at': number; //date
-  'received-at': number; //date
+  parent_path: string;
+  created_at: number; //date
+  received_at: number; //date
   definition: string;
-  'updated-at': number; //date
+  updated_at: number; //date
   revision: any; //?
   v: number; //version number?
   ship: string;

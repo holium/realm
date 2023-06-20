@@ -89,7 +89,14 @@ export const useStore = create<Store>((set, get) => ({
 
   addWordRow: (newWordRow: any) => {
     const newWordRows = [...get().wordRows];
-    newWordRows.push(newWordRow);
+
+    const fixedWordRow = {
+      ...newWordRow,
+      created_at: newWordRow['created-at'],
+      received_at: newWordRow['received-at'],
+      updated_at: newWordRow['updated-at'],
+    };
+    newWordRows.push(fixedWordRow);
     set({
       wordRows: newWordRows,
     });
@@ -107,9 +114,18 @@ export const useStore = create<Store>((set, get) => ({
   voteRows: [],
   setVoteRows: (voteRows: VoteRow[]) => set({ voteRows }),
 
-  addVoteRow: (newVoteRow: VoteRow) => {
+  addVoteRow: (newVoteRow: any) => {
     const newVoteRows = [...get().voteRows];
-    newVoteRows.push(newVoteRow);
+    const fixedVoteRow = {
+      ...newVoteRow,
+      parent_id: newVoteRow['parent-id'],
+      parent_type: newVoteRow['parent-type'],
+      parent_path: newVoteRow['parent-path'],
+      created_at: newVoteRow['created-at'],
+      received_at: newVoteRow['received-at'],
+      updated_at: newVoteRow['updated-at'],
+    };
+    newVoteRows.push(fixedVoteRow);
     set({
       voteRows: newVoteRows,
     });
@@ -137,9 +153,16 @@ export const useStore = create<Store>((set, get) => ({
   setDefinitionRows: (definitionRows: DefinitionRow[]) =>
     set({ definitionRows }),
 
-  addDefinitionRow: (newDefinitionRow: DefinitionRow) => {
+  addDefinitionRow: (newDefinitionRow: any) => {
     const newDefinitionRows = [...get().definitionRows];
-    newDefinitionRows.push(newDefinitionRow);
+    const fixedDefinitionRow = {
+      ...newDefinitionRow,
+      created_at: newDefinitionRow['created-at'],
+      received_at: newDefinitionRow['received-at'],
+      updated_at: newDefinitionRow['updated-at'],
+      word_id: newDefinitionRow['word-id'],
+    };
+    newDefinitionRows.push(fixedDefinitionRow);
 
     set({
       definitionRows: newDefinitionRows,
@@ -151,9 +174,16 @@ export const useStore = create<Store>((set, get) => ({
   sentenceRows: [],
   setSentenceRows: (sentenceRows: SentenceRow[]) => set({ sentenceRows }),
 
-  addSentenceRow: (newSentenceRow: SentenceRow) => {
+  addSentenceRow: (newSentenceRow: any) => {
     const newSentenceRows = [...get().sentenceRows];
-    newSentenceRows.push(newSentenceRow);
+    const fixedSentenceRow = {
+      ...newSentenceRow,
+      created_at: newSentenceRow['created-at'],
+      received_at: newSentenceRow['received-at'],
+      updated_at: newSentenceRow['updated-at'],
+      word_id: newSentenceRow['word-id'],
+    };
+    newSentenceRows.push(fixedSentenceRow);
 
     set({
       sentenceRows: newSentenceRows,

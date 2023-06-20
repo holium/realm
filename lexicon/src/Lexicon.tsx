@@ -87,22 +87,11 @@ export const Lexicon = ({
       const subscribeToSpace = await lexiconIPC.subscribePath(space);
       log('subscribeToSpace', subscribeToSpace);
       if (result) {
-        let newWordRows: any = [];
-        let newVoteRows: any = [];
-        let newSentenceRows: any = [];
-        let newDefinitionRows: any = [];
+        const newWordRows: WordRow[] = result.words;
+        const newSentenceRows: SentenceRow[] = result.sentences;
+        const newDefinitionRows: DefinitionRow[] = result.definitions;
+        const newVoteRows: VoteRow[] = result.votes;
 
-        result.tables.forEach((item: any) => {
-          if (item.type === 'lexicon-word') {
-            newWordRows = item.rows;
-          } else if (item.type === 'vote') {
-            newVoteRows = item.rows;
-          } else if (item.type === 'lexicon-definition') {
-            newDefinitionRows = item.rows;
-          } else if (item.type === 'lexicon-sentence') {
-            newSentenceRows = item.rows;
-          }
-        });
         setVoteRows(newVoteRows);
         setWordRows(newWordRows);
         setSentenceRows(newSentenceRows);
@@ -118,11 +107,11 @@ export const Lexicon = ({
     const sentenceMap: any = new Map();
     sentenceRows.forEach((item: SentenceRow) => {
       //if this vote is linked to a word (we check wordMap) add it to our voteMap under that word's idea
-      if (wordMap.has(item['word-id'])) {
-        const newSentenceList = sentenceMap.get(item['word-id']) ?? [];
+      if (wordMap.has(item['word_id'])) {
+        const newSentenceList = sentenceMap.get(item['word_id']) ?? [];
 
         newSentenceList.push(item);
-        sentenceMap.set(item['word-id'], newSentenceList);
+        sentenceMap.set(item['word_id'], newSentenceList);
       }
     });
     setSentenceMap(sentenceMap);
@@ -131,11 +120,11 @@ export const Lexicon = ({
     const definitionMap: any = new Map();
     definitionRows.forEach((item: DefinitionRow) => {
       //if this vote is linked to a word (we check wordMap) add it to our voteMap under that word's idea
-      if (wordMap.has(item['word-id'])) {
-        const newDefinitionList = definitionMap.get(item['word-id']) ?? [];
+      if (wordMap.has(item['word_id'])) {
+        const newDefinitionList = definitionMap.get(item['word_id']) ?? [];
 
         newDefinitionList.push(item);
-        definitionMap.set(item['word-id'], newDefinitionList);
+        definitionMap.set(item['word_id'], newDefinitionList);
       }
     });
     setDefinitionMap(definitionMap);
@@ -157,7 +146,7 @@ export const Lexicon = ({
       return {
         id: item.id,
         word: item.word,
-        createdAt: item['created-at'],
+        createdAt: item['created_at'],
       };
     });
     setWordList(newWordList);
@@ -169,9 +158,9 @@ export const Lexicon = ({
 
     voteRows.forEach((item: VoteRow) => {
       //if this vote is linked to a word (we check wordMap) add it to our voteMap under that word's idea
-      if (wordMap.has(item['parent-id'])) {
+      if (wordMap.has(item['parent_id'])) {
         //accumulate rows into their respective parents (words)
-        const lastVoteData = voteMap.get(item['parent-id']);
+        const lastVoteData = voteMap.get(item['parent_id']);
 
         let upVotes = lastVoteData?.upVotes ?? 0;
         let downVotes = lastVoteData?.downVotes ?? 0;
@@ -191,7 +180,7 @@ export const Lexicon = ({
 
         //we count the up/down vote
         newVotes.push(item);
-        voteMap.set(item['parent-id'], {
+        voteMap.set(item['parent_id'], {
           votes: newVotes,
           upVotes,
           downVotes,
@@ -208,9 +197,9 @@ export const Lexicon = ({
       definitionIdSet.add(item.id);
     });
     voteRows.forEach((item: VoteRow) => {
-      if (definitionIdSet.has(item['parent-id'])) {
+      if (definitionIdSet.has(item['parent_id'])) {
         //accumulate rows into their respective parents (words)
-        const lastVoteData = newVoteMap.get(item['parent-id']);
+        const lastVoteData = newVoteMap.get(item['parent_id']);
 
         let upVotes = lastVoteData?.upVotes ?? 0;
         let downVotes = lastVoteData?.downVotes ?? 0;
@@ -231,7 +220,7 @@ export const Lexicon = ({
 
         //we count the up/down vote
         newVotes.push(item);
-        newVoteMap.set(item['parent-id'], {
+        newVoteMap.set(item['parent_id'], {
           votes: newVotes,
           upVotes,
           downVotes,
@@ -250,9 +239,9 @@ export const Lexicon = ({
       sentenceIdSet.add(item.id);
     });
     voteRows.forEach((item: VoteRow) => {
-      if (sentenceIdSet.has(item['parent-id'])) {
+      if (sentenceIdSet.has(item['parent_id'])) {
         //accumulate rows into their respective parents (words)
-        const lastVoteData = newVoteMap.get(item['parent-id']);
+        const lastVoteData = newVoteMap.get(item['parent_id']);
 
         let upVotes = lastVoteData?.upVotes ?? 0;
         let downVotes = lastVoteData?.downVotes ?? 0;
@@ -273,7 +262,7 @@ export const Lexicon = ({
 
         //we count the up/down vote
         newVotes.push(item);
-        newVoteMap.set(item['parent-id'], {
+        newVoteMap.set(item['parent_id'], {
           votes: newVotes,
           upVotes,
           downVotes,
@@ -312,30 +301,34 @@ export const Lexicon = ({
   }, [shipName]);
   if (!api) return null;
   return (
-    <main
-      style={{
-        overflowY: 'auto',
-        height: '100vh',
-        backgroundColor: 'transparent',
-      }}
-    >
-      <GlobalStyle />
-      <div id="portal-root" />
-      <Box maxWidth={550} margin="auto">
-        <Router>
-          <Routes>
-            <Route element={<Navigation selectedSpace={selectedSpace} />}>
-              <Route path="/index.html/:ship/:group/:word" element={<Word />} />
-              <Route path="/index.html/:ship/:group" element={<Home />} />
-              <Route path="/index.html/dict/:word" element={<Dictionary />} />
-              <Route
-                path="/index.html"
-                element={<p>don't mind me just redirecting over here</p>}
-              />
-            </Route>
-          </Routes>
-        </Router>
-      </Box>
-    </main>
+    <>
+      <main
+        style={{
+          overflowY: 'auto',
+          height: '100vh',
+          backgroundColor: 'transparent',
+        }}
+      >
+        <GlobalStyle />
+        <Box maxWidth={550} margin="auto">
+          <Router>
+            <Routes>
+              <Route element={<Navigation selectedSpace={selectedSpace} />}>
+                <Route
+                  path="/index.html/:ship/:group/:word"
+                  element={<Word />}
+                />
+                <Route path="/index.html/:ship/:group" element={<Home />} />
+                <Route path="/index.html/dict/:word" element={<Dictionary />} />
+                <Route
+                  path="/index.html"
+                  element={<p>don't mind me just redirecting over here</p>}
+                />
+              </Route>
+            </Routes>
+          </Router>
+        </Box>
+      </main>
+    </>
   );
 };

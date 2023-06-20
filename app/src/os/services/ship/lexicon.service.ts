@@ -40,7 +40,6 @@ class LexiconService extends AbstractService<any> {
   }
 
   async init() {
-    console.log('initing lexicon ===============>');
     //insert all the words/votes/definitions/sentences in our local sqlite database
     const { words, votes, definitions, sentences } = await this._getState();
     this._insertVotes(votes);
@@ -49,6 +48,7 @@ class LexiconService extends AbstractService<any> {
     this._insertSentences(sentences);
     return;
   }
+  // INSERT statements
   private _insertVotes(votes: any) {
     if (!this.db?.open) return;
 
@@ -242,8 +242,22 @@ class LexiconService extends AbstractService<any> {
     });
     insertMany(sentences);
   }
+  private _deleteWord(wordId: string) {
+    if (!this.db?.open) return;
+    const deleteWord = this.db.prepare(
+      `DELETE FROM ${LEXICON_TABLES.WORDS} WHERE id = ?`
+    );
+    deleteWord.run(wordId);
+  }
+  private _deleteVote(voteId: string) {
+    if (!this.db?.open) return;
+    const deleteVote = this.db.prepare(
+      `DELETE FROM ${LEXICON_TABLES.VOTES} WHERE id = ?`
+    );
+    deleteVote.run(voteId);
+  }
   // database queries
-  getVotes(path: string) {
+  _getVotes(path: string) {
     if (!this.db?.open) return;
     const query = this.db.prepare(
       `SELECT * FROM ${LEXICON_TABLES.VOTES} WHERE path = ?;`
@@ -251,7 +265,7 @@ class LexiconService extends AbstractService<any> {
     const result: any = query.all(path);
     return result;
   }
-  getWords(path: string) {
+  _getWords(path: string) {
     if (!this.db?.open) return;
     const query = this.db.prepare(
       `SELECT * FROM ${LEXICON_TABLES.WORDS} WHERE path = ?;`
@@ -259,7 +273,7 @@ class LexiconService extends AbstractService<any> {
     const result: any = query.all(path);
     return result;
   }
-  getDefinitions(path: string) {
+  _getDefinitions(path: string) {
     if (!this.db?.open) return;
     const query = this.db.prepare(
       `SELECT * FROM ${LEXICON_TABLES.DEFINITIONS} WHERE path = ?;`
@@ -267,7 +281,7 @@ class LexiconService extends AbstractService<any> {
     const result: any = query.all(path);
     return result;
   }
-  getSentences(path: string) {
+  _getSentences(path: string) {
     if (!this.db?.open) return;
     const query = this.db.prepare(
       `SELECT * FROM ${LEXICON_TABLES.SENTENCES} WHERE path = ?;`
@@ -360,19 +374,19 @@ class LexiconService extends AbstractService<any> {
   }
   // Lexicon-specific
   async createWord(path: string, word: string) {
-    const data = [word, {}];
+    const data = [word];
 
     return this.runThread(path, 'lexicon-word', 0, data, WordSchema);
   }
   async editWord(path: string, wordID: string, word: string) {
-    const data = [word, {}];
+    const data = [word];
     return await this.edit(wordID, path, 'lexicon-word', 0, data, WordSchema);
   }
   async removeWord(path: string, wordID: string) {
     return await this.remove(wordID, path, 'lexicon-word');
   }
   async createDefinition(path: string, wordID: string, definition: string) {
-    const data = [definition, wordID, {}];
+    const data = [definition, wordID];
     return await this.create(
       path,
       'lexicon-definition',
@@ -382,11 +396,11 @@ class LexiconService extends AbstractService<any> {
     );
   }
   async createSentence(path: string, wordID: string, sentence: string) {
-    const data = [sentence, wordID, {}];
+    const data = [sentence, wordID];
     return await this.create(path, 'lexicon-sentence', 0, data, SentenceSchema);
   }
   async createRelated(path: string, wordID: string, related: string) {
-    const data = [related, wordID, {}];
+    const data = [related, wordID];
     return await this.create(path, 'lexicon-related', 0, data, RelatedSchema);
   }
   async voteOnWord(
@@ -426,46 +440,56 @@ class LexiconService extends AbstractService<any> {
       onQuit: () => console.log('Kicked from subscription.'),
     });
   }
-  onUpdate(data: any) {
-    console.log('data', data);
-    if (data.length === 0) return;
-    const type = data[0].change;
+  onUpdate(update: any) {
+    console.log('update', update);
+    if (update.length === 0) return;
+    const type = update[0].change;
     if (type === 'add-row') {
       //insert a new row into the db
-      const change = data[0].row.type;
+      const change = update[0].row.type;
       switch (change) {
         case 'lexicon-word': {
+          this._insertWords([update[0].row]);
           break;
         }
         case 'lexicon-definition': {
+          this._insertDefinitions([update[0].row]);
           break;
         }
         case 'lexicon-sentence': {
+          this._insertSentences([update[0].row]);
           break;
         }
         case 'vote': {
+          this._insertVotes([update[0].row]);
           break;
         }
       }
     } else if (type === 'del-row') {
       //delete a row from the db
-      const change = data[0].type;
-
+      const change = update[0].type;
       switch (change) {
         case 'lexicon-word': {
+          this._deleteWord(update[0].id);
           break;
         }
         case 'vote': {
+          this._deleteVote(update[0].id);
           break;
         }
       }
     }
   }
-  async getPath(path: string) {
-    return APIConnection.getInstance().conduit.scry({
-      app: 'db',
-      path: '/db/path' + path,
-    });
+  getPath(path: string) {
+    return this._getPath(path);
+  }
+  _getPath(path: string) {
+    // fetch from db all the rows lexicon needs at the given path
+    const words = this._getWords(path);
+    const definitions = this._getDefinitions(path);
+    const sentences = this._getSentences(path);
+    const votes = this._getVotes(path);
+    return { words, definitions, sentences, votes };
   }
   async _getState() {
     const result = await APIConnection.getInstance().conduit.scry({
