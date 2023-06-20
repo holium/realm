@@ -22,18 +22,6 @@ export const ProductCards = ({ products, productId, setProductId }: Props) => {
     }
   }, [byopProduct, setProductId]);
 
-  if (byopProduct) {
-    return (
-      <ProductCard
-        key={byopProduct.id}
-        h2Text={`$${byopProduct.subscription_price}.00`}
-        bodyText="Monthly"
-        isSelected={productId === byopProduct.id}
-        onClick={() => setProductId(byopProduct.id)}
-      />
-    );
-  }
-
   return (
     <Flex gap={16}>
       {/* Assume the cheapest is monthly and the second yearly. */}
