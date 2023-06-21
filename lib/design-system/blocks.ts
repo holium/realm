@@ -5,7 +5,7 @@ export * from './src/blocks/Bubble/Bubble.styles';
 export * from './src/blocks/Bubble/Bubble.types';
 export { PinnedMessage } from './src/blocks/Bubble/Pinned';
 export type { OnReactionPayload } from './src/blocks/Bubble/Reaction';
-export { ReactionPicker, Reactions } from './src/blocks/Bubble/Reaction';
+export { Reactions } from './src/blocks/Bubble/Reaction';
 export { Reply } from './src/blocks/Bubble/Reply';
 export * from './src/blocks/ChatInput/ChatInput';
 export {

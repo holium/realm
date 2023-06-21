@@ -8,6 +8,7 @@ import {
   MenuItemProps,
   OnReactionPayload,
 } from '@holium/design-system';
+import { useToggle } from '@holium/design-system/util';
 
 import { useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
@@ -38,6 +39,8 @@ export const ChatMessagePresenter = ({
   const ourShip = useMemo(() => loggedInAccount?.serverId, [loggedInAccount]);
   const isOur = message.sender === ourShip;
   const { getOptions, setOptions, defaultOptions } = useContextMenu();
+
+  const deleting = useToggle(false);
 
   const messageRowId = useMemo(() => `message-row-${message.id}`, [message.id]);
   const isPinned = selectedChat?.isMessagePinned(message.id);
@@ -233,9 +236,11 @@ export const ChatMessagePresenter = ({
         icon: 'Trash',
         iconColor: '#ff6240',
         labelColor: '#ff6240',
-        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
+        onClick: async (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
-          selectedChat.deleteMessage(message.id);
+          deleting.toggleOn();
+          await selectedChat.deleteMessage(message.id);
+          deleting.toggleOff();
         },
       });
     }
@@ -312,6 +317,7 @@ export const ChatMessagePresenter = ({
       ourShip={ourShip}
       ourColor={ourColor}
       isEditing={selectedChat?.isEditing(message.id)}
+      isDeleting={deleting.isOn}
       updatedAt={message.updatedAt}
       isEdited={hasEdited}
       author={message.sender}

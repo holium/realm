@@ -101,7 +101,7 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
   const showPin =
     selectedChat.pinnedMessageId !== null && !selectedChat.hidePinned;
 
-  const containerWidth = dimensions.width - 24;
+  const containerWidth = isStandaloneChat ? 434 : dimensions.width - 24;
 
   const onMessageSend = async (fragments: any[]) => {
     if (!selectedChat) return;
