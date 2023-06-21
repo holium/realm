@@ -62,14 +62,7 @@ export const AddWord = ({ open, onClose }: Props) => {
   };
 
   return (
-    <Card
-      p={3}
-      elevation={4}
-      width={'100%'}
-      minHeight={400}
-      margin="20px"
-      marginBottom={12}
-    >
+    <Card flex={1} p={3} elevation={4} width={'100%'} minHeight={400}>
       <Input
         style={{
           flex: 0,
@@ -91,7 +84,7 @@ export const AddWord = ({ open, onClose }: Props) => {
         }}
         autoFocus
       />
-      <Flex flexDirection={'column'} gap={12}>
+      <Flex flexDirection={'column'} gap={16}>
         <Flex flexDirection={'column'} gap={6}>
           <RequiredLabel text="Definition" />
           <TextInput

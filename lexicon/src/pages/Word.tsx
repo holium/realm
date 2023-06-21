@@ -15,7 +15,7 @@ import { DefinitionRow, SentenceRow } from '../api/types/bedrock';
 import { TabPanel, Tabs, Vote } from '../components';
 import { Store, useStore } from '../store';
 import { TabItem } from '../types';
-import { log } from '../utils';
+import { displayDate, log } from '../utils';
 
 const tabData: TabItem[] = [
   { label: 'Definitions', value: 0 },
@@ -65,7 +65,7 @@ export const Word = () => {
     navigate('/index.html/dict/' + state.word);
   };
   return (
-    <Card p={3} elevation={4} width={'100%'} margin={'12px 20px'}>
+    <Card flex={1} p={3} elevation={4} width={'100%'}>
       <Flex justifyContent={'space-between'} mb={'8px'}>
         <Text.H3 fontWeight={600}>{state.word}</Text.H3>
 
@@ -95,6 +95,7 @@ export const Word = () => {
             orientation="bottom-left"
             id={`menu`}
             fontStyle={'normal'}
+            width={'200px'}
             triggerEl={
               <Button.IconButton size={25}>
                 <Icon name="MoreVertical" size={18} opacity={0.5} />
@@ -125,10 +126,10 @@ export const Word = () => {
       </Flex>
       <Flex justifyContent={'space-between'} mb={'16px'}>
         <Text.Body opacity={0.5} fontWeight={500}>
-          ~lodlev-migdev
+          {state.id?.split('/')[1]}
         </Text.Body>
         <Text.Body opacity={0.5} fontWeight={500}>
-          07/21/2022 10:30 AM
+          {state.createdAt && displayDate(state.createdAt)}
         </Text.Body>
       </Flex>
       <Tabs
@@ -137,14 +138,18 @@ export const Word = () => {
         tabData={tabData}
       />
       <TabPanel value={tabValue} index={0} other={null}>
-        <Definitions
-          definitionList={definitionList}
-          state={state}
-          space={space}
-        />
+        <Flex flexDirection={'column'} flex={1}>
+          <Definitions
+            definitionList={definitionList}
+            state={state}
+            space={space}
+          />
+        </Flex>
       </TabPanel>
       <TabPanel value={tabValue} index={1} other={null}>
-        <Sentences sentenceList={sentenceList} state={state} space={space} />
+        <Flex flexDirection={'column'} flex={1}>
+          <Sentences sentenceList={sentenceList} state={state} space={space} />
+        </Flex>
       </TabPanel>
     </Card>
   );
@@ -192,20 +197,23 @@ const Sentences = ({ sentenceList, space, state }: any) => {
     }
   };
   return (
-    <Flex flexDirection="column" gap={20}>
-      {sentenceList.map((item: SentenceRow, index: number) => {
-        const votes = sentenceVoteMap.get(item.id);
+    <>
+      <Flex flexDirection="column" gap={20}>
+        {sentenceList.map((item: SentenceRow, index: number) => {
+          const votes = sentenceVoteMap.get(item.id);
 
-        return (
-          <Definition
-            id={item.id}
-            text={item.sentence}
-            votes={votes}
-            key={'sentence-item-' + index}
-          />
-        );
-      })}
-      <Flex flexDirection={'column'} gap={10}>
+          return (
+            <Definition
+              id={item.id}
+              text={item.sentence}
+              votes={votes}
+              key={'sentence-item-' + index}
+            />
+          );
+        })}
+      </Flex>
+
+      <Flex flexDirection={'column'} gap={10} marginTop={'auto'}>
         <TextInput
           id="definition-input"
           name="definition"
@@ -230,7 +238,7 @@ const Sentences = ({ sentenceList, space, state }: any) => {
           Submit
         </Button.TextButton>
       </Flex>
-    </Flex>
+    </>
   );
 };
 const Definitions = ({ definitionList, state, space }: any) => {
@@ -257,19 +265,22 @@ const Definitions = ({ definitionList, state, space }: any) => {
     }
   };
   return (
-    <Flex flexDirection="column" gap={20}>
-      {definitionList.map((item: DefinitionRow, index: number) => {
-        const votes = definitionVoteMap.get(item.id);
-        return (
-          <Definition
-            id={item.id}
-            text={item.definition}
-            key={'definition-item-' + index}
-            votes={votes}
-          />
-        );
-      })}
-      <Flex flexDirection={'column'} gap={10}>
+    <>
+      <Flex flexDirection="column" gap={20}>
+        {definitionList.map((item: DefinitionRow, index: number) => {
+          const votes = definitionVoteMap.get(item.id);
+          return (
+            <Definition
+              id={item.id}
+              text={item.definition}
+              key={'definition-item-' + index}
+              votes={votes}
+            />
+          );
+        })}
+      </Flex>
+
+      <Flex flexDirection={'column'} gap={10} marginTop={'auto'}>
         <TextInput
           id="definition-input"
           name="definition"
@@ -294,6 +305,6 @@ const Definitions = ({ definitionList, state, space }: any) => {
           Submit
         </Button.TextButton>
       </Flex>
-    </Flex>
+    </>
   );
 };

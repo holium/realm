@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useParams } from 'react-router-dom';
 
 import { Flex } from '@holium/design-system/general';
 
-import { useStore } from '../store';
+import { Store, useStore } from '../store';
 import { AddWord, SearchBar } from '.';
 
 interface Props {
@@ -13,7 +13,9 @@ export const Navigation = ({ selectedSpace }: Props) => {
   const { ship, group, word } = useParams();
   //presisted space data for filtering search correctly
   const navigate = useNavigate();
-  const { setAddModalOpen, addModalOpen, setSpace } = useStore();
+  const setAddModalOpen = useStore((state: Store) => state.setAddModalOpen);
+  const addModalOpen = useStore((state: Store) => state.addModalOpen);
+  const setSpace = useStore((state: Store) => state.setSpace);
 
   useEffect(() => {
     if (selectedSpace) {
@@ -30,10 +32,18 @@ export const Navigation = ({ selectedSpace }: Props) => {
     }
     //everytime we get a new space (ship/group) we check if we are admins on that space, via a scry
   }, [ship, group]);
-
   //render the relevant route
   return (
-    <Flex flexDirection={'column'} alignItems={'center'}>
+    <Flex
+      style={{
+        minHeight: 'calc(100% - 20px)',
+      }}
+      flexDirection={'column'}
+      alignItems={'center'}
+      marginRight={'20px'}
+      marginLeft={'20px'}
+      marginBottom={'20px'}
+    >
       <SearchBar
         addModalOpen={addModalOpen}
         onAddWord={() => setAddModalOpen(true)}

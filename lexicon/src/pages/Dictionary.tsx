@@ -35,7 +35,7 @@ export const Dictionary = () => {
     fetchDict();
   }, [word]);
   return (
-    <Card p={3} elevation={4} width={'100%'} margin={'12px 20px'}>
+    <Card flex={1} p={3} elevation={4} width={'100%'}>
       <Flex flexDirection={'column'} justifyContent={'space-between'}>
         <Text.H3 fontWeight={600} style={{ marginBottom: '20px' }}>
           {word}
@@ -44,7 +44,7 @@ export const Dictionary = () => {
           {loading && <Spinner size={1} />}
 
           {noResults ? (
-            <Text.H6 opacity=".7" fontWeight={500}>
+            <Text.H6 opacity=".7" fontWeight={500} textAlign="center">
               No result found
             </Text.H6>
           ) : (

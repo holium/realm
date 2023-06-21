@@ -78,7 +78,10 @@ export const SearchBar = ({
       flex={1}
       gap={10}
       justifyContent={'center'}
-      style={{ position: 'relative' }}
+      style={{ position: 'relative', width: '80%' }}
+      marginTop="14px"
+      marginBottom="14px"
+      maxHeight="34px"
     >
       {backButton && (
         <Button.IconButton onClick={() => onBack()}>
@@ -92,7 +95,9 @@ export const SearchBar = ({
         leftAdornment={<Icon name="Search" size={16} opacity={0.7} />}
         style={{
           paddingLeft: 9,
+          flex: 1,
         }}
+        height={'30px'}
         value={searchQuery}
         placeholder="Search words"
         error={false}

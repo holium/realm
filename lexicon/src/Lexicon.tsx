@@ -2,8 +2,6 @@ import { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { createGlobalStyle } from 'styled-components';
 
-import { Box } from '@holium/design-system/general';
-
 import {
   DefinitionRow,
   SentenceRow,
@@ -310,24 +308,19 @@ export const Lexicon = ({
         }}
       >
         <GlobalStyle />
-        <Box maxWidth={550} margin="auto">
-          <Router>
-            <Routes>
-              <Route element={<Navigation selectedSpace={selectedSpace} />}>
-                <Route
-                  path="/index.html/:ship/:group/:word"
-                  element={<Word />}
-                />
-                <Route path="/index.html/:ship/:group" element={<Home />} />
-                <Route path="/index.html/dict/:word" element={<Dictionary />} />
-                <Route
-                  path="/index.html"
-                  element={<p>don't mind me just redirecting over here</p>}
-                />
-              </Route>
-            </Routes>
-          </Router>
-        </Box>
+        <Router>
+          <Routes>
+            <Route element={<Navigation selectedSpace={selectedSpace} />}>
+              <Route path="/index.html/:ship/:group/:word" element={<Word />} />
+              <Route path="/index.html/:ship/:group" element={<Home />} />
+              <Route path="/index.html/dict/:word" element={<Dictionary />} />
+              <Route
+                path="/index.html"
+                element={<p>don't mind me just redirecting over here</p>}
+              />
+            </Route>
+          </Routes>
+        </Router>
       </main>
     </>
   );

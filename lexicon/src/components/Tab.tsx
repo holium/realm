@@ -65,6 +65,11 @@ export const TabPanel = ({
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
+      style={{
+        display: value !== index ? 'none' : 'flex',
+        flexDirection: 'column',
+        flex: 1,
+      }}
       {...other}
     >
       {children}
