@@ -30,7 +30,8 @@ export enum LEXICON_TABLES {
 }
 
 class LexiconService extends AbstractService<any> {
-  //public walletDB?: WalletDB;
+  public db?: Database;
+
   constructor(options?: ServiceOptions, db?: Database) {
     super('LexiconService', options);
     this.db = db;
@@ -355,7 +356,7 @@ class LexiconService extends AbstractService<any> {
     data: any,
     schema: Schema
   ) {
-    const json = {
+    const json: any = {
       create: {
         path: path,
         type: type,

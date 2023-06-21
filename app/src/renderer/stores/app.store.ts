@@ -180,7 +180,7 @@ function registerOnUpdateListener() {
     appState.shellStore.setFullscreen(isFullScreen);
   });
 
-  LexiconIPC.onUpdate(async (update) => {
+  LexiconIPC.onUpdate(async (update: any) => {
     //update lexicon store with the latest update
     shipStore.lexiconStore.setUpdate(update?.payload);
   });

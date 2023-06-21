@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 
-import { Button, Card, Flex, Text } from '@holium/design-system/general';
+import {
+  Button,
+  Card,
+  ErrorBox,
+  Flex,
+  Text,
+} from '@holium/design-system/general';
 import { Input, TextInput } from '@holium/design-system/inputs';
 
 import { Store, useStore } from '../store';
@@ -18,11 +24,13 @@ export const AddWord = ({ open, onClose }: Props) => {
   const [definition, setDefinition] = useState<string>('');
   const [sentence, setSentence] = useState<string>('');
   const [related, setRelated] = useState<string>('');
+  const [error, setError] = useState<string>(''); // TODO: error never displays since thread doesn't error
 
   if (!space) return null;
   if (!open) return null;
 
   const addWord = async () => {
+    setError('');
     try {
       const result: any = await api.createWord(space, word);
       if (result) {
@@ -49,6 +57,7 @@ export const AddWord = ({ open, onClose }: Props) => {
       log('addWord result =>', result);
     } catch (e) {
       log('addword error => ', e);
+      setError('Something went wrong');
     }
   };
   const resetForm = () => {
@@ -125,6 +134,12 @@ export const AddWord = ({ open, onClose }: Props) => {
           />
         </Flex>
       </Flex>
+
+      {error && (
+        <Flex marginTop={'auto'}>
+          <ErrorBox>{error}</ErrorBox>
+        </Flex>
+      )}
       <Flex gap={10} justifyContent={'flex-end'} marginTop={'auto'}>
         <Button.Transparent
           fontSize={1}

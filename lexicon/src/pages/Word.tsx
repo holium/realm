@@ -95,7 +95,7 @@ export const Word = () => {
             orientation="bottom-left"
             id={`menu`}
             fontStyle={'normal'}
-            width={'200px'}
+            dimensions={{ width: 200, height: 80 }}
             triggerEl={
               <Button.IconButton size={25}>
                 <Icon name="MoreVertical" size={18} opacity={0.5} />
