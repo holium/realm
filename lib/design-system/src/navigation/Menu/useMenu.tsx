@@ -1,81 +1,4 @@
-// import { useState, useEffect, useRef } from 'react';
-
-// interface MenuState {
-//   isOpen: boolean;
-//   anchorEl: null | HTMLElement;
-// }
-
-// function useMenu(): {
-//   isOpen: boolean;
-//   anchorEl: null | HTMLElement;
-//   openMenu: (event: React.MouseEvent<HTMLElement>) => void;
-//   closeMenu: () => void;
-//   toggleMenu: (event: React.MouseEvent<HTMLElement>) => void;
-//   menuRef: React.RefObject<HTMLDivElement>;
-// } {
-//   const [menuState, setMenuState] = useState<MenuState>({
-//     isOpen: false,
-//     anchorEl: null,
-//   });
-//   const menuRef = useRef<HTMLDivElement>(null);
-
-//   useEffect(() => {
-//     const handleOutsideClick = (event: MouseEvent) => {
-//       if (
-//         menuState.anchorEl &&
-//         !menuState.anchorEl.contains(event.target as Node)
-//       ) {
-//         closeMenu();
-//       }
-//     };
-
-//     if (menuState.isOpen) {
-//       const listener = (event: MouseEvent) => handleOutsideClick(event);
-//       document.addEventListener('mousedown', listener);
-//       return () => {
-//         document.removeEventListener('mousedown', listener);
-//       };
-//     }
-//   }, [menuState.isOpen, menuState.anchorEl]);
-
-//   const openMenu = (event: React.MouseEvent<HTMLElement>) => {
-//     if (!menuState.isOpen) {
-//       setMenuState({
-//         isOpen: true,
-//         anchorEl: event.currentTarget,
-//       });
-//     }
-//   };
-
-//   const closeMenu = () => {
-//     setMenuState({
-//       isOpen: false,
-//       anchorEl: null,
-//     });
-//   };
-
-//   const toggleMenu = (event: React.MouseEvent<HTMLElement>) => {
-//     if (menuState.isOpen) {
-//       closeMenu();
-//     } else {
-//       openMenu(event);
-//     }
-//   };
-
-//   return {
-//     isOpen: menuState.isOpen,
-//     anchorEl: menuState.anchorEl,
-//     openMenu,
-//     closeMenu,
-//     toggleMenu,
-//     menuRef,
-//   };
-// }
-
-// export default useMenu;
-
-import { useEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { RefObject, useCallback, useEffect, useRef, useState } from 'react';
 
 import { Dimensions, Position } from '../../../util';
 import { getAnchorPointByTarget } from '../../util/position';
@@ -97,14 +20,14 @@ type Orientation =
   | 'bottom-right'
   | 'bottom';
 
-type UseMenuProps = {
+type UseMenu = {
   isOpen: boolean;
   anchorEl: null | HTMLElement;
   position: { y: number; x: number };
+  menuRef: RefObject<HTMLDivElement>;
   openMenu: (event: React.MouseEvent<HTMLElement>) => void;
-  closeMenu: () => void;
   toggleMenu: (event: React.MouseEvent<HTMLElement>) => void;
-  menuRef: React.RefObject<HTMLDivElement>;
+  closeMenu: () => void;
 };
 
 export function useMenu(
@@ -113,56 +36,55 @@ export function useMenu(
   offset?: Position,
   closableIds?: string[],
   closableClasses?: string[]
-): UseMenuProps {
+): UseMenu {
+  const menuRef = useRef<HTMLDivElement>(null);
   const [menuState, setMenuState] = useState<MenuState>({
     isOpen: false,
     anchorEl: null,
     position: { y: 0, x: 0 },
   });
-  const menuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleOutsideClick = (event: MouseEvent) => {
-      // eslint-disable-next-line react/no-find-dom-node
-      const domNode = ReactDOM.findDOMNode(menuRef.current);
+  const handleOutsideClick = useCallback(
+    (event: MouseEvent) => {
+      event.stopPropagation();
 
-      if (domNode && domNode.contains(event.target as HTMLElement)) {
+      const isMenuAnchorClick =
+        menuState.anchorEl && menuState.anchorEl.contains(event.target as Node);
+      const isMenuContainerClick =
+        menuRef.current && menuRef.current.contains(event.target as Node);
+
+      if (isMenuAnchorClick) {
+        return;
+      } else if (isMenuContainerClick && menuState.isOpen) {
         // check if the click is on a closable element
-        if (closableIds) {
+        if (closableIds?.length) {
           const id = (event.target as HTMLElement).id;
           if (closableIds.includes(id)) {
             closeMenu();
             return;
           }
         }
-        if (closableClasses) {
+        if (closableClasses?.length) {
           const classes = (event.target as HTMLElement).classList;
           if (closableClasses.some((c) => classes.contains(c))) {
             closeMenu();
             return;
           }
         }
-        event.stopPropagation();
-      } else {
-        if (
-          menuState.anchorEl &&
-          !menuState.anchorEl.contains(event.target as Node)
-        ) {
-          closeMenu();
-          event.stopPropagation();
-        }
+      } else if (menuState.isOpen) {
+        closeMenu();
       }
-    };
+    },
+    [menuState, closableIds, closableClasses]
+  );
 
-    if (menuState.isOpen) {
-      const listener = (event: MouseEvent) => handleOutsideClick(event);
-      document.addEventListener('mousedown', listener);
-      return () => {
-        document.removeEventListener('mousedown', listener);
-      };
-    }
-    return;
-  }, [menuState.isOpen, menuState.anchorEl, closableIds, closableClasses]);
+  useEffect(() => {
+    document.addEventListener('mousedown', handleOutsideClick);
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [handleOutsideClick]);
 
   const calculatePosition = (
     anchorEvent: React.MouseEvent<HTMLElement>,

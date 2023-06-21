@@ -32,6 +32,7 @@ export const InboxBodyList = ({
         justifyContent="center"
         alignItems="center"
         gap={8}
+        paddingLeft={isStandaloneChat ? 12 : 0}
       >
         <Text.Custom
           width={200}
@@ -50,7 +51,7 @@ export const InboxBodyList = ({
   }
 
   return (
-    <InboxListContainer>
+    <InboxListContainer isStandaloneChat={isStandaloneChat}>
       <WindowedList
         data={inboxes}
         shiftScrollbar={!isStandaloneChat}

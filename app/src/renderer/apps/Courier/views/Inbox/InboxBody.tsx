@@ -7,11 +7,13 @@ import { ChatModelType } from 'renderer/stores/models/chat.model';
 
 import { InboxBodyHeaderContainer } from './InboxBody.styles';
 import { InboxBodyList } from './InboxBodyList';
+import { InboxBodyLoadingHeader } from './InboxBodyLoadingHeader';
 
 type Props = {
   inboxes: ChatModelType[];
   accountIdentity: string | undefined;
   spacePath: string | undefined;
+  isLoading: boolean;
   isStandaloneChat?: boolean;
   isChatPinned: (path: string) => boolean;
   onClickInbox: (path: string) => void;
@@ -23,6 +25,7 @@ export const InboxBody = ({
   inboxes,
   accountIdentity,
   spacePath,
+  isLoading,
   isStandaloneChat,
   isChatPinned,
   onClickInbox,
@@ -44,13 +47,7 @@ export const InboxBody = ({
   const filteredInboxes = inboxes.filter(searchFilter);
 
   return (
-    <Flex
-      width="100%"
-      height="100%"
-      minWidth={0}
-      flexDirection="column"
-      paddingLeft={isStandaloneChat ? 12 : 0}
-    >
+    <Flex width="100%" height="100%" minWidth={0} flexDirection="column">
       <InboxBodyHeaderContainer isStandaloneChat={isStandaloneChat}>
         <Flex width={26}>
           <Icon name="Messages" size={24} opacity={0.8} />
@@ -88,6 +85,7 @@ export const InboxBody = ({
           </Button.IconButton>
         </Flex>
       </InboxBodyHeaderContainer>
+      {isLoading && <InboxBodyLoadingHeader />}
       <InboxBodyList
         inboxes={filteredInboxes}
         spacePath={spacePath}

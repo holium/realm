@@ -4,7 +4,7 @@ import { Box, Text } from '../../../general';
 import { opacifyHexColor } from '../../util/colors';
 import { FontSizes, REACTION_WIDTH, ReactionSizes } from './Reaction.sizes';
 
-export const ReactionRow = styled(Box)<{ variant: 'overlay' | 'inline' }>`
+export const ReactionContainer = styled(Box)<{ variant: 'overlay' | 'inline' }>`
   display: flex;
   position: relative;
   flex-direction: row;

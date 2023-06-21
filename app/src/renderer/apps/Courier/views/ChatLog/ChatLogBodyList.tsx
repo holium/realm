@@ -15,7 +15,6 @@ type Props = {
   messages: ChatMessageType[];
   listRef: RefObject<WindowedListRef>;
   topPadding: number;
-  endPadding: number;
   ourColor: string;
   showPin: boolean;
   pinnedChatMessage: ChatMessageType | null | undefined;
@@ -28,7 +27,6 @@ export const ChatLogBodyList = ({
   messages,
   listRef,
   topPadding,
-  endPadding,
   ourColor,
   showPin,
   isEmpty,
@@ -67,7 +65,6 @@ export const ChatLogBodyList = ({
         listRef={listRef}
         messages={messages}
         topOfListPadding={topPadding}
-        endOfListPadding={endPadding}
         ourColor={ourColor}
         isStandaloneChat={isStandaloneChat}
       />

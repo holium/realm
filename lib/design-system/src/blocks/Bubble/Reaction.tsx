@@ -1,6 +1,5 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
-import { Icon } from '../../../general';
 import { useMenu } from '../../navigation/Menu/useMenu';
 import { FragmentReactionType } from './Bubble.types';
 import {
@@ -8,9 +7,9 @@ import {
   REACTION_WIDTH,
   ReactionSizes,
 } from './Reaction.sizes';
-import { ReactionButton, ReactionRow } from './Reaction.styles';
+import { ReactionContainer } from './Reaction.styles';
 import { ReactionCount } from './ReactionCount';
-import { ReactionEmojiPicker } from './ReactionEmojiPicker';
+import { ReactionRow } from './ReactionRow';
 
 const defaultShip =
   typeof window !== 'undefined' ? (window as any)?.ship ?? 'zod' : 'zod';
@@ -52,17 +51,14 @@ export const Reactions = ({
   const { isOpen, menuRef, position, toggleMenu, closeMenu } = useMenu(
     'top-left',
     { width: REACTION_WIDTH, height: REACTION_HEIGHT },
-    { x: 0, y: 2 },
-    [], // closeableIds
-    [] // closeableClasses
+    { x: 0, y: 2 }
   );
-
-  const reactIds = reactions.map((r) => r.msgId);
 
   const reactionsAggregated = useMemo(() => {
     if (reactions.length === 0) {
       return [];
     }
+
     return Object.values<ReactionAggregateType>(
       reactions.reduce((acc, reaction) => {
         if (acc[reaction.emoji]) {
@@ -78,50 +74,56 @@ export const Reactions = ({
         return acc;
       }, {} as Record<string, ReactionAggregateType>)
     ).sort((a, b) => b.count - a.count);
-  }, [reactIds, reactions.length]);
+  }, [reactions.length]);
 
-  // if we have reactions, and we're in overlay mode, switch to inline
-  const variantAuto =
-    reactions.length > 0 && variant === 'overlay' ? 'inline' : 'overlay';
-
-  const checkDupe = (emoji: string) => {
-    const index = reactionsAggregated.findIndex((r) => r.emoji === emoji);
-    if (index > -1) {
-      const reaction = reactionsAggregated[index];
-      if (reaction.by.includes(ourShip)) {
-        return true;
+  const checkDupe = useCallback(
+    (emoji: string) => {
+      const index = reactionsAggregated.findIndex((r) => r.emoji === emoji);
+      if (index > -1) {
+        const reaction = reactionsAggregated[index];
+        if (reaction.by.includes(ourShip)) {
+          return true;
+        }
       }
-    }
-    return false;
-  };
+      return false;
+    },
+    [reactionsAggregated]
+  );
 
-  const onClickEmoji = (emoji: string) => {
-    if (!onReaction) return;
-    closeMenu();
+  const onClickEmoji = useCallback(
+    (emoji: string) => {
+      if (!onReaction) return;
+      if (!emoji) return;
+      closeMenu();
 
-    if (checkDupe(emoji)) {
-      const reactToRemove = reactions.find(
-        (r) => r.by === ourShip && r.emoji === emoji
-      );
-      if (!reactToRemove) return;
-      onReaction({
-        reactId: reactToRemove.msgId,
-        emoji,
-        action: 'remove',
-        by: ourShip,
-      });
-    } else {
-      onReaction({ emoji, action: 'add', by: ourShip });
-    }
-  };
+      if (checkDupe(emoji)) {
+        const reactToRemove = reactions.find(
+          (r) => r.by === ourShip && r.emoji === emoji
+        );
+        if (!reactToRemove) return;
+        onReaction({
+          reactId: reactToRemove.msgId,
+          emoji,
+          action: 'remove',
+          by: ourShip,
+        });
+      } else {
+        onReaction({ emoji, action: 'add', by: ourShip });
+      }
+    },
+    [checkDupe, closeMenu, onReaction, reactions]
+  );
 
   return (
-    <ReactionRow
+    <ReactionContainer
       id={id}
       style={{
         width: 'max-content',
       }}
-      variant={variantAuto}
+      // if we have reactions, and we're in overlay mode, switch to inline
+      variant={
+        reactions.length > 0 && variant === 'overlay' ? 'inline' : 'overlay'
+      }
       onClick={(evt) => {
         evt.stopPropagation();
       }}
@@ -138,26 +140,19 @@ export const Reactions = ({
           onClick={onClickEmoji}
         />
       ))}
-      <>
-        <ReactionButton
+      {!isOur && (
+        <ReactionRow
           id={id}
           isOur={isOur}
           ourColor={ourColor}
           size={size}
-          className="bubble-reactions"
-          onClick={(evt) => {
-            toggleMenu(evt);
-          }}
-        >
-          <Icon pointerEvents="none" size={18} opacity={0.5} name="Reaction" />
-        </ReactionButton>
-        <ReactionEmojiPicker
           isOpen={isOpen}
           menuRef={menuRef}
           position={position}
+          toggleMenu={toggleMenu}
           onClickEmoji={onClickEmoji}
         />
-      </>
-    </ReactionRow>
+      )}
+    </ReactionContainer>
   );
 };

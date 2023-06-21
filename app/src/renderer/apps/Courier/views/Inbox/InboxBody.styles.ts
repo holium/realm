@@ -2,8 +2,9 @@ import styled from 'styled-components';
 
 import { Flex } from '@holium/design-system/general';
 
-export const InboxListContainer = styled(Flex)`
+export const InboxListContainer = styled(Flex)<{ isStandaloneChat: boolean }>`
   flex: 1;
+
   .chat-inbox-row-top-pinned {
     .chat-inbox-row {
       border-top-left-radius: 6px;
@@ -28,6 +29,12 @@ export const InboxListContainer = styled(Flex)`
       border-bottom-right-radius: 6px;
     }
   }
+
+  ${({ isStandaloneChat }) =>
+    isStandaloneChat &&
+    `
+    padding-left: 12px;
+  `}
 `;
 
 export const InboxBodyHeaderContainer = styled(Flex)<{
@@ -41,6 +48,6 @@ export const InboxBodyHeaderContainer = styled(Flex)<{
     isStandaloneChat &&
     `
     height: 58px;
-    padding: 12px
+    padding: 12px 12px 12px 24px;
   `}
 `;

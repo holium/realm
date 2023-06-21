@@ -1,4 +1,4 @@
-import { RefObject, useState } from 'react';
+import { RefObject } from 'react';
 import { observer } from 'mobx-react';
 
 import { Flex, WindowedListRef } from '@holium/design-system/general';
@@ -52,28 +52,14 @@ const ChatLogBodyPresenter = ({
   const { chatStore } = useShipStore();
   const { selectedChat, setSubroute, inboxLoader } = chatStore;
 
-  const [showAttachments, setShowAttachments] = useState(false);
-
   const messages = selectedChat?.messages ?? [];
 
   let topPadding = 0;
-  let endPadding = 0;
   if (showPin) {
     topPadding = 50;
   }
-  if (showAttachments) {
-    endPadding = 136;
-  }
-  if (selectedChat?.replyingMsg) {
-    endPadding = 56;
-  }
 
-  const onAttachmentChange = (attachmentCount: number) => {
-    if (attachmentCount > 0) {
-      setShowAttachments(true);
-    } else {
-      setShowAttachments(false);
-    }
+  const onAttachmentChange = () => {
     // Wait for transition to finish, then scroll to bottom.
     setTimeout(() => {
       listRef.current?.scrollToIndex(messages.length - 1);
@@ -102,7 +88,6 @@ const ChatLogBodyPresenter = ({
           messages={messages}
           listRef={listRef}
           topPadding={topPadding}
-          endPadding={endPadding}
           ourColor={ourColor}
           showPin={showPin}
           pinnedChatMessage={pinnedChatMessage}
