@@ -744,6 +744,32 @@
         ~
       (time t)
     ::
+    ++  precise-time
+    ::  same as (time:enjs:format @da) except produces an extra 3 digits
+    ::  of precision
+      |=  t=@da
+      ^-  json
+      =/  as-int  (precise-unm t)
+      =/  int-part=@ta     (just-numb (div as-int 1.000))
+      =/  real-part=@ta    (just-numb (mod as-int 1.000))
+      :-  %n
+      `@ta`(crip (weld (weld (trip int-part) ".") (trip real-part)))
+    ::
+    ++  precise-unm
+      |=  a=@da
+      ^-  @
+      =-  (div (mul - 1.000.000) ~s1)
+      (sub (add a (div ~s1 2.000.000)) ~1970.1.1)
+    ::
+    ++  just-numb
+      |=  a=@u
+      ^-  @ta
+      ?:  =(0 a)  '0'
+      %-  crip
+      %-  flop
+      |-  ^-  ^tape
+      ?:(=(0 a) ~ [(add '0' (mod a 10)) $(a (div a 10))])
+    ::
     ++  reply-to-to-json
       |=  =reply-to:sur
       ^-  json
