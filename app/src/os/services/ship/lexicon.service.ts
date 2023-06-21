@@ -410,7 +410,6 @@ class LexiconService extends AbstractService<any> {
     vote: boolean | null,
     ship: string
   ) {
-    //TODO: use realm data here (ship Name)
     if (vote === null) {
       return await this.remove(voteId, path, 'vote');
     } else {
@@ -434,6 +433,7 @@ class LexiconService extends AbstractService<any> {
       onEvent: (data: any) => {
         //send update to the IPC update handler in app.store
         this.sendUpdate({ type: 'lexicon-update', payload: data });
+        // sync changes to sql db here
         this.onUpdate(data);
       },
       onError: () => console.log('Subscription rejected.'),
@@ -441,7 +441,6 @@ class LexiconService extends AbstractService<any> {
     });
   }
   onUpdate(update: any) {
-    console.log('update', update);
     if (update.length === 0) return;
     const type = update[0].change;
     if (type === 'add-row') {
@@ -500,7 +499,7 @@ class LexiconService extends AbstractService<any> {
     let votes: any = [];
     let definitions: any = [];
     let sentences: any = [];
-    console.log('result', result['data-tables']);
+
     if (result) {
       result['data-tables'].forEach((item: any) => {
         if (item.type === 'lexicon-word') {
@@ -515,6 +514,17 @@ class LexiconService extends AbstractService<any> {
       });
     }
     return { words, votes, definitions, sentences };
+  }
+  async getDictonaryDefinition(word: string) {
+    try {
+      const result = await fetch(
+        'https://api.dictionaryapi.dev/api/v2/entries/en/' + word
+      );
+      const data = await result.json();
+      return data;
+    } catch (e) {
+      return [];
+    }
   }
 }
 

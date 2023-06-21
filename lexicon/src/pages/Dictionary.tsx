@@ -3,7 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { Box, Card, Flex, Spinner, Text } from '@holium/design-system/general';
 
+import { Store, useStore } from '../store';
+
 export const Dictionary = () => {
+  const api = useStore((store: Store) => store.api);
   const [defs, setDefs] = useState<any>([]);
   const [noResults, setNoResults] = useState<boolean>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -15,10 +18,7 @@ export const Dictionary = () => {
     setLoading(true);
     setDefs([]);
     try {
-      const result = await fetch(
-        'https://api.dictionaryapi.dev/api/v2/entries/en/' + word
-      );
-      const data = await result.json();
+      const data = await api.getDictonaryDefinition(word);
 
       if (data[0]?.meanings) {
         setDefs(data[0].meanings);
@@ -41,7 +41,11 @@ export const Dictionary = () => {
           {word}
         </Text.H3>
         <Flex flexDirection={'column'} gap="14px">
-          {loading && <Spinner size={1} />}
+          {loading && (
+            <Flex alignItems={'center'} justifyContent={'center'}>
+              <Spinner size={1} />
+            </Flex>
+          )}
 
           {noResults ? (
             <Text.H6 opacity=".7" fontWeight={500} textAlign="center">
