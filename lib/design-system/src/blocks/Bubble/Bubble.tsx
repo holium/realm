@@ -170,7 +170,7 @@ export const Bubble = ({
   return (
     <Flex
       ref={innerRef}
-      key={id}
+      key={`${id}-${fragments.join('-')}`}
       display="inline-flex"
       justifyContent={isOur ? 'flex-end' : 'flex-start'}
       position="relative"

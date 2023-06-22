@@ -77,7 +77,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   });
 
   const minX = 0;
-  const minY = showTitleBar ? TITLEBAR_HEIGHT + 8 : 0;
+  const minY = showTitleBar ? TITLEBAR_HEIGHT : 0;
   const maxX = shellStore.desktopDimensions.width;
   const maxY = shellStore.desktopDimensions.height;
 
