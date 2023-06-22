@@ -172,12 +172,12 @@
 ++  get-path-card
   |=  [=ship =path-row peers=ship-roles]
   ^-  card
-  [%pass /dbpoke %agent [ship %db] %poke %db-action !>([%get-path path-row peers])]
+  [%pass /dbpoke %agent [ship %bedrock] %poke %db-action !>([%get-path path-row peers])]
 ::
 ++  delete-path-card
   |=  [=ship =path]
   ^-  card
-  [%pass /dbpoke %agent [ship %db] %poke %db-action !>([%delete-path path])]
+  [%pass /dbpoke %agent [ship %bedrock] %poke %db-action !>([%delete-path path])]
 ::
 ++  del-path-in-tables
   |=  [state=state-0 =path]
@@ -764,7 +764,7 @@
   =/  path-sub-wire           (weld /next/(scot %da updated-at.path-row) path)
   =/  cards=(list card)  :~
     :: poke %delete-path to the ship we are kicking
-    [%pass /dbpoke %agent [ship %db] %poke %db-action !>([%delete-path path])]
+    [%pass /dbpoke %agent [ship %bedrock] %poke %db-action !>([%delete-path path])]
     :: tell subs that we deleted `ship`
     [%give %fact [/db (weld /path path) path-sub-wire ~] db-changes+!>([%del-peer path ship now.bowl]~)]
     :: kick subs to force them to re-sub for next update
@@ -787,6 +787,7 @@
 ++  get-path
   |=  [[=path-row peers=ship-roles] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  ~&  "%get-path {<path.path-row>}"
   :: ensure the path doesn't already exist
   =/  pre-existing    (~(get by paths.state) path.path-row)
   ?>  =(~ pre-existing)
@@ -827,7 +828,7 @@
       %pass
       (weld /next path.path-row)
       %agent
-      [src.bowl %db]
+      [src.bowl dap.bowl]
       %watch
       (weld /next/(scot %da updated-at.path-row) path.path-row)
     ]
@@ -892,7 +893,7 @@
   ?.  =(host.path-row our.bowl)
     ~&  >>  "{<src.bowl>} tried to have us ({<our.bowl>}) create a row in {<path.path-row>} where we are not the host. forwarding the poke to the host: {<host.path-row>}"
     :_  state
-    [%pass /dbpoke %agent [host.path-row %db] %poke %db-action !>([%create req-id input-row])]~
+    [%pass /dbpoke %agent [host.path-row dap.bowl] %poke %db-action !>([%create req-id input-row])]~
   :: ensure that the row meets constraints
   ?.  (meets-constraints path-row row state bowl)
     ~&  >>>  "{(scow %p src.bowl)} tried to create a %{(scow %tas type.row)} row where they violated constraints"
@@ -924,7 +925,7 @@
 :: generally, you'd only bother passing the schema if you are changing the version of the row
 ::db &db-action [%edit [our ~2023.5.22..17.21.47..9d73] /example %foo 0 [%general ~[2 'b']] ~]
   |=  [[=id:common =input-row] state=state-0 =bowl:gall]
-  ~&  "%db agent - %edit poke"
+  ~&  "%bedrock agent - %edit poke"
   ^-  (quip card state-0)
   :: permissions
   =/  old-row              (~(got by (~(got by (~(got by tables.state) type.input-row)) path.input-row)) id) :: old row must first exist
@@ -936,7 +937,7 @@
   ?.  =(host.path-row our.bowl)
     ~&  >>  "{<src.bowl>} tried to have us ({<our.bowl>}) edit a row in {<path.path-row>} where we are not the host. forwarding the poke to the host: {<host.path-row>}"
     :_  state
-    [%pass /dbpoke %agent [host.path-row %db] %poke %db-action !>([%edit id input-row])]~
+    [%pass /dbpoke %agent [host.path-row dap.bowl] %poke %db-action !>([%edit id input-row])]~
 
   :: schema checking
   =/  sch=schema
@@ -992,7 +993,7 @@
   ?.  =(host.path-row our.bowl)
     ~&  >>  "{<src.bowl>} tried to have us ({<our.bowl>}) remove a row in {<path.path-row>} where we are not the host. forwarding the poke to the host: {<host.path-row>}"
     :_  state
-    [%pass /dbpoke %agent [host.path-row %db] %poke %db-action !>([%remove type path id])]~
+    [%pass /dbpoke %agent [host.path-row dap.bowl] %poke %db-action !>([%remove type path id])]~
 
   :: update path
   =/  foreign-ship-sub-wire   (weld /next/(scot %da updated-at.path-row) path)
@@ -1025,6 +1026,7 @@
 ::bedrock &db-action [%relay [~bus now] /target %relay 0 [%relay [~zod ~2023.6.13..15.57.34..aa97] %foo /example 0 %all %.n] ~]
   |=  [[=req-id =input-row] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  ~&  %relay
   :: first check that the input is actually a %relay
   ?+  -.data.input-row   !!
     %relay 
@@ -1109,6 +1111,7 @@
           [%create de-create-input-row]
           [%edit (ot ~[[%id de-id] [%input-row de-input-row]])]
           [%remove remove]
+          [%relay de-create-input-row]
       ==
     ::
     ++  de-create-input-row

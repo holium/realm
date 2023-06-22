@@ -269,7 +269,7 @@
             ~&  >  "{<dap.bowl>}: /next/[path] kicked us, resubbing {(spud newpath)}"
             :_  this
             :~
-              [%pass wire %agent [src.bowl %db] %watch newpath]
+              [%pass wire %agent [src.bowl dap.bowl] %watch newpath]
             ==
           %fact
             :: handle the update by updating our local state and
