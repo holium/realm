@@ -136,14 +136,20 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
     const newBounds = parentWindow.getBounds();
 
     newMouseWindow.setBounds(newBounds);
-    parentWindow.webContents.send('set-dimensions', newBounds);
+    parentWindow.webContents.send('set-dimensions', {
+      width: newBounds.width,
+      height: newBounds.height - (isArm64Mac ? 40 : 0),
+    });
   });
 
   parentWindow.on('move', () => {
-    const newDimension = parentWindow.getBounds();
+    const newBounds = parentWindow.getBounds();
 
-    newMouseWindow.setBounds(newDimension);
-    parentWindow.webContents.send('set-dimensions', newDimension);
+    newMouseWindow.setBounds(newBounds);
+    parentWindow.webContents.send('set-dimensions', {
+      width: newBounds.width,
+      height: newBounds.height - (isArm64Mac ? 40 : 0),
+    });
   });
 
   return newMouseWindow;
