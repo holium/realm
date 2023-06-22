@@ -1583,7 +1583,9 @@
                 ['revision' (numb revision.data.row)]
             ==
         ==
-      =/  keyvals  (weld basekvs dynamickvs)
+      =/  keyvals
+        :_  basekvs
+        data+(pairs dynamickvs)
       (pairs keyvals)
     ::
     ++  en-path-row
