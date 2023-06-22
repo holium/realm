@@ -176,7 +176,7 @@
 +$  req-id  [src=ship now=@da] :: the request-id, used for threads and venting
 ::
 +$  vent
-  $%  [%row-id =id:common]
+  $%  [%row =row =schema]
       [%ack ~]
   ==
 --

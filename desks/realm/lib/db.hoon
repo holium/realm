@@ -914,7 +914,7 @@
     :: kick subs to force them to re-sub for next update
     [%give %kick [path-sub-wire ~] ~]
     :: give vent response
-    [%give %fact ~[vent-path] db-vent+!>([%row-id id.row])]
+    [%give %fact ~[vent-path] db-vent+!>([%row row schema.input-row])]
     kickcard
   ==
   ~&  >  "publishing new row to {(spud path-sub-wire)} (and also kicking)"
@@ -1381,8 +1381,8 @@
       |=  =vent
       ^-  json
       ?-  -.vent
-        %ack     s/%ack
-        %row-id  (frond row-id+(row-id-to-json id.vent))
+        %ack   s/%ack
+        %row   (en-row row.vent (~(put by *schemas) [type.row.vent v.row.vent] schema.vent))
       ==
     ::
     ++  en-db-changes
