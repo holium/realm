@@ -18,14 +18,14 @@
 =/  data-path=path   path.input-row.u.axn
 =/  scry-path=wire
   %+  weld
-    /gx/db/host/path
+    /gx/bedrock/host/path
   %+  weld
     data-path
   /noun
 =/  =wire  /vent/(scot %p our)/(scot %da now)
 ;<  host=ship  bind:m  (scry ship scry-path)
-;<  ~        bind:m  (watch wire [host %db] wire)
-;<  ~        bind:m  (poke [host %db] db-action+!>([%create [our now] +>.u.axn]))
+;<  ~        bind:m  (watch wire [host %bedrock] wire)
+;<  ~        bind:m  (poke [host %bedrock] db-action+!>([%create [our now] +>.u.axn]))
 ;<  cage=(unit cage)  bind:m  (take-fact-or-kick wire)
 ?^  cage
   (pure:m q.u.cage)
