@@ -15,8 +15,14 @@ export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
   const { loggedInAccount, shellStore } = useAppState();
   const { chatStore, spacesStore } = useShipStore();
 
-  const { sortedChatList, loader, setChat, setSubroute, isChatPinned } =
-    chatStore;
+  const {
+    sortedChatList,
+    loader,
+    setChat,
+    setStandaloneChat,
+    setSubroute,
+    isChatPinned,
+  } = chatStore;
   const currentSpace = spacesStore.selected;
 
   useEffect(() => {
@@ -33,6 +39,7 @@ export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
       isChatPinned={isChatPinned}
       onClickInbox={(path) => {
         setChat(path);
+        isStandaloneChat ? setStandaloneChat(path) : setChat(path);
         setSubroute('chat');
       }}
       onClickNewInbox={() => {

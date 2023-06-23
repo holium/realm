@@ -22,7 +22,6 @@ const StandaloneChatPassportPresenter = ({ onBack }: Props) => {
       width="100%"
       height="100%"
       borderTop="1px solid var(--rlm--color)"
-      background="var(--rlm-base-color)"
     >
       <ChatLogHeader
         path={loggedInAccount.serverId}
