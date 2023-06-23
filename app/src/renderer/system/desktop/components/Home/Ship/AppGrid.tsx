@@ -44,10 +44,14 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
       canClick.setToggle(!isDragging);
       if (!isDragging) disableScroll.off();
     });
-
     window.electron.app.onMouseUp(() => {
       canClick.setToggle(true);
     });
+
+    return () => {
+      window.electron.app.removeOnMouseMove();
+      window.electron.app.removeOnMouseUp();
+    };
   }, []);
 
   if (!currentSpace) return null;
