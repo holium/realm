@@ -133,10 +133,12 @@ export class Conduit extends EventEmitter {
       mark: 'helm-hi',
       json: 'Opening Realm API channel',
     });
+    console.log('init: starting SSE');
     await this.startSSE(this.channelUrl(this.uid));
   }
 
   async startSSE(channelUrl: string): Promise<void> {
+    console.log('start SSE => %o', this.status);
     if (this.status === ConduitState.Connected) {
       return Promise.resolve();
     }
@@ -151,130 +153,135 @@ export class Conduit extends EventEmitter {
     this.updateStatus(ConduitState.Initialized);
 
     return new Promise((resolve, reject) => {
-      this.sse = new EventSource(channelUrl, {
-        headers: { Cookie: this.cookie },
-      });
+      console.log('start SSE');
+      try {
+        this.sse = new EventSource(channelUrl, {
+          headers: { Cookie: this.cookie },
+        });
 
-      this.sse.onopen = async (response) => {
-        if (response.type === 'open') {
-          this.updateStatus(ConduitState.Connected);
-          resolve();
-        } else {
-          this.updateStatus(ConduitState.Failed);
-          reject(new Error('failed to open sse'));
-        }
-      };
-
-      this.sse.onmessage = async (event: MessageEvent) => {
-        if (this.status !== ConduitState.Connected) {
-          this.updateStatus(ConduitState.Connected);
-        }
-        const parsedData = JSON.parse(event.data);
-        const eventId = parseInt(parsedData.id, 10);
-        const type = parsedData.response as Responses;
-        const lastEventId = parseInt(event.lastEventId, 10);
-        if (lastEventId - this.lastAckId > 20) {
-          this.ack(lastEventId);
-        }
-        switch (type) {
-          case 'poke':
-            if (this.pokes.has(eventId)) {
-              const handler = this.pokes.get(eventId);
-              if (parsedData.ok && handler) {
-                // @ts-expect-error
-                handler.onSuccess();
-              } else if (parsedData.err && handler) {
-                // @ts-expect-error
-                handler.onError(parsedData.err);
-              } else {
-                log.error('poke sse error', parsedData.err);
-              }
-            }
-            this.pokes.delete(eventId);
-            break;
-          //
-          case 'subscribe':
-            if (parsedData.err) {
-              const watchHandler = this.watches.get(eventId);
-              if (watchHandler) {
-                watchHandler.onError?.(eventId, parsedData.err);
-              } else {
-                log.error('watch sse error', parsedData.err);
-              }
-              this.setAsIdleWatch(eventId);
-            } else {
-              const watchHandler = this.watches.get(eventId);
-              if (watchHandler) {
-                watchHandler.onSubscribed?.(eventId);
-              }
-            }
-            break;
-          //
-          case 'diff': {
-            const json = parsedData.json;
-            const mark = parsedData.mark;
-            if (this.watches.has(eventId)) {
-              this.watches.get(eventId)?.onEvent?.(json, eventId, mark);
-            }
-            const reaction = Object.keys(json)[0];
-            const maybeReactionPath = `${mark}.${reaction}`;
-            if (this.reactions.has(maybeReactionPath)) {
-              this.reactions.get(maybeReactionPath)?.(parsedData.json, mark);
-              this.reactions.delete(maybeReactionPath);
-            }
-            break;
+        this.sse.onopen = async (response) => {
+          if (response.type === 'open') {
+            this.updateStatus(ConduitState.Connected);
+            resolve();
+          } else {
+            this.updateStatus(ConduitState.Failed);
+            reject(new Error('failed to open sse'));
           }
-          // quit
-          case 'quit':
-            log.info('on quit', eventId, this.watches.has(eventId));
-            if (this.watches.has(eventId)) {
-              const reconnectSub = this.watches.get(eventId);
-              this.setAsIdleWatch(eventId);
-              if (reconnectSub?.onQuit) {
-                reconnectSub?.onQuit?.(parsedData);
-              } else {
-                this.resubscribe(eventId);
-              }
-            }
-            break;
-          //
-          default:
-            log.info('unrecognized', parsedData);
-            break;
-        }
-      };
-      this.sse.onerror = async (error) => {
-        log.info(this.watches.keys());
-        if (!error) {
-          this.handleError({ status: 500, message: 'Unknown error' });
-        }
-        log.error('sse error', error);
-        if (error.status === 403) {
-          // @ts-ignore
-          error.originator = 'sse';
-          this.handleError(error);
-        }
-        // @ts-ignore
-        if (error.status === '404') {
-          return;
-        }
-        // @ts-expect-error
-        if (error.status >= 500) {
-          console.log('error', error);
-          this.updateStatus(ConduitState.Failed);
-          this.failGracefully();
-        }
-        if (!error.status) {
-          // this happens when the ship is offline
-          console.log('error.status', error);
+        };
 
-          this.updateStatus(ConduitState.Failed);
-          this.disconnectGracefully();
-        }
-      };
-      this.sse.addEventListener('close', () => {
-        log.warn('Ship unexpectedly closed the connection');
-      });
+        this.sse.onmessage = async (event: MessageEvent) => {
+          if (this.status !== ConduitState.Connected) {
+            this.updateStatus(ConduitState.Connected);
+          }
+          const parsedData = JSON.parse(event.data);
+          const eventId = parseInt(parsedData.id, 10);
+          const type = parsedData.response as Responses;
+          const lastEventId = parseInt(event.lastEventId, 10);
+          if (lastEventId - this.lastAckId > 20) {
+            this.ack(lastEventId);
+          }
+          switch (type) {
+            case 'poke':
+              if (this.pokes.has(eventId)) {
+                const handler = this.pokes.get(eventId);
+                if (parsedData.ok && handler) {
+                  // @ts-expect-error
+                  handler.onSuccess();
+                } else if (parsedData.err && handler) {
+                  // @ts-expect-error
+                  handler.onError(parsedData.err);
+                } else {
+                  log.error('poke sse error', parsedData.err);
+                }
+              }
+              this.pokes.delete(eventId);
+              break;
+            //
+            case 'subscribe':
+              if (parsedData.err) {
+                const watchHandler = this.watches.get(eventId);
+                if (watchHandler) {
+                  watchHandler.onError?.(eventId, parsedData.err);
+                } else {
+                  log.error('watch sse error', parsedData.err);
+                }
+                this.setAsIdleWatch(eventId);
+              } else {
+                const watchHandler = this.watches.get(eventId);
+                if (watchHandler) {
+                  watchHandler.onSubscribed?.(eventId);
+                }
+              }
+              break;
+            //
+            case 'diff': {
+              const json = parsedData.json;
+              const mark = parsedData.mark;
+              if (this.watches.has(eventId)) {
+                this.watches.get(eventId)?.onEvent?.(json, eventId, mark);
+              }
+              const reaction = Object.keys(json)[0];
+              const maybeReactionPath = `${mark}.${reaction}`;
+              if (this.reactions.has(maybeReactionPath)) {
+                this.reactions.get(maybeReactionPath)?.(parsedData.json, mark);
+                this.reactions.delete(maybeReactionPath);
+              }
+              break;
+            }
+            // quit
+            case 'quit':
+              log.info('on quit', eventId, this.watches.has(eventId));
+              if (this.watches.has(eventId)) {
+                const reconnectSub = this.watches.get(eventId);
+                this.setAsIdleWatch(eventId);
+                if (reconnectSub?.onQuit) {
+                  reconnectSub?.onQuit?.(parsedData);
+                } else {
+                  this.resubscribe(eventId);
+                }
+              }
+              break;
+            //
+            default:
+              log.info('unrecognized', parsedData);
+              break;
+          }
+        };
+        this.sse.onerror = async (error) => {
+          log.info(this.watches.keys());
+          if (!error) {
+            this.handleError({ status: 500, message: 'Unknown error' });
+          }
+          log.error('sse error', error);
+          if (error.status === 403) {
+            // @ts-ignore
+            error.originator = 'sse';
+            this.handleError(error);
+          }
+          // @ts-ignore
+          if (error.status === '404') {
+            return;
+          }
+          // @ts-expect-error
+          if (error.status >= 500) {
+            console.log('error', error);
+            this.updateStatus(ConduitState.Failed);
+            this.failGracefully();
+          }
+          if (!error.status) {
+            // this happens when the ship is offline
+            console.log('error.status', error);
+
+            this.updateStatus(ConduitState.Failed);
+            this.disconnectGracefully();
+          }
+        };
+        this.sse.addEventListener('close', () => {
+          log.warn('Ship unexpectedly closed the connection');
+        });
+      } catch (e) {
+        reject(e);
+      }
     });
   }
 
@@ -576,10 +583,14 @@ export class Conduit extends EventEmitter {
           return false;
         }
         if (
+          // body.action !== Action.Delete &&
           this.status !== ConduitState.Connected &&
           this.status !== ConduitState.Initialized
         ) {
-          this.startSSE(this.channelUrl(this.uid));
+          console.info('postToChannel: status is not connected, starting SSE');
+          // you must await here for SSE to complete; otherwise init calls in other
+          //  locations of the conduit can create 2nd connections
+          await this.startSSE(this.channelUrl(this.uid));
         }
 
         return true;

@@ -1,7 +1,6 @@
 import { app } from 'electron';
 import log from 'electron-log';
 import fs from 'fs';
-import { reject } from 'lodash';
 import moment from 'moment';
 import path from 'path';
 
@@ -92,44 +91,45 @@ export class ShipService extends AbstractService<any> {
     }
   }
 
-  _openConduit(credentials: any) {
-    return new Promise((resolve) =>
-      APIConnection.getInstance({
-        ...credentials,
-        ship: this.patp,
+  async _openConduit(credentials: any) {
+    // return new Promise(async (resolve) => {
+    console.log('_openConduit');
+    const conduit = APIConnection.getInstance({
+      ...credentials,
+      ship: this.patp,
+    }).conduit;
+    console.log('_openConduit: events');
+    conduit
+      .on('connected', () => {
+        // resolve(null);
       })
-        .conduit.on('connected', () => {
-          resolve(null);
-        })
-        .on('failed', () => {
-          // log.info('ship.service.ts:', 'Conduit failed');
-          try {
-            this.shipDB?.setCredentials(
-              credentials.url,
-              credentials.code,
-              null
-            );
-            this.authService?._setLockfile({ ...credentials, cookie: null });
-            APIConnection.getInstance().closeChannel();
-          } catch (e) {
-            log.error(e);
-          }
-          resolve(null);
-        })
-        .on('refreshed', (session: ConduitSession) => {
-          // log.info('ship.service.ts:', 'Conduit refreshed', session);
-          this.shipDB?.setCredentials(
-            session.url,
-            session.code,
-            session.cookie
-          );
-          resolve(null);
-        })
-        .on('error', (err: any) => {
-          log.error('ship.service.ts:', 'Conduit error', err);
-          reject(err);
-        })
+      .on('failed', () => {
+        // log.info('ship.service.ts:', 'Conduit failed');
+        try {
+          this.shipDB?.setCredentials(credentials.url, credentials.code, null);
+          this.authService?._setLockfile({ ...credentials, cookie: null });
+          APIConnection.getInstance().closeChannel();
+        } catch (e) {
+          log.error(e);
+        }
+        // resolve(null);
+      })
+      .on('refreshed', (session: ConduitSession) => {
+        // log.info('ship.service.ts:', 'Conduit refreshed', session);
+        this.shipDB?.setCredentials(session.url, session.code, session.cookie);
+        // resolve(null);
+      })
+      .on('error', (err: any) => {
+        log.error('ship.service.ts:', 'Conduit error', err);
+        // reject(err);
+      });
+    console.log('_openConduit: init');
+    await conduit.init(
+      credentials.url,
+      credentials.code,
+      credentials.cookie || ''
     );
+    // });
   }
 
   private _registerServices() {
