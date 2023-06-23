@@ -33,7 +33,12 @@ export default function VerifyEmail() {
       OnboardingStorage.set({ token: result.token });
 
       if (result) {
-        return goToPage('/choose-id');
+        const { productType } = OnboardingStorage.get();
+        if (productType === 'byop-p') {
+          return goToPage('/payment');
+        } else {
+          return goToPage('/choose-id');
+        }
       } else {
         return false;
       }

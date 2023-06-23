@@ -56,6 +56,8 @@
       :: meta-chat management pokes
       %create-chat
         (create-chat:lib +.act state bowl)
+      %vented-create-chat
+        (vented-create-chat:lib +.act state bowl)
       %edit-chat
         (edit-chat:lib +.act state bowl)
       %pin-message
@@ -69,6 +71,8 @@
       :: message management pokes
       %send-message
         (send-message:lib +.act state bowl)
+      %vented-send-message
+        (vented-send-message:lib +.act state bowl)
       %edit-message
         (edit-message:lib +.act state bowl)
       %delete-message
@@ -216,24 +220,35 @@
                       (gth (lent ~(tap by devices.state)) 0) :: there is at least one device
                   ==
                     =/  prow            (scry-path-row:lib thepath bowl)
+                    =/  mess            (scry-message:lib id bowl)
+                    =/  space-scry=(unit view:spc)
+                      ?.  =(%space type.prow)  ~
+                      =/  uspace  (~(get by metadata.prow) 'space')
+                      ?~  uspace  ~
+                      =/  path-first=path   /(scot %p our.bowl)/spaces/(scot %da now.bowl)
+                      =/  path-second=path  (stab u.uspace)
+                      =/  path-final=path   (weld (weld path-first path-second) /noun)
+                      (some .^(view:spc %gx path-final))
+
                     =/  push-title      (notif-from-nickname-or-patp sender.id bowl)
-                    =/  push-subtitle   (group-name-or-blank prow)
+                    =/  push-subtitle   
+                      ?~  space-scry
+                        (group-name-or-blank prow)
+                      ?.  =(%space type.prow)
+                        (group-name-or-blank prow)
+                      ?>  ?=(%space -.u.space-scry)
+                      (crip [name.space:(need space-scry) ' - ' (group-name-or-blank prow) ~])
                     =/  push-contents   (notif-msg parts bowl)
                     =/  unread-count    +(.^(@ud %gx /(scot %p our.bowl)/notif-db/(scot %da now.bowl)/db/unread-count/(scot %tas %realm-chat)/noun))
                     =/  avatar=(unit @t)
                       ?:  =(%dm type.prow)      (scry-avatar-for-patp:lib sender.id bowl)
                       ?:  =(%group type.prow)   (~(get by metadata.prow) 'image')
                       ?:  =(%space type.prow)
-                        =/  uspace  (~(get by metadata.prow) 'space')
-                        ?~  uspace  ~
-                        =/  path-first=path   /(scot %p our.bowl)/spaces/(scot %da now.bowl)
-                        =/  path-second=path  (stab u.uspace)
-                        =/  path-final=path   (weld (weld path-first path-second) /noun)
-                        =/  space-scry    .^(view:spc %gx path-final)
-                        ?>  ?=(%space -.space-scry)
-                        ?:  =('' picture.space.space-scry)
-                          (some wallpaper.theme.space.space-scry)
-                        (some picture.space.space-scry)
+                        ?~  space-scry  ~
+                        ?>  ?=(%space -.u.space-scry)
+                        ?:  =('' picture.space.u.space-scry)
+                          (some wallpaper.theme.space.u.space-scry)
+                        (some picture.space.u.space-scry)
                       ~  :: default to null if we don't know what type of chat this is
                     =/  push-card
                       %:  push-notification-card:lib
@@ -245,6 +260,7 @@
                           push-contents
                           unread-count
                           avatar
+                          mess
                       ==
                     [push-card notif-db-card ~]
                   :: otherwise, just send to notif-db
@@ -380,8 +396,70 @@
       %inline-code          p.content.part
       %code                 p.content.part
       %status               p.content.part
+      %link                 p.content.part
+      %image                'Shared an image'
+      %react
+        ?~  reply-to.part   'Reacted to a message'
+        =/  prev-msg  (scry-message:lib +.u.reply-to.part bowl)
+        =/  prev-summary  (notif-msg prev-msg bowl)
+        (crip "Reacted {(emoji-codepoint-to-character-as-tape p.content.part)} to: \"{(trip prev-summary)}\"")
     ==
   (crip `tape`(swag [0 140] str)) :: only show the first 140 characters of the message in the preview
+++  emoji-codepoint-to-character-as-tape
+::0x4E3E -> 0b100.1110.0011.1110
+::          1110xxxx 10xxxxxx 10xxxxxx
+::fills  -> 11100100 10111000 10111110
+::'1f44d' goal -> `@ub`0x8d91.9ff0 -> 1000 1101 1001 0001 1001 1111 1111 0000
+::                                        00 01 1111 01 0001 00 1101
+::                                    10xx xxxx 10xx xxxx 10xx xxxx 1111 00xx
+  |=  t=@t
+  ^-  tape
+  =/  working  (trip t)
+  ?:  =(9 (lent working))
+    %+  weld
+    (emoji-codepoint-to-character-as-tape (crip (scag 4 working)))
+    (emoji-codepoint-to-character-as-tape (crip (oust [0 5] working)))
+  ?:  =(4 (lent working))
+  =/  parsed=@     (slav %ux (crip (weld "0x" working)))
+  :: fixed str-bin
+  =/  f=tape  (fix-str-bin-for-emoji parsed 16)
+  =/  fillin=tape  "0b10{(trip (snag 10 f))}{(trip (snag 11 f))}.{(trip (snag 12 f))}{(trip (snag 13 f))}{(trip (snag 14 f))}{(trip (snag 15 f))}.10{(trip (snag 4 f))}{(trip (snag 5 f))}.{(trip (snag 6 f))}{(trip (snag 7 f))}{(trip (snag 8 f))}{(trip (snag 9 f))}.1110.{(trip (snag 0 f))}{(trip (snag 1 f))}{(trip (snag 2 f))}{(trip (snag 3 f))}"
+  (trip `@t`(slav %ub (crip fillin)))
+  ?.  =(5 (lent working))  "?"
+  =/  parsed=@    (slav %ux (crip (weld "0x" (into working 1 '.'))))
+  :: fixed str-bin
+  =/  f=tape  (fix-str-bin-for-emoji parsed 20)
+  =/  fillin=tape  "0b10{(trip (snag 14 f))}{(trip (snag 15 f))}.{(trip (snag 16 f))}{(trip (snag 17 f))}{(trip (snag 18 f))}{(trip (snag 19 f))}.10{(trip (snag 8 f))}{(trip (snag 9 f))}.{(trip (snag 10 f))}{(trip (snag 11 f))}{(trip (snag 12 f))}{(trip (snag 13 f))}.10{(trip (snag 2 f))}{(trip (snag 3 f))}.{(trip (snag 4 f))}{(trip (snag 5 f))}{(trip (snag 6 f))}{(trip (snag 7 f))}.1111.00{(trip (snag 0 f))}{(trip (snag 1 f))}"
+  (trip `@t`(slav %ub (crip fillin)))
+::
+++  fix-str-bin-for-emoji
+::  take a @ux parsed version of the codepoint and turn it into a string
+::  representation of the binary where it's zero-padded to the goal
+::  length on the left side, and there are no prefixes or periods
+::  ex: "1010110101001011"
+  |=  [parsed=@ goal=@ud]
+  ^-  tape
+  =/  str-bin=tape   (oust [0 2] (scow %ub `@ub`parsed))
+  =/  res=tape  ""
+  =/  index=@ud    0
+  |-
+    ?:  =(index (lent str-bin))
+      ?:  =(goal (lent res))
+        res
+      (left-pad res '0' goal)
+    =/  char  (snag index str-bin)
+    ?:  =(char '.')
+      $(index +(index))
+    $(index +(index), res (snoc res char))
+::
+++  left-pad
+  |=  [t=tape c=@t n=@ud]
+  ^-  tape
+  |-
+    ?:  (gte (lent t) n)
+      t
+    $(t (weld (trip c) t))
+::
 ++  group-name-or-blank
   |=  [=path-row:db-sur]
   ^-  @t

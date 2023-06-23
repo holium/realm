@@ -1,5 +1,6 @@
 import {
   AccountDownloadRealmDialog,
+  OnboardingStorage,
   UserContextProvider,
   useUser,
 } from '@holium/shared';
@@ -13,6 +14,10 @@ const DownloadRealmPresenter = () => {
   const { goToPage, logout } = useNavigation();
   const { ships, selectedIdentity, setSelectedIdentity } = useUser();
 
+  const identities = ships.map((ship) => ship.patp);
+  const ship = ships.find((ship) => ship.patp === selectedIdentity);
+  const isUploadedIdentity = ship?.product_type === 'byop-p';
+
   const onClickSidebarSection = (section: string) => {
     if (section === 'Get Hosting') {
       goToPage(accountPageUrl[section], {
@@ -22,9 +27,19 @@ const DownloadRealmPresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  const onClickBuyIdentity = () => {
-    goToPage(accountPageUrl['Get Hosting'], {
-      back_url: accountPageUrl['Download Realm'],
+  const onClickUploadId = () => {
+    OnboardingStorage.set({
+      productType: 'byop-p',
+    });
+    goToPage('/payment', {
+      back_url: '/account/download-realm',
+    });
+  };
+
+  const onClickPurchaseId = () => {
+    OnboardingStorage.remove('productType');
+    goToPage('/choose-id', {
+      back_url: '/account/download-realm',
     });
   };
 
@@ -40,14 +55,16 @@ const DownloadRealmPresenter = () => {
   return (
     <Page title="Account / Download Realm" isProtected>
       <AccountDownloadRealmDialog
-        identities={ships.map((ship) => ship.patp)}
+        identities={identities}
         selectedIdentity={selectedIdentity}
+        isUploadedIdentity={isUploadedIdentity}
         setSelectedIdentity={setSelectedIdentity}
         onDownloadMacM1={onDownloadMacM1}
         onDownloadMacIntel={onDownloadMacIntel}
         onDownloadWindows={onDownloadWindows}
         onDownloadLinux={onDownloadLinux}
-        onClickBuyIdentity={onClickBuyIdentity}
+        onClickPurchaseId={onClickPurchaseId}
+        onClickUploadId={onClickUploadId}
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />

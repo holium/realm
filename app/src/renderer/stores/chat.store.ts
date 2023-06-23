@@ -90,7 +90,6 @@ export const ChatStore = types
         return bTimestamp - aTimestamp;
       });
     },
-
     getChatHeader(path: string): {
       title: string;
       sigil?: any;
@@ -133,6 +132,7 @@ export const ChatStore = types
   .actions((self) => ({
     init: flow(function* () {
       try {
+        self.loader.set('loading');
         const pinnedChats = yield ChatIPC.fetchPinnedChats();
         const muted = yield ChatIPC.fetchMuted();
         self.inbox = yield ChatIPC.getChatList();
@@ -141,11 +141,13 @@ export const ChatStore = types
           chat.setPinned(pinnedChats.includes(chat.path));
         });
         self.pinnedChats = pinnedChats;
-        return self.pinnedChats;
       } catch (error) {
         console.error(error);
-        return self.pinnedChats;
       }
+
+      self.loader.set('loaded');
+
+      return self.inbox;
     }),
     fetchInboxMetadata: flow(function* () {
       const { muted, pinned } = yield ChatIPC.fetchPathMetadata();
@@ -153,8 +155,21 @@ export const ChatStore = types
       self.mutedChats = muted;
     }),
     loadChatList: flow(function* () {
+      self.loader.set('loading');
+
       try {
         self.inbox = yield ChatIPC.getChatList();
+      } catch (error) {
+        console.error(error);
+      }
+
+      self.loader.set('loaded');
+    }),
+    findChatDM: flow(function* (peer: string, our: string) {
+      // find the DM, if exists, where it's only ourselves and the peer
+      try {
+        const path = yield ChatIPC.findChatDM(peer, our);
+        return path;
       } catch (error) {
         console.error(error);
       }
@@ -318,8 +333,9 @@ ChatIPC.onUpdate(({ type, payload }: ChatUpdateTypes) => {
     );
 
     if (selectedChat) selectedChat.addMessage(payload);
-    if (shipStore.chatStore.subroute === 'inbox')
+    if (shipStore.chatStore.subroute === 'inbox') {
       shipStore.chatStore.refreshInbox();
+    }
 
     return;
   }

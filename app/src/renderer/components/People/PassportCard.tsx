@@ -1,29 +1,84 @@
-// import { useTrayApps } from 'renderer/apps/store';
-// import { PassportButton } from './PassportButton';
+import { useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
+import { darken } from 'polished';
 
-import { Avatar, Box, Flex, Text } from '@holium/design-system';
+import {
+  Avatar,
+  Box,
+  Flex,
+  Icon,
+  Spinner,
+  Text,
+  useToggle,
+} from '@holium/design-system';
+
+import { AppRegistry } from 'renderer/apps/registry';
+import { useTrayApps } from 'renderer/apps/store';
+import { calculateAnchorPointById } from 'renderer/lib/position';
+import { useAppState } from 'renderer/stores/app.store';
+import { useShipStore } from 'renderer/stores/ship.store';
+
+import { PassportButton } from './PassportButton';
 
 interface IPassport {
   patp: string;
-  sigilColor?: string | null;
+  color?: string | null;
   avatar?: string | null;
   nickname?: string | null;
-  description?: string | null;
+  bio?: string | null;
   onClose: any;
 }
 
+///  aa
 const PassportCardPresenter = ({
   patp,
-  sigilColor,
+  color,
   avatar,
   nickname,
-  description,
-}: // onClose,
-IPassport) => {
+  bio,
+  onClose,
+}: IPassport) => {
   // const { setActiveApp, walletApp } = useTrayApps();
+  const { loggedInAccount, theme } = useAppState();
+  const { chatStore } = useShipStore();
+  const { setChat, createChat } = chatStore;
+  const [dmPath, setDMPath] = useState([]);
+  const creating = useToggle(false);
 
-  // const buttonColor = darken(0.1, theme.windowColor);
+  const { activeApp, setActiveApp, setTrayAppCoords, setTrayAppDimensions } =
+    useTrayApps();
+
+  const { icon, position, anchorOffset, dimensions } = AppRegistry['chat'];
+
+  const our = loggedInAccount?.serverId;
+  const getDMPath = async () => {
+    if (!our) return;
+    const _dmPath = await chatStore.findChatDM(patp, our);
+    setDMPath(_dmPath);
+    return _dmPath;
+  };
+
+  useEffect(() => {
+    getDMPath();
+  }, [patp]);
+
+  const onChatClick = useCallback(() => {
+    const { left, bottom }: any = calculateAnchorPointById(
+      'messages-tray',
+      anchorOffset,
+      position,
+      dimensions
+    );
+    setTrayAppCoords({
+      left,
+      bottom,
+    });
+    setTrayAppDimensions(dimensions);
+    setActiveApp('messages-tray');
+    onClose();
+  }, [activeApp, setTrayAppCoords, setTrayAppDimensions, setActiveApp]);
+
+  const buttonColor = darken(0.1, theme.windowColor);
 
   return (
     <Flex flexDirection="column" gap={14}>
@@ -34,7 +89,7 @@ IPassport) => {
             size={52}
             avatar={avatar}
             patp={patp}
-            sigilColor={[sigilColor || '#000000', 'white']}
+            sigilColor={[color || '#000000', 'white']}
             borderRadiusOverride="6px"
           />
         </Box>
@@ -84,33 +139,49 @@ IPassport) => {
             </PassportButton>
           )} */}
           {/* TODO re-enable */}
-          {/* <PassportButton
+          <PassportButton
             style={{ backgroundColor: buttonColor }}
             data-prevent-menu-close="true"
             onClick={(evt: any) => {
-              // TODO replace with new DMs
-              // if(chatStore.)
-              // if (courier.previews.has(`/dm-inbox/${patp}`)) {
-              //   const dmPreview = courier.previews.get(`/dm-inbox/${patp}`);
-              //   if (dmPreview) openDMsToChat(dmApp, dmPreview, setActiveApp);
-              // } else {
-              //   ShipActions.draftDm(
-              //     [patp],
-              //     [{ color: sigilColor, avatar, nickname }]
-              //   ).then((dmDraft) => {
-              //     openDMsToChat(dmApp, dmDraft, setActiveApp);
-              //   });
-              // }
-              onClose();
+              if (dmPath.length > 0) {
+                // @ts-expect-error
+                const path = dmPath[0].path;
+                setChat(path);
+                onChatClick();
+              } else {
+                // TODO: create chat and then navigate there
+                const title = nickname || patp;
+                if (!our) return;
+                creating.toggleOn();
+                createChat(title, our, 'dm', [patp])
+                  .then(() => {
+                    getDMPath().then((_dmPath) => {
+                      if (_dmPath.length > 0) {
+                        const path = _dmPath[0].path;
+                        setChat(path);
+                        onChatClick();
+                      }
+                      creating.toggleOff();
+                    });
+                  })
+                  .catch((err) => {
+                    creating.toggleOff();
+                    console.log(err);
+                  });
+              }
               evt.stopPropagation();
             }}
           >
-            <Icons name="StartDM" color={iconColor} size="16px" />
-          </PassportButton> */}
+            {creating.isOn ? (
+              <Spinner size={0} />
+            ) : (
+              <Icon name={icon} size="16px" />
+            )}
+          </PassportButton>
         </Flex>
-        {description && (
+        {bio && (
           <Flex flexDirection="column" gap={4}>
-            <Text.Custom fontSize={2}>{description}</Text.Custom>
+            <Text.Custom fontSize={2}>{bio}</Text.Custom>
           </Flex>
         )}
       </Flex>

@@ -304,7 +304,6 @@ export class ShipService extends AbstractService<any> {
           let fileContent, fileName, fileExtension;
           if (args.source === 'file' && typeof args.content === 'string') {
             fileContent = fs.readFileSync(args.content);
-            // console.log(fileContent);
             const fileParts = args.content.split('.');
             fileName = fileParts.slice(0, -1);
             // only take the filename, not the path

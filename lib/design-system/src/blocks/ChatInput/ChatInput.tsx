@@ -200,6 +200,7 @@ export const ChatInput = ({
           py={2}
           px={2}
           justifyContent="flex-end"
+          width="100%"
         >
           {attachments && attachments.length > 0 ? (
             <Flex

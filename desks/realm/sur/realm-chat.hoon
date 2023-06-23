@@ -33,18 +33,21 @@
   $:  =path-row:db
       unread=@ud
       avatar=(unit @t)
+      =message:db
   ==
 ::
 +$  action
   $%
       :: interface to %chat-db
       [%create-chat =create-chat-data]
+      [%vented-create-chat t=@da c=create-chat-data]
       [%edit-chat =path metadata=(map cord cord) peers-get-backlog=? invites=@tas max-expires-at-duration=@dr]
       [%pin-message =path =msg-id:db pin=?]
       [%clear-pinned-messages =path]
       [%add-ship-to-chat =path =ship]
       [%remove-ship-from-chat =path =ship]
       [%send-message =path fragments=(list minimal-fragment:db) expires-in=@dr]
+      [%vented-send-message t=@da =path fragments=(list minimal-fragment:db) expires-in=@dr]
       [%edit-message =edit-message-action:db]
       [%delete-message =path =msg-id:db]
       [%delete-backlog =path]

@@ -12,7 +12,6 @@ import { useToggle } from '@holium/design-system/util';
 
 import {
   denormalizeBounds,
-  isFullWidth,
   normalizeBounds,
 } from 'renderer/lib/window-manager';
 import { useAppState } from 'renderer/stores/app.store';
@@ -77,7 +76,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
   });
 
   const minX = 0;
-  const minY = showTitleBar ? TITLEBAR_HEIGHT + 8 : 0;
+  const minY = showTitleBar ? TITLEBAR_HEIGHT : 0;
   const maxX = shellStore.desktopDimensions.width;
   const maxY = shellStore.desktopDimensions.height;
 
@@ -418,21 +417,13 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
       const xPos = cursorX.get();
       const win = shellStore.getWindowByAppId(appWindow.appId);
       if (win) {
-        if (isFullWidth(win.prevBounds.width, shellStore.desktopDimensions)) {
-          const relativeX = xPos / dmbPrev.width;
-          controls.start({
-            x: xPos - relativeX * dmb.width,
-            width: dmb.width,
-            height: dmb.height,
-            transition: { duration: 0.2 },
-          });
-        } else {
-          controls.start({
-            width: dmb.width,
-            height: dmb.height,
-            transition: { duration: 0.2 },
-          });
-        }
+        const relativeX = xPos / dmbPrev.width;
+        controls.start({
+          x: xPos - relativeX * dmb.width,
+          width: dmb.width,
+          height: dmb.height,
+          transition: { duration: 0.2 },
+        });
       }
     }
   };

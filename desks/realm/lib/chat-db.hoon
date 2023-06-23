@@ -31,7 +31,7 @@
   =/  index  0
   =/  result=message:sur  *message:sur
   |-
-  ?~  (has:msgon:sur tbl [msg-id index])
+  ?.  (has:msgon:sur tbl [msg-id index])
     result
   $(index +(index), result (snoc result (got:msgon:sur tbl [msg-id index])))
 ::
@@ -215,8 +215,12 @@
 
   =.  peers-table.state  (~(put by peers-table.state) path.row thepeers)
   =/  thechange  chat-db-change+!>((limo [[%add-row %paths row] (turn thepeers |=(p=peer-row:sur [%add-row %peers p]))]))
+  =/  vent-path=path  /chat-vent/(scot %da created-at.row)
   =/  gives  :~
     [%give %fact [/db (weld /db/path path.row) ~] thechange]
+    :: give vent response
+    [%give %fact ~[vent-path] chat-vent+!>([%path row])]
+    [%give %kick ~[vent-path] ~]
   ==
   [gives state]
 ::
@@ -318,8 +322,12 @@
   :: /db/messages/start since every new message will need to go out to
   :: those subscriptions
   =/  message-paths  (messages-start-paths bowl)
+  =/  vent-path=path  /chat-vent/(scot %da timestamp.msg-act)
   =/  gives  :~
     [%give %fact (weld message-paths (limo [/db (weld /db/path path.msg-act) ~])) thechange]
+    :: give vent response
+    [%give %fact ~[vent-path] chat-vent+!>([%msg +.add-result])]
+    [%give %kick ~[vent-path] ~]
   ==
   [gives state]
 ::
@@ -719,6 +727,15 @@
           updated-at+(time updated-at.msg-part)
           expires-at+(time-bunt-null expires-at.msg-part)
           received-at+(time received-at.msg-part)
+      ==
+    ::
+    ++  en-vent
+      |=  =chat-vent:sur
+      ^-  json
+      ?-  -.chat-vent
+        %ack     s/%ack
+        %msg     a+(turn message.chat-vent |=(m=msg-part:sur (messages-row [msg-id.m msg-part-id.m] m)))
+        %path    (path-row path-row.chat-vent)
       ==
     ::
     ++  time-bunt-null
