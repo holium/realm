@@ -133,8 +133,6 @@ export class Conduit extends EventEmitter {
       mark: 'helm-hi',
       json: 'Opening Realm API channel',
     });
-    console.log('init: starting SSE');
-    await this.startSSE(this.channelUrl(this.uid));
   }
 
   async startSSE(channelUrl: string): Promise<void> {
@@ -162,6 +160,11 @@ export class Conduit extends EventEmitter {
         this.sse.onopen = async (response) => {
           if (response.type === 'open') {
             this.updateStatus(ConduitState.Connected);
+            setInterval(() => {
+              if (this.sse?.readyState === EventSource.CLOSED) {
+                log.warn('sse closed!');
+              }
+            }, 1000);
             resolve();
           } else {
             this.updateStatus(ConduitState.Failed);
@@ -583,7 +586,7 @@ export class Conduit extends EventEmitter {
           return false;
         }
         if (
-          // body.action !== Action.Delete &&
+          body.action !== Action.Delete &&
           this.status !== ConduitState.Connected &&
           this.status !== ConduitState.Initialized
         ) {
