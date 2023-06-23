@@ -584,7 +584,6 @@ export class Conduit extends EventEmitter {
           this.status !== ConduitState.Connected &&
           this.status !== ConduitState.Initialized
         ) {
-          console.info('postToChannel: status is not connected, starting SSE');
           // you must await here for SSE to complete; otherwise init calls in other
           //  locations of the conduit can create 2nd connections
           await this.startSSE(this.channelUrl(this.uid));
