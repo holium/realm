@@ -166,11 +166,11 @@ export const Lexicon = ({
         const newVotes = lastVoteData?.votes ?? [];
         //incremenet/decrement vote count accrodingly
         if (item.up) {
-          if (item.ship === shipName)
+          if (item.creator === shipName)
             currentShipVoted = { vote: true, voteId: item.id };
           upVotes++;
         } else {
-          if (item.ship === shipName)
+          if (item.creator === shipName)
             currentShipVoted = { vote: false, voteId: item.id };
 
           downVotes++;
@@ -206,11 +206,11 @@ export const Lexicon = ({
         //incremenet/decrement vote count accrodingly
 
         if (item.up) {
-          if (item.ship === shipName)
+          if (item.creator === shipName)
             currentShipVoted = { vote: true, voteId: item.id };
           upVotes++;
         } else {
-          if (item.ship === shipName)
+          if (item.creator === shipName)
             currentShipVoted = { vote: false, voteId: item.id };
 
           downVotes++;
@@ -248,11 +248,11 @@ export const Lexicon = ({
         //incremenet/decrement vote count accrodingly
 
         if (item.up) {
-          if (item.ship === shipName)
+          if (item.creator === shipName)
             currentShipVoted = { vote: true, voteId: item.id };
           upVotes++;
         } else {
-          if (item.ship === shipName)
+          if (item.creator === shipName)
             currentShipVoted = { vote: false, voteId: item.id };
 
           downVotes++;

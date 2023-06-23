@@ -48,8 +48,8 @@ export const Vote = ({ id, votes }: WordItemProps) => {
             voteOnWord(id, null, votes?.currentShipVoted.voteId);
           } else if (votes?.currentShipVoted.vote === false) {
             //user voted down, remove the down vote and add an upvote
+            voteOnWord(id, null, votes?.currentShipVoted.voteId); //make sure we do the delete command first because of the one vote constraint
             voteOnWord(id, true); //new up vote
-            voteOnWord(id, null, votes?.currentShipVoted.voteId);
           } else {
             //user has no other votes on this word, just up vote
             voteOnWord(id, true);
@@ -102,7 +102,7 @@ export const Vote = ({ id, votes }: WordItemProps) => {
 
           if (votes?.currentShipVoted.vote === true) {
             //user up voted, remove his up vote and add a down vote
-            voteOnWord(id, null, votes?.currentShipVoted.voteId);
+            voteOnWord(id, null, votes?.currentShipVoted.voteId); //make sure we do the delete command first because of the one vote constraint
             voteOnWord(id, false);
           } else if (votes?.currentShipVoted.vote === false) {
             //user already down voted, remove the down vote

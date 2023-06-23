@@ -95,6 +95,7 @@ export const useStore = create<Store>((set, get) => ({
       created_at: newWordRow['created-at'],
       received_at: newWordRow['received-at'],
       updated_at: newWordRow['updated-at'],
+      word: newWordRow.data.word,
     };
     newWordRows.push(fixedWordRow);
     set({
@@ -116,14 +117,16 @@ export const useStore = create<Store>((set, get) => ({
 
   addVoteRow: (newVoteRow: any) => {
     const newVoteRows = [...get().voteRows];
+
     const fixedVoteRow = {
       ...newVoteRow,
-      parent_id: newVoteRow['parent-id'],
-      parent_type: newVoteRow['parent-type'],
-      parent_path: newVoteRow['parent-path'],
+      parent_id: newVoteRow.data['parent-id'],
+      parent_type: newVoteRow.data['parent-type'],
+      parent_path: newVoteRow.data['parent-path'],
       created_at: newVoteRow['created-at'],
       received_at: newVoteRow['received-at'],
       updated_at: newVoteRow['updated-at'],
+      up: newVoteRow.data.up,
     };
     newVoteRows.push(fixedVoteRow);
     set({
@@ -155,12 +158,14 @@ export const useStore = create<Store>((set, get) => ({
 
   addDefinitionRow: (newDefinitionRow: any) => {
     const newDefinitionRows = [...get().definitionRows];
+
     const fixedDefinitionRow = {
       ...newDefinitionRow,
       created_at: newDefinitionRow['created-at'],
       received_at: newDefinitionRow['received-at'],
       updated_at: newDefinitionRow['updated-at'],
-      word_id: newDefinitionRow['word-id'],
+      word_id: newDefinitionRow.data['word-id'],
+      definition: newDefinitionRow.data.definition,
     };
     newDefinitionRows.push(fixedDefinitionRow);
 
@@ -176,12 +181,14 @@ export const useStore = create<Store>((set, get) => ({
 
   addSentenceRow: (newSentenceRow: any) => {
     const newSentenceRows = [...get().sentenceRows];
+
     const fixedSentenceRow = {
       ...newSentenceRow,
       created_at: newSentenceRow['created-at'],
       received_at: newSentenceRow['received-at'],
       updated_at: newSentenceRow['updated-at'],
-      word_id: newSentenceRow['word-id'],
+      word_id: newSentenceRow.data['word-id'],
+      sentence: newSentenceRow.data.sentence,
     };
     newSentenceRows.push(fixedSentenceRow);
 

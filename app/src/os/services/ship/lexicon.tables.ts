@@ -6,7 +6,7 @@ create table if not exists votes
     updated_at        INTEGER not NULL,
     revision        NULL,
     id       TEXT not NULL PRIMARY KEY,
-    ship     TEXT not NULL,
+    creator     TEXT not NULL,
     created_at       INTEGER not NULL,
     up     INTEGER not NULL,
     path        TEXT not NULL,

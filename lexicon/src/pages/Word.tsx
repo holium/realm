@@ -61,6 +61,7 @@ export const Word = () => {
       log('removeWord error => ', removeWord);
     }
   };
+
   const goToDict = () => {
     navigate('/index.html/dict/' + state.word);
   };

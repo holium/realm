@@ -127,7 +127,7 @@ export interface VoteRow {
   updated_at: number; //date
   revision: any; //?
   v: number; //version number?
-  ship: string;
+  creator: string;
   type: 'vote';
   up: boolean;
 }

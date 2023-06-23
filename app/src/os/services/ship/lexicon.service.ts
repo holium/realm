@@ -60,7 +60,7 @@ class LexiconService extends AbstractService<any> {
         parent_path,
         updated_at,
         revision,
-        ship,
+        creator,
         created_at,
         up,
         path,
@@ -74,7 +74,7 @@ class LexiconService extends AbstractService<any> {
         @parent_path, 
         @updated_at,
         @revision,
-        @ship,
+        @creator,
         @created_at,
         @up,
         @path,
@@ -88,17 +88,17 @@ class LexiconService extends AbstractService<any> {
       for (const vote of votes) {
         insert.run({
           received_at: vote['received-at'],
-          parent_path: vote['parent-path'],
+          parent_path: vote.data['parent-path'],
           updated_at: vote['updated-at'],
           revision: vote['revision'],
           id: vote['id'],
-          ship: vote['ship'],
+          creator: vote['creator'],
           created_at: vote['created-at'],
-          up: vote['up'] ? 1 : 0, //conver boolean to 1 or 0
+          up: vote.data['up'] ? 1 : 0, //conver boolean to 1 or 0
           path: vote['path'],
           type: vote['type'],
-          parent_id: vote['parent-id'],
-          parent_type: vote['parent-type'],
+          parent_id: vote.data['parent-id'],
+          parent_type: vote.data['parent-type'],
           v: vote['v'],
           // fall bock to zero since we have not-null constraint
         });
@@ -136,7 +136,7 @@ class LexiconService extends AbstractService<any> {
       for (const word of words) {
         insert.run({
           received_at: word['received-at'],
-          word: word['word'],
+          word: word.data['word'], // should be data.word
           updated_at: word['updated-at'],
           revision: word['revision'],
           id: word['id'],
@@ -151,7 +151,6 @@ class LexiconService extends AbstractService<any> {
   }
   private _insertDefinitions(definitions: any) {
     if (!this.db?.open) return;
-
     const insert = this.db.prepare(
       `REPLACE INTO ${LEXICON_TABLES.DEFINITIONS} (
         id,
@@ -182,14 +181,14 @@ class LexiconService extends AbstractService<any> {
       for (const definition of definitions) {
         insert.run({
           received_at: definition['received-at'],
-          definition: definition['definition'],
+          definition: definition.data['definition'],
           updated_at: definition['updated-at'],
           revision: definition['revision'],
           id: definition['id'],
           created_at: definition['created-at'],
           path: definition['path'],
           type: definition['type'],
-          word_id: definition['word-id'],
+          word_id: definition.data['word-id'],
           v: definition['v'],
         });
       }
@@ -229,14 +228,14 @@ class LexiconService extends AbstractService<any> {
       for (const sentence of sentences) {
         insert.run({
           received_at: sentence['received-at'],
-          sentence: sentence['sentence'],
+          sentence: sentence.data['sentence'],
           updated_at: sentence['updated-at'],
           revision: sentence['revision'],
           id: sentence['id'],
           created_at: sentence['created-at'],
           path: sentence['path'],
           type: sentence['type'],
-          word_id: sentence['word-id'],
+          word_id: sentence.data['word-id'],
           v: sentence['v'],
         });
       }
@@ -298,7 +297,7 @@ class LexiconService extends AbstractService<any> {
     schema: Schema
   ) {
     return APIConnection.getInstance().conduit.poke({
-      app: 'db',
+      app: 'bedrock',
       mark: 'db-action',
       json: {
         create: {
@@ -320,7 +319,7 @@ class LexiconService extends AbstractService<any> {
     schema: Schema
   ) {
     return APIConnection.getInstance().conduit.poke({
-      app: 'db',
+      app: 'bedrock',
       mark: 'db-action',
       json: {
         edit: {
@@ -338,7 +337,7 @@ class LexiconService extends AbstractService<any> {
   }
   async remove(rowID: string, path: string, type: string) {
     return APIConnection.getInstance().conduit.poke({
-      app: 'db',
+      app: 'bedrock',
       mark: 'db-action',
       json: {
         remove: {
@@ -374,6 +373,46 @@ class LexiconService extends AbstractService<any> {
     });
   }
   // Lexicon-specific
+  /* async relayWord() {
+     *
+     * How to get relays working:
+     * -below relay creates a row in the relay table,
+     *    where the data object is a reference to the original row
+     *
+     * -never copy the original row, allows fetch it from the original
+     *    space and add it to the result of the state fetch so it appears in the UI
+     *
+     * -new votes should live in current space, but should also show the votes form the
+     *    original space
+    
+    const targetPath = '/~lux/our';
+
+    const data = {
+      deleted: false,
+      revision: 0,
+      protocal: 'all',
+      type: 'lexicon-word',
+      id: '/~lux/~2023.6.23..16.58.30..3b60',
+      path: '/~lux/randy',
+    };
+    const json: any = {
+      relay: {
+        path: targetPath,
+        type: 'relay',
+        v: 0,
+        data: data,
+        schema: [],
+      },
+    };
+    return APIConnection.getInstance().conduit.thread({
+      inputMark: 'db-action',
+      outputMark: 'db-vent',
+      threadName: 'venter',
+      body: json,
+      desk: 'realm',
+    });
+  }
+   */
   async createWord(path: string, word: string) {
     const data = [word];
 
@@ -429,7 +468,7 @@ class LexiconService extends AbstractService<any> {
   }
   async subscribePath(path: string) {
     return APIConnection.getInstance().conduit.watch({
-      app: 'db',
+      app: 'bedrock',
       path: `/path${path}`,
       onEvent: (data: any) => {
         //send update to the IPC update handler in app.store
@@ -493,9 +532,10 @@ class LexiconService extends AbstractService<any> {
   }
   async _getState() {
     const result = await APIConnection.getInstance().conduit.scry({
-      app: 'db',
+      app: 'bedrock',
       path: '/db',
     });
+
     let words: any = [];
     let votes: any = [];
     let definitions: any = [];

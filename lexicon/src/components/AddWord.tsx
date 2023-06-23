@@ -33,25 +33,25 @@ export const AddWord = ({ open, onClose }: Props) => {
     setError('');
     try {
       const result: any = await api.createWord(space, word);
-      if (result) {
-        //word created succesfully, create a definition and sentence if any
-        const wordId = result['row-id'];
+      log('result', result);
+      //word created succesfully, create a definition and sentence if any
+      const wordId = result['id'];
 
-        const definitionResult = await api.createDefinition(
+      const definitionResult = await api.createDefinition(
+        space,
+        wordId,
+        definition
+      );
+      log('definitionResult', definitionResult);
+      if (sentence) {
+        const sentenceResult = await api.createSentence(
           space,
           wordId,
-          definition
+          sentence
         );
-        log('definitionResult', definitionResult);
-        if (sentence) {
-          const sentenceResult = await api.createSentence(
-            space,
-            wordId,
-            sentence
-          );
-          log('sentenceResult', sentenceResult);
-        }
+        log('sentenceResult', sentenceResult);
       }
+
       resetForm();
       onClose();
       log('addWord result =>', result);
@@ -136,11 +136,19 @@ export const AddWord = ({ open, onClose }: Props) => {
       </Flex>
 
       {error && (
-        <Flex marginTop={'auto'}>
+        <Flex
+          marginTop={'auto'}
+          flexDirection={'column'}
+          style={{ textAlign: 'center' }}
+        >
           <ErrorBox>{error}</ErrorBox>
         </Flex>
       )}
-      <Flex gap={10} justifyContent={'flex-end'} marginTop={'auto'}>
+      <Flex
+        gap={10}
+        justifyContent={'flex-end'}
+        marginTop={error ? '20px' : 'auto'}
+      >
         <Button.Transparent
           fontSize={1}
           fontWeight={500}

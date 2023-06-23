@@ -27,6 +27,7 @@ export const SearchBar = ({
 }: Props) => {
   const space = useStore((store: Store) => store.space);
   const wordList = useStore((store: Store) => store.wordList);
+  const setAddModalOpen = useStore((state: Store) => state.setAddModalOpen);
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -50,6 +51,8 @@ export const SearchBar = ({
 
   const onWordClick = (selectedWord: any) => {
     const { word, id, createdAt, votes, webSearch } = selectedWord;
+    //if we navigate using the search bar, make sure it's closed
+    setAddModalOpen(false);
     if (webSearch) {
       navigate('/index.html/dict/' + word);
     } else {
