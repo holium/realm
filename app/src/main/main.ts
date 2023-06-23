@@ -21,6 +21,7 @@ const store = new Store();
 let updater: AppUpdater;
 let menuBuilder: MenuBuilder | null;
 let realmService: RealmService | null;
+export const getRealmService = () => realmService;
 
 // The realm window has a mouse overlay window associated with it.
 // The standalone chat window is for booting Realm in a standalone mode

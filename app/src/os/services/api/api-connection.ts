@@ -19,14 +19,14 @@ export class APIConnection {
   private constructor(session: ConduitSession) {
     this.conduitInstance = new Conduit(session.ship);
     this.handleConnectionStatus(this.conduitInstance);
-    this.conduitInstance
-      .init(session.url, session.code, session.cookie ?? '')
-      // .then(() => {
-      //   log.info('Conduit initialized');
-      // })
-      .catch((e) => {
-        log.error('Conduit initialization failed', e);
-      });
+    // this.conduitInstance
+    //   .init(session.url, session.code, session.cookie ?? '')
+    //   // .then(() => {
+    //   //   log.info('Conduit initialized');
+    //   // })
+    //   .catch((e) => {
+    //     log.error('Conduit initialization failed', e);
+    //   });
 
     app.on('quit', () => {
       this.closeChannel();

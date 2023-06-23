@@ -1,15 +1,19 @@
 import { BrowserWindow, powerMonitor } from 'electron';
 
+import { getRealmService } from '../main';
+
 const registerListeners = (mainWindow: BrowserWindow) => {
   powerMonitor.on('suspend', () => {
     if (mainWindow.isDestroyed()) return;
-
     mainWindow.webContents.send('realm.sys.sleep');
     mainWindow.webContents.send('realm.sys.suspend');
   });
-  powerMonitor.on('resume', () => {
+  powerMonitor.on('resume', async () => {
     if (mainWindow.isDestroyed()) return;
-
+    const realmService = getRealmService();
+    if (realmService) {
+      realmService.reconnectConduit();
+    }
     mainWindow.webContents.send('realm.sys.wake');
     mainWindow.webContents.send('realm.sys.resume');
   });
