@@ -67,6 +67,25 @@ const HostingPresenter = () => {
     }
   }, [isUploadedIdentity, ships]);
 
+  const setSelectedShipOrRedirect = (ship: string) => {
+    const shipToSelect = ships.find((teShip) => teShip.patp === ship);
+    if (
+      shipToSelect?.product_type === 'byop-p' &&
+      !shipToSelect?.payment_status
+    ) {
+      OnboardingStorage.set({
+        productType: 'byop-p',
+        provisionalShipId: shipToSelect.id.toString(),
+      });
+      goToPage('/upload-id', {
+        back_url: '/account',
+      });
+      return;
+    }
+    if (ship === selectedIdentity) return;
+    setSelectedIdentity(ship);
+  };
+
   const onClickSidebarSection = (section: string) => {
     goToPage(accountPageUrl[section]);
   };
@@ -251,13 +270,14 @@ const HostingPresenter = () => {
         identities={identities}
         selectedIdentity={selectedIdentity}
         isUploadedIdentity={isUploadedIdentity}
+        ships={ships}
         email={email}
         serverUrl={selectedShip?.link}
         serverCode={selectedShip?.code}
         serverMaintenanceWindow={selectedShip?.maintenance_window}
         onClickPurchaseId={onClickPurchaseId}
         onClickUploadId={onClickUploadId}
-        setSelectedIdentity={setSelectedIdentity}
+        setSelectedIdentity={setSelectedShipOrRedirect}
         onClickChangeEmail={changeEmailModal.toggleOn}
         onClickChangePassword={changePasswordModal.toggleOn}
         onClickManageBilling={onClickManageBilling}

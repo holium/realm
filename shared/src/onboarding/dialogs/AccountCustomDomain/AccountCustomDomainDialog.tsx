@@ -39,6 +39,7 @@ export const AccountCustomDomainDialog = ({
   <AccountDialog
     identities={identities}
     selectedIdentity={selectedIdentity}
+    ships={[]}
     setSelectedIdentity={setSelectedIdentity}
     currentSection={SidebarSection.CustomDomain}
     isLoading={!dropletIp}
