@@ -27,6 +27,7 @@ export const UploadIdDialogBody = ({ fileName, progress, onUpload }: Props) => {
 
   const handleUpload = async (file: File) => {
     if (uploading || uploaded) return;
+    console.log('uploading ==> ');
 
     setFieldValue('uploading', true);
 

@@ -31,10 +31,9 @@ export default function UploadId() {
   const [error, setError] = useState<string>();
 
   const onUpload = async (file: File) => {
-    const { token, email, serverId, provisionalShipId } =
-      OnboardingStorage.get();
+    const { token, provisionalShipId } = OnboardingStorage.get();
 
-    if (!token || !serverId || !email || !provisionalShipId) return false;
+    if (!token || !provisionalShipId) return false;
 
     setFile(file);
     setProgress(0);

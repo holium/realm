@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { useToggle } from '@holium/design-system/util';
 import {
@@ -36,15 +36,32 @@ const HostingPresenter = () => {
   const changeMaintenanceWindowModal = useToggle(false);
   const ejectIdModal = useToggle(false);
 
-  const identities = useMemo(() => ships.map((ship) => ship.patp), [ships]);
+  const identities = useMemo(
+    () => ships.map((ship) => ship.patp || ship.title),
+    [ships]
+  );
   const selectedShip = useMemo(
-    () => ships.find((ship) => ship.patp === selectedIdentity),
+    () => ships.find((ship) => ship.patp === selectedIdentity) || ships[0],
     [ships, selectedIdentity]
   );
+
   const isUploadedIdentity = useMemo(
     () => selectedShip?.product_type === 'byop-p',
     [selectedShip]
   );
+
+  useEffect(() => {
+    // if there are no ships and the only one is a BYOP-P, go to upload-id
+    if (
+      isUploadedIdentity &&
+      ships.length === 1 &&
+      !selectedShip.payment_status
+    ) {
+      goToPage('/upload-id', {
+        back_url: '/account',
+      });
+    }
+  }, [isUploadedIdentity, ships]);
 
   const onClickSidebarSection = (section: string) => {
     goToPage(accountPageUrl[section]);

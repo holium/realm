@@ -68,6 +68,10 @@ export const AccountDialog = ({
 
   let sidebarItems: SidebarSection[] = [];
 
+  useEffect(() => {
+    hasCSEK.setToggle(Boolean(OnboardingStorage.get().clientSideEncryptionKey));
+  }, []);
+
   if (hasShips) {
     if (isUploadedIdentity) {
       sidebarItems = [
@@ -88,10 +92,6 @@ export const AccountDialog = ({
   } else {
     sidebarItems = [SidebarSection.GetRealm, SidebarSection.GetHosting];
   }
-
-  useEffect(() => {
-    hasCSEK.setToggle(Boolean(OnboardingStorage.get().clientSideEncryptionKey));
-  }, []);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
