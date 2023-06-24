@@ -14,6 +14,7 @@ export const accountPageUrl: Record<string, OnboardingPage> = {
   'Custom Domain': '/account/custom-domain',
   Storage: '/account/storage',
   Hosting: '/account',
+  'Get Hosting': '/choose-id',
 };
 
 export const useNavigation = () => {
