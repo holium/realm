@@ -16,13 +16,20 @@ type PaymentStepViewProps = StepProps & {
   products: ThirdEarthProduct[];
 };
 
-const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
+const PaymentStepView = ({
+  products: unfilteredProducts,
+  setStep,
+}: PaymentStepViewProps) => {
   const [serverId, setserverId] = useState('');
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
 
   const [stripe, setStripe] = useState<Stripe>();
   const [clientSecret, setClientSecret] = useState<string>();
+
+  const products = unfilteredProducts.filter(
+    (product) => product.product_type === 'planet'
+  );
 
   const [productId, setProductId] = useState(products[0].id);
   const [invoiceId, setInvoiceId] = useState<string>();
