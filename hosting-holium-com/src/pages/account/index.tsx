@@ -57,6 +57,10 @@ const HostingPresenter = () => {
       ships.length === 1 &&
       !selectedShip.payment_status
     ) {
+      OnboardingStorage.set({
+        productType: 'byop-p',
+        provisionalShipId: selectedShip.id.toString(),
+      });
       goToPage('/upload-id', {
         back_url: '/account',
       });
