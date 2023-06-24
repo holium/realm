@@ -1,4 +1,5 @@
 import { AccountDialog, SidebarSection } from '../../components/AccountDialog';
+import { ThirdEarthShip } from '../../types';
 import { AccountHostingDialogBody } from './AccountHostingDialogBody';
 
 type Props = {
@@ -9,6 +10,7 @@ type Props = {
   serverCode: string | undefined;
   serverMaintenanceWindow: number | undefined;
   isUploadedIdentity: boolean;
+  ships: ThirdEarthShip[];
   setSelectedIdentity: (patp: string) => void;
   onClickChangeEmail: () => void;
   onClickChangePassword: () => void;
@@ -30,6 +32,7 @@ export const AccountHostingDialog = ({
   serverCode,
   serverMaintenanceWindow,
   isUploadedIdentity,
+  ships,
   setSelectedIdentity,
   onClickChangeEmail,
   onClickChangePassword,
@@ -47,6 +50,7 @@ export const AccountHostingDialog = ({
     selectedIdentity={selectedIdentity}
     setSelectedIdentity={setSelectedIdentity}
     currentSection={SidebarSection.Hosting}
+    ships={ships}
     isLoading={
       !email ||
       !serverUrl ||
