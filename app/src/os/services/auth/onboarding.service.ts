@@ -562,8 +562,7 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
         // reject(err);
       });
     console.log('_openConduit: init');
-    await conduit.init(serverUrl, serverCode, cookie);
-    // });
+    return conduit.init(serverUrl, serverCode, cookie);
   }
 
   private _createShipDB(
