@@ -1,3 +1,4 @@
+import { ConduitState } from 'os/services/api/types';
 import { AppStateType } from 'renderer/stores/app.store';
 import { RealmIPC } from 'renderer/stores/ipc';
 
@@ -14,6 +15,6 @@ export const watchOnlineStatus = (appState: AppStateType) => {
     console.log('offline detected, cleaning up...');
     // MainIPC.disconnect();
     appState.setOnline(false);
-    RealmIPC.setConduitStatus('no-internet');
+    RealmIPC.setConduitStatus('no-internet' as ConduitState);
   });
 };
