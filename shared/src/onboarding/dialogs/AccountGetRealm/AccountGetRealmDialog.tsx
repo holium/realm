@@ -24,6 +24,7 @@ export const AccountGetRealmDialog = ({
 }: Props) => (
   <AccountDialog
     identities={[]}
+    ships={[]}
     selectedIdentity={''}
     setSelectedIdentity={() => {}}
     isUploadedIdentity={false}
