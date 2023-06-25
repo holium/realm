@@ -82,3 +82,5 @@ https://github.com/Willena/sqlite-jdbc-crypt/releases
 ```
 
 Guide: https://intellij-support.jetbrains.com/hc/en-us/community/posts/360007633799-How-to-open-SQLCipher-passwrd-protected-file-in-Datagrip
+
+--
