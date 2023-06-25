@@ -37,7 +37,7 @@ export default function UploadId() {
       if (
         ships.length === 1 &&
         ships[0].product_type === 'byop-p' &&
-        !ships[0].payment_status
+        ships[0].ship_type !== 'planet'
       ) {
         OnboardingStorage.set({
           productType: 'byop-p',

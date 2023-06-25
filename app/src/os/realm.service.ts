@@ -32,24 +32,25 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     };
 
     this.onWebViewAttached = this.onWebViewAttached.bind(this);
-    this.onWillRedirect = this.onWillRedirect.bind(this);
+    // this.onWillRedirect = this.onWillRedirect.bind(this);
 
     app.on('quit', () => {
       // do other cleanup here
     });
 
-    app.on(
-      'web-contents-created',
-      async (_: Event, webContents: WebContents) => {
-        webContents.on('will-redirect', (_: Event, url: string) => {
-          this.onWillRedirect(url, webContents);
-        });
-      }
-    );
+    // app.on(
+    //   'web-contents-created',
+    //   async (_: Event, webContents: WebContents) => {
+    //     webContents.on('will-redirect', (_: Event, url: string) => {
+    //       this.onWillRedirect(url, webContents);
+    //     });
+    //   }
+    // );
 
     const windows = BrowserWindow.getAllWindows();
     windows.forEach(({ webContents }) => {
       webContents.on('did-attach-webview', (event, webviewWebContents) => {
+        log.info("realm.service.ts: 'did-attach-webview' event fired");
         this.onWebViewAttached(event, webviewWebContents);
       });
     });
@@ -132,6 +133,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         log.error('realm.service.ts:', 'No credentials found');
         return false;
       }
+
       const cookie = await getCookie({
         serverUrl: credentials.url,
         serverCode: credentials.code,
@@ -310,52 +312,53 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     saveReleaseChannelInSettings(channel);
   }
 
-  async onWillRedirect(url: string, webContents: WebContents) {
-    try {
-      const delim = '/~/login?redirect=';
-      const parts = url.split(delim);
-      // http://localhost/~/login?redirect=
-      if (parts.length > 1) {
-        let appPath = decodeURIComponent(parts[1]);
-        // console.log('appPath => %o', appPath);
-        appPath = appPath.split('?')[0];
-        if (appPath.endsWith('/')) {
-          appPath = appPath.substring(0, appPath.length - 1);
-        }
-        const credentials = this.services?.ship?.credentials;
-        if (!credentials) {
-          log.error('realm.service.ts:', 'No credentials found');
-          return;
-        }
-        const cookie = await getCookie({
-          serverUrl: credentials.url,
-          serverCode: credentials.code,
-        });
-        log.info('realm.service.ts:', 'onWillRedirect getCookie', cookie);
-        if (!cookie) {
-          log.error('realm.service.ts:', 'Could not fetch a new cookie!');
-          // TODO show feedback to user
-          return;
-        }
-        const patp = this.services?.ship?.patp;
-        if (!patp) {
-          log.error('realm.service.ts:', 'No patp found');
-          return;
-        }
+  // async onWillRedirect(url: string, webContents: WebContents) {
+  //   try {
+  //     const delim = '/~/login?redirect=';
+  //     const parts = url.split(delim);
+  //     // http://localhost/~/login?redirect=
+  //     if (parts.length > 1) {
+  //       let appPath = decodeURIComponent(parts[1]);
+  //       // console.log('appPath => %o', appPath);
+  //       appPath = appPath.split('?')[0];
+  //       if (appPath.endsWith('/')) {
+  //         appPath = appPath.substring(0, appPath.length - 1);
+  //       }
+  //       const credentials = this.services?.ship?.credentials;
+  //       if (!credentials) {
+  //         log.error('realm.service.ts:', 'No credentials found');
+  //         return;
+  //       }
+  //       const cookie = await getCookie({
+  //         serverUrl: credentials.url,
+  //         serverCode: credentials.code,
+  //       });
+  //       log.info('realm.service.ts:', 'onWillRedirect getCookie', cookie);
+  //       if (!cookie) {
+  //         log.error('realm.service.ts:', 'Could not fetch a new cookie!');
+  //         // TODO show feedback to user
+  //         return;
+  //       }
+  //       const patp = this.services?.ship?.patp;
+  //       if (!patp) {
+  //         log.error('realm.service.ts:', 'No patp found');
+  //         return;
+  //       }
 
-        await setSessionCookie({ ...credentials, cookie });
+  //       await setSessionCookie({ ...credentials, cookie });
 
-        this.services?.ship?.updateCookie(cookie);
-        webContents.reload();
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }
+  //       this.services?.ship?.updateCookie(cookie);
+  //       // webContents.loadURL(url);
+  //     }
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  // }
 
   async onWebViewAttached(_: any, webContents: WebContents) {
     webContents.on('will-redirect', (_, url) => {
-      this.onWillRedirect(url, webContents);
+      log.info('realm.service.ts:', 'will-redirect', url);
+      // this.onWillRedirect(url, webContents);
     });
 
     webContents.on('dom-ready', () => {

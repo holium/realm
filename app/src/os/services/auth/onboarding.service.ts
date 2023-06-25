@@ -538,7 +538,13 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
 
     const { serverUrl, serverCode, serverId } = (this.credentials ||
       creds) as OnboardingCredentials;
-    const cookie = await this.getCookie({ serverId, serverUrl, serverCode });
+    const cookie = await getCookie({
+      serverUrl,
+      serverCode,
+    });
+    if (!cookie) {
+      throw new Error('Failed to get cookie, auth error');
+    }
     // return new Promise(async (resolve, reject) => {
     // after 10 seconds, give up
     setTimeout(() => {
