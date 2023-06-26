@@ -129,7 +129,7 @@ export const AccountDialog = ({
                   if (
                     ship &&
                     ship.product_type === 'byop-p' &&
-                    !ship.payment_status
+                    ship.ship_type !== 'planet'
                   ) {
                     return {
                       value: patp,

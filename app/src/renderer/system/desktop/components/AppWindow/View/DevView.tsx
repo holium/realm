@@ -120,7 +120,7 @@ const DevViewPresenter = ({ appWindow, isResizing }: Props) => {
           src={appWindow.href?.site}
           webpreferences="sandbox=false"
           useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0"
-          partition={`persist:webview-${loggedInAccount?.serverId}`}
+          // partition={`persist:webview-${loggedInAccount?.serverId}`}
           isLocked={isResizing || loading.isOn}
           style={{
             width: 'inherit',

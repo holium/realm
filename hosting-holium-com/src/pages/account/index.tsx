@@ -55,7 +55,7 @@ const HostingPresenter = () => {
     if (
       isUploadedIdentity &&
       ships.length === 1 &&
-      !selectedShip.payment_status
+      selectedShip.ship_type !== 'planet'
     ) {
       OnboardingStorage.set({
         productType: 'byop-p',
@@ -71,7 +71,7 @@ const HostingPresenter = () => {
     const shipToSelect = ships.find((teShip) => teShip.patp === ship);
     if (
       shipToSelect?.product_type === 'byop-p' &&
-      !shipToSelect?.payment_status
+      shipToSelect.ship_type !== 'planet'
     ) {
       OnboardingStorage.set({
         productType: 'byop-p',

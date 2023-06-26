@@ -41,7 +41,8 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     app.on(
       'web-contents-created',
       async (_: Event, webContents: WebContents) => {
-        webContents.on('will-redirect', (_: Event, url: string) => {
+        webContents.on('will-redirect', (e: Event, url: string) => {
+          e.preventDefault();
           this.onWillRedirect(url, webContents);
         });
       }
@@ -50,6 +51,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     const windows = BrowserWindow.getAllWindows();
     windows.forEach(({ webContents }) => {
       webContents.on('did-attach-webview', (event, webviewWebContents) => {
+        log.info("realm.service.ts: 'did-attach-webview' event fired");
         this.onWebViewAttached(event, webviewWebContents);
       });
     });
@@ -132,6 +134,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         log.error('realm.service.ts:', 'No credentials found');
         return false;
       }
+
       const cookie = await getCookie({
         serverUrl: credentials.url,
         serverCode: credentials.code,
@@ -343,10 +346,14 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           return;
         }
 
-        await setSessionCookie({ ...credentials, cookie });
+        // await setSessionCookie({ ...credentials, cookie });
 
         this.services?.ship?.updateCookie(cookie);
+        log.info('realm.service.ts', 'reloading after cookie refresh');
         webContents.reload();
+        // webContents.loadURL(url, {
+        //   extraHeaders: `Cookie: ${cookie}`,
+        // });
       }
     } catch (e) {
       console.error(e);
@@ -354,10 +361,6 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   }
 
   async onWebViewAttached(_: any, webContents: WebContents) {
-    webContents.on('will-redirect', (_, url) => {
-      this.onWillRedirect(url, webContents);
-    });
-
     webContents.on('dom-ready', () => {
       // TODO wire up libs here
     });

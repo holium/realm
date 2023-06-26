@@ -539,30 +539,27 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     const { serverUrl, serverCode, serverId } = (this.credentials ||
       creds) as OnboardingCredentials;
     const cookie = await this.getCookie({ serverId, serverUrl, serverCode });
-    // return new Promise(async (resolve, reject) => {
-    // after 10 seconds, give up
-    setTimeout(() => {
-      throw new Error(
-        'conduit took too long to open (is the url supposed to be https instead of http?)'
-      );
-    }, 10000);
-
-    const conduit = APIConnection.getInstance({
-      url: serverUrl,
-      code: serverCode,
-      ship: serverId,
-      cookie,
-    }).conduit;
-    conduit
-      .on('connected', () => {
-        // resolve(null);
+    return new Promise((resolve, reject) => {
+      // after 10 seconds, give up
+      setTimeout(() => {
+        reject(
+          'conduit took too long to open (is the url supposed to be https instead of http?)'
+        );
+      }, 10000);
+      APIConnection.getInstance({
+        url: serverUrl,
+        code: serverCode,
+        ship: serverId,
+        cookie,
       })
-      .on('error', (err: any) => {
-        log.error('onboarding.service.ts:', 'Conduit error', err);
-        // reject(err);
-      });
-    console.log('_openConduit: init');
-    return conduit.init(serverUrl, serverCode, cookie);
+        .conduit.on('connected', () => {
+          resolve(null);
+        })
+        .on('error', (err: any) => {
+          log.error('onboarding.service.ts:', 'Conduit error', err);
+          reject(err);
+        });
+    });
   }
 
   private _createShipDB(

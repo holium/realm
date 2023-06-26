@@ -1,10 +1,9 @@
-import { session } from 'electron';
 import log from 'electron-log';
 import { deSig, preSig } from '@urbit/aura';
 import EventEmitter, { setMaxListeners } from 'events';
 import EventSource from 'eventsource';
 
-import { getCookie } from '../../lib/shipHelpers';
+import { getCookie, setSessionCookie } from '../../lib/shipHelpers';
 import {
   Action,
   ConduitState,
@@ -700,13 +699,19 @@ export class Conduit extends EventEmitter {
           });
           if (cookie) {
             this.cookie = cookie;
-            await session
-              .fromPartition(`persist:default-${this.ship}`)
-              .cookies.set({
-                url: `${this.url}`,
-                name: `urbauth-${this.ship}`,
-                value: cookie?.split('=')[1].split('; ')[0],
-              });
+            await setSessionCookie({
+              ship: preSig(this.ship),
+              url: this.url,
+              code: this.code,
+              cookie: this.cookie,
+            });
+            // await session
+            //   .fromPartition(`persist:default-${this.ship}`)
+            //   .cookies.set({
+            //     url: `${this.url}`,
+            //     name: `urbauth-${this.ship}`,
+            //     value: cookie?.split('=')[1].split('; ')[0],
+            //   });
             this.updateStatus(ConduitState.Refreshed, {
               url: this.url,
               ship: preSig(this.ship),
