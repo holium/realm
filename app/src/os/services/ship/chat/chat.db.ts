@@ -320,8 +320,12 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     if (dbChange.type === 'del-messages-row') {
       // console.log('del-messages-row', dbChange);
       const delMessagesRow = dbChange as DelMessagesRow;
-      this._deleteMessagesRow(delMessagesRow['msg-id']);
-      this.sendUpdate({ type: 'message-deleted', payload: delMessagesRow });
+      // only delete the message if it has a created-at older than dbChange.timestamp (since if the message was created after the delete, the delete is invalid)
+      const msg = this.getChatMessage(delMessagesRow['msg-id']);
+      if (msg && msg.created_at < delMessagesRow.timestamp) {
+        this._deleteMessagesRow(delMessagesRow['msg-id']);
+        this.sendUpdate({ type: 'message-deleted', payload: delMessagesRow });
+      }
       this._insertDeleteLogs([
         {
           change: delMessagesRow,
@@ -332,8 +336,18 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     if (dbChange.type === 'del-paths-row') {
       // console.log('del-paths-row', dbChange);
       const delPathsRow = dbChange as DelPathsRow;
-      this._deletePathsRow(delPathsRow.path);
-      this.sendUpdate({ type: 'path-deleted', payload: delPathsRow.path });
+      // only delete the path if our peer-row for it has a created-at older than dbChange.timestamp
+      // (since if we were added to the path after the delete, the delete is invalid)
+      // this can happen when someone is kicked and then re-added to a chat
+      // @ts-ignore
+      const peerrow = this.getChatPeer(
+        delPathsRow.path,
+        preSig(APIConnection.getInstance().conduit.ship)
+      );
+      if (peerrow && peerrow.created_at < delPathsRow.timestamp) {
+        this._deletePathsRow(delPathsRow.path);
+        this.sendUpdate({ type: 'path-deleted', payload: delPathsRow.path });
+      }
       this._insertDeleteLogs([
         {
           change: delPathsRow,
@@ -344,8 +358,13 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     if (dbChange.type === 'del-peers-row') {
       // console.log('del-peers-row', dbChange);
       const delPeersRow = dbChange as DelPeersRow;
-      this._deletePeersRow(delPeersRow.path, delPeersRow.ship);
-      this.sendUpdate({ type: 'peer-deleted', payload: delPeersRow });
+      // only delete the path if it has a created-at older than dbChange.timestamp (since if the path was created after the delete, the delete is invalid)
+      // this can happen when someone is kicked and then re-added to a chat
+      const peerrow = this.getChatPeer(delPeersRow.path, delPeersRow.ship);
+      if (peerrow && peerrow.created_at < delPeersRow.timestamp) {
+        this._deletePeersRow(delPeersRow.path, delPeersRow.ship);
+        this.sendUpdate({ type: 'peer-deleted', payload: delPeersRow });
+      }
       this._insertDeleteLogs([
         {
           change: delPeersRow,
@@ -762,6 +781,18 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     `);
     const result = query.all(path);
     return result;
+  }
+
+  getChatPeer(path: string, ship: string) {
+    if (!this.db?.open) return;
+    const query = this.db.prepare(`
+      SELECT *
+      FROM ${CHAT_TABLES.PEERS}
+      WHERE path = ? AND ship = ?;
+    `);
+    const result = query.all(path, ship);
+    if (result.length === 0) return null;
+    return result[0];
   }
 
   //
