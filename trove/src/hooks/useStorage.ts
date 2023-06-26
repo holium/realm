@@ -2,7 +2,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DeleteObjectCommand, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
 
-import api from '../api';
 import { log } from '../helpers';
 import useTroveStore, { TroveStore } from '../store/troveStore';
 
@@ -45,6 +44,7 @@ const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
   const [uploading, setUploading] = useState(false);
   const [s3, setS3] = useState<any>();
   const shipName = useTroveStore((store: TroveStore) => store.shipName);
+  const api = useTroveStore((store: TroveStore) => store.api);
 
   useEffect(() => {
     if (!s3) {

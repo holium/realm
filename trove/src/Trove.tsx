@@ -10,6 +10,7 @@ import { theme } from './theme';
 interface Props {
   selectedSpace: string;
   shipName: string;
+  TroveIPC: any;
 }
 const muiTheme = createTheme({
   palette: {
@@ -30,10 +31,14 @@ const muiTheme = createTheme({
     },
   },
 });
-export const Trove = ({ selectedSpace, shipName }: Props) => {
-  //TODO: reinstate loader
+export const Trove = ({ selectedSpace, shipName, TroveIPC }: Props) => {
   const setShipName = useTroveStore((store: TroveStore) => store.setShipName);
   const setMySpace = useTroveStore((store: TroveStore) => store.setMySpace);
+  const setApi = useTroveStore((store: TroveStore) => store.setApi);
+  useEffect(() => {
+    //add our api instance to the store
+    setApi(TroveIPC);
+  }, [TroveIPC]);
 
   useEffect(() => {
     if (shipName) {

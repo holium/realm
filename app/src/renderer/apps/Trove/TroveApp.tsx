@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import { Trove } from '@holium/trove';
 
 import { useAppState } from 'renderer/stores/app.store';
+import { TroveIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 const TroveAppPresenter = () => {
@@ -13,6 +14,7 @@ const TroveAppPresenter = () => {
     <Trove
       shipName={loggedInAccount?.serverId ?? ''}
       selectedSpace={selectedSpace?.path ?? ''}
+      TroveIPC={TroveIPC}
     />
   );
 };

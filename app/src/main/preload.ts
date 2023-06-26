@@ -7,6 +7,7 @@ import { lexiconPreload } from 'os/services/ship/lexicon.service';
 import { settingsPreload } from 'os/services/ship/settings.service';
 import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
+import { trovePreload } from 'os/services/ship/trove.service';
 
 import { realmPreload } from '../os/realm.service';
 import { authPreload } from '../os/services/auth/auth.service';
@@ -220,3 +221,4 @@ contextBridge.exposeInMainWorld('appInstallService', appPublishersDBPreload);
 contextBridge.exposeInMainWorld('appRecentsService', appRecentsPreload);
 contextBridge.exposeInMainWorld('settingsService', settingsPreload);
 contextBridge.exposeInMainWorld('lexiconService', lexiconPreload);
+contextBridge.exposeInMainWorld('troveService', trovePreload);

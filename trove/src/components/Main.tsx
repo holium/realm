@@ -11,7 +11,6 @@ import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 
-import api from '../api';
 import {
   FolderInput,
   LinkFileInput,
@@ -29,6 +28,8 @@ export const Main = ({ troveRenderTree }: any) => {
   const [displayFolderInput, setDisplayFolderInput] = useState<boolean>(false);
   const [displayFileInput, setDisplayFileInput] = useState<boolean>(false);
   const [displayFileLink, setDisplayFileLink] = useState<boolean>(false);
+
+  const api = useTroveStore((store: TroveStore) => store.api);
 
   const myPerms = useTroveStore((store: TroveStore) => store.myPerms);
   const selectedTopLevelFolder = useTroveStore(

@@ -5,7 +5,6 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import api from '../api';
 import { Folder, FolderInput, WrappedBackground } from '../components';
 import useTroveStore, { TroveStore } from '../store/troveStore';
 import { theme } from '../theme';
@@ -14,6 +13,7 @@ export const Aside = () => {
     useState<boolean>(false);
   const [displayCurrentSpaceInput, setDisplayCurrentSpaceInput] =
     useState<boolean>(false);
+  const api = useTroveStore((store: TroveStore) => store.api);
   const selectedFolder = useTroveStore(
     (store: TroveStore) => store.selectedTopLevelFolder
   );

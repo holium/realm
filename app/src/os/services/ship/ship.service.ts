@@ -18,6 +18,7 @@ import { ShipDB } from './ship.db';
 import { Credentials } from './ship.types.ts';
 import BazaarService from './spaces/bazaar.service';
 import SpacesService from './spaces/spaces.service';
+import TroveService from './trove.service';
 import WalletService from './wallet/wallet.service';
 
 export class ShipService extends AbstractService<any> {
@@ -32,6 +33,7 @@ export class ShipService extends AbstractService<any> {
     bazaar: BazaarService;
     wallet: WalletService;
     lexicon: LexiconService;
+    trove: TroveService;
     settings: SettingsService;
   };
 
@@ -135,6 +137,7 @@ export class ShipService extends AbstractService<any> {
       friends: new FriendsService(this.serviceOptions, this.shipDB.db),
       wallet: new WalletService(undefined, this.shipDB.db),
       lexicon: new LexiconService(undefined, this.shipDB.db),
+      trove: new TroveService(undefined, this.shipDB.db),
       settings: new SettingsService(this.serviceOptions, this.shipDB.db),
     };
   }

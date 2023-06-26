@@ -8,6 +8,9 @@ type Node = null | {
   type: 'file' | 'folder';
 };
 export interface TroveStore {
+  api: any;
+  setApi: (api: any) => void;
+
   troves: any; //a list of our troves unedited, kept flat for ease of interaction
   setTroves: (troves: any) => void;
 
@@ -49,6 +52,9 @@ export interface TroveStore {
 }
 
 const useTroveStore = create<TroveStore>((set) => ({
+  api: null, //set to the TroveIPC passed down from Realm
+  setApi: (api: any) => set({ api }),
+
   troves: null,
   setTroves: (troves: any) => set(() => ({ troves })),
 

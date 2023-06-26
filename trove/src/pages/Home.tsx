@@ -4,13 +4,13 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 
-import api from '../api';
 import { Aside, Main, NavigationHeader } from '../components';
 import { log, splitLastOccurrence } from '../helpers';
 import useTroveStore, { TroveStore } from '../store/troveStore';
 import { Role } from '../types';
 
 export const Home = () => {
+  const api = useTroveStore((store: TroveStore) => store.api);
   const space = useTroveStore((store: TroveStore) => store.space);
   const troves = useTroveStore((store: TroveStore) => store.troves);
   const setTroves = useTroveStore((store: TroveStore) => store.setTroves);

@@ -1,8 +1,8 @@
-import api from '../api';
 import { log, splitLastOccurrence } from '../helpers';
 import useTroveStore from './troveStore';
 const moveFileAction = async (fileId: string, toPath: string) => {
   const state = useTroveStore.getState();
+  const api = state.api;
   const troves = state.troves;
   const currentSpace = state.currentSpace;
   const selectedTopLevelFolder = state.selectedTopLevelFolder;
@@ -38,6 +38,7 @@ const moveFileAction = async (fileId: string, toPath: string) => {
 const removeFileAction = async (fileId: string) => {
   //look up the parent of the file id
   const state = useTroveStore.getState();
+  const api = state.api;
   const troves = state.troves;
   const currentSpace = state.currentSpace;
   const selectedTopLevelFolder = state.selectedTopLevelFolder;
@@ -67,9 +68,9 @@ const removeFileAction = async (fileId: string) => {
     log('error ', e);
   }
 };
-
 const addFileAction = async (metadata: any) => {
   const state = useTroveStore.getState();
+  const api = state.api;
   const selectedNode = state.selectedNode;
   const selectedTopLevelFolder = state.selectedTopLevelFolder;
 
@@ -107,6 +108,7 @@ const addFileAction = async (metadata: any) => {
 };
 const removeFolderAction = async (pathToFolder: string) => {
   const state = useTroveStore.getState();
+  const api = state.api;
   const currentSpace = state.currentSpace;
   const selectedTopLevelFolder = state.selectedTopLevelFolder;
   try {
@@ -122,6 +124,7 @@ const removeFolderAction = async (pathToFolder: string) => {
 };
 const removeTroveAction = async (troveName: string) => {
   const state = useTroveStore.getState();
+  const api = state.api;
   const currentSpace = state.currentSpace;
   try {
     const result = await api.removeTrove(currentSpace, troveName);
@@ -132,6 +135,7 @@ const removeTroveAction = async (troveName: string) => {
 };
 const editTroveAction = async (newTitle: string, trove: string) => {
   const state = useTroveStore.getState();
+  const api = state.api;
   const currentSpace = state.currentSpace;
 
   try {
@@ -143,6 +147,7 @@ const editTroveAction = async (newTitle: string, trove: string) => {
 };
 const repermTroveAction = async (troveName: string, perms: any) => {
   const state = useTroveStore.getState();
+  const api = state.api;
   const currentSpace = state.currentSpace;
   try {
     const result = await api.repermTrove(currentSpace, troveName, perms);
@@ -153,6 +158,7 @@ const repermTroveAction = async (troveName: string, perms: any) => {
 };
 const moveFolderAction = async (fromPath: string, toPath: string) => {
   const state = useTroveStore.getState();
+  const api = state.api;
   const currentSpace = state.currentSpace;
   const selectedTopLevelFolder = state.selectedTopLevelFolder;
   //TODO: rule set for moving
@@ -181,6 +187,7 @@ const moveFolderAction = async (fromPath: string, toPath: string) => {
 };
 const editFolderAction = async (fromPath: string, newName: string) => {
   const state = useTroveStore.getState();
+  const api = state.api;
   const currentSpace = state.currentSpace;
   const selectedTopLevelFolder = state.selectedTopLevelFolder;
 
@@ -200,6 +207,7 @@ const editFolderAction = async (fromPath: string, newName: string) => {
 };
 const editFileAction = async (fileId: string, newTitle: string) => {
   const state = useTroveStore.getState();
+  const api = state.api;
   const currentSpace = state.currentSpace;
   const troves = state.troves;
   const selectedTopLevelFolder = state.selectedTopLevelFolder;
