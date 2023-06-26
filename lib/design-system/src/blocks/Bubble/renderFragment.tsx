@@ -55,7 +55,8 @@ export const renderFragment = (
   index: number,
   author: string,
   onReplyClick?: (id: string) => void,
-  onJoinSpaceClick?: (path: string) => void
+  onJoinSpaceClick?: (path: string) => void,
+  allSpacePaths?: string[]
 ) => {
   const key = Object.keys(fragment)[0] as FragmentKey;
   switch (key) {
@@ -274,16 +275,24 @@ export const renderFragment = (
                 url={cust.value}
                 image={space.theme.wallpaper}
                 onClick={onJoinSpaceClick}
+                hasJoined={
+                  !!(
+                    allSpacePaths &&
+                    allSpacePaths.includes('/spaces' + space.path)
+                  )
+                }
               />
             );
           } else {
+            console.log(cust);
             return (
               <SpaceBlock
                 id={id}
-                name={cust.value.split('/')[1]}
+                name={cust.value.split('/')[3]}
                 members={0}
                 url={cust.value}
                 onClick={onJoinSpaceClick}
+                hasJoined={false}
               />
             );
           }

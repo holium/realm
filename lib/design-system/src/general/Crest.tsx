@@ -70,15 +70,17 @@ export const ImageCrest = styled(motion.img)<CrestStyleProps>`
 `;
 
 interface ICrest {
-  picture?: string;
+  id?: string;
   color: string;
   size: keyof typeof crestSize;
+  picture?: string;
 }
 export const Crest: FC<ICrest> = (props: ICrest) => {
-  const { picture, color, size } = props;
+  const { picture, color, size, id } = props;
 
   return picture ? (
     <ImageCrest
+      id={id}
       height={crestSize[size]}
       width={crestSize[size]}
       borderRadius={crestRadius[size]}
@@ -87,20 +89,14 @@ export const Crest: FC<ICrest> = (props: ICrest) => {
     />
   ) : (
     <ColorCrest
+      id={id}
       initial={{ backgroundColor: color }}
       animate={{ backgroundColor: color }}
       height={crestSize[size]}
       width={crestSize[size]}
       borderRadius={crestRadius[size]}
       transition={{ backgroundColor: { duration: 0.5 } }}
-    >
-      {/* <CrestSymbol
-        fill={color}
-        transitionDuration={0.5}
-        height={crestSize[size] * 0.65}
-        width={crestSize[size] * 0.65}
-      /> */}
-    </ColorCrest>
+    />
   );
 };
 

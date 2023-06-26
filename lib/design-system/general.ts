@@ -6,6 +6,7 @@ export * from './src/general/Button/Button';
 export * from './src/general/Card/Card';
 export { CommButton } from './src/general/CommButton/CommButton';
 export * from './src/general/CopyButton/CopyButton';
+export * from './src/general/Crest';
 export { Favicon } from './src/general/Favicon/Favicon';
 export * from './src/general/Flex/Flex';
 export { HideButton } from './src/general/HideButton/HideButton';

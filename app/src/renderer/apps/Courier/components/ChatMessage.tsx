@@ -367,6 +367,7 @@ export const ChatMessagePresenter = ({
       onReaction={canReact ? onReaction : undefined}
       onReplyClick={onReplyClick}
       onJoinSpaceClick={joiner}
+      allSpacePaths={spacesStore.allSpacePaths}
       error={message.error}
     />
   );

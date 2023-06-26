@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 
-import { Button, Flex, Icon, Text } from '../../../general';
+import { Button, Crest, Flex, Icon, Text } from '../../../general';
 import { Block, BlockProps } from '../Block/Block';
-import { ImageBlock } from '../ImageBlock/ImageBlock';
 
 type SpaceBlockProps = {
   name: string;
   members: number;
   url: string;
+  hasJoined: boolean;
   image?: string;
   onClick?: (path: string) => void;
 } & BlockProps;
@@ -17,6 +17,7 @@ export const SpaceBlock = ({
   name,
   members,
   url,
+  hasJoined,
   image,
   id,
   onClick,
@@ -27,29 +28,23 @@ export const SpaceBlock = ({
   return (
     <Block id={id} {...rest}>
       <StyledSpaceWrapper id={id}>
-        <Flex id={id}>
-          <ImageBlock
-            id={id}
-            by=""
-            showLoader={true}
-            image={image || ''}
-            width={40}
-            height={40}
-            mr={2}
-          />
-          <div id={id}>
-            <Text.Custom id={id} fontWeight={700} pb={1}>
+        <Flex id={id} gap={4}>
+          <Crest id={id} color="black" picture={image} size="sm2" />
+          <Flex id={id} flexDirection="column" justifyContent="center">
+            <Text.Custom id={id} fontWeight={500} fontSize={3} mb="2px" pb={1}>
               {name}
             </Text.Custom>
             {members > 0 ? (
-              <Flex id={id}>
+              <Flex id={id} gap={4} alignItems={'center'}>
                 <Icon id={id} name="Members" size={14} opacity={0.5} />
-                <Text.Custom id={id}>{members} members</Text.Custom>
+                <Text.Custom id={id} opacity={0.5}>
+                  {members} members
+                </Text.Custom>
               </Flex>
             ) : (
-              <Text.Custom id={id}>{url.split('/')[0]}</Text.Custom>
+              <Text.Custom id={id}>{url.split('/')[2]}</Text.Custom>
             )}
-          </div>
+          </Flex>
         </Flex>
         <Button.Primary
           id={id}
@@ -64,8 +59,9 @@ export const SpaceBlock = ({
           }}
           height={30}
           mt={1}
+          isDisabled={hasJoined}
         >
-          Join
+          {hasJoined ? 'Joined' : 'Join'}
         </Button.Primary>
       </StyledSpaceWrapper>
       {error && (

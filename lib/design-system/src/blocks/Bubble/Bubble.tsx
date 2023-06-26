@@ -45,6 +45,7 @@ export type BubbleProps = {
   onReaction?: (payload: OnReactionPayload) => void;
   onReplyClick?: (msgId: string) => void;
   onJoinSpaceClick?: (spacePath: string) => void;
+  allSpacePaths?: string[];
   error?: string;
 } & BoxProps;
 
@@ -71,6 +72,7 @@ export const Bubble = ({
   onReaction,
   onReplyClick,
   onJoinSpaceClick,
+  allSpacePaths,
   error,
 }: BubbleProps) => {
   const [dateDisplay, setDateDisplay] = useState(chatDate(new Date(sentAt)));
@@ -145,7 +147,8 @@ export const Bubble = ({
             index,
             author,
             onReplyClick,
-            onJoinSpaceClick
+            onJoinSpaceClick,
+            allSpacePaths
           )}
           {nextLineBreak}
         </span>
