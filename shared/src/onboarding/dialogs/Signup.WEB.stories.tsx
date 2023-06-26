@@ -13,6 +13,7 @@ import {
 } from '../onboarding';
 import { GetOnRealmDialog } from './GetOnRealm/GetOnRealmDialog';
 import { UploadIdDialog } from './UploadId/UploadIdDialog';
+import { UploadIdDisclaimerDialog } from './UploadIdDisclaimer/UploadIdDisclaimerDialog';
 import {
   mockPatps,
   OnboardingDialogWrapper,
@@ -182,6 +183,19 @@ export const DownloadDialogStory: ComponentStory<
 
 DownloadDialogStory.storyName = '(Purchase) 8. Download Realm for desktop';
 
+export const UploadIdDisclaimerDialogStory: ComponentStory<
+  typeof PaymentDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <UploadIdDisclaimerDialog
+      onBack={() => {}}
+      onNext={() => Promise.resolve(false)}
+    />
+  </OnboardingDialogWrapper>
+);
+
+UploadIdDisclaimerDialogStory.storyName = '(Upload) 4. Disclaimer';
+
 export const UploadIdPaymentDialogStory: ComponentStory<
   typeof PaymentDialog
 > = () => (
@@ -206,7 +220,7 @@ export const UploadIdPaymentDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdPaymentDialogStory.storyName = '(Upload) 4. Payment';
+UploadIdPaymentDialogStory.storyName = '(Upload) 5. Payment';
 
 export const UploadIdDialogStory: ComponentStory<
   typeof UploadIdDialog
@@ -220,7 +234,7 @@ export const UploadIdDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdDialogStory.storyName = '(Upload) 5.1. Upload ID';
+UploadIdDialogStory.storyName = '(Upload) 6.1. Upload ID';
 
 export const UploadIdUploadingDialogStory: ComponentStory<
   typeof UploadIdDialog
@@ -236,7 +250,7 @@ export const UploadIdUploadingDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdUploadingDialogStory.storyName = '(Upload) 5.2. Upload ID – Uploading';
+UploadIdUploadingDialogStory.storyName = '(Upload) 6.2. Upload ID – Uploading';
 
 export const UploadIdDoneDialogStory: ComponentStory<
   typeof UploadIdDialog
@@ -252,7 +266,7 @@ export const UploadIdDoneDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdDoneDialogStory.storyName = '(Upload) 5.3. Upload an ID – Uploaded';
+UploadIdDoneDialogStory.storyName = '(Upload) 6.3. Upload an ID – Uploaded';
 
 export const BYOPBootingDialogStory: ComponentStory<
   typeof BootingDialog
@@ -266,7 +280,7 @@ export const BYOPBootingDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-BYOPBootingDialogStory.storyName = '(Upload) 6.1. Booting';
+BYOPBootingDialogStory.storyName = '(Upload) 7.1. Booting';
 
 export const BYOPBootingDialogCompleteStory: ComponentStory<
   typeof BootingDialog
@@ -280,4 +294,4 @@ export const BYOPBootingDialogCompleteStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-BYOPBootingDialogCompleteStory.storyName = '(Upload) 6.2. Booting complete';
+BYOPBootingDialogCompleteStory.storyName = '(Upload) 7.2. Booting complete';

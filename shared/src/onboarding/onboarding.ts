@@ -42,6 +42,7 @@ export { PaymentDialog } from './dialogs/Payment/PaymentDialog';
 export { ServerSelfHostingDialogBody } from './dialogs/ServerSelfHosting/ServerSelfHostingDialogBody';
 export { SomethingWentWrongDialog } from './dialogs/SomethingWentWrong/SomethingWentWrongDialog';
 export { UploadIdDialog } from './dialogs/UploadId/UploadIdDialog';
+export { UploadIdDisclaimerDialog } from './dialogs/UploadIdDisclaimer/UploadIdDisclaimerDialog';
 export { VerifyEmailDialog } from './dialogs/VerifyEmail/VerifyEmailDialog';
 export { http } from './services/http';
 export { OnboardingStorage } from './services/OnboardingStorage';
