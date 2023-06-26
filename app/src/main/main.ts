@@ -30,6 +30,31 @@ let realmWindow: BrowserWindow | null;
 let mouseOverlayWindow: BrowserWindow | null;
 let standaloneChatWindow: BrowserWindow | null;
 
+const updateMacDockMenu = (
+  macDock: Electron.Dock,
+  mode: 'realm' | 'standalone-chat'
+) => {
+  const currentMenuItems = macDock.getMenu()?.items ?? [];
+  const defaultMenuItems =
+    currentMenuItems.filter(
+      (item) =>
+        item.label !== 'Switch to Realm' && item.label !== 'Switch to Chat'
+    ) ?? [];
+  if (mode === 'realm') {
+    const newMenuItem = new MenuItem({
+      label: 'Switch to Chat',
+      click: bootStandaloneChat,
+    });
+    macDock.setMenu(Menu.buildFromTemplate([...defaultMenuItems, newMenuItem]));
+  } else {
+    const newMenuItem = new MenuItem({
+      label: 'Switch to Realm',
+      click: bootRealm,
+    });
+    macDock.setMenu(Menu.buildFromTemplate([...defaultMenuItems, newMenuItem]));
+  }
+};
+
 export const bootRealm = () => {
   store.set('isStandaloneChat', false);
 
@@ -42,11 +67,6 @@ export const bootRealm = () => {
   }
 
   standaloneChatWindow = null;
-
-  if (mouseOverlayWindow && !mouseOverlayWindow.isDestroyed()) {
-    mouseOverlayWindow.destroy();
-  }
-
   mouseOverlayWindow = null;
 
   setRealmCursor(true);
@@ -65,19 +85,8 @@ export const bootRealm = () => {
 
     // Change dock icon to realm icon.
     macDock.setIcon(realmImage);
-
     // Update dock menu to include 'Switch to Chat' menu item.
-    const currentMenuItems = macDock.getMenu()?.items ?? [];
-    const defaultMenuItems =
-      currentMenuItems.filter(
-        (item) =>
-          item.label !== 'Switch to Realm' && item.label !== 'Switch to Chat'
-      ) ?? [];
-    const newMenuItem = new MenuItem({
-      label: 'Switch to Chat',
-      click: bootStandaloneChat,
-    });
-    macDock.setMenu(Menu.buildFromTemplate([...defaultMenuItems, newMenuItem]));
+    updateMacDockMenu(macDock, 'realm');
   } else {
     // On Windows we are able to change the icon of the window itself.
     realmWindow.setIcon(realmImage);
@@ -128,17 +137,7 @@ export const bootStandaloneChat = () => {
     macDock.setIcon(standaloneImage);
 
     // Update dock menu to include 'Switch to Realm' menu item.
-    const currentMenuItems = macDock.getMenu()?.items ?? [];
-    const defaultMenuItems =
-      currentMenuItems.filter(
-        (item) =>
-          item.label !== 'Switch to Realm' && item.label !== 'Switch to Chat'
-      ) ?? [];
-    const newMenuItem = new MenuItem({
-      label: 'Switch to Realm',
-      click: bootRealm,
-    });
-    macDock.setMenu(Menu.buildFromTemplate([...defaultMenuItems, newMenuItem]));
+    updateMacDockMenu(macDock, 'standalone-chat');
   } else {
     // On Windows we are able to change the icon of the window itself.
     standaloneChatWindow.setIcon(standaloneImage);
