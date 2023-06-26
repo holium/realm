@@ -12,7 +12,7 @@ import { Select } from '@holium/design-system/inputs';
 import { HoliumButton } from '@holium/design-system/os';
 import { useToggle } from '@holium/design-system/util';
 
-import { OnboardingStorage } from '../onboarding';
+import { OnboardingStorage, ThirdEarthShip } from '../onboarding';
 import {
   AccountDialogCard,
   AccountDialogInnerCard,
@@ -39,7 +39,10 @@ type Props = {
   children?: ReactNode;
   customBody?: ReactNode;
   isLoading?: boolean;
-  onClickBuyIdentity: () => void;
+  isUploadedIdentity: boolean;
+  ships: ThirdEarthShip[];
+  onClickUploadId: () => void;
+  onClickPurchaseId: () => void;
   setSelectedIdentity: (patp: string) => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onSubmit?: () => void;
@@ -53,7 +56,10 @@ export const AccountDialog = ({
   children,
   customBody,
   isLoading,
-  onClickBuyIdentity,
+  isUploadedIdentity,
+  ships,
+  onClickUploadId,
+  onClickPurchaseId,
   setSelectedIdentity,
   onClickSidebarSection,
   onSubmit,
@@ -65,12 +71,20 @@ export const AccountDialog = ({
   let sidebarItems: SidebarSection[] = [];
 
   if (hasShips) {
-    sidebarItems = [
-      SidebarSection.Hosting,
-      SidebarSection.Storage,
-      SidebarSection.CustomDomain,
-      SidebarSection.DownloadRealm,
-    ];
+    if (isUploadedIdentity) {
+      sidebarItems = [
+        SidebarSection.Hosting,
+        SidebarSection.CustomDomain,
+        SidebarSection.DownloadRealm,
+      ];
+    } else {
+      sidebarItems = [
+        SidebarSection.Hosting,
+        SidebarSection.Storage,
+        SidebarSection.CustomDomain,
+        SidebarSection.DownloadRealm,
+      ];
+    }
   } else if (hasCSEK.isOn) {
     sidebarItems = [SidebarSection.DownloadRealm, SidebarSection.GetHosting];
   } else {
@@ -110,24 +124,44 @@ export const AccountDialog = ({
               </AccountDialogSidebarMenuItemText>
               <Select
                 id="ship-selector"
-                options={identities.map((patp) => ({
-                  value: patp,
-                  label: patp,
-                }))}
+                options={identities.map((patp) => {
+                  const ship = ships.find((ship) => ship.patp === patp);
+                  if (
+                    ship &&
+                    ship.product_type === 'byop-p' &&
+                    ship.ship_type !== 'planet'
+                  ) {
+                    return {
+                      value: patp,
+                      label: `${ship.title} - ID: ${ship.id}`,
+                    };
+                  }
+                  return {
+                    value: patp,
+                    label: patp,
+                  };
+                })}
                 extraSection={
                   <Flex
                     flexDirection="column"
                     mt="8px"
                     pt="8px"
+                    gap="8px"
                     borderTop="1px solid rgba(var(--rlm-border-rgba))"
                   >
+                    <Button.Transparent width="100%" onClick={onClickUploadId}>
+                      <Flex alignItems="center" gap="8px">
+                        <Icon name="ArrowRightLine" size={16} />
+                        <Text.Body>Upload ID</Text.Body>
+                      </Flex>
+                    </Button.Transparent>
                     <Button.Transparent
                       width="100%"
-                      onClick={onClickBuyIdentity}
+                      onClick={onClickPurchaseId}
                     >
                       <Flex alignItems="center" gap="8px">
                         <Icon name="AddCircleLine" size={16} />
-                        <Text.Body>Get another ID</Text.Body>
+                        <Text.Body>Purchase ID</Text.Body>
                       </Flex>
                     </Button.Transparent>
                   </Flex>
@@ -194,9 +228,12 @@ export const AccountDialogSkeleton = ({
       selectedIdentity=""
       currentSection={currentSection}
       isLoading
+      ships={[]}
+      isUploadedIdentity={false}
       customBody={isBlankBody ? <Flex flex={5} /> : undefined}
       setSelectedIdentity={() => {}}
-      onClickBuyIdentity={() => {}}
+      onClickPurchaseId={() => {}}
+      onClickUploadId={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />

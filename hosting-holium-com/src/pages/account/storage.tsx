@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import {
   AccountStorageDialog,
+  OnboardingStorage,
   UserContextProvider,
   useUser,
 } from '@holium/shared';
@@ -26,9 +27,19 @@ const S3StoragePresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  const onClickBuyIdentity = () => {
+  const onClickUploadId = () => {
+    OnboardingStorage.set({
+      productType: 'byop-p',
+    });
+    goToPage('/payment', {
+      back_url: '/account/storage',
+    });
+  };
+
+  const onClickPurchaseId = () => {
+    OnboardingStorage.remove('productType');
     goToPage(accountPageUrl['Get Hosting'], {
-      back_url: accountPageUrl['Storage'],
+      back_url: '/account/storage',
     });
   };
 
@@ -63,7 +74,8 @@ const S3StoragePresenter = () => {
         total: Number(s3Info?.storageCapacity),
       }}
       dataSent={{ networkUsage, minioUsage }}
-      onClickBuyIdentity={onClickBuyIdentity}
+      onClickPurchaseId={onClickPurchaseId}
+      onClickUploadId={onClickUploadId}
       onClickSidebarSection={onClickSidebarSection}
       onExit={logout}
     />

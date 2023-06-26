@@ -13,8 +13,10 @@ import {
 type Props = DownloadRealmButtonsProps & {
   identities: string[] | undefined;
   selectedIdentity: string | undefined;
+  isUploadedIdentity: boolean;
   setSelectedIdentity: (patp: string) => void;
-  onClickBuyIdentity: () => void;
+  onClickPurchaseId: () => void;
+  onClickUploadId: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -22,20 +24,24 @@ type Props = DownloadRealmButtonsProps & {
 export const AccountDownloadRealmDialog = ({
   identities,
   selectedIdentity,
+  isUploadedIdentity,
   setSelectedIdentity,
   onDownloadMacM1,
   onDownloadMacIntel,
   onDownloadWindows,
   onDownloadLinux,
-  onClickBuyIdentity,
+  onClickPurchaseId,
+  onClickUploadId,
   onClickSidebarSection,
   onExit,
 }: Props) => (
   <AccountDialog
+    ships={[]}
     identities={identities ?? []}
     selectedIdentity={selectedIdentity ?? ''}
     setSelectedIdentity={setSelectedIdentity}
     currentSection={SidebarSection.DownloadRealm}
+    isUploadedIdentity={isUploadedIdentity}
     customBody={
       <Flex
         flex={3}
@@ -60,7 +66,8 @@ export const AccountDownloadRealmDialog = ({
         />
       </Flex>
     }
-    onClickBuyIdentity={onClickBuyIdentity}
+    onClickPurchaseId={onClickPurchaseId}
+    onClickUploadId={onClickUploadId}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   />

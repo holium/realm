@@ -10,7 +10,6 @@ import {
 import { useAppState } from 'renderer/stores/app.store';
 import { AppType } from 'renderer/stores/models/bazaar.model';
 
-import { TITLEBAR_HEIGHT } from '../titlebar/Titlebar';
 import { AppWindow } from './components/AppWindow/AppWindow';
 
 const AppWindowManagerPresenter = () => {
@@ -63,14 +62,13 @@ const AppWindowManagerPresenter = () => {
         display: shellStore.isHomePaneOpen ? 'none' : 'block',
       }}
       style={{
-        bottom: 0,
         padding: '8px',
-        position: 'fixed',
-        left: 0,
-        top: showTitleBar ? TITLEBAR_HEIGHT : 0,
-        right: 0,
-        height: `calc(100vh - ${TITLEBAR_HEIGHT}px)`,
         paddingTop: 0,
+        position: 'fixed',
+        top: showTitleBar ? 40 : 0,
+        height: `calc(100vh - 88px)`,
+        left: 0,
+        right: 0,
       }}
     >
       {windows.map((appWindow) => (

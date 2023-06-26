@@ -18,7 +18,6 @@ type Props = {
   messages: ChatMessageType[];
   ourColor: string;
   isStandaloneChat: boolean;
-  endOfListPadding?: number;
   topOfListPadding?: number;
 };
 
@@ -26,7 +25,6 @@ export const ChatLogList = ({
   listRef,
   messages: unfilteredMessages,
   ourColor,
-  endOfListPadding,
   topOfListPadding,
   isStandaloneChat,
 }: Props) => {
@@ -118,19 +116,10 @@ export const ChatLogList = ({
             listRef?.current?.scrollBy({
               top: 10,
             });
-          } else if (height - prevHeight === endOfListPadding) {
-            listRef?.current?.scrollBy({
-              top: endOfListPadding,
-            });
           }
           setPrevHeight(height);
         }}
         itemContent={renderChatRow}
-        components={{
-          Footer: () => {
-            return <div style={{ height: endOfListPadding + 'px' }}> </div>;
-          },
-        }}
         chatMode
         shiftScrollbar={!isStandaloneChat}
       />

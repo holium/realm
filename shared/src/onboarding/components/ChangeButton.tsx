@@ -6,9 +6,10 @@ export const ChangeButton = styled(Button.TextButton)`
   height: 30px;
 `;
 
-export const ChangeButtonGray = styled(ChangeButton)`
-  color: #b8b8b8;
-  background-color: rgba(184, 184, 184, 0.12);
+export const GrayButton = styled(ChangeButton)`
+  color: rgba(var(--rlm-text-rgba), 0.5);
+  background-color: rgba(var(--rlm-text-rgba), 0.05);
+
   &:hover:not([disabled]) {
     background-color: rgba(184, 184, 184, 0.15);
   }

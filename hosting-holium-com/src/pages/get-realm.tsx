@@ -42,13 +42,19 @@ export default function GetRealm({ prefilledEmail }: Props) {
     window.location.href = 'https://holium.com';
   };
 
-  const onGetANewId = () => {
-    goToPage('/', { email: prefilledEmail });
+  const onPurchaseId = () => {
+    goToPage('/create-account', { email: prefilledEmail });
   };
+
+  const onUploadId = () => {};
 
   return (
     <Page title="Get Realm">
-      <GetRealmDialog onBack={onBack} onGetANewId={onGetANewId} />
+      <GetRealmDialog
+        onBack={onBack}
+        onPurchaseId={onPurchaseId}
+        onUploadId={onUploadId}
+      />
     </Page>
   );
 }

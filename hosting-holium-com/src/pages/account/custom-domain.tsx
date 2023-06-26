@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { useToggle } from '@holium/design-system/util';
 import {
   AccountCustomDomainDialog,
+  OnboardingStorage,
   UserContextProvider,
   useUser,
 } from '@holium/shared';
@@ -63,9 +64,19 @@ const CustomDomainPresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  const onClickBuyIdentity = () => {
-    goToPage(accountPageUrl['Get Hosting'], {
-      back_url: accountPageUrl['Custom Domain'],
+  const onClickUploadId = () => {
+    OnboardingStorage.set({
+      productType: 'byop-p',
+    });
+    goToPage('/payment', {
+      back_url: '/account/custom-domain',
+    });
+  };
+
+  const onClickPurchaseId = () => {
+    OnboardingStorage.remove('productType');
+    goToPage('/choose-id', {
+      back_url: '/account/custom-domain',
     });
   };
 
@@ -79,10 +90,12 @@ const CustomDomainPresenter = () => {
         errorMessage={errorMessage}
         successMessage={successMessage}
         submitting={submitting.isOn}
+        isUploadedIdentity={ship?.product_type === 'byop-p'}
         setSelectedIdentity={setSelectedIdentity}
         onChangeDomain={setDomain}
         onSubmit={onSubmit}
-        onClickBuyIdentity={onClickBuyIdentity}
+        onClickPurchaseId={onClickPurchaseId}
+        onClickUploadId={onClickUploadId}
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />

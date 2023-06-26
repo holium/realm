@@ -1,4 +1,8 @@
-import { AccountGetRealmDialog, UserContextProvider } from '@holium/shared';
+import {
+  AccountGetRealmDialog,
+  OnboardingStorage,
+  UserContextProvider,
+} from '@holium/shared';
 
 import { thirdEarthApi } from 'util/thirdEarthApi';
 
@@ -27,15 +31,25 @@ export const joinWaitlist = async (email: string) => {
 const GetRealmPresenter = () => {
   const { goToPage, logout } = useNavigation();
 
-  const goToGetHosting = () => {
-    goToPage(accountPageUrl['Get Hosting'], {
+  const onClickUploadId = () => {
+    OnboardingStorage.set({
+      productType: 'byop-p',
+    });
+    goToPage('/payment', {
+      back_url: '/account/get-realm',
+    });
+  };
+
+  const onClickPurchaseId = () => {
+    OnboardingStorage.remove('productType');
+    goToPage('/choose-id', {
       back_url: '/account/get-realm',
     });
   };
 
   const onClickSidebarSection = (section: string) => {
     if (section === 'Get Hosting') {
-      goToGetHosting();
+      onClickPurchaseId();
     } else {
       goToPage(accountPageUrl[section]);
     }
@@ -44,10 +58,10 @@ const GetRealmPresenter = () => {
   return (
     <Page title="Account / Get Realm" isProtected>
       <AccountGetRealmDialog
-        onClickGetHosting={goToGetHosting}
         onClickJoinWaitlist={joinWaitlist}
         onClickSidebarSection={onClickSidebarSection}
-        onClickBuyIdentity={() => {}}
+        onClickPurchaseId={onClickPurchaseId}
+        onClickUploadId={onClickUploadId}
         onExit={logout}
       />
     </Page>

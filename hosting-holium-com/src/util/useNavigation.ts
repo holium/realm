@@ -33,7 +33,15 @@ export const useNavigation = () => {
   }, [router.pathname]);
 
   const goToPage = useCallback(
-    (page: OnboardingPage, params?: Record<string, string>) => {
+    (
+      page: OnboardingPage,
+      params?: {
+        email?: string;
+        back_url?: OnboardingPage;
+        redirect_url?: OnboardingPage;
+        haha?: string; // Hide "Already have an account"
+      }
+    ) => {
       const path =
         page + (params ? `?${new URLSearchParams(params).toString()}` : '');
       return router.push(path);

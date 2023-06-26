@@ -3,12 +3,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import { Box, Flex } from '../../../general';
 import { FragmentReactionType } from './Bubble.types';
-import {
-  OnReactionPayload,
-  ReactionPicker,
-  ReactionPickerStyle,
-  Reactions,
-} from './Reaction';
+import { OnReactionPayload, Reactions } from './Reaction';
 
 export default {
   component: Reactions,
@@ -40,17 +35,5 @@ export const Default: ComponentStory<typeof Reactions> = () => {
         <Reactions reactions={reacts} onReaction={onReaction} />
       </Box>
     </Flex>
-  );
-};
-
-export const Picker: ComponentStory<typeof ReactionPicker> = () => {
-  return (
-    <ReactionPickerStyle>
-      <ReactionPicker
-        isReacting
-        anchorPoint={{ x: 12, y: 12 }}
-        onClick={(react) => console.log(react)}
-      />
-    </ReactionPickerStyle>
   );
 };

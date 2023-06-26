@@ -1,3 +1,9 @@
+export type ThirdEarthProductType =
+  | 'planet'
+  | 'byop-p'
+  | 'byop-nk'
+  | 'subscription';
+
 export type ThirdEarthProduct = {
   client_id: number;
   comet_count: string;
@@ -11,7 +17,7 @@ export type ThirdEarthProduct = {
   price_id: string;
   priority: number;
   product_status: string;
-  product_type: string;
+  product_type: ThirdEarthProductType;
   subscription_price: number;
   threshold: any;
   title: string;
@@ -36,7 +42,7 @@ export type ThirdEarthShip = {
   payment_status: string;
   patp: string;
   product_id: number;
-  product_type: string;
+  product_type: ThirdEarthProductType;
   screen_name: string;
   ship_status: string;
   ship_type: string;
@@ -81,9 +87,11 @@ type OnboardingAccountPage =
 
 type OnboardingSignupPage =
   | '/'
+  | '/create-account'
   | '/login'
   | '/verify-email'
   | '/choose-id'
+  | '/upload-id'
   | '/payment'
   | '/booting'
   | '/credentials'

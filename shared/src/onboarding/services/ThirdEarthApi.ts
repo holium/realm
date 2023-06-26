@@ -116,12 +116,32 @@ type UpdatePlanetResponse = {
   msg?: string;
 };
 
-type ShipResponse = {
-  invoiceId?: string;
+type ProvisionalShipEntryPayload = {
+  token: string;
+  product: string;
+  invoiceId: string;
+  shipType: string;
   patp?: string;
-  product?: string;
-  shipType?: string;
+};
+
+type ProvisionalShipEntryResponse = {
+  id: number;
+  user_id: number;
+  invoice_id: string;
 }[];
+
+type UploadPierFileResponse = {
+  patp?: string;
+  sigil?: string;
+  arvo_key_file?: {
+    iv: string;
+    content: string;
+  };
+  sponsor?: string;
+  planet_status?: string;
+  product_ids?: number[];
+  ship_type?: string;
+};
 
 export class ThirdEarthApi {
   private apiBaseUrl: string;
@@ -275,17 +295,26 @@ export class ThirdEarthApi {
     );
   }
 
-  ship(token: string, patp: string, product: string, invoiceId: string) {
-    return http<ShipResponse>(`${this.apiBaseUrl}/ship`, {
-      method: 'POST',
-      headers: this.getHeaders(token),
-      body: JSON.stringify({
-        patp,
-        shipType: 'planet',
-        product,
-        invoiceId,
-      }),
-    });
+  provisionalShipEntry({
+    token,
+    patp,
+    shipType,
+    product,
+    invoiceId,
+  }: ProvisionalShipEntryPayload) {
+    return http<ProvisionalShipEntryResponse>(
+      `${this.apiBaseUrl}/provisional-ship-entry`,
+      {
+        method: 'POST',
+        headers: this.getHeaders(token),
+        body: JSON.stringify({
+          patp,
+          shipType,
+          invoiceId,
+          product,
+        }),
+      }
+    );
   }
 
   updatePlanetStatus(
@@ -431,5 +460,23 @@ export class ThirdEarthApi {
       method: 'GET',
       headers: this.getHeaders(token),
     });
+  }
+
+  uploadPierFile(token: string, shipId: string, formData: FormData) {
+    return http<UploadPierFileResponse>(
+      `${this.apiBaseUrl}/user/host-ship/${shipId}`,
+      {
+        method: 'POST',
+        headers: {
+          // Don't specify content-type for FormData.
+          authorization: `Bearer ${token}`,
+          client_id: this.headersClientId,
+          version: this.headersVersion,
+        },
+        body: formData,
+      },
+      // 60 minutes timeout
+      3600000
+    );
   }
 }

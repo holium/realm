@@ -41,6 +41,106 @@ const hideSystemCursorCss = `
   *:focus:not(:focus-visible) {
     cursor: none !important;
   }
+
+  .react-player-hide-cursor {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-panel {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-play-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-volume-slider-container {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-volume-slider {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-mute-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-timeline {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-current-time-display {
+    cursor: none !important;
+  }
+
+  video::-webkit-full-page-media::-webkit-media-controls-panel {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-panel {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-start-playback-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-overlay-play-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-toggle-closed-captions-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-status-display {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-mouse-display {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-timeline-container {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-time-remaining-display {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-seek-back-button {
+    cursor: none !important;
+  }
+
+  video {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-seek-forward-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-fullscreen-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-enclosure {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-rewind-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-return-to-realtime-button {
+    cursor: none !important;
+  }
+
+  video::-webkit-media-controls-toggle-closed-captions-button {
+    cursor: none !important;
+  }
 `;
 
 const showSystemCursorCss = `

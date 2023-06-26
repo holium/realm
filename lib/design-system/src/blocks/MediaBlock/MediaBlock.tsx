@@ -107,7 +107,7 @@ export const MediaBlock = ({
             id={rest.id}
             url={url}
             controls
-            className={'react-player-iframe'}
+            className="react-player-hide-cursor"
             onReady={() => {
               setIsReady(true);
               onLoaded && onLoaded();
@@ -120,7 +120,6 @@ export const MediaBlock = ({
             style={{
               borderRadius: '4px',
               overflow: 'hidden',
-              cursor: 'none',
             }}
             config={{
               youtube: {
@@ -147,110 +146,4 @@ const MediaWrapper = styled(Flex)`
   height: fit-content;
   width: 100%;
   min-width: 250px;
-  .react-player-hide-cursor {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    cursor: none !important;
-    z-index: 100;
-    pointer-events: auto;
-  }
-
-  video::-webkit-media-controls-panel {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-play-button {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-volume-slider-container {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-volume-slider {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-mute-button {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-timeline {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-current-time-display {
-    cursor: none !important;
-  }
-
-  video::-webkit-full-page-media::-webkit-media-controls-panel {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-panel {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-start-playback-button {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-overlay-play-button {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-toggle-closed-captions-button {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-status-display {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-mouse-display {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-timeline-container {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-time-remaining-display {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-seek-back-button {
-    cursor: none !important;
-  }
-
-  video {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-seek-forward-button {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-fullscreen-button {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-enclosure {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-rewind-button {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-return-to-realtime-button {
-    cursor: none !important;
-  }
-
-  video::-webkit-media-controls-toggle-closed-captions-button {
-    cursor: none !important;
-  }
 `;

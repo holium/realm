@@ -80,7 +80,7 @@ export default function ClaimInvite({
     if (full_account) {
       goToPage('/login', {
         email,
-        redirect: '/account/download-realm',
+        redirect_url: '/account/download-realm',
       });
     }
   }, []);
