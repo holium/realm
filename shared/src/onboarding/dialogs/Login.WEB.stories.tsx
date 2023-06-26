@@ -43,6 +43,7 @@ export const AccountHostingDialogStory: ComponentStory<
       selectedIdentity="~pasren-satmex"
       setSelectedIdentity={() => {}}
       isUploadedIdentity={false}
+      ships={[]}
       onClickPurchaseId={() => {}}
       onClickUploadId={() => {}}
       email="rubberducky12@protonmail.com"

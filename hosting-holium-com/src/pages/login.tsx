@@ -73,7 +73,7 @@ export default function Login({ prefilledEmail, redirectAfterLogin }: Props) {
   };
 
   const onLogin = async (email: string, password: string) => {
-    const response = await thirdEarthApi.login(email, password);
+    const response = await thirdEarthApi.login(email, password, true);
 
     if (!response.token || !response.email) {
       return false;

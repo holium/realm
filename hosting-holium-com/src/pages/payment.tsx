@@ -58,20 +58,25 @@ export default function Payment({
   useEffect(() => {
     const { serverId, email, token, productType } = OnboardingStorage.get();
 
-    if (!serverId || !email || !token) return;
+    if (!email || !token) return;
 
-    setServerId(serverId);
-    setEmail(email);
-    setToken(token);
     if (productType) {
       setProductType(productType as ThirdEarthProductType);
     }
+
+    if (productType !== 'byop-p') {
+      if (!serverId) return;
+      else setServerId(serverId);
+    }
+
+    setEmail(email);
+    setToken(token);
 
     const getSecretAndSetupStripe = async () => {
       const response = await thirdEarthApi.stripeMakePayment(
         token,
         productId.toString(),
-        serverId
+        serverId ?? 'undefined'
       );
       setClientSecret(response.clientSecret);
       setInvoiceId(response.invoiceId);
@@ -107,9 +112,11 @@ export default function Payment({
   };
 
   const onNext = async () => {
-    if (!token || !serverId || !invoiceId || !productId) return false;
+    if (!token || !invoiceId || !productId) return false;
 
     if (productType === 'planet') {
+      if (!serverId) return false;
+
       await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
       await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
       await thirdEarthApi.provisionalShipEntry({

@@ -38,6 +38,7 @@ export const AccountStorageDialog = ({
 }: Props) => (
   <AccountDialog
     identities={identities}
+    ships={[]}
     selectedIdentity={selectedIdentity}
     currentSection={SidebarSection.Storage}
     isLoading={!storageUrl || !storageBucket || !storagePassword}

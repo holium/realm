@@ -7,7 +7,7 @@ export enum ConduitState {
   Connecting = 'connecting',
   Initialized = 'initialized',
   Connected = 'connected',
-  Disconnected = 'offline',
+  Disconnected = 'disconnected',
   Failed = 'failed',
   NoInternet = 'no-internet',
   Stale = 'stale',

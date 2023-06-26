@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { useToggle } from '@holium/design-system/util';
 import {
@@ -36,15 +36,55 @@ const HostingPresenter = () => {
   const changeMaintenanceWindowModal = useToggle(false);
   const ejectIdModal = useToggle(false);
 
-  const identities = useMemo(() => ships.map((ship) => ship.patp), [ships]);
+  const identities = useMemo(
+    () => ships.map((ship) => ship.patp || ship.title),
+    [ships]
+  );
   const selectedShip = useMemo(
-    () => ships.find((ship) => ship.patp === selectedIdentity),
+    () => ships.find((ship) => ship.patp === selectedIdentity) || ships[0],
     [ships, selectedIdentity]
   );
+
   const isUploadedIdentity = useMemo(
     () => selectedShip?.product_type === 'byop-p',
     [selectedShip]
   );
+
+  useEffect(() => {
+    // if there are no ships and the only one is a BYOP-P, go to upload-id
+    if (
+      isUploadedIdentity &&
+      ships.length === 1 &&
+      selectedShip.ship_type !== 'planet'
+    ) {
+      OnboardingStorage.set({
+        productType: 'byop-p',
+        provisionalShipId: selectedShip.id.toString(),
+      });
+      goToPage('/upload-id', {
+        back_url: '/account',
+      });
+    }
+  }, [isUploadedIdentity, ships]);
+
+  const setSelectedShipOrRedirect = (ship: string) => {
+    const shipToSelect = ships.find((teShip) => teShip.patp === ship);
+    if (
+      shipToSelect?.product_type === 'byop-p' &&
+      shipToSelect.ship_type !== 'planet'
+    ) {
+      OnboardingStorage.set({
+        productType: 'byop-p',
+        provisionalShipId: shipToSelect.id.toString(),
+      });
+      goToPage('/upload-id', {
+        back_url: '/account',
+      });
+      return;
+    }
+    if (ship === selectedIdentity) return;
+    setSelectedIdentity(ship);
+  };
 
   const onClickSidebarSection = (section: string) => {
     goToPage(accountPageUrl[section]);
@@ -230,13 +270,14 @@ const HostingPresenter = () => {
         identities={identities}
         selectedIdentity={selectedIdentity}
         isUploadedIdentity={isUploadedIdentity}
+        ships={ships}
         email={email}
         serverUrl={selectedShip?.link}
         serverCode={selectedShip?.code}
         serverMaintenanceWindow={selectedShip?.maintenance_window}
         onClickPurchaseId={onClickPurchaseId}
         onClickUploadId={onClickUploadId}
-        setSelectedIdentity={setSelectedIdentity}
+        setSelectedIdentity={setSelectedShipOrRedirect}
         onClickChangeEmail={changeEmailModal.toggleOn}
         onClickChangePassword={changePasswordModal.toggleOn}
         onClickManageBilling={onClickManageBilling}
