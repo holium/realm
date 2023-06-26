@@ -12,11 +12,7 @@ import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
 const DownloadRealmPresenter = () => {
   const { goToPage, logout } = useNavigation();
-  const { ships, selectedIdentity, setSelectedIdentity } = useUser();
-
-  const identities = ships.map((ship) => ship.patp);
-  const ship = ships.find((ship) => ship.patp === selectedIdentity);
-  const isUploadedIdentity = ship?.product_type === 'byop-p';
+  const { ships, selectedShipId, setSelectedShipId } = useUser();
 
   const onClickSidebarSection = (section: string) => {
     if (section === 'Get Hosting') {
@@ -31,7 +27,7 @@ const DownloadRealmPresenter = () => {
     OnboardingStorage.set({
       productType: 'byop-p',
     });
-    goToPage('/payment', {
+    goToPage('/upload-id-disclaimer', {
       back_url: '/account/download-realm',
     });
   };
@@ -55,10 +51,9 @@ const DownloadRealmPresenter = () => {
   return (
     <Page title="Account / Download Realm" isProtected>
       <AccountDownloadRealmDialog
-        identities={identities}
-        selectedIdentity={selectedIdentity}
-        isUploadedIdentity={isUploadedIdentity}
-        setSelectedIdentity={setSelectedIdentity}
+        ships={ships}
+        selectedShipId={selectedShipId}
+        setSelectedShipId={setSelectedShipId}
         onDownloadMacM1={onDownloadMacM1}
         onDownloadMacIntel={onDownloadMacIntel}
         onDownloadWindows={onDownloadWindows}

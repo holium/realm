@@ -245,7 +245,7 @@ const InviteMembersPresenter = ({
                 ...permissionMap,
                 [patp]: {
                   primaryRole: selected as MemberRole,
-                  roles: [selected],
+                  roles: [selected as MemberRole],
                   alias: '',
                   status: 'invited',
                 },

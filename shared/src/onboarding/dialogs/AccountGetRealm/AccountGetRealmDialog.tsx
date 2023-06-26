@@ -23,11 +23,9 @@ export const AccountGetRealmDialog = ({
   onExit,
 }: Props) => (
   <AccountDialog
-    identities={[]}
     ships={[]}
-    selectedIdentity={''}
-    setSelectedIdentity={() => {}}
-    isUploadedIdentity={false}
+    selectedShipId={0}
+    setSelectedShipId={() => {}}
     currentSection={SidebarSection.GetRealm}
     customBody={
       <Flex flex={5}>

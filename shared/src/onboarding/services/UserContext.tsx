@@ -53,18 +53,7 @@ export const UserContextProvider = ({ api, children }: Props) => {
       setToken(token);
       setEmail(email);
       setShips(newShips ?? []);
-
-      console.log('newShips', JSON.stringify(newShips, null, 2));
-
-      const unfinishedByop = newShips.find(
-        (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
-      );
-
-      if (unfinishedByop) {
-        setSelectedShipId(unfinishedByop.id);
-      } else {
-        setSelectedShipId(newShips[0]?.id);
-      }
+      setSelectedShipId(newShips[0]?.id);
     };
 
     getAndSetUserData();

@@ -183,7 +183,7 @@ const HostingPresenter = () => {
     OnboardingStorage.set({
       productType: 'byop-p',
     });
-    goToPage('/payment', {
+    goToPage('/upload-id-disclaimer', {
       back_url: '/account',
     });
   };
