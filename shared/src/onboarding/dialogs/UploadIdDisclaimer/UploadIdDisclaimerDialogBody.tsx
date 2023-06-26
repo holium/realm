@@ -51,8 +51,11 @@ export const UploadIdDisclaimerDialogBody = () => {
           <Flex flex={1} flexDirection="column">
             <Text.Body>
               I have read through the{' '}
-              <Anchor>
-                <u>migration guide</u>
+              <Anchor
+                href="https://docs.holium.com/realm/hosting/byop-pier"
+                target="_blank"
+              >
+                <u>our guide</u>
               </Anchor>{' '}
               and understand that I must have my Urbit updated to the latest
               vere and latest OTA.

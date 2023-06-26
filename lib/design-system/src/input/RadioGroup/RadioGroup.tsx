@@ -9,7 +9,7 @@ import {
 
 export type RadioOption = {
   label: string;
-  value: string;
+  value: string | number;
   sublabel?: string;
   icon?: IconPathsType;
   disabled?: boolean;

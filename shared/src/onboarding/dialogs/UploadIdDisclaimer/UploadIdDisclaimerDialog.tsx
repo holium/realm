@@ -9,7 +9,7 @@ const UploadIdDisclaimerSchema = Yup.object().shape({
 
 type Props = {
   onBack?: () => void;
-  onNext: () => void;
+  onNext: () => Promise<boolean>;
 };
 
 export const UploadIdDisclaimerDialog = ({ onBack, onNext }: Props) => (

@@ -12,6 +12,8 @@ export default function UploadIdDisclaimer() {
 
   const onNext = () => {
     goToPage('/payment');
+
+    return Promise.resolve(true);
   };
 
   return (

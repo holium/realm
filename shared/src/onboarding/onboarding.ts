@@ -25,6 +25,8 @@ export { AccountHostingDialogBody } from './dialogs/AccountHosting/AccountHostin
 export { AccountSelfHostingDialogBody } from './dialogs/AccountSelfHosting/AccountSelfHostingDialogBody';
 export { AccountStorageDialog } from './dialogs/AccountStorage/AccountStorageDialog';
 export { AccountStorageDialogBody } from './dialogs/AccountStorage/AccountStorageDialogBody';
+export { AccountUnfinishedUploadDialog } from './dialogs/AccountUnfinishedUpload/AccountUnfinishedUploadDialog';
+export { uploadErrors } from './dialogs/AccountUnfinishedUpload/AccountUnfinishedUploadDialogBody';
 export { AddIdentityDialog } from './dialogs/AddIdentity/AddIdentityDialog';
 export { BootingDialog } from './dialogs/Booting/BootingDialog';
 export { ChooseIdentityDialog } from './dialogs/ChooseIdentity/ChooseIdentityDialog';
