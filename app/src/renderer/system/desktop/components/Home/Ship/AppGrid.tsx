@@ -37,6 +37,16 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
             hideTitlebarBorder: true,
           },
         },
+        {
+          id: 'trove',
+          title: 'Trove',
+          type: 'native',
+          color: '#000',
+          icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/lexicon.svg',
+          native: {
+            hideTitlebarBorder: true,
+          },
+        },
       ] as AppMobxType[],
     [bazaarStore.catalog, bazaarStore.installations.values()]
   );

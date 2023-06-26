@@ -43,8 +43,11 @@ const configuration: webpack.Configuration = {
     modules: [webpackPaths.srcPath, 'node_modules'],
     alias: {
       crypto: require.resolve('crypto-browserify'),
-      stream: require.resolve('stream-browserify')
-    }
+      stream: require.resolve('stream-browserify'),
+    },
+    fallback: {
+      'process/browser': require.resolve('process/browser'), //fix for trove
+    },
   },
 
   plugins: [],

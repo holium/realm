@@ -70,5 +70,15 @@ export const nativeApps: AppManifestMap = {
       hideTitlebarBorder: true,
     },
   },
+  trove: {
+    id: 'trove',
+    title: 'Trove',
+    type: 'native',
+    color: '#000',
+    icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/lexicon.svg',
+    native: {
+      hideTitlebarBorder: true,
+    },
+  },
   ...devApps,
 };

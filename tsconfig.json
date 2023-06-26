@@ -12,6 +12,7 @@
     "lib/presence",
     "lib/room/test-ui",
     "lib/room",
-    "lexicon"
+    "lexicon",
+    "trove"
   ]
 } 
