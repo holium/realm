@@ -92,44 +92,36 @@ export class ShipService extends AbstractService<any> {
   }
 
   async _openConduit(credentials: any) {
-    // return new Promise(async (resolve) => {
-    console.log('_openConduit');
-    const conduit = APIConnection.getInstance({
-      ...credentials,
-      ship: this.patp,
-    }).conduit;
-    console.log('_openConduit: events');
-    conduit
-      .on('connected', () => {
-        // resolve(null);
+    return new Promise((resolve, reject) => {
+      console.log('_openConduit');
+      APIConnection.getInstance({
+        ...credentials,
+        ship: this.patp,
       })
-      .on('failed', () => {
-        // log.info('ship.service.ts:', 'Conduit failed');
-        try {
+        .conduit.on('connected', () => {
+          resolve(null);
+        })
+        .on('failed', () => {
+          log.info('ship.service.ts:', 'Conduit failed');
           this.shipDB?.setCredentials(credentials.url, credentials.code, null);
           this.authService?._setLockfile({ ...credentials, cookie: null });
           APIConnection.getInstance().closeChannel();
-        } catch (e) {
-          log.error(e);
-        }
-        // resolve(null);
-      })
-      .on('refreshed', (session: ConduitSession) => {
-        // log.info('ship.service.ts:', 'Conduit refreshed', session);
-        this.shipDB?.setCredentials(session.url, session.code, session.cookie);
-        // resolve(null);
-      })
-      .on('error', (err: any) => {
-        log.error('ship.service.ts:', 'Conduit error', err);
-        // reject(err);
-      });
-    console.log('_openConduit: init');
-    await conduit.init(
-      credentials.url,
-      credentials.code,
-      credentials.cookie || ''
-    );
-    // });
+          resolve(null);
+        })
+        .on('refreshed', (session: ConduitSession) => {
+          // log.info('ship.service.ts:', 'Conduit refreshed', session);
+          this.shipDB?.setCredentials(
+            session.url,
+            session.code,
+            session.cookie
+          );
+          resolve(null);
+        })
+        .on('error', (err: any) => {
+          log.error('ship.service.ts:', 'Conduit error', err);
+          reject(err);
+        });
+    });
   }
 
   private _registerServices() {
