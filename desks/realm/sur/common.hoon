@@ -17,10 +17,10 @@
 
 :: like/dislike upvote/downvote
 +$  vote
-  $:  up=?              :: true for like/upvote, false for dislike/downvote
-      parent-type=type  :: table name of the thing this vote is attached to
-      parent-id=id      :: id of the thing this vote is attached to
-      parent-path=path
+  $:  up=?              :: true for like/upvote, false for dislike/downvote  0 -> 2
+      parent-type=type  :: table name of the thing this vote is attached to  1 -> 6
+      parent-id=id      :: id of the thing this vote is attached to          2 -> 14
+      parent-path=path  ::                                                   3 -> 30
   ==
 
 :: 5 star rating, 100% scoring, etc
