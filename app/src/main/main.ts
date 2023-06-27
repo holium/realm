@@ -4,7 +4,7 @@ import Store from 'electron-store';
 import { RealmService } from '../os/realm.service';
 import { AppUpdater } from './AppUpdater';
 import { setRealmCursor } from './helpers/cursorSettings';
-import { isArm64Mac, isMac } from './helpers/env';
+import { isMac, isMacWithCameraNotch } from './helpers/env';
 import { windowWindow } from './helpers/fullscreen';
 import { MenuBuilder } from './menu';
 import { getAssetPath } from './util';
@@ -165,7 +165,9 @@ app
     });
 
     app.on('before-quit', () => {
-      if (isArm64Mac) {
+      // For Macs with camera notch we're using simple fullscreen,
+      // then this is required to exit the app.
+      if (isMacWithCameraNotch()) {
         realmWindow?.isClosable() && realmWindow?.close();
         standaloneChatWindow?.isClosable() && standaloneChatWindow?.close();
         app.exit();
