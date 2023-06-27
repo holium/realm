@@ -128,13 +128,17 @@ export const AccountDialog = ({
               </AccountDialogSidebarMenuItemText>
               <Select
                 id="ship-selector"
-                options={ships.map(({ id, patp, title, product_type }) => {
-                  return {
-                    value: id,
-                    label:
-                      product_type === 'byop-p' ? `${title} - ID: ${id}` : patp,
-                  };
-                })}
+                options={ships.map(
+                  ({ id, patp, title, product_type, ship_type }) => {
+                    const isUnfinishedByop =
+                      product_type === 'byop-p' && ship_type !== 'planet';
+
+                    return {
+                      value: id,
+                      label: isUnfinishedByop ? `${title} - ID: ${id}` : patp,
+                    };
+                  }
+                )}
                 extraSection={
                   <Flex
                     flexDirection="column"

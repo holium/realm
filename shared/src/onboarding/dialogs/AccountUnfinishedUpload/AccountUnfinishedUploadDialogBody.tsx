@@ -67,7 +67,7 @@ export const AccountUnfinishedUploadDialogBody = ({
 
   return (
     <OnboardDialogDescription>
-      Your identity is being created. Please wait.
+      Your uploaded identity is booting. It will be ready in 5-10 minutes.
     </OnboardDialogDescription>
   );
 };
