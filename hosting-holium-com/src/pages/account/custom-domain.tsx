@@ -8,6 +8,8 @@ import {
   useUser,
 } from '@holium/shared';
 
+import { getSupportEmail } from 'util/constants';
+
 import { Page } from '../../components/Page';
 import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
@@ -61,7 +63,11 @@ const CustomDomainPresenter = () => {
   };
 
   const onClickSidebarSection = (section: string) => {
-    goToPage(accountPageUrl[section]);
+    if (section === 'Contact Support') {
+      window.open(getSupportEmail(ship?.patp), '_blank');
+    } else {
+      goToPage(accountPageUrl[section]);
+    }
   };
 
   const onClickUploadId = () => {

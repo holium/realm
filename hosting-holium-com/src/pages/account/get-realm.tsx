@@ -7,7 +7,7 @@ import {
 import { thirdEarthApi } from 'util/thirdEarthApi';
 
 import { Page } from '../../components/Page';
-import { constants } from '../../util/constants';
+import { constants, getSupportEmail } from '../../util/constants';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
 export const joinWaitlist = async (email: string) => {
@@ -48,7 +48,9 @@ const GetRealmPresenter = () => {
   };
 
   const onClickSidebarSection = (section: string) => {
-    if (section === 'Get Hosting') {
+    if (section === 'Contact Support') {
+      window.open(getSupportEmail(), '_blank');
+    } else if (section === 'Get Hosting') {
       onClickPurchaseId();
     } else {
       goToPage(accountPageUrl[section]);
