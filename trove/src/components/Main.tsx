@@ -18,11 +18,10 @@ import {
   UploadFileInput,
   WrappedBackground,
 } from '../components';
-import { useStorage } from '../hooks';
 import { moveFileAction, moveFolderAction } from '../store/troveActions';
 import useTroveStore, { TroveStore } from '../store/troveStore';
 import { theme } from '../theme';
-export const Main = ({ troveRenderTree }: any) => {
+export const Main = ({ troveRenderTree, useStorage, uploadFile }: any) => {
   const { canUpload } = useStorage();
   const containerRef = useRef<HTMLDivElement>(null);
   const [displayFolderInput, setDisplayFolderInput] = useState<boolean>(false);
@@ -383,10 +382,18 @@ export const Main = ({ troveRenderTree }: any) => {
         >
           <div style={{ zIndex: 1 }}>
             {displayFileInput && (
-              <UploadFileInput closeInput={() => setDisplayFileInput(false)} />
+              <UploadFileInput
+                closeInput={() => setDisplayFileInput(false)}
+                useStorage={useStorage}
+                uploadFile={uploadFile}
+              />
             )}
             {displayFileLink && (
-              <LinkFileInput closeInput={() => setDisplayFileLink(false)} />
+              <LinkFileInput
+                closeInput={() => setDisplayFileLink(false)}
+                useStorage={useStorage}
+                uploadFile={uploadFile}
+              />
             )}
             {displayFolderInput && (
               <FolderInput

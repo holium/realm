@@ -277,7 +277,9 @@ export class ShipService extends AbstractService<any> {
     };
   }
 
-  public async uploadFile(args: FileUploadParams): Promise<string | undefined> {
+  public async uploadFile(
+    args: FileUploadParams
+  ): Promise<{ Location: string; key: string }> {
     return await new Promise((resolve, reject) => {
       this.getS3Bucket()
         .then(async (response: any) => {
@@ -306,15 +308,18 @@ export class ShipService extends AbstractService<any> {
             fileExtension = args.contentType.split('/')[1];
           }
           if (!fileContent) log.warn('No file content found');
+          const key = `${
+            this.patp
+          }/${moment().unix()}-${fileName}.${fileExtension}`;
           const params = {
             Bucket: response.configuration.currentBucket,
-            Key: `${this.patp}/${moment().unix()}-${fileName}.${fileExtension}`,
+            Key: key,
             Body: fileContent as Buffer,
             ACL: StorageAcl.PublicRead,
             ContentType: args.contentType,
           };
           const { Location } = await client.upload(params).promise();
-          resolve(Location);
+          resolve({ Location, key });
         })
         .catch(reject);
     });

@@ -2,16 +2,11 @@ import { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
+import { updateHandler } from './api/updates';
 import { Navigation } from './components';
 import { Home } from './pages';
 import useTroveStore, { TroveStore } from './store/troveStore';
 import { theme } from './theme';
-
-interface Props {
-  selectedSpace: string;
-  shipName: string;
-  TroveIPC: any;
-}
 const muiTheme = createTheme({
   palette: {
     primary: { main: theme.primary },
@@ -31,22 +26,53 @@ const muiTheme = createTheme({
     },
   },
 });
-export const Trove = ({ selectedSpace, shipName, TroveIPC }: Props) => {
+interface Props {
+  selectedSpace: string;
+  shipName: string;
+  TroveIPC: any;
+  update: any;
+  useStorage: any;
+  uploadFile: any;
+}
+
+export const Trove = ({
+  selectedSpace,
+  shipName,
+  TroveIPC,
+  update,
+  useStorage,
+  uploadFile,
+}: Props) => {
   const setShipName = useTroveStore((store: TroveStore) => store.setShipName);
   const setMySpace = useTroveStore((store: TroveStore) => store.setMySpace);
+  const setSpace = useTroveStore((store: TroveStore) => store.setSpace);
+  const space = useTroveStore((store: TroveStore) => store.space);
   const setApi = useTroveStore((store: TroveStore) => store.setApi);
   useEffect(() => {
+    //subscribe to updates here
+    TroveIPC.UIUpdates();
     //add our api instance to the store
     setApi(TroveIPC);
   }, [TroveIPC]);
-
+  useEffect(() => {
+    if (update) {
+      updateHandler(update);
+    }
+  }, [update]);
   useEffect(() => {
     if (shipName) {
       setShipName(shipName);
-      setMySpace('/' + shipName + '/our');
+      setMySpace(shipName + '/our');
     }
   }, [shipName]);
+  useEffect(() => {
+    if (selectedSpace) {
+      const newSpace = selectedSpace.substring(1);
+      setSpace(newSpace);
+    }
+  }, [selectedSpace]);
 
+  if (!space) return null;
   return (
     <main
       style={{
@@ -58,7 +84,12 @@ export const Trove = ({ selectedSpace, shipName, TroveIPC }: Props) => {
         <Router>
           <Routes>
             <Route element={<Navigation selectedSpace={selectedSpace} />}>
-              <Route path="index.html/:ship/:group" element={<Home />} />
+              <Route
+                path="index.html/:ship/:group"
+                element={
+                  <Home useStorage={useStorage} uploadFile={uploadFile} />
+                }
+              />
               <Route
                 path="index.html/"
                 element={

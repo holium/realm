@@ -24,6 +24,7 @@ import {
   OnboardingIPC,
   RealmIPC,
   SpacesIPC,
+  TroveIPC,
 } from './ipc';
 import { ShellModel } from './models/shell.model';
 import { shipStore } from './ship.store';
@@ -183,6 +184,10 @@ function registerOnUpdateListener() {
   LexiconIPC.onUpdate(async (update: any) => {
     //update lexicon store with the latest update
     shipStore.lexiconStore.setUpdate(update?.payload);
+  });
+  TroveIPC.onUpdate(async (update: any) => {
+    //update trove store with the latest update
+    shipStore.troveStore.setUpdate(update?.payload);
   });
   RealmIPC.onUpdate(async (update) => {
     if (update.type === 'booted') {

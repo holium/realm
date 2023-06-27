@@ -3,7 +3,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { isChildPath, log } from '../helpers';
 import useTroveStore from '../store/troveStore';
 
-const updateHandler = (update: any) => {
+export const updateHandler = (update: any) => {
   log('update', update);
   const actionName: any = Object.keys(update?.update)[0];
   const updateData: any = update?.update;

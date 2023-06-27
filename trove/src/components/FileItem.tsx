@@ -8,7 +8,6 @@ import Typography from '@mui/material/Typography';
 import Lightbox from 'yet-another-react-lightbox';
 
 import { copyToClipboard, downloadURI, isImage, log } from '../helpers';
-import { useStorage } from '../hooks';
 import { editFileAction, removeFileAction } from '../store/troveActions';
 import useTroveStore, { TroveStore } from '../store/troveStore';
 import { theme } from '../theme';
@@ -28,7 +27,6 @@ export const FileItem = ({
   const setSelectedNode = useTroveStore(
     (store: TroveStore) => store.setSelectedNode
   );
-  const { deleteFile } = useStorage();
   const [LightboxOpen, setLightboxOpen] = useState(false);
   const [editing, setEditing] = useState<boolean>(false);
   const [newTitle, setNewTitle] = useState<string>('');
@@ -63,7 +61,7 @@ export const FileItem = ({
     {
       onClick: async () => {
         //remove it from S3 (try)
-        deleteFile(item.dat.key);
+        //api.deleteFile(item.dat.key); TODO: make a delete function
         //remove it from trove
         removeFileAction(item.id);
         //unselected this after deletion

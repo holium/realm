@@ -9,7 +9,7 @@ import { log, splitLastOccurrence } from '../helpers';
 import useTroveStore, { TroveStore } from '../store/troveStore';
 import { Role } from '../types';
 
-export const Home = () => {
+export const Home = ({ useStorage, uploadFile }: any) => {
   const api = useTroveStore((store: TroveStore) => store.api);
   const space = useTroveStore((store: TroveStore) => store.space);
   const troves = useTroveStore((store: TroveStore) => store.troves);
@@ -235,7 +235,6 @@ export const Home = () => {
   };
   const getTroves = async () => {
     try {
-      if (!space) throw Error('no space');
       getMyRole();
       setCurrentSpace(space); //we use this to switch between our and current space for calling pokes
       if (splitLastOccurrence(space, '/')[1] === 'our') {
@@ -279,7 +278,11 @@ export const Home = () => {
       <Stack direction="row" spacing={'4px'}>
         <Aside />
         <DndProvider backend={HTML5Backend}>
-          <Main troveRenderTree={troveRenderTree} />
+          <Main
+            troveRenderTree={troveRenderTree}
+            useStorage={useStorage}
+            uploadFile={uploadFile}
+          />
         </DndProvider>
       </Stack>
     </Box>

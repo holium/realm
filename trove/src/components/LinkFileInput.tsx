@@ -1,5 +1,5 @@
 //custom text field with a button inside the same container
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -13,11 +13,16 @@ import Typography from '@mui/material/Typography';
 import mime from 'mime';
 
 import { getFileMetadata, isValidUrl, log } from '../helpers';
-import { useStorage } from '../hooks';
 import { addFileAction } from '../store/troveActions';
 import { theme } from '../theme';
 import { displayDate } from '../time';
-
+interface FileUploadParams {
+  source: 'file' | 'buffer';
+  // when source='file', content is filename; otherwise
+  //   content should be clipboard contents
+  content: string;
+  contentType: string;
+}
 const CircularIndeterminate = () => {
   return (
     <Box sx={{ display: 'flex' }}>
@@ -52,14 +57,14 @@ const CustomTextField = styled(TextField)({
   },
 });
 
-export const LinkFileInput = ({ closeInput }: any) => {
-  const { canUpload, uploadDefault } = useStorage();
+export const LinkFileInput = ({ closeInput, useStorage, uploadFile }: any) => {
+  const { canUpload } = useStorage();
   const containerRef = useRef<HTMLDivElement>(null);
   const [addingFile, setAddingFile] = useState<boolean>(false);
   const [uri, setUri] = useState<string>('');
   const [title, setTitle] = useState<string>('');
   const [metadata, setMetadata] = useState<any>(null);
-  const [file, setFile] = useState<null | File>(null);
+  const [file, setFile] = useState<null | any>(null);
   const [error, setError] = useState<string>('');
 
   const clearComponent = () => {
@@ -71,6 +76,7 @@ export const LinkFileInput = ({ closeInput }: any) => {
     closeInput();
   };
   const downloadLink = () => {
+    //TODO: move to IPC
     setError('');
     //downloads link and produces a file form the blob data
     if (!isValidUrl(uri)) {
@@ -112,7 +118,22 @@ export const LinkFileInput = ({ closeInput }: any) => {
       });
   };
 
-  const uploadFile = async () => {
+  const uploadFileCb = useCallback(
+    (params: FileUploadParams): Promise<{ Location: string; key: string }> => {
+      return new Promise((resolve, reject) => {
+        uploadFile(params)
+          .then((data: any) => {
+            resolve(data);
+          })
+          .catch((e: any) => {
+            reject(e);
+          })
+          .finally(() => log('setIsUploading(false)'));
+      });
+    },
+    []
+  );
+  const onUploadFile = async () => {
     setAddingFile(true);
     setError('');
     try {
@@ -121,8 +142,15 @@ export const LinkFileInput = ({ closeInput }: any) => {
       if (!file) throw Error('no file found');
 
       const uploadMetadata = { ...metadata, title };
-      const newMetadata = await uploadDefault(file, uploadMetadata); //same as the previous metadata with an added url for trove agent
+      log('uploadMetadata', uploadMetadata);
 
+      const params: FileUploadParams = {
+        source: 'file',
+        content: file.path,
+        contentType: file.type,
+      };
+      const { Location, key } = await uploadFileCb(params); //same as the previous metadata with an added url for trove agent
+      const newMetadata = { ...uploadMetadata, url: Location, key };
       await addFileAction(newMetadata);
       clearComponent();
     } catch (e: any) {
@@ -198,7 +226,7 @@ export const LinkFileInput = ({ closeInput }: any) => {
                     <IconButton
                       aria-label="done uploading"
                       onClick={() => {
-                        uploadFile();
+                        onUploadFile();
                       }}
                       size="small"
                     >

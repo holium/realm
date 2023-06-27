@@ -13,7 +13,7 @@ class TroveService extends AbstractService<any> {
       return;
     }
   }
-  async subscribePath() {
+  async UIUpdates() {
     return APIConnection.getInstance().conduit.watch({
       app: 'trove',
       path: '/ui',
@@ -276,7 +276,6 @@ class TroveService extends AbstractService<any> {
     });
   }
   async getMembers(space: string) {
-    console.log('hehe', space);
     return APIConnection.getInstance().conduit.scry({
       app: 'spaces',
       path: '/' + space + '/members',
