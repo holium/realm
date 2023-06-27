@@ -39,7 +39,7 @@ export const HeroContainer = styled(Flex)`
     text-align: center;
     max-width: 814px;
     width: 100%;
-    max-height: 725px;
+    max-height: 777px;
     overflow: hidden;
 
     .cursors-static {
