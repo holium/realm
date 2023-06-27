@@ -36,6 +36,7 @@ export const AccountDownloadRealmDialog = ({
   onExit,
 }: Props) => (
   <AccountDialog
+    ships={[]}
     identities={identities ?? []}
     selectedIdentity={selectedIdentity ?? ''}
     setSelectedIdentity={setSelectedIdentity}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { OnboardingStorage, UploadIdDialog } from '@holium/shared';
 
@@ -30,11 +30,27 @@ export default function UploadId() {
   const [progress, setProgress] = useState<number>();
   const [error, setError] = useState<string>();
 
-  const onUpload = async (file: File) => {
-    const { token, email, serverId, provisionalShipId } =
-      OnboardingStorage.get();
+  useEffect(() => {
+    const { token } = OnboardingStorage.get();
+    if (!token) return;
+    thirdEarthApi.getUserShips(token).then((ships) => {
+      if (
+        ships.length === 1 &&
+        ships[0].product_type === 'byop-p' &&
+        ships[0].ship_type !== 'planet'
+      ) {
+        OnboardingStorage.set({
+          productType: 'byop-p',
+          provisionalShipId: ships[0].id.toString(),
+        });
+      }
+    });
+  }, []);
 
-    if (!token || !serverId || !email || !provisionalShipId) return false;
+  const onUpload = async (file: File) => {
+    const { token, provisionalShipId } = OnboardingStorage.get();
+
+    if (!token || !provisionalShipId) return false;
 
     setFile(file);
     setProgress(0);
@@ -87,7 +103,9 @@ export default function UploadId() {
     return true;
   };
 
-  const onBack = () => goToPage('/account/get-realm');
+  const onBack = () => {
+    goToPage('/account');
+  };
 
   const onNext = () => {
     return goToPage('/booting');

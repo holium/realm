@@ -1,7 +1,6 @@
 import { app } from 'electron';
 import log from 'electron-log';
 import fs from 'fs';
-import { reject } from 'lodash';
 import moment from 'moment';
 import path from 'path';
 
@@ -92,8 +91,9 @@ export class ShipService extends AbstractService<any> {
     }
   }
 
-  _openConduit(credentials: any) {
-    return new Promise((resolve) =>
+  async _openConduit(credentials: any) {
+    return new Promise((resolve, reject) => {
+      console.log('_openConduit');
       APIConnection.getInstance({
         ...credentials,
         ship: this.patp,
@@ -102,18 +102,10 @@ export class ShipService extends AbstractService<any> {
           resolve(null);
         })
         .on('failed', () => {
-          // log.info('ship.service.ts:', 'Conduit failed');
-          try {
-            this.shipDB?.setCredentials(
-              credentials.url,
-              credentials.code,
-              null
-            );
-            this.authService?._setLockfile({ ...credentials, cookie: null });
-            APIConnection.getInstance().closeChannel();
-          } catch (e) {
-            log.error(e);
-          }
+          log.info('ship.service.ts:', 'Conduit failed');
+          this.shipDB?.setCredentials(credentials.url, credentials.code, null);
+          this.authService?._setLockfile({ ...credentials, cookie: null });
+          APIConnection.getInstance().closeChannel();
           resolve(null);
         })
         .on('refreshed', (session: ConduitSession) => {
@@ -128,8 +120,8 @@ export class ShipService extends AbstractService<any> {
         .on('error', (err: any) => {
           log.error('ship.service.ts:', 'Conduit error', err);
           reject(err);
-        })
-    );
+        });
+    });
   }
 
   private _registerServices() {
