@@ -6,7 +6,7 @@ import {
 } from '@holium/shared';
 
 import { Page } from '../../components/Page';
-import { downloadLinks } from '../../util/constants';
+import { downloadLinks, getSupportEmail } from '../../util/constants';
 import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
@@ -15,12 +15,16 @@ const DownloadRealmPresenter = () => {
   const { ships, selectedShipId, setSelectedShipId } = useUser();
 
   const onClickSidebarSection = (section: string) => {
-    if (section === 'Get Hosting') {
+    if (section === 'Contact Support') {
+      const ship = ships.find((ship) => ship.id === selectedShipId);
+      window.open(getSupportEmail(ship?.patp ?? ''), '_blank');
+    } else if (section === 'Get Hosting') {
       goToPage(accountPageUrl[section], {
         back_url: '/account/download-realm',
       });
+    } else {
+      goToPage(accountPageUrl[section]);
     }
-    goToPage(accountPageUrl[section]);
   };
 
   const onClickUploadId = () => {

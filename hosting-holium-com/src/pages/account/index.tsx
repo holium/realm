@@ -15,6 +15,8 @@ import {
   VerifyEmailModal,
 } from '@holium/shared';
 
+import { getSupportEmail } from 'util/constants';
+
 import { Page } from '../../components/Page';
 import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
@@ -49,7 +51,11 @@ const HostingPresenter = () => {
   }, [selectedShip]);
 
   const onClickSidebarSection = (section: string) => {
-    goToPage(accountPageUrl[section]);
+    if (section === 'Contact Support') {
+      window.open(getSupportEmail(selectedShip.patp), '_blank');
+    } else {
+      goToPage(accountPageUrl[section]);
+    }
   };
 
   const onSubmitNewEmail = async (email: string) => {
