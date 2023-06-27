@@ -35,7 +35,7 @@ export default function VerifyEmail() {
       if (result) {
         const { productType } = OnboardingStorage.get();
         if (productType === 'byop-p') {
-          return goToPage('/payment');
+          return goToPage('/upload-id-disclaimer');
         } else {
           return goToPage('/choose-id');
         }

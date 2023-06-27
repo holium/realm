@@ -45,7 +45,7 @@ const GetNewAccessCodeContainer = styled(Flex)`
 `;
 
 type Props = {
-  selectedIdentity: string;
+  selectedIdentity: string | undefined;
   email: string;
   serverUrl: string;
   serverCode: string;

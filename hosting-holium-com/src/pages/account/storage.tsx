@@ -17,7 +17,7 @@ type GetUserS3InfoResponse = Awaited<
 
 const S3StoragePresenter = () => {
   const { goToPage, logout } = useNavigation();
-  const { token, ships, selectedIdentity, setSelectedIdentity } = useUser();
+  const { token, ships, selectedShipId, setSelectedShipId } = useUser();
 
   const [s3Info, setS3Info] = useState<GetUserS3InfoResponse>();
   const [networkUsage, setNetworkUsage] = useState<number>(0);
@@ -31,7 +31,7 @@ const S3StoragePresenter = () => {
     OnboardingStorage.set({
       productType: 'byop-p',
     });
-    goToPage('/payment', {
+    goToPage('/upload-id-disclaimer', {
       back_url: '/account/storage',
     });
   };
@@ -44,7 +44,7 @@ const S3StoragePresenter = () => {
   };
 
   useEffect(() => {
-    const selectedShip = ships.find((ship) => ship.patp === selectedIdentity);
+    const selectedShip = ships.find((ship) => ship.id === selectedShipId);
 
     if (!token) return;
     if (!selectedShip) return;
@@ -59,13 +59,13 @@ const S3StoragePresenter = () => {
         setNetworkUsage(response.networkUsage?.network_sent_total ?? 0);
         setMinioUsage(response.networkUsage?.minio_sent_total ?? 0);
       });
-  }, [token, ships, selectedIdentity]);
+  }, [token, ships, selectedShipId]);
 
   return (
     <AccountStorageDialog
-      identities={ships.map((ship) => ship.patp)}
-      selectedIdentity={selectedIdentity}
-      setSelectedIdentity={setSelectedIdentity}
+      ships={ships}
+      selectedShipId={selectedShipId}
+      setSelectedShipId={setSelectedShipId}
       storageUrl={s3Info?.consoleUrl}
       storageBucket={s3Info?.userName}
       storagePassword={s3Info?.code}
