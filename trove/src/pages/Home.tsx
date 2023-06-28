@@ -273,9 +273,9 @@ export const Home = ({ useStorage, uploadFile, deleteFile }: any) => {
   };
 
   return (
-    <Box>
+    <Box height="100%">
       <NavigationHeader />
-      <Stack direction="row" spacing={'4px'}>
+      <Stack direction="row" spacing={'4px'} height="100%">
         <Aside />
         <DndProvider backend={HTML5Backend}>
           <Main

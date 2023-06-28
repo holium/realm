@@ -322,11 +322,11 @@ export const Main = ({
     return null;
   };
   return (
-    <Box width={'80%'}>
+    <Box width={'80%'} height="100%">
       <div ref={containerRef} style={{ display: 'none' }}></div>
       <WrappedBackground
         styles={{
-          height: 'calc(100vh - 53px)',
+          height: 'calc(100% - 53px)',
           overflow: 'hidden',
           padding: '10px',
           margin: '8px 8px 8px 8px',

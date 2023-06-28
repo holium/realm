@@ -216,10 +216,10 @@ export const Aside = () => {
     );
   };
   return (
-    <Box width={'20%'}>
+    <Box width={'20%'} height="100%">
       <WrappedBackground
         styles={{
-          height: 'calc(100vh - 53px)',
+          height: 'calc(100% - 53px)',
           backgroundColor: 'transparent',
           borderColor: 'transparent',
           padding: 0,

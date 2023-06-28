@@ -78,7 +78,7 @@ export const Trove = ({
   return (
     <main
       style={{
-        height: '100vh',
+        height: '100%',
         backgroundColor: 'transparent',
       }}
     >
