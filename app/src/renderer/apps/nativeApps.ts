@@ -64,7 +64,7 @@ export const nativeApps: AppManifestMap = {
     id: 'lexicon',
     title: 'Lexicon',
     type: 'native',
-    color: '#c5a77c',
+    color: '#EEDFC9',
     icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/lexicon.svg',
     native: {
       hideTitlebarBorder: true,
