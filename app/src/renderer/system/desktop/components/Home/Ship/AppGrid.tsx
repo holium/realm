@@ -26,31 +26,10 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
     () =>
       [
         ...bazaarStore.installed,
-        ...bazaarStore.devApps,
-        {
-          id: 'lexicon',
-          title: 'Lexicon',
-          type: 'native',
-          color: '#c5a77c',
-          icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/lexicon.svg',
-          native: {
-            hideTitlebarBorder: true,
-          },
-        },
-        {
-          id: 'trove',
-          title: 'Trove',
-          type: 'native',
-          color: '#000',
-          icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/lexicon.svg',
-          native: {
-            hideTitlebarBorder: true,
-          },
-        },
+        //...bazaarStore.devApps
       ] as AppMobxType[],
     [bazaarStore.catalog, bazaarStore.installations.values()]
   );
-  console.log('apps', apps);
   const [items, setItems] = useState(apps);
 
   useEffect(() => {
