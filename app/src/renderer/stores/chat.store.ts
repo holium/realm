@@ -154,7 +154,6 @@ export const ChatStore = types
   .actions((self) => ({
     init: flow(function* () {
       try {
-        self.loader.set('loading');
         const pinnedChats = yield ChatIPC.fetchPinnedChats();
         const muted = yield ChatIPC.fetchMuted();
         self.inbox = yield ChatIPC.getChatList();
@@ -167,25 +166,21 @@ export const ChatStore = types
         console.error(error);
       }
 
-      self.loader.set('loaded');
-
       return self.inbox;
     }),
     fetchInboxMetadata: flow(function* () {
+      self.loader.set('loading');
       const { muted, pinned } = yield ChatIPC.fetchPathMetadata();
       self.pinnedChats = pinned;
       self.mutedChats = muted;
+      self.loader.set('loaded');
     }),
     loadChatList: flow(function* () {
-      self.loader.set('loading');
-
       try {
         self.inbox = yield ChatIPC.getChatList();
       } catch (error) {
         console.error(error);
       }
-
-      self.loader.set('loaded');
     }),
     findChatDM: flow(function* (peer: string, our: string) {
       // find the DM, if exists, where it's only ourselves and the peer
@@ -303,7 +298,9 @@ export const ChatStore = types
       }
     },
     refreshInbox: flow(function* () {
+      console.log('start');
       self.inbox = yield ChatIPC.getChatList();
+      console.log('end');
     }),
     reset() {
       self.subroute = 'inbox';
@@ -317,7 +314,6 @@ export const ChatStore = types
       if (self.loader.isFirstLoad) {
         self.inbox = payload;
         localStorage.setItem(`${window.ship}-firstLoad`, 'true');
-        self.loader.set('loaded');
       }
     },
   }));
