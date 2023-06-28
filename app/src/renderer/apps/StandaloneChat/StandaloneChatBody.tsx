@@ -117,20 +117,28 @@ export const StandaloneChatBodyPresenter = () => {
           }}
         />
       </Flex>
-      <Flex flex={1} height="100%" position="relative" minWidth={360}>
-        <StandaloneBackgroundImage
-          key={theme.wallpaper}
-          src={theme.wallpaper}
-          initial={{ opacity: 0 }}
-          exit={{ opacity: 0 }}
-          animate={{
-            opacity: 1,
-            filter: `var(--blur)`,
-          }}
-          transition={{
-            opacity: { duration: 0.5 },
-          }}
-        />
+      <Flex
+        flex={1}
+        height="100%"
+        position="relative"
+        minWidth={360}
+        background="var(--rlm-dock-color)"
+      >
+        {chatStore.subroute === 'chat' && (
+          <StandaloneBackgroundImage
+            key={theme.wallpaper}
+            src={theme.wallpaper}
+            initial={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            animate={{
+              opacity: 1,
+              filter: `var(--blur)`,
+            }}
+            transition={{
+              opacity: { duration: 0.5 },
+            }}
+          />
+        )}
         {chatStore.subroute === 'chat' && <ChatLog isStandaloneChat />}
         {chatStore.subroute === 'chat-info' && <ChatInfo isStandaloneChat />}
         {chatStore.subroute === 'new' && <CreateNewChat isStandaloneChat />}
