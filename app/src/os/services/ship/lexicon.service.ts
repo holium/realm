@@ -2,6 +2,7 @@ import Database from 'better-sqlite3-multiple-ciphers';
 
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection } from '../api';
+import { LexiconUpdateType } from './lexicon.types';
 
 type KeyPair = [name: string, t: string];
 type Schema = KeyPair[];
@@ -29,7 +30,7 @@ export enum LEXICON_TABLES {
   VOTES = 'votes',
 }
 
-class LexiconService extends AbstractService<any> {
+class LexiconService extends AbstractService<LexiconUpdateType> {
   public db?: Database;
 
   constructor(options?: ServiceOptions, db?: Database) {
