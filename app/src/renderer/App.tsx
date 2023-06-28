@@ -8,9 +8,11 @@ import { GlobalStyle, RealmBackground } from './App.styles';
 import { AppContent } from './AppContent';
 import { AppLoading } from './AppLoading';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
+import { ShareModal } from './components/ShareModal';
 import { SelectionProvider } from './lib/selection';
 import { appState, AppStateProvider, useAppState } from './stores/app.store';
 import { RealmIPC } from './stores/ipc';
+import { AccountProvider, shipStore } from './stores/ship.store';
 import { ErrorBoundary } from './system/ErrorBoundary';
 import {
   RealmTitlebar,
@@ -76,20 +78,23 @@ const AppPresenter = () => {
   return (
     <MotionConfig transition={{ duration: 1, reducedMotion: 'user' }}>
       <AppStateProvider value={appState}>
-        <GlobalStyle blur={true} realmTheme={theme} />
-        {background}
-        <SelectionProvider>
-          <ContextMenuProvider>
-            <PassportMenuProvider>
-              <ErrorBoundary>
-                {titlebar}
-                {content}
-                {contextMenu}
-                <div id="portal-root" />
-              </ErrorBoundary>
-            </PassportMenuProvider>
-          </ContextMenuProvider>
-        </SelectionProvider>
+        <AccountProvider value={shipStore}>
+          <GlobalStyle blur={true} realmTheme={theme} />
+          {background}
+          <SelectionProvider>
+            <ContextMenuProvider>
+              <PassportMenuProvider>
+                <ErrorBoundary>
+                  {titlebar}
+                  {content}
+                  {contextMenu}
+                  <ShareModal />
+                  <div id="portal-root" />
+                </ErrorBoundary>
+              </PassportMenuProvider>
+            </ContextMenuProvider>
+          </SelectionProvider>
+        </AccountProvider>
       </AppStateProvider>
     </MotionConfig>
   );

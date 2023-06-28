@@ -217,6 +217,17 @@ export const ChatMessagePresenter = ({
         selectedChat.setReplying(message);
       },
     });
+    menu.push({
+      id: `${messageRowId}-forward`,
+      icon: 'ShareArrow',
+      label: 'Forward',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
+        evt.stopPropagation();
+        selectedChat.setForwarding(message);
+        console.log(selectedChat.forwardingMsg);
+      },
+    });
     if (isOur) {
       menu.push({
         id: `${messageRowId}-edit-message`,
