@@ -18,7 +18,8 @@ export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
   const {
     sortedChatList,
     sortedStandaloneChatList,
-    loader,
+    inboxLoader,
+    inboxMetadataLoader,
     setChat,
     setSubroute,
     isChatPinned,
@@ -35,7 +36,7 @@ export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
       accountIdentity={loggedInAccount?.serverId}
       spacePath={currentSpace?.path}
       isStandaloneChat={isStandaloneChat}
-      isLoading={loader.isLoading}
+      isLoading={inboxLoader.isLoading || inboxMetadataLoader.isLoading}
       isChatPinned={isChatPinned}
       onClickInbox={(path) => {
         setChat(path);

@@ -42,8 +42,10 @@ export const ChatStore = types
     inbox: types.array(Chat),
     selectedChat: types.maybe(types.reference(Chat)),
     isOpen: types.boolean,
-    loader: LoaderModel,
     inboxLoader: LoaderModel,
+    inboxInitLoader: LoaderModel,
+    inboxMetadataLoader: LoaderModel,
+    chatLoader: LoaderModel,
   })
   .views((self) => ({
     isChatPinned(path: string) {
@@ -153,8 +155,9 @@ export const ChatStore = types
   }))
   .actions((self) => ({
     init: flow(function* () {
+      self.inboxInitLoader.set('loading');
+
       try {
-        self.loader.set('loading');
         const pinnedChats = yield ChatIPC.fetchPinnedChats();
         const muted = yield ChatIPC.fetchMuted();
         self.inbox = yield ChatIPC.getChatList();
@@ -167,17 +170,19 @@ export const ChatStore = types
         console.error(error);
       }
 
-      self.loader.set('loaded');
+      self.inboxInitLoader.set('loaded');
 
       return self.inbox;
     }),
     fetchInboxMetadata: flow(function* () {
+      self.inboxMetadataLoader.set('loading');
       const { muted, pinned } = yield ChatIPC.fetchPathMetadata();
       self.pinnedChats = pinned;
       self.mutedChats = muted;
+      self.inboxMetadataLoader.set('loaded');
     }),
     loadChatList: flow(function* () {
-      self.loader.set('loading');
+      self.inboxLoader.set('loading');
 
       try {
         self.inbox = yield ChatIPC.getChatList();
@@ -185,7 +190,7 @@ export const ChatStore = types
         console.error(error);
       }
 
-      self.loader.set('loaded');
+      self.inboxLoader.set('loaded');
     }),
     findChatDM: flow(function* (peer: string, our: string) {
       // find the DM, if exists, where it's only ourselves and the peer
@@ -209,15 +214,17 @@ export const ChatStore = types
       }
       self.subroute = subroute;
     }),
-    setChat(path: string) {
+    setChat: flow(function* (path: string) {
+      self.chatLoader.set('loading');
       self.selectedChat = tryReference(() =>
         self.inbox.find((chat) => chat.path === path)
       );
-      ChatIPC.refreshMessagesOnPath(path, window.ship);
+      yield ChatIPC.refreshMessagesOnPath(path, window.ship);
       if (self.subroute === 'inbox') {
         self.subroute = 'chat';
       }
-    },
+      self.chatLoader.set('loaded');
+    }),
     togglePinned: flow(function* (path: string, pinned: boolean) {
       try {
         if (pinned) {
@@ -314,10 +321,9 @@ export const ChatStore = types
       self.isOpen = false;
     },
     _onInit(payload: any) {
-      if (self.loader.isFirstLoad) {
+      if (self.inboxInitLoader.isFirstLoad) {
         self.inbox = payload;
         localStorage.setItem(`${window.ship}-firstLoad`, 'true');
-        self.loader.set('loaded');
       }
     },
   }));

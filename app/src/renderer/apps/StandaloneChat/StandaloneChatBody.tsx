@@ -53,7 +53,7 @@ export const StandaloneChatBodyPresenter = () => {
     }
   }, [chatStore.subroute, chatStore.selectedChat, chatStore.inbox]);
 
-  if (chatStore.loader.isFirstLoad) {
+  if (chatStore.inboxInitLoader.isFirstLoad) {
     return (
       <Flex
         position="absolute"
