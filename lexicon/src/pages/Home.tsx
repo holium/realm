@@ -2,9 +2,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { Card, Flex, Text } from '@holium/design-system';
 
-import { Vote } from '../components';
+import { WordItem } from '../components';
 import { Store, useStore } from '../store';
-import { displayDate } from '../utils';
 
 export const Home = () => {
   const navigate = useNavigate();
