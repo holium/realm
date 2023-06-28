@@ -10,6 +10,7 @@ import {
 } from '@holium/shared';
 
 import { RealmUpdateBooted } from 'os/realm.types';
+import { LexiconUpdateType } from 'os/services/ship/lexicon.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';
 import { SoundActions } from 'renderer/lib/sound';
 import { MobXAccount } from 'renderer/stores/models/account.model';
@@ -181,7 +182,7 @@ function registerOnUpdateListener() {
     appState.shellStore.setFullscreen(isFullScreen);
   });
 
-  LexiconIPC.onUpdate(async (update: any) => {
+  LexiconIPC.onUpdate(async (update: LexiconUpdateType) => {
     //update lexicon store with the latest update
     shipStore.lexiconStore.setUpdate(update?.payload);
   });
