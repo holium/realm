@@ -23,7 +23,6 @@ export const AddWord = ({ open, onClose }: Props) => {
   const [word, setWord] = useState<string>('');
   const [definition, setDefinition] = useState<string>('');
   const [sentence, setSentence] = useState<string>('');
-  const [related, setRelated] = useState<string>('');
   const [error, setError] = useState<string>(''); // TODO: error never displays since thread doesn't error
 
   if (!space) return null;
@@ -64,7 +63,6 @@ export const AddWord = ({ open, onClose }: Props) => {
     setWord('');
     setDefinition('');
     setSentence('');
-    setRelated('');
   };
   const handleSubmit = () => {
     addWord();
@@ -117,19 +115,6 @@ export const AddWord = ({ open, onClose }: Props) => {
             error={false}
             onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
               setSentence(evt.target.value);
-            }}
-          />
-        </Flex>
-        <Flex flexDirection={'column'} gap={6}>
-          <Text.Label fontWeight={600}>Related</Text.Label>
-          <TextInput
-            id="add-word-related-input"
-            name="related"
-            value={related}
-            placeholder="words related to this one..."
-            error={false}
-            onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-              setRelated(evt.target.value);
             }}
           />
         </Flex>
