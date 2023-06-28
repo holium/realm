@@ -55,6 +55,24 @@ export const ChatStore = types
     isChatSelected(path: string) {
       return self.selectedChat?.path === path;
     },
+    // like sortedChatList but we don't apply to space chats - causes jumpiness
+    get sortedStandaloneChatList() {
+      return self.inbox.slice().sort((a: ChatModelType, b: ChatModelType) => {
+        // Check if the chats are pinned
+        const isAPinned = self.pinnedChats.includes(a.path);
+        const isBPinned = self.pinnedChats.includes(b.path);
+
+        // Compare the pinned status
+        if (isAPinned !== isBPinned) {
+          return isBPinned ? 1 : -1;
+        }
+
+        // Compare the updatedAt or metadata.timestamp properties
+        const aTimestamp = a.updatedAt || a.metadata.timestamp;
+        const bTimestamp = b.updatedAt || b.metadata.timestamp;
+        return bTimestamp - aTimestamp;
+      });
+    },
     get sortedChatList() {
       const spacesStore: SpacesStoreType = getParentOfType(
         self,

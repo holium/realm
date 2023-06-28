@@ -17,6 +17,7 @@ export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
 
   const {
     sortedChatList,
+    sortedStandaloneChatList,
     loader,
     setChat,
     setStandaloneChat,
@@ -31,7 +32,7 @@ export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
 
   return (
     <InboxBody
-      inboxes={sortedChatList}
+      inboxes={isStandaloneChat ? sortedStandaloneChatList : sortedChatList}
       accountIdentity={loggedInAccount?.serverId}
       spacePath={currentSpace?.path}
       isStandaloneChat={isStandaloneChat}
