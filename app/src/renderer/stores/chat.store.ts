@@ -18,7 +18,7 @@ import { ShipStore, shipStore } from './ship.store';
 
 export type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info' | 'passport';
 
-export const sortByUpdatedAt = (a: any, b: any) => {
+export const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
   return (
     (b.updatedAt || b.metadata.timestamp) -
     (a.updatedAt || a.metadata.timestamp)
@@ -55,6 +55,26 @@ export const ChatStore = types
     isChatSelected(path: string) {
       return self.selectedChat?.path === path;
     },
+    // like sortedChatList but we don't apply to space chats - causes jumpiness
+    get sortedStandaloneChatList() {
+      return self.inbox.slice().sort((a: ChatModelType, b: ChatModelType) => {
+        // Check if the chats are pinned
+        const isAPinned = self.pinnedChats.includes(a.path);
+        const isBPinned = self.pinnedChats.includes(b.path);
+
+        // Compare the pinned status
+        if (isAPinned !== isBPinned) {
+          return isBPinned ? 1 : -1;
+        }
+
+        // Compare the updatedAt or metadata.timestamp properties
+        const aTimestamp =
+          a.lastMessage?.createdAt || a.updatedAt || a.metadata.timestamp;
+        const bTimestamp =
+          b.lastMessage?.createdAt || b.updatedAt || b.metadata.timestamp;
+        return bTimestamp - aTimestamp;
+      });
+    },
     get sortedChatList() {
       const spacesStore: SpacesStoreType = getParentOfType(
         self,
@@ -85,8 +105,10 @@ export const ChatStore = types
         }
 
         // Compare the updatedAt or metadata.timestamp properties
-        const aTimestamp = a.updatedAt || a.metadata.timestamp;
-        const bTimestamp = b.updatedAt || b.metadata.timestamp;
+        const aTimestamp =
+          a.lastMessage?.createdAt || a.updatedAt || a.metadata.timestamp;
+        const bTimestamp =
+          b.lastMessage?.createdAt || b.updatedAt || b.metadata.timestamp;
         return bTimestamp - aTimestamp;
       });
     },
