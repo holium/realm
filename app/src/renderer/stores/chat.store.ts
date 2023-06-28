@@ -158,14 +158,11 @@ export const ChatStore = types
       self.inboxInitLoader.set('loading');
 
       try {
-        const pinnedChats = yield ChatIPC.fetchPinnedChats();
+        const pinned = yield ChatIPC.fetchPinnedChats();
         const muted = yield ChatIPC.fetchMuted();
         self.inbox = yield ChatIPC.getChatList();
-        self.inbox.forEach((chat) => {
-          chat.setMuted(muted.includes(chat.path));
-          chat.setPinned(pinnedChats.includes(chat.path));
-        });
-        self.pinnedChats = pinnedChats;
+        self.mutedChats = muted;
+        self.pinnedChats = pinned;
       } catch (error) {
         console.error(error);
       }
@@ -185,7 +182,17 @@ export const ChatStore = types
       self.inboxLoader.set('loading');
 
       try {
-        self.inbox = yield ChatIPC.getChatList();
+        const initialInbox = yield ChatIPC.getChatList();
+        const pins = initialInbox
+          .filter((chat: any) => chat.pinned)
+          .map((chat: any) => chat.path);
+        const mutes = initialInbox
+          .filter((chat: any) => chat.muted)
+          .map((chat: any) => chat.path);
+
+        self.inbox = initialInbox;
+        self.pinnedChats = pins;
+        self.mutedChats = mutes;
       } catch (error) {
         console.error(error);
       }
