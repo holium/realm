@@ -92,7 +92,7 @@ export const WalletSettingsScreenBody = ({
               { label: 'On-demand', value: 'on-demand' },
             ]}
             selected={creationMode}
-            onClick={onClickCreationMode}
+            onClick={(c) => onClickCreationMode(c as string)}
           />
         </Flex>
       </Flex>

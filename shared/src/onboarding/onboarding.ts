@@ -25,6 +25,8 @@ export { AccountHostingDialogBody } from './dialogs/AccountHosting/AccountHostin
 export { AccountSelfHostingDialogBody } from './dialogs/AccountSelfHosting/AccountSelfHostingDialogBody';
 export { AccountStorageDialog } from './dialogs/AccountStorage/AccountStorageDialog';
 export { AccountStorageDialogBody } from './dialogs/AccountStorage/AccountStorageDialogBody';
+export { AccountUnfinishedUploadDialog } from './dialogs/AccountUnfinishedUpload/AccountUnfinishedUploadDialog';
+export { uploadErrors } from './dialogs/AccountUnfinishedUpload/AccountUnfinishedUploadDialogBody';
 export { AddIdentityDialog } from './dialogs/AddIdentity/AddIdentityDialog';
 export { BootingDialog } from './dialogs/Booting/BootingDialog';
 export { ChooseIdentityDialog } from './dialogs/ChooseIdentity/ChooseIdentityDialog';
@@ -42,6 +44,7 @@ export { PaymentDialog } from './dialogs/Payment/PaymentDialog';
 export { ServerSelfHostingDialogBody } from './dialogs/ServerSelfHosting/ServerSelfHostingDialogBody';
 export { SomethingWentWrongDialog } from './dialogs/SomethingWentWrong/SomethingWentWrongDialog';
 export { UploadIdDialog } from './dialogs/UploadId/UploadIdDialog';
+export { UploadIdDisclaimerDialog } from './dialogs/UploadIdDisclaimer/UploadIdDisclaimerDialog';
 export { VerifyEmailDialog } from './dialogs/VerifyEmail/VerifyEmailDialog';
 export { http } from './services/http';
 export { OnboardingStorage } from './services/OnboardingStorage';

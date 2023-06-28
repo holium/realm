@@ -52,8 +52,8 @@ const getFullScreenBounds = () => {
 export const fullScreenWindow = (window: BrowserWindow) => {
   const fullScreenBounds = getFullScreenBounds();
   window.setBounds(fullScreenBounds);
-  window.setFullScreen(true);
   if (isArm64Mac) window.setSimpleFullScreen(true);
+  else window.setFullScreen(true);
   window.webContents.send('set-fullscreen', true);
   window.webContents.send('use-custom-titlebar', isArm64Mac);
 };

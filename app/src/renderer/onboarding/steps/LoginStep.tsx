@@ -65,8 +65,14 @@ export const LoginStep = ({ forcedNextStep, setStep }: StepProps) => {
     if (userShips.length > 0) {
       // Create a "default" account for each ship.
       // The user can customize their passports later.
+
+      // Filter out ships that are unfinished BYOP uploads.
+      const finishedShips = userShips.filter(
+        (ship) => ship.product_type !== 'byop-p' || ship.ship_type === 'planet'
+      );
+
       await Promise.all(
-        userShips.map((ship) =>
+        finishedShips.map((ship) =>
           OnboardingIPC.createAccount(
             {
               accountId: masterAccount.id,

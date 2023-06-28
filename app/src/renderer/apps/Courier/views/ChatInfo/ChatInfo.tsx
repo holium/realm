@@ -340,7 +340,7 @@ export const ChatInfoPresenter = ({ isStandaloneChat }: Props) => {
                         { label: 'Anyone', value: 'anyone' },
                       ]}
                       selected={invites}
-                      onClick={(value: string) => {
+                      onClick={(value) => {
                         updateInvitePermissions(value as InvitePermissionType);
                       }}
                     />
@@ -384,7 +384,7 @@ export const ChatInfoPresenter = ({ isStandaloneChat }: Props) => {
                     ? millisecondsToExpires(expiresDuration)
                     : 'off'
                 }
-                onClick={(value: string) => {
+                onClick={(value) => {
                   updateExpiresDuration(value as ExpiresValue);
                 }}
               />
