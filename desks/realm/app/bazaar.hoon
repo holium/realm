@@ -1052,10 +1052,10 @@
       =|  =native-app:store
         =.  title.native-app            'Lexicon'
         =.  color.native-app            '#EEDFC9'
-        =.  icon.native-app             ''
+        =.  icon.native-app             'AppIconLexicon'
         =.  config.native-app           [size=[3 7] titlebar-border=%.n show-titlebar=%.y]
-      =.  catalog.init                  (~(put by catalog.init) %os-lexicon [%native native-app])
-      =.  grid-index.init               (set-grid-index:helpers:bazaar:core %os-lexicon grid-index.init)
+      =.  catalog.init                  (~(put by catalog.init) %lexicon [%native native-app])
+      =.  grid-index.init               (set-grid-index:helpers:bazaar:core %lexicon grid-index.init)
       init
     ::
     ++  get-stall-apps
