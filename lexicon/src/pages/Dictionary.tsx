@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { Box, Card, Flex, Spinner, Text } from '@holium/design-system/general';
+import { Card, Flex, Spinner, Text } from '@holium/design-system/general';
 
+import { Definition } from '../components';
 import { Store, useStore } from '../store';
 
 export const Dictionary = () => {
@@ -71,105 +72,5 @@ export const Dictionary = () => {
     </Card>
   );
 };
-const Definition = ({
-  definitions,
-  partOfSpeech,
-  synonyms,
-  antonyms,
-  navigate,
-}: any) => {
-  return (
-    <Box>
-      <Text.H6
-        fontWeight={600}
-        fontStyle={'italic'}
-        style={{ marginBottom: '16px' }}
-      >
-        {partOfSpeech}
-      </Text.H6>
-      <Flex flexDirection={'column'} gap="10px" marginBottom={'16px'}>
-        {definitions.map((item: any, index: number) => {
-          const { definition, example } = item;
-          return (
-            <DefinitionElement
-              key={'definition-element-' + index}
-              count={(index + 1).toString()}
-              text={definition}
-              example={example}
-            />
-          );
-        })}
-      </Flex>
-      <Flex>
-        <Flex flexDirection="column" width={'50%'} gap="6px">
-          {synonyms.length > 0 && (
-            <Text.H6 fontWeight={600} style={{ marginBottom: '6px' }}>
-              Synonyms
-            </Text.H6>
-          )}
-          {synonyms.map((word: any, index: number) => {
-            return (
-              <Text.Body
-                key={'synonym-element-' + index}
-                color="accent"
-                style={{ cursor: 'pointer' }}
-                onClick={() => {
-                  navigate('../index.html/dict/' + word);
-                }}
-              >
-                {word}
-              </Text.Body>
-            );
-          })}
-        </Flex>
-        <Flex flexDirection="column" width={'50%'} gap="6px">
-          {antonyms.length > 0 && (
-            <Text.H6 fontWeight={600} style={{ marginBottom: '6px' }}>
-              Antonyms
-            </Text.H6>
-          )}
-          {antonyms.map((word: any, index: number) => {
-            return (
-              <Text.Body
-                key={'antonym-element-' + index}
-                color="accent"
-                style={{ cursor: 'pointer' }}
-                onClick={() => {
-                  navigate('../index.html/dict/' + word);
-                }}
-              >
-                {word}
-              </Text.Body>
-            );
-          })}
-        </Flex>
-      </Flex>
-    </Box>
-  );
-};
-
-function DefinitionElement({
-  count,
-  text,
-  example,
-}: {
-  count: string;
-  text: string;
-  example: string;
-}) {
-  return (
-    <Flex flexDirection={'column'}>
-      <Flex>
-        <Text.Body style={{ textDecoration: 'underline', marginRight: 5 }}>
-          {count}.
-        </Text.Body>
-        <Text.Body>{text}</Text.Body>
-      </Flex>
-      <Text.Body style={{ marginLeft: '18px', marginTop: '2px', opacity: 0.7 }}>
-        {example}
-      </Text.Body>
-    </Flex>
-  );
-}
 
 export default Dictionary;
