@@ -11,14 +11,17 @@ export interface UploadParams {
   ACL: StorageAcl; // ACL, always 'public-read'
   Body: File | Buffer; // the object itself
 }
-
+export interface DeleteParams {
+  Bucket: string; // the bucket to upload the object to
+  Key: string; // the desired location within the bucket
+}
 export interface UploadResult {
   Location: string;
 }
 
 // Extra layer of indirection used by S3 client.
 export interface StorageUpload {
-  promise: () => Promise<UploadResult>;
+  promise: () => Promise<any>;
 }
 
 export interface StorageClient {
@@ -50,6 +53,25 @@ export class S3Client implements StorageClient {
     const upload = this.initAndUpload.bind(this);
     return {
       promise: async () => await upload(params),
+    };
+  }
+
+  async initAndDelete(params: DeleteParams) {
+    if (!this.S3) {
+      await this.loadLib();
+    }
+
+    if (!this.client) {
+      this.client = new this.S3(this.config);
+    }
+
+    return await this.client.deleteObject(params).promise();
+  }
+
+  delete(params: DeleteParams): StorageUpload {
+    const deleteCall = this.initAndDelete.bind(this);
+    return {
+      promise: async () => await deleteCall(params),
     };
   }
 

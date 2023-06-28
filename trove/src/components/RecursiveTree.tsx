@@ -5,7 +5,7 @@ import { FileItem } from './FileItem';
 import { FolderItem } from './FolderItem';
 //TODO: make two components for folders and one for files
 export const RecursiveTree = memo(
-  ({ itemList, handleSelection, selected, writePerms }: any) => {
+  ({ itemList, handleSelection, selected, writePerms, deleteFile }: any) => {
     const createTree = (name: any, data: any, parentCount = 0) => {
       if (data.type === 'folder') {
         return (
@@ -46,6 +46,7 @@ export const RecursiveTree = memo(
             selected={selected}
             key={data.id}
             writePerms={writePerms}
+            deleteFile={deleteFile}
           />
         );
       }

@@ -30,7 +30,7 @@ export const AccountPassportSection = ({ account }: Props) => {
       contentType: file.type,
     });
 
-    return src;
+    return src.Location;
   };
 
   const onSubmit = async () => {

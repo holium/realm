@@ -23,6 +23,7 @@ export const FileItem = ({
   title,
   selected,
   writePerms,
+  deleteFile,
 }: any) => {
   const setSelectedNode = useTroveStore(
     (store: TroveStore) => store.setSelectedNode
@@ -61,7 +62,7 @@ export const FileItem = ({
     {
       onClick: async () => {
         //remove it from S3 (try)
-        //api.deleteFile(item.dat.key); TODO: make a delete function
+        deleteFile({ key: item.dat.key });
         //remove it from trove
         removeFileAction(item.id);
         //unselected this after deletion

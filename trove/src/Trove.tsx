@@ -33,6 +33,7 @@ interface Props {
   update: any;
   useStorage: any;
   uploadFile: any;
+  deleteFile: any;
 }
 
 export const Trove = ({
@@ -42,6 +43,7 @@ export const Trove = ({
   update,
   useStorage,
   uploadFile,
+  deleteFile,
 }: Props) => {
   const setShipName = useTroveStore((store: TroveStore) => store.setShipName);
   const setMySpace = useTroveStore((store: TroveStore) => store.setMySpace);
@@ -87,7 +89,11 @@ export const Trove = ({
               <Route
                 path="index.html/:ship/:group"
                 element={
-                  <Home useStorage={useStorage} uploadFile={uploadFile} />
+                  <Home
+                    useStorage={useStorage}
+                    uploadFile={uploadFile}
+                    deleteFile={deleteFile}
+                  />
                 }
               />
               <Route

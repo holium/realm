@@ -324,6 +324,32 @@ export class ShipService extends AbstractService<any> {
         .catch(reject);
     });
   }
+  public async deleteFile(args: { key: string }): Promise<any> {
+    return await new Promise((resolve, reject) => {
+      this.getS3Bucket()
+        .then(async (response: any) => {
+          console.log('getS3Bucket response: ', response);
+          // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
+          let endp = response.credentials.endpoint;
+          if (endp.split('.')[0] === response.configuration.currentBucket) {
+            endp = endp.split('.').slice(1).join('.');
+          }
+          const client = new S3Client({
+            credentials: response.credentials,
+            endpoint: endp,
+            signatureVersion: 'v4',
+          });
+
+          const params = {
+            Bucket: response.configuration.currentBucket,
+            Key: args.key,
+          };
+          const result = await client.delete(params).promise();
+          resolve(result);
+        })
+        .catch(reject);
+    });
+  }
 
   getPassport() {
     if (!this.services) return;

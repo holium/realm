@@ -19,6 +19,7 @@ const TroveAppPresenter = () => {
       TroveIPC={TroveIPC}
       useStorage={useStorage}
       uploadFile={ShipIPC.uploadFile}
+      deleteFile={ShipIPC.deleteFile}
     />
   );
 };

@@ -9,7 +9,7 @@ import { log, splitLastOccurrence } from '../helpers';
 import useTroveStore, { TroveStore } from '../store/troveStore';
 import { Role } from '../types';
 
-export const Home = ({ useStorage, uploadFile }: any) => {
+export const Home = ({ useStorage, uploadFile, deleteFile }: any) => {
   const api = useTroveStore((store: TroveStore) => store.api);
   const space = useTroveStore((store: TroveStore) => store.space);
   const troves = useTroveStore((store: TroveStore) => store.troves);
@@ -282,6 +282,7 @@ export const Home = ({ useStorage, uploadFile }: any) => {
             troveRenderTree={troveRenderTree}
             useStorage={useStorage}
             uploadFile={uploadFile}
+            deleteFile={deleteFile}
           />
         </DndProvider>
       </Stack>

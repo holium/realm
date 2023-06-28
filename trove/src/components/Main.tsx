@@ -21,7 +21,12 @@ import {
 import { moveFileAction, moveFolderAction } from '../store/troveActions';
 import useTroveStore, { TroveStore } from '../store/troveStore';
 import { theme } from '../theme';
-export const Main = ({ troveRenderTree, useStorage, uploadFile }: any) => {
+export const Main = ({
+  troveRenderTree,
+  useStorage,
+  uploadFile,
+  deleteFile,
+}: any) => {
   const { canUpload } = useStorage();
   const containerRef = useRef<HTMLDivElement>(null);
   const [displayFolderInput, setDisplayFolderInput] = useState<boolean>(false);
@@ -413,6 +418,7 @@ export const Main = ({ troveRenderTree, useStorage, uploadFile }: any) => {
               handleSelection={handleSelection}
               selected={selectedNode}
               writePerms={writePerms}
+              deleteFile={deleteFile}
             />
           </div>
           <div
