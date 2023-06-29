@@ -1,40 +1,20 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-
 import { Card, Flex, Spinner, Text } from '@holium/design-system/general';
 
-import { Definition } from '../components';
-import { Store, useStore } from '../store';
-
-export const Dictionary = () => {
-  const api = useStore((store: Store) => store.api);
-  const [defs, setDefs] = useState<any>([]);
-  const [noResults, setNoResults] = useState<boolean>();
-  const [loading, setLoading] = useState<boolean>(false);
-  const { word } = useParams();
-  const navigate = useNavigate();
-
-  const fetchDict = async () => {
-    setNoResults(false);
-    setLoading(true);
-    setDefs([]);
-    try {
-      const data = await api.getDictonaryDefinition(word);
-
-      if (data[0]?.meanings) {
-        setDefs(data[0].meanings);
-      } else {
-        setNoResults(true);
-      }
-    } catch {
-      setNoResults(true);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchDict();
-  }, [word]);
+import { DictDefinition } from '../components';
+interface Props {
+  navigate: any;
+  word: string | undefined;
+  defs: any;
+  loading: boolean;
+  noResults: boolean | undefined;
+}
+export const Dictionary = ({
+  navigate,
+  word,
+  defs,
+  loading,
+  noResults,
+}: Props) => {
   return (
     <Card flex={1} p={3} elevation={4} width={'100%'}>
       <Flex flexDirection={'column'} justifyContent={'space-between'}>
@@ -56,7 +36,7 @@ export const Dictionary = () => {
             defs?.map((meaning: any, index: number) => {
               const { synonyms, antonyms, definitions, partOfSpeech } = meaning;
               return (
-                <Definition
+                <DictDefinition
                   key={'word-definition-' + index}
                   definitions={definitions}
                   partOfSpeech={partOfSpeech}
@@ -72,5 +52,3 @@ export const Dictionary = () => {
     </Card>
   );
 };
-
-export default Dictionary;

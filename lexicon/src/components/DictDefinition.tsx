@@ -1,8 +1,8 @@
 import { Box, Flex, Text } from '@holium/design-system/general';
 
-import { DefinitionElement } from './DefinitionElement';
+import { DictDefinitionElement } from './DictDefinitionElement';
 
-export const Definition = ({
+export const DictDefinition = ({
   definitions,
   partOfSpeech,
   synonyms,
@@ -22,7 +22,7 @@ export const Definition = ({
         {definitions.map((item: any, index: number) => {
           const { definition, example } = item;
           return (
-            <DefinitionElement
+            <DictDefinitionElement
               key={'definition-element-' + index}
               count={(index + 1).toString()}
               text={definition}

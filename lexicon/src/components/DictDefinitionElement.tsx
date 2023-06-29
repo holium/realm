@@ -1,6 +1,6 @@
 import { Flex, Text } from '@holium/design-system/general';
 
-export const DefinitionElement = ({
+export const DictDefinitionElement = ({
   count,
   text,
   example,

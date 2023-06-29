@@ -10,7 +10,7 @@ import {
 } from './api/types/bedrock';
 import { updateHandler } from './api/updates';
 import { Navigation } from './components/Navigation';
-import { Dictionary, Home, Word } from './pages';
+import { DictionaryPage, HomePage, WordPage } from './pages';
 import { Store, useStore } from './store';
 import { log } from './utils';
 
@@ -27,7 +27,6 @@ const GlobalStyle = createGlobalStyle`
     transition: '.25s ease';
     outline: none;
   }
-
 `;
 declare global {
   interface Window {
@@ -311,9 +310,15 @@ export const Lexicon = ({
         <Router>
           <Routes>
             <Route element={<Navigation selectedSpace={selectedSpace} />}>
-              <Route path="/index.html/:ship/:group/:word" element={<Word />} />
-              <Route path="/index.html/:ship/:group" element={<Home />} />
-              <Route path="/index.html/dict/:word" element={<Dictionary />} />
+              <Route
+                path="/index.html/:ship/:group/:word"
+                element={<WordPage />}
+              />
+              <Route path="/index.html/:ship/:group" element={<HomePage />} />
+              <Route
+                path="/index.html/dict/:word"
+                element={<DictionaryPage />}
+              />
               <Route
                 path="/index.html"
                 element={<p>don't mind me just redirecting over here</p>}

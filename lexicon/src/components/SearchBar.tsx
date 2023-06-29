@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import {
   Box,
@@ -18,17 +17,18 @@ interface Props {
   onAddWord: () => void;
   backButton: boolean;
   onBack: () => void;
+  navigate: any;
 }
 export const SearchBar = ({
   onAddWord,
   addModalOpen,
   backButton,
   onBack,
+  navigate,
 }: Props) => {
   const space = useStore((store: Store) => store.space);
   const wordList = useStore((store: Store) => store.wordList);
   const setAddModalOpen = useStore((state: Store) => state.setAddModalOpen);
-  const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [matchedWords, setMatchedWords] = useState<any>([]);
@@ -50,6 +50,7 @@ export const SearchBar = ({
   };
 
   const onWordClick = (selectedWord: any) => {
+    if (!navigate) return;
     const { word, id, createdAt, votes, webSearch } = selectedWord;
     //if we navigate using the search bar, make sure it's closed
     setAddModalOpen(false);

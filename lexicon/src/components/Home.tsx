@@ -1,18 +1,20 @@
-import { useNavigate } from 'react-router-dom';
-
 import { Card, Flex, Spinner, Text } from '@holium/design-system';
 
 import { WordItem } from '../components';
-import { Store, useStore } from '../store';
-
-export const Home = () => {
-  const navigate = useNavigate();
-
-  const addModalOpen = useStore((state: Store) => state.addModalOpen);
-  const voteMap = useStore((state: Store) => state.voteMap);
-  const wordList = useStore((state: Store) => state.wordList);
-  const loadingMain = useStore((state: Store) => state.loadingMain);
-
+interface Props {
+  navigate: any;
+  addModalOpen: boolean;
+  voteMap: any;
+  wordList: any;
+  loadingMain: boolean;
+}
+export const Home = ({
+  navigate,
+  addModalOpen,
+  voteMap,
+  wordList,
+  loadingMain,
+}: Props) => {
   return (
     <Card
       p={'10px'}

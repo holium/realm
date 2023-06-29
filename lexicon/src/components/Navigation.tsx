@@ -49,6 +49,7 @@ export const Navigation = ({ selectedSpace }: Props) => {
         onAddWord={() => setAddModalOpen(true)}
         backButton={!!word}
         onBack={() => navigate(-1)}
+        navigate={navigate}
       />
       <AddWord open={addModalOpen} onClose={() => setAddModalOpen(false)} />
       <Outlet />
