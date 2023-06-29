@@ -19,6 +19,6 @@ export const InboxBodyLoadingHeader = () => (
     transition={{ duration: 0.2, ease: 'easeInOut' }}
   >
     <Spinner size="16px" width={1.5} color="var(--rlm-text-color)" />
-    <Text.Body>Loading new messages...</Text.Body>
+    <Text.Body>Syncing messages...</Text.Body>
   </Container>
 );

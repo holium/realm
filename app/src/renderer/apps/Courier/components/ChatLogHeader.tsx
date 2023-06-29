@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
-import { Button, Flex, Icon } from '@holium/design-system/general';
+import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
 import { Menu, MenuItemProps } from '@holium/design-system/navigation';
 
 import { useAppState } from 'renderer/stores/app.store';
@@ -30,7 +30,6 @@ type Props = {
   path: string;
   isMuted: boolean;
   hasMenu: boolean;
-  rightAction?: React.ReactNode;
   forceBackButton?: boolean;
   isStandaloneChat?: boolean;
   onBack: () => void;
@@ -38,7 +37,6 @@ type Props = {
 
 const ChatLogHeaderPresenter = ({
   path,
-  rightAction,
   isMuted,
   hasMenu = true,
   forceBackButton = false,
@@ -47,7 +45,7 @@ const ChatLogHeaderPresenter = ({
 }: Props) => {
   const { loggedInAccount, shellStore } = useAppState();
   const { chatStore } = useShipStore();
-  const { selectedChat, setSubroute, toggleMuted } = chatStore;
+  const { selectedChat, chatLoader, setSubroute, toggleMuted } = chatStore;
   const isSpaceChat = selectedChat?.type === 'space';
 
   const chatLogId = useMemo(() => `chat-log-${path}`, [path]);
@@ -144,8 +142,10 @@ const ChatLogHeaderPresenter = ({
         )}
         <ChatLogHeaderContent isStandaloneChat={isStandaloneChat} />
       </Flex>
-      <Flex>
-        {rightAction}
+      <Flex gap={8}>
+        {chatLoader.isLoading && (
+          <Spinner size="16px" width={1.5} color="var(--rlm-text-color)" />
+        )}
         {hasMenu && (
           <Menu
             id={`chat-${path}-menu`}
