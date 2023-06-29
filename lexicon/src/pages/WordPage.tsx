@@ -47,7 +47,6 @@ export const WordPage = () => {
   const goToDict = () => {
     navigate('/index.html/dict/' + state.word);
   };
-  console.log(definitionList, sentenceList, votes);
   return (
     <Word
       space={space}
