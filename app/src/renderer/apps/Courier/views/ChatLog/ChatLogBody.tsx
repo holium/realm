@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 import { observer } from 'mobx-react';
 
-import { Flex, WindowedListRef } from '@holium/design-system/general';
+import { Flex, Spinner, WindowedListRef } from '@holium/design-system/general';
 
 import {
   ChatFragmentMobxType,
@@ -83,6 +83,7 @@ const ChatLogBodyPresenter = ({
         flexDirection="column"
         alignItems="center"
         justifyContent="center"
+        position="relative"
       >
         <ChatLogBodyList
           messages={messages}
@@ -95,6 +96,17 @@ const ChatLogBodyPresenter = ({
           isEmpty={messages.length === 0}
           isLoaded={chatLoader.isLoaded}
         />
+        {chatLoader.isLoading && (
+          <div
+            style={{
+              position: 'absolute',
+              left: 12,
+              bottom: 12,
+            }}
+          >
+            <Spinner size="16px" width={1.5} color="var(--rlm-text-color)" />
+          </div>
+        )}
       </Flex>
       <ChatInputContainer isStandaloneChat={isStandaloneChat}>
         {selectedChat && (
