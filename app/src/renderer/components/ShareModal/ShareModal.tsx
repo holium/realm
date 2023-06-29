@@ -1,22 +1,14 @@
-import { useMemo } from 'react';
+import { Card, Portal, Text } from '@holium/design-system';
 
-import { Card, Portal } from '@holium/design-system';
-
-import { useShipStore } from 'renderer/stores/ship.store';
+import { useShareModal } from './useShareModal';
 
 const WIDTH = 340;
 const HEIGHT = 470;
 
 export const ShareModal = () => {
-  const { chatStore } = useShipStore();
+  const { object, colors } = useShareModal();
 
-  const somethingToShare = useMemo(() => {
-    return !!chatStore.selectedChat?.forwardingMsg;
-  }, [chatStore.selectedChat]);
-
-  console.log('rendering sharemodal', chatStore, somethingToShare);
-  if (!somethingToShare) return <div />;
-  console.log('rendering sharemodal with content');
+  if (!object) return <div />;
 
   return (
     <Portal>
@@ -47,9 +39,10 @@ export const ShareModal = () => {
           width: WIDTH,
           maxHeight: HEIGHT,
           overflowY: 'auto',
+          backgroundColor: colors.windowColor,
         }}
       >
-        Share Modal crap here
+        <Text.H2 color={colors.textColor}>Share Modal crap here</Text.H2>
       </Card>
     </Portal>
   );

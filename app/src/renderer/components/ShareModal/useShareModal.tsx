@@ -4,199 +4,87 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
   useState,
 } from 'react';
 
-import { useSelection } from 'renderer/lib/selection';
 import { useAppState } from 'renderer/stores/app.store';
 
-import { ContextMenuOption } from './ContextMenu';
+type ShareObject = {
+  message?: any;
+} | null;
 
-type ContextMenuOptionsMap = {
-  [containerId: string]: ContextMenuOption[];
+type SharePath = {
+  path: string;
+  selected: boolean;
+  space?: {
+    title: string;
+    image: string;
+    memberCoung: string;
+  };
 };
 
-type ColorConfig = {
-  textColor: string;
-  backgroundColor: string;
-  borderColor?: string;
+type ShareModalContextValue = {
+  object: ShareObject;
+  setObject: (obj: ShareObject) => void;
+  getPaths: () => SharePath[];
+  setPaths: (paths: SharePath[]) => void;
+  colors: { textColor: any; windowColor: any };
 };
 
-type ContextMenuColorsMap = {
-  [containerId: string]: ColorConfig;
-};
+const ShareModalContext = createContext<ShareModalContextValue>({} as any);
 
-type ContextMenuContextValue = {
-  mouseRef: MouseEvent | null;
-  setMouseRef: (e: MouseEvent | null) => void;
-  getOptions: (containerId: string) => ContextMenuOption[];
-  setOptions: (containerId: string, Options: ContextMenuOption[]) => void;
-  getColors: (containerId: string) => ColorConfig;
-  setColors: (containerId: string, colors: ColorConfig) => void;
-  defaultOptions: ContextMenuOption[];
-};
-
-const ContextMenuContext = createContext<ContextMenuContextValue>({} as any);
-
-type ContextMenuProviderProps = {
+type ShareModalProviderProps = {
   children: ReactNode;
 };
 
-export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
+export const ShareModalProvider = ({ children }: ShareModalProviderProps) => {
   const root = document.getElementById('root');
-  const { selectedText, selectedElement } = useSelection();
-  const { theme, shellStore } = useAppState();
+  const { theme } = useAppState();
   const { textColor, windowColor } = theme;
-  const [mouseRef, setMouseRef] = useState<MouseEvent | null>(null);
-  const [menuOptions, setMenuOptions] = useState<ContextMenuOptionsMap>();
-  const [menuColors, setMenuColors] = useState<ContextMenuColorsMap>();
-  const [copied, setCopied] = useState('');
+  const [shareObject, setShareObject] = useState<ShareObject>(null);
+  const [sharePaths, setSharePaths] = useState<SharePath[]>([]);
 
-  const showDevTools = useMemo(
-    () =>
-      process.env.NODE_ENV === 'development' ||
-      process.env.DEBUG_PROD === 'true',
-    []
-  );
-
-  const isInputOrTextArea = useCallback(
-    (t: EventTarget | null | undefined) =>
-      t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement,
-    []
-  );
-
-  const isValidCopy = useMemo(
-    () =>
-      selectedText &&
-      (selectedElement === mouseRef?.target ||
-        selectedElement?.contains(mouseRef?.target as Node)),
-    [mouseRef?.target, selectedElement, selectedText]
-  );
-
-  const isValidPaste = useMemo(
-    () => copied.length && isInputOrTextArea(mouseRef?.target),
-    [copied.length, isInputOrTextArea, mouseRef?.target]
-  );
-
-  const defaultOptions = useMemo(
-    () =>
-      [
-        {
-          id: 'copy-text',
-          label: 'Copy',
-          icon: 'Copy',
-          disabled: !isValidCopy,
-          onClick: (e: MouseEvent) => {
-            e.stopPropagation();
-            setCopied(selectedText);
-            navigator.clipboard.writeText(selectedText);
-          },
-        },
-        {
-          id: 'paste-text',
-          label: 'Paste',
-          icon: 'Clipboard',
-          disabled: !isValidPaste,
-          onClick: (e: MouseEvent) => {
-            e.stopPropagation();
-            // Insert copied text into focused input at cursor position
-            const input = mouseRef?.target as HTMLInputElement;
-            const startPos = input.selectionStart ?? 0;
-            const endPos = input.selectionEnd ?? 0;
-            input.value =
-              input.value.substring(0, startPos) +
-              copied +
-              input.value.substring(endPos, input.value.length);
-            input.selectionStart = startPos + copied.length;
-            input.selectionEnd = startPos + copied.length;
-          },
-        },
-        showDevTools && {
-          id: 'toggle-devtools',
-          icon: 'DevBox',
-          label: 'Toggle devtools',
-          onClick: shellStore.toggleDevTools,
-        },
-      ].filter(Boolean) as ContextMenuOption[],
-    [
-      isValidCopy,
-      isValidPaste,
-      mouseRef?.target,
-      selectedText,
-      showDevTools,
-      copied,
-    ]
-  );
-
-  const setOptions = useCallback(
-    (containerId: string, options: ContextMenuOption[]) => {
-      setMenuOptions((prev) => ({
-        ...prev,
-        [containerId]: options,
-      }));
-    },
-    []
-  );
-
-  const getOptions = useCallback(
-    (containerId: string) => menuOptions?.[containerId] ?? defaultOptions,
-    [defaultOptions, menuOptions]
-  );
-
-  const setColors = useCallback((containerId: string, colors: ColorConfig) => {
-    setMenuColors((prev) => ({
-      ...prev,
-      [containerId]: colors,
-    }));
+  const setObject = useCallback((obj: ShareObject) => {
+    setShareObject({ ...obj });
   }, []);
 
-  const getColors = useCallback(
-    (containerId: string) =>
-      menuColors?.[containerId] ?? { textColor, backgroundColor: windowColor },
-    [menuColors, textColor, windowColor]
-  );
+  const setPaths = useCallback((paths: SharePath[]) => {
+    setSharePaths(paths);
+  }, []);
+
+  const getPaths = useCallback(() => sharePaths, [sharePaths]);
 
   const handleClick = useCallback((e: MouseEvent) => {
-    const contextMenu = document.getElementById('context-menu');
-    if (contextMenu && contextMenu.contains(e.target as Node)) return;
-    setMouseRef(null);
-  }, []);
-
-  const handleContextMenu = useCallback((e: MouseEvent) => {
-    setMouseRef(e);
-    e.preventDefault();
+    const modal = document.getElementById('share-modal');
+    if (modal && modal.contains(e.target as Node)) return;
+    setShareObject(null);
   }, []);
 
   useEffect(() => {
     if (!root) return;
     root.addEventListener('mousedown', handleClick);
-    root.addEventListener('contextmenu', handleContextMenu);
 
     return () => {
       root.removeEventListener('mousedown', handleClick);
-      root.removeEventListener('contextmenu', handleContextMenu);
     };
-  }, [handleClick, handleContextMenu, root]);
+  }, [handleClick, root]);
 
   return (
-    <ContextMenuContext.Provider
+    <ShareModalContext.Provider
       value={{
-        mouseRef,
-        setMouseRef,
-        getOptions,
-        setOptions,
-        getColors,
-        setColors,
-        defaultOptions,
+        object: shareObject,
+        setObject,
+        getPaths,
+        setPaths,
+        colors: { textColor, windowColor },
       }}
     >
       {children}
-    </ContextMenuContext.Provider>
+    </ShareModalContext.Provider>
   );
 };
 
-export const useContextMenu = () => {
-  const context = useContext(ContextMenuContext);
+export const useShareModal = () => {
+  const context = useContext(ShareModalContext);
   return context;
 };

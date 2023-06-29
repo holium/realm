@@ -11,6 +11,7 @@ import {
 import { useToggle } from '@holium/design-system/util';
 
 import { useContextMenu } from 'renderer/components';
+import { useShareModal } from 'renderer/components/ShareModal';
 import { useAppState } from 'renderer/stores/app.store';
 import { MainIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -39,6 +40,7 @@ export const ChatMessagePresenter = ({
   const ourShip = useMemo(() => loggedInAccount?.serverId, [loggedInAccount]);
   const isOur = message.sender === ourShip;
   const { getOptions, setOptions, defaultOptions } = useContextMenu();
+  const { setObject } = useShareModal();
 
   const deleting = useToggle(false);
 
@@ -224,8 +226,7 @@ export const ChatMessagePresenter = ({
       disabled: false,
       onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
-        selectedChat.setForwarding(message);
-        console.log(selectedChat.forwardingMsg);
+        setObject({ message });
       },
     });
     if (isOur) {
