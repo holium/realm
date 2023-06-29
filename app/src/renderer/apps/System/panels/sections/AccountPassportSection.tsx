@@ -24,13 +24,13 @@ export const AccountPassportSection = ({ account }: Props) => {
   };
 
   const onUploadFile = async (file: File) => {
-    const src = await ShipIPC.uploadFile({
+    const result = await ShipIPC.uploadFile({
       source: 'file',
       content: file.path,
       contentType: file.type,
     });
 
-    return src.Location;
+    return result.Location;
   };
 
   const onSubmit = async () => {
