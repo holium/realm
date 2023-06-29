@@ -74,8 +74,8 @@ export const nativeApps: AppManifestMap = {
     id: 'trove',
     title: 'Trove',
     type: 'native',
-    color: '#000',
-    icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/lexicon.svg',
+    color: '#DCDCDC',
+    icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/trove.svg',
     native: {
       hideTitlebarBorder: true,
     },
