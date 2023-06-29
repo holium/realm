@@ -1,7 +1,6 @@
 import { Flex } from '@holium/design-system';
 
-import { SearchBar } from '../components';
-import { Dictionary } from '../pages';
+import { Dictionary, SearchBar } from '../components';
 
 export default {
   title: 'Lexicon/Dictionary Definition',

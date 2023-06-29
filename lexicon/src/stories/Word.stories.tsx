@@ -1,7 +1,6 @@
 import { Flex } from '@holium/design-system';
 
-import { SearchBar } from '../components';
-import { Word } from '../pages';
+import { SearchBar, Word } from '../components';
 
 export default {
   title: 'Lexicon/Word Details',
