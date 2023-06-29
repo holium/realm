@@ -16,18 +16,10 @@ export const StyledInboxRowContainer = styled(Box)<{
   `}
 `;
 
-export const StyledInboxRow = styled(Box)<{
-  isPinned: boolean;
-}>`
+export const StyledInboxRow = styled(Box)`
   width: 100%;
   min-width: 0;
   align-items: center;
   z-index: 2;
   border-radius: 6px;
-
-  ${({ isPinned }) =>
-    isPinned &&
-    `
-    background: var(--rlm-overlay-hover-color);
-  `}
 `;
