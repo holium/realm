@@ -5,7 +5,6 @@ import Menu, { MenuProps } from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { styled } from '@mui/material/styles';
 
-import { log } from '../helpers';
 import { theme } from '../theme';
 const StyledMenu = styled((props: MenuProps) => (
   <Menu
@@ -97,7 +96,6 @@ export const ContextMenu = ({ listItems, id }: any) => {
               onClick={(e: any) => {
                 e.stopPropagation(); //intended to stop reselection ( TODO )
                 setTimeout(() => {
-                  log('after a short delay');
                   item.onClick();
                 }, 200);
                 handleClose();

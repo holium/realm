@@ -85,7 +85,6 @@ export const UploadFileInput = ({
       if (file) {
         //we set metadata and display it for the user, he can change the title
         const metadata = getFileMetadata(file);
-        log('metadata', metadata);
         setTitle(metadata.title);
         setMetadata(metadata);
         setFile(file);
@@ -94,7 +93,6 @@ export const UploadFileInput = ({
       log('error =>', e);
     }
   };
-  console.log('uploadFile', uploadFile);
 
   const uploadFileCb = useCallback(
     (params: FileUploadParams): Promise<{ Location: string; key: string }> => {
@@ -120,7 +118,6 @@ export const UploadFileInput = ({
       if (!file) throw Error('no file found');
 
       const uploadMetadata = { ...metadata, title };
-      log('uploadMetadata', uploadMetadata);
 
       const params: FileUploadParams = {
         source: 'file',

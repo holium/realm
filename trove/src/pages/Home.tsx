@@ -202,9 +202,8 @@ export const Home = ({ useStorage, uploadFile, deleteFile }: any) => {
       const newTopLevelFolders: any = [];
       const newTroveTree: any = {};
       const myPerms: any = {};
-      log('troves', troves);
+
       for (const trove in troves) {
-        log('troves[trove]', troves[trove]);
         newTroveTree[trove] = makeTree(troves[trove].trove);
         newTopLevelFolders.push({
           title: troves[trove].name,

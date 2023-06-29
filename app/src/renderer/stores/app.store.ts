@@ -11,6 +11,7 @@ import {
 
 import { RealmUpdateBooted } from 'os/realm.types';
 import { LexiconUpdateType } from 'os/services/ship/lexicon.types';
+import { TroveUpdateType } from 'os/services/ship/trove.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';
 import { SoundActions } from 'renderer/lib/sound';
 import { MobXAccount } from 'renderer/stores/models/account.model';
@@ -186,7 +187,7 @@ function registerOnUpdateListener() {
     //update lexicon store with the latest update
     shipStore.lexiconStore.setUpdate(update?.payload);
   });
-  TroveIPC.onUpdate(async (update: any) => {
+  TroveIPC.onUpdate(async (update: TroveUpdateType) => {
     //update trove store with the latest update
     shipStore.troveStore.setUpdate(update?.payload);
   });

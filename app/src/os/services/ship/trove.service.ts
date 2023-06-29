@@ -2,8 +2,9 @@ import Database from 'better-sqlite3-multiple-ciphers';
 
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection } from '../api';
+import { TroveUpdateType } from './trove.types';
 
-class TroveService extends AbstractService<any> {
+class TroveService extends AbstractService<TroveUpdateType> {
   public db?: Database;
 
   constructor(options?: ServiceOptions, db?: Database) {
@@ -243,6 +244,31 @@ class TroveService extends AbstractService<any> {
       app: 'trove',
       mark: 'trove-action',
       json: moveFolder,
+    });
+  }
+  async moveFile(
+    space: string,
+    trove: null | string,
+    id: string,
+    fromPath: string,
+    toPath: string
+  ) {
+    const moveNode = {
+      trove: {
+        st: { space, tope: trove },
+        axn: {
+          'move-node': {
+            id,
+            from: fromPath, // "/path/to/parent/folder",
+            to: toPath, //"/path/to/new-parent/folder",
+          },
+        },
+      },
+    };
+    return APIConnection.getInstance().conduit.poke({
+      app: 'trove',
+      mark: 'trove-action',
+      json: moveNode,
     });
   }
   async getTroves(space: string) {

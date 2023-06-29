@@ -81,7 +81,7 @@ export const Main = ({
         selectedTopLevelFolder,
         pathToNewFolder
       );
-      console.log('response', response);
+      console.log('handleAddFolder result =>', response);
     } catch (e) {
       console.log('e', e);
     }
