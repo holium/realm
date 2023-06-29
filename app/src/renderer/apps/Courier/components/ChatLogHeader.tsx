@@ -30,7 +30,6 @@ type Props = {
   path: string;
   isMuted: boolean;
   hasMenu: boolean;
-  rightAction?: React.ReactNode;
   forceBackButton?: boolean;
   isStandaloneChat?: boolean;
   onBack: () => void;
@@ -38,7 +37,6 @@ type Props = {
 
 const ChatLogHeaderPresenter = ({
   path,
-  rightAction,
   isMuted,
   hasMenu = true,
   forceBackButton = false,
@@ -144,12 +142,11 @@ const ChatLogHeaderPresenter = ({
         )}
         <ChatLogHeaderContent isStandaloneChat={isStandaloneChat} />
       </Flex>
-      <Flex>
-        {rightAction}
+      <Flex gap={8}>
         {chatLoader.isLoading && (
           <Spinner size="16px" width={1.5} color="var(--rlm-text-color)" />
         )}
-        {hasMenu && !chatLoader.isLoading && (
+        {hasMenu && (
           <Menu
             id={`chat-${path}-menu`}
             orientation="bottom-left"
