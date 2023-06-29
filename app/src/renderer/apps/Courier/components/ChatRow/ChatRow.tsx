@@ -20,7 +20,6 @@ type ChatRowProps = {
   title: string;
   peers: string[];
   isAdmin: boolean;
-  muted: boolean;
   metadata: any;
   timestamp: number;
   type: ChatPathType;
@@ -230,14 +229,7 @@ export const ChatRowPresenter = ({
                 >
                   {lastMessageTimestamp}
                 </Text.Custom>
-                {isMuted && (
-                  <Icon
-                    name="NotificationOff"
-                    size={12}
-                    fill="text"
-                    opacity={0.3}
-                  />
-                )}
+                {unreadCount > 0 && <UnreadBadge count={unreadCount} />}
               </Flex>
             </Flex>
             <Flex
@@ -265,7 +257,19 @@ export const ChatRowPresenter = ({
               >
                 {lastMessageUpdated}
               </Text.Custom>
-              <UnreadBadge count={unreadCount} />
+              <Flex gap="6px" alignItems="center">
+                {isMuted && (
+                  <Icon
+                    name="NotificationOff"
+                    size={12}
+                    fill="text"
+                    opacity={0.3}
+                  />
+                )}
+                {isPinned && (
+                  <Icon name="Pin" size={12} fill="text" opacity={0.3} />
+                )}
+              </Flex>
             </Flex>
           </Flex>
         </Flex>

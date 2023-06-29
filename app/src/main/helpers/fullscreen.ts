@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain, screen } from 'electron';
 
-import { isArm64Mac } from './env';
+import { isMacWithCameraNotch } from './env';
 
 // Get the menu bar of new macs with notch.
 const getMenubarHeight = () => {
@@ -37,13 +37,14 @@ export const getWindowedBounds = () => {
 
 const getFullScreenBounds = () => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const hasCameraNotch = isMacWithCameraNotch();
 
   const fullScreenBounds = {
     x: 0,
     // Account for notch on arm64 mac with simple fullscreen.
-    y: isArm64Mac ? 0 - getMenubarHeight() : 0,
+    y: hasCameraNotch ? 0 - getMenubarHeight() : 0,
     width,
-    height: isArm64Mac ? height + getMenubarHeight() : height,
+    height: hasCameraNotch ? height + getMenubarHeight() : height,
   };
 
   return fullScreenBounds;
@@ -52,24 +53,34 @@ const getFullScreenBounds = () => {
 export const fullScreenWindow = (window: BrowserWindow) => {
   const fullScreenBounds = getFullScreenBounds();
   window.setBounds(fullScreenBounds);
-  if (isArm64Mac) window.setSimpleFullScreen(true);
+  window.setFullScreen(true);
+
+  const hasCameraNotch = isMacWithCameraNotch();
+  if (hasCameraNotch) window.setSimpleFullScreen(true);
   else window.setFullScreen(true);
   window.webContents.send('set-fullscreen', true);
-  window.webContents.send('use-custom-titlebar', isArm64Mac);
+  window.webContents.send('use-custom-titlebar', hasCameraNotch);
 };
 
 export const windowWindow = (window: BrowserWindow) => {
   const windowedBounds = getWindowedBounds();
 
   window.setFullScreen(false);
-  if (isArm64Mac) window.setSimpleFullScreen(false);
+
+  const hasCameraNotch = isMacWithCameraNotch();
+  if (hasCameraNotch) window.setSimpleFullScreen(false);
   window.setBounds(windowedBounds);
   window.webContents.send('set-fullscreen', false);
-  window.webContents.send('use-custom-titlebar', isArm64Mac);
+  window.webContents.send('use-custom-titlebar', hasCameraNotch);
 };
 
 export const toggleFullScreen = (window: BrowserWindow) => {
-  if (window.isFullScreen() || (isArm64Mac && window.isSimpleFullScreen())) {
+  const hasCameraNotch = isMacWithCameraNotch();
+
+  if (
+    window.isFullScreen() ||
+    (hasCameraNotch && window.isSimpleFullScreen())
+  ) {
     windowWindow(window);
   } else {
     fullScreenWindow(window);
@@ -119,7 +130,7 @@ const registerListeners = (
   });
 
   ipcMain.handle('should-use-custom-titlebar', () => {
-    return isArm64Mac;
+    return isMacWithCameraNotch();
   });
 };
 

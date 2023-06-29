@@ -85,7 +85,7 @@ export const InboxBody = ({
           </Button.IconButton>
         </Flex>
       </InboxBodyHeaderContainer>
-      {isLoading && <InboxBodyLoadingHeader />}
+      {isLoading && isStandaloneChat && <InboxBodyLoadingHeader />}
       <InboxBodyList
         inboxes={filteredInboxes}
         spacePath={spacePath}
