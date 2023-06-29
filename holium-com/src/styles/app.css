@@ -10,6 +10,7 @@
 
 body {
   background-color: var(--rlm-base-color);
+  overscroll-behavior: none;
 }
 
 #__next {
