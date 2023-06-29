@@ -1,3 +1,3 @@
-export * from './Dictionary';
-export * from './Home';
-export * from './Word';
+export * from './DictionaryPage';
+export * from './HomePage';
+export * from './WordPage';
