@@ -13,11 +13,10 @@ const StartRoomButtonPresenter = () => {
   const { friends, chatStore } = useShipStore();
   const { selectedChat } = chatStore;
 
-  const existingRoom = roomsStore.rooms.get(selectedChat?.path ?? '');
+  const existingRoom = roomsStore.getRoomByPath(selectedChat?.path ?? '');
   const areWeInRoom = existingRoom?.present?.includes(
     loggedInAccount?.serverId ?? ''
   );
-  const areWeCreator = existingRoom?.creator === loggedInAccount?.serverId;
 
   const participants =
     existingRoom?.present.map((patp: string) => {
@@ -29,7 +28,7 @@ const StartRoomButtonPresenter = () => {
 
     if (existingRoom) {
       if (areWeInRoom) {
-        if (areWeCreator) {
+        if (existingRoom?.present.length === 1) {
           // DELETE ROOM
           SoundActions.playRoomLeave();
           roomsStore.deleteRoom(existingRoom.rid);

@@ -270,6 +270,10 @@ export class RoomsStore extends EventsEmitter {
     return domain;
   }
 
+  getRoomByPath(path: string) {
+    return Array.from(this.rooms.values()).find((room) => room.path === path);
+  }
+
   getSpaceRooms(space: string) {
     return Array.from(this.rooms.values()).filter(
       (room) => room.path === space
