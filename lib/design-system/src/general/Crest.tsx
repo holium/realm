@@ -8,17 +8,9 @@ export const isValidHexColor = (hex: string) => {
 };
 const urlRegex =
   /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
+
 export const isValidImageUrl = (url: string) => {
   return urlRegex.test(url);
-};
-
-export const isImgUrl = (url: string): Promise<boolean> => {
-  const img = new Image();
-  img.src = url;
-  return new Promise((resolve) => {
-    img.onerror = () => resolve(false);
-    img.onload = () => resolve(true);
-  });
 };
 
 const crestSize = {

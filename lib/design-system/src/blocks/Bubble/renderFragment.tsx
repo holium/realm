@@ -270,6 +270,7 @@ export const renderFragment = (
             return (
               <SpaceBlock
                 id={id}
+                mt={1}
                 name={space.name}
                 members={Object.keys(space.members.all).length}
                 url={cust.value}
@@ -281,6 +282,7 @@ export const renderFragment = (
                     allSpacePaths.includes('/spaces' + space.path)
                   )
                 }
+                minWidth={320}
               />
             );
           } else {
