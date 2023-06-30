@@ -11,13 +11,12 @@ const StartRoomButtonPresenter = () => {
   const roomsStore = useRoomsStore();
   const { loggedInAccount } = useAppState();
   const { friends, chatStore } = useShipStore();
-  const { selectedChat } = chatStore;
+  const { selectedChat, subroute, setSubroute } = chatStore;
 
   const existingRoom = roomsStore.getRoomByPath(selectedChat?.path ?? '');
   const areWeInRoom = existingRoom?.present?.includes(
     loggedInAccount?.serverId ?? ''
   );
-
   const participants =
     existingRoom?.present.map((patp: string) => {
       return friends.getContactAvatarMetadata(patp);
@@ -26,30 +25,44 @@ const StartRoomButtonPresenter = () => {
   const onClickRoom = async () => {
     if (!selectedChat) return;
 
+    const areWeInRoomInOtherChat =
+      roomsStore.currentRoom &&
+      roomsStore.currentRoom.path !== selectedChat.path;
+    if (areWeInRoomInOtherChat) {
+      // LEAVE OTHER ROOM
+      SoundActions.playRoomLeave();
+      roomsStore.leaveRoom(roomsStore.currentRoom.rid);
+    }
+
     if (existingRoom) {
       if (areWeInRoom) {
         if (existingRoom?.present.length === 1) {
           // DELETE ROOM
           SoundActions.playRoomLeave();
           roomsStore.deleteRoom(existingRoom.rid);
+          if (subroute === 'room') setSubroute('chat');
         } else {
           // LEAVE ROOM
           SoundActions.playRoomLeave();
           roomsStore.leaveRoom(existingRoom.rid);
+          if (subroute === 'room') setSubroute('chat');
         }
       } else {
         // JOIN ROOM
         SoundActions.playRoomEnter();
         await roomsStore.joinRoom(existingRoom.rid);
+        setSubroute('room');
       }
     } else {
       // CREATE ROOM
       SoundActions.playRoomEnter();
-      await roomsStore?.createRoom(
+      const newRoomRid = await roomsStore?.createRoom(
         'standalone-room',
         'public',
         selectedChat.path
       );
+      await roomsStore.joinRoom(newRoomRid);
+      setSubroute('room');
     }
   };
 

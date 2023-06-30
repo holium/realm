@@ -16,6 +16,7 @@ import {
 } from './StandaloneChatBody.styles';
 import { StandaloneChatPassport } from './StandaloneChatPassport';
 import { StandaloneChatPassportPreview } from './StandaloneChatPassportPreview';
+import { StandaloneChatRoom } from './StandaloneChatRoom';
 
 export const StandaloneChatBodyPresenter = () => {
   const { showTitleBar } = useAppState();
@@ -109,6 +110,7 @@ export const StandaloneChatBodyPresenter = () => {
             onBack={() => chatStore.setSubroute('inbox')}
           />
         )}
+        {chatStore.subroute === 'room' && <StandaloneChatRoom />}
       </Flex>
     </StandaloneChatContainer>
   );

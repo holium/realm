@@ -6,6 +6,7 @@ import { Flex, Icon, Row, Text } from '@holium/design-system/general';
 import { timelineDate } from '@holium/design-system/util';
 
 import { ChatPathType } from 'os/services/ship/chat/chat.types';
+import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
@@ -13,6 +14,7 @@ import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ChatAvatar } from '../ChatAvatar';
 import { UnreadBadge } from '../UnreadBadge';
+import { ChatRowHasRoomSvg } from './ChatRowHasRoomSvg';
 import { useChatRowContextMenuOptions } from './useChatRowContextMenuOptions';
 
 type ChatRowProps = {
@@ -40,6 +42,7 @@ export const ChatRowPresenter = ({
 }: ChatRowProps) => {
   const { loggedInAccount, shellStore } = useAppState();
   const { notifStore, chatStore, spacesStore } = useShipStore();
+  const roomsStore = useRoomsStore();
   const {
     inbox,
     getChatHeader,
@@ -54,6 +57,8 @@ export const ChatRowPresenter = ({
   const { getOptions, setOptions } = useContextMenu();
 
   const unreadCount = getUnreadCountByPath(path);
+
+  const hasRoom = roomsStore.getRoomByPath(path);
 
   const chatRowId = useMemo(() => `chat-row-${path}`, [path]);
   const isPinned = isChatPinned(path);
@@ -155,8 +160,7 @@ export const ChatRowPresenter = ({
       >
         <Flex flex={1} gap={12} alignItems="center" minWidth={0}>
           <Flex
-            // layoutId={isStandaloneChat ? undefined : `chat-${path}-avatar`}
-            // layout={isStandaloneChat ? undefined : 'preserve-aspect'}
+            position="relative"
             transition={{
               duration: isStandaloneChat ? 0 : 0.15,
             }}
@@ -171,6 +175,20 @@ export const ChatRowPresenter = ({
               metadata={metadata}
               canEdit={false}
             />
+            {hasRoom && isStandaloneChat && (
+              <Flex
+                position="absolute"
+                bottom={-7}
+                right={-7}
+                background="var(--rlm-accent-color)"
+                borderRadius="50%"
+                padding="2px"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <ChatRowHasRoomSvg />
+              </Flex>
+            )}
           </Flex>
           <Flex
             flex={1}

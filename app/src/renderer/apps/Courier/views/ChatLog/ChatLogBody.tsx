@@ -101,7 +101,7 @@ const ChatLogBodyPresenter = ({
             style={{
               position: 'absolute',
               left: 12,
-              bottom: 12,
+              bottom: 8,
             }}
           >
             <Spinner size="16px" width={1.5} color="var(--rlm-text-color)" />

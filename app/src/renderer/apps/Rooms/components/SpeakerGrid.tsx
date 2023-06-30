@@ -76,6 +76,7 @@ export const SCROLLBAR_WIDTH = 12;
 
 const SpeakerGridStyle = styled.div<SpeakerGridStyleProps>`
   display: grid;
+  width: 100%;
   padding: 2px;
   padding-bottom: 4px;
   gap: 8px;

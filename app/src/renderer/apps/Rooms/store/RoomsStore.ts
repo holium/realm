@@ -560,6 +560,8 @@ export class RoomsStore extends EventsEmitter {
         path,
       })
     );
+
+    return newRoom.rid;
   }
 
   @action
