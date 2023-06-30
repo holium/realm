@@ -146,7 +146,7 @@ const ChatLogHeaderPresenter = ({
       <Flex gap="12px" alignItems="center">
         {hasMenu && (
           <>
-            <StartRoomButton />
+            <StartRoomButton isStandaloneChat={isStandaloneChat} />
             <Menu
               id={`chat-${path}-menu`}
               orientation="bottom-left"

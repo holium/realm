@@ -7,7 +7,11 @@ import { useShipStore } from 'renderer/stores/ship.store';
 
 import { StartRoomButtonView } from './StartRoomButtonView';
 
-const StartRoomButtonPresenter = () => {
+type Props = {
+  isStandaloneChat: boolean;
+};
+
+const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
   const roomsStore = useRoomsStore();
   const { loggedInAccount } = useAppState();
   const { friends, chatStore } = useShipStore();
@@ -51,18 +55,18 @@ const StartRoomButtonPresenter = () => {
         // JOIN ROOM
         SoundActions.playRoomEnter();
         await roomsStore.joinRoom(existingRoom.rid);
-        setSubroute('room');
+        if (isStandaloneChat) setSubroute('room');
       }
     } else {
       // CREATE ROOM
       SoundActions.playRoomEnter();
       const newRoomRid = await roomsStore?.createRoom(
-        'standalone-room',
+        selectedChat.metadata.title,
         'public',
         selectedChat.path
       );
       await roomsStore.joinRoom(newRoomRid);
-      setSubroute('room');
+      if (isStandaloneChat) setSubroute('room');
     }
   };
 

@@ -175,7 +175,7 @@ export const ChatRowPresenter = ({
               metadata={metadata}
               canEdit={false}
             />
-            {hasRoom && isStandaloneChat && (
+            {hasRoom && (
               <Flex
                 position="absolute"
                 bottom={-7}
