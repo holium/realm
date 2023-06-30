@@ -46,13 +46,18 @@
   ++  on-load
     |=  old-state=vase
     ^-  (quip card _this)
-    =/  old  !<(versioned-state old-state)
+    ::=/  old  !<(versioned-state old-state)
+    :: REMOVE WHEN YOU WANT DATA TO ACTUALLY STICK AROUND
+    =/  default-state=state-0   *state-0
+    :: make sure the relay table exists on-init
+    =.  tables.default-state
+    (~(gas by *^tables) ~[[%relay *pathed-table] [%vote *pathed-table] [%react *pathed-table]])
     :: do a quick check to make sure we are subbed to /updates in %spaces
     =/  cards
       ?:  (~(has by wex.bowl) [/spaces our.bowl %spaces])
         ~
       [%pass /spaces %agent [our.bowl %spaces] %watch /updates]~
-    [cards this(state old)]
+    [cards this(state default-state)]
   ::
   ++  on-poke
     |=  [=mark =vase]
@@ -264,7 +269,7 @@
             ~&  >  "{<dap.bowl>}: /next/[path] kicked us, resubbing {(spud newpath)}"
             :_  this
             :~
-              [%pass wire %agent [src.bowl %db] %watch newpath]
+              [%pass wire %agent [src.bowl dap.bowl] %watch newpath]
             ==
           %fact
             :: handle the update by updating our local state and

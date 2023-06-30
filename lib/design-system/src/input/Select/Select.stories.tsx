@@ -20,7 +20,7 @@ export const Default: ComponentStory<typeof Select> = () => {
         { label: 'gamma', value: 'gamma' },
       ]}
       selected={selected}
-      onClick={setSelected}
+      onClick={(value) => setSelected(value as string)}
     />
   );
 };

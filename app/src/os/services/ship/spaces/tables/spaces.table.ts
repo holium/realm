@@ -114,6 +114,13 @@ export class SpacesDB extends AbstractDataAccess<Space, any> {
     return row ? this.mapRow(row) : null;
   }
 
+  public getCurrent(): Space | null {
+    const query = `SELECT * FROM ${this.tableName} WHERE current = 1 LIMIT 1`;
+    const stmt = this.prepare(query);
+    const row = stmt.get();
+    return row ? this.mapRow(row) : null;
+  }
+
   public create(values: Partial<Space>): Space {
     const columns = Object.keys(values).join(', ');
     const placeholders = Object.keys(values)

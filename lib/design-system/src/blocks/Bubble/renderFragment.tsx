@@ -4,6 +4,7 @@ import { capitalizeFirstLetter } from '../../util/strings';
 import { convertFragmentsToPreview } from '../ChatInput/fragment-parser';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
 import { LinkBlock } from '../LinkBlock/LinkBlock';
+import { SpaceBlock } from '../SpaceBlock/SpaceBlock';
 import { BubbleAuthor } from './Bubble.styles';
 import {
   FragmentBlockquoteType,
@@ -12,6 +13,7 @@ import {
   FragmentBoldStrikeType,
   FragmentBoldType,
   FragmentCodeType,
+  FragmentCustomType,
   FragmentImageType,
   FragmentInlineCodeType,
   FragmentItalicsStrikeType,
@@ -52,7 +54,9 @@ export const renderFragment = (
   fragment: FragmentType,
   index: number,
   author: string,
-  onReplyClick?: (id: string) => void
+  onReplyClick?: (id: string) => void,
+  onJoinSpaceClick?: (path: string) => void,
+  allSpacePaths?: string[]
 ) => {
   const key = Object.keys(fragment)[0] as FragmentKey;
   switch (key) {
@@ -255,6 +259,53 @@ export const renderFragment = (
           />
         </TabWrapper>
       );
+    }
+    case 'custom': {
+      const cust = (fragment as FragmentCustomType).custom;
+      switch (cust.name) {
+        case 'space': {
+          const mtd = (fragment as FragmentCustomType).metadata;
+          const space: any = mtd && mtd.space && JSON.parse(mtd.space);
+          if (space) {
+            return (
+              <SpaceBlock
+                id={id}
+                mt={1}
+                name={space.name}
+                members={Object.keys(space.members.all).length}
+                url={cust.value}
+                image={space.theme.wallpaper}
+                onClick={onJoinSpaceClick}
+                hasJoined={
+                  !!(
+                    allSpacePaths &&
+                    allSpacePaths.includes('/spaces' + space.path)
+                  )
+                }
+                minWidth={320}
+              />
+            );
+          } else {
+            console.log(cust);
+            return (
+              <SpaceBlock
+                id={id}
+                name={cust.value.split('/')[3]}
+                members={0}
+                url={cust.value}
+                onClick={onJoinSpaceClick}
+                hasJoined={false}
+              />
+            );
+          }
+        }
+        default:
+          return (
+            <span>
+              UNKNOWN CUSTOM TYPE. name: {cust.name} value: {cust.value}
+            </span>
+          );
+      }
     }
     case 'ur-link':
       return `<${(fragment as FragmentUrLinkType)['ur-link']}>`;

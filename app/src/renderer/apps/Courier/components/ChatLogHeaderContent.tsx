@@ -46,7 +46,6 @@ const ChatLogHeaderContentPresenter = ({ isStandaloneChat = false }: Props) => {
         transition={{
           duration: isStandaloneChat ? 0 : 0.15,
         }}
-        width={210}
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.5, lineHeight: '1' }}
         fontSize={2}
@@ -64,7 +63,6 @@ const ChatLogHeaderContentPresenter = ({ isStandaloneChat = false }: Props) => {
         transition={{
           duration: 0.15,
         }}
-        width={210}
         initial={{ opacity: 0.5 }}
         animate={{ opacity: 0.5, lineHeight: '1' }}
         fontSize={1}
@@ -99,7 +97,6 @@ const ChatLogHeaderContentPresenter = ({ isStandaloneChat = false }: Props) => {
         {pretitle}
         <Text.Custom
           truncate
-          width={255}
           layoutId={isStandaloneChat ? `chat-${path}-name` : undefined}
           layout="preserve-aspect"
           textAlign="left"

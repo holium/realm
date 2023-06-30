@@ -15,7 +15,6 @@ import { OnboardDialogTitle } from '../../components/OnboardDialog.styles';
 import { PaymentIcon } from '../../icons/PaymentIcon';
 import { ThirdEarthProduct, ThirdEarthProductType } from '../../types';
 import { AccountInformation } from './AccountInformation';
-import { BYOPInformation } from './BYOPInformation';
 import { PaymentForm } from './PaymentForm';
 import { ProductCards } from './ProductCards';
 
@@ -84,7 +83,6 @@ const PaymentDialogPresenter = ({
       body={
         <>
           <OnboardDialogTitle>Payment</OnboardDialogTitle>
-          {productType === 'byop-p' && <BYOPInformation />}
           <ProductCards
             products={products}
             productId={productId}
@@ -112,7 +110,6 @@ export const PaymentDialog = ({ stripe, stripeOptions, ...props }: Props) => {
         body={
           <>
             <OnboardDialogTitle>Payment</OnboardDialogTitle>
-            {props.productType === 'byop-p' && <BYOPInformation />}
             <ProductCards
               products={props.products}
               productId={props.productId}

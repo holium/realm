@@ -320,8 +320,12 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     if (dbChange.type === 'del-messages-row') {
       // console.log('del-messages-row', dbChange);
       const delMessagesRow = dbChange as DelMessagesRow;
-      this._deleteMessagesRow(delMessagesRow['msg-id']);
-      this.sendUpdate({ type: 'message-deleted', payload: delMessagesRow });
+      // only delete the message if it has a created-at older than dbChange.timestamp (since if the message was created after the delete, the delete is invalid)
+      const msg = this.getChatMessage(delMessagesRow['msg-id']);
+      if (msg && msg.created_at < delMessagesRow.timestamp) {
+        this._deleteMessagesRow(delMessagesRow['msg-id']);
+        this.sendUpdate({ type: 'message-deleted', payload: delMessagesRow });
+      }
       this._insertDeleteLogs([
         {
           change: delMessagesRow,
@@ -332,8 +336,18 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     if (dbChange.type === 'del-paths-row') {
       // console.log('del-paths-row', dbChange);
       const delPathsRow = dbChange as DelPathsRow;
-      this._deletePathsRow(delPathsRow.path);
-      this.sendUpdate({ type: 'path-deleted', payload: delPathsRow.path });
+      // only delete the path if our peer-row for it has a created-at older than dbChange.timestamp
+      // (since if we were added to the path after the delete, the delete is invalid)
+      // this can happen when someone is kicked and then re-added to a chat
+      // @ts-ignore
+      const peerrow = this.getChatPeer(
+        delPathsRow.path,
+        preSig(APIConnection.getInstance().conduit.ship)
+      );
+      if (peerrow && peerrow.created_at < delPathsRow.timestamp) {
+        this._deletePathsRow(delPathsRow.path);
+        this.sendUpdate({ type: 'path-deleted', payload: delPathsRow.path });
+      }
       this._insertDeleteLogs([
         {
           change: delPathsRow,
@@ -344,8 +358,13 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     if (dbChange.type === 'del-peers-row') {
       // console.log('del-peers-row', dbChange);
       const delPeersRow = dbChange as DelPeersRow;
-      this._deletePeersRow(delPeersRow.path, delPeersRow.ship);
-      this.sendUpdate({ type: 'peer-deleted', payload: delPeersRow });
+      // only delete the path if it has a created-at older than dbChange.timestamp (since if the path was created after the delete, the delete is invalid)
+      // this can happen when someone is kicked and then re-added to a chat
+      const peerrow = this.getChatPeer(delPeersRow.path, delPeersRow.ship);
+      if (peerrow && peerrow.created_at < delPeersRow.timestamp) {
+        this._deletePeersRow(delPeersRow.path, delPeersRow.ship);
+        this.sendUpdate({ type: 'peer-deleted', payload: delPeersRow });
+      }
       this._insertDeleteLogs([
         {
           change: delPeersRow,
@@ -457,9 +476,9 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
       // deserialize the last message
       const lastMessage = row.lastMessage ? JSON.parse(row.lastMessage) : null;
       if (lastMessage && lastMessage.contents) {
-        lastMessage.contents = JSON.parse(lastMessage.contents).map(
-          (message: any) => message && JSON.parse(message)
-        );
+        lastMessage.contents = JSON.parse(lastMessage.contents)
+          .map((message: any) => message && JSON.parse(message))
+          .map(this._makeCustomContentTypeMessageFormat);
       }
       return {
         ...row,
@@ -471,6 +490,43 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         muted: row.muted === 1,
       };
     });
+  }
+
+  private _makeCustomContentTypeMessageFormat(msg: any) {
+    const key = Object.keys(msg)[0];
+    const allowed = [
+      'markdown',
+      'plain',
+      'bold',
+      'italics',
+      'strike',
+      'bold-italics',
+      'bold-strike',
+      'italics-strike',
+      'bold-italics-strike',
+      'blockquote',
+      'inline-code',
+      'ship',
+      'code',
+      'link',
+      'image',
+      'ur-link',
+      'react',
+      'status',
+      'break',
+    ];
+    if (allowed.includes(key)) {
+      return msg;
+    } else {
+      return {
+        custom: {
+          name: key,
+          value: msg[key],
+        },
+        metadata: msg.metadata,
+        reactions: msg.reactions,
+      };
+    }
   }
 
   getChat(path: string) {
@@ -563,9 +619,9 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     const rows = result.map((row: any) => {
       const lastMessage = row.lastMessage ? JSON.parse(row.lastMessage) : null;
       if (lastMessage && lastMessage.contents) {
-        lastMessage.contents = JSON.parse(lastMessage.contents).map(
-          (message: any) => message && JSON.parse(message)
-        );
+        lastMessage.contents = JSON.parse(lastMessage.contents)
+          .map((message: any) => message && JSON.parse(message))
+          .map(this._makeCustomContentTypeMessageFormat);
       }
       return {
         ...row,
@@ -648,12 +704,14 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         ...row,
         metadata: row.metadata ? this._parseMetadata(row.metadata) : [null],
         contents: row.contents
-          ? JSON.parse(row.contents).map((content: any) => {
-              if (content?.metadata) {
-                content.metadata = JSON.parse(content.metadata);
-              }
-              return content;
-            })
+          ? JSON.parse(row.contents)
+              .map((content: any) => {
+                if (content?.metadata) {
+                  content.metadata = JSON.parse(content.metadata);
+                }
+                return content;
+              })
+              .map(this._makeCustomContentTypeMessageFormat)
           : null,
         reactions: row.reactions ? JSON.parse(row.reactions) : [],
       };
@@ -698,13 +756,15 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
       return {
         ...row,
         contents: row.contents
-          ? JSON.parse(row.contents).map((content: any) => {
-              const parsedContent = content;
-              if (parsedContent?.metadata) {
-                parsedContent.metadata = JSON.parse(content.metadata);
-              }
-              return parsedContent;
-            })
+          ? JSON.parse(row.contents)
+              .map((content: any) => {
+                const parsedContent = content;
+                if (parsedContent?.metadata) {
+                  parsedContent.metadata = JSON.parse(content.metadata);
+                }
+                return parsedContent;
+              })
+              .map(this._makeCustomContentTypeMessageFormat)
           : null,
       };
     });
@@ -762,6 +822,18 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     `);
     const result = query.all(path);
     return result;
+  }
+
+  getChatPeer(path: string, ship: string) {
+    if (!this.db?.open) return;
+    const query = this.db.prepare(`
+      SELECT *
+      FROM ${CHAT_TABLES.PEERS}
+      WHERE path = ? AND ship = ?;
+    `);
+    const result = query.all(path, ship);
+    if (result.length === 0) return null;
+    return result[0];
   }
 
   //

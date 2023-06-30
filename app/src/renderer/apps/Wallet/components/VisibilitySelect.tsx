@@ -35,8 +35,8 @@ export const VisibilitySelect = ({
     value: wallet.index.toString(),
   }));
 
-  function visibilityChange(newVisibility: string) {
-    ['anyone', 'friends'].includes(newVisibility)
+  function visibilityChange(newVisibility: string | number) {
+    ['anyone', 'friends'].includes(newVisibility as WalletVisibility)
       ? onChange(newVisibility as WalletVisibility, defaultIndex)
       : onChange(newVisibility as WalletVisibility);
   }

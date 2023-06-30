@@ -1,15 +1,22 @@
+import { ColorVariants } from '../../../util';
 import { Icon } from '../Icon/Icon';
 import { IconPathsType } from '../Icon/icons';
 import { CommCircle } from './CommButton.styles';
 
 interface CommButtonProps {
   icon: IconPathsType;
-  customBg: string;
-  onClick: (evt: any) => void;
+  customBg?: ColorVariants;
+  size?: number;
+  onClick: (evt: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }
 
-export const CommButton = ({ icon, customBg, onClick }: CommButtonProps) => (
-  <CommCircle customBg={customBg} onClick={(evt: any) => onClick(evt)}>
-    <Icon size={28} name={icon} />
+export const CommButton = ({
+  icon,
+  customBg,
+  size = 28,
+  onClick,
+}: CommButtonProps) => (
+  <CommCircle customBg={customBg} onClick={onClick}>
+    <Icon size={size} name={icon} />
   </CommCircle>
 );

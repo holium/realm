@@ -90,26 +90,26 @@ const SettingsPresenter = () => {
       const audioDeviceId =
         localStorage.getItem('rooms-audio-input') ||
         audioSources.find((source) =>
-          source.value.toLowerCase().includes('default')
+          (source.value as string).toLowerCase().includes('default')
         )?.value ||
         audioSources[0]?.value;
-      setSelectedSource(audioDeviceId);
+      setSelectedSource(audioDeviceId as string);
 
       const audioOutputId =
         localStorage.getItem('rooms-audio-output') ||
         audioOutputSources.find((source) =>
-          source.value.toLowerCase().includes('default')
+          (source.value as string).toLowerCase().includes('default')
         )?.value ||
         audioOutputSources[0]?.value;
-      setSelectedOutputSource(audioOutputId);
+      setSelectedOutputSource(audioOutputId as string);
 
       const videoDeviceId =
         localStorage.getItem('rooms-video-input') ||
         videoSources.find((source) =>
-          source.value.toLowerCase().includes('default')
+          (source.value as string).toLowerCase().includes('default')
         )?.value ||
         videoSources[0]?.value;
-      setSelectedVideoSource(videoDeviceId);
+      setSelectedVideoSource(videoDeviceId as string);
     });
   }, []);
 
@@ -150,8 +150,8 @@ const SettingsPresenter = () => {
           options={audioSourceOptions}
           selected={selectedSource}
           onClick={(source) => {
-            setSelectedSource(source);
-            roomsStore.setAudioInput(source);
+            setSelectedSource(source as string);
+            roomsStore.setAudioInput(source as string);
           }}
         />
       </Flex>
@@ -162,8 +162,8 @@ const SettingsPresenter = () => {
           options={audioOutputOptions}
           selected={selectedOutputSource}
           onClick={(source) => {
-            setSelectedOutputSource(source);
-            roomsStore.setAudioOutput(source);
+            setSelectedOutputSource(source as string);
+            roomsStore.setAudioOutput(source as string);
           }}
         />
       </Flex>
@@ -174,8 +174,8 @@ const SettingsPresenter = () => {
           options={videoSourceOptions}
           selected={selectedVideoSource}
           onClick={(source) => {
-            setSelectedVideoSource(source);
-            roomsStore.setVideoInput(source);
+            setSelectedVideoSource(source as string);
+            roomsStore.setVideoInput(source as string);
           }}
         />
       </Flex>

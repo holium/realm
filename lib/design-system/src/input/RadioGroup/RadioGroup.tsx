@@ -9,7 +9,7 @@ import {
 
 export type RadioOption = {
   label: string;
-  value: string;
+  value: string | number;
   sublabel?: string;
   icon?: IconPathsType;
   disabled?: boolean;
@@ -40,7 +40,7 @@ export const RadioGroup = ({ options, selected, onClick }: Props) => (
         <RadioLabelContainer
           key={option.value}
           hasIcon={Boolean(option.icon)}
-          onClick={() => onClick(option.value)}
+          onClick={() => onClick(option.value as string)}
         >
           {isSelected && <RadioHighlight isSelected />}
           {option.icon && (

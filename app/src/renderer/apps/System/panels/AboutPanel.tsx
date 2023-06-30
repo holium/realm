@@ -40,9 +40,9 @@ const AboutPanelPresenter = () => {
                 { label: 'production', value: 'latest' },
               ]}
               selected={selectedChannel}
-              onClick={(channel: string) => {
-                setSelectedChannel(channel);
-                RealmIPC.setReleaseChannel(channel);
+              onClick={(channel) => {
+                setSelectedChannel(channel as string);
+                RealmIPC.setReleaseChannel(channel as string);
               }}
             />
           </>

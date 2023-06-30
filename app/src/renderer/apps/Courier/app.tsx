@@ -33,7 +33,7 @@ export const CourierAppPresenter = () => {
     clearInnerNavigation();
   }, [chatStore.subroute]);
 
-  if (chatStore.loader.isFirstLoad) {
+  if (chatStore.inboxInitLoader.isFirstLoad) {
     return (
       <Flex
         position="absolute"

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import { useTrayApps } from 'renderer/apps/store';
@@ -6,18 +6,39 @@ import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { SpeakerGrid } from '../components/SpeakerGrid';
+import { SpeakerGridStandaloneChat } from '../components/SpeakerGridStandaloneChat';
 import { roomTrayConfig } from '../config';
 import { useRoomsStore } from '../store/RoomsStoreContext';
 
-const VoiceViewPresenter = () => {
-  const roomsStore = useRoomsStore();
+type Props = {
+  isStandaloneChat?: boolean;
+};
 
+const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
+  const roomsStore = useRoomsStore();
+  const { setTrayAppHeight } = useTrayApps();
   const { loggedInAccount } = useAppState();
   const { friends } = useShipStore();
   const [activeSpeaker, setActiveSpeaker] = useState<string | null>(null);
 
-  const { setTrayAppHeight } = useTrayApps();
-  const peers = roomsStore.currentRoomPresent ?? [];
+  const ourId = useMemo(() => loggedInAccount?.serverId, [loggedInAccount]);
+  const peers = useMemo(
+    () => roomsStore.currentRoomPresent ?? [],
+    [roomsStore.currentRoomPresent]
+  );
+
+  // Sort peers in the following priority:
+  // #1: Active speaker
+  // #2: Ourself
+  const peersSorted = useMemo(() => {
+    return peers.slice().sort((a, b) => {
+      if (a === activeSpeaker) return -1;
+      if (b === activeSpeaker) return 1;
+      if (a === ourId) return -1;
+      if (b === ourId) return 1;
+      return 0;
+    });
+  }, [peers, activeSpeaker, ourId]);
 
   useEffect(() => {
     const regularHeight = roomTrayConfig.dimensions.height;
@@ -93,20 +114,25 @@ const VoiceViewPresenter = () => {
     return friends.getContactAvatarMetadata(peerId);
   };
 
-  const ourId = loggedInAccount?.serverId;
+  if (isStandaloneChat) {
+    return (
+      <SpeakerGridStandaloneChat
+        ourId={ourId ?? ''}
+        activeSpeaker={activeSpeaker ?? ourId ?? peersSorted[0]}
+        peers={peersSorted}
+        getContactMetadata={getContactMetadata}
+        getPeer={getPeer}
+        room={roomsStore.currentRoom}
+        kickPeer={roomsStore.kickPeer}
+        retryPeer={roomsStore.retryPeer}
+      />
+    );
+  }
 
   return (
     <SpeakerGrid
       activeSpeaker={activeSpeaker || ourId || null}
-      peers={peers.slice().sort((a, b) => {
-        if (a === ourId) {
-          return -1;
-        }
-        if (b === ourId) {
-          return 1;
-        }
-        return 0;
-      })}
+      peers={peersSorted}
       getContactMetadata={getContactMetadata}
       getPeer={getPeer}
       ourId={ourId ?? ''}

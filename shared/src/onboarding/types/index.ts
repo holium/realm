@@ -92,6 +92,7 @@ type OnboardingSignupPage =
   | '/verify-email'
   | '/choose-id'
   | '/upload-id'
+  | '/upload-id-disclaimer'
   | '/payment'
   | '/booting'
   | '/credentials'
