@@ -22,7 +22,7 @@ const PeersScroller = styled(Flex)`
 type Props = {
   ourId: string;
   peers: string[];
-  activeSpeaker: string | null;
+  activeSpeaker: string;
   room: RoomType;
   getPeer: (peerId: string) => any;
   getContactMetadata: (peerId: string) => any;
@@ -52,8 +52,8 @@ export const SpeakerGridStandaloneChat = ({
     const isOur = peerId === ourId;
     return (
       <Speaker
+        key={`peer-${peerId}`}
         isActive={activeSpeaker ? activeSpeaker === peerId : false}
-        key={peerId}
         room={room}
         type={room.creator === peerId ? 'creator' : 'speaker'}
         height={height}

@@ -114,7 +114,7 @@ const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
     return (
       <SpeakerGridStandaloneChat
         ourId={ourId ?? ''}
-        activeSpeaker={activeSpeaker || ourId || null}
+        activeSpeaker={activeSpeaker ?? ourId ?? peersSorted[0]}
         peers={peersSorted}
         getContactMetadata={getContactMetadata}
         getPeer={getPeer}
