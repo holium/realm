@@ -2,7 +2,6 @@ export * from './AppTile';
 export * from './Badge';
 export * from './ConnectionStatus';
 export * from './ContextMenu';
-export * from './Crest';
 export * from './Divider';
 export * from './Embeds/EmbedBox';
 export * from './Embeds/LinkPreview';

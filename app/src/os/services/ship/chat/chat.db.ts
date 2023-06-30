@@ -476,9 +476,9 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
       // deserialize the last message
       const lastMessage = row.lastMessage ? JSON.parse(row.lastMessage) : null;
       if (lastMessage && lastMessage.contents) {
-        lastMessage.contents = JSON.parse(lastMessage.contents).map(
-          (message: any) => message && JSON.parse(message)
-        );
+        lastMessage.contents = JSON.parse(lastMessage.contents)
+          .map((message: any) => message && JSON.parse(message))
+          .map(this._makeCustomContentTypeMessageFormat);
       }
       return {
         ...row,
@@ -490,6 +490,43 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         muted: row.muted === 1,
       };
     });
+  }
+
+  private _makeCustomContentTypeMessageFormat(msg: any) {
+    const key = Object.keys(msg)[0];
+    const allowed = [
+      'markdown',
+      'plain',
+      'bold',
+      'italics',
+      'strike',
+      'bold-italics',
+      'bold-strike',
+      'italics-strike',
+      'bold-italics-strike',
+      'blockquote',
+      'inline-code',
+      'ship',
+      'code',
+      'link',
+      'image',
+      'ur-link',
+      'react',
+      'status',
+      'break',
+    ];
+    if (allowed.includes(key)) {
+      return msg;
+    } else {
+      return {
+        custom: {
+          name: key,
+          value: msg[key],
+        },
+        metadata: msg.metadata,
+        reactions: msg.reactions,
+      };
+    }
   }
 
   getChat(path: string) {
@@ -582,9 +619,9 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     const rows = result.map((row: any) => {
       const lastMessage = row.lastMessage ? JSON.parse(row.lastMessage) : null;
       if (lastMessage && lastMessage.contents) {
-        lastMessage.contents = JSON.parse(lastMessage.contents).map(
-          (message: any) => message && JSON.parse(message)
-        );
+        lastMessage.contents = JSON.parse(lastMessage.contents)
+          .map((message: any) => message && JSON.parse(message))
+          .map(this._makeCustomContentTypeMessageFormat);
       }
       return {
         ...row,
@@ -667,12 +704,14 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         ...row,
         metadata: row.metadata ? this._parseMetadata(row.metadata) : [null],
         contents: row.contents
-          ? JSON.parse(row.contents).map((content: any) => {
-              if (content?.metadata) {
-                content.metadata = JSON.parse(content.metadata);
-              }
-              return content;
-            })
+          ? JSON.parse(row.contents)
+              .map((content: any) => {
+                if (content?.metadata) {
+                  content.metadata = JSON.parse(content.metadata);
+                }
+                return content;
+              })
+              .map(this._makeCustomContentTypeMessageFormat)
           : null,
         reactions: row.reactions ? JSON.parse(row.reactions) : [],
       };
@@ -717,13 +756,15 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
       return {
         ...row,
         contents: row.contents
-          ? JSON.parse(row.contents).map((content: any) => {
-              const parsedContent = content;
-              if (parsedContent?.metadata) {
-                parsedContent.metadata = JSON.parse(content.metadata);
-              }
-              return parsedContent;
-            })
+          ? JSON.parse(row.contents)
+              .map((content: any) => {
+                const parsedContent = content;
+                if (parsedContent?.metadata) {
+                  parsedContent.metadata = JSON.parse(content.metadata);
+                }
+                return parsedContent;
+              })
+              .map(this._makeCustomContentTypeMessageFormat)
           : null,
       };
     });

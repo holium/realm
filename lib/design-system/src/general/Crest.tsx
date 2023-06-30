@@ -8,17 +8,9 @@ export const isValidHexColor = (hex: string) => {
 };
 const urlRegex =
   /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
+
 export const isValidImageUrl = (url: string) => {
   return urlRegex.test(url);
-};
-
-export const isImgUrl = (url: string): Promise<boolean> => {
-  const img = new Image();
-  img.src = url;
-  return new Promise((resolve) => {
-    img.onerror = () => resolve(false);
-    img.onload = () => resolve(true);
-  });
 };
 
 const crestSize = {
@@ -70,15 +62,17 @@ export const ImageCrest = styled(motion.img)<CrestStyleProps>`
 `;
 
 interface ICrest {
-  picture?: string;
+  id?: string;
   color: string;
   size: keyof typeof crestSize;
+  picture?: string;
 }
 export const Crest: FC<ICrest> = (props: ICrest) => {
-  const { picture, color, size } = props;
+  const { picture, color, size, id } = props;
 
   return picture ? (
     <ImageCrest
+      id={id}
       height={crestSize[size]}
       width={crestSize[size]}
       borderRadius={crestRadius[size]}
@@ -87,20 +81,14 @@ export const Crest: FC<ICrest> = (props: ICrest) => {
     />
   ) : (
     <ColorCrest
+      id={id}
       initial={{ backgroundColor: color }}
       animate={{ backgroundColor: color }}
       height={crestSize[size]}
       width={crestSize[size]}
       borderRadius={crestRadius[size]}
       transition={{ backgroundColor: { duration: 0.5 } }}
-    >
-      {/* <CrestSymbol
-        fill={color}
-        transitionDuration={0.5}
-        height={crestSize[size] * 0.65}
-        width={crestSize[size] * 0.65}
-      /> */}
-    </ColorCrest>
+    />
   );
 };
 

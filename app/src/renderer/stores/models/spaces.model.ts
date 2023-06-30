@@ -198,6 +198,8 @@ export type SpaceModelType = Instance<typeof SpaceModel>;
 export const SpacesStore = types
   .model('SpacesStore', {
     loader: LoaderModel,
+    searchPath: types.optional(types.string, ''),
+    searching: types.optional(types.boolean, false),
     creating: types.optional(LoaderModel, { state: 'initial' }),
     join: types.optional(LoaderModel, { state: 'initial' }),
     selected: types.safeReference(SpaceModel),
@@ -211,6 +213,9 @@ export const SpacesStore = types
     }),
   })
   .views((self) => ({
+    get searchVisible() {
+      return self.searching;
+    },
     get isLoading() {
       return self.loader.state === 'loading';
     },
@@ -220,6 +225,11 @@ export const SpacesStore = types
     get spacesList() {
       return Array.from(self.spaces.values()).filter(
         (space: SpaceModelType) => space.type !== 'our'
+      );
+    },
+    get allSpacePaths() {
+      return Array.from(self.spaces.values()).map(
+        (space: SpaceModelType) => `/spaces${space.path}`
       );
     },
     get ourSpace() {
@@ -269,6 +279,12 @@ export const SpacesStore = types
         self.loader.set('error');
       }
     }),
+    setSearchVisible(flag: boolean) {
+      self.searching = flag;
+    },
+    setSearchPath(path: string) {
+      self.searchPath = path;
+    },
     selectSpace(spacePath: string) {
       self.selected = self.spaces.get(spacePath);
       if (self.selected) {

@@ -44,6 +44,8 @@ export type BubbleProps = {
   innerRef?: Ref<HTMLDivElement>;
   onReaction?: (payload: OnReactionPayload) => void;
   onReplyClick?: (msgId: string) => void;
+  onJoinSpaceClick?: (spacePath: string) => void;
+  allSpacePaths?: string[];
   error?: string;
 } & BoxProps;
 
@@ -69,6 +71,8 @@ export const Bubble = ({
   expiresAt,
   onReaction,
   onReplyClick,
+  onJoinSpaceClick,
+  allSpacePaths,
   error,
 }: BubbleProps) => {
   const [dateDisplay, setDateDisplay] = useState(chatDate(new Date(sentAt)));
@@ -137,7 +141,15 @@ export const Bubble = ({
       return (
         <span id={id} key={`${id}-index-${index}`}>
           {prevLineBreak}
-          {renderFragment(id, fragment, index, author, onReplyClick)}
+          {renderFragment(
+            id,
+            fragment,
+            index,
+            author,
+            onReplyClick,
+            onJoinSpaceClick,
+            allSpacePaths
+          )}
           {nextLineBreak}
         </span>
       );
