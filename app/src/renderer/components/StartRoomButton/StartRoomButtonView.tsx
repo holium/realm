@@ -29,16 +29,23 @@ const buttonCopy: Record<StartRoomButtonState, string> = {
 type Props = {
   state: StartRoomButtonState;
   participants: ContactData[];
+  isStandaloneChat: boolean;
   onClick: () => void;
 };
 
 export const StartRoomButtonView = ({
   state,
   participants,
+  isStandaloneChat,
   onClick,
 }: Props) => {
   const firstThreeParticipants = participants.slice(0, 3);
   const remainingParticipants = participants.slice(3);
+
+  // Just show first word in docked mode.
+  const copy = isStandaloneChat
+    ? buttonCopy[state]
+    : buttonCopy[state].split(' ')[0];
 
   return (
     <PillContainer>
@@ -55,15 +62,15 @@ export const StartRoomButtonView = ({
           }}
           onClick={onClick}
         >
-          {buttonCopy[state]}
+          {copy}
         </Button.Primary>
-        {state !== 'start' && participants.length > 0 && (
+        {/* We don't show AvatarRow in docked mode since we have the Rooms Dock */}
+        {state !== 'start' && participants.length > 0 && isStandaloneChat && (
           <AvatarRow
             people={firstThreeParticipants}
             size={24}
             offset={6}
             borderRadiusOverride="5px"
-            // border="1px solid #E0EAF5"
           />
         )}
         {remainingParticipants.length > 0 && (

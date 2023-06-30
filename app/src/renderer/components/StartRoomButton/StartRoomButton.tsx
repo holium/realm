@@ -74,6 +74,7 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
     <StartRoomButtonView
       participants={participants}
       state={existingRoom ? (areWeInRoom ? 'leave' : 'join') : 'start'}
+      isStandaloneChat={isStandaloneChat}
       onClick={onClickRoom}
     />
   );
