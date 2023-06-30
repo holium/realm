@@ -171,6 +171,7 @@ const SpeakerPresenter = ({
             height: '100%',
             objectFit: 'cover',
             borderRadius: '9px',
+            background: 'black',
           }}
           id={`peer-video-${person}`}
           autoPlay
@@ -298,7 +299,6 @@ const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
   }
   background: transparent;
   &.speaker-video-on {
-    background: black;
     transition: 0.25s ease;
     .speaker-name {
       color: #fff;
