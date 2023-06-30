@@ -40,16 +40,15 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
 
     if (existingRoom) {
       if (areWeInRoom) {
-        if (existingRoom?.present.length === 1) {
+        SoundActions.playRoomLeave();
+        // LEAVE ROOM
+        SoundActions.playRoomLeave();
+        roomsStore.leaveRoom(existingRoom.rid);
+        if (subroute === 'room') setSubroute('chat');
+
+        if (existingRoom?.present.length === 0) {
           // DELETE ROOM
-          SoundActions.playRoomLeave();
           roomsStore.deleteRoom(existingRoom.rid);
-          if (subroute === 'room') setSubroute('chat');
-        } else {
-          // LEAVE ROOM
-          SoundActions.playRoomLeave();
-          roomsStore.leaveRoom(existingRoom.rid);
-          if (subroute === 'room') setSubroute('chat');
         }
       } else {
         // JOIN ROOM
