@@ -278,7 +278,8 @@ const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
   border-radius: 9px;
   transition: 0.25s ease;
   position: relative;
-  outline: 2px solid transparent;
+  border: 2px solid transparent;
+  box-sizing: border-box;
 
   ${({ height }) =>
     height &&
@@ -293,7 +294,7 @@ const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
   &.speaker-speaking {
     transition: 0.25s ease;
     z-index: 2;
-    outline: 2px solid rgba(var(--rlm-accent-rgba));
+    border: 2px solid rgba(var(--rlm-accent-rgba));
   }
   background: transparent;
   &.speaker-video-on {
