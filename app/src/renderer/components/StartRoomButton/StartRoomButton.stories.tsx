@@ -45,7 +45,13 @@ export const StartRoomStory: ComponentStory<
   typeof StartRoomButtonView
 > = () => (
   <Flex p="32px">
-    <StartRoomButtonView state="start" participants={[]} onClick={() => {}} />
+    <StartRoomButtonView
+      state="start"
+      participants={[]}
+      isStandaloneChat
+      onClickButton={() => {}}
+      onClickAvatar={() => {}}
+    />
   </Flex>
 );
 
@@ -56,7 +62,9 @@ export const JoinRoomStory: ComponentStory<typeof StartRoomButtonView> = () => (
     <StartRoomButtonView
       state="join"
       participants={mockParticipants}
-      onClick={() => {}}
+      isStandaloneChat
+      onClickButton={() => {}}
+      onClickAvatar={() => {}}
     />
   </Flex>
 );
@@ -70,7 +78,9 @@ export const LeaveRoomStory: ComponentStory<
     <StartRoomButtonView
       state="leave"
       participants={mockParticipants}
-      onClick={() => {}}
+      isStandaloneChat
+      onClickButton={() => {}}
+      onClickAvatar={() => {}}
     />
   </Flex>
 );

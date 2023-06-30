@@ -40,52 +40,49 @@ const StandaloneChatRoomPresenter = () => {
     creator.length > 14 ? `${creator.substring(0, 14)}...` : creator;
 
   return (
-    <Flex flex={1} flexDirection="column">
+    <Flex flex={1} flexDirection="column" width="100%">
       <Flex
-        flexDirection="row"
-        justifyContent="space-between"
         alignItems="center"
         height="58px"
+        gap={10}
+        padding="0 12px"
         borderBottom="1px solid var(--rlm-base-color)"
       >
-        <Flex gap={10} justifyContent="center" alignItems="center">
-          <Button.IconButton
-            className="realm-cursor-hover"
-            size={26}
-            onClick={() => chatStore.setSubroute('chat')}
+        <Button.IconButton
+          size={26}
+          onClick={() => chatStore.setSubroute('chat')}
+        >
+          <Icon name="ArrowLeftLine" size={22} opacity={0.7} />
+        </Button.IconButton>
+        <Flex flexDirection="column">
+          <Text.Custom
+            fontSize={3}
+            fontWeight={600}
+            opacity={0.8}
+            style={{
+              wordWrap: 'normal',
+              textOverflow: 'ellipsis',
+              textTransform: 'uppercase',
+            }}
           >
-            <Icon name="ArrowLeftLine" size={22} opacity={0.7} />
-          </Button.IconButton>
-          <Flex flexDirection="column">
-            <Text.Custom
-              fontSize={3}
-              fontWeight={600}
-              opacity={0.8}
-              style={{
-                wordWrap: 'normal',
-                textOverflow: 'ellipsis',
-                textTransform: 'uppercase',
-              }}
-            >
-              {title}
+            {title}
+          </Text.Custom>
+          <Flex mt="2px">
+            <Text.Custom fontSize={2} fontWeight={400} opacity={0.5}>
+              {creatorStr}
             </Text.Custom>
-            <Flex mt="2px">
-              <Text.Custom fontSize={2} fontWeight={400} opacity={0.5}>
-                {creatorStr}
-              </Text.Custom>
-              <Text.Custom mx="6px" fontSize={2} fontWeight={400} opacity={0.5}>
-                •
-              </Text.Custom>
-              <Text.Custom fontSize={2} fontWeight={400} opacity={0.5}>
-                {`${presentCount} ${presentCount === 1 ? 'person' : 'people'}`}
-              </Text.Custom>
-            </Flex>
+            <Text.Custom mx="6px" fontSize={2} fontWeight={400} opacity={0.5}>
+              •
+            </Text.Custom>
+            <Text.Custom fontSize={2} fontWeight={400} opacity={0.5}>
+              {`${presentCount} ${presentCount === 1 ? 'person' : 'people'}`}
+            </Text.Custom>
           </Flex>
         </Flex>
       </Flex>
       <Flex flex={1} flexDirection="column">
         <Flex flex={1}>
-          <VoiceView />
+          <VoiceView isStandaloneChat />
         </Flex>
         <Flex
           width="100%"

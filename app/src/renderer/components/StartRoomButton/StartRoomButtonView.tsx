@@ -30,14 +30,16 @@ type Props = {
   state: StartRoomButtonState;
   participants: ContactData[];
   isStandaloneChat: boolean;
-  onClick: () => void;
+  onClickButton: () => void;
+  onClickAvatar: () => void;
 };
 
 export const StartRoomButtonView = ({
   state,
   participants,
   isStandaloneChat,
-  onClick,
+  onClickButton,
+  onClickAvatar,
 }: Props) => {
   const firstThreeParticipants = participants.slice(0, 3);
   const remainingParticipants = participants.slice(3);
@@ -60,30 +62,41 @@ export const StartRoomButtonView = ({
             borderRadius: '999px',
             backgroundColor: '#ffffff',
           }}
-          onClick={onClick}
+          onClick={onClickButton}
         >
           {copy}
         </Button.Primary>
         {/* We don't show AvatarRow in docked mode since we have the Rooms Dock */}
-        {state !== 'start' && participants.length > 0 && isStandaloneChat && (
-          <AvatarRow
-            people={firstThreeParticipants}
-            size={24}
-            offset={6}
-            borderRadiusOverride="5px"
-          />
-        )}
-        {remainingParticipants.length > 0 && (
-          <Text.Body
-            style={{
-              color: 'var(--rlm-accent-color)',
-            }}
-          >
-            +{remainingParticipants.length}
-          </Text.Body>
-        )}
+        <Flex
+          alignItems="center"
+          style={{ cursor: state !== 'start' ? 'pointer' : 'auto' }}
+          onClick={onClickAvatar}
+        >
+          {state !== 'start' && participants.length > 0 && isStandaloneChat && (
+            <AvatarRow
+              people={firstThreeParticipants}
+              size={24}
+              offset={6}
+              borderRadiusOverride="5px"
+            />
+          )}
+          {remainingParticipants.length > 0 && (
+            <Text.Body
+              style={{
+                color: 'var(--rlm-accent-color)',
+              }}
+            >
+              +{remainingParticipants.length}
+            </Text.Body>
+          )}
+        </Flex>
       </Flex>
-      <StartRoomSvg />
+      <Flex
+        style={{ cursor: state !== 'start' ? 'pointer' : 'auto' }}
+        onClick={onClickAvatar}
+      >
+        <StartRoomSvg />
+      </Flex>
     </PillContainer>
   );
 };

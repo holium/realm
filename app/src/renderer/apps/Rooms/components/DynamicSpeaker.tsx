@@ -17,7 +17,7 @@ interface ISpeaker {
   isActive?: boolean;
   person: string;
   cursors?: boolean;
-  size?: 'tray' | 'full';
+  height?: string;
   type: 'speaker' | 'listener' | 'creator';
   isOur: boolean;
   ourId: string;
@@ -35,21 +35,19 @@ const speakerType = {
   listener: 'Listener',
 };
 
-const SpeakerPresenter = (props: ISpeaker) => {
-  const {
-    size = 'tray',
-    person,
-    type,
-    isOur,
-    ourId,
-    metadata,
-    isActive = false,
-    peer,
-    kickPeer,
-    retryPeer,
-    room,
-  } = props;
-
+const SpeakerPresenter = ({
+  height = 'auto',
+  person,
+  type,
+  isOur,
+  ourId,
+  metadata,
+  isActive = false,
+  peer,
+  kickPeer,
+  retryPeer,
+  room,
+}: ISpeaker) => {
   const speakerRef = useRef<any>(null);
   const videoRef = useRef<any>(null);
   const { getOptions, setOptions } = useContextMenu();
@@ -143,7 +141,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
   return (
     <SpeakerWrapper
       id={`room-speaker-${person}`}
-      size={size}
+      height={height}
       ref={speakerRef}
       key={person}
       gap={4}
@@ -272,7 +270,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
 export const Speaker = observer(SpeakerPresenter);
 
 type SpeakerWrapperProps = {
-  size: 'tray' | 'full';
+  height: string;
 };
 
 const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
@@ -281,6 +279,12 @@ const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
   transition: 0.25s ease;
   position: relative;
   outline: 2px solid transparent;
+
+  ${({ height }) =>
+    height &&
+    `
+    height: ${height};
+  `}
 
   &:hover {
     transition: 0.25s ease;

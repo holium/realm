@@ -6,10 +6,15 @@ import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { SpeakerGrid } from '../components/SpeakerGrid';
+import { SpeakerGridStandaloneChat } from '../components/SpeakerGridStandaloneChat';
 import { roomTrayConfig } from '../config';
 import { useRoomsStore } from '../store/RoomsStoreContext';
 
-const VoiceViewPresenter = () => {
+type Props = {
+  isStandaloneChat: boolean;
+};
+
+const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
   const roomsStore = useRoomsStore();
 
   const { loggedInAccount } = useAppState();
@@ -95,18 +100,35 @@ const VoiceViewPresenter = () => {
 
   const ourId = loggedInAccount?.serverId;
 
+  const peersSorted = peers.slice().sort((a, b) => {
+    if (a === ourId) {
+      return -1;
+    }
+    if (b === ourId) {
+      return 1;
+    }
+    return 0;
+  });
+
+  if (isStandaloneChat) {
+    return (
+      <SpeakerGridStandaloneChat
+        ourId={ourId ?? ''}
+        activeSpeaker={activeSpeaker || ourId || null}
+        peers={peersSorted}
+        getContactMetadata={getContactMetadata}
+        getPeer={getPeer}
+        room={roomsStore.currentRoom}
+        kickPeer={roomsStore.kickPeer}
+        retryPeer={roomsStore.retryPeer}
+      />
+    );
+  }
+
   return (
     <SpeakerGrid
       activeSpeaker={activeSpeaker || ourId || null}
-      peers={peers.slice().sort((a, b) => {
-        if (a === ourId) {
-          return -1;
-        }
-        if (b === ourId) {
-          return 1;
-        }
-        return 0;
-      })}
+      peers={peersSorted}
       getContactMetadata={getContactMetadata}
       getPeer={getPeer}
       ourId={ourId ?? ''}

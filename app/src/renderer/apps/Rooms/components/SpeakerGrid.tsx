@@ -6,7 +6,6 @@ import { RoomType } from './rooms.stories';
 
 type SpeakerGridProps = {
   ourId: string;
-  size?: 'tray' | 'full';
   columns?: number;
   peers: string[];
   activeSpeaker: string | null;
@@ -22,7 +21,6 @@ export const SpeakerGridPresenter = ({
   activeSpeaker,
   peers,
   room,
-  size = 'tray',
   columns = 2,
   getContactMetadata,
   getPeer,
@@ -37,7 +35,6 @@ export const SpeakerGridPresenter = ({
       <Speaker
         isActive={activeSpeaker ? activeSpeaker === peerId : false}
         key={peerId}
-        size={size}
         room={room}
         type={room.creator === peerId ? 'creator' : 'speaker'}
         person={peerId}
@@ -53,7 +50,6 @@ export const SpeakerGridPresenter = ({
 
   return (
     <SpeakerGridStyle
-      size={size}
       activeSpeaker={activeSpeaker}
       peers={peers}
       columns={columns}
@@ -66,7 +62,6 @@ export const SpeakerGridPresenter = ({
 export const SpeakerGrid = observer(SpeakerGridPresenter);
 
 type SpeakerGridStyleProps = {
-  size: 'tray' | 'full';
   columns: number;
   peers: string[];
   activeSpeaker: string | null;
@@ -124,9 +119,9 @@ const SpeakerGridStyle = styled.div<SpeakerGridStyleProps>`
     overflow: visible;
   }
 
-  ${({ peers, size }: SpeakerGridStyleProps) => css`
-    grid-template-columns: ${size === 'tray' ? '1fr 1fr' : '4fr 1fr'};
-    grid-template-rows: ${size === 'tray' ? '240px' : '186px'};
+  ${({ peers }: SpeakerGridStyleProps) => css`
+    grid-template-columns: '1fr 1fr';
+    grid-template-rows: '240px';
     grid-auto-rows: 156px;
 
     ${peers.length >= 4 &&

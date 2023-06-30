@@ -26,7 +26,7 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
       return friends.getContactAvatarMetadata(patp);
     }) ?? [];
 
-  const onClickRoom = async () => {
+  const onClickButton = async () => {
     if (!selectedChat) return;
 
     const areWeInRoomInOtherChat =
@@ -70,12 +70,19 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
     }
   };
 
+  const onClickAvatar = () => {
+    if (existingRoom && isStandaloneChat) {
+      setSubroute('room');
+    }
+  };
+
   return (
     <StartRoomButtonView
       participants={participants}
       state={existingRoom ? (areWeInRoom ? 'leave' : 'join') : 'start'}
       isStandaloneChat={isStandaloneChat}
-      onClick={onClickRoom}
+      onClickButton={onClickButton}
+      onClickAvatar={onClickAvatar}
     />
   );
 };
