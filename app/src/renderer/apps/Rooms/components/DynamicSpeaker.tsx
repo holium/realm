@@ -12,6 +12,7 @@ import { PeerClass } from '../store/Peer';
 import { PeerConnectionState } from '../store/room.types';
 import { AudioWave } from './AudioWave';
 import { RoomType } from './rooms.stories';
+import { Video } from './Video';
 
 interface ISpeaker {
   isActive?: boolean;
@@ -63,7 +64,6 @@ const SpeakerPresenter = ({
       videoRef.current.srcObject = peer.videoStream;
       videoRef.current.style.display = 'inline-block';
       videoRef.current.playsInline = true;
-      // videoRef.current.muted = true;
     }
   }, [peer?.hasVideo, videoRef.current]);
 
@@ -156,28 +156,7 @@ const SpeakerPresenter = ({
       } ${isSpeaking ? 'speaker-speaking' : ''}`}
     >
       <>
-        <video
-          ref={videoRef}
-          style={{
-            zIndex: 0,
-            display: 'none',
-            position: 'absolute',
-            pointerEvents: 'none',
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            borderRadius: '9px',
-            background: 'black',
-          }}
-          id={`peer-video-${person}`}
-          autoPlay
-          playsInline
-          muted
-        />
+        <Video id={`peer-video-${person}`} innerRef={videoRef} />
         <Flex
           zIndex={2}
           className="speaker-avatar-wrapper"
@@ -275,8 +254,10 @@ type SpeakerWrapperProps = {
 };
 
 const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
+  position: relative;
   padding: 16px 0;
   border-radius: 9px;
+  overflow: hidden;
   transition: 0.25s ease;
   position: relative;
   border: 2px solid transparent;

@@ -46,6 +46,7 @@ const StandaloneChatRoomPresenter = () => {
         height="58px"
         gap={10}
         padding="0 12px"
+        background="var(--rlm-window-color)"
         borderBottom="1px solid var(--rlm-base-color)"
       >
         <Button.IconButton
@@ -91,6 +92,7 @@ const StandaloneChatRoomPresenter = () => {
           flexDirection="row"
           alignItems="center"
           justifyContent="space-between"
+          background="var(--rlm-window-color)"
           borderTop="1px solid var(--rlm-base-color)"
           px={1}
           pb={1}
