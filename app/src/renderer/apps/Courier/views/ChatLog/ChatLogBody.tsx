@@ -100,11 +100,11 @@ const ChatLogBodyPresenter = ({
           <div
             style={{
               position: 'absolute',
-              left: 12,
-              bottom: 8,
+              top: isStandaloneChat ? 8 : 0,
+              right: isStandaloneChat ? 12 : 0,
             }}
           >
-            <Spinner size="16px" width={1.5} color="var(--rlm-text-color)" />
+            <Spinner size="16px" width={1.5} color="var(--rlm-accent-color)" />
           </div>
         )}
       </Flex>
