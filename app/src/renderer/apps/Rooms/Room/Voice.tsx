@@ -11,7 +11,7 @@ import { roomTrayConfig } from '../config';
 import { useRoomsStore } from '../store/RoomsStoreContext';
 
 type Props = {
-  isStandaloneChat: boolean;
+  isStandaloneChat?: boolean;
 };
 
 const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
