@@ -50,7 +50,7 @@ const ChatLogBodyPresenter = ({
   onSend,
 }: Props) => {
   const { chatStore } = useShipStore();
-  const { selectedChat, setSubroute, inboxLoader } = chatStore;
+  const { selectedChat, setSubroute, chatLoader } = chatStore;
 
   const messages = selectedChat?.messages ?? [];
 
@@ -93,7 +93,7 @@ const ChatLogBodyPresenter = ({
           pinnedChatMessage={pinnedChatMessage}
           isStandaloneChat={isStandaloneChat}
           isEmpty={messages.length === 0}
-          isLoaded={inboxLoader.isLoaded}
+          isLoaded={chatLoader.isLoaded}
         />
       </Flex>
       <ChatInputContainer isStandaloneChat={isStandaloneChat}>

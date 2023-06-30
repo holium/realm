@@ -227,7 +227,7 @@ export const ShipBarPresenter = () => {
             }}
           >
             <Scroller>
-              {chatStore.loader.isFirstLoad ? (
+              {chatStore.inboxInitLoader.isFirstLoad ? (
                 <Flex
                   isSkeleton
                   flexDirection="column"

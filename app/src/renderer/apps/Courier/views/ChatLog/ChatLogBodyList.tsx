@@ -34,12 +34,16 @@ export const ChatLogBodyList = ({
   isStandaloneChat,
   pinnedChatMessage,
 }: Props) => {
-  if (isEmpty && isLoaded) {
-    return (
-      <Text.Custom textAlign="center" width={300} fontSize={3} opacity={0.5}>
-        You haven't sent or received any messages in this chat yet.
-      </Text.Custom>
-    );
+  if (isEmpty) {
+    if (isLoaded) {
+      return (
+        <Text.Custom textAlign="center" width={300} fontSize={3} opacity={0.5}>
+          You haven't sent or received any messages in this chat yet.
+        </Text.Custom>
+      );
+    }
+
+    return null;
   }
 
   return (

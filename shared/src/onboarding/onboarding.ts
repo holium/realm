@@ -2,7 +2,6 @@ export { FormField } from '../form/FormField';
 export { AccountDialogSkeleton } from './components/AccountDialog';
 export { SidebarSection } from './components/AccountDialog';
 export { ForgotPassword } from './components/ForgotPassword';
-export { LearnMoreModal } from './components/LearnMoreModal';
 export { ChangeEmailModal } from './components/modals/ChangeEmailModal';
 export { ChangeMaintenanceWindowModal } from './components/modals/ChangeMaintenanceWindowModal';
 export { ChangePasswordModal } from './components/modals/ChangePasswordModal';

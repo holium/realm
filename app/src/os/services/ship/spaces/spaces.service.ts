@@ -83,6 +83,7 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
   private _onEvent = (data: any, _id?: number, mark?: string) => {
     if (mark === 'spaces-reaction') {
       const spacesType = Object.keys(data)[0];
+      const currPath = this.spacesDB?.getCurrent()?.path;
       switch (spacesType) {
         case 'initial':
           // TODO this DROP is here until we get the agent refactor with lastTimestamp scries
@@ -93,7 +94,7 @@ export class SpacesService extends AbstractService<SpacesUpdateType> {
             `);
           }
           this.spacesDB?.insertAll(data['initial'].spaces);
-          this.spacesDB?.setCurrent(data['initial'].current.path);
+          this.spacesDB?.setCurrent(currPath || data.initial.current.path);
           this.membersDB?.insertAll(data['initial'].membership);
           this.sendUpdate({
             type: 'initial',

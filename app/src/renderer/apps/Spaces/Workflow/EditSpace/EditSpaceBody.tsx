@@ -2,16 +2,16 @@ import { ChangeEvent, useEffect, useState } from 'react';
 
 import {
   Button,
+  Crest,
   Flex,
   Icon,
+  isImgUrl,
   Spinner,
   Text,
 } from '@holium/design-system/general';
 import { RadioGroup, RadioList, TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
 import { CreateSpaceInvitePayload } from '@holium/shared';
-
-import { Crest, isImgUrl } from 'renderer/components/Crest';
 
 import { EditSpaceColor } from './EditSpaceColor';
 import { joinApi } from './JoinApi';

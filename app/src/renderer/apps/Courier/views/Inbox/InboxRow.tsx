@@ -39,12 +39,7 @@ export const InboxRow = ({
       isSelectedSpaceChat={isSelectedSpaceChat}
       className={className}
     >
-      <StyledInboxRow
-        className="chat-inbox-row"
-        isPinned={isPinned}
-        // layout="preserve-aspect"
-        // layoutId={isStandaloneChat ? undefined : `chat-${inbox.path}-container`}
-      >
+      <StyledInboxRow className="chat-inbox-row">
         <ChatRow
           path={inbox.path}
           title={inbox.metadata.title}
@@ -54,7 +49,6 @@ export const InboxRow = ({
           timestamp={inbox.createdAt || inbox.metadata.timestamp}
           metadata={inbox.metadata}
           peersGetBacklog={inbox.peersGetBacklog}
-          muted={inbox.muted}
           isStandaloneChat={isStandaloneChat}
           onClick={(evt) => {
             evt.stopPropagation();

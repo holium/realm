@@ -393,7 +393,7 @@
   [cards state]
 ::
 ++  delete-message
-::  :realm-chat &action [%delete-message /realm-chat/path-id ~2023.2.3..16.23.37..72f6 ~zod]
+::  :realm-chat &chat-action [%delete-message /realm-chat/path-id ~2023.2.3..16.23.37..72f6 ~zod]
   |=  [act=[=path =msg-id:db] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   ?>  =(src.bowl our.bowl)
@@ -703,7 +703,7 @@
           [%break ul]
           [%ship de-ship]
           [%link so]
-          [%custom (at ~[so so])]
+          [%custom (ot ~[[%name so] [%value so]])]
           [%status so]
       ==
     ::
