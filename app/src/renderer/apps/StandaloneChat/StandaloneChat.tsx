@@ -9,6 +9,7 @@ import { useAppState } from 'renderer/stores/app.store';
 import { RealmIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
 
+import { RoomsStoreProvider } from '../Rooms/store/RoomsStoreProvider';
 import { StandaloneChatBody } from './StandaloneChatBody';
 
 export const StandaloneChatPresenter = () => {
@@ -21,24 +22,28 @@ export const StandaloneChatPresenter = () => {
     spacesStore.selectSpace(ourSpace);
   }, []);
 
+  if (!loggedInAccount) return null;
+
   return (
-    <ViewPort>
-      <Layer zIndex={20}>
-        <ConnectionStatus
-          serverId={loggedInAccount?.serverId || ''}
-          themeMode={theme.mode as 'light' | 'dark'}
-          status={connectionStatus as ConduitState}
-          onReconnect={() => {
-            console.log('reconnect');
-            RealmIPC.reconnectConduit();
-          }}
-          onSendBugReport={() => {
-            console.log('send bug report');
-          }}
-        />
-      </Layer>
-      <StandaloneChatBody />
-    </ViewPort>
+    <RoomsStoreProvider ourId={loggedInAccount.serverId}>
+      <ViewPort>
+        <Layer zIndex={20}>
+          <ConnectionStatus
+            serverId={loggedInAccount?.serverId || ''}
+            themeMode={theme.mode as 'light' | 'dark'}
+            status={connectionStatus as ConduitState}
+            onReconnect={() => {
+              console.log('reconnect');
+              RealmIPC.reconnectConduit();
+            }}
+            onSendBugReport={() => {
+              console.log('send bug report');
+            }}
+          />
+        </Layer>
+        <StandaloneChatBody />
+      </ViewPort>
+    </RoomsStoreProvider>
   );
 };
 

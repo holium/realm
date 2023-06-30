@@ -2,9 +2,10 @@ import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
-import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
+import { Button, Flex, Icon } from '@holium/design-system/general';
 import { Menu, MenuItemProps } from '@holium/design-system/navigation';
 
+import { StartRoomButton } from 'renderer/components/StartRoomButton/StartRoomButton';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -45,7 +46,7 @@ const ChatLogHeaderPresenter = ({
 }: Props) => {
   const { loggedInAccount, shellStore } = useAppState();
   const { chatStore } = useShipStore();
-  const { selectedChat, chatLoader, setSubroute, toggleMuted } = chatStore;
+  const { selectedChat, setSubroute, toggleMuted } = chatStore;
   const isSpaceChat = selectedChat?.type === 'space';
 
   const chatLogId = useMemo(() => `chat-log-${path}`, [path]);
@@ -142,22 +143,22 @@ const ChatLogHeaderPresenter = ({
         )}
         <ChatLogHeaderContent isStandaloneChat={isStandaloneChat} />
       </Flex>
-      <Flex gap={8}>
-        {chatLoader.isLoading && (
-          <Spinner size="16px" width={1.5} color="var(--rlm-text-color)" />
-        )}
+      <Flex gap="12px" alignItems="center">
         {hasMenu && (
-          <Menu
-            id={`chat-${path}-menu`}
-            orientation="bottom-left"
-            offset={{ x: 2, y: 2 }}
-            triggerEl={
-              <Button.IconButton size={26}>
-                <Icon name="MoreHorizontal" size={22} opacity={0.5} />
-              </Button.IconButton>
-            }
-            options={contextMenuOptions}
-          />
+          <>
+            <StartRoomButton isStandaloneChat={isStandaloneChat} />
+            <Menu
+              id={`chat-${path}-menu`}
+              orientation="bottom-left"
+              offset={{ x: 2, y: 2 }}
+              triggerEl={
+                <Button.IconButton size={26}>
+                  <Icon name="MoreHorizontal" size={22} opacity={0.5} />
+                </Button.IconButton>
+              }
+              options={contextMenuOptions}
+            />
+          </>
         )}
       </Flex>
     </ChatLogHeaderContainer>

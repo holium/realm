@@ -5,12 +5,11 @@ import {
   Crest,
   Flex,
   Icon,
-  isImgUrl,
   Spinner,
   Text,
 } from '@holium/design-system/general';
 import { RadioGroup, RadioList, TextInput } from '@holium/design-system/inputs';
-import { useToggle } from '@holium/design-system/util';
+import { isImgUrl, useToggle } from '@holium/design-system/util';
 import { CreateSpaceInvitePayload } from '@holium/shared';
 
 import { EditSpaceColor } from './EditSpaceColor';
