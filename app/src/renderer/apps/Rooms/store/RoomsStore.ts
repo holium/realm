@@ -275,8 +275,8 @@ export class RoomsStore extends EventsEmitter {
   }
 
   getSpaceRooms(space: string) {
-    return Array.from(this.rooms.values()).filter(
-      (room) => room.path === space
+    return Array.from(this.rooms.values()).filter((room) =>
+      room.path?.includes(space)
     );
   }
 
