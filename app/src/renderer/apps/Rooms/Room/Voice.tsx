@@ -27,8 +27,9 @@ const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
     [roomsStore.currentRoomPresent]
   );
 
-  // Sort peers so that activeSpeaker is always first
-  // and our peer is always second.
+  // Sort peers in the following priority:
+  // #1: Active speaker
+  // #2: Ourself
   const peersSorted = useMemo(() => {
     return peers.slice().sort((a, b) => {
       if (a === activeSpeaker) return -1;
