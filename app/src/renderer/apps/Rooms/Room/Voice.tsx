@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import { useTrayApps } from 'renderer/apps/store';
@@ -16,13 +16,28 @@ type Props = {
 
 const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
   const roomsStore = useRoomsStore();
-
+  const { setTrayAppHeight } = useTrayApps();
   const { loggedInAccount } = useAppState();
   const { friends } = useShipStore();
   const [activeSpeaker, setActiveSpeaker] = useState<string | null>(null);
 
-  const { setTrayAppHeight } = useTrayApps();
-  const peers = roomsStore.currentRoomPresent ?? [];
+  const ourId = useMemo(() => loggedInAccount?.serverId, [loggedInAccount]);
+  const peers = useMemo(
+    () => roomsStore.currentRoomPresent ?? [],
+    [roomsStore.currentRoomPresent]
+  );
+
+  // Sort peers so that activeSpeaker is always first
+  // and our peer is always second.
+  const peersSorted = useMemo(() => {
+    return peers.slice().sort((a, b) => {
+      if (a === activeSpeaker) return -1;
+      if (b === activeSpeaker) return 1;
+      if (a === ourId) return -1;
+      if (b === ourId) return 1;
+      return 0;
+    });
+  }, [peers, activeSpeaker, ourId]);
 
   useEffect(() => {
     const regularHeight = roomTrayConfig.dimensions.height;
@@ -97,18 +112,6 @@ const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
   const getContactMetadata = (peerId: string) => {
     return friends.getContactAvatarMetadata(peerId);
   };
-
-  const ourId = loggedInAccount?.serverId;
-
-  const peersSorted = peers.slice().sort((a, b) => {
-    if (a === ourId) {
-      return -1;
-    }
-    if (b === ourId) {
-      return 1;
-    }
-    return 0;
-  });
 
   if (isStandaloneChat) {
     return (

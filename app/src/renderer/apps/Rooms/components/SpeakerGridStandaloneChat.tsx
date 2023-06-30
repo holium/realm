@@ -42,22 +42,18 @@ export const SpeakerGridStandaloneChat = ({
   retryPeer,
   kickPeer,
 }: Props) => {
-  const peersWithoutActiveSpeaker = peers.filter(
-    (peer: string) => peer !== activeSpeaker
-  );
-
   const renderPeer = (peerId: string, height: string) => {
     const metadata = getContactMetadata(peerId);
     const peerObj = getPeer(peerId);
     const isOur = peerId === ourId;
     return (
       <Speaker
-        key={`peer-${peerId}`}
+        key={peerId}
+        person={peerId}
         isActive={activeSpeaker ? activeSpeaker === peerId : false}
         room={room}
         type={room.creator === peerId ? 'creator' : 'speaker'}
         height={height}
-        person={peerId}
         isOur={isOur}
         ourId={ourId}
         metadata={metadata}
@@ -79,14 +75,14 @@ export const SpeakerGridStandaloneChat = ({
     >
       <Flex flex={1}>
         <Box height="100%" width="100%">
-          {activeSpeaker && renderPeer(activeSpeaker, '100%')}
+          {renderPeer(peers[0], '100%')}
         </Box>
       </Flex>
-      {peersWithoutActiveSpeaker.length > 0 && (
+      {peers.slice(1).length > 0 && (
         <PeersScroller>
-          {peersWithoutActiveSpeaker.map((peerId: string, i) => (
+          {peers.slice(1).map((peerId: string) => (
             <Box
-              key={`peer-${i}-${peerId}`}
+              key={`${peerId}-box`}
               width="250px"
               minWidth="250px"
               height="250px"
