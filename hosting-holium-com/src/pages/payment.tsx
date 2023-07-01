@@ -17,16 +17,21 @@ import { useNavigation } from '../util/useNavigation';
 
 type ServerSideProps = {
   products: ThirdEarthProduct[];
+  // We use underscore to highlight that this is a query param.
+  product_type: ThirdEarthProductType;
   back_url?: string;
 };
 
 export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const products = await thirdEarthApi.getProducts();
   const back_url = (query.back_url ?? '') as string;
+  const product_type = (query.product_type ??
+    'planet') as ThirdEarthProductType;
 
   return {
     props: {
       products,
+      product_type,
       back_url,
     } as ServerSideProps,
   };
@@ -34,6 +39,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
 
 export default function Payment({
   products: unfilteredProducts,
+  product_type,
   back_url,
 }: ServerSideProps) {
   const { goToPage } = useNavigation();
@@ -45,28 +51,21 @@ export default function Payment({
   const [stripe, setStripe] = useState<Stripe>();
   const [clientSecret, setClientSecret] = useState<string>();
 
-  const [productType, setProductType] =
-    useState<ThirdEarthProductType>('planet');
-
   const products = unfilteredProducts.filter(
-    (product) => product.product_type === productType
+    (product) => product.product_type === product_type
   );
 
   const [productId, setProductId] = useState(products[0].id);
   const [invoiceId, setInvoiceId] = useState<string>();
 
   useEffect(() => {
-    const { serverId, email, token, productType } = OnboardingStorage.get();
+    const { serverId, email, token } = OnboardingStorage.get();
 
     if (!email || !token) return;
 
-    if (productType) {
-      setProductType(productType as ThirdEarthProductType);
-    }
-
-    if (productType !== 'byop-p') {
-      if (!serverId) return;
-      else setServerId(serverId);
+    if (product_type === 'planet') {
+      if (serverId) setServerId(serverId);
+      else return; // Must have serverId for planet.
     }
 
     setEmail(email);
@@ -76,7 +75,8 @@ export default function Payment({
       const response = await thirdEarthApi.stripeMakePayment(
         token,
         productId.toString(),
-        serverId ?? 'undefined'
+        // Don't pass serverId for byop-p.
+        product_type !== 'byop-p' && serverId ? serverId : 'undefined'
       );
       setClientSecret(response.clientSecret);
       setInvoiceId(response.invoiceId);
@@ -104,7 +104,7 @@ export default function Payment({
       return goToPage(back_url as OnboardingPage);
     }
 
-    if (productType === 'byop-p') {
+    if (product_type === 'byop-p') {
       return goToPage('/');
     } else {
       return goToPage('/choose-id');
@@ -114,21 +114,7 @@ export default function Payment({
   const onNext = async () => {
     if (!token || !invoiceId || !productId) return false;
 
-    if (productType === 'planet') {
-      if (!serverId) return false;
-
-      await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
-      await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
-      await thirdEarthApi.provisionalShipEntry({
-        token,
-        patp: serverId,
-        product: productId.toString(),
-        invoiceId,
-        shipType: 'planet',
-      });
-
-      return goToPage('/booting');
-    } else if (productType === 'byop-p') {
+    if (product_type === 'byop-p') {
       await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
       const provisionalResponse = await thirdEarthApi.provisionalShipEntry({
         token,
@@ -143,16 +129,30 @@ export default function Payment({
         provisionalShipId: provisionalResponse[0].id.toString(),
       });
 
-      return goToPage('/upload-id');
-    }
+      return goToPage('/upload-id', {
+        product_type: 'byop-p',
+      });
+    } else {
+      if (!serverId) return false;
 
-    return false;
+      await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
+      await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
+      await thirdEarthApi.provisionalShipEntry({
+        token,
+        patp: serverId,
+        product: productId.toString(),
+        invoiceId,
+        shipType: 'planet',
+      });
+
+      return goToPage('/booting');
+    }
   };
 
   return (
     <Page title="Payment" isProtected>
       <PaymentDialog
-        productType={productType}
+        productType={product_type}
         products={products}
         productId={productId}
         patp={serverId}

@@ -11,7 +11,9 @@ export default function UploadIdDisclaimer() {
   };
 
   const onNext = () => {
-    goToPage('/payment');
+    goToPage('/payment', {
+      product_type: 'byop-p',
+    });
 
     return Promise.resolve(true);
   };

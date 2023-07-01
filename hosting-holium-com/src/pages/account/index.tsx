@@ -186,26 +186,20 @@ const HostingPresenter = () => {
   };
 
   const onClickUploadId = () => {
-    OnboardingStorage.set({
-      productType: 'byop-p',
-    });
     goToPage('/upload-id-disclaimer', {
+      product_type: 'byop-p',
       back_url: '/account',
     });
   };
 
   const onClickReuploadId = () => {
-    OnboardingStorage.set({
-      productType: 'byop-p',
-      provisionalShipId: selectedShipId?.toString(),
-    });
     goToPage('/upload-id', {
+      product_type: 'byop-p',
       back_url: '/account',
     });
   };
 
   const onClickPurchaseId = () => {
-    OnboardingStorage.remove('productType');
     goToPage('/choose-id', {
       back_url: '/account',
     });

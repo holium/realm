@@ -1,6 +1,5 @@
 import {
   AccountDownloadRealmDialog,
-  OnboardingStorage,
   UserContextProvider,
   useUser,
 } from '@holium/shared';
@@ -28,16 +27,13 @@ const DownloadRealmPresenter = () => {
   };
 
   const onClickUploadId = () => {
-    OnboardingStorage.set({
-      productType: 'byop-p',
-    });
     goToPage('/upload-id-disclaimer', {
+      product_type: 'byop-p',
       back_url: '/account/download-realm',
     });
   };
 
   const onClickPurchaseId = () => {
-    OnboardingStorage.remove('productType');
     goToPage('/choose-id', {
       back_url: '/account/download-realm',
     });

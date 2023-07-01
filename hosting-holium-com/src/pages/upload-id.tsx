@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import {
   OnboardingStorage,
@@ -16,23 +16,6 @@ export default function UploadId() {
   const [file, setFile] = useState<File>();
   const [progress, setProgress] = useState<number>();
   const [error, setError] = useState<string>();
-
-  useEffect(() => {
-    const { token } = OnboardingStorage.get();
-    if (!token) return;
-    thirdEarthApi.getUserShips(token).then((ships) => {
-      if (
-        ships.length === 1 &&
-        ships[0].product_type === 'byop-p' &&
-        ships[0].ship_type !== 'planet'
-      ) {
-        OnboardingStorage.set({
-          productType: 'byop-p',
-          provisionalShipId: ships[0].id.toString(),
-        });
-      }
-    });
-  }, []);
 
   const onUpload = async (file: File) => {
     const { token, provisionalShipId } = OnboardingStorage.get();

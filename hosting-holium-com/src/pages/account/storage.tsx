@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 
 import {
   AccountStorageDialog,
-  OnboardingStorage,
   UserContextProvider,
   useUser,
 } from '@holium/shared';
@@ -35,16 +34,13 @@ const S3StoragePresenter = () => {
   };
 
   const onClickUploadId = () => {
-    OnboardingStorage.set({
-      productType: 'byop-p',
-    });
     goToPage('/upload-id-disclaimer', {
+      product_type: 'byop-p',
       back_url: '/account/storage',
     });
   };
 
   const onClickPurchaseId = () => {
-    OnboardingStorage.remove('productType');
     goToPage(accountPageUrl['Get Hosting'], {
       back_url: '/account/storage',
     });
