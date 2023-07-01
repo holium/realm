@@ -115,6 +115,14 @@ export default function Payment({
     if (!token || !invoiceId || !productId) return false;
 
     if (product_type === 'byop-p') {
+      await thirdEarthApi.log(token, {
+        file: 'purchases',
+        type: 'info',
+        subject: 'FRONTENT: /payment',
+        message: `Succesful stripe purchase of byop-p by ${email}.`,
+        productId: productId.toString(),
+        auditTrailCode: 1000,
+      });
       await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
       const provisionalResponse = await thirdEarthApi.provisionalShipEntry({
         token,
@@ -133,7 +141,17 @@ export default function Payment({
         product_type: 'byop-p',
       });
     } else {
+      // Product type planet also requires serverId.
       if (!serverId) return false;
+
+      await thirdEarthApi.log(token, {
+        file: 'purchases',
+        type: 'info',
+        subject: 'FRONTENT: /payment',
+        message: `Succesful stripe purchase of planet by ${email}.`,
+        productId: productId.toString(),
+        auditTrailCode: 1000,
+      });
 
       await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
       await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
