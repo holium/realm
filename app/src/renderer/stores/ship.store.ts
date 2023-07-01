@@ -130,6 +130,8 @@ export const shipStore = ShipStore.create({
     isolationModeEnabled: false,
     realmCursorEnabled: true,
     profileColorForCursorEnabled: true,
+    standaloneChatPersonalWallpaperEnabled: false,
+    standaloneChatSpaceWallpaperEnabled: true,
   },
   loader: {
     state: 'initial',

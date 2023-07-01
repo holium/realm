@@ -45,12 +45,25 @@ const StandaloneChatPassportPresenter = ({ onBack }: Props) => {
         <SettingSection
           title="Background"
           body={
-            <SettingControl label="Space Wallpaper">
-              <CheckBox
-                label="Use space wallpapers as the background for chat windows."
-                isChecked={settingsStore.isolationModeEnabled}
-                onChange={settingsStore.toggleIsolationMode}
-              />
+            <SettingControl label="Wallpaper">
+              <Flex flexDirection="column" gap="8px">
+                <CheckBox
+                  label="Use personal wallpaper as the background for DMs and group chats."
+                  isChecked={
+                    settingsStore.standaloneChatPersonalWallpaperEnabled
+                  }
+                  onChange={
+                    settingsStore.toggleStandaloneChatPersonalWallpaperEnabled
+                  }
+                />
+                <CheckBox
+                  label="Use space wallpaper as the background for space chats."
+                  isChecked={settingsStore.standaloneChatSpaceWallpaperEnabled}
+                  onChange={
+                    settingsStore.toggleStandaloneChatSpaceWallpaperEnabled
+                  }
+                />
+              </Flex>
             </SettingControl>
           }
         />

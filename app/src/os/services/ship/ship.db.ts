@@ -102,10 +102,15 @@ const migrations: Migration[] = [
     `,
   },
   {
-    // todo: add settings updates
     version: 3,
-    up: ``,
-    down: ``,
+    up: `
+      ALTER TABLE settings ADD COLUMN standaloneChatSpaceWallpaperEnabled number DEFAULT 1;
+      ALTER TABLE settings ADD COLUMN standaloneChatPersonalWallpaperEnabled number DEFAULT 0;
+    `,
+    down: `
+      ALTER TABLE settings DROP COLUMN standaloneChatSpaceWallpaperEnabled;
+      ALTER TABLE settings DROP COLUMN standaloneChatPersonalWallpaperEnabled;
+    `,
   },
 ];
 
@@ -125,7 +130,7 @@ export class ShipDB {
     this.shipDB = MigrationService.getInstance().setupAndMigrate(
       this.patp,
       migrations,
-      2
+      3
     );
     // TODO: re-enable encryption
     //   log.info('ship.db.ts:', 'Encrypting ship db');

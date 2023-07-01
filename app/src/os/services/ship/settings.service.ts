@@ -8,6 +8,8 @@ export type Setting = {
   isolationModeEnabled: number;
   realmCursorEnabled: number;
   profileColorForCursorEnabled: number;
+  standaloneChatSpaceWallpaperEnabled: number;
+  standaloneChatPersonalWallpaperEnabled: number;
 };
 
 export class SettingsService extends AbstractDataAccess<Setting, any> {
@@ -26,6 +28,10 @@ export class SettingsService extends AbstractDataAccess<Setting, any> {
       isolationModeEnabled: row.isolationModeEnabled,
       realmCursorEnabled: row.realmCursorEnabled,
       profileColorForCursorEnabled: row.profileColorForCursorEnabled,
+      standaloneChatSpaceWallpaperEnabled:
+        row.standaloneChatSpaceWallpaperEnabled,
+      standaloneChatPersonalWallpaperEnabled:
+        row.standaloneChatPersonalWallpaperEnabled,
     };
   }
 
@@ -49,12 +55,16 @@ export class SettingsService extends AbstractDataAccess<Setting, any> {
         identity,
         isolationModeEnabled,
         realmCursorEnabled,
-        profileColorForCursorEnabled
+        profileColorForCursorEnabled,
+        standaloneChatSpaceWallpaperEnabled,
+        standaloneChatPersonalWallpaperEnabled
       ) VALUES (
         @identity,
         @isolationModeEnabled,
         @realmCursorEnabled,
-        @profileColorForCursorEnabled
+        @profileColorForCursorEnabled,
+        @standaloneChatSpaceWallpaperEnabled,
+        @standaloneChatPersonalWallpaperEnabled
       )`
     );
     replace.run(setting);
@@ -77,10 +87,6 @@ export const settingsInitSql = `
     profileColorForCursorEnabled number
   );
 `;
-
-// standaloneChatWallpaperEnabled number,
-// roomsAudioInputSource text,
-// roomsAudioOutputSource text
 
 export const settingsWipeSql = `drop table if exists settings;`;
 

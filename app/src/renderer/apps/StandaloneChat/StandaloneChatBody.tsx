@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import styled, { css } from 'styled-components';
 
+import { useToggle } from '@holium/design-system';
 import { Flex, Spinner, Text } from '@holium/design-system/general';
 
 import { useAppState } from 'renderer/stores/app.store';
@@ -43,9 +44,10 @@ const StandaloneBackgroundImage = styled(motion.img)`
 
 export const StandaloneChatBodyPresenter = () => {
   const { showTitleBar, theme } = useAppState();
-  const { chatStore } = useShipStore();
+  const { chatStore, settingsStore } = useShipStore();
 
   const [sidebarWidth, setSidebarWidth] = useState(400);
+  const showBackgroundImage = useToggle(false);
 
   const onMouseDownResizeHandle = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -65,6 +67,18 @@ export const StandaloneChatBodyPresenter = () => {
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
   };
+
+  useEffect(() => {
+    if (chatStore.selectedChat?.type === 'space') {
+      showBackgroundImage.setToggle(
+        settingsStore.standaloneChatSpaceWallpaperEnabled
+      );
+    } else {
+      showBackgroundImage.setToggle(
+        settingsStore.standaloneChatPersonalWallpaperEnabled
+      );
+    }
+  }, [chatStore.selectedChat]);
 
   useEffect(() => {
     // Fetch messages for the selected chat.
@@ -125,7 +139,7 @@ export const StandaloneChatBodyPresenter = () => {
         minWidth={360}
         background="var(--rlm-dock-color)"
       >
-        {chatStore.subroute === 'chat' && (
+        {chatStore.subroute === 'chat' && showBackgroundImage.isOn && (
           <StandaloneBackgroundImage
             key={theme.wallpaper}
             src={theme.wallpaper}
