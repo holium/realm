@@ -61,7 +61,7 @@
       =replication
       default-access=access-rules   :: for everything not found in the table-access
       =table-access                 :: allows a path to specify role-based access rules on a per-table basis
-      =constraints
+      =constraints                  :: if there is not a constraint rule for a given type, the default constraints for types will be applied
       space=(unit [=path =role:membership])  :: if the path-row is created from a space, record the info
       created-at=@da
       updated-at=@da
@@ -74,11 +74,19 @@
 +$  permission-scope  ?(%table %own %none)
 :: by default the host can CED everything and everyone else can CED the objects they created
 ++  default-access-rules  (~(gas by *access-rules) ~[[%host [%.y %table %table]] [%$ [%.y %own %own]]])
-+$  constraints   (set constraint)
++$  constraints   (map type:common constraint)
 +$  constraint    [=type:common =uniques =check]
 +$  uniques       (set unique-columns)  :: the various uniqueness rules that must all be true
-+$  unique-columns  (set @t)  :: names of columns that taken together must be unique in the table+path
++$  unique-columns  (set column-accessor)  :: names of columns that taken together must be unique in the table+path
 +$  check         ~  :: I want check to be the mold for a gate that takes in a row and produces %.y or %.n, which will allow applications to specify arbitrary check functions to constrain their data
+++  default-vote-constraint  [%vote (silt ~[(~(gas in *unique-columns) ~[1 2 3 "ship.id"])]) ~]
+++  default-rating-constraint  [%rating (silt ~[(~(gas in *unique-columns) ~[3 4 5 "ship.id" 2])]) ~]
+++  default-constraints
+  %-  ~(gas by *constraints)
+  :~  [%vote default-vote-constraint]
+      [%rating default-rating-constraint]
+  ==
++$  column-accessor  ?(@ud tape)
 :: used for dumping the current state of every row on a given path
 +$  fullpath
   $:  =path-row
@@ -168,7 +176,7 @@
 +$  req-id  [src=ship now=@da] :: the request-id, used for threads and venting
 ::
 +$  vent
-  $%  [%row-id =id:common]
+  $%  [%row =row =schema]
       [%ack ~]
   ==
 --

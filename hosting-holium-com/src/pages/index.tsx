@@ -28,16 +28,13 @@ export default function GetOnRealm({ email }: Props) {
   };
 
   const onUploadId = () => {
-    OnboardingStorage.set({ productType: 'byop-p' });
-
     return goToPage('/create-account', {
       haha: 'true',
+      product_type: 'byop-p',
     });
   };
 
   const onPurchaseId = async () => {
-    OnboardingStorage.remove('productType');
-
     return goToPage('/create-account', {
       haha: 'true',
     });

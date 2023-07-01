@@ -1,27 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-import { OnboardingStorage, UploadIdDialog } from '@holium/shared';
+import {
+  OnboardingStorage,
+  uploadErrors,
+  UploadIdDialog,
+} from '@holium/shared';
 
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
-
-// These errors are stored as the ship_type of the associated ship row in the database.
-const uploadErrors: Record<string, string> = {
-  invalidFileError:
-    'The uploaded .tar.gz or .zip file failed to be decompressed.',
-  invalidFileFormatError:
-    'Pier directory was not found after unzipping uploaded file.',
-  invalidPierError: 'Unpacked pier directory is not a valid/bootable pier.',
-  dropletTimeout:
-    'The customer did not upload their pier within the 1 hour time limit.',
-  tooManyFiles:
-    'More files were uploaded other than the compressed pier and done.file.',
-  uploadError:
-    'File failed to be uploaded (web upload only, so this is UNUSED).',
-  dbInsertionError:
-    "Failed to create an associated row in the 'planets' table.",
-};
 
 export default function UploadId() {
   const { goToPage } = useNavigation();
@@ -29,23 +16,6 @@ export default function UploadId() {
   const [file, setFile] = useState<File>();
   const [progress, setProgress] = useState<number>();
   const [error, setError] = useState<string>();
-
-  useEffect(() => {
-    const { token } = OnboardingStorage.get();
-    if (!token) return;
-    thirdEarthApi.getUserShips(token).then((ships) => {
-      if (
-        ships.length === 1 &&
-        ships[0].product_type === 'byop-p' &&
-        ships[0].ship_type !== 'planet'
-      ) {
-        OnboardingStorage.set({
-          productType: 'byop-p',
-          provisionalShipId: ships[0].id.toString(),
-        });
-      }
-    });
-  }, []);
 
   const onUpload = async (file: File) => {
     const { token, provisionalShipId } = OnboardingStorage.get();
@@ -76,6 +46,12 @@ export default function UploadId() {
     formData.append('desks', 'false');
     formData.append('groups', 'false');
 
+    await thirdEarthApi.log(token, {
+      file: 'purchases',
+      type: 'info',
+      subject: 'FRONTEND: upload started (email notify)',
+      message: `Upload of pier file ${file.name} started.`,
+    });
     const response = await thirdEarthApi.uploadPierFile(
       token,
       provisionalShipId,
@@ -108,7 +84,9 @@ export default function UploadId() {
   };
 
   const onNext = () => {
-    return goToPage('/booting');
+    return goToPage('/booting', {
+      product_type: 'byop-p',
+    });
   };
 
   return (

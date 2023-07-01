@@ -16,11 +16,16 @@
 ++  get-db
   |=  [=type:common =path =id:common state=state-0]
   ^-  (unit row)
-  =/  ptbl  (~(get by tables.state) type)
-  ?~  ptbl  ~
-  =/  tbl   (~(get by u.ptbl) path)
+  =/  tbl   (get-tbl type path state)
   ?~  tbl   ~
   (~(get by u.tbl) id)
+::
+++  get-tbl
+  |=  [=type:common =path state=state-0]
+  ^-  (unit table)
+  =/  ptbl  (~(get by tables.state) type)
+  ?~  ptbl  ~
+  (~(get by u.ptbl) path)
 ::
 ++  del-db
   |=  [=type:common =path =id:common state=state-0 t=@da]
@@ -48,7 +53,59 @@
     %relay
       &(=(id.data.rel id.r) =(ship.id.rel our.bowl))
   ==
-
+::
+++  meets-constraints
+  |=  [=path-row =row state=state-0 =bowl:gall]
+  ^-  ?
+  =/  tbl=(unit table)    (get-tbl type.row path.path-row state)
+  ?~  tbl  %.y  :: there's nothing in this table, so any row we add is unique along all possible columns
+  =/  uconst=(unit constraint)  (~(get by constraints.path-row) type.row)
+  =/  const=(unit constraint)
+    ?~  uconst  (~(get by default-constraints) type.row)
+    uconst
+  ?~  const  %.y  :: there is neither a defined-constraint nor a default-constraint, thus this "meets constraints"
+  %-  ~(all in uniques.u.const)
+  |=  cols=unique-columns
+  ^-  ?
+  =/  where=(list [column-accessor *])
+    %+  turn
+      ~(tap in cols)
+    |=  ca=column-accessor
+    :-  ca
+    (snag-val-from-row ca row)
+  =/  matches=(list ^row)  (find-from-where u.tbl where)
+  ?~  matches  %.y
+  %.n
+::
+++  find-from-where
+  |=  [tbl=table conds=(list [i=column-accessor v=*])]
+  ^-  (list row)
+  %+  skim
+    ~(val by tbl)
+  |=  r=row
+  %+  levy
+    conds
+  |=  cond=[i=column-accessor v=*]
+  =(v.cond (snag-val-from-row i.cond r))
+::
+++  snag-val-from-row
+  |=  [i=column-accessor r=row]
+  ?@  i   (snag-by-index i +.data.r)
+  ?:  =(i "ship.id")      ship.id.r
+  ?:  =(i "t.id")         t.id.r
+  ?:  =(i "v")            v.r
+  ?:  =(i "created-at")   created-at.r
+  ?:  =(i "updated-at")   updated-at.r
+  ?:  =(i "received-at")  received-at.r
+  !! :: unsupported name
+::
+++  snag-by-index
+  |=  [i=@ r=*]
+  |-
+    ?@  r  !!
+    ?:  =(0 i)  -:r
+    $(r +:r, i (dec i))
+::
 ++  has-create-permissions
   |=  [=path-row =row state=state-0 =bowl:gall]
   ^-  ?
@@ -115,12 +172,12 @@
 ++  get-path-card
   |=  [=ship =path-row peers=ship-roles]
   ^-  card
-  [%pass /dbpoke %agent [ship %db] %poke %db-action !>([%get-path path-row peers])]
+  [%pass /dbpoke %agent [ship %bedrock] %poke %db-action !>([%get-path path-row peers])]
 ::
 ++  delete-path-card
   |=  [=ship =path]
   ^-  card
-  [%pass /dbpoke %agent [ship %db] %poke %db-action !>([%delete-path path])]
+  [%pass /dbpoke %agent [ship %bedrock] %poke %db-action !>([%delete-path path])]
 ::
 ++  del-path-in-tables
   |=  [state=state-0 =path]
@@ -454,12 +511,10 @@
 ::   tests:
 ::bedrock &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
 ::bedrock &db-action [%add-peer /example ~fed %member]
-::bedrock &db-action [%create /example %foo 0 [%general ~[1 'a']] ~[['num' 'ud'] ['str' 't']]]
-::bedrock &db-action [%create /example %vote 0 [%vote [%.y our %foo [our now] /example]] ~]
+::bedrock &db-action [%create [~zod now] /example %foo 0 [%general ~[1 'a']] ~[['num' 'ud'] ['str' 't']]]
+::bedrock &db-action [%create [~zod now] /example %vote 0 [%vote [%.y %foo [~zod ~2023.6.21..22.25.01..e411] /example]] ~]
 :: from ~bus:
-::~zod/bedrock &db-action [%create /example %vote 0 [%vote %.y our %foo [~zod now] /example] ~]
-::bedrock &db-action [%edit /example [our ~2023.5.22..20.15.47..86fe] %foo 0 [%general ~[2 'b']] *@da *@da *@da]
-::bedrock &db-action [%remove %foo /example [our ~2023.5.22..20.15.47..86fe]]
+::~zod/bedrock &db-action [%create /example %foo 0 [%general ~[1 'a']]  ~[['num' 'ud'] ['str' 't']]]
 ::
 ::  in zod
 ::bedrock &db-action [%create-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
@@ -709,7 +764,7 @@
   =/  path-sub-wire           (weld /next/(scot %da updated-at.path-row) path)
   =/  cards=(list card)  :~
     :: poke %delete-path to the ship we are kicking
-    [%pass /dbpoke %agent [ship %db] %poke %db-action !>([%delete-path path])]
+    [%pass /dbpoke %agent [ship %bedrock] %poke %db-action !>([%delete-path path])]
     :: tell subs that we deleted `ship`
     [%give %fact [/db (weld /path path) path-sub-wire ~] db-changes+!>([%del-peer path ship now.bowl]~)]
     :: kick subs to force them to re-sub for next update
@@ -732,6 +787,7 @@
 ++  get-path
   |=  [[=path-row peers=ship-roles] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  ~&  "%get-path {<path.path-row>}"
   :: ensure the path doesn't already exist
   =/  pre-existing    (~(get by paths.state) path.path-row)
   ?>  =(~ pre-existing)
@@ -772,7 +828,7 @@
       %pass
       (weld /next path.path-row)
       %agent
-      [src.bowl %db]
+      [src.bowl dap.bowl]
       %watch
       (weld /next/(scot %da updated-at.path-row) path.path-row)
     ]
@@ -814,6 +870,8 @@
 ::~zod/bedrock &db-action [%create /example %vote 0 [%vote %.y our %foo [~zod now] /example] ~]
   |=  [[=req-id =input-row] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  =/  vent-path=path  /vent/(scot %p src.req-id)/(scot %da now.req-id)
+  =/  kickcard=card  [%give %kick ~[vent-path] ~]
   :: form row from input
   =/  row=row  [
     path.input-row
@@ -830,12 +888,16 @@
   =/  path-row=path-row    (~(got by paths.state) path.row)
   ?.  (has-create-permissions path-row row state bowl)
     ~&  >>>  "{(scow %p src.bowl)} tried to create a %{(scow %tas type.row)} row where they didn't have permissions"
-    `state
+    [~[kickcard] state]
   :: forward the request if we aren't the host
   ?.  =(host.path-row our.bowl)
     ~&  >>  "{<src.bowl>} tried to have us ({<our.bowl>}) create a row in {<path.path-row>} where we are not the host. forwarding the poke to the host: {<host.path-row>}"
     :_  state
-    [%pass /dbpoke %agent [host.path-row %db] %poke %db-action !>([%create req-id input-row])]~
+    [%pass /dbpoke %agent [host.path-row dap.bowl] %poke %db-action !>([%create req-id input-row])]~
+  :: ensure that the row meets constraints
+  ?.  (meets-constraints path-row row state bowl)
+    ~&  >>>  "{(scow %p src.bowl)} tried to create a %{(scow %tas type.row)} row where they violated constraints"
+    [~[kickcard] state]
 
   :: update path
   =/  path-sub-wire           (weld /next/(scot %da updated-at.path-row) path.row)
@@ -846,15 +908,14 @@
   =.  state             (add-row-to-db row schema.input-row state)
 
   :: emit the change to subscribers
-  =/  vent-path=path  /vent/(scot %p src.req-id)/(scot %da now.req-id)
   =/  cards=(list card)  :~
     :: tell subs about the new row
     [%give %fact [/db (weld /path path.row) path-sub-wire ~] db-changes+!>([%add-row row schema.input-row]~)]
     :: kick subs to force them to re-sub for next update
     [%give %kick [path-sub-wire ~] ~]
     :: give vent response
-    [%give %fact ~[vent-path] db-vent+!>([%row-id id.row])]
-    [%give %kick ~[vent-path] ~]
+    [%give %fact ~[vent-path] db-vent+!>([%row row schema.input-row])]
+    kickcard
   ==
   ~&  >  "publishing new row to {(spud path-sub-wire)} (and also kicking)"
 
@@ -864,7 +925,7 @@
 :: generally, you'd only bother passing the schema if you are changing the version of the row
 ::db &db-action [%edit [our ~2023.5.22..17.21.47..9d73] /example %foo 0 [%general ~[2 'b']] ~]
   |=  [[=id:common =input-row] state=state-0 =bowl:gall]
-  ~&  "%db agent - %edit poke"
+  ~&  "%bedrock agent - %edit poke"
   ^-  (quip card state-0)
   :: permissions
   =/  old-row              (~(got by (~(got by (~(got by tables.state) type.input-row)) path.input-row)) id) :: old row must first exist
@@ -876,7 +937,7 @@
   ?.  =(host.path-row our.bowl)
     ~&  >>  "{<src.bowl>} tried to have us ({<our.bowl>}) edit a row in {<path.path-row>} where we are not the host. forwarding the poke to the host: {<host.path-row>}"
     :_  state
-    [%pass /dbpoke %agent [host.path-row %db] %poke %db-action !>([%edit id input-row])]~
+    [%pass /dbpoke %agent [host.path-row dap.bowl] %poke %db-action !>([%edit id input-row])]~
 
   :: schema checking
   =/  sch=schema
@@ -932,7 +993,7 @@
   ?.  =(host.path-row our.bowl)
     ~&  >>  "{<src.bowl>} tried to have us ({<our.bowl>}) remove a row in {<path.path-row>} where we are not the host. forwarding the poke to the host: {<host.path-row>}"
     :_  state
-    [%pass /dbpoke %agent [host.path-row %db] %poke %db-action !>([%remove type path id])]~
+    [%pass /dbpoke %agent [host.path-row dap.bowl] %poke %db-action !>([%remove type path id])]~
 
   :: update path
   =/  foreign-ship-sub-wire   (weld /next/(scot %da updated-at.path-row) path)
@@ -965,6 +1026,7 @@
 ::bedrock &db-action [%relay [~bus now] /target %relay 0 [%relay [~zod ~2023.6.13..15.57.34..aa97] %foo /example 0 %all %.n] ~]
   |=  [[=req-id =input-row] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
+  ~&  %relay
   :: first check that the input is actually a %relay
   ?+  -.data.input-row   !!
     %relay 
@@ -1049,6 +1111,7 @@
           [%create de-create-input-row]
           [%edit (ot ~[[%id de-id] [%input-row de-input-row]])]
           [%remove remove]
+          [%relay de-create-input-row]
       ==
     ::
     ++  de-create-input-row
@@ -1318,8 +1381,8 @@
       |=  =vent
       ^-  json
       ?-  -.vent
-        %ack     s/%ack
-        %row-id  (frond row-id+(row-id-to-json id.vent))
+        %ack   s/%ack
+        %row   (en-row row.vent (~(put by *schemas) [type.row.vent v.row.vent] schema.vent))
       ==
     ::
     ++  en-db-changes
@@ -1520,7 +1583,9 @@
                 ['revision' (numb revision.data.row)]
             ==
         ==
-      =/  keyvals  (weld basekvs dynamickvs)
+      =/  keyvals
+        :_  basekvs
+        data+(pairs dynamickvs)
       (pairs keyvals)
     ::
     ++  en-path-row

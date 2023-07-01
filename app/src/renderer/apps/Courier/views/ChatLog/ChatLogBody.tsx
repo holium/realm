@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
 import { observer } from 'mobx-react';
 
-import { Flex, WindowedListRef } from '@holium/design-system/general';
+import { Flex, Spinner, WindowedListRef } from '@holium/design-system/general';
 
 import {
   ChatFragmentMobxType,
@@ -50,7 +50,7 @@ const ChatLogBodyPresenter = ({
   onSend,
 }: Props) => {
   const { chatStore } = useShipStore();
-  const { selectedChat, setSubroute, inboxLoader } = chatStore;
+  const { selectedChat, setSubroute, chatLoader } = chatStore;
 
   const messages = selectedChat?.messages ?? [];
 
@@ -83,6 +83,7 @@ const ChatLogBodyPresenter = ({
         flexDirection="column"
         alignItems="center"
         justifyContent="center"
+        position="relative"
       >
         <ChatLogBodyList
           messages={messages}
@@ -93,8 +94,19 @@ const ChatLogBodyPresenter = ({
           pinnedChatMessage={pinnedChatMessage}
           isStandaloneChat={isStandaloneChat}
           isEmpty={messages.length === 0}
-          isLoaded={inboxLoader.isLoaded}
+          isLoaded={chatLoader.isLoaded}
         />
+        {chatLoader.isLoading && (
+          <div
+            style={{
+              position: 'absolute',
+              top: isStandaloneChat ? 8 : 0,
+              right: isStandaloneChat ? 12 : 0,
+            }}
+          >
+            <Spinner size="16px" width={1.5} color="var(--rlm-accent-color)" />
+          </div>
+        )}
       </Flex>
       <ChatInputContainer isStandaloneChat={isStandaloneChat}>
         {selectedChat && (

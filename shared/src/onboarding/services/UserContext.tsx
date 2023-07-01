@@ -16,8 +16,8 @@ interface IUserContext {
   token: string | null;
   email: string | null;
   ships: ThirdEarthShip[];
-  selectedIdentity: string;
-  setSelectedIdentity: (patp: string) => void;
+  selectedShipId: number | undefined;
+  setSelectedShipId: (newId: number) => void;
   refetchShips: () => Promise<void>;
 }
 
@@ -32,7 +32,7 @@ export const UserContextProvider = ({ api, children }: Props) => {
   const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [ships, setShips] = useState<ThirdEarthShip[]>([]);
-  const [selectedIdentity, setSelectedIdentity] = useState<string>('');
+  const [selectedShipId, setSelectedShipId] = useState<number>();
 
   const refetchShips = async () => {
     if (!token) return;
@@ -53,7 +53,7 @@ export const UserContextProvider = ({ api, children }: Props) => {
       setToken(token);
       setEmail(email);
       setShips(newShips ?? []);
-      setSelectedIdentity(newShips[0]?.patp ?? '');
+      setSelectedShipId(newShips[0]?.id);
     };
 
     getAndSetUserData();
@@ -65,8 +65,8 @@ export const UserContextProvider = ({ api, children }: Props) => {
         token,
         email,
         ships,
-        selectedIdentity,
-        setSelectedIdentity,
+        selectedShipId,
+        setSelectedShipId,
         refetchShips,
       }}
     >

@@ -1,8 +1,9 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { useToggle } from '@holium/design-system/util';
 import {
   AccountHostingDialog,
+  AccountUnfinishedUploadDialog,
   ChangeEmailModal,
   ChangeMaintenanceWindowModal,
   ChangePasswordModal,
@@ -14,6 +15,8 @@ import {
   VerifyEmailModal,
 } from '@holium/shared';
 
+import { getSupportEmail } from 'util/constants';
+
 import { Page } from '../../components/Page';
 import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
@@ -24,8 +27,8 @@ const HostingPresenter = () => {
     token,
     email,
     ships,
-    selectedIdentity,
-    setSelectedIdentity,
+    selectedShipId,
+    setSelectedShipId,
     refetchShips,
   } = useUser();
 
@@ -36,58 +39,23 @@ const HostingPresenter = () => {
   const changeMaintenanceWindowModal = useToggle(false);
   const ejectIdModal = useToggle(false);
 
-  const identities = useMemo(
-    () => ships.map((ship) => ship.patp || ship.title),
-    [ships]
-  );
-  const selectedShip = useMemo(
-    () => ships.find((ship) => ship.patp === selectedIdentity) || ships[0],
-    [ships, selectedIdentity]
-  );
+  const selectedShip = useMemo(() => {
+    return ships.find((ship) => ship.id === selectedShipId) || ships[0];
+  }, [ships, selectedShipId]);
 
-  const isUploadedIdentity = useMemo(
-    () => selectedShip?.product_type === 'byop-p',
-    [selectedShip]
-  );
-
-  useEffect(() => {
-    // if there are no ships and the only one is a BYOP-P, go to upload-id
-    if (
-      isUploadedIdentity &&
-      ships.length === 1 &&
+  const isUnfinishedByop = useMemo(() => {
+    return (
+      selectedShip?.product_type === 'byop-p' &&
       selectedShip.ship_type !== 'planet'
-    ) {
-      OnboardingStorage.set({
-        productType: 'byop-p',
-        provisionalShipId: selectedShip.id.toString(),
-      });
-      goToPage('/upload-id', {
-        back_url: '/account',
-      });
-    }
-  }, [isUploadedIdentity, ships]);
-
-  const setSelectedShipOrRedirect = (ship: string) => {
-    const shipToSelect = ships.find((teShip) => teShip.patp === ship);
-    if (
-      shipToSelect?.product_type === 'byop-p' &&
-      shipToSelect.ship_type !== 'planet'
-    ) {
-      OnboardingStorage.set({
-        productType: 'byop-p',
-        provisionalShipId: shipToSelect.id.toString(),
-      });
-      goToPage('/upload-id', {
-        back_url: '/account',
-      });
-      return;
-    }
-    if (ship === selectedIdentity) return;
-    setSelectedIdentity(ship);
-  };
+    );
+  }, [selectedShip]);
 
   const onClickSidebarSection = (section: string) => {
-    goToPage(accountPageUrl[section]);
+    if (section === 'Contact Support') {
+      window.open(getSupportEmail(selectedShip.patp), '_blank');
+    } else {
+      goToPage(accountPageUrl[section]);
+    }
   };
 
   const onSubmitNewEmail = async (email: string) => {
@@ -218,20 +186,40 @@ const HostingPresenter = () => {
   };
 
   const onClickUploadId = () => {
-    OnboardingStorage.set({
-      productType: 'byop-p',
+    goToPage('/upload-id-disclaimer', {
+      back_url: '/account',
     });
-    goToPage('/payment', {
+  };
+
+  const onClickReuploadId = () => {
+    goToPage('/upload-id', {
+      product_type: 'byop-p',
       back_url: '/account',
     });
   };
 
   const onClickPurchaseId = () => {
-    OnboardingStorage.remove('productType');
     goToPage('/choose-id', {
       back_url: '/account',
     });
   };
+
+  if (isUnfinishedByop) {
+    return (
+      <Page title="Account / Upload ID" isProtected>
+        <AccountUnfinishedUploadDialog
+          ships={ships}
+          selectedShipId={selectedShipId}
+          onClickReuploadId={onClickReuploadId}
+          onClickPurchaseId={onClickPurchaseId}
+          onClickUploadId={onClickUploadId}
+          setSelectedShipId={setSelectedShipId}
+          onClickSidebarSection={onClickSidebarSection}
+          onClickExit={logout}
+        />
+      </Page>
+    );
+  }
 
   return (
     <Page title="Account / Hosting" isProtected>
@@ -267,17 +255,15 @@ const HostingPresenter = () => {
         onSubmit={onSubmitEjectId}
       />
       <AccountHostingDialog
-        identities={identities}
-        selectedIdentity={selectedIdentity}
-        isUploadedIdentity={isUploadedIdentity}
         ships={ships}
+        selectedShipId={selectedShipId}
         email={email}
         serverUrl={selectedShip?.link}
         serverCode={selectedShip?.code}
         serverMaintenanceWindow={selectedShip?.maintenance_window}
         onClickPurchaseId={onClickPurchaseId}
         onClickUploadId={onClickUploadId}
-        setSelectedIdentity={setSelectedShipOrRedirect}
+        setSelectedShipId={setSelectedShipId}
         onClickChangeEmail={changeEmailModal.toggleOn}
         onClickChangePassword={changePasswordModal.toggleOn}
         onClickManageBilling={onClickManageBilling}

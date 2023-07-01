@@ -1,12 +1,33 @@
 import { FormikValues } from 'formik';
+import type { GetServerSideProps } from 'next/types';
 
-import { OnboardingStorage, VerifyEmailDialog } from '@holium/shared';
+import {
+  OnboardingStorage,
+  ThirdEarthProductType,
+  VerifyEmailDialog,
+} from '@holium/shared';
 
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
-export default function VerifyEmail() {
+type ServerSideProps = {
+  // We use underscore to highlight that this is a query param.
+  product_type: ThirdEarthProductType;
+};
+
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+  const product_type = (query.product_type ??
+    'planet') as ThirdEarthProductType;
+
+  return {
+    props: {
+      product_type,
+    } as ServerSideProps,
+  };
+};
+
+export default function VerifyEmail({ product_type }: ServerSideProps) {
   const { goToPage } = useNavigation();
 
   const onResend = () => {
@@ -33,9 +54,8 @@ export default function VerifyEmail() {
       OnboardingStorage.set({ token: result.token });
 
       if (result) {
-        const { productType } = OnboardingStorage.get();
-        if (productType === 'byop-p') {
-          return goToPage('/payment');
+        if (product_type === 'byop-p') {
+          return goToPage('/upload-id-disclaimer');
         } else {
           return goToPage('/choose-id');
         }

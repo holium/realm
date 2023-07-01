@@ -357,7 +357,6 @@
   :: NOTE, %notif-db agent now depends on us setting this properly so it
   :: can delete notifs for deleted messages automatically
   =/  link      (msg-id-to-cord:encode:db-lib msg-id.msg-part)
-  ~&  >  link
   [
     %pass
     /dbpoke

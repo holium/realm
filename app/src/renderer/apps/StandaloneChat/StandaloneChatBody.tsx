@@ -18,6 +18,7 @@ import {
 } from './StandaloneChatBody.styles';
 import { StandaloneChatPassport } from './StandaloneChatPassport';
 import { StandaloneChatPassportPreview } from './StandaloneChatPassportPreview';
+import { StandaloneChatRoom } from './StandaloneChatRoom';
 
 const StandaloneBackgroundImage = styled(motion.img)`
   ${(props: { src?: string }) =>
@@ -76,7 +77,7 @@ export const StandaloneChatBodyPresenter = () => {
     }
   }, [chatStore.subroute, chatStore.selectedChat, chatStore.inbox]);
 
-  if (chatStore.loader.isFirstLoad) {
+  if (chatStore.inboxInitLoader.isFirstLoad) {
     return (
       <Flex
         position="absolute"
@@ -147,6 +148,7 @@ export const StandaloneChatBodyPresenter = () => {
             onBack={() => chatStore.setSubroute('inbox')}
           />
         )}
+        {chatStore.subroute === 'room' && <StandaloneChatRoom />}
       </Flex>
     </StandaloneChatContainer>
   );

@@ -4,7 +4,7 @@ import { BrowserHelper } from './helpers/browser';
 import { CursorSettingsHelper } from './helpers/cursorSettings';
 import { DeepLinkHelper } from './helpers/deepLink';
 import { DevHelper } from './helpers/dev';
-import { isArm64Mac } from './helpers/env';
+import { isMacWithCameraNotch } from './helpers/env';
 import {
   FullScreenHelper,
   fullScreenWindow,
@@ -20,9 +20,11 @@ import { TitlebarHelper } from './helpers/titlebar';
 import { WebViewHelper } from './helpers/webview';
 import { getAssetPath, getPreloadPath, resolveHtmlPath } from './util';
 
-const defaultRealmWindowOptions: Electron.BrowserWindowConstructorOptions = {
+const getDefaultRealmWindowOptions = (
+  frame: boolean
+): Electron.BrowserWindowConstructorOptions => ({
   show: false,
-  frame: isArm64Mac ? false : true,
+  frame,
   // We start with a zero size window and enlarge it,
   // to trigger the mouse-in event when the window is shown.
   width: 0,
@@ -40,10 +42,11 @@ const defaultRealmWindowOptions: Electron.BrowserWindowConstructorOptions = {
     contextIsolation: true,
     preload: getPreloadPath(),
   },
-};
+});
 
 export const createRealmWindow = () => {
-  const newRealmWindow = new BrowserWindow(defaultRealmWindowOptions);
+  const frame = isMacWithCameraNotch() ? false : true;
+  const newRealmWindow = new BrowserWindow(getDefaultRealmWindowOptions(frame));
   newRealmWindow.setMenuBarVisibility(false);
   newRealmWindow.loadURL(resolveHtmlPath('index.html'));
 
@@ -134,21 +137,23 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
 
   parentWindow.on('resize', () => {
     const newBounds = parentWindow.getBounds();
+    const useSimpleFullScreen = parentWindow.isSimpleFullScreen();
 
     newMouseWindow.setBounds(newBounds);
     parentWindow.webContents.send('set-dimensions', {
       width: newBounds.width,
-      height: newBounds.height - (isArm64Mac ? 40 : 0),
+      height: newBounds.height - (useSimpleFullScreen ? 40 : 0),
     });
   });
 
   parentWindow.on('move', () => {
     const newBounds = parentWindow.getBounds();
+    const useSimpleFullScreen = parentWindow.isSimpleFullScreen();
 
     newMouseWindow.setBounds(newBounds);
     parentWindow.webContents.send('set-dimensions', {
       width: newBounds.width,
-      height: newBounds.height - (isArm64Mac ? 40 : 0),
+      height: newBounds.height - (useSimpleFullScreen ? 40 : 0),
     });
   });
 
@@ -156,6 +161,8 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
 };
 
 export const createStandaloneChatWindow = () => {
+  const frame = isMacWithCameraNotch() ? false : true;
+  const defaultRealmWindowOptions = getDefaultRealmWindowOptions(frame);
   const newStandaloneChatWindow = new BrowserWindow({
     ...defaultRealmWindowOptions,
     title: 'Realm Chat',

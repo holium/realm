@@ -31,7 +31,6 @@ const StandaloneChatPassportPresenter = ({ onBack }: Props) => {
     >
       <ChatLogHeader
         path={loggedInAccount.serverId}
-        rightAction={null}
         isMuted={false}
         hasMenu={false}
         forceBackButton

@@ -9,12 +9,12 @@ import {
   DownloadRealmButtons,
   DownloadRealmButtonsProps,
 } from '../../components/DownloadRealmButtons';
+import { ThirdEarthShip } from '../../types';
 
 type Props = DownloadRealmButtonsProps & {
-  identities: string[] | undefined;
-  selectedIdentity: string | undefined;
-  isUploadedIdentity: boolean;
-  setSelectedIdentity: (patp: string) => void;
+  ships: ThirdEarthShip[];
+  selectedShipId: number | undefined;
+  setSelectedShipId: (newId: number) => void;
   onClickPurchaseId: () => void;
   onClickUploadId: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
@@ -22,10 +22,9 @@ type Props = DownloadRealmButtonsProps & {
 };
 
 export const AccountDownloadRealmDialog = ({
-  identities,
-  selectedIdentity,
-  isUploadedIdentity,
-  setSelectedIdentity,
+  ships,
+  selectedShipId,
+  setSelectedShipId,
   onDownloadMacM1,
   onDownloadMacIntel,
   onDownloadWindows,
@@ -36,12 +35,10 @@ export const AccountDownloadRealmDialog = ({
   onExit,
 }: Props) => (
   <AccountDialog
-    ships={[]}
-    identities={identities ?? []}
-    selectedIdentity={selectedIdentity ?? ''}
-    setSelectedIdentity={setSelectedIdentity}
+    ships={ships}
+    selectedShipId={selectedShipId}
+    setSelectedShipId={setSelectedShipId}
     currentSection={SidebarSection.DownloadRealm}
-    isUploadedIdentity={isUploadedIdentity}
     customBody={
       <Flex
         flex={3}

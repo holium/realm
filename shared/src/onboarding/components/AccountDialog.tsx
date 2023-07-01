@@ -30,65 +30,80 @@ export enum SidebarSection {
   DownloadRealm = 'Download Realm',
   GetHosting = 'Get Hosting',
   GetRealm = 'Get Realm',
+  ContactSupport = 'Contact Support',
 }
 
 type Props = {
-  identities: string[];
-  selectedIdentity: string;
+  ships: ThirdEarthShip[];
+  selectedShipId?: number;
   currentSection?: SidebarSection;
   children?: ReactNode;
   customBody?: ReactNode;
   isLoading?: boolean;
-  isUploadedIdentity: boolean;
-  ships: ThirdEarthShip[];
   onClickUploadId: () => void;
   onClickPurchaseId: () => void;
-  setSelectedIdentity: (patp: string) => void;
+  setSelectedShipId: (shipId: number) => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onSubmit?: () => void;
   onExit: () => void;
 };
 
 export const AccountDialog = ({
-  identities,
-  selectedIdentity,
+  ships,
+  selectedShipId,
   currentSection,
   children,
   customBody,
   isLoading,
-  isUploadedIdentity,
-  ships,
   onClickUploadId,
   onClickPurchaseId,
-  setSelectedIdentity,
+  setSelectedShipId,
   onClickSidebarSection,
   onSubmit,
   onExit,
 }: Props) => {
-  const hasShips = identities ? identities.length > 0 : false;
+  const hasShips = ships ? ships.length > 0 : false;
   const hasCSEK = useToggle(false);
 
   let sidebarItems: SidebarSection[] = [];
 
   if (hasShips) {
+    const selectedShip = ships.find((ship) => ship.id === selectedShipId);
+    const isUploadedIdentity = selectedShip?.product_type === 'byop-p';
+    const isFinishedUploading = selectedShip?.ship_type === 'planet';
+
     if (isUploadedIdentity) {
-      sidebarItems = [
-        SidebarSection.Hosting,
-        SidebarSection.CustomDomain,
-        SidebarSection.DownloadRealm,
-      ];
+      if (isFinishedUploading) {
+        sidebarItems = [
+          SidebarSection.Hosting,
+          SidebarSection.CustomDomain,
+          SidebarSection.DownloadRealm,
+          SidebarSection.ContactSupport,
+        ];
+      } else {
+        sidebarItems = [SidebarSection.Hosting, SidebarSection.ContactSupport];
+      }
     } else {
       sidebarItems = [
         SidebarSection.Hosting,
         SidebarSection.Storage,
         SidebarSection.CustomDomain,
         SidebarSection.DownloadRealm,
+        SidebarSection.ContactSupport,
       ];
     }
   } else if (hasCSEK.isOn) {
-    sidebarItems = [SidebarSection.DownloadRealm, SidebarSection.GetHosting];
+    sidebarItems = [
+      SidebarSection.DownloadRealm,
+      SidebarSection.GetHosting,
+      SidebarSection.ContactSupport,
+    ];
   } else {
-    sidebarItems = [SidebarSection.GetRealm, SidebarSection.GetHosting];
+    sidebarItems = [
+      SidebarSection.GetRealm,
+      SidebarSection.GetHosting,
+      SidebarSection.ContactSupport,
+    ];
   }
 
   useEffect(() => {
@@ -124,23 +139,17 @@ export const AccountDialog = ({
               </AccountDialogSidebarMenuItemText>
               <Select
                 id="ship-selector"
-                options={identities.map((patp) => {
-                  const ship = ships.find((ship) => ship.patp === patp);
-                  if (
-                    ship &&
-                    ship.product_type === 'byop-p' &&
-                    ship.ship_type !== 'planet'
-                  ) {
+                options={ships.map(
+                  ({ id, patp, title, product_type, ship_type }) => {
+                    const isUnfinishedByop =
+                      product_type === 'byop-p' && ship_type !== 'planet';
+
                     return {
-                      value: patp,
-                      label: `${ship.title} - ID: ${ship.id}`,
+                      value: id,
+                      label: isUnfinishedByop ? `${title} - ID: ${id}` : patp,
                     };
                   }
-                  return {
-                    value: patp,
-                    label: patp,
-                  };
-                })}
+                )}
                 extraSection={
                   <Flex
                     flexDirection="column"
@@ -166,8 +175,8 @@ export const AccountDialog = ({
                     </Button.Transparent>
                   </Flex>
                 }
-                selected={selectedIdentity}
-                onClick={(newPatp) => setSelectedIdentity(newPatp)}
+                selected={selectedShipId}
+                onClick={(newId) => setSelectedShipId(newId as number)}
               />
             </Flex>
           )}
@@ -224,14 +233,12 @@ export const AccountDialogSkeleton = ({
 
   return (
     <AccountDialog
-      identities={[]}
-      selectedIdentity=""
+      ships={[]}
+      selectedShipId={0}
       currentSection={currentSection}
       isLoading
-      ships={[]}
-      isUploadedIdentity={false}
       customBody={isBlankBody ? <Flex flex={5} /> : undefined}
-      setSelectedIdentity={() => {}}
+      setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
       onClickUploadId={() => {}}
       onClickSidebarSection={() => {}}
