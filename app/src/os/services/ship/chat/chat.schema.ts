@@ -76,3 +76,11 @@ create unique index if not exists ${CHAT_TABLES.DELETE_LOGS}_change_uindex
     on ${CHAT_TABLES.DELETE_LOGS} (timestamp, change);
 
 `;
+
+export const chatWipeSql = `
+drop table if exists ${CHAT_TABLES.MESSAGES};
+drop table if exists ${CHAT_TABLES.PATHS};
+drop table if exists ${CHAT_TABLES.PEERS};
+drop table if exists ${CHAT_TABLES.PATHS_FLAGS};
+drop table if exists ${CHAT_TABLES.DELETE_LOGS};
+`;

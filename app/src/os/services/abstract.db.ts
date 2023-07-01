@@ -76,7 +76,13 @@ abstract class AbstractDataAccess<T, U = unknown> {
     return row ? this.mapRow(row) : null;
   }
 
-  public create(values: Partial<T>): T {
+  /**
+   *
+   * @param values the values to insert into the table.  This should also include the primary key, if not auto-incrementing
+   * @param pKey Optional primary key to use for the record.  If not provided, the lastInsertRowId will be used to find the record
+   * @returns the newly created record
+   */
+  public create(values: Partial<T>, pKey?: number | string): T {
     const columns = Object.keys(values).join(', ');
     const placeholders = Object.keys(values)
       .map(() => '?')
@@ -85,9 +91,15 @@ abstract class AbstractDataAccess<T, U = unknown> {
     const stmt = this.prepare(query);
 
     const result = stmt.run(Object.values(values));
-    const id = result.lastInsertRowid;
-    if (!id) throw new Error('Failed to create new record');
-    const created = this.findOne(id as number);
+    if (result.changes !== 1) throw new Error('Failed to create record');
+
+    let created: T | null = null;
+    if (typeof pKey !== 'undefined') {
+      created = this.findOne(pKey);
+    } else {
+      const id = result.lastInsertRowid;
+      created = this.findOne(id as number);
+    }
     if (!created) throw new Error('Failed to create new record');
     return created;
   }
@@ -96,20 +108,35 @@ abstract class AbstractDataAccess<T, U = unknown> {
     const setClause = Object.keys(values)
       .map((key) => `${key} = ?`)
       .join(', ');
-    const query = `UPDATE ${this.tableName} SET ${setClause} WHERE ${this.pKey} = ?`;
+    const query = `UPDATE ${this.tableName} SET ${setClause} WHERE ${this.pKey} = ${pKey}`;
     const stmt = this.prepare(query);
 
-    const result = stmt.run([...Object.values(values), pKey]);
+    const result = stmt.run();
     if (result.changes !== 1) throw new Error('Failed to update record');
+
     const updated = this.findOne(pKey);
     if (!updated) throw new Error('Failed to update record');
     return updated;
   }
 
+  /**
+   *
+   * @param pKey key of the record to update or create
+   * @param values the table values, in proper order, including the primary key
+   * @returns the created or updated record
+   */
+  public upsert(pKey: number | string, values: Partial<T>): T {
+    if (this.findOne(pKey)) {
+      return this.update(pKey, values);
+    }
+    return this.create(values, pKey);
+  }
+
   public delete(pKey: number | string): void {
-    const query = `DELETE FROM ${this.tableName} WHERE ${this.pKey} = ?`;
+    const query = `DELETE FROM ${this.tableName} WHERE ${this.pKey} = ${pKey}`;
     const stmt = this.prepare(query);
-    stmt.run(pKey);
+    const result = stmt.run();
+    if (result.changes !== 1) throw new Error('Failed to delete record');
   }
 
   public raw(query: string, params?: any[]): any[] {

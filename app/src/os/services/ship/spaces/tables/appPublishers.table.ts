@@ -240,6 +240,8 @@ export const appPublishersInitSql = `
   create unique index if not exists ${tableName}_uindex on ${tableName} (publisher, source, desk);
 `;
 
+export const appPublishersWipeSql = `drop table if exists ${tableName};`;
+
 export const appPublishersDBPreload = AppPublishersTable.preload(
   new AppPublishersTable(true)
 );

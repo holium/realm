@@ -13,14 +13,24 @@ import {
   Bookmark,
   BookmarksDB,
   bookmarksInitSql,
+  bookmarksWipeSql,
 } from './tables/bookmarks.table';
 import {
   FeaturedSpacesDB,
   spacesFeaturedInitSql,
+  spacesFeaturedWipeSql,
 } from './tables/featured.table';
-import { MembersDB, spacesMembersInitSql } from './tables/members.table';
-import { SpacesDB, spacesInitSql } from './tables/spaces.table';
-import { InvitationDB, spacesInvitationsInitSql } from './tables/visas.table';
+import {
+  MembersDB,
+  spacesMembersInitSql,
+  spacesMembersWipeSql,
+} from './tables/members.table';
+import { SpacesDB, spacesInitSql, spacesWipeSql } from './tables/spaces.table';
+import {
+  InvitationDB,
+  spacesInvitationsInitSql,
+  spacesInvitationsWipeSql,
+} from './tables/visas.table';
 
 export class SpacesService extends AbstractService<SpacesUpdateType> {
   private shipDB?: Database;
@@ -612,6 +622,14 @@ export const spacesTablesInitSql = `
  ${spacesMembersInitSql}
  ${spacesFeaturedInitSql}
  ${bookmarksInitSql}
+`;
+
+export const spacesTablesWipeSql = `
+  ${spacesWipeSql}
+  ${spacesInvitationsWipeSql}
+  ${spacesMembersWipeSql}
+  ${spacesFeaturedWipeSql}
+  ${bookmarksWipeSql}
 `;
 
 export type NewSpace = {

@@ -107,49 +107,9 @@ export class SpacesDB extends AbstractDataAccess<Space, any> {
     stmt.run(path);
   }
 
-  public findOne(path: string): Space | null {
-    const query = `SELECT * FROM ${this.tableName} WHERE path = ?`;
-    const stmt = this.prepare(query);
-    const row = stmt.get(path);
-    return row ? this.mapRow(row) : null;
-  }
-
-  public create(values: Partial<Space>): Space {
-    const columns = Object.keys(values).join(', ');
-    const placeholders = Object.keys(values)
-      .map(() => '?')
-      .join(', ');
-    const query = `INSERT INTO ${this.tableName} (${columns}) VALUES (${placeholders})`;
-    const stmt = this.prepare(query);
-
-    stmt.run(Object.values(values));
-    if (!values.path) throw new Error('Failed to create new record');
-    const created = this.findOne(values.path);
-    if (!created) throw new Error('Failed to create new record');
-    return created;
-  }
-
   public update(path: string, values: Partial<Space>): Space {
     if (values.theme) values.theme = JSON.stringify(values.theme);
-    console.log('update', path, values);
-    const setClause = Object.keys(values)
-      .map((key) => `${key} = ?`)
-      .join(', ');
-    const query = `UPDATE ${this.tableName} SET ${setClause} WHERE path = ?`;
-    const stmt = this.prepare(query);
-
-    stmt.run([...Object.values(values), path]);
-    const updated = this.findOne(path);
-    if (!updated) throw new Error('Failed to update record');
-    return updated;
-  }
-
-  public delete(path: string): void {
-    const query = `DELETE FROM ${this.tableName} WHERE path = ?`;
-    const stmt = this.prepare(query);
-
-    const result = stmt.run(path);
-    if (result.changes !== 1) throw new Error('Failed to delete record');
+    return super.update(path, values);
   }
 }
 
@@ -169,5 +129,7 @@ export const spacesInitSql = `
   );
   create unique index if not exists spaces_path_uindex on spaces (path);
 `;
+
+export const spacesWipeSql = `drop table if exists spaces;`;
 
 export const spacesDBPreload = SpacesDB.preload(new SpacesDB(true));

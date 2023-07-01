@@ -14,12 +14,14 @@ import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { APIConnection } from './services/api';
 import { AuthService } from './services/auth/auth.service';
 import OnboardingService from './services/auth/onboarding.service';
+import { MigrationService } from './services/migration/migration.service';
 import { FileUploadParams, ShipService } from './services/ship/ship.service';
 
 export class RealmService extends AbstractService<RealmUpdateTypes> {
   public services?: {
     auth: AuthService;
     onboarding: OnboardingService;
+    migration: MigrationService;
     ship?: ShipService;
   };
 
@@ -29,6 +31,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     this.services = {
       auth: new AuthService(),
       onboarding: new OnboardingService(),
+      migration: new MigrationService(),
     };
 
     this.onWebViewAttached = this.onWebViewAttached.bind(this);

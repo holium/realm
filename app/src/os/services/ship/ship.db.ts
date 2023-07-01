@@ -1,24 +1,117 @@
-import { app } from 'electron';
-import log from 'electron-log';
 import Database from 'better-sqlite3-multiple-ciphers';
-import path from 'path';
 
-import { CHAT_TABLES, chatInitSql } from './chat/chat.schema';
-import { friendsInitSql } from './friends.service';
-import { notifInitSql } from './notifications/notifications.table';
-import { settingsInitSql } from './settings.service';
+import { Migration, MigrationService } from '../migration/migration.service';
+import { CHAT_TABLES, chatInitSql, chatWipeSql } from './chat/chat.schema';
+import { friendsInitSql, friendsWipeSql } from './friends.service';
+import {
+  notifInitSql,
+  notifWipeSql,
+} from './notifications/notifications.table';
+import { settingsInitSql, settingsWipeSql } from './settings.service';
 import { Credentials } from './ship.types.ts';
-import { spacesTablesInitSql } from './spaces/spaces.service';
-import { appPublishersInitSql } from './spaces/tables/appPublishers.table';
-import { appRecentsInitSql } from './spaces/tables/appRecents.table';
-import { bazaarTablesInitSql } from './spaces/tables/catalog.table';
-import { walletInitSql } from './wallet/wallet.db';
+import {
+  spacesTablesInitSql,
+  spacesTablesWipeSql,
+} from './spaces/spaces.service';
+import {
+  appPublishersInitSql,
+  appPublishersWipeSql,
+} from './spaces/tables/appPublishers.table';
+import {
+  appRecentsInitSql,
+  appRecentsWipeSql,
+} from './spaces/tables/appRecents.table';
+import {
+  bazaarTablesInitSql,
+  bazaarTablesWipeSql,
+} from './spaces/tables/catalog.table';
+import { walletInitSql, walletWipeSql } from './wallet/wallet.db';
+
+const initSql = `
+${bazaarTablesInitSql}
+${chatInitSql}
+${notifInitSql}
+${friendsInitSql}
+${spacesTablesInitSql}
+${walletInitSql}
+${appPublishersInitSql}
+${appRecentsInitSql}
+${settingsInitSql}
+create table if not exists credentials (
+  url       TEXT PRIMARY KEY NOT NULL,
+  code      TEXT NOT NULL,
+  cookie    TEXT NOT NULL,
+  wallet    TEXT
+);
+`;
+
+const wipeSql = `
+  ${bazaarTablesWipeSql}
+  ${chatWipeSql}
+  ${notifWipeSql}
+  ${friendsWipeSql}
+  ${spacesTablesWipeSql}
+  ${walletWipeSql}
+  ${appPublishersWipeSql}
+  ${appRecentsWipeSql}
+  ${settingsWipeSql}
+  drop table if exists credentials;
+`;
+
+const migrations: Migration[] = [
+  {
+    version: 1,
+    up: `${initSql}`,
+    down: `${wipeSql}`,
+  },
+  {
+    version: 2,
+    up: `
+      alter table ${CHAT_TABLES.MESSAGES} add column received_at INTEGER NOT NULL DEFAULT 0;
+      alter table ${CHAT_TABLES.PEERS} add column received_at INTEGER NOT NULL DEFAULT 0;
+      alter table ${CHAT_TABLES.PATHS} add column received_at INTEGER NOT NULL DEFAULT 0;
+
+      BEGIN TRANSACTION;
+      create table if not exists credentials_temp (
+        url       TEXT PRIMARY KEY NOT NULL,
+        code      TEXT NOT NULL,
+        cookie    TEXT,
+        wallet    TEXT
+      );
+      INSERT INTO credentials_temp(url, code, cookie, wallet)
+      SELECT url, code, cookie, wallet
+      FROM credentials;
+      DROP TABLE credentials;
+      ALTER TABLE credentials_temp RENAME TO credentials;
+      COMMIT TRANSACTION;
+
+    `,
+    down: `
+      alter table ${CHAT_TABLES.MESSAGES} drop column received_at;
+      alter table ${CHAT_TABLES.PEERS} drop column received_at;
+      alter table ${CHAT_TABLES.PATHS} drop column received_at;
+
+      BEGIN TRANSACTION;
+      create table if not exists credentials_temp (
+        url       TEXT PRIMARY KEY NOT NULL,
+        code      TEXT NOT NULL,
+        cookie    TEXT NOT NULL,
+        wallet    TEXT
+      );
+      INSERT INTO credentials_temp(url, code, cookie, wallet)
+      SELECT url, code, COALESCE(cookie, ''), wallet
+      FROM credentials;
+      DROP TABLE credentials;
+      ALTER TABLE credentials_temp RENAME TO credentials;
+      COMMIT TRANSACTION;
+    `,
+  },
+];
 
 export class ShipDB {
   private shipDB: Database;
   private patp: string;
 
-  private readonly dbPath: string;
   // private readonly dontEncryptDb: boolean =
   //   process.env.DONT_ENCRYPT_DB === 'true';
 
@@ -28,14 +121,12 @@ export class ShipDB {
     _clientSideEncryptionKey: string
   ) {
     this.patp = patp;
-    this.dbPath = path.join(app.getPath('userData'), `${patp}.sqlite`);
-
-    // Create the database if it doesn't exist
-
-    this.shipDB = new Database(this.dbPath);
-    this.shipDB.exec(initSql);
-
-    // } else {
+    this.shipDB = MigrationService.getInstance().setupAndMigrate(
+      this.patp,
+      migrations,
+      2
+    );
+    // TODO: re-enable encryption
     //   log.info('ship.db.ts:', 'Encrypting ship db');
     //   const hashGenerator = crypto.createHmac(
     //     'sha256',
@@ -48,39 +139,6 @@ export class ShipDB {
     //   });
     //   this.shipDB.exec(initSql);
     // }
-
-    // update db schemas if we need to
-    this.addColumnIfNotExists(
-      CHAT_TABLES.MESSAGES,
-      'received_at',
-      'INTEGER NOT NULL DEFAULT 0'
-    );
-    this.addColumnIfNotExists(
-      CHAT_TABLES.PEERS,
-      'received_at',
-      'INTEGER NOT NULL DEFAULT 0'
-    );
-    this.addColumnIfNotExists(
-      CHAT_TABLES.PATHS,
-      'received_at',
-      'INTEGER NOT NULL DEFAULT 0'
-    );
-
-    // e.g. make cookie nullable in credentials table
-    log.info('ship.db.ts:', 'Running upgrade script');
-    this.shipDB.exec(upgradeScript);
-  }
-
-  private addColumnIfNotExists(table: string, column: string, type: string) {
-    const queryResult = this.shipDB
-      .prepare(
-        `select count(*) as found from pragma_table_info('${table}') where name='${column}'`
-      )
-      .all();
-    const found: boolean = queryResult?.[0].found > 0;
-    if (!found) {
-      this.shipDB.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${type};`);
-    }
   }
 
   get db() {
@@ -127,37 +185,3 @@ export class ShipDB {
     this.shipDB.close();
   }
 }
-
-const initSql = `
-${bazaarTablesInitSql}
-${chatInitSql}
-${notifInitSql}
-${friendsInitSql}
-${spacesTablesInitSql}
-${walletInitSql}
-${appPublishersInitSql}
-${appRecentsInitSql}
-${settingsInitSql}
-create table if not exists credentials (
-  url       TEXT PRIMARY KEY NOT NULL,
-  code      TEXT NOT NULL,
-  cookie    TEXT NOT NULL,
-  wallet    TEXT
-);
-`;
-
-const upgradeScript = `
-BEGIN TRANSACTION;
-create table if not exists credentials_temp (
-  url       TEXT PRIMARY KEY NOT NULL,
-  code      TEXT NOT NULL,
-  cookie    TEXT,
-  wallet    TEXT
-);
-INSERT INTO credentials_temp(url, code, cookie, wallet)
-SELECT url, code, cookie, wallet
-FROM credentials;
-DROP TABLE credentials;
-ALTER TABLE credentials_temp RENAME TO credentials;
-COMMIT TRANSACTION;
-`;

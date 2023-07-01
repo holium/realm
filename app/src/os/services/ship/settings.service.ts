@@ -45,7 +45,23 @@ export class SettingsService extends AbstractDataAccess<Setting, any> {
   set(setting: Setting) {
     if (!this.db?.open) return;
     const replace = this.db.prepare(
-      `REPLACE INTO settings (identity, isolationModeEnabled, realmCursorEnabled, profileColorForCursorEnabled) VALUES (@identity, @isolationModeEnabled, @realmCursorEnabled, @profileColorForCursorEnabled)`
+      `REPLACE INTO settings (
+        identity,
+        isolationModeEnabled,
+        realmCursorEnabled,
+        profileColorForCursorEnabled,
+        standaloneChatWallpaperEnabled,
+        roomsAudioInputSource,
+        roomsAudioOutputSource
+      ) VALUES (
+        @identity,
+        @isolationModeEnabled,
+        @realmCursorEnabled,
+        @profileColorForCursorEnabled
+        @standaloneChatWallpaperEnabled,
+        @roomsAudioInputSource,
+        @roomsAudioOutputSource
+      )`
     );
     replace.run(setting);
   }
@@ -64,9 +80,14 @@ export const settingsInitSql = `
     identity text primary key,
     isolationModeEnabled number,
     realmCursorEnabled number,
-    profileColorForCursorEnabled number
+    profileColorForCursorEnabled number,
+    standaloneChatWallpaperEnabled number,
+    roomsAudioInputSource text,
+    roomsAudioOutputSource text
   );
 `;
+
+export const settingsWipeSql = `drop table if exists settings;`;
 
 export const settingsPreload = SettingsService.preload(
   new SettingsService({ preload: true })
