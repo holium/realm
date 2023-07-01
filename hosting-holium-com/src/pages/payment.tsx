@@ -76,7 +76,7 @@ export default function Payment({
         token,
         productId.toString(),
         // Don't pass serverId for byop-p.
-        product_type !== 'byop-p' && serverId ? serverId : 'undefined'
+        product_type !== 'byop-p' && serverId ? serverId : undefined
       );
       setClientSecret(response.clientSecret);
       setInvoiceId(response.invoiceId);

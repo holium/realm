@@ -261,12 +261,7 @@ export class ThirdEarthApi {
     );
   }
 
-  stripeMakePayment(
-    token: string,
-    productId: string,
-    patp: string,
-    coupon = 'undefined'
-  ) {
+  stripeMakePayment(token: string, productId: string, patp?: string) {
     return http<StripeMakePaymentResponse>(
       `${this.apiBaseUrl}/stripe-make-payment`,
       {
@@ -275,7 +270,6 @@ export class ThirdEarthApi {
         body: JSON.stringify({
           productId,
           patp,
-          coupon,
         }),
       }
     );
