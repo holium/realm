@@ -92,6 +92,13 @@ export class SpacesDB extends AbstractDataAccess<Space, any> {
     });
   }
 
+  public getCurrent(): Space | null {
+    const query = `SELECT * FROM ${this.tableName} WHERE current = 1 LIMIT 1`;
+    const stmt = this.prepare(query);
+    const row = stmt.get();
+    return row ? this.mapRow(row) : null;
+  }
+
   public setCurrent(path: string) {
     // update all to 0 and then set the one to 1 in one transaction
     const query = `
