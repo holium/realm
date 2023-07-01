@@ -1,13 +1,34 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { GetServerSideProps } from 'next/types';
 
 import { useToggle } from '@holium/design-system/util';
-import { BootingDialog, OnboardingStorage } from '@holium/shared';
+import {
+  BootingDialog,
+  OnboardingStorage,
+  ThirdEarthProductType,
+} from '@holium/shared';
 
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
-export default function Booting() {
+type ServerSideProps = {
+  // We use underscore to highlight that this is a query param.
+  product_type: ThirdEarthProductType;
+};
+
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+  const product_type = (query.product_type ??
+    'planet') as ThirdEarthProductType;
+
+  return {
+    props: {
+      product_type,
+    } as ServerSideProps,
+  };
+};
+
+export default function Booting({ product_type }: ServerSideProps) {
   const { goToPage } = useNavigation();
 
   const intervalRef = useRef<NodeJS.Timer>();
@@ -18,7 +39,7 @@ export default function Booting() {
   const isBYOP = useToggle(false);
 
   const pollShipStatus = useCallback(async () => {
-    const { serverId, token, productType } = OnboardingStorage.get();
+    const { serverId, token } = OnboardingStorage.get();
 
     if (!token) return;
 
@@ -30,7 +51,7 @@ export default function Booting() {
       error.toggleOn();
     }
 
-    if (productType === 'byop-p') {
+    if (product_type === 'byop-p') {
       isBYOP.toggleOn();
       ship = Object.values(ships)
         .filter((s) => s.product_type === 'byop-p' && s.is_migration)
@@ -44,7 +65,7 @@ export default function Booting() {
     if (!ship) return;
 
     if (logs.length === 1) {
-      if (productType === 'byop-p') {
+      if (product_type === 'byop-p') {
         setLogs((logs) => [
           ...logs,
           `Your uploaded identity will be ready in 5-10 minutes.`,
