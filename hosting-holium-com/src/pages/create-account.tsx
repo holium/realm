@@ -2,28 +2,38 @@ import { useEffect, useState } from 'react';
 import { FormikValues } from 'formik';
 import type { GetServerSideProps } from 'next/types';
 
-import { CreateAccountDialog, OnboardingStorage } from '@holium/shared';
+import {
+  CreateAccountDialog,
+  OnboardingStorage,
+  ThirdEarthProductType,
+} from '@holium/shared';
 
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
 type ServerSideProps = {
-  hideAlreadyHaveAccount: string;
+  // We use underscore to highlight that this is a query param.
+  product_type: ThirdEarthProductType;
+  hide_already_have_account: string;
 };
 
 export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-  const hideAlreadyHaveAccount = (query.haha ?? '') as string;
+  const hide_already_have_account = (query.haha ?? '') as string;
+  const product_type = (query.product_type ??
+    'planet') as ThirdEarthProductType;
 
   return {
     props: {
-      hideAlreadyHaveAccount: hideAlreadyHaveAccount === 'true',
+      product_type,
+      hide_already_have_account: hide_already_have_account === 'true',
     },
   };
 };
 
 export default function CreateAccount({
-  hideAlreadyHaveAccount,
+  product_type,
+  hide_already_have_account,
 }: ServerSideProps) {
   const { goToPage } = useNavigation();
 
@@ -40,7 +50,9 @@ export default function CreateAccount({
     try {
       const result = await thirdEarthApi.register(email, password);
       if (result) {
-        return goToPage('/verify-email');
+        return goToPage('/verify-email', {
+          product_type,
+        });
       } else {
         return false;
       }
@@ -62,7 +74,7 @@ export default function CreateAccount({
         onBack={onBack}
         onNext={onNext}
         onAlreadyHaveAccount={
-          hideAlreadyHaveAccount ? undefined : onAlreadyHaveAccount
+          hide_already_have_account ? undefined : onAlreadyHaveAccount
         }
       />
     </Page>

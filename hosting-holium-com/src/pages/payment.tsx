@@ -118,7 +118,7 @@ export default function Payment({
       await thirdEarthApi.log(token, {
         file: 'purchases',
         type: 'info',
-        subject: 'FRONTEND: /payment',
+        subject: 'FRONTEND: payment step',
         message: `Succesful stripe purchase of byop-p by ${email}.`,
         productId: productId.toString(),
         auditTrailCode: 1000,
@@ -147,7 +147,7 @@ export default function Payment({
       await thirdEarthApi.log(token, {
         file: 'purchases',
         type: 'info',
-        subject: 'FRONTEND: /payment',
+        subject: 'FRONTEND: payment step',
         message: `Succesful stripe purchase of planet by ${email}.`,
         productId: productId.toString(),
         auditTrailCode: 1000,
