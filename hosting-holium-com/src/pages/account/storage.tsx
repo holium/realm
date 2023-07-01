@@ -35,7 +35,6 @@ const S3StoragePresenter = () => {
 
   const onClickUploadId = () => {
     goToPage('/upload-id-disclaimer', {
-      product_type: 'byop-p',
       back_url: '/account/storage',
     });
   };

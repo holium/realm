@@ -28,7 +28,6 @@ const DownloadRealmPresenter = () => {
 
   const onClickUploadId = () => {
     goToPage('/upload-id-disclaimer', {
-      product_type: 'byop-p',
       back_url: '/account/download-realm',
     });
   };

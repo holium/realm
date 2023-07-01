@@ -29,7 +29,6 @@ const GetRealmPresenter = () => {
 
   const onClickUploadId = () => {
     goToPage('/upload-id-disclaimer', {
-      product_type: 'byop-p',
       back_url: '/account/get-realm',
     });
   };

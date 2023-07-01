@@ -71,7 +71,6 @@ const CustomDomainPresenter = () => {
 
   const onClickUploadId = () => {
     goToPage('/upload-id-disclaimer', {
-      product_type: 'byop-p',
       back_url: '/account/custom-domain',
     });
   };
