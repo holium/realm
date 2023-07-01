@@ -163,7 +163,9 @@ export default function Payment({
         shipType: 'planet',
       });
 
-      return goToPage('/booting');
+      return goToPage('/booting', {
+        product_type,
+      });
     }
   };
 
