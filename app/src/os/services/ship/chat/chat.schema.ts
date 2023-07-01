@@ -19,8 +19,7 @@ create table if not exists ${CHAT_TABLES.MESSAGES}
     sender       text    NOT NULL,
     updated_at   INTEGER NOT NULL,
     created_at   INTEGER NOT NULL,
-    expires_at   INTEGER,
-    received_at   INTEGER NOT NULL
+    expires_at   INTEGER
 );
 
 create unique index if not exists ${CHAT_TABLES.MESSAGES}_path_msg_id_msg_part_id_uindex
@@ -39,8 +38,7 @@ create table if not exists ${CHAT_TABLES.PATHS}
     pinned                      INTEGER default 0 NOT NULL,
     muted                       INTEGER default 0 NOT NULL,
     updated_at                  INTEGER NOT NULL,
-    created_at                  INTEGER NOT NULL,
-    received_at                 INTEGER NOT NULL
+    created_at                  INTEGER NOT NULL
 );
 
 create unique index if not exists ${CHAT_TABLES.PATHS}_path_uindex
@@ -59,8 +57,7 @@ create table if not exists ${CHAT_TABLES.PEERS}
     ship        text NOT NULL,
     role        TEXT default 'member' NOT NULL,
     updated_at  INTEGER NOT NULL,
-    created_at  INTEGER NOT NULL,
-    received_at  INTEGER NOT NULL
+    created_at  INTEGER NOT NULL
 );
 
 create unique index if not exists ${CHAT_TABLES.PEERS}_path_ship_uindex

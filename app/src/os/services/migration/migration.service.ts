@@ -20,7 +20,7 @@ export class MigrationService extends AbstractService {
     if (options?.preload) {
       return;
     }
-    this.migrationDB = new MigrationDB();
+    this.migrationDB = new MigrationDB(this);
   }
 
   public static getInstance(options?: ServiceOptions): MigrationService {
@@ -30,32 +30,39 @@ export class MigrationService extends AbstractService {
     return MigrationService.instance;
   }
 
-  public getSchemaVersion(table: string): number {
+  public getSchemaVersion(tableName: string): number {
     if (!this.migrationDB) return 0;
-    const record = this.migrationDB.tables.schemaVersions.findOne(table);
-    if (!record) return 0;
+    const record = this.migrationDB.tables.schemaVersions.findOne(tableName);
+    if (!record) {
+      this.setSchemaVersion(tableName, 0);
+      return 0;
+    }
     return record.version;
   }
 
-  public setSchemaVersion(table: string, version: number) {
+  public setSchemaVersion(tableName: string, version: number) {
     if (!this.migrationDB) return;
-    return this.migrationDB.tables.schemaVersions.upsert(table, { version });
+    return this.migrationDB.tables.schemaVersions.upsert(tableName, {
+      table_name: tableName,
+      version,
+    });
   }
 
+  // run migrations as a transaction based on the current table version
   public setupAndMigrate(
-    table: string,
+    tableName: string,
     migrations: Migration[],
     targetVersion: number,
     password?: string
   ): Database {
-    const dbPath = path.join(app.getPath('userData'), table + '.sqlite');
+    const dbPath = path.join(app.getPath('userData'), tableName + '.sqlite');
     const db = new Database(dbPath, { password });
 
     // default actions
     db.pragma('journal_mode = WAL');
     db.pragma('foreign_keys = ON');
 
-    const currentVersion = this.getSchemaVersion(table);
+    const currentVersion = this.getSchemaVersion(tableName);
 
     if (targetVersion > currentVersion) {
       for (const migration of migrations) {
@@ -63,13 +70,31 @@ export class MigrationService extends AbstractService {
           migration.version > currentVersion &&
           migration.version <= targetVersion
         ) {
-          const upStatement = db.prepare(migration.up);
-          upStatement.run();
-          this.setSchemaVersion(table, migration.version);
-          log.info(
-            'migration.service.ts:',
-            `Up migration to version ${migration.version} for table ${table} applied.`
-          );
+          // Run all statements in a transaction
+          // These have to be broken into separate statements based on semicolon.
+          const statements = migration.up
+            .split(';')
+            .filter((s) => s.trim() !== '');
+          const transact = db.transaction((statements: string[]) => {
+            for (const statement of statements) {
+              log.info(statement);
+              db.prepare(statement).run();
+            }
+            this.setSchemaVersion(tableName, migration.version);
+          });
+          try {
+            transact(statements);
+            log.info(
+              'migration.service.ts:',
+              `Up migration to version ${migration.version} for database '${tableName}' applied.`
+            );
+          } catch (error) {
+            log.error(
+              'migration.service.ts:',
+              `Up migration to version ${migration.version} for database '${tableName}' failed.`
+            );
+            throw error;
+          }
         }
       }
     } else if (targetVersion < currentVersion) {
@@ -81,14 +106,12 @@ export class MigrationService extends AbstractService {
         ) {
           const downStatement = db.prepare(migration.down);
           downStatement.run();
-          db.prepare('UPDATE schema_version SET version = ?').run(
-            migration.version - 1
-          );
+          this.setSchemaVersion(tableName, migration.version - 1);
           log.info(
             'migration.service.ts:',
             `Down migration to version ${
               migration.version - 1
-            } for table ${table} applied.`
+            } for table '${tableName}' applied.`
           );
         }
       }
@@ -97,3 +120,7 @@ export class MigrationService extends AbstractService {
   }
   //   public migrate(table: string, version: number);
 }
+// Generate preload
+export const migrationPreload = MigrationService.preload(
+  new MigrationService({ preload: true })
+);

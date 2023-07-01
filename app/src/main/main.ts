@@ -37,10 +37,6 @@ export const bootRealm = () => {
     realmService = new RealmService();
   }
 
-  // realmService.services?.auth.handleMigrations();
-  // realmService.services?.ship.handleMigrations();
-  // realmService.services?.onboarding.handleMigrations();
-
   if (standaloneChatWindow && !standaloneChatWindow.isDestroyed()) {
     standaloneChatWindow.destroy();
   }

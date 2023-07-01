@@ -108,10 +108,10 @@ abstract class AbstractDataAccess<T, U = unknown> {
     const setClause = Object.keys(values)
       .map((key) => `${key} = ?`)
       .join(', ');
-    const query = `UPDATE ${this.tableName} SET ${setClause} WHERE ${this.pKey} = ${pKey}`;
+    const query = `UPDATE ${this.tableName} SET ${setClause} WHERE ${this.pKey} = ?`;
     const stmt = this.prepare(query);
 
-    const result = stmt.run();
+    const result = stmt.run([...Object.values(values), pKey]);
     if (result.changes !== 1) throw new Error('Failed to update record');
 
     const updated = this.findOne(pKey);
@@ -133,9 +133,9 @@ abstract class AbstractDataAccess<T, U = unknown> {
   }
 
   public delete(pKey: number | string): void {
-    const query = `DELETE FROM ${this.tableName} WHERE ${this.pKey} = ${pKey}`;
+    const query = `DELETE FROM ${this.tableName} WHERE ${this.pKey} = ?`;
     const stmt = this.prepare(query);
-    const result = stmt.run();
+    const result = stmt.run(pKey);
     if (result.changes !== 1) throw new Error('Failed to delete record');
   }
 

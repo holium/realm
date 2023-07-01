@@ -4,6 +4,7 @@ import { Position } from '@holium/design-system';
 import { MouseState } from '@holium/realm-presence';
 
 import { ConduitState } from 'os/services/api';
+import { migrationPreload } from 'os/services/migration/migration.service';
 import { settingsPreload } from 'os/services/ship/settings.service';
 import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
@@ -215,6 +216,7 @@ contextBridge.exposeInMainWorld('realm', realmPreload);
 contextBridge.exposeInMainWorld('shipService', shipPreload);
 contextBridge.exposeInMainWorld('spacesService', spacesPreload);
 contextBridge.exposeInMainWorld('authService', authPreload);
+contextBridge.exposeInMainWorld('migrationService', migrationPreload);
 contextBridge.exposeInMainWorld('chatService', chatPreload);
 contextBridge.exposeInMainWorld('walletService', walletPreload);
 contextBridge.exposeInMainWorld('notifService', notifPreload);

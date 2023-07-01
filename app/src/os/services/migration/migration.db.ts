@@ -22,12 +22,8 @@ export class MigrationDB {
     schemaVersions: SchemaVersions;
   };
 
-  constructor() {
-    this.migrationDB = MigrationService.getInstance().setupAndMigrate(
-      'migration',
-      migrations,
-      1
-    );
+  constructor(instance: MigrationService) {
+    this.migrationDB = instance.setupAndMigrate('migration', migrations, 1);
     this.tables = {
       schemaVersions: new SchemaVersions(this.migrationDB),
     };

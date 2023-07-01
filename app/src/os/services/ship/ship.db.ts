@@ -71,7 +71,6 @@ const migrations: Migration[] = [
       alter table ${CHAT_TABLES.PEERS} add column received_at INTEGER NOT NULL DEFAULT 0;
       alter table ${CHAT_TABLES.PATHS} add column received_at INTEGER NOT NULL DEFAULT 0;
 
-      BEGIN TRANSACTION;
       create table if not exists credentials_temp (
         url       TEXT PRIMARY KEY NOT NULL,
         code      TEXT NOT NULL,
@@ -83,15 +82,12 @@ const migrations: Migration[] = [
       FROM credentials;
       DROP TABLE credentials;
       ALTER TABLE credentials_temp RENAME TO credentials;
-      COMMIT TRANSACTION;
-
     `,
     down: `
       alter table ${CHAT_TABLES.MESSAGES} drop column received_at;
       alter table ${CHAT_TABLES.PEERS} drop column received_at;
       alter table ${CHAT_TABLES.PATHS} drop column received_at;
 
-      BEGIN TRANSACTION;
       create table if not exists credentials_temp (
         url       TEXT PRIMARY KEY NOT NULL,
         code      TEXT NOT NULL,
@@ -103,8 +99,13 @@ const migrations: Migration[] = [
       FROM credentials;
       DROP TABLE credentials;
       ALTER TABLE credentials_temp RENAME TO credentials;
-      COMMIT TRANSACTION;
     `,
+  },
+  {
+    // todo: add settings updates
+    version: 3,
+    up: ``,
+    down: ``,
   },
 ];
 

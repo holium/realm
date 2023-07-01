@@ -49,18 +49,12 @@ export class SettingsService extends AbstractDataAccess<Setting, any> {
         identity,
         isolationModeEnabled,
         realmCursorEnabled,
-        profileColorForCursorEnabled,
-        standaloneChatWallpaperEnabled,
-        roomsAudioInputSource,
-        roomsAudioOutputSource
+        profileColorForCursorEnabled
       ) VALUES (
         @identity,
         @isolationModeEnabled,
         @realmCursorEnabled,
         @profileColorForCursorEnabled
-        @standaloneChatWallpaperEnabled,
-        @roomsAudioInputSource,
-        @roomsAudioOutputSource
       )`
     );
     replace.run(setting);
@@ -80,12 +74,13 @@ export const settingsInitSql = `
     identity text primary key,
     isolationModeEnabled number,
     realmCursorEnabled number,
-    profileColorForCursorEnabled number,
-    standaloneChatWallpaperEnabled number,
-    roomsAudioInputSource text,
-    roomsAudioOutputSource text
+    profileColorForCursorEnabled number
   );
 `;
+
+// standaloneChatWallpaperEnabled number,
+// roomsAudioInputSource text,
+// roomsAudioOutputSource text
 
 export const settingsWipeSql = `drop table if exists settings;`;
 
