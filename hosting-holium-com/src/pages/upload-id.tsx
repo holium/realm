@@ -78,7 +78,9 @@ export default function UploadId() {
   };
 
   const onNext = () => {
-    return goToPage('/booting');
+    return goToPage('/booting', {
+      product_type: 'byop-p',
+    });
   };
 
   return (
