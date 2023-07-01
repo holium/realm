@@ -481,8 +481,8 @@ export class ThirdEarthApi {
       type: string;
       subject: string;
       message: string;
-      productId: string;
-      auditTrailCode: number;
+      productId?: string;
+      auditTrailCode?: number;
     }
   ) {
     return http<UploadPierFileResponse>(`${this.apiBaseUrl}/user/raise-alarm`, {

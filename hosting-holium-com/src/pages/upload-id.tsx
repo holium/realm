@@ -46,6 +46,12 @@ export default function UploadId() {
     formData.append('desks', 'false');
     formData.append('groups', 'false');
 
+    await thirdEarthApi.log(token, {
+      file: 'purchases',
+      type: 'info',
+      subject: 'FRONTEND: upload started (email notify)',
+      message: `Upload of pier file ${file.name} started.`,
+    });
     const response = await thirdEarthApi.uploadPierFile(
       token,
       provisionalShipId,
