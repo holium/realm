@@ -488,9 +488,7 @@ export class ThirdEarthApi {
     return http<UploadPierFileResponse>(`${this.apiBaseUrl}/user/raise-alarm`, {
       method: 'POST',
       headers: this.getHeaders(token),
-      body: JSON.stringify({
-        payload,
-      }),
+      body: JSON.stringify({ ...payload }),
     });
   }
 }
