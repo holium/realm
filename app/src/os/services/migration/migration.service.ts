@@ -48,6 +48,28 @@ export class MigrationService extends AbstractService {
     });
   }
 
+  private executeStatement(db: Database, statement: string) {
+    try {
+      db.prepare(statement).run();
+    } catch (error: any) {
+      if (
+        error.message.includes('duplicate column name') ||
+        error.message.includes('no such column')
+      ) {
+        log.info(
+          'MigrationService.executeStatement',
+          'ignoring error: ',
+          error.message,
+          'for statement: ',
+          statement
+        );
+        return;
+      } else {
+        throw error;
+      }
+    }
+  }
+
   // run migrations as a transaction based on the current table version
   public setupAndMigrate(
     tableName: string,
@@ -77,8 +99,7 @@ export class MigrationService extends AbstractService {
             .filter((s) => s.trim() !== '');
           const transact = db.transaction((statements: string[]) => {
             for (const statement of statements) {
-              log.info(statement);
-              db.prepare(statement).run();
+              this.executeStatement(db, statement);
             }
             this.setSchemaVersion(tableName, migration.version);
           });
@@ -104,21 +125,39 @@ export class MigrationService extends AbstractService {
           migration.version <= currentVersion &&
           migration.version > targetVersion
         ) {
-          const downStatement = db.prepare(migration.down);
-          downStatement.run();
-          this.setSchemaVersion(tableName, migration.version - 1);
-          log.info(
-            'migration.service.ts:',
-            `Down migration to version ${
-              migration.version - 1
-            } for table '${tableName}' applied.`
-          );
+          // Run all statements in a transaction
+          // These have to be broken into separate statements based on semicolon.
+          const statements = migration.down
+            .split(';')
+            .filter((s) => s.trim() !== '');
+          const transact = db.transaction((statements: string[]) => {
+            for (const statement of statements) {
+              this.executeStatement(db, statement);
+            }
+            this.setSchemaVersion(tableName, migration.version - 1);
+          });
+          try {
+            transact(statements);
+            log.info(
+              'migration.service.ts:',
+              `Down migration to version ${
+                migration.version - 1
+              } for table '${tableName}' applied.`
+            );
+          } catch (error) {
+            log.info(
+              'migration.service.ts:',
+              `Down migration to version ${
+                migration.version - 1
+              } for table '${tableName}' failed.`
+            );
+            throw error;
+          }
         }
       }
     }
     return db;
   }
-  //   public migrate(table: string, version: number);
 }
 // Generate preload
 export const migrationPreload = MigrationService.preload(
