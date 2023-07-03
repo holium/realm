@@ -338,6 +338,7 @@ export const ChatStore = types
       if (self.inboxInitLoader.isFirstLoad) {
         self.inbox = payload;
         localStorage.setItem(`${window.ship}-firstLoad`, 'true');
+        self.inboxInitLoader.set('loaded');
       }
     },
   }));
