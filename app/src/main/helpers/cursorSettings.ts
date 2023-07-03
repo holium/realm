@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain } from 'electron';
+import { BrowserWindow, ipcMain, webContents } from 'electron';
 import Store from 'electron-store';
 
 import { isMac, isWindows } from './env';
@@ -179,32 +179,22 @@ const showSystemCursor = (webContents: Electron.WebContents) => {
   webContents.insertCSS(showSystemCursorCss);
 };
 
-const enableRealmCursor = (
-  mainWindow: BrowserWindow,
-  mouseOverlayWindow: BrowserWindow
-) => {
-  if (isMac) {
-    hideSystemCursor(mouseOverlayWindow.webContents);
-    hideSystemCursor(mainWindow.webContents);
-  } else if (isWindows) {
-    hideSystemCursor(mouseOverlayWindow.webContents);
-    hideSystemCursor(mainWindow.webContents);
-  }
+const enableRealmCursor = () => {
+  // Get all windows and potentially nested webviews.
+  const webviews = webContents.getAllWebContents();
+
+  webviews.forEach(hideSystemCursor);
 };
 
-export const disableRealmCursor = (
-  mainWindow: BrowserWindow,
-  mouseOverlayWindow: BrowserWindow
-) => {
-  if (mainWindow.isDestroyed()) return;
-
+export const disableRealmCursor = (mouseOverlayWindow: BrowserWindow) => {
   const isStandaloneChat = store.get('isStandaloneChat');
 
   // In Realm you can toggle the cursor in settings,
   // but in standalone we don't need to override the `cursor: none` since it's never applied.
   if (!isStandaloneChat) {
-    showSystemCursor(mouseOverlayWindow.webContents);
-    showSystemCursor(mainWindow.webContents);
+    // Get all windows and potentially nested webviews.
+    const webviews = webContents.getAllWebContents();
+    webviews.forEach(showSystemCursor);
   }
 
   mouseOverlayWindow.webContents.send('disable-realm-cursor');
@@ -237,9 +227,9 @@ const registerListeners = (
     if (mainWindow.isDestroyed()) return;
 
     if (realmCursorEnabled) {
-      enableRealmCursor(mainWindow, mouseOverlayWindow);
+      enableRealmCursor();
     } else {
-      disableRealmCursor(mainWindow, mouseOverlayWindow);
+      disableRealmCursor(mouseOverlayWindow);
     }
   });
 
@@ -251,7 +241,7 @@ const registerListeners = (
     const enabled = setRealmCursor(true);
     if (!enabled) return;
 
-    enableRealmCursor(mainWindow, mouseOverlayWindow);
+    enableRealmCursor();
 
     if (reloadMouseWindow) {
       mouseOverlayWindow.reload();
@@ -261,7 +251,7 @@ const registerListeners = (
   ipcMain.handle('disable-realm-cursor', (_, reloadMouseWindow?: boolean) => {
     setRealmCursor(false);
 
-    disableRealmCursor(mainWindow, mouseOverlayWindow);
+    disableRealmCursor(mouseOverlayWindow);
 
     if (reloadMouseWindow) {
       mouseOverlayWindow.reload();
