@@ -1,6 +1,6 @@
 import { useFormikContext } from 'formik';
 
-import { Anchor, Flex } from '@holium/design-system/general';
+import { Anchor, ErrorBox, Flex, InfoBox } from '@holium/design-system/general';
 
 import {
   OnboardDialogDescription,
@@ -16,10 +16,18 @@ type UploadIdFields = {
 type Props = {
   fileName?: string;
   progress?: number;
+  error?: string;
+  hint?: string;
   onUpload: (file: File) => Promise<boolean>;
 };
 
-export const UploadIdDialogBody = ({ fileName, progress, onUpload }: Props) => {
+export const UploadIdDialogBody = ({
+  fileName,
+  progress,
+  error,
+  hint,
+  onUpload,
+}: Props) => {
   const {
     values: { uploaded, uploading },
     setFieldValue,
@@ -70,6 +78,8 @@ export const UploadIdDialogBody = ({ fileName, progress, onUpload }: Props) => {
         <OnboardDialogDescription>Planets only</OnboardDialogDescription>
         <OnboardDialogDescription>Max file size: 3 GB</OnboardDialogDescription>
       </Flex>
+      {error && <ErrorBox>{error}</ErrorBox>}
+      {hint && <InfoBox>{hint}</InfoBox>}
     </Flex>
   );
 };
