@@ -3,11 +3,11 @@ import { deSig, preSig } from '@urbit/aura';
 import EventEmitter, { setMaxListeners } from 'events';
 import EventSource from 'eventsource';
 
+import { getCookie, setSessionCookie } from '../../lib/shipHelpers';
 import {
   Action,
   ConduitState,
   Message,
-  Patp,
   PokeCallbacks,
   PokeParams,
   ReactionPath,
@@ -39,7 +39,7 @@ export class Conduit extends EventEmitter {
   reconnectTimeout: any = 0;
   status: ConduitState = ConduitState.Disconnected;
   private abort = new AbortController();
-  private uid: string = this.generateUID();
+  uid: string = this.generateUID();
   private code: string | undefined = undefined;
   private sse: EventSource | undefined;
 
@@ -65,6 +65,27 @@ export class Conduit extends EventEmitter {
   }
 
   /**
+   * refreshCookie - centralized location for refreshing the conduit cookie. ensures
+   *   errors are handled and events are emitted.
+   *
+   */
+  async refreshCookie() {
+    if (!this.code) throw new Error('fetchCookie failed, no code');
+    this.cookie = await getCookie({
+      serverUrl: this.url,
+      serverCode: this.code,
+    });
+    if (!this.cookie) {
+      throw new Error('fetchCookie failed');
+    }
+    this.updateStatus(ConduitState.Refreshed, {
+      url: this.url,
+      code: this.code,
+      cookie: this.cookie,
+    });
+  }
+
+  /**
    * safeFetch - wrap the base fetch with an auto-retry attempt on 403 error
    *
    * @param url
@@ -74,10 +95,7 @@ export class Conduit extends EventEmitter {
     try {
       let response = await fetch(url, { ...options, headers: this.headers });
       if (response.status === 403) {
-        this.cookie = await Conduit.fetchCookie(this.url, this.code ?? '');
-        if (!this.cookie) {
-          throw new Error('fetchCookie failed');
-        }
+        await this.refreshCookie();
         response = await fetch(url, { ...options, headers: this.headers });
       }
       return response;
@@ -114,7 +132,6 @@ export class Conduit extends EventEmitter {
       mark: 'helm-hi',
       json: 'Opening Realm API channel',
     });
-    await this.startSSE(this.channelUrl(this.uid));
   }
 
   async startSSE(channelUrl: string): Promise<void> {
@@ -133,12 +150,17 @@ export class Conduit extends EventEmitter {
 
     return new Promise((resolve, reject) => {
       this.sse = new EventSource(channelUrl, {
-        headers: { Cookie: this.cookie?.split('; ')[0] },
+        headers: { Cookie: this.cookie },
       });
 
       this.sse.onopen = async (response) => {
         if (response.type === 'open') {
           this.updateStatus(ConduitState.Connected);
+          setInterval(() => {
+            if (this.sse?.readyState === EventSource.CLOSED) {
+              log.warn('sse closed!');
+            }
+          }, 1000);
           resolve();
         } else {
           this.updateStatus(ConduitState.Failed);
@@ -225,6 +247,7 @@ export class Conduit extends EventEmitter {
         }
       };
       this.sse.onerror = async (error) => {
+        log.info(this.watches.keys());
         if (!error) {
           this.handleError({ status: 500, message: 'Unknown error' });
         }
@@ -240,11 +263,14 @@ export class Conduit extends EventEmitter {
         }
         // @ts-expect-error
         if (error.status >= 500) {
+          console.log('error', error);
           this.updateStatus(ConduitState.Failed);
           this.failGracefully();
         }
         if (!error.status) {
           // this happens when the ship is offline
+          console.log('error.status', error);
+
           this.updateStatus(ConduitState.Failed);
           this.disconnectGracefully();
         }
@@ -263,8 +289,12 @@ export class Conduit extends EventEmitter {
    */
   async refresh(url: string, code: string): Promise<string | null> {
     this.url = url;
+    this.code = code;
     this.updateStatus(ConduitState.Refreshing);
-    const cookie: string | null = await Conduit.fetchCookie(url, code);
+    const cookie: string | null = await getCookie({
+      serverUrl: url,
+      serverCode: code,
+    });
     if (cookie === null) {
       this.updateStatus(ConduitState.Failed);
       return null;
@@ -481,7 +511,7 @@ export class Conduit extends EventEmitter {
     if (!this.cookie) throw new Error('cookie not set');
     return {
       'Content-Type': 'application/json',
-      Cookie: this.cookie.split('; ')[0],
+      Cookie: this.cookie,
     };
   }
 
@@ -549,10 +579,13 @@ export class Conduit extends EventEmitter {
           return false;
         }
         if (
+          body.action !== Action.Delete &&
           this.status !== ConduitState.Connected &&
           this.status !== ConduitState.Initialized
         ) {
-          this.startSSE(this.channelUrl(this.uid));
+          // you must await here for SSE to complete; otherwise init calls in other
+          //  locations of the conduit can create 2nd connections
+          await this.startSSE(this.channelUrl(this.uid));
         }
 
         return true;
@@ -574,7 +607,6 @@ export class Conduit extends EventEmitter {
     this.watches = new Map();
     this.reactions = new Map();
     this.abort.abort();
-
     this.abort = new AbortController();
     this.sse?.close();
     this.sse = undefined;
@@ -614,43 +646,12 @@ export class Conduit extends EventEmitter {
     return res;
   }
 
-  /**
-   * fetchCookie
-   *
-   * Should be used when not connected to a channel to retrieve a cookie
-   *
-   * @param url
-   * @param code
-   * @returns
-   */
-  static async fetchCookie(url: string, code: Patp): Promise<string | null> {
-    let cookie = null;
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => {
-      controller.abort();
-      log.error('fetchCookie timed out');
-    }, 10000);
-
-    try {
-      const response = await fetch(`${url}/~/login`, {
-        method: 'POST',
-        body: `password=${code}`,
-        headers: {
-          'Content-Type': 'text/plain',
-        },
-        signal: controller.signal,
-      });
-      if (!response.ok) {
-        return Promise.reject(response);
-      }
-      cookie = response.headers.get('set-cookie');
-    } catch (err: any) {
-      log.error(err);
-    } finally {
-      clearTimeout(timeout);
-    }
-    return cookie;
+  static async reconnect(conduit: Conduit) {
+    await conduit.closeChannel();
+    if (!conduit.url || !conduit.code || !conduit.cookie)
+      throw new Error('url, code, or cookie not set');
+    await conduit.init(conduit.url, conduit.code, conduit.cookie);
+    return conduit;
   }
 
   /**
@@ -691,9 +692,26 @@ export class Conduit extends EventEmitter {
         let cookie: string | null = null;
         try {
           this.updateStatus(ConduitState.Refreshing);
-          cookie = await Conduit.fetchCookie(this.url, this.code ?? '');
+          if (!this.code) throw new Error('fetchCookie failed, no code');
+          cookie = await getCookie({
+            serverUrl: this.url,
+            serverCode: this.code,
+          });
           if (cookie) {
             this.cookie = cookie;
+            await setSessionCookie({
+              ship: preSig(this.ship),
+              url: this.url,
+              code: this.code,
+              cookie: this.cookie,
+            });
+            // await session
+            //   .fromPartition(`persist:default-${this.ship}`)
+            //   .cookies.set({
+            //     url: `${this.url}`,
+            //     name: `urbauth-${this.ship}`,
+            //     value: cookie?.split('=')[1].split('; ')[0],
+            //   });
             this.updateStatus(ConduitState.Refreshed, {
               url: this.url,
               ship: preSig(this.ship),

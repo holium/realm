@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useToggle } from '@holium/design-system/util';
 import {
   AccountHostingDialog,
+  AccountUnfinishedUploadDialog,
   ChangeEmailModal,
   ChangeMaintenanceWindowModal,
   ChangePasswordModal,
@@ -14,6 +15,8 @@ import {
   VerifyEmailModal,
 } from '@holium/shared';
 
+import { getSupportEmail } from 'util/constants';
+
 import { Page } from '../../components/Page';
 import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
@@ -24,8 +27,8 @@ const HostingPresenter = () => {
     token,
     email,
     ships,
-    selectedIdentity,
-    setSelectedIdentity,
+    selectedShipId,
+    setSelectedShipId,
     refetchShips,
   } = useUser();
 
@@ -36,13 +39,23 @@ const HostingPresenter = () => {
   const changeMaintenanceWindowModal = useToggle(false);
   const ejectIdModal = useToggle(false);
 
-  const selectedShip = useMemo(
-    () => ships.find((ship) => ship.patp === selectedIdentity),
-    [ships, selectedIdentity]
-  );
+  const selectedShip = useMemo(() => {
+    return ships.find((ship) => ship.id === selectedShipId) || ships[0];
+  }, [ships, selectedShipId]);
+
+  const isUnfinishedByop = useMemo(() => {
+    return (
+      selectedShip?.product_type === 'byop-p' &&
+      selectedShip.ship_type !== 'planet'
+    );
+  }, [selectedShip]);
 
   const onClickSidebarSection = (section: string) => {
-    goToPage(accountPageUrl[section]);
+    if (section === 'Contact Support') {
+      window.open(getSupportEmail(selectedShip.patp), '_blank');
+    } else {
+      goToPage(accountPageUrl[section]);
+    }
   };
 
   const onSubmitNewEmail = async (email: string) => {
@@ -172,11 +185,41 @@ const HostingPresenter = () => {
     return false;
   };
 
-  const onClickBuyIdentity = () => {
-    goToPage(accountPageUrl['Get Hosting'], {
-      back_url: accountPageUrl['Hosting'],
+  const onClickUploadId = () => {
+    goToPage('/upload-id-disclaimer', {
+      back_url: '/account',
     });
   };
+
+  const onClickReuploadId = () => {
+    goToPage('/upload-id', {
+      product_type: 'byop-p',
+      back_url: '/account',
+    });
+  };
+
+  const onClickPurchaseId = () => {
+    goToPage('/choose-id', {
+      back_url: '/account',
+    });
+  };
+
+  if (isUnfinishedByop) {
+    return (
+      <Page title="Account / Upload ID" isProtected>
+        <AccountUnfinishedUploadDialog
+          ships={ships}
+          selectedShipId={selectedShipId}
+          onClickReuploadId={onClickReuploadId}
+          onClickPurchaseId={onClickPurchaseId}
+          onClickUploadId={onClickUploadId}
+          setSelectedShipId={setSelectedShipId}
+          onClickSidebarSection={onClickSidebarSection}
+          onClickExit={logout}
+        />
+      </Page>
+    );
+  }
 
   return (
     <Page title="Account / Hosting" isProtected>
@@ -212,14 +255,15 @@ const HostingPresenter = () => {
         onSubmit={onSubmitEjectId}
       />
       <AccountHostingDialog
-        identities={ships.map((ship) => ship.patp)}
-        selectedIdentity={selectedIdentity}
+        ships={ships}
+        selectedShipId={selectedShipId}
         email={email}
         serverUrl={selectedShip?.link}
         serverCode={selectedShip?.code}
         serverMaintenanceWindow={selectedShip?.maintenance_window}
-        onClickBuyIdentity={onClickBuyIdentity}
-        setSelectedIdentity={setSelectedIdentity}
+        onClickPurchaseId={onClickPurchaseId}
+        onClickUploadId={onClickUploadId}
+        setSelectedShipId={setSelectedShipId}
         onClickChangeEmail={changeEmailModal.toggleOn}
         onClickChangePassword={changePasswordModal.toggleOn}
         onClickManageBilling={onClickManageBilling}

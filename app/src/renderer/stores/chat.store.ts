@@ -16,9 +16,15 @@ import { Chat, ChatModelType } from './models/chat.model';
 import { LoaderModel } from './models/common.model';
 import { ShipStore, shipStore } from './ship.store';
 
-export type Subroutes = 'inbox' | 'chat' | 'new' | 'chat-info' | 'passport';
+export type Subroutes =
+  | 'inbox'
+  | 'chat'
+  | 'new'
+  | 'chat-info'
+  | 'passport'
+  | 'room';
 
-export const sortByUpdatedAt = (a: any, b: any) => {
+export const sortByUpdatedAt = (a: ChatModelType, b: ChatModelType) => {
   return (
     (b.updatedAt || b.metadata.timestamp) -
     (a.updatedAt || a.metadata.timestamp)
@@ -34,6 +40,7 @@ export const ChatStore = types
         'chat',
         'chat-info',
         'passport',
+        'room',
       ]),
       'inbox'
     ),
@@ -42,8 +49,10 @@ export const ChatStore = types
     inbox: types.array(Chat),
     selectedChat: types.maybe(types.reference(Chat)),
     isOpen: types.boolean,
-    loader: LoaderModel,
     inboxLoader: LoaderModel,
+    inboxInitLoader: LoaderModel,
+    inboxMetadataLoader: LoaderModel,
+    chatLoader: LoaderModel,
   })
   .views((self) => ({
     isChatPinned(path: string) {
@@ -54,6 +63,26 @@ export const ChatStore = types
     },
     isChatSelected(path: string) {
       return self.selectedChat?.path === path;
+    },
+    // like sortedChatList but we don't apply to space chats - causes jumpiness
+    get sortedStandaloneChatList() {
+      return self.inbox.slice().sort((a: ChatModelType, b: ChatModelType) => {
+        // Check if the chats are pinned
+        const isAPinned = self.pinnedChats.includes(a.path);
+        const isBPinned = self.pinnedChats.includes(b.path);
+
+        // Compare the pinned status
+        if (isAPinned !== isBPinned) {
+          return isBPinned ? 1 : -1;
+        }
+
+        // Compare the updatedAt or metadata.timestamp properties
+        const aTimestamp =
+          a.lastMessage?.createdAt || a.updatedAt || a.metadata.timestamp;
+        const bTimestamp =
+          b.lastMessage?.createdAt || b.updatedAt || b.metadata.timestamp;
+        return bTimestamp - aTimestamp;
+      });
     },
     get sortedChatList() {
       const spacesStore: SpacesStoreType = getParentOfType(
@@ -85,8 +114,10 @@ export const ChatStore = types
         }
 
         // Compare the updatedAt or metadata.timestamp properties
-        const aTimestamp = a.updatedAt || a.metadata.timestamp;
-        const bTimestamp = b.updatedAt || b.metadata.timestamp;
+        const aTimestamp =
+          a.lastMessage?.createdAt || a.updatedAt || a.metadata.timestamp;
+        const bTimestamp =
+          b.lastMessage?.createdAt || b.updatedAt || b.metadata.timestamp;
         return bTimestamp - aTimestamp;
       });
     },
@@ -131,32 +162,49 @@ export const ChatStore = types
   }))
   .actions((self) => ({
     init: flow(function* () {
+      self.inboxInitLoader.set('loading');
+
       try {
-        const pinnedChats = yield ChatIPC.fetchPinnedChats();
+        const pinned = yield ChatIPC.fetchPinnedChats();
         const muted = yield ChatIPC.fetchMuted();
         self.inbox = yield ChatIPC.getChatList();
-        self.inbox.forEach((chat) => {
-          chat.setMuted(muted.includes(chat.path));
-          chat.setPinned(pinnedChats.includes(chat.path));
-        });
-        self.pinnedChats = pinnedChats;
-        return self.pinnedChats;
+        self.mutedChats = muted;
+        self.pinnedChats = pinned;
       } catch (error) {
         console.error(error);
-        return self.pinnedChats;
       }
+
+      self.inboxInitLoader.set('loaded');
+
+      return self.inbox;
     }),
     fetchInboxMetadata: flow(function* () {
+      self.inboxMetadataLoader.set('loading');
       const { muted, pinned } = yield ChatIPC.fetchPathMetadata();
       self.pinnedChats = pinned;
       self.mutedChats = muted;
+      self.inboxMetadataLoader.set('loaded');
     }),
     loadChatList: flow(function* () {
+      self.inboxLoader.set('loading');
+
       try {
-        self.inbox = yield ChatIPC.getChatList();
+        const initialInbox = yield ChatIPC.getChatList();
+        const pins = initialInbox
+          .filter((chat: any) => chat.pinned)
+          .map((chat: any) => chat.path);
+        const mutes = initialInbox
+          .filter((chat: any) => chat.muted)
+          .map((chat: any) => chat.path);
+
+        self.inbox = initialInbox;
+        self.pinnedChats = pins;
+        self.mutedChats = mutes;
       } catch (error) {
         console.error(error);
       }
+
+      self.inboxLoader.set('loaded');
     }),
     findChatDM: flow(function* (peer: string, our: string) {
       // find the DM, if exists, where it's only ourselves and the peer
@@ -180,15 +228,17 @@ export const ChatStore = types
       }
       self.subroute = subroute;
     }),
-    setChat(path: string) {
+    setChat: flow(function* (path: string) {
+      self.chatLoader.set('loading');
       self.selectedChat = tryReference(() =>
         self.inbox.find((chat) => chat.path === path)
       );
-      ChatIPC.refreshMessagesOnPath(path, window.ship);
+      yield ChatIPC.refreshMessagesOnPath(path, window.ship);
       if (self.subroute === 'inbox') {
         self.subroute = 'chat';
       }
-    },
+      self.chatLoader.set('loaded');
+    }),
     togglePinned: flow(function* (path: string, pinned: boolean) {
       try {
         if (pinned) {
@@ -285,10 +335,10 @@ export const ChatStore = types
       self.isOpen = false;
     },
     _onInit(payload: any) {
-      if (self.loader.isFirstLoad) {
+      if (self.inboxInitLoader.isFirstLoad) {
         self.inbox = payload;
         localStorage.setItem(`${window.ship}-firstLoad`, 'true');
-        self.loader.set('loaded');
+        self.inboxInitLoader.set('loaded');
       }
     },
   }));
@@ -326,8 +376,9 @@ ChatIPC.onUpdate(({ type, payload }: ChatUpdateTypes) => {
     );
 
     if (selectedChat) selectedChat.addMessage(payload);
-    if (shipStore.chatStore.subroute === 'inbox')
+    if (shipStore.chatStore.subroute === 'inbox') {
       shipStore.chatStore.refreshInbox();
+    }
 
     return;
   }

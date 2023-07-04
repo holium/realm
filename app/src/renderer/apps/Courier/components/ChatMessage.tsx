@@ -8,7 +8,10 @@ import {
   MenuItemProps,
   OnReactionPayload,
 } from '@holium/design-system';
+import { useToggle } from '@holium/design-system/util';
 
+import { SystemTrayRegistry } from 'renderer/apps/registry';
+import { useTrayApps } from 'renderer/apps/store';
 import { useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
 import { MainIPC } from 'renderer/stores/ipc';
@@ -24,6 +27,8 @@ type ChatMessageProps = {
   onReplyClick?: (msgId: string) => void;
 };
 
+const { dimensions } = SystemTrayRegistry.spaces;
+
 export const ChatMessagePresenter = ({
   message,
   ourColor,
@@ -32,12 +37,21 @@ export const ChatMessagePresenter = ({
   onReplyClick,
 }: ChatMessageProps) => {
   const { loggedInAccount, theme } = useAppState();
-  const { chatStore, friends } = useShipStore();
+  const { chatStore, friends, spacesStore } = useShipStore();
+  const {
+    activeApp,
+    setActiveApp,
+    setTrayAppCoords,
+    setTrayAppDimensions,
+    coords,
+  } = useTrayApps();
   const { selectedChat } = chatStore;
   const messageRef = useRef<HTMLDivElement>(null);
   const ourShip = useMemo(() => loggedInAccount?.serverId, [loggedInAccount]);
   const isOur = message.sender === ourShip;
   const { getOptions, setOptions, defaultOptions } = useContextMenu();
+
+  const deleting = useToggle(false);
 
   const messageRowId = useMemo(() => `message-row-${message.id}`, [message.id]);
   const isPinned = selectedChat?.isMessagePinned(message.id);
@@ -233,9 +247,11 @@ export const ChatMessagePresenter = ({
         icon: 'Trash',
         iconColor: '#ff6240',
         labelColor: '#ff6240',
-        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
+        onClick: async (evt: React.MouseEvent<HTMLDivElement>) => {
           evt.stopPropagation();
-          selectedChat.deleteMessage(message.id);
+          deleting.toggleOn();
+          await selectedChat.deleteMessage(message.id);
+          deleting.toggleOff();
         },
       });
     }
@@ -300,6 +316,33 @@ export const ChatMessagePresenter = ({
     friends,
   ]);
 
+  const joiner = useCallback(
+    (path: string) => {
+      console.log(spacesStore.allSpacePaths, path);
+      if (spacesStore.allSpacePaths.includes(path)) {
+        throw new Error('you are already in this space');
+      }
+      setTrayAppCoords({
+        left: 55,
+        bottom: coords.bottom,
+      });
+      setTrayAppDimensions(dimensions);
+      spacesStore.setJoin('initial');
+      spacesStore.setSearchVisible(true);
+      spacesStore.setSearchPath(path);
+      setActiveApp('spaces-tray');
+      spacesStore.setJoin('loading');
+      spacesStore.joinSpace(path.replace(/^\/spaces/, ''));
+    },
+    [
+      activeApp,
+      setTrayAppCoords,
+      setTrayAppDimensions,
+      setActiveApp,
+      spacesStore,
+    ]
+  );
+
   return (
     <Bubble
       innerRef={messageRef}
@@ -312,6 +355,7 @@ export const ChatMessagePresenter = ({
       ourShip={ourShip}
       ourColor={ourColor}
       isEditing={selectedChat?.isEditing(message.id)}
+      isDeleting={deleting.isOn}
       updatedAt={message.updatedAt}
       isEdited={hasEdited}
       author={message.sender}
@@ -322,6 +366,8 @@ export const ChatMessagePresenter = ({
       reactions={reactionList}
       onReaction={canReact ? onReaction : undefined}
       onReplyClick={onReplyClick}
+      onJoinSpaceClick={joiner}
+      allSpacePaths={spacesStore.allSpacePaths}
       error={message.error}
     />
   );

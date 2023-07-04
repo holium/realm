@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { Button, Flex, Icon } from '@holium/design-system/general';
 import { Menu, MenuItemProps } from '@holium/design-system/navigation';
 
+import { StartRoomButton } from 'renderer/components/StartRoomButton/StartRoomButton';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -30,7 +31,6 @@ type Props = {
   path: string;
   isMuted: boolean;
   hasMenu: boolean;
-  rightAction?: React.ReactNode;
   forceBackButton?: boolean;
   isStandaloneChat?: boolean;
   onBack: () => void;
@@ -38,7 +38,6 @@ type Props = {
 
 const ChatLogHeaderPresenter = ({
   path,
-  rightAction,
   isMuted,
   hasMenu = true,
   forceBackButton = false,
@@ -144,20 +143,22 @@ const ChatLogHeaderPresenter = ({
         )}
         <ChatLogHeaderContent isStandaloneChat={isStandaloneChat} />
       </Flex>
-      <Flex>
-        {rightAction}
+      <Flex gap="12px" alignItems="center">
         {hasMenu && (
-          <Menu
-            id={`chat-${path}-menu`}
-            orientation="bottom-left"
-            offset={{ x: 2, y: 2 }}
-            triggerEl={
-              <Button.IconButton size={26}>
-                <Icon name="MoreHorizontal" size={22} opacity={0.5} />
-              </Button.IconButton>
-            }
-            options={contextMenuOptions}
-          />
+          <>
+            <StartRoomButton isStandaloneChat={isStandaloneChat} />
+            <Menu
+              id={`chat-${path}-menu`}
+              orientation="bottom-left"
+              offset={{ x: 2, y: 2 }}
+              triggerEl={
+                <Button.IconButton size={26}>
+                  <Icon name="MoreHorizontal" size={22} opacity={0.5} />
+                </Button.IconButton>
+              }
+              options={contextMenuOptions}
+            />
+          </>
         )}
       </Flex>
     </ChatLogHeaderContainer>

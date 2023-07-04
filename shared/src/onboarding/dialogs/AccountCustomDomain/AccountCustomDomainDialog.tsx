@@ -1,44 +1,48 @@
 import { AccountDialog, SidebarSection } from '../../components/AccountDialog';
+import { ThirdEarthShip } from '../../types';
 import { AccountCustomDomainDialogBody } from './AccountCustomDomainDialogBody';
 
 type Props = {
-  identities: string[];
-  selectedIdentity: string;
+  ships: ThirdEarthShip[];
+  selectedShipId: number | undefined;
   domain: string;
   dropletIp: string | undefined;
   submitting: boolean;
   errorMessage?: string;
   successMessage?: string;
-  setSelectedIdentity: (patp: string) => void;
+  setSelectedShipId: (newId: number) => void;
   onChangeDomain: (domain: string) => void;
   onSubmit: () => Promise<void>;
-  onClickBuyIdentity: () => void;
+  onClickPurchaseId: () => void;
+  onClickUploadId: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
 
 export const AccountCustomDomainDialog = ({
-  identities,
-  selectedIdentity,
+  ships,
+  selectedShipId,
   dropletIp,
   domain,
   submitting,
   errorMessage,
   successMessage,
-  setSelectedIdentity,
+  setSelectedShipId,
   onChangeDomain,
   onSubmit,
-  onClickBuyIdentity,
+  onClickPurchaseId,
+  onClickUploadId,
   onClickSidebarSection,
   onExit,
 }: Props) => (
   <AccountDialog
-    identities={identities}
-    selectedIdentity={selectedIdentity}
-    setSelectedIdentity={setSelectedIdentity}
+    ships={ships}
+    selectedShipId={selectedShipId}
+    setSelectedShipId={setSelectedShipId}
     currentSection={SidebarSection.CustomDomain}
     isLoading={!dropletIp}
-    onClickBuyIdentity={onClickBuyIdentity}
+    onClickPurchaseId={onClickPurchaseId}
+    onClickUploadId={onClickUploadId}
     onClickSidebarSection={onClickSidebarSection}
     onSubmit={onSubmit}
     onExit={onExit}

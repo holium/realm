@@ -34,12 +34,12 @@ type Props = {
   placeholder?: string;
   defaultValue?: string;
   options: RadioOption[];
-  selected?: string;
+  selected?: string | number;
   maxWidth?: number;
   width?: number;
   backgroundColor?: string;
   extraSection?: ReactNode;
-  onClick: (value: string) => void;
+  onClick: (value: string | number) => void;
 };
 
 export const Select = ({

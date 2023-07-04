@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import styled, { css } from 'styled-components';
 
@@ -34,8 +34,14 @@ type TweetBlockProps = {
   onTweetLoad?: () => void;
 } & BlockProps;
 
-export const TweetBlock: FC<TweetBlockProps> = (props: TweetBlockProps) => {
-  const { id, link, width, height, onTweetLoad, ...rest } = props;
+export const TweetBlock = ({
+  id,
+  link,
+  width,
+  height,
+  onTweetLoad,
+  ...rest
+}: TweetBlockProps) => {
   let tweetEmbed: any = null;
   // todo: get theme mode from context
   const themeMode = 'light';
@@ -60,18 +66,17 @@ export const TweetBlock: FC<TweetBlockProps> = (props: TweetBlockProps) => {
   return useMemo(() => {
     if (link.includes('status')) {
       const tweetId = link.split('status/')[1].split('?')[0];
-      const tWidth = width;
       tweetEmbed = (
         <webview
           id={`${id}-webview`}
           // eslint-disable-next-line react/no-unknown-property
           webpreferences="sandbox=false"
-          src={`https://platform.twitter.com/embed/Tweet.html?dnt=true&embedId=twitter-widget-0a&frame=false&hideCard=false&hideThread=false&id=${tweetId}&lang=en&theme=light&widgetsVersion=aaf4084522e3a%3A1674595607486&width=${tWidth}px`}
+          src={`https://platform.twitter.com/embed/Tweet.html?dnt=true&embedId=twitter-widget-0a&frame=false&hideCard=false&hideThread=false&id=${tweetId}&lang=en&theme=light&widgetsVersion=aaf4084522e3a%3A1674595607486&width=${width}px`}
           style={{
             borderRadius: '4px',
             overflow: 'hidden',
-            width: tWidth,
-            height: height,
+            width,
+            height,
           }}
         />
       );
@@ -89,7 +94,7 @@ export const TweetBlock: FC<TweetBlockProps> = (props: TweetBlockProps) => {
 
 export const measureTweet = (
   src: string,
-  _containerWidth?: number
+  width = 320
 ): Promise<{ width: string; height: string }> => {
   const div = document.createElement('div');
   const body = document.getElementsByTagName('body')[0];
@@ -100,11 +105,11 @@ export const measureTweet = (
   div.style.position = 'absolute';
   div.style.top = '-1000px';
   div.style.left = '-1000px';
-  div.style.width = `${320}px`;
+  div.style.width = `${width}px`;
   div.style.padding = '8px';
   div.style.boxSizing = 'border-box';
   div.style.minWidth = '150px';
-  div.style.height = '700px';
+  div.style.height = '340px';
   body.appendChild(div);
   const root = createRoot(div);
 
@@ -114,7 +119,7 @@ export const measureTweet = (
         id="premeasure-tweet"
         variant="content"
         link={src}
-        width={320}
+        width={width}
         height={340}
         onTweetLoad={() => {
           const webview: HTMLWebViewElement | null = document.getElementById(

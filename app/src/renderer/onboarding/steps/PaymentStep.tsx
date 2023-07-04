@@ -16,13 +16,20 @@ type PaymentStepViewProps = StepProps & {
   products: ThirdEarthProduct[];
 };
 
-const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
+const PaymentStepView = ({
+  products: unfilteredProducts,
+  setStep,
+}: PaymentStepViewProps) => {
   const [serverId, setserverId] = useState('');
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
 
   const [stripe, setStripe] = useState<Stripe>();
   const [clientSecret, setClientSecret] = useState<string>();
+
+  const products = unfilteredProducts.filter(
+    (product) => product.product_type === 'planet'
+  );
 
   const [productId, setProductId] = useState(products[0].id);
   const [invoiceId, setInvoiceId] = useState<string>();
@@ -76,7 +83,13 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
 
     await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
     await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
-    await thirdEarthApi.ship(token, serverId, productId.toString(), invoiceId);
+    await thirdEarthApi.provisionalShipEntry({
+      token,
+      patp: serverId,
+      shipType: 'planet',
+      product: productId.toString(),
+      invoiceId,
+    });
 
     setStep('/booting');
 
@@ -85,6 +98,7 @@ const PaymentStepView = ({ products, setStep }: PaymentStepViewProps) => {
 
   return (
     <PaymentDialog
+      productType="planet"
       products={products}
       productId={productId}
       patp={serverId}

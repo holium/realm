@@ -5,26 +5,36 @@ import {
 } from '@holium/shared';
 
 import { Page } from '../../components/Page';
-import { downloadLinks } from '../../util/constants';
+import { downloadLinks, getSupportEmail } from '../../util/constants';
 import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
 const DownloadRealmPresenter = () => {
   const { goToPage, logout } = useNavigation();
-  const { ships, selectedIdentity, setSelectedIdentity } = useUser();
+  const { ships, selectedShipId, setSelectedShipId } = useUser();
 
   const onClickSidebarSection = (section: string) => {
-    if (section === 'Get Hosting') {
+    if (section === 'Contact Support') {
+      const ship = ships.find((ship) => ship.id === selectedShipId);
+      window.open(getSupportEmail(ship?.patp ?? ''), '_blank');
+    } else if (section === 'Get Hosting') {
       goToPage(accountPageUrl[section], {
         back_url: '/account/download-realm',
       });
+    } else {
+      goToPage(accountPageUrl[section]);
     }
-    goToPage(accountPageUrl[section]);
   };
 
-  const onClickBuyIdentity = () => {
-    goToPage(accountPageUrl['Get Hosting'], {
-      back_url: accountPageUrl['Download Realm'],
+  const onClickUploadId = () => {
+    goToPage('/upload-id-disclaimer', {
+      back_url: '/account/download-realm',
+    });
+  };
+
+  const onClickPurchaseId = () => {
+    goToPage('/choose-id', {
+      back_url: '/account/download-realm',
     });
   };
 
@@ -40,14 +50,15 @@ const DownloadRealmPresenter = () => {
   return (
     <Page title="Account / Download Realm" isProtected>
       <AccountDownloadRealmDialog
-        identities={ships.map((ship) => ship.patp)}
-        selectedIdentity={selectedIdentity}
-        setSelectedIdentity={setSelectedIdentity}
+        ships={ships}
+        selectedShipId={selectedShipId}
+        setSelectedShipId={setSelectedShipId}
         onDownloadMacM1={onDownloadMacM1}
         onDownloadMacIntel={onDownloadMacIntel}
         onDownloadWindows={onDownloadWindows}
         onDownloadLinux={onDownloadLinux}
-        onClickBuyIdentity={onClickBuyIdentity}
+        onClickPurchaseId={onClickPurchaseId}
+        onClickUploadId={onClickUploadId}
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />

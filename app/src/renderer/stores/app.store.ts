@@ -11,6 +11,7 @@ import {
 
 import { RealmUpdateBooted } from 'os/realm.types';
 import { LexiconUpdateType } from 'os/services/ship/lexicon.types';
+import { ConduitState } from 'os/services/api';
 import { watchOnlineStatus } from 'renderer/lib/offline';
 import { SoundActions } from 'renderer/lib/sound';
 import { MobXAccount } from 'renderer/stores/models/account.model';
@@ -43,14 +44,16 @@ const AppStateModel = types
     shellStore: ShellModel,
     online: types.boolean,
     connectionStatus: types.enumeration([
-      'connecting',
       'initialized',
+      'connecting',
       'connected',
-      'offline',
+      'disconnected',
       'failed',
       'stale',
       'refreshing',
       'refreshed',
+      'offline',
+      'no-internet',
     ]),
     error: types.maybeNull(types.string),
   })
@@ -84,7 +87,7 @@ const AppStateModel = types
       self.booted = false;
       self.shellStore.setIsBlurred(true);
     },
-    setConnectionStatus(status: any) {
+    setConnectionStatus(status: ConduitState) {
       self.connectionStatus = status;
       localStorage.setItem('connection-status', status);
     },
@@ -144,6 +147,7 @@ export const appState = AppStateModel.create({
 });
 
 watchOnlineStatus(appState);
+MainIPC.onConnectionStatus(appState.setConnectionStatus);
 
 window.electron.app.onSetTitlebarVisible((show: boolean) => {
   appState.setShowTitleBar(show);

@@ -13,12 +13,13 @@ import { Flex, Spinner } from '@holium/design-system/general';
 import { OnboardDialog } from '../../components/OnboardDialog';
 import { OnboardDialogTitle } from '../../components/OnboardDialog.styles';
 import { PaymentIcon } from '../../icons/PaymentIcon';
-import { ThirdEarthProduct } from '../../types';
+import { ThirdEarthProduct, ThirdEarthProductType } from '../../types';
 import { AccountInformation } from './AccountInformation';
 import { PaymentForm } from './PaymentForm';
 import { ProductCards } from './ProductCards';
 
 type Props = {
+  productType: ThirdEarthProductType;
   products: ThirdEarthProduct[];
   productId: number;
   patp: string;
@@ -31,6 +32,7 @@ type Props = {
 };
 
 const PaymentDialogPresenter = ({
+  productType,
   products,
   productId,
   patp,
@@ -86,7 +88,10 @@ const PaymentDialogPresenter = ({
             productId={productId}
             setProductId={setProductId}
           />
-          <AccountInformation patp={patp} email={email} />
+          <AccountInformation
+            patp={productType === 'planet' ? patp : undefined}
+            email={email}
+          />
           <PaymentForm />
         </>
       }
@@ -110,7 +115,10 @@ export const PaymentDialog = ({ stripe, stripeOptions, ...props }: Props) => {
               productId={props.productId}
               setProductId={props.setProductId}
             />
-            <AccountInformation patp={props.patp} email={props.email} />
+            <AccountInformation
+              patp={props.productType === 'planet' ? props.patp : undefined}
+              email={props.email}
+            />
             <Flex justifyContent="center" alignItems="center" my={30}>
               <Spinner size={3} />
             </Flex>

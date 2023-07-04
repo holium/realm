@@ -12,12 +12,13 @@ import { PeerClass } from '../store/Peer';
 import { PeerConnectionState } from '../store/room.types';
 import { AudioWave } from './AudioWave';
 import { RoomType } from './rooms.stories';
+import { Video } from './Video';
 
 interface ISpeaker {
   isActive?: boolean;
   person: string;
   cursors?: boolean;
-  size?: 'tray' | 'full';
+  height?: string;
   type: 'speaker' | 'listener' | 'creator';
   isOur: boolean;
   ourId: string;
@@ -35,21 +36,19 @@ const speakerType = {
   listener: 'Listener',
 };
 
-const SpeakerPresenter = (props: ISpeaker) => {
-  const {
-    size = 'tray',
-    person,
-    type,
-    isOur,
-    ourId,
-    metadata,
-    isActive = false,
-    peer,
-    kickPeer,
-    retryPeer,
-    room,
-  } = props;
-
+const SpeakerPresenter = ({
+  height = 'auto',
+  person,
+  type,
+  isOur,
+  ourId,
+  metadata,
+  isActive = false,
+  peer,
+  kickPeer,
+  retryPeer,
+  room,
+}: ISpeaker) => {
   const speakerRef = useRef<any>(null);
   const videoRef = useRef<any>(null);
   const { getOptions, setOptions } = useContextMenu();
@@ -65,7 +64,6 @@ const SpeakerPresenter = (props: ISpeaker) => {
       videoRef.current.srcObject = peer.videoStream;
       videoRef.current.style.display = 'inline-block';
       videoRef.current.playsInline = true;
-      // videoRef.current.muted = true;
     }
   }, [peer?.hasVideo, videoRef.current]);
 
@@ -143,7 +141,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
   return (
     <SpeakerWrapper
       id={`room-speaker-${person}`}
-      size={size}
+      height={height}
       ref={speakerRef}
       key={person}
       gap={4}
@@ -158,27 +156,7 @@ const SpeakerPresenter = (props: ISpeaker) => {
       } ${isSpeaking ? 'speaker-speaking' : ''}`}
     >
       <>
-        <video
-          ref={videoRef}
-          style={{
-            zIndex: 0,
-            display: 'none',
-            position: 'absolute',
-            pointerEvents: 'none',
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            borderRadius: '9px',
-          }}
-          id={`peer-video-${person}`}
-          autoPlay
-          playsInline
-          muted
-        />
+        <Video id={`peer-video-${person}`} innerRef={videoRef} />
         <Flex
           zIndex={2}
           className="speaker-avatar-wrapper"
@@ -272,15 +250,24 @@ const SpeakerPresenter = (props: ISpeaker) => {
 export const Speaker = observer(SpeakerPresenter);
 
 type SpeakerWrapperProps = {
-  size: 'tray' | 'full';
+  height: string;
 };
 
 const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
+  position: relative;
   padding: 16px 0;
   border-radius: 9px;
+  overflow: hidden;
   transition: 0.25s ease;
   position: relative;
-  outline: 2px solid transparent;
+  border: 2px solid transparent;
+  box-sizing: border-box;
+
+  ${({ height }) =>
+    height &&
+    `
+    height: ${height};
+  `}
 
   &:hover {
     transition: 0.25s ease;
@@ -289,11 +276,10 @@ const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
   &.speaker-speaking {
     transition: 0.25s ease;
     z-index: 2;
-    outline: 2px solid rgba(var(--rlm-accent-rgba));
+    border: 2px solid rgba(var(--rlm-accent-rgba));
   }
   background: transparent;
   &.speaker-video-on {
-    background: black;
     transition: 0.25s ease;
     .speaker-name {
       color: #fff;

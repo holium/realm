@@ -31,8 +31,6 @@ export const FragmentBlock = styled(motion.span)`
   min-width: 0px;
   max-width: 100%;
   position: relative;
-  display: flex;
-  flex-direction: column;
   gap: 4px;
 
   blockquote {
@@ -104,7 +102,6 @@ export const FragmentReplyTo = styled(motion.blockquote)`
 export const FragmentInlineCode = styled(FragmentBase)`
   font-family: 'Fira Code', monospace;
   border-radius: 4px;
-  display: flex;
   max-width: 100%;
   word-break: break-all;
   /* padding: 0px 3px; */

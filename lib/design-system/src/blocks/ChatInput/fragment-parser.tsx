@@ -3,6 +3,7 @@ import { isValidPatp } from 'urbit-ob';
 
 import {
   FragmentBreakType,
+  FragmentCustomType,
   FragmentKey,
   FragmentPlainType,
   FragmentType,
@@ -10,6 +11,7 @@ import {
 } from '../Bubble/Bubble.types';
 
 type ParserKey =
+  | 'space'
   | 'bold'
   | 'italics'
   | 'strike'
@@ -32,6 +34,7 @@ type ParserRule = {
   regex?: RegExp;
   filter?: (s: string) => boolean;
   printToken?: string;
+  custom?: boolean;
 };
 type ParserRules = {
   [K in ParserKey]: ParserRule;
@@ -78,6 +81,12 @@ const parserRules: ParserRules = {
     tokenLength: 1,
     recurse: false,
     priority: 2,
+  },
+  space: {
+    regex: /\/spaces\/~([a-z]{3,6}-*)+\/[a-zA-Z-~.+0-9_%]*/,
+    recurse: false,
+    custom: true,
+    priority: 2.5,
   },
   image: {
     regex:
@@ -158,7 +167,13 @@ const eatSpecialType = (
       if (!parserRules[type].filter || parserRules[type].filter(matchingText)) {
         pre = raw.substr(0, startIndex);
         post = raw.substr(endIndex);
-        frag = { [type]: matchingText } as FragmentType;
+        if (parserRules[type].custom) {
+          frag = {
+            custom: { name: type, value: matchingText },
+          } as FragmentType;
+        } else {
+          frag = { [type]: matchingText } as FragmentType;
+        }
       }
     }
   } else {
@@ -209,7 +224,12 @@ const eatSpecialType = (
           const parsedIndex = offset + stopIndex + endTokenLength;
           pre = raw.substr(0, startIndex);
           post = raw.substr(parsedIndex);
-          frag = { [type]: raw.substr(offset, stopIndex) } as FragmentType;
+          const val = raw.substr(offset, stopIndex);
+          if (parserRules[type].custom) {
+            frag = { custom: { name: type, value: val } } as FragmentType;
+          } else {
+            frag = { [type]: val } as FragmentType;
+          }
         }
       }
     }
@@ -363,7 +383,11 @@ export const convertFragmentsToPreview = (
         const value = content[type];
         if (type === 'break') {
           return <span key={`${chatid}-lastMessage-${idx}`}> </span>;
-        } else if (TEXT_TYPES.includes(type) || type === 'link') {
+        } else if (
+          TEXT_TYPES.includes(type) ||
+          type === 'link' ||
+          type === 'space'
+        ) {
           return <span key={`${chatid}-lastMessage-${idx}`}>{value}</span>;
         } else {
           return (
@@ -409,5 +433,8 @@ export const fragmentToText = (fragment: FragmentType): string => {
     return `${parserRules.code.printToken}\n${text}${parserRules.code.printToken}`;
   if (type === 'break') return '\n';
   if (type === 'emoji') return `:\\u${text}:`;
+  if (type === 'custom') {
+    return `${(fragment as FragmentCustomType).custom.value}`;
+  }
   return text;
 };

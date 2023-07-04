@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Flex } from '@holium/design-system/general';
 
 import { AccountDialogDescription } from '../../components/AccountDialog.styles';
-import { ChangeButtonGray } from '../../components/ChangeButton';
+import { GrayButton } from '../../components/ChangeButton';
 import { TABLET_WIDTH } from '../../components/OnboardDialog.styles';
 import { maintenanceWindows, maintenanceWindowToString } from '../util';
 
@@ -40,8 +40,8 @@ export const ChangeMaintenanceWindow = ({
         {maintenanceWindowToString(maintenanceWindows[maintenanceWindow])}
       </AccountDialogDescription>
     </Flex>
-    <ChangeButtonGray type="button" onClick={onClick}>
+    <GrayButton type="button" onClick={onClick}>
       Change
-    </ChangeButtonGray>
+    </GrayButton>
   </ChangeMaintenanceWindowContainer>
 );

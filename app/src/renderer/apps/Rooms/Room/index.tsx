@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { darken } from 'polished';
 
 import { Button, CommButton, Flex, Icon, Text } from '@holium/design-system';
 
@@ -17,16 +16,13 @@ import { VoiceView } from './Voice';
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
 const RoomPresenter = () => {
-  const { loggedInAccount, theme, shellStore } = useAppState();
+  const { loggedInAccount, shellStore } = useAppState();
   const roomsStore = useRoomsStore();
   const { roomsApp } = useTrayApps();
 
-  const { dockColor, mode } = theme;
   const [roomView, setRoomView] = useState<RoomViews>('voice');
   const isMuted = roomsStore.ourPeer.isMuted;
   const hasVideo = roomsStore.ourPeer.isVideoOn;
-  const commButtonBg =
-    mode === 'light' ? darken(0.04, dockColor) : darken(0.01, dockColor);
 
   useEffect(() => {
     trackEvent('OPENED', 'ROOMS_VOICE');
@@ -194,7 +190,6 @@ const RoomPresenter = () => {
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
             <CommButton
               icon={isMuted ? 'MicOff' : 'MicOn'}
-              customBg={commButtonBg}
               onClick={(evt) => {
                 evt.stopPropagation();
                 if (isMuted) {
@@ -206,12 +201,10 @@ const RoomPresenter = () => {
             />
             <CommButton
               icon={shellStore.multiplayerEnabled ? 'MouseOn' : 'MouseOff'}
-              customBg={commButtonBg}
               onClick={shellStore.toggleMultiplayer}
             />
             <CommButton
               icon={hasVideo ? 'VideoOn' : 'VideoOff'}
-              customBg={commButtonBg}
               onClick={() => {
                 roomsStore.toggleVideo(!hasVideo);
               }}

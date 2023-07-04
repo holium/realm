@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 import { isValidPatp } from 'urbit-ob';
 
@@ -25,19 +25,23 @@ const SpacesTrayAppPresenter = () => {
   const { loggedInAccount, shellStore } = useAppState();
   const { spacesStore } = useShipStore();
   const { dimensions } = useTrayApps();
-  const [searchString, setSearchString] = useState<string>('');
+  const searchString = spacesStore.searchPath;
 
   const isValidSpace = (space: string) => {
+    if (!space.match(/^\/spaces\//)) {
+      return false;
+    }
     if (!space.includes('/')) {
       return false;
     }
     const pathArr = space.split('/');
-    const patp = pathArr[0];
-    const spaceName = pathArr[1];
+    if (!(pathArr.length === 4)) return false;
+    const patp = pathArr[2];
+    const spaceName = pathArr[3];
     return patp.length > 1 && isValidPatp(patp) && spaceName.length > 0;
   };
 
-  const [searchVisible, setSearchVisible] = useState(false);
+  const searchVisible = spacesStore.searchVisible;
 
   useEffect(() => {
     spacesStore.setJoin('initial');
@@ -48,7 +52,7 @@ const SpacesTrayAppPresenter = () => {
   ) {
     spacesStore.selectSpace('/' + searchString);
     if (searchVisible === true) {
-      setSearchVisible(false);
+      spacesStore.setSearchVisible(false);
     }
     spacesStore.setJoin('loaded');
   }
@@ -79,7 +83,7 @@ const SpacesTrayAppPresenter = () => {
             height={26}
             onClick={() => {
               spacesStore.setJoin('initial');
-              setSearchVisible(!searchVisible);
+              spacesStore.setSearchVisible(!searchVisible);
             }}
           >
             <Icon name="Search" size={20} opacity={0.7} />
@@ -114,11 +118,12 @@ const SpacesTrayAppPresenter = () => {
               id="space-input"
               name="space-input"
               height={34}
-              placeholder="Enter space path (e.g. ~zod/galaxy-space)"
+              placeholder="space path (e.g. /spaces/~zod/galaxies)"
+              value={searchString}
               onChange={(evt: any) => {
                 evt.stopPropagation();
                 spacesStore.setJoin('initial');
-                setSearchString(evt.target.value);
+                spacesStore.setSearchPath(evt.target.value);
               }}
               rightAdornment={
                 <Button.TextButton
@@ -126,7 +131,9 @@ const SpacesTrayAppPresenter = () => {
                   onClick={() => {
                     spacesStore.setJoin('loading');
                     console.log('joining space: ', searchString);
-                    spacesStore.joinSpace(`/${searchString}`);
+                    spacesStore.joinSpace(
+                      searchString.replace(/^\/spaces/, '')
+                    );
                   }}
                 >
                   {spacesStore.join.state === 'loading' ? (
@@ -181,7 +188,7 @@ const SpacesTrayAppPresenter = () => {
         >
           <SpacesList
             onFindMore={() => {
-              setSearchVisible(true);
+              spacesStore.setSearchVisible(true);
             }}
             selected={spacesStore.selected}
             spaces={spacesStore.spacesList}

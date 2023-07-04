@@ -7,13 +7,15 @@ import {
   useUser,
 } from '@holium/shared';
 
+import { getSupportEmail } from 'util/constants';
+
 import { Page } from '../../components/Page';
 import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
 const CustomDomainPresenter = () => {
   const { goToPage, logout } = useNavigation();
-  const { token, ships, selectedIdentity, setSelectedIdentity } = useUser();
+  const { token, ships, selectedShipId, setSelectedShipId } = useUser();
 
   const submitting = useToggle(false);
   const [domain, setDomain] = useState('');
@@ -21,8 +23,8 @@ const CustomDomainPresenter = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
 
   const ship = useMemo(
-    () => ships.find((ship) => ship.patp === selectedIdentity),
-    [ships, selectedIdentity]
+    () => ships.find((ship) => ship.id === selectedShipId),
+    [ships, selectedShipId]
   );
 
   const onSubmit = async () => {
@@ -60,29 +62,40 @@ const CustomDomainPresenter = () => {
   };
 
   const onClickSidebarSection = (section: string) => {
-    goToPage(accountPageUrl[section]);
+    if (section === 'Contact Support') {
+      window.open(getSupportEmail(ship?.patp), '_blank');
+    } else {
+      goToPage(accountPageUrl[section]);
+    }
   };
 
-  const onClickBuyIdentity = () => {
-    goToPage(accountPageUrl['Get Hosting'], {
-      back_url: accountPageUrl['Custom Domain'],
+  const onClickUploadId = () => {
+    goToPage('/upload-id-disclaimer', {
+      back_url: '/account/custom-domain',
+    });
+  };
+
+  const onClickPurchaseId = () => {
+    goToPage('/choose-id', {
+      back_url: '/account/custom-domain',
     });
   };
 
   return (
     <Page title="Account / Download Realm" isProtected>
       <AccountCustomDomainDialog
-        identities={ships.map((ship) => ship.patp)}
-        selectedIdentity={selectedIdentity}
+        ships={ships}
+        selectedShipId={selectedShipId}
         domain={domain}
         dropletIp={ship?.droplet_ip}
         errorMessage={errorMessage}
         successMessage={successMessage}
         submitting={submitting.isOn}
-        setSelectedIdentity={setSelectedIdentity}
+        setSelectedShipId={setSelectedShipId}
         onChangeDomain={setDomain}
         onSubmit={onSubmit}
-        onClickBuyIdentity={onClickBuyIdentity}
+        onClickPurchaseId={onClickPurchaseId}
+        onClickUploadId={onClickUploadId}
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />

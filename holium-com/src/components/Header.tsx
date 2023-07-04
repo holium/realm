@@ -32,7 +32,7 @@ export const Header = () => {
             <HeaderMenuLink
               target="_blank"
               rel="noreferrer"
-              href="https://holium.gitbook.io/realm/"
+              href="https://docs.holium.com"
             >
               Documentation
             </HeaderMenuLink>
