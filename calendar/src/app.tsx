@@ -1,12 +1,22 @@
-import React from 'react';
-import dayGridPlugin from '@fullcalendar/daygrid'; // a plugin!
-import FullCalendar from '@fullcalendar/react';
-import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
-import timeGridPlugin from '@fullcalendar/timegrid';
+// a plugin!
 import { createGlobalStyle } from 'styled-components';
 
+import {
+  Box,
+  Button,
+  Flex,
+  Icon,
+  SectionDivider,
+  Text,
+} from '@holium/design-system';
+
+import { Calendar, DatePicker } from './components';
+import { log } from './utils';
+
+import 'react-day-picker/dist/style.css';
+
 const GlobalStyle = createGlobalStyle`
-  html {
+  html { 
     overflow: hidden;
     font-family: var(--rlm-font);
   }
@@ -74,13 +84,9 @@ const GlobalStyle = createGlobalStyle`
     --rlm-intent-success-color: #0fc383;
     --rlm-overlay-hover-color: rgba(0, 0, 0, 0.04);
     --rlm-overlay-active-color: rgba(0, 0, 0, 0.06);
-
-    --fc-small-font-size: .85em;
-    --fc-button-text-color: orange;
   }
   
 `;
-// https://fullcalendar.io/docs/css-customization css customization
 declare global {
   interface Window {
     ship: string;
@@ -88,54 +94,49 @@ declare global {
 }
 
 export const App = () => {
-  const calendarRef: any = React.useRef(null);
-  const events: any = [
-    {
-      id: '4213',
-      title: 'event 10',
-      description: 'I got stuff to do V1',
-      participants: 'randy, chips, desu',
-      date: '2023-07-03',
-    },
-    {
-      id: '3412',
-      title: 'event 2',
-      description: 'I got stuff to do V2',
-      participants: 'randy, chips, desu',
-      date: '2023-07-03',
-    },
-  ];
-
   return (
-    <>
+    <main style={{ backgroundColor: 'var(--rlm-window-rgba)' }}>
       <GlobalStyle />
-      <div style={{ width: '80%' }}>
-        <FullCalendar
-          ref={calendarRef}
-          schedulerLicenseKey="CC-Attribution-NonCommercial-NoDerivatives"
-          plugins={[resourceTimelinePlugin, dayGridPlugin, timeGridPlugin]}
-          initialView="timeGridWeek" //dayGridMonth,  resourceTimelineWeek
-          weekends={true}
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'timeGridDay,timeGridWeek,dayGridMonth', // user can switch between the two
-          }}
-          height={'calc(90vh - 100px)'}
-          /*  eventClick={(data: any) => {
-          const eventData = data?.event["_def"];
-          console.log("eventData => ", eventData);
-          setSelectedEvent(eventData.publicId);
-          calendarApiFoo();
-        }}*/
-          events={events}
-          selectable
-          select={(selectInfo: any) => {
-            //for selecting a range
-            console.log('selectInfo', selectInfo);
-          }}
-        />
-      </div>
-    </>
+      <Flex>
+        <Flex flexDirection={'column'}>
+          <Flex alignItems={'center'}>
+            <Box flex={1}>
+              <SectionDivider label="My Calendars" alignment="left" />
+            </Box>
+            <Flex flex={0.15} justifyContent={'center'} alignItems={'center'}>
+              <Button.IconButton
+                className="realm-cursor-hover"
+                size={26}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  log('adding calendar');
+                }}
+              >
+                <Icon name="Plus" size={24} opacity={0.5} />
+              </Button.IconButton>
+            </Flex>
+          </Flex>
+          <Flex
+            flexDirection={'column'}
+            gap={'10px'}
+            marginTop={'20px'}
+            marginBottom={'20px'}
+          >
+            <Text.Body fontWeight="bold">Calendar 1</Text.Body>
+            <Text.Body fontWeight="bold">Calendar 2</Text.Body>
+            <Text.Body fontWeight="bold">Calendar 3</Text.Body>
+            <Text.Body fontWeight="bold">Calendar 4</Text.Body>
+          </Flex>
+          <Flex flexDirection={'column'} marginTop={'auto'}>
+            <Button.TextButton width="100%" justifyContent={'center'}>
+              <Icon name="Plus" size={24} opacity={0.5} />
+              New event
+            </Button.TextButton>
+            <DatePicker />
+          </Flex>
+        </Flex>
+        <Calendar />
+      </Flex>
+    </main>
   );
 };

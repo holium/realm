@@ -1,8 +1,7 @@
 {
   "extends": "../tsconfig.base.json",
   "include": [
-    "src"
-, "app.tsx"  ],
+    "src" ],
   "exclude": [
     "node_modules",
     "dist"
