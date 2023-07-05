@@ -120,7 +120,6 @@ export const Togglable: ComponentStory<typeof SpeakerGrid> = () => {
         >
           <SpeakerGrid
             columns={3}
-            size="full"
             activeSpeaker={activeSpeaker}
             peers={peers1}
             getContactMetadata={getContactMetadata}
@@ -179,7 +178,6 @@ export const NoActiveSpeaker: ComponentStory<typeof SpeakerGrid> = () => {
         >
           <SpeakerGrid
             columns={4}
-            size="full"
             activeSpeaker={null}
             peers={peers1}
             getContactMetadata={getContactMetadata}
@@ -229,7 +227,6 @@ export const ActiveSpeaker: ComponentStory<typeof SpeakerGrid> = () => (
       >
         <SpeakerGrid
           columns={4}
-          size="full"
           activeSpeaker={'~lomder-librun'}
           peers={peers1}
           getContactMetadata={getContactMetadata}
