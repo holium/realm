@@ -30,6 +30,35 @@ type ChatMessageProps = {
 
 const { dimensions } = SystemTrayRegistry.spaces;
 
+export const getMergedContents: any | undefined = (
+  message: ChatMessageType,
+  messages: any[],
+  friends: any
+) => {
+  const replyTo = message.replyToMsgId;
+  let replyToObj = {
+    reply: { msgId: replyTo, author: 'unknown', message: [{ plain: '' }] },
+  };
+  if (replyTo) {
+    const originalMsg = toJS(messages.find((m) => m.id === replyTo));
+    if (originalMsg) {
+      const { nickname } = friends.getContactAvatarMetadata(
+        originalMsg?.sender
+      );
+      replyToObj = originalMsg && {
+        reply: {
+          msgId: originalMsg.id,
+          author: nickname || originalMsg.sender,
+          message: originalMsg.contents,
+        },
+      };
+    }
+    return [replyToObj, ...message.contents];
+  } else {
+    return message.contents;
+  }
+};
+
 export const ChatMessagePresenter = ({
   message,
   ourColor,
@@ -46,12 +75,12 @@ export const ChatMessagePresenter = ({
     setTrayAppDimensions,
     coords,
   } = useTrayApps();
-  const { selectedChat } = chatStore;
+  const { selectedChat, inbox, getChatHeader } = chatStore;
   const messageRef = useRef<HTMLDivElement>(null);
   const ourShip = useMemo(() => loggedInAccount?.serverId, [loggedInAccount]);
   const isOur = message.sender === ourShip;
   const { getOptions, setOptions, defaultOptions } = useContextMenu();
-  const { setObject } = useShareModal();
+  const { setObject, setPaths } = useShareModal();
 
   const deleting = useToggle(false);
 
@@ -237,7 +266,23 @@ export const ChatMessagePresenter = ({
       disabled: false,
       onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
-        setObject({ message });
+        setObject({
+          app: 'Courier',
+          icon: 'Messages',
+          dataTypeName: 'message',
+          mergedContents: getMergedContents(message, messages, friends),
+          message,
+        });
+        setPaths(
+          inbox.map((c) => ({
+            ...getChatHeader(c.path),
+            path: c.path,
+            selected: false,
+            metadata: c.metadata,
+            type: c.type,
+            peers: c.peers.map((peer) => peer.ship),
+          }))
+        );
       },
     });
     if (isOur) {
@@ -298,28 +343,7 @@ export const ChatMessagePresenter = ({
   const messages = selectedChat?.messages || [];
 
   const mergedContents: any | undefined = useMemo(() => {
-    const replyTo = message.replyToMsgId;
-    let replyToObj = {
-      reply: { msgId: replyTo, author: 'unknown', message: [{ plain: '' }] },
-    };
-    if (replyTo) {
-      const originalMsg = toJS(messages.find((m) => m.id === replyTo));
-      if (originalMsg) {
-        const { nickname } = friends.getContactAvatarMetadata(
-          originalMsg?.sender
-        );
-        replyToObj = originalMsg && {
-          reply: {
-            msgId: originalMsg.id,
-            author: nickname || originalMsg.sender,
-            message: originalMsg.contents,
-          },
-        };
-      }
-      return [replyToObj, ...message.contents];
-    } else {
-      return message.contents;
-    }
+    return getMergedContents(message, messages, friends);
   }, [
     message.replyToMsgId,
     message.contents,

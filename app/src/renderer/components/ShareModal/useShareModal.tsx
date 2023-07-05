@@ -7,26 +7,41 @@ import {
   useState,
 } from 'react';
 
+import { IconPathsType } from '@holium/design-system';
+
+import { ChatPathType } from 'os/services/ship/chat/chat.types';
 import { useAppState } from 'renderer/stores/app.store';
+import { ChatMessageType } from 'renderer/stores/models/chat.model';
 
 type ShareObject = {
-  message?: any;
+  app: string;
+  icon: IconPathsType;
+  dataTypeName: string;
+  mergedContents?: any;
+  message?: ChatMessageType;
 } | null;
 
-type SharePath = {
+export type SharePath = {
   path: string;
+  title: string;
   selected: boolean;
+  type: ChatPathType;
+  peers: string[];
+  metadata?: any;
+  image?: string;
+  sigil?: any;
   space?: {
     title: string;
     image: string;
-    memberCoung: string;
+    memberCount: string;
+    color: string;
   };
 };
 
 type ShareModalContextValue = {
   object: ShareObject;
   setObject: (obj: ShareObject) => void;
-  getPaths: () => SharePath[];
+  paths: SharePath[];
   setPaths: (paths: SharePath[]) => void;
   colors: { textColor: any; windowColor: any };
 };
@@ -45,14 +60,12 @@ export const ShareModalProvider = ({ children }: ShareModalProviderProps) => {
   const [sharePaths, setSharePaths] = useState<SharePath[]>([]);
 
   const setObject = useCallback((obj: ShareObject) => {
-    setShareObject({ ...obj });
+    setShareObject(obj);
   }, []);
 
   const setPaths = useCallback((paths: SharePath[]) => {
     setSharePaths(paths);
   }, []);
-
-  const getPaths = useCallback(() => sharePaths, [sharePaths]);
 
   const handleClick = useCallback((e: MouseEvent) => {
     const modal = document.getElementById('share-modal');
@@ -74,7 +87,7 @@ export const ShareModalProvider = ({ children }: ShareModalProviderProps) => {
       value={{
         object: shareObject,
         setObject,
-        getPaths,
+        paths: sharePaths,
         setPaths,
         colors: { textColor, windowColor },
       }}
