@@ -19,31 +19,18 @@ const CalendarStyle = createGlobalStyle`
 
 `;
 // https://fullcalendar.io/docs/css-customization css customization
-
-export const Calendar = () => {
+interface Props {
+  events: any;
+}
+export const Calendar = ({ events }: Props) => {
   const calendarRef: any = useRef(null);
-  const events: any = [
-    {
-      id: '4213',
-      title: 'event 10',
-      description: 'I got stuff to do V1',
-      participants: 'randy, chips, desu',
-      date: '2023-07-03',
-    },
-    {
-      id: '3412',
-      title: 'event 2',
-      description: 'I got stuff to do V2',
-      participants: 'randy, chips, desu',
-      date: '2023-07-03',
-    },
-  ];
 
   return (
     <Box width={'100%'}>
       <CalendarStyle />
 
       <FullCalendar
+        timeZone="UTC"
         ref={calendarRef}
         schedulerLicenseKey="CC-Attribution-NonCommercial-NoDerivatives"
         plugins={[resourceTimelinePlugin, dayGridPlugin, timeGridPlugin]}

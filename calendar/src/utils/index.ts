@@ -1,19 +1,15 @@
 import memoize from 'lodash/memoize';
 
-export const isDev = () =>
-  !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
+const isDev = () => true;
 
 export const shipName = memoize(() => {
-  //TODO: use realm data here
-  return '';
+  return 'lux';
 });
 export const shipCode = memoize(() => {
-  //TODO: use realm data here
   return 'hidmeg-donfep-pagtyd-witfur';
 });
 export const shipURI = memoize(() => {
-  //TODO: use realm data here
-  return 'http://localhost:8545';
+  return 'http://localhost:8008';
 });
 
 export const log = (...args: any) => {

@@ -1,4 +1,4 @@
-// a plugin!
+import { useEffect, useState } from 'react';
 import { createGlobalStyle } from 'styled-components';
 
 import {
@@ -10,6 +10,7 @@ import {
   Text,
 } from '@holium/design-system';
 
+import { api } from './api';
 import { Calendar, DatePicker } from './components';
 import { log } from './utils';
 
@@ -94,6 +95,75 @@ declare global {
 }
 
 export const App = () => {
+  const [calendarList, setCalendarList] = useState<any>([]);
+  const [selectedCalendar, setSelectedCalendar] = useState<null | string>(null);
+  const [spans, setSpans] = useState<any>([]);
+  const [events, setEvents] = useState<any>([]);
+  const fetchCalendarList = async () => {
+    try {
+      const result = await api.getCalendarList();
+      log('fetchCalendarList result => ', result);
+      if (result.calendars) {
+        const newCalendarList = Object.keys(result.calendars).map(
+          (key: string) => {
+            return { id: key, ...result.calendars[key] };
+          }
+        );
+        setCalendarList(newCalendarList);
+      }
+    } catch (e) {
+      log('fetchCalendarList error =>', e);
+    }
+  };
+  const fetchCalendarEntries = async (calendarId: string) => {
+    try {
+      const result = await api.getCalendarData(calendarId);
+      if (result.calendar) {
+        const newSpans = Object.keys(result.calendar.spans).map(
+          (key: string) => {
+            return { id: key, ...result.calendar.spans[key] };
+          }
+        );
+        setSpans(newSpans);
+      }
+      log('fetchCalendarEntries result => ', result);
+    } catch (e) {
+      log('fetchCalendarEntries error =>', e);
+    }
+  };
+  const spansToEvents = (spans: any) => {
+    log('spans', spans[1]);
+    // TODO: makes this accumlate all of the spans instances...
+    const metaData = spans[1].metadata[spans[1]['def-data']];
+    const newEvents = Object.entries(spans[1]?.instances).map((item: any) => {
+      const startDate = new Date(item[1].instance?.instance.start);
+      const endDate = new Date(item[1].instance?.instance.end);
+      // TODO: make a typescript type for events in the project
+      return {
+        id: '/' + item[0] + item[1].mid,
+        start: startDate, //js date object
+        end: endDate, //js date object
+        title: metaData.name,
+        description: metaData.description,
+      };
+    });
+    setEvents(newEvents);
+
+    log('newEvents', newEvents);
+  };
+  useEffect(() => {
+    fetchCalendarList();
+  }, []);
+  useEffect(() => {
+    if (selectedCalendar) {
+      fetchCalendarEntries(selectedCalendar);
+    }
+  }, [selectedCalendar]);
+  useEffect(() => {
+    if (spans.length > 0) {
+      spansToEvents(spans);
+    }
+  }, [spans]);
   return (
     <main style={{ backgroundColor: 'var(--rlm-window-rgba)' }}>
       <GlobalStyle />
@@ -122,10 +192,27 @@ export const App = () => {
             marginTop={'20px'}
             marginBottom={'20px'}
           >
-            <Text.Body fontWeight="bold">Calendar 1</Text.Body>
-            <Text.Body fontWeight="bold">Calendar 2</Text.Body>
-            <Text.Body fontWeight="bold">Calendar 3</Text.Body>
-            <Text.Body fontWeight="bold">Calendar 4</Text.Body>
+            {calendarList.map((item: any, key: number) => {
+              return (
+                <Box
+                  key={'calendar-' + key}
+                  className="highlight-hover"
+                  style={{
+                    backgroundColor:
+                      selectedCalendar === item.id
+                        ? 'rgba(var(--rlm-overlay-hover-rgba))'
+                        : 'auto',
+                    borderRadius: '12px',
+                    padding: '4px 8px',
+                  }}
+                  onClick={() => {
+                    setSelectedCalendar(item.id);
+                  }}
+                >
+                  <Text.Body fontWeight={600}> {item.title}</Text.Body>
+                </Box>
+              );
+            })}
           </Flex>
           <Flex flexDirection={'column'} marginTop={'auto'}>
             <Button.TextButton width="100%" justifyContent={'center'}>
@@ -135,7 +222,7 @@ export const App = () => {
             <DatePicker />
           </Flex>
         </Flex>
-        <Calendar />
+        <Calendar events={events} />
       </Flex>
     </main>
   );
