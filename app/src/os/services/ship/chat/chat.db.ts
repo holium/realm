@@ -322,7 +322,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
       const delMessagesRow = dbChange as DelMessagesRow;
       // only delete the message if it has a created-at older than dbChange.timestamp (since if the message was created after the delete, the delete is invalid)
       const msg = this.getChatMessage(delMessagesRow['msg-id']);
-      if (msg && msg.created_at < delMessagesRow.timestamp) {
+      if (msg && msg.createdAt < delMessagesRow.timestamp) {
         this._deleteMessagesRow(delMessagesRow['msg-id']);
         this.sendUpdate({ type: 'message-deleted', payload: delMessagesRow });
       }
