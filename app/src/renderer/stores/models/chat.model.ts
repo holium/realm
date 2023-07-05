@@ -146,6 +146,7 @@ export const ChatMessage = types
     // ui state
     pending: types.optional(types.boolean, false),
     error: types.maybe(types.string),
+    forwardedFrom: types.maybe(types.string),
   })
   .views((self) => ({
     get reactionsList() {

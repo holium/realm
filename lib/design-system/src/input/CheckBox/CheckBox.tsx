@@ -10,6 +10,7 @@ type Props = {
   disabled?: boolean;
   defaultChecked?: boolean;
   onChange?: (v: boolean) => void;
+  size?: number;
 };
 
 export const CheckBox = ({
@@ -19,6 +20,7 @@ export const CheckBox = ({
   disabled,
   defaultChecked,
   onChange,
+  size,
 }: Props) => {
   const toggled = useToggle(isChecked ?? defaultChecked ?? false);
 
@@ -44,9 +46,17 @@ export const CheckBox = ({
         }}
       >
         {toggled.isOn ? (
-          <Icon name="CheckboxChecked" fill="accent" />
+          <Icon
+            name="CheckboxChecked"
+            fill="accent"
+            size={size ? size : undefined}
+          />
         ) : (
-          <Icon name="CheckboxBlank" fill="text" />
+          <Icon
+            name="CheckboxBlank"
+            fill="text"
+            size={size ? size : undefined}
+          />
         )}
       </Flex>
 

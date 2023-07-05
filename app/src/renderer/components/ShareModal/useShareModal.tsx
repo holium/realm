@@ -12,11 +12,13 @@ import { IconPathsType } from '@holium/design-system';
 import { ChatPathType } from 'os/services/ship/chat/chat.types';
 import { useAppState } from 'renderer/stores/app.store';
 import { ChatMessageType } from 'renderer/stores/models/chat.model';
+import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 
 type ShareObject = {
   app: string;
   icon: IconPathsType;
   dataTypeName: string;
+  share: (o: any, paths: SharePath[]) => void;
   mergedContents?: any;
   message?: ChatMessageType;
 } | null;
@@ -30,12 +32,7 @@ export type SharePath = {
   metadata?: any;
   image?: string;
   sigil?: any;
-  space?: {
-    title: string;
-    image: string;
-    memberCount: string;
-    color: string;
-  };
+  space?: SpaceModelType;
 };
 
 type ShareModalContextValue = {

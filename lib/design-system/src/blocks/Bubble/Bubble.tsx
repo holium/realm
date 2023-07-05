@@ -47,6 +47,7 @@ export type BubbleProps = {
   onJoinSpaceClick?: (spacePath: string) => void;
   allSpacePaths?: string[];
   error?: string;
+  forwardedFrom?: string;
 } & BoxProps;
 
 export const Bubble = ({
@@ -74,6 +75,7 @@ export const Bubble = ({
   onJoinSpaceClick,
   allSpacePaths,
   error,
+  forwardedFrom,
 }: BubbleProps) => {
   const [dateDisplay, setDateDisplay] = useState(chatDate(new Date(sentAt)));
   useEffect(() => {
@@ -217,17 +219,26 @@ export const Bubble = ({
             {authorNickname || author}
           </BubbleAuthor>
         )}
+        {forwardedFrom && (
+          <Text.Custom
+            style={{ color: 'rgba(51, 51, 51, 0.60)', fontSize: 11 }}
+          >
+            Forwarded from: {forwardedFrom}
+          </Text.Custom>
+        )}
         <FragmentBlock id={id}>{fragments}</FragmentBlock>
         <BubbleFooter id={id} height={footerHeight} mt={1}>
           <Box width="70%" id={id}>
-            <Reactions
-              id={id}
-              isOur={isOur}
-              ourShip={ourShip}
-              ourColor={ourColor}
-              reactions={reactions}
-              onReaction={onReaction}
-            />
+            {((reactions && reactions.length > 0) || onReaction) && (
+              <Reactions
+                id={id}
+                isOur={isOur}
+                ourShip={ourShip}
+                ourColor={ourColor}
+                reactions={reactions}
+                onReaction={onReaction}
+              />
+            )}
           </Box>
           <Flex
             width="30%"
