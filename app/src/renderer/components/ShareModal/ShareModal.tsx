@@ -216,9 +216,19 @@ export const PathRow = ({
           canEdit={false}
         />
       </Flex>
-      <Text.Custom flexGrow={2} fontSize="15px" fontWeight={500}>
-        {pathObj.title}
-      </Text.Custom>
+      <Flex col={true} flexGrow={2}>
+        <Text.Custom fontSize="15px" fontWeight={500}>
+          {pathObj.space ? pathObj.space.name : pathObj.title}
+        </Text.Custom>
+        {pathObj.space && (
+          <Flex gap={4}>
+            <Icon name="Members" size={14} fill="text" opacity={0.6} />
+            <Text.Custom opacity={0.6} fontSize="13px" fontWeight={400}>
+              {pathObj.space.members.count} members
+            </Text.Custom>
+          </Flex>
+        )}
+      </Flex>
       <CheckBox
         isChecked={pathObj.selected}
         onChange={(v) => toggle(pathObj.path, v)}
