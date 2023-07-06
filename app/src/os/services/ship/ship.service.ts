@@ -1,7 +1,6 @@
 import { app } from 'electron';
 import log from 'electron-log';
 import fs from 'fs';
-import { reject } from 'lodash';
 import moment from 'moment';
 import path from 'path';
 
@@ -9,6 +8,7 @@ import { S3Client, StorageAcl } from '../../../renderer/lib/S3Client';
 import { getCookie } from '../../lib/shipHelpers';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection, ConduitSession } from '../api';
+import AuthService from '../auth/auth.service';
 import ChatService from './chat/chat.service';
 import { FriendsService } from './friends.service';
 import LexiconService from './lexicon.service';
@@ -25,6 +25,7 @@ export class ShipService extends AbstractService<any> {
   public patp: string;
   private shipDB?: ShipDB;
   private serviceOptions: ServiceOptions = { preload: false, verbose: false };
+  private authService: AuthService | null = null;
   services?: {
     notifications: NotificationsService;
     chat: ChatService;
@@ -49,7 +50,7 @@ export class ShipService extends AbstractService<any> {
     if (options) {
       this.serviceOptions = options;
     }
-    this.shipDB = new ShipDB(patp, password, clientSideEncryptionKey);
+    this.shipDB = new ShipDB(this.patp, password, clientSideEncryptionKey);
     // this.encryptDb(password);
     if (options?.verbose) {
       log.info(
@@ -58,46 +59,45 @@ export class ShipService extends AbstractService<any> {
         clientSideEncryptionKey
       );
     }
-
-    const credentials = this.shipDB.getCredentials();
-    if (!credentials.cookie) {
-      if (options?.verbose) {
-        log.info('ship.service.ts:', 'No cookie found, getting cookie...');
-      }
-      getCookie({
-        serverUrl: credentials.url,
-        serverCode: credentials.code,
-      })
-        .then((cookie) => {
-          if (cookie) {
-            if (options?.verbose) {
-              log.info(
-                'ship.service.ts:',
-                'Got cookie, setting credentials...'
-              );
-            }
-            this.setCredentials(credentials.url, credentials.code, cookie);
-            this._openConduit({ ...credentials, patp, cookie });
-            this._registerServices();
-          } else {
-            log.error('ship.service.ts:', 'Failed to get cookie');
-          }
-        })
-        .catch((err) => {
-          log.error('ship.service.ts:', 'Failed to get cookie', err);
-        });
-    } else {
-      this._openConduit(credentials);
-      this._registerServices();
-    }
-
     app.on('quit', () => {
       this.shipDB?.disconnect();
     });
   }
 
-  _openConduit(credentials: any) {
-    return new Promise((resolve) =>
+  public async construct() {
+    if (!this.shipDB) return;
+    const credentials = this.shipDB.getCredentials();
+    if (!credentials.cookie) {
+      if (this.serviceOptions?.verbose) {
+        log.info('ship.service.ts:', 'No cookie found, getting cookie...');
+      }
+      try {
+        const cookie = await getCookie({
+          serverUrl: credentials.url,
+          serverCode: credentials.code,
+        });
+        if (cookie) {
+          if (this.serviceOptions?.verbose) {
+            log.info('ship.service.ts:', 'Got cookie, setting credentials...');
+          }
+          this.setCredentials(credentials.url, credentials.code, cookie);
+          await this._openConduit({ ...credentials, patp: this.patp, cookie });
+          this._registerServices();
+        } else {
+          log.error('ship.service.ts:', 'Failed to get cookie');
+        }
+      } catch (e) {
+        log.error(e);
+      }
+    } else {
+      await this._openConduit(credentials);
+      this._registerServices();
+    }
+  }
+
+  async _openConduit(credentials: any) {
+    return new Promise((resolve, reject) => {
+      console.log('_openConduit');
       APIConnection.getInstance({
         ...credentials,
         ship: this.patp,
@@ -105,7 +105,15 @@ export class ShipService extends AbstractService<any> {
         .conduit.on('connected', () => {
           resolve(null);
         })
+        .on('failed', () => {
+          log.info('ship.service.ts:', 'Conduit failed');
+          this.shipDB?.setCredentials(credentials.url, credentials.code, null);
+          this.authService?._setLockfile({ ...credentials, cookie: null });
+          APIConnection.getInstance().closeChannel();
+          resolve(null);
+        })
         .on('refreshed', (session: ConduitSession) => {
+          // log.info('ship.service.ts:', 'Conduit refreshed', session);
           this.shipDB?.setCredentials(
             session.url,
             session.code,
@@ -116,8 +124,8 @@ export class ShipService extends AbstractService<any> {
         .on('error', (err: any) => {
           log.error('ship.service.ts:', 'Conduit error', err);
           reject(err);
-        })
-    );
+        });
+    });
   }
 
   private _registerServices() {
@@ -142,7 +150,8 @@ export class ShipService extends AbstractService<any> {
     };
   }
 
-  public async init() {
+  public async init(authService: AuthService) {
+    this.authService = authService;
     this.initSpaces();
     this.initChat();
     this.initLexicon();
@@ -210,14 +219,18 @@ export class ShipService extends AbstractService<any> {
     this.shipDB.encrypt(password);
   }
 
-  public async cleanup() {
-    // remove all ipcMain listeners
-    this.removeHandlers();
+  public async cleanupServices() {
     this.services?.chat.reset();
     this.services?.notifications.reset();
     this.services?.friends.reset();
     this.services?.spaces.reset();
     this.services?.bazaar.reset();
+  }
+
+  public async cleanup() {
+    // remove all ipcMain listeners
+    this.removeHandlers();
+    this.cleanupServices();
     // if the ship is too slow, just skip closing the channel
     // so we dont hang the app for too long
     const timeout = setTimeout(() => {
@@ -228,7 +241,6 @@ export class ShipService extends AbstractService<any> {
     }, 1000);
     await APIConnection.getInstance().closeChannel();
     clearTimeout(timeout);
-
     this.shipDB?.disconnect();
   }
 

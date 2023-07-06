@@ -1,13 +1,14 @@
 import {
   Button,
+  Crest,
   Flex,
   Icon,
   IconPathsType,
+  isValidHexColor,
+  isValidImageUrl,
   Row,
   Text,
 } from '@holium/design-system';
-
-import { Crest, isValidHexColor, isValidImageUrl } from 'renderer/components';
 
 import { EmptyGroup } from '../SpaceRow';
 

@@ -38,7 +38,7 @@ export const ShipStore = types
   .actions((self) => ({
     init(session: RealmSessionCredentials) {
       if (!localStorage.getItem(`${session.serverId}-firstLoad`)) {
-        self.chatStore.loader.set('first-load');
+        self.chatStore.inboxInitLoader.set('first-load');
       }
       self.credentials = CredentialsModel.create(session);
       self.friends.init();
@@ -114,8 +114,10 @@ export const shipStore = ShipStore.create({
     subroute: 'inbox',
     isOpen: false,
     pinnedChats: [],
-    loader: { state: 'loading' },
     inboxLoader: { state: 'initial' },
+    inboxInitLoader: { state: 'loading' },
+    inboxMetadataLoader: { state: 'loading' },
+    chatLoader: { state: 'initial' },
   },
   spacesStore: {
     spaces: {},

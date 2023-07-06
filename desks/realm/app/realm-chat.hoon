@@ -357,7 +357,6 @@
   :: NOTE, %notif-db agent now depends on us setting this properly so it
   :: can delete notifs for deleted messages automatically
   =/  link      (msg-id-to-cord:encode:db-lib msg-id.msg-part)
-  ~&  >  link
   [
     %pass
     /dbpoke
@@ -397,13 +396,69 @@
       %code                 p.content.part
       %status               p.content.part
       %link                 p.content.part
+      %image                'Shared an image'
       %react
         ?~  reply-to.part   'Reacted to a message'
         =/  prev-msg  (scry-message:lib +.u.reply-to.part bowl)
         =/  prev-summary  (notif-msg prev-msg bowl)
-        (crip "Reacted to: \"{(trip prev-summary)}\"")
+        (crip "Reacted {(emoji-codepoint-to-character-as-tape p.content.part)} to: \"{(trip prev-summary)}\"")
     ==
   (crip `tape`(swag [0 140] str)) :: only show the first 140 characters of the message in the preview
+++  emoji-codepoint-to-character-as-tape
+::0x4E3E -> 0b100.1110.0011.1110
+::          1110xxxx 10xxxxxx 10xxxxxx
+::fills  -> 11100100 10111000 10111110
+::'1f44d' goal -> `@ub`0x8d91.9ff0 -> 1000 1101 1001 0001 1001 1111 1111 0000
+::                                        00 01 1111 01 0001 00 1101
+::                                    10xx xxxx 10xx xxxx 10xx xxxx 1111 00xx
+  |=  t=@t
+  ^-  tape
+  =/  working  (trip t)
+  ?:  =(9 (lent working))
+    %+  weld
+    (emoji-codepoint-to-character-as-tape (crip (scag 4 working)))
+    (emoji-codepoint-to-character-as-tape (crip (oust [0 5] working)))
+  ?:  =(4 (lent working))
+  =/  parsed=@     (slav %ux (crip (weld "0x" working)))
+  :: fixed str-bin
+  =/  f=tape  (fix-str-bin-for-emoji parsed 16)
+  =/  fillin=tape  "0b10{(trip (snag 10 f))}{(trip (snag 11 f))}.{(trip (snag 12 f))}{(trip (snag 13 f))}{(trip (snag 14 f))}{(trip (snag 15 f))}.10{(trip (snag 4 f))}{(trip (snag 5 f))}.{(trip (snag 6 f))}{(trip (snag 7 f))}{(trip (snag 8 f))}{(trip (snag 9 f))}.1110.{(trip (snag 0 f))}{(trip (snag 1 f))}{(trip (snag 2 f))}{(trip (snag 3 f))}"
+  (trip `@t`(slav %ub (crip fillin)))
+  ?.  =(5 (lent working))  "?"
+  =/  parsed=@    (slav %ux (crip (weld "0x" (into working 1 '.'))))
+  :: fixed str-bin
+  =/  f=tape  (fix-str-bin-for-emoji parsed 20)
+  =/  fillin=tape  "0b10{(trip (snag 14 f))}{(trip (snag 15 f))}.{(trip (snag 16 f))}{(trip (snag 17 f))}{(trip (snag 18 f))}{(trip (snag 19 f))}.10{(trip (snag 8 f))}{(trip (snag 9 f))}.{(trip (snag 10 f))}{(trip (snag 11 f))}{(trip (snag 12 f))}{(trip (snag 13 f))}.10{(trip (snag 2 f))}{(trip (snag 3 f))}.{(trip (snag 4 f))}{(trip (snag 5 f))}{(trip (snag 6 f))}{(trip (snag 7 f))}.1111.00{(trip (snag 0 f))}{(trip (snag 1 f))}"
+  (trip `@t`(slav %ub (crip fillin)))
+::
+++  fix-str-bin-for-emoji
+::  take a @ux parsed version of the codepoint and turn it into a string
+::  representation of the binary where it's zero-padded to the goal
+::  length on the left side, and there are no prefixes or periods
+::  ex: "1010110101001011"
+  |=  [parsed=@ goal=@ud]
+  ^-  tape
+  =/  str-bin=tape   (oust [0 2] (scow %ub `@ub`parsed))
+  =/  res=tape  ""
+  =/  index=@ud    0
+  |-
+    ?:  =(index (lent str-bin))
+      ?:  =(goal (lent res))
+        res
+      (left-pad res '0' goal)
+    =/  char  (snag index str-bin)
+    ?:  =(char '.')
+      $(index +(index))
+    $(index +(index), res (snoc res char))
+::
+++  left-pad
+  |=  [t=tape c=@t n=@ud]
+  ^-  tape
+  |-
+    ?:  (gte (lent t) n)
+      t
+    $(t (weld (trip c) t))
+::
 ++  group-name-or-blank
   |=  [=path-row:db-sur]
   ^-  @t

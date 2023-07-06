@@ -1,4 +1,5 @@
 import { app } from 'electron';
+import log from 'electron-log';
 import Database from 'better-sqlite3-multiple-ciphers';
 import path from 'path';
 
@@ -65,6 +66,10 @@ export class ShipDB {
       'received_at',
       'INTEGER NOT NULL DEFAULT 0'
     );
+
+    // e.g. make cookie nullable in credentials table
+    log.info('ship.db.ts:', 'Running upgrade script');
+    this.shipDB.exec(upgradeScript);
   }
 
   private addColumnIfNotExists(table: string, column: string, type: string) {
@@ -102,12 +107,12 @@ export class ShipDB {
       .prepare('SELECT * FROM credentials LIMIT 1;')
       .get();
 
-    // log.info('ship.db.ts:', 'getCredentials', result);
+    // console.info('ship.db.ts:', 'getCredentials', result);
 
     return { ...result, ship: this.patp };
   }
 
-  setCredentials(url: string, code: string, cookie: string) {
+  setCredentials(url: string, code: string, cookie: string | null) {
     this.shipDB
       .prepare(
         'INSERT OR REPLACE INTO credentials (url, code, cookie) VALUES (?, ?, ?);'
@@ -141,4 +146,20 @@ create table if not exists credentials (
   cookie    TEXT NOT NULL,
   wallet    TEXT
 );
+`;
+
+const upgradeScript = `
+BEGIN TRANSACTION;
+create table if not exists credentials_temp (
+  url       TEXT PRIMARY KEY NOT NULL,
+  code      TEXT NOT NULL,
+  cookie    TEXT,
+  wallet    TEXT
+);
+INSERT INTO credentials_temp(url, code, cookie, wallet)
+SELECT url, code, cookie, wallet
+FROM credentials;
+DROP TABLE credentials;
+ALTER TABLE credentials_temp RENAME TO credentials;
+COMMIT TRANSACTION;
 `;

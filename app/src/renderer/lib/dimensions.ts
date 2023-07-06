@@ -13,27 +13,27 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: Record<string, Dimensions> = {
   },
   escape: {
     width: 1200,
-    height: 900,
+    height: 800,
   },
   bitcoin: {
     width: 800,
-    height: 900,
+    height: 800,
   },
   landscape: {
     width: 1200,
-    height: 900,
+    height: 800,
   },
   talk: {
     width: 1200,
-    height: 900,
+    height: 800,
   },
   groups: {
     width: 1200,
-    height: 900,
+    height: 800,
   },
   engram: {
     width: 1200,
-    height: 900,
+    height: 800,
   },
   webterm: {
     width: 780,
@@ -53,7 +53,7 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: Record<string, Dimensions> = {
   },
   'os-browser': {
     width: 1200,
-    height: 900,
+    height: 820,
   },
   sphinx: {
     width: 600,
@@ -61,7 +61,7 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: Record<string, Dimensions> = {
   },
   channel: {
     width: 1000,
-    height: 900,
+    height: 820,
   },
   templeochess: {
     width: 700,

@@ -14,7 +14,6 @@ import { useTrayApps } from 'renderer/apps/store';
 import { trackEvent } from 'renderer/lib/track';
 import { useStorage } from 'renderer/lib/useStorage';
 import { useAppState } from 'renderer/stores/app.store';
-import { ChatMessageType } from 'renderer/stores/models/chat.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ChatLogBody } from './ChatLogBody';
@@ -27,7 +26,7 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
   const storage = useStorage();
   const { loggedInAccount, theme } = useAppState();
   const { dimensions, innerNavigation } = useTrayApps();
-  const { notifStore, friends, chatStore } = useShipStore();
+  const { notifStore, friends, chatStore, spacesStore } = useShipStore();
   const { selectedChat } = chatStore;
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
@@ -102,7 +101,7 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
   const showPin =
     selectedChat.pinnedMessageId !== null && !selectedChat.hidePinned;
 
-  const containerWidth = dimensions.width - 24;
+  const containerWidth = isStandaloneChat ? 434 : dimensions.width - 24;
 
   const onMessageSend = async (fragments: any[]) => {
     if (!selectedChat) return;
@@ -139,6 +138,17 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
             }
           }
         }
+        if (Object.keys(frag)[0] === 'custom') {
+          const cust = frag.custom;
+          if (cust.name === 'space') {
+            const match = spacesStore.getSpaceByPath(
+              cust.value.replace(/^\/spaces/, '')
+            );
+            metadata = {
+              space: match && JSON.stringify(match),
+            };
+          }
+        }
         return {
           content: frag,
           'reply-to': selectedChat.replyingMsg
@@ -173,7 +183,7 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
       storage={storage}
       isMuted={selectedChat.muted}
       showPin={showPin}
-      pinnedChatMessage={selectedChat.pinnedChatMessage as ChatMessageType}
+      pinnedChatMessage={selectedChat.pinnedChatMessage}
       ourColor={ourColor}
       themeMode={theme.mode as 'light' | 'dark'}
       listRef={listRef}

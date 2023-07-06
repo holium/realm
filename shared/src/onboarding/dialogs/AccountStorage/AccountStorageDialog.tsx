@@ -1,9 +1,10 @@
 import { AccountDialog, SidebarSection } from '../../components/AccountDialog';
+import { ThirdEarthShip } from '../../types';
 import { AccountStorageDialogBody } from './AccountStorageDialogBody';
 
 type Props = {
-  identities: string[];
-  selectedIdentity: string;
+  ships: ThirdEarthShip[];
+  selectedShipId: number | undefined;
   storageUrl: string | undefined;
   storageBucket: string | undefined;
   storagePassword: string | undefined;
@@ -15,32 +16,35 @@ type Props = {
     networkUsage: number; // MB
     minioUsage: number; // MB
   };
-  setSelectedIdentity: (patp: string) => void;
-  onClickBuyIdentity: () => void;
+  setSelectedShipId: (newId: number) => void;
+  onClickPurchaseId: () => void;
+  onClickUploadId: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
 
 export const AccountStorageDialog = ({
-  identities,
-  selectedIdentity,
+  ships,
+  selectedShipId,
   storageUrl,
   storageBucket,
   storagePassword,
   dataStorage,
   dataSent,
-  setSelectedIdentity,
-  onClickBuyIdentity,
+  setSelectedShipId,
+  onClickPurchaseId,
+  onClickUploadId,
   onClickSidebarSection,
   onExit,
 }: Props) => (
   <AccountDialog
-    identities={identities}
-    selectedIdentity={selectedIdentity}
+    ships={ships}
+    selectedShipId={selectedShipId}
     currentSection={SidebarSection.Storage}
     isLoading={!storageUrl || !storageBucket || !storagePassword}
-    setSelectedIdentity={setSelectedIdentity}
-    onClickBuyIdentity={onClickBuyIdentity}
+    setSelectedShipId={setSelectedShipId}
+    onClickPurchaseId={onClickPurchaseId}
+    onClickUploadId={onClickUploadId}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >

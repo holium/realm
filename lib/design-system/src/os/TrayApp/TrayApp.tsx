@@ -101,7 +101,7 @@ export const TrayApp = ({
           id={appId}
           initial={{
             x: coords.x,
-            y: coords.y + 8,
+            y: coords.y,
             height: coords.height,
             width: coords.width,
             opacity: 0,
@@ -117,7 +117,7 @@ export const TrayApp = ({
           }}
           exit={{
             x: coords.x,
-            y: coords.y + 8,
+            y: coords.y,
             height: coords.height,
             width: coords.width,
             opacity: 0,

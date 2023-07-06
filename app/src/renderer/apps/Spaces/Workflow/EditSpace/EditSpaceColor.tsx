@@ -1,12 +1,11 @@
 import { ChangeEvent, useEffect, useRef } from 'react';
 import { TwitterPicker } from 'react-color';
 
-import { Flex, Text } from '@holium/design-system/general';
+import { Flex, isValidHexColor, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
 
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
-import { isValidHexColor } from 'renderer/components/Crest';
 
 import { spaceColorOptions } from './types';
 

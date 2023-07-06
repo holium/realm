@@ -17,7 +17,7 @@ type CreateAccountFields = {
 };
 
 type Props = {
-  onAlreadyHaveAccount: () => void;
+  onAlreadyHaveAccount?: () => void;
 };
 
 export const CreateAccountDialogBody = ({ onAlreadyHaveAccount }: Props) => {
@@ -83,10 +83,12 @@ export const CreateAccountDialogBody = ({ onAlreadyHaveAccount }: Props) => {
           }
         />
       </Flex>
-      <OnboardDialogDescription>
-        Already have an account?{' '}
-        <Anchor onClick={onAlreadyHaveAccount}>Log in</Anchor>.
-      </OnboardDialogDescription>
+      {onAlreadyHaveAccount && (
+        <OnboardDialogDescription>
+          Already have an account?{' '}
+          <Anchor onClick={onAlreadyHaveAccount}>Log in</Anchor>.
+        </OnboardDialogDescription>
+      )}
     </>
   );
 };

@@ -3,7 +3,7 @@ import { AccountGetRealmDialog, UserContextProvider } from '@holium/shared';
 import { thirdEarthApi } from 'util/thirdEarthApi';
 
 import { Page } from '../../components/Page';
-import { constants } from '../../util/constants';
+import { constants, getSupportEmail } from '../../util/constants';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
 export const joinWaitlist = async (email: string) => {
@@ -27,15 +27,23 @@ export const joinWaitlist = async (email: string) => {
 const GetRealmPresenter = () => {
   const { goToPage, logout } = useNavigation();
 
-  const goToGetHosting = () => {
-    goToPage(accountPageUrl['Get Hosting'], {
+  const onClickUploadId = () => {
+    goToPage('/upload-id-disclaimer', {
+      back_url: '/account/get-realm',
+    });
+  };
+
+  const onClickPurchaseId = () => {
+    goToPage('/choose-id', {
       back_url: '/account/get-realm',
     });
   };
 
   const onClickSidebarSection = (section: string) => {
-    if (section === 'Get Hosting') {
-      goToGetHosting();
+    if (section === 'Contact Support') {
+      window.open(getSupportEmail(), '_blank');
+    } else if (section === 'Get Hosting') {
+      onClickPurchaseId();
     } else {
       goToPage(accountPageUrl[section]);
     }
@@ -44,10 +52,10 @@ const GetRealmPresenter = () => {
   return (
     <Page title="Account / Get Realm" isProtected>
       <AccountGetRealmDialog
-        onClickGetHosting={goToGetHosting}
         onClickJoinWaitlist={joinWaitlist}
         onClickSidebarSection={onClickSidebarSection}
-        onClickBuyIdentity={() => {}}
+        onClickPurchaseId={onClickPurchaseId}
+        onClickUploadId={onClickUploadId}
         onExit={logout}
       />
     </Page>

@@ -1,19 +1,20 @@
-import { app, BrowserWindow, session, WebContents } from 'electron';
+import { app, BrowserWindow, WebContents } from 'electron';
 import log from 'electron-log';
 import { track } from '@amplitude/analytics-browser';
+
+import { ConduitState } from 'os/services/api';
 
 import {
   getReleaseChannelFromSettings,
   saveReleaseChannelInSettings,
 } from './lib/settings';
-import { getCookie } from './lib/shipHelpers';
+import { getCookie, setSessionCookie } from './lib/shipHelpers';
 import { RealmUpdateTypes } from './realm.types';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { APIConnection } from './services/api';
 import { AuthService } from './services/auth/auth.service';
 import OnboardingService from './services/auth/onboarding.service';
 import { FileUploadParams, ShipService } from './services/ship/ship.service';
-import { Credentials } from './services/ship/ship.types.ts';
 
 export class RealmService extends AbstractService<RealmUpdateTypes> {
   public services?: {
@@ -37,9 +38,20 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       // do other cleanup here
     });
 
+    app.on(
+      'web-contents-created',
+      async (_: Event, webContents: WebContents) => {
+        webContents.on('will-redirect', (e: Event, url: string) => {
+          e.preventDefault();
+          this.onWillRedirect(url, webContents);
+        });
+      }
+    );
+
     const windows = BrowserWindow.getAllWindows();
     windows.forEach(({ webContents }) => {
       webContents.on('did-attach-webview', (event, webviewWebContents) => {
+        log.info("realm.service.ts: 'did-attach-webview' event fired");
         this.onWebViewAttached(event, webviewWebContents);
       });
     });
@@ -55,8 +67,8 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
    * @returns void
    */
   public async boot() {
-    const session = this._hydrateSessionIfExists();
-    this.services?.ship?.init();
+    const session = await this._hydrateSessionIfExists();
+    this.services?.ship?.init(this.services?.auth);
 
     this.sendUpdate({
       type: 'booted',
@@ -66,7 +78,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           ? {
               serverId: session.patp,
               serverUrl: session.url,
-              cookie: session.cookie,
+              cookie: session.cookie || '',
             }
           : undefined,
         seenSplash: this.services?.auth.hasSeenSplash() || false,
@@ -115,12 +127,14 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       const encryptionkey = await this.services.auth.deriveDbKey(password);
       if (this.services.ship) this.services.ship.cleanup();
       this.services.ship = new ShipService(patp, password, encryptionkey);
+      await this.services.ship.construct();
 
       const credentials = this.services.ship?.credentials;
       if (!credentials) {
         log.error('realm.service.ts:', 'No credentials found');
         return false;
       }
+
       const cookie = await getCookie({
         serverUrl: credentials.url,
         serverCode: credentials.code,
@@ -130,46 +144,24 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
         return false;
       }
 
-      await this.setSessionCookie({ ...credentials, cookie });
-      return new Promise((resolve) => {
-        APIConnection.getInstance().conduit.once('connected', () => {
-          log.info('realm.service.ts, login: conduit connected');
-          if (!this.services) return;
-          this.services.auth._setLockfile({ ...credentials, ship: patp });
-          this.services.ship?.init();
-          this.services.ship?.updateCookie(cookie);
-          this._sendAuthenticated(patp, credentials.url, credentials.cookie);
-          resolve(true);
-        });
+      await setSessionCookie({ ...credentials, cookie });
+      // return new Promise(async (resolve) => {
+      // APIConnection.getInstance().conduit.once('connected', () => {
+      log.info('realm.service.ts, login: conduit connected');
+      if (!this.services) return isAuthenticated;
+      this.services.auth._setLockfile({
+        ...credentials,
+        cookie,
+        ship: patp,
       });
+      await this.services.ship?.init(this.services.auth);
+      this.services.ship?.updateCookie(cookie);
+      this._sendAuthenticated(patp, credentials.url, credentials.cookie ?? '');
+      //   resolve(true);
+      // });
+      // });
     }
     return isAuthenticated;
-  }
-
-  async setSessionCookie(credentials: Credentials) {
-    const path = credentials.cookie?.split('; ')[1].split('=')[1];
-    const maxAge = credentials.cookie?.split('; ')[2].split('=')[1];
-    const value = credentials.cookie?.split('=')[1].split('; ')[0];
-    try {
-      // remove current cookie
-      await session
-        .fromPartition(`persist:webview-${credentials.ship}`)
-        .cookies.remove(`${credentials.url}`, `urbauth-${credentials.ship}`);
-      // set new cookie
-      return await session
-        .fromPartition(`persist:webview-${credentials.ship}`)
-        .cookies.set({
-          url: `${credentials.url}`,
-          name: `urbauth-${credentials.ship}`,
-          value,
-          expirationDate: new Date(
-            Date.now() + parseInt(maxAge) * 1000
-          ).getTime(),
-          path: path,
-        });
-    } catch (e) {
-      log.error('setSessionCookie error:', e);
-    }
   }
 
   /**
@@ -258,7 +250,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     });
   }
 
-  private _hydrateSessionIfExists() {
+  private async _hydrateSessionIfExists() {
     if (!this.services) return null;
 
     const session = this.services?.auth._getLockfile();
@@ -275,6 +267,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
 
       // todo figure out how to get the password and encryptionKey from the lockfile
       this.services.ship = new ShipService(session.ship, '', '');
+      await this.services.ship.construct();
 
       return {
         url: session.url,
@@ -355,10 +348,14 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           return;
         }
 
-        await this.setSessionCookie({ ...credentials, cookie });
+        // await setSessionCookie({ ...credentials, cookie });
 
         this.services?.ship?.updateCookie(cookie);
+        log.info('realm.service.ts', 'reloading after cookie refresh');
         webContents.reload();
+        // webContents.loadURL(url, {
+        //   extraHeaders: `Cookie: ${cookie}`,
+        // });
       }
     } catch (e) {
       console.error(e);
@@ -366,14 +363,29 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   }
 
   async onWebViewAttached(_: any, webContents: WebContents) {
-    webContents.on('will-redirect', (_, url) => {
-      this.onWillRedirect(url, webContents);
-    });
-
     webContents.on('dom-ready', () => {
       // TODO wire up libs here
     });
   }
+
+  async reconnectConduit() {
+    log.info('realm.service.ts:', 'Reconnecting conduit');
+    try {
+      await APIConnection.getInstance().reconnect();
+      this.services?.ship?.init(this.services?.auth);
+    } catch (e) {
+      log.error(e);
+    }
+    // APIConnection.getInstance()
+    //   .reconnect()
+    //   .then(() => this.services?.ship?.init(this.services?.auth))
+    //   .catch((e) => log.error(e));
+  }
+
+  async setConduitStatus(status: ConduitState) {
+    APIConnection.getInstance().conduit.updateStatus(status);
+  }
+
   // private startBackgroundProcess(): void {
   //   if (this.realmProcess) {
   //     return;

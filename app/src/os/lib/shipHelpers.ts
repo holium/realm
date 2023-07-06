@@ -1,5 +1,8 @@
+import { session } from 'electron';
 import log from 'electron-log';
 import dns from 'dns';
+
+import { Credentials } from '../services/ship/ship.types.ts';
 
 dns.setDefaultResultOrder('ipv4first');
 
@@ -25,16 +28,60 @@ export async function getCookie({
       headers: {
         'Content-Type': 'text/plain',
       },
-      // credentials: 'include', // TODO test this
+      credentials: 'include', // TODO test this
       signal: controller.signal,
     });
+    if (!response.ok) {
+      throw new Error(`Bad response from server: ${response.status}`);
+    }
     cookie = response.headers.get('set-cookie');
-    log.info(`Got cookie for ${serverUrl}`);
+    const ship = cookie?.split('; ')[0].split('=')[0].replace('urbauth-', '');
+    const path = cookie?.split('; ')[1].split('=')[1];
+    // const maxAge = cookie?.split('; ')[2].split('=')[1];
+    const value = cookie?.split('=')[1].split('; ')[0];
+
+    // const expiresAt = parseInt(maxAge ?? '0') * 1000;
+
+    await session.defaultSession.cookies.remove(serverUrl, `urbauth-${ship}`);
+    await session.defaultSession.cookies.set({
+      url: serverUrl,
+      name: `urbauth-${ship}`,
+      value,
+      path: path,
+    });
+
+    return cookie;
   } catch (e) {
     log.error(`Error getting cookie for ${serverUrl}`, e);
     return Promise.reject(e);
   } finally {
     clearTimeout(timeout);
   }
-  return cookie;
+}
+
+export async function setSessionCookie(credentials: Credentials) {
+  const path = credentials.cookie?.split('; ')[1].split('=')[1];
+  // const maxAge = credentials.cookie?.split('; ')[2].split('=')[1];
+  const value = credentials.cookie?.split('=')[1].split('; ')[0];
+
+  try {
+    // remove current cookie
+    await session.defaultSession.cookies.remove(
+      `${credentials.url}`,
+      `urbauth-${credentials.ship}`
+    );
+
+    // set new cookie
+    return await session.defaultSession.cookies.set({
+      url: `${credentials.url}`,
+      name: `urbauth-${credentials.ship}`,
+      value,
+      // expirationDate: new Date(
+      //   Date.now() + parseInt(maxAge ?? '0') * 1000
+      // ).getTime(),
+      path: path,
+    });
+  } catch (e) {
+    log.error('setSessionCookie error:', e);
+  }
 }

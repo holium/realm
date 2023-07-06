@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 
 import { Flex } from '@holium/design-system/general';
-import { ThirdEarthProduct } from '@holium/shared';
+import { ThirdEarthProduct, ThirdEarthShip } from '@holium/shared';
 
 export const OnboardingDialogWrapper = ({
   children,
@@ -19,7 +19,14 @@ export const OnboardingDialogWrapper = ({
   </Flex>
 );
 
-const thirdEarthMockProduct: ThirdEarthProduct = {
+export const mockShip: ThirdEarthShip = {
+  id: 0,
+  patp: '~pasren-satmex',
+  ship_type: 'planet',
+  product_type: 'planet',
+} as any;
+
+export const thirdEarthMockProduct: ThirdEarthProduct = {
   id: 1,
   client_id: 1,
   droplet_class_id: 1,

@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { loadStripe, Stripe, StripeElementsOptions } from '@stripe/stripe-js';
+import type { GetServerSideProps } from 'next/types';
 
 import {
+  OnboardingPage,
   OnboardingStorage,
   PaymentDialog,
   ThirdEarthProduct,
+  ThirdEarthProductType,
 } from '@holium/shared';
 
 import { Page } from '../components/Page';
@@ -14,19 +17,31 @@ import { useNavigation } from '../util/useNavigation';
 
 type ServerSideProps = {
   products: ThirdEarthProduct[];
+  // We use underscore to highlight that this is a query param.
+  product_type: ThirdEarthProductType;
+  back_url?: string;
 };
 
-export async function getServerSideProps() {
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const products = await thirdEarthApi.getProducts();
+  const back_url = (query.back_url ?? '') as string;
+  const product_type = (query.product_type ??
+    'planet') as ThirdEarthProductType;
 
   return {
     props: {
       products,
+      product_type,
+      back_url,
     } as ServerSideProps,
   };
-}
+};
 
-export default function Payment({ products }: ServerSideProps) {
+export default function Payment({
+  products: unfilteredProducts,
+  product_type,
+  back_url,
+}: ServerSideProps) {
   const { goToPage } = useNavigation();
 
   const [serverId, setServerId] = useState('');
@@ -36,15 +51,23 @@ export default function Payment({ products }: ServerSideProps) {
   const [stripe, setStripe] = useState<Stripe>();
   const [clientSecret, setClientSecret] = useState<string>();
 
+  const products = unfilteredProducts.filter(
+    (product) => product.product_type === product_type
+  );
+
   const [productId, setProductId] = useState(products[0].id);
   const [invoiceId, setInvoiceId] = useState<string>();
 
   useEffect(() => {
     const { serverId, email, token } = OnboardingStorage.get();
 
-    if (!serverId || !email || !token) return;
+    if (!email || !token) return;
 
-    setServerId(serverId);
+    if (product_type === 'planet') {
+      if (serverId) setServerId(serverId);
+      else return; // Must have serverId for planet.
+    }
+
     setEmail(email);
     setToken(token);
 
@@ -52,7 +75,8 @@ export default function Payment({ products }: ServerSideProps) {
       const response = await thirdEarthApi.stripeMakePayment(
         token,
         productId.toString(),
-        serverId
+        // Don't pass serverId for byop-p.
+        product_type !== 'byop-p' && serverId ? serverId : undefined
       );
       setClientSecret(response.clientSecret);
       setInvoiceId(response.invoiceId);
@@ -75,22 +99,80 @@ export default function Payment({ products }: ServerSideProps) {
     },
   };
 
-  const onBack = () => goToPage('/choose-id');
+  const onBack = () => {
+    if (back_url) {
+      return goToPage(back_url as OnboardingPage);
+    }
+
+    if (product_type === 'byop-p') {
+      return goToPage('/');
+    } else {
+      return goToPage('/choose-id');
+    }
+  };
 
   const onNext = async () => {
-    if (!token || !serverId || !invoiceId || !productId)
-      return Promise.resolve(false);
+    if (!token || !invoiceId || !productId) return false;
 
-    await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
-    await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
-    await thirdEarthApi.ship(token, serverId, productId.toString(), invoiceId);
+    if (product_type === 'byop-p') {
+      await thirdEarthApi.log(token, {
+        file: 'purchases',
+        type: 'info',
+        subject: 'FRONTEND: payment step (email notify)',
+        message: `Succesful stripe purchase of byop-p by ${email}.`,
+        productId: productId.toString(),
+        auditTrailCode: 1000,
+      });
+      await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
+      const provisionalResponse = await thirdEarthApi.provisionalShipEntry({
+        token,
+        product: productId.toString(),
+        invoiceId,
+        shipType: 'provisional',
+      });
 
-    return goToPage('/booting');
+      if (!provisionalResponse) return false;
+
+      OnboardingStorage.set({
+        provisionalShipId: provisionalResponse[0].id.toString(),
+      });
+
+      return goToPage('/upload-id', {
+        product_type: 'byop-p',
+      });
+    } else {
+      // Product type planet also requires serverId.
+      if (!serverId) return false;
+
+      await thirdEarthApi.log(token, {
+        file: 'purchases',
+        type: 'info',
+        subject: 'FRONTEND: payment step (email notify)',
+        message: `Succesful stripe purchase of planet by ${email}.`,
+        productId: productId.toString(),
+        auditTrailCode: 1000,
+      });
+
+      await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
+      await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
+      await thirdEarthApi.provisionalShipEntry({
+        token,
+        patp: serverId,
+        product: productId.toString(),
+        invoiceId,
+        shipType: 'planet',
+      });
+
+      return goToPage('/booting', {
+        product_type,
+      });
+    }
   };
 
   return (
     <Page title="Payment" isProtected>
       <PaymentDialog
+        productType={product_type}
         products={products}
         productId={productId}
         patp={serverId}

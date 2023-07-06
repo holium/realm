@@ -14,7 +14,6 @@ export const Default: ComponentStory<typeof CommButton> = () => {
   return (
     <CommButton
       icon={icon}
-      customBg="#F5F5F4"
       onClick={() => (icon === 'MicOn' ? setIcon('MicOff') : setIcon('MicOn'))}
     />
   );

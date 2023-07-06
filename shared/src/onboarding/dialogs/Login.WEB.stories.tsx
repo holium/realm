@@ -7,11 +7,12 @@ import {
   AccountDownloadRealmDialog,
   AccountHostingDialog,
   AccountStorageDialog,
+  AccountUnfinishedUploadDialog,
   ForgotPassword,
   LoginDialog,
   OnboardDialogDescription,
 } from '../onboarding';
-import { OnboardingDialogWrapper } from './util';
+import { mockShip, OnboardingDialogWrapper } from './util';
 
 export default {
   component: LoginDialog,
@@ -39,10 +40,11 @@ export const AccountHostingDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <AccountHostingDialog
-      identities={['~pasren-satmex']}
-      selectedIdentity="~pasren-satmex"
-      setSelectedIdentity={() => {}}
-      onClickBuyIdentity={() => {}}
+      ships={[mockShip]}
+      selectedShipId={0}
+      setSelectedShipId={() => {}}
+      onClickPurchaseId={() => {}}
+      onClickUploadId={() => {}}
       email="rubberducky12@protonmail.com"
       serverUrl="https://pasren-satmex.holium.network/"
       serverCode="tolnym-rilmug-ricnep-marlyx"
@@ -59,17 +61,18 @@ export const AccountHostingDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-AccountHostingDialogStory.storyName = '2. Hosting';
+AccountHostingDialogStory.storyName = '2 Hosting';
 
 export const AccountStorageDialogStory: ComponentStory<
   typeof AccountStorageDialog
 > = () => (
   <OnboardingDialogWrapper>
     <AccountStorageDialog
-      identities={['~pasren-satmex']}
-      selectedIdentity="~pasren-satmex"
-      setSelectedIdentity={() => {}}
-      onClickBuyIdentity={() => {}}
+      ships={[mockShip]}
+      selectedShipId={0}
+      setSelectedShipId={() => {}}
+      onClickPurchaseId={() => {}}
+      onClickUploadId={() => {}}
       storageUrl="https://console.s31.holium.network"
       storageBucket="pasren-satmex"
       storagePassword="1234567890"
@@ -91,15 +94,16 @@ export const AccountCustomDomainDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <AccountCustomDomainDialog
-      identities={['~pasren-satmex']}
-      selectedIdentity="~pasren-satmex"
+      ships={[mockShip]}
+      selectedShipId={0}
+      setSelectedShipId={() => {}}
       dropletIp="123.123.123.123"
       domain="holium.network"
       submitting={false}
       onChangeDomain={() => {}}
       onSubmit={() => Promise.resolve()}
-      setSelectedIdentity={() => {}}
-      onClickBuyIdentity={() => {}}
+      onClickPurchaseId={() => {}}
+      onClickUploadId={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />
@@ -113,10 +117,11 @@ export const AccountDownloadRealmDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <AccountDownloadRealmDialog
-      identities={['~pasren-satmex']}
-      selectedIdentity="~pasren-satmex"
-      setSelectedIdentity={() => {}}
-      onClickBuyIdentity={() => {}}
+      ships={[mockShip]}
+      selectedShipId={0}
+      setSelectedShipId={() => {}}
+      onClickPurchaseId={() => {}}
+      onClickUploadId={() => {}}
       onClickSidebarSection={() => {}}
       onDownloadMacM1={() => {}}
       onDownloadMacIntel={() => {}}
@@ -128,3 +133,46 @@ export const AccountDownloadRealmDialogStory: ComponentStory<
 );
 
 AccountDownloadRealmDialogStory.storyName = '5. Download Realm';
+
+export const AccountUnfinishedUploadDialogStory: ComponentStory<
+  typeof AccountStorageDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <AccountUnfinishedUploadDialog
+      ships={[mockShip]}
+      selectedShipId={0}
+      setSelectedShipId={() => {}}
+      onClickPurchaseId={() => {}}
+      onClickUploadId={() => {}}
+      onClickReuploadId={() => {}}
+      onClickSidebarSection={() => {}}
+      onClickExit={() => {}}
+    />
+  </OnboardingDialogWrapper>
+);
+
+AccountUnfinishedUploadDialogStory.storyName = '6.1. Identity Being Created';
+
+export const AccountErroredUploadDialogStory: ComponentStory<
+  typeof AccountStorageDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <AccountUnfinishedUploadDialog
+      ships={[
+        {
+          ...mockShip,
+          ship_type: 'hardError',
+        },
+      ]}
+      selectedShipId={0}
+      setSelectedShipId={() => {}}
+      onClickPurchaseId={() => {}}
+      onClickUploadId={() => {}}
+      onClickReuploadId={() => {}}
+      onClickSidebarSection={() => {}}
+      onClickExit={() => {}}
+    />
+  </OnboardingDialogWrapper>
+);
+
+AccountErroredUploadDialogStory.storyName = '6.2. Identity Upload Error';

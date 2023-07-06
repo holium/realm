@@ -1,8 +1,8 @@
 import { Flex } from '@holium/design-system';
 
-import { Dictionary, SearchBar } from '../components';
+import { SearchBar } from '../components';
+import { Dictionary } from '../pages';
 
-// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   title: 'Lexicon/Dictionary Definition',
   component: Dictionary,

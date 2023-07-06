@@ -8,6 +8,7 @@ import {
   Avatar,
   Box,
   Button,
+  Crest,
   Flex,
   Icon,
   Row,
@@ -19,7 +20,6 @@ import { defaultTheme } from '@holium/shared';
 
 import { getSpacePath } from 'os/lib/text';
 import { MemberRole, MemberStatus } from 'os/types';
-import { Crest } from 'renderer/components';
 import { ShipSearch } from 'renderer/components/ShipSearch';
 import { pluralize } from 'renderer/lib/text';
 import { useAppState } from 'renderer/stores/app.store';
@@ -245,7 +245,7 @@ const InviteMembersPresenter = ({
                 ...permissionMap,
                 [patp]: {
                   primaryRole: selected as MemberRole,
-                  roles: [selected],
+                  roles: [selected as MemberRole],
                   alias: '',
                   status: 'invited',
                 },

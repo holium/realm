@@ -33,10 +33,11 @@ export const onboardDialogCardCss = css`
 
   @media (max-width: ${MOBILE_WIDTH}px) {
     align-self: flex-start;
+    width: 100%;
     height: 100%;
     min-height: 100vh;
     margin: 0;
-    padding: 32px;
+    padding: 32px 24px;
     border-radius: 0;
   }
 `;

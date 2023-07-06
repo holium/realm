@@ -43,7 +43,7 @@ const SpaceRowPresenter = (props: SpaceRowProps) => {
       label: 'Copy link',
       onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
-        navigator.clipboard.writeText(space.path.substring(1));
+        navigator.clipboard.writeText('/spaces' + space.path);
       },
     });
     if (loggedInAccount && space.isAdmin(loggedInAccount.serverId)) {

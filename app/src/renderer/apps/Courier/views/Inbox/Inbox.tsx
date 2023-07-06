@@ -14,7 +14,16 @@ type Props = {
 export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
   const { loggedInAccount, shellStore } = useAppState();
   const { chatStore, spacesStore } = useShipStore();
-  const { sortedChatList, setChat, setSubroute, isChatPinned } = chatStore;
+
+  const {
+    sortedChatList,
+    sortedStandaloneChatList,
+    inboxLoader,
+    inboxMetadataLoader,
+    setChat,
+    setSubroute,
+    isChatPinned,
+  } = chatStore;
   const currentSpace = spacesStore.selected;
 
   useEffect(() => {
@@ -23,10 +32,11 @@ export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
 
   return (
     <InboxBody
-      inboxes={sortedChatList}
+      inboxes={isStandaloneChat ? sortedStandaloneChatList : sortedChatList}
       accountIdentity={loggedInAccount?.serverId}
       spacePath={currentSpace?.path}
       isStandaloneChat={isStandaloneChat}
+      isLoading={inboxLoader.isLoading || inboxMetadataLoader.isLoading}
       isChatPinned={isChatPinned}
       onClickInbox={(path) => {
         setChat(path);
