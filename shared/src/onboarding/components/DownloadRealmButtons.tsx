@@ -22,7 +22,7 @@ export const DownloadRealmButtons = ({
     <Flex flexDirection="column" gap={12}>
       <DownloadButton
         icon={<AppleIcon />}
-        hint="M1"
+        hint="Apple"
         onClick={onDownloadMacM1}
       />
       <DownloadButton icon={<WindowsIcon />} onClick={onDownloadWindows} />
