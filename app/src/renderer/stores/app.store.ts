@@ -11,6 +11,7 @@ import {
 
 import { RealmUpdateBooted } from 'os/realm.types';
 import { ConduitState } from 'os/services/api';
+import { LexiconUpdateType } from 'os/services/ship/lexicon.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';
 import { SoundActions } from 'renderer/lib/sound';
 import { MobXAccount } from 'renderer/stores/models/account.model';
@@ -19,6 +20,7 @@ import { AuthenticationModel } from './auth.store';
 import {
   AuthIPC,
   BazaarIPC,
+  LexiconIPC,
   MainIPC,
   NotifIPC,
   OnboardingIPC,
@@ -183,6 +185,10 @@ function registerOnUpdateListener() {
     appState.shellStore.setFullscreen(isFullScreen);
   });
 
+  LexiconIPC.onUpdate(async (update: LexiconUpdateType) => {
+    //update lexicon store with the latest update
+    shipStore.lexiconStore.setUpdate(update?.payload);
+  });
   RealmIPC.onUpdate(async (update) => {
     if (update.type === 'booted') {
       appState.reset();

@@ -35,6 +35,12 @@ export class BazaarService extends AbstractService<BazaarUpdateType> {
   }
 
   async init() {
+    //refresh app catalog
+    await APIConnection.getInstance().conduit.poke({
+      app: 'bazaar',
+      mark: 'bazaar-action',
+      json: { initialize: null },
+    });
     return new Promise((resolve, reject) => {
       APIConnection.getInstance().conduit.watch({
         app: 'bazaar',
