@@ -10,8 +10,8 @@ import {
 } from '@holium/shared';
 
 import { RealmUpdateBooted } from 'os/realm.types';
-import { LexiconUpdateType } from 'os/services/ship/lexicon.types';
 import { ConduitState } from 'os/services/api';
+import { LexiconUpdateType } from 'os/services/ship/lexicon.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';
 import { SoundActions } from 'renderer/lib/sound';
 import { MobXAccount } from 'renderer/stores/models/account.model';
