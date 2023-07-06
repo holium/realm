@@ -61,12 +61,20 @@ export const bootRealm = () => {
   const storedRealmRelease = store.get('realmRelease');
   const currentRealmRelease = app.getVersion();
 
-  if (storedRealmRelease !== currentRealmRelease) {
+  if (
+    Boolean(storedRealmRelease) &&
+    storedRealmRelease !== currentRealmRelease
+  ) {
     // If the stored realmRelease is different from the current realmRelease,
     // it means the user has had Realm uninstalled for a while and is now
     // reinstalling it, since it otherwise would have been updated by AppUpdater.
     // In this case, we want to clear the user data.
-    log.info('Booting a Realm version different from stored user data.');
+    log.info(
+      'Booting a Realm version different from stored user data:',
+      storedRealmRelease,
+      'vs.',
+      currentRealmRelease
+    );
     clearUserData();
   } else {
     log.info('Booting a Realm version compatible with stored user data.');
