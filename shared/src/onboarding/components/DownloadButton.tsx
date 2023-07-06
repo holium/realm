@@ -6,7 +6,7 @@ import { Button, Flex, Text } from '@holium/design-system/general';
 import { MOBILE_WIDTH } from './OnboardDialog.styles';
 
 const DownloadButtonStyled = styled(Button.Primary)`
-  width: 154px;
+  width: 162px;
   height: 32px;
   padding-left: 7px;
   padding-right: 7px;
