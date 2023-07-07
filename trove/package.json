@@ -11,8 +11,7 @@
   "peerDependencies": {
     "lodash": "^4.17.21",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-dnd": "^16.0.1"
+    "react-dom": "^18.2.0"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.267.0",
@@ -32,7 +31,8 @@
     "styled-system": "^5.1.5",
     "urbit-ob": "^5.0.1",
     "yet-another-react-lightbox": "^2.3.0",
-    "zustand": "^4.1.4"
+    "zustand": "^4.1.4",
+    "react-dnd": "^16.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.18.9",
