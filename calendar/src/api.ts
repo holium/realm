@@ -43,20 +43,49 @@ export const api = {
   /**
    * Span event related
    */
-  createSpan: async (
-    parentCalendarId: string,
+  createSpanLeftSingle: async (
+    calendarId: string,
+    startDateMS: number,
+    durationMS: number,
     name: string,
-    description: string
+    description = ''
   ) => {
     const json = {
       'create-span': {
-        cid: parentCalendarId, // parent calendar ID
-        dom: { l: 0, r: 5 },
-        rid: '~/left/periodic-0', // the recurence rule, left/periodic has a start date and duration
-        kind: { left: { tz: '~', d: 3600000 } }, // tz => timezone, d => ????????????
+        cid: calendarId, // the calendar id (I WILL be changing this format)
+        dom: { l: 0, r: 0 }, // domain, the numbers between l and r inclusive will be the basis for the instances of the event, in this case one instance, the 0th
+        rid: '~/left/single-0', // the rule id, in this case a single event defined by a start and a duration
+        kind: { left: { tz: '~', d: durationMS } }, // the kind of span, in this case instances are defined by a start and a duration
         args: {
-          Start: { da: 1104537600000 }, // start date in unix miliseconds
-          Period: { dr: 86400000 }, // duration of the event?????
+          // arguments to the rule, in this case a single event defined by a start and a duration
+          Start: { dx: { i: 0, d: startDateMS } }, // this single span is defined by the start
+        },
+        meta: {
+          name,
+          description,
+        },
+      },
+    };
+    return api.createApi().poke({ app: 'cal2', mark: 'calendar-action', json });
+  },
+  createSpanBothSingle: async (
+    calendarId: string,
+    startDateMS: number,
+    endDateMS: number,
+    name: string,
+    description = ''
+  ) => {
+    // an event that has both a start and end
+    const json = {
+      'create-span': {
+        cid: calendarId, //  '0v2j60e.mtk5c.b0hp1.an1v3.0v4b4', the calendar id (I WILL be changing this format)
+        dom: { l: 0, r: 0 }, // domain, the numbers between l and are inclusive will be the basis for the instances of the event, in this case one instance, the 0th
+        rid: '~/both/single-0', // the rule id, in this case a single event
+        kind: { both: { lz: '~', rz: '~' } }, // the kind of span, in this case both start and end are defined by the rule
+        args: {
+          // arguments for the rule, in this case a single event defined by start/end
+          Start: { dx: { i: 0, d: startDateMS } }, // the start of the single event (ex: d => 1104537600000)
+          End: { dx: { i: 0, d: endDateMS } }, // the end of the single event (ex: d =>1104537600000)
         },
         meta: {
           name,

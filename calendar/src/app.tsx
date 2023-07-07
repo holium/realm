@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { createGlobalStyle } from 'styled-components';
 
-import { Button, Flex, Icon } from '@holium/design-system';
+import { Flex } from '@holium/design-system';
 
 import { api } from './api';
-import { Calendar, CalendarList, DatePicker } from './components';
+import { Calendar, CalendarList, DatePicker, NewEvent } from './components';
 import { log } from './utils';
 
 import 'react-day-picker/dist/style.css';
@@ -92,6 +92,8 @@ export const App = () => {
   const [selectedCalendar, setSelectedCalendar] = useState<null | string>(null);
   const [spans, setSpans] = useState<any>([]);
   const [events, setEvents] = useState<any>([]);
+  const [datePickerSelected, setDatePickerSelected] = useState<any>(null);
+
   const fetchCalendarList = async () => {
     try {
       const result = await api.getCalendarList();
@@ -130,12 +132,12 @@ export const App = () => {
     const newEvents: any = [];
     spans.forEach((span: any) => {
       const metaData = span.metadata[span['def-data']];
-      Object.entries(span.instances).forEach((item: any) => {
-        const startDate = new Date(item[1].instance?.instance.start);
-        const endDate = new Date(item[1].instance?.instance.end);
+      span.instances.forEach((item: any) => {
+        const startDate = new Date(item.instance?.instance.start);
+        const endDate = new Date(item.instance?.instance.end);
         // TODO: make a typescript type for events in the project
         newEvents.push({
-          id: '/' + item[0] + item[1].mid,
+          id: '/' + item.idx + item.mid,
           start: startDate, //js date object
           end: endDate, //js date object
           title: metaData.name,
@@ -163,6 +165,7 @@ export const App = () => {
   return (
     <main style={{ backgroundColor: 'var(--rlm-window-rgba)' }}>
       <GlobalStyle />
+
       <Flex>
         <Flex flexDirection={'column'}>
           <CalendarList
@@ -171,11 +174,16 @@ export const App = () => {
             selectedCalendar={selectedCalendar}
           />
           <Flex flexDirection={'column'} marginTop={'auto'}>
-            <Button.TextButton width="100%" justifyContent={'center'}>
-              <Icon name="Plus" size={24} opacity={0.5} />
-              New event
-            </Button.TextButton>
-            <DatePicker />
+            {selectedCalendar && (
+              <NewEvent
+                selectedCalendar={selectedCalendar}
+                datePickerSelected={datePickerSelected}
+              />
+            )}
+            <DatePicker
+              onDatePickerSelect={setDatePickerSelected}
+              datePickerSelected={datePickerSelected}
+            />
           </Flex>
         </Flex>
         <Calendar events={events} />

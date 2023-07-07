@@ -53,3 +53,28 @@ export const formatDate = (
 export const displayDate = (date: number): string => {
   return formatDate(date, { long: false, dayOnly: false });
 };
+export const convertH2M = (timeInHour: string) => {
+  const timeParts = timeInHour.split(':');
+  return Number(timeParts[0]) * 60 + Number(timeParts[1]);
+};
+export const toUTCDate = (date: Date): Date => {
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const day = date.getUTCDate();
+  const hours = date.getUTCHours();
+  const minutes = date.getUTCMinutes();
+  const seconds = date.getUTCSeconds();
+  const milliseconds = date.getUTCMilliseconds();
+
+  return new Date(
+    Date.UTC(
+      year,
+      month,
+      day,
+      hours,
+      minutes + date.getTimezoneOffset(),
+      seconds,
+      milliseconds
+    )
+  );
+};

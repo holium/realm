@@ -1,16 +1,32 @@
-import { useState } from 'react';
 import { DayPicker } from 'react-day-picker';
+
+import { Flex, Text } from '@holium/design-system';
+
+import { log } from '../utils';
+
 //import { format } from 'date-fns';
 
-export const DatePicker = () => {
-  const [selected, setSelected] = useState<Date>();
-
+interface Props {
+  onDatePickerSelect: (date: any) => void;
+  datePickerSelected: any;
+}
+export const DatePicker = ({
+  onDatePickerSelect,
+  datePickerSelected,
+}: Props) => {
+  log('datePickerSelected', datePickerSelected);
   return (
-    <DayPicker
-      mode="single"
-      selected={selected}
-      onSelect={setSelected}
-      footer={null}
-    />
+    <Flex flexDirection="column">
+      <Flex gap="5px">
+        <Text.H5> Selected date:</Text.H5>
+        <Text.H5 fontWeight={600}>{datePickerSelected?.toDateString()}</Text.H5>
+      </Flex>
+      <DayPicker
+        mode="single"
+        selected={datePickerSelected}
+        onSelect={onDatePickerSelect}
+        footer={null}
+      />
+    </Flex>
   );
 };
