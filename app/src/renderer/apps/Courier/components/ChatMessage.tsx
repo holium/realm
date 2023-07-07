@@ -268,7 +268,7 @@ export const ChatMessagePresenter = ({
         evt.stopPropagation();
         setObject({
           app: 'Courier',
-          icon: 'Messages',
+          icon: 'CourierApp',
           dataTypeName: 'message',
           mergedContents: getMergedContents(message, messages, friends),
           message: { ...message, forwardedFrom: selectedChat.metadata.title },

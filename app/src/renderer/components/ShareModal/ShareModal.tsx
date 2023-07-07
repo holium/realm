@@ -102,7 +102,7 @@ export const ShareModal = () => {
               name={object.icon}
               size={44}
               fill="text"
-              opacity={0.3}
+              opacity={1}
               style={{
                 padding: '4px',
                 borderRadius: '6px',
