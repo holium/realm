@@ -1,17 +1,10 @@
 import { useEffect, useState } from 'react';
 import { createGlobalStyle } from 'styled-components';
 
-import {
-  Box,
-  Button,
-  Flex,
-  Icon,
-  SectionDivider,
-  Text,
-} from '@holium/design-system';
+import { Button, Flex, Icon } from '@holium/design-system';
 
 import { api } from './api';
-import { Calendar, DatePicker } from './components';
+import { Calendar, CalendarList, DatePicker } from './components';
 import { log } from './utils';
 
 import 'react-day-picker/dist/style.css';
@@ -116,6 +109,7 @@ export const App = () => {
     }
   };
   const fetchCalendarEntries = async (calendarId: string) => {
+    setSpans([]); // always reset spans
     try {
       const result = await api.getCalendarData(calendarId);
       if (result.calendar) {
@@ -132,21 +126,24 @@ export const App = () => {
     }
   };
   const spansToEvents = (spans: any) => {
-    log('spans', spans[1]);
-    // TODO: makes this accumlate all of the spans instances...
-    const metaData = spans[1].metadata[spans[1]['def-data']];
-    const newEvents = Object.entries(spans[1]?.instances).map((item: any) => {
-      const startDate = new Date(item[1].instance?.instance.start);
-      const endDate = new Date(item[1].instance?.instance.end);
-      // TODO: make a typescript type for events in the project
-      return {
-        id: '/' + item[0] + item[1].mid,
-        start: startDate, //js date object
-        end: endDate, //js date object
-        title: metaData.name,
-        description: metaData.description,
-      };
+    log('spans', spans);
+    const newEvents: any = [];
+    spans.forEach((span: any) => {
+      const metaData = span.metadata[span['def-data']];
+      Object.entries(span.instances).forEach((item: any) => {
+        const startDate = new Date(item[1].instance?.instance.start);
+        const endDate = new Date(item[1].instance?.instance.end);
+        // TODO: make a typescript type for events in the project
+        newEvents.push({
+          id: '/' + item[0] + item[1].mid,
+          start: startDate, //js date object
+          end: endDate, //js date object
+          title: metaData.name,
+          description: metaData.description,
+        });
+      });
     });
+
     setEvents(newEvents);
 
     log('newEvents', newEvents);
@@ -160,60 +157,19 @@ export const App = () => {
     }
   }, [selectedCalendar]);
   useEffect(() => {
-    if (spans.length > 0) {
-      spansToEvents(spans);
-    }
+    spansToEvents(spans);
   }, [spans]);
+
   return (
     <main style={{ backgroundColor: 'var(--rlm-window-rgba)' }}>
       <GlobalStyle />
       <Flex>
         <Flex flexDirection={'column'}>
-          <Flex alignItems={'center'}>
-            <Box flex={1}>
-              <SectionDivider label="My Calendars" alignment="left" />
-            </Box>
-            <Flex flex={0.15} justifyContent={'center'} alignItems={'center'}>
-              <Button.IconButton
-                className="realm-cursor-hover"
-                size={26}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  log('adding calendar');
-                }}
-              >
-                <Icon name="Plus" size={24} opacity={0.5} />
-              </Button.IconButton>
-            </Flex>
-          </Flex>
-          <Flex
-            flexDirection={'column'}
-            gap={'10px'}
-            marginTop={'20px'}
-            marginBottom={'20px'}
-          >
-            {calendarList.map((item: any, key: number) => {
-              return (
-                <Box
-                  key={'calendar-' + key}
-                  className="highlight-hover"
-                  style={{
-                    backgroundColor:
-                      selectedCalendar === item.id
-                        ? 'rgba(var(--rlm-overlay-hover-rgba))'
-                        : 'auto',
-                    borderRadius: '12px',
-                    padding: '4px 8px',
-                  }}
-                  onClick={() => {
-                    setSelectedCalendar(item.id);
-                  }}
-                >
-                  <Text.Body fontWeight={600}> {item.title}</Text.Body>
-                </Box>
-              );
-            })}
-          </Flex>
+          <CalendarList
+            calendarList={calendarList}
+            onCalendarSelect={setSelectedCalendar}
+            selectedCalendar={selectedCalendar}
+          />
           <Flex flexDirection={'column'} marginTop={'auto'}>
             <Button.TextButton width="100%" justifyContent={'center'}>
               <Icon name="Plus" size={24} opacity={0.5} />
