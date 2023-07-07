@@ -2,7 +2,6 @@ import { Flex } from '@holium/design-system';
 
 import { SearchBar, Word } from '../components';
 
-
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
   title: 'Lexicon/Word Details',
