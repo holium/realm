@@ -2497,7 +2497,8 @@
 
 "@eslint/js@8.42.0":
   version "8.42.0"
-  resolved "https://registry.npmjs.org/@eslint/js/-/js-8.42.0.tgz"
+
+  resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.42.0.tgz#484a1d638de2911e6f5a30c12f49c7e4a3270fb6"
   integrity sha512-6SWlXpWU5AvId8Ac7zjzmIOqMOba/JWY8XZ4A7q7Gn1Vlfg/SFFIlrtHXt9nPn4op9ZPAkl91Jao+QQv3r/ukw==
 
 "@etchteam/storybook-addon-css-variables-theme@^1.4.0":
@@ -2883,181 +2884,10 @@
   resolved "https://registry.npmjs.org/@gar/promisify/-/promisify-1.1.3.tgz"
   integrity sha512-k2Ty1JcVojjJFwrg/ThKi2ujJ7XNLYaFGNB/bWT9wGR+oSMJHMa5w+CUq6p/pVrKeNNgA7pCqEcjSnHVoqJQFw==
 
-"@holium/design-system@0.2.1", "@holium/design-system@file:C:\\Users\\pc\\Documents\\work\\realm1\\realm\\lib\\design-system":
-  version "0.2.1"
-  resolved "file:lib/design-system"
-  dependencies:
-    "@tlon/sigil-js" "^1.4.5"
-    dayjs "^1.11.7"
-    dom-helpers "^5.2.1"
-    emoji-picker-react "^4.4.7"
-    framer-motion "^7.6.7"
-    photoswipe "^5.3.7"
-    react-lifecycles-compat "^3.0.4"
-    react-photoswipe-gallery "^2.2.7"
-    react-player "^2.11.0"
-    react-virtuoso "^4.2.0"
-    urbit-ob "^5.0.1"
-
-"@holium/holium-com@file:C:\\Users\\pc\\Documents\\work\\realm1\\realm\\holium-com":
-  version "1.0.0"
-  resolved "file:holium-com"
-  dependencies:
-    framer-motion "^7.6.7"
-    next "^13.4.1"
-    react "^18.2.0"
-    react-dom "^18.2.0"
-    styled-components "^5.3.6"
-
-"@holium/hosting-holium-com@file:C:\\Users\\pc\\Documents\\work\\realm1\\realm\\hosting-holium-com":
-  version "0.1.0"
-  resolved "file:hosting-holium-com"
-  dependencies:
-    "@amplitude/analytics-browser" "^1.9.1"
-    "@sentry/nextjs" "^7.50.0"
-    "@stripe/react-stripe-js" "^2.1.0"
-    "@stripe/stripe-js" "^1.51.0"
-    formik "^2.2.9"
-    next "^13.4.1"
-    next-progress "^2.3.1"
-    react "^18.2.0"
-    react-dom "^18.2.0"
-    styled-components "^5.3.6"
-    yup "^1.1.1"
-
-"@holium/join-holium-com@file:C:\\Users\\pc\\Documents\\work\\realm1\\realm\\join-holium-com":
-  version "1.0.0"
-  resolved "file:join-holium-com"
-  dependencies:
-    "@prisma/client" "^4.14.1"
-    next "^13.4.1"
-    nextjs-cors "^2.1.2"
-    react "^18.2.0"
-    react-dom "^18.2.0"
-    styled-components "^5.3.6"
-
-"@holium/lexicon@file:C:\\Users\\pc\\Documents\\work\\realm1\\realm\\lexicon":
-  version "0.1.0"
-  resolved "file:lexicon"
-  dependencies:
-    "@urbit/http-api" "^2.3.0"
-    react-router-dom "^6.12.0"
-    zustand "^4.3.8"
-
-"@holium/realm-presence-notes@file:C:\\Users\\pc\\Documents\\work\\realm1\\realm\\lib\\presence\\code":
-  version "0.1.0"
-  resolved "file:lib/presence/code"
-  dependencies:
-    prosemirror-collab "^1.3.0"
-    prosemirror-commands "^1.5.1"
-    prosemirror-history "^1.3.0"
-    prosemirror-keymap "^1.2.1"
-    prosemirror-schema-basic "^1.2.1"
-    prosemirror-state "^1.4.2"
-    prosemirror-view "^1.30.1"
-    react "^18.2.0"
-    react-dom "^18.2.0"
-    styled-components "^5.3.6"
-
-"@holium/realm-presence@file:C:\\Users\\pc\\Documents\\work\\realm1\\realm\\lib\\presence":
-  version "0.1.3"
-  resolved "file:lib/presence"
-  dependencies:
-    "@radix-ui/react-slot" "^0.1.2"
-    babel-loader "^8.2.5"
-
-"@holium/realm@file:C:\\Users\\pc\\Documents\\work\\realm1\\realm\\app":
-  version "0.9.0"
-  resolved "file:app"
-  dependencies:
-    "@amplitude/analytics-browser" "^1.9.4"
-    "@cliqz/adblocker-electron" "^1.23.8"
-    "@radix-ui/react-popover" "^1.0.0"
-    "@sentry/integrations" "^7.48.0"
-    "@sentry/react" "^7.48.0"
-    "@stitches/react" "^1.2.8"
-    "@stripe/react-stripe-js" "^1.9.0"
-    "@stripe/stripe-js" "^1.32.0"
-    "@tlon/sigil-js" "^1.4.5"
-    "@urbit/api" "^2.1.1"
-    "@urbit/aura" "^1.0.0"
-    alchemy-sdk "^2.2.1"
-    aws-sdk "^2.1204.0"
-    axios "^1.3.5"
-    bcryptjs "^2.4.3"
-    better-sqlite3 "^8.2.0"
-    better-sqlite3-multiple-ciphers "^8.2.0"
-    big-integer "^1.6.51"
-    coingecko-api "^1.0.10"
-    crypto-js "^4.1.1"
-    disable-scroll "^0.6.0"
-    electron-debug "^3.2.0"
-    electron-dl "^3.5.0"
-    electron-log "^4.4.6"
-    electron-store "^8.0.1"
-    electron-updater "^4.6.5"
-    email-validator "^2.0.4"
-    ethers "^5.7.0"
-    eventsource "^2.0.2"
-    framer-motion "^6.2.10"
-    human-standard-token-abi "^2.0.0"
-    lodash "^4.17.21"
-    mobx "^6.5.0"
-    mobx-easy-form "^1.2.2"
-    mobx-react "^7.3.0"
-    mobx-state-tree "^5.1.3"
-    moment "^2.29.4"
-    node-fetch "2"
-    node-ipc "^11.1.0"
-    polished "^4.2.2"
-    qrcode.react "^3.1.0"
-    react "^18.2.0"
-    react-color "^2.19.3"
-    react-dom "^18.2.0"
-    react-gesture-responder "^2.1.0"
-    react-grid-dnd "^2.1.2"
-    react-hotkeys-hook "^3.4.7"
-    react-spaces "^0.3.2"
-    react-spinners "^0.13.4"
-    simple-peer "^9.11.1"
-    socket.io-client "^4.6.1"
-    stream-browserify "^3.0.0"
-    styled-components "^5.3.3"
-    styled-system "^5.1.5"
-    ts-node-dev "^2.0.0"
-    urbit-ob "^5.0.1"
-    yup "^0.32.11"
-
-"@holium/shared@file:C:\\Users\\pc\\Documents\\work\\realm1\\realm\\shared":
-  version "1.0.0"
-  resolved "file:shared"
-
-"@holium/trove@file:C:\\Users\\pc\\Documents\\work\\realm1\\realm\\trove":
-  version "0.1.0"
-  resolved "file:trove"
-  dependencies:
-    "@aws-sdk/client-s3" "^3.267.0"
-    "@emotion/react" "^11.10.5"
-    "@emotion/styled" "^11.10.5"
-    "@mui/icons-material" "^5.10.16"
-    "@mui/material" "^5.10.16"
-    "@urbit/api" "^2.0.0"
-    "@urbit/http-api" "^2.0.0"
-    axios "^1.1.3"
-    immer "^9.0.16"
-    mime "^3.0.0"
-    moment "^2.29.4"
-    react-dnd-html5-backend "^16.0.1"
-    react-router-dom "^6.4.3"
-    styled-components "^5.3.6"
-    styled-system "^5.1.5"
-    urbit-ob "^5.0.1"
-    yet-another-react-lightbox "^2.3.0"
-    zustand "^4.1.4"
 
 "@humanwhocodes/config-array@^0.11.10":
   version "0.11.10"
-  resolved "https://registry.npmjs.org/@humanwhocodes/config-array/-/config-array-0.11.10.tgz"
+  resolved "https://registry.yarnpkg.com/@humanwhocodes/config-array/-/config-array-0.11.10.tgz#5a3ffe32cc9306365fb3fd572596cd602d5e12d2"
   integrity sha512-KVVjQmNUepDVGXNuoRRdmmEjruj0KfiGSbS8LVc12LMsWDQzRXJ0qdhN8L8uUigKpfEHRhlaQFY0ib1tnUbNeQ==
   dependencies:
     "@humanwhocodes/object-schema" "^1.2.1"
@@ -3480,7 +3310,7 @@
 
 "@microsoft/fetch-event-source@^2.0.0":
   version "2.0.1"
-  resolved "https://registry.npmjs.org/@microsoft/fetch-event-source/-/fetch-event-source-2.0.1.tgz"
+  resolved "https://registry.yarnpkg.com/@microsoft/fetch-event-source/-/fetch-event-source-2.0.1.tgz#9ceecc94b49fbaa15666e38ae8587f64acce007d"
   integrity sha512-W6CLUJ2eBMw3Rec70qrsEW0jOm/3twwJv21mrmj2yORiaVmVYGS4sSS5yUwvQc1ZlDLYGPnClVWmUUMagKNsfA==
 
 "@motionone/animation@^10.12.0", "@motionone/animation@^10.15.1":
@@ -3706,10 +3536,16 @@
     mkdirp "^1.0.4"
     rimraf "^3.0.2"
 
-"@pmmmwh/react-refresh-webpack-plugin@^0.5.3":
-  version "0.5.10"
-  resolved "https://registry.npmjs.org/@pmmmwh/react-refresh-webpack-plugin/-/react-refresh-webpack-plugin-0.5.10.tgz"
-  integrity sha512-j0Ya0hCFZPd4x40qLzbhGsh9TMtdb+CJQiso+WxLOPNasohq9cc5SNUcwsZaRH6++Xh91Xkm/xHCkuIiIu0LUA==
+
+"@pkgjs/parseargs@^0.11.0":
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
+  integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
+
+"@pmmmwh/react-refresh-webpack-plugin@0.5.5":
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/@pmmmwh/react-refresh-webpack-plugin/-/react-refresh-webpack-plugin-0.5.5.tgz#e77aac783bd079f548daa0a7f080ab5b5a9741ca"
+  integrity sha512-RbG7h6TuP6nFFYKJwbcToA1rjC1FyPg25NR2noAZ0vKI+la01KTSRPkuVPE+U88jXv7javx2JHglUcL1MHcshQ==
   dependencies:
     ansi-html-community "^0.0.8"
     common-path-prefix "^3.0.0"
@@ -4084,6 +3920,7 @@
 
 "@remix-run/router@1.7.0":
   version "1.7.0"
+
 
 "@remusao/guess-url-type@^1.1.2":
   version "1.2.1"
@@ -6559,9 +6396,10 @@
   resolved "https://registry.npmjs.org/@urbit/aura/-/aura-1.0.0.tgz"
   integrity sha512-IeP3uoDzZ0Rpn345auXK0y/BCcXTmpgAlOPbgf7n4eD35h56OnSoit1kuXKA21sWE19gFjK/wqZcz5ULjz2ADg==
 
-"@urbit/http-api@^2.0.0", "@urbit/http-api@^2.3.0":
+
+"@urbit/http-api@^2.3.0":
   version "2.3.0"
-  resolved "https://registry.npmjs.org/@urbit/http-api/-/http-api-2.3.0.tgz"
+  resolved "https://registry.yarnpkg.com/@urbit/http-api/-/http-api-2.3.0.tgz#3187c30e4d223da4245ad6282d5a6ca0da510bf6"
   integrity sha512-3cKSdbBVcpoHqZLvoV23UK+nkqK0nFEBFKbaEwfBQE/NpkWf/7iP+mT7ldXTk7Uv/5bzDEBPqPB2fJNwdMQwcA==
   dependencies:
     "@babel/runtime" "^7.12.5"
@@ -6583,6 +6421,7 @@
     "@babel/plugin-transform-react-jsx-source" "^7.14.5"
     "@rollup/pluginutils" "^4.1.1"
     react-refresh "^0.10.0"
+
 
 "@vitejs/plugin-react@^3.1.0":
   version "3.1.0"
@@ -8004,7 +7843,7 @@ browser-assert@^1.2.1:
 
 browser-or-node@^1.3.0:
   version "1.3.0"
-  resolved "https://registry.npmjs.org/browser-or-node/-/browser-or-node-1.3.0.tgz"
+  resolved "https://registry.yarnpkg.com/browser-or-node/-/browser-or-node-1.3.0.tgz#f2a4e8568f60263050a6714b2cc236bb976647a7"
   integrity sha512-0F2z/VSnLbmEeBcUrSuDH5l0HxTXdQQzLjkmBR4cYfvg1zJrKSlmIZFqyFR8oX0NrwPhy3c3HQ6i3OxMbew4Tg==
 
 browserify-aes@^1.0.0, browserify-aes@^1.0.4:
@@ -10654,7 +10493,7 @@ eslint-plugin-react-hooks@^4.3.0, eslint-plugin-react-hooks@^4.6.0:
 
 eslint-plugin-react-refresh@^0.3.4:
   version "0.3.5"
-  resolved "https://registry.npmjs.org/eslint-plugin-react-refresh/-/eslint-plugin-react-refresh-0.3.5.tgz"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-react-refresh/-/eslint-plugin-react-refresh-0.3.5.tgz#0121e3f05f940250d3544bfaeff52e1c6adf4117"
   integrity sha512-61qNIsc7fo9Pp/mju0J83kzvLm0Bsayu7OQSLEoJxLDCBjIIyb87bkzufoOvdDxLkSlMfkF7UxomC4+eztUBSA==
 
 eslint-plugin-react@^7.27.1:
@@ -11873,7 +11712,19 @@ glob-to-regexp@^0.4.1:
   resolved "https://registry.npmjs.org/glob-to-regexp/-/glob-to-regexp-0.4.1.tgz"
   integrity sha512-lkX1HJXwyMcprw/5YUZc2s7DrpAiHB21/V+E1rHUrVNokkvB6bqMzT0VfV6/86ZNabt1k14YOIaT7nDvOX3Iiw==
 
-glob@*, glob@^7.0.5, glob@^7.1.3, glob@^7.1.4, glob@^7.1.6, glob@^7.1.7:
+
+glob@^10.2.5:
+  version "10.3.1"
+  resolved "https://registry.yarnpkg.com/glob/-/glob-10.3.1.tgz#9789cb1b994515bedb811a6deca735b5c37d2bf4"
+  integrity sha512-9BKYcEeIs7QwlCYs+Y3GBvqAMISufUS0i2ELd11zpZjxI5V9iyRj0HgzB5/cLf2NY4vcYBTYzJ7GIui7j/4DOw==
+  dependencies:
+    foreground-child "^3.1.0"
+    jackspeak "^2.0.3"
+    minimatch "^9.0.1"
+    minipass "^5.0.0 || ^6.0.2"
+    path-scurry "^1.10.0"
+
+glob@^7.0.5, glob@^7.1.3, glob@^7.1.4, glob@^7.1.6:
   version "7.2.3"
   resolved "https://registry.npmjs.org/glob/-/glob-7.2.3.tgz"
   integrity sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==
@@ -12024,7 +11875,7 @@ grapheme-splitter@^1.0.4:
 
 graphemer@^1.4.0:
   version "1.4.0"
-  resolved "https://registry.npmjs.org/graphemer/-/graphemer-1.4.0.tgz"
+  resolved "https://registry.yarnpkg.com/graphemer/-/graphemer-1.4.0.tgz#fb2f1d55e0e3a1849aeffc90c4fa0dd53a0e66c6"
   integrity sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==
 
 gzip-size@^6.0.0:
@@ -14270,6 +14121,17 @@ lru-cache@^7.7.1:
   resolved "https://registry.npmjs.org/lru-cache/-/lru-cache-7.18.3.tgz"
   integrity sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==
 
+
+"lru-cache@^9.1.1 || ^10.0.0":
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-10.0.0.tgz#b9e2a6a72a129d81ab317202d93c7691df727e61"
+  integrity sha512-svTf/fzsKHffP42sujkO/Rjs37BCIsQVRCeNYIm9WN8rgT7ffoUnRtZCqU+6BqcSBdv8gwJeTz8knJpgACeQMw==
+
+lru_map@^0.3.3:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/lru_map/-/lru_map-0.3.3.tgz#b5c8351b9464cbd750335a79650a0ec0e56118dd"
+  integrity sha512-Pn9cox5CsMYngeDbmChANltQl+5pi6XmTrraMSzhPmMBbmgcxmqWry0U3PGapCU1yB4/LqCcom7qhHZiF/jGfQ==
+
 lz-string@^1.4.4:
   version "1.5.0"
   resolved "https://registry.npmjs.org/lz-string/-/lz-string-1.5.0.tgz"
@@ -14682,12 +14544,13 @@ minimatch@^5.0.1:
   dependencies:
     brace-expansion "^2.0.1"
 
-minimatch@3.0.4:
-  version "3.0.4"
-  resolved "https://registry.npmjs.org/minimatch/-/minimatch-3.0.4.tgz"
-  integrity sha512-yJHVQEhyqPLUTgt9B83PXu6W3rx4MvvHvSUvToogpwoGDOUQ+yDrR0HRot+yOCdCO7u4hX3pWft6kWBBcqh0UA==
+
+minimatch@^9.0.1:
+  version "9.0.2"
+  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-9.0.2.tgz#397e387fff22f6795844d00badc903a3d5de7057"
+  integrity sha512-PZOT9g5v2ojiTL7r1xF6plNHLtOeTpSlDI007As2NlA2aYBMfVom17yqa6QzhmDP8QOhn7LjHTg7DFCVSSa6yg==
   dependencies:
-    brace-expansion "^1.1.7"
+    brace-expansion "^2.0.1"
 
 minimist-options@4.1.0:
   version "4.1.0"
@@ -16956,21 +16819,16 @@ react-remove-scroll@2.5.5:
 
 react-router-dom@^6.12.0:
   version "6.12.1"
-  resolved "https://registry.npmjs.org/react-router-dom/-/react-router-dom-6.12.1.tgz"
+  resolved "https://registry.yarnpkg.com/react-router-dom/-/react-router-dom-6.12.1.tgz#601fe7eb493071a33dc7573a20b920324a834606"
   integrity sha512-POIZN9UDKWwEDga054LvYr2KnK8V+0HR4Ny4Bwv8V7/FZCPxJgsCjYxXGxqxzHs7VBxMKZfgvtKhafuJkJSPGA==
   dependencies:
     "@remix-run/router" "1.6.3"
     react-router "6.12.1"
 
-react-router-dom@^6.4.3:
-  version "6.14.0"
-  dependencies:
-    "@remix-run/router" "1.7.0"
-    react-router "6.14.0"
 
 react-router@6.12.1:
   version "6.12.1"
-  resolved "https://registry.npmjs.org/react-router/-/react-router-6.12.1.tgz"
+  resolved "https://registry.yarnpkg.com/react-router/-/react-router-6.12.1.tgz#9e4126aa1139ec6b5d347e19576d5e940cd46362"
   integrity sha512-evd/GrKJOeOypD0JB9e1r7pQh2gWCsTbUfq059Wm1AFT/K2MNZuDo19lFtAgIhlBrp0MmpgpqtvZC7LPAs7vSw==
   dependencies:
     "@remix-run/router" "1.6.3"
@@ -16979,6 +16837,7 @@ react-router@6.14.0:
   version "6.14.0"
   dependencies:
     "@remix-run/router" "1.7.0"
+
 
 react-spaces@^0.3.2:
   version "0.3.9"
@@ -18619,6 +18478,33 @@ string.prototype.trimstart@^1.0.6:
     define-properties "^1.1.4"
     es-abstract "^1.20.4"
 
+
+string_decoder@^1.0.0, string_decoder@^1.1.1:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/string_decoder/-/string_decoder-1.3.0.tgz#42f114594a46cf1a8e30b0a84f56c78c3edac21e"
+  integrity sha512-hkRX8U1WjJFd8LsDJ2yQ/wWWxaopEsABU1XfkM8A+j0+85JAGppt16cr1Whg6KIbb4okU6Mql6BOj+uup/wKeA==
+  dependencies:
+    safe-buffer "~5.2.0"
+
+string_decoder@~0.10.x:
+  version "0.10.31"
+  resolved "https://registry.yarnpkg.com/string_decoder/-/string_decoder-0.10.31.tgz#62e203bc41766c6c28c9fc84301dab1c5310fa94"
+  integrity sha512-ev2QzSzWPYmy9GuqfIVildA4OdcGLeFZQrq5ys6RtiuF+RQQiZWr8TZNyAcuVXyQRYfEO+MsoB/1BuQVhOJuoQ==
+
+string_decoder@~1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/string_decoder/-/string_decoder-1.1.1.tgz#9cf1611ba62685d7030ae9e4ba34149c3af03fc8"
+  integrity sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==
+  dependencies:
+    safe-buffer "~5.1.0"
+
+"strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@^6.0.0, strip-ansi@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
+  integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
+  dependencies:
+    ansi-regex "^5.0.1"
+
 strip-ansi@^3.0.1:
   version "3.0.1"
   resolved "https://registry.npmjs.org/strip-ansi/-/strip-ansi-3.0.1.tgz"
@@ -18632,6 +18518,7 @@ strip-ansi@^6.0.0, strip-ansi@^6.0.1:
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
   dependencies:
     ansi-regex "^5.0.1"
+
 
 strip-ansi@^7.0.1:
   version "7.1.0"
@@ -19509,7 +19396,7 @@ typescript@*, typescript@^4.9.4, "typescript@>= 2.7", "typescript@>= 3.x", "type
 
 typescript@^5.0.2:
   version "5.1.3"
-  resolved "https://registry.npmjs.org/typescript/-/typescript-5.1.3.tgz"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.1.3.tgz#8d84219244a6b40b6fb2b33cc1c062f715b9e826"
   integrity sha512-XH627E9vkeqhlZFQuL+UsyAXEnibT0kWR2FWONlr4sTjvxyJYnyefgrkyECLzM5NenmKzRAy2rR/OlYLA1HkZw==
 
 uglify-js@^3.1.4:
@@ -19822,7 +19709,7 @@ use-sidecar@^1.1.2:
 
 use-sync-external-store@1.2.0:
   version "1.2.0"
-  resolved "https://registry.npmjs.org/use-sync-external-store/-/use-sync-external-store-1.2.0.tgz"
+  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.2.0.tgz#7dbefd6ef3fe4e767a0cf5d7287aacfb5846928a"
   integrity sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==
 
 use@^3.1.0:
@@ -20445,10 +20332,11 @@ wrap-ansi@^6.2.0:
     string-width "^4.1.0"
     strip-ansi "^6.0.0"
 
-wrap-ansi@^7.0.0:
-  version "7.0.0"
-  resolved "https://registry.npmjs.org/wrap-ansi/-/wrap-ansi-7.0.0.tgz"
-  integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
+
+wrap-ansi@^8.1.0:
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-8.1.0.tgz#56dc22368ee570face1b49819975d9b9a5ead214"
+  integrity sha512-si7QWI6zUMq56bESFvagtmzMdGOtoxfR+Sez11Mobfc7tm+VkUckk9bW2UeffTGVUbOksxmSw0AA2gs8g71NCQ==
   dependencies:
     ansi-styles "^6.1.0"
     string-width "^5.0.1"
@@ -20696,6 +20584,7 @@ zod@3.21.4:
 zustand@^4.1.4, zustand@^4.3.8:
   version "4.3.8"
   resolved "https://registry.npmjs.org/zustand/-/zustand-4.3.8.tgz"
+
   integrity sha512-4h28KCkHg5ii/wcFFJ5Fp+k1J3gJoasaIbppdgZFO4BPJnsNxL0mQXBSFgOgAdCdBj35aDTPvdAJReTMntFPGg==
   dependencies:
     use-sync-external-store "1.2.0"

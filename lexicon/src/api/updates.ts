@@ -1,6 +1,7 @@
 import { useStore } from '../store';
 import { log } from '../utils';
 const store = useStore.getState();
+
 export const updateHandler = (update: any) => {
   log('main update handler => ', update);
   let actionName;
@@ -11,6 +12,7 @@ export const updateHandler = (update: any) => {
     //delete row type
     actionName = update[0].change + '-' + update[0].type;
   }
+
   if (actionName) {
     switch (actionName) {
       case 'add-row-lexicon-word': {
