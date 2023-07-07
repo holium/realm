@@ -10,4 +10,5 @@
     %notif-db
     %chat-db
     %bedrock
+    %api-store
 ==
