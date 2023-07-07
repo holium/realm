@@ -38,21 +38,23 @@ const BubbleWrapper = styled(Flex)`
 
 const ShareTo = styled(Flex)`
   margin: 8px;
-  & > hr {
-    border: none;
-    flex-grow: 2;
-    height: 1px;
-    margin-top: 8px;
-    margin-left: 8px;
-    background-color: #3333331a;
-  }
-  & > div {
-    color: rgba(var(--rlm-text-rgba), 0.4);
-    text-align: center;
-    font-size: 14px;
-    font-family: Rubik;
-    font-weight: 500;
-  }
+`;
+
+const ShareToHr = styled.hr`
+  border: none;
+  flex-grow: 2;
+  height: 1px;
+  margin-top: 8px;
+  margin-left: 8px;
+  background-color: #3333331a;
+`;
+
+const ShareToLabel = styled(Text.Label)`
+  color: rgba(var(--rlm-text-rgba), 0.4);
+  text-align: center;
+  font-size: 14px;
+  font-family: Rubik;
+  font-weight: 500;
 `;
 
 export const ShareModal = () => {
@@ -175,8 +177,8 @@ export const ShareModal = () => {
         )}
 
         <ShareTo>
-          <Text.Label>Share to</Text.Label>
-          <hr />
+          <ShareToLabel>Share to</ShareToLabel>
+          <ShareToHr />
         </ShareTo>
 
         {paths.map((p) => (

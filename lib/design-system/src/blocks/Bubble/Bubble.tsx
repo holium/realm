@@ -221,7 +221,7 @@ export const Bubble = ({
         )}
         {forwardedFrom && (
           <Text.Custom
-            style={{ color: 'rgba(51, 51, 51, 0.60)', fontSize: 11 }}
+            style={{ color: 'rgba(var(--rlm-icon-rgba), 0.60)', fontSize: 11 }}
           >
             Forwarded from: {forwardedFrom}
           </Text.Custom>
