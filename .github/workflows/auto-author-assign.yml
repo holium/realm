@@ -13,4 +13,7 @@ jobs:
     steps:
       - name: Auto Author Assign
         uses: toshimaru/auto-author-assign@v1.6.2
+        with:
+          repo-token: ${{ secrets.GH_TOKEN }}
+
 
