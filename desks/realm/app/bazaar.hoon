@@ -1056,6 +1056,12 @@
         =.  config.native-app           [size=[3 7] titlebar-border=%.n show-titlebar=%.y]
       =.  catalog.init                  (~(put by catalog.init) %lexicon [%native native-app])
       =.  grid-index.init               (set-grid-index:helpers:bazaar:core %lexicon grid-index.init)
+        =.  title.native-app            'Notes'
+        =.  color.native-app            '#FFFFFF'
+        =.  icon.native-app             'AppIconNotes'
+        =.  config.native-app           [size=[5 6] titlebar-border=%.n show-titlebar=%.n]
+      =.  catalog.init                  (~(put by catalog.init) %os-notes [%native native-app])
+      =.  grid-index.init               (set-grid-index:helpers:bazaar:core %os-notes grid-index.init)
       init
     ::
     ++  get-stall-apps
