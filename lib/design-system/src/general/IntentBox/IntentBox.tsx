@@ -42,3 +42,16 @@ export const SuccessBox = ({ children }: Props) => (
     <Truncator>{children}</Truncator>
   </SuccessBoxContainer>
 );
+
+export const InfoBoxContainer = styled.div`
+  ${BaseCss}
+  border: 1px solid rgba(var(--rlm-accent-rgba));
+  background-color: rgba(var(--rlm-accent-rgba), 0.1);
+  color: rgba(var(--rlm-accent-rgba));
+`;
+
+export const InfoBox = ({ children }: Props) => (
+  <InfoBoxContainer>
+    <Truncator>{children}</Truncator>
+  </InfoBoxContainer>
+);

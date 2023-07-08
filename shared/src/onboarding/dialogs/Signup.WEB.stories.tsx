@@ -9,6 +9,7 @@ import {
   GetRealmDialog,
   PaymentDialog,
   SomethingWentWrongDialog,
+  uploadErrors,
   VerifyEmailDialog,
 } from '../onboarding';
 import { GetOnRealmDialog } from './GetOnRealm/GetOnRealmDialog';
@@ -252,6 +253,40 @@ export const UploadIdUploadingDialogStory: ComponentStory<
 
 UploadIdUploadingDialogStory.storyName = '(Upload) 6.2. Upload ID – Uploading';
 
+export const UploadIdStuckDialogStory: ComponentStory<
+  typeof UploadIdDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <UploadIdDialog
+      fileName="sampel-palnet.tar.gz"
+      progress={99}
+      hint="Upload stuck? Try uploading in a different browser."
+      onUpload={() => Promise.resolve(false)}
+      onBack={() => {}}
+      onNext={() => Promise.resolve(false)}
+    />
+  </OnboardingDialogWrapper>
+);
+
+UploadIdStuckDialogStory.storyName = '(Upload) 6.3. Upload ID – Stuck?';
+
+export const UploadIdErrorDialogStory: ComponentStory<
+  typeof UploadIdDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <UploadIdDialog
+      fileName="sampel-palnet.tar.gz"
+      progress={27}
+      error={uploadErrors['invalidFileError']}
+      onUpload={() => Promise.resolve(false)}
+      onBack={() => {}}
+      onNext={() => Promise.resolve(false)}
+    />
+  </OnboardingDialogWrapper>
+);
+
+UploadIdErrorDialogStory.storyName = '(Upload) 6.3. Upload ID – Error';
+
 export const UploadIdDoneDialogStory: ComponentStory<
   typeof UploadIdDialog
 > = () => (
@@ -266,7 +301,7 @@ export const UploadIdDoneDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdDoneDialogStory.storyName = '(Upload) 6.3. Upload an ID – Uploaded';
+UploadIdDoneDialogStory.storyName = '(Upload) 6.4. Upload an ID – Uploaded';
 
 export const BYOPBootingDialogStory: ComponentStory<
   typeof BootingDialog

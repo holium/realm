@@ -1,7 +1,5 @@
 import * as Yup from 'yup';
 
-import { ErrorBox } from '@holium/design-system/general';
-
 import { OnboardDialog } from '../../components/OnboardDialog';
 import { UploadIdDialogBody } from './UploadIdDialogBody';
 
@@ -14,6 +12,7 @@ type Props = {
   fileName?: string;
   progress?: number;
   error?: string;
+  hint?: string;
   onUpload: (file: File) => Promise<boolean>;
   onBack: () => void;
   onNext: () => Promise<boolean>;
@@ -23,6 +22,7 @@ export const UploadIdDialog = ({
   fileName,
   progress,
   error,
+  hint,
   onUpload,
   onBack,
   onNext,
@@ -31,14 +31,13 @@ export const UploadIdDialog = ({
     initialValues={{ uploaded: undefined, uploading: false }}
     validationSchema={UploadIdSchema}
     body={
-      <>
-        <UploadIdDialogBody
-          fileName={fileName}
-          progress={progress}
-          onUpload={onUpload}
-        />
-        {error && <ErrorBox>{error}</ErrorBox>}
-      </>
+      <UploadIdDialogBody
+        fileName={fileName}
+        progress={progress}
+        error={error}
+        hint={hint}
+        onUpload={onUpload}
+      />
     }
     onBack={onBack}
     onNext={onNext}
