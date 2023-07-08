@@ -146,6 +146,7 @@ export const ChatMessage = types
     // ui state
     pending: types.optional(types.boolean, false),
     error: types.maybe(types.string),
+    forwardedFrom: types.maybe(types.string),
   })
   .views((self) => ({
     get reactionsList() {
@@ -235,6 +236,7 @@ export const Chat = types
     hidePinned: types.optional(types.boolean, false),
     editingMsg: types.maybeNull(types.reference(ChatMessage)),
     replyingMsg: types.maybeNull(types.reference(ChatMessage)),
+    forwardingMsg: types.maybeNull(types.reference(ChatMessage)),
     our: types.maybe(types.string),
     isReacting: types.maybe(types.string),
     lastFetch: types.maybeNull(types.number),
@@ -441,6 +443,12 @@ export const Chat = types
         return self.pinnedMessageId;
       }
     }),
+    setForwarding(message: ChatMessageType) {
+      self.forwardingMsg = message;
+    },
+    clearForwarding() {
+      self.forwardingMsg = null;
+    },
     setReplying(message: ChatMessageType) {
       self.replyingMsg = message;
     },

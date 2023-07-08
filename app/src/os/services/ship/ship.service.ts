@@ -11,6 +11,7 @@ import { APIConnection, ConduitSession } from '../api';
 import AuthService from '../auth/auth.service';
 import ChatService from './chat/chat.service';
 import { FriendsService } from './friends.service';
+import LexiconService from './lexicon.service';
 import NotificationsService from './notifications/notifications.service';
 import { SettingsService } from './settings.service';
 import { ShipDB } from './ship.db';
@@ -31,6 +32,7 @@ export class ShipService extends AbstractService<any> {
     spaces: SpacesService;
     bazaar: BazaarService;
     wallet: WalletService;
+    lexicon: LexiconService;
     settings: SettingsService;
   };
 
@@ -140,6 +142,7 @@ export class ShipService extends AbstractService<any> {
       spaces: new SpacesService(this.serviceOptions, this.shipDB.db, this.patp),
       friends: new FriendsService(this.serviceOptions, this.shipDB.db),
       wallet: new WalletService(undefined, this.shipDB.db),
+      lexicon: new LexiconService(undefined, this.shipDB.db),
       settings: new SettingsService(this.serviceOptions, this.shipDB.db),
     };
   }
@@ -148,6 +151,7 @@ export class ShipService extends AbstractService<any> {
     this.authService = authService;
     this.initSpaces();
     this.initChat();
+    this.initLexicon();
   }
 
   private async initSpaces() {
@@ -158,6 +162,10 @@ export class ShipService extends AbstractService<any> {
   private async initChat() {
     await this.services?.chat.init();
     this.services?.notifications.init();
+  }
+
+  private async initLexicon() {
+    await this.services?.lexicon.init();
   }
 
   public updateCookie(cookie: string) {

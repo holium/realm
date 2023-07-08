@@ -49,6 +49,11 @@ export const StartRoomButtonView = ({
     ? buttonCopy[state]
     : buttonCopy[state].split(' ')[0];
 
+  // We don't show AvatarRow in docked mode since we have the Rooms Dock.
+  const showAvatarRow =
+    state !== 'start' && participants.length > 0 && isStandaloneChat;
+  const showPlus = remainingParticipants.length > 0;
+
   return (
     <PillContainer>
       <Flex gap="8px" alignItems="center">
@@ -66,30 +71,31 @@ export const StartRoomButtonView = ({
         >
           {copy}
         </Button.Primary>
-        {/* We don't show AvatarRow in docked mode since we have the Rooms Dock */}
-        <Flex
-          alignItems="center"
-          style={{ cursor: state !== 'start' ? 'pointer' : 'auto' }}
-          onClick={onClickAvatar}
-        >
-          {state !== 'start' && participants.length > 0 && isStandaloneChat && (
-            <AvatarRow
-              people={firstThreeParticipants}
-              size={24}
-              offset={6}
-              borderRadiusOverride="5px"
-            />
-          )}
-          {remainingParticipants.length > 0 && (
-            <Text.Body
-              style={{
-                color: 'var(--rlm-accent-color)',
-              }}
-            >
-              +{remainingParticipants.length}
-            </Text.Body>
-          )}
-        </Flex>
+        {(showAvatarRow || showPlus) && (
+          <Flex
+            alignItems="center"
+            style={{ cursor: state !== 'start' ? 'pointer' : 'auto' }}
+            onClick={onClickAvatar}
+          >
+            {showAvatarRow && (
+              <AvatarRow
+                people={firstThreeParticipants}
+                size={24}
+                offset={6}
+                borderRadiusOverride="5px"
+              />
+            )}
+            {remainingParticipants.length > 0 && (
+              <Text.Body
+                style={{
+                  color: 'var(--rlm-accent-color)',
+                }}
+              >
+                +{remainingParticipants.length}
+              </Text.Body>
+            )}
+          </Flex>
+        )}
       </Flex>
       <Flex
         style={{ cursor: state !== 'start' ? 'pointer' : 'auto' }}

@@ -5,6 +5,7 @@ import { MouseState } from '@holium/realm-presence';
 
 import { ConduitState } from 'os/services/api';
 import { migrationPreload } from 'os/services/migration/migration.service';
+import { lexiconPreload } from 'os/services/ship/lexicon.service';
 import { settingsPreload } from 'os/services/ship/settings.service';
 import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
@@ -226,3 +227,4 @@ contextBridge.exposeInMainWorld('onboardingService', onboardingPreload);
 contextBridge.exposeInMainWorld('appInstallService', appPublishersDBPreload);
 contextBridge.exposeInMainWorld('appRecentsService', appRecentsPreload);
 contextBridge.exposeInMainWorld('settingsService', settingsPreload);
+contextBridge.exposeInMainWorld('lexiconService', lexiconPreload);

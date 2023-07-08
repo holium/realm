@@ -120,8 +120,8 @@ const SpeakerGridStyle = styled.div<SpeakerGridStyleProps>`
   }
 
   ${({ peers }: SpeakerGridStyleProps) => css`
-    grid-template-columns: '1fr 1fr';
-    grid-template-rows: '240px';
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 240px;
     grid-auto-rows: 156px;
 
     ${peers.length >= 4 &&

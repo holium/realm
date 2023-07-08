@@ -8,6 +8,7 @@ module.exports = {
       path.resolve(__dirname, '../hosting-holium-com/src'),
       path.resolve(__dirname, '../lib/design-system/src'),
       path.resolve(__dirname, '../lib/presence/src'),
+      path.resolve(__dirname, '../lexicon/src'),
     ];
 
     config.resolve.modules.push(...modules);
@@ -21,6 +22,7 @@ module.exports = {
     '../hosting-holium-com/src/**/*.stories.@(js|jsx|ts|tsx)',
     '../lib/design-system/src/**/*.stories.@(js|jsx|ts|tsx)',
     '../lib/presence/src/**/*.stories.@(js|jsx|ts|tsx)',
+    '../lexicon/src/**/*.stories.@(js|jsx|ts|tsx)',
   ],
   addons: [
     '@storybook/addon-links',

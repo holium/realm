@@ -79,7 +79,6 @@ export const textIsLightOrDark = (hexColor: string) => {
  */
 export function bgIsLightOrDark(hexColor: string) {
   // Using the HSP value, determine whether the color is light or dark
-  // console.log(hexColor, hsp);
   const hsp = hexColorToHSP(hexColor);
   if (hsp > 127.5) {
     // the background image is too light

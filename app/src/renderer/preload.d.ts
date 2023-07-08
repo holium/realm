@@ -6,6 +6,7 @@ import { onboardingPreload } from 'os/services/auth/onboarding.service';
 import { migrationPreload } from 'os/services/migration/migration.service';
 import { chatPreload } from 'os/services/ship/chat/chat.service';
 import { friendsPreload } from 'os/services/ship/friends.service';
+import { lexiconPreload } from 'os/services/ship/lexicon.service';
 import { notifPreload } from 'os/services/ship/notifications/notifications.service';
 import { settingsPreload } from 'os/services/ship/settings.service';
 import { shipPreload } from 'os/services/ship/ship.service';
@@ -29,6 +30,7 @@ declare global {
     onboardingService: typeof onboardingPreload;
     chatService: typeof chatPreload;
     walletService: typeof walletPreload;
+    lexiconService: typeof lexiconPreload;
     notifService: typeof notifPreload;
     friendDb: typeof friendsPreload;
     realm: typeof realmPreload;

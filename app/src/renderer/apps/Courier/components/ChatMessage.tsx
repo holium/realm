@@ -13,6 +13,7 @@ import { useToggle } from '@holium/design-system/util';
 import { SystemTrayRegistry } from 'renderer/apps/registry';
 import { useTrayApps } from 'renderer/apps/store';
 import { useContextMenu } from 'renderer/components';
+import { SharePath, useShareModal } from 'renderer/components/ShareModal';
 import { useAppState } from 'renderer/stores/app.store';
 import { MainIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -28,6 +29,35 @@ type ChatMessageProps = {
 };
 
 const { dimensions } = SystemTrayRegistry.spaces;
+
+export const getMergedContents: any | undefined = (
+  message: ChatMessageType,
+  messages: any[],
+  friends: any
+) => {
+  const replyTo = message.replyToMsgId;
+  let replyToObj = {
+    reply: { msgId: replyTo, author: 'unknown', message: [{ plain: '' }] },
+  };
+  if (replyTo) {
+    const originalMsg = toJS(messages.find((m) => m.id === replyTo));
+    if (originalMsg) {
+      const { nickname } = friends.getContactAvatarMetadata(
+        originalMsg?.sender
+      );
+      replyToObj = originalMsg && {
+        reply: {
+          msgId: originalMsg.id,
+          author: nickname || originalMsg.sender,
+          message: originalMsg.contents,
+        },
+      };
+    }
+    return [replyToObj, ...message.contents];
+  } else {
+    return message.contents;
+  }
+};
 
 export const ChatMessagePresenter = ({
   message,
@@ -45,11 +75,12 @@ export const ChatMessagePresenter = ({
     setTrayAppDimensions,
     coords,
   } = useTrayApps();
-  const { selectedChat } = chatStore;
+  const { selectedChat, inbox, getChatHeader } = chatStore;
   const messageRef = useRef<HTMLDivElement>(null);
   const ourShip = useMemo(() => loggedInAccount?.serverId, [loggedInAccount]);
   const isOur = message.sender === ourShip;
   const { getOptions, setOptions, defaultOptions } = useContextMenu();
+  const { setObject, setPaths } = useShareModal();
 
   const deleting = useToggle(false);
 
@@ -228,6 +259,58 @@ export const ChatMessagePresenter = ({
         selectedChat.setReplying(message);
       },
     });
+    menu.push({
+      id: `${messageRowId}-forward`,
+      icon: 'ShareArrow',
+      label: 'Forward',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
+        evt.stopPropagation();
+        setObject({
+          app: 'Courier',
+          icon: 'CourierApp',
+          dataTypeName: 'message',
+          mergedContents: getMergedContents(message, messages, friends),
+          message: { ...message, forwardedFrom: selectedChat.metadata.title },
+          share: (o: any, paths: SharePath[]) => {
+            const frags = o.message.contents.map((c: any) => {
+              return {
+                content: {
+                  [Object.keys(c)[0]]: c[Object.keys(c)[0]],
+                },
+                'reply-to': o.message.replyToMsgId
+                  ? {
+                      path: o.message.replyToPath,
+                      'msg-id': o.message.replyToMsgId,
+                    }
+                  : null,
+                metadata: {
+                  ...c.metadata,
+                  forwardedId: o.message.id,
+                  forwardedPath: o.message.path,
+                  forwardedPathTitle: o.message.forwardedFrom,
+                },
+              };
+            });
+            paths.forEach((pathObj: SharePath) => {
+              selectedChat.sendMessage(pathObj.path, frags);
+            });
+            setObject(null);
+          },
+        });
+        setPaths(
+          inbox.map((c) => ({
+            ...getChatHeader(c.path),
+            path: c.path,
+            selected: false,
+            metadata: c.metadata,
+            type: c.type,
+            peers: c.peers.map((peer) => peer.ship),
+            space: spacesStore.getSpaceByChatPath(c.path),
+          }))
+        );
+      },
+    });
     if (isOur) {
       menu.push({
         id: `${messageRowId}-edit-message`,
@@ -286,28 +369,7 @@ export const ChatMessagePresenter = ({
   const messages = selectedChat?.messages || [];
 
   const mergedContents: any | undefined = useMemo(() => {
-    const replyTo = message.replyToMsgId;
-    let replyToObj = {
-      reply: { msgId: replyTo, author: 'unknown', message: [{ plain: '' }] },
-    };
-    if (replyTo) {
-      const originalMsg = toJS(messages.find((m) => m.id === replyTo));
-      if (originalMsg) {
-        const { nickname } = friends.getContactAvatarMetadata(
-          originalMsg?.sender
-        );
-        replyToObj = originalMsg && {
-          reply: {
-            msgId: originalMsg.id,
-            author: nickname || originalMsg.sender,
-            message: originalMsg.contents,
-          },
-        };
-      }
-      return [replyToObj, ...message.contents];
-    } else {
-      return message.contents;
-    }
+    return getMergedContents(message, messages, friends);
   }, [
     message.replyToMsgId,
     message.contents,
@@ -318,7 +380,6 @@ export const ChatMessagePresenter = ({
 
   const joiner = useCallback(
     (path: string) => {
-      console.log(spacesStore.allSpacePaths, path);
       if (spacesStore.allSpacePaths.includes(path)) {
         throw new Error('you are already in this space');
       }
@@ -343,6 +404,12 @@ export const ChatMessagePresenter = ({
     ]
   );
 
+  let forwardedFrom: string | undefined = undefined;
+  if (message.metadata.forwardedPathTitle) {
+    forwardedFrom = message.metadata.forwardedPathTitle;
+  } else if (message.metadata.forwardedPath) {
+    forwardedFrom = getChatHeader(message.metadata.forwardedPath).title;
+  }
   return (
     <Bubble
       innerRef={messageRef}
@@ -369,6 +436,7 @@ export const ChatMessagePresenter = ({
       onJoinSpaceClick={joiner}
       allSpacePaths={spacesStore.allSpacePaths}
       error={message.error}
+      forwardedFrom={forwardedFrom}
     />
   );
 };

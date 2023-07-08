@@ -3,6 +3,7 @@ import Database from 'better-sqlite3-multiple-ciphers';
 import { Migration, MigrationService } from '../migration/migration.service';
 import { CHAT_TABLES, chatInitSql, chatWipeSql } from './chat/chat.schema';
 import { friendsInitSql, friendsWipeSql } from './friends.service';
+import { lexiconInitSql, lexiconWipeSql } from './lexicon.tables';
 import {
   notifInitSql,
   notifWipeSql,
@@ -29,6 +30,7 @@ import { walletInitSql, walletWipeSql } from './wallet/wallet.db';
 
 const initSql = `
 ${bazaarTablesInitSql}
+${lexiconInitSql}
 ${chatInitSql}
 ${notifInitSql}
 ${friendsInitSql}
@@ -47,6 +49,7 @@ create table if not exists credentials (
 
 const wipeSql = `
   ${bazaarTablesWipeSql}
+  ${lexiconWipeSql}
   ${chatWipeSql}
   ${notifWipeSql}
   ${friendsWipeSql}

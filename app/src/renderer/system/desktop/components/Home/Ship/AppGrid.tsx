@@ -22,12 +22,11 @@ interface AppGridProps {
 const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
   const { bazaarStore, spacesStore } = useShipStore();
   const currentSpace = spacesStore.selected;
-
   const apps = useMemo(
     () =>
       [
         ...bazaarStore.installed,
-        // ...bazaarStore.devApps,
+        //...bazaarStore.devApps
       ] as AppMobxType[],
     [bazaarStore.catalog, bazaarStore.installations.values()]
   );
