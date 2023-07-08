@@ -31,7 +31,7 @@ export class MasterAccounts extends AbstractDataAccess<MasterAccount> {
   }
 }
 
-export const masterAccountsInit = `
+export const masterAccountsInitSql = `
   create table if not exists master_accounts (
     id              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     email           TEXT NOT NULL,
@@ -41,3 +41,5 @@ export const masterAccountsInit = `
   );
   create unique index if not exists master_email_uindex on master_accounts (email);
 `;
+
+export const masterAccountsWipeSql = `drop table if exists master_accounts;`;

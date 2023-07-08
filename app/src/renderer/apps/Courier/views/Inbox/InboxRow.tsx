@@ -36,7 +36,7 @@ export const InboxRow = ({
 
   return (
     <StyledInboxRowContainer
-      isSelectedSpaceChat={isSelectedSpaceChat}
+      isSelectedSpaceChat={!isStandaloneChat && isSelectedSpaceChat}
       className={className}
     >
       <StyledInboxRow className="chat-inbox-row">

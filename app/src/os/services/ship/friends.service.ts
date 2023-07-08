@@ -197,49 +197,6 @@ export class FriendsService extends AbstractDataAccess<Friend, any> {
 
     return APIConnection.getInstance().conduit.poke(payload);
   }
-
-  public findOne(patp: string): Friend | null {
-    const query = `SELECT * FROM ${this.tableName} WHERE patp = ?`;
-    const stmt = this.prepare(query);
-    const row = stmt.get(patp);
-    return row ? this.mapRow(row) : null;
-  }
-
-  public create(values: Partial<Friend>): Friend {
-    const columns = Object.keys(values).join(', ');
-    const placeholders = Object.keys(values)
-      .map(() => '?')
-      .join(', ');
-    const query = `INSERT INTO ${this.tableName} (${columns}) VALUES (${placeholders})`;
-    const stmt = this.prepare(query);
-
-    stmt.run(Object.values(values));
-    if (!values.patp) throw new Error('Failed to create new record');
-    const created = this.findOne(values.patp);
-    if (!created) throw new Error('Failed to create new record');
-    return created;
-  }
-
-  public update(patp: string, values: Partial<Friend>): Friend {
-    const setClause = Object.keys(values)
-      .map((key) => `${key} = ?`)
-      .join(', ');
-    const query = `UPDATE ${this.tableName} SET ${setClause} WHERE patp = ?`;
-    const stmt = this.prepare(query);
-
-    stmt.run([...Object.values(values), patp]);
-    const updated = this.findOne(patp);
-    if (!updated) throw new Error('Failed to update record');
-    return updated;
-  }
-
-  public delete(patp: string): void {
-    const query = `DELETE FROM ${this.tableName} WHERE patp = ?`;
-    const stmt = this.prepare(query);
-
-    const result = stmt.run(patp);
-    if (result.changes !== 1) throw new Error('Failed to delete record');
-  }
 }
 
 export const friendsInitSql = `
@@ -255,6 +212,10 @@ export const friendsInitSql = `
     cover text default ''
   );
   create unique index if not exists friends_patp_uindex on friends (patp);
+`;
+
+export const friendsWipeSql = `
+drop table if exists friends;
 `;
 
 export const friendsPreload = FriendsService.preload(

@@ -109,6 +109,8 @@ export const appRecentsInitSql = `
   create unique index if not exists ${tableName}_uindex on ${tableName} (publisher, desk, type);
 `;
 
+export const appRecentsWipeSql = `drop table if exists ${tableName};`;
+
 export const appRecentsPreload = AppRecentsTable.preload(
   new AppRecentsTable(true)
 );

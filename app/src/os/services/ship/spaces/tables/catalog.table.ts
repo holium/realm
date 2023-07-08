@@ -464,3 +464,11 @@ create table if not exists spaces_stalls (
 create unique index if not exists spaces_stalls_uindex on spaces_stalls (space);
 
 `;
+
+export const bazaarTablesWipeSql = `
+drop table if exists app_catalog;
+drop table if exists app_grid;
+drop table if exists app_docks;
+drop table if exists app_recommendations;
+drop table if exists spaces_stalls;
+`;

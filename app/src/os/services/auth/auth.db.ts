@@ -1,12 +1,48 @@
 import { app } from 'electron';
-import log from 'electron-log';
-import Store from 'electron-store';
 import Database from 'better-sqlite3-multiple-ciphers';
-import path from 'path';
 
-import { Accounts, accountsInit } from './accounts.table';
-import { AuthStore } from './auth.model.old';
-import { MasterAccounts, masterAccountsInit } from './masterAccounts.table';
+import { Migration, MigrationService } from '../migration/migration.service';
+import { Accounts, accountsInitSql, accountsWipeSql } from './accounts.table';
+import {
+  MasterAccounts,
+  masterAccountsInitSql,
+  masterAccountsWipeSql,
+} from './masterAccounts.table';
+
+const initSql = `
+${accountsInitSql}
+${masterAccountsInitSql}
+create table if not exists accounts_order (
+  serverId      TEXT PRIMARY KEY NOT NULL,
+  idx           INTEGER NOT NULL
+);
+
+create table if not exists accounts_meta (
+  seenSplash    INTEGER NOT NULL DEFAULT 0,
+  migrated      INTEGER NOT NULL DEFAULT 0,
+  migratedAt    INTEGER
+);
+`;
+
+const wipeSql = `
+${accountsWipeSql}
+${masterAccountsWipeSql}
+drop table if exists accounts_order;
+drop table if exists accounts_meta;
+`;
+
+const migrations: Migration[] = [
+  {
+    version: 1,
+    up: `${initSql}`,
+    down: `${wipeSql}`,
+  },
+  {
+    version: 2,
+    up: `ALTER TABLE accounts DROP COLUMN serverCode;`,
+    down: `ALTER TABLE accounts ADD COLUMN serverCode TEXT;`,
+  },
+];
 
 export class AuthDB {
   private readonly authDB: Database;
@@ -16,17 +52,11 @@ export class AuthDB {
   };
 
   constructor() {
-    // Open the authentication database
-    this.authDB = new Database(
-      path.join(app.getPath('userData'), 'auth.sqlite'),
-      {}
+    this.authDB = MigrationService.getInstance().setupAndMigrate(
+      'auth',
+      migrations,
+      2
     );
-    this.authDB.pragma('journal_mode = WAL');
-    this.authDB.pragma('foreign_keys = ON');
-    this.authDB.exec(initSql);
-    // Migration and cleanup
-    // TODO need to define a better migration strategy
-    this.removeShipCodeColumnIfExist();
 
     this.tables = {
       accounts: new Accounts(this.authDB),
@@ -36,29 +66,6 @@ export class AuthDB {
     app.on('quit', () => {
       this.disconnect();
     });
-  }
-
-  private removeShipCodeColumnIfExist(): void {
-    const query = this.authDB.prepare(`
-      select count(*) as found from pragma_table_info('accounts') where name='serverCode'
-    `);
-    const result = query.all();
-    const found: boolean = result?.[0].found > 0;
-    if (found) {
-      log.info(
-        'auth.db.ts:',
-        'Removing "serverCode" column from accounts table'
-      );
-      this.authDB.prepare('ALTER TABLE accounts RENAME TO accounts_old;').run();
-      this.authDB.exec(accountsInit);
-      this.authDB
-        .prepare(
-          'INSERT INTO accounts (accountId, serverUrl, serverId, serverType, nickname, color, avatar, status, theme, passwordHash) SELECT accountId, serverUrl, serverId, serverType, nickname, color, avatar, status, theme, passwordHash FROM accounts_old;'
-        )
-
-        .run();
-      this.authDB.prepare('DROP TABLE accounts_old;').run();
-    }
   }
 
   hasSeenSplash(): boolean {
@@ -75,69 +82,6 @@ export class AuthDB {
         'REPLACE INTO accounts_meta (seenSplash, migrated) VALUES (1, 0);'
       )
       .run();
-  }
-
-  _needsMigration(): boolean {
-    const result: any = this.authDB
-      .prepare('SELECT migrated FROM accounts_meta LIMIT 1;')
-      .all();
-
-    return !(result[0]?.migrated || null);
-  }
-
-  migrateJsonToSqlite(masterAccountId: number) {
-    try {
-      const oldAuth = new Store({
-        name: 'realm.auth',
-        accessPropertiesByDotNotation: true,
-        defaults: AuthStore.create({ firstTime: true }),
-      });
-      // if realm.auth is empty, don't migrate
-      if (!oldAuth.store || Object.keys(oldAuth.store).length === 0) {
-        log.info('auth.db.ts:', 'No realm.auth.json to migrate -> skipping');
-        return;
-      }
-      log.info('auth.db.ts:', 'Migrating realm.auth.json to sqlite');
-      const oldTheme = new Store({
-        name: 'realm.auth-theme',
-        accessPropertiesByDotNotation: true,
-      });
-      // loop through ships and insert into accounts table
-      oldAuth.store.ships.forEach((ship) => {
-        const theme = oldTheme.store[ship.patp];
-        const query = this.authDB.prepare(`
-        INSERT INTO accounts (accountId, serverUrl, serverId, serverType, nickname, color, avatar, status, theme, passwordHash)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
-      `);
-        query.run(
-          masterAccountId,
-          ship.url,
-          ship.patp,
-          'local',
-          ship.nickname,
-          ship.color,
-          ship.avatar,
-          ship.status,
-          theme ? JSON.stringify(theme) : JSON.stringify({}),
-          ship.passwordHash
-        );
-      });
-      oldAuth.store.order.forEach((serverId: string, index: number) => {
-        const query = this.authDB.prepare(`
-        REPLACE INTO accounts_order (serverId, idx)
-        VALUES (?, ?);
-      `);
-        query.run(serverId.replace('auth', ''), index);
-      });
-      // TODO clear old auth store
-    } catch (error) {
-      log.error(error);
-    }
-    this.authDB
-      .prepare(
-        'REPLACE INTO accounts_meta (migrated, migratedAt) VALUES (1, ?);'
-      )
-      .run(Date.now());
   }
 
   public addToOrder(serverId: string): void {
@@ -175,18 +119,3 @@ export class AuthDB {
     this.authDB.close();
   }
 }
-
-const initSql = `
-${accountsInit}
-${masterAccountsInit}
-create table if not exists accounts_order (
-  serverId      TEXT PRIMARY KEY NOT NULL,
-  idx           INTEGER NOT NULL
-);
-
-create table if not exists accounts_meta (
-  seenSplash    INTEGER NOT NULL DEFAULT 0,
-  migrated      INTEGER NOT NULL DEFAULT 0,
-  migratedAt    INTEGER
-);
-`;

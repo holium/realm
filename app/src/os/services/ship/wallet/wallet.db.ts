@@ -223,6 +223,11 @@ create unique index if not exists path_uindex
     on wallets (path);
 `;
 
+export const walletWipeSql = `
+drop table if exists transactions;
+drop table if exists wallets;
+`;
+
 export const walletDBPreload = WalletDB.preload(
   new WalletDB({ preload: true, name: 'walletDB' })
 );

@@ -36,62 +36,13 @@ export class Accounts extends AbstractDataAccess<DBAccount, any> {
       updatedAt: row.updatedAt,
     };
   }
-
-  public findOne(serverId: string): DBAccount | null {
-    const query = `SELECT * FROM ${this.tableName} WHERE serverId = ?`;
-    const stmt = this.prepare(query);
-    const row = stmt.get(serverId);
-    return row ? this.mapRow(row) : null;
-  }
-
-  public findAll(accountId: number): DBAccount[] {
-    const query = `SELECT * FROM ${this.tableName} WHERE accountId = ?`;
-    const stmt = this.prepare(query);
-    const rows = stmt.all(accountId);
-    return rows.map((row) => this.mapRow(row));
-  }
-
-  public create(values: Partial<DBAccount>): DBAccount {
-    const columns = Object.keys(values).join(', ');
-    const placeholders = Object.keys(values)
-      .map(() => '?')
-      .join(', ');
-    const query = `INSERT INTO ${this.tableName} (${columns}) VALUES (${placeholders})`;
-    const stmt = this.prepare(query);
-
-    stmt.run(Object.values(values));
-    if (!values.serverId) throw new Error('Failed to create new record');
-    const created = this.findOne(values.serverId);
-    if (!created) throw new Error('Failed to create new record');
-    return created;
-  }
-
-  public update(serverId: string, values: Partial<DBAccount>): DBAccount {
-    const setClause = Object.keys(values)
-      .map((key) => `${key} = ?`)
-      .join(', ');
-    const query = `UPDATE ${this.tableName} SET ${setClause} WHERE serverId = ?`;
-    const stmt = this.prepare(query);
-
-    stmt.run([...Object.values(values), serverId]);
-    const updated = this.findOne(serverId);
-    if (!updated) throw new Error('Failed to update record');
-    return updated;
-  }
-
-  public delete(serverId: string): void {
-    const query = `DELETE FROM ${this.tableName} WHERE serverId = ?`;
-    const stmt = this.prepare(query);
-
-    const result = stmt.run(serverId);
-    if (result.changes !== 1) throw new Error('Failed to delete record');
-  }
 }
 
-export const accountsInit = `
+export const accountsInitSql = `
   create table if not exists accounts (
     accountId       INTEGER,
     serverId        TEXT PRIMARY KEY NOT NULL,
+    serverCode      TEXT,
     serverUrl       TEXT NOT NULL,
     serverType      TEXT NOT NULL DEFAULT 'local',
     nickname        TEXT,
@@ -108,3 +59,5 @@ export const accountsInit = `
   );
   create unique index if not exists accounts_server_id_uindex on accounts (serverId);
 `;
+
+export const accountsWipeSql = `drop table if exists accounts;`;

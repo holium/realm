@@ -74,4 +74,6 @@ export const bookmarksInitSql = `
   create unique index if not exists bookmarks_path_url on bookmarks (path, url);
 `;
 
+export const bookmarksWipeSql = `drop table if exists bookmarks;`;
+
 export const bookmarksDBPreload = BookmarksDB.preload(new BookmarksDB(true));
