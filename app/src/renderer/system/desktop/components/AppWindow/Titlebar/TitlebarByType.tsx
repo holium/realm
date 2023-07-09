@@ -18,6 +18,7 @@ type Props = {
   shell: ShellModelType;
   hideTitlebarBorder: boolean;
   onClose: () => void;
+  toggleMaximize: () => void;
   onMaximize: () => void;
   onMinimize: () => void;
   onDevTools: () => void;
@@ -35,6 +36,7 @@ export const TitlebarByType = ({
   onClose,
   onMaximize,
   onMinimize,
+  toggleMaximize,
 }: Props) => {
   let noTitlebar = false;
   let CustomTitlebar: FC<BrowserToolbarProps> | FC<DialogTitlebarProps> | null;
@@ -55,6 +57,7 @@ export const TitlebarByType = ({
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onClose={onClose}
+      toggleMaximize={toggleMaximize}
       onMaximize={onMaximize}
       onMinimize={onMinimize}
       appWindow={appWindow}
@@ -80,6 +83,7 @@ export const TitlebarByType = ({
           onClose={onClose}
           onMinimize={onMinimize}
           onMaximize={onMaximize}
+          toggleMaximize={toggleMaximize}
         />
       );
     } else {
@@ -97,6 +101,7 @@ export const TitlebarByType = ({
           onDragStart={onDragStart}
           onDragEnd={onDragEnd}
           onClose={onClose}
+          toggleMaximize={toggleMaximize}
           onMinimize={onMinimize}
           onMaximize={onMaximize}
           appWindow={appWindow}

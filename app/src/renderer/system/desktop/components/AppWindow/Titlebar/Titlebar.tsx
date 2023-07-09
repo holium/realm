@@ -23,6 +23,7 @@ type Props = {
   hasBlur?: boolean;
   children?: ReactNode;
   onClose: () => void;
+  toggleMaximize: () => void;
   onMinimize: () => void;
   onMaximize: () => void;
   onDevTools: () => void;
@@ -45,6 +46,7 @@ export const Titlebar = ({
   shareable,
   hasBlur,
   onClose,
+  toggleMaximize,
   onMaximize,
   onMinimize,
   onDevTools,
@@ -125,7 +127,7 @@ export const Titlebar = ({
               icon="Expand"
               onClick={(evt: any) => {
                 evt.stopPropagation();
-                onMaximize();
+                toggleMaximize();
               }}
             />
           )}

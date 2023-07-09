@@ -21,6 +21,7 @@ export type BrowserToolbarProps = {
   showDevToolsToggle: boolean;
   innerRef?: RefObject<HTMLDivElement>;
   onClose: () => void;
+  toggleMaximize: () => void;
   onMinimize: () => void;
   onMaximize: () => void;
   onDragStart: (e: PointerEvent<HTMLDivElement>) => void;
@@ -36,6 +37,7 @@ const BrowserToolbarPresenter = ({
   onClose,
   onMinimize,
   onMaximize,
+  toggleMaximize,
 }: BrowserToolbarProps) => {
   const { currentTab } = useBrowser();
   const onDoubleClick = useDoubleClick(onMaximize);
@@ -137,7 +139,7 @@ const BrowserToolbarPresenter = ({
         toggleDevTools={toggleDevTools}
         onClose={onClose}
         onMinimize={onMinimize}
-        onMaximize={onMaximize}
+        onMaximize={toggleMaximize}
       />
     </ToolbarContainer>
   );

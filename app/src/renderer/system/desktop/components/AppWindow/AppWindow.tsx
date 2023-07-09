@@ -433,6 +433,11 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
     setBoundsAfterMaximize(mb);
   };
 
+  const toggleMaximize = () => {
+    const mb = shellStore.maximize(appWindow.appId);
+    setBoundsAfterMaximize(mb);
+  };
+
   const onMinimize = () => shellStore.toggleMinimized(appWindow.appId);
 
   const onClose = () =>
@@ -516,6 +521,7 @@ const AppWindowPresenter = ({ appWindow }: Props) => {
           onDragEnd={onDragEnd}
           onClose={onClose}
           onMaximize={onMaximize}
+          toggleMaximize={toggleMaximize}
           onMinimize={onMinimize}
         />
         <ErrorBoundary>
