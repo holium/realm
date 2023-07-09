@@ -6,6 +6,10 @@ on:
       - 'hosting-holium-com/**/*.ts'
       - 'hosting-holium-com/**/*.tsx'
       - 'hosting-holium-com/**/*.jsx'
+
+env:
+  NODE_ENV: development
+
 jobs:
   cypress-run:
     runs-on: ubuntu-22.04
