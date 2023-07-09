@@ -4,6 +4,7 @@ import { applySnapshot, cast, flow, Instance, types } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/ship/chat/chat.types';
 import { SoundActions } from 'renderer/lib/sound';
 import { ChatIPC } from 'renderer/stores/ipc';
+import { shipStore } from 'renderer/stores/ship.store';
 
 import { expiresInMap, ExpiresValue } from '../../apps/Courier/types';
 
@@ -305,7 +306,7 @@ export const Chat = types
       }
     }),
     sendMessage: flow(function* (path: string, fragments: any[]) {
-      SoundActions.playDMSend();
+      shipStore.settingsStore.systemSoundsEnabled && SoundActions.playDMSend();
       try {
         // create temporary message
         const tempContents: ChatFragmentMobxType = fragments.map((f) =>

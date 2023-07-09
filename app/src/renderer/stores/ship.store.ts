@@ -136,6 +136,7 @@ export const shipStore = ShipStore.create({
     profileColorForCursorEnabled: true,
     standaloneChatPersonalWallpaperEnabled: false,
     standaloneChatSpaceWallpaperEnabled: true,
+    systemSoundsEnabled: true,
   },
   loader: {
     state: 'initial',

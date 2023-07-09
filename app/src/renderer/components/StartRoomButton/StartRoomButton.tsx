@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
 
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
-import { SoundActions } from 'renderer/lib/sound';
+import { useSound } from 'renderer/lib/sound';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -16,6 +16,7 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
   const { loggedInAccount } = useAppState();
   const { friends, chatStore } = useShipStore();
   const { selectedChat, subroute, setSubroute } = chatStore;
+  const sound = useSound();
 
   const existingRoom = roomsStore.getRoomByPath(selectedChat?.path ?? '');
   const areWeInRoom = existingRoom?.present?.includes(
@@ -34,15 +35,15 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
       roomsStore.currentRoom.path !== selectedChat.path;
     if (areWeInRoomInOtherChat) {
       // LEAVE OTHER ROOM
-      SoundActions.playRoomLeave();
+      sound.playRoomLeave();
       roomsStore.leaveRoom(roomsStore.currentRoom.rid);
     }
 
     if (existingRoom) {
       if (areWeInRoom) {
-        SoundActions.playRoomLeave();
+        sound.playRoomLeave();
         // LEAVE ROOM
-        SoundActions.playRoomLeave();
+        sound.playRoomLeave();
         roomsStore.leaveRoom(existingRoom.rid);
         if (subroute === 'room') setSubroute('chat');
 
@@ -52,13 +53,13 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
         }
       } else {
         // JOIN ROOM
-        SoundActions.playRoomEnter();
+        sound.playRoomEnter();
         await roomsStore.joinRoom(existingRoom.rid);
         if (isStandaloneChat) setSubroute('room');
       }
     } else {
       // CREATE ROOM
-      SoundActions.playRoomEnter();
+      sound.playRoomEnter();
       const newRoomRid = await roomsStore?.createRoom(
         selectedChat.metadata.title,
         'public',
