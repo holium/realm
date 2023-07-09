@@ -11,7 +11,7 @@ import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
-type ServerSideProps = {
+export type ChooseIdServerSideProps = {
   identities: string[];
   back_url: string;
 };
@@ -30,11 +30,14 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
     props: {
       identities,
       back_url,
-    } as ServerSideProps,
+    } as ChooseIdServerSideProps,
   };
 };
 
-export default function ChooseId({ identities, back_url }: ServerSideProps) {
+export default function ChooseId({
+  identities,
+  back_url,
+}: ChooseIdServerSideProps) {
   const { goToPage } = useNavigation();
 
   const onBack = back_url.length

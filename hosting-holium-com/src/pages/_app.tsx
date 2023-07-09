@@ -6,7 +6,9 @@ import { constants } from '../util/constants';
 
 import '../style/app.css';
 
-Amplitude.init(constants.AMPLITUDE_API_KEY);
+if (process.env.NODE_ENV === 'production') {
+  Amplitude.init(constants.AMPLITUDE_API_KEY);
+}
 
 export default function App({ Component, pageProps }: AppProps) {
   return (

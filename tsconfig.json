@@ -12,6 +12,8 @@
     "lib/presence",
     "lib/room/test-ui",
     "lib/room",
-    "lexicon"
+    "lexicon",
+    "cypress",
+    "cypress.config.ts"
   ]
-} 
+}
