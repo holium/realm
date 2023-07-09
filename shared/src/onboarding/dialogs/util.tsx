@@ -19,7 +19,7 @@ export const OnboardingDialogWrapper = ({
   </Flex>
 );
 
-export const mockShip: ThirdEarthShip = {
+export const thirdEarthMockShip: ThirdEarthShip = {
   id: 0,
   patp: '~pasren-satmex',
   ship_type: 'planet',

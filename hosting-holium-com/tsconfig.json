@@ -6,7 +6,11 @@
     "noEmit": true,
     "incremental": true,
     "isolatedModules": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "types": [
+      "cypress",
+      "cypress-plugin-stripe-elements"
+    ]
   },
   "include": [
     "src",
