@@ -95,6 +95,18 @@ const SystemPanelPresenter = () => {
           </SettingControl>
         }
       />
+      <SettingSection
+        title="Sounds"
+        body={
+          <SettingControl label="System Sounds">
+            <CheckBox
+              label="Disable system sounds."
+              isChecked={!settingsStore.systemSoundsEnabled}
+              onChange={settingsStore.toggleSystemSoundsEnabled}
+            />
+          </SettingControl>
+        }
+      />
       <SystemMouseSection
         realmCursorEnabled={settingsStore.realmCursorEnabled}
         setRealmCursor={settingsStore.setRealmCursor}

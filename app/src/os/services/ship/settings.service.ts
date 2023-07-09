@@ -10,6 +10,7 @@ export type Setting = {
   profileColorForCursorEnabled: number;
   standaloneChatSpaceWallpaperEnabled: number;
   standaloneChatPersonalWallpaperEnabled: number;
+  systemSoundsEnabled: number;
 };
 
 export class SettingsService extends AbstractDataAccess<Setting, any> {
@@ -32,6 +33,7 @@ export class SettingsService extends AbstractDataAccess<Setting, any> {
         row.standaloneChatSpaceWallpaperEnabled,
       standaloneChatPersonalWallpaperEnabled:
         row.standaloneChatPersonalWallpaperEnabled,
+      systemSoundsEnabled: row.systemSoundsEnabled,
     };
   }
 
@@ -57,14 +59,16 @@ export class SettingsService extends AbstractDataAccess<Setting, any> {
         realmCursorEnabled,
         profileColorForCursorEnabled,
         standaloneChatSpaceWallpaperEnabled,
-        standaloneChatPersonalWallpaperEnabled
+        standaloneChatPersonalWallpaperEnabled,
+        systemSoundsEnabled
       ) VALUES (
         @identity,
         @isolationModeEnabled,
         @realmCursorEnabled,
         @profileColorForCursorEnabled,
         @standaloneChatSpaceWallpaperEnabled,
-        @standaloneChatPersonalWallpaperEnabled
+        @standaloneChatPersonalWallpaperEnabled,
+        @systemSoundsEnabled
       )`
     );
     replace.run(setting);

@@ -115,6 +115,11 @@ const migrations: Migration[] = [
       ALTER TABLE settings DROP COLUMN standaloneChatPersonalWallpaperEnabled;
     `,
   },
+  {
+    version: 4,
+    up: `ALTER TABLE settings ADD COLUMN systemSoundsEnabled number DEFAULT 1;`,
+    down: `ALTER TABLE settings DROP COLUMN systemSoundsEnabled;`,
+  },
 ];
 
 export class ShipDB {
@@ -133,7 +138,7 @@ export class ShipDB {
     this.shipDB = MigrationService.getInstance().setupAndMigrate(
       this.patp,
       migrations,
-      3
+      4
     );
     // TODO: re-enable encryption
     //   log.info('ship.db.ts:', 'Encrypting ship db');

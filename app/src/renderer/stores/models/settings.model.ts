@@ -12,6 +12,7 @@ export const SettingsModel = types
     profileColorForCursorEnabled: types.boolean,
     standaloneChatSpaceWallpaperEnabled: types.boolean,
     standaloneChatPersonalWallpaperEnabled: types.boolean,
+    systemSoundsEnabled: types.boolean,
   })
   .actions((self) => ({
     init: flow(function* (identity: string) {
@@ -25,6 +26,7 @@ export const SettingsModel = types
           self.profileColorForCursorEnabled = true;
           self.standaloneChatPersonalWallpaperEnabled = false;
           self.standaloneChatSpaceWallpaperEnabled = true;
+          self.systemSoundsEnabled = true;
           return;
         } else {
           self.identity = setting.identity;
@@ -39,6 +41,7 @@ export const SettingsModel = types
           self.standaloneChatPersonalWallpaperEnabled = Boolean(
             setting.standaloneChatPersonalWallpaperEnabled
           );
+          self.systemSoundsEnabled = Boolean(setting.systemSoundsEnabled);
           // Sync Electron isolation mode with settings.
           if (self.isolationModeEnabled) {
             window.electron.app.enableIsolationMode();
@@ -67,6 +70,7 @@ export const SettingsModel = types
           self.standaloneChatSpaceWallpaperEnabled ? 1 : 0,
         standaloneChatPersonalWallpaperEnabled:
           self.standaloneChatPersonalWallpaperEnabled ? 1 : 0,
+        systemSoundsEnabled: self.systemSoundsEnabled ? 1 : 0,
       };
     },
     toggleIsolationMode() {
@@ -108,6 +112,15 @@ export const SettingsModel = types
           newStandaloneChatPersonalWallpaperEnabled ? 1 : 0,
       });
     },
+    toggleSystemSoundsEnabled() {
+      const newSystemSoundsEnabled = !self.systemSoundsEnabled;
+      self.systemSoundsEnabled = newSystemSoundsEnabled;
+
+      SettingsIPC.set({
+        ...this._getCurrentSettings(),
+        systemSoundsEnabled: newSystemSoundsEnabled ? 1 : 0,
+      });
+    },
     setRealmCursor(enabled: boolean) {
       self.realmCursorEnabled = enabled;
 
@@ -139,6 +152,7 @@ export const SettingsModel = types
         profileColorForCursorEnabled: true,
         standaloneChatPersonalWallpaperEnabled: false,
         standaloneChatSpaceWallpaperEnabled: true,
+        systemSoundsEnabled: true,
       });
     },
   }));

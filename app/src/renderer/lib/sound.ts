@@ -8,6 +8,60 @@ available sound bites:
 'dm-notify'
 'dm-send'
 */
+import { useMemo } from 'react';
+
+import { useShipStore } from 'renderer/stores/ship.store';
+
+export function useSound() {
+  const { settingsStore } = useShipStore();
+
+  return useMemo(
+    () => ({
+      playStartup: async () => {
+        settingsStore.systemSoundsEnabled && SoundActions.playStartup();
+      },
+      playLogin: async () => {
+        settingsStore.systemSoundsEnabled && SoundActions.playLogin();
+      },
+      playLogout: async () => {
+        settingsStore.systemSoundsEnabled && SoundActions.playLogout();
+      },
+      playSystemNotification: async () => {
+        settingsStore.systemSoundsEnabled &&
+          SoundActions.playSystemNotification();
+      },
+      playError: async () => {
+        settingsStore.systemSoundsEnabled && SoundActions.playError();
+      },
+      playDMNotify: async () => {
+        settingsStore.systemSoundsEnabled && SoundActions.playDMNotify();
+      },
+      playDMSend: async () => {
+        settingsStore.systemSoundsEnabled && SoundActions.playDMSend();
+      },
+      playCall: async () => {
+        settingsStore.systemSoundsEnabled && SoundActions.playCall();
+      },
+      playHangup: async () => {
+        settingsStore.systemSoundsEnabled && SoundActions.playHangup();
+      },
+      playRoomEnter: async () => {
+        settingsStore.systemSoundsEnabled && SoundActions.playRoomEnter();
+      },
+      playRoomLeave: async () => {
+        settingsStore.systemSoundsEnabled && SoundActions.playRoomLeave();
+      },
+      playRoomPeerEnter: async () => {
+        settingsStore.systemSoundsEnabled && SoundActions.playRoomPeerEnter();
+      },
+      playRoomPeerLeave: async () => {
+        settingsStore.systemSoundsEnabled && SoundActions.playRoomPeerLeave();
+      },
+    }),
+    [settingsStore.systemSoundsEnabled]
+  );
+}
+
 const playAudio = (src: string) => {
   // play sound on worker thread
   if (window.audio) {
@@ -19,6 +73,7 @@ const playAudio = (src: string) => {
     console.log('audio error', err);
   });
 };
+
 export const SoundActions = {
   playStartup: async () => {
     playAudio('sounds/startup.wav');
