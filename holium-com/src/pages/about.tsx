@@ -1,3 +1,6 @@
+import { useEffect } from 'react';
+import { track } from '@amplitude/analytics-browser';
+
 import { Flex, Text } from '@holium/design-system/general';
 
 import { HoliumLogoSection } from 'components/about/HoliumLogoSection';
@@ -9,6 +12,10 @@ import { Page, siteUrl } from 'components/Page';
 import { Section, SectionTitle } from '../styles/about.styles';
 
 export default function AboutPage() {
+  useEffect(() => {
+    track('About');
+  }, []);
+
   return (
     <Page
       title="Our mission"
