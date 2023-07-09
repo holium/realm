@@ -24,7 +24,7 @@
     "test": "cross-env NODE_ENV=development ELECTRON_RUN_AS_NODE=true ./node_modules/.bin/electron ../node_modules/jest-cli/bin/jest.js"
   },
   "dependencies": {
-    "@amplitude/analytics-browser": "^1.9.4",
+    "@amplitude/analytics-browser": "^1.9.1",
     "@cliqz/adblocker-electron": "^1.23.8",
     "@radix-ui/react-popover": "^1.0.0",
     "@sentry/integrations": "^7.48.0",
