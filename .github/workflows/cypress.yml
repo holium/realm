@@ -15,4 +15,5 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
-          start: yarn workspace @holium/hosting-holium-com dev
+          build: yarn workspace @holium/hosting-holium-com build
+          start: yarn workspace @holium/hosting-holium-com start
