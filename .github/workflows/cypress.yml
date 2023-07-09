@@ -2,7 +2,10 @@ name: Cypress Tests
 on:
   pull_request:
     paths:
-      - 'hosting-holium-com/**/*.{js,jsx,ts,tsx}'
+      - 'hosting-holium-com/**/*.js'
+      - 'hosting-holium-com/**/*.ts'
+      - 'hosting-holium-com/**/*.tsx'
+      - 'hosting-holium-com/**/*.jsx'
 jobs:
   cypress-run:
     runs-on: ubuntu-22.04
@@ -12,4 +15,4 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
-          start: yarn workspace @holium/hosting-holium-com start
+          start: yarn workspace @holium/hosting-holium-com dev
