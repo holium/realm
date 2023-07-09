@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { track } from '@amplitude/analytics-browser';
 import { spaces } from 'spaces';
 
 import { Footer } from 'components/Footer';
@@ -30,6 +31,10 @@ export default function HomePage() {
 
     setTrayApp(app);
   };
+
+  useEffect(() => {
+    track('Home');
+  }, []);
 
   return (
     <>
