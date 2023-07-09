@@ -2,7 +2,6 @@ import { PointerEvent, ReactNode } from 'react';
 
 import { Flex, Text } from '@holium/design-system';
 
-import { useDoubleClick } from 'renderer/lib/useDoubleClick';
 import { AppWindowMobxType } from 'renderer/stores/models/window.model';
 
 import { AppWindowIcon } from '../AppWindowIcon';
@@ -51,7 +50,7 @@ export const Titlebar = ({
   onDragEnd,
   onDragStart,
 }: Props) => {
-  const onDoubleClick = useDoubleClick(onMaximize);
+  // const onDoubleClick = useDoubleClick(onMaximize);
 
   return (
     <TitlebarContainer
@@ -66,7 +65,11 @@ export const Titlebar = ({
       isAppWindow={isAppWindow}
     >
       {appWindow && !noTitlebar && (
-        <TitleCentered justifyContent="center" flex={1} onClick={onDoubleClick}>
+        <TitleCentered
+          justifyContent="center"
+          flex={1}
+          //onClick={onDoubleClick}
+        >
           <Flex gap={4} alignItems="center">
             <Flex justifyContent="center" alignItems="center">
               <Text.Custom
