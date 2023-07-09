@@ -13,7 +13,7 @@ import { Section, SectionTitle } from '../styles/about.styles';
 
 export default function AboutPage() {
   useEffect(() => {
-    track('About');
+    track('About Page');
   }, []);
 
   return (

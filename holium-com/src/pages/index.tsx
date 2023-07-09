@@ -14,7 +14,7 @@ import { WalletApp } from 'components/TrayApps/Wallet';
 
 import { SpaceKeys, TrayAppType } from '../types';
 
-export default function HomePage() {
+export default function LandingPage() {
   const { space } = useSpace();
   const [trayApp, setTrayApp] = useState<TrayAppType | null>(null);
 
@@ -33,7 +33,7 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    track('Home');
+    track('Landing Page');
   }, []);
 
   return (
