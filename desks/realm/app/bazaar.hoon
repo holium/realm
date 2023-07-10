@@ -1056,6 +1056,7 @@
         =.  config.native-app           [size=[3 7] titlebar-border=%.n show-titlebar=%.y]
       =.  catalog.init                  (~(put by catalog.init) %lexicon [%native native-app])
       =.  grid-index.init               (set-grid-index:helpers:bazaar:core %lexicon grid-index.init)
+      =|  =native-app:store
         =.  title.native-app            'Notes'
         =.  color.native-app            '#FFFFFF'
         =.  icon.native-app             'AppIconNotes'
