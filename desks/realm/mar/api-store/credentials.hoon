@@ -10,8 +10,8 @@
     ^-  ^json
     %-  pairs:enjs:format
     :~  ['endpoint' s+endpoint.creds]
-        ['access-key-id' s+access-key-id.creds]
-        ['secret-access-key' s+secret-access-key.creds]
+        ['accessKeyId' s+access-key-id.creds]
+        ['secretAccessKey' s+secret-access-key.creds]
     ==
   --
 ::

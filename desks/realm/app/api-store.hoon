@@ -53,7 +53,7 @@
         =/  ucreds=(unit table:db)  (~(get by tables.fp) %creds)
         ?~  ucreds
           ``api-store-configuration+!>([%configuration ~ '' ''])
-        =/  creds=row:db  (snag 0 ~(val by u.ucreds))
+        =/  creds=row:db  (snag 0 (sort ~(val by u.ucreds) |=([a=row:db b=row:db] (gth t.id.a t.id.b))))
         ?+  -.data.creds  !!
             %creds
           ``api-store-configuration+!>([%configuration buckets.data.creds current-bucket.data.creds current-bucket.data.creds])
@@ -64,7 +64,7 @@
         =/  ucreds=(unit table:db)  (~(get by tables.fp) %creds)
         ?~  ucreds
           ``api-store-credentials+!>(['credentials' '' '' ''])
-        =/  creds=row:db  (snag 0 ~(val by u.ucreds))
+        =/  creds=row:db  (snag 0 (sort ~(val by u.ucreds) |=([a=row:db b=row:db] (gth t.id.a t.id.b))))
         ?+  -.data.creds  !!
             %creds
           ``api-store-credentials+!>(['credentials' endpoint.data.creds access-key-id.data.creds secret-access-key.data.creds])
