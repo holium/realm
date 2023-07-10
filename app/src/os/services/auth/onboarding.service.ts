@@ -70,8 +70,6 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     });
 
     if (newAccount) {
-      //if (this.authDB._needsMigration()) this.authDB.migrateJsonToSqlite(newAccount.id);
-
       log.info(
         'auth.service.ts:',
         `Created master account for ${masterAccountPayload.email}`
@@ -117,19 +115,22 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       return { account: existing, masterAccount };
     }
 
-    const newAccount = this.authDB.tables.accounts.create({
-      accountId: acc.accountId,
-      serverId: acc.serverId,
-      serverUrl: acc.serverUrl,
-      serverType: acc.serverType,
-      avatar: acc.avatar,
-      nickname: acc.nickname,
-      description: acc.description,
-      color: acc.color,
-      status: acc.status,
-      theme: acc.theme,
-      passwordHash: masterAccount?.passwordHash,
-    });
+    const newAccount = this.authDB.tables.accounts.create(
+      {
+        accountId: acc.accountId,
+        serverId: acc.serverId,
+        serverUrl: acc.serverUrl,
+        serverType: acc.serverType,
+        avatar: acc.avatar,
+        nickname: acc.nickname,
+        description: acc.description,
+        color: acc.color,
+        status: acc.status,
+        theme: acc.theme,
+        passwordHash: masterAccount?.passwordHash,
+      },
+      acc.serverId
+    );
     this.authDB.addToOrder(acc.serverId);
 
     const cookie = await this.getCookie({
@@ -205,7 +206,9 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
       return false;
     }
 
-    const accounts = this.authDB.tables.accounts.findAll(masterAccount.id);
+    const accounts = this.authDB.tables.accounts.find(
+      `accountId = ${masterAccount.id}`
+    );
     if (!accounts || accounts.length === 0) {
       log.error(
         'auth.service.ts:',

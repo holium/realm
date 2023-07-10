@@ -27,6 +27,7 @@
     "lint:ci": "eslint $(git diff origin/master --name-only -- \"*.js\" \"*.jsx\" \"*.ts\" \"*.tsx\") --no-error-on-unmatched-pattern",
     "lint:all": "eslint --fix . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore && yarn tsc",
     "lint:ci:master": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore",
+    "cypress:open": "cypress open",
     "start": "yarn workspace @holium/realm start",
     "start:onboard": "yarn workspace @holium/realm start:onboard",
     "add:realm": "yarn workspace @holium/realm add -W",
@@ -41,11 +42,9 @@
     "storybook": "start-storybook -p 6006",
     "prepare": "husky install"
   },
-  "dependencies": {
-    "@etchteam/storybook-addon-css-variables-theme": "^1.4.0"
-  },
   "version": "0.1.11-alpha",
   "devDependencies": {
+    "@etchteam/storybook-addon-css-variables-theme": "^1.4.0",
     "@storybook/addon-actions": "^6.5.13",
     "@storybook/addon-essentials": "^6.5.13",
     "@storybook/addon-interactions": "^6.5.13",
@@ -55,12 +54,14 @@
     "@storybook/react": "^6.5.13",
     "@storybook/testing-library": "^0.0.13",
     "@typescript-eslint/parser": "^5.49.0",
+    "cypress": "^12.17.0",
+    "cypress-plugin-stripe-elements": "^1.0.2",
     "eslint": "^8.32.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-unused-imports": "^2.0.0",
     "eslint-plugin-simple-import-sort": "^10.0.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.2",
     "prettier": "^2.8.3",

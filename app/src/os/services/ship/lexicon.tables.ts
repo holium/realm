@@ -68,3 +68,10 @@ ${wordInitSql}
 ${definitionInitSql}
 ${sentenceInitSql}
 `;
+
+export const lexiconWipeSql = `
+drop table if exists votes;
+drop table if exists lexicon_words;
+drop table if exists lexicon_definitions;
+drop table if exists lexicon_sentences;
+`;

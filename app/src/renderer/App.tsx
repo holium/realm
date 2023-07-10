@@ -8,6 +8,7 @@ import { GlobalStyle, RealmBackground } from './App.styles';
 import { AppContent } from './AppContent';
 import { AppLoading } from './AppLoading';
 import { ContextMenu, ContextMenuProvider } from './components/ContextMenu';
+import { ShareModal, ShareModalProvider } from './components/ShareModal';
 import { SelectionProvider } from './lib/selection';
 import { appState, AppStateProvider, useAppState } from './stores/app.store';
 import { RealmIPC } from './stores/ipc';
@@ -41,6 +42,7 @@ const AppPresenter = () => {
   }, []);
 
   const contextMenu = useMemo(() => <ContextMenu />, []);
+  const share = useMemo(() => <ShareModal />, []);
 
   const titlebar = useMemo(() => {
     if (!showTitleBar) return null;
@@ -79,16 +81,19 @@ const AppPresenter = () => {
         <GlobalStyle blur={true} realmTheme={theme} />
         {background}
         <SelectionProvider>
-          <ContextMenuProvider>
-            <PassportMenuProvider>
-              <ErrorBoundary>
-                {titlebar}
-                {content}
-                {contextMenu}
-                <div id="portal-root" />
-              </ErrorBoundary>
-            </PassportMenuProvider>
-          </ContextMenuProvider>
+          <ShareModalProvider>
+            <ContextMenuProvider>
+              <PassportMenuProvider>
+                <ErrorBoundary>
+                  {titlebar}
+                  {content}
+                  {contextMenu}
+                  {share}
+                  <div id="portal-root" />
+                </ErrorBoundary>
+              </PassportMenuProvider>
+            </ContextMenuProvider>
+          </ShareModalProvider>
         </SelectionProvider>
       </AppStateProvider>
     </MotionConfig>

@@ -3,6 +3,7 @@ import { MultiplayerPreloadType } from 'main/preload.multiplayer';
 import { realmPreload } from 'os/realm.service';
 import { authPreload } from 'os/services/auth/auth.service';
 import { onboardingPreload } from 'os/services/auth/onboarding.service';
+import { migrationPreload } from 'os/services/migration/migration.service';
 import { chatPreload } from 'os/services/ship/chat/chat.service';
 import { friendsPreload } from 'os/services/ship/friends.service';
 import { lexiconPreload } from 'os/services/ship/lexicon.service';
@@ -26,6 +27,7 @@ declare global {
     ship: string;
     shipService: typeof shipPreload;
     authService: typeof authPreload;
+    migrationService: typeof migrationPreload;
     onboardingService: typeof onboardingPreload;
     chatService: typeof chatPreload;
     walletService: typeof walletPreload;

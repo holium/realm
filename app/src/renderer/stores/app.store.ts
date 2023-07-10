@@ -221,7 +221,7 @@ function registerOnUpdateListener() {
       }
     }
     if (update.type === 'auth-success') {
-      SoundActions.playLogin();
+      shipStore.settingsStore.systemSoundsEnabled && SoundActions.playLogin();
       window.ship = update.payload.serverId;
       OnboardingStorage.set({
         lastAccountLogin: update.payload.serverId,
@@ -232,13 +232,13 @@ function registerOnUpdateListener() {
       appState.setCurrentScreen('os');
     }
     if (update.type === 'auth-failed') {
-      // SoundActions.playError();
+      //shipStore.settingsStore.systemSoundsEnabled && SoundActions.playError();
       appState.authStore.status.setError(update.payload);
     }
     if (update.type === 'logout') {
       appState.setLoggedOut(update.payload.serverId);
       shipStore.reset();
-      SoundActions.playLogout();
+      shipStore.settingsStore.systemSoundsEnabled && SoundActions.playLogout();
 
       appState.setCurrentScreen('login');
     }
