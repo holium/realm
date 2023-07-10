@@ -92,7 +92,7 @@ export const App = () => {
   const [selectedCalendar, setSelectedCalendar] = useState<null | string>(null);
   const [spans, setSpans] = useState<any>([]);
   const [events, setEvents] = useState<any>([]);
-  const [datePickerSelected, setDatePickerSelected] = useState<any>(null);
+  const [datePickerSelected, setDatePickerSelected] = useState<any>(new Date());
 
   const fetchCalendarList = async () => {
     try {
