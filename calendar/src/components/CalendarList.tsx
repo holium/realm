@@ -82,7 +82,6 @@ export const CalendarList = ({
           id="new-calendar-input"
           name="new-calendar-input"
           tabIndex={1}
-          width="100%"
           placeholder="New calendar"
           value={newCalendar}
           onKeyDown={(evt: any) => {
