@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { observer } from 'mobx-react';
 
 import { IconPathsType } from '@holium/design-system';
 
@@ -14,7 +15,7 @@ import { useAppState } from 'renderer/stores/app.store';
 import { ChatMessageType } from 'renderer/stores/models/chat.model';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 
-type ShareObject = {
+export type ShareObject = {
   app: string;
   icon: IconPathsType;
   dataTypeName: string;
@@ -49,8 +50,7 @@ type ShareModalProviderProps = {
   children: ReactNode;
 };
 
-export const ShareModalProvider = ({ children }: ShareModalProviderProps) => {
-  const root = document.getElementById('root');
+const ShareModalProviderPresenter = ({ children }: ShareModalProviderProps) => {
   const { theme } = useAppState();
   const { textColor, windowColor } = theme;
   const [shareObject, setShareObject] = useState<ShareObject>(null);
@@ -71,13 +71,15 @@ export const ShareModalProvider = ({ children }: ShareModalProviderProps) => {
   }, []);
 
   useEffect(() => {
+    const root = document.getElementById('root');
+
     if (!root) return;
     root.addEventListener('mousedown', handleClick);
 
     return () => {
       root.removeEventListener('mousedown', handleClick);
     };
-  }, [handleClick, root]);
+  }, [handleClick]);
 
   return (
     <ShareModalContext.Provider
@@ -94,7 +96,6 @@ export const ShareModalProvider = ({ children }: ShareModalProviderProps) => {
   );
 };
 
-export const useShareModal = () => {
-  const context = useContext(ShareModalContext);
-  return context;
-};
+export const ShareModalProvider = observer(ShareModalProviderPresenter);
+
+export const useShareModal = () => useContext(ShareModalContext);
