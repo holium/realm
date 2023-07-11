@@ -1,7 +1,7 @@
 ::  app/realm-chat.hoon
 /-  *realm-chat, db-sur=chat-db, ndb=notif-db, fr=friends, spc=spaces-store
 /+  dbug, lib=realm-chat, db-lib=chat-db
-=|  state-0
+=|  state-1
 =*  state  -
 :: ^-  agent:gall
 =<
@@ -12,8 +12,9 @@
   ::
   ++  on-init
     ^-  (quip card _this)
-    =/  default-state=state-0
-      :*  %0
+    =/  default-state=state-1
+      :*  %1
+          %.y            :: hide-debug
           '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id
           (sham our.bowl)                         :: uuid
           *(map @t @t)
@@ -41,9 +42,11 @@
       [%pass /selfpoke %agent [our.bowl %realm-chat] %poke %chat-action !>([%create-notes-to-self-if-not-exists ~])]~
 
     =/  old  !<(versioned-state old-state)
-    =.  app-id.old  '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id
     ?-  -.old
-      %0  [cards this(state old)]
+      %0  (on-load !>([%1 %.y +.old]))
+      %1
+        =.  app-id.old  '82328a88-f49e-4f05-bc2b-06f61d5a733e'  :: app-id
+        [cards this(state old)]
     ==
   ::
   ++  on-poke
@@ -94,6 +97,8 @@
         (pin-chat:lib +.act state bowl)
       %toggle-msg-preview-notif
         (toggle-msg-preview-notif:lib +.act state bowl)
+      %toggle-hide-debug
+        (toggle-hide-debug:lib +.act state bowl)
 
       %create-notes-to-self-if-not-exists
         (create-notes-to-self-if-not-exists:lib state bowl)
@@ -139,7 +144,7 @@
         ?+    -.sign  `this
           %poke-ack
             ?~  p.sign  `this
-            ~&  >>>  "%realm-chat: {<(spat wire)>} dbpoke failed"
+            =/  log1  (maybe-log hide-debug.state "%realm-chat: {<(spat wire)>} dbpoke failed")
             :: ~&  >>>  p.sign
             `this
             :: ?~  +.wire
@@ -156,17 +161,17 @@
         ?+    -.sign  `this
           %poke-ack
             ?~  p.sign  `this
-            ~&  >>>  "%realm-chat: {<(spat wire)>} selfpoke failed"
+            =/  log1  (maybe-log hide-debug.state "%realm-chat: {<(spat wire)>} selfpoke failed")
             `this
         ==
       [%db ~]
         ?+    -.sign  !!
           %watch-ack
             ?~  p.sign  `this
-            ~&  >>>  "{<dap.bowl>}: /db subscription failed"
+            =/  log1  (maybe-log hide-debug.state "{<dap.bowl>}: /db subscription failed")
             `this
           %kick
-            ~&  >  "{<dap.bowl>}: /db kicked us, resubscribing..."
+            =/  log1  (maybe-log hide-debug.state "{<dap.bowl>}: /db kicked us, resubscribing...")
             :_  this
             :~
               [%pass /db %agent [our.bowl %chat-db] %watch /db]
@@ -332,6 +337,11 @@
 ::
 ++  this  .
 ++  core  .
+++  maybe-log
+  |=  [hide-debug=? msg=*]
+  ?:  =(%.y hide-debug)  ~
+  ~&  >>>  msg
+  ~
 ++  is-new-message
   |=  ch=*
   ^-  ?
