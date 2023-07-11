@@ -16,6 +16,10 @@ import {
   RAW_LINK_HEIGHT,
 } from './util';
 
+const InlineLink = styled(Text.Anchor)`
+  color: rgba(var(--rlm-accent-rgba), 1);
+`;
+
 const LinkTitle = styled(Text.Anchor)`
   overflow: hidden;
   line-height: 1.7rem;
@@ -154,9 +158,15 @@ export const LinkBlock = ({
       link = 'https://' + link;
     }
     return (
-      <a id={id} href={link} title={link} target="_blank" rel="noreferrer">
+      <InlineLink
+        id={id}
+        href={link}
+        title={link}
+        target="_blank"
+        rel="noreferrer"
+      >
         {link}
-      </a>
+      </InlineLink>
     );
   }
 
