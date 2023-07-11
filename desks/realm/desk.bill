@@ -11,4 +11,5 @@
     %chat-db
     %trove
     %bedrock
+    %api-store
 ==

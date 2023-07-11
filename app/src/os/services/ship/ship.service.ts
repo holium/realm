@@ -274,18 +274,18 @@ export class ShipService extends AbstractService<any> {
   public async getS3Bucket() {
     const [credentials, configuration] = await Promise.all([
       APIConnection.getInstance().conduit.scry({
-        app: 's3-store',
+        app: 'api-store',
         path: `/credentials`,
       }),
       APIConnection.getInstance().conduit.scry({
-        app: 's3-store',
+        app: 'api-store',
         path: `/configuration`,
       }),
     ]);
 
     return {
-      ...credentials['s3-update'],
-      ...configuration['s3-update'],
+      credentials,
+      configuration,
     };
   }
 

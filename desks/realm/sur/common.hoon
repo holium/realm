@@ -8,6 +8,7 @@
       %follow
       %relay
       %react
+      %creds
       @tas
   ==
 +$  id        [=ship t=@da] :: ship is who created the row, t is when it was created since that's inherently unique in one-at-a-time only creation fashion
@@ -94,6 +95,17 @@
       revision=@ud
       protocol=relay-protocol
       deleted=?
+  ==
+
+:: s3 storage creds
++$  creds
+  $:
+    endpoint=@t
+    access-key-id=@t
+    secret-access-key=@t
+    buckets=(set @t)
+    current-bucket=@t
+    region=@t
   ==
 --
 
