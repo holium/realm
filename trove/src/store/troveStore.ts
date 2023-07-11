@@ -1,5 +1,6 @@
 import create from 'zustand';
 
+import { trovePreload } from '../../../app/src/os/services/ship/trove.service';
 import { Role } from '../types';
 
 export type Folder = null | string;
@@ -8,8 +9,8 @@ type Node = null | {
   type: 'file' | 'folder';
 };
 export interface TroveStore {
-  api: any;
-  setApi: (api: any) => void;
+  api: null | typeof trovePreload;
+  setApi: (api: typeof trovePreload) => void;
 
   troves: any; //a list of our troves unedited, kept flat for ease of interaction
   setTroves: (troves: any) => void;

@@ -34,6 +34,7 @@ export const Aside = () => {
   }, [selectedFolder]);
   const space = useTroveStore((store: TroveStore) => store.space);
   const newFolder = async (name: string, perms: any, space: string) => {
+    if (!api) return;
     try {
       const response = await api.addTrove(space, name, perms);
       console.log('response', response);

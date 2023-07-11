@@ -56,6 +56,7 @@ export const Main = ({
   };
 
   const handleAddFolder = async (name: string) => {
+    if (!api) return;
     //if we have a file selected this option should be disabled
     let pathToParent;
     let pathToNewFolder;

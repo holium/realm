@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
+import { trovePreload } from '../../app/src/os/services/ship/trove.service';
 import { updateHandler } from './api/updates';
 import { Navigation } from './components';
 import { Home } from './pages';
@@ -29,7 +30,7 @@ const muiTheme = createTheme({
 interface Props {
   selectedSpace: string;
   shipName: string;
-  TroveIPC: any;
+  TroveIPC: typeof trovePreload;
   update: any;
   useStorage: any;
   uploadFile: any;

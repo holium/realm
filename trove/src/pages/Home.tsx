@@ -17,7 +17,6 @@ export const Home = ({ useStorage, uploadFile, deleteFile }: any) => {
   const setMyPerms = useTroveStore((store: TroveStore) => store.setMyPerms);
   const shipName = useTroveStore((store: TroveStore) => store.shipName);
   const mySpace = useTroveStore((store: TroveStore) => store.mySpace);
-
   const setInPersonalSpace = useTroveStore(
     (store: TroveStore) => store.setInPersonalSpace
   );
@@ -221,6 +220,7 @@ export const Home = ({ useStorage, uploadFile, deleteFile }: any) => {
   }, [troves, dateSorting]);
 
   const getMyRole = async () => {
+    if (!api) return;
     try {
       const members = await api.getMembers(space);
       const myRoles = members.members[shipName].roles;
@@ -233,6 +233,7 @@ export const Home = ({ useStorage, uploadFile, deleteFile }: any) => {
     }
   };
   const getTroves = async () => {
+    if (!api) return;
     try {
       getMyRole();
       setCurrentSpace(space); //we use this to switch between our and current space for calling pokes

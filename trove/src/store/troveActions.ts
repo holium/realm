@@ -7,6 +7,7 @@ const moveFileAction = async (fileId: string, toPath: string) => {
   const currentSpace = state.currentSpace;
   const selectedTopLevelFolder = state.selectedTopLevelFolder;
 
+  if (!api) return;
   if (!selectedTopLevelFolder) return;
   //TODO: make getting parent folder it's own function
   let parentFolder;
@@ -45,6 +46,7 @@ const removeFileAction = async (fileId: string) => {
   //TODO: make getting parent folder it's own function
   let parentFolder;
 
+  if (!api) return;
   if (!selectedTopLevelFolder) return;
   const currentTrove = troves[selectedTopLevelFolder].trove;
   for (const property in currentTrove) {
@@ -91,6 +93,7 @@ const addFileAction = async (metadata: any) => {
     parentFolder = '/';
   }
   if (!parentFolder) return;
+  if (!api) return;
 
   log(metadata);
 
@@ -111,6 +114,7 @@ const removeFolderAction = async (pathToFolder: string) => {
   const api = state.api;
   const currentSpace = state.currentSpace;
   const selectedTopLevelFolder = state.selectedTopLevelFolder;
+  if (!api) return;
   try {
     const result = await api.removeFolder(
       currentSpace,
@@ -126,6 +130,7 @@ const removeTroveAction = async (troveName: string) => {
   const state = useTroveStore.getState();
   const api = state.api;
   const currentSpace = state.currentSpace;
+  if (!api) return;
   try {
     const result = await api.removeTrove(currentSpace, troveName);
     log('result', result);
@@ -137,7 +142,7 @@ const editTroveAction = async (newTitle: string, trove: string) => {
   const state = useTroveStore.getState();
   const api = state.api;
   const currentSpace = state.currentSpace;
-
+  if (!api) return;
   try {
     const result = await api.editTrove(currentSpace, trove, newTitle);
     log('result', result);
@@ -149,6 +154,7 @@ const repermTroveAction = async (troveName: string, perms: any) => {
   const state = useTroveStore.getState();
   const api = state.api;
   const currentSpace = state.currentSpace;
+  if (!api) return;
   try {
     const result = await api.repermTrove(currentSpace, troveName, perms);
     log('result', result);
@@ -161,8 +167,7 @@ const moveFolderAction = async (fromPath: string, toPath: string) => {
   const api = state.api;
   const currentSpace = state.currentSpace;
   const selectedTopLevelFolder = state.selectedTopLevelFolder;
-  //TODO: rule set for moving
-
+  if (!api) return;
   let newFolderPath;
   if (toPath === '/') {
     //if to path is the root, we don't use the '/'
@@ -170,9 +175,7 @@ const moveFolderAction = async (fromPath: string, toPath: string) => {
   } else {
     newFolderPath = toPath + '/' + splitLastOccurrence(fromPath, '/')[1];
   }
-  log('fromPath', fromPath);
-  log('toPath', toPath);
-  log('newFolderPath', newFolderPath);
+
   try {
     const result = await api.moveFolder(
       currentSpace,
@@ -190,7 +193,7 @@ const editFolderAction = async (fromPath: string, newName: string) => {
   const api = state.api;
   const currentSpace = state.currentSpace;
   const selectedTopLevelFolder = state.selectedTopLevelFolder;
-
+  if (!api) return;
   //from and to path are the same, we change the display name (the last part of the folder) to rename it
   const newFolderPath = splitLastOccurrence(fromPath, '/')[0] + '/' + newName;
   try {
@@ -214,7 +217,7 @@ const editFileAction = async (fileId: string, newTitle: string) => {
 
   let parentFolder;
   //TODO: make getting parent folder it's own function
-
+  if (!api) return;
   if (!selectedTopLevelFolder) return;
 
   const currentTrove = troves[selectedTopLevelFolder].trove;
