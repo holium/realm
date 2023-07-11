@@ -311,7 +311,8 @@ export const ChatMessagePresenter = ({
         );
       },
     });
-    if (isOur) {
+    if (isOur && !message.pending) {
+      // don't allow people to edit pending messages
       menu.push({
         id: `${messageRowId}-edit-message`,
         icon: 'Edit',
