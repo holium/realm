@@ -293,7 +293,7 @@ export const ChatMessagePresenter = ({
               };
             });
             paths.forEach((pathObj: SharePath) => {
-              selectedChat.sendMessage(pathObj.path, frags);
+              selectedChat.forwardMessage(pathObj.path, frags);
             });
             setObject(null);
           },
