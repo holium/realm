@@ -54,6 +54,7 @@ export const formatDate = (
   }
   return date.toLocaleDateString('en-us', format) + time;
 };
+
 export const displayDate = (date: number): string => {
   return formatDate(date, { long: false, dayOnly: false });
 };

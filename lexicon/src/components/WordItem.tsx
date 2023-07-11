@@ -5,20 +5,16 @@ import { Flex, Text } from '@holium/design-system';
 import { Store, useStore } from '../store';
 import { displayDate } from '../utils';
 import { Vote } from './Vote';
-interface WordItemProps {
+
+type Props = {
   id: string;
   word: string;
   createdAt: number;
   votes: any;
   navigate: any;
-}
-export const WordItem = ({
-  id,
-  word,
-  createdAt,
-  votes,
-  navigate,
-}: WordItemProps) => {
+};
+
+export const WordItem = ({ id, word, createdAt, votes, navigate }: Props) => {
   const space = useStore((store: Store) => store.space);
   const definitionMap = useStore((store: Store) => store.definitionMap);
   const definitionVoteMap = useStore((store: Store) => store.definitionVoteMap);
@@ -52,6 +48,7 @@ export const WordItem = ({
       navigateToWord();
     }
   };
+
   return (
     <Flex
       flexDirection={'column'}

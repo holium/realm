@@ -1,13 +1,16 @@
 import { Card, Flex, Spinner, Text } from '@holium/design-system';
 
 import { WordItem } from '../components';
-interface Props {
+import { LexiconWord } from '../store';
+
+type Props = {
   navigate: any;
   addModalOpen: boolean;
   voteMap: any;
-  wordList: any;
+  wordList: LexiconWord[];
   loadingMain: boolean;
-}
+};
+
 export const Home = ({
   navigate,
   addModalOpen,
@@ -29,20 +32,24 @@ export const Home = ({
             No words in this space, add one to start
           </Text.H6>
         )}
-        {wordList.map((item: any, index: number) => {
-          const { id, word, createdAt } = item;
-          const votes = voteMap.get(id);
-          return (
-            <WordItem
-              key={'word-item-' + index}
-              id={id}
-              word={word}
-              createdAt={createdAt}
-              votes={votes}
-              navigate={navigate}
-            />
-          );
-        })}
+        {wordList
+          // Filter duplicate ids
+          .filter(
+            (word, i, self) => i === self.findIndex((w) => w.id === word.id)
+          )
+          .map((word, index: number) => {
+            const votes = voteMap.get(word.id);
+            return (
+              <WordItem
+                key={`${word.word}-${index}-${word.id}`}
+                id={word.id}
+                word={word.word}
+                createdAt={word.createdAt}
+                votes={votes}
+                navigate={navigate}
+              />
+            );
+          })}
       </Flex>
     </Card>
   );

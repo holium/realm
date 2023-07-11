@@ -11,6 +11,8 @@ export const HomePage = () => {
   const wordList = useStore((state: Store) => state.wordList);
   const loadingMain = useStore((state: Store) => state.loadingMain);
 
+  console.log('wordList', wordList);
+
   return (
     <Home
       navigate={navigate}

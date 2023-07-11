@@ -34,7 +34,7 @@ export const Navigation = ({ selectedSpace }: Props) => {
     }
     //everytime we get a new space (ship/group) we check if we are admins on that space, via a scry
   }, [ship, group]);
-  //render the relevant route
+
   return (
     <Flex
       style={{
