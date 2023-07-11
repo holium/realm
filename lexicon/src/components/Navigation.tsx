@@ -38,11 +38,11 @@ export const Navigation = ({ selectedSpace }: Props) => {
       style={{
         minHeight: 'calc(100% - 20px)',
       }}
-      flexDirection={'column'}
-      alignItems={'center'}
-      marginRight={'20px'}
-      marginLeft={'20px'}
-      marginBottom={'20px'}
+      flexDirection="column"
+      alignItems="center"
+      marginRight="20px"
+      marginLeft="20px"
+      marginBottom="20px"
     >
       <SearchBar
         addModalOpen={addModalOpen}

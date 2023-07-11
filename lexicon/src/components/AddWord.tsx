@@ -8,6 +8,7 @@ import {
   Text,
 } from '@holium/design-system/general';
 import { Input, TextInput } from '@holium/design-system/inputs';
+import { useToggle } from '@holium/design-system/util';
 
 import { Store, useStore } from '../store';
 import { log } from '../utils';
@@ -18,6 +19,8 @@ type Props = {
 };
 
 export const AddWord = ({ open, onClose }: Props) => {
+  const adding = useToggle();
+
   const api = useStore((store: Store) => store.api);
   const space = useStore((store: Store) => store.space);
   const [word, setWord] = useState<string>('');
@@ -30,6 +33,8 @@ export const AddWord = ({ open, onClose }: Props) => {
 
   const addWord = async () => {
     setError('');
+    adding.toggleOn();
+
     try {
       const result: any = await api.createWord(space, word);
       log('result', result);
@@ -58,6 +63,8 @@ export const AddWord = ({ open, onClose }: Props) => {
       log('addword error => ', e);
       setError('Something went wrong');
     }
+
+    adding.toggleOff();
   };
   const resetForm = () => {
     setWord('');
@@ -138,6 +145,7 @@ export const AddWord = ({ open, onClose }: Props) => {
           fontSize={1}
           fontWeight={500}
           opacity={0.7}
+          disabled={adding.isOn}
           onClick={() => onClose()}
         >
           Cancel
@@ -147,7 +155,7 @@ export const AddWord = ({ open, onClose }: Props) => {
           fontWeight={500}
           alignSelf={'flex-end'}
           onClick={handleSubmit}
-          disabled={!definition || !word}
+          disabled={!definition || !word || adding.isOn}
         >
           Submit
         </Button.TextButton>
