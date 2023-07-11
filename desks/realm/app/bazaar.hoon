@@ -1063,13 +1063,6 @@
         =.  config.native-app           [size=[7 8] titlebar-border=%.n show-titlebar=%.y]
       =.  catalog.init                  (~(put by catalog.init) %trove [%native native-app])
       =.  grid-index.init               (set-grid-index:helpers:bazaar:core %trove grid-index.init)
-      =|  =native-app:store
-        =.  title.native-app            'Notes'
-        =.  color.native-app            '#FFFFFF'
-        =.  icon.native-app             'AppIconNotes'
-        =.  config.native-app           [size=[5 6] titlebar-border=%.n show-titlebar=%.n]
-      =.  catalog.init                  (~(put by catalog.init) %os-notes [%native native-app])
-      =.  grid-index.init               (set-grid-index:helpers:bazaar:core %os-notes grid-index.init)
       init
     ::
     ++  get-stall-apps
