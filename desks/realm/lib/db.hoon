@@ -1582,6 +1582,14 @@
                 ['path' s+(spat path.data.row)]
                 ['revision' (numb revision.data.row)]
             ==
+          %creds
+            :~  ['endpoint' s+endpoint.data.row]
+                ['access-key-id' s+access-key-id.data.row]
+                ['secret-access-key' s+secret-access-key.data.row]
+                ['buckets' a+(turn ~(tap in buckets.data.row) |=(t=@t s+t))]
+                ['current-bucket' s+current-bucket.data.row]
+                ['region' s+region.data.row]
+            ==
         ==
       =/  keyvals
         :_  basekvs

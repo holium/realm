@@ -13,6 +13,11 @@ module.exports = ({ github }, ci, desks) => {
   console.log(`bump.js: build version = ${ci.buildVersion}`);
   for (let i = 0; i < desks.length; i++) {
     const desk = desks[i];
+    console.log(`bump.js: setting developer desk in '${desk}/desk.ship'...`);
+    fs.writeFileSync(
+      `${desk}/desk.ship`,
+      ci.channel === 'latest' ? '~hostyv' : '~nimwyd-ramwyl-dozzod-hostyv'
+    );
     console.log(`bump.js: reading file '${desk}/desk.docket-0'...`);
     const docketInfo = fs.readFileSync(`${desk}/desk.docket-0`).toString();
     console.log(`bump.js: docketInfo = ${typeof docketInfo} ${docketInfo}`);

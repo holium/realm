@@ -40,6 +40,7 @@ export const useNavigation = () => {
         back_url?: OnboardingPage;
         redirect_url?: OnboardingPage;
         haha?: string; // Hide "Already have an account"
+        product_type?: string;
       }
     ) => {
       const path =

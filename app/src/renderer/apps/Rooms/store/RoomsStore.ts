@@ -4,6 +4,7 @@ import { action, makeObservable, observable } from 'mobx';
 
 import { SoundActions } from 'renderer/lib/sound';
 import { RealmIPC } from 'renderer/stores/ipc';
+import { shipStore } from 'renderer/stores/ship.store';
 
 import { serialize, unserialize } from './helpers';
 import { LocalPeer } from './LocalPeer';
@@ -459,7 +460,8 @@ export class RoomsStore extends EventsEmitter {
             console.log('someone entered the room', event);
             this.createPeer(event.peer_id);
 
-            SoundActions.playRoomPeerEnter();
+            shipStore.settingsStore.systemSoundsEnabled &&
+              SoundActions.playRoomPeerEnter();
           }
         }
         break;
@@ -475,7 +477,8 @@ export class RoomsStore extends EventsEmitter {
             this.hangupAllPeers();
           } else {
             // someone left the room
-            SoundActions.playRoomPeerLeave();
+            shipStore.settingsStore.systemSoundsEnabled &&
+              SoundActions.playRoomPeerLeave();
             console.log('someone left the room', event);
             this.destroyPeer(event.peer_id);
             this.rooms.get(event.rid)?.removePeer(event.peer_id);
@@ -587,7 +590,7 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   deleteRoom(rid: string) {
-    SoundActions.playRoomLeave();
+    shipStore.settingsStore.systemSoundsEnabled && SoundActions.playRoomLeave();
     this.rooms.delete(rid);
     this.ourPeer.disableAll();
     this.currentRid = null;
@@ -632,7 +635,7 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   leaveRoom(rid: string) {
-    SoundActions.playRoomLeave();
+    shipStore.settingsStore.systemSoundsEnabled && SoundActions.playRoomLeave();
     this.rooms.get(rid)?.removePeer(this.ourId);
     this.currentRid = null;
     this.ourPeer.disableAll();

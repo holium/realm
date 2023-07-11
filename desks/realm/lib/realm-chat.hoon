@@ -9,6 +9,12 @@
 ::
 :: helpers
 ::
+++  maybe-log
+  |=  [hide-debug=? msg=*]
+  ?:  =(%.y hide-debug)  ~
+  ~&  >>>  msg
+  ~
+::
 ++  scry-avatar-for-patp
   |=  [patp=ship =bowl:gall]
   ^-  (unit @t)
@@ -148,7 +154,7 @@
   :: |=(peer=ship [%pass (weld /dbpoke path) %agent [s %chat-db] %poke %chat-db-action !>([%add-peer path peer])])
 ::
 ++  push-notification-card
-  |=  [=bowl:gall state=state-0 =path-row:db title=@t subtitle=@t content=@t unread=@ud avatar=(unit @t) =message:db]
+  |=  [=bowl:gall state=state-1 =path-row:db title=@t subtitle=@t content=@t unread=@ud avatar=(unit @t) =message:db]
   ^-  card
   =/  note=push-notif
     [
@@ -201,13 +207,13 @@
 ++  create-chat
 ::realm-chat &chat-action [%create-chat ~ %dm ~[~bus] %host *@dr]
 ::realm-chat &chat-action [%create-chat ~ %chat ~[~bus ~dev] %host *@dr]
-  |=  [act=create-chat-data state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [act=create-chat-data state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   (vented-create-chat [now.bowl act] state bowl)
 ::
 ++  vented-create-chat
-  |=  [act=[t=@da c=create-chat-data] state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [act=[t=@da c=create-chat-data] state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   ?>  =(src.bowl our.bowl)
   =/  chat-path  /realm-chat/(scot %uv (sham [our.bowl t.act]))
   =/  pathrow=path-row:db  [chat-path metadata.c.act type.c.act t.act t.act ~ invites.c.act %.n max-expires-at-duration.c.act now.bowl]
@@ -215,7 +221,7 @@
     ?:  (~(has in (silt peers.c.act)) our.bowl)  peers.c.act
     [our.bowl peers.c.act]
   ?:  (dm-already-exists type.c.act all-ships bowl)
-    ~&  >>>  "dm between {<all-ships>} already exists"
+    =/  log1  (maybe-log hide-debug.state "dm between {<all-ships>} already exists")
     `state
   =/  all-peers=ship-roles:db  
     %+  turn
@@ -241,8 +247,8 @@
 ::
 ++  edit-chat
 ::  :realm-chat &action [%edit-chat /realm-chat/path-id ~ %.n %host *@dr]
-  |=  [act=[=path metadata=(map cord cord) peers-get-backlog=? invites=@tas max-expires-at-duration=@dr] state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [act=[=path metadata=(map cord cord) peers-get-backlog=? invites=@tas max-expires-at-duration=@dr] state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
 
   =/  pathpeers   (scry-peers path.act bowl)
   =/  src-peer    (snag 0 (skim pathpeers |=(p=peer-row:db =(patp.p src.bowl))))  :: intentionally will crash if the source of this request is not a peer
@@ -264,8 +270,8 @@
 ::
 ++  pin-message
 ::  :realm-chat &action [%pin-message /realm-chat/path-id [*@da ~zod] %.y]
-  |=  [act=[=path =msg-id:db pin=?] state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [act=[=path =msg-id:db pin=?] state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   ?>  =(src.bowl our.bowl)
 
   =/  pathrow=path-row:db  (scry-path-row path.act bowl)
@@ -285,8 +291,8 @@
 ::
 ++  clear-pinned-messages
 ::  :realm-chat &action [%clear-pinned-messages /realm-chat/path-id]
-  |=  [=path state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [=path state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   ?>  =(src.bowl our.bowl)
 
   =/  pathpeers  (scry-peers path bowl)
@@ -300,8 +306,8 @@
 ::
 ++  add-ship-to-chat
 ::realm-chat &chat-action [%add-ship-to-chat /realm-chat/path-id ~bus]
-  |=  [act=[=path =ship] state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [act=[=path =ship] state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   ?>  =(src.bowl our.bowl)
 
   =/  pathrow  (scry-path-row path.act bowl)
@@ -330,8 +336,8 @@
 ::  allows self to remove self, or %host to kick others
 ++  remove-ship-from-chat
 ::realm-chat &chat-action [%remove-ship-from-chat /realm-chat/path-id ~bus]
-  |=  [act=[=path =ship] state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [act=[=path =ship] state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   ?>  =(src.bowl our.bowl)
 
   =/  pathpeers  (scry-peers path.act bowl)
@@ -355,13 +361,13 @@
 ::
 ++  send-message
 ::realm-chat &chat-action [%send-message /realm-chat/path-id ~[[[%plain '0'] ~ ~] [[%plain '1'] ~ ~]] *@dr]
-  |=  [act=[=path fragments=(list minimal-fragment:db) expires-in=@dr] state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [act=[=path fragments=(list minimal-fragment:db) expires-in=@dr] state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   (vented-send-message [now.bowl act] state bowl)
 ::
 ++  vented-send-message
-  |=  [act=[t=@da =path fragments=(list minimal-fragment:db) expires-in=@dr] state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [act=[t=@da =path fragments=(list minimal-fragment:db) expires-in=@dr] state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   ?>  =(src.bowl our.bowl)
   ?>  (gth (lent fragments.act) 0)  :: no sending empty messages
 
@@ -378,8 +384,8 @@
 ::
 ++  edit-message
 ::  :realm-chat &action [%edit-message [~2023.2.22..16.46.28..e019 ~zod] /realm-chat/path-id (limo [[[%plain 'edited'] ~ ~] ~])]
-  |=  [act=edit-message-action:db state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [act=edit-message-action:db state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   ?>  =(src.bowl our.bowl)
 
   :: just pass along the edit-message-action to all the peers chat-db
@@ -394,8 +400,8 @@
 ::
 ++  delete-message
 ::  :realm-chat &chat-action [%delete-message /realm-chat/path-id ~2023.2.3..16.23.37..72f6 ~zod]
-  |=  [act=[=path =msg-id:db] state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [act=[=path =msg-id:db] state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   ?>  =(src.bowl our.bowl)
 
   :: just pass along the delete msg-id to all the peers chat-db
@@ -410,8 +416,8 @@
 ::
 ++  delete-backlog
 ::  :realm-chat &action [%delete-backlog /realm-chat/path-id]
-  |=  [act=[=path] state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [act=[=path] state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   ?>  =(src.bowl our.bowl)
   :: just pass along the delete-backlog to all the peers chat-db
   :: %chat-db will disallow invalid signals
@@ -427,37 +433,37 @@
   [cards state]
 ::
 ++  disable-push
-  |=  [state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   ?>  =(src.bowl our.bowl)
   =.  push-enabled.state  %.n
   `state
 ::
 ++  enable-push
-  |=  [state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   ?>  =(src.bowl our.bowl)
   =.  push-enabled.state  %.y
   `state
 ::
 ++  remove-device
-  |=  [device-id=cord state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [device-id=cord state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   ?>  =(src.bowl our.bowl)
   =.  devices.state         (~(del by devices.state) device-id)
   `state
 ::
 ++  set-device
 ::realm-chat &chat-action [%set-device 'device' 'player']
-  |=  [[device-id=cord player-id=cord] state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [[device-id=cord player-id=cord] state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   ?>  =(src.bowl our.bowl)
   =.  devices.state         (~(put by devices.state) device-id player-id)
   `state
 ::
 ++  mute-chat
-  |=  [[chat-path=path mute=?] state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [[chat-path=path mute=?] state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   ?>  =(src.bowl our.bowl)
   =/  new-mutes
     ?:  mute
@@ -467,8 +473,8 @@
   `state
 ::
 ++  pin-chat
-  |=  [[chat-path=path pin=?] state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [[chat-path=path pin=?] state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   ?>  =(src.bowl our.bowl)
   =/  new-pins
     ?:  pin
@@ -479,15 +485,23 @@
 ::
 ++  toggle-msg-preview-notif
 ::realm-chat &chat-action [%toggle-msg-preview-notif %.y]
-  |=  [toggle=? state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [toggle=? state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   ?>  =(src.bowl our.bowl)
   =.  msg-preview-notif.state  toggle
   `state
 ::
+++  toggle-hide-debug
+::realm-chat &chat-action [%toggle-hide-debug %.y]
+  |=  [toggle=? state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
+  ?>  =(src.bowl our.bowl)
+  =.  hide-debug.state  toggle
+  `state
+::
 ++  create-notes-to-self-if-not-exists
-  |=  [state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
+  |=  [state=state-1 =bowl:gall]
+  ^-  (quip card state-1)
   =/  selfpaths=(list path-row:db)  (skim (scry-paths bowl) |=(p=path-row:db =(type.p %self)))
   ?.  =(0 (lent selfpaths))
     `state

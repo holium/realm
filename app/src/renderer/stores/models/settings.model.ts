@@ -10,6 +10,9 @@ export const SettingsModel = types
     isolationModeEnabled: types.boolean,
     realmCursorEnabled: types.boolean,
     profileColorForCursorEnabled: types.boolean,
+    standaloneChatSpaceWallpaperEnabled: types.boolean,
+    standaloneChatPersonalWallpaperEnabled: types.boolean,
+    systemSoundsEnabled: types.boolean,
   })
   .actions((self) => ({
     init: flow(function* (identity: string) {
@@ -21,6 +24,9 @@ export const SettingsModel = types
           self.isolationModeEnabled = false;
           self.realmCursorEnabled = true;
           self.profileColorForCursorEnabled = true;
+          self.standaloneChatPersonalWallpaperEnabled = false;
+          self.standaloneChatSpaceWallpaperEnabled = true;
+          self.systemSoundsEnabled = true;
           return;
         } else {
           self.identity = setting.identity;
@@ -29,7 +35,13 @@ export const SettingsModel = types
           self.profileColorForCursorEnabled = Boolean(
             setting.profileColorForCursorEnabled
           );
-
+          self.standaloneChatSpaceWallpaperEnabled = Boolean(
+            setting.standaloneChatSpaceWallpaperEnabled
+          );
+          self.standaloneChatPersonalWallpaperEnabled = Boolean(
+            setting.standaloneChatPersonalWallpaperEnabled
+          );
+          self.systemSoundsEnabled = Boolean(setting.systemSoundsEnabled);
           // Sync Electron isolation mode with settings.
           if (self.isolationModeEnabled) {
             window.electron.app.enableIsolationMode();
@@ -54,6 +66,11 @@ export const SettingsModel = types
         isolationModeEnabled: self.isolationModeEnabled ? 1 : 0,
         realmCursorEnabled: self.realmCursorEnabled ? 1 : 0,
         profileColorForCursorEnabled: self.profileColorForCursorEnabled ? 1 : 0,
+        standaloneChatSpaceWallpaperEnabled:
+          self.standaloneChatSpaceWallpaperEnabled ? 1 : 0,
+        standaloneChatPersonalWallpaperEnabled:
+          self.standaloneChatPersonalWallpaperEnabled ? 1 : 0,
+        systemSoundsEnabled: self.systemSoundsEnabled ? 1 : 0,
       };
     },
     toggleIsolationMode() {
@@ -70,6 +87,39 @@ export const SettingsModel = types
       } else {
         window.electron.app.disableIsolationMode();
       }
+    },
+    toggleStandaloneChatSpaceWallpaperEnabled() {
+      const newStandaloneChatSpaceWallpaperEnabled =
+        !self.standaloneChatSpaceWallpaperEnabled;
+      self.standaloneChatSpaceWallpaperEnabled =
+        newStandaloneChatSpaceWallpaperEnabled;
+
+      SettingsIPC.set({
+        ...this._getCurrentSettings(),
+        standaloneChatSpaceWallpaperEnabled:
+          newStandaloneChatSpaceWallpaperEnabled ? 1 : 0,
+      });
+    },
+    toggleStandaloneChatPersonalWallpaperEnabled() {
+      const newStandaloneChatPersonalWallpaperEnabled =
+        !self.standaloneChatPersonalWallpaperEnabled;
+      self.standaloneChatPersonalWallpaperEnabled =
+        newStandaloneChatPersonalWallpaperEnabled;
+
+      SettingsIPC.set({
+        ...this._getCurrentSettings(),
+        standaloneChatPersonalWallpaperEnabled:
+          newStandaloneChatPersonalWallpaperEnabled ? 1 : 0,
+      });
+    },
+    toggleSystemSoundsEnabled() {
+      const newSystemSoundsEnabled = !self.systemSoundsEnabled;
+      self.systemSoundsEnabled = newSystemSoundsEnabled;
+
+      SettingsIPC.set({
+        ...this._getCurrentSettings(),
+        systemSoundsEnabled: newSystemSoundsEnabled ? 1 : 0,
+      });
     },
     setRealmCursor(enabled: boolean) {
       self.realmCursorEnabled = enabled;
@@ -100,6 +150,9 @@ export const SettingsModel = types
         isolationModeEnabled: false,
         realmCursorEnabled: true,
         profileColorForCursorEnabled: true,
+        standaloneChatPersonalWallpaperEnabled: false,
+        standaloneChatSpaceWallpaperEnabled: true,
+        systemSoundsEnabled: true,
       });
     },
   }));

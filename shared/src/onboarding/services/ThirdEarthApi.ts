@@ -261,12 +261,7 @@ export class ThirdEarthApi {
     );
   }
 
-  stripeMakePayment(
-    token: string,
-    productId: string,
-    patp: string,
-    coupon = 'undefined'
-  ) {
+  stripeMakePayment(token: string, productId: string, patp?: string) {
     return http<StripeMakePaymentResponse>(
       `${this.apiBaseUrl}/stripe-make-payment`,
       {
@@ -275,7 +270,6 @@ export class ThirdEarthApi {
         body: JSON.stringify({
           productId,
           patp,
-          coupon,
         }),
       }
     );
@@ -478,5 +472,23 @@ export class ThirdEarthApi {
       // 60 minutes timeout
       3600000
     );
+  }
+
+  log(
+    token: string,
+    payload: {
+      file: string;
+      type: string;
+      subject: string;
+      message: string;
+      productId?: string;
+      auditTrailCode?: number;
+    }
+  ) {
+    return http<UploadPierFileResponse>(`${this.apiBaseUrl}/user/raise-alarm`, {
+      method: 'POST',
+      headers: this.getHeaders(token),
+      body: JSON.stringify({ ...payload }),
+    });
   }
 }

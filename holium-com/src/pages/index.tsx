@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { track } from '@amplitude/analytics-browser';
 import { spaces } from 'spaces';
 
 import { Footer } from 'components/Footer';
@@ -13,7 +14,7 @@ import { WalletApp } from 'components/TrayApps/Wallet';
 
 import { SpaceKeys, TrayAppType } from '../types';
 
-export default function HomePage() {
+export default function LandingPage() {
   const { space } = useSpace();
   const [trayApp, setTrayApp] = useState<TrayAppType | null>(null);
 
@@ -30,6 +31,10 @@ export default function HomePage() {
 
     setTrayApp(app);
   };
+
+  useEffect(() => {
+    track('Landing Page');
+  }, []);
 
   return (
     <>

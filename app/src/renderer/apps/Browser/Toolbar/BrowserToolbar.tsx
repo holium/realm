@@ -2,7 +2,6 @@ import { PointerEvent, RefObject, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
-import { useDoubleClick } from 'renderer/lib/useDoubleClick';
 import { TitlebarContainer } from 'renderer/system/desktop/components/AppWindow/Titlebar/Titlebar.styles';
 
 import { useBrowser } from '../store';
@@ -38,7 +37,7 @@ const BrowserToolbarPresenter = ({
   onMaximize,
 }: BrowserToolbarProps) => {
   const { currentTab } = useBrowser();
-  const onDoubleClick = useDoubleClick(onMaximize);
+  // const onDoubleClick = useDoubleClick(onMaximize);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const navigationButtonsRef = useRef<HTMLInputElement>(null);
@@ -84,13 +83,13 @@ const BrowserToolbarPresenter = ({
     e.target === inputRef.current ||
     inputRef.current?.contains(e.target as Node);
 
-  const isInNavigationButtons = (e: PointerEvent<HTMLDivElement>) =>
-    e.target === navigationButtonsRef.current ||
-    navigationButtonsRef.current?.contains(e.target as Node);
+  // const isInNavigationButtons = (e: PointerEvent<HTMLDivElement>) =>
+  //   e.target === navigationButtonsRef.current ||
+  //   navigationButtonsRef.current?.contains(e.target as Node);
 
-  const onDoubleClickToolbar = (e: PointerEvent<HTMLDivElement>) => {
-    if (!isInInputField(e) && !isInNavigationButtons(e)) onDoubleClick();
-  };
+  // const onDoubleClickToolbar = (e: PointerEvent<HTMLDivElement>) => {
+  //   if (!isInInputField(e) && !isInNavigationButtons(e)) onDoubleClick();
+  // };
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     if (!isInInputField(e)) onDragStart(e);
@@ -121,7 +120,7 @@ const BrowserToolbarPresenter = ({
       zIndex={zIndex}
       onPointerUp={onPointerUp}
       onPointerDown={onPointerDown}
-      onClick={onDoubleClickToolbar}
+      //onClick={onDoubleClickToolbar}
     >
       <ToolbarNavigationButtons
         innerRef={navigationButtonsRef}

@@ -6,6 +6,9 @@ const nextConfig = {
     styledComponents: true,
   },
   reactStrictMode: true,
+  publicRuntimeConfig: {
+    AMPLITUDE_API_KEY: process.env.AMPLITUDE_API_KEY,
+  },
 };
 
 module.exports = withPreconstruct(nextConfig);

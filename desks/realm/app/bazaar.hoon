@@ -1049,6 +1049,20 @@
         =.  config.native-app           [size=[5 6] titlebar-border=%.y show-titlebar=%.n]
       =.  catalog.init                  (~(put by catalog.init) %os-settings [%native native-app])
       =.  grid-index.init               (set-grid-index:helpers:bazaar:core %os-settings grid-index.init)
+      =|  =native-app:store
+        =.  title.native-app            'Lexicon'
+        =.  color.native-app            '#EEDFC9'
+        =.  icon.native-app             'AppIconLexicon'
+        =.  config.native-app           [size=[3 7] titlebar-border=%.n show-titlebar=%.y]
+      =.  catalog.init                  (~(put by catalog.init) %lexicon [%native native-app])
+      =.  grid-index.init               (set-grid-index:helpers:bazaar:core %lexicon grid-index.init)
+      =|  =native-app:store
+        =.  title.native-app            'Trove'
+        =.  color.native-app            '#DCDCDC'
+        =.  icon.native-app             'AppIconTrove'
+        =.  config.native-app           [size=[7 8] titlebar-border=%.n show-titlebar=%.y]
+      =.  catalog.init                  (~(put by catalog.init) %trove [%native native-app])
+      =.  grid-index.init               (set-grid-index:helpers:bazaar:core %trove grid-index.init)
       init
     ::
     ++  get-stall-apps

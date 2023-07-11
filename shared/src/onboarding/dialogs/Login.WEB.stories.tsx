@@ -12,7 +12,7 @@ import {
   LoginDialog,
   OnboardDialogDescription,
 } from '../onboarding';
-import { mockShip, OnboardingDialogWrapper } from './util';
+import { OnboardingDialogWrapper, thirdEarthMockShip } from './util';
 
 export default {
   component: LoginDialog,
@@ -40,7 +40,7 @@ export const AccountHostingDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <AccountHostingDialog
-      ships={[mockShip]}
+      ships={[thirdEarthMockShip]}
       selectedShipId={0}
       setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
@@ -68,7 +68,7 @@ export const AccountStorageDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <AccountStorageDialog
-      ships={[mockShip]}
+      ships={[thirdEarthMockShip]}
       selectedShipId={0}
       setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
@@ -94,7 +94,7 @@ export const AccountCustomDomainDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <AccountCustomDomainDialog
-      ships={[mockShip]}
+      ships={[thirdEarthMockShip]}
       selectedShipId={0}
       setSelectedShipId={() => {}}
       dropletIp="123.123.123.123"
@@ -117,7 +117,7 @@ export const AccountDownloadRealmDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <AccountDownloadRealmDialog
-      ships={[mockShip]}
+      ships={[thirdEarthMockShip]}
       selectedShipId={0}
       setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
@@ -139,7 +139,7 @@ export const AccountUnfinishedUploadDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <AccountUnfinishedUploadDialog
-      ships={[mockShip]}
+      ships={[thirdEarthMockShip]}
       selectedShipId={0}
       setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
@@ -160,7 +160,7 @@ export const AccountErroredUploadDialogStory: ComponentStory<
     <AccountUnfinishedUploadDialog
       ships={[
         {
-          ...mockShip,
+          ...thirdEarthMockShip,
           ship_type: 'hardError',
         },
       ]}

@@ -4,9 +4,12 @@ import { Position } from '@holium/design-system';
 import { MouseState } from '@holium/realm-presence';
 
 import { ConduitState } from 'os/services/api';
+import { migrationPreload } from 'os/services/migration/migration.service';
+import { lexiconPreload } from 'os/services/ship/lexicon.service';
 import { settingsPreload } from 'os/services/ship/settings.service';
 import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
+import { trovePreload } from 'os/services/ship/trove.service';
 
 import { realmPreload } from '../os/realm.service';
 import { authPreload } from '../os/services/auth/auth.service';
@@ -215,6 +218,7 @@ contextBridge.exposeInMainWorld('realm', realmPreload);
 contextBridge.exposeInMainWorld('shipService', shipPreload);
 contextBridge.exposeInMainWorld('spacesService', spacesPreload);
 contextBridge.exposeInMainWorld('authService', authPreload);
+contextBridge.exposeInMainWorld('migrationService', migrationPreload);
 contextBridge.exposeInMainWorld('chatService', chatPreload);
 contextBridge.exposeInMainWorld('walletService', walletPreload);
 contextBridge.exposeInMainWorld('notifService', notifPreload);
@@ -224,3 +228,5 @@ contextBridge.exposeInMainWorld('onboardingService', onboardingPreload);
 contextBridge.exposeInMainWorld('appInstallService', appPublishersDBPreload);
 contextBridge.exposeInMainWorld('appRecentsService', appRecentsPreload);
 contextBridge.exposeInMainWorld('settingsService', settingsPreload);
+contextBridge.exposeInMainWorld('lexiconService', lexiconPreload);
+contextBridge.exposeInMainWorld('troveService', trovePreload);

@@ -7,9 +7,21 @@
 +$  mutes  (set path)
 +$  versioned-state
   $%  state-0
+      state-1
   ==
 +$  state-0
   $:  %0
+      app-id=@t           :: constant
+      uuid=@uvH           :: (sham @p)
+      =devices            :: (map device-id player-id)
+      push-enabled=?
+      =mutes              :: the list of muted chat `path`s
+      =pins               :: the set of pinned chat `path`s
+      msg-preview-notif=?
+  ==
++$  state-1
+  $:  %1
+      hide-debug=?
       app-id=@t           :: constant
       uuid=@uvH           :: (sham @p)
       =devices            :: (map device-id player-id)
@@ -60,6 +72,7 @@
       [%mute-chat =path mute=?]  :: toggles the muted-state of the path
       [%pin-chat =path pin=?]    :: toggles the pinned-state of the path
       [%toggle-msg-preview-notif msg-preview-notif=?]
+      [%toggle-hide-debug hide-debug=?]
 
       [%create-notes-to-self-if-not-exists ~]
   ==

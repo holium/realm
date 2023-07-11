@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import styled from 'styled-components';
 
 import { Box, Flex, skeletonStyle, Text } from '../../../general';
-import { Bookmark } from '../../os/Bookmark/Bookmark';
 import { parseMediaType } from '../../util/links';
 import { Block, BlockProps } from '../Block/Block';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
@@ -16,6 +15,10 @@ import {
   LinkPreviewType,
   RAW_LINK_HEIGHT,
 } from './util';
+
+const InlineLink = styled(Text.Anchor)`
+  color: rgba(var(--rlm-accent-rgba), 1);
+`;
 
 const LinkTitle = styled(Text.Anchor)`
   overflow: hidden;
@@ -151,24 +154,19 @@ export const LinkBlock = ({
     !metadata.ogData ||
     (metadata.ogData && !openGraph?.ogTitle)
   ) {
-    const width = containerWidth ? containerWidth - 12 : 320;
+    if (!link.match(/^http/i)) {
+      link = 'https://' + link;
+    }
     return (
-      <Box id={id} height={RAW_LINK_HEIGHT}>
-        <Block id={id} {...rest} width={width - 4}>
-          <Bookmark
-            id={id}
-            url={link}
-            title={link}
-            width={width - 24}
-            onNavigate={(url: string) => {
-              if (!url.match(/^http/i)) {
-                url = 'https://' + url;
-              }
-              window.open(url, '_blank');
-            }}
-          />
-        </Block>
-      </Box>
+      <InlineLink
+        id={id}
+        href={link}
+        title={link}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {link}
+      </InlineLink>
     );
   }
 

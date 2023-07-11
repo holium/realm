@@ -11,7 +11,7 @@ import {
   TextInput,
 } from '@holium/design-system';
 
-import { SoundActions } from 'renderer/lib/sound';
+import { useSound } from 'renderer/lib/sound';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -78,6 +78,8 @@ const NewRoomPresenter = () => {
     []
   );
 
+  const sound = useSound();
+
   const createRoom = async (evt: any) => {
     // setLoading(true)
     if (roomsStore.currentRoom) {
@@ -87,7 +89,7 @@ const NewRoomPresenter = () => {
         roomsStore.leaveRoom(roomsStore.currentRoom.rid);
       }
     }
-    SoundActions.playRoomEnter();
+    sound.playRoomEnter();
     const { name, isPrivate } = form.actions.submit();
     evt.stopPropagation();
     const spacePath =

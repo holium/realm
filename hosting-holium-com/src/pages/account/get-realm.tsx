@@ -1,8 +1,4 @@
-import {
-  AccountGetRealmDialog,
-  OnboardingStorage,
-  UserContextProvider,
-} from '@holium/shared';
+import { AccountGetRealmDialog, UserContextProvider } from '@holium/shared';
 
 import { thirdEarthApi } from 'util/thirdEarthApi';
 
@@ -32,16 +28,12 @@ const GetRealmPresenter = () => {
   const { goToPage, logout } = useNavigation();
 
   const onClickUploadId = () => {
-    OnboardingStorage.set({
-      productType: 'byop-p',
-    });
     goToPage('/upload-id-disclaimer', {
       back_url: '/account/get-realm',
     });
   };
 
   const onClickPurchaseId = () => {
-    OnboardingStorage.remove('productType');
     goToPage('/choose-id', {
       back_url: '/account/get-realm',
     });

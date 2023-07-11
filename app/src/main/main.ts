@@ -1,8 +1,10 @@
 import { app, BrowserWindow, Menu, MenuItem, nativeImage } from 'electron';
+import log from 'electron-log';
 import Store from 'electron-store';
 
 import { RealmService } from '../os/realm.service';
 import { AppUpdater } from './AppUpdater';
+import { clearUserData } from './helpers/clearUserData';
 import { setRealmCursor } from './helpers/cursorSettings';
 import { isMac, isMacWithCameraNotch } from './helpers/env';
 import { windowWindow } from './helpers/fullscreen';
@@ -56,6 +58,28 @@ const updateMacDockMenu = (
 };
 
 export const bootRealm = () => {
+  const storedRealmRelease = store.get('realmRelease');
+  const currentRealmRelease = app.getVersion();
+
+  if (
+    Boolean(storedRealmRelease) &&
+    storedRealmRelease !== currentRealmRelease
+  ) {
+    // If the stored realmRelease is different from the current realmRelease,
+    // it means the user has had Realm uninstalled for a while and is now
+    // reinstalling it, since it otherwise would have been updated by AppUpdater.
+    // In this case, we want to clear the user data.
+    log.info(
+      'Booting a Realm version different from stored user data:',
+      storedRealmRelease,
+      'vs.',
+      currentRealmRelease
+    );
+    clearUserData();
+  } else {
+    log.info('Booting a Realm version compatible with stored user data.');
+  }
+
   store.set('isStandaloneChat', false);
 
   if (!realmService) {

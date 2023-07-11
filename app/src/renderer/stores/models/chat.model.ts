@@ -4,6 +4,7 @@ import { applySnapshot, cast, flow, Instance, types } from 'mobx-state-tree';
 import { ChatPathMetadata } from 'os/services/ship/chat/chat.types';
 import { SoundActions } from 'renderer/lib/sound';
 import { ChatIPC } from 'renderer/stores/ipc';
+import { shipStore } from 'renderer/stores/ship.store';
 
 import { expiresInMap, ExpiresValue } from '../../apps/Courier/types';
 
@@ -146,6 +147,7 @@ export const ChatMessage = types
     // ui state
     pending: types.optional(types.boolean, false),
     error: types.maybe(types.string),
+    forwardedFrom: types.maybe(types.string),
   })
   .views((self) => ({
     get reactionsList() {
@@ -235,6 +237,7 @@ export const Chat = types
     hidePinned: types.optional(types.boolean, false),
     editingMsg: types.maybeNull(types.reference(ChatMessage)),
     replyingMsg: types.maybeNull(types.reference(ChatMessage)),
+    forwardingMsg: types.maybeNull(types.reference(ChatMessage)),
     our: types.maybe(types.string),
     isReacting: types.maybe(types.string),
     lastFetch: types.maybeNull(types.number),
@@ -303,7 +306,7 @@ export const Chat = types
       }
     }),
     sendMessage: flow(function* (path: string, fragments: any[]) {
-      SoundActions.playDMSend();
+      shipStore.settingsStore.systemSoundsEnabled && SoundActions.playDMSend();
       try {
         // create temporary message
         const tempContents: ChatFragmentMobxType = fragments.map((f) =>
@@ -331,6 +334,14 @@ export const Chat = types
         };
         self.lastUpdatedAt = new Date().getTime();
         self.replyingMsg = null;
+        yield ChatIPC.sendMessage(path, fragments);
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+    forwardMessage: flow(function* (path: string, fragments: any[]) {
+      shipStore.settingsStore.systemSoundsEnabled && SoundActions.playDMSend();
+      try {
         yield ChatIPC.sendMessage(path, fragments);
       } catch (error) {
         console.error(error);
@@ -441,6 +452,12 @@ export const Chat = types
         return self.pinnedMessageId;
       }
     }),
+    setForwarding(message: ChatMessageType) {
+      self.forwardingMsg = message;
+    },
+    clearForwarding() {
+      self.forwardingMsg = null;
+    },
     setReplying(message: ChatMessageType) {
       self.replyingMsg = message;
     },

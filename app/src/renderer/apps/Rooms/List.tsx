@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, Text, Tooltip } from '@holium/design-system';
 
-import { SoundActions } from 'renderer/lib/sound';
+import { useSound } from 'renderer/lib/sound';
 import { trackEvent } from 'renderer/lib/track';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -18,6 +18,8 @@ const RoomsPresenter = () => {
   const { spacesStore } = useShipStore();
   const { roomsApp, dimensions, setTrayAppHeight } = useTrayApps();
   const roomsStore = useRoomsStore();
+
+  const sound = useSound();
 
   const ourSpace = spacesStore.selected?.type === 'our';
 
@@ -90,7 +92,7 @@ const RoomsPresenter = () => {
               onClick={async (evt: any) => {
                 evt.stopPropagation();
                 if (roomsStore.currentRid !== room.rid) {
-                  SoundActions.playRoomEnter();
+                  sound.playRoomEnter();
                   try {
                     await roomsStore.joinRoom(room.rid);
                     roomsApp.setView('room');

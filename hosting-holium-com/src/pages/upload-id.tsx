@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import {
   OnboardingStorage,
@@ -16,23 +16,7 @@ export default function UploadId() {
   const [file, setFile] = useState<File>();
   const [progress, setProgress] = useState<number>();
   const [error, setError] = useState<string>();
-
-  useEffect(() => {
-    const { token } = OnboardingStorage.get();
-    if (!token) return;
-    thirdEarthApi.getUserShips(token).then((ships) => {
-      if (
-        ships.length === 1 &&
-        ships[0].product_type === 'byop-p' &&
-        ships[0].ship_type !== 'planet'
-      ) {
-        OnboardingStorage.set({
-          productType: 'byop-p',
-          provisionalShipId: ships[0].id.toString(),
-        });
-      }
-    });
-  }, []);
+  const [hint, setHint] = useState<string>();
 
   const onUpload = async (file: File) => {
     const { token, provisionalShipId } = OnboardingStorage.get();
@@ -57,17 +41,31 @@ export default function UploadId() {
       });
     }, 2000);
 
+    // After 15 minutes, show a hint to try a different browser.
+    const timeout = setTimeout(() => {
+      setHint('Upload stuck? Try uploading in a different browser.');
+    }, 15 * 60 * 1000);
+
     const formData = new FormData();
     formData.append('attachment', file);
     formData.append('type', 'pier');
     formData.append('desks', 'false');
     formData.append('groups', 'false');
 
+    await thirdEarthApi.log(token, {
+      file: 'purchases',
+      type: 'info',
+      subject: 'FRONTEND: upload started (email notify)',
+      message: `Upload of pier file ${file.name} started.`,
+    });
     const response = await thirdEarthApi.uploadPierFile(
       token,
       provisionalShipId,
       formData
     );
+
+    setHint(undefined);
+    clearTimeout(timeout);
 
     if (!response) {
       setError('An unknown error occurred.');
@@ -95,7 +93,9 @@ export default function UploadId() {
   };
 
   const onNext = () => {
-    return goToPage('/booting');
+    return goToPage('/booting', {
+      product_type: 'byop-p',
+    });
   };
 
   return (
@@ -104,6 +104,7 @@ export default function UploadId() {
         fileName={file?.name}
         progress={progress}
         error={error}
+        hint={hint}
         onUpload={onUpload}
         onBack={onBack}
         onNext={onNext}
