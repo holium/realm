@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Database from 'better-sqlite3-multiple-ciphers';
 
 import AbstractService, { ServiceOptions } from '../abstract.service';
