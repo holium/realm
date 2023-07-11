@@ -63,11 +63,13 @@ export const SearchBar = ({
     }
     resetSearch();
   };
+
   const resetSearch = () => {
     setSearchQuery('');
     setDisplaySuggestions(false);
     setMatchedWords([]);
   };
+
   const handleKeyDown = (
     event: React.KeyboardEvent<HTMLInputElement>,
     data: any
@@ -77,6 +79,12 @@ export const SearchBar = ({
       onWordClick(data);
     }
   };
+
+  const onClickAddWord = () => {
+    resetSearch();
+    onAddWord();
+  };
+
   return (
     <Flex
       flex={1}
@@ -161,7 +169,7 @@ export const SearchBar = ({
         <Button.TextButton
           fontSize={1}
           fontWeight={500}
-          onClick={() => onAddWord()}
+          onClick={onClickAddWord}
           disabled={addModalOpen}
         >
           Add Word
