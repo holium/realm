@@ -14,6 +14,7 @@ import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
 import { appPublishersDBPreload } from 'os/services/ship/spaces/tables/appPublishers.table';
 import { appRecentsPreload } from 'os/services/ship/spaces/tables/appRecents.table';
+import { trovePreload } from 'os/services/ship/trove.service';
 import { walletPreload } from 'os/services/ship/wallet/wallet.service';
 
 declare global {
@@ -31,6 +32,7 @@ declare global {
     chatService: typeof chatPreload;
     walletService: typeof walletPreload;
     lexiconService: typeof lexiconPreload;
+    troveService: typeof trovePreload;
     notifService: typeof notifPreload;
     friendDb: typeof friendsPreload;
     realm: typeof realmPreload;

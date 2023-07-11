@@ -14,3 +14,4 @@ export const AppInstallIPC = window.appInstallService;
 export const AppRecentsIPC = window.appRecentsService;
 export const SettingsIPC = window.settingsService;
 export const LexiconIPC = window.lexiconService;
+export const TroveIPC = window.troveService;

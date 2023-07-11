@@ -210,7 +210,9 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   }
 
   // Used in onboarding before a session exists.
-  async uploadFile(args: FileUploadParams): Promise<string | undefined> {
+  async uploadFile(
+    args: FileUploadParams
+  ): Promise<{ Location: string; key: string } | undefined> {
     if (!this.services) return;
 
     const credentials = this.services.ship?.credentials;

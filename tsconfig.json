@@ -13,6 +13,7 @@
     "lib/room/test-ui",
     "lib/room",
     "lexicon",
+    "trove",
     "cypress",
     "cypress.config.ts"
   ]

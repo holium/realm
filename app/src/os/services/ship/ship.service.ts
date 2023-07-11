@@ -18,6 +18,7 @@ import { ShipDB } from './ship.db';
 import { Credentials } from './ship.types.ts';
 import BazaarService from './spaces/bazaar.service';
 import SpacesService from './spaces/spaces.service';
+import TroveService from './trove.service';
 import WalletService from './wallet/wallet.service';
 
 export class ShipService extends AbstractService<any> {
@@ -33,6 +34,7 @@ export class ShipService extends AbstractService<any> {
     bazaar: BazaarService;
     wallet: WalletService;
     lexicon: LexiconService;
+    trove: TroveService;
     settings: SettingsService;
   };
 
@@ -143,6 +145,7 @@ export class ShipService extends AbstractService<any> {
       friends: new FriendsService(this.serviceOptions, this.shipDB.db),
       wallet: new WalletService(undefined, this.shipDB.db),
       lexicon: new LexiconService(undefined, this.shipDB.db),
+      trove: new TroveService(undefined, this.shipDB.db),
       settings: new SettingsService(this.serviceOptions, this.shipDB.db),
     };
   }
@@ -286,7 +289,9 @@ export class ShipService extends AbstractService<any> {
     };
   }
 
-  public async uploadFile(args: FileUploadParams): Promise<string | undefined> {
+  public async uploadFile(
+    args: FileUploadParams
+  ): Promise<{ Location: string; key: string }> {
     return await new Promise((resolve, reject) => {
       this.getS3Bucket()
         .then(async (response: any) => {
@@ -315,15 +320,44 @@ export class ShipService extends AbstractService<any> {
             fileExtension = args.contentType.split('/')[1];
           }
           if (!fileContent) log.warn('No file content found');
+          const key = `${
+            this.patp
+          }/${moment().unix()}-${fileName}.${fileExtension}`;
           const params = {
             Bucket: response.configuration.currentBucket,
-            Key: `${this.patp}/${moment().unix()}-${fileName}.${fileExtension}`,
+            Key: key,
             Body: fileContent as Buffer,
             ACL: StorageAcl.PublicRead,
             ContentType: args.contentType,
           };
           const { Location } = await client.upload(params).promise();
-          resolve(Location);
+          resolve({ Location, key });
+        })
+        .catch(reject);
+    });
+  }
+  public async deleteFile(args: { key: string }): Promise<any> {
+    return await new Promise((resolve, reject) => {
+      this.getS3Bucket()
+        .then(async (response: any) => {
+          console.log('getS3Bucket response: ', response);
+          // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
+          let endp = response.credentials.endpoint;
+          if (endp.split('.')[0] === response.configuration.currentBucket) {
+            endp = endp.split('.').slice(1).join('.');
+          }
+          const client = new S3Client({
+            credentials: response.credentials,
+            endpoint: endp,
+            signatureVersion: 'v4',
+          });
+
+          const params = {
+            Bucket: response.configuration.currentBucket,
+            Key: args.key,
+          };
+          const result = await client.delete(params).promise();
+          resolve(result);
         })
         .catch(reject);
     });

@@ -12,6 +12,7 @@ import {
 import { RealmUpdateBooted } from 'os/realm.types';
 import { ConduitState } from 'os/services/api';
 import { LexiconUpdateType } from 'os/services/ship/lexicon.types';
+import { TroveUpdateType } from 'os/services/ship/trove.types';
 import { watchOnlineStatus } from 'renderer/lib/offline';
 import { SoundActions } from 'renderer/lib/sound';
 import { MobXAccount } from 'renderer/stores/models/account.model';
@@ -26,6 +27,7 @@ import {
   OnboardingIPC,
   RealmIPC,
   SpacesIPC,
+  TroveIPC,
 } from './ipc';
 import { ShellModel } from './models/shell.model';
 import { shipStore } from './ship.store';
@@ -188,6 +190,10 @@ function registerOnUpdateListener() {
   LexiconIPC.onUpdate(async (update: LexiconUpdateType) => {
     //update lexicon store with the latest update
     shipStore.lexiconStore.setUpdate(update?.payload);
+  });
+  TroveIPC.onUpdate(async (update: TroveUpdateType) => {
+    //update trove store with the latest update
+    shipStore.troveStore.setUpdate(update?.payload);
   });
   RealmIPC.onUpdate(async (update) => {
     if (update.type === 'booted') {

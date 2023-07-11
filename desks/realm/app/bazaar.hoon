@@ -1057,6 +1057,13 @@
       =.  catalog.init                  (~(put by catalog.init) %lexicon [%native native-app])
       =.  grid-index.init               (set-grid-index:helpers:bazaar:core %lexicon grid-index.init)
       =|  =native-app:store
+        =.  title.native-app            'Trove'
+        =.  color.native-app            '#DCDCDC'
+        =.  icon.native-app             'AppIconTrove'
+        =.  config.native-app           [size=[7 8] titlebar-border=%.n show-titlebar=%.y]
+      =.  catalog.init                  (~(put by catalog.init) %trove [%native native-app])
+      =.  grid-index.init               (set-grid-index:helpers:bazaar:core %trove grid-index.init)
+      =|  =native-app:store
         =.  title.native-app            'Notes'
         =.  color.native-app            '#FFFFFF'
         =.  icon.native-app             'AppIconNotes'

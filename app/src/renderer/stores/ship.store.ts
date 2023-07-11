@@ -16,6 +16,7 @@ import { NotifStore } from './models/notification.model';
 import { SettingsModel } from './models/settings.model';
 import { SpacesStore } from './models/spaces.model';
 import { WalletStore } from './models/wallet.model';
+import { TroveStore } from './trove.store';
 // import { RoomsStore } from './rooms.store';
 
 export const ShipStore = types
@@ -29,6 +30,7 @@ export const ShipStore = types
     walletStore: WalletStore,
     featuredStore: FeaturedStore,
     lexiconStore: LexiconStore,
+    troveStore: TroveStore,
     // roomsStore: RoomsStore,
     settingsStore: SettingsModel,
     loader: LoaderModel,
@@ -126,6 +128,7 @@ export const shipStore = ShipStore.create({
   bazaarStore: loadBazaarSnapshot(),
   walletStore: walletAppDefault,
   lexiconStore: { update: null },
+  troveStore: { update: null },
   featuredStore: {
     spaces: {},
   },

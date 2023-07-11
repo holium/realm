@@ -71,6 +71,10 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: Record<string, Dimensions> = {
     width: 600,
     height: 700,
   },
+  trove: {
+    width: 1328,
+    height: 768,
+  },
 };
 
 export const getDefaultAppDimensions = (
