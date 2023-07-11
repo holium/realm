@@ -15,18 +15,18 @@ import { log } from '../utils';
 
 type Props = {
   open: boolean;
+  word: string;
+  setWord: (word: string) => void;
   onClose: () => void;
 };
 
-export const AddWord = ({ open, onClose }: Props) => {
-  const adding = useToggle();
-
+export const AddWord = ({ open, word, setWord, onClose }: Props) => {
   const api = useStore((store: Store) => store.api);
   const space = useStore((store: Store) => store.space);
-  const [word, setWord] = useState<string>('');
   const [definition, setDefinition] = useState<string>('');
   const [sentence, setSentence] = useState<string>('');
   const [error, setError] = useState<string>(''); // TODO: error never displays since thread doesn't error
+  const adding = useToggle();
 
   if (!space) return null;
   if (!open) return null;
@@ -66,11 +66,13 @@ export const AddWord = ({ open, onClose }: Props) => {
 
     adding.toggleOff();
   };
+
   const resetForm = () => {
     setWord('');
     setDefinition('');
     setSentence('');
   };
+
   const handleSubmit = () => {
     addWord();
   };
@@ -86,7 +88,8 @@ export const AddWord = ({ open, onClose }: Props) => {
           padding: 0,
           backgroundColor: 'transparent',
         }}
-        id={'add-word-input'}
+        id="add-word-input"
+        autoFocus
         spellCheck={false}
         autoComplete="off"
         autoCorrect="off"
@@ -96,7 +99,6 @@ export const AddWord = ({ open, onClose }: Props) => {
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
           setWord(evt.target.value);
         }}
-        autoFocus
       />
       <Flex flexDirection={'column'} gap={16}>
         <Flex flexDirection={'column'} gap={6}>
@@ -146,7 +148,7 @@ export const AddWord = ({ open, onClose }: Props) => {
           fontWeight={500}
           opacity={0.7}
           disabled={adding.isOn}
-          onClick={() => onClose()}
+          onClick={onClose}
         >
           Cancel
         </Button.Transparent>
@@ -154,8 +156,8 @@ export const AddWord = ({ open, onClose }: Props) => {
           fontSize={1}
           fontWeight={500}
           alignSelf={'flex-end'}
-          onClick={handleSubmit}
           disabled={!definition || !word || adding.isOn}
+          onClick={handleSubmit}
         >
           Submit
         </Button.TextButton>
@@ -163,6 +165,7 @@ export const AddWord = ({ open, onClose }: Props) => {
     </Card>
   );
 };
+
 const RequiredLabel = ({ text }: { text: string }) => {
   return (
     <Flex gap={2}>

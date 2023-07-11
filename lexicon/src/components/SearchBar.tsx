@@ -14,17 +14,17 @@ import { Store, useStore } from '../store';
 
 interface Props {
   addModalOpen: boolean;
-  onAddWord: () => void;
   backButton: boolean;
-  onBack: () => void;
   navigate: any;
+  onBack: () => void;
+  onAddWord: (searchQuery: string) => void;
 }
 export const SearchBar = ({
-  onAddWord,
   addModalOpen,
   backButton,
-  onBack,
   navigate,
+  onBack,
+  onAddWord,
 }: Props) => {
   const space = useStore((store: Store) => store.space);
   const wordList = useStore((store: Store) => store.wordList);
@@ -81,8 +81,8 @@ export const SearchBar = ({
   };
 
   const onClickAddWord = () => {
+    onAddWord(searchQuery);
     resetSearch();
-    onAddWord();
   };
 
   return (
@@ -169,8 +169,8 @@ export const SearchBar = ({
         <Button.TextButton
           fontSize={1}
           fontWeight={500}
-          onClick={onClickAddWord}
           disabled={addModalOpen}
+          onClick={onClickAddWord}
         >
           Add Word
         </Button.TextButton>
