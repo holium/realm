@@ -339,6 +339,14 @@ export const Chat = types
         console.error(error);
       }
     }),
+    forwardMessage: flow(function* (path: string, fragments: any[]) {
+      shipStore.settingsStore.systemSoundsEnabled && SoundActions.playDMSend();
+      try {
+        yield ChatIPC.sendMessage(path, fragments);
+      } catch (error) {
+        console.error(error);
+      }
+    }),
     addMessage(message: ChatMessageType) {
       if (Object.keys(message.contents[0])[0] === 'react') {
         const msg = self.messages.find((m) => m.id === message.replyToMsgId);
