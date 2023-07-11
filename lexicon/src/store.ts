@@ -7,6 +7,12 @@ import {
   WordRow,
 } from './api/types/bedrock';
 
+export type LexiconWord = {
+  id: string;
+  word: string;
+  createdAt: number;
+};
+
 export interface Store {
   api: any;
   setApi: (api: any) => void;
@@ -64,8 +70,8 @@ export interface Store {
   mostVotedDefinitionMap: any;
   setMostVotedDefinitionMap: (mostVotedDefinitionMap: any) => void;
 
-  wordList: any;
-  setWordList: (wordList: any) => void;
+  wordList: LexiconWord[];
+  setWordList: (wordList: LexiconWord[]) => void;
 
   loadingMain: boolean;
   setLoadingMain: (loadingMain: boolean) => void;
@@ -204,7 +210,7 @@ export const useStore = create<Store>((set, get) => ({
   setWordMap: (wordMap: any) => set({ wordMap }),
 
   wordList: [],
-  setWordList: (wordList: any) => set({ wordList }),
+  setWordList: (wordList: LexiconWord[]) => set({ wordList }),
 
   mostVotedDefinitionMap: new Map(),
   setMostVotedDefinitionMap: (mostVotedDefinitionMap: any) =>

@@ -8,28 +8,33 @@ import {
   Text,
 } from '@holium/design-system/general';
 import { Input, TextInput } from '@holium/design-system/inputs';
+import { useToggle } from '@holium/design-system/util';
 
 import { Store, useStore } from '../store';
 import { log } from '../utils';
 
 type Props = {
   open: boolean;
+  word: string;
+  setWord: (word: string) => void;
   onClose: () => void;
 };
 
-export const AddWord = ({ open, onClose }: Props) => {
+export const AddWord = ({ open, word, setWord, onClose }: Props) => {
   const api = useStore((store: Store) => store.api);
   const space = useStore((store: Store) => store.space);
-  const [word, setWord] = useState<string>('');
   const [definition, setDefinition] = useState<string>('');
   const [sentence, setSentence] = useState<string>('');
   const [error, setError] = useState<string>(''); // TODO: error never displays since thread doesn't error
+  const adding = useToggle();
 
   if (!space) return null;
   if (!open) return null;
 
   const addWord = async () => {
     setError('');
+    adding.toggleOn();
+
     try {
       const result: any = await api.createWord(space, word);
       log('result', result);
@@ -58,12 +63,16 @@ export const AddWord = ({ open, onClose }: Props) => {
       log('addword error => ', e);
       setError('Something went wrong');
     }
+
+    adding.toggleOff();
   };
+
   const resetForm = () => {
     setWord('');
     setDefinition('');
     setSentence('');
   };
+
   const handleSubmit = () => {
     addWord();
   };
@@ -79,7 +88,8 @@ export const AddWord = ({ open, onClose }: Props) => {
           padding: 0,
           backgroundColor: 'transparent',
         }}
-        id={'add-word-input'}
+        id="add-word-input"
+        autoFocus
         spellCheck={false}
         autoComplete="off"
         autoCorrect="off"
@@ -89,7 +99,6 @@ export const AddWord = ({ open, onClose }: Props) => {
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
           setWord(evt.target.value);
         }}
-        autoFocus
       />
       <Flex flexDirection={'column'} gap={16}>
         <Flex flexDirection={'column'} gap={6}>
@@ -138,7 +147,8 @@ export const AddWord = ({ open, onClose }: Props) => {
           fontSize={1}
           fontWeight={500}
           opacity={0.7}
-          onClick={() => onClose()}
+          disabled={adding.isOn}
+          onClick={onClose}
         >
           Cancel
         </Button.Transparent>
@@ -146,8 +156,8 @@ export const AddWord = ({ open, onClose }: Props) => {
           fontSize={1}
           fontWeight={500}
           alignSelf={'flex-end'}
+          disabled={!definition || !word || adding.isOn}
           onClick={handleSubmit}
-          disabled={!definition || !word}
         >
           Submit
         </Button.TextButton>
@@ -155,6 +165,7 @@ export const AddWord = ({ open, onClose }: Props) => {
     </Card>
   );
 };
+
 const RequiredLabel = ({ text }: { text: string }) => {
   return (
     <Flex gap={2}>

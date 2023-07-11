@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 
 import { Flex } from '@holium/design-system/general';
@@ -10,12 +10,14 @@ interface Props {
   selectedSpace: string;
 }
 export const Navigation = ({ selectedSpace }: Props) => {
-  const { ship, group, word } = useParams();
+  const { ship, group, word: wordView } = useParams();
   //presisted space data for filtering search correctly
   const navigate = useNavigate();
   const setAddModalOpen = useStore((state: Store) => state.setAddModalOpen);
   const addModalOpen = useStore((state: Store) => state.addModalOpen);
   const setSpace = useStore((state: Store) => state.setSpace);
+
+  const [word, setWord] = useState('');
 
   useEffect(() => {
     if (selectedSpace) {
@@ -32,26 +34,35 @@ export const Navigation = ({ selectedSpace }: Props) => {
     }
     //everytime we get a new space (ship/group) we check if we are admins on that space, via a scry
   }, [ship, group]);
-  //render the relevant route
+
   return (
     <Flex
       style={{
         minHeight: 'calc(100% - 20px)',
       }}
-      flexDirection={'column'}
-      alignItems={'center'}
-      marginRight={'20px'}
-      marginLeft={'20px'}
-      marginBottom={'20px'}
+      flexDirection="column"
+      alignItems="center"
+      marginRight="20px"
+      marginLeft="20px"
+      marginBottom="20px"
     >
       <SearchBar
         addModalOpen={addModalOpen}
-        onAddWord={() => setAddModalOpen(true)}
-        backButton={!!word}
+        onAddWord={(searchQuery) => {
+          if (searchQuery) setWord(searchQuery);
+          else setWord('');
+          setAddModalOpen(true);
+        }}
+        backButton={!!wordView}
         onBack={() => navigate(-1)}
         navigate={navigate}
       />
-      <AddWord open={addModalOpen} onClose={() => setAddModalOpen(false)} />
+      <AddWord
+        open={addModalOpen}
+        word={word}
+        setWord={setWord}
+        onClose={() => setAddModalOpen(false)}
+      />
       <Outlet />
     </Flex>
   );

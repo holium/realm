@@ -7,24 +7,24 @@ import {
   Flex,
   Icon,
   Text,
-  TextInput,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
 
 import { Store, useStore } from '../store';
 
 interface Props {
   addModalOpen: boolean;
-  onAddWord: () => void;
   backButton: boolean;
-  onBack: () => void;
   navigate: any;
+  onBack: () => void;
+  onAddWord: (searchQuery: string) => void;
 }
 export const SearchBar = ({
-  onAddWord,
   addModalOpen,
   backButton,
-  onBack,
   navigate,
+  onBack,
+  onAddWord,
 }: Props) => {
   const space = useStore((store: Store) => store.space);
   const wordList = useStore((store: Store) => store.wordList);
@@ -63,11 +63,13 @@ export const SearchBar = ({
     }
     resetSearch();
   };
+
   const resetSearch = () => {
     setSearchQuery('');
     setDisplaySuggestions(false);
     setMatchedWords([]);
   };
+
   const handleKeyDown = (
     event: React.KeyboardEvent<HTMLInputElement>,
     data: any
@@ -77,11 +79,17 @@ export const SearchBar = ({
       onWordClick(data);
     }
   };
+
+  const onClickAddWord = () => {
+    onAddWord(searchQuery);
+    resetSearch();
+  };
+
   return (
     <Flex
       flex={1}
       gap={10}
-      justifyContent={'center'}
+      justifyContent="center"
       style={{ position: 'relative', width: '80%' }}
       marginTop="14px"
       marginBottom="14px"
@@ -101,7 +109,7 @@ export const SearchBar = ({
           paddingLeft: 9,
           flex: 1,
         }}
-        height={'30px'}
+        height="30px"
         value={searchQuery}
         placeholder="Search words"
         error={false}
@@ -109,12 +117,12 @@ export const SearchBar = ({
       />
       {displaySuggestions && (
         <Card
-          padding={'5px'}
+          padding="5px"
           elevation={4}
-          width={'100%'}
+          width="100%"
           style={{ position: 'absolute', left: 0, top: 40, zIndex: 1 }}
         >
-          <Flex flexDirection={'column'}>
+          <Flex flexDirection="column">
             {matchedWords.map((item: any, index: number) => {
               return (
                 <Box
@@ -136,7 +144,7 @@ export const SearchBar = ({
             })}
 
             <Box
-              key={'search-suggestion-search-web'}
+              key="search-suggestion-search-web"
               className="highlight-hover"
               style={{
                 padding: '6px 8px',
@@ -161,8 +169,8 @@ export const SearchBar = ({
         <Button.TextButton
           fontSize={1}
           fontWeight={500}
-          onClick={() => onAddWord()}
           disabled={addModalOpen}
+          onClick={onClickAddWord}
         >
           Add Word
         </Button.TextButton>
