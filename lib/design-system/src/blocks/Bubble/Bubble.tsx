@@ -143,7 +143,7 @@ export const Bubble = ({
       const key = `${id}-${index}-fragments`;
 
       return (
-        <span id={key} key={key}>
+        <span id={key} key={key} className="bubble-fragment">
           {prevLineBreak}
           {renderFragment(
             id,

@@ -6,9 +6,21 @@ import { Flex } from '@holium/design-system/general';
 import { useShareModal } from './useShareModal';
 
 const BubbleWrapper = styled(Flex)`
-  margin: 0 8px;
-  max-height: 100px;
-  overflow: hidden;
+  flex: 1;
+  padding: 0 8px;
+
+  span.bubble-fragment {
+    /* truncate after 3 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Hide all span.bubble-fragment except the first one */
+  span.bubble-fragment ~ span.bubble-fragment {
+    display: none;
+  }
 `;
 
 export const ShareModalBubble = () => {
