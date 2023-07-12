@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { darken, lighten, rgba, saturate } from 'polished';
 import styled, { css } from 'styled-components';
 
-import { Button, Flex, Icon, Spinner, Text } from '../../';
+import { Button, Flex, Icon, Spinner, Text } from '../../../general';
 
 interface ConnStatusStyleProps {
   baseColor: string;

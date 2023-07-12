@@ -1,4 +1,4 @@
-import { Flex, Spinner, Text } from '@holium/design-system';
+import { Flex, Spinner, Text } from '@holium/design-system/general';
 
 type Props = {
   text?: string;
