@@ -37,7 +37,6 @@ export const ShareModalBubble = () => {
         message={object.mergedContents}
         sentAt={new Date(object.message.createdAt).toISOString()}
         error={object.message.error}
-        forwardedFrom={object.message.forwardedFrom}
       />
     </BubbleWrapper>
   );
