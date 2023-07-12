@@ -1,5 +1,11 @@
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Navigate,
+  redirect,
+  Route,
+  Routes,
+} from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import { trovePreload } from '../../app/src/os/services/ship/trove.service';
@@ -8,12 +14,12 @@ import { Navigation } from './components';
 import { Home } from './pages';
 import useTroveStore, { TroveStore } from './store/troveStore';
 import { theme } from './theme';
+
 const muiTheme = createTheme({
   palette: {
     primary: { main: theme.primary },
     error: { main: theme.error },
   },
-
   typography: {
     fontFamily: ['Rubik'].join(','),
     subtitle1: {
@@ -27,7 +33,8 @@ const muiTheme = createTheme({
     },
   },
 });
-interface Props {
+
+type Props = {
   selectedSpace: string;
   shipName: string;
   TroveIPC: typeof trovePreload;
@@ -35,7 +42,7 @@ interface Props {
   useStorage: any;
   uploadFile: any;
   deleteFile: any;
-}
+};
 
 export const Trove = ({
   selectedSpace,
@@ -51,23 +58,32 @@ export const Trove = ({
   const setSpace = useTroveStore((store: TroveStore) => store.setSpace);
   const space = useTroveStore((store: TroveStore) => store.space);
   const setApi = useTroveStore((store: TroveStore) => store.setApi);
+
+  useEffect(() => {
+    // Start at the root path.
+    redirect('/');
+  }, []);
+
   useEffect(() => {
     //subscribe to updates here
     TroveIPC.UIUpdates();
     //add our api instance to the store
     setApi(TroveIPC);
   }, [TroveIPC]);
+
   useEffect(() => {
     if (update) {
       updateHandler(update);
     }
   }, [update]);
+
   useEffect(() => {
     if (shipName) {
       setShipName(shipName);
       setMySpace(shipName + '/our');
     }
   }, [shipName]);
+
   useEffect(() => {
     if (selectedSpace) {
       const newSpace = selectedSpace.substring(1);
@@ -76,6 +92,7 @@ export const Trove = ({
   }, [selectedSpace]);
 
   if (!space) return null;
+
   return (
     <main
       style={{
@@ -84,11 +101,11 @@ export const Trove = ({
       }}
     >
       <ThemeProvider theme={muiTheme}>
-        <Router>
+        <BrowserRouter>
           <Routes>
             <Route element={<Navigation selectedSpace={selectedSpace} />}>
               <Route
-                path="index.html/:ship/:group"
+                path="/:ship/:group"
                 element={
                   <Home
                     useStorage={useStorage}
@@ -98,14 +115,15 @@ export const Trove = ({
                 }
               />
               <Route
-                path="index.html/"
+                path="/"
                 element={
                   <>Enter a space in the url example: ...apps/trove/~zod/our</>
                 }
               />
             </Route>
           </Routes>
-        </Router>
+          <Navigate to={selectedSpace} />
+        </BrowserRouter>
       </ThemeProvider>
     </main>
   );

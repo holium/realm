@@ -1,5 +1,6 @@
 import { log, splitLastOccurrence } from '../helpers';
 import useTroveStore from './troveStore';
+
 const moveFileAction = async (fileId: string, toPath: string) => {
   const state = useTroveStore.getState();
   const api = state.api;
@@ -36,6 +37,7 @@ const moveFileAction = async (fileId: string, toPath: string) => {
     log('error ', e);
   }
 };
+
 const removeFileAction = async (fileId: string) => {
   //look up the parent of the file id
   const state = useTroveStore.getState();
@@ -70,6 +72,7 @@ const removeFileAction = async (fileId: string) => {
     log('error ', e);
   }
 };
+
 const addFileAction = async (metadata: any) => {
   const state = useTroveStore.getState();
   const api = state.api;
@@ -109,6 +112,7 @@ const addFileAction = async (metadata: any) => {
     metadata.key
   );
 };
+
 const removeFolderAction = async (pathToFolder: string) => {
   const state = useTroveStore.getState();
   const api = state.api;
@@ -126,6 +130,7 @@ const removeFolderAction = async (pathToFolder: string) => {
     log('error ', e);
   }
 };
+
 const removeTroveAction = async (troveName: string) => {
   const state = useTroveStore.getState();
   const api = state.api;
@@ -138,6 +143,7 @@ const removeTroveAction = async (troveName: string) => {
     log('error ', e);
   }
 };
+
 const editTroveAction = async (newTitle: string, trove: string) => {
   const state = useTroveStore.getState();
   const api = state.api;
@@ -150,6 +156,7 @@ const editTroveAction = async (newTitle: string, trove: string) => {
     log('error ', e);
   }
 };
+
 const repermTroveAction = async (troveName: string, perms: any) => {
   const state = useTroveStore.getState();
   const api = state.api;
@@ -162,6 +169,7 @@ const repermTroveAction = async (troveName: string, perms: any) => {
     log('error ', e);
   }
 };
+
 const moveFolderAction = async (fromPath: string, toPath: string) => {
   const state = useTroveStore.getState();
   const api = state.api;
@@ -188,6 +196,7 @@ const moveFolderAction = async (fromPath: string, toPath: string) => {
     log('error ', e);
   }
 };
+
 const editFolderAction = async (fromPath: string, newName: string) => {
   const state = useTroveStore.getState();
   const api = state.api;
@@ -208,6 +217,7 @@ const editFolderAction = async (fromPath: string, newName: string) => {
     log('error ', e);
   }
 };
+
 const editFileAction = async (fileId: string, newTitle: string) => {
   const state = useTroveStore.getState();
   const api = state.api;
@@ -243,6 +253,7 @@ const editFileAction = async (fileId: string, newTitle: string) => {
     log('error ', e);
   }
 };
+
 export {
   addFileAction,
   editFileAction,

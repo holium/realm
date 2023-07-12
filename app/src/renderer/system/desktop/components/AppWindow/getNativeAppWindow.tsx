@@ -10,8 +10,8 @@ import { TroveApp } from 'renderer/apps/Trove/TroveApp';
 export enum NativeAppId {
   Browser = 'os-browser',
   Settings = 'os-settings',
-  Lexicon = 'lexicon',
-  Trove = 'trove',
+  Lexicon = 'os-lexicon',
+  Trove = 'os-trove',
 }
 
 export const getNativeAppWindow = {
@@ -25,11 +25,11 @@ export const getNativeAppWindow = {
     titlebar: null,
     view: (props: any) => <SystemApp {...props} />,
   },
-  lexicon: {
+  'os-lexicon': {
     titlebar: null,
     view: (props: any) => <LexiconApp {...props} />,
   },
-  trove: {
+  'os-trove': {
     titlebar: null,
     view: (props: any) => <TroveApp {...props} />,
   },
