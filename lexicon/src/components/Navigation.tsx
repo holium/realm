@@ -21,7 +21,7 @@ export const Navigation = ({ selectedSpace }: Props) => {
 
   useEffect(() => {
     if (selectedSpace) {
-      navigate('/index.html' + selectedSpace);
+      navigate(selectedSpace);
     }
   }, [selectedSpace]);
 

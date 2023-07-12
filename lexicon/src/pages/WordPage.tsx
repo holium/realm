@@ -45,7 +45,7 @@ export const WordPage = () => {
   };
 
   const goToDict = () => {
-    navigate('/index.html/dict/' + state.word);
+    navigate('/dict/' + state.word);
   };
   return (
     <Word

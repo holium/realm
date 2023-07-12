@@ -12,7 +12,7 @@ export const Navigation = ({ selectedSpace }: Props) => {
   const navigate = useNavigate();
   useEffect(() => {
     if (selectedSpace) {
-      navigate('/index.html' + selectedSpace);
+      navigate(selectedSpace);
     }
   }, [selectedSpace]);
 
