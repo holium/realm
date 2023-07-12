@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { Text } from '@holium/design-system';
+import { Text } from '@holium/design-system/general';
 
 import { useAppState } from 'renderer/stores/app.store';
 import { WebView } from 'renderer/system/desktop/components/AppWindow/View/WebView';

@@ -2,7 +2,7 @@ import { Top } from 'react-spaces';
 import { observer } from 'mobx-react';
 import styled, { css } from 'styled-components';
 
-import { Flex, Text } from '@holium/design-system';
+import { Flex, Text } from '@holium/design-system/general';
 
 import { useAppState } from 'renderer/stores/app.store';
 

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 
 import { useTrayApps } from 'renderer/apps/store';
 import { useAppState } from 'renderer/stores/app.store';

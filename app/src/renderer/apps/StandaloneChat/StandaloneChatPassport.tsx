@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
 
-import { CheckBox } from '@holium/design-system';
 import { Flex } from '@holium/design-system/general';
+import { CheckBox } from '@holium/design-system/inputs';
 
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';

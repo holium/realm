@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 
-import { UseToggleHook } from '@holium/design-system';
+import { UseToggleHook } from '@holium/design-system/util';
 
 import { AppTile, ContextMenuOption } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';

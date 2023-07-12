@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
-import { Flex, Icon, Text } from '@holium/design-system';
+import { Flex, Icon, Text } from '@holium/design-system/general';
 
 import { useRoomsStore } from '../store/RoomsStoreContext';
 

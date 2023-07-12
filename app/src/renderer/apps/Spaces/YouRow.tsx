@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { Avatar, Box, Flex, Row, Text } from '@holium/design-system';
+import { Avatar, Box, Flex, Row, Text } from '@holium/design-system/general';
 
 import { MobXAccount } from 'renderer/stores/models/account.model';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';

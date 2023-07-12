@@ -8,8 +8,8 @@ import {
   Flex,
   Spinner,
   Text,
-  TextInput,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
 
 import { normalizeBounds } from 'renderer/lib/window-manager';
 import { appState } from 'renderer/stores/app.store';

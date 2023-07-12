@@ -3,7 +3,13 @@ import BeatLoader from 'react-spinners/BeatLoader';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
-import { Avatar, Flex, FlexProps, Icon, Text } from '@holium/design-system';
+import {
+  Avatar,
+  Flex,
+  FlexProps,
+  Icon,
+  Text,
+} from '@holium/design-system/general';
 
 import { ContextMenuOption, useContextMenu } from 'renderer/components';
 

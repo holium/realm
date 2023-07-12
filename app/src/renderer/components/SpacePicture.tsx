@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components';
 
-import { Crest, Flex, Icon, Text } from '@holium/design-system';
+import { Crest, Flex, Icon, Text } from '@holium/design-system/general';
 
 import { pluralize } from 'renderer/lib/text';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';

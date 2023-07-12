@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react';
 
-import { Button, Flex, Spinner, Text } from '@holium/design-system';
+import { Button, Flex, Spinner, Text } from '@holium/design-system/general';
 
 import { useAppState } from 'renderer/stores/app.store';
 

@@ -11,6 +11,7 @@ const TroveAppPresenter = () => {
   const { loggedInAccount } = useAppState();
   const { troveStore, spacesStore } = useShipStore();
   const selectedSpace = spacesStore.selected;
+
   return (
     <Trove
       shipName={loggedInAccount?.serverId ?? ''}

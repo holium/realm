@@ -61,7 +61,7 @@ export const nativeApps: AppManifestMap = {
     },
   },
   lexicon: {
-    id: 'lexicon',
+    id: 'os-lexicon',
     title: 'Lexicon',
     type: 'native',
     color: '#EEDFC9',
@@ -71,7 +71,7 @@ export const nativeApps: AppManifestMap = {
     },
   },
   trove: {
-    id: 'trove',
+    id: 'os-trove',
     title: 'Trove',
     type: 'native',
     color: '#DCDCDC',

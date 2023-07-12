@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { TwitterPicker } from 'react-color';
 
-import { Flex, useToggle } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 
 import { ColorTile, ColorTilePopover } from 'renderer/components/ColorTile';
 

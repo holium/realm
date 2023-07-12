@@ -1,6 +1,7 @@
-import { Flex, Text } from '@holium/design-system';
+import { Flex, Text } from '@holium/design-system/general';
 
 import { Vote } from './Vote';
+
 export const WordDefinitionElement = ({
   text,
   id,

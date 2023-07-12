@@ -1,7 +1,13 @@
 import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 
-import { Button, Flex, Icon, Text, Tooltip } from '@holium/design-system';
+import {
+  Button,
+  Flex,
+  Icon,
+  Text,
+  Tooltip,
+} from '@holium/design-system/general';
 
 import { useSound } from 'renderer/lib/sound';
 import { trackEvent } from 'renderer/lib/track';

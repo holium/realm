@@ -2,7 +2,8 @@ import { createRef, useCallback, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import { darken, lighten, rgba } from 'polished';
 
-import { BarButton, Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
+import { BarButton } from '@holium/design-system/os';
 
 import { SystemTrayRegistry } from 'renderer/apps/registry';
 import { useTrayApps } from 'renderer/apps/store';

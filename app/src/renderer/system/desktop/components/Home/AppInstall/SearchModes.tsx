@@ -7,11 +7,11 @@ import { isValidPatp } from 'urbit-ob';
 import {
   Button,
   Flex,
-  InstallStatus,
   NoScrollBar,
   Spinner,
   Text,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
+import { InstallStatus } from '@holium/design-system/os';
 
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
 import { appState, useAppState } from 'renderer/stores/app.store';

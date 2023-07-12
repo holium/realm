@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { Flex, Skeleton, Text } from '@holium/design-system';
+import { Flex, Skeleton, Text } from '@holium/design-system/general';
 
 import { EmbedBox } from '../../components';
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { Flex, Text } from '@holium/design-system';
+import { Flex, Text } from '@holium/design-system/general';
 import { PassportForm } from '@holium/shared';
 
 import { AuthIPC, ShipIPC } from 'renderer/stores/ipc';

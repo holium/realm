@@ -1,7 +1,8 @@
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
-import { Avatar, BarButton, Flex, Text } from '@holium/design-system';
+import { Avatar, Flex, Text } from '@holium/design-system/general';
+import { BarButton } from '@holium/design-system/os';
 
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';

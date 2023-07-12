@@ -5,9 +5,9 @@ import { observer } from 'mobx-react';
 import {
   Bubble,
   convertFragmentsToText,
-  MenuItemProps,
   OnReactionPayload,
-} from '@holium/design-system';
+} from '@holium/design-system/blocks';
+import { MenuItemProps } from '@holium/design-system/navigation';
 import { useToggle } from '@holium/design-system/util';
 
 import { SystemTrayRegistry } from 'renderer/apps/registry';

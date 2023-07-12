@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 
 export const SettingPane = styled(Flex)`
   gap: 12px;

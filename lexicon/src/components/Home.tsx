@@ -1,4 +1,4 @@
-import { Card, Flex, Spinner, Text } from '@holium/design-system';
+import { Card, Flex, Spinner, Text } from '@holium/design-system/general';
 
 import { WordItem } from '../components';
 import { LexiconWord } from '../store';

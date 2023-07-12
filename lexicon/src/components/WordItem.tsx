@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Flex, Text } from '@holium/design-system';
+import { Flex, Text } from '@holium/design-system/general';
 
 import { Store, useStore } from '../store';
 import { displayDate } from '../utils';
