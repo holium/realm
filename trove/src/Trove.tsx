@@ -1,5 +1,11 @@
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Navigate,
+  redirect,
+  Route,
+  Routes,
+} from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import { trovePreload } from '../../app/src/os/services/ship/trove.service';
@@ -54,6 +60,11 @@ export const Trove = ({
   const setApi = useTroveStore((store: TroveStore) => store.setApi);
 
   useEffect(() => {
+    // Start at the root path.
+    redirect('/');
+  }, []);
+
+  useEffect(() => {
     //subscribe to updates here
     TroveIPC.UIUpdates();
     //add our api instance to the store
@@ -90,11 +101,11 @@ export const Trove = ({
       }}
     >
       <ThemeProvider theme={muiTheme}>
-        <Router>
+        <BrowserRouter>
           <Routes>
             <Route element={<Navigation selectedSpace={selectedSpace} />}>
               <Route
-                path="index.html/:ship/:group"
+                path="/:ship/:group"
                 element={
                   <Home
                     useStorage={useStorage}
@@ -104,14 +115,15 @@ export const Trove = ({
                 }
               />
               <Route
-                path="index.html/"
+                path="/"
                 element={
                   <>Enter a space in the url example: ...apps/trove/~zod/our</>
                 }
               />
             </Route>
           </Routes>
-        </Router>
+          <Navigate to={selectedSpace} />
+        </BrowserRouter>
       </ThemeProvider>
     </main>
   );
