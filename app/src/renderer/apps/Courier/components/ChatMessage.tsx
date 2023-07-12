@@ -271,7 +271,7 @@ export const ChatMessagePresenter = ({
           icon: 'CourierApp',
           dataTypeName: 'message',
           mergedContents: getMergedContents(message, messages, friends),
-          message: { ...message, forwardedFrom: selectedChat.metadata.title },
+          message,
           share: (o: any, paths: SharePath[]) => {
             const frags = o.message.contents.map((c: any) => {
               return {
