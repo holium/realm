@@ -129,11 +129,11 @@ export const Calendar = ({ events }: Props) => {
       <CalendarStyle />
 
       <FullCalendar
-        timeZone="UTC"
+        //timeZone="UTC"
         ref={calendarRef}
         schedulerLicenseKey="CC-Attribution-NonCommercial-NoDerivatives"
         plugins={[resourceTimelinePlugin, dayGridPlugin, timeGridPlugin]}
-        initialView="timeGridWeek" //dayGridMonth,  resourceTimelineWeek
+        initialView="dayGridMonth" //dayGridMonth,  resourceTimelineWeek,timeGridWeek
         weekends={true}
         headerToolbar={{
           left: 'prev,today,next',

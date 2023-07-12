@@ -95,7 +95,7 @@ export const api = {
     };
     return api.createApi().poke({ app: 'cal2', mark: 'calendar-action', json });
   },
-  createSpanPeriodic: async (
+  createSpanPeriodicDaily: async (
     calendarId: string,
     startDateMS: number,
     repeatCount: { l: number; r: number },
@@ -114,6 +114,44 @@ export const api = {
         args: {
           Start: { da: startDateMS }, //start date
           Period: { dr: timeBetweenEvents }, //the time between events
+        },
+        meta: {
+          name,
+          description,
+        },
+      },
+    };
+    return api.createApi().poke({ app: 'cal2', mark: 'calendar-action', json });
+  },
+  createSpanPeriodicWeekly: async (
+    calendarId: string,
+    startDateMS: number,
+    durationMS: number,
+    includedWeekDays: number[],
+    name: string,
+    description = ''
+  ) => {
+    const json = {
+      'create-span': {
+        cid: calendarId,
+        dom: {
+          l: 0,
+          r: 10,
+        },
+        rid: '~/left/days-of-week-0',
+        kind: {
+          left: {
+            tz: null,
+            d: durationMS, //duration
+          },
+        },
+        args: {
+          Start: {
+            da: startDateMS,
+          },
+          Weekdays: {
+            wl: includedWeekDays, // [0,1,2,3,4] a list of weekdays, 0-mon, 1-tue, 2-wed, 3-thu, 4-fri, 5-sat, 6-sun
+          },
         },
         meta: {
           name,
