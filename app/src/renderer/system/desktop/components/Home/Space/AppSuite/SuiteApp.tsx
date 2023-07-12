@@ -2,7 +2,7 @@ import React from 'react';
 import { rgba } from 'polished';
 import styled, { css } from 'styled-components';
 
-import { Box, BoxProps, Icon } from '@holium/design-system';
+import { Box, BoxProps, Icon } from '@holium/design-system/general';
 
 import { AppType } from 'renderer/stores/models/bazaar.model';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';

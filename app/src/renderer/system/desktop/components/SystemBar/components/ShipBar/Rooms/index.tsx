@@ -1,7 +1,8 @@
 import { useCallback, useEffect } from 'react';
 import { observer } from 'mobx-react';
 
-import { Box, RoomsDock } from '@holium/design-system';
+import { Box } from '@holium/design-system/general';
+import { RoomsDock } from '@holium/design-system/os';
 
 import { roomTrayConfig } from 'renderer/apps/Rooms/config';
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';

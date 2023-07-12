@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
-import { Position } from '@holium/design-system';
+import { Position } from '@holium/design-system/util';
 import { MouseState } from '@holium/realm-presence';
 
 import { ConduitState } from 'os/services/api';

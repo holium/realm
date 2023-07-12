@@ -1,4 +1,4 @@
-import { Position } from '@holium/design-system';
+import { Position } from '@holium/design-system/util';
 
 import { PresenceArg } from './hooks/useBroadcast';
 

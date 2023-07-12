@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
-import { Flex, Icon, Row, Text } from '@holium/design-system';
+import { Flex, Icon, Row, Text } from '@holium/design-system/general';
 
 import {
   ContextMenuOption,

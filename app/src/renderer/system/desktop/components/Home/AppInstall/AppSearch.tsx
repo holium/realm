@@ -4,7 +4,8 @@ import { observer } from 'mobx-react';
 import { isValidPatp } from 'urbit-ob';
 import * as yup from 'yup';
 
-import { Flex, Text, TextInput } from '@holium/design-system';
+import { Flex, Text } from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
 
 import { useShipStore } from 'renderer/stores/ship.store';
 

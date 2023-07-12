@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { IconPathsType } from '../../';
+import { IconPathsType } from '../../../general';
 import { CommButton } from './CommButton';
 
 export default {

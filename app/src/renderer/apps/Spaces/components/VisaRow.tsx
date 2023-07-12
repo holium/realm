@@ -7,7 +7,7 @@ import {
   Row,
   Spinner,
   Text,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
 
 import { Patp } from 'os/types';
 import { useShipStore } from 'renderer/stores/ship.store';

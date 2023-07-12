@@ -1,14 +1,10 @@
 import { Ref, useEffect, useMemo, useState } from 'react';
 
+import { Box, BoxProps, Flex, Icon, Text } from '../../../general';
 import {
-  Box,
-  BoxProps,
   contrastAwareBlackOrWhiteHex,
-  Flex,
   flipColorIfLowContrast,
-  Icon,
-  Text,
-} from '../..';
+} from '../../../util';
 import { chatDate } from '../../util/date';
 import { BUBBLE_HEIGHT, STATUS_HEIGHT } from './Bubble.constants';
 import { BubbleAuthor, BubbleFooter, BubbleStyle } from './Bubble.styles';

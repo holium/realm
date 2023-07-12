@@ -2,16 +2,16 @@ import { useCallback, useMemo, useRef } from 'react';
 import { createField, createForm } from 'mobx-easy-form';
 import { observer } from 'mobx-react';
 
+import { Bubble } from '@holium/design-system/blocks';
 import {
   Box,
-  Bubble,
   Button,
   Flex,
   Icon,
   Text,
-  TextInput,
   WindowedList,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
 
 import { useTrayApps } from 'renderer/apps/store';
 import { useAppState } from 'renderer/stores/app.store';

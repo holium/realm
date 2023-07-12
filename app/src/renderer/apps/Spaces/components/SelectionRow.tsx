@@ -8,7 +8,7 @@ import {
   isValidImageUrl,
   Row,
   Text,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
 
 import { EmptyGroup } from '../SpaceRow';
 

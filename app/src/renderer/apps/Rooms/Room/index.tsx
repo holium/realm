@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { Button, CommButton, Flex, Icon, Text } from '@holium/design-system';
+import {
+  Button,
+  CommButton,
+  Flex,
+  Icon,
+  Text,
+} from '@holium/design-system/general';
 
 import { useTrayApps } from 'renderer/apps/store';
 import { Badge } from 'renderer/components';

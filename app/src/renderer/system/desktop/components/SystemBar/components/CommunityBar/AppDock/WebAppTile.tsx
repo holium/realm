@@ -1,5 +1,5 @@
-import { UseToggleHook } from '@holium/design-system';
 import { Flex } from '@holium/design-system/general';
+import { UseToggleHook } from '@holium/design-system/util';
 
 type WebAppTileProps = {
   tileId: string;

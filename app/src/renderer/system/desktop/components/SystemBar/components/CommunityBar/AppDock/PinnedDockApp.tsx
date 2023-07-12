@@ -5,10 +5,9 @@ import { observer } from 'mobx-react-lite';
 import {
   AppTile,
   AppTileType,
-  bgIsLightOrDark,
   getAppTileFlags,
-  useToggle,
-} from '@holium/design-system';
+} from '@holium/design-system/os';
+import { bgIsLightOrDark, useToggle } from '@holium/design-system/util';
 
 import { ContextMenuOption, useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
