@@ -4,6 +4,12 @@ import { Button, Flex, Icon, Text } from '@holium/design-system/general';
 
 import { useShareModal } from './useShareModal';
 
+const ShareModalHeaderContainer = styled(Flex)`
+  padding: 8px 8px 16px 8px;
+  justify-content: space-between;
+  align-items: center;
+`;
+
 const ShareButton = styled(Button.IconButton)`
   height: 30px;
   width: 30px;
@@ -18,11 +24,7 @@ export const ShareModalHeader = () => {
   if (!object) return <div />;
 
   return (
-    <Flex
-      justifyContent="space-between"
-      style={{ padding: '8px', paddingBottom: '16px' }}
-      alignItems="center"
-    >
+    <ShareModalHeaderContainer>
       <Flex gap={8}>
         <Icon
           name={object.icon}
@@ -75,6 +77,6 @@ export const ShareModalHeader = () => {
           style={{ fill: '#4E9EFD' }}
         />
       </ShareButton>
-    </Flex>
+    </ShareModalHeaderContainer>
   );
 };

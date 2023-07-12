@@ -6,11 +6,20 @@ import { Flex } from '@holium/design-system/general';
 import { useShareModal } from './useShareModal';
 
 const BubbleWrapper = styled(Flex)`
-  width: 90%;
-  margin-left: 8px;
-  margin-bottom: 8px;
-  & > div {
-    flex-grow: 2;
+  flex: 1;
+  padding: 0 8px;
+
+  span.bubble-fragment {
+    /* truncate after 3 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Hide all span.bubble-fragment except the first one */
+  span.bubble-fragment ~ span.bubble-fragment {
+    display: none;
   }
 `;
 
@@ -37,7 +46,6 @@ export const ShareModalBubble = () => {
         message={object.mergedContents}
         sentAt={new Date(object.message.createdAt).toISOString()}
         error={object.message.error}
-        forwardedFrom={object.message.forwardedFrom}
       />
     </BubbleWrapper>
   );

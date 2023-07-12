@@ -140,8 +140,10 @@ export const Bubble = ({
         }
       }
 
+      const key = `${id}-${index}-fragments`;
+
       return (
-        <span id={id} key={`${id}-index-${index}`}>
+        <span id={key} key={key} className="bubble-fragment">
           {prevLineBreak}
           {renderFragment(
             id,
@@ -162,18 +164,18 @@ export const Bubble = ({
 
   if (message?.length === 1) {
     const contentType = Object.keys(message[0])[0];
+
     if (contentType === 'status') {
       return (
         <Flex
-          id={id}
+          key={`${id}-${contentType}-inline-status-container`}
           ref={innerRef}
-          key={id}
           display="inline-flex"
           height={STATUS_HEIGHT}
           justifyContent={isOur ? 'flex-end' : 'flex-start'}
         >
           <InlineStatus
-            id={id}
+            id={`${id}-${contentType}-inline-status`}
             text={(message[0] as FragmentStatusType).status}
           />
         </Flex>
@@ -190,7 +192,6 @@ export const Bubble = ({
       position="relative"
     >
       <BubbleStyle
-        id={id}
         isPrevGrouped={isPrevGrouped}
         isNextGrouped={isNextGrouped}
         ourTextColor={contrastAwareBlackOrWhiteHex(
@@ -210,7 +211,6 @@ export const Bubble = ({
       >
         {!isOur && !isPrevGrouped && (
           <BubbleAuthor
-            id={id}
             style={{
               color: authorColorDisplay,
             }}
@@ -226,12 +226,11 @@ export const Bubble = ({
             Forwarded from: {forwardedFrom}
           </Text.Custom>
         )}
-        <FragmentBlock id={id}>{fragments}</FragmentBlock>
-        <BubbleFooter id={id} height={footerHeight} mt={1}>
-          <Box width="70%" id={id}>
+        <FragmentBlock>{fragments}</FragmentBlock>
+        <BubbleFooter height={footerHeight} mt={1}>
+          <Box width="70%">
             {((reactions && reactions.length > 0) || onReaction) && (
               <Reactions
-                id={id}
                 isOur={isOur}
                 ourShip={ourShip}
                 ourColor={ourColor}
@@ -243,7 +242,6 @@ export const Bubble = ({
           <Flex
             width="30%"
             gap={4}
-            id={id}
             alignItems="flex-end"
             justifyContent="flex-end"
             minWidth={minBubbleWidth}
@@ -283,7 +281,6 @@ export const Bubble = ({
               alignItems="flex-end"
               justifyContent="flex-end"
               opacity={0.35}
-              id={id}
             >
               {isEditing && 'Editing... · '}
               {isEdited && !isEditing && 'Edited · '}
