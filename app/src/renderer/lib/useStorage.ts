@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import moment from 'moment';
 
+import { S3CredentialsAndConfig } from 'os/services/ship/ship.service';
 import { ShipIPC } from 'renderer/stores/ipc';
 
 import { S3Client, StorageAcl, StorageClient } from './S3Client';
@@ -17,18 +18,15 @@ export interface IuseStorage {
 
 export const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
   const [uploading, setUploading] = useState(false);
-  const [s3, setS3] = useState<any>();
+  const [s3, setS3] = useState<S3CredentialsAndConfig>();
+
+  const getAndSetS3 = async () => {
+    const fetched = await ShipIPC.getS3Bucket();
+    if (fetched) setS3(fetched);
+  };
 
   useEffect(() => {
-    if (!s3) {
-      (ShipIPC.getS3Bucket() as Promise<any>)
-        .then((response: any) => {
-          setS3(response);
-        })
-        .catch((err: any) => {
-          console.error(err);
-        });
-    }
+    if (!s3) getAndSetS3();
   }, [s3]);
 
   const client = useRef<StorageClient | null>(null);
@@ -58,13 +56,12 @@ export const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
   }, [s3]);
 
   const canUpload = useMemo(() => {
-    if (!s3) return;
-    return (
-      (s3.credentials &&
+    if (!s3) return false;
+    return Boolean(
+      s3.credentials &&
         s3.credentials.accessKeyId &&
         s3.credentials.secretAccessKey &&
-        s3.configuration.currentBucket !== '') ||
-      false
+        s3.configuration.currentBucket !== ''
     );
   }, [s3]);
 
@@ -99,7 +96,7 @@ export const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
 
   const uploadDefault = useCallback(
     async (file: File): Promise<string> => {
-      if (s3.configuration.currentBucket === '') {
+      if (!s3 || s3.configuration.currentBucket === '') {
         throw new Error('current bucket not set');
       }
       return await upload(file, s3.configuration.currentBucket);

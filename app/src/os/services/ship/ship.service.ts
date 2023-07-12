@@ -21,6 +21,17 @@ import SpacesService from './spaces/spaces.service';
 import TroveService from './trove.service';
 import WalletService from './wallet/wallet.service';
 
+export type S3CredentialsAndConfig = {
+  credentials: {
+    accessKeyId: string;
+    secretAccessKey: string;
+    endpoint: string;
+  };
+  configuration: {
+    currentBucket: string;
+  };
+};
+
 export class ShipService extends AbstractService<any> {
   public patp: string;
   private shipDB?: ShipDB;
@@ -271,22 +282,23 @@ export class ShipService extends AbstractService<any> {
   // ----------------------------------------
   // ------------------ S3 ------------------
   // ----------------------------------------
-  public async getS3Bucket() {
-    const [credentials, configuration] = await Promise.all([
-      APIConnection.getInstance().conduit.scry({
+  public async getS3Bucket(): Promise<S3CredentialsAndConfig | null> {
+    try {
+      const credentials = await APIConnection.getInstance().conduit.scry({
         app: 'api-store',
         path: `/credentials`,
-      }),
-      APIConnection.getInstance().conduit.scry({
+      });
+      const configuration = await APIConnection.getInstance().conduit.scry({
         app: 'api-store',
         path: `/configuration`,
-      }),
-    ]);
+      });
 
-    return {
-      credentials,
-      configuration,
-    };
+      return { credentials, configuration };
+    } catch (e) {
+      log.error('ship.service.ts, getS3Bucket(): error getting credentials', e);
+
+      return null;
+    }
   }
 
   public async uploadFile(
@@ -294,8 +306,9 @@ export class ShipService extends AbstractService<any> {
   ): Promise<{ Location: string; key: string }> {
     return await new Promise((resolve, reject) => {
       this.getS3Bucket()
-        .then(async (response: any) => {
+        .then(async (response) => {
           console.log('getS3Bucket response: ', response);
+          if (!response) return;
           // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
           let endp = response.credentials.endpoint;
           if (endp.split('.')[0] === response.configuration.currentBucket) {
@@ -339,8 +352,9 @@ export class ShipService extends AbstractService<any> {
   public async deleteFile(args: { key: string }): Promise<any> {
     return await new Promise((resolve, reject) => {
       this.getS3Bucket()
-        .then(async (response: any) => {
+        .then(async (response) => {
           console.log('getS3Bucket response: ', response);
+          if (!response) return;
           // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
           let endp = response.credentials.endpoint;
           if (endp.split('.')[0] === response.configuration.currentBucket) {
