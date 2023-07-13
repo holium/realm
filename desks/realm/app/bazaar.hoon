@@ -53,22 +53,26 @@
     ^-  (quip card:agent:gall agent:gall)
     =/  old=(unit state-0)
       (mole |.(!<(state-0 vase)))
-    ?^  old  `this(state u.old)
-      :: =|  lexicon-app=native-app:store
-      ::   =.  title.lexicon-app            'Lexicon'
-      ::   =.  color.lexicon-app            '#EEDFC9'
-      ::   =.  icon.lexicon-app             'AppIconLexicon'
-      ::   =.  config.lexicon-app           [size=[3 7] titlebar-border=%.n show-titlebar=%.y]
-      :: =|  trove-app=native-app:store
-      ::   =.  title.trove-app            'Trove'
-      ::   =.  color.trove-app            '#DCDCDC'
-      ::   =.  icon.trove-app             'AppIconTrove'
-      ::   =.  config.trove-app           [size=[7 8] titlebar-border=%.n show-titlebar=%.y]
-      :: :_  this(state u.old)
-      :: :: add two new app entries for Realm's new "native" apps: %trove and %lexicon
-      :: :~  [%pass / %agent [our.bowl %bazaar] %poke bazaar-action+!>([%add-catalog-entry [%os-lexicon lexicon-app]])]
-      ::     [%pass / %agent [our.bowl %bazaar] %poke bazaar-action+!>([%add-catalog-entry [%os-trove trove-app]])]
-      :: ==
+    ?^  old  ::  `this(state u.old)
+      =|  lexicon-app=native-app:store
+        =.  title.lexicon-app            'Lexicon'
+        =.  color.lexicon-app            '#EEDFC9'
+        =.  icon.lexicon-app             'AppIconLexicon'
+        =.  config.lexicon-app           [size=[3 7] titlebar-border=%.n show-titlebar=%.y]
+      =|  trove-app=native-app:store
+        =.  title.trove-app            'Trove'
+        =.  color.trove-app            '#DCDCDC'
+        =.  icon.trove-app             'AppIconTrove'
+        =.  config.trove-app           [size=[7 8] titlebar-border=%.n show-titlebar=%.y]
+      =.  catalog.u.old  (~(del by catalog.u.old) %lexicon)
+      =.  catalog.u.old  (~(del by catalog.u.old) %trove)
+      :_  this(state u.old)
+      :: add two new app entries for Realm's new "native" apps: %trove and %lexicon
+      :~  ::[%pass / %agent [our.bowl %bazaar] %poke bazaar-action+!>([%delete-catalog-entry [%lexicon]]])]
+          [%pass / %agent [our.bowl %bazaar] %poke bazaar-action+!>([%add-catalog-entry [%os-lexicon lexicon-app]])]
+          ::[%pass / %agent [our.bowl %bazaar] %poke bazaar-action+!>([%delete-catalog-entry [%trove]]])]
+          [%pass / %agent [our.bowl %bazaar] %poke bazaar-action+!>([%add-catalog-entry [%os-trove trove-app]])]
+      ==
     %-  (slog leaf+"nuking old %bazaar state" ~) ::  temporarily doing this for making development easier
     =^  cards  this  on-init
     :_  this
@@ -747,8 +751,10 @@
     ++  delete-catalog-entry
       |=  [=app-id:store]
       ^-  (quip card _state)
-      =.  catalog.state  (~(del by catalog.state) app-id)
-      [~ state]
+      ?:  (~(has by catalog.state) app-id)
+        =.  catalog.state  (~(del by catalog.state) app-id)
+        `state
+      `state
     ::
     ::
     ::  $add-catalog-entry
