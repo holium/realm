@@ -42,7 +42,8 @@
     |=(=space ?:(=(-.space our.bowl) ~ (some space)))
   =^  cards  state
     abet:(leave-and-refollow:hc remote-spaces)
-  [cards this]
+  ?:  (~(has by wex.bowl) /spaces [our.bowl %spaces])  [cards this]
+  :_(this [[%pass /spaces %agent [our.bowl %spaces] %watch /updates] cards])
 ::
 ++  on-poke
   |=  [=mark =vase]
