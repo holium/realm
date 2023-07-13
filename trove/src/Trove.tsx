@@ -1,11 +1,5 @@
-import { useEffect } from 'react';
-import {
-  BrowserRouter,
-  Navigate,
-  redirect,
-  Route,
-  Routes,
-} from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import { trovePreload } from '../../app/src/os/services/ship/trove.service';
@@ -53,16 +47,13 @@ export const Trove = ({
   uploadFile,
   deleteFile,
 }: Props) => {
+  const [appInit, setAppInit] = useState(false);
+
   const setShipName = useTroveStore((store: TroveStore) => store.setShipName);
   const setMySpace = useTroveStore((store: TroveStore) => store.setMySpace);
   const setSpace = useTroveStore((store: TroveStore) => store.setSpace);
   const space = useTroveStore((store: TroveStore) => store.space);
   const setApi = useTroveStore((store: TroveStore) => store.setApi);
-
-  useEffect(() => {
-    // Start at the root path.
-    redirect('/');
-  }, []);
 
   useEffect(() => {
     //subscribe to updates here
@@ -91,6 +82,11 @@ export const Trove = ({
     }
   }, [selectedSpace]);
 
+  useEffect(() => {
+    //redirect once using <navigate/>
+    setAppInit(true);
+  }, []);
+
   if (!space) return null;
 
   return (
@@ -103,7 +99,7 @@ export const Trove = ({
       <ThemeProvider theme={muiTheme}>
         <BrowserRouter>
           <Routes>
-            <Route element={<Navigation selectedSpace={selectedSpace} />}>
+            <Route element={<Navigation />}>
               <Route
                 path="/:ship/:group"
                 element={
@@ -122,7 +118,7 @@ export const Trove = ({
               />
             </Route>
           </Routes>
-          <Navigate to={selectedSpace} />
+          {!appInit && <Navigate to={selectedSpace} />}
         </BrowserRouter>
       </ThemeProvider>
     </main>

@@ -48,6 +48,8 @@ export const Lexicon = ({
   update,
   shipName,
 }: Props) => {
+  const [appInit, setAppInit] = useState(false);
+
   const api = useStore((store: Store) => store.api);
   const setApi = useStore((store: Store) => store.setApi);
 
@@ -75,7 +77,6 @@ export const Lexicon = ({
   const setDefinitionVoteMap = useStore(
     (store: Store) => store.setDefinitionVoteMap
   );
-  const [appInit, setAppInit] = useState<boolean>(false);
   const getPathData = async () => {
     if (!space) return;
     setLoadingMain(true);
@@ -316,7 +317,7 @@ export const Lexicon = ({
       <GlobalStyle />
       <BrowserRouter>
         <Routes>
-          <Route element={<Navigation selectedSpace={selectedSpace} />}>
+          <Route element={<Navigation />}>
             <Route path="/:ship/:group/:word" element={<WordPage />} />
             <Route path="/:ship/:group" element={<HomePage />} />
             <Route path="/dict/:word" element={<DictionaryPage />} />
