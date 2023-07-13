@@ -79,4 +79,5 @@ export type MediaAccessStatus =
 export type MediaAccess = {
   camera: MediaAccessStatus;
   mic: MediaAccessStatus;
+  screen: MediaAccessStatus;
 };

@@ -23,6 +23,7 @@ const StandaloneChatRoomPresenter = () => {
 
   const isMuted = roomsStore.ourPeer.isMuted;
   const hasVideo = roomsStore.ourPeer.isVideoOn;
+  const isScreenSharing = roomsStore.ourPeer.isScreenSharing;
 
   useEffect(() => {
     trackEvent('OPENED', 'ROOMS_VOICE');
@@ -128,6 +129,12 @@ const StandaloneChatRoomPresenter = () => {
               icon={hasVideo ? 'VideoOn' : 'VideoOff'}
               onClick={() => {
                 roomsStore.toggleVideo(!hasVideo);
+              }}
+            />
+            <CommButton
+              icon={'ScreenSharing'}
+              onClick={() => {
+                roomsStore.toggleScreenShare(!isScreenSharing);
               }}
             />
           </Flex>

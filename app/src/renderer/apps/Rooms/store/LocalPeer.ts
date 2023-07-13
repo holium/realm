@@ -1,5 +1,7 @@
 import { EventEmitter } from 'events';
-import { action, makeObservable, observable } from 'mobx';
+import { action, makeObservable, observable, runInAction } from 'mobx';
+
+import { MainIPC } from 'renderer/stores/ipc';
 
 import { PeerConnectionState } from './room.types';
 import { IAudioAnalyser, SpeakingDetectionAnalyser } from './SpeakingDetector';
@@ -35,6 +37,7 @@ export class LocalPeer extends EventEmitter {
   @observable isMuted = false;
   @observable isSpeaking = false;
   @observable isVideoOn = false;
+  @observable isScreenSharing = false;
   @observable status: PeerConnectionState = PeerConnectionState.New;
   @observable audioStream: MediaStream | undefined = undefined;
   @observable videoStream: MediaStream | undefined = undefined;
@@ -53,6 +56,7 @@ export class LocalPeer extends EventEmitter {
     makeObservable(this);
     this.patp = ourId;
     this.setAudioStream = this.setAudioStream.bind(this);
+    MainIPC.onScreenshareSource(this.setScreenShareSource.bind(this));
   }
 
   @action
@@ -196,6 +200,77 @@ export class LocalPeer extends EventEmitter {
       track.stop();
     });
     this.videoStream = undefined;
+  }
+
+  @action
+  async enableScreenSharing() {
+    return await MainIPC.askForScreen();
+  }
+
+  @action
+  async setScreenShareSource(source: string) {
+    const options = {
+      // video: {
+      //   deviceId: source,
+      // },
+      video: {
+        mandatory: {
+          chromeMediaSource: 'desktop',
+          chromeMediaSourceId: source,
+          minWidth: 1280,
+          maxWidth: 1280,
+          minHeight: 720,
+          maxHeight: 720,
+        },
+      },
+      audio: false,
+    };
+
+    this.isScreenSharing = true;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(options);
+      this.setScreenStream(stream);
+      this.emit('screenSharingStatusChanged', true);
+      return stream;
+    } catch (err) {
+      console.error('Error: ' + err);
+      runInAction(() => {
+        this.isScreenSharing = false;
+      });
+      return;
+    }
+  }
+
+  @action
+  setScreenStream(stream: MediaStream) {
+    this.screenStream = stream;
+    const video = document.getElementById(
+      `peer-video-${this.patp}`
+    ) as HTMLVideoElement;
+
+    if (video) {
+      video.style.display = 'inline-block';
+      video.srcObject = stream;
+    }
+
+    // pause the video stream if it's currently playing
+    if (this.videoStream) {
+      this.disableVideo();
+    }
+
+    return this.screenStream;
+  }
+
+  @action
+  async disableScreenSharing() {
+    if (this.isScreenSharing) {
+      this.screenStream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
+        track.stop();
+      });
+      this.isScreenSharing = false;
+      this.screenStream = undefined;
+      this.emit('screenSharingStatusChanged', false);
+    }
   }
 
   @action

@@ -304,6 +304,28 @@ export class RoomsStore extends EventsEmitter {
   }
 
   @action
+  async toggleScreenShare(enableScreenSharing: boolean) {
+    if (!enableScreenSharing) {
+      this.peers.forEach((peer) => {
+        if (
+          this.ourPeer.screenStream &&
+          peer.peer.streams.includes(this.ourPeer.screenStream)
+        ) {
+          peer.peer.removeStream(this.ourPeer.screenStream);
+        }
+      });
+      this.ourPeer.disableScreenSharing();
+    } else {
+      const stream = await this.ourPeer.enableScreenSharing();
+      this.peers.forEach((peer) => {
+        if (stream) {
+          peer.setNewStream(stream);
+        }
+      });
+    }
+  }
+
+  @action
   setProvider(provider: string) {
     this.provider = provider;
     this.websocket = this.connect();

@@ -46,6 +46,9 @@ const appPreload = {
   askForCamera: (): Promise<MediaAccessStatus> => {
     return ipcRenderer.invoke('ask-for-camera');
   },
+  askForScreen: (): Promise<MediaAccessStatus> => {
+    return ipcRenderer.invoke('ask-for-screen');
+  },
   getMediaStatus: (): Promise<MediaAccess> => {
     return ipcRenderer.invoke('get-media-status');
   },
@@ -92,6 +95,11 @@ const appPreload = {
     ipcRenderer.invoke('realm-to-app.ephemeral-chat', patp, message);
   },
   /* Receivers */
+  onScreenshareSource(callback: (sourceId: string) => void) {
+    ipcRenderer.on('set-screenshare-source', (_, sourceId) => {
+      callback(sourceId);
+    });
+  },
   onSetFullScreen(callback: (isFullscreen: boolean) => void) {
     ipcRenderer.on('set-fullscreen', (_, isFullscreen) => {
       callback(isFullscreen);
