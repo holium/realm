@@ -78,3 +78,91 @@ export const toUTCDate = (date: Date): Date => {
     )
   );
 };
+export const getDayOfWeekJS = (dayCount: number): string => {
+  //converts js Date.getDay() to a week day string (sunday, monday...)
+  const daysOfWeek = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ];
+  return daysOfWeek[dayCount];
+};
+export const getOccurrenceOfDayInMonth = (
+  date: any,
+  dayOfWeek: number
+): number => {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+
+  const firstOfMonth = new Date(year, month, 1);
+  const firstDayOfWeek = firstOfMonth.getDay();
+
+  let dayOffset = dayOfWeek - firstDayOfWeek;
+  if (dayOffset < 0) {
+    dayOffset += 7;
+  }
+
+  const occurrence = Math.floor((date.getDate() + dayOffset - 1) / 7) + 1;
+  return occurrence;
+};
+export const getMonthAndDay = (date: any): string => {
+  const monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  const month = monthNames[date.getMonth()];
+  const day = date.getDate();
+
+  const formattedDate = `${month} ${day}`;
+  return formattedDate; //august 10..
+};
+export const addOrdinal = (num: number): string => {
+  switch (num) {
+    case 1:
+      return num + 'st';
+      break;
+    case 2:
+      return num + 'nd';
+      break;
+    case 3:
+      return num + 'rd';
+      break;
+    default:
+      return num + 'th';
+  }
+};
+export const addOrdinal2 = (
+  num: number
+): 'first' | 'second' | 'third' | 'fourth' | 'last' => {
+  switch (num) {
+    case 1:
+      return 'first';
+      break;
+    case 2:
+      return 'second';
+      break;
+    case 3:
+      return 'third';
+      break;
+    case 4:
+      return 'fourth';
+      break;
+    default:
+      return 'last';
+  }
+};

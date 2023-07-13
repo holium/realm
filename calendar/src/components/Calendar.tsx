@@ -137,7 +137,7 @@ export const Calendar = ({ events }: Props) => {
         weekends={true}
         headerToolbar={{
           left: 'prev,today,next',
-          // center: 'title',
+          center: 'title', // keeping this to test
           right: 'timeGridDay,timeGridWeek,dayGridMonth', // user can switch between the two
         }}
         height={'calc(100vh - 30px )'}

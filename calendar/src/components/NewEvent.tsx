@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 
 import {
   Button,
@@ -10,12 +10,21 @@ import {
 } from '@holium/design-system';
 
 import { api } from '../api';
-import { convertH2M, log } from '../utils';
+import {
+  addOrdinal,
+  addOrdinal2,
+  convertH2M,
+  getDayOfWeekJS,
+  getMonthAndDay,
+  getOccurrenceOfDayInMonth,
+  log,
+} from '../utils';
 
 interface Props {
   datePickerSelected: any;
   selectedCalendar: string;
 }
+type reccurenceOption = { value: string; label: string };
 // TODO: include every (day like today) reccuring event
 // TODO: changing timepicker also points at selected date in fullcalendar
 export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
@@ -26,14 +35,53 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
 
   const [selectedReccurenceType, setReccurenceType] =
     useState<string>('noRepeat');
-  const reccurenceTypeOptions = [
+  const [reccurenceTypeOptions, setReccurenceTypeOptions] = useState<
+    reccurenceOption[]
+  >([
     { value: 'noRepeat', label: 'Dont repeat' },
     { value: 'everyday', label: 'Everyday' },
     { value: 'weekdays', label: 'Week days (mon to fri)' },
     { value: 'weekend', label: 'Weekend (sat-sun)' },
     { value: 'everyToday', label: 'Every (today)' },
-  ];
+    {
+      value: 'everyMonth',
+      label: 'Monthly on (first/second.... (today) of the month)',
+    },
+    {
+      value: 'everyYearToday',
+      label: 'Annually on (whatever date of the month today is)',
+    },
+  ]);
 
+  useEffect(() => {
+    if (datePickerSelected) {
+      const weekDay = getDayOfWeekJS(datePickerSelected.getDay()); //sunday,monday...
+      const ordinalDayOfMonth =
+        addOrdinal(
+          getOccurrenceOfDayInMonth(
+            datePickerSelected,
+            datePickerSelected.getDay()
+          )
+        ) +
+        ' ' +
+        getDayOfWeekJS(datePickerSelected.getDay()); //1st sunday, monday of the month...
+
+      const monthAndDay = getMonthAndDay(datePickerSelected);
+
+      const newReccurenceTypeOptions: reccurenceOption[] =
+        reccurenceTypeOptions.map((item: reccurenceOption) => {
+          if (item.value === 'everyToday') {
+            return { ...item, label: 'Every ' + weekDay };
+          } else if (item.value === 'everyMonth') {
+            return { ...item, label: 'Monthly on the ' + ordinalDayOfMonth };
+          } else if (item.value === 'everyYearToday') {
+            return { ...item, label: 'Annually on ' + monthAndDay };
+          }
+          return item;
+        }); // add the type
+      setReccurenceTypeOptions(newReccurenceTypeOptions);
+    }
+  }, [datePickerSelected]);
   const createEventLeftSingle = async () => {
     if (!startDate || !endDate || !datePickerSelected || !newEventName) return;
     const startDateMinutes = convertH2M(startDate);
@@ -70,8 +118,9 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
 
     const durationMs = Math.abs(endDateMinutes - startDateMinutes) * 60000; // TODO: if endDate < startDate we have a problem
     try {
+      let result;
       if (selectedReccurenceType === 'everyday') {
-        await api.createSpanPeriodicDaily(
+        result = await api.createSpanPeriodicDaily(
           selectedCalendar,
           startDateMS,
           repeatCountObject,
@@ -81,7 +130,7 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
           newEventDescription
         );
       } else if (selectedReccurenceType === 'weekdays') {
-        await api.createSpanPeriodicWeekly(
+        result = await api.createSpanPeriodicWeekly(
           selectedCalendar,
           startDateMS,
           durationMs,
@@ -90,7 +139,7 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
           newEventDescription
         );
       } else if (selectedReccurenceType === 'weekend') {
-        await api.createSpanPeriodicWeekly(
+        result = await api.createSpanPeriodicWeekly(
           selectedCalendar,
           startDateMS,
           durationMs,
@@ -98,8 +147,53 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
           newEventName,
           newEventDescription
         );
+      } else if (selectedReccurenceType === 'everyToday') {
+        //on all (selected day of week)
+        const selectedWeekDay =
+          datePickerSelected.getDay() === 0
+            ? 6
+            : datePickerSelected.getDay() - 1;
+
+        result = await api.createSpanPeriodicWeekly(
+          selectedCalendar,
+          startDateMS,
+          durationMs,
+          [selectedWeekDay],
+          newEventName,
+          newEventDescription
+        );
+      } else if (selectedReccurenceType === 'everyMonth') {
+        //on all (selected day of week)
+        const selectedWeekDay =
+          datePickerSelected.getDay() === 0
+            ? 6
+            : datePickerSelected.getDay() - 1;
+        const ordinal = addOrdinal2(
+          getOccurrenceOfDayInMonth(
+            datePickerSelected,
+            datePickerSelected.getDay()
+          )
+        );
+        result = await api.createSpanPeriodicMonthlyNthWeekday(
+          selectedCalendar,
+          startDateMS,
+          durationMs,
+          ordinal,
+          selectedWeekDay,
+          newEventName,
+          newEventDescription
+        );
+      } else if (selectedReccurenceType === 'everyYearToday') {
+        //on all (current date of month) for however many years
+        result = await api.createSpanPeriodicYearlyOnDate(
+          selectedCalendar,
+          startDateMS,
+          durationMs,
+          newEventName,
+          newEventDescription
+        );
       }
-      log('createEventPeriodic result =>');
+      log('createEventPeriodic result =>', result);
     } catch (e) {
       log('createEventPeriodic error =>', e);
     }
@@ -113,7 +207,7 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
         onClick={() => {
           log('selectedReccurenceType', selectedReccurenceType);
           if (selectedReccurenceType === 'noRepeat') createEventLeftSingle();
-          else if (selectedReccurenceType === 'everyday') createEventPeriodic();
+          else createEventPeriodic();
         }}
       >
         <Icon name="Plus" size={24} opacity={0.5} />

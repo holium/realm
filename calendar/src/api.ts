@@ -161,6 +161,82 @@ export const api = {
     };
     return api.createApi().poke({ app: 'cal2', mark: 'calendar-action', json });
   },
+  createSpanPeriodicMonthlyNthWeekday: async (
+    calendarId: string,
+    startDateMS: number,
+    durationMS: number,
+    ordinal: 'first' | 'second' | 'third' | 'fourth' | 'last',
+    dayOfWeek: number,
+    name: string,
+    description = ''
+  ) => {
+    const json = {
+      'create-span': {
+        cid: calendarId,
+        dom: {
+          l: 0,
+          r: 10,
+        },
+        rid: '~/left/monthly-nth-weekday-0',
+        kind: {
+          left: {
+            tz: null,
+            d: durationMS,
+          },
+        },
+        args: {
+          Start: {
+            da: startDateMS,
+          },
+          Ordinal: {
+            od: ordinal, // first, second, third, fourth, or last
+          },
+          Weekday: {
+            ud: dayOfWeek, // 0-mon, 1-tue, 2-wed, 3-thu, 4-fri, 5-sat, 6-sun
+          },
+        },
+        meta: {
+          name,
+          description,
+        },
+      },
+    };
+    return api.createApi().poke({ app: 'cal2', mark: 'calendar-action', json });
+  },
+  createSpanPeriodicYearlyOnDate: async (
+    calendarId: string,
+    startDateMS: number,
+    durationMS: number,
+    name: string,
+    description = ''
+  ) => {
+    const json = {
+      'create-span': {
+        cid: calendarId,
+        dom: {
+          l: 0,
+          r: 10,
+        },
+        rid: '~/left/yearly-on-date-0',
+        kind: {
+          left: {
+            tz: null,
+            d: durationMS,
+          },
+        },
+        args: {
+          Start: {
+            da: startDateMS,
+          },
+        },
+        meta: {
+          name,
+          description,
+        },
+      },
+    };
+    return api.createApi().poke({ app: 'cal2', mark: 'calendar-action', json });
+  },
   deleteSpan: async (spanId: string) => {
     const json = {
       'delete-span': {
