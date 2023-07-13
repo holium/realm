@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import styled, { css } from 'styled-components';
 
-import { useToggle } from '@holium/design-system';
 import { Flex, Spinner, Text } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';

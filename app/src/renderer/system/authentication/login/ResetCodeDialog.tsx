@@ -9,9 +9,9 @@ import {
   Icon,
   Spinner,
   Text,
-  TextInput,
-  useToggle,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
+import { useToggle } from '@holium/design-system/util';
 
 import { normalizeBounds } from 'renderer/lib/window-manager';
 import { appState } from 'renderer/stores/app.store';

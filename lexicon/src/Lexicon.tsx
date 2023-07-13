@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { createGlobalStyle } from 'styled-components';
 
 import {
@@ -28,6 +28,7 @@ const GlobalStyle = createGlobalStyle`
     outline: none;
   }
 `;
+
 declare global {
   interface Window {
     ship: string;
@@ -47,6 +48,8 @@ export const Lexicon = ({
   update,
   shipName,
 }: Props) => {
+  const [appInit, setAppInit] = useState(false);
+
   const api = useStore((store: Store) => store.api);
   const setApi = useStore((store: Store) => store.setApi);
 
@@ -74,7 +77,6 @@ export const Lexicon = ({
   const setDefinitionVoteMap = useStore(
     (store: Store) => store.setDefinitionVoteMap
   );
-
   const getPathData = async () => {
     if (!space) return;
     setLoadingMain(true);
@@ -296,37 +298,37 @@ export const Lexicon = ({
   useEffect(() => {
     setShipName(shipName);
   }, [shipName]);
+
+  useEffect(() => {
+    //redirect once using <navigate/>
+    setAppInit(true);
+  }, []);
+
   if (!api) return null;
+
   return (
-    <>
-      <main
-        style={{
-          overflowY: 'auto',
-          height: '100vh',
-          backgroundColor: 'transparent',
-        }}
-      >
-        <GlobalStyle />
-        <Router>
-          <Routes>
-            <Route element={<Navigation selectedSpace={selectedSpace} />}>
-              <Route
-                path="/index.html/:ship/:group/:word"
-                element={<WordPage />}
-              />
-              <Route path="/index.html/:ship/:group" element={<HomePage />} />
-              <Route
-                path="/index.html/dict/:word"
-                element={<DictionaryPage />}
-              />
-              <Route
-                path="/index.html"
-                element={<p>don't mind me just redirecting over here</p>}
-              />
-            </Route>
-          </Routes>
-        </Router>
-      </main>
-    </>
+    <main
+      style={{
+        overflowY: 'auto',
+        height: '100vh',
+        backgroundColor: 'transparent',
+      }}
+    >
+      <GlobalStyle />
+      <BrowserRouter>
+        <Routes>
+          <Route element={<Navigation selectedSpace={selectedSpace} />}>
+            <Route path="/:ship/:group/:word" element={<WordPage />} />
+            <Route path="/:ship/:group" element={<HomePage />} />
+            <Route path="/dict/:word" element={<DictionaryPage />} />
+            <Route
+              path="/"
+              element={<p>don't mind me just redirecting over here</p>}
+            />
+          </Route>
+        </Routes>
+        {!appInit && <Navigate to={selectedSpace} />}
+      </BrowserRouter>
+    </main>
   );
 };

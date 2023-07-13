@@ -1,12 +1,8 @@
 import { MouseEventHandler } from 'react';
 import styled from 'styled-components';
 
-import {
-  Button,
-  ColorVariants,
-  Icon,
-  IconPathsType,
-} from '@holium/design-system';
+import { Button, Icon, IconPathsType } from '@holium/design-system/general';
+import { ColorVariants } from '@holium/design-system/util';
 
 type WindowButtonProps = {
   bgColor?: string;

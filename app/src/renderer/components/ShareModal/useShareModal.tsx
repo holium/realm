@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { observer } from 'mobx-react';
 
-import { IconPathsType } from '@holium/design-system';
+import { IconPathsType } from '@holium/design-system/general';
 
 import { ChatPathType } from 'os/services/ship/chat/chat.types';
 import { useAppState } from 'renderer/stores/app.store';

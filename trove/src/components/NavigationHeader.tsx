@@ -7,6 +7,7 @@ import { WrappedBackground } from '../components';
 import { splitLastOccurrence } from '../helpers';
 import useTroveStore, { TroveStore } from '../store/troveStore';
 import { theme } from '../theme';
+
 export const NavigationHeader = () => {
   const currentSpace = useTroveStore((store: TroveStore) => store.currentSpace);
   const [stlfDisplay, setStflDisplay] = useState<string>('');

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { observer } from 'mobx-react';
 
-import { Button, Flex, Icon, NoScrollBar } from '@holium/design-system';
+import { Button, Flex, Icon, NoScrollBar } from '@holium/design-system/general';
 
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';

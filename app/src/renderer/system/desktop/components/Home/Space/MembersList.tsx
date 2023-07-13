@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 
-import { Flex, Text, WindowedList } from '@holium/design-system';
+import { Flex, Text, WindowedList } from '@holium/design-system/general';
 
 import { PersonRow } from 'renderer/components/People/PersonRow';
 import { useAppState } from 'renderer/stores/app.store';

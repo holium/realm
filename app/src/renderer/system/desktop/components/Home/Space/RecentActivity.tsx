@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react';
 
-import { Flex, Text } from '@holium/design-system';
+import { Flex, Text } from '@holium/design-system/general';
 
 export const RecentActivity = observer(() => (
   <Flex flex={1} flexDirection="column" gap={20}>

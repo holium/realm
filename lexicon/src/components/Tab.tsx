@@ -4,12 +4,13 @@ import { Button, Flex } from '@holium/design-system/general';
 
 import { TabItem } from '../types';
 
-interface TabsProps {
+type Props = {
   value: number;
   tabData: TabItem[];
   onChange: (value: number) => void;
-}
-export const Tabs = ({ value, tabData, onChange }: TabsProps) => {
+};
+
+export const Tabs = ({ value, tabData, onChange }: Props) => {
   return (
     <Flex
       gap={10}
@@ -24,6 +25,8 @@ export const Tabs = ({ value, tabData, onChange }: TabsProps) => {
             fontSize={1}
             fontWeight={item.value === value ? 500 : 400}
             style={{
+              width: 76,
+              alignItems: 'center',
               padding: '2px 0px',
               borderRadius: 0,
               backgroundColor: 'transparent',

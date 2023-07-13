@@ -1,4 +1,4 @@
-import { Dimensions } from '@holium/design-system';
+import { Dimensions } from '@holium/design-system/util';
 
 import { normalizeDimensions } from './window-manager';
 

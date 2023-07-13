@@ -8,7 +8,7 @@ export default {
 } as ComponentMeta<typeof AppTile>;
 
 const lexicon: AppTileType = {
-  id: 'lexicon',
+  id: 'os-lexicon',
   title: 'Lexicon',
   href: {
     glob: {

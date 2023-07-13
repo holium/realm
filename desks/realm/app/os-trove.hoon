@@ -26,7 +26,6 @@
 ::
 ++  on-init
   ^-  (quip card _this)
-  ?.  has-spaces:hc  ~|("ERROR: Must have %spaces installed." !!)
   :_  this
   [%pass /spaces %agent [our.bowl %spaces] %watch /updates]~
 ::
@@ -43,7 +42,8 @@
     |=(=space ?:(=(-.space our.bowl) ~ (some space)))
   =^  cards  state
     abet:(leave-and-refollow:hc remote-spaces)
-  [cards this]
+  ?:  (~(has by wex.bowl) /spaces [our.bowl %spaces])  [cards this]
+  :_(this [[%pass /spaces %agent [our.bowl %spaces] %watch /updates] cards])
 ::
 ++  on-poke
   |=  [=mark =vase]
@@ -96,11 +96,11 @@
     ?+    -.sign  (on-agent:def wire sign)
         %watch-ack
       ?~  p.sign
-        =/  tang  [leaf+"%trove: subscribed to /updates from %spaces."]~
+        =/  tang  [leaf+"%os-trove: subscribed to /updates from %spaces."]~
         ((slog tang) `this)
       =/  tang
         :_  u.p.sign
-        leaf+"%trove: failed to subscribe to /updates from %spaces."
+        leaf+"%os-trove: failed to subscribe to /updates from %spaces."
       ((slog tang) `this)
       ::
         %kick
@@ -161,11 +161,11 @@
         %.  `this
         %-  slog
         :_  ~  
-        leaf+"%trove-client: joining {(spud wire)} succeeded!"
+        leaf+"%os-trove: joining {(spud wire)} succeeded!"
       %.  `this
       %-  slog
       :_  u.p.sign
-      leaf+"%trove-client: joining {(spud wire)} failed!"
+      leaf+"%os-trove: joining {(spud wire)} failed!"
     ::
         %kick
       ~&  "{<dap.bowl>}: got kick from {(spud wire)}, resubscribing..."

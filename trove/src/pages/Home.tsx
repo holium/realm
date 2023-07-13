@@ -167,6 +167,7 @@ export const Home = ({ useStorage, uploadFile, deleteFile }: any) => {
   useEffect(() => {
     getTroves();
   }, [space]);
+
   const getPerm = (
     permObj: any,
     troveName: string

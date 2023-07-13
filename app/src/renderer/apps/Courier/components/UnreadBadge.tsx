@@ -1,4 +1,4 @@
-import { Flex, Text } from '@holium/design-system';
+import { Flex, Text } from '@holium/design-system/general';
 
 export const UnreadBadge = ({ count }: { count: number }) => {
   return (

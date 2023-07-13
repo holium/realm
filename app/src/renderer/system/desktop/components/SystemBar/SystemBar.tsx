@@ -1,4 +1,4 @@
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 
 import { CommunityBar } from './components/CommunityBar';
 import { HomeButton } from './components/HomeButton';

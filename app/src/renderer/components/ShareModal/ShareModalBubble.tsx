@@ -21,6 +21,12 @@ const BubbleWrapper = styled(Flex)`
   span.bubble-fragment ~ span.bubble-fragment {
     display: none;
   }
+
+  /* Set images to a max-height of 150px */
+  span.bubble-fragment img {
+    max-height: 150px;
+    object-fit: contain;
+  }
 `;
 
 export const ShareModalBubble = () => {

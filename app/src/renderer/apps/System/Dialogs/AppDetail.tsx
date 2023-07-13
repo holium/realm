@@ -9,10 +9,10 @@ import {
   Flex,
   Icon,
   IconPathsType,
-  InstallStatus,
   Spinner,
   Text,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
+import { InstallStatus } from '@holium/design-system/os';
 
 import { LinkPreview } from 'renderer/components';
 import { getAppTileFlags } from 'renderer/lib/app';

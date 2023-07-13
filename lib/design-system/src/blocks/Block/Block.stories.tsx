@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { Flex } from '../../';
+import { Flex } from '../../../general';
 import { Block } from './Block';
 
 export default {

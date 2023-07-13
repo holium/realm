@@ -8,7 +8,7 @@ import {
 import disableScroll from 'disable-scroll';
 import { observer } from 'mobx-react';
 
-import { useToggle } from '@holium/design-system';
+import { useToggle } from '@holium/design-system/util';
 
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 import { useShipStore } from 'renderer/stores/ship.store';

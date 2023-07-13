@@ -1,4 +1,4 @@
-import { Flex, Icon, Text } from '@holium/design-system';
+import { Flex, Icon, Text } from '@holium/design-system/general';
 
 import { Store, useStore } from '../store';
 import { log } from '../utils';

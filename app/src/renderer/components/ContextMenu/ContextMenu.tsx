@@ -1,10 +1,9 @@
+import { Card, Portal } from '@holium/design-system/general';
 import {
-  Card,
   MenuItem,
   MenuItemDivider,
   MenuItemProps,
-  Portal,
-} from '@holium/design-system';
+} from '@holium/design-system/navigation';
 
 import { useContextMenu } from 'renderer/components/ContextMenu';
 

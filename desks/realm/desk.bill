@@ -9,7 +9,7 @@
     %spaces-chat
     %notif-db
     %chat-db
-    %trove
+    %os-trove
     %bedrock
     %api-store
 ==

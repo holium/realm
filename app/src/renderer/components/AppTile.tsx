@@ -3,14 +3,8 @@ import { observer } from 'mobx-react';
 import { darken, desaturate, lighten, rgba } from 'polished';
 import styled, { css } from 'styled-components';
 
-import {
-  Box,
-  Flex,
-  Icon,
-  Spinner,
-  Text,
-  textIsLightOrDark,
-} from '@holium/design-system';
+import { Box, Flex, Icon, Spinner, Text } from '@holium/design-system/general';
+import { textIsLightOrDark } from '@holium/design-system/util';
 
 import {
   ContextMenuOption,

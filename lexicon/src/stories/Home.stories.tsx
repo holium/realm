@@ -1,12 +1,13 @@
-import { Flex } from '@holium/design-system';
+import { ComponentMeta } from '@storybook/react';
+
+import { Flex } from '@holium/design-system/general';
 
 import { Home, SearchBar } from '../components';
 
-// eslint-disable-next-line import/no-anonymous-default-export
 export default {
-  title: 'Lexicon/Word List',
   component: Home,
-};
+  title: 'Lexicon/Word List',
+} as ComponentMeta<typeof Home>;
 
 export const Default = () => (
   <Flex flexDirection="column" alignItems={'center'} marginBottom={10}>
@@ -28,6 +29,7 @@ export const Default = () => (
     </Flex>
   </Flex>
 );
+
 const wordList = [
   {
     id: '/~lux/~2023.6.29..15.11.59..0b9d',
@@ -40,6 +42,7 @@ const wordList = [
     createdAt: 1688051660591,
   },
 ];
+
 const voteMap = new Map(
   Object.entries({
     '/~lux/~2023.6.29..15.14.20..9754': {

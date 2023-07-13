@@ -2,7 +2,13 @@ import { FC } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 
-import { Button, Flex, Icon, Spinner, Text } from '@holium/design-system';
+import {
+  Button,
+  Flex,
+  Icon,
+  Spinner,
+  Text,
+} from '@holium/design-system/general';
 
 import { AppTile } from 'renderer/components';
 import { getAppTileFlags } from 'renderer/lib/app';

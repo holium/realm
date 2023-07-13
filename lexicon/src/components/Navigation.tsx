@@ -20,8 +20,9 @@ export const Navigation = ({ selectedSpace }: Props) => {
   const [word, setWord] = useState('');
 
   useEffect(() => {
+    //everytime space changes redirect to that space
     if (selectedSpace) {
-      navigate('/index.html' + selectedSpace);
+      navigate(selectedSpace);
     }
   }, [selectedSpace]);
 

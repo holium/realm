@@ -60,8 +60,8 @@ export const nativeApps: AppManifestMap = {
       hideTitlebarBorder: true,
     },
   },
-  lexicon: {
-    id: 'lexicon',
+  'os-lexicon': {
+    id: 'os-lexicon',
     title: 'Lexicon',
     type: 'native',
     color: '#EEDFC9',
@@ -70,8 +70,8 @@ export const nativeApps: AppManifestMap = {
       hideTitlebarBorder: true,
     },
   },
-  trove: {
-    id: 'trove',
+  'os-trove': {
+    id: 'os-trove',
     title: 'Trove',
     type: 'native',
     color: '#DCDCDC',

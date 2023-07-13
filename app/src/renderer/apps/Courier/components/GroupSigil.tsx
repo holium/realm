@@ -1,6 +1,6 @@
 import { FC } from 'react';
 
-import { Avatar, Flex } from '@holium/design-system';
+import { Avatar, Flex } from '@holium/design-system/general';
 
 import { Patp } from 'os/types';
 import { useShipStore } from 'renderer/stores/ship.store';

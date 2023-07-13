@@ -1,12 +1,13 @@
-import { Flex } from '@holium/design-system';
+import { ComponentMeta } from '@storybook/react';
+
+import { Flex } from '@holium/design-system/general';
 
 import { Dictionary, SearchBar } from '../components';
 
-// eslint-disable-next-line import/no-anonymous-default-export
 export default {
-  title: 'Lexicon/Dictionary Definition',
   component: Dictionary,
-};
+  title: 'Lexicon/Dictionary Definition',
+} as ComponentMeta<typeof Dictionary>;
 
 export const Default = () => (
   <Flex flexDirection="column" alignItems={'center'} marginBottom={10}>

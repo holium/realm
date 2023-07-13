@@ -1,4 +1,4 @@
-import { Anchor, Text } from '@holium/design-system';
+import { Anchor, Text } from '@holium/design-system/general';
 
 import { SettingPane } from '../components/SettingPane';
 import { SettingSection } from '../components/SettingSection';

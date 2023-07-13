@@ -1,6 +1,7 @@
 import { ReactNode, useEffect } from 'react';
 
-import { Flex, Spinner, useToggle } from '@holium/design-system';
+import { Flex, Spinner } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 import { OnboardingStorage } from '@holium/shared';
 
 import { thirdEarthApi } from 'renderer/onboarding/thirdEarthApi';

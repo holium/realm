@@ -3,7 +3,7 @@ import { LayoutGroup, motion, Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
-import { Avatar, Flex, Tooltip } from '@holium/design-system';
+import { Avatar, Flex, Tooltip } from '@holium/design-system/general';
 
 import { useAppState } from 'renderer/stores/app.store';
 

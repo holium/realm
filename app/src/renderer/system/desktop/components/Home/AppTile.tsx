@@ -3,15 +3,9 @@ import { Variants } from 'framer-motion';
 import { observer } from 'mobx-react';
 import styled, { css } from 'styled-components';
 
-import {
-  bgIsLightOrDark,
-  Box,
-  Flex,
-  Icon,
-  InstallStatus,
-  Spinner,
-  Text,
-} from '@holium/design-system';
+import { Box, Flex, Icon, Spinner, Text } from '@holium/design-system/general';
+import { InstallStatus } from '@holium/design-system/os';
+import { bgIsLightOrDark } from '@holium/design-system/util';
 
 import {
   ContextMenuOption,

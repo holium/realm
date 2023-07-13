@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
-import { Box, Flex, Icon, Row, Text } from '@holium/design-system';
+import { Box, Flex, Icon, Row, Text } from '@holium/design-system/general';
 
 import { DocketAppType } from 'renderer/stores/models/bazaar.model';
 

@@ -4,7 +4,13 @@ import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
-import { Button, Flex, Icon, Skeleton, Text } from '@holium/design-system';
+import {
+  Button,
+  Flex,
+  Icon,
+  Skeleton,
+  Text,
+} from '@holium/design-system/general';
 
 import { useShipStore } from 'renderer/stores/ship.store';
 import { BaseDialogProps } from 'renderer/system/dialog/dialogs';

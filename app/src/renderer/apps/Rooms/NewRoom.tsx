@@ -8,8 +8,8 @@ import {
   Icon,
   Spinner,
   Text,
-  TextInput,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
 
 import { useSound } from 'renderer/lib/sound';
 import { useAppState } from 'renderer/stores/app.store';

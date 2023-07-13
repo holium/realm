@@ -17,7 +17,7 @@ class TroveService extends AbstractService<TroveUpdateType> {
   }
   async UIUpdates() {
     return APIConnection.getInstance().conduit.watch({
-      app: 'trove',
+      app: 'os-trove',
       path: '/ui',
       onEvent: (data: any) => {
         //send update to the IPC update handler in app.store
@@ -56,7 +56,7 @@ class TroveService extends AbstractService<TroveUpdateType> {
       },
     };
     return APIConnection.getInstance().conduit.poke({
-      app: 'trove',
+      app: 'os-trove',
       mark: 'trove-action',
       json: newFile,
     });
@@ -83,7 +83,7 @@ class TroveService extends AbstractService<TroveUpdateType> {
       },
     };
     return APIConnection.getInstance().conduit.poke({
-      app: 'trove',
+      app: 'os-trove',
       mark: 'trove-action',
       json: editFile,
     });
@@ -105,7 +105,7 @@ class TroveService extends AbstractService<TroveUpdateType> {
       },
     };
     return APIConnection.getInstance().conduit.poke({
-      app: 'trove',
+      app: 'os-trove',
       mark: 'trove-action',
       json: newTrove,
     });
@@ -122,7 +122,7 @@ class TroveService extends AbstractService<TroveUpdateType> {
       },
     };
     return APIConnection.getInstance().conduit.poke({
-      app: 'trove',
+      app: 'os-trove',
       mark: 'trove-action',
       json: editTrove,
     });
@@ -139,7 +139,7 @@ class TroveService extends AbstractService<TroveUpdateType> {
       },
     };
     return APIConnection.getInstance().conduit.poke({
-      app: 'trove',
+      app: 'os-trove',
       mark: 'trove-action',
       json: remTrove,
     });
@@ -156,7 +156,7 @@ class TroveService extends AbstractService<TroveUpdateType> {
       },
     };
     return APIConnection.getInstance().conduit.poke({
-      app: 'trove',
+      app: 'os-trove',
       mark: 'trove-action',
       json: reperTrove,
     });
@@ -177,7 +177,7 @@ class TroveService extends AbstractService<TroveUpdateType> {
       },
     };
     return APIConnection.getInstance().conduit.poke({
-      app: 'trove',
+      app: 'os-trove',
       mark: 'trove-action',
       json: newFolder,
     });
@@ -195,7 +195,7 @@ class TroveService extends AbstractService<TroveUpdateType> {
     };
 
     return APIConnection.getInstance().conduit.poke({
-      app: 'trove',
+      app: 'os-trove',
       mark: 'trove-action',
       json: removeFolder,
     });
@@ -218,7 +218,7 @@ class TroveService extends AbstractService<TroveUpdateType> {
       },
     };
     return APIConnection.getInstance().conduit.poke({
-      app: 'trove',
+      app: 'os-trove',
       mark: 'trove-action',
       json: removeFile,
     });
@@ -242,7 +242,7 @@ class TroveService extends AbstractService<TroveUpdateType> {
     };
 
     return APIConnection.getInstance().conduit.poke({
-      app: 'trove',
+      app: 'os-trove',
       mark: 'trove-action',
       json: moveFolder,
     });
@@ -267,20 +267,20 @@ class TroveService extends AbstractService<TroveUpdateType> {
       },
     };
     return APIConnection.getInstance().conduit.poke({
-      app: 'trove',
+      app: 'os-trove',
       mark: 'trove-action',
       json: moveNode,
     });
   }
   async getTroves(space: string) {
     return APIConnection.getInstance().conduit.scry({
-      app: 'trove',
+      app: 'os-trove',
       path: '/troves/' + space,
     });
   }
   async getFullState() {
     return APIConnection.getInstance().conduit.scry({
-      app: 'trove',
+      app: 'os-trove',
       path: '/state',
     });
   }
@@ -298,7 +298,7 @@ class TroveService extends AbstractService<TroveUpdateType> {
   }
   async getSpaces() {
     return APIConnection.getInstance().conduit.scry({
-      app: 'trove',
+      app: 'os-trove',
       path: '/hosts',
     });
   }

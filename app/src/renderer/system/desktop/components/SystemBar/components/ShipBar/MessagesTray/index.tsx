@@ -1,7 +1,8 @@
 import { useCallback } from 'react';
 import { observer } from 'mobx-react';
 
-import { BarButton, Flex, Icon } from '@holium/design-system';
+import { Flex, Icon } from '@holium/design-system/general';
+import { BarButton } from '@holium/design-system/os';
 
 import { AppRegistry } from 'renderer/apps/registry';
 import { useTrayApps } from 'renderer/apps/store';

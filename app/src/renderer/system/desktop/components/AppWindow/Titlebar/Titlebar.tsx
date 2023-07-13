@@ -1,6 +1,6 @@
 import { PointerEvent, ReactNode } from 'react';
 
-import { Flex, Text } from '@holium/design-system';
+import { Flex, Text } from '@holium/design-system/general';
 
 import { AppWindowMobxType } from 'renderer/stores/models/window.model';
 
