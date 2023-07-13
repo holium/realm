@@ -38,7 +38,7 @@ export const WordItem = ({ id, word, createdAt, votes, navigate }: Props) => {
     }
   }, [definitionMap, definitionVoteMap]);
   const navigateToWord = () => {
-    navigate('/index.html' + space + '/' + word, {
+    navigate(space + '/' + word, {
       state: { id, word, createdAt, votes },
     });
   };

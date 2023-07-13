@@ -1,11 +1,5 @@
-import { useEffect } from 'react';
-import {
-  BrowserRouter,
-  Navigate,
-  redirect,
-  Route,
-  Routes,
-} from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { createGlobalStyle } from 'styled-components';
 
 import {
@@ -54,6 +48,8 @@ export const Lexicon = ({
   update,
   shipName,
 }: Props) => {
+  const [appInit, setAppInit] = useState(false);
+
   const api = useStore((store: Store) => store.api);
   const setApi = useStore((store: Store) => store.setApi);
 
@@ -81,7 +77,6 @@ export const Lexicon = ({
   const setDefinitionVoteMap = useStore(
     (store: Store) => store.setDefinitionVoteMap
   );
-
   const getPathData = async () => {
     if (!space) return;
     setLoadingMain(true);
@@ -305,8 +300,8 @@ export const Lexicon = ({
   }, [shipName]);
 
   useEffect(() => {
-    // Start at the root path.
-    redirect('/');
+    //redirect once using <navigate/>
+    setAppInit(true);
   }, []);
 
   if (!api) return null;
@@ -322,7 +317,7 @@ export const Lexicon = ({
       <GlobalStyle />
       <BrowserRouter>
         <Routes>
-          <Route element={<Navigation selectedSpace={selectedSpace} />}>
+          <Route element={<Navigation />}>
             <Route path="/:ship/:group/:word" element={<WordPage />} />
             <Route path="/:ship/:group" element={<HomePage />} />
             <Route path="/dict/:word" element={<DictionaryPage />} />
@@ -332,7 +327,7 @@ export const Lexicon = ({
             />
           </Route>
         </Routes>
-        <Navigate to={selectedSpace} />
+        {!appInit && <Navigate to={selectedSpace} />}
       </BrowserRouter>
     </main>
   );
