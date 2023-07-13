@@ -7,7 +7,6 @@ import { HostingDialog, OnboardingStorage } from '@holium/shared';
 import { OnboardingIPC } from 'renderer/stores/ipc';
 
 import { useAppState } from '../../stores/app.store';
-import { thirdEarthApi } from '../thirdEarthApi';
 import { StepProps } from './types';
 
 export const HostingStepPresenter = ({ setStep }: StepProps) => {
@@ -26,24 +25,7 @@ export const HostingStepPresenter = ({ setStep }: StepProps) => {
   };
 
   const onGetHosting = async () => {
-    OnboardingStorage.set({ serverType: 'hosted' });
-
-    // Check if authenticated.
-    const usedToken = OnboardingStorage.get().token;
-    if (!usedToken) setStep('/intermediary-login');
-
-    try {
-      const { email, token } = await thirdEarthApi.refreshToken(
-        usedToken as string
-      );
-      OnboardingStorage.set({ email, token });
-
-      setStep('/choose-id');
-    } catch (error) {
-      console.error(error);
-
-      setStep('/intermediary-login');
-    }
+    window.open('https://hosting.holium.com', '_blank');
   };
 
   const onAddExistingServer = () => {
