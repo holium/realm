@@ -2,8 +2,8 @@
 
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { useToggle } from '@holium/design-system';
 import { Flex } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 
 import { SystemMouseSectionView } from './SystemMouseSectionView';
 

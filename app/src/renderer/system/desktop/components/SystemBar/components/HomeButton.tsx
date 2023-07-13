@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react';
 
-import { BarStyle, HoliumButton } from '@holium/design-system';
+import { BarStyle, HoliumButton } from '@holium/design-system/os';
 
 import { useAppState } from 'renderer/stores/app.store';
 

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
-import { Flex, Spinner } from '@holium/design-system';
+import { Flex, Spinner } from '@holium/design-system/general';
 import { genCSSVariables } from '@holium/shared';
 
 // import { AppType } from 'renderer/stores/models/bazaar.model';

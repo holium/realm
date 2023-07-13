@@ -3,7 +3,7 @@ import { TextSelection, Transaction } from 'prosemirror-state';
 import { Step } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
 
-import { Flex, Text } from '@holium/design-system';
+import { Flex, Text } from '@holium/design-system/general';
 import { useBroadcast } from '@holium/realm-presence';
 
 import { EditorContainer, Header } from './App.styles';

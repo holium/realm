@@ -9,8 +9,8 @@ import {
   Icon,
   Spinner,
   Text,
-  useToggle,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 
 import { AppRegistry } from 'renderer/apps/registry';
 import { useTrayApps } from 'renderer/apps/store';
@@ -29,7 +29,6 @@ interface IPassport {
   onClose: any;
 }
 
-///  aa
 const PassportCardPresenter = ({
   patp,
   color,

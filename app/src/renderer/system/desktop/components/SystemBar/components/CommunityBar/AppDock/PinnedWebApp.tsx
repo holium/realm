@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Reorder } from 'framer-motion';
 import { observer } from 'mobx-react';
 
-import { useToggle } from '@holium/design-system';
 import { TileHighlight } from '@holium/design-system/os';
+import { useToggle } from '@holium/design-system/util';
 
 import { Bookmark } from 'os/services/ship/spaces/tables/bookmarks.table';
 import { ContextMenuOption, useContextMenu } from 'renderer/components';

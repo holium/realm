@@ -1,4 +1,5 @@
-import { CheckBox, Flex, Icon, Row, Text } from '@holium/design-system';
+import { Flex, Icon, Row, Text } from '@holium/design-system/general';
+import { CheckBox } from '@holium/design-system/inputs';
 
 import { ChatAvatar } from 'renderer/apps/Courier/components/ChatAvatar';
 

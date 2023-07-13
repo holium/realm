@@ -1,4 +1,4 @@
-import { Flex, Text } from '@holium/design-system';
+import { Flex, Text } from '@holium/design-system/general';
 
 type SettingTitleProps = {
   title: string;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
-import { Button, Card, Flex, Icon, Menu, Text } from '@holium/design-system';
+import { Button, Card, Flex, Icon, Text } from '@holium/design-system/general';
+import { Menu } from '@holium/design-system/navigation';
 
 import { Sentences, TabPanel, Tabs, WordDefinitions } from '../components';
 import { TabItem } from '../types';
@@ -10,7 +11,8 @@ const tabData: TabItem[] = [
   { label: 'Definitions', value: 0 },
   { label: 'Sentences', value: 1 },
 ];
-interface Props {
+
+type Props = {
   space: string | null;
   state: any;
   definitionList: any;
@@ -18,7 +20,8 @@ interface Props {
   votes: any;
   removeWord: any;
   goToDict: any;
-}
+};
+
 export const Word = ({
   space,
   state,

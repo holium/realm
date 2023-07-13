@@ -2,7 +2,13 @@ import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 import styled from 'styled-components';
 
-import { Avatar, Button, Flex, Icon, Text } from '@holium/design-system';
+import {
+  Avatar,
+  Button,
+  Flex,
+  Icon,
+  Text,
+} from '@holium/design-system/general';
 
 import { useShipStore } from 'renderer/stores/ship.store';
 

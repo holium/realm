@@ -6,9 +6,9 @@ import {
   fetchOGData,
   measureImage,
   measureTweet,
-  parseMediaType,
-  WindowedListRef,
-} from '@holium/design-system';
+} from '@holium/design-system/blocks';
+import { WindowedListRef } from '@holium/design-system/general';
+import { parseMediaType } from '@holium/design-system/util';
 
 import { useTrayApps } from 'renderer/apps/store';
 import { trackEvent } from 'renderer/lib/track';

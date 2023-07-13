@@ -1,7 +1,10 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
 import { motion, MotionStyle, Variant } from 'framer-motion';
 
-import { contrastAwareBlackOrWhiteRgb, Position } from '@holium/design-system';
+import {
+  contrastAwareBlackOrWhiteRgb,
+  Position,
+} from '@holium/design-system/util';
 import { MouseState } from '@holium/realm-presence';
 
 import { IsDevice } from './isDevice';

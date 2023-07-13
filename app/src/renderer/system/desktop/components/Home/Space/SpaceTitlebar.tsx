@@ -1,7 +1,7 @@
 import { MouseEvent } from 'react';
 import { observer } from 'mobx-react';
 
-import { Button, Flex, Icon } from '@holium/design-system';
+import { Button, Flex, Icon } from '@holium/design-system/general';
 
 import { SpacePicture } from 'renderer/components';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';

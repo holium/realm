@@ -1,7 +1,7 @@
 import { MouseEvent, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 
-import { Flex, Row, Text } from '@holium/design-system';
+import { Flex, Row, Text } from '@holium/design-system/general';
 
 import {
   ContextMenuOption,

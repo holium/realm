@@ -45,7 +45,7 @@ export const DictDefinition = ({
                 color="accent"
                 style={{ cursor: 'pointer' }}
                 onClick={() => {
-                  navigate('../index.html/dict/' + word);
+                  navigate('../dict/' + word);
                 }}
               >
                 {word}
@@ -66,7 +66,7 @@ export const DictDefinition = ({
                 color="accent"
                 style={{ cursor: 'pointer' }}
                 onClick={() => {
-                  navigate('../index.html/dict/' + word);
+                  navigate('../dict/' + word);
                 }}
               >
                 {word}

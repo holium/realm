@@ -1,7 +1,8 @@
 import { FC, useCallback } from 'react';
 import { observer } from 'mobx-react';
 
-import { BarButton, Icon } from '@holium/design-system';
+import { Icon } from '@holium/design-system/general';
+import { BarButton } from '@holium/design-system/os';
 
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/lib/position';

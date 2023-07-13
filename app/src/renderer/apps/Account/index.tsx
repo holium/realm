@@ -1,6 +1,12 @@
 import { observer } from 'mobx-react';
 
-import { Avatar, Button, Flex, Icon, Text } from '@holium/design-system';
+import {
+  Avatar,
+  Button,
+  Flex,
+  Icon,
+  Text,
+} from '@holium/design-system/general';
 
 import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';

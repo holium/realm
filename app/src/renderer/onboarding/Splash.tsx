@@ -3,7 +3,7 @@ import { Fill } from 'react-spaces';
 import { AnimatePresence, motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 
 import { useSound } from 'renderer/lib/sound';
 import { useAppState } from 'renderer/stores/app.store';

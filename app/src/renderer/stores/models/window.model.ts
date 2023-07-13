@@ -1,7 +1,7 @@
 // Bounds are using the realm.config 1-10 scale.
 import { Instance, SnapshotIn, types } from 'mobx-state-tree';
 
-import { Dimensions } from '@holium/design-system';
+import { Dimensions } from '@holium/design-system/util';
 
 import {
   getMaximizedBounds,

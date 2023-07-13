@@ -1,27 +1,21 @@
 import { useEffect, useRef } from 'react';
 
-import {
-  Avatar,
-  Box,
-  Flex,
-  MenuItemProps,
-  Row,
-  Text,
-  useToggle,
-} from '@holium/design-system';
+import { Avatar, Box, Flex, Row, Text } from '@holium/design-system/general';
+import { MenuItemProps } from '@holium/design-system/navigation';
+import { useToggle } from '@holium/design-system/util';
 
 import { useContextMenu } from 'renderer/components/ContextMenu';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { usePassportMenu } from './usePassportMenu';
 
-interface IPersonRow {
+type Props = {
   listId: string;
   patp: string;
   shortPatp: string;
   contextMenuOptions?: MenuItemProps[];
   children?: any;
-}
+};
 
 export const PersonRow = ({
   listId,
@@ -29,7 +23,7 @@ export const PersonRow = ({
   shortPatp,
   contextMenuOptions,
   children,
-}: IPersonRow) => {
+}: Props) => {
   const rowRef = useRef<HTMLDivElement>(null);
   const { getOptions, setOptions } = useContextMenu();
   const { getMenuConfig, setMenuConfig } = usePassportMenu();

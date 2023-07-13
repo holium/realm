@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { LayoutGroup } from 'framer-motion';
 import { observer } from 'mobx-react';
 
-import { Flex, Spinner, Text } from '@holium/design-system';
+import { Flex, Spinner, Text } from '@holium/design-system/general';
 
 import { useTrayApps } from 'renderer/apps/store';
 import { useShipStore } from 'renderer/stores/ship.store';

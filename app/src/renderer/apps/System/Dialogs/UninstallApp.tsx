@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react';
 
-import { Button, Flex, Text } from '@holium/design-system';
+import { Button, Flex, Text } from '@holium/design-system/general';
 
 import { normalizeBounds } from 'renderer/lib/window-manager';
 import { useAppState } from 'renderer/stores/app.store';

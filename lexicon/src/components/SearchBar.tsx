@@ -55,9 +55,9 @@ export const SearchBar = ({
     //if we navigate using the search bar, make sure it's closed
     setAddModalOpen(false);
     if (webSearch) {
-      navigate('/index.html/dict/' + word);
+      navigate('/dict/' + word);
     } else {
-      navigate('/index.html' + space + '/' + word, {
+      navigate(space + '/' + word, {
         state: { id, word, createdAt, votes, webSearch },
       });
     }

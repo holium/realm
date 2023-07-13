@@ -3,7 +3,7 @@ import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { keyframes, styled } from '@stitches/react';
 import { observer } from 'mobx-react';
 
-import { Button, Flex, Text } from '@holium/design-system';
+import { Button, Flex, Text } from '@holium/design-system/general';
 
 import { calculatePopoverAnchorById } from 'renderer/lib/position';
 import { useShipStore } from 'renderer/stores/ship.store';

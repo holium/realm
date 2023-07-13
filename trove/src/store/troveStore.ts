@@ -4,10 +4,12 @@ import { trovePreload } from '../../../app/src/os/services/ship/trove.service';
 import { Role } from '../types';
 
 export type Folder = null | string;
+
 type Node = null | {
   id: string;
   type: 'file' | 'folder';
 };
+
 export interface TroveStore {
   api: null | typeof trovePreload;
   setApi: (api: typeof trovePreload) => void;

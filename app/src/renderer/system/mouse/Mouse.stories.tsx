@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 
 import { AnimatedCursor } from './AnimatedCursor';
 import { StandAloneMouse } from './StandAloneMouse';

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { observer } from 'mobx-react';
 
-import { Box, Button, Icon } from '@holium/design-system';
+import { Box, Button, Icon } from '@holium/design-system/general';
 
 import { AppTile, ContextMenuOption } from 'renderer/components';
 import { getAppTileFlags } from 'renderer/lib/app';

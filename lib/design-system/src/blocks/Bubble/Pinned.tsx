@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 
-import { Box, BoxProps, capitalizeFirstLetter, Flex, Text } from '../../index';
+import { Box, BoxProps, Flex, Text } from '../../../general';
+import { capitalizeFirstLetter } from '../../util/strings';
 import { BubbleAuthor } from './Bubble.styles';
 import { FragmentImageType, FragmentType, TEXT_TYPES } from './Bubble.types';
 import { renderFragment } from './renderFragment';

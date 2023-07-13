@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { Button, CheckBox, Flex, Text } from '@holium/design-system';
+import { Button, Flex, Text } from '@holium/design-system/general';
+import { CheckBox } from '@holium/design-system/inputs';
 
 import { MediaAccess, MediaAccessStatus } from 'os/types';
 import { MainIPC } from 'renderer/stores/ipc';

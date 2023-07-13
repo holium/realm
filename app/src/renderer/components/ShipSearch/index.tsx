@@ -12,7 +12,7 @@ import {
   Row,
   Text,
   WindowedList,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
 
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
