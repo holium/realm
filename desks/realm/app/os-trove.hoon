@@ -26,7 +26,6 @@
 ::
 ++  on-init
   ^-  (quip card _this)
-  ?.  has-spaces:hc  ~|("ERROR: Must have %spaces installed." !!)
   :_  this
   [%pass /spaces %agent [our.bowl %spaces] %watch /updates]~
 ::
