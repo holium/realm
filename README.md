@@ -1,6 +1,6 @@
 # Holium Realm
 
-The GUI for a new network OS.
+The GUI for Realm OS.
 
 ## Directory structure
 
