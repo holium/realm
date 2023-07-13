@@ -46,11 +46,6 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
     window.electron.app.onMouseUp(() => {
       canClick.setToggle(true);
     });
-
-    return () => {
-      window.electron.app.removeOnMouseMove();
-      window.electron.app.removeOnMouseUp();
-    };
   }, []);
 
   if (!currentSpace) return null;
