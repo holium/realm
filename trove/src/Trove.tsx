@@ -99,7 +99,7 @@ export const Trove = ({
       <ThemeProvider theme={muiTheme}>
         <BrowserRouter>
           <Routes>
-            <Route element={<Navigation />}>
+            <Route element={<Navigation selectedSpace={selectedSpace} />}>
               <Route
                 path="/:ship/:group"
                 element={

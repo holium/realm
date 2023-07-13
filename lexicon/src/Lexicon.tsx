@@ -317,7 +317,7 @@ export const Lexicon = ({
       <GlobalStyle />
       <BrowserRouter>
         <Routes>
-          <Route element={<Navigation />}>
+          <Route element={<Navigation selectedSpace={selectedSpace} />}>
             <Route path="/:ship/:group/:word" element={<WordPage />} />
             <Route path="/:ship/:group" element={<HomePage />} />
             <Route path="/dict/:word" element={<DictionaryPage />} />
