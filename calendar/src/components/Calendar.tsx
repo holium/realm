@@ -6,6 +6,9 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import { createGlobalStyle } from 'styled-components';
 
 import { Card } from '@holium/design-system';
+
+import { Event } from './Event';
+
 const CalendarStyle = createGlobalStyle`
 
 
@@ -141,11 +144,9 @@ export const Calendar = ({ events }: Props) => {
           right: 'timeGridDay,timeGridWeek,dayGridMonth', // user can switch between the two
         }}
         height={'calc(100vh - 30px )'}
-        /*  eventClick={(data: any) => {
-          const eventData = data?.event["_def"];
-          console.log("eventData => ", eventData);
-          setSelectedEvent(eventData.publicId);
-          calendarApiFoo();
+        /* eventClick={(data: any) => {
+          const eventData = data?.event['_def'];
+          log('eventData => ', eventData);
         }}*/
         events={events}
         selectable
@@ -153,7 +154,11 @@ export const Calendar = ({ events }: Props) => {
           //for selecting a range
           console.log('selectInfo', selectInfo);
         }}
+        eventContent={renderEvent}
       />
     </Card>
   );
+};
+const renderEvent = (eventInfo: any) => {
+  return <Event eventInfo={eventInfo} />;
 };

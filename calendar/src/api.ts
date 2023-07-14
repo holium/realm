@@ -237,9 +237,10 @@ export const api = {
     };
     return api.createApi().poke({ app: 'cal2', mark: 'calendar-action', json });
   },
-  deleteSpan: async (spanId: string) => {
+  deleteSpan: async (calendarId: string, spanId: string) => {
     const json = {
       'delete-span': {
+        cid: calendarId,
         eid: spanId,
       },
     };

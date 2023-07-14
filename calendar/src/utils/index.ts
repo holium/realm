@@ -166,3 +166,6 @@ export const addOrdinal2 = (
       return 'last';
   }
 };
+export const formatHoursMinutes = (date: any): string => {
+  return date.getHours() + ':' + date.getMinutes(); // => hh:mm
+};

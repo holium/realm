@@ -140,10 +140,15 @@ export const App = () => {
         const startDate = new Date(item.instance?.instance.start);
         const endDate = new Date(item.instance?.instance.end);
         // TODO: make a typescript type for events in the project
+        //params starting with _ are included in event's extendedProps (passed to <Event /> component)
         newEvents.push({
           id: '/' + item.idx + item.mid,
           start: startDate, //js date object
           end: endDate, //js date object
+          _startDate: startDate,
+          _endDate: endDate,
+          _spanId: span.id,
+          _calendarId: selectedCalendar,
           title: metaData.name,
           description: metaData.description,
         });
