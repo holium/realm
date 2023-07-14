@@ -13,7 +13,7 @@ import ChatService from './chat/chat.service';
 import { FriendsService } from './friends/friends.service';
 import LexiconService from './lexicon/lexicon.service';
 import NotificationsService from './notifications/notifications.service';
-import { SettingsService } from './settings.service';
+import { SettingsService } from './settings/settings.service';
 import { ShipDB } from './ship.db';
 import { Credentials } from './ship.types.ts';
 import BazaarService from './spaces/bazaar.service';

@@ -6,7 +6,7 @@ import { MouseState } from '@holium/realm-presence';
 import { ConduitState } from 'os/services/api';
 import { migrationPreload } from 'os/services/migration/migration.service';
 import { lexiconPreload } from 'os/services/ship/lexicon/lexicon.service';
-import { settingsPreload } from 'os/services/ship/settings.service';
+import { settingsPreload } from 'os/services/ship/settings/settings.service';
 import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
 import { trovePreload } from 'os/services/ship/trove/trove.service';

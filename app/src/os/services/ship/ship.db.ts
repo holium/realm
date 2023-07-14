@@ -8,7 +8,7 @@ import {
   notifInitSql,
   notifWipeSql,
 } from './notifications/notifications.table';
-import { settingsInitSql, settingsWipeSql } from './settings.service';
+import { settingsInitSql, settingsWipeSql } from './settings/settings.service';
 import { Credentials } from './ship.types.ts';
 import {
   spacesTablesInitSql,

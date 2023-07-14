@@ -8,7 +8,7 @@ import { chatPreload } from 'os/services/ship/chat/chat.service';
 import { friendsPreload } from 'os/services/ship/friends/friends.service';
 import { lexiconPreload } from 'os/services/ship/lexicon/lexicon.service';
 import { notifPreload } from 'os/services/ship/notifications/notifications.service';
-import { settingsPreload } from 'os/services/ship/settings.service';
+import { settingsPreload } from 'os/services/ship/settings/settings.service';
 import { shipPreload } from 'os/services/ship/ship.service';
 import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
