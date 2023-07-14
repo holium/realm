@@ -3,7 +3,7 @@ import Database from 'better-sqlite3-multiple-ciphers';
 import { Migration, MigrationService } from '../migration/migration.service';
 import { CHAT_TABLES, chatInitSql, chatWipeSql } from './chat/chat.schema';
 import { friendsInitSql, friendsWipeSql } from './friends.service';
-import { lexiconInitSql, lexiconWipeSql } from './lexicon.tables';
+import { lexiconInitSql, lexiconWipeSql } from './lexicon/lexicon.tables';
 import {
   notifInitSql,
   notifWipeSql,

@@ -11,7 +11,7 @@ import { APIConnection, ConduitSession } from '../api';
 import AuthService from '../auth/auth.service';
 import ChatService from './chat/chat.service';
 import { FriendsService } from './friends.service';
-import LexiconService from './lexicon.service';
+import LexiconService from './lexicon/lexicon.service';
 import NotificationsService from './notifications/notifications.service';
 import { SettingsService } from './settings.service';
 import { ShipDB } from './ship.db';
