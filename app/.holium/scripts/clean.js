@@ -12,6 +12,6 @@ const commandMap = {
 args.forEach((x) => {
   const pathToRemove = commandMap[x];
   if (pathToRemove !== undefined) {
-    rimrafSync(pathToRemove);
+    rimrafSync(pathToRemove, { glob: true });
   }
 });
