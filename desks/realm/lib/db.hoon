@@ -1254,6 +1254,8 @@
             [%comment (de-comment (~(got by p.jon) 'data'))]
           %relay
             [%relay (de-relay (~(got by p.jon) 'data'))]
+          %creds
+            [%creds (de-creds (~(got by p.jon) 'data'))]
         ==
       [
         (pa (~(got by p.jon) 'path'))
@@ -1298,6 +1300,16 @@
           [%parent-type (se %tas)]
           [%parent-id de-id]
           [%parent-path pa]
+      ==
+    ::
+    ++  de-creds
+      %-  ot
+      :~  [%endpoint so]
+          [%access-key-id so]
+          [%secret-access-key so]
+          [%buckets (as so)]
+          [%current-bucket so]
+          [%region so]
       ==
     ::
     ++  de-comment
