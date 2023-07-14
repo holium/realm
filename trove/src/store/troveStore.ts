@@ -1,6 +1,6 @@
 import create from 'zustand';
 
-import { trovePreload } from '../../../app/src/os/services/ship/trove.service';
+import { trovePreload } from '../../../app/src/os/services/ship/trove/trove.service';
 import { Role } from '../types';
 
 export type Folder = null | string;
