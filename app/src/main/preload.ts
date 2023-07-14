@@ -15,7 +15,7 @@ import { realmPreload } from '../os/realm.service';
 import { authPreload } from '../os/services/auth/auth.service';
 import { onboardingPreload } from '../os/services/auth/onboarding.service';
 import { chatPreload } from '../os/services/ship/chat/chat.service';
-import { friendsPreload } from '../os/services/ship/friends.service';
+import { friendsPreload } from '../os/services/ship/friends/friends.service';
 import { notifPreload } from '../os/services/ship/notifications/notifications.service';
 import { shipPreload } from '../os/services/ship/ship.service';
 import { appPublishersDBPreload } from '../os/services/ship/spaces/tables/appPublishers.table';

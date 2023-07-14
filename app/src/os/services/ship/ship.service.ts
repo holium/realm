@@ -10,7 +10,7 @@ import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection, ConduitSession } from '../api';
 import AuthService from '../auth/auth.service';
 import ChatService from './chat/chat.service';
-import { FriendsService } from './friends.service';
+import { FriendsService } from './friends/friends.service';
 import LexiconService from './lexicon/lexicon.service';
 import NotificationsService from './notifications/notifications.service';
 import { SettingsService } from './settings.service';

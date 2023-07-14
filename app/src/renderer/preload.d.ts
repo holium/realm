@@ -5,7 +5,7 @@ import { authPreload } from 'os/services/auth/auth.service';
 import { onboardingPreload } from 'os/services/auth/onboarding.service';
 import { migrationPreload } from 'os/services/migration/migration.service';
 import { chatPreload } from 'os/services/ship/chat/chat.service';
-import { friendsPreload } from 'os/services/ship/friends.service';
+import { friendsPreload } from 'os/services/ship/friends/friends.service';
 import { lexiconPreload } from 'os/services/ship/lexicon/lexicon.service';
 import { notifPreload } from 'os/services/ship/notifications/notifications.service';
 import { settingsPreload } from 'os/services/ship/settings.service';
