@@ -18,7 +18,7 @@ import { ShipDB } from './ship.db';
 import { Credentials } from './ship.types.ts';
 import BazaarService from './spaces/bazaar.service';
 import SpacesService from './spaces/spaces.service';
-import TroveService from './trove.service';
+import TroveService from './trove/trove.service';
 import WalletService from './wallet/wallet.service';
 
 export type S3CredentialsAndConfig = {

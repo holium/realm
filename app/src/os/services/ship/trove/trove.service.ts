@@ -1,8 +1,8 @@
 // @ts-nocheck
 import Database from 'better-sqlite3-multiple-ciphers';
 
-import AbstractService, { ServiceOptions } from '../abstract.service';
-import { APIConnection } from '../api';
+import AbstractService, { ServiceOptions } from '../../abstract.service';
+import { APIConnection } from '../../api';
 import { TroveUpdateType } from './trove.types';
 
 class TroveService extends AbstractService<TroveUpdateType> {
