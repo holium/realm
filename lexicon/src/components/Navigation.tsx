@@ -6,7 +6,10 @@ import { Flex } from '@holium/design-system/general';
 import { Store, useStore } from '../store';
 import { AddWord, SearchBar } from '.';
 
-export const Navigation = () => {
+interface Props {
+  selectedSpace: string;
+}
+export const Navigation = ({ selectedSpace }: Props) => {
   const { ship, group, word: wordView } = useParams();
   //presisted space data for filtering search correctly
   const navigate = useNavigate();
@@ -15,6 +18,13 @@ export const Navigation = () => {
   const setSpace = useStore((state: Store) => state.setSpace);
 
   const [word, setWord] = useState('');
+
+  useEffect(() => {
+    //everytime space changes redirect to that space
+    if (selectedSpace) {
+      navigate(selectedSpace);
+    }
+  }, [selectedSpace]);
 
   useEffect(() => {
     //We care about knowing the space id, either through params {ship}/{group} or space id which is the same thing

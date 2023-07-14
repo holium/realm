@@ -46,11 +46,6 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
     window.electron.app.onMouseUp(() => {
       canClick.setToggle(true);
     });
-
-    return () => {
-      window.electron.app.removeOnMouseMove();
-      window.electron.app.removeOnMouseUp();
-    };
   }, []);
 
   if (!currentSpace) return null;
@@ -65,8 +60,7 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
     setItems(nextState);
     const newGrid = Object();
 
-    // eslint-disable-next-line array-callback-return
-    nextState.map((app, index: number) => {
+    nextState.forEach((app, index: number) => {
       newGrid[index] = app.id;
     });
     bazaarStore.reorderApp(sourceIndex, targetIndex, newGrid);

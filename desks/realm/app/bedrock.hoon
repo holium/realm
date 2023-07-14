@@ -96,6 +96,8 @@
 
       %create-initial-spaces-paths
         (create-initial-spaces-paths:db state bowl)
+      %toggle-hide-logs
+        (toggle-hide-logs:db +.act state bowl)
     ==
     [cards this]
   ::
@@ -131,7 +133,7 @@
           =/  thepathrow    (~(got by paths.state) t.t.path)
           :: if the @da they passed was behind, %give them the current version, and %kick them
           ?:  (gth updated-at.thepathrow t)
-            ~&  >>>  "{<src.bowl>} tried to sub on old @da {<t>}, %kicking them"
+            ::~&  >>>  "{<src.bowl>} tried to sub on old @da {<t>}, %kicking them"
             =/  thepeers    (~(got by peers.state) t.t.path)
             =/  tbls        (tables-by-path:db tables.state t.t.path)
             =/  dels=(list [@da db-del-change])
@@ -151,7 +153,7 @@
           ::=/  thepathrow   (~(get by paths-table.state) t.t.path)
           :::~  [%give %fact ~ chat-path-row+!>(thepathrow)]
           ::==
-          ~&  >  "{(scow %p src.bowl)} subbed to {(spud path)}"
+          ::~&  >  "{(scow %p src.bowl)} subbed to {(spud path)}"
           ~
       :: /vent/~zod/~2000.1.1
         [%vent @ @ ~] :: poke response comes on this path
@@ -209,32 +211,32 @@
     ^-  (quip card _this)
     ?+    wire  ~&(wire ~&(sign !!))
       [%remote-scry %callback ~]
-        ~&  >  "remote-scry/callback on-agent {<-.sign>}"
-        ~&  +.sign
+        ::~&  >  "remote-scry/callback on-agent {<-.sign>}"
+        ::~&  +.sign
         `this
       [%dbpoke ~]
         ?+    -.sign  `this
           %poke-ack
             ?~  p.sign  `this
-            ~&  >>>  "%db: {<(spat wire)>} dbpoke failed"
-            ~&  >>>  p.sign
+            ::~&  >>>  "%db: {<(spat wire)>} dbpoke failed"
+            ::~&  >>>  p.sign
             `this
         ==
       [%selfpoke ~]
         ?+    -.sign  `this
           %poke-ack
             ?~  p.sign  `this
-            ~&  >>>  "%db: {<(spat wire)>} selfpoke failed"
+            ::~&  >>>  "%db: {<(spat wire)>} selfpoke failed"
             `this
         ==
       [%spaces ~]
         ?+    -.sign  !!
           %watch-ack
             ?~  p.sign  %-  (slog leaf+"{<dap.bowl>}: subscribed to spaces" ~)  `this
-            ~&  >>>  "{<dap.bowl>}: spaces subscription failed"
+            ::~&  >>>  "{<dap.bowl>}: spaces subscription failed"
             `this
           %kick
-            ~&  >  "{<dap.bowl>}: spaces kicked us, resubscribing..."
+            ::~&  >  "{<dap.bowl>}: spaces kicked us, resubscribing..."
             :_  this
             :~  [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
             ==
@@ -255,20 +257,20 @@
         ?-    -.sign
           %poke-ack
             ?~  p.sign  `this
-            ~&  >>>  "%db: {<(spat wire)>} /next/[path] failed"
-            ~&  >>>  p.sign
+            ::~&  >>>  "%db: {<(spat wire)>} /next/[path] failed"
+            ::~&  >>>  p.sign
             `this
           %watch-ack
             ?~  p.sign  `this
-            ~&  >>>  "{<dap.bowl>}: /next/[path] subscription failed"
+            ::~&  >>>  "{<dap.bowl>}: /next/[path] subscription failed"
             `this
           %kick
             =/  pathrow    (~(get by paths.state) +.wire)
             ?:  =(~ pathrow)
-              ~&  >>>  "got a %kick on {(spud +.wire)} that we are ignoring because that path is not in our state"
+              ::~&  >>>  "got a %kick on {(spud +.wire)} that we are ignoring because that path is not in our state"
               `this
             =/  newpath  (weld /next/(scot %da updated-at:(need pathrow)) path:(need pathrow))
-            ~&  >  "{<dap.bowl>}: /next/[path] kicked us, resubbing {(spud newpath)}"
+            ::~&  >  "{<dap.bowl>}: /next/[path] kicked us, resubbing {(spud newpath)}"
             :_  this
             :~
               [%pass wire %agent [src.bowl dap.bowl] %watch newpath]
@@ -280,7 +282,7 @@
             ^-  (quip card state-0)
             =/  dbpath=path         +.wire
             =/  factmark  -.+.sign
-            ~&  >>  "%fact on {(spud wire)}: {<factmark>}"
+            ::~&  >>  "%fact on {(spud wire)}: {<factmark>}"
             ?+  factmark
               :: default case:
                 ~&  >>>  "UNHANDLED FACT type"
@@ -307,7 +309,7 @@
                         ?>  ?=(%relay -.data.row.change)
                         =/  uobj=(unit row)  (get-db:db type.data.row.change path.data.row.change id.data.row.change state)
                         ?~  uobj :: if we DONT have the obj already, remote-scry it
-                          ~&  >>>  "asking for remote-scry"
+                          ::~&  >>>  "asking for remote-scry"
                           :~  [
                             %pass
                             /remote-scry/callback
@@ -323,7 +325,7 @@
                         ?.  ?=(%relay type.row.change)  ~
                         ?>  ?=(%relay -.data.row.change)
                         ?:  deleted.data.row.change  ~  :: if the root-obj is deleted, don't remote-scry it
-                        ~&  >>>  "asking for remote-scry"
+                        ::~&  >>>  "asking for remote-scry"
                         :~  [
                           %pass
                           /remote-scry/callback
@@ -392,7 +394,7 @@
                             ?=(%relay -.data.row.change)
                             =(%.y deleted.data.row.change)
                         ==
-                      ~&  >>>  "{<our.bowl>} is del-db ing {<type.data.row.change>} {<ship.id.data.row.change>} {<t.id.data.row.change>}"
+                      ::~&  >>>  "{<our.bowl>} is del-db ing {<type.data.row.change>} {<ship.id.data.row.change>} {<t.id.data.row.change>}"
                       (del-db:db type.data.row.change path.data.row.change id.data.row.change state (add now.bowl index))
                     state
                   $(index +(index), state (process-db-change:db dbpath change state bowl), result-cards (weld (weld result-cards new-scry) pokes))
@@ -436,15 +438,15 @@
         ?-    -.sign
           %poke-ack
             ?~  p.sign  `this
-            ~&  >>>  "%realm-chat: {<(spat wire)>} dbpoke failed"
-            ~&  >>>  p.sign
+            ::~&  >>>  "%realm-chat: {<(spat wire)>} dbpoke failed"
+            ::~&  >>>  p.sign
             `this
           %watch-ack
             ?~  p.sign  `this
-            ~&  >>>  "{<dap.bowl>}: /db subscription failed"
+            ::~&  >>>  "{<dap.bowl>}: /db subscription failed"
             `this
           %kick
-            ~&  >  "{<dap.bowl>}: /db kicked us, resubscribing..."
+            ::~&  >  "{<dap.bowl>}: /db kicked us, resubscribing..."
             :_  this
             :~
               [%pass /db %agent [our.bowl %chat-db] %watch /db]
@@ -457,7 +459,7 @@
   ++  on-leave
     |=  =path
     ^-  (quip card _this)
-    ~&  "Unsubscribe by: {<src.bowl>} on: {<path>}"
+    ::~&  "Unsubscribe by: {<src.bowl>} on: {<path>}"
     `this
   ::
   ++  on-arvo
@@ -465,7 +467,7 @@
     ^-  (quip card _this)
     ?+  wire  !!
       [%remote-scry %callback ~]
-        ~&  >  "remote-scry/callback on-arvo"
+        ::~&  >  "remote-scry/callback on-arvo"
         ?+  -.sign-arvo  `this
           %ames
             ?+  -.+.sign-arvo  `this
@@ -486,8 +488,8 @@
             ==
         ==
       [%remote-scry %cullback ~]
-        ~&  >  "remote-scry cullback we culled something"
-        ~&  >  -.sign-arvo
+        ::~&  >  "remote-scry cullback we culled something"
+        ::~&  >  -.sign-arvo
         `this
       [%timer ~]
         ~&  >>>  "unhandled on-arvo %timer"

@@ -3,14 +3,10 @@ import { observer } from 'mobx-react';
 import { useAppState } from 'renderer/stores/app.store';
 
 import { AddIdentityStep } from './steps/AddIdentityStep';
-import { BootingStep } from './steps/BootingStep';
-import { ChooseIdStep } from './steps/ChooseIdStep';
-import { CredentialsStep } from './steps/CredentialsStep';
 import { HostingStep } from './steps/HostingStep';
 import { InstallationStep } from './steps/InstallationStep';
 import { LoginStep } from './steps/LoginStep';
 import { PassportStep } from './steps/PassportStep';
-import { PaymentStep } from './steps/PaymentStep';
 
 export const OnboardingStepPresenter = () => {
   const { onboardingStep, setOnboardingStep } = useAppState();
@@ -30,14 +26,6 @@ export const OnboardingStepPresenter = () => {
       return <PassportStep setStep={setOnboardingStep} />;
     case '/installation':
       return <InstallationStep setStep={setOnboardingStep} />;
-    case '/choose-id':
-      return <ChooseIdStep setStep={setOnboardingStep} />;
-    case '/payment':
-      return <PaymentStep setStep={setOnboardingStep} />;
-    case '/booting':
-      return <BootingStep setStep={setOnboardingStep} />;
-    case '/credentials':
-      return <CredentialsStep setStep={setOnboardingStep} />;
     default:
       return <LoginStep setStep={setOnboardingStep} />;
   }
