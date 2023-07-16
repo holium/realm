@@ -1,7 +1,7 @@
 import { JSONObject } from 'os/types';
 
 export type NotesDB_Insert = (payload: {
-  bedrockId: string;
+  id: string;
   author: string;
   space: string;
   title: string;
@@ -9,8 +9,7 @@ export type NotesDB_Insert = (payload: {
 }) => number;
 
 export type NotesDB_SelectAll = (payload: { space: string }) => {
-  id: number;
-  bedrockId: string;
+  id: string;
   author: string;
   space: string;
   title: string;
@@ -25,4 +24,4 @@ export type NotesDB_Update = (payload: {
   doc: JSONObject;
 }) => number;
 
-export type NotesDB_Delete = (payload: { id: number }) => number;
+export type NotesDB_Delete = (payload: { id: string }) => number;

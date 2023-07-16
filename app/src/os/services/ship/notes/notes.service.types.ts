@@ -1,5 +1,6 @@
 import { JSONObject } from 'os/types';
 
+/* Service method payloads */
 export type NotesService_CreateNote_Payload = {
   title: string;
   doc: JSONObject;
@@ -11,28 +12,28 @@ export type NotesService_GetNotes_Payload = {
 };
 
 export type NotesService_SaveNote_Payload = {
-  id: number;
+  id: string;
+  space: string;
   title: string;
   doc: JSONObject;
 };
 
 export type NotesService_DeleteNote_Payload = {
-  id: number;
+  id: string;
+  space: string;
 };
 
+/* Bedrock updates */
 export type NotesService_BedrockUpdate_CreateNoteData = {
   title: string;
   doc: string;
 };
 
-// ---
-// IPC update types.
-// ---
+/* IPC updates */
 type NotesService_IPCUpdate_CreateNote = {
   type: 'create-note';
   payload: {
-    id: number;
-    bedrockId: string;
+    id: string;
     author: string;
     space: string;
     title: string;
@@ -42,4 +43,13 @@ type NotesService_IPCUpdate_CreateNote = {
   };
 };
 
-export type NotesService_IPCUpdate = NotesService_IPCUpdate_CreateNote;
+type NotesService_IPCUpdate_DeleteNote = {
+  type: 'delete-note';
+  payload: {
+    id: string;
+  };
+};
+
+export type NotesService_IPCUpdate =
+  | NotesService_IPCUpdate_CreateNote
+  | NotesService_IPCUpdate_DeleteNote;

@@ -11,8 +11,7 @@ import {
 
 export const notesInitSql = `
   create table if not exists notes (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      bedrockId   TEXT NOT NULL,
+      id          TEXT PRIMARY KEY,
       author      TEXT NOT NULL,
       space       TEXT NOT NULL,
       title       TEXT NOT NULL,
@@ -52,17 +51,18 @@ export class NotesDB {
     }));
   };
 
-  insert: NotesDB_Insert = ({ title, doc, space, author, bedrockId }) => {
+  insert: NotesDB_Insert = ({ id, title, doc, space, author }) => {
+    // Upsert, i.e. insert or replace
     const info = this.notesDB
       .prepare(
-        `INSERT INTO notes (title, doc, space, author, bedrockId, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+        `INSERT INTO notes (id, title, doc, space, author, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
       )
       .run(
+        id,
         title,
         JSON.stringify(doc),
         space,
         author,
-        bedrockId,
         Date.now(),
         Date.now()
       );

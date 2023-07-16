@@ -9,6 +9,7 @@ export const NoteViewContainer = styled(Flex)`
 `;
 
 export const NoteViewCard = styled(Card)`
+  position: relative;
   flex: 1;
   height: 100%;
   border-radius: 12px 12px 0 0;

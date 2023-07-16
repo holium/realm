@@ -27,12 +27,11 @@ export type SendTransaction = (
 ) => void;
 
 type Props = {
-  noteId: NotesStore_Note['id'];
-  noteTitle: NotesStore_Note['title'];
-  noteDoc: NotesStore_Note['doc'];
+  doc: NotesStore_Note['doc'];
+  saveDoc: (doc: JSONObject) => Promise<void>;
 };
 
-export const Editor = ({ noteId, noteTitle, noteDoc }: Props) => {
+export const Editor = ({ doc, saveDoc }: Props) => {
   const [editorView, setEditorView] = useState<EditorView>();
   const [authority, setAuthority] = useState<Authority>();
   const [carets, setCarets] = useState<Carets>({});
@@ -63,31 +62,28 @@ export const Editor = ({ noteId, noteTitle, noteDoc }: Props) => {
     onBroadcast: onCaret,
   });
 
-  const saveDoc = useCallback(
-    (serializedDoc: JSONObject) => {
-      console.log(serializedDoc);
-      // NotesIPC.saveNote(noteId, noteTitle, serializedDoc);
-    },
-    [noteId, noteTitle]
-  );
+  const onBlur = () => {
+    if (!editorView) return;
+    const serializedDoc = editorView.state.doc.toJSON();
+    saveDoc(serializedDoc);
+  };
 
   const onEditorRef = useCallback(
     (ref: HTMLDivElement) => {
       if (!ref) return;
 
-      const newAuthority = new Authority(noteDoc);
+      const newAuthority = new Authority(doc);
       const newEditor = collabEditor(
         newAuthority,
         ref,
         sendTransaction,
-        sendCaret,
-        saveDoc
+        sendCaret
       );
 
       setEditorView(newEditor);
       setAuthority(newAuthority);
     },
-    [noteDoc, saveDoc]
+    [doc]
   );
 
   const moveToEnd = () => {
@@ -106,7 +102,7 @@ export const Editor = ({ noteId, noteTitle, noteDoc }: Props) => {
 
   return (
     <EditorContainer>
-      <div ref={onEditorRef}>
+      <div ref={onEditorRef} onBlur={onBlur}>
         {Object.entries(carets).map(([patp, position]) => (
           <CustomCaret key={patp} top={position.y} left={position.x} />
         ))}

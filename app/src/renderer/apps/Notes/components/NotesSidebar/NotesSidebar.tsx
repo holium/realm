@@ -5,6 +5,7 @@ import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
 
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { schema } from '../Editor/schema';
@@ -21,10 +22,11 @@ import {
 } from './NotesSidebar.styles';
 
 const NotesSidebarPresenter = () => {
+  const { loggedInAccount } = useAppState();
   const { spacesStore, notesStore } = useShipStore();
 
   const selectedSpace = spacesStore.selected;
-  const { personalNotes, spaceNotes, selectedNote, setSelectedNote } =
+  const { personalNotes, spaceNotes, selectedNoteId, setSelectedNoteId } =
     notesStore;
 
   const creating = useToggle(false);
@@ -41,21 +43,15 @@ const NotesSidebarPresenter = () => {
       schema.node('paragraph', null, [schema.text('\n')]),
     ]);
     const newDocJSON = newDoc.toJSON();
-    const noteId = await notesStore.createNote({
-      title: 'My note',
+    await notesStore.createNote({
+      title: selectedSpace.isOur
+        ? 'My note'
+        : `${loggedInAccount?.nickname ?? loggedInAccount?.serverId}'s note`,
       doc: newDocJSON,
       space: selectedSpace.path,
     });
 
     creating.toggleOff();
-
-    console.log(
-      'newNote',
-      JSON.stringify(notesStore.getNoteById(noteId), null, 2)
-    );
-
-    const newNote = notesStore.getNoteById(noteId);
-    if (newNote) setSelectedNote(newNote);
   };
 
   return (
@@ -82,7 +78,7 @@ const NotesSidebarPresenter = () => {
           onClick={onClickNewNote}
         >
           {creating.isOn ? (
-            <Spinner size="20px" />
+            <Spinner size="19px" width={2} />
           ) : (
             <Icon name="AddNote" size={22} />
           )}
@@ -103,8 +99,12 @@ const NotesSidebarPresenter = () => {
                   <NoteRow
                     key={note.id}
                     note={note}
-                    selected={selectedNote?.id === note.id}
-                    onClick={() => setSelectedNote(note)}
+                    isPersonal={false}
+                    isSelected={selectedNoteId === note.id}
+                    onClickDelete={() => {
+                      notesStore.deleteNote({ id: note.id, space: note.space });
+                    }}
+                    onClick={() => setSelectedNoteId(note.id)}
                   />
                 ))
               ) : (
@@ -124,8 +124,12 @@ const NotesSidebarPresenter = () => {
                 <NoteRow
                   key={note.id}
                   note={note}
-                  selected={selectedNote?.id === note.id}
-                  onClick={() => setSelectedNote(note)}
+                  isPersonal
+                  isSelected={selectedNoteId === note.id}
+                  onClickDelete={() => {
+                    notesStore.deleteNote({ id: note.id, space: note.space });
+                  }}
+                  onClick={() => setSelectedNoteId(note.id)}
                 />
               ))
             ) : (

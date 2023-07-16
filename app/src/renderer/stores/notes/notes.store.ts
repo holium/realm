@@ -7,6 +7,7 @@ import { NotesIPC } from '../ipc';
 import {
   NoteModel,
   NotesStore_CreateNote,
+  NotesStore_DeleteNote,
   NotesStore_Note,
 } from './notes.store.types';
 
@@ -18,7 +19,7 @@ export const NotesStore = types
   .model('NotesStore', {
     spaceNotes: types.optional(types.array(NoteModel), []),
     personalNotes: types.optional(types.array(NoteModel), []),
-    selectedNote: types.maybeNull(types.reference(NoteModel)),
+    selectedNoteId: types.maybeNull(types.string),
   })
   .actions((self) => ({
     /*
@@ -33,6 +34,10 @@ export const NotesStore = types
         space,
       });
     },
+    deleteNote: flow(function* ({ id, space }: NotesStore_DeleteNote) {
+      if (self.selectedNoteId === id) self.selectedNoteId = null;
+      yield NotesIPC.deleteNote({ id, space });
+    }),
     /*
      * Used by the UI layer to populate MobX with space notes
      * from the SQLite database upon mounting the notes app.
@@ -46,7 +51,6 @@ export const NotesStore = types
           .map((note) => {
             return NoteModel.create({
               ...note,
-              mobxIdentifier: `${note.id}`,
               doc: schema.nodeFromJSON(note.doc),
             });
           })
@@ -70,7 +74,6 @@ export const NotesStore = types
           .map((note) => {
             return NoteModel.create({
               ...note,
-              mobxIdentifier: `${note.id}`,
               doc: schema.nodeFromJSON(note.doc),
             });
           })
@@ -81,10 +84,10 @@ export const NotesStore = types
         self.personalNotes = personalNotesSorted;
       }
     }),
-    setSelectedNote: (note: NotesStore_Note) => {
-      self.selectedNote = note;
+    setSelectedNoteId: (id: string | null) => {
+      self.selectedNoteId = id;
     },
-    getNoteById(id: number) {
+    getNoteById(id: string) {
       return self.spaceNotes.find((note) => note.id === id);
     },
     /*
@@ -99,12 +102,24 @@ export const NotesStore = types
         self.spaceNotes.push(note);
       }
     },
+    _deleteNote: (id: string) => {
+      const spaceNote = self.spaceNotes.find((note) => note.id === id);
+
+      if (spaceNote) {
+        self.spaceNotes.remove(spaceNote);
+      } else {
+        const personalNote = self.personalNotes.find((note) => note.id === id);
+        if (personalNote) {
+          self.personalNotes.remove(personalNote);
+        }
+      }
+    },
   }));
 
 export const notesStore = NotesStore.create({
   personalNotes: [],
   spaceNotes: [],
-  selectedNote: null,
+  selectedNoteId: null,
 });
 
 // -------------------------------
@@ -119,9 +134,12 @@ NotesIPC.onUpdate(({ type, payload }: NotesService_IPCUpdate) => {
     notesStore._insertNote(
       NoteModel.create({
         ...payload,
-        mobxIdentifier: `${payload.id}`,
         doc: schema.nodeFromJSON(payload.doc),
       })
     );
+  } else if (type === 'delete-note') {
+    notesStore._deleteNote(payload.id);
+  } else {
+    console.log('NotesStore.onUpdate: Unknown type');
   }
 });

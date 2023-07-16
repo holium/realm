@@ -10,8 +10,6 @@ import { keymap } from 'prosemirror-keymap';
 import { EditorState, Plugin } from 'prosemirror-state';
 import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 
-import { JSONObject } from 'os/types';
-
 import { Authority } from './Authority';
 import { streamCaretPlugin } from './Caret';
 import { SendCaret, SendTransaction } from './Editor';
@@ -21,8 +19,7 @@ export const collabEditor = (
   authority: Authority,
   place: HTMLElement,
   sendTransaction: SendTransaction,
-  sendCaret: SendCaret,
-  saveDoc: (serializedDoc: JSONObject) => void
+  sendCaret: SendCaret
 ) => {
   const view = new EditorView(place, {
     state: EditorState.create({
@@ -69,9 +66,6 @@ export const collabEditor = (
     dispatchTransaction(transaction) {
       const newState = view.state.apply(transaction);
       view.updateState(newState);
-
-      const serializedDoc = newState.doc.toJSON();
-      saveDoc(serializedDoc);
 
       const sendable = sendableSteps(newState);
       if (sendable) {

@@ -1,6 +1,14 @@
 import styled from 'styled-components';
 
-import { Text } from '@holium/design-system/general';
+import { Row, Text } from '@holium/design-system/general';
+
+export const NoteRowContainer = styled(Row)`
+  min-width: 0;
+
+  * {
+    pointer-events: none;
+  }
+`;
 
 export const NoteRowTitle = styled(Text.Body)`
   font-size: 13px;

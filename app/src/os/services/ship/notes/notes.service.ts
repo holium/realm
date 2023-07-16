@@ -9,8 +9,10 @@ import { NotesDB } from './notes.db';
 import {
   NotesService_BedrockUpdate_CreateNoteData,
   NotesService_CreateNote_Payload,
+  NotesService_DeleteNote_Payload,
   NotesService_GetNotes_Payload,
   NotesService_IPCUpdate,
+  NotesService_SaveNote_Payload,
 } from './notes.service.types';
 
 export class NotesService extends AbstractService<NotesService_IPCUpdate> {
@@ -60,46 +62,60 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     });
   }
 
+  async deleteNote({ id, space }: NotesService_DeleteNote_Payload) {
+    const result = await APIConnection.getInstance().conduit.poke({
+      app: 'bedrock',
+      mark: 'db-action',
+      json: {
+        remove: {
+          id,
+          path: space,
+          type: 'realm-note',
+        },
+      },
+    });
+
+    if (result) {
+      this.notesDB?.delete({ id });
+      this.sendUpdate({
+        type: 'delete-note',
+        payload: { id },
+      });
+    }
+  }
+
   getNotes({ space }: NotesService_GetNotes_Payload) {
     if (!this.notesDB) return [];
+
+    // TODO: sync with Bedrock and replace local DB with the response.
 
     return this.notesDB.selectAll({ space });
   }
 
-  // saveNote: NotesService_SaveNote = ({ bedrockRowId, space, title, doc }) => {
-  //   return APIConnection.getInstance().conduit.poke({
-  //     app: 'bedrock',
-  //     mark: 'db-action',
-  //     json: {
-  //       edit: {
-  //         id: bedrockRowId,
-  //         'input-row': {
-  //           v: 0,
-  //           path: space,
-  //           type: 'realm-note',
-  //           data: [],
-  //           schema: [],
-  //         },
-  //       },
-  //     },
-  //   });
-  // };
+  editNote({ id, space, title, doc }: NotesService_SaveNote_Payload) {
+    const editNoteData = [title, JSON.stringify(doc)];
+    const editNoteSchema: BedrockSchema = [
+      ['title', 't'],
+      ['doc', 't'],
+    ];
 
-  // deleteNote: NotesService_DeleteNote = ({ id }) => {
-  //   return APIConnection.getInstance().conduit.poke({
-  //     app: 'bedrock',
-  //     mark: 'db-action',
-  //     json: {
-  //       remove: {
-  //         id: rowID,
-  //         path: path,
-  //         type: type,
-  //       },
-  //     },
-  //   });
-
-  //   return this.notesDB?.delete({ id });
-  // };
+    return APIConnection.getInstance().conduit.poke({
+      app: 'bedrock',
+      mark: 'db-action',
+      json: {
+        edit: {
+          id,
+          'input-row': {
+            v: 0,
+            path: space,
+            type: 'realm-note',
+            data: editNoteData,
+            schema: editNoteSchema,
+          },
+        },
+      },
+    });
+  }
 
   subscribe(spacePath: string) {
     return APIConnection.getInstance().conduit.watch({
@@ -116,20 +132,19 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
             const rowData: NotesService_BedrockUpdate_CreateNoteData =
               update.row.data;
 
-            const sqlRowId = this.notesDB?.insert({
-              bedrockId: update.row.id,
+            // Update SQLite.
+            this.notesDB?.insert({
+              id: update.row.id,
               space: update.row.path,
               author: update.row.creator,
               title: rowData.title,
               doc: JSON.parse(rowData.doc),
             });
-
-            console.log('notes.service.ts: realm-note subscription update.');
+            // Update MobX.
             this.sendUpdate({
               type: 'create-note',
               payload: {
-                id: sqlRowId,
-                bedrockId: update.row.id,
+                id: update.row.id,
                 title: rowData.title,
                 author: update.row.creator,
                 space: update.row.path,

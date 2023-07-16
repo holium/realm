@@ -129,7 +129,6 @@ export const shipStore = ShipStore.create({
   },
   bazaarStore: loadBazaarSnapshot(),
   walletStore: walletAppDefault,
-  // @ts-ignore
   notesStore,
   lexiconStore: { update: null },
   troveStore: { update: null },

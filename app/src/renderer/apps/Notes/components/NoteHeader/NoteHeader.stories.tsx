@@ -8,7 +8,13 @@ export default {
 } as ComponentMeta<typeof NoteHeader>;
 
 export const NoteHeaderStory: ComponentStory<typeof NoteHeader> = () => (
-  <NoteHeader noteAuthor="~zod" noteTitle="My Note" onClickDelete={() => {}} />
+  <NoteHeader
+    noteAuthor="~zod"
+    noteTitle="My Note"
+    noteUpdatedAt={1697047820000}
+    loading={false}
+    onClickDelete={() => {}}
+  />
 );
 
 NoteHeaderStory.storyName = 'NoteHeader';
