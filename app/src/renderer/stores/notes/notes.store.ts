@@ -103,7 +103,10 @@ export const NotesStore = types
       self.selectedNoteId = id;
     },
     getNoteById(id: string) {
-      return self.spaceNotes.find((note) => note.id === id);
+      const isPersonalNote = self.personalNotes.find((n) => n.id === id);
+      const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
+
+      return notes.find((n) => n.id === id);
     },
     /*
      * Used by IPC handler to register a new note in MobX.
