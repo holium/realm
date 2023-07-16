@@ -6,7 +6,7 @@ export type NotesDB_Insert = (payload: {
   space: string;
   title: string;
   doc: JSONObject;
-}) => number;
+}) => string;
 
 export type NotesDB_SelectAll = (payload: { space: string }) => {
   id: string;
@@ -19,9 +19,9 @@ export type NotesDB_SelectAll = (payload: { space: string }) => {
 }[];
 
 export type NotesDB_Update = (payload: {
-  id: number;
+  id: string;
   title: string;
   doc: JSONObject;
-}) => number;
+}) => string;
 
-export type NotesDB_Delete = (payload: { id: string }) => number;
+export type NotesDB_Delete = (payload: { id: string }) => string;

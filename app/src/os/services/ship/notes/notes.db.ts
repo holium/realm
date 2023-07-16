@@ -51,8 +51,16 @@ export class NotesDB {
     }));
   };
 
-  insert: NotesDB_Insert = ({ id, title, doc, space, author }) => {
-    // Upsert, i.e. insert or replace
+  upsert: NotesDB_Insert = ({ id, title, doc, space, author }) => {
+    // If the note already exists, update it.
+    const existingNote = this.notesDB
+      .prepare(`SELECT * FROM notes WHERE id = ?`)
+      .get(id);
+
+    if (existingNote) {
+      return this.update({ id, title, doc });
+    }
+
     const info = this.notesDB
       .prepare(
         `INSERT INTO notes (id, title, doc, space, author, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`

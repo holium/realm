@@ -24,8 +24,6 @@ export const NotesStore = types
   .actions((self) => ({
     /*
      * Used by the UI layer to create a note.
-     * MobX won't be updated until the bedrock response
-     * from the main process is received.
      */
     createNote({ title, doc, space }: NotesStore_CreateNote) {
       return NotesIPC.createNote({
@@ -34,8 +32,25 @@ export const NotesStore = types
         space,
       });
     },
+    /*
+     * Used by the UI layer to delete a note.
+     * We delete it in MobX immediately for a snappy UI,
+     * even though the main process will also send an update to
+     * delete it when the response comes back.
+     */
     deleteNote: flow(function* ({ id, space }: NotesStore_DeleteNote) {
       if (self.selectedNoteId === id) self.selectedNoteId = null;
+
+      // Remove the note from MobX.
+      const isPersonalNote = space === `/${window.ship}/our`;
+      const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
+
+      const noteIndex = notes.findIndex((n) => n.id === id);
+      if (noteIndex === -1) return;
+
+      notes.splice(noteIndex, 1);
+
+      // Remove the note from Bedrock & SQLite.
       yield NotesIPC.deleteNote({ id, space });
     }),
     /*
@@ -96,23 +111,21 @@ export const NotesStore = types
      */
     _insertNote(note: NotesStore_Note) {
       const isPersonalNote = note.space === `/${window.ship}/our`;
-      if (isPersonalNote) {
-        self.personalNotes.push(note);
-      } else {
-        self.spaceNotes.push(note);
-      }
+      const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
+
+      const existingNote = notes.find((n) => n.id === note.id);
+      if (existingNote) return;
+
+      notes.unshift(note);
     },
     _deleteNote: (id: string) => {
-      const spaceNote = self.spaceNotes.find((note) => note.id === id);
+      const isPersonalNote = self.personalNotes.find((n) => n.id === id);
+      const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
 
-      if (spaceNote) {
-        self.spaceNotes.remove(spaceNote);
-      } else {
-        const personalNote = self.personalNotes.find((note) => note.id === id);
-        if (personalNote) {
-          self.personalNotes.remove(personalNote);
-        }
-      }
+      const noteIndex = notes.findIndex((n) => n.id === id);
+      if (noteIndex === -1) return;
+
+      notes.splice(noteIndex, 1);
     },
   }));
 

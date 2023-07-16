@@ -133,7 +133,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
               update.row.data;
 
             // Update SQLite.
-            this.notesDB?.insert({
+            this.notesDB?.upsert({
               id: update.row.id,
               space: update.row.path,
               author: update.row.creator,
