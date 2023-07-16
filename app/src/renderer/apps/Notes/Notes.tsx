@@ -1,51 +1,41 @@
 import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 
-import { useAppState } from 'renderer/stores/app.store';
 import { NotesIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { NotesBody } from './components/NotesBody/NotesBody';
+import { NotesSidebar } from './components/NotesSidebar/NotesSidebar';
+import { NoteView } from './components/NoteView/NoteView';
+import { NotesContainer } from './Notes.styles';
 
 const NotesPresenter = () => {
-  const { loggedInAccount } = useAppState();
   const { spacesStore, notesStore } = useShipStore();
 
-  const spacePath = useMemo(
-    () => spacesStore.selected?.path,
-    [spacesStore.selected?.path]
-  );
-  const ourSpacePath = useMemo(
-    () => '/' + loggedInAccount?.serverId + '/our',
-    [loggedInAccount?.serverId]
-  );
-  const isPersonalSpace = useMemo(
-    () => spacePath === ourSpacePath,
-    [spacePath, ourSpacePath]
+  const selectedSpace = useMemo(
+    () => spacesStore.selected,
+    [spacesStore.selected]
   );
 
   useEffect(() => {
-    if (!spacePath) return;
+    if (!selectedSpace?.path) return;
 
-    if (!isPersonalSpace) {
-      notesStore.loadSpaceNotes(spacePath);
+    if (!selectedSpace.isOur) {
+      // Load space if it's not our personal space.
+      notesStore.loadSpaceNotes(selectedSpace?.path);
     }
 
-    notesStore.loadMyNotes(ourSpacePath);
-  }, [spacePath, ourSpacePath, isPersonalSpace]);
+    // Always load personal notes.
+    notesStore.loadPersonalNotes(`/${window.ship}/our`);
 
-  useEffect(() => {
-    if (spacePath) NotesIPC.subscribe(spacePath);
-  }, [spacePath]);
+    // Subscribe to Bedrock updates.
+    NotesIPC.subscribe(selectedSpace?.path);
+  }, [selectedSpace]);
 
   return (
-    <NotesBody
-      myNotes={notesStore.myNotes}
-      isPersonalSpace={isPersonalSpace}
-      spaceTitle={spacesStore.selected?.name}
-      spacePath={spacePath}
-      spaceNotes={notesStore.spaceNotes}
-    />
+    <NotesContainer>
+      <NotesSidebar />
+      <NoteView />
+    </NotesContainer>
   );
 };
 

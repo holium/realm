@@ -4,6 +4,7 @@ import { Node } from 'prosemirror-model';
 import { JSONObject } from 'os/types';
 
 export const NoteModel = types.model('NoteModel', {
+  mobxIdentifier: types.identifier,
   id: types.number,
   bedrockId: types.string,
   author: types.string,

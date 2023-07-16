@@ -16,51 +16,23 @@ const sortByUpdatedAt = (a: NotesStore_Note, b: NotesStore_Note) => {
 
 export const NotesStore = types
   .model('NotesStore', {
-    myNotes: types.optional(types.array(NoteModel), []),
     spaceNotes: types.optional(types.array(NoteModel), []),
+    personalNotes: types.optional(types.array(NoteModel), []),
+    selectedNote: types.maybeNull(types.reference(NoteModel)),
   })
-  .views((_self) => ({}))
   .actions((self) => ({
     /*
      * Used by the UI layer to create a note.
      * MobX won't be updated until the bedrock response
      * from the main process is received.
      */
-    createNote: flow(function* ({
-      title,
-      doc,
-      space,
-    }: NotesStore_CreateNote): Generator<any, number | undefined, any> {
-      const noteId = yield NotesIPC.createNote({
+    createNote({ title, doc, space }: NotesStore_CreateNote) {
+      return NotesIPC.createNote({
         title,
         doc,
         space,
       });
-      return noteId;
-    }),
-    /*
-     * Used by the UI layer to populate MobX with personal notes
-     * from the SQLite database upon mounting the notes app.
-     */
-    loadMyNotes: flow(function* (ourSpacePath: string) {
-      const myNotesSorted = yield NotesIPC.getNotes({
-        space: ourSpacePath,
-      }).then((res) => {
-        if (!res) return;
-        return res
-          .map((note) => {
-            return NoteModel.create({
-              ...note,
-              doc: schema.nodeFromJSON(note.doc),
-            });
-          })
-          .sort(sortByUpdatedAt);
-      });
-
-      if (myNotesSorted) {
-        self.myNotes = myNotesSorted;
-      }
-    }),
+    },
     /*
      * Used by the UI layer to populate MobX with space notes
      * from the SQLite database upon mounting the notes app.
@@ -74,6 +46,7 @@ export const NotesStore = types
           .map((note) => {
             return NoteModel.create({
               ...note,
+              mobxIdentifier: `${note.id}`,
               doc: schema.nodeFromJSON(note.doc),
             });
           })
@@ -85,13 +58,43 @@ export const NotesStore = types
       }
     }),
     /*
+     * Used by the UI layer to populate MobX with personal notes
+     * from the SQLite database upon mounting the notes app.
+     */
+    loadPersonalNotes: flow(function* (ourSpacePath: string) {
+      const personalNotesSorted = yield NotesIPC.getNotes({
+        space: ourSpacePath,
+      }).then((res) => {
+        if (!res) return;
+        return res
+          .map((note) => {
+            return NoteModel.create({
+              ...note,
+              mobxIdentifier: `${note.id}`,
+              doc: schema.nodeFromJSON(note.doc),
+            });
+          })
+          .sort(sortByUpdatedAt);
+      });
+
+      if (personalNotesSorted) {
+        self.personalNotes = personalNotesSorted;
+      }
+    }),
+    setSelectedNote: (note: NotesStore_Note) => {
+      self.selectedNote = note;
+    },
+    getNoteById(id: number) {
+      return self.spaceNotes.find((note) => note.id === id);
+    },
+    /*
      * Used by IPC handler to register a new note in MobX.
      * This is called when the main process receives a bedrock update.
      */
     _insertNote(note: NotesStore_Note) {
       const isPersonalNote = note.space === `/${window.ship}/our`;
       if (isPersonalNote) {
-        self.myNotes.push(note);
+        self.personalNotes.push(note);
       } else {
         self.spaceNotes.push(note);
       }
@@ -99,8 +102,9 @@ export const NotesStore = types
   }));
 
 export const notesStore = NotesStore.create({
-  myNotes: [],
+  personalNotes: [],
   spaceNotes: [],
+  selectedNote: null,
 });
 
 // -------------------------------
@@ -115,6 +119,7 @@ NotesIPC.onUpdate(({ type, payload }: NotesService_IPCUpdate) => {
     notesStore._insertNote(
       NoteModel.create({
         ...payload,
+        mobxIdentifier: `${payload.id}`,
         doc: schema.nodeFromJSON(payload.doc),
       })
     );

@@ -1,61 +1,140 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
 
-import type { NotesStore_Note } from 'renderer/stores/notes/notes.store.types';
+import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
+import { useToggle } from '@holium/design-system/util';
+
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { schema } from '../Editor/schema';
-import { NotesSidebarView } from './NotesSidebarView';
+import { NoteRow } from '../NoteRow/NoteRow';
+import {
+  NoNotesYet,
+  NotesSectionDivider,
+  NotesSectionDividerBorder,
+  NotesSectionDividerText,
+  NotesSidebarContainer,
+  NotesSidebarSection,
+  NotesSidebarSectionList,
+  NotesSidebarSectionsContainer,
+} from './NotesSidebar.styles';
 
-type Props = {
-  myNotes: NotesStore_Note[];
-  isPersonalSpace: boolean;
-  spacePath: string | undefined;
-  spaceTitle: string | undefined;
-  spaceNotes: NotesStore_Note[] | undefined;
-  selectedNote: NotesStore_Note | undefined;
-  setSelectedNote: (note: NotesStore_Note) => void;
-};
+const NotesSidebarPresenter = () => {
+  const { spacesStore, notesStore } = useShipStore();
 
-const NotesSidebarPresenter = ({
-  myNotes,
-  isPersonalSpace,
-  spaceTitle,
-  spacePath,
-  spaceNotes,
-  selectedNote,
-  setSelectedNote,
-}: Props) => {
-  const { notesStore } = useShipStore();
+  const selectedSpace = spacesStore.selected;
+  const { personalNotes, spaceNotes, selectedNote, setSelectedNote } =
+    notesStore;
 
+  const creating = useToggle(false);
   const [_, setSearchString] = useState<string>('');
 
+  if (!selectedSpace) return null;
+
   const onClickNewNote = async () => {
-    if (!spacePath) return;
+    if (creating.isOn) return;
+
+    creating.toggleOn();
 
     const newDoc = schema.node('doc', null, [
       schema.node('paragraph', null, [schema.text('\n')]),
     ]);
     const newDocJSON = newDoc.toJSON();
-    const noteId = notesStore.createNote({
+    const noteId = await notesStore.createNote({
       title: 'My note',
       doc: newDocJSON,
-      space: spacePath,
+      space: selectedSpace.path,
     });
-    console.log('noteId', noteId);
+
+    creating.toggleOff();
+
+    console.log(
+      'newNote',
+      JSON.stringify(notesStore.getNoteById(noteId), null, 2)
+    );
+
+    const newNote = notesStore.getNoteById(noteId);
+    if (newNote) setSelectedNote(newNote);
   };
 
   return (
-    <NotesSidebarView
-      myNotes={myNotes}
-      isPersonalSpace={isPersonalSpace}
-      spaceTitle={spaceTitle}
-      spaceNotes={spaceNotes}
-      selectedNote={selectedNote}
-      setSelectedNote={setSelectedNote}
-      onChangeSearchInput={setSearchString}
-      onClickNewNote={onClickNewNote}
-    />
+    <NotesSidebarContainer>
+      <Flex gap="8px" marginBottom="12px" alignItems="center">
+        <TextInput
+          id="dm-search"
+          name="dm-search"
+          width="100%"
+          borderRadius={16}
+          height={32}
+          placeholder="Search"
+          onChange={(e) => {
+            setSearchString((e.target as HTMLInputElement).value);
+          }}
+        />
+        <Button.IconButton
+          style={{
+            width: '32px',
+            height: '32px',
+            padding: '4px',
+          }}
+          disabled={creating.isOn}
+          onClick={onClickNewNote}
+        >
+          {creating.isOn ? (
+            <Spinner size="20px" />
+          ) : (
+            <Icon name="AddNote" size={22} />
+          )}
+        </Button.IconButton>
+      </Flex>
+      <NotesSidebarSectionsContainer>
+        {!selectedSpace.isOur && (
+          <NotesSidebarSection>
+            <NotesSectionDivider>
+              <NotesSectionDividerText>
+                {selectedSpace.name}
+              </NotesSectionDividerText>
+              <NotesSectionDividerBorder />
+            </NotesSectionDivider>
+            <NotesSidebarSectionList>
+              {spaceNotes && spaceNotes.length ? (
+                spaceNotes.map((note) => (
+                  <NoteRow
+                    key={note.id}
+                    note={note}
+                    selected={selectedNote?.id === note.id}
+                    onClick={() => setSelectedNote(note)}
+                  />
+                ))
+              ) : (
+                <NoNotesYet>No notes yet</NoNotesYet>
+              )}
+            </NotesSidebarSectionList>
+          </NotesSidebarSection>
+        )}
+        <NotesSidebarSection>
+          <NotesSectionDivider>
+            <NotesSectionDividerText>My Notes</NotesSectionDividerText>
+            <NotesSectionDividerBorder />
+          </NotesSectionDivider>
+          <NotesSidebarSectionList>
+            {personalNotes && personalNotes.length ? (
+              personalNotes.map((note) => (
+                <NoteRow
+                  key={note.id}
+                  note={note}
+                  selected={selectedNote?.id === note.id}
+                  onClick={() => setSelectedNote(note)}
+                />
+              ))
+            ) : (
+              <NoNotesYet>No notes yet</NoNotesYet>
+            )}
+          </NotesSidebarSectionList>
+        </NotesSidebarSection>
+      </NotesSidebarSectionsContainer>
+    </NotesSidebarContainer>
   );
 };
 

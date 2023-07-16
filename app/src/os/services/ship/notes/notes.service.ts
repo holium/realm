@@ -35,7 +35,11 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     });
   }
 
-  createNote({ title, doc, space }: NotesService_CreateNote_Payload) {
+  createNote({
+    title,
+    doc,
+    space,
+  }: NotesService_CreateNote_Payload): Promise<number> {
     const createNoteData = [title, JSON.stringify(doc)];
     const createNoteSchema: BedrockSchema = [
       ['title', 't'],

@@ -11,7 +11,8 @@ type Props = {
 };
 
 export const NoteRow = ({ note, selected, onClick }: Props) => {
-  const notePreview = note.doc.content?.toString() || '';
+  // TODO: Parse prosemirror doc to get the first paragraph.
+  const notePreview = note.doc.text ?? 'No preview';
   const noteDateString = new Date(note.updated_at).toLocaleDateString();
 
   return (
