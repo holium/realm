@@ -70,6 +70,16 @@ export const nativeApps: AppManifestMap = {
       hideTitlebarBorder: true,
     },
   },
+  'os-notes': {
+    id: 'os-notes',
+    title: 'Notes',
+    color: '#F9D9F9',
+    icon: 'AppIconNotes',
+    type: 'native',
+    native: {
+      hideTitlebarBorder: true,
+    },
+  },
   'os-trove': {
     id: 'os-trove',
     title: 'Trove',

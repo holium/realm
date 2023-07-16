@@ -16,3 +16,29 @@ export type MediaAccess = {
   mic: MediaAccessStatus;
   screen: MediaAccessStatus;
 };
+
+type JSONValue = string | number | boolean | JSONObject | JSONArray;
+type JSONArray = Array<JSONValue>;
+export type JSONObject = {
+  [x: string]: JSONValue;
+};
+
+type KeyPair = [name: string, t: string];
+export type BedrockSchema = KeyPair[];
+
+export type BedrockRow<T = any> = {
+  id: string;
+  data: T;
+  creator: string;
+  path: string;
+  type: 'realm-note';
+  'created-at': number;
+  'updated-at': number;
+  'received-at': number;
+  v: number;
+};
+
+export type BedrockSubscriptionUpdate<T = any> = {
+  change: string;
+  row?: BedrockRow<T>;
+};

@@ -4,12 +4,14 @@ import {
   BrowserToolbarProps,
 } from 'renderer/apps/Browser/Toolbar/BrowserToolbar';
 import { LexiconApp } from 'renderer/apps/Lexicon/LexiconApp';
+import { Notes } from 'renderer/apps/Notes/Notes';
 import { SystemApp } from 'renderer/apps/System';
 import { TroveApp } from 'renderer/apps/Trove/TroveApp';
 
 export enum NativeAppId {
   Browser = 'os-browser',
   Settings = 'os-settings',
+  Notes = 'os-notes',
   Lexicon = 'os-lexicon',
   Trove = 'os-trove',
 }
@@ -32,5 +34,9 @@ export const getNativeAppWindow = {
   'os-trove': {
     titlebar: null,
     view: (props: any) => <TroveApp {...props} />,
+  },
+  'os-notes': {
+    titlebar: null,
+    view: () => <Notes />,
   },
 };

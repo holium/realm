@@ -12,6 +12,7 @@ import AuthService from '../auth/auth.service';
 import ChatService from './chat/chat.service';
 import { FriendsService } from './friends/friends.service';
 import LexiconService from './lexicon/lexicon.service';
+import { NotesService } from './notes/notes.service';
 import NotificationsService from './notifications/notifications.service';
 import { SettingsService } from './settings/settings.service';
 import { ShipDB } from './ship.db';
@@ -44,6 +45,7 @@ export class ShipService extends AbstractService<any> {
     spaces: SpacesService;
     bazaar: BazaarService;
     wallet: WalletService;
+    notes: NotesService;
     lexicon: LexiconService;
     trove: TroveService;
     settings: SettingsService;
@@ -154,6 +156,7 @@ export class ShipService extends AbstractService<any> {
       spaces: new SpacesService(this.serviceOptions, this.shipDB.db, this.patp),
       friends: new FriendsService(this.serviceOptions, this.shipDB.db),
       wallet: new WalletService(undefined, this.shipDB.db),
+      notes: new NotesService(this.patp, this.serviceOptions),
       lexicon: new LexiconService(undefined, this.shipDB.db),
       trove: new TroveService(undefined, this.shipDB.db),
       settings: new SettingsService(this.serviceOptions, this.shipDB.db),

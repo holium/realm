@@ -31,7 +31,7 @@ export const Row = styled(Box)<RowProps>`
   flex-basis: initial;
   gap: ${(props: RowProps) => props.gap || '6px'};
   color: rgba(var(--rlm-text-rgba));
-  transition: var(--transition-fast);
+  transition: var(--transition);
 
   &:active:not([disabled]) {
     background-color: rgba(var(--rlm-overlay-active-rgba));

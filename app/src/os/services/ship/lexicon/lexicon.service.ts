@@ -1,25 +1,24 @@
 import Database from 'better-sqlite3-multiple-ciphers';
 
+import { BedrockSchema } from 'os/types';
+
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
 import { LexiconUpdateType } from './lexicon.types';
 
-type KeyPair = [name: string, t: string];
-type Schema = KeyPair[];
+const WordSchema: BedrockSchema = [['word', 't']];
 
-const WordSchema: Schema = [['word', 't']];
-
-const DefinitionSchema: Schema = [
+const DefinitionSchema: BedrockSchema = [
   ['definition', 't'],
   ['word-id', 'id'],
 ];
 
-const SentenceSchema: Schema = [
+const SentenceSchema: BedrockSchema = [
   ['sentence', 't'],
   ['word-id', 'id'],
 ];
 
-const RelatedSchema: Schema = [
+const RelatedSchema: BedrockSchema = [
   ['related', 't'],
   ['word-id', 'id'],
 ];
@@ -295,7 +294,7 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
     type: string,
     version: number,
     data: any,
-    schema: Schema
+    schema: BedrockSchema
   ) {
     return APIConnection.getInstance().conduit.poke({
       app: 'bedrock',
@@ -317,7 +316,7 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
     type: string,
     version: number,
     data: any,
-    schema: Schema
+    schema: BedrockSchema
   ) {
     return APIConnection.getInstance().conduit.poke({
       app: 'bedrock',
@@ -354,7 +353,7 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
     type: string,
     version: number,
     data: any,
-    schema: Schema
+    schema: BedrockSchema
   ) {
     const json: any = {
       create: {
@@ -471,7 +470,7 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
     return APIConnection.getInstance().conduit.watch({
       app: 'bedrock',
       path: `/path${path}`,
-      onEvent: (data: any) => {
+      onEvent: (data) => {
         //send update to the IPC update handler in app.store
         this.sendUpdate({ type: 'lexicon-update', payload: data });
         // sync changes to sql db here
