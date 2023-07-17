@@ -104,7 +104,7 @@ const NotesSidebarPresenter = () => {
                     onClickDelete={() => {
                       notesStore.deleteNote({ id: note.id, space: note.space });
                     }}
-                    onClick={() => setSelectedNoteId(note.id)}
+                    onClick={() => setSelectedNoteId({ id: note.id })}
                   />
                 ))
               ) : (
@@ -129,7 +129,7 @@ const NotesSidebarPresenter = () => {
                   onClickDelete={() => {
                     notesStore.deleteNote({ id: note.id, space: note.space });
                   }}
-                  onClick={() => setSelectedNoteId(note.id)}
+                  onClick={() => setSelectedNoteId({ id: note.id })}
                 />
               ))
             ) : (

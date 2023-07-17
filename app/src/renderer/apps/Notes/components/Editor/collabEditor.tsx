@@ -12,7 +12,7 @@ import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 
 import { Authority } from './Authority';
 import { streamCaretPlugin } from './Caret';
-import { SendCaret, SendTransaction } from './Editor';
+import { SendCaret, SendTransaction } from './EditorView';
 import { SelectionSizeTooltip } from './plugins/SelectionSizeTooltip';
 
 export const collabEditor = (

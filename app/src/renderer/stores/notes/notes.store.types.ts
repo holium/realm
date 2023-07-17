@@ -15,6 +15,7 @@ export const NoteModel = types.model('NoteModel', {
 
 export type NotesStore_Note = Instance<typeof NoteModel>;
 
+/* Notes Store Public Methods */
 export type NotesStore_CreateNote = {
   title: string;
   doc: JSONObject;
@@ -26,15 +27,37 @@ export type NotesStore_DeleteNote = {
   space: string;
 };
 
-export type NotesStore_UpdateNote = {
+export type NotesStore_LoadLocalNotes = {
+  space: string;
+};
+
+export type NotesStore_SubscribeToBedrockUpdates = {
+  space: string;
+};
+
+export type NotesStore_SetSelectedNoteId = {
+  id: string | null;
+};
+
+export type NotesStore_GetNote = {
+  id: string;
+};
+
+export type NotesStore_PersistLocalNoteChanges = {
+  id: string;
+};
+
+/* Notes Store Private Methods */
+export type NotesStore_InsertNoteLocally = {
+  note: NotesStore_Note;
+};
+
+export type NotesStore_UpdateNoteLocally = {
   id: string;
   title?: string;
   doc?: Node;
 };
 
-export type NotesStore_EditNote = {
+export type NotesStore_DeleteNoteLocally = {
   id: string;
-  space: string;
-  title: string;
-  doc: Node;
 };

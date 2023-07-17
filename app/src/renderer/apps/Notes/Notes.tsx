@@ -20,14 +20,14 @@ const NotesPresenter = () => {
 
     if (!selectedSpace.isOur) {
       // Load space if it's not our personal space.
-      notesStore.loadLocalSpaceNotes(selectedSpace.path);
+      notesStore.loadLocalSpaceNotes({ space: selectedSpace.path });
     }
 
     // Always load personal notes.
-    notesStore.loadLocalPersonalNotes(`/${window.ship}/our`);
+    notesStore.loadLocalPersonalNotes({ space: `/${window.ship}/our` });
 
     // Subscribe to Bedrock updates.
-    notesStore.subscribeToBedrockUpdates(selectedSpace.path);
+    notesStore.subscribeToBedrockUpdates({ space: selectedSpace.path });
 
     // Sync local notes with Bedrock.
     // notesStore.syncLocalNotesWithBedrock(selectedSpace.path);

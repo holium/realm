@@ -8,9 +8,15 @@ import {
   NoteModel,
   NotesStore_CreateNote,
   NotesStore_DeleteNote,
-  NotesStore_EditNote,
+  NotesStore_DeleteNoteLocally,
+  NotesStore_GetNote,
+  NotesStore_InsertNoteLocally,
+  NotesStore_LoadLocalNotes,
   NotesStore_Note,
-  NotesStore_UpdateNote,
+  NotesStore_PersistLocalNoteChanges,
+  NotesStore_SetSelectedNoteId,
+  NotesStore_SubscribeToBedrockUpdates,
+  NotesStore_UpdateNoteLocally,
 } from './notes.store.types';
 
 const sortByUpdatedAt = (a: NotesStore_Note, b: NotesStore_Note) => {
@@ -64,9 +70,9 @@ export const NotesStore = types
      * Used by the UI layer to populate MobX with space notes
      * from the SQLite database upon mounting the notes app.
      */
-    loadLocalSpaceNotes: flow(function* (spacePath: string) {
+    loadLocalSpaceNotes: flow(function* ({ space }: NotesStore_LoadLocalNotes) {
       const spaceNotesSorted = yield NotesIPC.getNotesFromDb({
-        space: spacePath,
+        space,
       }).then((res) => {
         if (!res) return;
         return res
@@ -87,9 +93,11 @@ export const NotesStore = types
      * Used by the UI layer to populate MobX with personal notes
      * from the SQLite database upon mounting the notes app.
      */
-    loadLocalPersonalNotes: flow(function* (ourSpacePath: string) {
+    loadLocalPersonalNotes: flow(function* ({
+      space,
+    }: NotesStore_LoadLocalNotes) {
       const personalNotesSorted = yield NotesIPC.getNotesFromDb({
-        space: ourSpacePath,
+        space,
       }).then((res) => {
         if (!res) return;
         return res
@@ -106,30 +114,24 @@ export const NotesStore = types
         self.personalNotes = personalNotesSorted;
       }
     }),
-    subscribeToBedrockUpdates(spacePath: string) {
-      NotesIPC.subscribe({ space: spacePath });
+    subscribeToBedrockUpdates({ space }: NotesStore_SubscribeToBedrockUpdates) {
+      NotesIPC.subscribe({ space });
     },
     // syncLocalNotesWithBedrock(spacePath: string) {
     //   NotesIPC.syncWithBedrock({ space: spacePath });
     // },
-    setSelectedNoteId: (id: string | null) => {
+    setSelectedNoteId: ({ id }: NotesStore_SetSelectedNoteId) => {
       self.selectedNoteId = id;
     },
-    getNoteById(id: string) {
+    getNote({ id }: NotesStore_GetNote) {
       const isPersonalNote = self.personalNotes.find((n) => n.id === id);
       const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
 
       return notes.find((n) => n.id === id);
     },
-    editNoteInBedrock({ id, doc, title, space }: NotesStore_EditNote) {
-      return NotesIPC.editNote({
-        id,
-        title,
-        doc: doc.toJSON(),
-        space: space,
-      });
-    },
-    persistLocalNoteChanges: flow(function* (id: string) {
+    persistLocalNoteChanges: flow(function* ({
+      id,
+    }: NotesStore_PersistLocalNoteChanges) {
       self.loading = true;
       const isPersonalNote = self.personalNotes.find((n) => n.id === id);
       const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
@@ -150,7 +152,7 @@ export const NotesStore = types
      * Private methods used by the IPC handler to register a new note in MobX.
      * This is called when the main process receives a bedrock update.
      */
-    _insertNoteLocally(note: NotesStore_Note) {
+    _insertNoteLocally({ note }: NotesStore_InsertNoteLocally) {
       const isPersonalNote = note.space === `/${window.ship}/our`;
       const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
 
@@ -159,7 +161,7 @@ export const NotesStore = types
 
       notes.unshift(note);
     },
-    _updateNoteLocally: ({ id, title, doc }: NotesStore_UpdateNote) => {
+    _updateNoteLocally: ({ id, title, doc }: NotesStore_UpdateNoteLocally) => {
       const isPersonalNote = self.personalNotes.find((n) => n.id === id);
       const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
 
@@ -170,14 +172,12 @@ export const NotesStore = types
       if (doc) note.doc = doc;
       note.updated_at = Date.now();
     },
-    _deleteNoteLocally(id: string) {
+    _deleteNoteLocally({ id }: NotesStore_DeleteNoteLocally) {
       const isPersonalNote = self.personalNotes.find((n) => n.id === id);
       const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
 
       const noteIndex = notes.findIndex((n) => n.id === id);
       if (noteIndex === -1) return;
-
-      notes.splice(noteIndex, 1);
     },
   }));
 
@@ -203,12 +203,12 @@ NotesIPC.onUpdate(({ type, payload }: NotesService_IPCUpdate) => {
   }
 
   if (type === 'create-note') {
-    notesStore._insertNoteLocally(
-      NoteModel.create({
+    notesStore._insertNoteLocally({
+      note: NoteModel.create({
         ...payload,
         doc: schema.nodeFromJSON(payload.doc),
-      })
-    );
+      }),
+    });
   } else if (type === 'update-note') {
     notesStore._updateNoteLocally({
       id: payload.id,
@@ -216,7 +216,7 @@ NotesIPC.onUpdate(({ type, payload }: NotesService_IPCUpdate) => {
       doc: schema.nodeFromJSON(payload.doc),
     });
   } else if (type === 'delete-note') {
-    notesStore._deleteNoteLocally(payload.id);
+    notesStore._deleteNoteLocally({ id: payload.id });
   } else {
     console.error('NotesStore.onUpdate', 'Unknown type');
   }

@@ -19,7 +19,7 @@ export const NoteHeader = () => {
   const { selectedNoteId, loading } = notesStore;
 
   const selectedNote = selectedNoteId
-    ? notesStore.getNoteById(selectedNoteId)
+    ? notesStore.getNote({ id: selectedNoteId })
     : null;
 
   const [title, setTitle] = useState(selectedNote?.title);
@@ -59,7 +59,7 @@ export const NoteHeader = () => {
       id: selectedNote.id,
       title,
     });
-    notesStore.persistLocalNoteChanges(selectedNote.id);
+    notesStore.persistLocalNoteChanges({ id: selectedNote.id });
   };
 
   return (
