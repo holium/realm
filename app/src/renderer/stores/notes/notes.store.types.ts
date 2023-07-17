@@ -27,6 +27,12 @@ export type NotesStore_DeleteNote = {
   space: string;
 };
 
+export type NotesStore_UpdateNote = {
+  id: string;
+  title?: string;
+  doc?: Node;
+};
+
 export type NotesStore_LoadLocalNotes = {
   space: string;
 };
@@ -40,10 +46,6 @@ export type NotesStore_SetSelectedNoteId = {
 };
 
 export type NotesStore_GetNote = {
-  id: string;
-};
-
-export type NotesStore_PersistLocalNoteChanges = {
   id: string;
 };
 

@@ -13,9 +13,9 @@ import {
   NotesStore_InsertNoteLocally,
   NotesStore_LoadLocalNotes,
   NotesStore_Note,
-  NotesStore_PersistLocalNoteChanges,
   NotesStore_SetSelectedNoteId,
   NotesStore_SubscribeToBedrockUpdates,
+  NotesStore_UpdateNote,
   NotesStore_UpdateNoteLocally,
 } from './notes.store.types';
 
@@ -66,6 +66,39 @@ export const NotesStore = types
 
       self.loading = false;
     }),
+    /*
+     * Used by the UI layer to update a note.
+     * We update it in MobX immediately for a snappy UI,
+     * even though the main process will also send an update to
+     * update it when the response comes back.
+     */
+    updateNote: flow(function* ({ id, title, doc }: NotesStore_UpdateNote) {
+      self.loading = true;
+      const isPersonalNote = self.personalNotes.find((n) => n.id === id);
+      const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
+
+      const note = notes.find((n) => n.id === id);
+      if (!note) return;
+
+      if (title) note.title = title;
+      if (doc) note.doc = doc;
+      note.updated_at = Date.now();
+
+      yield NotesIPC.editNote({
+        id,
+        space: note.space,
+        title: title ? title : note.title,
+        doc: doc ? doc.toJSON() : note.doc.toJSON(),
+      });
+
+      self.loading = false;
+    }),
+    getNote({ id }: NotesStore_GetNote) {
+      const isPersonalNote = self.personalNotes.find((n) => n.id === id);
+      const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
+
+      return notes.find((n) => n.id === id);
+    },
     /*
      * Used by the UI layer to populate MobX with space notes
      * from the SQLite database upon mounting the notes app.
@@ -123,31 +156,6 @@ export const NotesStore = types
     setSelectedNoteId: ({ id }: NotesStore_SetSelectedNoteId) => {
       self.selectedNoteId = id;
     },
-    getNote({ id }: NotesStore_GetNote) {
-      const isPersonalNote = self.personalNotes.find((n) => n.id === id);
-      const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
-
-      return notes.find((n) => n.id === id);
-    },
-    persistLocalNoteChanges: flow(function* ({
-      id,
-    }: NotesStore_PersistLocalNoteChanges) {
-      self.loading = true;
-      const isPersonalNote = self.personalNotes.find((n) => n.id === id);
-      const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
-
-      const note = notes.find((n) => n.id === id);
-      if (!note) return;
-
-      yield NotesIPC.editNote({
-        id,
-        title: note.title,
-        doc: note.doc.toJSON(),
-        space: note.space,
-      });
-
-      self.loading = false;
-    }),
     /*
      * Private methods used by the IPC handler to register a new note in MobX.
      * This is called when the main process receives a bedrock update.

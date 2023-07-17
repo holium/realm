@@ -55,11 +55,10 @@ export const NoteHeader = () => {
   ];
 
   const onBlurTitle = () => {
-    notesStore._updateNoteLocally({
+    notesStore.updateNote({
       id: selectedNote.id,
       title,
     });
-    notesStore.persistLocalNoteChanges({ id: selectedNote.id });
   };
 
   return (

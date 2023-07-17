@@ -136,7 +136,9 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     return APIConnection.getInstance().conduit.watch({
       app: 'bedrock',
       path: `/path${spacePath}`,
-      onEvent: (updates: BedrockSubscriptionUpdate[]) => {
+      onEvent: (updates: BedrockSubscriptionUpdate[] | null) => {
+        if (!updates || !updates.length) return;
+
         updates.forEach((update) => {
           if (!this.notesDB) return;
 

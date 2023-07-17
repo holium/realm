@@ -19,13 +19,9 @@ const EditorPresenter = () => {
   const onBlurDoc = (doc: Node) => {
     if (selectedNote.doc.eq(doc)) return;
 
-    notesStore._updateNoteLocally({
+    notesStore.updateNote({
       id: selectedNote.id,
       doc,
-    });
-
-    notesStore.persistLocalNoteChanges({
-      id: selectedNote.id,
     });
   };
 
