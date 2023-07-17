@@ -1,11 +1,19 @@
 import { memo } from 'react';
 import Box from '@mui/material/Box';
 
+import { Node, TroveRenderTree } from '../store/troveStore';
 import { FileItem } from './FileItem';
 import { FolderItem } from './FolderItem';
 //TODO: make two components for folders and one for files
+interface Props {
+  itemList: undefined | [] | TroveRenderTree;
+  handleSelection: (data: Node) => void;
+  deleteFile: (key: string) => void;
+  selected: Node;
+  writePerms: boolean;
+}
 export const RecursiveTree = memo(
-  ({ itemList, handleSelection, selected, writePerms, deleteFile }: any) => {
+  ({ itemList, handleSelection, selected, writePerms, deleteFile }: Props) => {
     const createTree = (name: any, data: any, parentCount = 0) => {
       if (data.type === 'folder') {
         return (
@@ -53,7 +61,7 @@ export const RecursiveTree = memo(
     };
     return (
       <Box>
-        {itemList.map((item: any) => {
+        {itemList?.map((item: any) => {
           if (item.type === 'folder') {
             return createTree(item.path, item);
           } else {
