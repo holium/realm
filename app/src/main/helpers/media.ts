@@ -6,7 +6,6 @@ import {
   systemPreferences,
 } from 'electron';
 import { download } from 'electron-dl';
-import log from 'electron-log';
 
 import { MediaAccess, MediaAccessStatus } from '../../os/types';
 import { isMac, isWindows } from './env';
@@ -31,10 +30,7 @@ const registerListeners = (mainWindow: BrowserWindow) => {
     const sources = await desktopCapturer.getSources({
       types: ['screen', 'window'],
     });
-    log.info(
-      'has screen access',
-      systemPreferences.getMediaAccessStatus('screen')
-    );
+
     if (systemPreferences.getMediaAccessStatus('screen') !== 'granted') {
       return false;
     }

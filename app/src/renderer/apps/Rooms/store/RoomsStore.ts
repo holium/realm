@@ -182,6 +182,16 @@ export class RoomsStore extends EventsEmitter {
       });
     });
 
+    this.ourPeer.on('screenSharingStatusChanged', (isScreenSharing) => {
+      if (isScreenSharing) {
+        console.log('screen sharing started');
+        this.peers.forEach((peer) => {
+          this.ourPeer.screenStream &&
+            peer.setNewStream(this.ourPeer.screenStream);
+        });
+      }
+    });
+
     this.websocket = this.connect();
     this.onRoomEvent = this.onRoomEvent.bind(this);
     this.createPeer = this.createPeer.bind(this);

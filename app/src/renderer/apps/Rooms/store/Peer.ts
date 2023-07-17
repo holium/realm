@@ -161,6 +161,7 @@ export class PeerClass extends EventsEmitter {
       console.error('Invalid track received in onTrack');
       return;
     }
+    console.log('got track', track.id, track.kind);
     if (track.kind === 'video') {
       // console.log('got video track', track.id);
       if (this.videoTracks.has(track.id)) {
