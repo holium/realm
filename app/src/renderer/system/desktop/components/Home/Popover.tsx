@@ -4,7 +4,7 @@ import { observer } from 'mobx-react';
 import styled from 'styled-components';
 import { color, compose, space, typography } from 'styled-system';
 
-import { Box } from '@holium/design-system';
+import { Box } from '@holium/design-system/general';
 
 import { useAppState } from 'renderer/stores/app.store';
 

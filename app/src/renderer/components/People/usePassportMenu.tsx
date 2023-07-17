@@ -7,7 +7,8 @@ import {
 } from 'react';
 import { AnimatePresence } from 'framer-motion';
 
-import { Box, Position } from '@holium/design-system';
+import { Box } from '@holium/design-system/general';
+import { Position } from '@holium/design-system/util';
 
 import { Menu } from 'renderer/components/Menu/Menu';
 import { useAppState } from 'renderer/stores/app.store';

@@ -1,6 +1,6 @@
 import { Centered, Fill, ViewPort } from 'react-spaces';
 
-import { Flex, Spinner } from '@holium/design-system';
+import { Flex, Spinner } from '@holium/design-system/general';
 
 export const AppLoading = () => (
   <ViewPort>

@@ -1,7 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 
-import { AppTile, AppTileType, bgIsLightOrDark } from '@holium/design-system';
+import { AppTile, AppTileType } from '@holium/design-system/os';
+import { bgIsLightOrDark } from '@holium/design-system/util';
 
 import { useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';

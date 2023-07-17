@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react';
 
-import { Avatar, Box, Flex } from '@holium/design-system';
+import { Avatar, Box, Flex } from '@holium/design-system/general';
 
 import { useShipStore } from 'renderer/stores/ship.store';
 

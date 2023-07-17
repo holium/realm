@@ -11,6 +11,7 @@
       =paths
       =peers
       =del-log
+      hide-logs=?  :: default hidden %.y
   ==
 
 +$  schemas   (map [=type:common v=@ud] schema)
@@ -51,6 +52,7 @@
       [%follow follow:common]
       [%relay relay:common]
       [%react react:common]
+      [%creds creds:common]
   ==
 +$  row-and-schema  [=row =schema] :: the row and the schema for the row
 
@@ -154,6 +156,8 @@
       [%remove =type:common =path =id:common]      :: %host deleting the row, sends %delete to all peers
       [%relay =req-id =input-row]          :: like %create, but for creating a %relay (relay:common)
       [%create-initial-spaces-paths ~]
+
+      [%toggle-hide-logs toggle=?]
   ==
 ::
 +$  ship-roles  (list [s=@p =role])

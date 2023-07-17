@@ -6,12 +6,15 @@
  *****************/
 import { app, BrowserWindow, dialog, ipcMain, net } from 'electron';
 import log from 'electron-log';
+import Store from 'electron-store';
 import { autoUpdater, UpdateInfo } from 'electron-updater';
 import path from 'path';
 
 import { getReleaseChannelFromSettings } from '../os/lib/settings';
 import { isDevelopment } from './helpers/env';
 import { resolveHtmlPath, resolveUpdaterPath } from './util';
+
+const store = new Store();
 
 const RESOURCES_PATH = app.isPackaged
   ? path.join(process.resourcesPath, 'assets')
@@ -122,6 +125,10 @@ export class AppUpdater implements IAppUpdater {
       this.splashWindow?.close();
       this.splashWindow = null;
       this.updateInfo = info;
+      // Keep the version up to date in the store so we, on boot, know if the user has
+      // uninstalled/reinstalled the app since the last time it was run.
+      store.set('realmRelease', info.version);
+
       if (!this.manualCheck) {
         this.progressWindow?.webContents.send('auto-updater-message', {
           name: 'starting-download',

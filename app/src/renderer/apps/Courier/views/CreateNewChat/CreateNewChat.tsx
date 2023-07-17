@@ -7,9 +7,9 @@ import {
   Icon,
   Spinner,
   Text,
-  TextInput,
   Tooltip,
-} from '@holium/design-system';
+} from '@holium/design-system/general';
+import { TextInput } from '@holium/design-system/inputs';
 
 import { ChatPathType } from 'os/services/ship/chat/chat.types';
 import { ShipSearch } from 'renderer/components/ShipSearch';

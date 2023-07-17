@@ -1,6 +1,6 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Button, Flex, Icon, Spinner } from '@holium/design-system';
+import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
 
 import { useAppState } from 'renderer/stores/app.store';
 import { AppWindowMobxType } from 'renderer/stores/models/window.model';

@@ -119,43 +119,6 @@ export class MembersDB extends AbstractDataAccess<Member, any> {
     const stmt = this.prepare(query);
     stmt.run(path, patp);
   }
-
-  public create(values: Partial<Member>): Member {
-    if (values.roles) values.roles = JSON.stringify(values.roles);
-    const columns = Object.keys(values).join(', ');
-    const placeholders = Object.keys(values)
-      .map(() => '?')
-      .join(', ');
-    const query = `INSERT INTO ${this.tableName} (${columns}) VALUES (${placeholders})`;
-    const stmt = this.prepare(query);
-
-    stmt.run(Object.values(values));
-    if (!values.space) throw new Error('Failed to create new record');
-    const created = this.findOne(values.space);
-    if (!created) throw new Error('Failed to create new record');
-    return created;
-  }
-
-  public update(path: string, values: Partial<Member>): Member {
-    const setClause = Object.keys(values)
-      .map((key) => `${key} = ?`)
-      .join(', ');
-    const query = `UPDATE ${this.tableName} SET ${setClause} WHERE path = ?`;
-    const stmt = this.prepare(query);
-
-    stmt.run([...Object.values(values), path]);
-    const updated = this.findOne(path);
-    if (!updated) throw new Error('Failed to update record');
-    return updated;
-  }
-
-  public delete(path: string): void {
-    const query = `DELETE FROM ${this.tableName} WHERE path = ?`;
-    const stmt = this.prepare(query);
-
-    const result = stmt.run(path);
-    if (result.changes !== 1) throw new Error('Failed to delete record');
-  }
 }
 
 export const spacesMembersInitSql = `
@@ -168,5 +131,7 @@ export const spacesMembersInitSql = `
   );
   create unique index if not exists spaces_members_patp_uindex on spaces_members (space, patp);
 `;
+
+export const spacesMembersWipeSql = `drop table if exists spaces_members;`;
 
 export const spacesMembersDBPreload = MembersDB.preload(new MembersDB(true));

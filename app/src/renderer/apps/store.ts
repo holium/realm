@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 import { Instance, onSnapshot, types } from 'mobx-state-tree';
 
-import { Dimensions } from '@holium/design-system';
+import { Dimensions } from '@holium/design-system/util';
 
 import {
   NetworkStoreType,

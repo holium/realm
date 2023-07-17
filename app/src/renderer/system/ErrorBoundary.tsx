@@ -1,6 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 
-import { Anchor, Flex, Text } from '@holium/design-system';
+import { Anchor, Flex, Text } from '@holium/design-system/general';
 
 type State = {
   error: Error | null;

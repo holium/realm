@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { Flex, Text } from '@holium/design-system';
+import { Flex, Text } from '@holium/design-system/general';
 import { PassportForm } from '@holium/shared';
 
 import { AuthIPC, ShipIPC } from 'renderer/stores/ipc';
@@ -24,13 +24,13 @@ export const AccountPassportSection = ({ account }: Props) => {
   };
 
   const onUploadFile = async (file: File) => {
-    const src = await ShipIPC.uploadFile({
+    const result = await ShipIPC.uploadFile({
       source: 'file',
       content: file.path,
       contentType: file.type,
     });
 
-    return src;
+    return result.Location;
   };
 
   const onSubmit = async () => {

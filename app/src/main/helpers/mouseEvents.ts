@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain, screen } from 'electron';
 
-import { Position } from '@holium/design-system';
+import { Position } from '@holium/design-system/util';
 import { MouseState, PresenceArg } from '@holium/realm-presence';
 
 import { denormalizePosition } from '../../renderer/lib/window-manager';

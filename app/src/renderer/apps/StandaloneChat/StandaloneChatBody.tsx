@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
+import styled, { css } from 'styled-components';
 
 import { Flex, Spinner, Text } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -18,11 +21,33 @@ import { StandaloneChatPassport } from './StandaloneChatPassport';
 import { StandaloneChatPassportPreview } from './StandaloneChatPassportPreview';
 import { StandaloneChatRoom } from './StandaloneChatRoom';
 
+const StandaloneBackgroundImage = styled(motion.img)`
+  ${(props: { src?: string }) =>
+    props.src &&
+    css`
+      user-select: none;
+      position: absolute;
+      right: 0px;
+      left: 0px;
+      z-index: -1;
+      top: 0px;
+      bottom: 0px;
+      width: calc(100%);
+      height: calc(100vh);
+      object-fit: cover;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+      background-image: url(${props.src});
+    `}
+`;
+
 export const StandaloneChatBodyPresenter = () => {
-  const { showTitleBar } = useAppState();
-  const { chatStore } = useShipStore();
+  const { showTitleBar, theme } = useAppState();
+  const { chatStore, settingsStore } = useShipStore();
 
   const [sidebarWidth, setSidebarWidth] = useState(400);
+  const showBackgroundImage = useToggle(false);
 
   const onMouseDownResizeHandle = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -42,6 +67,18 @@ export const StandaloneChatBodyPresenter = () => {
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
   };
+
+  useEffect(() => {
+    if (chatStore.selectedChat?.type === 'space') {
+      showBackgroundImage.setToggle(
+        settingsStore.standaloneChatSpaceWallpaperEnabled
+      );
+    } else {
+      showBackgroundImage.setToggle(
+        settingsStore.standaloneChatPersonalWallpaperEnabled
+      );
+    }
+  }, [chatStore.selectedChat]);
 
   useEffect(() => {
     // Fetch messages for the selected chat.
@@ -102,6 +139,21 @@ export const StandaloneChatBodyPresenter = () => {
         minWidth={360}
         background="var(--rlm-dock-color)"
       >
+        {chatStore.subroute === 'chat' && showBackgroundImage.isOn && (
+          <StandaloneBackgroundImage
+            key={theme.wallpaper}
+            src={theme.wallpaper}
+            initial={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            animate={{
+              opacity: 1,
+              filter: `var(--blur)`,
+            }}
+            transition={{
+              opacity: { duration: 0.5 },
+            }}
+          />
+        )}
         {chatStore.subroute === 'chat' && <ChatLog isStandaloneChat />}
         {chatStore.subroute === 'chat-info' && <ChatInfo isStandaloneChat />}
         {chatStore.subroute === 'new' && <CreateNewChat isStandaloneChat />}

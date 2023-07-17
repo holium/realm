@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { hexToRgb, Position, rgbToString } from '@holium/design-system';
+import { hexToRgb, Position, rgbToString } from '@holium/design-system/util';
 import { MouseState } from '@holium/realm-presence';
 
 import { AnimatedCursor } from './AnimatedCursor';

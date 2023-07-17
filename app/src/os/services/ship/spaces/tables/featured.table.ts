@@ -133,6 +133,8 @@ export const spacesFeaturedInitSql = `
   create unique index if not exists spaces_featured_uindex on spaces_featured (path);
 `;
 
+export const spacesFeaturedWipeSql = `drop table if exists spaces_featured;`;
+
 export const spacesFeaturedDBPreload = FeaturedSpacesDB.preload(
   new FeaturedSpacesDB(true)
 );

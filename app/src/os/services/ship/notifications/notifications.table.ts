@@ -439,6 +439,11 @@ create table if not exists notifications_delete_logs
 );
 `;
 
+export const notifWipeSql = `
+DROP TABLE IF EXISTS notifications;
+DROP TABLE IF EXISTS notifications_delete_logs;
+`;
+
 export const QUERY_NOTIFICATIONS = `
   SELECT id,
     app,

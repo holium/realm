@@ -1,6 +1,6 @@
 import { RefObject } from 'react';
 
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 
 import { AppWindowIcon } from 'renderer/system/desktop/components/AppWindow/AppWindowIcon';
 

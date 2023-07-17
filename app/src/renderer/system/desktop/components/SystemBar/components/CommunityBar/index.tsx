@@ -1,4 +1,5 @@
-import { BarStyle, Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
+import { BarStyle } from '@holium/design-system/os';
 
 import { AppDock } from './AppDock/AppDock';
 import { SpaceSelector } from './SpaceSelector';

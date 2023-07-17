@@ -7,14 +7,16 @@ import {
   Box,
   Flex,
   Icon,
-  InlineEdit,
   NoScrollBar,
   SectionDivider,
-  Select,
   Text,
+} from '@holium/design-system/general';
+import {
+  InlineEdit,
+  Select,
   TextInput,
   Toggle,
-} from '@holium/design-system';
+} from '@holium/design-system/inputs';
 
 import { FileUploadParams } from 'os/services/ship/ship.service';
 import { ShipSearch } from 'renderer/components/ShipSearch';
@@ -140,7 +142,8 @@ export const ChatInfoPresenter = ({ isStandaloneChat }: Props) => {
     setIsUploading(true);
     setUploadError('');
     (ShipIPC.uploadFile(params) as Promise<any>)
-      .then((url: string) => {
+      .then((data: { Location: string; key: string }) => {
+        const url = data.Location;
         setImage(url);
         editMetadata({ image: url });
       })

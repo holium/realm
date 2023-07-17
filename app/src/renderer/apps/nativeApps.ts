@@ -60,5 +60,25 @@ export const nativeApps: AppManifestMap = {
       hideTitlebarBorder: true,
     },
   },
+  'os-lexicon': {
+    id: 'os-lexicon',
+    title: 'Lexicon',
+    type: 'native',
+    color: '#EEDFC9',
+    icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/lexicon.svg',
+    native: {
+      hideTitlebarBorder: true,
+    },
+  },
+  'os-trove': {
+    id: 'os-trove',
+    title: 'Trove',
+    type: 'native',
+    color: '#DCDCDC',
+    icon: 'https://lomder-librun.sfo3.digitaloceanspaces.com/tiles/trove.svg',
+    native: {
+      hideTitlebarBorder: true,
+    },
+  },
   ...devApps,
 };

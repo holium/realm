@@ -8,7 +8,7 @@ import {
 import disableScroll from 'disable-scroll';
 import { observer } from 'mobx-react';
 
-import { useToggle } from '@holium/design-system';
+import { useToggle } from '@holium/design-system/util';
 
 import { AppMobxType } from 'renderer/stores/models/bazaar.model';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -22,12 +22,11 @@ interface AppGridProps {
 const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
   const { bazaarStore, spacesStore } = useShipStore();
   const currentSpace = spacesStore.selected;
-
   const apps = useMemo(
     () =>
       [
         ...bazaarStore.installed,
-        // ...bazaarStore.devApps,
+        //...bazaarStore.devApps
       ] as AppMobxType[],
     [bazaarStore.catalog, bazaarStore.installations.values()]
   );
@@ -47,11 +46,6 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
     window.electron.app.onMouseUp(() => {
       canClick.setToggle(true);
     });
-
-    return () => {
-      window.electron.app.removeOnMouseMove();
-      window.electron.app.removeOnMouseUp();
-    };
   }, []);
 
   if (!currentSpace) return null;
@@ -66,8 +60,7 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
     setItems(nextState);
     const newGrid = Object();
 
-    // eslint-disable-next-line array-callback-return
-    nextState.map((app, index: number) => {
+    nextState.forEach((app, index: number) => {
       newGrid[index] = app.id;
     });
     bazaarStore.reorderApp(sourceIndex, targetIndex, newGrid);

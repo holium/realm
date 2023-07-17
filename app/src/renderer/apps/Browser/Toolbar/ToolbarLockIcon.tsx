@@ -1,4 +1,4 @@
-import { Flex, Icon, Spinner } from '@holium/design-system';
+import { Flex, Icon, Spinner } from '@holium/design-system/general';
 
 type Props = {
   loading: boolean;

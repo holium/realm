@@ -228,6 +228,10 @@ export const ChatStore = types
       }
       self.subroute = subroute;
     }),
+    setStandaloneChat(path: string) {
+      this.setChat(path);
+      this.updateStandaloneChatTheme();
+    },
     setChat: flow(function* (path: string) {
       self.chatLoader.set('loading');
       self.selectedChat = tryReference(() =>
@@ -326,6 +330,23 @@ export const ChatStore = types
     refreshInbox: flow(function* () {
       self.inbox = yield ChatIPC.getChatList();
     }),
+    updateStandaloneChatTheme() {
+      const selectedChat = self.selectedChat;
+      if (!selectedChat) return;
+      const spacesStore: SpacesStoreType = getParentOfType(
+        self,
+        ShipStore
+      ).spacesStore;
+      if (selectedChat.type === 'space') {
+        // get space theme
+        const selectedSpace = spacesStore.getSpaceByChatPath(selectedChat.path);
+        if (!selectedSpace) return;
+        spacesStore.selectSpace(selectedSpace?.path);
+      } else {
+        // personal theme
+        spacesStore.selectSpace(spacesStore.ourSpace.path);
+      }
+    },
     reset() {
       self.subroute = 'inbox';
       self.pinnedChats.clear();

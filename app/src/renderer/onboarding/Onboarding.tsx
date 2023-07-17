@@ -1,6 +1,6 @@
 import { Fill } from 'react-spaces';
 
-import { Flex } from '@holium/design-system';
+import { Flex } from '@holium/design-system/general';
 
 import { OnboardingStep } from './OnboardingStep';
 

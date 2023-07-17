@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { Dimensions, useToggle } from '@holium/design-system';
+import { Dimensions, useToggle } from '@holium/design-system/util';
 import {
   MultiplayerChat,
   MultiplayerClick,

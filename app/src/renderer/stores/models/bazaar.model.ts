@@ -8,7 +8,7 @@ import {
   types,
 } from 'mobx-state-tree';
 
-import { cleanNounColor } from '@holium/design-system';
+import { cleanNounColor } from '@holium/design-system/util';
 
 import { AppRecentsIPC, BazaarIPC } from '../ipc';
 import { LoaderModel } from './common.model';

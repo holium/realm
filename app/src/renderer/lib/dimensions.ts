@@ -1,4 +1,4 @@
-import { Dimensions } from '@holium/design-system';
+import { Dimensions } from '@holium/design-system/util';
 
 import { normalizeDimensions } from './window-manager';
 
@@ -66,6 +66,14 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: Record<string, Dimensions> = {
   templeochess: {
     width: 700,
     height: 700,
+  },
+  lexicon: {
+    width: 600,
+    height: 700,
+  },
+  trove: {
+    width: 1328,
+    height: 768,
   },
 };
 

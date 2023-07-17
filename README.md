@@ -1,6 +1,6 @@
 # Holium Realm
 
-The GUI for a new network OS.
+The GUI for Realm OS.
 
 ## Directory structure
 
@@ -44,6 +44,9 @@ If you download from releases, you will have to include a github token env when 
 In the debug build you can bypass the invite code and email with `~admins-admins-admins` and `admin@admin.com` (only if DEBUG_PROD=true).
 
 `~hostyv` hosts several of the desks needed for Realm, you may have to manually install them for now.
+
+### Urbit pre-release / development moon
+To get the cutting edge `%base` desk to test and develop against, set your OTA source to `~binnec-dozzod-marzod`
 
 ### Linux Installation Notes
 

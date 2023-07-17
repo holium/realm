@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { useToggle } from '@holium/design-system';
+import { useToggle } from '@holium/design-system/util';
 
 import { WalletOnboardingScreen } from 'renderer/apps/Wallet/types';
 import { useShipStore } from 'renderer/stores/ship.store';

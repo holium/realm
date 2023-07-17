@@ -12,6 +12,10 @@
     "lib/presence",
     "lib/room/test-ui",
     "lib/room",
-    "calendar"
+    "calendar",
+    "lexicon",
+    "trove",
+    "cypress",
+    "cypress.config.ts"
   ]
 }

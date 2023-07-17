@@ -10,14 +10,27 @@ import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection, ConduitSession } from '../api';
 import AuthService from '../auth/auth.service';
 import ChatService from './chat/chat.service';
-import { FriendsService } from './friends.service';
+import { FriendsService } from './friends/friends.service';
+import LexiconService from './lexicon/lexicon.service';
 import NotificationsService from './notifications/notifications.service';
-import { SettingsService } from './settings.service';
+import { SettingsService } from './settings/settings.service';
 import { ShipDB } from './ship.db';
 import { Credentials } from './ship.types.ts';
 import BazaarService from './spaces/bazaar.service';
 import SpacesService from './spaces/spaces.service';
+import TroveService from './trove/trove.service';
 import WalletService from './wallet/wallet.service';
+
+export type S3CredentialsAndConfig = {
+  credentials: {
+    accessKeyId: string;
+    secretAccessKey: string;
+    endpoint: string;
+  };
+  configuration: {
+    currentBucket: string;
+  };
+};
 
 export class ShipService extends AbstractService<any> {
   public patp: string;
@@ -31,6 +44,8 @@ export class ShipService extends AbstractService<any> {
     spaces: SpacesService;
     bazaar: BazaarService;
     wallet: WalletService;
+    lexicon: LexiconService;
+    trove: TroveService;
     settings: SettingsService;
   };
 
@@ -140,6 +155,8 @@ export class ShipService extends AbstractService<any> {
       spaces: new SpacesService(this.serviceOptions, this.shipDB.db, this.patp),
       friends: new FriendsService(this.serviceOptions, this.shipDB.db),
       wallet: new WalletService(undefined, this.shipDB.db),
+      lexicon: new LexiconService(undefined, this.shipDB.db),
+      trove: new TroveService(undefined, this.shipDB.db),
       settings: new SettingsService(this.serviceOptions, this.shipDB.db),
     };
   }
@@ -148,6 +165,7 @@ export class ShipService extends AbstractService<any> {
     this.authService = authService;
     this.initSpaces();
     this.initChat();
+    this.initLexicon();
   }
 
   private async initSpaces() {
@@ -158,6 +176,10 @@ export class ShipService extends AbstractService<any> {
   private async initChat() {
     await this.services?.chat.init();
     this.services?.notifications.init();
+  }
+
+  private async initLexicon() {
+    await this.services?.lexicon.init();
   }
 
   public updateCookie(cookie: string) {
@@ -260,29 +282,33 @@ export class ShipService extends AbstractService<any> {
   // ----------------------------------------
   // ------------------ S3 ------------------
   // ----------------------------------------
-  public async getS3Bucket() {
-    const [credentials, configuration] = await Promise.all([
-      APIConnection.getInstance().conduit.scry({
-        app: 's3-store',
+  public async getS3Bucket(): Promise<S3CredentialsAndConfig | null> {
+    try {
+      const credentials = await APIConnection.getInstance().conduit.scry({
+        app: 'api-store',
         path: `/credentials`,
-      }),
-      APIConnection.getInstance().conduit.scry({
-        app: 's3-store',
+      });
+      const configuration = await APIConnection.getInstance().conduit.scry({
+        app: 'api-store',
         path: `/configuration`,
-      }),
-    ]);
+      });
 
-    return {
-      ...credentials['s3-update'],
-      ...configuration['s3-update'],
-    };
+      return { credentials, configuration };
+    } catch (e) {
+      log.error('ship.service.ts, getS3Bucket(): error getting credentials', e);
+
+      return null;
+    }
   }
 
-  public async uploadFile(args: FileUploadParams): Promise<string | undefined> {
+  public async uploadFile(
+    args: FileUploadParams
+  ): Promise<{ Location: string; key: string }> {
     return await new Promise((resolve, reject) => {
       this.getS3Bucket()
-        .then(async (response: any) => {
+        .then(async (response) => {
           console.log('getS3Bucket response: ', response);
+          if (!response) return;
           // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
           let endp = response.credentials.endpoint;
           if (endp.split('.')[0] === response.configuration.currentBucket) {
@@ -307,15 +333,45 @@ export class ShipService extends AbstractService<any> {
             fileExtension = args.contentType.split('/')[1];
           }
           if (!fileContent) log.warn('No file content found');
+          const key = `${
+            this.patp
+          }/${moment().unix()}-${fileName}.${fileExtension}`;
           const params = {
             Bucket: response.configuration.currentBucket,
-            Key: `${this.patp}/${moment().unix()}-${fileName}.${fileExtension}`,
+            Key: key,
             Body: fileContent as Buffer,
             ACL: StorageAcl.PublicRead,
             ContentType: args.contentType,
           };
           const { Location } = await client.upload(params).promise();
-          resolve(Location);
+          resolve({ Location, key });
+        })
+        .catch(reject);
+    });
+  }
+  public async deleteFile(args: { key: string }): Promise<any> {
+    return await new Promise((resolve, reject) => {
+      this.getS3Bucket()
+        .then(async (response) => {
+          console.log('getS3Bucket response: ', response);
+          if (!response) return;
+          // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
+          let endp = response.credentials.endpoint;
+          if (endp.split('.')[0] === response.configuration.currentBucket) {
+            endp = endp.split('.').slice(1).join('.');
+          }
+          const client = new S3Client({
+            credentials: response.credentials,
+            endpoint: endp,
+            signatureVersion: 'v4',
+          });
+
+          const params = {
+            Bucket: response.configuration.currentBucket,
+            Key: args.key,
+          };
+          const result = await client.delete(params).promise();
+          resolve(result);
         })
         .catch(reject);
     });

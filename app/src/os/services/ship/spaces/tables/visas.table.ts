@@ -116,6 +116,8 @@ export const spacesInvitationsInitSql = `
   create unique index if not exists spaces_invitations_uindex on spaces_invitations (path);
 `;
 
+export const spacesInvitationsWipeSql = `drop table if exists spaces_invitations;`;
+
 export const spacesMembersDBPreload = InvitationDB.preload(
   new InvitationDB(true)
 );

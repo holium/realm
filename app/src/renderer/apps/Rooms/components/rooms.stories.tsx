@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { Button, Flex, Text } from '@holium/design-system';
+import { Button, Flex, Text } from '@holium/design-system/general';
 
 import { PeerConnectionState } from '../store/room.types';
 import { SpeakerGrid } from './SpeakerGrid';

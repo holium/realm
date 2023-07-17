@@ -64,8 +64,9 @@ export const ChatInputBox = ({
       setIsUploading(true);
       setUploadError('');
       (ShipIPC.uploadFile(params) as Promise<any>)
-        .then((url) => {
-          console.log(url);
+        .then((data: { Location: string; key: string }) => {
+          console.log(data);
+          const url = data.Location;
           setAttachment([...attachments, url]);
         })
         .catch(() => {

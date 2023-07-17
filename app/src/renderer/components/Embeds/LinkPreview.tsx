@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import styled from 'styled-components';
 
-import { Flex, Icon } from '@holium/design-system';
+import { Flex, Icon } from '@holium/design-system/general';
 
 import { EmbedBox } from '../../components';
 

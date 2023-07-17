@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { darken } from 'polished';
 import styled, { css } from 'styled-components';
 
-import { Avatar, Flex, Text } from '@holium/design-system';
+import { Avatar, Flex, Text } from '@holium/design-system/general';
 
 import { useAppState } from 'renderer/stores/app.store';
 

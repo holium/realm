@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { Layer, ViewPort } from 'react-spaces';
 import { observer } from 'mobx-react';
 
-import { ConnectionStatus } from '@holium/design-system';
+import { ConnectionStatus } from '@holium/design-system/os';
 
 import { ConduitState } from 'os/services/api';
 import { RoomsStoreProvider } from 'renderer/apps/Rooms/store/RoomsStoreProvider';

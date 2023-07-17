@@ -73,9 +73,8 @@ export const PassportStep = ({ setStep }: StepProps) => {
       content: file.path,
       contentType: file.type,
     };
-    const url = await RealmIPC.uploadFile(params);
-
-    return url;
+    const result = await RealmIPC.uploadFile(params);
+    return result?.Location;
   };
 
   const onBack = () => {

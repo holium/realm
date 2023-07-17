@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 
-import { Button, CheckBox, Flex, Text } from '@holium/design-system';
+import { Button, Flex, Text } from '@holium/design-system/general';
+import { CheckBox } from '@holium/design-system/inputs';
 
 import { MediaAccess, MediaAccessStatus } from 'os/types';
 import { MainIPC } from 'renderer/stores/ipc';
@@ -91,6 +92,18 @@ const SystemPanelPresenter = () => {
               label="Prevents the native OS from causing edge events and notifications."
               isChecked={settingsStore.isolationModeEnabled}
               onChange={settingsStore.toggleIsolationMode}
+            />
+          </SettingControl>
+        }
+      />
+      <SettingSection
+        title="Sounds"
+        body={
+          <SettingControl label="System Sounds">
+            <CheckBox
+              label="Disable system sounds."
+              isChecked={!settingsStore.systemSoundsEnabled}
+              onChange={settingsStore.toggleSystemSoundsEnabled}
             />
           </SettingControl>
         }
