@@ -198,6 +198,12 @@ export class RoomsStore extends EventsEmitter {
             peer.peer.removeStream(this.ourPeer.screenStream);
           }
         });
+        this.sendDataToRoom({
+          kind: 5,
+          value: {
+            data: false,
+          },
+        });
       }
     });
 
@@ -322,6 +328,12 @@ export class RoomsStore extends EventsEmitter {
         }
       });
       this.ourPeer.disableVideo();
+      this.sendDataToRoom({
+        kind: 6,
+        value: {
+          data: false,
+        },
+      });
     } else {
       const stream = await this.ourPeer.enableVideo();
       this.peers.forEach((peer) => {
@@ -660,6 +672,7 @@ export class RoomsStore extends EventsEmitter {
         this.leaveRoom(this.currentRoom.rid);
       }
     }
+    this.pinnedSpeaker = null;
   }
 
   @action

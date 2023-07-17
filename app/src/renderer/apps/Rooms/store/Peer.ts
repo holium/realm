@@ -8,6 +8,9 @@ import { OnDataChannel, OnLeftRoom } from './RoomsStore';
 import { IAudioAnalyser, SpeakingDetectionAnalyser } from './SpeakingDetector';
 
 const DataPacketMuteStatus = 3;
+const DataPacketScreenShareStatus = 5;
+const DataPacketWebcamStatus = 6;
+
 // const DataPacketSpeakingChanged = 4;
 //
 export class PeerClass extends EventsEmitter {
@@ -100,6 +103,11 @@ export class PeerClass extends EventsEmitter {
     this.hasVideo = hasVideo;
   }
 
+  @action
+  isScreenSharingChanged(isScreenSharing: boolean) {
+    this.isScreenSharing = isScreenSharing;
+  }
+
   setNewStream(stream: MediaStream) {
     // this.peer.removeStream(this.ourStreams);
     this.peer.addStream(stream);
@@ -157,6 +165,7 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onTrack(track: MediaStreamTrack, stream: MediaStream) {
+    console.log('onTRACK');
     if (!track || !(track instanceof MediaStreamTrack)) {
       console.error('Invalid track received in onTrack');
       return;
@@ -183,10 +192,13 @@ export class PeerClass extends EventsEmitter {
       const video = document.getElementById(
         `peer-video-${this.peerId}`
       ) as HTMLVideoElement;
+
       if (track.label === 'Screen') {
         video.classList.add('screen');
+        this.isScreenSharing = true;
       } else {
         video.classList.remove('screen');
+        this.hasVideo = true;
       }
 
       if (video) {
@@ -316,6 +328,19 @@ export class PeerClass extends EventsEmitter {
         this.isMutedChanged(true);
       } else {
         this.isMutedChanged(false);
+      }
+    } else if (dataPacket.kind === DataPacketScreenShareStatus) {
+      const payload = dataPacket.value as DataPayload;
+      if (payload.data) {
+        this.isScreenSharingChanged(true);
+      } else {
+        this.isScreenSharingChanged(false);
+      }
+    } else if (dataPacket.kind === DataPacketWebcamStatus) {
+      if (dataPacket.value === true) {
+        this.hasVideoChanged(true);
+      } else {
+        this.hasVideoChanged(false);
       }
     }
     this.onDataChannel(this.rid, this.peerId, dataPacket);

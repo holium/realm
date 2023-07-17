@@ -6,6 +6,8 @@ export enum DataPacket_Kind {
   TRACK_META = 2,
   MUTE_STATUS = 3,
   SPEAKING_CHANGED = 4,
+  SCREENSHARE_CHANGED = 5,
+  WEBCAM_CHANGED = 6,
   UNRECOGNIZED = -1,
 }
 
@@ -15,6 +17,8 @@ export enum DataPacketKind {
   TRACK_META = 2,
   MUTE_STATUS = 3,
   SPEAKING_CHANGED = 4,
+  SCREENSHARE_CHANGED = 5,
+  WEBCAM_CHANGED = 6,
   UNRECOGNIZED = -1,
 }
 export interface DataPayload {
