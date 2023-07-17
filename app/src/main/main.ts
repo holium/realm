@@ -1,7 +1,6 @@
 import { app, BrowserWindow, Menu, MenuItem, nativeImage } from 'electron';
 import Store from 'electron-store';
 
-import { RealmService } from '../os/realm.service';
 import { AppUpdater } from './AppUpdater';
 import { setRealmCursor } from './helpers/cursorSettings';
 import { isMac, isMacWithCameraNotch } from './helpers/env';
@@ -9,6 +8,7 @@ import { windowWindow } from './helpers/fullscreen';
 import { MenuBuilder } from './menu';
 import { getAssetPath } from './util';
 import {
+  createBackgroundWindow,
   createMouseOverlayWindow,
   createRealmWindow,
   createStandaloneChatWindow,
@@ -20,8 +20,9 @@ const store = new Store();
 
 let updater: AppUpdater;
 let menuBuilder: MenuBuilder | null;
-let realmService: RealmService | null;
-export const getRealmService = () => realmService;
+
+// let realmService: RealmService | null;
+// export const getRealmService = () => realmService;
 
 // The realm window has a mouse overlay window associated with it.
 // The standalone chat window is for booting Realm in a standalone mode
@@ -29,6 +30,7 @@ export const getRealmService = () => realmService;
 let realmWindow: BrowserWindow | null;
 let mouseOverlayWindow: BrowserWindow | null;
 let standaloneChatWindow: BrowserWindow | null;
+let backgroundProcessWindow: BrowserWindow | null;
 
 const updateMacDockMenu = (
   macDock: Electron.Dock,
@@ -58,8 +60,9 @@ const updateMacDockMenu = (
 export const bootRealm = () => {
   store.set('isStandaloneChat', false);
 
-  if (!realmService) {
-    realmService = new RealmService();
+  // check if backgroundProcessWindow is created
+  if (!backgroundProcessWindow) {
+    backgroundProcessWindow = createBackgroundWindow();
   }
 
   if (standaloneChatWindow && !standaloneChatWindow.isDestroyed()) {
@@ -104,8 +107,8 @@ export const bootRealm = () => {
 export const bootStandaloneChat = () => {
   store.set('isStandaloneChat', true);
 
-  if (!realmService) {
-    realmService = new RealmService();
+  if (!backgroundProcessWindow) {
+    backgroundProcessWindow = createBackgroundWindow();
   }
 
   if (realmWindow && !realmWindow.isDestroyed()) {

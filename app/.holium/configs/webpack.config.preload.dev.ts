@@ -17,6 +17,7 @@ const configuration: webpack.Configuration = {
   mode: 'development',
   target: 'electron-preload',
   entry: {
+    osPreload: path.join(webpackPaths.srcPath, 'background/preload.ts'),
     preload: path.join(webpackPaths.srcMainPath, 'preload.ts'),
     updater: path.join(webpackPaths.srcMainPath, 'updater.ts'),
   },

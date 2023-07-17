@@ -5,6 +5,7 @@ import { URL } from 'url';
 export let resolveHtmlPath: (htmlFileName: string) => string;
 export let resolveUpdaterPath: (mediaFileName: string) => string;
 export let resolveMediaPath: (mediaFileName: string) => string;
+export let resolveBackgroundProcessPath: (htmlFileName: string) => string;
 
 if (process.env.NODE_ENV === 'development') {
   const port = process.env.PORT || 1212;
@@ -15,6 +16,13 @@ if (process.env.NODE_ENV === 'development') {
   };
   resolveUpdaterPath = (htmlFileName: string) => {
     return `file://${path.resolve(__dirname, './updater/', htmlFileName)}`;
+  };
+  resolveBackgroundProcessPath = (htmlFileName: string) => {
+    return `file://${path.resolve(
+      __dirname,
+      '../../release/app/dist/background/',
+      htmlFileName
+    )}`;
   };
 } else {
   resolveHtmlPath = (htmlFileName: string) => {
@@ -42,3 +50,8 @@ export const getPreloadPath = () =>
   app.isPackaged
     ? path.join(__dirname, 'preload.js')
     : path.join(__dirname, '../../.holium/dll/preload.js');
+
+export const getOSPreloadPath = () =>
+  app.isPackaged
+    ? path.join(__dirname, 'osPreload.js')
+    : path.join(__dirname, '../../.holium/dll/osPreload.js');

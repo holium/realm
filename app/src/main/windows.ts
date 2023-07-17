@@ -1,4 +1,4 @@
-import { BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 
 import { BrowserHelper } from './helpers/browser';
 import { CursorSettingsHelper } from './helpers/cursorSettings';
@@ -18,7 +18,13 @@ import { PowerHelper } from './helpers/power';
 import { StandaloneHelper } from './helpers/standalone';
 import { TitlebarHelper } from './helpers/titlebar';
 import { WebViewHelper } from './helpers/webview';
-import { getAssetPath, getPreloadPath, resolveHtmlPath } from './util';
+import {
+  getAssetPath,
+  getOSPreloadPath,
+  getPreloadPath,
+  resolveBackgroundProcessPath,
+  resolveHtmlPath,
+} from './util';
 
 const getDefaultRealmWindowOptions = (
   frame: boolean
@@ -36,7 +42,7 @@ const getDefaultRealmWindowOptions = (
   simpleFullscreen: false,
   acceptFirstMouse: true,
   webPreferences: {
-    nodeIntegration: true,
+    nodeIntegration: false,
     webviewTag: true,
     sandbox: false,
     contextIsolation: true,
@@ -44,6 +50,21 @@ const getDefaultRealmWindowOptions = (
   },
 });
 
+export const createBackgroundWindow = (): BrowserWindow => {
+  const backgroundWindow: BrowserWindow = new BrowserWindow({
+    show: true,
+    frame: false,
+    webPreferences: {
+      nodeIntegration: true,
+      nodeIntegrationInWorker: true,
+      contextIsolation: true,
+      sandbox: false,
+      preload: getOSPreloadPath(),
+    },
+  });
+  backgroundWindow.loadURL(resolveBackgroundProcessPath('background.html'));
+  return backgroundWindow;
+};
 export const createRealmWindow = () => {
   const frame = isMacWithCameraNotch() ? false : true;
   const newRealmWindow = new BrowserWindow(getDefaultRealmWindowOptions(frame));
@@ -162,6 +183,10 @@ export const createMouseOverlayWindow = (parentWindow: BrowserWindow) => {
 
 export const createStandaloneChatWindow = () => {
   const frame = isMacWithCameraNotch() ? false : true;
+  app.commandLine.appendSwitch(
+    'disable-features',
+    'IOSurfaceCapturer,DesktopCaptureMacV2'
+  );
   const defaultRealmWindowOptions = getDefaultRealmWindowOptions(frame);
   const newStandaloneChatWindow = new BrowserWindow({
     ...defaultRealmWindowOptions,

@@ -28,11 +28,13 @@ const registerListeners = (mainWindow: BrowserWindow) => {
   });
 
   ipcMain.handle('ask-for-screen', async () => {
-    // await systemPreferences.askForMediaAccess('screen');
-    const sources = await desktopCapturer.getSources({ types: ['screen'] });
+    const sources = await desktopCapturer.getSources({
+      types: ['screen', 'windows'],
+    });
     log.info(
       'has screen access',
-      systemPreferences.getMediaAccessStatus('screen')
+      systemPreferences.getMediaAccessStatus('screen'),
+      sources
     );
     const videoOptionsMenu = Menu.buildFromTemplate(
       sources.map((source) => {

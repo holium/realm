@@ -71,7 +71,7 @@ const configuration: webpack.Configuration = {
     library: {
       type: 'umd',
     },
-  },
+  }, 
   module: {
     rules: [
       {
