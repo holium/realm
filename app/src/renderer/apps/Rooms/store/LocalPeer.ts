@@ -143,6 +143,9 @@ export class LocalPeer extends EventEmitter {
   @action
   async enableVideo() {
     this.isVideoOn = true;
+    if (this.isScreenSharing) {
+      this.disableScreenSharing();
+    }
     if (this.videoStream && this.videoStream.getVideoTracks().length > 0) {
       this.videoStream.getVideoTracks().forEach((track: MediaStreamTrack) => {
         track.enabled = true;
@@ -206,6 +209,9 @@ export class LocalPeer extends EventEmitter {
 
   @action
   async setScreenShareSource(source: Electron.DesktopCapturerSource) {
+    if (this.hasVideo) {
+      this.disableVideo();
+    }
     const options = {
       video: {
         mandatory: {
