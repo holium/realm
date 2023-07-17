@@ -62,8 +62,8 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     });
   }
 
-  async deleteNote({ id, space }: NotesService_DeleteNote_Payload) {
-    const result = await APIConnection.getInstance().conduit.poke({
+  deleteNote({ id, space }: NotesService_DeleteNote_Payload) {
+    return APIConnection.getInstance().conduit.poke({
       app: 'bedrock',
       mark: 'db-action',
       json: {
@@ -74,14 +74,6 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         },
       },
     });
-
-    if (result) {
-      this.notesDB?.delete({ id });
-      this.sendUpdate({
-        type: 'delete-note',
-        payload: { id },
-      });
-    }
   }
 
   getNotesFromDb({ space }: NotesService_GetNotes_Payload) {
@@ -191,6 +183,19 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
                 title: rowData.title,
                 doc: JSON.parse(rowData.doc),
                 updated_at: update.row['updated-at'],
+              },
+            });
+          } else if (update.change === 'del-row') {
+            // Delete responses have a diffrent structure.
+            if (update.type !== 'realm-note' || !update.id) return;
+
+            // Update SQLite.
+            this.notesDB.delete({ id: update.id });
+            // Update MobX.
+            this.sendUpdate({
+              type: 'delete-note',
+              payload: {
+                id: update.id,
               },
             });
           }

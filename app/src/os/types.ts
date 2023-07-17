@@ -40,5 +40,11 @@ export type BedrockRow<T = any> = {
 
 export type BedrockSubscriptionUpdate<T = any> = {
   change: string;
+  /* Create/Update events */
   row?: BedrockRow<T>;
+  /* Delete events */
+  id?: string;
+  timestamp?: number;
+  path?: string;
+  type?: string;
 };

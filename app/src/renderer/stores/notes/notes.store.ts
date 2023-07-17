@@ -221,6 +221,8 @@ export const NotesStore = types
 
       const noteIndex = notes.findIndex((n) => n.id === id);
       if (noteIndex === -1) return;
+
+      notes.splice(noteIndex, 1);
     },
   }));
 
