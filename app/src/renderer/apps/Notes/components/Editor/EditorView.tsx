@@ -27,9 +27,10 @@ export type SendTransaction = (
 type Props = {
   doc: Node;
   onBlurDoc: (doc: Node) => void;
+  onChangeDoc: (doc: Node) => void;
 };
 
-export const EditorView = ({ doc, onBlurDoc }: Props) => {
+export const EditorView = ({ doc, onBlurDoc, onChangeDoc }: Props) => {
   const [editorView, setEditorView] = useState<ProseMirrorEditorView>();
   const [authority, setAuthority] = useState<Authority>();
   const [carets, setCarets] = useState<Carets>({});
@@ -84,7 +85,8 @@ export const EditorView = ({ doc, onBlurDoc }: Props) => {
       newAuthority,
       ref,
       sendTransaction,
-      sendCaret
+      sendCaret,
+      onChangeDoc
     );
 
     setEditorView(newEditor);

@@ -14,8 +14,8 @@ export const NoteHeaderStory: ComponentStory<typeof NoteHeaderView> = () => (
     noteUpdatedAtString="Jan 1, 2021, 12:00 PM"
     contextMenuOptions={[]}
     loading={false}
-    setTitle={() => {}}
-    onBlurTitle={() => {}}
+    onChange={() => {}}
+    onBlur={() => {}}
   />
 );
 

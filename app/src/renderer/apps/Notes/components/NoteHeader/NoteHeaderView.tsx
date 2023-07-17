@@ -1,3 +1,5 @@
+import { ChangeEvent } from 'react';
+
 import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
 import { Menu } from '@holium/design-system/navigation';
 
@@ -16,8 +18,8 @@ type Props = {
   noteUpdatedAtString: string;
   contextMenuOptions: ContextMenuOption[];
   loading: boolean;
-  setTitle: (title: string) => void;
-  onBlurTitle: () => void;
+  onBlur: () => void;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 };
 
 export const NoteHeaderView = ({
@@ -26,8 +28,8 @@ export const NoteHeaderView = ({
   noteUpdatedAtString,
   contextMenuOptions,
   loading,
-  setTitle,
-  onBlurTitle,
+  onBlur,
+  onChange,
 }: Props) => (
   <NoteHeaderContainer>
     <Flex flex={1} flexDirection="column">
@@ -37,8 +39,8 @@ export const NoteHeaderView = ({
         name="note-title-input"
         placeholder="Title"
         value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        onBlur={onBlurTitle}
+        onBlur={onBlur}
+        onChange={onChange}
       />
       <AuthorText>{author}</AuthorText>
     </Flex>

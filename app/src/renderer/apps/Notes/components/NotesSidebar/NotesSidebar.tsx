@@ -23,11 +23,16 @@ import {
 
 const NotesSidebarPresenter = () => {
   const { loggedInAccount } = useAppState();
-  const { spacesStore, notesStore } = useShipStore();
+  const { notesStore, spacesStore } = useShipStore();
 
+  const {
+    sortedPersonalNotes,
+    sortedSpaceNotes,
+    selectedNoteId,
+    setSelectedNoteId,
+    deleteNote,
+  } = notesStore;
   const selectedSpace = spacesStore.selected;
-  const { personalNotes, spaceNotes, selectedNoteId, setSelectedNoteId } =
-    notesStore;
 
   const creating = useToggle(false);
   const [_, setSearchString] = useState<string>('');
@@ -94,17 +99,24 @@ const NotesSidebarPresenter = () => {
               <NotesSectionDividerBorder />
             </NotesSectionDivider>
             <NotesSidebarSectionList>
-              {spaceNotes && spaceNotes.length ? (
-                spaceNotes.map((note) => (
+              {sortedSpaceNotes && sortedSpaceNotes.length ? (
+                sortedSpaceNotes.map((note) => (
                   <NoteRow
-                    key={`${note.id}-${note.updated_at}`}
-                    note={note}
+                    key={`space-note-row-${note.id}`}
+                    id={note.id}
+                    title={note.title}
+                    author={note.author}
+                    space={note.space}
+                    updatedAt={note.updated_at}
+                    firstParagraph={(
+                      note.doc.content.firstChild?.textContent ?? ''
+                    ).trim()}
                     isPersonal={false}
                     isSelected={selectedNoteId === note.id}
-                    onClickDelete={() => {
-                      notesStore.deleteNote({ id: note.id, space: note.space });
-                    }}
                     onClick={() => setSelectedNoteId({ id: note.id })}
+                    onClickDelete={() => {
+                      deleteNote({ id: note.id, space: note.space });
+                    }}
                   />
                 ))
               ) : (
@@ -119,17 +131,24 @@ const NotesSidebarPresenter = () => {
             <NotesSectionDividerBorder />
           </NotesSectionDivider>
           <NotesSidebarSectionList>
-            {personalNotes && personalNotes.length ? (
-              personalNotes.map((note) => (
+            {sortedPersonalNotes && sortedPersonalNotes.length ? (
+              sortedPersonalNotes.map((note) => (
                 <NoteRow
-                  key={note.id}
-                  note={note}
+                  key={`personal-note-row-${note.id}`}
+                  id={note.id}
+                  title={note.title}
+                  author={note.author}
+                  space={note.space}
+                  updatedAt={note.updated_at}
+                  firstParagraph={(
+                    note.doc.content.firstChild?.textContent ?? ''
+                  ).trim()}
                   isPersonal
                   isSelected={selectedNoteId === note.id}
-                  onClickDelete={() => {
-                    notesStore.deleteNote({ id: note.id, space: note.space });
-                  }}
                   onClick={() => setSelectedNoteId({ id: note.id })}
+                  onClickDelete={() => {
+                    deleteNote({ id: note.id, space: note.space });
+                  }}
                 />
               ))
             ) : (

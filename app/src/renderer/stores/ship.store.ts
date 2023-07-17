@@ -18,7 +18,6 @@ import { SpacesStore } from './models/spaces.model';
 import { WalletStore } from './models/wallet.model';
 import { NotesStore, notesStore } from './notes/notes.store';
 import { TroveStore } from './trove.store';
-// import { RoomsStore } from './rooms.store';
 
 export const ShipStore = types
   .model('ShipStore', {

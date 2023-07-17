@@ -30,6 +30,23 @@ export const NotesStore = types
     selectedNoteId: types.maybeNull(types.string),
     loading: types.optional(types.boolean, false),
   })
+  .views((self) => ({
+    get sortedSpaceNotes() {
+      return self.spaceNotes.slice().sort(sortByUpdatedAt);
+    },
+    get sortedPersonalNotes() {
+      return self.personalNotes.slice().sort(sortByUpdatedAt);
+    },
+    get selectedNote() {
+      if (!self.selectedNoteId) return null;
+      const isPersonalNote = self.personalNotes.find(
+        (n) => n.id === self.selectedNoteId
+      );
+      const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
+
+      return notes.find((n) => n.id === self.selectedNoteId);
+    },
+  }))
   .actions((self) => ({
     /*
      * Used by the UI layer to create a note.
@@ -73,7 +90,11 @@ export const NotesStore = types
      * update it when the response comes back.
      */
     updateNote: flow(function* ({ id, title, doc }: NotesStore_UpdateNote) {
+      // TODO: set up a queue to prevent multiple updates from happening at once.
+      if (self.loading) return;
+
       self.loading = true;
+
       const isPersonalNote = self.personalNotes.find((n) => n.id === id);
       const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
 
@@ -93,6 +114,24 @@ export const NotesStore = types
 
       self.loading = false;
     }),
+    persistLocalChanges: flow(function* ({ id }: NotesStore_GetNote) {
+      self.loading = true;
+
+      const isPersonalNote = self.personalNotes.find((n) => n.id === id);
+      const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
+
+      const note = notes.find((n) => n.id === id);
+      if (!note) return;
+
+      yield NotesIPC.editNote({
+        id,
+        space: note.space,
+        title: note.title,
+        doc: note.doc.toJSON(),
+      });
+
+      self.loading = false;
+    }),
     getNote({ id }: NotesStore_GetNote) {
       const isPersonalNote = self.personalNotes.find((n) => n.id === id);
       const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
@@ -108,14 +147,12 @@ export const NotesStore = types
         space,
       }).then((res) => {
         if (!res) return;
-        return res
-          .map((note) => {
-            return NoteModel.create({
-              ...note,
-              doc: schema.nodeFromJSON(note.doc),
-            });
-          })
-          .sort(sortByUpdatedAt);
+        return res.map((note) => {
+          return NoteModel.create({
+            ...note,
+            doc: schema.nodeFromJSON(note.doc),
+          });
+        });
       });
 
       if (spaceNotesSorted) {
@@ -133,14 +170,12 @@ export const NotesStore = types
         space,
       }).then((res) => {
         if (!res) return;
-        return res
-          .map((note) => {
-            return NoteModel.create({
-              ...note,
-              doc: schema.nodeFromJSON(note.doc),
-            });
-          })
-          .sort(sortByUpdatedAt);
+        return res.map((note) => {
+          return NoteModel.create({
+            ...note,
+            doc: schema.nodeFromJSON(note.doc),
+          });
+        });
       });
 
       if (personalNotesSorted) {
@@ -204,11 +239,12 @@ NotesIPC.onUpdate(({ type, payload }: NotesService_IPCUpdate) => {
   console.log('NotesStore.onUpdate', type, payload);
   console.log('-------------------------------');
 
-  // Don't update MobX if the update is for a note that is currently being edited.
-  if (payload.id === notesStore.selectedNoteId) {
-    console.log('NotesStore.onUpdate, Note is being edited, skipping update');
-    return;
-  }
+  // If a note is open, multiplayer should handle the update.
+  // const isEditing = Boolean(notesStore.selectedNoteId);
+  // if (isEditing) {
+  //   console.info('NotesStore.onUpdate', 'Note is open, ignoring update');
+  //   return;
+  // }
 
   if (type === 'create-note') {
     notesStore._insertNoteLocally({

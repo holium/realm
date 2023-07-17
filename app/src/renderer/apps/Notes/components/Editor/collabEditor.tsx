@@ -7,6 +7,7 @@ import {
 import { baseKeymap } from 'prosemirror-commands';
 import { history, redo, undo } from 'prosemirror-history';
 import { keymap } from 'prosemirror-keymap';
+import { Node } from 'prosemirror-model';
 import { EditorState, Plugin } from 'prosemirror-state';
 import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 
@@ -19,7 +20,8 @@ export const collabEditor = (
   authority: Authority,
   place: HTMLElement,
   sendTransaction: SendTransaction,
-  sendCaret: SendCaret
+  sendCaret: SendCaret,
+  onChangeDoc: (doc: Node) => void
 ) => {
   const view = new EditorView(place, {
     state: EditorState.create({
@@ -66,6 +68,8 @@ export const collabEditor = (
     dispatchTransaction(transaction) {
       const newState = view.state.apply(transaction);
       view.updateState(newState);
+
+      onChangeDoc(newState.doc);
 
       const sendable = sendableSteps(newState);
       if (sendable) {

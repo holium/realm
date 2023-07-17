@@ -2,30 +2,39 @@ import { MouseEvent, useEffect, useMemo } from 'react';
 
 import { ContextMenuOption } from 'renderer/components/ContextMenu/ContextMenu';
 import { useContextMenu } from 'renderer/components/ContextMenu/useContextMenu';
-import type { NotesStore_Note } from 'renderer/stores/notes/notes.store.types';
 
 import { NoteRowView } from './NoteRowView';
 
 type Props = {
-  note: NotesStore_Note;
+  id: string;
+  title: string;
+  author: string;
+  firstParagraph: string;
+  space: string;
+  updatedAt: number;
   isSelected: boolean;
   isPersonal: boolean;
-  onClickDelete: () => void;
   onClick: () => void;
+  onClickDelete: () => void;
 };
 
 export const NoteRow = ({
-  note,
+  id,
+  title,
+  author,
+  firstParagraph,
+  space,
+  updatedAt,
   isSelected,
   isPersonal,
-  onClickDelete,
   onClick,
+  onClickDelete,
 }: Props) => {
-  const rowId = useMemo(() => `note-row-${note.id}`, [note.id]);
+  const rowId = useMemo(() => `note-row-${id}`, [id]);
   const rowOptions: ContextMenuOption[] = useMemo(
     () => [
       {
-        id: rowId,
+        id: `${id}-select-note`,
         icon: 'Trash',
         iconColor: '#ff6240',
         labelColor: '#ff6240',
@@ -34,7 +43,7 @@ export const NoteRow = ({
         onClick: onClickDelete,
       },
     ],
-    [rowId, onClickDelete]
+    [id, space, onClickDelete]
   );
 
   const { getOptions, setOptions } = useContextMenu();
@@ -50,10 +59,19 @@ export const NoteRow = ({
     onClick();
   };
 
+  const notePreview =
+    firstParagraph && firstParagraph.length > 0
+      ? firstParagraph
+      : 'No additional text';
+  const noteUpdated = new Date(updatedAt).toLocaleDateString();
+
   return (
     <NoteRowView
       id={rowId}
-      note={note}
+      title={title}
+      author={author}
+      preview={notePreview}
+      date={noteUpdated}
       isSelected={isSelected}
       isPersonal={isPersonal}
       onClick={onClickRow}
