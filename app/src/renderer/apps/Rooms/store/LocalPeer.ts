@@ -217,10 +217,10 @@ export class LocalPeer extends EventEmitter {
         mandatory: {
           chromeMediaSource: 'desktop',
           chromeMediaSourceId: source.id,
-          minWidth: 1280,
-          maxWidth: 1920,
-          minHeight: 720,
-          maxHeight: 1080,
+          // minWidth: 1280,
+          // maxWidth: 1920,
+          // minHeight: 720,
+          // maxHeight: 1080,
         },
       },
       audio: false,
@@ -252,6 +252,7 @@ export class LocalPeer extends EventEmitter {
     if (video) {
       video.style.display = 'inline-block';
       video.srcObject = stream;
+      video.classList.add('screen');
     }
 
     // pause the video stream if it's currently playing
@@ -270,6 +271,7 @@ export class LocalPeer extends EventEmitter {
     if (videoEl) {
       videoEl.style.display = 'none';
       videoEl.srcObject = null;
+      videoEl.classList.remove('screen');
     }
     this.screenStream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
       track.enabled = false;

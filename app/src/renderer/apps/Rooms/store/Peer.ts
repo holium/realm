@@ -161,23 +161,21 @@ export class PeerClass extends EventsEmitter {
       console.error('Invalid track received in onTrack');
       return;
     }
-    console.log('got track', track.id, track.kind);
+    console.log('got track', track.id, track);
     if (track.kind === 'video') {
       // console.log('got video track', track.id);
       if (this.videoTracks.has(track.id)) {
         console.log('already have this video track', track.id);
         return;
       }
-      if (this.videoTracks.size > 0 && track.label !== 'screen') {
+      if (this.videoTracks.size > 0) {
         // only remove old track if its a camera track
         console.log('already have a video track set, replacing');
         const oldTrack = this.videoTracks.values().next().value;
         this.videoTracks.delete(oldTrack.id);
         oldTrack.stop();
       }
-      if (track.label === 'screen') {
-        console.log('got screen track');
-      }
+
       this.videoTracks.set(track.id, track);
       this.videoStream = stream;
 
@@ -185,17 +183,14 @@ export class PeerClass extends EventsEmitter {
       const video = document.getElementById(
         `peer-video-${this.peerId}`
       ) as HTMLVideoElement;
-
-      // track.onmute = () => {
-      //   // triggered when video is stopped by peer
-      //   track.stop();
-      //   if (!video) return;
-      //   video.style.display = 'none';
-      //   this.hasVideoChanged(false);
-      // };
+      if (track.label === 'Screen') {
+        video.classList.add('screen');
+      } else {
+        video.classList.remove('screen');
+      }
 
       if (video) {
-        console.log('video stream id', stream.id);
+        console.log('video stream id', stream);
         video.style.display = 'inline-block';
         video.srcObject = stream;
         video.playsInline = true;

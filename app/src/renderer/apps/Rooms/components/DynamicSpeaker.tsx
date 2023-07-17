@@ -22,6 +22,7 @@ import { Video } from './Video';
 
 interface ISpeaker {
   isActive?: boolean;
+  isPinned?: boolean;
   person: string;
   cursors?: boolean;
   height?: string;
@@ -32,6 +33,7 @@ interface ISpeaker {
   peer: PeerClass | LocalPeer | any;
   kickPeer: (person: string) => void;
   retryPeer: (person: string) => void;
+  onPin?: () => void;
   room: RoomType;
 }
 
@@ -50,9 +52,11 @@ const SpeakerPresenter = ({
   ourId,
   metadata,
   isActive = false,
+  isPinned = false,
   peer,
   kickPeer,
   retryPeer,
+  onPin,
   room,
 }: ISpeaker) => {
   const speakerRef = useRef<any>(null);
@@ -94,46 +98,67 @@ const SpeakerPresenter = ({
 
   const contextMenuOptions = useMemo(
     () =>
-      [
-        {
-          id: `room-speaker-${person}-reconnect`,
-          label: 'Reconnect',
-          disabled: peer?.status === PeerConnectionState.Connected,
-          onClick: (evt: any) => {
-            retryPeer(person);
-            evt.stopPropagation();
-          },
-        },
-        {
-          id: `room-speaker-${person}-mute`,
-          label: peer?.isForceMuted ? 'Unmute' : 'Mute',
-          // disabled: peer?.status === PeerConnectionState.,
-          onClick: (evt: any) => {
-            if (peer?.isForceMuted) {
-              peer.forceUnmute();
-            } else {
-              peer.forceMute();
-            }
-            evt.stopPropagation();
-          },
-        },
-        // only the creator can kick people
-        room.creator === ourId && {
-          style: { color: '#FD4E4E' },
-          id: `room-speaker-${person}-kick`,
-          label: 'Kick',
-          loading: false,
-          onClick: (evt: any) => {
-            evt.stopPropagation();
-            kickPeer(person);
-          },
-        },
-      ].filter(Boolean) as ContextMenuOption[],
-    [peer?.status, peer?.isForceMuted, person, room.rid, type]
+      isOur
+        ? [
+            {
+              id: `room-speaker-${person}-pin`,
+              label: isPinned ? 'Unpin speaker' : 'Pin speaker',
+              // disabled: peer?.status === PeerConnectionState.Connected,
+              onClick: (evt: any) => {
+                onPin && onPin();
+                evt.stopPropagation();
+              },
+            },
+          ]
+        : ([
+            {
+              id: `room-speaker-${person}-pin`,
+              label: isPinned ? 'Unpin speaker' : 'Pin speaker',
+              // disabled: peer?.status === PeerConnectionState.Connected,
+              onClick: (evt: any) => {
+                onPin && onPin();
+                evt.stopPropagation();
+              },
+            },
+            {
+              id: `room-speaker-${person}-reconnect`,
+              label: 'Reconnect',
+              disabled: peer?.status === PeerConnectionState.Connected,
+              onClick: (evt: any) => {
+                retryPeer(person);
+                evt.stopPropagation();
+              },
+            },
+            {
+              id: `room-speaker-${person}-mute`,
+              label: peer?.isForceMuted ? 'Unmute' : 'Mute',
+              // disabled: peer?.status === PeerConnectionState.,
+              onClick: (evt: any) => {
+                if (peer?.isForceMuted) {
+                  peer.forceUnmute();
+                } else {
+                  peer.forceMute();
+                }
+                evt.stopPropagation();
+              },
+            },
+            // only the creator can kick people
+            room.creator === ourId && {
+              style: { color: '#FD4E4E' },
+              id: `room-speaker-${person}-kick`,
+              label: 'Kick',
+              loading: false,
+              onClick: (evt: any) => {
+                evt.stopPropagation();
+                kickPeer(person);
+              },
+            },
+          ].filter(Boolean) as ContextMenuOption[]),
+    [peer?.status, peer?.isForceMuted, person, room.rid, type, isPinned]
   );
 
   useEffect(() => {
-    if (!isOur && contextMenuOptions !== getOptions(`room-speaker-${person}`)) {
+    if (contextMenuOptions !== getOptions(`room-speaker-${person}`)) {
       setOptions(`room-speaker-${person}`, contextMenuOptions);
     }
   }, [contextMenuOptions, getOptions, person, setOptions, isOur]);
@@ -289,6 +314,9 @@ const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
   background: transparent;
   &.speaker-video-on {
     transition: 0.25s ease;
+    .screen {
+      object-fit: contain !important;
+    }
     .speaker-name {
       color: #fff;
       text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.75);

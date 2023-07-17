@@ -145,6 +145,7 @@ export class RoomsStore extends EventsEmitter {
   @observable speakers: Map<string, ActiveSpeaker> = observable.map();
   @observable websocket: WebSocket;
   @observable reconnectTimer: NodeJS.Timeout | null = null;
+  @observable pinnedSpeaker: string | null = null;
   @observable rtcConfig = {
     iceServers: [
       {
@@ -184,10 +185,18 @@ export class RoomsStore extends EventsEmitter {
 
     this.ourPeer.on('screenSharingStatusChanged', (isScreenSharing) => {
       if (isScreenSharing) {
-        console.log('screen sharing started');
         this.peers.forEach((peer) => {
           this.ourPeer.screenStream &&
             peer.setNewStream(this.ourPeer.screenStream);
+        });
+      } else {
+        this.peers.forEach((peer) => {
+          if (
+            this.ourPeer.screenStream &&
+            peer.peer.streams.includes(this.ourPeer.screenStream)
+          ) {
+            peer.peer.removeStream(this.ourPeer.screenStream);
+          }
         });
       }
     });
@@ -195,6 +204,7 @@ export class RoomsStore extends EventsEmitter {
     this.websocket = this.connect();
     this.onRoomEvent = this.onRoomEvent.bind(this);
     this.createPeer = this.createPeer.bind(this);
+    this.pinSpeaker = this.pinSpeaker.bind(this);
 
     // handles various connectivity events
     window.addEventListener('offline', () => {
@@ -292,6 +302,15 @@ export class RoomsStore extends EventsEmitter {
   }
 
   @action
+  pinSpeaker(speakerId: string) {
+    if (speakerId === this.pinnedSpeaker) {
+      this.pinnedSpeaker = null;
+      return;
+    }
+    this.pinnedSpeaker = speakerId;
+  }
+
+  @action
   async toggleVideo(enableVideo: boolean) {
     if (!enableVideo) {
       this.peers.forEach((peer) => {
@@ -324,10 +343,8 @@ export class RoomsStore extends EventsEmitter {
           peer.peer.removeStream(this.ourPeer.screenStream);
         }
       });
-      this.ourPeer.screenStream?.getTracks().forEach((track) => {
-        track.stop();
-      });
-      this.ourPeer.disableScreenSharing();
+
+      await this.ourPeer.disableScreenSharing();
     } else {
       await this.ourPeer.enableScreenSharing();
     }
