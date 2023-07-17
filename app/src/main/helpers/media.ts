@@ -27,38 +27,31 @@ const registerListeners = (mainWindow: BrowserWindow) => {
     return systemPreferences.getMediaAccessStatus('camera');
   });
 
-  ipcMain.handle('ask-for-screen', async () => {
-    // await systemPreferences.askForMediaAccess('screen');
-    const sources = await desktopCapturer.getSources({ types: ['screen'] });
+  ipcMain.handle('ask-for-screen', async (): Promise<void | boolean> => {
+    const sources = await desktopCapturer.getSources({
+      types: ['screen', 'window'],
+    });
     log.info(
       'has screen access',
       systemPreferences.getMediaAccessStatus('screen')
     );
+    if (systemPreferences.getMediaAccessStatus('screen') !== 'granted') {
+      return false;
+    }
     const videoOptionsMenu = Menu.buildFromTemplate(
-      sources.map((source) => {
-        return {
-          label: source.name,
-          icon: source.thumbnail,
-          click: () =>
-            mainWindow.webContents.send('set-screenshare-source', source),
-        };
-      })
+      sources
+        .filter((source) => source.name !== 'Mouse Overlay')
+        .map((source) => {
+          return {
+            label: source.name,
+            icon: source.thumbnail,
+            click: () =>
+              mainWindow.webContents.send('set-screenshare-source', source),
+          };
+        })
     );
 
     videoOptionsMenu.popup();
-    // desktopCapturer
-    //   .getSources({ types: ['window', 'screen'] })
-    //   .then(async (sources) => {
-    //     log.info('sources', sources);
-    //     mainWindow.webContents.send('set-screenshare-source', 'screen:1:0');
-
-    //     for (const source of sources) {
-    //       if (source.name === 'Electron') {
-    //         mainWindow.webContents.send('set-screenshare-source', 'screen:1:0');
-    //         return;
-    //       }
-    //     }
-    //   });
   });
 
   ipcMain.handle('get-media-status', (_event): MediaAccess => {

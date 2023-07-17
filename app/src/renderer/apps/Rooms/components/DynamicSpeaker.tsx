@@ -71,7 +71,7 @@ const SpeakerPresenter = ({
       videoRef.current.style.display = 'inline-block';
       videoRef.current.playsInline = true;
     }
-  }, [peer?.hasVideo, videoRef.current]);
+  }, [peer?.hasVideo, peer?.isScreenSharing, videoRef.current]);
 
   if (name.length > 17) name = `${name.substring(0, 17)}...`;
 
@@ -139,6 +139,7 @@ const SpeakerPresenter = ({
   }, [contextMenuOptions, getOptions, person, setOptions, isOur]);
 
   const hasVideo = (peer as PeerClass)?.hasVideo;
+  const isScreenSharing = (peer as PeerClass)?.isScreenSharing;
   const isSpeaking =
     (peer as PeerClass)?.isSpeaking && !(peer as PeerClass)?.isMuted;
 
@@ -156,7 +157,8 @@ const SpeakerPresenter = ({
       alignItems="center"
       justifyContent="center"
       className={`speaker ${isActive ? 'active-speaker' : ''} ${
-        hasVideo && peerState !== PeerConnectionState.Closed
+        (hasVideo || isScreenSharing) &&
+        peerState !== PeerConnectionState.Closed
           ? 'speaker-video-on'
           : ''
       } ${isSpeaking ? 'speaker-speaking' : ''}`}
@@ -289,6 +291,7 @@ const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
     transition: 0.25s ease;
     .speaker-name {
       color: #fff;
+      text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.75);
     }
     .speaker-avatar-wrapper {
       position: absolute;

@@ -314,14 +314,12 @@ export class RoomsStore extends EventsEmitter {
           peer.peer.removeStream(this.ourPeer.screenStream);
         }
       });
+      this.ourPeer.screenStream?.getTracks().forEach((track) => {
+        track.stop();
+      });
       this.ourPeer.disableScreenSharing();
     } else {
-      const stream = await this.ourPeer.enableScreenSharing();
-      this.peers.forEach((peer) => {
-        if (stream) {
-          peer.setNewStream(stream);
-        }
-      });
+      await this.ourPeer.enableScreenSharing();
     }
   }
 

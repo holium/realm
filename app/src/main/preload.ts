@@ -95,7 +95,11 @@ const appPreload = {
     ipcRenderer.invoke('realm-to-app.ephemeral-chat', patp, message);
   },
   /* Receivers */
-  onScreenshareSource(callback: (sourceId: string) => void) {
+  onScreenshareSource(
+    callback: (
+      source: Electron.DesktopCapturerSource
+    ) => Promise<MediaStream | undefined>
+  ) {
     ipcRenderer.on('set-screenshare-source', (_, sourceId) => {
       callback(sourceId);
     });

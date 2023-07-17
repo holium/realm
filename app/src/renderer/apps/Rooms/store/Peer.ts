@@ -17,6 +17,7 @@ export class PeerClass extends EventsEmitter {
   @observable peer: PeerInstance;
   @observable websocket: WebSocket;
   @observable hasVideo = false;
+  @observable isScreenSharing = false;
   @observable isMuted = false;
   @observable isForceMuted = false;
   @observable isSpeaking = false;

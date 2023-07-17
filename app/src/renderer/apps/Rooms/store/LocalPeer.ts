@@ -196,9 +196,6 @@ export class LocalPeer extends EventEmitter {
       videoEl.style.display = 'none';
       videoEl.srcObject = null;
     }
-    this.videoStream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
-      track.stop();
-    });
     this.videoStream = undefined;
   }
 
@@ -208,19 +205,12 @@ export class LocalPeer extends EventEmitter {
   }
 
   @action
-  async setScreenShareSource(source: string) {
+  async setScreenShareSource(source: Electron.DesktopCapturerSource) {
     const options = {
-      // video: {
-      //   deviceId: source,
-      // },
       video: {
         mandatory: {
           chromeMediaSource: 'desktop',
-          chromeMediaSourceId: source,
-          minWidth: 1280,
-          maxWidth: 1280,
-          minHeight: 720,
-          maxHeight: 720,
+          chromeMediaSourceId: source.id,
         },
       },
       audio: false,
@@ -228,6 +218,7 @@ export class LocalPeer extends EventEmitter {
 
     this.isScreenSharing = true;
     try {
+      // @ts-ignore - typescript doesn't know about electron desktopCapturer for some reason
       const stream = await navigator.mediaDevices.getUserMedia(options);
       this.setScreenStream(stream);
       this.emit('screenSharingStatusChanged', true);
@@ -263,14 +254,20 @@ export class LocalPeer extends EventEmitter {
 
   @action
   async disableScreenSharing() {
-    if (this.isScreenSharing) {
-      this.screenStream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
-        track.stop();
-      });
-      this.isScreenSharing = false;
-      this.screenStream = undefined;
-      this.emit('screenSharingStatusChanged', false);
+    const videoEl = document.getElementById(
+      `peer-video-${this.patp}`
+    ) as HTMLVideoElement;
+    if (videoEl) {
+      videoEl.style.display = 'none';
+      videoEl.srcObject = null;
     }
+    this.screenStream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
+      track.enabled = false;
+      track.stop();
+    });
+    this.isScreenSharing = false;
+    this.screenStream = undefined;
+    this.emit('screenSharingStatusChanged', false);
   }
 
   @action
