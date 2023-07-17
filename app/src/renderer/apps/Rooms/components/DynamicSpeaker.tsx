@@ -67,17 +67,15 @@ const SpeakerPresenter = ({
 
   // if navigating away and back, we need to reattach the video
   useEffect(() => {
+    console.log('peer', peer);
     if (!videoRef.current) return;
-    if (!peer || !peer?.hasVideo) {
-      videoRef.current.srcObject = null;
-      videoRef.current.style.display = 'none';
-      return;
-    }
-    if (!peer || !peer?.isScreenSharing) {
-      videoRef.current.srcObject = null;
-      videoRef.current.style.display = 'none';
-      return;
-    }
+    if (!peer || !peer?.hasVideo) return;
+
+    // if (!peer || !peer?.isScreenSharing) {
+    //   videoRef.current.srcObject = null;
+    //   videoRef.current.style.display = 'none';
+    //   return;
+    // }
 
     if (!videoRef.current.srcObject) {
       videoRef.current.srcObject = peer.videoStream;

@@ -321,23 +321,24 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onData(data: any) {
+    console.log('onData', unserialize(data));
     const dataPacket = unserialize(data);
+    const payload = dataPacket.value as DataPayload;
+    console.log('onData', payload);
     if (dataPacket.kind === DataPacketMuteStatus) {
-      const payload = dataPacket.value as DataPayload;
       if (payload.data) {
         this.isMutedChanged(true);
       } else {
         this.isMutedChanged(false);
       }
     } else if (dataPacket.kind === DataPacketScreenShareStatus) {
-      const payload = dataPacket.value as DataPayload;
       if (payload.data) {
         this.isScreenSharingChanged(true);
       } else {
         this.isScreenSharingChanged(false);
       }
     } else if (dataPacket.kind === DataPacketWebcamStatus) {
-      if (dataPacket.value === true) {
+      if (payload.data === true) {
         this.hasVideoChanged(true);
       } else {
         this.hasVideoChanged(false);
