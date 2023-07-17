@@ -53,7 +53,7 @@ export const RecursiveTree = memo(
     };
     return (
       <Box>
-        {itemList.map((item: any) => {
+        {itemList?.map((item: any) => {
           if (item.type === 'folder') {
             return createTree(item.path, item);
           } else {
