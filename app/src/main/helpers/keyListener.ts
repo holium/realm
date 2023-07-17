@@ -13,7 +13,9 @@ ipcRenderer.on('add-key-listeners', () => {
     const existsProseMirrorFocusedElement = document.querySelector(
       '.ProseMirror-focused'
     );
-    const isFocused = isInTextElement || existsProseMirrorFocusedElement;
+    const isFocused = Boolean(
+      isInTextElement || existsProseMirrorFocusedElement
+    );
 
     ipcRenderer.invoke('key-down', key, isFocused);
   };
