@@ -84,13 +84,28 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     }
   }
 
-  getNotes({ space }: NotesService_GetNotes_Payload) {
+  getNotesFromDb({ space }: NotesService_GetNotes_Payload) {
     if (!this.notesDB) return [];
-
-    // TODO: sync with Bedrock and replace local DB with the response.
 
     return this.notesDB.selectAll({ space });
   }
+
+  // async syncWithBedrock({ space }: NotesService_GetNotes_Payload) {
+  //   if (!this.notesDB) return;
+
+  //   const result = await APIConnection.getInstance().conduit.poke({
+  //     app: 'bedrock',
+  //     mark: 'db-action',
+  //     json: {
+  //       get: {
+  //         path: space,
+  //         type: 'realm-note',
+  //       },
+  //     },
+  //   });
+
+  //   console.log('syncWithBedrock', JSON.stringify(result, null, 2));
+  // }
 
   editNote({ id, space, title, doc }: NotesService_SaveNote_Payload) {
     const editNoteData = [title, JSON.stringify(doc)];
@@ -117,7 +132,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     });
   }
 
-  subscribe(spacePath: string) {
+  subscribe({ space: spacePath }: NotesService_GetNotes_Payload) {
     return APIConnection.getInstance().conduit.watch({
       app: 'bedrock',
       path: `/path${spacePath}`,
@@ -133,7 +148,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
               update.row.data;
 
             // Update SQLite.
-            this.notesDB?.upsert({
+            this.notesDB.upsert({
               id: update.row.id,
               space: update.row.path,
               author: update.row.creator,
@@ -150,6 +165,29 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
                 space: update.row.path,
                 doc: JSON.parse(rowData.doc),
                 created_at: update.row['created-at'],
+                updated_at: update.row['updated-at'],
+              },
+            });
+          } else if (update.change === 'upd-row') {
+            // Only handle realm-note updates.
+            if (update.row?.type !== 'realm-note') return;
+
+            const rowData: NotesService_BedrockUpdate_CreateNoteData =
+              update.row.data;
+
+            // Update SQLite.
+            this.notesDB.update({
+              id: update.row.id,
+              title: rowData.title,
+              doc: JSON.parse(rowData.doc),
+            });
+            // Update MobX.
+            this.sendUpdate({
+              type: 'update-note',
+              payload: {
+                id: update.row.id,
+                title: rowData.title,
+                doc: JSON.parse(rowData.doc),
                 updated_at: update.row['updated-at'],
               },
             });

@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Node } from 'prosemirror-model';
 import { TextSelection, Transaction } from 'prosemirror-state';
 import { Step } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
@@ -6,7 +7,6 @@ import { EditorView } from 'prosemirror-view';
 import { Flex } from '@holium/design-system/general';
 import { useBroadcast } from '@holium/realm-presence';
 
-import { JSONObject } from 'os/types';
 import type { NotesStore_Note } from 'renderer/stores/notes/notes.store.types';
 
 import { Authority } from './Authority';
@@ -28,10 +28,11 @@ export type SendTransaction = (
 
 type Props = {
   doc: NotesStore_Note['doc'];
-  saveDoc: (doc: JSONObject) => Promise<void>;
+  onBlurDoc: (doc: Node) => void;
+  onUnmountDoc: (doc: Node) => void;
 };
 
-export const Editor = ({ doc, saveDoc }: Props) => {
+export const Editor = ({ doc, onBlurDoc, onUnmountDoc }: Props) => {
   const [editorView, setEditorView] = useState<EditorView>();
   const [authority, setAuthority] = useState<Authority>();
   const [carets, setCarets] = useState<Carets>({});
@@ -62,29 +63,22 @@ export const Editor = ({ doc, saveDoc }: Props) => {
     onBroadcast: onCaret,
   });
 
-  const onBlur = () => {
-    if (!editorView) return;
-    const serializedDoc = editorView.state.doc.toJSON();
-    saveDoc(serializedDoc);
+  const onEditorRef = (ref: HTMLDivElement) => {
+    if (!ref) return;
+    if (editorView) return;
+    if (authority) return;
+
+    const newAuthority = new Authority(doc);
+    const newEditor = collabEditor(
+      newAuthority,
+      ref,
+      sendTransaction,
+      sendCaret
+    );
+
+    setEditorView(newEditor);
+    setAuthority(newAuthority);
   };
-
-  const onEditorRef = useCallback(
-    (ref: HTMLDivElement) => {
-      if (!ref) return;
-
-      const newAuthority = new Authority(doc);
-      const newEditor = collabEditor(
-        newAuthority,
-        ref,
-        sendTransaction,
-        sendCaret
-      );
-
-      setEditorView(newEditor);
-      setAuthority(newAuthority);
-    },
-    [doc]
-  );
 
   const moveToEnd = () => {
     // Focus the editor.
@@ -99,6 +93,18 @@ export const Editor = ({ doc, saveDoc }: Props) => {
     );
     editorView.dispatch(transaction);
   };
+
+  const onBlur = () => {
+    if (!editorView) return;
+    onBlurDoc(editorView.state.doc);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (!editorView) return;
+      onUnmountDoc(editorView.state.doc);
+    };
+  }, [editorView, onUnmountDoc]);
 
   return (
     <EditorContainer>

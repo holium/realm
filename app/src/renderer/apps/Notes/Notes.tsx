@@ -1,7 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 
-import { NotesIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { NotesSidebar } from './components/NotesSidebar/NotesSidebar';
@@ -17,18 +16,21 @@ const NotesPresenter = () => {
   );
 
   useEffect(() => {
-    if (!selectedSpace?.path) return;
+    if (!selectedSpace) return;
 
     if (!selectedSpace.isOur) {
       // Load space if it's not our personal space.
-      notesStore.loadSpaceNotes(selectedSpace?.path);
+      notesStore.loadLocalSpaceNotes(selectedSpace.path);
     }
 
     // Always load personal notes.
-    notesStore.loadPersonalNotes(`/${window.ship}/our`);
+    notesStore.loadLocalPersonalNotes(`/${window.ship}/our`);
 
     // Subscribe to Bedrock updates.
-    NotesIPC.subscribe(selectedSpace?.path);
+    notesStore.subscribeToBedrockUpdates(selectedSpace.path);
+
+    // Sync local notes with Bedrock.
+    // notesStore.syncLocalNotesWithBedrock(selectedSpace.path);
   }, [selectedSpace]);
 
   return (

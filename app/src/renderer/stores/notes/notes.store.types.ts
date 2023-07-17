@@ -25,3 +25,16 @@ export type NotesStore_DeleteNote = {
   id: string;
   space: string;
 };
+
+export type NotesStore_UpdateNote = {
+  id: string;
+  title?: string;
+  doc?: Node;
+};
+
+export type NotesStore_EditNote = {
+  id: string;
+  space: string;
+  title: string;
+  doc: Node;
+};

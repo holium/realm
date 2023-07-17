@@ -50,6 +50,17 @@ type NotesService_IPCUpdate_DeleteNote = {
   };
 };
 
+type NotesService_IPCUpdate_UpdateNote = {
+  type: 'update-note';
+  payload: {
+    id: string;
+    title: string;
+    doc: JSONObject;
+    updated_at: number;
+  };
+};
+
 export type NotesService_IPCUpdate =
   | NotesService_IPCUpdate_CreateNote
+  | NotesService_IPCUpdate_UpdateNote
   | NotesService_IPCUpdate_DeleteNote;

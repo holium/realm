@@ -8,8 +8,8 @@ import {
   AuthorText,
   NoteHeaderContainer,
   NoteUpdatedAtText,
-  TitleInput,
 } from './NoteHeader.styles';
+import { NoteHeaderTitle } from './NoteHeaderTitle';
 
 type Props = {
   noteTitle: NotesStore_Note['title'];
@@ -50,12 +50,7 @@ export const NoteHeader = ({
     <NoteHeaderContainer>
       <Flex flex={1} flexDirection="column">
         <NoteUpdatedAtText>{noteUpdatedAtString}</NoteUpdatedAtText>
-        <TitleInput
-          id="note-title-input"
-          name="note-title-input"
-          value={noteTitle}
-          placeholder="Title"
-        />
+        <NoteHeaderTitle />
         <AuthorText>{noteAuthor}</AuthorText>
       </Flex>
       {loading ? (
