@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Node } from 'prosemirror-model';
+import { observer } from 'mobx-react';
 import { TextSelection, Transaction } from 'prosemirror-state';
 import { Step } from 'prosemirror-transform';
 import { EditorView } from 'prosemirror-view';
@@ -7,7 +7,7 @@ import { EditorView } from 'prosemirror-view';
 import { Flex } from '@holium/design-system/general';
 import { useBroadcast } from '@holium/realm-presence';
 
-import type { NotesStore_Note } from 'renderer/stores/notes/notes.store.types';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { Authority } from './Authority';
 import { collabEditor } from './collabEditor';
@@ -26,13 +26,15 @@ export type SendTransaction = (
   clientID: string | number
 ) => void;
 
-type Props = {
-  doc: NotesStore_Note['doc'];
-  onBlurDoc: (doc: Node) => void;
-  onUnmountDoc: (doc: Node) => void;
-};
+const EditorPresenter = () => {
+  const { notesStore } = useShipStore();
 
-export const Editor = ({ doc, onBlurDoc, onUnmountDoc }: Props) => {
+  const { selectedNoteId } = notesStore;
+
+  const selectedNote = selectedNoteId
+    ? notesStore.getNoteById(selectedNoteId)
+    : null;
+
   const [editorView, setEditorView] = useState<EditorView>();
   const [authority, setAuthority] = useState<Authority>();
   const [carets, setCarets] = useState<Carets>({});
@@ -63,12 +65,30 @@ export const Editor = ({ doc, onBlurDoc, onUnmountDoc }: Props) => {
     onBroadcast: onCaret,
   });
 
+  useEffect(() => {
+    return () => {
+      if (!editorView) return;
+      if (!selectedNote) return;
+
+      const doc = editorView.state.doc;
+
+      if (selectedNote.doc.eq(doc)) return;
+
+      notesStore._updateNoteLocally({
+        id: selectedNote.id,
+        doc,
+      });
+    };
+  }, []);
+
+  if (!selectedNote) return null;
+
   const onEditorRef = (ref: HTMLDivElement) => {
     if (!ref) return;
     if (editorView) return;
     if (authority) return;
 
-    const newAuthority = new Authority(doc);
+    const newAuthority = new Authority(selectedNote.doc);
     const newEditor = collabEditor(
       newAuthority,
       ref,
@@ -94,21 +114,24 @@ export const Editor = ({ doc, onBlurDoc, onUnmountDoc }: Props) => {
     editorView.dispatch(transaction);
   };
 
-  const onBlur = () => {
+  const onBlurDoc = () => {
     if (!editorView) return;
-    onBlurDoc(editorView.state.doc);
-  };
 
-  useEffect(() => {
-    return () => {
-      if (!editorView) return;
-      onUnmountDoc(editorView.state.doc);
-    };
-  }, [editorView, onUnmountDoc]);
+    const doc = editorView.state.doc;
+
+    if (selectedNote.doc.eq(doc)) return;
+
+    notesStore.editNoteInBedrock({
+      id: selectedNote.id,
+      doc,
+      title: selectedNote.title,
+      space: selectedNote.space,
+    });
+  };
 
   return (
     <EditorContainer>
-      <div ref={onEditorRef} onBlur={onBlur}>
+      <div ref={onEditorRef} onBlur={onBlurDoc}>
         {Object.entries(carets).map(([patp, position]) => (
           <CustomCaret key={patp} top={position.y} left={position.x} />
         ))}
@@ -117,3 +140,5 @@ export const Editor = ({ doc, onBlurDoc, onUnmountDoc }: Props) => {
     </EditorContainer>
   );
 };
+
+export const Editor = observer(EditorPresenter);

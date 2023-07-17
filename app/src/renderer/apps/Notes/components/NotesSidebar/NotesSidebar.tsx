@@ -97,7 +97,7 @@ const NotesSidebarPresenter = () => {
               {spaceNotes && spaceNotes.length ? (
                 spaceNotes.map((note) => (
                   <NoteRow
-                    key={note.id}
+                    key={`${note.id}-${note.updated_at}`}
                     note={note}
                     isPersonal={false}
                     isSelected={selectedNoteId === note.id}

@@ -1,12 +1,10 @@
-import { useEffect, useMemo } from 'react';
-
-import { Flex } from '@holium/design-system/general';
+import { MouseEvent, useEffect, useMemo } from 'react';
 
 import { ContextMenuOption } from 'renderer/components/ContextMenu/ContextMenu';
 import { useContextMenu } from 'renderer/components/ContextMenu/useContextMenu';
 import type { NotesStore_Note } from 'renderer/stores/notes/notes.store.types';
 
-import { NoteRowContainer, NoteRowText, NoteRowTitle } from './NoteRow.styles';
+import { NoteRowView } from './NoteRowView';
 
 type Props = {
   note: NotesStore_Note;
@@ -23,12 +21,7 @@ export const NoteRow = ({
   onClickDelete,
   onClick,
 }: Props) => {
-  // TODO: Parse prosemirror doc to get the first paragraph.
-  const notePreview = note.doc.text ?? 'No preview';
-  const noteDateString = new Date(note.updated_at).toLocaleDateString();
-
   const rowId = useMemo(() => `note-row-${note.id}`, [note.id]);
-
   const rowOptions: ContextMenuOption[] = useMemo(
     () => [
       {
@@ -52,30 +45,18 @@ export const NoteRow = ({
     }
   }, [rowId, rowOptions, getOptions, setOptions]);
 
-  const onClickRow = (e: React.MouseEvent) => {
+  const onClickRow = (e: MouseEvent) => {
     e.stopPropagation();
     onClick();
   };
 
   return (
-    <NoteRowContainer id={rowId} selected={isSelected} onClick={onClickRow}>
-      <Flex flex={1} flexDirection="column" gap="2px" maxWidth="100%">
-        <Flex flex={1} gap="4px" justifyContent="space-between">
-          <NoteRowTitle flex={1}>{note.title}</NoteRowTitle>
-          <Flex gap="4px">
-            {!isPersonal && (
-              <NoteRowText>{note.author}</NoteRowText>
-              /* {note.participants && note.participants?.length > 0 && (
-                <AvatarRow size={16} people={note.participants} />
-              )} */
-            )}
-          </Flex>
-        </Flex>
-        <Flex flex={1} gap="4px" justifyContent="space-between" maxWidth="100%">
-          <NoteRowText flex={1}>{notePreview}</NoteRowText>
-          <NoteRowText>{noteDateString}</NoteRowText>
-        </Flex>
-      </Flex>
-    </NoteRowContainer>
+    <NoteRowView
+      id={rowId}
+      note={note}
+      isSelected={isSelected}
+      isPersonal={isPersonal}
+      onClick={onClickRow}
+    />
   );
 };
