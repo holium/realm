@@ -50,115 +50,115 @@ const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
     }
   }, [peers.length, setTrayAppHeight]);
 
-  // useEffect(() => {
-  //   let interval: NodeJS.Timer | null = null;
-
-  //   if (peers.length > 0) {
-  //     interval = setInterval(() => {
-  //       let dominantSpeaker: string | null = null;
-  //       let maxSpeakingTime = 0;
-  //       const speakers = roomsStore.speakers;
-
-  //       // Iterate over each speaker
-  //       for (const [peerId, speaker] of speakers) {
-  //         // If the speaker is currently speaking, update the current session's end time
-  //         if (!speaker.isSpeaking && speaker.currentSession) {
-  //           if (speaker.currentSession.start) {
-  //             speaker.currentSession.end = Date.now();
-  //           }
-  //         }
-  //         // Remove sessions that ended more than 10 seconds ago
-  //         while (
-  //           speaker.sessions.length > 0 &&
-  //           Date.now() - (speaker.sessions[0]?.end || 0) > 10000
-  //         ) {
-  //           speaker.sessions.shift();
-  //         }
-  //         // Calculate the total speaking time in the last 10 seconds
-  //         const totalSpeakingTime = speaker.sessions.reduce(
-  //           (total, session) => total + (session.duration || 0),
-  //           0
-  //         );
-  //         // Update the dominant speaker if this speaker has spoken more
-  //         if (totalSpeakingTime > maxSpeakingTime) {
-  //           dominantSpeaker = peerId;
-  //           maxSpeakingTime = totalSpeakingTime;
-  //         }
-  //       }
-  //       if (!dominantSpeaker && activeSpeaker) {
-  //         setActiveSpeaker(null);
-  //       }
-  //       if (activeSpeaker !== dominantSpeaker) {
-  //         setActiveSpeaker(dominantSpeaker);
-  //       }
-  //     }, 1000);
-  //   }
-
-  //   return () => {
-  //     if (interval) clearInterval(interval);
-  //   };
-  // }, [roomsStore.currentRid, activeSpeaker, peers.length]);
   useEffect(() => {
     let interval: NodeJS.Timer | null = null;
 
-    interval = setInterval(() => {
-      // Create/Update speakers according to the current peer list
-      const speakers = peers.reduce((acc: any, peer: any) => {
-        if (!acc[peer.id]) {
-          acc[peer.id] = {
-            isSpeaking: false,
-            currentSession: null,
-            sessions: [],
-          };
-        }
-        return acc;
-      }, roomsStore.speakers || {});
+    if (peers.length > 0) {
+      interval = setInterval(() => {
+        let dominantSpeaker: string | null = null;
+        let maxSpeakingTime = 0;
+        const speakers = roomsStore.speakers;
 
-      let dominantSpeaker: string | null = null;
-      let maxSpeakingTime = 0;
-
-      // Iterate over each speaker
-      for (const [peerId, speaker] of Object.entries<any>(speakers)) {
-        // If the speaker is currently speaking, update the current session's end time
-        if (speaker.isSpeaking && speaker.currentSession) {
-          speaker.currentSession.end = Date.now();
-          speaker.currentSession.duration =
-            speaker.currentSession.end - speaker.currentSession.start;
-        }
-
-        // Calculate the total speaking time in the last 10 seconds
-        const now = Date.now();
-        const totalSpeakingTime = speaker.sessions.reduce(
-          (total: number, session: any) => {
-            const sessionEndTime = session.end || now;
-            if (now - sessionEndTime <= 10000) {
-              total += session.duration;
+        // Iterate over each speaker
+        for (const [peerId, speaker] of speakers) {
+          // If the speaker is currently speaking, update the current session's end time
+          if (!speaker.isSpeaking && speaker.currentSession) {
+            if (speaker.currentSession.start) {
+              speaker.currentSession.end = Date.now();
             }
-            return total;
-          },
-          0
-        );
-
-        // Update the dominant speaker if this speaker has spoken more
-        if (totalSpeakingTime > maxSpeakingTime) {
-          dominantSpeaker = peerId;
-          maxSpeakingTime = totalSpeakingTime;
+          }
+          // Remove sessions that ended more than 10 seconds ago
+          while (
+            speaker.sessions.length > 0 &&
+            Date.now() - (speaker.sessions[0]?.end || 0) > 10000
+          ) {
+            speaker.sessions.shift();
+          }
+          // Calculate the total speaking time in the last 10 seconds
+          const totalSpeakingTime = speaker.sessions.reduce(
+            (total, session) => total + (session.duration || 0),
+            0
+          );
+          // Update the dominant speaker if this speaker has spoken more
+          if (totalSpeakingTime > maxSpeakingTime) {
+            dominantSpeaker = peerId;
+            maxSpeakingTime = totalSpeakingTime;
+          }
         }
-      }
-
-      // If the active speaker is not the dominant speaker, update the active speaker
-      if (activeSpeaker !== dominantSpeaker) {
-        setActiveSpeaker(dominantSpeaker);
-      }
-
-      // Update the speakers in the roomStore
-      roomsStore.speakers = speakers;
-    }, 500); // reduce interval time for quicker updates
+        if (!dominantSpeaker && activeSpeaker) {
+          setActiveSpeaker(null);
+        }
+        if (activeSpeaker !== dominantSpeaker) {
+          setActiveSpeaker(dominantSpeaker);
+        }
+      }, 1000);
+    }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [roomsStore.currentRid, activeSpeaker, peers]);
+  }, [roomsStore.currentRid, activeSpeaker, peers.length]);
+  // useEffect(() => {
+  //   let interval: NodeJS.Timer | null = null;
+
+  //   interval = setInterval(() => {
+  //     // Create/Update speakers according to the current peer list
+  //     const speakers = peers.reduce((acc: any, peer: any) => {
+  //       if (!acc[peer.id]) {
+  //         acc[peer.id] = {
+  //           isSpeaking: false,
+  //           currentSession: null,
+  //           sessions: [],
+  //         };
+  //       }
+  //       return acc;
+  //     }, roomsStore.speakers || {});
+
+  //     let dominantSpeaker: string | null = null;
+  //     let maxSpeakingTime = 0;
+
+  //     // Iterate over each speaker
+  //     for (const [peerId, speaker] of Object.entries<any>(speakers)) {
+  //       // If the speaker is currently speaking, update the current session's end time
+  //       if (speaker.isSpeaking && speaker.currentSession) {
+  //         speaker.currentSession.end = Date.now();
+  //         speaker.currentSession.duration =
+  //           speaker.currentSession.end - speaker.currentSession.start;
+  //       }
+
+  //       // Calculate the total speaking time in the last 10 seconds
+  //       const now = Date.now();
+  //       const totalSpeakingTime = speaker.sessions.reduce(
+  //         (total: number, session: any) => {
+  //           const sessionEndTime = session.end || now;
+  //           if (now - sessionEndTime <= 10000) {
+  //             total += session.duration;
+  //           }
+  //           return total;
+  //         },
+  //         0
+  //       );
+
+  //       // Update the dominant speaker if this speaker has spoken more
+  //       if (totalSpeakingTime > maxSpeakingTime) {
+  //         dominantSpeaker = peerId;
+  //         maxSpeakingTime = totalSpeakingTime;
+  //       }
+  //     }
+
+  //     // If the active speaker is not the dominant speaker, update the active speaker
+  //     if (activeSpeaker !== dominantSpeaker) {
+  //       setActiveSpeaker(dominantSpeaker);
+  //     }
+
+  //     // Update the speakers in the roomStore
+  //     roomsStore.speakers = speakers;
+  //   }, 500); // reduce interval time for quicker updates
+
+  //   return () => {
+  //     if (interval) clearInterval(interval);
+  //   };
+  // }, [roomsStore.currentRid, activeSpeaker, peers]);
 
   if (!roomsStore.currentRid || !roomsStore.currentRoom) {
     return null;
