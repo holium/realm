@@ -185,9 +185,9 @@ export const NotesStore = types
     subscribeToBedrockUpdates({ space }: NotesStore_SubscribeToBedrockUpdates) {
       NotesIPC.subscribe({ space });
     },
-    // syncLocalNotesWithBedrock(spacePath: string) {
-    //   NotesIPC.syncWithBedrock({ space: spacePath });
-    // },
+    syncLocalNotesWithBedrock(spacePath: string) {
+      return NotesIPC.syncWithBedrockNotes({ space: spacePath });
+    },
     setSelectedNoteId: ({ id }: NotesStore_SetSelectedNoteId) => {
       self.selectedNoteId = id;
     },

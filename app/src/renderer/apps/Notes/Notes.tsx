@@ -30,7 +30,7 @@ const NotesPresenter = () => {
     notesStore.subscribeToBedrockUpdates({ space: selectedSpace.path });
 
     // Sync local notes with Bedrock.
-    // notesStore.syncLocalNotesWithBedrock(selectedSpace.path);
+    notesStore.syncLocalNotesWithBedrock(selectedSpace.path);
   }, [selectedSpace]);
 
   return (

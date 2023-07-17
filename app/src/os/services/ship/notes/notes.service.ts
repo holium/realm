@@ -10,6 +10,8 @@ import {
   NotesService_BedrockUpdate_CreateNoteData,
   NotesService_CreateNote_Payload,
   NotesService_DeleteNote_Payload,
+  NotesService_GetBedrockState_Payload,
+  NotesService_GetBedrockState_Response,
   NotesService_GetNotes_Payload,
   NotesService_IPCUpdate,
   NotesService_SaveNote_Payload,
@@ -82,22 +84,42 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     return this.notesDB.selectAll({ space });
   }
 
-  // async syncWithBedrock({ space }: NotesService_GetNotes_Payload) {
-  //   if (!this.notesDB) return;
+  async syncWithBedrockNotes({ space }: NotesService_GetBedrockState_Payload) {
+    if (!this.notesDB) return;
 
-  //   const result = await APIConnection.getInstance().conduit.poke({
-  //     app: 'bedrock',
-  //     mark: 'db-action',
-  //     json: {
-  //       get: {
-  //         path: space,
-  //         type: 'realm-note',
-  //       },
-  //     },
-  //   });
+    const result: NotesService_GetBedrockState_Response =
+      await APIConnection.getInstance().conduit.scry({
+        app: 'bedrock',
+        path: `/db/path${space}`,
+      });
 
-  //   console.log('syncWithBedrock', JSON.stringify(result, null, 2));
-  // }
+    const realmNotesTable = result.tables.find((o) => o.type === 'realm-note');
+    const spaceNotes = realmNotesTable?.rows;
+
+    spaceNotes?.forEach((note) => {
+      const rowData: NotesService_BedrockUpdate_CreateNoteData = note.data;
+
+      this.notesDB?.upsert({
+        id: note.id,
+        space: note.path,
+        author: note.creator,
+        title: rowData.title,
+        doc: JSON.parse(rowData.doc),
+      });
+      this.sendUpdate({
+        type: 'create-note',
+        payload: {
+          id: note.id,
+          title: rowData.title,
+          author: note.creator,
+          space: note.path,
+          doc: JSON.parse(rowData.doc),
+          created_at: note['created-at'],
+          updated_at: note['updated-at'],
+        },
+      });
+    });
+  }
 
   editNote({ id, space, title, doc }: NotesService_SaveNote_Payload) {
     const editNoteData = [title, JSON.stringify(doc)];

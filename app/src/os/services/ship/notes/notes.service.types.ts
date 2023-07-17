@@ -1,4 +1,4 @@
-import { JSONObject } from 'os/types';
+import { BedrockRow, JSONObject } from 'os/types';
 
 /* Service method payloads */
 export type NotesService_CreateNote_Payload = {
@@ -27,6 +27,26 @@ export type NotesService_DeleteNote_Payload = {
 export type NotesService_BedrockUpdate_CreateNoteData = {
   title: string;
   doc: string;
+};
+
+export type NotesService_GetBedrockState_Payload = {
+  space: string;
+};
+
+type BedrockTable = {
+  type: string;
+  rows: BedrockRow<{
+    title: string;
+    doc: string;
+  }>[];
+};
+
+export type NotesService_GetBedrockState_Response = {
+  dels: JSONObject;
+  'path-row': JSONObject;
+  peers: JSONObject;
+  tables: BedrockTable[];
+  schemas: JSONObject;
 };
 
 /* IPC updates */
