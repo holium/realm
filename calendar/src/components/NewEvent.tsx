@@ -14,9 +14,16 @@ import {
   addOrdinal,
   addOrdinal2,
   convertH2M,
+  countDaysBetweenDates,
+  countNthWeekdaysBetweenDates,
+  countWeekDayOccurenceBetweenDates,
+  countWeekdaysBetweenDates,
+  countWeekendsBetweenDates,
+  formatDateToYYYYMMDD,
   getDayOfWeekJS,
   getMonthAndDay,
   getOccurrenceOfDayInMonth,
+  isDateValidInYear,
   log,
 } from '../utils';
 
@@ -24,19 +31,17 @@ interface Props {
   datePickerSelected: any;
   selectedCalendar: string;
 }
-type reccurenceOption = { value: string; label: string };
-// TODO: include every (day like today) reccuring event
-// TODO: changing timepicker also points at selected date in fullcalendar
+type selectOptions = { value: string; label: string };
+// TODO: changing timepicker also points at selected date in fullcalendar and vice versa
 export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
   const [startDate, setStartDate] = useState<string | undefined>();
   const [endDate, setEndDate] = useState<string | undefined>();
   const [newEventName, setNewEventName] = useState<string>('');
   const [newEventDescription, setNewEventDescription] = useState<string>('');
-
   const [selectedReccurenceType, setReccurenceType] =
     useState<string>('noRepeat');
   const [reccurenceTypeOptions, setReccurenceTypeOptions] = useState<
-    reccurenceOption[]
+    selectOptions[]
   >([
     { value: 'noRepeat', label: 'Dont repeat' },
     { value: 'everyday', label: 'Everyday' },
@@ -53,6 +58,11 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
     },
   ]);
 
+  const [reccurentEndDate, setReccurentEndDate] = useState<string>(
+    formatDateToYYYYMMDD(new Date())
+  );
+  const [reccurentRepTime, setReccurentRepTime] = useState<number>(0);
+
   useEffect(() => {
     if (datePickerSelected) {
       const weekDay = getDayOfWeekJS(datePickerSelected.getDay()); //sunday,monday...
@@ -68,8 +78,8 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
 
       const monthAndDay = getMonthAndDay(datePickerSelected);
 
-      const newReccurenceTypeOptions: reccurenceOption[] =
-        reccurenceTypeOptions.map((item: reccurenceOption) => {
+      const newReccurenceTypeOptions: selectOptions[] =
+        reccurenceTypeOptions.map((item: selectOptions) => {
           if (item.value === 'everyToday') {
             return { ...item, label: 'Every ' + weekDay };
           } else if (item.value === 'everyMonth') {
@@ -113,7 +123,7 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
       datePickerSelected.getTime() + startDateMinutes * 60000
     ).getTime();
 
-    const repeatCountObject = { l: 0, r: 9 };
+    const repeatCountObject = { l: 0, r: reccurentRepTime - 1 };
     const timeBetweenEventsEveryday = 1 * 60 * 60 * 24 * 1000; //1 is the number of days
 
     const durationMs = Math.abs(endDateMinutes - startDateMinutes) * 60000; // TODO: if endDate < startDate we have a problem
@@ -133,6 +143,7 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
         result = await api.createSpanPeriodicWeekly(
           selectedCalendar,
           startDateMS,
+          repeatCountObject,
           durationMs,
           [0, 1, 2, 3, 4],
           newEventName,
@@ -142,6 +153,7 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
         result = await api.createSpanPeriodicWeekly(
           selectedCalendar,
           startDateMS,
+          repeatCountObject,
           durationMs,
           [5, 6],
           newEventName,
@@ -157,6 +169,7 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
         result = await api.createSpanPeriodicWeekly(
           selectedCalendar,
           startDateMS,
+          repeatCountObject,
           durationMs,
           [selectedWeekDay],
           newEventName,
@@ -177,6 +190,7 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
         result = await api.createSpanPeriodicMonthlyNthWeekday(
           selectedCalendar,
           startDateMS,
+          repeatCountObject,
           durationMs,
           ordinal,
           selectedWeekDay,
@@ -188,6 +202,7 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
         result = await api.createSpanPeriodicYearlyOnDate(
           selectedCalendar,
           startDateMS,
+          repeatCountObject,
           durationMs,
           newEventName,
           newEventDescription
@@ -198,6 +213,89 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
       log('createEventPeriodic error =>', e);
     }
   };
+
+  const [reccurenceEndYearOptions, setReccurentEndYearOptions] = useState<
+    selectOptions[]
+  >([]);
+  const [selectedEndYearOption, setSelectedEndYearOption] = useState<string>(
+    new Date().getFullYear().toString()
+  );
+  useEffect(() => {
+    // generate select options for end year select, do it every time datePickerSelected changes
+    if (datePickerSelected) {
+      setReccurentEndYearOptions(generateYearsOptions(datePickerSelected));
+    }
+  }, [datePickerSelected]);
+  const generateYearsOptions = (
+    startDate: Date,
+    years = 10
+  ): selectOptions[] => {
+    const startYear = startDate.getFullYear();
+    const newYearOptions: selectOptions[] = [];
+    const selectedMonth = datePickerSelected.getMonth();
+    const selectedDay = datePickerSelected.getDate();
+    for (let i = startYear; i < startYear + years; i++) {
+      // Check if a date exists on that year
+      if (!isDateValidInYear(i, selectedMonth, selectedDay)) continue;
+
+      newYearOptions.push({ value: i.toString(), label: i.toString() });
+    }
+    return newYearOptions;
+  };
+  useEffect(() => {
+    if (reccurentEndDate) {
+      if (selectedReccurenceType === 'everyday') {
+        const newReccurentRepTime = countDaysBetweenDates(
+          datePickerSelected,
+          reccurentEndDate
+        );
+        setReccurentRepTime(newReccurentRepTime);
+      } else if (selectedReccurenceType === 'weekdays') {
+        const newReccurentRepTime = countWeekdaysBetweenDates(
+          datePickerSelected,
+          reccurentEndDate
+        );
+        setReccurentRepTime(newReccurentRepTime);
+      } else if (selectedReccurenceType === 'weekend') {
+        const newReccurentRepTime = countWeekendsBetweenDates(
+          datePickerSelected,
+          reccurentEndDate
+        );
+        setReccurentRepTime(newReccurentRepTime);
+      } else if (selectedReccurenceType === 'everyToday') {
+        const newReccurentRepTime = countWeekDayOccurenceBetweenDates(
+          datePickerSelected,
+          reccurentEndDate,
+          datePickerSelected.getDay()
+        );
+        setReccurentRepTime(newReccurentRepTime);
+      } else if (selectedReccurenceType === 'everyMonth') {
+        const nthOccurence = getOccurrenceOfDayInMonth(
+          datePickerSelected,
+          datePickerSelected.getDay()
+        );
+        log('nthOccurence', nthOccurence);
+        const newReccurentRepTime = countNthWeekdaysBetweenDates(
+          datePickerSelected,
+          reccurentEndDate,
+          datePickerSelected.getDay(),
+          nthOccurence
+        );
+        setReccurentRepTime(newReccurentRepTime);
+      } else if (selectedReccurenceType === 'everyYearToday') {
+        const newReccurentRepTime =
+          1 +
+          parseInt(selectedEndYearOption) -
+          datePickerSelected.getFullYear();
+        setReccurentRepTime(newReccurentRepTime);
+      }
+    }
+  }, [
+    reccurentEndDate,
+    selectedEndYearOption,
+    selectedReccurenceType,
+    datePickerSelected,
+  ]);
 
   return (
     <>
@@ -230,15 +328,14 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
           }}
         />
         <TextInput
-          id="new-event-description"
-          name="new-event-description"
+          id="new-event-reccurent-end-date"
+          name="new-event-reccurent-end-date"
           placeholder="Event description"
           value={newEventDescription}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
             setNewEventDescription(evt.target.value);
           }}
         />
-
         <Flex gap="5px" alignItems={'center'}>
           <Text.Label fontWeight={600}>
             {datePickerSelected?.toDateString().slice(0, -4)}
@@ -263,14 +360,50 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
             }}
           />
         </Flex>
-        <Select
-          id="reccurence-type-select"
-          options={reccurenceTypeOptions}
-          selected={selectedReccurenceType}
-          onClick={(type) => {
-            setReccurenceType(type as string);
-          }}
-        />
+        <Flex>
+          <Select
+            id="reccurence-type-select"
+            options={reccurenceTypeOptions}
+            selected={selectedReccurenceType}
+            onClick={(type) => {
+              setReccurenceType(type as string);
+            }}
+          />
+        </Flex>
+
+        {selectedReccurenceType !== 'noRepeat' &&
+          selectedReccurenceType !== 'everyYearToday' && (
+            <Flex alignItems={'center'} gap="10px">
+              <Text.Body fontWeight={600}>End of reccurent event</Text.Body>
+              <input
+                type="date"
+                id="reccurent-event-end-date"
+                name="reccurent-event-end-date"
+                min={formatDateToYYYYMMDD(new Date())}
+                value={reccurentEndDate}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setReccurentEndDate(e.target.value);
+                }}
+              />
+              <Text.Body fontWeight={600}>{reccurentRepTime}</Text.Body>
+            </Flex>
+          )}
+        {selectedReccurenceType === 'everyYearToday' && (
+          <Flex flexDirection={'column'} gap="10px">
+            <Text.Body fontWeight={600}>End of reccurent event</Text.Body>
+            <Flex flexDirection={'row'} gap="10px" alignItems={'center'}>
+              <Select
+                id="reccurence-end-year-select"
+                options={reccurenceEndYearOptions}
+                selected={selectedEndYearOption}
+                onClick={(type) => {
+                  setSelectedEndYearOption(type as string);
+                }}
+              />
+              <Text.Body fontWeight={600}>{reccurentRepTime}</Text.Body>
+            </Flex>
+          </Flex>
+        )}
       </Flex>
     </>
   );

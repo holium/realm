@@ -2,7 +2,7 @@ import Urbit from '@urbit/http-api';
 import memoize from 'lodash/memoize';
 
 import { log, shipCode, shipName } from './utils';
-
+type RepeatCount = { l: number; r: number };
 export const api = {
   createApi: memoize(() => {
     /*
@@ -98,7 +98,7 @@ export const api = {
   createSpanPeriodicDaily: async (
     calendarId: string,
     startDateMS: number,
-    repeatCount: { l: number; r: number },
+    repeatCount: RepeatCount,
     timeBetweenEvents: number,
     durationMS: number,
     name: string,
@@ -126,6 +126,7 @@ export const api = {
   createSpanPeriodicWeekly: async (
     calendarId: string,
     startDateMS: number,
+    repeatCountObject: RepeatCount,
     durationMS: number,
     includedWeekDays: number[],
     name: string,
@@ -134,10 +135,7 @@ export const api = {
     const json = {
       'create-span': {
         cid: calendarId,
-        dom: {
-          l: 0,
-          r: 10,
-        },
+        dom: repeatCountObject,
         rid: '~/left/days-of-week-0',
         kind: {
           left: {
@@ -164,6 +162,7 @@ export const api = {
   createSpanPeriodicMonthlyNthWeekday: async (
     calendarId: string,
     startDateMS: number,
+    repeatCountObject: RepeatCount,
     durationMS: number,
     ordinal: 'first' | 'second' | 'third' | 'fourth' | 'last',
     dayOfWeek: number,
@@ -173,10 +172,7 @@ export const api = {
     const json = {
       'create-span': {
         cid: calendarId,
-        dom: {
-          l: 0,
-          r: 10,
-        },
+        dom: repeatCountObject,
         rid: '~/left/monthly-nth-weekday-0',
         kind: {
           left: {
@@ -206,6 +202,7 @@ export const api = {
   createSpanPeriodicYearlyOnDate: async (
     calendarId: string,
     startDateMS: number,
+    repeatCountObject: RepeatCount,
     durationMS: number,
     name: string,
     description = ''
@@ -213,10 +210,7 @@ export const api = {
     const json = {
       'create-span': {
         cid: calendarId,
-        dom: {
-          l: 0,
-          r: 10,
-        },
+        dom: repeatCountObject,
         rid: '~/left/yearly-on-date-0',
         kind: {
           left: {
