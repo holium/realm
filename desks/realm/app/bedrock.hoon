@@ -72,6 +72,8 @@
         (create-path:db +.act state bowl)
       %create-from-space
         (create-from-space:db +.act state bowl)
+      %edit-path
+        (edit-path:db +.act state bowl)
       %remove-path
         (remove-path:db +.act state bowl)
       %add-peer
@@ -137,15 +139,7 @@
             =/  thepeers    (~(got by peers.state) t.t.path)
             =/  tbls        (tables-by-path:db tables.state t.t.path)
             =/  dels=(list [@da db-del-change])
-              %+  skim
-                ~(tap by del-log.state)
-              |=  [k=@da v=db-del-change]
-              ^-  ?
-              ?-  -.v
-                %del-row   =(path.v t.t.path)
-                %del-peer  =(path.v t.t.path)
-                %del-path  =(path.v t.t.path)
-              ==
+              (dels-by-path:db t.t.path state)
             :~  [%give %fact ~ db-path+!>([thepathrow thepeers tbls schemas.state dels])]
                 [%give %kick [path ~] `src.bowl]
             ==
@@ -182,16 +176,14 @@
         =/  thepeers    (~(got by peers.state) thepath)
         =/  tbls        (tables-by-path:db tables.state thepath)
         =/  dels=(list [@da db-del-change])
-          %+  skim
-            ~(tap by del-log.state)
-          |=  [k=@da v=db-del-change]
-          ^-  ?
-          ?-  -.v
-            %del-row   =(path.v thepath)
-            %del-peer  =(path.v thepath)
-            %del-path  =(path.v thepath)
-          ==
+          (dels-by-path:db thepath state)
         ``db-path+!>([thepathrow thepeers tbls schemas.state dels])
+    ::
+    :: all rows from a given table
+    ::  /db/table/realm-note.json
+      [%x %db %table @ ~]
+        =/  tblname=@tas  i.t.t.t.path
+        ``db-table+!>([tblname (~(got by tables.state) tblname) schemas.state])
     ::
     :: host of a given path
       [%x %host %path *]
@@ -399,7 +391,8 @@
                     state
                   $(index +(index), state (process-db-change:db dbpath change state bowl), result-cards (weld (weld result-cards new-scry) pokes))
               %db-path
-                =/  full=fullpath  !<(fullpath +.+.sign)
+                ~&  %here
+                =/  full=fullpath   !<(fullpath +.+.sign)
                 :: insert pathrow
                 =.  received-at.path-row.full  now.bowl
                 =.  paths.state     (~(put by paths.state) dbpath path-row.full)
