@@ -853,6 +853,11 @@ react-router@6.14.1:
   dependencies:
     "@remix-run/router" "1.7.1"
 
+react-tiny-popover@^7.2.4:
+  version "7.2.4"
+  resolved "https://registry.yarnpkg.com/react-tiny-popover/-/react-tiny-popover-7.2.4.tgz#b11fe9b43d1fc8ac46e760419346afd41d6111ee"
+  integrity sha512-T7ZSwXcUtPXCog3Bux9+TjoTvUeMi/+zI0Yv/TkIznZCWUg0XTt2797G0IiT5mTVeJeLivUzdOmKA1hOQdMfOQ==
+
 react@^18.2.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
