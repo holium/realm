@@ -10,6 +10,7 @@ import { ThemeType } from '@holium/shared';
 
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { ConduitSession } from '../api';
+import { MigrationService } from '../migration/migration.service';
 import ShipService from '../ship/ship.service';
 import { DBAccount } from './accounts.table';
 import { AuthDB } from './auth.db';
@@ -143,6 +144,7 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
         order: this.authDB?.getOrder(),
       },
     });
+    MigrationService.getInstance()._deleteShip(serverId);
     ShipService._deleteShipDB(serverId);
   }
   /**
