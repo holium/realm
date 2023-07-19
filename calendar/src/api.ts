@@ -240,4 +240,29 @@ export const api = {
     };
     return api.createApi().poke({ app: 'cal2', mark: 'calendar-action', json });
   },
+  deleteSpanInstance: async (
+    calendarId: string,
+    spanId: string,
+    instanceId: number,
+    name: string,
+    description: string
+  ) => {
+    // we make the changes to delete this instance
+    const json = {
+      'update-span-instances': {
+        cid: calendarId,
+        eid: spanId,
+        dom: { l: instanceId, r: instanceId },
+        def: true,
+        rid: '~/left/skip-0',
+        kind: { left: { tz: null, d: 0 } },
+        args: {},
+        meta: {
+          name,
+          description,
+        },
+      },
+    };
+    return api.createApi().poke({ app: 'cal2', mark: 'calendar-action', json });
+  },
 };

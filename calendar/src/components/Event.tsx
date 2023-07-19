@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import { Popover } from 'react-tiny-popover';
 
-import { Box, Button, Card, Flex, Icon, Text } from '@holium/design-system';
+import {
+  Box,
+  Button,
+  Card,
+  Flex,
+  Icon,
+  Select,
+  Text,
+} from '@holium/design-system';
 
 import { api } from '../api';
 import {
@@ -12,23 +20,41 @@ import {
 } from '../utils';
 // TODO: add reccurence text
 export const Event = ({ eventInfo }: any) => {
+  const [selectedInteractionType, setSelectedInteractionType] =
+    useState<string>('span');
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   // TODO: optimize this
+  const title = eventInfo.event.title;
   const description = eventInfo.event['_def']?.extendedProps.description;
   const startDate = eventInfo.event['_def']?.extendedProps._startDate;
   const endDate = eventInfo.event['_def']?.extendedProps._endDate;
   const calendarId = eventInfo.event['_def']?.extendedProps._calendarId;
   const spanId = eventInfo.event['_def']?.extendedProps._spanId;
+  const instanceId = eventInfo.event['_def']?.extendedProps._instanceId;
   const startWeekMonthDate =
     getDayOfWeekJS(startDate.getDay()) + ', ' + getMonthAndDay(startDate);
 
   const deleteSpan = async () => {
-    log('spanId', spanId);
     try {
       const result = await api.deleteSpan(calendarId, spanId);
       log('deleteSpan result => ', result);
     } catch (e) {
       log('deleteSpan error => ', e);
+    }
+  };
+  const deleteSpanInstance = async () => {
+    log('spanId', spanId);
+    try {
+      const result = await api.deleteSpanInstance(
+        calendarId,
+        spanId,
+        parseInt(instanceId),
+        title,
+        description
+      );
+      log('deleteSpanInstance result => ', result);
+    } catch (e) {
+      log('deleteSpanInstance error => ', e);
     }
   };
   return (
@@ -46,9 +72,16 @@ export const Event = ({ eventInfo }: any) => {
               justifyContent={'space-between'}
               alignItems={'center'}
             >
-              <Text.H6 fontWeight={600}>{eventInfo.event.title}</Text.H6>
+              <Text.H6 fontWeight={600}>{title}</Text.H6>
               <Flex>
-                <Button.IconButton size={28} onClick={() => deleteSpan()}>
+                <Button.IconButton
+                  size={28}
+                  onClick={() =>
+                    selectedInteractionType === 'span'
+                      ? deleteSpan()
+                      : deleteSpanInstance()
+                  }
+                >
                   <Icon name="Trash" size={16} opacity={0.7} />
                 </Button.IconButton>
                 <Button.IconButton
@@ -74,6 +107,20 @@ export const Event = ({ eventInfo }: any) => {
           <Box marginTop="10px">
             <Text.Body>{description}</Text.Body>
           </Box>
+          <Box marginTop={'auto'} width="80px">
+            <Select
+              placeholder="Type"
+              id="event-interaction-type-select"
+              options={[
+                { value: 'span', label: 'span' },
+                { value: 'instance', label: 'instance' },
+              ]}
+              selected={selectedInteractionType}
+              onClick={(type) => {
+                setSelectedInteractionType(type as string);
+              }}
+            />
+          </Box>
         </Card>
       }
     >
@@ -84,7 +131,6 @@ export const Event = ({ eventInfo }: any) => {
         width={'100%'}
         height={'100%'}
         onClick={() => {
-          log('hehe');
           setIsPopoverOpen(!isPopoverOpen);
         }}
         // TODO: stop overflow of text with ...

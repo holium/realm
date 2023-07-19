@@ -275,7 +275,7 @@ export const countNthWeekdaysBetweenDates = (
   nthInstance: number
 ) => {
   const startDateObj = new Date(startDate);
-  // Make sure startDate is the first day of the month
+  //make sure startDate is the first day of the month
   startDateObj.setDate(1);
 
   const endDateObj = new Date(endDate);
