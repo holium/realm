@@ -183,11 +183,13 @@ export const Bubble = ({
     <Flex
       ref={innerRef}
       key={`${id}-${fragments.join('-')}`}
+      id={id}
       display="inline-flex"
       justifyContent={isOur ? 'flex-end' : 'flex-start'}
       position="relative"
     >
       <BubbleStyle
+        id={id}
         isPrevGrouped={isPrevGrouped}
         isNextGrouped={isNextGrouped}
         ourTextColor={contrastAwareBlackOrWhiteHex(
@@ -207,6 +209,7 @@ export const Bubble = ({
       >
         {!isOur && !isPrevGrouped && (
           <BubbleAuthor
+            id={id}
             style={{
               color: authorColorDisplay,
             }}
@@ -218,11 +221,12 @@ export const Bubble = ({
         {forwardedFrom && (
           <Text.Custom
             style={{ color: 'rgba(var(--rlm-icon-rgba), 0.60)', fontSize: 11 }}
+            id={id}
           >
             Forwarded from: {forwardedFrom}
           </Text.Custom>
         )}
-        <FragmentBlock>{fragments}</FragmentBlock>
+        <FragmentBlock id={id}>{fragments}</FragmentBlock>
         <BubbleFooter height={footerHeight} mt={1}>
           <Box width="70%">
             {((reactions && reactions.length > 0) || onReaction) && (
@@ -236,6 +240,7 @@ export const Bubble = ({
             )}
           </Box>
           <Flex
+            id={id}
             width="30%"
             gap={4}
             alignItems="flex-end"
@@ -270,6 +275,7 @@ export const Bubble = ({
               />
             )}
             <Text.Custom
+              id={id}
               style={{ whiteSpace: 'nowrap', userSelect: 'none' }}
               pointerEvents="none"
               textAlign="right"
