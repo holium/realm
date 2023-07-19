@@ -54,7 +54,7 @@ const GlobalStyle = createGlobalStyle`
       --rlm-window-bg-rgba: 240,240,237,0.9;
       --rlm-card-rgba: 252,252,251;
       --rlm-text-rgba: 10,10,8;
-      --rlm-icon-rgba: 10,10,8,0.;
+      --rlm-icon-rgba: 10,10,8,0.7;
       --rlm-mouse-rgba: 78,158,253;
       --rlm-brand-rgba: 240,135,53;
       --rlm-intent-alert-rgba: 255,98,64;
@@ -81,9 +81,30 @@ const GlobalStyle = createGlobalStyle`
       --rlm-intent-success-color: #0fc383;
       --rlm-overlay-hover-color: rgba(0,0,0,0.04);
       --rlm-overlay-active-color: rgba(0,0,0,0.06);
+  }
+
+  input[type="time"],
+  input[type="date"] {
+    font-family: var(--rlm-font);
+    font-size: 12px;
+    background-color: rgba(var(--rlm-input-rgba));
+    color: rgba(var(--rlm-text-rgba));
+    pointer-events: all;
+    flex: 1;
+    height: inherit;
+    padding: 3px 6px;
+    appearance: none;
+    outline: none;
+    border: 1px solid rgba(var(--rlm-border-rgba));
+    border-radius: 6px;
+    padding-inline-start: 9px;
   
   }
-  
+  input[type="time"]::-webkit-calendar-picker-indicator, input[type="date"]::-webkit-calendar-picker-indicator  {
+    fill: rgba(var(--rlm-text-rgba), 0.5);
+    font-size: 16px;//controls size of icon
+    padding: 0;
+  }
 `;
 declare global {
   interface Window {
@@ -154,6 +175,7 @@ export const App = () => {
             _calendarId: selectedCalendar,
             title: metaData.name,
             description: metaData.description,
+            // allDay: true, display an event as an all day event IMPORTANT for when start using them
           });
         }
       });
@@ -177,8 +199,9 @@ export const App = () => {
 
   return (
     <main>
+      {/* use this for design system menu to work, remove once we move to realm */}
+      <div id="portal-root" />
       <GlobalStyle />
-
       <Flex>
         <Flex flexDirection={'column'} marginRight="8px">
           <CalendarList

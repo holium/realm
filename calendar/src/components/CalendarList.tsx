@@ -6,12 +6,12 @@ import {
   Flex,
   Icon,
   SectionDivider,
-  Text,
   TextInput,
 } from '@holium/design-system';
 
 import { api } from '../api';
 import { log } from '../utils';
+import { CalendarItem } from './CalendarItem';
 interface Props {
   calendarList: any;
   onCalendarSelect: (id: string) => void;
@@ -22,6 +22,7 @@ export const CalendarList = ({
   onCalendarSelect,
   selectedCalendar,
 }: Props) => {
+  const [isAdding, setIsAdding] = useState<boolean>(false);
   const addCalendar = async (newCalendar: string) => {
     try {
       const result = await api.createCalendar(newCalendar);
@@ -44,7 +45,7 @@ export const CalendarList = ({
             size={26}
             onClick={(e) => {
               e.stopPropagation();
-              log('adding calendar');
+              setIsAdding(!isAdding);
             }}
           >
             <Icon name="Plus" size={24} opacity={0.5} />
@@ -57,42 +58,41 @@ export const CalendarList = ({
         marginTop={'20px'}
         marginBottom={'20px'}
       >
-        {calendarList.map((item: any, key: number) => {
+        {calendarList.map((item: any, index: number) => {
           return (
-            <Box
-              key={'calendar-' + key}
-              className="highlight-hover"
-              style={{
-                backgroundColor:
-                  selectedCalendar === item.id
-                    ? 'rgba(var(--rlm-overlay-hover-rgba))'
-                    : 'transparent',
-                borderRadius: '12px',
-                padding: '4px 8px',
-              }}
-              onClick={() => {
-                onCalendarSelect(item.id);
-              }}
-            >
-              <Text.Body fontWeight={600}> {item.title}</Text.Body>
-            </Box>
+            <CalendarItem
+              key={'calendar-' + index}
+              title={item.title}
+              description={item.description}
+              id={item.id}
+              onCalendarSelect={onCalendarSelect}
+              selectedCalendar={selectedCalendar}
+            />
           );
         })}
-        <TextInput
-          id="new-calendar-input"
-          name="new-calendar-input"
-          tabIndex={1}
-          placeholder="New calendar"
-          value={newCalendar}
-          onKeyDown={(evt: any) => {
-            if (evt.key === 'Enter' && newCalendar.length > 0) {
-              addCalendar(newCalendar);
-            }
-          }}
-          onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-            setNewCalendar(evt.target.value);
-          }}
-        />
+        {isAdding && (
+          <TextInput
+            id="new-calendar-input"
+            name="new-calendar-input"
+            tabIndex={1}
+            autoFocus
+            placeholder="New calendar"
+            value={newCalendar}
+            onKeyDown={(evt: any) => {
+              if (evt.key === 'Enter' && newCalendar.length > 0) {
+                addCalendar(newCalendar);
+              }
+              // Hitting escape closes the inpu
+              if (evt.key === 'Escape') {
+                setIsAdding(false);
+              }
+            }}
+            onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
+              setNewCalendar(evt.target.value);
+            }}
+            onBlur={() => setIsAdding(false)}
+          />
+        )}
       </Flex>
     </>
   );

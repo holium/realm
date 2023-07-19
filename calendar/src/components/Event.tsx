@@ -124,7 +124,13 @@ export const Event = ({ eventInfo }: any) => {
         </Card>
       }
     >
+      {/* Custom event component */}
       <Box
+        style={{
+          padding: 2,
+          background: 'rgba(var(--rlm-accent-rgba), .5)',
+          color: 'rgba(var(--rlm-text-rgba))',
+        }}
         flex={1}
         padding={0}
         margin={0}

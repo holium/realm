@@ -118,7 +118,19 @@ const CalendarStyle = createGlobalStyle`
     text-transform: capitalize!important;
     background-color: rgba(0,0,0,.05)!important;
   }
-
+  .fc-v-event {
+    /* remove a border set to events in day/week views */
+    border: none;
+    background-color: transparent;
+  }
+  .fc-timegrid-event-harness-inset .fc-timegrid-event, .fc-timegrid-event.fc-event-mirror, .fc-timegrid-more-link {
+    /* 
+    this is a white box shadow appearing around edges of event to show time ?
+    I set it to none
+    box-shadow: 0 0 0 1px var(--fc-page-bg-color);
+    */
+    box-shadow: none;
+}
 `;
 // https://fullcalendar.io/docs/css-customization css customization
 interface Props {

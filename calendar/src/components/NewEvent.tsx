@@ -1,6 +1,7 @@
 import { ChangeEvent, useEffect, useState } from 'react';
 
 import {
+  Box,
   Button,
   Flex,
   Icon,
@@ -26,6 +27,49 @@ import {
   isDateValidInYear,
   log,
 } from '../utils';
+const colors = [
+  {
+    id: '1',
+    backgroundColor: '#a4bdfc',
+  },
+  {
+    id: '2',
+    backgroundColor: '#7ae7bf',
+  },
+  {
+    id: '3',
+    backgroundColor: '#dbadff',
+  },
+  {
+    id: '4',
+    backgroundColor: '#ff887c',
+  },
+  {
+    id: '5',
+    backgroundColor: '#fbd75b',
+  },
+  {
+    id: '6',
+    backgroundColor: '#ffb878',
+  },
+  {
+    id: '7',
+    backgroundColor: '#46d6db',
+  },
+
+  {
+    id: '9',
+    backgroundColor: '#5484ed',
+  },
+  {
+    id: '10',
+    backgroundColor: '#51b749',
+  },
+  {
+    id: '11',
+    backgroundColor: '#dc2127',
+  },
+];
 
 interface Props {
   datePickerSelected: any;
@@ -34,6 +78,9 @@ interface Props {
 type selectOptions = { value: string; label: string };
 // TODO: changing timepicker also points at selected date in fullcalendar and vice versa
 export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
+  const [selectedBackgroundColor, setSelectedBackground] = useState<
+    null | string
+  >(null);
   const [startDate, setStartDate] = useState<string | undefined>();
   const [endDate, setEndDate] = useState<string | undefined>();
   const [newEventName, setNewEventName] = useState<string>('');
@@ -360,21 +407,10 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
             }}
           />
         </Flex>
-        <Flex>
-          <Select
-            id="reccurence-type-select"
-            options={reccurenceTypeOptions}
-            selected={selectedReccurenceType}
-            onClick={(type) => {
-              setReccurenceType(type as string);
-            }}
-          />
-        </Flex>
-
         {selectedReccurenceType !== 'noRepeat' &&
           selectedReccurenceType !== 'everyYearToday' && (
             <Flex alignItems={'center'} gap="10px">
-              <Text.Body fontWeight={600}>End of reccurent event</Text.Body>
+              <Text.Label fontWeight={600}>End of event</Text.Label>
               <input
                 type="date"
                 id="reccurent-event-end-date"
@@ -384,8 +420,8 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
                   setReccurentEndDate(e.target.value);
                 }}
+                style={{ maxWidth: 100 }}
               />
-              <Text.Body fontWeight={600}>{reccurentRepTime}</Text.Body>
             </Flex>
           )}
         {selectedReccurenceType === 'everyYearToday' && (
@@ -404,6 +440,56 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
             </Flex>
           </Flex>
         )}
+        <Flex>
+          <Select
+            id="reccurence-type-select"
+            options={reccurenceTypeOptions}
+            selected={selectedReccurenceType}
+            onClick={(type) => {
+              setReccurenceType(type as string);
+            }}
+          />
+        </Flex>
+        <Flex>
+          {' '}
+          <Flex flexWrap="wrap" gap="3px" maxWidth={300}>
+            <Box
+              style={{
+                boxSizing: 'border-box',
+                backgroundColor: 'rgba(var(--rlm-accent-rgba))',
+                border: !selectedBackgroundColor ? '2px solid black' : 'none',
+              }}
+              key={'swatch-rlm-accent'}
+              height="30px"
+              width="30px"
+              borderRadius={5}
+              onClick={() => {
+                setSelectedBackground(null);
+              }}
+            />
+            {colors.map((item: any, index: number) => {
+              return (
+                <Box
+                  style={{
+                    boxSizing: 'border-box',
+                    backgroundColor: item.backgroundColor,
+                    border:
+                      selectedBackgroundColor === item.backgroundColor
+                        ? '2px solid black'
+                        : 'none',
+                  }}
+                  key={'swatch-' + index}
+                  height="30px"
+                  width="30px"
+                  borderRadius={5}
+                  onClick={() => {
+                    setSelectedBackground(item.backgroundColor);
+                  }}
+                />
+              );
+            })}
+          </Flex>
+        </Flex>
       </Flex>
     </>
   );
