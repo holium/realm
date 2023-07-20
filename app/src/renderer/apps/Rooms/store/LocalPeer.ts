@@ -33,6 +33,7 @@ const DEFAULT_VIDEO_OPTIONS = {
 
 export class LocalPeer extends EventEmitter {
   @observable patp = '';
+  @observable peerId = '';
   @observable audioLevel = 0;
   @observable isMuted = false;
   @observable isSpeaking = false;
@@ -55,6 +56,7 @@ export class LocalPeer extends EventEmitter {
     super();
     makeObservable(this);
     this.patp = ourId;
+    this.peerId = ourId;
     this.setAudioStream = this.setAudioStream.bind(this);
     MainIPC.onScreenshareSource(this.setScreenShareSource.bind(this));
   }

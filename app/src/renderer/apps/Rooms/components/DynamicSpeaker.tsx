@@ -82,9 +82,9 @@ const SpeakerPresenter = ({
       videoRef.current.playsInline = true;
     }
     if (peer.hasVideo || peer.isScreenSharing) {
-      console.log('re-showing video wrapper for', peer.patp);
+      console.log('re-showing video wrapper for', peer.peerId);
       const videoWrapper = document.getElementById(
-        `peer-video-${peer.patp}-wrapper`
+        `peer-video-${peer.peerId}-wrapper`
       ) as HTMLDivElement;
       if (videoWrapper) {
         videoWrapper.style.display = 'inline-block';
