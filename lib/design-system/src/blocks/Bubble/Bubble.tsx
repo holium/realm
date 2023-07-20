@@ -7,7 +7,12 @@ import {
 } from '../../../util';
 import { chatDate } from '../../util/date';
 import { BUBBLE_HEIGHT, STATUS_HEIGHT } from './Bubble.constants';
-import { BubbleAuthor, BubbleFooter, BubbleStyle } from './Bubble.styles';
+import {
+  BubbleAuthor,
+  BubbleContainer,
+  BubbleFooter,
+  BubbleStyle,
+} from './Bubble.styles';
 import {
   FragmentReactionType,
   FragmentStatusType,
@@ -180,16 +185,13 @@ export const Bubble = ({
   }
 
   return (
-    <Flex
+    <BubbleContainer
       ref={innerRef}
       key={`${id}-${fragments.join('-')}`}
       id={id}
-      display="inline-flex"
-      justifyContent={isOur ? 'flex-end' : 'flex-start'}
-      position="relative"
+      isOur={Boolean(isOur)}
     >
       <BubbleStyle
-        id={id}
         isPrevGrouped={isPrevGrouped}
         isNextGrouped={isNextGrouped}
         ourTextColor={contrastAwareBlackOrWhiteHex(
@@ -209,7 +211,6 @@ export const Bubble = ({
       >
         {!isOur && !isPrevGrouped && (
           <BubbleAuthor
-            id={id}
             style={{
               color: authorColorDisplay,
             }}
@@ -221,12 +222,11 @@ export const Bubble = ({
         {forwardedFrom && (
           <Text.Custom
             style={{ color: 'rgba(var(--rlm-icon-rgba), 0.60)', fontSize: 11 }}
-            id={id}
           >
             Forwarded from: {forwardedFrom}
           </Text.Custom>
         )}
-        <FragmentBlock id={id}>{fragments}</FragmentBlock>
+        <FragmentBlock>{fragments}</FragmentBlock>
         <BubbleFooter height={footerHeight} mt={1}>
           <Box width="70%">
             {((reactions && reactions.length > 0) || onReaction) && (
@@ -240,7 +240,6 @@ export const Bubble = ({
             )}
           </Box>
           <Flex
-            id={id}
             width="30%"
             gap={4}
             alignItems="flex-end"
@@ -251,13 +250,11 @@ export const Bubble = ({
             {error && (
               <Text.Custom
                 style={{ whiteSpace: 'nowrap', userSelect: 'none' }}
-                pointerEvents="none"
                 textAlign="right"
                 display="inline-flex"
                 alignItems="flex-end"
                 justifyContent="flex-end"
                 opacity={0.35}
-                id={id}
               >
                 {error}
               </Text.Custom>
@@ -266,7 +263,6 @@ export const Bubble = ({
               // TODO tooltip with time remaining
               <Icon
                 mb="1px"
-                id={id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.35 }}
                 transition={{ opacity: 0.2 }}
@@ -275,9 +271,7 @@ export const Bubble = ({
               />
             )}
             <Text.Custom
-              id={id}
               style={{ whiteSpace: 'nowrap', userSelect: 'none' }}
-              pointerEvents="none"
               textAlign="right"
               display="inline-flex"
               alignItems="flex-end"
@@ -291,6 +285,6 @@ export const Bubble = ({
           </Flex>
         </BubbleFooter>
       </BubbleStyle>
-    </Flex>
+    </BubbleContainer>
   );
 };
