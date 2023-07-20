@@ -56,6 +56,19 @@ export const api = {
       return result;
     }
   },
+  /**
+   * Rules related
+   */
+  getRules: async () => {
+    return api.createApi().scry({ app: 'calendar', path: '/rules' });
+  },
+  getRule: async (ruleId: string) => {
+    const res = await api.getRules();
+    return res.rules[ruleId];
+  },
+  /**
+   * Calendar related
+   */
   createCalendar: async (title: string, description = '') => {
     const json = { title, description };
     return await api.vent({
@@ -88,6 +101,80 @@ export const api = {
   },
   getCalendarData: async (id: string) => {
     return api.createApi().scry({ app: 'calendar', path: '/calendar/' + id });
+  },
+  /**
+   * Spaces related
+   */
+  getOur: async () => {
+    return api.createApi().scry({ app: 'calendar-spaces', path: '/our' });
+  },
+  getAlmanac: async () => {
+    return api.createApi().scry({ app: 'calendar-spaces', path: '/almanac' });
+  },
+  createSpaceCalendar: async (
+    space: string,
+    title: string,
+    description = ''
+  ) => {
+    const perms = {
+      admins: 'admin',
+      member: 'guest',
+      custom: {},
+    };
+    const json = { title, description, space, perms };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar-spaces', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'spaces-async-create', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  deleteSpaceCalendar: async (space: string, calendarId: string) => {
+    const json = { space: space, axn: { delete: calendarId } };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar-spaces', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'spaces-crud-action', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  updateBannedShips: async (space: string, banned: string[]) => {
+    const json = { space: space, axn: { banned: banned } };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar-spaces', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'spaces-crud-action', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  repermSpaceCalendar: async (space: string, calendarId: string) => {
+    const perms = {
+      admins: 'admin',
+      member: 'member',
+      custom: {},
+    };
+    const json = {
+      space: space,
+      axn: { reperm: { cid: calendarId, perms: perms } },
+    };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar-spaces', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'spaces-crud-action', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
   },
   /**
    * Span event related
