@@ -30,6 +30,7 @@ export class PeerClass extends EventsEmitter {
   @observable audioTracks: Map<string, any> = new Map();
   @observable audioStream: MediaStream | null = null;
   @observable videoStream: MediaStream | null = null;
+  @observable screenStream: MediaStream | undefined = undefined;
   @observable videoTracks: Map<string, any> = new Map();
   @observable stream: MediaStream | null = null;
   @observable ourStreams: MediaStream[];
@@ -186,7 +187,6 @@ export class PeerClass extends EventsEmitter {
       }
 
       this.videoTracks.set(track.id, track);
-      this.videoStream = stream;
 
       this.hasVideoChanged(true);
       const video = document.getElementById(
@@ -196,9 +196,11 @@ export class PeerClass extends EventsEmitter {
       if (track.label === 'Screen') {
         video.classList.add('screen');
         this.isScreenSharing = true;
+        this.screenStream = stream;
       } else {
         video.classList.remove('screen');
         this.hasVideo = true;
+        this.videoStream = stream;
       }
 
       if (video) {
@@ -209,6 +211,12 @@ export class PeerClass extends EventsEmitter {
         video.muted = true;
       } else {
         console.log('no video element found');
+      }
+      const videoWrapper = document.getElementById(
+        `peer-video-${this.peerId}-wrapper`
+      ) as HTMLDivElement;
+      if (videoWrapper) {
+        videoWrapper.style.display = 'inline-block';
       }
     }
     if (track.kind === 'audio') {
@@ -283,6 +291,13 @@ export class PeerClass extends EventsEmitter {
       video.style.display = 'none';
       video.srcObject = null;
       video.playsInline = false;
+    }
+
+    const videoWrapper = document.getElementById(
+      `peer-video-${this.peerId}-wrapper`
+    ) as HTMLDivElement;
+    if (videoWrapper) {
+      videoWrapper.style.display = 'none';
     }
 
     this.analysers.forEach((analyser) => {

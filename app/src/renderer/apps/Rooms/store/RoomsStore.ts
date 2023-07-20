@@ -189,6 +189,12 @@ export class RoomsStore extends EventsEmitter {
           this.ourPeer.screenStream &&
             peer.setNewStream(this.ourPeer.screenStream);
         });
+        this.sendDataToRoom({
+          kind: 5,
+          value: {
+            data: true,
+          },
+        });
       } else {
         this.peers.forEach((peer) => {
           if (
@@ -340,6 +346,12 @@ export class RoomsStore extends EventsEmitter {
         if (stream) {
           peer.setNewStream(stream);
         }
+      });
+      this.sendDataToRoom({
+        kind: 6,
+        value: {
+          data: true,
+        },
       });
     }
   }

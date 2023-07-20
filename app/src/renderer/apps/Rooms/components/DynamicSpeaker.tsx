@@ -79,6 +79,15 @@ const SpeakerPresenter = ({
       videoRef.current.style.display = 'inline-block';
       videoRef.current.playsInline = true;
     }
+    if (peer.hasVideo || peer.isScreenSharing) {
+      console.log('attaching video to', peer.patp);
+      const videoWrapper = document.getElementById(
+        `peer-video-${peer.patp}-wrapper`
+      ) as HTMLDivElement;
+      if (videoWrapper) {
+        videoWrapper.style.display = 'inline-block';
+      }
+    }
   }, [peer?.hasVideo, peer?.isScreenSharing, videoRef.current]);
 
   if (name.length > 17) name = `${name.substring(0, 17)}...`;

@@ -88,12 +88,12 @@ export const SpeakerGridStandaloneChat = ({
     >
       <Flex flex={1}>
         <Box height="100%" width="100%">
-          {renderPeer(activePeer, 'calc(100% - 250px)')}
+          {renderPeer(activePeer, '100%')}
         </Box>
       </Flex>
-      {peers.slice(1).length > 0 && (
-        <PeersScroller>
-          {peers
+      <PeersScroller>
+        {peers.slice(1).length > 0 &&
+          peers
             .filter((peerId) => activePeer !== peerId)
             .map((peerId: string) => (
               <Box
@@ -105,8 +105,7 @@ export const SpeakerGridStandaloneChat = ({
                 {renderPeer(peerId, '250px')}
               </Box>
             ))}
-        </PeersScroller>
-      )}
+      </PeersScroller>
     </SpeakerGridStyle>
   );
 };
