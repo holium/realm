@@ -102,11 +102,17 @@ export class PeerClass extends EventsEmitter {
   @action
   hasVideoChanged(hasVideo: boolean) {
     this.hasVideo = hasVideo;
+    if (this.isScreenSharing && hasVideo) {
+      this.isScreenSharing = false;
+    }
   }
 
   @action
   isScreenSharingChanged(isScreenSharing: boolean) {
     this.isScreenSharing = isScreenSharing;
+    if (this.hasVideo && isScreenSharing) {
+      this.hasVideo = false;
+    }
   }
 
   setNewStream(stream: MediaStream) {
@@ -188,7 +194,7 @@ export class PeerClass extends EventsEmitter {
 
       this.videoTracks.set(track.id, track);
 
-      this.hasVideoChanged(true);
+      // this.hasVideoChanged(true);
       const video = document.getElementById(
         `peer-video-${this.peerId}`
       ) as HTMLVideoElement;
@@ -354,16 +360,35 @@ export class PeerClass extends EventsEmitter {
       if (payload.data) {
         this.isScreenSharingChanged(true);
       } else {
-        this.isScreenSharingChanged(false);
+        this.disableVideo();
       }
     } else if (dataPacket.kind === DataPacketWebcamStatus) {
       if (payload.data === true) {
         this.hasVideoChanged(true);
       } else {
-        this.hasVideoChanged(false);
+        this.disableVideo();
       }
     }
     this.onDataChannel(this.rid, this.peerId, dataPacket);
+  }
+
+  @action
+  disableVideo() {
+    const videoWrapper = document.getElementById(
+      `peer-video-${this.peerId}-wrapper`
+    ) as HTMLDivElement;
+    if (videoWrapper) {
+      videoWrapper.style.display = 'none';
+    }
+    const video = document.getElementById(
+      `peer-video-${this.peerId}`
+    ) as HTMLVideoElement;
+    if (videoWrapper) {
+      video.style.display = 'none';
+      video.srcObject = null;
+    }
+    this.hasVideoChanged(false);
+    this.isScreenSharingChanged(false);
   }
 
   @action

@@ -754,6 +754,8 @@ export class RoomsStore extends EventsEmitter {
     const streams = [this.ourPeer.audioStream];
     if (this.ourPeer.videoStream) {
       streams.push(this.ourPeer.videoStream);
+    } else if (this.ourPeer.screenStream) {
+      streams.push(this.ourPeer.screenStream);
     }
     const peer = new PeerClass(
       this.currentRid,
