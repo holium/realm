@@ -70,17 +70,19 @@ const SpeakerPresenter = ({
     if (!videoRef.current) return;
     if (!peer) return;
     if (peer.hasVideo && !videoRef.current.srcObject) {
+      console.log('hasVideo - DynamicSpeaker.tsx, attach video');
       videoRef.current.srcObject = peer.videoStream;
       videoRef.current.style.display = 'inline-block';
       videoRef.current.playsInline = true;
     }
     if (peer.isScreenSharing && !videoRef.current.srcObject) {
+      console.log('isScreenSharing - DynamicSpeaker.tsx, attach video');
       videoRef.current.srcObject = peer.screenStream;
       videoRef.current.style.display = 'inline-block';
       videoRef.current.playsInline = true;
     }
     if (peer.hasVideo || peer.isScreenSharing) {
-      console.log('attaching video to', peer.patp);
+      console.log('re-showing video wrapper for', peer.patp);
       const videoWrapper = document.getElementById(
         `peer-video-${peer.patp}-wrapper`
       ) as HTMLDivElement;

@@ -194,12 +194,16 @@ export class PeerClass extends EventsEmitter {
       ) as HTMLVideoElement;
 
       if (track.label === 'Screen') {
+        console.log('screen track', track);
         video.classList.add('screen');
         this.isScreenSharing = true;
+        this.hasVideo = false;
         this.screenStream = stream;
       } else {
         video.classList.remove('screen');
+        console.log('video track', track);
         this.hasVideo = true;
+        this.isScreenSharing = false;
         this.videoStream = stream;
       }
 
