@@ -1,9 +1,11 @@
+import { Box, Tooltip } from '../../../general';
 import { ColorVariants } from '../../../util';
 import { Icon } from '../Icon/Icon';
 import { IconPathsType } from '../Icon/icons';
 import { CommCircle } from './CommButton.styles';
 
 interface CommButtonProps {
+  tooltip: string;
   icon: IconPathsType;
   customBg?: ColorVariants;
   size?: number;
@@ -13,12 +15,34 @@ interface CommButtonProps {
 
 export const CommButton = ({
   icon,
+  tooltip,
   customBg,
   isDisabled = false,
   size = 28,
   onClick,
 }: CommButtonProps) => (
-  <CommCircle isDisabled={isDisabled} customBg={customBg} onClick={onClick}>
-    <Icon size={size} name={icon} />
-  </CommCircle>
+  <Box position="relative">
+    <Tooltip
+      id={`${icon}-button`}
+      content={isDisabled ? `${tooltip} permissions are disabled` : tooltip}
+      placement="top"
+      wrapperStyle={{
+        marginTop: 10,
+      }}
+    >
+      {isDisabled && (
+        <Box position="absolute" right={-2} top={-2}>
+          <Icon size={14} name="Error" fill="intent-alert" />
+        </Box>
+      )}
+
+      <CommCircle
+        isDisabled={isDisabled}
+        customBg={customBg}
+        onClick={!isDisabled && onClick}
+      >
+        <Icon size={size} name={icon} />
+      </CommCircle>
+    </Tooltip>
+  </Box>
 );

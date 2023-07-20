@@ -41,15 +41,15 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       // do other cleanup here
     });
 
-    app.on(
-      'web-contents-created',
-      async (_: Event, webContents: WebContents) => {
-        webContents.on('will-redirect', (e: Event, url: string) => {
-          e.preventDefault();
-          this.onWillRedirect(url, webContents);
-        });
-      }
-    );
+    // app.on(
+    //   'web-contents-created',
+    //   async (_: Event, webContents: WebContents) => {
+    //     webContents.on('will-redirect', (e: Event, url: string) => {
+    //       e.preventDefault();
+    //       this.onWillRedirect(url, webContents);
+    //     });
+    //   }
+    // );
 
     const windows = BrowserWindow.getAllWindows();
     windows.forEach(({ webContents }) => {

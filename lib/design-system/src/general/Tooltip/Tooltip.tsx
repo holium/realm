@@ -27,6 +27,7 @@ export interface TooltipProps {
   children: ReactNode;
   position?: any;
   show?: boolean;
+  wrapperStyle?: CSSProperties;
 }
 
 const margin = 2;
@@ -48,7 +49,7 @@ const placementMaps: Record<MenuOrientation, any> = {
   `,
   top: css`
     margin-bottom: ${margin}px;
-    bottom: 100%;
+    top: 100%;
     left: 50%;
     transform: translate(-50%, 0);
   `,
@@ -150,6 +151,7 @@ export const Tooltip = ({
   placement = 'bottom-right',
   children,
   show = true,
+  wrapperStyle,
   ...rest
 }: TooltipProps) => {
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -158,7 +160,7 @@ export const Tooltip = ({
 
   const body =
     typeof content === 'string' ? (
-      <Card borderRadius={4} style={{ fontSize: 14 }} padding="4px">
+      <Card borderRadius={4} style={{ fontSize: 14 }} padding="4px 6px">
         {content}
       </Card>
     ) : (
@@ -173,6 +175,7 @@ export const Tooltip = ({
             <Wrapper
               key={`${id}-tooltip`}
               coords={coords}
+              style={wrapperStyle}
               {...rest}
               {...baseMotionProps}
             >
@@ -184,6 +187,7 @@ export const Tooltip = ({
         )}
       </Portal>
       <Box
+        position="relative"
         onMouseDown={(evt) => {
           setIsVisible(false);
           evt.stopPropagation();
@@ -191,7 +195,7 @@ export const Tooltip = ({
         onMouseEnter={(evt) => {
           const rect = (evt.target as HTMLElement).getBoundingClientRect();
           setCoords({
-            left: rect.x,
+            left: rect.x + rect.width / 2,
             top: rect.top - rect.height,
           });
           evt.stopPropagation();

@@ -88,7 +88,7 @@ export const SpeakerGridStandaloneChat = ({
     >
       <Flex flex={1}>
         <Box height="100%" width="100%">
-          {renderPeer(activePeer, '100%')}
+          {renderPeer(activePeer, 'calc(100% - 250px)')}
         </Box>
       </Flex>
       {peers.slice(1).length > 0 && (

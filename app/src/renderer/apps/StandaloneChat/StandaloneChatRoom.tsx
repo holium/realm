@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import {
@@ -9,8 +9,10 @@ import {
   Text,
 } from '@holium/design-system/general';
 
+import { MediaAccess } from 'os/types';
 import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
+import { MainIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { VoiceView } from '../Rooms/Room/Voice';
@@ -20,6 +22,11 @@ const StandaloneChatRoomPresenter = () => {
   const { loggedInAccount } = useAppState();
   const roomsStore = useRoomsStore();
   const { chatStore } = useShipStore();
+  const [mediaAccessStatus, setMediaAccessStatus] = useState<MediaAccess>({
+    camera: 'granted',
+    mic: 'granted',
+    screen: 'granted',
+  });
 
   const isMuted = roomsStore.ourPeer.isMuted;
   const hasVideo = roomsStore.ourPeer.isVideoOn;
@@ -27,6 +34,9 @@ const StandaloneChatRoomPresenter = () => {
 
   useEffect(() => {
     trackEvent('OPENED', 'ROOMS_VOICE');
+    MainIPC.getMediaStatus().then((status: MediaAccess) => {
+      setMediaAccessStatus(status);
+    });
   }, []);
 
   const presentRoom = roomsStore.getRoomByPath(
@@ -101,6 +111,7 @@ const StandaloneChatRoomPresenter = () => {
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
             <CommButton
               icon="RoomLeave"
+              tooltip="Leave room"
               size={22}
               customBg="intent-alert"
               onClick={(evt) => {
@@ -115,7 +126,9 @@ const StandaloneChatRoomPresenter = () => {
               }}
             />
             <CommButton
+              tooltip="Microphone"
               icon={isMuted ? 'MicOff' : 'MicOn'}
+              isDisabled={mediaAccessStatus.mic !== 'granted'}
               onClick={(evt) => {
                 evt.stopPropagation();
                 if (isMuted) {
@@ -126,13 +139,17 @@ const StandaloneChatRoomPresenter = () => {
               }}
             />
             <CommButton
+              tooltip="Camera"
               icon={hasVideo ? 'VideoOn' : 'VideoOff'}
+              isDisabled={mediaAccessStatus.camera !== 'granted'}
               onClick={() => {
                 roomsStore.toggleVideo(!hasVideo);
               }}
             />
             <CommButton
-              icon={'ScreenSharing'}
+              tooltip="Screen sharing"
+              icon={isScreenSharing ? 'ScreenSharing' : 'ScreenSharingOff'}
+              isDisabled={mediaAccessStatus.screen !== 'granted'}
               onClick={() => {
                 roomsStore.toggleScreenShare(!isScreenSharing);
               }}

@@ -67,18 +67,15 @@ const SpeakerPresenter = ({
 
   // if navigating away and back, we need to reattach the video
   useEffect(() => {
-    console.log('peer', peer);
     if (!videoRef.current) return;
-    if (!peer || !peer?.hasVideo) return;
-
-    // if (!peer || !peer?.isScreenSharing) {
-    //   videoRef.current.srcObject = null;
-    //   videoRef.current.style.display = 'none';
-    //   return;
-    // }
-
-    if (!videoRef.current.srcObject) {
+    if (!peer) return;
+    if (peer.hasVideo && !videoRef.current.srcObject) {
       videoRef.current.srcObject = peer.videoStream;
+      videoRef.current.style.display = 'inline-block';
+      videoRef.current.playsInline = true;
+    }
+    if (peer.isScreenSharing && !videoRef.current.srcObject) {
+      videoRef.current.srcObject = peer.screenStream;
       videoRef.current.style.display = 'inline-block';
       videoRef.current.playsInline = true;
     }
@@ -196,7 +193,12 @@ const SpeakerPresenter = ({
       } ${isSpeaking ? 'speaker-speaking' : ''}`}
     >
       <>
-        <Video id={`peer-video-${person}`} innerRef={videoRef} />
+        <Video
+          id={`peer-video-${person}`}
+          innerRef={videoRef}
+          isPinned={isPinned}
+          onPin={onPin}
+        />
         <Flex
           zIndex={2}
           className="speaker-avatar-wrapper"
@@ -295,7 +297,7 @@ type SpeakerWrapperProps = {
 
 const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
   position: relative;
-  padding: 16px 0;
+  /* padding: 16px 0; */
   border-radius: 9px;
   overflow: hidden;
   transition: 0.25s ease;

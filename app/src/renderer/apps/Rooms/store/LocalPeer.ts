@@ -182,6 +182,13 @@ export class LocalPeer extends EventEmitter {
       video.style.display = 'inline-block';
       video.srcObject = stream;
     }
+
+    const videoWrapper = document.getElementById(
+      `peer-video-${this.patp}-wrapper`
+    ) as HTMLDivElement;
+    if (videoWrapper) {
+      videoWrapper.style.display = 'inline-block';
+    }
     return this.videoStream;
   }
 
@@ -198,6 +205,12 @@ export class LocalPeer extends EventEmitter {
     if (videoEl) {
       videoEl.style.display = 'none';
       videoEl.srcObject = null;
+    }
+    const videoWrapper = document.getElementById(
+      `peer-video-${this.patp}-wrapper`
+    ) as HTMLDivElement;
+    if (videoWrapper) {
+      videoWrapper.style.display = 'none';
     }
     this.videoStream = undefined;
   }
@@ -255,6 +268,13 @@ export class LocalPeer extends EventEmitter {
       video.classList.add('screen');
     }
 
+    const videoWrapper = document.getElementById(
+      `peer-video-${this.patp}-wrapper`
+    ) as HTMLDivElement;
+    if (videoWrapper) {
+      videoWrapper.style.display = 'inline-block';
+    }
+
     // pause the video stream if it's currently playing
     if (this.videoStream) {
       this.disableVideo();
@@ -272,6 +292,12 @@ export class LocalPeer extends EventEmitter {
       videoEl.style.display = 'none';
       videoEl.srcObject = null;
       videoEl.classList.remove('screen');
+    }
+    const videoWrapper = document.getElementById(
+      `peer-video-${this.patp}-wrapper`
+    ) as HTMLDivElement;
+    if (videoWrapper) {
+      videoWrapper.style.display = 'none';
     }
     this.screenStream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
       track.enabled = false;

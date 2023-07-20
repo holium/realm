@@ -206,6 +206,7 @@ const RoomPresenter = () => {
           </Flex>
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
             <CommButton
+              tooltip="Microphone"
               icon={isMuted ? 'MicOff' : 'MicOn'}
               isDisabled={mediaAccessStatus.mic !== 'granted'}
               onClick={(evt) => {
@@ -218,10 +219,12 @@ const RoomPresenter = () => {
               }}
             />
             <CommButton
+              tooltip="Multiplayer mode"
               icon={shellStore.multiplayerEnabled ? 'MouseOn' : 'MouseOff'}
               onClick={shellStore.toggleMultiplayer}
             />
             <CommButton
+              tooltip="Camera"
               icon={hasVideo ? 'VideoOn' : 'VideoOff'}
               isDisabled={mediaAccessStatus.camera !== 'granted'}
               onClick={() => {
@@ -229,19 +232,13 @@ const RoomPresenter = () => {
               }}
             />
             <CommButton
-              icon={'ScreenSharing'}
+              tooltip="Screen sharing"
+              icon={isScreenSharing ? 'ScreenSharing' : 'ScreenSharingOff'}
               isDisabled={mediaAccessStatus.screen !== 'granted'}
               onClick={() => {
                 roomsStore.toggleScreenShare(!isScreenSharing);
               }}
             />
-            {/* <CommButton
-              icon="HeadphoneLine"
-              customBg={dockColor}
-              onClick={(evt: any) => {
-                evt.stopPropagation();
-              }}
-            /> */}
           </Flex>
           <Flex alignItems="center">
             <Badge
