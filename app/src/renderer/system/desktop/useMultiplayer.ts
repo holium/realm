@@ -242,6 +242,8 @@ export const useMultiplayer = ({
       _peer: string,
       data: DataPacket
     ) => {
+      console.log('data ***', data);
+
       const multiplayerPayload = data.value.multiplayer;
       if (!multiplayerPayload) return;
 

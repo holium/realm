@@ -3,7 +3,7 @@ import { BedrockRow, JSONObject } from 'os/types';
 /* Service method payloads */
 export type NotesService_CreateNote_Payload = {
   title: string;
-  doc: JSONObject;
+  history: string[];
   space: string;
 };
 
@@ -15,7 +15,7 @@ export type NotesService_SaveNote_Payload = {
   id: string;
   space: string;
   title: string;
-  doc: JSONObject;
+  history: string[];
 };
 
 export type NotesService_DeleteNote_Payload = {
@@ -26,7 +26,7 @@ export type NotesService_DeleteNote_Payload = {
 /* Bedrock updates */
 export type NotesService_BedrockUpdate_CreateNoteData = {
   title: string;
-  doc: string;
+  history: string[];
 };
 
 export type NotesService_GetBedrockState_Payload = {
@@ -37,7 +37,7 @@ type BedrockTable = {
   type: string;
   rows: BedrockRow<{
     title: string;
-    doc: string;
+    history: string[];
   }>[];
 };
 
@@ -57,7 +57,7 @@ type NotesService_IPCUpdate_CreateNote = {
     author: string;
     space: string;
     title: string;
-    doc: JSONObject;
+    history: string[];
     created_at: number;
     updated_at: number;
   };
@@ -75,7 +75,7 @@ type NotesService_IPCUpdate_UpdateNote = {
   payload: {
     id: string;
     title: string;
-    doc: JSONObject;
+    history: string[];
     updated_at: number;
   };
 };

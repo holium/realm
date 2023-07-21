@@ -1,19 +1,14 @@
-import { useState } from 'react';
-import { Node } from 'prosemirror-model';
+import { fromUint8Array } from 'js-base64';
 import { TextSelection, Transaction } from 'prosemirror-state';
-import { Step } from 'prosemirror-transform';
-import { EditorView as ProseMirrorEditorView } from 'prosemirror-view';
+import * as Y from 'yjs';
 
 import { Flex } from '@holium/design-system/general';
-import { useBroadcast } from '@holium/realm-presence';
 
-import { Authority } from './Authority';
-import { collabEditor } from './collabEditor';
-import { CustomCaret } from './CustomCaret';
+import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
+import { useShipStore } from 'renderer/stores/ship.store';
+
 import { EditorContainer } from './EditorView.styles';
-import { schema } from './schema';
-
-type Carets = Record<string, { x: number; y: number }>;
+import { useCollabEditor } from './useCollabEditor';
 
 export type SendCaret = (patp: string, x: number, y: number) => void;
 
@@ -25,40 +20,22 @@ export type SendTransaction = (
 ) => void;
 
 type Props = {
-  doc: Node;
-  onBlurDoc: (doc: Node) => void;
-  onChangeDoc: (doc: Node) => void;
+  history: string[];
+  shipStore: ReturnType<typeof useShipStore>;
+  roomsStore: ReturnType<typeof useRoomsStore>;
+  onBlurDoc: (newHistory: string[]) => void;
 };
 
-export const EditorView = ({ doc, onBlurDoc, onChangeDoc }: Props) => {
-  const [editorView, setEditorView] = useState<ProseMirrorEditorView>();
-  const [authority, setAuthority] = useState<Authority>();
-  const [carets, setCarets] = useState<Carets>({});
-
-  const onTransaction: SendTransaction = (
-    _patp,
-    version,
-    serializedSteps,
-    clientID
-  ) => {
-    if (!editorView || !authority) return;
-    const parsedSteps = serializedSteps.map((s: object) =>
-      Step.fromJSON(schema, s)
-    );
-    authority.receiveSteps(version, parsedSteps, clientID);
-  };
-
-  const onCaret: SendCaret = (patp, x, y) => {
-    setCarets((prevCarets) => ({ ...prevCarets, [patp]: { x, y } }));
-  };
-
-  const { broadcast: sendTransaction } = useBroadcast({
-    channelId: 'transactions',
-    onBroadcast: onTransaction,
-  });
-  const { broadcast: sendCaret } = useBroadcast({
-    channelId: 'carets',
-    onBroadcast: onCaret,
+export const EditorView = ({
+  history,
+  shipStore,
+  roomsStore,
+  onBlurDoc,
+}: Props) => {
+  const { ydoc, editorView, onEditorRef } = useCollabEditor({
+    history,
+    shipStore,
+    roomsStore,
   });
 
   const moveToEnd = () => {
@@ -75,36 +52,18 @@ export const EditorView = ({ doc, onBlurDoc, onChangeDoc }: Props) => {
     editorView.dispatch(transaction);
   };
 
-  const onEditorRef = (ref: HTMLDivElement) => {
-    if (!ref) return;
-    if (editorView) return;
-    if (authority) return;
-
-    const newAuthority = new Authority(doc);
-    const newEditor = collabEditor(
-      newAuthority,
-      ref,
-      sendTransaction,
-      sendCaret,
-      onChangeDoc
-    );
-
-    setEditorView(newEditor);
-    setAuthority(newAuthority);
-  };
-
   const onBlur = () => {
-    if (!editorView) return;
-    onBlurDoc(editorView.state.doc);
+    if (!ydoc) return;
+
+    const update = Y.encodeStateAsUpdate(ydoc);
+    const updateBase64Encoded = fromUint8Array(update);
+
+    onBlurDoc([updateBase64Encoded]);
   };
 
   return (
     <EditorContainer>
-      <div ref={onEditorRef} onBlur={onBlur}>
-        {Object.entries(carets).map(([patp, position]) => (
-          <CustomCaret key={patp} top={position.y} left={position.x} />
-        ))}
-      </div>
+      <div ref={onEditorRef} onBlur={onBlur} />
       <Flex flex={1} className="text-cursor move-to-end" onClick={moveToEnd} />
     </EditorContainer>
   );

@@ -1,6 +1,6 @@
 import { MouseEvent } from 'react';
 
-import { Flex } from '@holium/design-system/general';
+import { AvatarRow, ContactData, Flex } from '@holium/design-system/general';
 
 import {
   NoteRowContainer,
@@ -16,6 +16,7 @@ type Props = {
   author: string;
   isSelected: boolean;
   isPersonal: boolean;
+  participants: ContactData[];
   onClick: (e: MouseEvent) => void;
 };
 
@@ -27,6 +28,7 @@ export const NoteRowView = ({
   author,
   isSelected,
   isPersonal,
+  participants,
   onClick,
 }: Props) => (
   <NoteRowContainer id={id} selected={isSelected} onClick={onClick}>
@@ -35,10 +37,12 @@ export const NoteRowView = ({
         <NoteRowTitle flex={1}>{title}</NoteRowTitle>
         <Flex gap="4px">
           {!isPersonal && (
-            <NoteRowText>{author}</NoteRowText>
-            /* {note.participants && note.participants?.length > 0 && (
-                <AvatarRow size={16} people={note.participants} />
-              )} */
+            <>
+              <NoteRowText>{author}</NoteRowText>
+              {participants.length > 0 && (
+                <AvatarRow size={16} people={participants} />
+              )}
+            </>
           )}
         </Flex>
       </Flex>

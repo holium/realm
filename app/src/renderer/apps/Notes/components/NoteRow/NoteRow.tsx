@@ -1,7 +1,10 @@
 import { MouseEvent, useEffect, useMemo } from 'react';
+import { observer } from 'mobx-react';
 
+import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { ContextMenuOption } from 'renderer/components/ContextMenu/ContextMenu';
 import { useContextMenu } from 'renderer/components/ContextMenu/useContextMenu';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { NoteRowView } from './NoteRowView';
 
@@ -18,7 +21,7 @@ type Props = {
   onClickDelete: () => void;
 };
 
-export const NoteRow = ({
+const NoteRowPresenter = ({
   id,
   title,
   author,
@@ -30,6 +33,23 @@ export const NoteRow = ({
   onClick,
   onClickDelete,
 }: Props) => {
+  const { friends } = useShipStore();
+  const roomsStore = useRoomsStore();
+  const noteRowPath = space + id;
+
+  const noteRoom = roomsStore
+    .getSpaceRooms(space)
+    .find((room) => room.path === noteRowPath);
+  const participants = isPersonal
+    ? []
+    : noteRoom?.present.map((patp: string) => {
+        const metadata = friends.getContactAvatarMetadata(patp);
+        return metadata;
+      }) || [];
+  if (participants.length > 0) {
+    console.log('--- participants ---', participants);
+  }
+
   const rowId = useMemo(() => `note-row-${id}`, [id]);
   const rowOptions: ContextMenuOption[] = useMemo(
     () => [
@@ -74,7 +94,10 @@ export const NoteRow = ({
       date={noteUpdated}
       isSelected={isSelected}
       isPersonal={isPersonal}
+      participants={participants}
       onClick={onClickRow}
     />
   );
 };
+
+export const NoteRow = observer(NoteRowPresenter);

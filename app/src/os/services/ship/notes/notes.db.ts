@@ -15,7 +15,7 @@ export const notesInitSql = `
       author      TEXT NOT NULL,
       space       TEXT NOT NULL,
       title       TEXT NOT NULL,
-      doc         TEXT NOT NULL,
+      history     TEXT NOT NULL,
       created_at  INTEGER NOT NULL,
       updated_at  INTEGER NOT NULL
   );
@@ -47,28 +47,28 @@ export class NotesDB {
 
     return notes.map((note) => ({
       ...note,
-      doc: JSON.parse(note.doc),
+      history: JSON.parse(note.history),
     }));
   };
 
-  upsert: NotesDB_Insert = ({ id, title, doc, space, author }) => {
+  upsert: NotesDB_Insert = ({ id, title, history, space, author }) => {
     // If the note already exists, update it.
     const existingNote = this.notesDB
       .prepare(`SELECT * FROM notes WHERE id = ?`)
       .get(id);
 
     if (existingNote) {
-      return this.update({ id, title, doc });
+      return this.update({ id, title, history });
     }
 
     const info = this.notesDB
       .prepare(
-        `INSERT INTO notes (id, title, doc, space, author, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+        `INSERT INTO notes (id, title, history, space, author, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
       )
       .run(
         id,
         title,
-        JSON.stringify(doc),
+        JSON.stringify(history),
         space,
         author,
         Date.now(),
@@ -79,12 +79,12 @@ export class NotesDB {
     return noteId;
   };
 
-  update: NotesDB_Update = ({ id, title, doc }) => {
+  update: NotesDB_Update = ({ id, title, history }) => {
     const info = this.notesDB
       .prepare(
-        `UPDATE notes SET title = ?, doc = ?, updated_at = ? WHERE id = ?`
+        `UPDATE notes SET title = ?, history = ?, updated_at = ? WHERE id = ?`
       )
-      .run(title, JSON.stringify(doc), Date.now(), id);
+      .run(title, JSON.stringify(history), Date.now(), id);
     const noteId = info.lastInsertRowid;
 
     return noteId;

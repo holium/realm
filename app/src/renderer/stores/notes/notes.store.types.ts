@@ -1,14 +1,11 @@
 import { Instance, types } from 'mobx-state-tree';
-import { Node } from 'prosemirror-model';
-
-import { JSONObject } from 'os/types';
 
 export const NoteModel = types.model('NoteModel', {
   id: types.identifier,
   author: types.string,
   space: types.string,
   title: types.string,
-  doc: types.frozen<Node>(),
+  history: types.array(types.string),
   created_at: types.number,
   updated_at: types.number,
 });
@@ -18,7 +15,7 @@ export type NotesStore_Note = Instance<typeof NoteModel>;
 /* Notes Store Public Methods */
 export type NotesStore_CreateNote = {
   title: string;
-  doc: JSONObject;
+  history: string[];
   space: string;
 };
 
@@ -30,7 +27,7 @@ export type NotesStore_DeleteNote = {
 export type NotesStore_UpdateNote = {
   id: string;
   title?: string;
-  doc?: Node;
+  history?: string[];
 };
 
 export type NotesStore_LoadLocalNotes = {
@@ -57,7 +54,7 @@ export type NotesStore_InsertNoteLocally = {
 export type NotesStore_UpdateNoteLocally = {
   id: string;
   title?: string;
-  doc?: Node;
+  history?: string[];
 };
 
 export type NotesStore_DeleteNoteLocally = {

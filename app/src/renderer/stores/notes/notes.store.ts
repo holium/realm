@@ -1,5 +1,4 @@
-import { flow, types } from 'mobx-state-tree';
-import { schema } from 'prosemirror-schema-basic';
+import { cast, flow, types } from 'mobx-state-tree';
 
 import { NotesService_IPCUpdate } from 'os/services/ship/notes/notes.service.types';
 
@@ -51,10 +50,10 @@ export const NotesStore = types
     /*
      * Used by the UI layer to create a note.
      */
-    createNote({ title, doc, space }: NotesStore_CreateNote) {
+    createNote({ title, history, space }: NotesStore_CreateNote) {
       return NotesIPC.createNote({
         title,
-        doc,
+        history,
         space,
       });
     },
@@ -89,7 +88,7 @@ export const NotesStore = types
      * even though the main process will also send an update to
      * update it when the response comes back.
      */
-    updateNote: flow(function* ({ id, title, doc }: NotesStore_UpdateNote) {
+    updateNote: flow(function* ({ id, title, history }: NotesStore_UpdateNote) {
       // TODO: set up a queue to prevent multiple updates from happening at once.
       if (self.loading) return;
 
@@ -102,14 +101,14 @@ export const NotesStore = types
       if (!note) return;
 
       if (title) note.title = title;
-      if (doc) note.doc = doc;
+      if (history) note.history = cast(history);
       note.updated_at = Date.now();
 
       yield NotesIPC.editNote({
         id,
         space: note.space,
         title: title ? title : note.title,
-        doc: doc ? doc.toJSON() : note.doc.toJSON(),
+        history: history ? history : note.history,
       });
 
       self.loading = false;
@@ -127,7 +126,7 @@ export const NotesStore = types
         id,
         space: note.space,
         title: note.title,
-        doc: note.doc.toJSON(),
+        history: note.history,
       });
 
       self.loading = false;
@@ -148,10 +147,7 @@ export const NotesStore = types
       }).then((res) => {
         if (!res) return;
         return res.map((note) => {
-          return NoteModel.create({
-            ...note,
-            doc: schema.nodeFromJSON(note.doc),
-          });
+          return NoteModel.create(note);
         });
       });
 
@@ -171,10 +167,7 @@ export const NotesStore = types
       }).then((res) => {
         if (!res) return;
         return res.map((note) => {
-          return NoteModel.create({
-            ...note,
-            doc: schema.nodeFromJSON(note.doc),
-          });
+          return NoteModel.create(note);
         });
       });
 
@@ -204,7 +197,11 @@ export const NotesStore = types
 
       notes.unshift(note);
     },
-    _updateNoteLocally: ({ id, title, doc }: NotesStore_UpdateNoteLocally) => {
+    _updateNoteLocally: ({
+      id,
+      title,
+      history,
+    }: NotesStore_UpdateNoteLocally) => {
       const isPersonalNote = self.personalNotes.find((n) => n.id === id);
       const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
 
@@ -212,7 +209,7 @@ export const NotesStore = types
       if (!note) return;
 
       if (title) note.title = title;
-      if (doc) note.doc = doc;
+      if (history) note.history = cast(history);
       note.updated_at = Date.now();
     },
     _deleteNoteLocally({ id }: NotesStore_DeleteNoteLocally) {
@@ -237,10 +234,6 @@ export const notesStore = NotesStore.create({
 // Listen for bedrock updates from the main process.
 // -------------------------------
 NotesIPC.onUpdate(({ type, payload }: NotesService_IPCUpdate) => {
-  console.log('-------------------------------');
-  console.log('NotesStore.onUpdate', type, payload);
-  console.log('-------------------------------');
-
   // If a note is open, multiplayer should handle the update.
   // const isEditing = Boolean(notesStore.selectedNoteId);
   // if (isEditing) {
@@ -250,17 +243,10 @@ NotesIPC.onUpdate(({ type, payload }: NotesService_IPCUpdate) => {
 
   if (type === 'create-note') {
     notesStore._insertNoteLocally({
-      note: NoteModel.create({
-        ...payload,
-        doc: schema.nodeFromJSON(payload.doc),
-      }),
+      note: NoteModel.create(payload),
     });
   } else if (type === 'update-note') {
-    notesStore._updateNoteLocally({
-      id: payload.id,
-      title: payload.title,
-      doc: schema.nodeFromJSON(payload.doc),
-    });
+    notesStore._updateNoteLocally(payload);
   } else if (type === 'delete-note') {
     notesStore._deleteNoteLocally({ id: payload.id });
   } else {

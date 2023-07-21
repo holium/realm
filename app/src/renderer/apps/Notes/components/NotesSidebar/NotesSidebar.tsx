@@ -1,14 +1,17 @@
 import { useState } from 'react';
+import { fromUint8Array } from 'js-base64';
 import { observer } from 'mobx-react';
+import * as Y from 'yjs';
 
 import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
 
+import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
+import { useSound } from 'renderer/lib/sound';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { schema } from '../Editor/schema';
 import { NoteRow } from '../NoteRow/NoteRow';
 import {
   NoNotesYet,
@@ -24,6 +27,8 @@ import {
 const NotesSidebarPresenter = () => {
   const { loggedInAccount } = useAppState();
   const { notesStore, spacesStore } = useShipStore();
+  const roomsStore = useRoomsStore();
+  const sound = useSound();
 
   const {
     sortedPersonalNotes,
@@ -44,19 +49,59 @@ const NotesSidebarPresenter = () => {
 
     creating.toggleOn();
 
-    const newDoc = schema.node('doc', null, [
-      schema.node('paragraph', null, [schema.text('\n')]),
-    ]);
-    const newDocJSON = newDoc.toJSON();
+    const newYdoc = new Y.Doc();
+    const update = Y.encodeStateAsUpdate(newYdoc);
+    const updateBase64Encoded = fromUint8Array(update);
     await notesStore.createNote({
       title: selectedSpace.isOur
         ? 'My note'
         : `${loggedInAccount?.nickname ?? loggedInAccount?.serverId}'s note`,
-      doc: newDocJSON,
+      history: [updateBase64Encoded],
       space: selectedSpace.path,
     });
 
     creating.toggleOff();
+  };
+
+  const onClickSpaceNote = async (id: string, space: string) => {
+    setSelectedNoteId({ id });
+
+    const noteRoomPath = space + id;
+    const areWeInRoomInOtherNote =
+      roomsStore.currentRoom && roomsStore.currentRoom.path !== noteRoomPath;
+    if (areWeInRoomInOtherNote) {
+      // LEAVE OTHER ROOM
+      sound.playRoomLeave();
+      roomsStore.leaveRoom(roomsStore.currentRoom.rid);
+
+      // DELETE OTHER ROOM IF EMPTY
+      if (roomsStore.currentRoom?.present.length === 0) {
+        roomsStore.deleteRoom(roomsStore.currentRoom.rid);
+      }
+    }
+
+    const spaceRooms = roomsStore.getSpaceRooms(space);
+    const existingRoom = spaceRooms.find((room) => room.path === noteRoomPath);
+    if (existingRoom) {
+      // JOIN ROOM
+      sound.playRoomEnter();
+      await roomsStore.joinRoom(existingRoom.rid);
+    } else {
+      // CREATE ROOM
+      const note = notesStore.getNote({ id });
+      if (!note) return;
+
+      const newRoomRid = await roomsStore?.createRoom(
+        note.title,
+        'public',
+        noteRoomPath
+      );
+      sound.playRoomEnter();
+      await roomsStore.joinRoom(newRoomRid);
+    }
+
+    // In Notes rooms everyone should be muted by default.
+    roomsStore.ourPeer.mute();
   };
 
   return (
@@ -108,12 +153,13 @@ const NotesSidebarPresenter = () => {
                     author={note.author}
                     space={note.space}
                     updatedAt={note.updated_at}
-                    firstParagraph={(
-                      note.doc.content.firstChild?.textContent ?? ''
-                    ).trim()}
+                    // firstParagraph={(
+                    //   note.doc.content.firstChild?.textContent ?? ''
+                    // ).trim()}
+                    firstParagraph=""
                     isPersonal={false}
                     isSelected={selectedNoteId === note.id}
-                    onClick={() => setSelectedNoteId({ id: note.id })}
+                    onClick={() => onClickSpaceNote(note.id, note.space)}
                     onClickDelete={() => {
                       deleteNote({ id: note.id, space: note.space });
                     }}
@@ -140,9 +186,10 @@ const NotesSidebarPresenter = () => {
                   author={note.author}
                   space={note.space}
                   updatedAt={note.updated_at}
-                  firstParagraph={(
-                    note.doc.content.firstChild?.textContent ?? ''
-                  ).trim()}
+                  // firstParagraph={(
+                  //   note.doc.content.firstChild?.textContent ?? ''
+                  // ).trim()}
+                  firstParagraph=""
                   isPersonal
                   isSelected={selectedNoteId === note.id}
                   onClick={() => setSelectedNoteId({ id: note.id })}

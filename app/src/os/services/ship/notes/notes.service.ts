@@ -41,20 +41,20 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
 
   createNote({
     title,
-    doc,
+    history,
     space,
   }: NotesService_CreateNote_Payload): Promise<number> {
-    const createNoteData = [title, JSON.stringify(doc)];
+    const createNoteData = [title, history];
     const createNoteSchema: BedrockSchema = [
       ['title', 't'],
-      ['doc', 't'],
+      ['history', 'list'],
     ];
     return APIConnection.getInstance().conduit.poke({
       app: 'bedrock',
       mark: 'db-action',
       json: {
         create: {
-          v: 0,
+          v: 3,
           path: space,
           type: 'realm-note',
           data: createNoteData,
@@ -92,6 +92,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         app: 'bedrock',
         path: `/db/path${space}`,
       });
+    if (!result) return;
 
     const realmNotesTable = result.tables.find((o) => o.type === 'realm-note');
     const spaceNotes = realmNotesTable?.rows;
@@ -104,7 +105,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         space: note.path,
         author: note.creator,
         title: rowData.title,
-        doc: JSON.parse(rowData.doc),
+        history: rowData.history,
       });
       this.sendUpdate({
         type: 'create-note',
@@ -113,7 +114,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
           title: rowData.title,
           author: note.creator,
           space: note.path,
-          doc: JSON.parse(rowData.doc),
+          history: rowData.history,
           created_at: note['created-at'],
           updated_at: note['updated-at'],
         },
@@ -121,11 +122,11 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     });
   }
 
-  editNote({ id, space, title, doc }: NotesService_SaveNote_Payload) {
-    const editNoteData = [title, JSON.stringify(doc)];
+  editNote({ id, space, title, history }: NotesService_SaveNote_Payload) {
+    const editNoteData = [title, history];
     const editNoteSchema: BedrockSchema = [
       ['title', 't'],
-      ['doc', 't'],
+      ['history', 'list'],
     ];
 
     return APIConnection.getInstance().conduit.poke({
@@ -135,7 +136,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         edit: {
           id,
           'input-row': {
-            v: 0,
+            v: 3,
             path: space,
             type: 'realm-note',
             data: editNoteData,
@@ -169,17 +170,17 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
               space: update.row.path,
               author: update.row.creator,
               title: rowData.title,
-              doc: JSON.parse(rowData.doc),
+              history: rowData.history,
             });
             // Update MobX.
             this.sendUpdate({
               type: 'create-note',
               payload: {
                 id: update.row.id,
-                title: rowData.title,
-                author: update.row.creator,
                 space: update.row.path,
-                doc: JSON.parse(rowData.doc),
+                author: update.row.creator,
+                title: rowData.title,
+                history: rowData.history,
                 created_at: update.row['created-at'],
                 updated_at: update.row['updated-at'],
               },
@@ -195,7 +196,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
             this.notesDB.update({
               id: update.row.id,
               title: rowData.title,
-              doc: JSON.parse(rowData.doc),
+              history: rowData.history,
             });
             // Update MobX.
             this.sendUpdate({
@@ -203,7 +204,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
               payload: {
                 id: update.row.id,
                 title: rowData.title,
-                doc: JSON.parse(rowData.doc),
+                history: rowData.history,
                 updated_at: update.row['updated-at'],
               },
             });
