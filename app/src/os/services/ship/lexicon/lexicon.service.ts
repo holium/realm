@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3-multiple-ciphers';
 
-import AbstractService, { ServiceOptions } from '../abstract.service';
-import { APIConnection } from '../api';
+import AbstractService, { ServiceOptions } from '../../abstract.service';
+import { APIConnection } from '../../api';
 import { LexiconUpdateType } from './lexicon.types';
 
 type KeyPair = [name: string, t: string];

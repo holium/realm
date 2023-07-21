@@ -8,6 +8,18 @@
 ::
 :: helpers
 ::
+++  dels-by-path
+  |=  [=path state=state-0]
+  ^-  (list [@da db-del-change])
+  %+  skim
+    ~(tap by del-log.state)
+  |=  [k=@da v=db-del-change]
+  ^-  ?
+  ?-  -.v
+    %del-row   =(path.v path)
+    %del-peer  =(path.v path)
+    %del-path  =(path.v path)
+  ==
 ++  maybe-log
   |=  [hide-debug=? msg=*]
   ?:  =(%.y hide-debug)  ~
@@ -683,6 +695,53 @@
   =/  cards  (weld peer-pokes subscription-facts)
   [cards state]
 ::
+++  edit-path
+::bedrock &db-action [%edit-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
+::bedrock &db-action [%edit-path /target %host ~ ~ ~ ~[[~bus %host] [~fed %member]]]
+  |=  [=input-path-row state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  :: ensure the path exists
+  =/  path-row    (~(got by paths.state) path.input-path-row)
+  :: ensure this came from our ship
+  ?>  =(our.bowl src.bowl)
+  :: ensure we are the host (ONLY HOST CAN EDIT)
+  ?>  =(our.bowl host.path-row)
+
+  =/  path-sub-wire       (weld /next/(scot %da updated-at.path-row) path.path-row)
+
+  :: only editable fields are:
+  ::  replication
+  ::  default-access
+  ::  table-access
+  ::  constraints
+  =.  replication.path-row              replication.input-path-row
+  =.  default-access.path-row
+    ?~  default-access.input-path-row   default-access.path-row
+    default-access.input-path-row
+  =.  table-access.path-row
+    ?~  table-access.input-path-row     table-access.path-row
+    table-access.input-path-row
+  =.  constraints.path-row
+    ?~  constraints.input-path-row      constraints.path-row
+    constraints.input-path-row
+  =.  updated-at.path-row               now.bowl
+  =.  received-at.path-row              now.bowl
+
+  =.  paths.state     (~(put by paths.state) path.path-row path-row)
+
+  :: emit the change to /next and self-subscriptions (our clients)
+  =/  prs=(list peer)   (~(got by peers.state) path.path-row)
+  =/  tbls              (tables-by-path tables.state path.path-row)
+  =/  dels              (dels-by-path path.path-row state)
+  =/  full=fullpath     [path-row prs tbls schemas.state dels]
+  =/  thechange         db-path+!>(full)
+  =/  cards=(list card)  :~
+    [%give %fact [/db (weld /path path.path-row) path-sub-wire ~] thechange]
+    :: kick subs to force them to re-sub for next update
+    [%give %kick [path-sub-wire ~] ~]
+  ==
+
+  [cards state]
 ++  remove-path
 ::bedrock &db-action [%remove-path /example]
   |=  [=path state=state-0 =bowl:gall]
@@ -1117,6 +1176,7 @@
           [%kick-peer kick-peer]
           [%create-path create-path]
           [%create-from-space de-create-from-space]
+          [%edit-path create-path]
           [%remove-path pa]
           [%create de-create-input-row]
           [%edit (ot ~[[%id de-id] [%input-row de-input-row]])]
@@ -1179,13 +1239,18 @@
         ?~  utbl
           ~
         (de-table-access (need utbl))
+      =/  uprs    (~(get by p.jon) 'peers')
+      =/  prs
+        ?~  uprs
+          ~
+        ((ar (ot ~[[%ship de-ship] [%role (se %tas)]])) (need uprs))
       [
         (pa (~(got by p.jon) 'path'))
         replication
         default-access
         table-access
         ~ :: TODO parse json constraints
-        ((ar (ot ~[[%ship de-ship] [%role (se %tas)]])) (~(got by p.jon) 'peers'))
+        prs
       ]
     ::
     ++  de-table-access
@@ -1264,6 +1329,8 @@
             [%comment (de-comment (~(got by p.jon) 'data'))]
           %relay
             [%relay (de-relay (~(got by p.jon) 'data'))]
+          %creds
+            [%creds (de-creds (~(got by p.jon) 'data'))]
         ==
       [
         (pa (~(got by p.jon) 'path'))
@@ -1308,6 +1375,16 @@
           [%parent-type (se %tas)]
           [%parent-id de-id]
           [%parent-path pa]
+      ==
+    ::
+    ++  de-creds
+      %-  ot
+      :~  [%endpoint so]
+          [%access-key-id so]
+          [%secret-access-key so]
+          [%buckets (as so)]
+          [%current-bucket so]
+          [%region so]
       ==
     ::
     ++  de-comment

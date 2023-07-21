@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3-multiple-ciphers';
 
-import AbstractDataAccess from '../abstract.db';
-import { ServiceOptions } from '../abstract.service';
+import AbstractDataAccess from '../../abstract.db';
+import { ServiceOptions } from '../../abstract.service';
 
 export type Setting = {
   identity: string;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { MouseEvent, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import {
@@ -52,6 +52,18 @@ const StandaloneChatRoomPresenter = () => {
   const presentCount = present?.length ?? 0;
   const creatorStr =
     creator.length > 14 ? `${creator.substring(0, 14)}...` : creator;
+
+  const onClickLeaveRoom = (e: MouseEvent) => {
+    e.stopPropagation();
+
+    chatStore.setSubroute('chat');
+    roomsStore.leaveRoom(rid);
+
+    // Delete room if we're the creator or the last person in the room.
+    if (creator === loggedInAccount?.serverId || presentCount === 0) {
+      roomsStore.deleteRoom(rid);
+    }
+  };
 
   return (
     <Flex position="relative" flex={1} flexDirection="column" width="100%">
@@ -133,16 +145,7 @@ const StandaloneChatRoomPresenter = () => {
               tooltip="Leave room"
               size={22}
               customBg="intent-alert"
-              onClick={(evt) => {
-                evt.stopPropagation();
-                if (creator === loggedInAccount?.serverId) {
-                  roomsStore.deleteRoom(rid);
-                  chatStore.setSubroute('chat');
-                } else {
-                  roomsStore.leaveRoom(rid);
-                  chatStore.setSubroute('chat');
-                }
-              }}
+              onClick={onClickLeaveRoom}
             />
             <CommButton
               tooltip="Microphone"

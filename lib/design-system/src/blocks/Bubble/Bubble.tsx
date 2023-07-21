@@ -7,7 +7,12 @@ import {
 } from '../../../util';
 import { chatDate } from '../../util/date';
 import { BUBBLE_HEIGHT, STATUS_HEIGHT } from './Bubble.constants';
-import { BubbleAuthor, BubbleFooter, BubbleStyle } from './Bubble.styles';
+import {
+  BubbleAuthor,
+  BubbleContainer,
+  BubbleFooter,
+  BubbleStyle,
+} from './Bubble.styles';
 import {
   FragmentReactionType,
   FragmentStatusType,
@@ -180,12 +185,11 @@ export const Bubble = ({
   }
 
   return (
-    <Flex
+    <BubbleContainer
       ref={innerRef}
       key={`${id}-${fragments.join('-')}`}
-      display="inline-flex"
-      justifyContent={isOur ? 'flex-end' : 'flex-start'}
-      position="relative"
+      id={id}
+      isOur={Boolean(isOur)}
     >
       <BubbleStyle
         isPrevGrouped={isPrevGrouped}
@@ -246,13 +250,11 @@ export const Bubble = ({
             {error && (
               <Text.Custom
                 style={{ whiteSpace: 'nowrap', userSelect: 'none' }}
-                pointerEvents="none"
                 textAlign="right"
                 display="inline-flex"
                 alignItems="flex-end"
                 justifyContent="flex-end"
                 opacity={0.35}
-                id={id}
               >
                 {error}
               </Text.Custom>
@@ -261,7 +263,6 @@ export const Bubble = ({
               // TODO tooltip with time remaining
               <Icon
                 mb="1px"
-                id={id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.35 }}
                 transition={{ opacity: 0.2 }}
@@ -271,7 +272,6 @@ export const Bubble = ({
             )}
             <Text.Custom
               style={{ whiteSpace: 'nowrap', userSelect: 'none' }}
-              pointerEvents="none"
               textAlign="right"
               display="inline-flex"
               alignItems="flex-end"
@@ -285,6 +285,6 @@ export const Bubble = ({
           </Flex>
         </BubbleFooter>
       </BubbleStyle>
-    </Flex>
+    </BubbleContainer>
   );
 };
