@@ -26,22 +26,35 @@ export type JSONObject = {
 type KeyPair = [name: string, t: string];
 export type BedrockSchema = KeyPair[];
 
-export type BedrockRow<T = any> = {
+type BedrockRow = {
   id: string;
-  data: T;
+  data: any;
   creator: string;
   path: string;
-  type: 'realm-note';
+  type: string;
   'created-at': number;
   'updated-at': number;
   'received-at': number;
   v: number;
 };
 
-export type BedrockSubscriptionUpdate<T = any> = {
+export type BedrockTable = {
+  type: string;
+  rows: BedrockRow[];
+};
+
+export type BedrockResponse = {
+  dels: JSONObject;
+  'path-row': JSONObject;
+  peers: JSONObject;
+  tables: BedrockTable[];
+  schemas: JSONObject;
+};
+
+export type BedrockSubscriptionUpdate = {
   change: string;
   /* Create/Update events */
-  row?: BedrockRow<T>;
+  row?: BedrockRow;
   /* Delete events */
   id?: string;
   timestamp?: number;

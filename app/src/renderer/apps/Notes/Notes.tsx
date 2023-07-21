@@ -26,6 +26,9 @@ const NotesPresenter = () => {
     // Always load personal notes.
     notesStore.loadLocalPersonalNotes({ space: `/${window.ship}/our` });
 
+    // Always load notes updates.
+    notesStore.loadLocalNotesUpdates();
+
     // Subscribe to Bedrock updates.
     notesStore.subscribeToBedrockUpdates({ space: selectedSpace.path });
 

@@ -13,9 +13,8 @@ export const NoteHeaderStory: ComponentStory<typeof NoteHeaderView> = () => (
     author="~zod"
     noteUpdatedAtString="Jan 1, 2021, 12:00 PM"
     contextMenuOptions={[]}
-    loading={false}
+    saving={false}
     onChange={() => {}}
-    onBlur={() => {}}
   />
 );
 

@@ -1,3 +1,6 @@
+// TODO: Remove this ts nocheck!
+// @ts-nocheck
+
 /**
  * @module bindings/prosemirror
  */

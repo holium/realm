@@ -14,8 +14,13 @@ export const EditorContainer = styled(Flex)`
   overflow-y: auto;
 
   .ProseMirror {
+    padding: 0;
     outline: none;
     line-height: 22px;
+
+    p {
+      margin: 0;
+    }
   }
 
   .move-to-end {

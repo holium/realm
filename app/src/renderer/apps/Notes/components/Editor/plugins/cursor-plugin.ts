@@ -1,3 +1,6 @@
+// TODO: Remove this ts nocheck!
+// @ts-nocheck
+
 import * as math from 'lib0/math';
 import { Plugin } from 'prosemirror-state';
 import { Decoration, DecorationSet } from 'prosemirror-view';

@@ -1,21 +1,24 @@
-import { BedrockRow, JSONObject } from 'os/types';
-
 /* Service method payloads */
 export type NotesService_CreateNote_Payload = {
-  title: string;
-  history: string[];
   space: string;
+  title: string;
+  update: string;
 };
 
 export type NotesService_GetNotes_Payload = {
   space: string;
 };
 
-export type NotesService_SaveNote_Payload = {
+export type NotesService_EditNoteTitle_Payload = {
   id: string;
   space: string;
   title: string;
-  history: string[];
+};
+
+export type NotesService_CreateNoteUpdate_Payload = {
+  note_id: string;
+  space: string;
+  update: string;
 };
 
 export type NotesService_DeleteNote_Payload = {
@@ -24,29 +27,17 @@ export type NotesService_DeleteNote_Payload = {
 };
 
 /* Bedrock updates */
-export type NotesService_BedrockUpdate_CreateNoteData = {
-  title: string;
-  history: string[];
-};
-
 export type NotesService_GetBedrockState_Payload = {
   space: string;
 };
 
-type BedrockTable = {
-  type: string;
-  rows: BedrockRow<{
-    title: string;
-    history: string[];
-  }>[];
+export type BedrockRowData_Notes = {
+  title: string;
 };
 
-export type NotesService_GetBedrockState_Response = {
-  dels: JSONObject;
-  'path-row': JSONObject;
-  peers: JSONObject;
-  tables: BedrockTable[];
-  schemas: JSONObject;
+export type BedrockRowData_NotesUpdates = {
+  note_id: string;
+  update: string;
 };
 
 /* IPC updates */
@@ -57,9 +48,17 @@ type NotesService_IPCUpdate_CreateNote = {
     author: string;
     space: string;
     title: string;
-    history: string[];
     created_at: number;
     updated_at: number;
+  };
+};
+
+type NotesService_IPCUpdate_CreateNoteHistory = {
+  type: 'create-note-update';
+  payload: {
+    id: string;
+    note_id: string;
+    update: string;
   };
 };
 
@@ -75,12 +74,12 @@ type NotesService_IPCUpdate_UpdateNote = {
   payload: {
     id: string;
     title: string;
-    history: string[];
     updated_at: number;
   };
 };
 
 export type NotesService_IPCUpdate =
   | NotesService_IPCUpdate_CreateNote
+  | NotesService_IPCUpdate_CreateNoteHistory
   | NotesService_IPCUpdate_UpdateNote
   | NotesService_IPCUpdate_DeleteNote;

@@ -1,3 +1,6 @@
+// TODO: Remove this ts nocheck!
+// @ts-nocheck
+
 import { Schema } from 'prosemirror-model';
 
 const brDOM = ['br'];

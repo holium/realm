@@ -1,3 +1,6 @@
+// TODO: Remove this ts nocheck!
+// @ts-nocheck
+
 import { Plugin } from 'prosemirror-state';
 import { ContentType, Item, Text, UndoManager, XmlElement } from 'yjs';
 

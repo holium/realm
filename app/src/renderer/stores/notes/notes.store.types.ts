@@ -5,29 +5,30 @@ export const NoteModel = types.model('NoteModel', {
   author: types.string,
   space: types.string,
   title: types.string,
-  history: types.array(types.string),
   created_at: types.number,
   updated_at: types.number,
 });
 
 export type NotesStore_Note = Instance<typeof NoteModel>;
 
-/* Notes Store Public Methods */
+export const NoteUpdateModel = types.model('NoteUpdateModel', {
+  id: types.identifier,
+  note_id: types.string,
+  update: types.string,
+});
+
+export type NotesStore_NoteUpdate = Instance<typeof NoteUpdateModel>;
+
+/* notes.store.ts Public Methods */
 export type NotesStore_CreateNote = {
-  title: string;
-  history: string[];
   space: string;
+  title: string;
+  update: string;
 };
 
 export type NotesStore_DeleteNote = {
   id: string;
   space: string;
-};
-
-export type NotesStore_UpdateNote = {
-  id: string;
-  title?: string;
-  history?: string[];
 };
 
 export type NotesStore_LoadLocalNotes = {
@@ -46,15 +47,29 @@ export type NotesStore_GetNote = {
   id: string;
 };
 
-/* Notes Store Private Methods */
+export type NotesStore_EditNoteTitle = {
+  id: string;
+  title: string;
+};
+
+export type NotesStore_CreateNoteUpdate = {
+  note_id: string;
+  space: string;
+  update: string;
+};
+
+/* notes.store.ts Private Methods */
 export type NotesStore_InsertNoteLocally = {
   note: NotesStore_Note;
 };
 
+export type NotesStore_InsertNoteUpdateLocally = {
+  update: NotesStore_NoteUpdate;
+};
+
 export type NotesStore_UpdateNoteLocally = {
   id: string;
-  title?: string;
-  history?: string[];
+  title: string;
 };
 
 export type NotesStore_DeleteNoteLocally = {

@@ -10,7 +10,7 @@ import { NoteHeaderView } from './NoteHeaderView';
 const NoteHeaderPresenter = () => {
   const { notesStore } = useShipStore();
 
-  const { selectedNote, loading } = notesStore;
+  const { selectedNote, saving } = notesStore;
 
   if (!selectedNote) return null;
 
@@ -42,19 +42,13 @@ const NoteHeaderPresenter = () => {
     },
   ];
 
-  const onBlurTitle = debounce(() => {
-    notesStore.updateNote({
-      id: selectedNote.id,
-      title: selectedNote.title,
-    });
-  }, 1000);
-
-  const onChangeTitle = (e: ChangeEvent<HTMLInputElement>) => {
-    notesStore._updateNoteLocally({
+  // Autosave after 5s of inactivity plus a random 0-3s.
+  const onChangeTitle = debounce((e: ChangeEvent<HTMLInputElement>) => {
+    notesStore.editNoteTitle({
       id: selectedNote.id,
       title: e.target.value,
     });
-  };
+  }, 5000 + Math.random() * 3000);
 
   return (
     <NoteHeaderView
@@ -62,8 +56,7 @@ const NoteHeaderPresenter = () => {
       author={selectedNote.author}
       noteUpdatedAtString={noteUpdatedAtString}
       contextMenuOptions={contextMenuOptions}
-      loading={loading}
-      onBlur={onBlurTitle}
+      saving={saving}
       onChange={onChangeTitle}
     />
   );

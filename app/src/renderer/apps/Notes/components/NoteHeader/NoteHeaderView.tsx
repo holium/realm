@@ -17,8 +17,7 @@ type Props = {
   author: string;
   noteUpdatedAtString: string;
   contextMenuOptions: ContextMenuOption[];
-  loading: boolean;
-  onBlur: () => void;
+  saving: boolean;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 };
 
@@ -27,8 +26,7 @@ export const NoteHeaderView = ({
   author,
   noteUpdatedAtString,
   contextMenuOptions,
-  loading,
-  onBlur,
+  saving,
   onChange,
 }: Props) => (
   <NoteHeaderContainer>
@@ -39,12 +37,11 @@ export const NoteHeaderView = ({
         name="note-title-input"
         placeholder="Title"
         value={title}
-        onBlur={onBlur}
         onChange={onChange}
       />
       <AuthorText>{author}</AuthorText>
     </Flex>
-    {loading ? (
+    {saving ? (
       <Spinner size="19px" width={2} />
     ) : (
       <Menu

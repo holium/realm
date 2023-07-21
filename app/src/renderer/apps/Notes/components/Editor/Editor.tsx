@@ -14,39 +14,35 @@ const EditorPresenter = () => {
   const shipStore = useShipStore();
   const roomsStore = useRoomsStore();
 
-  const { selectedNote, updateNote } = shipStore.notesStore;
+  const { selectedNote, selectedNoteUpdates, createNoteUpdate } =
+    shipStore.notesStore;
 
-  if (!selectedNote) return null;
+  if (!selectedNote || !selectedNoteUpdates) return null;
 
-  const onBlurDoc = debounce((newHistory: string[]) => {
-    updateNote({
-      id: selectedNote.id,
-      history: newHistory,
+  // Auto save the document after 3 seconds of inactivity,
+  // with a random delay of up to 3 seconds to avoid spamming the server.
+  const debouncedAutoSave = debounce((update: string) => {
+    console.log('Saving...');
+    createNoteUpdate({
+      note_id: selectedNote.id,
+      space: selectedNote.space,
+      update,
     });
-  }, 1000);
+  }, 3000 + Math.random() * 3000);
 
-  // const onChangeDoc = (doc: Node) => {
-  //   if (selectedNote.doc.content.eq(doc.content)) return;
-
-  //   notesStore._updateNoteLocally({
-  //     id: selectedNote.id,
-  //     doc,
-  //   });
-  // };
-
-  if (!roomsStore.currentRoom)
+  if (!roomsStore.currentRoom) {
     return (
       <Flex flex={1} justifyContent="center" alignItems="center" height="100%">
-        <Spinner size="24px" />
+        <Spinner size="19px" width={2} />
       </Flex>
     );
+  }
 
   return (
     <EditorView
-      history={selectedNote.history}
+      updates={selectedNoteUpdates}
       roomsStore={roomsStore}
-      shipStore={shipStore}
-      onBlurDoc={onBlurDoc}
+      onChangeDoc={debouncedAutoSave}
     />
   );
 };

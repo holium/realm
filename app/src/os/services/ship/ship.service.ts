@@ -156,7 +156,7 @@ export class ShipService extends AbstractService<any> {
       spaces: new SpacesService(this.serviceOptions, this.shipDB.db, this.patp),
       friends: new FriendsService(this.serviceOptions, this.shipDB.db),
       wallet: new WalletService(undefined, this.shipDB.db),
-      notes: new NotesService(this.patp, this.serviceOptions),
+      notes: new NotesService(undefined, this.shipDB.db),
       lexicon: new LexiconService(undefined, this.shipDB.db),
       trove: new TroveService(undefined, this.shipDB.db),
       settings: new SettingsService(this.serviceOptions, this.shipDB.db),

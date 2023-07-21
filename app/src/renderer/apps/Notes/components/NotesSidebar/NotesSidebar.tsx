@@ -49,15 +49,18 @@ const NotesSidebarPresenter = () => {
 
     creating.toggleOn();
 
+    const title = selectedSpace.isOur
+      ? 'My note'
+      : `${loggedInAccount?.nickname ?? loggedInAccount?.serverId}'s note`;
+
     const newYdoc = new Y.Doc();
     const update = Y.encodeStateAsUpdate(newYdoc);
     const updateBase64Encoded = fromUint8Array(update);
+
     await notesStore.createNote({
-      title: selectedSpace.isOur
-        ? 'My note'
-        : `${loggedInAccount?.nickname ?? loggedInAccount?.serverId}'s note`,
-      history: [updateBase64Encoded],
       space: selectedSpace.path,
+      title,
+      update: updateBase64Encoded,
     });
 
     creating.toggleOff();

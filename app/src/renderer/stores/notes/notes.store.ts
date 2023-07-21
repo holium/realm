@@ -1,4 +1,4 @@
-import { cast, flow, types } from 'mobx-state-tree';
+import { flow, types } from 'mobx-state-tree';
 
 import { NotesService_IPCUpdate } from 'os/services/ship/notes/notes.service.types';
 
@@ -6,16 +6,19 @@ import { NotesIPC } from '../ipc';
 import {
   NoteModel,
   NotesStore_CreateNote,
+  NotesStore_CreateNoteUpdate,
   NotesStore_DeleteNote,
   NotesStore_DeleteNoteLocally,
+  NotesStore_EditNoteTitle,
   NotesStore_GetNote,
   NotesStore_InsertNoteLocally,
+  NotesStore_InsertNoteUpdateLocally,
   NotesStore_LoadLocalNotes,
   NotesStore_Note,
   NotesStore_SetSelectedNoteId,
   NotesStore_SubscribeToBedrockUpdates,
-  NotesStore_UpdateNote,
   NotesStore_UpdateNoteLocally,
+  NoteUpdateModel,
 } from './notes.store.types';
 
 const sortByUpdatedAt = (a: NotesStore_Note, b: NotesStore_Note) => {
@@ -27,7 +30,8 @@ export const NotesStore = types
     spaceNotes: types.optional(types.array(NoteModel), []),
     personalNotes: types.optional(types.array(NoteModel), []),
     selectedNoteId: types.maybeNull(types.string),
-    loading: types.optional(types.boolean, false),
+    updates: types.optional(types.array(NoteUpdateModel), []),
+    saving: types.optional(types.boolean, false),
   })
   .views((self) => ({
     get sortedSpaceNotes() {
@@ -45,16 +49,22 @@ export const NotesStore = types
 
       return notes.find((n) => n.id === self.selectedNoteId);
     },
+    get selectedNoteUpdates() {
+      if (!self.selectedNoteId) return [];
+      return self.updates
+        .filter((u) => u.note_id === self.selectedNoteId)
+        .map((u) => u.update);
+    },
   }))
   .actions((self) => ({
     /*
      * Used by the UI layer to create a note.
      */
-    createNote({ title, history, space }: NotesStore_CreateNote) {
+    createNote({ space, title, update }: NotesStore_CreateNote) {
       return NotesIPC.createNote({
-        title,
-        history,
         space,
+        title,
+        update,
       });
     },
     /*
@@ -64,8 +74,6 @@ export const NotesStore = types
      * delete it when the response comes back.
      */
     deleteNote: flow(function* ({ id, space }: NotesStore_DeleteNote) {
-      self.loading = true;
-
       if (self.selectedNoteId === id) self.selectedNoteId = null;
 
       // Remove the note from MobX.
@@ -79,20 +87,10 @@ export const NotesStore = types
 
       // Remove the note from Bedrock & SQLite.
       yield NotesIPC.deleteNote({ id, space });
-
-      self.loading = false;
     }),
-    /*
-     * Used by the UI layer to update a note.
-     * We update it in MobX immediately for a snappy UI,
-     * even though the main process will also send an update to
-     * update it when the response comes back.
-     */
-    updateNote: flow(function* ({ id, title, history }: NotesStore_UpdateNote) {
-      // TODO: set up a queue to prevent multiple updates from happening at once.
-      if (self.loading) return;
 
-      self.loading = true;
+    editNoteTitle: flow(function* ({ id, title }: NotesStore_EditNoteTitle) {
+      self.saving = true;
 
       const isPersonalNote = self.personalNotes.find((n) => n.id === id);
       const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
@@ -100,43 +98,38 @@ export const NotesStore = types
       const note = notes.find((n) => n.id === id);
       if (!note) return;
 
-      if (title) note.title = title;
-      if (history) note.history = cast(history);
-      note.updated_at = Date.now();
-
-      yield NotesIPC.editNote({
+      yield NotesIPC.editNoteTitle({
         id,
         space: note.space,
-        title: title ? title : note.title,
-        history: history ? history : note.history,
+        title,
       });
 
-      self.loading = false;
+      self.saving = false;
     }),
-    persistLocalChanges: flow(function* ({ id }: NotesStore_GetNote) {
-      self.loading = true;
 
-      const isPersonalNote = self.personalNotes.find((n) => n.id === id);
-      const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
+    createNoteUpdate: flow(function* ({
+      note_id,
+      space,
+      update,
+    }: NotesStore_CreateNoteUpdate) {
+      self.saving = true;
 
-      const note = notes.find((n) => n.id === id);
-      if (!note) return;
-
-      yield NotesIPC.editNote({
-        id,
-        space: note.space,
-        title: note.title,
-        history: note.history,
+      yield NotesIPC.createNoteUpdate({
+        note_id,
+        space,
+        update,
       });
 
-      self.loading = false;
+      self.saving = false;
     }),
+
     getNote({ id }: NotesStore_GetNote) {
       const isPersonalNote = self.personalNotes.find((n) => n.id === id);
       const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
 
       return notes.find((n) => n.id === id);
     },
+
     /*
      * Used by the UI layer to populate MobX with space notes
      * from the SQLite database upon mounting the notes app.
@@ -175,12 +168,29 @@ export const NotesStore = types
         self.personalNotes = personalNotesSorted;
       }
     }),
+
+    loadLocalNotesUpdates: flow(function* () {
+      const updates = yield NotesIPC.getNotesUpdatesFromDb().then((res) => {
+        if (!res) return;
+        return res.map((update) => {
+          return NoteUpdateModel.create({
+            ...update,
+            update: update.note_update,
+          });
+        });
+      });
+
+      if (updates) self.updates = updates;
+    }),
+
     subscribeToBedrockUpdates({ space }: NotesStore_SubscribeToBedrockUpdates) {
       NotesIPC.subscribe({ space });
     },
+
     syncLocalNotesWithBedrock(spacePath: string) {
       return NotesIPC.syncWithBedrockNotes({ space: spacePath });
     },
+
     setSelectedNoteId: ({ id }: NotesStore_SetSelectedNoteId) => {
       self.selectedNoteId = id;
     },
@@ -197,11 +207,12 @@ export const NotesStore = types
 
       notes.unshift(note);
     },
-    _updateNoteLocally: ({
-      id,
-      title,
-      history,
-    }: NotesStore_UpdateNoteLocally) => {
+
+    _insertNoteUpdateLocally({ update }: NotesStore_InsertNoteUpdateLocally) {
+      self.updates.unshift(update);
+    },
+
+    _updateNoteLocally: ({ id, title }: NotesStore_UpdateNoteLocally) => {
       const isPersonalNote = self.personalNotes.find((n) => n.id === id);
       const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
 
@@ -209,9 +220,9 @@ export const NotesStore = types
       if (!note) return;
 
       if (title) note.title = title;
-      if (history) note.history = cast(history);
       note.updated_at = Date.now();
     },
+
     _deleteNoteLocally({ id }: NotesStore_DeleteNoteLocally) {
       const isPersonalNote = self.personalNotes.find((n) => n.id === id);
       const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
@@ -226,8 +237,9 @@ export const NotesStore = types
 export const notesStore = NotesStore.create({
   personalNotes: [],
   spaceNotes: [],
+  updates: [],
   selectedNoteId: null,
-  loading: false,
+  saving: false,
 });
 
 // -------------------------------
@@ -235,8 +247,8 @@ export const notesStore = NotesStore.create({
 // -------------------------------
 NotesIPC.onUpdate(({ type, payload }: NotesService_IPCUpdate) => {
   // If a note is open, multiplayer should handle the update.
-  // const isEditing = Boolean(notesStore.selectedNoteId);
-  // if (isEditing) {
+  // const isInMultiplayerSession = Boolean(notesStore.selectedNote);
+  // if (isInMultiplayerSession) {
   //   console.info('NotesStore.onUpdate', 'Note is open, ignoring update');
   //   return;
   // }
@@ -244,6 +256,10 @@ NotesIPC.onUpdate(({ type, payload }: NotesService_IPCUpdate) => {
   if (type === 'create-note') {
     notesStore._insertNoteLocally({
       note: NoteModel.create(payload),
+    });
+  } else if (type === 'create-note-update') {
+    notesStore._insertNoteUpdateLocally({
+      update: NoteUpdateModel.create(payload),
     });
   } else if (type === 'update-note') {
     notesStore._updateNoteLocally(payload);

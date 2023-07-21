@@ -1,97 +1,143 @@
-import { app } from 'electron';
-import Database from 'better-sqlite3-multiple-ciphers';
-import path from 'path';
-
+import AbstractDataAccess, {
+  DataAccessContructorParams,
+} from '../../abstract.db';
 import {
-  NotesDB_Delete,
-  NotesDB_Insert,
-  NotesDB_SelectAll,
-  NotesDB_Update,
+  NotesDB_DeleteNote,
+  NotesDB_EditNote,
+  NotesDB_Note,
+  NotesDB_SelectAllNotes,
+  NotesDB_SelectAllNotesUpdates,
+  NotesDB_UpdateTitle,
+  NotesDB_UpsertNote,
 } from './notes.db.types';
 
 export const notesInitSql = `
-  create table if not exists notes (
-      id          TEXT PRIMARY KEY,
-      author      TEXT NOT NULL,
-      space       TEXT NOT NULL,
-      title       TEXT NOT NULL,
-      history     TEXT NOT NULL,
-      created_at  INTEGER NOT NULL,
-      updated_at  INTEGER NOT NULL
-  );
+create table if not exists notes (
+  id          TEXT PRIMARY KEY,
+  author      TEXT NOT NULL,
+  space       TEXT NOT NULL,
+  title       TEXT NOT NULL,
+  created_at  INTEGER NOT NULL,
+  updated_at  INTEGER NOT NULL
+);
+
+create table if not exists notes_updates (
+  id              TEXT PRIMARY KEY,
+  note_id         TEXT NOT NULL,
+  note_update     TEXT NOT NULL
+);
 `;
 
-export class NotesDB {
-  private notesDB: Database;
+export const notesWipeSql = `
+drop table if exists notes;
+drop table if exists notes_updates;
+`;
 
-  constructor(patp: string) {
-    const dbPath = path.join(app.getPath('userData'), `${patp}.sqlite`);
-
-    // Create the database if it doesn't exist
-    this.notesDB = new Database(dbPath);
-    this.notesDB.exec(notesInitSql);
+export class NotesDB extends AbstractDataAccess<any> {
+  constructor(params: DataAccessContructorParams) {
+    params.name = 'notesDB';
+    params.tableName = 'notes';
+    params.tableName = 'notes_updates';
+    super(params);
+    this.db?.exec(notesInitSql);
+    if (params.preload) return;
+    this._onError = this._onError.bind(this);
+    this._onDbUpdate = this._onDbUpdate.bind(this);
   }
 
-  get db() {
-    return this.notesDB;
+  private _onError(err: any) {
+    console.log('err!', err);
+  }
+
+  private _onDbUpdate(data: any) {
+    const type = Object.keys(data)[0];
+    console.log('_onDbUpdate', type);
+    // if (type === 'note') {
+    //   this._insertWallets({ [data.wallet.key]: data.wallet });
+    // } else if (type === 'note-update') {
+    //   this._insertTransactions([data.transaction]);
+    // }
+    // this.sendUpdate(data);
+  }
+
+  protected mapRow(row: any): NotesDB_Note {
+    return {
+      id: row.id,
+      author: row.author,
+      space: row.space,
+      title: row.title,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+    };
   }
 
   disconnect() {
-    this.notesDB.close();
+    this.db?.close();
   }
 
-  selectAll: NotesDB_SelectAll = ({ space }) => {
-    const notes = this.notesDB
+  selectAllNotes: NotesDB_SelectAllNotes = ({ space }) => {
+    if (!this.db) return [];
+    const notes = this.db
       .prepare(`SELECT * FROM notes WHERE space = ?`)
       .all(space);
 
-    return notes.map((note) => ({
-      ...note,
-      history: JSON.parse(note.history),
-    }));
+    return notes;
   };
 
-  upsert: NotesDB_Insert = ({ id, title, history, space, author }) => {
-    // If the note already exists, update it.
-    const existingNote = this.notesDB
+  selectAllNotesUpdates: NotesDB_SelectAllNotesUpdates = () => {
+    if (!this.db) return [];
+    const notes = this.db.prepare(`SELECT * FROM notes_updates`).all();
+
+    return notes;
+  };
+
+  upsertNote: NotesDB_UpsertNote = ({ id, title, space, author }) => {
+    if (!this.db) return -1;
+    // TODO: transaction-ify the title as well.
+    // If the note already exists, update the title.
+    const existingNote = this.db
       .prepare(`SELECT * FROM notes WHERE id = ?`)
       .get(id);
 
     if (existingNote) {
-      return this.update({ id, title, history });
+      return this.updateTitle({ id, title });
     }
 
-    const info = this.notesDB
+    const info = this.db
       .prepare(
-        `INSERT INTO notes (id, title, history, space, author, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+        `INSERT INTO notes (id, title, space, author, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`
       )
-      .run(
-        id,
-        title,
-        JSON.stringify(history),
-        space,
-        author,
-        Date.now(),
-        Date.now()
-      );
+      .run(id, title, space, author, Date.now(), Date.now());
     const noteId = info.lastInsertRowid;
 
     return noteId;
   };
 
-  update: NotesDB_Update = ({ id, title, history }) => {
-    const info = this.notesDB
+  insertNoteHistory: NotesDB_EditNote = ({ id, note_id, update }) => {
+    if (!this.db) return -1;
+    const info = this.db
       .prepare(
-        `UPDATE notes SET title = ?, history = ?, updated_at = ? WHERE id = ?`
+        `INSERT INTO notes_updates (id, note_id, note_update) VALUES (?, ?, ?)`
       )
-      .run(title, JSON.stringify(history), Date.now(), id);
+      .run(id, note_id, update);
     const noteId = info.lastInsertRowid;
 
     return noteId;
   };
 
-  delete: NotesDB_Delete = ({ id }) => {
-    const info = this.notesDB.prepare(`DELETE FROM notes WHERE id = ?`).run(id);
+  updateTitle: NotesDB_UpdateTitle = ({ id, title }) => {
+    if (!this.db) return -1;
+    const info = this.db
+      .prepare(`UPDATE notes SET title = ?, updated_at = ? WHERE id = ?`)
+      .run(title, Date.now(), id);
+    const noteId = info.lastInsertRowid;
+
+    return noteId;
+  };
+
+  deleteNote: NotesDB_DeleteNote = ({ id }) => {
+    if (!this.db) return -1;
+    const info = this.db.prepare(`DELETE FROM notes WHERE id = ?`).run(id);
     const noteId = info.lastInsertRowid;
 
     return noteId;
