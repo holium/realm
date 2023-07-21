@@ -124,11 +124,6 @@ const SpeakerGridStyle = styled.div`
   min-width: 0;
 
   .active-speaker {
-    /* grid-area: 1 / 1 / 2 / 3;
-    width: 100%;
-    height: 100%;
-    transition: width 0.5s ease-in-out;
-    overflow: visible; */
     flex: 2 1 60%; /* grow, shrink, basis */
   }
 
@@ -143,16 +138,3 @@ const SpeakerGridStyle = styled.div`
     grid-column: 3 / span 1;
   }
 `;
-
-// <SpeakerGridStyle>
-//   {peers.map((peerId: string) => (
-//     <Box
-//       key={`${peerId}-box`}
-//       // width="250px"
-//       // minWidth="250px"
-//       // height="250px"
-//     >
-//       {renderPeer(peerId, '250px')}
-//     </Box>
-//   ))}
-// </SpeakerGridStyle>
