@@ -70,19 +70,16 @@ const SpeakerPresenter = ({
     if (!videoRef.current) return;
     if (!peer) return;
     if (peer.hasVideo && !videoRef.current.srcObject) {
-      console.log('hasVideo - DynamicSpeaker.tsx, attach video');
       videoRef.current.srcObject = peer.videoStream;
       videoRef.current.style.display = 'inline-block';
       videoRef.current.playsInline = true;
     }
     if (peer.isScreenSharing && !videoRef.current.srcObject) {
-      console.log('isScreenSharing - DynamicSpeaker.tsx, attach video');
       videoRef.current.srcObject = peer.screenStream;
       videoRef.current.style.display = 'inline-block';
       videoRef.current.playsInline = true;
     }
     if (peer.hasVideo || peer.isScreenSharing) {
-      console.log('re-showing video wrapper for', peer.peerId);
       const videoWrapper = document.getElementById(
         `peer-video-${peer.peerId}-wrapper`
       ) as HTMLDivElement;
@@ -216,7 +213,7 @@ const SpeakerPresenter = ({
           style={{ pointerEvents: 'none' }}
           flexDirection="column"
           alignItems="center"
-          gap={10}
+          gap={hasVideo || isScreenSharing ? 6 : 10}
         >
           <Flex
             className="speaker-avatar"
@@ -245,6 +242,14 @@ const SpeakerPresenter = ({
           >
             {name}
           </Text.Custom>
+          <Icon
+            className={`speaker-pin ${isPinned ? 'pinned' : ''}`}
+            size={18}
+            name="Pin"
+            style={{
+              fill: '#ffffff90',
+            }}
+          />
         </Flex>
         <Flex
           className="speaker-audio-indicator"
@@ -308,7 +313,6 @@ type SpeakerWrapperProps = {
 
 const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
   position: relative;
-  /* padding: 16px 0; */
   border-radius: 9px;
   overflow: hidden;
   transition: 0.25s ease;
@@ -331,9 +335,18 @@ const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
     z-index: 2;
     border: 2px solid rgba(var(--rlm-accent-rgba));
   }
+  .speaker-pin {
+    display: none;
+  }
   background: transparent;
   &.speaker-video-on {
     transition: 0.25s ease;
+    .speaker-pin {
+      transition: 0.25s ease;
+      &.pinned {
+        display: inline-block;
+      }
+    }
     .screen {
       object-fit: contain !important;
     }

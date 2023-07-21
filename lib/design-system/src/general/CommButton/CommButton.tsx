@@ -5,7 +5,7 @@ import { IconPathsType } from '../Icon/icons';
 import { CommCircle } from './CommButton.styles';
 
 interface CommButtonProps {
-  tooltip: string;
+  tooltip: string | null;
   icon: IconPathsType;
   customBg?: ColorVariants;
   size?: number;
@@ -28,6 +28,7 @@ export const CommButton = ({
       placement="top"
       wrapperStyle={{
         marginTop: 10,
+        display: tooltip ? 'inline-block' : 'none',
       }}
     >
       {isDisabled && (

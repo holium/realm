@@ -5,20 +5,6 @@ import { Box, Flex } from '@holium/design-system/general';
 import { Speaker } from './DynamicSpeaker';
 import { RoomType } from './rooms.stories';
 
-const PeersScroller = styled(Flex)`
-  gap: 8px;
-  overflow-x: auto;
-  height: 250px;
-  width: 100%;
-  min-width: 0;
-  margin-top: 8px;
-
-  /* Hide scrollbar */
-  ::-webkit-scrollbar {
-    display: none;
-  }
-`;
-
 type Props = {
   ourId: string;
   peers: string[];
@@ -78,20 +64,24 @@ export const SpeakerGridStandaloneChat = ({
   const activePeer = pinnedSpeaker || peers[0];
 
   return (
-    <SpeakerGridStyle
-    // flex={1}
-    // flexDirection="column"
-    // padding="12px"
-    // position="relative"
-    // width="100%"
-    // minWidth={0}
-    >
+    <SpeakerGridStyle>
       <Flex flex={1}>
         <Box height="100%" width="100%">
           {renderPeer(activePeer, '100%')}
         </Box>
       </Flex>
-      <PeersScroller>
+      <PeersScroller
+        position={pinnedSpeaker ? 'absolute' : 'relative'}
+        initial={{ opacity: 1 }}
+        animate={{
+          opacity: 1,
+          transform: pinnedSpeaker ? 'translateY(-250px)' : 'translateY(0px)',
+          transition: {
+            duration: 0.5,
+          },
+        }}
+        exit={{ opacity: 0 }}
+      >
         {peers.slice(1).length > 0 &&
           peers
             .filter((peerId) => activePeer !== peerId)
@@ -110,19 +100,21 @@ export const SpeakerGridStandaloneChat = ({
   );
 };
 
-const SpeakerGridStyle = styled.div`
-  /* display: grid;
+const PeersScroller = styled(Flex)`
+  gap: 8px;
+  overflow-x: auto;
+  height: 250px;
   width: 100%;
-  padding: 2px;
-  padding-bottom: 4px;
-  gap: 8px; */
+  min-width: 0;
+  margin-top: 8px;
 
-  /* grid-template-rows: repeat(3, 1fr);
-  grid-template-columns: repeat(2, 1fr); */
-  /* gap: 20px; adjust the gap as needed */
-  /* overflow-x: auto;
-  grid-template-rows: 2fr 1fr;
-  grid-template-columns: 2fr 1fr; */
+  /* Hide scrollbar */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+`;
+
+const SpeakerGridStyle = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;

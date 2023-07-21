@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 
 import {
   Button,
+  Card,
   CommButton,
   Flex,
   Icon,
@@ -16,12 +17,14 @@ import { MainIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { VoiceView } from '../Rooms/Room/Voice';
+import { Settings } from '../Rooms/Settings';
 import { useRoomsStore } from '../Rooms/store/RoomsStoreContext';
 
 const StandaloneChatRoomPresenter = () => {
   const { loggedInAccount } = useAppState();
   const roomsStore = useRoomsStore();
   const { chatStore } = useShipStore();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [mediaAccessStatus, setMediaAccessStatus] = useState<MediaAccess>({
     camera: 'granted',
     mic: 'granted',
@@ -51,7 +54,7 @@ const StandaloneChatRoomPresenter = () => {
     creator.length > 14 ? `${creator.substring(0, 14)}...` : creator;
 
   return (
-    <Flex flex={1} flexDirection="column" width="100%">
+    <Flex position="relative" flex={1} flexDirection="column" width="100%">
       <Flex
         alignItems="center"
         height="58px"
@@ -92,7 +95,23 @@ const StandaloneChatRoomPresenter = () => {
           </Flex>
         </Flex>
       </Flex>
-      <Flex flex={1} flexDirection="column">
+      <Flex position="relative" flex={1} flexDirection="column">
+        <Card
+          zIndex={100}
+          elevation={1}
+          p={3}
+          style={{
+            position: 'absolute',
+            height: 250,
+            width: 300,
+            bottom: 70,
+            right: 'calc(50% - 112px)',
+            transform: 'translateX(50%)',
+            display: isSettingsOpen ? 'inline-block' : 'none',
+          }}
+        >
+          <Settings showBackButton={false} />
+        </Card>
         <Flex flex={1}>
           <VoiceView isStandaloneChat />
         </Flex>
@@ -152,6 +171,19 @@ const StandaloneChatRoomPresenter = () => {
               isDisabled={mediaAccessStatus.screen !== 'granted'}
               onClick={() => {
                 roomsStore.toggleScreenShare(!isScreenSharing);
+              }}
+            />
+            <CommButton
+              tooltip={null}
+              size={22}
+              icon="AudioControls"
+              customBg={isSettingsOpen ? 'input' : undefined}
+              onClick={() => {
+                if (isSettingsOpen) {
+                  setIsSettingsOpen(false);
+                } else {
+                  setIsSettingsOpen(true);
+                }
               }}
             />
           </Flex>

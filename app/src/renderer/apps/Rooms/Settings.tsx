@@ -50,7 +50,11 @@ const getMediaSources = async () => {
 //   );
 // };
 
-const SettingsPresenter = () => {
+const SettingsPresenter = ({
+  showBackButton = true,
+}: {
+  showBackButton?: boolean;
+}) => {
   const { roomsApp } = useTrayApps();
   const roomsStore = useRoomsStore();
 
@@ -116,28 +120,30 @@ const SettingsPresenter = () => {
         mb={3}
       >
         <Flex justifyContent="center" alignItems="center">
-          <Button.IconButton
-            className="realm-cursor-hover"
-            size={26}
-            onClick={(evt: any) => {
-              evt.stopPropagation();
-              roomsApp.setView('list');
-            }}
-          >
-            <Icon name="ArrowLeftLine" size={22} opacity={0.7} />
-          </Button.IconButton>
+          {showBackButton && (
+            <Button.IconButton
+              className="realm-cursor-hover"
+              mr={2}
+              size={26}
+              onClick={(evt: any) => {
+                evt.stopPropagation();
+                roomsApp.setView('list');
+              }}
+            >
+              <Icon name="ArrowLeftLine" size={22} opacity={0.7} />
+            </Button.IconButton>
+          )}
           <Text.Custom
-            ml={2}
             opacity={0.8}
             style={{ textTransform: 'uppercase' }}
             fontWeight={600}
           >
-            Audio Settings
+            Input Settings
           </Text.Custom>
         </Flex>
         <Flex ml={1} pl={2} pr={2}></Flex>
       </Flex>
-      <Flex flexDirection="column" mb={2}>
+      <Flex flexDirection="column" mb={2} gap={4}>
         <Text.Label mb={1}>Audio input</Text.Label>
         <Select
           id="rooms-settings-audio-input"

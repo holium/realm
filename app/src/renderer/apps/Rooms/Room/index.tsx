@@ -129,34 +129,6 @@ const RoomPresenter = () => {
             </Flex>
           </Flex>
         </Flex>
-        <Flex gap={12}>
-          {/* <IconButton
-            className="realm-cursor-hover"
-            size={26}
-            customBg={dockColor}
-            color={roomView === 'invite' ? accentColor : undefined}
-            onClick={(evt: any) => {
-              evt.stopPropagation();
-              roomView === 'invite'
-                ? setRoomView('voice')
-                : setRoomView('invite');
-              // RoomsActions.invite(id, '~dev'); // TODO invite a custom ship, ~dev is for testing purposes
-            }}
-          >
-            <Icons name="UserAdd" />
-          </IconButton> */}
-          {/* <IconButton
-            className="realm-cursor-hover"
-            size={26}
-            color={roomView === 'info' ? accentColor : undefined}
-            onClick={(evt: any) => {
-              evt.stopPropagation();
-              roomView === 'info' ? setRoomView('voice') : setRoomView('info');
-            }}
-          >
-            <Icons name="InfoCircle" />
-          </IconButton> */}
-        </Flex>
       </Flex>
       <Flex position="relative" flex={1} flexDirection="column">
         {roomView === 'voice' && <VoiceView />}

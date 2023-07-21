@@ -1,12 +1,6 @@
 import styled from 'styled-components';
 
-import {
-  Button,
-  Flex,
-  Icon,
-  Text,
-  Tooltip,
-} from '@holium/design-system/general';
+import { Box, Flex, Icon, Text, Tooltip } from '@holium/design-system/general';
 
 const ControlRow = styled.div`
   z-index: 1;
@@ -82,16 +76,16 @@ export const Video = ({ id, innerRef, isPinned, onPin }: Props) => (
             zIndex: 10,
           }}
         >
-          <Button.IconButton
-            // iconColor={isPinned ? 'accent' : 'icon'}
+          <Box
             onClick={(_evt: any) => onPin && onPin()}
+            style={{ cursor: 'pointer' }}
           >
             <Icon
-              size={30}
+              size={28}
               name={isPinned ? 'Unpin' : 'Pin'}
               style={{ fill: '#ffffff80' }}
             />
-          </Button.IconButton>
+          </Box>
         </Tooltip>
       </Flex>
     </ControlRow>
