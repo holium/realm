@@ -115,7 +115,7 @@ const StandaloneChatRoomPresenter = () => {
           style={{
             position: 'absolute',
             height: 250,
-            width: 300,
+            width: 350,
             bottom: 70,
             right: 'calc(50% - 112px)',
             transform: 'translateX(50%)',
