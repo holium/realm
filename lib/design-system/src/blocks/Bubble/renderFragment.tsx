@@ -1,9 +1,11 @@
 import { Flex, Text } from '../../../general';
 import { Bookmark } from '../../os/Bookmark/Bookmark';
+import { parseMediaType } from '../../util/links';
 import { capitalizeFirstLetter } from '../../util/strings';
 import { convertFragmentsToPreview } from '../ChatInput/fragment-parser';
 import { ImageBlock } from '../ImageBlock/ImageBlock';
 import { LinkBlock } from '../LinkBlock/LinkBlock';
+import { MediaBlock } from '../MediaBlock/MediaBlock';
 import { SpaceBlock } from '../SpaceBlock/SpaceBlock';
 import { BubbleAuthor } from './Bubble.styles';
 import {
@@ -143,7 +145,21 @@ export const renderFragment = (
           </FragmentCodeBlock>
         </CodeWrapper>
       );
-    case 'link':
+    case 'link': {
+      const link = (fragment as FragmentLinkType).link;
+      const { linkType } = parseMediaType(link);
+      if (linkType === 'media') {
+        return (
+          <MediaBlock
+            id={`media-${link}`}
+            mode="embed"
+            variant="content"
+            width={320}
+            url={link}
+            onLoaded={() => {}}
+          />
+        );
+      }
       return (
         <BlockWrapper id={id} key={author + index} className="block-wrapper">
           <LinkBlock
@@ -158,6 +174,7 @@ export const renderFragment = (
           />
         </BlockWrapper>
       );
+    }
     case 'image': {
       const imageFrag = fragment as FragmentImageType;
       return (
