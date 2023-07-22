@@ -167,7 +167,7 @@ export const addOrdinal2 = (
   }
 };
 export const formatHoursMinutes = (date: any): string => {
-  return date.getHours() + ':' + date.getMinutes(); // => hh:mm
+  return date.getHours() + ':' + String(date.getMinutes()).padStart(2, '0'); // => hh:mm
 };
 export const formatDateToYYYYMMDD = (date: Date): string => {
   const day = String(date.getDate()).padStart(2, '0');
@@ -317,4 +317,27 @@ export const isDateValidInYear = (
     dateToCheck.getMonth() === month &&
     dateToCheck.getDate() === day
   );
+};
+export const reccurenceRuleToReadable = (rule: string): string => {
+  switch (rule) {
+    case '~/left/single-0': {
+      return 'Single';
+    }
+    case '~/left/periodic-0': {
+      return 'Daily';
+    }
+    case '~/left/days-of-week-0': {
+      return 'Weekly';
+    }
+    case '~/left/monthly-nth-weekday-0': {
+      return 'Monthly';
+    }
+    case '~/left/yearly-on-date-0': {
+      return 'Yearly';
+    }
+    default: {
+      // Leave default case for single events?
+      return 'Single';
+    }
+  }
 };

@@ -157,28 +157,29 @@ export const App = () => {
     const newEvents: any = [];
     spans.forEach((span: any) => {
       const metaData = span.metadata[span['def-data']];
-      span.instances.forEach((item: any) => {
-        if (item.instance?.exception !== 'skip') {
-          // TODO: move to using for loop and continue
-          const startDate = new Date(item.instance?.instance.start);
-          const endDate = new Date(item.instance?.instance.end);
-          // TODO: make a typescript type for events in the project
-          //params starting with _ are included in event's extendedProps (passed to <Event /> component)
-          newEvents.push({
-            id: '/' + item.idx + item.mid,
-            start: startDate, //js date object
-            end: endDate, //js date object
-            _startDate: startDate,
-            _endDate: endDate,
-            _spanId: span.id,
-            _instanceId: item.idx,
-            _calendarId: selectedCalendar,
-            title: metaData.name,
-            description: metaData.description,
-            // allDay: true, display an event as an all day event IMPORTANT for when start using them
-          });
-        }
-      });
+      const reccurenceRule = span.rules[span['def-rule']]?.rid;
+      for (const item of span.instances) {
+        if (item.instance?.exception === 'skip') continue;
+        // NOTE: can use a unix milisecond for these start/end date params instead
+        const startDate = new Date(item.instance?.instance.start);
+        const endDate = new Date(item.instance?.instance.end);
+        // TODO: make a typescript type for events in the project
+        //params starting with _ are included in event's extendedProps (passed to <Event /> component)
+        newEvents.push({
+          id: '/' + item.idx + item.mid,
+          start: startDate, //js date object
+          end: endDate, //js date object
+          _startDate: startDate,
+          _endDate: endDate,
+          _spanId: span.id,
+          _instanceId: item.idx,
+          _calendarId: selectedCalendar,
+          title: metaData.name,
+          description: metaData.description,
+          _reccurenceRule: reccurenceRule,
+          // allDay: true, display an event as an all day event IMPORTANT for when start using them
+        });
+      }
     });
 
     setEvents(newEvents);
@@ -222,7 +223,7 @@ export const App = () => {
             />
           </Flex>
         </Flex>
-        <Calendar events={events} />
+        <Calendar events={events} datePickerSelected={datePickerSelected} />
       </Flex>
     </main>
   );

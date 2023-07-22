@@ -76,7 +76,6 @@ interface Props {
   selectedCalendar: string;
 }
 type selectOptions = { value: string; label: string };
-// TODO: changing timepicker also points at selected date in fullcalendar and vice versa
 export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
   const [selectedBackgroundColor, setSelectedBackground] = useState<
     null | string

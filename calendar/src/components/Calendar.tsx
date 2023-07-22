@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import dayGridPlugin from '@fullcalendar/daygrid'; // a plugin!
 import FullCalendar from '@fullcalendar/react';
 import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
@@ -135,10 +135,16 @@ const CalendarStyle = createGlobalStyle`
 // https://fullcalendar.io/docs/css-customization css customization
 interface Props {
   events: any;
+  datePickerSelected: any;
 }
-export const Calendar = ({ events }: Props) => {
+export const Calendar = ({ events, datePickerSelected }: Props) => {
   const calendarRef: any = useRef(null);
-
+  useEffect(() => {
+    // navigate to the selected date picker date in calendar
+    if (calendarRef.current?.calendar && datePickerSelected) {
+      calendarRef.current?.calendar.gotoDate(datePickerSelected);
+    }
+  }, [datePickerSelected]);
   return (
     <Card width={'100%'}>
       <CalendarStyle />
