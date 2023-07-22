@@ -1,6 +1,6 @@
 import { Ref, useEffect, useMemo, useState } from 'react';
 
-import { Box, BoxProps, Flex, Icon, Text } from '../../../general';
+import { BoxProps, Flex, Icon, Text } from '../../../general';
 import {
   contrastAwareBlackOrWhiteHex,
   flipColorIfLowContrast,
@@ -188,10 +188,10 @@ export const Bubble = ({
     <BubbleContainer
       ref={innerRef}
       key={`${id}-${fragments.join('-')}`}
-      id={id}
       isOur={Boolean(isOur)}
     >
       <BubbleStyle
+        id={id}
         isPrevGrouped={isPrevGrouped}
         isNextGrouped={isNextGrouped}
         ourTextColor={contrastAwareBlackOrWhiteHex(
@@ -213,6 +213,7 @@ export const Bubble = ({
           <BubbleAuthor
             style={{
               color: authorColorDisplay,
+              pointerEvents: 'none',
             }}
             authorColor={authorColor}
           >
@@ -221,14 +222,24 @@ export const Bubble = ({
         )}
         {forwardedFrom && (
           <Text.Custom
-            style={{ color: 'rgba(var(--rlm-icon-rgba), 0.60)', fontSize: 11 }}
+            style={{
+              color: 'rgba(var(--rlm-icon-rgba), 0.60)',
+              fontSize: 11,
+              pointerEvents: 'none',
+            }}
           >
             Forwarded from: {forwardedFrom}
           </Text.Custom>
         )}
-        <FragmentBlock>{fragments}</FragmentBlock>
-        <BubbleFooter height={footerHeight} mt={1}>
-          <Box width="70%">
+        <FragmentBlock style={{ pointerEvents: 'none' }}>
+          {fragments}
+        </FragmentBlock>
+        <BubbleFooter
+          height={footerHeight}
+          mt={1}
+          style={{ pointerEvents: 'none' }}
+        >
+          <Flex height="100%" flex={7} style={{ pointerEvents: 'auto' }}>
             {((reactions && reactions.length > 0) || onReaction) && (
               <Reactions
                 isOur={isOur}
@@ -238,14 +249,15 @@ export const Bubble = ({
                 onReaction={onReaction}
               />
             )}
-          </Box>
+          </Flex>
           <Flex
-            width="30%"
+            flex={3}
             gap={4}
             alignItems="flex-end"
             justifyContent="flex-end"
             minWidth={minBubbleWidth}
             flexBasis={minBubbleWidth}
+            style={{ pointerEvents: 'none' }}
           >
             {error && (
               <Text.Custom
@@ -271,7 +283,11 @@ export const Bubble = ({
               />
             )}
             <Text.Custom
-              style={{ whiteSpace: 'nowrap', userSelect: 'none' }}
+              style={{
+                whiteSpace: 'nowrap',
+                userSelect: 'none',
+                pointerEvents: 'none',
+              }}
               textAlign="right"
               display="inline-flex"
               alignItems="flex-end"

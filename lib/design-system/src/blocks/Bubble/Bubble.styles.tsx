@@ -11,11 +11,6 @@ type BubbleContainerProps = {
 export const BubbleContainer = styled(Flex)<BubbleContainerProps>`
   position: relative;
   justify-content: ${({ isOur }) => (isOur ? 'flex-end' : 'flex-start')};
-
-  /* Make sure clicks on all children pass through to container */
-  > * {
-    pointer-events: none;
-  }
 `;
 
 export type BubbleStyleProps = {
