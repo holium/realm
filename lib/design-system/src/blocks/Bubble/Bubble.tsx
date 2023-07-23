@@ -231,9 +231,7 @@ export const Bubble = ({
             Forwarded from: {forwardedFrom}
           </Text.Custom>
         )}
-        <FragmentBlock style={{ pointerEvents: 'none' }}>
-          {fragments}
-        </FragmentBlock>
+        <FragmentBlock id={id}>{fragments}</FragmentBlock>
         <BubbleFooter
           height={footerHeight}
           mt={1}
