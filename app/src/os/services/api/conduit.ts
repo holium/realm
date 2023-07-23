@@ -689,20 +689,14 @@ export class Conduit extends EventEmitter {
    * @returns boolean indicating if the close was successful
    */
   async closeChannel() {
-    log.info('Closing channel');
     await this.delete();
-
-    // const res = await this.postToChannel({
-    //   id: this.nextMsgId,
-    //   action: Action.Delete,
-    // });
-
     // Reset to 0
     this.pokes = new Map();
     this.watches = new Map();
     this.reactions = new Map();
     this.abort.abort();
     this.abort = new AbortController();
+
     this.sse?.close();
     this.sse = undefined;
     this.lastEventId = 0;

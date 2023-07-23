@@ -110,11 +110,11 @@ const StandaloneChatRoomPresenter = () => {
       <Flex position="relative" flex={1} flexDirection="column">
         <Card
           zIndex={100}
-          elevation={1}
+          elevation={2}
           p={3}
           style={{
             position: 'absolute',
-            height: 250,
+            height: 370,
             width: 350,
             bottom: 70,
             right: 'calc(50% - 112px)',
@@ -122,7 +122,7 @@ const StandaloneChatRoomPresenter = () => {
             display: isSettingsOpen ? 'inline-block' : 'none',
           }}
         >
-          <Settings showBackButton={false} />
+          <Settings maxWidth={330} showBackButton={false} />
         </Card>
         <Flex flex={1}>
           <VoiceView isStandaloneChat />

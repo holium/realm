@@ -85,7 +85,7 @@
   },
   "devDependencies": {
     "@electron/rebuild": "^3.2.10",
-    "@pmmmwh/react-refresh-webpack-plugin": "0.5.5",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.10",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.0.0",
     "@types/bcryptjs": "^2.4.2",

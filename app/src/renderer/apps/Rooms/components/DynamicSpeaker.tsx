@@ -181,6 +181,7 @@ const SpeakerPresenter = ({
     (peer as PeerClass)?.isSpeaking && !(peer as PeerClass)?.isMuted;
 
   const showMuteIcon = peer?.isMuted || peer?.isForceMuted;
+  const isVideoOn = hasVideo || isScreenSharing;
 
   return (
     <SpeakerWrapper
@@ -194,8 +195,7 @@ const SpeakerPresenter = ({
       alignItems="center"
       justifyContent="center"
       className={`speaker ${isActive ? 'active-speaker' : ''} ${
-        (hasVideo || isScreenSharing) &&
-        peerState !== PeerConnectionState.Closed
+        isVideoOn && peerState !== PeerConnectionState.Closed
           ? 'speaker-video-on'
           : ''
       } ${isSpeaking ? 'speaker-speaking' : ''}`}
@@ -213,7 +213,7 @@ const SpeakerPresenter = ({
           style={{ pointerEvents: 'none' }}
           flexDirection="column"
           alignItems="center"
-          gap={hasVideo || isScreenSharing ? 6 : 10}
+          gap={isVideoOn ? 6 : 10}
         >
           <Flex
             className="speaker-avatar"
@@ -242,14 +242,16 @@ const SpeakerPresenter = ({
           >
             {name}
           </Text.Custom>
-          <Icon
-            className={`speaker-pin ${isPinned ? 'pinned' : ''}`}
-            size={18}
-            name="Pin"
-            style={{
-              fill: '#ffffff90',
-            }}
-          />
+          {isVideoOn && (
+            <Icon
+              className={`speaker-pin ${isPinned ? 'pinned' : ''}`}
+              size={18}
+              name="Pin"
+              style={{
+                fill: '#ffffff90',
+              }}
+            />
+          )}
         </Flex>
         <Flex
           className="speaker-audio-indicator"
@@ -297,6 +299,17 @@ const SpeakerPresenter = ({
               position="absolute"
             >
               {sublabel}
+              {!isVideoOn && (
+                <Icon
+                  ml={1}
+                  className={`speaker-pin ${isPinned ? 'pinned' : ''}`}
+                  size={14}
+                  name="Pin"
+                  style={{
+                    fill: '#ffffff90',
+                  }}
+                />
+              )}
             </Flex>
           )}
         </Flex>
@@ -336,17 +349,19 @@ const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
     border: 2px solid rgba(var(--rlm-accent-rgba));
   }
   .speaker-pin {
+    transition: 0.25s ease;
     display: none;
+  }
+  .speaker-pin {
+    transition: 0.25s ease;
+    &.pinned {
+      display: inline-block;
+    }
   }
   background: transparent;
   &.speaker-video-on {
     transition: 0.25s ease;
-    .speaker-pin {
-      transition: 0.25s ease;
-      &.pinned {
-        display: inline-block;
-      }
-    }
+
     .screen {
       object-fit: contain !important;
     }

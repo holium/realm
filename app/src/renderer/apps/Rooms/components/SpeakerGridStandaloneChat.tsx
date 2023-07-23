@@ -65,21 +65,23 @@ export const SpeakerGridStandaloneChat = ({
 
   return (
     <SpeakerGridStyle>
-      <Flex flex={1}>
-        <Box height="100%" width="100%">
-          {renderPeer(activePeer, '100%')}
-        </Box>
-      </Flex>
-      <PeersScroller
-        position={pinnedSpeaker ? 'absolute' : 'relative'}
-        initial={{ opacity: 1 }}
+      <Box
+        position="relative"
+        initial={{ height: 'calc(100% - 250px)' }}
         animate={{
-          opacity: 1,
-          transform: pinnedSpeaker ? 'translateY(-250px)' : 'translateY(0px)',
-          transition: {
-            duration: 0.5,
-          },
+          height: pinnedSpeaker ? '100%' : 'calc(100% - 250px)',
         }}
+      >
+        {renderPeer(activePeer, '100%')}
+      </Box>
+      <PeersScroller
+        position="absolute"
+        initial={{ opacity: 1, bottom: 0 }}
+        animate={{
+          opacity: pinnedSpeaker ? 0 : 1,
+          bottom: pinnedSpeaker ? -500 : 0,
+        }}
+        transition={{ opacity: { delay: pinnedSpeaker ? 0.5 : 0 } }}
         exit={{ opacity: 0 }}
       >
         {peers.slice(1).length > 0 &&
