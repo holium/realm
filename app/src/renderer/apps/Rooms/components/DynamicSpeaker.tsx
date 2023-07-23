@@ -23,6 +23,7 @@ import { Video } from './Video';
 interface ISpeaker {
   isActive?: boolean;
   isPinned?: boolean;
+  canPin?: boolean;
   person: string;
   cursors?: boolean;
   height?: string;
@@ -53,6 +54,7 @@ const SpeakerPresenter = ({
   metadata,
   isActive = false,
   isPinned = false,
+  canPin = false,
   peer,
   kickPeer,
   retryPeer,
@@ -205,6 +207,7 @@ const SpeakerPresenter = ({
           id={`peer-video-${person}`}
           innerRef={videoRef}
           isPinned={isPinned}
+          canPin={canPin}
           onPin={onPin}
         />
         <Flex

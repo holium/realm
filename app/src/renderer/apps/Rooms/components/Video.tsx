@@ -53,14 +53,15 @@ const VideoWrapper = styled.div`
 
 type Props = {
   id: string;
+  canPin: boolean;
   isPinned: boolean;
   innerRef: React.RefObject<HTMLVideoElement>;
   onPin?: () => void;
 };
 
-export const Video = ({ id, innerRef, isPinned, onPin }: Props) => (
+export const Video = ({ id, innerRef, isPinned, canPin, onPin }: Props) => (
   <VideoWrapper id={`${id}-wrapper`}>
-    <ControlRow>
+    <ControlRow style={{ display: canPin ? 'flex' : 'none' }}>
       <Flex col align="center" gap={4}>
         <Tooltip
           id={`${id}-button`}

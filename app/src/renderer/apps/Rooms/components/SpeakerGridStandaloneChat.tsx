@@ -40,6 +40,7 @@ export const SpeakerGridStandaloneChat = ({
       <Speaker
         key={peerId}
         person={peerId}
+        canPin
         isActive={
           pinnedSpeaker
             ? pinnedSpeaker === peerId

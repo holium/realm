@@ -62,56 +62,67 @@ export function useSound() {
   );
 }
 
-const playAudio = (src: string) => {
+// This prevents the audio from being garbage collected
+const playAudio = async (src: string) => {
   // play sound on worker thread
   if (window.audio) {
     window.audio.src = src;
   } else {
     window.audio = new window.Audio(src);
   }
-  window.audio.play().catch((err: any) => {
+
+  // Wrap the play action inside a Promise
+  await new Promise((resolve, reject) => {
+    // Wait until audio is ready to play
+    window.audio.oncanplaythrough = () => {
+      window.audio
+        .play()
+        .then(resolve) // Resolve the promise when play is successful
+        .catch(reject); // Reject the promise when there's an error
+    };
+  }).catch((err: any) => {
     console.log('audio error', err);
   });
 };
 
 export const SoundActions = {
   playStartup: async () => {
-    playAudio('sounds/startup.wav');
+    await playAudio('sounds/startup.wav');
   },
   playLogin: async () => {
-    playAudio('sounds/login.wav');
+    await playAudio('sounds/login.wav');
   },
   playLogout: async () => {
-    playAudio('sounds/logout.wav');
+    await playAudio('sounds/logout.wav');
   },
   playSystemNotification: async () => {
-    playAudio('sounds/system-notify.wav');
+    await playAudio('sounds/system-notify.wav');
   },
   playError: async () => {
-    playAudio('sounds/error.wav');
+    await playAudio('sounds/error.wav');
   },
   playDMNotify: async () => {
-    playAudio('sounds/dm-received.wav');
+    await playAudio('sounds/dm-received.wav');
   },
   playDMSend: async () => {
-    playAudio('sounds/dm-sent.wav');
+    await playAudio('sounds/dm-sent.wav');
   },
   playCall: async () => {
-    playAudio('sounds/voice-ring.wav');
+    await playAudio('sounds/voice-ring.wav');
   },
   playHangup: async () => {
-    playAudio('sounds/voice-hang-up.wav');
+    await playAudio('sounds/voice-hang-up.wav');
   },
   playRoomEnter: async () => {
-    playAudio('sounds/room-enter.wav');
+    await playAudio('sounds/room-enter.wav');
   },
   playRoomLeave: async () => {
-    playAudio('sounds/room-leave.wav');
+    await playAudio('sounds/room-leave.wav');
   },
   playRoomPeerEnter: async () => {
-    playAudio('sounds/room-peer-enter.wav');
+    await playAudio('sounds/room-peer-enter.wav');
   },
   playRoomPeerLeave: async () => {
-    playAudio('sounds/room-peer-leave.wav');
+    await playAudio('sounds/room-peer-leave.wav');
   },
 };
