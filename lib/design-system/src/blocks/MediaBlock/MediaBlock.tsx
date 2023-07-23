@@ -76,7 +76,7 @@ export const MediaBlock = ({
     );
   }
   return (
-    <Block {...rest}>
+    <Block {...rest} display="block">
       <MediaWrapper>
         {!isReady && !isError && (
           <Flex
