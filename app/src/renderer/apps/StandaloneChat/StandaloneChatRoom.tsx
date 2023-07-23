@@ -1,31 +1,45 @@
-import { MouseEvent, useEffect } from 'react';
+import { MouseEvent, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 
 import {
   Button,
+  Card,
   CommButton,
   Flex,
   Icon,
   Text,
 } from '@holium/design-system/general';
 
+import { MediaAccess } from 'os/types';
 import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
+import { MainIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { VoiceView } from '../Rooms/Room/Voice';
+import { Settings } from '../Rooms/Settings';
 import { useRoomsStore } from '../Rooms/store/RoomsStoreContext';
 
 const StandaloneChatRoomPresenter = () => {
   const { loggedInAccount } = useAppState();
   const roomsStore = useRoomsStore();
   const { chatStore } = useShipStore();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [mediaAccessStatus, setMediaAccessStatus] = useState<MediaAccess>({
+    camera: 'granted',
+    mic: 'granted',
+    screen: 'granted',
+  });
 
   const isMuted = roomsStore.ourPeer.isMuted;
   const hasVideo = roomsStore.ourPeer.isVideoOn;
+  const isScreenSharing = roomsStore.ourPeer.isScreenSharing;
 
   useEffect(() => {
     trackEvent('OPENED', 'ROOMS_VOICE');
+    MainIPC.getMediaStatus().then((status: MediaAccess) => {
+      setMediaAccessStatus(status);
+    });
   }, []);
 
   const presentRoom = roomsStore.getRoomByPath(
@@ -52,7 +66,7 @@ const StandaloneChatRoomPresenter = () => {
   };
 
   return (
-    <Flex flex={1} flexDirection="column" width="100%">
+    <Flex position="relative" flex={1} flexDirection="column" width="100%">
       <Flex
         alignItems="center"
         height="58px"
@@ -93,7 +107,23 @@ const StandaloneChatRoomPresenter = () => {
           </Flex>
         </Flex>
       </Flex>
-      <Flex flex={1} flexDirection="column">
+      <Flex position="relative" flex={1} flexDirection="column">
+        <Card
+          zIndex={100}
+          elevation={2}
+          p={3}
+          style={{
+            position: 'absolute',
+            height: 370,
+            width: 350,
+            bottom: 70,
+            right: 'calc(50% - 112px)',
+            transform: 'translateX(50%)',
+            display: isSettingsOpen ? 'inline-block' : 'none',
+          }}
+        >
+          <Settings maxWidth={330} showBackButton={false} />
+        </Card>
         <Flex flex={1}>
           <VoiceView isStandaloneChat />
         </Flex>
@@ -112,12 +142,15 @@ const StandaloneChatRoomPresenter = () => {
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
             <CommButton
               icon="RoomLeave"
+              tooltip="Leave room"
               size={22}
               customBg="intent-alert"
               onClick={onClickLeaveRoom}
             />
             <CommButton
+              tooltip="Microphone"
               icon={isMuted ? 'MicOff' : 'MicOn'}
+              isDisabled={mediaAccessStatus.mic !== 'granted'}
               onClick={(evt) => {
                 evt.stopPropagation();
                 if (isMuted) {
@@ -128,9 +161,32 @@ const StandaloneChatRoomPresenter = () => {
               }}
             />
             <CommButton
+              tooltip="Camera"
               icon={hasVideo ? 'VideoOn' : 'VideoOff'}
+              isDisabled={mediaAccessStatus.camera !== 'granted'}
               onClick={() => {
                 roomsStore.toggleVideo(!hasVideo);
+              }}
+            />
+            <CommButton
+              tooltip="Screen sharing"
+              icon={isScreenSharing ? 'ScreenSharing' : 'ScreenSharingOff'}
+              isDisabled={mediaAccessStatus.screen !== 'granted'}
+              onClick={() => {
+                roomsStore.toggleScreenShare(!isScreenSharing);
+              }}
+            />
+            <CommButton
+              tooltip="Input options"
+              size={22}
+              icon="AudioControls"
+              customBg={isSettingsOpen ? 'input' : undefined}
+              onClick={() => {
+                if (isSettingsOpen) {
+                  setIsSettingsOpen(false);
+                } else {
+                  setIsSettingsOpen(true);
+                }
               }}
             />
           </Flex>

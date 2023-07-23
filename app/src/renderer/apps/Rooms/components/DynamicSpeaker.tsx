@@ -22,6 +22,8 @@ import { Video } from './Video';
 
 interface ISpeaker {
   isActive?: boolean;
+  isPinned?: boolean;
+  canPin?: boolean;
   person: string;
   cursors?: boolean;
   height?: string;
@@ -32,6 +34,7 @@ interface ISpeaker {
   peer: PeerClass | LocalPeer | any;
   kickPeer: (person: string) => void;
   retryPeer: (person: string) => void;
+  onPin?: () => void;
   room: RoomType;
 }
 
@@ -50,9 +53,12 @@ const SpeakerPresenter = ({
   ourId,
   metadata,
   isActive = false,
+  isPinned = false,
+  canPin = false,
   peer,
   kickPeer,
   retryPeer,
+  onPin,
   room,
 }: ISpeaker) => {
   const speakerRef = useRef<any>(null);
@@ -64,14 +70,26 @@ const SpeakerPresenter = ({
   // if navigating away and back, we need to reattach the video
   useEffect(() => {
     if (!videoRef.current) return;
-    if (!peer || !peer?.hasVideo) return;
-
-    if (!videoRef.current.srcObject) {
+    if (!peer) return;
+    if (peer.hasVideo && !videoRef.current.srcObject) {
       videoRef.current.srcObject = peer.videoStream;
       videoRef.current.style.display = 'inline-block';
       videoRef.current.playsInline = true;
     }
-  }, [peer?.hasVideo, videoRef.current]);
+    if (peer.isScreenSharing && !videoRef.current.srcObject) {
+      videoRef.current.srcObject = peer.screenStream;
+      videoRef.current.style.display = 'inline-block';
+      videoRef.current.playsInline = true;
+    }
+    if (peer.hasVideo || peer.isScreenSharing) {
+      const videoWrapper = document.getElementById(
+        `peer-video-${peer.peerId}-wrapper`
+      ) as HTMLDivElement;
+      if (videoWrapper) {
+        videoWrapper.style.display = 'inline-block';
+      }
+    }
+  }, [peer?.hasVideo, peer?.isScreenSharing, videoRef.current]);
 
   if (name.length > 17) name = `${name.substring(0, 17)}...`;
 
@@ -94,55 +112,78 @@ const SpeakerPresenter = ({
 
   const contextMenuOptions = useMemo(
     () =>
-      [
-        {
-          id: `room-speaker-${person}-reconnect`,
-          label: 'Reconnect',
-          disabled: peer?.status === PeerConnectionState.Connected,
-          onClick: (evt: any) => {
-            retryPeer(person);
-            evt.stopPropagation();
-          },
-        },
-        {
-          id: `room-speaker-${person}-mute`,
-          label: peer?.isForceMuted ? 'Unmute' : 'Mute',
-          // disabled: peer?.status === PeerConnectionState.,
-          onClick: (evt: any) => {
-            if (peer?.isForceMuted) {
-              peer.forceUnmute();
-            } else {
-              peer.forceMute();
-            }
-            evt.stopPropagation();
-          },
-        },
-        // only the creator can kick people
-        room.creator === ourId && {
-          style: { color: '#FD4E4E' },
-          id: `room-speaker-${person}-kick`,
-          label: 'Kick',
-          loading: false,
-          onClick: (evt: any) => {
-            evt.stopPropagation();
-            kickPeer(person);
-          },
-        },
-      ].filter(Boolean) as ContextMenuOption[],
-    [peer?.status, peer?.isForceMuted, person, room.rid, type]
+      isOur
+        ? [
+            {
+              id: `room-speaker-${person}-pin`,
+              label: isPinned ? 'Unpin speaker' : 'Pin speaker',
+              // disabled: peer?.status === PeerConnectionState.Connected,
+              onClick: (evt: any) => {
+                onPin && onPin();
+                evt.stopPropagation();
+              },
+            },
+          ]
+        : ([
+            {
+              id: `room-speaker-${person}-pin`,
+              label: isPinned ? 'Unpin speaker' : 'Pin speaker',
+              // disabled: peer?.status === PeerConnectionState.Connected,
+              onClick: (evt: any) => {
+                onPin && onPin();
+                evt.stopPropagation();
+              },
+            },
+            {
+              id: `room-speaker-${person}-reconnect`,
+              label: 'Reconnect',
+              disabled: peer?.status === PeerConnectionState.Connected,
+              onClick: (evt: any) => {
+                retryPeer(person);
+                evt.stopPropagation();
+              },
+            },
+            {
+              id: `room-speaker-${person}-mute`,
+              label: peer?.isForceMuted ? 'Unmute' : 'Mute',
+              // disabled: peer?.status === PeerConnectionState.,
+              onClick: (evt: any) => {
+                if (peer?.isForceMuted) {
+                  peer.forceUnmute();
+                } else {
+                  peer.forceMute();
+                }
+                evt.stopPropagation();
+              },
+            },
+            // only the creator can kick people
+            room.creator === ourId && {
+              style: { color: '#FD4E4E' },
+              id: `room-speaker-${person}-kick`,
+              label: 'Kick',
+              loading: false,
+              onClick: (evt: any) => {
+                evt.stopPropagation();
+                kickPeer(person);
+              },
+            },
+          ].filter(Boolean) as ContextMenuOption[]),
+    [peer?.status, peer?.isForceMuted, person, room.rid, type, isPinned]
   );
 
   useEffect(() => {
-    if (!isOur && contextMenuOptions !== getOptions(`room-speaker-${person}`)) {
+    if (contextMenuOptions !== getOptions(`room-speaker-${person}`)) {
       setOptions(`room-speaker-${person}`, contextMenuOptions);
     }
   }, [contextMenuOptions, getOptions, person, setOptions, isOur]);
 
   const hasVideo = (peer as PeerClass)?.hasVideo;
+  const isScreenSharing = (peer as PeerClass)?.isScreenSharing;
   const isSpeaking =
     (peer as PeerClass)?.isSpeaking && !(peer as PeerClass)?.isMuted;
 
   const showMuteIcon = peer?.isMuted || peer?.isForceMuted;
+  const isVideoOn = hasVideo || isScreenSharing;
 
   return (
     <SpeakerWrapper
@@ -156,20 +197,26 @@ const SpeakerPresenter = ({
       alignItems="center"
       justifyContent="center"
       className={`speaker ${isActive ? 'active-speaker' : ''} ${
-        hasVideo && peerState !== PeerConnectionState.Closed
+        isVideoOn && peerState !== PeerConnectionState.Closed
           ? 'speaker-video-on'
           : ''
       } ${isSpeaking ? 'speaker-speaking' : ''}`}
     >
       <>
-        <Video id={`peer-video-${person}`} innerRef={videoRef} />
+        <Video
+          id={`peer-video-${person}`}
+          innerRef={videoRef}
+          isPinned={isPinned}
+          canPin={canPin}
+          onPin={onPin}
+        />
         <Flex
           zIndex={2}
           className="speaker-avatar-wrapper"
           style={{ pointerEvents: 'none' }}
           flexDirection="column"
           alignItems="center"
-          gap={10}
+          gap={isVideoOn ? 6 : 10}
         >
           <Flex
             className="speaker-avatar"
@@ -198,6 +245,16 @@ const SpeakerPresenter = ({
           >
             {name}
           </Text.Custom>
+          {isVideoOn && (
+            <Icon
+              className={`speaker-pin ${isPinned ? 'pinned' : ''}`}
+              size={18}
+              name="Pin"
+              style={{
+                fill: '#ffffff90',
+              }}
+            />
+          )}
         </Flex>
         <Flex
           className="speaker-audio-indicator"
@@ -245,6 +302,17 @@ const SpeakerPresenter = ({
               position="absolute"
             >
               {sublabel}
+              {!isVideoOn && (
+                <Icon
+                  ml={1}
+                  className={`speaker-pin ${isPinned ? 'pinned' : ''}`}
+                  size={14}
+                  name="Pin"
+                  style={{
+                    fill: '#ffffff90',
+                  }}
+                />
+              )}
             </Flex>
           )}
         </Flex>
@@ -261,7 +329,6 @@ type SpeakerWrapperProps = {
 
 const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
   position: relative;
-  padding: 16px 0;
   border-radius: 9px;
   overflow: hidden;
   transition: 0.25s ease;
@@ -284,11 +351,26 @@ const SpeakerWrapper = styled(Flex)<FlexProps & SpeakerWrapperProps>`
     z-index: 2;
     border: 2px solid rgba(var(--rlm-accent-rgba));
   }
+  .speaker-pin {
+    transition: 0.25s ease;
+    display: none;
+  }
+  .speaker-pin {
+    transition: 0.25s ease;
+    &.pinned {
+      display: inline-block;
+    }
+  }
   background: transparent;
   &.speaker-video-on {
     transition: 0.25s ease;
+
+    .screen {
+      object-fit: contain !important;
+    }
     .speaker-name {
       color: #fff;
+      text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.75);
     }
     .speaker-avatar-wrapper {
       position: absolute;

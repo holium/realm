@@ -27,8 +27,6 @@ const RoomsPresenter = () => {
 
   const sound = useSound();
 
-  const ourSpace = spacesStore.selected?.type === 'our';
-
   useEffect(() => {
     trackEvent('OPENED', 'ROOMS_LIST');
     if (dimensions.height !== roomTrayConfig.dimensions.height) {
@@ -36,9 +34,7 @@ const RoomsPresenter = () => {
     }
   }, []);
 
-  const rooms = ourSpace
-    ? roomsStore.roomsList
-    : roomsStore.getSpaceRooms(spacesStore.selected?.path ?? '');
+  const rooms = roomsStore.getSpaceRooms(spacesStore.selected?.path ?? '');
 
   return (
     <>

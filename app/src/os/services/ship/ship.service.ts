@@ -108,7 +108,6 @@ export class ShipService extends AbstractService<any> {
 
   async _openConduit(credentials: any) {
     return new Promise((resolve, reject) => {
-      console.log('_openConduit');
       APIConnection.getInstance({
         ...credentials,
         ship: this.patp,
@@ -180,6 +179,10 @@ export class ShipService extends AbstractService<any> {
 
   private async initLexicon() {
     await this.services?.lexicon.init();
+  }
+
+  public async getOurPassport() {
+    return await this.services?.friends.fetchOne(this.patp);
   }
 
   public updateCookie(cookie: string) {

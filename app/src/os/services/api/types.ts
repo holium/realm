@@ -89,7 +89,8 @@ export type Message =
   | (MessageBase & PokeParams & { action: Action.Poke })
   | (MessageBase & SubscribeParams & { action: Action.Subscribe })
   | (MessageBase & UnsubscribeParams)
-  | (MessageBase & AckParams)
+  // | (MessageBase & AckParams)
+  | AckParams
   | (MessageBase & DeleteParams);
 
 export interface Thread<Action> {

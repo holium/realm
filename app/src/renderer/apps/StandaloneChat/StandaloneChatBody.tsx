@@ -143,7 +143,7 @@ export const StandaloneChatBodyPresenter = () => {
           <StandaloneBackgroundImage
             key={theme.wallpaper}
             src={theme.wallpaper}
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 0, filter: `var(--blur)` }}
             exit={{ opacity: 0 }}
             animate={{
               opacity: 1,

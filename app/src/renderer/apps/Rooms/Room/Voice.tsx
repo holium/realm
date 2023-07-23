@@ -125,6 +125,8 @@ const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
         room={roomsStore.currentRoom}
         kickPeer={roomsStore.kickPeer}
         retryPeer={roomsStore.retryPeer}
+        pinnedSpeaker={roomsStore.pinnedSpeaker}
+        onPinnedSpeaker={roomsStore.pinSpeaker}
       />
     );
   }

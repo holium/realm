@@ -37,19 +37,15 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     this.onWebViewAttached = this.onWebViewAttached.bind(this);
     this.onWillRedirect = this.onWillRedirect.bind(this);
 
-    app.on('quit', () => {
-      // do other cleanup here
-    });
-
-    app.on(
-      'web-contents-created',
-      async (_: Event, webContents: WebContents) => {
-        webContents.on('will-redirect', (e: Event, url: string) => {
-          e.preventDefault();
-          this.onWillRedirect(url, webContents);
-        });
-      }
-    );
+    // app.on(
+    //   'web-contents-created',
+    //   async (_: Event, webContents: WebContents) => {
+    //     webContents.on('will-redirect', (e: Event, url: string) => {
+    //       e.preventDefault();
+    //       this.onWillRedirect(url, webContents);
+    //     });
+    //   }
+    // );
 
     const windows = BrowserWindow.getAllWindows();
     windows.forEach(({ webContents }) => {
@@ -148,8 +144,6 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       }
 
       await setSessionCookie({ ...credentials, cookie });
-      // return new Promise(async (resolve) => {
-      // APIConnection.getInstance().conduit.once('connected', () => {
       log.info('realm.service.ts, login: conduit connected');
       if (!this.services) return isAuthenticated;
       this.services.auth._setLockfile({
@@ -159,10 +153,10 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
       });
       await this.services.ship?.init(this.services.auth);
       this.services.ship?.updateCookie(cookie);
+
       this._sendAuthenticated(patp, credentials.url, credentials.cookie ?? '');
-      //   resolve(true);
-      // });
-      // });
+      const updatedPassport = await this.services.ship?.getOurPassport();
+      this.services.auth.setPassport(patp, updatedPassport);
     }
     return isAuthenticated;
   }

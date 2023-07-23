@@ -1,5 +1,7 @@
 import { EventEmitter } from 'events';
-import { action, makeObservable, observable } from 'mobx';
+import { action, makeObservable, observable, runInAction } from 'mobx';
+
+import { MainIPC } from 'renderer/stores/ipc';
 
 import { PeerConnectionState } from './room.types';
 import { IAudioAnalyser, SpeakingDetectionAnalyser } from './SpeakingDetector';
@@ -31,10 +33,12 @@ const DEFAULT_VIDEO_OPTIONS = {
 
 export class LocalPeer extends EventEmitter {
   @observable patp = '';
+  @observable peerId = '';
   @observable audioLevel = 0;
   @observable isMuted = false;
   @observable isSpeaking = false;
   @observable isVideoOn = false;
+  @observable isScreenSharing = false;
   @observable status: PeerConnectionState = PeerConnectionState.New;
   @observable audioStream: MediaStream | undefined = undefined;
   @observable videoStream: MediaStream | undefined = undefined;
@@ -52,7 +56,9 @@ export class LocalPeer extends EventEmitter {
     super();
     makeObservable(this);
     this.patp = ourId;
+    this.peerId = ourId;
     this.setAudioStream = this.setAudioStream.bind(this);
+    MainIPC.onScreenshareSource(this.setScreenShareSource.bind(this));
   }
 
   @action
@@ -139,6 +145,9 @@ export class LocalPeer extends EventEmitter {
   @action
   async enableVideo() {
     this.isVideoOn = true;
+    if (this.isScreenSharing) {
+      this.disableScreenSharing();
+    }
     if (this.videoStream && this.videoStream.getVideoTracks().length > 0) {
       this.videoStream.getVideoTracks().forEach((track: MediaStreamTrack) => {
         track.enabled = true;
@@ -175,6 +184,13 @@ export class LocalPeer extends EventEmitter {
       video.style.display = 'inline-block';
       video.srcObject = stream;
     }
+
+    const videoWrapper = document.getElementById(
+      `peer-video-${this.patp}-wrapper`
+    ) as HTMLDivElement;
+    if (videoWrapper) {
+      videoWrapper.style.display = 'inline-block';
+    }
     return this.videoStream;
   }
 
@@ -192,10 +208,106 @@ export class LocalPeer extends EventEmitter {
       videoEl.style.display = 'none';
       videoEl.srcObject = null;
     }
-    this.videoStream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
+    const videoWrapper = document.getElementById(
+      `peer-video-${this.patp}-wrapper`
+    ) as HTMLDivElement;
+    if (videoWrapper) {
+      videoWrapper.style.display = 'none';
+    }
+    this.videoStream = undefined;
+  }
+
+  @action
+  async enableScreenSharing() {
+    return await MainIPC.askForScreen();
+  }
+
+  @action
+  async setScreenShareSource(source: Electron.DesktopCapturerSource) {
+    if (this.hasVideo) {
+      this.disableVideo();
+    }
+    const options = {
+      video: {
+        mandatory: {
+          chromeMediaSource: 'desktop',
+          chromeMediaSourceId: source.id,
+          // minWidth: 1280,
+          // maxWidth: 1920,
+          // minHeight: 720,
+          // maxHeight: 1080,
+        },
+      },
+      audio: false,
+    };
+
+    this.isScreenSharing = true;
+    try {
+      // @ts-ignore - typescript doesn't know about electron desktopCapturer for some reason
+      const stream = await navigator.mediaDevices.getUserMedia(options);
+      this.setScreenStream(stream);
+      this.emit('screenSharingStatusChanged', true);
+      return stream;
+    } catch (err) {
+      console.error('Error: ' + err);
+      runInAction(() => {
+        this.isScreenSharing = false;
+      });
+      return;
+    }
+  }
+
+  @action
+  setScreenStream(stream: MediaStream) {
+    this.screenStream = stream;
+    const video = document.getElementById(
+      `peer-video-${this.patp}`
+    ) as HTMLVideoElement;
+
+    if (video) {
+      video.style.display = 'inline-block';
+      video.srcObject = stream;
+      video.classList.add('screen');
+    }
+
+    const videoWrapper = document.getElementById(
+      `peer-video-${this.patp}-wrapper`
+    ) as HTMLDivElement;
+    if (videoWrapper) {
+      videoWrapper.style.display = 'inline-block';
+    }
+
+    // pause the video stream if it's currently playing
+    if (this.videoStream) {
+      this.disableVideo();
+    }
+
+    return this.screenStream;
+  }
+
+  @action
+  async disableScreenSharing() {
+    const videoEl = document.getElementById(
+      `peer-video-${this.patp}`
+    ) as HTMLVideoElement;
+    if (videoEl) {
+      videoEl.style.display = 'none';
+      videoEl.srcObject = null;
+      videoEl.classList.remove('screen');
+    }
+    const videoWrapper = document.getElementById(
+      `peer-video-${this.patp}-wrapper`
+    ) as HTMLDivElement;
+    if (videoWrapper) {
+      videoWrapper.style.display = 'none';
+    }
+    this.screenStream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
+      track.enabled = false;
       track.stop();
     });
-    this.videoStream = undefined;
+    this.isScreenSharing = false;
+    this.screenStream = undefined;
+    this.emit('screenSharingStatusChanged', false);
   }
 
   @action
@@ -257,8 +369,13 @@ export class LocalPeer extends EventEmitter {
     this.videoStream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
       track.stop();
     });
+    this.screenStream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
+      track.stop();
+    });
+    this.isScreenSharing = false;
     this.isVideoOn = false;
     this.videoStream = undefined;
+    this.screenStream = undefined;
     this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
       track.stop();
     });
