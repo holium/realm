@@ -567,6 +567,7 @@ export class Conduit extends EventEmitter {
     if (!response.ok) {
       throw new Error('Failed to DELETE channel in node context');
     }
+    return;
   }
 
   /**************************************************************/

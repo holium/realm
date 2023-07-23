@@ -71,14 +71,10 @@ const playAudio = async (src: string) => {
     window.audio = new window.Audio(src);
   }
 
-  // Wrap the play action inside a Promise
   await new Promise((resolve, reject) => {
     // Wait until audio is ready to play
     window.audio.oncanplaythrough = () => {
-      window.audio
-        .play()
-        .then(resolve) // Resolve the promise when play is successful
-        .catch(reject); // Reject the promise when there's an error
+      window.audio.play().then(resolve).catch(reject);
     };
   }).catch((err: any) => {
     console.log('audio error', err);
