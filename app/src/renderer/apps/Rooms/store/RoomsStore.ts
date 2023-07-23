@@ -9,7 +9,7 @@ import { shipStore } from 'renderer/stores/ship.store';
 import { serialize, unserialize } from './helpers';
 import { LocalPeer } from './LocalPeer';
 import { PeerClass } from './Peer';
-import { DataPacket } from './room.types';
+import { DataPacket, DataPacketKind } from './room.types';
 
 type RoomAccess = 'public' | 'private';
 type RoomCreateType = {
@@ -176,7 +176,7 @@ export class RoomsStore extends EventsEmitter {
 
     this.ourPeer.on('isMutedChanged', (isMuted) => {
       this.sendDataToRoom({
-        kind: 3,
+        kind: DataPacketKind.MUTE_STATUS,
         value: {
           data: isMuted,
         },
@@ -190,7 +190,7 @@ export class RoomsStore extends EventsEmitter {
             peer.setNewStream(this.ourPeer.screenStream);
         });
         this.sendDataToRoom({
-          kind: 5,
+          kind: DataPacketKind.SCREENSHARE_CHANGED,
           value: {
             data: true,
           },
@@ -205,7 +205,7 @@ export class RoomsStore extends EventsEmitter {
           }
         });
         this.sendDataToRoom({
-          kind: 5,
+          kind: DataPacketKind.SCREENSHARE_CHANGED,
           value: {
             data: false,
           },
@@ -335,7 +335,7 @@ export class RoomsStore extends EventsEmitter {
       });
       this.ourPeer.disableVideo();
       this.sendDataToRoom({
-        kind: 6,
+        kind: DataPacketKind.WEBCAM_CHANGED,
         value: {
           data: false,
         },
@@ -348,7 +348,7 @@ export class RoomsStore extends EventsEmitter {
         }
       });
       this.sendDataToRoom({
-        kind: 6,
+        kind: DataPacketKind.WEBCAM_CHANGED,
         value: {
           data: true,
         },

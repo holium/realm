@@ -177,7 +177,7 @@ const StandaloneChatRoomPresenter = () => {
               }}
             />
             <CommButton
-              tooltip={null}
+              tooltip="Input options"
               size={22}
               icon="AudioControls"
               customBg={isSettingsOpen ? 'input' : undefined}

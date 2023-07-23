@@ -130,7 +130,7 @@ const SettingsPresenter = ({
             style={{ textTransform: 'uppercase' }}
             fontWeight={600}
           >
-            Input Settings
+            Input Options
           </Text.Custom>
         </Flex>
         <Flex ml={1} pl={2} pr={2}></Flex>
