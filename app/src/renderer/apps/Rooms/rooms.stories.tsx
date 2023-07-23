@@ -63,6 +63,7 @@ export const Default: ComponentStory<typeof Video> = () => {
         <Video
           id={ourPeer}
           innerRef={ref}
+          canPin={true}
           isPinned={pinned}
           onPin={() => setPinned(!pinned)}
         />
