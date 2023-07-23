@@ -151,7 +151,7 @@ export const renderFragment = (
       if (linkType === 'media') {
         return (
           <MediaBlock
-            id={`media-${link}`}
+            id={id}
             mode="embed"
             variant="content"
             width={320}
