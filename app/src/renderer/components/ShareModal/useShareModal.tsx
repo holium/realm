@@ -22,6 +22,7 @@ export type ShareObject = {
   share: (o: any, paths: SharePath[]) => void;
   mergedContents?: any;
   message?: ChatMessageType;
+  forwardedPathTitle?: string;
 } | null;
 
 export type SharePath = {

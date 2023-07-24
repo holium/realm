@@ -9,10 +9,12 @@ import {
   Text,
 } from '@holium/design-system/general';
 
+import { MediaAccess } from 'os/types';
 import { useTrayApps } from 'renderer/apps/store';
 import { Badge } from 'renderer/components';
 import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
+import { MainIPC } from 'renderer/stores/ipc';
 
 import { useRoomsStore } from '../store/RoomsStoreContext';
 import { RoomChat } from './Chat';
@@ -25,13 +27,22 @@ const RoomPresenter = () => {
   const { loggedInAccount, shellStore } = useAppState();
   const roomsStore = useRoomsStore();
   const { roomsApp } = useTrayApps();
+  const [mediaAccessStatus, setMediaAccessStatus] = useState<MediaAccess>({
+    camera: 'granted',
+    mic: 'granted',
+    screen: 'granted',
+  });
 
   const [roomView, setRoomView] = useState<RoomViews>('voice');
   const isMuted = roomsStore.ourPeer.isMuted;
   const hasVideo = roomsStore.ourPeer.isVideoOn;
+  const isScreenSharing = roomsStore.ourPeer.isScreenSharing;
 
   useEffect(() => {
     trackEvent('OPENED', 'ROOMS_VOICE');
+    MainIPC.getMediaStatus().then((status: MediaAccess) => {
+      setMediaAccessStatus(status);
+    });
   }, []);
 
   const [readChat, setReadChat] = useState(roomsStore.chat.slice());
@@ -118,34 +129,6 @@ const RoomPresenter = () => {
             </Flex>
           </Flex>
         </Flex>
-        <Flex gap={12}>
-          {/* <IconButton
-            className="realm-cursor-hover"
-            size={26}
-            customBg={dockColor}
-            color={roomView === 'invite' ? accentColor : undefined}
-            onClick={(evt: any) => {
-              evt.stopPropagation();
-              roomView === 'invite'
-                ? setRoomView('voice')
-                : setRoomView('invite');
-              // RoomsActions.invite(id, '~dev'); // TODO invite a custom ship, ~dev is for testing purposes
-            }}
-          >
-            <Icons name="UserAdd" />
-          </IconButton> */}
-          {/* <IconButton
-            className="realm-cursor-hover"
-            size={26}
-            color={roomView === 'info' ? accentColor : undefined}
-            onClick={(evt: any) => {
-              evt.stopPropagation();
-              roomView === 'info' ? setRoomView('voice') : setRoomView('info');
-            }}
-          >
-            <Icons name="InfoCircle" />
-          </IconButton> */}
-        </Flex>
       </Flex>
       <Flex position="relative" flex={1} flexDirection="column">
         {roomView === 'voice' && <VoiceView />}
@@ -195,7 +178,9 @@ const RoomPresenter = () => {
           </Flex>
           <Flex gap={12} flex={1} justifyContent="center" alignItems="center">
             <CommButton
+              tooltip="Microphone"
               icon={isMuted ? 'MicOff' : 'MicOn'}
+              isDisabled={mediaAccessStatus.mic !== 'granted'}
               onClick={(evt) => {
                 evt.stopPropagation();
                 if (isMuted) {
@@ -206,22 +191,26 @@ const RoomPresenter = () => {
               }}
             />
             <CommButton
+              tooltip="Multiplayer mode"
               icon={shellStore.multiplayerEnabled ? 'MouseOn' : 'MouseOff'}
               onClick={shellStore.toggleMultiplayer}
             />
             <CommButton
+              tooltip="Camera"
               icon={hasVideo ? 'VideoOn' : 'VideoOff'}
+              isDisabled={mediaAccessStatus.camera !== 'granted'}
               onClick={() => {
                 roomsStore.toggleVideo(!hasVideo);
               }}
             />
-            {/* <CommButton
-              icon="HeadphoneLine"
-              customBg={dockColor}
-              onClick={(evt: any) => {
-                evt.stopPropagation();
+            <CommButton
+              tooltip="Screen sharing"
+              icon={isScreenSharing ? 'ScreenSharing' : 'ScreenSharingOff'}
+              isDisabled={mediaAccessStatus.screen !== 'granted'}
+              onClick={() => {
+                roomsStore.toggleScreenShare(!isScreenSharing);
               }}
-            /> */}
+            />
           </Flex>
           <Flex alignItems="center">
             <Badge

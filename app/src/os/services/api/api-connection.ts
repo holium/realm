@@ -28,8 +28,8 @@ export class APIConnection {
         log.error('Conduit initialization failed', e);
       });
 
-    app.on('quit', () => {
-      this.closeChannel();
+    app.once('quit', () => {
+      APIConnection.getInstance().conduit.closeChannel();
       APIConnection.getInstance().conduit.removeAllListeners();
     });
   }
@@ -70,7 +70,7 @@ export class APIConnection {
     this.isReconnecting = false;
   }
 
-  public async closeChannel(): Promise<boolean> {
+  public async closeChannel() {
     return await this.conduitInstance.closeChannel();
   }
   /**

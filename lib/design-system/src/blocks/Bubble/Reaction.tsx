@@ -116,7 +116,7 @@ export const Reactions = ({
 
   return (
     <ReactionContainer
-      id={id}
+      id={`${id}-reaction-container`}
       style={{
         width: 'max-content',
       }}
@@ -130,7 +130,7 @@ export const Reactions = ({
     >
       {reactionsAggregated.map((reaction: ReactionAggregateType) => (
         <ReactionCount
-          id={id}
+          id={`${id}-reaction-${reaction.emoji}`}
           key={reaction.count}
           reaction={reaction}
           isOur={isOur}
@@ -142,7 +142,7 @@ export const Reactions = ({
       ))}
       {!isOur && (
         <ReactionRow
-          id={id}
+          id={`${id}-reaction-row`}
           isOur={isOur}
           ourColor={ourColor}
           size={size}

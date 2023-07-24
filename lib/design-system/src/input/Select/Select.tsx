@@ -98,7 +98,7 @@ export const Select = ({
       onClick={() => !disabled && (open ? setOpen(false) : setOpen(true))}
     >
       {selectedOption ? (
-        <Text.Custom fontSize={2} color="text">
+        <Text.Custom truncate width={maxWidth} fontSize={2} color="text">
           {selectedOption.label}
         </Text.Custom>
       ) : (
@@ -124,7 +124,9 @@ export const Select = ({
               !disabled && !option.disabled && onClick(option.value)
             }
           >
-            {option.label}
+            <Text.Custom truncate width={maxWidth} fontSize={2} color="text">
+              {option.label}
+            </Text.Custom>
           </MenuItemStyle>
         ))}
         {extraSection}

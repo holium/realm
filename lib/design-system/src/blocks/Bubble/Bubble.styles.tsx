@@ -1,8 +1,17 @@
 import styled from 'styled-components';
 
-import { Box, BoxProps, Icon, Text } from '../../../general';
+import { Box, BoxProps, Flex, Icon, Text } from '../../../general';
 import { BlockStyle } from '../../blocks/Block/Block';
 import { BUBBLE_HEIGHT, BUBBLE_WIDTH } from './Bubble.constants';
+
+type BubbleContainerProps = {
+  isOur: boolean;
+};
+
+export const BubbleContainer = styled(Flex)<BubbleContainerProps>`
+  position: relative;
+  justify-content: ${({ isOur }) => (isOur ? 'flex-end' : 'flex-start')};
+`;
 
 export type BubbleStyleProps = {
   isPrevGrouped?: boolean;

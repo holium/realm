@@ -10,15 +10,15 @@ import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection, ConduitSession } from '../api';
 import AuthService from '../auth/auth.service';
 import ChatService from './chat/chat.service';
-import { FriendsService } from './friends.service';
-import LexiconService from './lexicon.service';
+import { FriendsService } from './friends/friends.service';
+import LexiconService from './lexicon/lexicon.service';
 import NotificationsService from './notifications/notifications.service';
-import { SettingsService } from './settings.service';
+import { SettingsService } from './settings/settings.service';
 import { ShipDB } from './ship.db';
 import { Credentials } from './ship.types.ts';
 import BazaarService from './spaces/bazaar.service';
 import SpacesService from './spaces/spaces.service';
-import TroveService from './trove.service';
+import TroveService from './trove/trove.service';
 import WalletService from './wallet/wallet.service';
 
 export type S3CredentialsAndConfig = {
@@ -108,7 +108,6 @@ export class ShipService extends AbstractService<any> {
 
   async _openConduit(credentials: any) {
     return new Promise((resolve, reject) => {
-      console.log('_openConduit');
       APIConnection.getInstance({
         ...credentials,
         ship: this.patp,
@@ -180,6 +179,10 @@ export class ShipService extends AbstractService<any> {
 
   private async initLexicon() {
     await this.services?.lexicon.init();
+  }
+
+  public async getOurPassport() {
+    return await this.services?.friends.fetchOne(this.patp);
   }
 
   public updateCookie(cookie: string) {

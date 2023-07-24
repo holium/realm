@@ -9,7 +9,7 @@ import { shipStore } from 'renderer/stores/ship.store';
 import { serialize, unserialize } from './helpers';
 import { LocalPeer } from './LocalPeer';
 import { PeerClass } from './Peer';
-import { DataPacket } from './room.types';
+import { DataPacket, DataPacketKind } from './room.types';
 
 type RoomAccess = 'public' | 'private';
 type RoomCreateType = {
@@ -145,6 +145,7 @@ export class RoomsStore extends EventsEmitter {
   @observable speakers: Map<string, ActiveSpeaker> = observable.map();
   @observable websocket: WebSocket;
   @observable reconnectTimer: NodeJS.Timeout | null = null;
+  @observable pinnedSpeaker: string | null = null;
   @observable rtcConfig = {
     iceServers: [
       {
@@ -175,16 +176,47 @@ export class RoomsStore extends EventsEmitter {
 
     this.ourPeer.on('isMutedChanged', (isMuted) => {
       this.sendDataToRoom({
-        kind: 3,
+        kind: DataPacketKind.MUTE_STATUS,
         value: {
           data: isMuted,
         },
       });
     });
 
+    this.ourPeer.on('screenSharingStatusChanged', (isScreenSharing) => {
+      if (isScreenSharing) {
+        this.peers.forEach((peer) => {
+          this.ourPeer.screenStream &&
+            peer.setNewStream(this.ourPeer.screenStream);
+        });
+        this.sendDataToRoom({
+          kind: DataPacketKind.SCREENSHARE_CHANGED,
+          value: {
+            data: true,
+          },
+        });
+      } else {
+        this.peers.forEach((peer) => {
+          if (
+            this.ourPeer.screenStream &&
+            peer.peer.streams.includes(this.ourPeer.screenStream)
+          ) {
+            peer.peer.removeStream(this.ourPeer.screenStream);
+          }
+        });
+        this.sendDataToRoom({
+          kind: DataPacketKind.SCREENSHARE_CHANGED,
+          value: {
+            data: false,
+          },
+        });
+      }
+    });
+
     this.websocket = this.connect();
     this.onRoomEvent = this.onRoomEvent.bind(this);
     this.createPeer = this.createPeer.bind(this);
+    this.pinSpeaker = this.pinSpeaker.bind(this);
 
     // handles various connectivity events
     window.addEventListener('offline', () => {
@@ -282,6 +314,15 @@ export class RoomsStore extends EventsEmitter {
   }
 
   @action
+  pinSpeaker(speakerId: string) {
+    if (speakerId === this.pinnedSpeaker) {
+      this.pinnedSpeaker = null;
+      return;
+    }
+    this.pinnedSpeaker = speakerId;
+  }
+
+  @action
   async toggleVideo(enableVideo: boolean) {
     if (!enableVideo) {
       this.peers.forEach((peer) => {
@@ -293,6 +334,12 @@ export class RoomsStore extends EventsEmitter {
         }
       });
       this.ourPeer.disableVideo();
+      this.sendDataToRoom({
+        kind: DataPacketKind.WEBCAM_CHANGED,
+        value: {
+          data: false,
+        },
+      });
     } else {
       const stream = await this.ourPeer.enableVideo();
       this.peers.forEach((peer) => {
@@ -300,6 +347,30 @@ export class RoomsStore extends EventsEmitter {
           peer.setNewStream(stream);
         }
       });
+      this.sendDataToRoom({
+        kind: DataPacketKind.WEBCAM_CHANGED,
+        value: {
+          data: true,
+        },
+      });
+    }
+  }
+
+  @action
+  async toggleScreenShare(enableScreenSharing: boolean) {
+    if (!enableScreenSharing) {
+      this.peers.forEach((peer) => {
+        if (
+          this.ourPeer.screenStream &&
+          peer.peer.streams.includes(this.ourPeer.screenStream)
+        ) {
+          peer.peer.removeStream(this.ourPeer.screenStream);
+        }
+      });
+
+      await this.ourPeer.disableScreenSharing();
+    } else {
+      await this.ourPeer.enableScreenSharing();
     }
   }
 
@@ -613,6 +684,7 @@ export class RoomsStore extends EventsEmitter {
         this.leaveRoom(this.currentRoom.rid);
       }
     }
+    this.pinnedSpeaker = null;
   }
 
   @action
@@ -682,6 +754,8 @@ export class RoomsStore extends EventsEmitter {
     const streams = [this.ourPeer.audioStream];
     if (this.ourPeer.videoStream) {
       streams.push(this.ourPeer.videoStream);
+    } else if (this.ourPeer.screenStream) {
+      streams.push(this.ourPeer.screenStream);
     }
     const peer = new PeerClass(
       this.currentRid,

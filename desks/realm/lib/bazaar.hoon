@@ -31,6 +31,7 @@
           [%clear-stall clear-stall]
           [%set-host set-host]
           [%delete-catalog-entry del-cat-entry]
+          [%add-catalog-entry add-cat-entry]
       ==
     ::
     ++  install-app
@@ -119,6 +120,33 @@
     ++  del-cat-entry
       %-  ot
       :~  [%app-id so]
+      ==
+    ::
+    ++  add-cat-entry
+      %-  ot
+      :~  [%app-id so]
+          [%native-app native-app]
+      ==
+      :: %-  of
+      :: :~  [%native native-app]
+      ::     [%web ~]                :: currently not supported
+      ::     [%urbit ~]              :: currently not supported
+      :: ==
+    ::
+    ++  native-app
+      %-  ot
+      :~  [%title so]
+          [%info so]
+          [%color so]
+          [%icon so]
+          [%config cfg]
+      ==
+    ::
+    ++  cfg
+      %-  ot
+      :~  [%size (at ~[ni ni])]
+          [%titlebar-border bo]
+          [%show-titlebar bo]
       ==
     --
   --

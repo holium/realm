@@ -45,6 +45,9 @@ In the debug build you can bypass the invite code and email with `~admins-admins
 
 `~hostyv` hosts several of the desks needed for Realm, you may have to manually install them for now.
 
+### Urbit pre-release / development moon
+To get the cutting edge `%base` desk to test and develop against, set your OTA source to `~binnec-dozzod-marzod`
+
 ### Linux Installation Notes
 
 - Realm is distributed as an AppImage file. AppImages require FUSE version 2 to run. If you are running Ubuntu (>= 22.04), you will need to install fuse version 2. More information here:
