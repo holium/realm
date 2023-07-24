@@ -341,6 +341,7 @@ export const ChatInfoPresenter = ({ isStandaloneChat }: Props) => {
                       options={[
                         { label: 'Host only', value: 'host' },
                         { label: 'Anyone', value: 'anyone' },
+                        { label: 'Open', value: 'open' },
                       ]}
                       selected={invites}
                       onClick={(value) => {

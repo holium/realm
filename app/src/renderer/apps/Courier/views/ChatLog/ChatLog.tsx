@@ -27,7 +27,7 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
   const { loggedInAccount, theme } = useAppState();
   const { dimensions, innerNavigation } = useTrayApps();
   const { notifStore, friends, chatStore, spacesStore } = useShipStore();
-  const { selectedChat } = chatStore;
+  const { selectedChat, inbox } = chatStore;
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
 
@@ -146,6 +146,12 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
             );
             metadata = {
               space: match && JSON.stringify(match),
+            };
+          }
+          if (cust.name === 'realm-chat') {
+            const match = inbox.find((i) => i.path === cust.value);
+            metadata = {
+              chat: match && JSON.stringify(match),
             };
           }
         }

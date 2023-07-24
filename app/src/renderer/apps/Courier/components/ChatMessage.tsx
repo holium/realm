@@ -15,7 +15,7 @@ import { useTrayApps } from 'renderer/apps/store';
 import { useContextMenu } from 'renderer/components';
 import { SharePath, useShareModal } from 'renderer/components/ShareModal';
 import { useAppState } from 'renderer/stores/app.store';
-import { MainIPC } from 'renderer/stores/ipc';
+import { ChatIPC, MainIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ChatMessageType } from '../../../stores/models/chat.model';
@@ -410,6 +410,34 @@ export const ChatMessagePresenter = ({
     ]
   );
 
+  const chatJoiner = useCallback(
+    (path: string, host?: string) => {
+      const chat = chatStore.inbox.find((i) => i.path === path);
+      if (chat) {
+        throw new Error('you are already in this space');
+      }
+      if (!loggedInAccount) {
+        throw new Error('you are not logged in');
+      }
+      chatStore.setSubroute('inbox');
+
+      (
+        ChatIPC.addPeerToChat(
+          path,
+          loggedInAccount.serverId,
+          host
+        ) as Promise<void>
+      )
+        .then(() => {
+          console.log('joining chat', path);
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+    },
+    [chatStore, loggedInAccount]
+  );
+
   let forwardedFrom: string | undefined = undefined;
   if (message.metadata.forwardedPathTitle) {
     forwardedFrom = message.metadata.forwardedPathTitle;
@@ -440,7 +468,9 @@ export const ChatMessagePresenter = ({
       onReaction={canReact ? onReaction : undefined}
       onReplyClick={onReplyClick}
       onJoinSpaceClick={joiner}
+      onJoinChatClick={chatJoiner}
       allSpacePaths={spacesStore.allSpacePaths}
+      allChatPaths={chatStore.allChatPaths}
       error={message.error}
       forwardedFrom={forwardedFrom}
     />

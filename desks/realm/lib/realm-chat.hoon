@@ -305,12 +305,18 @@
   [cards state]
 ::
 ++  add-ship-to-chat
-::realm-chat &chat-action [%add-ship-to-chat /realm-chat/path-id ~bus]
-  |=  [act=[=path =ship] state=state-1 =bowl:gall]
+::realm-chat &chat-action [%add-ship-to-chat /realm-chat/path-id ~bus ~]
+  |=  [act=[=path =ship host=(unit ship)] state=state-1 =bowl:gall]
   ^-  (quip card state-1)
-  ?>  =(src.bowl our.bowl)
-
+  ?:  &(=(src.bowl our.bowl) =(our.bowl ship.act))  :: if we are trying to add ourselves, then actually we just need to forward this poke to the host
+    ?~  host.act  !!  :: have to pass the host if we are adding ourselves
+    :_  state
+    [%pass /dbpoke %agent [(need host.act) dap.bowl] %poke %chat-action !>([%add-ship-to-chat path.act ship.act ~])]~
+    
   =/  pathrow  (scry-path-row path.act bowl)
+  ?>  ?|  =(src.bowl our.bowl)
+          &(?!(=(src.bowl our.bowl)) =(invites.pathrow %open))
+      ==
   =/  pathpeers  (scry-peers path.act bowl)
   =/  all-peers=ship-roles:db
     %+  snoc
@@ -602,7 +608,7 @@
           [%edit-chat edit-chat]
           [%pin-message pin-message]
           [%clear-pinned-messages (ot ~[[%path pa]])]
-          [%add-ship-to-chat path-and-ship]
+          [%add-ship-to-chat path-and-ship-and-unit-host]
           [%remove-ship-from-chat path-and-ship]
           [%send-message path-and-fragments]
           [%edit-message de-edit-info]
@@ -659,6 +665,20 @@
       :~  [%path pa]
           [%pin bo]
       ==
+    ::
+    ++  path-and-ship-and-unit-host
+      |=  jon=json
+      ^-  [path ship (unit ship)]
+      ?>  ?=([%o *] jon)
+      =/  uhost    (~(get by p.jon) 'host')
+      =/  host=(unit ship)
+        ?~  uhost  ~
+        (some (de-ship (need uhost)))
+      [
+        (pa (~(got by p.jon) 'path'))
+        (de-ship (~(got by p.jon) 'ship'))
+        host
+      ]
     ::
     ++  path-and-ship
       %-  ot

@@ -9,8 +9,10 @@
 ::  random helpers
 ::
 ++  is-valid-inviter
-  |=  [=path-row:sur peers=(list peer-row:sur) src=ship]
+  |=  [=path-row:sur peers=(list peer-row:sur) src=ship patp=ship]
   ^-  ?
+  ?:  &(=(invites.path-row %open) =(src patp))   %.y :: if the invites are set to open, you can invite yourself, otherwise, normal rules apply
+
   :: add-peer pokes are only valid from:
   :: a ship within the peers list
   =/  src-peer  (snag 0 (skim peers |=(p=peer-row:sur =(patp.p src)))) :: will crash if src not in list
@@ -355,7 +357,7 @@
       =/  us-peer   (snag 0 (skim peers |=(p=peer-row:sur =(patp.p our.bowl))))
       ?>  (gth created-at.us-peer created-at.msg)
       :: has to be from a ship that has invite-potential in the path
-      ?>  (is-valid-inviter pathrow peers src.bowl)
+      ?>  (is-valid-inviter pathrow peers src.bowl our.bowl)
       :: the path has to be %.y on peers-get-backlog
       ?>  peers-get-backlog.pathrow
       =.  received-at.msg   now.bowl
@@ -457,7 +459,7 @@
 
   =/  original-peers-list   (~(got by peers-table.state) path.act)
   =/  pathrow               (~(got by paths-table.state) path.act)
-  ?>  (is-valid-inviter pathrow original-peers-list src.bowl)
+  ?>  (is-valid-inviter pathrow original-peers-list src.bowl patp.act)
 
   =/  row=peer-row:sur   [
     path.act
