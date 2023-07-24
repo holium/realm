@@ -35,12 +35,11 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
   async createNote({
     title,
     space,
-    update,
   }: NotesService_CreateNote_Payload): Promise<void> {
     // Create metadata entry in Bedrock.
     const createNoteData = [title];
     const createNoteSchema: BedrockSchema = [['title', 't']];
-    const note_id = await APIConnection.getInstance().conduit.poke({
+    return APIConnection.getInstance().conduit.poke({
       app: 'bedrock',
       mark: 'db-action',
       json: {
@@ -50,27 +49,6 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
           type: 'notes',
           data: createNoteData,
           schema: createNoteSchema,
-        },
-      },
-    });
-    console.log('createNote note_id:::', note_id);
-
-    // Create first update entry in Bedrock.
-    const createNoteHistoryData = [note_id, update];
-    const createNoteHistorySchema: BedrockSchema = [
-      ['note_id', 't'],
-      ['update', 't'],
-    ];
-    await APIConnection.getInstance().conduit.poke({
-      app: 'bedrock',
-      mark: 'db-action',
-      json: {
-        create: {
-          v: 0,
-          path: space,
-          type: 'notes-updates',
-          data: createNoteHistoryData,
-          schema: createNoteHistorySchema,
         },
       },
     });
@@ -115,7 +93,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
 
     const notesTable = bedrockResponse.tables.find((o) => o.type === 'notes');
     const notesTableRows = notesTable?.rows ?? [];
-    console.log('notesTableRows', notesTableRows);
+    // console.log('notesTableRows', notesTableRows);
     notesTableRows.forEach((note) => {
       const rowData: BedrockRowData_Notes = note.data;
 
@@ -144,18 +122,18 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     );
     const notesUpdatesTableRows = notesUpdatesTable?.rows ?? [];
     console.log('notesUpdatesTableRows', notesUpdatesTableRows);
-    notesUpdatesTableRows.forEach((noteHistory) => {
-      const rowData: BedrockRowData_NotesUpdates = noteHistory.data;
+    notesUpdatesTableRows.forEach((noteUpdate) => {
+      const rowData: BedrockRowData_NotesUpdates = noteUpdate.data;
 
-      this.notesDB?.insertNoteHistory({
-        id: noteHistory.id,
+      this.notesDB?.insertNoteUpdate({
+        id: noteUpdate.id,
         note_id: rowData.note_id,
         update: rowData.update,
       });
       this.sendUpdate({
         type: 'create-note-update',
         payload: {
-          id: noteHistory.id,
+          id: noteUpdate.id,
           note_id: rowData.note_id,
           update: rowData.update,
         },
@@ -217,6 +195,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
       path: `/path${spacePath}`,
       onEvent: (updates: BedrockSubscriptionUpdate[] | null) => {
         if (!updates || !updates.length) return;
+        // console.log('updates', updates);
 
         updates.forEach((update) => {
           if (!this.notesDB) return;
@@ -283,6 +262,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
           }
         });
       },
+      onSubscribed: () => console.log('Notes: Subscription accepted.'),
       onError: () => console.log('Notes: Subscription rejected.'),
       onQuit: () => console.log('Notes: Kicked from subscription.'),
     });

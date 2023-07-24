@@ -93,12 +93,12 @@ export class NotesDB extends AbstractDataAccess<any> {
 
   upsertNote: NotesDB_UpsertNote = ({ id, title, space, author }) => {
     if (!this.db) return -1;
+
     // TODO: transaction-ify the title as well.
     // If the note already exists, update the title.
     const existingNote = this.db
       .prepare(`SELECT * FROM notes WHERE id = ?`)
       .get(id);
-
     if (existingNote) {
       return this.updateTitle({ id, title });
     }
@@ -113,8 +113,17 @@ export class NotesDB extends AbstractDataAccess<any> {
     return noteId;
   };
 
-  insertNoteHistory: NotesDB_EditNote = ({ id, note_id, update }) => {
+  insertNoteUpdate: NotesDB_EditNote = ({ id, note_id, update }) => {
     if (!this.db) return -1;
+
+    // If the note update already exists, do nothing.
+    const existingNoteUpdate = this.db
+      .prepare(`SELECT * FROM notes_updates WHERE id = ?`)
+      .get(id);
+    if (existingNoteUpdate) {
+      return -1;
+    }
+
     const info = this.db
       .prepare(
         `INSERT INTO notes_updates (id, note_id, note_update) VALUES (?, ?, ?)`

@@ -21,7 +21,7 @@ import { schema } from './schema';
 type Props = {
   updates: string[];
   roomsStore: ReturnType<typeof useRoomsStore>;
-  onChangeDoc: (newHistory: string) => void;
+  onChangeDoc: (update: string) => void;
 };
 
 export const useCollabEditor = ({
@@ -97,6 +97,9 @@ export const useCollabEditor = ({
     });
 
     const type = newYdoc.getXmlFragment('prosemirror');
+
+    console.log('firstline preview', type.toDOM().firstChild?.textContent);
+
     const prosemirrorView = new EditorView(editorRef, {
       state: EditorState.create({
         schema,

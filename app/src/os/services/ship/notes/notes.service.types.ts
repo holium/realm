@@ -2,7 +2,6 @@
 export type NotesService_CreateNote_Payload = {
   space: string;
   title: string;
-  update: string;
 };
 
 export type NotesService_GetNotes_Payload = {

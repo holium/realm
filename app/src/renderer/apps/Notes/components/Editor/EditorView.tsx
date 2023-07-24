@@ -10,7 +10,7 @@ import { useCollabEditor } from './useCollabEditor';
 type Props = {
   updates: string[];
   roomsStore: ReturnType<typeof useRoomsStore>;
-  onChangeDoc: (newHistory: string) => void;
+  onChangeDoc: (updates: string) => void;
 };
 
 export const EditorView = ({ updates, roomsStore, onChangeDoc }: Props) => {

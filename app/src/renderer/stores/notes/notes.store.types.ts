@@ -23,7 +23,6 @@ export type NotesStore_NoteUpdate = Instance<typeof NoteUpdateModel>;
 export type NotesStore_CreateNote = {
   space: string;
   title: string;
-  update: string;
 };
 
 export type NotesStore_DeleteNote = {

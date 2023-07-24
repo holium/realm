@@ -69,6 +69,9 @@ const NoteRowPresenter = ({
   const { getOptions, setOptions } = useContextMenu();
 
   useEffect(() => {
+    // Don't allow delete if we're not the author.
+    if (window.ship !== author) return;
+
     if (rowOptions !== getOptions(rowId)) {
       setOptions(rowId, rowOptions);
     }

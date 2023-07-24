@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { fromUint8Array } from 'js-base64';
 import { observer } from 'mobx-react';
-import * as Y from 'yjs';
 
 import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
@@ -49,18 +47,11 @@ const NotesSidebarPresenter = () => {
 
     creating.toggleOn();
 
-    const title = selectedSpace.isOur
-      ? 'My note'
-      : `${loggedInAccount?.nickname ?? loggedInAccount?.serverId}'s note`;
-
-    const newYdoc = new Y.Doc();
-    const update = Y.encodeStateAsUpdate(newYdoc);
-    const updateBase64Encoded = fromUint8Array(update);
-
     await notesStore.createNote({
       space: selectedSpace.path,
-      title,
-      update: updateBase64Encoded,
+      title: selectedSpace.isOur
+        ? 'My note'
+        : `${loggedInAccount?.nickname ?? loggedInAccount?.serverId}'s note`,
     });
 
     creating.toggleOff();
@@ -69,6 +60,7 @@ const NotesSidebarPresenter = () => {
   const onClickSpaceNote = async (id: string, space: string) => {
     setSelectedNoteId({ id });
 
+    console.log('id, space', id, space);
     const noteRoomPath = space + id;
     const areWeInRoomInOtherNote =
       roomsStore.currentRoom && roomsStore.currentRoom.path !== noteRoomPath;

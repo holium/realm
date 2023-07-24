@@ -51,6 +51,7 @@ export const NotesStore = types
     },
     get selectedNoteUpdates() {
       if (!self.selectedNoteId) return [];
+
       return self.updates
         .filter((u) => u.note_id === self.selectedNoteId)
         .map((u) => u.update);
@@ -60,11 +61,10 @@ export const NotesStore = types
     /*
      * Used by the UI layer to create a note.
      */
-    createNote({ space, title, update }: NotesStore_CreateNote) {
+    createNote({ space, title }: NotesStore_CreateNote) {
       return NotesIPC.createNote({
         space,
         title,
-        update,
       });
     },
     /*
@@ -112,15 +112,11 @@ export const NotesStore = types
       space,
       update,
     }: NotesStore_CreateNoteUpdate) {
-      self.saving = true;
-
       yield NotesIPC.createNoteUpdate({
         note_id,
         space,
         update,
       });
-
-      self.saving = false;
     }),
 
     getNote({ id }: NotesStore_GetNote) {
@@ -194,6 +190,10 @@ export const NotesStore = types
     setSelectedNoteId: ({ id }: NotesStore_SetSelectedNoteId) => {
       self.selectedNoteId = id;
     },
+
+    setSaving: (saving: boolean) => {
+      self.saving = saving;
+    },
     /*
      * Private methods used by the IPC handler to register a new note in MobX.
      * This is called when the main process receives a bedrock update.
@@ -209,6 +209,11 @@ export const NotesStore = types
     },
 
     _insertNoteUpdateLocally({ update }: NotesStore_InsertNoteUpdateLocally) {
+      const existingUpdate = self.updates.find(
+        (u) => u.note_id === update.note_id && u.update === update.update
+      );
+      if (existingUpdate) return;
+
       self.updates.unshift(update);
     },
 
