@@ -47,7 +47,6 @@ export type NotesStore_GetNote = {
 };
 
 export type NotesStore_EditNoteTitle = {
-  id: string;
   title: string;
 };
 

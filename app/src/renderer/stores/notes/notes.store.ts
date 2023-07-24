@@ -89,19 +89,33 @@ export const NotesStore = types
       yield NotesIPC.deleteNote({ id, space });
     }),
 
-    editNoteTitle: flow(function* ({ id, title }: NotesStore_EditNoteTitle) {
-      self.saving = true;
-
-      const isPersonalNote = self.personalNotes.find((n) => n.id === id);
+    editNoteTitleLocally: ({ title }: NotesStore_EditNoteTitle) => {
+      const isPersonalNote = self.personalNotes.find(
+        (n) => n.id === self.selectedNoteId
+      );
       const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
 
-      const note = notes.find((n) => n.id === id);
+      const note = notes.find((n) => n.id === self.selectedNoteId);
+      if (!note) return;
+
+      note.title = title;
+    },
+
+    persistNoteTitle: flow(function* () {
+      self.saving = true;
+
+      const isPersonalNote = self.personalNotes.find(
+        (n) => n.id === self.selectedNoteId
+      );
+      const notes = isPersonalNote ? self.personalNotes : self.spaceNotes;
+
+      const note = notes.find((n) => n.id === self.selectedNoteId);
       if (!note) return;
 
       yield NotesIPC.editNoteTitle({
-        id,
+        id: note.id,
         space: note.space,
-        title,
+        title: note.title,
       });
 
       self.saving = false;

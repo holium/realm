@@ -42,22 +42,32 @@ const NoteHeaderPresenter = () => {
     },
   ];
 
-  // Autosave after 5s of inactivity plus a random 0-3s.
-  const onChangeTitle = debounce((e: ChangeEvent<HTMLInputElement>) => {
-    notesStore.editNoteTitle({
-      id: selectedNote.id,
+  const onChangeTitle = (e: ChangeEvent<HTMLInputElement>) => {
+    const isAuthor = selectedNote.author === window.ship;
+    if (!isAuthor) return;
+
+    notesStore.editNoteTitleLocally({
       title: e.target.value,
     });
-  }, 5000 + Math.random() * 3000);
+  };
+
+  // Autosave on blur plus a random 0-3s.
+  const onBlurTitle = debounce(() => {
+    const isAuthor = selectedNote.author === window.ship;
+    if (!isAuthor) return;
+
+    notesStore.persistNoteTitle();
+  }, Math.random() * 3000);
 
   return (
     <NoteHeaderView
-      title={selectedNote.title}
       author={selectedNote.author}
       noteUpdatedAtString={noteUpdatedAtString}
       contextMenuOptions={contextMenuOptions}
       saving={saving}
+      title={selectedNote.title}
       onChange={onChangeTitle}
+      onBlur={onBlurTitle}
     />
   );
 };
