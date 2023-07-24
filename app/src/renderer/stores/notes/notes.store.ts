@@ -238,6 +238,16 @@ export const NotesStore = types
         Y.applyUpdate(selectedYDoc, binaryEncodedUpdate);
       });
     },
+
+    getNotePreview(id: string) {
+      const ydoc = self.ydocs.get(id);
+      if (!ydoc) return null;
+
+      const preview = ydoc.getXmlFragment('prosemirror')?.toDOM()
+        .firstChild?.textContent;
+
+      return preview ?? null;
+    },
     /*
      * Private methods used by the IPC handler to register a new note in MobX.
      * This is called when the main process receives a bedrock update.

@@ -2,17 +2,14 @@ import { useState } from 'react';
 import { exampleSetup } from 'prosemirror-example-setup';
 import { redo, undo } from 'prosemirror-history';
 import { keymap } from 'prosemirror-keymap';
-import {
-  EditorState,
-  Plugin,
-  TextSelection,
-  Transaction,
-} from 'prosemirror-state';
-import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
+import { EditorState } from 'prosemirror-state';
+import { EditorView } from 'prosemirror-view';
 
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { ySyncPlugin, yUndoPlugin } from './plugins/y-prosemirror';
+import { ySyncPlugin } from './plugins/sync-plugin';
+import { textCursorPlugin } from './plugins/text-cursor-plugin';
+import { yUndoPlugin } from './plugins/undo-plugin';
 import { schema } from './schema';
 
 export const useCollabEditor = () => {
@@ -29,8 +26,6 @@ export const useCollabEditor = () => {
 
     const type = selectedYDoc.getXmlFragment('prosemirror');
 
-    console.log('firstline preview', type.toDOM().firstChild?.textContent);
-
     const prosemirrorView = new EditorView(editorRef, {
       state: EditorState.create({
         schema,
@@ -43,29 +38,7 @@ export const useCollabEditor = () => {
             'Mod-y': redo,
             'Mod-Shift-z': redo,
           }),
-          new Plugin({
-            props: {
-              decorations(state) {
-                const decorations: Decoration[] = [];
-                const { doc, selection } = state;
-                const { from, to } = selection;
-                doc.descendants((node, pos) => {
-                  if (node.type.name === 'paragraph') {
-                    const isCurrent = from >= pos && to <= pos + node.nodeSize;
-                    const className = isCurrent
-                      ? 'text-cursor current-element'
-                      : 'text-cursor';
-                    decorations.push(
-                      Decoration.node(pos, pos + node.nodeSize, {
-                        class: className,
-                      })
-                    );
-                  }
-                });
-                return DecorationSet.create(doc, decorations);
-              },
-            },
-          }),
+          textCursorPlugin(),
         ].concat(exampleSetup({ schema })),
       }),
     });
@@ -77,16 +50,8 @@ export const useCollabEditor = () => {
     if (!editorView) return;
 
     console.log('Moving to end...');
-    // Focus the editor.
-    editorView.focus();
 
-    // Move the cursor to the end of the doc and line.
-    const transaction: Transaction = editorView.state.tr.setSelection(
-      new TextSelection(
-        editorView.state.doc.resolve(editorView.state.doc.nodeSize - 2)
-      )
-    );
-    editorView.dispatch(transaction);
+    editorView.focus();
   };
 
   return { onEditorRef, moveToEnd };

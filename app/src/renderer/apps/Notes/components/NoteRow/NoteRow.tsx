@@ -12,7 +12,7 @@ type Props = {
   id: string;
   title: string;
   author: string;
-  firstParagraph: string;
+  firstParagraph: string | null;
   space: string;
   updatedAt: number;
   isSelected: boolean;

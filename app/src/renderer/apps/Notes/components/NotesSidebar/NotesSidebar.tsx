@@ -33,6 +33,7 @@ const NotesSidebarPresenter = () => {
     sortedSpaceNotes,
     selectedNoteId,
     setSelectedNoteId,
+    getNotePreview,
     deleteNote,
   } = notesStore;
   const selectedSpace = spacesStore.selected;
@@ -147,10 +148,7 @@ const NotesSidebarPresenter = () => {
                     author={note.author}
                     space={note.space}
                     updatedAt={note.updated_at}
-                    // firstParagraph={(
-                    //   note.doc.content.firstChild?.textContent ?? ''
-                    // ).trim()}
-                    firstParagraph=""
+                    firstParagraph={getNotePreview(note.id)}
                     isPersonal={false}
                     isSelected={selectedNoteId === note.id}
                     onClick={() => onClickSpaceNote(note.id, note.space)}
@@ -180,10 +178,7 @@ const NotesSidebarPresenter = () => {
                   author={note.author}
                   space={note.space}
                   updatedAt={note.updated_at}
-                  // firstParagraph={(
-                  //   note.doc.content.firstChild?.textContent ?? ''
-                  // ).trim()}
-                  firstParagraph=""
+                  firstParagraph={getNotePreview(note.id)}
                   isPersonal
                   isSelected={selectedNoteId === note.id}
                   onClick={() => setSelectedNoteId({ id: note.id })}
