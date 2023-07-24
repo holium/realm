@@ -15,6 +15,7 @@ export const NoteHeaderStory: ComponentStory<typeof NoteHeaderView> = () => (
     contextMenuOptions={[]}
     saving={false}
     onChange={() => {}}
+    onBlur={() => {}}
   />
 );
 

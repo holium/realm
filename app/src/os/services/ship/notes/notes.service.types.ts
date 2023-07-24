@@ -53,7 +53,7 @@ type NotesService_IPCUpdate_CreateNote = {
 };
 
 type NotesService_IPCUpdate_CreateNoteHistory = {
-  type: 'create-note-update';
+  type: 'apply-note-update';
   payload: {
     id: string;
     note_id: string;

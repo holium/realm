@@ -1,10 +1,13 @@
+import { toUint8Array } from 'js-base64';
 import { flow, types } from 'mobx-state-tree';
+import * as Y from 'yjs';
 
 import { NotesService_IPCUpdate } from 'os/services/ship/notes/notes.service.types';
 
 import { NotesIPC } from '../ipc';
 import {
   NoteModel,
+  NotesStore_ApplyNoteUpdate,
   NotesStore_CreateNote,
   NotesStore_CreateNoteUpdate,
   NotesStore_DeleteNote,
@@ -12,13 +15,11 @@ import {
   NotesStore_EditNoteTitle,
   NotesStore_GetNote,
   NotesStore_InsertNoteLocally,
-  NotesStore_InsertNoteUpdateLocally,
   NotesStore_LoadLocalNotes,
   NotesStore_Note,
   NotesStore_SetSelectedNoteId,
   NotesStore_SubscribeToBedrockUpdates,
   NotesStore_UpdateNoteLocally,
-  NoteUpdateModel,
 } from './notes.store.types';
 
 const sortByUpdatedAt = (a: NotesStore_Note, b: NotesStore_Note) => {
@@ -30,9 +31,11 @@ export const NotesStore = types
     spaceNotes: types.optional(types.array(NoteModel), []),
     personalNotes: types.optional(types.array(NoteModel), []),
     selectedNoteId: types.maybeNull(types.string),
-    updates: types.optional(types.array(NoteUpdateModel), []),
     saving: types.optional(types.boolean, false),
   })
+  .volatile(() => ({
+    ydocs: new Map<string, Y.Doc>(),
+  }))
   .views((self) => ({
     get sortedSpaceNotes() {
       return self.spaceNotes.slice().sort(sortByUpdatedAt);
@@ -49,12 +52,10 @@ export const NotesStore = types
 
       return notes.find((n) => n.id === self.selectedNoteId);
     },
-    get selectedNoteUpdates() {
-      if (!self.selectedNoteId) return [];
+    get selectedYDoc() {
+      if (!self.selectedNoteId) return null;
 
-      return self.updates
-        .filter((u) => u.note_id === self.selectedNoteId)
-        .map((u) => u.update);
+      return self.ydocs.get(self.selectedNoteId);
     },
   }))
   .actions((self) => ({
@@ -150,6 +151,10 @@ export const NotesStore = types
       }).then((res) => {
         if (!res) return;
         return res.map((note) => {
+          // Create a Y.Doc for each note.
+          const ydoc = new Y.Doc();
+          self.ydocs.set(note.id, ydoc);
+
           return NoteModel.create(note);
         });
       });
@@ -170,6 +175,10 @@ export const NotesStore = types
       }).then((res) => {
         if (!res) return;
         return res.map((note) => {
+          // Create a Y.Doc for each note.
+          const ydoc = new Y.Doc();
+          self.ydocs.set(note.id, ydoc);
+
           return NoteModel.create(note);
         });
       });
@@ -179,19 +188,28 @@ export const NotesStore = types
       }
     }),
 
-    loadLocalNotesUpdates: flow(function* () {
-      const updates = yield NotesIPC.getNotesUpdatesFromDb().then((res) => {
+    async applyNotesUpdates() {
+      return NotesIPC.getNotesUpdatesFromDb().then((res) => {
         if (!res) return;
-        return res.map((update) => {
-          return NoteUpdateModel.create({
-            ...update,
-            update: update.note_update,
-          });
+        return res.forEach((update) => {
+          const note = self.spaceNotes.find((n) => n.id === update.note_id);
+          if (!note) return;
+
+          const ydoc = self.ydocs.get(note.id);
+          if (!ydoc) return;
+
+          const uint8Array = toUint8Array(update.note_update);
+
+          Y.applyUpdate(ydoc, uint8Array);
         });
       });
+    },
 
-      if (updates) self.updates = updates;
-    }),
+    setUpOnYdocUpdate(callback: any) {
+      if (!self.selectedYDoc) return;
+
+      self.selectedYDoc.on('update', callback);
+    },
 
     subscribeToBedrockUpdates({ space }: NotesStore_SubscribeToBedrockUpdates) {
       NotesIPC.subscribe({ space });
@@ -208,6 +226,18 @@ export const NotesStore = types
     setSaving: (saving: boolean) => {
       self.saving = saving;
     },
+
+    applyBroadcastedNoteUpdate(update: string) {
+      const binaryEncodedUpdate = toUint8Array(update);
+      if (!self.selectedNoteId) return;
+
+      const selectedYDoc = self.ydocs.get(self.selectedNoteId);
+      if (!selectedYDoc) return;
+
+      selectedYDoc.transact(() => {
+        Y.applyUpdate(selectedYDoc, binaryEncodedUpdate);
+      });
+    },
     /*
      * Private methods used by the IPC handler to register a new note in MobX.
      * This is called when the main process receives a bedrock update.
@@ -222,13 +252,16 @@ export const NotesStore = types
       notes.unshift(note);
     },
 
-    _insertNoteUpdateLocally({ update }: NotesStore_InsertNoteUpdateLocally) {
-      const existingUpdate = self.updates.find(
-        (u) => u.note_id === update.note_id && u.update === update.update
-      );
-      if (existingUpdate) return;
+    _applyNoteUpdate(update: NotesStore_ApplyNoteUpdate) {
+      const note = self.spaceNotes.find((n) => n.id === update.note_id);
+      if (!note) return;
 
-      self.updates.unshift(update);
+      const ydoc = self.ydocs.get(note.id);
+      if (!ydoc) return;
+
+      ydoc.transact(() => {
+        Y.applyUpdate(ydoc, toUint8Array(update.update));
+      });
     },
 
     _updateNoteLocally: ({ id, title }: NotesStore_UpdateNoteLocally) => {
@@ -256,7 +289,6 @@ export const NotesStore = types
 export const notesStore = NotesStore.create({
   personalNotes: [],
   spaceNotes: [],
-  updates: [],
   selectedNoteId: null,
   saving: false,
 });
@@ -276,10 +308,8 @@ NotesIPC.onUpdate(({ type, payload }: NotesService_IPCUpdate) => {
     notesStore._insertNoteLocally({
       note: NoteModel.create(payload),
     });
-  } else if (type === 'create-note-update') {
-    notesStore._insertNoteUpdateLocally({
-      update: NoteUpdateModel.create(payload),
-    });
+  } else if (type === 'apply-note-update') {
+    notesStore._applyNoteUpdate(payload);
   } else if (type === 'update-note') {
     notesStore._updateNoteLocally(payload);
   } else if (type === 'delete-note') {

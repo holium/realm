@@ -176,7 +176,6 @@ export class PeerClass extends EventsEmitter {
       console.error('Invalid track received in onTrack');
       return;
     }
-    console.log('got track', track.id, track);
     if (track.kind === 'video') {
       // console.log('got video track', track.id);
       if (this.videoTracks.has(track.id)) {
@@ -345,10 +344,8 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onData(data: any) {
-    console.log('onData', unserialize(data));
     const dataPacket = unserialize(data);
     const payload = dataPacket.value as DataPayload;
-    console.log('onData', payload);
     if (dataPacket.kind === DataPacketMuteStatus) {
       if (payload.data) {
         this.isMutedChanged(true);

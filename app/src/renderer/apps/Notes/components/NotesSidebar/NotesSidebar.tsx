@@ -60,7 +60,6 @@ const NotesSidebarPresenter = () => {
   const onClickSpaceNote = async (id: string, space: string) => {
     setSelectedNoteId({ id });
 
-    console.log('id, space', id, space);
     const noteRoomPath = space + id;
     const areWeInRoomInOtherNote =
       roomsStore.currentRoom && roomsStore.currentRoom.path !== noteRoomPath;

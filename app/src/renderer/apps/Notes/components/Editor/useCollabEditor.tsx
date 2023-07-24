@@ -1,102 +1,33 @@
-import { useEffect, useState } from 'react';
-import { fromUint8Array, toUint8Array } from 'js-base64';
+import { useState } from 'react';
 import { exampleSetup } from 'prosemirror-example-setup';
 import { redo, undo } from 'prosemirror-history';
 import { keymap } from 'prosemirror-keymap';
-import { EditorState, Plugin } from 'prosemirror-state';
-import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
-import * as Y from 'yjs';
-
-import { PresenceBroadcast } from '@holium/realm-presence';
-
 import {
-  DataPacket,
-  DataPacketKind,
-} from 'renderer/apps/Rooms/store/room.types';
-import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
+  EditorState,
+  Plugin,
+  TextSelection,
+  Transaction,
+} from 'prosemirror-state';
+import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
+
+import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ySyncPlugin, yUndoPlugin } from './plugins/y-prosemirror';
 import { schema } from './schema';
 
-type Props = {
-  updates: string[];
-  roomsStore: ReturnType<typeof useRoomsStore>;
-  onChangeDoc: (update: string) => void;
-};
+export const useCollabEditor = () => {
+  const { notesStore } = useShipStore();
 
-export const useCollabEditor = ({
-  updates,
-  roomsStore,
-  onChangeDoc,
-}: Props) => {
-  const [ydoc, setYdoc] = useState<Y.Doc>();
+  const { selectedYDoc } = notesStore;
+
   const [editorView, setEditorView] = useState<EditorView>();
 
-  useEffect(() => {
-    if (!ydoc) return;
-
-    // Listen to updates from other peers.
-    const onDataChannel = async (
-      _rid: string,
-      _peer: string,
-      data: DataPacket
-    ) => {
-      const broadcastPayload = data.value.broadcast;
-      console.log('RECEEEEEIVED.', broadcastPayload);
-      if (!broadcastPayload) return;
-      if (broadcastPayload.event !== 'broadcast') return;
-
-      const [update] = broadcastPayload.data;
-      const binaryEncodedUpdate = toUint8Array(update as string);
-      Y.applyUpdate(ydoc, binaryEncodedUpdate);
-    };
-
-    roomsStore.registerListeners({
-      onLeftRoom: () => {},
-      onDataChannel,
-    });
-  }, [ydoc, roomsStore]);
-
-  const broadcast = (update: string, ydoc: Y.Doc) => {
-    // Apply the update to this provider
-    const binaryEncodedUpdate = toUint8Array(update);
-    Y.applyUpdate(ydoc, binaryEncodedUpdate);
-
-    const broadcast: PresenceBroadcast = {
-      event: 'broadcast',
-      data: [update],
-    };
-    roomsStore.sendDataToRoom({
-      kind: DataPacketKind.DATA,
-      value: { broadcast },
-    });
-  };
-
-  useEffect(() => {
-    if (!ydoc) return;
-
-    // Set up broadcasting and automatic saving.
-    ydoc.on('update', (update: Uint8Array) => {
-      const base64EncodedUpdate = fromUint8Array(update);
-      console.log('BROADCAST-ING', base64EncodedUpdate);
-      broadcast(base64EncodedUpdate, ydoc);
-      onChangeDoc(base64EncodedUpdate);
-    });
-  }, [ydoc]);
-
   const onEditorRef = (editorRef: HTMLDivElement) => {
-    // Only initialize the editor once.
-    if (ydoc || editorView) return;
+    // Only initialize the editorView once.
+    if (editorView) return;
+    if (!selectedYDoc) return;
 
-    // Initialize the ydoc with the history from the database.
-    const newYdoc = new Y.Doc();
-    console.log('applying updates', updates);
-    updates.forEach((update) => {
-      const binaryEncodedUpdate = toUint8Array(update);
-      Y.applyUpdate(newYdoc, binaryEncodedUpdate);
-    });
-
-    const type = newYdoc.getXmlFragment('prosemirror');
+    const type = selectedYDoc.getXmlFragment('prosemirror');
 
     console.log('firstline preview', type.toDOM().firstChild?.textContent);
 
@@ -139,9 +70,24 @@ export const useCollabEditor = ({
       }),
     });
 
-    setYdoc(newYdoc);
     setEditorView(prosemirrorView);
   };
 
-  return { editorView, onEditorRef };
+  const moveToEnd = () => {
+    if (!editorView) return;
+
+    console.log('Moving to end...');
+    // Focus the editor.
+    editorView.focus();
+
+    // Move the cursor to the end of the doc and line.
+    const transaction: Transaction = editorView.state.tr.setSelection(
+      new TextSelection(
+        editorView.state.doc.resolve(editorView.state.doc.nodeSize - 2)
+      )
+    );
+    editorView.dispatch(transaction);
+  };
+
+  return { onEditorRef, moveToEnd };
 };

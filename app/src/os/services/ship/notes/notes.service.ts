@@ -131,7 +131,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         update: rowData.update,
       });
       this.sendUpdate({
-        type: 'create-note-update',
+        type: 'apply-note-update',
         payload: {
           id: noteUpdate.id,
           note_id: rowData.note_id,

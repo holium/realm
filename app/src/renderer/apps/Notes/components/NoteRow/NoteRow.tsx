@@ -46,9 +46,6 @@ const NoteRowPresenter = ({
         const metadata = friends.getContactAvatarMetadata(patp);
         return metadata;
       }) || [];
-  if (participants.length > 0) {
-    console.log('--- participants ---', participants);
-  }
 
   const rowId = useMemo(() => `note-row-${id}`, [id]);
   const rowOptions: ContextMenuOption[] = useMemo(

@@ -11,14 +11,6 @@ export const NoteModel = types.model('NoteModel', {
 
 export type NotesStore_Note = Instance<typeof NoteModel>;
 
-export const NoteUpdateModel = types.model('NoteUpdateModel', {
-  id: types.identifier,
-  note_id: types.string,
-  update: types.string,
-});
-
-export type NotesStore_NoteUpdate = Instance<typeof NoteUpdateModel>;
-
 /* notes.store.ts Public Methods */
 export type NotesStore_CreateNote = {
   space: string;
@@ -61,8 +53,9 @@ export type NotesStore_InsertNoteLocally = {
   note: NotesStore_Note;
 };
 
-export type NotesStore_InsertNoteUpdateLocally = {
-  update: NotesStore_NoteUpdate;
+export type NotesStore_ApplyNoteUpdate = {
+  note_id: string;
+  update: string;
 };
 
 export type NotesStore_UpdateNoteLocally = {
