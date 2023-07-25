@@ -4,27 +4,27 @@ import { history, redo, undo } from 'prosemirror-history';
 import { keymap } from 'prosemirror-keymap';
 import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-
-import { useShipStore } from 'renderer/stores/ship.store';
+import * as Y from 'yjs';
 
 import { ySyncPlugin } from './plugins/sync-plugin';
 import { textCursorPlugin } from './plugins/text-cursor-plugin';
 import { yUndoPlugin } from './plugins/undo-plugin';
 import { schema } from './schema';
 
-export const useCollabEditor = () => {
-  const { notesStore } = useShipStore();
+type Props = {
+  ydoc: Y.Doc | null;
+};
 
-  const { selectedYDoc } = notesStore;
-
+export const useCollabEditor = ({ ydoc }: Props) => {
   const [editorView, setEditorView] = useState<EditorView>();
 
   const onEditorRef = (editorRef: HTMLDivElement) => {
+    // Only initialize the editorView if the ydoc is ready.
+    if (!ydoc) return;
     // Only initialize the editorView once.
     if (editorView) return;
-    if (!selectedYDoc) return;
 
-    const type = selectedYDoc.getXmlFragment('prosemirror');
+    const type = ydoc.getXmlFragment('prosemirror');
 
     const prosemirrorView = new EditorView(editorRef, {
       state: EditorState.create({

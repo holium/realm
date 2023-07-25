@@ -18,14 +18,19 @@ import './prosemirror.css';
 let updateQueue: string[] = [];
 
 const EditorPresenter = () => {
-  const shipStore = useShipStore();
   const roomsStore = useRoomsStore();
-  const { spacesStore } = useShipStore();
-  const { onEditorRef } = useCollabEditor();
+  const { notesStore, spacesStore } = useShipStore();
 
   const selectedSpace = spacesStore.selected;
-  const { selectedNote, createNoteUpdate, setSaving, setUpOnYdocUpdate } =
-    shipStore.notesStore;
+  const {
+    selectedNote,
+    selectedYDoc,
+    createNoteUpdate,
+    setSaving,
+    setUpOnYdocUpdate,
+  } = notesStore;
+
+  const { onEditorRef } = useCollabEditor({ ydoc: selectedYDoc ?? null });
 
   useEffect(() => {
     setUpOnYdocUpdate(onChangeDoc);
