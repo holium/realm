@@ -18,6 +18,7 @@ export const Event = ({ eventInfo }: any) => {
   // TODO: optimize this
   const title = eventInfo.event.title;
   const description = eventInfo.event['_def']?.extendedProps.description;
+  const color = eventInfo.event['_def']?.extendedProps._color;
   const startDate = eventInfo.event['_def']?.extendedProps._startDate;
   const endDate = eventInfo.event['_def']?.extendedProps._endDate;
   const calendarId = eventInfo.event['_def']?.extendedProps._calendarId;
@@ -147,7 +148,7 @@ export const Event = ({ eventInfo }: any) => {
       <Box
         style={{
           padding: 2,
-          background: 'rgba(var(--rlm-accent-rgba), .5)',
+          background: color ? color : 'rgba(var(--rlm-accent-rgba), .5)',
           color: 'rgba(var(--rlm-text-rgba))',
         }}
         flex={1}

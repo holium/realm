@@ -113,6 +113,7 @@ declare global {
 }
 
 export const App = () => {
+  const space = '~lux/dev';
   const [calendarList, setCalendarList] = useState<any>([]);
   const [selectedCalendar, setSelectedCalendar] = useState<null | string>(null);
   const [spans, setSpans] = useState<any>([]);
@@ -121,8 +122,10 @@ export const App = () => {
 
   const fetchCalendarList = async () => {
     try {
-      const result = await api.getCalendarList();
-      log('fetchCalendarList result => ', result);
+      const result = await api.getCalendarsSpace(space);
+      const spaces = await api.getSpaces();
+      log('getCalendarsSpace result => ', result);
+      log('fetchCalendarList spaces => ', spaces);
       if (result.calendars) {
         const newCalendarList = Object.keys(result.calendars).map(
           (key: string) => {
@@ -176,6 +179,7 @@ export const App = () => {
           _calendarId: selectedCalendar,
           title: metaData.name,
           description: metaData.description,
+          _color: metaData.color,
           _reccurenceRule: reccurenceRule,
           // allDay: true, display an event as an all day event IMPORTANT for when start using them
         });
@@ -206,6 +210,7 @@ export const App = () => {
       <Flex>
         <Flex flexDirection={'column'} marginRight="8px">
           <CalendarList
+            space={space}
             calendarList={calendarList}
             onCalendarSelect={setSelectedCalendar}
             selectedCalendar={selectedCalendar}

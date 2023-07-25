@@ -16,16 +16,18 @@ interface Props {
   calendarList: any;
   onCalendarSelect: (id: string) => void;
   selectedCalendar: null | string;
+  space: string;
 }
 export const CalendarList = ({
   calendarList,
   onCalendarSelect,
   selectedCalendar,
+  space,
 }: Props) => {
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const addCalendar = async (newCalendar: string) => {
     try {
-      const result = await api.createCalendar(newCalendar);
+      const result = await api.createCalendar(space, newCalendar);
       log('addCalendar result => ', result);
     } catch (e) {
       log('addCalendar error => ', e);

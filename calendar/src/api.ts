@@ -69,7 +69,7 @@ export const api = {
   /**
    * Calendar related
    */
-  createCalendar: async (title: string, description = '') => {
+  createCalendar: async (space: string, title: string, description = '') => {
     const perms = {
       admins: 'admin',
       member: 'guest',
@@ -78,7 +78,7 @@ export const api = {
     const json = {
       title,
       description,
-      space: '~' + shipName() + '/our',
+      space,
       perms,
     };
     return await api.vent({
@@ -131,12 +131,19 @@ export const api = {
       body: json, // the actual poke content
     });
   },
-
+  getCalendarsSpace: async (space: string) => {
+    return api
+      .createApi()
+      .scry({ app: 'calendar-spaces', path: '/calendars/' + space });
+  },
   getCalendarList: async () => {
     return api.createApi().scry({ app: 'calendar', path: '/calendars' });
   },
   getCalendarData: async (id: string) => {
     return api.createApi().scry({ app: 'calendar', path: '/calendar/' + id });
+  },
+  getSpaces: async () => {
+    return api.createApi().scry({ app: 'calendar-spaces', path: '/spaces' });
   },
   /**
    * Spaces related
@@ -188,7 +195,8 @@ export const api = {
     startDateMS: number,
     durationMS: number,
     name: string,
-    description = ''
+    description = '',
+    color = ''
   ) => {
     const json = {
       span: {
@@ -203,6 +211,7 @@ export const api = {
         meta: {
           name,
           description,
+          color,
         },
       },
     };
@@ -221,7 +230,8 @@ export const api = {
     startDateMS: number,
     endDateMS: number,
     name: string,
-    description = ''
+    description = '',
+    color = ''
   ) => {
     // an event that has both a start and end
     const json = {
@@ -238,6 +248,7 @@ export const api = {
         meta: {
           name,
           description,
+          color,
         },
       },
     };
@@ -258,7 +269,8 @@ export const api = {
     timeBetweenEvents: number,
     durationMS: number,
     name: string,
-    description = ''
+    description = '',
+    color = ''
   ) => {
     // an event that has both a start and end
     const json = {
@@ -274,6 +286,7 @@ export const api = {
         meta: {
           name,
           description,
+          color,
         },
       },
     };
@@ -294,7 +307,8 @@ export const api = {
     durationMS: number,
     includedWeekDays: number[],
     name: string,
-    description = ''
+    description = '',
+    color = ''
   ) => {
     const json = {
       span: {
@@ -318,6 +332,7 @@ export const api = {
         meta: {
           name,
           description,
+          color,
         },
       },
     };
@@ -339,7 +354,8 @@ export const api = {
     ordinal: 'first' | 'second' | 'third' | 'fourth' | 'last',
     dayOfWeek: number,
     name: string,
-    description = ''
+    description = '',
+    color = ''
   ) => {
     const json = {
       span: {
@@ -366,6 +382,7 @@ export const api = {
         meta: {
           name,
           description,
+          color,
         },
       },
     };
@@ -385,7 +402,8 @@ export const api = {
     repeatCountObject: RepeatCount,
     durationMS: number,
     name: string,
-    description = ''
+    description = '',
+    color = ''
   ) => {
     const json = {
       span: {
@@ -406,6 +424,7 @@ export const api = {
         meta: {
           name,
           description,
+          color,
         },
       },
     };

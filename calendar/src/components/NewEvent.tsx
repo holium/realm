@@ -30,44 +30,48 @@ import {
 const colors = [
   {
     id: '1',
-    backgroundColor: '#a4bdfc',
+    backgroundColor: 'rgb(63, 81, 181)',
   },
   {
     id: '2',
-    backgroundColor: '#7ae7bf',
+    backgroundColor: 'rgb(213, 0, 0)',
   },
   {
     id: '3',
-    backgroundColor: '#dbadff',
+    backgroundColor: 'rgb(244, 81, 30)',
   },
   {
     id: '4',
-    backgroundColor: '#ff887c',
+    backgroundColor: 'rgb(51, 182, 121)',
   },
   {
     id: '5',
-    backgroundColor: '#fbd75b',
+    backgroundColor: 'rgb(3, 155, 229)',
   },
   {
     id: '6',
-    backgroundColor: '#ffb878',
+    backgroundColor: 'rgb(121, 134, 203)',
   },
   {
     id: '7',
-    backgroundColor: '#46d6db',
+    backgroundColor: 'rgb(97, 97, 97)',
   },
 
   {
     id: '9',
-    backgroundColor: '#5484ed',
+    backgroundColor: 'rgb(230, 124, 115)',
   },
   {
     id: '10',
-    backgroundColor: '#51b749',
+    backgroundColor: 'rgb(246, 191, 38)',
   },
   {
     id: '11',
-    backgroundColor: '#dc2127',
+    backgroundColor: 'rgb(11, 128, 67)',
+  },
+  {
+    id: '12',
+    backgroundColor: 'rgb(142, 36, 170)',
   },
 ];
 
@@ -77,9 +81,7 @@ interface Props {
 }
 type selectOptions = { value: string; label: string };
 export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
-  const [selectedBackgroundColor, setSelectedBackground] = useState<
-    null | string
-  >(null);
+  const [selectedBackgroundColor, setSelectedBackground] = useState<string>('');
   const [startDate, setStartDate] = useState<string | undefined>();
   const [endDate, setEndDate] = useState<string | undefined>();
   const [newEventName, setNewEventName] = useState<string>('');
@@ -153,7 +155,8 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
         startDateMS,
         durationMs,
         newEventName,
-        newEventDescription
+        newEventDescription,
+        selectedBackgroundColor
       );
       log('createEventLeftSingle result =>', result);
     } catch (e) {
@@ -183,7 +186,8 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
           timeBetweenEventsEveryday,
           durationMs,
           newEventName,
-          newEventDescription
+          newEventDescription,
+          selectedBackgroundColor
         );
       } else if (selectedReccurenceType === 'weekdays') {
         result = await api.createSpanPeriodicWeekly(
@@ -193,7 +197,8 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
           durationMs,
           [0, 1, 2, 3, 4],
           newEventName,
-          newEventDescription
+          newEventDescription,
+          selectedBackgroundColor
         );
       } else if (selectedReccurenceType === 'weekend') {
         result = await api.createSpanPeriodicWeekly(
@@ -203,7 +208,8 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
           durationMs,
           [5, 6],
           newEventName,
-          newEventDescription
+          newEventDescription,
+          selectedBackgroundColor
         );
       } else if (selectedReccurenceType === 'everyToday') {
         //on all (selected day of week)
@@ -219,7 +225,8 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
           durationMs,
           [selectedWeekDay],
           newEventName,
-          newEventDescription
+          newEventDescription,
+          selectedBackgroundColor
         );
       } else if (selectedReccurenceType === 'everyMonth') {
         //on all (selected day of week)
@@ -241,7 +248,8 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
           ordinal,
           selectedWeekDay,
           newEventName,
-          newEventDescription
+          newEventDescription,
+          selectedBackgroundColor
         );
       } else if (selectedReccurenceType === 'everyYearToday') {
         //on all (current date of month) for however many years
@@ -251,7 +259,8 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
           repeatCountObject,
           durationMs,
           newEventName,
-          newEventDescription
+          newEventDescription,
+          selectedBackgroundColor
         );
       }
       log('createEventPeriodic result =>', result);
