@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react';
 import { createGlobalStyle } from 'styled-components';
 
-import { Flex } from '@holium/design-system';
+import { Button, Flex } from '@holium/design-system';
 
 import { api } from './api';
-import { Calendar, CalendarList, DatePicker, NewEvent } from './components';
+import {
+  Calendar,
+  CalendarList,
+  DatePicker,
+  NewEvent,
+  SpaceList,
+} from './components';
 import { log } from './utils';
 
 import 'react-day-picker/dist/style.css';
@@ -83,6 +89,16 @@ const GlobalStyle = createGlobalStyle`
       --rlm-overlay-active-color: rgba(0,0,0,0.06);
   }
 
+  .highlight-hover:hover {
+    background-color: rgba(var(--rlm-overlay-hover-rgba));
+    cursor: pointer;
+  }
+  .highlight-hover:focus {
+    background-color: rgba(var(--rlm-overlay-hover-rgba));
+    transition: '.25s ease';
+    outline: none;
+  }
+
   input[type="time"],
   input[type="date"] {
     font-family: var(--rlm-font);
@@ -113,19 +129,28 @@ declare global {
 }
 
 export const App = () => {
-  const space = '~lux/dev';
+  const [selectedSpace, setSelectedSpace] = useState<null | string>(null);
+  const [spaceList, setSpaceList] = useState<string[]>([]);
   const [calendarList, setCalendarList] = useState<any>([]);
   const [selectedCalendar, setSelectedCalendar] = useState<null | string>(null);
   const [spans, setSpans] = useState<any>([]);
   const [events, setEvents] = useState<any>([]);
   const [datePickerSelected, setDatePickerSelected] = useState<any>(new Date());
-
-  const fetchCalendarList = async () => {
+  const fetchSpacesList = async () => {
     try {
-      const result = await api.getCalendarsSpace(space);
-      const spaces = await api.getSpaces();
+      const result = await api.getSpaces();
+      setSpaceList(result.spaces);
+      log('fetchSpacesList result => ', result);
+    } catch (e) {
+      log('fetchSpacesList error => ', e);
+    }
+  };
+  const fetchCalendarList = async () => {
+    if (!selectedSpace) return;
+    try {
+      const result = await api.getCalendarsSpace(selectedSpace);
+
       log('getCalendarsSpace result => ', result);
-      log('fetchCalendarList spaces => ', spaces);
       if (result.calendars) {
         const newCalendarList = Object.keys(result.calendars).map(
           (key: string) => {
@@ -191,8 +216,13 @@ export const App = () => {
     log('newEvents', newEvents);
   };
   useEffect(() => {
-    fetchCalendarList();
+    fetchSpacesList();
   }, []);
+  useEffect(() => {
+    if (selectedSpace) {
+      fetchCalendarList();
+    }
+  }, [selectedSpace]);
   useEffect(() => {
     if (selectedCalendar) {
       fetchCalendarEntries(selectedCalendar);
@@ -209,12 +239,22 @@ export const App = () => {
       <GlobalStyle />
       <Flex>
         <Flex flexDirection={'column'} marginRight="8px">
-          <CalendarList
-            space={space}
-            calendarList={calendarList}
-            onCalendarSelect={setSelectedCalendar}
-            selectedCalendar={selectedCalendar}
-          />
+          {selectedSpace && (
+            <Button.TextButton onClick={() => setSelectedSpace(null)}>
+              Select space
+            </Button.TextButton>
+          )}
+          {!selectedSpace ? (
+            <SpaceList spaceList={spaceList} onSpaceSelect={setSelectedSpace} />
+          ) : (
+            <CalendarList
+              space={selectedSpace}
+              calendarList={calendarList}
+              onCalendarSelect={setSelectedCalendar}
+              selectedCalendar={selectedCalendar}
+            />
+          )}
+
           <Flex flexDirection={'column'} marginTop={'auto'}>
             {selectedCalendar && (
               <NewEvent
