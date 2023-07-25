@@ -62,16 +62,22 @@ const NotesSidebarPresenter = () => {
     setSelectedNoteId({ id });
 
     const noteRoomPath = space + id;
-    const areWeInRoomInOtherNote =
-      roomsStore.currentRoom && roomsStore.currentRoom.path !== noteRoomPath;
-    if (areWeInRoomInOtherNote) {
-      // LEAVE OTHER ROOM
-      sound.playRoomLeave();
-      roomsStore.leaveRoom(roomsStore.currentRoom.rid);
+    const areWeInRoom = roomsStore.currentRoom;
+    const areWeInRoomInOtherSpace =
+      areWeInRoom && roomsStore.currentRoom?.path !== noteRoomPath;
+    if (areWeInRoom) {
+      if (areWeInRoomInOtherSpace) {
+        // LEAVE OTHER ROOM
+        sound.playRoomLeave();
+        roomsStore.leaveRoom(roomsStore.currentRoom.rid);
 
-      // DELETE OTHER ROOM IF EMPTY
-      if (roomsStore.currentRoom?.present.length === 0) {
-        roomsStore.deleteRoom(roomsStore.currentRoom.rid);
+        // DELETE OTHER ROOM IF EMPTY
+        if (roomsStore.currentRoom?.present.length === 0) {
+          roomsStore.deleteRoom(roomsStore.currentRoom.rid);
+        }
+      } else {
+        // DO NOTHING IF WE ARE ALREADY IN THE NOTE ROOM
+        return;
       }
     }
 
