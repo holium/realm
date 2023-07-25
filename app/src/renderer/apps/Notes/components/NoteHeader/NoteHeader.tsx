@@ -51,13 +51,13 @@ const NoteHeaderPresenter = () => {
     });
   };
 
-  // Autosave on blur plus a random 0-3s.
+  // Autosave on blur.
   const onBlurTitle = debounce(() => {
     const isAuthor = selectedNote.author === window.ship;
     if (!isAuthor) return;
 
     notesStore.persistNoteTitle();
-  }, Math.random() * 3000);
+  }, 500);
 
   return (
     <NoteHeaderView

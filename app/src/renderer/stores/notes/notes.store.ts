@@ -205,12 +205,6 @@ export const NotesStore = types
       });
     },
 
-    setUpOnYdocUpdate(callback: any) {
-      if (!self.selectedYDoc) return;
-
-      self.selectedYDoc.on('update', callback);
-    },
-
     subscribeToBedrockUpdates({ space }: NotesStore_SubscribeToBedrockUpdates) {
       NotesIPC.subscribe({ space });
     },
