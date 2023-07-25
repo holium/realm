@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { exampleSetup } from 'prosemirror-example-setup';
-import { redo, undo } from 'prosemirror-history';
+import { baseKeymap } from 'prosemirror-commands';
+import { history, redo, undo } from 'prosemirror-history';
 import { keymap } from 'prosemirror-keymap';
 import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
@@ -30,16 +30,18 @@ export const useCollabEditor = () => {
       state: EditorState.create({
         schema,
         plugins: [
+          history(),
           ySyncPlugin(type),
           // yCursorPlugin(provider.awareness),
           yUndoPlugin(),
+          keymap(baseKeymap),
           keymap({
             'Mod-z': undo,
             'Mod-y': redo,
             'Mod-Shift-z': redo,
           }),
           textCursorPlugin(),
-        ].concat(exampleSetup({ schema })),
+        ],
       }),
     });
 
