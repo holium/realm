@@ -472,7 +472,7 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
               width="30px"
               borderRadius={5}
               onClick={() => {
-                setSelectedBackground(null);
+                setSelectedBackground('');
               }}
             />
             {colors.map((item: any, index: number) => {
