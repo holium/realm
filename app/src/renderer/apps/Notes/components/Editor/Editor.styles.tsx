@@ -23,10 +23,6 @@ export const EditorContainer = styled(Flex)`
     }
   }
 
-  .move-to-end {
-    cursor: text;
-  }
-
   .tooltip {
     position: absolute;
     z-index: 1;

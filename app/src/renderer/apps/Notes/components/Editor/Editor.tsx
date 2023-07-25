@@ -14,14 +14,14 @@ import { useCollabEditor } from './useCollabEditor';
 
 import './prosemirror.css';
 
-// Set of unique updates that have been applied to the editor.
+// Set of unique updates that have not yet been sent to the server.
 let updateQueue: string[] = [];
 
 const EditorPresenter = () => {
   const shipStore = useShipStore();
   const roomsStore = useRoomsStore();
   const { spacesStore } = useShipStore();
-  const { onEditorRef, moveToEnd } = useCollabEditor();
+  const { onEditorRef } = useCollabEditor();
 
   const selectedSpace = spacesStore.selected;
   const { selectedNote, createNoteUpdate, setSaving, setUpOnYdocUpdate } =
@@ -54,7 +54,7 @@ const EditorPresenter = () => {
   };
 
   // Auto save the document after 3 seconds of inactivity,
-  // with a random delay of up to 3 seconds to avoid spamming the server.
+  // with a random delay of up to 3 seconds to avoid clients saving at the same time.
   const debouncedAutoSave = debounce(async () => {
     if (!selectedNote) return;
 
@@ -84,8 +84,7 @@ const EditorPresenter = () => {
 
   return (
     <EditorContainer>
-      <div ref={onEditorRef} />
-      <Flex flex={1} className="text-cursor move-to-end" onClick={moveToEnd} />
+      <div ref={onEditorRef} style={{ flex: 1 }} />
     </EditorContainer>
   );
 };

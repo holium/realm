@@ -48,13 +48,5 @@ export const useCollabEditor = () => {
     setEditorView(prosemirrorView);
   };
 
-  const moveToEnd = () => {
-    if (!editorView) return;
-
-    console.log('Moving to end...');
-
-    editorView.focus();
-  };
-
-  return { onEditorRef, moveToEnd };
+  return { onEditorRef };
 };
