@@ -3,7 +3,7 @@ import { action, makeObservable, observable } from 'mobx';
 import Peer, { Instance as PeerInstance } from 'simple-peer';
 
 import { serialize, unserialize } from './helpers';
-import { DataPacket, DataPayload } from './room.types';
+import { DataPacket } from './room.types';
 import { OnDataChannel, OnLeftRoom } from './RoomsStore';
 import { IAudioAnalyser, SpeakingDetectionAnalyser } from './SpeakingDetector';
 
@@ -343,9 +343,9 @@ export class PeerClass extends EventsEmitter {
   }
 
   @action
-  onData(data: any) {
-    const dataPacket = unserialize(data);
-    const payload = dataPacket.value as DataPayload;
+  onData(data: string) {
+    const dataPacket: DataPacket = unserialize(data);
+    const payload = dataPacket.value;
     if (dataPacket.kind === DataPacketMuteStatus) {
       if (payload.data) {
         this.isMutedChanged(true);

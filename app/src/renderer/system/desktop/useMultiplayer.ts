@@ -11,6 +11,7 @@ import {
   PresenceBroadcast,
 } from '@holium/realm-presence';
 
+import { NotesBroadcastChannel } from 'renderer/apps/Notes/components/Editor/Editor';
 import {
   DataPacket,
   DataPacketKind,
@@ -275,12 +276,19 @@ export const useMultiplayer = ({
           window.electron.multiplayer.realmToAppSendChat(patp, message);
         }
       } else if (broadcastPayload) {
-        const { event, data } = broadcastPayload;
+        if (broadcastPayload.event === 'broadcast') {
+          const [channel, update] = broadcastPayload.data;
 
-        if (event === 'broadcast') {
-          const [update] = data;
+          console.log('channel', channel);
 
-          notesStore.applyBroadcastedNoteUpdate(update as string);
+          if (channel === NotesBroadcastChannel.YDocUpdate) {
+            notesStore.applyBroadcastedYdocUpdate(data.from, update as string);
+          } else if (channel === NotesBroadcastChannel.AwarenessUpdate) {
+            notesStore.applyBroadcastedAwarenessUpdate(
+              data.from,
+              update as string
+            );
+          }
         }
       }
     };

@@ -7,6 +7,7 @@ import {
   NotesDB_Note,
   NotesDB_SelectAllNotes,
   NotesDB_SelectAllNotesUpdates,
+  NotesDB_SelectAllNoteUpdates,
   NotesDB_UpdateTitle,
   NotesDB_UpsertNote,
 } from './notes.db.types';
@@ -91,6 +92,15 @@ export class NotesDB extends AbstractDataAccess<any> {
     return notes;
   };
 
+  selectNoteUpdates: NotesDB_SelectAllNoteUpdates = ({ note_id }) => {
+    if (!this.db) return [];
+    const notes = this.db
+      .prepare(`SELECT * FROM notes_updates WHERE note_id = ?`)
+      .all(note_id);
+
+    return notes;
+  };
+
   upsertNote: NotesDB_UpsertNote = ({ id, title, space, author }) => {
     if (!this.db) return -1;
 
@@ -145,8 +155,23 @@ export class NotesDB extends AbstractDataAccess<any> {
   };
 
   deleteNote: NotesDB_DeleteNote = ({ id }) => {
+    if (!this.db) return false;
+    const notesInfo = this.db.prepare(`DELETE FROM notes WHERE id = ?`).run(id);
+    const notesId = notesInfo.lastInsertRowid;
+
+    const notesUpdatesInfo = this.db
+      .prepare(`DELETE FROM notes_updates WHERE note_id = ?`)
+      .run(id);
+    const noteUpdatesId = notesUpdatesInfo.lastInsertRowid;
+
+    return Boolean(notesId && noteUpdatesId);
+  };
+
+  deleteNoteUpdate: NotesDB_DeleteNote = ({ id }) => {
     if (!this.db) return -1;
-    const info = this.db.prepare(`DELETE FROM notes WHERE id = ?`).run(id);
+    const info = this.db
+      .prepare(`DELETE FROM notes_updates WHERE id = ?`)
+      .run(id);
     const noteId = info.lastInsertRowid;
 
     return noteId;

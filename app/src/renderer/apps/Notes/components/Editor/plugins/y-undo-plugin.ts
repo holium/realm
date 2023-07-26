@@ -5,7 +5,7 @@ import { Plugin } from 'prosemirror-state';
 import { ContentType, Item, Text, UndoManager, XmlElement } from 'yjs';
 
 import { ySyncPluginKey, yUndoPluginKey } from './keys';
-import { getRelativeSelection } from './sync-plugin';
+import { getRelativeSelection } from './y-sync-plugin';
 
 export const undo = (state) => {
   const undoManager = yUndoPluginKey.getState(state).undoManager;

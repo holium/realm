@@ -1,6 +1,3 @@
-// TODO: Remove this ts nocheck!
-// @ts-nocheck
-
 import * as error from 'lib0/error';
 import * as eventloop from 'lib0/eventloop';
 import * as map from 'lib0/map';
@@ -9,20 +6,12 @@ import { EditorView } from 'prosemirror-view';
 import * as Y from 'yjs';
 
 import { ySyncPluginKey } from './keys';
-import { updateYFragment } from './sync-plugin';
+import { updateYFragment } from './y-sync-plugin';
 
-/**
- * Either a node if type is YXmlElement or an Array of text nodes if YXmlText
- * @typedef {Map<Y.AbstractType, Node | Array<Node>>} ProsemirrorMapping
- */
+// Either a node if type is YXmlElement or an Array of text nodes if YXmlText.
+type ProsemirrorMapping = Map<Y.AbstractType<any>, Node | Node[]>;
 
-/**
- * Is null if no timeout is in progress.
- * Is defined if a timeout is in progress.
- * Maps from view
- * @type {Map<EditorView, Map<any, any>>|null}
- */
-let viewsToUpdate: EditorView[] | null = null;
+let viewsToUpdate: Map<EditorView, Map<any, any>> | null[] | null = null;
 
 const updateMetas = () => {
   const ups = viewsToUpdate;
@@ -58,7 +47,7 @@ export const setMeta = (view, key, value) => {
 export const absolutePositionToRelativePosition = (
   pos: number,
   type: Y.XmlFragment,
-  mapping: any
+  mapping: ProsemirrorMapping
 ) => {
   if (pos === 0) {
     return Y.createRelativePositionFromTypeIndex(type, 0);

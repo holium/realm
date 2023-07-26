@@ -24,6 +24,12 @@ export type NotesDB_SelectAllNotesUpdates = () => {
   note_update: string;
 }[];
 
+export type NotesDB_SelectAllNoteUpdates = (payload: { note_id: string }) => {
+  id: string;
+  note_id: string;
+  note_update: string;
+}[];
+
 export type NotesDB_UpdateTitle = (payload: {
   id: string;
   title: string;
@@ -35,4 +41,4 @@ export type NotesDB_EditNote = (payload: {
   update: string;
 }) => string;
 
-export type NotesDB_DeleteNote = (payload: { id: string }) => string;
+export type NotesDB_DeleteNote = (payload: { id: string }) => boolean;

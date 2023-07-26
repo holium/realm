@@ -18,6 +18,7 @@ import {
   NotesService_EditNoteTitle_Payload,
   NotesService_GetBedrockState_Payload,
   NotesService_GetNotes_Payload,
+  NotesService_GetNoteUpdates_Payload,
   NotesService_IPCUpdate,
 } from './notes.service.types';
 
@@ -54,8 +55,8 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     });
   }
 
-  deleteNote({ id, space }: NotesService_DeleteNote_Payload) {
-    return APIConnection.getInstance().conduit.poke({
+  async deleteNote({ id, space }: NotesService_DeleteNote_Payload) {
+    const notesResult = await APIConnection.getInstance().conduit.poke({
       app: 'bedrock',
       mark: 'db-action',
       json: {
@@ -66,6 +67,23 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         },
       },
     });
+
+    const associatedUpdates = this.getNoteUpdatesFromDb({ note_id: id });
+    const ids = associatedUpdates.map((o) => o.id);
+
+    const notesUpdatesResult = await APIConnection.getInstance().conduit.poke({
+      app: 'bedrock',
+      mark: 'db-action',
+      json: {
+        'remove-many': {
+          ids,
+          path: space,
+          type: 'notes-updates',
+        },
+      },
+    });
+
+    return Boolean(notesResult && notesUpdatesResult);
   }
 
   getNotesFromDb({ space }: NotesService_GetNotes_Payload) {
@@ -80,10 +98,25 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     return this.notesDB.selectAllNotesUpdates();
   }
 
+  getNoteUpdatesFromDb({ note_id }: NotesService_GetNoteUpdates_Payload) {
+    if (!this.notesDB) return [];
+
+    return this.notesDB.selectNoteUpdates({ note_id });
+  }
+
   async syncWithBedrockNotes({ space }: NotesService_GetBedrockState_Payload) {
+    // Phase 1: Sync notes metadata (not CRDT-d yet).
+    // 1. Fetch notes metadata from Bedrock.
+    // 2. Upsert notes metadata in SQLite.
+    // 3. Delete notes metadata that are no longer in Bedrock.
+    // Phase 2: Sync notes updates (CRDT-d).
+    // 4. Fetch all notes updates from Bedrock.
+    // 5. Insert all missing notes updates in SQLite.
+    // 6. Post back notes updates that weren't in Bedrock.
+
     if (!this.notesDB) return;
 
-    // Get notes from Bedrock.
+    // 1. Fetch notes metadata from Bedrock.
     const bedrockResponse: BedrockResponse =
       await APIConnection.getInstance().conduit.scry({
         app: 'bedrock',
@@ -91,9 +124,9 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
       });
     if (!bedrockResponse) return;
 
+    // 2. Upsert notes metadata in SQLite.
     const notesTable = bedrockResponse.tables.find((o) => o.type === 'notes');
     const notesTableRows = notesTable?.rows ?? [];
-    // console.log('notesTableRows', notesTableRows);
     notesTableRows.forEach((note) => {
       const rowData: BedrockRowData_Notes = note.data;
 
@@ -115,13 +148,30 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         },
       });
     });
+    // 3. Delete notes metadata that are no longer in Bedrock.
+    const notesDBNotes = this.notesDB.selectAllNotes({ space });
+    notesDBNotes.forEach((note) => {
+      const noteExistsInBedrock = notesTableRows.find((o) => o.id === note.id);
+      if (!noteExistsInBedrock) {
+        this.notesDB?.deleteNote({
+          id: note.id,
+        });
+        this.sendUpdate({
+          type: 'delete-note',
+          payload: {
+            id: note.id,
+          },
+        });
+      }
+    });
 
-    // Get notes update from Bedrock.
+    // 4. Fetch notes updates from Bedrock.
     const notesUpdatesTable = bedrockResponse.tables.find(
       (o) => o.type === 'notes-updates'
     );
     const notesUpdatesTableRows = notesUpdatesTable?.rows ?? [];
-    console.log('notesUpdatesTableRows', notesUpdatesTableRows);
+
+    // 5. Insert notes updates in SQLite.
     notesUpdatesTableRows.forEach((noteUpdate) => {
       const rowData: BedrockRowData_NotesUpdates = noteUpdate.data;
 
@@ -138,6 +188,21 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
           update: rowData.update,
         },
       });
+    });
+
+    // 6. Post notes updates that weren't in Bedrock.
+    const notesDBNotesUpdates = this.notesDB.selectAllNotesUpdates();
+    notesDBNotesUpdates.forEach((noteUpdate) => {
+      const noteUpdateExistsInBedrock = notesUpdatesTableRows.find(
+        (o) => o.id === noteUpdate.id
+      );
+      if (!noteUpdateExistsInBedrock) {
+        this.createNoteUpdate({
+          note_id: noteUpdate.note_id,
+          update: noteUpdate.note_update,
+          space,
+        });
+      }
     });
   }
 
@@ -247,7 +312,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
               },
             });
           } else if (update.change === 'del-row') {
-            // Delete responses have a diffrent structure.
+            // Delete responses that have a diffrent structure.
             if (update.type !== 'notes' || !update.id) return;
 
             // Update SQLite.

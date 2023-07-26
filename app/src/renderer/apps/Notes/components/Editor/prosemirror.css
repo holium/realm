@@ -1,13 +1,41 @@
-.ProseMirror {
+.editor-container {
+  display: flex;
   position: relative;
-  height: 100%;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  padding: 16px 16px 0 16px;
+  font-size: 13px;
+  font-family: var(--rlm-font);
+  color: var(--rlm-text-color);
+  overflow-y: auto;
+
+  >div {
+    display: flex;
+  }
 }
 
 .ProseMirror {
+  flex: 1;
+  position: relative;
+  padding: 0;
+  outline: none;
+  line-height: 22px;
+
   word-wrap: break-word;
   white-space: pre-wrap;
   -webkit-font-variant-ligatures: none;
   font-variant-ligatures: none;
+
+  p {
+    margin: 0;
+  }
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 1;
+  background: red;
 }
 
 .ProseMirror pre {
@@ -329,12 +357,6 @@ li.ProseMirror-selectednode:after {
 .ProseMirror h5:first-child,
 .ProseMirror h6:first-child {
   margin-top: 10px;
-}
-
-.ProseMirror {
-  padding: 4px 8px 4px 14px;
-  line-height: 1.2;
-  outline: none;
 }
 
 .ProseMirror p {

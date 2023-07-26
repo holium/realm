@@ -4,25 +4,46 @@ import { history, redo, undo } from 'prosemirror-history';
 import { keymap } from 'prosemirror-keymap';
 import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
+import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
 
-import { ySyncPlugin } from './plugins/sync-plugin';
 import { textCursorPlugin } from './plugins/text-cursor-plugin';
-import { yUndoPlugin } from './plugins/undo-plugin';
+import { yCaretPlugin } from './plugins/y-caret-plugin';
+import { ySyncPlugin } from './plugins/y-sync-plugin';
+import { yUndoPlugin } from './plugins/y-undo-plugin';
 import { schema } from './schema';
 
+export type OnYdocUpdate = (update: Uint8Array, origin: any) => void;
+
+export type OnAwarenessUpdate = (
+  update: {
+    added: number[];
+    updated: number[];
+    removed: number[];
+  },
+  origin: any
+) => void;
+
 type Props = {
-  ydoc: Y.Doc | null;
+  ydoc: Y.Doc;
+  awareness: Awareness;
+  onYdocUpdate: OnYdocUpdate;
+  onAwarenessUpdate: OnAwarenessUpdate;
 };
 
-export const useCollabEditor = ({ ydoc }: Props) => {
+export const useEditorView = ({
+  ydoc,
+  awareness,
+  onYdocUpdate,
+  onAwarenessUpdate,
+}: Props) => {
   const [editorView, setEditorView] = useState<EditorView>();
 
   const onEditorRef = (editorRef: HTMLDivElement) => {
-    // Only initialize the editorView if the ydoc is ready.
-    if (!ydoc) return;
     // Only initialize the editorView once.
     if (editorView) return;
+    // Only initialize the editorView once the editorRef is available.
+    if (!editorRef) return;
 
     const type = ydoc.getXmlFragment('prosemirror');
 
@@ -32,7 +53,7 @@ export const useCollabEditor = ({ ydoc }: Props) => {
         plugins: [
           history(),
           ySyncPlugin(type),
-          // yCursorPlugin(provider.awareness),
+          yCaretPlugin(awareness),
           yUndoPlugin(),
           keymap(baseKeymap),
           keymap({
@@ -44,6 +65,10 @@ export const useCollabEditor = ({ ydoc }: Props) => {
         ],
       }),
     });
+
+    // Set up listeners for updates to the ydoc and awareness.
+    ydoc.on('update', onYdocUpdate);
+    awareness.on('update', onAwarenessUpdate);
 
     setEditorView(prosemirrorView);
   };

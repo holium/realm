@@ -1,41 +1,42 @@
-import { useEffect } from 'react';
-import { fromUint8Array } from 'js-base64';
 import debounce from 'lodash/debounce';
 import { observer } from 'mobx-react';
 
 import { Flex, Spinner, Text } from '@holium/design-system/general';
+import { PresenceBroadcast } from '@holium/realm-presence';
 
 import { DataPacketKind } from 'renderer/apps/Rooms/store/room.types';
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { useShipStore } from 'renderer/stores/ship.store';
 
-import { EditorContainer } from './Editor.styles';
-import { useCollabEditor } from './useCollabEditor';
+import { EditorView } from './EditorView';
 
-import './prosemirror.css';
-
-// Set of unique updates that have not yet been sent to the server.
-let updateQueue: string[] = [];
+export enum NotesBroadcastChannel {
+  YDocUpdate = 'notes-ydoc-update',
+  AwarenessUpdate = 'notes-awareness-update',
+}
 
 const EditorPresenter = () => {
   const roomsStore = useRoomsStore();
   const { notesStore, spacesStore } = useShipStore();
 
   const selectedSpace = spacesStore.selected;
-  const { selectedNote, selectedYDoc, createNoteUpdate, setSaving } =
-    notesStore;
-
-  const { onEditorRef } = useCollabEditor({ ydoc: selectedYDoc ?? null });
+  const {
+    selectedNote,
+    selectedAwareness,
+    syncing,
+    createNoteUpdate,
+    setSaving,
+  } = notesStore;
 
   // Auto save the document after 3 seconds of inactivity,
   // with a random delay of up to 3 seconds to avoid clients saving at the same time.
-  const debouncedAutoSave = debounce(async () => {
+  const debouncedAutoSave = debounce(async (editQueue: string[]) => {
     if (!selectedNote) return;
 
     setSaving(true);
 
     // TODO: merge updates into one update before sending to server.
-    const promises = updateQueue.map((update) => {
+    const promises = editQueue.map((update) => {
       return createNoteUpdate({
         note_id: selectedNote.id,
         space: selectedNote.space,
@@ -44,39 +45,35 @@ const EditorPresenter = () => {
     });
     await Promise.all(promises);
 
-    updateQueue = [];
     setSaving(false);
   }, 3000 + Math.random() * 3000);
 
-  const onUpdate = (update: Uint8Array, origin: any) => {
-    const base64EncodedUpdate = fromUint8Array(update);
-    updateQueue = [...updateQueue, base64EncodedUpdate];
-    debouncedAutoSave();
-
-    if (origin?.key !== 'y-sync$') {
-      // Don't broadcast updates that were received from other peers.
-      return;
-    }
-
+  const broadcast = (channel: NotesBroadcastChannel, data: string) => {
+    const broadcast: PresenceBroadcast = {
+      event: 'broadcast',
+      data: [channel, data],
+    };
     roomsStore.sendDataToRoom({
       from: window.ship,
       kind: DataPacketKind.DATA,
-      value: {
-        broadcast: {
-          event: 'broadcast',
-          data: [base64EncodedUpdate],
-        },
-      },
+      value: { broadcast },
     });
   };
 
-  useEffect(() => {
-    if (!selectedYDoc) return;
+  if (
+    !selectedSpace ||
+    !selectedNote ||
+    !selectedAwareness ||
+    !selectedAwareness.doc
+  ) {
+    return null;
+  }
 
-    selectedYDoc.on('update', onUpdate);
-  }, [selectedYDoc]);
-
-  if (!selectedSpace?.isOur && !roomsStore.currentRoom) {
+  if (
+    (!selectedSpace.isOur &&
+      roomsStore.currentRoom?.path !== selectedSpace.path + selectedNote.id) ||
+    syncing
+  ) {
     return (
       <Flex flex={1} justifyContent="center" alignItems="center" height="100%">
         <Flex flexDirection="column" alignItems="center" gap="12px">
@@ -88,9 +85,12 @@ const EditorPresenter = () => {
   }
 
   return (
-    <EditorContainer>
-      <div ref={onEditorRef} style={{ flex: 1 }} />
-    </EditorContainer>
+    <EditorView
+      ydoc={selectedAwareness.doc}
+      awareness={selectedAwareness}
+      broadcast={broadcast}
+      onSave={debouncedAutoSave}
+    />
   );
 };
 

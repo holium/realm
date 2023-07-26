@@ -63,7 +63,7 @@ const NotesSidebarPresenter = () => {
 
     const noteRoomPath = space + id;
     const areWeAlreadyInTheRoom =
-      roomsStore.currentRoom && roomsStore.currentRoom?.path == noteRoomPath;
+      roomsStore.currentRoom && roomsStore.currentRoom?.path === noteRoomPath;
     if (areWeAlreadyInTheRoom) return;
 
     // DELETE/LEAVE CURRENT ROOM
@@ -74,21 +74,20 @@ const NotesSidebarPresenter = () => {
       .find((room) => room.path === noteRoomPath);
     if (existingRoom) {
       // JOIN ROOM
-      sound.playRoomEnter();
       await roomsStore.joinRoom(existingRoom.rid);
     } else {
       // CREATE ROOM
       const note = notesStore.getNote({ id });
       if (!note) return;
 
-      const newRoomRid = await roomsStore?.createRoom(
+      const newRoomRid = await roomsStore.createRoom(
         note.title,
         'public',
         noteRoomPath
       );
-      sound.playRoomEnter();
       await roomsStore.joinRoom(newRoomRid);
     }
+    sound.playRoomEnter();
 
     // In Notes rooms everyone should be muted by default.
     roomsStore.ourPeer.mute();

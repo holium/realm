@@ -19,4 +19,4 @@ export const yUndoPluginKey = new PluginKey('y-undo');
  *
  * @public
  */
-export const yCursorPluginKey = new PluginKey('yjs-cursor');
+export const yCaretPluginKey = new PluginKey('yjs-cursor');

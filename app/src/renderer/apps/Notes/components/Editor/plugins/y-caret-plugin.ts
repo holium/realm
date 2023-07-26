@@ -1,25 +1,22 @@
-// TODO: Remove this ts nocheck!
-// @ts-nocheck
-
 import * as math from 'lib0/math';
-import { Plugin } from 'prosemirror-state';
-import { Decoration, DecorationSet } from 'prosemirror-view';
+import { EditorState, Plugin } from 'prosemirror-state';
+import { Decoration, DecorationAttrs, DecorationSet } from 'prosemirror-view';
+import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
 
-import { yCursorPluginKey, ySyncPluginKey } from './keys';
+import { yCaretPluginKey, ySyncPluginKey } from './keys';
 import {
   absolutePositionToRelativePosition,
   relativePositionToAbsolutePosition,
   setMeta,
 } from './lib';
 
-/**
- * Default generator for a cursor element
- *
- * @param {any} user user data
- * @return {HTMLElement}
- */
-export const defaultCursorBuilder = (user) => {
+type User = {
+  name: string;
+  color: string;
+};
+
+export const defaultCursorBuilder = (user: User) => {
   const cursor = document.createElement('span');
   cursor.classList.add('ProseMirror-yjs-cursor');
   cursor.setAttribute('style', `border-color: ${user.color}`);
@@ -34,13 +31,7 @@ export const defaultCursorBuilder = (user) => {
   return cursor;
 };
 
-/**
- * Default generator for the selection attributes
- *
- * @param {any} user user data
- * @return {import('prosemirror-view').DecorationAttrs}
- */
-export const defaultSelectionBuilder = (user) => {
+export const defaultSelectionBuilder = (user: User): DecorationAttrs => {
   return {
     style: `background-color: ${user.color}70`,
     class: 'ProseMirror-yjs-selection',
@@ -49,17 +40,16 @@ export const defaultSelectionBuilder = (user) => {
 
 const rxValidColor = /^#[0-9a-fA-F]{6}$/;
 
-/**
- * @param {any} state
- * @param {Awareness} awareness
- * @param {function({ name: string, color: string }):Element} createCursor
- * @param {function({ name: string, color: string }):import('prosemirror-view').DecorationAttrs} createSelection
- * @return {any} DecorationSet
- */
-const createDecorations = (state, awareness, createCursor, createSelection) => {
+export const createDecorations = (
+  state: EditorState,
+  awareness: Awareness,
+  createCursor: typeof defaultCursorBuilder,
+  createSelection: typeof defaultSelectionBuilder
+): DecorationSet => {
   const ystate = ySyncPluginKey.getState(state);
   const y = ystate.doc;
-  const decorations = [];
+  const decorations: Decoration[] = [];
+
   if (
     ystate.snapshot != null ||
     ystate.prevSnapshot != null ||
@@ -68,21 +58,26 @@ const createDecorations = (state, awareness, createCursor, createSelection) => {
     // do not render cursors while snapshot is active
     return DecorationSet.create(state.doc, []);
   }
+
   awareness.getStates().forEach((aw, clientId) => {
     if (clientId === y.clientID) {
       return;
     }
+
     if (aw.cursor != null) {
       const user = aw.user || {};
+
       if (user.color == null) {
         user.color = '#ffa500';
       } else if (!rxValidColor.test(user.color)) {
         // We only support 6-digit RGB colors in y-prosemirror
         console.warn('A user uses an unsupported color format', user);
       }
+
       if (user.name == null) {
         user.name = `User: ${clientId}`;
       }
+
       let anchor = relativePositionToAbsolutePosition(
         y,
         ystate.type,
@@ -116,33 +111,25 @@ const createDecorations = (state, awareness, createCursor, createSelection) => {
       }
     }
   });
+
   return DecorationSet.create(state.doc, decorations);
 };
 
 /**
  * A prosemirror plugin that listens to awareness information on Yjs.
  * This requires that a `prosemirrorPlugin` is also bound to the prosemirror.
- *
- * @public
- * @param {Awareness} awareness
- * @param {object} opts
- * @param {function(any):HTMLElement} [opts.cursorBuilder]
- * @param {function(any):import('prosemirror-view').DecorationAttrs} [opts.selectionBuilder]
- * @param {function(any):any} [opts.getSelection]
- * @param {string} [cursorStateField] By default all editor bindings use the awareness 'cursor' field to propagate cursor information.
- * @return {any}
  */
-export const yCursorPlugin = (
-  awareness,
+export const yCaretPlugin = (
+  awareness: Awareness,
   {
     cursorBuilder = defaultCursorBuilder,
     selectionBuilder = defaultSelectionBuilder,
-    getSelection = (state) => state.selection,
+    getSelection = (state: EditorState) => state.selection,
   } = {},
   cursorStateField = 'cursor'
 ) => {
   return new Plugin({
-    key: yCursorPluginKey,
+    key: yCaretPluginKey,
     state: {
       init(_, state) {
         return createDecorations(
@@ -154,7 +141,7 @@ export const yCursorPlugin = (
       },
       apply(tr, prevState, _oldState, newState) {
         const ystate = ySyncPluginKey.getState(newState);
-        const yCursorState = tr.getMeta(yCursorPluginKey);
+        const yCursorState = tr.getMeta(yCaretPluginKey);
         if (
           (ystate && ystate.isChangeOrigin) ||
           (yCursorState && yCursorState.awarenessUpdated)
@@ -171,14 +158,14 @@ export const yCursorPlugin = (
     },
     props: {
       decorations: (state) => {
-        return yCursorPluginKey.getState(state);
+        return yCaretPluginKey.getState(state);
       },
     },
     view: (view) => {
       const awarenessListener = () => {
         // @ts-ignore
         if (view.docView) {
-          setMeta(view, yCursorPluginKey, { awarenessUpdated: true });
+          setMeta(view, yCaretPluginKey, { awarenessUpdated: true });
         }
       };
       const updateCursorInfo = () => {
@@ -190,18 +177,11 @@ export const yCursorPlugin = (
         }
         if (view.hasFocus()) {
           const selection = getSelection(view.state);
-          /**
-           * @type {Y.RelativePosition}
-           */
           const anchor = absolutePositionToRelativePosition(
             selection.anchor,
             ystate.type,
             ystate.binding.mapping
           );
-          console.log('updateCursorInfo', anchor);
-          /**
-           * @type {Y.RelativePosition}
-           */
           const head = absolutePositionToRelativePosition(
             selection.head,
             ystate.type,

@@ -1,5 +1,6 @@
 import { toUint8Array } from 'js-base64';
 import { flow, types } from 'mobx-state-tree';
+import { applyAwarenessUpdate, Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
 
 import { NotesService_IPCUpdate } from 'os/services/ship/notes/notes.service.types';
@@ -32,9 +33,10 @@ export const NotesStore = types
     personalNotes: types.optional(types.array(NoteModel), []),
     selectedNoteId: types.maybeNull(types.string),
     saving: types.optional(types.boolean, false),
+    syncing: types.optional(types.boolean, false),
   })
   .volatile(() => ({
-    ydocs: new Map<string, Y.Doc>(),
+    awarenesses: new Map<string, Awareness>(),
   }))
   .views((self) => ({
     get sortedSpaceNotes() {
@@ -52,10 +54,10 @@ export const NotesStore = types
 
       return notes.find((n) => n.id === self.selectedNoteId);
     },
-    get selectedYDoc() {
+    get selectedAwareness() {
       if (!self.selectedNoteId) return null;
 
-      return self.ydocs.get(self.selectedNoteId);
+      return self.awarenesses.get(self.selectedNoteId) ?? null;
     },
   }))
   .actions((self) => ({
@@ -151,9 +153,10 @@ export const NotesStore = types
       }).then((res) => {
         if (!res) return;
         return res.map((note) => {
-          // Create a Y.Doc for each note.
+          // Create a Y.Doc and awareness instance for each note.
           const ydoc = new Y.Doc();
-          self.ydocs.set(note.id, ydoc);
+          const awareness = new Awareness(ydoc);
+          self.awarenesses.set(note.id, awareness);
 
           return NoteModel.create(note);
         });
@@ -175,9 +178,10 @@ export const NotesStore = types
       }).then((res) => {
         if (!res) return;
         return res.map((note) => {
-          // Create a Y.Doc for each note.
+          // Create a Y.Doc and awareness instance for each note.
           const ydoc = new Y.Doc();
-          self.ydocs.set(note.id, ydoc);
+          const awareness = new Awareness(ydoc);
+          self.awarenesses.set(note.id, awareness);
 
           return NoteModel.create(note);
         });
@@ -195,12 +199,14 @@ export const NotesStore = types
           const note = self.spaceNotes.find((n) => n.id === update.note_id);
           if (!note) return;
 
-          const ydoc = self.ydocs.get(note.id);
-          if (!ydoc) return;
+          const awareness = self.awarenesses.get(note.id);
+          if (!awareness) return;
 
           const uint8Array = toUint8Array(update.note_update);
 
-          Y.applyUpdate(ydoc, uint8Array);
+          awareness.doc.transact(() => {
+            Y.applyUpdate(awareness.doc, uint8Array);
+          });
         });
       });
     },
@@ -209,9 +215,11 @@ export const NotesStore = types
       NotesIPC.subscribe({ space });
     },
 
-    syncLocalNotesWithBedrock(spacePath: string) {
-      return NotesIPC.syncWithBedrockNotes({ space: spacePath });
-    },
+    syncLocalNotesWithBedrock: flow(function* (spacePath: string) {
+      self.syncing = true;
+      yield NotesIPC.syncWithBedrockNotes({ space: spacePath });
+      self.syncing = false;
+    }),
 
     setSelectedNoteId: ({ id }: NotesStore_SetSelectedNoteId) => {
       self.selectedNoteId = id;
@@ -221,20 +229,31 @@ export const NotesStore = types
       self.saving = saving;
     },
 
-    applyBroadcastedNoteUpdate(update: string) {
-      const binaryEncodedUpdate = toUint8Array(update);
+    applyBroadcastedYdocUpdate(_from: string, update: string) {
       if (!self.selectedNoteId) return;
 
-      const selectedYDoc = self.ydocs.get(self.selectedNoteId);
-      if (!selectedYDoc) return;
+      const awareness = self.awarenesses.get(self.selectedNoteId);
+      if (!awareness) return;
 
-      selectedYDoc.transact(() => {
-        Y.applyUpdate(selectedYDoc, binaryEncodedUpdate);
+      const uint8Array = toUint8Array(update);
+
+      awareness.doc.transact(() => {
+        Y.applyUpdate(awareness.doc, uint8Array);
       });
     },
 
+    applyBroadcastedAwarenessUpdate(from: string, update: string) {
+      const binaryEncodedUpdate = toUint8Array(update);
+      if (!self.selectedNoteId) return;
+
+      const selectedAwareness = self.awarenesses.get(self.selectedNoteId);
+      if (!selectedAwareness) return;
+
+      applyAwarenessUpdate(selectedAwareness, binaryEncodedUpdate, from);
+    },
+
     getNotePreview(id: string) {
-      const ydoc = self.ydocs.get(id);
+      const ydoc = self.awarenesses.get(id)?.doc;
       if (!ydoc) return null;
 
       const preview = ydoc.getXmlFragment('prosemirror')?.toDOM()
@@ -254,17 +273,26 @@ export const NotesStore = types
       if (existingNote) return;
 
       notes.unshift(note);
+
+      const existingAwareness = self.awarenesses.get(note.id);
+      if (existingAwareness) return;
+
+      const ydoc = new Y.Doc();
+      const awareness = new Awareness(ydoc);
+      self.awarenesses.set(note.id, awareness);
     },
 
     _applyNoteUpdate(update: NotesStore_ApplyNoteUpdate) {
       const note = self.spaceNotes.find((n) => n.id === update.note_id);
       if (!note) return;
 
-      const ydoc = self.ydocs.get(note.id);
-      if (!ydoc) return;
+      const awareness = self.awarenesses.get(note.id);
+      if (!awareness) return;
 
-      ydoc.transact(() => {
-        Y.applyUpdate(ydoc, toUint8Array(update.update));
+      const uint8Array = toUint8Array(update.update);
+
+      awareness.doc.transact(() => {
+        Y.applyUpdate(awareness.doc, uint8Array);
       });
     },
 
@@ -295,19 +323,13 @@ export const notesStore = NotesStore.create({
   spaceNotes: [],
   selectedNoteId: null,
   saving: false,
+  syncing: false,
 });
 
 // -------------------------------
 // Listen for bedrock updates from the main process.
 // -------------------------------
 NotesIPC.onUpdate(({ type, payload }: NotesService_IPCUpdate) => {
-  // If a note is open, multiplayer should handle the update.
-  // const isInMultiplayerSession = Boolean(notesStore.selectedNote);
-  // if (isInMultiplayerSession) {
-  //   console.info('NotesStore.onUpdate', 'Note is open, ignoring update');
-  //   return;
-  // }
-
   if (type === 'create-note') {
     notesStore._insertNoteLocally({
       note: NoteModel.create(payload),

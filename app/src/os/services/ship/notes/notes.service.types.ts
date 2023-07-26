@@ -8,6 +8,10 @@ export type NotesService_GetNotes_Payload = {
   space: string;
 };
 
+export type NotesService_GetNoteUpdates_Payload = {
+  note_id: string;
+};
+
 export type NotesService_EditNoteTitle_Payload = {
   id: string;
   space: string;
@@ -52,12 +56,19 @@ type NotesService_IPCUpdate_CreateNote = {
   };
 };
 
-type NotesService_IPCUpdate_CreateNoteHistory = {
+type NotesService_IPCUpdate_CreateNoteUpdate = {
   type: 'apply-note-update';
   payload: {
     id: string;
     note_id: string;
     update: string;
+  };
+};
+
+type NotesService_IPCUpdate_DeleteNoteUpdate = {
+  type: 'delete-note-update';
+  payload: {
+    id: string;
   };
 };
 
@@ -79,6 +90,7 @@ type NotesService_IPCUpdate_UpdateNote = {
 
 export type NotesService_IPCUpdate =
   | NotesService_IPCUpdate_CreateNote
-  | NotesService_IPCUpdate_CreateNoteHistory
+  | NotesService_IPCUpdate_CreateNoteUpdate
+  | NotesService_IPCUpdate_DeleteNoteUpdate
   | NotesService_IPCUpdate_UpdateNote
   | NotesService_IPCUpdate_DeleteNote;
