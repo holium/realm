@@ -119,11 +119,15 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     if (!this.notesDB) return;
 
     // 1. Fetch notes metadata from Bedrock.
-    const bedrockResponse: BedrockResponse =
-      await APIConnection.getInstance().conduit.scry({
+    let bedrockResponse: BedrockResponse | undefined;
+    try {
+      bedrockResponse = await APIConnection.getInstance().conduit.scry({
         app: 'bedrock',
         path: `/db/path${space}`,
       });
+    } catch (error) {
+      console.error('Notes: Failed to fetch notes from Bedrock.', error);
+    }
     if (!bedrockResponse || !bedrockResponse.tables) return;
 
     // 2. Upsert notes metadata in SQLite.
