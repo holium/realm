@@ -145,11 +145,13 @@ export const Event = ({ eventInfo }: any) => {
       content={deletePrompt ? deletePopoverContent() : normalPopoverContent()}
     >
       {/* Custom event component */}
-      <Box
+      <Flex
         style={{
           padding: 2,
           background: color ? color : 'rgba(var(--rlm-accent-rgba), .5)',
           color: 'rgba(var(--rlm-text-rgba))',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
         }}
         flex={1}
         padding={0}
@@ -160,10 +162,15 @@ export const Event = ({ eventInfo }: any) => {
           setIsPopoverOpen(!isPopoverOpen);
         }}
         // TODO: stop overflow of text with ...
+        gap="5px"
       >
-        <b>{eventInfo.timeText}</b>
-        <i>{eventInfo.event.title}</i>
-      </Box>
+        <Text.Body fontWeight={600} style={{ textOverflow: 'ellipsis' }}>
+          {eventInfo.timeText}
+        </Text.Body>
+        <Text.Body style={{ textOverflow: 'ellipsis' }}>
+          {eventInfo.event.title}
+        </Text.Body>
+      </Flex>
     </Popover>
   );
 };

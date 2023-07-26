@@ -76,10 +76,12 @@ export const api = {
       custom: {},
     };
     const json = {
-      title,
-      description,
-      space,
-      perms,
+      space: {
+        title,
+        description,
+        space,
+        perms,
+      },
     };
     return await api.vent({
       ship: shipName(), // the ship to poke
