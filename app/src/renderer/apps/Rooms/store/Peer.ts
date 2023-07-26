@@ -172,7 +172,6 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onTrack(track: MediaStreamTrack, stream: MediaStream) {
-    console.log('onTRACK');
     if (!track || !(track instanceof MediaStreamTrack)) {
       console.error('Invalid track received in onTrack');
       return;
