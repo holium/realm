@@ -6,6 +6,7 @@ import { PresenceBroadcast } from '@holium/realm-presence';
 
 import { DataPacketKind } from 'renderer/apps/Rooms/store/room.types';
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { EditorView } from './EditorView';
@@ -17,6 +18,7 @@ export enum NotesBroadcastChannel {
 
 const EditorPresenter = () => {
   const roomsStore = useRoomsStore();
+  const { loggedInAccount } = useAppState();
   const { notesStore, spacesStore } = useShipStore();
 
   const selectedSpace = spacesStore.selected;
@@ -61,6 +63,7 @@ const EditorPresenter = () => {
   };
 
   if (
+    !loggedInAccount ||
     !selectedSpace ||
     !selectedNote ||
     !selectedAwareness ||
@@ -88,6 +91,15 @@ const EditorPresenter = () => {
     <EditorView
       ydoc={selectedAwareness.doc}
       awareness={selectedAwareness}
+      user={{
+        patp: loggedInAccount.serverId,
+        nickname: loggedInAccount.nickname,
+        color:
+          loggedInAccount.color && loggedInAccount.color !== '0x0'
+            ? loggedInAccount.color
+            : '0, 0, 0',
+        avatar: loggedInAccount.avatar,
+      }}
       broadcast={broadcast}
       onSave={debouncedAutoSave}
     />

@@ -1,3 +1,4 @@
+import { sigil, stringRenderer } from '@tlon/sigil-js';
 import * as math from 'lib0/math';
 import { EditorState, Plugin } from 'prosemirror-state';
 import { Decoration, DecorationAttrs, DecorationSet } from 'prosemirror-view';
@@ -11,40 +12,86 @@ import {
   setMeta,
 } from './lib';
 
-type User = {
-  name: string;
+export type UserMetadata = {
+  patp: string;
+  nickname: string | null;
   color: string;
+  avatar: string | null;
 };
 
-export const defaultCursorBuilder = (user: User) => {
+export const cursorBuilder = (user: UserMetadata) => {
   const cursor = document.createElement('span');
   cursor.classList.add('ProseMirror-yjs-cursor');
-  cursor.setAttribute('style', `border-color: ${user.color}`);
+  cursor.setAttribute('style', `border-color: rgba(${user.color}, 1)`);
   const userDiv = document.createElement('div');
-  userDiv.setAttribute('style', `background-color: ${user.color}`);
-  userDiv.insertBefore(document.createTextNode(user.name), null);
-  const nonbreakingSpace1 = document.createTextNode('\u2060');
-  const nonbreakingSpace2 = document.createTextNode('\u2060');
-  cursor.insertBefore(nonbreakingSpace1, null);
+  userDiv.setAttribute(
+    'style',
+    `
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem;
+    color: rgba(255, 255, 255, 1);
+    background-color: rgba(${user.color}, 0.3);
+    border: 1px solid rgba(${user.color}, 1);
+    border-radius: 4px;
+    `
+  );
+
+  if (user.avatar) {
+    const avatar = document.createElement('img');
+    avatar.setAttribute('src', user.avatar || '');
+    avatar.setAttribute(
+      'style',
+      `
+    width: 1rem;
+    height: 1rem;
+    border-radius: 2px;
+    `
+    );
+    userDiv.insertBefore(avatar, null);
+  } else {
+    const svgString = sigil({
+      patp: user.patp,
+      size: 16,
+      icon: true,
+      margin: false,
+      renderer: stringRenderer,
+    });
+    const avatar = document.createElement('div');
+    avatar.setAttribute(
+      'style',
+      `
+    width: 1rem;
+    height: 1rem;
+    border-radius: 2px;
+    `
+    );
+    avatar.innerHTML = svgString;
+    userDiv.insertBefore(avatar, null);
+  }
+
+  userDiv.insertBefore(
+    document.createTextNode(user.nickname ?? user.patp),
+    null
+  );
   cursor.insertBefore(userDiv, null);
-  cursor.insertBefore(nonbreakingSpace2, null);
+
   return cursor;
 };
 
-export const defaultSelectionBuilder = (user: User): DecorationAttrs => {
+export const selectionBuilder = (user: UserMetadata): DecorationAttrs => {
   return {
-    style: `background-color: ${user.color}70`,
+    style: `background-color: rgba(${user.color}, 0.3)`,
     class: 'ProseMirror-yjs-selection',
   };
 };
 
-const rxValidColor = /^#[0-9a-fA-F]{6}$/;
-
 export const createDecorations = (
   state: EditorState,
   awareness: Awareness,
-  createCursor: typeof defaultCursorBuilder,
-  createSelection: typeof defaultSelectionBuilder
+  createCursor: typeof cursorBuilder,
+  createSelection: typeof selectionBuilder
 ): DecorationSet => {
   const ystate = ySyncPluginKey.getState(state);
   const y = ystate.doc;
@@ -64,20 +111,9 @@ export const createDecorations = (
       return;
     }
 
+    const user = aw.cursor.user;
+
     if (aw.cursor != null) {
-      const user = aw.user || {};
-
-      if (user.color == null) {
-        user.color = '#ffa500';
-      } else if (!rxValidColor.test(user.color)) {
-        // We only support 6-digit RGB colors in y-prosemirror
-        console.warn('A user uses an unsupported color format', user);
-      }
-
-      if (user.name == null) {
-        user.name = `User: ${clientId}`;
-      }
-
       let anchor = relativePositionToAbsolutePosition(
         y,
         ystate.type,
@@ -119,15 +155,7 @@ export const createDecorations = (
  * A prosemirror plugin that listens to awareness information on Yjs.
  * This requires that a `prosemirrorPlugin` is also bound to the prosemirror.
  */
-export const yCaretPlugin = (
-  awareness: Awareness,
-  {
-    cursorBuilder = defaultCursorBuilder,
-    selectionBuilder = defaultSelectionBuilder,
-    getSelection = (state: EditorState) => state.selection,
-  } = {},
-  cursorStateField = 'cursor'
-) => {
+export const yCaretPlugin = (awareness: Awareness, user: UserMetadata) => {
   return new Plugin({
     key: yCaretPluginKey,
     state: {
@@ -176,7 +204,7 @@ export const yCaretPlugin = (
           return;
         }
         if (view.hasFocus()) {
-          const selection = getSelection(view.state);
+          const selection = view.state.selection;
           const anchor = absolutePositionToRelativePosition(
             selection.anchor,
             ystate.type,
@@ -198,9 +226,10 @@ export const yCaretPlugin = (
               head
             )
           ) {
-            awareness.setLocalStateField(cursorStateField, {
+            awareness.setLocalStateField('cursor', {
               anchor,
               head,
+              user,
             });
           }
         } else if (
@@ -213,7 +242,7 @@ export const yCaretPlugin = (
           ) !== null
         ) {
           // delete cursor information if current cursor information is owned by this editor binding
-          awareness.setLocalStateField(cursorStateField, null);
+          awareness.setLocalStateField('cursor', null);
         }
       };
       awareness.on('change', awarenessListener);
@@ -225,7 +254,7 @@ export const yCaretPlugin = (
           view.dom.removeEventListener('focusin', updateCursorInfo);
           view.dom.removeEventListener('focusout', updateCursorInfo);
           awareness.off('change', awarenessListener);
-          awareness.setLocalStateField(cursorStateField, null);
+          awareness.setLocalStateField('cursor', null);
         },
       };
     },

@@ -5,8 +5,9 @@ import * as Y from 'yjs';
 
 import { NotesBroadcastChannel } from './Editor';
 import { ySyncPluginKey } from './plugins/keys';
+import { UserMetadata } from './plugins/y-caret-plugin';
 import {
-  OnAwarenessUpdate,
+  onAwarenessChange,
   OnYdocUpdate,
   useEditorView,
 } from './useEditorView';
@@ -17,13 +18,20 @@ import './prosemirror.css';
 let editQueue: string[] = [];
 
 type Props = {
+  user: UserMetadata;
   ydoc: Y.Doc;
   awareness: Awareness;
   broadcast: (channel: NotesBroadcastChannel, data: string) => void;
   onSave: DebouncedFunc<(editQueue: string[]) => Promise<void>>;
 };
 
-export const EditorView = ({ ydoc, awareness, broadcast, onSave }: Props) => {
+export const EditorView = ({
+  user,
+  ydoc,
+  awareness,
+  broadcast,
+  onSave,
+}: Props) => {
   const onYdocUpdate: OnYdocUpdate = (update, origin) => {
     const base64EncodedUpdate = fromUint8Array(update);
 
@@ -39,7 +47,7 @@ export const EditorView = ({ ydoc, awareness, broadcast, onSave }: Props) => {
     });
   };
 
-  const onAwarenessUpdate: OnAwarenessUpdate = (
+  const onAwarenessChange: onAwarenessChange = (
     { added, updated, removed },
     origin
   ) => {
@@ -56,10 +64,11 @@ export const EditorView = ({ ydoc, awareness, broadcast, onSave }: Props) => {
   };
 
   const { onEditorRef } = useEditorView({
+    user,
     ydoc,
     awareness,
     onYdocUpdate,
-    onAwarenessUpdate,
+    onAwarenessChange,
   });
 
   return (

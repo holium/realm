@@ -229,7 +229,7 @@ export const NotesStore = types
       self.saving = saving;
     },
 
-    applyBroadcastedYdocUpdate(_from: string, update: string) {
+    applyBroadcastedYdocUpdate(from: string, update: string) {
       if (!self.selectedNoteId) return;
 
       const awareness = self.awarenesses.get(self.selectedNoteId);
@@ -238,7 +238,7 @@ export const NotesStore = types
       const uint8Array = toUint8Array(update);
 
       awareness.doc.transact(() => {
-        Y.applyUpdate(awareness.doc, uint8Array);
+        Y.applyUpdate(awareness.doc, uint8Array, from);
       });
     },
 

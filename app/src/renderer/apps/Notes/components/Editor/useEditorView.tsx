@@ -8,14 +8,14 @@ import { Awareness } from 'y-protocols/awareness';
 import * as Y from 'yjs';
 
 import { textCursorPlugin } from './plugins/text-cursor-plugin';
-import { yCaretPlugin } from './plugins/y-caret-plugin';
+import { UserMetadata, yCaretPlugin } from './plugins/y-caret-plugin';
 import { ySyncPlugin } from './plugins/y-sync-plugin';
 import { yUndoPlugin } from './plugins/y-undo-plugin';
 import { schema } from './schema';
 
 export type OnYdocUpdate = (update: Uint8Array, origin: any) => void;
 
-export type OnAwarenessUpdate = (
+export type onAwarenessChange = (
   update: {
     added: number[];
     updated: number[];
@@ -25,17 +25,19 @@ export type OnAwarenessUpdate = (
 ) => void;
 
 type Props = {
+  user: UserMetadata;
   ydoc: Y.Doc;
   awareness: Awareness;
   onYdocUpdate: OnYdocUpdate;
-  onAwarenessUpdate: OnAwarenessUpdate;
+  onAwarenessChange: onAwarenessChange;
 };
 
 export const useEditorView = ({
+  user,
   ydoc,
   awareness,
   onYdocUpdate,
-  onAwarenessUpdate,
+  onAwarenessChange,
 }: Props) => {
   const [editorView, setEditorView] = useState<EditorView>();
 
@@ -53,7 +55,7 @@ export const useEditorView = ({
         plugins: [
           history(),
           ySyncPlugin(type),
-          yCaretPlugin(awareness),
+          yCaretPlugin(awareness, user),
           yUndoPlugin(),
           keymap(baseKeymap),
           keymap({
@@ -68,7 +70,7 @@ export const useEditorView = ({
 
     // Set up listeners for updates to the ydoc and awareness.
     ydoc.on('update', onYdocUpdate);
-    awareness.on('update', onAwarenessUpdate);
+    awareness.on('change', onAwarenessChange);
 
     setEditorView(prosemirrorView);
   };
