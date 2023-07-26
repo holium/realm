@@ -11,7 +11,7 @@ import {
   NewEvent,
   SpaceList,
 } from './components';
-import { log } from './utils';
+import { isOur, log } from './utils';
 
 import 'react-day-picker/dist/style.css';
 
@@ -148,19 +148,23 @@ export const App = () => {
   const fetchCalendarList = async () => {
     if (!selectedSpace) return;
     try {
-      const result = await api.getCalendarsSpace(selectedSpace);
-
-      log('getCalendarsSpace result => ', result);
-      if (result.calendars) {
-        const newCalendarList = Object.keys(result.calendars).map(
-          (key: string) => {
-            return { id: key, ...result.calendars[key] };
-          }
-        );
+      const result = isOur(selectedSpace)
+        ? await api.getOurCalendar()
+        : await api.getCalendarsSpace(selectedSpace);
+      const cals = result.our ? result.our : result.calendars;
+      if (cals) {
+        const newCalendarList = Object.keys(cals).map((key: string) => {
+          return { id: key, ...cals[key] };
+        });
         setCalendarList(newCalendarList);
+      } else {
+        //reset if no results to clear list
+        setCalendarList([]);
       }
     } catch (e) {
       log('fetchCalendarList error =>', e);
+      //reset if no results to clear list
+      setCalendarList([]);
     }
   };
   const fetchCalendarEntries = async (calendarId: string) => {
@@ -241,7 +245,7 @@ export const App = () => {
         <Flex flexDirection={'column'} marginRight="8px">
           {selectedSpace && (
             <Button.TextButton onClick={() => setSelectedSpace(null)}>
-              Select space
+              {selectedSpace}
             </Button.TextButton>
           )}
           {!selectedSpace ? (

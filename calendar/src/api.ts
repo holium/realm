@@ -69,20 +69,14 @@ export const api = {
   /**
    * Calendar related
    */
+
   createCalendar: async (space: string, title: string, description = '') => {
     const perms = {
       admins: 'admin',
       member: 'guest',
       custom: {},
     };
-    const json = {
-      space: {
-        title,
-        description,
-        space,
-        perms,
-      },
-    };
+    const json = { space: { title, description, space, perms } };
     return await api.vent({
       ship: shipName(), // the ship to poke
       dude: 'calendar-spaces', // the agent to poke
@@ -150,7 +144,7 @@ export const api = {
   /**
    * Spaces related
    */
-  getOur: async () => {
+  getOurCalendar: async () => {
     return api.createApi().scry({ app: 'calendar-spaces', path: '/our' });
   },
   getAlmanac: async () => {
@@ -484,6 +478,175 @@ export const api = {
       dude: 'calendar', // the agent to poke
       inputDesk: 'calendar', // where does the input mark live
       inputMark: 'span-action', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  /**
+   * Inbox/Outbox related
+   */
+  inviteToCalendar: async (
+    calendarId: string,
+    ship: string,
+    message: string
+  ) => {
+    const json = { cid: calendarId, ship: ship, msg: message };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'boxes-async-invite', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  cancelCalendarInvite: async (calendarId: string, ship: string) => {
+    const json = {
+      p: calendarId,
+      q: { cancel: { ship: ship } },
+    };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'boxes-invite-action', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  kickFromCalendar: async (calendarId: string, ship: string) => {
+    const json = {
+      p: calendarId,
+      q: { kick: { ship: ship } },
+    };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'boxes-invite-action', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  acceptCalendarInvite: async (calendarId: string) => {
+    const json = {
+      p: calendarId,
+      q: { accept: null },
+    };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'boxes-invite-action', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  rejectCalendarInvite: async (calendarId: string) => {
+    const json = {
+      p: calendarId,
+      q: { reject: null },
+    };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'boxes-invite-action', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  joinCalendar: async (calendarId: string) => {
+    const json = {
+      p: calendarId,
+      q: { join: null },
+    };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'boxes-join-action', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  leaveCalendar: async (calendarId: string) => {
+    const json = {
+      p: calendarId,
+      q: { leave: null },
+    };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'boxes-join-action', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  /**
+   * OurSpace related
+   */
+  createCalendarOur: async (title: string, description = '') => {
+    const json = { our: { title, description } };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar-spaces', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'spaces-async-create', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  deleteCalendarOur: async (calendarId: string) => {
+    const json = {
+      p: calendarId,
+      q: 'delete',
+    };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar-spaces', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'spaces-our-action', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  acceptInviteOur: async (calendarId: string) => {
+    const json = {
+      p: calendarId,
+      q: 'accept',
+    };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar-spaces', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'spaces-our-action', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  leaveCalendarOur: async (calendarId: string) => {
+    const json = {
+      p: calendarId,
+      q: 'leave',
+    };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar-spaces', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'spaces-our-action', // name of input mark
       outputDesk: 'calendar', // where does the output mark live
       outputMark: 'calendar-vent', // name of output mark
       body: json, // the actual poke content

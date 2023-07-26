@@ -10,7 +10,7 @@ import {
 } from '@holium/design-system';
 
 import { api } from '../api';
-import { log } from '../utils';
+import { isOur, log } from '../utils';
 import { CalendarItem } from './CalendarItem';
 interface Props {
   calendarList: any;
@@ -27,7 +27,9 @@ export const CalendarList = ({
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const addCalendar = async (newCalendar: string) => {
     try {
-      const result = await api.createCalendar(space, newCalendar);
+      const result = isOur(space)
+        ? await api.createCalendarOur(newCalendar)
+        : await api.createCalendar(space, newCalendar);
       log('addCalendar result => ', result);
     } catch (e) {
       log('addCalendar error => ', e);

@@ -341,3 +341,8 @@ export const reccurenceRuleToReadable = (rule: string): string => {
     }
   }
 };
+export const isOur = (space: string): boolean => {
+  const spaceName = space.split('/')?.[1];
+  if (spaceName && spaceName === 'our') return true;
+  return false;
+};
