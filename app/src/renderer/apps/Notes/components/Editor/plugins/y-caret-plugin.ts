@@ -24,32 +24,20 @@ export const cursorBuilder = (user: UserMetadata) => {
   cursor.classList.add('ProseMirror-yjs-cursor');
   cursor.setAttribute('style', `border-color: rgba(${user.color}, 1)`);
   const userDiv = document.createElement('div');
+  userDiv.classList.add('ProseMirror-yjs-cursor-user');
   userDiv.setAttribute(
     'style',
     `
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.25rem;
-    color: rgba(255, 255, 255, 1);
-    background-color: rgba(${user.color}, 0.3);
+    background-color: rgba(${user.color}, 0.5);
     border: 1px solid rgba(${user.color}, 1);
-    border-radius: 4px;
     `
   );
 
+  let avatar = document.createElement('div');
+  avatar.classList.add('ProseMirror-yjs-avatar');
   if (user.avatar) {
-    const avatar = document.createElement('img');
-    avatar.setAttribute('src', user.avatar || '');
-    avatar.setAttribute(
-      'style',
-      `
-    width: 1rem;
-    height: 1rem;
-    border-radius: 2px;
-    `
-    );
-    userDiv.insertBefore(avatar, null);
+    avatar = document.createElement('img');
+    avatar.setAttribute('src', user.avatar);
   } else {
     const svgString = sigil({
       patp: user.patp,
@@ -58,23 +46,11 @@ export const cursorBuilder = (user: UserMetadata) => {
       margin: false,
       renderer: stringRenderer,
     });
-    const avatar = document.createElement('div');
-    avatar.setAttribute(
-      'style',
-      `
-    width: 1rem;
-    height: 1rem;
-    border-radius: 2px;
-    `
-    );
+    avatar = document.createElement('div');
+    avatar.classList.add('ProseMirror-yjs-avatar');
     avatar.innerHTML = svgString;
-    userDiv.insertBefore(avatar, null);
   }
-
-  userDiv.insertBefore(
-    document.createTextNode(user.nickname ?? user.patp),
-    null
-  );
+  userDiv.insertBefore(avatar, null);
   cursor.insertBefore(userDiv, null);
 
   return cursor;
@@ -110,6 +86,8 @@ export const createDecorations = (
     if (clientId === y.clientID) {
       return;
     }
+
+    if (!aw.cursor?.user) return;
 
     const user = aw.cursor.user;
 

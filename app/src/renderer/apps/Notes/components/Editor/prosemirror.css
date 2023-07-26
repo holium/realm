@@ -32,6 +32,49 @@
   }
 }
 
+/* this is a rough fix for the first cursor position when the first paragraph is empty */
+.ProseMirror>.ProseMirror-yjs-cursor:first-child {
+  margin-top: 16px;
+}
+
+/* This gives the remote user caret. The colors are automatically overwritten*/
+.ProseMirror-yjs-cursor {
+  position: relative;
+  margin-left: -1px;
+  margin-right: -1px;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  border-color: orange;
+  word-break: normal;
+  pointer-events: none;
+}
+
+/* This renders the username above the caret */
+.ProseMirror-yjs-cursor-user {
+  position: absolute;
+  top: -1.1em;
+  left: -1px;
+  border-radius: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.ProseMirror-yjs-avatar {
+  width: 16px;
+  height: 16px;
+}
+
+#y-functions {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+#y-functions>* {
+  display: inline-block;
+}
+
 .tooltip {
   position: absolute;
   z-index: 1;
@@ -357,8 +400,4 @@ li.ProseMirror-selectednode:after {
 .ProseMirror h5:first-child,
 .ProseMirror h6:first-child {
   margin-top: 10px;
-}
-
-.ProseMirror p {
-  margin-bottom: 1em
 }

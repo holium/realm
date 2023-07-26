@@ -11,6 +11,9 @@ import { useShipStore } from 'renderer/stores/ship.store';
 
 import { EditorView } from './EditorView';
 
+// Playful colors for the text cursor to randomly cycle through.
+const cursorColors = ['255, 0, 0', '0, 255, 0', '0, 0, 255'];
+
 export enum NotesBroadcastChannel {
   YDocUpdate = 'notes-ydoc-update',
   AwarenessUpdate = 'notes-awareness-update',
@@ -97,7 +100,7 @@ const EditorPresenter = () => {
         color:
           loggedInAccount.color && loggedInAccount.color !== '0x0'
             ? loggedInAccount.color
-            : '0, 0, 0',
+            : cursorColors[Math.floor(Math.random() * cursorColors.length)],
         avatar: loggedInAccount.avatar,
       }}
       broadcast={broadcast}
