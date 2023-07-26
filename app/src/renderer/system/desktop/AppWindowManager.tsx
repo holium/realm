@@ -2,10 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { observer } from 'mobx-react';
 
-import { Flex } from '@holium/design-system/general';
-
 import { nativeApps } from 'renderer/apps/nativeApps';
-import { Notes } from 'renderer/apps/Notes/Notes';
 import {
   ContextMenuOption,
   useContextMenu,
@@ -13,12 +10,14 @@ import {
 import { useAppState } from 'renderer/stores/app.store';
 import { AppType } from 'renderer/stores/models/bazaar.model';
 
-import { AppWindowContainer } from './components/AppWindow/AppWindow.styles';
+import { AppWindow } from './components/AppWindow/AppWindow';
 
 const AppWindowManagerPresenter = () => {
   const { shellStore, showTitleBar } = useAppState();
   const { getOptions, setOptions } = useContextMenu();
   const id = 'desktop-fill';
+
+  const windows = Array.from(shellStore.windows.values());
 
   const contextMenuOptions: ContextMenuOption[] = useMemo(
     () => [
@@ -72,16 +71,9 @@ const AppWindowManagerPresenter = () => {
         right: 0,
       }}
     >
-      <AppWindowContainer
-        style={{
-          width: '90%',
-          height: '90%',
-        }}
-      >
-        <Flex width="100%" height="100%">
-          <Notes />
-        </Flex>
-      </AppWindowContainer>
+      {windows.map((appWindow) => (
+        <AppWindow key={appWindow.appId} appWindow={appWindow} />
+      ))}
     </motion.div>
   );
 };

@@ -27,7 +27,7 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
       [
         ...bazaarStore.installed,
         // ...bazaarStore.devApps,
-        // TODO: Remove this once bazaar is ready
+        // TODO: Remove this once bazaar is ready.
         {
           id: 'os-notes',
           title: 'Notes',
