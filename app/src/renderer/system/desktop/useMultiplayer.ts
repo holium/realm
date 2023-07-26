@@ -279,8 +279,6 @@ export const useMultiplayer = ({
         if (broadcastPayload.event === 'broadcast') {
           const [channel, update] = broadcastPayload.data;
 
-          console.log('channel', channel);
-
           if (channel === NotesBroadcastChannel.YDocUpdate) {
             notesStore.applyBroadcastedYdocUpdate(data.from, update as string);
           } else if (channel === NotesBroadcastChannel.AwarenessUpdate) {

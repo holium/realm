@@ -45,7 +45,6 @@ export const EditorView = ({ ydoc, awareness, broadcast, onSave }: Props) => {
   ) => {
     // Only broadcast updates that originate from us.
     if (origin !== 'local') return;
-    console.log('onAwarenessUpdate', { added, updated, removed });
 
     const changedClients = added.concat(updated).concat(removed);
     const awarenessUpdate = encodeAwarenessUpdate(awareness, changedClients);

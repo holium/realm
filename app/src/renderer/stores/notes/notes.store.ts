@@ -217,7 +217,7 @@ export const NotesStore = types
 
     syncLocalNotesWithBedrock: flow(function* (spacePath: string) {
       self.syncing = true;
-      yield NotesIPC.syncWithBedrockNotes({ space: spacePath });
+      yield NotesIPC.syncWithBedrock({ space: spacePath });
       self.syncing = false;
     }),
 

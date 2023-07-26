@@ -104,15 +104,17 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     return this.notesDB.selectNoteUpdates({ note_id });
   }
 
-  async syncWithBedrockNotes({ space }: NotesService_GetBedrockState_Payload) {
-    // Phase 1: Sync notes metadata (not CRDT-d yet).
-    // 1. Fetch notes metadata from Bedrock.
-    // 2. Upsert notes metadata in SQLite.
-    // 3. Delete notes metadata that are no longer in Bedrock.
-    // Phase 2: Sync notes updates (CRDT-d).
-    // 4. Fetch all notes updates from Bedrock.
-    // 5. Insert all missing notes updates in SQLite.
-    // 6. Post back notes updates that weren't in Bedrock.
+  async syncWithBedrock({ space }: NotesService_GetBedrockState_Payload) {
+    /**
+     * PHASE 1 – Sync `notes` (not using yjs yet, so we override)
+     * 1. Fetch notes (metadata) from Bedrock.
+     * 2. Upsert notes in SQLite.
+     * 3. Delete notes rows that are no longer in Bedrock.
+     * PHASE 2 – Sync `notes_updates` (using yjs for CRDT)
+     * 4. Fetch all notes_updates from Bedrock.
+     * 5. Insert all missing notes updates rows in SQLite.
+     * 6. Post back missing notes_updates rows to Bedrock.
+     */
 
     if (!this.notesDB) return;
 
@@ -122,11 +124,13 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         app: 'bedrock',
         path: `/db/path${space}`,
       });
-    if (!bedrockResponse) return;
+    if (!bedrockResponse || !bedrockResponse.tables) return;
 
     // 2. Upsert notes metadata in SQLite.
     const notesTable = bedrockResponse.tables.find((o) => o.type === 'notes');
-    const notesTableRows = notesTable?.rows ?? [];
+    if (!notesTable) return;
+
+    const notesTableRows = notesTable.rows ?? [];
     notesTableRows.forEach((note) => {
       const rowData: BedrockRowData_Notes = note.data;
 
@@ -148,6 +152,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         },
       });
     });
+
     // 3. Delete notes metadata that are no longer in Bedrock.
     const notesDBNotes = this.notesDB.selectAllNotes({ space });
     notesDBNotes.forEach((note) => {
@@ -169,9 +174,10 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     const notesUpdatesTable = bedrockResponse.tables.find(
       (o) => o.type === 'notes-updates'
     );
-    const notesUpdatesTableRows = notesUpdatesTable?.rows ?? [];
+    if (!notesUpdatesTable) return;
 
-    // 5. Insert notes updates in SQLite.
+    // 5. Insert all missing notes updates in SQLite.
+    const notesUpdatesTableRows = notesUpdatesTable.rows ?? [];
     notesUpdatesTableRows.forEach((noteUpdate) => {
       const rowData: BedrockRowData_NotesUpdates = noteUpdate.data;
 
