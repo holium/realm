@@ -32,6 +32,7 @@ export const NotesStore = types
     spaceNotes: types.optional(types.array(NoteModel), []),
     personalNotes: types.optional(types.array(NoteModel), []),
     selectedNoteId: types.maybeNull(types.string),
+    searchQuery: types.optional(types.string, ''),
     saving: types.optional(types.boolean, false),
     syncing: types.optional(types.boolean, false),
   })
@@ -58,6 +59,37 @@ export const NotesStore = types
       if (!self.selectedNoteId) return null;
 
       return self.awarenesses.get(self.selectedNoteId) ?? null;
+    },
+    get searchedNotes() {
+      // Both personal and space notes.
+      const allNotes = [...self.personalNotes, ...self.spaceNotes];
+
+      return allNotes.filter((note) => {
+        const matchingTitle = note.title
+          .toLowerCase()
+          .includes(self.searchQuery.toLowerCase());
+
+        if (matchingTitle) return true;
+
+        const doc = self.awarenesses.get(note.id)?.doc;
+        if (!doc) return false;
+
+        // Check if any of the prosemirror nodes match the search query.
+        const prosemirrorNodes = doc.getXmlFragment('prosemirror')?.toDOM()
+          .firstChild?.childNodes;
+        if (!prosemirrorNodes) return false;
+
+        const matchingProsemirrorNodes = Array.from(prosemirrorNodes).filter(
+          (node) => {
+            const textContent = node.textContent ?? '';
+            return textContent
+              .toLowerCase()
+              .includes(self.searchQuery.toLowerCase());
+          }
+        );
+
+        return matchingProsemirrorNodes.length > 0;
+      });
     },
   }))
   .actions((self) => ({
@@ -227,6 +259,10 @@ export const NotesStore = types
 
     setSaving: (saving: boolean) => {
       self.saving = saving;
+    },
+
+    setSearchquery: (query: string) => {
+      self.searchQuery = query;
     },
 
     applyBroadcastedYdocUpdate(from: string, update: string) {

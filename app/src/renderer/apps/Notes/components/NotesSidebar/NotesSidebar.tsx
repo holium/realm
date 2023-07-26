@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
@@ -33,13 +32,15 @@ const NotesSidebarPresenter = () => {
     sortedSpaceNotes,
     selectedNoteId,
     setSelectedNoteId,
+    searchQuery,
+    searchedNotes,
+    setSearchquery,
     getNotePreview,
     deleteNote,
   } = notesStore;
   const selectedSpace = spacesStore.selected;
 
   const creating = useToggle(false);
-  const [_, setSearchString] = useState<string>('');
 
   if (!selectedSpace) return null;
 
@@ -104,7 +105,7 @@ const NotesSidebarPresenter = () => {
           height={32}
           placeholder="Search"
           onChange={(e) => {
-            setSearchString((e.target as HTMLInputElement).value);
+            setSearchquery((e.target as HTMLInputElement).value);
           }}
         />
         <Button.IconButton
@@ -124,68 +125,108 @@ const NotesSidebarPresenter = () => {
         </Button.IconButton>
       </Flex>
       <NotesSidebarSectionsContainer>
-        {!selectedSpace.isOur && (
+        {searchQuery ? (
           <NotesSidebarSection>
             <NotesSectionDivider>
               <NotesSectionDividerText>
-                {selectedSpace.name}
+                {searchedNotes.length} search results
               </NotesSectionDividerText>
               <NotesSectionDividerBorder />
             </NotesSectionDivider>
             <NotesSidebarSectionList>
-              {sortedSpaceNotes && sortedSpaceNotes.length ? (
-                sortedSpaceNotes.map((note) => (
-                  <NoteRow
-                    key={`space-note-row-${note.id}`}
-                    id={note.id}
-                    title={note.title}
-                    author={note.author}
-                    space={note.space}
-                    updatedAt={note.updated_at}
-                    firstParagraph={getNotePreview(note.id)}
-                    isPersonal={false}
-                    isSelected={selectedNoteId === note.id}
-                    onClick={() => onClickSpaceNote(note.id, note.space)}
-                    onClickDelete={() => {
-                      deleteNote({ id: note.id, space: note.space });
-                    }}
-                  />
-                ))
-              ) : (
-                <NoNotesYet>No notes yet</NoNotesYet>
-              )}
-            </NotesSidebarSectionList>
-          </NotesSidebarSection>
-        )}
-        <NotesSidebarSection>
-          <NotesSectionDivider>
-            <NotesSectionDividerText>My Notes</NotesSectionDividerText>
-            <NotesSectionDividerBorder />
-          </NotesSectionDivider>
-          <NotesSidebarSectionList>
-            {sortedPersonalNotes && sortedPersonalNotes.length ? (
-              sortedPersonalNotes.map((note) => (
+              {searchedNotes.map((note) => (
                 <NoteRow
-                  key={`personal-note-row-${note.id}`}
+                  key={`searched-note-row-${note.id}`}
                   id={note.id}
                   title={note.title}
                   author={note.author}
                   space={note.space}
                   updatedAt={note.updated_at}
                   firstParagraph={getNotePreview(note.id)}
-                  isPersonal
+                  isPersonal={
+                    note.space === `/${loggedInAccount?.serverId}/our`
+                  }
                   isSelected={selectedNoteId === note.id}
-                  onClick={() => setSelectedNoteId({ id: note.id })}
+                  onClick={() => {
+                    if (note.space === `/${loggedInAccount?.serverId}/our`) {
+                      setSelectedNoteId({ id: note.id });
+                    } else {
+                      onClickSpaceNote(note.id, note.space);
+                    }
+                  }}
                   onClickDelete={() => {
                     deleteNote({ id: note.id, space: note.space });
                   }}
                 />
-              ))
-            ) : (
-              <NoNotesYet>No notes yet</NoNotesYet>
+              ))}
+            </NotesSidebarSectionList>
+          </NotesSidebarSection>
+        ) : (
+          <>
+            {!selectedSpace.isOur && (
+              <NotesSidebarSection>
+                <NotesSectionDivider>
+                  <NotesSectionDividerText>
+                    {selectedSpace.name}
+                  </NotesSectionDividerText>
+                  <NotesSectionDividerBorder />
+                </NotesSectionDivider>
+                <NotesSidebarSectionList>
+                  {sortedSpaceNotes && sortedSpaceNotes.length ? (
+                    sortedSpaceNotes.map((note) => (
+                      <NoteRow
+                        key={`space-note-row-${note.id}`}
+                        id={note.id}
+                        title={note.title}
+                        author={note.author}
+                        space={note.space}
+                        updatedAt={note.updated_at}
+                        firstParagraph={getNotePreview(note.id)}
+                        isPersonal={false}
+                        isSelected={selectedNoteId === note.id}
+                        onClick={() => onClickSpaceNote(note.id, note.space)}
+                        onClickDelete={() => {
+                          deleteNote({ id: note.id, space: note.space });
+                        }}
+                      />
+                    ))
+                  ) : (
+                    <NoNotesYet>No notes yet</NoNotesYet>
+                  )}
+                </NotesSidebarSectionList>
+              </NotesSidebarSection>
             )}
-          </NotesSidebarSectionList>
-        </NotesSidebarSection>
+            <NotesSidebarSection>
+              <NotesSectionDivider>
+                <NotesSectionDividerText>My Notes</NotesSectionDividerText>
+                <NotesSectionDividerBorder />
+              </NotesSectionDivider>
+              <NotesSidebarSectionList>
+                {sortedPersonalNotes && sortedPersonalNotes.length ? (
+                  sortedPersonalNotes.map((note) => (
+                    <NoteRow
+                      key={`personal-note-row-${note.id}`}
+                      id={note.id}
+                      title={note.title}
+                      author={note.author}
+                      space={note.space}
+                      updatedAt={note.updated_at}
+                      firstParagraph={getNotePreview(note.id)}
+                      isPersonal
+                      isSelected={selectedNoteId === note.id}
+                      onClick={() => setSelectedNoteId({ id: note.id })}
+                      onClickDelete={() => {
+                        deleteNote({ id: note.id, space: note.space });
+                      }}
+                    />
+                  ))
+                ) : (
+                  <NoNotesYet>No notes yet</NoNotesYet>
+                )}
+              </NotesSidebarSectionList>
+            </NotesSidebarSection>
+          </>
+        )}
       </NotesSidebarSectionsContainer>
     </NotesSidebarContainer>
   );
