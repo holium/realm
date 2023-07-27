@@ -168,7 +168,13 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
   const createEventFullDaySingle = async () => {
     if (!datePickerSelected || !newEventName) return;
 
-    const startDateMS = datePickerSelected.getTime();
+    const startDateMS = new Date(
+      Date.UTC(
+        datePickerSelected.getUTCFullYear(),
+        datePickerSelected.getUTCMonth(),
+        datePickerSelected.getUTCDate()
+      )
+    ).getTime();
     try {
       const result = await api.createSpanFullDaySingle(
         selectedCalendar,
@@ -291,7 +297,13 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
   const createEventFullDayPeriodic = async () => {
     if (!datePickerSelected || !newEventName) return;
 
-    const startDateMS = datePickerSelected.getTime();
+    const startDateMS = new Date(
+      Date.UTC(
+        datePickerSelected.getUTCFullYear(),
+        datePickerSelected.getUTCMonth(),
+        datePickerSelected.getUTCDate()
+      )
+    ).getTime();
 
     const repeatCountObject = { l: 0, r: reccurentRepTime - 1 };
     const timeBetweenEventsEveryday = 1 * 60 * 60 * 24 * 1000; //1 is the number of days
