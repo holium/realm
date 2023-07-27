@@ -16,6 +16,8 @@ const NotesPresenter = () => {
   );
 
   useEffect(() => {
+    notesStore.setSelectedNoteId({ id: null });
+
     if (!selectedSpace) return;
 
     if (!selectedSpace.isOur) {
@@ -29,11 +31,8 @@ const NotesPresenter = () => {
     // Always load notes updates.
     notesStore.applyNotesUpdates();
 
-    // Subscribe to Bedrock updates.
-    notesStore.subscribeToBedrockUpdates({ space: selectedSpace.path });
-
-    // Sync local notes with Bedrock.
-    notesStore.syncLocalNotesWithBedrock(selectedSpace.path);
+    // Connect to bedrock.
+    notesStore.connectToBedrock({ space: selectedSpace.path });
   }, [selectedSpace]);
 
   return (

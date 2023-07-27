@@ -37,7 +37,7 @@ const EditorPresenter = () => {
   const {
     selectedNote,
     selectedAwareness,
-    syncing,
+    initializing,
     createNoteUpdate,
     setSaving,
   } = notesStore;
@@ -89,13 +89,13 @@ const EditorPresenter = () => {
   const alreadyInRoom =
     roomsStore.currentRoom?.path === selectedSpace.path + selectedNote.id;
 
-  if (syncing || (!isPersonalNote && !alreadyInRoom)) {
+  if (initializing || (!isPersonalNote && !alreadyInRoom)) {
     return (
       <Flex flex={1} justifyContent="center" alignItems="center" height="100%">
         <Flex flexDirection="column" alignItems="center" gap="12px">
           <Spinner size="19px" width={2} />
           <Text.Body opacity={0.5}>
-            {syncing ? 'Loading note' : 'Connecting to peers'}
+            {initializing ? 'Loading updates' : 'Connecting to peers'}
           </Text.Body>
         </Flex>
       </Flex>

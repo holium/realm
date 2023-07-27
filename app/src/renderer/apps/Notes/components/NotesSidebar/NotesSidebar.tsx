@@ -31,9 +31,10 @@ const NotesSidebarPresenter = () => {
     sortedPersonalNotes,
     sortedSpaceNotes,
     selectedNoteId,
-    setSelectedNoteId,
     searchQuery,
     searchedNotes,
+    initializing,
+    setSelectedNoteId,
     setSearchquery,
     getNotePreview,
     deleteNote,
@@ -191,7 +192,9 @@ const NotesSidebarPresenter = () => {
                       />
                     ))
                   ) : (
-                    <NoNotesYet>No notes yet</NoNotesYet>
+                    <NoNotesYet>
+                      {initializing ? 'Loading...' : 'No notes yet'}
+                    </NoNotesYet>
                   )}
                 </NotesSidebarSectionList>
               </NotesSidebarSection>
@@ -221,7 +224,9 @@ const NotesSidebarPresenter = () => {
                     />
                   ))
                 ) : (
-                  <NoNotesYet>No notes yet</NoNotesYet>
+                  <NoNotesYet>
+                    {initializing ? 'Loading...' : 'No notes yet'}
+                  </NoNotesYet>
                 )}
               </NotesSidebarSectionList>
             </NotesSidebarSection>

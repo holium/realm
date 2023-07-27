@@ -1,3 +1,6 @@
+// TODO: rm this @ts-nocheck
+// @ts-nocheck
+
 import * as error from 'lib0/error';
 import * as eventloop from 'lib0/eventloop';
 import * as map from 'lib0/map';

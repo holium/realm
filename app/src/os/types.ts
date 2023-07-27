@@ -61,3 +61,29 @@ export type BedrockSubscriptionUpdate = {
   path?: string;
   type?: string;
 };
+
+type Access = {
+  edit: string;
+  create: boolean;
+  delete: string;
+};
+
+export type BedrockPath = {
+  'received-at': number;
+  'updated-at': number;
+  'default-access': {
+    '': Access;
+    host: Access;
+  };
+  constraints: null;
+  host: Patp;
+  'created-at': number;
+  path: string;
+  replication: 'host';
+  'table-access': {
+    [key: string]: {
+      host: Access;
+      $: Access;
+    };
+  };
+};

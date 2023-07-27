@@ -19,7 +19,6 @@ import {
   NotesStore_LoadLocalNotes,
   NotesStore_Note,
   NotesStore_SetSelectedNoteId,
-  NotesStore_SubscribeToBedrockUpdates,
   NotesStore_UpdateNoteLocally,
 } from './notes.store.types';
 
@@ -34,7 +33,7 @@ export const NotesStore = types
     selectedNoteId: types.maybeNull(types.string),
     searchQuery: types.optional(types.string, ''),
     saving: types.optional(types.boolean, false),
-    syncing: types.optional(types.boolean, false),
+    initializing: types.optional(types.boolean, false),
   })
   .volatile(() => ({
     awarenesses: new Map<string, Awareness>(),
@@ -93,6 +92,15 @@ export const NotesStore = types
     },
   }))
   .actions((self) => ({
+    connectToBedrock: flow(function* ({ space }: { space: string }) {
+      self.initializing = true;
+
+      yield NotesIPC.createPublicBedrockPath({ space });
+      yield NotesIPC.syncWithBedrock({ space });
+      NotesIPC.subscribe({ space });
+
+      self.initializing = false;
+    }),
     /*
      * Used by the UI layer to create a note.
      */
@@ -156,17 +164,13 @@ export const NotesStore = types
       self.saving = false;
     }),
 
-    createNoteUpdate: flow(function* ({
-      note_id,
-      space,
-      update,
-    }: NotesStore_CreateNoteUpdate) {
-      yield NotesIPC.createNoteUpdate({
+    createNoteUpdate({ note_id, space, update }: NotesStore_CreateNoteUpdate) {
+      return NotesIPC.createNoteUpdate({
         note_id,
         space,
         update,
       });
-    }),
+    },
 
     getNote({ id }: NotesStore_GetNote) {
       const isPersonalNote = self.personalNotes.find((n) => n.id === id);
@@ -242,16 +246,6 @@ export const NotesStore = types
         });
       });
     },
-
-    subscribeToBedrockUpdates({ space }: NotesStore_SubscribeToBedrockUpdates) {
-      NotesIPC.subscribe({ space });
-    },
-
-    syncLocalNotesWithBedrock: flow(function* (spacePath: string) {
-      self.syncing = true;
-      yield NotesIPC.syncWithBedrock({ space: spacePath });
-      self.syncing = false;
-    }),
 
     setSelectedNoteId: ({ id }: NotesStore_SetSelectedNoteId) => {
       self.selectedNoteId = id;
@@ -359,7 +353,7 @@ export const notesStore = NotesStore.create({
   spaceNotes: [],
   selectedNoteId: null,
   saving: false,
-  syncing: false,
+  initializing: false,
 });
 
 // -------------------------------

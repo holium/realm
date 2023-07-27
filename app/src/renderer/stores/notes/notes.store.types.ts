@@ -26,10 +26,6 @@ export type NotesStore_LoadLocalNotes = {
   space: string;
 };
 
-export type NotesStore_SubscribeToBedrockUpdates = {
-  space: string;
-};
-
 export type NotesStore_SetSelectedNoteId = {
   id: string | null;
 };
