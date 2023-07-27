@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+// TODO: install this (peerdep?)
 import {
   Box,
   Button,
@@ -12,6 +13,8 @@ import {
 import { api } from '../api';
 import { isOur, log } from '../utils';
 import { CalendarItem } from './CalendarItem';
+import { CalendarPerms } from './CalendarPerms';
+
 interface Props {
   calendarList: any;
   onCalendarSelect: (id: string) => void;
@@ -24,18 +27,18 @@ export const CalendarList = ({
   selectedCalendar,
   space,
 }: Props) => {
+  const [newCalendar, setNewCalendar] = useState<string>('');
   const [isAdding, setIsAdding] = useState<boolean>(false);
-  const addCalendar = async (newCalendar: string) => {
+
+  const addCalendarOur = async () => {
     try {
-      const result = isOur(space)
-        ? await api.createCalendarOur(newCalendar)
-        : await api.createCalendar(space, newCalendar);
-      log('addCalendar result => ', result);
+      const result = await api.createCalendarOur(newCalendar);
+
+      log('addCalendarOur result => ', result);
     } catch (e) {
-      log('addCalendar error => ', e);
+      log('addCalendarOur error => ', e);
     }
   };
-  const [newCalendar, setNewCalendar] = useState<string>('');
 
   return (
     <>
@@ -66,37 +69,47 @@ export const CalendarList = ({
           return (
             <CalendarItem
               key={'calendar-' + index}
+              id={item.id}
               title={item.title}
               description={item.description}
-              id={item.id}
+              perms={item.perms}
               onCalendarSelect={onCalendarSelect}
               selectedCalendar={selectedCalendar}
+              space={space}
+              calendarId={item.id}
             />
           );
         })}
-        {isAdding && (
-          <TextInput
-            id="new-calendar-input"
-            name="new-calendar-input"
-            tabIndex={1}
-            autoFocus
-            placeholder="New calendar"
-            value={newCalendar}
-            onKeyDown={(evt: any) => {
-              if (evt.key === 'Enter' && newCalendar.length > 0) {
-                addCalendar(newCalendar);
-              }
-              // Hitting escape closes the inpu
-              if (evt.key === 'Escape') {
-                setIsAdding(false);
-              }
-            }}
-            onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-              setNewCalendar(evt.target.value);
-            }}
-            onBlur={() => setIsAdding(false)}
-          />
-        )}
+        {isAdding &&
+          (isOur(space) ? (
+            <TextInput
+              id="new-calendar-input"
+              name="new-calendar-input"
+              autoFocus
+              placeholder="New calendar"
+              value={newCalendar}
+              onKeyDown={(evt: any) => {
+                if (evt.key === 'Enter' && newCalendar.length > 0) {
+                  addCalendarOur();
+                }
+                // Hitting escape closes the inpu
+                if (evt.key === 'Escape') {
+                  setIsAdding(false);
+                }
+              }}
+              onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
+                setNewCalendar(evt.target.value);
+              }}
+              //    onBlur={() => setIsAdding(false)}
+            />
+          ) : (
+            <CalendarPerms
+              setVisible={setIsAdding}
+              edit={false}
+              calendarId={null}
+              space={space}
+            />
+          ))}
       </Flex>
     </>
   );

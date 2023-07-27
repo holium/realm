@@ -1,16 +1,10 @@
 import { useState } from 'react';
 
-import {
-  Button,
-  Flex,
-  Icon,
-  Menu,
-  Text,
-  TextInput,
-} from '@holium/design-system';
+import { Button, Flex, Icon, Menu, Text } from '@holium/design-system';
 
-import { api } from '../api';
+import { api, Perms } from '../api';
 import { log } from '../utils';
+import { CalendarPerms } from './CalendarPerms';
 
 interface Props {
   title: string;
@@ -18,6 +12,9 @@ interface Props {
   id: string;
   onCalendarSelect: (id: string) => void;
   selectedCalendar: null | string;
+  space: string;
+  calendarId: string;
+  perms: Perms;
 }
 
 export const CalendarItem = ({
@@ -25,49 +22,34 @@ export const CalendarItem = ({
   id,
   onCalendarSelect,
   selectedCalendar,
+  space,
+  calendarId,
+  perms,
 }: Props) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [newTitle, setNewTitle] = useState<string>('');
+
   const deleteCalendar = async (id: string) => {
     try {
-      const result = await api.deleteCalendar(id);
+      const result = await api.deleteCalendar(space, id);
 
       log('deleteCalendar result => ', result);
     } catch (e) {
       log('deleteCalendar error => ', e);
     }
   };
-  const editCalendar = async (newTitle: string, id: string) => {
-    setIsEditing(false);
-    try {
-      log(newTitle, id);
-    } catch (e) {
-      log(newTitle, id);
-    }
-  };
+
   return (
     <>
       {isEditing ? (
-        <TextInput
-          id="edit-calendar-input"
-          name="edit-calendar-input"
-          tabIndex={1}
-          autoFocus
-          placeholder="New calendar title"
-          value={newTitle}
-          onKeyDown={(evt: any) => {
-            if (evt.key === 'Enter' && newTitle.length > 0) {
-              editCalendar(newTitle, id);
-            }
-            // Hitting escape closes the inpu
-            if (evt.key === 'Escape') {
-              setIsEditing(false);
-            }
+        <CalendarPerms
+          defaultValues={{
+            title: title,
+            perms,
           }}
-          onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-            setNewTitle(evt.target.value);
-          }}
-          onBlur={() => setIsEditing(false)}
+          setVisible={setIsEditing}
+          calendarId={calendarId}
+          edit={true}
+          space={space}
         />
       ) : (
         <Flex
@@ -105,7 +87,6 @@ export const CalendarItem = ({
                 onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
                   evt.stopPropagation();
                   setIsEditing(true);
-                  setNewTitle(title);
                 },
               },
               {

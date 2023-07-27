@@ -161,6 +161,7 @@ export const App = () => {
         //reset if no results to clear list
         setCalendarList([]);
       }
+      log('fetchCalendarList result =>', result);
     } catch (e) {
       log('fetchCalendarList error =>', e);
       //reset if no results to clear list
@@ -244,7 +245,10 @@ export const App = () => {
       <Flex>
         <Flex flexDirection={'column'} marginRight="8px">
           {selectedSpace && (
-            <Button.TextButton onClick={() => setSelectedSpace(null)}>
+            <Button.TextButton
+              tabIndex={1}
+              onClick={() => setSelectedSpace(null)}
+            >
               {selectedSpace}
             </Button.TextButton>
           )}

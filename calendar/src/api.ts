@@ -3,6 +3,13 @@ import memoize from 'lodash/memoize';
 
 import { log, shipCode, shipName } from './utils';
 type RepeatCount = { l: number; r: number };
+export type Roles = 'admin' | 'viewer' | 'guest' | 'member';
+export type Perms = {
+  admins: Roles;
+  member: null | Roles;
+  custom: { [key: string]: Roles };
+};
+
 export const api = {
   createApi: memoize(() => {
     /*
@@ -70,18 +77,33 @@ export const api = {
    * Calendar related
    */
 
-  createCalendar: async (space: string, title: string, description = '') => {
-    const perms = {
-      admins: 'admin',
-      member: 'guest',
-      custom: {},
-    };
+  createCalendar: async (
+    space: string,
+    title: string,
+    description = '',
+    perms: Perms
+  ) => {
     const json = { space: { title, description, space, perms } };
     return await api.vent({
       ship: shipName(), // the ship to poke
       dude: 'calendar-spaces', // the agent to poke
       inputDesk: 'calendar', // where does the input mark live
       inputMark: 'spaces-async-create', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  repermCalendar: async (space: string, calendarId: string, perms: Perms) => {
+    const json = {
+      space: space,
+      axn: { reperm: { cid: calendarId, perms: perms } },
+    };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar-spaces', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'spaces-crud-action', // name of input mark
       outputDesk: 'calendar', // where does the output mark live
       outputMark: 'calendar-vent', // name of output mark
       body: json, // the actual poke content
