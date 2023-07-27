@@ -3,6 +3,7 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import {
   Box,
   Button,
+  CheckBox,
   Flex,
   Icon,
   Select,
@@ -110,6 +111,7 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
     formatDateToYYYYMMDD(new Date())
   );
   const [reccurentRepTime, setReccurentRepTime] = useState<number>(0);
+  const [isFullDay, setIsFullDay] = useState<boolean>(false);
 
   useEffect(() => {
     if (datePickerSelected) {
@@ -163,6 +165,24 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
       log('createEventLeftSingle error =>', e);
     }
   };
+  const createEventFullDaySingle = async () => {
+    if (!datePickerSelected || !newEventName) return;
+
+    const startDateMS = datePickerSelected.getTime();
+    try {
+      const result = await api.createSpanFullDaySingle(
+        selectedCalendar,
+        startDateMS,
+        newEventName,
+        newEventDescription,
+        selectedBackgroundColor
+      );
+      log('createEventLeftSingle result =>', result);
+    } catch (e) {
+      log('createEventLeftSingle error =>', e);
+    }
+  };
+
   const createEventPeriodic = async () => {
     if (!startDate || !endDate || !datePickerSelected || !newEventName) return;
     const startDateMinutes = convertH2M(startDate);
@@ -268,7 +288,101 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
       log('createEventPeriodic error =>', e);
     }
   };
+  const createEventFullDayPeriodic = async () => {
+    if (!datePickerSelected || !newEventName) return;
 
+    const startDateMS = datePickerSelected.getTime();
+
+    const repeatCountObject = { l: 0, r: reccurentRepTime - 1 };
+    const timeBetweenEventsEveryday = 1 * 60 * 60 * 24 * 1000; //1 is the number of days
+
+    try {
+      let result;
+      if (selectedReccurenceType === 'everyday') {
+        result = await api.createSpanPeriodicFullDayDaily(
+          selectedCalendar,
+          startDateMS,
+          repeatCountObject,
+          timeBetweenEventsEveryday,
+          newEventName,
+          newEventDescription,
+          selectedBackgroundColor
+        );
+      } else if (selectedReccurenceType === 'weekdays') {
+        result = await api.createSpanPeriodicFullDayWeekly(
+          selectedCalendar,
+          startDateMS,
+          repeatCountObject,
+          [0, 1, 2, 3, 4],
+          newEventName,
+          newEventDescription,
+          selectedBackgroundColor
+        );
+      } else if (selectedReccurenceType === 'weekend') {
+        result = await api.createSpanPeriodicFullDayWeekly(
+          selectedCalendar,
+          startDateMS,
+          repeatCountObject,
+          [5, 6],
+          newEventName,
+          newEventDescription,
+          selectedBackgroundColor
+        );
+      } else if (selectedReccurenceType === 'everyToday') {
+        //on all (selected day of week)
+        const selectedWeekDay =
+          datePickerSelected.getDay() === 0
+            ? 6
+            : datePickerSelected.getDay() - 1;
+
+        result = await api.createSpanPeriodicFullDayWeekly(
+          selectedCalendar,
+          startDateMS,
+          repeatCountObject,
+          [selectedWeekDay],
+          newEventName,
+          newEventDescription,
+          selectedBackgroundColor
+        );
+      } else if (selectedReccurenceType === 'everyMonth') {
+        //on all (selected day of week)
+        const selectedWeekDay =
+          datePickerSelected.getDay() === 0
+            ? 6
+            : datePickerSelected.getDay() - 1;
+        const ordinal = addOrdinal2(
+          getOccurrenceOfDayInMonth(
+            datePickerSelected,
+            datePickerSelected.getDay()
+          )
+        );
+        result = await api.createSpanPeriodicFullDayMonthlyNthWeekday(
+          selectedCalendar,
+          startDateMS,
+          repeatCountObject,
+
+          ordinal,
+          selectedWeekDay,
+          newEventName,
+          newEventDescription,
+          selectedBackgroundColor
+        );
+      } else if (selectedReccurenceType === 'everyYearToday') {
+        //on all (current date of month) for however many years
+        result = await api.createSpanPeriodicFullDayYearlyOnDate(
+          selectedCalendar,
+          startDateMS,
+          repeatCountObject,
+          newEventName,
+          newEventDescription,
+          selectedBackgroundColor
+        );
+      }
+      log('createEventPeriodic result =>', result);
+    } catch (e) {
+      log('createEventPeriodic error =>', e);
+    }
+  };
   const [reccurenceEndYearOptions, setReccurentEndYearOptions] = useState<
     selectOptions[]
   >([]);
@@ -359,8 +473,10 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
         justifyContent={'center'}
         onClick={() => {
           log('selectedReccurenceType', selectedReccurenceType);
-          if (selectedReccurenceType === 'noRepeat') createEventLeftSingle();
-          else createEventPeriodic();
+          if (selectedReccurenceType === 'noRepeat') {
+            isFullDay ? createEventFullDaySingle() : createEventLeftSingle();
+          } else
+            isFullDay ? createEventFullDayPeriodic() : createEventPeriodic();
         }}
       >
         <Icon name="Plus" size={24} opacity={0.5} />
@@ -391,30 +507,32 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
             setNewEventDescription(evt.target.value);
           }}
         />
-        <Flex gap="5px" alignItems={'center'}>
-          <Text.Label fontWeight={600}>
-            {datePickerSelected?.toDateString().slice(0, -4)}
-          </Text.Label>
-          <input
-            type="time"
-            id="start-time"
-            name="start-time"
-            value={startDate}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              setStartDate(e.target.value);
-            }}
-          />
-          <Text.Body>{'-'}</Text.Body>
-          <input
-            type="time"
-            id="end-time"
-            name="end-time"
-            value={endDate}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              setEndDate(e.target.value);
-            }}
-          />
-        </Flex>
+        {!isFullDay && (
+          <Flex gap="5px" alignItems={'center'}>
+            <Text.Label fontWeight={600}>
+              {datePickerSelected?.toDateString().slice(0, -4)}
+            </Text.Label>
+            <input
+              type="time"
+              id="start-time"
+              name="start-time"
+              value={startDate}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                setStartDate(e.target.value);
+              }}
+            />
+            <Text.Body>{'-'}</Text.Body>
+            <input
+              type="time"
+              id="end-time"
+              name="end-time"
+              value={endDate}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                setEndDate(e.target.value);
+              }}
+            />
+          </Flex>
+        )}
         {selectedReccurenceType !== 'noRepeat' &&
           selectedReccurenceType !== 'everyYearToday' && (
             <Flex alignItems={'center'} gap="10px">
@@ -448,6 +566,12 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
             </Flex>
           </Flex>
         )}
+        <CheckBox
+          label="Fullday event"
+          isChecked={isFullDay}
+          onChange={setIsFullDay}
+        />
+
         <Flex>
           <Select
             id="reccurence-type-select"
@@ -458,8 +582,8 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
             }}
           />
         </Flex>
+
         <Flex>
-          {' '}
           <Flex flexWrap="wrap" gap="3px" maxWidth={300}>
             <Box
               style={{

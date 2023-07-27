@@ -243,6 +243,39 @@ export const api = {
       body: json, // the actual poke content
     });
   },
+  createSpanFullDaySingle: async (
+    calendarId: string,
+    startDateMS: number,
+    name: string,
+    description = '',
+    color = ''
+  ) => {
+    const json = {
+      fullday: {
+        cid: calendarId,
+        dom: { l: 0, r: 0 }, // domain, the numbers between l and r inclusive will be the basis for the instances of the event, in this case one instance, the 0th
+        rid: '~/fuld/single-0', // the rule id, in this case a single event defined by a start and a duration
+        args: {
+          // arguments to the rule, in this case a single event defined by a start and a duration
+          Date: { da: startDateMS }, // this single span is defined by the start
+        },
+        meta: {
+          name,
+          description,
+          color,
+        },
+      },
+    };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'calendar-async-create', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
   createSpanBothSingle: async (
     calendarId: string,
     startDateMS: number,
@@ -318,6 +351,42 @@ export const api = {
       body: json, // the actual poke content
     });
   },
+  createSpanPeriodicFullDayDaily: async (
+    calendarId: string,
+    startDateMS: number,
+    repeatCount: RepeatCount,
+    timeBetweenEvents: number,
+    name: string,
+    description = '',
+    color = ''
+  ) => {
+    // an event that has both a start and end
+    const json = {
+      fullday: {
+        cid: calendarId,
+        dom: repeatCount, //number of total events (10 here)
+        rid: '~/fuld/periodic-0',
+        args: {
+          Start: { da: startDateMS }, //start date
+          Period: { dr: timeBetweenEvents }, //the time between events
+        },
+        meta: {
+          name,
+          description,
+          color,
+        },
+      },
+    };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'calendar-async-create', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
   createSpanPeriodicWeekly: async (
     calendarId: string,
     startDateMS: number,
@@ -339,6 +408,45 @@ export const api = {
             d: durationMS, //duration
           },
         },
+        args: {
+          Start: {
+            da: startDateMS,
+          },
+          Weekdays: {
+            wl: includedWeekDays, // [0,1,2,3,4] a list of weekdays, 0-mon, 1-tue, 2-wed, 3-thu, 4-fri, 5-sat, 6-sun
+          },
+        },
+        meta: {
+          name,
+          description,
+          color,
+        },
+      },
+    };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'calendar-async-create', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  createSpanPeriodicFullDayWeekly: async (
+    calendarId: string,
+    startDateMS: number,
+    repeatCountObject: RepeatCount,
+    includedWeekDays: number[],
+    name: string,
+    description = '',
+    color = ''
+  ) => {
+    const json = {
+      fullday: {
+        cid: calendarId,
+        dom: repeatCountObject,
+        rid: '~/fuld/days-of-week-0',
         args: {
           Start: {
             da: startDateMS,
@@ -414,6 +522,49 @@ export const api = {
       body: json, // the actual poke content
     });
   },
+  createSpanPeriodicFullDayMonthlyNthWeekday: async (
+    calendarId: string,
+    startDateMS: number,
+    repeatCountObject: RepeatCount,
+    ordinal: 'first' | 'second' | 'third' | 'fourth' | 'last',
+    dayOfWeek: number,
+    name: string,
+    description = '',
+    color = ''
+  ) => {
+    const json = {
+      fullday: {
+        cid: calendarId,
+        dom: repeatCountObject,
+        rid: '~/fuld/monthly-nth-weekday-0',
+        args: {
+          Start: {
+            da: startDateMS,
+          },
+          Ordinal: {
+            od: ordinal, // first, second, third, fourth, or last
+          },
+          Weekday: {
+            ud: dayOfWeek, // 0-mon, 1-tue, 2-wed, 3-thu, 4-fri, 5-sat, 6-sun
+          },
+        },
+        meta: {
+          name,
+          description,
+          color,
+        },
+      },
+    };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'calendar-async-create', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
   createSpanPeriodicYearlyOnDate: async (
     calendarId: string,
     startDateMS: number,
@@ -434,6 +585,41 @@ export const api = {
             d: durationMS,
           },
         },
+        args: {
+          Start: {
+            da: startDateMS,
+          },
+        },
+        meta: {
+          name,
+          description,
+          color,
+        },
+      },
+    };
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'calendar-async-create', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: json, // the actual poke content
+    });
+  },
+  createSpanPeriodicFullDayYearlyOnDate: async (
+    calendarId: string,
+    startDateMS: number,
+    repeatCountObject: RepeatCount,
+    name: string,
+    description = '',
+    color = ''
+  ) => {
+    const json = {
+      fullday: {
+        cid: calendarId,
+        dom: repeatCountObject,
+        rid: '~/fuld/yearly-on-date-0',
         args: {
           Start: {
             da: startDateMS,
