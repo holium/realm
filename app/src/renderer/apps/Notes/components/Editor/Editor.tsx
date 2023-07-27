@@ -12,7 +12,16 @@ import { useShipStore } from 'renderer/stores/ship.store';
 import { EditorView } from './EditorView';
 
 // Playful colors for the text cursor to randomly cycle through.
-const cursorColors = ['255, 0, 0', '0, 255, 0', '0, 0, 255'];
+const cursorColors = [
+  '78, 158, 253',
+  '255, 255, 0',
+  '0, 255, 0',
+  '255, 0, 0',
+  '82, 178, 120',
+  '217, 104, 42',
+  '255, 51, 153',
+  '132, 25, 217',
+];
 
 export enum NotesBroadcastChannel {
   YDocUpdate = 'notes-ydoc-update',
@@ -75,16 +84,19 @@ const EditorPresenter = () => {
     return null;
   }
 
-  if (
-    (!selectedSpace.isOur &&
-      roomsStore.currentRoom?.path !== selectedSpace.path + selectedNote.id) ||
-    syncing
-  ) {
+  const isPersonalNote =
+    selectedNote.space === `/${loggedInAccount.serverId}/our`;
+  const alreadyInRoom =
+    roomsStore.currentRoom?.path === selectedSpace.path + selectedNote.id;
+
+  if (syncing || (!isPersonalNote && !alreadyInRoom)) {
     return (
       <Flex flex={1} justifyContent="center" alignItems="center" height="100%">
         <Flex flexDirection="column" alignItems="center" gap="12px">
           <Spinner size="19px" width={2} />
-          <Text.Body opacity={0.5}>Connecting to peers</Text.Body>
+          <Text.Body opacity={0.5}>
+            {syncing ? 'Loading note' : 'Connecting to peers'}
+          </Text.Body>
         </Flex>
       </Flex>
     );
@@ -97,11 +109,11 @@ const EditorPresenter = () => {
       user={{
         patp: loggedInAccount.serverId,
         nickname: loggedInAccount.nickname,
+        avatar: loggedInAccount.avatar,
         color:
           loggedInAccount.color && loggedInAccount.color !== '0x0'
             ? loggedInAccount.color
             : cursorColors[Math.floor(Math.random() * cursorColors.length)],
-        avatar: loggedInAccount.avatar,
       }}
       broadcast={broadcast}
       onSave={debouncedAutoSave}
