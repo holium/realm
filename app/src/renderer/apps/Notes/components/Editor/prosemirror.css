@@ -54,6 +54,8 @@
   position: absolute;
   top: -1.1em;
   left: -1px;
+  width: 18px;
+  height: 18px;
   border-radius: 4px;
   overflow: hidden;
   white-space: nowrap;
