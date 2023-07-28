@@ -174,7 +174,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
           edit: 'table',
           delete: 'table',
         },
-        $: {
+        '': {
           create: true,
           edit: 'table',
           delete: 'table',
