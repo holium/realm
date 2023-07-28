@@ -38,10 +38,13 @@ export const cursorBuilder = (user: UserMetadata) => {
   if (user.avatar) {
     avatar = document.createElement('img');
     avatar.setAttribute('src', user.avatar);
+    avatar.setAttribute('alt', user.patp);
+    avatar.setAttribute('width', '20');
+    avatar.setAttribute('height', '20');
   } else {
     const svgString = sigil({
       patp: user.patp,
-      size: 16,
+      size: 20,
       icon: true,
       margin: false,
       renderer: stringRenderer,

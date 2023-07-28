@@ -18,7 +18,7 @@ const NotesPresenter = () => {
   useEffect(() => {
     notesStore.setSelectedNoteId({ id: null });
 
-    if (!selectedSpace) return;
+    if (!selectedSpace?.path) return;
 
     if (!selectedSpace.isOur) {
       // Load space if it's not our personal space.
@@ -33,7 +33,7 @@ const NotesPresenter = () => {
 
     // Connect to bedrock.
     notesStore.connectToBedrock({ space: selectedSpace.path });
-  }, [selectedSpace]);
+  }, [selectedSpace?.path]);
 
   return (
     <NotesContainer>

@@ -140,7 +140,7 @@ const NotesSidebarPresenter = () => {
                   key={`searched-note-row-${note.id}`}
                   id={note.id}
                   title={note.title}
-                  author={note.author}
+                  patp={note.author}
                   space={note.space}
                   updatedAt={note.updated_at}
                   firstParagraph={getNotePreview(note.id)}
@@ -179,7 +179,7 @@ const NotesSidebarPresenter = () => {
                         key={`space-note-row-${note.id}`}
                         id={note.id}
                         title={note.title}
-                        author={note.author}
+                        patp={note.author}
                         space={note.space}
                         updatedAt={note.updated_at}
                         firstParagraph={getNotePreview(note.id)}
@@ -211,7 +211,7 @@ const NotesSidebarPresenter = () => {
                       key={`personal-note-row-${note.id}`}
                       id={note.id}
                       title={note.title}
-                      author={note.author}
+                      patp={note.author}
                       space={note.space}
                       updatedAt={note.updated_at}
                       firstParagraph={getNotePreview(note.id)}
