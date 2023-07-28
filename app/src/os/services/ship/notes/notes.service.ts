@@ -346,64 +346,81 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
           if (!this.notesDB) return;
 
           if (update.change === 'add-row') {
-            // TODO: handle notes-updates
-            // Only handle 'notes' updates.
-            if (update.row?.type !== 'notes') return;
+            if (update.row?.type === 'notes') {
+              const rowData = update.row.data;
 
-            const rowData = update.row.data;
-
-            // Update SQLite.
-            this.notesDB.upsertNote({
-              id: update.row.id,
-              space: update.row.path.split('/notes')[0],
-              author: update.row.creator,
-              title: rowData.title,
-            });
-            // Update MobX.
-            this.sendUpdate({
-              type: 'create-note',
-              payload: {
+              // Update SQLite.
+              this.notesDB.upsertNote({
                 id: update.row.id,
                 space: update.row.path.split('/notes')[0],
                 author: update.row.creator,
                 title: rowData.title,
-                created_at: update.row['created-at'],
-                updated_at: update.row['updated-at'],
-              },
-            });
+              });
+              // Update MobX.
+              this.sendUpdate({
+                type: 'create-note',
+                payload: {
+                  id: update.row.id,
+                  space: update.row.path.split('/notes')[0],
+                  author: update.row.creator,
+                  title: rowData.title,
+                  created_at: update.row['created-at'],
+                  updated_at: update.row['updated-at'],
+                },
+              });
+            } else if (update.row?.type === 'notes-updates') {
+              const rowData = update.row.data;
+
+              // Update SQLite.
+              this.notesDB.insertNoteUpdate({
+                id: update.row.id,
+                note_id: rowData.note_id,
+                update: rowData.update,
+              });
+              // Update MobX.
+              this.sendUpdate({
+                type: 'apply-note-update',
+                payload: {
+                  id: update.row.id,
+                  note_id: rowData.note_id,
+                  update: rowData.update,
+                },
+              });
+            }
           } else if (update.change === 'upd-row') {
-            // Only handle notes updates.
-            if (update.row?.type !== 'notes') return;
+            if (update.row?.type === 'notes') {
+              const rowData = update.row.data;
 
-            const rowData = update.row.data;
-
-            // Update SQLite.
-            this.notesDB.updateTitle({
-              id: update.row.id,
-              title: rowData.title,
-            });
-            // Update MobX.
-            this.sendUpdate({
-              type: 'update-note',
-              payload: {
+              // Update SQLite.
+              this.notesDB.updateTitle({
                 id: update.row.id,
                 title: rowData.title,
-                updated_at: update.row['updated-at'],
-              },
-            });
+              });
+              // Update MobX.
+              this.sendUpdate({
+                type: 'update-note',
+                payload: {
+                  id: update.row.id,
+                  title: rowData.title,
+                  updated_at: update.row['updated-at'],
+                },
+              });
+            }
           } else if (update.change === 'del-row') {
-            // Delete responses that have a diffrent structure.
-            if (update.type !== 'notes' || !update.id) return;
+            // Delete responses that have a different structure.
+            if (!update.id) return;
 
-            // Update SQLite.
-            this.notesDB.deleteNote({ id: update.id });
-            // Update MobX.
-            this.sendUpdate({
-              type: 'delete-note',
-              payload: {
-                id: update.id,
-              },
-            });
+            if (update.row?.type === 'notes') {
+              // Update SQLite.
+              this.notesDB.deleteNote({ id: update.id });
+              // Update MobX.
+              this.sendUpdate({
+                type: 'delete-note',
+                payload: {
+                  id: update.id,
+                },
+              });
+            }
           }
         });
       },
