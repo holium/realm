@@ -196,7 +196,4 @@ export const ContextMenuProvider = ({ children }: ContextMenuProviderProps) => {
   );
 };
 
-export const useContextMenu = () => {
-  const context = useContext(ContextMenuContext);
-  return context;
-};
+export const useContextMenu = () => useContext(ContextMenuContext);

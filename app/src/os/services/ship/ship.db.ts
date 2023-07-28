@@ -4,6 +4,7 @@ import { Migration, MigrationService } from '../migration/migration.service';
 import { CHAT_TABLES, chatInitSql, chatWipeSql } from './chat/chat.schema';
 import { friendsInitSql, friendsWipeSql } from './friends/friends.service';
 import { lexiconInitSql, lexiconWipeSql } from './lexicon/lexicon.tables';
+import { notesInitSql, notesWipeSql } from './notes/notes.db';
 import {
   notifInitSql,
   notifWipeSql,
@@ -30,6 +31,7 @@ import { walletInitSql, walletWipeSql } from './wallet/wallet.db';
 
 const initSql = `
 ${bazaarTablesInitSql}
+${notesInitSql}
 ${lexiconInitSql}
 ${chatInitSql}
 ${notifInitSql}
@@ -49,6 +51,7 @@ create table if not exists credentials (
 
 const wipeSql = `
   ${bazaarTablesWipeSql}
+  ${notesWipeSql}
   ${lexiconWipeSql}
   ${chatWipeSql}
   ${notifWipeSql}

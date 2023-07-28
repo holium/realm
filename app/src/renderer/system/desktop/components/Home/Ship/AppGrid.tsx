@@ -26,7 +26,7 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
     () =>
       [
         ...bazaarStore.installed,
-        //...bazaarStore.devApps
+        // ...bazaarStore.devApps
       ] as AppMobxType[],
     [bazaarStore.catalog, bazaarStore.installations.values()]
   );
