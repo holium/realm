@@ -14,6 +14,9 @@
     "@types/react-dom": "18.2.7"
   },
   "dependencies": {
+    "mobx": "^6.10.0",
+    "mobx-react-lite": "^4.0.3",
+    "mobx-state-tree": "^5.1.8",
     "next": "13.4.12",
     "react": "18.2.0",
     "react-dom": "18.2.0"

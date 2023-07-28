@@ -346,6 +346,7 @@ export const ChatInput = ({
                 onClick={(evt) => {
                   evt.stopPropagation();
                   const fragments = onParseFragments();
+                  console.log(fragments);
                   onSendClick(fragments);
                 }}
               >
