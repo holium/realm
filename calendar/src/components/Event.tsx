@@ -64,11 +64,16 @@ export const Event = ({ eventInfo }: any) => {
               </Box>
               <Flex gap="2px">
                 <Text.Body>{formatHoursMinutes(startDate)}</Text.Body>
-                <Text.Body>-</Text.Body>
-                <Text.Body>{formatHoursMinutes(endDate)}</Text.Body>
+                {endDate && (
+                  <>
+                    <Text.Body>-</Text.Body>
+                    <Text.Body>{formatHoursMinutes(endDate)}</Text.Body>
+                  </>
+                )}
               </Flex>
             </Flex>
             <Text.Body>{reccurenceRuleToReadable(reccurenceRule)}</Text.Body>
+
             <Box>
               <Text.Body>{description}</Text.Body>
             </Box>

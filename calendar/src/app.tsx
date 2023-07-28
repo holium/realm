@@ -178,7 +178,14 @@ export const App = () => {
             return { id: key, ...result.calendar.spans[key] };
           }
         );
-        setSpans(newSpans);
+        const newFullDay = Object.keys(result.calendar.fulldays).map(
+          (key: string) => {
+            return { id: key, fullday: true, ...result.calendar.fulldays[key] };
+          }
+        );
+
+        // For now Spans and Fullday events are different, marge them here
+        setSpans([...newSpans, ...newFullDay]);
       }
       log('fetchCalendarEntries result => ', result);
     } catch (e) {
@@ -193,17 +200,34 @@ export const App = () => {
       const reccurenceRule = span.rules[span['def-rule']]?.rid;
       for (const item of span.instances) {
         if (item.instance?.exception === 'skip') continue;
-        // NOTE: can use a unix milisecond for these start/end date params instead
-        const startDate = new Date(item.instance?.instance.start);
-        const endDate = new Date(item.instance?.instance.end);
-        // TODO: make a typescript type for events in the project
-        //params starting with _ are included in event's extendedProps (passed to <Event /> component)
-        newEvents.push({
-          id: '/' + item.idx + item.mid,
-          start: startDate, //js date object
-          end: endDate, //js date object
-          _startDate: startDate,
-          _endDate: endDate,
+        let newEvent;
+        if (span.fullday) {
+          // NOTE: can use a unix milisecond for these start/end date params instead
+          const startDate = new Date(item.instance?.instance);
+          //params starting with _ are included in event's extendedProps (passed to <Event /> component)
+          newEvent = {
+            start: startDate, //js date object
+            _startDate: startDate,
+            _fullday: true,
+            allDay: true,
+          };
+        } else {
+          // NOTE: can use a unix milisecond for these start/end date params instead
+          const startDate = new Date(item.instance?.instance.start);
+          const endDate = new Date(item.instance?.instance.end);
+          // TODO: make a typescript type for events in the project
+          //params starting with _ are included in event's extendedProps (passed to <Event /> component)
+          newEvent = {
+            start: startDate, //js date object
+            end: endDate, //js date object
+            _startDate: startDate,
+            _endDate: endDate,
+            _fullday: false,
+            allDay: false,
+          };
+        }
+        newEvent = {
+          ...newEvent,
           _spanId: span.id,
           _instanceId: item.idx,
           _calendarId: selectedCalendar,
@@ -211,8 +235,8 @@ export const App = () => {
           description: metaData.description,
           _color: metaData.color,
           _reccurenceRule: reccurenceRule,
-          // allDay: true, display an event as an all day event IMPORTANT for when start using them
-        });
+        };
+        newEvents.push(newEvent);
       }
     });
 
