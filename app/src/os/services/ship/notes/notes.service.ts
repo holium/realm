@@ -59,34 +59,42 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
   }
 
   async deleteNote({ id, space }: NotesService_DeleteNote_Payload) {
-    const notesResult = await APIConnection.getInstance().conduit.poke({
-      app: 'bedrock',
-      mark: 'db-action',
-      json: {
-        remove: {
-          id,
-          path: `${space}/notes`,
-          type: 'notes',
+    try {
+      const notesResult = await APIConnection.getInstance().conduit.poke({
+        app: 'bedrock',
+        mark: 'db-action',
+        json: {
+          remove: {
+            id,
+            path: `${space}/notes`,
+            type: 'notes',
+          },
         },
-      },
-    });
+      });
 
-    const associatedUpdates = this.getNoteUpdatesFromDb({ note_id: id });
-    const ids = associatedUpdates.map((o) => o.id);
+      const associatedUpdates = this.getNoteUpdatesFromDb({ note_id: id });
+      const ids = associatedUpdates.map((o) => o.id);
 
-    const notesUpdatesResult = await APIConnection.getInstance().conduit.poke({
-      app: 'bedrock',
-      mark: 'db-action',
-      json: {
-        'remove-many': {
-          ids,
-          path: `${space}/notes`,
-          type: 'notes-updates',
-        },
-      },
-    });
+      const notesUpdatesResult = await APIConnection.getInstance().conduit.poke(
+        {
+          app: 'bedrock',
+          mark: 'db-action',
+          json: {
+            'remove-many': {
+              ids,
+              path: `${space}/notes`,
+              type: 'notes-updates',
+            },
+          },
+        }
+      );
 
-    return Boolean(notesResult && notesUpdatesResult);
+      return Boolean(notesResult && notesUpdatesResult);
+    } catch (error) {
+      console.error('Notes: Failed to delete note.', error);
+
+      return false;
+    }
   }
 
   getNotesFromDb({ space }: NotesService_GetNotes_Payload) {
@@ -317,22 +325,28 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     const editNoteData = [title];
     const editNoteSchema: BedrockSchema = [['title', 't']];
 
-    return APIConnection.getInstance().conduit.poke({
-      app: 'bedrock',
-      mark: 'db-action',
-      json: {
-        edit: {
-          id,
-          'input-row': {
-            v: 0,
-            path: `${space}/notes`,
-            type: 'notes',
-            data: editNoteData,
-            schema: editNoteSchema,
+    try {
+      return APIConnection.getInstance().conduit.poke({
+        app: 'bedrock',
+        mark: 'db-action',
+        json: {
+          edit: {
+            id,
+            'input-row': {
+              v: 0,
+              path: `${space}/notes`,
+              type: 'notes',
+              data: editNoteData,
+              schema: editNoteSchema,
+            },
           },
         },
-      },
-    });
+      });
+    } catch (error) {
+      console.error('Notes: Failed to edit note title.', error);
+
+      return null;
+    }
   }
 
   createNoteUpdate({
@@ -346,19 +360,25 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
       ['update', 't'],
     ];
 
-    return APIConnection.getInstance().conduit.poke({
-      app: 'bedrock',
-      mark: 'db-action',
-      json: {
-        create: {
-          v: 0,
-          path: `${space}/notes`,
-          type: 'notes-updates',
-          data: createNoteUpdateData,
-          schema: createNoteUpdateSchema,
+    try {
+      return APIConnection.getInstance().conduit.poke({
+        app: 'bedrock',
+        mark: 'db-action',
+        json: {
+          create: {
+            v: 0,
+            path: `${space}/notes`,
+            type: 'notes-updates',
+            data: createNoteUpdateData,
+            schema: createNoteUpdateSchema,
+          },
         },
-      },
-    });
+      });
+    } catch (error) {
+      console.error('Notes: Failed to create note update.', error);
+
+      return null;
+    }
   }
 
   createNoteUpdateLocally({
