@@ -58,7 +58,7 @@
         =.  title.notes-app            'Notes'
         =.  info.notes-app             'Realm\'s collaborative notes app.'
         =.  color.notes-app            '#F9D9F9'
-        =.  icon.notes-app             'https://lomder-librun.sfo3.digitaloceanspaces.com/Images/~lomder-librun/1690571848-notes.svg'
+        =.  icon.notes-app             'AppIconNotes'
         =.  config.notes-app           [size=[0 0] titlebar-border=%.n show-titlebar=%.y]
       =|  lexicon-app=native-app:store
         =.  title.lexicon-app            'Lexicon'
