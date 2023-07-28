@@ -29,6 +29,7 @@ export const AccountPassportSection = ({ account }: Props) => {
       content: file.path,
       contentType: file.type,
     });
+    if (!result) return null;
 
     return result.Location;
   };

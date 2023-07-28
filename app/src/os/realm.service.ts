@@ -206,24 +206,24 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
   // Used in onboarding before a session exists.
   async uploadFile(
     args: FileUploadParams
-  ): Promise<{ Location: string; key: string } | undefined> {
-    if (!this.services) return;
+  ): Promise<{ Location: string; key: string } | null> {
+    if (!this.services?.ship) return null;
 
-    const credentials = this.services.ship?.credentials;
+    const credentials = this.services.ship.credentials;
 
     if (!credentials) {
       log.error('realm.service.ts:', 'No credentials found');
-      return;
+      return null;
     }
 
-    const patp = this.services.ship?.patp;
+    const patp = this.services.ship.patp;
 
     if (!patp) {
       log.error('realm.service.ts:', 'No patp found');
-      return;
+      return null;
     }
 
-    return this.services.ship?.uploadFile(args);
+    return this.services.ship.uploadFile(args);
   }
 
   async updatePassword(patp: string, password: string) {
