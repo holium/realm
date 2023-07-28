@@ -24,10 +24,10 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
   const currentSpace = spacesStore.selected;
   const apps = useMemo(
     () =>
-      [
-        ...bazaarStore.installed,
-        // ...bazaarStore.devApps
-      ] as AppMobxType[],
+      // Filter out old Groups.
+      bazaarStore.installed.filter(
+        (app) => app.id !== 'landscape'
+      ) as AppMobxType[],
     [bazaarStore.catalog, bazaarStore.installations.values()]
   );
   const [items, setItems] = useState(apps);
