@@ -46,7 +46,7 @@ const NotesSidebarPresenter = () => {
   if (!selectedSpace) return null;
 
   const onClickNewNote = async () => {
-    if (creating.isOn) return;
+    if (creating.isOn || initializing) return;
 
     creating.toggleOn();
 
@@ -115,10 +115,10 @@ const NotesSidebarPresenter = () => {
             height: '32px',
             padding: '4px',
           }}
-          disabled={creating.isOn}
+          disabled={creating.isOn || initializing}
           onClick={onClickNewNote}
         >
-          {creating.isOn ? (
+          {creating.isOn || initializing ? (
             <Spinner size="19px" width={2} />
           ) : (
             <Icon name="AddNote" size={22} />
@@ -192,9 +192,7 @@ const NotesSidebarPresenter = () => {
                       />
                     ))
                   ) : (
-                    <NoNotesYet>
-                      {initializing ? 'Loading...' : 'No notes yet'}
-                    </NoNotesYet>
+                    <NoNotesYet>No notes yet</NoNotesYet>
                   )}
                 </NotesSidebarSectionList>
               </NotesSidebarSection>
@@ -224,9 +222,7 @@ const NotesSidebarPresenter = () => {
                     />
                   ))
                 ) : (
-                  <NoNotesYet>
-                    {initializing ? 'Loading...' : 'No notes yet'}
-                  </NoNotesYet>
+                  <NoNotesYet>No notes yet</NoNotesYet>
                 )}
               </NotesSidebarSectionList>
             </NotesSidebarSection>
