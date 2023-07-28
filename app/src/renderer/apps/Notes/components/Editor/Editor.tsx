@@ -111,10 +111,7 @@ const EditorPresenter = () => {
         patp: loggedInAccount.serverId,
         nickname: loggedInAccount.nickname,
         avatar: loggedInAccount.avatar,
-        color:
-          loggedInAccount.color && loggedInAccount.color !== '0x0'
-            ? loggedInAccount.color
-            : cursorColors[Math.floor(Math.random() * cursorColors.length)],
+        color: cursorColors[Math.floor(Math.random() * cursorColors.length)],
       }}
       broadcast={broadcast}
       onChange={onChange}
