@@ -11,12 +11,14 @@ import {
   PresenceBroadcast,
 } from '@holium/realm-presence';
 
+import { NotesBroadcastChannel } from 'renderer/apps/Notes/components/Editor/Editor';
 import {
   DataPacket,
   DataPacketKind,
 } from 'renderer/apps/Rooms/store/room.types';
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { normalizePosition } from 'renderer/lib/window-manager';
+import { useShipStore } from 'renderer/stores/ship.store';
 
 type Props = {
   patp: string | undefined;
@@ -34,6 +36,7 @@ export const useMultiplayer = ({
   const chat = useRef('');
   const ephemeralChat = useToggle(false);
   const roomsStore = useRoomsStore();
+  const { notesStore } = useShipStore();
 
   const timeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -242,29 +245,49 @@ export const useMultiplayer = ({
       _peer: string,
       data: DataPacket
     ) => {
+      const broadcastPayload = data.value.broadcast;
       const multiplayerPayload = data.value.multiplayer;
-      if (!multiplayerPayload) return;
 
-      const { event } = multiplayerPayload;
+      if (multiplayerPayload) {
+        const { event } = multiplayerPayload;
 
-      if (event === 'mouse-move') {
-        const { patp, position, state, hexColor } = multiplayerPayload;
-        window.electron.multiplayer.mouseMove(patp, position, state, hexColor);
-      } else if (event === 'mouse-out') {
-        const { patp } = multiplayerPayload;
-        window.electron.multiplayer.mouseOut(patp);
-      } else if (event === 'mouse-down') {
-        const { patp } = multiplayerPayload;
-        window.electron.multiplayer.mouseDown(patp);
-      } else if (event === 'mouse-up') {
-        const { patp } = multiplayerPayload;
-        window.electron.multiplayer.mouseUp(patp);
-      } else if (event === 'mouse-click') {
-        const { patp, elementId } = multiplayerPayload;
-        window.electron.multiplayer.realmToAppMouseClick(patp, elementId);
-      } else {
-        const { patp, message } = multiplayerPayload;
-        window.electron.multiplayer.realmToAppSendChat(patp, message);
+        if (event === 'mouse-move') {
+          const { patp, position, state, hexColor } = multiplayerPayload;
+          window.electron.multiplayer.mouseMove(
+            patp,
+            position,
+            state,
+            hexColor
+          );
+        } else if (event === 'mouse-out') {
+          const { patp } = multiplayerPayload;
+          window.electron.multiplayer.mouseOut(patp);
+        } else if (event === 'mouse-down') {
+          const { patp } = multiplayerPayload;
+          window.electron.multiplayer.mouseDown(patp);
+        } else if (event === 'mouse-up') {
+          const { patp } = multiplayerPayload;
+          window.electron.multiplayer.mouseUp(patp);
+        } else if (event === 'mouse-click') {
+          const { patp, elementId } = multiplayerPayload;
+          window.electron.multiplayer.realmToAppMouseClick(patp, elementId);
+        } else {
+          const { patp, message } = multiplayerPayload;
+          window.electron.multiplayer.realmToAppSendChat(patp, message);
+        }
+      } else if (broadcastPayload) {
+        if (broadcastPayload.event === 'broadcast') {
+          const [channel, update] = broadcastPayload.data;
+
+          if (channel === NotesBroadcastChannel.YDocUpdate) {
+            notesStore.applyBroadcastedYdocUpdate(data.from, update as string);
+          } else if (channel === NotesBroadcastChannel.AwarenessUpdate) {
+            notesStore.applyBroadcastedAwarenessUpdate(
+              data.from,
+              update as string
+            );
+          }
+        }
       }
     };
 

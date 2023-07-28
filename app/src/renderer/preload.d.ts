@@ -17,6 +17,8 @@ import { appRecentsPreload } from 'os/services/ship/spaces/tables/appRecents.tab
 import { trovePreload } from 'os/services/ship/trove/trove.service';
 import { walletPreload } from 'os/services/ship/wallet/wallet.service';
 
+import { notesPreload } from '../os/services/ship/notes/notes.service';
+
 declare global {
   interface Window {
     electron: {
@@ -31,6 +33,7 @@ declare global {
     onboardingService: typeof onboardingPreload;
     chatService: typeof chatPreload;
     walletService: typeof walletPreload;
+    notesService: typeof notesPreload;
     lexiconService: typeof lexiconPreload;
     troveService: typeof trovePreload;
     notifService: typeof notifPreload;

@@ -1,12 +1,13 @@
+import { Node } from 'prosemirror-model';
 import { Step } from 'prosemirror-transform';
 
 export class Authority {
-  doc: any;
+  doc: Node | null;
   steps: Step[];
   stepClientIDs: (string | number)[];
   onNewSteps: any[];
 
-  constructor(doc: any) {
+  constructor(doc: Node) {
     this.doc = doc;
     this.steps = [];
     this.stepClientIDs = [];
@@ -22,10 +23,13 @@ export class Authority {
 
     // Apply and accumulate new steps
     steps.forEach((step) => {
+      if (!this.doc) return;
+
       this.doc = step.apply(this.doc).doc;
       this.steps.push(step);
       this.stepClientIDs.push(clientID);
     });
+
     // Signal listeners
     this.onNewSteps.forEach(function (f) {
       f();

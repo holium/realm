@@ -47,7 +47,8 @@ export const TitlebarByType = ({
       maximizeButton={maximizeButton}
       minimizeButton
       closeButton
-      noTitlebar={noTitlebar}
+      title={noTitlebar ? undefined : appWindow.title}
+      isNative={appWindow.type === 'native'}
       hasBorder={!hideTitlebarBorder}
       showDevToolsToggle={showDevToolsToggle}
       zIndex={appWindow.zIndex}
@@ -57,7 +58,6 @@ export const TitlebarByType = ({
       onClose={onClose}
       onMaximize={onMaximize}
       onMinimize={onMinimize}
-      appWindow={appWindow}
     />
   );
 
@@ -89,7 +89,8 @@ export const TitlebarByType = ({
           maximizeButton={maximizeButton}
           minimizeButton
           closeButton
-          noTitlebar={noTitlebar}
+          title={noTitlebar ? undefined : appWindow.title}
+          isNative={appWindow.type === 'native'}
           hasBorder={!hideTitlebarBorder}
           showDevToolsToggle={showDevToolsToggle}
           zIndex={appWindow.zIndex}
@@ -99,7 +100,6 @@ export const TitlebarByType = ({
           onClose={onClose}
           onMinimize={onMinimize}
           onMaximize={onMaximize}
-          appWindow={appWindow}
         />
       );
     }

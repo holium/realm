@@ -21,10 +21,6 @@ export enum DataPacketKind {
   WEBCAM_CHANGED = 6,
   UNRECOGNIZED = -1,
 }
-export interface DataPayload {
-  app?: string;
-  data?: any;
-}
 
 export enum PeerEvent {
   Connected = 'connected',
@@ -75,13 +71,15 @@ export enum PeerConnectionState {
   Redialing = 'redialing',
   Broadcasting = 'broadcasting',
 }
+
 export interface DataPacket {
   from: string;
   kind: DataPacketKind;
   value: {
     multiplayer?: MultiplayerPayload;
     broadcast?: PresenceBroadcast;
-  } & DataPayload;
+    data?: boolean; // Used to toggle screen/cam/mic in Rooms.
+  };
 }
 export enum TrackKind {
   Audio = 'audio',
