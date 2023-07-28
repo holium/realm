@@ -170,12 +170,12 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     try {
       const accessRules = {
         host: {
-          read: true,
+          create: true,
           edit: 'table',
           delete: 'table',
         },
         $: {
-          read: true,
+          create: true,
           edit: 'table',
           delete: 'table',
         },
