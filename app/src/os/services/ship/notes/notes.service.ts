@@ -127,17 +127,33 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
 
     // 2. Create the paths.
     try {
-      await APIConnection.getInstance().conduit.poke({
-        app: 'bedrock',
-        mark: 'db-action',
-        json: {
-          'create-from-space': {
-            path: `${space}/notes`,
-            'space-path': space,
-            'space-role': 'member',
+      const isPersonalSpace = space.split('/our').length > 1;
+      if (isPersonalSpace) {
+        console.log('Notes: Personal space, skipping making public.');
+        await APIConnection.getInstance().conduit.poke({
+          app: 'bedrock',
+          mark: 'db-action',
+          json: {
+            'create-path': {
+              path: `${space}/notes`,
+            },
           },
-        },
-      });
+        });
+
+        return;
+      } else {
+        await APIConnection.getInstance().conduit.poke({
+          app: 'bedrock',
+          mark: 'db-action',
+          json: {
+            'create-from-space': {
+              path: `${space}/notes`,
+              'space-path': space,
+              'space-role': 'member',
+            },
+          },
+        });
+      }
     } catch (error) {
       console.error('Notes: Failed to create notes path.', error);
     }

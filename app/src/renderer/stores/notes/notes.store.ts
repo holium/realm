@@ -313,7 +313,9 @@ export const NotesStore = types
     },
 
     _applyNoteUpdate(update: NotesStore_ApplyNoteUpdate) {
-      const note = self.spaceNotes.find((n) => n.id === update.note_id);
+      const note = [...self.personalNotes, ...self.spaceNotes].find(
+        (n) => n.id === update.note_id
+      );
       if (!note) return;
 
       const awareness = self.awarenesses.get(note.id);
