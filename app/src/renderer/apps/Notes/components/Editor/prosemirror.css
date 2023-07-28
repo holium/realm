@@ -60,11 +60,6 @@
   user-select: none;
 }
 
-.ProseMirror-yjs-avatar {
-  width: 16px;
-  height: 16px;
-}
-
 #y-functions {
   position: absolute;
   top: 20px;
