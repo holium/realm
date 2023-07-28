@@ -208,7 +208,7 @@ export const App = () => {
           newEvent = {
             start: startDate, //js date object
             _startDate: startDate,
-            _fullday: true,
+            _isFullday: true,
             allDay: true,
           };
         } else {
@@ -222,7 +222,7 @@ export const App = () => {
             end: endDate, //js date object
             _startDate: startDate,
             _endDate: endDate,
-            _fullday: false,
+            _isFullday: false,
             allDay: false,
           };
         }
@@ -241,8 +241,6 @@ export const App = () => {
     });
 
     setEvents(newEvents);
-
-    log('newEvents', newEvents);
   };
   useEffect(() => {
     fetchSpacesList();
@@ -292,6 +290,7 @@ export const App = () => {
               <NewEvent
                 selectedCalendar={selectedCalendar}
                 datePickerSelected={datePickerSelected}
+                setDatePickerValue={setDatePickerSelected}
               />
             )}
             <DatePicker

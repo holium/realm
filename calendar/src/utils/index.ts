@@ -3,13 +3,13 @@ import memoize from 'lodash/memoize';
 const isDev = () => true;
 
 export const shipName = memoize(() => {
-  return 'lux';
+  return 'botweb';
 });
 export const shipCode = memoize(() => {
-  return 'hidmeg-donfep-pagtyd-witfur';
+  return 'novput-dapdun-riglur-dosmeb';
 });
 export const shipURI = memoize(() => {
-  return 'http://localhost:8008';
+  return 'http://localhost:8080';
 });
 
 export const log = (...args: any) => {
@@ -56,6 +56,11 @@ export const displayDate = (date: number): string => {
 export const convertH2M = (timeInHour: string) => {
   const timeParts = timeInHour.split(':');
   return Number(timeParts[0]) * 60 + Number(timeParts[1]);
+};
+export const convertDateToHHMM = (date: Date): string => {
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
 };
 export const toUTCDate = (date: Date): Date => {
   const year = date.getUTCFullYear();
@@ -318,26 +323,75 @@ export const isDateValidInYear = (
     dateToCheck.getDate() === day
   );
 };
-export const reccurenceRuleToReadable = (rule: string): string => {
-  switch (rule) {
-    case '~/left/single-0': {
-      return 'Single';
+export const splitLastOccurrence = (
+  str: string,
+  substring: string
+): [string, string] => {
+  const lastIndex = str.lastIndexOf(substring);
+
+  const before = str.slice(0, lastIndex);
+
+  const after = str.slice(lastIndex + 1);
+
+  return [before, after];
+};
+export const reccurenceTypeOptionsDS = [
+  { value: 'noRepeat', label: 'Dont repeat' },
+  { value: 'everyday', label: 'Everyday' },
+  { value: 'weekdays', label: 'Week days (mon to fri)' },
+  { value: 'weekend', label: 'Weekend (sat-sun)' },
+  { value: 'everyToday', label: 'Every (today)' },
+  {
+    value: 'everyMonth',
+    label: 'Monthly on (first/second.... (today) of the month)',
+  },
+  {
+    value: 'everyYearToday',
+    label: 'Annually on (whatever date of the month today is)',
+  },
+];
+export const reccurenceRuleParse = (
+  rule: string
+): { display: string; reccurenceTypeOption: string } => {
+  const slicedRule = splitLastOccurrence(rule, '/');
+
+  switch (slicedRule[1]) {
+    case 'single-0': {
+      return {
+        display: 'Single',
+        reccurenceTypeOption: reccurenceTypeOptionsDS[0].value,
+      };
     }
-    case '~/left/periodic-0': {
-      return 'Daily';
+    case 'periodic-0': {
+      return {
+        display: 'Daily',
+        reccurenceTypeOption: reccurenceTypeOptionsDS[1].value,
+      };
     }
-    case '~/left/days-of-week-0': {
-      return 'Weekly';
+    case 'days-of-week-0': {
+      return {
+        display: 'Weekly',
+        reccurenceTypeOption: reccurenceTypeOptionsDS[2].value, // TODO: this has two possible values
+      };
     }
-    case '~/left/monthly-nth-weekday-0': {
-      return 'Monthly';
+    case 'monthly-nth-weekday-0': {
+      return {
+        display: 'Monthly',
+        reccurenceTypeOption: reccurenceTypeOptionsDS[4].value,
+      };
     }
-    case '~/left/yearly-on-date-0': {
-      return 'Yearly';
+    case 'yearly-on-date-0': {
+      return {
+        display: 'Yearly',
+        reccurenceTypeOption: reccurenceTypeOptionsDS[5].value,
+      };
     }
     default: {
       // Leave default case for single events?
-      return 'Single';
+      return {
+        display: 'Single',
+        reccurenceTypeOption: reccurenceTypeOptionsDS[0].value,
+      };
     }
   }
 };

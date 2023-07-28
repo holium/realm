@@ -4,15 +4,22 @@ import { Popover } from 'react-tiny-popover';
 import { Box, Button, Card, Flex, Icon, Text } from '@holium/design-system';
 
 import { api } from '../api';
+import useCalendarStore, { CalendarStore } from '../CalendarStore';
 import {
   formatHoursMinutes,
   getDayOfWeekJS,
   getMonthAndDay,
   log,
-  reccurenceRuleToReadable,
+  reccurenceRuleParse,
 } from '../utils';
 // TODO: add reccurence text
 export const Event = ({ eventInfo }: any) => {
+  const setIsEditingInstance = useCalendarStore(
+    (store: CalendarStore) => store.setIsEditingInstance
+  );
+  const setEditingData = useCalendarStore(
+    (store: CalendarStore) => store.setEditingData
+  );
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [deletePrompt, setDeletePrompt] = useState<boolean>(false);
   // TODO: optimize this
@@ -21,10 +28,12 @@ export const Event = ({ eventInfo }: any) => {
   const color = eventInfo.event['_def']?.extendedProps._color;
   const startDate = eventInfo.event['_def']?.extendedProps._startDate;
   const endDate = eventInfo.event['_def']?.extendedProps._endDate;
+
   const calendarId = eventInfo.event['_def']?.extendedProps._calendarId;
   const spanId = eventInfo.event['_def']?.extendedProps._spanId;
   const instanceId = eventInfo.event['_def']?.extendedProps._instanceId;
   const reccurenceRule = eventInfo.event['_def']?.extendedProps._reccurenceRule;
+  const isFullDay = eventInfo.event['_def']?.extendedProps._isFullday;
 
   const startWeekMonthDate =
     getDayOfWeekJS(startDate.getDay()) + ', ' + getMonthAndDay(startDate);
@@ -72,13 +81,35 @@ export const Event = ({ eventInfo }: any) => {
                 )}
               </Flex>
             </Flex>
-            <Text.Body>{reccurenceRuleToReadable(reccurenceRule)}</Text.Body>
+            <Text.Body>{reccurenceRuleParse(reccurenceRule).display}</Text.Body>
 
             <Box>
               <Text.Body>{description}</Text.Body>
             </Box>
           </Flex>
           <Flex minWidth={50}>
+            <Button.IconButton
+              size={28}
+              onClick={() => {
+                setIsEditingInstance(true);
+
+                setEditingData({
+                  title,
+                  description,
+                  color,
+                  startDate,
+                  endDate,
+                  calendarId,
+                  spanId,
+                  instanceId,
+                  reccurenceRule,
+                  isFullDay,
+                });
+                setIsPopoverOpen(false);
+              }}
+            >
+              <Icon name="Edit" size={16} opacity={0.7} />
+            </Button.IconButton>
             <Button.IconButton size={28} onClick={() => setDeletePrompt(true)}>
               <Icon name="Trash" size={16} opacity={0.7} />
             </Button.IconButton>

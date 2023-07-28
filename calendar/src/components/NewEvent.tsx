@@ -12,9 +12,11 @@ import {
 } from '@holium/design-system';
 
 import { api } from '../api';
+import useCalendarStore, { CalendarStore } from '../CalendarStore';
 import {
   addOrdinal,
   addOrdinal2,
+  convertDateToHHMM,
   convertH2M,
   countDaysBetweenDates,
   countNthWeekdaysBetweenDates,
@@ -27,6 +29,8 @@ import {
   getOccurrenceOfDayInMonth,
   isDateValidInYear,
   log,
+  reccurenceRuleParse,
+  reccurenceTypeOptionsDS,
 } from '../utils';
 const colors = [
   {
@@ -79,9 +83,14 @@ const colors = [
 interface Props {
   datePickerSelected: any;
   selectedCalendar: string;
+  setDatePickerValue: (date: Date) => void;
 }
 type selectOptions = { value: string; label: string };
-export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
+export const NewEvent = ({
+  selectedCalendar,
+  datePickerSelected,
+  setDatePickerValue,
+}: Props) => {
   const [selectedBackgroundColor, setSelectedBackground] = useState<string>('');
   const [startDate, setStartDate] = useState<string | undefined>();
   const [endDate, setEndDate] = useState<string | undefined>();
@@ -91,21 +100,7 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
     useState<string>('noRepeat');
   const [reccurenceTypeOptions, setReccurenceTypeOptions] = useState<
     selectOptions[]
-  >([
-    { value: 'noRepeat', label: 'Dont repeat' },
-    { value: 'everyday', label: 'Everyday' },
-    { value: 'weekdays', label: 'Week days (mon to fri)' },
-    { value: 'weekend', label: 'Weekend (sat-sun)' },
-    { value: 'everyToday', label: 'Every (today)' },
-    {
-      value: 'everyMonth',
-      label: 'Monthly on (first/second.... (today) of the month)',
-    },
-    {
-      value: 'everyYearToday',
-      label: 'Annually on (whatever date of the month today is)',
-    },
-  ]);
+  >(reccurenceTypeOptionsDS);
 
   const [reccurentEndDate, setReccurentEndDate] = useState<string>(
     formatDateToYYYYMMDD(new Date())
@@ -140,6 +135,8 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
           return item;
         }); // add the type
       setReccurenceTypeOptions(newReccurenceTypeOptions);
+      // Update end of event date picker to reflected datePickerSelected
+      setReccurentEndDate(formatDateToYYYYMMDD(datePickerSelected));
     }
   }, [datePickerSelected]);
   const createEventLeftSingle = async () => {
@@ -477,23 +474,109 @@ export const NewEvent = ({ selectedCalendar, datePickerSelected }: Props) => {
     selectedReccurenceType,
     datePickerSelected,
   ]);
+  const isEditingInstance = useCalendarStore(
+    (store: CalendarStore) => store.isEditingInstance
+  );
+  const setIsEditingInstance = useCalendarStore(
+    (store: CalendarStore) => store.setIsEditingInstance
+  );
 
+  const editingData = useCalendarStore(
+    (store: CalendarStore) => store.editingData
+  );
+  const setEditingData = useCalendarStore(
+    (store: CalendarStore) => store.setEditingData
+  );
+  useEffect(() => {
+    if (editingData) {
+      // Update the state with the given editingData
+      setNewEventName(editingData.title);
+      setNewEventDescription(editingData.description);
+      setStartDate(convertDateToHHMM(editingData.startDate)); // TODO: is it bad to set this if it's a fullday event?
+      editingData.endDate && setEndDate(convertDateToHHMM(editingData.endDate));
+
+      setIsFullDay(editingData.isFullDay);
+      const reccurenceTypeOption = reccurenceRuleParse(
+        editingData.reccurenceRule
+      ).reccurenceTypeOption;
+      setReccurenceType(reccurenceTypeOption);
+      // endDate is not just the time, it's also the end of reccurent event date
+      if (reccurenceTypeOption !== 'noRepeat') {
+        editingData.endDate &&
+          setReccurentEndDate(formatDateToYYYYMMDD(editingData.endDate));
+      }
+      // TODO: start an end date values aren't for the entire event just for the passed instance??
+      editingData.endDate && setDatePickerValue(editingData.endDate);
+    }
+  }, [editingData]);
+  const resetState = () => {
+    setNewEventName('');
+    setNewEventDescription('');
+    // TODO: values for time input don't reset, find a fix
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setIsFullDay(false);
+    setReccurenceType('noRepeat');
+    setReccurentEndDate(formatDateToYYYYMMDD(new Date()));
+    setDatePickerValue(new Date());
+  };
   return (
     <>
-      <Button.TextButton
-        width="100%"
-        justifyContent={'center'}
-        onClick={() => {
-          log('selectedReccurenceType', selectedReccurenceType);
-          if (selectedReccurenceType === 'noRepeat') {
-            isFullDay ? createEventFullDaySingle() : createEventLeftSingle();
-          } else
-            isFullDay ? createEventFullDayPeriodic() : createEventPeriodic();
-        }}
-      >
-        <Icon name="Plus" size={24} opacity={0.5} />
-        New event
-      </Button.TextButton>
+      <Flex gap="5px" height="30px">
+        {isEditingInstance ? (
+          <>
+            <Button.Transparent
+              fontWeight={600}
+              onClick={() => {
+                setIsEditingInstance(false);
+                setEditingData(null);
+                resetState();
+              }}
+            >
+              Cancel
+            </Button.Transparent>
+            <Button.TextButton
+              width="100%"
+              justifyContent={'center'}
+              onClick={() => {
+                log('selectedReccurenceType', selectedReccurenceType);
+                if (selectedReccurenceType === 'noRepeat') {
+                  isFullDay
+                    ? createEventFullDaySingle()
+                    : createEventLeftSingle();
+                } else
+                  isFullDay
+                    ? createEventFullDayPeriodic()
+                    : createEventPeriodic();
+              }}
+              fontWeight={600}
+            >
+              <Icon name="Edit" size={22} opacity={0.7} />
+              Edit event
+            </Button.TextButton>
+          </>
+        ) : (
+          <Button.TextButton
+            width="100%"
+            justifyContent={'center'}
+            onClick={() => {
+              log('selectedReccurenceType', selectedReccurenceType);
+              if (selectedReccurenceType === 'noRepeat') {
+                isFullDay
+                  ? createEventFullDaySingle()
+                  : createEventLeftSingle();
+              } else
+                isFullDay
+                  ? createEventFullDayPeriodic()
+                  : createEventPeriodic();
+            }}
+            fontWeight={600}
+          >
+            <Icon name="Plus" size={24} opacity={0.7} />
+            New event
+          </Button.TextButton>
+        )}
+      </Flex>
 
       <Flex
         flexDirection={'column'}
