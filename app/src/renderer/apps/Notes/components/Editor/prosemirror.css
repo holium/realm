@@ -49,9 +49,11 @@
   pointer-events: none;
 }
 
-/* This renders the username above the caret */
+/* This renders the avatar above the caret */
 .ProseMirror-yjs-cursor-user {
   position: absolute;
+  width: 18px;
+  height: 18px;
   top: -1.1em;
   left: -1px;
   border-radius: 4px;
@@ -63,6 +65,9 @@
 .ProseMirror-yjs-avatar {
   width: 16px;
   height: 16px;
+  object-fit: cover;
+  margin: 0;
+  padding: 0;
 }
 
 #y-functions {
