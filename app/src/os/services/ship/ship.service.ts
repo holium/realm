@@ -12,6 +12,7 @@ import AuthService from '../auth/auth.service';
 import ChatService from './chat/chat.service';
 import { FriendsService } from './friends/friends.service';
 import LexiconService from './lexicon/lexicon.service';
+import { NotesService } from './notes/notes.service';
 import NotificationsService from './notifications/notifications.service';
 import { SettingsService } from './settings/settings.service';
 import { ShipDB } from './ship.db';
@@ -44,6 +45,7 @@ export class ShipService extends AbstractService<any> {
     spaces: SpacesService;
     bazaar: BazaarService;
     wallet: WalletService;
+    notes: NotesService;
     lexicon: LexiconService;
     trove: TroveService;
     settings: SettingsService;
@@ -154,6 +156,7 @@ export class ShipService extends AbstractService<any> {
       spaces: new SpacesService(this.serviceOptions, this.shipDB.db, this.patp),
       friends: new FriendsService(this.serviceOptions, this.shipDB.db),
       wallet: new WalletService(undefined, this.shipDB.db),
+      notes: new NotesService(undefined, this.shipDB.db),
       lexicon: new LexiconService(undefined, this.shipDB.db),
       trove: new TroveService(undefined, this.shipDB.db),
       settings: new SettingsService(this.serviceOptions, this.shipDB.db),
@@ -297,8 +300,8 @@ export class ShipService extends AbstractService<any> {
       });
 
       return { credentials, configuration };
-    } catch (e) {
-      log.error('ship.service.ts, getS3Bucket(): error getting credentials', e);
+    } catch {
+      log.error('ship.service.ts: Failed to get S3 bucket.');
 
       return null;
     }
@@ -306,52 +309,55 @@ export class ShipService extends AbstractService<any> {
 
   public async uploadFile(
     args: FileUploadParams
-  ): Promise<{ Location: string; key: string }> {
-    return await new Promise((resolve, reject) => {
-      this.getS3Bucket()
-        .then(async (response) => {
-          console.log('getS3Bucket response: ', response);
-          if (!response) return;
-          // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
-          let endp = response.credentials.endpoint;
-          if (endp.split('.')[0] === response.configuration.currentBucket) {
-            endp = endp.split('.').slice(1).join('.');
-          }
-          const client = new S3Client({
-            credentials: response.credentials,
-            endpoint: endp,
-            signatureVersion: 'v4',
-          });
-          let fileContent, fileName, fileExtension;
-          if (args.source === 'file' && typeof args.content === 'string') {
-            fileContent = fs.readFileSync(args.content);
-            const fileParts = args.content.split('.');
-            fileName = fileParts.slice(0, -1);
-            // only take the filename, not the path
-            fileName = fileName[0].split('/').pop();
-            fileExtension = fileParts.pop();
-          } else if (args.source === 'buffer') {
-            fileContent = Buffer.from(args.content, 'base64');
-            fileName = 'clipboard';
-            fileExtension = args.contentType.split('/')[1];
-          }
-          if (!fileContent) log.warn('No file content found');
-          const key = `${
-            this.patp
-          }/${moment().unix()}-${fileName}.${fileExtension}`;
-          const params = {
-            Bucket: response.configuration.currentBucket,
-            Key: key,
-            Body: fileContent as Buffer,
-            ACL: StorageAcl.PublicRead,
-            ContentType: args.contentType,
-          };
-          const { Location } = await client.upload(params).promise();
-          resolve({ Location, key });
-        })
-        .catch(reject);
-    });
+  ): Promise<{ Location: string; key: string } | null> {
+    try {
+      const response = await this.getS3Bucket();
+      if (!response) return null;
+
+      // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
+      let endp = response.credentials.endpoint;
+      if (endp.split('.')[0] === response.configuration.currentBucket) {
+        endp = endp.split('.').slice(1).join('.');
+      }
+      const client = new S3Client({
+        credentials: response.credentials,
+        endpoint: endp,
+        signatureVersion: 'v4',
+      });
+      let fileContent, fileName, fileExtension;
+      if (args.source === 'file' && typeof args.content === 'string') {
+        fileContent = fs.readFileSync(args.content);
+        const fileParts = args.content.split('.');
+        fileName = fileParts.slice(0, -1);
+        // only take the filename, not the path
+        fileName = fileName[0].split('/').pop();
+        fileExtension = fileParts.pop();
+      } else if (args.source === 'buffer') {
+        fileContent = Buffer.from(args.content, 'base64');
+        fileName = 'clipboard';
+        fileExtension = args.contentType.split('/')[1];
+      }
+      if (!fileContent) log.warn('No file content found');
+      const key = `${
+        this.patp
+      }/${moment().unix()}-${fileName}.${fileExtension}`;
+      const params = {
+        Bucket: response.configuration.currentBucket,
+        Key: key,
+        Body: fileContent as Buffer,
+        ACL: StorageAcl.PublicRead,
+        ContentType: args.contentType,
+      };
+      const { Location } = await client.upload(params).promise();
+
+      return { Location, key };
+    } catch {
+      log.error('ship.service.ts: Failed to upload file.');
+
+      return null;
+    }
   }
+
   public async deleteFile(args: { key: string }): Promise<any> {
     return await new Promise((resolve, reject) => {
       this.getS3Bucket()

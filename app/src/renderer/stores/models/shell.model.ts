@@ -169,6 +169,8 @@ export const ShellModel = types
       if (app.type === 'native' && nativeConfig) {
         self.nativeConfig.set(app.id, nativeConfig);
       }
+
+      const bounds = getInitialWindowBounds(app, self.desktopDimensions);
       const newWindow = AppWindowModel.create({
         appId: app.id,
         title: app.title,
@@ -177,7 +179,7 @@ export const ShellModel = types
         state: 'normal',
         zIndex: self.windows.size + 1,
         type: app.type,
-        bounds: getInitialWindowBounds(app, self.desktopDimensions),
+        bounds,
       });
 
       shipStore.bazaarStore.addRecentApp(app.id);

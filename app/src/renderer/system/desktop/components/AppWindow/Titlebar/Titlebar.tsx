@@ -2,13 +2,13 @@ import { PointerEvent, ReactNode } from 'react';
 
 import { Flex, Text } from '@holium/design-system/general';
 
-import { AppWindowMobxType } from 'renderer/stores/models/window.model';
-
 import { AppWindowIcon } from '../AppWindowIcon';
 import { TitlebarContainer, TitleCentered } from './Titlebar.styles';
 
 type Props = {
   zIndex: number;
+  title?: string;
+  isNative: boolean;
   showDevToolsToggle?: boolean;
   hasBorder?: boolean;
   navigationButtons?: boolean;
@@ -16,9 +16,7 @@ type Props = {
   maximizeButton?: boolean;
   minimizeButton?: boolean;
   isAppWindow?: boolean;
-  noTitlebar?: boolean;
   shareable?: boolean;
-  appWindow: AppWindowMobxType;
   hasBlur?: boolean;
   children?: ReactNode;
   onClose: () => void;
@@ -31,12 +29,12 @@ type Props = {
 
 export const Titlebar = ({
   children,
-  appWindow,
+  title,
+  isNative,
   showDevToolsToggle,
   closeButton,
   hasBorder = true,
   zIndex = 2,
-  noTitlebar,
   isAppWindow,
   maximizeButton,
   minimizeButton,
@@ -64,11 +62,11 @@ export const Titlebar = ({
       hasBorder={hasBorder}
       isAppWindow={isAppWindow}
     >
-      {appWindow && !noTitlebar && (
+      {title && (
         <TitleCentered
           justifyContent="center"
           flex={1}
-          //onClick={onDoubleClick}
+          // onClick={onDoubleClick}
         >
           <Flex gap={4} alignItems="center">
             <Flex justifyContent="center" alignItems="center">
@@ -78,7 +76,7 @@ export const Titlebar = ({
                 fontSize={2}
                 fontWeight={500}
               >
-                {appWindow.title}
+                {title}
               </Text.Custom>
             </Flex>
           </Flex>
@@ -92,7 +90,7 @@ export const Titlebar = ({
               backgroundColor={theme.windowColor}
             />
           )} */}
-          {showDevToolsToggle && appWindow.type !== 'native' && (
+          {showDevToolsToggle && !isNative && (
             <AppWindowIcon
               icon="DevBox"
               onClick={(evt: any) => {

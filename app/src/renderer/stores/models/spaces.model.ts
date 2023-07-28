@@ -96,6 +96,9 @@ export const SpaceModel = types
     get bookmarkUrls() {
       return self.bookmarks.slice().map((bookmark) => bookmark.url);
     },
+    get isOur() {
+      return self.type === 'our';
+    },
     isHost() {
       // TODO check if admin
       return self.path.includes(window.ship);
