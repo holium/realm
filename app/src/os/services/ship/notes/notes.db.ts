@@ -2,9 +2,12 @@ import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
 import {
+  NotesDB_DeleteAllLocalNoteUpdates,
   NotesDB_DeleteNote,
-  NotesDB_EditNote,
+  NotesDB_InsertNoteUpdate,
+  NotesDB_InsertNoteUpdateLocally,
   NotesDB_Note,
+  NotesDB_SelectAllLocalNotesUpdates,
   NotesDB_SelectAllNotes,
   NotesDB_SelectAllNotesUpdates,
   NotesDB_SelectAllNoteUpdates,
@@ -24,6 +27,13 @@ create table if not exists notes (
 
 create table if not exists notes_updates (
   id              TEXT PRIMARY KEY,
+  note_id         TEXT NOT NULL,
+  note_update     TEXT NOT NULL
+);
+
+create table if not exists notes_updates_local (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  space           TEXT NOT NULL,
   note_id         TEXT NOT NULL,
   note_update     TEXT NOT NULL
 );
@@ -92,6 +102,25 @@ export class NotesDB extends AbstractDataAccess<any> {
     return notes;
   };
 
+  selectAllLocalNotesUpdates: NotesDB_SelectAllNotesUpdates = () => {
+    if (!this.db) return [];
+    const notes = this.db.prepare(`SELECT * FROM notes_updates_local`).all();
+
+    return notes;
+  };
+
+  selectAllLocalNoteUpdates: NotesDB_SelectAllLocalNotesUpdates = ({
+    note_id,
+  }) => {
+    if (!this.db) return [];
+
+    const notes = this.db
+      .prepare(`SELECT * FROM notes_updates_local WHERE note_id = ?`)
+      .all(note_id);
+
+    return notes;
+  };
+
   selectNoteUpdates: NotesDB_SelectAllNoteUpdates = ({ note_id }) => {
     if (!this.db) return [];
     const notes = this.db
@@ -123,7 +152,7 @@ export class NotesDB extends AbstractDataAccess<any> {
     return noteId;
   };
 
-  insertNoteUpdate: NotesDB_EditNote = ({ id, note_id, update }) => {
+  insertNoteUpdate: NotesDB_InsertNoteUpdate = ({ id, note_id, update }) => {
     if (!this.db) return -1;
 
     // If the note update already exists, do nothing.
@@ -139,6 +168,23 @@ export class NotesDB extends AbstractDataAccess<any> {
         `INSERT INTO notes_updates (id, note_id, note_update) VALUES (?, ?, ?)`
       )
       .run(id, note_id, update);
+    const noteId = info.lastInsertRowid;
+
+    return noteId;
+  };
+
+  insertNoteUpdateLocally: NotesDB_InsertNoteUpdateLocally = ({
+    space,
+    note_id,
+    update,
+  }) => {
+    if (!this.db) return -1;
+
+    const info = this.db
+      .prepare(
+        `INSERT INTO notes_updates_local (space, note_id, note_update) VALUES (?, ?, ?)`
+      )
+      .run(space, note_id, update);
     const noteId = info.lastInsertRowid;
 
     return noteId;
@@ -172,6 +218,26 @@ export class NotesDB extends AbstractDataAccess<any> {
     const info = this.db
       .prepare(`DELETE FROM notes_updates WHERE id = ?`)
       .run(id);
+    const noteId = info.lastInsertRowid;
+
+    return noteId;
+  };
+
+  deleteAllLocalNotesUpdates = () => {
+    if (!this.db) return -1;
+    const info = this.db.prepare(`DELETE FROM notes_updates_local`).run();
+    const noteId = info.lastInsertRowid;
+
+    return noteId;
+  };
+
+  deleteAllLocalNoteUpdates: NotesDB_DeleteAllLocalNoteUpdates = ({
+    note_id,
+  }) => {
+    if (!this.db) return -1;
+    const info = this.db
+      .prepare(`DELETE FROM notes_updates_local WHERE note_id = ?`)
+      .run(note_id);
     const noteId = info.lastInsertRowid;
 
     return noteId;

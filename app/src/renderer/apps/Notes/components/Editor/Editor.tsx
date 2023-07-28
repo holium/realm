@@ -38,29 +38,30 @@ const EditorPresenter = () => {
     selectedNote,
     selectedAwareness,
     initializing,
-    createNoteUpdate,
-    setSaving,
+    createNoteUpdateLocally,
+    persistLocalNoteUpdates,
   } = notesStore;
 
   // Auto save the document after 3 seconds of inactivity,
   // with a random delay of up to 3 seconds to avoid clients saving at the same time.
-  const debouncedAutoSave = debounce(async (editQueue: string[]) => {
+  const debouncedAutoSave = debounce(() => {
     if (!selectedNote) return;
 
-    setSaving(true);
-
-    // TODO: merge updates into one update before sending to server.
-    const promises = editQueue.map((update) => {
-      return createNoteUpdate({
-        note_id: selectedNote.id,
-        space: selectedNote.space,
-        update,
-      });
-    });
-    await Promise.all(promises);
-
-    setSaving(false);
+    persistLocalNoteUpdates({ note_id: selectedNote.id });
   }, 3000 + Math.random() * 3000);
+
+  const onChange = (update: string) => {
+    if (!selectedNote) return;
+    if (!selectedSpace) return;
+
+    createNoteUpdateLocally({
+      note_id: selectedNote.id,
+      space: selectedSpace.path,
+      update,
+    });
+
+    debouncedAutoSave();
+  };
 
   const broadcast = (channel: NotesBroadcastChannel, data: string) => {
     const broadcast: PresenceBroadcast = {
@@ -95,7 +96,7 @@ const EditorPresenter = () => {
         <Flex flexDirection="column" alignItems="center" gap="12px">
           <Spinner size="19px" width={2} />
           <Text.Body opacity={0.5}>
-            {initializing ? 'Loading updates' : 'Connecting to peers'}
+            {initializing ? 'Syncing updates' : 'Connecting to peers'}
           </Text.Body>
         </Flex>
       </Flex>
@@ -116,7 +117,7 @@ const EditorPresenter = () => {
             : cursorColors[Math.floor(Math.random() * cursorColors.length)],
       }}
       broadcast={broadcast}
-      onSave={debouncedAutoSave}
+      onChange={onChange}
     />
   );
 };

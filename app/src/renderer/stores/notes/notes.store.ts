@@ -164,13 +164,23 @@ export const NotesStore = types
       self.saving = false;
     }),
 
-    createNoteUpdate({ note_id, space, update }: NotesStore_CreateNoteUpdate) {
-      return NotesIPC.createNoteUpdate({
+    createNoteUpdateLocally({
+      note_id,
+      space,
+      update,
+    }: NotesStore_CreateNoteUpdate) {
+      return NotesIPC.createNoteUpdateLocally({
         note_id,
         space,
         update,
       });
     },
+
+    persistLocalNoteUpdates: flow(function* ({ note_id }: { note_id: string }) {
+      self.saving = true;
+      yield NotesIPC.persistLocalNoteUpdates({ note_id });
+      self.saving = false;
+    }),
 
     getNote({ id }: NotesStore_GetNote) {
       const isPersonalNote = self.personalNotes.find((n) => n.id === id);

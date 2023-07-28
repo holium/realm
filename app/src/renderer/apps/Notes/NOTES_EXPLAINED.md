@@ -18,6 +18,8 @@ There is no one source of truth, instead, we save every edit made to a document,
 
 Saving is done automatically after a few seconds of inactivity (debounced save). We also add on a randomized delay to avoid multiple clients poking the network at the same time.
 
+We also immediately save any change to disk, so if the user closes the app before an autosave, it will be synchronized the next time the app is opened.
+
 ### Loading documents
 
 Upon opening the Notes app, we do an initial sync of all edits with the Urbit network and apply them to the documents. Syncing is done in two directions:

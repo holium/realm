@@ -24,6 +24,15 @@ export type NotesDB_SelectAllNotesUpdates = () => {
   note_update: string;
 }[];
 
+export type NotesDB_SelectAllLocalNotesUpdates = (payload: {
+  note_id: string;
+}) => {
+  id: string;
+  space: string;
+  note_id: string;
+  note_update: string;
+}[];
+
 export type NotesDB_SelectAllNoteUpdates = (payload: { note_id: string }) => {
   id: string;
   note_id: string;
@@ -41,4 +50,20 @@ export type NotesDB_EditNote = (payload: {
   update: string;
 }) => string;
 
+export type NotesDB_InsertNoteUpdate = (payload: {
+  id: string;
+  note_id: string;
+  update: string;
+}) => string;
+
+export type NotesDB_InsertNoteUpdateLocally = (payload: {
+  space: string;
+  note_id: string;
+  update: string;
+}) => string;
+
 export type NotesDB_DeleteNote = (payload: { id: string }) => boolean;
+
+export type NotesDB_DeleteAllLocalNoteUpdates = (payload: {
+  note_id: string;
+}) => boolean;

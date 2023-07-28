@@ -301,6 +301,16 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         });
       }
     });
+    // Unsynced local changes.
+    const notesDBLocalNotesUpdates = this.notesDB.selectAllLocalNotesUpdates();
+    notesDBLocalNotesUpdates.forEach((noteUpdate) => {
+      this.createNoteUpdate({
+        note_id: noteUpdate.note_id,
+        update: noteUpdate.note_update,
+        space,
+      });
+    });
+    this.notesDB.deleteAllLocalNotesUpdates();
   }
 
   editNoteTitle({ id, space, title }: NotesService_EditNoteTitle_Payload) {
@@ -349,6 +359,42 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         },
       },
     });
+  }
+
+  createNoteUpdateLocally({
+    note_id,
+    space,
+    update,
+  }: NotesService_CreateNoteUpdate_Payload) {
+    if (!this.notesDB) return;
+
+    return this.notesDB.insertNoteUpdateLocally({
+      note_id,
+      space,
+      update,
+    });
+  }
+
+  async persistLocalNoteUpdates({ note_id }: { note_id: string }) {
+    if (!this.notesDB) return;
+
+    const localNoteUpdates = this.notesDB.selectAllLocalNoteUpdates({
+      note_id,
+    });
+
+    if (!localNoteUpdates.length) return;
+
+    // TODO: merge yjs updates into one before sending to Bedrock.
+    const promises = localNoteUpdates.map((update) => {
+      return this.createNoteUpdate({
+        note_id: update.note_id,
+        update: update.note_update,
+        space: update.space,
+      });
+    });
+    await Promise.all(promises);
+
+    this.notesDB.deleteAllLocalNoteUpdates({ note_id });
   }
 
   subscribe({ space: spacePath }: NotesService_Subscribe_Payload) {
