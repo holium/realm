@@ -26,7 +26,16 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
     () =>
       [
         ...bazaarStore.installed,
-        // ...bazaarStore.devApps
+        // ...bazaarStore.devApps,
+        // TODO: Remove this once bazaar is ready.
+        {
+          id: 'os-notes',
+          title: 'Notes',
+          info: 'A simple note-taking app.',
+          color: '#F5F5F5',
+          favicon: 'https://ship.holium.app/assets/icons/notes.svg',
+          type: 'native',
+        },
       ] as AppMobxType[],
     [bazaarStore.catalog, bazaarStore.installations.values()]
   );

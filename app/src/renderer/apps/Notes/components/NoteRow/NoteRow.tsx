@@ -11,7 +11,7 @@ import { NoteRowView } from './NoteRowView';
 type Props = {
   id: string;
   title: string;
-  author: string;
+  patp: string;
   firstParagraph: string | null;
   space: string;
   updatedAt: number;
@@ -24,7 +24,7 @@ type Props = {
 const NoteRowPresenter = ({
   id,
   title,
-  author,
+  patp,
   firstParagraph,
   space,
   updatedAt,
@@ -35,7 +35,11 @@ const NoteRowPresenter = ({
 }: Props) => {
   const { friends } = useShipStore();
   const roomsStore = useRoomsStore();
+
   const noteRowPath = space + id;
+  const authorMetadata = friends.getContactAvatarMetadata(patp);
+  const nickname =
+    authorMetadata.nickname.length > 0 ? authorMetadata.nickname : null;
 
   const noteRoom = roomsStore
     .getSpaceRooms(space)
@@ -67,7 +71,7 @@ const NoteRowPresenter = ({
 
   useEffect(() => {
     // Don't allow delete if we're not the author.
-    if (window.ship !== author) return;
+    if (window.ship !== patp) return;
 
     if (rowOptions !== getOptions(rowId)) {
       setOptions(rowId, rowOptions);
@@ -89,7 +93,7 @@ const NoteRowPresenter = ({
     <NoteRowView
       id={rowId}
       title={title}
-      author={author}
+      author={nickname ?? patp}
       preview={notePreview}
       date={noteUpdated}
       isSelected={isSelected}
