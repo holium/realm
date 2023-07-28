@@ -57,7 +57,7 @@
       =|  notes-app=native-app:store
         =.  title.notes-app            'Notes'
         =.  info.notes-app             'Realm\'s collaborative notes app.'
-        =.  color.notes-app            '#F9D9F9'
+        =.  color.notes-app            '#F2CA00'
         =.  icon.notes-app             'AppIconNotes'
         =.  config.notes-app           [size=[0 0] titlebar-border=%.n show-titlebar=%.y]
       =|  lexicon-app=native-app:store
