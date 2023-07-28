@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { track } from '@amplitude/analytics-browser';
 
+import { useToggle } from '@holium/design-system/util';
 import { OnboardingStorage, PassportDialog } from '@holium/shared';
 
 import { FileUploadParams } from '../../../os/services/ship/ship.service';
@@ -15,7 +16,7 @@ export const PassportStep = ({ setStep }: StepProps) => {
   const [nicknameSrc, setNickname] = useState<string | null>(nickname);
   const [sigilColor, setSigilColor] = useState<string | undefined>('#000000');
 
-  const [isReady, setIsReady] = useState(false);
+  const loading = useToggle(true);
 
   const isHoliumHosted = serverType === 'hosted';
 
@@ -48,18 +49,18 @@ export const PassportStep = ({ setStep }: StepProps) => {
     OnboardingIPC.getPassport()
       .then((ourPassport) => {
         if (!ourPassport) {
-          setIsReady(true);
+          loading.toggleOff();
           return;
         }
         setNickname(ourPassport?.nickname);
         setAvatarSrc(ourPassport?.avatar);
         setDescription(ourPassport?.bio);
         setSigilColor(ourPassport?.color);
-        setIsReady(true);
+        loading.toggleOff();
       })
       .catch((e) => {
         console.error(e);
-        setIsReady(true);
+        loading.toggleOff();
       });
   }, []);
 
@@ -74,7 +75,9 @@ export const PassportStep = ({ setStep }: StepProps) => {
       contentType: file.type,
     };
     const result = await RealmIPC.uploadFile(params);
-    return result?.Location;
+    if (!result) return null;
+
+    return result.Location;
   };
 
   const onBack = () => {
@@ -117,7 +120,7 @@ export const PassportStep = ({ setStep }: StepProps) => {
   return (
     <PassportDialog
       patp={serverId ?? ''}
-      loading={!isReady}
+      loading={loading.isOn}
       prefilledColor={sigilColor}
       prefilledNickname={nicknameSrc ?? ''}
       prefilledDescription={descriptionSrc ?? ''}
