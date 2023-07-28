@@ -60,6 +60,7 @@ export const AccountPassportSection = ({ account }: Props) => {
     <SettingSection
       title="Passport"
       onSubmit={onSubmit}
+      elevation={2}
       body={
         <>
           <PassportForm
