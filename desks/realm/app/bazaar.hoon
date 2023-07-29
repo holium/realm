@@ -64,6 +64,7 @@
         =.  color.trove-app            '#DCDCDC'
         =.  icon.trove-app             'AppIconTrove'
         =.  config.trove-app           [size=[7 8] titlebar-border=%.n show-titlebar=%.y]
+      =.  catalog.u.old  (~(del by catalog.u.old) %os-notes)
       =.  catalog.u.old  (~(del by catalog.u.old) %lexicon)
       =.  catalog.u.old  (~(del by catalog.u.old) %trove)
       :_  this(state u.old)
