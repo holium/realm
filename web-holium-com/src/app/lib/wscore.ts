@@ -1,3 +1,5 @@
+import { IRootStore } from '../ws';
+
 const network = 'holium.network';
 
 enum ConduitConnectionState {
@@ -11,7 +13,8 @@ interface IConduitMessageHandler {
 }
 
 interface IConduit {
-  connect(): void;
+  connect(): Promise<ConduitConnectionState>;
+  status(): ConduitConnectionState | undefined;
   register(handler: IConduitMessageHandler): void;
   transmit(data: any): void;
 }
@@ -112,6 +115,7 @@ class UrbitMessageHandler implements IConduitMessageHandler {
 class WebSocketConduit implements IConduit {
   private url: string;
   private ws: WebSocket | undefined;
+  private connectionStatus: ConduitConnectionState | undefined = undefined;
   private handlers: IConduitMessageHandler[] = [];
 
   public constructor(patp: string, accessCode: string) {
@@ -128,7 +132,11 @@ class WebSocketConduit implements IConduit {
     this.register(new UrbitMessageHandler(this));
   }
 
-  public async connect(): Promise<ConduitConnectionState> {
+  public status(): ConduitConnectionState | undefined {
+    return this.connectionStatus;
+  }
+
+  public connect(): Promise<ConduitConnectionState> {
     return new Promise((resolve, reject) => {
       const ws = new WebSocket(this.url);
 
@@ -157,6 +165,7 @@ class WebSocketConduit implements IConduit {
 
       ws.onclose = (event) => {
         console.log('ws: [onclose] web socket closed %o', event);
+        this.ws = undefined;
       };
 
       ws.onerror = (event) => {
@@ -175,16 +184,22 @@ class WebSocketConduit implements IConduit {
   }
 }
 
+//
+// SINGLETON CONDUIT CONNECTION
+// in the case of browser chat, the underlying conduit will be a web socket connection
+//
 export class APIConnection {
   private static instance: APIConnection;
   private patp: string;
   private accessCode: string;
   private _conduit: IConduit | undefined;
+  private rootStore: IRootStore | undefined;
 
   private constructor(patp: string, accessCode: string) {
     this.patp = patp;
     this.accessCode = accessCode;
     this._conduit = undefined;
+    this.rootStore = undefined;
   }
 
   // url - e.g. wss://pasren-satmex.holium.network
@@ -195,7 +210,17 @@ export class APIConnection {
     return APIConnection.instance;
   }
 
-  public async connect(): Promise<void> {
+  public attach(rootStore: IRootStore) {
+    this.rootStore = rootStore;
+  }
+
+  // connect to the underlying conduit. in the case of browser chat,
+  //  this will be the new websocket capability
+  public connect(): Promise<ConduitConnectionState> {
+    if (this._conduit) {
+      console.error('ws: error. _conduit instance already established');
+      return new Promise((_, reject) => reject('conduit is single instance'));
+    }
     this._conduit = new WebSocketConduit(
       this.patp,
       this.accessCode
@@ -206,6 +231,4 @@ export class APIConnection {
   get conduit(): IConduit {
     return this._conduit as IConduit;
   }
-
-  public async reconnect(): Promise<void> {}
 }
