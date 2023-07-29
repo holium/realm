@@ -427,6 +427,13 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         updates.forEach((update) => {
           if (!this.notesDB) return;
 
+          if (
+            update.row?.type &&
+            ['notes', 'notes-updates'].includes(update.row?.type)
+          ) {
+            console.log('Notes received SSE event:', update.change);
+          }
+
           if (update.change === 'add-row') {
             if (update.row?.type === 'notes') {
               const rowData = update.row.data;
