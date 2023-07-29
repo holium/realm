@@ -14,7 +14,6 @@ export const Default: ComponentStory<typeof CommButton> = () => {
   return (
     <CommButton
       icon={icon}
-      tooltip={null}
       onClick={() => (icon === 'MicOn' ? setIcon('MicOff') : setIcon('MicOn'))}
     />
   );

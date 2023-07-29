@@ -1,10 +1,4 @@
-import {
-  CSSProperties,
-  ReactNode,
-  useRef,
-  useState,
-  useTransition,
-} from 'react';
+import { CSSProperties, ReactNode, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
 import { color, compose, space, typography } from 'styled-system';
@@ -33,7 +27,6 @@ export interface TooltipProps {
   children: ReactNode;
   position?: any;
   show?: boolean;
-  wrapperStyle?: CSSProperties;
 }
 
 const margin = 2;
@@ -55,7 +48,7 @@ const placementMaps: Record<MenuOrientation, any> = {
   `,
   top: css`
     margin-bottom: ${margin}px;
-    top: 100%;
+    bottom: 100%;
     left: 50%;
     transform: translate(-50%, 0);
   `,
@@ -125,26 +118,47 @@ const TooltipWrapper = styled(styled.div<Partial<TooltipProps>>`
   }
 `)(compose(space, color, typography));
 
+const baseMotionProps = {
+  variants: {
+    active: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.2,
+        delay: 1,
+        ease: 'easeOut',
+      },
+    },
+    inactive: {
+      opacity: 0,
+      y: 4,
+      transition: {
+        duration: 0.1,
+      },
+    },
+  },
+  initial: 'inactive',
+  animate: 'active',
+  exit: 'inactive',
+};
+
 export const Tooltip = ({
   id,
   style,
   content,
-  delay = 0.5,
+  delay = 0,
   placement = 'bottom-right',
   children,
   show = true,
-  wrapperStyle,
   ...rest
 }: TooltipProps) => {
   const tooltipRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_isPending, startTransition] = useTransition();
   const [coords, setCoords] = useState({ left: 0, top: 0 });
   const [isVisible, setIsVisible] = useState(false);
 
   const body =
     typeof content === 'string' ? (
-      <Card borderRadius={4} style={{ fontSize: 14 }} padding="4px 6px">
+      <Card borderRadius={4} style={{ fontSize: 14 }} padding="4px">
         {content}
       </Card>
     ) : (
@@ -159,29 +173,8 @@ export const Tooltip = ({
             <Wrapper
               key={`${id}-tooltip`}
               coords={coords}
-              style={wrapperStyle}
               {...rest}
-              variants={{
-                active: {
-                  opacity: 1,
-                  y: 0,
-                  transition: {
-                    duration: 0.2,
-                    delay,
-                    ease: 'easeOut',
-                  },
-                },
-                inactive: {
-                  opacity: 0,
-                  y: 4,
-                  transition: {
-                    duration: 0.1,
-                  },
-                },
-              }}
-              initial="inactive"
-              animate="active"
-              exit="inactive"
+              {...baseMotionProps}
             >
               <TooltipStyle style={coords} placement={placement}>
                 {body}
@@ -191,23 +184,18 @@ export const Tooltip = ({
         )}
       </Portal>
       <Box
-        position="relative"
         onMouseDown={(evt) => {
-          startTransition(() => {
-            setIsVisible(false);
-          });
+          setIsVisible(false);
           evt.stopPropagation();
         }}
         onMouseEnter={(evt) => {
           const rect = (evt.target as HTMLElement).getBoundingClientRect();
-          startTransition(() => {
-            setCoords({
-              left: rect.x + rect.width / 2,
-              top: rect.top - rect.height,
-            });
-            show && setIsVisible(true);
+          setCoords({
+            left: rect.x,
+            top: rect.top - rect.height,
           });
           evt.stopPropagation();
+          show && setIsVisible(true);
         }}
         onMouseLeave={() => setIsVisible(false)}
       >

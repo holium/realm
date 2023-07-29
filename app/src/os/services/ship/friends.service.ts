@@ -1,18 +1,10 @@
 import log from 'electron-log';
 import Database from 'better-sqlite3-multiple-ciphers';
 
-import { cleanNounColor, removeHash } from '../../../lib/color';
-import AbstractDataAccess from '../../abstract.db';
-import { ServiceOptions } from '../../abstract.service';
-import { APIConnection } from '../../api';
-
-export type ContactResponse = {
-  avatar: string | null;
-  cover: string | null;
-  bio: string | null;
-  nickname: string | null;
-  color: string | null;
-};
+import { cleanNounColor, removeHash } from '../../lib/color';
+import AbstractDataAccess from '../abstract.db';
+import { ServiceOptions } from '../abstract.service';
+import { APIConnection } from '../api';
 
 export interface Friend {
   patp: string;
@@ -35,7 +27,6 @@ export class FriendsService extends AbstractDataAccess<Friend, any> {
       db,
       name: 'friends',
       tableName: 'friends',
-      pKey: 'patp',
     });
     if (options.preload) {
       return;
@@ -116,40 +107,7 @@ export class FriendsService extends AbstractDataAccess<Friend, any> {
       app: 'friends',
       path: `/contact/${patp}`,
     });
-
-    // return response?.contact;
-    const current = this.findOne(patp);
-    if (current) {
-      const compareObj = {
-        avatar: current.avatar,
-        cover: current.cover,
-        bio: current.bio,
-        nickname: current.nickname,
-        color: current.color,
-      };
-      if (response !== compareObj) {
-        this._updateLocalContact(patp, response);
-      }
-    }
-
     return response;
-  }
-
-  private _updateLocalContact(patp: string, contact: ContactResponse) {
-    if (!this.db?.open) return;
-    const update = this.db.prepare(
-      `UPDATE friends SET
-        nickname = @nickname,
-        avatar = @avatar,
-        bio = @bio,
-        color = @color,
-        cover = @cover
-      WHERE patp = @patp`
-    );
-    update.run({
-      patp,
-      ...contact,
-    });
   }
 
   private async _fetchFriends() {

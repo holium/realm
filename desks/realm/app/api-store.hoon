@@ -99,15 +99,9 @@
 ::api-store &api-store-action [%sync-to-bedrock ~]
   |=  [state=state-0]
   ^-  (quip card state-0)
-  =/  s3-store=store-results
-    ?:  .^(? %gu /(scot %p our.bowl)/s3-store/(scot %da now.bowl)/$)
-      ;;([@t @t @t @t] .^(* %gx /(scot %p our.bowl)/s3-store/(scot %da now.bowl)/credentials/noun))
-    ['' '' '' '']
+  =/  s3-store=store-results  ;;([@t @t @t @t] .^(* %gx /(scot %p our.bowl)/s3-store/(scot %da now.bowl)/credentials/noun))
   =/  storage=store-results  ;;([@t @t @t @t] .^(* %gx /(scot %p our.bowl)/storage/(scot %da now.bowl)/credentials/noun))
-  =/  s3-conf=store-conf
-    ?:  .^(? %gu /(scot %p our.bowl)/s3-store/(scot %da now.bowl)/$)
-      ;;(store-conf .^(* %gx /(scot %p our.bowl)/s3-store/(scot %da now.bowl)/configuration/noun))
-    [%configuration ~ '' '']
+  =/  s3-conf=store-conf  ;;(store-conf .^(* %gx /(scot %p our.bowl)/s3-store/(scot %da now.bowl)/configuration/noun))
   =/  stoconf=store-conf  ;;(store-conf .^(* %gx /(scot %p our.bowl)/storage/(scot %da now.bowl)/configuration/noun))
   =/  merged=[%creds @t @t @t (set @t) @t @t]
       [

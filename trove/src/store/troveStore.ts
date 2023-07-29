@@ -1,41 +1,15 @@
 import create from 'zustand';
 
-import { trovePreload } from '../../../app/src/os/services/ship/trove/trove.service';
+import { trovePreload } from '../../../app/src/os/services/ship/trove.service';
 import { Role } from '../types';
 
 export type Folder = null | string;
 
-export type Node = null | {
+type Node = null | {
   id: string;
   type: 'file' | 'folder';
 };
-interface TroveRenderFile {
-  [key: string]: {
-    url: string;
-    dat: {
-      size: string;
-      title: string;
-      key: string;
-      from: number;
-      description: string;
-      by: string;
-      extension: string;
-    };
-    type: string;
-  };
-}
-interface TroveRenderFolder {
-  text: string;
-  path: string;
-  type: string;
-  timestamp: number;
-  children: TroveRenderFolder | TroveRenderFile | []; //has either a folder or a file as a child or is an empty array
-}
-export type TroveRenderTree =
-  | {
-      [key: string]: TroveRenderFolder | TroveRenderFile | []; //a map of ship/space to trove folder and their files..
-    }[]
-  | null;
+
 export interface TroveStore {
   api: null | typeof trovePreload;
   setApi: (api: typeof trovePreload) => void;
@@ -46,8 +20,8 @@ export interface TroveStore {
   inPersonalSpace: null | boolean;
   setInPersonalSpace: (state: boolean) => void;
 
-  troveRenderTree: TroveRenderTree; //calculated from the troves variable, for rendering in react
-  setTroveRenderTree: (newTroveRenderTree: TroveRenderTree) => void;
+  troveRenderTree: any; //calculated from the troves variable, for rendering in react
+  setTroveRenderTree: (newTroveRenderTree: any) => void;
 
   topLevelFolders: any;
   setTopLevelFolders: (newTopLevelFolders: any) => void;
@@ -91,7 +65,7 @@ const useTroveStore = create<TroveStore>((set) => ({
   setInPersonalSpace: (state: any) => set(() => ({ inPersonalSpace: state })),
 
   troveRenderTree: null,
-  setTroveRenderTree: (newTroveRenderTree: TroveRenderTree) =>
+  setTroveRenderTree: (newTroveRenderTree: any) =>
     set(() => ({ troveRenderTree: newTroveRenderTree })),
 
   topLevelFolders: [],

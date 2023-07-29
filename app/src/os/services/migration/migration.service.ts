@@ -48,11 +48,6 @@ export class MigrationService extends AbstractService {
     });
   }
 
-  public _deleteShip(patp: string) {
-    if (!this.migrationDB) return;
-    this.migrationDB.tables.schemaVersions.delete(patp);
-  }
-
   private executeStatement(db: Database, statement: string) {
     try {
       db.prepare(statement).run();

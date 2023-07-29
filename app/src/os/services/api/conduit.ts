@@ -28,14 +28,8 @@ setMaxListeners(20);
  */
 export class Conduit extends EventEmitter {
   private url = '';
-  /**
-   * lastEventId is an auto-updated index of which events have been *sent* over this channel.
-   * lastHeardEventId is the latest event we have heard back about.
-   * lastAcknowledgedEventId is the latest event we have sent an ack for.
-   */
-  private lastEventId = 0;
-  private lastHeardEventId = -1;
-  private lastAcknowledgedEventId = -1;
+  private prevMsgId = 0;
+  private lastAckId = 0;
   cookie: string | null = null;
   ship: string;
   pokes: Map<number, PokeParams & PokeCallbacks>;
@@ -141,11 +135,10 @@ export class Conduit extends EventEmitter {
   }
 
   async startSSE(channelUrl: string): Promise<void> {
-    log.info('starting SSE');
     if (this.status === ConduitState.Connected) {
       return Promise.resolve();
     }
-    if (this.lastEventId === 0) {
+    if (this.prevMsgId === 0) {
       await this.poke({
         app: 'hood',
         mark: 'helm-hi',
@@ -160,7 +153,7 @@ export class Conduit extends EventEmitter {
         headers: { Cookie: this.cookie },
       });
 
-      this.sse.onopen = (response) => {
+      this.sse.onopen = async (response) => {
         if (response.type === 'open') {
           this.updateStatus(ConduitState.Connected);
           setInterval(() => {
@@ -169,60 +162,47 @@ export class Conduit extends EventEmitter {
             }
           }, 1000);
           resolve();
-          return;
         } else {
           this.updateStatus(ConduitState.Failed);
           reject(new Error('failed to open sse'));
         }
       };
 
-      this.sse.onmessage = (event: MessageEvent) => {
+      this.sse.onmessage = async (event: MessageEvent) => {
         if (this.status !== ConduitState.Connected) {
           this.updateStatus(ConduitState.Connected);
         }
-        if (!event.lastEventId) return;
-
+        const parsedData = JSON.parse(event.data);
+        const eventId = parseInt(parsedData.id, 10);
+        const type = parsedData.response as Responses;
         const lastEventId = parseInt(event.lastEventId, 10);
-        if (lastEventId <= this.lastHeardEventId) {
-          log.warn('dropping old or out-of-order event', {
-            lastEventId,
-            lastHeard: this.lastHeardEventId,
-          });
-          return;
-        }
-        this.lastHeardEventId = lastEventId;
-
-        if (lastEventId - this.lastAcknowledgedEventId > 20) {
+        if (lastEventId - this.lastAckId > 20) {
           this.ack(lastEventId);
         }
-        const parsedEvent = JSON.parse(event.data);
-        const eventId = parsedEvent.id;
-        const type = parsedEvent.response as Responses;
-
         switch (type) {
           case 'poke':
             if (this.pokes.has(eventId)) {
               const handler = this.pokes.get(eventId);
-              if (parsedEvent.ok && handler) {
+              if (parsedData.ok && handler) {
                 // @ts-expect-error
                 handler.onSuccess();
-              } else if (parsedEvent.err && handler) {
+              } else if (parsedData.err && handler) {
                 // @ts-expect-error
-                handler.onError(parsedEvent.err);
+                handler.onError(parsedData.err);
               } else {
-                log.error('poke sse error', parsedEvent.err);
+                log.error('poke sse error', parsedData.err);
               }
             }
             this.pokes.delete(eventId);
             break;
           //
           case 'subscribe':
-            if (parsedEvent.err) {
+            if (parsedData.err) {
               const watchHandler = this.watches.get(eventId);
               if (watchHandler) {
-                watchHandler.onError?.(eventId, parsedEvent.err);
+                watchHandler.onError?.(eventId, parsedData.err);
               } else {
-                log.error('watch sse error', parsedEvent.err);
+                log.error('watch sse error', parsedData.err);
               }
               this.setAsIdleWatch(eventId);
             } else {
@@ -234,29 +214,27 @@ export class Conduit extends EventEmitter {
             break;
           //
           case 'diff': {
-            // log.info('diff event', parsedEvent);
-            const json = parsedEvent.json;
-            const mark = parsedEvent.mark;
+            const json = parsedData.json;
+            const mark = parsedData.mark;
             if (this.watches.has(eventId)) {
               this.watches.get(eventId)?.onEvent?.(json, eventId, mark);
             }
             const reaction = Object.keys(json)[0];
             const maybeReactionPath = `${mark}.${reaction}`;
             if (this.reactions.has(maybeReactionPath)) {
-              this.reactions.get(maybeReactionPath)?.(parsedEvent.json, mark);
+              this.reactions.get(maybeReactionPath)?.(parsedData.json, mark);
               this.reactions.delete(maybeReactionPath);
             }
             break;
           }
           // quit
           case 'quit':
-            log.info('on quit called');
+            log.info('on quit', eventId, this.watches.has(eventId));
             if (this.watches.has(eventId)) {
-              log.info('on quit', eventId, this.watches.has(eventId));
               const reconnectSub = this.watches.get(eventId);
               this.setAsIdleWatch(eventId);
               if (reconnectSub?.onQuit) {
-                reconnectSub?.onQuit?.(parsedEvent);
+                reconnectSub?.onQuit?.(parsedData);
               } else {
                 this.resubscribe(eventId);
               }
@@ -264,7 +242,7 @@ export class Conduit extends EventEmitter {
             break;
           //
           default:
-            log.info('unrecognized', parsedEvent);
+            log.info('unrecognized', parsedData);
             break;
         }
       };
@@ -285,13 +263,13 @@ export class Conduit extends EventEmitter {
         }
         // @ts-expect-error
         if (error.status >= 500) {
-          log.error('error.status >= 500', error);
+          console.log('error', error);
           this.updateStatus(ConduitState.Failed);
           this.failGracefully();
         }
         if (!error.status) {
           // this happens when the ship is offline
-          log.error('!error.status', error);
+          console.log('error.status', error);
 
           this.updateStatus(ConduitState.Failed);
           this.disconnectGracefully();
@@ -301,14 +279,6 @@ export class Conduit extends EventEmitter {
         log.warn('Ship unexpectedly closed the connection');
       });
     });
-  }
-
-  /**
-   * Autoincrements the next event ID for the appropriate channel.
-   */
-  private getEventId(): number {
-    this.lastEventId += 1;
-    return this.lastEventId;
   }
 
   /**
@@ -352,13 +322,8 @@ export class Conduit extends EventEmitter {
       onError: (_id, _err) => {},
       ...params,
     };
-
-    if (this.lastEventId === 0) {
-      log.info('poke: opening conduit');
-    }
-
     const message: Message = {
-      id: this.getEventId(),
+      id: this.nextMsgId,
       action: Action.Poke,
       ship: this.ship ?? '',
       app: params.app,
@@ -403,13 +368,8 @@ export class Conduit extends EventEmitter {
       onSubscribed: (_id) => {},
       ...params,
     };
-
-    if (this.lastEventId === 0) {
-      log.info('watch: opening conduit');
-    }
-
     const message: Message = {
-      id: this.getEventId(),
+      id: this.nextMsgId,
       action: Action.Subscribe,
       ship: this.ship ?? '',
       app: params.app,
@@ -433,7 +393,7 @@ export class Conduit extends EventEmitter {
    */
   unsubscribe(subscription: number) {
     const message: Message = {
-      id: this.getEventId(),
+      id: this.nextMsgId,
       action: Action.Unsubscribe,
       subscription,
     };
@@ -534,40 +494,14 @@ export class Conduit extends EventEmitter {
    * @returns
    */
   private async ack(eventId: number): Promise<number | void> {
-    this.lastAcknowledgedEventId = eventId;
+    this.lastAckId = eventId;
     const message: Message = {
-      // id: this.getEventId(),
+      id: this.nextMsgId,
       action: Action.Ack,
       'event-id': eventId,
     };
     await this.postToChannel(message);
     return eventId;
-  }
-
-  /**
-   * Deletes the connection to a channel.
-   */
-  async delete() {
-    const body = JSON.stringify([
-      {
-        id: this.getEventId(),
-        action: 'delete',
-      },
-    ]);
-
-    const response = await fetch(this.channelUrl(this.uid), {
-      headers: {
-        ...this.headers,
-        Cookie: this.headers.Cookie,
-      },
-      method: 'POST',
-      body: body,
-      signal: this.abort.signal,
-    });
-    if (!response.ok) {
-      throw new Error('Failed to DELETE channel in node context');
-    }
-    return;
   }
 
   /**************************************************************/
@@ -583,6 +517,12 @@ export class Conduit extends EventEmitter {
 
   private channelUrl(uuid: string): string {
     return `${this.url}/~/channel/${uuid}`;
+  }
+
+  private get nextMsgId() {
+    const next = this.prevMsgId + 1;
+    this.prevMsgId = next;
+    return next;
   }
 
   /**************************************************************/
@@ -662,9 +602,7 @@ export class Conduit extends EventEmitter {
   }
 
   cleanup() {
-    this.lastEventId = 0;
-    this.lastHeardEventId = -1;
-    this.lastAcknowledgedEventId = -1;
+    this.prevMsgId = 0;
     this.pokes = new Map();
     this.watches = new Map();
     this.reactions = new Map();
@@ -689,25 +627,27 @@ export class Conduit extends EventEmitter {
    *
    * @returns boolean indicating if the close was successful
    */
-  async closeChannel() {
-    await this.delete();
+  async closeChannel(): Promise<boolean> {
+    const res = await this.postToChannel({
+      id: this.nextMsgId,
+      action: Action.Delete,
+    });
+
     // Reset to 0
+    this.prevMsgId = 0;
     this.pokes = new Map();
     this.watches = new Map();
     this.reactions = new Map();
     this.abort.abort();
     this.abort = new AbortController();
-
     this.sse?.close();
     this.sse = undefined;
-    this.lastEventId = 0;
-    this.lastHeardEventId = -1;
-    this.lastAcknowledgedEventId = -1;
     this.updateStatus(ConduitState.Disconnected);
+    return res;
   }
 
   static async reconnect(conduit: Conduit) {
-    conduit.closeChannel();
+    await conduit.closeChannel();
     if (!conduit.url || !conduit.code || !conduit.cookie)
       throw new Error('url, code, or cookie not set');
     await conduit.init(conduit.url, conduit.code, conduit.cookie);

@@ -5,17 +5,17 @@ import { MouseState } from '@holium/realm-presence';
 
 import { ConduitState } from 'os/services/api';
 import { migrationPreload } from 'os/services/migration/migration.service';
-import { lexiconPreload } from 'os/services/ship/lexicon/lexicon.service';
-import { settingsPreload } from 'os/services/ship/settings/settings.service';
+import { lexiconPreload } from 'os/services/ship/lexicon.service';
+import { settingsPreload } from 'os/services/ship/settings.service';
 import { bazaarPreload } from 'os/services/ship/spaces/bazaar.service';
 import { spacesPreload } from 'os/services/ship/spaces/spaces.service';
-import { trovePreload } from 'os/services/ship/trove/trove.service';
+import { trovePreload } from 'os/services/ship/trove.service';
 
 import { realmPreload } from '../os/realm.service';
 import { authPreload } from '../os/services/auth/auth.service';
 import { onboardingPreload } from '../os/services/auth/onboarding.service';
 import { chatPreload } from '../os/services/ship/chat/chat.service';
-import { friendsPreload } from '../os/services/ship/friends/friends.service';
+import { friendsPreload } from '../os/services/ship/friends.service';
 import { notifPreload } from '../os/services/ship/notifications/notifications.service';
 import { shipPreload } from '../os/services/ship/ship.service';
 import { appPublishersDBPreload } from '../os/services/ship/spaces/tables/appPublishers.table';
@@ -45,9 +45,6 @@ const appPreload = {
   },
   askForCamera: (): Promise<MediaAccessStatus> => {
     return ipcRenderer.invoke('ask-for-camera');
-  },
-  askForScreen: (): Promise<MediaAccessStatus> => {
-    return ipcRenderer.invoke('ask-for-screen');
   },
   getMediaStatus: (): Promise<MediaAccess> => {
     return ipcRenderer.invoke('get-media-status');
@@ -95,15 +92,6 @@ const appPreload = {
     ipcRenderer.invoke('realm-to-app.ephemeral-chat', patp, message);
   },
   /* Receivers */
-  onScreenshareSource(
-    callback: (
-      source: Electron.DesktopCapturerSource
-    ) => Promise<MediaStream | undefined>
-  ) {
-    ipcRenderer.on('set-screenshare-source', (_, sourceId) => {
-      callback(sourceId);
-    });
-  },
   onSetFullScreen(callback: (isFullscreen: boolean) => void) {
     ipcRenderer.on('set-fullscreen', (_, isFullscreen) => {
       callback(isFullscreen);

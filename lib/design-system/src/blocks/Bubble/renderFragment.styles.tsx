@@ -244,5 +244,4 @@ export const LineBreak = styled.div`
   height: 4px;
   margin: 0;
   padding: 0;
-  pointer-events: none;
 `;

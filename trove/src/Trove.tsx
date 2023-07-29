@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-import { trovePreload } from '../../app/src/os/services/ship/trove/trove.service';
+import { trovePreload } from '../../app/src/os/services/ship/trove.service';
 import { updateHandler } from './api/updates';
 import { Navigation } from './components';
 import { Home } from './pages';

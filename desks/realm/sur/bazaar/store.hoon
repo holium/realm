@@ -74,7 +74,6 @@
       [%clear-stall path=space-path:spaces args=(map cord cord)]
       [%set-host app-id=desk host=ship]
       [%delete-catalog-entry =app-id]
-      [%add-catalog-entry =app-id =native-app]
   ==
 ::
 +$  interaction

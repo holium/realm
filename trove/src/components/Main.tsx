@@ -19,7 +19,7 @@ import {
   WrappedBackground,
 } from '../components';
 import { moveFileAction, moveFolderAction } from '../store/troveActions';
-import useTroveStore, { Node, TroveStore } from '../store/troveStore';
+import useTroveStore, { TroveStore } from '../store/troveStore';
 import { theme } from '../theme';
 export const Main = ({
   troveRenderTree,
@@ -32,6 +32,7 @@ export const Main = ({
   const [displayFolderInput, setDisplayFolderInput] = useState<boolean>(false);
   const [displayFileInput, setDisplayFileInput] = useState<boolean>(false);
   const [displayFileLink, setDisplayFileLink] = useState<boolean>(false);
+
   const api = useTroveStore((store: TroveStore) => store.api);
 
   const myPerms = useTroveStore((store: TroveStore) => store.myPerms);
@@ -44,10 +45,9 @@ export const Main = ({
     (store: TroveStore) => store.setSelectedNode
   );
   const space = useTroveStore((store: TroveStore) => store.currentSpace);
-  const handleSelection = (data: Node = null) => {
+  const handleSelection = (data: any = null) => {
     //if we get the same instance twice, we unselect
     setSelectedNode(null);
-    if (!data) return;
     if (data?.id === selectedNode?.id) {
       //this block isn't empty
     } else {

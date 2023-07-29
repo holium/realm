@@ -37,21 +37,18 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
       // LEAVE OTHER ROOM
       sound.playRoomLeave();
       roomsStore.leaveRoom(roomsStore.currentRoom.rid);
-      // DELETE OTHER ROOM IF EMPTY
-      if (roomsStore.currentRoom?.present.length === 0) {
-        roomsStore.deleteRoom(roomsStore.currentRoom.rid);
-      }
     }
 
     if (existingRoom) {
       if (areWeInRoom) {
+        sound.playRoomLeave();
         // LEAVE ROOM
         sound.playRoomLeave();
         roomsStore.leaveRoom(existingRoom.rid);
         if (subroute === 'room') setSubroute('chat');
 
-        // DELETE ROOM IF EMPTY
         if (existingRoom?.present.length === 0) {
+          // DELETE ROOM
           roomsStore.deleteRoom(existingRoom.rid);
         }
       } else {

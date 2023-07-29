@@ -1,7 +1,4 @@
 module.exports = {
-  globals: {
-    self: 'readonly',
-  },
   extends: [
     'react-app',
     'eslint:recommended',

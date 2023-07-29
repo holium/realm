@@ -8,9 +8,6 @@ import { OnDataChannel, OnLeftRoom } from './RoomsStore';
 import { IAudioAnalyser, SpeakingDetectionAnalyser } from './SpeakingDetector';
 
 const DataPacketMuteStatus = 3;
-const DataPacketScreenShareStatus = 5;
-const DataPacketWebcamStatus = 6;
-
 // const DataPacketSpeakingChanged = 4;
 //
 export class PeerClass extends EventsEmitter {
@@ -20,7 +17,6 @@ export class PeerClass extends EventsEmitter {
   @observable peer: PeerInstance;
   @observable websocket: WebSocket;
   @observable hasVideo = false;
-  @observable isScreenSharing = false;
   @observable isMuted = false;
   @observable isForceMuted = false;
   @observable isSpeaking = false;
@@ -30,7 +26,6 @@ export class PeerClass extends EventsEmitter {
   @observable audioTracks: Map<string, any> = new Map();
   @observable audioStream: MediaStream | null = null;
   @observable videoStream: MediaStream | null = null;
-  @observable screenStream: MediaStream | undefined = undefined;
   @observable videoTracks: Map<string, any> = new Map();
   @observable stream: MediaStream | null = null;
   @observable ourStreams: MediaStream[];
@@ -102,17 +97,6 @@ export class PeerClass extends EventsEmitter {
   @action
   hasVideoChanged(hasVideo: boolean) {
     this.hasVideo = hasVideo;
-    if (this.isScreenSharing && hasVideo) {
-      this.isScreenSharing = false;
-    }
-  }
-
-  @action
-  isScreenSharingChanged(isScreenSharing: boolean) {
-    this.isScreenSharing = isScreenSharing;
-    if (this.hasVideo && isScreenSharing) {
-      this.hasVideo = false;
-    }
   }
 
   setNewStream(stream: MediaStream) {
@@ -172,61 +156,50 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onTrack(track: MediaStreamTrack, stream: MediaStream) {
-    console.log('onTRACK');
     if (!track || !(track instanceof MediaStreamTrack)) {
       console.error('Invalid track received in onTrack');
       return;
     }
-    console.log('got track', track.id, track);
     if (track.kind === 'video') {
       // console.log('got video track', track.id);
       if (this.videoTracks.has(track.id)) {
         console.log('already have this video track', track.id);
         return;
       }
-      if (this.videoTracks.size > 0) {
+      if (this.videoTracks.size > 0 && track.label !== 'screen') {
         // only remove old track if its a camera track
         console.log('already have a video track set, replacing');
         const oldTrack = this.videoTracks.values().next().value;
         this.videoTracks.delete(oldTrack.id);
         oldTrack.stop();
       }
-
+      if (track.label === 'screen') {
+        console.log('got screen track');
+      }
       this.videoTracks.set(track.id, track);
+      this.videoStream = stream;
 
-      // this.hasVideoChanged(true);
+      this.hasVideoChanged(true);
       const video = document.getElementById(
         `peer-video-${this.peerId}`
       ) as HTMLVideoElement;
 
-      if (track.label === 'Screen') {
-        console.log('screen track', track);
-        video.classList.add('screen');
-        this.isScreenSharing = true;
-        this.hasVideo = false;
-        this.screenStream = stream;
-      } else {
-        video.classList.remove('screen');
-        console.log('video track', track);
-        this.hasVideo = true;
-        this.isScreenSharing = false;
-        this.videoStream = stream;
-      }
+      // track.onmute = () => {
+      //   // triggered when video is stopped by peer
+      //   track.stop();
+      //   if (!video) return;
+      //   video.style.display = 'none';
+      //   this.hasVideoChanged(false);
+      // };
 
       if (video) {
-        console.log('video stream id', stream);
+        console.log('video stream id', stream.id);
         video.style.display = 'inline-block';
         video.srcObject = stream;
         video.playsInline = true;
         video.muted = true;
       } else {
         console.log('no video element found');
-      }
-      const videoWrapper = document.getElementById(
-        `peer-video-${this.peerId}-wrapper`
-      ) as HTMLDivElement;
-      if (videoWrapper) {
-        videoWrapper.style.display = 'inline-block';
       }
     }
     if (track.kind === 'audio') {
@@ -303,13 +276,6 @@ export class PeerClass extends EventsEmitter {
       video.playsInline = false;
     }
 
-    const videoWrapper = document.getElementById(
-      `peer-video-${this.peerId}-wrapper`
-    ) as HTMLDivElement;
-    if (videoWrapper) {
-      videoWrapper.style.display = 'none';
-    }
-
     this.analysers.forEach((analyser) => {
       analyser.detach();
     });
@@ -346,49 +312,16 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onData(data: any) {
-    console.log('onData', unserialize(data));
     const dataPacket = unserialize(data);
-    const payload = dataPacket.value as DataPayload;
-    console.log('onData', payload);
     if (dataPacket.kind === DataPacketMuteStatus) {
+      const payload = dataPacket.value as DataPayload;
       if (payload.data) {
         this.isMutedChanged(true);
       } else {
         this.isMutedChanged(false);
       }
-    } else if (dataPacket.kind === DataPacketScreenShareStatus) {
-      if (payload.data) {
-        this.isScreenSharingChanged(true);
-      } else {
-        this.disableVideo();
-      }
-    } else if (dataPacket.kind === DataPacketWebcamStatus) {
-      if (payload.data === true) {
-        this.hasVideoChanged(true);
-      } else {
-        this.disableVideo();
-      }
     }
     this.onDataChannel(this.rid, this.peerId, dataPacket);
-  }
-
-  @action
-  disableVideo() {
-    const videoWrapper = document.getElementById(
-      `peer-video-${this.peerId}-wrapper`
-    ) as HTMLDivElement;
-    if (videoWrapper) {
-      videoWrapper.style.display = 'none';
-    }
-    const video = document.getElementById(
-      `peer-video-${this.peerId}`
-    ) as HTMLVideoElement;
-    if (videoWrapper) {
-      video.style.display = 'none';
-      video.srcObject = null;
-    }
-    this.hasVideoChanged(false);
-    this.isScreenSharingChanged(false);
   }
 
   @action

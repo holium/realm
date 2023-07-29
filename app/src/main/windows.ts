@@ -36,7 +36,7 @@ const getDefaultRealmWindowOptions = (
   simpleFullscreen: false,
   acceptFirstMouse: true,
   webPreferences: {
-    nodeIntegration: true,
+    nodeIntegration: false,
     webviewTag: true,
     sandbox: false,
     contextIsolation: true,
@@ -52,7 +52,7 @@ export const createRealmWindow = () => {
 
   WebViewHelper.registerListeners(newRealmWindow);
   DevHelper.registerListeners(newRealmWindow);
-  MediaHelper.registerListeners(newRealmWindow);
+  MediaHelper.registerListeners();
   BrowserHelper.registerListeners(newRealmWindow);
   PowerHelper.registerListeners(newRealmWindow);
   KeyHelper.registerListeners(newRealmWindow);
@@ -173,7 +173,7 @@ export const createStandaloneChatWindow = () => {
 
   WebViewHelper.registerListeners(newStandaloneChatWindow);
   DevHelper.registerListeners(newStandaloneChatWindow);
-  MediaHelper.registerListeners(newStandaloneChatWindow);
+  MediaHelper.registerListeners();
   BrowserHelper.registerListeners(newStandaloneChatWindow);
   PowerHelper.registerListeners(newStandaloneChatWindow);
   KeyHelper.registerListeners(newStandaloneChatWindow);

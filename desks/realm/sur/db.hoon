@@ -11,7 +11,6 @@
       =paths
       =peers
       =del-log
-      hide-logs=?  :: default hidden %.y
   ==
 
 +$  schemas   (map [=type:common v=@ud] schema)
@@ -142,7 +141,6 @@
       :: only from our.bowl
       [%create-path =input-path-row]       :: create a new peers list, sends %get-path to all peers
       [%create-from-space =path space-path=[=ship space=cord] sr=role:membership]  :: create a new peers list based on space members, automatically keeps peers list in sync, sends %get-path to all peers
-      [%edit-path =input-path-row]         :: edit a new peers list
       [%remove-path =path]                    :: remove a peers list and all attached objects in tables, sends %delete-path to all peers
       [%add-peer =path =ship =role]           :: add a peer to an existing peers list, sends %get-path to that peer
       [%kick-peer =path =ship]                :: remove a peer from an existing peers list, sends %delete-path to that peer
@@ -157,8 +155,6 @@
       [%remove =type:common =path =id:common]      :: %host deleting the row, sends %delete to all peers
       [%relay =req-id =input-row]          :: like %create, but for creating a %relay (relay:common)
       [%create-initial-spaces-paths ~]
-
-      [%toggle-hide-logs toggle=?]
   ==
 ::
 +$  ship-roles  (list [s=@p =role])

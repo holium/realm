@@ -38,7 +38,6 @@ const SystemPanelPresenter = () => {
   const [mediaStatus, setMediaStatus] = useState<MediaAccess>({
     camera: 'unknown',
     mic: 'unknown',
-    screen: 'unknown',
   });
 
   useEffect(() => {

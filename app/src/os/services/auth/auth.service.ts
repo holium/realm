@@ -10,8 +10,6 @@ import { ThemeType } from '@holium/shared';
 
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { ConduitSession } from '../api';
-import { MigrationService } from '../migration/migration.service';
-import { ContactResponse } from '../ship/friends/friends.service';
 import ShipService from '../ship/ship.service';
 import { DBAccount } from './accounts.table';
 import { AuthDB } from './auth.db';
@@ -56,25 +54,6 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     if (account) {
       this.authDB.tables.accounts.update(serverId, {
         theme: JSON.stringify(theme),
-      });
-    }
-  }
-
-  public setPassport(patp: string, passport: ContactResponse) {
-    if (!this.authDB) return;
-    const account = this.authDB.tables.accounts.findOne(patp);
-    if (account) {
-      const updated = this.authDB.tables.accounts.update(patp, {
-        nickname: passport.nickname,
-        avatar: passport.avatar,
-        color: passport.color,
-      });
-      this.sendUpdate({
-        type: 'account-updated',
-        payload: {
-          account: updated,
-          order: this.authDB?.getOrder(),
-        },
       });
     }
   }
@@ -164,7 +143,6 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
         order: this.authDB?.getOrder(),
       },
     });
-    MigrationService.getInstance()._deleteShip(serverId);
     ShipService._deleteShipDB(serverId);
   }
   /**

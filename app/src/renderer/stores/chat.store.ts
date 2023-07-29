@@ -341,11 +341,9 @@ export const ChatStore = types
         // get space theme
         const selectedSpace = spacesStore.getSpaceByChatPath(selectedChat.path);
         if (!selectedSpace) return;
-        if (spacesStore.selected?.path === selectedSpace?.path) return;
         spacesStore.selectSpace(selectedSpace?.path);
       } else {
         // personal theme
-        if (spacesStore.selected?.path === spacesStore.ourSpace.path) return;
         spacesStore.selectSpace(spacesStore.ourSpace.path);
       }
     },

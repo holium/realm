@@ -3,10 +3,7 @@ import styled from 'styled-components';
 import { ColorVariants } from '../../../util';
 import { Flex } from '../../general/Flex/Flex';
 
-export const CommCircle: any = styled(Flex)<{
-  customBg?: ColorVariants;
-  isDisabled: boolean;
-}>`
+export const CommCircle = styled(Flex)<{ customBg?: ColorVariants }>`
   height: 44px;
   width: 44px;
   display: flex;
@@ -29,12 +26,5 @@ export const CommCircle: any = styled(Flex)<{
     &:hover {
       background: rgba(var(--rlm-${customBg}-rgba));
     }
-  `}
-
-  ${({ isDisabled }) =>
-    isDisabled &&
-    `
-    opacity: 0.5;
-    cursor: default;
   `}
 `;

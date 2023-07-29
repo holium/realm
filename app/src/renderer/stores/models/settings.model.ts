@@ -1,6 +1,6 @@
 import { applySnapshot, flow, types } from 'mobx-state-tree';
 
-import { Setting } from 'os/services/ship/settings/settings.service';
+import { Setting } from 'os/services/ship/settings.service';
 
 import { SettingsIPC } from '../ipc';
 

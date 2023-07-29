@@ -8,23 +8,6 @@
 ::
 :: helpers
 ::
-++  dels-by-path
-  |=  [=path state=state-0]
-  ^-  (list [@da db-del-change])
-  %+  skim
-    ~(tap by del-log.state)
-  |=  [k=@da v=db-del-change]
-  ^-  ?
-  ?-  -.v
-    %del-row   =(path.v path)
-    %del-peer  =(path.v path)
-    %del-path  =(path.v path)
-  ==
-++  maybe-log
-  |=  [hide-debug=? msg=*]
-  ?:  =(%.y hide-debug)  ~
-  ~&  msg
-  ~
 ++  got-db
   |=  [=type:common =path =id:common state=state-0]
   ^-  row
@@ -619,7 +602,7 @@
 ::   %initiate, every ship in the members list, regardless of role or joined status
   |=  [[=path sp=[=ship space=cord] sr=role:mstore] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =/  log1  (maybe-log hide-logs.state %create-from-space)
+  ~&  %create-from-space
   =/  members     .^(view:mstore %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.sp)/(scot %tas space.sp)/members/noun)
   ?>  ?=(%members -.members)
   =/  filtered-members
@@ -695,53 +678,6 @@
   =/  cards  (weld peer-pokes subscription-facts)
   [cards state]
 ::
-++  edit-path
-::bedrock &db-action [%edit-path /example %host ~ ~ ~ ~[[~zod %host] [~bus %member]]]
-::bedrock &db-action [%edit-path /target %host ~ ~ ~ ~[[~bus %host] [~fed %member]]]
-  |=  [=input-path-row state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
-  :: ensure the path exists
-  =/  path-row    (~(got by paths.state) path.input-path-row)
-  :: ensure this came from our ship
-  ?>  =(our.bowl src.bowl)
-  :: ensure we are the host (ONLY HOST CAN EDIT)
-  ?>  =(our.bowl host.path-row)
-
-  =/  path-sub-wire       (weld /next/(scot %da updated-at.path-row) path.path-row)
-
-  :: only editable fields are:
-  ::  replication
-  ::  default-access
-  ::  table-access
-  ::  constraints
-  =.  replication.path-row              replication.input-path-row
-  =.  default-access.path-row
-    ?~  default-access.input-path-row   default-access.path-row
-    default-access.input-path-row
-  =.  table-access.path-row
-    ?~  table-access.input-path-row     table-access.path-row
-    table-access.input-path-row
-  =.  constraints.path-row
-    ?~  constraints.input-path-row      constraints.path-row
-    constraints.input-path-row
-  =.  updated-at.path-row               now.bowl
-  =.  received-at.path-row              now.bowl
-
-  =.  paths.state     (~(put by paths.state) path.path-row path-row)
-
-  :: emit the change to /next and self-subscriptions (our clients)
-  =/  prs=(list peer)   (~(got by peers.state) path.path-row)
-  =/  tbls              (tables-by-path tables.state path.path-row)
-  =/  dels              (dels-by-path path.path-row state)
-  =/  full=fullpath     [path-row prs tbls schemas.state dels]
-  =/  thechange         db-path+!>(full)
-  =/  cards=(list card)  :~
-    [%give %fact [/db (weld /path path.path-row) path-sub-wire ~] thechange]
-    :: kick subs to force them to re-sub for next update
-    [%give %kick [path-sub-wire ~] ~]
-  ==
-
-  [cards state]
 ++  remove-path
 ::bedrock &db-action [%remove-path /example]
   |=  [=path state=state-0 =bowl:gall]
@@ -809,7 +745,7 @@
     :: kick subs to force them to re-sub for next update
     [%give %kick [path-sub-wire ~] ~]
   ==
-  =/  log1  (maybe-log hide-logs.state "publishing to {(spud path-sub-wire)} (and also kicking)")
+  ~&  >  "publishing to {(spud path-sub-wire)} (and also kicking)"
 
   [cards state]
 ::
@@ -834,8 +770,8 @@
     :: kick subs to force them to re-sub for next update
     [%give %kick [path-sub-wire ~] ~]
   ==
-  =/  log1  (maybe-log hide-logs.state "poking %delete-path to {(scow %p ship)}")
-  =/  log2  (maybe-log hide-logs.state "publishing to {(spud path-sub-wire)} (and also kicking those subs)")
+  ~&  >  "poking %delete-path to {(scow %p ship)}"
+  ~&  >  "publishing to {(spud path-sub-wire)} (and also kicking those subs)"
 
   :: local state updates
   :: update paths table
@@ -851,7 +787,7 @@
 ++  get-path
   |=  [[=path-row peers=ship-roles] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =/  log1  (maybe-log hide-logs.state "%get-path {<path.path-row>}")
+  ~&  "%get-path {<path.path-row>}"
   :: ensure the path doesn't already exist
   =/  pre-existing    (~(get by paths.state) path.path-row)
   ?>  =(~ pre-existing)
@@ -897,8 +833,8 @@
       (weld /next/(scot %da updated-at.path-row) path.path-row)
     ]
   ==
-  =/  log1  (maybe-log hide-logs.state "subbing to")
-  =/  log2  (maybe-log hide-logs.state subs)
+  ~&  >  "subbing to"
+  ~&  >  subs
   =/  cards=(list card)  (weld subs sub-facts)
   [cards state]
 ::
@@ -906,12 +842,12 @@
   |=  [=path state=state-0 =bowl:gall]
   ^-  (quip card state-0)
   :: ensure the path actually exists
-  =/  log1  (maybe-log hide-logs.state "attempting to delete {<path>}")
+  ~&  >>>  "attempting to delete {<path>}"
   =/  path-row=path-row    (~(got by paths.state) path)
   :: ensure this came from host ship
   ?>  =(host.path-row src.bowl)
 
-  =/  log2  (maybe-log hide-logs.state "we either got kicked or the host deleted the whole path: {(spud path)}")
+  ~&  >  "we either got kicked or the host deleted the whole path: {(spud path)}"
 
   :: remove from paths table, and peers table
   =.  paths.state  (~(del by paths.state) path)
@@ -951,16 +887,16 @@
   :: ensure the path actually exists
   =/  path-row=path-row    (~(got by paths.state) path.row)
   ?.  (has-create-permissions path-row row state bowl)
-    =/  log1  (maybe-log hide-logs.state "{(scow %p src.bowl)} tried to create a %{(scow %tas type.row)} row where they didn't have permissions")
+    ~&  >>>  "{(scow %p src.bowl)} tried to create a %{(scow %tas type.row)} row where they didn't have permissions"
     [~[kickcard] state]
   :: forward the request if we aren't the host
   ?.  =(host.path-row our.bowl)
-    =/  log2  (maybe-log hide-logs.state "{<src.bowl>} tried to have us ({<our.bowl>}) create a row in {<path.path-row>} where we are not the host. forwarding the poke to the host: {<host.path-row>}")
+    ~&  >>  "{<src.bowl>} tried to have us ({<our.bowl>}) create a row in {<path.path-row>} where we are not the host. forwarding the poke to the host: {<host.path-row>}"
     :_  state
     [%pass /dbpoke %agent [host.path-row dap.bowl] %poke %db-action !>([%create req-id input-row])]~
   :: ensure that the row meets constraints
   ?.  (meets-constraints path-row row state bowl)
-    =/  log3  (maybe-log hide-logs.state "{(scow %p src.bowl)} tried to create a %{(scow %tas type.row)} row where they violated constraints")
+    ~&  >>>  "{(scow %p src.bowl)} tried to create a %{(scow %tas type.row)} row where they violated constraints"
     [~[kickcard] state]
 
   :: update path
@@ -981,7 +917,7 @@
     [%give %fact ~[vent-path] db-vent+!>([%row row schema.input-row])]
     kickcard
   ==
-  =/  log4  (maybe-log hide-logs.state "publishing new row to {(spud path-sub-wire)} (and also kicking)")
+  ~&  >  "publishing new row to {(spud path-sub-wire)} (and also kicking)"
 
   [cards state]
 ::
@@ -989,17 +925,17 @@
 :: generally, you'd only bother passing the schema if you are changing the version of the row
 ::db &db-action [%edit [our ~2023.5.22..17.21.47..9d73] /example %foo 0 [%general ~[2 'b']] ~]
   |=  [[=id:common =input-row] state=state-0 =bowl:gall]
-  =/  log1  (maybe-log hide-logs.state "%bedrock agent - %edit poke")
+  ~&  "%bedrock agent - %edit poke"
   ^-  (quip card state-0)
   :: permissions
   =/  old-row              (~(got by (~(got by (~(got by tables.state) type.input-row)) path.input-row)) id) :: old row must first exist
   =/  path-row=path-row    (~(got by paths.state) path.input-row)
   ?.  (has-edit-permissions path-row old-row state bowl)
-    =/  log2  (maybe-log hide-logs.state "{(scow %p src.bowl)} tried to edit a %{(scow %tas type.input-row)} row where they didn't have permissions")
+    ~&  >>>  "{(scow %p src.bowl)} tried to edit a %{(scow %tas type.input-row)} row where they didn't have permissions"
     `state
   :: forward the request if we aren't the host
   ?.  =(host.path-row our.bowl)
-    =/  log3  (maybe-log hide-logs.state "{<src.bowl>} tried to have us ({<our.bowl>}) edit a row in {<path.path-row>} where we are not the host. forwarding the poke to the host: {<host.path-row>}")
+    ~&  >>  "{<src.bowl>} tried to have us ({<our.bowl>}) edit a row in {<path.path-row>} where we are not the host. forwarding the poke to the host: {<host.path-row>}"
     :_  state
     [%pass /dbpoke %agent [host.path-row dap.bowl] %poke %db-action !>([%edit id input-row])]~
 
@@ -1037,7 +973,7 @@
     :: kick subs to force them to re-sub for next update
     [%give %kick [path-sub-wire ~] ~]
   ==
-  =/  log4  (maybe-log hide-logs.state "publishing edited row to {(spud path-sub-wire)} and kicking everyone there")
+  ~&  >  "publishing edited row to {(spud path-sub-wire)} and kicking everyone there"
 
   [cards state]
 ::
@@ -1051,11 +987,11 @@
   =/  old-row             (~(got by tbl) id) :: old row must first exist
   =/  path-row=path-row   (~(got by paths.state) path)
   ?.  (has-delete-permissions path-row old-row state bowl)
-    =/  log1  (maybe-log hide-logs.state "{(scow %p src.bowl)} tried to delete a %{(scow %tas type)} row where they didn't have permissions")
+    ~&  >>>  "{(scow %p src.bowl)} tried to delete a %{(scow %tas type)} row where they didn't have permissions"
     `state
   :: forward the request if we aren't the host
   ?.  =(host.path-row our.bowl)
-    =/  log2  (maybe-log hide-logs.state "{<src.bowl>} tried to have us ({<our.bowl>}) remove a row in {<path.path-row>} where we are not the host. forwarding the poke to the host: {<host.path-row>}")
+    ~&  >>  "{<src.bowl>} tried to have us ({<our.bowl>}) remove a row in {<path.path-row>} where we are not the host. forwarding the poke to the host: {<host.path-row>}"
     :_  state
     [%pass /dbpoke %agent [host.path-row dap.bowl] %poke %db-action !>([%remove type path id])]~
 
@@ -1080,7 +1016,7 @@
     :: kick foreign ship subs to force them to re-sub for next update
     [%give %kick [foreign-ship-sub-wire ~] ~]
   ==
-  =/  log3  (maybe-log hide-logs.state "publishing %del-row type: {<type>} id: {<id>} to {(spud foreign-ship-sub-wire)} + kicking those subs")
+  ~&  >  "publishing %del-row type: {<type>} id: {<id>} to {(spud foreign-ship-sub-wire)} + kicking those subs"
 
   [cards state]
 ::
@@ -1090,7 +1026,7 @@
 ::bedrock &db-action [%relay [~bus now] /target %relay 0 [%relay [~zod ~2023.6.13..15.57.34..aa97] %foo /example 0 %all %.n] ~]
   |=  [[=req-id =input-row] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =/  log1  (maybe-log hide-logs.state %relay)
+  ~&  %relay
   :: first check that the input is actually a %relay
   ?+  -.data.input-row   !!
     %relay 
@@ -1119,11 +1055,6 @@
   ==
   ==
 ::
-++  toggle-hide-logs
-  |=  [toggle=? state=state-0 =bowl:gall]
-  ^-  (quip card state-0)
-  =.  hide-logs.state  toggle
-  `state
 ::  on-init selfpoke
 ++  create-initial-spaces-paths
   |=  [state=state-0 =bowl:gall]
@@ -1176,7 +1107,6 @@
           [%kick-peer kick-peer]
           [%create-path create-path]
           [%create-from-space de-create-from-space]
-          [%edit-path create-path]
           [%remove-path pa]
           [%create de-create-input-row]
           [%edit (ot ~[[%id de-id] [%input-row de-input-row]])]
@@ -1239,18 +1169,13 @@
         ?~  utbl
           ~
         (de-table-access (need utbl))
-      =/  uprs    (~(get by p.jon) 'peers')
-      =/  prs
-        ?~  uprs
-          ~
-        ((ar (ot ~[[%ship de-ship] [%role (se %tas)]])) (need uprs))
       [
         (pa (~(got by p.jon) 'path'))
         replication
         default-access
         table-access
         ~ :: TODO parse json constraints
-        prs
+        ((ar (ot ~[[%ship de-ship] [%role (se %tas)]])) (~(got by p.jon) 'peers'))
       ]
     ::
     ++  de-table-access
@@ -1329,8 +1254,6 @@
             [%comment (de-comment (~(got by p.jon) 'data'))]
           %relay
             [%relay (de-relay (~(got by p.jon) 'data'))]
-          %creds
-            [%creds (de-creds (~(got by p.jon) 'data'))]
         ==
       [
         (pa (~(got by p.jon) 'path'))
@@ -1375,16 +1298,6 @@
           [%parent-type (se %tas)]
           [%parent-id de-id]
           [%parent-path pa]
-      ==
-    ::
-    ++  de-creds
-      %-  ot
-      :~  [%endpoint so]
-          [%access-key-id so]
-          [%secret-access-key so]
-          [%buckets (as so)]
-          [%current-bucket so]
-          [%region so]
       ==
     ::
     ++  de-comment

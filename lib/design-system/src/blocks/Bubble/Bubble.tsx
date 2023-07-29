@@ -1,18 +1,13 @@
 import { Ref, useEffect, useMemo, useState } from 'react';
 
-import { BoxProps, Flex, Icon, Text } from '../../../general';
+import { Box, BoxProps, Flex, Icon, Text } from '../../../general';
 import {
   contrastAwareBlackOrWhiteHex,
   flipColorIfLowContrast,
 } from '../../../util';
 import { chatDate } from '../../util/date';
 import { BUBBLE_HEIGHT, STATUS_HEIGHT } from './Bubble.constants';
-import {
-  BubbleAuthor,
-  BubbleContainer,
-  BubbleFooter,
-  BubbleStyle,
-} from './Bubble.styles';
+import { BubbleAuthor, BubbleFooter, BubbleStyle } from './Bubble.styles';
 import {
   FragmentReactionType,
   FragmentStatusType,
@@ -185,13 +180,14 @@ export const Bubble = ({
   }
 
   return (
-    <BubbleContainer
+    <Flex
       ref={innerRef}
       key={`${id}-${fragments.join('-')}`}
-      isOur={Boolean(isOur)}
+      display="inline-flex"
+      justifyContent={isOur ? 'flex-end' : 'flex-start'}
+      position="relative"
     >
       <BubbleStyle
-        id={id}
         isPrevGrouped={isPrevGrouped}
         isNextGrouped={isNextGrouped}
         ourTextColor={contrastAwareBlackOrWhiteHex(
@@ -213,7 +209,6 @@ export const Bubble = ({
           <BubbleAuthor
             style={{
               color: authorColorDisplay,
-              pointerEvents: 'none',
             }}
             authorColor={authorColor}
           >
@@ -222,22 +217,14 @@ export const Bubble = ({
         )}
         {forwardedFrom && (
           <Text.Custom
-            style={{
-              color: 'rgba(var(--rlm-icon-rgba), 0.60)',
-              fontSize: 11,
-              pointerEvents: 'none',
-            }}
+            style={{ color: 'rgba(var(--rlm-icon-rgba), 0.60)', fontSize: 11 }}
           >
             Forwarded from: {forwardedFrom}
           </Text.Custom>
         )}
-        <FragmentBlock id={id}>{fragments}</FragmentBlock>
-        <BubbleFooter
-          height={footerHeight}
-          mt={1}
-          style={{ pointerEvents: 'none' }}
-        >
-          <Flex height="100%" flex={7} style={{ pointerEvents: 'auto' }}>
+        <FragmentBlock>{fragments}</FragmentBlock>
+        <BubbleFooter height={footerHeight} mt={1}>
+          <Box width="70%">
             {((reactions && reactions.length > 0) || onReaction) && (
               <Reactions
                 isOur={isOur}
@@ -247,24 +234,25 @@ export const Bubble = ({
                 onReaction={onReaction}
               />
             )}
-          </Flex>
+          </Box>
           <Flex
-            flex={3}
+            width="30%"
             gap={4}
             alignItems="flex-end"
             justifyContent="flex-end"
             minWidth={minBubbleWidth}
             flexBasis={minBubbleWidth}
-            style={{ pointerEvents: 'none' }}
           >
             {error && (
               <Text.Custom
                 style={{ whiteSpace: 'nowrap', userSelect: 'none' }}
+                pointerEvents="none"
                 textAlign="right"
                 display="inline-flex"
                 alignItems="flex-end"
                 justifyContent="flex-end"
                 opacity={0.35}
+                id={id}
               >
                 {error}
               </Text.Custom>
@@ -273,6 +261,7 @@ export const Bubble = ({
               // TODO tooltip with time remaining
               <Icon
                 mb="1px"
+                id={id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.35 }}
                 transition={{ opacity: 0.2 }}
@@ -281,11 +270,8 @@ export const Bubble = ({
               />
             )}
             <Text.Custom
-              style={{
-                whiteSpace: 'nowrap',
-                userSelect: 'none',
-                pointerEvents: 'none',
-              }}
+              style={{ whiteSpace: 'nowrap', userSelect: 'none' }}
+              pointerEvents="none"
               textAlign="right"
               display="inline-flex"
               alignItems="flex-end"
@@ -299,6 +285,6 @@ export const Bubble = ({
           </Flex>
         </BubbleFooter>
       </BubbleStyle>
-    </BubbleContainer>
+    </Flex>
   );
 };

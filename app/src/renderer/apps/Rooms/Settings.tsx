@@ -4,9 +4,6 @@ import { observer } from 'mobx-react';
 import { Button, Flex, Icon, Text } from '@holium/design-system/general';
 import { RadioOption, Select } from '@holium/design-system/inputs';
 
-import { MediaAccess } from 'os/types';
-import { MainIPC } from 'renderer/stores/ipc';
-
 import { useTrayApps } from '../store';
 import { useRoomsStore } from './store/RoomsStoreContext';
 
@@ -33,13 +30,27 @@ const getMediaSources = async () => {
   );
 };
 
-const SettingsPresenter = ({
-  showBackButton = true,
-  maxWidth,
-}: {
-  showBackButton?: boolean;
-  maxWidth?: number;
-}) => {
+// const getAudioOutputSources = async () => {
+//   const devices: MediaDeviceInfo[] =
+//     await navigator.mediaDevices.enumerateDevices();
+//   return formSourceOptions(
+//     devices.filter((device: MediaDeviceInfo) => {
+//       return device.kind === 'audiooutput';
+//     })
+//   );
+// };
+
+// const getVideoInputSources = async () => {
+//   const devices: MediaDeviceInfo[] =
+//     await navigator.mediaDevices.enumerateDevices();
+//   return formSourceOptions(
+//     devices.filter((device: MediaDeviceInfo) => {
+//       return device.kind === 'videoinput';
+//     })
+//   );
+// };
+
+const SettingsPresenter = () => {
   const { roomsApp } = useTrayApps();
   const roomsStore = useRoomsStore();
 
@@ -55,12 +66,6 @@ const SettingsPresenter = ({
   const [selectedSource, setSelectedSource] = useState('');
   const [selectedOutputSource, setSelectedOutputSource] = useState('');
   const [selectedVideoSource, setSelectedVideoSource] = useState('');
-
-  const [mediaStatus, setMediaStatus] = useState<MediaAccess>({
-    camera: 'unknown',
-    mic: 'unknown',
-    screen: 'unknown',
-  });
 
   useEffect(() => {
     getMediaSources().then((sources: any[]) => {
@@ -99,7 +104,6 @@ const SettingsPresenter = ({
         )?.value ||
         videoSources[0]?.value;
       setSelectedVideoSource(videoDeviceId as string);
-      MainIPC.getMediaStatus().then(setMediaStatus);
     });
   }, []);
 
@@ -109,37 +113,34 @@ const SettingsPresenter = ({
         flexDirection="row"
         justifyContent="space-between"
         alignItems="center"
-        mb="20px"
+        mb={3}
       >
         <Flex justifyContent="center" alignItems="center">
-          {showBackButton && (
-            <Button.IconButton
-              className="realm-cursor-hover"
-              mr={2}
-              size={26}
-              onClick={(evt: any) => {
-                evt.stopPropagation();
-                roomsApp.setView('list');
-              }}
-            >
-              <Icon name="ArrowLeftLine" size={22} opacity={0.7} />
-            </Button.IconButton>
-          )}
+          <Button.IconButton
+            className="realm-cursor-hover"
+            size={26}
+            onClick={(evt: any) => {
+              evt.stopPropagation();
+              roomsApp.setView('list');
+            }}
+          >
+            <Icon name="ArrowLeftLine" size={22} opacity={0.7} />
+          </Button.IconButton>
           <Text.Custom
+            ml={2}
             opacity={0.8}
             style={{ textTransform: 'uppercase' }}
             fontWeight={600}
           >
-            Input Options
+            Audio Settings
           </Text.Custom>
         </Flex>
         <Flex ml={1} pl={2} pr={2}></Flex>
       </Flex>
-      <Flex flexDirection="column" mb={3} gap={4}>
+      <Flex flexDirection="column" mb={2}>
         <Text.Label mb={1}>Audio input</Text.Label>
         <Select
           id="rooms-settings-audio-input"
-          maxWidth={maxWidth}
           options={audioSourceOptions}
           selected={selectedSource}
           onClick={(source) => {
@@ -148,11 +149,10 @@ const SettingsPresenter = ({
           }}
         />
       </Flex>
-      <Flex flexDirection="column" mb={3}>
+      <Flex flexDirection="column" mb={2}>
         <Text.Label mb={1}>Audio output</Text.Label>
         <Select
           id="rooms-settings-audio-output"
-          maxWidth={maxWidth}
           options={audioOutputOptions}
           selected={selectedOutputSource}
           onClick={(source) => {
@@ -161,11 +161,10 @@ const SettingsPresenter = ({
           }}
         />
       </Flex>
-      <Flex flexDirection="column" mb={3}>
+      <Flex flexDirection="column">
         <Text.Label mb={1}>Video input</Text.Label>
         <Select
           id="rooms-settings-video-input"
-          maxWidth={maxWidth}
           options={videoSourceOptions}
           selected={selectedVideoSource}
           onClick={(source) => {
@@ -173,44 +172,6 @@ const SettingsPresenter = ({
             roomsStore.setVideoInput(source as string);
           }}
         />
-      </Flex>
-      <Flex mt={3} col gap={12}>
-        <Flex row alignItems="center" gap={2}>
-          <Text.Label mb={1} width={160}>
-            Microphone permission
-          </Text.Label>
-          <Button.TextButton
-            style={{ fontWeight: 400 }}
-            color="intent-success"
-            isDisabled={mediaStatus.mic === 'granted'}
-            disabled={mediaStatus.mic === 'granted'}
-            onClick={() => {
-              MainIPC.askForMicrophone().then((status) => {
-                setMediaStatus({ ...mediaStatus, mic: status });
-              });
-            }}
-          >
-            {mediaStatus.mic === 'granted' ? 'Granted' : 'Grant'}
-          </Button.TextButton>
-        </Flex>
-        <Flex row alignItems="center" gap={2}>
-          <Text.Label mb={1} width={160}>
-            Camera permission
-          </Text.Label>
-          <Button.TextButton
-            style={{ fontWeight: 400 }}
-            color="intent-success"
-            isDisabled={mediaStatus.camera === 'granted'}
-            disabled={mediaStatus.camera === 'granted'}
-            onClick={() => {
-              MainIPC.askForCamera().then((status) => {
-                setMediaStatus({ ...mediaStatus, camera: status });
-              });
-            }}
-          >
-            {mediaStatus.camera === 'granted' ? 'Granted' : 'Grant'}
-          </Button.TextButton>
-        </Flex>
       </Flex>
     </>
   );

@@ -65,7 +65,7 @@ export const StartRoomButtonView = ({
                 ? 'var(--rlm-intent-alert-color)'
                 : 'var(--rlm-accent-color)',
             borderRadius: '999px',
-            backgroundColor: 'var(--rlm-input-color)',
+            backgroundColor: '#ffffff',
           }}
           onClick={onClickButton}
         >
@@ -100,7 +100,6 @@ export const StartRoomButtonView = ({
       <Flex
         style={{ cursor: state !== 'start' ? 'pointer' : 'auto' }}
         onClick={onClickAvatar}
-        mr={1}
       >
         <StartRoomSvg />
       </Flex>

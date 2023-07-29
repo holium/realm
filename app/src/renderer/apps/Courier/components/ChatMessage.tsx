@@ -266,17 +266,12 @@ export const ChatMessagePresenter = ({
       disabled: false,
       onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
         evt.stopPropagation();
-        const forwardedPathTitle: string =
-          selectedChat.type === 'dm'
-            ? `DM with ${selectedChat.metadata.title}`
-            : selectedChat.metadata.title;
         setObject({
           app: 'Courier',
           icon: 'CourierApp',
           dataTypeName: 'message',
           mergedContents: getMergedContents(message, messages, friends),
           message,
-          forwardedPathTitle,
           share: (o: any, paths: SharePath[]) => {
             const frags = o.message.contents.map((c: any) => {
               return {
@@ -293,7 +288,7 @@ export const ChatMessagePresenter = ({
                   ...c.metadata,
                   forwardedId: o.message.id,
                   forwardedPath: o.message.path,
-                  forwardedPathTitle: o.forwardedPathTitle,
+                  forwardedPathTitle: o.message.forwardedFrom,
                 },
               };
             });
