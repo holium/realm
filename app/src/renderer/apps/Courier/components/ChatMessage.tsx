@@ -410,7 +410,7 @@ export const ChatMessagePresenter = ({
     ]
   );
 
-  const chatJoiner = useCallback(
+  const onJoinChatClick = useCallback(
     (path: string, host?: string) => {
       const chat = chatStore.inbox.find((i) => i.path === path);
       if (chat) {
@@ -421,13 +421,7 @@ export const ChatMessagePresenter = ({
       }
       chatStore.setSubroute('inbox');
 
-      (
-        ChatIPC.addPeerToChat(
-          path,
-          loggedInAccount.serverId,
-          host
-        ) as Promise<void>
-      )
+      ChatIPC.addPeerToChat(path, loggedInAccount.serverId, host)
         .then(() => {
           console.log('joining chat', path);
         })
@@ -468,7 +462,7 @@ export const ChatMessagePresenter = ({
       onReaction={canReact ? onReaction : undefined}
       onReplyClick={onReplyClick}
       onJoinSpaceClick={joiner}
-      onJoinChatClick={chatJoiner}
+      onJoinChatClick={onJoinChatClick}
       allSpacePaths={spacesStore.allSpacePaths}
       allChatPaths={chatStore.allChatPaths}
       error={message.error}
