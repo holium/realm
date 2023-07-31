@@ -410,6 +410,9 @@ export const api = {
   deleteSpan: async (calendarId: string, spanId: string) => {
     return await api.deleteEventAction(calendarId, spanId);
   },
+  /**
+   * Instances / Instance updates
+   */
   deleteSpanInstance: async (
     calendarId: string,
     spanId: string,
@@ -423,7 +426,7 @@ export const api = {
       calendarId,
       spanId,
       { l: instanceId, r: instanceId },
-      { argId: '0v0' }
+      { argId: '0v0' } // reserved id of skip rule
     );
   },
   /**
