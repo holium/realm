@@ -46,20 +46,20 @@
   ++  on-load
     |=  old-state=vase
     ^-  (quip card _this)
-    ::=/  old  !<(versioned-state old-state)
+    =/  old  !<(versioned-state old-state)
     :: REMOVE WHEN YOU WANT DATA TO ACTUALLY STICK AROUND
-    =/  default-state=state-0   *state-0
+    ::=/  default-state=state-0   *state-0
     :: make sure the relay table exists on-init
-    =.  tables.default-state
-    (~(gas by *^tables) ~[[%relay *pathed-table] [%vote *pathed-table] [%react *pathed-table]])
+    ::=.  tables.default-state
+    ::(~(gas by *^tables) ~[[%relay *pathed-table] [%vote *pathed-table] [%react *pathed-table]])
     :: do a quick check to make sure we are subbed to /updates in %spaces
     =/  cards
-      :-  [%pass /selfpoke %agent [our.bowl dap.bowl] %poke %db-action !>([%create-initial-spaces-paths ~])]
-      :-  [%pass /selfpoke %agent [our.bowl %api-store] %poke %api-store-action !>([%sync-to-bedrock ~])] :: ALSO REMOVE WHEN YOU STOP WIPING THE DATA EVERY TIME
+      :: :-  [%pass /selfpoke %agent [our.bowl dap.bowl] %poke %db-action !>([%create-initial-spaces-paths ~])]
+      :: :-  [%pass /selfpoke %agent [our.bowl %api-store] %poke %api-store-action !>([%sync-to-bedrock ~])] :: ALSO REMOVE WHEN YOU STOP WIPING THE DATA EVERY TIME
       ?:  (~(has by wex.bowl) [/spaces our.bowl %spaces])
         ~
       [%pass /spaces %agent [our.bowl %spaces] %watch /updates]~
-    [cards this(state default-state)]
+    [cards this(state old)]
   ::
   ++  on-poke
     |=  [=mark =vase]
