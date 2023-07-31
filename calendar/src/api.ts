@@ -9,6 +9,8 @@ export type Perms = {
   member: null | Roles;
   custom: { [key: string]: Roles };
 };
+export type Offset = { sign: '+' | '-'; d: number };
+export type Meta = { name: string; description: string; color: string };
 
 export const api = {
   createApi: memoize(() => {
@@ -30,39 +32,6 @@ export const api = {
 
     return urb;
   }),
-  vent: async (vnt: any) => {
-    const result: any = await api.createApi().thread({
-      inputMark: 'vent-package', // input to thread, contains poke
-      outputMark: vnt.outputMark,
-      threadName: 'venter',
-      body: {
-        dock: {
-          ship: vnt.ship,
-          dude: vnt.dude,
-        },
-        input: {
-          desk: vnt.inputDesk,
-          mark: vnt.inputMark, // mark of the poke itself
-        },
-        output: {
-          desk: vnt.outputDesk,
-          mark: vnt.outputMark,
-        },
-        body: vnt.body,
-      },
-      desk: 'calendar',
-    });
-    if (
-      result !== null &&
-      result.term &&
-      result.tang &&
-      Array.isArray(result.tang)
-    ) {
-      throw new Error(`\n${result.term}\n${result.tang.join('\n')}`);
-    } else {
-      return result;
-    }
-  },
   /**
    * Rules related
    */
@@ -129,25 +98,7 @@ export const api = {
       defaultRole?: string;
     }
   ) => {
-    const { title, description, defaultRole } = options;
-    const updateList = [
-      typeof title === 'string' ? { title: title } : null,
-      typeof description === 'string' ? { description: description } : null,
-      typeof defaultRole === 'string' ? { 'default-role': defaultRole } : null,
-    ].filter(Boolean);
-    const json = {
-      p: calendarId,
-      q: { update: updateList },
-    };
-    return await api.vent({
-      ship: shipName(), // the ship to poke
-      dude: 'calendar', // the agent to poke
-      inputDesk: 'calendar', // where does the input mark live
-      inputMark: 'calendar-action', // name of input mark
-      outputDesk: 'calendar', // where does the output mark live
-      outputMark: 'calendar-vent', // name of output mark
-      body: json, // the actual poke content
-    });
+    return await api.updateCalendarAction(calendarId, options);
   },
   getCalendarsSpace: async (space: string) => {
     return api
@@ -208,6 +159,11 @@ export const api = {
   /**
    * Span event related
    */
+  parseToDateOffset: (datetime: number): { date: number; offset: Offset } => {
+    const time = datetime % (24 * 60 * 60 * 1000);
+    const offset: Offset = { sign: '+', d: time };
+    return { date: datetime - time, offset };
+  },
   createSpanLeftSingle: async (
     calendarId: string,
     startDateMS: number,
@@ -216,32 +172,14 @@ export const api = {
     description = '',
     color = ''
   ) => {
-    const json = {
-      span: {
-        cid: calendarId,
-        dom: { l: 0, r: 0 }, // domain, the numbers between l and r inclusive will be the basis for the instances of the event, in this case one instance, the 0th
-        rid: '~/left/single-0', // the rule id, in this case a single event defined by a start and a duration
-        kind: { left: { tz: null, d: durationMS } }, // the kind of span, in this case instances are defined by a start and a duration
-        args: {
-          // arguments to the rule, in this case a single event defined by a start and a duration
-          Start: { dx: { i: 0, d: startDateMS } }, // this single span is defined by the start
-        },
-        meta: {
-          name,
-          description,
-          color,
-        },
-      },
-    };
-    return await api.vent({
-      ship: shipName(), // the ship to poke
-      dude: 'calendar', // the agent to poke
-      inputDesk: 'calendar', // where does the input mark live
-      inputMark: 'calendar-async-create', // name of input mark
-      outputDesk: 'calendar', // where does the output mark live
-      outputMark: 'calendar-vent', // name of output mark
-      body: json, // the actual poke content
-    });
+    return await api.eventAsyncCreate(
+      calendarId,
+      { l: 0, r: 0 },
+      '~/left/single-0',
+      { left: { tz: null, d: durationMS } },
+      { Start: { dx: { i: 0, d: startDateMS } } },
+      { name, description, color }
+    );
   },
   createSpanFullDaySingle: async (
     calendarId: string,
@@ -250,31 +188,14 @@ export const api = {
     description = '',
     color = ''
   ) => {
-    const json = {
-      fullday: {
-        cid: calendarId,
-        dom: { l: 0, r: 0 }, // domain, the numbers between l and r inclusive will be the basis for the instances of the event, in this case one instance, the 0th
-        rid: '~/fuld/single-0', // the rule id, in this case a single event defined by a start and a duration
-        args: {
-          // arguments to the rule, in this case a single event defined by a start and a duration
-          Date: { da: startDateMS }, // this single span is defined by the start
-        },
-        meta: {
-          name,
-          description,
-          color,
-        },
-      },
-    };
-    return await api.vent({
-      ship: shipName(), // the ship to poke
-      dude: 'calendar', // the agent to poke
-      inputDesk: 'calendar', // where does the input mark live
-      inputMark: 'calendar-async-create', // name of input mark
-      outputDesk: 'calendar', // where does the output mark live
-      outputMark: 'calendar-vent', // name of output mark
-      body: json, // the actual poke content
-    });
+    return await api.eventAsyncCreate(
+      calendarId,
+      { l: 0, r: 0 },
+      '~/fuld/single-0',
+      { fuld: null },
+      { Start: { da: startDateMS } },
+      { name, description, color }
+    );
   },
   createSpanBothSingle: async (
     calendarId: string,
@@ -284,34 +205,17 @@ export const api = {
     description = '',
     color = ''
   ) => {
-    // an event that has both a start and end
-    const json = {
-      span: {
-        cid: calendarId,
-        dom: { l: 0, r: 0 }, // domain, the numbers between l and are inclusive will be the basis for the instances of the event, in this case one instance, the 0th
-        rid: '~/both/single-0', // the rule id, in this case a single event
-        kind: { both: { lz: null, rz: null } }, // the kind of span, in this case both start and end are defined by the rule
-        args: {
-          // arguments for the rule, in this case a single event defined by start/end
-          Start: { dx: { i: 0, d: startDateMS } }, // the start of the single event (ex: d => 1104537600000)
-          End: { dx: { i: 0, d: endDateMS } }, // the end of the single event (ex: d =>1104537600000)
-        },
-        meta: {
-          name,
-          description,
-          color,
-        },
+    return await api.eventAsyncCreate(
+      calendarId,
+      { l: 0, r: 0 },
+      '~/both/single-0',
+      { both: { lz: null, rz: null } },
+      {
+        Start: { dx: { i: 0, d: startDateMS } },
+        End: { dx: { i: 0, d: endDateMS } },
       },
-    };
-    return await api.vent({
-      ship: shipName(), // the ship to poke
-      dude: 'calendar', // the agent to poke
-      inputDesk: 'calendar', // where does the input mark live
-      inputMark: 'calendar-async-create', // name of input mark
-      outputDesk: 'calendar', // where does the output mark live
-      outputMark: 'calendar-vent', // name of output mark
-      body: json, // the actual poke content
-    });
+      { name, description, color }
+    );
   },
   createSpanPeriodicDaily: async (
     calendarId: string,
@@ -323,33 +227,19 @@ export const api = {
     description = '',
     color = ''
   ) => {
-    // an event that has both a start and end
-    const json = {
-      span: {
-        cid: calendarId,
-        dom: repeatCount, //number of total events (10 here)
-        rid: '~/left/periodic-0',
-        kind: { left: { tz: null, d: durationMS } }, //duration of the instance
-        args: {
-          Start: { da: startDateMS }, //start date
-          Period: { dr: timeBetweenEvents }, //the time between events
-        },
-        meta: {
-          name,
-          description,
-          color,
-        },
+    const { date, offset } = api.parseToDateOffset(startDateMS);
+    return await api.eventAsyncCreate(
+      calendarId,
+      repeatCount,
+      '~/left/periodic-0',
+      { left: { tz: null, d: durationMS } },
+      {
+        Start: { da: date },
+        Offset: { dl: offset },
+        Period: { dr: timeBetweenEvents },
       },
-    };
-    return await api.vent({
-      ship: shipName(), // the ship to poke
-      dude: 'calendar', // the agent to poke
-      inputDesk: 'calendar', // where does the input mark live
-      inputMark: 'calendar-async-create', // name of input mark
-      outputDesk: 'calendar', // where does the output mark live
-      outputMark: 'calendar-vent', // name of output mark
-      body: json, // the actual poke content
-    });
+      { name, description, color }
+    );
   },
   createSpanPeriodicFullDayDaily: async (
     calendarId: string,
@@ -360,32 +250,17 @@ export const api = {
     description = '',
     color = ''
   ) => {
-    // an event that has both a start and end
-    const json = {
-      fullday: {
-        cid: calendarId,
-        dom: repeatCount, //number of total events (10 here)
-        rid: '~/fuld/periodic-0',
-        args: {
-          Start: { da: startDateMS }, //start date
-          Period: { dr: timeBetweenEvents }, //the time between events
-        },
-        meta: {
-          name,
-          description,
-          color,
-        },
+    return await api.eventAsyncCreate(
+      calendarId,
+      repeatCount,
+      '~/fuld/periodic-0',
+      { fuld: null },
+      {
+        Start: { da: startDateMS },
+        Period: { dr: timeBetweenEvents },
       },
-    };
-    return await api.vent({
-      ship: shipName(), // the ship to poke
-      dude: 'calendar', // the agent to poke
-      inputDesk: 'calendar', // where does the input mark live
-      inputMark: 'calendar-async-create', // name of input mark
-      outputDesk: 'calendar', // where does the output mark live
-      outputMark: 'calendar-vent', // name of output mark
-      body: json, // the actual poke content
-    });
+      { name, description, color }
+    );
   },
   createSpanPeriodicWeekly: async (
     calendarId: string,
@@ -397,41 +272,21 @@ export const api = {
     description = '',
     color = ''
   ) => {
-    const json = {
-      span: {
-        cid: calendarId,
-        dom: repeatCountObject,
-        rid: '~/left/days-of-week-0',
-        kind: {
-          left: {
-            tz: null,
-            d: durationMS, //duration
-          },
-        },
-        args: {
-          Start: {
-            da: startDateMS,
-          },
-          Weekdays: {
-            wl: includedWeekDays, // [0,1,2,3,4] a list of weekdays, 0-mon, 1-tue, 2-wed, 3-thu, 4-fri, 5-sat, 6-sun
-          },
-        },
-        meta: {
-          name,
-          description,
-          color,
+    const { date, offset } = api.parseToDateOffset(startDateMS);
+    return await api.eventAsyncCreate(
+      calendarId,
+      repeatCountObject,
+      '~/left/days-of-week-0',
+      { left: { tz: null, d: durationMS } },
+      {
+        Start: { da: date },
+        Offset: { dl: offset },
+        Weekdays: {
+          wl: includedWeekDays, // [0,1,2,3,4] a list of weekdays, 0-mon, 1-tue, 2-wed, 3-thu, 4-fri, 5-sat, 6-sun
         },
       },
-    };
-    return await api.vent({
-      ship: shipName(), // the ship to poke
-      dude: 'calendar', // the agent to poke
-      inputDesk: 'calendar', // where does the input mark live
-      inputMark: 'calendar-async-create', // name of input mark
-      outputDesk: 'calendar', // where does the output mark live
-      outputMark: 'calendar-vent', // name of output mark
-      body: json, // the actual poke content
-    });
+      { name, description, color }
+    );
   },
   createSpanPeriodicFullDayWeekly: async (
     calendarId: string,
@@ -442,35 +297,19 @@ export const api = {
     description = '',
     color = ''
   ) => {
-    const json = {
-      fullday: {
-        cid: calendarId,
-        dom: repeatCountObject,
-        rid: '~/fuld/days-of-week-0',
-        args: {
-          Start: {
-            da: startDateMS,
-          },
-          Weekdays: {
-            wl: includedWeekDays, // [0,1,2,3,4] a list of weekdays, 0-mon, 1-tue, 2-wed, 3-thu, 4-fri, 5-sat, 6-sun
-          },
-        },
-        meta: {
-          name,
-          description,
-          color,
+    return await api.eventAsyncCreate(
+      calendarId,
+      repeatCountObject,
+      '~/fuld/days-of-week-0',
+      { fuld: null },
+      {
+        Start: { da: startDateMS },
+        Weekdays: {
+          wl: includedWeekDays, // [0,1,2,3,4] a list of weekdays, 0-mon, 1-tue, 2-wed, 3-thu, 4-fri, 5-sat, 6-sun
         },
       },
-    };
-    return await api.vent({
-      ship: shipName(), // the ship to poke
-      dude: 'calendar', // the agent to poke
-      inputDesk: 'calendar', // where does the input mark live
-      inputMark: 'calendar-async-create', // name of input mark
-      outputDesk: 'calendar', // where does the output mark live
-      outputMark: 'calendar-vent', // name of output mark
-      body: json, // the actual poke content
-    });
+      { name, description, color }
+    );
   },
   createSpanPeriodicMonthlyNthWeekday: async (
     calendarId: string,
@@ -483,44 +322,24 @@ export const api = {
     description = '',
     color = ''
   ) => {
-    const json = {
-      span: {
-        cid: calendarId,
-        dom: repeatCountObject,
-        rid: '~/left/monthly-nth-weekday-0',
-        kind: {
-          left: {
-            tz: null,
-            d: durationMS,
-          },
+    const { date, offset } = api.parseToDateOffset(startDateMS);
+    return await api.eventAsyncCreate(
+      calendarId,
+      repeatCountObject,
+      '~/left/monthly-nth-weekday-0',
+      { left: { tz: null, d: durationMS } },
+      {
+        Start: { da: date },
+        Offset: { dl: offset },
+        Ordinal: {
+          od: ordinal, // first, second, third, fourth, or last
         },
-        args: {
-          Start: {
-            da: startDateMS,
-          },
-          Ordinal: {
-            od: ordinal, // first, second, third, fourth, or last
-          },
-          Weekday: {
-            ud: dayOfWeek, // 0-mon, 1-tue, 2-wed, 3-thu, 4-fri, 5-sat, 6-sun
-          },
-        },
-        meta: {
-          name,
-          description,
-          color,
+        Weekday: {
+          ud: dayOfWeek, // 0-mon, 1-tue, 2-wed, 3-thu, 4-fri, 5-sat, 6-sun
         },
       },
-    };
-    return await api.vent({
-      ship: shipName(), // the ship to poke
-      dude: 'calendar', // the agent to poke
-      inputDesk: 'calendar', // where does the input mark live
-      inputMark: 'calendar-async-create', // name of input mark
-      outputDesk: 'calendar', // where does the output mark live
-      outputMark: 'calendar-vent', // name of output mark
-      body: json, // the actual poke content
-    });
+      { name, description, color }
+    );
   },
   createSpanPeriodicFullDayMonthlyNthWeekday: async (
     calendarId: string,
@@ -532,38 +351,22 @@ export const api = {
     description = '',
     color = ''
   ) => {
-    const json = {
-      fullday: {
-        cid: calendarId,
-        dom: repeatCountObject,
-        rid: '~/fuld/monthly-nth-weekday-0',
-        args: {
-          Start: {
-            da: startDateMS,
-          },
-          Ordinal: {
-            od: ordinal, // first, second, third, fourth, or last
-          },
-          Weekday: {
-            ud: dayOfWeek, // 0-mon, 1-tue, 2-wed, 3-thu, 4-fri, 5-sat, 6-sun
-          },
+    return await api.eventAsyncCreate(
+      calendarId,
+      repeatCountObject,
+      '~/fuld/monthly-nth-weekday-0',
+      { fuld: null },
+      {
+        Start: { da: startDateMS },
+        Ordinal: {
+          od: ordinal, // first, second, third, fourth, or last
         },
-        meta: {
-          name,
-          description,
-          color,
+        Weekday: {
+          ud: dayOfWeek, // 0-mon, 1-tue, 2-wed, 3-thu, 4-fri, 5-sat, 6-sun
         },
       },
-    };
-    return await api.vent({
-      ship: shipName(), // the ship to poke
-      dude: 'calendar', // the agent to poke
-      inputDesk: 'calendar', // where does the input mark live
-      inputMark: 'calendar-async-create', // name of input mark
-      outputDesk: 'calendar', // where does the output mark live
-      outputMark: 'calendar-vent', // name of output mark
-      body: json, // the actual poke content
-    });
+      { name, description, color }
+    );
   },
   createSpanPeriodicYearlyOnDate: async (
     calendarId: string,
@@ -574,38 +377,18 @@ export const api = {
     description = '',
     color = ''
   ) => {
-    const json = {
-      span: {
-        cid: calendarId,
-        dom: repeatCountObject,
-        rid: '~/left/yearly-on-date-0',
-        kind: {
-          left: {
-            tz: null,
-            d: durationMS,
-          },
-        },
-        args: {
-          Start: {
-            da: startDateMS,
-          },
-        },
-        meta: {
-          name,
-          description,
-          color,
-        },
+    const { date, offset } = api.parseToDateOffset(startDateMS);
+    return await api.eventAsyncCreate(
+      calendarId,
+      repeatCountObject,
+      '~/left/yearly-on-date-0',
+      { left: { tz: null, d: durationMS } },
+      {
+        Start: { da: date },
+        Offset: { dl: offset },
       },
-    };
-    return await api.vent({
-      ship: shipName(), // the ship to poke
-      dude: 'calendar', // the agent to poke
-      inputDesk: 'calendar', // where does the input mark live
-      inputMark: 'calendar-async-create', // name of input mark
-      outputDesk: 'calendar', // where does the output mark live
-      outputMark: 'calendar-vent', // name of output mark
-      body: json, // the actual poke content
-    });
+      { name, description, color }
+    );
   },
   createSpanPeriodicFullDayYearlyOnDate: async (
     calendarId: string,
@@ -615,81 +398,33 @@ export const api = {
     description = '',
     color = ''
   ) => {
-    const json = {
-      fullday: {
-        cid: calendarId,
-        dom: repeatCountObject,
-        rid: '~/fuld/yearly-on-date-0',
-        args: {
-          Start: {
-            da: startDateMS,
-          },
-        },
-        meta: {
-          name,
-          description,
-          color,
-        },
-      },
-    };
-    return await api.vent({
-      ship: shipName(), // the ship to poke
-      dude: 'calendar', // the agent to poke
-      inputDesk: 'calendar', // where does the input mark live
-      inputMark: 'calendar-async-create', // name of input mark
-      outputDesk: 'calendar', // where does the output mark live
-      outputMark: 'calendar-vent', // name of output mark
-      body: json, // the actual poke content
-    });
+    return await api.eventAsyncCreate(
+      calendarId,
+      repeatCountObject,
+      '~/fuld/yearly-on-date-0',
+      { fuld: null },
+      { Start: { da: startDateMS } },
+      { name, description, color }
+    );
   },
   deleteSpan: async (calendarId: string, spanId: string) => {
-    const json = {
-      p: { cid: calendarId, eid: spanId },
-      q: { delete: null },
-    };
-    return await api.vent({
-      ship: shipName(), // the ship to poke
-      dude: 'calendar', // the agent to poke
-      inputDesk: 'calendar', // where does the input mark live
-      inputMark: 'span-action', // name of input mark
-      outputDesk: 'calendar', // where does the output mark live
-      outputMark: 'calendar-vent', // name of output mark
-      body: json, // the actual poke content
-    });
+    return await api.deleteEventAction(calendarId, spanId);
   },
   deleteSpanInstance: async (
     calendarId: string,
     spanId: string,
     instanceId: number,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     name: string,
+    // eslint-disable-next-line unused-imports/no-unused-vars
     description: string
   ) => {
-    // we make the changes to delete this instance
-    const json = {
-      p: { cid: calendarId, eid: spanId },
-      q: {
-        'update-instances': {
-          dom: { l: instanceId, r: instanceId },
-          def: true,
-          rid: '~/left/skip-0',
-          kind: { left: { tz: null, d: 0 } },
-          args: {},
-          meta: {
-            name,
-            description,
-          },
-        },
-      },
-    };
-    return await api.vent({
-      ship: shipName(), // the ship to poke
-      dude: 'calendar', // the agent to poke
-      inputDesk: 'calendar', // where does the input mark live
-      inputMark: 'span-action', // name of input mark
-      outputDesk: 'calendar', // where does the output mark live
-      outputMark: 'calendar-vent', // name of output mark
-      body: json, // the actual poke content
-    });
+    return api.updateInstancesEventAction(
+      calendarId,
+      spanId,
+      { l: instanceId, r: instanceId },
+      { argId: '0v0' }
+    );
   },
   /**
    * Inbox/Outbox related
@@ -859,5 +594,300 @@ export const api = {
       outputMark: 'calendar-vent', // name of output mark
       body: json, // the actual poke content
     });
+  },
+  /**
+   * Fundamental API
+   */
+  vent: async (vnt: any) => {
+    const result: any = await api.createApi().thread({
+      inputMark: 'vent-package', // input to thread, contains poke
+      outputMark: vnt.outputMark,
+      threadName: 'venter',
+      body: {
+        dock: {
+          ship: vnt.ship,
+          dude: vnt.dude,
+        },
+        input: {
+          desk: vnt.inputDesk,
+          mark: vnt.inputMark, // mark of the poke itself
+        },
+        output: {
+          desk: vnt.outputDesk,
+          mark: vnt.outputMark,
+        },
+        body: vnt.body,
+      },
+      desk: 'calendar',
+    });
+    if (
+      result !== null &&
+      result.term &&
+      result.tang &&
+      Array.isArray(result.tang)
+    ) {
+      throw new Error(`\n${result.term}\n${result.tang.join('\n')}`);
+    } else {
+      return result;
+    }
+  },
+  asyncCreateVent: async (body: any) => {
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'calendar-async-create', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: body, // the actual poke content
+    });
+  },
+  calendarActionVent: async (body: any) => {
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'calendar-action', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: body, // the actual poke content
+    });
+  },
+  eventActionVent: async (body: any) => {
+    return await api.vent({
+      ship: shipName(), // the ship to poke
+      dude: 'calendar', // the agent to poke
+      inputDesk: 'calendar', // where does the input mark live
+      inputMark: 'event-action', // name of input mark
+      outputDesk: 'calendar', // where does the output mark live
+      outputMark: 'calendar-vent', // name of output mark
+      body: body, // the actual poke content
+    });
+  },
+  /**
+   * Fundamental API: Async Creates
+   */
+  calendarAsyncCreate: async (title: string, description: string) => {
+    return await api.asyncCreateVent({ calendar: { title, description } });
+  },
+  eventAsyncCreate: async (
+    calendarId: string,
+    dom: RepeatCount,
+    rule: string,
+    kind: any,
+    args: any,
+    meta: Meta
+  ) => {
+    const json = {
+      event: {
+        cid: calendarId,
+        dom,
+        rid: rule,
+        kind,
+        args,
+        meta,
+      },
+    };
+    return await api.asyncCreateVent(json);
+  },
+  eventAsyncCreateUntil: async (
+    calendarId: string,
+    start: number,
+    until: number,
+    rule: string,
+    kind: any,
+    args: any,
+    meta: Meta
+  ) => {
+    const json = {
+      'event-until': { cid: calendarId, start, until, rule, kind, args, meta },
+    };
+    return await api.asyncCreateVent(json);
+  },
+  eventRuleAsyncCreate: async (
+    calendarId: string,
+    eid: string,
+    rule: string,
+    kind: any,
+    args: any
+  ) => {
+    const json = { 'event-rule': { calendarId, eid, rule, kind, args } };
+    return await api.asyncCreateVent(json);
+  },
+  eventMetadataAsyncCreate: async (
+    calendarId: string,
+    eid: string,
+    meta: Meta
+  ) => {
+    const json = { 'event-metadata': { calendarId, eid, meta } };
+    return await api.asyncCreateVent(json);
+  },
+  /**
+   * Fundamental API: Calendar Actions
+   */
+  updateCalendarAction: async (
+    calendarId: string,
+    fields: {
+      title?: string;
+      description?: string;
+      defaultRole?: string;
+    }
+  ) => {
+    const { title, description, defaultRole } = fields;
+    const fieldsList = [
+      typeof title === 'string' ? { title: title } : null,
+      typeof description === 'string' ? { description: description } : null,
+      typeof defaultRole === 'string' ? { 'default-role': defaultRole } : null,
+    ].filter(Boolean);
+    const json = {
+      p: calendarId,
+      q: { update: fieldsList },
+    };
+    return await api.calendarActionVent(json);
+  },
+  deleteCalendarAction: async (calendarId: string) => {
+    const json = { p: calendarId, q: { delete: null } };
+    return await api.calendarActionVent(json);
+  },
+  /**
+   * Fundamental API: Event Actions
+   */
+  updateEventAction: async (
+    calendarId: string,
+    eventId: string,
+    fields: {
+      defRule?: string;
+      defData?: string;
+    }
+  ) => {
+    const { defRule, defData } = fields;
+    const fieldsList = [
+      typeof defRule === 'string' ? { defRule: defRule } : null,
+      typeof defData === 'string' ? { defData: defData } : null,
+    ].filter(Boolean);
+    const json = {
+      p: { cid: calendarId, eid: eventId },
+      q: { update: fieldsList },
+    };
+    return await api.calendarActionVent(json);
+  },
+  deleteEventAction: async (calendarId: string, eventId: string) => {
+    const json = { p: { cid: calendarId, eid: eventId }, q: { delete: null } };
+    return await api.calendarActionVent(json);
+  },
+  createRuleEventAction: async (
+    calendarId: string,
+    eventId: string,
+    argId: string,
+    rule: string,
+    kind: any,
+    args: any
+  ) => {
+    const json = {
+      p: { cid: calendarId, eid: eventId },
+      q: { 'create-rule': { aid: argId, rid: rule, kind: kind, args: args } },
+    };
+    return await api.calendarActionVent(json);
+  },
+  updateRuleEventAction: async (
+    calendarId: string,
+    eventId: string,
+    argId: string,
+    rule: string,
+    kind: any,
+    args: any
+  ) => {
+    const json = {
+      p: { cid: calendarId, eid: eventId },
+      q: { 'update-rule': { aid: argId, rid: rule, kind: kind, args: args } },
+    };
+    return await api.calendarActionVent(json);
+  },
+  deleteRuleEventAction: async (
+    calendarId: string,
+    eventId: string,
+    argId: string
+  ) => {
+    const json = {
+      p: { cid: calendarId, eid: eventId },
+      q: { 'delete-rule': { aid: argId } },
+    };
+    return await api.calendarActionVent(json);
+  },
+  createMetadataEventAction: async (
+    calendarId: string,
+    eventId: string,
+    metaId: string,
+    meta: Meta
+  ) => {
+    const json = {
+      p: { cid: calendarId, eid: eventId },
+      q: { 'create-metadata': { mid: metaId, meta: meta } },
+    };
+    return await api.calendarActionVent(json);
+  },
+  updateMetadataEventAction: async (
+    calendarId: string,
+    eventId: string,
+    metaId: string,
+    fields: {
+      name?: string;
+      description?: string;
+      color?: string;
+    }
+  ) => {
+    const { name, description, color } = fields;
+    const fieldsList = [
+      typeof name === 'string' ? { name: name } : null,
+      typeof description === 'string' ? { description: description } : null,
+      typeof color === 'string' ? { color: color } : null,
+    ].filter(Boolean);
+    const json = {
+      p: { cid: calendarId, eid: eventId },
+      q: { 'update-metadata': { mid: metaId, fields: fieldsList } },
+    };
+    return await api.calendarActionVent(json);
+  },
+  deleteMetadataEventAction: async (
+    calendarId: string,
+    eventId: string,
+    metaId: string
+  ) => {
+    const json = {
+      p: { cid: calendarId, eid: eventId },
+      q: { 'delete-metadata': { mid: metaId } },
+    };
+    return await api.calendarActionVent(json);
+  },
+  updateInstancesEventAction: async (
+    calendarId: string,
+    eventId: string,
+    dom: RepeatCount,
+    fields: {
+      argId?: string;
+      metaId?: string;
+    }
+  ) => {
+    const { argId, metaId } = fields;
+    const fieldsList = [
+      typeof argId === 'string' ? { argId: argId } : null,
+      typeof metaId === 'string' ? { metaId: metaId } : null,
+    ].filter(Boolean);
+    const json = {
+      p: { cid: calendarId, eid: eventId },
+      q: { 'update-instances': { dom: dom, fields: fieldsList } },
+    };
+    return await api.calendarActionVent(json);
+  },
+  updateDomainEventAction: async (
+    calendarId: string,
+    eventId: string,
+    dom: RepeatCount
+  ) => {
+    const json = {
+      p: { cid: calendarId, eid: eventId },
+      q: { 'update-domain': { dom: dom } },
+    };
+    return await api.calendarActionVent(json);
   },
 };
