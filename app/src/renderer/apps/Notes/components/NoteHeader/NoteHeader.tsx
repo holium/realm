@@ -63,7 +63,9 @@ const NoteHeaderPresenter = () => {
     <NoteHeaderView
       author={selectedNote.author}
       noteEditedAtString={noteEditedAtString}
-      contextMenuOptions={contextMenuOptions}
+      contextMenuOptions={
+        selectedNote.author === window.ship ? contextMenuOptions : []
+      }
       saving={saving}
       title={selectedNote.title}
       onChange={onChangeTitle}

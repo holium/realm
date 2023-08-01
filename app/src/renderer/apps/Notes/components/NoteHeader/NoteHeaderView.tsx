@@ -47,7 +47,7 @@ export const NoteHeaderView = ({
     </Flex>
     {saving ? (
       <Spinner size="19px" width={2} />
-    ) : (
+    ) : contextMenuOptions.length ? (
       <Menu
         id={`${title}-menu`}
         orientation="bottom-left"
@@ -59,6 +59,6 @@ export const NoteHeaderView = ({
         }
         options={contextMenuOptions}
       />
-    )}
+    ) : null}
   </NoteHeaderContainer>
 );
