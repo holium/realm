@@ -661,7 +661,6 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   deleteRoom(rid: string) {
-    shipStore.settingsStore.systemSoundsEnabled && SoundActions.playRoomLeave();
     this.rooms.delete(rid);
     this.ourPeer.disableAll();
     this.currentRid = null;
@@ -707,7 +706,6 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   leaveRoom(rid: string) {
-    shipStore.settingsStore.systemSoundsEnabled && SoundActions.playRoomLeave();
     this.rooms.get(rid)?.removePeer(this.ourId);
     this.currentRid = null;
     this.ourPeer.disableAll();

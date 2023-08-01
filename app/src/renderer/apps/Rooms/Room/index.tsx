@@ -12,6 +12,7 @@ import {
 import { MediaAccess } from 'os/types';
 import { useTrayApps } from 'renderer/apps/store';
 import { Badge } from 'renderer/components';
+import { useSound } from 'renderer/lib/sound';
 import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
 import { MainIPC } from 'renderer/stores/ipc';
@@ -24,6 +25,7 @@ import { VoiceView } from './Voice';
 type RoomViews = 'voice' | 'chat' | 'invite' | 'info';
 
 const RoomPresenter = () => {
+  const sound = useSound();
   const { loggedInAccount, shellStore } = useAppState();
   const roomsStore = useRoomsStore();
   const { roomsApp } = useTrayApps();
@@ -166,6 +168,7 @@ const RoomPresenter = () => {
                   roomsStore.leaveRoom(rid);
                   roomsApp.setView('list');
                 }
+                sound.playRoomLeave();
               }}
             >
               <Icon
