@@ -68,6 +68,10 @@ export class UrbitProtocol implements IConduitProtocol {
         }
         break;
 
+      case 'subscribe':
+        console.log(`ws: [on_urbit_event] quit received`);
+        break;
+
       case 'quit':
         console.log(`ws: [on_urbit_event] quit received`);
         break;

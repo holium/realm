@@ -13,6 +13,7 @@ export enum ConduitConnectionState {
 export interface IConduitProtocol {
   conduit: IConduit | undefined;
   rootStore: IRootStore;
+  attach(conduit: IConduit): void;
   match(message: any): boolean;
   send(msg: any): any;
   on_new_message(msg: any): boolean;
@@ -71,6 +72,12 @@ class WebSocketConduit implements IConduit {
 
         // notify any thing observing our state
         this.rootStore.setConnectionState(ConduitConnectionState.connected);
+
+        // ask the protocol if it recognizes the message and, if so, allow
+        //  it to handle the message
+        for (let i = 0; i < this.protocols.length; i++) {
+          this.protocols[i].attach(this);
+        }
 
         // hole onto this reference
         this.ws = ws;
