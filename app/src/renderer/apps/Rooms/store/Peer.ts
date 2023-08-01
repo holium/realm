@@ -398,7 +398,7 @@ export class PeerClass extends EventsEmitter {
   @action
   sendData(data: Partial<DataPacket>) {
     try {
-      if (this.peer) {
+      if (this.peer && this.peer.connected) {
         this.peer.send(serialize(data));
       }
     } catch (e) {
