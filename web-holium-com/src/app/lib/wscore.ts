@@ -3,13 +3,15 @@ import { IRootStore } from '../ws';
 const network = 'holium.network';
 
 export enum ConduitConnectionState {
+  initial = 'initial',
   connected = 'connected',
   closed = 'closed',
+  error = 'error',
   reconnecting = 'reconnecting',
 }
 
 export interface IConduitProtocol {
-  conduit: IConduit;
+  conduit: IConduit | undefined;
   rootStore: IRootStore;
   match(message: any): boolean;
   send(msg: any): any;
@@ -19,6 +21,7 @@ export interface IConduitProtocol {
 export interface IConduit {
   readonly patp: string;
   readonly code: string;
+  protocols: IConduitProtocol[];
   connect(): Promise<ConduitConnectionState>;
   status(): ConduitConnectionState | undefined;
   // register(handler: IConduitMessageHandler): void;
@@ -30,16 +33,21 @@ class WebSocketConduit implements IConduit {
   private ws: WebSocket | undefined;
   public patp: string;
   public code: string;
-  private connectionStatus: ConduitConnectionState | undefined = undefined;
-  private protocol: IConduitProtocol | undefined = undefined;
+  private connectionStatus: ConduitConnectionState;
+  public protocols: IConduitProtocol[];
+  public rootStore: IRootStore;
 
   public constructor(
     patp: string,
     accessCode: string,
-    conduitProtocol: IConduitProtocol
+    protocols: IConduitProtocol[],
+    rootStore: IRootStore
   ) {
+    this.connectionStatus = ConduitConnectionState.initial;
     this.patp = patp;
     this.code = accessCode;
+    this.protocols = protocols;
+    this.rootStore = rootStore;
 
     const protocol = process.env.NODE_ENV === 'production' ? 'wss' : 'ws';
     const domain =
@@ -47,8 +55,6 @@ class WebSocketConduit implements IConduit {
         ? `${patp.substring(1)}.${network}`
         : 'localhost:3030';
     this.url = `${protocol}://${domain}/ws?access_code=${accessCode}`;
-
-    this.protocol = conduitProtocol;
   }
 
   public status(): ConduitConnectionState | undefined {
@@ -57,10 +63,15 @@ class WebSocketConduit implements IConduit {
 
   public connect(): Promise<ConduitConnectionState> {
     return new Promise((resolve, reject) => {
+      console.log(`opening websocket connection to '${this.url}...`);
       const ws = new WebSocket(this.url);
 
       ws.onopen = (event) => {
         console.log('ws: [onopen] web socket opened %o', event);
+
+        // notify any thing observing our state
+        this.rootStore.setConnectionState(ConduitConnectionState.connected);
+
         // hole onto this reference
         this.ws = ws;
         resolve(ConduitConnectionState.connected);
@@ -77,7 +88,13 @@ class WebSocketConduit implements IConduit {
 
         console.log('ws: [onmessage] event received. %o', data);
 
-        this.protocol?.on_new_message(data);
+        // ask the protocol if it recognizes the message and, if so, allow
+        //  it to handle the message
+        for (let i = 0; i < this.protocols.length; i++) {
+          if (this.protocols[i].match(data)) {
+            this.protocols[i].on_new_message(data);
+          }
+        }
       };
 
       ws.onclose = (event) => {
@@ -87,13 +104,17 @@ class WebSocketConduit implements IConduit {
 
       ws.onerror = (event) => {
         console.log('ws: [onerror] web socket error %o', event);
+
+        // notify anyone observing connection state
+        this.rootStore.setConnectionState(ConduitConnectionState.error);
+
         reject('error trying to connect to websocket');
       };
     });
   }
 
   transmit(data: any): void {
-    this.ws?.send(data);
+    this.ws?.send(JSON.stringify(data));
   }
 }
 
@@ -106,16 +127,16 @@ export class APIConnection {
   private patp: string;
   private accessCode: string;
   private _conduit: IConduit | undefined;
-  private protocol: IConduitProtocol | undefined;
   // @ts-ignore
   private rootStore: IRootStore | undefined;
+  private protocols: IConduitProtocol[];
 
   private constructor(patp: string, accessCode: string) {
     this.patp = patp;
     this.accessCode = accessCode;
     this._conduit = undefined;
     this.rootStore = undefined;
-    this.protocol = undefined;
+    this.protocols = [];
   }
 
   // url - e.g. wss://pasren-satmex.holium.network
@@ -126,37 +147,28 @@ export class APIConnection {
     return APIConnection.instance;
   }
 
-  public use(protocol: IConduitProtocol) {
-    this.protocol = protocol;
+  public register_protocol(protocol: IConduitProtocol) {
+    this.protocols.push(protocol);
   }
+
   // connect to the underlying conduit. in the case of browser chat,
   //  this will be the new websocket capability
-  public connect(): Promise<ConduitConnectionState> {
+  public connect(rootStore: IRootStore): Promise<ConduitConnectionState> {
     if (this._conduit) {
       console.error('ws: error. _conduit instance already established');
       return new Promise((_, reject) => reject('conduit is single instance'));
     }
-    if (!this.protocol) {
-      console.error(
-        "ws: error. connection needs a protocol to function property. please call the 'use' method of the api"
-      );
-      return new Promise((_, reject) => reject('conduit is single instance'));
-    }
 
-    // store this for now. there will most probably be a future use-case for this reference
-    // this.rootStore = rootStore;
-
-    // const messageHandlers = [
-    //   new HolonMessageHandler(this.conduit, rootStore),
-    //   new UrbitMessageHandler(this.conduit, rootStore),
-    // ];
+    this.rootStore = rootStore;
 
     this._conduit = new WebSocketConduit(
       this.patp,
       this.accessCode,
-      this.protocol
+      this.protocols,
+      this.rootStore
     ) as IConduit;
-    return this._conduit.connect();
+
+    return this._conduit?.connect();
   }
 
   get conduit(): IConduit {

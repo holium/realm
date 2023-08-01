@@ -1,17 +1,18 @@
 'use client';
 import { useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
 
+import { HolonProtocol } from './lib/holon';
 import { UrbitProtocol } from './lib/urbit';
 import { APIConnection, ConduitConnectionState } from './lib/wscore';
 import { AppModel, RootModel, useConnectionState } from './ws';
 
-export default function Home() {
+const Home = observer(() => {
   const connectionState = useConnectionState();
 
   // one time load of entire app / root store
   // connects to holon over websocket. maintained as Singleton instance.
   useEffect(() => {
-    console.warn('this should only ever be called once');
     const conn: APIConnection = APIConnection.getInstance(
       '~ralbes-mislec-lodlev-migdev',
       'napdem-fopbex-mapbus-ridmel'
@@ -20,25 +21,30 @@ export default function Home() {
     // instantiate the root store model for state changes and observability
     const rootStore = RootModel.create({ app: AppModel.create() });
 
-    // const protocol = new HolonProtocol(conn.conduit, rootStore);
-    // implement the urbit "protocol" on top of the underlying websocket backbone
-    const protocol = new UrbitProtocol(conn.conduit, rootStore);
+    // we are only interested in the UrbitProtocol for sending messages, but
+    // need the Holon protocol to handle special use cases
+    const urbit_protocol = new UrbitProtocol(rootStore);
 
     // make the urbit protocol the active protocol
-    conn.use(protocol);
+    conn.register_protocol(urbit_protocol);
+    conn.register_protocol(new HolonProtocol(rootStore));
 
     console.log('connecting to websocket...');
-    conn.connect().then((_connectionState: ConduitConnectionState) => {
-      console.log('connected to websocket!');
+    conn
+      .connect(rootStore)
+      .then((_connectionStatus: ConduitConnectionState) => {
+        console.log('connected to websocket!');
 
-      console.log('subscribing to spaces...');
-      protocol.subscribe('spaces', '/updates');
-    });
+        console.log('subscribing to spaces...');
+        // use the urbit protocol to subscribe to spaces /updates
+        urbit_protocol.subscribe('spaces', '/updates');
+      })
+      .catch((e) => console.error(e));
   }, []);
 
   useEffect(() => {
-    console.log(connectionState?.isConnected);
-  }, [connectionState?.isConnected]);
+    console.log(connectionState?.status);
+  }, [connectionState?.status]);
 
   return (
     <main>
@@ -46,4 +52,6 @@ export default function Home() {
       <p>Implement WebSockets here.</p>
     </main>
   );
-}
+});
+
+export default Home;

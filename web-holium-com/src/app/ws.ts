@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Instance, types } from 'mobx-state-tree';
 
+import { ConduitConnectionState } from './lib/wscore';
+
 export const ConnectionState = types.model({
-  isConnected: types.boolean,
+  status: types.string,
 });
 
 export type IConnectionState = Instance<typeof ConnectionState>;
@@ -20,7 +22,7 @@ const handleSpacesMessage = (message: any): void => {
 
 export const AppModel = types
   .model('AppModel', {
-    connectionState: types.optional(ConnectionState, { isConnected: false }),
+    connectionState: types.optional(ConnectionState, { status: 'initial' }),
     spaces: types.optional(types.maybeNull(SpacesStore), null),
   })
   .actions((_self) => ({
@@ -39,14 +41,20 @@ export const AppModel = types
 
 export type AppStore = Instance<typeof AppModel>;
 
-export const RootModel = types.model({
-  app: AppModel,
-});
+export const RootModel = types
+  .model({
+    app: AppModel,
+  })
+  .actions((self) => ({
+    setConnectionState(connectionStatus: ConduitConnectionState): void {
+      self.app.connectionState.status = connectionStatus;
+    },
+  }));
 
 export type IRootStore = Instance<typeof RootModel>;
 
 export function useConnectionState() {
   const [connectionState, _setConnectionState] = useState<IConnectionState>();
-  useEffect(() => {}, [connectionState?.isConnected]);
+  useEffect(() => {}, [connectionState?.status]);
   return connectionState;
 }

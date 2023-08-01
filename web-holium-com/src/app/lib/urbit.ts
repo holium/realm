@@ -2,15 +2,18 @@ import { IRootStore } from '../ws';
 import { IConduit, IConduitProtocol } from './wscore';
 
 export class UrbitProtocol implements IConduitProtocol {
-  private nextMessageId = 1;
+  private static nextMessageId = 1;
   private msgs: Map<number, any>;
-  public conduit: IConduit;
+  public conduit: IConduit | undefined;
   public rootStore: IRootStore;
 
-  constructor(conduit: IConduit, rootStore: IRootStore) {
-    this.conduit = conduit;
+  constructor(rootStore: IRootStore) {
     this.rootStore = rootStore;
     this.msgs = new Map<number, any>();
+  }
+
+  attach(conduit: IConduit) {
+    this.conduit = conduit;
   }
 
   match(message: any): boolean {
@@ -26,8 +29,10 @@ export class UrbitProtocol implements IConduitProtocol {
     return false;
   }
 
+  // wrap the message in an array .. the actual underlying conduit
+  // (in the case of websocket), will JSON.stringify this payload.
   send(msg: any) {
-    this.conduit.transmit(msg);
+    this.conduit?.transmit([msg]);
   }
 
   on_new_message(msg: any): boolean {
@@ -37,23 +42,19 @@ export class UrbitProtocol implements IConduitProtocol {
       );
     }
 
-    console.log(`acking ${msg.id} msg-id=${this.nextMessageId + 1}`);
+    console.log(`acking ${msg.id} msg-id=${UrbitProtocol.nextMessageId + 1}`);
 
     // ack the event before doing anything else
-    this.conduit.transmit(
-      JSON.stringify([
-        {
-          id: this.nextMessageId++,
-          action: 'ack',
-          'event-id': msg.id,
-        },
-      ])
-    );
+    this.conduit?.transmit({
+      id: UrbitProtocol.nextMessageId++,
+      action: 'ack',
+      'event-id': msg.id,
+    });
 
     // remove the message from the queue
     this.msgs.delete(msg.id);
 
-    if ('err' in msg) {
+    if (msg.err) {
       console.error(`ws: [on_urbit_event] error: %o`, msg);
       return false;
     }
@@ -88,10 +89,10 @@ export class UrbitProtocol implements IConduitProtocol {
 
   public subscribe(app: string, path: string): void {
     this.send({
-      id: this.nextMessageId++,
+      id: UrbitProtocol.nextMessageId++,
       action: 'subscribe',
       // patp always starts with ~
-      ship: this.conduit.patp.substring(1),
+      ship: this.conduit?.patp.substring(1),
       app: app,
       path: path,
     });
@@ -99,7 +100,7 @@ export class UrbitProtocol implements IConduitProtocol {
 
   public unsubscribe(subscription: number): void {
     this.send({
-      id: this.nextMessageId++,
+      id: UrbitProtocol.nextMessageId++,
       action: 'unsubscribe',
       subscription: subscription,
     });
@@ -107,10 +108,10 @@ export class UrbitProtocol implements IConduitProtocol {
 
   public poke(app: string, mark: string, json: any): void {
     this.send({
-      id: this.nextMessageId++,
+      id: UrbitProtocol.nextMessageId++,
       action: 'poke',
       // patp always starts with ~
-      ship: this.conduit.patp.substring(1),
+      ship: this.conduit?.patp.substring(1),
       app: app,
       mark: mark,
       json: json,
@@ -119,7 +120,7 @@ export class UrbitProtocol implements IConduitProtocol {
 
   public delete_channel(): void {
     this.send({
-      id: this.nextMessageId++,
+      id: UrbitProtocol.nextMessageId++,
       action: 'delete',
     });
   }
