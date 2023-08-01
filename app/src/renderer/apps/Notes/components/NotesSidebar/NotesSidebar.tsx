@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
@@ -40,6 +41,13 @@ const NotesSidebarPresenter = () => {
   const selectedSpace = spacesStore.selected;
 
   const creating = useToggle(false);
+
+  useEffect(() => {
+    return () => {
+      // Leave current room on unmount.
+      roomsStore.cleanUpCurrentRoom();
+    };
+  }, []);
 
   if (!selectedSpace) return null;
 
