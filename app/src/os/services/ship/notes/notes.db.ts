@@ -28,9 +28,11 @@ create table if not exists notes (
 
 create table if not exists notes_edits (
   id              TEXT,
-  note_edit       TEXT PRIMARY KEY,
+  note_edit       TEXT NOT NULL,
   note_id         TEXT NOT NULL
 );
+
+create index if not exists notes_edits_note_edit_note_id on notes_edits (note_edit, note_id);
 `;
 
 export const notesWipeSql = `
@@ -126,10 +128,10 @@ export class NotesDB extends AbstractDataAccess<any> {
 
     // If the note edit already exists, update the id.
     const existingNoteEdit = this.db
-      .prepare(`SELECT * FROM notes_edits WHERE note_edit = ?`)
-      .get(note_edit);
+      .prepare(`SELECT * FROM notes_edits WHERE note_edit = ? AND note_id = ?`)
+      .get(note_edit, note_id);
     if (existingNoteEdit) {
-      return this.updateNoteEditId({ note_edit, id });
+      return this.updateNoteEditId({ note_edit, note_id, id });
     }
 
     const info = this.db
@@ -147,6 +149,14 @@ export class NotesDB extends AbstractDataAccess<any> {
     note_id,
   }) => {
     if (!this.db) return -1;
+
+    // If the note edit already exists, do nothing.
+    const existingNoteEdit = this.db
+      .prepare(`SELECT * FROM notes_edits WHERE note_edit = ? AND note_id = ?`)
+      .get(note_edit, note_id);
+    if (existingNoteEdit) {
+      return existingNoteEdit.id;
+    }
 
     const info = this.db
       .prepare(`INSERT INTO notes_edits (note_edit, note_id) VALUES (?, ?)`)
@@ -166,11 +176,13 @@ export class NotesDB extends AbstractDataAccess<any> {
     return noteId;
   };
 
-  updateNoteEditId: NotesDB_UpdateNoteEditId = ({ note_edit }) => {
+  updateNoteEditId: NotesDB_UpdateNoteEditId = ({ note_edit, note_id, id }) => {
     if (!this.db) return -1;
     const info = this.db
-      .prepare(`UPDATE notes_edits SET id = ? WHERE note_edit = ?`)
-      .run(note_edit, Date.now());
+      .prepare(
+        `UPDATE notes_edits SET id = ? WHERE note_edit = ? AND note_id = ?`
+      )
+      .run(id, note_edit, note_id);
     const noteId = info.lastInsertRowid;
 
     return noteId;

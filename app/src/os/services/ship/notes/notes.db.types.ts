@@ -43,6 +43,7 @@ export type NotesDB_UpdateNoteTitle = (payload: {
 
 export type NotesDB_UpdateNoteEditId = (payload: {
   note_edit: string;
+  note_id: string;
   id: string;
 }) => string;
 
