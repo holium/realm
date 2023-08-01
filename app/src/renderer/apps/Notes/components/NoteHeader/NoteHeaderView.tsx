@@ -15,7 +15,7 @@ import {
 type Props = {
   title: string;
   author: string;
-  noteEditdAtString: string;
+  noteEditedAtString: string;
   contextMenuOptions: ContextMenuOption[];
   saving: boolean;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -25,7 +25,7 @@ type Props = {
 export const NoteHeaderView = ({
   title,
   author,
-  noteEditdAtString,
+  noteEditedAtString,
   contextMenuOptions,
   saving,
   onChange,
@@ -33,7 +33,7 @@ export const NoteHeaderView = ({
 }: Props) => (
   <NoteHeaderContainer>
     <Flex flex={1} flexDirection="column">
-      <NoteUpdatedAtText>{noteEditdAtString}</NoteUpdatedAtText>
+      <NoteUpdatedAtText>{noteEditedAtString}</NoteUpdatedAtText>
       <NoteHeaderTitleInput
         id="note-title-input"
         name="note-title-input"

@@ -87,7 +87,7 @@ const NoteRowPresenter = ({
     firstParagraph && firstParagraph.length > 0
       ? firstParagraph
       : 'No additional text';
-  const noteEditd = new Date(updatedAt).toLocaleDateString();
+  const date = new Date(updatedAt).toLocaleDateString();
 
   return (
     <NoteRowView
@@ -95,7 +95,7 @@ const NoteRowPresenter = ({
       title={title}
       author={nickname ?? patp}
       preview={notePreview}
-      date={noteEditd}
+      date={date}
       isSelected={isSelected}
       isPersonal={isPersonal}
       participants={participants}

@@ -11,7 +11,7 @@ export const NoteHeaderStory: ComponentStory<typeof NoteHeaderView> = () => (
   <NoteHeaderView
     title="My Note"
     author="~zod"
-    noteEditdAtString="Jan 1, 2021, 12:00 PM"
+    noteEditedAtString="Jan 1, 2021, 12:00 PM"
     contextMenuOptions={[]}
     saving={false}
     onChange={() => {}}
