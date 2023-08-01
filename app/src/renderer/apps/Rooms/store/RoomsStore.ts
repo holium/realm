@@ -531,8 +531,10 @@ export class RoomsStore extends EventsEmitter {
             console.log('someone entered the room', event);
             this.createPeer(event.peer_id);
 
-            shipStore.settingsStore.systemSoundsEnabled &&
+            const isRoomsNote = event.room.title.startsWith('Notes:');
+            if (shipStore.settingsStore.systemSoundsEnabled && !isRoomsNote) {
               SoundActions.playRoomPeerEnter();
+            }
           }
         }
         break;
@@ -548,8 +550,10 @@ export class RoomsStore extends EventsEmitter {
             this.hangupAllPeers();
           } else {
             // someone left the room
-            shipStore.settingsStore.systemSoundsEnabled &&
+            const isRoomsNote = event.room.title.startsWith('Notes:');
+            if (shipStore.settingsStore.systemSoundsEnabled && !isRoomsNote) {
               SoundActions.playRoomPeerLeave();
+            }
             console.log('someone left the room', event);
             this.destroyPeer(event.peer_id);
             this.rooms.get(event.rid)?.removePeer(event.peer_id);

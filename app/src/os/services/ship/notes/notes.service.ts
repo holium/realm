@@ -283,7 +283,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     );
     if (!notesEditsTable) return;
 
-    // 5. Insert all missing notes updates in SQLite.
+    // 5. Upsert all missing notes updates in SQLite.
     const notesEditsTableRows = notesEditsTable.rows ?? [];
     notesEditsTableRows.forEach((noteEdit) => {
       const rowData: BedrockRowData_NotesEdits = noteEdit.data;
@@ -303,6 +303,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     });
 
     // 6. Post notes updates that weren't in Bedrock.
+    // This can happen if the user closes before the updates are sent.
     const notesDBNotesEdits = this.notesDB.selectAllNotesEdits();
     notesDBNotesEdits.forEach((noteEdit) => {
       const noteEditExistsInBedrock = notesEditsTableRows.find(
@@ -316,16 +317,6 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         });
       }
     });
-    // Unsynced local changes.
-    // const notesDBLocalNotesEdits = this.notesDB.selectAllLocalNotesEdits();
-    // notesDBLocalNotesEdits.forEach((noteEdit) => {
-    //   this.createNoteUpdate({
-    //     note_id: noteEdit.note_id,
-    //     edit: noteEdit.note_edit,
-    //     space,
-    //   });
-    // });
-    // this.notesDB.deleteAllLocalNotesEdits();
   }
 
   editNoteTitle({ id, space, title }: NotesService_EditNoteTitle_Payload) {
