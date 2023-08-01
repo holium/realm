@@ -133,6 +133,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
       app: 'bedrock',
       path: '/db',
     });
+    if (!dbResponse) return;
 
     const paths: BedrockPath[] = dbResponse.paths ?? [];
     const existingPath = paths.find((o) => o.path === `${space}/notes`);
@@ -216,7 +217,6 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
      * PHASE 2 – Sync `notes_edits` (using yjs for CRDT)
      * 4. Get all notes_edits from Bedrock.
      * 5. Insert all missing notes updates rows in SQLite.
-     * 6. Post back missing notes_edits rows to Bedrock.
      */
 
     if (!this.notesDB) return;
@@ -300,22 +300,6 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
           note_id: rowData.note_id,
         },
       });
-    });
-
-    // 6. Post notes updates that weren't in Bedrock.
-    // This can happen if the user closes before the updates are sent.
-    const notesDBNotesEdits = this.notesDB.selectAllNotesEdits();
-    notesDBNotesEdits.forEach((noteEdit) => {
-      const noteEditExistsInBedrock = notesEditsTableRows.find(
-        (o) => o.id === noteEdit.id
-      );
-      if (!noteEditExistsInBedrock) {
-        this.createNoteUpdate({
-          note_id: noteEdit.note_id,
-          note_edit: noteEdit.note_edit,
-          space,
-        });
-      }
     });
   }
 
@@ -418,6 +402,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     });
 
     if (response) {
+      // TODO: make this into one transaction.
       // Delete local unsaved edits that will be replaced by the merged update.
       this.notesDB.deleteAllUnsavedNoteEdits({ note_id });
 

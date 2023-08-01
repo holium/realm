@@ -59,7 +59,6 @@ export const EditorView = ({
   ) => {
     // Only broadcast updates that originate from us.
     if (origin !== 'local') return;
-    console.log('onAwarenessChange');
 
     const changedClients = added.concat(updated).concat(removed);
     const awarenessUpdate = encodeAwarenessUpdate(awareness, changedClients);

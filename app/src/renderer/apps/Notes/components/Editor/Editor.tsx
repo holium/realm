@@ -47,6 +47,13 @@ const EditorPresenter = () => {
   const debouncedAutoSave = debounce(() => {
     if (!selectedNote) return;
 
+    // If there are multiple participants in a room,
+    // we only need one to be responsible for saving the document.
+    if (roomsStore.currentRoom?.present?.length) {
+      // If we're not the creator of the room, don't save.
+      if (roomsStore.currentRoom?.creator !== loggedInAccount?.serverId) return;
+    }
+
     saveNoteUpdates({
       note_id: selectedNote.id,
       space: selectedNote.space,
