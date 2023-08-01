@@ -5,7 +5,6 @@ import { TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
 
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
-import { useSound } from 'renderer/lib/sound';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -25,7 +24,6 @@ const NotesSidebarPresenter = () => {
   const { loggedInAccount } = useAppState();
   const { notesStore, spacesStore } = useShipStore();
   const roomsStore = useRoomsStore();
-  const sound = useSound();
 
   const {
     sortedPersonalNotes,
@@ -89,7 +87,6 @@ const NotesSidebarPresenter = () => {
       );
       await roomsStore.joinRoom(newRoomRid);
     }
-    sound.playRoomEnter();
 
     // In Notes rooms everyone should be muted by default.
     roomsStore.ourPeer.mute();
