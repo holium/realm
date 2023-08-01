@@ -13,32 +13,13 @@ import { ySyncPlugin } from './plugins/y-sync-plugin';
 import { yUndoPlugin } from './plugins/y-undo-plugin';
 import { schema } from './schema';
 
-export type OnYdocUpdate = (update: Uint8Array, origin: any) => void;
-
-export type onAwarenessChange = (
-  update: {
-    added: number[];
-    updated: number[];
-    removed: number[];
-  },
-  origin: any
-) => void;
-
 type Props = {
   user: UserMetadata;
   ydoc: Y.Doc;
   awareness: Awareness;
-  onYdocUpdate: OnYdocUpdate;
-  onAwarenessChange: onAwarenessChange;
 };
 
-export const useEditorView = ({
-  user,
-  ydoc,
-  awareness,
-  onYdocUpdate,
-  onAwarenessChange,
-}: Props) => {
+export const useEditorView = ({ user, ydoc, awareness }: Props) => {
   const [editorView, setEditorView] = useState<EditorView>();
 
   const onEditorRef = (editorRef: HTMLDivElement) => {
@@ -67,10 +48,6 @@ export const useEditorView = ({
         ],
       }),
     });
-
-    // Set up listeners for updates to the ydoc and awareness.
-    ydoc.on('update', onYdocUpdate);
-    awareness.on('change', onAwarenessChange);
 
     setEditorView(prosemirrorView);
   };

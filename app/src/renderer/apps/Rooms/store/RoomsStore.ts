@@ -139,7 +139,6 @@ export class RoomsStore extends EventsEmitter {
   @observable isMuted = false;
   @observable isSpeaking = false;
   @observable isAudioAttached = false;
-  @observable peersMetadata = observable.map();
   @observable status = 'disconnected';
   @observable peers: Map<string, PeerClass> = observable.map();
   @observable speakers: Map<string, ActiveSpeaker> = observable.map();
