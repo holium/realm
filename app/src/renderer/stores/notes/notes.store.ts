@@ -8,9 +8,9 @@ import { NotesService_IPCUpdate } from 'os/services/ship/notes/notes.service.typ
 import { NotesIPC } from '../ipc';
 import {
   NoteModel,
-  NotesStore_ApplyNoteUpdate,
+  NotesStore_ApplyNoteEditLocally,
   NotesStore_CreateNote,
-  NotesStore_CreateNoteUpdate,
+  NotesStore_CreateNoteUpdateLocally,
   NotesStore_DeleteNote,
   NotesStore_DeleteNoteLocally,
   NotesStore_EditNoteTitle,
@@ -18,6 +18,7 @@ import {
   NotesStore_InsertNoteLocally,
   NotesStore_LoadLocalNotes,
   NotesStore_Note,
+  NotesStore_SaveLocalNoteUpdates,
   NotesStore_SetSelectedNoteId,
   NotesStore_UpdateNoteLocally,
 } from './notes.store.types';
@@ -92,7 +93,7 @@ export const NotesStore = types
     },
   }))
   .actions((self) => ({
-    connectToBedrock: flow(function* ({ space }: { space: string }) {
+    initialize: flow(function* ({ space }: { space: string }) {
       self.initializing = true;
 
       yield NotesIPC.createPublicBedrockPath({ space });
@@ -101,9 +102,7 @@ export const NotesStore = types
 
       self.initializing = false;
     }),
-    /*
-     * Used by the UI layer to create a note.
-     */
+
     createNote({ space, title }: NotesStore_CreateNote) {
       return NotesIPC.createNote({
         space,
@@ -165,20 +164,21 @@ export const NotesStore = types
     }),
 
     createNoteUpdateLocally({
+      note_edit,
       note_id,
-      space,
-      update,
-    }: NotesStore_CreateNoteUpdate) {
+    }: NotesStore_CreateNoteUpdateLocally) {
       return NotesIPC.createNoteUpdateLocally({
+        note_edit,
         note_id,
-        space,
-        update,
       });
     },
 
-    persistLocalNoteUpdates: flow(function* ({ note_id }: { note_id: string }) {
+    saveNoteUpdates: flow(function* ({
+      note_id,
+      space,
+    }: NotesStore_SaveLocalNoteUpdates) {
       self.saving = true;
-      yield NotesIPC.persistLocalNoteUpdates({ note_id });
+      yield NotesIPC.saveNoteUpdates({ note_id, space });
       self.saving = false;
     }),
 
@@ -189,10 +189,6 @@ export const NotesStore = types
       return notes.find((n) => n.id === id);
     },
 
-    /*
-     * Used by the UI layer to populate MobX with space notes
-     * from the SQLite database upon mounting the notes app.
-     */
     loadLocalSpaceNotes: flow(function* ({ space }: NotesStore_LoadLocalNotes) {
       const spaceNotesSorted = yield NotesIPC.getNotesFromDb({
         space,
@@ -212,10 +208,7 @@ export const NotesStore = types
         self.spaceNotes = spaceNotesSorted;
       }
     }),
-    /*
-     * Used by the UI layer to populate MobX with personal notes
-     * from the SQLite database upon mounting the notes app.
-     */
+
     loadLocalPersonalNotes: flow(function* ({
       space,
     }: NotesStore_LoadLocalNotes) {
@@ -238,20 +231,18 @@ export const NotesStore = types
       }
     }),
 
-    async applyNotesUpdates() {
-      return NotesIPC.getNotesUpdatesFromDb().then((res) => {
+    async applyNotesEdits() {
+      return NotesIPC.getNotesEditsFromDb().then((res) => {
         if (!res) return;
-        return res.forEach((update) => {
-          const note = self.spaceNotes.find((n) => n.id === update.note_id);
+        return res.forEach((edit) => {
+          const note = self.spaceNotes.find((n) => n.id === edit.note_id);
           if (!note) return;
 
           const awareness = self.awarenesses.get(note.id);
           if (!awareness) return;
 
-          const uint8Array = toUint8Array(update.note_update);
-
           awareness.doc.transact(() => {
-            Y.applyUpdate(awareness.doc, uint8Array);
+            Y.applyUpdate(awareness.doc, toUint8Array(edit.note_edit));
           });
         });
       });
@@ -269,27 +260,24 @@ export const NotesStore = types
       self.searchQuery = query;
     },
 
-    applyBroadcastedYdocUpdate(from: string, update: string) {
+    applyBroadcastedYdocUpdate(from: string, edit: string) {
       if (!self.selectedNoteId) return;
 
       const awareness = self.awarenesses.get(self.selectedNoteId);
       if (!awareness) return;
 
-      const uint8Array = toUint8Array(update);
-
       awareness.doc.transact(() => {
-        Y.applyUpdate(awareness.doc, uint8Array, from);
+        Y.applyUpdate(awareness.doc, toUint8Array(edit), from);
       });
     },
 
-    applyBroadcastedAwarenessUpdate(from: string, update: string) {
-      const binaryEncodedUpdate = toUint8Array(update);
+    applyBroadcastedAwarenessUpdate(from: string, edit: string) {
       if (!self.selectedNoteId) return;
 
       const selectedAwareness = self.awarenesses.get(self.selectedNoteId);
       if (!selectedAwareness) return;
 
-      applyAwarenessUpdate(selectedAwareness, binaryEncodedUpdate, from);
+      applyAwarenessUpdate(selectedAwareness, toUint8Array(edit), from);
     },
 
     getNotePreview(id: string) {
@@ -322,19 +310,17 @@ export const NotesStore = types
       self.awarenesses.set(note.id, awareness);
     },
 
-    _applyNoteUpdate(update: NotesStore_ApplyNoteUpdate) {
+    _applyNoteEdit(edit: NotesStore_ApplyNoteEditLocally) {
       const note = [...self.personalNotes, ...self.spaceNotes].find(
-        (n) => n.id === update.note_id
+        (n) => n.id === edit.note_id
       );
       if (!note) return;
 
       const awareness = self.awarenesses.get(note.id);
       if (!awareness) return;
 
-      const uint8Array = toUint8Array(update.update);
-
       awareness.doc.transact(() => {
-        Y.applyUpdate(awareness.doc, uint8Array);
+        Y.applyUpdate(awareness.doc, toUint8Array(edit.note_edit));
       });
     },
 
@@ -376,8 +362,8 @@ NotesIPC.onUpdate(({ type, payload }: NotesService_IPCUpdate) => {
     notesStore._insertNoteLocally({
       note: NoteModel.create(payload),
     });
-  } else if (type === 'apply-note-update') {
-    notesStore._applyNoteUpdate(payload);
+  } else if (type === 'apply-notes-edit') {
+    notesStore._applyNoteEdit(payload);
   } else if (type === 'update-note') {
     notesStore._updateNoteLocally(payload);
   } else if (type === 'delete-note') {

@@ -2,17 +2,18 @@ import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
 import {
-  NotesDB_DeleteAllLocalNoteUpdates,
+  NotesDB_DeleteAllUnsavedNoteEdits,
   NotesDB_DeleteNote,
-  NotesDB_InsertNoteUpdate,
-  NotesDB_InsertNoteUpdateLocally,
+  NotesDB_InsertNoteEditLocally,
   NotesDB_Note,
-  NotesDB_SelectAllLocalNotesUpdates,
+  NotesDB_SelectAllLocalNotesEdits,
+  NotesDB_SelectAllNoteEdits,
   NotesDB_SelectAllNotes,
-  NotesDB_SelectAllNotesUpdates,
-  NotesDB_SelectAllNoteUpdates,
-  NotesDB_UpdateTitle,
+  NotesDB_SelectAllNotesEdits,
+  NotesDB_UpdateNoteEditId,
+  NotesDB_UpdateNoteTitle,
   NotesDB_UpsertNote,
+  NotesDB_UpsertNoteEdit,
 } from './notes.db.types';
 
 export const notesInitSql = `
@@ -25,50 +26,25 @@ create table if not exists notes (
   updated_at  INTEGER NOT NULL
 );
 
-create table if not exists notes_updates (
-  id              TEXT PRIMARY KEY,
-  note_id         TEXT NOT NULL,
-  note_update     TEXT NOT NULL
-);
-
-create table if not exists notes_updates_local (
-  id              INTEGER PRIMARY KEY AUTOINCREMENT,
-  space           TEXT NOT NULL,
-  note_id         TEXT NOT NULL,
-  note_update     TEXT NOT NULL
+create table if not exists notes_edits (
+  id              TEXT,
+  note_edit       TEXT PRIMARY KEY,
+  note_id         TEXT NOT NULL
 );
 `;
 
 export const notesWipeSql = `
 drop table if exists notes;
-drop table if exists notes_updates;
+drop table if exists notes_edits;
 `;
 
 export class NotesDB extends AbstractDataAccess<any> {
   constructor(params: DataAccessContructorParams) {
     params.name = 'notesDB';
     params.tableName = 'notes';
-    params.tableName = 'notes_updates';
+    params.tableName = 'notes_edits';
     super(params);
     this.db?.exec(notesInitSql);
-    if (params.preload) return;
-    this._onError = this._onError.bind(this);
-    this._onDbUpdate = this._onDbUpdate.bind(this);
-  }
-
-  private _onError(err: any) {
-    console.log('err!', err);
-  }
-
-  private _onDbUpdate(data: any) {
-    const type = Object.keys(data)[0];
-    console.log('_onDbUpdate', type);
-    // if (type === 'note') {
-    //   this._insertWallets({ [data.wallet.key]: data.wallet });
-    // } else if (type === 'note-update') {
-    //   this._insertTransactions([data.transaction]);
-    // }
-    // this.sendUpdate(data);
   }
 
   protected mapRow(row: any): NotesDB_Note {
@@ -95,36 +71,30 @@ export class NotesDB extends AbstractDataAccess<any> {
     return notes;
   };
 
-  selectAllNotesUpdates: NotesDB_SelectAllNotesUpdates = () => {
+  selectAllNotesEdits: NotesDB_SelectAllNotesEdits = () => {
     if (!this.db) return [];
-    const notes = this.db.prepare(`SELECT * FROM notes_updates`).all();
+    const notes = this.db.prepare(`SELECT * FROM notes_edits`).all();
 
     return notes;
   };
 
-  selectAllLocalNotesUpdates: NotesDB_SelectAllNotesUpdates = () => {
-    if (!this.db) return [];
-    const notes = this.db.prepare(`SELECT * FROM notes_updates_local`).all();
-
-    return notes;
-  };
-
-  selectAllLocalNoteUpdates: NotesDB_SelectAllLocalNotesUpdates = ({
+  selectAllUnsavedNoteEdits: NotesDB_SelectAllLocalNotesEdits = ({
     note_id,
   }) => {
     if (!this.db) return [];
 
+    // Null id means it's an unsaved edit.
     const notes = this.db
-      .prepare(`SELECT * FROM notes_updates_local WHERE note_id = ?`)
+      .prepare(`SELECT * FROM notes_edits WHERE note_id = ? AND id IS NULL`)
       .all(note_id);
 
     return notes;
   };
 
-  selectNoteUpdates: NotesDB_SelectAllNoteUpdates = ({ note_id }) => {
+  selectNoteEdits: NotesDB_SelectAllNoteEdits = ({ note_id }) => {
     if (!this.db) return [];
     const notes = this.db
-      .prepare(`SELECT * FROM notes_updates WHERE note_id = ?`)
+      .prepare(`SELECT * FROM notes_edits WHERE note_id = ?`)
       .all(note_id);
 
     return notes;
@@ -133,13 +103,12 @@ export class NotesDB extends AbstractDataAccess<any> {
   upsertNote: NotesDB_UpsertNote = ({ id, title, space, author }) => {
     if (!this.db) return -1;
 
-    // TODO: transaction-ify the title as well.
     // If the note already exists, update the title.
     const existingNote = this.db
       .prepare(`SELECT * FROM notes WHERE id = ?`)
       .get(id);
     if (existingNote) {
-      return this.updateTitle({ id, title });
+      return this.updateNoteTitle({ id, title });
     }
 
     const info = this.db
@@ -152,49 +121,56 @@ export class NotesDB extends AbstractDataAccess<any> {
     return noteId;
   };
 
-  insertNoteUpdate: NotesDB_InsertNoteUpdate = ({ id, note_id, update }) => {
+  upsertNoteEdit: NotesDB_UpsertNoteEdit = ({ note_edit, note_id, id }) => {
     if (!this.db) return -1;
 
-    // If the note update already exists, do nothing.
-    const existingNoteUpdate = this.db
-      .prepare(`SELECT * FROM notes_updates WHERE id = ?`)
-      .get(id);
-    if (existingNoteUpdate) {
-      return -1;
+    // If the note edit already exists, update the id.
+    const existingNoteEdit = this.db
+      .prepare(`SELECT * FROM notes_edits WHERE note_edit = ?`)
+      .get(note_edit);
+    if (existingNoteEdit) {
+      return this.updateNoteEditId({ note_edit, id });
     }
 
     const info = this.db
       .prepare(
-        `INSERT INTO notes_updates (id, note_id, note_update) VALUES (?, ?, ?)`
+        `INSERT INTO notes_edits (note_edit, note_id, id) VALUES (?, ?, ?)`
       )
-      .run(id, note_id, update);
+      .run(note_edit, note_id, id);
     const noteId = info.lastInsertRowid;
 
     return noteId;
   };
 
-  insertNoteUpdateLocally: NotesDB_InsertNoteUpdateLocally = ({
-    space,
+  insertNoteEditLocally: NotesDB_InsertNoteEditLocally = ({
+    note_edit,
     note_id,
-    update,
   }) => {
     if (!this.db) return -1;
 
     const info = this.db
-      .prepare(
-        `INSERT INTO notes_updates_local (space, note_id, note_update) VALUES (?, ?, ?)`
-      )
-      .run(space, note_id, update);
+      .prepare(`INSERT INTO notes_edits (note_edit, note_id) VALUES (?, ?)`)
+      .run(note_edit, note_id);
     const noteId = info.lastInsertRowid;
 
     return noteId;
   };
 
-  updateTitle: NotesDB_UpdateTitle = ({ id, title }) => {
+  updateNoteTitle: NotesDB_UpdateNoteTitle = ({ id, title }) => {
     if (!this.db) return -1;
     const info = this.db
       .prepare(`UPDATE notes SET title = ?, updated_at = ? WHERE id = ?`)
       .run(title, Date.now(), id);
+    const noteId = info.lastInsertRowid;
+
+    return noteId;
+  };
+
+  updateNoteEditId: NotesDB_UpdateNoteEditId = ({ note_edit }) => {
+    if (!this.db) return -1;
+    const info = this.db
+      .prepare(`UPDATE notes_edits SET id = ? WHERE note_edit = ?`)
+      .run(note_edit, Date.now());
     const noteId = info.lastInsertRowid;
 
     return noteId;
@@ -205,41 +181,23 @@ export class NotesDB extends AbstractDataAccess<any> {
     const notesInfo = this.db.prepare(`DELETE FROM notes WHERE id = ?`).run(id);
     const notesId = notesInfo.lastInsertRowid;
 
-    const notesUpdatesInfo = this.db
-      .prepare(`DELETE FROM notes_updates WHERE note_id = ?`)
+    const notesEditsInfo = this.db
+      .prepare(`DELETE FROM notes_edits WHERE note_id = ?`)
       .run(id);
-    const noteUpdatesId = notesUpdatesInfo.lastInsertRowid;
+    const noteEditsId = notesEditsInfo.lastInsertRowid;
 
-    return Boolean(notesId && noteUpdatesId);
+    return Boolean(notesId && noteEditsId);
   };
 
-  deleteNoteUpdate: NotesDB_DeleteNote = ({ id }) => {
-    if (!this.db) return -1;
-    const info = this.db
-      .prepare(`DELETE FROM notes_updates WHERE id = ?`)
-      .run(id);
-    const noteId = info.lastInsertRowid;
-
-    return noteId;
-  };
-
-  deleteAllLocalNotesUpdates = () => {
-    if (!this.db) return -1;
-    const info = this.db.prepare(`DELETE FROM notes_updates_local`).run();
-    const noteId = info.lastInsertRowid;
-
-    return noteId;
-  };
-
-  deleteAllLocalNoteUpdates: NotesDB_DeleteAllLocalNoteUpdates = ({
+  deleteAllUnsavedNoteEdits: NotesDB_DeleteAllUnsavedNoteEdits = ({
     note_id,
   }) => {
-    if (!this.db) return -1;
-    const info = this.db
-      .prepare(`DELETE FROM notes_updates_local WHERE note_id = ?`)
+    if (!this.db) return false;
+    const notesInfo = this.db
+      .prepare(`DELETE FROM notes_edits WHERE note_id = ? AND id IS NULL`)
       .run(note_id);
-    const noteId = info.lastInsertRowid;
+    const notesId = notesInfo.lastInsertRowid;
 
-    return noteId;
+    return Boolean(notesId);
   };
 }

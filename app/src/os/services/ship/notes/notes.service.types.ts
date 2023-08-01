@@ -8,7 +8,7 @@ export type NotesService_GetNotes_Payload = {
   space: string;
 };
 
-export type NotesService_GetNoteUpdates_Payload = {
+export type NotesService_GetNoteEdits_Payload = {
   note_id: string;
 };
 
@@ -18,10 +18,20 @@ export type NotesService_EditNoteTitle_Payload = {
   title: string;
 };
 
-export type NotesService_CreateNoteUpdate_Payload = {
+export type NotesService_CreateNoteEdit_Payload = {
+  note_id: string;
+  note_edit: string;
+  space: string;
+};
+
+export type NotesService_CreateNoteEditLocally_Payload = Omit<
+  NotesService_CreateNoteEdit_Payload,
+  'space'
+>;
+
+export type NotesService_SaveNoteUpdates_Payload = {
   note_id: string;
   space: string;
-  update: string;
 };
 
 export type NotesService_DeleteNote_Payload = {
@@ -46,9 +56,9 @@ export type BedrockRowData_Notes = {
   title: string;
 };
 
-export type BedrockRowData_NotesUpdates = {
+export type BedrockRowData_NotesEdits = {
   note_id: string;
-  update: string;
+  note_edit: string;
 };
 
 /* IPC updates */
@@ -64,19 +74,12 @@ type NotesService_IPCUpdate_CreateNote = {
   };
 };
 
-type NotesService_IPCUpdate_CreateNoteUpdate = {
-  type: 'apply-note-update';
+type NotesService_IPCUpdate_UpdateNote = {
+  type: 'update-note';
   payload: {
     id: string;
-    note_id: string;
-    update: string;
-  };
-};
-
-type NotesService_IPCUpdate_DeleteNoteUpdate = {
-  type: 'delete-note-update';
-  payload: {
-    id: string;
+    title: string;
+    updated_at: number;
   };
 };
 
@@ -87,18 +90,16 @@ type NotesService_IPCUpdate_DeleteNote = {
   };
 };
 
-type NotesService_IPCUpdate_UpdateNote = {
-  type: 'update-note';
+type NotesService_IPCUpdate_ApplyNoteEdit = {
+  type: 'apply-notes-edit';
   payload: {
-    id: string;
-    title: string;
-    updated_at: number;
+    note_id: string;
+    note_edit: string;
   };
 };
 
 export type NotesService_IPCUpdate =
   | NotesService_IPCUpdate_CreateNote
-  | NotesService_IPCUpdate_CreateNoteUpdate
-  | NotesService_IPCUpdate_DeleteNoteUpdate
   | NotesService_IPCUpdate_UpdateNote
-  | NotesService_IPCUpdate_DeleteNote;
+  | NotesService_IPCUpdate_DeleteNote
+  | NotesService_IPCUpdate_ApplyNoteEdit;

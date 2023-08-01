@@ -39,7 +39,7 @@ const EditorPresenter = () => {
     selectedAwareness,
     initializing,
     createNoteUpdateLocally,
-    persistLocalNoteUpdates,
+    saveNoteUpdates,
   } = notesStore;
 
   // Auto save the document after 3 seconds of inactivity,
@@ -47,17 +47,18 @@ const EditorPresenter = () => {
   const debouncedAutoSave = debounce(() => {
     if (!selectedNote) return;
 
-    persistLocalNoteUpdates({ note_id: selectedNote.id });
+    saveNoteUpdates({
+      note_id: selectedNote.id,
+      space: selectedNote.space,
+    });
   }, 3000 + Math.random() * 3000);
 
-  const onChange = (update: string) => {
+  const onChange = (note_edit: string) => {
     if (!selectedNote) return;
-    if (!selectedSpace) return;
 
     createNoteUpdateLocally({
+      note_edit,
       note_id: selectedNote.id,
-      space: selectedSpace.path,
-      update,
     });
 
     debouncedAutoSave();

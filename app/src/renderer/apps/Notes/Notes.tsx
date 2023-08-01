@@ -29,10 +29,10 @@ const NotesPresenter = () => {
     notesStore.loadLocalPersonalNotes({ space: `/${window.ship}/our` });
 
     // Always load notes updates.
-    notesStore.applyNotesUpdates();
+    notesStore.applyNotesEdits();
 
     // Connect to bedrock.
-    notesStore.connectToBedrock({ space: selectedSpace.path });
+    notesStore.initialize({ space: selectedSpace.path });
   }, [selectedSpace?.path]);
 
   return (
