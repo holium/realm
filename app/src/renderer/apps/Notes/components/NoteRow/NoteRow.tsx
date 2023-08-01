@@ -41,9 +41,7 @@ const NoteRowPresenter = ({
   const nickname =
     authorMetadata.nickname.length > 0 ? authorMetadata.nickname : null;
 
-  const noteRoom = roomsStore
-    .getSpaceRooms(space)
-    .find((room) => room.path === noteRowPath);
+  const noteRoom = roomsStore.getRoomByPath(noteRowPath);
   const participants = isPersonal
     ? []
     : noteRoom?.present.map((patp: string) => {

@@ -89,7 +89,7 @@ const NotesSidebarPresenter = () => {
       if (!note) return;
 
       const newRoomRid = await roomsStore.createRoom(
-        note.title,
+        `Notes: ${note.title}`,
         'public',
         noteRoomPath
       );
