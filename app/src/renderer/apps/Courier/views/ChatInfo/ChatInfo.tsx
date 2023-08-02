@@ -339,9 +339,9 @@ export const ChatInfoPresenter = ({ isStandaloneChat }: Props) => {
                       id="select-invite-permission"
                       width={120}
                       options={[
-                        { label: 'Host only', value: 'host' },
-                        { label: 'Anyone', value: 'anyone' },
-                        { label: 'Open', value: 'open' },
+                        { label: 'Host can invite', value: 'host' },
+                        { label: 'Members can invite', value: 'anyone' },
+                        { label: 'Anyone with a link can join', value: 'open' },
                       ]}
                       selected={invites}
                       onClick={(value) => {
