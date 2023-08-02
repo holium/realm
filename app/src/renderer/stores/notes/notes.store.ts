@@ -97,7 +97,6 @@ export const NotesStore = types
     initialize: flow(function* ({ space }: { space: string }) {
       self.initializing = true;
 
-      yield NotesIPC.createPublicBedrockPath({ space });
       yield NotesIPC.syncWithBedrock({ space });
       NotesIPC.subscribe({ space });
 

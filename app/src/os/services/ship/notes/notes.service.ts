@@ -3,7 +3,6 @@ import { fromUint8Array, toUint8Array } from 'js-base64';
 import * as Y from 'yjs';
 
 import type {
-  BedrockPath,
   BedrockResponse,
   BedrockSchema,
   BedrockSubscriptionUpdate,
@@ -18,7 +17,6 @@ import {
   NotesService_CreateNote_Payload,
   NotesService_CreateNoteEdit_Payload,
   NotesService_CreateNoteEditLocally_Payload,
-  NotesService_CreatePath_Payload,
   NotesService_DeleteNote_Payload,
   NotesService_EditNoteTitle_Payload,
   NotesService_GetBedrockState_Payload,
@@ -54,7 +52,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
       json: {
         create: {
           v: 0,
-          path: `${space}/notes`,
+          path: space,
           type: 'notes',
           data: createNoteData,
           schema: createNoteSchema,
@@ -71,7 +69,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         json: {
           remove: {
             id,
-            path: `${space}/notes`,
+            path: space,
             type: 'notes',
           },
         },
@@ -92,7 +90,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         json: {
           'remove-many': {
             ids: bedrockIds,
-            path: `${space}/notes`,
+            path: space,
             type: 'notes-edits',
           },
         },
@@ -124,91 +122,6 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     return this.notesDB.selectNoteEdits({ note_id });
   }
 
-  async createPublicBedrockPath({ space }: NotesService_CreatePath_Payload) {
-    // 1. Check if the `space/notes` path already exists.
-    // 2. Create it if it doesn't.
-    // 3. Make it public (which we can since we're the host).
-
-    // 1. Check if the paths already exists in bedrock-db.
-    const dbResponse = await APIConnection.getInstance().conduit.scry({
-      app: 'bedrock',
-      path: '/db',
-    });
-    if (!dbResponse) return;
-
-    const paths: BedrockPath[] = dbResponse.paths ?? [];
-    const existingPath = paths.find((o) => o.path === `${space}/notes`);
-    if (existingPath) {
-      console.info('Notes: Path already exists, skipping.');
-      return;
-    }
-
-    // 2. Create the paths.
-    try {
-      const isPersonalSpace = space.split('/our').length > 1;
-      if (isPersonalSpace) {
-        console.log('Notes: Personal space, skipping making public.');
-        await APIConnection.getInstance().conduit.poke({
-          app: 'bedrock',
-          mark: 'db-action',
-          json: {
-            'create-path': {
-              path: `${space}/notes`,
-            },
-          },
-        });
-
-        return;
-      } else {
-        await APIConnection.getInstance().conduit.poke({
-          app: 'bedrock',
-          mark: 'db-action',
-          json: {
-            'create-from-space': {
-              path: `${space}/notes`,
-              'space-path': space,
-              'space-role': 'member',
-            },
-          },
-        });
-      }
-    } catch (error) {
-      console.error('Notes: Failed to create notes path.', error);
-    }
-
-    // 3. Make notes and notes_edits tables public.
-    try {
-      const accessRules = {
-        host: {
-          create: true,
-          edit: 'table',
-          delete: 'table',
-        },
-        '': {
-          create: true,
-          edit: 'table',
-          delete: 'table',
-        },
-      };
-
-      await APIConnection.getInstance().conduit.poke({
-        app: 'bedrock',
-        mark: 'db-action',
-        json: {
-          'edit-path': {
-            path: `${space}/notes`,
-            'table-access': {
-              notes: accessRules,
-              'notes-edits': accessRules,
-            },
-          },
-        },
-      });
-    } catch (error) {
-      console.error('Notes: Failed to make notes table public.', error);
-    }
-  }
-
   async syncWithBedrock({ space }: NotesService_GetBedrockState_Payload) {
     /**
      * PHASE 1 – Sync `notes` (not using yjs yet, so we override)
@@ -228,7 +141,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     try {
       bedrockResponse = await APIConnection.getInstance().conduit.scry({
         app: 'bedrock',
-        path: `/db/path${space}/notes`,
+        path: `/db/path${space}`,
       });
     } catch (error) {
       console.error('Notes: Failed to fetch notes from Bedrock.', error);
@@ -326,7 +239,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
             id,
             'input-row': {
               v: 0,
-              path: `${space}/notes`,
+              path: space,
               type: 'notes',
               data: editNoteData,
               schema: editNoteSchema,
@@ -359,7 +272,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         json: {
           create: {
             v: 0,
-            path: `${space}/notes`,
+            path: space,
             type: 'notes-edits',
             data: createNoteUpdateData,
             schema: createNoteUpdateSchema,
@@ -438,7 +351,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
   subscribe({ space: spacePath }: NotesService_Subscribe_Payload) {
     return APIConnection.getInstance().conduit.watch({
       app: 'bedrock',
-      path: `/path${spacePath}/notes`,
+      path: `/path${spacePath}`,
       onEvent: (updates: BedrockSubscriptionUpdate[] | null) => {
         if (!updates || !updates.length) return;
 

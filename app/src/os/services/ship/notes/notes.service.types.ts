@@ -52,10 +52,6 @@ export type NotesService_Subscribe_Payload = {
   space: string;
 };
 
-export type NotesService_CreatePath_Payload = {
-  space: string;
-};
-
 export type BedrockRowData_Notes = {
   title: string;
 };
