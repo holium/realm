@@ -1,7 +1,8 @@
 import debounce from 'lodash/debounce';
 import { observer } from 'mobx-react';
 
-import { Flex, Spinner, Text } from '@holium/design-system/general';
+import { Button, Flex, Spinner, Text } from '@holium/design-system/general';
+import { useToggle } from '@holium/design-system/util';
 import { PresenceBroadcast } from '@holium/realm-presence';
 
 import { DataPacketKind } from 'renderer/apps/Rooms/store/room.types';
@@ -33,11 +34,14 @@ const EditorPresenter = () => {
   const { loggedInAccount } = useAppState();
   const { notesStore, spacesStore } = useShipStore();
 
+  const reconnecting = useToggle(false);
+
   const selectedSpace = spacesStore.selected;
   const {
     selectedNote,
     selectedAwareness,
     initializing,
+    connectingToNoteRoom,
     createNoteUpdateLocally,
     saveNoteUpdates,
   } = notesStore;
@@ -93,22 +97,69 @@ const EditorPresenter = () => {
     return null;
   }
 
-  const isPersonalNote =
-    selectedNote.space === `/${loggedInAccount.serverId}/our`;
-  const alreadyInRoom =
-    roomsStore.currentRoom?.path === selectedSpace.path + selectedNote.id;
-
-  if (initializing || (!isPersonalNote && !alreadyInRoom)) {
+  if (initializing) {
     return (
       <Flex flex={1} justifyContent="center" alignItems="center" height="100%">
         <Flex flexDirection="column" alignItems="center" gap="12px">
           <Spinner size="19px" width={2} />
-          <Text.Body opacity={0.5}>
-            {initializing ? 'Syncing updates' : 'Connecting to peers'}
-          </Text.Body>
+          <Text.Body opacity={0.5}>Syncing updates</Text.Body>
         </Flex>
       </Flex>
     );
+  }
+
+  const isSpaceNote = selectedNote.space !== `/${loggedInAccount.serverId}/our`;
+  const roomPath = selectedSpace.path + selectedNote.id;
+  const existingRoom = roomsStore.getRoomByPath(roomPath);
+
+  const onClickReconnect = async () => {
+    reconnecting.toggleOn();
+
+    await roomsStore.createRoom(
+      `Notes: ${selectedNote.title}`,
+      'public',
+      roomPath
+    );
+
+    reconnecting.toggleOff();
+  };
+
+  if (isSpaceNote && !existingRoom) {
+    if (connectingToNoteRoom) {
+      return (
+        <Flex
+          flex={1}
+          justifyContent="center"
+          alignItems="center"
+          height="100%"
+        >
+          <Flex flexDirection="column" alignItems="center" gap="12px">
+            <Spinner size="19px" width={2} />
+            <Text.Body opacity={0.5}>Connecting to peers</Text.Body>
+          </Flex>
+        </Flex>
+      );
+    } else {
+      return (
+        <Flex
+          flex={1}
+          justifyContent="center"
+          alignItems="center"
+          height="100%"
+        >
+          <Flex flexDirection="column" alignItems="center" gap="12px">
+            <Text.H5 opacity={0.5}>Room Closed</Text.H5>
+            {reconnecting.isOn ? (
+              <Spinner size="19px" width={2} />
+            ) : (
+              <Button.Primary onClick={onClickReconnect}>
+                Reconnect
+              </Button.Primary>
+            )}
+          </Flex>
+        </Flex>
+      );
+    }
   }
 
   return (

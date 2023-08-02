@@ -35,6 +35,7 @@ export const NotesStore = types
     searchQuery: types.optional(types.string, ''),
     saving: types.optional(types.boolean, false),
     initializing: types.optional(types.boolean, false),
+    connectingToNoteRoom: types.optional(types.boolean, false),
   })
   .volatile(() => ({
     awarenesses: new Map<string, Awareness>(),
@@ -260,6 +261,10 @@ export const NotesStore = types
       self.searchQuery = query;
     },
 
+    setConnectingToNoteRoom: (connecting: boolean) => {
+      self.connectingToNoteRoom = connecting;
+    },
+
     applyBroadcastedYdocUpdate(from: string, edit: string) {
       if (!self.selectedNoteId) return;
 
@@ -352,6 +357,7 @@ export const notesStore = NotesStore.create({
   selectedNoteId: null,
   saving: false,
   initializing: false,
+  connectingToNoteRoom: false,
 });
 
 // -------------------------------

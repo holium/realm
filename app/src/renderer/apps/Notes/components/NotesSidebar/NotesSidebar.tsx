@@ -33,6 +33,7 @@ const NotesSidebarPresenter = () => {
     searchQuery,
     searchedNotes,
     initializing,
+    setConnectingToNoteRoom,
     setSelectedNoteId,
     setSearchquery,
     getNotePreview,
@@ -74,6 +75,8 @@ const NotesSidebarPresenter = () => {
       roomsStore.currentRoom && roomsStore.currentRoom?.path === noteRoomPath;
     if (areWeAlreadyInTheRoom) return;
 
+    setConnectingToNoteRoom(true);
+
     // DELETE/LEAVE CURRENT ROOM
     roomsStore.cleanUpCurrentRoom();
 
@@ -95,6 +98,8 @@ const NotesSidebarPresenter = () => {
       );
       await roomsStore.joinRoom(newRoomRid);
     }
+
+    setConnectingToNoteRoom(false);
 
     // In Notes rooms everyone should be muted by default.
     roomsStore.ourPeer.mute();
