@@ -158,7 +158,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
 
       this.notesDB?.upsertNote({
         id: note.id,
-        space: note.path.split('/notes')[0],
+        space: note.path,
         author: note.creator,
         title: rowData.title,
       });
@@ -168,7 +168,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
           id: note.id,
           title: note.data.title,
           author: note.creator,
-          space: note.path.split('/notes')[0],
+          space: note.path,
           created_at: note['created-at'],
           updated_at: note['updated-at'],
         },
@@ -365,7 +365,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
               // Update SQLite.
               this.notesDB.upsertNote({
                 id: update.row.id,
-                space: update.row.path.split('/notes')[0],
+                space: update.row.path,
                 author: update.row.creator,
                 title: rowData.title,
               });
@@ -374,7 +374,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
                 type: 'create-note',
                 payload: {
                   id: update.row.id,
-                  space: update.row.path.split('/notes')[0],
+                  space: update.row.path,
                   author: update.row.creator,
                   title: rowData.title,
                   created_at: update.row['created-at'],
