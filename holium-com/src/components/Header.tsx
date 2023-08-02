@@ -4,6 +4,7 @@ import { Button, Text } from '@holium/design-system/general';
 
 import { Holium } from '../../public/Holium';
 import { LOGIN_HREF } from '../consts';
+import { ConnectWalletButton } from './ConnectWalletButton';
 import {
   HeaderContainer,
   HeaderCTAs,
@@ -48,10 +49,11 @@ export const Header = () => {
         <UnstyledNextLink href={LOGIN_HREF}>
           <Button.Secondary>
             <Text.Body color="text" fontWeight={500}>
-              Login
+              Login with Email
             </Text.Body>
           </Button.Secondary>
         </UnstyledNextLink>
+        <ConnectWalletButton />
       </HeaderCTAs>
     </HeaderContainer>
   );
