@@ -66,6 +66,7 @@ export type NotesDB_InsertNoteEditLocally = (payload: {
 
 export type NotesDB_DeleteNote = (payload: { id: string }) => boolean;
 
-export type NotesDB_DeleteAllUnsavedNoteEdits = (payload: {
+export type NotesDB_ReplaceUnsavedNoteEditsWithOne = (payload: {
+  note_edit: string;
   note_id: string;
 }) => boolean;

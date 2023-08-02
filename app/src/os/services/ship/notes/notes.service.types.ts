@@ -29,7 +29,11 @@ export type NotesService_CreateNoteEditLocally_Payload = Omit<
   'space'
 >;
 
-export type NotesService_SaveNoteUpdates_Payload = {
+export type NotesService_MergeUnsavedNoteEdits_Payload = {
+  note_id: string;
+};
+
+export type NotesService_SaveNoteEdits_Payload = {
   note_id: string;
   space: string;
 };

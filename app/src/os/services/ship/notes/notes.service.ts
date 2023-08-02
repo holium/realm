@@ -25,7 +25,8 @@ import {
   NotesService_GetNoteEdits_Payload,
   NotesService_GetNotes_Payload,
   NotesService_IPCUpdate,
-  NotesService_SaveNoteUpdates_Payload,
+  NotesService_MergeUnsavedNoteEdits_Payload,
+  NotesService_SaveNoteEdits_Payload,
   NotesService_Subscribe_Payload,
 } from './notes.service.types';
 
@@ -215,8 +216,9 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
      * 2. Upsert notes in SQLite.
      * 3. Delete notes rows that are no longer in Bedrock.
      * PHASE 2 – Sync `notes_edits` (using yjs for CRDT)
-     * 4. Get all notes_edits from Bedrock.
-     * 5. Insert all missing notes updates rows in SQLite.
+     * 4. Merge all unsaved note edits.
+     * 5. Get all notes_edits from Bedrock.
+     * 6. Insert all missing notes updates rows in SQLite.
      */
 
     if (!this.notesDB) return;
@@ -277,13 +279,21 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
       }
     });
 
-    // 4. Get all notes updates from Bedrock.
+    // 4. Merge all unsaved note edits.
+    // We don't save the merged unsaved edits until the user edits the note.
+    this.notesDB.selectAllNotes({ space }).forEach((note) => {
+      this.mergeUnsavedNoteEdits({
+        note_id: note.id,
+      });
+    });
+
+    // 5. Get all notes updates from Bedrock.
     const notesEditsTable = bedrockResponse.tables.find(
       (o) => o.type === 'notes-edits'
     );
     if (!notesEditsTable) return;
 
-    // 5. Upsert all missing notes updates in SQLite.
+    // 6. Upsert all missing notes updates in SQLite.
     const notesEditsTableRows = notesEditsTable.rows ?? [];
     notesEditsTableRows.forEach((noteEdit) => {
       const rowData: BedrockRowData_NotesEdits = noteEdit.data;
@@ -375,41 +385,54 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     });
   }
 
-  async saveNoteUpdates({
+  mergeUnsavedNoteEdits({
     note_id,
-    space,
-  }: NotesService_SaveNoteUpdates_Payload) {
+  }: NotesService_MergeUnsavedNoteEdits_Payload) {
     if (!this.notesDB) return;
 
     const unsavedNoteEdits = this.notesDB.selectAllUnsavedNoteEdits({
       note_id,
     });
-    if (!unsavedNoteEdits.length) return;
+    if (unsavedNoteEdits.length < 2) return null;
 
-    // Merge yjs updates into one before sending to Bedrock.
+    // Merge yjs updates into one.
     const edits = unsavedNoteEdits.map((o) => {
       return toUint8Array(o.note_edit);
     });
     const mergedNoteEdits = edits.reduce((acc, curr) => {
       return Y.mergeUpdates([acc, curr]);
     });
+    const mergedNoteEdit = fromUint8Array(mergedNoteEdits);
 
-    // Send merged updates to Bedrock.
+    // Merge unsaved note edits.
+    const result = this.notesDB.replaceUnsavedNoteEditsWithOne({
+      note_edit: mergedNoteEdit,
+      note_id,
+    });
+
+    return result ? mergedNoteEdit : null;
+  }
+
+  async saveNoteUpdates({
+    note_id,
+    space,
+  }: NotesService_SaveNoteEdits_Payload) {
+    if (!this.notesDB) return;
+
+    // Merge unsaved note edits.
+    const note_edit = this.mergeUnsavedNoteEdits({
+      note_id,
+    });
+    if (!note_edit) return false;
+
+    // Send merged note_edit to Bedrock.
     const response = await this.createNoteUpdate({
-      note_edit: fromUint8Array(mergedNoteEdits),
+      note_edit,
       note_id,
       space,
     });
 
-    if (response) {
-      // TODO: make this into one transaction.
-      // Delete local unsaved edits that will be replaced by the merged update.
-      this.notesDB.deleteAllUnsavedNoteEdits({ note_id });
-
-      return true;
-    } else {
-      return false;
-    }
+    return Boolean(response);
   }
 
   subscribe({ space: spacePath }: NotesService_Subscribe_Payload) {

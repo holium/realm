@@ -2,10 +2,10 @@ import AbstractDataAccess, {
   DataAccessContructorParams,
 } from '../../abstract.db';
 import {
-  NotesDB_DeleteAllUnsavedNoteEdits,
   NotesDB_DeleteNote,
   NotesDB_InsertNoteEditLocally,
   NotesDB_Note,
+  NotesDB_ReplaceUnsavedNoteEditsWithOne,
   NotesDB_SelectAllLocalNotesEdits,
   NotesDB_SelectAllNoteEdits,
   NotesDB_SelectAllNotes,
@@ -90,7 +90,7 @@ export class NotesDB extends AbstractDataAccess<any> {
       .prepare(`SELECT * FROM notes_edits WHERE note_id = ? AND id IS NULL`)
       .all(note_id);
 
-    return notes;
+    return notes ?? [];
   };
 
   selectNoteEdits: NotesDB_SelectAllNoteEdits = ({ note_id }) => {
@@ -134,6 +134,7 @@ export class NotesDB extends AbstractDataAccess<any> {
       return this.updateNoteEditId({ note_edit, note_id, id });
     }
 
+    // Otherwise, insert a new note edit.
     const info = this.db
       .prepare(
         `INSERT INTO notes_edits (note_edit, note_id, id) VALUES (?, ?, ?)`
@@ -201,15 +202,25 @@ export class NotesDB extends AbstractDataAccess<any> {
     return Boolean(notesId && noteEditsId);
   };
 
-  deleteAllUnsavedNoteEdits: NotesDB_DeleteAllUnsavedNoteEdits = ({
+  replaceUnsavedNoteEditsWithOne: NotesDB_ReplaceUnsavedNoteEditsWithOne = ({
+    note_edit,
     note_id,
   }) => {
     if (!this.db) return false;
-    const notesInfo = this.db
-      .prepare(`DELETE FROM notes_edits WHERE note_id = ? AND id IS NULL`)
-      .run(note_id);
-    const notesId = notesInfo.lastInsertRowid;
 
-    return Boolean(notesId);
+    const info = this.db.transaction(() => {
+      if (!this.db) return false;
+
+      const res1 = this.db
+        .prepare(`DELETE FROM notes_edits WHERE note_id = ? AND id IS NULL`)
+        .run(note_id);
+      const res2 = this.db
+        .prepare(`INSERT INTO notes_edits (note_edit, note_id) VALUES (?, ?)`)
+        .run(note_edit, note_id);
+
+      return Boolean(res1 && res2);
+    })();
+
+    return info;
   };
 }
