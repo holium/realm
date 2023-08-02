@@ -27,7 +27,7 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
   const { loggedInAccount, theme } = useAppState();
   const { dimensions, innerNavigation } = useTrayApps();
   const { notifStore, friends, chatStore, spacesStore } = useShipStore();
-  const { selectedChat } = chatStore;
+  const { selectedChat, inbox } = chatStore;
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
 
@@ -107,7 +107,7 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
     if (!selectedChat) return;
     const measuredFrags = await Promise.all(
       fragments.map(async (frag) => {
-        let metadata: object | string = {};
+        let metadata: { [key: string]: string } = {};
         if (Object.keys(frag)[0] === 'image') {
           const { width, height } = await measureImage(
             frag.image,
@@ -144,9 +144,19 @@ export const ChatLogPresenter = ({ isStandaloneChat = false }: Props) => {
             const match = spacesStore.getSpaceByPath(
               cust.value.replace(/^\/spaces/, '')
             );
-            metadata = {
-              space: match && JSON.stringify(match),
-            };
+            if (match) {
+              metadata = {
+                space: JSON.stringify(match),
+              };
+            }
+          }
+          if (cust.name === 'realm-chat') {
+            const match = inbox.find((i) => i.path === cust.value);
+            if (match) {
+              metadata = {
+                chat: JSON.stringify(match),
+              };
+            }
           }
         }
         return {
