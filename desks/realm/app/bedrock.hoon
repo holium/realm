@@ -393,7 +393,6 @@
                     state
                   $(index +(index), state (process-db-change:db dbpath change state bowl), result-cards (weld (weld result-cards new-scry) pokes))
               %db-path
-                ~&  %here
                 =/  full=fullpath   !<(fullpath +.+.sign)
                 :: insert pathrow
                 =.  received-at.path-row.full  now.bowl
