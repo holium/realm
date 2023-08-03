@@ -487,6 +487,7 @@
       =/  pr   (snag index prs)
       =/  prole  role:(need space.pr)
       ?:  ?|  =(prole %member)
+              =(prole %initiate)
               ?&  =(prole %admin)
                   |(=(max-role %host) =(max-role %admin))
               ==
@@ -498,7 +499,7 @@
         =/  new  (add-peer [path.pr ship max-role] +.cs bowl)
         $(index +(index), cs [(weld -.cs -.new) +.new])
       :: else, move on
-      $(index +(index))
+      $(index +(index), cs cs)
   ::
   ++  on-kicked
     |=  [path=space-path:sstore =ship]
