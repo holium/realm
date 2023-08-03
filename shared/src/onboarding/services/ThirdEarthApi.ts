@@ -513,4 +513,20 @@ export class ThirdEarthApi {
       headers: this.getHeaders(),
     });
   }
+
+  /* SIWE */
+  getNonce() {
+    return http<{ nonce: string }>(`${this.apiBaseUrl}/siwe/nonce`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+  }
+
+  verifyMessage(message: string, signature: string) {
+    return http<{ valid: boolean }>(`${this.apiBaseUrl}/siwe/regin`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ message, signature }),
+    });
+  }
 }
