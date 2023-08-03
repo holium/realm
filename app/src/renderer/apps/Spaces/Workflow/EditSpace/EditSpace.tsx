@@ -27,14 +27,14 @@ const EditSpacePresenter = ({ edit, workflowState, setState }: Props) => {
   if (existingSpace) {
     initialValues = {
       ...initialValues,
-      path: existingSpace?.path,
-      name: existingSpace?.name || '',
-      description: existingSpace?.description || '',
-      color: existingSpace?.color || '#000000',
-      picture: existingSpace?.picture || '',
-      access: (existingSpace?.access as AccessOptionType) || 'public',
-      crestOption: existingSpace?.picture ? 'image' : 'color',
-      theme: toJS(existingSpace?.theme),
+      path: existingSpace.path,
+      name: existingSpace.name || '',
+      description: existingSpace.description || '',
+      color: existingSpace.color || '#000000',
+      picture: existingSpace.picture || '',
+      access: (existingSpace.access as AccessOptionType) || 'public',
+      crestOption: existingSpace.picture ? 'image' : 'color',
+      theme: toJS(existingSpace.theme),
     };
   }
 

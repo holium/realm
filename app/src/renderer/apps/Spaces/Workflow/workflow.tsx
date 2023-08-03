@@ -158,7 +158,6 @@ export const spacesDialogs: DialogRenderers = {
     hasPrevious: () => true,
     nextButtonText: 'Create Space',
     onNext: (_evt: any, state: any, setState: any) => {
-      console.log('state', state);
       setState({
         ...state,
         loading: true,
