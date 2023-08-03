@@ -11,22 +11,22 @@
   =/  groups  .^(groups:g %gx /(scot %p our)/groups/(scot %da now)/groups/groups)
   ::  find ours
   =/  hosted
-    ^-  (list [f=flag:g g=group:g])
+    ^-  (list [f=flag:g g=group-ui:g])
     %+  skim  ~(tap by groups)
-      |=  [f=flag:g g=group:g]
+      |=  [f=flag:g g=group-ui:g]
       =(our -.f)
   ::  get metadata for each
   %+  turn  hosted
-    |=  [=flag:g =group:g]
+    |=  [=flag:g =group-ui:g]
     ^-  group-space
     =/  access
-      ?:  =(-.cordon.group %open)
+      ?:  =(-.cordon.group-ui %open)
         %public
       %private
-    =/  metadata  meta.group
+    =/  metadata  meta.group-ui
     ::  Get group data
     =/  member-count=@u
-      (lent ~(tap by fleet.group))
+      (lent ~(tap by fleet.group-ui))
     ::  Get metadata
     =/  title=@t     title.metadata
     =/  image=@t     image.metadata
@@ -43,7 +43,7 @@
 ::
 ++  get-group
   |=  [rid=[entity=ship name=@tas] our=ship now=@da]
-  ^-  group:g
+  ^-  group-ui:g
   =/  groups  .^(groups:g %gx /(scot %p our)/groups/(scot %da now)/groups/groups)
   (~(got by groups) rid)
 ::
