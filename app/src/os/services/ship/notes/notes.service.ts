@@ -422,7 +422,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
             // Delete responses that have a different structure.
             if (!update.id) return;
 
-            if (update.row?.type === 'notes') {
+            if (update.type === 'notes') {
               // Update SQLite.
               this.notesDB.deleteNote({ id: update.id });
               // Update MobX.
