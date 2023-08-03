@@ -159,6 +159,7 @@ export class Conduit extends EventEmitter {
       this.sse = new EventSource(channelUrl, {
         headers: { Cookie: this.cookie },
       });
+
       this.sse.onopen = (response) => {
         if (response.type === 'open') {
           this.updateStatus(ConduitState.Connected);

@@ -44,7 +44,6 @@ export class ChatService extends AbstractService<ChatUpdateTypes> {
         },
       },
     };
-    console.log(JSON.stringify(payload));
     await APIConnection.getInstance().conduit.poke(payload);
     return {
       path,
