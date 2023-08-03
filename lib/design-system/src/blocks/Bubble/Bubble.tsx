@@ -46,7 +46,9 @@ export type BubbleProps = {
   onReaction?: (payload: OnReactionPayload) => void;
   onReplyClick?: (msgId: string) => void;
   onJoinSpaceClick?: (spacePath: string) => void;
+  onJoinChatClick?: (spacePath: string, host?: string) => void;
   allSpacePaths?: string[];
+  allChatPaths?: string[];
   error?: string;
   forwardedFrom?: string;
 } & BoxProps;
@@ -75,6 +77,8 @@ export const Bubble = ({
   onReplyClick,
   onJoinSpaceClick,
   allSpacePaths,
+  allChatPaths,
+  onJoinChatClick,
   error,
   forwardedFrom,
 }: BubbleProps) => {
@@ -151,9 +155,12 @@ export const Bubble = ({
             fragment,
             index,
             author,
+            ourShip || '',
             onReplyClick,
             onJoinSpaceClick,
-            allSpacePaths
+            allSpacePaths,
+            onJoinChatClick,
+            allChatPaths
           )}
           {nextLineBreak}
         </span>

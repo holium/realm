@@ -56,9 +56,12 @@ export const renderFragment = (
   fragment: FragmentType,
   index: number,
   author: string,
+  ourShip: string,
   onReplyClick?: (id: string) => void,
   onJoinSpaceClick?: (path: string) => void,
-  allSpacePaths?: string[]
+  allSpacePaths?: string[],
+  onJoinChatClick?: (path: string, host?: string) => void,
+  allChatPaths?: string[]
 ) => {
   const key = Object.keys(fragment)[0] as FragmentKey;
   switch (key) {
@@ -221,7 +224,7 @@ export const renderFragment = (
       } else if (fragmentType === 'image') {
         // take out precalculated height and width
         (msg as FragmentImageType).metadata = {};
-        replyContent = renderFragment(id, msg, index, replyAuthor);
+        replyContent = renderFragment(id, msg, index, replyAuthor, ourShip);
       }
 
       return (
@@ -303,7 +306,6 @@ export const renderFragment = (
               />
             );
           } else {
-            console.log(cust);
             return (
               <SpaceBlock
                 id={id}
@@ -313,6 +315,38 @@ export const renderFragment = (
                 onClick={onJoinSpaceClick}
                 hasJoined={false}
               />
+            );
+          }
+        }
+        case 'realm-chat': {
+          const mtd = (fragment as FragmentCustomType).metadata;
+          const chat: any = mtd && mtd.chat && JSON.parse(mtd.chat);
+          if (chat) {
+            return (
+              <SpaceBlock
+                id={id}
+                mt={1}
+                name={chat.metadata?.title}
+                members={chat.peers?.length || 0}
+                url={cust.value}
+                image={chat.metadata?.image}
+                host={
+                  chat.peers?.find(
+                    (p: { role: string; ship: string }) => p.role === 'host'
+                  )?.ship
+                }
+                onClick={onJoinChatClick}
+                hasJoined={
+                  !!allChatPaths?.find((p: string) => p === cust.value)
+                }
+                minWidth={320}
+              />
+            );
+          } else {
+            return (
+              <FragmentPlain id={id} key={index}>
+                {cust.value}
+              </FragmentPlain>
             );
           }
         }

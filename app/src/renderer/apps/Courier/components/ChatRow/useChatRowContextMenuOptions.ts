@@ -11,6 +11,7 @@ type Props = {
   isMuted: boolean;
   isAdmin: boolean;
   isSpaceChat: boolean;
+  isOpenChat: boolean;
   chatRowId: string;
   loggedInAccount: MobXAccount | undefined;
   togglePinned: (path: string, isPinned: boolean) => void;
@@ -31,6 +32,7 @@ export const useChatRowContextMenuOptions = ({
   isMuted,
   isAdmin,
   isSpaceChat,
+  isOpenChat,
   chatRowId,
   loggedInAccount,
   togglePinned,
@@ -85,6 +87,17 @@ export const useChatRowContextMenuOptions = ({
         toggleMuted(path, !isMuted);
       },
     });
+    if (isOpenChat) {
+      menu.push({
+        id: `${chatRowId}-chat-link`,
+        icon: 'Copy',
+        label: 'Copy chat link',
+        onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
+          evt.stopPropagation();
+          navigator.clipboard.writeText(path);
+        },
+      });
+    }
     if (!isSpaceChat) {
       menu.push({
         id: `${chatRowId}-leave-chat`,
@@ -111,6 +124,7 @@ export const useChatRowContextMenuOptions = ({
     isMuted,
     isAdmin,
     isSpaceChat,
+    isOpenChat,
     chatRowId,
     loggedInAccount,
     togglePinned,

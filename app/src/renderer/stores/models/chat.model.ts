@@ -94,7 +94,7 @@ const ChatFragment = types.union(
 );
 export type ChatFragmentMobxType = Instance<typeof ChatFragment>;
 
-const InvitePermission = types.enumeration(['host', 'anyone']);
+const InvitePermission = types.enumeration(['host', 'anyone', 'open']);
 export type InvitePermissionType = Instance<typeof InvitePermission>;
 
 const PeerModel = types.model('PeerModel', {

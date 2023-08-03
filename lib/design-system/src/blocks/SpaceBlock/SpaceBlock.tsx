@@ -9,8 +9,9 @@ type SpaceBlockProps = {
   members: number;
   url: string;
   hasJoined: boolean;
+  host?: string;
   image?: string;
-  onClick?: (path: string) => void;
+  onClick?: (path: string, host?: string) => void;
 } & BlockProps;
 
 export const SpaceBlock = ({
@@ -20,6 +21,7 @@ export const SpaceBlock = ({
   hasJoined,
   image,
   id,
+  host,
   onClick,
   ...rest
 }: SpaceBlockProps) => {
@@ -58,7 +60,7 @@ export const SpaceBlock = ({
             e.stopPropagation();
             e.preventDefault();
             try {
-              onClick && onClick(url);
+              onClick && onClick(url, host);
             } catch (e) {
               setError((e as any).message as string);
             }

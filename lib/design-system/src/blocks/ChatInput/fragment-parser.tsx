@@ -12,6 +12,7 @@ import {
 
 type ParserKey =
   | 'space'
+  | 'realm-chat'
   | 'bold'
   | 'italics'
   | 'strike'
@@ -87,6 +88,12 @@ const parserRules: ParserRules = {
     recurse: false,
     custom: true,
     priority: 2.5,
+  },
+  'realm-chat': {
+    regex: /\/realm-chat\/0v[a-zA-Z0-9.]+/,
+    recurse: false,
+    custom: true,
+    priority: 2.6,
   },
   image: {
     regex:
@@ -386,7 +393,8 @@ export const convertFragmentsToPreview = (
         } else if (
           TEXT_TYPES.includes(type) ||
           type === 'link' ||
-          type === 'space'
+          type === 'space' ||
+          type === 'realm-chat'
         ) {
           return <span key={`${chatid}-lastMessage-${idx}`}>{value}</span>;
         } else {
