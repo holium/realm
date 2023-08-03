@@ -48,7 +48,6 @@ export class Conduit extends EventEmitter {
   uid: string = this.generateUID();
   private code: string | undefined = undefined;
   private sse: EventSource | undefined;
-  private ws: WebSocket | undefined;
 
   constructor(patp: string) {
     super();
@@ -157,25 +156,6 @@ export class Conduit extends EventEmitter {
     this.updateStatus(ConduitState.Initialized);
 
     return new Promise((resolve, reject) => {
-      try {
-        console.log('ws: opening web socket...');
-        this.ws = new WebSocket('ws://localhost:3030/ws');
-        this.ws.onopen = (_event) => {
-          window.onunload = () => {
-            console.log('closing web socket...');
-            this.ws?.close();
-          };
-          console.log('ws: [onopen] web socket opened');
-        };
-        this.ws.onmessage = (event) => {
-          console.log('ws: [onmessage] => %o', event);
-        };
-        this.ws.onclose = (_event) => {
-          console.log('ws: [onclose] web socket closed');
-        };
-      } catch (e) {
-        console.log('ws: error %o', e);
-      }
       this.sse = new EventSource(channelUrl, {
         headers: { Cookie: this.cookie },
       });
@@ -643,11 +623,6 @@ export class Conduit extends EventEmitter {
   private async postToChannel(body: Message): Promise<boolean> {
     try {
       if (!this.headers.Cookie) throw new Error('headers.Cookie not set');
-
-      if (this.ws && body) {
-        this.ws.send(JSON.stringify([body]));
-        return true;
-      }
 
       const response = await this.safeFetch(this.channelUrl(this.uid), {
         headers: {
