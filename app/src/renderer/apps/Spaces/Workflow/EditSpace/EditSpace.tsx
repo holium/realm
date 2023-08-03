@@ -20,17 +20,23 @@ const EditSpacePresenter = ({ edit, workflowState, setState }: Props) => {
 
   const existingSpace = spacesStore.spaces.get(edit?.space);
 
-  const initialValues: SpaceWorkFlowState = {
+  let initialValues: SpaceWorkFlowState = {
     ...workflowState,
-    path: existingSpace?.path,
-    name: existingSpace?.name || '',
-    description: existingSpace?.description || '',
-    color: existingSpace?.color || '#000000',
-    picture: existingSpace?.picture || '',
-    access: (existingSpace?.access as AccessOptionType) || 'public',
-    crestOption: existingSpace?.picture ? 'image' : 'color',
-    theme: toJS(existingSpace?.theme),
   };
+
+  if (existingSpace) {
+    initialValues = {
+      ...initialValues,
+      path: existingSpace.path,
+      name: existingSpace.name || '',
+      description: existingSpace.description || '',
+      color: existingSpace.color || '#000000',
+      picture: existingSpace.picture || '',
+      access: (existingSpace.access as AccessOptionType) || 'public',
+      crestOption: existingSpace.picture ? 'image' : 'color',
+      theme: toJS(existingSpace.theme),
+    };
+  }
 
   const updateState = (state: Partial<SpaceWorkFlowState>) => {
     setState?.({ ...workflowState, ...state });
