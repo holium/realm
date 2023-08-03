@@ -39,9 +39,19 @@ export type NotesStore_EditNoteTitle = {
 };
 
 export type NotesStore_CreateNoteUpdate = {
+  note_edit: string;
   note_id: string;
   space: string;
-  update: string;
+};
+
+export type NotesStore_CreateNoteUpdateLocally = Omit<
+  NotesStore_CreateNoteUpdate,
+  'space'
+>;
+
+export type NotesStore_SaveLocalNoteUpdates = {
+  note_id: string;
+  space: string;
 };
 
 /* notes.store.ts Private Methods */
@@ -49,9 +59,9 @@ export type NotesStore_InsertNoteLocally = {
   note: NotesStore_Note;
 };
 
-export type NotesStore_ApplyNoteUpdate = {
+export type NotesStore_ApplyNoteEditLocally = {
   note_id: string;
-  update: string;
+  note_edit: string;
 };
 
 export type NotesStore_UpdateNoteLocally = {

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
@@ -5,7 +6,6 @@ import { TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
 
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
-import { useSound } from 'renderer/lib/sound';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -25,7 +25,6 @@ const NotesSidebarPresenter = () => {
   const { loggedInAccount } = useAppState();
   const { notesStore, spacesStore } = useShipStore();
   const roomsStore = useRoomsStore();
-  const sound = useSound();
 
   const {
     sortedPersonalNotes,
@@ -34,6 +33,7 @@ const NotesSidebarPresenter = () => {
     searchQuery,
     searchedNotes,
     initializing,
+    setConnectingToNoteRoom,
     setSelectedNoteId,
     setSearchquery,
     getNotePreview,
@@ -42,6 +42,13 @@ const NotesSidebarPresenter = () => {
   const selectedSpace = spacesStore.selected;
 
   const creating = useToggle(false);
+
+  useEffect(() => {
+    return () => {
+      // Leave current room on unmount.
+      roomsStore.cleanUpCurrentRoom();
+    };
+  }, []);
 
   if (!selectedSpace) return null;
 
@@ -68,6 +75,8 @@ const NotesSidebarPresenter = () => {
       roomsStore.currentRoom && roomsStore.currentRoom?.path === noteRoomPath;
     if (areWeAlreadyInTheRoom) return;
 
+    setConnectingToNoteRoom(true);
+
     // DELETE/LEAVE CURRENT ROOM
     roomsStore.cleanUpCurrentRoom();
 
@@ -83,13 +92,14 @@ const NotesSidebarPresenter = () => {
       if (!note) return;
 
       const newRoomRid = await roomsStore.createRoom(
-        note.title,
+        `Notes: ${note.title}`,
         'public',
         noteRoomPath
       );
       await roomsStore.joinRoom(newRoomRid);
     }
-    sound.playRoomEnter();
+
+    setConnectingToNoteRoom(false);
 
     // In Notes rooms everyone should be muted by default.
     roomsStore.ourPeer.mute();

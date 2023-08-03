@@ -101,7 +101,7 @@ export class MembersDB extends AbstractDataAccess<Member, any> {
     path: string,
     patp: string,
     values: Partial<Member>
-  ): Member {
+  ): Member | null {
     if (values.roles) values.roles = JSON.stringify(values.roles);
     const setClause = Object.keys(values)
       .map((key) => `${key} = ?`)
@@ -110,7 +110,10 @@ export class MembersDB extends AbstractDataAccess<Member, any> {
     const stmt = this.prepare(query);
     stmt.run([...Object.values(values), path, patp]);
     const updated = this.getMember(path, patp);
-    if (!updated) throw new Error('Failed to update record');
+    if (!updated) {
+      console.error('Failed to update record');
+      return null;
+    }
     return updated;
   }
 

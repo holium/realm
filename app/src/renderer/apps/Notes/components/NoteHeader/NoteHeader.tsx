@@ -14,7 +14,7 @@ const NoteHeaderPresenter = () => {
 
   if (!selectedNote) return null;
 
-  const noteUpdatedAtString = new Date(selectedNote.updated_at).toLocaleString(
+  const noteEditedAtString = new Date(selectedNote.updated_at).toLocaleString(
     'en-US',
     {
       day: 'numeric',
@@ -62,8 +62,10 @@ const NoteHeaderPresenter = () => {
   return (
     <NoteHeaderView
       author={selectedNote.author}
-      noteUpdatedAtString={noteUpdatedAtString}
-      contextMenuOptions={contextMenuOptions}
+      noteEditedAtString={noteEditedAtString}
+      contextMenuOptions={
+        selectedNote.author === window.ship ? contextMenuOptions : []
+      }
       saving={saving}
       title={selectedNote.title}
       onChange={onChangeTitle}
