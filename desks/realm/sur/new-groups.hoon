@@ -3,6 +3,14 @@
 /-  grp=group-store
 /-  metadata-store
 |%
+++  okay  `epic:e`2
+++  mar
+  |%
+  ++  act  `mark`(rap 3 %group-action '-' (scot %ud okay) ~)
+  ++  upd  `mark`(rap 3 %group-update '-' (scot %ud okay) ~)
+  ++  log  `mark`(rap 3 %group-log '-' (scot %ud okay) ~)
+  ++  int  `mark`(rap 3 %group-init '-' (scot %ud okay) ~)
+  --
 ::  $flag: ID for a group
 ::
 +$  flag  (pair ship term)
@@ -17,7 +25,7 @@
 ::
 ::  $zone: channel grouping
 ::
-::    includes its own metadata for display and keeps the order of 
+::    includes its own metadata for display and keeps the order of
 ::    channels within.
 ::
 ::    zone: the term that represents the ID of a zone
@@ -28,7 +36,7 @@
 ::      %edit: modify the zone metadata
 ::      %mov: reorders the zone in the group
 ::      %mov-nest: reorders a channel within the zone
-::  
+::
 ++  zone
   =<  zone
   |%
@@ -42,7 +50,7 @@
     $%  [%add meta=data:meta]
         [%del ~]
         [%edit meta=data:meta]
-        [%mov idx=@ud]            
+        [%mov idx=@ud]
         [%mov-nest =nest idx=@ud]
     ==
   --
@@ -98,7 +106,7 @@
     ==
   ::
   ::  $diff: represents the set of actions you can take on a channel
-  ::  
+  ::
   ::    add: create a channel
   ::    edit: edit a channel
   ::    del: delete a channel
@@ -112,7 +120,7 @@
         [%edit =channel]
         [%del ~]
       ::
-        [%add-sects sects=(set sect)]   
+        [%add-sects sects=(set sect)]
         [%del-sects sects=(set sect)]
       ::
         [%zone =zone]
@@ -139,6 +147,7 @@
       meta=data:meta
   ==
 ::
++$  group-ui  [group saga=(unit saga:e)]
 ::  $cabal: metadata representing a $sect or role
 ::
 ++  cabal
@@ -266,7 +275,7 @@
   $:  name=term
       title=cord
       description=cord
-      image=cord  
+      image=cord
       cover=cord
       =cordon
       members=(jug ship sect)
@@ -275,8 +284,9 @@
 ::
 +$  init  [=time =group]
 ::
+::  $groups: map for frontend to display groups
 +$  groups
-  (map flag group)
+  (map flag group-ui)
 +$  net-groups
   (map flag [net group])
 ::
@@ -307,7 +317,7 @@
 ::
 +$  knock  flag
 ::
-::  $progress: the state of a group join 
+::  $progress: the state of a group join
 ::
 +$  progress
   ?(%knocking %adding %watching %done %error)
@@ -321,7 +331,7 @@
 ::
 ::  $preview: the metadata and entry policy for a group
 ::
-+$  preview  
++$  preview
   $:  =flag
       meta=data:meta
       =cordon
