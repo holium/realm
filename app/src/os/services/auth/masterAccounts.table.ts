@@ -37,8 +37,7 @@ export const masterAccountsInitSql = `
     email           TEXT NOT NULL,
     encryptionKey   TEXT NOT NULL,
     passwordHash    TEXT NOT NULL,
-    authToken       TEXT,
-    clientEncryptionKey TEXT
+    authToken       TEXT
   );
   create unique index if not exists master_email_uindex on master_accounts (email);
 `;
