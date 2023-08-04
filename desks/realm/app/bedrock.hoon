@@ -30,6 +30,7 @@
   %-  agent:dbug
   |_  =bowl:gall
   +*  this  .
+      core   ~(. +> [bowl ~])
   ::
   ++  on-init
     ^-  (quip card _this)
@@ -40,6 +41,7 @@
     =/  default-cards
       :~  [%pass /spaces %agent [our.bowl %spaces] %watch /updates]
           [%pass /selfpoke %agent [our.bowl dap.bowl] %poke %db-action !>([%create-initial-spaces-paths ~])]
+          [%pass /timer %arvo %b %wait next-refresh-time:core]
       ==
     [default-cards this(state default-state)]
   ++  on-save   !>(state)
@@ -54,6 +56,8 @@
     ::(~(gas by *^tables) ~[[%relay *pathed-table] [%vote *pathed-table] [%react *pathed-table]])
     :: do a quick check to make sure we are subbed to /updates in %spaces
     =/  cards
+      :-  [%pass /timer %arvo %b %rest next-refresh-time:core]
+      :-  [%pass /timer %arvo %b %wait next-refresh-time:core]
       :: :-  [%pass /selfpoke %agent [our.bowl dap.bowl] %poke %db-action !>([%create-initial-spaces-paths ~])]
       :: :-  [%pass /selfpoke %agent [our.bowl %api-store] %poke %api-store-action !>([%sync-to-bedrock ~])] :: ALSO REMOVE WHEN YOU STOP WIPING THE DATA EVERY TIME
       ?:  (~(has by wex.bowl) [/spaces our.bowl %spaces])
@@ -85,6 +89,8 @@
         (get-path:db +.act state bowl)
       %delete-path
         (delete-path:db +.act state bowl)
+      %refresh-path
+        (refresh-path:db +.act state bowl)
 
       %create
         (create:db +.act state bowl)
@@ -486,8 +492,28 @@
         ::~&  >  -.sign-arvo
         `this
       [%timer ~]
-        ~&  >>>  "unhandled on-arvo %timer"
-        `this
+        =/  paths-we-host  (skim ~(val by paths.state) |=(p=path-row =(our.bowl host.p)))
+        =/  refresh-pokes=(list card)
+          %-  zing
+          %+  turn
+            paths-we-host
+          |=  p=path-row
+          ^-  (list card)
+          =/  peers=(list peer)  (~(got by peers.state) path.p)
+          %+  turn
+            (skip peers |=(per=peer =(ship.per our.bowl))) :: don't bother poking ourselves
+          |=  =peer
+          ^-  card
+          [%pass /dbpoke %agent [ship.peer dap.bowl] %poke %db-action !>([%refresh-path updated-at.p path.p])]
+        [
+          :: we remove the old timer (if any) and add the new one, so that
+          :: we don't get an increasing number of timers associated with
+          :: this agent every time the agent gets updated
+          :-  [%pass /timer %arvo %b %rest next-refresh-time:core]
+          :-  [%pass /timer %arvo %b %wait next-refresh-time:core]
+          refresh-pokes
+          this
+        ]
     ==
   ::
   ++  on-fail
@@ -498,4 +524,6 @@
 |_  [=bowl:gall cards=(list card)]
 ::
 ++  this  .
+++  core  .
+++  next-refresh-time  `@da`(add (mul (div now.bowl ~h8) ~h8) ~h8)  :: TODO decide on actual timer interval
 --

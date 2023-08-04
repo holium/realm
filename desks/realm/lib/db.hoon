@@ -21,7 +21,7 @@
     %del-path  =(path.v path)
   ==
 ++  maybe-log
-  |=  [hide-debug=? msg=*]
+  |=  [hide-debug=? msg=tape]
   ?:  =(%.y hide-debug)  ~
   ~&  msg
   ~
@@ -620,7 +620,7 @@
 ::   %initiate, every ship in the members list, regardless of role or joined status
   |=  [[=path sp=[=ship space=cord] sr=role:mstore] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =/  log1  (maybe-log hide-logs.state %create-from-space)
+  =/  log1  (maybe-log hide-logs.state "create-from-space")
   =/  members     .^(view:mstore %gx /(scot %p our.bowl)/spaces/(scot %da now.bowl)/(scot %p ship.sp)/(scot %tas space.sp)/members/noun)
   ?>  ?=(%members -.members)
   =/  filtered-members
@@ -798,7 +798,7 @@
   =.  received-at.path-row    now.bowl
   =.  paths.state             (~(put by paths.state) path path-row)
   :: update peers table
-  =/  newlist=(list peer)     [newpeer (~(got by peers.state) path)]
+  =/  newlist=(list peer)     [newpeer (skip (~(got by peers.state) path) |=(p=peer =(ship.p ship)))]
   =.  peers.state             (~(put by peers.state) path newlist)
 
   :: emit the change to subscribers
@@ -898,8 +898,7 @@
       (weld /next/(scot %da updated-at.path-row) path.path-row)
     ]
   ==
-  =/  log1  (maybe-log hide-logs.state "subbing to")
-  =/  log2  (maybe-log hide-logs.state subs)
+  =/  log1  (maybe-log hide-logs.state "subbing to {<subs>}")
   =/  cards=(list card)  (weld subs sub-facts)
   [cards state]
 ::
@@ -926,6 +925,24 @@
   :: emit the change to subscribers
   =/  cards=(list card)
     [%give %fact [/db (weld /path path) ~] db-changes+!>([%del-path path now.bowl]~)]~
+  [cards state]
+::
+++  refresh-path
+  |=  [[t=@da =path] state=state-0 =bowl:gall]
+  ^-  (quip card state-0)
+  =/  log1  (maybe-log hide-logs.state "%refresh-path {(spud path)}")
+  :: sanity checking
+  =/  path-row=path-row   (~(got by paths.state) path)
+  ?>  =(src.bowl host.path-row)
+  ?<  =(src.bowl our.bowl) :: ignore requests to refresh from ourself
+  :: logic
+  ?:  =(t updated-at.path-row)
+    `state :: if we are in sync, do nothing
+  :: otherwise sub to an intentionally way too old time, so that we get
+  :: the full path state updated
+  =/  log2  (maybe-log hide-logs.state "we are OUT OF sync, resubbing")
+  =/  newpath  (weld /next/~2000.1.1 path)
+  =/  cards=(list card)  [%pass (weld /next path) %agent [host.path-row dap.bowl] %watch newpath]~
   [cards state]
 ::
 ++  create
@@ -1088,7 +1105,7 @@
 ++  remove-many :: only works on ids from same path
 ::bedrock &db-action [%remove-many %foo /example [[our ~2023.5.22..19.22.29..d0f7] [our ~2023.5.22..19.22.29..d0f7] ~]]
   |=  [[=type:common =path ids=(list id:common)] state=state-0 =bowl:gall]
-  ~&  %remove-many
+  =/  log3  (maybe-log hide-logs.state "%remove-many")
   ^-  (quip card state-0)
 
   :: forward the request if we aren't the host
@@ -1103,7 +1120,6 @@
   =/  index=@ud   0
   =/  all-have-permission=?
     |-
-      ~&  %permission-iter
       ?:  =(index (lent ids))
         %.y
       =/  id        (snag index ids)
@@ -1126,7 +1142,6 @@
   =/  logs=(list db-row-del-change)  ~
   |-
     ?:  =(index (lent ids))
-      ~&  logs
       =.  pt              (~(put by pt) path tbl)           :: update the pathed-table
       =.  tables.state    (~(put by tables.state) type pt)  :: update the tables.state
       :: TODO remove remote-scry paths for the row
@@ -1149,7 +1164,7 @@
 ::bedrock &db-action [%relay [~bus now] /target %relay 0 [%relay [~zod ~2023.6.13..15.57.34..aa97] %foo /example 0 %all %.n] ~]
   |=  [[=req-id =input-row] state=state-0 =bowl:gall]
   ^-  (quip card state-0)
-  =/  log1  (maybe-log hide-logs.state %relay)
+  =/  log1  (maybe-log hide-logs.state "relay")
   :: first check that the input is actually a %relay
   ?+  -.data.input-row   !!
     %relay 
