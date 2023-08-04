@@ -4,7 +4,7 @@ import Store from 'electron-store';
 import { RealmService } from '../os/realm.service';
 import { AppUpdater } from './AppUpdater';
 import { setRealmCursor } from './helpers/cursorSettings';
-import { isDevelopment, isMac, isMacWithCameraNotch } from './helpers/env';
+import { isMac, isMacWithCameraNotch } from './helpers/env';
 import { windowWindow } from './helpers/fullscreen';
 import { MenuBuilder } from './menu';
 import { getAssetPath } from './util';
@@ -81,7 +81,7 @@ export const bootRealm = () => {
   );
 
   realmWindow.on('ready-to-show', () => {
-    if (isDevelopment && realmService !== null && realmWindow !== null) {
+    if (realmService !== null && realmWindow !== null) {
       const lastWindowMetadata = realmService.getLastWindowMetadata();
       const isFullScreen = lastWindowMetadata.isFullscreen ?? true;
       if (lastWindowMetadata.lastWindowBounds) {
@@ -190,23 +190,19 @@ app
     });
 
     app.on('before-quit', () => {
-      const hasNotch = isMacWithCameraNotch();
-      if (
-        (hasNotch && realmWindow?.isSimpleFullScreen()) ||
-        realmWindow?.isFullScreen()
-      ) {
+      if (realmWindow?.isSimpleFullScreen() || realmWindow?.isFullScreen()) {
         realmService?.setLastFullscreenStatus(true);
       } else {
         realmService?.setLastFullscreenStatus(false);
-        const bounds = realmWindow?.getBounds();
-        if (bounds) {
-          realmService?.setLastWindowBounds(bounds);
-        }
+      }
+      const bounds = realmWindow?.getBounds();
+      if (bounds) {
+        realmService?.setLastWindowBounds(bounds);
       }
 
       // For Macs with camera notch we're using simple fullscreen,
       // then this is required to exit the app.
-      if (hasNotch) {
+      if (isMacWithCameraNotch()) {
         realmWindow?.isClosable() && realmWindow?.close();
         standaloneChatWindow?.isClosable() && standaloneChatWindow?.close();
         app.exit();
