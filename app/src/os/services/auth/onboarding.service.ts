@@ -1,4 +1,5 @@
 import log from 'electron-log';
+import Store from 'electron-store';
 import bcrypt from 'bcryptjs';
 
 import { RealmInstallStatus } from '@holium/shared';
@@ -19,6 +20,8 @@ import {
   OnboardingUpdateTypes,
   RealmInstallVersionTest,
 } from './onboarding.types';
+
+const keystore = new Store<any>();
 
 type OnboardingCredentials = {
   serverId: string;
@@ -520,6 +523,23 @@ export class OnboardingService extends AbstractService<OnboardingUpdateTypes> {
     }
 
     return this.authDB.tables.masterAccounts.findFirst("id = '" + id + "'");
+  }
+
+  public getFirstMasterAccount() {
+    if (!this.authDB) {
+      log.error('onboarding.service.ts:', 'No authDB');
+      return;
+    }
+
+    return this.authDB.tables.masterAccounts.findFirst();
+  }
+
+  public setClientEncryptionKey(key: string) {
+    keystore.set('clientEncryptionKey', key);
+  }
+
+  public getClientEncryptionKey(): string {
+    return keystore.get<any>('clientEncryptionKey');
   }
 
   public finishOnboarding() {

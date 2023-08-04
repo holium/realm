@@ -31,8 +31,15 @@ export const AddIdentityStep = ({ setStep }: StepProps) => {
       serverCode,
     });
 
-    if (!sanitizedCookie || !serverId || !serverUrl || !serverCode)
+    if (!sanitizedCookie || !serverId || !serverUrl || !serverCode) {
+      console.log('getCookieAndOpenConduit error: %o', {
+        sanitizedCookie,
+        serverId,
+        serverUrl,
+        serverCode,
+      });
       return false;
+    }
 
     OnboardingStorage.set({
       serverId,
@@ -46,9 +53,32 @@ export const AddIdentityStep = ({ setStep }: StepProps) => {
       serverUrl,
     });
 
-    const { passwordHash, masterAccountId } = OnboardingStorage.get();
+    // const { passwordHash, masterAccountId } = OnboardingStorage.get();
+    const result = await OnboardingIPC.getFirstMasterAccount();
+    if (!result) {
+      throw new Error('You have no masterAccount');
+    }
+    const { id: masterAccountId, passwordHash } = result;
 
-    if (!serverId || !passwordHash || !masterAccountId) return false;
+    OnboardingStorage.set({
+      serverId,
+      serverUrl,
+      serverCode,
+      passwordHash,
+      clientSideEncryptionKey: await OnboardingIPC.getClientEncryptionKey(),
+    });
+
+    if (!serverId || !passwordHash || !masterAccountId) {
+      console.log('OnboardingStorage.get error: %o', {
+        sanitizedCookie,
+        serverId,
+        serverUrl,
+        serverCode,
+        passwordHash,
+        masterAccountId,
+      });
+      return false;
+    }
 
     await OnboardingIPC.createAccount(
       {

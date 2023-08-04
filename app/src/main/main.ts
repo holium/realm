@@ -1,10 +1,17 @@
-import { app, BrowserWindow, Menu, MenuItem, nativeImage } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  Menu,
+  MenuItem,
+  nativeImage,
+  screen,
+} from 'electron';
 import Store from 'electron-store';
 
 import { RealmService } from '../os/realm.service';
 import { AppUpdater } from './AppUpdater';
 import { setRealmCursor } from './helpers/cursorSettings';
-import { isMac, isMacWithCameraNotch } from './helpers/env';
+import { isDevelopment, isMac, isMacWithCameraNotch } from './helpers/env';
 import { windowWindow } from './helpers/fullscreen';
 import { MenuBuilder } from './menu';
 import { getAssetPath } from './util';
@@ -71,6 +78,15 @@ export const bootRealm = () => {
 
   setRealmCursor(true);
   realmWindow = createRealmWindow();
+  if (isDevelopment) {
+    const lastWindowMetadata = realmService.getLastWindowMetadata();
+    const isFullScreen = lastWindowMetadata.isFullscreen ?? false;
+    if (lastWindowMetadata.lastWindowBounds) {
+      realmWindow.setFullScreen(isFullScreen);
+      realmWindow.setBounds(lastWindowMetadata.lastWindowBounds);
+      realmWindow.webContents.send('set-fullscreen', isFullScreen);
+    }
+  }
   mouseOverlayWindow = createMouseOverlayWindow(realmWindow);
 
   menuBuilder = null;
@@ -167,6 +183,16 @@ app
     app.on('before-quit', () => {
       // For Macs with camera notch we're using simple fullscreen,
       // then this is required to exit the app.
+      const bounds = realmWindow?.getBounds();
+
+      if (bounds) {
+        const distScreen = screen.getDisplayNearestPoint({
+          x: bounds.x,
+          y: bounds.y,
+        });
+        realmService?.setLastDisplay(distScreen);
+        realmService?.setLastWindowBounds(bounds);
+      }
       if (isMacWithCameraNotch()) {
         realmWindow?.isClosable() && realmWindow?.close();
         standaloneChatWindow?.isClosable() && standaloneChatWindow?.close();

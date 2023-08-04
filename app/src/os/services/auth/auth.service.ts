@@ -19,11 +19,38 @@ import { AuthUpdateTypes } from './auth.types';
 
 type LockFileType = {
   session?: ConduitSession;
+  lastWindowBounds?: Electron.Rectangle;
+  lastDisplay?: Electron.Display;
+  isFullscreen?: boolean;
+};
+
+export type LastWindowMetadata = {
+  lastWindowBounds?: Electron.Rectangle;
+  lastDisplay?: Electron.Display;
+  isFullscreen?: boolean;
 };
 
 const LockFileOptions = {
   name: 'session',
   fileExtension: 'lock',
+};
+
+const getLockFileOptions = () => {
+  console.log(
+    'getLockFileOptions => %o',
+    process.env.SESSION_FILENAME || 'session.lock'
+  );
+  const result = LockFileOptions;
+  if (process.env.SESSION_FILENAME) {
+    const parts = process.env.SESSION_FILENAME.split('.');
+    if (parts.length > 0) {
+      result.name = parts[0];
+      if (parts.length > 1) {
+        result.fileExtension = parts[1];
+      }
+    }
+  }
+  return result;
 };
 
 export class AuthService extends AbstractService<AuthUpdateTypes> {
@@ -262,21 +289,55 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
     return bcrypt.compareSync(password, hash);
   }
 
+  public setLastWindowBounds(bounds: Electron.Rectangle) {
+    const options = getLockFileOptions();
+    const lockFile = new Store<LockFileType>(options);
+    lockFile.set('lastWindowBounds', bounds);
+  }
+
+  public setLastDisplay(display: Electron.Display) {
+    const options = getLockFileOptions();
+    const lockFile = new Store<LockFileType>(options);
+    lockFile.set('lastDisplay', display);
+  }
+
+  public setLastFullscreenStatus(isFullscreen: boolean) {
+    const options = getLockFileOptions();
+    const lockFile = new Store<LockFileType>(options);
+    lockFile.set('isFullscreen', isFullscreen);
+  }
+
+  public getLastWindowMetadata(): any {
+    const options = getLockFileOptions();
+    const lockFile = new Store<LockFileType>(options);
+    return {
+      lastDisplay: lockFile.get('lastDisplay'),
+      lastWindowBounds: lockFile.get('lastWindowBounds'),
+      isFullscreen: lockFile.get('isFullscreen'),
+    };
+  }
+
   public _setLockfile(session: ConduitSession): void {
-    log.info('auth.service.ts:', 'Setting session.lock');
-    const lockFile = new Store<LockFileType>(LockFileOptions);
+    const options = getLockFileOptions();
+    log.info(
+      'auth.service.ts:',
+      `Setting ${options.name}.${options.fileExtension}...`
+    );
+    const lockFile = new Store<LockFileType>(options);
     lockFile.set('session', session);
   }
 
   public _getLockfile(): ConduitSession | null {
-    const lockFile = new Store<LockFileType>(LockFileOptions);
+    const lockFile = new Store<LockFileType>(getLockFileOptions());
     return lockFile.get('session') || null;
     return null;
   }
 
   public _clearLockfile(): void {
-    log.info('Clearing session.lock');
-    fs.unlinkSync(path.join(app.getPath('userData'), 'session.lock'));
+    const options = getLockFileOptions();
+    const filename = `${options.name}.${options.fileExtension}`;
+    log.info(`Clearing ${filename}...`);
+    fs.unlinkSync(path.join(app.getPath('userData'), filename));
   }
 
   public hasSeenSplash(): boolean {

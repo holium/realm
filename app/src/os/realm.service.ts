@@ -12,7 +12,7 @@ import { getCookie, setSessionCookie } from './lib/shipHelpers';
 import { RealmUpdateTypes } from './realm.types';
 import AbstractService, { ServiceOptions } from './services/abstract.service';
 import { APIConnection } from './services/api';
-import { AuthService } from './services/auth/auth.service';
+import { AuthService, LastWindowMetadata } from './services/auth/auth.service';
 import OnboardingService from './services/auth/onboarding.service';
 import { MigrationService } from './services/migration/migration.service';
 import { FileUploadParams, ShipService } from './services/ship/ship.service';
@@ -48,12 +48,31 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     // );
 
     const windows = BrowserWindow.getAllWindows();
-    windows.forEach(({ webContents }) => {
-      webContents.on('did-attach-webview', (event, webviewWebContents) => {
-        log.info("realm.service.ts: 'did-attach-webview' event fired");
-        this.onWebViewAttached(event, webviewWebContents);
-      });
+    windows.forEach((window) => {
+      window.webContents.on(
+        'did-attach-webview',
+        (event, webviewWebContents) => {
+          log.info("realm.service.ts: 'did-attach-webview' event fired");
+          this.onWebViewAttached(event, webviewWebContents);
+        }
+      );
     });
+  }
+
+  public setLastWindowBounds(bounds: Electron.Rectangle) {
+    this.services?.auth.setLastWindowBounds(bounds);
+  }
+
+  public setLastDisplay(display: Electron.Display) {
+    this.services?.auth.setLastDisplay(display);
+  }
+
+  public setLastFullscreenStatus(isFullscreen: boolean) {
+    this.services?.auth.setLastFullscreenStatus(isFullscreen);
+  }
+
+  public getLastWindowMetadata(): LastWindowMetadata {
+    return this.services?.auth.getLastWindowMetadata();
   }
 
   /**
