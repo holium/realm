@@ -100,6 +100,16 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   //
   // Fetches
   //
+  async fetchMessageCountForPath(path: string) {
+    if (!this.db?.open || path.length === 0) return;
+    const response = await APIConnection.getInstance().conduit.scry({
+      app: 'chat-db',
+      path: `/db/message-count-for-path${path}`,
+    });
+
+    return response;
+  }
+
   async fetchMuted() {
     if (!this.db?.open) return;
     const response = await APIConnection.getInstance().conduit.scry({
@@ -158,6 +168,11 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
       path: '/pins',
     });
     return response;
+  }
+
+  async resyncPathIfNeeded(path: string) {
+    const msgCount: number = await this.fetchMessageCountForPath(path);
+    console.log(path, msgCount, this.selectMessageCountForPath(path));
   }
 
   async refreshMessagesOnPath(path: string, patp: string) {
@@ -241,6 +256,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         this._insertMessages(messages);
         const msg = this.getChatMessage(messages[0]['msg-id']);
         this.sendUpdate({ type: 'message-received', payload: msg });
+        this.resyncPathIfNeeded(messages[0]['path']);
       } else {
         data.forEach(this._handleDBChange);
       }
@@ -259,6 +275,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
           this._insertMessages([message]);
           const msg = this.getChatMessage(message['msg-id']);
           this.sendUpdate({ type: 'message-received', payload: msg });
+          this.resyncPathIfNeeded(message['path']);
           break;
         }
         case 'paths': {
@@ -795,6 +812,16 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     const result: any = query.all();
     // subtract 1 to ensure re-fetching that same timestamp so we don't have timing issues
     return Math.max(result[0]?.lastTimestamp - 1, 0) || 0;
+  }
+
+  selectMessageCountForPath(path: string) {
+    if (!this.db?.open) return;
+    const query = this.db.prepare(`
+      SELECT count(*)
+      FROM ${CHAT_TABLES.MESSAGES}
+      WHERE path = '${path}'`);
+    const result = query.all();
+    return result[0]['count(*)'];
   }
 
   findChatDM(peer: string, our: string) {

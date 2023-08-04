@@ -205,6 +205,11 @@
         =/  msgs=messages-table:sur  (path-msgs:from:db-lib messages-table.state thepath)
         ``chat-db-dump+!>(tables+[messages+msgs ~])
     ::
+      [%x %db %message-count-for-path *]
+        =/  thepath  t.t.t.path
+        =/  count=@ud  (path-msgs-count:from:db-lib messages-table.state thepath)
+        ``ud+!>(count)
+    ::
       [%x %db %messages ~]
         ``chat-db-dump+!>(tables+[messages+messages-table.state ~])
     ::
