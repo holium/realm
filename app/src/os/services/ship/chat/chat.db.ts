@@ -173,9 +173,8 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   async resyncPathIfNeeded(path: string) {
     const msgCount: number = await this.fetchMessageCountForPath(path);
     const localMsgCount: number = this.selectMessageCountForPath(path);
-    console.log('resyncPathIfNeeded', path, msgCount, localMsgCount);
     if (msgCount > localMsgCount) {
-      console.log('count mismatch, we need to resync');
+      console.log('count mismatch, we need to resync', path);
       let messages;
       try {
         const response = await APIConnection.getInstance().conduit.scry({
