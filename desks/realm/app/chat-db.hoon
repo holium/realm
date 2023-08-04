@@ -253,6 +253,13 @@
         =/  timestamp=@da   (di:dejs:format n+i.t.t.t.t.path)
         ``chat-db-dump+!>(tables+[messages+(start:from:db-lib timestamp messages-table.state) ~])
     ::
+      [%x %db %messages %start-ms @ %path *]
+        =/  timestamp=@da   (di:dejs:format n+i.t.t.t.t.path)
+        =/  thepath  t.t.t.t.t.t.path
+        =/  timeboxed=messages-table:sur    (start:from:db-lib timestamp messages-table.state)
+        =/  msgs=messages-table:sur         (path-msgs:from:db-lib timeboxed thepath)
+        ``chat-db-dump+!>(tables+[messages+msgs ~])
+    ::
     :: /db/start/<time>.json
     :: all tables, but only with received-at after <time>
       [%x %db %start @ ~]

@@ -172,26 +172,25 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
 
   async resyncPathIfNeeded(path: string) {
     const msgCount: number = await this.fetchMessageCountForPath(path);
-    console.log(path, msgCount, this.selectMessageCountForPath(path));
-  }
+    const localMsgCount: number = this.selectMessageCountForPath(path);
+    console.log('resyncPathIfNeeded', path, msgCount, localMsgCount);
+    if (msgCount > localMsgCount) {
+      console.log('count mismatch, we need to resync');
+      let messages;
+      try {
+        const response = await APIConnection.getInstance().conduit.scry({
+          app: 'chat-db',
+          path: `/db/messages/start-ms/0/path${path}`, // from the beginning `0`
+        });
 
-  async refreshMessagesOnPath(path: string, patp: string) {
-    const lastTimestamp =
-      this.getLastTimestamp(CHAT_TABLES.MESSAGES, path, patp) + 1; // add 1 because we keep getting messages we already have
-    let messages;
-    try {
-      const response = await APIConnection.getInstance().conduit.scry({
-        app: 'chat-db',
-        path: `/db/messages/start-ms/${lastTimestamp}`,
-      });
-
-      messages = response.tables.messages.filter((msg: any) => {
-        return msg.path === path && msg.sender !== patp;
-      });
-    } catch (e) {
-      messages = [];
+        messages = response.tables.messages.filter((msg: any) => {
+          return msg.path === path;
+        });
+      } catch (e) {
+        messages = [];
+      }
+      this._insertMessages(messages);
     }
-    this._insertMessages(messages);
   }
 
   private async _fetchMessages() {
