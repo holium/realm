@@ -68,6 +68,7 @@ export const ShipStore = types
         return yield ShipIPC.getOurGroups() as Promise<any>;
       } catch (e) {
         console.error(e);
+        return [];
       }
     }),
     getGroup: flow(function* (path: string) {
