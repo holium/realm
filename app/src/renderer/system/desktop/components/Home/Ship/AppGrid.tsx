@@ -24,11 +24,19 @@ const AppGridPresenter = ({ maxWidth }: AppGridProps) => {
   const currentSpace = spacesStore.selected;
   const apps = useMemo(
     () =>
-      // Filter out old Groups.
-      bazaarStore.installed.filter(
-        (app) => app.id !== 'landscape'
-      ) as AppMobxType[],
-    [bazaarStore.catalog, bazaarStore.installations.values()]
+      [
+        ...bazaarStore.installed,
+        // ...bazaarStore.devApps,
+        // TODO: Remove this once bazaar is ready.
+        {
+          id: 'os-notes',
+          title: 'Notes',
+          info: 'A simple note-taking app.',
+          color: '#F5F5F5',
+          favicon: 'https://ship.holium.app/assets/icons/notes.svg',
+          type: 'native',
+        },
+      ] as AppMobxType[]
   );
   const [items, setItems] = useState(apps);
 
