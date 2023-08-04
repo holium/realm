@@ -48,14 +48,11 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     // );
 
     const windows = BrowserWindow.getAllWindows();
-    windows.forEach((window) => {
-      window.webContents.on(
-        'did-attach-webview',
-        (event, webviewWebContents) => {
-          log.info("realm.service.ts: 'did-attach-webview' event fired");
-          this.onWebViewAttached(event, webviewWebContents);
-        }
-      );
+    windows.forEach(({ webContents }) => {
+      webContents.on('did-attach-webview', (event, webviewWebContents) => {
+        log.info("realm.service.ts: 'did-attach-webview' event fired");
+        this.onWebViewAttached(event, webviewWebContents);
+      });
     });
   }
 

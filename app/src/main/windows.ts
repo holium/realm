@@ -44,7 +44,10 @@ const getDefaultRealmWindowOptions = (
   },
 });
 
-export const createRealmWindow = () => {
+export const createRealmWindow = (
+  isFullscreen: boolean | undefined,
+  initialBounds: Partial<Electron.Rectangle> | undefined
+) => {
   const frame = isMacWithCameraNotch() ? false : true;
   const newRealmWindow = new BrowserWindow(getDefaultRealmWindowOptions(frame));
   newRealmWindow.setMenuBarVisibility(false);
@@ -72,8 +75,17 @@ export const createRealmWindow = () => {
       newRealmWindow.show();
     }
 
-    if (!hasBeenExpanded(newRealmWindow)) {
+    if (
+      (isFullscreen === undefined ||
+        isFullscreen === true ||
+        initialBounds === undefined) &&
+      !hasBeenExpanded(newRealmWindow)
+    ) {
       fullScreenWindow(newRealmWindow);
+    } else {
+      if (initialBounds !== undefined) {
+        newRealmWindow.setBounds(initialBounds);
+      }
     }
   });
 

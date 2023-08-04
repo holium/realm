@@ -1,11 +1,4 @@
-import {
-  app,
-  BrowserWindow,
-  Menu,
-  MenuItem,
-  nativeImage,
-  screen,
-} from 'electron';
+import { app, BrowserWindow, Menu, MenuItem, nativeImage } from 'electron';
 import Store from 'electron-store';
 
 import { RealmService } from '../os/realm.service';
@@ -77,16 +70,32 @@ export const bootRealm = () => {
   mouseOverlayWindow = null;
 
   setRealmCursor(true);
-  realmWindow = createRealmWindow();
-  if (isDevelopment) {
-    const lastWindowMetadata = realmService.getLastWindowMetadata();
-    const isFullScreen = lastWindowMetadata.isFullscreen ?? false;
-    if (lastWindowMetadata.lastWindowBounds) {
-      realmWindow.setFullScreen(isFullScreen);
-      realmWindow.setBounds(lastWindowMetadata.lastWindowBounds);
-      realmWindow.webContents.send('set-fullscreen', isFullScreen);
-    }
+
+  let lastWindowMetadata = undefined;
+  if (realmService) {
+    lastWindowMetadata = realmService.getLastWindowMetadata();
   }
+  realmWindow = createRealmWindow(
+    lastWindowMetadata?.isFullscreen,
+    lastWindowMetadata?.lastWindowBounds
+  );
+
+  realmWindow.on('ready-to-show', () => {
+    if (isDevelopment && realmService !== null && realmWindow !== null) {
+      const lastWindowMetadata = realmService.getLastWindowMetadata();
+      const isFullScreen = lastWindowMetadata.isFullscreen ?? true;
+      if (lastWindowMetadata.lastWindowBounds) {
+        setTimeout(() => {
+          realmWindow?.setFullScreen(isFullScreen);
+          if (lastWindowMetadata?.lastWindowBounds) {
+            realmWindow?.setBounds(lastWindowMetadata?.lastWindowBounds);
+          }
+          realmWindow?.webContents.send('set-fullscreen', isFullScreen);
+        }, 0);
+      }
+    }
+  });
+
   mouseOverlayWindow = createMouseOverlayWindow(realmWindow);
 
   menuBuilder = null;
@@ -181,19 +190,23 @@ app
     });
 
     app.on('before-quit', () => {
+      const hasNotch = isMacWithCameraNotch();
+      if (
+        (hasNotch && realmWindow?.isSimpleFullScreen()) ||
+        realmWindow?.isFullScreen()
+      ) {
+        realmService?.setLastFullscreenStatus(true);
+      } else {
+        realmService?.setLastFullscreenStatus(false);
+        const bounds = realmWindow?.getBounds();
+        if (bounds) {
+          realmService?.setLastWindowBounds(bounds);
+        }
+      }
+
       // For Macs with camera notch we're using simple fullscreen,
       // then this is required to exit the app.
-      const bounds = realmWindow?.getBounds();
-
-      if (bounds) {
-        const distScreen = screen.getDisplayNearestPoint({
-          x: bounds.x,
-          y: bounds.y,
-        });
-        realmService?.setLastDisplay(distScreen);
-        realmService?.setLastWindowBounds(bounds);
-      }
-      if (isMacWithCameraNotch()) {
+      if (hasNotch) {
         realmWindow?.isClosable() && realmWindow?.close();
         standaloneChatWindow?.isClosable() && standaloneChatWindow?.close();
         app.exit();

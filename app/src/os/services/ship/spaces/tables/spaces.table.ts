@@ -21,7 +21,13 @@ export interface Space {
 
 export class SpacesDB extends AbstractDataAccess<Space, any> {
   constructor(preload: boolean, db?: Database) {
-    super({ preload: preload, db, name: 'spacesDB', tableName: 'spaces' });
+    super({
+      pKey: 'path',
+      preload: preload,
+      db,
+      name: 'spacesDB',
+      tableName: 'spaces',
+    });
     if (preload) {
       return;
     }
