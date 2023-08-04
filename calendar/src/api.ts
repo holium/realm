@@ -772,11 +772,11 @@ export const api = {
       p: { cid: calendarId, eid: eventId },
       q: { update: fieldsList },
     };
-    return await api.calendarActionVent(json);
+    return await api.eventActionVent(json);
   },
   deleteEventAction: async (calendarId: string, eventId: string) => {
     const json = { p: { cid: calendarId, eid: eventId }, q: { delete: null } };
-    return await api.calendarActionVent(json);
+    return await api.eventActionVent(json);
   },
   createRuleEventAction: async (
     calendarId: string,
@@ -790,7 +790,7 @@ export const api = {
       p: { cid: calendarId, eid: eventId },
       q: { 'create-rule': { aid: argId, rid: rule, kind: kind, args: args } },
     };
-    return await api.calendarActionVent(json);
+    return await api.eventActionVent(json);
   },
   updateRuleEventAction: async (
     calendarId: string,
@@ -804,7 +804,7 @@ export const api = {
       p: { cid: calendarId, eid: eventId },
       q: { 'update-rule': { aid: argId, rid: rule, kind: kind, args: args } },
     };
-    return await api.calendarActionVent(json);
+    return await api.eventActionVent(json);
   },
   deleteRuleEventAction: async (
     calendarId: string,
@@ -815,7 +815,7 @@ export const api = {
       p: { cid: calendarId, eid: eventId },
       q: { 'delete-rule': { aid: argId } },
     };
-    return await api.calendarActionVent(json);
+    return await api.eventActionVent(json);
   },
   createMetadataEventAction: async (
     calendarId: string,
@@ -827,7 +827,7 @@ export const api = {
       p: { cid: calendarId, eid: eventId },
       q: { 'create-metadata': { mid: metaId, meta: meta } },
     };
-    return await api.calendarActionVent(json);
+    return await api.eventActionVent(json);
   },
   updateMetadataEventAction: async (
     calendarId: string,
@@ -849,7 +849,7 @@ export const api = {
       p: { cid: calendarId, eid: eventId },
       q: { 'update-metadata': { mid: metaId, fields: fieldsList } },
     };
-    return await api.calendarActionVent(json);
+    return await api.eventActionVent(json);
   },
   deleteMetadataEventAction: async (
     calendarId: string,
@@ -860,7 +860,7 @@ export const api = {
       p: { cid: calendarId, eid: eventId },
       q: { 'delete-metadata': { mid: metaId } },
     };
-    return await api.calendarActionVent(json);
+    return await api.eventActionVent(json);
   },
   updateInstancesEventAction: async (
     calendarId: string,
@@ -873,14 +873,14 @@ export const api = {
   ) => {
     const { argId, metaId } = fields;
     const fieldsList = [
-      typeof argId === 'string' ? { argId: argId } : null,
-      typeof metaId === 'string' ? { metaId: metaId } : null,
+      typeof argId === 'string' ? { aid: argId } : null,
+      typeof metaId === 'string' ? { mid: metaId } : null,
     ].filter(Boolean);
     const json = {
       p: { cid: calendarId, eid: eventId },
       q: { 'update-instances': { dom: dom, fields: fieldsList } },
     };
-    return await api.calendarActionVent(json);
+    return await api.eventActionVent(json);
   },
   updateDomainEventAction: async (
     calendarId: string,
@@ -891,6 +891,6 @@ export const api = {
       p: { cid: calendarId, eid: eventId },
       q: { 'update-domain': { dom: dom } },
     };
-    return await api.calendarActionVent(json);
+    return await api.eventActionVent(json);
   },
 };
