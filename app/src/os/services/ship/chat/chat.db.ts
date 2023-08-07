@@ -100,6 +100,16 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
   //
   // Fetches
   //
+  async fetchMessageCountForPath(path: string) {
+    if (!this.db?.open || path.length === 0) return;
+    const response = await APIConnection.getInstance().conduit.scry({
+      app: 'chat-db',
+      path: `/db/message-count-for-path${path}`,
+    });
+
+    return response;
+  }
+
   async fetchMuted() {
     if (!this.db?.open) return;
     const response = await APIConnection.getInstance().conduit.scry({
@@ -160,23 +170,26 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     return response;
   }
 
-  async refreshMessagesOnPath(path: string, patp: string) {
-    const lastTimestamp =
-      this.getLastTimestamp(CHAT_TABLES.MESSAGES, path, patp) + 1; // add 1 because we keep getting messages we already have
-    let messages;
-    try {
-      const response = await APIConnection.getInstance().conduit.scry({
-        app: 'chat-db',
-        path: `/db/messages/start-ms/${lastTimestamp}`,
-      });
+  async resyncPathIfNeeded(path: string) {
+    const msgCount: number = await this.fetchMessageCountForPath(path);
+    const localMsgCount: number = this.selectMessageCountForPath(path);
+    if (msgCount > localMsgCount) {
+      console.log('count mismatch, we need to resync', path);
+      let messages;
+      try {
+        const response = await APIConnection.getInstance().conduit.scry({
+          app: 'chat-db',
+          path: `/db/messages/start-ms/0/path${path}`, // from the beginning `0`
+        });
 
-      messages = response.tables.messages.filter((msg: any) => {
-        return msg.path === path && msg.sender !== patp;
-      });
-    } catch (e) {
-      messages = [];
+        messages = response.tables.messages.filter((msg: any) => {
+          return msg.path === path;
+        });
+      } catch (e) {
+        messages = [];
+      }
+      this._insertMessages(messages);
     }
-    this._insertMessages(messages);
   }
 
   private async _fetchMessages() {
@@ -241,6 +254,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
         this._insertMessages(messages);
         const msg = this.getChatMessage(messages[0]['msg-id']);
         this.sendUpdate({ type: 'message-received', payload: msg });
+        this.resyncPathIfNeeded(messages[0]['path']);
       } else {
         data.forEach(this._handleDBChange);
       }
@@ -259,6 +273,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
           this._insertMessages([message]);
           const msg = this.getChatMessage(message['msg-id']);
           this.sendUpdate({ type: 'message-received', payload: msg });
+          this.resyncPathIfNeeded(message['path']);
           break;
         }
         case 'paths': {
@@ -795,6 +810,16 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
     const result: any = query.all();
     // subtract 1 to ensure re-fetching that same timestamp so we don't have timing issues
     return Math.max(result[0]?.lastTimestamp - 1, 0) || 0;
+  }
+
+  selectMessageCountForPath(path: string) {
+    if (!this.db?.open) return;
+    const query = this.db.prepare(`
+      SELECT count(*)
+      FROM ${CHAT_TABLES.MESSAGES}
+      WHERE path = '${path}'`);
+    const result = query.all();
+    return result[0]['count(*)'];
   }
 
   findChatDM(peer: string, our: string) {

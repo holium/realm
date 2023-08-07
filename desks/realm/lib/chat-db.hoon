@@ -538,6 +538,14 @@
       (tap:msgon:sur tbl)
     |=([k=uniq-id:sur v=msg-part:sur] =(path.v path))
   ::
+  ++  path-msgs-count
+    |=  [tbl=messages-table:sur =path]
+    ^-  @ud
+    %-  lent
+    %+  skim
+      (tap:msgon:sur tbl)
+    |=([k=uniq-id:sur v=msg-part:sur] =(path.v path))
+  ::
   ++  path-start
     |=  [t=time tbl=paths-table:sur]
     ^-  paths-table:sur
