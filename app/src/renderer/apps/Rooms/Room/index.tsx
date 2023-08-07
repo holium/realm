@@ -100,7 +100,9 @@ const RoomPresenter = () => {
             size={26}
             onClick={(evt: any) => {
               evt.stopPropagation();
-              roomsApp.setView('list');
+              roomView === 'chat'
+                ? setRoomView('voice')
+                : roomsApp.setView('list');
             }}
           >
             <Icon name="ArrowLeftLine" size={22} opacity={0.7} />
