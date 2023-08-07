@@ -750,7 +750,7 @@ export const api = {
   },
   deleteCalendarAction: async (calendarId: string) => {
     const json = { p: calendarId, q: { delete: null } };
-    return await api.eventActionVent(json);
+    return await api.calendarActionVent(json);
   },
   /**
    * Fundamental API: Event Actions
