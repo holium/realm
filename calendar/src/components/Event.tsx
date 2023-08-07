@@ -88,7 +88,7 @@ export const Event = ({ eventInfo }: any) => {
             </Box>
           </Flex>
           <Flex minWidth={50}>
-            <Button.IconButton
+            {/*  <Button.IconButton
               size={28}
               onClick={() => {
                 setIsEditingInstance(true);
@@ -109,7 +109,7 @@ export const Event = ({ eventInfo }: any) => {
               }}
             >
               <Icon name="Edit" size={16} opacity={0.7} />
-            </Button.IconButton>
+            </Button.IconButton>*/}
             <Button.IconButton size={28} onClick={() => setDeletePrompt(true)}>
               <Icon name="Trash" size={16} opacity={0.7} />
             </Button.IconButton>

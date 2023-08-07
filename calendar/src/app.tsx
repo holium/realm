@@ -173,19 +173,14 @@ export const App = () => {
     try {
       const result = await api.getCalendarData(calendarId);
       if (result.calendar) {
-        const newSpans = Object.keys(result.calendar.spans).map(
+        const newSpans = Object.keys(result.calendar.events).map(
           (key: string) => {
-            return { id: key, ...result.calendar.spans[key] };
-          }
-        );
-        const newFullDay = Object.keys(result.calendar.fulldays).map(
-          (key: string) => {
-            return { id: key, fullday: true, ...result.calendar.fulldays[key] };
+            return { id: key, ...result.calendar.events[key] };
           }
         );
 
         // For now Spans and Fullday events are different, marge them here
-        setSpans([...newSpans, ...newFullDay]);
+        setSpans(newSpans);
       }
       log('fetchCalendarEntries result => ', result);
     } catch (e) {
@@ -193,17 +188,29 @@ export const App = () => {
     }
   };
   const spansToEvents = (spans: any) => {
+    const getSpanData = (item: any) => {
+      if (item.span) {
+        return item.span.instance;
+      } else if (item.fuld) {
+        return item.fuld.instance;
+      } else if (item.skip) {
+        log('item.skip', item.skip);
+        return item.skip.instance;
+      }
+    };
+    const isFullDay = (item: any) => !!item.fuld;
+    const isSkip = (item: any) => !!item.skip; // This instance has most likely been deleted
     log('spans', spans);
     const newEvents: any = [];
     spans.forEach((span: any) => {
       const metaData = span.metadata[span['def-data']];
       const reccurenceRule = span.rules[span['def-rule']]?.rid;
       for (const item of span.instances) {
-        if (item.instance?.exception === 'skip') continue;
+        if (isSkip(item.instance)) continue;
         let newEvent;
-        if (span.fullday) {
+        if (isFullDay(item.instance)) {
           // NOTE: can use a unix milisecond for these start/end date params instead
-          const startDate = new Date(item.instance?.instance);
+          const startDate = new Date(getSpanData(item.instance));
           //params starting with _ are included in event's extendedProps (passed to <Event /> component)
           newEvent = {
             start: startDate, //js date object
@@ -213,8 +220,9 @@ export const App = () => {
           };
         } else {
           // NOTE: can use a unix milisecond for these start/end date params instead
-          const startDate = new Date(item.instance?.instance.start);
-          const endDate = new Date(item.instance?.instance.end);
+          const spanData = getSpanData(item.instance);
+          const startDate = new Date(spanData.start);
+          const endDate = new Date(spanData.end);
           // TODO: make a typescript type for events in the project
           //params starting with _ are included in event's extendedProps (passed to <Event /> component)
           newEvent = {
