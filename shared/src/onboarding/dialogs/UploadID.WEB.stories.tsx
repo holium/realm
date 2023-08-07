@@ -3,6 +3,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import {
   BootingDialog,
   CreateAccountDialog,
+  GetOnRealmDialog,
   PaymentDialog,
   uploadErrors,
   VerifyEmailDialog,
@@ -15,6 +16,20 @@ export default {
   component: CreateAccountDialog,
   title: 'Onboarding/Upload ID flow WEB',
 } as ComponentMeta<typeof CreateAccountDialog>;
+
+export const GetOnRealmDialogStory: ComponentStory<
+  typeof GetOnRealmDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <GetOnRealmDialog
+      onPurchaseId={() => {}}
+      onUploadId={() => {}}
+      onAlreadyHaveAccount={() => {}}
+    />
+  </OnboardingDialogWrapper>
+);
+
+GetOnRealmDialogStory.storyName = '0. Purchase or Upload';
 
 export const CreateAccountDialogStory: ComponentStory<
   typeof CreateAccountDialog

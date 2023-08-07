@@ -6,6 +6,7 @@ import {
   CreateAccountDialog,
   CredentialsDialog,
   DownloadDialog,
+  GetOnRealmDialog,
   PaymentDialog,
   VerifyEmailDialog,
 } from '../onboarding';
@@ -19,6 +20,20 @@ export default {
   component: CreateAccountDialog,
   title: 'Onboarding/Purchase ID flow WEB',
 } as ComponentMeta<typeof CreateAccountDialog>;
+
+export const GetOnRealmDialogStory: ComponentStory<
+  typeof GetOnRealmDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <GetOnRealmDialog
+      onPurchaseId={() => {}}
+      onUploadId={() => {}}
+      onAlreadyHaveAccount={() => {}}
+    />
+  </OnboardingDialogWrapper>
+);
+
+GetOnRealmDialogStory.storyName = '0. Purchase or Upload';
 
 export const CreateAccountDialogStory: ComponentStory<
   typeof CreateAccountDialog
