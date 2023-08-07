@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { MOBILE_WIDTH } from '../consts';
+import { MOBILE_WIDTH } from '../constants';
 import { UnstyledNextLink } from './UnstyledNextLink';
 
 export const HeaderContainer = styled.header`

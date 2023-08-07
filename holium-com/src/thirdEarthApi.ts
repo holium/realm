@@ -1,4 +1,4 @@
-import { constants } from 'consts';
+import { constants } from 'constants';
 
 import { ThirdEarthApi } from '@holium/shared';
 

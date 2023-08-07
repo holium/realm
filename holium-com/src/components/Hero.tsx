@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { Flex, Icon, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 
-import { hostingHrefs } from '../consts';
+import { hostingHrefs } from '../constants';
 import { H1, H1Text } from './H1';
 import {
   GetRealmButton,

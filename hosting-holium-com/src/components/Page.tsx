@@ -1,7 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
 import NextHead from 'next/head';
-import styled from 'styled-components';
 
 import { useToggle } from '@holium/design-system/util';
 import {
@@ -12,6 +11,7 @@ import {
 
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
+import { Main } from './Page.styles';
 
 const siteDescription = 'Get on the Holium network.';
 const siteKeywords = 'Holium, Hosting, Holium Hosting, Urbit, Urbit Hosting';
@@ -19,21 +19,19 @@ const siteUrl = 'https://hosting.holium.com';
 const siteImage = `${siteUrl}/og-image.png`;
 const siteColor = '#000000';
 
-const Main = styled.main`
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
 type Props = {
   title: string;
   isProtected?: boolean;
+  noBackground?: boolean;
   children: ReactNode;
 };
 
-export const Page = ({ title, isProtected = false, children }: Props) => {
+export const Page = ({
+  title,
+  isProtected = false,
+  noBackground = false,
+  children,
+}: Props) => {
   const { currentAccountSection, goToPage, logout } = useNavigation();
   const authenticated = useToggle(false);
 
@@ -96,7 +94,7 @@ export const Page = ({ title, isProtected = false, children }: Props) => {
           content={siteColor}
         />
       </NextHead>
-      <Main>
+      <Main noBackground={noBackground}>
         {isProtected && currentAccountSection ? (
           authenticated.isOn ? (
             children

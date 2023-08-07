@@ -1,21 +1,11 @@
 import { useEffect, useState } from 'react';
-import { hostingHrefs } from 'consts';
 import { BrowserProvider } from 'ethers';
 import { SiweMessage } from 'siwe';
 import { thirdEarthApi } from 'thirdEarthApi';
 
 import { Button, Text } from '@holium/design-system/general';
 
-const getNonce = async () => {
-  try {
-    const nonceResponse = await thirdEarthApi.getNonce();
-    if (!nonceResponse.nonce) return null;
-    return nonceResponse.nonce;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-};
+import { hostingHrefs } from '../constants';
 
 const createSiweMessage = (nonce: string, address: string) => {
   const message = new SiweMessage({
@@ -34,11 +24,18 @@ const createSiweMessage = (nonce: string, address: string) => {
 export const ConnectWalletButton = () => {
   const [provider, setProvider] = useState<BrowserProvider>();
 
-  async function signInWithEthereum() {
+  const signInWithEthereum = async () => {
     if (!provider) return;
 
-    const nonce = await getNonce();
-    if (!nonce) return;
+    let nonce = '';
+    try {
+      const nonceResponse = await thirdEarthApi.getNonce();
+      if (!nonceResponse.nonce) return;
+      nonce = nonceResponse.nonce;
+    } catch (error) {
+      console.error(error);
+      return;
+    }
 
     let message = '';
     let signature = '';
@@ -57,17 +54,16 @@ export const ConnectWalletButton = () => {
     if (loginResponse.token) {
       const redirectUrl = new URL(hostingHrefs.CREATE_ACCOUNT_WITH_WALLET);
       redirectUrl.searchParams.append('token', loginResponse.token);
-      // Redirect.
       window.location.href = redirectUrl.toString();
     }
-  }
+  };
 
   useEffect(() => {
     if ((window as any).ethereum && !provider) {
       const newProvider = new BrowserProvider((window as any).ethereum);
       setProvider(newProvider);
     }
-  }, []);
+  });
 
   return (
     <Button.Primary onClick={signInWithEthereum}>

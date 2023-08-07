@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 import { Button, Flex, Text } from '@holium/design-system/general';
 
-import { DESKTOP_WIDTH, MOBILE_WIDTH } from '../consts';
+import { DESKTOP_WIDTH, MOBILE_WIDTH } from '../constants';
 
 export const GetRealmButton = styled(Button.Primary)`
   display: flex;

@@ -38,7 +38,7 @@ export default function CreateAccount() {
   };
 
   return (
-    <Page title="Create your account">
+    <Page title="Create your account" isProtected noBackground>
       <CreateAccountWithWalletDialog onNext={onNext} />
     </Page>
   );

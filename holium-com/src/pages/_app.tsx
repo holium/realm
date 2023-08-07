@@ -3,7 +3,7 @@ import type { AppProps } from 'next/app';
 
 import { SpaceProvider } from 'components/SpaceContext';
 
-import { constants } from '../consts';
+import { constants } from '../constants';
 
 import '../styles/app.css';
 

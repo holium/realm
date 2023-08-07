@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { Button, Text } from '@holium/design-system/general';
 
 import { Holium } from '../../public/Holium';
-import { hostingHrefs } from '../consts';
+import { hostingHrefs } from '../constants';
 import { ConnectWalletButton } from './ConnectWalletButton';
 import {
   HeaderContainer,

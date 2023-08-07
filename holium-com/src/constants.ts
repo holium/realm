@@ -14,7 +14,7 @@ export const DESKTOP_WIDTH = 1480;
 
 const isDev = process.env.NODE_ENV === 'development';
 const hostingBaseUrl = isDev
-  ? 'http://localhost:3000'
+  ? 'http://localhost:3001'
   : 'https://hosting.holium.com';
 
 export const hostingHrefs = {
