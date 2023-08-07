@@ -189,18 +189,15 @@ export const App = () => {
   };
   const spansToEvents = (spans: any) => {
     const getSpanData = (item: any) => {
-      if (item.span) {
+      if (Object.prototype.hasOwnProperty.call(item, 'span')) {
         return item.span.instance;
-      } else if (item.fuld) {
+      } else if (Object.prototype.hasOwnProperty.call(item, 'fuld')) {
         return item.fuld.instance;
-      } else if (item.skip) {
-        log('item.skip', item.skip);
-        return item.skip.instance;
       }
     };
     const isFullDay = (item: any) => !!item.fuld;
-    const isSkip = (item: any) => !!item.skip; // This instance has most likely been deleted
-    log('spans', spans);
+    const isSkip = (item: any) =>
+      Object.prototype.hasOwnProperty.call(item, 'skip'); // This instance has most likely been deleted
     const newEvents: any = [];
     spans.forEach((span: any) => {
       const metaData = span.metadata[span['def-data']];
