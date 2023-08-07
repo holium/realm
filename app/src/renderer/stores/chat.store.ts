@@ -242,7 +242,7 @@ export const ChatStore = types
       self.selectedChat = tryReference(() =>
         self.inbox.find((chat) => chat.path === path)
       );
-      yield ChatIPC.refreshMessagesOnPath(path, window.ship);
+      yield ChatIPC.resyncPathIfNeeded(path);
       if (self.subroute === 'inbox') {
         self.subroute = 'chat';
       }
