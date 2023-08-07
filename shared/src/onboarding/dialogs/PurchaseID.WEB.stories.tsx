@@ -1,18 +1,14 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 
-import { Anchor } from '@holium/design-system/general';
-
 import {
   BootingDialog,
   ChooseIdentityDialog,
   CreateAccountDialog,
   CredentialsDialog,
-  HostingDialog,
-  LoginDialog,
-  OnboardDialogDescription,
-  PassportDialog,
+  DownloadDialog,
+  GetOnRealmDialog,
   PaymentDialog,
-  TermsDisclaimer,
+  VerifyEmailDialog,
 } from '../onboarding';
 import {
   mockPatps,
@@ -22,38 +18,51 @@ import {
 
 export default {
   component: CreateAccountDialog,
-  title: 'Onboarding/Buy Identity DESKTOP',
+  title: 'Onboarding/Purchase ID flow WEB',
 } as ComponentMeta<typeof CreateAccountDialog>;
 
-export const LoginDialogStory: ComponentStory<typeof LoginDialog> = () => (
+export const GetOnRealmDialogStory: ComponentStory<
+  typeof GetOnRealmDialog
+> = () => (
   <OnboardingDialogWrapper>
-    <LoginDialog
-      label={
-        <OnboardDialogDescription>
-          Don't have access? <Anchor>Join waitlist</Anchor>.
-        </OnboardDialogDescription>
-      }
-      footer={<TermsDisclaimer onClick={() => {}} />}
-      onLogin={() => Promise.resolve(false)}
+    <GetOnRealmDialog
+      onPurchaseId={() => {}}
+      onUploadId={() => {}}
+      onAlreadyHaveAccount={() => {}}
     />
   </OnboardingDialogWrapper>
 );
 
-LoginDialogStory.storyName = '1. Login';
+GetOnRealmDialogStory.storyName = '0. Purchase or Upload';
 
-export const HostingDialogStory: ComponentStory<typeof HostingDialog> = () => (
+export const CreateAccountDialogStory: ComponentStory<
+  typeof CreateAccountDialog
+> = () => (
   <OnboardingDialogWrapper>
-    <HostingDialog
+    <CreateAccountDialog
       onBack={() => {}}
-      onGetHosting={() => {}}
-      onAddExistingServer={() => {}}
+      onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
 
-HostingDialogStory.storyName = '2. Hosting';
+CreateAccountDialogStory.storyName = '1. Create account';
 
-export const ChooseIdentityDialogStory: ComponentStory<
+export const VerifyEmailDialogStory: ComponentStory<
+  typeof VerifyEmailDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <VerifyEmailDialog
+      onResend={() => {}}
+      onBack={() => {}}
+      onNext={() => Promise.resolve(false)}
+    />
+  </OnboardingDialogWrapper>
+);
+
+VerifyEmailDialogStory.storyName = '2. Verify email';
+
+export const ChooseIdDialogStory: ComponentStory<
   typeof ChooseIdentityDialog
 > = () => (
   <OnboardingDialogWrapper>
@@ -64,7 +73,7 @@ export const ChooseIdentityDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-ChooseIdentityDialogStory.storyName = '3. Choose Identity';
+ChooseIdDialogStory.storyName = '3. Choose ID';
 
 export const PaymentDialogStory: ComponentStory<typeof PaymentDialog> = () => (
   <OnboardingDialogWrapper>
@@ -95,7 +104,7 @@ export const BootingDialogStory: ComponentStory<typeof BootingDialog> = () => (
   </OnboardingDialogWrapper>
 );
 
-BootingDialogStory.storyName = '5.1 Booting';
+BootingDialogStory.storyName = '5.1. Booting';
 
 export const BootingDialogCompleteStory: ComponentStory<
   typeof BootingDialog
@@ -109,7 +118,7 @@ export const BootingDialogCompleteStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-BootingDialogCompleteStory.storyName = '5.2 Booting complete';
+BootingDialogCompleteStory.storyName = '5.2. Booting complete';
 
 export const CredentialsDialogStory: ComponentStory<
   typeof CredentialsDialog
@@ -128,21 +137,19 @@ export const CredentialsDialogStory: ComponentStory<
 
 CredentialsDialogStory.storyName = '6. Credentials';
 
-export const PassportDialogStory: ComponentStory<
-  typeof PassportDialog
+export const DownloadDialogStory: ComponentStory<
+  typeof DownloadDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <PassportDialog
-      patp="~pasren-satmex"
-      prefilledNickname="The Nickname of the Century"
-      prefilledDescription=""
-      prefilledAvatarSrc=""
-      prefilledColor="#333333"
-      onUploadFile={() => Promise.reject()}
+    <DownloadDialog
+      onDownloadMacM1={() => {}}
+      onDownloadMacIntel={() => {}}
+      onDownloadWindows={() => {}}
+      onDownloadLinux={() => {}}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
 
-PassportDialogStory.storyName = '7. Create your Passport';
+DownloadDialogStory.storyName = '7. Download Realm for desktop';
