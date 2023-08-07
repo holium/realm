@@ -15,6 +15,7 @@ import { ChatPathType } from 'os/services/ship/chat/chat.types';
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { useContextMenu } from 'renderer/components';
 import { useAppState } from 'renderer/stores/app.store';
+import { InvitePermissionType } from 'renderer/stores/models/chat.model';
 import { SpaceModelType } from 'renderer/stores/models/spaces.model';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -31,6 +32,7 @@ type ChatRowProps = {
   metadata: any;
   timestamp: number;
   type: ChatPathType;
+  invites: InvitePermissionType;
   peersGetBacklog: boolean;
   isStandaloneChat?: boolean;
   onClick: (evt: MouseEvent<HTMLDivElement>) => void;
@@ -42,6 +44,7 @@ export const ChatRowPresenter = ({
   timestamp,
   isAdmin,
   type,
+  invites,
   metadata,
   isStandaloneChat,
   onClick,
@@ -77,6 +80,7 @@ export const ChatRowPresenter = ({
   const isMuted = isChatMuted(path);
   const isSpaceChat = type === 'space';
   const isSelected = chatStore.selectedChat?.path === path;
+  const isOpenChat = invites === 'open';
 
   const chat = inbox.find((c) => c.path === path);
   const lastMessageUpdated: React.ReactNode = useMemo(() => {
@@ -94,6 +98,7 @@ export const ChatRowPresenter = ({
     isPinned,
     isMuted,
     isSpaceChat,
+    isOpenChat,
     loggedInAccount,
     chatRowId,
     setSubroute,

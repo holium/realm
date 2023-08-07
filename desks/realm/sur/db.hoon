@@ -149,6 +149,7 @@
       :: only from host foreign ship
       [%get-path =path-row peers=ship-roles]  :: when we are being informed that we were added to a peers list. we don't know the list, only the host (which is who sent it to us)
       [%delete-path =path]                    :: when we are being informed that we got kicked (or host deleted the path entirely). also deletes all attached objects
+      [%refresh-path t=@da =path]             :: we are being informed of the current `updated-at` for a path, so that we can refresh if needed
 
       :: any peer in the path can send these pokes to the %host
       :: if they have right permissions, host will propagate the data

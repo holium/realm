@@ -17,44 +17,44 @@ export function useSound() {
 
   return useMemo(
     () => ({
-      playStartup: async () => {
+      playStartup: () => {
         settingsStore.systemSoundsEnabled && SoundActions.playStartup();
       },
-      playLogin: async () => {
+      playLogin: () => {
         settingsStore.systemSoundsEnabled && SoundActions.playLogin();
       },
-      playLogout: async () => {
+      playLogout: () => {
         settingsStore.systemSoundsEnabled && SoundActions.playLogout();
       },
-      playSystemNotification: async () => {
+      playSystemNotification: () => {
         settingsStore.systemSoundsEnabled &&
           SoundActions.playSystemNotification();
       },
-      playError: async () => {
+      playError: () => {
         settingsStore.systemSoundsEnabled && SoundActions.playError();
       },
-      playDMNotify: async () => {
+      playDMNotify: () => {
         settingsStore.systemSoundsEnabled && SoundActions.playDMNotify();
       },
-      playDMSend: async () => {
+      playDMSend: () => {
         settingsStore.systemSoundsEnabled && SoundActions.playDMSend();
       },
-      playCall: async () => {
+      playCall: () => {
         settingsStore.systemSoundsEnabled && SoundActions.playCall();
       },
-      playHangup: async () => {
+      playHangup: () => {
         settingsStore.systemSoundsEnabled && SoundActions.playHangup();
       },
-      playRoomEnter: async () => {
+      playRoomEnter: () => {
         settingsStore.systemSoundsEnabled && SoundActions.playRoomEnter();
       },
-      playRoomLeave: async () => {
+      playRoomLeave: () => {
         settingsStore.systemSoundsEnabled && SoundActions.playRoomLeave();
       },
-      playRoomPeerEnter: async () => {
+      playRoomPeerEnter: () => {
         settingsStore.systemSoundsEnabled && SoundActions.playRoomPeerEnter();
       },
-      playRoomPeerLeave: async () => {
+      playRoomPeerLeave: () => {
         settingsStore.systemSoundsEnabled && SoundActions.playRoomPeerLeave();
       },
     }),
@@ -82,43 +82,17 @@ const playAudio = async (src: string) => {
 };
 
 export const SoundActions = {
-  playStartup: async () => {
-    await playAudio('sounds/startup.wav');
-  },
-  playLogin: async () => {
-    await playAudio('sounds/login.wav');
-  },
-  playLogout: async () => {
-    await playAudio('sounds/logout.wav');
-  },
-  playSystemNotification: async () => {
-    await playAudio('sounds/system-notify.wav');
-  },
-  playError: async () => {
-    await playAudio('sounds/error.wav');
-  },
-  playDMNotify: async () => {
-    await playAudio('sounds/dm-received.wav');
-  },
-  playDMSend: async () => {
-    await playAudio('sounds/dm-sent.wav');
-  },
-  playCall: async () => {
-    await playAudio('sounds/voice-ring.wav');
-  },
-  playHangup: async () => {
-    await playAudio('sounds/voice-hang-up.wav');
-  },
-  playRoomEnter: async () => {
-    await playAudio('sounds/room-enter.wav');
-  },
-  playRoomLeave: async () => {
-    await playAudio('sounds/room-leave.wav');
-  },
-  playRoomPeerEnter: async () => {
-    await playAudio('sounds/room-peer-enter.wav');
-  },
-  playRoomPeerLeave: async () => {
-    await playAudio('sounds/room-peer-leave.wav');
-  },
+  playStartup: () => playAudio('sounds/startup.wav'),
+  playLogin: () => playAudio('sounds/login.wav'),
+  playLogout: () => playAudio('sounds/logout.wav'),
+  playSystemNotification: () => playAudio('sounds/system-notify.wav'),
+  playError: () => playAudio('sounds/error.wav'),
+  playDMNotify: () => playAudio('sounds/dm-received.wav'),
+  playDMSend: () => playAudio('sounds/dm-sent.wav'),
+  playCall: () => playAudio('sounds/voice-ring.wav'),
+  playHangup: () => playAudio('sounds/voice-hang-up.wav'),
+  playRoomEnter: () => playAudio('sounds/room-enter.wav'),
+  playRoomLeave: () => playAudio('sounds/room-leave.wav'),
+  playRoomPeerEnter: () => playAudio('sounds/room-peer-enter.wav'),
+  playRoomPeerLeave: () => playAudio('sounds/room-peer-leave.wav'),
 };

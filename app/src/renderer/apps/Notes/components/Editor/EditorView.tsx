@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { fromUint8Array } from 'js-base64';
 import { Awareness, encodeAwarenessUpdate } from 'y-protocols/awareness';
 import * as Y from 'yjs';
@@ -5,13 +6,20 @@ import * as Y from 'yjs';
 import { NotesBroadcastChannel } from './Editor';
 import { ySyncPluginKey } from './plugins/keys';
 import { UserMetadata } from './plugins/y-caret-plugin';
-import {
-  onAwarenessChange,
-  OnYdocUpdate,
-  useEditorView,
-} from './useEditorView';
+import { useEditorView } from './useEditorView';
 
 import './prosemirror.css';
+
+type OnYdocUpdate = (update: Uint8Array, origin: any) => void;
+
+type OnAwarenessChange = (
+  update: {
+    added: number[];
+    updated: number[];
+    removed: number[];
+  },
+  origin: any
+) => void;
 
 type Props = {
   user: UserMetadata;
@@ -28,6 +36,12 @@ export const EditorView = ({
   broadcast,
   onChange,
 }: Props) => {
+  const { onEditorRef } = useEditorView({
+    user,
+    ydoc,
+    awareness,
+  });
+
   const onYdocUpdate: OnYdocUpdate = (update, origin) => {
     const base64EncodedUpdate = fromUint8Array(update);
 
@@ -39,7 +53,7 @@ export const EditorView = ({
     onChange(base64EncodedUpdate);
   };
 
-  const onAwarenessChange: onAwarenessChange = (
+  const onAwarenessChange: OnAwarenessChange = (
     { added, updated, removed },
     origin
   ) => {
@@ -55,13 +69,16 @@ export const EditorView = ({
     );
   };
 
-  const { onEditorRef } = useEditorView({
-    user,
-    ydoc,
-    awareness,
-    onYdocUpdate,
-    onAwarenessChange,
-  });
+  useEffect(() => {
+    // Set up listeners for updates to the ydoc and awareness.
+    ydoc.on('update', onYdocUpdate);
+    awareness.on('change', onAwarenessChange);
+
+    return () => {
+      ydoc._observers.delete('change');
+      awareness._observers.delete('change');
+    };
+  }, []);
 
   return (
     <div className="editor-container">

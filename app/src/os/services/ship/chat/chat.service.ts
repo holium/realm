@@ -259,7 +259,7 @@ export class ChatService extends AbstractService<ChatUpdateTypes> {
     }
   }
 
-  async addPeerToChat(path: string, ship: string) {
+  async addPeerToChat(path: string, ship: string, host?: string) {
     const payload = {
       app: 'realm-chat',
       mark: 'chat-action',
@@ -268,6 +268,7 @@ export class ChatService extends AbstractService<ChatUpdateTypes> {
         'add-ship-to-chat': {
           ship,
           path,
+          host,
         },
       },
     };

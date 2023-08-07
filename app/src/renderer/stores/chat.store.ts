@@ -55,6 +55,11 @@ export const ChatStore = types
     chatLoader: LoaderModel,
   })
   .views((self) => ({
+    get allChatPaths() {
+      return Array.from(self.inbox.values()).map(
+        (chat: ChatModelType) => chat.path
+      );
+    },
     isChatPinned(path: string) {
       return !!self.pinnedChats.find((p) => path === p);
     },

@@ -46,6 +46,7 @@ export const InboxRow = ({
           peers={inbox.peers.map((peer) => peer.ship)}
           isAdmin={isAdmin}
           type={inbox.type}
+          invites={inbox.invites}
           timestamp={inbox.createdAt || inbox.metadata.timestamp}
           metadata={inbox.metadata}
           peersGetBacklog={inbox.peersGetBacklog}

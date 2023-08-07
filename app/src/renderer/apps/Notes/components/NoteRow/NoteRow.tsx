@@ -41,9 +41,7 @@ const NoteRowPresenter = ({
   const nickname =
     authorMetadata.nickname.length > 0 ? authorMetadata.nickname : null;
 
-  const noteRoom = roomsStore
-    .getSpaceRooms(space)
-    .find((room) => room.path === noteRowPath);
+  const noteRoom = roomsStore.getRoomByPath(noteRowPath);
   const participants = isPersonal
     ? []
     : noteRoom?.present.map((patp: string) => {
@@ -87,7 +85,7 @@ const NoteRowPresenter = ({
     firstParagraph && firstParagraph.length > 0
       ? firstParagraph
       : 'No additional text';
-  const noteUpdated = new Date(updatedAt).toLocaleDateString();
+  const date = new Date(updatedAt).toLocaleDateString();
 
   return (
     <NoteRowView
@@ -95,7 +93,7 @@ const NoteRowPresenter = ({
       title={title}
       author={nickname ?? patp}
       preview={notePreview}
-      date={noteUpdated}
+      date={date}
       isSelected={isSelected}
       isPersonal={isPersonal}
       participants={participants}

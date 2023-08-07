@@ -134,6 +134,30 @@ export const AccountDownloadRealmDialogStory: ComponentStory<
 
 AccountDownloadRealmDialogStory.storyName = '5. Download Realm';
 
+export const AccountContinueWorkflowDialogStory: ComponentStory<
+  typeof AccountStorageDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <AccountUnfinishedUploadDialog
+      ships={[
+        {
+          ...thirdEarthMockShip,
+          ship_type: 'host',
+        },
+      ]}
+      selectedShipId={0}
+      setSelectedShipId={() => {}}
+      onClickPurchaseId={() => {}}
+      onClickUploadId={() => {}}
+      onClickReuploadId={() => {}}
+      onClickSidebarSection={() => {}}
+      onClickExit={() => {}}
+    />
+  </OnboardingDialogWrapper>
+);
+
+AccountContinueWorkflowDialogStory.storyName = '6.1. Continue Workflow';
+
 export const AccountUnfinishedUploadDialogStory: ComponentStory<
   typeof AccountStorageDialog
 > = () => (
@@ -151,7 +175,7 @@ export const AccountUnfinishedUploadDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-AccountUnfinishedUploadDialogStory.storyName = '6.1. Identity Being Created';
+AccountUnfinishedUploadDialogStory.storyName = '6.2. Identity Being Created';
 
 export const AccountErroredUploadDialogStory: ComponentStory<
   typeof AccountStorageDialog
@@ -175,4 +199,4 @@ export const AccountErroredUploadDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-AccountErroredUploadDialogStory.storyName = '6.2. Identity Upload Error';
+AccountErroredUploadDialogStory.storyName = '6.3. Identity Upload Error';

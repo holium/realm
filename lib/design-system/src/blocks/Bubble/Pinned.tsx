@@ -66,7 +66,7 @@ export const PinnedMessage = ({
       </Box>
     );
   } else {
-    pinnedContent = renderFragment(id, message[0], 0, author);
+    pinnedContent = renderFragment(id, message[0], 0, author, window.ship);
   }
 
   return (
