@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { Flex, Icon, Text } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 
-import { GET_REALM_HREF } from '../consts';
+import { hostingHrefs } from '../consts';
 import { H1, H1Text } from './H1';
 import {
   GetRealmButton,
@@ -52,7 +52,7 @@ export const Hero = () => {
           marginTop="16px"
           onSubmit={(e) => {
             e.preventDefault();
-            router.push(`${GET_REALM_HREF}?email=${email}`);
+            router.push(`${hostingHrefs.GET_REALM}?email=${email}`);
           }}
         >
           <TextInput

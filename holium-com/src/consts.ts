@@ -12,5 +12,13 @@ export const constants = {
 export const MOBILE_WIDTH = 560;
 export const DESKTOP_WIDTH = 1480;
 
-export const LOGIN_HREF = 'https://hosting.holium.com/login';
-export const GET_REALM_HREF = 'http://hosting.holium.com/get-realm';
+const isDev = process.env.NODE_ENV === 'development';
+const hostingBaseUrl = isDev
+  ? 'http://localhost:3000'
+  : 'https://hosting.holium.com';
+
+export const hostingHrefs = {
+  LOGIN: hostingBaseUrl + '/login',
+  GET_REALM: hostingBaseUrl + '/get-realm',
+  CREATE_ACCOUNT_WITH_WALLET: hostingBaseUrl + '/create-account-with-wallet',
+};

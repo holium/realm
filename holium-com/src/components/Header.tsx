@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { Button, Text } from '@holium/design-system/general';
 
 import { Holium } from '../../public/Holium';
-import { LOGIN_HREF } from '../consts';
+import { hostingHrefs } from '../consts';
 import { ConnectWalletButton } from './ConnectWalletButton';
 import {
   HeaderContainer,
@@ -46,7 +46,7 @@ export const Header = () => {
         </ul>
       </HeaderNavigation>
       <HeaderCTAs>
-        <UnstyledNextLink href={LOGIN_HREF}>
+        <UnstyledNextLink href={hostingHrefs.LOGIN}>
           <Button.Secondary>
             <Text.Body color="text" fontWeight={500}>
               Login with Email

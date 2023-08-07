@@ -1,19 +1,27 @@
 import { useEffect, useState } from 'react';
+import { hostingHrefs } from 'consts';
 import { BrowserProvider } from 'ethers';
 import { SiweMessage } from 'siwe';
 import { thirdEarthApi } from 'thirdEarthApi';
 
 import { Button, Text } from '@holium/design-system/general';
 
-const createSiweMessage = (
-  nonce: string,
-  address: string,
-  statement: string
-) => {
+const getNonce = async () => {
+  try {
+    const nonceResponse = await thirdEarthApi.getNonce();
+    if (!nonceResponse.nonce) return null;
+    return nonceResponse.nonce;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+const createSiweMessage = (nonce: string, address: string) => {
   const message = new SiweMessage({
     nonce,
     address,
-    statement,
+    statement: 'Sign in to Holium',
     domain: window.location.host,
     uri: window.location.origin,
     version: '1',
@@ -29,24 +37,28 @@ export const ConnectWalletButton = () => {
   async function signInWithEthereum() {
     if (!provider) return;
 
-    const nonceResponse = await thirdEarthApi.getNonce();
-    if (!nonceResponse.nonce) return;
+    const nonce = await getNonce();
+    if (!nonce) return;
 
-    const signer = await provider.getSigner();
-    const message = createSiweMessage(
-      nonceResponse.nonce,
-      signer.address,
-      'Sign in with Ethereum to the app.'
-    );
-    const signature = await signer.signMessage(message);
+    let message = '';
+    let signature = '';
+    try {
+      const signer = await provider.getSigner();
+      message = createSiweMessage(nonce, signer.address);
+      signature = await signer.signMessage(message);
+    } catch (error) {
+      console.error(error);
+      return;
+    }
 
     const loginPayload = { message, signature };
-    console.log('logging in...', loginPayload);
     const loginResponse = await thirdEarthApi.loginWithWallet(loginPayload);
 
     if (loginResponse.token) {
-      // Redirect to hosting.holium.com
-      window.location.href = `https://hosting.holium.com?token=${loginResponse.token}`;
+      const redirectUrl = new URL(hostingHrefs.CREATE_ACCOUNT_WITH_WALLET);
+      redirectUrl.searchParams.append('token', loginResponse.token);
+      // Redirect.
+      window.location.href = redirectUrl.toString();
     }
   }
 
