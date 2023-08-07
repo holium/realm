@@ -271,7 +271,6 @@ export class AuthService extends AbstractService<AuthUpdateTypes> {
   public _getLockfile(): ConduitSession | null {
     const lockFile = new Store<LockFileType>(LockFileOptions);
     return lockFile.get('session') || null;
-    return null;
   }
 
   public _clearLockfile(): void {
