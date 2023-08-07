@@ -37,7 +37,20 @@ export const CalendarItem = ({
       log('deleteCalendar error => ', e);
     }
   };
-
+  /*
+  TODO: editing calendar in our doesn't have perms, handle this case with below input
+     <TextInput
+            id="new-calendar-input"
+            name="new-calendar-input"
+            autoFocus
+            placeholder="New calendar"
+            value={newCalendar}
+            onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
+              setNewCalendar(evt.target.value);
+            }}
+            //    onBlur={() => setIsAdding(false)}
+          />
+  */
   return (
     <>
       {isEditing ? (

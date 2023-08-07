@@ -134,7 +134,8 @@ export const App = () => {
   const [spaceList, setSpaceList] = useState<string[]>([]);
   const [calendarList, setCalendarList] = useState<any>([]);
   const [selectedCalendar, setSelectedCalendar] = useState<null | string>(null);
-  const [spans, setSpans] = useState<any>([]);
+  const spans = useCalendarStore((store: CalendarStore) => store.spans);
+  const setSpans = useCalendarStore((store: CalendarStore) => store.setSpans);
   const [events, setEvents] = useState<any>([]);
   const [datePickerSelected, setDatePickerSelected] = useState<any>(new Date());
   const setCurrentCalendarSub = useCalendarStore(
@@ -143,6 +144,7 @@ export const App = () => {
   const currentCalendarSub = useCalendarStore(
     (store: CalendarStore) => store.currentCalendarSub
   );
+  log('spans', spans);
   const fetchSpacesList = async () => {
     try {
       const result = await api.getSpaces();

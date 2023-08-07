@@ -1,6 +1,7 @@
 import Urbit from '@urbit/http-api';
 import memoize from 'lodash/memoize';
 
+import useCalendarStore from './CalendarStore';
 import { log, shipCode, shipName } from './utils';
 type RepeatCount = { l: number; r: number };
 export type Roles = 'admin' | 'viewer' | 'guest' | 'member';
@@ -11,19 +12,7 @@ export type Perms = {
 };
 export type Offset = { sign: '+' | '-'; d: number };
 export type Meta = { name: string; description: string; color: string };
-const updateHandler = (update: any) => {
-  log('update', update);
-};
-const updates = (calendarId: string) => {
-  return {
-    app: 'calendar',
-    path: '/ui/calendar/' + calendarId,
-    event: updateHandler,
-    //TODO: handle sub death/kick/err
-    err: () => log('Subscription rejected'),
-    quit: (e: any) => log('Kicked from subscription', e),
-  };
-};
+
 export const api = {
   createApi: memoize(() => {
     /*
@@ -917,4 +906,60 @@ export const api = {
     };
     return await api.eventActionVent(json);
   },
+};
+const updateHandler = (update: any) => {
+  log('update', update);
+  if (update.event) {
+    // Update instance
+    if (Object.prototype.hasOwnProperty.call(update.event, 'update')) {
+      const eventId = update.event.update.eid;
+      const instance = update.event.update.update?.instance;
+      if (Object.prototype.hasOwnProperty.call(instance, 'add')) {
+        // Our new updated instance, find the corresponding instance in our state (spans)
+        const state = useCalendarStore.getState();
+        const spans = state.spans;
+        // Find the event
+        const newSpans = spans.map((item: any) => {
+          if (item.id === eventId) {
+            // find the instance and update it
+            return {
+              ...item,
+              instances: item.instances.map((inst: any) => {
+                if (inst.idx === instance.add.idx) {
+                  const newInstance = { ...inst, ...instance.add };
+                  return newInstance;
+                }
+                return inst;
+              }),
+            };
+          }
+          // default, return the span as is
+          return item;
+        });
+        state.setSpans(newSpans);
+      }
+    }
+    // Delete event
+    if (Object.prototype.hasOwnProperty.call(update.event, 'delete')) {
+      const state = useCalendarStore.getState();
+      const spans = state.spans;
+      const eventId = update.event.delete.eid;
+      // Find the event
+
+      const newSpans = spans.filter((item: any) => item.id !== eventId);
+      state.setSpans(newSpans);
+    }
+  }
+  // Delete event
+  return;
+};
+const updates = (calendarId: string) => {
+  return {
+    app: 'calendar',
+    path: '/ui/calendar/' + calendarId,
+    event: updateHandler,
+    //TODO: handle sub death/kick/err
+    err: () => log('Subscription rejected'),
+    quit: (e: any) => log('Kicked from subscription', e),
+  };
 };

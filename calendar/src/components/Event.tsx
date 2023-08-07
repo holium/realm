@@ -129,24 +129,40 @@ export const Event = ({ eventInfo }: any) => {
       <Card elevation={3} padding={3} width={'400px'} height="180px">
         <Flex flexDirection={'row'}>
           <Flex flexDirection={'column'} gap="5px" flex={1}>
-            <Button.TextButton
-              showOnHover
-              onClick={(evt) => {
-                evt.stopPropagation();
-                deleteSpanInstance();
-              }}
-            >
-              Delete instance
-            </Button.TextButton>
-            <Button.TextButton
-              showOnHover
-              onClick={(evt) => {
-                evt.stopPropagation();
-                deleteSpan();
-              }}
-            >
-              Delete event
-            </Button.TextButton>
+            {reccurenceRuleParse(reccurenceRule).reccurenceTypeOption ===
+            'noRepeat' ? (
+              <Button.TextButton
+                showOnHover
+                onClick={(evt) => {
+                  evt.stopPropagation();
+                  deleteSpan();
+                }}
+              >
+                Delete Event
+              </Button.TextButton>
+            ) : (
+              <>
+                <Button.TextButton
+                  showOnHover
+                  onClick={(evt) => {
+                    evt.stopPropagation();
+                    deleteSpanInstance();
+                  }}
+                >
+                  Delete this instance
+                </Button.TextButton>
+                <Button.TextButton
+                  showOnHover
+                  onClick={(evt) => {
+                    evt.stopPropagation();
+                    deleteSpan();
+                  }}
+                >
+                  Delete all instances
+                </Button.TextButton>
+              </>
+            )}
+
             <Button.TextButton
               showOnHover
               onClick={(evt) => {
@@ -163,7 +179,11 @@ export const Event = ({ eventInfo }: any) => {
             </Button.IconButton>
             <Button.IconButton
               size={28}
-              onClick={() => setIsPopoverOpen(false)}
+              onClick={() => {
+                // Make sure we leave delete prompt if we were there
+                setDeletePrompt(false);
+                setIsPopoverOpen(false);
+              }}
             >
               <Icon name="Close" size={22} opacity={0.7} />
             </Button.IconButton>

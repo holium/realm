@@ -12,6 +12,9 @@ export interface CalendarStore {
 
   currentCalendarSub: null | number;
   setCurrentCalendarSub: (subNumber: null | number) => void;
+
+  spans: any;
+  setSpans: (spans: any) => void;
 }
 
 const useCalendarStore = create<CalendarStore>((set) => ({
@@ -33,6 +36,11 @@ const useCalendarStore = create<CalendarStore>((set) => ({
   currentCalendarSub: null,
   setCurrentCalendarSub: (subNumber: null | number) => {
     set(() => ({ currentCalendarSub: subNumber }));
+  },
+
+  spans: [],
+  setSpans: (spans: any) => {
+    set(() => ({ spans }));
   },
 }));
 
