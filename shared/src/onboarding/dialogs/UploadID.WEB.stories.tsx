@@ -2,54 +2,20 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 
 import {
   BootingDialog,
-  ChooseIdentityDialog,
   CreateAccountDialog,
-  CredentialsDialog,
-  DownloadDialog,
-  GetRealmDialog,
+  GetOnRealmDialog,
   PaymentDialog,
-  SomethingWentWrongDialog,
   uploadErrors,
   VerifyEmailDialog,
 } from '../onboarding';
-import { GetOnRealmDialog } from './GetOnRealm/GetOnRealmDialog';
 import { UploadIdDialog } from './UploadId/UploadIdDialog';
 import { UploadIdDisclaimerDialog } from './UploadIdDisclaimer/UploadIdDisclaimerDialog';
-import {
-  mockPatps,
-  OnboardingDialogWrapper,
-  thirdEarthMockProduct,
-  thirdEarthMockProducts,
-} from './util';
+import { OnboardingDialogWrapper, thirdEarthMockProduct } from './util';
 
 export default {
   component: CreateAccountDialog,
-  title: 'Onboarding/Signup flow WEB',
+  title: 'Onboarding/Upload ID flow WEB',
 } as ComponentMeta<typeof CreateAccountDialog>;
-
-export const GetRealmDialogStory: ComponentStory<
-  typeof GetRealmDialog
-> = () => (
-  <OnboardingDialogWrapper>
-    <GetRealmDialog
-      onBack={() => {}}
-      onPurchaseId={() => {}}
-      onUploadId={() => {}}
-    />
-  </OnboardingDialogWrapper>
-);
-
-GetRealmDialogStory.storyName = '0. Join waitlist';
-
-export const SomethingWentWrongDialogStory: ComponentStory<
-  typeof SomethingWentWrongDialog
-> = () => (
-  <OnboardingDialogWrapper>
-    <SomethingWentWrongDialog onBack={() => {}} />
-  </OnboardingDialogWrapper>
-);
-
-SomethingWentWrongDialogStory.storyName = '0.1. Something went wrong';
 
 export const GetOnRealmDialogStory: ComponentStory<
   typeof GetOnRealmDialog
@@ -63,7 +29,7 @@ export const GetOnRealmDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-GetOnRealmDialogStory.storyName = '1. Get on Realm (Purchase or Upload)';
+GetOnRealmDialogStory.storyName = '0. Purchase or Upload';
 
 export const CreateAccountDialogStory: ComponentStory<
   typeof CreateAccountDialog
@@ -76,7 +42,7 @@ export const CreateAccountDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-CreateAccountDialogStory.storyName = '2. Create account';
+CreateAccountDialogStory.storyName = '1. Create account';
 
 export const VerifyEmailDialogStory: ComponentStory<
   typeof VerifyEmailDialog
@@ -90,99 +56,7 @@ export const VerifyEmailDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-VerifyEmailDialogStory.storyName = '3. Verify email';
-
-export const ChooseIdDialogStory: ComponentStory<
-  typeof ChooseIdentityDialog
-> = () => (
-  <OnboardingDialogWrapper>
-    <ChooseIdentityDialog
-      identities={mockPatps}
-      onNext={() => Promise.resolve(false)}
-    />
-  </OnboardingDialogWrapper>
-);
-
-ChooseIdDialogStory.storyName = '(Purchase) 4. Choose ID';
-
-export const PaymentDialogStory: ComponentStory<typeof PaymentDialog> = () => (
-  <OnboardingDialogWrapper>
-    <PaymentDialog
-      productType="planet"
-      products={thirdEarthMockProducts}
-      productId={1}
-      setProductId={() => {}}
-      patp="~zod"
-      email="admin@admin.com"
-      stripe={undefined}
-      stripeOptions={undefined}
-      onBack={() => {}}
-      onNext={() => Promise.resolve(false)}
-    />
-  </OnboardingDialogWrapper>
-);
-
-PaymentDialogStory.storyName = '(Purchase) 5. Payment';
-
-export const BootingDialogStory: ComponentStory<typeof BootingDialog> = () => (
-  <OnboardingDialogWrapper>
-    <BootingDialog
-      isBooting
-      logs={['Booting ~zod.', 'Grab some steak.']}
-      onNext={() => Promise.resolve(false)}
-    />
-  </OnboardingDialogWrapper>
-);
-
-BootingDialogStory.storyName = '(Purchase) 6.1. Booting';
-
-export const BootingDialogCompleteStory: ComponentStory<
-  typeof BootingDialog
-> = () => (
-  <OnboardingDialogWrapper>
-    <BootingDialog
-      isBooting={false}
-      logs={['Booting ~zod.', 'Grab some steak.', 'Booting complete.']}
-      onNext={() => Promise.resolve(false)}
-    />
-  </OnboardingDialogWrapper>
-);
-
-BootingDialogCompleteStory.storyName = '(Purchase) 6.2. Booting complete';
-
-export const CredentialsDialogStory: ComponentStory<
-  typeof CredentialsDialog
-> = () => (
-  <OnboardingDialogWrapper>
-    <CredentialsDialog
-      credentials={{
-        id: '~pasren-satmex',
-        url: 'https://pasren-satmex.holium.network',
-        accessCode: 'tolnym-rilmug-ricnep-marlyx',
-      }}
-      onNext={() => Promise.resolve(false)}
-    />
-  </OnboardingDialogWrapper>
-);
-
-CredentialsDialogStory.storyName = '(Purchase) 7. Credentials';
-
-export const DownloadDialogStory: ComponentStory<
-  typeof DownloadDialog
-> = () => (
-  <OnboardingDialogWrapper>
-    <DownloadDialog
-      onDownloadMacM1={() => {}}
-      onDownloadMacIntel={() => {}}
-      onDownloadWindows={() => {}}
-      onDownloadLinux={() => {}}
-      onBack={() => {}}
-      onNext={() => Promise.resolve(false)}
-    />
-  </OnboardingDialogWrapper>
-);
-
-DownloadDialogStory.storyName = '(Purchase) 8. Download Realm for desktop';
+VerifyEmailDialogStory.storyName = '2. Verify email';
 
 export const UploadIdDisclaimerDialogStory: ComponentStory<
   typeof PaymentDialog
@@ -195,7 +69,7 @@ export const UploadIdDisclaimerDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdDisclaimerDialogStory.storyName = '(Upload) 4. Disclaimer';
+UploadIdDisclaimerDialogStory.storyName = '3. Disclaimer';
 
 export const UploadIdPaymentDialogStory: ComponentStory<
   typeof PaymentDialog
@@ -221,7 +95,7 @@ export const UploadIdPaymentDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdPaymentDialogStory.storyName = '(Upload) 5. Payment';
+UploadIdPaymentDialogStory.storyName = '4. Payment';
 
 export const UploadIdDialogStory: ComponentStory<
   typeof UploadIdDialog
@@ -235,7 +109,7 @@ export const UploadIdDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdDialogStory.storyName = '(Upload) 6.1. Upload ID';
+UploadIdDialogStory.storyName = '5.1. Upload ID';
 
 export const UploadIdUploadingDialogStory: ComponentStory<
   typeof UploadIdDialog
@@ -251,7 +125,7 @@ export const UploadIdUploadingDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdUploadingDialogStory.storyName = '(Upload) 6.2. Upload ID – Uploading';
+UploadIdUploadingDialogStory.storyName = '5.2. Upload ID – Uploading';
 
 export const UploadIdStuckDialogStory: ComponentStory<
   typeof UploadIdDialog
@@ -268,7 +142,7 @@ export const UploadIdStuckDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdStuckDialogStory.storyName = '(Upload) 6.3. Upload ID – Stuck?';
+UploadIdStuckDialogStory.storyName = '5.3. Upload ID – Stuck?';
 
 export const UploadIdErrorDialogStory: ComponentStory<
   typeof UploadIdDialog
@@ -285,7 +159,7 @@ export const UploadIdErrorDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdErrorDialogStory.storyName = '(Upload) 6.3. Upload ID – Error';
+UploadIdErrorDialogStory.storyName = '5.4. Upload ID – Error';
 
 export const UploadIdDoneDialogStory: ComponentStory<
   typeof UploadIdDialog
@@ -301,7 +175,7 @@ export const UploadIdDoneDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdDoneDialogStory.storyName = '(Upload) 6.4. Upload an ID – Uploaded';
+UploadIdDoneDialogStory.storyName = '5.5. Upload an ID – Uploaded';
 
 export const BYOPBootingDialogStory: ComponentStory<
   typeof BootingDialog
@@ -315,7 +189,7 @@ export const BYOPBootingDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-BYOPBootingDialogStory.storyName = '(Upload) 7.1. Booting';
+BYOPBootingDialogStory.storyName = '6.1. Booting';
 
 export const BYOPBootingDialogCompleteStory: ComponentStory<
   typeof BootingDialog
@@ -329,4 +203,4 @@ export const BYOPBootingDialogCompleteStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-BYOPBootingDialogCompleteStory.storyName = '(Upload) 7.2. Booting complete';
+BYOPBootingDialogCompleteStory.storyName = '6.2. Booting complete';
