@@ -148,6 +148,21 @@ type AlertsResponse = {
   alerts: ThirdEarthAlert[];
 };
 
+type GetNonceResponse = {
+  nonce: string;
+};
+
+type LoginWithWalletPayload = {
+  message: string;
+  signature: string;
+};
+
+type VerifyMessageResponse = {
+  token: string;
+  email: string;
+  client_side_encryption_key: string;
+};
+
 export class ThirdEarthApi {
   private apiBaseUrl: string;
   private headersClientId: string;
@@ -516,7 +531,7 @@ export class ThirdEarthApi {
 
   /* SIWE */
   getNonce() {
-    return http<{ nonce: string }>(`${this.apiBaseUrl}/siwe/nonce`, {
+    return http<GetNonceResponse>(`${this.apiBaseUrl}/siwe/nonce`, {
       method: 'GET',
       headers: this.getHeaders(),
     });
@@ -524,6 +539,14 @@ export class ThirdEarthApi {
 
   verifyMessage(message: string, signature: string) {
     return http<{ valid: boolean }>(`${this.apiBaseUrl}/siwe/regin`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ message, signature }),
+    });
+  }
+
+  loginWithWallet({ message, signature }: LoginWithWalletPayload) {
+    return http<VerifyMessageResponse>(`${this.apiBaseUrl}/siwe/regin`, {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify({ message, signature }),
