@@ -4,6 +4,7 @@ import { createGlobalStyle } from 'styled-components';
 import { Button, Flex } from '@holium/design-system';
 
 import { api } from './api';
+import useCalendarStore, { CalendarStore } from './CalendarStore';
 import {
   Calendar,
   CalendarList,
@@ -136,6 +137,12 @@ export const App = () => {
   const [spans, setSpans] = useState<any>([]);
   const [events, setEvents] = useState<any>([]);
   const [datePickerSelected, setDatePickerSelected] = useState<any>(new Date());
+  const setCurrentCalendarSub = useCalendarStore(
+    (store: CalendarStore) => store.setCurrentCalendarSub
+  );
+  const currentCalendarSub = useCalendarStore(
+    (store: CalendarStore) => store.currentCalendarSub
+  );
   const fetchSpacesList = async () => {
     try {
       const result = await api.getSpaces();
@@ -263,7 +270,24 @@ export const App = () => {
   useEffect(() => {
     spansToEvents(spans);
   }, [spans]);
-
+  const onCalendarSelect = async (calendarId: string) => {
+    setSelectedCalendar(calendarId);
+    try {
+      if (currentCalendarSub) {
+        log('currentCalendarSub', currentCalendarSub);
+        // unsub from the current path
+        const unsubResult = await api.unsubCalendarUpdates(currentCalendarSub);
+        log('unsubResult =>', unsubResult);
+      }
+      const subResult = await api.subCalendarUpdates(calendarId);
+      log('subResult =>', subResult);
+      setCurrentCalendarSub(subResult);
+    } catch (e) {
+      // try again?
+      log('onCalendarSelect sub error => ', e);
+    }
+    // setCurrentCalendarSub()
+  };
   return (
     <main>
       {/* use this for design system menu to work, remove once we move to realm */}
@@ -285,7 +309,7 @@ export const App = () => {
             <CalendarList
               space={selectedSpace}
               calendarList={calendarList}
-              onCalendarSelect={setSelectedCalendar}
+              onCalendarSelect={onCalendarSelect}
               selectedCalendar={selectedCalendar}
             />
           )}

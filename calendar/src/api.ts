@@ -11,7 +11,19 @@ export type Perms = {
 };
 export type Offset = { sign: '+' | '-'; d: number };
 export type Meta = { name: string; description: string; color: string };
-
+const updateHandler = (update: any) => {
+  log('update', update);
+};
+const updates = (calendarId: string) => {
+  return {
+    app: 'calendar',
+    path: '/ui/calendar/' + calendarId,
+    event: updateHandler,
+    //TODO: handle sub death/kick/err
+    err: () => log('Subscription rejected'),
+    quit: (e: any) => log('Kicked from subscription', e),
+  };
+};
 export const api = {
   createApi: memoize(() => {
     /*
@@ -27,11 +39,23 @@ export const api = {
     urb.onOpen = () => log('urbit onOpen');
     urb.onRetry = () => log('urbit onRetry');
     //sub to our frontend updates
-    // urb.subscribe(updates);
+    //  urb.subscribe(updates);
     urb.connect();
 
     return urb;
   }),
+  /**
+   * Subscription handlers
+    -keep the current subscribed to calendar in a store var
+    -when user switches calendars unsub from that calendar (if any) and sub to the new one
+  */
+  subCalendarUpdates: async (calendarId: string) => {
+    const calUpdateObj = updates(calendarId);
+    return api.createApi().subscribe(calUpdateObj);
+  },
+  unsubCalendarUpdates: async (subNumber: number) => {
+    return api.createApi().unsubscribe(subNumber);
+  },
   /**
    * Rules related
    */

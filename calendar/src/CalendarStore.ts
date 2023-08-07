@@ -9,6 +9,9 @@ export interface CalendarStore {
 
   editingData: any;
   setEditingData: (data: any) => void;
+
+  currentCalendarSub: null | number;
+  setCurrentCalendarSub: (subNumber: null | number) => void;
 }
 
 const useCalendarStore = create<CalendarStore>((set) => ({
@@ -25,6 +28,11 @@ const useCalendarStore = create<CalendarStore>((set) => ({
   editingData: null,
   setEditingData: (data: any) => {
     set(() => ({ editingData: data }));
+  },
+
+  currentCalendarSub: null,
+  setCurrentCalendarSub: (subNumber: null | number) => {
+    set(() => ({ currentCalendarSub: subNumber }));
   },
 }));
 
