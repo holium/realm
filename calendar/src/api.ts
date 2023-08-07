@@ -750,7 +750,7 @@ export const api = {
   },
   deleteCalendarAction: async (calendarId: string) => {
     const json = { p: calendarId, q: { delete: null } };
-    return await api.calendarActionVent(json);
+    return await api.eventActionVent(json);
   },
   /**
    * Fundamental API: Event Actions
@@ -776,7 +776,7 @@ export const api = {
   },
   deleteEventAction: async (calendarId: string, eventId: string) => {
     const json = { p: { cid: calendarId, eid: eventId }, q: { delete: null } };
-    return await api.calendarActionVent(json);
+    return await api.eventActionVent(json);
   },
   createRuleEventAction: async (
     calendarId: string,
