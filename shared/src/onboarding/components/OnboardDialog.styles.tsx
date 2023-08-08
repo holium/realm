@@ -123,6 +123,17 @@ export const OnboardDialogInputLabel = styled(Text.Label)`
   margin-bottom: 4px;
 `;
 
+export const OnboardDialogInputLabelSmall = styled(OnboardDialogInputLabel)`
+  color: rgba(var(--rlm-text-rgba), 0.6);
+  font-family: Rubik;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: 0.72px;
+  text-transform: uppercase;
+`;
+
 export const OnboardDialogTitle = styled(Text.H1)`
   font-size: 22px;
   font-weight: 600;

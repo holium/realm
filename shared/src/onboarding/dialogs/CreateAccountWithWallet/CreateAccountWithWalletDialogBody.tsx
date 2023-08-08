@@ -4,7 +4,7 @@ import { Flex } from '@holium/design-system/general';
 
 import {
   OnboardDialogDescriptionSmall,
-  OnboardDialogInputLabel,
+  OnboardDialogInputLabelSmall,
   OnboardDialogTitleBig,
 } from '../../components/OnboardDialog.styles';
 import { FormField, TermsDisclaimer } from '../../onboarding';
@@ -31,9 +31,9 @@ export const CreateAccountWithWalletDialogBody = ({ ethAddress }: Props) => {
         </OnboardDialogDescriptionSmall>
       </Flex>
       <Flex flexDirection="column" gap={2}>
-        <OnboardDialogInputLabel as="label" htmlFor="eth-address">
+        <OnboardDialogInputLabelSmall as="label" htmlFor="eth-address">
           Eth Address
-        </OnboardDialogInputLabel>
+        </OnboardDialogInputLabelSmall>
         <FormField
           name="eth-address"
           type="text"
@@ -44,9 +44,9 @@ export const CreateAccountWithWalletDialogBody = ({ ethAddress }: Props) => {
         />
       </Flex>
       <Flex flexDirection="column" gap={2}>
-        <OnboardDialogInputLabel as="label" htmlFor="contact-email">
-          Contact Email
-        </OnboardDialogInputLabel>
+        <OnboardDialogInputLabelSmall as="label" htmlFor="contact-email">
+          Contact Email <span style={{ opacity: 0.6 }}>(optional)</span>
+        </OnboardDialogInputLabelSmall>
         <FormField
           name="contact-email"
           type="text"

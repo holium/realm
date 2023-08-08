@@ -6,7 +6,7 @@ import { Button, CopyButton, Flex, Text } from '@holium/design-system/general';
 import { FundingCard } from '../../components/FundingCard';
 import {
   OnboardDialogDescriptionTiny,
-  OnboardDialogInputLabel,
+  OnboardDialogInputLabelSmall,
   OnboardDialogTitleBig,
 } from '../../components/OnboardDialog.styles';
 import { FormField } from '../../onboarding';
@@ -47,9 +47,9 @@ export const FundAccountDialogBody = ({ ethAddress, onNext }: Props) => {
         <OnboardDialogTitleBig>Fund your account</OnboardDialogTitleBig>
       </Flex>
       <Flex flexDirection="column" gap={4} mb="16px">
-        <OnboardDialogInputLabel as="label" htmlFor="eth-address">
+        <OnboardDialogInputLabelSmall as="label" htmlFor="eth-address">
           Deposit Address
-        </OnboardDialogInputLabel>
+        </OnboardDialogInputLabelSmall>
         <FormField
           name="eth-address"
           type="text"
@@ -65,9 +65,9 @@ export const FundAccountDialogBody = ({ ethAddress, onNext }: Props) => {
         </OnboardDialogDescriptionTiny>
       </Flex>
       <Flex flexDirection="column" gap={4} mb="8px">
-        <OnboardDialogInputLabel as="label" htmlFor="eth-address">
+        <OnboardDialogInputLabelSmall as="label" htmlFor="eth-address">
           Funding options
-        </OnboardDialogInputLabel>
+        </OnboardDialogInputLabelSmall>
         <FundingCard
           label="One month"
           ethPrice="0.0080 ETH"
