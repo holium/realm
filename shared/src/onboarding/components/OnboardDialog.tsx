@@ -95,46 +95,48 @@ export const OnboardDialog = ({
             {icon && (
               <OnboardDialogIconContainer>{icon}</OnboardDialogIconContainer>
             )}
-            <OnboardDialogBodyContainer>
+            <OnboardDialogBodyContainer minimal={minimal}>
               {body}
               {submitErrorMessage && <ErrorBox>{submitErrorMessage}</ErrorBox>}
             </OnboardDialogBodyContainer>
           </OnboardDialogBody>
-          <OnboardDialogFooter>
-            <Flex flex={1} alignItems="center">
-              <OnboardDialogFooterBackButtonFlex>
-                {onBack && (
-                  <OnboardDialogBackButton type="button" onClick={onBack}>
-                    <Icon
-                      name="ArrowLeftLine"
-                      size={20}
-                      fill="text"
-                      opacity={0.3}
+          {(footer || onBack || onNext) && (
+            <OnboardDialogFooter>
+              <Flex flex={1} alignItems="center">
+                <OnboardDialogFooterBackButtonFlex>
+                  {onBack && (
+                    <OnboardDialogBackButton type="button" onClick={onBack}>
+                      <Icon
+                        name="ArrowLeftLine"
+                        size={20}
+                        fill="text"
+                        opacity={0.3}
+                      />
+                    </OnboardDialogBackButton>
+                  )}
+                </OnboardDialogFooterBackButtonFlex>
+                <Flex flex={5} gap="16px">
+                  <Flex flex={1} alignItems="center">
+                    {footer}
+                  </Flex>
+                  {!hideNextButton && (
+                    <SubmitButton
+                      text={nextText}
+                      icon={nextIcon}
+                      submitting={isSubmitting}
+                      disabled={
+                        !onNext ||
+                        !isValid ||
+                        Object.keys(values).filter(
+                          (key) => values[key] === undefined
+                        ).length > 0
+                      }
                     />
-                  </OnboardDialogBackButton>
-                )}
-              </OnboardDialogFooterBackButtonFlex>
-              <Flex flex={5} gap="16px">
-                <Flex flex={1} alignItems="center">
-                  {footer}
+                  )}
                 </Flex>
-                {!hideNextButton && (
-                  <SubmitButton
-                    text={nextText}
-                    icon={nextIcon}
-                    submitting={isSubmitting}
-                    disabled={
-                      !onNext ||
-                      !isValid ||
-                      Object.keys(values).filter(
-                        (key) => values[key] === undefined
-                      ).length > 0
-                    }
-                  />
-                )}
               </Flex>
-            </Flex>
-          </OnboardDialogFooter>
+            </OnboardDialogFooter>
+          )}
         </OnboardDialogCard>
       )}
     </Formik>

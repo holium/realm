@@ -51,6 +51,12 @@ export const OnboardDialogCard = styled(Form)<{ minimal: boolean }>`
     max-width: 566px;
     min-height: 0;
     padding: 32px 32px 20px 32px;
+
+    @media (max-width: ${TABLET_WIDTH}px) {
+      margin-left: 12px;
+      margin-right: 12px;
+      padding: 32px 24px 20px 24px;
+    }
   `}
 `;
 
@@ -68,7 +74,7 @@ export const OnboardDialogBody = styled.div`
   }
 `;
 
-export const OnboardDialogBodyContainer = styled.div`
+export const OnboardDialogBodyContainer = styled.div<{ minimal: boolean }>`
   display: flex;
   flex: 5;
   min-width: 0;
@@ -78,8 +84,13 @@ export const OnboardDialogBodyContainer = styled.div`
 
   @media (max-width: ${TABLET_WIDTH}px) {
     width: 100%;
-    max-width: 360px;
     flex: none;
+
+    ${({ minimal }) =>
+      !minimal &&
+      `
+      max-width: 360px;
+    `}
   }
 `;
 
@@ -96,6 +107,13 @@ export const OnboardDialogDescriptionSmall = styled(Text.Body)`
   font-style: normal;
   font-weight: 400;
   line-height: 20px;
+`;
+
+export const OnboardDialogDescriptionTiny = styled(
+  OnboardDialogDescriptionSmall
+)`
+  font-size: 12px;
+  line-height: 16px;
 `;
 
 export const OnboardDialogInputLabel = styled(Text.Label)`

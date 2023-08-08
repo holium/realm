@@ -7,7 +7,7 @@ import {
   OnboardDialogInputLabel,
   OnboardDialogTitleBig,
 } from '../../components/OnboardDialog.styles';
-import { FormField } from '../../onboarding';
+import { FormField, TermsDisclaimer } from '../../onboarding';
 
 type Props = {
   ethAddress: string;
@@ -54,6 +54,7 @@ export const CreateAccountWithWalletDialogBody = ({ ethAddress }: Props) => {
           isError={Boolean(errors?.contactEmail)}
         />
       </Flex>
+      <TermsDisclaimer onClick={() => {}} />
     </>
   );
 };

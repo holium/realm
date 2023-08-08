@@ -1,10 +1,7 @@
 import { FormikValues } from 'formik';
 import * as Yup from 'yup';
 
-import { Flex } from '@holium/design-system/general';
-
 import { OnboardDialog } from '../../components/OnboardDialog';
-import { TermsDisclaimer } from '../../onboarding';
 import {
   CreateAccountWithWalletDialogBody,
   CreateAccountWithWalletDialogFields,
@@ -28,18 +25,15 @@ export const CreateAccountWithWalletDialog = ({ onNext }: Props) => {
   };
 
   return (
-    <Flex flexDirection="column" alignItems="center">
-      <OnboardDialog
-        minimal
-        initialValues={initialValues}
-        validationSchema={CreateAccountSchema}
-        body={
-          <CreateAccountWithWalletDialogBody ethAddress="0xAC36fc83EB0B09ACd3244AD6637A8e8404724D6c" />
-        }
-        nextText="Confirm"
-        onNext={onNext}
-      />
-      <TermsDisclaimer onClick={() => {}} />
-    </Flex>
+    <OnboardDialog
+      minimal
+      initialValues={initialValues}
+      validationSchema={CreateAccountSchema}
+      body={
+        <CreateAccountWithWalletDialogBody ethAddress="0xAC36fc83EB0B09ACd3244AD6637A8e8404724D6c" />
+      }
+      nextText="Confirm"
+      onNext={onNext}
+    />
   );
 };

@@ -25,8 +25,13 @@ export const FundAccountDialog = ({ onNext }: Props) => {
       minimal
       initialValues={initialValues}
       validationSchema={CreateAccountSchema}
-      body={<FundAccountDialogBody />}
-      onNext={onNext}
+      body={
+        <FundAccountDialogBody
+          ethAddress="0xAC36fc83EB0B09ACd3244AD6637A8e8404724D6c"
+          onNext={() => onNext({})}
+        />
+      }
+      hideNextButton
     />
   );
 };
