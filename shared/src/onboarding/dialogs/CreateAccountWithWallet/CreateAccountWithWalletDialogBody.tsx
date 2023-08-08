@@ -7,15 +7,15 @@ import {
   OnboardDialogInputLabel,
   OnboardDialogTitle,
 } from '../../components/OnboardDialog.styles';
-import { FormField } from '../../onboarding';
+import { FormField, TermsDisclaimer } from '../../onboarding';
 
-export type CreateAccountWithWalletFields = {
+export type CreateAccountWithWalletDialogFields = {
   ethAddress: string;
   contactEmail: string;
 };
 
 export const CreateAccountWithWalletDialogBody = () => {
-  const { errors } = useFormikContext<CreateAccountWithWalletFields>();
+  const { errors } = useFormikContext<CreateAccountWithWalletDialogFields>();
 
   return (
     <>
@@ -45,6 +45,7 @@ export const CreateAccountWithWalletDialogBody = () => {
           isError={Boolean(errors?.contactEmail)}
         />
       </Flex>
+      <TermsDisclaimer onClick={() => {}} />
     </>
   );
 };

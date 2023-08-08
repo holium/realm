@@ -201,3 +201,22 @@ export const AccountErroredUploadDialogStory: ComponentStory<
 );
 
 AccountErroredUploadDialogStory.storyName = '6.3. Identity Upload Error';
+
+export const AccountCryptoPaymentDialogStory: ComponentStory<
+  typeof AccountStorageDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <AccountUnfinishedUploadDialog
+      ships={[thirdEarthMockShip]}
+      selectedShipId={0}
+      setSelectedShipId={() => {}}
+      onClickPurchaseId={() => {}}
+      onClickUploadId={() => {}}
+      onClickReuploadId={() => {}}
+      onClickSidebarSection={() => {}}
+      onClickExit={() => {}}
+    />
+  </OnboardingDialogWrapper>
+);
+
+AccountCryptoPaymentDialogStory.storyName = '7. Crypto payment';

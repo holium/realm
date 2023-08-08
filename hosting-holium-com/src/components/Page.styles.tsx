@@ -13,7 +13,9 @@ export const Main = styled.main<MainProps>`
 
   ${({ noBackground }) =>
     noBackground
-      ? ''
+      ? `
+  background-color: #f9f9f9;
+      `
       : `
   background-size: cover;
   background-repeat: no-repeat;

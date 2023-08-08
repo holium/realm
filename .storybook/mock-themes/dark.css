@@ -75,3 +75,7 @@ html {
   transition: var(--transition-slow);
   background-image: url('https://images.unsplash.com/photo-1672821337870-2180f5223865?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=4032&q=80');
 }
+
+.no-wallpaper {
+  background: #f9f9f9;
+}

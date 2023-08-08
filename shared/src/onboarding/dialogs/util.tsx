@@ -11,7 +11,7 @@ export const OnboardingDialogWrapper = ({
   wallpaper?: boolean;
 }) => (
   <Flex
-    className={wallpaper ? 'wallpaper' : ''}
+    className={wallpaper ? 'wallpaper' : 'no-wallpaper'}
     justifyContent="center"
     alignItems="center"
     width="100%"

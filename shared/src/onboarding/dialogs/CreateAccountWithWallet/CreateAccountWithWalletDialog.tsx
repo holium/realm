@@ -2,7 +2,10 @@ import { FormikValues } from 'formik';
 import * as Yup from 'yup';
 
 import { OnboardDialog } from '../../components/OnboardDialog';
-import { CreateAccountWithWalletDialogBody } from './CreateAccountWithWalletDialogBody';
+import {
+  CreateAccountWithWalletDialogBody,
+  CreateAccountWithWalletDialogFields,
+} from './CreateAccountWithWalletDialogBody';
 
 const CreateAccountSchema = Yup.object().shape({
   ethAddress: Yup.string()
@@ -15,14 +18,18 @@ type Props = {
   onNext: (values: FormikValues) => Promise<boolean>;
 };
 
-export const CreateAccountWithWalletDialog = ({ onNext }: Props) => (
-  <OnboardDialog
-    initialValues={{
-      ethAddress: undefined,
-      contactEmail: undefined,
-    }}
-    validationSchema={CreateAccountSchema}
-    body={<CreateAccountWithWalletDialogBody />}
-    onNext={onNext}
-  />
-);
+export const CreateAccountWithWalletDialog = ({ onNext }: Props) => {
+  const initialValues: Partial<CreateAccountWithWalletDialogFields> = {
+    ethAddress: undefined,
+    contactEmail: undefined,
+  };
+
+  return (
+    <OnboardDialog
+      initialValues={initialValues}
+      validationSchema={CreateAccountSchema}
+      body={<CreateAccountWithWalletDialogBody />}
+      onNext={onNext}
+    />
+  );
+};
