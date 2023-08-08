@@ -358,6 +358,10 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         updates.forEach((update) => {
           if (!this.notesDB) return;
 
+          if (['notes'].includes(update.row?.type ?? '')) {
+            console.log('Notes: Received update.', update);
+          }
+
           if (update.change === 'add-row') {
             if (update.row?.type === 'notes') {
               const rowData = update.row.data;
