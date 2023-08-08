@@ -90,7 +90,7 @@ export const FundAccountDialogBody = ({ ethAddress, onNext }: Props) => {
           onClick={() => setFundingOption(2)}
         />
       </Flex>
-      <Flex>
+      <Flex gap="8px">
         <SkipButton onClick={onNext}>
           <Text.Body
             style={{

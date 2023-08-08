@@ -4,6 +4,7 @@ import { CreateAccountDialog } from '../onboarding';
 import { BootingNodeDialog } from './BootingNode/BootingNodeDialog';
 import { CreateAccountWithWalletDialog } from './CreateAccountWithWallet/CreateAccountWithWalletDialog';
 import { FundAccountDialog } from './FundAccount/FundAccountDialog';
+import { SkippedPaymentDialog } from './SkippedPayment/SkippedPaymentDialog';
 import { OnboardingDialogWrapper } from './util';
 
 export default {
@@ -35,7 +36,7 @@ export const SkippedPaymentDialogStory: ComponentStory<
   typeof CreateAccountDialog
 > = () => (
   <OnboardingDialogWrapper wallpaper={false}>
-    <FundAccountDialog onNext={() => Promise.resolve(false)} />
+    <SkippedPaymentDialog onNext={() => Promise.resolve(false)} />
   </OnboardingDialogWrapper>
 );
 
