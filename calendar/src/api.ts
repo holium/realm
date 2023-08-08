@@ -911,41 +911,36 @@ const updateHandler = (update: any) => {
   log('update', update);
   if (update.event) {
     // Update instance
-    if (Object.prototype.hasOwnProperty.call(update.event, 'update')) {
-      const eventId = update.event.update.eid;
-      const instance = update.event.update.update?.instance;
-      if (Object.prototype.hasOwnProperty.call(instance, 'add')) {
-        // Our new updated instance, find the corresponding instance in our state (spans)
-        const state = useCalendarStore.getState();
-        const spans = state.spans;
-        // Find the event
-        const newSpans = spans.map((item: any) => {
-          if (item.id === eventId) {
-            // find the instance and update it
-            return {
-              ...item,
-              instances: item.instances.map((inst: any) => {
-                if (inst.idx === instance.add.idx) {
-                  const newInstance = { ...inst, ...instance.add };
-                  return newInstance;
-                }
-                return inst;
-              }),
-            };
-          }
-          // default, return the span as is
-          return item;
-        });
-        state.setSpans(newSpans);
-      }
-    }
-    // Delete event
-    if (Object.prototype.hasOwnProperty.call(update.event, 'delete')) {
+    if (Object.prototype.hasOwnProperty.call(update.event, 'put')) {
+      const eventId = update.event.put.eid;
+      const newEvent = { id: eventId, ...update.event.put.event };
       const state = useCalendarStore.getState();
       const spans = state.spans;
-      const eventId = update.event.delete.eid;
-      // Find the event
-
+      // Find the event and update it
+      let eventExists = false;
+      const newSpans = spans.map((item: any) => {
+        if (item.id === eventId) {
+          // find the instance and update it
+          eventExists = true;
+          return {
+            ...item,
+            ...newEvent,
+          };
+        }
+        return item;
+      });
+      // Event doesn't exist, it's a new one. Add it to the list
+      if (!eventExists) {
+        newSpans.push(newEvent);
+      }
+      state.setSpans(newSpans);
+    }
+    // Delete event
+    if (Object.prototype.hasOwnProperty.call(update.event, 'del')) {
+      const state = useCalendarStore.getState();
+      const spans = state.spans;
+      const eventId = update.event.del.eid;
+      // Filter out this event using the id
       const newSpans = spans.filter((item: any) => item.id !== eventId);
       state.setSpans(newSpans);
     }
