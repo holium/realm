@@ -12,10 +12,11 @@ const CreateAccountSchema = Yup.object().shape({
 });
 
 type Props = {
+  booting: boolean;
   onNext: (values: FormikValues) => Promise<boolean>;
 };
 
-export const BootingNodeDialog = ({ onNext }: Props) => {
+export const BootingNodeDialog = ({ booting, onNext }: Props) => {
   const initialValues: Partial<BootingNodeDialogFields> = {
     booted: false,
   };
@@ -25,8 +26,19 @@ export const BootingNodeDialog = ({ onNext }: Props) => {
       minimal
       initialValues={initialValues}
       validationSchema={CreateAccountSchema}
-      body={<BootingNodeDialogBody />}
-      onNext={onNext}
+      body={
+        <BootingNodeDialogBody
+          booting={booting}
+          credentials={{
+            id: '~pasren-satmex',
+            url: 'https://pasren-satmex.holium.network',
+            accessCode: 'tolnym-rilmug-ricnep-marlyx',
+          }}
+        />
+      }
+      nextText="Go to account"
+      hideNextButton={booting}
+      onNext={() => onNext({})}
     />
   );
 };

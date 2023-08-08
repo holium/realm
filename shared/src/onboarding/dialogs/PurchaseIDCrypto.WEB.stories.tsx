@@ -46,7 +46,7 @@ export const BootingNodeDialogStory: ComponentStory<
   typeof CreateAccountDialog
 > = () => (
   <OnboardingDialogWrapper wallpaper={false}>
-    <BootingNodeDialog onNext={() => Promise.resolve(false)} />
+    <BootingNodeDialog booting onNext={() => Promise.resolve(false)} />
   </OnboardingDialogWrapper>
 );
 
@@ -56,7 +56,7 @@ export const BootedDialogStory: ComponentStory<
   typeof CreateAccountDialog
 > = () => (
   <OnboardingDialogWrapper wallpaper={false}>
-    <BootingNodeDialog onNext={() => Promise.resolve(false)} />
+    <BootingNodeDialog booting={false} onNext={() => Promise.resolve(false)} />
   </OnboardingDialogWrapper>
 );
 

@@ -42,7 +42,7 @@ export const onboardDialogCardCss = css`
   }
 `;
 
-export const OnboardDialogCard = styled(Form)<{ minimal: boolean }>`
+export const OnboardDialogCard = styled(Form)<{ minimal?: boolean }>`
   ${onboardDialogCardCss}
 
   ${({ minimal }) =>

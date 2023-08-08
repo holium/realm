@@ -24,6 +24,7 @@
     "react-dom": "^18.2.0"
   },
   "dependencies": {
+    "framer-motion": "^10.15.1",
     "react-dropzone": "^14.2.3"
   }
 }
