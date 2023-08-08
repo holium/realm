@@ -11,7 +11,7 @@ import {
 } from '../../components/OnboardDialog.styles';
 import { FormField } from '../../onboarding';
 
-const PayButton = styled(Button.Primary)`
+export const PayButton = styled(Button.Primary)`
   flex: 1;
   height: 36px;
   justify-content: center;

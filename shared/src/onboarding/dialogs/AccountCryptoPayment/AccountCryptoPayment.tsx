@@ -1,7 +1,6 @@
-import { AccountDialog } from '../../components/AccountDialog';
-import { SidebarSection } from '../../components/AccountDialogSidebar';
+import { AccountDialog, SidebarSection } from '../../components/AccountDialog';
 import { ThirdEarthShip } from '../../types';
-import { AccountUnfinishedUploadDialogBody } from './AccountUnfinishedUploadDialogBody';
+import { AccountCryptoPaymentBody } from './AccountCryptoPaymentBody';
 
 type Props = {
   ships: ThirdEarthShip[];
@@ -10,18 +9,18 @@ type Props = {
   onClickSidebarSection: (section: SidebarSection) => void;
   onClickPurchaseId: () => void;
   onClickUploadId: () => void;
-  onClickReuploadId: () => void;
+  onClickPay: () => void;
   onClickExit: () => void;
 };
 
-export const AccountUnfinishedUploadDialog = ({
+export const AccountCryptoPayment = ({
   ships,
   selectedShipId,
   setSelectedShipId,
   onClickSidebarSection,
   onClickPurchaseId,
   onClickUploadId,
-  onClickReuploadId,
+  onClickPay,
   onClickExit,
 }: Props) => (
   <AccountDialog
@@ -34,10 +33,6 @@ export const AccountUnfinishedUploadDialog = ({
     onClickSidebarSection={onClickSidebarSection}
     onExit={onClickExit}
   >
-    <AccountUnfinishedUploadDialogBody
-      key={selectedShipId}
-      shipType={ships.find((ship) => ship.id === selectedShipId)?.ship_type}
-      onClickReuploadId={onClickReuploadId}
-    />
+    <AccountCryptoPaymentBody key={selectedShipId} onClickPay={onClickPay} />
   </AccountDialog>
 );

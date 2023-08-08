@@ -12,6 +12,7 @@ import {
   LoginDialog,
   OnboardDialogDescription,
 } from '../onboarding';
+import { AccountCryptoPayment } from './AccountCryptoPayment/AccountCryptoPayment';
 import { OnboardingDialogWrapper, thirdEarthMockShip } from './util';
 
 export default {
@@ -206,13 +207,13 @@ export const AccountCryptoPaymentDialogStory: ComponentStory<
   typeof AccountStorageDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <AccountUnfinishedUploadDialog
+    <AccountCryptoPayment
       ships={[thirdEarthMockShip]}
       selectedShipId={0}
       setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
       onClickUploadId={() => {}}
-      onClickReuploadId={() => {}}
+      onClickPay={() => {}}
       onClickSidebarSection={() => {}}
       onClickExit={() => {}}
     />
