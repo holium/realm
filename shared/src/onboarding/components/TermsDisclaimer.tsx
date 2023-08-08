@@ -19,7 +19,7 @@ type Props = {
 
 export const TermsDisclaimer = ({ onClick }: Props) => (
   <OnboardDialogFooter>
-    By using Realm, you agree to our{' '}
+    By using Realm, you agree to Holium's{' '}
     <OnboardDialogFooterLink onClick={onClick}>
       Terms of Service
     </OnboardDialogFooterLink>

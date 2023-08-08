@@ -22,6 +22,7 @@ export const BootingNodeDialog = ({ onNext }: Props) => {
 
   return (
     <OnboardDialog
+      minimal
       initialValues={initialValues}
       validationSchema={CreateAccountSchema}
       body={<BootingNodeDialogBody />}

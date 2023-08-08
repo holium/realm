@@ -22,6 +22,7 @@ type Props = {
   nextIcon?: ReactNode;
   hideNextButton?: boolean;
   footer?: ReactNode;
+  minimal?: boolean;
   initialValues?: FormikValues;
   validationSchema?: Yup.ObjectSchema<any>;
   onBack?: () => void;
@@ -35,6 +36,7 @@ export const OnboardDialog = ({
   nextIcon,
   hideNextButton,
   footer,
+  minimal = false,
   initialValues = {},
   validationSchema = Yup.object(),
   onBack,
@@ -88,7 +90,7 @@ export const OnboardDialog = ({
       onSubmit={onSubmit}
     >
       {({ values, isSubmitting, isValid }) => (
-        <OnboardDialogCard>
+        <OnboardDialogCard minimal={minimal}>
           <OnboardDialogBody>
             {icon && (
               <OnboardDialogIconContainer>{icon}</OnboardDialogIconContainer>

@@ -28,11 +28,18 @@ export const FormFieldInput = styled(Field)`
   &:-webkit-autofill:focus {
     transition: background-color 600000s 0s, color 600000s 0s;
   }
+
+  &:disabled {
+    cursor: not-allowed;
+    background-color: #f8f8f8;
+    color: rgba(var(--rlm-text-rgba), 0.52);
+  }
 `;
 
 type ContainerProps = {
   isError?: boolean;
   rightIcon?: ReactNode;
+  disabled?: boolean;
 };
 
 export const FormFieldContainer = styled.div<ContainerProps>`
@@ -61,6 +68,12 @@ export const FormFieldContainer = styled.div<ContainerProps>`
         border-color: rgba(var(--rlm-intent-alert-rgba));
       }
     `}
+
+  ${({ disabled }) =>
+    disabled &&
+    css`
+      border: none;
+    `}
 `;
 
 const FormFieldIconContainer = styled.div`
@@ -71,9 +84,14 @@ const FormFieldIconContainer = styled.div`
 
 type Props = ComponentProps<typeof Field> & ContainerProps;
 
-export const FormField = ({ isError, rightIcon, ...formikProps }: Props) => (
-  <FormFieldContainer isError={isError}>
-    <FormFieldInput {...formikProps} />
+export const FormField = ({
+  isError,
+  disabled,
+  rightIcon,
+  ...formikProps
+}: Props) => (
+  <FormFieldContainer isError={isError} disabled={disabled}>
+    <FormFieldInput {...formikProps} disabled={disabled} />
     {rightIcon && <FormFieldIconContainer>{rightIcon}</FormFieldIconContainer>}
   </FormFieldContainer>
 );

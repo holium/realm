@@ -22,6 +22,7 @@ export const FundAccountDialog = ({ onNext }: Props) => {
 
   return (
     <OnboardDialog
+      minimal
       initialValues={initialValues}
       validationSchema={CreateAccountSchema}
       body={<FundAccountDialogBody />}

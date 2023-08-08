@@ -42,8 +42,16 @@ export const onboardDialogCardCss = css`
   }
 `;
 
-export const OnboardDialogCard = styled(Form)`
+export const OnboardDialogCard = styled(Form)<{ minimal: boolean }>`
   ${onboardDialogCardCss}
+
+  ${({ minimal }) =>
+    minimal &&
+    `
+    max-width: 566px;
+    min-height: 0;
+    padding: 32px 32px 20px 32px;
+  `}
 `;
 
 export const OnboardDialogBody = styled.div`
@@ -82,6 +90,14 @@ export const OnboardDialogDescription = styled(Text.Body)`
   line-height: 1.5em;
 `;
 
+export const OnboardDialogDescriptionSmall = styled(Text.Body)`
+  color: rgba(var(--rlm-text-rgba), 0.5);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+`;
+
 export const OnboardDialogInputLabel = styled(Text.Label)`
   font-size: 14px;
   line-height: 17px;
@@ -94,6 +110,13 @@ export const OnboardDialogTitle = styled(Text.H1)`
   font-weight: 600;
   line-height: 26px;
   color: rgba(var(--rlm-text-rgba));
+`;
+
+export const OnboardDialogTitleBig = styled(OnboardDialogTitle)`
+  font-size: 26px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
 `;
 
 export const OnboardDialogSubTitle = styled(Text.Body)`
