@@ -1,6 +1,6 @@
-import { constants } from 'constants';
-
 import { ThirdEarthApi } from '@holium/shared';
+
+import { constants } from './constants';
 
 export const thirdEarthApi = new ThirdEarthApi(
   constants.API_URL as string,
