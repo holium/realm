@@ -175,7 +175,8 @@
       body.request
         :-  ~
         %-  as-octt:mimes:html
-        %-  en-json:html
+        %-  trip
+        %-  en:json:html
         %+  notify-request:encode
           note
         devices.state
@@ -223,7 +224,7 @@
   ?:  (dm-already-exists type.c.act all-ships bowl)
     =/  log1  (maybe-log hide-debug.state "dm between {<all-ships>} already exists")
     `state
-  =/  all-peers=ship-roles:db  
+  =/  all-peers=ship-roles:db
     %+  turn
       all-ships
     |=  s=ship
@@ -255,7 +256,7 @@
   =/  host-peer   (snag 0 (skim pathpeers |=(p=peer-row:db =(role.p %host))))
   =/  ogpath      (scry-path-row path.act bowl)
 
-  =/  cards  
+  =/  cards
     ?:  &(=(type.ogpath %dm) ?!(=(patp.host-peer our.bowl)))
       :: non-hosts are allowed to edit %dm type chats, but can only do
       :: so by relaying the request through the host-peer, since chat-db
@@ -281,7 +282,7 @@
     (~(del in pins.pathrow) msg-id.act)
 
   =/  pathpeers  (scry-peers path.act bowl)
-  =/  cards  
+  =/  cards
     :: we poke all peers/members' db with edit-path-pins (including ourselves)
     %:  turn
       pathpeers
@@ -312,7 +313,7 @@
     ?~  host.act  !!  :: have to pass the host if we are adding ourselves
     :_  state
     [%pass /dbpoke %agent [(need host.act) dap.bowl] %poke %chat-action !>([%add-ship-to-chat path.act ship.act ~])]~
-    
+
   =/  pathrow  (scry-path-row path.act bowl)
   ?>  ?|  =(src.bowl our.bowl)
           &(?!(=(src.bowl our.bowl)) =(invites.pathrow %open))
@@ -380,7 +381,7 @@
   :: read the peers for the path
   =/  pathpeers  (scry-peers path.act bowl)
   =/  official-time  t.act
-  =/  cards  
+  =/  cards
     %:  turn
       pathpeers
       |=(a=peer-row:db (into-insert-message-poke a +.act official-time))
@@ -397,7 +398,7 @@
   :: just pass along the edit-message-action to all the peers chat-db
   :: %chat-db will disallow invalid signals
   =/  pathpeers  (scry-peers path.act bowl)
-  =/  cards  
+  =/  cards
     %:  turn
       pathpeers
       |=(p=peer-row:db (into-edit-message-poke p act))
@@ -413,7 +414,7 @@
   :: just pass along the delete msg-id to all the peers chat-db
   :: %chat-db will disallow invalid signals
   =/  pathpeers  (scry-peers path.act bowl)
-  =/  cards  
+  =/  cards
     %:  turn
       pathpeers
       |=(p=peer-row:db (into-delete-message-poke p msg-id.act))
@@ -544,7 +545,7 @@
       ^-  json
       =/  player-ids  ~(val by devices)
       =/  base-list
-      :~  
+      :~
           ['app_id' s+app-id.notif]
           ['data' (mtd data.notif)]
           ['include_player_ids' a+(turn player-ids |=([id=@t] s+id))]
@@ -562,7 +563,7 @@
         ['contents' (contents contents.notif)]
         extended-list
     ::
-    ++  mtd 
+    ++  mtd
       |=  mtd=push-mtd
       ^-  json
       %-  pairs
@@ -573,7 +574,7 @@
         ['msg' a+(turn message.mtd |=(m=msg-part:db (messages-row:encode:chat-db [msg-id.m msg-part-id.m] m)))]
       ==
     ::
-    ++  contents 
+    ++  contents
       |=  contents=(map cord cord)
       ^-  json
       =/  message   (~(got by contents) 'en')
@@ -584,7 +585,7 @@
       |=  =devices
       ^-  json
       %-  pairs
-      :~  
+      :~
         :-  %devices
         %-  pairs
         %+  turn  ~(tap by devices)
@@ -682,14 +683,14 @@
     ::
     ++  path-and-ship
       %-  ot
-      :~  
+      :~
           [%path pa]
           [%ship de-ship]
       ==
     ::
     ++  de-edit-info
       %-  ot
-      :~  
+      :~
           [%msg-id de-msg-id]
           [%path pa]
           de-frag
@@ -710,7 +711,7 @@
     ::
     ++  path-and-fragments
       %-  ot
-      :~  
+      :~
           [%path pa]
           de-frag
           [%expires-in null-or-dri]
@@ -718,7 +719,7 @@
     ::
     ++  de-content
       %-  of
-      :~  
+      :~
           [%plain so]
           [%markdown so]
           [%bold so]
@@ -743,14 +744,14 @@
     ::
     ++  path-and-msg-id
       %-  ot
-      :~  
+      :~
           [%path pa]
           [%msg-id de-msg-id]
       ==
     ::
     ++  pin-message
       %-  ot
-      :~  
+      :~
           [%path pa]
           [%msg-id de-msg-id]
           [%pin bo]
