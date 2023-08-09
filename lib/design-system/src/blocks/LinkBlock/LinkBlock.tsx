@@ -11,7 +11,6 @@ import { TweetBlock } from './TweetBlock';
 import {
   extractOGData,
   fetchOGData,
-  LINK_PREVIEW_HEIGHT,
   LinkPreviewType,
   RAW_LINK_HEIGHT,
 } from './util';
@@ -189,9 +188,8 @@ export const LinkBlock = ({
     );
   }
   const ogOrLink = ogHasURL ? openGraph?.ogUrl : link;
-  const blockHeight = ogHasImage ? LINK_PREVIEW_HEIGHT : 100;
   return (
-    <Block id={id} {...rest} height={blockHeight}>
+    <Block id={id} {...rest}>
       {ogHasImage && (
         <LinkImage
           id={id}
