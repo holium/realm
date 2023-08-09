@@ -11,7 +11,6 @@ import { TweetBlock } from './TweetBlock';
 import {
   extractOGData,
   fetchOGData,
-  LINK_PREVIEW_HEIGHT,
   LinkPreviewType,
   RAW_LINK_HEIGHT,
 } from './util';
@@ -173,7 +172,12 @@ export const LinkBlock = ({
   const ogHasURL = openGraph && openGraph.ogUrl;
   const ogHasImage = openGraph && openGraph.ogImage;
   // 254px in rem is 15rem
-  if (!ogHasURL && !ogHasImage) {
+  // show the loader if the image or ogUrl is missing, but NOT if both are the empty string. In that case, it's just an og object with missing info, so display as best we can
+  if (
+    !ogHasURL &&
+    !ogHasImage &&
+    !(openGraph?.ogUrl === '' && openGraph?.ogImage === '')
+  ) {
     const width = containerWidth ? containerWidth - 12 : 320;
     return (
       <Box height={RAW_LINK_HEIGHT} id={id}>
@@ -185,15 +189,17 @@ export const LinkBlock = ({
   }
   const ogOrLink = ogHasURL ? openGraph?.ogUrl : link;
   return (
-    <Block id={id} {...rest} height={LINK_PREVIEW_HEIGHT}>
-      <LinkImage
-        id={id}
-        src={openGraph?.ogImage}
-        alt={openGraph?.ogTitle}
-        onError={() => {
-          // todo: if the image fails to load, set the image to error image
-        }}
-      />
+    <Block id={id} {...rest}>
+      {ogHasImage && (
+        <LinkImage
+          id={id}
+          src={openGraph?.ogImage}
+          alt={openGraph?.ogTitle}
+          onError={() => {
+            // todo: if the image fails to load, set the image to error image
+          }}
+        />
+      )}
       <Flex id={id} width="100%" flexDirection="column">
         <LinkTitle
           id={id}
