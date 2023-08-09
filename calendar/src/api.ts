@@ -429,11 +429,7 @@ export const api = {
   deleteSpanInstance: async (
     calendarId: string,
     spanId: string,
-    instanceId: number,
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    name: string,
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    description: string
+    instanceId: number
   ) => {
     return api.updateInstancesEventAction(
       calendarId,

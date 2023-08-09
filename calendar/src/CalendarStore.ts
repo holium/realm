@@ -21,6 +21,9 @@ export interface CalendarStore {
 
   selectedCalendar: null | string;
   setSelectedCalendar: (selectedCalendar: string) => void;
+
+  publicCalendarId: null | string;
+  setPublicCalendarId: (publicCalendarId: null | string) => void;
 }
 
 const useCalendarStore = create<CalendarStore>((set) => ({
@@ -57,6 +60,11 @@ const useCalendarStore = create<CalendarStore>((set) => ({
   selectedCalendar: null,
   setSelectedCalendar: (selectedCalendar: null | string) => {
     set(() => ({ selectedCalendar }));
+  },
+
+  publicCalendarId: null,
+  setPublicCalendarId: (publicCalendarId: null | string) => {
+    set(() => ({ publicCalendarId }));
   },
 }));
 

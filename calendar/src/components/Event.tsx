@@ -4,7 +4,6 @@ import { Popover } from 'react-tiny-popover';
 import { Box, Button, Card, Flex, Icon, Text } from '@holium/design-system';
 
 import { api } from '../api';
-import useCalendarStore, { CalendarStore } from '../CalendarStore';
 import {
   formatHoursMinutes,
   getDayOfWeekJS,
@@ -14,12 +13,6 @@ import {
 } from '../utils';
 // TODO: add reccurence text
 export const Event = ({ eventInfo }: any) => {
-  const setIsEditingInstance = useCalendarStore(
-    (store: CalendarStore) => store.setIsEditingInstance
-  );
-  const setEditingData = useCalendarStore(
-    (store: CalendarStore) => store.setEditingData
-  );
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [deletePrompt, setDeletePrompt] = useState<boolean>(false);
   // TODO: optimize this
@@ -33,7 +26,7 @@ export const Event = ({ eventInfo }: any) => {
   const spanId = eventInfo.event['_def']?.extendedProps._spanId;
   const instanceId = eventInfo.event['_def']?.extendedProps._instanceId;
   const reccurenceRule = eventInfo.event['_def']?.extendedProps._reccurenceRule;
-  const isFullDay = eventInfo.event['_def']?.extendedProps._isFullday;
+  // const isFullDay = eventInfo.event['_def']?.extendedProps._isFullday;
 
   const startWeekMonthDate =
     getDayOfWeekJS(startDate.getDay()) + ', ' + getMonthAndDay(startDate);
@@ -52,9 +45,7 @@ export const Event = ({ eventInfo }: any) => {
       const result = await api.deleteSpanInstance(
         calendarId,
         spanId,
-        parseInt(instanceId),
-        title,
-        description
+        parseInt(instanceId)
       );
       log('deleteSpanInstance result => ', result);
     } catch (e) {

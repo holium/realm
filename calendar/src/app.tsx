@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { createGlobalStyle } from 'styled-components';
 
 import { Button, Flex } from '@holium/design-system';
@@ -12,6 +13,7 @@ import {
   NewEvent,
   SpaceList,
 } from './components';
+import { Navigation } from './components/Navigation';
 import { isOur, log } from './utils';
 
 import 'react-day-picker/dist/style.css';
@@ -130,6 +132,24 @@ declare global {
 }
 
 export const App = () => {
+  return (
+    <main>
+      <Router>
+        <Routes>
+          <Route element={<Navigation />}>
+            <Route path="/apps/calendar/" element={<Home />} />
+            {/* :ship/:calendar form the calendarId we use */}
+            <Route
+              path="/calendar/public/:ship/:calendar"
+              element={<ClearWebCalendar />}
+            />
+          </Route>
+        </Routes>
+      </Router>
+    </main>
+  );
+};
+const Home = () => {
   const [selectedSpace, setSelectedSpace] = useState<null | string>(null);
   const [spaceList, setSpaceList] = useState<string[]>([]);
   const calendarList = useCalendarStore(
@@ -302,8 +322,7 @@ export const App = () => {
     // setCurrentCalendarSub()
   };
   return (
-    <main>
-      {/* use this for design system menu to work, remove once we move to realm */}
+    <>
       <div id="portal-root" />
       <GlobalStyle />
       <Flex>
@@ -343,6 +362,15 @@ export const App = () => {
         </Flex>
         <Calendar events={events} datePickerSelected={datePickerSelected} />
       </Flex>
-    </main>
+    </>
+  );
+};
+const ClearWebCalendar = () => {
+  const publicCalendarId = useCalendarStore(
+    (store: CalendarStore) => store.publicCalendarId
+  );
+
+  return (
+    <p>rendering a clear web option with this calendar : {publicCalendarId}</p>
   );
 };
