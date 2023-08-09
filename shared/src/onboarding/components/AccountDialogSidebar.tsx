@@ -17,6 +17,7 @@ import {
   AccountDialogSidebarMenu,
   AccountDialogSidebarMenuItemText,
 } from './AccountDialogSidebar.styles';
+import { FundWithBy } from './FundWithBy';
 
 export enum SidebarSection {
   Hosting = 'Hosting',
@@ -54,6 +55,8 @@ export const AccountDialogSidebar = ({
 }: Props) => {
   const hasShips = ships ? ships.length > 0 : false;
   const hasCSEK = useToggle(false);
+  // TODO: replace by actual check (if no email on user)
+  const isCryptoUser = currentSection === SidebarSection.CryptoPayment;
 
   let sidebarItems: SidebarSection[] = [];
 
@@ -173,6 +176,7 @@ export const AccountDialogSidebar = ({
             {section}
           </AccountDialogSidebarMenuItemText>
         ))}
+        {isCryptoUser && <FundWithBy amount="0.0080 ETH" due="08/16/23" />}
       </AccountDialogSidebarMenu>
       <Button.Transparent style={{ padding: 0 }} onClick={onExit}>
         <Icon fill="text" opacity={0.5} name="RoomLeave" size={20} />

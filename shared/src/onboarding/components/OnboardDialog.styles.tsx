@@ -102,7 +102,7 @@ export const OnboardDialogDescription = styled(Text.Body)`
 `;
 
 export const OnboardDialogDescriptionSmall = styled(Text.Body)`
-  color: rgba(var(--rlm-text-rgba), 0.35);
+  color: rgba(var(--rlm-text-rgba), 0.52);
   font-size: 14px;
   font-style: normal;
   font-weight: 400;

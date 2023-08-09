@@ -12,7 +12,7 @@ import {
   LoginDialog,
   OnboardDialogDescription,
 } from '../onboarding';
-import { AccountCryptoPayment } from './AccountCryptoPayment/AccountCryptoPayment';
+import { AccountCryptoPaymentDialog } from './AccountCryptoPayment/AccountCryptoPayment';
 import { OnboardingDialogWrapper, thirdEarthMockShip } from './util';
 
 export default {
@@ -207,7 +207,7 @@ export const AccountCryptoPaymentDialogStory: ComponentStory<
   typeof AccountStorageDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <AccountCryptoPayment
+    <AccountCryptoPaymentDialog
       ships={[thirdEarthMockShip]}
       selectedShipId={0}
       setSelectedShipId={() => {}}

@@ -15,6 +15,7 @@ export { OnboardDialogDescription } from './components/OnboardDialog.styles';
 export { PassportForm } from './components/PassportForm';
 export { SubmitButton } from './components/SubmitButton';
 export { TermsDisclaimer } from './components/TermsDisclaimer';
+export { AccountCryptoPaymentDialog } from './dialogs/AccountCryptoPayment/AccountCryptoPayment';
 export { AccountCustomDomainDialog } from './dialogs/AccountCustomDomain/AccountCustomDomainDialog';
 export { AccountCustomDomainDialogBody } from './dialogs/AccountCustomDomain/AccountCustomDomainDialogBody';
 export { AccountDownloadRealmDialog } from './dialogs/AccountDownloadRealm/AccountDownloadRealmDialog';

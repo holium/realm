@@ -124,7 +124,7 @@ export const BootingNodeDialogBody = ({ booting, credentials }: Props) => {
           <Flex flexDirection="column" gap="16px" mt="-32px">
             <GrayBox flexDirection="column">
               <Flex gap={4} alignItems="center">
-                <OnboardDialogSubTitle width="100px" fontWeight={600}>
+                <OnboardDialogSubTitle width="100px" fontWeight={500}>
                   URL
                 </OnboardDialogSubTitle>
                 <OnboardDialogDescriptionSmall width="280px">
@@ -132,7 +132,7 @@ export const BootingNodeDialogBody = ({ booting, credentials }: Props) => {
                 </OnboardDialogDescriptionSmall>
               </Flex>
               <Flex gap={4} alignItems="center">
-                <OnboardDialogSubTitle width="100px" fontWeight={600}>
+                <OnboardDialogSubTitle width="100px" fontWeight={500}>
                   Access Code
                 </OnboardDialogSubTitle>
                 <OnboardDialogDescriptionSmall width="203px">

@@ -18,6 +18,12 @@ export const PayButton = styled(Button.Primary)`
   gap: 12px;
   border-radius: 6px;
   background: #43c35f;
+
+  && {
+    &:hover {
+      background: #43c35f !important;
+    }
+  }
 `;
 
 const SkipButton = styled(Button.Secondary)`
