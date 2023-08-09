@@ -57,7 +57,8 @@ const StandaloneChatRoomPresenter = () => {
     e.stopPropagation();
 
     chatStore.setSubroute('chat');
-    roomsStore.cleanUpCurrentRoom();
+    roomsStore.leaveRoom(presentRoom.rid);
+    // roomsStore.cleanUpCurrentRoom();
 
     sound.playRoomLeave();
   };

@@ -118,7 +118,8 @@ const EditorPresenter = () => {
     await roomsStore.createRoom(
       `Notes: ${selectedNote.title}`,
       'public',
-      roomPath
+      roomPath,
+      'background'
     );
 
     reconnecting.toggleOff();

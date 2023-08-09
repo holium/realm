@@ -14,6 +14,9 @@ import { DataPacket, DataPacketKind } from './room.types';
 type RoomAccess = 'public' | 'private';
 type RoomCreateType = {
   rid: string;
+  // interactive - video/audio/data capabilities
+  // background - data only (e.g. for notes and typing feedback)
+  rtype: 'interactive' | 'background';
   provider: string;
   creator: string;
   access?: RoomAccess;
@@ -57,6 +60,7 @@ export type RoomChat = {
 
 export class RoomModel {
   @observable rid: string;
+  @observable rtype: 'interactive' | 'background' = 'interactive';
   @observable provider = '';
   @observable creator = '';
   @observable access: RoomAccess = 'public';
@@ -69,6 +73,7 @@ export class RoomModel {
   constructor(initialData: RoomCreateType) {
     makeObservable(this);
     this.rid = initialData.rid;
+    this.rtype = initialData.rtype;
     this.provider = initialData.provider;
     this.creator = initialData.creator;
     this.access = initialData.access || 'public';
@@ -83,6 +88,7 @@ export class RoomModel {
 
   @action
   update(data: RoomModel) {
+    this.rtype = data.rtype;
     this.access = data.access || 'public';
     this.title = data.title;
     this.whitelist = data.whitelist || [];
@@ -129,8 +135,13 @@ export class RoomsStore extends EventsEmitter {
   @observable ourId: string;
   @observable ourPeer: LocalPeer;
   @observable path = '';
-  @observable provider = 'litzod-dozzod-hostyv.holium.live';
+  // @observable provider = 'litzod-dozzod-hostyv.holium.live';
+  @observable provider = 'localhost:3030';
   @observable rooms: Map<string, RoomModel> = observable.map<
+    string,
+    RoomModel
+  >();
+  @observable sessions: Map<string, RoomModel> = observable.map<
     string,
     RoomModel
   >();
@@ -231,7 +242,7 @@ export class RoomsStore extends EventsEmitter {
 
     RealmIPC.onUpdate((update) => {
       if (update.type === 'logout') {
-        this.cleanUpCurrentRoom();
+        this.cleanUpCurrentRoom(true);
         this.status = 'disconnected';
         this.websocket.close();
       }
@@ -300,6 +311,10 @@ export class RoomsStore extends EventsEmitter {
     const domain = this.provider.split('.')[0];
     // parse our node number
     return domain;
+  }
+
+  getCurrentSession(type: 'interactive' | 'background') {
+    return this.sessions.get(type);
   }
 
   getRoomByPath(path: string) {
@@ -424,7 +439,9 @@ export class RoomsStore extends EventsEmitter {
   @action
   connect() {
     const websocket = new WebSocket(
-      `wss://${this.provider}/signaling?serverId=${this.ourId}`
+      `${process.env.NODE_ENV === 'development' ? 'ws' : 'wss'}://${
+        this.provider
+      }/signaling?serverId=${this.ourId}`
     );
 
     websocket.onopen = () => {
@@ -500,6 +517,7 @@ export class RoomsStore extends EventsEmitter {
         const newRoom = new RoomModel(event.room);
         newRoom.update(event.room);
         this.rooms.set(event.room.rid, newRoom);
+        this.sessions.set(event.room.rtype, newRoom);
 
         this.currentRid = event.room.rid;
         break;
@@ -615,13 +633,19 @@ export class RoomsStore extends EventsEmitter {
   }
 
   @action
-  async createRoom(title: string, access: RoomAccess, path: string | null) {
+  async createRoom(
+    title: string,
+    access: RoomAccess,
+    path: string | null = null,
+    roomType: 'interactive' | 'background' = 'interactive'
+  ) {
     if (!this.ourPeer.audioStream) {
       await this.ourPeer.enableAudio();
     }
 
     const newRoom = {
       rid: ridFromTitle(this.provider, this.ourId, title),
+      rtype: roomType,
       provider: this.provider,
       creator: this.ourId,
       access,
@@ -632,6 +656,7 @@ export class RoomsStore extends EventsEmitter {
     this.websocket.send(
       serialize({
         type: 'create-room',
+        rtype: roomType,
         rid: ridFromTitle(this.provider, this.ourId, title),
         title: title,
         path,
@@ -664,6 +689,8 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   deleteRoom(rid: string) {
+    const room = this.rooms.get(rid);
+    if (room) this.sessions.delete(room.rtype);
     this.rooms.delete(rid);
     this.ourPeer.disableAll();
     this.currentRid = null;
@@ -678,12 +705,24 @@ export class RoomsStore extends EventsEmitter {
   }
 
   @action
-  cleanUpCurrentRoom() {
+  cleanUpCurrentRoom(force = false) {
     if (this.currentRoom) {
-      if (this.currentRoom.creator === this.ourId) {
+      if (force) {
+        console.log('cleanUpCurrentRoom - forcing delete...');
         this.deleteRoom(this.currentRoom.rid);
       } else {
-        this.leaveRoom(this.currentRoom.rid);
+        if (this.currentRoom.present.length > 1) {
+          console.log('cleanUpCurrentRoom - still people in room. leaving...');
+          // if there will still be someone left when you leave the room, simply
+          //   keep the room alive and leave
+          this.leaveRoom(this.currentRoom.rid);
+        } else {
+          console.log(
+            'cleanUpCurrentRoom - last one standing. deleting room...'
+          );
+          // turn the lights out if you're the last one out
+          this.deleteRoom(this.currentRoom.rid);
+        }
       }
     }
     this.pinnedSpeaker = null;
@@ -691,7 +730,14 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   async joinRoom(rid: string) {
-    this.cleanUpCurrentRoom();
+    const room = this.rooms.get(rid);
+    if (room) {
+      const session = this.getCurrentSession(room.rtype);
+      if (session) {
+        this.leaveRoom(session.rid);
+      }
+      this.sessions.set(room.rtype, room);
+    }
     this.setCurrentRoom(rid);
     if (!this.ourPeer.audioStream) {
       await this.ourPeer.enableAudio();
@@ -704,22 +750,31 @@ export class RoomsStore extends EventsEmitter {
       })
     );
     // add us to the room
-    this.rooms.get(rid)?.addPeer(this.ourId);
+    if (room) {
+      room.addPeer(this.ourId);
+    }
   }
 
   @action
   leaveRoom(rid: string) {
-    this.rooms.get(rid)?.removePeer(this.ourId);
-    this.currentRid = null;
-    this.ourPeer.disableAll();
-    this.websocket.send(
-      serialize({
-        type: 'leave-room',
-        rid,
-      })
-    );
-    this.onLeftRoom(rid, this.ourId);
-    this.hangupAllPeers();
+    const room = this.rooms.get(rid);
+    if (room === undefined) return;
+    room.removePeer(this.ourId);
+    if (room.present.length === 0) {
+      this.deleteRoom(rid);
+    } else {
+      this.sessions.delete(room.rtype);
+      this.currentRid = null;
+      this.ourPeer.disableAll();
+      this.websocket.send(
+        serialize({
+          type: 'leave-room',
+          rid,
+        })
+      );
+      this.onLeftRoom(rid, this.ourId);
+      this.hangupAllPeers();
+    }
   }
 
   @action

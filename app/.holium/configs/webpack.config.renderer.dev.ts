@@ -57,7 +57,8 @@ const configuration: webpack.Configuration = {
     mouse: {
       import: path.join(webpackPaths.srcRendererPath, 'mouse.tsx'),
     },
-    reactRefreshSetup: '@pmmmwh/react-refresh-webpack-plugin/client/ReactRefreshEntry.js',
+    reactRefreshSetup:
+      '@pmmmwh/react-refresh-webpack-plugin/client/ReactRefreshEntry.js',
     updater: {
       import: path.join(
         webpackPaths.srcRendererPath,
@@ -139,7 +140,7 @@ const configuration: webpack.Configuration = {
       NODE_ENV: 'development',
       PLAYGROUND_PORT: playgroundPort,
       USE_LOCAL_WALLET_API: useLocalWalletAPI,
-      API_URL: 'https://backend-server-test.thirdearth.com',
+      API_URL: 'https://backend-server.third.earth',
       JOIN_API_URL: 'http://localhost:3000',
       API_HEADERS_CLIENT_ID: '5',
       API_HEADERS_VERSION: '2',
@@ -203,17 +204,17 @@ const configuration: webpack.Configuration = {
     __dirname: true,
     __filename: false,
   },
-optimization: {
-      runtimeChunk: 'single',
-      // Ensure `react-refresh/runtime` is hoisted and shared
-      // Could be replicated via a vendors chunk
-      splitChunks: {
-        chunks: 'all',
-        name(_, __, cacheGroupKey) {
-          return cacheGroupKey;
-        },
+  optimization: {
+    runtimeChunk: 'single',
+    // Ensure `react-refresh/runtime` is hoisted and shared
+    // Could be replicated via a vendors chunk
+    splitChunks: {
+      chunks: 'all',
+      name(_, __, cacheGroupKey) {
+        return cacheGroupKey;
       },
-    }, 
+    },
+  },
   devServer: {
     port,
     compress: true,

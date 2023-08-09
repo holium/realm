@@ -81,7 +81,10 @@ const NewRoomPresenter = () => {
   const createRoom = async (evt: any) => {
     setLoading(true);
 
-    roomsStore.cleanUpCurrentRoom();
+    const session = roomsStore.getCurrentSession('interactive');
+    if (session) {
+      roomsStore.deleteRoom(session.rid);
+    }
 
     const { name, isPrivate } = form.actions.submit();
     evt.stopPropagation();

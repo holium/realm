@@ -63,7 +63,8 @@ const RoomsPresenter = () => {
         </Button.TextButton>
       </Flex>
       <Flex gap={8} flex={1} flexDirection="column" overflowY={'auto'}>
-        {rooms?.length === 0 && (
+        {rooms?.filter((value) => value.rtype === 'interactive').length ===
+          0 && (
           <Flex
             flex={1}
             flexDirection="column"
@@ -80,35 +81,44 @@ const RoomsPresenter = () => {
             </Text.Custom>
           </Flex>
         )}
-        {rooms?.map((room: RoomModel, index: number) => {
-          return (
-            <RoomRow
-              key={`${room.title}-${index}`}
-              rid={room.rid}
-              title={room.title}
-              provider={room.provider}
-              present={room.present}
-              creator={room.creator}
-              access={room.access}
-              capacity={room.capacity}
-              onClick={async (evt: any) => {
-                evt.stopPropagation();
-                if (roomsStore.currentRid !== room.rid) {
-                  sound.playRoomEnter();
-                  try {
-                    await roomsStore.joinRoom(room.rid);
-                    roomsApp.setView('room');
-                  } catch (e) {
-                    // TODO put error in UI
-                    console.error(e);
-                  }
-                } else {
-                  roomsApp.setView('room');
-                }
-              }}
-            />
-          );
-        })}
+        {
+          /* only return 'room' rooms, not background or any other */
+          rooms
+            ?.filter((value: RoomModel) => value.rtype === 'interactive')
+            .map((room: RoomModel, index: number) => {
+              return (
+                <RoomRow
+                  key={`${room.title}-${index}`}
+                  rid={room.rid}
+                  title={room.title}
+                  provider={room.provider}
+                  present={room.present}
+                  creator={room.creator}
+                  access={room.access}
+                  capacity={room.capacity}
+                  onClick={async (evt: any) => {
+                    evt.stopPropagation();
+                    const session = roomsStore.getCurrentSession('interactive');
+                    if (session) {
+                      if (session.rid !== room.rid) {
+                        // if (roomsStore.currentRid !== room.rid) {
+                        sound.playRoomEnter();
+                        try {
+                          await roomsStore.joinRoom(room.rid);
+                          roomsApp.setView('room');
+                        } catch (e) {
+                          // TODO put error in UI
+                          console.error(e);
+                        }
+                      } else {
+                        roomsApp.setView('room');
+                      }
+                    }
+                  }}
+                />
+              );
+            })
+        }
       </Flex>
       <Flex mt={3} justifyContent="space-between">
         <Tooltip

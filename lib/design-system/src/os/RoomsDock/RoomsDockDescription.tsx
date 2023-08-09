@@ -9,14 +9,18 @@ type Props = {
 };
 
 export const RoomsDockDescription = ({ live, rooms, participants }: Props) => {
-  if (!live) {
+  console.log('rooms => %o', rooms);
+  if (!live || live.rtype === 'background') {
+    const numRooms = rooms.filter(
+      (value) => value.rtype !== 'background'
+    ).length;
     return (
       <Flex pointerEvents="none" gap={12} align="center">
         <Icon name="Connect" size={20} />
         <Flex>
-          {rooms.length > 0 ? (
+          {numRooms > 0 ? (
             <Text.Custom fontSize={2}>
-              {rooms.length} {pluralize('room', rooms.length)}
+              {numRooms} {pluralize('room', numRooms)}
             </Text.Custom>
           ) : (
             <Text.Custom fontSize={2} opacity={0.7}>

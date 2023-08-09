@@ -74,7 +74,11 @@ const RoomPresenter = () => {
 
   if (!roomsStore.currentRid) return <div />;
 
-  const presentRoom = roomsStore.rooms.get(roomsStore.currentRid);
+  // get the current interactive session
+  const session = roomsStore.getCurrentSession('interactive');
+  if (session === undefined) return <div />;
+
+  const presentRoom = roomsStore.rooms.get(session.rid);
   if (!presentRoom) return <div />;
   const { rid, creator, present, title } = presentRoom;
   const presentCount = present?.length ?? 0;

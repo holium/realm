@@ -301,6 +301,7 @@ export const ShellModel = types
           this.setActive(nextWindow.appId);
         }
       }
+      console.log('delete %o', appId);
       self.windows.delete(appId);
     },
     setMicAllowed(isAllowed: boolean) {

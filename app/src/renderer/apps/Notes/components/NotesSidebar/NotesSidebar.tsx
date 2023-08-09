@@ -45,8 +45,13 @@ const NotesSidebarPresenter = () => {
 
   useEffect(() => {
     return () => {
+      console.log('unmounting and cleaning up room...');
       // Leave current room on unmount.
-      roomsStore.cleanUpCurrentRoom();
+      // only if there is a notes (background) room
+      const session = roomsStore.getCurrentSession('background');
+      if (session) {
+        roomsStore.deleteRoom(session.rid);
+      }
     };
   }, []);
 
@@ -68,17 +73,24 @@ const NotesSidebarPresenter = () => {
   };
 
   const onClickSpaceNote = async (id: string, space: string) => {
+    console.log('selectedNoteId: %o, %o', selectedNoteId, id);
     setSelectedNoteId({ id });
 
     const noteRoomPath = space + id;
+
     const areWeAlreadyInTheRoom =
       roomsStore.currentRoom && roomsStore.currentRoom?.path === noteRoomPath;
-    if (areWeAlreadyInTheRoom) return;
+    if (areWeAlreadyInTheRoom) {
+      // per Trent, leave room if already in and click again
+      roomsStore.cleanUpCurrentRoom();
+      return;
+    }
+
+    if (selectedNoteId !== null && selectedNoteId !== id) {
+      roomsStore.leaveRoom(selectedNoteId);
+    }
 
     setConnectingToNoteRoom(true);
-
-    // DELETE/LEAVE CURRENT ROOM
-    roomsStore.cleanUpCurrentRoom();
 
     const existingRoom = roomsStore
       .getSpaceRooms(space)
@@ -94,7 +106,8 @@ const NotesSidebarPresenter = () => {
       const newRoomRid = await roomsStore.createRoom(
         `Notes: ${note.title}`,
         'public',
-        noteRoomPath
+        noteRoomPath,
+        'background'
       );
       await roomsStore.joinRoom(newRoomRid);
     }

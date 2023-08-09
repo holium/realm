@@ -30,7 +30,7 @@ export const RoomsDockControls = ({
     );
   }
 
-  if (!live) return null;
+  if (!live || live.rtype === 'background') return null;
 
   return (
     <BarButton

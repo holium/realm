@@ -35,10 +35,11 @@ export const RoomAppPresenter = () => {
   }, []);
 
   useEffect(() => {
-    if (roomsStore.currentRid) {
+    const session = roomsStore.getCurrentSession('interactive');
+    if (session) {
       roomsApp.setView('room');
     }
-  }, [roomsApp, roomsStore.currentRid]);
+  }, [roomsApp, roomsStore.currentRid, roomsStore.sessions.size]);
   const View = RoomViews[roomsApp.currentView];
   return (
     <Flex
