@@ -743,13 +743,15 @@ export const api = {
       title?: string;
       description?: string;
       defaultRole?: string;
+      publish?: boolean;
     }
   ) => {
-    const { title, description, defaultRole } = fields;
+    const { title, description, defaultRole, publish } = fields;
     const fieldsList = [
       typeof title === 'string' ? { title: title } : null,
       typeof description === 'string' ? { description: description } : null,
       typeof defaultRole === 'string' ? { 'default-role': defaultRole } : null,
+      typeof publish === 'boolean' ? { publish: publish } : null,
     ].filter(Boolean);
     const json = {
       p: calendarId,
