@@ -2,7 +2,7 @@ import Urbit from '@urbit/http-api';
 import memoize from 'lodash/memoize';
 
 import useCalendarStore from './CalendarStore';
-import { log, shipCode, shipName } from './utils';
+import { log, shipCode, shipName, splitLastOccurrence } from './utils';
 type RepeatCount = { l: number; r: number };
 export type Roles = 'admin' | 'viewer' | 'guest' | 'member';
 export type Perms = {
@@ -28,7 +28,7 @@ export const api = {
     urb.onOpen = () => log('urbit onOpen');
     urb.onRetry = () => log('urbit onRetry');
     //sub to our frontend updates
-    //  urb.subscribe(updates);
+    urb.subscribe(generalUpdates);
     urb.connect();
 
     return urb;
@@ -39,7 +39,7 @@ export const api = {
     -when user switches calendars unsub from that calendar (if any) and sub to the new one
   */
   subCalendarUpdates: async (calendarId: string) => {
-    const calUpdateObj = updates(calendarId);
+    const calUpdateObj = calendarUpdates(calendarId);
     return api.createApi().subscribe(calUpdateObj);
   },
   unsubCalendarUpdates: async (subNumber: number) => {
@@ -909,7 +909,7 @@ export const api = {
 };
 const updateHandler = (update: any) => {
   log('update', update);
-  if (update.event) {
+  if (Object.prototype.hasOwnProperty.call(update, 'event')) {
     // Update instance
     if (Object.prototype.hasOwnProperty.call(update.event, 'put')) {
       const eventId = update.event.put.eid;
@@ -944,11 +944,58 @@ const updateHandler = (update: any) => {
       const newSpans = spans.filter((item: any) => item.id !== eventId);
       state.setSpans(newSpans);
     }
+  } else if (Object.prototype.hasOwnProperty.call(update, 'add-calendar')) {
+    // Add calendar
+    const newCalId = update['add-calendar'].cid;
+    const newCalTitle = splitLastOccurrence(newCalId, '/')[1];
+    const state = useCalendarStore.getState();
+    // Create the new cal entry
+    const newCalendar = {
+      id: newCalId,
+      title: newCalTitle,
+      ...update['add-calendar'],
+    };
+    // push it to the new calendar list
+    const newCalendarList = state.calendarList;
+    newCalendarList.push(newCalendar);
+    state.setCalendarList(newCalendarList);
+  } else if (Object.prototype.hasOwnProperty.call(update, 'del-calendar')) {
+    // Delete calendar
+    const delCalId = update['del-calendar'].cid;
+    const state = useCalendarStore.getState();
+    // Filter out the deleted calendar
+    const newCalendarList = state.calendarList.filter(
+      (item: any) => item.id !== delCalId
+    );
+
+    state.setCalendarList(newCalendarList);
+  } else if (Object.prototype.hasOwnProperty.call(update, 'title')) {
+    // Update the currently selected calendar's title
+    // TODO changing space should null selectedCalendar
+    const state = useCalendarStore.getState();
+    const selectedCalendar = state.selectedCalendar;
+    const newCalendarList = state.calendarList.map((item: any) => {
+      if (item.id === selectedCalendar) {
+        return { ...item, title: update.title };
+      }
+      return item;
+    });
+    state.setCalendarList(newCalendarList);
+  } else if (Object.prototype.hasOwnProperty.call(update, 'perms')) {
+    // Update the perms for this calendar
+    const calId = update.perms.cid;
+    const state = useCalendarStore.getState();
+
+    const newCalendarList = state.calendarList.map((item: any) => {
+      if (item.id === calId) {
+        return { ...item, perms: update.perms.perms };
+      }
+      return item;
+    });
+    state.setCalendarList(newCalendarList);
   }
-  // Delete event
-  return;
 };
-const updates = (calendarId: string) => {
+const calendarUpdates = (calendarId: string) => {
   return {
     app: 'calendar',
     path: '/ui/calendar/' + calendarId,
@@ -957,4 +1004,12 @@ const updates = (calendarId: string) => {
     err: () => log('Subscription rejected'),
     quit: (e: any) => log('Kicked from subscription', e),
   };
+};
+const generalUpdates = {
+  app: 'calendar-spaces',
+  path: '/ui',
+  event: updateHandler,
+  //TODO: handle sub death/kick/err
+  err: () => log('Subscription rejected'),
+  quit: (e: any) => log('Kicked from subscription', e),
 };

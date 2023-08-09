@@ -132,8 +132,19 @@ declare global {
 export const App = () => {
   const [selectedSpace, setSelectedSpace] = useState<null | string>(null);
   const [spaceList, setSpaceList] = useState<string[]>([]);
-  const [calendarList, setCalendarList] = useState<any>([]);
-  const [selectedCalendar, setSelectedCalendar] = useState<null | string>(null);
+  const calendarList = useCalendarStore(
+    (store: CalendarStore) => store.calendarList
+  );
+  const setCalendarList = useCalendarStore(
+    (store: CalendarStore) => store.setCalendarList
+  );
+  const selectedCalendar = useCalendarStore(
+    (store: CalendarStore) => store.selectedCalendar
+  );
+  log('selectedCalendar', selectedCalendar);
+  const setSelectedCalendar = useCalendarStore(
+    (store: CalendarStore) => store.setSelectedCalendar
+  );
   const spans = useCalendarStore((store: CalendarStore) => store.spans);
   const setSpans = useCalendarStore((store: CalendarStore) => store.setSpans);
   const [events, setEvents] = useState<any>([]);

@@ -54,6 +54,7 @@ export const CalendarPerms = ({
     } catch (e) {
       log('addCalendar error => ', e);
     }
+    setVisible(false);
   };
   const updateCalendar = async () => {
     if (!calendarId) return;
@@ -77,6 +78,7 @@ export const CalendarPerms = ({
     } catch (e) {
       log('updateCalendar error => ', e);
     }
+    setVisible(false);
   };
   const addCustomShip = () => {
     if (!newCustomShip) return; // Epty ship name, do nothing

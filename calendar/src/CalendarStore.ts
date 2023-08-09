@@ -15,6 +15,12 @@ export interface CalendarStore {
 
   spans: any;
   setSpans: (spans: any) => void;
+
+  calendarList: any;
+  setCalendarList: (calendarList: any) => void;
+
+  selectedCalendar: null | string;
+  setSelectedCalendar: (selectedCalendar: string) => void;
 }
 
 const useCalendarStore = create<CalendarStore>((set) => ({
@@ -41,6 +47,16 @@ const useCalendarStore = create<CalendarStore>((set) => ({
   spans: [],
   setSpans: (spans: any) => {
     set(() => ({ spans }));
+  },
+
+  calendarList: [],
+  setCalendarList: (calendarList: any) => {
+    set(() => ({ calendarList }));
+  },
+
+  selectedCalendar: null,
+  setSelectedCalendar: (selectedCalendar: null | string) => {
+    set(() => ({ selectedCalendar }));
   },
 }));
 
