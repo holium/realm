@@ -31,8 +31,8 @@ export const FormFieldInput = styled(Field)`
 
   &:disabled {
     cursor: not-allowed;
-    background-color: #f8f8f8;
-    color: rgba(var(--rlm-text-rgba), 0.52);
+    background-color: var(--rlm-input-color);
+    color: rgba(var(--rlm-text-rgba), 0.35);
   }
 `;
 

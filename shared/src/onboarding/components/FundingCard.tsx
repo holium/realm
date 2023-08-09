@@ -18,8 +18,8 @@ const FundingCardContainer = styled(Flex)<{ isSelected: boolean }>`
     border: 1px solid #43C35F;
   `
       : `
-    background: #F9F9F9;
-    border: 1px solid #EBEBEB;
+    background: var(--rlm-input-color);
+    border: 1px solid var(--rlm-border-color);
   `}
 `;
 
@@ -32,7 +32,7 @@ const FundingCardLabel = styled(Text.Body)<{ isSelected: boolean }>`
     color: rgba(67, 195, 95, 0.8);
   `
       : `
-    color: rgba(51, 51, 51, 0.70);
+    color: rgba(var(--rlm-text-rgba), 0.70);
   `}
 `;
 
@@ -52,7 +52,7 @@ const FundingCardEthPrice = styled(Text.Body)<{ isSelected: boolean }>`
 `;
 
 const FundingCardUsdPrice = styled(Text.Body)`
-  color: rgba(85, 100, 118, 0.6);
+  color: rgba(var(--rlm-text-rgba), 0.6);
   text-align: right;
   font-size: 13px;
   font-style: normal;

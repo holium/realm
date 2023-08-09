@@ -12,6 +12,7 @@ import { useToggle } from '@holium/design-system/util';
 
 import {
   OnboardDialogDescription,
+  OnboardDialogDescriptionSmall,
   OnboardDialogInputLabel,
   OnboardDialogSubTitle,
   OnboardDialogTitleBig,
@@ -120,40 +121,45 @@ export const BootingNodeDialogBody = ({ booting, credentials }: Props) => {
             </motion.div>
           </AnimatePresence>
         ) : (
-          <GrayBox flexDirection="column">
-            <Flex gap={4} alignItems="center">
-              <OnboardDialogSubTitle width="100px" fontWeight={600}>
-                URL
-              </OnboardDialogSubTitle>
-              <OnboardDialogDescription>
-                {credentials.url}
-              </OnboardDialogDescription>
-            </Flex>
-            <Flex gap={4} alignItems="center">
-              <OnboardDialogSubTitle width="100px" fontWeight={600}>
-                Access Code
-              </OnboardDialogSubTitle>
-              <OnboardDialogDescription width="216px">
-                {showCode.isOn
-                  ? credentials.accessCode
-                  : '• • • • • • • • • • • • • • • • • • • • •'}
-              </OnboardDialogDescription>
-              <Button.IconButton type="button" onClick={showCode.toggle}>
-                <Icon name={showCode.isOn ? 'EyeOff' : 'EyeOn'} opacity={0.5} />
-              </Button.IconButton>
-            </Flex>
-            <Flex mt={1} width="100%" justifyContent="flex-end">
+          <Flex flexDirection="column" gap="16px" mt="-32px">
+            <GrayBox flexDirection="column">
+              <Flex gap={4} alignItems="center">
+                <OnboardDialogSubTitle width="100px" fontWeight={600}>
+                  URL
+                </OnboardDialogSubTitle>
+                <OnboardDialogDescriptionSmall width="280px">
+                  {credentials.url}
+                </OnboardDialogDescriptionSmall>
+              </Flex>
+              <Flex gap={4} alignItems="center">
+                <OnboardDialogSubTitle width="100px" fontWeight={600}>
+                  Access Code
+                </OnboardDialogSubTitle>
+                <OnboardDialogDescriptionSmall width="203px">
+                  {showCode.isOn
+                    ? credentials.accessCode
+                    : '• • • • • • • • • • • • • • • • • • • • • • •'}
+                </OnboardDialogDescriptionSmall>
+                <Button.IconButton type="button" onClick={showCode.toggle}>
+                  <Icon
+                    name={showCode.isOn ? 'EyeOff' : 'EyeOn'}
+                    opacity={0.5}
+                  />
+                </Button.IconButton>
+              </Flex>
+            </GrayBox>
+            <Flex width="100%" justifyContent="center" opacity={0.7}>
               <CopyButton
                 content={[
                   credentials.id,
                   credentials.url,
                   credentials.accessCode,
                 ].join(' ')}
-                label="Copy"
+                label="Copy connection info"
                 size={16}
               />
             </Flex>
-          </GrayBox>
+          </Flex>
         )}
       </Flex>
     </Flex>
