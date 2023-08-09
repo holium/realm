@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { FormikValues } from 'formik';
+import type { GetServerSideProps } from 'next/types';
 
 import { OnboardingStorage } from '@holium/shared';
 
@@ -7,15 +9,19 @@ import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
-// type ServerSideProps = {};
+type ServerSideProps = {
+  token: string | undefined;
+};
 
-// export const getServerSideProps: GetServerSideProps = async ({}) => {
-//   return {
-//     props: {},
-//   };
-// };
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+  return {
+    props: {
+      token: query.token as string | undefined,
+    },
+  };
+};
 
-export default function CreateAccount() {
+export default function CreateAccount({ token }: ServerSideProps) {
   const { goToPage } = useNavigation();
 
   const onNext = async ({ email, password }: FormikValues) => {
@@ -36,6 +42,12 @@ export default function CreateAccount() {
       return false;
     }
   };
+
+  useEffect(() => {
+    if (token) {
+      OnboardingStorage.set({ token });
+    }
+  });
 
   return (
     <Page title="Create your account" isProtected noBackground>
