@@ -119,13 +119,13 @@ const RoomChatPresenter = () => {
   }, [chats]);
 
   return (
-    <Flex position="relative" bottom={50} flex={1} flexDirection="column">
-      <Flex position="absolute" top={50} bottom={10} left={0} right={0}>
+    <Flex position="relative" flex={1} flexDirection="column">
+      <Flex position="absolute" top={0} bottom={10} left={0} right={0}>
         {ChatList}
       </Flex>
       <Flex
         position="absolute"
-        bottom={0}
+        bottom={50}
         left={0}
         right={0}
         flexDirection="row"
