@@ -50,7 +50,7 @@ export default function CreateAccount({ token }: ServerSideProps) {
   });
 
   return (
-    <Page title="Create your account" isProtected noBackground>
+    <Page title="Create your account" isProtected>
       <CreateAccountWithWalletDialog onNext={onNext} />
     </Page>
   );

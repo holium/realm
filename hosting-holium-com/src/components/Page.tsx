@@ -22,16 +22,10 @@ const siteColor = '#000000';
 type Props = {
   title: string;
   isProtected?: boolean;
-  noBackground?: boolean;
   children: ReactNode;
 };
 
-export const Page = ({
-  title,
-  isProtected = false,
-  noBackground = false,
-  children,
-}: Props) => {
+export const Page = ({ title, isProtected = false, children }: Props) => {
   const { currentAccountSection, goToPage, logout } = useNavigation();
   const authenticated = useToggle(false);
 
@@ -94,7 +88,7 @@ export const Page = ({
           content={siteColor}
         />
       </NextHead>
-      <Main noBackground={noBackground}>
+      <Main>
         {isProtected && currentAccountSection ? (
           authenticated.isOn ? (
             children

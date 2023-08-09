@@ -15,7 +15,7 @@ export default {
 export const CreateAccountDialogStory: ComponentStory<
   typeof CreateAccountDialog
 > = () => (
-  <OnboardingDialogWrapper wallpaper={false}>
+  <OnboardingDialogWrapper>
     <CreateAccountWithWalletDialog onNext={() => Promise.resolve(false)} />
   </OnboardingDialogWrapper>
 );
@@ -25,7 +25,7 @@ CreateAccountDialogStory.storyName = '1. Create your account';
 export const FundAccountDialogStory: ComponentStory<
   typeof CreateAccountDialog
 > = () => (
-  <OnboardingDialogWrapper wallpaper={false}>
+  <OnboardingDialogWrapper>
     <FundAccountDialog onNext={() => Promise.resolve(false)} />
   </OnboardingDialogWrapper>
 );
@@ -35,7 +35,7 @@ FundAccountDialogStory.storyName = '2.1 Fund your account';
 export const SkippedPaymentDialogStory: ComponentStory<
   typeof CreateAccountDialog
 > = () => (
-  <OnboardingDialogWrapper wallpaper={false}>
+  <OnboardingDialogWrapper>
     <SkippedPaymentDialog onNext={() => Promise.resolve(false)} />
   </OnboardingDialogWrapper>
 );
@@ -45,7 +45,7 @@ SkippedPaymentDialogStory.storyName = '2.2 You skipped payment';
 export const BootingNodeDialogStory: ComponentStory<
   typeof CreateAccountDialog
 > = () => (
-  <OnboardingDialogWrapper wallpaper={false}>
+  <OnboardingDialogWrapper>
     <BootingNodeDialog booting onNext={() => Promise.resolve(false)} />
   </OnboardingDialogWrapper>
 );
@@ -55,7 +55,7 @@ BootingNodeDialogStory.storyName = '3.1 Booting your node';
 export const BootedDialogStory: ComponentStory<
   typeof CreateAccountDialog
 > = () => (
-  <OnboardingDialogWrapper wallpaper={false}>
+  <OnboardingDialogWrapper>
     <BootingNodeDialog booting={false} onNext={() => Promise.resolve(false)} />
   </OnboardingDialogWrapper>
 );

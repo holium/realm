@@ -5,17 +5,14 @@ import { ThirdEarthProduct, ThirdEarthShip } from '@holium/shared';
 
 export const OnboardingDialogWrapper = ({
   children,
-  wallpaper = true,
 }: {
   children: ReactNode;
-  wallpaper?: boolean;
 }) => (
   <Flex
-    className={wallpaper ? 'wallpaper' : 'no-wallpaper'}
-    justifyContent="center"
-    alignItems="center"
     width="100%"
     height="calc(100vh - 32px)"
+    alignItems="center"
+    justifyContent="center"
   >
     {children}
   </Flex>

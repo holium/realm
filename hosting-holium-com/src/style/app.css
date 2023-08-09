@@ -11,6 +11,7 @@
   min-height: 100vh;
   backdrop-filter: var(--blur);
   font-family: var(--rlm-font);
+  background-color: #F9F9F9;
 }
 
 
