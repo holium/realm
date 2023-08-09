@@ -140,7 +140,7 @@ export const App = () => {
             <Route path="/apps/calendar/" element={<Home />} />
             {/* :ship/:calendar form the calendarId we use */}
             <Route
-              path="/calendar/public/:ship/:calendar"
+              path="/apps/calendar/public/:ship/:calendar"
               element={<ClearWebCalendar />}
             />
           </Route>
