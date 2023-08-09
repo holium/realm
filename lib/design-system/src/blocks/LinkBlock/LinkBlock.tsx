@@ -246,6 +246,12 @@ export const LinkBlock = ({
               const origin = new URL(ogOrLink).origin;
               window.open(origin, '_blank');
             }}
+            style={{
+              textOverflow: 'ellipsis',
+              maxWidth: '100%',
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+            }}
           >
             {openGraph?.ogSiteName || new URL(ogOrLink).hostname}
           </Text.Anchor>
