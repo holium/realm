@@ -304,6 +304,7 @@ const Home = () => {
     spansToEvents(spans);
   }, [spans]);
   const onCalendarSelect = async (calendarId: string) => {
+    if (selectedCalendar === calendarId) return; // This calendar is currently selected do nothing
     setSelectedCalendar(calendarId);
     try {
       if (currentCalendarSub) {

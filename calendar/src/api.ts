@@ -109,6 +109,7 @@ export const api = {
       title?: string;
       description?: string;
       defaultRole?: string;
+      publish?: boolean;
     }
   ) => {
     return await api.updateCalendarAction(calendarId, options);
@@ -127,16 +128,15 @@ export const api = {
   getSpaces: async () => {
     return api.createApi().scry({ app: 'calendar-spaces', path: '/spaces' });
   },
-  /**
-   * Spaces related
-   */
   getOurCalendar: async () => {
     return api.createApi().scry({ app: 'calendar-spaces', path: '/our' });
   },
   getAlmanac: async () => {
     return api.createApi().scry({ app: 'calendar-spaces', path: '/almanac' });
   },
-
+  getCurrentLink: async () => {
+    return api.createApi().scry({ app: 'calendar', path: '/url-prefix' });
+  },
   updateBannedShips: async (space: string, banned: string[]) => {
     const json = { space: space, axn: { banned: banned } };
     return await api.vent({
@@ -987,6 +987,16 @@ const updateHandler = (update: any) => {
     const newCalendarList = state.calendarList.map((item: any) => {
       if (item.id === calId) {
         return { ...item, perms: update.perms.perms };
+      }
+      return item;
+    });
+    state.setCalendarList(newCalendarList);
+  } else if (Object.prototype.hasOwnProperty.call(update, 'publish')) {
+    const state = useCalendarStore.getState();
+    const selectedCalendar = state.selectedCalendar;
+    const newCalendarList = state.calendarList.map((item: any) => {
+      if (item.id === selectedCalendar) {
+        return { ...item, publish: update.publish };
       }
       return item;
     });

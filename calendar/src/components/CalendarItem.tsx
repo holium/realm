@@ -10,7 +10,7 @@ import {
 } from '@holium/design-system';
 
 import { api, Perms } from '../api';
-import { isOur, log } from '../utils';
+import { copyToClipboard, isOur, log } from '../utils';
 import { CalendarPerms } from './CalendarPerms';
 
 interface Props {
@@ -22,6 +22,7 @@ interface Props {
   space: string;
   calendarId: string;
   perms: Perms;
+  publish: boolean;
 }
 
 export const CalendarItem = ({
@@ -32,6 +33,7 @@ export const CalendarItem = ({
   space,
   calendarId,
   perms,
+  publish,
 }: Props) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [newCalendarTitle, setNewCalendarTitle] = useState<string>('');
@@ -47,6 +49,16 @@ export const CalendarItem = ({
       log('updateCalendar error => ', e);
     }
   };
+  const toggleCalendarPublish = async (value: boolean) => {
+    try {
+      const result = await api.updateCalendar(calendarId, {
+        publish: value,
+      }); // Only updating title for now
+      log('toggleCalendarPublish updateMetadata => ', result);
+    } catch (e) {
+      log('toggleCalendarPublish error => ', e);
+    }
+  };
   const deleteCalendar = async (id: string) => {
     try {
       const result = await api.deleteCalendar(space, id);
@@ -56,7 +68,17 @@ export const CalendarItem = ({
       log('deleteCalendar error => ', e);
     }
   };
-
+  const buildClearWebLink = async () => {
+    try {
+      const result = await api.getCurrentLink();
+      // append the path to the app and the calendar
+      const shareableLink = result + '/apps/calendar/public/' + calendarId;
+      copyToClipboard(shareableLink);
+      log('shareableLink => ', shareableLink);
+    } catch (e) {
+      log('buildClearWebLink error => ', e);
+    }
+  };
   const renderEditing = () => {
     if (isOur(space)) {
       return (
@@ -119,7 +141,7 @@ export const CalendarItem = ({
             orientation="bottom-right"
             id={`menu`}
             fontStyle={'normal'}
-            dimensions={{ width: 200, height: 80 }}
+            dimensions={{ width: 200, height: 150 }}
             triggerEl={
               <Button.IconButton size={25}>
                 <Icon name="MoreHorizontal" size={18} opacity={0.5} />
@@ -143,6 +165,34 @@ export const CalendarItem = ({
                 onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
                   evt.stopPropagation();
                   deleteCalendar(id);
+                },
+              },
+              publish
+                ? {
+                    id: `calendar-menu-element-publish-off`,
+                    label: 'Disable clearweb access',
+                    disabled: false,
+                    onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
+                      evt.stopPropagation();
+                      toggleCalendarPublish(false);
+                    },
+                  }
+                : {
+                    id: `calendar-menu-element-publish-on`,
+                    label: 'Enable clearweb access',
+                    disabled: false,
+                    onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
+                      evt.stopPropagation();
+                      toggleCalendarPublish(true);
+                    },
+                  },
+              {
+                id: `calendar-menu-element-link`,
+                label: 'Get clearweb link',
+                disabled: false,
+                onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
+                  evt.stopPropagation();
+                  buildClearWebLink();
                 },
               },
             ]}

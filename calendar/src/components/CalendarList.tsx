@@ -77,6 +77,7 @@ export const CalendarList = ({
               selectedCalendar={selectedCalendar}
               space={space}
               calendarId={item.id}
+              publish={item.publish}
             />
           );
         })}

@@ -400,3 +400,33 @@ export const isOur = (space: string): boolean => {
   if (spaceName && spaceName === 'our') return true;
   return false;
 };
+export const copyToClipboard = (text: string) => {
+  if (
+    navigator.clipboard &&
+    typeof navigator.clipboard.writeText === 'function'
+  ) {
+    // Use navigator clipboard API if available
+    return navigator.clipboard.writeText(text);
+  } else if (
+    document.queryCommandSupported &&
+    document.queryCommandSupported('copy')
+  ) {
+    // Use document.execCommand('copy') fallback
+    const textarea = document.createElement('textarea');
+    textarea.textContent = text;
+    textarea.style.position = 'fixed';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      return document.execCommand('copy');
+    } catch (err) {
+      console.error('Fallback: Oops, unable to copy', err);
+      return false;
+    } finally {
+      document.body.removeChild(textarea);
+    }
+  } else {
+    console.error('Clipboard access not supported');
+    return false;
+  }
+};
