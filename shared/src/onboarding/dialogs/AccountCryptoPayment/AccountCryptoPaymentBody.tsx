@@ -15,12 +15,19 @@ const GrayBoxCrypto = styled(GrayBox)`
   gap: 8px;
 `;
 
+export type CryptoPayment = {
+  date: string;
+  from: string;
+  ethAmount: string;
+  usdAmount: string;
+};
+
 type Props = {
   serviceStartDate: string;
   ethAddress: string;
   balance: string;
   due: string;
-  paymentHistory: string[];
+  paymentHistory: CryptoPayment[];
   onClickPay: () => void;
 };
 
@@ -29,9 +36,10 @@ export const AccountCryptoPaymentBody = ({
   ethAddress,
   balance,
   due,
+  paymentHistory,
   onClickPay,
 }: Props) => (
-  <>
+  <Flex flexDirection="column" gap="16px" minHeight={0} overflowY="auto">
     <Flex flexDirection="column">
       <OnboardDialogInputLabelSmall>
         Service Start Date
@@ -54,13 +62,17 @@ export const AccountCryptoPaymentBody = ({
           <CopyButton content={ethAddress} />
         </Flex>
         <Flex gap="10px">
-          <OnboardDialogDescriptionSmall>Balance</OnboardDialogDescriptionSmall>
+          <OnboardDialogDescriptionSmall width="100px">
+            Balance
+          </OnboardDialogDescriptionSmall>
           <OnboardDialogDescriptionSmall fontWeight={500}>
             {balance}
           </OnboardDialogDescriptionSmall>
         </Flex>
         <Flex gap="10px">
-          <OnboardDialogDescriptionSmall>Due</OnboardDialogDescriptionSmall>
+          <OnboardDialogDescriptionSmall width="100px">
+            Due
+          </OnboardDialogDescriptionSmall>
           <OnboardDialogDescriptionSmall fontWeight={500}>
             {due}
           </OnboardDialogDescriptionSmall>
@@ -70,16 +82,53 @@ export const AccountCryptoPaymentBody = ({
         <PayWithEthButton onClick={onClickPay} />
       </Flex>
     </Flex>
-    <Flex gap="2px" alignItems="center">
-      <Icon name="History" size={16} />
-      <OnboardDialogInputLabelSmall style={{ margin: 0 }}>
-        Payment History
-      </OnboardDialogInputLabelSmall>
+    <Flex flexDirection="column" gap="4px">
+      <Flex gap="4px" alignItems="center">
+        <Icon name="History" size={16} />
+        <OnboardDialogInputLabelSmall style={{ margin: 0 }}>
+          Payment History
+        </OnboardDialogInputLabelSmall>
+      </Flex>
+      <Flex flexDirection="column" gap="8px" overflowY="auto" minHeight={0}>
+        {paymentHistory.length > 0 ? (
+          paymentHistory.map((payment, index) => (
+            <GrayBoxCrypto key={index}>
+              <Flex gap="10px">
+                <OnboardDialogDescriptionSmall width="100px">
+                  Date
+                </OnboardDialogDescriptionSmall>
+                <OnboardDialogDescriptionSmall fontWeight={500}>
+                  {payment.date}
+                </OnboardDialogDescriptionSmall>
+              </Flex>
+              <Flex gap="10px">
+                <OnboardDialogDescriptionSmall width="100px">
+                  From
+                </OnboardDialogDescriptionSmall>
+                <OnboardDialogDescriptionSmall fontWeight={500}>
+                  {payment.from}
+                </OnboardDialogDescriptionSmall>
+              </Flex>
+              <Flex gap="10px">
+                <OnboardDialogDescriptionSmall width="100px">
+                  Amount
+                </OnboardDialogDescriptionSmall>
+                <OnboardDialogDescriptionSmall fontWeight={500}>
+                  {payment.ethAmount}
+                </OnboardDialogDescriptionSmall>
+              </Flex>
+            </GrayBoxCrypto>
+          ))
+        ) : (
+          <OnboardDialogDescriptionSmall
+            width="100%"
+            textAlign="center"
+            pt="16px"
+          >
+            No payment history
+          </OnboardDialogDescriptionSmall>
+        )}
+      </Flex>
     </Flex>
-    <Flex flexDirection="column" alignItems="center">
-      <OnboardDialogDescriptionSmall>
-        No payment history
-      </OnboardDialogDescriptionSmall>
-    </Flex>
-  </>
+  </Flex>
 );

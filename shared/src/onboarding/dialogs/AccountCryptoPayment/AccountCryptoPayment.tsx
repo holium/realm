@@ -13,11 +13,15 @@ import { Modal } from '../../components/Modal';
 import { OnboardDialogTitleBig } from '../../components/OnboardDialog.styles';
 import { PayWithEthButton } from '../../components/PayWithEthButton';
 import { ThirdEarthShip } from '../../types';
-import { AccountCryptoPaymentBody } from './AccountCryptoPaymentBody';
+import {
+  AccountCryptoPaymentBody,
+  CryptoPayment,
+} from './AccountCryptoPaymentBody';
 
 type Props = {
   ships: ThirdEarthShip[];
   selectedShipId: number | undefined;
+  paymentHistory: CryptoPayment[];
   setSelectedShipId: (newId: number) => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onClickPurchaseId: () => void;
@@ -29,6 +33,7 @@ type Props = {
 export const AccountCryptoPaymentDialog = ({
   ships,
   selectedShipId,
+  paymentHistory,
   setSelectedShipId,
   onClickSidebarSection,
   onClickPurchaseId,
@@ -78,7 +83,7 @@ export const AccountCryptoPaymentDialog = ({
           ethAddress="0xAC36fc83EB0B09ACd3244AD6637A8e8404724D6c"
           balance="0.00 ETH"
           due="0.0080 ETH by 08/16/23"
-          paymentHistory={[]}
+          paymentHistory={paymentHistory}
           onClickPay={payModal.toggleOn}
         />
       </AccountDialog>

@@ -210,6 +210,7 @@ export const AccountCryptoPaymentDialogStory: ComponentStory<
     <AccountCryptoPaymentDialog
       ships={[thirdEarthMockShip]}
       selectedShipId={0}
+      paymentHistory={[]}
       setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
       onClickUploadId={() => {}}
@@ -229,6 +230,20 @@ export const AccountCryptoPaidDialogStory: ComponentStory<
     <AccountCryptoPaymentDialog
       ships={[thirdEarthMockShip]}
       selectedShipId={0}
+      paymentHistory={[
+        {
+          date: '07/18/23 06:56:00 UTC',
+          from: '0xf36f9EA6AC3d6424a2eC360BA8E93FfaAfdA34a6',
+          ethAmount: '0.080 ETH',
+          usdAmount: '$150.00',
+        },
+        {
+          date: '07/18/23 06:56:00 UTC',
+          from: '0xf36f9EA6AC3d6424a2eC360BA8E93FfaAfdA34a6',
+          ethAmount: '0.080 ETH',
+          usdAmount: '$150.00',
+        },
+      ]}
       setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
       onClickUploadId={() => {}}

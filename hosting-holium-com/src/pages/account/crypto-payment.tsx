@@ -42,6 +42,7 @@ const CryptoPaymentPresenter = () => {
     <AccountCryptoPaymentDialog
       ships={ships}
       selectedShipId={selectedShipId}
+      paymentHistory={[]}
       setSelectedShipId={setSelectedShipId}
       onClickPurchaseId={onClickPurchaseId}
       onClickUploadId={onClickUploadId}
