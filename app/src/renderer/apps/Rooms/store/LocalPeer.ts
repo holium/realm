@@ -312,6 +312,7 @@ export class LocalPeer extends EventEmitter {
 
   @action
   setStatus(status: PeerConnectionState) {
+    console.log('LocalPeer.setStatus: %o', status);
     this.status = status;
   }
 

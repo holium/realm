@@ -69,10 +69,15 @@ const RoomPresenter = () => {
   }, [roomView, roomsStore.chat.length]);
 
   useEffect(() => {
-    if (!roomsStore.currentRid) roomsApp.setView('list');
+    if (!roomsStore.currentRid) {
+      roomsApp.setView('list');
+    }
   }, [roomsStore.currentRid, roomsApp]);
 
-  if (!roomsStore.currentRid) return <div />;
+  // looks like this case gets hit when the room host deletes a room
+  //  therefore put a safeguard useEffect in the ./Rooms/index.tsx to catch when
+  //  currentRid is null to ensure list is rendered
+  if (!roomsStore.currentRid) return;
 
   // get the current interactive session
   const session = roomsStore.getCurrentSession('interactive');

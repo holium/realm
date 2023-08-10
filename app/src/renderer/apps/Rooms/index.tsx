@@ -39,6 +39,10 @@ export const RoomAppPresenter = () => {
     if (session) {
       roomsApp.setView('room');
     }
+    if (!roomsStore.currentRid) {
+      console.log('index: currentRid changed to null, setting to list...');
+      roomsApp.setView('list');
+    }
   }, [roomsApp, roomsStore.currentRid, roomsStore.sessions.size]);
   const View = RoomViews[roomsApp.currentView];
   return (

@@ -271,6 +271,7 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onClose() {
+    console.log('Peer.onClose');
     if (!this.peer) {
       console.error('Peer does not exist in onClose');
       return;

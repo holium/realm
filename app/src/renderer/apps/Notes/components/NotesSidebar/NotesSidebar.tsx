@@ -81,32 +81,40 @@ const NotesSidebarPresenter = () => {
   };
 
   const onClickSpaceNote = async (id: string, space: string) => {
-    console.log('selectedNoteId: %o, %o', selectedNoteId, id);
     setSelectedNoteId({ id });
 
     const noteRoomPath = space + id;
-
-    const areWeAlreadyInTheRoom =
-      roomsStore.currentRoom && roomsStore.currentRoom?.path === noteRoomPath;
-    if (areWeAlreadyInTheRoom) {
-      // per Trent, leave room if already in and click again
-      roomsStore.cleanUpCurrentRoom();
-      return;
-    }
-
-    if (selectedNoteId !== null && selectedNoteId !== id) {
-      roomsStore.leaveRoom(selectedNoteId);
-    }
 
     setConnectingToNoteRoom(true);
 
     const existingRoom = roomsStore
       .getSpaceRooms(space)
       .find((room) => room.path === noteRoomPath);
+
+    // if it's an existing room and we're already in it, leave it (per Trent)
     if (existingRoom) {
-      // JOIN ROOM
-      await roomsStore.joinRoom(existingRoom.rid);
+      console.log('present: %o', existingRoom.present);
+      console.log('loggedInAccount: %o', loggedInAccount);
+      if (
+        loggedInAccount?.serverId &&
+        existingRoom.present.indexOf(loggedInAccount?.serverId) === -1
+      ) {
+        // leave any 'background' rooms we may current reside in
+        const session = roomsStore.getCurrentSession('background');
+        if (session) {
+          roomsStore.leaveRoom(session.rid);
+        }
+        await roomsStore.joinRoom(existingRoom.rid);
+      } else {
+        roomsStore.leaveRoom(existingRoom.rid);
+      }
     } else {
+      // leave the current background session (note) if we are already in a note room
+      const session = roomsStore.getCurrentSession('background');
+      if (session) {
+        roomsStore.leaveRoom(session.rid);
+      }
+
       // CREATE ROOM
       const note = notesStore.getNote({ id });
       if (!note) return;
@@ -122,9 +130,8 @@ const NotesSidebarPresenter = () => {
 
     setConnectingToNoteRoom(false);
 
-    const session = roomsStore.getCurrentSession('interactive');
     // do not auto mute if there is an interactive session
-    if (session === undefined) {
+    if (roomsStore.hasCurrentSession('interactive')) {
       roomsStore.ourPeer.mute();
     }
   };

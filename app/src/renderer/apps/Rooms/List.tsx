@@ -113,20 +113,21 @@ const RoomsPresenter = () => {
                   onClick={async (evt: any) => {
                     evt.stopPropagation();
                     const session = roomsStore.getCurrentSession('interactive');
-                    if (session) {
-                      if (session.rid !== room.rid) {
-                        // if (roomsStore.currentRid !== room.rid) {
-                        sound.playRoomEnter();
-                        try {
-                          await roomsStore.joinRoom(room.rid);
-                          roomsApp.setView('room');
-                        } catch (e) {
-                          // TODO put error in UI
-                          console.error(e);
+                    if (session === undefined || session.rid !== room.rid) {
+                      // if (roomsStore.currentRid !== room.rid) {
+                      sound.playRoomEnter();
+                      try {
+                        if (session) {
+                          roomsStore.deleteRoom(session.rid);
                         }
-                      } else {
+                        await roomsStore.joinRoom(room.rid);
                         roomsApp.setView('room');
+                      } catch (e) {
+                        // TODO put error in UI
+                        console.error(e);
                       }
+                    } else {
+                      roomsApp.setView('room');
                     }
                   }}
                 />

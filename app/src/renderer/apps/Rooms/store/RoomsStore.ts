@@ -314,6 +314,10 @@ export class RoomsStore extends EventsEmitter {
     return domain;
   }
 
+  hasCurrentSession(type: 'interactive' | 'background') {
+    return this.sessions.has(type);
+  }
+
   getCurrentSession(type: 'interactive' | 'background') {
     return this.sessions.get(type);
   }
@@ -590,15 +594,17 @@ export class RoomsStore extends EventsEmitter {
         }
         break;
       case 'room-deleted':
+        console.log('room-deleted: %o, %o', this.currentRid, event);
         if (this.currentRid && this.currentRid === event.rid) {
           const room = this.rooms.get(this.currentRid);
-          if (room && !(room.rtype === 'background')) {
+          if (room) {
             this.rooms
               .get(this.currentRid)
               ?.present.forEach((peerId: string) => {
                 if (peerId !== this.ourId) this.destroyPeer(peerId);
               });
             this.ourPeer.disableAll();
+            console.log('this.currentRid = null');
             this.currentRid = null;
           }
         }
@@ -746,12 +752,6 @@ export class RoomsStore extends EventsEmitter {
   async joinRoom(rid: string) {
     const room = this.rooms.get(rid);
     if (room) {
-      if (rid !== room.rid) {
-        const session = this.getCurrentSession(room.rtype);
-        if (session) {
-          this.leaveRoom(session.rid);
-        }
-      }
       this.sessions.set(room.rtype, room);
 
       if (!(room.rtype === 'background')) {
