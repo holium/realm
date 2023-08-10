@@ -5,7 +5,7 @@ import { Flex } from '@holium/design-system/general';
 import { AccountDialogDescription } from '../../components/AccountDialog.styles';
 import { GrayButton } from '../../components/ChangeButton';
 import { TABLET_WIDTH } from '../../components/OnboardDialog.styles';
-import { maintenanceWindows, maintenanceWindowToString } from '../util';
+import { displayMaintenanceWindow } from '../util';
 
 const ChangeMaintenanceWindowContainer = styled(Flex)`
   width: 100%;
@@ -37,7 +37,7 @@ export const ChangeMaintenanceWindow = ({
         Your maintenance window is scheduled for:
       </AccountDialogDescription>
       <AccountDialogDescription style={{ fontSize: 13 }}>
-        {maintenanceWindowToString(maintenanceWindows[maintenanceWindow])}
+        {displayMaintenanceWindow(maintenanceWindow)}
       </AccountDialogDescription>
     </Flex>
     <GrayButton type="button" onClick={onClick}>
