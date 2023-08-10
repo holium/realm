@@ -25,6 +25,7 @@ const RoomRowPresenter = ({
   provider,
   present,
   creator,
+  ext,
   onClick,
 }: RoomRowProps) => {
   const { loggedInAccount, theme } = useAppState();
@@ -137,6 +138,13 @@ const RoomRowPresenter = ({
                 </>
               )}
             </Flex>
+          )}
+          {ext && (
+            <>
+              <Text.Custom opacity={0.5} fontWeight={200} fontSize={2}>
+                {ext}
+              </Text.Custom>
+            </>
           )}
         </Flex>
 

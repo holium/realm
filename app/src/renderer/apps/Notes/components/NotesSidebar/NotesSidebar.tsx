@@ -45,15 +45,23 @@ const NotesSidebarPresenter = () => {
 
   useEffect(() => {
     return () => {
-      console.log('unmounting and cleaning up room...');
-      // Leave current room on unmount.
-      // only if there is a notes (background) room
+      console.log('NotesSidebar unmount');
+      // also cleanup server side resources when the notes app closes
       const session = roomsStore.getCurrentSession('background');
       if (session) {
         roomsStore.deleteRoom(session.rid);
       }
     };
   }, []);
+
+  useEffect(() => {
+    console.log('NotesSidebar space change');
+    // cleanup server side resources when switching spaces
+    const session = roomsStore.getCurrentSession('background');
+    if (session) {
+      roomsStore.deleteRoom(session.rid);
+    }
+  }, [selectedSpace]);
 
   if (!selectedSpace) return null;
 
@@ -104,7 +112,7 @@ const NotesSidebarPresenter = () => {
       if (!note) return;
 
       const newRoomRid = await roomsStore.createRoom(
-        `Notes: ${note.title}`,
+        `Notes: ${note.title}-${id}`,
         'public',
         noteRoomPath,
         'background'
@@ -114,8 +122,11 @@ const NotesSidebarPresenter = () => {
 
     setConnectingToNoteRoom(false);
 
-    // In Notes rooms everyone should be muted by default.
-    roomsStore.ourPeer.mute();
+    const session = roomsStore.getCurrentSession('interactive');
+    // do not auto mute if there is an interactive session
+    if (session === undefined) {
+      roomsStore.ourPeer.mute();
+    }
   };
 
   return (

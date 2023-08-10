@@ -36,6 +36,17 @@ const RoomsPresenter = () => {
 
   const rooms = roomsStore.getSpaceRooms(spacesStore.selected?.path ?? '');
 
+  let ext: string | undefined = undefined;
+  if (roomsStore.currentRoom) {
+    const idx = rooms.findIndex((room) => room.rid === roomsStore.currentRid);
+    if (idx === -1) {
+      rooms.splice(0, 0, roomsStore.currentRoom);
+      ext = roomsStore.currentRoom.path?.substring(
+        roomsStore.currentRoom.path?.lastIndexOf('/') + 1
+      );
+    }
+  }
+
   return (
     <>
       <Flex
@@ -50,17 +61,19 @@ const RoomsPresenter = () => {
             Rooms
           </Text.Custom>
         </Flex>
-        <Button.TextButton
-          showOnHover
-          height={26}
-          fontWeight={500}
-          onClick={(evt: any) => {
-            evt.stopPropagation();
-            roomsApp.setView('new-room');
-          }}
-        >
-          Create
-        </Button.TextButton>
+        {!spacesStore.selected?.path.endsWith('/our') && (
+          <Button.TextButton
+            showOnHover
+            height={26}
+            fontWeight={500}
+            onClick={(evt: any) => {
+              evt.stopPropagation();
+              roomsApp.setView('new-room');
+            }}
+          >
+            Create
+          </Button.TextButton>
+        )}
       </Flex>
       <Flex gap={8} flex={1} flexDirection="column" overflowY={'auto'}>
         {rooms?.filter((value) => value.rtype === 'interactive').length ===
@@ -96,6 +109,7 @@ const RoomsPresenter = () => {
                   creator={room.creator}
                   access={room.access}
                   capacity={room.capacity}
+                  ext={ext}
                   onClick={async (evt: any) => {
                     evt.stopPropagation();
                     const session = roomsStore.getCurrentSession('interactive');

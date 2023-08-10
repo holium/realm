@@ -185,6 +185,7 @@ export class RoomsStore extends EventsEmitter {
     });
 
     this.ourPeer.on('isMutedChanged', (isMuted) => {
+      console.log('isMutedChanged');
       this.sendDataToRoom({
         kind: DataPacketKind.MUTE_STATUS,
         value: {
@@ -518,8 +519,9 @@ export class RoomsStore extends EventsEmitter {
         newRoom.update(event.room);
         this.rooms.set(event.room.rid, newRoom);
         this.sessions.set(event.room.rtype, newRoom);
-
-        this.currentRid = event.room.rid;
+        if (event.room.rtype !== 'background') {
+          this.currentRid = event.room.rid;
+        }
         break;
       case 'room-entered':
         console.log('room entered', event);
@@ -548,8 +550,8 @@ export class RoomsStore extends EventsEmitter {
             console.log('someone entered the room', event);
             this.createPeer(event.peer_id);
 
-            const isRoomsNote = event.room.title.startsWith('Notes:');
-            if (shipStore.settingsStore.systemSoundsEnabled && !isRoomsNote) {
+            const isBackground = event.room.rtype === 'background';
+            if (shipStore.settingsStore.systemSoundsEnabled && !isBackground) {
               SoundActions.playRoomPeerEnter();
             }
           }
@@ -563,12 +565,14 @@ export class RoomsStore extends EventsEmitter {
         }
         if (this.currentRid === event.room.rid) {
           if (event.peer_id === this.ourId) {
-            this.currentRid = null;
-            this.hangupAllPeers();
+            if (event.room.rtype !== 'background') {
+              this.currentRid = null;
+              this.hangupAllPeers();
+            }
           } else {
             // someone left the room
-            const isRoomsNote = event.room.title.startsWith('Notes:');
-            if (shipStore.settingsStore.systemSoundsEnabled && !isRoomsNote) {
+            const isBackground = event.room.rtype === 'background';
+            if (shipStore.settingsStore.systemSoundsEnabled && !isBackground) {
               SoundActions.playRoomPeerLeave();
             }
             console.log('someone left the room', event);
@@ -579,17 +583,24 @@ export class RoomsStore extends EventsEmitter {
             // self.rooms = self.rooms.map((room: any) =>
             //   room.rid === event.rid ? updatedRoom : room
             // );
-            this.currentRid = event.rid;
+            if (event.room.rtype !== 'background') {
+              this.currentRid = event.rid;
+            }
           }
         }
         break;
       case 'room-deleted':
         if (this.currentRid && this.currentRid === event.rid) {
-          this.rooms.get(this.currentRid)?.present.forEach((peerId: string) => {
-            if (peerId !== this.ourId) this.destroyPeer(peerId);
-          });
-          this.ourPeer.disableAll();
-          this.currentRid = null;
+          const room = this.rooms.get(this.currentRid);
+          if (room && !(room.rtype === 'background')) {
+            this.rooms
+              .get(this.currentRid)
+              ?.present.forEach((peerId: string) => {
+                if (peerId !== this.ourId) this.destroyPeer(peerId);
+              });
+            this.ourPeer.disableAll();
+            this.currentRid = null;
+          }
         }
         this._removeRoom(event.rid);
         break;
@@ -692,8 +703,10 @@ export class RoomsStore extends EventsEmitter {
     const room = this.rooms.get(rid);
     if (room) this.sessions.delete(room.rtype);
     this.rooms.delete(rid);
-    this.ourPeer.disableAll();
-    this.currentRid = null;
+    if (!(room?.rtype === 'background')) {
+      this.ourPeer.disableAll();
+      this.currentRid = null;
+    }
     this.websocket.send(
       serialize({
         type: 'delete-room',
@@ -737,10 +750,16 @@ export class RoomsStore extends EventsEmitter {
         this.leaveRoom(session.rid);
       }
       this.sessions.set(room.rtype, room);
-    }
-    this.setCurrentRoom(rid);
-    if (!this.ourPeer.audioStream) {
-      await this.ourPeer.enableAudio();
+
+      if (!(room.rtype === 'background')) {
+        this.setCurrentRoom(rid);
+
+        if (!this.ourPeer.audioStream) {
+          await this.ourPeer.enableAudio();
+        }
+      }
+
+      room.addPeer(this.ourId);
     }
 
     this.websocket.send(
@@ -749,10 +768,6 @@ export class RoomsStore extends EventsEmitter {
         rid,
       })
     );
-    // add us to the room
-    if (room) {
-      room.addPeer(this.ourId);
-    }
   }
 
   @action
@@ -764,8 +779,10 @@ export class RoomsStore extends EventsEmitter {
       this.deleteRoom(rid);
     } else {
       this.sessions.delete(room.rtype);
-      this.currentRid = null;
-      this.ourPeer.disableAll();
+      if (!(room?.rtype === 'background')) {
+        this.currentRid = null;
+        this.ourPeer.disableAll();
+      }
       this.websocket.send(
         serialize({
           type: 'leave-room',

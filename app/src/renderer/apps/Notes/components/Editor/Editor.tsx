@@ -116,7 +116,7 @@ const EditorPresenter = () => {
     reconnecting.toggleOn();
 
     await roomsStore.createRoom(
-      `Notes: ${selectedNote.title}`,
+      `Notes: ${selectedNote.title}-${selectedNote.id}`,
       'public',
       roomPath,
       'background'
