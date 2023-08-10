@@ -33,6 +33,7 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
     // only one interactive (video/audio) session at a time
     const session = roomsStore.getCurrentSession('interactive');
     if (session) {
+      console.log('StartRoomButton (deleteRoom) %o', session.rid);
       roomsStore.deleteRoom(session.rid);
     }
 

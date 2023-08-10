@@ -700,6 +700,7 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   deleteRoom(rid: string) {
+    console.log('RoomsStore.deleteRoom %o', rid);
     const room = this.rooms.get(rid);
     if (room) this.sessions.delete(room.rtype);
     this.rooms.delete(rid);
@@ -745,9 +746,11 @@ export class RoomsStore extends EventsEmitter {
   async joinRoom(rid: string) {
     const room = this.rooms.get(rid);
     if (room) {
-      const session = this.getCurrentSession(room.rtype);
-      if (session) {
-        this.leaveRoom(session.rid);
+      if (rid !== room.rid) {
+        const session = this.getCurrentSession(room.rtype);
+        if (session) {
+          this.leaveRoom(session.rid);
+        }
       }
       this.sessions.set(room.rtype, room);
 
@@ -776,6 +779,7 @@ export class RoomsStore extends EventsEmitter {
     if (room === undefined) return;
     room.removePeer(this.ourId);
     if (room.present.length === 0) {
+      console.log('RoomsStore.leaveRoom (deleteRoom) %o', rid);
       this.deleteRoom(rid);
     } else {
       this.sessions.delete(room.rtype);

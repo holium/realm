@@ -83,6 +83,7 @@ const NewRoomPresenter = () => {
 
     const session = roomsStore.getCurrentSession('interactive');
     if (session) {
+      console.log('deleteRoom %o', session.rid);
       roomsStore.deleteRoom(session.rid);
     }
 
