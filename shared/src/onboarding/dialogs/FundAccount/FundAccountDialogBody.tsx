@@ -3,28 +3,18 @@ import styled from 'styled-components';
 
 import { Button, CopyButton, Flex, Text } from '@holium/design-system/general';
 
-import { FundingCard } from '../../components/FundingCard';
+import {
+  FUNDING_OPTIONS,
+  FundingOption,
+  FundingOptions,
+} from '../../components/FundingOptions';
 import {
   OnboardDialogDescriptionTiny,
   OnboardDialogInputLabelSmall,
   OnboardDialogTitleBig,
 } from '../../components/OnboardDialog.styles';
+import { PayWithEthButton } from '../../components/PayWithEthButton';
 import { FormField } from '../../onboarding';
-
-export const PayButton = styled(Button.Primary)`
-  flex: 1;
-  height: 36px;
-  justify-content: center;
-  gap: 12px;
-  border-radius: 6px;
-  background: #43c35f;
-
-  && {
-    &:hover {
-      background: #43c35f !important;
-    }
-  }
-`;
 
 const SkipButton = styled(Button.Secondary)`
   flex: 1;
@@ -45,7 +35,9 @@ export type FundAccountDialogFields = {
 export const FundAccountDialogBody = ({ ethAddress, onNext }: Props) => {
   // const { errors } = useFormikContext<Fields>();
 
-  const [fundingOption, setFundingOption] = useState(0);
+  const [fundingOption, setFundingOption] = useState<FundingOption>(
+    FUNDING_OPTIONS[0]
+  );
 
   return (
     <>
@@ -70,32 +62,10 @@ export const FundAccountDialogBody = ({ ethAddress, onNext }: Props) => {
           maintain uninterrupted service.
         </OnboardDialogDescriptionTiny>
       </Flex>
-      <Flex flexDirection="column" gap={4} mb="8px">
-        <OnboardDialogInputLabelSmall as="label" htmlFor="eth-address">
-          Funding options
-        </OnboardDialogInputLabelSmall>
-        <FundingCard
-          label="One month"
-          ethPrice="0.0080 ETH"
-          usdPrice="$15.00 USD"
-          isSelected={fundingOption === 0}
-          onClick={() => setFundingOption(0)}
-        />
-        <FundingCard
-          label="One year"
-          ethPrice="0.080 ETH"
-          usdPrice="$150.00 USD"
-          isSelected={fundingOption === 1}
-          onClick={() => setFundingOption(1)}
-        />
-        <FundingCard
-          label="Lifetime"
-          ethPrice="2.125 ETH"
-          usdPrice="$4,000.00 USD"
-          isSelected={fundingOption === 2}
-          onClick={() => setFundingOption(2)}
-        />
-      </Flex>
+      <FundingOptions
+        fundingOption={fundingOption}
+        setFundingOption={setFundingOption}
+      />
       <Flex gap="8px">
         <SkipButton onClick={onNext}>
           <Text.Body
@@ -108,26 +78,7 @@ export const FundAccountDialogBody = ({ ethAddress, onNext }: Props) => {
             Skip for now
           </Text.Body>
         </SkipButton>
-        <PayButton onClick={onNext}>
-          <Text.Body
-            style={{
-              fontSize: '18px',
-              fontWeight: 500,
-              color: 'rgba(255, 255, 255)',
-            }}
-          >
-            Pay
-          </Text.Body>
-          <Text.Body
-            style={{
-              fontSize: '18px',
-              fontWeight: 500,
-              color: 'rgba(255, 255, 255, 0.70)',
-            }}
-          >
-            0.0080 ETH
-          </Text.Body>
-        </PayButton>
+        <PayWithEthButton ethPrice={fundingOption.ethPrice} onClick={onNext} />
       </Flex>
     </>
   );

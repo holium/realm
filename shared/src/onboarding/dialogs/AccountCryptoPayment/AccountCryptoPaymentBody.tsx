@@ -1,12 +1,12 @@
 import styled from 'styled-components';
 
-import { CopyButton, Flex, Icon, Text } from '@holium/design-system/general';
+import { CopyButton, Flex, Icon } from '@holium/design-system/general';
 
 import {
   OnboardDialogDescriptionSmall,
   OnboardDialogInputLabelSmall,
 } from '../../components/OnboardDialog.styles';
-import { PayButton } from '../FundAccount/FundAccountDialogBody';
+import { PayWithEthButton } from '../../components/PayWithEthButton';
 import { GrayBox } from '../GetRealm/GetRealmDialogBody.styles';
 
 const GrayBoxCrypto = styled(GrayBox)`
@@ -67,9 +67,7 @@ export const AccountCryptoPaymentBody = ({
         </Flex>
       </GrayBoxCrypto>
       <Flex width="100%" mt="16px">
-        <PayButton onClick={onClickPay}>
-          <Text.Body style={{ color: '#ffffff' }}>Pay</Text.Body>
-        </PayButton>
+        <PayWithEthButton onClick={onClickPay} />
       </Flex>
     </Flex>
     <Flex gap="2px" alignItems="center">

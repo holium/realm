@@ -220,4 +220,23 @@ export const AccountCryptoPaymentDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-AccountCryptoPaymentDialogStory.storyName = '7. Crypto payment';
+AccountCryptoPaymentDialogStory.storyName = '7.1. Crypto payment';
+
+export const AccountCryptoPaidDialogStory: ComponentStory<
+  typeof AccountStorageDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <AccountCryptoPaymentDialog
+      ships={[thirdEarthMockShip]}
+      selectedShipId={0}
+      setSelectedShipId={() => {}}
+      onClickPurchaseId={() => {}}
+      onClickUploadId={() => {}}
+      onClickPay={() => {}}
+      onClickSidebarSection={() => {}}
+      onClickExit={() => {}}
+    />
+  </OnboardingDialogWrapper>
+);
+
+AccountCryptoPaidDialogStory.storyName = '7.2 Paid';

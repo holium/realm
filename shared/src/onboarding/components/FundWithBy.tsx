@@ -5,7 +5,7 @@ import { Flex, Icon, Text } from '@holium/design-system/general';
 import { GrayBox } from '../dialogs/GetRealm/GetRealmDialogBody.styles';
 
 export const FundText = styled(Text.Body)`
-  color: rgba(51, 51, 51, 0.5);
+  color: rgba(var(--rlm-text-rgba), 0.5);
   font-family: Rubik;
   font-size: 12px;
   line-height: 16px;
