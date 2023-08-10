@@ -121,4 +121,9 @@ export const maintenanceWindowToString = ({
   weekDay,
   time,
   optimizedFor,
-}: MaintenanceWindow) => `${weekDay} ${time} (optimized for ${optimizedFor})`;
+}: MaintenanceWindow) => (
+  <>
+    {weekDay} {time} GMT{' '}
+    <span style={{ fontWeight: 400 }}>(optimal for {optimizedFor})</span>
+  </>
+);
