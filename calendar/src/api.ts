@@ -125,6 +125,10 @@ export const api = {
   getCalendarData: async (id: string) => {
     return api.createApi().scry({ app: 'calendar', path: '/calendar/' + id });
   },
+  getClearWebCalendarData: async (calendarId: string) => {
+    // HTTP GET request
+    return fetch('/apps/calendar/scry/calendar/' + calendarId);
+  },
   getSpaces: async () => {
     return api.createApi().scry({ app: 'calendar-spaces', path: '/spaces' });
   },

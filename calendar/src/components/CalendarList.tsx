@@ -65,10 +65,10 @@ export const CalendarList = ({
         marginTop={'20px'}
         marginBottom={'20px'}
       >
-        {calendarList.map((item: any, index: number) => {
+        {calendarList.map((item: any) => {
           return (
             <CalendarItem
-              key={'calendar-' + index}
+              key={'calendar-' + item.id}
               id={item.id}
               title={item.title}
               description={item.description}

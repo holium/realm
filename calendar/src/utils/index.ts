@@ -430,3 +430,68 @@ export const copyToClipboard = (text: string) => {
     return false;
   }
 };
+
+export const spansToEvents = (
+  spans: any,
+  setEvents: (events: any) => void,
+  selectedCalendar: null | string
+) => {
+  const getSpanData = (item: any) => {
+    if (Object.prototype.hasOwnProperty.call(item, 'span')) {
+      return item.span.instance;
+    } else if (Object.prototype.hasOwnProperty.call(item, 'fuld')) {
+      return item.fuld.instance;
+    }
+  };
+  const isFullDay = (item: any) => !!item.fuld;
+  const isSkip = (item: any) =>
+    Object.prototype.hasOwnProperty.call(item, 'skip'); // This instance has most likely been deleted
+  const newEvents: any = [];
+  spans.forEach((span: any) => {
+    const metaData = span.metadata[span['def-data']];
+    const reccurenceRule = span.rules[span['def-rule']]?.rid;
+    for (const item of span.instances) {
+      if (isSkip(item.instance)) continue;
+      let newEvent;
+      if (isFullDay(item.instance)) {
+        // NOTE: can use a unix milisecond for these start/end date params instead
+        const startDate = new Date(getSpanData(item.instance));
+        //params starting with _ are included in event's extendedProps (passed to <Event /> component)
+        newEvent = {
+          start: startDate, //js date object
+          _startDate: startDate,
+          _isFullday: true,
+          allDay: true,
+        };
+      } else {
+        // NOTE: can use a unix milisecond for these start/end date params instead
+        const spanData = getSpanData(item.instance);
+        const startDate = new Date(spanData.start);
+        const endDate = new Date(spanData.end);
+        // TODO: make a typescript type for events in the project
+        //params starting with _ are included in event's extendedProps (passed to <Event /> component)
+        newEvent = {
+          start: startDate, //js date object
+          end: endDate, //js date object
+          _startDate: startDate,
+          _endDate: endDate,
+          _isFullday: false,
+          allDay: false,
+        };
+      }
+      newEvent = {
+        ...newEvent,
+        _spanId: span.id,
+        _instanceId: item.idx,
+        _calendarId: selectedCalendar,
+        title: metaData.name,
+        description: metaData.description,
+        _color: metaData.color,
+        _reccurenceRule: reccurenceRule,
+      };
+      newEvents.push(newEvent);
+    }
+  });
+
+  setEvents(newEvents);
+};

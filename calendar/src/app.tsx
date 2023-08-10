@@ -14,10 +14,10 @@ import {
   SpaceList,
 } from './components';
 import { Navigation } from './components/Navigation';
-import { isOur, log } from './utils';
+import { isOur, log, spansToEvents } from './utils';
 
 import 'react-day-picker/dist/style.css';
-
+// TODO: put <Home/> and <ClearWebCalendar/> in their own pages and export them
 const GlobalStyle = createGlobalStyle`
   html { 
     overflow: hidden;
@@ -134,6 +134,7 @@ declare global {
 export const App = () => {
   return (
     <main>
+      <GlobalStyle />
       <Router>
         <Routes>
           <Route element={<Navigation />}>
@@ -227,66 +228,7 @@ const Home = () => {
       log('fetchCalendarEntries error =>', e);
     }
   };
-  const spansToEvents = (spans: any) => {
-    const getSpanData = (item: any) => {
-      if (Object.prototype.hasOwnProperty.call(item, 'span')) {
-        return item.span.instance;
-      } else if (Object.prototype.hasOwnProperty.call(item, 'fuld')) {
-        return item.fuld.instance;
-      }
-    };
-    const isFullDay = (item: any) => !!item.fuld;
-    const isSkip = (item: any) =>
-      Object.prototype.hasOwnProperty.call(item, 'skip'); // This instance has most likely been deleted
-    const newEvents: any = [];
-    spans.forEach((span: any) => {
-      const metaData = span.metadata[span['def-data']];
-      const reccurenceRule = span.rules[span['def-rule']]?.rid;
-      for (const item of span.instances) {
-        if (isSkip(item.instance)) continue;
-        let newEvent;
-        if (isFullDay(item.instance)) {
-          // NOTE: can use a unix milisecond for these start/end date params instead
-          const startDate = new Date(getSpanData(item.instance));
-          //params starting with _ are included in event's extendedProps (passed to <Event /> component)
-          newEvent = {
-            start: startDate, //js date object
-            _startDate: startDate,
-            _isFullday: true,
-            allDay: true,
-          };
-        } else {
-          // NOTE: can use a unix milisecond for these start/end date params instead
-          const spanData = getSpanData(item.instance);
-          const startDate = new Date(spanData.start);
-          const endDate = new Date(spanData.end);
-          // TODO: make a typescript type for events in the project
-          //params starting with _ are included in event's extendedProps (passed to <Event /> component)
-          newEvent = {
-            start: startDate, //js date object
-            end: endDate, //js date object
-            _startDate: startDate,
-            _endDate: endDate,
-            _isFullday: false,
-            allDay: false,
-          };
-        }
-        newEvent = {
-          ...newEvent,
-          _spanId: span.id,
-          _instanceId: item.idx,
-          _calendarId: selectedCalendar,
-          title: metaData.name,
-          description: metaData.description,
-          _color: metaData.color,
-          _reccurenceRule: reccurenceRule,
-        };
-        newEvents.push(newEvent);
-      }
-    });
 
-    setEvents(newEvents);
-  };
   useEffect(() => {
     fetchSpacesList();
   }, []);
@@ -301,7 +243,7 @@ const Home = () => {
     }
   }, [selectedCalendar]);
   useEffect(() => {
-    spansToEvents(spans);
+    spansToEvents(spans, setEvents, selectedCalendar);
   }, [spans]);
   const onCalendarSelect = async (calendarId: string) => {
     if (selectedCalendar === calendarId) return; // This calendar is currently selected do nothing
@@ -325,7 +267,6 @@ const Home = () => {
   return (
     <>
       <div id="portal-root" />
-      <GlobalStyle />
       <Flex>
         <Flex flexDirection={'column'} marginRight="8px">
           {selectedSpace && (
@@ -370,8 +311,35 @@ const ClearWebCalendar = () => {
   const publicCalendarId = useCalendarStore(
     (store: CalendarStore) => store.publicCalendarId
   );
+  const [events, setEvents] = useState<any>([]);
+  const [spans, setSpans] = useState<any>([]);
+  const fetchCalendarEntries = async (calendarId: string) => {
+    setSpans([]); // always reset spans
+    try {
+      const result = await api.getClearWebCalendarData(calendarId);
+      const data = await result.json();
+      if (data) {
+        const newSpans = Object.keys(data.events).map((key: string) => {
+          return { id: key, ...data.events[key] };
+        });
 
-  return (
-    <p>rendering a clear web option with this calendar : {publicCalendarId}</p>
-  );
+        // For now Spans and Fullday events are different, marge them here
+        setSpans(newSpans);
+      }
+      log('fetchCalendarEntries data => ', data);
+    } catch (e) {
+      log('fetchCalendarEntries error =>', e);
+    }
+  };
+  useEffect(() => {
+    if (publicCalendarId) {
+      fetchCalendarEntries(publicCalendarId);
+    }
+  }, [publicCalendarId]);
+  useEffect(() => {
+    if (spans) {
+      spansToEvents(spans, setEvents, publicCalendarId);
+    }
+  }, [spans]);
+  return <Calendar events={events} datePickerSelected={null} />;
 };

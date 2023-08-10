@@ -4,6 +4,7 @@ import { Popover } from 'react-tiny-popover';
 import { Box, Button, Card, Flex, Icon, Text } from '@holium/design-system';
 
 import { api } from '../api';
+import useCalendarStore, { CalendarStore } from '../CalendarStore';
 import {
   formatHoursMinutes,
   getDayOfWeekJS,
@@ -13,6 +14,9 @@ import {
 } from '../utils';
 // TODO: add reccurence text
 export const Event = ({ eventInfo }: any) => {
+  const publicCalendarId = useCalendarStore(
+    (store: CalendarStore) => store.publicCalendarId
+  ); // If this exist we're in a clearweb calendar view, we disable interactions
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [deletePrompt, setDeletePrompt] = useState<boolean>(false);
   // TODO: optimize this
@@ -102,7 +106,9 @@ export const Event = ({ eventInfo }: any) => {
               <Icon name="Edit" size={16} opacity={0.7} />
             </Button.IconButton>*/}
             <Button.IconButton size={28} onClick={() => setDeletePrompt(true)}>
-              <Icon name="Trash" size={16} opacity={0.7} />
+              {!publicCalendarId && (
+                <Icon name="Trash" size={16} opacity={0.7} />
+              )}
             </Button.IconButton>
             <Button.IconButton
               size={28}

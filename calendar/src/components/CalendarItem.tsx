@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Button,
@@ -37,6 +37,69 @@ export const CalendarItem = ({
 }: Props) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [newCalendarTitle, setNewCalendarTitle] = useState<string>('');
+  const sharedMenuOptions = [
+    {
+      id: `calendar-menu-element-edit`,
+      label: 'Edit',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
+        evt.stopPropagation();
+        setIsEditing(true);
+        setNewCalendarTitle(title);
+      },
+    },
+    {
+      id: `calendar-menu-element-delete`,
+      label: 'Delete',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
+        evt.stopPropagation();
+        deleteCalendar(id);
+      },
+    },
+  ];
+  const menuOptionsPublishOn = [
+    ...sharedMenuOptions,
+    {
+      id: `calendar-menu-element-publish-off`,
+      label: 'Disable clearweb access',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
+        evt.stopPropagation();
+        toggleCalendarPublish(false);
+      },
+    },
+    {
+      id: `calendar-menu-element-link`,
+      label: 'Get clearweb link',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
+        evt.stopPropagation();
+        buildClearWebLink();
+      },
+    },
+  ];
+  const menuOptionsPublishOff = [
+    ...sharedMenuOptions,
+    {
+      id: `calendar-menu-element-publish-on`,
+      label: 'Enable clearweb access',
+      disabled: false,
+      onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
+        evt.stopPropagation();
+        toggleCalendarPublish(true);
+      },
+    },
+  ];
+  const [menuOptions, setMenuOptions] = useState<any>([]);
+  useEffect(() => {
+    log('publish', publish);
+    if (publish) {
+      setMenuOptions(menuOptionsPublishOn);
+    } else {
+      setMenuOptions(menuOptionsPublishOff);
+    }
+  }, [publish]);
   const updateCalendar = async () => {
     if (!calendarId) return;
     if (!newCalendarTitle) return; // TODO: should be called newTitle?
@@ -141,61 +204,13 @@ export const CalendarItem = ({
             orientation="bottom-right"
             id={`menu`}
             fontStyle={'normal'}
-            dimensions={{ width: 200, height: 150 }}
+            dimensions={{ width: 200, height: publish ? 150 : 120 }}
             triggerEl={
               <Button.IconButton size={25}>
                 <Icon name="MoreHorizontal" size={18} opacity={0.5} />
               </Button.IconButton>
             }
-            options={[
-              {
-                id: `calendar-menu-element-edit`,
-                label: 'Edit',
-                disabled: false,
-                onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
-                  evt.stopPropagation();
-                  setIsEditing(true);
-                  setNewCalendarTitle(title);
-                },
-              },
-              {
-                id: `calendar-menu-element-delete`,
-                label: 'Delete',
-                disabled: false,
-                onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
-                  evt.stopPropagation();
-                  deleteCalendar(id);
-                },
-              },
-              publish
-                ? {
-                    id: `calendar-menu-element-publish-off`,
-                    label: 'Disable clearweb access',
-                    disabled: false,
-                    onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
-                      evt.stopPropagation();
-                      toggleCalendarPublish(false);
-                    },
-                  }
-                : {
-                    id: `calendar-menu-element-publish-on`,
-                    label: 'Enable clearweb access',
-                    disabled: false,
-                    onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
-                      evt.stopPropagation();
-                      toggleCalendarPublish(true);
-                    },
-                  },
-              {
-                id: `calendar-menu-element-link`,
-                label: 'Get clearweb link',
-                disabled: false,
-                onClick: (evt: React.MouseEvent<HTMLDivElement>) => {
-                  evt.stopPropagation();
-                  buildClearWebLink();
-                },
-              },
-            ]}
+            options={menuOptions}
           />
         </Flex>
       )}
