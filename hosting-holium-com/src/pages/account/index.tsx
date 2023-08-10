@@ -221,6 +221,8 @@ const HostingPresenter = () => {
     );
   }
 
+  console.log('ChangeMaintenanceWindow', selectedShip);
+
   return (
     <Page title="Account / Hosting" isProtected>
       <ChangeEmailModal
@@ -244,6 +246,7 @@ const HostingPresenter = () => {
         onSubmit={onSubmitNewPassword}
       />
       <ChangeMaintenanceWindowModal
+        key={`change-maintenance-window-${selectedShip?.maintenance_window}`}
         isOpen={changeMaintenanceWindowModal.isOn}
         initialSelected={(selectedShip?.maintenance_window ?? 0).toString()}
         onDismiss={changeMaintenanceWindowModal.toggleOff}
