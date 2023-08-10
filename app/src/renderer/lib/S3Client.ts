@@ -1,4 +1,4 @@
-import type S3 from 'aws-sdk/clients/s3';
+import { S3, S3ClientConfig } from '@aws-sdk/client-s3';
 // pulled this from landscape
 export enum StorageAcl {
   PublicRead = 'public-read',
@@ -29,24 +29,19 @@ export interface StorageClient {
 }
 
 export class S3Client implements StorageClient {
-  config: S3.ClientConfiguration;
+  config: S3ClientConfig;
   client: S3 | null = null;
-  S3!: typeof import('aws-sdk/clients/s3');
 
-  constructor(config: S3.ClientConfiguration) {
+  constructor(config: S3ClientConfig) {
     this.config = config;
   }
 
   async initAndUpload(params: UploadParams) {
-    if (!this.S3) {
-      await this.loadLib();
-    }
-
     if (!this.client) {
-      this.client = new this.S3(this.config);
+      this.client = new S3(this.config);
     }
 
-    return await this.client.upload(params).promise();
+    return await this.client.putObject(params);
   }
 
   upload(params: UploadParams): StorageUpload {
@@ -57,15 +52,11 @@ export class S3Client implements StorageClient {
   }
 
   async initAndDelete(params: DeleteParams) {
-    if (!this.S3) {
-      await this.loadLib();
-    }
-
     if (!this.client) {
-      this.client = new this.S3(this.config);
+      this.client = new S3(this.config);
     }
 
-    return await this.client.deleteObject(params).promise();
+    return await this.client.deleteObject(params);
   }
 
   delete(params: DeleteParams): StorageUpload {
@@ -73,9 +64,5 @@ export class S3Client implements StorageClient {
     return {
       promise: async () => await deleteCall(params),
     };
-  }
-
-  async loadLib() {
-    this.S3 = (await import('aws-sdk/clients/s3')).default;
   }
 }

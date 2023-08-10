@@ -30,6 +30,7 @@ export type S3CredentialsAndConfig = {
   };
   configuration: {
     currentBucket: string;
+    region: string;
   };
 };
 
@@ -321,8 +322,7 @@ export class ShipService extends AbstractService<any> {
       }
       const client = new S3Client({
         credentials: response.credentials,
-        endpoint: endp,
-        signatureVersion: 'v4',
+        region: response.configuration.region,
       });
       let fileContent, fileName, fileExtension;
       if (args.source === 'file' && typeof args.content === 'string') {
@@ -348,9 +348,13 @@ export class ShipService extends AbstractService<any> {
         ACL: StorageAcl.PublicRead,
         ContentType: args.contentType,
       };
-      const { Location } = await client.upload(params).promise();
-
-      return { Location, key };
+      const uploadResponse = await client.upload(params).promise();
+      if (uploadResponse['$metadata'].httpStatusCode === 200) {
+        const Location = `https://${endp}/${params.Bucket}/${key}`;
+        return { Location, key };
+      } else {
+        throw new Error();
+      }
     } catch {
       log.error('ship.service.ts: Failed to upload file.');
 
@@ -372,7 +376,6 @@ export class ShipService extends AbstractService<any> {
           const client = new S3Client({
             credentials: response.credentials,
             endpoint: endp,
-            signatureVersion: 'v4',
           });
 
           const params = {
