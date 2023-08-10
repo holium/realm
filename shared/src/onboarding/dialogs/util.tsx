@@ -117,13 +117,16 @@ export const maintenanceWindows: MaintenanceWindow[] = [
   },
 ];
 
-export const maintenanceWindowToString = ({
-  weekDay,
-  time,
-  optimizedFor,
-}: MaintenanceWindow) => (
-  <>
-    {weekDay} {time} GMT{' '}
-    <span style={{ fontWeight: 400 }}>(optimal for {optimizedFor})</span>
-  </>
-);
+export const displayMaintenanceWindow = (index: number) => {
+  const { weekDay, time, optimizedFor } =
+    maintenanceWindows[index % maintenanceWindows.length];
+
+  return (
+    <>
+      <span>
+        {weekDay} {time} GMT{' '}
+      </span>
+      <span style={{ fontWeight: 400 }}>(optimal for {optimizedFor})</span>
+    </>
+  );
+};

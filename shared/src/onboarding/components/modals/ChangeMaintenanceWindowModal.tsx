@@ -5,8 +5,8 @@ import { RadioList } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
 
 import {
+  displayMaintenanceWindow,
   maintenanceWindows,
-  maintenanceWindowToString,
 } from '../../dialogs/util';
 import { Modal } from '../Modal';
 import { SubmitButton } from '../SubmitButton';
@@ -52,8 +52,8 @@ export const ChangeMaintenanceWindowModal = ({
       <Text.H5>Change maintenance window</Text.H5>
       <Flex>
         <RadioList
-          options={maintenanceWindows.map((window, index) => ({
-            label: maintenanceWindowToString(window),
+          options={maintenanceWindows.map((_, index) => ({
+            label: displayMaintenanceWindow(index),
             value: index.toString(),
           }))}
           selected={selectedMaintenanceWindow}
