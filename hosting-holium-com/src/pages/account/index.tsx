@@ -221,8 +221,6 @@ const HostingPresenter = () => {
     );
   }
 
-  console.log('ChangeMaintenanceWindow', selectedShip);
-
   return (
     <Page title="Account / Hosting" isProtected>
       <ChangeEmailModal

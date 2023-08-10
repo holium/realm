@@ -80,45 +80,45 @@ export function bytesToString(bytes: number): string {
 
 type MaintenanceWindow = {
   weekDay: string;
-  startTime: string;
-  endTime: string;
+  time: string;
+  optimizedFor: string;
 };
 
 export const maintenanceWindows: MaintenanceWindow[] = [
   {
     weekDay: 'Wednesday',
-    startTime: '18:00',
-    endTime: '19:00',
+    time: '18:00',
+    optimizedFor: 'Asia/Pacific',
   },
   {
     weekDay: 'Thursday',
-    startTime: '00:00',
-    endTime: '01:00',
+    time: '00:00',
+    optimizedFor: 'EU/Africa',
   },
   {
     weekDay: 'Thursday',
-    startTime: '06:00',
-    endTime: '07:00',
+    time: '06:00',
+    optimizedFor: 'Americas',
   },
   {
     weekDay: 'Saturday',
-    startTime: '18:00',
-    endTime: '19:00',
+    time: '18:00',
+    optimizedFor: 'Asia/Pacific',
   },
   {
     weekDay: 'Sunday',
-    startTime: '00:00',
-    endTime: '01:00',
+    time: '00:00',
+    optimizedFor: 'EU/Africa',
   },
   {
     weekDay: 'Sunday',
-    startTime: '06:00',
-    endTime: '07:00',
+    time: '06:00',
+    optimizedFor: 'Americas',
   },
 ];
 
 export const maintenanceWindowToString = ({
   weekDay,
-  startTime,
-  endTime,
-}: MaintenanceWindow) => `${weekDay} ${startTime} - ${endTime} GMT`;
+  time,
+  optimizedFor,
+}: MaintenanceWindow) => `${weekDay} ${time} (optimized for ${optimizedFor})`;
