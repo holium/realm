@@ -86,44 +86,34 @@ type MaintenanceWindow = {
 
 export const maintenanceWindows: MaintenanceWindow[] = [
   {
-    weekDay: 'Monday',
-    startTime: '01:00',
-    endTime: '03:00',
-  },
-  {
-    weekDay: 'Tuesday',
-    startTime: '01:00',
-    endTime: '03:00',
-  },
-  {
     weekDay: 'Wednesday',
-    startTime: '01:00',
-    endTime: '03:00',
+    startTime: '18:00',
+    endTime: '19:00',
   },
   {
     weekDay: 'Thursday',
-    startTime: '01:00',
-    endTime: '03:00',
+    startTime: '00:00',
+    endTime: '01:00',
   },
   {
-    weekDay: 'Friday',
-    startTime: '01:00',
-    endTime: '03:00',
+    weekDay: 'Thursday',
+    startTime: '06:00',
+    endTime: '07:00',
   },
   {
     weekDay: 'Saturday',
-    startTime: '01:00',
-    endTime: '03:00',
+    startTime: '18:00',
+    endTime: '19:00',
   },
   {
     weekDay: 'Sunday',
-    startTime: '01:00',
-    endTime: '03:00',
+    startTime: '00:00',
+    endTime: '01:00',
   },
   {
     weekDay: 'Sunday',
-    startTime: '04:00',
-    endTime: '06:00',
+    startTime: '06:00',
+    endTime: '07:00',
   },
 ];
 
