@@ -1,7 +1,5 @@
 import styled from 'styled-components';
 
-import { Flex } from '@holium/design-system/general';
-
 import {
   MOBILE_WIDTH,
   OnboardDialogCard,
@@ -57,45 +55,7 @@ export const AccountDialogSubtitle = styled(OnboardDialogDescription)`
   color: rgba(var(--rlm-text-rgba), 0.6);
 `;
 
-export const AccountDialogSidebar = styled(Flex)`
-  flex: 1;
-  height: 100%;
-  flex-direction: column;
-  justify-content: space-between;
-
-  @media (max-width: ${TABLET_WIDTH}px) {
-    flex: none;
-    gap: 32px;
-    width: 100%;
-    height: auto;
-  }
-`;
-
-export const AccountDialogSidebarMenu = styled(Flex)`
-  flex-direction: column;
-  gap: 18px;
-
-  @media (max-width: ${TABLET_WIDTH}px) {
-    padding-bottom: 0;
-  }
-`;
-
 export const AccountDialogDescription = styled(OnboardDialogDescription)`
   font-size: 14px;
   line-height: 17px;
-`;
-
-export const AccountDialogSidebarMenuItemText = styled(
-  OnboardDialogDescription
-)<{
-  isOpen: boolean;
-}>`
-  font-size: 13px;
-  line-height: 15px;
-  cursor: pointer;
-  user-select: none;
-  color: ${({ isOpen }) =>
-    isOpen
-      ? 'rgba(var(--rlm-accent-rgba))'
-      : 'rgba(var(--rlm-text-rgba), 0.7)'};
 `;
