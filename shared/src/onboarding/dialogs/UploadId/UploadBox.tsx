@@ -16,15 +16,10 @@ export const UploadBox = ({ fileName, progress, onUpload }: Props) => {
   const [error, setError] = useState<string | null>(null);
 
   const onDrop = (acceptedFiles: File[]) => {
-    acceptedFiles.forEach((file) => {
-      console.log('file ==> ', file.name);
-
-      onUpload(file);
-    });
+    acceptedFiles.forEach(onUpload);
   };
 
   const { isDragActive, getRootProps, getInputProps } = useDropzone({
-    // .zip or .tar.gz
     accept: {
       'application/zip': ['.zip'],
       'application/gzip': ['.tar.gz'],
