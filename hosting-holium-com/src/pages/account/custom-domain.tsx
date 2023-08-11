@@ -82,24 +82,22 @@ const CustomDomainPresenter = () => {
   };
 
   return (
-    <Page title="Account / Download Realm" isProtected>
-      <AccountCustomDomainDialog
-        ships={ships}
-        selectedShipId={selectedShipId}
-        domain={domain}
-        dropletIp={ship?.droplet_ip}
-        errorMessage={errorMessage}
-        successMessage={successMessage}
-        submitting={submitting.isOn}
-        setSelectedShipId={setSelectedShipId}
-        onChangeDomain={setDomain}
-        onSubmit={onSubmit}
-        onClickPurchaseId={onClickPurchaseId}
-        onClickUploadId={onClickUploadId}
-        onClickSidebarSection={onClickSidebarSection}
-        onExit={logout}
-      />
-    </Page>
+    <AccountCustomDomainDialog
+      ships={ships}
+      selectedShipId={selectedShipId}
+      domain={domain}
+      dropletIp={ship?.droplet_ip}
+      errorMessage={errorMessage}
+      successMessage={successMessage}
+      submitting={submitting.isOn}
+      setSelectedShipId={setSelectedShipId}
+      onChangeDomain={setDomain}
+      onSubmit={onSubmit}
+      onClickPurchaseId={onClickPurchaseId}
+      onClickUploadId={onClickUploadId}
+      onClickSidebarSection={onClickSidebarSection}
+      onExit={logout}
+    />
   );
 };
 

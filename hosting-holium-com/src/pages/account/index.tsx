@@ -206,23 +206,21 @@ const HostingPresenter = () => {
 
   if (isUnfinishedByop) {
     return (
-      <Page title="Account / Upload Pier" isProtected>
-        <AccountUnfinishedUploadDialog
-          ships={ships}
-          selectedShipId={selectedShipId}
-          onClickReuploadId={onClickReuploadId}
-          onClickPurchaseId={onClickPurchaseId}
-          onClickUploadId={onClickUploadId}
-          setSelectedShipId={setSelectedShipId}
-          onClickSidebarSection={onClickSidebarSection}
-          onClickExit={logout}
-        />
-      </Page>
+      <AccountUnfinishedUploadDialog
+        ships={ships}
+        selectedShipId={selectedShipId}
+        onClickReuploadId={onClickReuploadId}
+        onClickPurchaseId={onClickPurchaseId}
+        onClickUploadId={onClickUploadId}
+        setSelectedShipId={setSelectedShipId}
+        onClickSidebarSection={onClickSidebarSection}
+        onClickExit={logout}
+      />
     );
   }
 
   return (
-    <Page title="Account / Hosting" isProtected>
+    <>
       <ChangeEmailModal
         isOpen={changeEmailModal.isOn}
         onDismiss={changeEmailModal.toggleOff}
@@ -274,7 +272,7 @@ const HostingPresenter = () => {
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />
-    </Page>
+    </>
   );
 };
 

@@ -50,21 +50,19 @@ const GetRealmPresenter = () => {
   };
 
   return (
-    <Page title="Account / Get Realm" isProtected>
-      <AccountGetRealmDialog
-        onClickJoinWaitlist={joinWaitlist}
-        onClickSidebarSection={onClickSidebarSection}
-        onClickPurchaseId={onClickPurchaseId}
-        onClickUploadId={onClickUploadId}
-        onExit={logout}
-      />
-    </Page>
+    <AccountGetRealmDialog
+      onClickJoinWaitlist={joinWaitlist}
+      onClickSidebarSection={onClickSidebarSection}
+      onClickPurchaseId={onClickPurchaseId}
+      onClickUploadId={onClickUploadId}
+      onExit={logout}
+    />
   );
 };
 
 export default function GetRealm() {
   return (
-    <Page title="Account / Download Realm" isProtected>
+    <Page title="Account / Get Realm" isProtected>
       <UserContextProvider api={thirdEarthApi}>
         <GetRealmPresenter />
       </UserContextProvider>

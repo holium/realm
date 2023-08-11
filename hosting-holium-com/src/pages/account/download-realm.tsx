@@ -48,21 +48,19 @@ const DownloadRealmPresenter = () => {
   const onDownloadLinux = () => window.open(downloadLinks.linux, '_blank');
 
   return (
-    <Page title="Account / Download Realm" isProtected>
-      <AccountDownloadRealmDialog
-        ships={ships}
-        selectedShipId={selectedShipId}
-        setSelectedShipId={setSelectedShipId}
-        onDownloadMacM1={onDownloadMacM1}
-        onDownloadMacIntel={onDownloadMacIntel}
-        onDownloadWindows={onDownloadWindows}
-        onDownloadLinux={onDownloadLinux}
-        onClickPurchaseId={onClickPurchaseId}
-        onClickUploadId={onClickUploadId}
-        onClickSidebarSection={onClickSidebarSection}
-        onExit={logout}
-      />
-    </Page>
+    <AccountDownloadRealmDialog
+      ships={ships}
+      selectedShipId={selectedShipId}
+      setSelectedShipId={setSelectedShipId}
+      onDownloadMacM1={onDownloadMacM1}
+      onDownloadMacIntel={onDownloadMacIntel}
+      onDownloadWindows={onDownloadWindows}
+      onDownloadLinux={onDownloadLinux}
+      onClickPurchaseId={onClickPurchaseId}
+      onClickUploadId={onClickUploadId}
+      onClickSidebarSection={onClickSidebarSection}
+      onExit={logout}
+    />
   );
 };
 
