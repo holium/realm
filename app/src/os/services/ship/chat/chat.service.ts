@@ -182,21 +182,22 @@ export class ChatService extends AbstractService<ChatUpdateTypes> {
       metadata.peer = dmPeer;
     }
     const payload = {
-      app: 'realm-chat',
-      mark: 'chat-action',
-      reaction: '',
-      json: {
+      threadName: 'chat-venter',
+      inputMark: 'chat-action',
+      outputMark: 'chat-vent',
+      desk: 'realm',
+      body: {
         'create-chat': {
-          type,
           metadata,
+          type,
           peers,
           invites: 'anyone',
           'max-expires-at-duration': null,
         },
-      },
+      } as any,
     };
     try {
-      await APIConnection.getInstance().conduit.poke(payload);
+      return await APIConnection.getInstance().conduit.thread(payload);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to create chat');
