@@ -27,9 +27,19 @@ const DownloadRealmPresenter = () => {
   };
 
   const onClickUploadId = () => {
-    goToPage('/upload-id-disclaimer', {
-      back_url: '/account/download-realm',
-    });
+    const byopInProgress = ships.find(
+      (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
+    );
+
+    if (byopInProgress) {
+      goToPage('/upload-id', {
+        back_url: '/account/download-realm',
+      });
+    } else {
+      goToPage('/upload-id-disclaimer', {
+        back_url: '/account/download-realm',
+      });
+    }
   };
 
   const onClickPurchaseId = () => {
@@ -48,21 +58,19 @@ const DownloadRealmPresenter = () => {
   const onDownloadLinux = () => window.open(downloadLinks.linux, '_blank');
 
   return (
-    <Page title="Account / Download Realm" isProtected>
-      <AccountDownloadRealmDialog
-        ships={ships}
-        selectedShipId={selectedShipId}
-        setSelectedShipId={setSelectedShipId}
-        onDownloadMacM1={onDownloadMacM1}
-        onDownloadMacIntel={onDownloadMacIntel}
-        onDownloadWindows={onDownloadWindows}
-        onDownloadLinux={onDownloadLinux}
-        onClickPurchaseId={onClickPurchaseId}
-        onClickUploadId={onClickUploadId}
-        onClickSidebarSection={onClickSidebarSection}
-        onExit={logout}
-      />
-    </Page>
+    <AccountDownloadRealmDialog
+      ships={ships}
+      selectedShipId={selectedShipId}
+      setSelectedShipId={setSelectedShipId}
+      onDownloadMacM1={onDownloadMacM1}
+      onDownloadMacIntel={onDownloadMacIntel}
+      onDownloadWindows={onDownloadWindows}
+      onDownloadLinux={onDownloadLinux}
+      onClickPurchaseId={onClickPurchaseId}
+      onClickUploadId={onClickUploadId}
+      onClickSidebarSection={onClickSidebarSection}
+      onExit={logout}
+    />
   );
 };
 

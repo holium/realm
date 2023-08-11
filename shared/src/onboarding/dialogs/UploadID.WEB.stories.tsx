@@ -14,7 +14,7 @@ import { OnboardingDialogWrapper, thirdEarthMockProduct } from './util';
 
 export default {
   component: CreateAccountDialog,
-  title: 'Onboarding/Upload ID flow WEB',
+  title: 'Onboarding/Upload Pier flow WEB',
 } as ComponentMeta<typeof CreateAccountDialog>;
 
 export const GetOnRealmDialogStory: ComponentStory<
@@ -109,7 +109,7 @@ export const UploadIdDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdDialogStory.storyName = '5.1. Upload ID';
+UploadIdDialogStory.storyName = '5.1. Upload Pier';
 
 export const UploadIdUploadingDialogStory: ComponentStory<
   typeof UploadIdDialog
@@ -125,7 +125,7 @@ export const UploadIdUploadingDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdUploadingDialogStory.storyName = '5.2. Upload ID – Uploading';
+UploadIdUploadingDialogStory.storyName = '5.2. Upload Pier – Uploading';
 
 export const UploadIdStuckDialogStory: ComponentStory<
   typeof UploadIdDialog
@@ -142,7 +142,7 @@ export const UploadIdStuckDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdStuckDialogStory.storyName = '5.3. Upload ID – Stuck?';
+UploadIdStuckDialogStory.storyName = '5.3. Upload Pier – Stuck?';
 
 export const UploadIdErrorDialogStory: ComponentStory<
   typeof UploadIdDialog
@@ -159,7 +159,7 @@ export const UploadIdErrorDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdErrorDialogStory.storyName = '5.4. Upload ID – Error';
+UploadIdErrorDialogStory.storyName = '5.4. Upload Pier – Error';
 
 export const UploadIdDoneDialogStory: ComponentStory<
   typeof UploadIdDialog

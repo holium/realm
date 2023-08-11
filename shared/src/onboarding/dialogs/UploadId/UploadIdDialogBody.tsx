@@ -53,7 +53,7 @@ export const UploadIdDialogBody = ({
       maxWidth={550}
       alignSelf="center"
     >
-      <OnboardDialogTitle>Upload ID</OnboardDialogTitle>
+      <OnboardDialogTitle>Upload Pier</OnboardDialogTitle>
       <OnboardDialogDescription>
         Upload a compressed archive of your existing pier in a <code>.zip</code>{' '}
         or <code>.tar.gz</code> format which was created after the ship was shut

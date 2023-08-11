@@ -186,9 +186,19 @@ const HostingPresenter = () => {
   };
 
   const onClickUploadId = () => {
-    goToPage('/upload-id-disclaimer', {
-      back_url: '/account',
-    });
+    const byopInProgress = ships.find(
+      (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
+    );
+
+    if (byopInProgress) {
+      goToPage('/upload-id', {
+        back_url: '/account',
+      });
+    } else {
+      goToPage('/upload-id-disclaimer', {
+        back_url: '/account',
+      });
+    }
   };
 
   const onClickReuploadId = () => {
@@ -206,23 +216,21 @@ const HostingPresenter = () => {
 
   if (isUnfinishedByop) {
     return (
-      <Page title="Account / Upload ID" isProtected>
-        <AccountUnfinishedUploadDialog
-          ships={ships}
-          selectedShipId={selectedShipId}
-          onClickReuploadId={onClickReuploadId}
-          onClickPurchaseId={onClickPurchaseId}
-          onClickUploadId={onClickUploadId}
-          setSelectedShipId={setSelectedShipId}
-          onClickSidebarSection={onClickSidebarSection}
-          onClickExit={logout}
-        />
-      </Page>
+      <AccountUnfinishedUploadDialog
+        ships={ships}
+        selectedShipId={selectedShipId}
+        onClickReuploadId={onClickReuploadId}
+        onClickPurchaseId={onClickPurchaseId}
+        onClickUploadId={onClickUploadId}
+        setSelectedShipId={setSelectedShipId}
+        onClickSidebarSection={onClickSidebarSection}
+        onClickExit={logout}
+      />
     );
   }
 
   return (
-    <Page title="Account / Hosting" isProtected>
+    <>
       <ChangeEmailModal
         isOpen={changeEmailModal.isOn}
         onDismiss={changeEmailModal.toggleOff}
@@ -274,7 +282,7 @@ const HostingPresenter = () => {
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />
-    </Page>
+    </>
   );
 };
 

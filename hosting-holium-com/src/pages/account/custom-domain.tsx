@@ -70,9 +70,19 @@ const CustomDomainPresenter = () => {
   };
 
   const onClickUploadId = () => {
-    goToPage('/upload-id-disclaimer', {
-      back_url: '/account/custom-domain',
-    });
+    const byopInProgress = ships.find(
+      (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
+    );
+
+    if (byopInProgress) {
+      goToPage('/upload-id', {
+        back_url: '/account/custom-domain',
+      });
+    } else {
+      goToPage('/upload-id-disclaimer', {
+        back_url: '/account/custom-domain',
+      });
+    }
   };
 
   const onClickPurchaseId = () => {
@@ -82,24 +92,22 @@ const CustomDomainPresenter = () => {
   };
 
   return (
-    <Page title="Account / Download Realm" isProtected>
-      <AccountCustomDomainDialog
-        ships={ships}
-        selectedShipId={selectedShipId}
-        domain={domain}
-        dropletIp={ship?.droplet_ip}
-        errorMessage={errorMessage}
-        successMessage={successMessage}
-        submitting={submitting.isOn}
-        setSelectedShipId={setSelectedShipId}
-        onChangeDomain={setDomain}
-        onSubmit={onSubmit}
-        onClickPurchaseId={onClickPurchaseId}
-        onClickUploadId={onClickUploadId}
-        onClickSidebarSection={onClickSidebarSection}
-        onExit={logout}
-      />
-    </Page>
+    <AccountCustomDomainDialog
+      ships={ships}
+      selectedShipId={selectedShipId}
+      domain={domain}
+      dropletIp={ship?.droplet_ip}
+      errorMessage={errorMessage}
+      successMessage={successMessage}
+      submitting={submitting.isOn}
+      setSelectedShipId={setSelectedShipId}
+      onChangeDomain={setDomain}
+      onSubmit={onSubmit}
+      onClickPurchaseId={onClickPurchaseId}
+      onClickUploadId={onClickUploadId}
+      onClickSidebarSection={onClickSidebarSection}
+      onExit={logout}
+    />
   );
 };
 
