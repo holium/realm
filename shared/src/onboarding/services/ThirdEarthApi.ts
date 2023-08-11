@@ -491,4 +491,15 @@ export class ThirdEarthApi {
       body: JSON.stringify({ ...payload }),
     });
   }
+
+  alerts() {
+    return http<AlertsResponse>(`${this.apiBaseUrl}/alerts`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+    });
+  }
 }
+
+type AlertsResponse = {
+  alerts: string[];
+};

@@ -17,8 +17,3 @@ export const downloadLinks = {
   windows: 'https://download.holium.com/latest/windows',
   linux: 'https://download.holium.com/latest/linux',
 };
-
-export const getSupportEmail = (patp?: string) =>
-  `mailto:support@holium.com?subject=Hosting Support${
-    patp ? ` for ${patp}` : ''
-  }&body=A picture is worth a thousand words. Please attach any screenshots that may help us understand your issue.`;

@@ -6,8 +6,6 @@ import {
   useUser,
 } from '@holium/shared';
 
-import { getSupportEmail } from 'util/constants';
-
 import { Page } from '../../components/Page';
 import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
@@ -25,12 +23,7 @@ const S3StoragePresenter = () => {
   const [minioUsage, setMinioUsage] = useState<number>(0);
 
   const onClickSidebarSection = (section: string) => {
-    if (section === 'Contact Support') {
-      const ship = ships.find((ship) => ship.id === selectedShipId);
-      window.open(getSupportEmail(ship?.patp), '_blank');
-    } else {
-      goToPage(accountPageUrl[section]);
-    }
+    goToPage(accountPageUrl[section]);
   };
 
   const onClickUploadId = () => {
@@ -94,7 +87,7 @@ const S3StoragePresenter = () => {
   );
 };
 
-export default function S3Storage() {
+export default function AccountStoragePage() {
   return (
     <Page title="Account / Storage" isProtected>
       <UserContextProvider api={thirdEarthApi}>
