@@ -358,6 +358,16 @@ export class ThirdEarthApi {
     });
   }
 
+  setStorage(token: string, shipId: string) {
+    return http<string>(`${this.apiBaseUrl}/user/setup-storage`, {
+      method: 'POST',
+      headers: this.getHeaders(token),
+      body: JSON.stringify({
+        shipId,
+      }),
+    });
+  }
+
   getManagePaymentLink(token: string) {
     return http<CreateCustomerPortalSessionResponse>(
       `${this.apiBaseUrl}/create-customer-portal-session`,

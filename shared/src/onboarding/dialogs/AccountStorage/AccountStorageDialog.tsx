@@ -17,6 +17,7 @@ type Props = {
     networkUsage: number; // MB
     minioUsage: number; // MB
   };
+  onClickRestartStorage: () => Promise<string> | undefined;
   setSelectedShipId: (newId: number) => void;
   onClickPurchaseId: () => void;
   onClickUploadId: () => void;
@@ -32,6 +33,7 @@ export const AccountStorageDialog = ({
   storagePassword,
   dataStorage,
   dataSent,
+  onClickRestartStorage,
   setSelectedShipId,
   onClickPurchaseId,
   onClickUploadId,
@@ -55,6 +57,7 @@ export const AccountStorageDialog = ({
       storagePassword={storagePassword as string}
       dataStorage={dataStorage}
       dataSent={dataSent}
+      onClickRestartStorage={onClickRestartStorage}
     />
   </AccountDialog>
 );
