@@ -40,6 +40,15 @@ export const AccountStorageSection = ({ account }: Props) => {
       });
   }, [token, ships, account.serverId]);
 
+  const onClickRestartStorage = () => {
+    const selectedShip = ships.find((ship) => ship.patp === account.serverId);
+
+    if (!token) return;
+    if (!selectedShip) return;
+
+    return thirdEarthApi.setStorage(token, selectedShip.id.toString());
+  };
+
   return (
     <SettingSection
       title="Storage"
@@ -53,6 +62,7 @@ export const AccountStorageSection = ({ account }: Props) => {
             total: Number(storageInfo?.storageCapacity),
           }}
           dataSent={{ networkUsage, minioUsage }}
+          onClickRestartStorage={onClickRestartStorage}
         />
       }
     />

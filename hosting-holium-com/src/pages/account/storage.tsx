@@ -66,6 +66,15 @@ const S3StoragePresenter = () => {
       });
   }, [token, ships, selectedShipId]);
 
+  const onClickRestartStorage = () => {
+    const selectedShip = ships.find((ship) => ship.id === selectedShipId);
+
+    if (!token) return;
+    if (!selectedShip) return;
+
+    return thirdEarthApi.setStorage(token, selectedShip.id.toString());
+  };
+
   return (
     <AccountStorageDialog
       ships={ships}
@@ -79,6 +88,7 @@ const S3StoragePresenter = () => {
         total: Number(s3Info?.storageCapacity),
       }}
       dataSent={{ networkUsage, minioUsage }}
+      onClickRestartStorage={onClickRestartStorage}
       onClickPurchaseId={onClickPurchaseId}
       onClickUploadId={onClickUploadId}
       onClickSidebarSection={onClickSidebarSection}
