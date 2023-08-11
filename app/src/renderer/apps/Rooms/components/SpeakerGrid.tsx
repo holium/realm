@@ -12,7 +12,7 @@ type SpeakerGridProps = {
   room: RoomType;
   getPeer: (peerId: string) => any;
   getContactMetadata: (peerId: string) => any;
-  kickPeer: (peerId: string) => void;
+  kickPeer: (rid: string, peerId: string) => void;
   retryPeer: (peerId: string) => void;
 };
 

@@ -11,7 +11,7 @@ import { Rooms } from './List';
 import { NewRoom } from './NewRoom';
 import { Room } from './Room';
 import { Settings } from './Settings';
-import { useRoomsStore } from './store/RoomsStoreContext';
+// import { useRoomsStore } from './store/RoomsStoreContext';
 
 const RoomViews: { [key: string]: any } = {
   list: () => <Rooms />,
@@ -22,7 +22,7 @@ const RoomViews: { [key: string]: any } = {
 
 export const RoomAppPresenter = () => {
   const { shellStore } = useAppState();
-  const roomsStore = useRoomsStore();
+  // const roomsStore = useRoomsStore();
   const { roomsApp, dimensions } = useTrayApps();
 
   useEffect(() => {
@@ -35,15 +35,13 @@ export const RoomAppPresenter = () => {
   }, []);
 
   useEffect(() => {
-    const session = roomsStore.getCurrentSession('interactive');
-    if (session) {
+    console.log('checking live room %o', roomsApp.liveRoomId);
+    if (roomsApp.liveRoomId) {
       roomsApp.setView('room');
-    }
-    if (!roomsStore.currentRid) {
-      console.log('index: currentRid changed to null, setting to list...');
+    } else {
       roomsApp.setView('list');
     }
-  }, [roomsApp, roomsStore.currentRid, roomsStore.sessions.size]);
+  }, [roomsApp.liveRoomId]);
   const View = RoomViews[roomsApp.currentView];
   return (
     <Flex

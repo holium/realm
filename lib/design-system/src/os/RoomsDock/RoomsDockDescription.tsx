@@ -12,7 +12,7 @@ export const RoomsDockDescription = ({ live, rooms, participants }: Props) => {
   console.log('rooms => %o', rooms);
   if (!live || live.rtype === 'background') {
     const numRooms = rooms.filter(
-      (value) => value.rtype !== 'background'
+      (value) => value.rtype === 'interactive'
     ).length;
     return (
       <Flex pointerEvents="none" gap={12} align="center">

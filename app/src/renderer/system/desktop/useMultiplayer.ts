@@ -17,6 +17,7 @@ import {
   DataPacketKind,
 } from 'renderer/apps/Rooms/store/room.types';
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
+import { useTrayApps } from 'renderer/apps/store';
 import { normalizePosition } from 'renderer/lib/window-manager';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -37,12 +38,13 @@ export const useMultiplayer = ({
   const ephemeralChat = useToggle(false);
   const roomsStore = useRoomsStore();
   const { notesStore } = useShipStore();
+  const { roomsApp } = useTrayApps();
 
   const timeout = useRef<NodeJS.Timeout | null>(null);
 
   const isInRoom = useMemo(
-    () => Boolean(roomsStore.currentRoom),
-    [roomsStore.currentRoom]
+    () => Boolean(roomsApp.liveRoomId || notesStore.activeRoomId),
+    [roomsApp.liveRoomId, notesStore.activeRoomId]
   );
 
   const broadcastChat = useCallback((patp: string, message: string) => {

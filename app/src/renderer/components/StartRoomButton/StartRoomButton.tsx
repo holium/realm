@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react';
 
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
+import { useTrayApps } from 'renderer/apps/store';
 import { useSound } from 'renderer/lib/sound';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -13,6 +14,7 @@ type Props = {
 
 const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
   const roomsStore = useRoomsStore();
+  const { roomsApp } = useTrayApps();
   const { loggedInAccount } = useAppState();
   const { friends, chatStore } = useShipStore();
   const { selectedChat, subroute, setSubroute } = chatStore;
@@ -31,10 +33,9 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
     if (!selectedChat) return;
 
     // only one interactive (video/audio) session at a time
-    const session = roomsStore.getCurrentSession('interactive');
-    if (session) {
-      console.log('StartRoomButton (deleteRoom) %o', session.rid);
-      roomsStore.deleteRoom(session.rid);
+    if (roomsApp.liveRoomId) {
+      console.log('StartRoomButton (deleteRoom) %o', roomsApp.liveRoomId);
+      roomsStore.deleteRoom(roomsApp.liveRoomId);
     }
 
     const areWeAlreadyInRoom = existingRoom?.present.includes(

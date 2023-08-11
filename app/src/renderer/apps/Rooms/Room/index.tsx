@@ -69,21 +69,22 @@ const RoomPresenter = () => {
   }, [roomView, roomsStore.chat.length]);
 
   useEffect(() => {
-    if (!roomsStore.currentRid) {
+    if (roomsApp.liveRoomId) {
+      roomsApp.setView('room');
+    } else {
       roomsApp.setView('list');
     }
-  }, [roomsStore.currentRid, roomsApp]);
+  }, [roomsApp.liveRoomId]);
 
   // looks like this case gets hit when the room host deletes a room
   //  therefore put a safeguard useEffect in the ./Rooms/index.tsx to catch when
   //  currentRid is null to ensure list is rendered
-  if (!roomsStore.currentRid) return;
+  if (!roomsApp.liveRoomId) {
+    console.log('how are we here?');
+    return;
+  }
 
-  // get the current interactive session
-  const session = roomsStore.getCurrentSession('interactive');
-  if (session === undefined) return <div />;
-
-  const presentRoom = roomsStore.rooms.get(session.rid);
+  const presentRoom = roomsStore.rooms.get(roomsApp.liveRoomId);
   if (!presentRoom) return <div />;
   const { rid, creator, present, title } = presentRoom;
   const presentCount = present?.length ?? 0;
@@ -174,6 +175,7 @@ const RoomPresenter = () => {
                 evt.stopPropagation();
                 if (creator === loggedInAccount?.serverId) {
                   roomsStore.deleteRoom(rid);
+                  roomsApp.setLiveRoomId(null);
                   roomsApp.setView('list');
                 } else {
                   roomsStore.leaveRoom(rid);

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
@@ -43,24 +43,34 @@ const NotesSidebarPresenter = () => {
 
   const creating = useToggle(false);
 
+  const currentRoom = useMemo(() => {
+    if (notesStore.selectedNote) {
+      const path = `${notesStore.selectedNote.space}${notesStore.selectedNote.id}`;
+      console.log(path);
+      return roomsStore
+        .getSpaceRooms(notesStore.selectedNote.space)
+        .find((room) => room.path === path);
+    }
+    return undefined;
+  }, [notesStore?.selectedNote]);
+
+  const leaveNoteRoom = useCallback(() => {
+    if (currentRoom) {
+      console.log('leaving room %o', currentRoom.path);
+      roomsStore.leaveRoom(currentRoom.rid);
+    }
+  }, [notesStore.selectedNote]);
+
   useEffect(() => {
     return () => {
-      console.log('NotesSidebar unmount');
-      // also cleanup server side resources when the notes app closes
-      const session = roomsStore.getCurrentSession('background');
-      if (session) {
-        roomsStore.deleteRoom(session.rid);
-      }
+      console.log('NotesSidebar unmount. searching for note...');
+      leaveNoteRoom();
     };
   }, []);
 
   useEffect(() => {
-    console.log('NotesSidebar space change');
-    // cleanup server side resources when switching spaces
-    const session = roomsStore.getCurrentSession('background');
-    if (session) {
-      roomsStore.deleteRoom(session.rid);
-    }
+    console.log('NotesSidebar space change. searching for note...');
+    leaveNoteRoom();
   }, [selectedSpace]);
 
   if (!selectedSpace) return null;
@@ -100,19 +110,20 @@ const NotesSidebarPresenter = () => {
         existingRoom.present.indexOf(loggedInAccount?.serverId) === -1
       ) {
         // leave any 'background' rooms we may current reside in
-        const session = roomsStore.getCurrentSession('background');
-        if (session) {
-          roomsStore.leaveRoom(session.rid);
+        if (currentRoom) {
+          roomsStore.leaveRoom(currentRoom.rid);
         }
         await roomsStore.joinRoom(existingRoom.rid);
+        notesStore.setActiveRoomId(existingRoom.rid);
       } else {
         roomsStore.leaveRoom(existingRoom.rid);
+        notesStore.setActiveRoomId(null);
       }
     } else {
       // leave the current background session (note) if we are already in a note room
-      const session = roomsStore.getCurrentSession('background');
-      if (session) {
-        roomsStore.leaveRoom(session.rid);
+      if (currentRoom) {
+        roomsStore.leaveRoom(currentRoom.rid);
+        notesStore.setActiveRoomId(null);
       }
 
       // CREATE ROOM
@@ -126,14 +137,10 @@ const NotesSidebarPresenter = () => {
         'background'
       );
       await roomsStore.joinRoom(newRoomRid);
+      notesStore.setActiveRoomId(newRoomRid);
     }
 
     setConnectingToNoteRoom(false);
-
-    // do not auto mute if there is an interactive session
-    if (roomsStore.hasCurrentSession('interactive')) {
-      roomsStore.ourPeer.mute();
-    }
   };
 
   return (

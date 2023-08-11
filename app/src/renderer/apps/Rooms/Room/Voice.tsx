@@ -16,21 +16,28 @@ type Props = {
 
 const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
   const roomsStore = useRoomsStore();
-  const { setTrayAppHeight } = useTrayApps();
+  const { roomsApp, setTrayAppHeight } = useTrayApps();
   const { loggedInAccount } = useAppState();
   const { friends } = useShipStore();
   const [activeSpeaker, setActiveSpeaker] = useState<string | null>(null);
 
+  console.log('VoiceViewPresenter %o', roomsApp.liveRoomId);
+
   const ourId = useMemo(() => loggedInAccount?.serverId, [loggedInAccount]);
-  const peers = useMemo(
-    () => roomsStore.currentRoomPresent ?? [],
-    [roomsStore.currentRoomPresent]
-  );
+  const peers = useMemo(() => {
+    if (roomsApp.liveRoomId) {
+      const peers = roomsStore.getRoomPresent(roomsApp.liveRoomId);
+      console.log('peers %o', peers);
+      return peers;
+    }
+    return [];
+  }, [roomsApp.liveRoomId, roomsStore.rooms]);
 
   // Sort peers in the following priority:
   // #1: Active speaker
   // #2: Ourself
   const peersSorted = useMemo(() => {
+    console.log('sorting peers...');
     return peers.slice().sort((a, b) => {
       if (a === activeSpeaker) return -1;
       if (b === activeSpeaker) return 1;
@@ -97,11 +104,14 @@ const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [roomsStore.currentRid, activeSpeaker, peers.length]);
+  }, [roomsApp.liveRoomId, activeSpeaker, peers.length]);
 
-  if (!roomsStore.currentRid || !roomsStore.currentRoom) {
+  if (!roomsApp.liveRoomId) {
     return null;
   }
+
+  const liveRoom = roomsStore.rooms.get(roomsApp.liveRoomId);
+  if (liveRoom === undefined) return null;
 
   const getPeer = (peerId: string) => {
     if (peerId === loggedInAccount?.serverId) {
@@ -122,7 +132,7 @@ const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
         peers={peersSorted}
         getContactMetadata={getContactMetadata}
         getPeer={getPeer}
-        room={roomsStore.currentRoom}
+        room={liveRoom}
         kickPeer={roomsStore.kickPeer}
         retryPeer={roomsStore.retryPeer}
         pinnedSpeaker={roomsStore.pinnedSpeaker}
@@ -138,7 +148,7 @@ const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
       getContactMetadata={getContactMetadata}
       getPeer={getPeer}
       ourId={ourId ?? ''}
-      room={roomsStore.currentRoom}
+      room={liveRoom}
       kickPeer={roomsStore.kickPeer}
       retryPeer={roomsStore.retryPeer}
     />

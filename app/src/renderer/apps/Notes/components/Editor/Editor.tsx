@@ -51,11 +51,16 @@ const EditorPresenter = () => {
   const debouncedAutoSave = debounce(() => {
     if (!selectedNote) return;
 
+    // @patrick: notes are handled via background rooms now. to get the active note room
+    //   grab the current background session
     // If there are multiple participants in a room,
     // we only need one to be responsible for saving the document.
-    if (roomsStore.currentRoom?.present?.length) {
-      // If we're not the creator of the room, don't save.
-      if (roomsStore.currentRoom?.creator !== loggedInAccount?.serverId) return;
+    if (notesStore.activeRoomId) {
+      const room = roomsStore.rooms.get(notesStore.activeRoomId);
+      if (room?.present?.length) {
+        // If we're not the creator of the room, don't save.
+        if (room?.creator !== loggedInAccount?.serverId) return;
+      }
     }
 
     saveNoteUpdates({

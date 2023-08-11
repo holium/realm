@@ -32,7 +32,7 @@ interface ISpeaker {
   ourId: string;
   metadata: any;
   peer: PeerClass | LocalPeer | any;
-  kickPeer: (person: string) => void;
+  kickPeer: (rid: string, person: string) => void;
   retryPeer: (person: string) => void;
   onPin?: () => void;
   room: RoomType;
@@ -164,7 +164,7 @@ const SpeakerPresenter = ({
               loading: false,
               onClick: (evt: any) => {
                 evt.stopPropagation();
-                kickPeer(person);
+                kickPeer(room.rid, person);
               },
             },
           ].filter(Boolean) as ContextMenuOption[]),

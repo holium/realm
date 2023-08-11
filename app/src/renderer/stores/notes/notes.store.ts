@@ -36,6 +36,7 @@ export const NotesStore = types
     saving: types.optional(types.boolean, false),
     initializing: types.optional(types.boolean, false),
     connectingToNoteRoom: types.optional(types.boolean, false),
+    activeRoomId: types.maybeNull(types.string),
   })
   .volatile(() => ({
     awarenesses: new Map<string, Awareness>(),
@@ -250,6 +251,10 @@ export const NotesStore = types
 
     setSelectedNoteId: ({ id }: NotesStore_SetSelectedNoteId) => {
       self.selectedNoteId = id;
+    },
+
+    setActiveRoomId: (rid: string | null) => {
+      self.activeRoomId = rid;
     },
 
     setSaving: (saving: boolean) => {

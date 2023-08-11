@@ -61,18 +61,19 @@ const RoomTrayPresenter = () => {
     },
     [
       activeApp,
-      roomsApp.liveRoom,
+      roomsApp.liveRoomId,
       setActiveApp,
       setTrayAppCoords,
       setTrayAppDimensions,
     ]
   );
 
-  const participants =
-    roomsStore.currentRoomPresent.map((patp: string) => {
-      const metadata = friends.getContactAvatarMetadata(patp);
-      return metadata;
-    }) || [];
+  const participants = roomsApp.liveRoomId
+    ? roomsStore.getRoomPresent(roomsApp.liveRoomId).map((patp: string) => {
+        const metadata = friends.getContactAvatarMetadata(patp);
+        return metadata;
+      }) || []
+    : [];
 
   const rooms = spacesStore.selected
     ? roomsStore.getSpaceRooms(spacesStore.selected?.path)
@@ -86,7 +87,9 @@ const RoomTrayPresenter = () => {
       transition={{ duration: 0.15, ease: 'easeInOut' }}
     >
       <RoomsDock
-        live={roomsStore.currentRoom}
+        live={
+          roomsApp.liveRoomId ? roomsStore.rooms.get(roomsApp.liveRoomId) : null
+        }
         rooms={rooms}
         participants={participants}
         onCreate={() => {

@@ -36,14 +36,17 @@ const RoomsPresenter = () => {
 
   const rooms = roomsStore.getSpaceRooms(spacesStore.selected?.path ?? '');
 
+  console.log('running live room check...');
   let ext: string | undefined = undefined;
-  if (roomsStore.currentRoom) {
-    const idx = rooms.findIndex((room) => room.rid === roomsStore.currentRid);
+  if (roomsApp.liveRoomId) {
+    const idx = rooms.findIndex((room) => room.rid === roomsApp.liveRoomId);
     if (idx === -1) {
-      rooms.splice(0, 0, roomsStore.currentRoom);
-      ext = roomsStore.currentRoom.path?.substring(
-        roomsStore.currentRoom.path?.lastIndexOf('/') + 1
-      );
+      // if it's not in the space, grab it from the Room store's full list
+      const room = roomsStore.rooms.get(roomsApp.liveRoomId);
+      if (room) {
+        rooms.splice(0, 0, room);
+        ext = room.path?.substring(room.path?.lastIndexOf('/') + 1);
+      }
     }
   }
 
@@ -112,14 +115,13 @@ const RoomsPresenter = () => {
                   ext={ext}
                   onClick={async (evt: any) => {
                     evt.stopPropagation();
-                    const session = roomsStore.getCurrentSession('interactive');
-                    if (session === undefined || session.rid !== room.rid) {
-                      // if (roomsStore.currentRid !== room.rid) {
-                      sound.playRoomEnter();
+                    if (
+                      roomsApp.liveRoomId &&
+                      roomsApp.liveRoomId !== room.rid
+                    ) {
                       try {
-                        if (session) {
-                          roomsStore.deleteRoom(session.rid);
-                        }
+                        sound.playRoomEnter();
+                        roomsStore.deleteRoom(roomsApp.liveRoomId);
                         await roomsStore.joinRoom(room.rid);
                         roomsApp.setView('room');
                       } catch (e) {

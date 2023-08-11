@@ -81,10 +81,9 @@ const NewRoomPresenter = () => {
   const createRoom = async (evt: any) => {
     setLoading(true);
 
-    const session = roomsStore.getCurrentSession('interactive');
-    if (session) {
-      console.log('deleteRoom %o', session.rid);
-      roomsStore.deleteRoom(session.rid);
+    if (roomsApp.liveRoomId) {
+      console.log('deleteRoom %o', roomsApp.liveRoomId);
+      roomsStore.deleteRoom(roomsApp.liveRoomId);
     }
 
     const { name, isPrivate } = form.actions.submit();
@@ -94,12 +93,14 @@ const NewRoomPresenter = () => {
         ? spacesStore.selected?.path ?? ''
         : null;
 
-    await roomsStore?.createRoom(
+    const rid = await roomsStore?.createRoom(
       name,
       isPrivate ? 'private' : 'public',
       spacePath
     );
 
+    console.log('setting live room id %o...', rid);
+    roomsApp.setLiveRoomId(rid);
     roomsApp.setView('room');
 
     sound.playRoomEnter();
