@@ -58,6 +58,7 @@ export type {
   OnboardingPage,
   RealmInstallStatus,
   RealmOnboardingStep,
+  ThirdEarthAlert,
   ThirdEarthPortalSession,
   ThirdEarthProduct,
   ThirdEarthProductType,

@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
-
 import {
   AccountSupportDialog,
+  ThirdEarthAlert,
   UserContextProvider,
   useUser,
 } from '@holium/shared';
@@ -10,11 +9,22 @@ import { Page } from '../../components/Page';
 import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
-const SupportPresenter = () => {
+export const getServerSideProps = async () => {
+  const alerts = await thirdEarthApi.alerts();
+  return {
+    props: {
+      alerts: alerts.alerts,
+    },
+  };
+};
+
+type Props = {
+  alerts: ThirdEarthAlert[];
+};
+
+const SupportPresenter = ({ alerts }: Props) => {
   const { goToPage, logout } = useNavigation();
   const { ships, selectedShipId, setSelectedShipId } = useUser();
-
-  const [alerts, setAlerts] = useState<string[]>([]);
 
   const onClickSidebarSection = (section: string) => {
     if (section === 'Get Hosting') {
@@ -48,16 +58,6 @@ const SupportPresenter = () => {
     });
   };
 
-  useEffect(() => {
-    const getAndSetAlerts = async () => {
-      const status = await thirdEarthApi.alerts();
-      console.log('status', JSON.stringify(status, null, 2));
-      setAlerts(status.alerts);
-    };
-
-    getAndSetAlerts();
-  });
-
   return (
     <AccountSupportDialog
       alerts={alerts}
@@ -72,11 +72,11 @@ const SupportPresenter = () => {
   );
 };
 
-export default function AccountSupportPage() {
+export default function AccountSupportPage({ alerts }: Props) {
   return (
     <Page title="Account / Support" isProtected>
       <UserContextProvider api={thirdEarthApi}>
-        <SupportPresenter />
+        <SupportPresenter alerts={alerts} />
       </UserContextProvider>
     </Page>
   );

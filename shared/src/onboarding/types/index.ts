@@ -72,6 +72,14 @@ export type ThirdEarthPortalSession = {
   url: string;
 };
 
+export type ThirdEarthAlert = {
+  id: string;
+  class: string;
+  content: string;
+  start_time: string;
+  end_time: string;
+};
+
 export type RealmInstallStatus = {
   success: boolean;
   message?: string;

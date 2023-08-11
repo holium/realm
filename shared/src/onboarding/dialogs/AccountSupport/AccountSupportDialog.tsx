@@ -1,10 +1,10 @@
 import { AccountDialog } from '../../components/AccountDialog';
 import { SidebarSection } from '../../components/AccountDialogSidebar';
-import { ThirdEarthShip } from '../../types';
+import { ThirdEarthAlert, ThirdEarthShip } from '../../types';
 import { AccountSupportDialogBody } from './AccountSupportDialogBody';
 
 type Props = {
-  alerts: string[];
+  alerts: ThirdEarthAlert[];
   ships: ThirdEarthShip[];
   selectedShipId: number | undefined;
   setSelectedShipId: (newId: number) => void;

@@ -4,6 +4,7 @@ import {
   ThirdEarthShip,
 } from '@holium/shared';
 
+import { ThirdEarthAlert } from '../types';
 import { http } from './http';
 
 type LoginResponse = {
@@ -141,6 +142,10 @@ type UploadPierFileResponse = {
   planet_status?: string;
   product_ids?: number[];
   ship_type?: string;
+};
+
+type AlertsResponse = {
+  alerts: ThirdEarthAlert[];
 };
 
 export class ThirdEarthApi {
@@ -499,7 +504,3 @@ export class ThirdEarthApi {
     });
   }
 }
-
-type AlertsResponse = {
-  alerts: string[];
-};
