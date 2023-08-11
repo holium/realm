@@ -29,7 +29,7 @@ const SupportPresenter = ({ alerts }: Props) => {
   const onClickSidebarSection = (section: string) => {
     if (section === 'Get Hosting') {
       goToPage(accountPageUrl[section], {
-        back_url: '/account/contact-support',
+        back_url: '/account/support',
       });
     } else {
       goToPage(accountPageUrl[section]);
@@ -43,18 +43,18 @@ const SupportPresenter = ({ alerts }: Props) => {
 
     if (byopInProgress) {
       goToPage('/upload-id', {
-        back_url: '/account/contact-support',
+        back_url: '/account/support',
       });
     } else {
       goToPage('/upload-id-disclaimer', {
-        back_url: '/account/contact-support',
+        back_url: '/account/support',
       });
     }
   };
 
   const onClickPurchaseId = () => {
     goToPage('/choose-id', {
-      back_url: '/account/contact-support',
+      back_url: '/account/support',
     });
   };
 

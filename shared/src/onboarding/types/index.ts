@@ -87,7 +87,7 @@ export type RealmInstallStatus = {
 
 type OnboardingAccountPage =
   | '/account'
-  | '/account/contact-support'
+  | '/account/support'
   | '/account/custom-domain'
   | '/account/download-realm'
   | '/account/get-realm'
