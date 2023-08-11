@@ -161,7 +161,7 @@ export const AccountDialog = ({
                     <Button.Transparent width="100%" onClick={onClickUploadId}>
                       <Flex alignItems="center" gap="8px">
                         <Icon name="ArrowRightLine" size={16} />
-                        <Text.Body>Upload ID</Text.Body>
+                        <Text.Body>Upload Pier</Text.Body>
                       </Flex>
                     </Button.Transparent>
                     <Button.Transparent

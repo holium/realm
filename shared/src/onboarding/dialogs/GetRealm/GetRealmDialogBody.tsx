@@ -47,7 +47,7 @@ export const GetRealmDialogBody = ({ onPurchaseId, onUploadId }: Props) => (
                   margin: '2px',
                 }}
               >
-                Upload ID
+                Upload Pier
               </Text.Body>
             </GrayButton>
           </Flex>

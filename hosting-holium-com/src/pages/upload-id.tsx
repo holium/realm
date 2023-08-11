@@ -99,7 +99,7 @@ export default function UploadId() {
   };
 
   return (
-    <Page title="Upload ID" isProtected>
+    <Page title="Upload Pier" isProtected>
       <UploadIdDialog
         fileName={file?.name}
         progress={progress}

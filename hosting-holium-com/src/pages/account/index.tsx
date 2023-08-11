@@ -206,7 +206,7 @@ const HostingPresenter = () => {
 
   if (isUnfinishedByop) {
     return (
-      <Page title="Account / Upload ID" isProtected>
+      <Page title="Account / Upload Pier" isProtected>
         <AccountUnfinishedUploadDialog
           ships={ships}
           selectedShipId={selectedShipId}

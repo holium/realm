@@ -43,7 +43,7 @@ export const AccountGetRealmDialog = ({
             <Button.Primary onClick={onClickPurchaseId}>
               Purchase ID
             </Button.Primary>
-            <GrayButton onClick={onClickUploadId}>Upload ID</GrayButton>
+            <GrayButton onClick={onClickUploadId}>Upload Pier</GrayButton>
           </Flex>
           <OrDivider maxWidth="180px" />
           <JoinWaitlist onClickJoinWaitlist={onClickJoinWaitlist} />

@@ -30,17 +30,18 @@ export const UploadIdDisclaimerDialogBody = () => {
       <OnboardDialogTitle>Disclaimer</OnboardDialogTitle>
       <Flex flexDirection="column" gap={8}>
         <OnboardDialogDescription>
-          <b>Migrating an ID</b>
+          <b>Uploading a Pier</b>
         </OnboardDialogDescription>
         <OnboardDialogDescription>
           This option is for people who want to move their existing pier with
-          all of its apps, subscriptions, and configurations to Holium hosting.
+          all of its apps, subscriptions, and configurations to Holium hosting,
+          as opposed to purchasing a fresh ID.
         </OnboardDialogDescription>
       </Flex>
       <OnboardDialogDescription>
-        <b>Requires:</b> A compressed archive of your existing pier in a .zip or
-        .tar.gz format which was created after the ship was shut down at its
-        current location.
+        <b>Required:</b> A compressed archive of your existing pier in a{' '}
+        <code>.zip</code> or <code>.tar.gz</code> format which was created after
+        the ship was shut down at its current location.
       </OnboardDialogDescription>
       <GrayBox>
         <Flex>
@@ -65,7 +66,9 @@ export const UploadIdDisclaimerDialogBody = () => {
       </GrayBox>
       <OnboardDialogDescription
         style={{
+          maxWidth: 340,
           fontWeight: 500,
+          margin: '0 auto',
           textAlign: 'center',
           color: 'var(--rlm-intent-alert-color)',
         }}
