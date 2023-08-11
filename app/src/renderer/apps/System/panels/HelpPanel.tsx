@@ -1,4 +1,5 @@
 import { Anchor, Text } from '@holium/design-system/general';
+import { getSupportMailTo, SUPPORT_EMAIL_ADDRESS } from '@holium/shared';
 
 import { SettingPane } from '../components/SettingPane';
 import { SettingSection } from '../components/SettingSection';
@@ -12,21 +13,19 @@ export const HelpPanel = () => (
       body={
         <>
           <Text.Custom fontSize={2}>
-            Send a DM to{' '}
+            If you have any questions or concerns, please contact us at{' '}
             <Anchor
-              href="https://twitter.com/HoliumCorp"
+              href={getSupportMailTo((window as any).ship, 'REALM issue')}
               rel="noreferrer"
               target="_blank"
-              // m={0}
             >
-              @HoliumCorp
+              {SUPPORT_EMAIL_ADDRESS}
             </Anchor>{' '}
             or check out our{' '}
             <Anchor
               href="https://holium.gitbook.io/realm"
               rel="noreferrer"
               target="_blank"
-              // m={0}
             >
               documentation
             </Anchor>

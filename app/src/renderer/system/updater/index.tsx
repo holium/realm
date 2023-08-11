@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { ProgressInfo, UpdateInfo } from 'electron-updater';
 
 import { Button, Flex, ProgressBar, Text } from '@holium/design-system/general';
+import { getSupportMailTo, SUPPORT_EMAIL_ADDRESS } from '@holium/shared';
 
 import { StandAloneMouse } from '../mouse/StandAloneMouse';
 import { HoliumLogo } from './holium-logo';
@@ -231,9 +232,11 @@ const AppUpdateError = (props: AppUpdateErrorProps) => {
           color="accent"
           fontSize={1}
           variant="hint"
-          href="mailto:support@holium.com?subject=BUG:Update error"
+          href={getSupportMailTo(window.ship, 'REALM UPDATER issue')}
+          rel="noreferrer"
+          target="_blank"
         >
-          Email support@holium.com
+          Email {SUPPORT_EMAIL_ADDRESS}
         </Text.Anchor>
       </Flex>
     </Flex>

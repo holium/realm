@@ -25,7 +25,7 @@ export enum SidebarSection {
   DownloadRealm = 'Download Realm',
   GetHosting = 'Get Hosting',
   GetRealm = 'Get Realm',
-  ContactSupport = 'Contact Support',
+  Support = 'Support',
 }
 
 type Props = {
@@ -67,10 +67,10 @@ export const AccountDialogSidebar = ({
           SidebarSection.Hosting,
           SidebarSection.CustomDomain,
           SidebarSection.DownloadRealm,
-          SidebarSection.ContactSupport,
+          SidebarSection.Support,
         ];
       } else {
-        sidebarItems = [SidebarSection.Hosting, SidebarSection.ContactSupport];
+        sidebarItems = [SidebarSection.Hosting, SidebarSection.Support];
       }
     } else {
       sidebarItems = [
@@ -78,20 +78,20 @@ export const AccountDialogSidebar = ({
         SidebarSection.Storage,
         SidebarSection.CustomDomain,
         SidebarSection.DownloadRealm,
-        SidebarSection.ContactSupport,
+        SidebarSection.Support,
       ];
     }
   } else if (hasCSEK.isOn) {
     sidebarItems = [
       SidebarSection.DownloadRealm,
       SidebarSection.GetHosting,
-      SidebarSection.ContactSupport,
+      SidebarSection.Support,
     ];
   } else {
     sidebarItems = [
       SidebarSection.GetRealm,
       SidebarSection.GetHosting,
-      SidebarSection.ContactSupport,
+      SidebarSection.Support,
     ];
   }
 

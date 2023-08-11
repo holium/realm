@@ -9,17 +9,7 @@ import {
   AccountDialogSubtitle,
   AccountDialogTitle,
 } from './AccountDialog.styles';
-import { AccountDialogSidebar } from './AccountDialogSidebar';
-
-export enum SidebarSection {
-  Hosting = 'Hosting',
-  Storage = 'Storage',
-  CustomDomain = 'Custom Domain',
-  DownloadRealm = 'Download Realm',
-  GetHosting = 'Get Hosting',
-  GetRealm = 'Get Realm',
-  ContactSupport = 'Contact Support',
-}
+import { AccountDialogSidebar, SidebarSection } from './AccountDialogSidebar';
 
 type Props = {
   ships: ThirdEarthShip[];

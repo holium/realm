@@ -1,5 +1,6 @@
 import { Anchor, Button, Flex } from '@holium/design-system/general';
 
+import { getSupportMailTo, SUPPORT_EMAIL_ADDRESS } from '../onboarding';
 import { Modal } from './Modal';
 import {
   OnboardDialogButtonText,
@@ -32,8 +33,12 @@ export const TermsModal = ({ isOpen, onDismiss, onAccept }: Props) => (
       Possible addition, or separate instruction to users: Alpha users are
       encouraged to report any perceived bugs or problems in the software and
       system to Holium Corporation via email:{' '}
-      <Anchor href="mailto:support@holium.com" rel="noreferrer" target="_blank">
-        support@holium.com
+      <Anchor
+        href={getSupportMailTo(undefined, 'REALM issue')}
+        rel="noreferrer"
+        target="_blank"
+      >
+        Email {SUPPORT_EMAIL_ADDRESS}
       </Anchor>
       .
     </OnboardDialogDescription>

@@ -3,7 +3,7 @@ import { AccountGetRealmDialog, UserContextProvider } from '@holium/shared';
 import { thirdEarthApi } from 'util/thirdEarthApi';
 
 import { Page } from '../../components/Page';
-import { constants, getSupportEmail } from '../../util/constants';
+import { constants } from '../../util/constants';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
 export const joinWaitlist = async (email: string) => {
@@ -40,9 +40,7 @@ const GetRealmPresenter = () => {
   };
 
   const onClickSidebarSection = (section: string) => {
-    if (section === 'Contact Support') {
-      window.open(getSupportEmail(), '_blank');
-    } else if (section === 'Get Hosting') {
+    if (section === 'Get Hosting') {
       onClickPurchaseId();
     } else {
       goToPage(accountPageUrl[section]);
@@ -60,7 +58,7 @@ const GetRealmPresenter = () => {
   );
 };
 
-export default function GetRealm() {
+export default function AccountGetRealmPage() {
   return (
     <Page title="Account / Get Realm" isProtected>
       <UserContextProvider api={thirdEarthApi}>

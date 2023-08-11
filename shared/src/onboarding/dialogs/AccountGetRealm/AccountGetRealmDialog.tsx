@@ -1,7 +1,8 @@
 import { Button, Flex } from '@holium/design-system/general';
 
-import { AccountDialog, SidebarSection } from '../../components/AccountDialog';
+import { AccountDialog } from '../../components/AccountDialog';
 import { AccountDialogDescription } from '../../components/AccountDialog.styles';
+import { SidebarSection } from '../../components/AccountDialogSidebar';
 import { GrayButton } from '../../components/ChangeButton';
 import { JoinWaitlist } from '../../components/JoinWaitlist';
 import { OrDivider } from '../../components/OrDivider';
