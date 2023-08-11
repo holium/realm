@@ -34,6 +34,9 @@ export const AccountSupportDialog = ({
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >
-    <AccountSupportDialogBody alerts={alerts} />
+    <AccountSupportDialogBody
+      patp={ships.find((s) => s.id === selectedShipId)?.patp}
+      alerts={alerts}
+    />
   </AccountDialog>
 );

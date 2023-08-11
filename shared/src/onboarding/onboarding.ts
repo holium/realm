@@ -25,6 +25,10 @@ export { AccountSelfHostingDialogBody } from './dialogs/AccountSelfHosting/Accou
 export { AccountStorageDialog } from './dialogs/AccountStorage/AccountStorageDialog';
 export { AccountStorageDialogBody } from './dialogs/AccountStorage/AccountStorageDialogBody';
 export { AccountSupportDialog } from './dialogs/AccountSupport/AccountSupportDialog';
+export {
+  getSupportMailTo,
+  SUPPORT_EMAIL_ADDRESS,
+} from './dialogs/AccountSupport/helpers';
 export { AccountUnfinishedUploadDialog } from './dialogs/AccountUnfinishedUpload/AccountUnfinishedUploadDialog';
 export { uploadErrors } from './dialogs/AccountUnfinishedUpload/AccountUnfinishedUploadDialogBody';
 export { AddIdentityDialog } from './dialogs/AddIdentity/AddIdentityDialog';

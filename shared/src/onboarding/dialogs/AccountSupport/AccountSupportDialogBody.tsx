@@ -4,17 +4,14 @@ import {
   AccountDialogDescription,
   AccountDialogTitle,
 } from '../../components/AccountDialog.styles';
-
-const getSupportEmail = (patp?: string) =>
-  `mailto:support@holium.com?subject=Hosting Support${
-    patp ? ` for ${patp}` : ''
-  }&body=A picture is worth a thousand words. Please attach any screenshots that may help us understand your issue.`;
+import { getSupportMailTo, SUPPORT_EMAIL_ADDRESS } from './helpers';
 
 type Props = {
+  patp: string | undefined;
   alerts: string[];
 };
 
-export const AccountSupportDialogBody = ({ alerts }: Props) => (
+export const AccountSupportDialogBody = ({ patp, alerts }: Props) => (
   <>
     <Flex flexDirection="column" gap="8px">
       <AccountDialogTitle>Status Page</AccountDialogTitle>
@@ -28,8 +25,8 @@ export const AccountSupportDialogBody = ({ alerts }: Props) => (
       <AccountDialogTitle>Contact Us</AccountDialogTitle>
       <AccountDialogDescription>
         If you have any questions or concerns, please contact us at{' '}
-        <a href={`mailto:${getSupportEmail((window as any).ship)}`}>
-          support@holium.com
+        <a href={getSupportMailTo(patp, 'HOSTING issue')}>
+          {SUPPORT_EMAIL_ADDRESS}
         </a>
         .
       </AccountDialogDescription>
