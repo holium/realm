@@ -186,9 +186,19 @@ const HostingPresenter = () => {
   };
 
   const onClickUploadId = () => {
-    goToPage('/upload-id-disclaimer', {
-      back_url: '/account',
-    });
+    const byopInProgress = ships.find(
+      (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
+    );
+
+    if (byopInProgress) {
+      goToPage('/upload-id', {
+        back_url: '/account',
+      });
+    } else {
+      goToPage('/upload-id-disclaimer', {
+        back_url: '/account',
+      });
+    }
   };
 
   const onClickReuploadId = () => {
