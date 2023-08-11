@@ -40,7 +40,7 @@ export const ConfirmScreen = ({ seedPhrase, setScreen }: Props) => {
         </Button.Transparent>
         <Button.TextButton
           flex={1}
-          disabled={!valid}
+          isDisabled={!valid}
           justifyContent="center"
           onClick={() => {
             localStorage.removeItem('WalletOnboardingWordPickerState');

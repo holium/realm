@@ -136,7 +136,7 @@ const MembersPresenter = ({ our, onMemberClick }: IMembers) => {
           placeholder="Search..."
           rightAdornment={
             <Button.TextButton
-              disabled={!person.computed.parsed}
+              isDisabled={!person.computed.parsed}
               onClick={() => {
                 onShipSelected([person.computed.parsed ?? '', '']);
                 person.actions.onChange('');

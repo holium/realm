@@ -125,7 +125,7 @@ const NotesSidebarPresenter = () => {
             height: '32px',
             padding: '4px',
           }}
-          disabled={creating.isOn || initializing}
+          isDisabled={creating.isOn || initializing}
           onClick={onClickNewNote}
         >
           {creating.isOn || initializing ? (

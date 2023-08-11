@@ -39,7 +39,7 @@ export const CreateWalletScreenBody = ({
         width="100%"
         mt="4px"
         justifyContent="center"
-        disabled={loading}
+        isDisabled={loading}
         onClick={onClickCreate}
       >
         {loading ? <Spinner size={0} /> : 'Create'}

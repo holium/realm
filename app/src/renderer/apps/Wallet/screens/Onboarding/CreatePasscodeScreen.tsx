@@ -44,7 +44,7 @@ export const CreatePasscodeScreen = ({
         </Button.Transparent>
         <Button.TextButton
           flex={1}
-          disabled={passcode.length !== 6}
+          isDisabled={passcode.length !== 6}
           justifyContent="center"
           onClick={() => {
             setScreen(WalletOnboardingScreen.CONFIRM_PASSCODE);

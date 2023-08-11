@@ -178,7 +178,7 @@ export const TransactionDetailScreenBody = ({
             <Button.Primary
               height={32}
               justifyContent="center"
-              disabled={notes === transactionNotes && !loading}
+              isDisabled={notes === transactionNotes && !loading}
               onClick={onClickSaveNotes}
             >
               {loading ? <Spinner size={0} color="white" /> : 'Save'}
