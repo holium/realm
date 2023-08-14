@@ -98,7 +98,13 @@ export const ChangePasswordModal = ({
         />
       </Flex>
       <Flex justifyContent="flex-end" paddingTop="8px">
-        <SubmitButton text="Save" submitting={submitting.isOn} />
+        <SubmitButton
+          text="Save"
+          submitting={submitting.isOn}
+          disabled={
+            !passwordRef?.current?.value || passwordRef?.current?.value === ''
+          }
+        />
       </Flex>
       {errorMessage && <ErrorBox>{errorMessage}</ErrorBox>}
     </Modal>

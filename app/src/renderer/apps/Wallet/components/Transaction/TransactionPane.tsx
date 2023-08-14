@@ -145,7 +145,7 @@ export const TransactionPane = ({
           <Button.TextButton
             flex={1}
             justifyContent="center"
-            disabled={!recipientValid || !amountValid}
+            isDisabled={!recipientValid || !amountValid}
             onClick={next}
           >
             Next

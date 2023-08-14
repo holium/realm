@@ -279,7 +279,7 @@ const AppDetailDialogComponentPresenter = ({ appId, type }: AppDetailProps) => {
                 borderRadius={6}
                 paddingTop="6px"
                 paddingBottom="6px"
-                disabled={isInstalling}
+                isDisabled={isInstalling}
                 fontWeight={500}
                 onClick={async (e) => {
                   e.stopPropagation();

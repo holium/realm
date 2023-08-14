@@ -39,7 +39,10 @@ export const CustomWallpaper = ({ initialWallpaper, onSave }: Props) => {
       onChange={onChange}
       rightAdornment={
         <Box>
-          <Button.TextButton disabled={error.isOn} onClick={() => onSave(src)}>
+          <Button.TextButton
+            isDisabled={error.isOn}
+            onClick={() => onSave(src)}
+          >
             Save
           </Button.TextButton>
         </Box>

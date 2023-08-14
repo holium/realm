@@ -183,7 +183,6 @@ const SettingsPresenter = ({
             style={{ fontWeight: 400 }}
             color="intent-success"
             isDisabled={mediaStatus.mic === 'granted'}
-            disabled={mediaStatus.mic === 'granted'}
             onClick={() => {
               MainIPC.askForMicrophone().then((status) => {
                 setMediaStatus({ ...mediaStatus, mic: status });
@@ -201,7 +200,6 @@ const SettingsPresenter = ({
             style={{ fontWeight: 400 }}
             color="intent-success"
             isDisabled={mediaStatus.camera === 'granted'}
-            disabled={mediaStatus.camera === 'granted'}
             onClick={() => {
               MainIPC.askForCamera().then((status) => {
                 setMediaStatus({ ...mediaStatus, camera: status });

@@ -139,7 +139,7 @@ const SystemPanelPresenter = () => {
                   <Button.TextButton
                     style={{ fontWeight: 400 }}
                     color="accent"
-                    disabled={mediaStatus.mic === 'granted'}
+                    isDisabled={mediaStatus.mic === 'granted'}
                     onClick={() => {
                       MainIPC.askForMicrophone().then((status) => {
                         setMediaStatus({ ...mediaStatus, mic: status });
@@ -169,7 +169,7 @@ const SystemPanelPresenter = () => {
                   <Button.TextButton
                     style={{ fontWeight: 400 }}
                     color="accent"
-                    // disabled={mediaStatus.camera === 'granted'}
+                    // isDisabled={mediaStatus.camera === 'granted'}
                     onClick={() => {
                       MainIPC.askForCamera().then((status) => {
                         setMediaStatus({ ...mediaStatus, camera: status });
@@ -209,7 +209,7 @@ const SystemPanelPresenter = () => {
                 {app.subscriptionState === 'unsubscribed' && (
                   <Button.TextButton
                     style={{ fontWeight: 600 }}
-                    disabled={isSubscribing}
+                    isDisabled={isSubscribing}
                     onClick={() => resubscribe(app.name)}
                   >
                     Reconnect

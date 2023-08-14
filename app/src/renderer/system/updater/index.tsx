@@ -101,7 +101,7 @@ const UpdateAvailable = (props: UpdateAvailableProps) => {
             height={26}
             width="inherit"
             justifyContent="center"
-            disabled={isOperating}
+            isDisabled={isOperating}
             px="8px"
             onClick={() => {
               if (!isOperating) {
@@ -116,7 +116,7 @@ const UpdateAvailable = (props: UpdateAvailableProps) => {
             height={26}
             width="inherit"
             justifyContent="center"
-            disabled={isOperating}
+            isDisabled={isOperating}
             px="8px"
             onClick={() => {
               if (!isOperating) {
@@ -149,7 +149,7 @@ const UpdateDownloaded = () => {
             width="inherit"
             justifyContent="center"
             px="8px"
-            disabled={isOperating}
+            isDisabled={isOperating}
             onClick={() => {
               if (!isOperating) {
                 setIsOperating(true);
@@ -164,7 +164,7 @@ const UpdateDownloaded = () => {
             width="inherit"
             justifyContent="center"
             px="8px"
-            disabled={isOperating}
+            isDisabled={isOperating}
             onClick={() => {
               if (!isOperating) {
                 setIsOperating(true);
@@ -196,7 +196,7 @@ const UpdateNotAvailable = () => {
             width="inherit"
             justifyContent="center"
             px="8px"
-            disabled={isOperating}
+            isDisabled={isOperating}
             onClick={() => {
               if (!isOperating) {
                 setIsOperating(true);

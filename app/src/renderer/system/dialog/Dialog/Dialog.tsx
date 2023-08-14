@@ -107,7 +107,7 @@ export const DialogView = ({ appWindow }: Props) => {
                   showOnHover
                   py={1}
                   fontWeight={500}
-                  disabled={!validated || workflowState.loading}
+                  isDisabled={!validated || workflowState.loading}
                   onClick={(evt: any) => {
                     onNext(evt, workflowState, setWorkflowState);
                   }}

@@ -70,7 +70,7 @@ export const WalletSettingsScreenBody = ({
       <Button.Primary
         variant="minimal"
         fontWeight={400}
-        disabled={saving}
+        isDisabled={saving}
         height={26}
         onClick={onClickSaveSettings}
       >

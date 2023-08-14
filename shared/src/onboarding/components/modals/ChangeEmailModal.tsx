@@ -89,7 +89,13 @@ export const ChangeEmailModal = ({
         />
       </Flex>
       <Flex justifyContent="flex-end" paddingTop="8px">
-        <SubmitButton text="Save" submitting={submitting.isOn} />
+        <SubmitButton
+          text="Save"
+          submitting={submitting.isOn}
+          disabled={
+            !emailRef?.current?.value || emailRef?.current?.value === ''
+          }
+        />
       </Flex>
       {errorMessage && <ErrorBox>{errorMessage}</ErrorBox>}
     </Modal>

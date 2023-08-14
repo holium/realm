@@ -94,7 +94,7 @@ export const RecoverExistingScreenBody = ({
         <Button.TextButton
           flex={1}
           justifyContent="center"
-          disabled={!ethers.utils.isValidMnemonic(phrase)}
+          isDisabled={!ethers.utils.isValidMnemonic(phrase)}
           onClick={() => setShowPasscode(true)}
         >
           {loading ? <Spinner size={0} /> : 'Recover'}

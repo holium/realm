@@ -255,7 +255,6 @@ const InviteMembersPresenter = ({
           {!isOur && (
             <Button.IconButton
               size={24}
-              disabled={isOur}
               onClick={(evt: any) => {
                 evt.stopPropagation();
                 const copyPatp = selectedIdentity;

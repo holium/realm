@@ -63,7 +63,7 @@ export const ImportExistingScreenBody = ({
       <Button.TextButton
         flex={1}
         justifyContent="center"
-        disabled={!ethers.utils.isValidMnemonic(phrase)}
+        isDisabled={!ethers.utils.isValidMnemonic(phrase)}
         onClick={saveSeedPhrase}
       >
         Import

@@ -5,7 +5,6 @@ import { Dimensions } from '@holium/design-system/util';
 import { LeaveChatDialogConfig } from 'renderer/apps/Courier/dialogs/LeaveChatDialog';
 import { spacesDialogs } from 'renderer/apps/Spaces/Workflow/workflow';
 import { AppDetailDialog } from 'renderer/apps/System/Dialogs/AppDetail';
-import { ChangeEmailDialogConfig } from 'renderer/apps/System/Dialogs/ChangeEmail';
 import { DeleteSpaceDialogConfig } from 'renderer/apps/System/Dialogs/DeleteSpaceConfirm';
 import { InstallAppDialogConfig } from 'renderer/apps/System/Dialogs/InstallApp';
 import { LeaveSpaceDialogConfig } from 'renderer/apps/System/Dialogs/LeaveSpaceConfirm';
@@ -57,7 +56,6 @@ export const dialogRenderers: DialogRenderers = {
   'leave-space-dialog': LeaveSpaceDialogConfig,
   'leave-chat-dialog': LeaveChatDialogConfig,
   'delete-space-dialog': DeleteSpaceDialogConfig,
-  'change-email-dialog': ChangeEmailDialogConfig,
   'reset-code-dialog': ResetCodeDialogConfig,
   ...spacesDialogs,
 };
