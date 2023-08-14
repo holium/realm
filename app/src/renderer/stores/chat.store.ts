@@ -286,7 +286,7 @@ export const ChatStore = types
       peers: string[]
     ) {
       try {
-        yield ChatIPC.createChat(peers, type, {
+        return yield ChatIPC.createChat(peers, type, {
           title,
           description: '',
           image: '',

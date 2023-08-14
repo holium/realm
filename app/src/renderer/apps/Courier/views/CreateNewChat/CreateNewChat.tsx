@@ -7,7 +7,6 @@ import {
   Icon,
   Spinner,
   Text,
-  Tooltip,
 } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 
@@ -25,48 +24,13 @@ type Props = {
 const CreateNewChatPresenter = ({ isStandaloneChat = false }: Props) => {
   const { loggedInAccount } = useAppState();
   const { friends, chatStore } = useShipStore();
-  const { inbox, setSubroute, createChat } = chatStore;
+  const { inbox, setSubroute, createChat, setChat, setStandaloneChat } =
+    chatStore;
   const [creating, setCreating] = useState<boolean>(false);
   const [searchString, setSearchString] = useState<string>('');
   const [selectedIdentity, setSelectedIdentity] = useState<Set<string>>(
     new Set()
   );
-
-  const onCreateChat = () => {
-    let title: string;
-    let chatType: ChatPathType;
-    if (!loggedInAccount) return;
-    if (selectedIdentity.size === 1) {
-      chatType = 'dm';
-      const metadata = friends.getContactAvatarMetadata(
-        Array.from(selectedIdentity)[0]
-      );
-      title = metadata.nickname || metadata.patp;
-    } else {
-      title = Array.from(selectedIdentity)
-        .map((patp: string) => {
-          const metadata = friends.getContactAvatarMetadata(patp);
-          return metadata.nickname || metadata.patp;
-        })
-        .join(', ');
-      chatType = 'group';
-    }
-    setCreating(true);
-    createChat(
-      title,
-      loggedInAccount.serverId,
-      chatType,
-      Array.from(selectedIdentity)
-    )
-      .then(() => {
-        setSubroute('inbox');
-        setCreating(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setCreating(false);
-      });
-  };
 
   const onShipSelected = (contact: [string, string?]) => {
     const patp = contact[0];
@@ -89,6 +53,60 @@ const CreateNewChatPresenter = ({ isStandaloneChat = false }: Props) => {
       );
     });
   }, [selectedIdentity.size === 1]);
+
+  const onCreateChat = () => {
+    let title: string;
+    let chatType: ChatPathType;
+    if (!loggedInAccount) return;
+
+    if (dmAlreadyExists) {
+      const dm = inbox.find((chat) => {
+        return (
+          chat.type === 'dm' &&
+          chat.peers.find(
+            (p: any) => p.ship === Array.from(selectedIdentity)[0]
+          )
+        );
+      });
+      if (dm && dm.path) {
+        isStandaloneChat ? setStandaloneChat(dm.path) : setChat(dm.path);
+        setSubroute('chat');
+        return;
+      }
+    }
+
+    if (selectedIdentity.size === 1) {
+      chatType = 'dm';
+      const metadata = friends.getContactAvatarMetadata(
+        Array.from(selectedIdentity)[0]
+      );
+      title = metadata.nickname || metadata.patp;
+    } else {
+      title = Array.from(selectedIdentity)
+        .map((patp: string) => {
+          const metadata = friends.getContactAvatarMetadata(patp);
+          return metadata.nickname || metadata.patp;
+        })
+        .join(', ');
+      chatType = 'group';
+    }
+    setCreating(true);
+    createChat(
+      title,
+      loggedInAccount.serverId,
+      chatType,
+      Array.from(selectedIdentity)
+    )
+      .then(({ path }) => {
+        isStandaloneChat ? setStandaloneChat(path) : setChat(path);
+        setSubroute('chat');
+        setCreating(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setCreating(false);
+      });
+  };
 
   return (
     <Flex flex={1} gap={4} height="100%" flexDirection="column">
@@ -120,23 +138,16 @@ const CreateNewChatPresenter = ({ isStandaloneChat = false }: Props) => {
           </Text.Custom>
           <Flex position="absolute" right={0} alignItems="center">
             {selectedIdentity.size > 0 && (
-              <Tooltip
-                id="create-chat-tooltip"
-                show={dmAlreadyExists}
-                placement="bottom-left"
-                content={'Chat already exists'}
+              <Button.TextButton
+                showOnHover
+                disabled={creating}
+                onClick={(evt) => {
+                  evt.stopPropagation();
+                  onCreateChat();
+                }}
               >
-                <Button.TextButton
-                  showOnHover
-                  disabled={creating || dmAlreadyExists}
-                  onClick={(evt) => {
-                    evt.stopPropagation();
-                    onCreateChat();
-                  }}
-                >
-                  {creating ? <Spinner size={0} color="#FFF" /> : 'Create'}
-                </Button.TextButton>
-              </Tooltip>
+                {creating ? <Spinner size={0} color="#FFF" /> : 'Create'}
+              </Button.TextButton>
             )}
           </Flex>
         </Flex>

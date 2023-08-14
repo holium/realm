@@ -6,6 +6,7 @@ import { InvitePermissionType } from 'renderer/stores/models/chat.model';
 
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
+import { Action } from '../../api/types';
 import { ChatDB, chatDBPreload } from './chat.db';
 import { ChatPathMetadata, ChatPathType, ChatUpdateTypes } from './chat.types';
 
@@ -182,21 +183,22 @@ export class ChatService extends AbstractService<ChatUpdateTypes> {
       metadata.peer = dmPeer;
     }
     const payload = {
-      app: 'realm-chat',
-      mark: 'chat-action',
-      reaction: '',
-      json: {
+      threadName: 'chat-venter',
+      inputMark: 'chat-action',
+      outputMark: 'chat-vent',
+      desk: 'realm',
+      body: {
         'create-chat': {
-          type,
           metadata,
+          type,
           peers,
           invites: 'anyone',
           'max-expires-at-duration': null,
         },
-      },
+      } as unknown as Action,
     };
     try {
-      await APIConnection.getInstance().conduit.poke(payload);
+      return await APIConnection.getInstance().conduit.thread(payload);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to create chat');
