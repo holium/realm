@@ -70,7 +70,7 @@ export const AccountStorageDialogStory: ComponentStory<
     <AccountStorageDialog
       ships={[thirdEarthMockShip]}
       selectedShipId={0}
-      onClickRestartStorage={() => Promise.resolve()}
+      onClickRestartStorage={() => Promise.resolve('')}
       setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
       onClickUploadId={() => {}}
