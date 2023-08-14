@@ -6,6 +6,7 @@ import { InvitePermissionType } from 'renderer/stores/models/chat.model';
 
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
+import { Action } from '../../api/types';
 import { ChatDB, chatDBPreload } from './chat.db';
 import { ChatPathMetadata, ChatPathType, ChatUpdateTypes } from './chat.types';
 
@@ -194,7 +195,7 @@ export class ChatService extends AbstractService<ChatUpdateTypes> {
           invites: 'anyone',
           'max-expires-at-duration': null,
         },
-      } as any,
+      } as unknown as Action,
     };
     try {
       return await APIConnection.getInstance().conduit.thread(payload);
