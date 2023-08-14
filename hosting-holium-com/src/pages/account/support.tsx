@@ -1,22 +1,35 @@
 import {
-  AccountDownloadRealmDialog,
+  AccountSupportDialog,
+  ThirdEarthAlert,
   UserContextProvider,
   useUser,
 } from '@holium/shared';
 
 import { Page } from '../../components/Page';
-import { downloadLinks } from '../../util/constants';
 import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
-const DownloadRealmPresenter = () => {
+export const getServerSideProps = async () => {
+  const alerts = await thirdEarthApi.alerts();
+  return {
+    props: {
+      alerts: alerts.alerts,
+    },
+  };
+};
+
+type Props = {
+  alerts: ThirdEarthAlert[];
+};
+
+const SupportPresenter = ({ alerts }: Props) => {
   const { goToPage, logout } = useNavigation();
   const { ships, selectedShipId, setSelectedShipId } = useUser();
 
   const onClickSidebarSection = (section: string) => {
     if (section === 'Get Hosting') {
       goToPage(accountPageUrl[section], {
-        back_url: '/account/download-realm',
+        back_url: '/account/support',
       });
     } else {
       goToPage(accountPageUrl[section]);
@@ -30,39 +43,27 @@ const DownloadRealmPresenter = () => {
 
     if (byopInProgress) {
       goToPage('/upload-id', {
-        back_url: '/account/download-realm',
+        back_url: '/account/support',
       });
     } else {
       goToPage('/upload-id-disclaimer', {
-        back_url: '/account/download-realm',
+        back_url: '/account/support',
       });
     }
   };
 
   const onClickPurchaseId = () => {
     goToPage('/choose-id', {
-      back_url: '/account/download-realm',
+      back_url: '/account/support',
     });
   };
 
-  const onDownloadMacM1 = () => window.open(downloadLinks.macM1, '_blank');
-
-  const onDownloadMacIntel = () =>
-    window.open(downloadLinks.macIntel, '_blank');
-
-  const onDownloadWindows = () => window.open(downloadLinks.windows, '_blank');
-
-  const onDownloadLinux = () => window.open(downloadLinks.linux, '_blank');
-
   return (
-    <AccountDownloadRealmDialog
+    <AccountSupportDialog
+      alerts={alerts}
       ships={ships}
       selectedShipId={selectedShipId}
       setSelectedShipId={setSelectedShipId}
-      onDownloadMacM1={onDownloadMacM1}
-      onDownloadMacIntel={onDownloadMacIntel}
-      onDownloadWindows={onDownloadWindows}
-      onDownloadLinux={onDownloadLinux}
       onClickPurchaseId={onClickPurchaseId}
       onClickUploadId={onClickUploadId}
       onClickSidebarSection={onClickSidebarSection}
@@ -71,11 +72,11 @@ const DownloadRealmPresenter = () => {
   );
 };
 
-export default function AccountDownloadRealmPage() {
+export default function AccountSupportPage({ alerts }: Props) {
   return (
-    <Page title="Account / Download Realm" isProtected>
+    <Page title="Account / Support" isProtected>
       <UserContextProvider api={thirdEarthApi}>
-        <DownloadRealmPresenter />
+        <SupportPresenter alerts={alerts} />
       </UserContextProvider>
     </Page>
   );

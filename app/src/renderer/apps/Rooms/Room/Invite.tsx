@@ -110,7 +110,7 @@ export const RoomInvite = observer(() => {
             tabIndex={2}
             style={{ padding: '6px 10px', borderRadius: 6, height: 35 }}
             color="intent-success"
-            disabled={!inviteForm.computed.isValid}
+            isDisabled={!inviteForm.computed.isValid}
             onClick={(evt: any) => {
               evt.preventDefault();
               evt.stopPropagation();

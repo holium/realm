@@ -19,9 +19,24 @@ export default function UploadId() {
   const [hint, setHint] = useState<string>();
 
   const onUpload = async (file: File) => {
-    const { token, provisionalShipId } = OnboardingStorage.get();
+    const { token } = OnboardingStorage.get();
 
-    if (!token || !provisionalShipId) return false;
+    if (!token) {
+      setError('Unathorized. Please log in again.');
+      return false;
+    }
+
+    // Get provisional ship ID.
+    const ships = await thirdEarthApi.getUserShips(token);
+    const provisionalShip = ships.find((ship) => ship.ship_type === 'host');
+
+    if (!provisionalShip) {
+      console.log('ships', JSON.stringify(ships, null, 2));
+      setError('No provisional ship found.');
+      return false;
+    }
+
+    const provisionalShipId = provisionalShip.id.toString();
 
     setFile(file);
     setProgress(0);
@@ -99,7 +114,7 @@ export default function UploadId() {
   };
 
   return (
-    <Page title="Upload ID" isProtected>
+    <Page title="Upload Pier" isProtected>
       <UploadIdDialog
         fileName={file?.name}
         progress={progress}

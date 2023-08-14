@@ -164,7 +164,7 @@ const NewRoomPresenter = () => {
             tabIndex={2}
             fontWeight={500}
             color="intent-success"
-            disabled={!form.computed.isValid}
+            isDisabled={!form.computed.isValid}
             justifyContent="center"
             style={{ borderRadius: 6, height: 32, minWidth: 60 }}
             onKeyDown={(evt: any) => {

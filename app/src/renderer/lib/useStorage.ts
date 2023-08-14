@@ -43,15 +43,9 @@ export const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
     ) {
       return;
     }
-    // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
-    let endp = s3.credentials.endpoint;
-    if (endp.split('.')[0] === s3.configuration.currentBucket) {
-      endp = endp.split('.').slice(1).join('.');
-    }
     client.current = new S3Client({
       credentials: s3.credentials,
-      endpoint: endp,
-      signatureVersion: 'v4',
+      region: s3.configuration.region,
     });
   }, [s3]);
 
@@ -75,9 +69,12 @@ export const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
       const fileName = fileParts.slice(0, -1);
       const fileExtension = fileParts.pop();
 
+      const key = `${
+        window.ship
+      }/${moment().unix()}-${fileName}.${fileExtension}`;
       const params = {
         Bucket: bucket,
-        Key: `${window.ship}/${moment().unix()}-${fileName}.${fileExtension}`,
+        Key: key,
         Body: file,
         ACL: StorageAcl.PublicRead,
         ContentType: file.type,
@@ -85,11 +82,19 @@ export const useStorage = ({ accept = '*' } = { accept: '*' }): IuseStorage => {
 
       setUploading(true);
 
-      const { Location } = await client.current.upload(params).promise();
+      const uploadResponse = await client.current.upload(params).promise();
+      if (s3 && uploadResponse['$metadata'].httpStatusCode === 200) {
+        // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
+        let endp = s3.credentials.endpoint;
+        if (endp.split('.')[0] === s3.configuration.currentBucket) {
+          endp = endp.split('.').slice(1).join('.');
+        }
 
-      setUploading(false);
-
-      return Location;
+        setUploading(false);
+        return `https://${endp}/${params.Bucket}/${key}`;
+      } else {
+        throw new Error();
+      }
     },
     [client, setUploading]
   );

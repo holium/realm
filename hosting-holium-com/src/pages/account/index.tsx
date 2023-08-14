@@ -15,8 +15,6 @@ import {
   VerifyEmailModal,
 } from '@holium/shared';
 
-import { getSupportEmail } from 'util/constants';
-
 import { Page } from '../../components/Page';
 import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
@@ -51,11 +49,7 @@ const HostingPresenter = () => {
   }, [selectedShip]);
 
   const onClickSidebarSection = (section: string) => {
-    if (section === 'Contact Support') {
-      window.open(getSupportEmail(selectedShip.patp), '_blank');
-    } else {
-      goToPage(accountPageUrl[section]);
-    }
+    goToPage(accountPageUrl[section]);
   };
 
   const onSubmitNewEmail = async (email: string) => {
@@ -186,9 +180,19 @@ const HostingPresenter = () => {
   };
 
   const onClickUploadId = () => {
-    goToPage('/upload-id-disclaimer', {
-      back_url: '/account',
-    });
+    const byopInProgress = ships.find(
+      (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
+    );
+
+    if (byopInProgress) {
+      goToPage('/upload-id', {
+        back_url: '/account',
+      });
+    } else {
+      goToPage('/upload-id-disclaimer', {
+        back_url: '/account',
+      });
+    }
   };
 
   const onClickReuploadId = () => {
@@ -206,23 +210,21 @@ const HostingPresenter = () => {
 
   if (isUnfinishedByop) {
     return (
-      <Page title="Account / Upload ID" isProtected>
-        <AccountUnfinishedUploadDialog
-          ships={ships}
-          selectedShipId={selectedShipId}
-          onClickReuploadId={onClickReuploadId}
-          onClickPurchaseId={onClickPurchaseId}
-          onClickUploadId={onClickUploadId}
-          setSelectedShipId={setSelectedShipId}
-          onClickSidebarSection={onClickSidebarSection}
-          onClickExit={logout}
-        />
-      </Page>
+      <AccountUnfinishedUploadDialog
+        ships={ships}
+        selectedShipId={selectedShipId}
+        onClickReuploadId={onClickReuploadId}
+        onClickPurchaseId={onClickPurchaseId}
+        onClickUploadId={onClickUploadId}
+        setSelectedShipId={setSelectedShipId}
+        onClickSidebarSection={onClickSidebarSection}
+        onClickExit={logout}
+      />
     );
   }
 
   return (
-    <Page title="Account / Hosting" isProtected>
+    <>
       <ChangeEmailModal
         isOpen={changeEmailModal.isOn}
         onDismiss={changeEmailModal.toggleOff}
@@ -244,6 +246,7 @@ const HostingPresenter = () => {
         onSubmit={onSubmitNewPassword}
       />
       <ChangeMaintenanceWindowModal
+        key={`change-maintenance-window-${selectedShip?.maintenance_window}`}
         isOpen={changeMaintenanceWindowModal.isOn}
         initialSelected={(selectedShip?.maintenance_window ?? 0).toString()}
         onDismiss={changeMaintenanceWindowModal.toggleOff}
@@ -273,11 +276,11 @@ const HostingPresenter = () => {
         onClickSidebarSection={onClickSidebarSection}
         onExit={logout}
       />
-    </Page>
+    </>
   );
 };
 
-export default function Hosting() {
+export default function AccountHostingPage() {
   return (
     <Page title="Account / Hosting" isProtected>
       <UserContextProvider api={thirdEarthApi}>

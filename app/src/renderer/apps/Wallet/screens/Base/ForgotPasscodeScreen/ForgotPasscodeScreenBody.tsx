@@ -45,7 +45,7 @@ export const ForgotPasscodeScreenBody = ({
         <Button.Transparent
           height={32}
           fontWeight={500}
-          disabled={deleting.isOn}
+          isDisabled={deleting.isOn}
           onClick={onClickCancel}
         >
           Cancel
@@ -54,7 +54,7 @@ export const ForgotPasscodeScreenBody = ({
           height={32}
           fontWeight={500}
           color="intent-alert"
-          disabled={deleting.isOn}
+          isDisabled={deleting.isOn}
           onClick={handleOnClickDelete}
         >
           {deleting.isOn ? <Spinner size={0} /> : 'Delete'}

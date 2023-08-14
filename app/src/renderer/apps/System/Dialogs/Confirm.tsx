@@ -63,7 +63,7 @@ const ConfirmDialogPresenter = ({
           data-close-tray="false"
           tabIndex={1}
           color="intent-alert"
-          disabled={loading}
+          isDisabled={loading}
           style={{ fontWeight: 400 }}
           onClick={handleOnConfirm}
         >

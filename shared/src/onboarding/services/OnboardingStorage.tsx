@@ -6,7 +6,6 @@ type Storage = {
   masterAccountId: number;
   token: string;
   clientSideEncryptionKey: string;
-  provisionalShipId: string;
   /* Ship info */
   serverId: string;
   serverUrl: string;
@@ -25,7 +24,6 @@ const storageKeys: (keyof Storage)[] = [
   'masterAccountId',
   'token',
   'clientSideEncryptionKey',
-  'provisionalShipId',
   'serverId',
   'serverUrl',
   'serverCode',
@@ -44,7 +42,6 @@ export const OnboardingStorage = {
       masterAccountId: Number(localStorage.getItem('masterAccountId')),
       token: localStorage.getItem('token'),
       clientSideEncryptionKey: localStorage.getItem('clientSideEncryptionKey'),
-      provisionalShipId: localStorage.getItem('provisionalShipId'),
       serverId: localStorage.getItem('serverId'),
       serverUrl: localStorage.getItem('serverUrl'),
       serverCode: localStorage.getItem('serverCode'),
@@ -68,7 +65,6 @@ export const OnboardingStorage = {
     localStorage.removeItem('description');
     localStorage.removeItem('avatar');
     localStorage.removeItem('shipCode');
-    localStorage.removeItem('provisionalShipId');
   },
   remove(key: keyof Storage) {
     localStorage.removeItem(key);

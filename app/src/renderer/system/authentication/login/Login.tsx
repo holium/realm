@@ -277,7 +277,7 @@ const LoginPresenter = () => {
                         ) : (
                           <Button.IconButton
                             ref={submitRef}
-                            disabled={password.length < 1}
+                            isDisabled={password.length < 1}
                             onClick={async (evt: any) => await clickSubmit(evt)}
                           >
                             <Icon

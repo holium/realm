@@ -35,7 +35,7 @@ export const GetRealmDialogBody = ({
         <ButtonText>Purchase ID</ButtonText>
       </PurchaseIdButton>
       <UploadIdButton type="button" onClick={onUploadId}>
-        <ButtonText>Upload ID</ButtonText>
+        <ButtonText>Upload Pier</ButtonText>
       </UploadIdButton>
     </ButtonsContainer>
     {onAlreadyHaveAccount && (

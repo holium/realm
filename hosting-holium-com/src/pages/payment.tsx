@@ -133,10 +133,6 @@ export default function Payment({
 
       if (!provisionalResponse) return false;
 
-      OnboardingStorage.set({
-        provisionalShipId: provisionalResponse[0].id.toString(),
-      });
-
       return goToPage('/upload-id', {
         product_type: 'byop-p',
       });
