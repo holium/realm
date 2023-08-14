@@ -16,7 +16,6 @@ type RoomRowProps = Partial<any> & {
   tray?: boolean;
   loading?: boolean;
   onClick?: (evt: any) => any;
-  rightChildren?: any;
 };
 
 const RoomRowPresenter = ({
@@ -27,7 +26,6 @@ const RoomRowPresenter = ({
   present,
   creator,
   onClick,
-  rightChildren,
 }: RoomRowProps) => {
   const { loggedInAccount, theme } = useAppState();
   const roomsStore = useRoomsStore();
@@ -163,7 +161,6 @@ const RoomRowPresenter = ({
           <Icons name="Trash" />
         </IconButton>
       )} */}
-      {rightChildren || <div />}
     </Row>
   );
 };

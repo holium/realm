@@ -5,7 +5,7 @@ import {
 } from '@holium/shared';
 
 import { Page } from '../../components/Page';
-import { downloadLinks, getSupportEmail } from '../../util/constants';
+import { downloadLinks } from '../../util/constants';
 import { thirdEarthApi } from '../../util/thirdEarthApi';
 import { accountPageUrl, useNavigation } from '../../util/useNavigation';
 
@@ -14,10 +14,7 @@ const DownloadRealmPresenter = () => {
   const { ships, selectedShipId, setSelectedShipId } = useUser();
 
   const onClickSidebarSection = (section: string) => {
-    if (section === 'Contact Support') {
-      const ship = ships.find((ship) => ship.id === selectedShipId);
-      window.open(getSupportEmail(ship?.patp ?? ''), '_blank');
-    } else if (section === 'Get Hosting') {
+    if (section === 'Get Hosting') {
       goToPage(accountPageUrl[section], {
         back_url: '/account/download-realm',
       });
@@ -27,9 +24,19 @@ const DownloadRealmPresenter = () => {
   };
 
   const onClickUploadId = () => {
-    goToPage('/upload-id-disclaimer', {
-      back_url: '/account/download-realm',
-    });
+    const byopInProgress = ships.find(
+      (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
+    );
+
+    if (byopInProgress) {
+      goToPage('/upload-id', {
+        back_url: '/account/download-realm',
+      });
+    } else {
+      goToPage('/upload-id-disclaimer', {
+        back_url: '/account/download-realm',
+      });
+    }
   };
 
   const onClickPurchaseId = () => {
@@ -48,25 +55,23 @@ const DownloadRealmPresenter = () => {
   const onDownloadLinux = () => window.open(downloadLinks.linux, '_blank');
 
   return (
-    <Page title="Account / Download Realm" isProtected>
-      <AccountDownloadRealmDialog
-        ships={ships}
-        selectedShipId={selectedShipId}
-        setSelectedShipId={setSelectedShipId}
-        onDownloadMacM1={onDownloadMacM1}
-        onDownloadMacIntel={onDownloadMacIntel}
-        onDownloadWindows={onDownloadWindows}
-        onDownloadLinux={onDownloadLinux}
-        onClickPurchaseId={onClickPurchaseId}
-        onClickUploadId={onClickUploadId}
-        onClickSidebarSection={onClickSidebarSection}
-        onExit={logout}
-      />
-    </Page>
+    <AccountDownloadRealmDialog
+      ships={ships}
+      selectedShipId={selectedShipId}
+      setSelectedShipId={setSelectedShipId}
+      onDownloadMacM1={onDownloadMacM1}
+      onDownloadMacIntel={onDownloadMacIntel}
+      onDownloadWindows={onDownloadWindows}
+      onDownloadLinux={onDownloadLinux}
+      onClickPurchaseId={onClickPurchaseId}
+      onClickUploadId={onClickUploadId}
+      onClickSidebarSection={onClickSidebarSection}
+      onExit={logout}
+    />
   );
 };
 
-export default function DownloadRealm() {
+export default function AccountDownloadRealmPage() {
   return (
     <Page title="Account / Download Realm" isProtected>
       <UserContextProvider api={thirdEarthApi}>

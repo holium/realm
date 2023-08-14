@@ -29,7 +29,7 @@ export const BlockedInput = ({ blocked, onChange }: Props) => {
         onChange={(e) => setInput((e.target as HTMLInputElement).value)}
         rightAdornment={
           <Button.TextButton
-            disabled={!isValidPatp(input)}
+            isDisabled={!isValidPatp(input)}
             fontWeight={500}
             color="intent-alert"
             onClick={block}

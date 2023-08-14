@@ -8,7 +8,7 @@ import {
 } from './RadioGroup.style';
 
 export type RadioOption = {
-  label: string;
+  label: string | JSX.Element;
   value: string | number;
   sublabel?: string;
   icon?: IconPathsType;

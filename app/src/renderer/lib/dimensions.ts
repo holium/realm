@@ -55,6 +55,10 @@ export const DEFAULT_APP_WINDOW_DIMENSIONS: Record<string, Dimensions> = {
     width: 1200,
     height: 820,
   },
+  'os-notes': {
+    width: 1200,
+    height: 820,
+  },
   sphinx: {
     width: 600,
     height: 700,

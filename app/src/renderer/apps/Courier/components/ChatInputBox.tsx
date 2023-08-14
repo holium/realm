@@ -60,19 +60,20 @@ export const ChatInputBox = ({
   }, [attachments]);
 
   const uploadFile = useCallback(
-    (params: FileUploadParams) => {
+    async (params: FileUploadParams) => {
       setIsUploading(true);
       setUploadError('');
-      (ShipIPC.uploadFile(params) as Promise<any>)
-        .then((data: { Location: string; key: string }) => {
-          console.log(data);
-          const url = data.Location;
-          setAttachment([...attachments, url]);
-        })
-        .catch(() => {
-          setUploadError('Failed upload, please try again.');
-        })
-        .finally(() => setIsUploading(false));
+
+      try {
+        const data = await ShipIPC.uploadFile(params);
+        if (!data) throw new Error('Failed upload, please try again.');
+
+        setAttachment([...attachments, data.Location]);
+      } catch (e: string | any) {
+        setUploadError(e);
+      } finally {
+        setIsUploading(false);
+      }
     },
     [attachments]
   );

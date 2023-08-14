@@ -50,7 +50,7 @@ type Props = {
   setNickname: (nickname: string) => void;
   setDescription: (description: string) => void;
   setAvatarSrc: (src?: string) => void;
-  onUploadFile: (file: File) => Promise<string | undefined>;
+  onUploadFile: (file: File) => Promise<string | null>;
 };
 
 export const PassportForm = ({

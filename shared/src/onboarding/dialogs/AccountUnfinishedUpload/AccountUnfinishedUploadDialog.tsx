@@ -1,4 +1,5 @@
-import { AccountDialog, SidebarSection } from '../../components/AccountDialog';
+import { AccountDialog } from '../../components/AccountDialog';
+import { SidebarSection } from '../../components/AccountDialogSidebar';
 import { ThirdEarthShip } from '../../types';
 import { AccountUnfinishedUploadDialogBody } from './AccountUnfinishedUploadDialogBody';
 

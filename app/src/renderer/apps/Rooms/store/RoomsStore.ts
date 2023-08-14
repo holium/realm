@@ -139,7 +139,6 @@ export class RoomsStore extends EventsEmitter {
   @observable isMuted = false;
   @observable isSpeaking = false;
   @observable isAudioAttached = false;
-  @observable peersMetadata = observable.map();
   @observable status = 'disconnected';
   @observable peers: Map<string, PeerClass> = observable.map();
   @observable speakers: Map<string, ActiveSpeaker> = observable.map();
@@ -531,8 +530,10 @@ export class RoomsStore extends EventsEmitter {
             console.log('someone entered the room', event);
             this.createPeer(event.peer_id);
 
-            shipStore.settingsStore.systemSoundsEnabled &&
+            const isRoomsNote = event.room.title.startsWith('Notes:');
+            if (shipStore.settingsStore.systemSoundsEnabled && !isRoomsNote) {
               SoundActions.playRoomPeerEnter();
+            }
           }
         }
         break;
@@ -548,8 +549,10 @@ export class RoomsStore extends EventsEmitter {
             this.hangupAllPeers();
           } else {
             // someone left the room
-            shipStore.settingsStore.systemSoundsEnabled &&
+            const isRoomsNote = event.room.title.startsWith('Notes:');
+            if (shipStore.settingsStore.systemSoundsEnabled && !isRoomsNote) {
               SoundActions.playRoomPeerLeave();
+            }
             console.log('someone left the room', event);
             this.destroyPeer(event.peer_id);
             this.rooms.get(event.rid)?.removePeer(event.peer_id);
@@ -661,7 +664,6 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   deleteRoom(rid: string) {
-    shipStore.settingsStore.systemSoundsEnabled && SoundActions.playRoomLeave();
     this.rooms.delete(rid);
     this.ourPeer.disableAll();
     this.currentRid = null;
@@ -707,7 +709,6 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   leaveRoom(rid: string) {
-    shipStore.settingsStore.systemSoundsEnabled && SoundActions.playRoomLeave();
     this.rooms.get(rid)?.removePeer(this.ourId);
     this.currentRid = null;
     this.ourPeer.disableAll();

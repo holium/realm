@@ -104,7 +104,7 @@ type Props = {
   color?: string;
   initialAvatarSrc: string | undefined;
   setAvatarSrc: (src?: string) => void;
-  onUploadFile: (file: File) => Promise<string | undefined>;
+  onUploadFile: (file: File) => Promise<string | null>;
 };
 
 export const PassportCardAvatar = ({

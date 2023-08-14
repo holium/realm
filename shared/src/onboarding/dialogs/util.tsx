@@ -80,55 +80,53 @@ export function bytesToString(bytes: number): string {
 
 type MaintenanceWindow = {
   weekDay: string;
-  startTime: string;
-  endTime: string;
+  time: string;
+  optimizedFor: string;
 };
 
 export const maintenanceWindows: MaintenanceWindow[] = [
   {
-    weekDay: 'Monday',
-    startTime: '01:00',
-    endTime: '03:00',
-  },
-  {
-    weekDay: 'Tuesday',
-    startTime: '01:00',
-    endTime: '03:00',
-  },
-  {
     weekDay: 'Wednesday',
-    startTime: '01:00',
-    endTime: '03:00',
+    time: '18:00',
+    optimizedFor: 'Asia/Pacific',
   },
   {
     weekDay: 'Thursday',
-    startTime: '01:00',
-    endTime: '03:00',
+    time: '00:00',
+    optimizedFor: 'EU/Africa',
   },
   {
-    weekDay: 'Friday',
-    startTime: '01:00',
-    endTime: '03:00',
+    weekDay: 'Thursday',
+    time: '06:00',
+    optimizedFor: 'Americas',
   },
   {
     weekDay: 'Saturday',
-    startTime: '01:00',
-    endTime: '03:00',
+    time: '18:00',
+    optimizedFor: 'Asia/Pacific',
   },
   {
     weekDay: 'Sunday',
-    startTime: '01:00',
-    endTime: '03:00',
+    time: '00:00',
+    optimizedFor: 'EU/Africa',
   },
   {
     weekDay: 'Sunday',
-    startTime: '04:00',
-    endTime: '06:00',
+    time: '06:00',
+    optimizedFor: 'Americas',
   },
 ];
 
-export const maintenanceWindowToString = ({
-  weekDay,
-  startTime,
-  endTime,
-}: MaintenanceWindow) => `${weekDay} ${startTime} - ${endTime} GMT`;
+export const displayMaintenanceWindow = (index: number) => {
+  const { weekDay, time, optimizedFor } =
+    maintenanceWindows[index % maintenanceWindows.length];
+
+  return (
+    <>
+      <span>
+        {weekDay} {time} GMT{' '}
+      </span>
+      <span style={{ fontWeight: 400 }}>(optimal for {optimizedFor})</span>
+    </>
+  );
+};

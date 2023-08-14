@@ -1,6 +1,6 @@
 export { FormField } from '../form/FormField';
 export { AccountDialogSkeleton } from './components/AccountDialog';
-export { SidebarSection } from './components/AccountDialog';
+export { SidebarSection } from './components/AccountDialogSidebar';
 export { ForgotPassword } from './components/ForgotPassword';
 export { ChangeEmailModal } from './components/modals/ChangeEmailModal';
 export { ChangeMaintenanceWindowModal } from './components/modals/ChangeMaintenanceWindowModal';
@@ -24,6 +24,11 @@ export { AccountHostingDialogBody } from './dialogs/AccountHosting/AccountHostin
 export { AccountSelfHostingDialogBody } from './dialogs/AccountSelfHosting/AccountSelfHostingDialogBody';
 export { AccountStorageDialog } from './dialogs/AccountStorage/AccountStorageDialog';
 export { AccountStorageDialogBody } from './dialogs/AccountStorage/AccountStorageDialogBody';
+export { AccountSupportDialog } from './dialogs/AccountSupport/AccountSupportDialog';
+export {
+  getSupportMailTo,
+  SUPPORT_EMAIL_ADDRESS,
+} from './dialogs/AccountSupport/helpers';
 export { AccountUnfinishedUploadDialog } from './dialogs/AccountUnfinishedUpload/AccountUnfinishedUploadDialog';
 export { uploadErrors } from './dialogs/AccountUnfinishedUpload/AccountUnfinishedUploadDialogBody';
 export { AddIdentityDialog } from './dialogs/AddIdentity/AddIdentityDialog';
@@ -53,6 +58,7 @@ export type {
   OnboardingPage,
   RealmInstallStatus,
   RealmOnboardingStep,
+  ThirdEarthAlert,
   ThirdEarthPortalSession,
   ThirdEarthProduct,
   ThirdEarthProductType,

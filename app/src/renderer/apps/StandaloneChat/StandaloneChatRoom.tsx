@@ -11,8 +11,8 @@ import {
 } from '@holium/design-system/general';
 
 import { MediaAccess } from 'os/types';
+import { useSound } from 'renderer/lib/sound';
 import { trackEvent } from 'renderer/lib/track';
-import { useAppState } from 'renderer/stores/app.store';
 import { MainIPC } from 'renderer/stores/ipc';
 import { useShipStore } from 'renderer/stores/ship.store';
 
@@ -21,7 +21,7 @@ import { Settings } from '../Rooms/Settings';
 import { useRoomsStore } from '../Rooms/store/RoomsStoreContext';
 
 const StandaloneChatRoomPresenter = () => {
-  const { loggedInAccount } = useAppState();
+  const sound = useSound();
   const roomsStore = useRoomsStore();
   const { chatStore } = useShipStore();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -48,7 +48,7 @@ const StandaloneChatRoomPresenter = () => {
 
   if (!presentRoom) return <div />;
 
-  const { rid, creator, present, title } = presentRoom;
+  const { creator, present, title } = presentRoom;
   const presentCount = present?.length ?? 0;
   const creatorStr =
     creator.length > 14 ? `${creator.substring(0, 14)}...` : creator;
@@ -57,12 +57,9 @@ const StandaloneChatRoomPresenter = () => {
     e.stopPropagation();
 
     chatStore.setSubroute('chat');
-    roomsStore.leaveRoom(rid);
+    roomsStore.cleanUpCurrentRoom();
 
-    // Delete room if we're the creator or the last person in the room.
-    if (creator === loggedInAccount?.serverId || presentCount === 0) {
-      roomsStore.deleteRoom(rid);
-    }
+    sound.playRoomLeave();
   };
 
   return (

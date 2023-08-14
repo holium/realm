@@ -16,8 +16,8 @@ import { NotifStore } from './models/notification.model';
 import { SettingsModel } from './models/settings.model';
 import { SpacesStore } from './models/spaces.model';
 import { WalletStore } from './models/wallet.model';
+import { NotesStore, notesStore } from './notes/notes.store';
 import { TroveStore } from './trove.store';
-// import { RoomsStore } from './rooms.store';
 
 export const ShipStore = types
   .model('ShipStore', {
@@ -29,6 +29,7 @@ export const ShipStore = types
     bazaarStore: BazaarStore,
     walletStore: WalletStore,
     featuredStore: FeaturedStore,
+    notesStore: NotesStore,
     lexiconStore: LexiconStore,
     troveStore: TroveStore,
     // roomsStore: RoomsStore,
@@ -67,6 +68,7 @@ export const ShipStore = types
         return yield ShipIPC.getOurGroups() as Promise<any>;
       } catch (e) {
         console.error(e);
+        return [];
       }
     }),
     getGroup: flow(function* (path: string) {
@@ -127,6 +129,7 @@ export const shipStore = ShipStore.create({
   },
   bazaarStore: loadBazaarSnapshot(),
   walletStore: walletAppDefault,
+  notesStore,
   lexiconStore: { update: null },
   troveStore: { update: null },
   featuredStore: {

@@ -12,7 +12,6 @@ import {
 import { TextInput } from '@holium/design-system/inputs';
 
 import { useSound } from 'renderer/lib/sound';
-import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { useTrayApps } from '../store';
@@ -68,7 +67,6 @@ export const createRoomForm = (
 
 const NewRoomPresenter = () => {
   const roomsStore = useRoomsStore();
-  const { loggedInAccount } = useAppState();
   const { spacesStore } = useShipStore();
   const { roomsApp } = useTrayApps();
   const [loading, setLoading] = useState(false);
@@ -81,15 +79,10 @@ const NewRoomPresenter = () => {
   const sound = useSound();
 
   const createRoom = async (evt: any) => {
-    // setLoading(true)
-    if (roomsStore.currentRoom) {
-      if (roomsStore.currentRoom.creator === loggedInAccount?.serverId) {
-        roomsStore.deleteRoom(roomsStore.currentRoom.rid);
-      } else {
-        roomsStore.leaveRoom(roomsStore.currentRoom.rid);
-      }
-    }
-    sound.playRoomEnter();
+    setLoading(true);
+
+    roomsStore.cleanUpCurrentRoom();
+
     const { name, isPrivate } = form.actions.submit();
     evt.stopPropagation();
     const spacePath =
@@ -97,14 +90,17 @@ const NewRoomPresenter = () => {
         ? spacesStore.selected?.path ?? ''
         : null;
 
-    setLoading(true);
     await roomsStore?.createRoom(
       name,
       isPrivate ? 'private' : 'public',
       spacePath
     );
-    setLoading(false);
+
     roomsApp.setView('room');
+
+    sound.playRoomEnter();
+
+    setLoading(false);
   };
 
   return (
@@ -168,7 +164,7 @@ const NewRoomPresenter = () => {
             tabIndex={2}
             fontWeight={500}
             color="intent-success"
-            disabled={!form.computed.isValid}
+            isDisabled={!form.computed.isValid}
             justifyContent="center"
             style={{ borderRadius: 6, height: 32, minWidth: 60 }}
             onKeyDown={(evt: any) => {

@@ -55,6 +55,11 @@ export const ChatStore = types
     chatLoader: LoaderModel,
   })
   .views((self) => ({
+    get allChatPaths() {
+      return Array.from(self.inbox.values()).map(
+        (chat: ChatModelType) => chat.path
+      );
+    },
     isChatPinned(path: string) {
       return !!self.pinnedChats.find((p) => path === p);
     },
@@ -237,7 +242,7 @@ export const ChatStore = types
       self.selectedChat = tryReference(() =>
         self.inbox.find((chat) => chat.path === path)
       );
-      yield ChatIPC.refreshMessagesOnPath(path, window.ship);
+      yield ChatIPC.resyncPathIfNeeded(path);
       if (self.subroute === 'inbox') {
         self.subroute = 'chat';
       }
@@ -281,7 +286,7 @@ export const ChatStore = types
       peers: string[]
     ) {
       try {
-        yield ChatIPC.createChat(peers, type, {
+        return yield ChatIPC.createChat(peers, type, {
           title,
           description: '',
           image: '',

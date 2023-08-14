@@ -50,7 +50,7 @@ export const ConfirmPasscodeScreen = ({
       </Button.Transparent>
       <Button.TextButton
         flex={1}
-        disabled={!canContinue}
+        isDisabled={!canContinue}
         justifyContent="center"
         onClick={() => setScreen(WalletOnboardingScreen.FINALIZING)}
       >

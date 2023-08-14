@@ -33,7 +33,7 @@ type Props = {
   prefilledNickname: string;
   prefilledDescription: string;
   prefilledAvatarSrc: string;
-  onUploadFile: (file: File) => Promise<string | undefined>;
+  onUploadFile: (file: File) => Promise<string | null>;
   onBack?: () => void;
   onNext: (
     nickname: string,
@@ -129,7 +129,7 @@ export const PassportDialog = ({
         </Flex>
       }
       onBack={onBack}
-      onNext={handleOnNext}
+      onNext={loading ? undefined : handleOnNext}
     />
   );
 };

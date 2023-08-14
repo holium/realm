@@ -1,10 +1,11 @@
 import { Flex } from '@holium/design-system/general';
 
-import { AccountDialog, SidebarSection } from '../../components/AccountDialog';
+import { AccountDialog } from '../../components/AccountDialog';
 import {
   AccountDialogDescription,
   AccountDialogTitle,
 } from '../../components/AccountDialog.styles';
+import { SidebarSection } from '../../components/AccountDialogSidebar';
 import {
   DownloadRealmButtons,
   DownloadRealmButtonsProps,

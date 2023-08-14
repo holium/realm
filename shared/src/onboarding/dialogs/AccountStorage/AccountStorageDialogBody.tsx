@@ -3,6 +3,7 @@ import { AccountDialogTableRow } from '../../components/AccountDialogTableRow';
 import { DataSentIndicator } from '../../components/storage/DataSentIndicator';
 import { DataStorageIndicator } from '../../components/storage/DataStorageIndicator';
 import { StoragePassword } from '../../components/storage/StoragePassword';
+import { StorageTroubleshoot } from '../../components/storage/StorageTroubleshoot';
 import { AccountDialogTable } from '../AccountHosting/AccountHostingDialogBody';
 
 type Props = {
@@ -17,6 +18,7 @@ type Props = {
     networkUsage: number;
     minioUsage: number;
   };
+  onClickRestartStorage: () => Promise<string> | undefined;
 };
 
 export const AccountStorageDialogBody = ({
@@ -25,6 +27,7 @@ export const AccountStorageDialogBody = ({
   storagePassword,
   dataStorage,
   dataSent,
+  onClickRestartStorage,
 }: Props) => (
   <AccountDialogTable>
     <DataStorageIndicator dataStorage={dataStorage} />
@@ -38,5 +41,6 @@ export const AccountStorageDialogBody = ({
       </AccountDialogDescription>
     </AccountDialogTableRow>
     <StoragePassword storagePassword={storagePassword} />
+    <StorageTroubleshoot onClick={onClickRestartStorage} />
   </AccountDialogTable>
 );
