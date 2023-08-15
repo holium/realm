@@ -62,27 +62,7 @@ export const convertDateToHHMM = (date: Date): string => {
   const minutes = String(date.getMinutes()).padStart(2, '0');
   return `${hours}:${minutes}`;
 };
-export const toUTCDate = (date: Date): Date => {
-  const year = date.getUTCFullYear();
-  const month = date.getUTCMonth();
-  const day = date.getUTCDate();
-  const hours = date.getUTCHours();
-  const minutes = date.getUTCMinutes();
-  const seconds = date.getUTCSeconds();
-  const milliseconds = date.getUTCMilliseconds();
 
-  return new Date(
-    Date.UTC(
-      year,
-      month,
-      day,
-      hours,
-      minutes + date.getTimezoneOffset(),
-      seconds,
-      milliseconds
-    )
-  );
-};
 export const getDayOfWeekJS = (dayCount: number): string => {
   //converts js Date.getDay() to a week day string (sunday, monday...)
   const daysOfWeek = [
@@ -494,4 +474,31 @@ export const spansToEvents = (
   });
 
   setEvents(newEvents);
+};
+
+export const toUTCDateTime = (date: Date): Date => {
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const day = date.getUTCDate();
+  const hours = date.getUTCHours();
+  const minutes = date.getUTCMinutes();
+  const seconds = date.getUTCSeconds();
+  const milliseconds = date.getUTCMilliseconds();
+
+  return new Date(
+    Date.UTC(
+      year,
+      month,
+      day,
+      hours,
+      minutes + date.getTimezoneOffset(),
+      seconds,
+      milliseconds
+    )
+  );
+};
+export const toUTCDate = (date: Date): Date => {
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+  );
 };
