@@ -19,6 +19,7 @@ export class BookmarksDB extends AbstractDataAccess<Bookmark, any> {
       db,
       name: 'bookmarksDB',
       tableName: 'bookmarks',
+      pKey: 'path',
     });
     if (preload) {
       return;

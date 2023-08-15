@@ -21,6 +21,7 @@ export class FeaturedSpacesDB extends AbstractDataAccess<FeaturedSpace, any> {
       db,
       name: 'FeaturedSpaceDB',
       tableName: 'spaces_featured',
+      pKey: 'path',
     });
     if (preload) {
       return;

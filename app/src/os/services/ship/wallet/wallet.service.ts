@@ -59,20 +59,6 @@ export class WalletService extends AbstractService {
   }
 
   async checkPasscodeHash(passcode: number[]) {
-    const response = await APIConnection.getInstance().conduit.scry({
-      app: 'realm-wallet',
-      path: '/passcode',
-    });
-    console.log('response', response);
-    console.log(
-      'trying',
-      (
-        await APIConnection.getInstance().conduit.scry({
-          app: 'realm-wallet',
-          path: '/passcode',
-        })
-      ).passcode ?? ''
-    );
     const passcodeHash =
       (
         await APIConnection.getInstance().conduit.scry({
