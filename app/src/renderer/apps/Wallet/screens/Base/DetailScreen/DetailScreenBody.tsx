@@ -106,7 +106,9 @@ export const DetailScreenBody = ({
   const [coinPrice, setCoinPrice] = useState<number>();
 
   useEffect(() => {
-    coin?.conversions.getUsdPrice(coin.name).then(setCoinPrice);
+    const coinName = coin?.name.replace(/\s/g, '');
+    if (!coinName) return;
+    coin?.conversions.getUsdPrice(coinName).then(setCoinPrice);
   }, [coin]);
 
   // TODO default to coins or nfts if they have those
