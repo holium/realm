@@ -16,19 +16,27 @@ type Props = {
 };
 
 export const Coin = ({ coin, onClickCoin }: Props) => {
-  const [coinPrice, setCoinPrice] = useState<number>();
+  // const [coinPrice, setCoinPrice] = useState<number>();
+  const [amountUsdDisplay, setAmountUsdDisplay] = useState<string>('');
 
   useEffect(() => {
-    coin.conversions.getUsdPrice(coin.name).then(setCoinPrice);
+    const coinName = coin.name.replace(/\s/g, '');
+    coin.conversions.getUsdPrice(coinName).then((coinInUsd) => {
+      if (!coinInUsd) {
+        setAmountUsdDisplay('Error fetching price');
+      } else {
+        setAmountUsdDisplay(
+          `$${convertERC20AmountToUsd(
+            formatCoinAmount(coin.balance, coin.decimals),
+            coinInUsd / parseFloat(coin.balance)
+          )} USD`
+        );
+      }
+    });
   }, [coin]);
 
   const coinIcon = coin.logo || getMockCoinIcon(coin.name);
   const amount = formatCoinAmount(coin.balance, coin.decimals);
-
-  const amountUsdDisplay = `$${convertERC20AmountToUsd(
-    formatCoinAmount(coin.balance, coin.decimals),
-    coinPrice
-  )} USD`;
 
   return (
     <Row onClick={() => onClickCoin(coin.address)}>
