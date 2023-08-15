@@ -20,6 +20,7 @@ export class SettingsService extends AbstractDataAccess<Setting, any> {
       db,
       name: 'settingsService',
       tableName: 'settings',
+      pKey: 'identity',
     });
   }
 

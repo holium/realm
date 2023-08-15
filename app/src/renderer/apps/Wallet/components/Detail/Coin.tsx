@@ -19,7 +19,8 @@ export const Coin = ({ coin, onClickCoin }: Props) => {
   const [coinPrice, setCoinPrice] = useState<number>();
 
   useEffect(() => {
-    coin.conversions.getUsdPrice(coin.name).then(setCoinPrice);
+    const coinName = coin.name.replace(/\s/g, '');
+    coin.conversions.getUsdPrice(coinName).then(setCoinPrice);
   }, [coin]);
 
   const coinIcon = coin.logo || getMockCoinIcon(coin.name);

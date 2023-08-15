@@ -24,6 +24,7 @@ export class InvitationDB extends AbstractDataAccess<Invitation, any> {
       db,
       name: 'invitationDB',
       tableName: 'spaces_invitations',
+      pKey: 'path',
     });
     if (preload) {
       return;
