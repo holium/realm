@@ -215,16 +215,18 @@ export const LinkBlock = ({
         >
           {openGraph?.ogTitle}
         </LinkTitle>
-        <LinkDescription
-          id={id}
-          truncate
-          isSkeleton={!openGraph?.ogDescription}
-          fontSize={1}
-          opacity={0.7}
-          width={containerWidth ? containerWidth - 20 : 'calc(100% - 16px)'}
-        >
-          {description}
-        </LinkDescription>
+        {openGraph?.ogDescription && (
+          <LinkDescription
+            id={id}
+            truncate
+            isSkeleton={!openGraph?.ogDescription}
+            fontSize={1}
+            opacity={0.7}
+            width={containerWidth ? containerWidth - 20 : 'calc(100% - 16px)'}
+          >
+            {description}
+          </LinkDescription>
+        )}
       </Flex>
       <Flex
         id={id}
