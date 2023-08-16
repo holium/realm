@@ -18,11 +18,6 @@ import {
   addOrdinal2,
   convertDateToHHMM,
   convertH2M,
-  countDaysBetweenDates,
-  countNthWeekdaysBetweenDates,
-  countWeekDayOccurenceBetweenDates,
-  countWeekdaysBetweenDates,
-  countWeekendsBetweenDates,
   formatDateToYYYYMMDD,
   getDayOfWeekJS,
   getMonthAndDay,
@@ -31,6 +26,8 @@ import {
   log,
   reccurenceRuleParse,
   reccurenceTypeOptionsDS,
+  toUTCDate,
+  toUTCDateTime,
 } from '../utils';
 const colors = [
   {
@@ -105,7 +102,6 @@ export const NewEvent = ({
   const [reccurentEndDate, setReccurentEndDate] = useState<string>(
     formatDateToYYYYMMDD(new Date())
   );
-  const [reccurentRepTime, setReccurentRepTime] = useState<number>(0);
   const [isFullDay, setIsFullDay] = useState<boolean>(false);
 
   useEffect(() => {
@@ -143,8 +139,8 @@ export const NewEvent = ({
     if (!startDate || !endDate || !datePickerSelected || !newEventName) return;
     const startDateMinutes = convertH2M(startDate);
     const endDateMinutes = convertH2M(endDate);
-    const startDateMS = new Date(
-      datePickerSelected.getTime() + startDateMinutes * 60000
+    const startDateMS = toUTCDateTime(
+      new Date(datePickerSelected.getTime() + startDateMinutes * 60000)
     ).getTime();
     const durationMs = Math.abs(endDateMinutes - startDateMinutes) * 60000; // TODO: if endDate < startDate we have a problem
     try {
@@ -165,13 +161,7 @@ export const NewEvent = ({
   const createEventFullDaySingle = async () => {
     if (!datePickerSelected || !newEventName) return;
 
-    const startDateMS = new Date(
-      Date.UTC(
-        datePickerSelected.getUTCFullYear(),
-        datePickerSelected.getUTCMonth(),
-        datePickerSelected.getUTCDate()
-      )
-    ).getTime();
+    const startDateMS = toUTCDate(datePickerSelected).getTime();
     try {
       const result = await api.createSpanFullDaySingle(
         selectedCalendar,
@@ -187,15 +177,22 @@ export const NewEvent = ({
   };
 
   const createEventPeriodic = async () => {
-    if (!startDate || !endDate || !datePickerSelected || !newEventName) return;
+    if (
+      !startDate ||
+      !endDate ||
+      !datePickerSelected ||
+      !newEventName ||
+      !reccurentEndDate
+    )
+      return;
     const startDateMinutes = convertH2M(startDate);
     const endDateMinutes = convertH2M(endDate);
 
-    const startDateMS = new Date(
-      datePickerSelected.getTime() + startDateMinutes * 60000
+    const startDateTimeMS = toUTCDateTime(
+      new Date(datePickerSelected.getTime() + startDateMinutes * 60000)
     ).getTime();
-
-    const repeatCountObject = { l: 0, r: reccurentRepTime - 1 };
+    const startDateMS = toUTCDate(datePickerSelected).getTime();
+    const endDateMS = toUTCDate(new Date(reccurentEndDate)).getTime();
     const timeBetweenEventsEveryday = 1 * 60 * 60 * 24 * 1000; //1 is the number of days
 
     const durationMs = Math.abs(endDateMinutes - startDateMinutes) * 60000; // TODO: if endDate < startDate we have a problem
@@ -204,8 +201,9 @@ export const NewEvent = ({
       if (selectedReccurenceType === 'everyday') {
         result = await api.createSpanPeriodicDaily(
           selectedCalendar,
+          startDateTimeMS,
           startDateMS,
-          repeatCountObject,
+          endDateMS,
           timeBetweenEventsEveryday,
           durationMs,
           newEventName,
@@ -215,8 +213,9 @@ export const NewEvent = ({
       } else if (selectedReccurenceType === 'weekdays') {
         result = await api.createSpanPeriodicWeekly(
           selectedCalendar,
+          startDateTimeMS,
           startDateMS,
-          repeatCountObject,
+          endDateMS,
           durationMs,
           [0, 1, 2, 3, 4],
           newEventName,
@@ -226,8 +225,9 @@ export const NewEvent = ({
       } else if (selectedReccurenceType === 'weekend') {
         result = await api.createSpanPeriodicWeekly(
           selectedCalendar,
+          startDateTimeMS,
           startDateMS,
-          repeatCountObject,
+          endDateMS,
           durationMs,
           [5, 6],
           newEventName,
@@ -243,8 +243,9 @@ export const NewEvent = ({
 
         result = await api.createSpanPeriodicWeekly(
           selectedCalendar,
+          startDateTimeMS,
           startDateMS,
-          repeatCountObject,
+          endDateMS,
           durationMs,
           [selectedWeekDay],
           newEventName,
@@ -265,8 +266,9 @@ export const NewEvent = ({
         );
         result = await api.createSpanPeriodicMonthlyNthWeekday(
           selectedCalendar,
+          startDateTimeMS,
           startDateMS,
-          repeatCountObject,
+          endDateMS,
           durationMs,
           ordinal,
           selectedWeekDay,
@@ -278,8 +280,9 @@ export const NewEvent = ({
         //on all (current date of month) for however many years
         result = await api.createSpanPeriodicYearlyOnDate(
           selectedCalendar,
+          startDateTimeMS,
           startDateMS,
-          repeatCountObject,
+          endDateMS,
           durationMs,
           newEventName,
           newEventDescription,
@@ -292,17 +295,11 @@ export const NewEvent = ({
     }
   };
   const createEventFullDayPeriodic = async () => {
-    if (!datePickerSelected || !newEventName) return;
+    if (!datePickerSelected || !newEventName || !reccurentEndDate) return;
 
-    const startDateMS = new Date(
-      Date.UTC(
-        datePickerSelected.getUTCFullYear(),
-        datePickerSelected.getUTCMonth(),
-        datePickerSelected.getUTCDate()
-      )
-    ).getTime();
+    const startDateMS = toUTCDate(datePickerSelected).getTime();
+    const endDateMS = toUTCDate(new Date(reccurentEndDate)).getTime();
 
-    const repeatCountObject = { l: 0, r: reccurentRepTime - 1 };
     const timeBetweenEventsEveryday = 1 * 60 * 60 * 24 * 1000; //1 is the number of days
 
     try {
@@ -311,7 +308,7 @@ export const NewEvent = ({
         result = await api.createSpanPeriodicFullDayDaily(
           selectedCalendar,
           startDateMS,
-          repeatCountObject,
+          endDateMS,
           timeBetweenEventsEveryday,
           newEventName,
           newEventDescription,
@@ -321,7 +318,7 @@ export const NewEvent = ({
         result = await api.createSpanPeriodicFullDayWeekly(
           selectedCalendar,
           startDateMS,
-          repeatCountObject,
+          endDateMS,
           [0, 1, 2, 3, 4],
           newEventName,
           newEventDescription,
@@ -331,7 +328,7 @@ export const NewEvent = ({
         result = await api.createSpanPeriodicFullDayWeekly(
           selectedCalendar,
           startDateMS,
-          repeatCountObject,
+          endDateMS,
           [5, 6],
           newEventName,
           newEventDescription,
@@ -347,7 +344,7 @@ export const NewEvent = ({
         result = await api.createSpanPeriodicFullDayWeekly(
           selectedCalendar,
           startDateMS,
-          repeatCountObject,
+          endDateMS,
           [selectedWeekDay],
           newEventName,
           newEventDescription,
@@ -368,8 +365,7 @@ export const NewEvent = ({
         result = await api.createSpanPeriodicFullDayMonthlyNthWeekday(
           selectedCalendar,
           startDateMS,
-          repeatCountObject,
-
+          endDateMS,
           ordinal,
           selectedWeekDay,
           newEventName,
@@ -381,7 +377,7 @@ export const NewEvent = ({
         result = await api.createSpanPeriodicFullDayYearlyOnDate(
           selectedCalendar,
           startDateMS,
-          repeatCountObject,
+          endDateMS,
           newEventName,
           newEventDescription,
           selectedBackgroundColor
@@ -420,60 +416,7 @@ export const NewEvent = ({
     }
     return newYearOptions;
   };
-  useEffect(() => {
-    if (reccurentEndDate) {
-      if (selectedReccurenceType === 'everyday') {
-        const newReccurentRepTime = countDaysBetweenDates(
-          datePickerSelected,
-          reccurentEndDate
-        );
-        setReccurentRepTime(newReccurentRepTime);
-      } else if (selectedReccurenceType === 'weekdays') {
-        const newReccurentRepTime = countWeekdaysBetweenDates(
-          datePickerSelected,
-          reccurentEndDate
-        );
-        setReccurentRepTime(newReccurentRepTime);
-      } else if (selectedReccurenceType === 'weekend') {
-        const newReccurentRepTime = countWeekendsBetweenDates(
-          datePickerSelected,
-          reccurentEndDate
-        );
-        setReccurentRepTime(newReccurentRepTime);
-      } else if (selectedReccurenceType === 'everyToday') {
-        const newReccurentRepTime = countWeekDayOccurenceBetweenDates(
-          datePickerSelected,
-          reccurentEndDate,
-          datePickerSelected.getDay()
-        );
-        setReccurentRepTime(newReccurentRepTime);
-      } else if (selectedReccurenceType === 'everyMonth') {
-        const nthOccurence = getOccurrenceOfDayInMonth(
-          datePickerSelected,
-          datePickerSelected.getDay()
-        );
-        log('nthOccurence', nthOccurence);
-        const newReccurentRepTime = countNthWeekdaysBetweenDates(
-          datePickerSelected,
-          reccurentEndDate,
-          datePickerSelected.getDay(),
-          nthOccurence
-        );
-        setReccurentRepTime(newReccurentRepTime);
-      } else if (selectedReccurenceType === 'everyYearToday') {
-        const newReccurentRepTime =
-          1 +
-          parseInt(selectedEndYearOption) -
-          datePickerSelected.getFullYear();
-        setReccurentRepTime(newReccurentRepTime);
-      }
-    }
-  }, [
-    reccurentEndDate,
-    selectedEndYearOption,
-    selectedReccurenceType,
-    datePickerSelected,
-  ]);
+
   const isEditingInstance = useCalendarStore(
     (store: CalendarStore) => store.isEditingInstance
   );
@@ -657,7 +600,6 @@ export const NewEvent = ({
                   setSelectedEndYearOption(type as string);
                 }}
               />
-              <Text.Body fontWeight={600}>{reccurentRepTime}</Text.Body>
             </Flex>
           </Flex>
         )}

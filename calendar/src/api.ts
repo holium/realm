@@ -236,18 +236,20 @@ export const api = {
   },
   createSpanPeriodicDaily: async (
     calendarId: string,
-    startDateMS: number,
-    repeatCount: RepeatCount,
+    startDateTimeMS: number,
+    startDateMs: number,
+    endDateMS: number,
     timeBetweenEvents: number,
     durationMS: number,
     name: string,
     description = '',
     color = ''
   ) => {
-    const { date, offset } = api.parseToDateOffset(startDateMS);
-    return await api.eventAsyncCreate(
+    const { date, offset } = api.parseToDateOffset(startDateTimeMS);
+    return await api.eventAsyncCreateUntil(
       calendarId,
-      repeatCount,
+      startDateMs,
+      endDateMS,
       '~/left/periodic-0',
       { left: { tz: null, d: durationMS } },
       {
@@ -260,20 +262,21 @@ export const api = {
   },
   createSpanPeriodicFullDayDaily: async (
     calendarId: string,
-    startDateMS: number,
-    repeatCount: RepeatCount,
+    startDateMs: number,
+    endDateMS: number,
     timeBetweenEvents: number,
     name: string,
     description = '',
     color = ''
   ) => {
-    return await api.eventAsyncCreate(
+    return await api.eventAsyncCreateUntil(
       calendarId,
-      repeatCount,
+      startDateMs,
+      endDateMS,
       '~/fuld/periodic-0',
       { fuld: null },
       {
-        Start: { da: startDateMS },
+        Start: { da: startDateMs },
         Period: { dr: timeBetweenEvents },
       },
       { name, description, color }
@@ -281,18 +284,20 @@ export const api = {
   },
   createSpanPeriodicWeekly: async (
     calendarId: string,
-    startDateMS: number,
-    repeatCountObject: RepeatCount,
+    startDateTimeMS: number,
+    startDateMs: number,
+    endDateMS: number,
     durationMS: number,
     includedWeekDays: number[],
     name: string,
     description = '',
     color = ''
   ) => {
-    const { date, offset } = api.parseToDateOffset(startDateMS);
-    return await api.eventAsyncCreate(
+    const { date, offset } = api.parseToDateOffset(startDateTimeMS);
+    return await api.eventAsyncCreateUntil(
       calendarId,
-      repeatCountObject,
+      startDateMs,
+      endDateMS,
       '~/left/days-of-week-0',
       { left: { tz: null, d: durationMS } },
       {
@@ -307,20 +312,21 @@ export const api = {
   },
   createSpanPeriodicFullDayWeekly: async (
     calendarId: string,
-    startDateMS: number,
-    repeatCountObject: RepeatCount,
+    startDateMs: number,
+    endDateMS: number,
     includedWeekDays: number[],
     name: string,
     description = '',
     color = ''
   ) => {
-    return await api.eventAsyncCreate(
+    return await api.eventAsyncCreateUntil(
       calendarId,
-      repeatCountObject,
+      startDateMs,
+      endDateMS,
       '~/fuld/days-of-week-0',
       { fuld: null },
       {
-        Start: { da: startDateMS },
+        Start: { da: startDateMs },
         Weekdays: {
           wl: includedWeekDays, // [0,1,2,3,4] a list of weekdays, 0-mon, 1-tue, 2-wed, 3-thu, 4-fri, 5-sat, 6-sun
         },
@@ -330,8 +336,8 @@ export const api = {
   },
   createSpanPeriodicMonthlyNthWeekday: async (
     calendarId: string,
-    startDateMS: number,
-    repeatCountObject: RepeatCount,
+    startDateMs: number,
+    endDateMS: number,
     durationMS: number,
     ordinal: 'first' | 'second' | 'third' | 'fourth' | 'last',
     dayOfWeek: number,
@@ -339,10 +345,11 @@ export const api = {
     description = '',
     color = ''
   ) => {
-    const { date, offset } = api.parseToDateOffset(startDateMS);
-    return await api.eventAsyncCreate(
+    const { date, offset } = api.parseToDateOffset(startDateMs);
+    return await api.eventAsyncCreateUntil(
       calendarId,
-      repeatCountObject,
+      startDateMs,
+      endDateMS,
       '~/left/monthly-nth-weekday-0',
       { left: { tz: null, d: durationMS } },
       {
@@ -360,21 +367,22 @@ export const api = {
   },
   createSpanPeriodicFullDayMonthlyNthWeekday: async (
     calendarId: string,
-    startDateMS: number,
-    repeatCountObject: RepeatCount,
+    startDateMs: number,
+    endDateMS: number,
     ordinal: 'first' | 'second' | 'third' | 'fourth' | 'last',
     dayOfWeek: number,
     name: string,
     description = '',
     color = ''
   ) => {
-    return await api.eventAsyncCreate(
+    return await api.eventAsyncCreateUntil(
       calendarId,
-      repeatCountObject,
+      startDateMs,
+      endDateMS,
       '~/fuld/monthly-nth-weekday-0',
       { fuld: null },
       {
-        Start: { da: startDateMS },
+        Start: { da: endDateMS },
         Ordinal: {
           od: ordinal, // first, second, third, fourth, or last
         },
@@ -387,17 +395,19 @@ export const api = {
   },
   createSpanPeriodicYearlyOnDate: async (
     calendarId: string,
-    startDateMS: number,
-    repeatCountObject: RepeatCount,
+    startDateTimeMS: number,
+    startDateMs: number,
+    endDateMS: number,
     durationMS: number,
     name: string,
     description = '',
     color = ''
   ) => {
-    const { date, offset } = api.parseToDateOffset(startDateMS);
-    return await api.eventAsyncCreate(
+    const { date, offset } = api.parseToDateOffset(startDateTimeMS);
+    return await api.eventAsyncCreateUntil(
       calendarId,
-      repeatCountObject,
+      startDateMs,
+      endDateMS,
       '~/left/yearly-on-date-0',
       { left: { tz: null, d: durationMS } },
       {
@@ -409,18 +419,19 @@ export const api = {
   },
   createSpanPeriodicFullDayYearlyOnDate: async (
     calendarId: string,
-    startDateMS: number,
-    repeatCountObject: RepeatCount,
+    startDateMs: number,
+    endDateMS: number,
     name: string,
     description = '',
     color = ''
   ) => {
-    return await api.eventAsyncCreate(
+    return await api.eventAsyncCreateUntil(
       calendarId,
-      repeatCountObject,
+      startDateMs,
+      endDateMS,
       '~/fuld/yearly-on-date-0',
       { fuld: null },
-      { Start: { da: startDateMS } },
+      { Start: { da: startDateMs } },
       { name, description, color }
     );
   },
