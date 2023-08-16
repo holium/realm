@@ -65,7 +65,7 @@ export const ChatInputBox = ({
       setUploadError('');
 
       try {
-        const data = await ShipIPC.uploadFile(params);
+        const data = await ShipIPC.uploadFileAnon(params);
         if (!data) throw new Error('Failed upload, please try again.');
 
         setAttachment([...attachments, data.Location]);

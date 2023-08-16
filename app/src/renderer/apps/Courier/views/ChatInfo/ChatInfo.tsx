@@ -141,7 +141,7 @@ export const ChatInfoPresenter = ({ isStandaloneChat }: Props) => {
   const uploadFile = (params: FileUploadParams) => {
     setIsUploading(true);
     setUploadError('');
-    (ShipIPC.uploadFile(params) as Promise<any>)
+    (ShipIPC.uploadFileAnon(params) as Promise<any>)
       .then((data: { Location: string; key: string }) => {
         const url = data.Location;
         setImage(url);
