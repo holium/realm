@@ -63,7 +63,9 @@ export const ContextMenu = () => {
   allIds = allIds.filter((i) => i !== ''); // only care about parent elements that actually have an id set
   let allOptions: ContextMenuOption[] = [];
   for (const id of allIds) {
-    getOptions(id).forEach((o) => allOptions.push(o));
+    for (const opt of getOptions(id)) {
+      allOptions.push(opt);
+    }
   }
   // if any option is NOT a default option, then we should remove all the defaults.
   if (
@@ -80,7 +82,13 @@ export const ContextMenu = () => {
     // default options only
     allOptions = getOptions('A_GARBAGE_STRING_THAT_WE_WILL_NEVER_USE_AS_AN_ID');
   }
-  const contextualOptions = allOptions;
+  // ensure no options are duplicated
+  const contextualOptions: ContextMenuOption[] = [];
+  for (const option of allOptions) {
+    if (!contextualOptions.find((o) => o.id === option.id)) {
+      contextualOptions.push(option);
+    }
+  }
   const contextualColors = getColors(containerId);
   const anchorPoint = getAnchorPoint(mouseRef, contextualOptions);
 
