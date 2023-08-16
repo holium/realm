@@ -237,7 +237,6 @@ export const api = {
   createSpanPeriodicDaily: async (
     calendarId: string,
     startDateTimeMS: number,
-    startDateMs: number,
     endDateMS: number,
     timeBetweenEvents: number,
     durationMS: number,
@@ -248,7 +247,6 @@ export const api = {
     const { date, offset } = api.parseToDateOffset(startDateTimeMS);
     return await api.eventAsyncCreateUntil(
       calendarId,
-      startDateMs,
       endDateMS,
       '~/left/periodic-0',
       { left: { tz: null, d: durationMS } },
@@ -271,7 +269,6 @@ export const api = {
   ) => {
     return await api.eventAsyncCreateUntil(
       calendarId,
-      startDateMs,
       endDateMS,
       '~/fuld/periodic-0',
       { fuld: null },
@@ -285,7 +282,6 @@ export const api = {
   createSpanPeriodicWeekly: async (
     calendarId: string,
     startDateTimeMS: number,
-    startDateMs: number,
     endDateMS: number,
     durationMS: number,
     includedWeekDays: number[],
@@ -296,7 +292,6 @@ export const api = {
     const { date, offset } = api.parseToDateOffset(startDateTimeMS);
     return await api.eventAsyncCreateUntil(
       calendarId,
-      startDateMs,
       endDateMS,
       '~/left/days-of-week-0',
       { left: { tz: null, d: durationMS } },
@@ -321,7 +316,6 @@ export const api = {
   ) => {
     return await api.eventAsyncCreateUntil(
       calendarId,
-      startDateMs,
       endDateMS,
       '~/fuld/days-of-week-0',
       { fuld: null },
@@ -348,7 +342,6 @@ export const api = {
     const { date, offset } = api.parseToDateOffset(startDateMs);
     return await api.eventAsyncCreateUntil(
       calendarId,
-      startDateMs,
       endDateMS,
       '~/left/monthly-nth-weekday-0',
       { left: { tz: null, d: durationMS } },
@@ -377,7 +370,6 @@ export const api = {
   ) => {
     return await api.eventAsyncCreateUntil(
       calendarId,
-      startDateMs,
       endDateMS,
       '~/fuld/monthly-nth-weekday-0',
       { fuld: null },
@@ -396,7 +388,6 @@ export const api = {
   createSpanPeriodicYearlyOnDate: async (
     calendarId: string,
     startDateTimeMS: number,
-    startDateMs: number,
     endDateMS: number,
     durationMS: number,
     name: string,
@@ -406,7 +397,6 @@ export const api = {
     const { date, offset } = api.parseToDateOffset(startDateTimeMS);
     return await api.eventAsyncCreateUntil(
       calendarId,
-      startDateMs,
       endDateMS,
       '~/left/yearly-on-date-0',
       { left: { tz: null, d: durationMS } },
@@ -427,7 +417,6 @@ export const api = {
   ) => {
     return await api.eventAsyncCreateUntil(
       calendarId,
-      startDateMs,
       endDateMS,
       '~/fuld/yearly-on-date-0',
       { fuld: null },
