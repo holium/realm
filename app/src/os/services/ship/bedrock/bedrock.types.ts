@@ -1,80 +1,35 @@
-export interface WordRow {
+export interface BaseRow {
   id: string;
-  path: string; //path to a space in realm for Lexicon's use case
+  path: string;
+  type: string;
+  v: number; //version number
+  creator: string; // patp part of the id
   created_at: number; //date
-  received_at: number; //date
-  word: string;
   updated_at: number; //date
-  revision: any; //?
-  v: number; //version number?
-
-  type: 'lexicon-word';
+  received_at: number; //date
 }
 
-export interface DefinitionRow {
-  id: string;
-  path: string; //path to a space in realm for Lexicon's use case
-  created_at: number; //date
-  received_at: number; //date
-  definition: string;
-  updated_at: number; //date
-  revision: any; //?
-  v: number; //version number?
-
-  type: 'lexicon-sentence';
-  word_id: string; //id of parent word row
+export interface GeneralRow extends BaseRow {
+  data: string; // JSON.stringify of the data object
 }
-export interface SentenceRow {
-  id: string;
-  path: string; //path to a space in realm for Lexicon's use case
-  created_at: number; //date
-  received_at: number; //date
-  definition: string;
-  updated_at: number; //date
-  revision: any; //?
-  v: number; //version number?
 
-  type: 'lexicon-definition';
-  word_id: string; //id of parent word row
-}
-export interface SentenceRow {
-  id: string;
-  path: string; //path to a space in realm for Lexicon's use case
-  created_at: number; //date
-  received_at: number; //date
-  sentence: string;
-  updated_at: number; //date
-  revision: any; //?
-  v: number; //version number?
-
-  type: 'lexicon-definition';
-  word_id: string; //id of parent word row
-}
-export interface VoteRow {
-  id: string;
+export interface VoteRow extends BaseRow {
+  type: 'vote';
   parent_id: string;
   parent_type: string;
-  path: string; //path to a space in realm for Lexicon's use case
   parent_path: string;
-  created_at: number; //date
-  received_at: number; //date
-  definition: string;
-  updated_at: number; //date
-  revision: any; //?
-  v: number; //version number?
-  creator: string;
-  type: 'vote';
   up: boolean;
 }
-export type LeixconRow = VoteRow | WordRow | DefinitionRow | SentenceRow;
+
+export type BedrockRow = VoteRow | GeneralRow;
 
 export interface addRowUpdate {
   change: 'add-row';
-  row: LeixconRow;
+  row: BedrockRow;
 }
 export interface updateRowUpdate {
   change: 'upd-row';
-  row: LeixconRow;
+  row: BedrockRow;
 }
 export interface deleteRowUpdate {
   change: 'del-row';

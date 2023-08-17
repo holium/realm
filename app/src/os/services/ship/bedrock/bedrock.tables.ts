@@ -17,20 +17,21 @@ create table if not exists votes
 );
 `;
 
-export const wordInitSql = `
-create table if not exists lexicon_words
+export const generalInitSql = (tableName: string) => {
+  return `create table if not exists ${tableName}
 (
-    received_at       INTEGER not NULL,
-    word       TEXT not NULL,
-    updated_at        INTEGER not NULL,
-    revision        NULL,
-    id       TEXT not NULL PRIMARY KEY,
-    created_at       INTEGER not NULL,
-    path        TEXT not NULL,
-    type    TEXT not NULL,
-    v     INTEGER not NULL
+    id              TEXT not NULL PRIMARY KEY,
+    path            TEXT not NULL,
+    received_at     INTEGER not NULL,
+    updated_at      INTEGER not NULL,
+    created_at      INTEGER not NULL,
+    type            TEXT not NULL,
+    v               INTEGER not NULL,
+    creator         TEXT not NULL,
+    data            TEXT not NULL
 );
 `;
+};
 export const definitionInitSql = `
 create table if not exists lexicon_definitions
 (
