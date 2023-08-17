@@ -715,7 +715,7 @@ export const api = {
     meta: Meta
   ) => {
     const json = {
-      'event-until': { cid: calendarId, until, rule, kind, args, meta },
+      'event-until': { cid: calendarId, until, rid: rule, kind, args, meta },
     };
     return await api.asyncCreateVent(json);
   },

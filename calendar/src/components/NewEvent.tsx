@@ -188,9 +188,9 @@ export const NewEvent = ({
     const startDateMinutes = convertH2M(startDate);
     const endDateMinutes = convertH2M(endDate);
 
-    const startDateTimeMS = toUTCDateTime(
-      new Date(datePickerSelected.getTime() + startDateMinutes * 60000)
-    ).getTime();
+    // const startDateTimeMS = toUTCDateTime(
+    //   new Date(datePickerSelected.getTime() + startDateMinutes * 60000)
+    // ).getTime();
     const startDateMS = toUTCDate(datePickerSelected).getTime();
     const endDateMS = toUTCDate(new Date(reccurentEndDate)).getTime();
     const timeBetweenEventsEveryday = 1 * 60 * 60 * 24 * 1000; //1 is the number of days
@@ -201,7 +201,6 @@ export const NewEvent = ({
       if (selectedReccurenceType === 'everyday') {
         result = await api.createSpanPeriodicDaily(
           selectedCalendar,
-          startDateTimeMS,
           startDateMS,
           endDateMS,
           timeBetweenEventsEveryday,
@@ -213,7 +212,6 @@ export const NewEvent = ({
       } else if (selectedReccurenceType === 'weekdays') {
         result = await api.createSpanPeriodicWeekly(
           selectedCalendar,
-          startDateTimeMS,
           startDateMS,
           endDateMS,
           durationMs,
@@ -225,7 +223,6 @@ export const NewEvent = ({
       } else if (selectedReccurenceType === 'weekend') {
         result = await api.createSpanPeriodicWeekly(
           selectedCalendar,
-          startDateTimeMS,
           startDateMS,
           endDateMS,
           durationMs,
@@ -243,7 +240,6 @@ export const NewEvent = ({
 
         result = await api.createSpanPeriodicWeekly(
           selectedCalendar,
-          startDateTimeMS,
           startDateMS,
           endDateMS,
           durationMs,
@@ -266,7 +262,6 @@ export const NewEvent = ({
         );
         result = await api.createSpanPeriodicMonthlyNthWeekday(
           selectedCalendar,
-          startDateTimeMS,
           startDateMS,
           endDateMS,
           durationMs,
@@ -280,7 +275,6 @@ export const NewEvent = ({
         //on all (current date of month) for however many years
         result = await api.createSpanPeriodicYearlyOnDate(
           selectedCalendar,
-          startDateTimeMS,
           startDateMS,
           endDateMS,
           durationMs,
