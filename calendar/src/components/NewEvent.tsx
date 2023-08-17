@@ -27,7 +27,6 @@ import {
   reccurenceRuleParse,
   reccurenceTypeOptionsDS,
   toUTCDate,
-  toUTCDateTime,
 } from '../utils';
 const colors = [
   {
@@ -139,8 +138,8 @@ export const NewEvent = ({
     if (!startDate || !endDate || !datePickerSelected || !newEventName) return;
     const startDateMinutes = convertH2M(startDate);
     const endDateMinutes = convertH2M(endDate);
-    const startDateMS = toUTCDateTime(
-      new Date(datePickerSelected.getTime() + startDateMinutes * 60000)
+    const startDateMS = new Date(
+      datePickerSelected.getTime() + startDateMinutes * 60000
     ).getTime();
     const durationMs = Math.abs(endDateMinutes - startDateMinutes) * 60000; // TODO: if endDate < startDate we have a problem
     try {
@@ -188,10 +187,9 @@ export const NewEvent = ({
     const startDateMinutes = convertH2M(startDate);
     const endDateMinutes = convertH2M(endDate);
 
-    // const startDateTimeMS = toUTCDateTime(
-    //   new Date(datePickerSelected.getTime() + startDateMinutes * 60000)
-    // ).getTime();
-    const startDateMS = toUTCDate(datePickerSelected).getTime();
+    const startDateMS = new Date(
+      datePickerSelected.getTime() + startDateMinutes * 60000
+    ).getTime();
     const endDateMS = toUTCDate(new Date(reccurentEndDate)).getTime();
     const timeBetweenEventsEveryday = 1 * 60 * 60 * 24 * 1000; //1 is the number of days
 
