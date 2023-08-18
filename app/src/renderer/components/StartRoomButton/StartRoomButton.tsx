@@ -34,6 +34,9 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
       loggedInAccount?.serverId ?? ''
     );
     if (areWeAlreadyInRoom) {
+      // DELETE/LEAVE CURRENT ROOM
+      roomsStore.cleanUpCurrentRoom();
+
       if (subroute === 'room') setSubroute('chat');
 
       return;
@@ -44,6 +47,9 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
       await roomsStore.joinRoom(existingRoom.rid);
       if (isStandaloneChat) setSubroute('room');
     } else {
+      // DELETE/LEAVE CURRENT ROOM
+      roomsStore.cleanUpCurrentRoom();
+
       // CREATE ROOM
       const newRoomRid = await roomsStore?.createRoom(
         selectedChat.metadata.title,

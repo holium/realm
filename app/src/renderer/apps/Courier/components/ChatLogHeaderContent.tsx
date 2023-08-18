@@ -74,7 +74,13 @@ const ChatLogHeaderContentPresenter = ({ isStandaloneChat = false }: Props) => {
   }
 
   return (
-    <Flex flexDirection="row" gap={12} alignItems="center" flex={1}>
+    <Flex
+      flexDirection="row"
+      gap={12}
+      alignItems="center"
+      flex={1}
+      style={{ maxWidth: '100%', minWidth: 0 }}
+    >
       <Flex
         layoutId={isStandaloneChat ? undefined : `chat-${path}-avatar`}
         layout="preserve-aspect"
@@ -93,7 +99,11 @@ const ChatLogHeaderContentPresenter = ({ isStandaloneChat = false }: Props) => {
           canEdit={false}
         />
       </Flex>
-      <Flex alignItems="flex-start" flexDirection="column">
+      <Flex
+        alignItems="flex-start"
+        flexDirection="column"
+        style={{ maxWidth: '100%', minWidth: 0 }}
+      >
         {pretitle}
         <Text.Custom
           truncate
@@ -105,6 +115,7 @@ const ChatLogHeaderContentPresenter = ({ isStandaloneChat = false }: Props) => {
           }}
           fontWeight={500}
           fontSize={3}
+          style={{ maxWidth: '100%' }}
         >
           {title}
         </Text.Custom>

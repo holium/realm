@@ -129,6 +129,7 @@ const ChatLogHeaderPresenter = ({
         justifyContent="space-between"
         alignItems="center"
         gap={8}
+        style={{ maxWidth: '100%', minWidth: 0 }}
       >
         {(!isStandaloneChat || forceBackButton) && (
           <Button.IconButton
