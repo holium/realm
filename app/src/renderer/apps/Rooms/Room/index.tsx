@@ -69,12 +69,12 @@ const RoomPresenter = () => {
   }, [roomView, roomsStore.chat.length]);
 
   useEffect(() => {
-    if (!roomsStore.currentRid) roomsApp.setView('list');
-  }, [roomsStore.currentRid, roomsApp]);
+    if (!roomsApp.currentRoomId) roomsApp.setView('list');
+  }, [roomsApp.currentRoomId, roomsApp]);
 
-  if (!roomsStore.currentRid) return <div />;
+  if (!roomsApp.currentRoomId) return <div />;
 
-  const presentRoom = roomsStore.rooms.get(roomsStore.currentRid);
+  const presentRoom = roomsStore.rooms.get(roomsApp.currentRoomId);
   if (!presentRoom) return <div />;
   const { rid, creator, present, title } = presentRoom;
   const presentCount = present?.length ?? 0;
@@ -205,7 +205,9 @@ const RoomPresenter = () => {
               icon={hasVideo ? 'VideoOn' : 'VideoOff'}
               isDisabled={mediaAccessStatus.camera !== 'granted'}
               onClick={() => {
-                roomsStore.toggleVideo(!hasVideo);
+                if (roomsApp.currentRoomId) {
+                  roomsStore.toggleVideo(roomsApp.currentRoomId, !hasVideo);
+                }
               }}
             />
             <CommButton
@@ -213,7 +215,12 @@ const RoomPresenter = () => {
               icon={isScreenSharing ? 'ScreenSharing' : 'ScreenSharingOff'}
               isDisabled={mediaAccessStatus.screen !== 'granted'}
               onClick={() => {
-                roomsStore.toggleScreenShare(!isScreenSharing);
+                if (roomsApp.currentRoomId) {
+                  roomsStore.toggleScreenShare(
+                    roomsApp.currentRoomId,
+                    !isScreenSharing
+                  );
+                }
               }}
             />
           </Flex>

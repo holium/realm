@@ -52,6 +52,7 @@ export type ChatModelType = Instance<typeof ChatModel>;
 
 export const RoomsAppState = types
   .model('RoomsAppState', {
+    currentRoomId: types.maybeNull(types.string),
     currentView: types.enumeration(['list', 'room', 'new-room', 'settings']),
     liveRoom: types.safeReference(RoomsModel),
     knownRooms: types.map(RoomsModel),
@@ -112,6 +113,9 @@ export const RoomsAppState = types
     },
     dismissInvite(id: string) {
       self.invites.delete(id);
+    },
+    setCurrentRoomId(rid: string) {
+      self.currentRoomId = rid;
     },
     // Page nav
     setView(view: 'list' | 'room' | 'new-room' | 'settings') {

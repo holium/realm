@@ -30,9 +30,6 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
   const onClickButton = async () => {
     if (!selectedChat) return;
 
-    // DELETE/LEAVE CURRENT ROOM
-    roomsStore.cleanUpCurrentRoom();
-
     const areWeAlreadyInRoom = existingRoom?.present.includes(
       loggedInAccount?.serverId ?? ''
     );

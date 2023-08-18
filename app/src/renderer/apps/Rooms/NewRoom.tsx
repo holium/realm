@@ -81,14 +81,12 @@ const NewRoomPresenter = () => {
   const createRoom = async (evt: any) => {
     setLoading(true);
 
-    roomsStore.cleanUpCurrentRoom();
-
     const { name, isPrivate } = form.actions.submit();
     evt.stopPropagation();
     const spacePath =
       spacesStore.selected?.type !== 'our'
         ? spacesStore.selected?.path ?? ''
-        : null;
+        : 'our';
 
     await roomsStore?.createRoom(
       name,

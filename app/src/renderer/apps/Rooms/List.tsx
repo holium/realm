@@ -17,7 +17,7 @@ import { useTrayApps } from '../store';
 import { ProviderSelector } from './components/ProviderSelector';
 import { RoomRow } from './components/RoomRow';
 import { roomTrayConfig } from './config';
-import { RoomModel } from './store/RoomsStore';
+import { RoomModel, RoomType } from './store/RoomsStore';
 import { useRoomsStore } from './store/RoomsStoreContext';
 
 const RoomsPresenter = () => {
@@ -34,7 +34,16 @@ const RoomsPresenter = () => {
     }
   }, []);
 
-  const rooms = roomsStore.getSpaceRooms(spacesStore.selected?.path ?? '');
+  const spacePath =
+    spacesStore.selected?.type !== 'our'
+      ? spacesStore.selected?.path ?? ''
+      : 'our';
+
+  const rooms = roomsStore
+    .getSpaceRooms(spacePath)
+    .filter((room) => room.rtype !== RoomType.background);
+
+  console.log('rooms => %o', rooms);
 
   return (
     <>
@@ -93,16 +102,19 @@ const RoomsPresenter = () => {
               capacity={room.capacity}
               onClick={async (evt: any) => {
                 evt.stopPropagation();
-                if (roomsStore.currentRid !== room.rid) {
-                  sound.playRoomEnter();
+                sound.playRoomEnter();
+                const live = roomsStore.rooms.get(room.rid);
+                if (!live || live.present.includes(roomsStore.ourId)) {
                   try {
                     await roomsStore.joinRoom(room.rid);
+                    roomsApp.setCurrentRoomId(room.rid);
                     roomsApp.setView('room');
                   } catch (e) {
                     // TODO put error in UI
                     console.error(e);
                   }
                 } else {
+                  roomsApp.setCurrentRoomId(room.rid);
                   roomsApp.setView('room');
                 }
               }}

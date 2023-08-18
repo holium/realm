@@ -5,6 +5,7 @@ import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
 
+import { RoomType } from 'renderer/apps/Rooms/store/RoomsStore';
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -45,8 +46,15 @@ const NotesSidebarPresenter = () => {
 
   useEffect(() => {
     return () => {
-      // Leave current room on unmount.
-      roomsStore.cleanUpCurrentRoom();
+      if (selectedSpace) {
+        const noteRoomPath = selectedSpace.path + selectedNoteId;
+        const existingRoom = roomsStore
+          .getSpaceRooms(selectedSpace.path)
+          .find((room) => room.path === noteRoomPath);
+        if (existingRoom) {
+          roomsStore.leaveRoom(existingRoom.rid);
+        }
+      }
     };
   }, []);
 
@@ -68,17 +76,13 @@ const NotesSidebarPresenter = () => {
   };
 
   const onClickSpaceNote = async (id: string, space: string) => {
+    const currentRoomPath = space + selectedNoteId;
+
     setSelectedNoteId({ id });
 
     const noteRoomPath = space + id;
-    const areWeAlreadyInTheRoom =
-      roomsStore.currentRoom && roomsStore.currentRoom?.path === noteRoomPath;
-    if (areWeAlreadyInTheRoom) return;
 
     setConnectingToNoteRoom(true);
-
-    // DELETE/LEAVE CURRENT ROOM
-    roomsStore.cleanUpCurrentRoom();
 
     const existingRoom = roomsStore
       .getSpaceRooms(space)
@@ -91,18 +95,26 @@ const NotesSidebarPresenter = () => {
       const note = notesStore.getNote({ id });
       if (!note) return;
 
+      const existingRoom = roomsStore
+        .getSpaceRooms(space)
+        .find((room) => room.path === currentRoomPath);
+      if (existingRoom) {
+        if (roomsStore.rooms.has(existingRoom.rid)) {
+          console.log('leave room');
+          await roomsStore.leaveRoom(existingRoom.rid);
+        }
+      }
+
       const newRoomRid = await roomsStore.createRoom(
-        `Notes: ${note.title}`,
+        `Notes: ${note.title}-${id}`,
         'public',
-        noteRoomPath
+        noteRoomPath,
+        RoomType.background
       );
       await roomsStore.joinRoom(newRoomRid);
     }
 
     setConnectingToNoteRoom(false);
-
-    // In Notes rooms everyone should be muted by default.
-    roomsStore.ourPeer.mute();
   };
 
   return (

@@ -45,7 +45,7 @@ const RoomChatPresenter = () => {
   const { text } = useMemo(() => chatForm(), []);
   const { loggedInAccount } = useAppState();
   const roomsStore = useRoomsStore();
-  const { getTrayAppHeight } = useTrayApps();
+  const { getTrayAppHeight, roomsApp } = useTrayApps();
   const listHeight = getTrayAppHeight() - 168;
 
   const chatInputRef = useRef<HTMLInputElement>(null);
@@ -58,13 +58,13 @@ const RoomChatPresenter = () => {
       evt.preventDefault();
       evt.stopPropagation();
       if (chatInputRef.current === null) return;
-      if (!roomsStore.currentRid) return;
+      if (!roomsApp.currentRoomId) return;
       const innerText = chatInputRef.current.value;
       if (innerText === '') return;
-      roomsStore.sendChat(roomsStore.currentRid, innerText);
+      roomsStore.sendChat(roomsApp.currentRoomId, innerText);
       text.actions.onChange('');
     },
-    [roomsStore.currentRid, text.actions]
+    [roomsApp.currentRoomId, text.actions]
   );
 
   const ChatList = useMemo(() => {

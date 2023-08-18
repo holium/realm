@@ -14,7 +14,8 @@ const DataPacketWebcamStatus = 6;
 // const DataPacketSpeakingChanged = 4;
 //
 export class PeerClass extends EventsEmitter {
-  @observable rid: string;
+  // @observable rid: string;
+  @observable rooms: string[];
   @observable ourId: string;
   @observable peerId: string;
   @observable peer: PeerInstance;
@@ -56,7 +57,7 @@ export class PeerClass extends EventsEmitter {
       throw new Error('Invalid parameters provided for PeerClass');
     }
     makeObservable(this);
-    this.rid = rid;
+    this.rooms = [rid];
     this.websocket = websocket;
     this.peerId = peerId;
     this.ourStreams = stream;
@@ -315,10 +316,19 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onSignal(signal: any) {
+    // signaling should only happen once per peer. once a peer
+    //   connection is established, p2p comms happen over rtc data channels
+    // see: 'path' element of DataPacket
+    if (!(this.rooms.length === 0)) {
+      console.error(
+        `peer: invalid signal state from '${this.ourId}' to '${this.peerId}'`
+      );
+      return;
+    }
     try {
       const msg = {
         type: 'signal',
-        rid: this.rid,
+        rid: this.rooms[0],
         signal,
         to: this.peerId,
         from: this.ourId,
@@ -365,7 +375,7 @@ export class PeerClass extends EventsEmitter {
         this.disableVideo();
       }
     }
-    this.onDataChannel(this.rid, this.peerId, dataPacket);
+    this.onDataChannel(dataPacket.path, this.peerId, dataPacket);
   }
 
   @action
@@ -429,7 +439,10 @@ export class PeerClass extends EventsEmitter {
 
   @action
   destroy() {
-    this.onLeftRoom(this.rid, this.peerId);
+    // when the peer is destroyed, leave all rooms
+    this.rooms.forEach((rid: string) => {
+      this.onLeftRoom(rid, this.peerId);
+    });
     this.peer.destroy();
   }
 

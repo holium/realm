@@ -1,6 +1,6 @@
 import { patp2dec } from '@urbit/aura';
 import EventsEmitter from 'events';
-import { action, makeObservable, observable } from 'mobx';
+import { action, makeObservable, observable, runInAction } from 'mobx';
 
 import { SoundActions } from 'renderer/lib/sound';
 import { RealmIPC } from 'renderer/stores/ipc';
@@ -12,8 +12,15 @@ import { PeerClass } from './Peer';
 import { DataPacket, DataPacketKind } from './room.types';
 
 type RoomAccess = 'public' | 'private';
+
+export enum RoomType {
+  media = 'media',
+  background = 'background',
+}
+
 type RoomCreateType = {
   rid: string;
+  rtype: RoomType;
   provider: string;
   creator: string;
   access?: RoomAccess;
@@ -40,7 +47,8 @@ const isInitiator = (from: string, to: string) => {
 };
 
 export type OnDataChannel = (
-  rid: string,
+  // subscription path peer is watching
+  path: string,
   peer: string,
   data: DataPacket
 ) => Promise<void>;
@@ -57,6 +65,7 @@ export type RoomChat = {
 
 export class RoomModel {
   @observable rid: string;
+  @observable rtype: RoomType = RoomType.media;
   @observable provider = '';
   @observable creator = '';
   @observable access: RoomAccess = 'public';
@@ -69,6 +78,7 @@ export class RoomModel {
   constructor(initialData: RoomCreateType) {
     makeObservable(this);
     this.rid = initialData.rid;
+    this.rtype = initialData.rtype;
     this.provider = initialData.provider;
     this.creator = initialData.creator;
     this.access = initialData.access || 'public';
@@ -90,7 +100,7 @@ export class RoomModel {
     if (data.capacity) {
       this.capacity = data.capacity;
     }
-    this.path = data.path || null;
+    this.path = data.path;
   }
 
   @action
@@ -129,7 +139,8 @@ export class RoomsStore extends EventsEmitter {
   @observable ourId: string;
   @observable ourPeer: LocalPeer;
   @observable path = '';
-  @observable provider = 'litzod-dozzod-hostyv.holium.live';
+  // @observable provider = 'litzod-dozzod-hostyv.holium.live';
+  @observable provider = 'localhost:3030';
   @observable rooms: Map<string, RoomModel> = observable.map<
     string,
     RoomModel
@@ -231,7 +242,9 @@ export class RoomsStore extends EventsEmitter {
 
     RealmIPC.onUpdate((update) => {
       if (update.type === 'logout') {
-        this.cleanUpCurrentRoom();
+        this.rooms.forEach((room) => {
+          this.leaveRoom(room.rid);
+        });
         this.status = 'disconnected';
         this.websocket.close();
       }
@@ -250,45 +263,6 @@ export class RoomsStore extends EventsEmitter {
     this.onLeftRoom = onLeftRoom.bind(this);
     this.kickPeer = this.kickPeer.bind(this);
     this.retryPeer = this.retryPeer.bind(this);
-  }
-
-  get currentRoom() {
-    if (!this.currentRid) {
-      return null;
-    }
-    const room = this.rooms.get(this.currentRid);
-    if (!room) {
-      return null;
-    }
-    return room;
-  }
-
-  get currentRoomPeers() {
-    if (!this.currentRid) {
-      return [];
-    }
-    const room = this.rooms.get(this.currentRid);
-    return (
-      room?.present.filter((peerId: string) => peerId !== this.ourId) || []
-    );
-  }
-
-  get currentRoomPresent() {
-    if (!this.currentRid) {
-      return [];
-    }
-    const room = this.rooms.get(this.currentRid);
-    return (
-      room?.present.slice().sort((a, b) => {
-        if (a === this.ourId) {
-          return -1;
-        }
-        if (b === this.ourId) {
-          return 1;
-        }
-        return 0;
-      }) || []
-    );
   }
 
   get roomsList() {
@@ -322,10 +296,40 @@ export class RoomsStore extends EventsEmitter {
   }
 
   @action
-  async toggleVideo(enableVideo: boolean) {
+  async setMuteStatus(rid: string, muteStatus: boolean) {
+    const room = this.rooms.get(rid);
+    if (!room) {
+      console.error('setMuteStatus: room %o not found', rid);
+      return;
+    }
+    if (room.rtype === RoomType.background) {
+      console.error('setMuteStatus: unexpected. room type is background');
+      return;
+    }
+    this.sendDataToRoom({
+      path: rid,
+      kind: DataPacketKind.MUTE_STATUS,
+      value: {
+        data: muteStatus,
+      },
+    });
+  }
+
+  @action
+  async toggleVideo(rid: string, enableVideo: boolean) {
+    const room = this.rooms.get(rid);
+    if (!room) {
+      console.error('toggleVideo: room %o not found', rid);
+      return;
+    }
+    if (room.rtype === RoomType.background) {
+      console.error('toggleVideo: unexpected. room type is background');
+      return;
+    }
     if (!enableVideo) {
       this.peers.forEach((peer) => {
         if (
+          (rid === '*' || peer.rooms.includes(rid)) &&
           this.ourPeer.videoStream &&
           peer.peer.streams.includes(this.ourPeer.videoStream)
         ) {
@@ -334,6 +338,7 @@ export class RoomsStore extends EventsEmitter {
       });
       this.ourPeer.disableVideo();
       this.sendDataToRoom({
+        path: rid,
         kind: DataPacketKind.WEBCAM_CHANGED,
         value: {
           data: false,
@@ -342,11 +347,12 @@ export class RoomsStore extends EventsEmitter {
     } else {
       const stream = await this.ourPeer.enableVideo();
       this.peers.forEach((peer) => {
-        if (stream) {
+        if (stream && (rid === '*' || peer.rooms.includes(rid))) {
           peer.setNewStream(stream);
         }
       });
       this.sendDataToRoom({
+        path: rid,
         kind: DataPacketKind.WEBCAM_CHANGED,
         value: {
           data: true,
@@ -356,10 +362,20 @@ export class RoomsStore extends EventsEmitter {
   }
 
   @action
-  async toggleScreenShare(enableScreenSharing: boolean) {
+  async toggleScreenShare(rid: string, enableScreenSharing: boolean) {
+    const room = this.rooms.get(rid);
+    if (!room) {
+      console.error('toggleVideo: room %o not found', rid);
+      return;
+    }
+    if (room.rtype === RoomType.background) {
+      console.error('toggleVideo: unexpected. room type is background');
+      return;
+    }
     if (!enableScreenSharing) {
       this.peers.forEach((peer) => {
         if (
+          (rid === '*' || peer.rooms.includes(rid)) &&
           this.ourPeer.screenStream &&
           peer.peer.streams.includes(this.ourPeer.screenStream)
         ) {
@@ -399,11 +415,6 @@ export class RoomsStore extends EventsEmitter {
   }
 
   @action
-  setCurrentRoom(rid: string) {
-    this.currentRid = rid;
-  }
-
-  @action
   reconnect(delay: number, backoff: number) {
     // add backoff factor to delay
     delay = delay * backoff;
@@ -423,8 +434,9 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   connect() {
+    const protocol = process.env.NODE_ENV === 'development' ? 'ws' : 'wss';
     const websocket = new WebSocket(
-      `wss://${this.provider}/signaling?serverId=${this.ourId}`
+      `${protocol}://${this.provider}/signaling?serverId=${this.ourId}`
     );
 
     websocket.onopen = () => {
@@ -500,35 +512,40 @@ export class RoomsStore extends EventsEmitter {
         const newRoom = new RoomModel(event.room);
         newRoom.update(event.room);
         this.rooms.set(event.room.rid, newRoom);
-
-        this.currentRid = event.room.rid;
+        if (event.room.rtype === RoomType.media && !this.ourPeer.audioStream) {
+          runInAction(async () => {
+            await this.ourPeer.enableAudio();
+          });
+        }
         break;
       case 'room-entered':
         console.log('room entered', event);
         if (this.rooms.has(event.room.rid)) {
           this.rooms.get(event.room.rid)?.update(event.room);
-        }
-        if (event.room.rid === this.currentRid) {
+          if (!this.ourPeer.audioStream) {
+            console.error('no local stream');
+            return;
+          }
+          // }
+          // if (event.room.rid === this.currentRid) {
           // if we entered a room, we need to create a peer for each user in the room
           if (event.peer_id === this.ourId) {
             const peers = event.room.present.filter(
               (peer: string) => peer !== this.ourId
             );
-            peers.forEach((peerId: string) => {
-              if (!this.ourPeer.audioStream) {
-                console.error('no local stream');
-                return;
+            for (let i = 0; i < peers.length; i++) {
+              const peerId = peers[i];
+              const peer = this.peers.get(peerId);
+              if (peer) {
+                peer.rooms.push(event.rid);
+                continue;
               }
-              if (this.peers.get(peerId)) {
-                console.log('already have peer', peerId);
-                return;
-              }
-              this.createPeer(peerId);
-            });
+              this.createPeer(event.rid, event.rtype, peerId);
+            }
           } else {
             // someone else entered the room
             console.log('someone entered the room', event);
-            this.createPeer(event.peer_id);
+            this.createPeer(event.rid, event.rtype, event.peer_id);
 
             const isRoomsNote = event.room.title.startsWith('Notes:');
             if (shipStore.settingsStore.systemSoundsEnabled && !isRoomsNote) {
@@ -538,69 +555,73 @@ export class RoomsStore extends EventsEmitter {
         }
         break;
       case 'room-left':
-        // replace room in rooms array with event.room
-        console.log('room left', event);
-        if (this.rooms.has(event.room.rid)) {
-          this.rooms.get(event.room.rid)?.update(event.room);
-        }
-        if (this.currentRid === event.room.rid) {
-          if (event.peer_id === this.ourId) {
-            this.currentRid = null;
-            this.hangupAllPeers();
-          } else {
-            // someone left the room
-            const isRoomsNote = event.room.title.startsWith('Notes:');
-            if (shipStore.settingsStore.systemSoundsEnabled && !isRoomsNote) {
-              SoundActions.playRoomPeerLeave();
+        {
+          // replace room in rooms array with event.room
+          console.log('room left', event);
+          const room = this.rooms.get(event.room.rid);
+          if (room) {
+            room.update(event.room);
+            if (event.peer_id === this.ourId) {
+              this.hangupAllPeers();
+            } else {
+              if (
+                shipStore.settingsStore.systemSoundsEnabled &&
+                !(room.rtype === RoomType.background)
+              ) {
+                SoundActions.playRoomPeerLeave();
+              }
+              console.log('someone left the room', event);
+              this.destroyPeer(event.peer_id);
+              room.removePeer(event.peer_id);
             }
-            console.log('someone left the room', event);
-            this.destroyPeer(event.peer_id);
-            this.rooms.get(event.rid)?.removePeer(event.peer_id);
-
-            // this.rooms.get(event.rid)?.present.splice(
-            // self.rooms = self.rooms.map((room: any) =>
-            //   room.rid === event.rid ? updatedRoom : room
-            // );
-            this.currentRid = event.rid;
           }
         }
         break;
       case 'room-deleted':
-        if (this.currentRid && this.currentRid === event.rid) {
-          this.rooms.get(this.currentRid)?.present.forEach((peerId: string) => {
-            if (peerId !== this.ourId) this.destroyPeer(peerId);
-          });
-          this.ourPeer.disableAll();
-          this.currentRid = null;
+        {
+          const room = this.rooms.get(event.rid);
+          if (room) {
+            room.present.forEach((peerId: string) => {
+              if (peerId !== this.ourId) this.destroyPeer(peerId);
+            });
+            this.ourPeer.disableAll();
+          }
+          this._removeRoom(event.rid);
         }
-        this._removeRoom(event.rid);
         break;
       case 'signal':
-        if (this.currentRid === event.rid) {
-          if (!this.ourPeer.audioStream) {
-            console.error('no local stream');
-            return;
+        {
+          const room = this.rooms.get(event.rid);
+          if (room) {
+            if (room.rtype === RoomType.media) {
+              if (!this.ourPeer.audioStream) {
+                console.error('no local stream');
+                return;
+              }
+            }
+            let peer =
+              this.peers.get(event.from) ||
+              this.createPeer(room.rid, room.rtype, room.rid);
+            if (peer?.peer.destroyed) {
+              console.log(
+                'peer was destroyed, but is attempting to reconnect',
+                event.from
+              );
+              this.destroyPeer(event.from);
+              peer = this.createPeer(event.from, room.rtype, event.from);
+              return;
+            }
+            if (!peer) {
+              console.log('on signal - no peer found');
+              return;
+            }
+            peer.rooms.push(room.rid);
+            peer.onReceivedSignal(event.signal);
           }
-
-          let peer = this.peers.get(event.from) || this.createPeer(event.rid);
-          if (peer?.peer.destroyed) {
-            console.log(
-              'peer was destroyed, but is attempting to reconnect',
-              event.from
-            );
-            this.destroyPeer(event.from);
-            peer = this.createPeer(event.from);
-            return;
-          }
-          if (!peer) {
-            console.log('on signal - no peer found');
-            return;
-          }
-          peer.onReceivedSignal(event.signal);
         }
         break;
       case 'chat':
-        if (this.currentRid === event.rid && event.peer_id !== this.ourId) {
+        if (this.rooms.has(event.rid) && event.peer_id !== this.ourId) {
           console.log('chat', event);
           this.chat.push({
             author: event.peer_id,
@@ -615,13 +636,19 @@ export class RoomsStore extends EventsEmitter {
   }
 
   @action
-  async createRoom(title: string, access: RoomAccess, path: string | null) {
+  async createRoom(
+    title: string,
+    access: RoomAccess,
+    path: string | null,
+    rtype: RoomType = RoomType.media
+  ) {
     if (!this.ourPeer.audioStream) {
       await this.ourPeer.enableAudio();
     }
 
     const newRoom = {
       rid: ridFromTitle(this.provider, this.ourId, title),
+      rtype: rtype,
       provider: this.provider,
       creator: this.ourId,
       access,
@@ -633,6 +660,7 @@ export class RoomsStore extends EventsEmitter {
       serialize({
         type: 'create-room',
         rid: ridFromTitle(this.provider, this.ourId, title),
+        rtype: rtype === RoomType.media ? 'media' : 'background',
         title: title,
         path,
       })
@@ -666,7 +694,6 @@ export class RoomsStore extends EventsEmitter {
   deleteRoom(rid: string) {
     this.rooms.delete(rid);
     this.ourPeer.disableAll();
-    this.currentRid = null;
     this.websocket.send(
       serialize({
         type: 'delete-room',
@@ -675,51 +702,53 @@ export class RoomsStore extends EventsEmitter {
     );
     this.onLeftRoom(rid, this.ourId);
     this.hangupAllPeers();
-  }
-
-  @action
-  cleanUpCurrentRoom() {
-    if (this.currentRoom) {
-      if (this.currentRoom.creator === this.ourId) {
-        this.deleteRoom(this.currentRoom.rid);
-      } else {
-        this.leaveRoom(this.currentRoom.rid);
-      }
-    }
     this.pinnedSpeaker = null;
   }
 
   @action
   async joinRoom(rid: string) {
-    this.cleanUpCurrentRoom();
-    this.setCurrentRoom(rid);
-    if (!this.ourPeer.audioStream) {
-      await this.ourPeer.enableAudio();
+    const room = this.rooms.get(rid);
+    // are we already in the room? if so , no need to reenter
+    if (room && room.present.includes(this.ourId)) {
+      console.log('%o already in room', this.ourId);
+      return;
     }
-
+    if (room) {
+      if (room.rtype === RoomType.media && !this.ourPeer.audioStream) {
+        await this.ourPeer.enableAudio();
+      }
+    }
     this.websocket.send(
       serialize({
         type: 'enter-room',
         rid,
       })
     );
-    // add us to the room
-    this.rooms.get(rid)?.addPeer(this.ourId);
+    if (room) {
+      // add us to the room
+      room.addPeer(this.ourId);
+    }
   }
 
   @action
   leaveRoom(rid: string) {
-    this.rooms.get(rid)?.removePeer(this.ourId);
-    this.currentRid = null;
-    this.ourPeer.disableAll();
-    this.websocket.send(
-      serialize({
-        type: 'leave-room',
-        rid,
-      })
-    );
-    this.onLeftRoom(rid, this.ourId);
-    this.hangupAllPeers();
+    const room = this.rooms.get(rid);
+    if (room) {
+      room.removePeer(this.ourId);
+      if (room.present.length === 0) {
+        this.deleteRoom(rid);
+      } else {
+        this.ourPeer.disableAll();
+        this.websocket.send(
+          serialize({
+            type: 'leave-room',
+            rid,
+          })
+        );
+        this.onLeftRoom(rid, this.ourId);
+        this.hangupAllPeers();
+      }
+    }
   }
 
   @action
@@ -741,25 +770,24 @@ export class RoomsStore extends EventsEmitter {
   }
 
   @action
-  createPeer(peerId: string) {
-    if (!this.currentRid) {
-      console.warn('No current room');
-      return;
-    }
-    if (!this.ourPeer.audioStream) {
-      console.error('no local stream');
-      // TODO handle this better
-      return;
-    }
-    console.log('creating peer', peerId);
-    const streams = [this.ourPeer.audioStream];
-    if (this.ourPeer.videoStream) {
-      streams.push(this.ourPeer.videoStream);
-    } else if (this.ourPeer.screenStream) {
-      streams.push(this.ourPeer.screenStream);
+  createPeer(roomId: string, roomType: RoomType, peerId: string) {
+    let streams: MediaStream[] = [];
+    if (roomType === RoomType.media) {
+      if (!this.ourPeer.audioStream) {
+        console.error('no local stream');
+        // TODO handle this better
+        return;
+      }
+      console.log('creating peer', peerId);
+      streams = [this.ourPeer.audioStream];
+      if (this.ourPeer.videoStream) {
+        streams.push(this.ourPeer.videoStream);
+      } else if (this.ourPeer.screenStream) {
+        streams.push(this.ourPeer.screenStream);
+      }
     }
     const peer = new PeerClass(
-      this.currentRid,
+      roomId,
       this.ourId,
       peerId,
       isInitiator(this.ourId, peerId),
@@ -858,8 +886,11 @@ export class RoomsStore extends EventsEmitter {
   @action
   sendDataToRoom(data: Partial<DataPacket>) {
     const payload = { from: this.ourId, ...data } as DataPacket;
+    const rid = !data.path || data.path === '*' ? null : data.path;
     this.peers.forEach((peer) => {
-      peer.sendData(payload);
+      if (!rid || peer.rooms.includes(rid)) {
+        peer.sendData(payload);
+      }
     });
   }
 

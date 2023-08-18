@@ -16,15 +16,19 @@ type Props = {
 
 const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
   const roomsStore = useRoomsStore();
-  const { setTrayAppHeight } = useTrayApps();
+  const { setTrayAppHeight, roomsApp } = useTrayApps();
   const { loggedInAccount } = useAppState();
   const { friends } = useShipStore();
   const [activeSpeaker, setActiveSpeaker] = useState<string | null>(null);
 
   const ourId = useMemo(() => loggedInAccount?.serverId, [loggedInAccount]);
+  let currentRoom: any;
+  if (roomsApp.currentRoomId) {
+    currentRoom = roomsStore.rooms.get(roomsApp.currentRoomId);
+  }
   const peers = useMemo(
-    () => roomsStore.currentRoomPresent ?? [],
-    [roomsStore.currentRoomPresent]
+    () => currentRoom?.present ?? [],
+    [currentRoom?.present]
   );
 
   // Sort peers in the following priority:
@@ -97,11 +101,13 @@ const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [roomsStore.currentRid, activeSpeaker, peers.length]);
+  }, [roomsApp.currentRoomId, activeSpeaker, peers.length]);
 
-  if (!roomsStore.currentRid || !roomsStore.currentRoom) {
+  if (!roomsApp.currentRoomId) {
     return null;
   }
+
+  // const currentRoom = roomsStore.rooms.get(roomsApp.currentRoomId)
 
   const getPeer = (peerId: string) => {
     if (peerId === loggedInAccount?.serverId) {
@@ -122,7 +128,7 @@ const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
         peers={peersSorted}
         getContactMetadata={getContactMetadata}
         getPeer={getPeer}
-        room={roomsStore.currentRoom}
+        room={currentRoom}
         kickPeer={roomsStore.kickPeer}
         retryPeer={roomsStore.retryPeer}
         pinnedSpeaker={roomsStore.pinnedSpeaker}
@@ -138,7 +144,7 @@ const VoiceViewPresenter = ({ isStandaloneChat }: Props) => {
       getContactMetadata={getContactMetadata}
       getPeer={getPeer}
       ourId={ourId ?? ''}
-      room={roomsStore.currentRoom}
+      room={currentRoom}
       kickPeer={roomsStore.kickPeer}
       retryPeer={roomsStore.retryPeer}
     />

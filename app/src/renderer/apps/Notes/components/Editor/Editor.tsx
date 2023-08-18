@@ -6,6 +6,7 @@ import { useToggle } from '@holium/design-system/util';
 import { PresenceBroadcast } from '@holium/realm-presence';
 
 import { DataPacketKind } from 'renderer/apps/Rooms/store/room.types';
+import { RoomModel, RoomType } from 'renderer/apps/Rooms/store/RoomsStore';
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -46,6 +47,14 @@ const EditorPresenter = () => {
     saveNoteUpdates,
   } = notesStore;
 
+  let currentRoom: RoomModel | undefined = undefined;
+
+  if (selectedNote) {
+    currentRoom = roomsStore.getRoomByPath(
+      selectedNote.space + selectedNote.id
+    );
+  }
+
   // Auto save the document after 3 seconds of inactivity,
   // with a random delay of up to 3 seconds to avoid clients saving at the same time.
   const debouncedAutoSave = debounce(() => {
@@ -53,9 +62,9 @@ const EditorPresenter = () => {
 
     // If there are multiple participants in a room,
     // we only need one to be responsible for saving the document.
-    if (roomsStore.currentRoom?.present?.length) {
+    if (currentRoom?.present?.length) {
       // If we're not the creator of the room, don't save.
-      if (roomsStore.currentRoom?.creator !== loggedInAccount?.serverId) return;
+      if (currentRoom?.creator !== loggedInAccount?.serverId) return;
     }
 
     saveNoteUpdates({
@@ -116,9 +125,11 @@ const EditorPresenter = () => {
     reconnecting.toggleOn();
 
     await roomsStore.createRoom(
-      `Notes: ${selectedNote.title}`,
+      `Notes: ${selectedNote.title}-${selectedNote.id}`,
+
       'public',
-      roomPath
+      roomPath,
+      RoomType.background
     );
 
     reconnecting.toggleOff();

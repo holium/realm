@@ -57,7 +57,7 @@ const StandaloneChatRoomPresenter = () => {
     e.stopPropagation();
 
     chatStore.setSubroute('chat');
-    roomsStore.cleanUpCurrentRoom();
+    roomsStore.leaveRoom(presentRoom.rid);
 
     sound.playRoomLeave();
   };
@@ -162,7 +162,7 @@ const StandaloneChatRoomPresenter = () => {
               icon={hasVideo ? 'VideoOn' : 'VideoOff'}
               isDisabled={mediaAccessStatus.camera !== 'granted'}
               onClick={() => {
-                roomsStore.toggleVideo(!hasVideo);
+                roomsStore.toggleVideo(presentRoom.rid, !hasVideo);
               }}
             />
             <CommButton
@@ -170,7 +170,7 @@ const StandaloneChatRoomPresenter = () => {
               icon={isScreenSharing ? 'ScreenSharing' : 'ScreenSharingOff'}
               isDisabled={mediaAccessStatus.screen !== 'granted'}
               onClick={() => {
-                roomsStore.toggleScreenShare(!isScreenSharing);
+                roomsStore.toggleScreenShare(presentRoom.rid, !isScreenSharing);
               }}
             />
             <CommButton

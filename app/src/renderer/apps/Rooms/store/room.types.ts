@@ -75,6 +75,9 @@ export enum PeerConnectionState {
 export interface DataPacket {
   from: string;
   kind: DataPacketKind;
+  // path which is specific to its application (e.g. room, chat, notes, etc...)
+  //  used to distinguish and properly route packets to remotes
+  path: string;
   value: {
     multiplayer?: MultiplayerPayload;
     broadcast?: PresenceBroadcast;

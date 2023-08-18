@@ -68,15 +68,24 @@ const RoomTrayPresenter = () => {
     ]
   );
 
-  const participants =
-    roomsStore.currentRoomPresent.map((patp: string) => {
-      const metadata = friends.getContactAvatarMetadata(patp);
-      return metadata;
-    }) || [];
+  const participants = roomsApp.currentRoomId
+    ? roomsStore.rooms
+        .get(roomsApp.currentRoomId)
+        ?.present.map((patp: string) => {
+          const metadata = friends.getContactAvatarMetadata(patp);
+          return metadata;
+        }) || []
+    : [];
 
-  const rooms = spacesStore.selected
+  let rooms = spacesStore.selected
     ? roomsStore.getSpaceRooms(spacesStore.selected?.path)
     : [];
+
+  rooms = rooms.filter((room) => room.rtype !== 'background');
+
+  const liveRoom =
+    (roomsApp.currentRoomId && roomsStore.rooms.get(roomsApp.currentRoomId)) ||
+    null;
 
   return (
     <Box
@@ -86,7 +95,7 @@ const RoomTrayPresenter = () => {
       transition={{ duration: 0.15, ease: 'easeInOut' }}
     >
       <RoomsDock
-        live={roomsStore.currentRoom}
+        live={liveRoom}
         rooms={rooms}
         participants={participants}
         onCreate={() => {
