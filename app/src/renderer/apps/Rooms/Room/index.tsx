@@ -165,6 +165,7 @@ const RoomPresenter = () => {
                 evt.stopPropagation();
                 if (creator === loggedInAccount?.serverId) {
                   roomsStore.deleteRoom(rid);
+                  roomsApp.setCurrentRoomId(null);
                   roomsApp.setView('list');
                 } else {
                   roomsStore.leaveRoom(rid);

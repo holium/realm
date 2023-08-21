@@ -47,7 +47,9 @@ const RoomRowPresenter = ({
   if (titleText && titleText.length > 16 && tray) {
     titleText = titleText.substring(0, 16) + '...';
   }
+
   const isLive = roomsApp.currentRoomId === rid;
+  console.log('isLive %o %o', rid, isLive);
 
   const contextMenuOptions = useMemo(
     () =>

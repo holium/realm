@@ -114,7 +114,7 @@ export const RoomsAppState = types
     dismissInvite(id: string) {
       self.invites.delete(id);
     },
-    setCurrentRoomId(rid: string) {
+    setCurrentRoomId(rid: string | null) {
       self.currentRoomId = rid;
     },
     // Page nav

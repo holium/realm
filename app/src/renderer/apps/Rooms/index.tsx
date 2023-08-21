@@ -3,6 +3,8 @@ import { observer } from 'mobx-react';
 
 import { Flex } from '@holium/design-system/general';
 
+import { RoomType } from 'renderer/apps/Rooms/store/RoomsStore';
+import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { useTrayApps } from 'renderer/apps/store';
 import { useAppState } from 'renderer/stores/app.store';
 import { MainIPC } from 'renderer/stores/ipc';
@@ -21,7 +23,7 @@ const RoomViews: { [key: string]: any } = {
 
 export const RoomAppPresenter = () => {
   const { shellStore } = useAppState();
-  // const roomsStore = useRoomsStore();
+  const roomsStore = useRoomsStore();
   const { roomsApp, dimensions } = useTrayApps();
 
   useEffect(() => {
@@ -34,10 +36,14 @@ export const RoomAppPresenter = () => {
   }, []);
 
   useEffect(() => {
-    if (roomsApp.currentRoomId) {
+    console.log('we are here');
+    const mediaRoom = roomsStore.findActiveRoom(RoomType.media);
+    if (mediaRoom && mediaRoom?.rid === roomsApp.currentRoomId) {
       roomsApp.setView('room');
+    } else {
+      roomsApp.setView('list');
     }
-  }, [roomsApp, roomsApp.currentRoomId]);
+  }, [roomsApp, roomsApp.currentRoomId, roomsStore.rooms]);
   const View = RoomViews[roomsApp.currentView];
   return (
     <Flex

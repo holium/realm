@@ -102,9 +102,17 @@ const RoomsPresenter = () => {
               capacity={room.capacity}
               onClick={async (evt: any) => {
                 evt.stopPropagation();
-                sound.playRoomEnter();
-                const live = roomsStore.rooms.get(room.rid);
-                if (!live || live.present.includes(roomsStore.ourId)) {
+                if (
+                  roomsApp.currentRoomId &&
+                  roomsApp.currentRoomId === room.rid
+                ) {
+                  roomsApp.setView('room');
+                } else {
+                  // if you're already in a room, leave it
+                  if (roomsApp.currentRoomId) {
+                    await roomsStore.leaveRoom(roomsApp.currentRoomId);
+                  }
+                  sound.playRoomEnter();
                   try {
                     await roomsStore.joinRoom(room.rid);
                     roomsApp.setCurrentRoomId(room.rid);
@@ -113,9 +121,6 @@ const RoomsPresenter = () => {
                     // TODO put error in UI
                     console.error(e);
                   }
-                } else {
-                  roomsApp.setCurrentRoomId(room.rid);
-                  roomsApp.setView('room');
                 }
               }}
             />

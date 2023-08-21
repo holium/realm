@@ -88,12 +88,17 @@ const NewRoomPresenter = () => {
         ? spacesStore.selected?.path ?? ''
         : 'our';
 
-    await roomsStore?.createRoom(
+    const rid = await roomsStore?.createRoom(
       name,
       isPrivate ? 'private' : 'public',
       spacePath
     );
 
+    if (roomsApp.currentRoomId) {
+      roomsStore.leaveRoom(roomsApp.currentRoomId);
+    }
+
+    roomsApp.setCurrentRoomId(rid);
     roomsApp.setView('room');
 
     sound.playRoomEnter();

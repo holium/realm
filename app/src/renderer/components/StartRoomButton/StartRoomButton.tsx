@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react';
 
+import { RoomType } from 'renderer/apps/Rooms/store/RoomsStore';
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { useSound } from 'renderer/lib/sound';
 import { useAppState } from 'renderer/stores/app.store';
@@ -34,8 +35,13 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
       loggedInAccount?.serverId ?? ''
     );
     if (areWeAlreadyInRoom) {
-      // DELETE/LEAVE CURRENT ROOM
-      roomsStore.cleanUpCurrentRoom();
+      if (existingRoom?.rid) {
+        if (existingRoom.creator === loggedInAccount?.serverId) {
+          roomsStore.deleteRoom(existingRoom.rid);
+        } else {
+          roomsStore.leaveRoom(existingRoom.rid);
+        }
+      }
 
       if (subroute === 'room') setSubroute('chat');
 
@@ -48,8 +54,12 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
       if (isStandaloneChat) setSubroute('room');
     } else {
       // DELETE/LEAVE CURRENT ROOM
-      roomsStore.cleanUpCurrentRoom();
+      const mediaRoom = roomsStore.findActiveRoom(RoomType.media);
+      if (mediaRoom) {
+        roomsStore.leaveRoom(mediaRoom.rid);
+      }
 
+      console.log('selected chat => %o', selectedChat);
       // CREATE ROOM
       const newRoomRid = await roomsStore?.createRoom(
         selectedChat.metadata.title,

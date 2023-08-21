@@ -164,7 +164,7 @@ const SpeakerPresenter = ({
               loading: false,
               onClick: (evt: any) => {
                 evt.stopPropagation();
-                kickPeer(person);
+                kickPeer(room.rid, person);
               },
             },
           ].filter(Boolean) as ContextMenuOption[]),
