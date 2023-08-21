@@ -42,16 +42,23 @@ export const cursorBuilder = (user: UserMetadata) => {
     avatar.setAttribute('width', '20');
     avatar.setAttribute('height', '20');
   } else {
-    const svgString = sigil({
-      patp: user.patp,
-      size: 20,
-      icon: true,
-      margin: false,
-      renderer: stringRenderer,
-    });
-    avatar = document.createElement('div');
-    avatar.classList.add('ProseMirror-yjs-avatar');
-    avatar.innerHTML = svgString;
+    if (user.patp.split('-').length <= 2) {
+      const svgString = sigil({
+        patp: user.patp,
+        size: 20,
+        icon: true,
+        margin: false,
+        renderer: stringRenderer,
+      });
+      avatar = document.createElement('div');
+      avatar.classList.add('ProseMirror-yjs-avatar');
+      avatar.innerHTML = svgString;
+    } else {
+      avatar = document.createElement('div');
+      avatar.setAttribute('background-color', '#000000');
+      avatar.setAttribute('width', '20');
+      avatar.setAttribute('height', '20');
+    }
   }
   userDiv.insertBefore(avatar, null);
   cursor.insertBefore(userDiv, null);

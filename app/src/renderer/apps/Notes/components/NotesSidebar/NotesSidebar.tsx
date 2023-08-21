@@ -5,6 +5,7 @@ import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
 
+import { RoomType } from 'renderer/apps/Rooms/store/RoomsStore';
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -68,18 +69,20 @@ const NotesSidebarPresenter = () => {
   };
 
   const onClickSpaceNote = async (id: string, space: string) => {
-    setSelectedNoteId({ id });
+    const currentRoomPath = `${space}${selectedNoteId}`;
+    const currentRoom = roomsStore
+      .getSpaceRooms(space)
+      .find((room) => room.path === currentRoomPath);
+    if (currentRoom) {
+      await roomsStore.leaveRoom(currentRoom.rid);
+      if (id === selectedNoteId) return;
+    }
 
-    const noteRoomPath = space + id;
-    const areWeAlreadyInTheRoom =
-      roomsStore.currentRoom && roomsStore.currentRoom?.path === noteRoomPath;
-    if (areWeAlreadyInTheRoom) return;
+    setSelectedNoteId({ id });
 
     setConnectingToNoteRoom(true);
 
-    // DELETE/LEAVE CURRENT ROOM
-    roomsStore.cleanUpCurrentRoom();
-
+    const noteRoomPath = `${space}${id}`;
     const existingRoom = roomsStore
       .getSpaceRooms(space)
       .find((room) => room.path === noteRoomPath);
@@ -94,7 +97,8 @@ const NotesSidebarPresenter = () => {
       const newRoomRid = await roomsStore.createRoom(
         `Notes: ${note.title}`,
         'public',
-        noteRoomPath
+        noteRoomPath,
+        RoomType.background
       );
       await roomsStore.joinRoom(newRoomRid);
     }

@@ -35,6 +35,7 @@ export const RoomAppPresenter = () => {
   }, []);
 
   useEffect(() => {
+    console.log(roomsStore.currentRid);
     if (roomsStore.currentRid) {
       roomsApp.setView('room');
     }

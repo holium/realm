@@ -6,6 +6,7 @@ import { useToggle } from '@holium/design-system/util';
 import { PresenceBroadcast } from '@holium/realm-presence';
 
 import { DataPacketKind } from 'renderer/apps/Rooms/store/room.types';
+import { RoomType } from 'renderer/apps/Rooms/store/RoomsStore';
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -118,7 +119,8 @@ const EditorPresenter = () => {
     await roomsStore.createRoom(
       `Notes: ${selectedNote.title}`,
       'public',
-      roomPath
+      roomPath,
+      RoomType.background
     );
 
     reconnecting.toggleOff();

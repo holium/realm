@@ -47,6 +47,7 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
       await roomsStore.joinRoom(existingRoom.rid);
       if (isStandaloneChat) setSubroute('room');
     } else {
+      console.log(`creating room @ '${selectedChat.path}'...`);
       // CREATE ROOM
       const newRoomRid = await roomsStore?.createRoom(
         selectedChat.metadata.title,
