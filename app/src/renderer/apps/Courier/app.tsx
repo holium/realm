@@ -12,7 +12,7 @@ import { ChatLog } from './views/ChatLog/ChatLog';
 import { CreateNewChat } from './views/CreateNewChat/CreateNewChat';
 import { Inbox } from './views/Inbox/Inbox';
 
-export const CourierAppPresenter = () => {
+const CourierAppPresenter = () => {
   const { clearInnerNavigation } = useTrayApps();
   const { chatStore } = useShipStore();
 
