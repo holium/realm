@@ -136,7 +136,7 @@ export class RoomsStore extends EventsEmitter {
   @observable ourId: string;
   @observable ourPeer: LocalPeer;
   @observable path = '';
-  @observable provider = 'localhost:3030';
+  @observable provider = 'litzod-dozzod-hostyv.holium.live';
   @observable rooms: Map<string, RoomModel> = observable.map<
     string,
     RoomModel
@@ -440,9 +440,9 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   connect() {
-    const protocol = process.env.NODE_ENV === 'development' ? 'ws' : 'wss';
+    // const protocol = process.env.NODE_ENV === 'development' ? 'ws' : 'wss';
     const websocket = new WebSocket(
-      `${protocol}://${this.provider}/signaling?serverId=${this.ourId}`
+      `wss://${this.provider}/signaling?serverId=${this.ourId}`
     );
 
     websocket.onopen = () => {
