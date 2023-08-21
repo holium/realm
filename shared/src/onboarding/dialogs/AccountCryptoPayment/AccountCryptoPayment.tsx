@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Flex } from '@holium/design-system/general';
 import { useToggle } from '@holium/design-system/util';
 
-import { AccountDialog, SidebarSection } from '../../components/AccountDialog';
+import { AccountDialog } from '../../components/AccountDialog';
 import {
   FUNDING_OPTIONS,
   FundingOption,
@@ -12,6 +12,7 @@ import {
 import { Modal } from '../../components/Modal';
 import { OnboardDialogTitleBig } from '../../components/OnboardDialog.styles';
 import { PayWithEthButton } from '../../components/PayWithEthButton';
+import { SidebarSection } from '../../onboarding';
 import { ThirdEarthShip } from '../../types';
 import {
   AccountCryptoPaymentBody,

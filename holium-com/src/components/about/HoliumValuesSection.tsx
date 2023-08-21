@@ -1,8 +1,9 @@
-import { MOBILE_WIDTH } from 'constants';
 import Image from 'next/image';
 import styled from 'styled-components';
 
 import { Flex, Text } from '@holium/design-system/general';
+
+import { MOBILE_WIDTH } from '../../constants';
 
 const Values = styled(Flex)`
   gap: 48px;

@@ -1,9 +1,10 @@
-import { MOBILE_WIDTH } from 'constants';
 import Image from 'next/image';
 import styled from 'styled-components';
 
 import { Flex, Text } from '@holium/design-system/general';
 import { HoliumButton } from '@holium/design-system/os';
+
+import { MOBILE_WIDTH } from '../../constants';
 
 const LogoRow = styled(Flex)`
   align-items: center;
