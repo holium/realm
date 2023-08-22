@@ -73,9 +73,11 @@ const NotesSidebarPresenter = () => {
     const currentRoom = roomsStore
       .getSpaceRooms(space)
       .find((room) => room.path === currentRoomPath);
-    if (currentRoom) {
-      await roomsStore.leaveRoom(currentRoom.rid);
-      if (id === selectedNoteId) return;
+    if (currentRoom && loggedInAccount) {
+      if (currentRoom.present.includes(loggedInAccount.serverId)) {
+        await roomsStore.leaveRoom(currentRoom.rid);
+        if (id === selectedNoteId) return;
+      }
     }
 
     setSelectedNoteId({ id });
@@ -105,8 +107,12 @@ const NotesSidebarPresenter = () => {
 
     setConnectingToNoteRoom(false);
 
-    // In Notes rooms everyone should be muted by default.
-    roomsStore.ourPeer.mute();
+    // only do this if there are no media rooms active. if there are, let them
+    //  control the audio
+    if (roomsStore.getNumRooms(RoomType.media) === 0) {
+      // In Notes rooms everyone should be muted by default.
+      roomsStore.ourPeer.mute();
+    }
   };
 
   return (

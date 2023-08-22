@@ -279,6 +279,7 @@ export class PeerClass extends EventsEmitter {
       console.error('Peer does not exist in onClose');
       return;
     }
+    console.log('onClose. closing peer...');
     this.status = 'closed';
     this.peer.removeAllListeners();
     this.peer.destroy();
@@ -374,6 +375,7 @@ export class PeerClass extends EventsEmitter {
 
   @action
   disableVideo() {
+    console.log('disableVideo. closing peer...');
     const videoWrapper = document.getElementById(
       `peer-video-${this.peerId}-wrapper`
     ) as HTMLDivElement;
@@ -423,6 +425,7 @@ export class PeerClass extends EventsEmitter {
 
   @action
   retry(ourStreams?: MediaStream[]) {
+    console.log('retry. closing peer...');
     this.peer.destroy();
     this.peer = this.createPeer(
       this.peerId,
@@ -433,6 +436,7 @@ export class PeerClass extends EventsEmitter {
 
   @action
   destroy() {
+    console.log('destroy. closing peer...');
     this.onLeftRoom(this.rid, this.peerId);
     this.peer.destroy();
   }

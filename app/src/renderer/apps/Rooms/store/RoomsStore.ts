@@ -136,7 +136,9 @@ export class RoomsStore extends EventsEmitter {
   @observable ourId: string;
   @observable ourPeer: LocalPeer;
   @observable path = '';
-  @observable provider = 'litzod-dozzod-hostyv.holium.live';
+  // @observable provider = 'litzod-dozzod-hostyv.holium.live';
+  // @observable provider = 'node-test.holium.live';
+  @observable provider = 'localhost:3030';
   @observable rooms: Map<string, RoomModel> = observable.map<
     string,
     RoomModel
@@ -440,9 +442,13 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   connect() {
-    // const protocol = process.env.NODE_ENV === 'development' ? 'ws' : 'wss';
+    const protocol =
+      process.env.NODE_ENV === 'development' &&
+      !(this.provider.indexOf('localhost') === -1)
+        ? 'ws'
+        : 'wss';
     const websocket = new WebSocket(
-      `wss://${this.provider}/signaling?serverId=${this.ourId}`
+      `${protocol}://${this.provider}/signaling?serverId=${this.ourId}`
     );
 
     websocket.onopen = () => {
@@ -557,7 +563,7 @@ export class RoomsStore extends EventsEmitter {
 
               if (
                 shipStore.settingsStore.systemSoundsEnabled &&
-                room.rtype === RoomType.background
+                room.rtype === RoomType.media
               ) {
                 SoundActions.playRoomPeerEnter();
               }
@@ -576,12 +582,15 @@ export class RoomsStore extends EventsEmitter {
             if (event.peer_id === this.ourId) {
               if (room.rtype === RoomType.media) {
                 this.currentRid = null;
-                this.hangupAllPeers();
+                // this already happens in leave/delete Room calls. since we are using
+                //  peer reference counts to determine when to hangup, this extra call here
+                //  is causing a bug
+                // this.hangupAllPeers();
               }
             } else {
               if (
                 shipStore.settingsStore.systemSoundsEnabled &&
-                room.rtype === RoomType.background
+                room.rtype === RoomType.media
               ) {
                 SoundActions.playRoomPeerLeave();
               }
@@ -716,7 +725,9 @@ export class RoomsStore extends EventsEmitter {
     const room = this.rooms.get(rid);
     if (room) {
       this.rooms.delete(rid);
-      this.currentRid = null;
+      if (room.rtype === RoomType.media) {
+        this.currentRid = null;
+      }
       const mediaRoomCount = this.getNumRooms(RoomType.media);
       // if there are no more media rooms left, disable all media
       //   devices/streams
@@ -777,7 +788,9 @@ export class RoomsStore extends EventsEmitter {
       if (room.present.length === 0) {
         this.deleteRoom(rid);
       } else {
-        this.currentRid = null;
+        if (room.rtype === RoomType.media) {
+          this.currentRid = null;
+        }
         if (this.getNumRooms(RoomType.media) === 0) {
           this.ourPeer.disableAll();
         }
@@ -882,10 +895,12 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   destroyPeer(peerId: string) {
+    console.log('destroyPeer. closing peer...');
     const peer = this.peers.get(peerId);
     if (peer) {
       peer.refCount--;
       if (peer.refCount === 0) {
+        console.log(`destroyPeer: ${peer.peerId} refCount is 0. clearing...`);
         peer.removeAllListeners();
         peer.destroy();
         this.peers.delete(peerId);
@@ -895,9 +910,13 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   hangupAllPeers() {
+    console.log('hangupAllPeers. closing peer...');
     this.peers.forEach((peer) => {
       peer.refCount--;
       if (peer.refCount === 0) {
+        console.log(
+          `hangupAllPeers: ${peer.peerId} refCount is 0. clearing...`
+        );
         peer.destroy();
         this.peers.delete(peer.peerId);
       }

@@ -366,6 +366,7 @@ export class LocalPeer extends EventEmitter {
 
   @action
   disableAll() {
+    console.log('disableAll...');
     this.videoStream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
       track.stop();
     });
