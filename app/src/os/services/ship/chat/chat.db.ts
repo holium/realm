@@ -301,6 +301,7 @@ export class ChatDB extends AbstractDataAccess<ChatRow, ChatUpdateTypes> {
           const message = update as UpdateMessage;
           // console.log('update messages', message.message);
           const msgId = message.message[0]['msg-id'];
+          this._deleteMessagesRow(msgId);
           this._insertMessages(message.message);
           const msg = this.getChatMessage(msgId);
           this.sendUpdate({ type: 'message-edited', payload: msg });
