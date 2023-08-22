@@ -9,7 +9,7 @@ export const spaces: Record<SpaceKeys, Space> = {
     theme: {
       id: 'realm-forerunners',
       mode: 'light',
-      backgroundColor: '#F6F6F6',
+      backgroundColor: '#F9F9F9',
       inputColor: '#FFFFFF',
       dockColor: '#fff',
       windowColor: '#fff',

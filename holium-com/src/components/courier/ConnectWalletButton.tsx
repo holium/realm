@@ -5,7 +5,7 @@ import { thirdEarthApi } from 'thirdEarthApi';
 
 import { Button, Text } from '@holium/design-system/general';
 
-import { hostingHrefs } from '../constants';
+import { hostingHrefs } from '../../constants';
 
 const createSiweMessage = (nonce: string, address: string) => {
   const message = new SiweMessage({
@@ -66,9 +66,12 @@ export const ConnectWalletButton = () => {
   });
 
   return (
-    <Button.Primary onClick={signInWithEthereum}>
-      <Text.Body color="text" fontWeight={500}>
-        Connect Wallet
+    <Button.Primary
+      style={{ padding: '6px 10px' }}
+      onClick={signInWithEthereum}
+    >
+      <Text.Body style={{ color: '#fff' }} fontWeight={500}>
+        Connect wallet
       </Text.Body>
     </Button.Primary>
   );

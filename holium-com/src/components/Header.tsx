@@ -4,7 +4,7 @@ import { Button, Text } from '@holium/design-system/general';
 
 import { Holium } from '../../public/Holium';
 import { hostingHrefs } from '../constants';
-import { ConnectWalletButton } from './ConnectWalletButton';
+import { ConnectWalletButton } from './courier/ConnectWalletButton';
 import {
   HeaderContainer,
   HeaderCTAs,
@@ -17,6 +17,25 @@ export const Header = () => {
   const router = useRouter();
   const currentPath = router.pathname;
 
+  const routes = [
+    {
+      href: '/',
+      text: 'Home',
+    },
+    {
+      href: '/realm',
+      text: 'Realm',
+    },
+    {
+      href: 'https://docs.holium.com',
+      text: 'Docs',
+    },
+    {
+      href: '/about',
+      text: 'About',
+    },
+  ];
+
   return (
     <HeaderContainer>
       <UnstyledNextLink href="/" id="holium-logo">
@@ -24,36 +43,36 @@ export const Header = () => {
       </UnstyledNextLink>
       <HeaderNavigation>
         <ul>
-          <li>
-            <HeaderMenuLink href="/" current={currentPath === '/'}>
-              Realm
-            </HeaderMenuLink>
-          </li>
-          <li>
-            <HeaderMenuLink
-              target="_blank"
-              rel="noreferrer"
-              href="https://docs.holium.com"
-            >
-              Documentation
-            </HeaderMenuLink>
-          </li>
-          <li>
-            <HeaderMenuLink href="/about" current={currentPath === '/about'}>
-              About
-            </HeaderMenuLink>
-          </li>
+          {routes.map(({ href, text }) => (
+            <li key={href}>
+              <HeaderMenuLink href={href} current={currentPath === href}>
+                {text}
+              </HeaderMenuLink>
+            </li>
+          ))}
         </ul>
       </HeaderNavigation>
       <HeaderCTAs>
-        <UnstyledNextLink href={hostingHrefs.LOGIN}>
-          <Button.Secondary>
-            <Text.Body color="text" fontWeight={500}>
-              Login with Email
-            </Text.Body>
-          </Button.Secondary>
-        </UnstyledNextLink>
-        <ConnectWalletButton />
+        {currentPath === '/realm' ? (
+          <UnstyledNextLink href={hostingHrefs.LOGIN}>
+            <Button.Secondary>
+              <Text.Body color="text" fontWeight={500}>
+                Get Realm
+              </Text.Body>
+            </Button.Secondary>
+          </UnstyledNextLink>
+        ) : (
+          <>
+            {/* <UnstyledNextLink href={hostingHrefs.LOGIN}>
+              <Button.Secondary>
+                <Text.Body color="text" fontWeight={500}>
+                  Login with Email
+                </Text.Body>
+              </Button.Secondary>
+            </UnstyledNextLink> */}
+            <ConnectWalletButton />
+          </>
+        )}
       </HeaderCTAs>
     </HeaderContainer>
   );

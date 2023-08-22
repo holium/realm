@@ -11,6 +11,11 @@ export const HeaderContainer = styled.header`
   gap: 16px;
   padding: 16px;
 
+  #holium-logo {
+    display: flex;
+    opacity: 0.6;
+  }
+
   @media (max-width: ${MOBILE_WIDTH}px) {
     #holium-logo {
       display: none;
@@ -50,6 +55,7 @@ export const HeaderMenuLink = styled(UnstyledNextLink)<{
   padding-bottom: 2px;
   opacity: ${({ current }) => (current ? 1 : 0.5)};
   border-bottom: ${({ current }) => (current ? '2px solid' : 'none')};
+  user-select: none;
 
   &:hover {
     opacity: 1;

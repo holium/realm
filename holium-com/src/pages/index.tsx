@@ -1,79 +1,107 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { track } from '@amplitude/analytics-browser';
-import { spaces } from 'spaces';
+import styled from 'styled-components';
 
-import { Footer } from 'components/Footer';
-import { Hero } from 'components/Hero';
+import { Flex, Text } from '@holium/design-system/general';
+
+import { CourierWebButton } from 'components/courier/CourierWebButton';
 import { Page } from 'components/Page';
-import { useSpace } from 'components/SpaceContext';
-import { ChatApp } from 'components/TrayApps/Chat';
-import { NotificationApp } from 'components/TrayApps/Notifications';
-import { RoomApp } from 'components/TrayApps/Rooms';
-import { SpacesApp } from 'components/TrayApps/Spaces';
-import { WalletApp } from 'components/TrayApps/Wallet';
 
-import { SpaceKeys, TrayAppType } from '../types';
+import { IOSButton } from '../components/courier/IOSButton';
 
-export default function LandingPage() {
-  const { space } = useSpace();
-  const [trayApp, setTrayApp] = useState<TrayAppType | null>(null);
+const HeroContainer = styled(Flex)`
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 16px;
+  align-items: center;
+  justify-content: flex-start;
+`;
 
-  const handleSetTrayApp = (app: TrayAppType) => {
-    if (app?.id === 'spaces') {
-      // Preload all the wallpapers so the space transition is smooth.
-      Object.keys(spaces).map((s) => {
-        const theme = spaces[s as SpaceKeys]?.theme;
-        const wallpaper = new Image();
-        wallpaper.src = theme.wallpaper;
-        return wallpaper;
-      });
-    }
+const TextContainer = styled(Flex)`
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  max-width: 770px;
 
-    setTrayApp(app);
-  };
+  @media screen and (max-width: 1200px) {
+    max-width: 560px;
+  }
+`;
 
+const ButtonsContainer = styled(Flex)`
+  gap: 12px;
+
+  @media screen and (max-width: 582px) {
+    flex-direction: column;
+  }
+`;
+
+const H1 = styled(Text.H1)`
+  font-size: 66px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: rgba(var(--rlm-text-rgba));
+
+  @media screen and (max-width: 1200px) {
+    font-size: 48px;
+  }
+`;
+
+const Body = styled(Text.Body)`
+  font-size: 32px;
+  font-weight: 300;
+  line-height: 1.6;
+  color: rgba(var(--rlm-text-rgba), 0.7);
+
+  @media screen and (max-width: 1200px) {
+    font-size: 24px;
+  }
+`;
+
+const MobileGraphic = styled.img`
+  position: fixed;
+  width: auto;
+  height: 125%;
+  object-fit: contain;
+  bottom: 0;
+  right: 0;
+  transform: translate(40%, 30%);
+  z-index: -1;
+
+  @media screen and (max-width: 1000px) {
+    display: none;
+  }
+`;
+
+export default function HomePage() {
   useEffect(() => {
-    track('Landing Page');
+    track('Home Page');
   }, []);
 
   return (
-    <>
-      <Page
-        title="Holium"
-        body={<Hero />}
-        footer={
-          <Footer currentSpace={space} setCurrentApp={handleSetTrayApp} />
-        }
-      />
-      {trayApp && (
-        <>
-          <SpacesApp
-            coords={trayApp.coords}
-            isOpen={trayApp.id === 'spaces'}
-            closeTray={() => setTrayApp(null)}
-          />
-          <ChatApp
-            coords={trayApp.coords}
-            isOpen={trayApp.id === 'chat'}
-            closeTray={() => setTrayApp(null)}
-          />
-          <RoomApp
-            coords={trayApp.coords}
-            isOpen={trayApp.id === 'rooms-tray'}
-            closeTray={() => setTrayApp(null)}
-          />
-          <WalletApp
-            coords={trayApp.coords}
-            isOpen={trayApp.id === 'wallet'}
-            closeTray={() => setTrayApp(null)}
-          />
-          <NotificationApp
-            coords={trayApp.coords}
-            isOpen={trayApp.id === 'notifications'}
-            closeTray={() => setTrayApp(null)}
-          />
-        </>
-      )}
-    </>
+    <Page
+      title="Secure Conversations, Your Way."
+      wallpaper={false}
+      forcedSpace="realm-forerunners"
+      body={
+        <HeroContainer>
+          <Flex flexDirection="column" gap="60px">
+            <TextContainer>
+              <H1>Secure Conversations, Your Way.</H1>
+              <Body>
+                Leveraging end-to-end encryption, peer-to-peer nodes, and the
+                ability to self-host, Courier enables truly private messaging.
+              </Body>
+            </TextContainer>
+            <ButtonsContainer>
+              <IOSButton subLabel="MacOS" label="Desktop" />
+              <IOSButton subLabel="iOS" label="App Store" />
+              <CourierWebButton />
+            </ButtonsContainer>
+          </Flex>
+          <MobileGraphic src="/graphics/phone-mock.png" />
+        </HeroContainer>
+      }
+    />
   );
 }
