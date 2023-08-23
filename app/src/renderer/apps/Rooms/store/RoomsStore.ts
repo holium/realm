@@ -137,8 +137,8 @@ export class RoomsStore extends EventsEmitter {
   @observable ourPeer: LocalPeer;
   @observable path = '';
   // @observable provider = 'litzod-dozzod-hostyv.holium.live';
-  // @observable provider = 'node-test.holium.live';
-  @observable provider = 'localhost:3030';
+  @observable provider = 'node-test.holium.live';
+  //@observable provider = 'localhost:3030';
   @observable rooms: Map<string, RoomModel> = observable.map<
     string,
     RoomModel
