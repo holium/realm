@@ -164,11 +164,9 @@ const RoomPresenter = () => {
               onClick={(evt) => {
                 evt.stopPropagation();
                 if (creator === loggedInAccount?.serverId) {
-                  console.log('room: deleting room...');
                   roomsStore.deleteRoom(rid);
                   roomsApp.setView('list');
                 } else {
-                  console.log('room: leaving room...');
                   roomsStore.leaveRoom(rid);
                   roomsApp.setView('list');
                 }

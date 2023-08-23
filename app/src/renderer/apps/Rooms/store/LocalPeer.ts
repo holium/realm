@@ -378,7 +378,6 @@ export class LocalPeer extends EventEmitter {
     this.screenStream = undefined;
     if (this.audioStream) {
       this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
-        console.log([track.readyState, track.kind]);
         track.stop();
       });
       this.audioStream = undefined;
