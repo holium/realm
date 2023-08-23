@@ -56,6 +56,8 @@ export const LoginStep = ({ forcedNextStep, setStep }: StepProps) => {
       passwordHash,
     });
 
+    OnboardingIPC.setClientEncryptionKey(response.client_side_encryption_key);
+
     const userShips = await thirdEarthApi.getUserShips(response.token);
 
     if (userShips.length > 0) {

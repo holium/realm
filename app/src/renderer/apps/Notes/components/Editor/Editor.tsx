@@ -76,18 +76,6 @@ const EditorPresenter = () => {
     debouncedAutoSave();
   };
 
-  const broadcast = (channel: NotesBroadcastChannel, data: string) => {
-    const broadcast: PresenceBroadcast = {
-      event: 'broadcast',
-      data: [channel, data],
-    };
-    roomsStore.sendDataToRoom({
-      from: window.ship,
-      kind: DataPacketKind.DATA,
-      value: { broadcast },
-    });
-  };
-
   if (
     !loggedInAccount ||
     !selectedSpace ||
@@ -97,6 +85,30 @@ const EditorPresenter = () => {
   ) {
     return null;
   }
+
+  const isSpaceNote = selectedNote.space !== `/${loggedInAccount.serverId}/our`;
+  const roomPath = selectedSpace.path + selectedNote.id;
+  const existingRoom = roomsStore.getRoomByPath(roomPath);
+
+  const broadcast = (channel: NotesBroadcastChannel, data: string) => {
+    const broadcast: PresenceBroadcast = {
+      event: 'broadcast',
+      data: [channel, data],
+    };
+    console.log('broadcast: %o', [
+      existingRoom?.present,
+      loggedInAccount?.serverId,
+    ]);
+    // only broadcast from here if we are actually still in the room
+    if (existingRoom?.present.includes(loggedInAccount.serverId)) {
+      roomsStore.sendDataToRoom({
+        from: window.ship,
+        path: existingRoom.rid,
+        kind: DataPacketKind.DATA,
+        value: { broadcast },
+      });
+    }
+  };
 
   if (initializing) {
     return (
@@ -109,24 +121,30 @@ const EditorPresenter = () => {
     );
   }
 
-  const isSpaceNote = selectedNote.space !== `/${loggedInAccount.serverId}/our`;
-  const roomPath = selectedSpace.path + selectedNote.id;
-  const existingRoom = roomsStore.getRoomByPath(roomPath);
-
   const onClickReconnect = async () => {
     reconnecting.toggleOn();
 
-    await roomsStore.createRoom(
-      `Notes: ${selectedNote.title}`,
-      'public',
-      roomPath,
-      RoomType.background
-    );
+    if (
+      existingRoom &&
+      !existingRoom.present.includes(loggedInAccount.serverId)
+    ) {
+      await roomsStore.joinRoom(existingRoom.rid);
+    } else {
+      await roomsStore.createRoom(
+        `Notes: ${selectedNote.title}`,
+        'public',
+        roomPath,
+        RoomType.background
+      );
+    }
 
     reconnecting.toggleOff();
   };
 
-  if (isSpaceNote && !existingRoom) {
+  if (
+    isSpaceNote &&
+    (!existingRoom || !existingRoom.present.includes(loggedInAccount.serverId))
+  ) {
     if (connectingToNoteRoom) {
       return (
         <Flex

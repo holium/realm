@@ -366,7 +366,6 @@ export class LocalPeer extends EventEmitter {
 
   @action
   disableAll() {
-    console.log('disableAll...');
     this.videoStream?.getVideoTracks().forEach((track: MediaStreamTrack) => {
       track.stop();
     });
@@ -377,9 +376,12 @@ export class LocalPeer extends EventEmitter {
     this.isVideoOn = false;
     this.videoStream = undefined;
     this.screenStream = undefined;
-    this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
-      track.stop();
-    });
-    this.audioStream = undefined;
+    if (this.audioStream) {
+      this.audioStream?.getAudioTracks().forEach((track: MediaStreamTrack) => {
+        console.log([track.readyState, track.kind]);
+        track.stop();
+      });
+      this.audioStream = undefined;
+    }
   }
 }

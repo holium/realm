@@ -137,8 +137,8 @@ export class RoomsStore extends EventsEmitter {
   @observable ourPeer: LocalPeer;
   @observable path = '';
   // @observable provider = 'litzod-dozzod-hostyv.holium.live';
-  @observable provider = 'node-test.holium.live';
-  // @observable provider = 'localhost:3030';
+  // @observable provider = 'node-test.holium.live';
+  @observable provider = 'localhost:3030';
   @observable rooms: Map<string, RoomModel> = observable.map<
     string,
     RoomModel
@@ -229,7 +229,9 @@ export class RoomsStore extends EventsEmitter {
     // handles various connectivity events
     window.addEventListener('offline', () => {
       this.status = 'offline';
-      this.hangupAllPeers();
+      this.rooms.forEach((room) => {
+        this.hangupAllPeers(room.rid);
+      });
       this.websocket.close();
     });
 
@@ -551,6 +553,7 @@ export class RoomsStore extends EventsEmitter {
                 const peer = this.peers.get(peerId);
                 if (peer) {
                   peer.refCount++;
+                  peer.rooms.set(room.rid, room);
                   console.log('already have peer', peerId);
                   return;
                 }
@@ -612,11 +615,9 @@ export class RoomsStore extends EventsEmitter {
             room.present.forEach((peerId: string) => {
               if (peerId !== this.ourId) this.destroyPeer(peerId);
             });
-            if (this.getNumRooms(RoomType.media) === 0) {
-              this.ourPeer.disableAll();
-            }
             if (room.rtype === RoomType.media) {
               this.currentRid = null;
+              this.ourPeer.disableAll();
             }
             this._removeRoom(event.rid);
           }
@@ -727,11 +728,6 @@ export class RoomsStore extends EventsEmitter {
       this.rooms.delete(rid);
       if (room.rtype === RoomType.media) {
         this.currentRid = null;
-      }
-      const mediaRoomCount = this.getNumRooms(RoomType.media);
-      // if there are no more media rooms left, disable all media
-      //   devices/streams
-      if (mediaRoomCount === 0) {
         this.ourPeer.disableAll();
       }
     }
@@ -742,7 +738,7 @@ export class RoomsStore extends EventsEmitter {
       })
     );
     this.onLeftRoom(rid, this.ourId);
-    this.hangupAllPeers();
+    this.hangupAllPeers(rid);
   }
 
   @action
@@ -790,8 +786,6 @@ export class RoomsStore extends EventsEmitter {
       } else {
         if (room.rtype === RoomType.media) {
           this.currentRid = null;
-        }
-        if (this.getNumRooms(RoomType.media) === 0) {
           this.ourPeer.disableAll();
         }
       }
@@ -803,7 +797,8 @@ export class RoomsStore extends EventsEmitter {
       })
     );
     this.onLeftRoom(rid, this.ourId);
-    this.hangupAllPeers();
+    console.log('hangupAllPeers %o...', rid);
+    this.hangupAllPeers(rid);
   }
 
   @action
@@ -826,9 +821,16 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   createPeer(rid: string, rtype: RoomType, peerId: string) {
+    const room = this.rooms.get(rid);
+    if (!room) {
+      console.error('createPeer: no room with id %o', rid);
+      return;
+    }
+
     let peer = this.peers.get(peerId);
     if (peer) {
       peer.refCount++;
+      peer.rooms.set(room.rid, room);
       return;
     }
     const streams: MediaStream[] = [];
@@ -867,6 +869,8 @@ export class RoomsStore extends EventsEmitter {
       this.updateActiveSpeaker(peerId, isSpeaking);
     });
 
+    peer.rooms.set(rid, room);
+    console.log('adding peer: %o', peerId);
     this.peers.set(peerId, peer);
     return peer;
   }
@@ -887,9 +891,18 @@ export class RoomsStore extends EventsEmitter {
       })
     );
     const peer = this.peers.get(peerId);
-    if (peer && --peer.refCount === 0) {
-      // destroy peer
-      this.peers.get(peerId)?.destroy();
+    if (peer) {
+      if (peer.refCount === 0) {
+        console.warn('peer %o refcount is 0', peer.peerId);
+      }
+      if (this.currentRid) {
+        peer.rooms.delete(this.currentRid);
+      }
+      peer.refCount--;
+      if (peer.refCount === 0) {
+        // destroy peer
+        peer.destroy();
+      }
     }
   }
 
@@ -909,13 +922,13 @@ export class RoomsStore extends EventsEmitter {
   }
 
   @action
-  hangupAllPeers() {
+  hangupAllPeers(rid: string) {
     console.log('hangupAllPeers. closing peer...');
     this.peers.forEach((peer) => {
-      peer.refCount--;
-      if (peer.refCount === 0) {
+      peer.rooms.delete(rid);
+      if (peer.rooms.size === 0) {
         console.log(
-          `hangupAllPeers: ${peer.peerId} refCount is 0. clearing...`
+          `hangupAllPeers: ${peer.peerId} peer is in no more rooms. clearing...`
         );
         peer.destroy();
         this.peers.delete(peer.peerId);
@@ -965,9 +978,17 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   sendDataToRoom(data: Partial<DataPacket>) {
-    const payload = { from: this.ourId, ...data } as DataPacket;
+    const payload = { ...data } as DataPacket;
     this.peers.forEach((peer) => {
-      peer.sendData(payload);
+      if (!payload.path || peer.rooms.has(payload.path)) {
+        console.log(
+          'sendDataToRoom: %o, %o, %o',
+          payload.from,
+          peer.peerId,
+          peer.rooms
+        );
+        peer.sendData(payload);
+      }
     });
   }
 

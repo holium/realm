@@ -4,7 +4,7 @@ import Peer, { Instance as PeerInstance } from 'simple-peer';
 
 import { serialize, unserialize } from './helpers';
 import { DataPacket } from './room.types';
-import { OnDataChannel, OnLeftRoom } from './RoomsStore';
+import { OnDataChannel, OnLeftRoom, RoomModel } from './RoomsStore';
 import { IAudioAnalyser, SpeakingDetectionAnalyser } from './SpeakingDetector';
 
 const DataPacketMuteStatus = 3;
@@ -38,6 +38,7 @@ export class PeerClass extends EventsEmitter {
   // how to know its safe to destroy/delete a peer without more complex
   //  mechanisms at play. good ol' reference counting.
   @observable refCount = 0;
+  @observable rooms: Map<string, RoomModel> = new Map();
 
   @observable onDataChannel: OnDataChannel = async () => {};
   @observable onLeftRoom: OnLeftRoom = async () => {};
@@ -370,7 +371,11 @@ export class PeerClass extends EventsEmitter {
         this.disableVideo();
       }
     }
-    this.onDataChannel(this.rid, this.peerId, dataPacket);
+    // only allow this thru if we are in the room where this originated
+    if (this.rooms.has(this.rid)) {
+      console.log('onData: %o, %o, %o', this.rid, this.peerId, dataPacket);
+      this.onDataChannel(this.rid, this.peerId, dataPacket);
+    }
   }
 
   @action
@@ -405,6 +410,7 @@ export class PeerClass extends EventsEmitter {
   sendData(data: Partial<DataPacket>) {
     try {
       if (this.peer && this.peer.connected) {
+        console.log('sendData: %o', data);
         this.peer.send(serialize(data));
       }
     } catch (e) {

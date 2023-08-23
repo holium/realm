@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
@@ -46,10 +47,24 @@ const NotesSidebarPresenter = () => {
 
   useEffect(() => {
     return () => {
-      // Leave current room on unmount.
-      roomsStore.cleanUpCurrentRoom();
+      console.log('running effect...');
+      if (selectedSpace && selectedNoteId) {
+        console.log(`${selectedSpace.path}, ${selectedNoteId}`);
+        const currentRoomPath = `${selectedSpace.path}${selectedNoteId}`;
+        const currentRoom = roomsStore
+          .getSpaceRooms(selectedSpace.path)
+          .find((room) => room.path === currentRoomPath);
+        if (currentRoom && loggedInAccount) {
+          console.log(`found room ${currentRoom.rid}, ${currentRoom.present}`);
+          if (currentRoom.present.includes(loggedInAccount.serverId)) {
+            runInAction(async () => {
+              await roomsStore.leaveRoom(currentRoom.rid);
+            });
+          }
+        }
+      }
     };
-  }, []);
+  }, [selectedSpace?.path, selectedNoteId]);
 
   if (!selectedSpace) return null;
 
@@ -102,6 +117,8 @@ const NotesSidebarPresenter = () => {
         noteRoomPath,
         RoomType.background
       );
+
+      console.log('joining room %o, %o', newRoomRid, noteRoomPath);
       await roomsStore.joinRoom(newRoomRid);
     }
 

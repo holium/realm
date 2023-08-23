@@ -19,6 +19,7 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
   const sound = useSound();
 
   const existingRoom = roomsStore.getRoomByPath(selectedChat?.path ?? '');
+  console.log('existingRoom: %o', existingRoom);
   const areWeInRoom = existingRoom?.present?.includes(
     loggedInAccount?.serverId ?? ''
   );
@@ -30,24 +31,26 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
   const onClickButton = async () => {
     if (!selectedChat) return;
 
-    // DELETE/LEAVE CURRENT ROOM
-    roomsStore.cleanUpCurrentRoom();
-
-    const areWeAlreadyInRoom = existingRoom?.present.includes(
-      loggedInAccount?.serverId ?? ''
-    );
-    if (areWeAlreadyInRoom) {
-      if (subroute === 'room') setSubroute('chat');
-
-      return;
+    if (existingRoom) {
+      const areWeAlreadyInRoom = existingRoom.present.includes(
+        loggedInAccount?.serverId ?? ''
+      );
+      if (areWeAlreadyInRoom) {
+        await roomsStore.leaveRoom(existingRoom.rid);
+        if (subroute === 'room') setSubroute('chat');
+        return;
+      }
     }
 
     if (existingRoom) {
+      console.log('Start room button: joining room %o', existingRoom.rid);
       // JOIN ROOM
       await roomsStore.joinRoom(existingRoom.rid);
       if (isStandaloneChat) setSubroute('room');
     } else {
-      console.log(`creating room @ '${selectedChat.path}'...`);
+      console.log(
+        `start room button: creating room @ '${selectedChat.path}'...`
+      );
       // CREATE ROOM
       const newRoomRid = await roomsStore?.createRoom(
         selectedChat.metadata.title,
@@ -62,7 +65,11 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
   };
 
   const onClickAvatar = () => {
-    if (existingRoom && isStandaloneChat) {
+    if (
+      existingRoom &&
+      existingRoom.present.includes(loggedInAccount?.serverId ?? '') &&
+      isStandaloneChat
+    ) {
       setSubroute('room');
     }
   };
