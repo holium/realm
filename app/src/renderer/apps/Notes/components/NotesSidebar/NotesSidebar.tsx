@@ -87,7 +87,7 @@ const NotesSidebarPresenter = () => {
       .find((room) => room.path === currentRoomPath);
     if (currentRoom && loggedInAccount) {
       if (currentRoom.present.includes(loggedInAccount.serverId)) {
-        await roomsStore.leaveRoom(currentRoom.rid);
+        // await roomsStore.leaveRoom(currentRoom.rid);
         if (id === selectedNoteId) return;
       }
     }
