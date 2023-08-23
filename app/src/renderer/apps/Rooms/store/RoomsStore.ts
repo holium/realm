@@ -981,12 +981,6 @@ export class RoomsStore extends EventsEmitter {
     const payload = { ...data } as DataPacket;
     this.peers.forEach((peer) => {
       if (!payload.path || peer.rooms.has(payload.path)) {
-        console.log(
-          'sendDataToRoom: %o, %o, %o',
-          payload.from,
-          peer.peerId,
-          peer.rooms
-        );
         peer.sendData(payload);
       }
     });
