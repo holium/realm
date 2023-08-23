@@ -47,15 +47,12 @@ const NotesSidebarPresenter = () => {
 
   useEffect(() => {
     return () => {
-      console.log('running effect...');
       if (selectedSpace && selectedNoteId) {
-        console.log(`${selectedSpace.path}, ${selectedNoteId}`);
         const currentRoomPath = `${selectedSpace.path}${selectedNoteId}`;
         const currentRoom = roomsStore
           .getSpaceRooms(selectedSpace.path)
           .find((room) => room.path === currentRoomPath);
         if (currentRoom && loggedInAccount) {
-          console.log(`found room ${currentRoom.rid}, ${currentRoom.present}`);
           if (currentRoom.present.includes(loggedInAccount.serverId)) {
             runInAction(async () => {
               await roomsStore.leaveRoom(currentRoom.rid);
@@ -118,7 +115,6 @@ const NotesSidebarPresenter = () => {
         RoomType.background
       );
 
-      console.log('joining room %o, %o', newRoomRid, noteRoomPath);
       await roomsStore.joinRoom(newRoomRid);
     }
 

@@ -280,7 +280,6 @@ export class PeerClass extends EventsEmitter {
       console.error('Peer does not exist in onClose');
       return;
     }
-    console.log('onClose. closing peer...');
     this.status = 'closed';
     this.peer.removeAllListeners();
     this.peer.destroy();
@@ -373,14 +372,12 @@ export class PeerClass extends EventsEmitter {
     }
     // only allow this thru if we are in the room where this originated
     if (this.rooms.has(this.rid)) {
-      console.log('onData: %o, %o, %o', this.rid, this.peerId, dataPacket);
       this.onDataChannel(this.rid, this.peerId, dataPacket);
     }
   }
 
   @action
   disableVideo() {
-    console.log('disableVideo. closing peer...');
     const videoWrapper = document.getElementById(
       `peer-video-${this.peerId}-wrapper`
     ) as HTMLDivElement;
@@ -410,7 +407,6 @@ export class PeerClass extends EventsEmitter {
   sendData(data: Partial<DataPacket>) {
     try {
       if (this.peer && this.peer.connected) {
-        console.log('sendData: %o', data);
         this.peer.send(serialize(data));
       }
     } catch (e) {
@@ -431,7 +427,6 @@ export class PeerClass extends EventsEmitter {
 
   @action
   retry(ourStreams?: MediaStream[]) {
-    console.log('retry. closing peer...');
     this.peer.destroy();
     this.peer = this.createPeer(
       this.peerId,
@@ -442,7 +437,6 @@ export class PeerClass extends EventsEmitter {
 
   @action
   destroy() {
-    console.log('destroy. closing peer...');
     this.onLeftRoom(this.rid, this.peerId);
     this.peer.destroy();
   }

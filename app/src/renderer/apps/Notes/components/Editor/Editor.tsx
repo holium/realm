@@ -95,10 +95,6 @@ const EditorPresenter = () => {
       event: 'broadcast',
       data: [channel, data],
     };
-    console.log('broadcast: %o', [
-      existingRoom?.present,
-      loggedInAccount?.serverId,
-    ]);
     // only broadcast from here if we are actually still in the room
     if (existingRoom?.present.includes(loggedInAccount.serverId)) {
       roomsStore.sendDataToRoom({

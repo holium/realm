@@ -797,7 +797,6 @@ export class RoomsStore extends EventsEmitter {
       })
     );
     this.onLeftRoom(rid, this.ourId);
-    console.log('hangupAllPeers %o...', rid);
     this.hangupAllPeers(rid);
   }
 
@@ -870,7 +869,6 @@ export class RoomsStore extends EventsEmitter {
     });
 
     peer.rooms.set(rid, room);
-    console.log('adding peer: %o', peerId);
     this.peers.set(peerId, peer);
     return peer;
   }
@@ -908,7 +906,6 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   destroyPeer(peerId: string) {
-    console.log('destroyPeer. closing peer...');
     const peer = this.peers.get(peerId);
     if (peer) {
       peer.refCount--;
@@ -923,7 +920,6 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   hangupAllPeers(rid: string) {
-    console.log('hangupAllPeers. closing peer...');
     this.peers.forEach((peer) => {
       peer.rooms.delete(rid);
       if (peer.rooms.size === 0) {
