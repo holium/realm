@@ -72,7 +72,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
       const associatedUpdates = this.getNoteEditsFromDb({ note_id: id });
       const bedrockIds: { id: string; type: string }[] = associatedUpdates
         .map((o) => ({ id: o.id, type: NOTES_BEDROCK_TYPES.NOTES_EDITS }))
-        .filter((edits) => edits.id !== null);
+        .filter((edit) => edit.id !== null);
       bedrockIds.push({ id, type: NOTES_BEDROCK_TYPES.NOTES });
       console.log('bedrockIds: %o', bedrockIds);
 
@@ -339,6 +339,12 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
       note_edit,
       note_id,
       space,
+    });
+    // Update SQLite.
+    this.notesDB.upsertNoteEdit({
+      note_edit: response.data.note_edit,
+      note_id: response.data.note_id,
+      id: response.id,
     });
 
     return Boolean(response);
