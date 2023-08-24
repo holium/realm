@@ -55,13 +55,17 @@ const NotesSidebarPresenter = () => {
         if (currentRoom && loggedInAccount) {
           if (currentRoom.present.includes(loggedInAccount.serverId)) {
             runInAction(async () => {
+              console.log('runInAction: leaving room %o...', [
+                currentRoom.rid,
+                loggedInAccount.serverId,
+              ]);
               await roomsStore.leaveRoom(currentRoom.rid);
             });
           }
         }
       }
     };
-  }, [selectedSpace?.path, selectedNoteId]);
+  }, []);
 
   if (!selectedSpace) return null;
 
@@ -81,14 +85,20 @@ const NotesSidebarPresenter = () => {
   };
 
   const onClickSpaceNote = async (id: string, space: string) => {
+    // simply reclicked note. don't do anything. stay in room.
+    if (id === selectedNoteId) return;
+
     const currentRoomPath = `${space}${selectedNoteId}`;
     const currentRoom = roomsStore
       .getSpaceRooms(space)
       .find((room) => room.path === currentRoomPath);
     if (currentRoom && loggedInAccount) {
       if (currentRoom.present.includes(loggedInAccount.serverId)) {
-        // await roomsStore.leaveRoom(currentRoom.rid);
-        if (id === selectedNoteId) return;
+        console.log('onClickSpaceNote: leaving room %o...', [
+          currentRoom.rid,
+          loggedInAccount.serverId,
+        ]);
+        await roomsStore.leaveRoom(currentRoom.rid);
       }
     }
 

@@ -93,10 +93,18 @@ export type Message =
   | AckParams
   | (MessageBase & DeleteParams);
 
-export interface Thread<Action> {
+export type Json =
+  | boolean
+  | number
+  | string
+  | null
+  | { [key: string]: Json }
+  | Array<Json>;
+
+export interface Thread {
   inputMark: string; // graph-update
   outputMark: string; //
   threadName: string; // graph-add-nodes
   desk?: string; // graph-store
-  body: Action;
+  body: Json; // json to be stringified and send to the thread
 }

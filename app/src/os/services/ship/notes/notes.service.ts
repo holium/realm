@@ -51,65 +51,46 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     // Create metadata entry in Bedrock.
     const createNoteData = [title];
     const createNoteSchema: BedrockSchema = [['title', 't']];
-    return APIConnection.getInstance().conduit.poke({
-      app: 'bedrock',
-      mark: 'db-action',
-      json: {
+    return APIConnection.getInstance().conduit.thread({
+      inputMark: 'db-action',
+      outputMark: 'db-vent',
+      threadName: 'venter',
+      body: {
         create: {
-          v: 0,
           path: space,
           type: NOTES_BEDROCK_TYPES.NOTES,
           data: createNoteData,
           schema: createNoteSchema,
         },
       },
+      desk: 'realm',
     });
   }
 
   async deleteNote({ id, space }: NotesService_DeleteNote_Payload) {
     try {
       const associatedUpdates = this.getNoteEditsFromDb({ note_id: id });
-      const bedrockIds = associatedUpdates.map((o) => o.id);
+      const bedrockIds: { id: string; type: string }[] = associatedUpdates
+        .map((o) => ({ id: o.id, type: NOTES_BEDROCK_TYPES.NOTES_EDITS }))
+        .filter((edits) => edits.id !== null);
+      bedrockIds.push({ id, type: NOTES_BEDROCK_TYPES.NOTES });
+      console.log('bedrockIds: %o', bedrockIds);
 
-      if (bedrockIds.length > 0) {
-        const manyresult = await APIConnection.getInstance().conduit.thread({
-          inputMark: 'db-action',
-          outputMark: 'db-vent',
-          threadName: 'venter',
-          body: {
-            'remove-many': {
-              ids: bedrockIds,
-              path: space,
-              type: NOTES_BEDROCK_TYPES.NOTES_EDITS,
-            },
-          } as any,
-          desk: 'realm',
-        });
-        console.log('delete manyresult', manyresult);
-      }
-    } catch (error) {
-      console.error('Notes: Failed to delete note edits.', error);
-
-      return false;
-    }
-
-    try {
-      const result = await APIConnection.getInstance().conduit.thread({
+      const manyresult = await APIConnection.getInstance().conduit.thread({
         inputMark: 'db-action',
         outputMark: 'db-vent',
         threadName: 'venter',
         body: {
-          remove: {
-            id,
+          'remove-many': {
+            ids: bedrockIds,
             path: space,
-            type: NOTES_BEDROCK_TYPES.NOTES,
           },
-        } as any,
+        },
         desk: 'realm',
       });
-      console.log('delete result', result);
+      console.log('delete manyresult', manyresult);
     } catch (error) {
-      console.error('Notes: Failed to delete note.', error);
+      console.error('Notes: Failed to delete note + note edits.', error);
 
       return false;
     }
@@ -253,7 +234,6 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
           edit: {
             id,
             'input-row': {
-              v: 0,
               path: space,
               type: NOTES_BEDROCK_TYPES.NOTES,
               data: editNoteData,
@@ -281,18 +261,19 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     ];
 
     try {
-      return APIConnection.getInstance().conduit.poke({
-        app: 'bedrock',
-        mark: 'db-action',
-        json: {
+      return APIConnection.getInstance().conduit.thread({
+        inputMark: 'db-action',
+        outputMark: 'db-vent',
+        threadName: 'venter',
+        body: {
           create: {
-            v: 0,
             path: space,
             type: NOTES_BEDROCK_TYPES.NOTES_EDITS,
             data: createNoteUpdateData,
             schema: createNoteUpdateSchema,
           },
         },
+        desk: 'realm',
       });
     } catch (error) {
       console.error('Notes: Failed to create note update.', error);

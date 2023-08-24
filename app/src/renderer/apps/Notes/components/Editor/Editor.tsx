@@ -97,6 +97,7 @@ const EditorPresenter = () => {
     };
     // only broadcast from here if we are actually still in the room
     if (existingRoom?.present.includes(loggedInAccount.serverId)) {
+      // console.log('broadcast: %o', [window.ship, existingRoom.rid]);
       roomsStore.sendDataToRoom({
         from: window.ship,
         path: existingRoom.rid,

@@ -137,8 +137,8 @@ export class RoomsStore extends EventsEmitter {
   @observable ourPeer: LocalPeer;
   @observable path = '';
   // @observable provider = 'litzod-dozzod-hostyv.holium.live';
-  @observable provider = 'node-test.holium.live';
-  //@observable provider = 'localhost:3030';
+  // @observable provider = 'node-test.holium.live';
+  @observable provider = 'localhost:3030';
   @observable rooms: Map<string, RoomModel> = observable.map<
     string,
     RoomModel
@@ -610,6 +610,7 @@ export class RoomsStore extends EventsEmitter {
         break;
       case 'room-deleted':
         {
+          console.log('room-deleted: %o', event);
           const room = this.rooms.get(event.rid);
           if (room) {
             room.present.forEach((peerId: string) => {
@@ -625,6 +626,7 @@ export class RoomsStore extends EventsEmitter {
         break;
       case 'signal':
         {
+          console.log('signal: %o', event);
           const room = this.rooms.get(event.rid);
           if (room) {
             if (room.rtype === RoomType.media && !this.ourPeer.audioStream) {
@@ -633,7 +635,7 @@ export class RoomsStore extends EventsEmitter {
             }
             let peer =
               this.peers.get(event.from) ||
-              this.createPeer(room.rid, room.rtype, event.rid);
+              this.createPeer(room.rid, room.rtype, event.from);
             if (peer?.peer.destroyed) {
               console.log(
                 'peer was destroyed, but is attempting to reconnect',
@@ -673,6 +675,7 @@ export class RoomsStore extends EventsEmitter {
     path: string,
     rtype: RoomType = RoomType.media
   ) {
+    console.log('createRoom: %o', path);
     if (rtype === RoomType.media && !this.ourPeer.audioStream) {
       await this.ourPeer.enableAudio();
     }
@@ -723,6 +726,7 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   deleteRoom(rid: string) {
+    console.log('deleteRoom: %o', rid);
     const room = this.rooms.get(rid);
     if (room) {
       this.rooms.delete(rid);
@@ -755,6 +759,7 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   async joinRoom(rid: string) {
+    console.log('joinRoom: %o', [rid]);
     const room = this.rooms.get(rid);
     if (room) {
       if (room.rtype === RoomType.media) {
@@ -778,6 +783,7 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   leaveRoom(rid: string) {
+    console.log('leaveRoom: %o', rid);
     const room = this.rooms.get(rid);
     if (room) {
       room.removePeer(this.ourId);

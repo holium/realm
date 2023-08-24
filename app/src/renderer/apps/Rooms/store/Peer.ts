@@ -276,6 +276,7 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onClose() {
+    console.log('close: %o', this.peerId);
     if (!this.peer) {
       console.error('Peer does not exist in onClose');
       return;
@@ -320,6 +321,7 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onSignal(signal: any) {
+    console.log('signal: %o, %o', this.peerId, signal);
     try {
       const msg = {
         type: 'signal',
@@ -397,6 +399,7 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onConnect() {
+    console.log('connected: %o', this.peerId);
     this.status = 'connected';
     console.log('Peer connected', this.peerId);
   }
