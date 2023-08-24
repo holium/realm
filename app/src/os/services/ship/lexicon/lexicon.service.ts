@@ -4,6 +4,7 @@ import { BedrockSchema } from 'os/types';
 
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
+import { Json } from '../../api/types';
 import { LexiconUpdateType } from './lexicon.types';
 
 const WordSchema: BedrockSchema = [['word', 't']];
@@ -340,7 +341,7 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
     data: any,
     schema: BedrockSchema
   ) {
-    const json: any = {
+    const json: Json = {
       create: {
         path: path,
         type: type,
@@ -480,7 +481,6 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
     });
   }
   onUpdate(update: any) {
-    console.log(update);
     if (update.length === 0) return;
     const type = update[0].change;
     if (type === 'add-row') {
