@@ -28,6 +28,11 @@ import {
   NotesService_Subscribe_Payload,
 } from './notes.service.types';
 
+export enum NOTES_BEDROCK_TYPES {
+  NOTES = '/notes/0vfi9t9.n4gau.tovrh.ana0d.1lndd',
+  NOTES_EDITS = '/notes-edits/0v4.gbp6o.4u8st.6qo1f.ll1q5.65q0j',
+}
+
 export class NotesService extends AbstractService<NotesService_IPCUpdate> {
   private notesDB?: NotesDB;
 
@@ -53,7 +58,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         create: {
           v: 0,
           path: space,
-          type: 'notes',
+          type: NOTES_BEDROCK_TYPES.NOTES,
           data: createNoteData,
           schema: createNoteSchema,
         },
@@ -63,40 +68,48 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
 
   async deleteNote({ id, space }: NotesService_DeleteNote_Payload) {
     try {
-      await APIConnection.getInstance().conduit.poke({
-        app: 'bedrock',
-        mark: 'db-action',
-        json: {
-          remove: {
-            id,
-            path: space,
-            type: 'notes',
-          },
-        },
-      });
+      const associatedUpdates = this.getNoteEditsFromDb({ note_id: id });
+      const bedrockIds = associatedUpdates.map((o) => o.id);
+
+      if (bedrockIds.length > 0) {
+        const manyresult = await APIConnection.getInstance().conduit.thread({
+          inputMark: 'db-action',
+          outputMark: 'db-vent',
+          threadName: 'venter',
+          body: {
+            'remove-many': {
+              ids: bedrockIds,
+              path: space,
+              type: NOTES_BEDROCK_TYPES.NOTES_EDITS,
+            },
+          } as any,
+          desk: 'realm',
+        });
+        console.log('delete manyresult', manyresult);
+      }
     } catch (error) {
-      console.error('Notes: Failed to delete note.', error);
+      console.error('Notes: Failed to delete note edits.', error);
 
       return false;
     }
 
     try {
-      const associatedUpdates = this.getNoteEditsFromDb({ note_id: id });
-      const bedrockIds = associatedUpdates.map((o) => o.id);
-
-      await APIConnection.getInstance().conduit.poke({
-        app: 'bedrock',
-        mark: 'db-action',
-        json: {
-          'remove-many': {
-            ids: bedrockIds,
+      const result = await APIConnection.getInstance().conduit.thread({
+        inputMark: 'db-action',
+        outputMark: 'db-vent',
+        threadName: 'venter',
+        body: {
+          remove: {
+            id,
             path: space,
-            type: 'notes-edits',
+            type: NOTES_BEDROCK_TYPES.NOTES,
           },
-        },
+        } as any,
+        desk: 'realm',
       });
+      console.log('delete result', result);
     } catch (error) {
-      console.error('Notes: Failed to delete note edits.', error);
+      console.error('Notes: Failed to delete note.', error);
 
       return false;
     }
@@ -149,7 +162,9 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
     if (!bedrockResponse || !bedrockResponse.tables) return;
 
     // 2. Upsert notes metadata in SQLite.
-    const notesTable = bedrockResponse.tables.find((o) => o.type === 'notes');
+    const notesTable = bedrockResponse.tables.find(
+      (o) => o.type === NOTES_BEDROCK_TYPES.NOTES
+    );
     if (!notesTable) return;
 
     const notesTableRows = notesTable.rows ?? [];
@@ -202,7 +217,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
 
     // 5. Get all notes updates from Bedrock.
     const notesEditsTable = bedrockResponse.tables.find(
-      (o) => o.type === 'notes-edits'
+      (o) => o.type === NOTES_BEDROCK_TYPES.NOTES_EDITS
     );
     if (!notesEditsTable) return;
 
@@ -240,7 +255,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
             'input-row': {
               v: 0,
               path: space,
-              type: 'notes',
+              type: NOTES_BEDROCK_TYPES.NOTES,
               data: editNoteData,
               schema: editNoteSchema,
             },
@@ -273,7 +288,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
           create: {
             v: 0,
             path: space,
-            type: 'notes-edits',
+            type: NOTES_BEDROCK_TYPES.NOTES_EDITS,
             data: createNoteUpdateData,
             schema: createNoteUpdateSchema,
           },
@@ -359,7 +374,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
           if (!this.notesDB) return;
 
           if (update.change === 'add-row') {
-            if (update.row?.type === 'notes') {
+            if (update.row?.type === NOTES_BEDROCK_TYPES.NOTES) {
               const rowData = update.row.data;
 
               // Update SQLite.
@@ -381,7 +396,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
                   updated_at: update.row['updated-at'],
                 },
               });
-            } else if (update.row?.type === 'notes-edits') {
+            } else if (update.row?.type === NOTES_BEDROCK_TYPES.NOTES_EDITS) {
               const rowData = update.row.data;
 
               // Update SQLite.
@@ -400,7 +415,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
               });
             }
           } else if (update.change === 'upd-row') {
-            if (update.row?.type === 'notes') {
+            if (update.row?.type === NOTES_BEDROCK_TYPES.NOTES) {
               const rowData = update.row.data;
 
               // Update SQLite.
@@ -422,7 +437,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
             // Delete responses that have a different structure.
             if (!update.id) return;
 
-            if (update.type === 'notes') {
+            if (update.type === NOTES_BEDROCK_TYPES.NOTES) {
               // Update SQLite.
               this.notesDB.deleteNote({ id: update.id });
               // Update MobX.
