@@ -6,6 +6,7 @@ import { useToggle } from '@holium/design-system/util';
 import { PresenceBroadcast } from '@holium/realm-presence';
 
 import { DataPacketKind } from 'renderer/apps/Rooms/store/room.types';
+import { RoomType } from 'renderer/apps/Rooms/store/RoomsStore';
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -75,18 +76,6 @@ const EditorPresenter = () => {
     debouncedAutoSave();
   };
 
-  const broadcast = (channel: NotesBroadcastChannel, data: string) => {
-    const broadcast: PresenceBroadcast = {
-      event: 'broadcast',
-      data: [channel, data],
-    };
-    roomsStore.sendDataToRoom({
-      from: window.ship,
-      kind: DataPacketKind.DATA,
-      value: { broadcast },
-    });
-  };
-
   if (
     !loggedInAccount ||
     !selectedSpace ||
@@ -96,6 +85,27 @@ const EditorPresenter = () => {
   ) {
     return null;
   }
+
+  const isSpaceNote = selectedNote.space !== `/${loggedInAccount.serverId}/our`;
+  const roomPath = selectedSpace.path + selectedNote.id;
+  const existingRoom = roomsStore.getRoomByPath(roomPath);
+
+  const broadcast = (channel: NotesBroadcastChannel, data: string) => {
+    const broadcast: PresenceBroadcast = {
+      event: 'broadcast',
+      data: [channel, data],
+    };
+    // only broadcast from here if we are actually still in the room
+    if (existingRoom?.present.includes(loggedInAccount.serverId)) {
+      // console.log('broadcast: %o', [window.ship, existingRoom.rid]);
+      roomsStore.sendDataToRoom({
+        from: window.ship,
+        path: existingRoom.rid,
+        kind: DataPacketKind.DATA,
+        value: { broadcast },
+      });
+    }
+  };
 
   if (initializing) {
     return (
@@ -108,23 +118,34 @@ const EditorPresenter = () => {
     );
   }
 
-  const isSpaceNote = selectedNote.space !== `/${loggedInAccount.serverId}/our`;
-  const roomPath = selectedSpace.path + selectedNote.id;
-  const existingRoom = roomsStore.getRoomByPath(roomPath);
-
   const onClickReconnect = async () => {
     reconnecting.toggleOn();
 
-    await roomsStore.createRoom(
-      `Notes: ${selectedNote.title}`,
-      'public',
-      roomPath
-    );
+    if (
+      existingRoom &&
+      !existingRoom.present.includes(loggedInAccount.serverId)
+    ) {
+      await roomsStore.joinRoom(existingRoom.rid);
+    } else {
+      // the way notes room ids get generated, using selectedNote.title
+      //   was not genering unique room ids. to not impact other parts of the
+      //   rooms subsystem, simply send the note id to ensure a truly unique
+      //   room id is generated for the note
+      await roomsStore.createRoom(
+        `${roomPath}`,
+        'public',
+        roomPath,
+        RoomType.background
+      );
+    }
 
     reconnecting.toggleOff();
   };
 
-  if (isSpaceNote && !existingRoom) {
+  if (
+    isSpaceNote &&
+    (!existingRoom || !existingRoom.present.includes(loggedInAccount.serverId))
+  ) {
     if (connectingToNoteRoom) {
       return (
         <Flex

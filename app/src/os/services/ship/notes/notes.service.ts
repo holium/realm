@@ -74,6 +74,7 @@ export class NotesService extends AbstractService<NotesService_IPCUpdate> {
         .map((o) => ({ id: o.id, type: NOTES_BEDROCK_TYPES.NOTES_EDITS }))
         .filter((edit) => edit.id !== null);
       bedrockIds.push({ id, type: NOTES_BEDROCK_TYPES.NOTES });
+      console.log('bedrockIds: %o', bedrockIds);
 
       const manyresult = await APIConnection.getInstance().conduit.thread({
         inputMark: 'db-action',

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { observer } from 'mobx-react';
 
+import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { trackEvent } from 'renderer/lib/track';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -14,6 +15,7 @@ type Props = {
 export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
   const { loggedInAccount, shellStore } = useAppState();
   const { chatStore, spacesStore } = useShipStore();
+  const roomsStore = useRoomsStore();
 
   const {
     sortedChatList,
@@ -49,6 +51,7 @@ export const InboxPresenter = ({ isStandaloneChat = false }: Props) => {
         setSubroute('new');
       }}
       onClickStandaloneChat={() => {
+        roomsStore.cleanUpCurrentRoom();
         shellStore.setStandaloneChat(!isStandaloneChat);
       }}
     />
