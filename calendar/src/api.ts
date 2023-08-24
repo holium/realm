@@ -46,6 +46,82 @@ export const api = {
     return api.createApi().unsubscribe(subNumber);
   },
   /**
+   * Timezones related
+   */
+  getZones: async () => {
+    return api.createApi().scry({ app: 'timezones', path: '/zones' });
+  },
+  getFlags: async () => {
+    return api.createApi().scry({ app: 'timezones', path: '/flags' });
+  },
+  getZone: async (id: string) => {
+    return api.createApi().scry({ app: 'timezones', path: '/zone/' + id });
+  },
+  precedingRule: async (id: string, time: number) => {
+    const zone = await api.getZone(id);
+    let left = 0;
+    let right = zone.order.length - 1;
+    let precedingPair: [string, number] | null = null;
+
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2);
+
+      if (zone.order[mid].t <= time) {
+        precedingPair = [zone.order[mid].i, zone.order[mid].t];
+        left = mid + 1;
+      } else {
+        right = mid - 1;
+      }
+    }
+
+    if (precedingPair) {
+      const rule = zone.rules[precedingPair[0].split('/')[0]];
+      return { name: rule.name, offset: rule.offset };
+    } else {
+      return null;
+    }
+  },
+  tzToUtcList: async (id: string, time: number) => {
+    const zone = await api.getZone(id);
+    const candidates = zone.offsets.map((entry: { offset: any }) => ({
+      offset: entry.offset,
+      time: time - entry.offset,
+    }));
+
+    const validated = await Promise.all(
+      candidates.map(async (candidate: { offset: any; time: number }) => {
+        const result = await api.precedingRule(id, candidate.time);
+        return {
+          time: candidate.time,
+          possible: candidate.offset,
+          actual: result !== null ? result.offset : null,
+        };
+      })
+    );
+
+    const sortedTimes = validated
+      .filter((candidate) => candidate.possible === candidate.actual)
+      .map((candidate) => candidate.time)
+      .sort((a, b) => a - b);
+
+    return sortedTimes;
+  },
+  tzToUtc: async (id: string, idx: number, time: number) => {
+    const times = await api.tzToUtcList(id, time);
+    return idx >= 0 && idx < times.length ? times[idx] : null;
+  },
+  utcToTz: async (id: string, time: number) => {
+    const prec = await api.precedingRule(id, time);
+    if (prec === null) {
+      return null;
+    } else {
+      const tzTime = time + prec.offset;
+      const times = await api.tzToUtcList(id, tzTime);
+      const index = times.indexOf(tzTime);
+      return index !== -1 ? { index, tzTime } : null;
+    }
+  },
+  /**
    * Rules related
    */
   getRules: async () => {
