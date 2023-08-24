@@ -55,17 +55,13 @@ const NotesSidebarPresenter = () => {
         if (currentRoom && loggedInAccount) {
           if (currentRoom.present.includes(loggedInAccount.serverId)) {
             runInAction(async () => {
-              console.log('runInAction: leaving room %o...', [
-                currentRoom.rid,
-                loggedInAccount.serverId,
-              ]);
               await roomsStore.leaveRoom(currentRoom.rid);
             });
           }
         }
       }
     };
-  }, []);
+  }, [selectedSpace, selectedNoteId]);
 
   if (!selectedSpace) return null;
 
@@ -203,6 +199,13 @@ const NotesSidebarPresenter = () => {
                     }
                   }}
                   onClickDelete={() => {
+                    const currentRoomPath = `${note.space}${note.id}`;
+                    const currentRoom = roomsStore
+                      .getSpaceRooms(note.space)
+                      .find((room) => room.path === currentRoomPath);
+                    if (currentRoom) {
+                      roomsStore.deleteRoom(currentRoom.rid);
+                    }
                     deleteNote({ id: note.id, space: note.space });
                   }}
                 />
