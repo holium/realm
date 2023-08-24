@@ -1,3 +1,4 @@
 [submodule "desks"]
 	path = desks
 	url = https://github.com/holium/desks
+	branch = master
