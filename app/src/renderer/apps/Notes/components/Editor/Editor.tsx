@@ -126,8 +126,12 @@ const EditorPresenter = () => {
     ) {
       await roomsStore.joinRoom(existingRoom.rid);
     } else {
+      // the way notes room ids get generated, using selectedNote.title
+      //   was not genering unique room ids. to not impact other parts of the
+      //   rooms subsystem, simply send the note id to ensure a truly unique
+      //   room id is generated for the note
       await roomsStore.createRoom(
-        `Notes: ${selectedNote.title}`,
+        `${roomPath}`,
         'public',
         roomPath,
         RoomType.background

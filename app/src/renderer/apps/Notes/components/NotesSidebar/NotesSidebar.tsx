@@ -108,8 +108,12 @@ const NotesSidebarPresenter = () => {
       const note = notesStore.getNote({ id });
       if (!note) return;
 
+      // the way notes room ids get generated, using selectedNote.title
+      //   was not genering unique room ids. to not impact other parts of the
+      //   rooms subsystem, simply send the note id to ensure a truly unique
+      //   room id is generated for the note
       const newRoomRid = await roomsStore.createRoom(
-        `Notes: ${note.title}`,
+        `${noteRoomPath}`,
         'public',
         noteRoomPath,
         RoomType.background
