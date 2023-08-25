@@ -53,10 +53,12 @@ const EditorPresenter = () => {
     if (!selectedNote) return;
 
     // If there are multiple participants in a room,
-    // we only need one to be responsible for saving the document.
+    // we only need one to be responsible for saving the document at a time.
     if (roomsStore.currentRoom?.present?.length) {
-      // If we're not the creator of the room, don't save.
-      if (roomsStore.currentRoom?.creator !== loggedInAccount?.serverId) return;
+      // Always choose the first participant in the room to save the document.
+      const sortedList = roomsStore.currentRoom?.present.sort();
+      const saver = sortedList[0];
+      if (saver !== loggedInAccount?.serverId) return;
     }
 
     saveNoteUpdates({
