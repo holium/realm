@@ -4,7 +4,7 @@ export const isDev = () =>
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 export const shipName = memoize(() => {
-  return isDev() ? window.ship : 'botweb';
+  return isDev() ? 'botweb' : window.ship;
 });
 export const shipCode = memoize(() => {
   return 'novput-dapdun-riglur-dosmeb';
