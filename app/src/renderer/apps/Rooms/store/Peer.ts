@@ -317,7 +317,7 @@ export class PeerClass extends EventsEmitter {
 
   @action
   onSignal(signal: any) {
-    console.log('signal: %o, %o', this.peerId, signal);
+    // console.log('signal: %o, %o', this.peerId, signal);
     try {
       const msg = {
         type: 'signal',

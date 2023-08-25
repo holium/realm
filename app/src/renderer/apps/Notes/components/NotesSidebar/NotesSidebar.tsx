@@ -90,10 +90,10 @@ const NotesSidebarPresenter = () => {
       .find((room) => room.path === currentRoomPath);
     if (currentRoom && loggedInAccount) {
       if (currentRoom.present.includes(loggedInAccount.serverId)) {
-        console.log('onClickSpaceNote: leaving room %o...', [
-          currentRoom.rid,
-          loggedInAccount.serverId,
-        ]);
+        // console.log('onClickSpaceNote: leaving room %o...', [
+        //   currentRoom.rid,
+        //   loggedInAccount.serverId,
+        // ]);
         await roomsStore.leaveRoom(currentRoom.rid);
       }
     }
