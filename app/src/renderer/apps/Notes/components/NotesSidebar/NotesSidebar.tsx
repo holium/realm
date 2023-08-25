@@ -108,7 +108,7 @@ const NotesSidebarPresenter = () => {
       .find((room) => room.path === noteRoomPath);
     if (existingRoom) {
       // JOIN ROOM
-      await roomsStore.joinRoom(existingRoom.rid);
+      await roomsStore.joinRoom(existingRoom.rid, RoomType.background);
     } else {
       // CREATE ROOM
       const note = notesStore.getNote({ id });
@@ -125,7 +125,7 @@ const NotesSidebarPresenter = () => {
         RoomType.background
       );
 
-      await roomsStore.joinRoom(newRoomRid);
+      await roomsStore.joinRoom(newRoomRid, RoomType.background);
     }
 
     setConnectingToNoteRoom(false);
