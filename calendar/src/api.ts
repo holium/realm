@@ -2,7 +2,7 @@ import Urbit from '@urbit/http-api';
 import memoize from 'lodash/memoize';
 
 import useCalendarStore from './CalendarStore';
-import { log, shipCode, shipName, splitLastOccurrence } from './utils';
+import { isDev, log, shipCode, shipName, splitLastOccurrence } from './utils';
 type RepeatCount = { l: number; r: number };
 export type Roles = 'admin' | 'viewer' | 'guest' | 'member';
 export type Perms = {
@@ -20,9 +20,11 @@ export const api = {
     returns urbit instance
   */
 
-    const urb = new Urbit('http://localhost:8080', shipCode());
+    const urb = isDev()
+      ? new Urbit('http://localhost:8080', shipCode())
+      : new Urbit('');
 
-    urb.ship = shipName();
+    urb.ship = isDev() ? shipName() : window.ship;
     // Just log errors if we get any
     urb.onError = (message) => log('onError: ', message);
     urb.onOpen = () => log('urbit onOpen');
