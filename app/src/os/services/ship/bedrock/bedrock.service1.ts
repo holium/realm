@@ -1,10 +1,8 @@
-import Database from 'better-sqlite3-multiple-ciphers';
-
 import { BedrockSchema } from 'os/types';
 
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
-import { generalInitSql } from './bedrock.tables';
+import AbstractDbManager from './abstract';
 import { BedrockRow, BedrockUpdateType } from './bedrock.types';
 
 export const BUILTIN_TABLES: { [k: string]: string } = {
@@ -14,10 +12,11 @@ export const BUILTIN_TABLES: { [k: string]: string } = {
   relay: 'relays',
 };
 
+// knows how to talk to urbit %bedrock agent, and calls out to the passed in AbstractDbManager to actually save the data
 class BedrockService extends AbstractService<BedrockUpdateType> {
-  public db?: Database;
+  public db?: AbstractDbManager;
 
-  constructor(options?: ServiceOptions, db?: Database) {
+  constructor(options?: ServiceOptions, db?: AbstractDbManager) {
     super('BedrockService', options);
     this.db = db;
     if (options?.preload) {
@@ -29,150 +28,31 @@ class BedrockService extends AbstractService<BedrockUpdateType> {
     const result = await this._getState();
     if (!this.db || !this.db?.open) return;
     for (const table of result['data-tables']) {
-      if (BUILTIN_TABLES[table.type]) {
-        // TODO handle our special types
-      } else {
-        // ensure the sqlite tables exist
-        const versions: number[] = [];
-        for (const row of table.rows) {
-          if (!versions.includes(row.v)) {
-            versions.push(row.v);
-            this.db.exec(generalInitSql(this.makeTableName(row.type, row.v)));
-          }
-        }
-        // insert the rows
-        const insert = this.db.prepare(
-          `REPLACE INTO @tableName (
-            id,
-            received_at,
-            updated_at,
-            revision,
-            creator,
-            created_at,
-            path,
-            type,
-            v,
-            data
-          ) VALUES (
-            @id,
-            @received_at, 
-            @updated_at,
-            @revision,
-            @creator,
-            @created_at,
-            @path,
-            @type,
-            @v,
-            @data
-          )`
-        );
-        const insertMany = this.db.transaction((rows: any) => {
-          for (const row of rows) {
-            insert.run({
-              id: row['id'],
-              path: row['path'],
-              type: row['type'],
-              v: row['v'],
-              creator: row['creator'],
-              created_at: row['created-at'],
-              updated_at: row['updated-at'],
-              received_at: row['received-at'],
-              data: JSON.stringify(row.data),
-              tableName: this.makeTableName(row.type, row.v),
-            });
-          }
-        });
-        insertMany(table.rows);
-      }
+      this.db.createTableIfNotExists(table.rows);
+      this.db.insertRows(table.rows);
     }
     return;
-  }
-
-  private makeTableName(type: string, v: number) {
-    const tableName = `bedrock_${type}_${v}`;
-    if (BUILTIN_TABLES[type]) {
-      return `${BUILTIN_TABLES[type]}_${v}`;
-    }
-    return tableName;
-  }
-
-  private _insert(row: BedrockRow) {
-    if (!this.db?.open) return;
-    if (BUILTIN_TABLES[row.type]) {
-      // TODO implement for our pre-defined types
-      throw new Error();
-    } else {
-      const insert = this.db.prepare(
-        `REPLACE INTO ${this.makeTableName(row.type, row.v)} (
-          id,
-          received_at,
-          updated_at,
-          revision,
-          creator,
-          created_at,
-          path,
-          type,
-          v,
-          data
-        ) VALUES (
-          @id,
-          @received_at, 
-          @updated_at,
-          @revision,
-          @creator,
-          @created_at,
-          @path,
-          @type,
-          @v,
-          @data
-        )`
-      );
-      insert.run(row);
-    }
-  }
-
-  private _deleteById(table: string, id: string) {
-    if (!this.db?.open) return;
-    const deleteRow = this.db.prepare(`DELETE FROM ${table} WHERE id = ?`);
-    deleteRow.run(id);
-  }
-
-  // database queries
-  _getVotes(path: string) {
-    if (!this.db?.open) return;
-    const query = this.db.prepare(
-      `SELECT * FROM ${BUILTIN_TABLES.votes} WHERE path = ?;`
-    );
-    const result: any = query.all(path);
-    return result;
-  }
-
-  _getByPath(table: string, path: string) {
-    if (!this.db?.open) return;
-    const query = this.db.prepare(`SELECT * FROM ${table} WHERE path = ?;`);
-    const result: any = query.all(path);
-    return result;
   }
 
   async create(
     path: string,
     type: string,
-    version: number,
     data: any,
     schema: BedrockSchema
-  ) {
-    return APIConnection.getInstance().conduit.poke({
-      app: 'bedrock',
-      mark: 'db-action',
-      json: {
+  ): Promise<BedrockRow> {
+    return await APIConnection.getInstance().conduit.thread({
+      inputMark: 'db-action',
+      outputMark: 'db-vent',
+      threadName: 'venter',
+      body: {
         create: {
-          path: path,
-          type: type,
-          v: version,
-          data: data,
-          schema: schema,
+          path,
+          type,
+          data,
+          schema,
         },
       },
+      desk: 'realm',
     });
   }
 

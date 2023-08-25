@@ -24,6 +24,7 @@ export const BUILTIN_TABLES: { [k: string]: string } = {
 
 abstract class AbstractDbManager {
   protected readonly name: string;
+  public abstract readonly open: boolean; // set this when the database is accessible
 
   constructor(params: { preload: boolean; name?: string; verbose?: boolean }) {
     if (!params.name) throw new Error('DbManager must have a name');
@@ -34,10 +35,12 @@ abstract class AbstractDbManager {
     }
   }
 
-  protected makeTableName(type: string, v: number) {
-    const tableName = `bedrock_${type}_${v}`;
+  protected makeTableName(type: string) {
+    const tableName = `bedrock_${type
+      .replace(/^\//, '')
+      .replaceAll(/[./]/g, '_')}`;
     if (BUILTIN_TABLES[type]) {
-      return `${BUILTIN_TABLES[type]}_${v}`;
+      return `${BUILTIN_TABLES[type]}`;
     }
     return tableName;
   }
