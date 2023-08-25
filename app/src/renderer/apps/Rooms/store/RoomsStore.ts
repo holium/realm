@@ -444,11 +444,22 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   connect() {
-    const protocol =
-      process.env.NODE_ENV === 'development' &&
-      !(this.provider.indexOf('localhost') === -1)
-        ? 'ws'
-        : 'wss';
+    let protocol = 'ws';
+    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+      this.provider = 'localhost:3030';
+    } else {
+      protocol = 'wss';
+      if (
+        process.env.RELEASE_CHANNEL === 'latest' ||
+        process.env.RELEASE_CHANNEL === 'hotfix'
+      ) {
+        // production signaling/socket server
+        this.provider = 'litzod-dozzod-hostyv.holium.live';
+      } else {
+        // test signaling/socket server
+        this.provider = 'node-test.holium.live';
+      }
+    }
     const websocket = new WebSocket(
       `${protocol}://${this.provider}/signaling?serverId=${this.ourId}`
     );
@@ -552,7 +563,6 @@ export class RoomsStore extends EventsEmitter {
                 }
                 const peer = this.peers.get(peerId);
                 if (peer) {
-                  peer.refCount++;
                   peer.rooms.set(room.rid, room);
                   console.log('already have peer', peerId);
                   return;
@@ -598,12 +608,8 @@ export class RoomsStore extends EventsEmitter {
                 SoundActions.playRoomPeerLeave();
               }
               console.log('someone left the room', event);
-              this.destroyPeer(event.peer_id);
+              this.destroyPeer(event.rid, event.peer_id);
               room.removePeer(event.peer_id);
-
-              if (event.room.rtype === RoomType.media) {
-                this.currentRid = event.rid;
-              }
             }
           }
         }
@@ -614,7 +620,7 @@ export class RoomsStore extends EventsEmitter {
           const room = this.rooms.get(event.rid);
           if (room) {
             room.present.forEach((peerId: string) => {
-              if (peerId !== this.ourId) this.destroyPeer(peerId);
+              if (peerId !== this.ourId) this.destroyPeer(event.rid, peerId);
             });
             if (room.rtype === RoomType.media) {
               this.currentRid = null;
@@ -641,7 +647,7 @@ export class RoomsStore extends EventsEmitter {
                 'peer was destroyed, but is attempting to reconnect',
                 event.from
               );
-              this.destroyPeer(event.from);
+              this.destroyPeer(room.rid, event.from);
               peer = this.createPeer(room.rid, room.rtype, event.from);
               return;
             }
@@ -831,13 +837,12 @@ export class RoomsStore extends EventsEmitter {
       console.error('createPeer: no room with id %o', rid);
       return;
     }
-
     let peer = this.peers.get(peerId);
     if (peer) {
-      peer.refCount++;
       peer.rooms.set(room.rid, room);
       return;
     }
+
     const streams: MediaStream[] = [];
     if (rtype === RoomType.media) {
       if (!this.currentRid) {
@@ -896,27 +901,25 @@ export class RoomsStore extends EventsEmitter {
     );
     const peer = this.peers.get(peerId);
     if (peer) {
-      if (peer.refCount === 0) {
-        console.warn('peer %o refcount is 0', peer.peerId);
-      }
       if (this.currentRid) {
         peer.rooms.delete(this.currentRid);
-      }
-      peer.refCount--;
-      if (peer.refCount === 0) {
-        // destroy peer
-        peer.destroy();
+        if (peer.rooms.size === 0) {
+          // destroy peer
+          peer.destroy();
+        }
       }
     }
   }
 
   @action
-  destroyPeer(peerId: string) {
+  destroyPeer(rid: string, peerId: string) {
     const peer = this.peers.get(peerId);
     if (peer) {
-      peer.refCount--;
-      if (peer.refCount === 0) {
-        console.log(`destroyPeer: ${peer.peerId} refCount is 0. clearing...`);
+      peer.rooms.delete(rid);
+      if (peer.rooms.size === 0) {
+        console.log(
+          `destroyPeer: ${peer.peerId} peer left all rooms. clearing...`
+        );
         peer.removeAllListeners();
         peer.destroy();
         this.peers.delete(peerId);

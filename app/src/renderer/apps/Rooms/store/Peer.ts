@@ -35,9 +35,6 @@ export class PeerClass extends EventsEmitter {
   @observable stream: MediaStream | null = null;
   @observable ourStreams: MediaStream[];
   @observable reconnectAttempts = 0;
-  // how to know its safe to destroy/delete a peer without more complex
-  //  mechanisms at play. good ol' reference counting.
-  @observable refCount = 0;
   @observable rooms: Map<string, RoomModel> = new Map();
 
   @observable onDataChannel: OnDataChannel = async () => {};
@@ -66,7 +63,6 @@ export class PeerClass extends EventsEmitter {
     this.ourStreams = stream;
     this.ourId = ourId;
     this.peer = this.createPeer(peerId, initiator, stream);
-    this.refCount++;
     this.onDataChannel = listeners.onDataChannel;
     this.onLeftRoom = listeners.onLeftRoom;
   }

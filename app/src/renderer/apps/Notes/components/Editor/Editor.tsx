@@ -50,13 +50,18 @@ const EditorPresenter = () => {
   // Auto save the document after 3 seconds of inactivity,
   // with a random delay of up to 3 seconds to avoid clients saving at the same time.
   const debouncedAutoSave = debounce(() => {
-    if (!selectedNote) return;
+    if (!selectedNote || !selectedSpace) return;
 
     // If there are multiple participants in a room,
-    // we only need one to be responsible for saving the document.
-    if (roomsStore.currentRoom?.present?.length) {
-      // If we're not the creator of the room, don't save.
-      if (roomsStore.currentRoom?.creator !== loggedInAccount?.serverId) return;
+    // we only need one to be responsible for saving the document at a time.
+    const roomPath = selectedSpace.path + selectedNote.id;
+    const room = roomsStore.getRoomByPath(roomPath);
+
+    if (room?.present?.length) {
+      // Always choose the first participant in the room to save the document.
+      const sortedList = room.present.sort();
+      const saver = sortedList[0];
+      if (saver !== loggedInAccount?.serverId) return;
     }
 
     saveNoteUpdates({
