@@ -632,7 +632,7 @@ export class RoomsStore extends EventsEmitter {
         break;
       case 'signal':
         {
-          console.log('signal: %o', event);
+          // console.log('signal: %o', event);
           const room = this.rooms.get(event.rid);
           if (room) {
             if (room.rtype === RoomType.media && !this.ourPeer.audioStream) {
