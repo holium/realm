@@ -30,16 +30,15 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
   const onClickButton = async () => {
     if (!selectedChat) return;
 
-    // DELETE/LEAVE CURRENT ROOM
-    roomsStore.cleanUpCurrentRoom();
-
-    const areWeAlreadyInRoom = existingRoom?.present.includes(
-      loggedInAccount?.serverId ?? ''
-    );
-    if (areWeAlreadyInRoom) {
-      if (subroute === 'room') setSubroute('chat');
-
-      return;
+    if (existingRoom) {
+      const areWeAlreadyInRoom = existingRoom.present.includes(
+        loggedInAccount?.serverId ?? ''
+      );
+      if (areWeAlreadyInRoom) {
+        await roomsStore.leaveRoom(existingRoom.rid);
+        if (subroute === 'room') setSubroute('chat');
+        return;
+      }
     }
 
     if (existingRoom) {
@@ -61,7 +60,11 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
   };
 
   const onClickAvatar = () => {
-    if (existingRoom && isStandaloneChat) {
+    if (
+      existingRoom &&
+      existingRoom.present.includes(loggedInAccount?.serverId ?? '') &&
+      isStandaloneChat
+    ) {
       setSubroute('room');
     }
   };

@@ -46,7 +46,19 @@ export const AddIdentityStep = ({ setStep }: StepProps) => {
       serverUrl,
     });
 
-    const { passwordHash, masterAccountId } = OnboardingStorage.get();
+    const result = await OnboardingIPC.getFirstMasterAccount();
+    if (!result) {
+      throw new Error('You have no masterAccount');
+    }
+    const { id: masterAccountId, passwordHash } = result;
+
+    OnboardingStorage.set({
+      serverId,
+      serverUrl,
+      serverCode,
+      passwordHash,
+      clientSideEncryptionKey: await OnboardingIPC.getClientEncryptionKey(),
+    });
 
     if (!serverId || !passwordHash || !masterAccountId) return false;
 

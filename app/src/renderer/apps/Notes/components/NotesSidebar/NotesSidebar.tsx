@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
+import { runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 
 import { Button, Flex, Icon, Spinner } from '@holium/design-system/general';
 import { TextInput } from '@holium/design-system/inputs';
 import { useToggle } from '@holium/design-system/util';
 
+import { RoomType } from 'renderer/apps/Rooms/store/RoomsStore';
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
@@ -45,10 +47,21 @@ const NotesSidebarPresenter = () => {
 
   useEffect(() => {
     return () => {
-      // Leave current room on unmount.
-      roomsStore.cleanUpCurrentRoom();
+      if (selectedSpace && selectedNoteId) {
+        const currentRoomPath = `${selectedSpace.path}${selectedNoteId}`;
+        const currentRoom = roomsStore
+          .getSpaceRooms(selectedSpace.path)
+          .find((room) => room.path === currentRoomPath);
+        if (currentRoom && loggedInAccount) {
+          if (currentRoom.present.includes(loggedInAccount.serverId)) {
+            runInAction(async () => {
+              await roomsStore.leaveRoom(currentRoom.rid);
+            });
+          }
+        }
+      }
     };
-  }, []);
+  }, [selectedSpace, selectedNoteId]);
 
   if (!selectedSpace) return null;
 
@@ -68,18 +81,28 @@ const NotesSidebarPresenter = () => {
   };
 
   const onClickSpaceNote = async (id: string, space: string) => {
-    setSelectedNoteId({ id });
+    // simply reclicked note. don't do anything. stay in room.
+    if (id === selectedNoteId) return;
 
-    const noteRoomPath = space + id;
-    const areWeAlreadyInTheRoom =
-      roomsStore.currentRoom && roomsStore.currentRoom?.path === noteRoomPath;
-    if (areWeAlreadyInTheRoom) return;
+    const currentRoomPath = `${space}${selectedNoteId}`;
+    const currentRoom = roomsStore
+      .getSpaceRooms(space)
+      .find((room) => room.path === currentRoomPath);
+    if (currentRoom && loggedInAccount) {
+      if (currentRoom.present.includes(loggedInAccount.serverId)) {
+        // console.log('onClickSpaceNote: leaving room %o...', [
+        //   currentRoom.rid,
+        //   loggedInAccount.serverId,
+        // ]);
+        await roomsStore.leaveRoom(currentRoom.rid);
+      }
+    }
+
+    setSelectedNoteId({ id });
 
     setConnectingToNoteRoom(true);
 
-    // DELETE/LEAVE CURRENT ROOM
-    roomsStore.cleanUpCurrentRoom();
-
+    const noteRoomPath = `${space}${id}`;
     const existingRoom = roomsStore
       .getSpaceRooms(space)
       .find((room) => room.path === noteRoomPath);
@@ -91,18 +114,28 @@ const NotesSidebarPresenter = () => {
       const note = notesStore.getNote({ id });
       if (!note) return;
 
+      // the way notes room ids get generated, using selectedNote.title
+      //   was not genering unique room ids. to not impact other parts of the
+      //   rooms subsystem, simply send the note id to ensure a truly unique
+      //   room id is generated for the note
       const newRoomRid = await roomsStore.createRoom(
-        `Notes: ${note.title}`,
+        `${noteRoomPath}`,
         'public',
-        noteRoomPath
+        noteRoomPath,
+        RoomType.background
       );
+
       await roomsStore.joinRoom(newRoomRid);
     }
 
     setConnectingToNoteRoom(false);
 
-    // In Notes rooms everyone should be muted by default.
-    roomsStore.ourPeer.mute();
+    // only do this if there are no media rooms active. if there are, let them
+    //  control the audio
+    if (roomsStore.getNumRooms(RoomType.media) === 0) {
+      // In Notes rooms everyone should be muted by default.
+      roomsStore.ourPeer.mute();
+    }
   };
 
   return (
@@ -166,6 +199,13 @@ const NotesSidebarPresenter = () => {
                     }
                   }}
                   onClickDelete={() => {
+                    const currentRoomPath = `${note.space}${note.id}`;
+                    const currentRoom = roomsStore
+                      .getSpaceRooms(note.space)
+                      .find((room) => room.path === currentRoomPath);
+                    if (currentRoom) {
+                      roomsStore.deleteRoom(currentRoom.rid);
+                    }
                     deleteNote({ id: note.id, space: note.space });
                   }}
                 />

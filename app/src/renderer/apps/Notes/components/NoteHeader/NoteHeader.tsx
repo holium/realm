@@ -2,17 +2,31 @@ import { ChangeEvent } from 'react';
 import debounce from 'lodash/debounce';
 import { observer } from 'mobx-react';
 
+import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { ContextMenuOption } from 'renderer/components';
+import { useAppState } from 'renderer/stores/app.store';
 import { useShipStore } from 'renderer/stores/ship.store';
 
 import { NoteHeaderView } from './NoteHeaderView';
 
 const NoteHeaderPresenter = () => {
-  const { notesStore } = useShipStore();
+  const { loggedInAccount } = useAppState();
+  const { notesStore, spacesStore } = useShipStore();
+  const roomsStore = useRoomsStore();
 
   const { selectedNote, saving } = notesStore;
+  const selectedSpace = spacesStore.selected;
 
-  if (!selectedNote) return null;
+  if (!loggedInAccount || !selectedSpace || !selectedNote) {
+    return null;
+  }
+
+  // const isSpaceNote = selectedNote.space !== `/${loggedInAccount.serverId}/our`;
+  const roomPath = selectedSpace.path + selectedNote.id;
+  const existingRoom = roomsStore.getRoomByPath(roomPath);
+
+  if (!existingRoom || !existingRoom.present.includes(loggedInAccount.serverId))
+    return null;
 
   const noteEditedAtString = new Date(selectedNote.updated_at).toLocaleString(
     'en-US',
