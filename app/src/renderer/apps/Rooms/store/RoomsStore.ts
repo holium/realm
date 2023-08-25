@@ -548,7 +548,7 @@ export class RoomsStore extends EventsEmitter {
           if (!this.ourRooms.includes(event.room.rid)) return;
           const room = this.rooms.get(event.room.rid);
           if (room) {
-            this.rooms.set(event.room.rid, event.room);
+            this.rooms.set(event.room.rid, new RoomModel(event.room));
             // if (event.room.rid === this.currentRid) {
             // if we entered a room, we need to create a peer for each user in the room
             if (event.peer_id === this.ourId) {
