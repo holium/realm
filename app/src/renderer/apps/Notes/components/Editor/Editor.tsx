@@ -61,9 +61,6 @@ const EditorPresenter = () => {
       // Always choose the first participant in the room to save the document.
       const sortedList = room.present.sort();
       const saver = sortedList[0];
-      console.log('sortedList', sortedList);
-      console.log('saver', saver);
-
       if (saver !== loggedInAccount?.serverId) return;
     }
 
