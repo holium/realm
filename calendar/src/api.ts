@@ -24,7 +24,7 @@ export const api = {
       ? new Urbit('http://localhost:8080', shipCode())
       : new Urbit('');
 
-    urb.ship = isDev() ? shipName() : window.ship;
+    urb.ship = shipName();
     // Just log errors if we get any
     urb.onError = (message) => log('onError: ', message);
     urb.onOpen = () => log('urbit onOpen');
