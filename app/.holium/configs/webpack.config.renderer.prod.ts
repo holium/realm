@@ -104,6 +104,11 @@ const configuration: webpack.Configuration = {
         process.env.RELEASE_CHANNEL === 'hotfix'
           ? '~hostyv:realm'
           : '~nimwyd-ramwyl-dozzod-hostyv:realm',
+      ROOMS_PROVIDER:
+        process.env.RELEASE_CHANNEL === 'latest' ||
+        process.env.RELEASE_CHANNEL === 'hotfix'
+          ? 'litzod-dozzod-hostyv.holium.live'
+          : 'node-test.holium.live',
       DEBUG_PROD: false,
       SENTRY_DSN:
         'https://56fbf5e600db48cf8a785931be1ca5e4@o1327359.ingest.sentry.io/4504310987358208',
