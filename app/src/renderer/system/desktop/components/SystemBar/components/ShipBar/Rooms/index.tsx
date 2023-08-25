@@ -5,6 +5,7 @@ import { Box } from '@holium/design-system/general';
 import { RoomsDock } from '@holium/design-system/os';
 
 import { roomTrayConfig } from 'renderer/apps/Rooms/config';
+import { RoomType } from 'renderer/apps/Rooms/store/RoomsStore';
 import { useRoomsStore } from 'renderer/apps/Rooms/store/RoomsStoreContext';
 import { useTrayApps } from 'renderer/apps/store';
 import { calculateAnchorPoint } from 'renderer/lib/position';
@@ -75,7 +76,9 @@ const RoomTrayPresenter = () => {
     }) || [];
 
   const rooms = spacesStore.selected
-    ? roomsStore.getSpaceRooms(spacesStore.selected?.path)
+    ? roomsStore
+        .getSpaceRooms(spacesStore.selected?.path)
+        .filter((room) => !(room.rtype === RoomType.background))
     : [];
 
   return (

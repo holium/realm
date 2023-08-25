@@ -4,6 +4,7 @@ import { BedrockSchema } from 'os/types';
 
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
+import { Json } from '../../api/types';
 import { LexiconUpdateType } from './lexicon.types';
 
 const WordSchema: BedrockSchema = [['word', 't']];
@@ -22,6 +23,15 @@ const RelatedSchema: BedrockSchema = [
   ['related', 't'],
   ['word-id', 'id'],
 ];
+
+export enum LEXICON_BEDROCK_TYPES {
+  WORD = '/lexicon-word/0v4.fao37.8424p.trcih.kr5je.80jnn', // in dojo (sham (limo [['word' 't'] ~]))
+  DEFINITION = '/lexicon-definition/0v3.omons.hajqb.643gt.jd474.8qoj1', //(sham (limo [['definition' 't'] ['word-id' 'id'] ~]))
+  SENTENCE = '/lexicon-sentence/0v948nd.km7ue.1brbd.vqei5.hktbo', //(sham (limo [['sentence' 't'] ['word-id' 'id'] ~]))
+  RELATED = '/lexicon-related/0v4.j76bl.v9ue2.9u19u.1mma8.641jf', //(sham (limo [['related' 't'] ['word-id' 'id'] ~]))
+  VOTE = '/vote/0v3.hirga.bspbd.edlma.dfk59.gtu38',
+}
+
 export enum LEXICON_TABLES {
   WORDS = 'lexicon_words',
   DEFINITIONS = 'lexicon_definitions',
@@ -99,7 +109,7 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
           type: vote['type'],
           parent_id: vote.data['parent-id'],
           parent_type: vote.data['parent-type'],
-          v: vote['v'],
+          v: 0,
           // fall bock to zero since we have not-null constraint
         });
       }
@@ -143,7 +153,7 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
           created_at: word['created-at'],
           path: word['path'],
           type: word['type'],
-          v: word['v'],
+          v: 0,
         });
       }
     });
@@ -189,7 +199,7 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
           path: definition['path'],
           type: definition['type'],
           word_id: definition.data['word-id'],
-          v: definition['v'],
+          v: 0,
         });
       }
     });
@@ -236,7 +246,7 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
           path: sentence['path'],
           type: sentence['type'],
           word_id: sentence.data['word-id'],
-          v: sentence['v'],
+          v: 0,
         });
       }
     });
@@ -289,32 +299,10 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
     const result: any = query.all(path);
     return result;
   }
-  async create(
-    path: string,
-    type: string,
-    version: number,
-    data: any,
-    schema: BedrockSchema
-  ) {
-    return APIConnection.getInstance().conduit.poke({
-      app: 'bedrock',
-      mark: 'db-action',
-      json: {
-        create: {
-          path: path,
-          type: type,
-          v: version,
-          data: data,
-          schema: schema,
-        },
-      },
-    });
-  }
   async edit(
     rowID: string,
     path: string,
     type: string,
-    version: number,
     data: any,
     schema: BedrockSchema
   ) {
@@ -327,7 +315,6 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
           'input-row': {
             path: path,
             type: type,
-            v: version,
             data: data,
             schema: schema,
           },
@@ -351,15 +338,13 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
   async runThread(
     path: string,
     type: string,
-    version: number,
     data: any,
     schema: BedrockSchema
   ) {
-    const json: any = {
+    const json: Json = {
       create: {
         path: path,
         type: type,
-        v: version,
         data: data,
         schema: schema,
       },
@@ -391,7 +376,7 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
       deleted: false,
       revision: 0,
       protocal: 'all',
-      type: 'lexicon-word',
+      type: LEXICON_BEDROCK_TYPES.WORD,
       id: '/~lux/~2023.6.23..16.58.30..3b60',
       path: '/~lux/randy',
     };
@@ -416,32 +401,47 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
   async createWord(path: string, word: string) {
     const data = [word];
 
-    return this.runThread(path, 'lexicon-word', 0, data, WordSchema);
+    return this.runThread(path, LEXICON_BEDROCK_TYPES.WORD, data, WordSchema);
   }
   async editWord(path: string, wordID: string, word: string) {
     const data = [word];
-    return await this.edit(wordID, path, 'lexicon-word', 0, data, WordSchema);
+    return await this.edit(
+      wordID,
+      path,
+      LEXICON_BEDROCK_TYPES.WORD,
+      data,
+      WordSchema
+    );
   }
   async removeWord(path: string, wordID: string) {
-    return await this.remove(wordID, path, 'lexicon-word');
+    return await this.remove(wordID, path, LEXICON_BEDROCK_TYPES.WORD);
   }
   async createDefinition(path: string, wordID: string, definition: string) {
     const data = [definition, wordID];
-    return await this.create(
+    return await this.runThread(
       path,
-      'lexicon-definition',
-      0,
+      LEXICON_BEDROCK_TYPES.DEFINITION,
       data,
       DefinitionSchema
     );
   }
   async createSentence(path: string, wordID: string, sentence: string) {
     const data = [sentence, wordID];
-    return await this.create(path, 'lexicon-sentence', 0, data, SentenceSchema);
+    return await this.runThread(
+      path,
+      LEXICON_BEDROCK_TYPES.SENTENCE,
+      data,
+      SentenceSchema
+    );
   }
   async createRelated(path: string, wordID: string, related: string) {
     const data = [related, wordID];
-    return await this.create(path, 'lexicon-related', 0, data, RelatedSchema);
+    return await this.runThread(
+      path,
+      LEXICON_BEDROCK_TYPES.RELATED,
+      data,
+      RelatedSchema
+    );
   }
   async voteOnWord(
     path: string,
@@ -451,19 +451,19 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
     ship: string
   ) {
     if (vote === null) {
-      return await this.remove(voteId, path, 'vote');
+      return await this.remove(voteId, path, LEXICON_BEDROCK_TYPES.VOTE);
     } else {
       // Example vote
       const data = {
         up: vote,
         ship,
-        'parent-type': 'lexicon-word',
+        'parent-type': LEXICON_BEDROCK_TYPES.WORD,
         'parent-id': wordID,
         'parent-path': path,
       };
 
       // add conditionals for editing instead of creating
-      return await this.create(path, 'vote', 0, data, []);
+      return await this.runThread(path, LEXICON_BEDROCK_TYPES.VOTE, data, []);
     }
   }
   async subscribePath(path: string) {
@@ -487,19 +487,19 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
       //insert a new row into the db
       const change = update[0].row.type;
       switch (change) {
-        case 'lexicon-word': {
+        case LEXICON_BEDROCK_TYPES.WORD: {
           this._insertWords([update[0].row]);
           break;
         }
-        case 'lexicon-definition': {
+        case LEXICON_BEDROCK_TYPES.DEFINITION: {
           this._insertDefinitions([update[0].row]);
           break;
         }
-        case 'lexicon-sentence': {
+        case LEXICON_BEDROCK_TYPES.SENTENCE: {
           this._insertSentences([update[0].row]);
           break;
         }
-        case 'vote': {
+        case LEXICON_BEDROCK_TYPES.VOTE: {
           this._insertVotes([update[0].row]);
           break;
         }
@@ -508,11 +508,11 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
       //delete a row from the db
       const change = update[0].type;
       switch (change) {
-        case 'lexicon-word': {
+        case LEXICON_BEDROCK_TYPES.WORD: {
           this._deleteWord(update[0].id);
           break;
         }
-        case 'vote': {
+        case LEXICON_BEDROCK_TYPES.VOTE: {
           this._deleteVote(update[0].id);
           break;
         }
@@ -543,13 +543,13 @@ class LexiconService extends AbstractService<LexiconUpdateType> {
 
     if (result) {
       result['data-tables'].forEach((item: any) => {
-        if (item.type === 'lexicon-word') {
+        if (item.type === LEXICON_BEDROCK_TYPES.WORD) {
           words = item.rows;
-        } else if (item.type === 'vote') {
+        } else if (item.type === LEXICON_BEDROCK_TYPES.VOTE) {
           votes = item.rows;
-        } else if (item.type === 'lexicon-definition') {
+        } else if (item.type === LEXICON_BEDROCK_TYPES.DEFINITION) {
           definitions = item.rows;
-        } else if (item.type === 'lexicon-sentence') {
+        } else if (item.type === LEXICON_BEDROCK_TYPES.SENTENCE) {
           sentences = item.rows;
         }
       });

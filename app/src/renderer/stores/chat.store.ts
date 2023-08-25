@@ -243,9 +243,6 @@ export const ChatStore = types
         self.inbox.find((chat) => chat.path === path)
       );
       yield ChatIPC.resyncPathIfNeeded(path);
-      if (self.subroute === 'inbox') {
-        self.subroute = 'chat';
-      }
       self.chatLoader.set('loaded');
     }),
     togglePinned: flow(function* (path: string, pinned: boolean) {

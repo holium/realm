@@ -17,7 +17,7 @@ import { useTrayApps } from '../store';
 import { ProviderSelector } from './components/ProviderSelector';
 import { RoomRow } from './components/RoomRow';
 import { roomTrayConfig } from './config';
-import { RoomModel } from './store/RoomsStore';
+import { RoomModel, RoomType } from './store/RoomsStore';
 import { useRoomsStore } from './store/RoomsStoreContext';
 
 const RoomsPresenter = () => {
@@ -34,7 +34,14 @@ const RoomsPresenter = () => {
     }
   }, []);
 
-  const rooms = roomsStore.getSpaceRooms(spacesStore.selected?.path ?? '');
+  const spacePath =
+    spacesStore.selected?.type !== 'our'
+      ? spacesStore.selected?.path ?? ''
+      : '/our';
+
+  const rooms = roomsStore
+    .getSpaceRooms(spacePath)
+    .filter((room) => !(room.rtype === RoomType.background));
 
   return (
     <>
