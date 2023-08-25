@@ -130,7 +130,7 @@ const EditorPresenter = () => {
       existingRoom &&
       !existingRoom.present.includes(loggedInAccount.serverId)
     ) {
-      await roomsStore.joinRoom(existingRoom.rid);
+      await roomsStore.joinRoom(existingRoom.rid, RoomType.background);
     } else {
       // the way notes room ids get generated, using selectedNote.title
       //   was not genering unique room ids. to not impact other parts of the
