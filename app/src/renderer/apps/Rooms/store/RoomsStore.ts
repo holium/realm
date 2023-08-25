@@ -145,6 +145,7 @@ export class RoomsStore extends EventsEmitter {
   >();
   @observable chat: RoomChat[] = [];
   @observable currentRid: string | null = null;
+  @observable ourRooms: string[] = null;
   @observable isMuted = false;
   @observable isSpeaking = false;
   @observable isAudioAttached = false;
@@ -444,22 +445,23 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   connect() {
-    let protocol = 'ws';
-    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-      this.provider = 'localhost:3030';
-    } else {
-      protocol = 'wss';
-      if (
-        process.env.RELEASE_CHANNEL === 'latest' ||
-        process.env.RELEASE_CHANNEL === 'hotfix'
-      ) {
-        // production signaling/socket server
-        this.provider = 'litzod-dozzod-hostyv.holium.live';
-      } else {
-        // test signaling/socket server
-        this.provider = 'node-test.holium.live';
-      }
-    }
+    const protocol = 'wss';
+    this.provider = 'node-test.holium.live';
+    // if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+    //   this.provider = 'localhost:3030';
+    // } else {
+    //   protocol = 'wss';
+    //   if (
+    //     process.env.RELEASE_CHANNEL === 'latest' ||
+    //     process.env.RELEASE_CHANNEL === 'hotfix'
+    //   ) {
+    //     // production signaling/socket server
+    //     this.provider = 'litzod-dozzod-hostyv.holium.live';
+    //   } else {
+    //     // test signaling/socket server
+    //     this.provider = 'node-test.holium.live';
+    //   }
+    // }
     const websocket = new WebSocket(
       `${protocol}://${this.provider}/signaling?serverId=${this.ourId}`
     );
@@ -543,6 +545,7 @@ export class RoomsStore extends EventsEmitter {
       case 'room-entered':
         {
           console.log('room entered', event);
+          if (!this.ourRooms.includes(event.room.rid)) return;
           const room = this.rooms.get(event.room.rid);
           if (room) {
             this.rooms.set(event.room.rid, event.room);
@@ -616,6 +619,11 @@ export class RoomsStore extends EventsEmitter {
       case 'room-deleted':
         {
           console.log('room-deleted: %o', event);
+          if (this.ourRooms.includes(event.rid)) {
+            this.ourRooms = this.ourRooms.filter(
+              (rid: string) => rid !== event.rid
+            );
+          }
           const room = this.rooms.get(event.rid);
           if (room) {
             room.present.forEach((peerId: string) => {
@@ -732,6 +740,7 @@ export class RoomsStore extends EventsEmitter {
   @action
   deleteRoom(rid: string) {
     console.log('deleteRoom: %o', rid);
+    this.ourRooms = this.ourRooms.filter((roomid) => roomid !== rid);
     const room = this.rooms.get(rid);
     if (room) {
       this.rooms.delete(rid);
@@ -763,15 +772,14 @@ export class RoomsStore extends EventsEmitter {
   }
 
   @action
-  async joinRoom(rid: string) {
+  async joinRoom(rid: string, rtype: RoomType = RoomType.media) {
     console.log('joinRoom: %o', [rid]);
-    const room = this.rooms.get(rid);
-    if (room) {
-      if (room.rtype === RoomType.media) {
-        this.setCurrentRoom(rid);
-        if (!this.ourPeer.audioStream) {
-          await this.ourPeer.enableAudio();
-        }
+    this.ourRooms.push(rid);
+
+    if (rtype === RoomType.media) {
+      this.setCurrentRoom(rid);
+      if (!this.ourPeer.audioStream) {
+        await this.ourPeer.enableAudio();
       }
     }
     this.websocket.send(
@@ -780,6 +788,7 @@ export class RoomsStore extends EventsEmitter {
         rid,
       })
     );
+    const room = this.rooms.get(rid);
     // add us to the room
     if (room) {
       room.addPeer(this.ourId);
