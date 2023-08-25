@@ -145,7 +145,7 @@ export class RoomsStore extends EventsEmitter {
   >();
   @observable chat: RoomChat[] = [];
   @observable currentRid: string | null = null;
-  @observable ourRooms: string[] = null;
+  @observable ourRooms: string[] = [];
   @observable isMuted = false;
   @observable isSpeaking = false;
   @observable isAudioAttached = false;
