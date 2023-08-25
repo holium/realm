@@ -536,7 +536,6 @@ export class RoomsStore extends EventsEmitter {
         // eslint-disable-next-line no-case-declarations
         const newRoom = new RoomModel(event.room);
         newRoom.update(event.room);
-        this.rooms.set(event.room.rid, newRoom);
         if (event.room.rtype === RoomType.media) {
           this.currentRid = event.room.rid;
         }
@@ -546,7 +545,7 @@ export class RoomsStore extends EventsEmitter {
           console.log('room entered', event);
           const room = this.rooms.get(event.room.rid);
           if (room) {
-            room.update(event.room);
+            this.rooms.set(event.room.rid, event.room);
             // if (event.room.rid === this.currentRid) {
             // if we entered a room, we need to create a peer for each user in the room
             if (event.peer_id === this.ourId) {
