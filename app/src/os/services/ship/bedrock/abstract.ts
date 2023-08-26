@@ -13,14 +13,16 @@ import {
   deleteRowUpdate,
 } from './bedrock.types';
 
-export const BUILTIN_TABLES: { [k: string]: string } = {
-  vote: 'votes',
-  comment: 'comments',
-  rating: 'ratings',
-  relay: 'relays',
-  message: 'message',
-  chat: 'chat',
-};
+export enum BUILTIN_TYPES {
+  VOTE = '/vote/0v3.hirga.bspbd.edlma.dfk59.gtu38',
+  RATING = '/rating/0v1.v2o4q.pouki.srj9s.5482s.r9m5k',
+  COMMENT = '/comment/0v2.i12tg.bem6d.26vn3.710ac.ff5ad',
+  REACT = '/react/0v5.ekos4.ojb47.ltstl.t0av6.2irf8',
+  TAG = '/tag/0v3.1n5f4.fbcbp.9al74.3kvpq.r78fh',
+  LINK = '/link/0v3.tg68o.rji01.m25h2.hs6fo.0lqlg',
+  RELAY = '/relay/0v3.p12q0.0qv7v.29ogb.7lb9q.45hhv',
+  CREDS = '/creds/0v1.dm2bu.v3m6c.jug6d.32qb0.3h103',
+}
 
 abstract class AbstractDbManager {
   protected readonly name: string;
@@ -36,13 +38,7 @@ abstract class AbstractDbManager {
   }
 
   protected makeTableName(type: string) {
-    const tableName = `bedrock_${type
-      .replace(/^\//, '')
-      .replaceAll(/[./]/g, '_')}`;
-    if (BUILTIN_TABLES[type]) {
-      return `${BUILTIN_TABLES[type]}`;
-    }
-    return tableName;
+    return `bedrock_${type.replace(/^\//, '').replaceAll(/[./-]/g, '_')}`;
   }
 
   // return true if table is ready to be written to
@@ -57,9 +53,9 @@ abstract class AbstractDbManager {
   // return true if the rows were deleted
   abstract deleteRows(dels: deleteRowUpdate[]): boolean;
 
-  abstract selectByPath(type: string, v: number, path: string): BedrockRow[];
+  abstract selectByPath(type: string, path: string): BedrockRow[];
 
-  abstract selectById(type: string, v: number, id: string): BedrockRow[];
+  abstract selectById(type: string, id: string): BedrockRow[];
 
   /**
    * ------------------------------

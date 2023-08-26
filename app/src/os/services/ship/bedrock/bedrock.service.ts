@@ -1,345 +1,256 @@
-import log from 'electron-log';
-import { preSig } from '@urbit/aura';
-import Database from 'better-sqlite3-multiple-ciphers';
-
-import { InvitePermissionType } from 'renderer/stores/models/chat.model';
+import { BedrockSchema } from 'os/types';
 
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
-import { Action } from '../../api/types';
-import { ChatDB, chatDBPreload } from './chat.db';
-import { ChatPathMetadata, ChatPathType, ChatUpdateTypes } from './chat.types';
+import { Json } from '../../api/types';
+import AbstractDbManager, { BUILTIN_TYPES } from './abstract';
+import {
+  BedrockIDTriple,
+  BedrockRow,
+  BedrockUpdateType,
+  CredsRow,
+  deleteRowUpdate,
+  GeneralRow,
+  VoteRow,
+} from './bedrock.types';
 
-export class ChatService extends AbstractService<ChatUpdateTypes> {
-  public chatDB?: ChatDB;
-  constructor(options?: ServiceOptions, db?: Database) {
-    super('chatService', options);
+// knows how to talk to urbit %bedrock agent, and calls out to the passed in AbstractDbManager to actually save the data
+class BedrockService extends AbstractService<BedrockUpdateType> {
+  public db?: AbstractDbManager;
+
+  constructor(options?: ServiceOptions, db?: AbstractDbManager) {
+    super('BedrockService', options);
+    this.db = db;
     if (options?.preload) {
       return;
     }
-    this.chatDB = new ChatDB({ preload: false, db });
-    if (options?.verbose) {
-      log.info('chat.service.ts:', 'Constructed.');
-    }
-    this.sendUpdate({ type: 'init', payload: this.chatDB.getChatList() });
+    this.onUpdate = this.onUpdate.bind(this);
   }
 
   async init() {
-    return this.chatDB?.init();
+    // pull fresh data from scries
+    const result = await this.getState();
+    if (!this.db || !this.db?.open) return;
+    for (const table of result['data-tables']) {
+      if (table.rows[0]) {
+        console.log('syncing %bedrock type ', table.type);
+        this.db.createTableIfNotExists(this.transform(table.rows[0]));
+        this.db.insertRows(table.rows.map(this.transform));
+      }
+    }
+    // Missed delete events must be applied after inserts
+    for (const del of result['del-log']) {
+      if (del.change === 'del-row') {
+        this.db.deleteRows([del]);
+      }
+    }
+    // watch for live updates
+    console.log('subscribing to %bedrock /db');
+    return APIConnection.getInstance().conduit.watch({
+      app: 'bedrock',
+      path: `/db`,
+      onEvent: this.onUpdate,
+      onError: (err: any) => console.error('err!', err),
+      onQuit: () => console.log('Kicked from subscription.'),
+    });
   }
 
-  reset(): void {
-    super.removeHandlers();
-    this.chatDB?.reset();
+  //
+  // Fetches
+  //
+  private async _getScry(path: string) {
+    return await APIConnection.getInstance().conduit.scry({
+      app: 'bedrock',
+      path: path,
+    });
   }
 
-  async sendMessage(path: string, fragments: any[]) {
-    const payload = {
-      app: 'realm-chat',
-      mark: 'chat-action',
-      json: {
-        'send-message': {
-          path: path,
-          fragments,
-          'expires-in': null,
-        },
-      },
+  async getState() {
+    return await this._getScry('/db');
+  }
+
+  async getFullpath(path: string) {
+    return await this._getScry(`/db/path${path}`);
+  }
+
+  async getTable(type: string) {
+    return await this._getScry(`/db/table${type}`);
+  }
+
+  async getHost(path: string) {
+    return await this._getScry(`/host/path${path}`);
+  }
+
+  async getStateSince(timestamp: number) {
+    return await this._getScry(`/db/start-ms/${timestamp}`);
+  }
+
+  transform(row: any): BedrockRow {
+    const base: any = {
+      id: row.id,
+      path: row.path,
+      type: row.type,
+      creator: row.id.split('/')[1],
+      created_at: row['created-at'],
+      updated_at: row['updated-at'],
+      received_at: row['received-at'],
     };
-    await APIConnection.getInstance().conduit.poke(payload);
-    return {
-      path,
-      pending: true,
-      content: fragments,
-    };
+    if (row.type === BUILTIN_TYPES.CREDS) {
+      base.endpoint = row.data.endpoint;
+      base.access_key_id = row.data['access-key-id'];
+      base.secret_access_key = row.data['secret-access-key'];
+      base.buckets = row.data['buckets'];
+      base.current_bucket = row.data['current-bucket'];
+      base.region = row.data['region'];
+      return base as CredsRow;
+    } else if (row.type === BUILTIN_TYPES.VOTE) {
+      base.parent_id = row.data['parent-id'];
+      base.parent_type = row.data['parent-type'];
+      base.parent_path = row.data['parent-path'];
+      base.up = !!row.data['up'];
+      return base as VoteRow;
+    } else {
+      base.data = row['data'];
+      return base as GeneralRow;
+    }
   }
 
-  async toggleMutedChat(path: string, mute: boolean) {
-    const payload = {
-      app: 'realm-chat',
-      mark: 'chat-action',
-      json: {
-        'mute-chat': {
+  //
+  // Pokes
+  //
+  async create(path: string, type: string, data: Json, schema: BedrockSchema) {
+    if (!this.db || !this.db?.open) return;
+    const row: any = await APIConnection.getInstance().conduit.thread({
+      inputMark: 'db-action',
+      outputMark: 'db-vent',
+      threadName: 'venter',
+      body: {
+        create: {
           path,
-          mute,
+          type,
+          data,
+          schema,
         },
       },
-    };
-    try {
-      await APIConnection.getInstance().conduit.poke(payload);
-      this.chatDB?.setMuted(path, mute);
-    } catch (err) {
-      console.error(err);
-      throw new Error('Failed to toggle muted chat');
-    }
+      desk: 'realm',
+    });
+    const transformedRow = this.transform(row);
+    this.db.createTableIfNotExists(transformedRow);
+    this.db.insertRows([transformedRow]);
   }
 
-  async setPinnedMessage(path: string, msgId: string) {
-    const payload = {
-      app: 'realm-chat',
-      mark: 'chat-action',
-      json: {
-        'pin-message': {
-          'msg-id': msgId,
-          path: path,
-          pin: true,
-        },
-      },
-    };
-    try {
-      await APIConnection.getInstance().conduit.poke(payload);
-    } catch (err) {
-      console.error(err);
-      throw new Error('Failed to pin chat');
-    }
-  }
-
-  async clearPinnedMessage(path: string) {
-    const payload = {
-      app: 'realm-chat',
-      mark: 'chat-action',
-      json: {
-        'clear-pinned-messages': {
-          path: path,
-        },
-      },
-    };
-    try {
-      await APIConnection.getInstance().conduit.poke(payload);
-    } catch (err) {
-      console.error(err);
-      throw new Error('Failed to unpin chat');
-    }
-  }
-
-  async editMessage(path: string, msgId: string, fragments: any[]) {
-    const payload = {
-      app: 'realm-chat',
-      mark: 'chat-action',
-      json: {
-        'edit-message': {
-          'msg-id': msgId,
-          path,
-          fragments,
-        },
-      },
-    };
-    try {
-      await APIConnection.getInstance().conduit.poke(payload);
-    } catch (err) {
-      console.error(err);
-      throw new Error('Failed to edit message');
-    }
-  }
-
-  async deleteMessage(path: string, msgId: string) {
-    const payload = {
-      app: 'realm-chat',
-      mark: 'chat-action',
-      json: {
-        'delete-message': {
-          'msg-id': msgId,
-          path,
-        },
-      },
-    };
-    try {
-      await APIConnection.getInstance().conduit.poke(payload);
-    } catch (err) {
-      console.error(err);
-      throw new Error('Failed to delete message');
-    }
-  }
-
-  async clearChatBacklog(path: string) {
-    const payload = {
-      app: 'realm-chat',
-      mark: 'chat-action',
-      json: {
-        'delete-backlog': {
-          path,
-        },
-      },
-    };
-    try {
-      await APIConnection.getInstance().conduit.poke(payload);
-    } catch (err) {
-      console.error(err);
-      throw new Error('Failed to delete chat backlog');
-    }
-  }
-
-  async createChat(
-    peers: string[],
-    type: ChatPathType,
-    metadata: ChatPathMetadata
+  async edit(
+    rowID: string,
+    path: string,
+    type: string,
+    data: Json,
+    schema: BedrockSchema
   ) {
-    let dmPeer = '';
-    if (type === 'dm') {
-      // store the peer in metadata in the case the peer leaves
-      dmPeer =
-        peers.filter(
-          (p) => p !== preSig(APIConnection.getInstance().conduit?.ship)
-        )[0] || '';
-      metadata.peer = dmPeer;
-    }
-    const payload = {
-      threadName: 'chat-venter',
-      inputMark: 'chat-action',
-      outputMark: 'chat-vent',
+    if (!this.db || !this.db?.open) return;
+    const row: any = await APIConnection.getInstance().conduit.thread({
+      inputMark: 'db-action',
+      outputMark: 'db-vent',
+      threadName: 'venter',
       desk: 'realm',
       body: {
-        'create-chat': {
-          metadata,
-          type,
-          peers,
-          invites: 'anyone',
-          'max-expires-at-duration': null,
-        },
-      } as unknown as Action,
-    };
-    try {
-      return await APIConnection.getInstance().conduit.thread(payload);
-    } catch (err) {
-      console.error(err);
-      throw new Error('Failed to create chat');
-    }
-  }
-
-  // readChat(path: string) {
-  //   if (! APIConnection.getInstance().conduit) throw new Error('No conduit connection');
-  //   //  APIConnection.getInstance().conduit.readChat(path);
-  // }
-
-  async togglePinnedChat(path: string, pinned: boolean) {
-    const payload = {
-      app: 'realm-chat',
-      mark: 'chat-action',
-      reaction: '',
-      json: {
-        'pin-chat': {
-          path,
-          pin: pinned,
+        edit: {
+          id: rowID,
+          'input-row': {
+            path: path,
+            type: type,
+            data: data,
+            schema: schema,
+          },
         },
       },
-    };
-    try {
-      await APIConnection.getInstance().conduit.poke(payload);
-      this.chatDB?.setPinned(path, pinned);
-    } catch (err) {
-      console.error(err);
-      throw new Error('Failed to pin chat');
-    }
+    });
+    const transformedRow = this.transform(row);
+    this.db.updateRows([transformedRow]);
   }
 
-  async editChatMetadata(
+  async remove(rowID: string, path: string, type: string) {
+    if (!this.db || !this.db?.open) return;
+    const row: deleteRowUpdate =
+      await APIConnection.getInstance().conduit.thread({
+        inputMark: 'db-action',
+        outputMark: 'db-vent',
+        threadName: 'venter',
+        desk: 'realm',
+        body: {
+          remove: {
+            id: rowID,
+            path,
+            type,
+          },
+        },
+      });
+    this.db.deleteRows([row]);
+  }
+
+  async createVote(path: string, up: boolean, on: BedrockIDTriple) {
+    return this.create(
+      path,
+      BUILTIN_TYPES.VOTE,
+      {
+        up,
+        'parent-type': on.type,
+        'parent-id': on.id,
+        'parent-path': on.path,
+      },
+      []
+    );
+  }
+  async editVote(
     path: string,
-    metadata: ChatPathMetadata,
-    invites: InvitePermissionType,
-    peersGetBacklog: boolean,
-    expiresDuration: number
+    voteId: string,
+    up: boolean,
+    on: BedrockIDTriple
   ) {
-    console.log('editChatMetadata', path, invites, peersGetBacklog);
-    const payload = {
-      app: 'realm-chat',
-      mark: 'chat-action',
-      reaction: '',
-      json: {
-        'edit-chat': {
-          path,
-          metadata,
-          invites,
-          'peers-get-backlog': peersGetBacklog,
-          'max-expires-at-duration': expiresDuration,
-        },
+    return await this.edit(
+      voteId,
+      path,
+      BUILTIN_TYPES.VOTE,
+      {
+        up,
+        'parent-type': on.type,
+        'parent-id': on.id,
+        'parent-path': on.path,
       },
-    };
-    try {
-      await APIConnection.getInstance().conduit.poke(payload);
-    } catch (err) {
-      console.error(err);
-      throw new Error('Failed to edit chat');
-    }
+      []
+    );
+  }
+  async removeVote(path: string, id: string) {
+    return await this.remove(id, path, BUILTIN_TYPES.VOTE);
   }
 
-  async addPeerToChat(path: string, ship: string, host?: string) {
-    const payload = {
-      app: 'realm-chat',
-      mark: 'chat-action',
-      reaction: '',
-      json: {
-        'add-ship-to-chat': {
-          ship,
-          path,
-          host,
-        },
-      },
-    };
-    try {
-      await APIConnection.getInstance().conduit.poke(payload);
-    } catch (err) {
-      console.error(err);
-      throw new Error('Failed to create chat');
-    }
-  }
-
-  async removePeerFromChat(path: string, ship: string) {
-    const payload = {
-      app: 'realm-chat',
-      mark: 'chat-action',
-      reaction: '',
-      json: {
-        'remove-ship-from-chat': {
-          ship,
-          path,
-        },
-      },
-    };
-    try {
-      await APIConnection.getInstance().conduit.poke(payload);
-    } catch (err) {
-      console.error(err);
-      throw new Error('Failed to create chat');
-    }
-  }
-
-  /**
-   * leaveChat
-   *
-   * @description calls remove-ship-from-chat with our ship
-   * which will remove us from the chat and delete it if we
-   * are the host
-   *
-   * @param path
-   */
-  async leaveChat(path: string) {
-    const payload = {
-      app: 'realm-chat',
-      mark: 'chat-action',
-      reaction: '',
-      json: {
-        'remove-ship-from-chat': {
-          ship: `~${APIConnection.getInstance().conduit?.ship}`,
-          path,
-        },
-      },
-    };
-    try {
-      await APIConnection.getInstance().conduit.poke(payload);
-    } catch (err) {
-      console.error(err);
-      throw new Error('Failed to leave chat');
+  onUpdate(update: any) {
+    if (update.length === 0) return;
+    if (!this.db || !this.db?.open) return;
+    //send update to the IPC update handler in app.store
+    this.sendUpdate({ type: 'bedrock-update', payload: update });
+    for (const change of update) {
+      const changeType = change.change;
+      if (changeType === 'add-row') {
+        const transformedRow = this.transform(change.row);
+        this.db.createTableIfNotExists(transformedRow);
+        this.db.insertRows([transformedRow]);
+      } else if (changeType === 'upd-row') {
+        const transformedRow = this.transform(change.row);
+        this.db.updateRows([transformedRow]);
+      } else if (changeType === 'del-row') {
+        this.db.deleteRows([change]);
+      }
     }
   }
 }
 
-export default ChatService;
+export default BedrockService;
 
 // Generate preload
-export const chatServicePreload = ChatService.preload(
-  new ChatService({ preload: true })
+const BedrockServiceInstance = BedrockService.preload(
+  new BedrockService({ preload: true })
 );
 
-export const chatPreload = {
-  ...chatServicePreload,
-  ...chatDBPreload,
+export const bedrockPreload = {
+  ...BedrockServiceInstance,
 };

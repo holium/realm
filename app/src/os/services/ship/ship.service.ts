@@ -9,6 +9,8 @@ import { getCookie } from '../../lib/shipHelpers';
 import AbstractService, { ServiceOptions } from '../abstract.service';
 import { APIConnection, ConduitSession } from '../api';
 import AuthService from '../auth/auth.service';
+import { SqliteDbManager } from './bedrock/bedrock.db';
+import BedrockService from './bedrock/bedrock.service';
 import ChatService from './chat/chat.service';
 import { FriendsService } from './friends/friends.service';
 import LexiconService from './lexicon/lexicon.service';
@@ -42,6 +44,7 @@ export class ShipService extends AbstractService<any> {
   services?: {
     notifications: NotificationsService;
     chat: ChatService;
+    bedrock: BedrockService;
     friends: FriendsService;
     spaces: SpacesService;
     bazaar: BazaarService;
@@ -149,6 +152,10 @@ export class ShipService extends AbstractService<any> {
     );
     this.services = {
       chat: new ChatService(this.serviceOptions, this.shipDB.db),
+      bedrock: new BedrockService(
+        this.serviceOptions,
+        new SqliteDbManager({ db: this.shipDB.db })
+      ),
       notifications: new NotificationsService(
         this.serviceOptions,
         this.shipDB.db
@@ -168,6 +175,7 @@ export class ShipService extends AbstractService<any> {
     this.authService = authService;
     this.initSpaces();
     this.initChat();
+    this.initBedrock();
     this.initLexicon();
   }
 
@@ -179,6 +187,10 @@ export class ShipService extends AbstractService<any> {
   private async initChat() {
     await this.services?.chat.init();
     this.services?.notifications.init();
+  }
+
+  private async initBedrock() {
+    await this.services?.bedrock.init();
   }
 
   private async initLexicon() {
