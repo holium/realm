@@ -449,14 +449,15 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   connect() {
-    let protocol = 'ws';
-    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-      this.provider = 'localhost:3030';
-    } else {
-      protocol = 'wss';
-      this.provider =
-        process.env.ROOMS_PROVIDER || 'litzod-dozzod-hostyv.holium.live';
-    }
+    const protocol = 'wss';
+    this.provider = 'litzod-dozzod-hostyv.holium.live';
+    // if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+    //   this.provider = 'localhost:3030';
+    // } else {
+    //   protocol = 'wss';
+    //   this.provider =
+    //     process.env.ROOMS_PROVIDER || 'litzod-dozzod-hostyv.holium.live';
+    // }
     const websocket = new WebSocket(
       `${protocol}://${this.provider}/signaling?serverId=${this.ourId}`
     );
@@ -595,6 +596,9 @@ export class RoomsStore extends EventsEmitter {
           if (room) {
             room.update(event.room);
             if (event.peer_id === this.ourId) {
+              this.ourRooms = this.ourRooms.filter(
+                (rid: string) => rid !== event.rid
+              );
               if (room.rtype === RoomType.media) {
                 this.currentRid = null;
               }
@@ -739,7 +743,6 @@ export class RoomsStore extends EventsEmitter {
   @action
   deleteRoom(rid: string) {
     console.log('deleteRoom: %o', rid);
-    this.ourRooms = this.ourRooms.filter((roomid) => roomid !== rid);
     const room = this.rooms.get(rid);
     if (room) {
       this.rooms.delete(rid);
