@@ -135,6 +135,9 @@ type ActiveSpeaker = {
 export class RoomsStore extends EventsEmitter {
   @observable ourId: string;
   @observable ourPeer: LocalPeer;
+  // patrick - this array is used to track rooms we are either creating or joining
+  //  it is used to ignore socket messages coming in from other ship/room interactions
+  @observable ourRooms: string[] = [];
   @observable path = '';
   // @observable provider = 'litzod-dozzod-hostyv.holium.live';
   // @observable provider = 'node-test.holium.live';
@@ -145,7 +148,6 @@ export class RoomsStore extends EventsEmitter {
   >();
   @observable chat: RoomChat[] = [];
   @observable currentRid: string | null = null;
-  @observable ourRooms: string[] = [];
   @observable isMuted = false;
   @observable isSpeaking = false;
   @observable isAudioAttached = false;
@@ -233,6 +235,7 @@ export class RoomsStore extends EventsEmitter {
       this.rooms.forEach((room) => {
         this.hangupAllPeers(room.rid);
       });
+      this.ourRooms = [];
       this.websocket.close();
     });
 
@@ -246,6 +249,7 @@ export class RoomsStore extends EventsEmitter {
         this.rooms.forEach((room) => {
           this.leaveRoom(room.rid);
         });
+        this.ourRooms = [];
         this.status = 'disconnected';
         this.websocket.close();
       }
@@ -445,14 +449,15 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   connect() {
-    let protocol = 'ws';
-    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-      this.provider = 'localhost:3030';
-    } else {
-      protocol = 'wss';
-      this.provider =
-        process.env.ROOMS_PROVIDER || 'litzod-dozzod-hostyv.holium.live';
-    }
+    const protocol = 'wss';
+    this.provider = 'litzod-dozzod-hostyv.holium.live';
+    // if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+    //   this.provider = 'localhost:3030';
+    // } else {
+    //   protocol = 'wss';
+    //   this.provider =
+    //     process.env.ROOMS_PROVIDER || 'litzod-dozzod-hostyv.holium.live';
+    // }
     const websocket = new WebSocket(
       `${protocol}://${this.provider}/signaling?serverId=${this.ourId}`
     );
@@ -526,6 +531,9 @@ export class RoomsStore extends EventsEmitter {
         break;
       case 'room-created':
         console.log('room created', event);
+        // if this room is not a room we either requested to create or join,
+        //  ignore the message
+        if (!this.ourRooms.includes(event.room.rid)) return;
         // eslint-disable-next-line no-case-declarations
         const newRoom = new RoomModel(event.room);
         newRoom.update(event.room);
@@ -581,17 +589,15 @@ export class RoomsStore extends EventsEmitter {
         {
           // replace room in rooms array with event.room
           console.log('room left', event);
+          // if this room is not a room we either requested to create or join,
+          //  ignore the message
+          if (!this.ourRooms.includes(event.room.rid)) return;
           const room = this.rooms.get(event.room.rid);
           if (room) {
             room.update(event.room);
-            // if (this.currentRid === event.room.rid) {
             if (event.peer_id === this.ourId) {
               if (room.rtype === RoomType.media) {
                 this.currentRid = null;
-                // this already happens in leave/delete Room calls. since we are using
-                //  peer reference counts to determine when to hangup, this extra call here
-                //  is causing a bug
-                // this.hangupAllPeers();
               }
             } else {
               if (
@@ -610,11 +616,10 @@ export class RoomsStore extends EventsEmitter {
       case 'room-deleted':
         {
           console.log('room-deleted: %o', event);
-          if (this.ourRooms.includes(event.rid)) {
-            this.ourRooms = this.ourRooms.filter(
-              (rid: string) => rid !== event.rid
-            );
-          }
+          if (!this.ourRooms.includes(event.rid)) return;
+          this.ourRooms = this.ourRooms.filter(
+            (rid: string) => rid !== event.rid
+          );
           const room = this.rooms.get(event.rid);
           if (room) {
             room.present.forEach((peerId: string) => {
@@ -630,6 +635,7 @@ export class RoomsStore extends EventsEmitter {
         break;
       case 'signal':
         {
+          if (!this.ourRooms.includes(event.rid)) return;
           // console.log('signal: %o', event);
           const room = this.rooms.get(event.rid);
           if (room) {
@@ -658,7 +664,7 @@ export class RoomsStore extends EventsEmitter {
         }
         break;
       case 'chat':
-        if (event.peer_id !== this.ourId) {
+        if (this.ourRooms.includes(event.rid) && event.peer_id !== this.ourId) {
           console.log('chat', event);
           this.chat.push({
             author: event.peer_id,
