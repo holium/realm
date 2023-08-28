@@ -449,15 +449,14 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   connect() {
-    const protocol = 'wss';
-    this.provider = 'litzod-dozzod-hostyv.holium.live';
-    // if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-    //   this.provider = 'localhost:3030';
-    // } else {
-    //   protocol = 'wss';
-    //   this.provider =
-    //     process.env.ROOMS_PROVIDER || 'litzod-dozzod-hostyv.holium.live';
-    // }
+    let protocol = 'ws';
+    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+      this.provider = 'localhost:3030';
+    } else {
+      protocol = 'wss';
+      this.provider =
+        process.env.ROOMS_PROVIDER || 'litzod-dozzod-hostyv.holium.live';
+    }
     const websocket = new WebSocket(
       `${protocol}://${this.provider}/signaling?serverId=${this.ourId}`
     );
