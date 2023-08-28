@@ -699,6 +699,9 @@ export class RoomsStore extends EventsEmitter {
       title,
       path,
     };
+    if (!this.ourRooms.includes(newRoom.rid)) {
+      this.ourRooms.push(newRoom.rid);
+    }
     this.rooms.set(newRoom.rid, new RoomModel(newRoom));
     this.websocket.send(
       serialize({
@@ -771,7 +774,9 @@ export class RoomsStore extends EventsEmitter {
   @action
   async joinRoom(rid: string, rtype: RoomType = RoomType.media) {
     console.log('joinRoom: %o', [rid]);
-    this.ourRooms.push(rid);
+    if (!this.ourRooms.includes(rid)) {
+      this.ourRooms.push(rid);
+    }
 
     if (rtype === RoomType.media) {
       this.setCurrentRoom(rid);
