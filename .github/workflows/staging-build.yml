@@ -259,6 +259,7 @@ jobs:
           BUILD_VERSION=$BUILD_VERSION
           ARTIFACT_VERSION=$ARTIFACT_VERSION
           RELEASE_CHANNEL=$RELEASE_CHANNEL
+          ROOMS_PROVIDER=node-test.holium.live
           EOF
           cd ../
           sudo yarn package:prerelease:win
