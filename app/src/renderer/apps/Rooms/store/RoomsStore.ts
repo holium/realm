@@ -457,6 +457,8 @@ export class RoomsStore extends EventsEmitter {
       this.provider = 'localhost:3030';
     } else {
       protocol = 'wss';
+      // if no RELEASE_CHANNEL set, or if this is an official release build, set to the
+      //   production web socket server
       this.provider =
         process.env.ROOMS_PROVIDER || 'litzod-dozzod-hostyv.holium.live';
     }
