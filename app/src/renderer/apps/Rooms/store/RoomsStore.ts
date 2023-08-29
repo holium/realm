@@ -94,7 +94,7 @@ export class RoomModel {
     this.title = data.title;
     this.whitelist = data.whitelist || [];
     this.present = data.present || [];
-    console.log('update: [present] %o', this.present.toString());
+    // console.log('update: [present] %o', this.present.toString());
     if (data.capacity) {
       this.capacity = data.capacity;
     }
@@ -297,7 +297,7 @@ export class RoomsStore extends EventsEmitter {
       return [];
     }
     const room = this.rooms.get(this.currentRid);
-    console.log('currentroomPresent: %o', room?.present);
+    // console.log('currentroomPresent: %o', room?.present);
     return (
       room?.present.slice().sort((a, b) => {
         if (a === this.ourId) {
@@ -451,15 +451,14 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   connect() {
-    const protocol = 'wss';
-    this.provider = 'node-test.holium.live';
-    // if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-    //   this.provider = 'localhost:3030';
-    // } else {
-    //   protocol = 'wss';
-    //   this.provider =
-    //     process.env.ROOMS_PROVIDER || 'litzod-dozzod-hostyv.holium.live';
-    // }
+    let protocol = 'ws';
+    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+      this.provider = 'localhost:3030';
+    } else {
+      protocol = 'wss';
+      this.provider =
+        process.env.ROOMS_PROVIDER || 'litzod-dozzod-hostyv.holium.live';
+    }
     const websocket = new WebSocket(
       `${protocol}://${this.provider}/signaling?serverId=${this.ourId}`
     );
@@ -550,7 +549,7 @@ export class RoomsStore extends EventsEmitter {
             console.log('room-entered: %o', event);
             // if we entered a room, we need to create a peer for each user in the room
             if (event.peer_id === this.ourId) {
-              console.log('we entered the room...');
+              // console.log('we entered the room...');
               const peers = event.room.present.filter(
                 (peer: string) => peer !== this.ourId
               );
@@ -568,21 +567,11 @@ export class RoomsStore extends EventsEmitter {
                   console.log('already have peer', peerId);
                   return;
                 }
-                console.log('creating peer, %o', [
-                  event.room.rid,
-                  event.room.rtype,
-                  peerId,
-                ]);
                 this.createPeer(event.room.rid, event.room.rtype, peerId);
               });
             } else {
               // someone else entered the room
               console.log('%s entered the room', event.peer_id);
-              console.log('creating peer, %o', [
-                event.room.rid,
-                event.room.rtype,
-                event.peer_id,
-              ]);
               this.createPeer(event.room.rid, event.room.rtype, event.peer_id);
 
               if (
@@ -604,14 +593,14 @@ export class RoomsStore extends EventsEmitter {
           }
           if (this.tracking.has(event.rid)) {
             if (event.peer_id === this.ourId) {
-              console.log('we are leaving the room %o', [event.room.rtype]);
+              // console.log('we are leaving the room %o', [event.room.rtype]);
               event.room.present.forEach((peerId: string) => {
                 if (peerId !== this.ourId) this.destroyPeer(event.rid, peerId);
               });
               if (event.room.rtype === RoomType.media) {
                 this.currentRid = null;
                 this.tracking.delete(event.room.rid);
-                console.log('room-left: disabling all media...');
+                // console.log('room-left: disabling all media...');
                 this.ourPeer.disableAll();
                 // this._removeRoom(event.rid);
               }
@@ -640,7 +629,7 @@ export class RoomsStore extends EventsEmitter {
             if (rtype === RoomType.media) {
               this.currentRid = null;
               this.tracking.delete(event.rid);
-              console.log('room-deleted: disabling all media...');
+              // console.log('room-deleted: disabling all media...');
               this.ourPeer.disableAll();
             }
           }
@@ -649,11 +638,10 @@ export class RoomsStore extends EventsEmitter {
         break;
       case 'signal':
         {
-          console.log('signal: %o', event);
+          // console.log('signal: %o', event);
           const rtype = this.tracking.get(event.rid);
           if (!rtype) console.log('not found');
           if (rtype) {
-            // console.log('signal: %o', event);
             if (rtype === RoomType.media && !this.ourPeer.audioStream) {
               console.error('no local stream');
               return;
@@ -703,7 +691,7 @@ export class RoomsStore extends EventsEmitter {
   ) {
     console.log('createRoom: %o', path);
     if (rtype === RoomType.media && !this.ourPeer.audioStream) {
-      console.log('enabling audio');
+      // console.log('enabling audio');
       await this.ourPeer.enableAudio();
     }
 
@@ -761,7 +749,7 @@ export class RoomsStore extends EventsEmitter {
       if (room.rtype === RoomType.media) {
         this.currentRid = null;
         this.tracking.delete(rid);
-        console.log('deleteRoom: disabling all media...');
+        // console.log('deleteRoom: disabling all media...');
         this.ourPeer.disableAll();
       }
     }
@@ -779,10 +767,10 @@ export class RoomsStore extends EventsEmitter {
   cleanUpCurrentRoom() {
     if (this.currentRoom) {
       if (this.currentRoom.creator === this.ourId) {
-        console.log('cleanupCurrentRoom: deleting room...');
+        // console.log('cleanupCurrentRoom: deleting room...');
         this.deleteRoom(this.currentRoom.rid);
       } else {
-        console.log('cleanupCurrentRoom: leaving room...');
+        // console.log('cleanupCurrentRoom: leaving room...');
         this.leaveRoom(this.currentRoom.rid);
       }
     }
@@ -809,7 +797,7 @@ export class RoomsStore extends EventsEmitter {
     const room = this.rooms.get(rid);
     // add us to the room
     if (room && !room.present.includes(this.ourId)) {
-      console.log('adding peer %o', this.ourId);
+      // console.log('adding peer %o', this.ourId);
       room.addPeer(this.ourId);
     }
   }
@@ -826,7 +814,7 @@ export class RoomsStore extends EventsEmitter {
         if (room.rtype === RoomType.media) {
           this.currentRid = null;
           this.tracking.delete(rid);
-          console.log('leaveRoom: disabling media...');
+          // console.log('leaveRoom: disabling media...');
           this.ourPeer.disableAll();
         }
       }
