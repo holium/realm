@@ -28,6 +28,7 @@ export const RoomsDockDescription = ({ live, rooms, participants }: Props) => {
     );
   }
 
+  console.log('present: %o', live.present);
   return (
     <Flex pointerEvents="none" style={{ flexDirection: 'column' }} gap={1}>
       <Text.Custom
