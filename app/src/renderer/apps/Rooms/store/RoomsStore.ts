@@ -457,8 +457,18 @@ export class RoomsStore extends EventsEmitter {
       this.provider = 'localhost:3030';
     } else {
       protocol = 'wss';
-      this.provider =
-        process.env.ROOMS_PROVIDER || 'litzod-dozzod-hostyv.holium.live';
+      // if no RELEASE_CHANNEL set, or if this is an official release build, set to the
+      //   production web socket server
+      if (
+        !process.env.RELEASE_CHANNEL ||
+        process.env.RELEASE_CHANNEL === 'latest' ||
+        process.env.RELEASE_CHANNEL === 'hotfix'
+      ) {
+        this.provider = 'litzod-dozzod-hostyv.holium.live';
+      } else {
+        // else use the test web socket server
+        this.provider = 'node-test.holium.live';
+      }
     }
     const websocket = new WebSocket(
       `${protocol}://${this.provider}/signaling?serverId=${this.ourId}`
