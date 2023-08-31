@@ -326,7 +326,7 @@ export class ShipService extends AbstractService<any> {
 
       const endp = response.credentials.endpoint;
       const client = new S3Client({
-        forcePathStyle: false, // Configures to use subdomain/virtual calling format.
+        // forcePathStyle: false, // Configures to use subdomain/virtual calling format.
         endpoint: response.credentials.endpoint,
         credentials: {
           accessKeyId: response.credentials.accessKeyId,
