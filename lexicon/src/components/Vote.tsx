@@ -141,7 +141,7 @@ export const Vote = ({ id, votes }: WordItemProps) => {
             color:
               votes?.currentShipVoted.vote === false
                 ? 'rgba(var(--rlm-intent-alert-rgba))'
-                : 'rgba(var(--rlm-text-rgba))',
+                : 'rgba(var(--rlm-text-rgba), .7)',
           }}
         >
           {votes?.downVotes ?? 0}
