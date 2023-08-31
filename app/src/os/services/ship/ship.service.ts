@@ -324,16 +324,27 @@ export class ShipService extends AbstractService<any> {
 
       console.log('s3 config: %o', response);
 
-      const endp = response.credentials.endpoint;
+      // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
+      let endp = response.credentials.endpoint;
+      if (endp.split('.')[0] === response.configuration.currentBucket) {
+        endp = endp.split('.').slice(1).join('.');
+      }
+
+      endp = endp.replace('https://', '');
+
       const client = new S3Client({
-        // forcePathStyle: false, // Configures to use subdomain/virtual calling format.
-        endpoint: response.credentials.endpoint,
-        credentials: {
-          accessKeyId: response.credentials.accessKeyId,
-          secretAccessKey: response.credentials.secretAccessKey,
-        },
-        region: response.configuration.region,
+        endpoint: response.credentials.endpoint.includes('https://')
+          ? response.credentials.endpoint
+          : response.configuration.region === ''
+          ? `https://${endp}`
+          : undefined,
+        credentials: response.credentials,
+        region:
+          response.configuration.region === ''
+            ? 'us-east-1'
+            : response.configuration.region,
       });
+
       let fileContent, fileName, fileExtension;
       if (args.source === 'file' && typeof args.content === 'string') {
         fileContent = fs.readFileSync(args.content);
@@ -362,7 +373,7 @@ export class ShipService extends AbstractService<any> {
       const uploadResponse = await client.upload(params).promise();
       console.log(uploadResponse);
       if (uploadResponse['$metadata'].httpStatusCode === 200) {
-        let Location = `${endp}/${params.Bucket}/${key}`;
+        let Location = `https://${endp}/${params.Bucket}/${key}`;
         console.log(`encoding url '${Location}'...`);
         Location = encodeURI(Location);
         console.log(`result => '${Location}'`);
