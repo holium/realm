@@ -676,6 +676,7 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   async createRoom(
+    id: string,
     title: string,
     access: RoomAccess,
     path: string,
@@ -688,7 +689,7 @@ export class RoomsStore extends EventsEmitter {
     }
 
     const newRoom = {
-      rid: ridFromTitle(this.provider, this.ourId, title),
+      rid: ridFromTitle(this.provider, this.ourId, id),
       rtype: rtype,
       provider: this.provider,
       creator: this.ourId,
@@ -701,7 +702,7 @@ export class RoomsStore extends EventsEmitter {
     this.websocket.send(
       serialize({
         type: 'create-room',
-        rid: ridFromTitle(this.provider, this.ourId, title),
+        rid: ridFromTitle(this.provider, this.ourId, id),
         rtype: rtype,
         title: title,
         path,

@@ -119,7 +119,8 @@ const NotesSidebarPresenter = () => {
       //   rooms subsystem, simply send the note id to ensure a truly unique
       //   room id is generated for the note
       const newRoomRid = await roomsStore.createRoom(
-        `${noteRoomPath}`,
+        noteRoomPath,
+        noteRoomPath,
         'public',
         noteRoomPath,
         RoomType.background
