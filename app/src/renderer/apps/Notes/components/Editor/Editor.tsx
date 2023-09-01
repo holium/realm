@@ -137,7 +137,8 @@ const EditorPresenter = () => {
       //   rooms subsystem, simply send the note id to ensure a truly unique
       //   room id is generated for the note
       await roomsStore.createRoom(
-        `${roomPath}`,
+        roomPath,
+        roomPath,
         'public',
         roomPath,
         RoomType.background
