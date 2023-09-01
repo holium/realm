@@ -322,8 +322,6 @@ export class ShipService extends AbstractService<any> {
       const response = await this.getS3Bucket();
       if (!response) return null;
 
-      console.log('s3 config: %o', response);
-
       // a little shim to handle people who accidentally included their bucket at the front of the credentials.endpoint
       let endp = response.credentials.endpoint;
       if (endp.split('.')[0] === response.configuration.currentBucket) {
@@ -369,21 +367,15 @@ export class ShipService extends AbstractService<any> {
         ACL: StorageAcl.PublicRead,
         ContentType: args.contentType,
       };
-      console.log(`uploading file ${key}...`);
       const uploadResponse = await client.upload(params).promise();
-      console.log(uploadResponse);
       if (uploadResponse['$metadata'].httpStatusCode === 200) {
-        let Location = `https://${endp}/${params.Bucket}/${key}`;
-        console.log(`encoding url '${Location}'...`);
-        Location = encodeURI(Location);
-        console.log(`result => '${Location}'`);
+        const Location = `https://${endp}/${params.Bucket}/${key}`;
         return { Location, key };
       } else {
         throw new Error();
       }
-    } catch (e) {
-      log.error(e);
-      log.error('ship.service.ts: Failed to upload file.');
+    } catch (err) {
+      log.error('ship.service.ts: Failed to upload file.', err);
 
       return null;
     }
