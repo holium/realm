@@ -303,14 +303,11 @@ jobs:
           cache: 'npm'
       #
       - name: Pull latest desks master
-        uses: actions/github-script@v6
-        id: pull-latest-desks-master
-        with:
-          script: |
-            cd ./desks
-            git checkout master
-            git pull
-            cd ..
+        run: |
+          cd ./desks
+          git checkout master
+          git pull
+          cd ..
       #
       - name: Bump desks version
         uses: actions/github-script@v6
