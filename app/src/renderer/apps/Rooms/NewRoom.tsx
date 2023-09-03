@@ -91,6 +91,7 @@ const NewRoomPresenter = () => {
         : '/our';
 
     await roomsStore?.createRoom(
+      `${name}/${Date.now()}`,
       name,
       isPrivate ? 'private' : 'public',
       spacePath

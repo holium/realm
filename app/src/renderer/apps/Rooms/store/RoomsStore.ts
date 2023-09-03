@@ -138,9 +138,7 @@ export class RoomsStore extends EventsEmitter {
   @observable ourId: string;
   @observable ourPeer: LocalPeer;
   @observable path = '';
-  // @observable provider = 'litzod-dozzod-hostyv.holium.live';
-  // @observable provider = 'node-test.holium.live';
-  @observable provider = 'localhost:3030';
+  @observable provider = 'litzod-dozzod-hostyv.holium.live';
   @observable rooms: Map<string, RoomModel> = observable.map<
     string,
     RoomModel
@@ -452,16 +450,7 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   connect() {
-    let protocol = 'ws';
-    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-      this.provider = 'localhost:3030';
-    } else {
-      protocol = 'wss';
-      // if no RELEASE_CHANNEL set, or if this is an official release build, set to the
-      //   production web socket server
-      this.provider =
-        process.env.ROOMS_PROVIDER || 'litzod-dozzod-hostyv.holium.live';
-    }
+    const protocol = 'wss';
     const websocket = new WebSocket(
       `${protocol}://${this.provider}/signaling?serverId=${this.ourId}`
     );
@@ -687,6 +676,7 @@ export class RoomsStore extends EventsEmitter {
 
   @action
   async createRoom(
+    id: string,
     title: string,
     access: RoomAccess,
     path: string,
@@ -699,7 +689,7 @@ export class RoomsStore extends EventsEmitter {
     }
 
     const newRoom = {
-      rid: ridFromTitle(this.provider, this.ourId, title),
+      rid: ridFromTitle(this.provider, this.ourId, id),
       rtype: rtype,
       provider: this.provider,
       creator: this.ourId,
@@ -712,7 +702,7 @@ export class RoomsStore extends EventsEmitter {
     this.websocket.send(
       serialize({
         type: 'create-room',
-        rid: ridFromTitle(this.provider, this.ourId, title),
+        rid: ridFromTitle(this.provider, this.ourId, id),
         rtype: rtype,
         title: title,
         path,

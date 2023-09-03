@@ -351,6 +351,13 @@ jobs:
         with:
           node-version: '>=18'
           cache: 'npm'
+      # .
+      - name: Pull latest desks master
+        run: |
+          cd ./desks
+          git checkout master
+          git pull
+          cd ..
       #
       - name: Bump desks version
         uses: actions/github-script@v6

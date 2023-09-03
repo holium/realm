@@ -133,7 +133,7 @@ const configuration: webpack.Configuration = {
       // safe: false, // load '.env.example' to verify the '.env' variables are all set. Can also be a string to a different file.
       // allowEmptyValues: false, // allow empty variables (e.g. `FOO=`) (treat it as empty string, rather than missing)
       // systemvars: false, // load all the predefined 'process.env' variables which will trump anything local per dotenv specs.
-      silent: true, // hide any errors
+      silent: false, // hide any errors
       // defaults: false, // load '.env.defaults' as the default values if empty.
     }),
     new MiniCssExtractPlugin({
