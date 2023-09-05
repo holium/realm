@@ -146,7 +146,7 @@ const SpacesTrayAppPresenter = () => {
               onKeyDown={(evt: any) => {
                 if (evt.key === 'Enter' && isValidSpace(searchString)) {
                   spacesStore.setJoin('loading');
-                  spacesStore.joinSpace(`/${searchString}`);
+                  spacesStore.joinSpace(searchString.replace(/^\/spaces/, ''));
                 }
               }}
             />
