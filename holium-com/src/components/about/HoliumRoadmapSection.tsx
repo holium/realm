@@ -38,24 +38,17 @@ export const HoliumRoadmapSection = () => (
         title="Developer preview"
         description="Libraries for building on Realm will be released, starting with rooms and then wallet."
       />
+      <Date date="09/2023" />
       <Milestone
         index={4}
         title="Mobile rooms in Realm iOS"
         description="Drop into voice chat with friends in your space while on the move."
         rightSide
       />
-      <Date date="08/2023" />
-      <Milestone
-        index={5}
-        title="Realm Android"
-        description="The Android version of Realm will be released."
-      />
-      <Date date="09/2023" />
       <Milestone
         index={6}
         title="Bedrock SDK"
         description="A data primitives layer that makes application data much more composable."
-        rightSide
       />
       <Date date="10/2023" />
     </TimelineContainer>
