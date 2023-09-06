@@ -9,6 +9,19 @@ const nextConfig = {
   publicRuntimeConfig: {
     AMPLITUDE_API_KEY: process.env.AMPLITUDE_API_KEY,
   },
+  async headers() {
+    return [
+      {
+        source: '/.well-known/apple-app-site-association',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/json',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = withPreconstruct(nextConfig);
