@@ -29,7 +29,7 @@ export enum LEXICON_BEDROCK_TYPES {
   DEFINITION = '/lexicon-definition/0v3.omons.hajqb.643gt.jd474.8qoj1', //(sham (limo [['definition' 't'] ['word-id' 'id'] ~]))
   SENTENCE = '/lexicon-sentence/0v948nd.km7ue.1brbd.vqei5.hktbo', //(sham (limo [['sentence' 't'] ['word-id' 'id'] ~]))
   RELATED = '/lexicon-related/0v4.j76bl.v9ue2.9u19u.1mma8.641jf', //(sham (limo [['related' 't'] ['word-id' 'id'] ~]))
-  VOTE = '/vote/0v3.hirga.bspbd.edlma.dfk59.gtu38',
+  VOTE = '/vote/0v0',
 }
 
 export enum LEXICON_TABLES {
