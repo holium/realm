@@ -1,11 +1,33 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Rubik } from 'next/font/google';
 
-const inter = Inter({ subsets: ['latin'] });
+const rubik = Rubik({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Holium Chat',
-  description: 'Chat with your friends.',
+  title: 'Passport Profile',
+  description: 'Passport profile.',
+  openGraph: {
+    title: '{og-title}',
+    description: '{og-description}',
+    siteName: '{og-site}',
+    // https://ogp.me/#type_profile
+    type: 'profile',
+    images: [
+      {
+        url: '{og-image-small}',
+        width: 800,
+        height: 600,
+      },
+      {
+        url: '{og-image-large}',
+        width: 1800,
+        height: 1600,
+        alt: '{og-image-alt}',
+      },
+    ],
+    locale: 'en_US',
+    url: '{og-url}',
+  },
 };
 
 export default function RootLayout({
@@ -15,7 +37,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={rubik.className}>{children}</body>
     </html>
   );
 }
