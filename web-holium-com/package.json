@@ -16,9 +16,11 @@
   "dependencies": {
     "@web3modal/ethereum": "^2.7.1",
     "@web3modal/react": "^2.7.1",
+    "ethers": "^6.7.1",
     "next": "13.4.12",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "secp256k1": "^5.0.0",
     "styled-components": "^6.0.7",
     "viem": "^1.10.9",
     "wagmi": "^1.4.1"
