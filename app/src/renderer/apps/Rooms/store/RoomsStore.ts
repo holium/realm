@@ -407,25 +407,6 @@ export class RoomsStore extends EventsEmitter {
   }
 
   @action
-  setAudioInput(deviceId: string) {
-    this.ourPeer.setAudioInputDevice(deviceId);
-  }
-
-  @action
-  setAudioOutput(deviceId: string) {
-    this.ourPeer.setAudioOutputDevice(deviceId);
-    // loop peers and set their audio output on their audio elements
-    this.peers.forEach((peer) => {
-      peer.setAudioOutputDevice(deviceId);
-    });
-  }
-
-  @action
-  setVideoInput(deviceId: string) {
-    this.ourPeer.setVideoInputDevice(deviceId);
-  }
-
-  @action
   setCurrentRoom(rid: string) {
     this.currentRid = rid;
   }

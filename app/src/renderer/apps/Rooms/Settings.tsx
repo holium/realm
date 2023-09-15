@@ -8,7 +8,6 @@ import { MediaAccess } from 'os/types';
 import { MainIPC } from 'renderer/stores/ipc';
 
 import { useTrayApps } from '../store';
-import { useRoomsStore } from './store/RoomsStoreContext';
 
 const formSourceOptions = (sources: MediaDeviceInfo[]) => {
   return sources.map((source) => {
@@ -41,7 +40,6 @@ const SettingsPresenter = ({
   maxWidth?: number;
 }) => {
   const { roomsApp } = useTrayApps();
-  const roomsStore = useRoomsStore();
 
   const [audioSourceOptions, setAudioSources] = useState<RadioOption[] | any[]>(
     []
@@ -62,8 +60,69 @@ const SettingsPresenter = ({
     screen: 'unknown',
   });
 
+  const getDeviceId = async (deviceType: string, sources: RadioOption[]) => {
+    let deviceId =
+      sources.find((source) =>
+        (source.value as string).toLowerCase().includes('default')
+      )?.value || sources[0]?.value;
+
+    const cachedDeviceId = localStorage.getItem(`rooms-${deviceType}`);
+    if (cachedDeviceId) {
+      // Make sure the cached device is still available and accessible.
+      // But skip the check for audio-output, as getUserMedia doesn't support it.
+      if (deviceType !== 'audio-output') {
+        try {
+          await navigator.mediaDevices.getUserMedia({
+            [deviceType === 'video-input' ? 'video' : 'audio']: {
+              deviceId: { exact: cachedDeviceId },
+            },
+          });
+          deviceId = cachedDeviceId;
+        } catch (_) {
+          console.log("Couldn't access cached device, using default.");
+          localStorage.setItem(`rooms-${deviceType}`, deviceId as string);
+        }
+      } else {
+        deviceId = cachedDeviceId;
+      }
+    }
+
+    return deviceId;
+  };
+
+  const setDeviceId = (deviceType: string, deviceId: string) => {
+    localStorage.setItem(`rooms-${deviceType}`, deviceId);
+
+    if (deviceType === 'audio-output') {
+      const audioElement = document.querySelector('audio');
+      if (audioElement) {
+        audioElement
+          // @ts-ignore
+          .setSinkId(deviceId)
+          .then(() => {
+            console.log(`Success, audio output device attached: ${deviceId}`);
+          })
+          .catch((error: any) => {
+            console.error(`Failed to attach audio output device: ${error}`);
+          });
+      }
+    }
+
+    switch (deviceType) {
+      case 'audio-input':
+        setSelectedSource(deviceId);
+        break;
+      case 'audio-output':
+        setSelectedOutputSource(deviceId);
+        break;
+      case 'video-input':
+        setSelectedVideoSource(deviceId);
+        break;
+    }
+  };
+
   useEffect(() => {
-    getMediaSources().then((sources: any[]) => {
+    getMediaSources().then(async (sources: any[]) => {
       const audioSources = sources.filter(
         (source) => source.kind === 'audioinput'
       ) as RadioOption[];
@@ -76,29 +135,19 @@ const SettingsPresenter = ({
       setAudioSources(audioSources);
       setAudioOutput(audioOutputSources);
       setVideoSources(videoSources);
-      const audioDeviceId =
-        localStorage.getItem('rooms-audio-input') ||
-        audioSources.find((source) =>
-          (source.value as string).toLowerCase().includes('default')
-        )?.value ||
-        audioSources[0]?.value;
+
+      const audioDeviceId = await getDeviceId('audio-input', audioSources);
       setSelectedSource(audioDeviceId as string);
 
-      const audioOutputId =
-        localStorage.getItem('rooms-audio-output') ||
-        audioOutputSources.find((source) =>
-          (source.value as string).toLowerCase().includes('default')
-        )?.value ||
-        audioOutputSources[0]?.value;
+      const audioOutputId = await getDeviceId(
+        'audio-output',
+        audioOutputSources
+      );
       setSelectedOutputSource(audioOutputId as string);
 
-      const videoDeviceId =
-        localStorage.getItem('rooms-video-input') ||
-        videoSources.find((source) =>
-          (source.value as string).toLowerCase().includes('default')
-        )?.value ||
-        videoSources[0]?.value;
+      const videoDeviceId = await getDeviceId('video-input', videoSources);
       setSelectedVideoSource(videoDeviceId as string);
+
       MainIPC.getMediaStatus().then(setMediaStatus);
     });
   }, []);
@@ -142,10 +191,7 @@ const SettingsPresenter = ({
           maxWidth={maxWidth}
           options={audioSourceOptions}
           selected={selectedSource}
-          onClick={(source) => {
-            setSelectedSource(source as string);
-            roomsStore.setAudioInput(source as string);
-          }}
+          onClick={(source) => setDeviceId('audio-input', source as string)}
         />
       </Flex>
       <Flex flexDirection="column" mb={3}>
@@ -155,10 +201,7 @@ const SettingsPresenter = ({
           maxWidth={maxWidth}
           options={audioOutputOptions}
           selected={selectedOutputSource}
-          onClick={(source) => {
-            setSelectedOutputSource(source as string);
-            roomsStore.setAudioOutput(source as string);
-          }}
+          onClick={(source) => setDeviceId('audio-output', source as string)}
         />
       </Flex>
       <Flex flexDirection="column" mb={3}>
@@ -168,10 +211,7 @@ const SettingsPresenter = ({
           maxWidth={maxWidth}
           options={videoSourceOptions}
           selected={selectedVideoSource}
-          onClick={(source) => {
-            setSelectedVideoSource(source as string);
-            roomsStore.setVideoInput(source as string);
-          }}
+          onClick={(source) => setDeviceId('video-input', source as string)}
         />
       </Flex>
       <Flex mt={3} col gap={12}>
