@@ -1,14 +1,19 @@
 // 'use client';
 
+// image_id (or some variant) in the mobile code base to figure out
+//  how to render icons for wallets
+// see: getWalletListings on mobile
+// OnboardingNavigationController, and wallets.json .. both model
+
 import {
   EthereumClient,
   w3mConnectors,
   w3mProvider,
-} from "@web3modal/ethereum";
-import { Web3Modal } from "@web3modal/react";
-import { useEffect, useState } from "react";
-import { configureChains, createConfig, WagmiConfig } from "wagmi";
-import { mainnet, optimism, polygon } from "wagmi/chains";
+} from '@web3modal/ethereum';
+import { Web3Modal } from '@web3modal/react';
+import { useEffect, useState } from 'react';
+import { configureChains, createConfig, WagmiConfig } from 'wagmi';
+import { mainnet, optimism, polygon } from 'wagmi/chains';
 // import "../styles.css";
 
 const projectId = 'f8134a8b6ecfbef24cfd151795e94b5c';

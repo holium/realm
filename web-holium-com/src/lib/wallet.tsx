@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { EPOCH_NODE_POC  } from "./types";
+import { EPOCH_NODE_POC } from './types';
 
 export function generateEpochPassportNode(
   signingPublicKey: `0x${string}`
@@ -44,12 +44,19 @@ export function generateEpochPassportNode(
       new_entity_balance: 0,
       epoch_length: 0,
       signing_key: signingPublicKey,
+      data_state: {
+        NAME_RECORD: {},
+      },
     },
   };
   return root_node_data;
-};
+}
 
-export async function createEpochPassportNode(shipUrl: string, wallet: any, signingPublicKey: `0x${string}`) {
+export async function createEpochPassportNode(
+  shipUrl: string,
+  wallet: any,
+  signingPublicKey: `0x${string}`
+) {
   const root = generateEpochPassportNode(signingPublicKey);
   const data_string = JSON.stringify(root);
   const calculated_hash = await ethers.utils.sha256(
@@ -57,8 +64,8 @@ export async function createEpochPassportNode(shipUrl: string, wallet: any, sign
   );
   const signed_hash = await wallet.signMessage({
     account: signingPublicKey,
-    message: calculated_hash}
-  );
+    message: calculated_hash,
+  });
   const root_node_link = {
     data: data_string,
     hash: calculated_hash,
@@ -70,7 +77,9 @@ export async function createEpochPassportNode(shipUrl: string, wallet: any, sign
   const response = await fetch(url, {
     method: 'POST',
     credentials: 'include',
-    body: JSON.stringify(root_node_link),
+    body: JSON.stringify({
+      'add-link': root_node_link,
+    }),
     headers: {
       'Content-Type': 'application/json',
     },

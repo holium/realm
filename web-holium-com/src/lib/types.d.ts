@@ -36,15 +36,65 @@ export type Recommendation = {
 };
 
 export type PassportProfile = {
-  contact: Contact;
-  status: 'invisible' | 'online';
+  nfts: Array<any>;
+  cover: any;
   discoverable: boolean;
-  nfts: LinkedNFT[];
-  addresses: LinkedAddress[];
-  defaultAddress: string;
-  recommendations: Recommendation[];
-  // signature chain type? .. ask about this
-  chain: string;
+  contact: {
+    avatar: any | null;
+    bio: string | null;
+    ship: string;
+    'display-name': string | null;
+    color: string;
+  };
+  'user-status': 'online';
+  recommendations: Array<any>;
+  crypto: {
+    'data-block': number;
+    'epoch-block': number;
+    'pki-state': {
+      'entity-to-value': {
+        passport_root: number;
+      };
+      'entity-to-public-keys': {
+        passport_root: Array<string>;
+      };
+      'public-key-to-nonce': {
+        [key: string]: number;
+      };
+      'chain-owner-entities': Array<string>;
+      'public-key-to-entity': {
+        [key: string]: string;
+      };
+    };
+    'previous-epoch-hash': string;
+    'sig-chain-settings': {
+      'epoch-length': number;
+      'signing-key': string;
+      'new-entity-balance': number;
+    };
+    timestamp: number;
+    'data-structs': 'not-implemented';
+    'transaction-types': 'not-implemented';
+    'link-id': 'PASSPORT_ROOT';
+  } | null;
+  addresses: Array<{
+    'crypto-signature': {
+      'signature-of-hash': string;
+      data: string;
+      hash: string;
+      pubkey: string;
+    };
+    address: string;
+    wallet: 'root';
+    pubkey: string;
+  }>;
+  'default-address': string;
+  chain: Array<{
+    data: string;
+    hash: string;
+    link_type: 'PASSPORT_ROOT';
+    signature_of_hash: string;
+  }>;
 };
 
 // crypto/chain/wallet stuff (ask paul)
