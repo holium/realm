@@ -198,7 +198,7 @@ export const LinkBlock = ({
     );
   }
   // @patrick - only use ogUrl if it can be parsed using URL
-  const ogOrLink = ogHasURL && parseUrl(openGraph?.ogUrl, link);
+  const ogOrLink = ogHasURL ? parseUrl(openGraph?.ogUrl, link) : link;
   return (
     <Block id={id} {...rest}>
       {ogHasImage && (
