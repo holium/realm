@@ -259,6 +259,7 @@ jobs:
           BUILD_VERSION=$BUILD_VERSION
           ARTIFACT_VERSION=$ARTIFACT_VERSION
           RELEASE_CHANNEL=$RELEASE_CHANNEL
+          ROOMS_PROVIDER=litzod-dozzod-hostyv.holium.live
           EOF
           cd ../
           sudo yarn package:release:win
@@ -350,6 +351,13 @@ jobs:
         with:
           node-version: '>=18'
           cache: 'npm'
+      # .
+      - name: Pull latest desks master
+        run: |
+          cd ./desks
+          git checkout master
+          git pull
+          cd ..
       #
       - name: Bump desks version
         uses: actions/github-script@v6

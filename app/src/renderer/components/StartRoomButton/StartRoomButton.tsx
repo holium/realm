@@ -48,6 +48,7 @@ const StartRoomButtonPresenter = ({ isStandaloneChat }: Props) => {
     } else {
       // CREATE ROOM
       const newRoomRid = await roomsStore?.createRoom(
+        selectedChat.path,
         selectedChat.metadata.title,
         'public',
         selectedChat.path

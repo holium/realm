@@ -339,10 +339,22 @@ export class ShipService extends AbstractService<any> {
       if (endp.split('.')[0] === response.configuration.currentBucket) {
         endp = endp.split('.').slice(1).join('.');
       }
+
+      endp = endp.replace('https://', '');
+
       const client = new S3Client({
+        endpoint: response.credentials.endpoint.includes('https://')
+          ? response.credentials.endpoint
+          : response.configuration.region === ''
+          ? `https://${endp}`
+          : undefined,
         credentials: response.credentials,
-        region: response.configuration.region,
+        region:
+          response.configuration.region === ''
+            ? 'us-east-1'
+            : response.configuration.region,
       });
+
       let fileContent, fileName, fileExtension;
       if (args.source === 'file' && typeof args.content === 'string') {
         fileContent = fs.readFileSync(args.content);
@@ -374,8 +386,8 @@ export class ShipService extends AbstractService<any> {
       } else {
         throw new Error();
       }
-    } catch {
-      log.error('ship.service.ts: Failed to upload file.');
+    } catch (err) {
+      log.error('ship.service.ts: Failed to upload file.', err);
 
       return null;
     }

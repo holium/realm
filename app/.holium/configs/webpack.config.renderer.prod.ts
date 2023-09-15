@@ -104,6 +104,11 @@ const configuration: webpack.Configuration = {
         process.env.RELEASE_CHANNEL === 'hotfix'
           ? '~hostyv:realm'
           : '~nimwyd-ramwyl-dozzod-hostyv:realm',
+      ROOMS_PROVIDER:
+        process.env.RELEASE_CHANNEL === 'latest' ||
+        process.env.RELEASE_CHANNEL === 'hotfix'
+          ? 'litzod-dozzod-hostyv.holium.live'
+          : 'node-test.holium.live',
       DEBUG_PROD: false,
       SENTRY_DSN:
         'https://56fbf5e600db48cf8a785931be1ca5e4@o1327359.ingest.sentry.io/4504310987358208',
@@ -128,7 +133,7 @@ const configuration: webpack.Configuration = {
       // safe: false, // load '.env.example' to verify the '.env' variables are all set. Can also be a string to a different file.
       // allowEmptyValues: false, // allow empty variables (e.g. `FOO=`) (treat it as empty string, rather than missing)
       // systemvars: false, // load all the predefined 'process.env' variables which will trump anything local per dotenv specs.
-      silent: true, // hide any errors
+      silent: false, // hide any errors
       // defaults: false, // load '.env.defaults' as the default values if empty.
     }),
     new MiniCssExtractPlugin({

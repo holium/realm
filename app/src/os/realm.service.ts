@@ -37,21 +37,27 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
     this.onWebViewAttached = this.onWebViewAttached.bind(this);
     this.onWillRedirect = this.onWillRedirect.bind(this);
 
-    // app.on(
-    //   'web-contents-created',
-    //   async (_: Event, webContents: WebContents) => {
-    //     webContents.on('will-redirect', (e: Event, url: string) => {
-    //       e.preventDefault();
-    //       this.onWillRedirect(url, webContents);
-    //     });
-    //   }
-    // );
+    // this will catch a redirect when the window is first being launched
+    app.on(
+      'web-contents-created',
+      async (_: Event, webContents: WebContents) => {
+        webContents.on('will-redirect', (e: Event, url: string) => {
+          e.preventDefault();
+          this.onWillRedirect(url, webContents);
+        });
+      }
+    );
 
     const windows = BrowserWindow.getAllWindows();
     windows.forEach(({ webContents }) => {
       webContents.on('did-attach-webview', (event, webviewWebContents) => {
         log.info("realm.service.ts: 'did-attach-webview' event fired");
         this.onWebViewAttached(event, webviewWebContents);
+      });
+      // this will catch redirects that occur in the spawned window content
+      webContents.on('will-redirect', (e: Event, url: string) => {
+        e.preventDefault();
+        this.onWillRedirect(url, webContents);
       });
     });
   }
@@ -330,6 +336,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
 
   async onWillRedirect(url: string, webContents: WebContents) {
     try {
+      // log.info('realm.service.ts:', 'onWillRedirect %o', url);
       const delim = '/~/login?redirect=';
       const parts = url.split(delim);
       // http://localhost/~/login?redirect=
@@ -345,6 +352,7 @@ export class RealmService extends AbstractService<RealmUpdateTypes> {
           log.error('realm.service.ts:', 'No credentials found');
           return;
         }
+        // log.info('realm.service.ts:', 'onWillRedirect calling getCookie...');
         const cookie = await getCookie({
           serverUrl: credentials.url,
           serverCode: credentials.code,
