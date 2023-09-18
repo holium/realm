@@ -6,7 +6,7 @@ import { InvitePermissionType } from 'renderer/stores/models/chat.model';
 
 import AbstractService, { ServiceOptions } from '../../abstract.service';
 import { APIConnection } from '../../api';
-import { Action } from '../../api/types';
+import { Thread } from '../../api/types';
 import { ChatDB, chatDBPreload } from './chat.db';
 import { ChatPathMetadata, ChatPathType, ChatUpdateTypes } from './chat.types';
 
@@ -182,7 +182,7 @@ export class ChatService extends AbstractService<ChatUpdateTypes> {
         )[0] || '';
       metadata.peer = dmPeer;
     }
-    const payload = {
+    const payload: Thread = {
       threadName: 'chat-venter',
       inputMark: 'chat-action',
       outputMark: 'chat-vent',
@@ -195,7 +195,7 @@ export class ChatService extends AbstractService<ChatUpdateTypes> {
           invites: 'anyone',
           'max-expires-at-duration': null,
         },
-      } as unknown as Action,
+      },
     };
     try {
       return await APIConnection.getInstance().conduit.thread(payload);
@@ -262,7 +262,7 @@ export class ChatService extends AbstractService<ChatUpdateTypes> {
   }
 
   async addPeerToChat(path: string, ship: string, host?: string) {
-    const payload = {
+    const payload: Thread = {
       threadName: 'chat-venter',
       inputMark: 'chat-action',
       outputMark: 'chat-vent',
@@ -273,7 +273,7 @@ export class ChatService extends AbstractService<ChatUpdateTypes> {
           path,
           host,
         },
-      } as unknown as Action,
+      },
     };
     try {
       return APIConnection.getInstance().conduit.thread(payload);
