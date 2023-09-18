@@ -263,19 +263,20 @@ export class ChatService extends AbstractService<ChatUpdateTypes> {
 
   async addPeerToChat(path: string, ship: string, host?: string) {
     const payload = {
-      app: 'realm-chat',
-      mark: 'chat-action',
-      reaction: '',
-      json: {
+      threadName: 'chat-venter',
+      inputMark: 'chat-action',
+      outputMark: 'chat-vent',
+      desk: 'realm',
+      body: {
         'add-ship-to-chat': {
           ship,
           path,
           host,
         },
-      },
+      } as unknown as Action,
     };
     try {
-      await APIConnection.getInstance().conduit.poke(payload);
+      return APIConnection.getInstance().conduit.thread(payload);
     } catch (err) {
       console.error(err);
       throw new Error('Failed to create chat');
