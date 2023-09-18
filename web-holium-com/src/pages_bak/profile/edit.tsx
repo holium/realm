@@ -3,21 +3,18 @@ import { useWeb3Modal } from '@web3modal/react';
 import { useAccount, useDisconnect, useWalletClient } from 'wagmi';
 
 import { createEpochPassportNode } from 'lib/wallet';
+import { shipUrl } from '../shared';
 
-interface ProfilePageProps {
-  canEdit: boolean;
-}
-
-export default function EditProfilePage({ canEdit }: ProfilePageProps) {
+export default function EditProfilePage() {
   const { open } = useWeb3Modal();
   const { data: walletClient, isError, isLoading } = useWalletClient();
-  const { address, isConnected } = useAccount({
+  const { address /*isConnected */ } = useAccount({
     // @ts-ignore
     onConnect({ address, connector, isReconnected }) {
       console.log('Connected', { address, connector, isReconnected });
     },
   });
-  const { disconnect } = useDisconnect();
+  // const { disconnect } = useDisconnect();
 
   const [editing, setEditing] = useState<boolean>(false);
   const onClickEdit = () => {
@@ -41,7 +38,6 @@ export default function EditProfilePage({ canEdit }: ProfilePageProps) {
   return (
     <>
       <h1>This is the profile page</h1>
-      {canEdit && <button onClick={onClickEdit}>Edit</button>}
     </>
   );
 }

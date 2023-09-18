@@ -35,17 +35,19 @@ export type Recommendation = {
   metdata: object;
 };
 
+export type ContactInfo = {
+  avatar: any | null;
+  bio: string | null;
+  ship: string;
+  'display-name': string | null;
+  color: string;
+};
+
 export type PassportProfile = {
   nfts: Array<any>;
   cover: any;
   discoverable: boolean;
-  contact: {
-    avatar: any | null;
-    bio: string | null;
-    ship: string;
-    'display-name': string | null;
-    color: string;
-  };
+  contact: ContactInfo;
   'user-status': 'online';
   recommendations: Array<any>;
   crypto: {

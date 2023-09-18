@@ -3,15 +3,15 @@ import { useEffect, useState } from 'react';
 import { useAccount, useDisconnect, useWalletClient } from 'wagmi';
 
 import { PassportProfile } from 'lib/types';
+import { shipUrl } from './shared';
 
 import ViewProfilePage from './profile/view';
 import IncognitoPage from './incognito';
 
-const shipUrl = 'http://localhost';
 type PageMode = 'incognito' | 'view' | 'edit';
 
 export default function Home() {
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [pageMode, setPageMode] = useState<PageMode>('view');
   const [profile, setProfile] = useState<PassportProfile | null>(null);
 
@@ -20,7 +20,7 @@ export default function Home() {
     //   different than the %passport API which gives much more detailed information.
     //  the public version only gives the bare minimum data necessary to
     //   render the UI
-    fetch(`${shipUrl}/~/scry/passport/public/our-passport.json`, {
+    fetch(`${shipUrl}/~/scry/profile/our.json`, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -43,7 +43,7 @@ export default function Home() {
           for (let i = 0; i < pairs.length; i++) {
             const pair = pairs[i].split('=');
             const key = pair[0].trim();
-            if (key === `urbauth-${data.patp}`) {
+            if (key === `urbauth-${data.contact?.ship}`) {
               setPageMode('edit');
               break;
             }
@@ -67,25 +67,25 @@ export default function Home() {
   //       .catch((e) => console.error(e));
   //   }
   // }, [isError, isLoading]);
-  async function onOpen() {
-    setLoading(true);
-    await open();
-    setLoading(false);
-  }
+  // async function onOpen() {
+  //   setLoading(true);
+  //   await open();
+  //   setLoading(false);
+  // }
 
-  function onClick() {
-    if (isConnected) {
-      disconnect();
-    } else {
-      onOpen();
-    }
-  }
+  // function onClick() {
+  //   if (isConnected) {
+  //     disconnect();
+  //   } else {
+  //     onOpen();
+  //   }
+  // }
 
   if (!profile) return <>Please wait. Loading...</>;
 
   return pageMode === 'incognito' ? (
     <IncognitoPage patp={profile.contact.ship} />
   ) : (
-    <ViewProfilePage canEdit={pageMode === 'edit'} />
+    <ViewProfilePage profile={profile} canEdit={pageMode === 'edit'} />
   );
 }
