@@ -1,3 +1,4 @@
+import './globals.css';
 import type { Metadata } from 'next';
 import { Rubik } from 'next/font/google';
 
@@ -6,6 +7,7 @@ const rubik = Rubik({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Passport Profile',
   description: 'Passport profile.',
+  // metadataBase: new URL('{og-ship-url}'),
   openGraph: {
     title: '{og-title}',
     description: '{og-description}',
@@ -33,14 +35,11 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode,
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
-      <body className={rubik.className}>
-        huh
-        {children}
-      </body>
+      <body className={rubik.className}>{children}</body>
     </html>
   );
 }

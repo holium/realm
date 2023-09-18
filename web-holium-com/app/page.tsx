@@ -1,17 +1,16 @@
-import { useWeb3Modal } from '@web3modal/react';
+'use client';
+
 import { useEffect, useState } from 'react';
-import { useAccount, useDisconnect, useWalletClient } from 'wagmi';
 
-import { PassportProfile } from 'lib/types';
-import { shipUrl } from './shared';
+import { PassportProfile } from './lib/types';
+import { shipUrl } from './lib/shared';
 
-import ViewProfilePage from './profile/view';
-import IncognitoPage from './incognito';
+import IncognitoPage from './pages/incognito';
+import ViewProfilePage from './pages/profile';
 
 type PageMode = 'incognito' | 'view' | 'edit';
 
 export default function Home() {
-  // const [loading, setLoading] = useState(false);
   const [pageMode, setPageMode] = useState<PageMode>('view');
   const [profile, setProfile] = useState<PassportProfile | null>(null);
 
@@ -53,33 +52,6 @@ export default function Home() {
       })
       .catch((e) => console.error(e));
   }, []);
-
-  // useEffect(() => {
-  //   if (isError) {
-  //     console.error('error loading wallet client');
-  //     return;
-  //   }
-  //   if (address && !isLoading) {
-  //     createEpochPassportNode(shipUrl, walletClient, address)
-  //       .then((result) =>
-  //         console.log('createEpochPassportNode response => %o', result)
-  //       )
-  //       .catch((e) => console.error(e));
-  //   }
-  // }, [isError, isLoading]);
-  // async function onOpen() {
-  //   setLoading(true);
-  //   await open();
-  //   setLoading(false);
-  // }
-
-  // function onClick() {
-  //   if (isConnected) {
-  //     disconnect();
-  //   } else {
-  //     onOpen();
-  //   }
-  // }
 
   if (!profile) return <>Please wait. Loading...</>;
 

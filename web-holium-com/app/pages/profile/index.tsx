@@ -2,7 +2,7 @@ import { useState } from 'react';
 import styled from 'styled-components';
 
 import EditProfilePage from './edit';
-import { ContactInfo, PassportProfile } from 'lib/types';
+import { ContactInfo, PassportProfile } from '../../lib/types';
 
 import {
   ChatIcon,

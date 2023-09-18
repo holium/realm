@@ -1,9 +1,4 @@
-// 'use client';
-
-// image_id (or some variant) in the mobile code base to figure out
-//  how to render icons for wallets
-// see: getWalletListings on mobile
-// OnboardingNavigationController, and wallets.json .. both model
+import Image from 'next/image';
 
 import {
   EthereumClient,
@@ -33,7 +28,7 @@ const ethereumClient = new EthereumClient(wagmiConfig, chains);
 
 // 4. Wrap your app with WagmiProvider and add <Web3Modal /> compoennt
 // @ts-ignore
-export default function App({ Component, pageProps }) {
+export default function Home({ Component, pageProps }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
