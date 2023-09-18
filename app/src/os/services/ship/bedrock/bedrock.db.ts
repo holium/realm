@@ -11,6 +11,54 @@ import {
   VoteRow,
 } from './bedrock.types';
 
+// take raw db record and turns it into BaseRow
+function _encodeDbBase(row: any): BaseRow {
+  return {
+    id: row.id,
+    path: row.path,
+    type: row.type,
+    creator: row.creator,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    received_at: row.received_at,
+  };
+}
+
+// take raw db record and turns it into VoteRow
+function _encodeDbVote(row: any): VoteRow {
+  const base = _encodeDbBase(row);
+  return {
+    ...base,
+    up: row.up === 1,
+    parent_id: row.parent_id,
+    parent_type: row.parent_type,
+    parent_path: row.parent_path,
+  } as VoteRow;
+}
+
+// take raw db record and turns it into CredsRow
+function _encodeDbCreds(row: any): CredsRow {
+  const base = _encodeDbBase(row);
+  return {
+    ...base,
+    endpoint: row.endpoint,
+    access_key_id: row.access_key_id,
+    secret_access_key: row.secret_access_key,
+    buckets: JSON.parse(row.buckets),
+    current_bucket: row.current_bucket,
+    region: row.region,
+  } as CredsRow;
+}
+
+// take raw db record and turns it into GeneralRow
+function _encodeDbGeneral(row: any): GeneralRow {
+  const base = _encodeDbBase(row);
+  return {
+    ...base,
+    data: JSON.parse(row.data),
+  } as GeneralRow;
+}
+
 export class SqliteDbManager extends AbstractDbManager {
   protected db?: Database;
   public readonly open: boolean;
@@ -232,6 +280,13 @@ export class SqliteDbManager extends AbstractDbManager {
   // ----------------------------------------------
   // ----------------- DB queries -----------------
   // ----------------------------------------------
+  selectType(type: string): BedrockRow[] {
+    if (!this.db?.open) return [];
+    const tbl: string = this.makeTableName(type);
+    const results = this.db.prepare(`SELECT * FROM ${tbl}`).all();
+    return results.map(this._encodeDbRow);
+  }
+
   selectById(type: string, id: string): BedrockRow[] {
     if (!this.db?.open) return [];
     const tbl: string = this.makeTableName(type);
@@ -253,62 +308,13 @@ export class SqliteDbManager extends AbstractDbManager {
   // take raw db record and turns it into BaseRow
   private _encodeDbRow(row: any): BedrockRow {
     if (row.type === BUILTIN_TYPES.VOTE) {
-      return this._encodeDbVote(row);
+      return _encodeDbVote(row);
     } else if (row.type === BUILTIN_TYPES.CREDS) {
-      return this._encodeDbCreds(row);
+      return _encodeDbCreds(row);
     } else {
-      return this._encodeDbGeneral(row);
+      return _encodeDbGeneral(row);
     }
   }
-
-  // take raw db record and turns it into BaseRow
-  private _encodeDbBase(row: any): BaseRow {
-    return {
-      id: row.id,
-      path: row.path,
-      type: row.type,
-      creator: row.creator,
-      created_at: row.created_at,
-      updated_at: row.updated_at,
-      received_at: row.received_at,
-    };
-  }
-
-  // take raw db record and turns it into VoteRow
-  private _encodeDbVote(row: any): VoteRow {
-    const base = this._encodeDbBase(row);
-    return {
-      ...base,
-      up: row.up === 1,
-      parent_id: row.parent_id,
-      parent_type: row.parent_type,
-      parent_path: row.parent_path,
-    } as VoteRow;
-  }
-
-  // take raw db record and turns it into CredsRow
-  private _encodeDbCreds(row: any): CredsRow {
-    const base = this._encodeDbBase(row);
-    return {
-      ...base,
-      endpoint: row.endpoint,
-      access_key_id: row.access_key_id,
-      secret_access_key: row.secret_access_key,
-      buckets: JSON.parse(row.buckets),
-      current_bucket: row.current_bucket,
-      region: row.region,
-    } as CredsRow;
-  }
-
-  // take raw db record and turns it into GeneralRow
-  private _encodeDbGeneral(row: any): GeneralRow {
-    const base = this._encodeDbBase(row);
-    return {
-      ...base,
-      data: JSON.parse(row.data),
-    } as GeneralRow;
-  }
-
   getLastTimestamp(
     table:
       | CHAT_TABLES.PATHS

@@ -4,6 +4,7 @@ import { flow, Instance, onSnapshot, SnapshotIn, types } from 'mobx-state-tree';
 import { RealmSessionCredentials } from 'os/realm.types';
 import { walletAppDefault } from 'renderer/apps/store';
 
+import { BedrockStore, bedrockStore } from './bedrock.store';
 import { ChatStore } from './chat.store';
 import { ShipIPC } from './ipc';
 import { LexiconStore } from './lexicon.store';
@@ -31,6 +32,7 @@ export const ShipStore = types
     featuredStore: FeaturedStore,
     notesStore: NotesStore,
     lexiconStore: LexiconStore,
+    bedrockStore: BedrockStore,
     troveStore: TroveStore,
     // roomsStore: RoomsStore,
     settingsStore: SettingsModel,
@@ -131,6 +133,7 @@ export const shipStore = ShipStore.create({
   walletStore: walletAppDefault,
   notesStore,
   lexiconStore: { update: null },
+  bedrockStore,
   troveStore: { update: null },
   featuredStore: {
     spaces: {},

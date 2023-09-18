@@ -17,10 +17,12 @@ import {
 // knows how to talk to urbit %bedrock agent, and calls out to the passed in AbstractDbManager to actually save the data
 class BedrockService extends AbstractService<BedrockUpdateType> {
   public db?: AbstractDbManager;
+  private initialized: boolean;
 
   constructor(options?: ServiceOptions, db?: AbstractDbManager) {
     super('BedrockService', options);
     this.db = db;
+    this.initialized = false;
     if (options?.preload) {
       return;
     }
@@ -28,6 +30,7 @@ class BedrockService extends AbstractService<BedrockUpdateType> {
   }
 
   async init() {
+    if (this.initialized) return false;
     // pull fresh data from scries
     const result = await this.getState();
     if (!this.db || !this.db?.open) return;
@@ -46,6 +49,7 @@ class BedrockService extends AbstractService<BedrockUpdateType> {
     }
     // watch for live updates
     console.log('subscribing to %bedrock /db');
+    this.initialized = true;
     return APIConnection.getInstance().conduit.watch({
       app: 'bedrock',
       path: `/db`,
@@ -73,8 +77,12 @@ class BedrockService extends AbstractService<BedrockUpdateType> {
     return await this._getScry(`/db/path${path}`);
   }
 
-  async getTable(type: string) {
+  async scryTable(type: string) {
     return await this._getScry(`/db/table${type}`);
+  }
+
+  async queryTable(type: string) {
+    return this.db?.selectType(type);
   }
 
   async getHost(path: string) {

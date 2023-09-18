@@ -5,6 +5,7 @@ import { MouseState } from '@holium/realm-presence';
 
 import { ConduitState } from 'os/services/api';
 import { migrationPreload } from 'os/services/migration/migration.service';
+import { bedrockPreload } from 'os/services/ship/bedrock/bedrock.service';
 import { lexiconPreload } from 'os/services/ship/lexicon/lexicon.service';
 import { notesPreload } from 'os/services/ship/notes/notes.service';
 import { settingsPreload } from 'os/services/ship/settings/settings.service';
@@ -243,4 +244,5 @@ contextBridge.exposeInMainWorld('appRecentsService', appRecentsPreload);
 contextBridge.exposeInMainWorld('settingsService', settingsPreload);
 contextBridge.exposeInMainWorld('notesService', notesPreload);
 contextBridge.exposeInMainWorld('lexiconService', lexiconPreload);
+contextBridge.exposeInMainWorld('bedrockService', bedrockPreload);
 contextBridge.exposeInMainWorld('troveService', trovePreload);

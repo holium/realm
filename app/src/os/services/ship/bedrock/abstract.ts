@@ -53,6 +53,8 @@ abstract class AbstractDbManager {
   // return true if the rows were deleted
   abstract deleteRows(dels: deleteRowUpdate[]): boolean;
 
+  abstract selectType(type: string): BedrockRow[];
+
   abstract selectByPath(type: string, path: string): BedrockRow[];
 
   abstract selectById(type: string, id: string): BedrockRow[];

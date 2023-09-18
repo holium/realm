@@ -52,7 +52,7 @@ export interface deleteRowUpdate {
 
 export type BedrockUpdateType = {
   type: 'bedrock-update';
-  payload: addRowUpdate | updateRowUpdate | deleteRowUpdate;
+  payload: (addRowUpdate | updateRowUpdate | deleteRowUpdate)[];
 };
 
 export type BedrockIDTriple = {
