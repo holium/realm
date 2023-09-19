@@ -98,15 +98,9 @@ export class LocalPeer extends EventEmitter {
       this.isMuted = false;
       return this.audioStream;
     } else {
-      const storedDeviceId = localStorage.getItem('rooms-audio-input');
       const audio = await navigator.mediaDevices
         .getUserMedia({
-          audio: storedDeviceId
-            ? {
-                ...DEFAULT_AUDIO_OPTIONS,
-                deviceId: { exact: storedDeviceId },
-              }
-            : DEFAULT_AUDIO_OPTIONS,
+          audio: DEFAULT_AUDIO_OPTIONS,
           video: false,
         })
         .then(this.setAudioStream)
@@ -154,16 +148,10 @@ export class LocalPeer extends EventEmitter {
       });
       return this.videoStream;
     } else {
-      const storedDeviceId = localStorage.getItem('rooms-video-input');
       return await navigator.mediaDevices
         .getUserMedia({
           audio: false,
-          video: storedDeviceId
-            ? {
-                ...DEFAULT_VIDEO_OPTIONS,
-                deviceId: storedDeviceId,
-              }
-            : DEFAULT_VIDEO_OPTIONS,
+          video: DEFAULT_VIDEO_OPTIONS,
         })
         .then(this.setVideoStream.bind(this))
         .catch((err: any) => {
@@ -324,36 +312,6 @@ export class LocalPeer extends EventEmitter {
       this.isSpeaking = false;
       this.emit('isSpeakingChanged', false);
     }
-  }
-
-  @action
-  setAudioInputDevice(deviceId: string) {
-    localStorage.setItem('rooms-audio-input', deviceId);
-    // if (this.stream?.active) {
-    //   this.disableMedia();
-    //   this.constraints.audio = {
-    //     ...(this.constraints.audio as MediaTrackConstraints),
-    //     deviceId: {
-    //       exact: deviceId,
-    //     },
-    //   };
-    //   this.enableMedia({
-    //     audio: this.constraints.audio,
-    //     video: this.constraints.video,
-    //   });
-    // }
-  }
-
-  @action
-  setVideoInputDevice(deviceId: string) {
-    localStorage.setItem('rooms-video-input', deviceId);
-  }
-
-  // TODO
-  @action
-  setAudioOutputDevice(deviceId: string) {
-    localStorage.setItem('rooms-audio-output', deviceId);
-    // setup new audio output device
   }
 
   @action
