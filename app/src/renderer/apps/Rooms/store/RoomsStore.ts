@@ -1,5 +1,5 @@
 // bump
-import { patp2dec } from '@urbit/aura';
+import { patp2bn } from '@urbit/aura';
 import EventsEmitter from 'events';
 import { action, makeObservable, observable } from 'mobx';
 
@@ -42,7 +42,7 @@ export const ridFromTitle = (provider: string, our: string, title: string) => {
 };
 
 const isInitiator = (from: string, to: string) => {
-  return patp2dec(from) > patp2dec(to);
+  return patp2bn(from) > patp2bn(to);
 };
 
 export type OnDataChannel = (
