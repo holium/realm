@@ -1,14 +1,14 @@
-// 'use client';
+import Image from 'next/image';
 
 import {
   EthereumClient,
   w3mConnectors,
   w3mProvider,
-} from "@web3modal/ethereum";
-import { Web3Modal } from "@web3modal/react";
-import { useEffect, useState } from "react";
-import { configureChains, createConfig, WagmiConfig } from "wagmi";
-import { mainnet, optimism, polygon } from "wagmi/chains";
+} from '@web3modal/ethereum';
+import { Web3Modal } from '@web3modal/react';
+import { useEffect, useState } from 'react';
+import { configureChains, createConfig, WagmiConfig } from 'wagmi';
+import { mainnet, optimism, polygon } from 'wagmi/chains';
 // import "../styles.css";
 
 const projectId = 'f8134a8b6ecfbef24cfd151795e94b5c';
@@ -28,7 +28,7 @@ const ethereumClient = new EthereumClient(wagmiConfig, chains);
 
 // 4. Wrap your app with WagmiProvider and add <Web3Modal /> compoennt
 // @ts-ignore
-export default function App({ Component, pageProps }) {
+export default function Home({ Component, pageProps }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {

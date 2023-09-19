@@ -1,3 +1,4 @@
+import './globals.css';
 import type { Metadata } from 'next';
 import { Rubik } from 'next/font/google';
 
@@ -6,6 +7,7 @@ const rubik = Rubik({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Passport Profile',
   description: 'Passport profile.',
+  // metadataBase: new URL('{og-ship-url}'),
   openGraph: {
     title: '{og-title}',
     description: '{og-description}',
