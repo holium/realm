@@ -124,19 +124,6 @@ export class PeerClass extends EventsEmitter {
   }
 
   @action
-  setAudioOutputDevice(deviceId: string) {
-    // const video = document.getElementById(
-    //     `peer-video-${this.peerId}`
-    // ) as HTMLVideoElement;
-    // video.setSinkId(deviceId);
-    const audio = document.getElementById(
-      `peer-audio-${this.peerId}`
-    ) as HTMLAudioElement;
-    // @ts-expect-error
-    audio.setSinkId(deviceId);
-  }
-
-  @action
   createPeer(peerId: string, initiator: boolean, streams: MediaStream[]) {
     this.status = 'connecting';
     const peer = new Peer({
