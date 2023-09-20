@@ -283,6 +283,14 @@ export class SqliteDbManager extends AbstractDbManager {
   selectType(type: string): BedrockRow[] {
     if (!this.db?.open) return [];
     const tbl: string = this.makeTableName(type);
+
+    const tableExists = this.db
+      .prepare(
+        `SELECT name FROM sqlite_master WHERE type='table' AND name='${tbl}';`
+      )
+      .all();
+    if (tableExists.length === 0) return [];
+
     const results = this.db.prepare(`SELECT * FROM ${tbl}`).all();
     return results.map(this._encodeDbRow);
   }

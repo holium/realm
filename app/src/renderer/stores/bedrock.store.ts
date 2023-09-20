@@ -57,12 +57,7 @@ export const BedrockStore = types
     }),
 
     createRow(path: string, type: string, data: Json, schema: BedrockSchema) {
-      return BedrockIPC.create({
-        path,
-        type,
-        data,
-        schema,
-      });
+      return BedrockIPC.create(path, type, data, schema);
     },
 
     maybeAddRow(row: any) {
@@ -70,6 +65,7 @@ export const BedrockStore = types
       if (weCareAboutThisChange) {
         const tbl = self.rows.get(row.type);
         if (tbl) {
+          console.log('adding row', row.type);
           self.rows.set(row.type, tbl.set(row.id, row));
         } else {
           console.error(
@@ -92,15 +88,11 @@ export const bedrockStore: any = BedrockStore.create({
 // Listen for bedrock updates from the main process.
 // -------------------------------
 BedrockIPC.onUpdate(({ type, payload }: BedrockUpdateType) => {
+  console.log('we have an ipcupdate', type);
   if (type === 'bedrock-update') {
-    for (const change of payload) {
-      const changeType = change.change;
-      if (changeType === 'add-row') {
-        bedrockStore.maybeAddRow(change);
-      } else if (changeType === 'del-row') {
-        console.log('not implemented');
-      }
-    }
+    console.log('not implemented');
+  } else if (type === 'bedrock-add-row') {
+    bedrockStore.maybeAddRow(payload);
   } else {
     console.error('BedrockStore.onUpdate', 'Unknown type');
   }

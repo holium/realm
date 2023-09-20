@@ -50,10 +50,12 @@ export interface deleteRowUpdate {
   timestamp: number; //date
 }
 
-export type BedrockUpdateType = {
-  type: 'bedrock-update';
-  payload: (addRowUpdate | updateRowUpdate | deleteRowUpdate)[];
-};
+export type BedrockUpdateType =
+  | {
+      type: 'bedrock-update';
+      payload: (addRowUpdate | updateRowUpdate | deleteRowUpdate)[];
+    }
+  | { type: 'bedrock-add-row'; payload: BedrockRow };
 
 export type BedrockIDTriple = {
   type: string;

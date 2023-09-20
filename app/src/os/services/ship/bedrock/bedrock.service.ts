@@ -128,6 +128,7 @@ class BedrockService extends AbstractService<BedrockUpdateType> {
   //
   async create(path: string, type: string, data: Json, schema: BedrockSchema) {
     if (!this.db || !this.db?.open) return;
+    console.log(path, type, data, schema);
     const row: any = await APIConnection.getInstance().conduit.thread({
       inputMark: 'db-action',
       outputMark: 'db-vent',
@@ -235,11 +236,12 @@ class BedrockService extends AbstractService<BedrockUpdateType> {
     if (update.length === 0) return;
     if (!this.db || !this.db?.open) return;
     //send update to the IPC update handler in app.store
-    this.sendUpdate({ type: 'bedrock-update', payload: update });
     for (const change of update) {
       const changeType = change.change;
       if (changeType === 'add-row') {
+        console.log(change);
         const transformedRow = this.transform(change.row);
+        this.sendUpdate({ type: 'bedrock-add-row', payload: transformedRow });
         this.db.createTableIfNotExists(transformedRow);
         this.db.insertRows([transformedRow]);
       } else if (changeType === 'upd-row') {
