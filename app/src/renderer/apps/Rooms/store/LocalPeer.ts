@@ -44,13 +44,11 @@ export class LocalPeer extends EventEmitter {
   @observable videoStream: MediaStream | undefined = undefined;
   @observable screenStream: MediaStream | undefined = undefined;
   @observable analysers: IAudioAnalyser[] = [];
-  @observable devices:
-    | {
-        audioInput: string;
-        audioOutput: string;
-        videoInput: string;
-      }
-    | undefined;
+  @observable devices?: {
+    audioInput: string | undefined;
+    audioOutput: string | undefined;
+    videoInput: string | undefined;
+  };
 
   constructor(ourId: string) {
     super();
@@ -100,7 +98,12 @@ export class LocalPeer extends EventEmitter {
     } else {
       const audio = await navigator.mediaDevices
         .getUserMedia({
-          audio: DEFAULT_AUDIO_OPTIONS,
+          audio: this.devices?.audioInput
+            ? {
+                ...DEFAULT_AUDIO_OPTIONS,
+                deviceId: { exact: this.devices.audioInput },
+              }
+            : DEFAULT_AUDIO_OPTIONS,
           video: false,
         })
         .then(this.setAudioStream)
@@ -151,7 +154,12 @@ export class LocalPeer extends EventEmitter {
       return await navigator.mediaDevices
         .getUserMedia({
           audio: false,
-          video: DEFAULT_VIDEO_OPTIONS,
+          video: this.devices?.videoInput
+            ? {
+                ...DEFAULT_VIDEO_OPTIONS,
+                deviceId: { exact: this.devices.videoInput },
+              }
+            : DEFAULT_VIDEO_OPTIONS,
         })
         .then(this.setVideoStream.bind(this))
         .catch((err: any) => {
@@ -320,6 +328,33 @@ export class LocalPeer extends EventEmitter {
       track.stop();
     });
     this.audioStream = undefined;
+  }
+
+  @action
+  setAudioInputDevice(deviceId: string) {
+    this.devices = {
+      audioInput: deviceId,
+      audioOutput: this.devices?.audioOutput,
+      videoInput: this.devices?.videoInput,
+    };
+  }
+
+  @action
+  setVideoInputDevice(deviceId: string) {
+    this.devices = {
+      videoInput: deviceId,
+      audioInput: this.devices?.audioInput,
+      audioOutput: this.devices?.audioOutput,
+    };
+  }
+
+  @action
+  setAudioOutputDevice(deviceId: string) {
+    this.devices = {
+      audioOutput: deviceId,
+      audioInput: this.devices?.audioInput,
+      videoInput: this.devices?.videoInput,
+    };
   }
 
   @action
