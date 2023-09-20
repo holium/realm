@@ -47,6 +47,7 @@ module.exports = async ({ github, context }, args) => {
     // if you want to have the build script remove a release, set the release version/tag here
     // removeRelease: undefined,
   };
+  console.log(context);
   // disable this workflow to prevent multiple builds running simultaneously
   // console.log(
   //   `disabling workflow ${workflowId} to prevent multiple simultaneous builds...`
