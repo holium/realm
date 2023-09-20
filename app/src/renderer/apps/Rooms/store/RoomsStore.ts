@@ -28,6 +28,7 @@ type RoomCreateType = {
   capacity?: number;
   path: string;
 };
+export type DeviceType = 'audio-input' | 'audio-output' | 'video-input';
 
 export const providerFromRid = (rid: string) => {
   return rid.split('/')[0];
@@ -404,6 +405,21 @@ export class RoomsStore extends EventsEmitter {
   setProvider(provider: string) {
     this.provider = provider;
     this.websocket = this.connect();
+  }
+
+  @action
+  setDeviceId(deviceType: DeviceType, deviceId: string) {
+    switch (deviceType) {
+      case 'audio-input':
+        this.ourPeer.setAudioInputDevice(deviceId);
+        break;
+      case 'audio-output':
+        this.ourPeer.setAudioOutputDevice(deviceId);
+        break;
+      case 'video-input':
+        this.ourPeer.setVideoInputDevice(deviceId);
+        break;
+    }
   }
 
   @action
