@@ -162,7 +162,8 @@ module.exports = async ({ github, context }, args) => {
     if (context.eventName === 'pull_request' && context.ref === 'draft') {
       ci.channel = 'draft';
     } else if (
-      (context.eventName === 'pull_request' && context.ref === 'master') ||
+      (context.eventName === 'pull_request' &&
+        context.ref === 'refs/heads/master') ||
       (context.eventName === 'push' && context.ref.endsWith('/staging'))
     ) {
       ci.channel = 'alpha';
