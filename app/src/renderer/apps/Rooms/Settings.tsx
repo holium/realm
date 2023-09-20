@@ -8,6 +8,8 @@ import { MediaAccess } from 'os/types';
 import { MainIPC } from 'renderer/stores/ipc';
 
 import { useTrayApps } from '../store';
+import { DeviceType } from './store/RoomsStore';
+import { useRoomsStore } from './store/RoomsStoreContext';
 
 const formSourceOptions = (sources: MediaDeviceInfo[]) => {
   return sources.map((source) => {
@@ -40,6 +42,7 @@ const SettingsPresenter = ({
   maxWidth?: number;
 }) => {
   const { roomsApp } = useTrayApps();
+  const roomsStore = useRoomsStore();
 
   const [audioSourceOptions, setAudioSources] = useState<RadioOption[] | any[]>(
     []
@@ -90,7 +93,8 @@ const SettingsPresenter = ({
     return deviceId;
   };
 
-  const setDeviceId = (deviceType: string, deviceId: string) => {
+  const setDeviceId = (deviceType: DeviceType, deviceId: string) => {
+    roomsStore.setDeviceId(deviceType, deviceId);
     localStorage.setItem(`rooms-${deviceType}`, deviceId);
 
     if (deviceType === 'audio-output') {
