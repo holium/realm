@@ -1,6 +1,16 @@
 import { ethers } from 'ethers';
 import { EPOCH_NODE_POC } from './types';
 
+import { Network, Alchemy } from 'alchemy-sdk';
+
+// Optional Config object, but defaults to demo api-key and eth-mainnet.
+const settings = {
+  apiKey: 'YVJ7LV7w8esHG18rdnKSERfN_OcyJWY_', // Replace with your Alchemy API Key.
+  network: Network.ETH_MAINNET, // Replace with your network.
+};
+
+const alchemy = new Alchemy(settings);
+
 export function generateEpochPassportNode(
   signingPublicKey: `0x${string}`
 ): EPOCH_NODE_POC {
@@ -85,4 +95,13 @@ export async function createEpochPassportNode(
     },
   });
   return response.json();
+}
+
+export async function loadNfts(address: `0x${string}`) {
+  // let owner = 'vitalik.eth';
+
+  //Call the method to get the nfts owned by this address
+  let response = await alchemy.nft.getNftsForOwner(address);
+
+  return response;
 }

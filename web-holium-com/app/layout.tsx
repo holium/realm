@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { Rubik } from 'next/font/google';
 
 import './globals.css';
@@ -40,6 +41,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <Script id="show-banner">
+        {`window.__INITIAL_STATE__ = "{ discoverable: {passport-discoverable} };"`}
+      </Script>
       <body className={rubik.className}>{children}</body>
     </html>
   );

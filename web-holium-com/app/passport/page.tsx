@@ -39,14 +39,14 @@ const ChatRow = (data: any) => {
 type PageMode = 'incognito' | 'view' | 'edit' | 'error';
 
 export default function Home() {
-  const [canEdit, setCanEdit] = useState<boolean>(false);
+  const [canEdit, setCanEdit] = useState<boolean>(true);
   const [pageMode, setPageMode] = useState<PageMode>('view');
   const [passport, setPassport] = useState<PassportProfile | null>(null);
   const router = useRouter();
 
   const onEditClick = (e) => {
     e.preventDefault();
-    router.push(`/edit`);
+    router.push(`passport/edit`);
   };
   useEffect(() => {
     setPassport({
@@ -298,7 +298,7 @@ export default function Home() {
                 paddingBottom: '4px',
               }}
             >
-              {passport.chats.map((item, idx) => (
+              {passport.chats?.map((item, idx) => (
                 <ChatRow key={`chat-row-${idx}`} data={item} />
               ))}
             </div>
