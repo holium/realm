@@ -139,3 +139,14 @@ export interface EPOCH_NODE_POC {
   // blacklist_keys: Array<String>,
   // signing_key, only required in root node
 }
+
+export interface INITIAL_STATE {
+  discoverable: boolean;
+  passport_api_key?: string;
+}
+
+declare global {
+  interface Window {
+    __INITIAL_STATE__: INITIAL_STATE;
+  }
+}

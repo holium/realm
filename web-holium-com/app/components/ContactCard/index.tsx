@@ -1,30 +1,18 @@
-import { useState } from 'react';
-import styled from 'styled-components';
-
-import EditProfilePage from './edit';
-import { ContactInfo, PassportProfile } from '../../lib/types';
-
+import { ChatIcon, FollowIcon, PhoneIcon } from '@/app/assets/icons';
 import {
-  ChatIcon,
-  DuplicateIcon,
-  FollowIcon,
-  PhoneIcon,
-  UsersIcon,
-} from '../../assets/icons';
-
-import {
+  ActionButton,
   Avatar,
   DisplayName,
   PatpLabel,
   SocialButton,
-  ActionButton,
-} from '../../assets/styled';
+} from '@/app/assets/styled';
+import { ContactInfo } from '@/app/lib/types';
 
 interface ContactCardProps {
   contact: ContactInfo;
 }
 
-function ContactCard({ contact }: ContactCardProps) {
+export default function ContactCard({ contact }: ContactCardProps) {
   return (
     <>
       {contact.avatar && <Avatar src={contact.avatar.uri}></Avatar>}
@@ -61,6 +49,7 @@ function ContactCard({ contact }: ContactCardProps) {
             justifyContent: 'center',
             alignItems: 'center',
             width: '100%',
+            marginTop: '8px',
           }}
         >
           <div
@@ -84,32 +73,12 @@ function ContactCard({ contact }: ContactCardProps) {
             }}
           />
         </div>
-        <div style={{ color: '#333333', marginTop: '4px' }}>{contact.bio}</div>
+        <div
+          style={{ color: '#333333', marginTop: '4px', marginBottom: '8px' }}
+        >
+          {contact.bio}
+        </div>
       </div>
-    </>
-  );
-}
-
-interface ProfilePageProps {
-  canEdit: boolean;
-  profile: PassportProfile;
-}
-
-export default function ViewProfilePage({
-  canEdit,
-  profile,
-}: ProfilePageProps) {
-  const [editing, setEditing] = useState<boolean>(false);
-  const onClickEdit = () => {
-    setEditing(true);
-  };
-  return editing ? (
-    <EditProfilePage />
-  ) : (
-    <>
-      <h1>This is the profile page</h1>
-      {canEdit && <button onClick={onClickEdit}>Edit</button>}
-      <ContactCard contact={profile.contact} />
     </>
   );
 }

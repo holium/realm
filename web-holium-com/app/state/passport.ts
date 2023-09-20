@@ -1,20 +1,13 @@
-'use client';
+import { shipUrl } from '../lib/shared';
 
-import { useEffect, useState } from 'react';
+import { PassportProfile } from '@/app/lib/types';
 
-import { PassportProfile } from './lib/types';
-import { shipUrl } from './lib/shared';
+// const nextId = 0;
+let passport: PassportProfile | null = null;
+let listeners: any[] = [];
 
-import IncognitoPage from './pages/incognito';
-import ViewProfilePage from './pages/profile';
-
-type PageMode = 'incognito' | 'view' | 'edit';
-
-export default function Home() {
-  const [pageMode, setPageMode] = useState<PageMode>('view');
-  const [profile, setProfile] = useState<PassportProfile | null>(null);
-
-  useEffect(() => {
+export const passportStore = {
+  async load() {
     // get our passport from the publicly facing ship API. this is
     //   different than the %passport API which gives much more detailed information.
     //  the public version only gives the bare minimum data necessary to
@@ -31,7 +24,6 @@ export default function Home() {
         console.log(data);
         // if the profile is not discoverable, render some privacy page
         if (!data.discoverable) {
-          setPageMode('incognito');
           return;
         }
         // parse the cookie and extract the ship name. if the ship
@@ -43,21 +35,38 @@ export default function Home() {
             const pair = pairs[i].split('=');
             const key = pair[0].trim();
             if (key === `urbauth-${data.contact?.ship}`) {
-              setPageMode('edit');
               break;
             }
           }
         }
-        setProfile(data);
+        this.cache(data);
       })
-      .catch((e) => console.error(e));
-  }, []);
+      .catch((e) => {
+        console.error(e);
+      });
+  },
+  cache(passportProfile: PassportProfile) {
+    passport = { ...passportProfile };
+    emitChange();
+  },
+  async save(passportProfile: PassportProfile) {
+    // push to long term storage
+    this.cache(passportProfile);
+    emitChange();
+  },
+  subscribe(listener: any) {
+    listeners = [...listeners, listener];
+    return () => {
+      listeners = listeners.filter((l) => l !== listener);
+    };
+  },
+  getSnapshot() {
+    return passport;
+  },
+};
 
-  if (!profile) return <>Please wait. Loading...</>;
-
-  return pageMode === 'incognito' ? (
-    <IncognitoPage patp={profile.contact.ship} />
-  ) : (
-    <ViewProfilePage profile={profile} canEdit={pageMode === 'edit'} />
-  );
+function emitChange() {
+  for (const listener of listeners) {
+    listener();
+  }
 }

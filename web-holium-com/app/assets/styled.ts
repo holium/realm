@@ -17,12 +17,12 @@ export const Avatar = styled.img`
 export const SocialButton = styled.button`
   background: transparent;
   border-radius: 6px;
-  border: 1px solid #4e9efd;
   color: #fff;
   background-color: #4e9efd;
   font-size: 15px;
   font-weight: 450;
   padding: 6px 8px;
+  line-height: 18px;
   height: 30px;
 `;
 
