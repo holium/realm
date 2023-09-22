@@ -117,7 +117,7 @@ interface PassportEditorProps {
 function PassportEditor(props: PassportEditorProps) {
   const { open } = useWeb3Modal();
   const { data: walletClient, isError, isLoading } = useWalletClient();
-  const { address /*isConnected */ } = useAccount({
+  const { address /*isConnected */, connector } = useAccount({
     // @ts-ignore
     onConnect({ address, connector, isReconnected }) {
       console.log('Connected', { address, connector, isReconnected });
@@ -125,6 +125,8 @@ function PassportEditor(props: PassportEditorProps) {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const avatarRef = useRef<HTMLImageElement>(null);
+  const displayNameRef = useRef<HTMLInputElement>(null);
   const [nfts, setNFTs] = useState<OwnedNft[]>([]);
   const [displayName, setDisplayName] = useState<string>(
     props.passport?.contact['display-name'] ||
@@ -138,6 +140,31 @@ function PassportEditor(props: PassportEditorProps) {
 
   const onSaveClick = (e: any) => {
     e.preventDefault();
+    // generate a new opengraph image using canvas
+    let canvas: HTMLCanvasElement = document.createElement(
+      'canvas'
+    ) as HTMLCanvasElement;
+    var ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    let avatarImage: HTMLImageElement | null = document.getElementById(
+      'avatar-image'
+    ) as HTMLImageElement;
+    ctx.drawImage(avatarImage, 20, 20);
+    ctx.moveTo(40, 20);
+    let displayName: HTMLInputElement | null = document.getElementById(
+      'display-name'
+    ) as HTMLInputElement;
+    let metrics = ctx.measureText(displayName.value);
+    ctx.strokeText(displayName.value, 0, 0, 300);
+    let textHeight =
+      metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+    ctx.moveTo(40, 20 + textHeight + 8);
+    let patp: HTMLDivElement | null = document.getElementById(
+      'patp'
+    ) as HTMLDivElement;
+    ctx.strokeText(patp?.innerText || '', 0, 0, 300);
+    let dataUrl: string = canvas.toDataURL('img/png');
+    canvas;
   };
 
   const onPhotoUpload = (e: any) => {
@@ -182,7 +209,8 @@ function PassportEditor(props: PassportEditorProps) {
       console.error('error loading wallet client');
       return;
     }
-    if (address && !isLoading) {
+    if (!isLoading && address && connector) {
+      console.log('connector: %o', connector?.name);
       console.log('address loaded: %o', address);
       createEpochPassportNode(shipUrl, walletClient, address)
         .then((result) =>
@@ -505,19 +533,20 @@ function PassportEditor(props: PassportEditorProps) {
                 paddingBottom: '4px',
               }}
             >
-              {props.passport?.addresses?.length > 0 ? (
+              {/* {props.passport?.addresses?.length > 0 ? (
                 props.passport?.addresses?.map((address, idx) => (
-                  <Address
-                    key={`address-${idx}`}
-                    image={address.image || undefined}
-                    pubkey={address.pubkey}
-                    selectable={true}
-                    isSelected={true}
-                  />
+                  <div key={`address-${idx}`}>{address}</div>
+                  // <Address
+                  //   key={`address-${idx}`}
+                  //   image={address.image || undefined}
+                  //   pubkey={address.pubkey}
+                  //   selectable={true}
+                  //   isSelected={true}
+                  // />
                 ))
               ) : (
                 <div style={{ fontSize: '0.8em' }}>No addresses found</div>
-              )}
+              )} */}
             </div>
           </div>
         </>
