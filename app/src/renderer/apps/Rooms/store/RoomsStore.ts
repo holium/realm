@@ -1,5 +1,5 @@
 // bump
-import { patp2dec } from '@urbit/aura';
+import { patp2bn } from '@urbit/aura';
 import EventsEmitter from 'events';
 import { action, makeObservable, observable } from 'mobx';
 
@@ -28,6 +28,7 @@ type RoomCreateType = {
   capacity?: number;
   path: string;
 };
+export type DeviceType = 'audio-input' | 'audio-output' | 'video-input';
 
 export const providerFromRid = (rid: string) => {
   return rid.split('/')[0];
@@ -42,7 +43,7 @@ export const ridFromTitle = (provider: string, our: string, title: string) => {
 };
 
 const isInitiator = (from: string, to: string) => {
-  return patp2dec(from) > patp2dec(to);
+  return patp2bn(from) > patp2bn(to);
 };
 
 export type OnDataChannel = (
@@ -407,22 +408,18 @@ export class RoomsStore extends EventsEmitter {
   }
 
   @action
-  setAudioInput(deviceId: string) {
-    this.ourPeer.setAudioInputDevice(deviceId);
-  }
-
-  @action
-  setAudioOutput(deviceId: string) {
-    this.ourPeer.setAudioOutputDevice(deviceId);
-    // loop peers and set their audio output on their audio elements
-    this.peers.forEach((peer) => {
-      peer.setAudioOutputDevice(deviceId);
-    });
-  }
-
-  @action
-  setVideoInput(deviceId: string) {
-    this.ourPeer.setVideoInputDevice(deviceId);
+  setDeviceId(deviceType: DeviceType, deviceId: string) {
+    switch (deviceType) {
+      case 'audio-input':
+        this.ourPeer.setAudioInputDevice(deviceId);
+        break;
+      case 'audio-output':
+        this.ourPeer.setAudioOutputDevice(deviceId);
+        break;
+      case 'video-input':
+        this.ourPeer.setVideoInputDevice(deviceId);
+        break;
+    }
   }
 
   @action

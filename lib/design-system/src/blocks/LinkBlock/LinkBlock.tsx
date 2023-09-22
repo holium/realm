@@ -188,6 +188,12 @@ export const LinkBlock = ({
     );
   }
   const ogOrLink = ogHasURL ? openGraph?.ogUrl : link;
+  let sitename: string;
+  try {
+    sitename = openGraph?.ogSiteName || new URL(ogOrLink).hostname;
+  } catch {
+    sitename = ogOrLink;
+  }
   return (
     <Block id={id} {...rest}>
       {ogHasImage && (
@@ -261,7 +267,7 @@ export const LinkBlock = ({
               whiteSpace: 'nowrap',
             }}
           >
-            {openGraph?.ogSiteName || new URL(ogOrLink).hostname}
+            {sitename}
           </Text.Anchor>
         </Flex>
         <Flex flex={1} justifyContent="flex-end" alignItems="center">

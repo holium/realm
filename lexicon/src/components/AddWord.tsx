@@ -38,7 +38,9 @@ export const AddWord = ({ open, word, setWord, onClose }: Props) => {
     try {
       const result: any = await api.createWord(space, word);
       log('result', result);
-      //word created succesfully, create a definition and sentence if any
+      // no result, throw and error, don't proceed to creating sentence
+      if (!result) throw Error("couldn't create the word");
+      //word created succesfully, create a definition and sentence if any and call updateHandler with result
       const wordId = result['id'];
 
       const definitionResult = await api.createDefinition(

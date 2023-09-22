@@ -93,13 +93,7 @@ export type Message =
   | AckParams
   | (MessageBase & DeleteParams);
 
-export type Json =
-  | boolean
-  | number
-  | string
-  | null
-  | { [key: string]: Json }
-  | Array<Json>;
+export type Json = Record<string, any>;
 
 export interface Thread {
   inputMark: string; // graph-update
