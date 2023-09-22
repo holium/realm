@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { EPOCH_NODE_POC } from './types';
+import { EPOCH_NODE_POC, PassportProfile } from './types';
 
 import { Network, Alchemy } from 'alchemy-sdk';
 
@@ -64,6 +64,7 @@ export function generateEpochPassportNode(
 
 export async function createEpochPassportNode(
   shipUrl: string,
+  walletName: string,
   wallet: any,
   signingPublicKey: `0x${string}`
 ) {
@@ -81,6 +82,7 @@ export async function createEpochPassportNode(
     hash: calculated_hash,
     signature_of_hash: signed_hash,
     link_type: 'PASSPORT_ROOT',
+    ['wallet-source']: walletName,
   };
   // attempt to post payload to ship
   const url = `${shipUrl}/spider/realm/passport-action/passport-vent/passport-vent`;
@@ -96,6 +98,32 @@ export async function createEpochPassportNode(
   });
   return response.json();
 }
+
+// export async function addKey(passport: PassportProfile) {
+//   let wallet = ethers.Wallet.createRandom();
+//   let link_metadata: any = {
+//     link_id: 'KEY_ADD',
+
+//   };
+
+//   link_metadata.link_id = link_type
+//   // TODO remove one of these below from the type
+//   link_metadata.epoch_block_number = entity_state.epoch_block_number
+//   link_metadata.previous_epoch_nonce = entity_state.epoch_block_number
+//   link_metadata.previous_epoch_hash = entity_state.previous_epoch_hash
+//   if(previous_block == 0){
+//     link_metadata.nonce = 0
+//     link_metadata.previous_link_hash = "0x00000000000000000000000000000000"
+//     link_metadata.data_block_number = 0
+//   } else {
+//     link_metadata.data_block_number = entity_state.data_block_number + 1
+//     link_metadata.nonce = JSON.parse(previous_block.data).link_metadata.nonce + 1
+//     link_metadata.previous_link_hash = previous_block.hash
+//     link_metadata.data_block_number = JSON.parse(previous_block.data).link_metadata.data_block_number + 1
+//   }
+
+//   link_metadata.timestamp = Number(  (new Date()).getTime()  )
+// }
 
 export async function loadNfts(address: `0x${string}`) {
   // let owner = 'vitalik.eth';

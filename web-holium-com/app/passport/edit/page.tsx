@@ -212,7 +212,7 @@ function PassportEditor(props: PassportEditorProps) {
     if (!isLoading && address && connector) {
       console.log('connector: %o', connector?.name);
       console.log('address loaded: %o', address);
-      createEpochPassportNode(shipUrl, walletClient, address)
+      createEpochPassportNode(shipUrl, connector.name, walletClient, address)
         .then((result) =>
           console.log('createEpochPassportNode response => %o', result)
         )
