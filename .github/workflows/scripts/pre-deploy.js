@@ -47,6 +47,7 @@ module.exports = async ({ github, context }, args) => {
     // if you want to have the build script remove a release, set the release version/tag here
     // removeRelease: undefined,
   };
+  console.log(context);
   // disable this workflow to prevent multiple builds running simultaneously
   // console.log(
   //   `disabling workflow ${workflowId} to prevent multiple simultaneous builds...`
@@ -161,7 +162,8 @@ module.exports = async ({ github, context }, args) => {
     if (context.eventName === 'pull_request' && context.ref === 'draft') {
       ci.channel = 'draft';
     } else if (
-      (context.eventName === 'pull_request' && context.ref === 'master') ||
+      (context.eventName === 'pull_request' &&
+        context.ref === 'refs/heads/master') ||
       (context.eventName === 'push' && context.ref.endsWith('/staging'))
     ) {
       ci.channel = 'alpha';
