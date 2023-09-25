@@ -121,7 +121,7 @@ jobs:
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
           ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir -p ~/$BUILD_VERSION"
-          scp -O -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
@@ -178,7 +178,7 @@ jobs:
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
           ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir -p ~/$BUILD_VERSION"
-          scp -O -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME}}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
@@ -325,7 +325,7 @@ jobs:
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
           ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "mkdir -p ~/$BUILD_VERSION"
-          scp -O -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
+          scp -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./app/release/build/*.* $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
@@ -376,10 +376,10 @@ jobs:
           # ensure private key
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
-          ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf urbit/hostyv/realm/*"
-          scp -O -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm/* $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/realm
+          ssh -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf urbit/hostyv/realm/*"
+          scp -Rfpv -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/realm/* $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/realm
           ssh -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no $DEPLOY_USERNAME@$DEPLOY_HOST "rm -rf urbit/hostyv/usher/*"
-          scp -O -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher/* $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/usher
+          scp -Rfpv -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r ./desks/usher/* $DEPLOY_USERNAME@$DEPLOY_HOST:./urbit/hostyv/usher
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
@@ -448,7 +448,7 @@ jobs:
           echo "$DEPLOY_RSA" >> ~/.ssh/usher_rsa
           chmod 600 ~/.ssh/usher_rsa
           mkdir -p ~/$BUILD_VERSION
-          scp -O -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION ~
+          scp -Rfpv -v -i ~/.ssh/usher_rsa -o StrictHostKeyChecking=no -r $DEPLOY_USERNAME@$DEPLOY_HOST:~/$BUILD_VERSION ~
         env:
           DEPLOY_USERNAME: ${{ secrets.DEPLOY_USERNAME }}
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
