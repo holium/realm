@@ -6,6 +6,7 @@ import {
   w3mProvider,
 } from '@web3modal/ethereum';
 import { Web3Modal, useWeb3Modal } from '@web3modal/react';
+import { WalletClient } from 'wagmi';
 import {
   configureChains,
   createConfig,
@@ -25,7 +26,7 @@ import {
 import { PlusIcon } from '@/app/assets/icons';
 // import "../styles.css";
 import { shipUrl } from '@/app/lib/shared';
-import { createEpochPassportNode } from '@/app/lib/wallet';
+import { addKey, createEpochPassportNode } from '@/app/lib/wallet';
 import { PassportProfile } from '@/app/lib/types';
 import { SocialButton } from '@/app/assets/styled';
 
@@ -213,9 +214,15 @@ function PassportEditor(props: PassportEditorProps) {
       console.log('connector: %o', connector?.name);
       console.log('address loaded: %o', address);
       createEpochPassportNode(shipUrl, connector.name, walletClient, address)
-        .then((result) =>
-          console.log('createEpochPassportNode response => %o', result)
-        )
+        .then((result) => {
+          console.log('createEpochPassportNode response => %o', result);
+          console.log(
+            `wallet addresses: [${address}, ${walletClient?.account.address}]`
+          );
+          addKey(shipUrl, walletClient as WalletClient)
+            .then((result) => console.log(result))
+            .catch((e) => console.error(e));
+        })
         .catch((e) => console.error(e));
       alchemy.nft
         .getNftsForOwner(address)

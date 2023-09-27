@@ -1,7 +1,17 @@
 import { ethers } from 'ethers';
-import { EPOCH_NODE_POC, PassportProfile } from './types';
-
+import { createWalletClient, custom, recoverPublicKey } from 'viem';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
+import { mainnet } from 'viem/chains';
 import { Network, Alchemy } from 'alchemy-sdk';
+
+import { EPOCH_NODE_POC, PassportProfile } from './types';
+import { WalletClient } from 'wagmi';
+
+declare global {
+  interface Window {
+    ethereum: any;
+  }
+}
 
 // Optional Config object, but defaults to demo api-key and eth-mainnet.
 const settings = {
@@ -11,7 +21,7 @@ const settings = {
 
 const alchemy = new Alchemy(settings);
 
-export function generateEpochPassportNode(
+function generateEpochPassportNode(
   signingPublicKey: `0x${string}`
 ): EPOCH_NODE_POC {
   const entity = 'passport_root';
@@ -60,6 +70,32 @@ export function generateEpochPassportNode(
     },
   };
   return root_node_data;
+}
+
+function generateKeyAdd(
+  rootPublicKey: `0x${string}`,
+  walletAddress: `0x${string}`
+) {
+  return {
+    link_metadata: {
+      from_entity: 'passport_root',
+      signing_public_key: rootPublicKey,
+      value: 1,
+      link_id: 'KEY_ADD',
+      epoch_block_number: 0,
+      previous_epoch_nonce: 0,
+      previous_epoch_hash: '0x00000000000000000000000000000000',
+      nonce: 0,
+      previous_link_hash: '0x00000000000000000000000000000000',
+      data_block_number: 0,
+      timestamp: Number(new Date().getTime()),
+    },
+    link_data: {
+      public_key: walletAddress,
+      public_key_type: 'device_key',
+      entity_name: 'passport_root',
+    },
+  };
 }
 
 export async function createEpochPassportNode(
@@ -132,4 +168,46 @@ export async function loadNfts(address: `0x${string}`) {
   let response = await alchemy.nft.getNftsForOwner(address);
 
   return response;
+}
+
+export async function addKey(shipUrl: string, wallet: WalletClient) {
+  if (!wallet.account) {
+    console.error('wallet account is undefined');
+    return;
+  }
+  const walletAddress = generatePrivateKey();
+  // const account = privateKeyToAccount(walletAddress);
+  // const privateWallet = createWalletClient({
+  //   account,
+  //   chain: mainnet,
+  //   transport: custom(window.ethereum),
+  // });
+  const root = generateKeyAdd(wallet.account.address, walletAddress);
+  const data_string = JSON.stringify(root);
+  const calculated_hash = await ethers.utils.sha256(
+    ethers.utils.toUtf8Bytes(data_string)
+  );
+  const signed_hash = await wallet.signMessage({
+    message: calculated_hash,
+  });
+  const root_node_link = {
+    data: data_string,
+    hash: calculated_hash,
+    signature_of_hash: signed_hash,
+    link_type: 'KEY_ADD',
+  };
+  console.log('add-link payload => %o', root_node_link);
+  // attempt to post payload to ship
+  const url = `${shipUrl}/spider/realm/passport-action/passport-vent/passport-vent`;
+  const response = await fetch(url, {
+    method: 'POST',
+    credentials: 'include',
+    body: JSON.stringify({
+      'add-link': root_node_link,
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return response.json();
 }
