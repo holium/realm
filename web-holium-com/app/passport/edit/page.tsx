@@ -220,7 +220,14 @@ function PassportEditor(props: PassportEditorProps) {
             `wallet addresses: [${address}, ${walletClient?.account.address}]`
           );
           addKey(shipUrl, walletClient as WalletClient)
-            .then((result) => console.log(result))
+            // the wallet address of secret/hidden wallet that now lives on this device
+            .then((response: any) => {
+              console.log('addKey response => %o', result);
+              localStorage.setItem(
+                '/holium/realm/passport/wallet-address',
+                response.addresses[1].address
+              );
+            })
             .catch((e) => console.error(e));
         })
         .catch((e) => console.error(e));
