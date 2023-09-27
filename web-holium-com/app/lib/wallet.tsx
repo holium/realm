@@ -211,3 +211,18 @@ export async function addKey(shipUrl: string, wallet: WalletClient) {
   });
   return response.json();
 }
+
+// if wallet public/private keypair needed
+// function generateKeypair() {
+//   // Generate a new random wallet
+//   const wallet = ethers.Wallet.createRandom();
+
+//   // Get the address and private key
+//   const address = wallet.address;
+//   const privateKey = wallet.privateKey;
+
+//   console.log('Public Address:', address);
+//   console.log('Private Key:', privateKey);
+
+//   return { address, privateKey };
+// }
