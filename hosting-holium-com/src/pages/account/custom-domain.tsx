@@ -63,7 +63,7 @@ const CustomDomainPresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  const onClickUploadId = () => {
+  const onClickUploadPier = () => {
     const byopInProgress = ships.find(
       (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
     );
@@ -98,7 +98,7 @@ const CustomDomainPresenter = () => {
       onChangeDomain={setDomain}
       onSubmit={onSubmit}
       onClickPurchaseId={onClickPurchaseId}
-      onClickUploadId={onClickUploadId}
+      onClickUploadPier={onClickUploadPier}
       onClickSidebarSection={onClickSidebarSection}
       onExit={logout}
     />

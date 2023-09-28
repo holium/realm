@@ -26,7 +26,7 @@ const S3StoragePresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  const onClickUploadId = () => {
+  const onClickUploadPier = () => {
     const byopInProgress = ships.find(
       (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
     );
@@ -90,7 +90,7 @@ const S3StoragePresenter = () => {
       dataSent={{ networkUsage, minioUsage }}
       onClickRestartStorage={onClickRestartStorage}
       onClickPurchaseId={onClickPurchaseId}
-      onClickUploadId={onClickUploadId}
+      onClickUploadPier={onClickUploadPier}
       onClickSidebarSection={onClickSidebarSection}
       onExit={logout}
     />

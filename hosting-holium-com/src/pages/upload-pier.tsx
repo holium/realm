@@ -3,14 +3,14 @@ import { useState } from 'react';
 import {
   OnboardingStorage,
   uploadErrors,
-  UploadIdDialog,
+  UploadPierDialog,
 } from '@holium/shared';
 
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
-export default function UploadId() {
+export default function UploadPierPage() {
   const { goToPage } = useNavigation();
 
   const [file, setFile] = useState<File>();
@@ -56,31 +56,20 @@ export default function UploadId() {
       });
     }, 2000);
 
-    // After 15 minutes, show a hint to try a different browser.
-    const timeout = setTimeout(() => {
-      setHint('Upload stuck? Try uploading in a different browser.');
-    }, 15 * 60 * 1000);
-
-    const formData = new FormData();
-    formData.append('attachment', file);
-    formData.append('type', 'pier');
-    formData.append('desks', 'false');
-    formData.append('groups', 'false');
-
     await thirdEarthApi.log(token, {
       file: 'purchases',
       type: 'info',
-      subject: 'FRONTEND: upload started (email notify)',
-      message: `Upload of pier file ${file.name} started.`,
+      subject: 'FRONTEND: SFTP started (email notify)',
+      message: `Upload with SFTP started.`,
     });
-    const response = await thirdEarthApi.uploadPierFile(
+    const response = await thirdEarthApi.uploadUploadPier(
       token,
-      provisionalShipId,
-      formData
+      provisionalShipId
     );
 
+    console.log('SFTP response', response);
+
     setHint(undefined);
-    clearTimeout(timeout);
 
     if (!response) {
       setError('An unknown error occurred.');
@@ -115,7 +104,7 @@ export default function UploadId() {
 
   return (
     <Page title="Upload Pier" isProtected>
-      <UploadIdDialog
+      <UploadPierDialog
         fileName={file?.name}
         progress={progress}
         error={error}

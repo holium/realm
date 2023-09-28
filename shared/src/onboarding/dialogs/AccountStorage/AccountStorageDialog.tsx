@@ -20,7 +20,7 @@ type Props = {
   onClickRestartStorage: () => Promise<string> | undefined;
   setSelectedShipId: (newId: number) => void;
   onClickPurchaseId: () => void;
-  onClickUploadId: () => void;
+  onClickUploadPier: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -36,7 +36,7 @@ export const AccountStorageDialog = ({
   onClickRestartStorage,
   setSelectedShipId,
   onClickPurchaseId,
-  onClickUploadId,
+  onClickUploadPier,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -47,7 +47,7 @@ export const AccountStorageDialog = ({
     isLoading={!storageUrl || !storageBucket || !storagePassword}
     setSelectedShipId={setSelectedShipId}
     onClickPurchaseId={onClickPurchaseId}
-    onClickUploadId={onClickUploadId}
+    onClickUploadPier={onClickUploadPier}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >

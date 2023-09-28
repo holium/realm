@@ -23,7 +23,7 @@ const DownloadRealmPresenter = () => {
     }
   };
 
-  const onClickUploadId = () => {
+  const onClickUploadPier = () => {
     const byopInProgress = ships.find(
       (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
     );
@@ -64,7 +64,7 @@ const DownloadRealmPresenter = () => {
       onDownloadWindows={onDownloadWindows}
       onDownloadLinux={onDownloadLinux}
       onClickPurchaseId={onClickPurchaseId}
-      onClickUploadId={onClickUploadId}
+      onClickUploadPier={onClickUploadPier}
       onClickSidebarSection={onClickSidebarSection}
       onExit={logout}
     />

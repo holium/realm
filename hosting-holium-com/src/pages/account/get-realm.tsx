@@ -27,7 +27,7 @@ export const joinWaitlist = async (email: string) => {
 const GetRealmPresenter = () => {
   const { goToPage, logout } = useNavigation();
 
-  const onClickUploadId = () => {
+  const onClickUploadPier = () => {
     goToPage('/upload-id-disclaimer', {
       back_url: '/account/get-realm',
     });
@@ -52,7 +52,7 @@ const GetRealmPresenter = () => {
       onClickJoinWaitlist={joinWaitlist}
       onClickSidebarSection={onClickSidebarSection}
       onClickPurchaseId={onClickPurchaseId}
-      onClickUploadId={onClickUploadId}
+      onClickUploadPier={onClickUploadPier}
       onExit={logout}
     />
   );

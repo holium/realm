@@ -8,8 +8,8 @@ import {
   uploadErrors,
   VerifyEmailDialog,
 } from '../onboarding';
-import { UploadIdDialog } from './UploadId/UploadIdDialog';
-import { UploadIdDisclaimerDialog } from './UploadIdDisclaimer/UploadIdDisclaimerDialog';
+import { UploadPierDialog } from './UploadPier/UploadPierDialog';
+import { UploadPierDisclaimerDialog } from './UploadPierDisclaimer/UploadPierDisclaimerDialog';
 import { OnboardingDialogWrapper, thirdEarthMockProduct } from './util';
 
 export default {
@@ -23,7 +23,7 @@ export const GetOnRealmDialogStory: ComponentStory<
   <OnboardingDialogWrapper>
     <GetOnRealmDialog
       onPurchaseId={() => {}}
-      onUploadId={() => {}}
+      onUploadPier={() => {}}
       onAlreadyHaveAccount={() => {}}
     />
   </OnboardingDialogWrapper>
@@ -58,20 +58,20 @@ export const VerifyEmailDialogStory: ComponentStory<
 
 VerifyEmailDialogStory.storyName = '2. Verify email';
 
-export const UploadIdDisclaimerDialogStory: ComponentStory<
+export const UploadPierDisclaimerDialogStory: ComponentStory<
   typeof PaymentDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <UploadIdDisclaimerDialog
+    <UploadPierDisclaimerDialog
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
 
-UploadIdDisclaimerDialogStory.storyName = '3. Disclaimer';
+UploadPierDisclaimerDialogStory.storyName = '3. Disclaimer';
 
-export const UploadIdPaymentDialogStory: ComponentStory<
+export const UploadPierPaymentDialogStory: ComponentStory<
   typeof PaymentDialog
 > = () => (
   <OnboardingDialogWrapper>
@@ -95,13 +95,13 @@ export const UploadIdPaymentDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdPaymentDialogStory.storyName = '4. Payment';
+UploadPierPaymentDialogStory.storyName = '4. Payment';
 
-export const UploadIdDialogStory: ComponentStory<
-  typeof UploadIdDialog
+export const UploadPierDialogStory: ComponentStory<
+  typeof UploadPierDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <UploadIdDialog
+    <UploadPierDialog
       onUpload={() => Promise.resolve(false)}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
@@ -109,13 +109,13 @@ export const UploadIdDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdDialogStory.storyName = '5.1. Upload Pier';
+UploadPierDialogStory.storyName = '5.1. Upload Pier';
 
-export const UploadIdUploadingDialogStory: ComponentStory<
-  typeof UploadIdDialog
+export const UploadPierUploadingDialogStory: ComponentStory<
+  typeof UploadPierDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <UploadIdDialog
+    <UploadPierDialog
       fileName="sampel-palnet.tar.gz"
       progress={30}
       onUpload={() => Promise.resolve(false)}
@@ -125,13 +125,13 @@ export const UploadIdUploadingDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdUploadingDialogStory.storyName = '5.2. Upload Pier – Uploading';
+UploadPierUploadingDialogStory.storyName = '5.2. Upload Pier – Uploading';
 
-export const UploadIdStuckDialogStory: ComponentStory<
-  typeof UploadIdDialog
+export const UploadPierStuckDialogStory: ComponentStory<
+  typeof UploadPierDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <UploadIdDialog
+    <UploadPierDialog
       fileName="sampel-palnet.tar.gz"
       progress={99}
       hint="Upload stuck? Try uploading in a different browser."
@@ -142,13 +142,13 @@ export const UploadIdStuckDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdStuckDialogStory.storyName = '5.3. Upload Pier – Stuck?';
+UploadPierStuckDialogStory.storyName = '5.3. Upload Pier – Stuck?';
 
-export const UploadIdErrorDialogStory: ComponentStory<
-  typeof UploadIdDialog
+export const UploadPierErrorDialogStory: ComponentStory<
+  typeof UploadPierDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <UploadIdDialog
+    <UploadPierDialog
       fileName="sampel-palnet.tar.gz"
       progress={27}
       error={uploadErrors['invalidFileError']}
@@ -159,13 +159,13 @@ export const UploadIdErrorDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdErrorDialogStory.storyName = '5.4. Upload Pier – Error';
+UploadPierErrorDialogStory.storyName = '5.4. Upload Pier – Error';
 
-export const UploadIdDoneDialogStory: ComponentStory<
-  typeof UploadIdDialog
+export const UploadPierDoneDialogStory: ComponentStory<
+  typeof UploadPierDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <UploadIdDialog
+    <UploadPierDialog
       fileName="sampel-palnet.tar.gz"
       progress={100}
       onUpload={() => Promise.resolve(false)}
@@ -175,7 +175,7 @@ export const UploadIdDoneDialogStory: ComponentStory<
   </OnboardingDialogWrapper>
 );
 
-UploadIdDoneDialogStory.storyName = '5.5. Upload an ID – Uploaded';
+UploadPierDoneDialogStory.storyName = '5.5. Upload an ID – Uploaded';
 
 export const BYOPBootingDialogStory: ComponentStory<
   typeof BootingDialog

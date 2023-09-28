@@ -6,6 +6,7 @@ import {
   OnboardingPage,
   OnboardingStorage,
   SidebarSection,
+  ThirdEarthProductType,
 } from '@holium/shared';
 
 export const accountPageUrl: Record<string, OnboardingPage> = {
@@ -41,7 +42,7 @@ export const useNavigation = () => {
         back_url?: OnboardingPage;
         redirect_url?: OnboardingPage;
         haha?: string; // Hide "Already have an account"
-        product_type?: string;
+        product_type?: ThirdEarthProductType;
       }
     ) => {
       const path =

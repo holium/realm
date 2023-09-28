@@ -1,9 +1,9 @@
 import * as Yup from 'yup';
 
 import { OnboardDialog } from '../../components/OnboardDialog';
-import { UploadIdDialogBody } from './UploadIdDialogBody';
+import { UploadPierDialogBody } from './UploadPierDialogBody';
 
-const UploadIdSchema = Yup.object().shape({
+const UploadPierSchema = Yup.object().shape({
   uploaded: Yup.boolean().oneOf([true]),
   uploading: Yup.boolean().oneOf([false]),
 });
@@ -18,7 +18,7 @@ type Props = {
   onNext: () => Promise<boolean>;
 };
 
-export const UploadIdDialog = ({
+export const UploadPierDialog = ({
   fileName,
   progress,
   error,
@@ -29,9 +29,9 @@ export const UploadIdDialog = ({
 }: Props) => (
   <OnboardDialog
     initialValues={{ uploaded: undefined, uploading: false }}
-    validationSchema={UploadIdSchema}
+    validationSchema={UploadPierSchema}
     body={
-      <UploadIdDialogBody
+      <UploadPierDialogBody
         fileName={fileName}
         progress={progress}
         error={error}

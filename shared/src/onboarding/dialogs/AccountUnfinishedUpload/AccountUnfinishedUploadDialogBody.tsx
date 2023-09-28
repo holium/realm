@@ -24,12 +24,12 @@ export const uploadErrors: Record<string, string> = {
 
 type Props = {
   shipType?: string;
-  onClickReuploadId: () => void;
+  onClickReuploadPier: () => void;
 };
 
 export const AccountUnfinishedUploadDialogBody = ({
   shipType,
-  onClickReuploadId,
+  onClickReuploadPier,
 }: Props) => {
   const [error, setError] = useState<string>();
 
@@ -46,7 +46,7 @@ export const AccountUnfinishedUploadDialogBody = ({
       <>
         <ErrorBox>{error}</ErrorBox>
         <Flex flexDirection="column" alignItems="center">
-          <GrayButton onClick={onClickReuploadId}>Re-upload</GrayButton>
+          <GrayButton onClick={onClickReuploadPier}>Re-upload</GrayButton>
         </Flex>
       </>
     );
@@ -59,7 +59,9 @@ export const AccountUnfinishedUploadDialogBody = ({
           You haven't uploaded your pier yet.
         </OnboardDialogDescription>
         <Flex flexDirection="column" alignItems="center">
-          <GrayButton onClick={onClickReuploadId}>Continue workflow</GrayButton>
+          <GrayButton onClick={onClickReuploadPier}>
+            Continue workflow
+          </GrayButton>
         </Flex>
       </>
     );

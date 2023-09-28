@@ -179,7 +179,7 @@ const HostingPresenter = () => {
     return false;
   };
 
-  const onClickUploadId = () => {
+  const onClickUploadPier = () => {
     const byopInProgress = ships.find(
       (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
     );
@@ -195,7 +195,7 @@ const HostingPresenter = () => {
     }
   };
 
-  const onClickReuploadId = () => {
+  const onClickReuploadPier = () => {
     goToPage('/upload-id', {
       product_type: 'byop-p',
       back_url: '/account',
@@ -213,9 +213,9 @@ const HostingPresenter = () => {
       <AccountUnfinishedUploadDialog
         ships={ships}
         selectedShipId={selectedShipId}
-        onClickReuploadId={onClickReuploadId}
+        onClickReuploadPier={onClickReuploadPier}
         onClickPurchaseId={onClickPurchaseId}
-        onClickUploadId={onClickUploadId}
+        onClickUploadPier={onClickUploadPier}
         setSelectedShipId={setSelectedShipId}
         onClickSidebarSection={onClickSidebarSection}
         onClickExit={logout}
@@ -265,7 +265,7 @@ const HostingPresenter = () => {
         serverCode={selectedShip?.code}
         serverMaintenanceWindow={selectedShip?.maintenance_window}
         onClickPurchaseId={onClickPurchaseId}
-        onClickUploadId={onClickUploadId}
+        onClickUploadPier={onClickUploadPier}
         setSelectedShipId={setSelectedShipId}
         onClickChangeEmail={changeEmailModal.toggleOn}
         onClickChangePassword={changePasswordModal.toggleOn}

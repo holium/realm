@@ -15,7 +15,7 @@ type Props = {
   onChangeDomain: (domain: string) => void;
   onSubmit: () => Promise<void>;
   onClickPurchaseId: () => void;
-  onClickUploadId: () => void;
+  onClickUploadPier: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -32,7 +32,7 @@ export const AccountCustomDomainDialog = ({
   onChangeDomain,
   onSubmit,
   onClickPurchaseId,
-  onClickUploadId,
+  onClickUploadPier,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -43,7 +43,7 @@ export const AccountCustomDomainDialog = ({
     currentSection={SidebarSection.CustomDomain}
     isLoading={!dropletIp}
     onClickPurchaseId={onClickPurchaseId}
-    onClickUploadId={onClickUploadId}
+    onClickUploadPier={onClickUploadPier}
     onClickSidebarSection={onClickSidebarSection}
     onSubmit={onSubmit}
     onExit={onExit}

@@ -8,7 +8,7 @@ import {
 } from '../../components/OnboardDialog.styles';
 import { UploadBox } from './UploadBox';
 
-type UploadIdFields = {
+type UploadPierFields = {
   uploaded: boolean;
   uploading: boolean;
 };
@@ -21,7 +21,7 @@ type Props = {
   onUpload: (file: File) => Promise<boolean>;
 };
 
-export const UploadIdDialogBody = ({
+export const UploadPierDialogBody = ({
   fileName,
   progress,
   error,
@@ -31,7 +31,7 @@ export const UploadIdDialogBody = ({
   const {
     values: { uploaded, uploading },
     setFieldValue,
-  } = useFormikContext<UploadIdFields>();
+  } = useFormikContext<UploadPierFields>();
 
   const handleUpload = async (file: File) => {
     if (uploading || uploaded) return;

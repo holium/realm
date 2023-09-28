@@ -36,7 +36,7 @@ const SupportPresenter = ({ alerts }: Props) => {
     }
   };
 
-  const onClickUploadId = () => {
+  const onClickUploadPier = () => {
     const byopInProgress = ships.find(
       (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
     );
@@ -65,7 +65,7 @@ const SupportPresenter = ({ alerts }: Props) => {
       selectedShipId={selectedShipId}
       setSelectedShipId={setSelectedShipId}
       onClickPurchaseId={onClickPurchaseId}
-      onClickUploadId={onClickUploadId}
+      onClickUploadPier={onClickUploadPier}
       onClickSidebarSection={onClickSidebarSection}
       onExit={logout}
     />

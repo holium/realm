@@ -27,7 +27,7 @@ export const GetOnRealmDialogStory: ComponentStory<
   <OnboardingDialogWrapper>
     <GetOnRealmDialog
       onPurchaseId={() => {}}
-      onUploadId={() => {}}
+      onUploadPier={() => {}}
       onAlreadyHaveAccount={() => {}}
     />
   </OnboardingDialogWrapper>

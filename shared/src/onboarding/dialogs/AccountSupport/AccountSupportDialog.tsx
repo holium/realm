@@ -9,7 +9,7 @@ type Props = {
   selectedShipId: number | undefined;
   setSelectedShipId: (newId: number) => void;
   onClickPurchaseId: () => void;
-  onClickUploadId: () => void;
+  onClickUploadPier: () => void;
   onClickSidebarSection: (section: SidebarSection) => void;
   onExit: () => void;
 };
@@ -20,7 +20,7 @@ export const AccountSupportDialog = ({
   selectedShipId,
   setSelectedShipId,
   onClickPurchaseId,
-  onClickUploadId,
+  onClickUploadPier,
   onClickSidebarSection,
   onExit,
 }: Props) => (
@@ -30,7 +30,7 @@ export const AccountSupportDialog = ({
     setSelectedShipId={setSelectedShipId}
     currentSection={SidebarSection.Support}
     onClickPurchaseId={onClickPurchaseId}
-    onClickUploadId={onClickUploadId}
+    onClickUploadPier={onClickUploadPier}
     onClickSidebarSection={onClickSidebarSection}
     onExit={onExit}
   >

@@ -24,7 +24,7 @@ export const PurchaseIdButton = styled(Button.Primary)`
   ${CTAButtonCSS}
 `;
 
-export const UploadIdButton = styled(GrayButton)`
+export const UploadPierButton = styled(GrayButton)`
   ${CTAButtonCSS}
 `;
 

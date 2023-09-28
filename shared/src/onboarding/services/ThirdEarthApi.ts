@@ -489,6 +489,27 @@ export class ThirdEarthApi {
     );
   }
 
+  uploadUploadPier(token: string, shipId: string) {
+    const formData = new FormData();
+    formData.append('type', 'sftp');
+    formData.append('desks', 'false');
+    formData.append('groups', 'false');
+
+    return http<UploadPierFileResponse>(
+      `${this.apiBaseUrl}/user/host-ship/${shipId}`,
+      {
+        method: 'POST',
+        headers: {
+          // Don't specify content-type for FormData.
+          authorization: `Bearer ${token}`,
+          client_id: this.headersClientId,
+          version: this.headersVersion,
+        },
+        body: formData,
+      }
+    );
+  }
+
   log(
     token: string,
     payload: {
