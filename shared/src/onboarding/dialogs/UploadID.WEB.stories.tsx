@@ -9,7 +9,7 @@ import {
   VerifyEmailDialog,
 } from '../onboarding';
 import { UploadIdDialog } from './UploadId/UploadIdDialog';
-import { UploadIdDisclaimerDialog } from './UploadIdDisclaimer/UploadIdDisclaimerDialog';
+import { SftpDisclaimerDialog } from './UploadIdDisclaimer/SftpDisclaimerDialog';
 import { OnboardingDialogWrapper, thirdEarthMockProduct } from './util';
 
 export default {
@@ -58,18 +58,18 @@ export const VerifyEmailDialogStory: ComponentStory<
 
 VerifyEmailDialogStory.storyName = '2. Verify email';
 
-export const UploadIdDisclaimerDialogStory: ComponentStory<
+export const SftpDisclaimerDialogStory: ComponentStory<
   typeof PaymentDialog
 > = () => (
   <OnboardingDialogWrapper>
-    <UploadIdDisclaimerDialog
+    <SftpDisclaimerDialog
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
 
-UploadIdDisclaimerDialogStory.storyName = '3. Disclaimer';
+SftpDisclaimerDialogStory.storyName = '3. Disclaimer';
 
 export const UploadIdPaymentDialogStory: ComponentStory<
   typeof PaymentDialog

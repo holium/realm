@@ -9,15 +9,15 @@ import {
 } from '../../components/OnboardDialog.styles';
 import { GrayBox } from '../GetRealm/GetRealmDialogBody.styles';
 
-type UploadIdDisclaimerFields = {
+type SftpDisclaimerFields = {
   iHaveRead: boolean;
 };
 
-export const UploadIdDisclaimerDialogBody = () => {
+export const SftpDisclaimerDialogBody = () => {
   const {
     values: { iHaveRead },
     setFieldValue,
-  } = useFormikContext<UploadIdDisclaimerFields>();
+  } = useFormikContext<SftpDisclaimerFields>();
 
   return (
     <Flex
@@ -30,12 +30,12 @@ export const UploadIdDisclaimerDialogBody = () => {
       <OnboardDialogTitle>Disclaimer</OnboardDialogTitle>
       <Flex flexDirection="column" gap={8}>
         <OnboardDialogDescription>
-          <b>Uploading a Pier</b>
+          <b>Uploading a Pier with SFTP</b>
         </OnboardDialogDescription>
         <OnboardDialogDescription>
-          This option is for people who want to move their existing pier with
-          all of its apps, subscriptions, and configurations to Holium hosting,
-          as opposed to purchasing a fresh ID.
+          This option is for technical users who want to move their existing
+          pier with all of its apps, subscriptions, and configurations to Holium
+          hosting, as opposed to purchasing a fresh ID.
         </OnboardDialogDescription>
       </Flex>
       <OnboardDialogDescription>
@@ -51,30 +51,18 @@ export const UploadIdDisclaimerDialogBody = () => {
           />
           <Flex flex={1} flexDirection="column">
             <Text.Body>
-              I have read through the{' '}
+              I have read through{' '}
               <Anchor
-                href="https://docs.holium.com/realm/hosting/byop-pier"
+                href="https://docs.holium.com/realm/hosting/sftp-byop"
                 target="_blank"
               >
-                <u>our guide</u>
-              </Anchor>{' '}
-              and understand that I must have my Urbit updated to the latest
-              vere and latest OTA.
+                <u>the guide</u>
+              </Anchor>
+              .
             </Text.Body>
           </Flex>
         </Flex>
       </GrayBox>
-      <OnboardDialogDescription
-        style={{
-          maxWidth: 340,
-          fontWeight: 500,
-          margin: '0 auto',
-          textAlign: 'center',
-          color: 'var(--rlm-intent-alert-color)',
-        }}
-      >
-        IF THE PIER IS OUT OF DATE, IT WILL NOT START PROPERLY IN OUR SYSTEM.
-      </OnboardDialogDescription>
     </Flex>
   );
 };
