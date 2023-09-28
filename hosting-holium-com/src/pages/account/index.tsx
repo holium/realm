@@ -185,18 +185,18 @@ const HostingPresenter = () => {
     );
 
     if (byopInProgress) {
-      goToPage('/upload-id', {
+      goToPage('/upload-pier', {
         back_url: '/account',
       });
     } else {
-      goToPage('/upload-id-disclaimer', {
+      goToPage('/upload-pier-disclaimer', {
         back_url: '/account',
       });
     }
   };
 
   const onClickReuploadPier = () => {
-    goToPage('/upload-id', {
+    goToPage('/upload-pier', {
       product_type: 'byop-p',
       back_url: '/account',
     });

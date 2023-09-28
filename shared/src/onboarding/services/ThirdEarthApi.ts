@@ -131,7 +131,7 @@ type ProvisionalShipEntryResponse = {
   invoice_id: string;
 }[];
 
-type UploadPierFileResponse = {
+type PrepareSftpServerForPierUploadResponse = {
   patp?: string;
   sigil?: string;
   arvo_key_file?: {
@@ -471,32 +471,14 @@ export class ThirdEarthApi {
     });
   }
 
-  uploadPierFile(token: string, shipId: string, formData: FormData) {
-    return http<UploadPierFileResponse>(
-      `${this.apiBaseUrl}/user/host-ship/${shipId}`,
-      {
-        method: 'POST',
-        headers: {
-          // Don't specify content-type for FormData.
-          authorization: `Bearer ${token}`,
-          client_id: this.headersClientId,
-          version: this.headersVersion,
-        },
-        body: formData,
-      },
-      // 60 minutes timeout
-      3600000
-    );
-  }
-
-  uploadUploadPier(token: string, shipId: string) {
+  prepareSftpServerForPierUpload(token: string, userId: string) {
     const formData = new FormData();
     formData.append('type', 'sftp');
     formData.append('desks', 'false');
     formData.append('groups', 'false');
 
-    return http<UploadPierFileResponse>(
-      `${this.apiBaseUrl}/user/host-ship/${shipId}`,
+    return http<PrepareSftpServerForPierUploadResponse>(
+      `${this.apiBaseUrl}/user/host-ship/${userId}`,
       {
         method: 'POST',
         headers: {
@@ -521,7 +503,7 @@ export class ThirdEarthApi {
       auditTrailCode?: number;
     }
   ) {
-    return http<UploadPierFileResponse>(`${this.apiBaseUrl}/user/raise-alarm`, {
+    return http(`${this.apiBaseUrl}/user/raise-alarm`, {
       method: 'POST',
       headers: this.getHeaders(token),
       body: JSON.stringify({ ...payload }),

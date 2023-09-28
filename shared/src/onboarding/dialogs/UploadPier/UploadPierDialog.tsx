@@ -9,21 +9,19 @@ const UploadPierSchema = Yup.object().shape({
 });
 
 type Props = {
-  fileName?: string;
-  progress?: number;
+  ipAddress: string;
+  password: string;
   error?: string;
   hint?: string;
-  onUpload: (file: File) => Promise<boolean>;
   onBack: () => void;
   onNext: () => Promise<boolean>;
 };
 
 export const UploadPierDialog = ({
-  fileName,
-  progress,
+  ipAddress,
+  password,
   error,
   hint,
-  onUpload,
   onBack,
   onNext,
 }: Props) => (
@@ -32,11 +30,10 @@ export const UploadPierDialog = ({
     validationSchema={UploadPierSchema}
     body={
       <UploadPierDialogBody
-        fileName={fileName}
-        progress={progress}
+        ipAddress={ipAddress}
+        password={password}
         error={error}
         hint={hint}
-        onUpload={onUpload}
       />
     }
     onBack={onBack}

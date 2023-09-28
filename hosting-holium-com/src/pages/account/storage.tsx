@@ -32,11 +32,11 @@ const S3StoragePresenter = () => {
     );
 
     if (byopInProgress) {
-      goToPage('/upload-id', {
+      goToPage('/upload-pier', {
         back_url: '/account/storage',
       });
     } else {
-      goToPage('/upload-id-disclaimer', {
+      goToPage('/upload-pier-disclaimer', {
         back_url: '/account/storage',
       });
     }

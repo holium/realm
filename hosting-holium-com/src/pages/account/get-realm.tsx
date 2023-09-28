@@ -28,7 +28,7 @@ const GetRealmPresenter = () => {
   const { goToPage, logout } = useNavigation();
 
   const onClickUploadPier = () => {
-    goToPage('/upload-id-disclaimer', {
+    goToPage('/upload-pier-disclaimer', {
       back_url: '/account/get-realm',
     });
   };

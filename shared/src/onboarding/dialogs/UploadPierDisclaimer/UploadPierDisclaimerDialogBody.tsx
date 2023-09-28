@@ -30,7 +30,7 @@ export const UploadPierDisclaimerDialogBody = () => {
       <OnboardDialogTitle>Disclaimer</OnboardDialogTitle>
       <Flex flexDirection="column" gap={8}>
         <OnboardDialogDescription>
-          <b>Uploading Pier with SFTP</b>
+          <b>Upload Pier with SFTP</b>
         </OnboardDialogDescription>
         <OnboardDialogDescription>
           This option is for technical users who want to move their existing
@@ -41,7 +41,7 @@ export const UploadPierDisclaimerDialogBody = () => {
       <OnboardDialogDescription>
         <b>Required:</b> A compressed archive of your existing pier in a{' '}
         <code>.zip</code> or <code>.tar.gz</code> format which was created after
-        the ship was shut down at its current location.
+        the ship was shut down at its current location. Max file size is 3GB.
       </OnboardDialogDescription>
       <GrayBox>
         <Flex>
@@ -51,12 +51,12 @@ export const UploadPierDisclaimerDialogBody = () => {
           />
           <Flex flex={1} flexDirection="column">
             <Text.Body>
-              I have read through{' '}
+              I have read through the{' '}
               <Anchor
                 href="https://docs.holium.com/realm/hosting/sftp-byop"
                 target="_blank"
               >
-                <u>the SFTP guide</u>
+                <u>SFTP guide</u>
               </Anchor>
               .
             </Text.Body>

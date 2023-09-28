@@ -62,7 +62,7 @@ export default function UploadPierPage() {
       subject: 'FRONTEND: SFTP started (email notify)',
       message: `Upload with SFTP started.`,
     });
-    const response = await thirdEarthApi.uploadUploadPier(
+    const response = await thirdEarthApi.prepareSftpServerForPierUpload(
       token,
       provisionalShipId
     );

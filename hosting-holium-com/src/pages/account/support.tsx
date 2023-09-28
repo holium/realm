@@ -42,11 +42,11 @@ const SupportPresenter = ({ alerts }: Props) => {
     );
 
     if (byopInProgress) {
-      goToPage('/upload-id', {
+      goToPage('/upload-pier', {
         back_url: '/account/support',
       });
     } else {
-      goToPage('/upload-id-disclaimer', {
+      goToPage('/upload-pier-disclaimer', {
         back_url: '/account/support',
       });
     }

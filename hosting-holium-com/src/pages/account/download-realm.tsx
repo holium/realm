@@ -29,11 +29,11 @@ const DownloadRealmPresenter = () => {
     );
 
     if (byopInProgress) {
-      goToPage('/upload-id', {
+      goToPage('/upload-pier', {
         back_url: '/account/download-realm',
       });
     } else {
-      goToPage('/upload-id-disclaimer', {
+      goToPage('/upload-pier-disclaimer', {
         back_url: '/account/download-realm',
       });
     }

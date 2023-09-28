@@ -5,7 +5,6 @@ import {
   CreateAccountDialog,
   GetOnRealmDialog,
   PaymentDialog,
-  uploadErrors,
   VerifyEmailDialog,
 } from '../onboarding';
 import { UploadPierDialog } from './UploadPier/UploadPierDialog';
@@ -102,7 +101,8 @@ export const UploadPierDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <UploadPierDialog
-      onUpload={() => Promise.resolve(false)}
+      ipAddress="157.230.48.21"
+      password="908732"
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
@@ -116,9 +116,8 @@ export const UploadPierUploadingDialogStory: ComponentStory<
 > = () => (
   <OnboardingDialogWrapper>
     <UploadPierDialog
-      fileName="sampel-palnet.tar.gz"
-      progress={30}
-      onUpload={() => Promise.resolve(false)}
+      ipAddress="157.230.48.21"
+      password="908732"
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
@@ -127,55 +126,36 @@ export const UploadPierUploadingDialogStory: ComponentStory<
 
 UploadPierUploadingDialogStory.storyName = '5.2. Upload Pier – Uploading';
 
-export const UploadPierStuckDialogStory: ComponentStory<
-  typeof UploadPierDialog
-> = () => (
-  <OnboardingDialogWrapper>
-    <UploadPierDialog
-      fileName="sampel-palnet.tar.gz"
-      progress={99}
-      hint="Upload stuck? Try uploading in a different browser."
-      onUpload={() => Promise.resolve(false)}
-      onBack={() => {}}
-      onNext={() => Promise.resolve(false)}
-    />
-  </OnboardingDialogWrapper>
-);
-
-UploadPierStuckDialogStory.storyName = '5.3. Upload Pier – Stuck?';
-
 export const UploadPierErrorDialogStory: ComponentStory<
   typeof UploadPierDialog
 > = () => (
   <OnboardingDialogWrapper>
     <UploadPierDialog
-      fileName="sampel-palnet.tar.gz"
-      progress={27}
-      error={uploadErrors['invalidFileError']}
-      onUpload={() => Promise.resolve(false)}
+      ipAddress="157.230.48.21"
+      password="908732"
+      error="Pier already exists."
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
 
-UploadPierErrorDialogStory.storyName = '5.4. Upload Pier – Error';
+UploadPierErrorDialogStory.storyName = '5.3. Upload Pier – Error';
 
 export const UploadPierDoneDialogStory: ComponentStory<
   typeof UploadPierDialog
 > = () => (
   <OnboardingDialogWrapper>
     <UploadPierDialog
-      fileName="sampel-palnet.tar.gz"
-      progress={100}
-      onUpload={() => Promise.resolve(false)}
+      ipAddress="157.230.48.21"
+      password="908732"
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
 
-UploadPierDoneDialogStory.storyName = '5.5. Upload an ID – Uploaded';
+UploadPierDoneDialogStory.storyName = '5.4. Upload Pier – Uploaded';
 
 export const BYOPBootingDialogStory: ComponentStory<
   typeof BootingDialog
