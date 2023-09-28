@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import { useToggle } from '@holium/design-system/util';
 import {
   OnboardingStorage,
   uploadErrors,
@@ -10,15 +11,21 @@ import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
 import { useNavigation } from '../util/useNavigation';
 
+type SftpServer = {
+  ipAddress: string;
+  password: string;
+};
+
 export default function UploadPierPage() {
   const { goToPage } = useNavigation();
 
-  const [file, setFile] = useState<File>();
-  const [progress, setProgress] = useState<number>();
-  const [error, setError] = useState<string>();
-  const [hint, setHint] = useState<string>();
+  const uploaded = useToggle(false);
 
-  const onUpload = async (file: File) => {
+  const [sftpServer, _setSftpServer] = useState<SftpServer>();
+
+  const [error, setError] = useState<string>();
+
+  const onUpload = async () => {
     const { token } = OnboardingStorage.get();
 
     if (!token) {
@@ -38,23 +45,7 @@ export default function UploadPierPage() {
 
     const provisionalShipId = provisionalShip.id.toString();
 
-    setFile(file);
-    setProgress(0);
     setError(undefined);
-
-    // Increment progress by 1% every 2s until 99%.
-    const interval = setInterval(() => {
-      setProgress((progress) => {
-        if (progress === undefined) return 0;
-
-        if (progress < 99) {
-          return progress + 1;
-        } else {
-          clearInterval(interval);
-          return progress;
-        }
-      });
-    }, 2000);
 
     await thirdEarthApi.log(token, {
       file: 'purchases',
@@ -68,8 +59,6 @@ export default function UploadPierPage() {
     );
 
     console.log('SFTP response', response);
-
-    setHint(undefined);
 
     if (!response) {
       setError('An unknown error occurred.');
@@ -86,9 +75,6 @@ export default function UploadPierPage() {
       return false;
     }
 
-    setProgress(100);
-    clearInterval(interval);
-
     return true;
   };
 
@@ -102,14 +88,21 @@ export default function UploadPierPage() {
     });
   };
 
+  useEffect(() => {
+    if (sftpServer) {
+      // Poll.
+    } else {
+      onUpload();
+    }
+  }, []);
+
   return (
-    <Page title="Upload Pier" isProtected>
+    <Page title="Upload Pier with SFTP" isProtected>
       <UploadPierDialog
-        fileName={file?.name}
-        progress={progress}
+        password={sftpServer?.password}
+        ipAddress={sftpServer?.ipAddress}
         error={error}
-        hint={hint}
-        onUpload={onUpload}
+        uploaded={uploaded.isOn}
         onBack={onBack}
         onNext={onNext}
       />

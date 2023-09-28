@@ -1,4 +1,9 @@
-import { Anchor, ErrorBox, Flex, InfoBox } from '@holium/design-system/general';
+import {
+  Anchor,
+  ErrorBox,
+  Flex,
+  SuccessBox,
+} from '@holium/design-system/general';
 
 import {
   OnboardDialogDescription,
@@ -7,17 +12,17 @@ import {
 import { GrayBox } from '../GetRealm/GetRealmDialogBody.styles';
 
 type Props = {
-  ipAddress: string;
-  password: string;
+  ipAddress?: string;
+  password?: string;
   error?: string;
-  hint?: string;
+  uploaded: boolean;
 };
 
 export const UploadPierDialogBody = ({
   ipAddress,
   password,
   error,
-  hint,
+  uploaded,
 }: Props) => (
   <Flex
     flexDirection="column"
@@ -42,53 +47,60 @@ export const UploadPierDialogBody = ({
       </Anchor>{' '}
       to learn more.
     </OnboardDialogDescription>
-    <GrayBox>
-      <Flex flexDirection="column" gap="8px">
-        <Flex gap="8px" alignItems="center">
-          <OnboardDialogDescription
-            style={{
-              fontSize: 12,
-              fontWeight: 500,
-              opacity: 0.7,
-              width: 100,
-            }}
-          >
-            IP Address
-          </OnboardDialogDescription>
-          <OnboardDialogDescription
-            style={{
-              fontSize: 13,
-            }}
-          >
-            {ipAddress}
-          </OnboardDialogDescription>
+    <GrayBox style={{ minHeight: 81, alignItems: 'center' }}>
+      {ipAddress && password ? (
+        <Flex flexDirection="column" gap="8px">
+          <Flex gap="8px" alignItems="center">
+            <OnboardDialogDescription
+              style={{
+                fontSize: 12,
+                fontWeight: 500,
+                opacity: 0.7,
+                width: 100,
+              }}
+            >
+              IP Address
+            </OnboardDialogDescription>
+            <OnboardDialogDescription style={{ fontSize: 13 }}>
+              {ipAddress}
+            </OnboardDialogDescription>
+          </Flex>
+          <Flex gap="8px" alignItems="center">
+            <OnboardDialogDescription
+              style={{
+                fontSize: 12,
+                fontWeight: 500,
+                opacity: 0.7,
+                width: 100,
+              }}
+            >
+              Password
+            </OnboardDialogDescription>
+            <OnboardDialogDescription style={{ fontSize: 13 }}>
+              {password}
+            </OnboardDialogDescription>
+          </Flex>
         </Flex>
-        <Flex gap="8px" alignItems="center">
-          <OnboardDialogDescription
-            style={{
-              fontSize: 12,
-              fontWeight: 500,
-              opacity: 0.7,
-              width: 100,
-            }}
-          >
-            Password
-          </OnboardDialogDescription>
-          <OnboardDialogDescription
-            style={{
-              fontSize: 13,
-            }}
-          >
-            {password}
-          </OnboardDialogDescription>
-        </Flex>
-      </Flex>
+      ) : (
+        <OnboardDialogDescription
+          style={{ fontSize: 13, flex: 1, textAlign: 'center' }}
+        >
+          Generating SFTP credentials...
+        </OnboardDialogDescription>
+      )}
     </GrayBox>
-    <Flex flexDirection="column" gap="2px">
-      <OnboardDialogDescription>Planets only</OnboardDialogDescription>
-      <OnboardDialogDescription>Max file size: 3 GB</OnboardDialogDescription>
-    </Flex>
-    {error && <ErrorBox>{error}</ErrorBox>}
-    {hint && <InfoBox>{hint}</InfoBox>}
+    {uploaded ? (
+      <SuccessBox>Pier uploaded successfully.</SuccessBox>
+    ) : (
+      <>
+        <Flex flexDirection="column" gap="2px">
+          <OnboardDialogDescription>Planets only</OnboardDialogDescription>
+          <OnboardDialogDescription>
+            Max file size: 3 GB
+          </OnboardDialogDescription>
+        </Flex>
+        {error && <ErrorBox>{error}</ErrorBox>}
+      </>
+    )}
   </Flex>
 );

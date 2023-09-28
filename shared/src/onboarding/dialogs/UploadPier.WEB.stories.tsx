@@ -96,6 +96,22 @@ export const UploadPierPaymentDialogStory: ComponentStory<
 
 UploadPierPaymentDialogStory.storyName = '4. Payment';
 
+export const UploadPierGeneratingDialogStory: ComponentStory<
+  typeof UploadPierDialog
+> = () => (
+  <OnboardingDialogWrapper>
+    <UploadPierDialog
+      ipAddress={undefined}
+      password={undefined}
+      uploaded={false}
+      onBack={() => {}}
+      onNext={() => Promise.resolve(false)}
+    />
+  </OnboardingDialogWrapper>
+);
+
+UploadPierGeneratingDialogStory.storyName = '5.1. Upload Pier – Generating';
+
 export const UploadPierDialogStory: ComponentStory<
   typeof UploadPierDialog
 > = () => (
@@ -103,13 +119,14 @@ export const UploadPierDialogStory: ComponentStory<
     <UploadPierDialog
       ipAddress="157.230.48.21"
       password="908732"
+      uploaded={false}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
 
-UploadPierDialogStory.storyName = '5.1. Upload Pier';
+UploadPierDialogStory.storyName = '5.2. Upload Pier';
 
 export const UploadPierUploadingDialogStory: ComponentStory<
   typeof UploadPierDialog
@@ -118,13 +135,14 @@ export const UploadPierUploadingDialogStory: ComponentStory<
     <UploadPierDialog
       ipAddress="157.230.48.21"
       password="908732"
+      uploaded={false}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
 
-UploadPierUploadingDialogStory.storyName = '5.2. Upload Pier – Uploading';
+UploadPierUploadingDialogStory.storyName = '5.3. Upload Pier – Uploading';
 
 export const UploadPierErrorDialogStory: ComponentStory<
   typeof UploadPierDialog
@@ -134,13 +152,14 @@ export const UploadPierErrorDialogStory: ComponentStory<
       ipAddress="157.230.48.21"
       password="908732"
       error="Pier already exists."
+      uploaded={false}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
 
-UploadPierErrorDialogStory.storyName = '5.3. Upload Pier – Error';
+UploadPierErrorDialogStory.storyName = '5.4. Upload Pier – Error';
 
 export const UploadPierDoneDialogStory: ComponentStory<
   typeof UploadPierDialog
@@ -149,13 +168,14 @@ export const UploadPierDoneDialogStory: ComponentStory<
     <UploadPierDialog
       ipAddress="157.230.48.21"
       password="908732"
+      uploaded
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
 
-UploadPierDoneDialogStory.storyName = '5.4. Upload Pier – Uploaded';
+UploadPierDoneDialogStory.storyName = '5.5. Upload Pier – Uploaded';
 
 export const BYOPBootingDialogStory: ComponentStory<
   typeof BootingDialog
@@ -163,7 +183,7 @@ export const BYOPBootingDialogStory: ComponentStory<
   <OnboardingDialogWrapper>
     <BootingDialog
       isBooting
-      logs={['Booting ~zod.', 'Grab some steak.']}
+      logs={['Booting ~zod.', 'Go touch some grass.']}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
@@ -177,7 +197,7 @@ export const BYOPBootingDialogCompleteStory: ComponentStory<
   <OnboardingDialogWrapper>
     <BootingDialog
       isBooting={false}
-      logs={['Booting ~zod.', 'Grab some steak.', 'Booting complete.']}
+      logs={['Booting ~zod.', 'Go touch some grass.', 'Booting complete.']}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>

@@ -5,14 +5,13 @@ import { UploadPierDialogBody } from './UploadPierDialogBody';
 
 const UploadPierSchema = Yup.object().shape({
   uploaded: Yup.boolean().oneOf([true]),
-  uploading: Yup.boolean().oneOf([false]),
 });
 
 type Props = {
-  ipAddress: string;
-  password: string;
+  ipAddress?: string;
+  password?: string;
   error?: string;
-  hint?: string;
+  uploaded: boolean;
   onBack: () => void;
   onNext: () => Promise<boolean>;
 };
@@ -21,19 +20,19 @@ export const UploadPierDialog = ({
   ipAddress,
   password,
   error,
-  hint,
+  uploaded,
   onBack,
   onNext,
 }: Props) => (
   <OnboardDialog
-    initialValues={{ uploaded: undefined, uploading: false }}
+    initialValues={{ uploaded: uploaded ? true : undefined }}
     validationSchema={UploadPierSchema}
     body={
       <UploadPierDialogBody
         ipAddress={ipAddress}
         password={password}
         error={error}
-        hint={hint}
+        uploaded={uploaded}
       />
     }
     onBack={onBack}
