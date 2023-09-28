@@ -52,9 +52,10 @@ type MediaType = 'twitter' | 'media' | 'image';
 export type LinkBlockType = LinkType | MediaType;
 
 const parseUrl = (url: string, defaultUrl: string) => {
-  let result = undefined;
+  let result: string;
   try {
-    result = new URL(url);
+    const urlObject = new URL(url);
+    result = urlObject.toString();
   } catch (e) {
     result = defaultUrl;
   }
