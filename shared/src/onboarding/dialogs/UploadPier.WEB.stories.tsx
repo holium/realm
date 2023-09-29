@@ -151,7 +151,7 @@ export const UploadPierErrorDialogStory: ComponentStory<
     <UploadPierDialog
       ipAddress="157.230.48.21"
       password="908732"
-      error="Pier already exists."
+      error="No provisional ship found."
       uploaded={false}
       onBack={() => {}}
       onNext={() => Promise.resolve(false)}

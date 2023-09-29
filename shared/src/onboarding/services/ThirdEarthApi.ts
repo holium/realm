@@ -141,7 +141,6 @@ type PrepareSftpServerForPierUploadResponse = {
   sponsor?: string;
   planet_status?: string;
   product_ids?: number[];
-  ship_type?: string;
 };
 
 type AlertsResponse = {

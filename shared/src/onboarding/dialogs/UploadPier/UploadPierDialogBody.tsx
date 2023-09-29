@@ -40,7 +40,7 @@ export const UploadPierDialogBody = ({
     <OnboardDialogDescription>
       Read{' '}
       <Anchor
-        href="https://docs.holium.com/realm/hosting/byop-pier"
+        href="https://docs.holium.com/realm/hosting/upload-pier-with-sftp"
         target="_blank"
       >
         <u>our guide</u>

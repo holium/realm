@@ -53,7 +53,7 @@ export const UploadPierDisclaimerDialogBody = () => {
             <Text.Body>
               I have read through the{' '}
               <Anchor
-                href="https://docs.holium.com/realm/hosting/sftp-byop"
+                href="https://docs.holium.com/realm/hosting/upload-pier-with-sftp"
                 target="_blank"
               >
                 <u>SFTP guide</u>

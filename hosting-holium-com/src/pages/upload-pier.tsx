@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { useToggle } from '@holium/design-system/util';
-import {
-  OnboardingStorage,
-  uploadErrors,
-  UploadPierDialog,
-} from '@holium/shared';
+import { OnboardingStorage, UploadPierDialog } from '@holium/shared';
 
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
@@ -21,11 +17,11 @@ export default function UploadPierPage() {
 
   const uploaded = useToggle(false);
 
-  const [sftpServer, _setSftpServer] = useState<SftpServer>();
+  const [sftpServer, setSftpServer] = useState<SftpServer>();
 
   const [error, setError] = useState<string>();
 
-  const onUpload = async () => {
+  const getShip = async () => {
     const { token } = OnboardingStorage.get();
 
     if (!token) {
@@ -35,17 +31,21 @@ export default function UploadPierPage() {
 
     // Get provisional ship ID.
     const ships = await thirdEarthApi.getUserShips(token);
-    const provisionalShip = ships.find((ship) => ship.ship_type === 'host');
+    return ships.find((ship) => ship.product_type === 'byop-p');
+  };
 
-    if (!provisionalShip) {
-      console.log('ships', JSON.stringify(ships, null, 2));
-      setError('No provisional ship found.');
-      return false;
-    }
+  const prepareSftpServer = async () => {
+    const { token } = OnboardingStorage.get();
+    if (!token) return false;
 
-    const provisionalShipId = provisionalShip.id.toString();
+    const ship = await getShip();
+    if (!ship) return false;
 
-    setError(undefined);
+    const sftpResponse = await thirdEarthApi.prepareSftpServerForPierUpload(
+      token,
+      ship.id.toString()
+    );
+    if (!sftpResponse) return false;
 
     await thirdEarthApi.log(token, {
       file: 'purchases',
@@ -53,29 +53,42 @@ export default function UploadPierPage() {
       subject: 'FRONTEND: SFTP started (email notify)',
       message: `Upload with SFTP started.`,
     });
-    const response = await thirdEarthApi.prepareSftpServerForPierUpload(
-      token,
-      provisionalShipId
-    );
 
-    console.log('SFTP response', response);
+    return true;
+  };
 
-    if (!response) {
-      setError('An unknown error occurred.');
+  const pollUntilSftpIsReady = async () => {
+    const ship = await getShip();
+    if (!ship) return false;
 
-      return false;
-    }
-
-    if (
-      response.ship_type &&
-      Object.keys(uploadErrors).includes(response.ship_type)
-    ) {
-      setError(uploadErrors[response.ship_type]);
-
-      return false;
+    if (ship.ship_type.includes('dropletReady')) {
+      const parts = ship.ship_type.split('|');
+      const password = parts[2];
+      const ipAddress = parts[3];
+      setError(undefined);
+      setSftpServer({ password, ipAddress });
+      pollUntilUploaded();
+    } else {
+      // Continue polling until the SFTP server is ready.
+      setTimeout(pollUntilSftpIsReady, 1000);
     }
 
     return true;
+  };
+
+  const pollUntilUploaded = async () => {
+    const ship = await getShip();
+    if (!ship) return false;
+
+    if (ship.ship_type.includes('pierReceived')) {
+      uploaded.toggleOn();
+      setError(undefined);
+      return true;
+    } else {
+      // Continue polling until the ship is uploaded.
+      setTimeout(pollUntilUploaded, 1000);
+      return true;
+    }
   };
 
   const onBack = () => {
@@ -89,11 +102,7 @@ export default function UploadPierPage() {
   };
 
   useEffect(() => {
-    if (sftpServer) {
-      // Poll.
-    } else {
-      onUpload();
-    }
+    prepareSftpServer().then(pollUntilSftpIsReady);
   }, []);
 
   return (
