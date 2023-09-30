@@ -50,9 +50,8 @@ export default function UploadPierPage() {
 
   const shipIsReady = async () => {
     const ship = await getUnbootedByopShip();
-    if (ship && ship.ship_type !== 'provisional') return true;
-    setError('No BYOP ship found.');
-    return false;
+    if (!ship) return false;
+    return ship.ship_type === 'provisional';
   };
 
   const sftpIsReady = async () => {
