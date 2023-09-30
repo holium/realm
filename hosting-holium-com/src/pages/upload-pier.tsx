@@ -18,7 +18,7 @@ export default function UploadPierPage() {
 
   const [error, setError] = useState<string>();
 
-  const getByopShip = async () => {
+  const getUnbootedByopShip = async () => {
     const { token } = OnboardingStorage.get();
 
     if (!token) {
@@ -27,112 +27,148 @@ export default function UploadPierPage() {
     }
 
     const ships = await thirdEarthApi.getUserShips(token);
-    const byopShip = ships.find((ship) => ship.product_type === 'byop-p');
+    const byopShip = ships.find(
+      (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
+    );
 
     return byopShip;
   };
 
-  const pollUntilShipIsReady = async (abortSignal: AbortSignal) => {
-    if (abortSignal.aborted) return false;
-    // Get the ship and make sure ship_type is equal to host.
-    // If not, poll until it is.
-    const ship = await getByopShip();
-    if (!ship) return false;
+  const pollUntilShipIsReady = (abortSignal: AbortSignal): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const asyncCheck = async () => {
+        if (abortSignal.aborted) return resolve(false);
 
-    if (ship.ship_type === 'provisional') {
-      setTimeout(() => {
-        if (!abortSignal.aborted) pollUntilShipIsReady(abortSignal);
-      }, 1000);
-    }
+        const ship = await getUnbootedByopShip();
+        if (!ship) {
+          setError('No BYOP ship found.');
+          return resolve(false);
+        }
 
-    return true;
+        if (ship.ship_type !== 'provisional') {
+          return resolve(true);
+        }
+
+        setTimeout(() => asyncCheck(), 1000);
+      };
+
+      asyncCheck();
+    });
   };
 
   const prepareSftpServer = async () => {
     const { token } = OnboardingStorage.get();
     if (!token) return false;
 
-    const ship = await getByopShip();
+    const ship = await getUnbootedByopShip();
     if (!ship) return false;
 
-    const sftpResponse = await thirdEarthApi.prepareSftpServerForPierUpload(
-      token,
-      ship.id.toString()
-    );
-    if (!sftpResponse) return false;
+    try {
+      const sftpResponse = await thirdEarthApi.prepareSftpServerForPierUpload(
+        token,
+        ship.id.toString()
+      );
+      if (!sftpResponse) return false;
 
-    await thirdEarthApi.log(token, {
-      file: 'purchases',
-      type: 'info',
-      subject: 'FRONTEND: SFTP started (email notify)',
-      message: `Upload with SFTP started.`,
-    });
-
-    return true;
-  };
-
-  const pollUntilSftpIsReady = async (abortSignal: AbortSignal) => {
-    if (abortSignal.aborted) return false;
-
-    const ship = await getByopShip();
-    if (!ship) return false;
-
-    if (ship.ship_type.includes('dropletReady')) {
-      const parts = ship.ship_type.split('|');
-      const password = parts[2];
-      const ipAddress = parts[3];
-      setError(undefined);
-      setSftpServer({ password, ipAddress });
-      pollUntilUploaded(abortSignal);
-    } else {
-      // Continue polling until the SFTP server is ready.
-      setTimeout(() => {
-        if (!abortSignal.aborted) pollUntilSftpIsReady(abortSignal);
-      }, 1000);
-    }
-
-    return true;
-  };
-
-  const pollUntilUploaded = async (abortSignal: AbortSignal) => {
-    if (abortSignal.aborted) return false;
-
-    const ship = await getByopShip();
-    if (!ship) return false;
-
-    if (ship.ship_type.includes('pierReceived')) {
-      setError(undefined);
-      goToPage('/booting', {
-        product_type: 'byop-p',
+      await thirdEarthApi.log(token, {
+        file: 'purchases',
+        type: 'info',
+        subject: 'FRONTEND: SFTP started (email notify)',
+        message: `Upload with SFTP started.`,
       });
-    } else {
-      // Continue polling until the ship is uploaded.
-      setTimeout(() => {
-        if (!abortSignal.aborted) pollUntilUploaded(abortSignal);
-      }, 5000);
+    } catch (e) {
+      setError('Failed to start SFTP upload.');
+      console.error(e);
+      return false;
     }
 
     return true;
   };
 
-  const onBack = () => {
-    goToPage('/account');
+  const pollUntilSftpIsReady = (abortSignal: AbortSignal) => {
+    return new Promise<boolean>((resolve) => {
+      if (abortSignal.aborted) return resolve(false);
+
+      getUnbootedByopShip().then((ship) => {
+        if (!ship) return resolve(false);
+
+        if (ship.ship_type.includes('dropletReady')) {
+          const parts = ship.ship_type.split('|');
+          const password = parts[2];
+          const ipAddress = parts[3];
+          setSftpServer({ password, ipAddress });
+          return resolve(true);
+        } else {
+          setTimeout(() => {
+            if (!abortSignal.aborted) {
+              pollUntilSftpIsReady(abortSignal).then(() => resolve(true));
+            } else {
+              resolve(false);
+            }
+          }, 1000);
+        }
+      });
+    });
+  };
+
+  const pollUntilUploaded = (abortSignal: AbortSignal) => {
+    return new Promise<boolean>((resolve) => {
+      if (abortSignal.aborted) return resolve(false);
+
+      getUnbootedByopShip().then((ship) => {
+        if (!ship) return resolve(false);
+
+        if (ship.ship_type.includes('pierReceived')) {
+          return resolve(true);
+        } else {
+          setTimeout(() => {
+            if (!abortSignal.aborted) {
+              pollUntilUploaded(abortSignal).then(() => resolve(true));
+            } else {
+              resolve(false);
+            }
+          }, 5000);
+        }
+      });
+    });
   };
 
   useEffect(() => {
     const abortController = new AbortController();
     const { signal } = abortController;
 
-    pollUntilShipIsReady(signal)
-      .then(() => prepareSftpServer())
-      .then(() => pollUntilSftpIsReady(signal))
-      .then(() => pollUntilUploaded(signal));
+    pollUntilShipIsReady(signal).then((shipReady) => {
+      if (!shipReady) return false;
+
+      return prepareSftpServer()
+        .then(() => {
+          return pollUntilSftpIsReady(signal);
+        })
+        .then((sftpReady) => {
+          if (sftpReady) return false;
+
+          return pollUntilUploaded(signal);
+        })
+        .then((uploaded) => {
+          if (!uploaded) return false;
+
+          setError(undefined);
+          goToPage('/booting', {
+            product_type: 'byop-p',
+          });
+          return true;
+        });
+    });
 
     return () => {
       // Stop all polling when the component unmounts.
       abortController.abort();
     };
   }, []);
+
+  const onBack = () => {
+    goToPage('/account');
+  };
 
   return (
     <Page title="Upload Pier with SFTP" isProtected>
