@@ -21,7 +21,7 @@ export default function UploadPierPage() {
 
   const [error, setError] = useState<string>();
 
-  const getShip = async () => {
+  const getByopShip = async () => {
     const { token } = OnboardingStorage.get();
 
     if (!token) {
@@ -29,16 +29,30 @@ export default function UploadPierPage() {
       return false;
     }
 
-    // Get provisional ship ID.
     const ships = await thirdEarthApi.getUserShips(token);
-    return ships.find((ship) => ship.product_type === 'byop-p');
+    const byopShip = ships.find((ship) => ship.product_type === 'byop-p');
+
+    return byopShip;
+  };
+
+  const pollUntilShipIsReady = async () => {
+    // Get the ship and make sure ship_type is equal to host.
+    // If not, poll until it is.
+    const ship = await getByopShip();
+    if (!ship) return false;
+
+    if (ship.ship_type === 'provisional') {
+      setTimeout(pollUntilShipIsReady, 1000);
+    }
+
+    return true;
   };
 
   const prepareSftpServer = async () => {
     const { token } = OnboardingStorage.get();
     if (!token) return false;
 
-    const ship = await getShip();
+    const ship = await getByopShip();
     if (!ship) return false;
 
     const sftpResponse = await thirdEarthApi.prepareSftpServerForPierUpload(
@@ -58,7 +72,7 @@ export default function UploadPierPage() {
   };
 
   const pollUntilSftpIsReady = async () => {
-    const ship = await getShip();
+    const ship = await getByopShip();
     if (!ship) return false;
 
     if (ship.ship_type.includes('dropletReady')) {
@@ -77,7 +91,7 @@ export default function UploadPierPage() {
   };
 
   const pollUntilUploaded = async () => {
-    const ship = await getShip();
+    const ship = await getByopShip();
     if (!ship) return false;
 
     if (ship.ship_type.includes('pierReceived')) {
@@ -102,7 +116,10 @@ export default function UploadPierPage() {
   };
 
   useEffect(() => {
-    prepareSftpServer().then(pollUntilSftpIsReady);
+    pollUntilShipIsReady()
+      .then(prepareSftpServer)
+      .then(pollUntilSftpIsReady)
+      .then(pollUntilUploaded);
   }, []);
 
   return (

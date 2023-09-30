@@ -85,7 +85,7 @@ export const UploadPierDialogBody = ({
         <OnboardDialogDescription
           style={{ fontSize: 13, flex: 1, textAlign: 'center' }}
         >
-          Generating SFTP credentials...
+          Preparing SFTP (this may take a minute)...
         </OnboardDialogDescription>
       )}
     </GrayBox>
