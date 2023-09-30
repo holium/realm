@@ -52,7 +52,7 @@ export const AccountUnfinishedUploadDialogBody = ({
     );
   }
 
-  if (shipType === 'pierReceived') {
+  if (['pierReceived', 'updating'].includes(shipType ?? '')) {
     return (
       <OnboardDialogDescription>
         Your uploaded identity is booting. It will be ready in 5-10 minutes.
