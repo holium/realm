@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 
-import { useToggle } from '@holium/design-system/util';
 import { OnboardingStorage, UploadPierDialog } from '@holium/shared';
 
 import { Page } from '../components/Page';
@@ -14,8 +13,6 @@ type SftpServer = {
 
 export default function UploadPierPage() {
   const { goToPage } = useNavigation();
-
-  const uploaded = useToggle(false);
 
   const [sftpServer, setSftpServer] = useState<SftpServer>();
 
@@ -35,14 +32,17 @@ export default function UploadPierPage() {
     return byopShip;
   };
 
-  const pollUntilShipIsReady = async () => {
+  const pollUntilShipIsReady = async (abortSignal: AbortSignal) => {
+    if (abortSignal.aborted) return false;
     // Get the ship and make sure ship_type is equal to host.
     // If not, poll until it is.
     const ship = await getByopShip();
     if (!ship) return false;
 
     if (ship.ship_type === 'provisional') {
-      setTimeout(pollUntilShipIsReady, 1000);
+      setTimeout(() => {
+        if (!abortSignal.aborted) pollUntilShipIsReady(abortSignal);
+      }, 1000);
     }
 
     return true;
@@ -71,7 +71,9 @@ export default function UploadPierPage() {
     return true;
   };
 
-  const pollUntilSftpIsReady = async () => {
+  const pollUntilSftpIsReady = async (abortSignal: AbortSignal) => {
+    if (abortSignal.aborted) return false;
+
     const ship = await getByopShip();
     if (!ship) return false;
 
@@ -81,45 +83,55 @@ export default function UploadPierPage() {
       const ipAddress = parts[3];
       setError(undefined);
       setSftpServer({ password, ipAddress });
-      pollUntilUploaded();
+      pollUntilUploaded(abortSignal);
     } else {
       // Continue polling until the SFTP server is ready.
-      setTimeout(pollUntilSftpIsReady, 1000);
+      setTimeout(() => {
+        if (!abortSignal.aborted) pollUntilSftpIsReady(abortSignal);
+      }, 1000);
     }
 
     return true;
   };
 
-  const pollUntilUploaded = async () => {
+  const pollUntilUploaded = async (abortSignal: AbortSignal) => {
+    if (abortSignal.aborted) return false;
+
     const ship = await getByopShip();
     if (!ship) return false;
 
     if (ship.ship_type.includes('pierReceived')) {
-      uploaded.toggleOn();
       setError(undefined);
-      return true;
+      goToPage('/booting', {
+        product_type: 'byop-p',
+      });
     } else {
       // Continue polling until the ship is uploaded.
-      setTimeout(pollUntilUploaded, 1000);
-      return true;
+      setTimeout(() => {
+        if (!abortSignal.aborted) pollUntilUploaded(abortSignal);
+      }, 5000);
     }
+
+    return true;
   };
 
   const onBack = () => {
     goToPage('/account');
   };
 
-  const onNext = () => {
-    return goToPage('/booting', {
-      product_type: 'byop-p',
-    });
-  };
-
   useEffect(() => {
-    pollUntilShipIsReady()
-      .then(prepareSftpServer)
-      .then(pollUntilSftpIsReady)
-      .then(pollUntilUploaded);
+    const abortController = new AbortController();
+    const { signal } = abortController;
+
+    pollUntilShipIsReady(signal)
+      .then(() => prepareSftpServer())
+      .then(() => pollUntilSftpIsReady(signal))
+      .then(() => pollUntilUploaded(signal));
+
+    return () => {
+      // Stop all polling when the component unmounts.
+      abortController.abort();
+    };
   }, []);
 
   return (
@@ -128,9 +140,7 @@ export default function UploadPierPage() {
         password={sftpServer?.password}
         ipAddress={sftpServer?.ipAddress}
         error={error}
-        uploaded={uploaded.isOn}
         onBack={onBack}
-        onNext={onNext}
       />
     </Page>
   );

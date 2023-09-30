@@ -1,9 +1,4 @@
-import {
-  Anchor,
-  ErrorBox,
-  Flex,
-  SuccessBox,
-} from '@holium/design-system/general';
+import { Anchor, ErrorBox, Flex } from '@holium/design-system/general';
 
 import {
   OnboardDialogDescription,
@@ -15,15 +10,9 @@ type Props = {
   ipAddress?: string;
   password?: string;
   error?: string;
-  uploaded: boolean;
 };
 
-export const UploadPierDialogBody = ({
-  ipAddress,
-  password,
-  error,
-  uploaded,
-}: Props) => (
+export const UploadPierDialogBody = ({ ipAddress, password, error }: Props) => (
   <Flex
     flexDirection="column"
     gap={16}
@@ -33,19 +22,18 @@ export const UploadPierDialogBody = ({
   >
     <OnboardDialogTitle>Upload Pier with SFTP</OnboardDialogTitle>
     <OnboardDialogDescription>
-      Upload a compressed archive of your existing pier in a <code>.zip</code>{' '}
-      or <code>.tar.gz</code> format which was created after the ship was shut
-      down at its current location.
+      Upload a compressed archive of your existing pier to the SFTP server. This
+      page will automatically redirect once the upload is complete.
     </OnboardDialogDescription>
     <OnboardDialogDescription>
-      Read{' '}
+      Read the{' '}
       <Anchor
         href="https://docs.holium.com/realm/hosting/upload-pier-with-sftp"
         target="_blank"
       >
-        <u>our guide</u>
+        <u>SFTP guide</u>
       </Anchor>{' '}
-      to learn more.
+      step-by-step instructions.
     </OnboardDialogDescription>
     <GrayBox style={{ minHeight: 81, alignItems: 'center' }}>
       {ipAddress && password ? (
@@ -89,18 +77,10 @@ export const UploadPierDialogBody = ({
         </OnboardDialogDescription>
       )}
     </GrayBox>
-    {uploaded ? (
-      <SuccessBox>Pier uploaded successfully.</SuccessBox>
-    ) : (
-      <>
-        <Flex flexDirection="column" gap="2px">
-          <OnboardDialogDescription>Planets only</OnboardDialogDescription>
-          <OnboardDialogDescription>
-            Max file size: 3 GB
-          </OnboardDialogDescription>
-        </Flex>
-        {error && <ErrorBox>{error}</ErrorBox>}
-      </>
-    )}
+    <Flex flexDirection="column" gap="2px">
+      <OnboardDialogDescription>Planets only</OnboardDialogDescription>
+      <OnboardDialogDescription>Max file size: 3 GB</OnboardDialogDescription>
+    </Flex>
+    {error && <ErrorBox>{error}</ErrorBox>}
   </Flex>
 );
