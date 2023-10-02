@@ -27,7 +27,7 @@ export const GetOnRealmDialogStory: ComponentStory<
   <OnboardingDialogWrapper>
     <GetOnRealmDialog
       onPurchaseId={() => {}}
-      onUploadId={() => {}}
+      onUploadPier={() => {}}
       onAlreadyHaveAccount={() => {}}
     />
   </OnboardingDialogWrapper>
@@ -98,7 +98,7 @@ export const BootingDialogStory: ComponentStory<typeof BootingDialog> = () => (
   <OnboardingDialogWrapper>
     <BootingDialog
       isBooting
-      logs={['Booting ~zod.', 'Grab some steak.']}
+      logs={['Booting ~zod.', 'Go touch some grass.']}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
@@ -112,7 +112,7 @@ export const BootingDialogCompleteStory: ComponentStory<
   <OnboardingDialogWrapper>
     <BootingDialog
       isBooting={false}
-      logs={['Booting ~zod.', 'Grab some steak.', 'Booting complete.']}
+      logs={['Booting ~zod.', 'Go touch some grass.', 'Booting complete.']}
       onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>

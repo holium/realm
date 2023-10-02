@@ -26,17 +26,17 @@ const S3StoragePresenter = () => {
     goToPage(accountPageUrl[section]);
   };
 
-  const onClickUploadId = () => {
+  const onClickUploadPier = () => {
     const byopInProgress = ships.find(
       (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
     );
 
     if (byopInProgress) {
-      goToPage('/upload-id', {
+      goToPage('/upload-pier', {
         back_url: '/account/storage',
       });
     } else {
-      goToPage('/upload-id-disclaimer', {
+      goToPage('/upload-pier-disclaimer', {
         back_url: '/account/storage',
       });
     }
@@ -90,7 +90,7 @@ const S3StoragePresenter = () => {
       dataSent={{ networkUsage, minioUsage }}
       onClickRestartStorage={onClickRestartStorage}
       onClickPurchaseId={onClickPurchaseId}
-      onClickUploadId={onClickUploadId}
+      onClickUploadPier={onClickUploadPier}
       onClickSidebarSection={onClickSidebarSection}
       onExit={logout}
     />

@@ -76,25 +76,18 @@ export default function Booting({ product_type }: ServerSideProps) {
           `${serverId} will be ready in a few minutes.`,
         ]);
       }
-    } else if (logs.length === 2) {
-      setLogs((logs) => [...logs, 'Go touch some grass.']);
     }
 
     const serverCode = ship.code;
-    if (serverCode) {
+    if (serverCode && logs.length === 2) {
       setLogs((logs) => [...logs, 'Assigning a domain.']);
     }
 
     const serverUrl = ship.link;
-    const isBooted = serverUrl.includes('https://');
-    if (isBooted) {
-      booting.toggleOff();
-      if (intervalRef.current) clearInterval(intervalRef.current);
-
+    if (serverUrl && logs.length === 3) {
       setLogs((logs) => [
         ...logs,
         `Successfully assigned a domain: ${serverUrl}.`,
-        'Booting complete.',
       ]);
 
       // Store credentials for next page.
@@ -102,6 +95,14 @@ export default function Booting({ product_type }: ServerSideProps) {
         serverUrl,
         serverCode,
       });
+    }
+
+    const isBooted = ship.ship_type === 'planet';
+    if (isBooted && logs.length === 4) {
+      booting.toggleOff();
+      if (intervalRef.current) clearInterval(intervalRef.current);
+
+      setLogs((logs) => [...logs, 'Booting complete.']);
     }
   }, [logs, booting, isBYOP]);
 

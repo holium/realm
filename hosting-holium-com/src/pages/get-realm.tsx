@@ -46,14 +46,14 @@ export default function GetRealm({ prefilledEmail }: Props) {
     goToPage('/create-account', { email: prefilledEmail });
   };
 
-  const onUploadId = () => {};
+  const onUploadPier = () => {};
 
   return (
     <Page title="Get Realm">
       <GetRealmDialog
         onBack={onBack}
         onPurchaseId={onPurchaseId}
-        onUploadId={onUploadId}
+        onUploadPier={onUploadPier}
       />
     </Page>
   );

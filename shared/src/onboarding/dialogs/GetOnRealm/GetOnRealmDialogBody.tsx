@@ -8,17 +8,17 @@ import {
   ButtonsContainer,
   ButtonText,
   PurchaseIdButton,
-  UploadIdButton,
+  UploadPierButton,
 } from './GetOnRealmDialogBody.styles';
 
 type Props = {
-  onUploadId: () => void;
+  onUploadPier: () => void;
   onPurchaseId: () => void;
   onAlreadyHaveAccount?: () => void;
 };
 
 export const GetRealmDialogBody = ({
-  onUploadId,
+  onUploadPier,
   onPurchaseId,
   onAlreadyHaveAccount,
 }: Props) => (
@@ -34,9 +34,9 @@ export const GetRealmDialogBody = ({
       <PurchaseIdButton type="button" onClick={onPurchaseId}>
         <ButtonText>Purchase ID</ButtonText>
       </PurchaseIdButton>
-      <UploadIdButton type="button" onClick={onUploadId}>
+      <UploadPierButton type="button" onClick={onUploadPier}>
         <ButtonText>Upload Pier</ButtonText>
-      </UploadIdButton>
+      </UploadPierButton>
     </ButtonsContainer>
     {onAlreadyHaveAccount && (
       <OnboardDialogDescription>

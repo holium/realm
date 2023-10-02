@@ -123,17 +123,28 @@ export default function Payment({
         productId: productId.toString(),
         auditTrailCode: 1000,
       });
-      await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
-      const provisionalResponse = await thirdEarthApi.provisionalShipEntry({
-        token,
-        product: productId.toString(),
-        invoiceId,
-        shipType: 'provisional',
-      });
 
-      if (!provisionalResponse) return false;
+      try {
+        // Critical request, so we quit if it fails.
+        await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
 
-      return goToPage('/upload-id', {
+      try {
+        // This server call should be non-blocking since the user has already paid.
+        await thirdEarthApi.provisionalShipEntry({
+          token,
+          product: productId.toString(),
+          invoiceId,
+          shipType: 'provisional',
+        });
+      } catch (e) {
+        console.error(e);
+      }
+
+      return goToPage('/upload-pier', {
         product_type: 'byop-p',
       });
     } else {
@@ -149,15 +160,27 @@ export default function Payment({
         auditTrailCode: 1000,
       });
 
-      await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
-      await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
-      await thirdEarthApi.provisionalShipEntry({
-        token,
-        patp: serverId,
-        product: productId.toString(),
-        invoiceId,
-        shipType: 'planet',
-      });
+      try {
+        // Critical request, so we quit if it fails.
+        await thirdEarthApi.updatePaymentStatus(token, invoiceId, 'OK');
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
+
+      try {
+        // These server calls should be non-blocking since the user has already paid.
+        await thirdEarthApi.updatePlanetStatus(token, serverId, 'sold');
+        await thirdEarthApi.provisionalShipEntry({
+          token,
+          patp: serverId,
+          product: productId.toString(),
+          invoiceId,
+          shipType: 'planet',
+        });
+      } catch (e) {
+        console.error(e);
+      }
 
       return goToPage('/booting', {
         product_type,

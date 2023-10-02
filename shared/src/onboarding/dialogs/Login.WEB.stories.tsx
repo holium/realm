@@ -44,7 +44,7 @@ export const AccountHostingDialogStory: ComponentStory<
       selectedShipId={0}
       setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
-      onClickUploadId={() => {}}
+      onClickUploadPier={() => {}}
       email="rubberducky12@protonmail.com"
       serverUrl="https://pasren-satmex.holium.network/"
       serverCode="tolnym-rilmug-ricnep-marlyx"
@@ -73,7 +73,7 @@ export const AccountStorageDialogStory: ComponentStory<
       onClickRestartStorage={() => Promise.resolve('')}
       setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
-      onClickUploadId={() => {}}
+      onClickUploadPier={() => {}}
       storageUrl="https://console.s31.holium.network"
       storageBucket="pasren-satmex"
       storagePassword="1234567890"
@@ -104,7 +104,7 @@ export const AccountCustomDomainDialogStory: ComponentStory<
       onChangeDomain={() => {}}
       onSubmit={() => Promise.resolve()}
       onClickPurchaseId={() => {}}
-      onClickUploadId={() => {}}
+      onClickUploadPier={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />
@@ -122,7 +122,7 @@ export const AccountDownloadRealmDialogStory: ComponentStory<
       selectedShipId={0}
       setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
-      onClickUploadId={() => {}}
+      onClickUploadPier={() => {}}
       onClickSidebarSection={() => {}}
       onDownloadMacM1={() => {}}
       onDownloadMacIntel={() => {}}
@@ -149,8 +149,8 @@ export const AccountContinueWorkflowDialogStory: ComponentStory<
       selectedShipId={0}
       setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
-      onClickUploadId={() => {}}
-      onClickReuploadId={() => {}}
+      onClickUploadPier={() => {}}
+      onClickReuploadPier={() => {}}
       onClickSidebarSection={() => {}}
       onClickExit={() => {}}
     />
@@ -168,8 +168,8 @@ export const AccountUnfinishedUploadDialogStory: ComponentStory<
       selectedShipId={0}
       setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
-      onClickUploadId={() => {}}
-      onClickReuploadId={() => {}}
+      onClickUploadPier={() => {}}
+      onClickReuploadPier={() => {}}
       onClickSidebarSection={() => {}}
       onClickExit={() => {}}
     />
@@ -192,8 +192,8 @@ export const AccountErroredUploadDialogStory: ComponentStory<
       selectedShipId={0}
       setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
-      onClickUploadId={() => {}}
-      onClickReuploadId={() => {}}
+      onClickUploadPier={() => {}}
+      onClickReuploadPier={() => {}}
       onClickSidebarSection={() => {}}
       onClickExit={() => {}}
     />

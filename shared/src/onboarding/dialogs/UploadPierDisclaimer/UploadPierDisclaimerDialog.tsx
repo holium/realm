@@ -1,9 +1,9 @@
 import * as Yup from 'yup';
 
 import { OnboardDialog } from '../../components/OnboardDialog';
-import { UploadIdDisclaimerDialogBody } from './UploadIdDisclaimerDialogBody';
+import { UploadPierDisclaimerDialogBody } from './UploadPierDisclaimerDialogBody';
 
-const UploadIdDisclaimerSchema = Yup.object().shape({
+const UploadPierDisclaimerSchema = Yup.object().shape({
   iHaveRead: Yup.boolean().oneOf([true]),
 });
 
@@ -12,11 +12,11 @@ type Props = {
   onNext: () => Promise<boolean>;
 };
 
-export const UploadIdDisclaimerDialog = ({ onBack, onNext }: Props) => (
+export const UploadPierDisclaimerDialog = ({ onBack, onNext }: Props) => (
   <OnboardDialog
     initialValues={{ iHaveRead: undefined }}
-    validationSchema={UploadIdDisclaimerSchema}
-    body={<UploadIdDisclaimerDialogBody />}
+    validationSchema={UploadPierDisclaimerSchema}
+    body={<UploadPierDisclaimerDialogBody />}
     onBack={onBack}
     onNext={onNext}
   />
