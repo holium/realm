@@ -55,7 +55,7 @@ export default function VerifyEmail({ product_type }: ServerSideProps) {
 
       if (result) {
         if (product_type === 'byop-p') {
-          return goToPage('/upload-id-disclaimer');
+          return goToPage('/upload-pier-disclaimer');
         } else {
           return goToPage('/choose-id');
         }

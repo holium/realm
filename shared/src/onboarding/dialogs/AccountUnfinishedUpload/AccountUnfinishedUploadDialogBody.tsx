@@ -6,7 +6,7 @@ import { GrayButton } from '../../components/ChangeButton';
 import { OnboardDialogDescription } from '../../onboarding';
 
 // These errors are stored as the ship_type of the associated ship row in the database.
-export const uploadErrors: Record<string, string> = {
+const uploadErrors: Record<string, string> = {
   invalidFileError:
     'The uploaded .tar.gz or .zip file failed to be decompressed.',
   invalidFileFormatError:
@@ -24,12 +24,12 @@ export const uploadErrors: Record<string, string> = {
 
 type Props = {
   shipType?: string;
-  onClickReuploadId: () => void;
+  onClickReuploadPier: () => void;
 };
 
 export const AccountUnfinishedUploadDialogBody = ({
   shipType,
-  onClickReuploadId,
+  onClickReuploadPier,
 }: Props) => {
   const [error, setError] = useState<string>();
 
@@ -46,28 +46,28 @@ export const AccountUnfinishedUploadDialogBody = ({
       <>
         <ErrorBox>{error}</ErrorBox>
         <Flex flexDirection="column" alignItems="center">
-          <GrayButton onClick={onClickReuploadId}>Re-upload</GrayButton>
+          <GrayButton onClick={onClickReuploadPier}>Re-upload</GrayButton>
         </Flex>
       </>
     );
   }
 
-  if (shipType === 'host') {
+  if (['pierReceived', 'updating'].includes(shipType ?? '')) {
     return (
-      <>
-        <OnboardDialogDescription>
-          You haven't uploaded your pier yet.
-        </OnboardDialogDescription>
-        <Flex flexDirection="column" alignItems="center">
-          <GrayButton onClick={onClickReuploadId}>Continue workflow</GrayButton>
-        </Flex>
-      </>
+      <OnboardDialogDescription>
+        Your uploaded identity is booting. It will be ready in 5-10 minutes.
+      </OnboardDialogDescription>
     );
   }
 
   return (
-    <OnboardDialogDescription>
-      Your uploaded identity is booting. It will be ready in 5-10 minutes.
-    </OnboardDialogDescription>
+    <>
+      <OnboardDialogDescription>
+        You haven't uploaded your pier yet.
+      </OnboardDialogDescription>
+      <Flex flexDirection="column" alignItems="center">
+        <GrayButton onClick={onClickReuploadPier}>Continue workflow</GrayButton>
+      </Flex>
+    </>
   );
 };

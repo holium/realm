@@ -30,7 +30,6 @@ export {
   SUPPORT_EMAIL_ADDRESS,
 } from './dialogs/AccountSupport/helpers';
 export { AccountUnfinishedUploadDialog } from './dialogs/AccountUnfinishedUpload/AccountUnfinishedUploadDialog';
-export { uploadErrors } from './dialogs/AccountUnfinishedUpload/AccountUnfinishedUploadDialogBody';
 export { AddIdentityDialog } from './dialogs/AddIdentity/AddIdentityDialog';
 export { BootingDialog } from './dialogs/Booting/BootingDialog';
 export { ChooseIdentityDialog } from './dialogs/ChooseIdentity/ChooseIdentityDialog';
@@ -47,8 +46,8 @@ export { PassportDialog } from './dialogs/Passport/PassportDialog';
 export { PaymentDialog } from './dialogs/Payment/PaymentDialog';
 export { ServerSelfHostingDialogBody } from './dialogs/ServerSelfHosting/ServerSelfHostingDialogBody';
 export { SomethingWentWrongDialog } from './dialogs/SomethingWentWrong/SomethingWentWrongDialog';
-export { UploadIdDialog } from './dialogs/UploadId/UploadIdDialog';
-export { UploadIdDisclaimerDialog } from './dialogs/UploadIdDisclaimer/UploadIdDisclaimerDialog';
+export { UploadPierDialog } from './dialogs/UploadPier/UploadPierDialog';
+export { UploadPierDisclaimerDialog } from './dialogs/UploadPierDisclaimer/UploadPierDisclaimerDialog';
 export { VerifyEmailDialog } from './dialogs/VerifyEmail/VerifyEmailDialog';
 export { http } from './services/http';
 export { OnboardingStorage } from './services/OnboardingStorage';

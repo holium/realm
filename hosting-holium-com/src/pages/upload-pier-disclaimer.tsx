@@ -1,9 +1,9 @@
-import { UploadIdDisclaimerDialog } from '@holium/shared';
+import { UploadPierDisclaimerDialog } from '@holium/shared';
 
 import { Page } from '../components/Page';
 import { useNavigation } from '../util/useNavigation';
 
-export default function UploadIdDisclaimer() {
+export default function UploadPierDisclaimer() {
   const { goToPage } = useNavigation();
 
   const onBack = () => {
@@ -20,7 +20,7 @@ export default function UploadIdDisclaimer() {
 
   return (
     <Page title="Disclaimer">
-      <UploadIdDisclaimerDialog onBack={onBack} onNext={onNext} />
+      <UploadPierDisclaimerDialog onBack={onBack} onNext={onNext} />
     </Page>
   );
 }

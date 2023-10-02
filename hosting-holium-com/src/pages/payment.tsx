@@ -144,7 +144,7 @@ export default function Payment({
         console.error(e);
       }
 
-      return goToPage('/upload-id', {
+      return goToPage('/upload-pier', {
         product_type: 'byop-p',
       });
     } else {
