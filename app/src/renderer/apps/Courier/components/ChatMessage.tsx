@@ -20,7 +20,8 @@ import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ChatMessageType } from '../../../stores/models/chat.model';
 
-// We unify similar types of Emojis across mobile and web.
+// We unify similar Emojis across iOS and desktop (iOS taking precedence).
+// This is a map of different web emojis to the iOS emoji.
 const EMOJI_MAP: Record<string, string> = {
   // For both desktop hearts, use the mobile heart: 2764-fe0f
   '1f606': '2764-fe0f',
