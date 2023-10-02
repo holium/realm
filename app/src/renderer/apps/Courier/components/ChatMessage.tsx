@@ -20,6 +20,13 @@ import { useShipStore } from 'renderer/stores/ship.store';
 
 import { ChatMessageType } from '../../../stores/models/chat.model';
 
+// We unify similar types of Emojis across mobile and web.
+const EMOJI_MAP: Record<string, string> = {
+  // For both desktop hearts, use the mobile heart: 2764-fe0f
+  '1f606': '2764-fe0f',
+  '2665-fe0f': '2764-fe0f',
+};
+
 type ChatMessageProps = {
   message: ChatMessageType;
   ourColor: string;
@@ -101,8 +108,11 @@ export const ChatMessagePresenter = ({
 
   const onReaction = useCallback(
     (payload: OnReactionPayload) => {
+      const emoji =
+        payload.emoji in EMOJI_MAP ? EMOJI_MAP[payload.emoji] : payload.emoji;
+
       if (payload.action === 'add') {
-        selectedChat?.sendReaction(message.id, payload.emoji);
+        selectedChat?.sendReaction(message.id, emoji);
       } else {
         if (!payload.reactId) {
           console.warn('No reactId', payload);
