@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 
-import { OnboardingStorage, UploadPierDialog } from '@holium/shared';
+import {
+  OnboardingStorage,
+  uploadErrors,
+  UploadPierDialog,
+} from '@holium/shared';
 
 import { Page } from '../components/Page';
 import { thirdEarthApi } from '../util/thirdEarthApi';
@@ -68,7 +72,18 @@ export default function UploadPierPage() {
     const ship = await getUnbootedByopShip();
     if (!ship) return false;
 
-    return ship.ship_type.includes('pierReceived');
+    // If ship_type includes any of the keys in uploadErrors,
+    // then the upload failed, and we should show the error.
+    const shipType = ship.ship_type;
+    const defaultAdvice = 'Please refresh this page and try again.';
+
+    if (Object.keys(uploadErrors).includes(shipType)) {
+      setError(`${uploadErrors[shipType]} ${defaultAdvice}`);
+    } else if (shipType === 'hardError') {
+      setError(`Something went wrong with your upload. ${defaultAdvice}`);
+    }
+
+    return shipType.includes('pierReceived');
   };
 
   const prepareSftpServer = async () => {
