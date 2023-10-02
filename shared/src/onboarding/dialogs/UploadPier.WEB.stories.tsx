@@ -103,9 +103,7 @@ export const UploadPierGeneratingDialogStory: ComponentStory<
     <UploadPierDialog
       ipAddress={undefined}
       password={undefined}
-      uploaded={false}
       onBack={() => {}}
-      onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
@@ -119,9 +117,7 @@ export const UploadPierDialogStory: ComponentStory<
     <UploadPierDialog
       ipAddress="157.230.48.21"
       password="908732"
-      uploaded={false}
       onBack={() => {}}
-      onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
@@ -135,9 +131,7 @@ export const UploadPierUploadingDialogStory: ComponentStory<
     <UploadPierDialog
       ipAddress="157.230.48.21"
       password="908732"
-      uploaded={false}
       onBack={() => {}}
-      onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
@@ -152,9 +146,7 @@ export const UploadPierErrorDialogStory: ComponentStory<
       ipAddress="157.230.48.21"
       password="908732"
       error="No provisional ship found."
-      uploaded={false}
       onBack={() => {}}
-      onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
@@ -168,9 +160,7 @@ export const UploadPierDoneDialogStory: ComponentStory<
     <UploadPierDialog
       ipAddress="157.230.48.21"
       password="908732"
-      uploaded
       onBack={() => {}}
-      onNext={() => Promise.resolve(false)}
     />
   </OnboardingDialogWrapper>
 );
