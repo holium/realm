@@ -6,7 +6,7 @@ import { GrayButton } from '../../components/ChangeButton';
 import { OnboardDialogDescription } from '../../onboarding';
 
 // These errors are stored as the ship_type of the associated ship row in the database.
-const uploadErrors: Record<string, string> = {
+export const uploadErrors: Record<string, string> = {
   invalidFileError:
     'The uploaded .tar.gz or .zip file failed to be decompressed.',
   invalidFileFormatError:
