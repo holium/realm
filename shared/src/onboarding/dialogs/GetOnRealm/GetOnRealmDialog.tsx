@@ -4,14 +4,14 @@ import { GetRealmDialogBody } from './GetOnRealmDialogBody';
 
 type Props = {
   onBack?: () => void;
-  onUploadId: () => void;
+  onUploadPier: () => void;
   onPurchaseId: () => void;
   onAlreadyHaveAccount?: () => void;
 };
 
 export const GetOnRealmDialog = ({
   onBack,
-  onUploadId,
+  onUploadPier,
   onPurchaseId,
   onAlreadyHaveAccount,
 }: Props) => (
@@ -19,7 +19,7 @@ export const GetOnRealmDialog = ({
     icon={<GetIdIcon size={200} />}
     body={
       <GetRealmDialogBody
-        onUploadId={onUploadId}
+        onUploadPier={onUploadPier}
         onPurchaseId={onPurchaseId}
         onAlreadyHaveAccount={onAlreadyHaveAccount}
       />

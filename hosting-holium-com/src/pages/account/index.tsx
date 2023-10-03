@@ -179,24 +179,24 @@ const HostingPresenter = () => {
     return false;
   };
 
-  const onClickUploadId = () => {
+  const onClickUploadPier = () => {
     const byopInProgress = ships.find(
       (ship) => ship.product_type === 'byop-p' && ship.ship_type !== 'planet'
     );
 
     if (byopInProgress) {
-      goToPage('/upload-id', {
+      goToPage('/upload-pier', {
         back_url: '/account',
       });
     } else {
-      goToPage('/upload-id-disclaimer', {
+      goToPage('/upload-pier-disclaimer', {
         back_url: '/account',
       });
     }
   };
 
-  const onClickReuploadId = () => {
-    goToPage('/upload-id', {
+  const onClickReuploadPier = () => {
+    goToPage('/upload-pier', {
       product_type: 'byop-p',
       back_url: '/account',
     });
@@ -213,9 +213,9 @@ const HostingPresenter = () => {
       <AccountUnfinishedUploadDialog
         ships={ships}
         selectedShipId={selectedShipId}
-        onClickReuploadId={onClickReuploadId}
+        onClickReuploadPier={onClickReuploadPier}
         onClickPurchaseId={onClickPurchaseId}
-        onClickUploadId={onClickUploadId}
+        onClickUploadPier={onClickUploadPier}
         setSelectedShipId={setSelectedShipId}
         onClickSidebarSection={onClickSidebarSection}
         onClickExit={logout}
@@ -265,7 +265,7 @@ const HostingPresenter = () => {
         serverCode={selectedShip?.code}
         serverMaintenanceWindow={selectedShip?.maintenance_window}
         onClickPurchaseId={onClickPurchaseId}
-        onClickUploadId={onClickUploadId}
+        onClickUploadPier={onClickUploadPier}
         setSelectedShipId={setSelectedShipId}
         onClickChangeEmail={changeEmailModal.toggleOn}
         onClickChangePassword={changePasswordModal.toggleOn}

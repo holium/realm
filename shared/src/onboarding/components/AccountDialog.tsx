@@ -18,7 +18,7 @@ type Props = {
   children?: ReactNode;
   customBody?: ReactNode;
   isLoading?: boolean;
-  onClickUploadId: () => void;
+  onClickUploadPier: () => void;
   onClickPurchaseId: () => void;
   setSelectedShipId: (shipId: number) => void;
   onClickSidebarSection: (section: SidebarSection) => void;
@@ -33,7 +33,7 @@ export const AccountDialog = ({
   children,
   customBody,
   isLoading,
-  onClickUploadId,
+  onClickUploadPier,
   onClickPurchaseId,
   setSelectedShipId,
   onClickSidebarSection,
@@ -52,7 +52,7 @@ export const AccountDialog = ({
         selectedShipId={selectedShipId}
         currentSection={currentSection}
         isLoading={isLoading}
-        onClickUploadId={onClickUploadId}
+        onClickUploadPier={onClickUploadPier}
         onClickPurchaseId={onClickPurchaseId}
         setSelectedShipId={setSelectedShipId}
         onClickSidebarSection={onClickSidebarSection}
@@ -102,7 +102,7 @@ export const AccountDialogSkeleton = ({
       customBody={isBlankBody ? <Flex flex={5} /> : undefined}
       setSelectedShipId={() => {}}
       onClickPurchaseId={() => {}}
-      onClickUploadId={() => {}}
+      onClickUploadPier={() => {}}
       onClickSidebarSection={() => {}}
       onExit={() => {}}
     />

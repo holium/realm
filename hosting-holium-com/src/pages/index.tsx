@@ -27,7 +27,7 @@ export default function GetOnRealm({ email }: Props) {
     window.location.href = 'https://holium.com';
   };
 
-  const onUploadId = () => {
+  const onUploadPier = () => {
     return goToPage('/create-account', {
       haha: 'true',
       product_type: 'byop-p',
@@ -51,7 +51,7 @@ export default function GetOnRealm({ email }: Props) {
   return (
     <Page title="Get on Realm">
       <GetOnRealmDialog
-        onUploadId={onUploadId}
+        onUploadPier={onUploadPier}
         onPurchaseId={onPurchaseId}
         // Email query parameter means they're coming from the landing page.
         onBack={email ? onBack : undefined}

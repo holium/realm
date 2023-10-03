@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react';
+import styled from 'styled-components';
 
 import { Button, Flex, Spinner, Text } from '@holium/design-system/general';
 
@@ -13,6 +14,14 @@ interface ConfirmDialogProps {
   cancelText?: string;
   onConfirm: () => any;
 }
+
+const ConfirmDescription = styled(Text.Custom)`
+  display: -webkit-box;
+  max-width: 265px;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`;
 
 const ConfirmDialogPresenter = ({
   title,
@@ -43,9 +52,9 @@ const ConfirmDialogPresenter = ({
       <Text.Custom fontSize={3} fontWeight={600}>
         {title}
       </Text.Custom>
-      <Text.Custom fontSize={2} fontWeight={300}>
+      <ConfirmDescription fontSize={2} fontWeight={300}>
         {description}
-      </Text.Custom>
+      </ConfirmDescription>
       {innerContent}
       <Flex justifyContent="space-between">
         <Button.TextButton
