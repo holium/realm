@@ -23,12 +23,21 @@ import {
   OwnedNft,
 } from 'alchemy-sdk';
 
-import { PlusIcon } from '@/app/assets/icons';
+import { CloseIcon, PassportIcon, PlusIcon } from '@/app/assets/icons';
 // import "../styles.css";
 import { shipUrl } from '@/app/lib/shared';
-import { addKey, createEpochPassportNode } from '@/app/lib/wallet';
+import {
+  addKey,
+  generateWalletAddress,
+  createEpochPassportNode,
+} from '@/app/lib/wallet';
 import { PassportProfile } from '@/app/lib/types';
 import { SocialButton } from '@/app/assets/styled';
+import {
+  renderWorkflowInitializeStep,
+  renderWorkflowLinkRootStep,
+} from './workflow';
+// import PassportWorkflow from './workflow';
 
 const chains = [arbitrum, mainnet];
 const projectId = 'f8134a8b6ecfbef24cfd151795e94b5c';
@@ -115,7 +124,14 @@ interface PassportEditorProps {
   passport: PassportProfile;
 }
 
-function PassportEditor(props: PassportEditorProps) {
+// page states:
+// not public - user chose to keep passport profile hidden
+// no passport - profile is not public
+// no device key - chain array of profile/our.json call is empty.
+//    (i.e. the user has not made it thru the passport root / device key workflow)
+// all good - we have a passport, passport root, and device key
+
+function PassportEditor({ passport }: PassportEditorProps) {
   const { open } = useWeb3Modal();
   const { data: walletClient, isError, isLoading } = useWalletClient();
   const { address /*isConnected */, connector } = useAccount({
@@ -125,19 +141,25 @@ function PassportEditor(props: PassportEditorProps) {
     },
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const dialogRef = useRef<HTMLDialogElement>(null);
+  const nftPicker = useRef<HTMLDialogElement>(null);
+  const passportWorkflow = useRef<HTMLDialogElement>(null);
   const avatarRef = useRef<HTMLImageElement>(null);
   const displayNameRef = useRef<HTMLInputElement>(null);
   const [nfts, setNFTs] = useState<OwnedNft[]>([]);
   const [displayName, setDisplayName] = useState<string>(
-    props.passport?.contact['display-name'] ||
-      props.passport?.contact?.ship ||
-      ''
+    passport?.contact['display-name'] || passport?.contact?.ship || ''
   );
-  const [bio, setBio] = useState<string>(props.passport?.contact?.bio || '');
+  const [bio, setBio] = useState<string>(passport?.contact?.bio || '');
   const [selectedAvatar, setSelectedAvatar] = useState<string>('');
   const [avatar, setAvatar] = useState<string>('');
   const [ourNFTs, setOurNFTs] = useState<object>({});
+  const [workflowStep, setWorkflowStep] = useState<number>(0);
+  const [walletAddress, setWalletAddress] = useState<`0x${string}` | undefined>(
+    undefined
+  );
+  const [deviceKey, setDeviceKey] = useState<`0x${string}` | undefined>(
+    undefined
+  );
 
   const onSaveClick = (e: any) => {
     e.preventDefault();
@@ -176,6 +198,123 @@ function PassportEditor(props: PassportEditorProps) {
     }
   };
 
+  const onNextWorkflowStep = (currentStep: number) => {
+    switch (currentStep) {
+      case 0:
+        if (!isLoading && address && connector) {
+          createEpochPassportNode(
+            shipUrl,
+            connector.name,
+            walletClient,
+            address
+          )
+            .then((result) => {
+              console.log('createEpochPassportNode response => %o', result);
+              console.log(
+                `wallet addresses: [${address}, ${walletClient?.account.address}]`
+              );
+              // we already have a passport root; therefore generate a new device key
+              //  and set the workflow step to 2
+              setWorkflowStep(1);
+              setWalletAddress(address);
+            })
+            .catch((e) => console.error(e));
+        } else {
+          console.error('unexpected wallet state');
+        }
+        break;
+
+      case 1:
+        setDeviceKey(generateWalletAddress());
+        addKey(shipUrl, walletClient as WalletClient)
+          // the wallet address of secret/hidden wallet that now lives on this device
+          .then((response: any) => {
+            console.log('addKey response => %o', response);
+            localStorage.setItem(
+              '/holium/realm/passport/wallet-address',
+              response.addresses[1].address
+            );
+          })
+          .catch((e) => console.error(e));
+        break;
+    }
+  };
+
+  const onAddAddressClick = (e: any) => {
+    console.log('onAddressClick => %o', passport.chain);
+    if (!passportWorkflow.current) return;
+    // rule #2 . if chain length of profile/our.json call is empty, it means
+    //  we have no root. user must go thru add passport workflow.
+    if (passport.chain.length === 0) {
+      setWorkflowStep(0);
+      passportWorkflow.current.showModal();
+      return;
+    }
+
+    // do we have the passport root? if so, sanity check it
+    if (passport.chain.length === 1) {
+      let link = passport.chain[0];
+      let link_data = JSON.parse(link.data);
+      if (!(link_data.link_id === 'PASSPORT_ROOT')) {
+        console.error('invalid passport chain root');
+        return;
+      }
+      // we already have a passport root; therefore generate a new device key
+      //  and set the workflow step to 2
+      setWorkflowStep(2);
+      setDeviceKey(generateWalletAddress());
+      addKey(shipUrl, walletClient as WalletClient)
+        // the wallet address of secret/hidden wallet that now lives on this device
+        .then((response: any) => {
+          console.log('addKey response => %o', response);
+          localStorage.setItem(
+            '/holium/realm/passport/wallet-address',
+            response.addresses[1].address
+          );
+        })
+        .catch((e) => console.error(e));
+    }
+
+    // sanity check the existence of the device key
+    if (passport.chain.length >= 2) {
+      let link = passport.chain[1];
+      // do other types of validation here?
+      let link_data = JSON.parse(link.data);
+      if (
+        !(
+          link.link_type === 'KEY_ADD' &&
+          link_data.public_key_type === 'device_key'
+        )
+      ) {
+        console.error('invalid passport chain');
+        return;
+      }
+    }
+
+    if (!isLoading && address && connector) {
+      console.log('connector: %o', connector?.name);
+      console.log('address loaded: %o', address);
+      createEpochPassportNode(shipUrl, connector.name, walletClient, address)
+        .then((result) => {
+          console.log('createEpochPassportNode response => %o', result);
+          console.log(
+            `wallet addresses: [${address}, ${walletClient?.account.address}]`
+          );
+          addKey(shipUrl, walletClient as WalletClient)
+            // the wallet address of secret/hidden wallet that now lives on this device
+            .then((response: any) => {
+              console.log('addKey response => %o', result);
+              localStorage.setItem(
+                '/holium/realm/passport/wallet-address',
+                response.addresses[1].address
+              );
+            })
+            .catch((e) => console.error(e));
+        })
+        .catch((e) => console.error(e));
+    }
+  };
+
   useEffect(() => {
     alchemy.nft
       // .getNftsForOwner(wallet.pubkey)
@@ -191,8 +330,8 @@ function PassportEditor(props: PassportEditorProps) {
   }, []);
 
   useEffect(() => {
-    if (props.passport.addresses) {
-      props.passport.addresses.map((wallet, idx) => {
+    if (passport.addresses) {
+      passport.addresses.map((wallet, idx) => {
         alchemy.nft
           // .getNftsForOwner(wallet.pubkey)
           .getNftsForOwner('0x653b9EA6AC3d6424a2eC360BA8E93FfaAfdA8CA1')
@@ -203,7 +342,7 @@ function PassportEditor(props: PassportEditorProps) {
     } else {
       setNFTs([]);
     }
-  }, [props.passport['default-address'], props.passport.addresses]);
+  }, [passport['default-address'], passport.addresses]);
 
   useEffect(() => {
     if (isError) {
@@ -310,7 +449,7 @@ function PassportEditor(props: PassportEditorProps) {
           type="file"
           style={{ display: 'none' }}
         ></input>
-        <SocialButton onClick={() => dialogRef.current?.showModal()}>
+        <SocialButton onClick={() => nftPicker.current?.showModal()}>
           Choose NFT
         </SocialButton>
         <>
@@ -538,7 +677,9 @@ function PassportEditor(props: PassportEditorProps) {
                   marginRight: '8px',
                 }}
               />
-              <SocialButton onClick={open}>Add Address</SocialButton>
+              <SocialButton onClick={onAddAddressClick}>
+                Add Address
+              </SocialButton>
             </div>
             <div
               style={{
@@ -566,8 +707,59 @@ function PassportEditor(props: PassportEditorProps) {
         </>
       </div>
       <dialog
+        id="passportWorkflowDialog"
+        ref={passportWorkflow}
+        style={{
+          borderRadius: '24px',
+          padding: '12px',
+          width: '400px',
+          minWidth: '400px',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+          }}
+        >
+          <button
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignSelf: 'flex-end',
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              console.log('click close');
+              if (passportWorkflow.current) {
+                console.log('closing dialog');
+                passportWorkflow.current?.close();
+              }
+            }}
+          >
+            <CloseIcon />
+          </button>
+          {workflowStep === 0 &&
+            renderWorkflowInitializeStep({
+              step: workflowStep,
+              passport,
+              onNextWorkflowStep,
+            })}
+          {workflowStep === 1 &&
+            renderWorkflowLinkRootStep({
+              step: workflowStep,
+              walletAddress: walletAddress as `0x${string}`,
+              deviceSigningKey: deviceKey,
+              passport,
+              onNextWorkflowStep,
+            })}
+          {/* {workflowStep === 2 && renderStep3()} */}
+        </div>
+      </dialog>
+      <dialog
         id="nftPicker"
-        ref={dialogRef}
+        ref={nftPicker}
         style={{
           minWidth: '400px',
           borderRadius: '10px',
@@ -617,7 +809,7 @@ function PassportEditor(props: PassportEditorProps) {
             value="cancel"
             onClick={(e: any) => {
               e.preventDefault();
-              dialogRef.current?.close();
+              nftPicker.current?.close();
             }}
           >
             Cancel
@@ -628,7 +820,7 @@ function PassportEditor(props: PassportEditorProps) {
             onClick={(e: any) => {
               e.preventDefault();
               setAvatar(selectedAvatar);
-              dialogRef.current?.close(selectedAvatar);
+              nftPicker.current?.close(selectedAvatar);
             }}
           >
             Confirm

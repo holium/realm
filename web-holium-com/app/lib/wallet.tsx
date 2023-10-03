@@ -170,12 +170,17 @@ export async function loadNfts(address: `0x${string}`) {
   return response;
 }
 
+export function generateWalletAddress() {
+  return generatePrivateKey();
+}
+
 export async function addKey(shipUrl: string, wallet: WalletClient) {
   if (!wallet.account) {
     console.error('wallet account is undefined');
     return;
   }
-  const walletAddress = generatePrivateKey();
+  const walletAddress = generateWalletAddress();
+  // const walletAddress = generatePrivateKey();
   // const account = privateKeyToAccount(walletAddress);
   // const privateWallet = createWalletClient({
   //   account,

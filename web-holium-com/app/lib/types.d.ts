@@ -75,9 +75,9 @@ export type PassportProfile = {
       'new-entity-balance': number;
     };
     timestamp: number;
-    'data-structs': 'not-implemented';
-    'transaction-types': 'not-implemented';
-    'link-id': 'PASSPORT_ROOT';
+    'data-structs': string;
+    'transaction-types': string;
+    'link-id': string;
   } | null;
   addresses: Array<{
     'crypto-signature': {
@@ -87,14 +87,14 @@ export type PassportProfile = {
       pubkey: string;
     };
     address: string;
-    wallet: 'root';
+    wallet: string;
     pubkey: string;
   }>;
   'default-address': string;
   chain: Array<{
     data: string;
     hash: string;
-    link_type: 'PASSPORT_ROOT';
+    link_type: string;
     signature_of_hash: string;
   }>;
 };
