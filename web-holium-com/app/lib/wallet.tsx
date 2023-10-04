@@ -174,12 +174,17 @@ export function generateWalletAddress() {
   return generatePrivateKey();
 }
 
-export async function addKey(shipUrl: string, wallet: WalletClient) {
+export async function addKey(
+  shipUrl: string,
+  wallet: WalletClient,
+  rootWalletAddress: `0x${string}`,
+  address: `0x${string}`
+) {
   if (!wallet.account) {
     console.error('wallet account is undefined');
     return;
   }
-  const walletAddress = generateWalletAddress();
+  // const walletAddress = generateWalletAddress();
   // const walletAddress = generatePrivateKey();
   // const account = privateKeyToAccount(walletAddress);
   // const privateWallet = createWalletClient({
@@ -187,7 +192,7 @@ export async function addKey(shipUrl: string, wallet: WalletClient) {
   //   chain: mainnet,
   //   transport: custom(window.ethereum),
   // });
-  const root = generateKeyAdd(wallet.account.address, walletAddress);
+  const root = generateKeyAdd(rootWalletAddress, address);
   const data_string = JSON.stringify(root);
   const calculated_hash = await ethers.utils.sha256(
     ethers.utils.toUtf8Bytes(data_string)

@@ -1,8 +1,17 @@
 import { useState } from 'react';
 
-import { PassportIcon } from '@/app/assets/icons';
+import { CheckIcon, CopyIcon, PassportIcon } from '@/app/assets/icons';
 import { StyledSpinner } from '@/app/components';
 import { PassportProfile } from '@/app/lib/types';
+
+const renderAddress = (address: `0x${string}` | undefined) => {
+  if (!address) return 'unknown';
+  const parts = [
+    address.substring(0, 6),
+    address.substring(address.length - 4),
+  ];
+  return parts.join('...');
+};
 
 export interface PassportWorkflowState {
   currentStep: number;
@@ -190,7 +199,7 @@ export function RenderWorkflowLinkRootStep({
         borderRadius: '16px',
         backgroundColor: '#4292F1',
         padding: '12px',
-        gap: 12,
+        gap: 14,
       }}
     >
       <div
@@ -283,11 +292,143 @@ export function RenderWorkflowLinkRootStep({
   );
 }
 
-const renderAddress = (address: `0x${string}` | undefined) => {
-  if (!address) return 'unknown';
-  const parts = [
-    address.substring(0, 6),
-    address.substring(address.length - 4),
-  ];
-  return parts.join('...');
-};
+export function RenderWorkflowLinkDeviceKeyStep({
+  state,
+  onNextWorkflowStep,
+}: PassportWorkflowProps) {
+  console.log('RenderWorkflowLinkDeviceKeyStep');
+  const [loadingState, setLoadingState] = useState<string>('default');
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        color: '#FFFFFF',
+        borderRadius: '16px',
+        backgroundColor: '#4292F1',
+        padding: '12px',
+        gap: 12,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            // padding: 0,
+            lineHeight: '30px',
+            width: '30px',
+            height: '30px',
+            border: 0,
+            borderRadius: '50%',
+            backgroundColor: '#8CAEF0',
+            fontWeight: 450,
+            fontSize: '18px',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          2
+        </div>
+        <div
+          style={{
+            marginLeft: '12px',
+            fontWeight: 450,
+            fontSize: '1.2em',
+          }}
+        >
+          Generate device key
+        </div>
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          borderRadius: '38px',
+          border: 'solid 2px #91B0E9',
+          backgroundColor: '#739BEC',
+          alignItems: 'center',
+          padding: '8px 12px',
+          // lineHeight: '34px',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '0 12px',
+            flex: 1,
+          }}
+        >
+          <div style={{ fontSize: '0.8em' }}>Root wallet address</div>
+          <div style={{ fontSize: '1em', flex: 1 }}>
+            {renderAddress(state.walletAddress)}
+          </div>
+        </div>
+        <CheckIcon />
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          borderRadius: '38px',
+          border: 'solid 2px #91B0E9',
+          backgroundColor: '#739BEC',
+          alignItems: 'center',
+          padding: '8px 12px',
+          // lineHeight: '34px',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '0 12px',
+            flex: 1,
+          }}
+        >
+          <div style={{ fontSize: '0.8em' }}>Device signing key</div>
+          <div style={{ fontSize: '1em', flex: 1 }}>
+            <input
+              type="password"
+              readOnly={true}
+              value={state.deviceSigningKey || 'none'}
+              style={{ backgroundColor: '#739BEC', color: '#ffffff' }}
+            ></input>
+          </div>
+        </div>
+        <CopyIcon />
+      </div>
+      <div style={{ fontSize: '0.9em', fontWeight: 300 }}>
+        We’ve generated a device signing key for you. Please sign the new device
+        key with your root address by clicking the button below.
+      </div>
+      <hr
+        style={{
+          backgroundColor: '#7199F0',
+          width: '100%',
+          height: '1px',
+          border: 0,
+          // opacity: '10%',
+        }}
+      />
+      <button
+        style={{
+          borderRadius: '10px',
+          backgroundColor: '#FFFFFF',
+          color: '#4292F1',
+          lineHeight: '22px',
+          padding: '13px 0',
+        }}
+        onClick={() => onNextWorkflowStep(state)}
+      >
+        Sign and add key
+      </button>
+    </div>
+  );
+}
