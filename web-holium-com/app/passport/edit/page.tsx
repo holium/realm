@@ -5,7 +5,14 @@ import {
   w3mConnectors,
   w3mProvider,
 } from '@web3modal/ethereum';
-import { Web3Modal, useWeb3Modal } from '@web3modal/react';
+import { useWeb3Modal, Web3Modal } from '@web3modal/react';
+import {
+  Alchemy,
+  Media,
+  Network,
+  OwnedNft,
+  OwnedNftsResponse,
+} from 'alchemy-sdk';
 import { WalletClient } from 'wagmi';
 import {
   configureChains,
@@ -15,29 +22,23 @@ import {
   WagmiConfig,
 } from 'wagmi';
 import { arbitrum, mainnet } from 'wagmi/chains';
-import {
-  Network,
-  Alchemy,
-  Media,
-  OwnedNftsResponse,
-  OwnedNft,
-} from 'alchemy-sdk';
 
-import { CloseIcon, PassportIcon, PlusIcon } from '@/app/assets/icons';
+import {
+  PassportWorkflowState,
+  RenderWorkflowInitializeStep,
+  RenderWorkflowLinkRootStep,
+} from './workflow';
+
+import { CloseIcon, PlusIcon } from '@/app/assets/icons';
+import { SocialButton } from '@/app/assets/styled';
 // import "../styles.css";
 import { shipUrl } from '@/app/lib/shared';
+import { PassportProfile } from '@/app/lib/types';
 import {
   addKey,
-  generateWalletAddress,
   createEpochPassportNode,
+  generateWalletAddress,
 } from '@/app/lib/wallet';
-import { PassportProfile } from '@/app/lib/types';
-import { SocialButton } from '@/app/assets/styled';
-import {
-  renderWorkflowInitializeStep,
-  renderWorkflowLinkRootStep,
-} from './workflow';
-// import PassportWorkflow from './workflow';
 
 const chains = [arbitrum, mainnet];
 const projectId = 'f8134a8b6ecfbef24cfd151795e94b5c';
@@ -160,34 +161,35 @@ function PassportEditor({ passport }: PassportEditorProps) {
   const [deviceKey, setDeviceKey] = useState<`0x${string}` | undefined>(
     undefined
   );
+  const [startedWorkflow, setStartedWorkflow] = useState<boolean>(false);
 
   const onSaveClick = (e: any) => {
     e.preventDefault();
     // generate a new opengraph image using canvas
-    let canvas: HTMLCanvasElement = document.createElement(
+    const canvas: HTMLCanvasElement = document.createElement(
       'canvas'
     ) as HTMLCanvasElement;
-    var ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    let avatarImage: HTMLImageElement | null = document.getElementById(
+    const avatarImage: HTMLImageElement | null = document.getElementById(
       'avatar-image'
     ) as HTMLImageElement;
     ctx.drawImage(avatarImage, 20, 20);
     ctx.moveTo(40, 20);
-    let displayName: HTMLInputElement | null = document.getElementById(
+    const displayName: HTMLInputElement | null = document.getElementById(
       'display-name'
     ) as HTMLInputElement;
-    let metrics = ctx.measureText(displayName.value);
+    const metrics = ctx.measureText(displayName.value);
     ctx.strokeText(displayName.value, 0, 0, 300);
-    let textHeight =
+    const textHeight =
       metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
     ctx.moveTo(40, 20 + textHeight + 8);
-    let patp: HTMLDivElement | null = document.getElementById(
+    const patp: HTMLDivElement | null = document.getElementById(
       'patp'
     ) as HTMLDivElement;
     ctx.strokeText(patp?.innerText || '', 0, 0, 300);
-    let dataUrl: string = canvas.toDataURL('img/png');
-    canvas;
+    const dataUrl: string = canvas.toDataURL('img/png');
+    console.log('dataUrl => %o', dataUrl);
   };
 
   const onPhotoUpload = (e: any) => {
@@ -198,121 +200,116 @@ function PassportEditor({ passport }: PassportEditorProps) {
     }
   };
 
-  const onNextWorkflowStep = (currentStep: number) => {
-    switch (currentStep) {
-      case 0:
-        if (!isLoading && address && connector) {
-          createEpochPassportNode(
-            shipUrl,
-            connector.name,
-            walletClient,
-            address
-          )
-            .then((result) => {
-              console.log('createEpochPassportNode response => %o', result);
-              console.log(
-                `wallet addresses: [${address}, ${walletClient?.account.address}]`
-              );
-              // we already have a passport root; therefore generate a new device key
-              //  and set the workflow step to 2
-              setWorkflowStep(1);
-              setWalletAddress(address);
-            })
-            .catch((e) => console.error(e));
-        } else {
-          console.error('unexpected wallet state');
-        }
-        break;
+  const onNextWorkflowStep = async (state: PassportWorkflowState) => {
+    console.log('onNextWorkflowStep => %o', state);
+    return new Promise<void>((resolve, _reject) => {
+      switch (state.currentStep) {
+        case 0:
+          if (!isLoading && address && connector) {
+            // we already have a passport root; therefore generate a new device key
+            //  and set the workflow step to 2
+            setWorkflowStep(1);
+            setWalletAddress(address);
+            passportWorkflow.current?.showModal();
+          } else {
+            open()
+              .then(() => passportWorkflow.current?.close())
+              .then(() => resolve());
+          }
+          break;
 
-      case 1:
-        setDeviceKey(generateWalletAddress());
-        addKey(shipUrl, walletClient as WalletClient)
-          // the wallet address of secret/hidden wallet that now lives on this device
-          .then((response: any) => {
-            console.log('addKey response => %o', response);
-            localStorage.setItem(
-              '/holium/realm/passport/wallet-address',
-              response.addresses[1].address
-            );
-          })
-          .catch((e) => console.error(e));
-        break;
-    }
-  };
+        case 1:
+          if (!isLoading && address && connector) {
+            createEpochPassportNode(
+              shipUrl,
+              connector.name,
+              walletClient,
+              address
+            )
+              .then((result) => {
+                console.log('createEpochPassportNode response => %o', result);
+                console.log(
+                  `wallet addresses: [${address}, ${walletClient?.account.address}]`
+                );
+                // we already have a passport root; therefore generate a new device key
+                //  and set the workflow step to 2
+                setWorkflowStep(2);
+                setWalletAddress(address);
+              })
+              .catch((e) => console.error(e));
+          } else {
+            console.error('unexpected wallet state');
+          }
+          break;
 
-  const onAddAddressClick = (e: any) => {
-    console.log('onAddressClick => %o', passport.chain);
-    if (!passportWorkflow.current) return;
-    // rule #2 . if chain length of profile/our.json call is empty, it means
-    //  we have no root. user must go thru add passport workflow.
-    if (passport.chain.length === 0) {
-      setWorkflowStep(0);
-      passportWorkflow.current.showModal();
-      return;
-    }
-
-    // do we have the passport root? if so, sanity check it
-    if (passport.chain.length === 1) {
-      let link = passport.chain[0];
-      let link_data = JSON.parse(link.data);
-      if (!(link_data.link_id === 'PASSPORT_ROOT')) {
-        console.error('invalid passport chain root');
-        return;
-      }
-      // we already have a passport root; therefore generate a new device key
-      //  and set the workflow step to 2
-      setWorkflowStep(2);
-      setDeviceKey(generateWalletAddress());
-      addKey(shipUrl, walletClient as WalletClient)
-        // the wallet address of secret/hidden wallet that now lives on this device
-        .then((response: any) => {
-          console.log('addKey response => %o', response);
-          localStorage.setItem(
-            '/holium/realm/passport/wallet-address',
-            response.addresses[1].address
-          );
-        })
-        .catch((e) => console.error(e));
-    }
-
-    // sanity check the existence of the device key
-    if (passport.chain.length >= 2) {
-      let link = passport.chain[1];
-      // do other types of validation here?
-      let link_data = JSON.parse(link.data);
-      if (
-        !(
-          link.link_type === 'KEY_ADD' &&
-          link_data.public_key_type === 'device_key'
-        )
-      ) {
-        console.error('invalid passport chain');
-        return;
-      }
-    }
-
-    if (!isLoading && address && connector) {
-      console.log('connector: %o', connector?.name);
-      console.log('address loaded: %o', address);
-      createEpochPassportNode(shipUrl, connector.name, walletClient, address)
-        .then((result) => {
-          console.log('createEpochPassportNode response => %o', result);
-          console.log(
-            `wallet addresses: [${address}, ${walletClient?.account.address}]`
-          );
+        case 2:
+          setDeviceKey(generateWalletAddress());
           addKey(shipUrl, walletClient as WalletClient)
             // the wallet address of secret/hidden wallet that now lives on this device
             .then((response: any) => {
-              console.log('addKey response => %o', result);
+              console.log('addKey response => %o', response);
               localStorage.setItem(
                 '/holium/realm/passport/wallet-address',
                 response.addresses[1].address
               );
             })
             .catch((e) => console.error(e));
-        })
-        .catch((e) => console.error(e));
+          break;
+      }
+    });
+  };
+
+  const onAddAddressClick = (_e: any) => {
+    console.log('onAddressClick => %o', passport.chain);
+    if (!passportWorkflow.current) return;
+    // rule #2 . if chain length of profile/our.json call is empty, it means
+    //  we have no root. user must go thru add passport workflow.
+    if (passport.chain.length === 0) {
+      setStartedWorkflow(true);
+      setWorkflowStep(0);
+      passportWorkflow.current.showModal();
+      return;
     }
+
+    // do we have the passport root? if so, sanity check it
+    // if (passport.chain.length === 1) {
+    //   const link = passport.chain[0];
+    //   const link_data = JSON.parse(link.data);
+    //   if (!(link_data.link_id === 'PASSPORT_ROOT')) {
+    //     console.error('invalid passport chain root');
+    //     return;
+    //   }
+    //   // we already have a passport root; therefore generate a new device key
+    //   //  and set the workflow step to 2
+    //   setWorkflowStep(2);
+    //   setDeviceKey(generateWalletAddress());
+    //   addKey(shipUrl, walletClient as WalletClient)
+    //     // the wallet address of secret/hidden wallet that now lives on this device
+    //     .then((response: any) => {
+    //       console.log('addKey response => %o', response);
+    //       localStorage.setItem(
+    //         '/holium/realm/passport/wallet-address',
+    //         response.addresses[1].address
+    //       );
+    //     })
+    //     .catch((e) => console.error(e));
+    // }
+
+    // // sanity check the existence of the device key
+    // if (passport.chain.length >= 2) {
+    //   const link = passport.chain[1];
+    //   // do other types of validation here?
+    //   const link_data = JSON.parse(link.data);
+    //   if (
+    //     !(
+    //       link.link_type === 'KEY_ADD' &&
+    //       link_data.public_key_type === 'device_key'
+    //     )
+    //   ) {
+    //     console.error('invalid passport chain');
+    //     return;
+    //   }
+    // }
   };
 
   useEffect(() => {
@@ -320,9 +317,9 @@ function PassportEditor({ passport }: PassportEditorProps) {
       // .getNftsForOwner(wallet.pubkey)
       .getNftsForOwner('0x653b9EA6AC3d6424a2eC360BA8E93FfaAfdA8CA1')
       .then((response: OwnedNftsResponse) => {
-        let nfts = [];
+        const nfts = [];
         for (let i = 0; i < response.ownedNfts.length; i++) {
-          let ownedNft = response.ownedNfts[i];
+          const ownedNft = response.ownedNfts[i];
           nfts.push({ ...ownedNft });
         }
         setNFTs(nfts);
@@ -352,30 +349,35 @@ function PassportEditor({ passport }: PassportEditorProps) {
     if (!isLoading && address && connector) {
       console.log('connector: %o', connector?.name);
       console.log('address loaded: %o', address);
-      createEpochPassportNode(shipUrl, connector.name, walletClient, address)
-        .then((result) => {
-          console.log('createEpochPassportNode response => %o', result);
-          console.log(
-            `wallet addresses: [${address}, ${walletClient?.account.address}]`
-          );
-          addKey(shipUrl, walletClient as WalletClient)
-            // the wallet address of secret/hidden wallet that now lives on this device
-            .then((response: any) => {
-              console.log('addKey response => %o', result);
-              localStorage.setItem(
-                '/holium/realm/passport/wallet-address',
-                response.addresses[1].address
-              );
-            })
-            .catch((e) => console.error(e));
-        })
-        .catch((e) => console.error(e));
-      alchemy.nft
-        .getNftsForOwner(address)
-        .then((meta: OwnedNftsResponse) => console.log(meta))
-        .catch((e) => console.error(e));
+
+      // if (startedWorkflow) {
+      //   goToWorkflowStep(1);
+      // }
+
+      // createEpochPassportNode(shipUrl, connector.name, walletClient, address)
+      //   .then((result) => {
+      //     console.log('createEpochPassportNode response => %o', result);
+      //     console.log(
+      //       `wallet addresses: [${address}, ${walletClient?.account.address}]`
+      //     );
+      //     addKey(shipUrl, walletClient as WalletClient)
+      //       // the wallet address of secret/hidden wallet that now lives on this device
+      //       .then((response: any) => {
+      //         console.log('addKey response => %o', result);
+      //         localStorage.setItem(
+      //           '/holium/realm/passport/wallet-address',
+      //           response.addresses[1].address
+      //         );
+      //       })
+      //       .catch((e) => console.error(e));
+      //   })
+      //   .catch((e) => console.error(e));
+      // alchemy.nft
+      //   .getNftsForOwner(address)
+      //   .then((meta: OwnedNftsResponse) => console.log(meta))
+      //   .catch((e) => console.error(e));
     }
-  }, [address, walletClient, isError, isLoading]);
+  }, [address, connector, walletClient, isError, isLoading]);
 
   return (
     <div
@@ -625,14 +627,15 @@ function PassportEditor({ passport }: PassportEditorProps) {
                         selectable={true}
                         isSelected={
                           (media.thumbnail &&
+                            // eslint-disable-next-line no-prototype-builtins
                             ourNFTs.hasOwnProperty(media.thumbnail)) ||
                           false
                         }
                         nft={nft}
                         media={media}
                         onSelectionChange={(
-                          e: ChangeEvent<HTMLInputElement>,
-                          thumbnail: string
+                          _e: ChangeEvent<HTMLInputElement>,
+                          _thumbnail: string
                         ) => {}}
                       />
                     ))
@@ -741,17 +744,20 @@ function PassportEditor({ passport }: PassportEditorProps) {
             <CloseIcon />
           </button>
           {workflowStep === 0 &&
-            renderWorkflowInitializeStep({
-              step: workflowStep,
-              passport,
+            RenderWorkflowInitializeStep({
+              state: {
+                currentStep: workflowStep,
+                passport: passport,
+              },
               onNextWorkflowStep,
             })}
           {workflowStep === 1 &&
-            renderWorkflowLinkRootStep({
-              step: workflowStep,
-              walletAddress: walletAddress as `0x${string}`,
-              deviceSigningKey: deviceKey,
-              passport,
+            RenderWorkflowLinkRootStep({
+              state: {
+                currentStep: workflowStep,
+                walletAddress: walletAddress as `0x${string}`,
+                passport: passport,
+              },
               onNextWorkflowStep,
             })}
           {/* {workflowStep === 2 && renderStep3()} */}

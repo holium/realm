@@ -1,8 +1,10 @@
-import { PassportProfile } from '@/app/lib/types';
+import { useState } from 'react';
 
 import { PassportIcon } from '@/app/assets/icons';
+import { StyledSpinner } from '@/app/components';
+import { PassportProfile } from '@/app/lib/types';
 
-interface PassportWorkflowState {
+export interface PassportWorkflowState {
   currentStep: number;
   passport: PassportProfile;
   walletAddress?: `0x${string}`;
@@ -11,13 +13,14 @@ interface PassportWorkflowState {
 
 interface PassportWorkflowProps {
   state: PassportWorkflowState;
-  onNextWorkflowStep: (workflowState: PassportWorkflowState) => void;
+  onNextWorkflowStep: (workflowState: PassportWorkflowState) => Promise<void>;
 }
 
-export function renderWorkflowInitializeStep({
-  workflowState: PassportWorkflowState,
+export function RenderWorkflowInitializeStep({
+  state,
   onNextWorkflowStep,
 }: PassportWorkflowProps) {
+  const [loadingState, setLoadingState] = useState<string>('default');
   return (
     <div
       style={{
@@ -148,21 +151,36 @@ export function renderWorkflowInitializeStep({
           lineHeight: '22px',
           padding: '13px 0',
         }}
-        onClick={() => onNextWorkflowStep(step)}
+        onClick={() => {
+          setLoadingState('initializing');
+          onNextWorkflowStep(state).then(() => setLoadingState('default'));
+        }}
         // onClick={() => passportWorkflow.current?.close()}
       >
-        Initialize your passport
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          }}
+        >
+          <div>Initialize your passport</div>
+          {loadingState === 'initializing' && (
+            <StyledSpinner color="#4292F1" size={12} width={1.5} />
+          )}
+        </div>
       </button>
     </div>
   );
 }
 
-export function renderWorkflowLinkRootStep({
-  step,
-  walletAddress,
-  passport,
+export function RenderWorkflowLinkRootStep({
+  state,
   onNextWorkflowStep,
 }: PassportWorkflowProps) {
+  const [loadingState, setLoadingState] = useState<string>('default');
   return (
     <div
       style={{
@@ -223,9 +241,17 @@ export function renderWorkflowLinkRootStep({
         }}
       >
         {/* render the wallet icon here */}
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '0 12px',
+          }}
+        >
           <div style={{ fontSize: '0.8em' }}>Root wallet address</div>
-          <div style={{ fontSize: '1em' }}>{walletAddress || 'not founds'}</div>
+          <div style={{ fontSize: '1em' }}>
+            {renderAddress(state.walletAddress)}
+          </div>
         </div>
       </div>
       <div style={{ fontSize: '0.9em', fontWeight: 300 }}>
@@ -249,10 +275,19 @@ export function renderWorkflowLinkRootStep({
           lineHeight: '22px',
           padding: '13px 0',
         }}
-        onClick={() => onNextWorkflowStep(step)}
+        onClick={() => onNextWorkflowStep(state)}
       >
         Confirm root address
       </button>
     </div>
   );
 }
+
+const renderAddress = (address: `0x${string}` | undefined) => {
+  if (!address) return 'unknown';
+  const parts = [
+    address.substring(0, 6),
+    address.substring(address.length - 4),
+  ];
+  return parts.join('...');
+};
