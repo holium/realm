@@ -34,7 +34,7 @@ import {
 import { CloseIcon, PlusIcon } from '@/app/assets/icons';
 import { SocialButton } from '@/app/assets/styled';
 // import "../styles.css";
-import { shipUrl } from '@/app/lib/shared';
+import { shipName, shipUrl } from '@/app/lib/shared';
 import { PassportProfile } from '@/app/lib/types';
 import {
   addKey,
@@ -211,7 +211,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
 
   const onNextWorkflowStep = async (state: PassportWorkflowState) => {
     console.log('onNextWorkflowStep => %o', state);
-    return new Promise<void>((resolve, _reject) => {
+    return new Promise<void>((resolve, reject) => {
       switch (state.currentStep) {
         case 0:
           console.log([
@@ -246,6 +246,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
           if (isConnected && connector && address) {
             console.log('creating passport root for %o...', address);
             createEpochPassportNode(
+              shipName,
               shipUrl,
               connector.name,
               walletClient,
@@ -260,6 +261,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 //  and set the workflow step to 2
                 setDeviceKey(generateWalletAddress());
                 setWorkflowStep(2);
+                resolve();
               })
               .catch((e) => console.error(e));
           } else {
@@ -270,7 +272,13 @@ function PassportEditor({ passport }: PassportEditorProps) {
         case 2:
           console.log('add key');
           if (address && deviceKey) {
-            addKey(shipUrl, walletClient as WalletClient, address, deviceKey)
+            addKey(
+              shipName,
+              shipUrl,
+              walletClient as WalletClient,
+              address,
+              deviceKey
+            )
               // the wallet address of secret/hidden wallet that now lives on this device
               .then((response: any) => {
                 console.log('addKey response => %o', response);
@@ -278,10 +286,13 @@ function PassportEditor({ passport }: PassportEditorProps) {
                   '/holium/realm/passport/wallet-address',
                   response.addresses[1].address
                 );
+                passportWorkflow.current?.close();
+                resolve();
               })
               .catch((e) => console.error(e));
           } else {
             console.error('unexpected address and/or device signing key state');
+            reject('unexpected address and/or device signing key state');
           }
           break;
       }

@@ -22,9 +22,10 @@ const settings = {
 const alchemy = new Alchemy(settings);
 
 function generateEpochPassportNode(
+  entity: string,
   signingPublicKey: `0x${string}`
 ): EPOCH_NODE_POC {
-  const entity = 'passport_root';
+  // const entity = 'passport_root';
   const root_node_data: EPOCH_NODE_POC = {
     link_id: 'PASSPORT_ROOT',
     epoch_block_number: 0,
@@ -73,12 +74,13 @@ function generateEpochPassportNode(
 }
 
 function generateKeyAdd(
+  entity: string,
   rootPublicKey: `0x${string}`,
   walletAddress: `0x${string}`
 ) {
   return {
     link_metadata: {
-      from_entity: 'passport_root',
+      from_entity: entity,
       signing_public_key: rootPublicKey,
       value: 1,
       link_id: 'KEY_ADD',
@@ -93,18 +95,19 @@ function generateKeyAdd(
     link_data: {
       public_key: walletAddress,
       public_key_type: 'device_key',
-      entity_name: 'passport_root',
+      entity_name: entity,
     },
   };
 }
 
 export async function createEpochPassportNode(
+  entity: string,
   shipUrl: string,
   walletName: string,
   wallet: any,
   signingPublicKey: `0x${string}`
 ) {
-  const root = generateEpochPassportNode(signingPublicKey);
+  const root = generateEpochPassportNode(entity, signingPublicKey);
   const data_string = JSON.stringify(root);
   const calculated_hash = await ethers.utils.sha256(
     ethers.utils.toUtf8Bytes(data_string)
@@ -175,6 +178,7 @@ export function generateWalletAddress() {
 }
 
 export async function addKey(
+  entity: string,
   shipUrl: string,
   wallet: WalletClient,
   rootWalletAddress: `0x${string}`,
@@ -192,7 +196,7 @@ export async function addKey(
   //   chain: mainnet,
   //   transport: custom(window.ethereum),
   // });
-  const root = generateKeyAdd(rootWalletAddress, address);
+  const root = generateKeyAdd(entity, rootWalletAddress, address);
   const data_string = JSON.stringify(root);
   const calculated_hash = await ethers.utils.sha256(
     ethers.utils.toUtf8Bytes(data_string)
