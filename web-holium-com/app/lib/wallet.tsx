@@ -132,31 +132,60 @@ export async function createEpochPassportNode(
   shipUrl: string,
   walletName: string,
   wallet: any,
-  signingPublicKey: `0x${string}`
+  walletAddress: `0x${string}`
 ) {
   if (!wallet) {
     console.error('invalid wallet');
     return;
   }
-  const root = generateEpochPassportNode(entity, signingPublicKey);
-  const data_string = JSON.stringify(root);
+
+  let response = await fetch(
+    `${shipUrl}/~/scry/passport/template/next-block/metadata-or-root.json`,
+    {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  const metadata: any = await response.json();
+  console.log('raw metadata => %o', metadata);
+
+  let val = metadata['pki-state']['address-to-entity'].FILL_IN;
+  metadata['pki-state']['address-to-entity'] = {
+    [walletAddress]: val,
+  };
+
+  let nonce = metadata['pki-state']['address-to-nonce'].FILL_IN;
+  metadata['pki-state']['address-to-nonce'] = {
+    [walletAddress]: nonce,
+  };
+
+  metadata['pki-state']['entity-to-addresses'][val] = [walletAddress];
+
+  metadata['sig-chain-settings']['signing-key'] = walletAddress;
+  metadata['timestamp'] = Number(new Date().getTime());
+
+  // const root = generateEpochPassportNode(entity, signingPublicKey);
+  const data_string = JSON.stringify(metadata);
   const calculated_hash = await ethers.utils.sha256(
     ethers.utils.toUtf8Bytes(data_string)
   );
   const signed_hash = await wallet.signMessage({
-    account: signingPublicKey,
+    account: walletAddress,
     message: calculated_hash,
   });
   const root_node_link = {
     data: data_string,
     hash: calculated_hash,
-    signature_of_hash: signed_hash,
-    link_type: 'PASSPORT_ROOT',
+    'signature-of-hash': signed_hash,
+    'link-type': 'PASSPORT_ROOT',
     'wallet-source': walletName,
   };
 
   console.log('entity: %o', entity);
-  console.log('signing public key: %o', signingPublicKey);
+  console.log('wallet address: %o', walletAddress);
   console.log(data_string);
   console.log('calculated hash: %o', calculated_hash);
   console.log('signed hash: %o', signed_hash);
@@ -170,7 +199,7 @@ export async function createEpochPassportNode(
 
   // attempt to post payload to ship
   const url = `${shipUrl}/spider/realm/passport-action/passport-vent/passport-vent`;
-  const response = await fetch(url, {
+  response = await fetch(url, {
     method: 'POST',
     credentials: 'include',
     body: JSON.stringify({
@@ -201,15 +230,42 @@ export async function addDeviceSigningKey(
   shipUrl: string,
   wallet: WalletClient,
   rootWalletAddress: `0x${string}`,
-  address: `0x${string}`
+  deviceSigningKey: `0x${string}`
 ) {
   if (!wallet.account) {
     console.error('wallet account is undefined');
     return;
   }
 
-  const root = generateDeviceSigningKeyAdd(entity, rootWalletAddress, address);
-  const data_string = JSON.stringify(root);
+  let response = await fetch(
+    `${shipUrl}/~/scry/passport/template/next-block/metadata-or-root.json`,
+    {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  const metadata = await response.json();
+
+  const payload = {
+    'link-metadata': {
+      ...metadata,
+      timestamp: Number(new Date().getTime()),
+      'signing-address': rootWalletAddress,
+      'link-id': 'KEY_ADD',
+      'from-entity': entity,
+    },
+    'link-data': {
+      address: deviceSigningKey,
+      'address-type': 'device_key',
+      'entity-name': entity,
+    },
+  };
+
+  // const root = generateDeviceSigningKeyAdd(entity, rootWalletAddress, address);
+  const data_string = JSON.stringify(payload);
   const calculated_hash = await ethers.utils.sha256(
     ethers.utils.toUtf8Bytes(data_string)
   );
@@ -219,13 +275,13 @@ export async function addDeviceSigningKey(
   const root_node_link = {
     data: data_string,
     hash: calculated_hash,
-    signature_of_hash: signed_hash,
-    link_type: 'KEY_ADD',
+    'signature-of-hash': signed_hash,
+    'link-type': 'KEY_ADD',
   };
   console.log('add-link payload => %o', root_node_link);
   // attempt to post payload to ship
   const url = `${shipUrl}/spider/realm/passport-action/passport-vent/passport-vent`;
-  const response = await fetch(url, {
+  response = await fetch(url, {
     method: 'POST',
     credentials: 'include',
     body: JSON.stringify({
@@ -250,24 +306,51 @@ export async function addWalletAddress(
     return;
   }
 
-  const root = generateAddressAddKey(entity, deviceSigningKey, walletAddress);
-  const data_string = JSON.stringify(root);
+  let response = await fetch(
+    `${shipUrl}/~/scry/passport/template/next-block/metadata-or-root.json`,
+    {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  const metadata = await response.json();
+
+  const payload = {
+    'link-metadata': {
+      ...metadata,
+      timestamp: Number(new Date().getTime()),
+      'signing-address': deviceSigningKey,
+      'link-id': 'KEY_ADD',
+    },
+    'link-data': {
+      address: walletAddress,
+      'address-type': 'Eth',
+      'entity-name': entity,
+    },
+  };
+
+  // const root = generateAddressAddKey(entity, deviceSigningKey, walletAddress);
+  const data_string = JSON.stringify(payload);
   const calculated_hash = await ethers.utils.sha256(
     ethers.utils.toUtf8Bytes(data_string)
   );
   const signed_hash = await wallet.signMessage({
     message: calculated_hash,
   });
+
   const root_node_link = {
     data: data_string,
     hash: calculated_hash,
-    signature_of_hash: signed_hash,
-    link_type: 'KEY_ADD',
+    'signature-of-hash': signed_hash,
+    'link-type': 'KEY_ADD',
   };
-  console.log('add-link payload => %o', root_node_link);
+  // console.log('add-link payload => %o', root_node_link);
   // attempt to post payload to ship
   const url = `${shipUrl}/spider/realm/passport-action/passport-vent/passport-vent`;
-  const response = await fetch(url, {
+  response = await fetch(url, {
     method: 'POST',
     credentials: 'include',
     body: JSON.stringify({
@@ -277,5 +360,6 @@ export async function addWalletAddress(
       'Content-Type': 'application/json',
     },
   });
+
   return response.json();
 }
