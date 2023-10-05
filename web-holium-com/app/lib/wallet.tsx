@@ -23,7 +23,7 @@ const alchemy = new Alchemy(settings);
 
 function generateEpochPassportNode(
   entity: string,
-  signingPublicKey: `0x${string}`
+  walletAddress: `0x${string}`
 ): EPOCH_NODE_POC {
   // const entity = 'passport_root';
   const root_node_data: EPOCH_NODE_POC = {
@@ -34,17 +34,17 @@ function generateEpochPassportNode(
     previous_epoch_hash: '0x00000000000000000000000000000000',
     pki_state: {
       chain_owner_entities: [entity],
-      entity_to_public_keys: {
-        [entity]: [signingPublicKey],
+      entity_to_addresses: {
+        [entity]: [walletAddress],
       },
-      public_key_to_nonce: {
-        [signingPublicKey]: 0,
+      address_to_nonce: {
+        [walletAddress]: 0,
       },
       entity_to_value: {
         [entity]: 0,
       },
-      public_key_to_entity: {
-        [signingPublicKey]: entity,
+      address_to_entity: {
+        [walletAddress]: entity,
       },
     },
     transaction_types: {
@@ -64,7 +64,7 @@ function generateEpochPassportNode(
     sig_chain_settings: {
       new_entity_balance: 0,
       epoch_length: 0,
-      signing_key: signingPublicKey,
+      signing_key: walletAddress,
       data_state: {
         NAME_RECORD: {},
       },
@@ -75,13 +75,13 @@ function generateEpochPassportNode(
 
 function generateDeviceSigningKeyAdd(
   entity: string,
-  rootPublicKey: `0x${string}`,
+  rootWalletAddress: `0x${string}`,
   walletAddress: `0x${string}`
 ) {
   return {
     link_metadata: {
       from_entity: entity,
-      signing_public_key: rootPublicKey,
+      signing_address: rootWalletAddress,
       value: 1,
       link_id: 'KEY_ADD',
       epoch_block_number: 0,
@@ -93,15 +93,14 @@ function generateDeviceSigningKeyAdd(
       timestamp: Number(new Date().getTime()),
     },
     link_data: {
-      public_key: walletAddress,
-      public_key_type: 'device_key',
+      address: walletAddress,
+      address_type: 'device_key',
       entity_name: entity,
     },
   };
 }
 
 function generateAddressAddKey(
-  previousBlock: any,
   entity: string,
   rootPublicKey: `0x${string}`,
   walletAddress: `0x${string}`
@@ -109,20 +108,20 @@ function generateAddressAddKey(
   return {
     link_metadata: {
       from_entity: entity,
-      signing_public_key: rootPublicKey,
+      signing_address: rootPublicKey,
       value: 1,
       link_id: 'KEY_ADD',
       epoch_block_number: 0,
-      previous_epoch_nonce: previousBlock.prev,
+      previous_epoch_nonce: 0,
       previous_epoch_hash: '0x00000000000000000000000000000000',
-      nonce: JSON.parse(previousBlock.data).link_metadata.nonce + 1,
-      previous_link_hash: previousBlock.hash,
+      nonce: 0,
+      previous_link_hash: '0x00000000000000000000000000000000',
       data_block_number: 0,
       timestamp: Number(new Date().getTime()),
     },
     link_data: {
-      public_key: walletAddress,
-      public_key_type: 'Eth',
+      address: walletAddress,
+      address_type: 'Eth',
       entity_name: entity,
     },
   };
@@ -153,7 +152,7 @@ export async function createEpochPassportNode(
     hash: calculated_hash,
     signature_of_hash: signed_hash,
     link_type: 'PASSPORT_ROOT',
-    ['wallet-source']: walletName,
+    'wallet-source': walletName,
   };
 
   console.log('entity: %o', entity);
@@ -269,15 +268,15 @@ export async function addWalletAddress(
   entity: string,
   shipUrl: string,
   wallet: WalletClient,
-  rootWalletAddress: `0x${string}`,
-  address: `0x${string}`
+  deviceSigningKey: `0x${string}`,
+  walletAddress: `0x${string}`
 ) {
   if (!wallet.account) {
     console.error('wallet account is undefined');
     return;
   }
 
-  const root = generateDeviceSigningKeyAdd(entity, rootWalletAddress, address);
+  const root = generateAddressAddKey(entity, deviceSigningKey, walletAddress);
   const data_string = JSON.stringify(root);
   const calculated_hash = await ethers.utils.sha256(
     ethers.utils.toUtf8Bytes(data_string)

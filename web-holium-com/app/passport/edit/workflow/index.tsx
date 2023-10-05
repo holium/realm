@@ -1,6 +1,11 @@
 import { useState } from 'react';
 
-import { CheckIcon, CopyIcon, PassportIcon } from '@/app/assets/icons';
+import {
+  CheckIcon,
+  CloseIcon,
+  CopyIcon,
+  PassportIcon,
+} from '@/app/assets/icons';
 import { StyledSpinner } from '@/app/components';
 import { PassportProfile } from '@/app/lib/types';
 
@@ -20,8 +25,12 @@ export type WorkflowStep =
   | 'confirm-device-signing-key'
   | 'confirm-add-address';
 
+export type WorkflowStepReadyState = 'ready' | 'loading' | 'error';
+
 export interface PassportWorkflowState {
   currentStep: WorkflowStep;
+  readyState?: WorkflowStepReadyState;
+  lastError?: any;
   passport: PassportProfile;
   walletAddress?: `0x${string}`;
   deviceSigningKey?: `0x${string}`;
@@ -30,22 +39,43 @@ export interface PassportWorkflowState {
 interface PassportWorkflowProps {
   state: PassportWorkflowState;
   onNextWorkflowStep: (workflowState: PassportWorkflowState) => Promise<void>;
+  onCloseWorkflow: () => void;
+}
+
+interface WorkflowStepRenderState {
+  readyState: WorkflowStepReadyState;
+  lastError?: any;
+}
+
+export function RenderWorkflowNoneState() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-empty-pattern
+  const [] = useState<WorkflowStepRenderState>({
+    readyState: 'ready',
+  });
+  return <></>;
 }
 
 export function RenderWorkflowInitializeStep({
   state,
   onNextWorkflowStep,
+  onCloseWorkflow,
 }: PassportWorkflowProps) {
-  const [loadingState, setLoadingState] = useState<string>('default');
+  const [renderState, setRenderState] = useState<WorkflowStepRenderState>({
+    readyState: 'ready',
+  });
+  console.log(
+    'RenderWorkflowInitializeStep: readyState => %o',
+    renderState.readyState
+  );
   return (
     <div
       style={{
         display: 'flex',
         flexDirection: 'column',
-        color: '#FFFFFF',
-        borderRadius: '16px',
-        backgroundColor: '#4292F1',
-        padding: '12px',
+        // color: '#FFFFFF',
+        // borderRadius: '16px',
+        // backgroundColor: '#4292F1',
+        padding: '0 12px 12px',
         gap: 12,
       }}
     >
@@ -62,10 +92,20 @@ export function RenderWorkflowInitializeStep({
             marginLeft: '12px',
             fontWeight: 450,
             fontSize: '1.2em',
+            flex: 1,
           }}
         >
           Passport
         </div>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            setRenderState({ readyState: 'ready', lastError: undefined });
+            onCloseWorkflow && onCloseWorkflow();
+          }}
+        >
+          <CloseIcon />
+        </button>
       </div>
       <div style={{ fontSize: '0.9em', fontWeight: 300 }}>
         Once you initialize your passport you will be able to associate your
@@ -159,6 +199,22 @@ export function RenderWorkflowInitializeStep({
           // opacity: '10%',
         }}
       />
+      {renderState.lastError && (
+        <>
+          <div style={{ backgroundColor: '#ffffff', color: 'red' }}>
+            {renderState.lastError.toString()}
+          </div>
+          <hr
+            style={{
+              backgroundColor: '#7199F0',
+              width: '100%',
+              height: '1px',
+              border: 0,
+              // opacity: '10%',
+            }}
+          />
+        </>
+      )}
       <button
         style={{
           borderRadius: '10px',
@@ -168,8 +224,16 @@ export function RenderWorkflowInitializeStep({
           padding: '13px 0',
         }}
         onClick={() => {
-          setLoadingState('initializing');
-          onNextWorkflowStep(state).then(() => setLoadingState('default'));
+          setRenderState({ readyState: 'loading' });
+          onNextWorkflowStep(state)
+            .then(() => setRenderState({ readyState: 'ready' }))
+            .catch((e) => {
+              console.error('error: %o', e);
+              setRenderState({
+                readyState: 'error',
+                lastError: e,
+              });
+            });
         }}
         // onClick={() => passportWorkflow.current?.close()}
       >
@@ -183,7 +247,7 @@ export function RenderWorkflowInitializeStep({
           }}
         >
           <div>Initialize your passport</div>
-          {loadingState === 'initializing' && (
+          {renderState.readyState === 'loading' && (
             <StyledSpinner color="#4292F1" size={12} width={1.5} />
           )}
         </div>
@@ -195,8 +259,15 @@ export function RenderWorkflowInitializeStep({
 export function RenderWorkflowLinkRootStep({
   state,
   onNextWorkflowStep,
+  onCloseWorkflow,
 }: PassportWorkflowProps) {
-  const [loadingState, setLoadingState] = useState<string>('default');
+  const [renderState, setRenderState] = useState<WorkflowStepRenderState>({
+    readyState: 'ready',
+  });
+  console.log(
+    'RenderWorkflowLinkRootStep: readyState => %o',
+    renderState.readyState
+  );
   return (
     <div
       style={{
@@ -239,10 +310,20 @@ export function RenderWorkflowLinkRootStep({
             marginLeft: '12px',
             fontWeight: 450,
             fontSize: '1.2em',
+            flex: 1,
           }}
         >
           Link root address
         </div>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            setRenderState({ readyState: 'ready', lastError: undefined });
+            onCloseWorkflow && onCloseWorkflow();
+          }}
+        >
+          <CloseIcon />
+        </button>
       </div>
       <div
         style={{
@@ -283,6 +364,22 @@ export function RenderWorkflowLinkRootStep({
           // opacity: '10%',
         }}
       />
+      {renderState.lastError && (
+        <>
+          <div style={{ backgroundColor: '#ffffff', color: 'red' }}>
+            {renderState.lastError.toString()}
+          </div>
+          <hr
+            style={{
+              backgroundColor: '#7199F0',
+              width: '100%',
+              height: '1px',
+              border: 0,
+              // opacity: '10%',
+            }}
+          />
+        </>
+      )}
       <button
         style={{
           borderRadius: '10px',
@@ -291,9 +388,33 @@ export function RenderWorkflowLinkRootStep({
           lineHeight: '22px',
           padding: '13px 0',
         }}
-        onClick={() => onNextWorkflowStep(state)}
+        onClick={() => {
+          setRenderState({ readyState: 'loading' });
+          onNextWorkflowStep(state)
+            .then(() => setRenderState({ readyState: 'ready' }))
+            .catch((e) => {
+              console.error('error: %o', e);
+              setRenderState({
+                readyState: 'error',
+                lastError: e,
+              });
+            });
+        }}
       >
-        Confirm root address
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          }}
+        >
+          <div>Confirm root address</div>
+          {renderState.readyState === 'loading' && (
+            <StyledSpinner color="#4292F1" size={12} width={1.5} />
+          )}
+        </div>
       </button>
     </div>
   );
@@ -302,9 +423,15 @@ export function RenderWorkflowLinkRootStep({
 export function RenderWorkflowLinkDeviceKeyStep({
   state,
   onNextWorkflowStep,
+  onCloseWorkflow,
 }: PassportWorkflowProps) {
-  console.log('RenderWorkflowLinkDeviceKeyStep');
-  const [loadingState, setLoadingState] = useState<string>('default');
+  const [renderState, setRenderState] = useState<WorkflowStepRenderState>({
+    readyState: 'ready',
+  });
+  console.log(
+    'RenderWorkflowLinkDeviceKeyStep: readyState => %o',
+    renderState.readyState
+  );
   return (
     <div
       style={{
@@ -347,10 +474,20 @@ export function RenderWorkflowLinkDeviceKeyStep({
             marginLeft: '12px',
             fontWeight: 450,
             fontSize: '1.2em',
+            flex: 1,
           }}
         >
           Generate device key
         </div>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            setRenderState({ readyState: 'ready', lastError: undefined });
+            onCloseWorkflow && onCloseWorkflow();
+          }}
+        >
+          <CloseIcon />
+        </button>
       </div>
       <div
         style={{
@@ -424,6 +561,22 @@ export function RenderWorkflowLinkDeviceKeyStep({
           // opacity: '10%',
         }}
       />
+      {renderState.lastError && (
+        <>
+          <div style={{ backgroundColor: '#ffffff', color: 'red' }}>
+            {renderState.lastError.toString()}
+          </div>
+          <hr
+            style={{
+              backgroundColor: '#7199F0',
+              width: '100%',
+              height: '1px',
+              border: 0,
+              // opacity: '10%',
+            }}
+          />
+        </>
+      )}
       <button
         style={{
           borderRadius: '10px',
@@ -432,9 +585,33 @@ export function RenderWorkflowLinkDeviceKeyStep({
           lineHeight: '22px',
           padding: '13px 0',
         }}
-        onClick={() => onNextWorkflowStep(state)}
+        onClick={() => {
+          setRenderState({ readyState: 'loading' });
+          onNextWorkflowStep(state)
+            .then(() => setRenderState({ readyState: 'ready' }))
+            .catch((e) => {
+              console.error('error: %o', e);
+              setRenderState({
+                readyState: 'error',
+                lastError: e,
+              });
+            });
+        }}
       >
-        Sign and add key
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          }}
+        >
+          <div>Sign and add key</div>
+          {renderState.readyState === 'loading' && (
+            <StyledSpinner color="#4292F1" size={12} width={1.5} />
+          )}
+        </div>
       </button>
     </div>
   );
@@ -443,9 +620,15 @@ export function RenderWorkflowLinkDeviceKeyStep({
 export function RenderWorkflowLinkAddressStep({
   state,
   onNextWorkflowStep,
+  onCloseWorkflow,
 }: PassportWorkflowProps) {
-  console.log('RenderWorkflowLinkAddressStep');
-  // const [loadingState, setLoadingState] = useState<string>('default');
+  const [renderState, setRenderState] = useState<WorkflowStepRenderState>({
+    readyState: 'ready',
+  });
+  console.log(
+    'RenderWorkflowLinkAddressStep: readyState => %o',
+    renderState.readyState
+  );
   return (
     <div
       style={{
@@ -471,10 +654,20 @@ export function RenderWorkflowLinkAddressStep({
             marginLeft: '12px',
             fontWeight: 450,
             fontSize: '1.2em',
+            flex: 1,
           }}
         >
           Add address
         </div>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            setRenderState({ readyState: 'ready', lastError: undefined });
+            onCloseWorkflow && onCloseWorkflow();
+          }}
+        >
+          <CloseIcon />
+        </button>
       </div>
       <div
         style={{
@@ -519,6 +712,22 @@ export function RenderWorkflowLinkAddressStep({
           // opacity: '10%',
         }}
       />
+      {renderState.lastError && (
+        <>
+          <div style={{ backgroundColor: '#ffffff', color: 'red' }}>
+            {renderState.lastError.toString()}
+          </div>
+          <hr
+            style={{
+              backgroundColor: '#7199F0',
+              width: '100%',
+              height: '1px',
+              border: 0,
+              // opacity: '10%',
+            }}
+          />
+        </>
+      )}
       <button
         style={{
           borderRadius: '10px',
@@ -527,9 +736,33 @@ export function RenderWorkflowLinkAddressStep({
           lineHeight: '22px',
           padding: '13px 0',
         }}
-        onClick={() => onNextWorkflowStep(state)}
+        onClick={() => {
+          setRenderState({ readyState: 'loading' });
+          onNextWorkflowStep(state)
+            .then(() => setRenderState({ readyState: 'ready' }))
+            .catch((e) => {
+              console.error('error: %o', e);
+              setRenderState({
+                readyState: 'error',
+                lastError: e,
+              });
+            });
+        }}
       >
-        Sign and add key
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          }}
+        >
+          <div>Sign and add key</div>
+          {renderState.readyState === 'loading' && (
+            <StyledSpinner color="#4292F1" size={12} width={1.5} />
+          )}
+        </div>
       </button>
     </div>
   );

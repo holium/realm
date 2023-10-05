@@ -102,16 +102,16 @@ export type PassportProfile = {
 // crypto/chain/wallet stuff (ask paul)
 export interface PKI_STATE {
   chain_owner_entities: Array<string>;
-  entity_to_public_keys: {
+  entity_to_addresses: {
     [key: string]: any;
   };
-  public_key_to_nonce: {
+  address_to_nonce: {
     [key: string]: number;
   };
   entity_to_value: {
     [key: string]: number;
   };
-  public_key_to_entity: {
+  address_to_entity: {
     [key: string]: string;
   };
 }
