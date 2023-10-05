@@ -9,7 +9,7 @@ import {
 import { StyledSpinner } from '@/app/components';
 import { PassportProfile } from '@/app/lib/types';
 
-const renderAddress = (address: `0x${string}` | undefined) => {
+export const renderAddress = (address: `0x${string}` | undefined) => {
   if (!address) return 'unknown';
   const parts = [
     address.substring(0, 6),

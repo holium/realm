@@ -28,6 +28,7 @@ import { mainnet } from 'wagmi/chains';
 import {
   WorkflowStep,
   PassportWorkflowState,
+  renderAddress,
   RenderWorkflowInitializeStep,
   RenderWorkflowLinkAddressStep,
   RenderWorkflowLinkDeviceKeyStep,
@@ -35,7 +36,12 @@ import {
   RenderWorkflowNoneState,
 } from './workflow';
 
-import { CloseIcon, PlusIcon } from '@/app/assets/icons';
+import {
+  CloseIcon,
+  CopyIcon,
+  PlusIcon,
+  SmallPlusIcon,
+} from '@/app/assets/icons';
 import { SocialButton } from '@/app/assets/styled';
 // import "../styles.css";
 import { shipName, shipUrl } from '@/app/lib/shared';
@@ -759,12 +765,12 @@ function PassportEditor({ passport }: PassportEditorProps) {
                   border: 0,
                   opacity: '10%',
                   flex: 1,
-                  marginRight: '8px',
+                  // marginRight: '8px',
                 }}
               />
-              <SocialButton onClick={onAddAddressClick}>
+              {/* <SocialButton onClick={onAddAddressClick}>
                 Add Address
-              </SocialButton>
+              </SocialButton> */}
             </div>
             <div
               style={{
@@ -773,20 +779,96 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 paddingBottom: '4px',
               }}
             >
-              {/* {props.passport?.addresses?.length > 0 ? (
-                props.passport?.addresses?.map((address, idx) => (
-                  <div key={`address-${idx}`}>{address}</div>
-                  // <Address
-                  //   key={`address-${idx}`}
-                  //   image={address.image || undefined}
-                  //   pubkey={address.pubkey}
-                  //   selectable={true}
-                  //   isSelected={true}
-                  // />
-                ))
+              {passport?.addresses?.length > 0 ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                  }}
+                >
+                  <>
+                    {passport?.addresses?.map((entry, idx) => (
+                      <div
+                        key={`address-${idx}`}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          backgroundColor: '#F2F4F5',
+                          borderRadius: '8px',
+                          gap: '8px',
+                          padding: '8px',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <div
+                          style={{
+                            borderRadius: '4px',
+                            width: '20px',
+                            height: '20px',
+                            backgroundColor: '#5482EC',
+                          }}
+                        ></div>
+                        <div style={{ flex: 1 }}>
+                          {renderAddress(entry.address as `0x${string}`)}
+                        </div>
+                        {passport['default-address'] === entry.address && (
+                          <div style={{ color: '#878889' }}>Public</div>
+                        )}
+                        <CopyIcon fill={'#9FA1A1'} />
+                      </div>
+                    ))}
+                    <button
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        gap: '8px',
+                        padding: '8px',
+                        // alignItems: 'center',
+                        // just: 'flex-start',
+                      }}
+                      onClick={onAddAddressClick}
+                    >
+                      <SmallPlusIcon />
+                      <div
+                        style={{
+                          flex: 1,
+                          color: '#4e9efd',
+                          textAlign: 'left',
+                        }}
+                      >
+                        Add another address
+                      </div>
+                    </button>
+                  </>
+                </div>
               ) : (
-                <div style={{ fontSize: '0.8em' }}>No addresses found</div>
-              )} */}
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ fontSize: '0.8em' }}>No addresses found</div>
+                  <button
+                    style={{
+                      borderRadius: '10px',
+                      backgroundColor: '#FFFFFF',
+                      color: '#4292F1',
+                      lineHeight: '22px',
+                      padding: '13px 0',
+                    }}
+                    onClick={() => {}}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                      }}
+                    >
+                      <div>Connect your wallet</div>
+                    </div>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </>
