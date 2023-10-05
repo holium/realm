@@ -509,7 +509,50 @@ function PassportEditor({ passport }: PassportEditorProps) {
             width: '100%',
           }}
         >
-          <h1 style={{ fontWeight: '500', flex: 1 }}>Passport Editor</h1>
+          <div style={{ display: 'flex', flex: 1, flexDirection: 'column' }}>
+            <h1 style={{ fontWeight: '500' }}>Passport Editor</h1>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
+              <button
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                }}
+                onClick={onPhotoUpload}
+              >
+                <div
+                  style={{
+                    color: '#4e9efd',
+                    fontSize: '0.8em',
+                  }}
+                >
+                  Upload Photo
+                </div>
+              </button>
+              <div style={{ fontSize: '0.7em', margin: '0px 4px' }}>|</div>
+              <button
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                }}
+                onClick={() => nftPicker.current?.showModal()}
+              >
+                <div
+                  style={{
+                    color: '#4e9efd',
+                    fontSize: '0.8em',
+                  }}
+                >
+                  Choose NFT
+                </div>
+              </button>
+            </div>
+          </div>
           <button onClick={onSaveClick}>
             <div
               style={{
