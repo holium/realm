@@ -171,7 +171,9 @@ function PassportEditor({ passport }: PassportEditorProps) {
               break;
 
             case 'device-signing-key-not-found':
-              setWalletAddress(passport['default-address'] as `0x${string}`);
+              setWalletAddress(
+                currentPassport['default-address'] as `0x${string}`
+              );
               setDeviceSigningKey(generateWalletAddress());
               setWorkflowStep('confirm-device-signing-key');
               break;
@@ -209,8 +211,12 @@ function PassportEditor({ passport }: PassportEditorProps) {
   const [deviceSigningKey, setDeviceSigningKey] = useState<
     `0x${string}` | undefined
   >(undefined);
-  // const [passport, setPassport] = useState<PassportProfile>(() => initial);
+  const [currentPassport, setCurrentPassport] = useState<PassportProfile>(
+    () => passport
+  );
   const [passportState, setPassportState] = useState<PassportState>('initial');
+
+  if (!passport) return <></>;
 
   const onSaveClick = (e: any) => {
     e.preventDefault();
@@ -306,7 +312,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 console.log(
                   `wallet addresses: [${address}, ${walletClient?.account.address}]`
                 );
-                // setPassport;
+                setCurrentPassport(result);
                 // we already have a passport root; therefore generate a new device key
                 //  and set the workflow step to 2
                 setDeviceSigningKey(generateWalletAddress());
@@ -338,6 +344,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                   reject('error adding device key');
                   return;
                 }
+                setCurrentPassport(response);
                 localStorage.setItem(
                   '/holium/realm/passport/device-signing-key',
                   response.addresses[1].address
@@ -356,14 +363,14 @@ function PassportEditor({ passport }: PassportEditorProps) {
           break;
 
         case 'confirm-add-address':
-          if (walletAddress && passport.addresses[1].address) {
+          if (walletAddress && currentPassport.addresses[1].address) {
             console.log('adding new address...');
             addWalletAddress(
               shipName,
               shipUrl,
               walletClient as WalletClient,
               walletAddress,
-              passport.addresses[1].address as `0x${string}`
+              currentPassport.addresses[1].address as `0x${string}`
             )
               // the wallet address of secret/hidden wallet that now lives on this device
               .then((response: any) => {
@@ -372,6 +379,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                   reject('error adding device key');
                   return;
                 }
+                setCurrentPassport(response);
                 passportWorkflow.current?.close();
                 resolve();
               })
@@ -390,7 +398,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
   };
 
   const onAddAddressClick = (_e: any) => {
-    console.log('onAddressClick => %o', passport.chain);
+    console.log('onAddressClick => %o', currentPassport.chain);
 
     switch (passportState) {
       case 'passport-not-found':
@@ -399,7 +407,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
         break;
 
       case 'device-signing-key-not-found':
-        setWalletAddress(passport['default-address'] as `0x${string}`);
+        setWalletAddress(currentPassport['default-address'] as `0x${string}`);
         setDeviceSigningKey(generateWalletAddress());
         setWorkflowStep('confirm-device-signing-key');
         passportWorkflow.current?.showModal();
@@ -412,58 +420,54 @@ function PassportEditor({ passport }: PassportEditorProps) {
     }
   };
 
-  if (passport) {
-    useEffect(() => {
-      if (passport['default-address']) {
-        console.log('loading nfts for %o...', passport['default-address']);
-        alchemy.nft
-          .getNftsForOwner(passport['default-address'])
-          .then((response: OwnedNftsResponse) => {
-            const nfts = [];
-            for (let i = 0; i < response.ownedNfts.length; i++) {
-              const ownedNft = response.ownedNfts[i];
-              nfts.push({ ...ownedNft });
-            }
-            setNFTs(nfts);
-          });
-      }
-    }, [passport['default-address']]);
-  }
+  useEffect(() => {
+    if (currentPassport['default-address']) {
+      console.log('loading nfts for %o...', currentPassport['default-address']);
+      alchemy.nft
+        .getNftsForOwner(currentPassport['default-address'])
+        .then((response: OwnedNftsResponse) => {
+          const nfts = [];
+          for (let i = 0; i < response.ownedNfts.length; i++) {
+            const ownedNft = response.ownedNfts[i];
+            nfts.push({ ...ownedNft });
+          }
+          setNFTs(nfts);
+        });
+    }
+  }, [currentPassport['default-address']]);
 
-  if (passport) {
-    useEffect(() => {
-      // setup the initial wallet state of the page before rendering anything
-      if (passport.chain.length === 0) {
-        // if we have no links in the chain, the user will have to start by connecting
-        //   a wallet and creating the root/device keys
+  useEffect(() => {
+    // setup the initial wallet state of the page before rendering anything
+    if (currentPassport.chain.length === 0) {
+      // if we have no links in the chain, the user will have to start by connecting
+      //   a wallet and creating the root/device keys
 
-        // the only way this would exist is during testing, when you delete your entire
-        //  chain for testing purposes. unless we build out a feature that allows you
-        //  to restart the process from scratch
-        localStorage.removeItem('/holium/realm/passport/device-signing-key');
+      // the only way this would exist is during testing, when you delete your entire
+      //  chain for testing purposes. unless we build out a feature that allows you
+      //  to restart the process from scratch
+      localStorage.removeItem('/holium/realm/passport/device-signing-key');
 
-        setPassportState('passport-not-found');
-      } else if (passport.chain.length === 1) {
-        localStorage.removeItem('/holium/realm/passport/device-signing-key');
+      setPassportState('passport-not-found');
+    } else if (currentPassport.chain.length === 1) {
+      localStorage.removeItem('/holium/realm/passport/device-signing-key');
 
-        setPassportState('device-signing-key-not-found');
-      } else if (passport.chain.length >= 2) {
-        const deviceKey = localStorage.getItem(
-          '/holium/realm/passport/device-signing-key'
+      setPassportState('device-signing-key-not-found');
+    } else if (currentPassport.chain.length >= 2) {
+      const deviceKey = localStorage.getItem(
+        '/holium/realm/passport/device-signing-key'
+      );
+      if (!deviceKey) {
+        console.error(
+          'invalid passport state. passport chain has more than two links with no device signing key found'
         );
-        if (!deviceKey) {
-          console.error(
-            'invalid passport state. passport chain has more than two links with no device signing key found'
-          );
-        }
-        setPassportState('passport-ready');
       }
-    }, []);
-  }
+      setPassportState('passport-ready');
+    }
+  }, []);
 
   // useEffect(() => {
-  //   if (passport.addresses) {
-  //     passport.addresses.map((wallet, idx) => {
+  //   if (currentPassport.addresses) {
+  //     currentPassport.addresses.map((wallet, idx) => {
   //       alchemy.nft
   //         .getNftsForOwner(wallet.address)
   //         .then((response: OwnedNftsResponse) => {
@@ -473,7 +477,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
   //   } else {
   //     setNFTs([]);
   //   }
-  // }, [passport['default-address'], passport.addresses]);
+  // }, [passport['default-address'], currentPassport.addresses]);
 
   console.log('rendering workflow step: %o', workflowStep);
 
@@ -796,7 +800,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 paddingBottom: '4px',
               }}
             >
-              {passport?.addresses?.length > 0 ? (
+              {currentPassport.addresses?.length > 0 ? (
                 <div
                   style={{
                     display: 'flex',
@@ -805,7 +809,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                   }}
                 >
                   <>
-                    {passport?.addresses?.map((entry, idx) => (
+                    {currentPassport.addresses?.map((entry, idx) => (
                       <div
                         key={`address-${idx}`}
                         style={{
@@ -829,7 +833,8 @@ function PassportEditor({ passport }: PassportEditorProps) {
                         <div style={{ flex: 1 }}>
                           {renderAddress(entry.address as `0x${string}`)}
                         </div>
-                        {passport['default-address'] === entry.address && (
+                        {currentPassport['default-address'] ===
+                          entry.address && (
                           <div style={{ color: '#878889' }}>Public</div>
                         )}
                         <CopyIcon fill={'#9FA1A1'} />
@@ -1069,6 +1074,7 @@ export default function Home() {
             }
           }
         }
+        console.log('setting passport => %o', passport);
         setPassport(passport);
       })
       .catch((e) => {
@@ -1077,6 +1083,7 @@ export default function Home() {
       });
   }, []);
 
+  console.log('rendering passport => %o', passport);
   return (
     <>
       {passport ? (
