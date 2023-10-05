@@ -190,6 +190,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
     });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const nftPicker = useRef<HTMLDialogElement>(null);
+  const editAvatarMenu = useRef<HTMLDialogElement>(null);
   const passportWorkflow = useRef<HTMLDialogElement>(null);
   const avatarRef = useRef<HTMLImageElement>(null);
   const displayNameRef = useRef<HTMLInputElement>(null);
@@ -208,6 +209,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
   const [deviceSigningKey, setDeviceSigningKey] = useState<
     `0x${string}` | undefined
   >(undefined);
+  // const [passport, setPassport] = useState<PassportProfile>(() => initial);
   const [passportState, setPassportState] = useState<PassportState>('initial');
 
   const onSaveClick = (e: any) => {
@@ -304,6 +306,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 console.log(
                   `wallet addresses: [${address}, ${walletClient?.account.address}]`
                 );
+                // setPassport;
                 // we already have a passport root; therefore generate a new device key
                 //  and set the workflow step to 2
                 setDeviceSigningKey(generateWalletAddress());
@@ -409,61 +412,68 @@ function PassportEditor({ passport }: PassportEditorProps) {
     }
   };
 
-  useEffect(() => {
-    alchemy.nft
-      // .getNftsForOwner(wallet.pubkey)
-      .getNftsForOwner('0x653b9EA6AC3d6424a2eC360BA8E93FfaAfdA8CA1')
-      .then((response: OwnedNftsResponse) => {
-        const nfts = [];
-        for (let i = 0; i < response.ownedNfts.length; i++) {
-          const ownedNft = response.ownedNfts[i];
-          nfts.push({ ...ownedNft });
-        }
-        setNFTs(nfts);
-      });
-
-    // setup the initial wallet state of the page before rendering anything
-    if (passport.chain.length === 0) {
-      // if we have no links in the chain, the user will have to start by connecting
-      //   a wallet and creating the root/device keys
-
-      // the only way this would exist is during testing, when you delete your entire
-      //  chain for testing purposes. unless we build out a feature that allows you
-      //  to restart the process from scratch
-      localStorage.removeItem('/holium/realm/passport/device-signing-key');
-
-      setPassportState('passport-not-found');
-    } else if (passport.chain.length === 1) {
-      localStorage.removeItem('/holium/realm/passport/device-signing-key');
-
-      setPassportState('device-signing-key-not-found');
-    } else if (passport.chain.length >= 2) {
-      const deviceKey = localStorage.getItem(
-        '/holium/realm/passport/device-signing-key'
-      );
-      if (!deviceKey) {
-        console.error(
-          'invalid passport state. passport chain has more than two links with no device signing key found'
-        );
-      }
-      setPassportState('passport-ready');
-    }
-  }, []);
-
-  useEffect(() => {
-    if (passport.addresses) {
-      passport.addresses.map((wallet, idx) => {
+  if (passport) {
+    useEffect(() => {
+      if (passport['default-address']) {
+        console.log('loading nfts for %o...', passport['default-address']);
         alchemy.nft
-          // .getNftsForOwner(wallet.pubkey)
-          .getNftsForOwner('0x653b9EA6AC3d6424a2eC360BA8E93FfaAfdA8CA1')
+          .getNftsForOwner(passport['default-address'])
           .then((response: OwnedNftsResponse) => {
-            setNFTs([...response.ownedNfts]);
+            const nfts = [];
+            for (let i = 0; i < response.ownedNfts.length; i++) {
+              const ownedNft = response.ownedNfts[i];
+              nfts.push({ ...ownedNft });
+            }
+            setNFTs(nfts);
           });
-      });
-    } else {
-      setNFTs([]);
-    }
-  }, [passport['default-address'], passport.addresses]);
+      }
+    }, [passport['default-address']]);
+  }
+
+  if (passport) {
+    useEffect(() => {
+      // setup the initial wallet state of the page before rendering anything
+      if (passport.chain.length === 0) {
+        // if we have no links in the chain, the user will have to start by connecting
+        //   a wallet and creating the root/device keys
+
+        // the only way this would exist is during testing, when you delete your entire
+        //  chain for testing purposes. unless we build out a feature that allows you
+        //  to restart the process from scratch
+        localStorage.removeItem('/holium/realm/passport/device-signing-key');
+
+        setPassportState('passport-not-found');
+      } else if (passport.chain.length === 1) {
+        localStorage.removeItem('/holium/realm/passport/device-signing-key');
+
+        setPassportState('device-signing-key-not-found');
+      } else if (passport.chain.length >= 2) {
+        const deviceKey = localStorage.getItem(
+          '/holium/realm/passport/device-signing-key'
+        );
+        if (!deviceKey) {
+          console.error(
+            'invalid passport state. passport chain has more than two links with no device signing key found'
+          );
+        }
+        setPassportState('passport-ready');
+      }
+    }, []);
+  }
+
+  // useEffect(() => {
+  //   if (passport.addresses) {
+  //     passport.addresses.map((wallet, idx) => {
+  //       alchemy.nft
+  //         .getNftsForOwner(wallet.address)
+  //         .then((response: OwnedNftsResponse) => {
+  //           setNFTs([...response.ownedNfts]);
+  //         });
+  //     });
+  //   } else {
+  //     setNFTs([]);
+  //   }
+  // }, [passport['default-address'], passport.addresses]);
 
   console.log('rendering workflow step: %o', workflowStep);
 
@@ -491,16 +501,22 @@ function PassportEditor({ passport }: PassportEditorProps) {
           style={{
             display: 'flex',
             flexDirection: 'row',
-            width: '100%',
             alignItems: 'center',
-            justifyContent: 'center',
+            width: '100%',
           }}
         >
-          {/* <SocialButton onClick={open}>Connect Wallet</SocialButton>
-          <div style={{ flex: 1 }}></div> */}
-          <SocialButton onClick={onSaveClick}>Save</SocialButton>
+          <h1 style={{ fontWeight: '500', flex: 1 }}>Passport Editor</h1>
+          <button onClick={onSaveClick}>
+            <div
+              style={{
+                flex: 1,
+                color: '#4e9efd',
+              }}
+            >
+              Save
+            </div>
+          </button>
         </div>
-        <h1 style={{ fontWeight: '500' }}>Passport Editor</h1>
         <hr
           style={{
             // color: '#333333',
@@ -519,7 +535,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
             style={{ width: '80px', height: '80px', borderRadius: '10px' }}
           ></img>
         ) : (
-          <div
+          <button
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -529,19 +545,20 @@ function PassportEditor({ passport }: PassportEditorProps) {
               borderRadius: '10px',
               backgroundColor: '#F2F7FE',
             }}
+            onClick={() => editAvatarMenu.current?.show()}
           >
             <PlusIcon />
-          </div>
+          </button>
         )}
-        <SocialButton onClick={onPhotoUpload}>Upload photo</SocialButton>
+        {/* <SocialButton onClick={onPhotoUpload}>Upload photo</SocialButton> */}
         <input
           ref={fileInputRef}
           type="file"
           style={{ display: 'none' }}
         ></input>
-        <SocialButton onClick={() => nftPicker.current?.showModal()}>
+        {/* <SocialButton onClick={() => nftPicker.current?.showModal()}>
           Choose NFT
-        </SocialButton>
+        </SocialButton> */}
         <>
           <div style={{ width: '100%' }}>
             <div
@@ -853,7 +870,7 @@ function PassportEditor({ passport }: PassportEditorProps) {
                       lineHeight: '22px',
                       padding: '13px 0',
                     }}
-                    onClick={() => {}}
+                    onClick={onAddAddressClick}
                   >
                     <div
                       style={{
@@ -873,6 +890,9 @@ function PassportEditor({ passport }: PassportEditorProps) {
           </div>
         </>
       </div>
+      <dialog id="editAvatarMenu" ref={editAvatarMenu}>
+        some content
+      </dialog>
       {workflowStep === 'none' ? (
         RenderWorkflowNoneState()
       ) : (

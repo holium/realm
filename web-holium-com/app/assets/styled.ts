@@ -24,6 +24,7 @@ export const SocialButton = styled.button`
   padding: 6px 8px;
   line-height: 18px;
   height: 30px;
+  width: 100%;
 `;
 
 export const PatpLabel = styled.div`

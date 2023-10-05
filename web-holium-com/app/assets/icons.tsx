@@ -430,7 +430,7 @@ export const SmallPlusIcon = () => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g clip-path="url(#clip0_1047_18167)">
+    <g clipPath="url(#clip0_1047_18167)">
       <path d="M9 9V3H11V9H17V11H11V17H9V11H3V9H9Z" fill="#4292F1" />
     </g>
     <defs>
