@@ -1,5 +1,11 @@
 'use client';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  MouseEventHandler,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   EthereumClient,
   w3mConnectors,
@@ -45,14 +51,16 @@ import {
 import { SocialButton } from '@/app/assets/styled';
 // import "../styles.css";
 import { shipName, shipUrl } from '@/app/lib/shared';
-import { PassportProfile } from '@/app/lib/types';
+import { LinkedNFT, PassportProfile } from '@/app/lib/types';
 import {
   addDeviceSigningKey,
   addKey,
+  addNFT,
   addWalletAddress,
   createEpochPassportNode,
   generateWalletAddress,
 } from '@/app/lib/wallet';
+import { saveContact } from '@/app/lib/profile';
 
 const chains = [mainnet];
 const projectId = 'f8134a8b6ecfbef24cfd151795e94b5c';
@@ -73,66 +81,111 @@ const settings = {
 
 const alchemy = new Alchemy(settings);
 
-interface NFTProps {
+interface OwnedNFTProps {
   nft: OwnedNft;
   media: Media;
   selectable: boolean;
   isSelected: boolean;
-  onSelectionChange: (
+  onSelectionChange: (media: Media) => any;
+}
+
+const OwnedNFT = ({
+  media,
+  selectable,
+  isSelected,
+  onSelectionChange,
+}: OwnedNFTProps) => {
+  return (
+    <>
+      <button
+        style={
+          selectable && isSelected && media.thumbnail
+            ? { border: 'solid 3px #5482EC', borderRadius: '8px' }
+            : { border: 'solid 3px transparent' }
+        }
+        onClick={() => {
+          onSelectionChange && onSelectionChange(media);
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+          }}
+        >
+          {/* {selectable && media.thumbnail && (
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                onSelectionChange && onSelectionChange(e, media.thumbnail!)
+              }
+            ></input>
+          )} */}
+          {media.thumbnail && (
+            <img
+              alt={'nft'}
+              src={media.thumbnail}
+              style={{
+                height: '115px',
+                width: '115px',
+                borderRadius: '8px',
+              }}
+            ></img>
+          )}
+        </div>
+      </button>
+    </>
+  );
+};
+
+interface NFTProps {
+  nft: LinkedNFT;
+  selectable?: boolean;
+  isSelected?: boolean;
+  onSelectionChange?: (
     e: ChangeEvent<HTMLInputElement>,
     tokenId: string
   ) => void;
 }
 
-const NFT = ({
-  media,
-  selectable,
-  isSelected,
-  onSelectionChange,
-}: NFTProps) => {
+const NFT = ({ nft, selectable, isSelected, onSelectionChange }: NFTProps) => {
   return (
     <div
       style={{
         display: 'flex',
         flexDirection: 'column',
-        // borderTopLeftRadius: '8px',
-        // borderTopRightRadius: '8px',
-        // backgroundColor: '#F2F7FE',
         alignItems: 'center',
         justifyContent: 'center',
         gap: '8px',
         paddingTop: '8px',
       }}
     >
-      {selectable && media.thumbnail && (
+      {selectable && nft['image-url'] && (
         <input
           type="checkbox"
           checked={isSelected}
-          // onChange={(e) => (media.selected = e.target.checked)}
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            onSelectionChange && onSelectionChange(e, media.thumbnail!)
+            onSelectionChange && onSelectionChange(e, nft['image-url'])
           }
         ></input>
       )}
-      {media.thumbnail && (
+      {nft['image-url'] && (
         <img
           alt={'nft'}
-          src={media.thumbnail}
+          src={nft['image-url']}
           style={{
             height: '115px',
             width: '115px',
-            // borderBottomLeftRadius: '8px',
-            // borderBottomRightRadius: '8px',
             borderRadius: '8px',
           }}
         ></img>
       )}
     </div>
   );
-};
-
-const filesChanged = (e: any) => {
-  console.log('files changed: %o', e.target.files);
 };
 
 type PassportState =
@@ -174,7 +227,9 @@ function PassportEditor({ passport }: PassportEditorProps) {
               setWalletAddress(
                 currentPassport['default-address'] as `0x${string}`
               );
-              setDeviceSigningKey(generateWalletAddress());
+              const { walletAddress, privateKey } = generateWalletAddress();
+              setDeviceWalletAddress(walletAddress as `0x${string}`);
+              setDeviceSigningKey(privateKey);
               setWorkflowStep('confirm-device-signing-key');
               break;
 
@@ -182,11 +237,32 @@ function PassportEditor({ passport }: PassportEditorProps) {
               console.log(
                 'wallet connected. passport-ready. adding address...'
               );
-              setWalletAddress(address);
-              setWorkflowStep('confirm-add-address');
-              passportWorkflow.current?.showModal();
+              // is this a new wallet being added?
+              const idx = passport.addresses.findIndex(
+                (item) => item.address === address
+              );
+              if (idx === -1) {
+                setWalletAddress(address);
+                setWorkflowStep('confirm-add-address');
+                passportWorkflow.current?.showModal();
+              } else {
+                console.warn('%o found in passport. skipping...');
+              }
               break;
           }
+        }
+      },
+      onDisconnect() {
+        console.log('onDisconnect called');
+        // switch (passportState) {
+        //   case 'passport-not-found':
+        //     passportWorkflow.current?.showModal();
+        //     break;
+        // }
+        switch (workflowStep) {
+          case 'confirm-device-signing-key':
+            passportWorkflow.current?.showModal();
+            break;
         }
       },
     });
@@ -201,7 +277,12 @@ function PassportEditor({ passport }: PassportEditorProps) {
     passport?.contact['display-name'] || passport?.contact?.ship || ''
   );
   const [bio, setBio] = useState<string>(passport?.contact?.bio || '');
-  const [selectedAvatar, setSelectedAvatar] = useState<string>('');
+  const [selectedNft, setSelectedNft] = useState<OwnedNft | undefined>(
+    undefined
+  );
+  const [selectedMedia, setSelectedMedia] = useState<Media | undefined>(
+    undefined
+  );
   const [avatar, setAvatar] = useState<string>('');
   const [ourNFTs, setOurNFTs] = useState<object>({});
   const [workflowStep, setWorkflowStep] = useState<WorkflowStep>('none');
@@ -211,6 +292,9 @@ function PassportEditor({ passport }: PassportEditorProps) {
   const [deviceSigningKey, setDeviceSigningKey] = useState<
     `0x${string}` | undefined
   >(undefined);
+  const [deviceWalletAddress, setDeviceWalletAddress] = useState<
+    `0x${string}` | undefined
+  >(undefined);
   const [currentPassport, setCurrentPassport] = useState<PassportProfile>(
     () => passport
   );
@@ -218,33 +302,61 @@ function PassportEditor({ passport }: PassportEditorProps) {
 
   if (!passport) return <></>;
 
+  const filesChanged = (e: any) => {
+    console.log('files changed: %o', e.target.files);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (!(e.target && e.target.result)) {
+        console.error('image upload error');
+        return;
+      }
+      passport.contact.avatar = {
+        type: 'image',
+        img: e.target.result as string,
+      };
+      setAvatar(passport.contact.avatar.img);
+      console.log('passport => %o', passport);
+    };
+    reader.readAsDataURL(e.target.files[0]);
+  };
+
   const onSaveClick = (e: any) => {
     e.preventDefault();
     // generate a new opengraph image using canvas
-    const canvas: HTMLCanvasElement = document.createElement(
-      'canvas'
-    ) as HTMLCanvasElement;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const avatarImage: HTMLImageElement | null = document.getElementById(
-      'avatar-image'
-    ) as HTMLImageElement;
-    ctx.drawImage(avatarImage, 20, 20);
-    ctx.moveTo(40, 20);
-    const displayName: HTMLInputElement | null = document.getElementById(
-      'display-name'
-    ) as HTMLInputElement;
-    const metrics = ctx.measureText(displayName.value);
-    ctx.strokeText(displayName.value, 0, 0, 300);
-    const textHeight =
-      metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-    ctx.moveTo(40, 20 + textHeight + 8);
-    const patp: HTMLDivElement | null = document.getElementById(
-      'patp'
-    ) as HTMLDivElement;
-    ctx.strokeText(patp?.innerText || '', 0, 0, 300);
-    const dataUrl: string = canvas.toDataURL('img/png');
-    console.log('dataUrl => %o', dataUrl);
+    // const canvas: HTMLCanvasElement = document.createElement(
+    //   'canvas'
+    // ) as HTMLCanvasElement;
+    // const ctx = canvas.getContext('2d');
+    // if (!ctx) return;
+    // const avatarImage: HTMLImageElement | null = document.getElementById(
+    //   'avatar-image'
+    // ) as HTMLImageElement;
+    // ctx.drawImage(avatarImage, 20, 20);
+    // ctx.moveTo(40, 20);
+    // const displayNameElem: HTMLInputElement | null = document.getElementById(
+    //   'display-name'
+    // ) as HTMLInputElement;
+    // const metrics = ctx.measureText(displayNameElem.value);
+    // ctx.strokeText(displayNameElem.value, 0, 0, 300);
+    // const textHeight =
+    //   metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+    // ctx.moveTo(40, 20 + textHeight + 8);
+    // const patp: HTMLDivElement | null = document.getElementById(
+    //   'patp'
+    // ) as HTMLDivElement;
+    // ctx.strokeText(patp?.innerText || '', 0, 0, 300);
+    // const dataUrl: string = canvas.toDataURL('img/png');
+    // console.log('dataUrl => %o', dataUrl);
+
+    const contact = {
+      ...passport.contact,
+      'display-name': displayName,
+      bio: bio,
+    };
+    console.log('saving => %o', contact);
+    saveContact(contact)
+      .then((passport: PassportProfile) => setCurrentPassport(passport))
+      .catch((e) => console.error(e));
   };
 
   const onPhotoUpload = (e: any) => {
@@ -315,7 +427,9 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 setCurrentPassport(result);
                 // we already have a passport root; therefore generate a new device key
                 //  and set the workflow step to 2
-                setDeviceSigningKey(generateWalletAddress());
+                const { walletAddress, privateKey } = generateWalletAddress();
+                setDeviceWalletAddress(walletAddress as `0x${string}`);
+                setDeviceSigningKey(privateKey);
                 setWorkflowStep('confirm-device-signing-key');
                 resolve();
               })
@@ -347,8 +461,9 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 setCurrentPassport(response);
                 localStorage.setItem(
                   '/holium/realm/passport/device-signing-key',
-                  response.addresses[1].address
+                  deviceSigningKey
                 );
+                setPassportState('passport-ready');
                 passportWorkflow.current?.close();
                 resolve();
               })
@@ -415,7 +530,11 @@ function PassportEditor({ passport }: PassportEditorProps) {
 
       case 'passport-ready':
         console.log('passport-ready. launching wallet picker...');
-        disconnectAsync().finally(() => open({ view: 'Connect' }));
+        if (isConnected) {
+          console.log('disconnecting first...');
+          disconnect();
+        }
+        open({ view: 'Connect' });
         break;
     }
   };
@@ -575,11 +694,11 @@ function PassportEditor({ passport }: PassportEditorProps) {
             opacity: '10%',
           }}
         />
-        {avatar ? (
+        {passport.contact.avatar ? (
           <img
-            alt={avatar}
-            src={avatar}
-            style={{ width: '80px', height: '80px', borderRadius: '10px' }}
+            alt={passport.contact['display-name'] || passport.contact.ship}
+            src={passport.contact.avatar.img}
+            style={{ width: '120px', height: '120px', borderRadius: '10px' }}
           ></img>
         ) : (
           <button
@@ -768,30 +887,36 @@ function PassportEditor({ passport }: PassportEditorProps) {
                 gap: '8px',
               }}
             >
-              {nfts.length === 0 ? (
-                <div style={{ fontSize: '0.8em' }}>No NFTs found</div>
+              {passport.nfts.length === 0 ? (
+                <button
+                  style={{
+                    width: '115px',
+                    height: '115px',
+                    borderRadius: '8px',
+                    background: 'rgba(78, 158, 253, 0.08)',
+                  }}
+                  onClick={() => nftPicker.current?.showModal()}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <PlusIcon />
+                  </div>
+                </button>
               ) : (
+                // <div style={{ fontSize: '0.8em' }}>No NFTs found</div>
                 <>
-                  {nfts.map((nft: OwnedNft, _idx: number) =>
-                    nft.media.map((media: Media, idx: number) => (
-                      <NFT
-                        key={`owned-nft-${idx}`}
-                        selectable={true}
-                        isSelected={
-                          (media.thumbnail &&
-                            // eslint-disable-next-line no-prototype-builtins
-                            ourNFTs.hasOwnProperty(media.thumbnail)) ||
-                          false
-                        }
-                        nft={nft}
-                        media={media}
-                        onSelectionChange={(
-                          _e: ChangeEvent<HTMLInputElement>,
-                          _thumbnail: string
-                        ) => {}}
-                      />
-                    ))
-                  )}
+                  {passport.nfts.map((nft: LinkedNFT, idx: number) => (
+                    <NFT
+                      key={`owned-nft-${idx}`}
+                      selectable={false}
+                      nft={nft}
+                    />
+                  ))}
                 </>
               )}
             </div>
@@ -1029,17 +1154,16 @@ function PassportEditor({ passport }: PassportEditorProps) {
         >
           {nfts.map((nft: OwnedNft, _idx: number) =>
             nft.media.map((media: Media, idx: number) => (
-              <NFT
+              <OwnedNFT
                 key={`owned-nft-${idx}`}
                 selectable={true}
-                isSelected={selectedAvatar === media.thumbnail}
+                isSelected={selectedMedia === media}
                 nft={nft}
                 media={media}
-                onSelectionChange={(
-                  e: ChangeEvent<HTMLInputElement>,
-                  thumbnail: string
-                ) => {
-                  setSelectedAvatar(thumbnail);
+                onSelectionChange={(media: Media) => {
+                  // setSelectedAvatar(thumbnail);
+                  setSelectedNft(nft);
+                  setSelectedMedia(media);
                 }}
               />
             ))
@@ -1061,6 +1185,8 @@ function PassportEditor({ passport }: PassportEditorProps) {
             value="cancel"
             onClick={(e: any) => {
               e.preventDefault();
+              setSelectedNft(undefined);
+              setSelectedMedia(undefined);
               nftPicker.current?.close();
             }}
           >
@@ -1071,8 +1197,42 @@ function PassportEditor({ passport }: PassportEditorProps) {
             value="default"
             onClick={(e: any) => {
               e.preventDefault();
-              setAvatar(selectedAvatar);
-              nftPicker.current?.close(selectedAvatar);
+              if (!(selectedNft && selectedMedia)) return;
+              console.log(passport);
+              const devicePrivateKey = localStorage.getItem(
+                '/holium/realm/passport/device-signing-key'
+              );
+              if (!(devicePrivateKey && deviceWalletAddress)) {
+                console.error('no device private key found');
+                return;
+              }
+              addNFT(shipName, shipUrl, devicePrivateKey, [
+                ...passport.nfts,
+                {
+                  'token-standard': selectedNft.tokenType,
+                  name:
+                    selectedNft.title ||
+                    selectedNft?.rawMetadata?.name ||
+                    'error',
+                  'contract-address': selectedNft.contract.address,
+                  'token-id': selectedNft.tokenId,
+                  'image-url': selectedMedia.thumbnail || '?',
+                  'chain-id': 'eth-mainnet',
+                  'owned-by': deviceWalletAddress,
+                },
+              ])
+                .then((result: any) => {
+                  console.log('addNFT response => %o', result);
+                  if (result.term === 'poke-fail') {
+                    console.error('error => %o', result.tang[0]);
+                    return;
+                  }
+                  setCurrentPassport(result);
+                  nftPicker.current?.close();
+                })
+                .catch((e) => {
+                  console.error(e);
+                });
             }}
           >
             Confirm

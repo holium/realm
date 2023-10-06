@@ -11,13 +11,13 @@ export type Contact = {
 };
 
 export type LinkedNFT = {
-  chainId: 'eth-mainnet' | 'eth-testnet';
-  tokenId: string;
-  contractAddress: string;
+  'chain-id': 'eth-mainnet' | 'eth-testnet';
+  'token-id': string;
+  'contract-address': string;
   name: string;
-  imageUrl: string;
-  ownedBy: string;
-  tokenStandard: string; // e.g. ERC-721
+  'image-url': string;
+  'owned-by': string;
+  'token-standard': string; // e.g. ERC-721
 };
 
 export type LinkedAddress = {
@@ -36,7 +36,7 @@ export type Recommendation = {
 };
 
 export type ContactInfo = {
-  avatar: any | null;
+  avatar: null | { type: 'image' | 'nft'; img: string };
   bio: string | null;
   ship: string;
   'display-name': string | null;
@@ -44,7 +44,7 @@ export type ContactInfo = {
 };
 
 export type PassportProfile = {
-  nfts: Array<any>;
+  nfts: Array<LinkedNFT>;
   cover: any;
   discoverable: boolean;
   contact: ContactInfo;

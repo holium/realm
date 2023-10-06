@@ -4,7 +4,7 @@ import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { mainnet } from 'viem/chains';
 import { Network, Alchemy } from 'alchemy-sdk';
 
-import { EPOCH_NODE_POC, PassportProfile } from './types';
+import { EPOCH_NODE_POC, LinkedNFT, PassportProfile } from './types';
 import { WalletClient } from 'wagmi';
 
 declare global {
@@ -222,7 +222,9 @@ export async function loadNfts(address: `0x${string}`) {
 }
 
 export function generateWalletAddress() {
-  return generatePrivateKey();
+  const privateKey = generatePrivateKey();
+  const walletAddress = new ethers.Wallet(privateKey).address;
+  return { walletAddress, privateKey };
 }
 
 export async function addDeviceSigningKey(
@@ -269,6 +271,7 @@ export async function addDeviceSigningKey(
   const calculated_hash = await ethers.utils.sha256(
     ethers.utils.toUtf8Bytes(data_string)
   );
+
   const signed_hash = await wallet.signMessage({
     message: calculated_hash,
   });
@@ -324,10 +327,11 @@ export async function addWalletAddress(
       timestamp: Number(new Date().getTime()),
       'signing-address': deviceSigningKey,
       'link-id': 'KEY_ADD',
+      'from-entity': entity,
     },
     'link-data': {
       address: walletAddress,
-      'address-type': 'Eth',
+      'address-type': wallet.name,
       'entity-name': entity,
     },
   };
@@ -340,6 +344,76 @@ export async function addWalletAddress(
   const signed_hash = await wallet.signMessage({
     message: calculated_hash,
   });
+
+  const root_node_link = {
+    data: data_string,
+    hash: calculated_hash,
+    'signature-of-hash': signed_hash,
+    'link-type': 'KEY_ADD',
+  };
+  // console.log('add-link payload => %o', root_node_link);
+  // attempt to post payload to ship
+  const url = `${shipUrl}/spider/realm/passport-action/passport-vent/passport-vent`;
+  response = await fetch(url, {
+    method: 'POST',
+    credentials: 'include',
+    body: JSON.stringify({
+      'add-link': root_node_link,
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  return response.json();
+}
+
+export async function addNFT(
+  entity: string,
+  shipUrl: string,
+  devicePrivateKey: string,
+  nfts: LinkedNFT[]
+) {
+  let wallet = new ethers.Wallet(devicePrivateKey);
+  console.log(wallet.address);
+
+  console.log([entity, shipUrl, wallet.address, nfts]);
+  let response = await fetch(
+    `${shipUrl}/~/scry/passport/template/next-block/metadata-or-root.json`,
+    {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  const metadata = await response.json();
+
+  const payload = {
+    'link-metadata': {
+      ...metadata,
+      timestamp: Number(new Date().getTime()),
+      'signing-address': wallet.address,
+      'link-id': 'KEY_ADD',
+      'from-entity': entity,
+    },
+    'link-data': {
+      name: 'nfts',
+      record: nfts,
+    },
+  };
+
+  // const root = generateAddressAddKey(entity, deviceSigningKey, walletAddress);
+  const data_string = JSON.stringify(payload);
+  const calculated_hash = await ethers.utils.sha256(
+    ethers.utils.toUtf8Bytes(data_string)
+  );
+
+  console.log('creating wallet client...');
+
+  console.log('signing message...');
+  const signed_hash = await wallet.signMessage(calculated_hash);
 
   const root_node_link = {
     data: data_string,
