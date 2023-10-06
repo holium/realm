@@ -395,12 +395,12 @@ export async function addNFT(
       ...metadata,
       timestamp: Number(new Date().getTime()),
       'signing-address': wallet.address,
-      'link-id': 'KEY_ADD',
+      'link-id': 'NAME_RECORD_SET',
       'from-entity': entity,
     },
     'link-data': {
       name: 'nfts',
-      record: nfts,
+      record: JSON.stringify(nfts),
     },
   };
 
@@ -419,7 +419,7 @@ export async function addNFT(
     data: data_string,
     hash: calculated_hash,
     'signature-of-hash': signed_hash,
-    'link-type': 'KEY_ADD',
+    'link-type': 'NAME_RECORD_SET',
   };
   // console.log('add-link payload => %o', root_node_link);
   // attempt to post payload to ship
